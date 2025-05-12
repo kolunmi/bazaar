@@ -124,7 +124,7 @@
                             <property name="hexpand">TRUE</property>
                             <property name="vexpand">TRUE</property>
                             <property name="visible">TRUE</property>
-                            <property name="label">Press Control-f to search</property>
+                            <property name="label">Press Ctrl+f to search</property>
                             <property name="wrap">TRUE</property>
                           </object>
                         </child>
