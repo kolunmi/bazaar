@@ -12,13 +12,21 @@ everyone in the GNOME development community for creating such an
 awesome desktop environment!
 
 If you would like to try this project on your local machine, clone it
-on the cli and type these commands inside the project root:
+on the cli, install the necessary dependencies, and then type these commands inside the project root:
 
 ```sh
 meson setup build --prefix=/usr/local
 ninja -C build
 sudo ninja -C build install
 bazaar
+```
+
+Below is the command to install the necessary dependencies via dnf and apt:
+```sh
+sudo dnf5 install -y @development-tools gcc gcc-c++ make meson ninja-build pkgconf pkgconf-pkg-config glib2-devel gtk4-devel gnome-desktop4-devel libadwaita-devel gettext gettext-devel desktop-file-utils appstream cmake libdex-devel flatpak-devel libxmlb-devel glycin-devel glycin-gtk4-devel libyaml-devel
+```
+```sh
+sudo apt update && sudo apt install -y build-essential meson ninja-build pkg-config libglib2.0-dev libgtk-4-dev libgnome-desktop-4-dev libadwaita-1-dev gettext gettext-base desktop-file-utils appstream cmake libdex-dev libflatpak-dev libxmlb-dev libglycin-dev libglycin-gtk4-dev libyaml-dev
 ```
 
 ## Supporting
