@@ -15,10 +15,39 @@ find [here](https://gitlab.gnome.org/GNOME/gnome-software). Thanks to
 everyone in the GNOME development community for creating such an
 awesome desktop environment!
 
-If you would like to try this project on your local machine, clone it
-on the cli and type these commands inside the project root:
+If you would like to try this project on your local machine install these dependencies and follow the build instructions:
+## Build and Runtime Dependencies
+Build Tools:
 
+```
+meson
+ninja-build
+pkg-config
+cmake 
+git 
+```
+Core GNOME/GTK Libraries:
+
+```
+libglib2.0-dev
+libgtk-4-dev
+libadwaita-1-dev
+libsoup-3.0-dev
+libjson-glib-dev libflatpak-dev
+```
+Special Dependencies:
+```
+libdex-1-dev (or libdex-dev depending on your distro)
+libglycin-1-dev (or libglycin-gtk4-1-dev)
+libxmlb-dev
+libheif-dev
+libjxl-dev 
+rustc (for building glycin from source if needed)
+```
+
+For installation (just copy and paste this):
 ```sh
+git clone
 meson setup build --prefix=/usr/local
 ninja -C build
 sudo ninja -C build install
