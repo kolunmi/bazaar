@@ -47,7 +47,8 @@ rustc (for building glycin from source if needed)
 
 For installation (just copy and paste this):
 ```sh
-git clone
+git clone https://github.com/kolunmi/bazaar
+cd bazaar
 meson setup build --prefix=/usr/local
 ninja -C build
 sudo ninja -C build install
