@@ -33,7 +33,8 @@ libglib2.0-dev
 libgtk-4-dev
 libadwaita-1-dev
 libsoup-3.0-dev
-libjson-glib-dev libflatpak-dev
+libjson-glib-dev
+libflatpak-dev
 ```
 Special Dependencies:
 ```
