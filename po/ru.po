@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-09 02:28+0300\n"
+"POT-Creation-Date: 2025-07-09 11:10+0300\n"
 "PO-Revision-Date: 2025-07-09 08:48+0300\n"
 "Last-Translator: Jill Fiore <contact@lumaeris.com>\n"
 "Language-Team: Russian\n"
@@ -16,8 +16,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<="
-"4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Generator: Lokalize 25.04.3\n"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:2
@@ -59,8 +59,8 @@ msgstr "Адам Масциола"
 msgid "Main Bazaar window showing Blender"
 msgstr "Главное окно Bazaar, демонстрирующее Blender"
 
-#: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:161
-#: src/bz-installed-page.blp:173
+#: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:162
+#: src/bz-installed-page.blp:174
 msgid "Manage Addons"
 msgstr "Управление дополнениями"
 
@@ -70,7 +70,7 @@ msgstr "Данный flatpak был верифицирован подлинны�
 
 #: src/bz-application.c:1050
 msgid "translator-credits"
-msgstr "translator-credits"
+msgstr "Lumaeris"
 
 #: src/bz-browse-widget.blp:11 src/bz-full-view.blp:11
 #: src/bz-installed-page.blp:11 src/bz-window.blp:32
@@ -141,19 +141,19 @@ msgstr "Контент"
 msgid "Download and install this application"
 msgstr "Скачать и установить это приложение"
 
-#: src/bz-full-view.blp:201 src/bz-window.c:905
+#: src/bz-full-view.blp:202 src/bz-window.c:905
 msgid "Install"
 msgstr "Установить"
 
-#: src/bz-full-view.blp:217
+#: src/bz-full-view.blp:216
 msgid "Uninstall this application"
 msgstr "Удалить это приложение"
 
-#: src/bz-full-view.blp:239
+#: src/bz-full-view.blp:241
 msgid "Share this application"
 msgstr "Поделиться этим приложением"
 
-#: src/bz-full-view.blp:251
+#: src/bz-full-view.blp:253
 msgid ""
 "The number of downloads in the last 30 days. Click to view this "
 "application's download statistics."
@@ -161,23 +161,23 @@ msgstr ""
 "Количество скачиваний за эти 30 дней. Нажмите, чтобы открыть статистику "
 "скачиваний приложения."
 
-#: src/bz-full-view.blp:293
+#: src/bz-full-view.blp:295
 msgid "Support this developer"
 msgstr "Поддержать этого разработчика"
 
-#: src/bz-full-view.blp:306
+#: src/bz-full-view.blp:308
 msgid "Support"
 msgstr "Поддержать"
 
-#: src/bz-full-view.blp:364
+#: src/bz-full-view.blp:366
 msgid "Remote repo name"
 msgstr "Название репозитория"
 
-#: src/bz-full-view.blp:377
+#: src/bz-full-view.blp:379
 msgid "Project URL"
 msgstr "Веб-сайт проекта"
 
-#: src/bz-full-view.blp:389
+#: src/bz-full-view.blp:391
 msgid "Download size"
 msgstr "Размер скачивания"
 
@@ -195,17 +195,17 @@ msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
 msgstr ""
-"Это приложение имеет лицензию FLOSS, что значит исходный код может "
-"быть проверен на безопасность."
+"Это приложение имеет лицензию FLOSS, что значит исходный код может быть "
+"проверен на безопасность."
 
 #: src/bz-full-view.c:231
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
 msgstr ""
-"Это приложение имеет проприетарную лицензию, что значит "
-"исходный код разрабатывается в тайне и не может быть "
-"проверен независимой третьей стороной."
+"Это приложение имеет проприетарную лицензию, что значит исходный код "
+"разрабатывается в тайне и не может быть проверен независимой третьей "
+"стороной."
 
 #: src/bz-installed-page.blp:15
 msgid "No Flatpaks Installed"
@@ -215,11 +215,11 @@ msgstr "Нет установленных Flatpak"
 msgid "Installed"
 msgstr "Установленное"
 
-#: src/bz-installed-page.blp:142
+#: src/bz-installed-page.blp:143
 msgid "More actions"
 msgstr "Больше опций"
 
-#: src/bz-installed-page.blp:186 src/bz-installed-page.blp:197
+#: src/bz-installed-page.blp:187 src/bz-installed-page.blp:198
 msgid "Edit Permissions"
 msgstr "Редактировать разрешения"
 
@@ -295,7 +295,7 @@ msgstr "Минимизировать нижнюю границу"
 msgid "Maximize Upper Bound"
 msgstr "Минимизировать верхнюю границу"
 
-#: src/bz-transaction-manager.c:439
+#: src/bz-transaction-manager.c:451
 #, c-format
 msgid "Finished in %.02f seconds"
 msgstr "Закончено за %.02f секунд"
@@ -487,11 +487,11 @@ msgstr ""
 msgid "More details"
 msgstr "Больше подробностей"
 
-#: src/bz-window.c:1055
+#: src/bz-window.c:1056
 msgid "Resume the execution of transactions"
 msgstr "Возобновить выполнение транзакций"
 
-#: src/bz-window.c:1061
+#: src/bz-window.c:1062
 msgid "Pause the execution of transactions"
 msgstr "Приостановить выполнение транзакций"
 
