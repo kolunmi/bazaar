@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-07 22:10+0000\n"
+"POT-Creation-Date: 2025-07-09 08:45-0300\n"
 "PO-Revision-Date: 2025-07-08 00:14+0200\n"
 "Last-Translator: Atom <29772841+AtomHare@users.noreply.github.com>\n"
 "Language-Team: French\n"
@@ -24,7 +24,11 @@ msgstr ""
 msgid "Bazaar"
 msgstr "Bazaar"
 
-#: data/io.github.kolunmi.Bazaar.desktop.in:8
+#: data/io.github.kolunmi.Bazaar.desktop.in:3
+msgid "Add, remove or update flatpak software on this computer"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.desktop.in:9
 msgid "GTK;System;PackageManager;Discover;Flatpak;Software;Store;"
 msgstr "GTK;Système;GestionnaireDePaquets;Discover;Flatpak;Logiciel;Store;"
 
@@ -53,8 +57,8 @@ msgstr "Adam Masciola"
 msgid "Main Bazaar window showing Blender"
 msgstr "Fenêtre principale de Bazaar sur la page de Blender"
 
-#: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:161
-#: src/bz-installed-page.blp:173
+#: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:162
+#: src/bz-installed-page.blp:174
 msgid "Manage Addons"
 msgstr "Gérer les addons"
 
@@ -135,19 +139,19 @@ msgstr "Contenu"
 msgid "Download and install this application"
 msgstr "Télécharger et installer cette application"
 
-#: src/bz-full-view.blp:201 src/bz-window.c:905
+#: src/bz-full-view.blp:202 src/bz-window.c:905
 msgid "Install"
 msgstr "Installer"
 
-#: src/bz-full-view.blp:217
+#: src/bz-full-view.blp:216
 msgid "Uninstall this application"
 msgstr "Désinstaller cette application"
 
-#: src/bz-full-view.blp:239
+#: src/bz-full-view.blp:241
 msgid "Share this application"
 msgstr "Partager cette application"
 
-#: src/bz-full-view.blp:251
+#: src/bz-full-view.blp:253
 msgid ""
 "The number of downloads in the last 30 days. Click to view this "
 "application's download statistics."
@@ -155,23 +159,23 @@ msgstr ""
 "Le nombre de téléchargements des 30 derniers jours. Cliquez pour voir les "
 "statistiques de téléchargement."
 
-#: src/bz-full-view.blp:293
+#: src/bz-full-view.blp:295
 msgid "Support this developer"
 msgstr "Supporter le développeur"
 
-#: src/bz-full-view.blp:306
+#: src/bz-full-view.blp:308
 msgid "Support"
 msgstr "Support"
 
-#: src/bz-full-view.blp:363
+#: src/bz-full-view.blp:366
 msgid "Remote repo name"
 msgstr "Nom du dépôt distant"
 
-#: src/bz-full-view.blp:376
+#: src/bz-full-view.blp:379
 msgid "Project URL"
 msgstr "Site web du projet"
 
-#: src/bz-full-view.blp:388
+#: src/bz-full-view.blp:391
 msgid "Download size"
 msgstr "Taille du téléchargement"
 
@@ -180,15 +184,36 @@ msgstr "Taille du téléchargement"
 msgid "Released %x"
 msgstr "Publié le %x"
 
-#: src/bz-installed-page.blp:21
-msgid "BzInstalledPage"
-msgstr "BzInstalledPage"
+#: src/bz-full-view.c:222
+msgid "No URL"
+msgstr ""
 
-#: src/bz-installed-page.blp:142
+#: src/bz-full-view.c:230
+msgid ""
+"This application has a FLOSS license, meaning the source code can be audited "
+"for safety."
+msgstr ""
+
+#: src/bz-full-view.c:231
+msgid ""
+"This application has a proprietary license, meaning the source code is "
+"developed privately and cannot be audited by an independent third party."
+msgstr ""
+
+#: src/bz-installed-page.blp:15
+#, fuzzy
+msgid "No Flatpaks Installed"
+msgstr "Mes applications"
+
+#: src/bz-installed-page.blp:21 src/bz-window.blp:184 src/bz-window.blp:306
+msgid "Installed"
+msgstr "Mes applications"
+
+#: src/bz-installed-page.blp:143
 msgid "More actions"
 msgstr "Plus d'actions"
 
-#: src/bz-installed-page.blp:186 src/bz-installed-page.blp:197
+#: src/bz-installed-page.blp:187 src/bz-installed-page.blp:198
 msgid "Edit Permissions"
 msgstr "Éditer les permissions"
 
@@ -264,7 +289,7 @@ msgstr "Minimiser la borne inférieure"
 msgid "Maximize Upper Bound"
 msgstr "Maximiser la borne supérieure"
 
-#: src/bz-transaction-manager.c:439
+#: src/bz-transaction-manager.c:451
 #, c-format
 msgid "Finished in %.02f seconds"
 msgstr "Fini en %.02f secondes"
@@ -350,10 +375,6 @@ msgstr "Vue de l'application"
 #: src/bz-window.blp:174 src/bz-window.blp:285
 msgid "Flathub"
 msgstr "Flathub"
-
-#: src/bz-window.blp:184 src/bz-window.blp:306
-msgid "Installed"
-msgstr "Mes applications"
 
 #: src/bz-window.blp:203
 msgid "Go Back"
@@ -461,11 +482,11 @@ msgstr ""
 msgid "More details"
 msgstr "Plus de détails"
 
-#: src/bz-window.c:1055
+#: src/bz-window.c:1056
 msgid "Resume the execution of transactions"
 msgstr "Reprendre les opérations"
 
-#: src/bz-window.c:1061
+#: src/bz-window.c:1062
 msgid "Pause the execution of transactions"
 msgstr "Mettre en pause les opérations"
 
@@ -498,3 +519,6 @@ msgstr "_Afficher les raccourcis"
 msgctxt "shortcut window"
 msgid "Quit"
 msgstr "Quitter"
+
+#~ msgid "BzInstalledPage"
+#~ msgstr "BzInstalledPage"

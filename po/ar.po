@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-09 08:28+0300\n"
+"POT-Creation-Date: 2025-07-09 08:45-0300\n"
 "PO-Revision-Date: 2025-07-09 09:08+0300\n"
 "Last-Translator: Ahmed Najmawi <iramosu@protonmail.com>\n"
 "Language-Team: Arabic\n"
@@ -59,8 +59,8 @@ msgstr "Adam Masciola"
 msgid "Main Bazaar window showing Blender"
 msgstr "نافذة بازار الرئيسية تعرض تطبيق بلندر"
 
-#: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:161
-#: src/bz-installed-page.blp:173
+#: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:162
+#: src/bz-installed-page.blp:174
 msgid "Manage Addons"
 msgstr "أدِر الإضافات"
 
@@ -141,41 +141,41 @@ msgstr "المحتوى"
 msgid "Download and install this application"
 msgstr "نزِّل هذا التطبيق ونصِّبه"
 
-#: src/bz-full-view.blp:201 src/bz-window.c:905
+#: src/bz-full-view.blp:202 src/bz-window.c:905
 msgid "Install"
 msgstr "نصِّب"
 
-#: src/bz-full-view.blp:217
+#: src/bz-full-view.blp:216
 msgid "Uninstall this application"
 msgstr "أزِل هذا التطبيق"
 
-#: src/bz-full-view.blp:239
+#: src/bz-full-view.blp:241
 msgid "Share this application"
 msgstr "شارِك هذا التطبيق"
 
-#: src/bz-full-view.blp:251
+#: src/bz-full-view.blp:253
 msgid ""
 "The number of downloads in the last 30 days. Click to view this "
 "application's download statistics."
 msgstr "عدد التنزيلات في آخر 30 يومًا. انقر لعرض إحصائيات تنزيل هذا التطبيق."
 
-#: src/bz-full-view.blp:293
+#: src/bz-full-view.blp:295
 msgid "Support this developer"
 msgstr "ادعَم هذا المطور"
 
-#: src/bz-full-view.blp:306
+#: src/bz-full-view.blp:308
 msgid "Support"
 msgstr "ادعَم"
 
-#: src/bz-full-view.blp:364
+#: src/bz-full-view.blp:366
 msgid "Remote repo name"
 msgstr "اسم المستودع البعيد"
 
-#: src/bz-full-view.blp:377
+#: src/bz-full-view.blp:379
 msgid "Project URL"
 msgstr "مسار المشروع"
 
-#: src/bz-full-view.blp:389
+#: src/bz-full-view.blp:391
 msgid "Download size"
 msgstr "حجم التنزيل"
 
@@ -211,11 +211,11 @@ msgstr "لا حزم فلاتباك منصَّبة"
 msgid "Installed"
 msgstr "المنصَّبة"
 
-#: src/bz-installed-page.blp:142
+#: src/bz-installed-page.blp:143
 msgid "More actions"
 msgstr "إجراءات إضافية"
 
-#: src/bz-installed-page.blp:186 src/bz-installed-page.blp:197
+#: src/bz-installed-page.blp:187 src/bz-installed-page.blp:198
 msgid "Edit Permissions"
 msgstr "حرِّر الأذونات"
 
@@ -291,7 +291,7 @@ msgstr "صغِّر الحد الأدنى"
 msgid "Maximize Upper Bound"
 msgstr "كبِّر الحد الأعلى"
 
-#: src/bz-transaction-manager.c:439
+#: src/bz-transaction-manager.c:451
 #, c-format
 msgid "Finished in %.02f seconds"
 msgstr "انتهى في %.02f ثانية"
@@ -480,11 +480,11 @@ msgstr ""
 msgid "More details"
 msgstr "تفاصيل أكثر"
 
-#: src/bz-window.c:1055
+#: src/bz-window.c:1056
 msgid "Resume the execution of transactions"
 msgstr "استأنِف تنفيذ المعاملات"
 
-#: src/bz-window.c:1061
+#: src/bz-window.c:1062
 msgid "Pause the execution of transactions"
 msgstr "أوقِف تنفيذ المعاملات مؤقتًا"
 
