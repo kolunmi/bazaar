@@ -82,8 +82,8 @@ msgstr "Sem Aplicativos Recomendados"
 msgid ""
 "Bazaar was not provided a curated content configuration. Contact your "
 "operating system's support channels for assistance."
-msgstr "o Bazaar não possui uma configuração de conteúdo recomendado. "
-"Contate os canais de suporte de seu sistema operacional para mais ajuda. "
+msgstr "O Bazaar não possui uma configuração de conteúdo recomendado. "
+"Contate os canais de suporte do seu sistema operacional para mais ajuda. "
 
 #: src/bz-browse-widget.blp:22 src/bz-flathub-page.blp:11
 msgid "Browser"
@@ -119,13 +119,13 @@ msgstr "Recentemente Adicionados"
 
 #: src/bz-flathub-page.blp:181
 msgid "Popular"
-msgstr "Popular"
+msgstr "Populares"
 
 #: src/bz-full-view.blp:15
 msgid "No Results"
 msgstr "Sem Resultados"
 
-#: src/bz-full-view.blp:16
+#: src/bz-full-view.blp:61
 msgid "Try a different search query"
 msgstr "Tente outro termo de busca"
 
@@ -162,7 +162,7 @@ msgstr "Apoiar este desenvolvedor"
 
 #: src/bz-full-view.blp:308
 msgid "Support"
-msgstr "Suporte"
+msgstr "Apoiar"
 
 #: src/bz-full-view.blp:366
 msgid "Remote repo name"
@@ -189,7 +189,7 @@ msgstr "Sem URL"
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
-msgstr "Este aplicativo tem uma licença livre e de código aberto, o que significa que"
+msgstr "Este aplicativo tem uma licença livre e de código aberto, o que significa que "
 "o código fonte pode ser auditável por segurança."
 
 #: src/bz-full-view.c:231
