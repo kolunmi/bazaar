@@ -67,7 +67,7 @@ msgstr "Este flatpak foi verificado pelos desenvolvedores originais do software.
 
 #: src/bz-application.c:1050
 msgid "translator-credits"
-msgstr "creditos-do-tradutor"
+msgstr "Lucosec"
 
 #: src/bz-browse-widget.blp:11 src/bz-full-view.blp:11
 #: src/bz-installed-page.blp:11 src/bz-window.blp:32
