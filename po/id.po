@@ -36,7 +36,7 @@ msgstr ""
 msgid "GTK;System;PackageManager;Discover;Flatpak;Software;Store;"
 msgstr ""
 "GTK;Sistem;Manajer Paket;Discover;Flatpak;Perangkat Lunak;Toko;Aplikasi;"
-"Pusat Aplikasi"
+"Pusat Aplikasi;"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:6
 msgid "Show Animated Background"
@@ -189,7 +189,7 @@ msgstr "Konten"
 
 #: src/bz-full-view.blp:180
 msgid "Run this application"
-msgstr "Buka aplikasi ini"
+msgstr "Jalankan aplikasi ini"
 
 #: src/bz-full-view.blp:204
 msgid "Download and install this application"
