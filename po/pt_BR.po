@@ -29,7 +29,7 @@ msgstr "Adicione, remova ou atualize flatpaks neste computador"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:9
 msgid "GTK;System;PackageManager;Discover;Flatpak;Software;Store;"
-msgstr "GTK;Sistema;GerenciadorDePacotes;Discover;Flatpak;Aplicativos;Loja;"
+msgstr "GTK;Sistema;GerenciadorDePacotes;Discover;Flatpak;Aplicativos;Programas;Loja;"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:6
 msgid "Show Animated Background"
@@ -37,7 +37,7 @@ msgstr "Mostrar Plano de Fundo Animado"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:7
 msgid "Whether to show the animated icon background on the home page"
-msgstr "Mostrar ícone de plano de funto animado na página inicial"
+msgstr "Mostrar ícone de plano de fundo animado na página inicial"
 
 #. FIXME: add descriptions and summary
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:9
