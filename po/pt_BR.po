@@ -48,6 +48,8 @@ msgstr "Mantenha o resumo curto, entre 10 e 35 caracteres"
 msgid "No description"
 msgstr "Sem descrição"
 
+
+
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:15 src/bz-application.c:1223
 msgid "Adam Masciola"
 msgstr "Adam Masciola"
