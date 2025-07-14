@@ -1,5 +1,5 @@
 # Portuguese translations for bazaar package
-# Traduções em português brasileiro para o pacote bazaar.
+# Traduï¿½ï¿½es em portuguï¿½s brasileiro para o pacote bazaar.
 # Copyright (C) 2025 THE bazaar'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the bazaar package.
 # Automatically generated, 2025.
