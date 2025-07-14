@@ -396,7 +396,7 @@ msgstr ""
 #: src/bz-update-dialog.c:143
 #, c-format
 msgid "Additionally, %d runtimes and/or addons will be updated."
-msgstr "Adicionalmente, runtimes de %d e/ou extensões serão atualizados."
+msgstr "Adicionalmente, %d runtimes e/ou extensões serão atualizados."
 
 #: src/bz-window.blp:36
 msgid "Transactions Will Appear Here"
