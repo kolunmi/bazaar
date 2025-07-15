@@ -24,6 +24,7 @@
 
 #include "bz-async-texture.h"
 #include "bz-dynamic-list-view.h"
+#include "bz-env.h"
 #include "bz-error.h"
 #include "bz-flatpak-entry.h"
 #include "bz-full-view.h"
@@ -377,7 +378,8 @@ screenshot_activate_cb (BzFullView  *self,
     return;
 
   future = dex_scheduler_spawn (
-      scheduler, 0,
+      scheduler,
+      bz_get_dex_stack_size (),
       (DexFiberFunc) open_screenshots_external_fiber,
       open_screenshots_external_data_ref (data),
       open_screenshots_external_data_unref);
@@ -605,7 +607,8 @@ open_screenshots_external_fiber (OpenScreenshotsExternalData *data)
       save_data->output  = g_object_ref (download_file);
 
       jobs[i] = dex_scheduler_spawn (
-          dex_scheduler_get_thread_default (), 0,
+          dex_scheduler_get_thread_default (),
+          bz_get_dex_stack_size (),
           (DexFiberFunc) save_single_screenshot_fiber,
           save_single_screenshot_data_ref (save_data),
           save_single_screenshot_data_unref);

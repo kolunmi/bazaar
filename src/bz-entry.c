@@ -25,6 +25,7 @@
 
 #include "bz-data-point.h"
 #include "bz-entry.h"
+#include "bz-env.h"
 #include "bz-global-state.h"
 #include "bz-util.h"
 
@@ -1054,7 +1055,8 @@ query_flathub (BzEntry *self,
 
   future = dex_scheduler_spawn (
       dex_scheduler_get_default (),
-      0, (DexFiberFunc) query_flathub_fiber,
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) query_flathub_fiber,
       query_flathub_data_ref (data), query_flathub_data_unref);
   future = dex_future_then (
       future, (DexFutureCallback) query_flathub_then,

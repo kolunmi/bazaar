@@ -21,6 +21,7 @@
 #include "config.h"
 
 #include "bz-backend.h"
+#include "bz-env.h"
 #include "bz-transaction.h"
 #include "bz-util.h"
 
@@ -178,7 +179,7 @@ bz_backend_retrieve_remote_entries_with_blocklists (BzBackend                 *s
 
   return dex_scheduler_spawn (
       dex_thread_pool_scheduler_get_default (),
-      0,
+      bz_get_dex_stack_size (),
       (DexFiberFunc) retrieve_with_blocklists_fiber,
       retrieve_with_blocklists_data_ref (data),
       retrieve_with_blocklists_data_unref);

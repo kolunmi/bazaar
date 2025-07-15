@@ -18,6 +18,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+#define G_LOG_DOMAIN "BAZAAR::MAIN"
+
 #include "config.h"
 
 #include <glib/gi18n.h>
@@ -30,7 +32,7 @@ main (int   argc,
       char *argv[])
 {
   g_autoptr (BzApplication) app = NULL;
-  int ret;
+  int result                    = 0;
 
   if (argc > 1 && g_strcmp0 (argv[1], "--version") == 0)
     {
@@ -38,19 +40,26 @@ main (int   argc,
       return 0;
     }
 
+  g_debug ("Initializing libdex...");
   dex_init ();
+  /* Workaround */
+  (void) dex_thread_pool_scheduler_get_default ();
 
+  g_debug ("Configuring textdomain...");
   bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
   bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
   textdomain (GETTEXT_PACKAGE);
 
+  g_debug ("Constructing main application object...");
   app = g_object_new (
       BZ_TYPE_APPLICATION,
       "application-id", "io.github.kolunmi.Bazaar",
       "flags", G_APPLICATION_HANDLES_COMMAND_LINE,
       "resource-base-path", "/io/github/kolunmi/Bazaar",
       NULL);
-  ret = g_application_run (G_APPLICATION (app), argc, argv);
 
-  return ret;
+  g_debug ("Running!");
+  result = g_application_run (G_APPLICATION (app), argc, argv);
+
+  return result;
 }

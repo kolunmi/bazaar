@@ -24,6 +24,7 @@
 #include <libdex.h>
 
 #include "bz-async-texture.h"
+#include "bz-env.h"
 #include "bz-global-state.h"
 #include "bz-util.h"
 
@@ -299,7 +300,8 @@ load (BzAsyncTexture *self)
 
   future = dex_scheduler_spawn (
       dex_thread_pool_scheduler_get_default (),
-      0, (DexFiberFunc) load_fiber,
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) load_fiber,
       load_data_ref (data), load_data_unref);
   future = dex_future_finally (
       future,

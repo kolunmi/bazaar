@@ -20,6 +20,7 @@
 
 #include "bz-search-engine.h"
 #include "bz-entry-group.h"
+#include "bz-env.h"
 #include "bz-util.h"
 
 struct _BzSearchEngine
@@ -139,7 +140,7 @@ bz_search_engine_class_init (BzSearchEngineClass *klass)
 static void
 bz_search_engine_init (BzSearchEngine *self)
 {
-  self->scheduler = dex_thread_pool_scheduler_new ();
+  // self->scheduler = dex_thread_pool_scheduler_new ();
 }
 
 BzSearchEngine *
@@ -213,7 +214,9 @@ bz_search_engine_query (BzSearchEngine    *self,
   data->terms   = g_strdupv ((gchar **) terms);
 
   return dex_scheduler_spawn (
-      self->scheduler, 0, (DexFiberFunc) query_task_fiber,
+      dex_thread_pool_scheduler_get_default (),
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) query_task_fiber,
       query_task_data_ref (data), query_task_data_unref);
 }
 

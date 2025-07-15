@@ -22,6 +22,7 @@
 
 #include <xmlb.h>
 
+#include "bz-env.h"
 #include "bz-flatpak-private.h"
 #include "bz-global-state.h"
 #include "bz-issue.h"
@@ -847,7 +848,8 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
 
               self->icon_task = dex_scheduler_spawn (
                   dex_thread_pool_scheduler_get_default (),
-                  0, (DexFiberFunc) load_icon_fiber,
+                  bz_get_dex_stack_size (),
+                  (DexFiberFunc) load_icon_fiber,
                   load_icon_data_ref (data), load_icon_data_unref);
             }
         }
@@ -1134,7 +1136,8 @@ load_icon_fiber (LoadIconData *data)
       self->mini_icon = g_file_icon_new (mini_icon_file);
 
       return dex_scheduler_spawn (
-          home_scheduler, 0,
+          home_scheduler,
+          bz_get_dex_stack_size (),
           (DexFiberFunc) load_icon_notify_fiber,
           g_object_ref (self), g_object_unref);
     }

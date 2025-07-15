@@ -26,7 +26,7 @@
 #include "bz-async-texture.h"
 #include "bz-content-provider.h"
 #include "bz-content-section.h"
-#include "bz-entry-group.h"
+#include "bz-env.h"
 #include "bz-util.h"
 #include "bz-yaml-parser.h"
 
@@ -34,28 +34,20 @@
 G_DEFINE_QUARK (bz-content-yaml-error-quark, bz_content_yaml_error);
 /* clang-format on */
 
-BZ_DEFINE_DATA (
-    block_counter,
-    BlockCounter,
-    { gint blk; },
-    (void) self;)
-
 struct _BzContentProvider
 {
   GObject parent_instance;
 
   BzYamlParser *yaml_parser;
 
-  GHashTable *group_hash;
-  GListModel *input_files;
+  GListModel              *input_files;
+  BzApplicationMapFactory *factory;
 
   GListStore *input_mirror;
   GHashTable *input_tracking;
 
   GListStore          *outputs;
   GtkFlattenListModel *impl_model;
-
-  BlockCounterData *block;
 };
 
 static void list_model_iface_init (GListModelInterface *iface);
@@ -70,8 +62,8 @@ enum
 {
   PROP_0,
 
-  PROP_GROUP_HASH,
   PROP_INPUT_FILES,
+  PROP_FACTORY,
   PROP_HAS_INPUTS,
 
   LAST_PROP
@@ -92,11 +84,9 @@ BZ_DEFINE_DATA (
     {
       GFile        *file;
       BzYamlParser *parser;
-      GHashTable   *group_hash;
     },
     BZ_RELEASE_DATA (file, g_object_unref);
-    BZ_RELEASE_DATA (parser, g_object_unref);
-    BZ_RELEASE_DATA (group_hash, g_hash_table_unref))
+    BZ_RELEASE_DATA (parser, g_object_unref))
 static DexFuture *
 input_load_fiber (InputLoadData *data);
 
@@ -107,18 +97,13 @@ BZ_DEFINE_DATA (
     input_tracking,
     InputTracking,
     {
-      BlockCounterData *block;
-      GHashTable       *group_hash;
-      BzYamlParser     *parser;
-      char             *path;
-      GFileMonitor     *monitor;
-      DexFuture        *task;
-      GListStore       *output;
-      GtkCssProvider   *css;
+      BzContentProvider *self;
+      char              *path;
+      GFileMonitor      *monitor;
+      DexFuture         *task;
+      GListStore        *output;
+      GtkCssProvider    *css;
     },
-    BZ_RELEASE_DATA (block, block_counter_data_unref);
-    BZ_RELEASE_DATA (group_hash, g_hash_table_unref);
-    BZ_RELEASE_DATA (parser, g_object_unref);
     BZ_RELEASE_DATA (path, g_free);
     BZ_RELEASE_DATA (monitor, g_object_unref);
     BZ_RELEASE_DATA (task, dex_unref);
@@ -161,13 +146,12 @@ bz_content_provider_dispose (GObject *object)
   BzContentProvider *self = BZ_CONTENT_PROVIDER (object);
 
   g_clear_object (&self->yaml_parser);
-  g_clear_pointer (&self->group_hash, g_hash_table_unref);
   g_clear_object (&self->input_files);
+  g_clear_object (&self->factory);
   g_clear_object (&self->input_mirror);
   g_clear_pointer (&self->input_tracking, g_hash_table_unref);
   g_clear_object (&self->outputs);
   g_clear_object (&self->impl_model);
-  g_clear_pointer (&self->block, block_counter_data_unref);
 
   G_OBJECT_CLASS (bz_content_provider_parent_class)->dispose (object);
 }
@@ -182,11 +166,11 @@ bz_content_provider_get_property (GObject    *object,
 
   switch (prop_id)
     {
-    case PROP_GROUP_HASH:
-      g_value_set_boxed (value, bz_content_provider_get_group_hash (self));
-      break;
     case PROP_INPUT_FILES:
       g_value_set_object (value, bz_content_provider_get_input_files (self));
+      break;
+    case PROP_FACTORY:
+      g_value_set_object (value, bz_content_provider_get_factory (self));
       break;
     case PROP_HAS_INPUTS:
       g_value_set_boolean (value, bz_content_provider_get_has_inputs (self));
@@ -206,11 +190,11 @@ bz_content_provider_set_property (GObject      *object,
 
   switch (prop_id)
     {
-    case PROP_GROUP_HASH:
-      bz_content_provider_set_group_hash (self, g_value_get_object (value));
-      break;
     case PROP_INPUT_FILES:
       bz_content_provider_set_input_files (self, g_value_get_object (value));
+      break;
+    case PROP_FACTORY:
+      bz_content_provider_set_factory (self, g_value_get_object (value));
       break;
     case PROP_HAS_INPUTS:
     default:
@@ -227,18 +211,18 @@ bz_content_provider_class_init (BzContentProviderClass *klass)
   object_class->get_property = bz_content_provider_get_property;
   object_class->dispose      = bz_content_provider_dispose;
 
-  props[PROP_GROUP_HASH] =
-      g_param_spec_boxed (
-          "group-hash",
-          NULL, NULL,
-          G_TYPE_HASH_TABLE,
-          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
-
   props[PROP_INPUT_FILES] =
       g_param_spec_object (
           "input-files",
           NULL, NULL,
           G_TYPE_LIST_MODEL,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_FACTORY] =
+      g_param_spec_object (
+          "factory",
+          NULL, NULL,
+          BZ_TYPE_APPLICATION_MAP_FACTORY,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   props[PROP_HAS_INPUTS] =
@@ -268,9 +252,6 @@ bz_content_provider_init (BzContentProvider *self)
   g_signal_connect (
       self->impl_model, "items-changed",
       G_CALLBACK (impl_model_changed), self);
-
-  self->block = block_counter_data_new ();
-  g_atomic_int_set (&self->block->blk, 0);
 }
 
 static GType
@@ -353,23 +334,24 @@ bz_content_provider_get_input_files (BzContentProvider *self)
 }
 
 void
-bz_content_provider_set_group_hash (BzContentProvider *self,
-                                    GHashTable        *group_hash)
+bz_content_provider_set_factory (BzContentProvider       *self,
+                                 BzApplicationMapFactory *factory)
 {
   g_return_if_fail (BZ_IS_CONTENT_PROVIDER (self));
+  g_return_if_fail (factory == NULL || BZ_IS_APPLICATION_MAP_FACTORY (factory));
 
-  g_clear_pointer (&self->group_hash, g_hash_table_unref);
-  if (group_hash != NULL)
-    self->group_hash = g_hash_table_ref (group_hash);
+  g_clear_object (&self->factory);
+  if (factory != NULL)
+    self->factory = g_object_ref (factory);
 
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_GROUP_HASH]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INPUT_FILES]);
 }
 
-GHashTable *
-bz_content_provider_get_group_hash (BzContentProvider *self)
+BzApplicationMapFactory *
+bz_content_provider_get_factory (BzContentProvider *self)
 {
   g_return_val_if_fail (BZ_IS_CONTENT_PROVIDER (self), NULL);
-  return self->group_hash;
+  return self->factory;
 }
 
 gboolean
@@ -378,57 +360,6 @@ bz_content_provider_get_has_inputs (BzContentProvider *self)
   g_return_val_if_fail (BZ_IS_CONTENT_PROVIDER (self), FALSE);
   return self->input_files != NULL &&
          g_list_model_get_n_items (self->input_files) > 0;
-}
-
-void
-bz_content_provider_block (BzContentProvider *self)
-{
-  g_return_if_fail (BZ_IS_CONTENT_PROVIDER (self));
-
-  g_atomic_int_inc (&self->block->blk);
-
-  if (self->input_files != NULL)
-    {
-      guint n_inputs = 0;
-
-      n_inputs = g_list_model_get_n_items (self->input_files);
-      for (guint i = 0; i < n_inputs; i++)
-        {
-          g_autoptr (GFile) file  = NULL;
-          InputTrackingData *data = NULL;
-
-          file = g_list_model_get_item (self->input_files, i);
-          data = g_hash_table_lookup (self->input_tracking, file);
-          g_assert (data != NULL);
-
-          dex_clear (&data->task);
-        }
-    }
-}
-
-void
-bz_content_provider_unblock (BzContentProvider *self)
-{
-  g_return_if_fail (BZ_IS_CONTENT_PROVIDER (self));
-
-  if (g_atomic_int_dec_and_test (&self->block->blk) &&
-      self->input_files != NULL)
-    {
-      guint n_inputs = 0;
-
-      n_inputs = g_list_model_get_n_items (self->input_files);
-      for (guint i = 0; i < n_inputs; i++)
-        {
-          g_autoptr (GFile) file  = NULL;
-          InputTrackingData *data = NULL;
-
-          file = g_list_model_get_item (self->input_files, i);
-          data = g_hash_table_lookup (self->input_tracking, file);
-          g_assert (data != NULL);
-
-          commence_reload (data);
-        }
-    }
 }
 
 static void
@@ -501,16 +432,15 @@ input_files_changed (GListModel        *input_files,
 
       future = dex_scheduler_spawn (
           dex_thread_pool_scheduler_get_default (),
-          0, (DexFiberFunc) input_init_fiber,
+          bz_get_dex_stack_size (),
+          (DexFiberFunc) input_init_fiber,
           input_init_data_ref (init_data),
           input_init_data_unref);
 
-      data             = input_tracking_data_new ();
-      data->block      = block_counter_data_ref (self->block);
-      data->group_hash = self->group_hash != NULL ? g_hash_table_ref (self->group_hash) : NULL;
-      data->parser     = g_object_ref (self->yaml_parser);
-      data->path       = g_file_get_path (additions[i]);
-      data->output     = g_steal_pointer (&new_outputs[i]);
+      data         = input_tracking_data_new ();
+      data->self   = self;
+      data->path   = g_file_get_path (additions[i]);
+      data->output = g_steal_pointer (&new_outputs[i]);
 
       future = dex_future_finally (
           future,
@@ -597,7 +527,6 @@ static DexFuture *
 input_load_fiber (InputLoadData *data)
 {
   GFile        *file                   = data->file;
-  GHashTable   *group_hash             = data->group_hash;
   BzYamlParser *parser                 = data->parser;
   g_autoptr (GPtrArray) css            = NULL;
   g_autoptr (GPtrArray) sections       = NULL;
@@ -735,34 +664,26 @@ input_load_fiber (InputLoadData *data)
 
           if (g_hash_table_contains (section_props, "appids"))
             {
-              GPtrArray *appids            = NULL;
-              g_autoptr (GListStore) store = NULL;
+              GPtrArray *appids                 = NULL;
+              g_autoptr (GtkStringList) strlist = NULL;
 
               appids = g_value_get_boxed (
                   g_hash_table_lookup (section_props, "appids"));
-              store = g_list_store_new (BZ_TYPE_ENTRY_GROUP);
+              strlist = gtk_string_list_new (NULL);
 
-              if (group_hash != NULL)
+              for (guint j = 0; j < appids->len; j++)
                 {
-                  for (guint j = 0; j < appids->len; j++)
-                    {
-                      const char   *appid = NULL;
-                      BzEntryGroup *group = NULL;
+                  const char *appid = NULL;
 
-                      appid = g_variant_get_string (
-                          g_value_get_variant (
-                              g_ptr_array_index (appids, j)),
-                          NULL);
-                      group = g_hash_table_lookup (group_hash, appid);
+                  appid = g_variant_get_string (
+                      g_value_get_variant (
+                          g_ptr_array_index (appids, j)),
+                      NULL);
 
-                      if (group != NULL)
-                        g_list_store_append (store, group);
-                      else
-                        g_critical ("appid '%s' not found", appid);
-                    }
+                  gtk_string_list_append (strlist, appid);
                 }
 
-              g_object_set (section, "appids", store, NULL);
+              g_object_set (section, "appids", strlist, NULL);
             }
 
           if (g_hash_table_contains (section_props, "classes"))
@@ -848,7 +769,29 @@ input_load_finally (DexFuture         *future,
         }
 
       if (sections->pdata != NULL && sections->len > 0)
-        g_list_store_splice (data->output, 0, 0, sections->pdata, sections->len);
+        {
+          if (data->self->factory != NULL)
+            {
+              for (guint i = 0; i < sections->len; i++)
+                {
+                  BzContentSection *section     = NULL;
+                  g_autoptr (GListModel) appids = NULL;
+
+                  section = g_ptr_array_index (sections, i);
+                  g_object_get (section, "appids", &appids, NULL);
+
+                  if (appids != NULL)
+                    {
+                      g_autoptr (GListModel) converted = NULL;
+
+                      converted = bz_application_map_factory_generate (data->self->factory, appids);
+                      g_object_set (section, "appids", converted, NULL);
+                    }
+                }
+            }
+
+          g_list_store_splice (data->output, 0, 0, sections->pdata, sections->len);
+        }
     }
   else
     {
@@ -871,17 +814,15 @@ commence_reload (InputTrackingData *data)
   DexFuture *future                   = NULL;
 
   dex_clear (&data->task);
-  if (g_atomic_int_get (&data->block->blk) != 0)
-    goto done;
 
-  load_data             = input_load_data_new ();
-  load_data->file       = g_file_new_for_path (data->path);
-  load_data->parser     = g_object_ref (data->parser);
-  load_data->group_hash = data->group_hash != NULL ? g_hash_table_ref (data->group_hash) : NULL;
+  load_data         = input_load_data_new ();
+  load_data->file   = g_file_new_for_path (data->path);
+  load_data->parser = g_object_ref (data->self->yaml_parser);
 
   future = dex_scheduler_spawn (
       dex_thread_pool_scheduler_get_default (),
-      0, (DexFiberFunc) input_load_fiber,
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) input_load_fiber,
       input_load_data_ref (load_data),
       input_load_data_unref);
   future = dex_future_finally (
@@ -891,7 +832,6 @@ commence_reload (InputTrackingData *data)
       input_tracking_data_unref);
   data->task = future;
 
-done:
   return G_SOURCE_REMOVE;
 }
 

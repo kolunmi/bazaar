@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "bz-entry.h"
+#include "bz-application-map-factory.h"
 
 G_BEGIN_DECLS
 
@@ -46,21 +46,14 @@ bz_content_provider_set_input_files (BzContentProvider *self,
 GListModel *
 bz_content_provider_get_input_files (BzContentProvider *self);
 
+void
+bz_content_provider_set_factory (BzContentProvider       *self,
+                                 BzApplicationMapFactory *factory);
+
+BzApplicationMapFactory *
+bz_content_provider_get_factory (BzContentProvider *self);
+
 gboolean
 bz_content_provider_get_has_inputs (BzContentProvider *self);
-
-/* WARNING: it is ineffective to use this function unless directly after initialization */
-void
-bz_content_provider_set_group_hash (BzContentProvider *self,
-                                    GHashTable        *group_hash);
-
-GHashTable *
-bz_content_provider_get_group_hash (BzContentProvider *self);
-
-void
-bz_content_provider_block (BzContentProvider *self);
-
-void
-bz_content_provider_unblock (BzContentProvider *self);
 
 G_END_DECLS

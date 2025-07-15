@@ -28,6 +28,7 @@ bz_sources = [
   'bz-dynamic-list-view.c',
   'bz-entry-group.c',
   'bz-entry.c',
+  'bz-env.c',
   'bz-error.c',
   'bz-flathub-category.c',
   'bz-flathub-page.c',

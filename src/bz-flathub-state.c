@@ -18,8 +18,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+#define G_LOG_DOMAIN "BAZAAR::FLATHUB"
+
 #include <libdex.h>
 
+#include "bz-env.h"
 #include "bz-flathub-category.h"
 #include "bz-flathub-state.h"
 #include "bz-global-state.h"
@@ -274,7 +277,8 @@ const char *
 bz_flathub_state_get_app_of_the_day (BzFlathubState *self)
 {
   g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
-  g_return_val_if_fail (self->initializing == NULL, NULL);
+  if (self->initializing != NULL)
+    return NULL;
   return self->app_of_the_day;
 }
 
@@ -284,7 +288,8 @@ bz_flathub_state_dup_app_of_the_day_group (BzFlathubState *self)
   g_autoptr (GtkStringObject) string = NULL;
 
   g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
-  g_return_val_if_fail (self->initializing == NULL, NULL);
+  if (self->initializing != NULL)
+    return NULL;
   g_return_val_if_fail (self->map_factory != NULL, NULL);
 
   string = gtk_string_object_new (self->app_of_the_day);
@@ -295,7 +300,8 @@ GListModel *
 bz_flathub_state_dup_apps_of_the_week (BzFlathubState *self)
 {
   g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
-  g_return_val_if_fail (self->initializing == NULL, NULL);
+  if (self->initializing != NULL)
+    return NULL;
 
   if (self->apps_of_the_week != NULL)
     {
@@ -313,7 +319,8 @@ GListModel *
 bz_flathub_state_get_categories (BzFlathubState *self)
 {
   g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
-  g_return_val_if_fail (self->initializing == NULL, NULL);
+  if (self->initializing != NULL)
+    return NULL;
   return G_LIST_MODEL (self->categories);
 }
 
@@ -321,7 +328,8 @@ GListModel *
 bz_flathub_state_dup_recently_updated (BzFlathubState *self)
 {
   g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
-  g_return_val_if_fail (self->initializing == NULL, NULL);
+  if (self->initializing != NULL)
+    return NULL;
 
   if (self->recently_updated != NULL)
     {
@@ -339,7 +347,8 @@ GListModel *
 bz_flathub_state_dup_recently_added (BzFlathubState *self)
 {
   g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
-  g_return_val_if_fail (self->initializing == NULL, NULL);
+  if (self->initializing != NULL)
+    return NULL;
 
   if (self->recently_added != NULL)
     {
@@ -357,7 +366,8 @@ GListModel *
 bz_flathub_state_dup_popular (BzFlathubState *self)
 {
   g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
-  g_return_val_if_fail (self->initializing == NULL, NULL);
+  if (self->initializing != NULL)
+    return NULL;
 
   if (self->popular != NULL)
     {
@@ -375,7 +385,8 @@ GListModel *
 bz_flathub_state_dup_trending (BzFlathubState *self)
 {
   g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
-  g_return_val_if_fail (self->initializing == NULL, NULL);
+  if (self->initializing != NULL)
+    return NULL;
 
   if (self->trending != NULL)
     {
@@ -419,7 +430,8 @@ bz_flathub_state_set_for_day (BzFlathubState *self,
       self->trending         = gtk_string_list_new (NULL);
 
       future = dex_scheduler_spawn (
-          dex_thread_pool_scheduler_get_default (), 0,
+          dex_thread_pool_scheduler_get_default (),
+          bz_get_dex_stack_size (),
           (DexFiberFunc) initialize_fiber,
           self, NULL);
       future = dex_future_finally (
@@ -443,6 +455,7 @@ bz_flathub_state_update_to_today (BzFlathubState *self)
   datetime = g_date_time_new_now_utc ();
   for_day  = g_date_time_format (datetime, "%F");
 
+  g_debug ("Syncing with flathub for day: %s", for_day);
   bz_flathub_state_set_for_day (self, for_day);
 }
 
@@ -701,6 +714,7 @@ initialize_finally (DexFuture      *future,
     }
 
   self->initializing = NULL;
+  g_debug ("Done syncing flathub state; notifying property listeners...");
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_OF_THE_DAY]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_OF_THE_DAY_GROUP]);
