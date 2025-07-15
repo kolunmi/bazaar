@@ -28,8 +28,6 @@ finish-args:
   - "--filesystem=xdg-run/gvfsd"
 build-options:
   append-path: "/usr/lib/sdk/rust-stable/bin:/usr/lib/sdk/llvm20/bin"
-  build-args:
-    - "--share=network"
 modules:
   - name: bazaar
     buildsystem: meson
@@ -45,8 +43,13 @@ modules:
         - '*'
       sources:
         - type: git
-          url: https://gitlab.gnome.org/jwestman/blueprint-compiler
+          url: https://gitlab.gnome.org/GNOME/blueprint-compiler.git
           tag: 0.18.0
+          commit: 07c9c9df9cd1b6b4454ecba21ee58211e9144a4b
+          x-checker-data:
+            type: anitya
+            project-id: 279929
+            tag-template: $version
     - name: libsoup
       buildsystem: meson
       sources:
@@ -95,6 +98,11 @@ modules:
             type: anitya
             project-id: 369437
             url-template: https://gitlab.gnome.org/GNOME/glycin/-/archive/$version/glycin-$version.tar.gz
+        # Check `update-deps.sh` to vendor dependencies for this
+        - glycin-cargo-sources.json
+        - type: shell
+          commands:
+            - install -Dpm0644 cargo/config .cargo/config.toml
     - name: flatpak
       buildsystem: meson
       config-opts:
@@ -138,6 +146,17 @@ modules:
         - type: file
           path: flatpak-bwrap-wrapper.sh
       modules:
+      - name: python3-pyparsing
+        buildsystem: simple
+        build-commands:
+          - pip3 install --no-index --find-links="file://${PWD}" --prefix=${FLATPAK_DEST} pyparsing
+        sources:
+          - type: file
+            url: https://files.pythonhosted.org/packages/bb/22/f1129e69d94ffff626bdb5c835506b3a5b4f3d070f17ea295e12c2c6f60f/pyparsing-3.2.3.tar.gz
+            sha256: b9c13f1ab8b3b542f72e28f634bad4de758ab3ce4546e4301970ad6fa77c38be
+            x-checker-data:
+              type: pypi
+              name: pyparsing
       - python-deps.json
       - name: polkit
         config-opts:
@@ -206,9 +225,10 @@ modules:
           - type: git
             url: https://github.com/ostreedev/ostree
             tag: v2025.3
+            commit: d439f504624d7759cebde2f6c366ad610a7700ce
             x-checker-data:
               type: anitya
-              project-id: 6377
+              project-id: 10899
               tag-template: v$version
           modules:
             - name: libfuse
