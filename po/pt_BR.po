@@ -1,5 +1,5 @@
 # Portuguese translations for bazaar package
-# Tradu��es em portugu�s brasileiro para o pacote bazaar.
+# Traduções em português brasileiro para o pacote bazaar.
 # Copyright (C) 2025 THE bazaar'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the bazaar package.
 # Automatically generated, 2025.
@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-14 15:17-0300\n"
+"POT-Creation-Date: 2025-07-15 14:57-0300\n"
 "PO-Revision-Date: 2025-07-09 08:45-0300\n"
 "Last-Translator: Lucosec <lucas564lith@gmail.com>\n"
 "Language-Team: Brazilian Portuguese\n"
@@ -29,7 +29,7 @@ msgstr "Adicione, remova ou atualize flatpaks neste computador"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:9
 msgid "GTK;System;PackageManager;Discover;Flatpak;Software;Store;"
-msgstr "GTK;Sistema;GerenciadorDePacotes;Discover;Flatpak;Aplicativos;Programas;Loja;"
+msgstr "GTK;Sistema;GerenciadorDePacotes;Discover;Flatpak;Aplicativos;Loja;"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:6
 msgid "Show Animated Background"
@@ -37,7 +37,7 @@ msgstr "Mostrar Plano de Fundo Animado"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:7
 msgid "Whether to show the animated icon background on the home page"
-msgstr "Mostrar ícone de plano de fundo animado na página inicial"
+msgstr "Se deseja mostrar ícone de plano de fundo animado na página inicial"
 
 #. FIXME: add descriptions and summary
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:9
@@ -63,8 +63,7 @@ msgstr "Gerenciar Extensões"
 
 #: src/bz-app-tile.blp:65 src/bz-full-view.blp:139
 msgid "This flatpak is verified by the original developers of the software."
-msgstr ""
-"Este flatpak foi verificado pelos desenvolvedores originais do software."
+msgstr "Este flatpak foi verificado pelos desenvolvedores originais do software."
 
 #: src/bz-application.c:1194
 msgctxt "About Dialog Developer Credit"
@@ -130,8 +129,8 @@ msgid ""
 "Bazaar was not provided a curated content configuration. Contact your "
 "operating system's support channels for assistance."
 msgstr ""
-"O Bazaar não possui uma configuração de conteúdo recomendado. Contate os "
-"canais de suporte do seu sistema operacional para mais ajuda. "
+"O Bazaar não recebeu uma configuração de conteúdo recomendado. Contate os "
+"canais de suporte do seu sistema operacional para receber assistência. "
 
 #: src/bz-browse-widget.blp:22 src/bz-flathub-page.blp:11
 msgid "Browser"
@@ -227,7 +226,7 @@ msgstr "URL do Projeto"
 
 #: src/bz-full-view.blp:412
 msgid "Download size"
-msgstr "Tamanho do Download"
+msgstr "Tamanho do download"
 
 #: src/bz-full-view.c:214
 #, c-format
@@ -381,7 +380,7 @@ msgid ""
 "The following applications are eligible for updates. Would you like to "
 "install them?"
 msgstr ""
-"Os aplicativos a seguir podem ser atualizados. "
+"Os seguintes aplicativos podem ser atualizados. "
 "Você gostaria de instalá-los?"
 
 #: src/bz-update-dialog.c:135
@@ -390,8 +389,8 @@ msgid ""
 "%d runtimes and/or addons are eligible for updates. Would you like to "
 "install them?"
 msgstr ""
-"%d runtimes e/ou extensões podem ser atualizados. "
-"Você gostaria de instalá-los?"
+"%d runtimes e/ou extensões podem ser atualizados. Você gostaria de instalá-"
+"los?"
 
 #: src/bz-update-dialog.c:143
 #, c-format
@@ -499,8 +498,8 @@ msgid ""
 "\n"
 "on the command line."
 msgstr ""
-"A funcionalidade de inspecionar e instalar pacotes .flatpak está chegando "
-"em breve! Por enquanto, insira\n"
+"A funcionalidade de inspecionar e instalar pacotes .flatpak está chegando em "
+"breve! Por enquanto, insira\n"
 "\n"
 "flatpak install --bundle seu-pacote.flatpak\n"
 "\n"
