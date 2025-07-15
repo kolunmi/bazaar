@@ -2,12 +2,7 @@
 echo "Running fusermount wrapper, redirecting to host..."
 export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/flatpak/bus
 
-# Test if the `fusermount` command is available
-echo "Checking if fusermount is available on host system..."
-flatpak-spawn --host fusermount --version
-retval=$?
-
-if [ $retval -eq 0 ]; then
+if flatpak-spawn --host fusermount --version ; then
   echo "Using fusermount."
   binary="fusermount"
 else
@@ -16,10 +11,5 @@ else
   binary="fusermount3"
 fi
 
-# The actual call on the host side
-if [ -z "$_FUSE_COMMFD" ]; then
-    FD_ARGS=
-else
-    FD_ARGS="--env=_FUSE_COMMFD=${_FUSE_COMMFD} --forward-fd=${_FUSE_COMMFD}"
-fi
+[ ! -z "$_FUSE_COMMFD" ] && export FD_ARGS="--env=_FUSE_COMMFD=${_FUSE_COMMFD} --forward-fd=${_FUSE_COMMFD}"
 exec flatpak-spawn --host $FD_ARGS $binary "$@"

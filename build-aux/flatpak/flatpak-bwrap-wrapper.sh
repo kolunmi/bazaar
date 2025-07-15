@@ -4,8 +4,6 @@ export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/flatpak/bus
 
 # Inspect which fds are currently opened, and forward them to the host side.
 echo "Open file descriptors:"
-ls -l /proc/$$/fd
-
 fds=""
 for fd in $(ls /proc/$$/fd); do
   case "$fd" in
@@ -18,12 +16,7 @@ for fd in $(ls /proc/$$/fd); do
   esac
 done
 
-# Test if the `bwrap` command is available
-echo "Checking if bwrap is available on host system..."
-flatpak-spawn --host bwrap --version
-retval=$?
-
-if [ $retval -eq 0 ]; then
+if flatpak-spawn --host bwrap --version ; then
   echo "Using bwrap."
   binary="bwrap"
 else
