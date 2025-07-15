@@ -596,3 +596,6 @@ msgstr "Mostrar Atalhos"
 msgctxt "shortcut window"
 msgid "Quit"
 msgstr "Sair"
+
+#~ msgid "translator-credits"
+#~ msgstr "Guilherme Enes"
