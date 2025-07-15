@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-14 09:23+0330\n"
+"POT-Creation-Date: 2025-07-15 06:56+0100\n"
 "PO-Revision-Date: 2025-07-14 16:34+0330\n"
 "Last-Translator: Goudarz Jafari <me@goudarzjafari.com>\n"
 "Language-Team: none\n"
@@ -52,15 +52,6 @@ msgstr "بدون توضیح"
 msgid "Main Bazaar window showing Blender"
 msgstr "پنجره‌ی اصلی بازار که Blender را نمایش می‌دهد"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:50
-msgid "Release description"
-msgstr "توضیح‌های نگارش"
-
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:52
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:53
-msgid "List of changes"
-msgstr "فهرست تغییرات"
-
 #: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:162
 #: src/bz-installed-page.blp:174
 msgid "Manage Addons"
@@ -70,57 +61,57 @@ msgstr "مدیریت افزونه‌ها"
 msgid "This flatpak is verified by the original developers of the software."
 msgstr "این Flatpak توسط توسعه‌دهندگان اصلی نرم‌افزار تایید شده است."
 
-#: src/bz-application.c:1194
+#: src/bz-application.c:1186
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr "Adam Masciola <kolunmi@posteo.net>"
 
-#: src/bz-application.c:1199
+#: src/bz-application.c:1191
 msgctxt "About Dialog Translator Credit"
 msgid "Ahmed Najmawi"
 msgstr "Ahmed Najmawi"
 
-#: src/bz-application.c:1200
+#: src/bz-application.c:1192
 msgctxt "About Dialog Translator Credit"
 msgid "AtomHare"
 msgstr "AtomHare"
 
-#: src/bz-application.c:1201
+#: src/bz-application.c:1193
 msgctxt "About Dialog Translator Credit"
 msgid "Jill Fiore"
 msgstr "Jill Fiore"
 
-#: src/bz-application.c:1202
+#: src/bz-application.c:1194
 msgctxt "About Dialog Translator Credit"
 msgid "Lucosec"
 msgstr "Lucosec"
 
-#: src/bz-application.c:1203
+#: src/bz-application.c:1195
 msgctxt "About Dialog Translator Credit"
 msgid "Shihfu Juan"
 msgstr "Shihfu Juan"
 
-#: src/bz-application.c:1204
+#: src/bz-application.c:1196
 msgctxt "About Dialog Translator Credit"
 msgid "Vlastimil Dědek"
 msgstr "Vlastimil Dědek"
 
-#: src/bz-application.c:1205
+#: src/bz-application.c:1197
 msgctxt "About Dialog Translator Credit"
 msgid "asen23"
 msgstr "asen23"
 
-#: src/bz-application.c:1206
+#: src/bz-application.c:1198
 msgctxt "About Dialog Translator Credit"
 msgid "renner"
 msgstr "renner"
 
-#: src/bz-application.c:1207
+#: src/bz-application.c:1199
 msgctxt "About Dialog Translator Credit"
 msgid "robotta"
 msgstr "robotta"
 
-#: src/bz-application.c:1223
+#: src/bz-application.c:1215
 msgid "Adam Masciola"
 msgstr "Adam Masciola"
 
@@ -602,3 +593,9 @@ msgstr "نمایش میان‌برها"
 msgctxt "shortcut window"
 msgid "Quit"
 msgstr "خروج"
+
+#~ msgid "Release description"
+#~ msgstr "توضیح‌های نگارش"
+
+#~ msgid "List of changes"
+#~ msgstr "فهرست تغییرات"

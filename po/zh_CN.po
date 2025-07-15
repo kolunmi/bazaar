@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-12 12:59+0000\n"
+"POT-Creation-Date: 2025-07-15 06:56+0100\n"
 "PO-Revision-Date: 2025-07-12 21:40+0800\n"
 "Last-Translator: Shinsei <shinsei@anche.no>\n"
 "Language-Team: none\n"
@@ -60,57 +60,57 @@ msgstr "管理附加组件"
 msgid "This flatpak is verified by the original developers of the software."
 msgstr "此 Flatpak 已由软件原开发者认证。"
 
-#: src/bz-application.c:1178
+#: src/bz-application.c:1186
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr "Adam Masciola <kolunmi@posteo.net>"
 
-#: src/bz-application.c:1183
+#: src/bz-application.c:1191
 msgctxt "About Dialog Translator Credit"
 msgid "Ahmed Najmawi"
 msgstr "Ahmed Najmawi"
 
-#: src/bz-application.c:1184
+#: src/bz-application.c:1192
 msgctxt "About Dialog Translator Credit"
 msgid "AtomHare"
 msgstr "AtomHare"
 
-#: src/bz-application.c:1185
+#: src/bz-application.c:1193
 msgctxt "About Dialog Translator Credit"
 msgid "Jill Fiore"
 msgstr "Jill Fiore"
 
-#: src/bz-application.c:1186
+#: src/bz-application.c:1194
 msgctxt "About Dialog Translator Credit"
 msgid "Lucosec"
 msgstr "Lucosec"
 
-#: src/bz-application.c:1187
+#: src/bz-application.c:1195
 msgctxt "About Dialog Translator Credit"
 msgid "Shihfu Juan"
 msgstr "Shihfu Juan"
 
-#: src/bz-application.c:1188
+#: src/bz-application.c:1196
 msgctxt "About Dialog Translator Credit"
 msgid "Vlastimil Dědek"
 msgstr "Vlastimil Dědek"
 
-#: src/bz-application.c:1189
+#: src/bz-application.c:1197
 msgctxt "About Dialog Translator Credit"
 msgid "asen23"
 msgstr "asen23"
 
-#: src/bz-application.c:1190
+#: src/bz-application.c:1198
 msgctxt "About Dialog Translator Credit"
 msgid "renner"
 msgstr "renner"
 
-#: src/bz-application.c:1191
+#: src/bz-application.c:1199
 msgctxt "About Dialog Translator Credit"
 msgid "robotta"
 msgstr "robotta"
 
-#: src/bz-application.c:1207
+#: src/bz-application.c:1215
 msgid "Adam Masciola"
 msgstr "Adam Masciola"
 
@@ -223,22 +223,22 @@ msgstr "项目链接"
 msgid "Download size"
 msgstr "下载大小"
 
-#: src/bz-full-view.c:213
+#: src/bz-full-view.c:214
 #, c-format
 msgid "Released %x"
 msgstr "发布于 %x"
 
-#: src/bz-full-view.c:224
+#: src/bz-full-view.c:225
 msgid "No URL"
 msgstr "无链接"
 
-#: src/bz-full-view.c:232
+#: src/bz-full-view.c:233
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
 msgstr "该应用程序具有 FLOSS 许可证，这意味着可以审核源代码的安全性。"
 
-#: src/bz-full-view.c:233
+#: src/bz-full-view.c:234
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."

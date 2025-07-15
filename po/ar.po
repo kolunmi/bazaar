@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-09 08:28+0300\n"
+"POT-Creation-Date: 2025-07-15 06:56+0100\n"
 "PO-Revision-Date: 2025-07-09 09:08+0300\n"
 "Last-Translator: Ahmed Najmawi <iramosu@protonmail.com>\n"
 "Language-Team: Arabic\n"
@@ -51,16 +51,12 @@ msgstr "أبقِ الملخص مختصرًا، بين 10 و 35 حرفًا"
 msgid "No description"
 msgstr "لا يوجد وصف"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:15
-msgid "Adam Masciola"
-msgstr "Adam Masciola"
-
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:41
 msgid "Main Bazaar window showing Blender"
 msgstr "نافذة بازار الرئيسية تعرض تطبيق بلندر"
 
-#: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:161
-#: src/bz-installed-page.blp:173
+#: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:162
+#: src/bz-installed-page.blp:174
 msgid "Manage Addons"
 msgstr "أدِر الإضافات"
 
@@ -68,9 +64,59 @@ msgstr "أدِر الإضافات"
 msgid "This flatpak is verified by the original developers of the software."
 msgstr "وثَّق مطوروا البرمجيات الأصليون فلاتباك هذا."
 
-#: src/bz-application.c:1050
-msgid "translator-credits"
-msgstr "أحمد النجماوي <iramosu@protonmail.com>"
+#: src/bz-application.c:1186
+msgctxt "About Dialog Developer Credit"
+msgid "Adam Masciola <kolunmi@posteo.net>"
+msgstr ""
+
+#: src/bz-application.c:1191
+msgctxt "About Dialog Translator Credit"
+msgid "Ahmed Najmawi"
+msgstr ""
+
+#: src/bz-application.c:1192
+msgctxt "About Dialog Translator Credit"
+msgid "AtomHare"
+msgstr ""
+
+#: src/bz-application.c:1193
+msgctxt "About Dialog Translator Credit"
+msgid "Jill Fiore"
+msgstr ""
+
+#: src/bz-application.c:1194
+msgctxt "About Dialog Translator Credit"
+msgid "Lucosec"
+msgstr ""
+
+#: src/bz-application.c:1195
+msgctxt "About Dialog Translator Credit"
+msgid "Shihfu Juan"
+msgstr ""
+
+#: src/bz-application.c:1196
+msgctxt "About Dialog Translator Credit"
+msgid "Vlastimil Dědek"
+msgstr ""
+
+#: src/bz-application.c:1197
+msgctxt "About Dialog Translator Credit"
+msgid "asen23"
+msgstr ""
+
+#: src/bz-application.c:1198
+msgctxt "About Dialog Translator Credit"
+msgid "renner"
+msgstr ""
+
+#: src/bz-application.c:1199
+msgctxt "About Dialog Translator Credit"
+msgid "robotta"
+msgstr ""
+
+#: src/bz-application.c:1215
+msgid "Adam Masciola"
+msgstr "Adam Masciola"
 
 #: src/bz-browse-widget.blp:11 src/bz-full-view.blp:11
 #: src/bz-installed-page.blp:11 src/bz-window.blp:32
@@ -137,65 +183,70 @@ msgstr "جرِّب عبارة بحث مختلفة"
 msgid "Content"
 msgstr "المحتوى"
 
-#: src/bz-full-view.blp:184
+#: src/bz-full-view.blp:180
+#, fuzzy
+msgid "Run this application"
+msgstr "شارِك هذا التطبيق"
+
+#: src/bz-full-view.blp:204
 msgid "Download and install this application"
 msgstr "نزِّل هذا التطبيق ونصِّبه"
 
-#: src/bz-full-view.blp:201 src/bz-window.c:905
+#: src/bz-full-view.blp:222 src/bz-window.c:987
 msgid "Install"
 msgstr "نصِّب"
 
-#: src/bz-full-view.blp:217
+#: src/bz-full-view.blp:236
 msgid "Uninstall this application"
 msgstr "أزِل هذا التطبيق"
 
-#: src/bz-full-view.blp:239
+#: src/bz-full-view.blp:262
 msgid "Share this application"
 msgstr "شارِك هذا التطبيق"
 
-#: src/bz-full-view.blp:251
+#: src/bz-full-view.blp:274
 msgid ""
 "The number of downloads in the last 30 days. Click to view this "
 "application's download statistics."
 msgstr "عدد التنزيلات في آخر 30 يومًا. انقر لعرض إحصائيات تنزيل هذا التطبيق."
 
-#: src/bz-full-view.blp:293
+#: src/bz-full-view.blp:316
 msgid "Support this developer"
 msgstr "ادعَم هذا المطور"
 
-#: src/bz-full-view.blp:306
+#: src/bz-full-view.blp:329
 msgid "Support"
 msgstr "ادعَم"
 
-#: src/bz-full-view.blp:364
+#: src/bz-full-view.blp:387
 msgid "Remote repo name"
 msgstr "اسم المستودع البعيد"
 
-#: src/bz-full-view.blp:377
+#: src/bz-full-view.blp:400
 msgid "Project URL"
 msgstr "مسار المشروع"
 
-#: src/bz-full-view.blp:389
+#: src/bz-full-view.blp:412
 msgid "Download size"
 msgstr "حجم التنزيل"
 
-#: src/bz-full-view.c:211
+#: src/bz-full-view.c:214
 #, c-format
 msgid "Released %x"
 msgstr "أُصدِر في %x"
 
-#: src/bz-full-view.c:222
+#: src/bz-full-view.c:225
 msgid "No URL"
 msgstr "لا مسار"
 
-#: src/bz-full-view.c:230
+#: src/bz-full-view.c:233
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
 msgstr ""
 "هذا التطبيق مرخص تحت رخصة حرَّة، مما يعني أنه يمكن فحص المصدر البرمجي أمنيًا."
 
-#: src/bz-full-view.c:231
+#: src/bz-full-view.c:234
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
@@ -207,15 +258,15 @@ msgstr ""
 msgid "No Flatpaks Installed"
 msgstr "لا حزم فلاتباك منصَّبة"
 
-#: src/bz-installed-page.blp:21 src/bz-window.blp:184 src/bz-window.blp:306
+#: src/bz-installed-page.blp:21 src/bz-window.blp:201 src/bz-window.blp:336
 msgid "Installed"
 msgstr "المنصَّبة"
 
-#: src/bz-installed-page.blp:142
+#: src/bz-installed-page.blp:143
 msgid "More actions"
 msgstr "إجراءات إضافية"
 
-#: src/bz-installed-page.blp:186 src/bz-installed-page.blp:197
+#: src/bz-installed-page.blp:187 src/bz-installed-page.blp:198
 msgid "Edit Permissions"
 msgstr "حرِّر الأذونات"
 
@@ -291,7 +342,7 @@ msgstr "صغِّر الحد الأدنى"
 msgid "Maximize Upper Bound"
 msgstr "كبِّر الحد الأعلى"
 
-#: src/bz-transaction-manager.c:439
+#: src/bz-transaction-manager.c:451
 #, c-format
 msgid "Finished in %.02f seconds"
 msgstr "انتهى في %.02f ثانية"
@@ -362,79 +413,98 @@ msgstr "غير متصل"
 msgid "Loading"
 msgstr "يحمِّل"
 
-#: src/bz-window.blp:153
+#: src/bz-window.blp:170
 msgid "Browse"
 msgstr "تصفَّح"
 
-#: src/bz-window.blp:163
+#: src/bz-window.blp:180
 msgid "App View"
 msgstr "عرض التطبيق"
 
-#: src/bz-window.blp:174 src/bz-window.blp:285
+#: src/bz-window.blp:191 src/bz-window.blp:315
 msgid "Flathub"
 msgstr "فلاتهَب"
 
-#: src/bz-window.blp:203
+#: src/bz-window.blp:220
 msgid "Go Back"
 msgstr "ارجِع"
 
-#: src/bz-window.blp:211
+#: src/bz-window.blp:228
 msgid "Refresh"
 msgstr "أنعِش"
 
-#: src/bz-window.blp:220
+#: src/bz-window.blp:237
 msgid "Search"
 msgstr "ابحث"
 
-#: src/bz-window.blp:232
+#: src/bz-window.blp:249
 msgid "Update"
 msgstr "حدِّث"
 
-#: src/bz-window.blp:249
+#: src/bz-window.blp:263
+msgid "Checking for updates"
+msgstr ""
+
+#: src/bz-window.blp:279
 msgid "View curated applications"
 msgstr "اعرِض التطبيقات المنتقاة"
 
-#: src/bz-window.blp:264
+#: src/bz-window.blp:294
 msgid "Curated"
 msgstr "المنتقاة"
 
-#: src/bz-window.blp:270
+#: src/bz-window.blp:300
 msgid "View the latest on Flathub"
 msgstr "اعرِض آخر المستجدات على فلاتهَب"
 
-#: src/bz-window.blp:291
+#: src/bz-window.blp:321
 msgid "View installed applications"
 msgstr "اعرِض التطبيقات المنصَّبة"
 
-#: src/bz-window.blp:320
+#: src/bz-window.blp:350
 msgid "Main Menu"
 msgstr "القائمة الرئيسة"
 
-#: src/bz-window.blp:331
+#: src/bz-window.blp:361
 msgid "Toggle transaction sidebar"
 msgstr "بدِّل الشريط الجانبي للمعاملات"
 
-#: src/bz-window.blp:374
+#: src/bz-window.blp:400
+#, fuzzy
+msgid "Up to date!"
+msgstr "حدِّث"
+
+#: src/bz-window.blp:425
 msgid "_Keyboard Shortcuts"
 msgstr "ا_ختصارات لوحة المفاتيح"
 
-#: src/bz-window.blp:379
+#: src/bz-window.blp:430
 msgid "_About Bazaar"
 msgstr "_عَنْ بازار"
 
-#: src/bz-window.blp:384
+#: src/bz-window.blp:435
 msgid "_Donate to Bazaar ❤️"
 msgstr "_تبرَّع لبازار ❤️"
 
-#: src/bz-window.c:845
+#: src/bz-window.c:856
+msgid ""
+"The ability to inspect and install local .flatpak bundle files is coming "
+"soon! In the meantime, try running\n"
+"\n"
+"flatpak install --bundle your-bundle.flatpak\n"
+"\n"
+"on the command line."
+msgstr ""
+
+#: src/bz-window.c:927
 msgid "Can't do that right now!"
 msgstr "لا يمكن فعل ذلك الآن!"
 
-#: src/bz-window.c:858
+#: src/bz-window.c:940
 msgid "Confirm Action"
 msgstr "أكِّد الإجراء"
 
-#: src/bz-window.c:876
+#: src/bz-window.c:958
 #, c-format
 msgid ""
 "You are about to remove the following Flatpak:\n"
@@ -451,15 +521,15 @@ msgstr ""
 "\n"
 "أمتأكد؟"
 
-#: src/bz-window.c:884 src/bz-window.c:904
+#: src/bz-window.c:966 src/bz-window.c:986
 msgid "Cancel"
 msgstr "ألغِ"
 
-#: src/bz-window.c:885
+#: src/bz-window.c:967
 msgid "Remove"
 msgstr "أزِل"
 
-#: src/bz-window.c:896
+#: src/bz-window.c:978
 #, c-format
 msgid ""
 "You are about to install the following Flatpak:\n"
@@ -476,15 +546,15 @@ msgstr ""
 "\n"
 "أمتأكد؟"
 
-#: src/bz-window.c:930
+#: src/bz-window.c:1012
 msgid "More details"
 msgstr "تفاصيل أكثر"
 
-#: src/bz-window.c:1055
+#: src/bz-window.c:1138
 msgid "Resume the execution of transactions"
 msgstr "استأنِف تنفيذ المعاملات"
 
-#: src/bz-window.c:1061
+#: src/bz-window.c:1144
 msgid "Pause the execution of transactions"
 msgstr "أوقِف تنفيذ المعاملات مؤقتًا"
 
@@ -517,3 +587,6 @@ msgstr "أظهِر الاختصارات"
 msgctxt "shortcut window"
 msgid "Quit"
 msgstr "اخرُج"
+
+#~ msgid "translator-credits"
+#~ msgstr "أحمد النجماوي <iramosu@protonmail.com>"

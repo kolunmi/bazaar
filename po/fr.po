@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-11 10:22+0200\n"
+"POT-Creation-Date: 2025-07-15 06:56+0100\n"
 "PO-Revision-Date: 2025-07-11 10:35+0200\n"
 "Last-Translator: Léane GRASSER <leane.grasser@proton.me>\n"
 "Language-Team: French\n"
@@ -67,57 +67,57 @@ msgstr "Gérer les extensions"
 msgid "This flatpak is verified by the original developers of the software."
 msgstr "Ce Flatpak est validé par les développeurs à l'origine du logiciel."
 
-#: src/bz-application.c:1164
+#: src/bz-application.c:1186
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr "Adam Masciola <kolunmi@posteo.net>"
 
-#: src/bz-application.c:1169
+#: src/bz-application.c:1191
 msgctxt "About Dialog Translator Credit"
 msgid "Ahmed Najmawi"
 msgstr "Ahmed Najmawi"
 
-#: src/bz-application.c:1170
+#: src/bz-application.c:1192
 msgctxt "About Dialog Translator Credit"
 msgid "AtomHare"
 msgstr "AtomHare"
 
-#: src/bz-application.c:1171
+#: src/bz-application.c:1193
 msgctxt "About Dialog Translator Credit"
 msgid "Jill Fiore"
 msgstr "Jill Fiore"
 
-#: src/bz-application.c:1172
+#: src/bz-application.c:1194
 msgctxt "About Dialog Translator Credit"
 msgid "Lucosec"
 msgstr "Lucosec"
 
-#: src/bz-application.c:1173
+#: src/bz-application.c:1195
 msgctxt "About Dialog Translator Credit"
 msgid "Shihfu Juan"
 msgstr "Shihfu Juan"
 
-#: src/bz-application.c:1174
+#: src/bz-application.c:1196
 msgctxt "About Dialog Translator Credit"
 msgid "Vlastimil Dědek"
 msgstr "Vlastimil Dědek"
 
-#: src/bz-application.c:1175
+#: src/bz-application.c:1197
 msgctxt "About Dialog Translator Credit"
 msgid "asen23"
 msgstr "asen23"
 
-#: src/bz-application.c:1176
+#: src/bz-application.c:1198
 msgctxt "About Dialog Translator Credit"
 msgid "renner"
 msgstr "renner"
 
-#: src/bz-application.c:1177
+#: src/bz-application.c:1199
 msgctxt "About Dialog Translator Credit"
 msgid "robotta"
 msgstr "robotta"
 
-#: src/bz-application.c:1193
+#: src/bz-application.c:1215
 msgid "Adam Masciola"
 msgstr "Adam Masciola"
 
@@ -195,7 +195,7 @@ msgstr "Exécuter cette application"
 msgid "Download and install this application"
 msgstr "Télécharger et installer cette application"
 
-#: src/bz-full-view.blp:222 src/bz-window.c:944
+#: src/bz-full-view.blp:222 src/bz-window.c:987
 msgid "Install"
 msgstr "Installer"
 
@@ -235,16 +235,16 @@ msgstr "URL du projet"
 msgid "Download size"
 msgstr "Taille du téléchargement"
 
-#: src/bz-full-view.c:213
+#: src/bz-full-view.c:214
 #, c-format
 msgid "Released %x"
 msgstr "Publiée le %x"
 
-#: src/bz-full-view.c:224
+#: src/bz-full-view.c:225
 msgid "No URL"
 msgstr "Aucune URL"
 
-#: src/bz-full-view.c:232
+#: src/bz-full-view.c:233
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -252,7 +252,7 @@ msgstr ""
 "Cette application est soumise à une licence FLOSS, la fiabilité de son code "
 "source peut donc être auditée."
 
-#: src/bz-full-view.c:233
+#: src/bz-full-view.c:234
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
@@ -264,7 +264,7 @@ msgstr ""
 msgid "No Flatpaks Installed"
 msgstr "Aucun Flatpak installé"
 
-#: src/bz-installed-page.blp:21 src/bz-window.blp:201 src/bz-window.blp:323
+#: src/bz-installed-page.blp:21 src/bz-window.blp:201 src/bz-window.blp:336
 msgid "Installed"
 msgstr "Installées"
 
@@ -434,7 +434,7 @@ msgstr "Explorer"
 msgid "App View"
 msgstr "Vue Application"
 
-#: src/bz-window.blp:191 src/bz-window.blp:302
+#: src/bz-window.blp:191 src/bz-window.blp:315
 msgid "Flathub"
 msgstr "Flathub"
 
@@ -454,43 +454,52 @@ msgstr "Rechercher"
 msgid "Update"
 msgstr "Mettre à jour"
 
-#: src/bz-window.blp:266
+#: src/bz-window.blp:263
+msgid "Checking for updates"
+msgstr ""
+
+#: src/bz-window.blp:279
 msgid "View curated applications"
 msgstr "Voir les applications recommandées"
 
-#: src/bz-window.blp:281
+#: src/bz-window.blp:294
 msgid "Curated"
 msgstr "Recommandées"
 
-#: src/bz-window.blp:287
+#: src/bz-window.blp:300
 msgid "View the latest on Flathub"
 msgstr "Voir les nouveautés Flathub"
 
-#: src/bz-window.blp:308
+#: src/bz-window.blp:321
 msgid "View installed applications"
 msgstr "Voir les applications installées"
 
-#: src/bz-window.blp:337
+#: src/bz-window.blp:350
 msgid "Main Menu"
 msgstr "Menu principal"
 
-#: src/bz-window.blp:348
+#: src/bz-window.blp:361
 msgid "Toggle transaction sidebar"
 msgstr "Afficher/Masquer la barre latérale des opérations"
 
-#: src/bz-window.blp:392
+#: src/bz-window.blp:400
+#, fuzzy
+msgid "Up to date!"
+msgstr "Mettre à jour"
+
+#: src/bz-window.blp:425
 msgid "_Keyboard Shortcuts"
 msgstr "_Raccourcis clavier"
 
-#: src/bz-window.blp:397
+#: src/bz-window.blp:430
 msgid "_About Bazaar"
 msgstr "_À propos de Bazaar"
 
-#: src/bz-window.blp:402
+#: src/bz-window.blp:435
 msgid "_Donate to Bazaar ❤️"
 msgstr "_Faire un don à Bazaar ❤️"
 
-#: src/bz-window.c:813
+#: src/bz-window.c:856
 msgid ""
 "The ability to inspect and install local .flatpak bundle files is coming "
 "soon! In the meantime, try running\n"
@@ -506,15 +515,15 @@ msgstr ""
 "\n"
 "en ligne de commande."
 
-#: src/bz-window.c:884
+#: src/bz-window.c:927
 msgid "Can't do that right now!"
 msgstr "Impossible de faire ceci pour le moment !"
 
-#: src/bz-window.c:897
+#: src/bz-window.c:940
 msgid "Confirm Action"
 msgstr "Confirmer l'action"
 
-#: src/bz-window.c:915
+#: src/bz-window.c:958
 #, c-format
 msgid ""
 "You are about to remove the following Flatpak:\n"
@@ -531,15 +540,15 @@ msgstr ""
 "\n"
 "Voulez-vous vraiment continuer ?"
 
-#: src/bz-window.c:923 src/bz-window.c:943
+#: src/bz-window.c:966 src/bz-window.c:986
 msgid "Cancel"
 msgstr "Annuler"
 
-#: src/bz-window.c:924
+#: src/bz-window.c:967
 msgid "Remove"
 msgstr "Supprimer"
 
-#: src/bz-window.c:935
+#: src/bz-window.c:978
 #, c-format
 msgid ""
 "You are about to install the following Flatpak:\n"
@@ -556,15 +565,15 @@ msgstr ""
 "\n"
 "Voulez-vous vraiment continuer ?"
 
-#: src/bz-window.c:969
+#: src/bz-window.c:1012
 msgid "More details"
 msgstr "Plus de détails"
 
-#: src/bz-window.c:1095
+#: src/bz-window.c:1138
 msgid "Resume the execution of transactions"
 msgstr "Reprendre l'exécution des opérations"
 
-#: src/bz-window.c:1101
+#: src/bz-window.c:1144
 msgid "Pause the execution of transactions"
 msgstr "Mettre en pause l'exécution des opérations"
 

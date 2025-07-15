@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-12 05:36+0700\n"
+"POT-Creation-Date: 2025-07-15 06:56+0100\n"
 "PO-Revision-Date: 2025-07-12 06:09+0700\n"
 "Last-Translator: KiKaraage <kikaraage@tuta.io>\n"
 "Language-Team: Indonesian\n"
@@ -21,22 +21,22 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Gtranslator 48.0\n"
 
-#: data/io.github.kolunmi.Bazaar.desktop.in:3
+#: data/io.github.kolunmi.Bazaar.desktop.in:2
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:5
 msgid "Bazaar"
 msgstr "Bazaar"
 
-#: data/io.github.kolunmi.Bazaar.desktop.in:4
+#: data/io.github.kolunmi.Bazaar.desktop.in:3
 msgid "Add, remove or update flatpak software on this computer"
 msgstr ""
 "Tambah, hapus atau mutakhirkan perangkat lunak Flatpak pada komputer ini"
 
 # Added "Aplikasi" and "Pusat Aplikasi" (App Center) to search queries
-#: data/io.github.kolunmi.Bazaar.desktop.in:10
+#: data/io.github.kolunmi.Bazaar.desktop.in:9
 msgid "GTK;System;PackageManager;Discover;Flatpak;Software;Store;"
 msgstr ""
-"GTK;Sistem;Manajer Paket;Discover;Flatpak;Perangkat Lunak;Toko;Aplikasi;"
-"Pusat Aplikasi;"
+"GTK;Sistem;Manajer Paket;Discover;Flatpak;Perangkat "
+"Lunak;Toko;Aplikasi;Pusat Aplikasi;"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:6
 msgid "Show Animated Background"
@@ -68,57 +68,57 @@ msgstr "Kelola Modul Tambahan"
 msgid "This flatpak is verified by the original developers of the software."
 msgstr "Flatpak ini telah diverifikasi oleh pengembang perangkat lunak asli"
 
-#: src/bz-application.c:1178
+#: src/bz-application.c:1186
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr "Adam Masciola <kolunmi@posteo.net>"
 
-#: src/bz-application.c:1183
+#: src/bz-application.c:1191
 msgctxt "About Dialog Translator Credit"
 msgid "Ahmed Najmawi"
 msgstr "Ahmed Najmawi"
 
-#: src/bz-application.c:1184
+#: src/bz-application.c:1192
 msgctxt "About Dialog Translator Credit"
 msgid "AtomHare"
 msgstr "AtomHare"
 
-#: src/bz-application.c:1185
+#: src/bz-application.c:1193
 msgctxt "About Dialog Translator Credit"
 msgid "Jill Fiore"
 msgstr "Jill Fiore"
 
-#: src/bz-application.c:1186
+#: src/bz-application.c:1194
 msgctxt "About Dialog Translator Credit"
 msgid "Lucosec"
 msgstr "Lucosec"
 
-#: src/bz-application.c:1187
+#: src/bz-application.c:1195
 msgctxt "About Dialog Translator Credit"
 msgid "Shihfu Juan"
 msgstr "Shihfu Juan"
 
-#: src/bz-application.c:1188
+#: src/bz-application.c:1196
 msgctxt "About Dialog Translator Credit"
 msgid "Vlastimil Dědek"
 msgstr "Vlastimil Dědek"
 
-#: src/bz-application.c:1189
+#: src/bz-application.c:1197
 msgctxt "About Dialog Translator Credit"
 msgid "asen23"
 msgstr "asen23"
 
-#: src/bz-application.c:1190
+#: src/bz-application.c:1198
 msgctxt "About Dialog Translator Credit"
 msgid "renner"
 msgstr "renner"
 
-#: src/bz-application.c:1191
+#: src/bz-application.c:1199
 msgctxt "About Dialog Translator Credit"
 msgid "robotta"
 msgstr "robotta"
 
-#: src/bz-application.c:1207
+#: src/bz-application.c:1215
 msgid "Adam Masciola"
 msgstr "Adam Masciola"
 
@@ -235,16 +235,16 @@ msgstr "URL Proyek"
 msgid "Download size"
 msgstr "Ukuran unduhan"
 
-#: src/bz-full-view.c:213
+#: src/bz-full-view.c:214
 #, c-format
 msgid "Released %x"
 msgstr "Dirilis pada %x"
 
-#: src/bz-full-view.c:224
+#: src/bz-full-view.c:225
 msgid "No URL"
 msgstr "Tidak ada URL"
 
-#: src/bz-full-view.c:232
+#: src/bz-full-view.c:233
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -252,7 +252,7 @@ msgstr ""
 "Aplikasi ini memiliki lisensi FLOSS, sehingga kode sumbernya dapat diaudit "
 "secara bebas dan terbuka."
 
-#: src/bz-full-view.c:233
+#: src/bz-full-view.c:234
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
