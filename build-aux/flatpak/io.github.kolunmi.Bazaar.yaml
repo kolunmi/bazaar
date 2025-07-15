@@ -5,7 +5,7 @@ sdk: org.gnome.Sdk
 command: bazaar-launcher
 sdk-extensions:
   - org.freedesktop.Sdk.Extension.rust-stable
-  - org.freedesktop.Sdk.Extension.llvm18
+  - org.freedesktop.Sdk.Extension.llvm20
 finish-args:
   - "--share=network"
   - "--share=ipc"
@@ -30,7 +30,7 @@ finish-args:
   - "--env=GOBJECT_DEBUG=instance-count"
   - "--env=WORKER_AS_SUBPROCESS=1"
 build-options:
-  append-path: "/usr/lib/sdk/rust-stable/bin:/usr/lib/sdk/llvm18/bin"
+  append-path: "/usr/lib/sdk/rust-stable/bin:/usr/lib/sdk/llvm20/bin"
   env:
     MOUNT_FUSE_PATH: "../tmp/"
     RUSTFLAGS:
@@ -54,6 +54,10 @@ modules:
         - type: git
           url: https://gitlab.gnome.org/GNOME/libsoup.git
           tag: 3.6.1
+          x-checker-data:
+            type: anitya
+            project-id: 11483
+            tag-template: $version
     - name: libxmlb
       buildsystem: meson
       config-opts:
@@ -65,12 +69,20 @@ modules:
         - type: git
           url: https://github.com/hughsie/libxmlb.git
           tag: 0.3.22
+          x-checker-data:
+            type: anitya
+            project-id: 179028
+            tag-template: $version
     - name: libdex
       buildsystem: meson
       sources:
         - type: git
           url: https://gitlab.gnome.org/GNOME/libdex.git
           tag: 0.11.0
+          x-checker-data:
+            type: anitya
+            project-id: 328356
+            tag-template: $version
     - name: glycin-loaders
       buildsystem: meson
       config-opts:
@@ -80,6 +92,10 @@ modules:
         - type: git
           url: https://gitlab.gnome.org/sophie-h/glycin.git
           tag: 1.2.2
+          x-checker-data:
+            type: anitya
+            project-id: 369437
+            tag-template: $version
     - name: flatpak
       buildsystem: meson
       config-opts:
@@ -116,9 +132,62 @@ modules:
         - type: git
           url: https://github.com/flatpak/flatpak.git
           tag: 1.16.1
+          x-checker-data:
+            type: anitya
+            project-id: 6377
+            tag-template: $version
         - type: file
           path: flatpak-bwrap-wrapper.sh
       modules:
+      - python-deps.json
+      - name: polkit
+        config-opts:
+          - "--disable-polkitd"
+          - "--disable-man-pages"
+          - "--disable-introspection"
+          - "--disable-examples"
+          - "--disable-gtk-doc"
+          - "--disable-libelogind"
+          - "--disable-libsystemd-login"
+          - "--with-systemdsystemunitdir=no"
+          - "--with-authdb=dummy"
+          - "--with-authfw=none"
+        rm-configure: true
+        build-options:
+          env:
+            CFLAGS: "-Wno-implicit-function-declaration"
+        cleanup:
+          - "/bin/*"
+          - "/etc/pam.d"
+          - "/etc/dbus-1"
+          - "/share/dbus-1/system-services/*"
+          - "/share/polkit-1"
+          - "/lib/polkit-1"
+        sources:
+          - type: archive
+            url: https://www.freedesktop.org/software/polkit/releases/polkit-0.116.tar.gz
+            sha256: 88170c9e711e8db305a12fdb8234fac5706c61969b94e084d0f117d8ec5d34b1
+            x-checker-data:
+              type: anitya
+              project-id: 3682
+              url-template: https://www.freedesktop.org/software/polkit/releases/polkit-$version.tar.gz
+          - type: patch
+            path: polkit-build-Add-option-to-build-without-polkitd.patch
+          - type: file
+            path: polkit-autogen
+            dest-filename: autogen.sh
+        modules:
+        - name: intltool
+          cleanup:
+            - "*"
+          sources:
+            - type: archive
+              url: https://launchpad.net/intltool/trunk/0.51.0/+download/intltool-0.51.0.tar.gz
+              sha256: 67c74d94196b153b774ab9f89b2fa6c6ba79352407037c8c14d5aeb334e959cd
+              x-checker-data:
+                type: anitya
+                project-id: 1385
+                url-template: https://launchpad.net/intltool/trunk/$version/+download/intltool-$version.tar.gz
         - name: ostree
           config-opts:
             - "--disable-man"
@@ -133,7 +202,32 @@ modules:
           sources:
             - type: git
               url: https://github.com/ostreedev/ostree.git
-              tag: v2023.5
+              tag: v2025.3
+              x-checker-data:
+                type: anitya
+                project-id: 10899
+                tag-template: $version
+          modules:
+            - name: libfuse
+              config-opts:
+                - UDEV_RULES_PATH=/app/etc/udev/rules.d
+                - INIT_D_PATH=/app/etc/init.d
+              cleanup:
+                - "/bin/ulockmgr_server"
+              post-install:
+                - install -m a+rx fusermount-wrapper.sh /app/bin/fusermount
+              sources:
+                - type: archive
+                  url: https://github.com/libfuse/libfuse/releases/download/fuse-2.9.9/fuse-2.9.9.tar.gz
+                  sha256: d0e69d5d608cc22ff4843791ad097f554dd32540ddc9bed7638cc6fea7c1b4b5
+                - type: patch
+                  path: fuse-2.9.2-namespace-conflict-fix.patch
+                - type: patch
+                  path: fuse-disable-sys-mount-under-flatpak.patch
+                - type: patch
+                  path: fuse-2.9.2-closefrom.patch
+                - type: file
+                  path: fusermount-wrapper.sh
         - name: xdg-dbus-proxy
           buildsystem: meson
           config-opts:
@@ -143,66 +237,10 @@ modules:
             - type: archive
               url: https://github.com/flatpak/xdg-dbus-proxy/archive/refs/tags/0.1.6.tar.gz
               sha256: ee9c1d665f4e3b025a83d522d478ff7930070f2817fc2cb446db0dca93c990b1
-  - name: libfuse
-    config-opts:
-      - UDEV_RULES_PATH=/app/etc/udev/rules.d
-      - INIT_D_PATH=/app/etc/init.d
-    cleanup:
-      - "/bin/ulockmgr_server"
-    post-install:
-      - install -m a+rx fusermount-wrapper.sh /app/bin/fusermount
-    sources:
-      - type: archive
-        url: https://github.com/libfuse/libfuse/releases/download/fuse-2.9.9/fuse-2.9.9.tar.gz
-        sha256: d0e69d5d608cc22ff4843791ad097f554dd32540ddc9bed7638cc6fea7c1b4b5
-      - type: patch
-        path: fuse-2.9.2-namespace-conflict-fix.patch
-      - type: patch
-        path: fuse-disable-sys-mount-under-flatpak.patch
-      - type: patch
-        path: fuse-2.9.2-closefrom.patch
-      - type: file
-        path: fusermount-wrapper.sh
-  - name: polkit
-    config-opts:
-      - "--disable-polkitd"
-      - "--disable-man-pages"
-      - "--disable-introspection"
-      - "--disable-examples"
-      - "--disable-gtk-doc"
-      - "--disable-libelogind"
-      - "--disable-libsystemd-login"
-      - "--with-systemdsystemunitdir=no"
-      - "--with-authdb=dummy"
-      - "--with-authfw=none"
-    rm-configure: true
-    build-options:
-      env:
-        CFLAGS: "-Wno-implicit-function-declaration"
-    cleanup:
-      - "/bin/*"
-      - "/etc/pam.d"
-      - "/etc/dbus-1"
-      - "/share/dbus-1/system-services/*"
-      - "/share/polkit-1"
-      - "/lib/polkit-1"
-    sources:
-      - type: archive
-        url: https://www.freedesktop.org/software/polkit/releases/polkit-0.116.tar.gz
-        sha256: 88170c9e711e8db305a12fdb8234fac5706c61969b94e084d0f117d8ec5d34b1
-      - type: patch
-        path: polkit-build-Add-option-to-build-without-polkitd.patch
-      - type: file
-        path: polkit-autogen
-        dest-filename: autogen.sh
-    modules:
-    - name: intltool
-      cleanup:
-        - "*"
-      sources:
-        - type: archive
-          url: https://launchpad.net/intltool/trunk/0.51.0/+download/intltool-0.51.0.tar.gz
-          sha256: 67c74d94196b153b774ab9f89b2fa6c6ba79352407037c8c14d5aeb334e959cd
+              x-checker-data:
+                type: anitya
+                project-id: 58434
+                url-template: https://github.com/flatpak/xdg-dbus-proxy/archive/refs/tags/$version.tar.gz
   - name: bubblewrap
     buildsystem: meson
     config-opts:
@@ -211,6 +249,10 @@ modules:
       - "-Dtests=false"
     sources:
       - type: archive
-        url: https://github.com/projectatomic/bubblewrap/archive/refs/tags/v0.11.0.tar.gz
+        url: https://github.com/containers/bubblewrap/archive/refs/tags/v0.11.0.tar.gz
         sha256: cfeeb15fcc47d177d195f06fdf0847e93ee3aa6bf46f6ac0a141fa142759e2c3
-  - python-deps.json
+        x-checker-data:
+          type: anitya
+          project-id: 10937
+          url-template: https://github.com/containers/bubblewrap/archive/refs/tags/v$version.tar.gz
+
