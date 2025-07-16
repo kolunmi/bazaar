@@ -1,7 +1,7 @@
 # These are just convenience scripts, NOT a build system!
 
 appid := env("BAZAAR_APPID", "io.github.kolunmi.Bazaar")
-manifest := "./build-aux/flatpak/" + appid + ".json"
+manifest := "./build-aux/flatpak/" + appid + ".yaml"
 branch := env("BAZAAR_BRANCH", "stable")
 
 alias run := run-base
@@ -14,7 +14,7 @@ build-base:
     ninja -C build
 
 build-flatpak:
-    just build-flatpak-devel ./build-aux/flatpak/io.github.kolunmi.Bazaar.json stable
+    just build-flatpak-devel ./build-aux/flatpak/io.github.kolunmi.Bazaar.yaml stable
 
 build-flatpak-devel $manifest=manifest $branch=branch:
     #!/usr/bin/env bash
