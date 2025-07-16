@@ -12,8 +12,7 @@ finish-args:
   - "--socket=fallback-x11"
   - "--socket=wayland"
   - "--device=dri"
-  # We need directory access to user/system flatpak installations
-  - "--filesystem=~/.local/share/flatpak:rw"
+  # We need directory access to system flatpak installation
   - "--filesystem=/var/lib/flatpak"
   # Needs to talk to host so that installing flatpaks work
   - "--talk-name=org.freedesktop.Flatpak"
