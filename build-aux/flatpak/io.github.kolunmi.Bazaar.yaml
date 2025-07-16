@@ -136,7 +136,7 @@ modules:
         - "/share/gdm"
         - "/share/zsh"
       post-install:
-        - install -Dpm0755 -t /app/bin /usr/bin/update-{mime,desktop}-database ../flatpak-bwrap
+        - install -Dpm0755 -t /app/bin /usr/bin/update-{mime,desktop}-database
       sources:
         - type: archive
           url: https://github.com/flatpak/flatpak/archive/refs/tags/1.16.1.tar.gz
@@ -145,8 +145,6 @@ modules:
             type: anitya
             project-id: 6377
             url-template: https://github.com/flatpak/flatpak/archive/refs/tags/$version.tar.gz
-        - type: file
-          path: flatpak-bwrap
       modules:
       - name: python3-pyparsing
         buildsystem: simple
