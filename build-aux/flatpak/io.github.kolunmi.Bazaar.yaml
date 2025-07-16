@@ -29,11 +29,17 @@ build-options:
 modules:
   - name: bazaar
     buildsystem: meson
-    post-install:
-      - install -Dpm755 -t /app/bin ../build-aux/flatpak/bazaar-launcher
     sources:
       - type: dir
         path: "../.."
+      - type: shell
+        commands:
+          - |
+            tee ./bazaar-launcher <<'EOF'
+            #!/usr/bin/env bash
+            bazaar window --auto-service $@
+            EOF
+            install -Dpm0755 -t /app/bin ./bazaar-launcher
     modules:
     - name: blueprint-compiler
       buildsystem: meson
@@ -130,9 +136,7 @@ modules:
         - "/share/gdm"
         - "/share/zsh"
       post-install:
-        - install -Dpm0755 -t /app/bin /usr/bin/update-mime-database
-        - install -Dpm0755 -t /app/bin /usr/bin/update-desktop-database
-        - install -Dpm0755 ../flatpak-bwrap-wrapper.sh /app/bin/flatpak-bwrap
+        - install -Dpm0755 -t /app/bin /usr/bin/update-{mime,desktop}-database ../flatpak-bwrap
       sources:
         - type: archive
           url: https://github.com/flatpak/flatpak/archive/refs/tags/1.16.1.tar.gz
@@ -142,7 +146,7 @@ modules:
             project-id: 6377
             url-template: https://github.com/flatpak/flatpak/archive/refs/tags/$version.tar.gz
         - type: file
-          path: flatpak-bwrap-wrapper.sh
+          path: flatpak-bwrap
       modules:
       - name: python3-pyparsing
         buildsystem: simple

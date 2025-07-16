@@ -1,4 +1,4 @@
-id: io.github.kolunmi.Bazaar
+id: io.github.kolunmi.Bazaar.Devel
 runtime: org.gnome.Platform
 runtime-version: master
 sdk: org.gnome.Sdk
@@ -7,49 +7,55 @@ tags:
   - "nightly"
 sdk-extensions:
   - org.freedesktop.Sdk.Extension.rust-stable
-  - org.freedesktop.Sdk.Extension.llvm19
+  - org.freedesktop.Sdk.Extension.llvm20
 finish-args:
   - "--share=network"
   - "--share=ipc"
   - "--socket=fallback-x11"
   - "--socket=wayland"
-  - "--socket=session-bus"
   - "--device=dri"
-  - "--filesystem=host"
-  - "--filesystem=/var/lib/flatpak/"
+  # We need directory access to user/system flatpak installations
   - "--filesystem=~/.local/share/flatpak:rw"
-  - "--filesystem=/var/tmp:rw"
   - "--filesystem=/var/lib/flatpak"
-  - "--filesystem=/var/tmp"
-  - "--filesystem=/tmp"
+  # Needs to talk to host so that installing flatpaks work
   - "--talk-name=org.freedesktop.Flatpak"
-  - "--own-name=io.github.kolunmi.Bazaar"
+  # Can't read flatpaks from the system without this
   - "--system-talk-name=org.freedesktop.Flatpak.SystemHelper"
-  - "--system-talk-name=org.freedesktop.PolicyKit1"
+  # Necessary for sandbox escape
+  - "--filesystem=/var/tmp"
+  # Not having this makes it so libflatpak misbehaves and can't detect all flatpaks installed by users properly
+  # "(x) flatpaks need to be updated" when they in fact don't
   - "--system-talk-name=org.freedesktop.Accounts"
-  - "--talk-name=org.gtk.vfs.*"
-  - "--filesystem=xdg-run/gvfsd"
-  - "--env=GOBJECT_DEBUG=instance-count"
-  - "--env=WORKER_AS_SUBPROCESS=1"
 build-options:
   append-path: "/usr/lib/sdk/rust-stable/bin:/usr/lib/sdk/llvm20/bin"
-  env:
-    MOUNT_FUSE_PATH: "../tmp/"
-    RUSTFLAGS:
-      "-C force-frame-pointers=yes -C symbol-mangling-version=v0 -C linker=clang
-      -C link-arg=-fuse-ld=/usr/lib/sdk/rust-stable/bin/mold"
-    BASH_COMPLETIONSDIR: "/app/share/bash-completion/completions"
-  build-args:
-    - "--share=network"
 modules:
   - name: bazaar
     buildsystem: meson
     sources:
       - type: dir
         path: "../.."
-    post-install:
-      - install -Dm755 ../build-aux/flatpak/bazaar-launcher.sh /app/bin/bazaar-launcher
+      - type: shell
+        commands:
+          - |
+            tee ./bazaar-launcher <<'EOF'
+            #!/usr/bin/env bash
+            bazaar window --auto-service $@
+            EOF
+            install -Dpm0755 -t /app/bin ./bazaar-launcher
     modules:
+    - name: blueprint-compiler
+      buildsystem: meson
+      cleanup:
+        - '*'
+      sources:
+        - type: git
+          url: https://gitlab.gnome.org/GNOME/blueprint-compiler.git
+          tag: 0.18.0
+          commit: 07c9c9df9cd1b6b4454ecba21ee58211e9144a4b
+          x-checker-data:
+            type: anitya
+            project-id: 279929
+            tag-template: $version
     - name: libsoup
       buildsystem: meson
       sources:
@@ -98,6 +104,11 @@ modules:
             type: anitya
             project-id: 369437
             url-template: https://gitlab.gnome.org/GNOME/glycin/-/archive/$version/glycin-$version.tar.gz
+        # Check `update-deps.sh` to vendor dependencies for this
+        - glycin-cargo-sources.json
+        - type: shell
+          commands:
+            - install -Dpm0644 cargo/config .cargo/config.toml
     - name: flatpak
       buildsystem: meson
       config-opts:
@@ -127,9 +138,7 @@ modules:
         - "/share/gdm"
         - "/share/zsh"
       post-install:
-        - install -Dpm0755 -t /app/bin /usr/bin/update-mime-database
-        - install -Dpm0755 -t /app/bin /usr/bin/update-desktop-database
-        - install -Dpm0755 ../flatpak-bwrap-wrapper.sh /app/bin/flatpak-bwrap
+        - install -Dpm0755 -t /app/bin /usr/bin/update-{mime,desktop}-database ../flatpak-bwrap
       sources:
         - type: archive
           url: https://github.com/flatpak/flatpak/archive/refs/tags/1.16.1.tar.gz
@@ -139,9 +148,27 @@ modules:
             project-id: 6377
             url-template: https://github.com/flatpak/flatpak/archive/refs/tags/$version.tar.gz
         - type: file
-          path: flatpak-bwrap-wrapper.sh
+          path: flatpak-bwrap
       modules:
-      - python-deps.json
+      - name: python3-pyparsing
+        buildsystem: simple
+        cleanup:
+          - "*"
+        build-commands:
+          - pip3 install --no-index --find-links="file://${PWD}" --prefix=${FLATPAK_DEST} pyparsing
+        sources:
+          - type: file
+            url: https://files.pythonhosted.org/packages/bb/22/f1129e69d94ffff626bdb5c835506b3a5b4f3d070f17ea295e12c2c6f60f/pyparsing-3.2.3.tar.gz
+            sha256: b9c13f1ab8b3b542f72e28f634bad4de758ab3ce4546e4301970ad6fa77c38be
+            x-checker-data:
+              type: pypi
+              name: pyparsing
+          - type: file
+            url: https://files.pythonhosted.org/packages/ad/38/80992c4cb490a05474c886850ec818276d09c0a6722bd5b43bc487818ac7/flit_core-3.7.1-py3-none-any.whl
+            sha256: e454fdbf68c7036e1c7435ec7479383f9d9a1650ca5b304feb184eba1efcdcef
+            x-checker-data:
+              type: pypi
+              name: flit_core
       - name: polkit
         config-opts:
           - "--disable-polkitd"
@@ -172,9 +199,13 @@ modules:
             sha256: 88170c9e711e8db305a12fdb8234fac5706c61969b94e084d0f117d8ec5d34b1
           - type: patch
             path: polkit-build-Add-option-to-build-without-polkitd.patch
-          - type: file
-            path: polkit-autogen
+          - type: script
             dest-filename: autogen.sh
+            commands:
+              - |
+                #!/bin/sh
+                gtkdocize --flavour no-tmpl
+                autoreconf -if
         modules:
         - name: intltool
           cleanup:
@@ -188,7 +219,10 @@ modules:
                 project-id: 1385
                 url-template: https://launchpad.net/intltool/trunk/$version/+download/intltool-$version.tar.gz
         - name: ostree
-          config-opts:
+          build-options:
+            env:
+              BASH_COMPLETIONSDIR: "/app/share/bash-completion/completions"
+            config-opts:
             - "--disable-man"
             - "--with-curl"
             - "--without-libsystemd"
@@ -202,19 +236,23 @@ modules:
           - type: git
             url: https://github.com/ostreedev/ostree
             tag: v2025.3
+            commit: d439f504624d7759cebde2f6c366ad610a7700ce
             x-checker-data:
               type: anitya
-              project-id: 6377
+              project-id: 10899
               tag-template: v$version
           modules:
             - name: libfuse
+              build-options:
+                env:
+                  MOUNT_FUSE_PATH: "../tmp/"
               config-opts:
                 - UDEV_RULES_PATH=/app/etc/udev/rules.d
                 - INIT_D_PATH=/app/etc/init.d
               cleanup:
                 - "/bin/ulockmgr_server"
               post-install:
-                - install -m a+rx fusermount-wrapper.sh /app/bin/fusermount
+                - install -Dpm0755 ./fusermount-wrapper.sh /app/bin/fusermount
               sources:
                 - type: archive
                   url: https://github.com/libfuse/libfuse/releases/download/fuse-2.9.9/fuse-2.9.9.tar.gz
