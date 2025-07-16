@@ -11,21 +11,19 @@ finish-args:
   - "--share=ipc"
   - "--socket=fallback-x11"
   - "--socket=wayland"
-  - "--socket=session-bus"
   - "--device=dri"
-  - "--filesystem=host"
+  # We need directory access to user/system flatpak installations
   - "--filesystem=~/.local/share/flatpak:rw"
   - "--filesystem=/var/lib/flatpak"
-  - "--filesystem=/var/tmp:rw"
-  - "--filesystem=/var/tmp"
-  - "--filesystem=/tmp"
+  # Needs to talk to host so that installing flatpaks work
   - "--talk-name=org.freedesktop.Flatpak"
-  - "--own-name=io.github.kolunmi.Bazaar"
+  # Can't read flatpaks from the system without this
   - "--system-talk-name=org.freedesktop.Flatpak.SystemHelper"
-  - "--system-talk-name=org.freedesktop.PolicyKit1"
+  # Necessary for sandbox escape
+  - "--filesystem=/var/tmp"
+  # Not having this makes it so libflatpak misbehaves and can't detect all flatpaks installed by users properly
+  # "(x) flatpaks need to be updated" when they in fact don't
   - "--system-talk-name=org.freedesktop.Accounts"
-  - "--talk-name=org.gtk.vfs.*"
-  - "--filesystem=xdg-run/gvfsd"
 build-options:
   append-path: "/usr/lib/sdk/rust-stable/bin:/usr/lib/sdk/llvm20/bin"
 modules:
@@ -148,6 +146,8 @@ modules:
       modules:
       - name: python3-pyparsing
         buildsystem: simple
+        cleanup:
+          - "*"
         build-commands:
           - pip3 install --no-index --find-links="file://${PWD}" --prefix=${FLATPAK_DEST} pyparsing
         sources:
@@ -157,7 +157,12 @@ modules:
             x-checker-data:
               type: pypi
               name: pyparsing
-      - python-deps.json
+          - type: file
+            url: https://files.pythonhosted.org/packages/ad/38/80992c4cb490a05474c886850ec818276d09c0a6722bd5b43bc487818ac7/flit_core-3.7.1-py3-none-any.whl
+            sha256: e454fdbf68c7036e1c7435ec7479383f9d9a1650ca5b304feb184eba1efcdcef
+            x-checker-data:
+              type: pypi
+              name: flit_core
       - name: polkit
         config-opts:
           - "--disable-polkitd"
