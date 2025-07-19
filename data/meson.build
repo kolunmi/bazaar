@@ -33,9 +33,6 @@ test('Validate schema file',
      compile_schemas,
      args: ['--strict', '--dry-run', meson.current_source_dir()])
 
-install_data('io.github.kolunmi.Bazaar.service',
-  install_dir: get_option('datadir') / 'dbus-1' / 'services'
-)
 
 service_conf = configuration_data()
 service_conf.set('bindir', get_option('prefix') / get_option('bindir'))
@@ -55,3 +52,4 @@ configure_file(
 )
 
 subdir('icons')
+subdir('dbus')
