@@ -53,7 +53,7 @@ msgstr "Adam Masciola"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:41
 msgid "Main Bazaar window showing Blender"
-msgstr "Hoofd Bzaarventer dat Blender toone"
+msgstr "Hoofdvenster van Bazaar met Blender"
 
 #: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:162
 #: src/bz-installed-page.blp:174
@@ -127,7 +127,7 @@ msgstr "Geen Gecureerde Applicaties"
 msgid ""
 "Bazaar was not provided a curated content configuration. Contact your "
 "operating system's support channels for assistance."
-msgstr "Bazaar heeft geen gecureerde content configuratie gekregen. Contacteer uw bestuuringssysteem hun supportkanalen voor ondersteuning"
+msgstr "Bazaar heeft geen gecureerde content configuratie gekregen. Neem contact op met uw bestuuringssysteem hun supportkanalen voor ondersteuning"
 
 #: src/bz-browse-widget.blp:22 src/bz-flathub-page.blp:11
 msgid "Browser"
@@ -155,7 +155,7 @@ msgstr "Trending"
 
 #: src/bz-flathub-page.blp:117
 msgid "Recently Updated"
-msgstr "Recent Geupdated"
+msgstr "Onlangs bijgewerkt"
 
 #: src/bz-flathub-page.blp:149
 msgid "Recently Added"
@@ -179,7 +179,7 @@ msgstr "Content"
 
 #: src/bz-full-view.blp:180
 msgid "Run this application"
-msgstr "Voer deze applicatie uit"
+msgstr "Applicatie uitvoeren"
 
 #: src/bz-full-view.blp:204
 msgid "Download and install this application"
@@ -191,7 +191,7 @@ msgstr "Installeren"
 
 #: src/bz-full-view.blp:236
 msgid "Uninstall this application"
-msgstr "De-installeer deze applicatie"
+msgstr "Verwijder deze applicatie"
 
 #: src/bz-full-view.blp:262
 msgid "Share this application"
@@ -201,7 +201,7 @@ msgstr "Deel deze applicatie"
 msgid ""
 "The number of downloads in the last 30 days. Click to view this "
 "application's download statistics."
-msgstr "Het aantal downloads in de laatste 30 dagen. Click om de statestieken van deze applicatie te tonen"
+msgstr "Het aantal downloads in de laatste 30 dagen. Click om de statistieken van deze applicatie te tonen"
 
 #: src/bz-full-view.blp:316
 msgid "Support this developer"
@@ -213,11 +213,11 @@ msgstr "Steunen"
 
 #: src/bz-full-view.blp:387
 msgid "Remote repo name"
-msgstr "Repo naam op afstand"
+msgstr "Remote repo naam"
 
 #: src/bz-full-view.blp:400
 msgid "Project URL"
-msgstr "Project URL link"
+msgstr "Project URL"
 
 #: src/bz-full-view.blp:412
 msgid "Download size"
@@ -236,13 +236,13 @@ msgstr "Geen URL"
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
-msgstr "Deze applicatie heeft een FLOSS licentie, wat betekent dat de broncode kan gecontlroleerd worden voor de veiligheid"
+msgstr "Deze applicatie heeft een FLOSS licentie, wat betekent dat de broncode gecontroleerd kan worden op veiligheid"
 
 #: src/bz-full-view.c:234
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
-msgstr "Deze applicatie heeft een eigen 'proprietary' licentie, wat betekent dat deze in eigen beheer is ontwikkeld en niet kan veranderd worden door een derde partij"
+msgstr "Deze applicatie heeft een proprietary-licentie, wat betekent dat de broncode privé wordt ontwikkeld en niet gecontroleerd kan worden door een derde partij."
 
 #: src/bz-installed-page.blp:15
 msgid "No Flatpaks Installed"
@@ -250,7 +250,7 @@ msgstr "Geen Flatpaks geïnstalleerd"
 
 #: src/bz-installed-page.blp:21 src/bz-window.blp:201 src/bz-window.blp:336
 msgid "Installed"
-msgstr "geïnstalleerd"
+msgstr "Geïnstalleerd"
 
 #: src/bz-installed-page.blp:143
 msgid "More actions"
@@ -258,7 +258,7 @@ msgstr "Meer Acties"
 
 #: src/bz-installed-page.blp:187 src/bz-installed-page.blp:198
 msgid "Edit Permissions"
-msgstr "Bevoegdheden voor bewerken"
+msgstr "Bewerk bevoegdheden"
 
 #: src/bz-preferences-dialog.blp:9
 msgid "Preferences"
@@ -278,7 +278,7 @@ msgstr "Toon geanimeerde achtergrond"
 
 #: src/bz-search-widget.blp:69
 msgid "Type to filter"
-msgstr "Type om te filteren"
+msgstr "Typ om te filteren"
 
 #: src/bz-search-widget.blp:98 src/bz-search-widget.blp:115
 msgid "Search Options"
@@ -286,11 +286,11 @@ msgstr "Zoek Opties"
 
 #: src/bz-search-widget.blp:119
 msgid "Exclude results with proprietary licenses"
-msgstr "Laat resultaten weg met eigen 'proprietary' licenties"
+msgstr "Sluit resultaten met proprietary-licenties uit"
 
 #: src/bz-search-widget.blp:124
 msgid "Exclude results not originating from Flathub"
-msgstr "Laat resultaten weg die niet van Flathub komen"
+msgstr "Sluit resultaten die niet van Flathub komen uit"
 
 #: src/bz-search-widget.blp:139
 msgid "Advanced"
@@ -322,7 +322,7 @@ msgstr "Open deze link extern"
 
 #: src/bz-stats-dialog.blp:15
 msgid "Downloads Over Time"
-msgstr "Downloads doorheen de tijd"
+msgstr "Downloads door de tijd heen"
 
 #: src/bz-stats-dialog.blp:31
 msgid "Minimize Lower Bound"
@@ -343,15 +343,15 @@ msgstr "Installeren"
 
 #: src/bz-transaction-view.blp:63
 msgid "Updating"
-msgstr "Updaten"
+msgstr "Bijwerken"
 
 #: src/bz-transaction-view.blp:92
 msgid "Removing"
-msgstr "verwijderen"
+msgstr "Verwijderen"
 
 #: src/bz-transaction.c:268
 msgid "Pending"
-msgstr "In de wacht"
+msgstr "Wachten"
 
 #: src/bz-update-dialog.blp:6
 msgid "Later"
@@ -369,18 +369,19 @@ msgstr "Updates zijn beschikbaar"
 msgid ""
 "The following applications are eligible for updates. Would you like to "
 "install them?"
-msgstr "De volgende applicaties hebben updates. Wil je deze Installeren?"
+msgstr ""
+"De volgende applicaties hebben updates. Wil je deze Installeren?"
 
 #: src/bz-update-dialog.c:135
 #, c-format
 msgid ""
 "%d runtimes and/or addons are eligible for updates. Would you like to "
-"install them?"
-msgstr "%d runtimes en/of addons hebben Updates. Wil je deze nu installeren?"
+"update"
+msgstr "%d runtimes en/of addons hebben updates. Wil je deze nu installeren?"
 
 #: src/bz-update-dialog.c:143
 #, c-format
-msgid "Additionally, %d runtimes and/or addons will be updated."
+msgid "Daarnaast worden %d runtimes en/of addons ook bijgewerkt."
 msgstr "Additioneel, worden %d runtimes en/of addons ook Geupdated"
 
 #: src/bz-window.blp:36
@@ -389,11 +390,11 @@ msgstr "Transacties Zullen Hier Verschijnen"
 
 #: src/bz-window.blp:97
 msgid "Halt the execution of transactions"
-msgstr "Pauzeer de uitvoer van Transacties"
+msgstr "Pauzeer de uitvoer van transacties"
 
 #: src/bz-window.blp:105
 msgid "Clear all finished transactions"
-msgstr "Wis alle voltooide Transacties"
+msgstr "Wis alle voltooide transacties"
 
 #: src/bz-window.blp:136 src/bz-window.blp:140
 msgid "Offline"
@@ -483,7 +484,8 @@ msgid ""
 "flatpak install --bundle your-bundle.flatpak\n"
 "\n"
 "on the command line."
-msgstr "De mogelijkheid om lokale .flatpak bestanden te inspecteren en te installeren komt er binnenkort aan"
+msgstr ""
+"De mogelijkheid om lokale .flatpak bestanden te inspecteren en te installeren komt er binnenkort aan"
 "\n"
 "Flatpak install -bundle jouw-bundle.flatpak\n"
 "\n"
@@ -491,7 +493,7 @@ msgstr "De mogelijkheid om lokale .flatpak bestanden te inspecteren en te instal
 
 #: src/bz-window.c:927
 msgid "Can't do that right now!"
-msgstr "Kan dit momenteel niet doen"
+msgstr "Dit is nu niet mogelijk!"
 
 #: src/bz-window.c:940
 msgid "Confirm Action"
@@ -506,12 +508,13 @@ msgid ""
 "<tt>%s</tt>\n"
 "\n"
 "Are you sure?"
-msgstr "Je staat op het punt om te volgende flatpaks te verwijderen"
+msgstr ""
+"Je staat op het punt om de volgende Flatpak te verwijderen: \n"
 "\n"
-"<b>%s</b>"
-"<tt>%s</tt>"
+"<b>%s</b>\n"
+"<tt>%s</tt>\n"
 "\n"
-"Ben je zeker?"
+"Weet je het zeker?"
 
 
 #: src/bz-window.c:966 src/bz-window.c:986
@@ -531,12 +534,13 @@ msgid ""
 "<tt>%s</tt>\n"
 "\n"
 "Are you sure?"
-msgstr "Je staat op het punt om te volgende flatpaks te installeren"
+msgstr ""
+"Je staat op het punt om de volgende Flatpak te installeren: \n"
 "\n"
 "<b>%s</b>\n"
 "<tt>%s</tt>\n"
 "\n"
-"Ben je zeker?"
+"Weet je het zeker?"
 
 #: src/bz-window.c:1012
 msgid "More details"
@@ -578,4 +582,4 @@ msgstr "Toon Snelkoppelingen"
 #: src/gtk/help-overlay.blp:34
 msgctxt "shortcut window"
 msgid "Quit"
-msgstr "SLuit af"
+msgstr "Sluit af"
