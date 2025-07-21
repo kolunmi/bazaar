@@ -5,5 +5,8 @@ rpmbuild
 repo
 *.flatpak
 *.mo
+gpgme
+libassuan
+libxml2
 
 /subprojects/blueprint-compiler
