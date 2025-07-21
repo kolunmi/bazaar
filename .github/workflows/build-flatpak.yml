@@ -30,7 +30,7 @@ jobs:
       - name: Install Flatpak and Flatpak Builder
         run: |
           sudo apt update
-          sudo apt install -y flatpak flatpak-builder gnome-software-plugin-flatpak
+          sudo apt install -y flatpak flatpak-builder libflatpak-dev
       
       - name: Build Flatpak
         id: build-flatpak
