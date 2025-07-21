@@ -3,6 +3,7 @@
 appid := env("BAZAAR_APPID", "io.github.kolunmi.Bazaar")
 manifest := "./build-aux/flatpak/" + appid + ".yaml"
 branch := env("BAZAAR_BRANCH", "stable")
+just := just_executable()
 
 alias run := run-base
 
@@ -14,7 +15,7 @@ build-base:
     ninja -C build
 
 build-flatpak:
-    just build-flatpak-devel ./build-aux/flatpak/io.github.kolunmi.Bazaar.yaml stable
+    {{ just }} build-flatpak-devel ./build-aux/flatpak/io.github.kolunmi.Bazaar.yaml stable
 
 build-flatpak-devel $manifest=manifest $branch=branch:
     #!/usr/bin/env bash
@@ -63,26 +64,26 @@ build-rpm:
 
 [private]
 default:
-    @just --list
+    @{{ just }} --list
 
-# Check Just Syntax
-[group('Just')]
+# Check just Syntax
+[group('just')]
 check:
     #!/usr/bin/bash
     find . -type f -name "*.just" | while read -r file; do
     	echo "Checking syntax: $file"
-    	just --unstable --fmt --check -f $file
+    	{{ just }} --unstable --fmt --check -f $file
     done
     echo "Checking syntax: Justfile"
-    just --unstable --fmt --check -f Justfile
+    {{ just }} --unstable --fmt --check -f Justfile
 
-# Fix Just Syntax
-[group('Just')]
+# Fix {{ just }} Syntax
+[group('{{ just }}')]
 fix:
     #!/usr/bin/bash
     find . -type f -name "*.just" | while read -r file; do
     	echo "Checking syntax: $file"
-    	just --unstable --fmt -f $file
+    	{{ just }} --unstable --fmt -f $file
     done
     echo "Checking syntax: Justfile"
-    just --unstable --fmt -f Justfile || { exit 1; }
+    {{ just }} --unstable --fmt -f Justfile || { exit 1; }
