@@ -31,11 +31,9 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y flatpak flatpak-builder gnome-software-plugin-flatpak
-          # Add flathub remote if not already present (often needed for dependencies)
-          flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
       
-      - name: Build Image
-        id: build-image
+      - name: Build Flatpak
+        id: build-flatpak
         shell: bash
         run: |
           sudo $(command -v just) build-flatpak
