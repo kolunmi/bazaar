@@ -1,0 +1,581 @@
+# Dutch translations for bazaar package.
+# Copyright (C) 2025 THE bazaar'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the bazaar package.
+# Automatically generated, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: bazaar\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-07-15 07:56+0200\n"
+"PO-Revision-Date: 2025-07-15 07:56+0200\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: data/io.github.kolunmi.Bazaar.desktop.in:2
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:5
+msgid "Bazaar"
+msgstr "Bazaar"
+
+#: data/io.github.kolunmi.Bazaar.desktop.in:3
+msgid "Add, remove or update flatpak software on this computer"
+msgstr "Voeg flatpak software toe, verwijder deze of update deze op deze computer"
+
+#: data/io.github.kolunmi.Bazaar.desktop.in:9
+msgid "GTK;System;PackageManager;Discover;Flatpak;Software;Store;"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.gschema.xml:6
+msgid "Show Animated Background"
+msgstr "Toon geanimeerde Achtergrond"
+
+#: data/io.github.kolunmi.Bazaar.gschema.xml:7
+msgid "Whether to show the animated icon background on the home page"
+msgstr "Of je de geanimeerde icoon achtergrond wilt zien op de startpagina"
+
+#. FIXME: add descriptions and summary
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:9
+msgid "Keep the summary shorter, between 10 and 35 characters"
+msgstr "Houd de samenvatting korter, tussen 10 en 35 karakters"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:11
+msgid "No description"
+msgstr "Geen beschrijving"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:15 src/bz-application.c:1215
+msgid "Adam Masciola"
+msgstr "Adam Masciola"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:41
+msgid "Main Bazaar window showing Blender"
+msgstr "Hoofd Bzaarventer dat Blender toone"
+
+#: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:162
+#: src/bz-installed-page.blp:174
+msgid "Manage Addons"
+msgstr "Beheer Addons"
+
+#: src/bz-app-tile.blp:65 src/bz-full-view.blp:139
+msgid "This flatpak is verified by the original developers of the software."
+msgstr "Deze flatpak is geverifieerd door de originele ontwikkelaars van de software"
+
+#: src/bz-application.c:1186
+msgctxt "About Dialog Developer Credit"
+msgid "Adam Masciola <kolunmi@posteo.net>"
+msgstr "Adam Masciola <kolunmi@posteo.net>"
+
+#: src/bz-application.c:1191
+msgctxt "About Dialog Translator Credit"
+msgid "Ahmed Najmawi"
+msgstr "Admed Najmawi"
+
+#: src/bz-application.c:1192
+msgctxt "About Dialog Translator Credit"
+msgid "AtomHare"
+msgstr "AtomHare"
+
+#: src/bz-application.c:1193
+msgctxt "About Dialog Translator Credit"
+msgid "Jill Fiore"
+msgstr "Jill Fiore"
+
+#: src/bz-application.c:1194
+msgctxt "About Dialog Translator Credit"
+msgid "Lucosec"
+msgstr "Lucosec"
+
+#: src/bz-application.c:1195
+msgctxt "About Dialog Translator Credit"
+msgid "Shihfu Juan"
+msgstr "Shihfu Juan"
+
+#: src/bz-application.c:1196
+msgctxt "About Dialog Translator Credit"
+msgid "Vlastimil Dědek"
+msgstr "Vlastimil Dědek"
+
+#: src/bz-application.c:1197
+msgctxt "About Dialog Translator Credit"
+msgid "asen23"
+msgstr "asen23"
+
+#: src/bz-application.c:1198
+msgctxt "About Dialog Translator Credit"
+msgid "renner"
+msgstr "renner"
+
+#: src/bz-application.c:1199
+msgctxt "About Dialog Translator Credit"
+msgid "robotta"
+msgstr "robotta"
+
+#: src/bz-browse-widget.blp:11 src/bz-full-view.blp:11
+#: src/bz-installed-page.blp:11 src/bz-window.blp:32
+msgid "Empty"
+msgstr "Leeg"
+
+#: src/bz-browse-widget.blp:15
+msgid "No Curated Applications"
+msgstr "Geen Gecureerde Applicaties"
+
+#: src/bz-browse-widget.blp:16
+msgid ""
+"Bazaar was not provided a curated content configuration. Contact your "
+"operating system's support channels for assistance."
+msgstr "Bazaar heeft geen gecureerde content configuratie gekregen. Contacteer uw bestuuringssysteem hun supportkanalen voor ondersteuning"
+
+#: src/bz-browse-widget.blp:22 src/bz-flathub-page.blp:11
+msgid "Browser"
+msgstr "Browser"
+
+#: src/bz-error.c:45
+msgid "An Error Occurred"
+msgstr "Er is een fout opgetreden"
+
+#: src/bz-error.c:51
+msgid "Close"
+msgstr "Sluiten"
+
+#: src/bz-error.c:52
+msgid "Copy and Close"
+msgstr "Kopieren en Sluiten"
+
+#: src/bz-flathub-page.blp:41
+msgid "Apps Of The Week"
+msgstr "Apps Van De Week"
+
+#: src/bz-flathub-page.blp:85
+msgid "Trending"
+msgstr "Trending"
+
+#: src/bz-flathub-page.blp:117
+msgid "Recently Updated"
+msgstr "Recent Geupdated"
+
+#: src/bz-flathub-page.blp:149
+msgid "Recently Added"
+msgstr "Recent Toegevoegd"
+
+#: src/bz-flathub-page.blp:181
+msgid "Popular"
+msgstr "Populair"
+
+#: src/bz-full-view.blp:15
+msgid "No Results"
+msgstr "Geen Resultaten"
+
+#: src/bz-full-view.blp:16
+msgid "Try a different search query"
+msgstr "Probeer een andere zoekterm"
+
+#: src/bz-full-view.blp:22 src/bz-window.blp:42
+msgid "Content"
+msgstr "Content"
+
+#: src/bz-full-view.blp:180
+msgid "Run this application"
+msgstr "Voer deze applicatie uit"
+
+#: src/bz-full-view.blp:204
+msgid "Download and install this application"
+msgstr "Download deze applicatie en voer deze uit"
+
+#: src/bz-full-view.blp:222 src/bz-window.c:987
+msgid "Install"
+msgstr "Installeren"
+
+#: src/bz-full-view.blp:236
+msgid "Uninstall this application"
+msgstr "De-installeer deze applicatie"
+
+#: src/bz-full-view.blp:262
+msgid "Share this application"
+msgstr "Deel deze applicatie"
+
+#: src/bz-full-view.blp:274
+msgid ""
+"The number of downloads in the last 30 days. Click to view this "
+"application's download statistics."
+msgstr "Het aantal downloads in de laatste 30 dagen. Click om de statestieken van deze applicatie te tonen"
+
+#: src/bz-full-view.blp:316
+msgid "Support this developer"
+msgstr "Steun deze ontwikkelaar"
+
+#: src/bz-full-view.blp:329
+msgid "Support"
+msgstr "Steunen"
+
+#: src/bz-full-view.blp:387
+msgid "Remote repo name"
+msgstr "Repo naam op afstand"
+
+#: src/bz-full-view.blp:400
+msgid "Project URL"
+msgstr "Project URL link"
+
+#: src/bz-full-view.blp:412
+msgid "Download size"
+msgstr "Download grootte"
+
+#: src/bz-full-view.c:214
+#, c-format
+msgid "Released %x"
+msgstr "Gereleased %x"
+
+#: src/bz-full-view.c:225
+msgid "No URL"
+msgstr "Geen URL"
+
+#: src/bz-full-view.c:233
+msgid ""
+"This application has a FLOSS license, meaning the source code can be audited "
+"for safety."
+msgstr "Deze applicatie heeft een FLOSS licentie, wat betekent dat de broncode kan gecontlroleerd worden voor de veiligheid"
+
+#: src/bz-full-view.c:234
+msgid ""
+"This application has a proprietary license, meaning the source code is "
+"developed privately and cannot be audited by an independent third party."
+msgstr "Deze applicatie heeft een eigen 'proprietary' licentie, wat betekent dat deze in eigen beheer is ontwikkeld en niet kan veranderd worden door een derde partij"
+
+#: src/bz-installed-page.blp:15
+msgid "No Flatpaks Installed"
+msgstr "Geen Flatpaks geïnstalleerd"
+
+#: src/bz-installed-page.blp:21 src/bz-window.blp:201 src/bz-window.blp:336
+msgid "Installed"
+msgstr "geïnstalleerd"
+
+#: src/bz-installed-page.blp:143
+msgid "More actions"
+msgstr "Meer Acties"
+
+#: src/bz-installed-page.blp:187 src/bz-installed-page.blp:198
+msgid "Edit Permissions"
+msgstr "Bevoegdheden voor bewerken"
+
+#: src/bz-preferences-dialog.blp:9
+msgid "Preferences"
+msgstr "Voorkeuren"
+
+#: src/bz-preferences-dialog.blp:13
+msgid "How the application looks"
+msgstr "Hoe de applicatie eruit ziet"
+
+#: src/bz-preferences-dialog.blp:14
+msgid "Appearance"
+msgstr "Uiterlijk"
+
+#: src/bz-preferences-dialog.blp:17
+msgid "Show animated background"
+msgstr "Toon geanimeerde achtergrond"
+
+#: src/bz-search-widget.blp:69
+msgid "Type to filter"
+msgstr "Type om te filteren"
+
+#: src/bz-search-widget.blp:98 src/bz-search-widget.blp:115
+msgid "Search Options"
+msgstr "Zoek Opties"
+
+#: src/bz-search-widget.blp:119
+msgid "Exclude results with proprietary licenses"
+msgstr "Laat resultaten weg met eigen 'proprietary' licenties"
+
+#: src/bz-search-widget.blp:124
+msgid "Exclude results not originating from Flathub"
+msgstr "Laat resultaten weg die niet van Flathub komen"
+
+#: src/bz-search-widget.blp:139
+msgid "Advanced"
+msgstr "Geavanceerd"
+
+#: src/bz-search-widget.blp:143
+msgid "Match using regular expressions"
+msgstr "Match met behulp van reguliere expressies"
+
+#: src/bz-search-widget.blp:148
+msgid "Hide filtering and sorting behind a crossfade effect"
+msgstr "Verberg filteren en sorteren achter een crossfade effect"
+
+#: src/bz-search-widget.blp:153
+msgid "Debounce input to prevent instant replies"
+msgstr "Ontwijk input om onmiddelijke antwoorden te vermijden"
+
+#: src/bz-share-dialog.blp:13
+msgid "Share"
+msgstr "Delen"
+
+#: src/bz-share-dialog.blp:64
+msgid "Copy this link"
+msgstr "Kopieer deze link"
+
+#: src/bz-share-dialog.blp:71
+msgid "Open this link externally"
+msgstr "Open deze link extern"
+
+#: src/bz-stats-dialog.blp:15
+msgid "Downloads Over Time"
+msgstr "Downloads doorheen de tijd"
+
+#: src/bz-stats-dialog.blp:31
+msgid "Minimize Lower Bound"
+msgstr "Verlaag ondergrens"
+
+#: src/bz-stats-dialog.blp:36
+msgid "Maximize Upper Bound"
+msgstr "Verhoog bovengrens"
+
+#: src/bz-transaction-manager.c:451
+#, c-format
+msgid "Finished in %.02f seconds"
+msgstr "Geslaagd in %.02f seconden"
+
+#: src/bz-transaction-view.blp:34
+msgid "Installing"
+msgstr "Installeren"
+
+#: src/bz-transaction-view.blp:63
+msgid "Updating"
+msgstr "Updaten"
+
+#: src/bz-transaction-view.blp:92
+msgid "Removing"
+msgstr "verwijderen"
+
+#: src/bz-transaction.c:268
+msgid "Pending"
+msgstr "In de wacht"
+
+#: src/bz-update-dialog.blp:6
+msgid "Later"
+msgstr "Later"
+
+#: src/bz-update-dialog.blp:7
+msgid "Install Now"
+msgstr "Installeer nu"
+
+#: src/bz-update-dialog.blp:10
+msgid "Updates Are Available"
+msgstr "Updates zijn beschikbaar"
+
+#: src/bz-update-dialog.blp:11
+msgid ""
+"The following applications are eligible for updates. Would you like to "
+"install them?"
+msgstr "De volgende applicaties hebben updates. Wil je deze Installeren?"
+
+#: src/bz-update-dialog.c:135
+#, c-format
+msgid ""
+"%d runtimes and/or addons are eligible for updates. Would you like to "
+"install them?"
+msgstr "%d runtimes en/of addons hebben Updates. Wil je deze nu installeren?"
+
+#: src/bz-update-dialog.c:143
+#, c-format
+msgid "Additionally, %d runtimes and/or addons will be updated."
+msgstr "Additioneel, worden %d runtimes en/of addons ook Geupdated"
+
+#: src/bz-window.blp:36
+msgid "Transactions Will Appear Here"
+msgstr "Transacties Zullen Hier Verschijnen"
+
+#: src/bz-window.blp:97
+msgid "Halt the execution of transactions"
+msgstr "Pauzeer de uitvoer van Transacties"
+
+#: src/bz-window.blp:105
+msgid "Clear all finished transactions"
+msgstr "Wis alle voltooide Transacties"
+
+#: src/bz-window.blp:136 src/bz-window.blp:140
+msgid "Offline"
+msgstr "Offline"
+
+#: src/bz-window.blp:146
+msgid "Loading"
+msgstr "Laden"
+
+#: src/bz-window.blp:170
+msgid "Browse"
+msgstr "Blader"
+
+#: src/bz-window.blp:180
+msgid "App View"
+msgstr "App-Weergave"
+
+#: src/bz-window.blp:191 src/bz-window.blp:315
+msgid "Flathub"
+msgstr "Flathub"
+
+#: src/bz-window.blp:220
+msgid "Go Back"
+msgstr "Ga Terug"
+
+#: src/bz-window.blp:228
+msgid "Refresh"
+msgstr "Ververs"
+
+#: src/bz-window.blp:237
+msgid "Search"
+msgstr "Zoek"
+
+#: src/bz-window.blp:249
+msgid "Update"
+msgstr "Update"
+
+#: src/bz-window.blp:263
+msgid "Checking for updates"
+msgstr "Zoeken naar updates"
+
+#: src/bz-window.blp:279
+msgid "View curated applications"
+msgstr "Bekijk gecureerde applicaties"
+
+#: src/bz-window.blp:294
+msgid "Curated"
+msgstr "Gecureerd"
+
+#: src/bz-window.blp:300
+msgid "View the latest on Flathub"
+msgstr "Bekijk het nieuwste op Flathub"
+
+#: src/bz-window.blp:321
+msgid "View installed applications"
+msgstr "Bekijk geïnstalleerde applicaties"
+
+#: src/bz-window.blp:350
+msgid "Main Menu"
+msgstr "Hoofdmenu"
+
+#: src/bz-window.blp:361
+msgid "Toggle transaction sidebar"
+msgstr "Schakel Transactie-zijbalk"
+
+#: src/bz-window.blp:400
+msgid "Up to date!"
+msgstr "Up to date!"
+
+#: src/bz-window.blp:425
+msgid "_Keyboard Shortcuts"
+msgstr "Snelkoppelingen Toetsenbord"
+
+#: src/bz-window.blp:430
+msgid "_About Bazaar"
+msgstr "Over Bazaar"
+
+#: src/bz-window.blp:435
+msgid "_Donate to Bazaar ❤️"
+msgstr "_Doneer aan Bazaar ❤️"
+
+#: src/bz-window.c:856
+msgid ""
+"The ability to inspect and install local .flatpak bundle files is coming "
+"soon! In the meantime, try running\n"
+"\n"
+"flatpak install --bundle your-bundle.flatpak\n"
+"\n"
+"on the command line."
+msgstr "De mogelijkheid om lokale .flatpak bestanden te inspecteren en te installeren komt er binnenkort aan"
+"\n"
+"Flatpak install -bundle jouw-bundle.flatpak\n"
+"\n"
+"in de command line"
+
+#: src/bz-window.c:927
+msgid "Can't do that right now!"
+msgstr "Kan dit momenteel niet doen"
+
+#: src/bz-window.c:940
+msgid "Confirm Action"
+msgstr "Bevestig Actie"
+
+#: src/bz-window.c:958
+#, c-format
+msgid ""
+"You are about to remove the following Flatpak:\n"
+"\n"
+"<b>%s</b>\n"
+"<tt>%s</tt>\n"
+"\n"
+"Are you sure?"
+msgstr "Je staat op het punt om te volgende flatpaks te verwijderen"
+"\n"
+"<b>%s</b>"
+"<tt>%s</tt>"
+"\n"
+"Ben je zeker?"
+
+
+#: src/bz-window.c:966 src/bz-window.c:986
+msgid "Cancel"
+msgstr "Annuleer"
+
+#: src/bz-window.c:967
+msgid "Remove"
+msgstr "Verwijder"
+
+#: src/bz-window.c:978
+#, c-format
+msgid ""
+"You are about to install the following Flatpak:\n"
+"\n"
+"<b>%s</b>\n"
+"<tt>%s</tt>\n"
+"\n"
+"Are you sure?"
+msgstr "Je staat op het punt om te volgende flatpaks te installeren"
+"\n"
+"<b>%s</b>\n"
+"<tt>%s</tt>\n"
+"\n"
+"Ben je zeker?"
+
+#: src/bz-window.c:1012
+msgid "More details"
+msgstr "Meer details"
+
+#: src/bz-window.c:1138
+msgid "Resume the execution of transactions"
+msgstr "Hervat de uitvoer van transacties"
+
+#: src/bz-window.c:1144
+msgid "Pause the execution of transactions"
+msgstr "Pauzeer de uitvoer van transacties"
+
+#: src/gtk/help-overlay.blp:11
+msgctxt "shortcut window"
+msgid "General"
+msgstr "Algemeen"
+
+#: src/gtk/help-overlay.blp:14
+msgctxt "shortcut window"
+msgid "Open Search Dialog"
+msgstr "Open zoekdialoog"
+
+#: src/gtk/help-overlay.blp:19
+msgctxt "shortcut window"
+msgid "Refresh"
+msgstr "Ververs"
+
+#: src/gtk/help-overlay.blp:24
+msgctxt "shortcut window"
+msgid "Toggle Transaction Manager"
+msgstr "Schakel transactiebeheerder"
+
+#: src/gtk/help-overlay.blp:29
+msgctxt "shortcut window"
+msgid "Show Shortcuts"
+msgstr "Toon Snelkoppelingen"
+
+#: src/gtk/help-overlay.blp:34
+msgctxt "shortcut window"
+msgid "Quit"
+msgstr "SLuit af"
