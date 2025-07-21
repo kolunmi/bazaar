@@ -189,7 +189,7 @@ format_recent_downloads (gpointer object,
                          int      value)
 {
   if (value > 0)
-    return g_strdup_printf ("%d", value);
+    return g_strdup_printf ("%'d", value);
   else
     return g_strdup ("---");
 }
