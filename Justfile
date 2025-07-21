@@ -44,8 +44,8 @@ build-flatpak-devel $manifest=manifest $branch=branch:
     fi
     flatpak build-export repo "${FLATPAK_BUILDER_DIR}/build-dir"
     flatpak build-bundle \
-    repo bazaar.flatpak\
-      ${id} \
+    repo "${appid}".flatpak\
+      ${appid} \
 
 build-rpm:
     #!/usr/bin/env bash
