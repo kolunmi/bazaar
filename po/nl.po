@@ -32,7 +32,7 @@ msgstr ""
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:6
 msgid "Show Animated Background"
-msgstr "Toon geanimeerde Achtergrond"
+msgstr "Toon Geanimeerde Achtergrond"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:7
 msgid "Whether to show the animated icon background on the home page"
@@ -376,13 +376,13 @@ msgstr ""
 #, c-format
 msgid ""
 "%d runtimes and/or addons are eligible for updates. Would you like to "
-"update"
+"install them?"
 msgstr "%d runtimes en/of addons hebben updates. Wil je deze nu installeren?"
 
 #: src/bz-update-dialog.c:143
 #, c-format
 msgid "Daarnaast worden %d runtimes en/of addons ook bijgewerkt."
-msgstr "Additioneel, worden %d runtimes en/of addons ook Geupdated"
+msgstr "Daarnaast worden %d runtimes en/of addons ook bijgewerkt."
 
 #: src/bz-window.blp:36
 msgid "Transactions Will Appear Here"
