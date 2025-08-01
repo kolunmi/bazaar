@@ -168,6 +168,11 @@ format_flatpak_name (const char *flatpak_id,
                      gboolean    user);
 
 static void
+command_line_open_flatpakref (BzApplication           *self,
+                              GApplicationCommandLine *cmdline,
+                              const char              *path);
+
+static void
 bz_application_dispose (GObject *object)
 {
   BzApplication *self = BZ_APPLICATION (object);
@@ -317,9 +322,7 @@ bz_application_command_line (GApplication            *app,
   argc--;
   argv_shallow = g_memdup2 (argv + 1, sizeof (*argv) * argc);
 
-  if (g_strcmp0 (command, "open") == 0)
-    window_autostart = TRUE;
-  else if (g_strcmp0 (command, "window") == 0)
+  if (g_strcmp0 (command, "window") == 0)
     {
       g_autoptr (GOptionContext) pre_context = NULL;
 
@@ -344,12 +347,14 @@ bz_application_command_line (GApplication            *app,
       g_autoptr (GtkStringList) blocklists      = NULL;
       g_auto (GStrv) content_configs_strv       = NULL;
       g_autoptr (GtkStringList) content_configs = NULL;
+      g_auto (GStrv) paths                      = NULL;
 
       GOptionEntry main_entries[] = {
         { "help", 0, 0, G_OPTION_ARG_NONE, &help, "Print help" },
         { "is-running", 0, 0, G_OPTION_ARG_NONE, &is_running, "Exit successfully if the Bazaar service is running" },
         { "extra-blocklist", 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &blocklists_strv, "Add an extra blocklist to read from" },
         { "extra-content-config", 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &content_configs_strv, "Add an extra yaml file with which to configure the app browser" },
+        { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &paths, "flatpakref file to open" },
         { NULL }
       };
 
@@ -390,11 +395,6 @@ bz_application_command_line (GApplication            *app,
                   "Invoke \"bazaar --help\" to for available commands.\n");
               return EXIT_FAILURE;
             }
-
-          g_debug ("Initializing libdex...");
-          dex_init ();
-          /* Workaround */
-          (void) dex_thread_pool_scheduler_get_default ();
 
           g_debug ("Starting daemon!");
           g_application_hold (G_APPLICATION (self));
@@ -464,6 +464,9 @@ bz_application_command_line (GApplication            *app,
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_BLOCKLISTS]);
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CONTENT_CONFIGS]);
         }
+
+      if (paths != NULL && *paths != NULL)
+        command_line_open_flatpakref (self, cmdline, *paths);
     }
   else if (!self->running)
     {
@@ -559,18 +562,7 @@ bz_application_command_line (GApplication            *app,
             new_window (self);
 
           /* Just take the first one for now */
-          if (g_path_is_absolute (*paths))
-            open_flatpakref_take (self, g_file_new_for_path (*paths));
-          else
-            {
-              const char *cwd = NULL;
-
-              cwd = g_application_command_line_get_cwd (cmdline);
-              if (cwd != NULL)
-                open_flatpakref_take (self, g_file_new_build_filename (cwd, *paths, NULL));
-              else
-                open_flatpakref_take (self, g_file_new_for_path (*paths));
-            }
+          command_line_open_flatpakref (self, cmdline, *paths);
         }
       else if (g_strcmp0 (command, "refresh") == 0)
         {
@@ -1835,14 +1827,13 @@ refresh_finally (DexFuture     *future,
     }
 
   g_debug ("Completely done with the refresh process, notifying UI");
-
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_BUSY]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ONLINE]);
 
   if (self->waiting_to_open != NULL)
     {
       g_debug ("A flatpakref was requested to be opened during refresh. Doing that now...");
-      open_flatpakref_take (self, g_object_ref (self->waiting_to_open));
+      open_flatpakref_take (self, g_steal_pointer (&self->waiting_to_open));
     }
 
   return NULL;
@@ -2088,7 +2079,16 @@ open_flatpakref_take (BzApplication *self,
   g_assert (file != NULL);
   path = g_file_get_path (file);
 
-  if (self->flatpak != NULL)
+  if (self->busy)
+    {
+      g_debug ("Bazaar is currently refreshing, so we will load "
+               "the local flatpakref at %s when that is done",
+               path);
+
+      g_clear_object (&self->waiting_to_open);
+      self->waiting_to_open = file;
+    }
+  else
     {
       g_autoptr (DexFuture) future = NULL;
 
@@ -2103,14 +2103,24 @@ open_flatpakref_take (BzApplication *self,
       dex_future_disown (g_steal_pointer (&future));
       g_object_unref (file);
     }
+}
+
+static void
+command_line_open_flatpakref (BzApplication           *self,
+                              GApplicationCommandLine *cmdline,
+                              const char              *path)
+{
+  if (g_path_is_absolute (path))
+    open_flatpakref_take (self, g_file_new_for_path (path));
   else
     {
-      g_debug ("Bazaar is currently refreshing, so we will load "
-               "the local flatpakref at %s when that is done",
-               path);
+      const char *cwd = NULL;
 
-      g_clear_object (&self->waiting_to_open);
-      self->waiting_to_open = file;
+      cwd = g_application_command_line_get_cwd (cmdline);
+      if (cwd != NULL)
+        open_flatpakref_take (self, g_file_new_build_filename (cwd, path, NULL));
+      else
+        open_flatpakref_take (self, g_file_new_for_path (path));
     }
 }
 

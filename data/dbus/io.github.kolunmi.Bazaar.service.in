@@ -1,4 +1,4 @@
 [D-BUS Service]
 Name=io.github.kolunmi.Bazaar
 SystemdService=io.github.kolunmi.Bazaar.service
-Exec=/bin/app/bazaar service
+Exec=@bindir@/bazaar service

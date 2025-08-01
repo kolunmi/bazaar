@@ -32,13 +32,18 @@ main (int   argc,
       char *argv[])
 {
   g_autoptr (BzApplication) app = NULL;
-  int ret;
+  int result                    = 0;
 
   if (argc > 1 && g_strcmp0 (argv[1], "--version") == 0)
     {
       g_print ("%s\n", PACKAGE_VERSION);
       return 0;
     }
+
+  g_debug ("Initializing libdex...");
+  dex_init ();
+  /* Workaround */
+  (void) dex_thread_pool_scheduler_get_default ();
 
   g_debug ("Configuring textdomain...");
   bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
@@ -54,7 +59,7 @@ main (int   argc,
       NULL);
 
   g_debug ("Running!");
-  ret = g_application_run (G_APPLICATION (app), argc, argv);
+  result = g_application_run (G_APPLICATION (app), argc, argv);
 
-  return ret;
+  return result;
 }

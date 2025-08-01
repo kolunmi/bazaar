@@ -2,7 +2,7 @@
 
 INSTR="$1"
 
-FALLBACK_VERSION='0.2.2 no-git-info'
+FALLBACK_VERSION='0.2.3 no-git-info'
 
 case "$INSTR" in
     get-vcs)

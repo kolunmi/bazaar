@@ -4,5 +4,6 @@ build
 rpmbuild
 repo
 *.flatpak
+*.mo
 
 /subprojects/blueprint-compiler

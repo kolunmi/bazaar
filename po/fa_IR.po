@@ -1,84 +1,84 @@
-# Russian translations for bazaar package.
+# Persian translations for bazaar package.
 # Copyright (C) 2025 THE bazaar'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the bazaar package.
 # Automatically generated, 2025.
-#
-# SPDX-FileCopyrightText: 2025 Jill Fiore <contact@lumaeris.com>
-# Jill Fiore <contact@lumaeris.com>, 2025.
+# Goudarz Jafari <me@goudarzjafari.com>, 2025.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-14 22:03+0300\n"
-"PO-Revision-Date: 2025-07-14 22:06+0300\n"
-"Last-Translator: Jill Fiore <contact@lumaeris.com>\n"
-"Language-Team: Russian\n"
-"Language: ru\n"
+"POT-Creation-Date: 2025-07-14 09:23+0330\n"
+"PO-Revision-Date: 2025-07-14 16:34+0330\n"
+"Last-Translator: Goudarz Jafari <me@goudarzjafari.com>\n"
+"Language-Team: none\n"
+"Language: fa_IR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Gtranslator 48.0\n"
+"X-Generator: Poedit 3.6\n"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:2
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:5
 msgid "Bazaar"
-msgstr "Bazaar"
+msgstr "بازار"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:3
 msgid "Add, remove or update flatpak software on this computer"
-msgstr ""
-"Установка, удаление или обновление Flatpak приложений на этом компьютере"
+msgstr "افزودن، حذف یا به‌روزرسانی نرم‌افزارهای Flatpak در این رایانه"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:9
 msgid "GTK;System;PackageManager;Discover;Flatpak;Software;Store;"
-msgstr "GTK;Система;УправлениеПакетами;Discover;Flatpak;Приложения;Магазин;"
+msgstr "GTK;سیستم;مدیر بسته‌ها;کشف ;کردن;Flatpak;نرم‌افزار;فروشگاه;"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:6
 msgid "Show Animated Background"
-msgstr "Показать анимированный фон"
+msgstr "نمایش پس‌زمینه متحرک"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:7
 msgid "Whether to show the animated icon background on the home page"
-msgstr "Показывать ли анимированный фон иконок на главной странице"
+msgstr "آیا پس‌زمینه‌ی نماد متحرک در صفحه‌ی اصلی نمایش داده شود"
 
 #. FIXME: add descriptions and summary
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:9
 msgid "Keep the summary shorter, between 10 and 35 characters"
-msgstr "Keep the summary shorter, between 10 and 35 characters"
+msgstr "خلاصه را کوتاه نگه دارید، بین ۱۰ تا ۳۵ نویسه"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:11
 msgid "No description"
-msgstr "Без описания"
-
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:15 src/bz-application.c:1223
-msgid "Adam Masciola"
-msgstr "Адам Масциола"
+msgstr "بدون توضیح"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:41
 msgid "Main Bazaar window showing Blender"
-msgstr "Главное окно Bazaar, демонстрирующее Blender"
+msgstr "پنجره‌ی اصلی بازار که Blender را نمایش می‌دهد"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:50
+msgid "Release description"
+msgstr "توضیح‌های نگارش"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:52
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:53
+msgid "List of changes"
+msgstr "فهرست تغییرات"
 
 #: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:162
 #: src/bz-installed-page.blp:174
 msgid "Manage Addons"
-msgstr "Управление дополнениями"
+msgstr "مدیریت افزونه‌ها"
 
 #: src/bz-app-tile.blp:65 src/bz-full-view.blp:139
 msgid "This flatpak is verified by the original developers of the software."
-msgstr "Данный flatpak был верифицирован подлинными разработчиками программы."
+msgstr "این Flatpak توسط توسعه‌دهندگان اصلی نرم‌افزار تایید شده است."
 
 #: src/bz-application.c:1194
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
-msgstr "Адам Масциола <kolunmi@posteo.net>"
+msgstr "Adam Masciola <kolunmi@posteo.net>"
 
 #: src/bz-application.c:1199
 msgctxt "About Dialog Translator Credit"
 msgid "Ahmed Najmawi"
-msgstr "Ахмед Наймави"
+msgstr "Ahmed Najmawi"
 
 #: src/bz-application.c:1200
 msgctxt "About Dialog Translator Credit"
@@ -88,7 +88,7 @@ msgstr "AtomHare"
 #: src/bz-application.c:1201
 msgctxt "About Dialog Translator Credit"
 msgid "Jill Fiore"
-msgstr "Джилл Фиори"
+msgstr "Jill Fiore"
 
 #: src/bz-application.c:1202
 msgctxt "About Dialog Translator Credit"
@@ -98,12 +98,12 @@ msgstr "Lucosec"
 #: src/bz-application.c:1203
 msgctxt "About Dialog Translator Credit"
 msgid "Shihfu Juan"
-msgstr "Щифу Уан"
+msgstr "Shihfu Juan"
 
 #: src/bz-application.c:1204
 msgctxt "About Dialog Translator Credit"
 msgid "Vlastimil Dědek"
-msgstr "Властимил Дедек"
+msgstr "Vlastimil Dědek"
 
 #: src/bz-application.c:1205
 msgctxt "About Dialog Translator Credit"
@@ -120,272 +120,274 @@ msgctxt "About Dialog Translator Credit"
 msgid "robotta"
 msgstr "robotta"
 
+#: src/bz-application.c:1223
+msgid "Adam Masciola"
+msgstr "Adam Masciola"
+
 #: src/bz-browse-widget.blp:11 src/bz-full-view.blp:11
 #: src/bz-installed-page.blp:11 src/bz-window.blp:32
 msgid "Empty"
-msgstr "Пусто"
+msgstr "خالی"
 
 #: src/bz-browse-widget.blp:15
 msgid "No Curated Applications"
-msgstr "Нет курируемых приложений"
+msgstr "هنوز هیچ برنامه‌ی پیشنهادی‌ای وجود ندارد"
 
 #: src/bz-browse-widget.blp:16
 msgid ""
 "Bazaar was not provided a curated content configuration. Contact your "
 "operating system's support channels for assistance."
 msgstr ""
-"Bazaar не была предоставлена конфигурация курируемых приложений. Обратитесь "
-"за помощью к поддержке вашей операционной системы."
+"هیچ پیکربندی‌ای برای محتوای انتخاب‌شده به بازار ارائه نشده است. برای دریافت "
+"کمک با پشتیبانی سیستم‌عامل خود تماس بگیرید."
 
 #: src/bz-browse-widget.blp:22 src/bz-flathub-page.blp:11
 msgid "Browser"
-msgstr "Обзор"
+msgstr "مرورگر"
 
 #: src/bz-error.c:45
 msgid "An Error Occurred"
-msgstr "Произошла ошибка"
+msgstr "یک خطا رخ داد"
 
 #: src/bz-error.c:51
 msgid "Close"
-msgstr "Закрыть"
+msgstr "بستن"
 
 #: src/bz-error.c:52
 msgid "Copy and Close"
-msgstr "Скопировать и закрыть"
+msgstr "رونوشت و بستن"
 
 #: src/bz-flathub-page.blp:41
 msgid "Apps Of The Week"
-msgstr "Приложения недели"
+msgstr "برنامه‌های هفته"
 
 #: src/bz-flathub-page.blp:85
 msgid "Trending"
-msgstr "В тренде"
+msgstr "محبوب‌ها"
 
 #: src/bz-flathub-page.blp:117
 msgid "Recently Updated"
-msgstr "Недавно обновленные"
+msgstr "اخیرا به‌روزرسانی‌شده"
 
 #: src/bz-flathub-page.blp:149
 msgid "Recently Added"
-msgstr "Недавно добавленные"
+msgstr "اخیرا افزوده‌شده"
 
 #: src/bz-flathub-page.blp:181
 msgid "Popular"
-msgstr "Популярное"
+msgstr "پرطرفدار"
 
 #: src/bz-full-view.blp:15
 msgid "No Results"
-msgstr "Нет результатов"
+msgstr "نتیجه‌ای یافت نشد"
 
 #: src/bz-full-view.blp:16
 msgid "Try a different search query"
-msgstr "Попробуйте выполнить другой запрос"
+msgstr "از یک عبارت دیگر برای جستجو استفاده کنید"
 
 #: src/bz-full-view.blp:22 src/bz-window.blp:42
 msgid "Content"
-msgstr "Контент"
+msgstr "محتوا"
 
 #: src/bz-full-view.blp:180
 msgid "Run this application"
-msgstr "Запустить это приложение"
+msgstr "اجرای این برنامه"
 
 #: src/bz-full-view.blp:204
 msgid "Download and install this application"
-msgstr "Скачать и установить это приложение"
+msgstr "بارگیری و نصب این برنامه"
 
 #: src/bz-full-view.blp:222 src/bz-window.c:987
 msgid "Install"
-msgstr "Установить"
+msgstr "نصب"
 
 #: src/bz-full-view.blp:236
 msgid "Uninstall this application"
-msgstr "Удалить это приложение"
+msgstr "این برنامه را حذف کن"
 
 #: src/bz-full-view.blp:262
 msgid "Share this application"
-msgstr "Поделиться этим приложением"
+msgstr "هم‌رسانی این برنامه"
 
 #: src/bz-full-view.blp:274
 msgid ""
 "The number of downloads in the last 30 days. Click to view this "
 "application's download statistics."
 msgstr ""
-"Количество скачиваний за эти 30 дней. Нажмите, чтобы открыть статистику "
-"скачиваний приложения."
+"تعداد بارگیری در ۳۰ روز گذشته. برای مشاهده‌ی آمار بارگیری این برنامه کلیک "
+"کنید."
 
 #: src/bz-full-view.blp:316
 msgid "Support this developer"
-msgstr "Поддержать этого разработчика"
+msgstr "حمایت از این توسعه‌دهنده"
 
 #: src/bz-full-view.blp:329
 msgid "Support"
-msgstr "Поддержать"
+msgstr "پشتیبانی"
 
 #: src/bz-full-view.blp:387
 msgid "Remote repo name"
-msgstr "Название репозитория"
+msgstr "نام مخزن راه‌دور"
 
 #: src/bz-full-view.blp:400
 msgid "Project URL"
-msgstr "Веб-сайт проекта"
+msgstr "نشانی اینترنتی پروژه"
 
 #: src/bz-full-view.blp:412
 msgid "Download size"
-msgstr "Размер скачивания"
+msgstr "اندازه‌ی بارگیری"
 
 #: src/bz-full-view.c:214
 #, c-format
 msgid "Released %x"
-msgstr "Выпущено %x"
+msgstr "منتشر شده در %x"
 
 #: src/bz-full-view.c:225
 msgid "No URL"
-msgstr "Нет URL"
+msgstr "بدون نشانی اینترنتی"
 
 #: src/bz-full-view.c:233
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
 msgstr ""
-"Это приложение имеет лицензию FLOSS, что значит исходный код может быть "
-"проверен на безопасность."
+"این برنامه دارای مجوز FLOSS است، به این معنا که کد منبع آن برای ایمنی قابل "
+"بررسی است."
 
 #: src/bz-full-view.c:234
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
 msgstr ""
-"Это приложение имеет проприетарную лицензию, что значит исходный код "
-"разрабатывается в тайне и не может быть проверен независимой третьей "
-"стороной."
+"این برنامه دارای مجوز مالکیتی است، به این معنا که کد منبع آن به‌صورت خصوصی "
+"توسعه یافته و توسط طرف ثالث مستقل قابل بررسی نیست."
 
 #: src/bz-installed-page.blp:15
 msgid "No Flatpaks Installed"
-msgstr "Нет установленных Flatpak"
+msgstr "هیچ Flatpakی نصب نشده است"
 
 #: src/bz-installed-page.blp:21 src/bz-window.blp:201 src/bz-window.blp:336
 msgid "Installed"
-msgstr "Установленное"
+msgstr "نصب شده"
 
 #: src/bz-installed-page.blp:143
 msgid "More actions"
-msgstr "Больше опций"
+msgstr "اقدام‌های بیشتر"
 
 #: src/bz-installed-page.blp:187 src/bz-installed-page.blp:198
 msgid "Edit Permissions"
-msgstr "Редактировать разрешения"
+msgstr "ویرایش مجوزها"
 
 #: src/bz-preferences-dialog.blp:9
 msgid "Preferences"
-msgstr "Настройки"
+msgstr "تنظیمات"
 
 #: src/bz-preferences-dialog.blp:13
 msgid "How the application looks"
-msgstr "Как выглядит приложение"
+msgstr "ظاهر برنامه"
 
 #: src/bz-preferences-dialog.blp:14
 msgid "Appearance"
-msgstr "Внешний вид"
+msgstr "ظاهر"
 
 #: src/bz-preferences-dialog.blp:17
 msgid "Show animated background"
-msgstr "Показать анимированный фон"
+msgstr "نمایش پس‌زمینه متحرک"
 
 #: src/bz-search-widget.blp:69
 msgid "Type to filter"
-msgstr "Поиск"
+msgstr "برای فیلتر کردن تایپ کنید"
 
 #: src/bz-search-widget.blp:98 src/bz-search-widget.blp:115
 msgid "Search Options"
-msgstr "Настройки поиска"
+msgstr "گزینه‌های جستجو"
 
 #: src/bz-search-widget.blp:119
 msgid "Exclude results with proprietary licenses"
-msgstr "Исключить результаты с проприетарными лицензиями"
+msgstr "حذف نتایج دارای مجوز مالکیتی"
 
 #: src/bz-search-widget.blp:124
 msgid "Exclude results not originating from Flathub"
-msgstr "Исключить результаты вне Flathub"
+msgstr "حذف نتایجی که از Flathub منشا نگرفته‌اند"
 
 #: src/bz-search-widget.blp:139
 msgid "Advanced"
-msgstr "Дополнительно"
+msgstr "پیشرفته"
 
 #: src/bz-search-widget.blp:143
 msgid "Match using regular expressions"
-msgstr "Поиск с регулярными выражениями"
+msgstr "همسان‌سازی با استفاده از عبارات باقاعده"
 
 #: src/bz-search-widget.blp:148
 msgid "Hide filtering and sorting behind a crossfade effect"
-msgstr "Плавно показывать фильтрацию и сортировку"
+msgstr "پنهان‌سازی فیلتر و مرتب‌سازی با افکت محوشونده"
 
 #: src/bz-search-widget.blp:153
 msgid "Debounce input to prevent instant replies"
-msgstr "Увеличить время отклика при вводе"
+msgstr "مکث ورودی برای جلوگیری از پاسخ فوری"
 
 #: src/bz-share-dialog.blp:13
 msgid "Share"
-msgstr "Поделиться"
+msgstr "هم‌رسانی"
 
 #: src/bz-share-dialog.blp:64
 msgid "Copy this link"
-msgstr "Скопировать эту ссылку"
+msgstr "رونوشت این پیوند"
 
 #: src/bz-share-dialog.blp:71
 msgid "Open this link externally"
-msgstr "Открыть эту ссылку"
+msgstr "این پیوند را در بیرون از این برنامه باز کنید"
 
 #: src/bz-stats-dialog.blp:15
 msgid "Downloads Over Time"
-msgstr "Количество загрузок"
+msgstr "بارگیری‌ها در طول زمان"
 
 #: src/bz-stats-dialog.blp:31
 msgid "Minimize Lower Bound"
-msgstr "Уменьшить нижнюю границу"
+msgstr "کاهش حد پایین"
 
 #: src/bz-stats-dialog.blp:36
 msgid "Maximize Upper Bound"
-msgstr "Увеличить верхнюю границу"
+msgstr "افزایش حد بالا"
 
 #: src/bz-transaction-manager.c:451
 #, c-format
 msgid "Finished in %.02f seconds"
-msgstr "Закончено за %.02f секунд"
+msgstr "اتمام در %.02f ثانیه"
 
 #: src/bz-transaction-view.blp:34
 msgid "Installing"
-msgstr "Установка"
+msgstr "در حال نصب"
 
 #: src/bz-transaction-view.blp:63
 msgid "Updating"
-msgstr "Обновление"
+msgstr "در حال به‌روزرسانی"
 
 #: src/bz-transaction-view.blp:92
 msgid "Removing"
-msgstr "Удаление"
+msgstr "در حال حذف"
 
 #: src/bz-transaction.c:268
 msgid "Pending"
-msgstr "В ожидании"
+msgstr "در انتظار"
 
 #: src/bz-update-dialog.blp:6
 msgid "Later"
-msgstr "Позже"
+msgstr "بعداً"
 
 #: src/bz-update-dialog.blp:7
 msgid "Install Now"
-msgstr "Установить сейчас"
+msgstr "اکنون نصب شود"
 
 #: src/bz-update-dialog.blp:10
 msgid "Updates Are Available"
-msgstr "Доступны обновления"
+msgstr "به‌روزرسانی‌ها در دسترس‌اند"
 
 #: src/bz-update-dialog.blp:11
 msgid ""
 "The following applications are eligible for updates. Would you like to "
 "install them?"
-msgstr ""
-"Перечисленные приложения могут быть обновлены. Вы хотите установить их?"
+msgstr "برنامه‌های زیر واجد شرایط به‌روزرسانی هستند. آیا مایل به نصب آن‌ها هستید؟"
 
 #: src/bz-update-dialog.c:135
 #, c-format
@@ -393,41 +395,41 @@ msgid ""
 "%d runtimes and/or addons are eligible for updates. Would you like to "
 "install them?"
 msgstr ""
-"%d сред выполнения и/или дополнений могут быть обновлены. Вы хотите "
-"установить их?"
+"%d محیط اجرایی و/یا افزونه برای به‌روزرسانی واجد شرایط هستند. آیا مایل به نصب "
+"آن‌ها هستید؟"
 
 #: src/bz-update-dialog.c:143
 #, c-format
 msgid "Additionally, %d runtimes and/or addons will be updated."
-msgstr "Дополнительно, %d сред выполнения и/или расширений будут обновлены."
+msgstr "علاوه بر این، %d محیط اجرایی و/یا افزونه به‌روزرسانی خواهند شد."
 
 #: src/bz-window.blp:36
 msgid "Transactions Will Appear Here"
-msgstr "Транзакции будут отображаться здесь"
+msgstr "تراکنش‌ها اینجا ظاهر خواهند شد"
 
 #: src/bz-window.blp:97
 msgid "Halt the execution of transactions"
-msgstr "Остановить выполнение транзакций"
+msgstr "توقف اجرای تراکنش‌ها"
 
 #: src/bz-window.blp:105
 msgid "Clear all finished transactions"
-msgstr "Очистить все завершенные транзакции"
+msgstr "پاک‌سازی همه‌ی تراکنش‌های پایان‌یافته"
 
 #: src/bz-window.blp:136 src/bz-window.blp:140
 msgid "Offline"
-msgstr "Нет интернета"
+msgstr "آفلاین"
 
 #: src/bz-window.blp:146
 msgid "Loading"
-msgstr "Загрузка"
+msgstr "در حال بارگذاری"
 
 #: src/bz-window.blp:170
 msgid "Browse"
-msgstr "Просмотр"
+msgstr "مرور"
 
 #: src/bz-window.blp:180
 msgid "App View"
-msgstr "Вид приложения"
+msgstr "نمایش برنامه"
 
 #: src/bz-window.blp:191 src/bz-window.blp:315
 msgid "Flathub"
@@ -435,63 +437,63 @@ msgstr "Flathub"
 
 #: src/bz-window.blp:220
 msgid "Go Back"
-msgstr "Назад"
+msgstr "بازگشت"
 
 #: src/bz-window.blp:228
 msgid "Refresh"
-msgstr "Перезагрузить"
+msgstr "تازه‌سازی"
 
 #: src/bz-window.blp:237
 msgid "Search"
-msgstr "Поиск"
+msgstr "جست‌وجو"
 
 #: src/bz-window.blp:249
 msgid "Update"
-msgstr "Обновить"
+msgstr "به‌روزرسانی"
 
 #: src/bz-window.blp:263
 msgid "Checking for updates"
-msgstr "Проверяем на наличие обновлений"
+msgstr "در حال بررسی برای به‌روزرسانی‌ها"
 
 #: src/bz-window.blp:279
 msgid "View curated applications"
-msgstr "Посмотреть избранные приложения"
+msgstr "مشاهده‌ی برنامه‌های منتخب"
 
 #: src/bz-window.blp:294
 msgid "Curated"
-msgstr "Избранное"
+msgstr "منتخب"
 
 #: src/bz-window.blp:300
 msgid "View the latest on Flathub"
-msgstr "Посмотреть новое на Flathub"
+msgstr "مشاهده‌ی آخرین‌ها در Flathub"
 
 #: src/bz-window.blp:321
 msgid "View installed applications"
-msgstr "Посмотреть установленные приложения"
+msgstr "مشاهده‌ی برنامه‌های نصب‌شده"
 
 #: src/bz-window.blp:350
 msgid "Main Menu"
-msgstr "Главное меню"
+msgstr "منوی اصلی"
 
 #: src/bz-window.blp:361
 msgid "Toggle transaction sidebar"
-msgstr "Переключить боковую панель транзакций"
+msgstr "نمایش یا پنهان کردن نوار جانبی تراکنش‌ها"
 
 #: src/bz-window.blp:400
 msgid "Up to date!"
-msgstr "Нет обновлений!"
+msgstr "به‌روز است!"
 
 #: src/bz-window.blp:425
 msgid "_Keyboard Shortcuts"
-msgstr "_Сочетание клавиш"
+msgstr "_میان‌برهای صفحه‌کلید"
 
 #: src/bz-window.blp:430
 msgid "_About Bazaar"
-msgstr "_О Bazaar"
+msgstr "_درباره‌ی بازار"
 
 #: src/bz-window.blp:435
 msgid "_Donate to Bazaar ❤️"
-msgstr "_Поддержать Bazaar ❤️"
+msgstr "_به بازار اهدا کنید ❤️"
 
 #: src/bz-window.c:856
 msgid ""
@@ -502,20 +504,20 @@ msgid ""
 "\n"
 "on the command line."
 msgstr ""
-"Возможность просмотра и установки локального пакета .flatpak появится совсем "
-"скоро! Тем временем, попробуйте выполнить\n"
+"قابلیت بررسی و نصب پرونده‌های محلی .flatpak به‌زودی ارائه خواهد شد! در این "
+"فاصله، دستور\n"
 "\n"
 "flatpak install --bundle your-bundle.flatpak\n"
 "\n"
-"в командной строке."
+" را در خط فرمان امتحان کنید."
 
 #: src/bz-window.c:927
 msgid "Can't do that right now!"
-msgstr "Нельзя сделать это прямо сейчас!"
+msgstr "فعلا امکان انجام این کار وجود ندارد!"
 
 #: src/bz-window.c:940
 msgid "Confirm Action"
-msgstr "Подтвердить действие"
+msgstr "تایید عملیات"
 
 #: src/bz-window.c:958
 #, c-format
@@ -527,20 +529,20 @@ msgid ""
 "\n"
 "Are you sure?"
 msgstr ""
-"Вы собираетесь удалить данный Flatpak:\n"
+"شما در حال حذف Flatpak زیر هستید:\n"
 "\n"
 "<b>%s</b>\n"
 "<tt>%s</tt>\n"
 "\n"
-"Вы уверены?"
+"آیا مطمئن هستید؟"
 
 #: src/bz-window.c:966 src/bz-window.c:986
 msgid "Cancel"
-msgstr "Отмена"
+msgstr "لغو"
 
 #: src/bz-window.c:967
 msgid "Remove"
-msgstr "Удалить"
+msgstr "حذف"
 
 #: src/bz-window.c:978
 #, c-format
@@ -552,57 +554,51 @@ msgid ""
 "\n"
 "Are you sure?"
 msgstr ""
-"Вы собираетесь установить данный Flatpak:\n"
+"شما در حال نصب Flatpak زیر هستید:\n"
 "\n"
 "<b>%s</b>\n"
 "<tt>%s</tt>\n"
 "\n"
-"Вы уверены?"
+"آیا مطمئن هستید؟"
 
 #: src/bz-window.c:1012
 msgid "More details"
-msgstr "Больше подробностей"
+msgstr "جزئیات بیشتر"
 
 #: src/bz-window.c:1138
 msgid "Resume the execution of transactions"
-msgstr "Возобновить выполнение транзакций"
+msgstr "ادامه دادن اجرای تراکنش‌ها"
 
 #: src/bz-window.c:1144
 msgid "Pause the execution of transactions"
-msgstr "Приостановить выполнение транзакций"
+msgstr "توقف اجرای تراکنش‌ها"
 
 #: src/gtk/help-overlay.blp:11
 msgctxt "shortcut window"
 msgid "General"
-msgstr "Общее"
+msgstr "عمومی"
 
 #: src/gtk/help-overlay.blp:14
 msgctxt "shortcut window"
 msgid "Open Search Dialog"
-msgstr "Открыть диалог поиска"
+msgstr "باز کردن پنجره جست‌وجو"
 
 #: src/gtk/help-overlay.blp:19
 msgctxt "shortcut window"
 msgid "Refresh"
-msgstr "Перезагрузить"
+msgstr "تازه‌سازی"
 
 #: src/gtk/help-overlay.blp:24
 msgctxt "shortcut window"
 msgid "Toggle Transaction Manager"
-msgstr "Переключить боковую панель транзакций"
+msgstr "نمایش یا پنهان کردن مدیر تراکنش"
 
 #: src/gtk/help-overlay.blp:29
 msgctxt "shortcut window"
 msgid "Show Shortcuts"
-msgstr "Открыть сочетания клавиш"
+msgstr "نمایش میان‌برها"
 
 #: src/gtk/help-overlay.blp:34
 msgctxt "shortcut window"
 msgid "Quit"
-msgstr "Закрыть"
-
-#~ msgid "translator-credits"
-#~ msgstr "translator-credits"
-
-#~ msgid "BzInstalledPage"
-#~ msgstr "BzInstalledPage"
+msgstr "خروج"
