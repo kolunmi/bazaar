@@ -1,8 +1,9 @@
-[wrap-git]
-directory = libdex
-url = https://gitlab.gnome.org/GNOME/libdex.git
-revision = 0.9.1
-depth = 1
+[wrap-file]
+directory = libdex-0.9.1
+source_url = https://gitlab.gnome.org/GNOME/libdex/-/archive/0.9.1/libdex-0.9.1.tar.gz
+source_filename = libdex-0.9.1.tar.gz
+source_hash = 8106d034bd34fd3dd2160f9ac1c594e4291aa54a258c5c84cca7a7260fce2fe1
+
 
 [provide]
 dependency_names = libdex-1
