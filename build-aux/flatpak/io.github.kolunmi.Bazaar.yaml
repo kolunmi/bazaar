@@ -81,14 +81,13 @@ modules:
     - name: libdex
       buildsystem: meson
       sources:
-        - type: git
-          url: https://gitlab.gnome.org/GNOME/libdex.git
-          tag: 0.9.1
-          commit: 259b26b22bc626635a2b156dabd00b6f0d79f249
+        - type: archive
+          url: https://gitlab.gnome.org/GNOME/libdex/-/archive/0.9.1/libdex-0.9.1.tar.gz
+          sha256: 8106d034bd34fd3dd2160f9ac1c594e4291aa54a258c5c84cca7a7260fce2fe1
           x-checker-data:
             type: anitya
             project-id: 328356
-            tag-template: $version
+            url-template: https://gitlab.gnome.org/GNOME/libdex/-/archive/$version/libdex-$version.tar.gz
     - name: glycin
       buildsystem: meson
       config-opts:
