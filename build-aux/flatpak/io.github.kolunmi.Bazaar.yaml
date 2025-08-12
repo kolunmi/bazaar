@@ -84,8 +84,8 @@ modules:
       buildsystem: meson
       sources:
         - type: archive
-          url: https://gitlab.gnome.org/GNOME/libdex/-/archive/0.10.1/libdex-0.10.1.tar.gz
-          sha256: 3511e4ff25e5d82b7097d9602bc569bea7d3dc816c6fbbf1af68383f74ad9dd5
+          url: https://gitlab.gnome.org/GNOME/libdex/-/archive/0.11.1/libdex-0.11.1.tar.gz
+          sha256: a1702bc063b7004515d32e24692790d64383902542b2ee6e3b4a7a43770432e7
           x-checker-data:
             type: anitya
             project-id: 328356
