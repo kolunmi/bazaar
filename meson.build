@@ -31,11 +31,12 @@ else
   if get_option('hardcoded_content_config_path') != ''
     config_h.set_quoted('HARDCODED_CONTENT_CONFIG', get_option('hardcoded_content_config_path'))
   endif
-
+  if get_option('sandboxed_libflatpak')
+    config_h.set_quoted('SANDBOXED_LIBFLATPAK', '1')
+  endif
 
   configure_file(output: 'config.h', configuration: config_h)
   add_project_arguments(['-I' + meson.project_build_root()], language: 'c')
-
 
   project_c_args = []
   test_c_args = [

@@ -21,6 +21,7 @@
 #define G_LOG_DOMAIN  "BAZAAR::FLATPAK-ENTRY"
 #define BAZAAR_MODULE "entry"
 
+#include "config.h"
 #include <xmlb.h>
 
 #include "bz-async-texture.h"
@@ -922,18 +923,29 @@ bz_flatpak_entry_launch (BzFlatpakEntry    *self,
                          BzFlatpakInstance *flatpak,
                          GError           **error)
 {
+  FlatpakRef *ref = NULL;
+#ifdef SANDBOXED_LIBFLATPAK
+  g_autofree char *fmt     = NULL;
+  g_autofree char *cmdline = NULL;
+#else
   FlatpakInstallation *installation = NULL;
-  FlatpakRef          *ref          = NULL;
+#endif
 
   g_return_val_if_fail (BZ_IS_FLATPAK_ENTRY (self), FALSE);
   g_return_val_if_fail (BZ_IS_FLATPAK_INSTANCE (flatpak), FALSE);
 
+  ref = bz_flatpak_entry_get_ref (self);
+
+#ifdef SANDBOXED_LIBFLATPAK
+  fmt     = flatpak_ref_format_ref (FLATPAK_REF (ref));
+  cmdline = g_strdup_printf ("flatpak-spawn --host flatpak run %s", fmt);
+
+  return g_spawn_command_line_async (cmdline, error);
+#else
   installation =
       self->user
           ? bz_flatpak_instance_get_user_installation (flatpak)
           : bz_flatpak_instance_get_system_installation (flatpak);
-
-  ref = bz_flatpak_entry_get_ref (self);
 
   /* async? */
   return flatpak_installation_launch (
@@ -943,6 +955,7 @@ bz_flatpak_entry_launch (BzFlatpakEntry    *self,
       flatpak_ref_get_branch (ref),
       flatpak_ref_get_commit (ref),
       NULL, error);
+#endif
 }
 
 static void

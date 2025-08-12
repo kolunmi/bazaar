@@ -31,6 +31,8 @@ build-options:
 modules:
   - name: bazaar
     buildsystem: meson
+    config-opts:
+    - "-Dsandboxed_libflatpak=true"
     sources:
       - type: dir
         path: "../.."

@@ -12,3 +12,8 @@ option('im_a_translator',
        type: 'boolean',
        value: false,
        description: 'Whether to set up the environment for translation work')
+
+option('sandboxed_libflatpak',
+       type: 'boolean',
+       value: false,
+       description: 'Whether to treat libflatpak as being sandboxed or not')
