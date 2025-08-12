@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-14 22:03+0300\n"
-"PO-Revision-Date: 2025-07-14 22:06+0300\n"
+"POT-Creation-Date: 2025-08-12 08:04+0300\n"
+"PO-Revision-Date: 2025-08-12 09:25+0300\n"
 "Last-Translator: Jill Fiore <contact@lumaeris.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -53,7 +53,7 @@ msgstr "Keep the summary shorter, between 10 and 35 characters"
 msgid "No description"
 msgstr "Без описания"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:15 src/bz-application.c:1223
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:15 src/bz-application.c:802
 msgid "Adam Masciola"
 msgstr "Адам Масциола"
 
@@ -61,66 +61,136 @@ msgstr "Адам Масциола"
 msgid "Main Bazaar window showing Blender"
 msgstr "Главное окно Bazaar, демонстрирующее Blender"
 
-#: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:162
-#: src/bz-installed-page.blp:174
+#: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:164
+#: src/bz-installed-page.blp:176
 msgid "Manage Addons"
 msgstr "Управление дополнениями"
 
-#: src/bz-app-tile.blp:65 src/bz-full-view.blp:139
+#: src/bz-app-tile.blp:54 src/bz-full-view.blp:125
 msgid "This flatpak is verified by the original developers of the software."
 msgstr "Данный flatpak был верифицирован подлинными разработчиками программы."
 
-#: src/bz-application.c:1194
+#: src/bz-application.c:766
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr "Адам Масциола <kolunmi@posteo.net>"
 
-#: src/bz-application.c:1199
+#: src/bz-application.c:771
 msgctxt "About Dialog Translator Credit"
 msgid "Ahmed Najmawi"
 msgstr "Ахмед Наймави"
 
-#: src/bz-application.c:1200
+#: src/bz-application.c:772
 msgctxt "About Dialog Translator Credit"
 msgid "AtomHare"
 msgstr "AtomHare"
 
-#: src/bz-application.c:1201
+#: src/bz-application.c:773
+msgctxt "About Dialog Translator Credit"
+msgid "Azenyr"
+msgstr "Azenyr"
+
+#: src/bz-application.c:774
+msgctxt "About Dialog Translator Credit"
+msgid "Goudarz Jafari"
+msgstr "Гударц Яфари"
+
+#: src/bz-application.c:775
 msgctxt "About Dialog Translator Credit"
 msgid "Jill Fiore"
 msgstr "Джилл Фиори"
 
-#: src/bz-application.c:1202
+#: src/bz-application.c:776
+msgctxt "About Dialog Translator Credit"
+msgid "KiKaraage"
+msgstr "KiKaraage"
+
+#: src/bz-application.c:777
 msgctxt "About Dialog Translator Credit"
 msgid "Lucosec"
 msgstr "Lucosec"
 
-#: src/bz-application.c:1203
+#: src/bz-application.c:778
+msgctxt "About Dialog Translator Credit"
+msgid "Léane GRASSER"
+msgstr "Леан ГРАССЕР"
+
+#: src/bz-application.c:779
+msgctxt "About Dialog Translator Credit"
+msgid "Microwave"
+msgstr "Microwave"
+
+#: src/bz-application.c:780
+msgctxt "About Dialog Translator Credit"
+msgid "Pietro F."
+msgstr "Пьетро Ф."
+
+#: src/bz-application.c:781
 msgctxt "About Dialog Translator Credit"
 msgid "Shihfu Juan"
 msgstr "Щифу Уан"
 
-#: src/bz-application.c:1204
+#: src/bz-application.c:782
+msgctxt "About Dialog Translator Credit"
+msgid "Shinsei"
+msgstr "Shinsei"
+
+#: src/bz-application.c:783
 msgctxt "About Dialog Translator Credit"
 msgid "Vlastimil Dědek"
 msgstr "Властимил Дедек"
 
-#: src/bz-application.c:1205
+#: src/bz-application.c:784
 msgctxt "About Dialog Translator Credit"
 msgid "asen23"
 msgstr "asen23"
 
-#: src/bz-application.c:1206
+#: src/bz-application.c:785
 msgctxt "About Dialog Translator Credit"
 msgid "renner"
 msgstr "renner"
 
-#: src/bz-application.c:1207
+#: src/bz-application.c:786
 msgctxt "About Dialog Translator Credit"
 msgid "robotta"
 msgstr "robotta"
 
-#: src/bz-browse-widget.blp:11 src/bz-full-view.blp:11
+#: src/bz-application.c:1239
+#, c-format
+msgid "Received %'d entries out of %'d (%0.1f seconds elapsed)"
+msgstr "Получено %'d приложений из %'d (прошло %0.1f секунд)"
+
+#: src/bz-application.c:1325
+#, c-format
+msgid "Identifying installed entries..."
+msgstr "Определение установленных приложений..."
+
+#: src/bz-application.c:1356
+#, c-format
+msgid "Beginning remote entry retrieval while referencing %d blocklist(s)..."
+msgstr ""
+"Начинается получение элементов из репозитория при обращении к %d "
+"блокировкам..."
+
+#: src/bz-application.c:1382
+#, c-format
+msgid "Waiting for background indexing tasks to catch up..."
+msgstr "Ожидание завершения фоновых задач индексирования..."
+
+#: src/bz-application.c:1407
+#, c-format
+msgid "Completed initialization in %0.2f seconds"
+msgstr "Инициализация завершена за %0.2f секунд"
+
+#: src/bz-application.c:1581
+msgid "Constructing Flatpak instance..."
+msgstr "Настраиваем обращение к Flatpak..."
+
+#: src/bz-application.c:1587
+msgid "Reusing last Flatpak instance..."
+msgstr "Используем ранее настроенное обращение к Flatpak..."
+
+#: src/bz-browse-widget.blp:11 src/bz-full-view.blp:10
 #: src/bz-installed-page.blp:11 src/bz-window.blp:32
 msgid "Empty"
 msgstr "Пусто"
@@ -173,39 +243,39 @@ msgstr "Недавно добавленные"
 msgid "Popular"
 msgstr "Популярное"
 
-#: src/bz-full-view.blp:15
+#: src/bz-full-view.blp:14
 msgid "No Results"
 msgstr "Нет результатов"
 
-#: src/bz-full-view.blp:16
+#: src/bz-full-view.blp:15
 msgid "Try a different search query"
 msgstr "Попробуйте выполнить другой запрос"
 
-#: src/bz-full-view.blp:22 src/bz-window.blp:42
+#: src/bz-full-view.blp:21 src/bz-window.blp:42
 msgid "Content"
 msgstr "Контент"
 
-#: src/bz-full-view.blp:180
+#: src/bz-full-view.blp:166
 msgid "Run this application"
 msgstr "Запустить это приложение"
 
-#: src/bz-full-view.blp:204
+#: src/bz-full-view.blp:190
 msgid "Download and install this application"
 msgstr "Скачать и установить это приложение"
 
-#: src/bz-full-view.blp:222 src/bz-window.c:987
+#: src/bz-full-view.blp:208 src/bz-window.c:833
 msgid "Install"
 msgstr "Установить"
 
-#: src/bz-full-view.blp:236
+#: src/bz-full-view.blp:222
 msgid "Uninstall this application"
 msgstr "Удалить это приложение"
 
-#: src/bz-full-view.blp:262
+#: src/bz-full-view.blp:248
 msgid "Share this application"
 msgstr "Поделиться этим приложением"
 
-#: src/bz-full-view.blp:274
+#: src/bz-full-view.blp:260
 msgid ""
 "The number of downloads in the last 30 days. Click to view this "
 "application's download statistics."
@@ -213,36 +283,36 @@ msgstr ""
 "Количество скачиваний за эти 30 дней. Нажмите, чтобы открыть статистику "
 "скачиваний приложения."
 
-#: src/bz-full-view.blp:316
+#: src/bz-full-view.blp:304
 msgid "Support this developer"
 msgstr "Поддержать этого разработчика"
 
-#: src/bz-full-view.blp:329
+#: src/bz-full-view.blp:317
 msgid "Support"
 msgstr "Поддержать"
 
-#: src/bz-full-view.blp:387
+#: src/bz-full-view.blp:375
 msgid "Remote repo name"
 msgstr "Название репозитория"
 
-#: src/bz-full-view.blp:400
+#: src/bz-full-view.blp:388
 msgid "Project URL"
 msgstr "Веб-сайт проекта"
 
-#: src/bz-full-view.blp:412
+#: src/bz-full-view.blp:400
 msgid "Download size"
 msgstr "Размер скачивания"
 
-#: src/bz-full-view.c:214
+#: src/bz-full-view.c:204
 #, c-format
 msgid "Released %x"
 msgstr "Выпущено %x"
 
-#: src/bz-full-view.c:225
+#: src/bz-full-view.c:215
 msgid "No URL"
 msgstr "Нет URL"
 
-#: src/bz-full-view.c:233
+#: src/bz-full-view.c:223
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -250,7 +320,7 @@ msgstr ""
 "Это приложение имеет лицензию FLOSS, что значит исходный код может быть "
 "проверен на безопасность."
 
-#: src/bz-full-view.c:234
+#: src/bz-full-view.c:224
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
@@ -263,15 +333,15 @@ msgstr ""
 msgid "No Flatpaks Installed"
 msgstr "Нет установленных Flatpak"
 
-#: src/bz-installed-page.blp:21 src/bz-window.blp:201 src/bz-window.blp:336
+#: src/bz-installed-page.blp:21 src/bz-window.blp:219 src/bz-window.blp:356
 msgid "Installed"
 msgstr "Установленное"
 
-#: src/bz-installed-page.blp:143
+#: src/bz-installed-page.blp:145
 msgid "More actions"
 msgstr "Больше опций"
 
-#: src/bz-installed-page.blp:187 src/bz-installed-page.blp:198
+#: src/bz-installed-page.blp:189 src/bz-installed-page.blp:200
 msgid "Edit Permissions"
 msgstr "Редактировать разрешения"
 
@@ -295,31 +365,23 @@ msgstr "Показать анимированный фон"
 msgid "Type to filter"
 msgstr "Поиск"
 
-#: src/bz-search-widget.blp:98 src/bz-search-widget.blp:115
+#: src/bz-search-widget.blp:91 src/bz-search-widget.blp:108
 msgid "Search Options"
 msgstr "Настройки поиска"
 
-#: src/bz-search-widget.blp:119
+#: src/bz-search-widget.blp:112
 msgid "Exclude results with proprietary licenses"
 msgstr "Исключить результаты с проприетарными лицензиями"
 
-#: src/bz-search-widget.blp:124
+#: src/bz-search-widget.blp:117
 msgid "Exclude results not originating from Flathub"
 msgstr "Исключить результаты вне Flathub"
 
-#: src/bz-search-widget.blp:139
+#: src/bz-search-widget.blp:132
 msgid "Advanced"
 msgstr "Дополнительно"
 
-#: src/bz-search-widget.blp:143
-msgid "Match using regular expressions"
-msgstr "Поиск с регулярными выражениями"
-
-#: src/bz-search-widget.blp:148
-msgid "Hide filtering and sorting behind a crossfade effect"
-msgstr "Плавно показывать фильтрацию и сортировку"
-
-#: src/bz-search-widget.blp:153
+#: src/bz-search-widget.blp:136
 msgid "Debounce input to prevent instant replies"
 msgstr "Увеличить время отклика при вводе"
 
@@ -387,7 +449,7 @@ msgid ""
 msgstr ""
 "Перечисленные приложения могут быть обновлены. Вы хотите установить их?"
 
-#: src/bz-update-dialog.c:135
+#: src/bz-update-dialog.c:134
 #, c-format
 msgid ""
 "%d runtimes and/or addons are eligible for updates. Would you like to "
@@ -396,7 +458,7 @@ msgstr ""
 "%d сред выполнения и/или дополнений могут быть обновлены. Вы хотите "
 "установить их?"
 
-#: src/bz-update-dialog.c:143
+#: src/bz-update-dialog.c:142
 #, c-format
 msgid "Additionally, %d runtimes and/or addons will be updated."
 msgstr "Дополнительно, %d сред выполнения и/или расширений будут обновлены."
@@ -413,87 +475,87 @@ msgstr "Остановить выполнение транзакций"
 msgid "Clear all finished transactions"
 msgstr "Очистить все завершенные транзакции"
 
-#: src/bz-window.blp:136 src/bz-window.blp:140
+#: src/bz-window.blp:135 src/bz-window.blp:139
 msgid "Offline"
 msgstr "Нет интернета"
 
-#: src/bz-window.blp:146
+#: src/bz-window.blp:145
 msgid "Loading"
 msgstr "Загрузка"
 
-#: src/bz-window.blp:170
+#: src/bz-window.blp:187
 msgid "Browse"
 msgstr "Просмотр"
 
-#: src/bz-window.blp:180
+#: src/bz-window.blp:197
 msgid "App View"
 msgstr "Вид приложения"
 
-#: src/bz-window.blp:191 src/bz-window.blp:315
+#: src/bz-window.blp:209 src/bz-window.blp:335
 msgid "Flathub"
 msgstr "Flathub"
 
-#: src/bz-window.blp:220
+#: src/bz-window.blp:239
 msgid "Go Back"
 msgstr "Назад"
 
-#: src/bz-window.blp:228
+#: src/bz-window.blp:247
 msgid "Refresh"
 msgstr "Перезагрузить"
 
-#: src/bz-window.blp:237
+#: src/bz-window.blp:256
 msgid "Search"
 msgstr "Поиск"
 
-#: src/bz-window.blp:249
+#: src/bz-window.blp:268
 msgid "Update"
 msgstr "Обновить"
 
-#: src/bz-window.blp:263
+#: src/bz-window.blp:283
 msgid "Checking for updates"
 msgstr "Проверяем на наличие обновлений"
 
-#: src/bz-window.blp:279
+#: src/bz-window.blp:299
 msgid "View curated applications"
 msgstr "Посмотреть избранные приложения"
 
-#: src/bz-window.blp:294
+#: src/bz-window.blp:314
 msgid "Curated"
 msgstr "Избранное"
 
-#: src/bz-window.blp:300
+#: src/bz-window.blp:320
 msgid "View the latest on Flathub"
 msgstr "Посмотреть новое на Flathub"
 
-#: src/bz-window.blp:321
+#: src/bz-window.blp:341
 msgid "View installed applications"
 msgstr "Посмотреть установленные приложения"
 
-#: src/bz-window.blp:350
+#: src/bz-window.blp:370
 msgid "Main Menu"
 msgstr "Главное меню"
 
-#: src/bz-window.blp:361
+#: src/bz-window.blp:381
 msgid "Toggle transaction sidebar"
 msgstr "Переключить боковую панель транзакций"
 
-#: src/bz-window.blp:400
-msgid "Up to date!"
-msgstr "Нет обновлений!"
-
-#: src/bz-window.blp:425
+#: src/bz-window.blp:423
 msgid "_Keyboard Shortcuts"
 msgstr "_Сочетание клавиш"
 
-#: src/bz-window.blp:430
+#: src/bz-window.blp:428
 msgid "_About Bazaar"
 msgstr "_О Bazaar"
 
-#: src/bz-window.blp:435
+#: src/bz-window.blp:433
 msgid "_Donate to Bazaar ❤️"
 msgstr "_Поддержать Bazaar ❤️"
 
-#: src/bz-window.c:856
+#: src/bz-window.c:490
+msgid "Up to date!"
+msgstr "Нет обновлений!"
+
+#: src/bz-window.c:655
 msgid ""
 "The ability to inspect and install local .flatpak bundle files is coming "
 "soon! In the meantime, try running\n"
@@ -509,15 +571,15 @@ msgstr ""
 "\n"
 "в командной строке."
 
-#: src/bz-window.c:927
+#: src/bz-window.c:730
 msgid "Can't do that right now!"
 msgstr "Нельзя сделать это прямо сейчас!"
 
-#: src/bz-window.c:940
+#: src/bz-window.c:777
 msgid "Confirm Action"
 msgstr "Подтвердить действие"
 
-#: src/bz-window.c:958
+#: src/bz-window.c:806
 #, c-format
 msgid ""
 "You are about to remove the following Flatpak:\n"
@@ -534,15 +596,15 @@ msgstr ""
 "\n"
 "Вы уверены?"
 
-#: src/bz-window.c:966 src/bz-window.c:986
+#: src/bz-window.c:813 src/bz-window.c:832
 msgid "Cancel"
 msgstr "Отмена"
 
-#: src/bz-window.c:967
+#: src/bz-window.c:814
 msgid "Remove"
 msgstr "Удалить"
 
-#: src/bz-window.c:978
+#: src/bz-window.c:825
 #, c-format
 msgid ""
 "You are about to install the following Flatpak:\n"
@@ -559,15 +621,15 @@ msgstr ""
 "\n"
 "Вы уверены?"
 
-#: src/bz-window.c:1012
+#: src/bz-window.c:855
 msgid "More details"
 msgstr "Больше подробностей"
 
-#: src/bz-window.c:1138
+#: src/bz-window.c:981
 msgid "Resume the execution of transactions"
 msgstr "Возобновить выполнение транзакций"
 
-#: src/bz-window.c:1144
+#: src/bz-window.c:987
 msgid "Pause the execution of transactions"
 msgstr "Приостановить выполнение транзакций"
 
@@ -600,6 +662,12 @@ msgstr "Открыть сочетания клавиш"
 msgctxt "shortcut window"
 msgid "Quit"
 msgstr "Закрыть"
+
+#~ msgid "Match using regular expressions"
+#~ msgstr "Поиск с регулярными выражениями"
+
+#~ msgid "Hide filtering and sorting behind a crossfade effect"
+#~ msgstr "Плавно показывать фильтрацию и сортировку"
 
 #~ msgid "translator-credits"
 #~ msgstr "translator-credits"
