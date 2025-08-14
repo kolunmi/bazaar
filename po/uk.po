@@ -1,0 +1,653 @@
+# Ukrainian translations for bazaar package.
+# Copyright (C) 2025 THE bazaar'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the bazaar package.
+# Automatically generated, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: bazaar\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-08-12 22:05+0300\n"
+"PO-Revision-Date: 2025-08-12 22:05+0300\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#: data/io.github.kolunmi.Bazaar.desktop.in:3
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:5
+msgid "Bazaar"
+msgstr "Базар"
+
+#: data/io.github.kolunmi.Bazaar.desktop.in:4
+msgid "Add, remove or update flatpak software on this computer"
+msgstr "Встановлюйте, видаляйте та оновлюйте пакунки Flatpak на Ваш компʼютер"
+
+#: data/io.github.kolunmi.Bazaar.desktop.in:10
+msgid "GTK;System;PackageManager;Discover;Flatpak;Software;Store;"
+msgstr "GTK;System;PackageManager;Discover;Flatpak;Software;Store;Магазин;Крамниця;Флатпак;Пакунки;Програми;"
+
+#: data/io.github.kolunmi.Bazaar.gschema.xml:6
+msgid "Show Animated Background"
+msgstr "Показати анімоване тло"
+
+#: data/io.github.kolunmi.Bazaar.gschema.xml:7
+msgid "Whether to show the animated icon background on the home page"
+msgstr "Перемкнути показ анімованого тла іконок на головній сторінці"
+
+#. FIXME: add descriptions and summary
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:9
+msgid "Keep the summary shorter, between 10 and 35 characters"
+msgstr "Робіть підсумок коротшим, між 10 та 35 символами"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:11
+msgid "No description"
+msgstr "Відсутній опис"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:41
+msgid "Main Bazaar window showing Blender"
+msgstr "Blender у головному вікні Базару"
+
+#: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:164
+#: src/bz-installed-page.blp:176
+msgid "Manage Addons"
+msgstr "Керувати розширеннями"
+
+#: src/bz-app-tile.blp:54 src/bz-full-view.blp:125
+msgid "This flatpak is verified by the original developers of the software."
+msgstr "Цей пакунок затверджено розробниками цієї програми"
+
+#: src/bz-application.c:766
+msgctxt "About Dialog Developer Credit"
+msgid "Adam Masciola <kolunmi@posteo.net>"
+msgstr ""
+
+#: src/bz-application.c:771
+msgctxt "About Dialog Translator Credit"
+msgid "Ahmed Najmawi"
+msgstr ""
+
+#: src/bz-application.c:772
+msgctxt "About Dialog Translator Credit"
+msgid "AtomHare"
+msgstr ""
+
+#: src/bz-application.c:773
+msgctxt "About Dialog Translator Credit"
+msgid "Azenyr"
+msgstr ""
+
+#: src/bz-application.c:774
+msgctxt "About Dialog Translator Credit"
+msgid "Goudarz Jafari"
+msgstr ""
+
+#: src/bz-application.c:775
+msgctxt "About Dialog Translator Credit"
+msgid "Jill Fiore"
+msgstr ""
+
+#: src/bz-application.c:776
+msgctxt "About Dialog Translator Credit"
+msgid "KiKaraage"
+msgstr ""
+
+#: src/bz-application.c:777
+msgctxt "About Dialog Translator Credit"
+msgid "Lucosec"
+msgstr ""
+
+#: src/bz-application.c:778
+msgctxt "About Dialog Translator Credit"
+msgid "Léane GRASSER"
+msgstr ""
+
+#: src/bz-application.c:779
+msgctxt "About Dialog Translator Credit"
+msgid "Microwave"
+msgstr ""
+
+#: src/bz-application.c:780
+msgctxt "About Dialog Translator Credit"
+msgid "Pietro F."
+msgstr ""
+
+#: src/bz-application.c:781
+msgctxt "About Dialog Translator Credit"
+msgid "Shihfu Juan"
+msgstr ""
+
+#: src/bz-application.c:782
+msgctxt "About Dialog Translator Credit"
+msgid "Shinsei"
+msgstr ""
+
+#: src/bz-application.c:783
+msgctxt "About Dialog Translator Credit"
+msgid "Vlastimil Dědek"
+msgstr ""
+
+#: src/bz-application.c:784
+msgctxt "About Dialog Translator Credit"
+msgid "asen23"
+msgstr ""
+
+#: src/bz-application.c:785
+msgctxt "About Dialog Translator Credit"
+msgid "renner"
+msgstr ""
+
+#: src/bz-application.c:786
+msgctxt "About Dialog Translator Credit"
+msgid "robotta"
+msgstr ""
+
+#: src/bz-application.c:802
+msgid "Adam Masciola"
+msgstr ""
+
+#: src/bz-application.c:1239
+#, c-format
+msgid "Received %'d entries out of %'d (%0.1f seconds elapsed)"
+msgstr "%'d надходжень із %'d (за %0.1f сек)"
+
+#: src/bz-application.c:1325
+#, c-format
+msgid "Identifying installed entries..."
+msgstr "Визначення встановлених надходжень..."
+
+#: src/bz-application.c:1356
+#, c-format
+msgid "Beginning remote entry retrieval while referencing %d blocklist(s)..."
+msgstr "Отримання віддалених надходжень із застосуванням %d чорних списків..."
+
+#: src/bz-application.c:1382
+#, c-format
+msgid "Waiting for background indexing tasks to catch up..."
+msgstr "Очікується завершення індексації..."
+
+#: src/bz-application.c:1407
+#, c-format
+msgid "Completed initialization in %0.2f seconds"
+msgstr "Ініціалізовано за %0.2f сек"
+
+#: src/bz-application.c:1581
+msgid "Constructing Flatpak instance..."
+msgstr "Створення примірника Flatpak..."
+
+#: src/bz-application.c:1587
+msgid "Reusing last Flatpak instance..."
+msgstr "Повторне використання примірника Flatpak..."
+
+#: src/bz-browse-widget.blp:11 src/bz-full-view.blp:10
+#: src/bz-installed-page.blp:11 src/bz-window.blp:32
+msgid "Empty"
+msgstr "Порожньо"
+
+#: src/bz-browse-widget.blp:15
+msgid "No Curated Applications"
+msgstr "Жодного підібраного застосунку"
+
+#: src/bz-browse-widget.blp:16
+msgid ""
+"Bazaar was not provided a curated content configuration. Contact your "
+"operating system's support channels for assistance."
+msgstr ""
+"Базару не було надано налаштування підібраного вмісту. По допомогу, "
+"зверніться до каналу підтримки Вашої операційної системи."
+
+#: src/bz-browse-widget.blp:22 src/bz-flathub-page.blp:11
+msgid "Browser"
+msgstr "Оглядач"
+
+#: src/bz-error.c:45
+msgid "An Error Occurred"
+msgstr "Виникла помилка"
+
+#: src/bz-error.c:51
+msgid "Close"
+msgstr "Вийти"
+
+#: src/bz-error.c:52
+msgid "Copy and Close"
+msgstr "Копіювати та вийти"
+
+#: src/bz-flathub-page.blp:41
+msgid "Apps Of The Week"
+msgstr "Тижнева добірка"
+
+#: src/bz-flathub-page.blp:85
+msgid "Trending"
+msgstr "Набирають популярність"
+
+#: src/bz-flathub-page.blp:117
+msgid "Recently Updated"
+msgstr "Нещодавно оновлені"
+
+#: src/bz-flathub-page.blp:149
+msgid "Recently Added"
+msgstr "Нещодавно додані"
+
+#: src/bz-flathub-page.blp:181
+msgid "Popular"
+msgstr "Популярні"
+
+#: src/bz-full-view.blp:14
+msgid "No Results"
+msgstr "Нічого не знайдено"
+
+#: src/bz-full-view.blp:15
+msgid "Try a different search query"
+msgstr "Спробуйте інший запит"
+
+#: src/bz-full-view.blp:21 src/bz-window.blp:42
+msgid "Content"
+msgstr "Вміст"
+
+#: src/bz-full-view.blp:166
+msgid "Run this application"
+msgstr "Запустити цей застосунок"
+
+#: src/bz-full-view.blp:190
+msgid "Download and install this application"
+msgstr "Завантажити та встановити цей застосунок"
+
+#: src/bz-full-view.blp:208 src/bz-window.c:833
+msgid "Install"
+msgstr "Встановити"
+
+#: src/bz-full-view.blp:222
+msgid "Uninstall this application"
+msgstr "Видалити цей застосунок"
+
+#: src/bz-full-view.blp:248
+msgid "Share this application"
+msgstr "Поділитися цим застосунком"
+
+#: src/bz-full-view.blp:260
+msgid ""
+"The number of downloads in the last 30 days. Click to view this "
+"application's download statistics."
+msgstr ""
+"Кількість завантажень за останні 30 днів. Натисніть, аби побачити "
+"статистику завантажень цього застосунку."
+
+#: src/bz-full-view.blp:304
+msgid "Support this developer"
+msgstr "Підтримати розробників"
+
+#: src/bz-full-view.blp:317
+msgid "Support"
+msgstr "Підтримати"
+
+#: src/bz-full-view.blp:375
+msgid "Remote repo name"
+msgstr "Назва віддаленого сховища"
+
+#: src/bz-full-view.blp:388
+msgid "Project URL"
+msgstr "URL проєкту"
+
+#: src/bz-full-view.blp:400
+msgid "Download size"
+msgstr "Розмір завантаження"
+
+#: src/bz-full-view.c:204
+#, c-format
+msgid "Released %x"
+msgstr "Випуск %x"
+
+#: src/bz-full-view.c:215
+msgid "No URL"
+msgstr "Без URL"
+
+#: src/bz-full-view.c:223
+msgid ""
+"This application has a FLOSS license, meaning the source code can be audited "
+"for safety."
+msgstr ""
+"Цей застосунок має вільну ліцензію. Це означає, що початковий код може бути "
+"перевірено на безпечність."
+
+#: src/bz-full-view.c:224
+msgid ""
+"This application has a proprietary license, meaning the source code is "
+"developed privately and cannot be audited by an independent third party."
+msgstr ""
+"Цей застосунок має невільну (власницьку) ліцензію. Це означає, що початковий код "
+"не є публічно доступним і не може бути перевіреним на безпечність."
+
+#: src/bz-installed-page.blp:15
+msgid "No Flatpaks Installed"
+msgstr "Не встановлено жодного пакунку Flatpak"
+
+#: src/bz-installed-page.blp:21 src/bz-window.blp:219 src/bz-window.blp:356
+msgid "Installed"
+msgstr "Встановлені"
+
+#: src/bz-installed-page.blp:145
+msgid "More actions"
+msgstr "Більше дій"
+
+#: src/bz-installed-page.blp:189 src/bz-installed-page.blp:200
+msgid "Edit Permissions"
+msgstr "Керувати правами"
+
+#: src/bz-preferences-dialog.blp:9
+msgid "Preferences"
+msgstr "Налаштування"
+
+#: src/bz-preferences-dialog.blp:13
+msgid "How the application looks"
+msgstr "Який вигляд має застосунок"
+
+#: src/bz-preferences-dialog.blp:14
+msgid "Appearance"
+msgstr "Вигляд"
+
+#: src/bz-preferences-dialog.blp:17
+msgid "Show animated background"
+msgstr "Показати анімоване тло"
+
+#: src/bz-search-widget.blp:69
+msgid "Type to filter"
+msgstr "Введіть для пошуку"
+
+#: src/bz-search-widget.blp:91 src/bz-search-widget.blp:108
+msgid "Search Options"
+msgstr "Налаштування пошуку"
+
+#: src/bz-search-widget.blp:112
+msgid "Exclude results with proprietary licenses"
+msgstr "Виключити надходження з власницькою ліцензією"
+
+#: src/bz-search-widget.blp:117
+msgid "Exclude results not originating from Flathub"
+msgstr "Виключити надходження поза Flathub"
+
+#: src/bz-search-widget.blp:132
+msgid "Advanced"
+msgstr "Просунуті"
+
+#: src/bz-search-widget.blp:136
+msgid "Debounce input to prevent instant replies"
+msgstr "Чекати на закінчення вводу, аби попередити миттєві надходження."
+
+#: src/bz-share-dialog.blp:13
+msgid "Share"
+msgstr "Поділитися"
+
+#: src/bz-share-dialog.blp:64
+msgid "Copy this link"
+msgstr "Копіювати посилання"
+
+#: src/bz-share-dialog.blp:71
+msgid "Open this link externally"
+msgstr "Відкрити посилання у зовнішній програмі"
+
+#: src/bz-stats-dialog.blp:15
+msgid "Downloads Over Time"
+msgstr "Завантажень протягом часу"
+
+#: src/bz-stats-dialog.blp:31
+msgid "Minimize Lower Bound"
+msgstr "Найнижчий мінімальний поріг"
+
+#: src/bz-stats-dialog.blp:36
+msgid "Maximize Upper Bound"
+msgstr "Найвищий максимальний поріг"
+
+#: src/bz-transaction-manager.c:451
+#, c-format
+msgid "Finished in %.02f seconds"
+msgstr "Завершено за %.02f сек"
+
+#: src/bz-transaction-view.blp:34
+msgid "Installing"
+msgstr "Встановлюємо"
+
+#: src/bz-transaction-view.blp:63
+msgid "Updating"
+msgstr "Оновлюємо"
+
+#: src/bz-transaction-view.blp:92
+msgid "Removing"
+msgstr "Видаляємо"
+
+#: src/bz-transaction.c:268
+msgid "Pending"
+msgstr "Очікуємо"
+
+#: src/bz-update-dialog.blp:6
+msgid "Later"
+msgstr "Пізніше"
+
+#: src/bz-update-dialog.blp:7
+msgid "Install Now"
+msgstr "Встановити зараз"
+
+#: src/bz-update-dialog.blp:10
+msgid "Updates Are Available"
+msgstr "Доступні оновлення"
+
+#: src/bz-update-dialog.blp:11
+msgid ""
+"The following applications are eligible for updates. Would you like to "
+"install them?"
+msgstr "Для цих застосунків доступні оновлення. Бажаєте встановити?"
+
+#: src/bz-update-dialog.c:134
+#, c-format
+msgid ""
+"%d runtimes and/or addons are eligible for updates. Would you like to "
+"install them?"
+msgstr "Для %d середовищ виконання та/або розширень доступні оновлення. Бажаєте встановити?"
+
+#: src/bz-update-dialog.c:142
+#, c-format
+msgid "Additionally, %d runtimes and/or addons will be updated."
+msgstr "Крім того, буде оновлено %d середовищ виконання та/або розширень."
+
+#: src/bz-window.blp:36
+msgid "Transactions Will Appear Here"
+msgstr "Дії над застосунками зʼявлятимуться тут"
+
+#: src/bz-window.blp:97
+msgid "Halt the execution of transactions"
+msgstr "Зупинити виконання дій"
+
+#: src/bz-window.blp:105
+msgid "Clear all finished transactions"
+msgstr "Очистити всі завершені дії"
+
+#: src/bz-window.blp:135 src/bz-window.blp:139
+msgid "Offline"
+msgstr "Поза мережею"
+
+#: src/bz-window.blp:145
+msgid "Loading"
+msgstr "Завантажується"
+
+#: src/bz-window.blp:187
+msgid "Browse"
+msgstr "Шукати"
+
+#: src/bz-window.blp:197
+msgid "App View"
+msgstr "Огляд програми"
+
+#: src/bz-window.blp:209 src/bz-window.blp:335
+msgid "Flathub"
+msgstr "Flathub"
+
+#: src/bz-window.blp:239
+msgid "Go Back"
+msgstr "Назад"
+
+#: src/bz-window.blp:247
+msgid "Refresh"
+msgstr "Оновити"
+
+#: src/bz-window.blp:256
+msgid "Search"
+msgstr "Пошук"
+
+#: src/bz-window.blp:268
+msgid "Update"
+msgstr "Оновлення"
+
+#: src/bz-window.blp:283
+msgid "Checking for updates"
+msgstr "Пошук оновлень"
+
+#: src/bz-window.blp:299
+msgid "View curated applications"
+msgstr "Оглянути підібрані застосунки"
+
+#: src/bz-window.blp:314
+msgid "Curated"
+msgstr "Підібрані"
+
+#: src/bz-window.blp:320
+msgid "View the latest on Flathub"
+msgstr "Оглянути найновіше на Flathub"
+
+#: src/bz-window.blp:341
+msgid "View installed applications"
+msgstr "Оглянути встановлені застосунки"
+
+#: src/bz-window.blp:370
+msgid "Main Menu"
+msgstr "Головне меню"
+
+#: src/bz-window.blp:381
+msgid "Toggle transaction sidebar"
+msgstr "Перемкнути віконце дій над застосунками"
+
+#: src/bz-window.blp:423
+msgid "_Keyboard Shortcuts"
+msgstr "_Клавіатурні скорочення"
+
+#: src/bz-window.blp:428
+msgid "_About Bazaar"
+msgstr "_Про Базар"
+
+#: src/bz-window.blp:433
+msgid "_Donate to Bazaar ❤️"
+msgstr "_Пожертувати Базару ❤️"
+
+#: src/bz-window.c:490
+msgid "Up to date!"
+msgstr "Оновлень не знайдено!"
+
+#: src/bz-window.c:655
+msgid ""
+"The ability to inspect and install local .flatpak bundle files is coming "
+"soon! In the meantime, try running\n"
+"\n"
+"flatpak install --bundle your-bundle.flatpak\n"
+"\n"
+"on the command line."
+msgstr ""
+"Можливість оглянути та встановити локальні файл-пакунки .flatpak "
+"скоро буде доступна! Тим часом, спробуйте виконати команду\n"
+"\n"
+"flatpak install --bundle ваш-файл-пакунок.flatpak\n"
+"\n"
+"у терміналі."
+
+#: src/bz-window.c:730
+msgid "Can't do that right now!"
+msgstr "Наразі цього не можна зробити!"
+
+#: src/bz-window.c:777
+msgid "Confirm Action"
+msgstr "Підтвердити дію"
+
+#: src/bz-window.c:806
+#, c-format
+msgid ""
+"You are about to remove the following Flatpak:\n"
+"\n"
+"<b>%s</b>\n"
+"<tt>%s</tt>\n"
+"\n"
+"Are you sure?"
+msgstr ""
+"Ви збираєтесь видалити наступні пакунки:\n"
+"\n"
+"<b>%s</b>\n"
+"<tt>%s</tt>\n"
+"\n"
+"Упевнені?"
+
+#: src/bz-window.c:813 src/bz-window.c:832
+msgid "Cancel"
+msgstr "Скасувати"
+
+#: src/bz-window.c:814
+msgid "Remove"
+msgstr "Видалити"
+
+#: src/bz-window.c:825
+#, c-format
+msgid ""
+"You are about to install the following Flatpak:\n"
+"\n"
+"<b>%s</b>\n"
+"<tt>%s</tt>\n"
+"\n"
+"Are you sure?"
+msgstr ""
+"Ви збираєтесь встановити наступні пакунки:\n"
+"\n"
+"<b>%s</b>\n"
+"<tt>%s</tt>\n"
+"\n"
+"Упевнені?"
+
+#: src/bz-window.c:855
+msgid "More details"
+msgstr "Докладніше"
+
+#: src/bz-window.c:981
+msgid "Resume the execution of transactions"
+msgstr "Відновити виконання"
+
+#: src/bz-window.c:987
+msgid "Pause the execution of transactions"
+msgstr "Призупинити виконання"
+
+#: src/gtk/help-overlay.blp:11
+msgctxt "shortcut window"
+msgid "General"
+msgstr "Загальні"
+
+#: src/gtk/help-overlay.blp:14
+msgctxt "shortcut window"
+msgid "Open Search Dialog"
+msgstr "Відкрити вікно пошуку"
+
+#: src/gtk/help-overlay.blp:19
+msgctxt "shortcut window"
+msgid "Refresh"
+msgstr "Оновити"
+
+#: src/gtk/help-overlay.blp:24
+msgctxt "shortcut window"
+msgid "Toggle Transaction Manager"
+msgstr "Перемкнути віконце дій над застосунками"
+
+#: src/gtk/help-overlay.blp:29
+msgctxt "shortcut window"
+msgid "Show Shortcuts"
+msgstr "Показати клавіатурні скорочення"
+
+#: src/gtk/help-overlay.blp:34
+msgctxt "shortcut window"
+msgid "Quit"
+msgstr "Вийти"
