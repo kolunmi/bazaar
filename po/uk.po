@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-15 14:34+0300\n"
+"POT-Creation-Date: 2025-08-16 20:03+0300\n"
 "PO-Revision-Date: 2025-08-12 22:05+0300\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -87,130 +87,151 @@ msgstr "Керувати розширеннями"
 msgid "This flatpak is verified by the original developers of the software."
 msgstr "Цей пакунок затверджено розробниками цієї програми"
 
-#: src/bz-application.c:767
+#: src/bz-application.c:741
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr ""
 
-#: src/bz-application.c:772
+#: src/bz-application.c:746
 msgctxt "About Dialog Translator Credit"
 msgid "Ahmed Najmawi"
 msgstr ""
 
-#: src/bz-application.c:773
+#: src/bz-application.c:747
 msgctxt "About Dialog Translator Credit"
 msgid "AtomHare"
 msgstr ""
 
-#: src/bz-application.c:774
+#: src/bz-application.c:748
 msgctxt "About Dialog Translator Credit"
 msgid "Azenyr"
 msgstr ""
 
-#: src/bz-application.c:775
+#: src/bz-application.c:749
 msgctxt "About Dialog Translator Credit"
 msgid "Goudarz Jafari"
 msgstr ""
 
-#: src/bz-application.c:776
+#: src/bz-application.c:750
 msgctxt "About Dialog Translator Credit"
 msgid "Jill Fiore (Lumaeris)"
 msgstr ""
 
-#: src/bz-application.c:777
+#: src/bz-application.c:751
 msgctxt "About Dialog Translator Credit"
 msgid "KiKaraage"
 msgstr ""
 
-#: src/bz-application.c:778
+#: src/bz-application.c:752
 msgctxt "About Dialog Translator Credit"
 msgid "Lucosec"
 msgstr ""
 
-#: src/bz-application.c:779
+#: src/bz-application.c:753
 msgctxt "About Dialog Translator Credit"
 msgid "Léane GRASSER"
 msgstr ""
 
-#: src/bz-application.c:780
+#: src/bz-application.c:754
 msgctxt "About Dialog Translator Credit"
 msgid "Marcel Mrówka (Microwave)"
 msgstr ""
 
-#: src/bz-application.c:781
+#: src/bz-application.c:755
 msgctxt "About Dialog Translator Credit"
 msgid "Pietro F."
 msgstr ""
 
-#: src/bz-application.c:782
+#: src/bz-application.c:756
 msgctxt "About Dialog Translator Credit"
 msgid "Shihfu Juan"
 msgstr ""
 
-#: src/bz-application.c:783
+#: src/bz-application.c:757
 msgctxt "About Dialog Translator Credit"
 msgid "Shinsei"
 msgstr ""
 
-#: src/bz-application.c:784
+#: src/bz-application.c:758
 msgctxt "About Dialog Translator Credit"
 msgid "Vlastimil Dědek"
 msgstr ""
 
-#: src/bz-application.c:785
+#: src/bz-application.c:759
 msgctxt "About Dialog Translator Credit"
 msgid "asen23"
 msgstr ""
 
-#: src/bz-application.c:786
+#: src/bz-application.c:760
 msgctxt "About Dialog Translator Credit"
 msgid "renner"
 msgstr ""
 
-#: src/bz-application.c:787
+#: src/bz-application.c:761
 msgctxt "About Dialog Translator Credit"
 msgid "robotta"
 msgstr ""
 
-#: src/bz-application.c:803
+#: src/bz-application.c:777
 msgid "Adam Masciola"
 msgstr ""
 
-#: src/bz-application.c:1242
-#, c-format
-msgid "Received %'d entries out of %'d (%0.1f seconds elapsed)"
-msgstr "%'d надходжень із %'d (за %0.1f сек)"
+#: src/bz-application.c:1147
+msgid "Constructing Flatpak instance..."
+msgstr "Створення примірника Flatpak..."
 
-#: src/bz-application.c:1328
+#: src/bz-application.c:1157
+msgid "Reusing last Flatpak instance..."
+msgstr "Повторне використання примірника Flatpak..."
+
+#: src/bz-application.c:1182
+msgid "Flathub is not registered on this system"
+msgstr "Flathub не зареєстровано на цій системі"
+
+#: src/bz-application.c:1185
+msgid ""
+"Would you like to add Flathub as a remote? If you decline, the Flathub page "
+"will not be available. You can change this later."
+msgstr ""
+"Бажаєте додати Flathub до переліку віддалених сховищ? В іншому разі, "
+"сторінка Flathub буде недоступна. Ви можете змінити це пізніше."
+
+#: src/bz-application.c:1190 src/bz-update-dialog.blp:6
+msgid "Later"
+msgstr "Пізніше"
+
+#: src/bz-application.c:1191
+#, fuzzy
+msgid "Add Flathub"
+msgstr "Додати Flathub"
+
+#: src/bz-application.c:1223
 #, c-format
 msgid "Identifying installed entries..."
 msgstr "Визначення встановлених надходжень..."
 
-#: src/bz-application.c:1359
+#: src/bz-application.c:1235
 #, c-format
 msgid "Beginning remote entry retrieval while referencing %d blocklist(s)..."
 msgstr "Отримання віддалених надходжень із застосуванням %d чорних списків..."
 
-#: src/bz-application.c:1385
+#: src/bz-application.c:1379
+#, c-format
+msgid "Received %'d entries out of %'d (%0.1f seconds elapsed)"
+msgstr "%'d надходжень із %'d (за %0.1f сек)"
+
+#: src/bz-application.c:1386
 #, c-format
 msgid "Waiting for background indexing tasks to catch up..."
 msgstr "Очікується завершення індексації..."
 
-#: src/bz-application.c:1410
+#: src/bz-application.c:1422
 #, c-format
 msgid "Completed initialization in %0.2f seconds"
 msgstr "Ініціалізовано за %0.2f сек"
 
-#: src/bz-application.c:1584
-msgid "Constructing Flatpak instance..."
-msgstr "Створення примірника Flatpak..."
-
-#: src/bz-application.c:1590
-msgid "Reusing last Flatpak instance..."
-msgstr "Повторне використання примірника Flatpak..."
-
-#: src/bz-browse-widget.blp:11 src/bz-full-view.blp:10
-#: src/bz-installed-page.blp:11 src/bz-window.blp:32
+#: src/bz-browse-widget.blp:11 src/bz-flathub-page.blp:11
+#: src/bz-full-view.blp:10 src/bz-installed-page.blp:11 src/bz-window.blp:32
 msgid "Empty"
 msgstr "Порожньо"
 
@@ -226,39 +247,47 @@ msgstr ""
 "Базару не було надано налаштування підібраного вмісту. По допомогу, "
 "зверніться до каналу підтримки Вашої операційної системи."
 
-#: src/bz-browse-widget.blp:22 src/bz-flathub-page.blp:11
+#: src/bz-browse-widget.blp:22 src/bz-flathub-page.blp:22
 msgid "Browser"
 msgstr "Оглядач"
 
-#: src/bz-error.c:45
+#: src/bz-error.c:54
 msgid "An Error Occurred"
 msgstr "Виникла помилка"
 
-#: src/bz-error.c:51
+#: src/bz-error.c:60
 msgid "Close"
 msgstr "Вийти"
 
-#: src/bz-error.c:52
+#: src/bz-error.c:61
 msgid "Copy and Close"
 msgstr "Копіювати та вийти"
 
-#: src/bz-flathub-page.blp:41
+#: src/bz-flathub-page.blp:15
+msgid "Flathub Not Added"
+msgstr "Flathub не додано"
+
+#: src/bz-flathub-page.blp:16
+msgid "The Flathub remote was not found on any of your flatpak installations"
+msgstr "Сховище Flathub не було знайдено на жодному з Ваших встановлень"
+
+#: src/bz-flathub-page.blp:52
 msgid "Apps Of The Week"
 msgstr "Тижнева добірка"
 
-#: src/bz-flathub-page.blp:85
+#: src/bz-flathub-page.blp:96
 msgid "Trending"
 msgstr "Набирають популярність"
 
-#: src/bz-flathub-page.blp:117
+#: src/bz-flathub-page.blp:128
 msgid "Recently Updated"
 msgstr "Нещодавно оновлені"
 
-#: src/bz-flathub-page.blp:149
+#: src/bz-flathub-page.blp:160
 msgid "Recently Added"
 msgstr "Нещодавно додані"
 
-#: src/bz-flathub-page.blp:181
+#: src/bz-flathub-page.blp:192
 msgid "Popular"
 msgstr "Популярні"
 
@@ -447,10 +476,6 @@ msgstr "Видаляємо"
 #: src/bz-transaction.c:268
 msgid "Pending"
 msgstr "Очікуємо"
-
-#: src/bz-update-dialog.blp:6
-msgid "Later"
-msgstr "Пізніше"
 
 #: src/bz-update-dialog.blp:7
 msgid "Install Now"
