@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-10 09:33+0800\n"
+"POT-Creation-Date: 2025-08-19 19:15+0200\n"
 "PO-Revision-Date: 2025-07-10 20:21+0800\n"
 "Last-Translator: Shihfu Juan <xlion@xlion.tw>\n"
 "Language-Team: none\n"
@@ -41,79 +41,190 @@ msgstr "顯示動畫背景"
 msgid "Whether to show the animated icon background on the home page"
 msgstr "是否要在首頁顯示動畫的圖標背景"
 
-#. FIXME: add descriptions and summary
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:9
-msgid "Keep the summary shorter, between 10 and 35 characters"
-msgstr "保持摘要簡短，約在 10 到 35 個字元內"
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:8
+#, fuzzy
+msgid "Discover and install applications"
+msgstr "檢視已安裝的應用程式"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:11
-msgid "No description"
-msgstr "沒有描述"
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:10
+msgid ""
+"A new app store for GNOME with a focus on discovering and installing "
+"applications and add-ons from Flatpak remotes, particularly Flathub"
+msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:15 src/bz-application.c:1069
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:15
+msgid ""
+"It emphasizes supporting the developers who make the Linux desktop possible. "
+"Bazaar features a \"curated\" tab that can be configured by distributors to "
+"allow for a more locallized experience."
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:24 src/bz-application.c:777
 msgid "Adam Masciola"
 msgstr "Adam Masciola"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:41
-msgid "Main Bazaar window showing Blender"
-msgstr "顯示 Blender 的 Bazaar 視窗"
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:49
+#, fuzzy
+msgid "Calligraphy application page"
+msgstr "分享這個應用程式"
 
-#: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:162
-#: src/bz-installed-page.blp:174
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:53
+msgid "Searching for Blender"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:57
+msgid "Download graph for Blender"
+msgstr ""
+
+#: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:164
+#: src/bz-installed-page.blp:176
 msgid "Manage Addons"
 msgstr "管理附加元件"
 
-#: src/bz-app-tile.blp:65 src/bz-full-view.blp:139
+#: src/bz-app-tile.blp:54 src/bz-full-view.blp:125
 msgid "This flatpak is verified by the original developers of the software."
 msgstr "這個 Flatpak 已經被軟體的原始開發者認證"
 
-#: src/bz-application.c:1041
+#: src/bz-application.c:741
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr "Adam Masciola <kolunmi@posteo.net>"
 
-#: src/bz-application.c:1046
+#: src/bz-application.c:746
 msgctxt "About Dialog Translator Credit"
 msgid "Ahmed Najmawi"
 msgstr "Ahmed Najmawi"
 
-#: src/bz-application.c:1047
+#: src/bz-application.c:747
 msgctxt "About Dialog Translator Credit"
 msgid "AtomHare"
 msgstr "AtomHare"
 
-#: src/bz-application.c:1048
+#: src/bz-application.c:748
 msgctxt "About Dialog Translator Credit"
-msgid "Jill Fiore"
+msgid "Azenyr"
+msgstr ""
+
+#: src/bz-application.c:749
+msgctxt "About Dialog Translator Credit"
+msgid "Goudarz Jafari"
+msgstr ""
+
+#: src/bz-application.c:750
+#, fuzzy
+msgctxt "About Dialog Translator Credit"
+msgid "Jill Fiore (Lumaeris)"
 msgstr "Jill Fiore"
 
-#: src/bz-application.c:1049
+#: src/bz-application.c:751
+msgctxt "About Dialog Translator Credit"
+msgid "KiKaraage"
+msgstr ""
+
+#: src/bz-application.c:752
 msgctxt "About Dialog Translator Credit"
 msgid "Lucosec"
 msgstr "Lucosec"
 
-#: src/bz-application.c:1050
+#: src/bz-application.c:753
+msgctxt "About Dialog Translator Credit"
+msgid "Léane GRASSER"
+msgstr ""
+
+#: src/bz-application.c:754
+msgctxt "About Dialog Translator Credit"
+msgid "Marcel Mrówka (Microwave)"
+msgstr ""
+
+#: src/bz-application.c:755
+msgctxt "About Dialog Translator Credit"
+msgid "Pietro F."
+msgstr ""
+
+#: src/bz-application.c:756
+msgctxt "About Dialog Translator Credit"
+msgid "Shihfu Juan"
+msgstr ""
+
+#: src/bz-application.c:757
+msgctxt "About Dialog Translator Credit"
+msgid "Shinsei"
+msgstr ""
+
+#: src/bz-application.c:758
 msgctxt "About Dialog Translator Credit"
 msgid "Vlastimil Dědek"
 msgstr "Vlastimil Dědek"
 
-#: src/bz-application.c:1051
+#: src/bz-application.c:759
 msgctxt "About Dialog Translator Credit"
 msgid "asen23"
 msgstr "asen23"
 
-#: src/bz-application.c:1052
+#: src/bz-application.c:760
 msgctxt "About Dialog Translator Credit"
 msgid "renner"
 msgstr "renner"
 
-#: src/bz-application.c:1053
+#: src/bz-application.c:761
 msgctxt "About Dialog Translator Credit"
 msgid "robotta"
 msgstr "robotta"
 
-#: src/bz-browse-widget.blp:11 src/bz-full-view.blp:11
-#: src/bz-installed-page.blp:11 src/bz-window.blp:32
+#: src/bz-application.c:1147
+msgid "Constructing Flatpak instance..."
+msgstr ""
+
+#: src/bz-application.c:1157
+msgid "Reusing last Flatpak instance..."
+msgstr ""
+
+#: src/bz-application.c:1182
+msgid "Flathub is not registered on this system"
+msgstr ""
+
+#: src/bz-application.c:1185
+msgid ""
+"Would you like to add Flathub as a remote? If you decline, the Flathub page "
+"will not be available. You can change this later."
+msgstr ""
+
+#: src/bz-application.c:1190 src/bz-update-dialog.blp:6
+msgid "Later"
+msgstr "稍後"
+
+#: src/bz-application.c:1191
+#, fuzzy
+msgid "Add Flathub"
+msgstr "Flathub"
+
+#: src/bz-application.c:1223
+#, c-format
+msgid "Identifying installed entries..."
+msgstr ""
+
+#: src/bz-application.c:1235
+#, c-format
+msgid "Beginning remote entry retrieval while referencing %d blocklist(s)..."
+msgstr ""
+
+#: src/bz-application.c:1379
+#, c-format
+msgid "Received %'d entries out of %'d (%0.1f seconds elapsed)"
+msgstr ""
+
+#: src/bz-application.c:1386
+#, c-format
+msgid "Waiting for background indexing tasks to catch up..."
+msgstr ""
+
+#: src/bz-application.c:1422
+#, c-format
+msgid "Completed initialization in %0.2f seconds"
+msgstr ""
+
+#: src/bz-browse-widget.blp:11 src/bz-flathub-page.blp:11
+#: src/bz-full-view.blp:10 src/bz-installed-page.blp:11 src/bz-window.blp:32
 msgid "Empty"
 msgstr "空"
 
@@ -127,116 +238,124 @@ msgid ""
 "operating system's support channels for assistance."
 msgstr "Bazaar 未提供精選內容的設定。請聯絡您的作業系統支援頻道以獲得協助。"
 
-#: src/bz-browse-widget.blp:22 src/bz-flathub-page.blp:11
+#: src/bz-browse-widget.blp:22 src/bz-flathub-page.blp:22
 msgid "Browser"
 msgstr "瀏覽器"
 
-#: src/bz-error.c:45
+#: src/bz-error.c:54
 msgid "An Error Occurred"
 msgstr "發生了一個錯誤"
 
-#: src/bz-error.c:51
+#: src/bz-error.c:60
 msgid "Close"
 msgstr "關閉"
 
-#: src/bz-error.c:52
+#: src/bz-error.c:61
 msgid "Copy and Close"
 msgstr "複製和關閉"
 
-#: src/bz-flathub-page.blp:41
+#: src/bz-flathub-page.blp:15
+msgid "Flathub Not Added"
+msgstr ""
+
+#: src/bz-flathub-page.blp:16
+msgid "The Flathub remote was not found on any of your flatpak installations"
+msgstr ""
+
+#: src/bz-flathub-page.blp:52
 msgid "Apps Of The Week"
 msgstr "本週精選應用程式"
 
-#: src/bz-flathub-page.blp:85
+#: src/bz-flathub-page.blp:96
 msgid "Trending"
 msgstr "熱門"
 
-#: src/bz-flathub-page.blp:117
+#: src/bz-flathub-page.blp:128
 msgid "Recently Updated"
 msgstr "最近更新"
 
-#: src/bz-flathub-page.blp:149
+#: src/bz-flathub-page.blp:160
 msgid "Recently Added"
 msgstr "最近新增"
 
-#: src/bz-flathub-page.blp:181
+#: src/bz-flathub-page.blp:192
 msgid "Popular"
 msgstr "熱門"
 
-#: src/bz-full-view.blp:15
+#: src/bz-full-view.blp:14
 msgid "No Results"
 msgstr "沒有結果"
 
-#: src/bz-full-view.blp:16
+#: src/bz-full-view.blp:15
 msgid "Try a different search query"
 msgstr "請嘗試不同的搜尋關鍵字"
 
-#: src/bz-full-view.blp:22 src/bz-window.blp:42
+#: src/bz-full-view.blp:21 src/bz-window.blp:42
 msgid "Content"
 msgstr "聯絡"
 
-#: src/bz-full-view.blp:180
+#: src/bz-full-view.blp:166
 msgid "Run this application"
 msgstr "執行應用程式"
 
-#: src/bz-full-view.blp:204
+#: src/bz-full-view.blp:190
 msgid "Download and install this application"
 msgstr "下載和安裝這個應用程式"
 
-#: src/bz-full-view.blp:222 src/bz-window.c:905
+#: src/bz-full-view.blp:208 src/bz-window.c:845
 msgid "Install"
 msgstr "安裝"
 
-#: src/bz-full-view.blp:236
+#: src/bz-full-view.blp:222
 msgid "Uninstall this application"
 msgstr "移除這個應用程式"
 
-#: src/bz-full-view.blp:262
+#: src/bz-full-view.blp:248
 msgid "Share this application"
 msgstr "分享這個應用程式"
 
-#: src/bz-full-view.blp:274
+#: src/bz-full-view.blp:260
 msgid ""
 "The number of downloads in the last 30 days. Click to view this "
 "application's download statistics."
 msgstr "過去 30 天的下載次數。點擊以查看此應用程式的下載統計資料。"
 
-#: src/bz-full-view.blp:316
+#: src/bz-full-view.blp:304
 msgid "Support this developer"
 msgstr "支持這個開發者"
 
-#: src/bz-full-view.blp:329
+#: src/bz-full-view.blp:317
 msgid "Support"
 msgstr "支持"
 
-#: src/bz-full-view.blp:387
+#: src/bz-full-view.blp:375
 msgid "Remote repo name"
 msgstr "遠端儲存庫名稱"
 
-#: src/bz-full-view.blp:400
+#: src/bz-full-view.blp:388
 msgid "Project URL"
 msgstr "專案網址"
 
-#: src/bz-full-view.blp:412
+#: src/bz-full-view.blp:400
 msgid "Download size"
 msgstr "下載大小"
 
-#: src/bz-full-view.c:213
+#: src/bz-full-view.c:204
 #, c-format
 msgid "Released %x"
 msgstr "發布於 %x"
 
-#: src/bz-full-view.c:224
+#: src/bz-full-view.c:215
 msgid "No URL"
 msgstr "沒有網址"
 
-#: src/bz-full-view.c:232
+#: src/bz-full-view.c:223
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
 msgstr "此應用程式具有 FLOSS 授權，這意味著其原始碼可供審查以確保安全性。"
 
-#: src/bz-full-view.c:233
+#: src/bz-full-view.c:224
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
@@ -247,15 +366,15 @@ msgstr ""
 msgid "No Flatpaks Installed"
 msgstr "沒有已安裝的 Flatpak"
 
-#: src/bz-installed-page.blp:21 src/bz-window.blp:184 src/bz-window.blp:306
+#: src/bz-installed-page.blp:21 src/bz-window.blp:219 src/bz-window.blp:356
 msgid "Installed"
 msgstr "已安裝"
 
-#: src/bz-installed-page.blp:143
+#: src/bz-installed-page.blp:145
 msgid "More actions"
 msgstr "更多操作"
 
-#: src/bz-installed-page.blp:187 src/bz-installed-page.blp:198
+#: src/bz-installed-page.blp:189 src/bz-installed-page.blp:200
 msgid "Edit Permissions"
 msgstr "編輯權限"
 
@@ -279,31 +398,23 @@ msgstr "顯示動畫背景"
 msgid "Type to filter"
 msgstr "輸入以篩選"
 
-#: src/bz-search-widget.blp:98 src/bz-search-widget.blp:115
+#: src/bz-search-widget.blp:91 src/bz-search-widget.blp:108
 msgid "Search Options"
 msgstr "搜尋選項"
 
-#: src/bz-search-widget.blp:119
+#: src/bz-search-widget.blp:112
 msgid "Exclude results with proprietary licenses"
 msgstr "排除具有專有授權的結果"
 
-#: src/bz-search-widget.blp:124
+#: src/bz-search-widget.blp:117
 msgid "Exclude results not originating from Flathub"
 msgstr "排除來源並非 Flathub 的結果"
 
-#: src/bz-search-widget.blp:139
+#: src/bz-search-widget.blp:132
 msgid "Advanced"
 msgstr "進階"
 
-#: src/bz-search-widget.blp:143
-msgid "Match using regular expressions"
-msgstr "使用正則表達式匹配"
-
-#: src/bz-search-widget.blp:148
-msgid "Hide filtering and sorting behind a crossfade effect"
-msgstr "將篩選與排序的效果以交錯淡出方式隱藏"
-
-#: src/bz-search-widget.blp:153
+#: src/bz-search-widget.blp:136
 msgid "Debounce input to prevent instant replies"
 msgstr "對輸入進行防抖處理以避免立即回應"
 
@@ -352,10 +463,6 @@ msgstr "移除中"
 msgid "Pending"
 msgstr "等待中"
 
-#: src/bz-update-dialog.blp:6
-msgid "Later"
-msgstr "稍後"
-
 #: src/bz-update-dialog.blp:7
 msgid "Install Now"
 msgstr "現在安裝"
@@ -370,14 +477,14 @@ msgid ""
 "install them?"
 msgstr "下列應用程式可進行更新。您想要安裝它們嗎？"
 
-#: src/bz-update-dialog.c:135
+#: src/bz-update-dialog.c:134
 #, c-format
 msgid ""
 "%d runtimes and/or addons are eligible for updates. Would you like to "
 "install them?"
 msgstr "%d 個執行時期與/或附加元件可進行更新。您想要安裝它們嗎？"
 
-#: src/bz-update-dialog.c:143
+#: src/bz-update-dialog.c:142
 #, c-format
 msgid "Additionally, %d runtimes and/or addons will be updated."
 msgstr "此外，還有 %d 個執行時期與/或附加元件將會更新。"
@@ -394,87 +501,107 @@ msgstr "停止執行安裝作業"
 msgid "Clear all finished transactions"
 msgstr "清除所有已完成的安裝作業"
 
-#: src/bz-window.blp:136 src/bz-window.blp:140
+#: src/bz-window.blp:135 src/bz-window.blp:139
 msgid "Offline"
 msgstr "離線"
 
-#: src/bz-window.blp:146
+#: src/bz-window.blp:145
 msgid "Loading"
 msgstr "載入中"
 
-#: src/bz-window.blp:153
+#: src/bz-window.blp:187
 msgid "Browse"
 msgstr "瀏覽"
 
-#: src/bz-window.blp:163
+#: src/bz-window.blp:197
 msgid "App View"
 msgstr "App View"
 
-#: src/bz-window.blp:174 src/bz-window.blp:285
+#: src/bz-window.blp:209 src/bz-window.blp:335
 msgid "Flathub"
 msgstr "Flathub"
 
-#: src/bz-window.blp:203
+#: src/bz-window.blp:239
 msgid "Go Back"
 msgstr "返回"
 
-#: src/bz-window.blp:211
-msgid "Refresh"
-msgstr "刷新"
-
-#: src/bz-window.blp:220
+#: src/bz-window.blp:256
 msgid "Search"
 msgstr "搜尋"
 
-#: src/bz-window.blp:232
+#: src/bz-window.blp:268
 msgid "Update"
 msgstr "更新"
 
-#: src/bz-window.blp:249
+#: src/bz-window.blp:283
+msgid "Checking for updates"
+msgstr ""
+
+#: src/bz-window.blp:299
 msgid "View curated applications"
 msgstr "查看精選的應用程式"
 
-#: src/bz-window.blp:264
+#: src/bz-window.blp:314
 msgid "Curated"
 msgstr "精選"
 
-#: src/bz-window.blp:270
+#: src/bz-window.blp:320
 msgid "View the latest on Flathub"
 msgstr "在 Flathub 查看最新的"
 
-#: src/bz-window.blp:291
+#: src/bz-window.blp:341
 msgid "View installed applications"
 msgstr "檢視已安裝的應用程式"
 
-#: src/bz-window.blp:320
+#: src/bz-window.blp:370
 msgid "Main Menu"
 msgstr "主選單"
 
-#: src/bz-window.blp:331
+#: src/bz-window.blp:381
 msgid "Toggle transaction sidebar"
 msgstr "切換安裝作業側面板"
 
-#: src/bz-window.blp:374
+#: src/bz-window.blp:423
+#, fuzzy
+msgid "_Refresh"
+msgstr "刷新"
+
+#: src/bz-window.blp:428
 msgid "_Keyboard Shortcuts"
 msgstr "_鍵盤快捷建"
 
-#: src/bz-window.blp:379
+#: src/bz-window.blp:433
 msgid "_About Bazaar"
 msgstr "_關於 Bazaar"
 
-#: src/bz-window.blp:384
+#: src/bz-window.blp:438
 msgid "_Donate to Bazaar ❤️"
 msgstr "_捐款給 Bazaar ❤️"
 
-#: src/bz-window.c:845
+#: src/bz-window.c:492
+#, fuzzy
+msgid "Up to date!"
+msgstr "更新"
+
+#: src/bz-window.c:667
+msgid ""
+"The ability to inspect and install local .flatpak bundle files is coming "
+"soon! In the meantime, try running\n"
+"\n"
+"flatpak install --bundle your-bundle.flatpak\n"
+"\n"
+"on the command line."
+msgstr ""
+
+#: src/bz-window.c:742
 msgid "Can't do that right now!"
 msgstr "現在不可以這麼做！"
 
-#: src/bz-window.c:858
+#: src/bz-window.c:789
 msgid "Confirm Action"
 msgstr "確認操作"
 
-#: src/bz-window.c:876
+#: src/bz-window.c:818
 #, c-format
 msgid ""
 "You are about to remove the following Flatpak:\n"
@@ -491,15 +618,15 @@ msgstr ""
 "\r\n"
 "您確定嗎？"
 
-#: src/bz-window.c:884 src/bz-window.c:904
+#: src/bz-window.c:825 src/bz-window.c:844
 msgid "Cancel"
 msgstr "取消"
 
-#: src/bz-window.c:885
+#: src/bz-window.c:826
 msgid "Remove"
 msgstr "移除"
 
-#: src/bz-window.c:896
+#: src/bz-window.c:837
 #, c-format
 msgid ""
 "You are about to install the following Flatpak:\n"
@@ -516,15 +643,15 @@ msgstr ""
 "\r\n"
 "您確定嗎？"
 
-#: src/bz-window.c:930
+#: src/bz-window.c:867
 msgid "More details"
 msgstr "更多資訊"
 
-#: src/bz-window.c:1056
+#: src/bz-window.c:993
 msgid "Resume the execution of transactions"
 msgstr "恢復執行中的安裝作業"
 
-#: src/bz-window.c:1062
+#: src/bz-window.c:999
 msgid "Pause the execution of transactions"
 msgstr "暫停執行中的安裝作業"
 
@@ -557,3 +684,18 @@ msgstr "顯示快捷建"
 msgctxt "shortcut window"
 msgid "Quit"
 msgstr "離開"
+
+#~ msgid "Keep the summary shorter, between 10 and 35 characters"
+#~ msgstr "保持摘要簡短，約在 10 到 35 個字元內"
+
+#~ msgid "No description"
+#~ msgstr "沒有描述"
+
+#~ msgid "Main Bazaar window showing Blender"
+#~ msgstr "顯示 Blender 的 Bazaar 視窗"
+
+#~ msgid "Match using regular expressions"
+#~ msgstr "使用正則表達式匹配"
+
+#~ msgid "Hide filtering and sorting behind a crossfade effect"
+#~ msgstr "將篩選與排序的效果以交錯淡出方式隱藏"
