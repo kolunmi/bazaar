@@ -31,7 +31,7 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (BzFlathubState, bz_flathub_state, BZ, FLATHUB_STATE, GObject)
 
 BzFlathubState *
-bz_flathub_state_new (const char *for_day);
+bz_flathub_state_new (void);
 
 void
 bz_flathub_state_set_for_day (BzFlathubState *self,

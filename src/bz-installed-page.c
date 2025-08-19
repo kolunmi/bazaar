@@ -18,19 +18,19 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "config.h"
-
+#include "bz-installed-page.h"
 #include "bz-addons-dialog.h"
 #include "bz-error.h"
 #include "bz-flatpak-entry.h"
-#include "bz-installed-page.h"
 #include "bz-section-view.h"
+#include "bz-state-info.h"
 
 struct _BzInstalledPage
 {
   AdwBin parent_instance;
 
-  GListModel *model;
+  GListModel  *model;
+  BzStateInfo *state;
 
   GtkSortListModel *sorted;
 
@@ -47,6 +47,7 @@ enum
   PROP_0,
 
   PROP_MODEL,
+  PROP_STATE,
 
   LAST_PROP
 };
@@ -62,11 +63,11 @@ enum
 static guint signals[LAST_SIGNAL];
 
 static void
-items_changed (GListModel      *model,
+items_changed (BzInstalledPage *self,
                guint            position,
                guint            removed,
                guint            added,
-               BzInstalledPage *self);
+               GListModel      *model);
 
 static gint
 cmp_item (BzEntry         *a,
@@ -82,9 +83,9 @@ bz_installed_page_dispose (GObject *object)
   BzInstalledPage *self = BZ_INSTALLED_PAGE (object);
 
   if (self->model != NULL)
-    g_signal_handlers_disconnect_by_func (
-        self->model, items_changed, self);
+    g_signal_handlers_disconnect_by_func (self->model, items_changed, self);
   g_clear_object (&self->model);
+  g_clear_object (&self->state);
 
   g_clear_object (&self->sorted);
 
@@ -104,6 +105,9 @@ bz_installed_page_get_property (GObject    *object,
     case PROP_MODEL:
       g_value_set_object (value, bz_installed_page_get_model (self));
       break;
+    case PROP_STATE:
+      g_value_set_object (value, self->state);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -121,6 +125,10 @@ bz_installed_page_set_property (GObject      *object,
     {
     case PROP_MODEL:
       bz_installed_page_set_model (self, g_value_get_object (value));
+      break;
+    case PROP_STATE:
+      g_clear_object (&self->state);
+      self->state = g_value_dup_object (value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -160,16 +168,23 @@ static void
 run_cb (GtkListItem *list_item,
         GtkButton   *button)
 {
-  BzEntry *item = NULL;
+  BzEntry         *entry = NULL;
+  BzInstalledPage *self  = NULL;
 
-  item = gtk_list_item_get_item (list_item);
+  entry = gtk_list_item_get_item (list_item);
 
-  if (BZ_IS_FLATPAK_ENTRY (item))
+  self = BZ_INSTALLED_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_INSTALLED_PAGE));
+  g_assert (self != NULL);
+
+  if (BZ_IS_FLATPAK_ENTRY (entry))
     {
       g_autoptr (GError) local_error = NULL;
       gboolean result                = FALSE;
 
-      result = bz_flatpak_entry_launch (BZ_FLATPAK_ENTRY (item), &local_error);
+      result = bz_flatpak_entry_launch (
+          BZ_FLATPAK_ENTRY (entry),
+          BZ_FLATPAK_INSTANCE (bz_state_info_get_backend (self->state)),
+          &local_error);
       if (!result)
         {
           GtkWidget *window = NULL;
@@ -185,36 +200,41 @@ static void
 remove_cb (GtkListItem *list_item,
            GtkButton   *button)
 {
-  BzEntry   *item = NULL;
-  GtkWidget *self = NULL;
+  BzEntry   *entry = NULL;
+  GtkWidget *self  = NULL;
 
-  item = gtk_list_item_get_item (list_item);
+  entry = gtk_list_item_get_item (list_item);
 
   self = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_INSTALLED_PAGE);
   g_assert (self != NULL);
 
-  g_signal_emit (self, signals[SIGNAL_REMOVE], 0, item);
+  g_signal_emit (self, signals[SIGNAL_REMOVE], 0, entry);
 }
 
 static void
 install_addons_cb (GtkListItem *list_item,
                    GtkButton   *button)
 {
-  BzEntry   *item          = NULL;
-  GtkWidget *menu_btn      = NULL;
-  AdwDialog *addons_dialog = NULL;
-  GtkWidget *self          = NULL;
+  BzEntry   *entry               = NULL;
+  GtkWidget *menu_btn            = NULL;
+  g_autoptr (GListModel) model   = NULL;
+  AdwDialog       *addons_dialog = NULL;
+  BzInstalledPage *self          = NULL;
 
-  item = gtk_list_item_get_item (list_item);
+  entry = gtk_list_item_get_item (list_item);
 
   menu_btn = gtk_widget_get_ancestor (GTK_WIDGET (button), GTK_TYPE_MENU_BUTTON);
   if (menu_btn != NULL)
     gtk_menu_button_set_active (GTK_MENU_BUTTON (menu_btn), FALSE);
 
-  self = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_INSTALLED_PAGE);
+  self = BZ_INSTALLED_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_INSTALLED_PAGE));
   g_assert (self != NULL);
 
-  addons_dialog = bz_addons_dialog_new (item);
+  model = bz_application_map_factory_generate (
+      bz_state_info_get_entry_factory (self->state),
+      bz_entry_get_addons (entry));
+
+  addons_dialog = bz_addons_dialog_new (entry, model);
   adw_dialog_set_content_width (addons_dialog, 750);
   gtk_widget_set_size_request (GTK_WIDGET (addons_dialog), 350, -1);
   g_signal_connect_swapped (addons_dialog, "transact", G_CALLBACK (addon_transact_cb), self);
@@ -253,7 +273,14 @@ bz_installed_page_class_init (BzInstalledPageClass *klass)
           "model",
           NULL, NULL,
           G_TYPE_LIST_MODEL,
-          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_STATE] =
+      g_param_spec_object (
+          "state",
+          NULL, NULL,
+          BZ_TYPE_STATE_INFO,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
@@ -311,7 +338,6 @@ bz_installed_page_init (BzInstalledPage *self)
 
   custom_sorter = gtk_custom_sorter_new ((GCompareDataFunc) cmp_item, self, NULL);
   self->sorted  = gtk_sort_list_model_new (NULL, GTK_SORTER (custom_sorter));
-
   gtk_no_selection_set_model (self->no_selection, G_LIST_MODEL (self->sorted));
 }
 
@@ -329,19 +355,14 @@ bz_installed_page_set_model (BzInstalledPage *self,
   g_return_if_fail (model == NULL || G_IS_LIST_MODEL (model));
 
   if (self->model != NULL)
-    g_signal_handlers_disconnect_by_func (
-        self->model, items_changed, self);
+    g_signal_handlers_disconnect_by_func (self->model, items_changed, self);
   g_clear_object (&self->model);
-
   if (model != NULL)
     {
       self->model = g_object_ref (model);
-      g_signal_connect_after (
-          self->model, "items-changed",
-          G_CALLBACK (items_changed), self);
+      g_signal_connect_swapped (model, "items-changed", G_CALLBACK (items_changed), self);
     }
   gtk_sort_list_model_set_model (self->sorted, model);
-
   set_page (self);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MODEL]);
@@ -355,11 +376,11 @@ bz_installed_page_get_model (BzInstalledPage *self)
 }
 
 static void
-items_changed (GListModel      *model,
+items_changed (BzInstalledPage *self,
                guint            position,
                guint            removed,
                guint            added,
-               BzInstalledPage *self)
+               GListModel      *model)
 {
   set_page (self);
 }
@@ -400,10 +421,7 @@ set_page (BzInstalledPage *self)
 {
   if (self->model != NULL &&
       g_list_model_get_n_items (G_LIST_MODEL (self->model)) > 0)
-    {
-      adw_view_stack_set_visible_child_name (self->stack, "content");
-      gtk_list_view_scroll_to (self->list_view, 0, GTK_LIST_SCROLL_NONE, NULL);
-    }
+    adw_view_stack_set_visible_child_name (self->stack, "content");
   else
     adw_view_stack_set_visible_child_name (self->stack, "empty");
 }

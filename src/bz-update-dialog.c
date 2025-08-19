@@ -117,7 +117,6 @@ bz_update_dialog_new (GListModel *updates)
   guint           n_apps        = 0;
 
   g_return_val_if_fail (G_IS_LIST_MODEL (updates), NULL);
-  g_return_val_if_fail (g_list_model_get_item_type (updates) == BZ_TYPE_ENTRY, NULL);
 
   update_dialog          = g_object_new (BZ_TYPE_UPDATE_DIALOG, NULL);
   update_dialog->updates = g_object_ref (updates);

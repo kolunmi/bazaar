@@ -18,15 +18,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "config.h"
-
 #include "bz-screenshot.h"
+#include "bz-async-texture.h"
 
 struct _BzScreenshot
 {
   GtkWidget parent_instance;
 
   GdkPaintable *paintable;
+  double        focus_x;
+  double        focus_y;
 };
 
 G_DEFINE_FINAL_TYPE (BzScreenshot, bz_screenshot, GTK_TYPE_WIDGET)
@@ -36,18 +37,25 @@ enum
   PROP_0,
 
   PROP_PAINTABLE,
+  PROP_FOCUS_X,
+  PROP_FOCUS_Y,
 
   LAST_PROP
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
 
 static void
-invalidate_contents (GdkPaintable *paintable,
-                     BzScreenshot *self);
+invalidate_contents (BzScreenshot *self,
+                     GdkPaintable *paintable);
 
 static void
-invalidate_size (GdkPaintable *paintable,
-                 BzScreenshot *self);
+invalidate_size (BzScreenshot *self,
+                 GdkPaintable *paintable);
+
+static void
+async_loaded (BzScreenshot   *self,
+              GParamSpec     *pspec,
+              BzAsyncTexture *texture);
 
 static void
 bz_screenshot_dispose (GObject *object)
@@ -58,6 +66,7 @@ bz_screenshot_dispose (GObject *object)
     {
       g_signal_handlers_disconnect_by_func (self->paintable, invalidate_contents, self);
       g_signal_handlers_disconnect_by_func (self->paintable, invalidate_size, self);
+      g_signal_handlers_disconnect_by_func (self->paintable, async_loaded, self);
     }
   g_clear_object (&self->paintable);
 
@@ -77,6 +86,12 @@ bz_screenshot_get_property (GObject    *object,
     case PROP_PAINTABLE:
       g_value_set_object (value, bz_screenshot_get_paintable (self));
       break;
+    case PROP_FOCUS_X:
+      g_value_set_double (value, bz_screenshot_get_focus_x (self));
+      break;
+    case PROP_FOCUS_Y:
+      g_value_set_double (value, bz_screenshot_get_focus_y (self));
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -94,6 +109,12 @@ bz_screenshot_set_property (GObject      *object,
     {
     case PROP_PAINTABLE:
       bz_screenshot_set_paintable (self, g_value_get_object (value));
+      break;
+    case PROP_FOCUS_X:
+      bz_screenshot_set_focus_x (self, g_value_get_double (value));
+      break;
+    case PROP_FOCUS_Y:
+      bz_screenshot_set_focus_y (self, g_value_get_double (value));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -134,12 +155,12 @@ bz_screenshot_measure (GtkWidget     *widget,
 
           result = ceil ((double) for_size / intrinsic_aspect_rato);
 
-          *minimum = MIN (intrinsic_height, result);
-          *natural = MIN (intrinsic_height, result);
+          *minimum = (int) MIN (intrinsic_height, result);
+          *natural = (int) MIN (intrinsic_height, result);
         }
       else
         {
-          *minimum = 0.0;
+          *minimum = 0;
           *natural = intrinsic_height;
         }
     }
@@ -156,6 +177,7 @@ bz_screenshot_snapshot (GtkWidget   *widget,
 {
   BzScreenshot  *self            = BZ_SCREENSHOT (widget);
   int            widget_width    = 0;
+  int            widget_height   = 0;
   int            paintable_width = 0;
   GskRoundedRect rect            = { 0 };
 
@@ -163,6 +185,7 @@ bz_screenshot_snapshot (GtkWidget   *widget,
     return;
 
   widget_width    = gtk_widget_get_width (widget);
+  widget_height   = gtk_widget_get_height (widget);
   paintable_width = gdk_paintable_get_intrinsic_width (self->paintable);
 
   if (widget_width > paintable_width)
@@ -175,7 +198,7 @@ bz_screenshot_snapshot (GtkWidget   *widget,
   rect.bounds = GRAPHENE_RECT_INIT (
       0, 0,
       MIN (widget_width, paintable_width),
-      gtk_widget_get_height (widget));
+      widget_height);
 
   rect.corner[0].width  = 10.0;
   rect.corner[0].height = 10.0;
@@ -210,7 +233,21 @@ bz_screenshot_class_init (BzScreenshotClass *klass)
           "paintable",
           NULL, NULL,
           GDK_TYPE_PAINTABLE,
-          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_FOCUS_X] =
+      g_param_spec_double (
+          "focus-x",
+          NULL, NULL,
+          -1.0, G_MAXDOUBLE, -1.0,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_FOCUS_Y] =
+      g_param_spec_double (
+          "focus-y",
+          NULL, NULL,
+          -1.0, G_MAXDOUBLE, -1.0,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
@@ -222,6 +259,8 @@ bz_screenshot_class_init (BzScreenshotClass *klass)
 static void
 bz_screenshot_init (BzScreenshot *self)
 {
+  self->focus_x = -1.0;
+  self->focus_y = -1.0;
 }
 
 GtkWidget *
@@ -241,20 +280,26 @@ bz_screenshot_set_paintable (BzScreenshot *self,
     {
       g_signal_handlers_disconnect_by_func (self->paintable, invalidate_contents, self);
       g_signal_handlers_disconnect_by_func (self->paintable, invalidate_size, self);
+      g_signal_handlers_disconnect_by_func (self->paintable, async_loaded, self);
     }
   g_clear_object (&self->paintable);
 
   if (paintable != NULL)
     {
       self->paintable = g_object_ref (paintable);
-      g_signal_connect (paintable, "invalidate-contents",
-                        G_CALLBACK (invalidate_contents), self);
-      g_signal_connect (paintable, "invalidate-size",
-                        G_CALLBACK (invalidate_size), self);
+      g_signal_connect_swapped (paintable, "invalidate-contents",
+                                G_CALLBACK (invalidate_contents), self);
+      g_signal_connect_swapped (paintable, "invalidate-size",
+                                G_CALLBACK (invalidate_size), self);
+      if (BZ_IS_ASYNC_TEXTURE (paintable))
+        g_signal_connect_swapped (paintable, "notify::loaded",
+                                  G_CALLBACK (async_loaded), self);
     }
 
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PAINTABLE]);
+  gtk_widget_queue_resize (GTK_WIDGET (self));
   gtk_widget_queue_draw (GTK_WIDGET (self));
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PAINTABLE]);
 }
 
 GdkPaintable *
@@ -264,16 +309,63 @@ bz_screenshot_get_paintable (BzScreenshot *self)
   return self->paintable;
 }
 
+void
+bz_screenshot_set_focus_x (BzScreenshot *self,
+                           double        focus_x)
+{
+  g_return_if_fail (BZ_IS_SCREENSHOT (self));
+
+  self->focus_x = focus_x;
+  gtk_widget_queue_draw (GTK_WIDGET (self));
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_FOCUS_X]);
+}
+
+double
+bz_screenshot_get_focus_x (BzScreenshot *self)
+{
+  g_return_val_if_fail (BZ_IS_SCREENSHOT (self), 0.0);
+  return self->focus_x;
+}
+
+void
+bz_screenshot_set_focus_y (BzScreenshot *self,
+                           double        focus_y)
+{
+  g_return_if_fail (BZ_IS_SCREENSHOT (self));
+
+  self->focus_y = focus_y;
+  gtk_widget_queue_draw (GTK_WIDGET (self));
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_FOCUS_Y]);
+}
+
+double
+bz_screenshot_get_focus_y (BzScreenshot *self)
+{
+  g_return_val_if_fail (BZ_IS_SCREENSHOT (self), 0.0);
+  return self->focus_y;
+}
+
 static void
-invalidate_contents (GdkPaintable *paintable,
-                     BzScreenshot *self)
+invalidate_contents (BzScreenshot *self,
+                     GdkPaintable *paintable)
 {
   gtk_widget_queue_draw (GTK_WIDGET (self));
 }
 
 static void
-invalidate_size (GdkPaintable *paintable,
-                 BzScreenshot *self)
+invalidate_size (BzScreenshot *self,
+                 GdkPaintable *paintable)
 {
+  gtk_widget_queue_resize (GTK_WIDGET (self));
+}
+
+static void
+async_loaded (BzScreenshot   *self,
+              GParamSpec     *pspec,
+              BzAsyncTexture *texture)
+{
+  gtk_widget_queue_draw (GTK_WIDGET (self));
   gtk_widget_queue_resize (GTK_WIDGET (self));
 }

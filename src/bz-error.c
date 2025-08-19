@@ -30,6 +30,15 @@ error_alert_response (AdwAlertDialog *alert,
                       gchar          *response,
                       GtkWidget      *widget);
 
+static void
+await_alert_response (AdwAlertDialog *alert,
+                      gchar          *response,
+                      DexPromise     *promise);
+
+static void
+unref_dex_closure (gpointer  data,
+                   GClosure *closure);
+
 void
 bz_show_error_for_widget (GtkWidget  *widget,
                           const char *text)
@@ -60,6 +69,23 @@ bz_show_error_for_widget (GtkWidget  *widget,
   adw_dialog_present (alert, GTK_WIDGET (widget));
 }
 
+DexFuture *
+bz_make_alert_dialog_future (AdwAlertDialog *dialog)
+{
+  g_autoptr (DexPromise) promise = NULL;
+
+  dex_return_error_if_fail (ADW_IS_ALERT_DIALOG (dialog));
+
+  promise = dex_promise_new ();
+  g_signal_connect_data (
+      dialog, "response",
+      G_CALLBACK (await_alert_response),
+      dex_ref (promise), unref_dex_closure,
+      G_CONNECT_DEFAULT);
+
+  return DEX_FUTURE (g_steal_pointer (&promise));
+}
+
 static void
 error_alert_response (AdwAlertDialog *alert,
                       gchar          *response,
@@ -75,4 +101,29 @@ error_alert_response (AdwAlertDialog *alert,
 
       gdk_clipboard_set_text (clipboard, body);
     }
+}
+
+static void
+await_alert_response (AdwAlertDialog *alert,
+                      gchar          *response,
+                      DexPromise     *promise)
+{
+  dex_promise_resolve_string (promise, g_strdup (response));
+}
+
+static void
+unref_dex_closure (gpointer  data,
+                   GClosure *closure)
+{
+  DexPromise *promise = data;
+
+  if (dex_future_is_pending (DEX_FUTURE (promise)))
+    dex_promise_reject (
+        promise,
+        g_error_new (
+            DEX_ERROR,
+            DEX_ERROR_UNKNOWN,
+            "The signal was disconnected"));
+
+  dex_unref (promise);
 }

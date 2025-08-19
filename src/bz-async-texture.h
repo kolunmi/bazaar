@@ -29,15 +29,41 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (BzAsyncTexture, bz_async_texture, BZ, ASYNC_TEXTURE, GObject)
 
 BzAsyncTexture *
-bz_async_texture_new (GFile *source);
+bz_async_texture_new (GFile *source,
+                      GFile *cache_into);
 
 BzAsyncTexture *
-bz_async_texture_new_lazy (GFile *source);
+bz_async_texture_new_lazy (GFile *source,
+                           GFile *cache_into);
+
+GFile *
+bz_async_texture_get_source (BzAsyncTexture *self);
+
+const char *
+bz_async_texture_get_source_uri (BzAsyncTexture *self);
+
+GFile *
+bz_async_texture_get_cache_into (BzAsyncTexture *self);
+
+const char *
+bz_async_texture_get_cache_into_path (BzAsyncTexture *self);
 
 gboolean
 bz_async_texture_get_loaded (BzAsyncTexture *self);
 
 GdkTexture *
-bz_async_texture_get_texture (BzAsyncTexture *self);
+bz_async_texture_dup_texture (BzAsyncTexture *self);
+
+DexFuture *
+bz_async_texture_dup_future (BzAsyncTexture *self);
+
+void
+bz_async_texture_ensure (BzAsyncTexture *self);
+
+void
+bz_async_texture_cancel (BzAsyncTexture *self);
+
+gboolean
+bz_async_texture_is_loading (BzAsyncTexture *self);
 
 G_END_DECLS

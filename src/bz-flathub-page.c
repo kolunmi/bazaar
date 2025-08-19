@@ -191,7 +191,12 @@ bz_flathub_page_set_state (BzFlathubPage  *self,
 
   g_clear_object (&self->state);
   if (state != NULL)
-    self->state = g_object_ref (state);
+    {
+      self->state = g_object_ref (state);
+      adw_view_stack_set_visible_child_name (self->stack, "content");
+    }
+  else
+    adw_view_stack_set_visible_child_name (self->stack, "empty");
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_STATE]);
 }

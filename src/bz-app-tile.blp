@@ -17,18 +17,7 @@ template $BzAppTile: Button {
 
     Image {
       pixel-size: 64;
-      paintable: bind template.group as <$BzEntryGroup>.ui-entry as <$BzEntry>.icon-paintable;
-      visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.ui-entry as <$BzEntry>.icon-paintable) as <bool>) as <bool>;
-    }
-
-    Image {
-      valign: center;
-      halign: center;
-      width-request: 64;
-      height-request: 64;
-      pixel-size: 64;
-      icon-name: "image-missing-symbolic";
-      visible: bind $is_null(template.group as <$BzEntryGroup>.ui-entry as <$BzEntry>.icon-paintable) as <bool>;
+      paintable: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable;
     }
 
     Box {
@@ -48,13 +37,13 @@ template $BzAppTile: Button {
 
           xalign: 0.0;
           ellipsize: end;
-          label: bind template.group as <$BzEntryGroup>.ui-entry as <$BzEntry>.title;
+          label: bind template.group as <$BzEntryGroup>.title;
         }
 
         Revealer {
           transition-type: crossfade;
-          reveal-child: bind template.group as <$BzEntryGroup>.ui-entry as <$BzEntry>.verified;
-          visible: bind template.group as <$BzEntryGroup>.ui-entry as <$BzEntry>.verified;
+          reveal-child: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
+          visible: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
 
           child: Image {
             styles [
@@ -80,7 +69,7 @@ template $BzAppTile: Button {
         ellipsize: end;
         max-width-chars: 35;
         lines: 3;
-        label: bind template.group as <$BzEntryGroup>.ui-entry as <$BzEntry>.description;
+        label: bind template.group as <$BzEntryGroup>.description;
       }
     }
   };

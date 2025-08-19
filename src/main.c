@@ -42,8 +42,6 @@ main (int   argc,
 
   g_debug ("Initializing libdex...");
   dex_init ();
-  /* Workaround */
-  (void) dex_thread_pool_scheduler_get_default ();
 
   g_debug ("Configuring textdomain...");
   bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);

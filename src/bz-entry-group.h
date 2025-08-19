@@ -20,7 +20,9 @@
 
 #pragma once
 
+#include "bz-application-map-factory.h"
 #include "bz-entry.h"
+#include "bz-result.h"
 
 G_BEGIN_DECLS
 
@@ -28,13 +30,43 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (BzEntryGroup, bz_entry_group, BZ, ENTRY_GROUP, GObject)
 
 BzEntryGroup *
-bz_entry_group_new (void);
+bz_entry_group_new (BzApplicationMapFactory *factory);
 
 GListModel *
 bz_entry_group_get_model (BzEntryGroup *self);
 
-BzEntry *
-bz_entry_group_get_ui_entry (BzEntryGroup *self);
+const char *
+bz_entry_group_get_id (BzEntryGroup *self);
+
+const char *
+bz_entry_group_get_title (BzEntryGroup *self);
+
+const char *
+bz_entry_group_get_developer (BzEntryGroup *self);
+
+const char *
+bz_entry_group_get_description (BzEntryGroup *self);
+
+GdkPaintable *
+bz_entry_group_get_icon_paintable (BzEntryGroup *self);
+
+GIcon *
+bz_entry_group_get_mini_icon (BzEntryGroup *self);
+
+gboolean
+bz_entry_group_get_is_floss (BzEntryGroup *self);
+
+gboolean
+bz_entry_group_get_is_flathub (BzEntryGroup *self);
+
+GPtrArray *
+bz_entry_group_get_search_tokens (BzEntryGroup *self);
+
+BzResult *
+bz_entry_group_dup_ui_entry (BzEntryGroup *self);
+
+char *
+bz_entry_group_dup_ui_entry_id (BzEntryGroup *self);
 
 int
 bz_entry_group_get_installable (BzEntryGroup *self);
@@ -56,29 +88,9 @@ bz_entry_group_get_removable_and_available (BzEntryGroup *self);
 
 void
 bz_entry_group_add (BzEntryGroup *self,
-                    BzEntry      *entry,
-                    gboolean      installable,
-                    gboolean      updatable,
-                    gboolean      removable);
+                    BzEntry      *entry);
 
-void
-bz_entry_group_install (BzEntryGroup *self,
-                        BzEntry      *entry);
-
-void
-bz_entry_group_remove (BzEntryGroup *self,
-                       BzEntry      *entry);
-
-gboolean
-bz_entry_group_query_installable (BzEntryGroup *self,
-                                  BzEntry      *entry);
-
-gboolean
-bz_entry_group_query_updatable (BzEntryGroup *self,
-                                BzEntry      *entry);
-
-gboolean
-bz_entry_group_query_removable (BzEntryGroup *self,
-                                BzEntry      *entry);
+DexFuture *
+bz_entry_group_dup_all_into_model (BzEntryGroup *self);
 
 G_END_DECLS

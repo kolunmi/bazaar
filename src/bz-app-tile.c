@@ -44,7 +44,7 @@ bz_app_tile_dispose (GObject *object)
 {
   BzAppTile *self = BZ_APP_TILE (object);
 
-  g_clear_pointer (&self->group, g_object_unref);
+  g_clear_object (&self->group);
 
   G_OBJECT_CLASS (bz_app_tile_parent_class)->dispose (object);
 }
@@ -148,7 +148,7 @@ bz_app_tile_set_group (BzAppTile    *self,
 {
   g_return_if_fail (BZ_IS_APP_TILE (self));
 
-  g_clear_pointer (&self->group, g_object_unref);
+  g_clear_object (&self->group);
   if (group != NULL)
     self->group = g_object_ref (group);
 

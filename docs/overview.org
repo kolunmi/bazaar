@@ -1,0 +1,93 @@
+#+title: Bazaar Overview
+#+author: Adam Masciola (kolunmi)
+
+This document is intended for distributors of Bazaar to learn how to
+configure the application.
+
+** Features
+Here is a short list of some of the things Bazaar can do, beyond the
+basics of managing software through the GUI:
+
+- Queue an arbitrary number of transactions (a catch-all term for
+  installations, updates, and removals) during which you may close all
+  windows or continue to append new transactions freely
+
+- Display a "Curated" page which you may extensively customize with
+  YAML, as will be discussed later. This is a way to highlight
+  applications which you believe might be of interest.
+  - Curated configuration files are constantly monitored for
+    filesystem events, meaning you can update them and see the changes
+    immediate reflected in the GUI
+  - You can have any number of curated configuration files; they will
+    concatenate in the GUI in the order they were provided
+
+- Access data from [[https://flathub.org/][flathub]], such as the latest or most popular
+  applications
+
+- Filter through applications very quickly using a very forgiving
+  search routine
+  - For instance, if a user quickly types =ikscep= into the search
+    field, Inkscape will still appear as the top result.
+
+- Run in the background and respond to desktop search queries with
+  application info, using the same search routine as in-application
+  - GNOME will work out of the box, as Bazaar implements the
+    =org.gnome.Shell.SearchProvider2= dbus interface
+  - KDE Plasma will require a [[https://github.com/ublue-os/krunner-bazaar][krunner plugin]]
+
+- Hide applications you do not want users to see with blocklists,
+  which is useful for discouraging the use of certain packages which
+  you deem to be broken.
+
+- Manage an arbitrary amount of windows and keep them synchronized
+
+- Communicate with, and invoke operations on, the main daemon through
+  the command line
+
+** CLI Usage
+You can start the bazaar daemon in two ways:
+#+begin_example
+  bazaar service [ARGS] [PACKAGE PATH/URI]
+  bazaar window --auto-service [ARGS] [PACKAGE PATH/URI]
+#+end_example
+
+The latter will start the service if it hasn't been started already,
+then open a window. =bazaar window= by itself will fail if the service
+is not currently running.
+
+=[PACKAGE PATH/URI]= could be a =.flatpakref= file. flatpak+https and
+regular https is supported.
+
+This is the output of =bazaar service --help=:
+#+begin_example
+Usage:
+  bazaar [OPTION?] - an app center for GNOME
+
+Options for command "service"
+
+Options:
+  --help                     Print help
+  --is-running               Exit successfully if the Bazaar service is running
+  --extra-blocklist          Add an extra blocklist to read from
+  --extra-content-config     Add an extra yaml file with which to configure the app browser
+#+end_example
+
+** Comptime Vars
+Bazaar provides a few compile time meson options:
+
+| Name                            | Explanation                                                                                                                  |
+|---------------------------------+------------------------------------------------------------------------------------------------------------------------------|
+| =hardcoded_blocklist_path=      | Embeds a path to a blocklist into Bazaar which, if possible, will always be read with highest priority                       |
+| =hardcoded_content_config_path= | Embeds a path to a curated YAML configuration file into Bazaar which, if possible, will always be read with highest priority |
+
+** Curated Configurations
+WRITE ME!!!
+
+** Blocklists
+Blocklists are plain text files with newline-separated appids:
+#+begin_example
+com.jetbrains.CLion
+com.valvesoftware.Steam
+io.neovim.nvim
+net.lutris.Lutris
+#+end_example

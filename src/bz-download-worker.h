@@ -1,4 +1,4 @@
-/* bz-paintable-model.h
+/* bz-download-worker.h
  *
  * Copyright 2025 Adam Masciola
  *
@@ -20,25 +20,32 @@
 
 #pragma once
 
-#include <gtk/gtk.h>
 #include <libdex.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_PAINTABLE_MODEL (bz_paintable_model_get_type ())
-G_DECLARE_FINAL_TYPE (BzPaintableModel, bz_paintable_model, BZ, PAINTABLE_MODEL, GObject)
+#define BZ_TYPE_DOWNLOAD_WORKER (bz_download_worker_get_type ())
+G_DECLARE_FINAL_TYPE (BzDownloadWorker, bz_download_worker, BZ, DOWNLOAD_WORKER, GObject)
 
-BzPaintableModel *
-bz_paintable_model_new (GListModel *model);
+BzDownloadWorker *
+bz_download_worker_new (const char *name,
+                        GError    **error);
+
+const char *
+bz_download_worker_get_name (BzDownloadWorker *self);
 
 void
-bz_paintable_model_set_model (BzPaintableModel *self,
-                              GListModel       *model);
+bz_download_worker_set_name (BzDownloadWorker *self,
+                             const char       *name);
 
-GListModel *
-bz_paintable_model_get_model (BzPaintableModel *self);
+DexFuture *
+bz_download_worker_invoke (BzDownloadWorker *self,
+                           GFile            *src,
+                           GFile            *dest);
 
-gboolean
-bz_paintable_model_is_fully_loaded (BzPaintableModel *self);
+BzDownloadWorker *
+bz_download_worker_get_default (void);
 
 G_END_DECLS
+
+/* End of bz-download-worker.h */

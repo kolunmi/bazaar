@@ -9,6 +9,7 @@
     <file preprocess="xml-stripblanks">bz-addons-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-app-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-browse-widget.ui</file>
+    <file preprocess="xml-stripblanks">bz-decorated-screenshot.ui</file>
     <file preprocess="xml-stripblanks">bz-flathub-page.ui</file>
     <file preprocess="xml-stripblanks">bz-full-view.ui</file>
     <file preprocess="xml-stripblanks">bz-installed-page.ui</file>
@@ -61,6 +62,8 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/flatpak-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/sad-computer-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/check-plain-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/image-missing-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/delay-symbolic.svg</file>
 
   </gresource>
 </gresources>

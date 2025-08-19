@@ -32,7 +32,7 @@ bz_get_dex_stack_size (void)
       const char *envvar = NULL;
       guint64     value  = 0;
 
-      value = MAX (4096 * 32, dex_get_min_stack_size ());
+      value = MAX (4096 * 16, dex_get_min_stack_size ());
 
       envvar = g_getenv ("BAZAAR_DEX_STACK_SIZE");
       if (envvar != NULL)

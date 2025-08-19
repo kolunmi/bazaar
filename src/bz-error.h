@@ -20,7 +20,8 @@
 
 #pragma once
 
-#include <gtk/gtk.h>
+#include <adwaita.h>
+#include <libdex.h>
 
 G_BEGIN_DECLS
 
@@ -28,5 +29,8 @@ G_BEGIN_DECLS
 void
 bz_show_error_for_widget (GtkWidget  *widget,
                           const char *text);
+
+DexFuture *
+bz_make_alert_dialog_future (AdwAlertDialog *dialog);
 
 G_END_DECLS

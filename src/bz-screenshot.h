@@ -37,4 +37,18 @@ bz_screenshot_set_paintable (BzScreenshot *self,
 GdkPaintable *
 bz_screenshot_get_paintable (BzScreenshot *self);
 
+void
+bz_screenshot_set_focus_x (BzScreenshot *self,
+                           double        focus_x);
+
+double
+bz_screenshot_get_focus_x (BzScreenshot *self);
+
+void
+bz_screenshot_set_focus_y (BzScreenshot *self,
+                           double        focus_y);
+
+double
+bz_screenshot_get_focus_y (BzScreenshot *self);
+
 G_END_DECLS

@@ -20,14 +20,10 @@
 
 #pragma once
 
-#include <json-glib/json-glib.h>
 #include <libdex.h>
 #include <libsoup/soup.h>
 
 G_BEGIN_DECLS
-
-SoupSession *
-bz_get_global_http_session (void);
 
 DexFuture *
 bz_send_with_global_http_session (SoupMessage *message);

@@ -21,6 +21,7 @@
 #pragma once
 
 #include <gtk/gtk.h>
+#include <libdex.h>
 
 G_BEGIN_DECLS
 
@@ -52,12 +53,22 @@ gboolean
 bz_entry_is_holding (BzEntry *self);
 
 gboolean
+bz_entry_is_installed (BzEntry *self);
+
+void
+bz_entry_set_installed (BzEntry *self,
+                        gboolean installed);
+
+gboolean
 bz_entry_is_of_kinds (BzEntry *self,
                       guint    kinds);
 
 void
-bz_entry_add_addon (BzEntry *self,
-                    BzEntry *addon);
+bz_entry_append_addon (BzEntry    *self,
+                       const char *id);
+
+GListModel *
+bz_entry_get_addons (BzEntry *self);
 
 const char *
 bz_entry_get_id (BzEntry *self);
@@ -66,7 +77,13 @@ const char *
 bz_entry_get_unique_id (BzEntry *self);
 
 const char *
+bz_entry_get_unique_id_checksum (BzEntry *self);
+
+const char *
 bz_entry_get_title (BzEntry *self);
+
+const char *
+bz_entry_get_developer (BzEntry *self);
 
 const char *
 bz_entry_get_eol (BzEntry *self);
@@ -104,9 +121,23 @@ bz_entry_get_is_foss (BzEntry *self);
 gboolean
 bz_entry_get_is_flathub (BzEntry *self);
 
+DexFuture *
+bz_entry_load_mini_icon (BzEntry *self);
+
 gint
-bz_entry_cmp_usefulness (gconstpointer a,
-                         gconstpointer b,
-                         gpointer      user_data);
+bz_entry_calc_usefulness (BzEntry *self);
+
+void
+bz_entry_serialize (BzEntry         *self,
+                    GVariantBuilder *builder);
+
+gboolean
+bz_entry_deserialize (BzEntry  *self,
+                      GVariant *import,
+                      GError  **error);
+
+GIcon *
+bz_load_mini_icon_sync (const char *unique_id_checksum,
+                        const char *path);
 
 G_END_DECLS

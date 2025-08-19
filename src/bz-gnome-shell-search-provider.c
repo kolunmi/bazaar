@@ -20,6 +20,7 @@
 
 #include "bz-gnome-shell-search-provider.h"
 #include "bz-entry-group.h"
+#include "bz-search-result.h"
 #include "bz-util.h"
 #include "gs-shell-search-provider-generated.h"
 
@@ -186,7 +187,7 @@ get_result_metas (BzShellSearchProvider2     *skeleton,
     {
       BzEntryGroup *group                      = NULL;
       g_autoptr (GVariantBuilder) meta_builder = NULL;
-      BzEntry    *ui_entry                     = NULL;
+      const char *title                        = NULL;
       const char *description                  = NULL;
       GIcon      *icon                         = NULL;
 
@@ -197,17 +198,17 @@ get_result_metas (BzShellSearchProvider2     *skeleton,
           continue;
         }
 
-      ui_entry = bz_entry_group_get_ui_entry (group);
-
       meta_builder = g_variant_builder_new (G_VARIANT_TYPE ("a{sv}"));
       g_variant_builder_add (meta_builder, "{sv}", "id", g_variant_new_string (*result));
-      g_variant_builder_add (meta_builder, "{sv}", "name", g_variant_new_string (bz_entry_get_title (ui_entry)));
 
-      description = bz_entry_get_description (ui_entry);
+      title = bz_entry_group_get_title (group);
+      g_variant_builder_add (meta_builder, "{sv}", "name", g_variant_new_string (title));
+
+      description = bz_entry_group_get_description (group);
       if (description != NULL)
         g_variant_builder_add (meta_builder, "{sv}", "description", g_variant_new_string (description));
 
-      icon = bz_entry_get_mini_icon (ui_entry);
+      icon = bz_entry_group_get_mini_icon (group);
       if (icon != NULL)
         {
           g_autofree gchar *icon_str = g_icon_to_string (icon);
@@ -380,18 +381,18 @@ request_finally (DexFuture   *future,
 
       for (guint i = 0; i < results->len; i++)
         {
-          BzEntryGroup *group     = NULL;
-          BzEntry      *ui_entry  = NULL;
-          const char   *unique_id = NULL;
+          BzSearchResult *result = NULL;
+          BzEntryGroup   *group  = NULL;
+          const char     *id     = NULL;
 
-          group     = g_ptr_array_index (results, i);
-          ui_entry  = bz_entry_group_get_ui_entry (group);
-          unique_id = bz_entry_get_unique_id (ui_entry);
+          result = g_ptr_array_index (results, i);
+          group  = bz_search_result_get_group (result);
+          id     = bz_entry_group_get_id (group);
 
-          g_variant_builder_add (builder, "s", unique_id);
+          g_variant_builder_add (builder, "s", id);
           g_hash_table_replace (
               self->last_results,
-              g_strdup (unique_id),
+              g_strdup (id),
               g_object_ref (group));
         }
 

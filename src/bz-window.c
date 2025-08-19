@@ -20,8 +20,6 @@
 
 // This file is an utter mess
 
-#include "config.h"
-
 #include <glib/gi18n.h>
 
 #include "bz-browse-widget.h"
@@ -36,27 +34,19 @@
 #include "bz-search-widget.h"
 #include "bz-transaction-manager.h"
 #include "bz-update-dialog.h"
+#include "bz-util.h"
 #include "bz-window.h"
 
 struct _BzWindow
 {
   AdwApplicationWindow parent_instance;
 
-  GSettings            *settings;
-  BzContentProvider    *content_provider;
-  BzFlathubState       *flathub;
-  BzTransactionManager *transaction_manager;
-  GListModel           *applications;
-  GListModel           *installed;
-  GListStore           *updates;
-  gboolean              busy;
-  double                busy_progress;
-  gboolean              checking_updates;
-  gboolean              online;
+  BzStateInfo *state;
 
   GBinding *search_to_view_binding;
   gboolean  breakpoint_applied;
-  guint     after_update_check_timeout;
+
+  DexFuture *transact_future;
 
   /* Template widgets */
   BzCometOverlay      *comet_overlay;
@@ -67,12 +57,10 @@ struct _BzWindow
   BzFullView          *full_view;
   GtkToggleButton     *toggle_transactions;
   GtkButton           *go_back;
-  GtkButton           *refresh;
   GtkButton           *search;
   BzSearchWidget      *search_widget;
   GtkButton           *update_button;
   GtkRevealer         *title_revealer;
-  GtkRevealer         *up_to_date_revealer;
   AdwToggleGroup      *title_toggle_group;
   GtkToggleButton     *transactions_pause;
   GtkButton           *transactions_stop;
@@ -81,6 +69,8 @@ struct _BzWindow
   AdwToolbarView      *toolbar_view;
   AdwHeaderBar        *top_header_bar;
   AdwHeaderBar        *bottom_header_bar;
+  AdwToggle           *curated_toggle;
+  // GtkButton           *refresh;
 };
 
 G_DEFINE_FINAL_TYPE (BzWindow, bz_window, ADW_TYPE_APPLICATION_WINDOW)
@@ -89,42 +79,21 @@ enum
 {
   PROP_0,
 
-  PROP_SETTINGS,
-  PROP_TRANSACTION_MANAGER,
-  PROP_CONTENT_PROVIDER,
-  PROP_FLATHUB,
-  PROP_APPLICATIONS,
-  PROP_INSTALLED,
-  PROP_UPDATES,
-  PROP_BUSY,
-  PROP_BUSY_PROGRESS,
-  PROP_CHECKING_UPDATES,
-  PROP_ONLINE,
+  PROP_STATE,
 
   LAST_PROP
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
 
-static void setting_changed (GSettings   *settings,
-                             const gchar *pkey,
-                             BzWindow    *self);
-
-static void
-transactions_active_changed (BzTransactionManager *manager,
-                             GParamSpec           *pspec,
-                             BzWindow             *self);
-
-static void
-has_transactions_changed (BzTransactionManager *manager,
-                          GParamSpec           *pspec,
-                          BzWindow             *self);
-
-static void
-updates_changed (GListModel *model,
-                 guint       position,
-                 guint       removed,
-                 guint       added,
-                 BzWindow   *self);
+BZ_DEFINE_DATA (
+    transact,
+    Transact,
+    {
+      BzWindow     *self;
+      BzEntryGroup *group;
+      gboolean      remove;
+    },
+    BZ_RELEASE_DATA (group, g_object_unref))
 
 static void
 install_confirmation_response (AdwAlertDialog *alert,
@@ -147,6 +116,10 @@ try_transact (BzWindow     *self,
               BzEntryGroup *group,
               gboolean      remove);
 
+static DexFuture *
+ready_to_transact (DexFuture    *future,
+                   TransactData *data);
+
 static void
 update (BzWindow *self,
         BzEntry **updates,
@@ -166,37 +139,13 @@ static void
 set_bottom_bar (BzWindow *self);
 
 static void
-hide_up_to_date_notif (BzWindow *self);
-
-static void
 bz_window_dispose (GObject *object)
 {
   BzWindow *self = BZ_WINDOW (object);
 
-  if (self->settings != NULL)
-    g_signal_handlers_disconnect_by_func (
-        self->settings, setting_changed, self);
-  if (self->transaction_manager != NULL)
-    {
-      g_signal_handlers_disconnect_by_func (
-          self->transaction_manager, transactions_active_changed, self);
-      g_signal_handlers_disconnect_by_func (
-          self->transaction_manager, has_transactions_changed, self);
-    }
-  if (self->updates != NULL)
-    g_signal_handlers_disconnect_by_func (
-        self->updates, updates_changed, self);
-
-  g_clear_object (&self->settings);
-  g_clear_object (&self->content_provider);
-  g_clear_object (&self->flathub);
-  g_clear_object (&self->transaction_manager);
-  g_clear_object (&self->applications);
-  g_clear_object (&self->installed);
-  g_clear_object (&self->updates);
-
+  dex_clear (&self->transact_future);
+  g_clear_object (&self->state);
   g_clear_object (&self->search_to_view_binding);
-  g_clear_handle_id (&self->after_update_check_timeout, g_source_remove);
 
   G_OBJECT_CLASS (bz_window_parent_class)->dispose (object);
 }
@@ -211,38 +160,8 @@ bz_window_get_property (GObject    *object,
 
   switch (prop_id)
     {
-    case PROP_SETTINGS:
-      g_value_set_object (value, self->settings);
-      break;
-    case PROP_TRANSACTION_MANAGER:
-      g_value_set_object (value, self->transaction_manager);
-      break;
-    case PROP_CONTENT_PROVIDER:
-      g_value_set_object (value, self->content_provider);
-      break;
-    case PROP_FLATHUB:
-      g_value_set_object (value, self->flathub);
-      break;
-    case PROP_APPLICATIONS:
-      g_value_set_object (value, self->applications);
-      break;
-    case PROP_INSTALLED:
-      g_value_set_object (value, self->installed);
-      break;
-    case PROP_UPDATES:
-      g_value_set_object (value, self->updates);
-      break;
-    case PROP_BUSY:
-      g_value_set_boolean (value, self->busy);
-      break;
-    case PROP_BUSY_PROGRESS:
-      g_value_set_double (value, self->busy_progress);
-      break;
-    case PROP_CHECKING_UPDATES:
-      g_value_set_boolean (value, self->checking_updates);
-      break;
-    case PROP_ONLINE:
-      g_value_set_boolean (value, self->online);
+    case PROP_STATE:
+      g_value_set_object (value, self->state);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -255,112 +174,11 @@ bz_window_set_property (GObject      *object,
                         const GValue *value,
                         GParamSpec   *pspec)
 {
-  BzWindow *self = BZ_WINDOW (object);
+  // BzWindow *self = BZ_WINDOW (object);
 
   switch (prop_id)
     {
-    case PROP_SETTINGS:
-      if (self->settings != NULL)
-        g_signal_handlers_disconnect_by_func (
-            self->settings, setting_changed, self);
-      g_clear_object (&self->settings);
-      self->settings = g_value_dup_object (value);
-      if (self->settings != NULL)
-        {
-          g_signal_connect (
-              self->settings, "changed",
-              G_CALLBACK (setting_changed), self);
-          setting_changed (self->settings, "show-animated-background", self);
-        }
-      break;
-    case PROP_TRANSACTION_MANAGER:
-      if (self->transaction_manager != NULL)
-        {
-          g_signal_handlers_disconnect_by_func (
-              self->transaction_manager, transactions_active_changed, self);
-          g_signal_handlers_disconnect_by_func (
-              self->transaction_manager, has_transactions_changed, self);
-        }
-      g_clear_object (&self->transaction_manager);
-      self->transaction_manager = g_value_dup_object (value);
-      if (self->transaction_manager != NULL)
-        {
-          g_signal_connect (
-              self->transaction_manager, "notify::active",
-              G_CALLBACK (transactions_active_changed), self);
-          g_signal_connect (
-              self->transaction_manager, "notify::has-transactions",
-              G_CALLBACK (has_transactions_changed), self);
-        }
-      check_transactions (self);
-      break;
-    case PROP_CONTENT_PROVIDER:
-      g_clear_object (&self->content_provider);
-      self->content_provider = g_value_dup_object (value);
-      if (!gtk_window_is_active (GTK_WINDOW (self)) &&
-          (self->content_provider == NULL ||
-           !bz_content_provider_get_has_inputs (self->content_provider)))
-        adw_toggle_group_set_active_name (self->title_toggle_group, "flathub");
-      break;
-    case PROP_FLATHUB:
-      g_clear_object (&self->flathub);
-      self->flathub = g_value_dup_object (value);
-      break;
-    case PROP_APPLICATIONS:
-      g_clear_object (&self->applications);
-      self->applications = g_value_dup_object (value);
-      break;
-    case PROP_INSTALLED:
-      g_clear_object (&self->installed);
-      self->installed = g_value_dup_object (value);
-      break;
-    case PROP_UPDATES:
-      if (self->updates != NULL)
-        g_signal_handlers_disconnect_by_func (
-            self->updates, updates_changed, self);
-      g_clear_object (&self->updates);
-      self->updates = g_value_dup_object (value);
-      if (self->updates != NULL)
-        {
-          g_signal_connect (
-              self->updates, "items-changed",
-              G_CALLBACK (updates_changed), self);
-          gtk_widget_set_visible (
-              GTK_WIDGET (self->update_button),
-              g_list_model_get_n_items (G_LIST_MODEL (self->updates)) > 0);
-        }
-      else
-        gtk_widget_set_visible (GTK_WIDGET (self->update_button), FALSE);
-      break;
-    case PROP_BUSY:
-      self->busy = g_value_get_boolean (value);
-      set_page (self);
-      break;
-    case PROP_BUSY_PROGRESS:
-      self->busy_progress = g_value_get_double (value);
-      break;
-    case PROP_CHECKING_UPDATES:
-      {
-        gboolean last_value = FALSE;
-
-        g_clear_handle_id (&self->after_update_check_timeout, g_source_remove);
-        last_value             = self->checking_updates;
-        self->checking_updates = g_value_get_boolean (value);
-        if (last_value && !self->checking_updates &&
-            g_list_model_get_n_items (G_LIST_MODEL (self->updates)) == 0)
-          {
-            gtk_revealer_set_reveal_child (self->up_to_date_revealer, TRUE);
-            self->after_update_check_timeout =
-                g_timeout_add_once (4000 /* 5 seconds */,
-                                    (GSourceOnceFunc) hide_up_to_date_notif, self);
-          }
-        set_bottom_bar (self);
-      }
-      break;
-    case PROP_ONLINE:
-      self->online = g_value_get_boolean (value);
-      set_page (self);
-      break;
+    case PROP_STATE:
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -371,6 +189,13 @@ invert_boolean (gpointer object,
                 gboolean value)
 {
   return !value;
+}
+
+static gboolean
+is_null (gpointer object,
+         GObject *value)
+{
+  return value == NULL;
 }
 
 static void
@@ -465,8 +290,6 @@ breakpoint_apply_cb (BzWindow      *self,
 
   adw_header_bar_set_title_widget (self->top_header_bar, NULL);
   adw_header_bar_set_title_widget (self->bottom_header_bar, NULL);
-
-  adw_header_bar_set_title_widget (self->top_header_bar, GTK_WIDGET (self->up_to_date_revealer));
   adw_header_bar_set_title_widget (self->bottom_header_bar, GTK_WIDGET (self->title_revealer));
 
   set_bottom_bar (self);
@@ -480,9 +303,7 @@ breakpoint_unapply_cb (BzWindow      *self,
 
   adw_header_bar_set_title_widget (self->top_header_bar, NULL);
   adw_header_bar_set_title_widget (self->bottom_header_bar, NULL);
-
   adw_header_bar_set_title_widget (self->top_header_bar, GTK_WIDGET (self->title_revealer));
-  adw_header_bar_set_title_widget (self->bottom_header_bar, GTK_WIDGET (self->up_to_date_revealer));
 
   set_bottom_bar (self);
 }
@@ -494,7 +315,8 @@ pause_transactions_cb (BzWindow        *self,
   gboolean paused = FALSE;
 
   paused = gtk_toggle_button_get_active (toggle);
-  bz_transaction_manager_set_paused (self->transaction_manager, paused);
+  bz_transaction_manager_set_paused (
+      bz_state_info_get_transaction_manager (self->state), paused);
   check_transactions (self);
 }
 
@@ -502,8 +324,8 @@ static void
 stop_transactions_cb (BzWindow  *self,
                       GtkButton *button)
 {
-  bz_transaction_manager_set_paused (self->transaction_manager, TRUE);
-  bz_transaction_manager_cancel_current (self->transaction_manager);
+  bz_transaction_manager_set_paused (bz_state_info_get_transaction_manager (self->state), TRUE);
+  bz_transaction_manager_cancel_current (bz_state_info_get_transaction_manager (self->state));
 }
 
 static void
@@ -513,26 +335,27 @@ go_back_cb (BzWindow  *self,
   set_page (self);
 }
 
-static void
-refresh_cb (BzWindow  *self,
-            GtkButton *button)
-{
-  gtk_widget_activate_action (GTK_WIDGET (self), "app.refresh", NULL);
-}
+// static void
+// refresh_cb (BzWindow  *self,
+//             GtkButton *button)
+// {
+//   gtk_widget_activate_action (GTK_WIDGET (self), "app.refresh", NULL);
+// }
 
 static void
 update_cb (BzWindow  *self,
            GtkButton *button)
 {
   /* if the button is clickable, there have to be updates */
-  bz_window_push_update_dialog (self, self->updates);
+  bz_window_push_update_dialog (self);
 }
 
 static void
 transactions_clear_cb (BzWindow  *self,
                        GtkButton *button)
 {
-  bz_transaction_manager_clear_finished (self->transaction_manager);
+  bz_transaction_manager_clear_finished (
+      bz_state_info_get_transaction_manager (self->state));
 }
 
 static void
@@ -545,82 +368,12 @@ bz_window_class_init (BzWindowClass *klass)
   object_class->get_property = bz_window_get_property;
   object_class->set_property = bz_window_set_property;
 
-  props[PROP_SETTINGS] =
+  props[PROP_STATE] =
       g_param_spec_object (
-          "settings",
+          "state",
           NULL, NULL,
-          G_TYPE_SETTINGS,
-          G_PARAM_READWRITE);
-
-  props[PROP_TRANSACTION_MANAGER] =
-      g_param_spec_object (
-          "transaction-manager",
-          NULL, NULL,
-          BZ_TYPE_TRANSACTION_MANAGER,
-          G_PARAM_READWRITE);
-
-  props[PROP_CONTENT_PROVIDER] =
-      g_param_spec_object (
-          "content-provider",
-          NULL, NULL,
-          BZ_TYPE_CONTENT_PROVIDER,
-          G_PARAM_READWRITE);
-
-  props[PROP_FLATHUB] =
-      g_param_spec_object (
-          "flathub",
-          NULL, NULL,
-          BZ_TYPE_FLATHUB_STATE,
-          G_PARAM_READWRITE);
-
-  props[PROP_APPLICATIONS] =
-      g_param_spec_object (
-          "applications",
-          NULL, NULL,
-          G_TYPE_LIST_MODEL,
-          G_PARAM_READWRITE);
-
-  props[PROP_INSTALLED] =
-      g_param_spec_object (
-          "installed",
-          NULL, NULL,
-          G_TYPE_LIST_MODEL,
-          G_PARAM_READWRITE);
-
-  props[PROP_UPDATES] =
-      g_param_spec_object (
-          "updates",
-          NULL, NULL,
-          G_TYPE_LIST_STORE,
-          G_PARAM_READWRITE);
-
-  props[PROP_BUSY] =
-      g_param_spec_boolean (
-          "busy",
-          NULL, NULL,
-          FALSE,
-          G_PARAM_READWRITE);
-
-  props[PROP_BUSY_PROGRESS] =
-      g_param_spec_double (
-          "busy-progress",
-          NULL, NULL,
-          0.0, G_MAXDOUBLE, 0.0,
-          G_PARAM_READWRITE);
-
-  props[PROP_CHECKING_UPDATES] =
-      g_param_spec_boolean (
-          "checking_updates",
-          NULL, NULL,
-          FALSE,
-          G_PARAM_READWRITE);
-
-  props[PROP_ONLINE] =
-      g_param_spec_boolean (
-          "online",
-          NULL, NULL,
-          FALSE,
-          G_PARAM_READWRITE);
+          BZ_TYPE_STATE_INFO,
+          G_PARAM_READABLE);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
@@ -643,12 +396,11 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzWindow, toasts);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, toggle_transactions);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, go_back);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, refresh);
+  // gtk_widget_class_bind_template_child (widget_class, BzWindow, refresh);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, search);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, search_widget);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, update_button);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, title_revealer);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, up_to_date_revealer);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, title_toggle_group);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, transactions_pause);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, transactions_stop);
@@ -656,7 +408,9 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzWindow, toolbar_view);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, top_header_bar);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, bottom_header_bar);
+  gtk_widget_class_bind_template_child (widget_class, BzWindow, curated_toggle);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
+  gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, browser_group_selected_cb);
   gtk_widget_class_bind_template_callback (widget_class, search_widget_select_cb);
   gtk_widget_class_bind_template_callback (widget_class, full_view_install_cb);
@@ -670,7 +424,7 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, stop_transactions_cb);
   gtk_widget_class_bind_template_callback (widget_class, search_split_open_changed_cb);
   gtk_widget_class_bind_template_callback (widget_class, go_back_cb);
-  gtk_widget_class_bind_template_callback (widget_class, refresh_cb);
+  // gtk_widget_class_bind_template_callback (widget_class, refresh_cb);
   gtk_widget_class_bind_template_callback (widget_class, update_cb);
   gtk_widget_class_bind_template_callback (widget_class, transactions_clear_cb);
 }
@@ -695,38 +449,47 @@ bz_window_init (BzWindow *self)
 }
 
 static void
-setting_changed (GSettings   *settings,
-                 const gchar *pkey,
-                 BzWindow    *self)
+app_busy_changed (BzWindow    *self,
+                  GParamSpec  *pspec,
+                  BzStateInfo *info)
 {
+  bz_search_widget_refresh (self->search_widget);
+  set_page (self);
 }
 
 static void
-transactions_active_changed (BzTransactionManager *manager,
+transactions_active_changed (BzWindow             *self,
                              GParamSpec           *pspec,
-                             BzWindow             *self)
+                             BzTransactionManager *manager)
 {
   check_transactions (self);
 }
 
 static void
-has_transactions_changed (BzTransactionManager *manager,
+has_transactions_changed (BzWindow             *self,
                           GParamSpec           *pspec,
-                          BzWindow             *self)
+                          BzTransactionManager *manager)
 {
   check_transactions (self);
 }
 
 static void
-updates_changed (GListModel *model,
-                 guint       position,
-                 guint       removed,
-                 guint       added,
-                 BzWindow   *self)
+checking_for_updates_changed (BzWindow    *self,
+                              GParamSpec  *pspec,
+                              BzStateInfo *info)
 {
-  gtk_widget_set_visible (
-      GTK_WIDGET (self->update_button),
-      g_list_model_get_n_items (model) > 0);
+  gboolean busy                 = FALSE;
+  gboolean checking_for_updates = FALSE;
+  gboolean has_updates          = FALSE;
+
+  busy                 = bz_state_info_get_busy (info);
+  checking_for_updates = bz_state_info_get_checking_for_updates (info);
+  has_updates          = bz_state_info_get_available_updates (info) != NULL;
+
+  if (!busy && !checking_for_updates && !has_updates)
+    adw_toast_overlay_add_toast (
+        self->toasts,
+        adw_toast_new_format (_ ("Up to date!")));
 }
 
 static void
@@ -734,16 +497,18 @@ install_confirmation_response (AdwAlertDialog *alert,
                                gchar          *response,
                                BzWindow       *self)
 {
-  gboolean should_install           = FALSE;
-  gboolean should_remove            = FALSE;
-  g_autoptr (BzEntry) cb_entry      = NULL;
-  g_autoptr (BzEntryGroup) cb_group = NULL;
+  gboolean should_install               = FALSE;
+  gboolean should_remove                = FALSE;
+  g_autoptr (BzEntry) cb_entry          = NULL;
+  g_autoptr (BzEntryGroup) cb_group     = NULL;
+  g_autoptr (GListModel) cb_group_model = NULL;
 
   should_install = g_strcmp0 (response, "install") == 0;
   should_remove  = g_strcmp0 (response, "remove") == 0;
 
-  cb_entry = g_object_steal_data (G_OBJECT (alert), "entry");
-  cb_group = g_object_steal_data (G_OBJECT (alert), "group");
+  cb_entry       = g_object_steal_data (G_OBJECT (alert), "entry");
+  cb_group       = g_object_steal_data (G_OBJECT (alert), "group");
+  cb_group_model = g_object_steal_data (G_OBJECT (alert), "model");
 
   if (should_install || should_remove)
     {
@@ -754,13 +519,10 @@ install_confirmation_response (AdwAlertDialog *alert,
           checks = g_object_get_data (G_OBJECT (alert), "checks");
           if (checks != NULL)
             {
-              GListModel *entries       = NULL;
-              guint       n_entries     = 0;
+              guint n_entries           = 0;
               g_autoptr (BzEntry) entry = NULL;
 
-              entries   = bz_entry_group_get_model (cb_group);
-              n_entries = g_list_model_get_n_items (entries);
-
+              n_entries = g_list_model_get_n_items (cb_group_model);
               for (guint i = 0; i < n_entries; i++)
                 {
                   GtkCheckButton *check = NULL;
@@ -768,7 +530,7 @@ install_confirmation_response (AdwAlertDialog *alert,
                   check = g_ptr_array_index (checks, i);
                   if (check != NULL && gtk_check_button_get_active (check))
                     {
-                      entry = g_list_model_get_item (entries, i);
+                      entry = g_list_model_get_item (cb_group_model, i);
                       break;
                     }
                 }
@@ -776,8 +538,6 @@ install_confirmation_response (AdwAlertDialog *alert,
               if (entry != NULL)
                 transact (self, entry, should_remove);
             }
-          else
-            transact (self, bz_entry_group_get_ui_entry (cb_group), should_remove);
         }
       else if (cb_entry != NULL)
         transact (self, cb_entry, should_remove);
@@ -789,28 +549,76 @@ update_dialog_response (BzUpdateDialog *dialog,
                         const char     *response,
                         BzWindow       *self)
 {
-  g_autoptr (GListModel) updates = NULL;
+  g_autoptr (GListModel) accepted_model = NULL;
 
-  updates = bz_update_dialog_was_accepted (dialog);
-
-  if (updates != NULL)
+  accepted_model = bz_update_dialog_was_accepted (dialog);
+  if (accepted_model != NULL)
     {
+      GListModel          *updates     = NULL;
       guint                n_updates   = 0;
       g_autofree BzEntry **updates_buf = NULL;
 
+      updates     = bz_state_info_get_available_updates (self->state);
       n_updates   = g_list_model_get_n_items (updates);
       updates_buf = g_malloc_n (n_updates, sizeof (*updates_buf));
 
       for (guint i = 0; i < n_updates; i++)
         updates_buf[i] = g_list_model_get_item (updates, i);
-
       update (self, updates_buf, n_updates);
 
       for (guint i = 0; i < n_updates; i++)
         g_object_unref (updates_buf[i]);
-
-      g_list_store_remove_all (G_LIST_STORE (updates));
+      bz_state_info_set_available_updates (
+          self->state, NULL);
     }
+}
+
+BzWindow *
+bz_window_new (BzStateInfo *state)
+{
+  BzWindow *window = NULL;
+
+  g_return_val_if_fail (BZ_IS_STATE_INFO (state), NULL);
+
+  window        = g_object_new (BZ_TYPE_WINDOW, NULL);
+  window->state = g_object_ref (state);
+
+  g_signal_connect_object (state,
+                           "notify::busy",
+                           G_CALLBACK (app_busy_changed),
+                           window, G_CONNECT_SWAPPED);
+  g_signal_connect_object (state,
+                           "notify::checking-for-updates",
+                           G_CALLBACK (checking_for_updates_changed),
+                           window, G_CONNECT_SWAPPED);
+
+  /* these seem unsafe but BzApplication never
+   * changes the objects we are connecting to
+   */
+  g_signal_connect_object (bz_state_info_get_transaction_manager (state),
+                           "notify::active",
+                           G_CALLBACK (transactions_active_changed),
+                           window, G_CONNECT_SWAPPED);
+  g_signal_connect_object (bz_state_info_get_transaction_manager (state),
+                           "notify::has-transactions",
+                           G_CALLBACK (has_transactions_changed),
+                           window, G_CONNECT_SWAPPED);
+
+  /* TODO: connect to "items-changed" if this ever becomes dynamic */
+  if (g_list_model_get_n_items (
+          bz_state_info_get_curated_configs (state)) == 0)
+    {
+      adw_toggle_group_set_active_name (
+          window->title_toggle_group, "flathub");
+      adw_toggle_group_remove (
+          window->title_toggle_group, window->curated_toggle);
+    }
+
+  g_object_notify_by_pspec (G_OBJECT (window), props[PROP_STATE]);
+
+  set_page (window);
+  check_transactions (window);
+  return window;
 }
 
 void
@@ -832,15 +640,18 @@ bz_window_toggle_transactions (BzWindow *self)
 }
 
 void
-bz_window_push_update_dialog (BzWindow   *self,
-                              GListStore *updates)
+bz_window_push_update_dialog (BzWindow *self)
 {
-  AdwDialog *update_dialog = NULL;
+  GListModel *available_updates = NULL;
+  AdwDialog  *update_dialog     = NULL;
 
   g_return_if_fail (BZ_IS_WINDOW (self));
 
-  update_dialog = bz_update_dialog_new (G_LIST_MODEL (updates));
-  adw_dialog_set_content_width (update_dialog, 500);
+  available_updates = bz_state_info_get_available_updates (self->state);
+  g_return_if_fail (available_updates != NULL);
+
+  update_dialog = bz_update_dialog_new (available_updates);
+  adw_dialog_set_content_width (update_dialog, 750);
   g_signal_connect (update_dialog, "response", G_CALLBACK (update_dialog_response), self);
 
   adw_dialog_present (update_dialog, GTK_WIDGET (self));
@@ -892,7 +703,9 @@ transact (BzWindow *self,
         NULL, 0,
         NULL, 0);
 
-  bz_transaction_manager_add (self->transaction_manager, transaction);
+  bz_transaction_manager_add (
+      bz_state_info_get_transaction_manager (self->state),
+      transaction);
 
   icon = bz_entry_get_icon_paintable (entry);
   if (icon != NULL)
@@ -917,10 +730,12 @@ try_transact (BzWindow     *self,
               BzEntryGroup *group,
               gboolean      remove)
 {
-  BzEntry   *ui_entry = NULL;
-  AdwDialog *alert    = NULL;
+  g_autoptr (DexFuture) base_future = NULL;
+  g_autoptr (TransactData) data     = NULL;
 
-  if (self->busy)
+  g_return_if_fail (entry != NULL || group != NULL);
+
+  if (bz_state_info_get_busy (self->state))
     {
       adw_toast_overlay_add_toast (
           self->toasts,
@@ -928,154 +743,197 @@ try_transact (BzWindow     *self,
       return;
     }
 
-  if (entry != NULL)
-    ui_entry = entry;
-  else if (group != NULL)
-    ui_entry = bz_entry_group_get_ui_entry (group);
-  if (ui_entry == NULL)
-    return;
-
-  alert = adw_alert_dialog_new (NULL, NULL);
-  adw_alert_dialog_format_heading (
-      ADW_ALERT_DIALOG (alert), _ ("Confirm Action"));
-
-  if (entry != NULL)
-    g_object_set_data_full (
-        G_OBJECT (alert),
-        "entry", g_object_ref (entry),
-        g_object_unref);
-
   if (group != NULL)
-    g_object_set_data_full (
-        G_OBJECT (alert),
-        "group", g_object_ref (group),
-        g_object_unref);
+    base_future = bz_entry_group_dup_all_into_model (group);
+  else if (entry != NULL)
+    base_future = dex_future_new_for_object (entry);
 
-  if (remove)
+  data         = transact_data_new ();
+  data->self   = self;
+  data->group  = group != NULL ? g_object_ref (group) : NULL;
+  data->remove = remove;
+
+  dex_clear (&self->transact_future);
+  self->transact_future = dex_future_finally (
+      g_steal_pointer (&base_future),
+      (DexFutureCallback) ready_to_transact,
+      transact_data_ref (data), transact_data_unref);
+}
+
+static DexFuture *
+ready_to_transact (DexFuture    *future,
+                   TransactData *data)
+{
+  BzWindow     *self             = data->self;
+  BzEntryGroup *group            = data->group;
+  gboolean      remove           = data->remove;
+  g_autoptr (GError) local_error = NULL;
+  const GValue *value            = NULL;
+
+  value = dex_future_get_value (future, &local_error);
+  if (value != NULL)
     {
-      adw_alert_dialog_format_body_markup (
-          ADW_ALERT_DIALOG (alert),
-          _ ("You are about to remove the following Flatpak:\n\n"
-             "<b>%s</b>\n"
-             "<tt>%s</tt>\n\n"
-             "Are you sure?"),
-          bz_entry_get_title (ui_entry),
-          bz_entry_get_id (ui_entry));
-      adw_alert_dialog_add_responses (
-          ADW_ALERT_DIALOG (alert),
-          "cancel", _ ("Cancel"),
-          "remove", _ ("Remove"),
-          NULL);
-      adw_alert_dialog_set_response_appearance (
-          ADW_ALERT_DIALOG (alert), "remove", ADW_RESPONSE_DESTRUCTIVE);
-      adw_alert_dialog_set_default_response (ADW_ALERT_DIALOG (alert), "remove");
-      adw_alert_dialog_set_close_response (ADW_ALERT_DIALOG (alert), "cancel");
-    }
-  else
-    {
-      adw_alert_dialog_format_body_markup (
-          ADW_ALERT_DIALOG (alert),
-          _ ("You are about to install the following Flatpak:\n\n"
-             "<b>%s</b>\n"
-             "<tt>%s</tt>\n\n"
-             "Are you sure?"),
-          bz_entry_get_title (ui_entry),
-          bz_entry_get_id (ui_entry));
-      adw_alert_dialog_add_responses (
-          ADW_ALERT_DIALOG (alert),
-          "cancel", _ ("Cancel"),
-          "install", _ ("Install"),
-          NULL);
-      adw_alert_dialog_set_response_appearance (
-          ADW_ALERT_DIALOG (alert), "install", ADW_RESPONSE_SUGGESTED);
-      adw_alert_dialog_set_default_response (ADW_ALERT_DIALOG (alert), "install");
-      adw_alert_dialog_set_close_response (ADW_ALERT_DIALOG (alert), "cancel");
-    }
+      g_autoptr (GListModel) model = NULL;
+      g_autoptr (BzEntry) entry    = NULL;
+      AdwDialog  *alert            = NULL;
+      const char *title            = NULL;
+      const char *id               = NULL;
 
-  if (group != NULL)
-    {
-      GListModel *entries   = NULL;
-      guint       n_entries = 0;
+      if (G_VALUE_HOLDS (value, G_TYPE_LIST_MODEL))
+        model = g_value_dup_object (value);
+      else
+        entry = g_value_dup_object (value);
 
-      entries   = bz_entry_group_get_model (group);
-      n_entries = g_list_model_get_n_items (entries);
+      alert = adw_alert_dialog_new (NULL, NULL);
+      adw_alert_dialog_format_heading (
+          ADW_ALERT_DIALOG (alert), _ ("Confirm Action"));
 
-      if (n_entries > 0)
+      if (model != NULL)
         {
-          GtkWidget      *box               = NULL;
-          GtkWidget      *expander          = NULL;
-          GPtrArray      *checks            = NULL;
-          GtkCheckButton *first_valid_check = NULL;
-          int             n_valid_checks    = FALSE;
-
-          box      = gtk_box_new (GTK_ORIENTATION_VERTICAL, 5);
-          expander = gtk_expander_new (_ ("More details"));
-
-          gtk_expander_set_child (GTK_EXPANDER (expander), box);
-          adw_alert_dialog_set_extra_child (ADW_ALERT_DIALOG (alert), expander);
-
-          checks = g_ptr_array_new ();
-
-          for (guint i = 0; i < n_entries; i++)
-            {
-              g_autoptr (BzEntry) variant   = NULL;
-              gboolean         is_installed = FALSE;
-              g_autofree char *label        = NULL;
-              GtkWidget       *check        = NULL;
-              GtkWidget       *check_label  = NULL;
-
-              variant      = g_list_model_get_item (entries, i);
-              is_installed = bz_entry_group_query_removable (group, variant);
-
-              if (bz_entry_is_holding (variant) ||
-                  (!remove && is_installed) ||
-                  (remove && !is_installed))
-                {
-                  g_ptr_array_add (checks, NULL);
-                  continue;
-                }
-
-              label = g_strdup_printf (
-                  "%s: %s",
-                  bz_entry_get_remote_repo_name (variant),
-                  bz_entry_get_unique_id (variant));
-
-              check = gtk_check_button_new ();
-              g_ptr_array_add (checks, check);
-
-              gtk_widget_set_has_tooltip (check, TRUE);
-              gtk_widget_set_tooltip_text (check, label);
-
-              check_label = gtk_label_new (label);
-              gtk_label_set_wrap (GTK_LABEL (check_label), TRUE);
-              gtk_label_set_wrap_mode (GTK_LABEL (check_label), PANGO_WRAP_WORD_CHAR);
-              gtk_check_button_set_child (GTK_CHECK_BUTTON (check), check_label);
-
-              if (first_valid_check != NULL)
-                gtk_check_button_set_group (GTK_CHECK_BUTTON (check), first_valid_check);
-              else
-                {
-                  gtk_check_button_set_active (GTK_CHECK_BUTTON (check), TRUE);
-                  first_valid_check = GTK_CHECK_BUTTON (check);
-                }
-
-              gtk_box_append (GTK_BOX (box), check);
-              n_valid_checks++;
-            }
-
           g_object_set_data_full (
               G_OBJECT (alert),
-              "checks",
-              checks,
-              (GDestroyNotify) g_ptr_array_unref);
-
-          if (n_valid_checks == 1)
-            gtk_widget_set_sensitive (GTK_WIDGET (first_valid_check), FALSE);
+              "group", g_object_ref (group),
+              g_object_unref);
+          g_object_set_data_full (
+              G_OBJECT (alert),
+              "model", g_object_ref (model),
+              g_object_unref);
+          title = bz_entry_group_get_title (group);
+          id    = bz_entry_group_get_id (group);
         }
-    }
+      else
+        {
+          g_object_set_data_full (
+              G_OBJECT (alert),
+              "entry", g_object_ref (entry),
+              g_object_unref);
+          title = bz_entry_get_title (entry);
+          id    = bz_entry_get_id (entry);
+        }
 
-  g_signal_connect (alert, "response", G_CALLBACK (install_confirmation_response), self);
-  adw_dialog_present (alert, GTK_WIDGET (self));
+      if (remove)
+        {
+          adw_alert_dialog_format_body_markup (
+              ADW_ALERT_DIALOG (alert),
+              _ ("You are about to remove the following Flatpak:\n\n"
+                 "<b>%s</b>\n"
+                 "<tt>%s</tt>\n\n"
+                 "Are you sure?"),
+              title, id);
+          adw_alert_dialog_add_responses (
+              ADW_ALERT_DIALOG (alert),
+              "cancel", _ ("Cancel"),
+              "remove", _ ("Remove"),
+              NULL);
+          adw_alert_dialog_set_response_appearance (
+              ADW_ALERT_DIALOG (alert), "remove", ADW_RESPONSE_DESTRUCTIVE);
+          adw_alert_dialog_set_default_response (ADW_ALERT_DIALOG (alert), "remove");
+          adw_alert_dialog_set_close_response (ADW_ALERT_DIALOG (alert), "cancel");
+        }
+      else
+        {
+          adw_alert_dialog_format_body_markup (
+              ADW_ALERT_DIALOG (alert),
+              _ ("You are about to install the following Flatpak:\n\n"
+                 "<b>%s</b>\n"
+                 "<tt>%s</tt>\n\n"
+                 "Are you sure?"),
+              title, id);
+          adw_alert_dialog_add_responses (
+              ADW_ALERT_DIALOG (alert),
+              "cancel", _ ("Cancel"),
+              "install", _ ("Install"),
+              NULL);
+          adw_alert_dialog_set_response_appearance (
+              ADW_ALERT_DIALOG (alert), "install", ADW_RESPONSE_SUGGESTED);
+          adw_alert_dialog_set_default_response (ADW_ALERT_DIALOG (alert), "install");
+          adw_alert_dialog_set_close_response (ADW_ALERT_DIALOG (alert), "cancel");
+        }
+
+      if (group != NULL)
+        {
+          guint n_entries = 0;
+
+          n_entries = g_list_model_get_n_items (model);
+          if (n_entries > 0)
+            {
+              GtkWidget      *box               = NULL;
+              GtkWidget      *expander          = NULL;
+              GPtrArray      *checks            = NULL;
+              GtkCheckButton *first_valid_check = NULL;
+              int             n_valid_checks    = FALSE;
+
+              box      = gtk_box_new (GTK_ORIENTATION_VERTICAL, 5);
+              expander = gtk_expander_new (_ ("More details"));
+
+              gtk_expander_set_child (GTK_EXPANDER (expander), box);
+              adw_alert_dialog_set_extra_child (ADW_ALERT_DIALOG (alert), expander);
+
+              checks = g_ptr_array_new ();
+
+              for (guint i = 0; i < n_entries; i++)
+                {
+                  g_autoptr (BzEntry) entry_variant = NULL;
+                  gboolean         is_installed     = FALSE;
+                  g_autofree char *label            = NULL;
+                  GtkWidget       *check            = NULL;
+                  GtkWidget       *check_label      = NULL;
+
+                  entry_variant = g_list_model_get_item (model, i);
+                  is_installed  = bz_entry_is_installed (entry_variant);
+
+                  if (bz_entry_is_holding (entry_variant) ||
+                      (!remove && is_installed) ||
+                      (remove && !is_installed))
+                    {
+                      g_ptr_array_add (checks, NULL);
+                      continue;
+                    }
+
+                  label = g_strdup (bz_entry_get_unique_id (entry_variant));
+
+                  check = gtk_check_button_new ();
+                  g_ptr_array_add (checks, check);
+
+                  gtk_widget_set_has_tooltip (check, TRUE);
+                  gtk_widget_set_tooltip_text (check, label);
+
+                  check_label = gtk_label_new (label);
+                  gtk_label_set_wrap (GTK_LABEL (check_label), TRUE);
+                  gtk_label_set_wrap_mode (GTK_LABEL (check_label), PANGO_WRAP_WORD_CHAR);
+                  gtk_check_button_set_child (GTK_CHECK_BUTTON (check), check_label);
+
+                  if (first_valid_check != NULL)
+                    gtk_check_button_set_group (GTK_CHECK_BUTTON (check), first_valid_check);
+                  else
+                    {
+                      gtk_check_button_set_active (GTK_CHECK_BUTTON (check), TRUE);
+                      first_valid_check = GTK_CHECK_BUTTON (check);
+                    }
+
+                  gtk_box_append (GTK_BOX (box), check);
+                  n_valid_checks++;
+                }
+
+              g_object_set_data_full (
+                  G_OBJECT (alert),
+                  "checks",
+                  checks,
+                  (GDestroyNotify) g_ptr_array_unref);
+
+              if (n_valid_checks == 1)
+                gtk_widget_set_sensitive (GTK_WIDGET (first_valid_check), FALSE);
+            }
+        }
+
+      g_signal_connect (alert, "response", G_CALLBACK (install_confirmation_response), self);
+      adw_dialog_present (alert, GTK_WIDGET (self));
+    }
+  else
+    bz_show_error_for_widget (GTK_WIDGET (self), local_error->message);
+
+  dex_clear (&self->transact_future);
+  return NULL;
 }
 
 static void
@@ -1089,7 +947,9 @@ update (BzWindow *self,
       NULL, 0,
       updates, n_updates,
       NULL, 0);
-  bz_transaction_manager_add (self->transaction_manager, transaction);
+  bz_transaction_manager_add (
+      bz_state_info_get_transaction_manager (self->state),
+      transaction);
 }
 
 static void
@@ -1116,22 +976,17 @@ check_transactions (BzWindow *self)
   gboolean paused           = FALSE;
   gboolean active           = FALSE;
 
-  if (self->transaction_manager != NULL)
-    has_transactions = bz_transaction_manager_get_has_transactions (self->transaction_manager);
+  has_transactions = bz_transaction_manager_get_has_transactions (
+      bz_state_info_get_transaction_manager (self->state));
   adw_view_stack_set_visible_child_name (
       self->transactions_stack,
       has_transactions
           ? "content"
           : "empty");
 
-  if (self->transaction_manager == NULL)
-    return;
-
   paused = gtk_toggle_button_get_active (self->transactions_pause);
-  active = bz_transaction_manager_get_active (self->transaction_manager);
-
-  // ugh, this is so messy
-
+  active = bz_transaction_manager_get_active (
+      bz_state_info_get_transaction_manager (self->state));
   if (paused)
     {
       gtk_button_set_icon_name (GTK_BUTTON (self->transactions_pause), "media-playback-start-symbolic");
@@ -1161,19 +1016,19 @@ set_page (BzWindow *self)
   active_name = adw_toggle_group_get_active_name (self->title_toggle_group);
   show_search = adw_overlay_split_view_get_show_sidebar (self->search_split);
 
-  if (self->busy)
+  if (bz_state_info_get_busy (self->state))
     visible_child = "loading";
   else if (show_search)
     visible_child = "view";
   else if (g_strcmp0 (active_name, "installed") == 0)
     visible_child = "installed";
   else if (g_strcmp0 (active_name, "curated") == 0)
-    visible_child = self->online ? "browse" : "offline";
+    visible_child = bz_state_info_get_online (self->state) ? "browse" : "offline";
   else if (g_strcmp0 (active_name, "flathub") == 0)
-    visible_child = self->online ? "flathub" : "offline";
+    visible_child = bz_state_info_get_online (self->state) ? "flathub" : "offline";
 
   adw_view_stack_set_visible_child_name (self->main_stack, visible_child);
-  gtk_widget_set_sensitive (GTK_WIDGET (self->title_toggle_group), !self->busy);
+  gtk_widget_set_sensitive (GTK_WIDGET (self->title_toggle_group), !bz_state_info_get_busy (self->state));
   gtk_revealer_set_reveal_child (self->title_revealer, !show_search);
   set_bottom_bar (self);
 
@@ -1189,20 +1044,10 @@ set_page (BzWindow *self)
 static void
 set_bottom_bar (BzWindow *self)
 {
-  gboolean show_search     = FALSE;
+  gboolean showing_search  = FALSE;
   gboolean show_bottom_bar = FALSE;
 
-  show_search     = adw_overlay_split_view_get_show_sidebar (self->search_split);
-  show_bottom_bar = (self->breakpoint_applied && !show_search) ||
-                    (!self->breakpoint_applied && self->after_update_check_timeout > 0);
-
+  showing_search  = adw_overlay_split_view_get_show_sidebar (self->search_split);
+  show_bottom_bar = (self->breakpoint_applied && !showing_search);
   adw_toolbar_view_set_reveal_bottom_bars (self->toolbar_view, show_bottom_bar);
-}
-
-static void
-hide_up_to_date_notif (BzWindow *self)
-{
-  self->after_update_check_timeout = 0;
-  gtk_revealer_set_reveal_child (self->up_to_date_revealer, FALSE);
-  set_bottom_bar (self);
 }

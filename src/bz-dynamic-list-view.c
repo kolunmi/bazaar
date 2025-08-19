@@ -490,8 +490,6 @@ list_item_factory_teardown (BzDynamicListView        *self,
                             GtkSignalListItemFactory *factory)
 {
   g_return_if_fail (self->child_type != G_TYPE_INVALID && self->child_prop != NULL);
-
-  gtk_list_item_set_child (item, NULL);
 }
 
 static void

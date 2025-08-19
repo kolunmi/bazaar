@@ -18,26 +18,19 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "config.h"
+#define G_LOG_DOMAIN  "BAZAAR::FLATPAK-ENTRY"
+#define BAZAAR_MODULE "entry"
 
+#include "config.h"
 #include <xmlb.h>
 
-#include "bz-env.h"
+#include "bz-async-texture.h"
 #include "bz-flatpak-private.h"
-#include "bz-global-state.h"
+#include "bz-io.h"
 #include "bz-issue.h"
-#include "bz-paintable-model.h"
 #include "bz-release.h"
+#include "bz-serializable.h"
 #include "bz-url.h"
-#include "bz-util.h"
-// #include "bz-review.h"
-
-typedef struct
-{
-  const guchar *data;
-  gsize         size;
-  gsize         position;
-} CairoStreamReader;
 
 enum
 {
@@ -62,15 +55,17 @@ struct _BzFlatpakEntry
   char    *runtime_name;
   char    *addon_extension_of_ref;
 
-  BzFlatpakInstance *flatpak;
-  FlatpakRef        *ref;
-
-  DexFuture  *icon_task;
-  GdkTexture *icon_paintable;
-  GIcon      *mini_icon;
+  FlatpakRef *ref;
 };
 
-G_DEFINE_FINAL_TYPE (BzFlatpakEntry, bz_flatpak_entry, BZ_TYPE_ENTRY)
+static void
+serializable_iface_init (BzSerializableInterface *iface);
+
+G_DEFINE_FINAL_TYPE_WITH_CODE (
+    BzFlatpakEntry,
+    bz_flatpak_entry,
+    BZ_TYPE_ENTRY,
+    G_IMPLEMENT_INTERFACE (BZ_TYPE_SERIALIZABLE, serializable_iface_init))
 
 enum
 {
@@ -89,34 +84,6 @@ enum
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
 
-BZ_DEFINE_DATA (
-    load_icon,
-    LoadIcon,
-    {
-      BzFlatpakEntry *self;
-      char           *location;
-      gboolean        is_local;
-      int             width;
-      int             height;
-      char           *unique_id;
-      char           *output_dir;
-      DexScheduler   *home_scheduler;
-    },
-    BZ_RELEASE_DATA (self, g_object_unref);
-    BZ_RELEASE_DATA (location, g_free);
-    BZ_RELEASE_DATA (unique_id, g_free);
-    BZ_RELEASE_DATA (output_dir, g_free);
-    BZ_RELEASE_DATA (home_scheduler, dex_unref));
-static DexFuture *
-load_icon_fiber (LoadIconData *data);
-static DexFuture *
-load_icon_notify_fiber (BzFlatpakEntry *self);
-
-static cairo_status_t
-read_cairo_stream_data (void          *closure,
-                        unsigned char *data,
-                        unsigned int   length);
-
 static void
 compile_appstream_description (XbNode  *node,
                                GString *string,
@@ -128,23 +95,15 @@ append_markup_escaped (GString    *string,
                        const char *append);
 
 static void
+clear_entry (BzFlatpakEntry *self);
+
+static void
 bz_flatpak_entry_dispose (GObject *object)
 {
   BzFlatpakEntry *self = BZ_FLATPAK_ENTRY (object);
 
-  g_clear_pointer (&self->flatpak_id, g_free);
-  g_clear_pointer (&self->application_name, g_free);
-  g_clear_pointer (&self->application_runtime, g_free);
-  g_clear_pointer (&self->application_command, g_free);
-  g_clear_pointer (&self->runtime_name, g_free);
-  g_clear_pointer (&self->addon_extension_of_ref, g_free);
-
-  g_clear_object (&self->flatpak);
+  clear_entry (self);
   g_clear_object (&self->ref);
-
-  dex_clear (&self->icon_task);
-  g_clear_object (&self->icon_paintable);
-  g_clear_object (&self->mini_icon);
 
   G_OBJECT_CLASS (bz_flatpak_entry_parent_class)->dispose (object);
 }
@@ -159,9 +118,6 @@ bz_flatpak_entry_get_property (GObject    *object,
 
   switch (prop_id)
     {
-    case PROP_INSTANCE:
-      g_value_set_object (value, self->flatpak);
-      break;
     case PROP_USER:
       g_value_set_boolean (value, self->user);
       break;
@@ -278,6 +234,74 @@ bz_flatpak_entry_init (BzFlatpakEntry *self)
 {
 }
 
+static void
+bz_flatpak_entry_real_serialize (BzSerializable  *serializable,
+                                 GVariantBuilder *builder)
+{
+  BzFlatpakEntry *self = BZ_FLATPAK_ENTRY (serializable);
+
+  g_variant_builder_add (builder, "{sv}", "user", g_variant_new_boolean (self->user));
+  if (self->flatpak_id != NULL)
+    g_variant_builder_add (builder, "{sv}", "flatpak-id", g_variant_new_string (self->flatpak_id));
+  if (self->application_name != NULL)
+    g_variant_builder_add (builder, "{sv}", "application-name", g_variant_new_string (self->application_name));
+  if (self->application_runtime != NULL)
+    g_variant_builder_add (builder, "{sv}", "application-runtime", g_variant_new_string (self->application_runtime));
+  if (self->application_command != NULL)
+    g_variant_builder_add (builder, "{sv}", "application-command", g_variant_new_string (self->application_command));
+  if (self->runtime_name != NULL)
+    g_variant_builder_add (builder, "{sv}", "runtime-name", g_variant_new_string (self->runtime_name));
+  if (self->addon_extension_of_ref != NULL)
+    g_variant_builder_add (builder, "{sv}", "addon-extension-of-ref", g_variant_new_string (self->addon_extension_of_ref));
+
+  bz_entry_serialize (BZ_ENTRY (self), builder);
+}
+
+static gboolean
+bz_flatpak_entry_real_deserialize (BzSerializable *serializable,
+                                   GVariant       *import,
+                                   GError        **error)
+{
+  BzFlatpakEntry *self          = BZ_FLATPAK_ENTRY (serializable);
+  g_autoptr (GVariantIter) iter = NULL;
+
+  clear_entry (self);
+
+  iter = g_variant_iter_new (import);
+  for (;;)
+    {
+      g_autofree char *key       = NULL;
+      g_autoptr (GVariant) value = NULL;
+
+      if (!g_variant_iter_next (iter, "{sv}", &key, &value))
+        break;
+
+      if (g_strcmp0 (key, "user") == 0)
+        self->user = g_variant_get_boolean (value);
+      else if (g_strcmp0 (key, "flatpak-id") == 0)
+        self->flatpak_id = g_variant_dup_string (value, NULL);
+      else if (g_strcmp0 (key, "application-name") == 0)
+        self->application_name = g_variant_dup_string (value, NULL);
+      else if (g_strcmp0 (key, "application-runtime") == 0)
+        self->application_runtime = g_variant_dup_string (value, NULL);
+      else if (g_strcmp0 (key, "application-command") == 0)
+        self->application_command = g_variant_dup_string (value, NULL);
+      else if (g_strcmp0 (key, "runtime-name") == 0)
+        self->runtime_name = g_variant_dup_string (value, NULL);
+      else if (g_strcmp0 (key, "addon-extension-of-ref") == 0)
+        self->addon_extension_of_ref = g_variant_dup_string (value, NULL);
+    }
+
+  return bz_entry_deserialize (BZ_ENTRY (self), import, error);
+}
+
+static void
+serializable_iface_init (BzSerializableInterface *iface)
+{
+  iface->serialize   = bz_flatpak_entry_real_serialize;
+  iface->deserialize = bz_flatpak_entry_real_deserialize;
+}
+
 BzFlatpakEntry *
 bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
                               gboolean           user,
@@ -285,53 +309,51 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
                               FlatpakRef        *ref,
                               AsComponent       *component,
                               const char        *appstream_dir,
-                              const char        *output_dir,
                               GdkPaintable      *remote_icon,
-                              DexScheduler      *home_scheduler,
                               GError           **error)
 {
-  g_autoptr (BzFlatpakEntry) self         = NULL;
-  GBytes *bytes                           = NULL;
-  g_autoptr (GKeyFile) key_file           = NULL;
-  gboolean         result                 = FALSE;
-  guint            kinds                  = 0;
-  const char      *id                     = NULL;
-  g_autofree char *unique_id              = NULL;
-  guint64          download_size          = 0;
-  const char      *title                  = NULL;
-  const char      *eol                    = NULL;
-  const char      *description            = NULL;
-  const char      *metadata_license       = NULL;
-  const char      *project_license        = NULL;
-  gboolean         is_floss               = FALSE;
-  const char      *project_group          = NULL;
-  const char      *developer              = NULL;
-  const char      *developer_id           = NULL;
-  g_autofree char *long_description       = NULL;
-  const char      *remote_name            = NULL;
-  const char      *project_url            = NULL;
-  g_autoptr (GPtrArray) as_search_tokens  = NULL;
-  g_autoptr (GPtrArray) search_tokens     = NULL;
-  g_autoptr (GdkTexture) icon_paintable   = NULL;
-  g_autoptr (BzPaintableModel) paintables = NULL;
-  g_autoptr (GListStore) share_urls       = NULL;
-  g_autofree char *donation_url           = NULL;
-  g_autoptr (GListStore) native_reviews   = NULL;
-  double           average_rating         = 0.0;
-  g_autofree char *ratings_summary        = NULL;
-  g_autoptr (GListStore) version_history  = NULL;
+  g_autoptr (BzFlatpakEntry) self              = NULL;
+  GBytes *bytes                                = NULL;
+  g_autoptr (GKeyFile) key_file                = NULL;
+  gboolean         result                      = FALSE;
+  guint            kinds                       = 0;
+  g_autofree char *module_dir                  = NULL;
+  const char      *id                          = NULL;
+  g_autofree char *unique_id                   = NULL;
+  g_autofree char *unique_id_checksum          = NULL;
+  guint64          download_size               = 0;
+  const char      *title                       = NULL;
+  const char      *eol                         = NULL;
+  const char      *description                 = NULL;
+  const char      *metadata_license            = NULL;
+  const char      *project_license             = NULL;
+  gboolean         is_floss                    = FALSE;
+  const char      *project_group               = NULL;
+  const char      *developer                   = NULL;
+  const char      *developer_id                = NULL;
+  g_autofree char *long_description            = NULL;
+  const char      *remote_name                 = NULL;
+  const char      *project_url                 = NULL;
+  g_autoptr (GPtrArray) as_search_tokens       = NULL;
+  g_autoptr (GPtrArray) search_tokens          = NULL;
+  g_autoptr (GdkPaintable) icon_paintable      = NULL;
+  g_autoptr (GIcon) mini_icon                  = NULL;
+  g_autoptr (GListStore) screenshot_paintables = NULL;
+  g_autoptr (GListStore) share_urls            = NULL;
+  g_autofree char *donation_url                = NULL;
+  g_autoptr (GListStore) native_reviews        = NULL;
+  double           average_rating              = 0.0;
+  g_autofree char *ratings_summary             = NULL;
+  g_autoptr (GListStore) version_history       = NULL;
 
   g_return_val_if_fail (BZ_IS_FLATPAK_INSTANCE (instance), NULL);
   g_return_val_if_fail (FLATPAK_IS_REF (ref), NULL);
   g_return_val_if_fail (FLATPAK_IS_REMOTE_REF (ref) || FLATPAK_IS_BUNDLE_REF (ref), NULL);
   g_return_val_if_fail (component == NULL || appstream_dir != NULL, NULL);
-  g_return_val_if_fail (component == NULL || output_dir != NULL, NULL);
-  g_return_val_if_fail (home_scheduler == NULL || DEX_IS_SCHEDULER (home_scheduler), NULL);
 
-  self          = g_object_new (BZ_TYPE_FLATPAK_ENTRY, NULL);
-  self->flatpak = g_object_ref (instance);
-  self->user    = user;
-  self->ref     = g_object_ref (ref);
+  self       = g_object_new (BZ_TYPE_FLATPAK_ENTRY, NULL);
+  self->user = user;
+  self->ref  = g_object_ref (ref);
 
   key_file = g_key_file_new ();
   if (FLATPAK_IS_REMOTE_REF (ref))
@@ -360,19 +382,22 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
 
       GET_STRING (application_name, "Application", "name");
       GET_STRING (application_runtime, "Application", "runtime");
-      GET_STRING (application_command, "Application", "command");
+      if (g_key_file_has_key (key_file, "Application", "command", NULL))
+        GET_STRING (application_command, "Application", "command");
     }
 
   if (g_key_file_has_group (key_file, "Runtime"))
     {
-      kinds |= BZ_ENTRY_KIND_RUNTIME;
+      if (!g_key_file_has_group (key_file, "Build"))
+        kinds |= BZ_ENTRY_KIND_RUNTIME;
 
       GET_STRING (runtime_name, "Runtime", "name");
     }
 
   if (g_key_file_has_group (key_file, "ExtensionOf"))
     {
-      kinds |= BZ_ENTRY_KIND_ADDON;
+      if (!(kinds & BZ_ENTRY_KIND_RUNTIME))
+        kinds |= BZ_ENTRY_KIND_ADDON;
 
       GET_STRING (addon_extension_of_ref, "ExtensionOf", "ref");
     }
@@ -380,12 +405,18 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
 #undef GET_STRING
 
   if (kinds == 0)
-    return NULL;
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "Key file presented no useful information");
+      return NULL;
+    }
+  module_dir = bz_dup_module_dir ();
 
   self->flatpak_id = flatpak_ref_format_ref (ref);
 
-  id        = flatpak_ref_get_name (ref);
-  unique_id = bz_flatpak_ref_format_unique (ref, user);
+  id                 = flatpak_ref_get_name (ref);
+  unique_id          = bz_flatpak_ref_format_unique (ref, user);
+  unique_id_checksum = g_compute_checksum_for_string (G_CHECKSUM_MD5, unique_id, -1);
 
   if (FLATPAK_IS_REMOTE_REF (ref))
     download_size = flatpak_remote_ref_get_download_size (FLATPAK_REMOTE_REF (ref));
@@ -399,7 +430,7 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
       GPtrArray     *screenshots          = NULL;
       AsReleaseList *releases             = NULL;
       GPtrArray     *releases_arr         = NULL;
-      // GPtrArray   *reviews              = NULL;
+      GPtrArray     *icons                = NULL;
 
       title = as_component_get_name (component);
       if (title == NULL)
@@ -435,6 +466,7 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
           root   = xb_silo_get_root (silo);
           string = g_string_new (NULL);
 
+          /* TODO this sucks big time */
           cleanup_regex = g_regex_new (
               "^ +| +$|\\t+|\\A\\s+|\\s+\\z",
               G_REGEX_MULTILINE,
@@ -468,9 +500,7 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
       screenshots = as_component_get_screenshots_all (component);
       if (screenshots != NULL)
         {
-          g_autoptr (GListStore) files = NULL;
-
-          files = g_list_store_new (G_TYPE_FILE);
+          screenshot_paintables = g_list_store_new (BZ_TYPE_ASYNC_TEXTURE);
 
           for (guint i = 0; i < screenshots->len; i++)
             {
@@ -482,24 +512,30 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
 
               for (guint j = 0; j < images->len; j++)
                 {
-                  AsImage    *image_obj             = NULL;
-                  const char *url                   = NULL;
-                  g_autoptr (GFile) screenshot_file = NULL;
+                  AsImage    *image_obj = NULL;
+                  const char *url       = NULL;
 
-                  image_obj       = g_ptr_array_index (images, j);
-                  url             = as_image_get_url (image_obj);
-                  screenshot_file = g_file_new_for_uri (url);
+                  image_obj = g_ptr_array_index (images, j);
+                  url       = as_image_get_url (image_obj);
 
-                  if (screenshot_file != NULL)
+                  if (url != NULL)
                     {
-                      g_list_store_append (files, screenshot_file);
+                      g_autoptr (GFile) screenshot_file  = NULL;
+                      g_autofree char *cache_basename    = NULL;
+                      g_autoptr (GFile) cache_file       = NULL;
+                      g_autoptr (BzAsyncTexture) texture = NULL;
+
+                      screenshot_file = g_file_new_for_uri (url);
+                      cache_basename  = g_strdup_printf ("screenshot_%d.png", i);
+                      cache_file      = g_file_new_build_filename (
+                          module_dir, unique_id_checksum, cache_basename, NULL);
+
+                      texture = bz_async_texture_new_lazy (screenshot_file, cache_file);
+                      g_list_store_append (screenshot_paintables, texture);
                       break;
                     }
                 }
             }
-
-          if (g_list_model_get_n_items (G_LIST_MODEL (files)) > 0)
-            paintables = bz_paintable_model_new (G_LIST_MODEL (files));
         }
 
       share_urls = g_list_store_new (BZ_TYPE_URL);
@@ -612,158 +648,6 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
             }
         }
 
-      // reviews = as_component_get_reviews (component);
-      // if (reviews != NULL && reviews->len > 0)
-      //   {
-      //     double ratings_sum = 0.0;
-
-      //     native_reviews = g_list_store_new (BZ_TYPE_REVIEW);
-
-      //     for (guint i = 0; i < reviews->len; i++)
-      //       {
-      //         AsReview *review                   = NULL;
-      //         double    rating                   = 0.0;
-      //         g_autoptr (BzReview) native_review = NULL;
-
-      //         review = g_ptr_array_index (reviews, i);
-      //         rating = (double) as_review_get_rating (review) / 100.0;
-      //         ratings_sum += rating;
-
-      //         native_review = g_object_new (
-      //             BZ_TYPE_REVIEW,
-      //             "priority", as_review_get_priority (review),
-      //             "id", as_review_get_id (review),
-      //             "summary", as_review_get_summary (review),
-      //             "description", as_review_get_description (review),
-      //             "locale", as_review_get_locale (review),
-      //             "rating", rating,
-      //             "version", as_review_get_version (review),
-      //             "reviewer-id", as_review_get_reviewer_id (review),
-      //             "reviewer-name", as_review_get_reviewer_name (review),
-      //             "date", as_review_get_date (review),
-      //             "was-self", (gboolean) (as_review_get_flags (review) & AS_REVIEW_FLAG_SELF),
-      //             "self-voted", (gboolean) (as_review_get_flags (review) & AS_REVIEW_FLAG_VOTED),
-      //             NULL);
-      //         g_list_store_append (native_reviews, native_review);
-      //       }
-
-      //     average_rating  = ratings_sum / (double) reviews->len;
-      //     ratings_summary = g_strdup_printf (
-      //         "%.2f stars (%d reviews)",
-      //         average_rating * 5.0,
-      //         reviews->len);
-      //   }
-    }
-
-  if (FLATPAK_IS_BUNDLE_REF (ref))
-    {
-      for (int size = 128; size > 0; size -= 64)
-        {
-          g_autoptr (GBytes) icon_bytes = NULL;
-
-          icon_bytes = flatpak_bundle_ref_get_icon (FLATPAK_BUNDLE_REF (ref), size);
-          if (icon_bytes == NULL)
-            continue;
-
-          icon_paintable = gdk_texture_new_from_bytes (icon_bytes, NULL);
-          /* don't error out even if loading fails */
-
-          if (icon_paintable != NULL)
-            break;
-        }
-    }
-
-  search_tokens = g_ptr_array_new_with_free_func (g_free);
-  if (as_search_tokens != NULL)
-    {
-      for (guint i = 0; i < as_search_tokens->len; i++)
-        g_ptr_array_add (
-            search_tokens,
-            g_strdup (g_ptr_array_index (as_search_tokens, i)));
-    }
-  g_ptr_array_add (search_tokens, g_strdup (unique_id));
-
-  if (kinds & BZ_ENTRY_KIND_APPLICATION)
-    {
-      g_ptr_array_add (search_tokens, g_strdup (self->application_name));
-      g_ptr_array_add (search_tokens, g_strdup (self->application_runtime));
-      g_ptr_array_add (search_tokens, g_strdup (self->application_command));
-    }
-
-  if (title != NULL)
-    g_ptr_array_add (search_tokens, g_strdup (title));
-  else if (self->application_name != NULL)
-    title = self->application_name;
-  else if (self->runtime_name != NULL)
-    title = self->runtime_name;
-  else
-    title = self->flatpak_id;
-
-  if (FLATPAK_IS_REMOTE_REF (ref))
-    eol = flatpak_remote_ref_get_eol (FLATPAK_REMOTE_REF (ref));
-  if (eol != NULL)
-    g_ptr_array_add (search_tokens, g_strdup (eol));
-
-  if (description != NULL)
-    g_ptr_array_add (search_tokens, g_strdup (description));
-  if (long_description != NULL)
-    g_ptr_array_add (search_tokens, g_strdup (long_description));
-
-  if (remote != NULL)
-    remote_name = flatpak_remote_get_name (remote);
-  else if (FLATPAK_IS_BUNDLE_REF (ref))
-    remote_name = flatpak_bundle_ref_get_origin (FLATPAK_BUNDLE_REF (ref));
-  if (remote_name != NULL)
-    g_ptr_array_add (search_tokens, g_strdup (remote_name));
-
-  if (metadata_license != NULL)
-    g_ptr_array_add (search_tokens, g_strdup (metadata_license));
-  if (project_license != NULL)
-    g_ptr_array_add (search_tokens, g_strdup (project_license));
-  if (project_group != NULL)
-    g_ptr_array_add (search_tokens, g_strdup (project_group));
-  if (developer != NULL)
-    g_ptr_array_add (search_tokens, g_strdup (developer));
-  if (developer_id != NULL)
-    g_ptr_array_add (search_tokens, g_strdup (developer_id));
-  if (metadata_license != NULL)
-    g_ptr_array_add (search_tokens, g_strdup (metadata_license));
-  if (project_url != NULL)
-    g_ptr_array_add (search_tokens, g_strdup (project_url));
-
-  g_object_set (
-      self,
-      "kinds", kinds,
-      "id", id,
-      "unique-id", unique_id,
-      "title", title,
-      "eol", eol,
-      "description", description,
-      "long-description", long_description,
-      "remote-repo-name", remote_name,
-      "url", project_url,
-      "size", download_size,
-      "search-tokens", search_tokens,
-      "remote-repo-icon", remote_icon,
-      "metadata-license", metadata_license,
-      "project-license", project_license,
-      "is-floss", is_floss,
-      "project-group", project_group,
-      "developer", developer,
-      "developer-id", developer_id,
-      "screenshot-paintables", paintables,
-      "share-urls", share_urls,
-      "donation-url", donation_url,
-      "reviews", native_reviews,
-      "average-rating", average_rating,
-      "ratings-summary", ratings_summary,
-      "version-history", version_history,
-      NULL);
-
-  if (home_scheduler != NULL && component != NULL)
-    {
-      GPtrArray *icons = NULL;
-
       icons = as_component_get_icons (component);
       if (icons != NULL)
         {
@@ -834,26 +718,112 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
 
           if (select != NULL)
             {
-              g_autoptr (LoadIconData) data = NULL;
+              g_autofree char *select_uri  = NULL;
+              g_autoptr (GFile) source     = NULL;
+              g_autoptr (GFile) cache_into = NULL;
+              BzAsyncTexture *texture      = NULL;
 
-              data                 = load_icon_data_new ();
-              data->self           = g_object_ref (self);
-              data->location       = g_steal_pointer (&select);
-              data->is_local       = select_is_local;
-              data->width          = select_width;
-              data->height         = select_height;
-              data->output_dir     = g_strdup (output_dir);
-              data->unique_id      = g_steal_pointer (&unique_id);
-              data->home_scheduler = dex_ref (home_scheduler);
+              if (select_is_local)
+                select_uri = g_strdup_printf ("file://%s", select);
+              else
+                select_uri = g_steal_pointer (&select);
 
-              self->icon_task = dex_scheduler_spawn (
-                  dex_thread_pool_scheduler_get_default (),
-                  bz_get_dex_stack_size (),
-                  (DexFiberFunc) load_icon_fiber,
-                  load_icon_data_ref (data), load_icon_data_unref);
+              source     = g_file_new_for_uri (select_uri);
+              cache_into = g_file_new_build_filename (
+                  module_dir, unique_id_checksum, "icon-paintable.png", NULL);
+
+              texture        = bz_async_texture_new_lazy (source, cache_into);
+              icon_paintable = GDK_PAINTABLE (texture);
+
+              if (select_is_local)
+                mini_icon = bz_load_mini_icon_sync (unique_id_checksum, select);
             }
         }
     }
+
+  if (icon_paintable == NULL && FLATPAK_IS_BUNDLE_REF (ref))
+    {
+      for (int size = 128; size > 0; size -= 64)
+        {
+          g_autoptr (GBytes) icon_bytes = NULL;
+          GdkTexture *texture           = NULL;
+
+          icon_bytes = flatpak_bundle_ref_get_icon (FLATPAK_BUNDLE_REF (ref), size);
+          if (icon_bytes == NULL)
+            continue;
+
+          texture = gdk_texture_new_from_bytes (icon_bytes, NULL);
+          /* don't error out even if loading fails */
+
+          if (texture != NULL)
+            {
+              icon_paintable = GDK_PAINTABLE (texture);
+              break;
+            }
+        }
+    }
+
+  if (title == NULL)
+    {
+      if (self->application_name != NULL)
+        title = self->application_name;
+      else if (self->runtime_name != NULL)
+        title = self->runtime_name;
+      else
+        title = self->flatpak_id;
+    }
+
+  if (remote != NULL)
+    remote_name = flatpak_remote_get_name (remote);
+  else if (FLATPAK_IS_BUNDLE_REF (ref))
+    remote_name = flatpak_bundle_ref_get_origin (FLATPAK_BUNDLE_REF (ref));
+
+  if (FLATPAK_IS_REMOTE_REF (ref))
+    eol = flatpak_remote_ref_get_eol (FLATPAK_REMOTE_REF (ref));
+
+  if (as_search_tokens != NULL)
+    {
+      search_tokens = g_ptr_array_new_with_free_func (g_free);
+      for (guint i = 0; i < as_search_tokens->len; i++)
+        {
+          const char *token = NULL;
+
+          token = g_ptr_array_index (as_search_tokens, i);
+          g_ptr_array_add (search_tokens, g_strdup (token));
+        }
+    }
+
+  g_object_set (
+      self,
+      "kinds", kinds,
+      "id", id,
+      "unique-id", unique_id,
+      "unique-id-checksum", unique_id_checksum,
+      "title", title,
+      "eol", eol,
+      "description", description,
+      "long-description", long_description,
+      "remote-repo-name", remote_name,
+      "url", project_url,
+      "size", download_size,
+      "search-tokens", search_tokens,
+      "remote-repo-icon", remote_icon,
+      "metadata-license", metadata_license,
+      "project-license", project_license,
+      "is-floss", is_floss,
+      "project-group", project_group,
+      "developer", developer,
+      "developer-id", developer_id,
+      "icon-paintable", icon_paintable,
+      "mini-icon", mini_icon,
+      "screenshot-paintables", screenshot_paintables,
+      "share-urls", share_urls,
+      "donation-url", donation_url,
+      "reviews", native_reviews,
+      "average-rating", average_rating,
+      "ratings-summary", ratings_summary,
+      "version-history", version_history,
+      NULL);
 
   return g_steal_pointer (&self);
 }
@@ -884,6 +854,10 @@ FlatpakRef *
 bz_flatpak_entry_get_ref (BzFlatpakEntry *self)
 {
   g_return_val_if_fail (BZ_IS_FLATPAK_ENTRY (self), NULL);
+
+  if (self->ref == NULL)
+    self->ref = flatpak_ref_parse (self->flatpak_id, NULL);
+
   return self->ref;
 }
 
@@ -922,43 +896,66 @@ bz_flatpak_entry_get_addon_extension_of_ref (BzFlatpakEntry *self)
   return self->addon_extension_of_ref;
 }
 
-gboolean
-bz_flatpak_entry_launch (BzFlatpakEntry *self,
-                         GError        **error)
+char *
+bz_flatpak_entry_extract_id_from_unique_id (const char *unique_id)
 {
+  g_auto (GStrv) tokens      = NULL;
+  g_autoptr (FlatpakRef) ref = NULL;
+  const char *name           = NULL;
+
+  tokens = g_strsplit (unique_id, "::", 3);
+  if (g_strv_length (tokens) != 3)
+    return NULL;
+
+  ref = flatpak_ref_parse (tokens[2], NULL);
+  if (ref == NULL)
+    return NULL;
+
+  name = flatpak_ref_get_name (ref);
+  if (name == NULL)
+    return NULL;
+
+  return g_strdup (name);
+}
+
+gboolean
+bz_flatpak_entry_launch (BzFlatpakEntry    *self,
+                         BzFlatpakInstance *flatpak,
+                         GError           **error)
+{
+  FlatpakRef *ref = NULL;
+#ifdef SANDBOXED_LIBFLATPAK
+  g_autofree char *fmt     = NULL;
+  g_autofree char *cmdline = NULL;
+#else
   FlatpakInstallation *installation = NULL;
+#endif
 
   g_return_val_if_fail (BZ_IS_FLATPAK_ENTRY (self), FALSE);
+  g_return_val_if_fail (BZ_IS_FLATPAK_INSTANCE (flatpak), FALSE);
 
+  ref = bz_flatpak_entry_get_ref (self);
+
+#ifdef SANDBOXED_LIBFLATPAK
+  fmt     = flatpak_ref_format_ref (FLATPAK_REF (ref));
+  cmdline = g_strdup_printf ("flatpak-spawn --host flatpak run %s", fmt);
+
+  return g_spawn_command_line_async (cmdline, error);
+#else
   installation =
       self->user
-          ? bz_flatpak_instance_get_user_installation (self->flatpak)
-          : bz_flatpak_instance_get_system_installation (self->flatpak);
+          ? bz_flatpak_instance_get_user_installation (flatpak)
+          : bz_flatpak_instance_get_system_installation (flatpak);
 
   /* async? */
   return flatpak_installation_launch (
       installation,
-      flatpak_ref_get_name (self->ref),
-      flatpak_ref_get_arch (self->ref),
-      flatpak_ref_get_branch (self->ref),
-      flatpak_ref_get_commit (self->ref),
+      flatpak_ref_get_name (ref),
+      flatpak_ref_get_arch (ref),
+      flatpak_ref_get_branch (ref),
+      flatpak_ref_get_commit (ref),
       NULL, error);
-}
-
-static cairo_status_t
-read_cairo_stream_data (void          *closure,
-                        unsigned char *data,
-                        unsigned int   length)
-{
-  CairoStreamReader *reader_closure = closure;
-
-  if (reader_closure->position + length > reader_closure->size)
-    return CAIRO_STATUS_READ_ERROR;
-
-  memcpy (data, reader_closure->data + reader_closure->position, length);
-  reader_closure->position += length;
-
-  return CAIRO_STATUS_SUCCESS;
+#endif
 }
 
 static void
@@ -1055,107 +1052,13 @@ append_markup_escaped (GString    *string,
   g_string_append (string, escaped);
 }
 
-static DexFuture *
-load_icon_fiber (LoadIconData *data)
+static void
+clear_entry (BzFlatpakEntry *self)
 {
-  BzFlatpakEntry *self                   = data->self;
-  char           *location               = data->location;
-  gboolean        is_local               = data->is_local;
-  int             width                  = data->width;
-  int             height                 = data->height;
-  char           *unique_id              = data->unique_id;
-  char           *output_dir             = data->output_dir;
-  DexScheduler   *home_scheduler         = data->home_scheduler;
-  gboolean        result                 = FALSE;
-  g_autoptr (GBytes) icon_bytes          = NULL;
-  CairoStreamReader closure              = { 0 };
-  cairo_surface_t  *surface_in           = NULL;
-  cairo_surface_t  *surface_out          = NULL;
-  cairo_t          *cairo                = NULL;
-  g_autoptr (GString) mini_icon_basename = NULL;
-  g_autofree char *mini_icon_path        = NULL;
-  g_autoptr (GFile) mini_icon_file       = NULL;
-
-  if (is_local)
-    {
-      g_autoptr (GFile) file = NULL;
-
-      file       = g_file_new_for_path (location);
-      icon_bytes = g_file_load_bytes (file, NULL, NULL, NULL);
-    }
-  else
-    {
-      g_autoptr (SoupMessage) message  = NULL;
-      g_autoptr (GOutputStream) output = NULL;
-      guint64 bytes_written            = 0;
-
-      message       = soup_message_new (SOUP_METHOD_GET, location);
-      output        = g_memory_output_stream_new_resizable ();
-      bytes_written = dex_await_uint64 (
-          bz_send_with_global_http_session_then_splice_into (message, output),
-          NULL);
-      result = g_output_stream_close (output, NULL, NULL);
-
-      if (result && bytes_written >= 0)
-        icon_bytes = g_memory_output_stream_steal_as_bytes (
-            G_MEMORY_OUTPUT_STREAM (output));
-    }
-
-  if (icon_bytes != NULL)
-    {
-      /* Using glycin here is extremely slow for
-       * some reason so we'll opt for the old method.
-       */
-      self->icon_paintable = gdk_texture_new_from_bytes (icon_bytes, NULL);
-
-      closure.data     = g_bytes_get_data (icon_bytes, &closure.size);
-      closure.position = 0;
-      surface_in       = cairo_image_surface_create_from_png_stream (read_cairo_stream_data, &closure);
-
-      /* 24x24 for the gnome-shell search provider */
-      surface_out = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, 24, 24);
-      cairo       = cairo_create (surface_out);
-
-      cairo_scale (cairo, 24.0 / (double) width, 24.0 / (double) height);
-      cairo_set_source_surface (cairo, surface_in, 0, 0);
-      cairo_paint (cairo);
-      cairo_restore (cairo);
-
-      mini_icon_basename = g_string_new (unique_id);
-      g_string_replace (mini_icon_basename, "/", "::", 0);
-      g_string_append (mini_icon_basename, "-24x24.png");
-      mini_icon_path = g_build_filename (output_dir, mini_icon_basename->str, NULL);
-
-      cairo_surface_flush (surface_out);
-      cairo_surface_write_to_png (surface_out, mini_icon_path);
-      cairo_destroy (cairo);
-      cairo_surface_destroy (surface_in);
-      cairo_surface_destroy (surface_out);
-
-      mini_icon_file  = g_file_new_for_path (mini_icon_path);
-      self->mini_icon = g_file_icon_new (mini_icon_file);
-
-      return dex_scheduler_spawn (
-          home_scheduler,
-          bz_get_dex_stack_size (),
-          (DexFiberFunc) load_icon_notify_fiber,
-          g_object_ref (self), g_object_unref);
-    }
-  else
-    return NULL;
-}
-
-static DexFuture *
-load_icon_notify_fiber (BzFlatpakEntry *self)
-{
-  g_object_set (
-      self,
-      "icon-paintable", self->icon_paintable,
-      "mini-icon", self->mini_icon,
-      NULL);
-  g_clear_object (&self->icon_paintable);
-  g_clear_object (&self->mini_icon);
-
-  self->icon_task = NULL;
-  return NULL;
+  g_clear_pointer (&self->flatpak_id, g_free);
+  g_clear_pointer (&self->application_name, g_free);
+  g_clear_pointer (&self->application_runtime, g_free);
+  g_clear_pointer (&self->application_command, g_free);
+  g_clear_pointer (&self->runtime_name, g_free);
+  g_clear_pointer (&self->addon_extension_of_ref, g_free);
 }

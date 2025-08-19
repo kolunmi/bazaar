@@ -4,7 +4,6 @@ using Adw 1;
 template $BzFullView: Adw.Bin {
   child: Adw.ViewStack stack {
     enable-transitions: true;
-    transition-duration: 400;
 
     Adw.ViewStackPage {
       name: "empty";
@@ -16,7 +15,7 @@ template $BzFullView: Adw.Bin {
         description: _("Try a different search query");
       };
     }
-    
+
     Adw.ViewStackPage {
       name: "content";
       title: _("Content");
@@ -67,24 +66,12 @@ template $BzFullView: Adw.Bin {
                     orientation: horizontal;
                     spacing: 20;
 
-                    Picture {
-                      valign: start;
-                      width-request: 128;
-                      height-request: 128;
-                      content-fit: scale_down;
-                      can-shrink: false;
-                      paintable: bind template.entry-group as <$BzEntryGroup>.ui-entry as <$BzEntry>.icon-paintable;
-                      visible: bind $invert_boolean($is_null(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzEntry>.icon-paintable) as <bool>) as <bool>;
-                    }
-
                     Image {
                       valign: center;
                       halign: center;
                       width-request: 128;
                       height-request: 128;
-                      pixel-size: 128;
-                      icon-name: "image-missing-symbolic";
-                      visible: bind $is_null(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzEntry>.icon-paintable) as <bool>;
+                      paintable: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable;
                     }
 
                     Box {
@@ -94,7 +81,6 @@ template $BzFullView: Adw.Bin {
                       Box {
                         orientation: vertical;
                         spacing: 3;
-
                         
                         Label {
                           styles [
@@ -105,7 +91,7 @@ template $BzFullView: Adw.Bin {
                           wrap: true;
                           wrap-mode: word_char;
                           natural-wrap-mode: word;
-                          label: bind template.entry-group as <$BzEntryGroup>.ui-entry as <$BzEntry>.title;
+                          label: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.title;
                         }
 
                         Box {
@@ -122,13 +108,13 @@ template $BzFullView: Adw.Bin {
                             wrap: true;
                             wrap-mode: word_char;
                             natural-wrap-mode: word;
-                            label: bind template.entry-group as <$BzEntryGroup>.ui-entry as <$BzEntry>.developer;
+                            label: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.developer;
                           }
                           
                           Revealer {
                             transition-type: crossfade;
-                            reveal-child: bind template.entry-group as <$BzEntryGroup>.ui-entry as <$BzEntry>.verified;
-                            visible: bind template.entry-group as <$BzEntryGroup>.ui-entry as <$BzEntry>.verified;
+                            reveal-child: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
+                            visible: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
 
                             child: Image {
                               styles [
@@ -151,7 +137,7 @@ template $BzFullView: Adw.Bin {
                           xalign: 0.0;
                           wrap: true;
                           wrap-mode: word_char;
-                          label: bind template.entry-group as <$BzEntryGroup>.ui-entry as <$BzEntry>.description;
+                          label: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.description;
                         }
                       }
                     }
@@ -273,6 +259,8 @@ template $BzFullView: Adw.Bin {
                         has-tooltip: true;
                         tooltip-text: _("The number of downloads in the last 30 days. Click to view this application's download statistics.");
                         clicked => $dl_stats_cb(template);
+                        visible: bind $invert_boolean($is_null(template.debounced-ui-entry) as <bool>) as <bool>;
+                        sensitive: bind $invert_boolean($is_zero(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <bool>) as <bool>;
 
                         child: Box {
                           hexpand: false;
@@ -284,12 +272,12 @@ template $BzFullView: Adw.Bin {
                           }
 
                           Adw.Spinner {
-                            visible: bind $is_null(template.debounced-group) as <bool>;
+                            visible: bind $is_null(template.debounced-ui-entry) as <bool>;
                           }
                           
                           Label {
-                            label: bind $format_recent_downloads(template.debounced-group as <$BzEntryGroup>.ui-entry as <$BzEntry>.recent-downloads) as <string>;
-                            visible: bind $invert_boolean($is_null(template.debounced-group) as <bool>) as <bool>;
+                            label: bind $format_recent_downloads(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <string>;
+                            visible: bind $invert_boolean($is_null(template.debounced-ui-entry) as <bool>) as <bool>;
                           }
                         };
                       }
@@ -310,7 +298,7 @@ template $BzFullView: Adw.Bin {
                           "suggested-action",
                         ]
 
-                        visible: bind $invert_boolean($is_null(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzEntry>.donation-url) as <bool>) as <bool>;
+                        visible: bind $invert_boolean($is_null(template.ui-entry as <$BzResult>.object as <$BzEntry>.donation-url) as <bool>) as <bool>;
                         valign: start;
                         has-tooltip: true;
                         tooltip-text: _("Support this developer");
@@ -348,7 +336,7 @@ template $BzFullView: Adw.Bin {
                     wrap-mode: word_char;
                     use-markup: true;
                     selectable: true;
-                    label: bind template.entry-group as <$BzEntryGroup>.ui-entry as <$BzEntry>.long-description;
+                    label: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.long-description;
                   }
 
                   Adw.PreferencesGroup {
@@ -356,16 +344,16 @@ template $BzFullView: Adw.Bin {
                     title: "App Details";
 
                     Adw.ActionRow {
-                      title: bind template.entry-group as <$BzEntryGroup>.ui-entry as <$BzEntry>.project-license;
+                      title: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.project-license;
                       title-selectable: true;
-                      subtitle: bind $pick_license_warning(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzEntry>.is-floss) as <string>;
+                      subtitle: bind $pick_license_warning(template.ui-entry as <$BzResult>.object as <$BzEntry>.is-floss) as <string>;
 
                       [prefix]
                       Image {
                         icon-size: large;
                         has-tooltip: true;
                         icon-name: "license-symbolic";
-                        visible: bind template.entry-group as <$BzEntryGroup>.ui-entry as <$BzEntry>.is-floss;
+                        visible: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.is-floss;
                       }
 
                       [prefix]
@@ -373,7 +361,7 @@ template $BzFullView: Adw.Bin {
                         icon-size: large;
                         has-tooltip: true;
                         icon-name: "dialog-warning-symbolic";
-                        visible: bind $invert_boolean(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzEntry>.is-floss) as <bool>;
+                        visible: bind $invert_boolean(template.ui-entry as <$BzResult>.object as <$BzEntry>.is-floss) as <bool>;
                       }
                     }
 
@@ -391,7 +379,7 @@ template $BzFullView: Adw.Bin {
 
                     Adw.ActionRow {
                       use-markup: true;
-                      title: bind $format_as_link(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzEntry>.url) as <string>;
+                      title: bind $format_as_link(template.ui-entry as <$BzResult>.object as <$BzEntry>.url) as <string>;
 
                       [prefix]
                       Image {
@@ -403,7 +391,7 @@ template $BzFullView: Adw.Bin {
                     }
 
                     Adw.ActionRow {
-                      title: bind $format_size(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzEntry>.size) as <string>;
+                      title: bind $format_size(template.ui-entry as <$BzResult>.object as <$BzEntry>.size) as <string>;
 
                       [prefix]
                       Image {
@@ -432,7 +420,7 @@ template $BzFullView: Adw.Bin {
                       single-click-activate: true;
 
                       model: NoSelection {
-                        model: bind template.entry-group as <$BzEntryGroup>.ui-entry as <$BzEntry>.version-history;
+                        model: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.version-history;
                       };
 
                       factory: BuilderListItemFactory {
@@ -518,16 +506,20 @@ template $BzFullView: Adw.Bin {
 
                 Adw.Spinner {
                   vexpand: true;
-                  visible: bind $is_null(template.debounced-group) as <bool>;
+                  visible: bind $invert_boolean(template.debounced-ui-entry as <$BzResult>.resolved as <bool>) as <bool>;
                 }
 
                 $BzDynamicListView screenshots {
                   vexpand: true;
                   scroll: true;
-                  child-type: "BzScreenshot";
-                  child-prop: "paintable";
-                  visible: bind $invert_boolean($is_null(template.debounced-group) as <bool>) as <bool>;
-                  model: bind template.debounced-group as <$BzEntryGroup>.ui-entry as <$BzEntry>.screenshot-paintables;
+                  child-type: "BzDecoratedScreenshot";
+                  child-prop: "async-texture";
+                  visible: bind template.debounced-ui-entry as <$BzResult>.resolved as <bool>;
+                  model: $BzLazyAsyncTextureModel {
+                    model: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.screenshot-paintables;
+                  };
+                  bind-widget => $screenshots_bind_widget_cb(template);      
+                  unbind-widget => $screenshots_unbind_widget_cb(template);      
                 }
               }
             };

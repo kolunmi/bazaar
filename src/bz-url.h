@@ -27,6 +27,23 @@ G_BEGIN_DECLS
 #define BZ_TYPE_URL (bz_url_get_type ())
 G_DECLARE_FINAL_TYPE (BzUrl, bz_url, BZ, URL, GObject)
 
+BzUrl *
+bz_url_new (void);
+
+const char *
+bz_url_get_name (BzUrl *self);
+
+const char *
+bz_url_get_url (BzUrl *self);
+
+void
+bz_url_set_name (BzUrl      *self,
+                 const char *name);
+
+void
+bz_url_set_url (BzUrl      *self,
+                const char *url);
+
 G_END_DECLS
 
 /* End of bz-url.h */

@@ -7,6 +7,17 @@ template $BzFlathubPage: Adw.Bin {
     transition-duration: 400;
 
     Adw.ViewStackPage {
+      name: "empty";
+      title: _("Empty");
+
+      child: Adw.StatusPage {
+        icon-name: "flatpak-symbolic";
+        title: _("Flathub Not Added");
+        description: _("The Flathub remote was not found on any of your flatpak installations");
+      };
+    }
+    
+    Adw.ViewStackPage {
       name: "content";
       title: _("Browser");
 

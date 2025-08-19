@@ -22,12 +22,15 @@
 
 #include <adwaita.h>
 
-#include "bz-entry-group.h"
+#include "bz-state-info.h"
 
 G_BEGIN_DECLS
 
 #define BZ_TYPE_WINDOW (bz_window_get_type ())
 G_DECLARE_FINAL_TYPE (BzWindow, bz_window, BZ, WINDOW, AdwApplicationWindow)
+
+BzWindow *
+bz_window_new (BzStateInfo *state);
 
 void
 bz_window_search (BzWindow   *self,
@@ -37,8 +40,7 @@ void
 bz_window_toggle_transactions (BzWindow *self);
 
 void
-bz_window_push_update_dialog (BzWindow   *self,
-                              GListStore *updates);
+bz_window_push_update_dialog (BzWindow *self);
 
 void
 bz_window_show_entry (BzWindow *self,

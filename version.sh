@@ -2,11 +2,16 @@
 
 INSTR="$1"
 
-FALLBACK_VERSION='0.2.3 no-git-info'
+VERSION=0.3.2
 
 case "$INSTR" in
     get-vcs)
-        git -C "$MESON_SOURCE_ROOT" describe --always --dirty || echo "$FALLBACK_VERSION"
+        VCS_VERSION="$(git -C "$MESON_SOURCE_ROOT" describe --always --dirty)"
+        if [ -n "$VCS_VERSION" ]; then
+            echo "${VERSION} (vcs=${VCS_VERSION})"
+        else
+            echo "${VERSION}"
+        fi
         ;;
     *)
         echo invalid arguments 1>&2
