@@ -20,8 +20,11 @@ and replace the placeholder at the top of the file
 ```
 
 build the thing (might take a while)
+
+as long as fedora doesn't have the blueprint-compiler version needed you'll have to add the ublue-os/staging copr as a build argument to the mock wrapper
+
 ```
-just build ./staging/bazaar/bazaar.spec
+just build ./staging/bazaar/bazaar.spec -a "https://download.copr.fedorainfracloud.org/results/ublue-os/staging/fedora-$(rpm -E %fedora)-$(uname -m)/"
 ```
 
 

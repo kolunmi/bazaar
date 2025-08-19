@@ -106,8 +106,12 @@ bz_application_map_factory_generate (BzApplicationMapFactory *self,
     self->ref_user_data (self->user_data);
 
   map_model = gtk_map_list_model_new (
-      g_steal_pointer (&backing), self->func,
-      self->user_data, self->unref_user_data);
+      g_steal_pointer (&backing),
+      self->func,
+      self->user_data,
+      self->ref_user_data != NULL
+          ? self->unref_user_data
+          : NULL);
 
   return G_LIST_MODEL (map_model);
 }

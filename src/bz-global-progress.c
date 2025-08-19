@@ -420,7 +420,7 @@ bz_global_progress_set_fraction (BzGlobalProgress *self,
 
   g_return_if_fail (BZ_IS_GLOBAL_PROGRESS (self));
 
-  last           = self->fraction;
+  last           = self->actual_fraction;
   self->fraction = CLAMP (fraction, 0.0, 1.0);
 
   if (self->fraction < last ||

@@ -1,7 +1,11 @@
 project('bazaar', 'c',
           version: run_command('version.sh', 'get-vcs').stdout().strip(),
     meson_version: '>= 1.0.0',
-  default_options: [ 'warning_level=2', 'werror=false', 'c_std=gnu11', ],
+  default_options: [
+    'warning_level=2',
+    'werror=false',
+    'c_std=gnu11',
+  ],
 )
 
 i18n = import('i18n')
@@ -18,16 +22,21 @@ else
   config_h.set_quoted('LOCALEDIR', get_option('prefix') / get_option('localedir'))
   config_h.set_quoted('DONATE_LINK', 'https://ko-fi.com/kolunmi')
 
+  dl_worker_bin_name = 'bazaar-dl-worker'
+  config_h.set_quoted('DL_WORKER_BIN_NAME', dl_worker_bin_name)
+
   if get_option('hardcoded_blocklist_path') != ''
     config_h.set_quoted('HARDCODED_BLOCKLIST', get_option('hardcoded_blocklist_path'))
   endif
   if get_option('hardcoded_content_config_path') != ''
     config_h.set_quoted('HARDCODED_CONTENT_CONFIG', get_option('hardcoded_content_config_path'))
   endif
+  if get_option('sandboxed_libflatpak')
+    config_h.set_quoted('SANDBOXED_LIBFLATPAK', '1')
+  endif
 
   configure_file(output: 'config.h', configuration: config_h)
   add_project_arguments(['-I' + meson.project_build_root()], language: 'c')
-
 
   project_c_args = []
   test_c_args = [
@@ -95,7 +104,13 @@ else
   endforeach
   add_project_arguments(project_c_args, language: 'c')
 
+
+  # needed by both bazaar and bazaar-ui
+  gtk_dep = dependency('gtk4')
+
+
   subdir('data')
+  # subdir('bazaar-ui')
   subdir('src')
   subdir('po')
 

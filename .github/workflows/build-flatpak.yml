@@ -1,0 +1,50 @@
+name: Build Flatpak and Upload Artifact
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  build_flatpak:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      
+      - name: Setup Just
+        uses: extractions/setup-just@e33e0265a09d6d736e2ee1e0eb685ef1de4669ff # v3
+
+      - name: Check Just Syntax
+        shell: bash
+        run: |
+          just check
+
+      - name: Install Flatpak and Flatpak Builder
+        run: |
+          sudo apt update
+          sudo apt install -y flatpak flatpak-builder libflatpak-dev
+      
+      - name: Build Flatpak
+        id: build-flatpak
+        shell: bash
+        run: |
+          sudo $(command -v just) build-flatpak
+
+
+      - name: Upload Flatpak artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: io.github.kolunmi.Bazaar
+          path: io.github.kolunmi.Bazaar.flatpak
+          retention-days: 14
+
+      - name: Display success message
+        run: echo "Flatpak build and artifact upload complete!"

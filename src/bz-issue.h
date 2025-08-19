@@ -27,6 +27,23 @@ G_BEGIN_DECLS
 #define BZ_TYPE_ISSUE (bz_issue_get_type ())
 G_DECLARE_FINAL_TYPE (BzIssue, bz_issue, BZ, ISSUE, GObject)
 
+BzIssue *
+bz_issue_new (void);
+
+const char *
+bz_issue_get_id (BzIssue *self);
+
+const char *
+bz_issue_get_url (BzIssue *self);
+
+void
+bz_issue_set_id (BzIssue    *self,
+                 const char *id);
+
+void
+bz_issue_set_url (BzIssue    *self,
+                  const char *url);
+
 G_END_DECLS
 
 /* End of bz-issue.h */

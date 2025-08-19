@@ -18,10 +18,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "config.h"
-
-#include "bz-entry.h"
 #include "bz-share-dialog.h"
+#include "bz-entry.h"
 #include "bz-url.h"
 
 struct _BzShareDialog

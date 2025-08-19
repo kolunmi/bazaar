@@ -38,7 +38,6 @@ src/bz-inhibited-scrollable.c
 src/bz-installed-page.blp
 src/bz-installed-page.c
 src/bz-issue.c
-src/bz-paintable-model.c
 src/bz-preferences-dialog.blp
 src/bz-preferences-dialog.c
 src/bz-progress-bar.blp

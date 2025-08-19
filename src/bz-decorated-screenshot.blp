@@ -1,0 +1,65 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzDecoratedScreenshot: Adw.Bin {
+  Overlay overlay {
+    child: $BzScreenshot screenshot_widget {
+      paintable: bind template.async-texture;
+    };
+
+    [overlay]
+    Revealer revealer {
+      transition-type: crossfade;
+      
+      child: Frame {
+        styles [
+          "card",
+          "view",
+        ]
+        
+        halign: center;
+        valign: center;
+        sensitive: bind template.async-texture as <$BzAsyncTexture>.loaded;
+        
+        child: Box {
+          margin-start: 5;
+          margin-end: 5;
+          margin-top: 5;
+          margin-bottom: 5;
+          orientation: vertical;
+          spacing: 5;
+
+          Button {
+            child: Box {
+              orientation: horizontal;
+              spacing: 10;
+
+              Image {
+                icon-name: "external-link-symbolic";
+              }
+              Label {
+                label: _("Open in Image Viewer");
+              }
+            };
+            clicked => $open_externally_clicked(template);
+          }
+
+          Button copy {
+            child: Box {
+              orientation: horizontal;
+              spacing: 10;
+
+              Image {
+                icon-name: "copy-symbolic";
+              }
+              Label {
+                label: _("Copy to clipboard");
+              }
+            };
+            clicked => $copy_clicked(template);
+          }
+        };
+      };
+    }
+  }
+}

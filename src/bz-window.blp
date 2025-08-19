@@ -4,7 +4,7 @@ using Adw 1;
 template $BzWindow: Adw.ApplicationWindow {
   title: _("Bazaar");
   default-width: 1220;
-  default-height: 750;
+  default-height: 900;
   width-request: 650;
   height-request: 400;
 
@@ -55,7 +55,7 @@ template $BzWindow: Adw.ApplicationWindow {
                     ]
 
                     model: NoSelection no_selection {
-                      model: bind template.transaction-manager as <$BzTransactionManager>.transactions;
+                      model: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.transactions;
                     };
 
                     factory: BuilderListItemFactory {
@@ -88,7 +88,7 @@ template $BzWindow: Adw.ApplicationWindow {
 
                     ToggleButton transactions_pause {
                       has-tooltip: true;
-                      active: bind template.transaction-manager as <$BzTransactionManager>.paused;
+                      active: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.paused;
                       toggled => $pause_transactions_cb(template);
                     }
 
@@ -96,7 +96,7 @@ template $BzWindow: Adw.ApplicationWindow {
                       has-tooltip: true;
                       tooltip-text: _("Halt the execution of transactions");
                       icon-name: "media-playback-stop-symbolic";
-                      sensitive: bind template.transaction-manager as <$BzTransactionManager>.active;
+                      sensitive: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
                       clicked => $stop_transactions_cb(template);
                     }
 
@@ -118,11 +118,10 @@ template $BzWindow: Adw.ApplicationWindow {
             sidebar-position: start;
             notify::show-sidebar => $search_split_open_changed_cb(template);
 
-            sidebar: Adw.ToolbarView {
-              content: $BzSearchWidget search_widget {
-                model: bind template.applications;
-                select => $search_widget_select_cb(template);
-              };
+            sidebar: $BzSearchWidget search_widget {
+              width-request: 400;
+              state: bind template.state;
+              select => $search_widget_select_cb(template);
             };
 
             content: Adw.ToastOverlay toasts {
@@ -146,21 +145,39 @@ template $BzWindow: Adw.ApplicationWindow {
                     title: _("Loading");
 
                     child: Box {
-                      halign: center;
+                      halign: fill;
                       valign: center;
                       orientation: vertical;
-                      spacing: 20;
+                      spacing: 15;
 
-                      Adw.Spinner {
-                        width-request: 64;
-                        height-request: 64;
+                      Button {
+                        styles [
+                          "flat"
+                        ]
+
+                        halign: center;
+                        
+                        child: Image {
+                          icon-name: "io.github.kolunmi.Bazaar";
+                          pixel-size: 32;
+                        };
                       }
                       
                       $BzGlobalProgress {
+                        halign: center;
                         height-request: 20;
                         expand-size: 150;
-                        active: bind template.busy;
-                        fraction: bind template.busy-progress;
+                        active: bind template.state as <$BzStateInfo>.busy;
+                        fraction: bind template.state as <$BzStateInfo>.busy-progress;
+                      }
+
+                      Label {
+                        styles [
+                          "heading"
+                        ]
+
+                        ellipsize: end;
+                        label: bind template.state as <$BzStateInfo>.busy-label;
                       }
                     };
                   }
@@ -170,7 +187,7 @@ template $BzWindow: Adw.ApplicationWindow {
                     title: _("Browse");
 
                     child: $BzBrowseWidget browse {
-                      content-provider: bind template.content-provider;
+                      content-provider: bind template.state as <$BzStateInfo>.curated-provider;
                       group-selected => $browser_group_selected_cb(template);
                     };
                   }
@@ -180,7 +197,8 @@ template $BzWindow: Adw.ApplicationWindow {
                     title: _("App View");
 
                     child: $BzFullView full_view {
-                      transaction-manager: bind template.transaction-manager;
+                      state: bind template.state;
+                      transaction-manager: bind template.state as <$BzStateInfo>.transaction-manager;
                       install => $full_view_install_cb(template);
                       remove => $full_view_remove_cb(template);
                     };
@@ -191,7 +209,7 @@ template $BzWindow: Adw.ApplicationWindow {
                     title: _("Flathub");
 
                     child: $BzFlathubPage {
-                      state: bind template.flathub;
+                      state: bind template.state as <$BzStateInfo>.flathub;
                       group-selected => $browser_group_selected_cb(template);
                     };
                   }
@@ -201,7 +219,8 @@ template $BzWindow: Adw.ApplicationWindow {
                     title: _("Installed");
 
                     child: $BzInstalledPage {
-                      model: bind template.installed;
+                      state: bind template.state;
+                      model: bind template.state as <$BzStateInfo>.all-installed-entries;
                       install => $installed_page_install_cb(template);
                       remove => $installed_page_remove_cb(template);
                     };
@@ -222,14 +241,14 @@ template $BzWindow: Adw.ApplicationWindow {
             clicked => $go_back_cb(template);
           }
 
-          [start]
-          Button refresh {
-            has-tooltip: true;
-            tooltip-text: _("Refresh");
-            icon-name: "view-refresh-symbolic";
-            sensitive: bind $invert_boolean(template.busy) as <bool>;
-            clicked => $refresh_cb(template);
-          }
+          // [start]
+          // Button refresh {
+          //   has-tooltip: true;
+          //   tooltip-text: _("Refresh");
+          //   icon-name: "view-refresh-symbolic";
+          //   sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.busy) as <bool>;
+          //   clicked => $refresh_cb(template);
+          // }
 
           [start]
           ToggleButton search {
@@ -248,6 +267,7 @@ template $BzWindow: Adw.ApplicationWindow {
             has-tooltip: true;
             tooltip-text: _("Update");
             icon-name: "software-update-available-symbolic";
+            visible: bind $invert_boolean($is_null(template.state as <$BzStateInfo>.available-updates) as <bool>) as <bool>;
             clicked => $update_cb(template);
           }
 
@@ -255,7 +275,7 @@ template $BzWindow: Adw.ApplicationWindow {
           Box {
             orientation: horizontal;
             spacing: 10;
-            visible: bind template.checking-updates;
+            visible: bind template.state as <$BzStateInfo>.checking-for-updates;
 
             Adw.Spinner {}
 
@@ -275,7 +295,7 @@ template $BzWindow: Adw.ApplicationWindow {
               ]
               homogeneous: true;
 
-              Adw.Toggle {
+              Adw.Toggle curated_toggle {
                 tooltip: _("View curated applications");
                 name: "curated";
 
@@ -363,8 +383,8 @@ template $BzWindow: Adw.ApplicationWindow {
 
             child: $BzGlobalProgress {
               expand-size: 125;
-              active: bind template.transaction-manager as <$BzTransactionManager>.active;
-              fraction: bind template.transaction-manager as <$BzTransactionManager>.current-progress;
+              active: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
+              fraction: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.current-progress;
 
               child: Image {
                 halign: end;
@@ -378,29 +398,6 @@ template $BzWindow: Adw.ApplicationWindow {
         Adw.HeaderBar bottom_header_bar {
           show-start-title-buttons: false;
           show-end-title-buttons: false;
-
-          title-widget: Revealer up_to_date_revealer {
-            transition-type: crossfade;
-            transition-duration: 200;
-
-            child: Box {
-              orientation: horizontal;
-              spacing: 10;
-
-              Image {
-                icon-size: large;
-                icon-name: "check-plain-symbolic";
-              }
-
-              Label {
-                styles [
-                  "heading"
-                ]
-                
-                label: _("Up to date!");
-              }
-            };
-          };
         }
       };
 
@@ -410,6 +407,7 @@ template $BzWindow: Adw.ApplicationWindow {
         setters {
           split_view.collapsed: true;
           transactions.width-request: 250;
+          search_widget.width-request: 250;
         }
 
         apply => $breakpoint_apply_cb(template);
@@ -421,6 +419,11 @@ template $BzWindow: Adw.ApplicationWindow {
 
 menu primary_menu {
   section {
+    item {
+      label: _("_Refresh");
+      action: "app.refresh";
+    }
+    
     item {
       label: _("_Keyboard Shortcuts");
       action: "win.show-help-overlay";

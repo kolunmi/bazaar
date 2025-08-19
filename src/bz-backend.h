@@ -29,11 +29,6 @@ G_BEGIN_DECLS
 #define BZ_TYPE_BACKEND (bz_backend_get_type ())
 G_DECLARE_INTERFACE (BzBackend, bz_backend, BZ, BACKEND, GObject)
 
-typedef void (*BzBackendGatherEntriesFunc) (
-    BzEntry *entry,
-    guint    total,
-    gpointer user_data);
-
 typedef void (*BzBackendTransactionProgressFunc) (
     BzEntry    *entry,
     const char *status,
@@ -53,13 +48,12 @@ struct _BzBackendInterface
                                     GCancellable *cancellable);
 
   /* DexFuture* -> gboolean */
-  DexFuture *(*retrieve_remote_entries) (BzBackend                 *self,
-                                         DexScheduler              *home_scheduler,
-                                         GPtrArray                 *blocked_names,
-                                         BzBackendGatherEntriesFunc progress_func,
-                                         GCancellable              *cancellable,
-                                         gpointer                   user_data,
-                                         GDestroyNotify             destroy_user_data);
+  DexFuture *(*retrieve_remote_entries) (BzBackend     *self,
+                                         DexChannel    *channel,
+                                         GPtrArray     *blocked_names,
+                                         GCancellable  *cancellable,
+                                         gpointer       user_data,
+                                         GDestroyNotify destroy_user_data);
 
   /* DexFuture* -> GHashTable* */
   DexFuture *(*retrieve_install_ids) (BzBackend    *self,
@@ -89,22 +83,20 @@ bz_backend_load_local_package (BzBackend    *self,
                                GCancellable *cancellable);
 
 DexFuture *
-bz_backend_retrieve_remote_entries (BzBackend                 *self,
-                                    DexScheduler              *home_scheduler,
-                                    GPtrArray                 *blocked_names,
-                                    BzBackendGatherEntriesFunc progress_func,
-                                    GCancellable              *cancellable,
-                                    gpointer                   user_data,
-                                    GDestroyNotify             destroy_user_data);
+bz_backend_retrieve_remote_entries (BzBackend     *self,
+                                    DexChannel    *channel,
+                                    GPtrArray     *blocked_names,
+                                    GCancellable  *cancellable,
+                                    gpointer       user_data,
+                                    GDestroyNotify destroy_user_data);
 
 DexFuture *
-bz_backend_retrieve_remote_entries_with_blocklists (BzBackend                 *self,
-                                                    DexScheduler              *home_scheduler,
-                                                    GListModel                *blocklists,
-                                                    BzBackendGatherEntriesFunc progress_func,
-                                                    GCancellable              *cancellable,
-                                                    gpointer                   user_data,
-                                                    GDestroyNotify             destroy_user_data);
+bz_backend_retrieve_remote_entries_with_blocklists (BzBackend     *self,
+                                                    DexChannel    *channel,
+                                                    GListModel    *blocklists,
+                                                    GCancellable  *cancellable,
+                                                    gpointer       user_data,
+                                                    GDestroyNotify destroy_user_data);
 
 DexFuture *
 bz_backend_retrieve_install_ids (BzBackend    *self,

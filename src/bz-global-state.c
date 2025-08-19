@@ -18,95 +18,55 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#define G_LOG_DOMAIN "BAZAAR::GLOBAL"
+#define G_LOG_DOMAIN "BAZAAR::GLOBAL-NET"
 
-#include "bz-global-state.h"
+#include <json-glib/json-glib.h>
+
 #include "bz-env.h"
+#include "bz-global-state.h"
 #include "bz-util.h"
 
 BZ_DEFINE_DATA (
-    http_send,
-    HttpSend,
+    http_request,
+    HttpRequest,
     {
-      char          *uri;
       SoupMessage   *message;
-      GOutputStream *output;
+      GOutputStream *splice_into;
       gboolean       close_output;
-      char          *content_type;
     },
-    BZ_RELEASE_DATA (uri, g_free);
     BZ_RELEASE_DATA (message, g_object_unref);
-    BZ_RELEASE_DATA (output, g_object_unref);
-    BZ_RELEASE_DATA (content_type, g_free));
-
+    BZ_RELEASE_DATA (splice_into, g_object_unref));
 static DexFuture *
-http_send_fiber (HttpSendData *data);
+http_send_fiber (HttpRequestData *data);
 
 static void
-http_send_finish (GObject      *object,
-                  GAsyncResult *result,
-                  gpointer      user_data);
-
-static void
-splice_finish (GObject      *object,
-               GAsyncResult *result,
-               gpointer      user_data);
+http_send_and_splice_finish (GObject      *object,
+                             GAsyncResult *result,
+                             gpointer      user_data);
 
 static DexFuture *
-query_flathub_then (DexFuture    *future,
-                    HttpSendData *data);
+query_flathub_then (DexFuture     *future,
+                    GOutputStream *output_stream);
 
-SoupSession *
-bz_get_global_http_session (void)
-{
-  static SoupSession *session = NULL;
-
-  if (g_once_init_enter_pointer (&session))
-    g_once_init_leave_pointer (&session, soup_session_new ());
-
-  return session;
-}
+static DexFuture *
+send (SoupMessage   *message,
+      GOutputStream *splice_into,
+      gboolean       close_output);
 
 DexFuture *
 bz_send_with_global_http_session (SoupMessage *message)
 {
-  g_autoptr (HttpSendData) data = NULL;
-
   dex_return_error_if_fail (SOUP_IS_MESSAGE (message));
-
-  data               = http_send_data_new ();
-  data->message      = g_object_ref (message);
-  data->output       = NULL;
-  data->close_output = FALSE;
-  data->content_type = NULL;
-
-  return dex_scheduler_spawn (
-      dex_scheduler_get_default (),
-      bz_get_dex_stack_size (),
-      (DexFiberFunc) http_send_fiber,
-      g_steal_pointer (&data), http_send_data_unref);
+  return send (message, NULL, FALSE);
 }
 
 DexFuture *
 bz_send_with_global_http_session_then_splice_into (SoupMessage   *message,
                                                    GOutputStream *output)
 {
-  g_autoptr (HttpSendData) data = NULL;
-
   dex_return_error_if_fail (SOUP_IS_MESSAGE (message));
   dex_return_error_if_fail (G_IS_OUTPUT_STREAM (output));
-
-  data               = http_send_data_new ();
-  data->message      = g_object_ref (message);
-  data->output       = g_object_ref (output);
-  data->close_output = FALSE;
-  data->content_type = NULL;
-
-  return dex_scheduler_spawn (
-      dex_scheduler_get_default (),
-      bz_get_dex_stack_size (),
-      (DexFiberFunc) http_send_fiber,
-      g_steal_pointer (&data), http_send_data_unref);
+  return send (message, output, TRUE);
 }
 
 DexFuture *
@@ -116,7 +76,6 @@ bz_query_flathub_v2_json (const char *request)
   g_autofree char *uri             = NULL;
   g_autoptr (SoupMessage) message  = NULL;
   g_autoptr (GOutputStream) output = NULL;
-  g_autoptr (HttpSendData) data    = NULL;
   g_autoptr (DexFuture) future     = NULL;
 
   dex_return_error_if_fail (request != NULL);
@@ -127,22 +86,11 @@ bz_query_flathub_v2_json (const char *request)
 
   g_debug ("Querying Flathub at URI %s ...", uri);
 
-  data               = http_send_data_new ();
-  data->uri          = g_steal_pointer (&uri);
-  data->message      = g_object_ref (message);
-  data->output       = g_object_ref (output);
-  data->close_output = TRUE;
-  data->content_type = g_strdup ("application/json");
-
-  future = dex_scheduler_spawn (
-      dex_scheduler_get_default (),
-      bz_get_dex_stack_size (),
-      (DexFiberFunc) http_send_fiber,
-      http_send_data_ref (data), http_send_data_unref);
+  future = send (message, output, TRUE);
   future = dex_future_then (
       future,
       (DexFutureCallback) query_flathub_then,
-      http_send_data_ref (data), http_send_data_unref);
+      g_object_ref (output), g_object_unref);
   return g_steal_pointer (&future);
 }
 
@@ -160,121 +108,50 @@ bz_query_flathub_v2_json_take (char *request)
 }
 
 static DexFuture *
-http_send_fiber (HttpSendData *data)
+http_send_fiber (HttpRequestData *data)
 {
-  g_autoptr (DexPromise) promise = NULL;
+  static SoupSession      *session      = NULL;
+  SoupMessage             *message      = data->message;
+  GOutputStream           *splice_into  = data->splice_into;
+  gboolean                 close_output = data->close_output;
+  GOutputStreamSpliceFlags splice_flags = G_OUTPUT_STREAM_SPLICE_NONE;
+  g_autoptr (DexPromise) promise        = NULL;
 
-  if (data->uri != NULL)
-    g_debug ("Sending message to uri %s now...", data->uri);
+  if (g_once_init_enter_pointer (&session))
+    g_once_init_leave_pointer (&session, soup_session_new ());
+
+  splice_flags = G_OUTPUT_STREAM_SPLICE_CLOSE_SOURCE;
+  if (close_output)
+    splice_flags |= G_OUTPUT_STREAM_SPLICE_CLOSE_TARGET;
 
   promise = dex_promise_new_cancellable ();
-  soup_session_send_async (
-      bz_get_global_http_session (),
-      data->message,
-      G_PRIORITY_DEFAULT,
+  soup_session_send_and_splice_async (
+      session,
+      message,
+      splice_into,
+      splice_flags,
+      G_PRIORITY_DEFAULT_IDLE,
       dex_promise_get_cancellable (promise),
-      http_send_finish,
+      http_send_and_splice_finish,
       dex_ref (promise));
 
-  if (data->output != NULL || data->content_type != NULL)
-    {
-      g_autoptr (GError) local_error    = NULL;
-      g_autoptr (GInputStream) response = NULL;
-
-      response = dex_await_object (DEX_FUTURE (g_steal_pointer (&promise)), &local_error);
-      if (response == NULL)
-        return dex_future_new_for_error (g_steal_pointer (&local_error));
-
-      if (data->content_type != NULL)
-        {
-          SoupMessageHeaders *response_headers = NULL;
-          const char         *content_type     = NULL;
-
-          if (data->uri != NULL)
-            g_debug ("Ensuring response from uri %s is of type '%s' as requested ...",
-                     data->uri, data->content_type);
-
-          response_headers = soup_message_get_response_headers (data->message);
-          content_type     = soup_message_headers_get_content_type (response_headers, NULL);
-          if (g_strcmp0 (content_type, data->content_type) != 0)
-            return dex_future_new_reject (
-                G_IO_ERROR,
-                G_IO_ERROR_INVALID_DATA,
-                "HTTP request cancelled: expected content type '%s', got '%s'",
-                data->content_type,
-                content_type);
-        }
-
-      if (data->output != NULL)
-        {
-          g_autoptr (DexPromise) splice  = NULL;
-          GOutputStreamSpliceFlags flags = G_OUTPUT_STREAM_SPLICE_NONE;
-
-          if (data->uri != NULL)
-            g_debug ("Splicing response from uri %s into output stream as requested ...",
-                     data->uri);
-
-          splice = dex_promise_new_cancellable ();
-          flags  = G_OUTPUT_STREAM_SPLICE_CLOSE_SOURCE;
-          if (data->close_output)
-            flags |= G_OUTPUT_STREAM_SPLICE_CLOSE_TARGET;
-
-          g_output_stream_splice_async (
-              data->output,
-              response,
-              flags,
-              G_PRIORITY_DEFAULT,
-              dex_promise_get_cancellable (splice),
-              splice_finish,
-              dex_ref (splice));
-          return DEX_FUTURE (g_steal_pointer (&splice));
-        }
-      else
-        return dex_future_new_for_object (response);
-    }
-  else
-    return DEX_FUTURE (g_steal_pointer (&promise));
+  return DEX_FUTURE (g_steal_pointer (&promise));
 }
 
 static void
-http_send_finish (GObject      *object,
-                  GAsyncResult *result,
-                  gpointer      user_data)
-{
-  DexPromise *promise             = user_data;
-  g_autoptr (GError) local_error  = NULL;
-  g_autoptr (GInputStream) stream = NULL;
-
-  g_assert (SOUP_IS_SESSION (object));
-  g_assert (G_IS_ASYNC_RESULT (result));
-  g_assert (DEX_IS_PROMISE (promise));
-
-  stream = soup_session_send_finish (SOUP_SESSION (object), result, &local_error);
-  if (stream != NULL)
-    dex_promise_resolve_object (promise, g_steal_pointer (&stream));
-  else
-    {
-      g_debug ("Could not complete http operation: %s", local_error->message);
-      dex_promise_reject (promise, g_steal_pointer (&local_error));
-    }
-
-  dex_unref (promise);
-}
-
-static void
-splice_finish (GObject      *object,
-               GAsyncResult *result,
-               gpointer      user_data)
+http_send_and_splice_finish (GObject      *object,
+                             GAsyncResult *result,
+                             gpointer      user_data)
 {
   DexPromise *promise            = user_data;
   g_autoptr (GError) local_error = NULL;
   gssize bytes_written           = 0;
 
-  g_assert (G_IS_OUTPUT_STREAM (object));
+  g_assert (SOUP_IS_SESSION (object));
   g_assert (G_IS_ASYNC_RESULT (result));
   g_assert (DEX_IS_PROMISE (promise));
 
-  bytes_written = g_output_stream_splice_finish (G_OUTPUT_STREAM (object), result, &local_error);
+  bytes_written = soup_session_send_and_splice_finish (SOUP_SESSION (object), result, &local_error);
   if (bytes_written >= 0)
     {
       g_debug ("Spliced %zu bytes from http reply into output stream", bytes_written);
@@ -290,8 +167,8 @@ splice_finish (GObject      *object,
 }
 
 static DexFuture *
-query_flathub_then (DexFuture    *future,
-                    HttpSendData *data)
+query_flathub_then (DexFuture     *future,
+                    GOutputStream *output_stream)
 {
   g_autoptr (GError) local_error = NULL;
   g_autoptr (GBytes) bytes       = NULL;
@@ -302,7 +179,7 @@ query_flathub_then (DexFuture    *future,
   JsonNode *node                 = NULL;
 
   bytes = g_memory_output_stream_steal_as_bytes (
-      G_MEMORY_OUTPUT_STREAM (data->output));
+      G_MEMORY_OUTPUT_STREAM (output_stream));
   bytes_data = g_bytes_get_data (bytes, &bytes_size);
 
   g_debug ("Received %zu bytes back from Flathub", bytes_size);
@@ -314,4 +191,26 @@ query_flathub_then (DexFuture    *future,
 
   node = json_parser_get_root (parser);
   return dex_future_new_take_boxed (JSON_TYPE_NODE, json_node_ref (node));
+}
+
+static DexFuture *
+send (SoupMessage   *message,
+      GOutputStream *splice_into,
+      gboolean       close_output)
+{
+  g_autoptr (HttpRequestData) data = NULL;
+  g_autoptr (DexFuture) future     = NULL;
+
+  data               = http_request_data_new ();
+  data->message      = g_object_ref (message);
+  data->splice_into  = splice_into != NULL ? g_object_ref (splice_into) : NULL;
+  data->close_output = close_output;
+
+  future = dex_scheduler_spawn (
+      dex_scheduler_get_default (),
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) http_send_fiber,
+      http_request_data_ref (data),
+      http_request_data_unref);
+  return g_steal_pointer (&future);
 }

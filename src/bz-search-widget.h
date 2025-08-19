@@ -54,4 +54,7 @@ bz_search_widget_get_selected (BzSearchWidget *self,
 BzEntryGroup *
 bz_search_widget_get_previewing (BzSearchWidget *self);
 
+void
+bz_search_widget_refresh (BzSearchWidget *self);
+
 G_END_DECLS

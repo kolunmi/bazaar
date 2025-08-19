@@ -92,6 +92,8 @@ template $BzInstalledPage: Adw.Bin {
                     ellipsize: end;
                     single-line-mode: true;
                     selectable: true;
+                    has-tooltip: true;
+                    tooltip-text: bind template.item as <$BzEntry>.unique_id;
                     label: bind template.item as <$BzEntry>.id;
                   }
 

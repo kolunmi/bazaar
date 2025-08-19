@@ -1,0 +1,291 @@
+id: io.github.kolunmi.Bazaar
+runtime: org.gnome.Platform
+runtime-version: "48"
+sdk: org.gnome.Sdk
+command: bazaar-launcher
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.rust-stable
+  - org.freedesktop.Sdk.Extension.llvm20
+finish-args:
+  - "--share=network"
+  - "--share=ipc"
+  - "--socket=fallback-x11"
+  - "--socket=wayland"
+  - "--device=dri"
+  # We need directory access to system flatpak installation
+  - "--filesystem=/var/lib/flatpak"
+  # Needs to talk to host so that installing flatpaks work
+  - "--talk-name=org.freedesktop.Flatpak"
+  # Can't read flatpaks from the system without this
+  - "--system-talk-name=org.freedesktop.Flatpak.SystemHelper"
+  # Necessary for sandbox escape
+  - "--filesystem=/var/tmp"
+  # Not having this makes it so libflatpak misbehaves and can't detect all flatpaks installed by users properly
+  # "(x) flatpaks need to be updated" when they in fact don't
+  - "--system-talk-name=org.freedesktop.Accounts"
+build-options:
+  append-path: "/usr/lib/sdk/rust-stable/bin:/usr/lib/sdk/llvm20/bin"
+modules:
+  - name: bazaar
+    buildsystem: meson
+    config-opts:
+    - "-Dsandboxed_libflatpak=true"
+    sources:
+      - type: dir
+        path: "../.."
+      - type: shell
+        commands:
+          - |
+            tee ./bazaar-launcher <<'EOF'
+            #!/usr/bin/env bash
+            bazaar window --auto-service $@
+            EOF
+            install -Dpm0755 -t /app/bin ./bazaar-launcher
+    modules:
+    - name: blueprint-compiler
+      buildsystem: meson
+      cleanup:
+        - '*'
+      sources:
+        - type: git
+          url: https://gitlab.gnome.org/GNOME/blueprint-compiler.git
+          tag: 0.18.0
+          commit: 07c9c9df9cd1b6b4454ecba21ee58211e9144a4b
+          x-checker-data:
+            type: anitya
+            project-id: 279929
+            tag-template: $version
+    - name: libsoup
+      buildsystem: meson
+      sources:
+        - type: archive
+          url: https://gitlab.gnome.org/GNOME/libsoup/-/archive/3.6.5/libsoup-3.6.5.tar.gz
+          sha256: a97f88f9182db8dd7b46afc139a0ff19e463cf4a9f799682e8c4189cbd5815c4
+          x-checker-data:
+            type: anitya
+            project-id: 11483
+            url-template: https://gitlab.gnome.org/GNOME/libsoup/-/archive/$version/libsoup-$version.tar.gz
+    - name: libxmlb
+      buildsystem: meson
+      config-opts:
+        - "--libdir=/app/lib"
+        - "-Dgtkdoc=false"
+        - "-Dtests=false"
+        - "-Dcli=false"
+      sources:
+        - type: archive
+          url: https://github.com/hughsie/libxmlb/archive/refs/tags/0.3.22.tar.gz
+          sha256: 103684ed37a45d0aed8f95e97294ed26945b5aeebf44734f3994081eecebb11c
+          x-checker-data:
+            type: anitya
+            project-id: 179028
+            url-template: https://github.com/hughsie/libxmlb/archive/refs/tags/$version.tar.gz
+    - name: libdex
+      buildsystem: meson
+      sources:
+        - type: archive
+          url: https://gitlab.gnome.org/GNOME/libdex/-/archive/0.11.1/libdex-0.11.1.tar.gz
+          sha256: a1702bc063b7004515d32e24692790d64383902542b2ee6e3b4a7a43770432e7
+          x-checker-data:
+            type: anitya
+            project-id: 328356
+            url-template: https://gitlab.gnome.org/GNOME/libdex/-/archive/$version/libdex-$version.tar.gz
+    - name: glycin
+      buildsystem: meson
+      config-opts:
+        - "-Dglycin-loaders=true"
+        - "-Dlibglycin=true"
+      sources:
+        - type: archive
+          url: https://gitlab.gnome.org/GNOME/glycin/-/archive/1.2.2/glycin-1.2.2.tar.gz
+          sha256: 18f0bcdb606584a2e631c7224658b1b2c47f83166607caeac2891f20fa189575
+          x-checker-data:
+            type: anitya
+            project-id: 369437
+            url-template: https://gitlab.gnome.org/GNOME/glycin/-/archive/$version/glycin-$version.tar.gz
+        # Check `update-deps.sh` to vendor dependencies for this
+        - glycin-cargo-sources.json
+        - type: shell
+          commands:
+            - install -Dpm0644 cargo/config .cargo/config.toml
+    - name: flatpak
+      buildsystem: meson
+      config-opts:
+        - "-Dgtkdoc=disabled"
+        - "-Ddocbook_docs=disabled"
+        - "-Dtests=false"
+        - "-Dman=disabled"
+        - "-Dseccomp=disabled"
+        - "-Dselinux_module=disabled"
+        - "-Dmalcontent=disabled"
+        - "-Dsandboxed_triggers=false"
+        - "-Dsystem_helper=enabled"
+        - "-Dhttp_backend=curl"
+        - "-Dsystemd=disabled"
+        - "-Dsystem_install_dir=/var/lib/flatpak"
+        - "-Dsystem_bubblewrap=bwrap"
+        - "-Dsystem_dbus_proxy=xdg-dbus-proxy"
+        - "--sysconfdir=/var/run/host/etc"
+      cleanup:
+        - "/bin/flatpak-bisect"
+        - "/bin/flatpak-coredumpctl"
+        - "/etc/profile.d"
+        - "/lib/systemd"
+        - "/share/dbus-1/interfaces/org.freedesktop.*"
+        - "/share/dbus-1/services/org.freedesktop.*"
+        - "/share/flatpak/triggers"
+        - "/share/gdm"
+        - "/share/zsh"
+      post-install:
+        - install -Dpm0755 -t /app/bin /usr/bin/update-{mime,desktop}-database
+      sources:
+        - type: archive
+          url: https://github.com/flatpak/flatpak/archive/refs/tags/1.16.1.tar.gz
+          sha256: 281aa7e35efa0899fefaf7eba923e8ff117f7c03726c7f73b2ac296dae2daf37
+          x-checker-data:
+            type: anitya
+            project-id: 6377
+            url-template: https://github.com/flatpak/flatpak/archive/refs/tags/$version.tar.gz
+      modules:
+      - name: python3-pyparsing
+        buildsystem: simple
+        cleanup:
+          - "*"
+        build-commands:
+          - pip3 install --no-index --find-links="file://${PWD}" --prefix=${FLATPAK_DEST} pyparsing
+        sources:
+          - type: file
+            url: https://files.pythonhosted.org/packages/bb/22/f1129e69d94ffff626bdb5c835506b3a5b4f3d070f17ea295e12c2c6f60f/pyparsing-3.2.3.tar.gz
+            sha256: b9c13f1ab8b3b542f72e28f634bad4de758ab3ce4546e4301970ad6fa77c38be
+            x-checker-data:
+              type: pypi
+              name: pyparsing
+          - type: file
+            url: https://files.pythonhosted.org/packages/ad/38/80992c4cb490a05474c886850ec818276d09c0a6722bd5b43bc487818ac7/flit_core-3.7.1-py3-none-any.whl
+            sha256: e454fdbf68c7036e1c7435ec7479383f9d9a1650ca5b304feb184eba1efcdcef
+            x-checker-data:
+              type: pypi
+              name: flit_core
+      - name: polkit
+        config-opts:
+          - "--disable-polkitd"
+          - "--disable-man-pages"
+          - "--disable-introspection"
+          - "--disable-examples"
+          - "--disable-gtk-doc"
+          - "--disable-libelogind"
+          - "--disable-libsystemd-login"
+          - "--with-systemdsystemunitdir=no"
+          - "--with-authdb=dummy"
+          - "--with-authfw=none"
+        rm-configure: true
+        build-options:
+          env:
+            CFLAGS: "-Wno-implicit-function-declaration"
+        cleanup:
+          - "/bin/*"
+          - "/etc/pam.d"
+          - "/etc/dbus-1"
+          - "/share/dbus-1/system-services/*"
+          - "/share/polkit-1"
+          - "/lib/polkit-1"
+        sources:
+          # TODO: update this version once patch is fully up-to-date with 126+ polkit
+          - type: archive
+            url: https://www.freedesktop.org/software/polkit/releases/polkit-0.116.tar.gz
+            sha256: 88170c9e711e8db305a12fdb8234fac5706c61969b94e084d0f117d8ec5d34b1
+          - type: patch
+            path: polkit-build-Add-option-to-build-without-polkitd.patch
+          - type: script
+            dest-filename: autogen.sh
+            commands:
+              - |
+                #!/bin/sh
+                gtkdocize --flavour no-tmpl
+                autoreconf -if
+        modules:
+        - name: intltool
+          cleanup:
+            - "*"
+          sources:
+            - type: archive
+              url: https://launchpad.net/intltool/trunk/0.51.0/+download/intltool-0.51.0.tar.gz
+              sha256: 67c74d94196b153b774ab9f89b2fa6c6ba79352407037c8c14d5aeb334e959cd
+              x-checker-data:
+                type: anitya
+                project-id: 1385
+                url-template: https://launchpad.net/intltool/trunk/$version/+download/intltool-$version.tar.gz
+        - name: ostree
+          build-options:
+            env:
+              BASH_COMPLETIONSDIR: "/app/share/bash-completion/completions"
+            config-opts:
+            - "--disable-man"
+            - "--with-curl"
+            - "--without-libsystemd"
+          cleanup:
+            - "/bin"
+            - "/etc/grub.d"
+            - "/etc/ostree"
+            - "/share/ostree"
+            - "/libexec"
+          sources:
+          - type: git
+            url: https://github.com/ostreedev/ostree
+            tag: v2025.3
+            commit: d439f504624d7759cebde2f6c366ad610a7700ce
+            x-checker-data:
+              type: anitya
+              project-id: 10899
+              tag-template: v$version
+          modules:
+            - name: libfuse
+              build-options:
+                env:
+                  MOUNT_FUSE_PATH: "../tmp/"
+              config-opts:
+                - UDEV_RULES_PATH=/app/etc/udev/rules.d
+                - INIT_D_PATH=/app/etc/init.d
+              cleanup:
+                - "/bin/ulockmgr_server"
+              post-install:
+                - install -Dpm0755 ./fusermount-wrapper.sh /app/bin/fusermount
+              sources:
+                - type: archive
+                  url: https://github.com/libfuse/libfuse/releases/download/fuse-2.9.9/fuse-2.9.9.tar.gz
+                  sha256: d0e69d5d608cc22ff4843791ad097f554dd32540ddc9bed7638cc6fea7c1b4b5
+                - type: patch
+                  path: fuse-2.9.2-namespace-conflict-fix.patch
+                - type: patch
+                  path: fuse-disable-sys-mount-under-flatpak.patch
+                - type: patch
+                  path: fuse-2.9.2-closefrom.patch
+                - type: file
+                  path: fusermount-wrapper.sh
+        - name: xdg-dbus-proxy
+          buildsystem: meson
+          config-opts:
+            - "-Dman=disabled"
+            - "-Dtests=false"
+          sources:
+            - type: archive
+              url: https://github.com/flatpak/xdg-dbus-proxy/archive/refs/tags/0.1.6.tar.gz
+              sha256: ee9c1d665f4e3b025a83d522d478ff7930070f2817fc2cb446db0dca93c990b1
+              x-checker-data:
+                type: anitya
+                project-id: 58434
+                url-template: https://github.com/flatpak/xdg-dbus-proxy/archive/refs/tags/$version.tar.gz
+  - name: bubblewrap
+    buildsystem: meson
+    config-opts:
+      - "-Dman=disabled"
+      - "-Dselinux=disabled"
+      - "-Dtests=false"
+    sources:
+      - type: archive
+        url: https://github.com/containers/bubblewrap/archive/refs/tags/v0.11.0.tar.gz
+        sha256: cfeeb15fcc47d177d195f06fdf0847e93ee3aa6bf46f6ac0a141fa142759e2c3
+        x-checker-data:
+          type: anitya
+          project-id: 10937
+          url-template: https://github.com/containers/bubblewrap/archive/refs/tags/v$version.tar.gz

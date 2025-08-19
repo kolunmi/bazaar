@@ -44,4 +44,12 @@ G_DECLARE_FINAL_TYPE (BzFlatpakInstance, bz_flatpak_instance, BZ, FLATPAK_INSTAN
 DexFuture *
 bz_flatpak_instance_new (void);
 
+DexFuture *
+bz_flatpak_instance_has_flathub (BzFlatpakInstance *self,
+                                 GCancellable      *cancellable);
+
+DexFuture *
+bz_flatpak_instance_ensure_has_flathub (BzFlatpakInstance *self,
+                                        GCancellable      *cancellable);
+
 G_END_DECLS

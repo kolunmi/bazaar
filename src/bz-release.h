@@ -27,6 +27,37 @@ G_BEGIN_DECLS
 #define BZ_TYPE_RELEASE (bz_release_get_type ())
 G_DECLARE_FINAL_TYPE (BzRelease, bz_release, BZ, RELEASE, GObject)
 
+BzRelease *
+bz_release_new (void);
+
+GListModel *
+bz_release_get_issues (BzRelease *self);
+
+guint64
+bz_release_get_timestamp (BzRelease *self);
+
+const char *
+bz_release_get_url (BzRelease *self);
+
+const char *
+bz_release_get_version (BzRelease *self);
+
+void
+bz_release_set_issues (BzRelease  *self,
+                       GListModel *issues);
+
+void
+bz_release_set_timestamp (BzRelease *self,
+                          guint64    timestamp);
+
+void
+bz_release_set_url (BzRelease  *self,
+                    const char *url);
+
+void
+bz_release_set_version (BzRelease  *self,
+                        const char *version);
+
 G_END_DECLS
 
 /* End of bz-release.h */

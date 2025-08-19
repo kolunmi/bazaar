@@ -49,9 +49,7 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
                               FlatpakRef        *ref,
                               AsComponent       *component,
                               const char        *appstream_dir,
-                              const char        *output_dir,
                               GdkPaintable      *remote_icon,
-                              DexScheduler      *home_scheduler,
                               GError           **error);
 
 FlatpakRef *

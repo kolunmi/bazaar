@@ -22,13 +22,14 @@
 
 #include "bz-addons-dialog.h"
 #include "bz-entry.h"
+#include "bz-result.h"
 
 struct _BzAddonsDialog
 {
   AdwDialog parent_instance;
 
-  BzEntry          *entry;
-  GtkSortListModel *sorted;
+  BzResult   *entry;
+  GListModel *model;
 
   /* Template widgets */
 };
@@ -65,7 +66,7 @@ bz_addons_dialog_dispose (GObject *object)
   BzAddonsDialog *self = BZ_ADDONS_DIALOG (object);
 
   g_clear_object (&self->entry);
-  g_clear_object (&self->sorted);
+  g_clear_object (&self->model);
 
   G_OBJECT_CLASS (bz_addons_dialog_parent_class)->dispose (object);
 }
@@ -84,7 +85,7 @@ bz_addons_dialog_get_property (GObject    *object,
       g_value_set_object (value, self->entry);
       break;
     case PROP_MODEL:
-      g_value_set_object (value, self->sorted);
+      g_value_set_object (value, self->model);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -102,18 +103,13 @@ bz_addons_dialog_set_property (GObject      *object,
   switch (prop_id)
     {
     case PROP_ENTRY:
-      {
-        g_autoptr (GListModel) addons = NULL;
-
-        g_clear_object (&self->entry);
-        self->entry = g_value_dup_object (value);
-
-        if (self->entry != NULL)
-          g_object_get (self->entry, "addons", &addons, NULL);
-        gtk_sort_list_model_set_model (self->sorted, addons);
-      }
+      g_clear_object (&self->entry);
+      self->entry = g_value_dup_object (value);
       break;
     case PROP_MODEL:
+      g_clear_object (&self->model);
+      self->model = g_value_dup_object (value);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -130,10 +126,14 @@ static void
 transact_cb (GtkListItem *list_item,
              GtkButton   *button)
 {
+  BzResult  *item  = NULL;
   BzEntry   *entry = NULL;
   GtkWidget *self  = NULL;
 
-  entry = gtk_list_item_get_item (list_item);
+  item  = gtk_list_item_get_item (list_item);
+  entry = bz_result_get_object (item);
+  if (entry == NULL)
+    return;
 
   self = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_ADDONS_DIALOG);
   g_assert (self != NULL);
@@ -163,7 +163,7 @@ bz_addons_dialog_class_init (BzAddonsDialogClass *klass)
           "model",
           NULL, NULL,
           G_TYPE_LIST_MODEL,
-          G_PARAM_READABLE);
+          G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
@@ -190,37 +190,20 @@ bz_addons_dialog_class_init (BzAddonsDialogClass *klass)
 static void
 bz_addons_dialog_init (BzAddonsDialog *self)
 {
-  GtkCustomSorter *custom_sorter = NULL;
-
-  custom_sorter = gtk_custom_sorter_new ((GCompareDataFunc) cmp_item, self, NULL);
-  self->sorted  = gtk_sort_list_model_new (NULL, GTK_SORTER (custom_sorter));
-
   gtk_widget_init_template (GTK_WIDGET (self));
 }
 
 AdwDialog *
-bz_addons_dialog_new (BzEntry *entry)
+bz_addons_dialog_new (BzEntry    *entry,
+                      GListModel *model)
 {
   BzAddonsDialog *addons_dialog = NULL;
 
   addons_dialog = g_object_new (
       BZ_TYPE_ADDONS_DIALOG,
       "entry", entry,
+      "model", model,
       NULL);
 
   return ADW_DIALOG (addons_dialog);
-}
-
-static gint
-cmp_item (BzEntry        *a,
-          BzEntry        *b,
-          BzAddonsDialog *self)
-{
-  const char *title_a;
-  const char *title_b;
-
-  title_a = bz_entry_get_title (a);
-  title_b = bz_entry_get_title (b);
-
-  return g_strcmp0 (title_a, title_b);
 }

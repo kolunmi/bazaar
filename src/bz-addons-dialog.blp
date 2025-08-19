@@ -55,7 +55,7 @@ template $BzAddonsDialog: Adw.Dialog {
 
                   xalign: 0;
                   ellipsize: middle;
-                  label: bind template.item as <$BzEntry>.title;
+                  label: bind template.item as <$BzResult>.object as <$BzEntry>.title;
                 }
 
                 Label {
@@ -65,7 +65,7 @@ template $BzAddonsDialog: Adw.Dialog {
 
                   xalign: 0;
                   wrap: true;
-                  label: bind template.item as <$BzEntry>.description;
+                  label: bind template.item as <$BzResult>.object as <$BzEntry>.description;
                 }
               }
 
@@ -76,8 +76,8 @@ template $BzAddonsDialog: Adw.Dialog {
 
                 valign: center;
                 icon-name: "folder-download-symbolic";
-                visible: bind $invert_boolean(template.item as <$BzEntry>.installed) as <bool>;
-                sensitive: bind $invert_boolean(template.item as <$BzEntry>.holding) as <bool>;
+                visible: bind $invert_boolean(template.item as <$BzResult>.object as <$BzEntry>.installed) as <bool>;
+                sensitive: bind $invert_boolean(template.item as <$BzResult>.object as <$BzEntry>.holding) as <bool>;
                 clicked => $transact_cb(template);
               }
 
@@ -88,8 +88,8 @@ template $BzAddonsDialog: Adw.Dialog {
 
                 valign: center;
                 icon-name: "user-trash-symbolic";
-                visible: bind template.item as <$BzEntry>.installed;
-                sensitive: bind $invert_boolean(template.item as <$BzEntry>.holding) as <bool>;
+                visible: bind template.item as <$BzResult>.object as <$BzEntry>.installed;
+                sensitive: bind $invert_boolean(template.item as <$BzResult>.object as <$BzEntry>.holding) as <bool>;
                 clicked => $transact_cb(template);
               }
             };

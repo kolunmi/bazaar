@@ -68,16 +68,16 @@ bz_release_get_property (GObject    *object,
   switch (prop_id)
     {
     case PROP_ISSUES:
-      g_value_set_object (value, self->issues);
+      g_value_set_object (value, bz_release_get_issues (self));
       break;
     case PROP_TIMESTAMP:
-      g_value_set_uint64 (value, self->timestamp);
+      g_value_set_uint64 (value, bz_release_get_timestamp (self));
       break;
     case PROP_URL:
-      g_value_set_string (value, self->url);
+      g_value_set_string (value, bz_release_get_url (self));
       break;
     case PROP_VERSION:
-      g_value_set_string (value, self->version);
+      g_value_set_string (value, bz_release_get_version (self));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -95,19 +95,16 @@ bz_release_set_property (GObject      *object,
   switch (prop_id)
     {
     case PROP_ISSUES:
-      g_clear_pointer (&self->issues, g_object_unref);
-      self->issues = g_value_dup_object (value);
+      bz_release_set_issues (self, g_value_get_object (value));
       break;
     case PROP_TIMESTAMP:
-      self->timestamp = g_value_get_uint64 (value);
+      bz_release_set_timestamp (self, g_value_get_uint64 (value));
       break;
     case PROP_URL:
-      g_clear_pointer (&self->url, g_free);
-      self->url = g_value_dup_string (value);
+      bz_release_set_url (self, g_value_get_string (value));
       break;
     case PROP_VERSION:
-      g_clear_pointer (&self->version, g_free);
-      self->version = g_value_dup_string (value);
+      bz_release_set_version (self, g_value_get_string (value));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -128,26 +125,26 @@ bz_release_class_init (BzReleaseClass *klass)
           "issues",
           NULL, NULL,
           G_TYPE_LIST_MODEL,
-          G_PARAM_READWRITE);
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   props[PROP_TIMESTAMP] =
       g_param_spec_uint64 (
           "timestamp",
           NULL, NULL,
           0, G_MAXUINT64, (guint64) 0,
-          G_PARAM_READWRITE);
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   props[PROP_URL] =
       g_param_spec_string (
           "url",
           NULL, NULL, NULL,
-          G_PARAM_READWRITE);
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   props[PROP_VERSION] =
       g_param_spec_string (
           "version",
           NULL, NULL, NULL,
-          G_PARAM_READWRITE);
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 }
@@ -155,6 +152,90 @@ bz_release_class_init (BzReleaseClass *klass)
 static void
 bz_release_init (BzRelease *self)
 {
+}
+
+BzRelease *
+bz_release_new (void)
+{
+  return g_object_new (BZ_TYPE_RELEASE, NULL);
+}
+
+GListModel *
+bz_release_get_issues (BzRelease *self)
+{
+  g_return_val_if_fail (BZ_IS_RELEASE (self), NULL);
+  return self->issues;
+}
+
+guint64
+bz_release_get_timestamp (BzRelease *self)
+{
+  g_return_val_if_fail (BZ_IS_RELEASE (self), 0);
+  return self->timestamp;
+}
+
+const char *
+bz_release_get_url (BzRelease *self)
+{
+  g_return_val_if_fail (BZ_IS_RELEASE (self), NULL);
+  return self->url;
+}
+
+const char *
+bz_release_get_version (BzRelease *self)
+{
+  g_return_val_if_fail (BZ_IS_RELEASE (self), NULL);
+  return self->version;
+}
+
+void
+bz_release_set_issues (BzRelease  *self,
+                       GListModel *issues)
+{
+  g_return_if_fail (BZ_IS_RELEASE (self));
+
+  g_clear_pointer (&self->issues, g_object_unref);
+  if (issues != NULL)
+    self->issues = g_object_ref (issues);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ISSUES]);
+}
+
+void
+bz_release_set_timestamp (BzRelease *self,
+                          guint64    timestamp)
+{
+  g_return_if_fail (BZ_IS_RELEASE (self));
+
+  self->timestamp = timestamp;
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TIMESTAMP]);
+}
+
+void
+bz_release_set_url (BzRelease  *self,
+                    const char *url)
+{
+  g_return_if_fail (BZ_IS_RELEASE (self));
+
+  g_clear_pointer (&self->url, g_free);
+  if (url != NULL)
+    self->url = g_strdup (url);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_URL]);
+}
+
+void
+bz_release_set_version (BzRelease  *self,
+                        const char *version)
+{
+  g_return_if_fail (BZ_IS_RELEASE (self));
+
+  g_clear_pointer (&self->version, g_free);
+  if (version != NULL)
+    self->version = g_strdup (version);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_VERSION]);
 }
 
 /* End of bz-release.c */

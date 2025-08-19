@@ -1,0 +1,12 @@
+[package]
+name = "libbazaar-ui"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+adw = { version = "0.8.0", package = "libadwaita", features = ["v1_7"] }
+gtk = { version = "0.10.0", package = "gtk4", features = ["v4_18"]}
+
+[lib]
+name = "bazaar_ui"
+crate-type = ["staticlib"]

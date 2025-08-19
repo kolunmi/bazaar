@@ -71,16 +71,9 @@ template $BzSearchWidget: Adw.Bin {
 
       Label search_text {}
 
-      Label regex_error {
-        styles [
-          "error",
-          "monospace",
-        ]
-
+      Image timeout_busy {
         visible: false;
-        has-tooltip: true;
-        ellipsize: start;
-        max-width-chars: 30;
+        icon-name: "delay-symbolic";
       }
 
       Image search_busy {
@@ -139,16 +132,6 @@ template $BzSearchWidget: Adw.Bin {
                 label: _("Advanced");
               }
 
-              CheckButton regex_check {
-                label: _("Match using regular expressions");
-                toggled => $regex_toggled_cb(template);
-              }
-              
-              CheckButton crossfade_check {
-                label: _("Hide filtering and sorting behind a crossfade effect");
-                active: true;
-              }
-              
               CheckButton debounce_check {
                 label: _("Debounce input to prevent instant replies");
                 active: true;
@@ -159,17 +142,12 @@ template $BzSearchWidget: Adw.Bin {
       }
     }
 
-    Adw.Banner {
-      revealed: bind $is_valid_string(regex_error.label) as <bool>;
-      title: bind regex_error.label;
-    }
-
     Revealer entry_list_revealer {
       transition-type: crossfade;
 
       child: Box content_box {
         orientation: horizontal;
-        visible: bind $invert_boolean($is_null(list_view.model as <SingleSelection>.selected-item as <$BzEntryGroup>.ui-entry) as <bool>) as <bool>;
+        visible: bind $invert_boolean($is_null(list_view.model as <SingleSelection>.selected-item) as <bool>) as <bool>;
 
         ScrolledWindow entry_list_scroll {
           hexpand: true;
@@ -193,42 +171,23 @@ template $BzSearchWidget: Adw.Bin {
                   margin-end: 3;
                   spacing: 20;
 
-                  Picture {
-                    valign: center;
-                    halign: center;
-                    height-request: 64;
-                    width-request: 32;
-                    can-shrink: true;
-                    paintable: bind template.item as <$BzEntryGroup>.ui-entry as <$BzEntry>.icon-paintable;
-                    visible: bind $invert_boolean($is_null(template.item as <$BzEntryGroup>.ui-entry as <$BzEntry>.icon-paintable) as <bool>) as <bool>;
-                  }
-
-                  Image {
-                    valign: center;
-                    halign: center;
-                    width-request: 32;
-                    height-request: 32;
-                    pixel-size: 32;
-                    icon-name: "image-missing-symbolic";
-                    visible: bind $is_null(template.item as <$BzEntryGroup>.ui-entry as <$BzEntry>.icon-paintable) as <bool>;
-                  }
-
                   Box {
                     hexpand: true;
                     valign: center;
                     orientation: vertical;
-                    spacing: 5;
+                    spacing: 3;
 
                     Label {
                       styles [
                         "heading",
                       ]
 
+                      hexpand: true;
                       xalign: 0.0;
                       width-chars: 13;
                       ellipsize: end;
                       single-line-mode: true;
-                      label: bind template.item as <$BzEntryGroup>.ui-entry as <$BzEntry>.title;
+                      label: bind template.item as <$BzSearchResult>.group as <$BzEntryGroup>.title;
                     }
 
                     Label {
@@ -239,7 +198,7 @@ template $BzSearchWidget: Adw.Bin {
                       xalign: 0.0;
                       ellipsize: end;
                       single-line-mode: true;
-                      label: bind template.item as <$BzEntryGroup>.ui-entry as <$BzEntry>.description;
+                      label: bind template.item as <$BzSearchResult>.group as <$BzEntryGroup>.description;
                     }
                   }
                 };

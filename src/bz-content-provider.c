@@ -27,6 +27,7 @@
 #include "bz-content-provider.h"
 #include "bz-content-section.h"
 #include "bz-env.h"
+#include "bz-io.h"
 #include "bz-util.h"
 #include "bz-yaml-parser.h"
 
@@ -431,7 +432,7 @@ input_files_changed (GListModel        *input_files,
       init_data->file = g_object_ref (additions[i]);
 
       future = dex_scheduler_spawn (
-          dex_thread_pool_scheduler_get_default (),
+          bz_get_io_scheduler (),
           bz_get_dex_stack_size (),
           (DexFiberFunc) input_init_fiber,
           input_init_data_ref (init_data),
@@ -657,7 +658,7 @@ input_load_fiber (InputLoadData *data)
                 {
                   g_autoptr (BzAsyncTexture) texture = NULL;
 
-                  texture = bz_async_texture_new (source);
+                  texture = bz_async_texture_new (source, NULL);
                   g_object_set (section, "banner", texture, NULL);
                 }
             }
@@ -820,7 +821,7 @@ commence_reload (InputTrackingData *data)
   load_data->parser = g_object_ref (data->self->yaml_parser);
 
   future = dex_scheduler_spawn (
-      dex_thread_pool_scheduler_get_default (),
+      bz_get_io_scheduler (),
       bz_get_dex_stack_size (),
       (DexFiberFunc) input_load_fiber,
       input_load_data_ref (load_data),

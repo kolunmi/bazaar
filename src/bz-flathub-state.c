@@ -20,12 +20,14 @@
 
 #define G_LOG_DOMAIN "BAZAAR::FLATHUB"
 
+#include <json-glib/json-glib.h>
 #include <libdex.h>
 
 #include "bz-env.h"
 #include "bz-flathub-category.h"
 #include "bz-flathub-state.h"
 #include "bz-global-state.h"
+#include "bz-io.h"
 
 struct _BzFlathubState
 {
@@ -251,12 +253,9 @@ bz_flathub_state_init (BzFlathubState *self)
 }
 
 BzFlathubState *
-bz_flathub_state_new (const char *for_day)
+bz_flathub_state_new (void)
 {
-  return g_object_new (
-      BZ_TYPE_FLATHUB_STATE,
-      "for-day", for_day,
-      NULL);
+  return g_object_new (BZ_TYPE_FLATHUB_STATE, NULL);
 }
 
 const char *
@@ -417,6 +416,15 @@ bz_flathub_state_set_for_day (BzFlathubState *self,
   g_clear_pointer (&self->popular, g_object_unref);
   g_clear_pointer (&self->trending, g_object_unref);
 
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_OF_THE_DAY]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_OF_THE_DAY_GROUP]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APPS_OF_THE_WEEK]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CATEGORIES]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_RECENTLY_UPDATED]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_RECENTLY_ADDED]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_POPULAR]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TRENDING]);
+
   if (for_day != NULL)
     {
       g_autoptr (DexFuture) future = NULL;
@@ -430,7 +438,7 @@ bz_flathub_state_set_for_day (BzFlathubState *self,
       self->trending         = gtk_string_list_new (NULL);
 
       future = dex_scheduler_spawn (
-          dex_thread_pool_scheduler_get_default (),
+          bz_get_io_scheduler (),
           bz_get_dex_stack_size (),
           (DexFiberFunc) initialize_fiber,
           self, NULL);

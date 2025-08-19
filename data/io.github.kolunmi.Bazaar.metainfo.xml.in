@@ -5,10 +5,19 @@
   <project_license>GPL-3.0-or-later</project_license>
 
   <name>Bazaar</name>
-  <!-- FIXME: add descriptions and summary -->
-  <summary>Keep the summary shorter, between 10 and 35 characters</summary>
+  <summary>Discover and install applications</summary>
   <description>
-    <p>No description</p>
+    <p>
+      A new app store for GNOME with a focus on discovering and installing
+      applications and add-ons from Flatpak remotes, particularly
+      Flathub
+    </p>
+    <p>
+      It emphasizes supporting the
+      developers who make the Linux desktop possible. Bazaar features a
+      "curated" tab that can be configured by distributors to allow for a
+      more locallized experience.
+    </p>
   </description>
 
   <developer id="io.github.kolunmi">
@@ -29,30 +38,44 @@
   <launchable type="desktop-id">io.github.kolunmi.Bazaar.desktop</launchable>
   <content_rating type="oars-1.1" />
 
-  <!-- FIXME: figure out nice colors -->
   <branding>
-    <color type="primary" scheme_preference="light">#ff00ff</color>
-    <color type="primary" scheme_preference="dark">#993d3d</color>
+    <color type="primary" scheme_preference="light">#993d3d</color>
+    <color type="primary" scheme_preference="dark">#4f1305</color>
   </branding>
 
   <screenshots>
     <screenshot type="default">
-      <image>https://private-user-images.githubusercontent.com/113054217/443949986-1e305d42-8907-49d0-8522-ad9f9ed483a4.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDc1MTg2MTIsIm5iZiI6MTc0NzUxODMxMiwicGF0aCI6Ii8xMTMwNTQyMTcvNDQzOTQ5OTg2LTFlMzA1ZDQyLTg5MDctNDlkMC04NTIyLWFkOWY5ZWQ0ODNhNC5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwNTE3JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDUxN1QyMTQ1MTJaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT0xZDEyN2JlODExNzc4MGJjZTMyNDU3OTYzNzJjMTVmMmU0OWE5NzE5ODc3YTBmNTgzNzY2NjkzMGNjMzA0MjdlJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.PsquhbTag3GuLjbdldbShEnQgT20gT4H7oRQGYYHgQQ</image>
-      <caption>Main Bazaar window showing Blender</caption>
+      <image>https://github.com/user-attachments/assets/041f3d5b-393a-4a81-baf4-1940ed28827a</image>
+      <caption>Calligraphy application page</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/user-attachments/assets/dcda3b35-a334-446d-b4d7-546fc7ce0597</image>
+      <caption>Searching for Blender</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/user-attachments/assets/12e1bf5f-47ee-4038-a939-9582621f1749</image>
+      <caption>Download graph for Blender</caption>
     </screenshot>
   </screenshots>
 
   <releases>
-    <!-- FIXME: fill in releases whenever theres a release -->
-    <release version="1.0.1" date="2024-01-18">
-      <url type="details">https://example.org/changelog.html#version_1.0.1</url>
-      <description translate="no">
-        <p>Release description</p>
-        <ul>
-          <li>List of changes</li>
-          <li>List of changes</li>
-        </ul>
-      </description>
+    <release version="0.3.0" date="2025-08-11">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.3.0</url>
+    </release>
+    <release version="0.2.3" date="2025-07-14">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.2.3</url>
+    </release>
+    <release version="0.2.2" date="2025-07-09">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.2.2</url>
+    </release>
+    <release version="0.2.1" date="2025-07-07">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.2.1</url>
+    </release>
+    <release version="0.2.0" date="2025-07-07">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.2.0</url>
+    </release>
+    <release version="0.1.0" date="2025-06-24">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.1.0</url>
     </release>
   </releases>
 </component>

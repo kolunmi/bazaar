@@ -21,6 +21,7 @@
 #pragma once
 
 #include "bz-entry.h"
+#include "bz-flatpak-instance.h"
 
 G_BEGIN_DECLS
 
@@ -42,8 +43,12 @@ bz_flatpak_entry_get_runtime_name (BzFlatpakEntry *self);
 const char *
 bz_flatpak_entry_get_addon_extension_of_ref (BzFlatpakEntry *self);
 
+char *
+bz_flatpak_entry_extract_id_from_unique_id (const char *unique_id);
+
 gboolean
-bz_flatpak_entry_launch (BzFlatpakEntry *self,
-                         GError        **error);
+bz_flatpak_entry_launch (BzFlatpakEntry    *self,
+                         BzFlatpakInstance *flatpak,
+                         GError           **error);
 
 G_END_DECLS

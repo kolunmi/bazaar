@@ -8,4 +8,4 @@ Type=Application
 Categories=Utility;
 Keywords=GTK;System;PackageManager;Discover;Flatpak;Software;Store;
 StartupNotify=true
-MimeType=x-scheme-handler/flatpak;
+MimeType=x-scheme-handler/flatpak;x-scheme-handler/flatpak+https;

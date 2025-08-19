@@ -63,10 +63,10 @@ bz_issue_get_property (GObject    *object,
   switch (prop_id)
     {
     case PROP_ID:
-      g_value_set_string (value, self->id);
+      g_value_set_string (value, bz_issue_get_id (self));
       break;
     case PROP_URL:
-      g_value_set_string (value, self->url);
+      g_value_set_string (value, bz_issue_get_url (self));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -84,12 +84,10 @@ bz_issue_set_property (GObject      *object,
   switch (prop_id)
     {
     case PROP_ID:
-      g_clear_pointer (&self->id, g_free);
-      self->id = g_value_dup_string (value);
+      bz_issue_set_id (self, g_value_get_string (value));
       break;
     case PROP_URL:
-      g_clear_pointer (&self->url, g_free);
-      self->url = g_value_dup_string (value);
+      bz_issue_set_url (self, g_value_get_string (value));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -109,13 +107,13 @@ bz_issue_class_init (BzIssueClass *klass)
       g_param_spec_string (
           "id",
           NULL, NULL, NULL,
-          G_PARAM_READWRITE);
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   props[PROP_URL] =
       g_param_spec_string (
           "url",
           NULL, NULL, NULL,
-          G_PARAM_READWRITE);
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 }
@@ -123,6 +121,52 @@ bz_issue_class_init (BzIssueClass *klass)
 static void
 bz_issue_init (BzIssue *self)
 {
+}
+
+BzIssue *
+bz_issue_new (void)
+{
+  return g_object_new (BZ_TYPE_ISSUE, NULL);
+}
+
+const char *
+bz_issue_get_id (BzIssue *self)
+{
+  g_return_val_if_fail (BZ_IS_ISSUE (self), NULL);
+  return self->id;
+}
+
+const char *
+bz_issue_get_url (BzIssue *self)
+{
+  g_return_val_if_fail (BZ_IS_ISSUE (self), NULL);
+  return self->url;
+}
+
+void
+bz_issue_set_id (BzIssue    *self,
+                 const char *id)
+{
+  g_return_if_fail (BZ_IS_ISSUE (self));
+
+  g_clear_pointer (&self->id, g_free);
+  if (id != NULL)
+    self->id = g_strdup (id);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ID]);
+}
+
+void
+bz_issue_set_url (BzIssue    *self,
+                  const char *url)
+{
+  g_return_if_fail (BZ_IS_ISSUE (self));
+
+  g_clear_pointer (&self->url, g_free);
+  if (url != NULL)
+    self->url = g_strdup (url);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_URL]);
 }
 
 /* End of bz-issue.c */
