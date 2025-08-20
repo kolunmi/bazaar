@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-19 19:15+0200\n"
+"POT-Creation-Date: 2025-08-17 16:33+0300\n"
 "PO-Revision-Date: 2025-08-17 16:48+0300\n"
 "Last-Translator: Jill Fiore <contact@lumaeris.com>\n"
 "Language-Team: Russian\n"
@@ -545,6 +545,10 @@ msgstr "Flathub"
 msgid "Go Back"
 msgstr "Назад"
 
+#: src/bz-window.blp:247
+msgid "Refresh"
+msgstr "Перезагрузить"
+
 #: src/bz-window.blp:256
 msgid "Search"
 msgstr "Поиск"
@@ -582,19 +586,14 @@ msgid "Toggle transaction sidebar"
 msgstr "Переключить боковую панель транзакций"
 
 #: src/bz-window.blp:423
-#, fuzzy
-msgid "_Refresh"
-msgstr "Перезагрузить"
-
-#: src/bz-window.blp:428
 msgid "_Keyboard Shortcuts"
 msgstr "_Сочетание клавиш"
 
-#: src/bz-window.blp:433
+#: src/bz-window.blp:428
 msgid "_About Bazaar"
 msgstr "_О Bazaar"
 
-#: src/bz-window.blp:438
+#: src/bz-window.blp:433
 msgid "_Donate to Bazaar ❤️"
 msgstr "_Поддержать Bazaar ❤️"
 

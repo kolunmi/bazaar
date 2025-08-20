@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-19 19:15+0200\n"
+"POT-Creation-Date: 2025-07-08 03:52+0200\n"
 "PO-Revision-Date: 2025-08-17 05:02+0200\n"
 "Last-Translator: Vlastimil Dědek <dedek.vlastimil2@proton.me>\n"
 "Language-Team: Czech\n"
@@ -58,8 +58,8 @@ msgid ""
 "allow for a more locallized experience."
 msgstr ""
 "Zdůrazňuje podporu vývojářů, kteří umožňují existenci Linuxu na počítačích. "
-"Bazaar má kartu \"vybrané\" která může být nastavena distribucemi pro více "
-"přizpůsobený zážitek"
+"Bazaar má kartu \"vybrané\" která může být nastavena distribucemi pro "
+"více přizpůsobený zážitek"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:24 src/bz-application.c:777
 msgid "Adam Masciola"
@@ -189,8 +189,8 @@ msgid ""
 "Would you like to add Flathub as a remote? If you decline, the Flathub page "
 "will not be available. You can change this later."
 msgstr ""
-"Přejete si přidat Flathub jako remote? Pokud ne, Flathub kartanebude "
-"dostupná. Toto můžete změnit později."
+"Přejete si přidat Flathub jako remote? Pokud ne, Flathub karta"
+"nebude dostupná. Toto můžete změnit později."
 
 #: src/bz-application.c:1190 src/bz-update-dialog.blp:6
 msgid "Later"
@@ -209,18 +209,12 @@ msgstr "Identifikuji instalované položky..."
 #: src/bz-application.c:1235
 #, c-format
 msgid "Beginning remote entry retrieval while referencing %d blocklist(s)..."
-msgstr ""
-"Probíhá stahování vzdálených položek s odkazem na %d blokovací seznam(y)..."
+msgstr "Probíhá stahování vzdálených položek s odkazem na %d blokovací seznam(y)..."
 
 #: src/bz-application.c:1379
 #, c-format
 msgid "Received %'d entries out of %'d (%0.1f seconds elapsed)"
 msgstr "Získáno %'d položek z celkových %'d (%0.1f sekund uplynulo)"
-
-#: src/bz-application.c:1386
-#, c-format
-msgid "Waiting for background indexing tasks to catch up..."
-msgstr ""
 
 #: src/bz-application.c:1422
 #, c-format
@@ -240,7 +234,9 @@ msgstr "Žádné vybrané aplikace"
 msgid ""
 "Bazaar was not provided a curated content configuration. Contact your "
 "operating system's support channels for assistance."
-msgstr "Bazaar nezískal konfiguraci.Kontaktujtepodporu své distribuce"
+msgstr ""
+"Bazaar nezískal konfiguraci."
+"Kontaktujtepodporu své distribuce"
 
 #: src/bz-browse-widget.blp:22 src/bz-flathub-page.blp:22
 msgid "Browser"
@@ -361,8 +357,8 @@ msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
 msgstr ""
-"Tato aplikace má FLOSS licenci. To znamená že kód může být ověřen pro "
-"bezpečnost."
+"Tato aplikace má FLOSS licenci. To znamená že kód může být ověřen "
+"pro bezpečnost."
 
 #: src/bz-full-view.c:224
 msgid ""
@@ -486,14 +482,18 @@ msgstr "Aktualizace k dispozici"
 msgid ""
 "The following applications are eligible for updates. Would you like to "
 "install them?"
-msgstr "Následující aplikace mají aktualizace.Přejete si je nainstalovat?"
+msgstr ""
+"Následující aplikace mají aktualizace."
+"Přejete si je nainstalovat?"
 
 #: src/bz-update-dialog.c:134
 #, c-format
 msgid ""
 "%d runtimes and/or addons are eligible for updates. Would you like to "
 "install them?"
-msgstr "%d runtime a/nebo doplňky mají aktualizace.Přejete si jenainstalovat?"
+msgstr ""
+"%d runtime a/nebo doplňky mají aktualizace."
+"Přejete si jenainstalovat?"
 
 #: src/bz-update-dialog.c:142
 #, c-format
@@ -536,6 +536,10 @@ msgstr "Flathub"
 msgid "Go Back"
 msgstr "Zpět"
 
+#: src/bz-window.blp:247
+msgid "Refresh"
+msgstr "Obnovit"
+
 #: src/bz-window.blp:256
 msgid "Search"
 msgstr "Vyhledat"
@@ -573,19 +577,14 @@ msgid "Toggle transaction sidebar"
 msgstr "Zobraz/skryj přehled translakcí"
 
 #: src/bz-window.blp:423
-#, fuzzy
-msgid "_Refresh"
-msgstr "Obnovit"
-
-#: src/bz-window.blp:428
 msgid "_Keyboard Shortcuts"
 msgstr "_Klávesové Zkratky"
 
-#: src/bz-window.blp:433
+#: src/bz-window.blp:428
 msgid "_About Bazaar"
 msgstr "_O Bazaaru"
 
-#: src/bz-window.blp:438
+#: src/bz-window.blp:433
 msgid "_Donate to Bazaar ❤️"
 msgstr "_Podpořte Vývoj ❤️"
 
@@ -603,8 +602,8 @@ msgid ""
 "\n"
 "on the command line."
 msgstr ""
-"Možnost prohlížet a instalovat loální .flatpak soubory bude brzy hotová. "
-"Mezitím zkuste spustit\n"
+"Možnost prohlížet a instalovat loální .flatpak soubory bude "
+"brzy hotová. Mezitím zkuste spustit\n"
 "\n"
 "flatpak install --bundle tvuj-bundle.flatpak\n"
 "\n"

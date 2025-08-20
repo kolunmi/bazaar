@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-19 19:15+0200\n"
+"POT-Creation-Date: 2025-07-14 09:23+0330\n"
 "PO-Revision-Date: 2025-07-14 16:34+0330\n"
 "Last-Translator: Goudarz Jafari <me@goudarzjafari.com>\n"
 "Language-Team: none\n"
@@ -39,190 +39,93 @@ msgstr "نمایش پس‌زمینه متحرک"
 msgid "Whether to show the animated icon background on the home page"
 msgstr "آیا پس‌زمینه‌ی نماد متحرک در صفحه‌ی اصلی نمایش داده شود"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:8
-#, fuzzy
-msgid "Discover and install applications"
-msgstr "مشاهده‌ی برنامه‌های نصب‌شده"
+#. FIXME: add descriptions and summary
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:9
+msgid "Keep the summary shorter, between 10 and 35 characters"
+msgstr "خلاصه را کوتاه نگه دارید، بین ۱۰ تا ۳۵ نویسه"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:10
-msgid ""
-"A new app store for GNOME with a focus on discovering and installing "
-"applications and add-ons from Flatpak remotes, particularly Flathub"
-msgstr ""
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:11
+msgid "No description"
+msgstr "بدون توضیح"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:15
-msgid ""
-"It emphasizes supporting the developers who make the Linux desktop possible. "
-"Bazaar features a \"curated\" tab that can be configured by distributors to "
-"allow for a more locallized experience."
-msgstr ""
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:41
+msgid "Main Bazaar window showing Blender"
+msgstr "پنجره‌ی اصلی بازار که Blender را نمایش می‌دهد"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:24 src/bz-application.c:777
-msgid "Adam Masciola"
-msgstr "Adam Masciola"
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:50
+msgid "Release description"
+msgstr "توضیح‌های نگارش"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:49
-#, fuzzy
-msgid "Calligraphy application page"
-msgstr "هم‌رسانی این برنامه"
-
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:52
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:53
-msgid "Searching for Blender"
-msgstr ""
+msgid "List of changes"
+msgstr "فهرست تغییرات"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:57
-msgid "Download graph for Blender"
-msgstr ""
-
-#: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:164
-#: src/bz-installed-page.blp:176
+#: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:162
+#: src/bz-installed-page.blp:174
 msgid "Manage Addons"
 msgstr "مدیریت افزونه‌ها"
 
-#: src/bz-app-tile.blp:54 src/bz-full-view.blp:125
+#: src/bz-app-tile.blp:65 src/bz-full-view.blp:139
 msgid "This flatpak is verified by the original developers of the software."
 msgstr "این Flatpak توسط توسعه‌دهندگان اصلی نرم‌افزار تایید شده است."
 
-#: src/bz-application.c:741
+#: src/bz-application.c:1194
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr "Adam Masciola <kolunmi@posteo.net>"
 
-#: src/bz-application.c:746
+#: src/bz-application.c:1199
 msgctxt "About Dialog Translator Credit"
 msgid "Ahmed Najmawi"
 msgstr "Ahmed Najmawi"
 
-#: src/bz-application.c:747
+#: src/bz-application.c:1200
 msgctxt "About Dialog Translator Credit"
 msgid "AtomHare"
 msgstr "AtomHare"
 
-#: src/bz-application.c:748
+#: src/bz-application.c:1201
 msgctxt "About Dialog Translator Credit"
-msgid "Azenyr"
-msgstr ""
-
-#: src/bz-application.c:749
-msgctxt "About Dialog Translator Credit"
-msgid "Goudarz Jafari"
-msgstr ""
-
-#: src/bz-application.c:750
-#, fuzzy
-msgctxt "About Dialog Translator Credit"
-msgid "Jill Fiore (Lumaeris)"
+msgid "Jill Fiore"
 msgstr "Jill Fiore"
 
-#: src/bz-application.c:751
-msgctxt "About Dialog Translator Credit"
-msgid "KiKaraage"
-msgstr ""
-
-#: src/bz-application.c:752
+#: src/bz-application.c:1202
 msgctxt "About Dialog Translator Credit"
 msgid "Lucosec"
 msgstr "Lucosec"
 
-#: src/bz-application.c:753
-msgctxt "About Dialog Translator Credit"
-msgid "Léane GRASSER"
-msgstr ""
-
-#: src/bz-application.c:754
-msgctxt "About Dialog Translator Credit"
-msgid "Marcel Mrówka (Microwave)"
-msgstr ""
-
-#: src/bz-application.c:755
-msgctxt "About Dialog Translator Credit"
-msgid "Pietro F."
-msgstr ""
-
-#: src/bz-application.c:756
+#: src/bz-application.c:1203
 msgctxt "About Dialog Translator Credit"
 msgid "Shihfu Juan"
 msgstr "Shihfu Juan"
 
-#: src/bz-application.c:757
-msgctxt "About Dialog Translator Credit"
-msgid "Shinsei"
-msgstr ""
-
-#: src/bz-application.c:758
+#: src/bz-application.c:1204
 msgctxt "About Dialog Translator Credit"
 msgid "Vlastimil Dědek"
 msgstr "Vlastimil Dědek"
 
-#: src/bz-application.c:759
+#: src/bz-application.c:1205
 msgctxt "About Dialog Translator Credit"
 msgid "asen23"
 msgstr "asen23"
 
-#: src/bz-application.c:760
+#: src/bz-application.c:1206
 msgctxt "About Dialog Translator Credit"
 msgid "renner"
 msgstr "renner"
 
-#: src/bz-application.c:761
+#: src/bz-application.c:1207
 msgctxt "About Dialog Translator Credit"
 msgid "robotta"
 msgstr "robotta"
 
-#: src/bz-application.c:1147
-msgid "Constructing Flatpak instance..."
-msgstr ""
-
-#: src/bz-application.c:1157
-msgid "Reusing last Flatpak instance..."
-msgstr ""
-
-#: src/bz-application.c:1182
-msgid "Flathub is not registered on this system"
-msgstr ""
-
-#: src/bz-application.c:1185
-msgid ""
-"Would you like to add Flathub as a remote? If you decline, the Flathub page "
-"will not be available. You can change this later."
-msgstr ""
-
-#: src/bz-application.c:1190 src/bz-update-dialog.blp:6
-msgid "Later"
-msgstr "بعداً"
-
-#: src/bz-application.c:1191
-#, fuzzy
-msgid "Add Flathub"
-msgstr "Flathub"
-
 #: src/bz-application.c:1223
-#, c-format
-msgid "Identifying installed entries..."
-msgstr ""
+msgid "Adam Masciola"
+msgstr "Adam Masciola"
 
-#: src/bz-application.c:1235
-#, c-format
-msgid "Beginning remote entry retrieval while referencing %d blocklist(s)..."
-msgstr ""
-
-#: src/bz-application.c:1379
-#, c-format
-msgid "Received %'d entries out of %'d (%0.1f seconds elapsed)"
-msgstr ""
-
-#: src/bz-application.c:1386
-#, c-format
-msgid "Waiting for background indexing tasks to catch up..."
-msgstr ""
-
-#: src/bz-application.c:1422
-#, c-format
-msgid "Completed initialization in %0.2f seconds"
-msgstr ""
-
-#: src/bz-browse-widget.blp:11 src/bz-flathub-page.blp:11
-#: src/bz-full-view.blp:10 src/bz-installed-page.blp:11 src/bz-window.blp:32
+#: src/bz-browse-widget.blp:11 src/bz-full-view.blp:11
+#: src/bz-installed-page.blp:11 src/bz-window.blp:32
 msgid "Empty"
 msgstr "خالی"
 
@@ -238,83 +141,75 @@ msgstr ""
 "هیچ پیکربندی‌ای برای محتوای انتخاب‌شده به بازار ارائه نشده است. برای دریافت "
 "کمک با پشتیبانی سیستم‌عامل خود تماس بگیرید."
 
-#: src/bz-browse-widget.blp:22 src/bz-flathub-page.blp:22
+#: src/bz-browse-widget.blp:22 src/bz-flathub-page.blp:11
 msgid "Browser"
 msgstr "مرورگر"
 
-#: src/bz-error.c:54
+#: src/bz-error.c:45
 msgid "An Error Occurred"
 msgstr "یک خطا رخ داد"
 
-#: src/bz-error.c:60
+#: src/bz-error.c:51
 msgid "Close"
 msgstr "بستن"
 
-#: src/bz-error.c:61
+#: src/bz-error.c:52
 msgid "Copy and Close"
 msgstr "رونوشت و بستن"
 
-#: src/bz-flathub-page.blp:15
-msgid "Flathub Not Added"
-msgstr ""
-
-#: src/bz-flathub-page.blp:16
-msgid "The Flathub remote was not found on any of your flatpak installations"
-msgstr ""
-
-#: src/bz-flathub-page.blp:52
+#: src/bz-flathub-page.blp:41
 msgid "Apps Of The Week"
 msgstr "برنامه‌های هفته"
 
-#: src/bz-flathub-page.blp:96
+#: src/bz-flathub-page.blp:85
 msgid "Trending"
 msgstr "محبوب‌ها"
 
-#: src/bz-flathub-page.blp:128
+#: src/bz-flathub-page.blp:117
 msgid "Recently Updated"
 msgstr "اخیرا به‌روزرسانی‌شده"
 
-#: src/bz-flathub-page.blp:160
+#: src/bz-flathub-page.blp:149
 msgid "Recently Added"
 msgstr "اخیرا افزوده‌شده"
 
-#: src/bz-flathub-page.blp:192
+#: src/bz-flathub-page.blp:181
 msgid "Popular"
 msgstr "پرطرفدار"
 
-#: src/bz-full-view.blp:14
+#: src/bz-full-view.blp:15
 msgid "No Results"
 msgstr "نتیجه‌ای یافت نشد"
 
-#: src/bz-full-view.blp:15
+#: src/bz-full-view.blp:16
 msgid "Try a different search query"
 msgstr "از یک عبارت دیگر برای جستجو استفاده کنید"
 
-#: src/bz-full-view.blp:21 src/bz-window.blp:42
+#: src/bz-full-view.blp:22 src/bz-window.blp:42
 msgid "Content"
 msgstr "محتوا"
 
-#: src/bz-full-view.blp:166
+#: src/bz-full-view.blp:180
 msgid "Run this application"
 msgstr "اجرای این برنامه"
 
-#: src/bz-full-view.blp:190
+#: src/bz-full-view.blp:204
 msgid "Download and install this application"
 msgstr "بارگیری و نصب این برنامه"
 
-#: src/bz-full-view.blp:208 src/bz-window.c:845
+#: src/bz-full-view.blp:222 src/bz-window.c:987
 msgid "Install"
 msgstr "نصب"
 
-#: src/bz-full-view.blp:222
+#: src/bz-full-view.blp:236
 msgid "Uninstall this application"
 msgstr "این برنامه را حذف کن"
 
-#: src/bz-full-view.blp:248
+#: src/bz-full-view.blp:262
 msgid "Share this application"
 msgstr "هم‌رسانی این برنامه"
 
-#: src/bz-full-view.blp:260
+#: src/bz-full-view.blp:274
 msgid ""
 "The number of downloads in the last 30 days. Click to view this "
 "application's download statistics."
@@ -322,36 +217,36 @@ msgstr ""
 "تعداد بارگیری در ۳۰ روز گذشته. برای مشاهده‌ی آمار بارگیری این برنامه کلیک "
 "کنید."
 
-#: src/bz-full-view.blp:304
+#: src/bz-full-view.blp:316
 msgid "Support this developer"
 msgstr "حمایت از این توسعه‌دهنده"
 
-#: src/bz-full-view.blp:317
+#: src/bz-full-view.blp:329
 msgid "Support"
 msgstr "پشتیبانی"
 
-#: src/bz-full-view.blp:375
+#: src/bz-full-view.blp:387
 msgid "Remote repo name"
 msgstr "نام مخزن راه‌دور"
 
-#: src/bz-full-view.blp:388
+#: src/bz-full-view.blp:400
 msgid "Project URL"
 msgstr "نشانی اینترنتی پروژه"
 
-#: src/bz-full-view.blp:400
+#: src/bz-full-view.blp:412
 msgid "Download size"
 msgstr "اندازه‌ی بارگیری"
 
-#: src/bz-full-view.c:204
+#: src/bz-full-view.c:214
 #, c-format
 msgid "Released %x"
 msgstr "منتشر شده در %x"
 
-#: src/bz-full-view.c:215
+#: src/bz-full-view.c:225
 msgid "No URL"
 msgstr "بدون نشانی اینترنتی"
 
-#: src/bz-full-view.c:223
+#: src/bz-full-view.c:233
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -359,7 +254,7 @@ msgstr ""
 "این برنامه دارای مجوز FLOSS است، به این معنا که کد منبع آن برای ایمنی قابل "
 "بررسی است."
 
-#: src/bz-full-view.c:224
+#: src/bz-full-view.c:234
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
@@ -371,15 +266,15 @@ msgstr ""
 msgid "No Flatpaks Installed"
 msgstr "هیچ Flatpakی نصب نشده است"
 
-#: src/bz-installed-page.blp:21 src/bz-window.blp:219 src/bz-window.blp:356
+#: src/bz-installed-page.blp:21 src/bz-window.blp:201 src/bz-window.blp:336
 msgid "Installed"
 msgstr "نصب شده"
 
-#: src/bz-installed-page.blp:145
+#: src/bz-installed-page.blp:143
 msgid "More actions"
 msgstr "اقدام‌های بیشتر"
 
-#: src/bz-installed-page.blp:189 src/bz-installed-page.blp:200
+#: src/bz-installed-page.blp:187 src/bz-installed-page.blp:198
 msgid "Edit Permissions"
 msgstr "ویرایش مجوزها"
 
@@ -403,23 +298,31 @@ msgstr "نمایش پس‌زمینه متحرک"
 msgid "Type to filter"
 msgstr "برای فیلتر کردن تایپ کنید"
 
-#: src/bz-search-widget.blp:91 src/bz-search-widget.blp:108
+#: src/bz-search-widget.blp:98 src/bz-search-widget.blp:115
 msgid "Search Options"
 msgstr "گزینه‌های جستجو"
 
-#: src/bz-search-widget.blp:112
+#: src/bz-search-widget.blp:119
 msgid "Exclude results with proprietary licenses"
 msgstr "حذف نتایج دارای مجوز مالکیتی"
 
-#: src/bz-search-widget.blp:117
+#: src/bz-search-widget.blp:124
 msgid "Exclude results not originating from Flathub"
 msgstr "حذف نتایجی که از Flathub منشا نگرفته‌اند"
 
-#: src/bz-search-widget.blp:132
+#: src/bz-search-widget.blp:139
 msgid "Advanced"
 msgstr "پیشرفته"
 
-#: src/bz-search-widget.blp:136
+#: src/bz-search-widget.blp:143
+msgid "Match using regular expressions"
+msgstr "همسان‌سازی با استفاده از عبارات باقاعده"
+
+#: src/bz-search-widget.blp:148
+msgid "Hide filtering and sorting behind a crossfade effect"
+msgstr "پنهان‌سازی فیلتر و مرتب‌سازی با افکت محوشونده"
+
+#: src/bz-search-widget.blp:153
 msgid "Debounce input to prevent instant replies"
 msgstr "مکث ورودی برای جلوگیری از پاسخ فوری"
 
@@ -468,6 +371,10 @@ msgstr "در حال حذف"
 msgid "Pending"
 msgstr "در انتظار"
 
+#: src/bz-update-dialog.blp:6
+msgid "Later"
+msgstr "بعداً"
+
 #: src/bz-update-dialog.blp:7
 msgid "Install Now"
 msgstr "اکنون نصب شود"
@@ -482,7 +389,7 @@ msgid ""
 "install them?"
 msgstr "برنامه‌های زیر واجد شرایط به‌روزرسانی هستند. آیا مایل به نصب آن‌ها هستید؟"
 
-#: src/bz-update-dialog.c:134
+#: src/bz-update-dialog.c:135
 #, c-format
 msgid ""
 "%d runtimes and/or addons are eligible for updates. Would you like to "
@@ -491,7 +398,7 @@ msgstr ""
 "%d محیط اجرایی و/یا افزونه برای به‌روزرسانی واجد شرایط هستند. آیا مایل به نصب "
 "آن‌ها هستید؟"
 
-#: src/bz-update-dialog.c:142
+#: src/bz-update-dialog.c:143
 #, c-format
 msgid "Additionally, %d runtimes and/or addons will be updated."
 msgstr "علاوه بر این، %d محیط اجرایی و/یا افزونه به‌روزرسانی خواهند شد."
@@ -508,88 +415,87 @@ msgstr "توقف اجرای تراکنش‌ها"
 msgid "Clear all finished transactions"
 msgstr "پاک‌سازی همه‌ی تراکنش‌های پایان‌یافته"
 
-#: src/bz-window.blp:135 src/bz-window.blp:139
+#: src/bz-window.blp:136 src/bz-window.blp:140
 msgid "Offline"
 msgstr "آفلاین"
 
-#: src/bz-window.blp:145
+#: src/bz-window.blp:146
 msgid "Loading"
 msgstr "در حال بارگذاری"
 
-#: src/bz-window.blp:187
+#: src/bz-window.blp:170
 msgid "Browse"
 msgstr "مرور"
 
-#: src/bz-window.blp:197
+#: src/bz-window.blp:180
 msgid "App View"
 msgstr "نمایش برنامه"
 
-#: src/bz-window.blp:209 src/bz-window.blp:335
+#: src/bz-window.blp:191 src/bz-window.blp:315
 msgid "Flathub"
 msgstr "Flathub"
 
-#: src/bz-window.blp:239
+#: src/bz-window.blp:220
 msgid "Go Back"
 msgstr "بازگشت"
 
-#: src/bz-window.blp:256
+#: src/bz-window.blp:228
+msgid "Refresh"
+msgstr "تازه‌سازی"
+
+#: src/bz-window.blp:237
 msgid "Search"
 msgstr "جست‌وجو"
 
-#: src/bz-window.blp:268
+#: src/bz-window.blp:249
 msgid "Update"
 msgstr "به‌روزرسانی"
 
-#: src/bz-window.blp:283
+#: src/bz-window.blp:263
 msgid "Checking for updates"
 msgstr "در حال بررسی برای به‌روزرسانی‌ها"
 
-#: src/bz-window.blp:299
+#: src/bz-window.blp:279
 msgid "View curated applications"
 msgstr "مشاهده‌ی برنامه‌های منتخب"
 
-#: src/bz-window.blp:314
+#: src/bz-window.blp:294
 msgid "Curated"
 msgstr "منتخب"
 
-#: src/bz-window.blp:320
+#: src/bz-window.blp:300
 msgid "View the latest on Flathub"
 msgstr "مشاهده‌ی آخرین‌ها در Flathub"
 
-#: src/bz-window.blp:341
+#: src/bz-window.blp:321
 msgid "View installed applications"
 msgstr "مشاهده‌ی برنامه‌های نصب‌شده"
 
-#: src/bz-window.blp:370
+#: src/bz-window.blp:350
 msgid "Main Menu"
 msgstr "منوی اصلی"
 
-#: src/bz-window.blp:381
+#: src/bz-window.blp:361
 msgid "Toggle transaction sidebar"
 msgstr "نمایش یا پنهان کردن نوار جانبی تراکنش‌ها"
 
-#: src/bz-window.blp:423
-#, fuzzy
-msgid "_Refresh"
-msgstr "تازه‌سازی"
-
-#: src/bz-window.blp:428
-msgid "_Keyboard Shortcuts"
-msgstr "_میان‌برهای صفحه‌کلید"
-
-#: src/bz-window.blp:433
-msgid "_About Bazaar"
-msgstr "_درباره‌ی بازار"
-
-#: src/bz-window.blp:438
-msgid "_Donate to Bazaar ❤️"
-msgstr "_به بازار اهدا کنید ❤️"
-
-#: src/bz-window.c:492
+#: src/bz-window.blp:400
 msgid "Up to date!"
 msgstr "به‌روز است!"
 
-#: src/bz-window.c:667
+#: src/bz-window.blp:425
+msgid "_Keyboard Shortcuts"
+msgstr "_میان‌برهای صفحه‌کلید"
+
+#: src/bz-window.blp:430
+msgid "_About Bazaar"
+msgstr "_درباره‌ی بازار"
+
+#: src/bz-window.blp:435
+msgid "_Donate to Bazaar ❤️"
+msgstr "_به بازار اهدا کنید ❤️"
+
+#: src/bz-window.c:856
 msgid ""
 "The ability to inspect and install local .flatpak bundle files is coming "
 "soon! In the meantime, try running\n"
@@ -605,15 +511,15 @@ msgstr ""
 "\n"
 " را در خط فرمان امتحان کنید."
 
-#: src/bz-window.c:742
+#: src/bz-window.c:927
 msgid "Can't do that right now!"
 msgstr "فعلا امکان انجام این کار وجود ندارد!"
 
-#: src/bz-window.c:789
+#: src/bz-window.c:940
 msgid "Confirm Action"
 msgstr "تایید عملیات"
 
-#: src/bz-window.c:818
+#: src/bz-window.c:958
 #, c-format
 msgid ""
 "You are about to remove the following Flatpak:\n"
@@ -630,15 +536,15 @@ msgstr ""
 "\n"
 "آیا مطمئن هستید؟"
 
-#: src/bz-window.c:825 src/bz-window.c:844
+#: src/bz-window.c:966 src/bz-window.c:986
 msgid "Cancel"
 msgstr "لغو"
 
-#: src/bz-window.c:826
+#: src/bz-window.c:967
 msgid "Remove"
 msgstr "حذف"
 
-#: src/bz-window.c:837
+#: src/bz-window.c:978
 #, c-format
 msgid ""
 "You are about to install the following Flatpak:\n"
@@ -655,15 +561,15 @@ msgstr ""
 "\n"
 "آیا مطمئن هستید؟"
 
-#: src/bz-window.c:867
+#: src/bz-window.c:1012
 msgid "More details"
 msgstr "جزئیات بیشتر"
 
-#: src/bz-window.c:993
+#: src/bz-window.c:1138
 msgid "Resume the execution of transactions"
 msgstr "ادامه دادن اجرای تراکنش‌ها"
 
-#: src/bz-window.c:999
+#: src/bz-window.c:1144
 msgid "Pause the execution of transactions"
 msgstr "توقف اجرای تراکنش‌ها"
 
@@ -696,24 +602,3 @@ msgstr "نمایش میان‌برها"
 msgctxt "shortcut window"
 msgid "Quit"
 msgstr "خروج"
-
-#~ msgid "Keep the summary shorter, between 10 and 35 characters"
-#~ msgstr "خلاصه را کوتاه نگه دارید، بین ۱۰ تا ۳۵ نویسه"
-
-#~ msgid "No description"
-#~ msgstr "بدون توضیح"
-
-#~ msgid "Main Bazaar window showing Blender"
-#~ msgstr "پنجره‌ی اصلی بازار که Blender را نمایش می‌دهد"
-
-#~ msgid "Release description"
-#~ msgstr "توضیح‌های نگارش"
-
-#~ msgid "List of changes"
-#~ msgstr "فهرست تغییرات"
-
-#~ msgid "Match using regular expressions"
-#~ msgstr "همسان‌سازی با استفاده از عبارات باقاعده"
-
-#~ msgid "Hide filtering and sorting behind a crossfade effect"
-#~ msgstr "پنهان‌سازی فیلتر و مرتب‌سازی با افکت محوشونده"

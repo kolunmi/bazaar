@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-19 19:15+0200\n"
+"POT-Creation-Date: 2025-08-16 20:03+0300\n"
 "PO-Revision-Date: 2025-08-12 22:05+0300\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -18,18 +18,20 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: data/io.github.kolunmi.Bazaar.desktop.in:2
+#: data/io.github.kolunmi.Bazaar.desktop.in:3
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:5
 msgid "Bazaar"
 msgstr "Базар"
 
-#: data/io.github.kolunmi.Bazaar.desktop.in:3
+#: data/io.github.kolunmi.Bazaar.desktop.in:4
 msgid "Add, remove or update flatpak software on this computer"
 msgstr "Встановлюйте, видаляйте та оновлюйте пакунки Flatpak на Ваш компʼютер"
 
-#: data/io.github.kolunmi.Bazaar.desktop.in:9
+#: data/io.github.kolunmi.Bazaar.desktop.in:10
 msgid "GTK;System;PackageManager;Discover;Flatpak;Software;Store;"
-msgstr "GTK;System;PackageManager;Discover;Flatpak;Software;Store;Магазин;Крамниця;Флатпак;Пакунки;Програми;"
+msgstr ""
+"GTK;System;PackageManager;Discover;Flatpak;Software;Store;Магазин;Крамниця;"
+"Флатпак;Пакунки;Програми;"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:6
 msgid "Show Animated Background"
@@ -62,10 +64,6 @@ msgstr ""
 "Базар наголошує на підтримці розробників, що роблять можливим Linux на "
 "стільничних компʼютерах. Він має вкладку \"підібраних\" застосунків, котра "
 "може бути налаштована дистрибутивами, аби створити цілісніший досвід."
-
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:24 src/bz-application.c:777
-msgid "Adam Masciola"
-msgstr ""
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:49
 #, fuzzy
@@ -172,6 +170,10 @@ msgstr ""
 #: src/bz-application.c:761
 msgctxt "About Dialog Translator Credit"
 msgid "robotta"
+msgstr ""
+
+#: src/bz-application.c:777
+msgid "Adam Masciola"
 msgstr ""
 
 #: src/bz-application.c:1147
@@ -539,6 +541,10 @@ msgstr "Flathub"
 msgid "Go Back"
 msgstr "Назад"
 
+#: src/bz-window.blp:247
+msgid "Refresh"
+msgstr "Оновити"
+
 #: src/bz-window.blp:256
 msgid "Search"
 msgstr "Пошук"
@@ -576,19 +582,14 @@ msgid "Toggle transaction sidebar"
 msgstr "Перемкнути віконце дій над застосунками"
 
 #: src/bz-window.blp:423
-#, fuzzy
-msgid "_Refresh"
-msgstr "Оновити"
-
-#: src/bz-window.blp:428
 msgid "_Keyboard Shortcuts"
 msgstr "_Клавіатурні скорочення"
 
-#: src/bz-window.blp:433
+#: src/bz-window.blp:428
 msgid "_About Bazaar"
 msgstr "_Про Базар"
 
-#: src/bz-window.blp:438
+#: src/bz-window.blp:433
 msgid "_Donate to Bazaar ❤️"
 msgstr "_Пожертувати Базару ❤️"
 
