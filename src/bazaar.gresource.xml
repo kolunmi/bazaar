@@ -4,6 +4,7 @@
     
     <file>gtk/styles.css</file>
 
+    <file preprocess="xml-stripblanks">main-config-schema.xml</file>
     <file preprocess="xml-stripblanks">bz-content-provider-config-schema.xml</file>
     
     <file preprocess="xml-stripblanks">bz-addons-dialog.ui</file>

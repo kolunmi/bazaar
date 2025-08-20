@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mappings>
+  <mapping key="hooks">
+    <!-- Earlier hooks have greater priority -->
+    <list>
+      <mappings>
+        <mapping key="id">
+          <scalar type="s"/>
+        </mapping>
+        <mapping key="when">
+          <!-- Can be "before-transaction" or "after-transaction" -->
+          <scalar type="s"/>
+        </mapping>
+        <mapping key="dialogs">
+          <list>
+            <mappings>
+              <mapping key="id">
+                <scalar type="s"/>
+              </mapping>
+              <mapping key="title">
+                <scalar type="s"/>
+              </mapping>
+              <mapping key="body">
+                <scalar type="s"/>
+              </mapping>
+              <mapping key="body-use-markup">
+                <scalar type="b"/>
+              </mapping>
+              <mapping key="options">
+                <list>
+                  <mappings>
+                    <mapping key="id">
+                      <scalar type="s"/>
+                    </mapping>
+                    <mapping key="string">
+                      <scalar type="s"/>
+                    </mapping>
+                    <mapping key="style">
+                      <scalar type="s"/>
+                    </mapping>
+                  </mappings>
+                </list>
+              </mapping>
+              <mapping key="default-response-id">
+                <!-- Determines which option will be assumed if the
+                     user hits the escape key or otherwise cancels the
+                     dialog -->
+                <scalar type="s"/>
+              </mapping>
+            </mappings>
+          </list>
+        </mapping>
+        <mapping key="shell">
+          <!-- Run with `/bin/sh -c` with the following envvars:
+
+               `BAZAAR_HOOK_INITIATED_UNIX_STAMP`: the unix timestamp
+               in seconds at which this hook was first invoked (the
+               number of seconds that have elapsed since 1970-01-01
+               00:00:00 UTC)
+               
+               `BAZAAR_HOOK_INITIATED_UNIX_STAMP_USEC`: the unix
+               timestamp in microseconds at which this hook was first
+               invoked (the number of microseconds that have elapsed
+               since 1970-01-01 00:00:00 UTC)
+
+               `BAZAAR_HOOK_STAGE_IDX`: the number of stages this hook
+               has run so far
+               
+               `BAZAAR_HOOK_ID`: the value of the "id" mapping
+
+               `BAZAAR_HOOK_TYPE`: the value of the "when" mapping
+
+               `BAZAAR_HOOK_WAS_ABORTED`: "true" if a dialog aborted
+               the hook
+
+               `BAZAAR_HOOK_DIALOG_ID`: if applicable, the id of the
+               current dialog
+
+               `BAZAAR_HOOK_DIALOG_RESPONSE_ID`: if applicable, the
+               user response given through the current dialog
+               
+               `BAZAAR_TS_APPID`: if applicable, the appid of the
+               entry Bazaar is currently dealing with
+
+               `BAZAAR_TS_TYPE`: if applicable, the type of
+               transaction being run. Can be "install", "update", or
+               "removal".
+               
+               `BAZAAR_HOOK_STAGE`: the stage at which the hook is
+               running. This will indicate what the shell body is
+               instructed to do at this time. The shell body must
+               respond by outputting to stdout with a valid answer;
+               the structure of a valid answer will depend on the
+               stage, and if the structure is not valid the hook will
+               be abandoned. The shell body might be run multiple
+               times by Bazaar over the course of a hook with this
+               variable set to differing values in order know how to
+               orchestrate events in the UI, so the shell body must be
+               able to branch depending on the value. The value may be
+               any of the following:
+
+               * `setup`: the hook is starting. Respond with "ok" to
+               continue the execution of this hook, or "pass" to skip
+               it and move on to the next registered hook
+
+               * `setup-dialog` Bazaar is ready to ask the user a
+               question with one of the dialogs you've defined inside
+               the "dialogs" mapping. `BAZAAR_HOOK_DIALOG_ID` will
+               tell you which one. Respond with "ok" to spawn the
+               dialog, or "pass" to skip the dialog.
+
+               * `teardown-dialog` Bazaar has received input from the
+               user after asking them a question with one of the
+               dialogs you've defined inside the "dialogs" mapping.
+               `BAZAAR_HOOK_DIALOG_ID` will tell you which
+               one. `BAZAAR_HOOK_DIALOG_RESPONSE_ID` will tell you the
+               response the user chose. Respond with "ok" to continue,
+               or "abort" to stop the execution of this hook.
+
+               * `catch` One of your dialogs has aborted. This is your
+               chance to handle the error. Respond with "recover" to
+               continue, or "abort" to confirm that the execution of
+               this hook should indeed skip to the teardown stage.
+               
+               * `action` Everything so far has gone according to
+               plan, so it is time to take whatever external action
+               this hook exists for. Bazaar requires no response at
+               this time.
+
+               * `teardown` The hook is cleaning up. Respond with
+               "continue" to propagate the signal emission to lower
+               priority hooks, or "stop" to indicate the emission
+               should stop. Alternatively, if this hook type should
+               hint to Bazaar an action to take (such as the
+               "before-transaction" hook), respond with "confirm" to
+               hint that the action should be taken, or "deny" to
+               prevent the action from being taken. Both "confirm" and
+               "deny" imply the effect of "stop", and "stop" implies
+               "confirm".
+               
+               -->
+          <scalar type="s"/>
+        </mapping>
+      </mappings>
+    </list>
+  </mapping>
+</mappings>

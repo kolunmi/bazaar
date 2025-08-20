@@ -1,3 +1,8 @@
+option('hardcoded_main_config_path',
+       type: 'string',
+       value: '',
+       description: 'Hardcoded absolute path to a main yaml config which will be read at runtime')
+
 option('hardcoded_blocklist_path',
        type: 'string',
        value: '',

@@ -25,11 +25,26 @@
 
 G_BEGIN_DECLS
 
+#define BZ_TRANSACTION_MGR_ERROR (bz_transaction_mgr_error_quark ())
+GQuark bz_transaction_mgr_error_quark (void);
+
+typedef enum
+{
+  BZ_TRANSACTION_MGR_ERROR_CANCELLED_BY_HOOK = 0,
+} BzTransaction_MgrError;
+
 #define BZ_TYPE_TRANSACTION_MANAGER (bz_transaction_manager_get_type ())
 G_DECLARE_FINAL_TYPE (BzTransactionManager, bz_transaction_manager, BZ, TRANSACTION_MANAGER, GObject)
 
 BzTransactionManager *
 bz_transaction_manager_new (void);
+
+void
+bz_transaction_manager_set_config (BzTransactionManager *self,
+                                   GHashTable           *config);
+
+GHashTable *
+bz_transaction_manager_get_config (BzTransactionManager *self);
 
 void
 bz_transaction_manager_set_backend (BzTransactionManager *self,

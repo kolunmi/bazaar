@@ -241,7 +241,7 @@ compile_schema (XbNode *node)
   else if (g_strcmp0 (element, "object") == 0)
     {
       const char *class                  = NULL;
-      GType gtype                        = G_TYPE_INVALID;
+      GType       gtype                  = G_TYPE_INVALID;
       g_autoptr (GTypeClass) gtype_class = NULL;
       XbNode *child                      = NULL;
 

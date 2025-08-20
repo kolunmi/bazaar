@@ -43,12 +43,14 @@
 #include "bz-transaction-manager.h"
 #include "bz-util.h"
 #include "bz-window.h"
+#include "bz-yaml-parser.h"
 
 struct _BzApplication
 {
   AdwApplication parent_instance;
 
   GSettings       *settings;
+  GHashTable      *config;
   GListModel      *blocklists;
   GListModel      *content_configs;
   GtkCssProvider  *css;
@@ -662,8 +664,8 @@ bz_application_flatseal_action (GSimpleAction *action,
   if (window != NULL)
     bz_show_error_for_widget (
         GTK_WIDGET (window),
-        "This functionality is currently disabled. It is recommended "
-        "you download and install Flatseal to manage app permissions.");
+        _ ("This functionality is currently disabled. It is recommended "
+           "you download and install Flatseal to manage app permissions."));
 }
 
 static void
@@ -938,13 +940,44 @@ bz_application_init (BzApplication *self)
 static void
 init_service_struct (BzApplication *self)
 {
+#ifdef HARDCODED_MAIN_CONFIG
+  g_autoptr (GError) local_error  = NULL;
+  g_autoptr (GFile) config_file   = NULL;
+  g_autoptr (GBytes) config_bytes = NULL;
+#endif
   GtkCustomFilter *filter = NULL;
 
   // bazaar_ui_init ();
 
-  (void) bz_download_worker_get_default ();
+#ifdef HARDCODED_MAIN_CONFIG
+  config_file  = g_file_new_for_path (HARDCODED_MAIN_CONFIG);
+  config_bytes = g_file_load_bytes (config_file, NULL, NULL, &local_error);
+  if (config_bytes != NULL)
+    {
+      g_autoptr (BzYamlParser) parser      = NULL;
+      g_autoptr (GHashTable) parse_results = NULL;
+
+      parser = bz_yaml_parser_new_for_resource_schema (
+          "/io/github/kolunmi/Bazaar/main-config-schema.xml");
+
+      parse_results = bz_yaml_parser_process_bytes (
+          parser, config_bytes, &local_error);
+      if (parse_results != NULL)
+        self->config = g_steal_pointer (&parse_results);
+      else
+        g_critical ("Could not load main config at %s: %s",
+                    HARDCODED_MAIN_CONFIG, local_error->message);
+    }
+  else
+    g_critical ("Could not load main config at %s: %s",
+                HARDCODED_MAIN_CONFIG, local_error->message);
+
+  g_clear_pointer (&local_error, g_error_free);
+#endif
 
   self->init_timer = g_timer_new ();
+
+  (void) bz_download_worker_get_default ();
 
   self->groups         = g_list_store_new (BZ_TYPE_ENTRY_GROUP);
   self->installed_apps = g_list_store_new (BZ_TYPE_ENTRY);
@@ -977,6 +1010,8 @@ init_service_struct (BzApplication *self)
   bz_flathub_state_set_map_factory (self->flathub, self->application_factory);
 
   self->transactions = bz_transaction_manager_new ();
+  if (self->config != NULL)
+    bz_transaction_manager_set_config (self->transactions, self->config);
   g_signal_connect_swapped (self->transactions, "success",
                             G_CALLBACK (transaction_success), self);
 
@@ -987,6 +1022,7 @@ init_service_struct (BzApplication *self)
   bz_state_info_set_curated_provider (self->state, self->content_provider);
   bz_state_info_set_entry_factory (self->state, self->entry_factory);
   bz_state_info_set_flathub (self->state, self->flathub);
+  bz_state_info_set_main_config (self->state, self->config);
   bz_state_info_set_search_engine (self->state, self->search_engine);
   bz_state_info_set_settings (self->state, self->settings);
   bz_state_info_set_transaction_manager (self->state, self->transactions);

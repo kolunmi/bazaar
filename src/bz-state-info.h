@@ -39,6 +39,9 @@ bz_state_info_new (void);
 GSettings *
 bz_state_info_get_settings (BzStateInfo *self);
 
+GHashTable *
+bz_state_info_get_main_config (BzStateInfo *self);
+
 GListModel *
 bz_state_info_get_blocklists (BzStateInfo *self);
 
@@ -59,9 +62,6 @@ bz_state_info_get_available_updates (BzStateInfo *self);
 
 BzApplicationMapFactory *
 bz_state_info_get_entry_factory (BzStateInfo *self);
-
-BzApplicationMapFactory *
-bz_state_info_get_installed_factory (BzStateInfo *self);
 
 BzApplicationMapFactory *
 bz_state_info_get_application_factory (BzStateInfo *self);
@@ -107,6 +107,10 @@ bz_state_info_set_settings (BzStateInfo *self,
                             GSettings   *settings);
 
 void
+bz_state_info_set_main_config (BzStateInfo *self,
+                               GHashTable  *main_config);
+
+void
 bz_state_info_set_blocklists (BzStateInfo *self,
                               GListModel  *blocklists);
 
@@ -133,10 +137,6 @@ bz_state_info_set_available_updates (BzStateInfo *self,
 void
 bz_state_info_set_entry_factory (BzStateInfo             *self,
                                  BzApplicationMapFactory *entry_factory);
-
-void
-bz_state_info_set_installed_factory (BzStateInfo             *self,
-                                     BzApplicationMapFactory *installed_factory);
 
 void
 bz_state_info_set_application_factory (BzStateInfo             *self,

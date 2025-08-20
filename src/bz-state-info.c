@@ -25,6 +25,7 @@ struct _BzStateInfo
   GObject parent_instance;
 
   GSettings               *settings;
+  GHashTable              *main_config;
   GListModel              *blocklists;
   GListModel              *curated_configs;
   BzBackend               *backend;
@@ -32,7 +33,6 @@ struct _BzStateInfo
   BzTransactionManager    *transaction_manager;
   GListModel              *available_updates;
   BzApplicationMapFactory *entry_factory;
-  BzApplicationMapFactory *installed_factory;
   BzApplicationMapFactory *application_factory;
   GListModel              *all_entries;
   GListModel              *all_installed_entries;
@@ -55,6 +55,7 @@ enum
   PROP_0,
 
   PROP_SETTINGS,
+  PROP_MAIN_CONFIG,
   PROP_BLOCKLISTS,
   PROP_CURATED_CONFIGS,
   PROP_BACKEND,
@@ -62,7 +63,6 @@ enum
   PROP_TRANSACTION_MANAGER,
   PROP_AVAILABLE_UPDATES,
   PROP_ENTRY_FACTORY,
-  PROP_INSTALLED_FACTORY,
   PROP_APPLICATION_FACTORY,
   PROP_ALL_ENTRIES,
   PROP_ALL_INSTALLED_ENTRIES,
@@ -87,6 +87,7 @@ bz_state_info_dispose (GObject *object)
   BzStateInfo *self = BZ_STATE_INFO (object);
 
   g_clear_pointer (&self->settings, g_object_unref);
+  g_clear_pointer (&self->main_config, g_hash_table_unref);
   g_clear_pointer (&self->blocklists, g_object_unref);
   g_clear_pointer (&self->curated_configs, g_object_unref);
   g_clear_pointer (&self->backend, g_object_unref);
@@ -94,7 +95,6 @@ bz_state_info_dispose (GObject *object)
   g_clear_pointer (&self->transaction_manager, g_object_unref);
   g_clear_pointer (&self->available_updates, g_object_unref);
   g_clear_pointer (&self->entry_factory, g_object_unref);
-  g_clear_pointer (&self->installed_factory, g_object_unref);
   g_clear_pointer (&self->application_factory, g_object_unref);
   g_clear_pointer (&self->all_entries, g_object_unref);
   g_clear_pointer (&self->all_installed_entries, g_object_unref);
@@ -121,6 +121,9 @@ bz_state_info_get_property (GObject    *object,
     case PROP_SETTINGS:
       g_value_set_object (value, bz_state_info_get_settings (self));
       break;
+    case PROP_MAIN_CONFIG:
+      g_value_set_boxed (value, bz_state_info_get_main_config (self));
+      break;
     case PROP_BLOCKLISTS:
       g_value_set_object (value, bz_state_info_get_blocklists (self));
       break;
@@ -141,9 +144,6 @@ bz_state_info_get_property (GObject    *object,
       break;
     case PROP_ENTRY_FACTORY:
       g_value_set_object (value, bz_state_info_get_entry_factory (self));
-      break;
-    case PROP_INSTALLED_FACTORY:
-      g_value_set_object (value, bz_state_info_get_installed_factory (self));
       break;
     case PROP_APPLICATION_FACTORY:
       g_value_set_object (value, bz_state_info_get_application_factory (self));
@@ -202,6 +202,9 @@ bz_state_info_set_property (GObject      *object,
     case PROP_SETTINGS:
       bz_state_info_set_settings (self, g_value_get_object (value));
       break;
+    case PROP_MAIN_CONFIG:
+      bz_state_info_set_main_config (self, g_value_get_boxed (value));
+      break;
     case PROP_BLOCKLISTS:
       bz_state_info_set_blocklists (self, g_value_get_object (value));
       break;
@@ -222,9 +225,6 @@ bz_state_info_set_property (GObject      *object,
       break;
     case PROP_ENTRY_FACTORY:
       bz_state_info_set_entry_factory (self, g_value_get_object (value));
-      break;
-    case PROP_INSTALLED_FACTORY:
-      bz_state_info_set_installed_factory (self, g_value_get_object (value));
       break;
     case PROP_APPLICATION_FACTORY:
       bz_state_info_set_application_factory (self, g_value_get_object (value));
@@ -286,6 +286,13 @@ bz_state_info_class_init (BzStateInfoClass *klass)
           G_TYPE_SETTINGS,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
+  props[PROP_MAIN_CONFIG] =
+      g_param_spec_boxed (
+          "main-config",
+          NULL, NULL,
+          G_TYPE_HASH_TABLE,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
   props[PROP_BLOCKLISTS] =
       g_param_spec_object (
           "blocklists",
@@ -331,13 +338,6 @@ bz_state_info_class_init (BzStateInfoClass *klass)
   props[PROP_ENTRY_FACTORY] =
       g_param_spec_object (
           "entry-factory",
-          NULL, NULL,
-          BZ_TYPE_APPLICATION_MAP_FACTORY,
-          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
-
-  props[PROP_INSTALLED_FACTORY] =
-      g_param_spec_object (
-          "installed-factory",
           NULL, NULL,
           BZ_TYPE_APPLICATION_MAP_FACTORY,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
@@ -449,6 +449,13 @@ bz_state_info_get_settings (BzStateInfo *self)
   return self->settings;
 }
 
+GHashTable *
+bz_state_info_get_main_config (BzStateInfo *self)
+{
+  g_return_val_if_fail (BZ_IS_STATE_INFO (self), NULL);
+  return self->main_config;
+}
+
 GListModel *
 bz_state_info_get_blocklists (BzStateInfo *self)
 {
@@ -496,13 +503,6 @@ bz_state_info_get_entry_factory (BzStateInfo *self)
 {
   g_return_val_if_fail (BZ_IS_STATE_INFO (self), NULL);
   return self->entry_factory;
-}
-
-BzApplicationMapFactory *
-bz_state_info_get_installed_factory (BzStateInfo *self)
-{
-  g_return_val_if_fail (BZ_IS_STATE_INFO (self), NULL);
-  return self->installed_factory;
 }
 
 BzApplicationMapFactory *
@@ -610,6 +610,19 @@ bz_state_info_set_settings (BzStateInfo *self,
 }
 
 void
+bz_state_info_set_main_config (BzStateInfo *self,
+                               GHashTable  *main_config)
+{
+  g_return_if_fail (BZ_IS_STATE_INFO (self));
+
+  g_clear_pointer (&self->main_config, g_hash_table_unref);
+  if (main_config != NULL)
+    self->main_config = g_hash_table_ref (main_config);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MAIN_CONFIG]);
+}
+
+void
 bz_state_info_set_blocklists (BzStateInfo *self,
                               GListModel  *blocklists)
 {
@@ -698,19 +711,6 @@ bz_state_info_set_entry_factory (BzStateInfo             *self,
     self->entry_factory = g_object_ref (entry_factory);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ENTRY_FACTORY]);
-}
-
-void
-bz_state_info_set_installed_factory (BzStateInfo             *self,
-                                     BzApplicationMapFactory *installed_factory)
-{
-  g_return_if_fail (BZ_IS_STATE_INFO (self));
-
-  g_clear_pointer (&self->installed_factory, g_object_unref);
-  if (installed_factory != NULL)
-    self->installed_factory = g_object_ref (installed_factory);
-
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLED_FACTORY]);
 }
 
 void
