@@ -25,6 +25,9 @@ else
   dl_worker_bin_name = 'bazaar-dl-worker'
   config_h.set_quoted('DL_WORKER_BIN_NAME', dl_worker_bin_name)
 
+  if get_option('hardcoded_main_config_path') != ''
+    config_h.set_quoted('HARDCODED_MAIN_CONFIG', get_option('hardcoded_main_config_path'))
+  endif
   if get_option('hardcoded_blocklist_path') != ''
     config_h.set_quoted('HARDCODED_BLOCKLIST', get_option('hardcoded_blocklist_path'))
   endif
