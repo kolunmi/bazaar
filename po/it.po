@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-19 19:15+0200\n"
-"PO-Revision-Date: 2025-08-19 19:54+0200\n"
+"PO-Revision-Date: 2025-08-20 14:13+0200\n"
 "Last-Translator: Pietro F. <pfwork@tutamail.com>\n"
 "Language-Team: Italian\n"
 "Language: it\n"
@@ -51,11 +51,10 @@ msgid ""
 "applications and add-ons from Flatpak remotes, particularly Flathub"
 msgstr ""
 "Un nuovo app store per GNOME incentrato sulla ricerca e l'installazione di "
-"applicazioni e componenti aggiuntivi dai repository Flatpak, in particolare "
-"Flathub."
+"applicazioni e componenti aggiuntivi dai repository remoti Flatpak, in "
+"particolare Flathub."
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:15
-#, fuzzy
 msgid ""
 "It emphasizes supporting the developers who make the Linux desktop possible. "
 "Bazaar features a \"curated\" tab that can be configured by distributors to "
@@ -63,7 +62,7 @@ msgid ""
 msgstr ""
 "Sottolinea l'importanza di supportare gli sviluppatori che rendono possibile "
 "il desktop Linux. Bazaar presenta una scheda “Consigliate” che può essere "
-"configurata dai distributori per consentire un'esperienza migliore"
+"configurata dai distributori per consentire un'esperienza più personalizzata"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:24 src/bz-application.c:777
 msgid "Adam Masciola"
@@ -193,8 +192,9 @@ msgid ""
 "Would you like to add Flathub as a remote? If you decline, the Flathub page "
 "will not be available. You can change this later."
 msgstr ""
-"Vuoi aggiungere Flathub come repository? Se rifiuti, la pagina Flathub non "
-"sarà disponibile. Puoi cambiare questa impostazione in un secondo momento."
+"Vuoi aggiungere Flathub come repository remoto? Se rifiuti, la pagina "
+"Flathub non sarà disponibile. Puoi cambiare questa impostazione in un "
+"secondo momento."
 
 #: src/bz-application.c:1190 src/bz-update-dialog.blp:6
 msgid "Later"
@@ -212,12 +212,12 @@ msgstr "Identificazione delle voci installate..."
 #: src/bz-application.c:1235
 #, c-format
 msgid "Beginning remote entry retrieval while referencing %d blocklist(s)..."
-msgstr ""
+msgstr "Avvio recupero delle voci remote facendo riferimento a %d blacklist..."
 
 #: src/bz-application.c:1379
 #, c-format
 msgid "Received %'d entries out of %'d (%0.1f seconds elapsed)"
-msgstr ""
+msgstr "Ricevute %'d voci su %'d (%.1f secondi trascorsi)"
 
 #: src/bz-application.c:1386
 #, c-format
@@ -271,8 +271,8 @@ msgstr "Flathub non aggiunto"
 #: src/bz-flathub-page.blp:16
 msgid "The Flathub remote was not found on any of your flatpak installations"
 msgstr ""
-"Il repository Flathub non è stato trovato in nessuna delle tue installazioni "
-"flatpak."
+"Il repository remoto Flathub non è stato trovato in nessuna delle tue "
+"installazioni flatpak."
 
 #: src/bz-flathub-page.blp:52
 msgid "Apps Of The Week"
