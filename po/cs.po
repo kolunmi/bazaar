@@ -92,6 +92,8 @@ msgid ""
 "This functionality is currently disabled. It is recommended you download and "
 "install Flatseal to manage app permissions."
 msgstr ""
+"Tato funkce je aktuálně vypnutá. Doporučujeme stáhnout a nainstalovat"
+"Flatseal pro správu oprávnění aplikací."
 
 #: src/bz-application.c:743
 msgctxt "About Dialog Developer Credit"
