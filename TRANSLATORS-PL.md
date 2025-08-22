@@ -66,6 +66,7 @@ linijki.
 
 Teraz możesz otworzyć folder `po` i otworzyć `[kod-języka].po` w ulubionym programie do
 tłumaczenia, może to być Lokalize, GTranslator (Translation Editor), itp.
+Jak już skończysz, prześlij pliki na swój fork i stwórz Pull Request.
 
 
 ## Testowanie swojego tłumaczenia
