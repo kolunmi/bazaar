@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-07-08 03:52+0200\n"
-"PO-Revision-Date: 2025-08-17 05:02+0200\n"
+"PO-Revision-Date: 2025-08-22 06:23+0200\n"
 "Last-Translator: Vlastimil Dědek <dedek.vlastimil2@proton.me>\n"
 "Language-Team: Czech\n"
 "Language: cs\n"
@@ -58,10 +58,10 @@ msgid ""
 "allow for a more locallized experience."
 msgstr ""
 "Zdůrazňuje podporu vývojářů, kteří umožňují existenci Linuxu na počítačích. "
-"Bazaar má kartu \"vybrané\" která může být nastavena distribucemi pro "
-"více přizpůsobený zážitek"
+"Bazaar má kartu \"vybrané\" která může být nastavena distribucemi pro více "
+"přizpůsobený zážitek"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:24 src/bz-application.c:777
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:24 src/bz-application.c:779
 msgid "Adam Masciola"
 msgstr "Adam Masciola"
 
@@ -87,136 +87,147 @@ msgstr "Správce doplňků"
 msgid "This flatpak is verified by the original developers of the software."
 msgstr "Tento Flatpak je ověřený jeho původním vývojářem"
 
-#: src/bz-application.c:741
+#: src/bz-application.c:667
+msgid ""
+"This functionality is currently disabled. It is recommended you download and "
+"install Flatseal to manage app permissions."
+msgstr ""
+
+#: src/bz-application.c:743
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr "Adam Masciola <kolunmi@posteo.net>"
 
-#: src/bz-application.c:746
+#: src/bz-application.c:748
 msgctxt "About Dialog Translator Credit"
 msgid "Ahmed Najmawi"
 msgstr "Ahmed Najmawi"
 
-#: src/bz-application.c:747
+#: src/bz-application.c:749
 msgctxt "About Dialog Translator Credit"
 msgid "AtomHare"
 msgstr "AtomHare"
 
-#: src/bz-application.c:748
+#: src/bz-application.c:750
 msgctxt "About Dialog Translator Credit"
 msgid "Azenyr"
 msgstr "Azenyr"
 
-#: src/bz-application.c:749
+#: src/bz-application.c:751
 msgctxt "About Dialog Translator Credit"
 msgid "Goudarz Jafari"
 msgstr "Goudarz Jafari"
 
-#: src/bz-application.c:750
+#: src/bz-application.c:752
 msgctxt "About Dialog Translator Credit"
 msgid "Jill Fiore (Lumaeris)"
 msgstr "Jill Fiore (Lumaeris)"
 
-#: src/bz-application.c:751
+#: src/bz-application.c:753
 msgctxt "About Dialog Translator Credit"
 msgid "KiKaraage"
 msgstr "KiKaraage"
 
-#: src/bz-application.c:752
+#: src/bz-application.c:754
 msgctxt "About Dialog Translator Credit"
 msgid "Lucosec"
 msgstr "Lucosec"
 
-#: src/bz-application.c:753
+#: src/bz-application.c:755
 msgctxt "About Dialog Translator Credit"
 msgid "Léane GRASSER"
-msgstr ""
+msgstr "Léane GRASSER"
 
-#: src/bz-application.c:754
+#: src/bz-application.c:756
 msgctxt "About Dialog Translator Credit"
 msgid "Marcel Mrówka (Microwave)"
 msgstr "Marcel Mrówka (Microwave)"
 
-#: src/bz-application.c:755
+#: src/bz-application.c:757
 msgctxt "About Dialog Translator Credit"
 msgid "Pietro F."
 msgstr "Pietro F."
 
-#: src/bz-application.c:756
+#: src/bz-application.c:758
 msgctxt "About Dialog Translator Credit"
 msgid "Shihfu Juan"
 msgstr "Shihfu Juan"
 
-#: src/bz-application.c:757
+#: src/bz-application.c:759
 msgctxt "About Dialog Translator Credit"
 msgid "Shinsei"
 msgstr "Shinsei"
 
-#: src/bz-application.c:758
+#: src/bz-application.c:760
 msgctxt "About Dialog Translator Credit"
 msgid "Vlastimil Dědek"
 msgstr "Vlastimil Dědek"
 
-#: src/bz-application.c:759
+#: src/bz-application.c:761
 msgctxt "About Dialog Translator Credit"
 msgid "asen23"
 msgstr "asen23"
 
-#: src/bz-application.c:760
+#: src/bz-application.c:762
 msgctxt "About Dialog Translator Credit"
 msgid "renner"
 msgstr "renner"
 
-#: src/bz-application.c:761
+#: src/bz-application.c:763
 msgctxt "About Dialog Translator Credit"
 msgid "robotta"
 msgstr "robotta"
 
-#: src/bz-application.c:1147
+#: src/bz-application.c:1183
 msgid "Constructing Flatpak instance..."
 msgstr "Sestavuji Flatpak instanci..."
 
-#: src/bz-application.c:1157
+#: src/bz-application.c:1193
 msgid "Reusing last Flatpak instance..."
 msgstr "Používám poslední Flatpak instanci..."
 
-#: src/bz-application.c:1182
+#: src/bz-application.c:1218
 msgid "Flathub is not registered on this system"
 msgstr "Flathub není registrovaný na tomto systému"
 
-#: src/bz-application.c:1185
+#: src/bz-application.c:1221
 msgid ""
 "Would you like to add Flathub as a remote? If you decline, the Flathub page "
 "will not be available. You can change this later."
 msgstr ""
-"Přejete si přidat Flathub jako remote? Pokud ne, Flathub karta"
-"nebude dostupná. Toto můžete změnit později."
+"Přejete si přidat Flathub jako remote? Pokud ne, Flathub kartanebude "
+"dostupná. Toto můžete změnit později."
 
-#: src/bz-application.c:1190 src/bz-update-dialog.blp:6
+#: src/bz-application.c:1226 src/bz-update-dialog.blp:6
 msgid "Later"
 msgstr "Později"
 
-#: src/bz-application.c:1191
+#: src/bz-application.c:1227
 #, fuzzy
 msgid "Add Flathub"
 msgstr "Přidat Flathub"
 
-#: src/bz-application.c:1223
+#: src/bz-application.c:1259
 #, c-format
 msgid "Identifying installed entries..."
 msgstr "Identifikuji instalované položky..."
 
-#: src/bz-application.c:1235
+#: src/bz-application.c:1271
 #, c-format
 msgid "Beginning remote entry retrieval while referencing %d blocklist(s)..."
 msgstr "Probíhá stahování vzdálených položek s odkazem na %d blokovací seznam(y)..."
 
-#: src/bz-application.c:1379
+#: src/bz-application.c:1415
 #, c-format
 msgid "Received %'d entries out of %'d (%0.1f seconds elapsed)"
 msgstr "Získáno %'d položek z celkových %'d (%0.1f sekund uplynulo)"
 
 #: src/bz-application.c:1422
+#, c-format
+msgid "Waiting for background indexing tasks to catch up..."
+msgstr "Čekám na procesy na pozadí..."
+
+#: src/bz-application.c:1458
 #, c-format
 msgid "Completed initialization in %0.2f seconds"
 msgstr "Dokončeno během %0.2f sekund."
@@ -234,9 +245,9 @@ msgstr "Žádné vybrané aplikace"
 msgid ""
 "Bazaar was not provided a curated content configuration. Contact your "
 "operating system's support channels for assistance."
-msgstr ""
-"Bazaar nezískal konfiguraci."
-"Kontaktujtepodporu své distribuce"
+msgstr 
+"Bazaar nezískal konfiguraci vybraného obsahu."
+"Kontaktujte podporu své distribuce."
 
 #: src/bz-browse-widget.blp:22 src/bz-flathub-page.blp:22
 msgid "Browser"
@@ -266,19 +277,25 @@ msgstr "Flathub remote nebyl nalezen na žádné z instalacích flatpaku"
 msgid "Apps Of The Week"
 msgstr "Aplikace týdne"
 
-#: src/bz-flathub-page.blp:96
+#: src/bz-flathub-page.blp:86
 msgid "Trending"
 msgstr "Trendy"
 
-#: src/bz-flathub-page.blp:128
+#: src/bz-flathub-page.blp:92 src/bz-flathub-page.blp:133
+#: src/bz-flathub-page.blp:174 src/bz-flathub-page.blp:215
+#, fuzzy
+msgid "Show More"
+msgstr "Zobrazit Zkratky"
+
+#: src/bz-flathub-page.blp:127
 msgid "Recently Updated"
 msgstr "Nedávno aktualizované"
 
-#: src/bz-flathub-page.blp:160
+#: src/bz-flathub-page.blp:168
 msgid "Recently Added"
 msgstr "Nové"
 
-#: src/bz-flathub-page.blp:192
+#: src/bz-flathub-page.blp:209
 msgid "Popular"
 msgstr "Populární"
 
@@ -357,8 +374,8 @@ msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
 msgstr ""
-"Tato aplikace má FLOSS licenci. To znamená že kód může být ověřen "
-"pro bezpečnost."
+"Tato aplikace má FLOSS licenci. To znamená že kód může být ověřen pro "
+"bezpečnost."
 
 #: src/bz-full-view.c:224
 msgid ""
@@ -373,7 +390,7 @@ msgstr ""
 msgid "No Flatpaks Installed"
 msgstr "Žádné Flatpaky Nejsou Nainstalované."
 
-#: src/bz-installed-page.blp:21 src/bz-window.blp:219 src/bz-window.blp:356
+#: src/bz-installed-page.blp:21 src/bz-window.blp:219 src/bz-window.blp:355
 msgid "Installed"
 msgstr "Nainstalované"
 
@@ -449,7 +466,7 @@ msgstr "Minimalizuj dolní hranici"
 msgid "Maximize Upper Bound"
 msgstr "Maximalizuj horní hranici"
 
-#: src/bz-transaction-manager.c:451
+#: src/bz-transaction-manager.c:1049
 #, c-format
 msgid "Finished in %.02f seconds"
 msgstr "Dokončeno v %.02f sekundách"
@@ -483,8 +500,8 @@ msgid ""
 "The following applications are eligible for updates. Would you like to "
 "install them?"
 msgstr ""
-"Následující aplikace mají aktualizace."
-"Přejete si je nainstalovat?"
+"Následující aplikace mají aktualizace. Přejete si"
+"je nainstalovat?"
 
 #: src/bz-update-dialog.c:134
 #, c-format
@@ -492,8 +509,8 @@ msgid ""
 "%d runtimes and/or addons are eligible for updates. Would you like to "
 "install them?"
 msgstr ""
-"%d runtime a/nebo doplňky mají aktualizace."
-"Přejete si jenainstalovat?"
+"%d runtime a/nebo doplňky mají aktualizace. Přejete si"
+"Je nainstalovat?"
 
 #: src/bz-update-dialog.c:142
 #, c-format
@@ -528,17 +545,13 @@ msgstr "Přohlížet"
 msgid "App View"
 msgstr "Aplikace"
 
-#: src/bz-window.blp:209 src/bz-window.blp:335
+#: src/bz-window.blp:209 src/bz-window.blp:334
 msgid "Flathub"
 msgstr "Flathub"
 
 #: src/bz-window.blp:239
 msgid "Go Back"
 msgstr "Zpět"
-
-#: src/bz-window.blp:247
-msgid "Refresh"
-msgstr "Obnovit"
 
 #: src/bz-window.blp:256
 msgid "Search"
@@ -552,39 +565,44 @@ msgstr "Aktualizovat"
 msgid "Checking for updates"
 msgstr "Kontroluji aktualizace"
 
-#: src/bz-window.blp:299
+#: src/bz-window.blp:298
 msgid "View curated applications"
 msgstr "Zobraz vybrané aplikace"
 
-#: src/bz-window.blp:314
+#: src/bz-window.blp:313
 msgid "Curated"
 msgstr "Vybrané"
 
-#: src/bz-window.blp:320
+#: src/bz-window.blp:319
 msgid "View the latest on Flathub"
 msgstr "Zobraz to nejnovější z Flathubu"
 
-#: src/bz-window.blp:341
+#: src/bz-window.blp:340
 msgid "View installed applications"
 msgstr "Zobraz nainstalované aplikace"
 
-#: src/bz-window.blp:370
+#: src/bz-window.blp:369
 msgid "Main Menu"
 msgstr "Hlavní Menu"
 
-#: src/bz-window.blp:381
+#: src/bz-window.blp:380
 msgid "Toggle transaction sidebar"
 msgstr "Zobraz/skryj přehled translakcí"
 
-#: src/bz-window.blp:423
+#: src/bz-window.blp:422
+#, fuzzy
+msgid "_Refresh"
+msgstr "Obnovit"
+
+#: src/bz-window.blp:427
 msgid "_Keyboard Shortcuts"
 msgstr "_Klávesové Zkratky"
 
-#: src/bz-window.blp:428
+#: src/bz-window.blp:432
 msgid "_About Bazaar"
 msgstr "_O Bazaaru"
 
-#: src/bz-window.blp:433
+#: src/bz-window.blp:437
 msgid "_Donate to Bazaar ❤️"
 msgstr "_Podpořte Vývoj ❤️"
 
@@ -602,8 +620,8 @@ msgid ""
 "\n"
 "on the command line."
 msgstr ""
-"Možnost prohlížet a instalovat loální .flatpak soubory bude "
-"brzy hotová. Mezitím zkuste spustit\n"
+"Možnost prohlížet a instalovat loální .flatpak soubory bude brzy hotová. "
+"Mezitím zkuste spustit\n"
 "\n"
 "flatpak install --bundle tvuj-bundle.flatpak\n"
 "\n"
