@@ -19,6 +19,7 @@ build-flatpak $manifest=manifest $branch=branch:
     set -xeuo pipefail
     flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
     flatpak install -y "org.gnome.Sdk/$(arch)/48"
+    flatpak install -y "org.gnome.Platform/$(arch)/48"
     flatpak install -y "runtime/org.freedesktop.Sdk.Extension.rust-stable/$(arch)/24.08"
     flatpak install -y "runtime/org.freedesktop.Sdk.Extension.llvm20/$(arch)/24.08"
 
