@@ -7,7 +7,7 @@
 NOTE: If you are a distributor/packager who would like to learn how to
 customize Bazaar, take a look at the [docs](/docs/overview.org).
 
-Bazaar is new app store for GNOME with a focus on discovering and
+Bazaar is a new app store for GNOME with a focus on discovering and
 installing applications and add-ons from Flatpak remotes, particularly
 [Flathub](https://flathub.org/). It emphasizes supporting the
 developers who make the Linux desktop possible. Bazaar features a

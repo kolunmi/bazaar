@@ -197,7 +197,12 @@ flatpak cli, for example.
 Hooks are an advanced feature of Bazaar. In essence, they allow you to
 programmatically react to events and define dialogs with which you can
 query user input. Currently, the only events you can subscribe to are
-the "before-transaction" and "after-transaction" events.
+the "before-transaction" and "after-transaction" events:
+
+- =before-transaction=: run the hook right before a transaction is
+  scheduled to begin
+- =after-transaction=: run the hook after a transaction successfully
+  completes
 
 Hooks are run like a signal emission. After an event occurs, hooks
 that are found to be of the appropriate type are evaluated in an order
@@ -225,7 +230,7 @@ examples:
   script will go forward with the task of setting up a steam shortcut.
 - You would like to prevent users from installing a certain appid, as
   some other method of installation, such as a system package, would
-  provide a superior experience. A blocklist could acheieve this, but
+  provide a superior experience. A blocklist could achieve this, but
   you don't like the idea of hiding anything from the user. A hook
   subscribed to the "before-transaction" event could issue a warning
   and ask for extra confirmation. If the user decides to listen to the
@@ -246,7 +251,7 @@ will receive:
 - =BAZAAR_HOOK_ID=: the value of the "id" mapping
 - =BAZAAR_HOOK_TYPE=: the value of the "when" mapping
 - =BAZAAR_HOOK_WAS_ABORTED=: "true" if a dialog aborted the hook
-- =BAZAAR_HOOK_DIALOG_ID=: if applicable, the id of thecurrent dialog
+- =BAZAAR_HOOK_DIALOG_ID=: if applicable, the id of the current dialog
 - =BAZAAR_HOOK_DIALOG_RESPONSE_ID=: if applicable, the user response
   given through the current dialog
 - =BAZAAR_TS_APPID=: if applicable, the appid of the entry Bazaar is
@@ -302,7 +307,10 @@ demonstrating how to define a hook:
       dialogs:
         - id: my-dialog-1
           title: "Please confirm"
-          body: "This application is an official GNOME app, which is important because..."
+          # If true, render inline markup commands
+          # see https://docs.gtk.org/Pango/pango_markup.html
+          body-use-markup: true
+          body: "This application is an official <a href=\"https://www.gnome.org/\">GNOME</a> app, which is <b>important</b> because..."
           # Determines which option will be assumed if the user hits the
           # escape key or otherwise cancels the dialog
           default-response-id: no
@@ -317,6 +325,7 @@ demonstrating how to define a hook:
               style: suggested
         - id: my-dialog-2
           title: "Double check"
+          body-use-markup: false
           body: "Here are some other considerations..."
           default-response-id: no
           options:
