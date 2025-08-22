@@ -1,7 +1,7 @@
 # These are just convenience scripts, NOT a build system!
 
 appid := env("BAZAAR_APPID", "io.github.kolunmi.Bazaar")
-manifest := "./build-aux/flatpak/" + appid + ".yaml"
+manifest := "./build-aux/flatpak/" + appid + ".json"
 branch := env("BAZAAR_BRANCH", "stable")
 just := just_executable()
 
@@ -14,39 +14,32 @@ build-base:
     meson setup build --wipe
     ninja -C build
 
-build-flatpak:
-    {{ just }} build-flatpak-devel ./build-aux/flatpak/io.github.kolunmi.Bazaar.yaml stable
-
-build-flatpak-devel $manifest=manifest $branch=branch:
+build-flatpak $manifest=manifest $branch=branch:
     #!/usr/bin/env bash
+    set -xeuo pipefail
     flatpak --user remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-    mkdir -p ".flatpak-builder"
+
     FLATPAK_BUILDER_DIR=$(realpath ".flatpak-builder")
-    cd "$(dirname "${manifest}")"
-    FLATPAK_BUILDER="flatpak-builder"
-    BUILDER_ARGS=()
-    BUILDER_ARGS+=("--default-branch=${branch}")
-    BUILDER_ARGS+=("--state-dir=${FLATPAK_BUILDER_DIR}/flatpak-builder")
+    BUILDER_ARGS+=(--default-branch="${branch}")
+    BUILDER_ARGS+=(--state-dir="${FLATPAK_BUILDER_DIR}/flatpak-builder")
     BUILDER_ARGS+=("--user")
     BUILDER_ARGS+=("--ccache")
     BUILDER_ARGS+=("--force-clean")
     BUILDER_ARGS+=("--install")
-    BUILDER_ARGS+=("--install-deps-from=flathub")
     BUILDER_ARGS+=("--disable-rofiles-fuse")
     BUILDER_ARGS+=("${FLATPAK_BUILDER_DIR}/build-dir")
-    BUILDER_ARGS+=("$(basename "${manifest}")")
+    BUILDER_ARGS+=("${manifest}")
 
     if which flatpak-builder &>/dev/null ; then
         flatpak-builder "${BUILDER_ARGS[@]}"
-        exit $?
     else
         flatpak run org.flatpak.Builder "${BUILDER_ARGS[@]}"
-        exit $?
     fi
+
+
+build-flatpak-bundle $appid=appid: 
     flatpak build-export repo "${FLATPAK_BUILDER_DIR}/build-dir"
-    flatpak build-bundle \
-    repo "${appid}".flatpak\
-      ${appid} \
+    flatpak build-bundle repo "${appid}".flatpak "${appid}"
 
 build-rpm:
     #!/usr/bin/env bash
@@ -87,3 +80,6 @@ fix:
     done
     echo "Checking syntax: Justfile"
     {{ just }} --unstable --fmt -f Justfile || { exit 1; }
+
+update-flatpak:
+    

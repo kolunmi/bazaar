@@ -11,14 +11,14 @@ on:
 
 jobs:
   build_flatpak:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           submodules: true
-      
+
       - name: Setup Just
         uses: extractions/setup-just@e33e0265a09d6d736e2ee1e0eb685ef1de4669ff # v3
 
@@ -31,13 +31,13 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y flatpak flatpak-builder libflatpak-dev
-      
+
       - name: Build Flatpak
         id: build-flatpak
         shell: bash
         run: |
           sudo $(command -v just) build-flatpak
-
+          sudo $(command -v just) build-flatpak-bundle
 
       - name: Upload Flatpak artifact
         uses: actions/upload-artifact@v4
