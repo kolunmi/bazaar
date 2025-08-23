@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-21 07:57+0200\n"
-"PO-Revision-Date: 2025-07-09 15:24+0200\n"
+"PO-Revision-Date: 2025-08-23 15:37+0200\n"
 "Last-Translator: renner <renner0@posteo.de>\n"
 "Language-Team: German\n"
 "Language: de\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 25.04.3\n"
+"X-Generator: Lokalize 25.08.0\n"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:2
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:5
@@ -24,8 +24,7 @@ msgstr "Bazaar"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:3
 msgid "Add, remove or update flatpak software on this computer"
-msgstr ""
-"Hinzufügen, Entfernen oder Aktualisieren von Anwendungen auf diesem Computer"
+msgstr "Hinzufügen, Entfernen oder Aktualisieren von Anwendungen auf diesem Computer"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:9
 msgid "GTK;System;PackageManager;Discover;Flatpak;Software;Store;"
@@ -40,15 +39,16 @@ msgid "Whether to show the animated icon background on the home page"
 msgstr "Den animierten Hintergrund auf der Startseite anzeigen"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:8
-#, fuzzy
 msgid "Discover and install applications"
-msgstr "Installierte Anwendungen anzeigen"
+msgstr "Anwendungen entdecken und installieren"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:10
 msgid ""
 "A new app store for GNOME with a focus on discovering and installing "
 "applications and add-ons from Flatpak remotes, particularly Flathub"
 msgstr ""
+"Ein neuer App Store für GNOME mit Schwerpunkt auf der Suche und Installation von "
+"Anwendungen und Erweiterung aus Flatpak-Remotes, insbesondere Flathub"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:15
 msgid ""
@@ -56,23 +56,24 @@ msgid ""
 "Bazaar features a \"curated\" tab that can be configured by distributors to "
 "allow for a more locallized experience."
 msgstr ""
+"Es legt Wert darauf, die Entwickler zu unterstützen, die den Linux-Desktop möglich machen. "
+"Bazaar verfügt über ein „vorgestellt”-Unterfenster, der von Distributoren eingerichtet werden kann, um eine lokalisiertere Erfahrung zu ermöglichen."
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:24 src/bz-application.c:779
 msgid "Adam Masciola"
 msgstr "Adam Masciola"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:49
-#, fuzzy
 msgid "Calligraphy application page"
-msgstr "Diese Anwendung teilen"
+msgstr "Calligraphy"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:53
 msgid "Searching for Blender"
-msgstr ""
+msgstr "Nach Blender suchen"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:57
 msgid "Download graph for Blender"
-msgstr ""
+msgstr "Downloadkurve für Blender"
 
 #: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:164
 #: src/bz-installed-page.blp:176
@@ -90,143 +91,147 @@ msgid ""
 "This functionality is currently disabled. It is recommended you download and "
 "install Flatseal to manage app permissions."
 msgstr ""
+"Diese Funktion ist derzeit nicht freigeschaltet. "
+"Es wird empfohlen, Flatseal herunterzuladen und zu "
+"installieren, um Berechtigungen von Anwendungen einzustellen."
 
 #: src/bz-application.c:743
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
-msgstr ""
+msgstr "Adam Masciola <kolunmi@posteo.net>"
 
 #: src/bz-application.c:748
 msgctxt "About Dialog Translator Credit"
 msgid "Ahmed Najmawi"
-msgstr ""
+msgstr "Ahmed Najmawi"
 
 #: src/bz-application.c:749
 msgctxt "About Dialog Translator Credit"
 msgid "AtomHare"
-msgstr ""
+msgstr "AtomHare"
 
 #: src/bz-application.c:750
 msgctxt "About Dialog Translator Credit"
 msgid "Azenyr"
-msgstr ""
+msgstr "Azenyr"
 
 #: src/bz-application.c:751
 msgctxt "About Dialog Translator Credit"
 msgid "Goudarz Jafari"
-msgstr ""
+msgstr "Goudarz Jafari"
 
 #: src/bz-application.c:752
 msgctxt "About Dialog Translator Credit"
 msgid "Jill Fiore (Lumaeris)"
-msgstr ""
+msgstr "Jill Fiore (Lumaeris)"
 
 #: src/bz-application.c:753
 msgctxt "About Dialog Translator Credit"
 msgid "KiKaraage"
-msgstr ""
+msgstr "KiKaraage"
 
 #: src/bz-application.c:754
 msgctxt "About Dialog Translator Credit"
 msgid "Lucosec"
-msgstr ""
+msgstr "Lucosec"
 
 #: src/bz-application.c:755
 msgctxt "About Dialog Translator Credit"
 msgid "Léane GRASSER"
-msgstr ""
+msgstr "Léane GRASSER"
 
 #: src/bz-application.c:756
 msgctxt "About Dialog Translator Credit"
 msgid "Marcel Mrówka (Microwave)"
-msgstr ""
+msgstr "Marcel Mrówka (Microwave)"
 
 #: src/bz-application.c:757
 msgctxt "About Dialog Translator Credit"
 msgid "Pietro F."
-msgstr ""
+msgstr "Pietro F."
 
 #: src/bz-application.c:758
 msgctxt "About Dialog Translator Credit"
 msgid "Shihfu Juan"
-msgstr ""
+msgstr "Shihfu Juan"
 
 #: src/bz-application.c:759
 msgctxt "About Dialog Translator Credit"
 msgid "Shinsei"
-msgstr ""
+msgstr "Shinsei"
 
 #: src/bz-application.c:760
 msgctxt "About Dialog Translator Credit"
 msgid "Vlastimil Dědek"
-msgstr ""
+msgstr "Vlastimil Dědek"
 
 #: src/bz-application.c:761
 msgctxt "About Dialog Translator Credit"
 msgid "asen23"
-msgstr ""
+msgstr "asen23"
 
 #: src/bz-application.c:762
 msgctxt "About Dialog Translator Credit"
 msgid "renner"
-msgstr ""
+msgstr "renner"
 
 #: src/bz-application.c:763
 msgctxt "About Dialog Translator Credit"
 msgid "robotta"
-msgstr ""
+msgstr "robotta"
 
 #: src/bz-application.c:1183
 msgid "Constructing Flatpak instance..."
-msgstr ""
+msgstr "Flatpak-Instanz wird erstellt …"
 
 #: src/bz-application.c:1193
 msgid "Reusing last Flatpak instance..."
-msgstr ""
+msgstr "Letzte Flatpak-Instanz wiederverwenden …"
 
 #: src/bz-application.c:1218
 msgid "Flathub is not registered on this system"
-msgstr ""
+msgstr "Flathub ist auf diesem System nicht eingerichtet"
 
 #: src/bz-application.c:1221
 msgid ""
 "Would you like to add Flathub as a remote? If you decline, the Flathub page "
 "will not be available. You can change this later."
 msgstr ""
+"Möchten Sie Flathub hinzufügen? Wenn Sie ablehnen, ist die Flathub-Seite "
+"nicht verfügbar. Sie können dies später ändern."
 
 #: src/bz-application.c:1226 src/bz-update-dialog.blp:6
 msgid "Later"
 msgstr "Später"
 
 #: src/bz-application.c:1227
-#, fuzzy
 msgid "Add Flathub"
-msgstr "Flathub"
+msgstr "Flathub hinzufügen"
 
 #: src/bz-application.c:1259
 #, c-format
 msgid "Identifying installed entries..."
-msgstr ""
+msgstr "Installierte Einträge werden erkannt …"
 
 #: src/bz-application.c:1271
 #, c-format
 msgid "Beginning remote entry retrieval while referencing %d blocklist(s)..."
-msgstr ""
+msgstr "Abfragenbeginn der Gegenstelleneinträge unter Bezugnahme auf %d Blockliste(n) …"
 
 #: src/bz-application.c:1415
 #, c-format
 msgid "Received %'d entries out of %'d (%0.1f seconds elapsed)"
-msgstr ""
+msgstr "%'d Einträge von %'d empfangen (%0.1f Sekunden vergangen)"
 
 #: src/bz-application.c:1422
 #, c-format
 msgid "Waiting for background indexing tasks to catch up..."
-msgstr ""
+msgstr "Warten auf Hintergrund-Indizierung …"
 
 #: src/bz-application.c:1458
 #, c-format
 msgid "Completed initialization in %0.2f seconds"
-msgstr ""
+msgstr "Initialisierung in %0.2f Sekunden abgeschlossen"
 
 #: src/bz-browse-widget.blp:11 src/bz-flathub-page.blp:11
 #: src/bz-full-view.blp:10 src/bz-installed-page.blp:11 src/bz-window.blp:32
@@ -263,11 +268,11 @@ msgstr "Kopieren und Schließen"
 
 #: src/bz-flathub-page.blp:15
 msgid "Flathub Not Added"
-msgstr ""
+msgstr "Flathub wurde nicht hinzugefügt"
 
 #: src/bz-flathub-page.blp:16
 msgid "The Flathub remote was not found on any of your flatpak installations"
-msgstr ""
+msgstr "Flathub wurde auf keiner Ihrer Flatpak-Installationen gefunden."
 
 #: src/bz-flathub-page.blp:52
 msgid "Apps Of The Week"
@@ -279,9 +284,8 @@ msgstr "Im Trend"
 
 #: src/bz-flathub-page.blp:92 src/bz-flathub-page.blp:133
 #: src/bz-flathub-page.blp:174 src/bz-flathub-page.blp:215
-#, fuzzy
 msgid "Show More"
-msgstr "Kurzbefehle anzeigen"
+msgstr "Mehr anzeigen"
 
 #: src/bz-flathub-page.blp:127
 msgid "Recently Updated"
@@ -308,9 +312,8 @@ msgid "Content"
 msgstr "Inhalt"
 
 #: src/bz-full-view.blp:166
-#, fuzzy
 msgid "Run this application"
-msgstr "Diese Anwendung teilen"
+msgstr "Diese Anwendung ausführen"
 
 #: src/bz-full-view.blp:190
 msgid "Download and install this application"
@@ -436,7 +439,7 @@ msgstr "Erweitert"
 
 #: src/bz-search-widget.blp:136
 msgid "Debounce input to prevent instant replies"
-msgstr ""
+msgstr "Eingaben verzögern, um sofortige Ergebnisse zu verhindern"
 
 #: src/bz-share-dialog.blp:13
 msgid "Share"
@@ -511,8 +514,7 @@ msgstr ""
 #: src/bz-update-dialog.c:142
 #, c-format
 msgid "Additionally, %d runtimes and/or addons will be updated."
-msgstr ""
-"Zusätzlich werden %d Laufzeitumgebungen und/oder Erweiterungen aktualisiert."
+msgstr "Zusätzlich werden %d Laufzeitumgebungen und/oder Erweiterungen aktualisiert."
 
 #: src/bz-window.blp:36
 msgid "Transactions Will Appear Here"
@@ -560,7 +562,7 @@ msgstr "Aktualisieren"
 
 #: src/bz-window.blp:283
 msgid "Checking for updates"
-msgstr ""
+msgstr "Es wird nach Aktualisierungen gesucht"
 
 #: src/bz-window.blp:298
 msgid "View curated applications"
@@ -587,9 +589,8 @@ msgid "Toggle transaction sidebar"
 msgstr "Seitenleiste für Transaktionen anzeigen"
 
 #: src/bz-window.blp:422
-#, fuzzy
 msgid "_Refresh"
-msgstr "Aktualisieren"
+msgstr "_Aktualisieren"
 
 #: src/bz-window.blp:427
 msgid "_Keyboard Shortcuts"
@@ -604,9 +605,8 @@ msgid "_Donate to Bazaar ❤️"
 msgstr "An Bazaar _spenden ❤️"
 
 #: src/bz-window.c:492
-#, fuzzy
 msgid "Up to date!"
-msgstr "Aktualisieren"
+msgstr "Auf neuestem Stand"
 
 #: src/bz-window.c:667
 msgid ""
@@ -617,6 +617,11 @@ msgid ""
 "\n"
 "on the command line."
 msgstr ""
+"Die Möglichkeit, lokale .flatpak-Bundle-Dateien zu überprüfen und zu installieren, wird "
+"in Kürze verfügbar sein!\n"
+"In der Zwischenzeit können Sie versuchen, folgenden Befehl in der Befehlszeile auszuführen:\n"
+"\n"
+"flatpak install --bundle dein-bundle.flatpak"
 
 #: src/bz-window.c:742
 msgid "Can't do that right now!"
