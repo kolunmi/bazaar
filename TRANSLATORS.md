@@ -8,7 +8,7 @@ Some basic rules:
   you do, I will ban you from the project
 * If you are editing existing translation, make sure to check rules for that language
   in TRANSLATORS-[language code].md` file.
-  
+
 ## Basic Process
 
 Fork the project (so you can open a pr later) and clone the repo. Then
@@ -19,6 +19,24 @@ make sure your current directory is the bazaar project root:
 # for which you have write permissions
 git clone ...
 cd bazaar
+```
+# Automic Setup
+Once you've done that, you can run `./translators.sh` and follow instructions present on the screen.
+The script will show you how po/LINGUAS currently looks like, if everything is correct type Y and press enter.
+After that the scrpt will ask you to enter language code, please enter it, and press enter.
+The script will now generate a new .po file or update an existing one, so that there are all translatable lines avaible.
+
+You are now ready to open your po file in your text editor or
+translation editor (POEdit, GTranslator, Lokalize, etc.)and begin translating.
+When you are done, commit your changes and submit a pull request on github.
+
+# Manual Setup
+
+Once you've done that, setup the project with meson with the
+`im_a_translator` flag set to `true`:
+
+```sh
+meson setup build -Dim_a_translator=true
 ```
 
 Add your language identifier to `po/LINGUAS`. For example, if you are
@@ -42,21 +60,33 @@ en_GB
 es
 ms
 ```
-You can now open terminal in your Bazaar fork folder and then run:
-```
-./translators.sh
-```
-now follow instructions present on the screen.
-The script will show you how `po/LINGUAS` currently looks like,
-if everything is correct type Y and press enter.
-Now the scrpt will ask you to enter language code, please enter it,
-and press enter. The script will now generate a new .po file or
-update an existing one, so that there are all translatable lines
-avaible.
 
-You are now ready to open your `po` file in your text editor and begin
-translating. When you are done, commit your changes and submit a pull
-request on github.
+Next, enter the build directory:
+
+```sh
+cd build
+```
+
+Run this command to generate the main `pot` (**P**ortable **O**bject
+**T**emplate) file:
+
+```sh
+meson compile bazaar-pot
+```
+
+You might get a bunch of output complaining that the `blp` extension
+is unknown. You can ignore this.
+
+Finally, still inside the build directory, run the following command
+to update and/or create the `po` (**P**ortable **O**bject) files:
+
+```sh
+meson compile bazaar-update-po
+```
+
+You are now ready to open your po file in your text editor or
+translation editor (POEdit, GTranslator, Lokalize, etc.)and begin translating.
+When you are done, commit your changes and submit a pull request on github.
 
 ## Update existing translations
 
