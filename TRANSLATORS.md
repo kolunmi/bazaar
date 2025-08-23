@@ -20,15 +20,19 @@ make sure your current directory is the bazaar project root:
 git clone ...
 cd bazaar
 ```
-# Automic Setup
-Once you've done that, you can run `./translators.sh` and follow instructions present on the screen.
-The script will show you how `po/LINGUAS` currently looks like, if everything is correct type Y and press enter.
-After that the scrpt will ask you to enter language code, please enter it, and press enter.
-The script will now generate a new `po` file or update an existing one, so that there are all translatable lines avaible.
+# Automatic Setup
+Once you've done that, you can run `./translators.sh` and follow
+instructions present on the screen. The script will show you what
+`po/LINGUAS` currently looks like. If everything is correct, type `Y`
+and press enter. After that the script will ask you to enter language
+code, please enter it, and press enter. The script will now generate a
+new `po` file or update an existing one such that any new translatable
+strings will be available.
 
 You are now ready to open your `po` file in your text editor or
-translation editor (POEdit, GTranslator, Lokalize, etc.)and begin translating.
-When you are done, commit your changes and submit a pull request on github.
+translation editor (POEdit, GTranslator, Lokalize, etc.) and begin
+translating. When you are done, commit your changes and submit a pull
+request on github.
 
 # Manual Setup
 
