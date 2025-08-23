@@ -59,7 +59,7 @@ za instrukcjami widocznymi na ekranie. Skrypt pokaże ci jak
 plik `po/LINGUAS` aktualnie wygląda, jeśli wszystko się zgadza
 naciśnij Y, a następnie enter. Następnie skrypt poprosi cię o wprowadzenie
 kodu języka docelowego, wpisz go, a następnie naciśnij enter.
-Następnie skrypt wygeneruje nowy plik .po lub zaktualizuje istniejący,
+Następnie skrypt wygeneruje nowy plik `po` lub zaktualizuje istniejący,
 tak aby wszystkie przetłumaczalne linijki były dostępne.
 
 Teraz jesteś gotowy, aby otworzyć swój plik `po` w wybranym edytorze tekstu
