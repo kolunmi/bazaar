@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-19 19:15+0200\n"
-"PO-Revision-Date: 2025-08-20 15:03+0200\n"
+"POT-Creation-Date: 2025-08-20 15:41+0200\n"
+"PO-Revision-Date: 2025-08-23 16:16+0200\n"
 "Last-Translator: Pietro F. <pfwork@tutamail.com>\n"
 "Language-Team: Italian\n"
 "Language: it\n"
@@ -64,7 +64,7 @@ msgstr ""
 "il desktop Linux. Bazaar presenta una scheda “Consigliate” che può essere "
 "configurata dai distributori per consentire un'esperienza più personalizzata"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:24 src/bz-application.c:777
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:24 src/bz-application.c:779
 msgid "Adam Masciola"
 msgstr "Adam Masciola"
 
@@ -90,104 +90,112 @@ msgid "This flatpak is verified by the original developers of the software."
 msgstr ""
 "Questo flatpak è verificato dagli sviluppatori originali dell'applicazione."
 
-#: src/bz-application.c:741
+#: src/bz-application.c:667
+msgid ""
+"This functionality is currently disabled. It is recommended you download and "
+"install Flatseal to manage app permissions."
+msgstr ""
+"Questa funzionalità è attualmente disabilitata. Si consiglia di scaricare e "
+"installare Flatseal per gestire le autorizzazioni delle app."
+
+#: src/bz-application.c:743
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr "Adam Masciola <kolunmi@posteo.net>"
 
-#: src/bz-application.c:746
+#: src/bz-application.c:748
 msgctxt "About Dialog Translator Credit"
 msgid "Ahmed Najmawi"
 msgstr "Ahmed Najmawi"
 
-#: src/bz-application.c:747
+#: src/bz-application.c:749
 msgctxt "About Dialog Translator Credit"
 msgid "AtomHare"
 msgstr "AtomHare"
 
-#: src/bz-application.c:748
+#: src/bz-application.c:750
 msgctxt "About Dialog Translator Credit"
 msgid "Azenyr"
 msgstr "Azenyr"
 
-#: src/bz-application.c:749
+#: src/bz-application.c:751
 msgctxt "About Dialog Translator Credit"
 msgid "Goudarz Jafari"
 msgstr "Goudarz Jafari"
 
-#: src/bz-application.c:750
+#: src/bz-application.c:752
 msgctxt "About Dialog Translator Credit"
 msgid "Jill Fiore (Lumaeris)"
 msgstr "Jill Fiore (Lumaeris)"
 
-#: src/bz-application.c:751
+#: src/bz-application.c:753
 msgctxt "About Dialog Translator Credit"
 msgid "KiKaraage"
 msgstr "KiKaraage"
 
-#: src/bz-application.c:752
+#: src/bz-application.c:754
 msgctxt "About Dialog Translator Credit"
 msgid "Lucosec"
 msgstr "Lucosec"
 
-#: src/bz-application.c:753
+#: src/bz-application.c:755
 msgctxt "About Dialog Translator Credit"
 msgid "Léane GRASSER"
 msgstr "Léane GRASSER"
 
-#: src/bz-application.c:754
+#: src/bz-application.c:756
 msgctxt "About Dialog Translator Credit"
 msgid "Marcel Mrówka (Microwave)"
 msgstr "Marcel Mrówka (Microwave)"
 
-#: src/bz-application.c:755
+#: src/bz-application.c:757
 msgctxt "About Dialog Translator Credit"
 msgid "Pietro F."
 msgstr "Pietro F."
 
-#: src/bz-application.c:756
+#: src/bz-application.c:758
 msgctxt "About Dialog Translator Credit"
 msgid "Shihfu Juan"
 msgstr "Shihfu Juan"
 
-#: src/bz-application.c:757
+#: src/bz-application.c:759
 msgctxt "About Dialog Translator Credit"
 msgid "Shinsei"
 msgstr "Shinsei"
 
-#: src/bz-application.c:758
+#: src/bz-application.c:760
 msgctxt "About Dialog Translator Credit"
 msgid "Vlastimil Dědek"
 msgstr "Vlastimil Dědek"
 
-#: src/bz-application.c:759
+#: src/bz-application.c:761
 msgctxt "About Dialog Translator Credit"
 msgid "asen23"
 msgstr "asen23"
 
-#: src/bz-application.c:760
+#: src/bz-application.c:762
 msgctxt "About Dialog Translator Credit"
 msgid "renner"
 msgstr "renner"
 
-#: src/bz-application.c:761
+#: src/bz-application.c:763
 msgctxt "About Dialog Translator Credit"
 msgid "robotta"
 msgstr "robotta"
 
-#: src/bz-application.c:1147
+#: src/bz-application.c:1183
 msgid "Constructing Flatpak instance..."
 msgstr "Creazione dell'istanza Flatpak..."
 
-#: src/bz-application.c:1157
+#: src/bz-application.c:1193
 msgid "Reusing last Flatpak instance..."
 msgstr "Riutilizzo dell'ultima istanza Flatpak..."
 
-#: src/bz-application.c:1182
+#: src/bz-application.c:1218
 msgid "Flathub is not registered on this system"
 msgstr "Flathub non è registrato su questo sistema"
 
-#: src/bz-application.c:1185
+#: src/bz-application.c:1221
 msgid ""
 "Would you like to add Flathub as a remote? If you decline, the Flathub page "
 "will not be available. You can change this later."
@@ -196,37 +204,37 @@ msgstr ""
 "Flathub non sarà disponibile. Puoi cambiare questa impostazione in un "
 "secondo momento."
 
-#: src/bz-application.c:1190 src/bz-update-dialog.blp:6
+#: src/bz-application.c:1226 src/bz-update-dialog.blp:6
 msgid "Later"
 msgstr "Dopo"
 
-#: src/bz-application.c:1191
+#: src/bz-application.c:1227
 msgid "Add Flathub"
 msgstr "Aggiungi Flathub"
 
-#: src/bz-application.c:1223
+#: src/bz-application.c:1259
 #, c-format
 msgid "Identifying installed entries..."
 msgstr "Identificazione delle voci installate..."
 
-#: src/bz-application.c:1235
+#: src/bz-application.c:1271
 #, c-format
 msgid "Beginning remote entry retrieval while referencing %d blocklist(s)..."
 msgstr "Avvio recupero delle voci remote facendo riferimento a %d blacklist..."
 
-#: src/bz-application.c:1379
+#: src/bz-application.c:1415
 #, c-format
 msgid "Received %'d entries out of %'d (%0.1f seconds elapsed)"
 msgstr "Ricevute %'d voci su %'d (%.1f secondi trascorsi)"
 
-#: src/bz-application.c:1386
+#: src/bz-application.c:1422
 #, c-format
 msgid "Waiting for background indexing tasks to catch up..."
 msgstr ""
 "In attesa che le attività di indicizzazione in background vengano "
 "completate..."
 
-#: src/bz-application.c:1422
+#: src/bz-application.c:1458
 #, c-format
 msgid "Completed initialization in %0.2f seconds"
 msgstr "Inizializzazione completata in %0.2f secondi"
@@ -462,7 +470,7 @@ msgstr "Minimizzare il limite inferiore"
 msgid "Maximize Upper Bound"
 msgstr "Massimizzare il limite superiore"
 
-#: src/bz-transaction-manager.c:451
+#: src/bz-transaction-manager.c:1049
 #, c-format
 msgid "Finished in %.02f seconds"
 msgstr "Finito in %.02f secondi"
@@ -612,7 +620,7 @@ msgid ""
 "\n"
 "on the command line."
 msgstr ""
-"La possibilità di ispezionare e installare i file bundle .flatpak locali è "
+"La possibilità di ispezionare e installare i file bundle locali .flatpak è "
 "in arrivo! Nel frattempo, provate a eseguire\n"
 "\n"
 "flatpak install --bundle your-bundle.flatpak\n"
@@ -650,7 +658,7 @@ msgstr "Annulla"
 
 #: src/bz-window.c:826
 msgid "Remove"
-msgstr "Rimuove"
+msgstr "Rimuovi"
 
 #: src/bz-window.c:837
 #, c-format
