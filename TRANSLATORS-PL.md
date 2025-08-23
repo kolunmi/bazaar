@@ -28,6 +28,9 @@ Następnie upewnij się, że jesteś w folderze odpowiadającym budową do podst
 git clone ...
 cd bazaar
 ```
+Nie zamykaj okna terminala
+
+# Konfiguracja Automatyczna
 
 Dodaj kod języka docelowego do `po/LINGUAS`. Na przykład, jeśli dodajesz
 hiszpańskie tłumaczenie, wstaw `es` do nowej linijki, upewniając się, że
@@ -51,23 +54,77 @@ es
 ms
 ```
 
-Teraz w otwórz okno terminala w podstawie katalogu projektu,
-i uruchom:
+Jak już to zrobisz, możesz uruchomić `./translators.sh` i podążać
+za instrukcjami widocznymi na ekranie. Skrypt pokaże ci jak
+plik `po/LINGUAS` aktualnie wygląda, jeśli wszystko się zgadza
+naciśnij Y, a następnie enter. Następnie skrypt poprosi cię o wprowadzenie
+kodu języka docelowego, wpisz go, a następnie naciśnij enter.
+Następnie skrypt wygeneruje nowy plik .po lub zaktualizuje istniejący,
+tak aby wszystkie przetłumaczalne linijki były dostępne.
+
+Teraz jesteś gotowy, aby otworzyć swój plik `po` w wybranym edytorze tekstu
+lub edytorze tłumaczeń (POEdit, GTranslator, Lokalize, itp.) i rozpocząć proces
+tłumaczenia. Jak już skończysz, skommituj swoje zmiany i utwórz pull request na
+githubie.
+
+# Konfiguracja Ręczna
+
+Jak już to zrobisz, skonfiguruj projekt za pomocą mesona z
+flagą `im_a_translator` ustawioną na `true`:
+
+```sh
+meson setup build -Dim_a_translator=true
 ```
-./translators.sh
+
+Dodaj kod języka docelowego do `po/LINGUAS`. Na przykład, jeśli dodajesz
+hiszpańskie tłumaczenie, wstaw `es` do nowej linijki, upewniając się, że
+lista jest w kolejności alfabetycznej. Zatem jeśli `po/LINGUAS` wygląda
+następująco:
+
+```
+# Please keep this file sorted alphabetically.
+ab
+en_GB
+ms
 ```
 
-teraz postępuj z instrukcjami na ekranie.
-Skrypt pokaże ci jak aktualnie wygląda `po/LINGUAS`, jeśli wszystko się zgadza
-napisz Y i naciśnij enter. Teraz skrypt poprosi ciebie o wpisanie kodu języka,
-na który chcesz przetłumaczyć Bazaar, wpisz go i naciśnij enter. Skrypt
-stworzy lub zaktualizuje instiejący plik, tak aby miał wszystkie przetłumaczalne
-linijki.
+musisz zmienić to na:
 
-Teraz możesz otworzyć folder `po` i otworzyć `[kod-języka].po` w ulubionym programie do
-tłumaczenia, może to być Lokalize, GTranslator (Translation Editor), itp.
-Jak już skończysz, prześlij pliki na swój fork i stwórz Pull Request.
+```
+# Please keep this file sorted alphabetically.
+ab
+en_GB
+es
+ms
+```
 
+Następnie, przejdź do katalogu `build`:
+
+```sh
+cd build
+```
+
+Uruchom tą komendę, aby wygenerować główny plik `pot`
+(**P**ortable **O**bject **T**emplate):
+
+```sh
+meson compile bazaar-pot
+```
+
+Na wierszu poleceń może wyskoczyć mnóstwo błędów o tym, że rozszerzenie `blp`
+jest nieznane. Możesz je zignorować.
+
+Wreszcie, wciąż będąc w katalogu `build`, uruchom następującą komendę,
+aby zaktualizować i/lub stworzyć pliki `po` (**P**ortable **O**bject):
+
+```sh
+meson compile bazaar-update-po
+```
+
+Teraz jesteś gotowy, aby otworzyć swój plik `po` w wybranym edytorze tekstu
+lub edytorze tłumaczeń (POEdit, GTranslator, Lokalize, itp.) i rozpocząć proces
+tłumaczenia. Jak już skończysz, skommituj swoje zmiany i utwórz pull request na
+githubie.
 
 ## Testowanie swojego tłumaczenia
 
