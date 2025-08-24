@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-22 04:32+0300\n"
+"POT-Creation-Date: 2025-08-25 14:33+0300\n"
 "PO-Revision-Date: 2025-08-12 22:05+0300\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -353,28 +353,32 @@ msgstr "Підтримати розробників"
 msgid "Support"
 msgstr "Підтримати"
 
-#: src/bz-full-view.blp:375
+#: src/bz-full-view.blp:342
+msgid "VCS Forge Star Count"
+msgstr "Вподобань на сторінці розробки"
+
+#: src/bz-full-view.blp:411
 msgid "Remote repo name"
 msgstr "Назва віддаленого сховища"
 
-#: src/bz-full-view.blp:388
+#: src/bz-full-view.blp:424
 msgid "Project URL"
 msgstr "URL проєкту"
 
-#: src/bz-full-view.blp:400
+#: src/bz-full-view.blp:436
 msgid "Download size"
 msgstr "Розмір завантаження"
 
-#: src/bz-full-view.c:204
+#: src/bz-full-view.c:213
 #, c-format
 msgid "Released %x"
 msgstr "Випуск %x"
 
-#: src/bz-full-view.c:215
+#: src/bz-full-view.c:224
 msgid "No URL"
 msgstr "Без URL"
 
-#: src/bz-full-view.c:223
+#: src/bz-full-view.c:232
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -382,7 +386,7 @@ msgstr ""
 "Цей застосунок має вільну ліцензію. Це означає, що початковий код може бути "
 "перевірено на безпечність."
 
-#: src/bz-full-view.c:224
+#: src/bz-full-view.c:233
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
