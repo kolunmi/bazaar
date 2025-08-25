@@ -1,0 +1,8 @@
+[wrap-git]
+directory = flatpak
+url = https://github.com/flatpak/flatpak.git
+revision = 1.16.1
+depth = 1
+
+[provide]
+dependency_names = flatpak
