@@ -31,6 +31,7 @@ build-flatpak $manifest=manifest $branch=branch:
     BUILDER_ARGS+=("--force-clean")
     BUILDER_ARGS+=("--install")
     BUILDER_ARGS+=("--disable-rofiles-fuse")
+    BUILDER_ARGS+=("--share=network")
     BUILDER_ARGS+=("${FLATPAK_BUILDER_DIR}/build-dir")
     BUILDER_ARGS+=("${manifest}")
 
