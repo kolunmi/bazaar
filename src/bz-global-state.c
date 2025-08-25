@@ -45,8 +45,8 @@ http_send_and_splice_finish (GObject      *object,
                              gpointer      user_data);
 
 static DexFuture *
-query_flathub_then (DexFuture     *future,
-                    GOutputStream *output_stream);
+query_json_source_then (DexFuture     *future,
+                        GOutputStream *output_stream);
 
 static DexFuture *
 send (SoupMessage   *message,
@@ -70,28 +70,40 @@ bz_send_with_global_http_session_then_splice_into (SoupMessage   *message,
 }
 
 DexFuture *
-bz_query_flathub_v2_json (const char *request)
+bz_https_query_json (const char *uri)
 {
   g_autoptr (GError) local_error   = NULL;
-  g_autofree char *uri             = NULL;
   g_autoptr (SoupMessage) message  = NULL;
+  SoupMessageHeaders *headers      = NULL;
   g_autoptr (GOutputStream) output = NULL;
   g_autoptr (DexFuture) future     = NULL;
 
-  dex_return_error_if_fail (request != NULL);
+  dex_return_error_if_fail (uri != NULL);
 
-  uri     = g_strdup_printf ("https://flathub.org/api/v2%s", request);
   message = soup_message_new (SOUP_METHOD_GET, uri);
-  output  = g_memory_output_stream_new_resizable ();
+  headers = soup_message_get_request_headers (message);
+  /* Needed for github for some reason */
+  soup_message_headers_append (headers, "User-Agent", "Bazaar");
 
-  g_debug ("Querying Flathub at URI %s ...", uri);
+  output = g_memory_output_stream_new_resizable ();
 
   future = send (message, output, TRUE);
   future = dex_future_then (
       future,
-      (DexFutureCallback) query_flathub_then,
+      (DexFutureCallback) query_json_source_then,
       g_object_ref (output), g_object_unref);
   return g_steal_pointer (&future);
+}
+
+DexFuture *
+bz_query_flathub_v2_json (const char *request)
+{
+  g_autofree char *uri = NULL;
+
+  dex_return_error_if_fail (request != NULL);
+
+  uri = g_strdup_printf ("https://flathub.org/api/v2%s", request);
+  return bz_https_query_json (uri);
 }
 
 DexFuture *
@@ -167,8 +179,8 @@ http_send_and_splice_finish (GObject      *object,
 }
 
 static DexFuture *
-query_flathub_then (DexFuture     *future,
-                    GOutputStream *output_stream)
+query_json_source_then (DexFuture     *future,
+                        GOutputStream *output_stream)
 {
   g_autoptr (GError) local_error = NULL;
   g_autoptr (GBytes) bytes       = NULL;
@@ -181,8 +193,6 @@ query_flathub_then (DexFuture     *future,
   bytes = g_memory_output_stream_steal_as_bytes (
       G_MEMORY_OUTPUT_STREAM (output_stream));
   bytes_data = g_bytes_get_data (bytes, &bytes_size);
-
-  g_debug ("Received %zu bytes back from Flathub", bytes_size);
 
   parser = json_parser_new_immutable ();
   result = json_parser_load_from_data (parser, bytes_data, bytes_size, &local_error);

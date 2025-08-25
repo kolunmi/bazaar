@@ -6,7 +6,9 @@ Some basic rules:
 * You must be fluent in the language you contribute
 * You may not use llms to generate the strings (I could do that). If
   you do, I will ban you from the project
-  
+* If you are editing existing translation, make sure to check rules for that language
+  in `TRANSLATORS-[language code].md` file.
+
 ## Basic Process
 
 Fork the project (so you can open a pr later) and clone the repo. Then
@@ -18,6 +20,21 @@ make sure your current directory is the bazaar project root:
 git clone ...
 cd bazaar
 ```
+# Automatic Setup
+Once you've done that, you can run `./translators.sh` and follow
+instructions present on the screen. The script will show you what
+`po/LINGUAS` currently looks like. If everything is correct, type `Y`
+and press enter. After that the script will ask you to enter language
+code, please enter it, and press enter. The script will now generate a
+new `po` file or update an existing one such that any new translatable
+strings will be available.
+
+You are now ready to open your `po` file in your text editor or
+translation editor (POEdit, GTranslator, Lokalize, etc.) and begin
+translating. When you are done, commit your changes and submit a pull
+request on github.
+
+# Manual Setup
 
 Once you've done that, setup the project with meson with the
 `im_a_translator` flag set to `true`:
@@ -71,9 +88,9 @@ to update and/or create the `po` (**P**ortable **O**bject) files:
 meson compile bazaar-update-po
 ```
 
-You are now ready to open your `po` file in your text editor and begin
-translating. When you are done, commit your changes and submit a pull
-request on github.
+You are now ready to open your `po` file in your text editor or
+translation editor (POEdit, GTr`anslator, Lokalize, etc.)and begin translating.
+When you are done, commit your changes and submit a pull request on github.
 
 ## Update existing translations
 

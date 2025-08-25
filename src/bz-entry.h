@@ -115,6 +115,9 @@ bz_entry_get_search_tokens (BzEntry *self);
 const char *
 bz_entry_get_donation_url (BzEntry *self);
 
+const char *
+bz_entry_get_forge_url (BzEntry *self);
+
 gboolean
 bz_entry_get_is_foss (BzEntry *self);
 

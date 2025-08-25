@@ -74,6 +74,7 @@ typedef struct
   GListModel   *screenshot_paintables;
   GListModel   *share_urls;
   char         *donation_url;
+  char         *forge_url;
   GListModel   *reviews;
   double        average_rating;
   char         *ratings_summary;
@@ -121,6 +122,7 @@ enum
   PROP_SCREENSHOT_PAINTABLES,
   PROP_SHARE_URLS,
   PROP_DONATION_URL,
+  PROP_FORGE_URL,
   PROP_REVIEWS,
   PROP_AVERAGE_RATING,
   PROP_RATINGS_SUMMARY,
@@ -298,6 +300,9 @@ bz_entry_get_property (GObject    *object,
     case PROP_DONATION_URL:
       g_value_set_string (value, priv->donation_url);
       break;
+    case PROP_FORGE_URL:
+      g_value_set_string (value, priv->forge_url);
+      break;
     case PROP_REVIEWS:
       g_value_set_object (value, priv->reviews);
       break;
@@ -442,6 +447,10 @@ bz_entry_set_property (GObject      *object,
     case PROP_DONATION_URL:
       g_clear_pointer (&priv->donation_url, g_free);
       priv->donation_url = g_value_dup_string (value);
+      break;
+    case PROP_FORGE_URL:
+      g_clear_pointer (&priv->forge_url, g_free);
+      priv->forge_url = g_value_dup_string (value);
       break;
     case PROP_REVIEWS:
       g_clear_object (&priv->reviews);
@@ -681,6 +690,12 @@ bz_entry_class_init (BzEntryClass *klass)
           NULL, NULL, NULL,
           G_PARAM_READWRITE);
 
+  props[PROP_FORGE_URL] =
+      g_param_spec_string (
+          "forge-url",
+          NULL, NULL, NULL,
+          G_PARAM_READWRITE);
+
   props[PROP_REVIEWS] =
       g_param_spec_object (
           "reviews",
@@ -881,6 +896,8 @@ bz_entry_real_serialize (BzSerializable  *serializable,
     }
   if (priv->donation_url != NULL)
     g_variant_builder_add (builder, "{sv}", "donation-url", g_variant_new_string (priv->donation_url));
+  if (priv->forge_url != NULL)
+    g_variant_builder_add (builder, "{sv}", "forge-url", g_variant_new_string (priv->forge_url));
   if (priv->version_history != NULL)
     {
       guint n_items = 0;
@@ -1132,6 +1149,8 @@ bz_entry_real_deserialize (BzSerializable *serializable,
         }
       else if (g_strcmp0 (key, "donation-url") == 0)
         priv->donation_url = g_variant_dup_string (value, NULL);
+      else if (g_strcmp0 (key, "forge-url") == 0)
+        priv->forge_url = g_variant_dup_string (value, NULL);
       else if (g_strcmp0 (key, "version-history") == 0)
         {
           g_autoptr (GListStore) store          = NULL;
@@ -1503,6 +1522,17 @@ bz_entry_get_donation_url (BzEntry *self)
   priv = bz_entry_get_instance_private (self);
 
   return priv->donation_url;
+}
+
+const char *
+bz_entry_get_forge_url (BzEntry *self)
+{
+  BzEntryPrivate *priv = NULL;
+
+  g_return_val_if_fail (BZ_IS_ENTRY (self), NULL);
+  priv = bz_entry_get_instance_private (self);
+
+  return priv->forge_url;
 }
 
 gboolean
@@ -1998,6 +2028,7 @@ clear_entry (BzEntry *self)
   g_clear_object (&priv->screenshot_paintables);
   g_clear_object (&priv->share_urls);
   g_clear_pointer (&priv->donation_url, g_free);
+  g_clear_pointer (&priv->forge_url, g_free);
   g_clear_object (&priv->reviews);
   g_clear_pointer (&priv->ratings_summary, g_free);
   g_clear_object (&priv->version_history);

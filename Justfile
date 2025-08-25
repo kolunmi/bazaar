@@ -40,8 +40,7 @@ build-flatpak $manifest=manifest $branch=branch:
         flatpak run org.flatpak.Builder "${BUILDER_ARGS[@]}"
     fi
 
-
-build-flatpak-bundle $appid=appid: 
+build-flatpak-bundle $appid=appid:
     flatpak build-export repo "${FLATPAK_BUILDER_DIR}/build-dir"
     flatpak build-bundle repo "${appid}".flatpak "${appid}"
 
@@ -86,4 +85,3 @@ fix:
     {{ just }} --unstable --fmt -f Justfile || { exit 1; }
 
 update-flatpak:
-    

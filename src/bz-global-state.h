@@ -33,6 +33,9 @@ bz_send_with_global_http_session_then_splice_into (SoupMessage   *message,
                                                    GOutputStream *output);
 
 DexFuture *
+bz_https_query_json (const char *uri);
+
+DexFuture *
 bz_query_flathub_v2_json (const char *request);
 
 DexFuture *

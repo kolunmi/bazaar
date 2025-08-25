@@ -341,6 +341,7 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
   g_autoptr (GListStore) screenshot_paintables = NULL;
   g_autoptr (GListStore) share_urls            = NULL;
   g_autofree char *donation_url                = NULL;
+  g_autofree char *forge_url                   = NULL;
   g_autoptr (GListStore) native_reviews        = NULL;
   double           average_rating              = 0.0;
   g_autofree char *ratings_summary             = NULL;
@@ -565,6 +566,8 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
                   break;
                 case AS_URL_KIND_DONATION:
                   enum_string = "Donation";
+                  g_clear_pointer (&donation_url, g_free);
+                  donation_url = g_strdup (url);
                   break;
                 case AS_URL_KIND_TRANSLATE:
                   enum_string = "Translate";
@@ -574,6 +577,8 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
                   break;
                 case AS_URL_KIND_VCS_BROWSER:
                   enum_string = "VCS Browser";
+                  g_clear_pointer (&forge_url, g_free);
+                  forge_url = g_strdup (url);
                   break;
                 case AS_URL_KIND_CONTRIBUTE:
                   enum_string = "Contribute";
@@ -588,12 +593,6 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
                   "url", url,
                   NULL);
               g_list_store_append (share_urls, share_url);
-
-              if (e == AS_URL_KIND_DONATION)
-                {
-                  g_clear_pointer (&donation_url, g_free);
-                  donation_url = g_strdup (url);
-                }
             }
         }
       if (g_list_model_get_n_items (G_LIST_MODEL (share_urls)) == 0)
@@ -819,6 +818,7 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
       "screenshot-paintables", screenshot_paintables,
       "share-urls", share_urls,
       "donation-url", donation_url,
+      "forge-url", forge_url,
       "reviews", native_reviews,
       "average-rating", average_rating,
       "ratings-summary", ratings_summary,

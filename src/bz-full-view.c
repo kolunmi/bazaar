@@ -18,13 +18,18 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+#define G_LOG_DOMAIN "BAZAAR::FULL-VIEW-WIDGET"
+
 #include <glib/gi18n.h>
+#include <json-glib/json-glib.h>
 
 #include "bz-decorated-screenshot.h"
 #include "bz-dynamic-list-view.h"
+#include "bz-env.h"
 #include "bz-error.h"
 #include "bz-flatpak-entry.h"
 #include "bz-full-view.h"
+#include "bz-global-state.h"
 #include "bz-lazy-async-texture-model.h"
 #include "bz-screenshot.h"
 #include "bz-section-view.h"
@@ -44,10 +49,11 @@ struct _BzFullView
   BzResult             *group_model;
 
   guint      debounce_timeout;
-  DexFuture *loading_image_viewer;
+  DexFuture *loading_forge_stars;
 
   /* Template widgets */
   AdwViewStack *stack;
+  GtkLabel     *forge_stars_label;
 };
 
 G_DEFINE_FINAL_TYPE (BzFullView, bz_full_view, ADW_TYPE_BIN)
@@ -78,6 +84,9 @@ static guint signals[LAST_SIGNAL];
 static void
 debounce_timeout (BzFullView *self);
 
+static DexFuture *
+retrieve_star_string_fiber (BzFullView *self);
+
 static void
 bz_full_view_dispose (GObject *object)
 {
@@ -90,7 +99,7 @@ bz_full_view_dispose (GObject *object)
   g_clear_object (&self->debounced_ui_entry);
   g_clear_object (&self->group_model);
 
-  dex_clear (&self->loading_image_viewer);
+  dex_clear (&self->loading_forge_stars);
   g_clear_handle_id (&self->debounce_timeout, g_source_remove);
 
   G_OBJECT_CLASS (bz_full_view_parent_class)->dispose (object);
@@ -332,6 +341,22 @@ support_cb (BzFullView *self,
 }
 
 static void
+forge_cb (BzFullView *self,
+          GtkButton  *button)
+{
+  BzEntry *entry = NULL;
+
+  entry = bz_result_get_object (self->ui_entry);
+  if (entry != NULL)
+    {
+      const char *url = NULL;
+
+      url = bz_entry_get_forge_url (entry);
+      g_app_info_launch_default_for_uri (url, NULL, NULL);
+    }
+}
+
+static void
 screenshots_bind_widget_cb (BzFullView            *self,
                             BzDecoratedScreenshot *screenshot,
                             GdkPaintable          *paintable,
@@ -435,6 +460,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-full-view.ui");
   gtk_widget_class_bind_template_child (widget_class, BzFullView, stack);
+  gtk_widget_class_bind_template_child (widget_class, BzFullView, forge_stars_label);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
@@ -448,6 +474,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, install_cb);
   gtk_widget_class_bind_template_callback (widget_class, remove_cb);
   gtk_widget_class_bind_template_callback (widget_class, support_cb);
+  gtk_widget_class_bind_template_callback (widget_class, forge_cb);
   gtk_widget_class_bind_template_callback (widget_class, screenshots_bind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, screenshots_unbind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, pick_license_warning);
@@ -501,6 +528,8 @@ bz_full_view_set_entry_group (BzFullView   *self,
   g_clear_object (&self->debounced_ui_entry);
   g_clear_object (&self->group_model);
 
+  gtk_label_set_label (self->forge_stars_label, "...");
+
   if (group != NULL)
     {
       g_autoptr (DexFuture) future = NULL;
@@ -540,4 +569,61 @@ debounce_timeout (BzFullView *self)
   g_clear_object (&self->debounced_ui_entry);
   self->debounced_ui_entry = g_object_ref (self->ui_entry);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DEBOUNCED_UI_ENTRY]);
+
+  /* Disabled for now since we don't want to users to be rate limited
+     by github */
+  // dex_clear (&self->loading_forge_stars);
+  // self->loading_forge_stars = dex_scheduler_spawn (
+  //     dex_scheduler_get_default (),
+  //     bz_get_dex_stack_size (),
+  //     (DexFiberFunc) retrieve_star_string_fiber,
+  //     self, NULL);
+}
+
+static DexFuture *
+retrieve_star_string_fiber (BzFullView *self)
+{
+  g_autoptr (GError) local_error = NULL;
+  g_autoptr (BzEntry) entry      = NULL;
+  const char      *forge_link    = NULL;
+  g_autofree char *star_url      = NULL;
+  g_autoptr (JsonNode) node      = NULL;
+  JsonObject      *object        = NULL;
+  gint64           star_count    = 0;
+  g_autofree char *fmt           = NULL;
+
+  entry = dex_await_object (bz_result_dup_future (self->ui_entry), NULL);
+  if (entry == NULL)
+    goto done;
+
+  forge_link = bz_entry_get_forge_url (entry);
+  if (forge_link == NULL)
+    goto done;
+
+  if (g_regex_match_simple (
+          "https://github.com/.*/.*",
+          forge_link,
+          G_REGEX_DEFAULT,
+          G_REGEX_MATCH_DEFAULT))
+    star_url = g_strdup_printf (
+        "https://api.github.com/repos/%s",
+        forge_link + strlen ("https://github.com/"));
+  else
+    goto done;
+
+  node = dex_await_boxed (bz_https_query_json (star_url), &local_error);
+  if (node == NULL)
+    {
+      g_warning ("Could not retrieve vcs star count at %s: %s",
+                 forge_link, local_error->message);
+      goto done;
+    }
+
+  object     = json_node_get_object (node);
+  star_count = json_object_get_int_member_with_default (object, "stargazers_count", 0);
+  fmt        = g_strdup_printf ("%'zu", star_count);
+
+done:
+  gtk_label_set_label (self->forge_stars_label, fmt != NULL ? fmt : "?");
+  return NULL;
 }

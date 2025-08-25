@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-20 13:39+0300\n"
+"POT-Creation-Date: 2025-08-22 04:32+0300\n"
 "PO-Revision-Date: 2025-08-12 22:05+0300\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -283,19 +283,25 @@ msgstr "Сховище Flathub не було знайдено на жодном�
 msgid "Apps Of The Week"
 msgstr "Тижнева добірка"
 
-#: src/bz-flathub-page.blp:96
+#: src/bz-flathub-page.blp:86
 msgid "Trending"
 msgstr "Набирають популярність"
 
-#: src/bz-flathub-page.blp:128
+#: src/bz-flathub-page.blp:92 src/bz-flathub-page.blp:133
+#: src/bz-flathub-page.blp:174 src/bz-flathub-page.blp:215
+#, fuzzy
+msgid "Show More"
+msgstr "Показати більше"
+
+#: src/bz-flathub-page.blp:127
 msgid "Recently Updated"
 msgstr "Нещодавно оновлені"
 
-#: src/bz-flathub-page.blp:160
+#: src/bz-flathub-page.blp:168
 msgid "Recently Added"
 msgstr "Нещодавно додані"
 
-#: src/bz-flathub-page.blp:192
+#: src/bz-flathub-page.blp:209
 msgid "Popular"
 msgstr "Популярні"
 
@@ -388,7 +394,7 @@ msgstr ""
 msgid "No Flatpaks Installed"
 msgstr "Не встановлено жодного пакунку Flatpak"
 
-#: src/bz-installed-page.blp:21 src/bz-window.blp:219 src/bz-window.blp:356
+#: src/bz-installed-page.blp:21 src/bz-window.blp:219 src/bz-window.blp:355
 msgid "Installed"
 msgstr "Встановлені"
 
@@ -541,7 +547,7 @@ msgstr "Шукати"
 msgid "App View"
 msgstr "Огляд програми"
 
-#: src/bz-window.blp:209 src/bz-window.blp:335
+#: src/bz-window.blp:209 src/bz-window.blp:334
 msgid "Flathub"
 msgstr "Flathub"
 
@@ -561,44 +567,44 @@ msgstr "Оновлення"
 msgid "Checking for updates"
 msgstr "Пошук оновлень"
 
-#: src/bz-window.blp:299
+#: src/bz-window.blp:298
 msgid "View curated applications"
 msgstr "Оглянути підібрані застосунки"
 
-#: src/bz-window.blp:314
+#: src/bz-window.blp:313
 msgid "Curated"
 msgstr "Підібрані"
 
-#: src/bz-window.blp:320
+#: src/bz-window.blp:319
 msgid "View the latest on Flathub"
 msgstr "Оглянути найновіше на Flathub"
 
-#: src/bz-window.blp:341
+#: src/bz-window.blp:340
 msgid "View installed applications"
 msgstr "Оглянути встановлені застосунки"
 
-#: src/bz-window.blp:370
+#: src/bz-window.blp:369
 msgid "Main Menu"
 msgstr "Головне меню"
 
-#: src/bz-window.blp:381
+#: src/bz-window.blp:380
 msgid "Toggle transaction sidebar"
 msgstr "Перемкнути віконце дій над застосунками"
 
-#: src/bz-window.blp:423
+#: src/bz-window.blp:422
 #, fuzzy
 msgid "_Refresh"
 msgstr "_Оновити"
 
-#: src/bz-window.blp:428
+#: src/bz-window.blp:427
 msgid "_Keyboard Shortcuts"
 msgstr "_Клавіатурні скорочення"
 
-#: src/bz-window.blp:433
+#: src/bz-window.blp:432
 msgid "_About Bazaar"
 msgstr "_Про Базар"
 
-#: src/bz-window.blp:438
+#: src/bz-window.blp:437
 msgid "_Donate to Bazaar ❤️"
 msgstr "_Пожертувати Базару ❤️"
 

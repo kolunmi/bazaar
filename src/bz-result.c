@@ -269,7 +269,7 @@ future_finally (DexFuture *future,
     }
   else
     {
-      self->error = g_error_copy (self->error);
+      self->error = g_error_copy (local_error);
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MESSAGE]);
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PENDING]);
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_REJECTED]);

@@ -319,6 +319,42 @@ template $BzFullView: Adw.Bin {
                         };
                       }
                     }
+
+                    Box {
+                      styles [
+                        "linked",
+                      ]
+
+                      halign: start;
+                      hexpand: false;
+                      orientation: horizontal;
+                      
+                      Button {
+                        styles [
+                          "pill",
+                        ]
+
+                        // disabled for now
+                        visible: false;
+                        // visible: bind $invert_boolean($is_null(template.ui-entry as <$BzResult>.object as <$BzEntry>.forge-url as <string>) as <bool>) as <bool>;
+                        valign: start;
+                        has-tooltip: true;
+                        tooltip-text: _("VCS Forge Star Count");
+                        clicked => $forge_cb(template);
+
+                        child: Box {
+                          hexpand: false;
+                          orientation: horizontal;
+                          spacing: 10;
+
+                          Image {
+                            icon-name: "starred-symbolic";
+                          }
+
+                          Label forge_stars_label {}
+                        };
+                      }
+                    }
                   }
 
                   Label {

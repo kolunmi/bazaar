@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-21 10:17+0200\n"
-"PO-Revision-Date: 2025-08-21 10:51+0200\n"
+"PO-Revision-Date: 2025-08-21 15:56+0200\n"
 "Last-Translator: Marcel Mrówka <micro.mail88@gmail.com>\n"
 "Language-Team: Polish\n"
 "Language: pl\n"
@@ -600,9 +600,8 @@ msgid "Toggle transaction sidebar"
 msgstr "Włącz pasek boczny transakcji"
 
 #: src/bz-window.blp:422
-#, fuzzy
 msgid "_Refresh"
-msgstr "Odśwież"
+msgstr "_Odśwież"
 
 #: src/bz-window.blp:427
 msgid "_Keyboard Shortcuts"

@@ -599,50 +599,76 @@ check_has_flathub_fiber (CheckHasFlathubData *data)
 static DexFuture *
 ensure_flathub_fiber (EnsureFlathubData *data)
 {
-  BzFlatpakInstance *instance      = data->instance;
-  GCancellable      *cancellable   = data->cancellable;
-  g_autoptr (GError) local_error   = NULL;
-  g_autoptr (SoupMessage) message  = NULL;
-  g_autoptr (GOutputStream) output = NULL;
-  gboolean result                  = FALSE;
-  g_autoptr (GBytes) bytes         = NULL;
-  g_autoptr (FlatpakRemote) remote = NULL;
+  BzFlatpakInstance *instance          = data->instance;
+  GCancellable      *cancellable       = data->cancellable;
+  g_autoptr (GError) local_error       = NULL;
+  g_autoptr (FlatpakRemote) sys_remote = NULL;
+  g_autoptr (FlatpakRemote) usr_remote = NULL;
+  gboolean result                      = FALSE;
+  g_autoptr (FlatpakRemote) remote     = NULL;
 
 #define REPO_URL "https://dl.flathub.org/repo/flathub.flatpakrepo"
 
-  message = soup_message_new (SOUP_METHOD_GET, REPO_URL);
-  output  = g_memory_output_stream_new_resizable ();
-  result  = dex_await (
-      bz_send_with_global_http_session_then_splice_into (message, output),
-      &local_error);
-  if (!result)
-    return dex_future_new_reject (
-        BZ_FLATPAK_ERROR,
-        BZ_FLATPAK_ERROR_IO_MISBEHAVIOR,
-        "Failed to retrieve flatpakrepo file from %s: %s",
-        REPO_URL, local_error->message);
+  if (instance->system != NULL)
+    sys_remote = flatpak_installation_get_remote_by_name (
+        instance->system, "flathub", cancellable, NULL);
+  if (instance->user != NULL)
+    usr_remote = flatpak_installation_get_remote_by_name (
+        instance->user, "flathub", cancellable, NULL);
 
-  bytes  = g_memory_output_stream_steal_as_bytes (G_MEMORY_OUTPUT_STREAM (output));
-  remote = flatpak_remote_new_from_file ("flathub", bytes, &local_error);
-  if (remote == NULL)
-    return dex_future_new_reject (
-        BZ_FLATPAK_ERROR,
-        BZ_FLATPAK_ERROR_IO_MISBEHAVIOR,
-        "Failed to construct flatpak remote from flatpakrepo file %s: %s",
-        REPO_URL, local_error->message);
+  if (sys_remote != NULL)
+    remote = g_steal_pointer (&sys_remote);
+  else if (usr_remote != NULL)
+    remote = g_steal_pointer (&usr_remote);
 
-  result = flatpak_installation_add_remote (
-      instance->system != NULL ? instance->system : instance->user,
-      remote,
-      TRUE,
-      cancellable,
-      &local_error);
-  if (!result)
-    return dex_future_new_reject (
-        BZ_FLATPAK_ERROR,
-        BZ_FLATPAK_ERROR_REMOTE_SYNCHRONIZATION_FAILURE,
-        "Failed to add flathub to flatpak installation: %s",
-        local_error->message);
+  if (remote != NULL)
+    {
+      flatpak_remote_set_disabled (remote, FALSE);
+      flatpak_remote_set_noenumerate (remote, FALSE);
+      flatpak_remote_set_gpg_verify (remote, TRUE);
+    }
+  else
+    {
+      g_autoptr (SoupMessage) message  = NULL;
+      g_autoptr (GOutputStream) output = NULL;
+      g_autoptr (GBytes) bytes         = NULL;
+
+      message = soup_message_new (SOUP_METHOD_GET, REPO_URL);
+      output  = g_memory_output_stream_new_resizable ();
+      result  = dex_await (
+          bz_send_with_global_http_session_then_splice_into (message, output),
+          &local_error);
+      if (!result)
+        return dex_future_new_reject (
+            BZ_FLATPAK_ERROR,
+            BZ_FLATPAK_ERROR_IO_MISBEHAVIOR,
+            "Failed to retrieve flatpakrepo file from %s: %s",
+            REPO_URL, local_error->message);
+
+      bytes  = g_memory_output_stream_steal_as_bytes (G_MEMORY_OUTPUT_STREAM (output));
+      remote = flatpak_remote_new_from_file ("flathub", bytes, &local_error);
+      if (remote == NULL)
+        return dex_future_new_reject (
+            BZ_FLATPAK_ERROR,
+            BZ_FLATPAK_ERROR_IO_MISBEHAVIOR,
+            "Failed to construct flatpak remote from flatpakrepo file %s: %s",
+            REPO_URL, local_error->message);
+
+      flatpak_remote_set_gpg_verify (remote, TRUE);
+
+      result = flatpak_installation_add_remote (
+          instance->system != NULL ? instance->system : instance->user,
+          remote,
+          TRUE,
+          cancellable,
+          &local_error);
+      if (!result)
+        return dex_future_new_reject (
+            BZ_FLATPAK_ERROR,
+            BZ_FLATPAK_ERROR_REMOTE_SYNCHRONIZATION_FAILURE,
+            "Failed to add flathub to flatpak installation: %s",
+            local_error->message);
+    }
 
   return dex_future_new_true ();
 }
