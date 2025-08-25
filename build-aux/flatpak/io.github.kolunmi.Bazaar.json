@@ -32,7 +32,10 @@
     "*.a"
   ],
   "build-options": {
-    "append-path": "/usr/lib/sdk/rust-stable/bin:/usr/lib/sdk/llvm20/bin"
+    "append-path": "/usr/lib/sdk/rust-stable/bin:/usr/lib/sdk/llvm20/bin",
+    "build-args": [
+      "--share=network"
+    ]
   },
   "modules": [
     {
