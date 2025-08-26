@@ -1,6 +1,6 @@
 # These are just convenience scripts, NOT a build system!
 
-appid := env("BAZAAR_APPID", "io.github.kolunmi.Bazaar")
+appid := env("BAZAAR_APPID", "io.github.kolunmi.Bazaar.Devel")
 manifest := "./build-aux/flatpak/" + appid + ".json"
 branch := env("BAZAAR_BRANCH", "stable")
 just := just_executable()
@@ -29,9 +29,10 @@ build-flatpak $manifest=manifest $branch=branch:
 
     if [ "${CI}" == 1 ] ; then
         set -u
-        flatpak remote-add --if-not-exists flathub --user https://dl.flathub.org/repo/flathub.flatpakrepo
-        flatpak install --user -y "org.gnome.Sdk/$(arch)/48"
-        flatpak install --user -y "org.gnome.Platform/$(arch)/48"
+        flatpak remote-add --if-not-exists flathub --user "https://dl.flathub.org/repo/flathub.flatpakrepo"
+        flatpak remote-add --if-not-exists gnome-nightly --user "https://nightly.gnome.org/gnome-nightly.flatpakrepo"
+        flatpak install --user -y "org.gnome.Sdk/$(arch)/master"
+        flatpak install --user -y "org.gnome.Platform/$(arch)/master"
         flatpak install --user -y "runtime/org.freedesktop.Sdk.Extension.rust-stable/$(arch)/24.08"
         flatpak install --user -y "runtime/org.freedesktop.Sdk.Extension.llvm20/$(arch)/24.08"
         flatpak install --user -y org.flatpak.Builder

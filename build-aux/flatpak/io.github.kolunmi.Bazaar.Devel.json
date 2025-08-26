@@ -1,9 +1,12 @@
 {
-  "id": "io.github.kolunmi.Bazaar",
+  "id": "io.github.kolunmi.Bazaar.Devel",
   "runtime": "org.gnome.Platform",
-  "runtime-version": "48",
+  "runtime-version": "master",
   "sdk": "org.gnome.Sdk",
   "command": "bazaar-launcher",
+  "tags": [
+    "nightly"
+  ],
   "sdk-extensions": [
     "org.freedesktop.Sdk.Extension.rust-stable",
     "org.freedesktop.Sdk.Extension.llvm20"
@@ -85,49 +88,6 @@
                 "project-id": 279929,
                 "tag-template": "$version"
               }
-            }
-          ]
-        },
-        {
-          "name": "libdex",
-          "buildsystem": "meson",
-          "sources": [
-            {
-              "type": "archive",
-              "url": "https://gitlab.gnome.org/GNOME/libdex/-/archive/0.11.1/libdex-0.11.1.tar.gz",
-              "sha256": "a1702bc063b7004515d32e24692790d64383902542b2ee6e3b4a7a43770432e7",
-              "x-checker-data": {
-                "type": "anitya",
-                "project-id": 328356,
-                "url-template": "https://gitlab.gnome.org/GNOME/libdex/-/archive/$version/libdex-$version.tar.gz"
-              }
-            }
-          ]
-        },
-        {
-          "name": "glycin",
-          "buildsystem": "meson",
-          "config-opts": [
-            "-Dglycin-loaders=true",
-            "-Dlibglycin=true"
-          ],
-          "sources": [
-            {
-              "type": "archive",
-              "url": "https://gitlab.gnome.org/GNOME/glycin/-/archive/1.2.3/glycin-1.2.3.tar.gz",
-              "sha256": "ce413c2e011931eca25636feaccc0a0eac02a0c89485b78d7db34e5cbeb28615",
-              "x-checker-data": {
-                "type": "anitya",
-                "project-id": 369437,
-                "url-template": "https://gitlab.gnome.org/GNOME/glycin/-/archive/$version/glycin-$version.tar.gz"
-              }
-            },
-            "glycin-cargo-sources.json",
-            {
-              "type": "shell",
-              "commands": [
-                "install -Dpm0644 cargo/config .cargo/config.toml"
-              ]
             }
           ]
         },
