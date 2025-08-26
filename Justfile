@@ -19,12 +19,12 @@ build-flatpak $manifest=manifest $branch=branch:
     set -xeo pipefail
     if [ "${CI}" == 1 ] ; then
         set -u
-        flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-        flatpak install -y "org.gnome.Sdk/$(arch)/48"
-        flatpak install -y "org.gnome.Platform/$(arch)/48"
-        flatpak install -y "runtime/org.freedesktop.Sdk.Extension.rust-stable/$(arch)/24.08"
-        flatpak install -y "runtime/org.freedesktop.Sdk.Extension.llvm20/$(arch)/24.08"
-        flatpak install -y org.flatpak.Builder
+        flatpak remote-add --if-not-exists flathub --user https://dl.flathub.org/repo/flathub.flatpakrepo
+        flatpak install --user -y "org.gnome.Sdk/$(arch)/48"
+        flatpak install --user -y "org.gnome.Platform/$(arch)/48"
+        flatpak install --user -y "runtime/org.freedesktop.Sdk.Extension.rust-stable/$(arch)/24.08"
+        flatpak install --user -y "runtime/org.freedesktop.Sdk.Extension.llvm20/$(arch)/24.08"
+        flatpak install --user -y org.flatpak.Builder
     fi
     set -u
 

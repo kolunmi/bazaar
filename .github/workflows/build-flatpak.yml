@@ -36,8 +36,8 @@ jobs:
         id: build-flatpak
         shell: bash
         run: |
-          sudo env CI=1 $(command -v just) build-flatpak
-          sudo $(command -v just) build-flatpak-bundle
+          CI=1 just build-flatpak
+          just build-flatpak-bundle
 
       - name: Upload Flatpak artifact
         uses: actions/upload-artifact@v4
