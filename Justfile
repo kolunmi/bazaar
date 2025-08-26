@@ -31,10 +31,10 @@ build-flatpak $manifest=manifest $branch=branch:
         set -u
         flatpak remote-add --if-not-exists flathub --user "https://dl.flathub.org/repo/flathub.flatpakrepo"
         flatpak remote-add --if-not-exists gnome-nightly --user "https://nightly.gnome.org/gnome-nightly.flatpakrepo"
-        flatpak install --user -y "org.gnome.Sdk/$(arch)/master"
-        flatpak install --user -y "org.gnome.Platform/$(arch)/master"
-        flatpak install --user -y "runtime/org.freedesktop.Sdk.Extension.rust-stable/$(arch)/24.08"
-        flatpak install --user -y "runtime/org.freedesktop.Sdk.Extension.llvm20/$(arch)/24.08"
+        flatpak install --user -y "org.gnome.Sdk//master"
+        flatpak install --user -y "org.gnome.Platform//master"
+        flatpak install --user -y "runtime/org.freedesktop.Sdk.Extension.rust-stable//24.08"
+        flatpak install --user -y "runtime/org.freedesktop.Sdk.Extension.llvm20//24.08"
         flatpak install --user -y org.flatpak.Builder
     else
         BUILDER_ARGS+=("--disable-rofiles-fuse")
