@@ -30,7 +30,9 @@ jobs:
       - name: Install Flatpak and Flatpak Builder
         run: |
           sudo apt update
-          sudo apt install -y flatpak
+          sudo apt install -y flatpak-builder flatpak
+          # Enable unprivileged user namespaces so that CI can work
+          sudo aa-teardown >/dev/null 2>&1 || true
 
       - name: Build Flatpak
         id: build-flatpak

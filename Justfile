@@ -17,6 +17,16 @@ build-base:
 build-flatpak $manifest=manifest $branch=branch:
     #!/usr/bin/env bash
     set -xeo pipefail
+    FLATPAK_BUILDER_DIR="$(realpath ".flatpak-builder")"
+    BUILDER_ARGS+=("--default-branch=${branch}")
+    BUILDER_ARGS+=("--state-dir=${FLATPAK_BUILDER_DIR}/flatpak-builder")
+    BUILDER_ARGS+=("--user")
+    BUILDER_ARGS+=("--ccache")
+    BUILDER_ARGS+=("--force-clean")
+    BUILDER_ARGS+=("--install")
+    BUILDER_ARGS+=("${FLATPAK_BUILDER_DIR}/build-dir")
+    BUILDER_ARGS+=("${manifest}")
+
     if [ "${CI}" == 1 ] ; then
         set -u
         flatpak remote-add --if-not-exists flathub --user https://dl.flathub.org/repo/flathub.flatpakrepo
@@ -25,19 +35,11 @@ build-flatpak $manifest=manifest $branch=branch:
         flatpak install --user -y "runtime/org.freedesktop.Sdk.Extension.rust-stable/$(arch)/24.08"
         flatpak install --user -y "runtime/org.freedesktop.Sdk.Extension.llvm20/$(arch)/24.08"
         flatpak install --user -y org.flatpak.Builder
+    else
+        BUILDER_ARGS+=("--disable-rofiles-fuse")
     fi
     set -u
 
-    FLATPAK_BUILDER_DIR=$(realpath ".flatpak-builder")
-    BUILDER_ARGS+=("--default-branch=${branch}")
-    BUILDER_ARGS+=("--state-dir=${FLATPAK_BUILDER_DIR}/flatpak-builder")
-    BUILDER_ARGS+=("--user")
-    BUILDER_ARGS+=("--ccache")
-    BUILDER_ARGS+=("--force-clean")
-    BUILDER_ARGS+=("--install")
-    BUILDER_ARGS+=("--disable-rofiles-fuse")
-    BUILDER_ARGS+=("${FLATPAK_BUILDER_DIR}/build-dir")
-    BUILDER_ARGS+=("${manifest}")
 
     if which flatpak-builder &>/dev/null ; then
         flatpak-builder "${BUILDER_ARGS[@]}"
