@@ -30,13 +30,13 @@ jobs:
       - name: Install Flatpak and Flatpak Builder
         run: |
           sudo apt update
-          sudo apt install -y flatpak flatpak-builder libflatpak-dev
+          sudo apt install -y flatpak
 
       - name: Build Flatpak
         id: build-flatpak
         shell: bash
         run: |
-          sudo $(command -v just) build-flatpak
+          sudo env CI=1 $(command -v just) build-flatpak
           sudo $(command -v just) build-flatpak-bundle
 
       - name: Upload Flatpak artifact

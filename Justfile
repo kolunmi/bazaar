@@ -16,16 +16,21 @@ build-base:
 
 build-flatpak $manifest=manifest $branch=branch:
     #!/usr/bin/env bash
-    set -xeuo pipefail
-    flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-    flatpak install -y "org.gnome.Sdk/$(arch)/48"
-    flatpak install -y "org.gnome.Platform/$(arch)/48"
-    flatpak install -y "runtime/org.freedesktop.Sdk.Extension.rust-stable/$(arch)/24.08"
-    flatpak install -y "runtime/org.freedesktop.Sdk.Extension.llvm20/$(arch)/24.08"
+    set -xeo pipefail
+    if [ "${CI}" == 1 ] ; then
+        set -u
+        flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+        flatpak install -y "org.gnome.Sdk/$(arch)/48"
+        flatpak install -y "org.gnome.Platform/$(arch)/48"
+        flatpak install -y "runtime/org.freedesktop.Sdk.Extension.rust-stable/$(arch)/24.08"
+        flatpak install -y "runtime/org.freedesktop.Sdk.Extension.llvm20/$(arch)/24.08"
+        flatpak install -y org.flatpak.Builder
+    fi
+    set -u
 
     FLATPAK_BUILDER_DIR=$(realpath ".flatpak-builder")
-    BUILDER_ARGS+=(--default-branch="${branch}")
-    BUILDER_ARGS+=(--state-dir="${FLATPAK_BUILDER_DIR}/flatpak-builder")
+    BUILDER_ARGS+=("--default-branch=${branch}")
+    BUILDER_ARGS+=("--state-dir=${FLATPAK_BUILDER_DIR}/flatpak-builder")
     BUILDER_ARGS+=("--user")
     BUILDER_ARGS+=("--ccache")
     BUILDER_ARGS+=("--force-clean")
