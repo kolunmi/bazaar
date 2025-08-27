@@ -13,8 +13,8 @@ xmlb_dep             = dependency('xmlb', version: '>= 0.3.4')
 yaml_dep             = dependency('yaml-0.1', version: '>= 0.2.5')
 libsoup_dep          = dependency('libsoup-3.0', version: '>= 3.6.0')
 json_glib_dep        = dependency('json-glib-1.0', version: '>= 1.10.0')
-glycin_dep           = dependency('glycin-1', version: '>= 1.0')
-glycin_gtk4_dep      = dependency('glycin-gtk4-1', version: '>= 1.0')
+glycin_dep           = dependency('glycin-2', version: '>= 1.0')
+glycin_gtk4_dep      = dependency('glycin-gtk4-2', version: '>= 1.0')
 
 
 dl_worker_sources = [
