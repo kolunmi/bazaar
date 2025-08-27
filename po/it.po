@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-20 15:41+0200\n"
-"PO-Revision-Date: 2025-08-23 16:42+0200\n"
+"POT-Creation-Date: 2025-08-26 16:58+0200\n"
+"PO-Revision-Date: 2025-08-27 11:22+0200\n"
 "Last-Translator: Pietro F. <pfwork@tutamail.com>\n"
 "Language-Team: Italian\n"
 "Language: it\n"
@@ -62,7 +62,7 @@ msgid ""
 msgstr ""
 "Sottolinea l'importanza di supportare gli sviluppatori che rendono possibile "
 "il desktop Linux. Bazaar presenta una scheda “Consigliate” che può essere "
-"configurata dai distributori per consentire un'esperienza più personalizzata"
+"configurata dai distributori per consentire un'esperienza più personalizzata."
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:24 src/bz-application.c:779
 msgid "Adam Masciola"
@@ -78,7 +78,7 @@ msgstr "Ricerca di Blender"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:57
 msgid "Download graph for Blender"
-msgstr "Scarica il grafico per Blender"
+msgstr "Grafico degli scaricamenti di Blender"
 
 #: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:164
 #: src/bz-installed-page.blp:176
@@ -286,19 +286,24 @@ msgstr ""
 msgid "Apps Of The Week"
 msgstr "Applicazioni della Settimana"
 
-#: src/bz-flathub-page.blp:96
+#: src/bz-flathub-page.blp:86
 msgid "Trending"
 msgstr "In Tendenza"
 
-#: src/bz-flathub-page.blp:128
+#: src/bz-flathub-page.blp:92 src/bz-flathub-page.blp:133
+#: src/bz-flathub-page.blp:174 src/bz-flathub-page.blp:215
+msgid "Show More"
+msgstr "Mostra di più"
+
+#: src/bz-flathub-page.blp:127
 msgid "Recently Updated"
 msgstr "Aggiornate Recentemente"
 
-#: src/bz-flathub-page.blp:160
+#: src/bz-flathub-page.blp:168
 msgid "Recently Added"
 msgstr "Aggiunte Recentemente"
 
-#: src/bz-flathub-page.blp:192
+#: src/bz-flathub-page.blp:209
 msgid "Popular"
 msgstr "Popolari"
 
@@ -350,28 +355,32 @@ msgstr "Supporta lo sviluppatore"
 msgid "Support"
 msgstr "Supporta"
 
-#: src/bz-full-view.blp:375
+#: src/bz-full-view.blp:342
+msgid "VCS Forge Star Count"
+msgstr "Conteggio stelle di VCS Forge"
+
+#: src/bz-full-view.blp:411
 msgid "Remote repo name"
 msgstr "Nome del repository remoto"
 
-#: src/bz-full-view.blp:388
+#: src/bz-full-view.blp:424
 msgid "Project URL"
 msgstr "URL del progetto"
 
-#: src/bz-full-view.blp:400
+#: src/bz-full-view.blp:436
 msgid "Download size"
 msgstr "Dimensione di scaricamento"
 
-#: src/bz-full-view.c:204
+#: src/bz-full-view.c:213
 #, c-format
 msgid "Released %x"
 msgstr "Rilasciata il %x"
 
-#: src/bz-full-view.c:215
+#: src/bz-full-view.c:224
 msgid "No URL"
 msgstr "Nessun URL"
 
-#: src/bz-full-view.c:223
+#: src/bz-full-view.c:232
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -379,7 +388,7 @@ msgstr ""
 "Questa applicazione ha una licenza FLOSS, il che significa che il codice "
 "sorgente può essere controllato per sicurezza."
 
-#: src/bz-full-view.c:224
+#: src/bz-full-view.c:233
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
@@ -392,7 +401,7 @@ msgstr ""
 msgid "No Flatpaks Installed"
 msgstr "Nessun Flatpak Installato"
 
-#: src/bz-installed-page.blp:21 src/bz-window.blp:219 src/bz-window.blp:356
+#: src/bz-installed-page.blp:21 src/bz-window.blp:219 src/bz-window.blp:355
 msgid "Installed"
 msgstr "Installate"
 
@@ -529,7 +538,7 @@ msgstr "Ferma l'esecuzione delle operazioni"
 
 #: src/bz-window.blp:105
 msgid "Clear all finished transactions"
-msgstr "Cancellare tutte le operazioni completate"
+msgstr "Pulisce tutte le operazioni completate"
 
 #: src/bz-window.blp:135 src/bz-window.blp:139
 msgid "Offline"
@@ -547,7 +556,7 @@ msgstr "Esplora"
 msgid "App View"
 msgstr "Vista dell'App"
 
-#: src/bz-window.blp:209 src/bz-window.blp:335
+#: src/bz-window.blp:209 src/bz-window.blp:334
 msgid "Flathub"
 msgstr "Flathub"
 
@@ -567,45 +576,45 @@ msgstr "Aggiorna"
 msgid "Checking for updates"
 msgstr "Controlla aggiornamenti"
 
-#: src/bz-window.blp:299
+#: src/bz-window.blp:298
 msgid "View curated applications"
 msgstr "Visualizza applicazioni consigliate"
 
-#: src/bz-window.blp:314
+#: src/bz-window.blp:313
 msgid "Curated"
 msgstr "Consigliate"
 
-#: src/bz-window.blp:320
+#: src/bz-window.blp:319
 msgid "View the latest on Flathub"
 msgstr "Visualizza le ultime novità di Flathub"
 
-#: src/bz-window.blp:341
+#: src/bz-window.blp:340
 msgid "View installed applications"
 msgstr "Visualizza applicazioni installate"
 
-#: src/bz-window.blp:370
+#: src/bz-window.blp:369
 msgid "Main Menu"
 msgstr "Menu Principale"
 
-#: src/bz-window.blp:381
+#: src/bz-window.blp:380
 msgid "Toggle transaction sidebar"
 msgstr "Mostra o Nasconde il menu delle operazioni"
 
-#: src/bz-window.blp:423
+#: src/bz-window.blp:422
 msgid "_Refresh"
 msgstr "_Ricarica"
 
-#: src/bz-window.blp:428
+#: src/bz-window.blp:427
 msgid "_Keyboard Shortcuts"
-msgstr "Scorciatoie da tastiera"
+msgstr "_Scorciatoie da tastiera"
 
-#: src/bz-window.blp:433
+#: src/bz-window.blp:432
 msgid "_About Bazaar"
-msgstr "Info su Bazaar"
+msgstr "_Info su Bazaar"
 
-#: src/bz-window.blp:438
+#: src/bz-window.blp:437
 msgid "_Donate to Bazaar ❤️"
-msgstr "Dona a Bazaar ❤️"
+msgstr "_Dona a Bazaar ❤️"
 
 #: src/bz-window.c:492
 msgid "Up to date!"
