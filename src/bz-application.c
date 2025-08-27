@@ -66,7 +66,8 @@ struct _BzApplication
   BzGnomeShellSearchProvider *gs_search;
 
   BzFlatpakInstance *flatpak;
-  GFile             *waiting_to_open;
+  char              *waiting_to_open_appstream;
+  GFile             *waiting_to_open_file;
   BzFlathubState    *flathub;
   BzContentProvider *content_provider;
 
@@ -100,6 +101,10 @@ static DexFuture *
 open_flatpakref_fiber (OpenFlatpakrefData *data);
 
 static void
+open_generic_id (BzApplication *self,
+                 const char    *generic_id);
+
+static void
 transaction_success (BzApplication        *self,
                      BzTransaction        *transaction,
                      BzTransactionManager *manager);
@@ -114,13 +119,17 @@ static GtkWindow *
 new_window (BzApplication *self);
 
 static void
+open_appstream_take (BzApplication *self,
+                     char          *appstream);
+
+static void
 open_flatpakref_take (BzApplication *self,
                       GFile         *file);
 
 static void
-command_line_open_flatpakref (BzApplication           *self,
-                              GApplicationCommandLine *cmdline,
-                              const char              *path);
+command_line_open_location (BzApplication           *self,
+                            GApplicationCommandLine *cmdline,
+                            const char              *path);
 
 static gint
 cmp_group (BzEntryGroup *a,
@@ -147,7 +156,7 @@ bz_application_dispose (GObject *object)
   g_clear_object (&self->search_engine);
   g_clear_object (&self->gs_search);
   g_clear_object (&self->flatpak);
-  g_clear_object (&self->waiting_to_open);
+  g_clear_object (&self->waiting_to_open_file);
   g_clear_object (&self->entry_factory);
   g_clear_object (&self->application_filter);
   g_clear_object (&self->application_factory);
@@ -156,6 +165,7 @@ bz_application_dispose (GObject *object)
   g_clear_object (&self->groups);
   g_clear_object (&self->installed_apps);
   g_clear_object (&self->state);
+  g_clear_pointer (&self->waiting_to_open_appstream, g_free);
   g_clear_pointer (&self->init_timer, g_timer_destroy);
 
   G_OBJECT_CLASS (bz_application_parent_class)->dispose (object);
@@ -177,6 +187,7 @@ bz_application_command_line (GApplication            *app,
   g_autofree GStrv argv_shallow     = NULL;
   const char      *command          = NULL;
   gboolean         window_autostart = FALSE;
+  g_autofree char *location         = NULL;
 
   argv = g_application_command_line_get_arguments (cmdline, &argc);
   g_debug ("Handling gapplication command line; argc=%d", argc);
@@ -233,14 +244,14 @@ bz_application_command_line (GApplication            *app,
       g_autoptr (GtkStringList) blocklists      = NULL;
       g_auto (GStrv) content_configs_strv       = NULL;
       g_autoptr (GtkStringList) content_configs = NULL;
-      g_auto (GStrv) paths                      = NULL;
+      g_auto (GStrv) locations                  = NULL;
 
       GOptionEntry main_entries[] = {
         { "help", 0, 0, G_OPTION_ARG_NONE, &help, "Print help" },
         { "is-running", 0, 0, G_OPTION_ARG_NONE, &is_running, "Exit successfully if the Bazaar service is running" },
         { "extra-blocklist", 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &blocklists_strv, "Add an extra blocklist to read from" },
         { "extra-content-config", 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &content_configs_strv, "Add an extra yaml file with which to configure the app browser" },
-        { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &paths, "flatpakref file to open" },
+        { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &locations, "flatpakref file to open" },
         { NULL }
       };
 
@@ -352,8 +363,11 @@ bz_application_command_line (GApplication            *app,
           bz_state_info_set_curated_configs (self->state, self->content_configs);
         }
 
-      if (paths != NULL && *paths != NULL)
-        command_line_open_flatpakref (self, cmdline, *paths);
+      if (locations != NULL && *locations != NULL)
+        {
+          g_clear_pointer (&location, g_free);
+          location = g_strdup (*locations);
+        }
     }
   else if (!self->running)
     {
@@ -411,12 +425,12 @@ bz_application_command_line (GApplication            *app,
         }
       else if (g_strcmp0 (command, "open") == 0)
         {
-          gboolean help        = FALSE;
-          g_auto (GStrv) paths = NULL;
+          gboolean help            = FALSE;
+          g_auto (GStrv) locations = NULL;
 
           GOptionEntry main_entries[] = {
             { "help", 0, 0, G_OPTION_ARG_NONE, &help, "Print help" },
-            { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &paths, "flatpakref file to open" },
+            { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &locations, "flatpakref file to open" },
             { NULL }
           };
 
@@ -438,7 +452,7 @@ bz_application_command_line (GApplication            *app,
               return EXIT_SUCCESS;
             }
 
-          if (paths == NULL || *paths == NULL)
+          if (locations == NULL || *locations == NULL)
             {
               g_application_command_line_printerr (cmdline, "Command \"open\" requires a file path argument\n");
               return EXIT_FAILURE;
@@ -448,8 +462,9 @@ bz_application_command_line (GApplication            *app,
           if (gtk_application_get_active_window (GTK_APPLICATION (self)) == NULL)
             new_window (self);
 
+          g_clear_pointer (&location, g_free);
           /* Just take the first one for now */
-          command_line_open_flatpakref (self, cmdline, *paths);
+          location = g_strdup (*locations);
         }
       else if (g_strcmp0 (command, "refresh") == 0)
         {
@@ -602,6 +617,9 @@ bz_application_command_line (GApplication            *app,
           return EXIT_FAILURE;
         }
     }
+
+  if (location != NULL)
+    command_line_open_location (self, cmdline, location);
 
   return EXIT_SUCCESS;
 }
@@ -1083,28 +1101,36 @@ open_flatpakref_fiber (OpenFlatpakrefData *data)
             bz_window_show_entry (BZ_WINDOW (window), entry);
         }
       else
-        {
-          const char   *generic_id = NULL;
-          BzEntryGroup *group      = NULL;
-
-          generic_id = g_value_get_string (value);
-          group      = g_hash_table_lookup (self->ids_to_groups, generic_id);
-
-          if (group != NULL)
-            bz_window_show_group (BZ_WINDOW (window), group);
-          else
-            {
-              g_autofree char *message = NULL;
-
-              message = g_strdup_printf ("ID '%s' was not found", generic_id);
-              bz_show_error_for_widget (GTK_WIDGET (window), message);
-            }
-        }
+        open_generic_id (self, g_value_get_string (value));
     }
   else
     bz_show_error_for_widget (GTK_WIDGET (window), local_error->message);
 
   return NULL;
+}
+
+static void
+open_generic_id (BzApplication *self,
+                 const char    *generic_id)
+{
+  BzEntryGroup *group  = NULL;
+  GtkWindow    *window = NULL;
+
+  group = g_hash_table_lookup (self->ids_to_groups, generic_id);
+
+  window = gtk_application_get_active_window (GTK_APPLICATION (self));
+  if (window == NULL)
+    window = new_window (self);
+
+  if (group != NULL)
+    bz_window_show_group (BZ_WINDOW (window), group);
+  else
+    {
+      g_autofree char *message = NULL;
+
+      message = g_strdup_printf ("ID '%s' was not found", generic_id);
+      bz_show_error_for_widget (GTK_WIDGET (window), message);
+    }
 }
 
 static void
@@ -1566,10 +1592,17 @@ refresh_finally (DexFuture     *future,
     }
 
   g_debug ("Completely done with the refresh process!");
-  if (self->waiting_to_open != NULL)
+
+  if (self->waiting_to_open_appstream != NULL)
+    {
+      g_debug ("An appstream link was requested to be opened during refresh. Doing that now...");
+      open_appstream_take (self, g_steal_pointer (&self->waiting_to_open_appstream));
+    }
+
+  if (self->waiting_to_open_file != NULL)
     {
       g_debug ("A flatpakref was requested to be opened during refresh. Doing that now...");
-      open_flatpakref_take (self, g_steal_pointer (&self->waiting_to_open));
+      open_flatpakref_take (self, g_steal_pointer (&self->waiting_to_open_file));
     }
 
   return NULL;
@@ -1630,6 +1663,30 @@ new_window (BzApplication *self)
 }
 
 static void
+open_appstream_take (BzApplication *self,
+                     char          *appstream)
+{
+  g_assert (appstream != NULL);
+
+  if (bz_state_info_get_busy (self->state))
+    {
+      g_debug ("Bazaar is currently refreshing, so we will load "
+               "the appstream link %s when that is done",
+               appstream);
+
+      g_clear_pointer (&self->waiting_to_open_appstream, g_free);
+      self->waiting_to_open_appstream = g_steal_pointer (&appstream);
+    }
+  else if (g_str_has_prefix (appstream, "appstream://"))
+    open_generic_id (self, appstream + strlen ("appstream://"));
+  else
+    open_generic_id (self, appstream + strlen ("appstream:"));
+
+  if (appstream != NULL)
+    g_free (appstream);
+}
+
+static void
 open_flatpakref_take (BzApplication *self,
                       GFile         *file)
 {
@@ -1644,8 +1701,8 @@ open_flatpakref_take (BzApplication *self,
                "the local flatpakref at %s when that is done",
                path);
 
-      g_clear_object (&self->waiting_to_open);
-      self->waiting_to_open = g_steal_pointer (&file);
+      g_clear_object (&self->waiting_to_open_file);
+      self->waiting_to_open_file = g_steal_pointer (&file);
     }
   else
     {
@@ -1669,23 +1726,28 @@ open_flatpakref_take (BzApplication *self,
 }
 
 static void
-command_line_open_flatpakref (BzApplication           *self,
-                              GApplicationCommandLine *cmdline,
-                              const char              *path)
+command_line_open_location (BzApplication           *self,
+                            GApplicationCommandLine *cmdline,
+                            const char              *location)
 {
-  if (g_uri_is_valid (path, G_URI_FLAGS_NONE, NULL))
-    open_flatpakref_take (self, g_file_new_for_uri (path));
-  else if (g_path_is_absolute (path))
-    open_flatpakref_take (self, g_file_new_for_path (path));
+  if (g_uri_is_valid (location, G_URI_FLAGS_NONE, NULL))
+    {
+      if (g_str_has_prefix (location, "appstream:"))
+        open_appstream_take (self, g_strdup (location));
+      else
+        open_flatpakref_take (self, g_file_new_for_uri (location));
+    }
+  else if (g_path_is_absolute (location))
+    open_flatpakref_take (self, g_file_new_for_path (location));
   else
     {
       const char *cwd = NULL;
 
       cwd = g_application_command_line_get_cwd (cmdline);
       if (cwd != NULL)
-        open_flatpakref_take (self, g_file_new_build_filename (cwd, path, NULL));
+        open_flatpakref_take (self, g_file_new_build_filename (cwd, location, NULL));
       else
-        open_flatpakref_take (self, g_file_new_for_path (path));
+        open_flatpakref_take (self, g_file_new_for_path (location));
     }
 }
 
