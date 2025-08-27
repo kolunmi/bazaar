@@ -779,6 +779,7 @@ bz_application_about_action (GSimpleAction *action,
     C_ ("About Dialog Translator Credit", "asen23"),
     C_ ("About Dialog Translator Credit", "renner"),
     C_ ("About Dialog Translator Credit", "robotta"),
+    C_ ("About Dialog Translator Credit", "Peter Dave Hello"),
     /* This array MUST be NULL terminated */
     NULL
   };
