@@ -273,20 +273,9 @@ template $BzFullView: Adw.Bin {
                         has-tooltip: true;
                         tooltip-text: _("Support this developer");
                         clicked => $support_cb(template);
-
-                        child: Box {
-                          hexpand: false;
-                          orientation: horizontal;
-                          spacing: 10;
-
-                          Image {
-                            icon-name: "heart-filled-symbolic";
-                          }
-
-                          Label {
+                        child:Label {
                             label: _("Support");
-                          }
-                        };
+                          };
                       }
                     }
 
