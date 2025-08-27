@@ -112,6 +112,9 @@ bz_entry_get_mini_icon (BzEntry *self);
 GPtrArray *
 bz_entry_get_search_tokens (BzEntry *self);
 
+const char
+*bz_entry_get_url (BzEntry *self);
+
 const char *
 bz_entry_get_donation_url (BzEntry *self);
 

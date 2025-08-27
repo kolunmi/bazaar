@@ -1514,6 +1514,17 @@ bz_entry_get_search_tokens (BzEntry *self)
 }
 
 const char *
+bz_entry_get_url (BzEntry *self)
+{
+  BzEntryPrivate *priv = NULL;
+
+  g_return_val_if_fail (BZ_IS_ENTRY (self), NULL);
+  priv = bz_entry_get_instance_private (self);
+
+  return priv->url;
+}
+
+const char *
 bz_entry_get_donation_url (BzEntry *self)
 {
   BzEntryPrivate *priv = NULL;
