@@ -37,6 +37,7 @@
 #include "bz-flatpak-entry.h"
 #include "bz-flatpak-instance.h"
 #include "bz-gnome-shell-search-provider.h"
+#include "bz-inspector.h"
 #include "bz-preferences-dialog.h"
 #include "bz-result.h"
 #include "bz-state-info.h"
@@ -669,6 +670,23 @@ bz_application_class_init (BzApplicationClass *klass)
 }
 
 static void
+bz_application_bazaar_inspector_action (GSimpleAction *action,
+                                        GVariant      *parameter,
+                                        gpointer       user_data)
+{
+  BzApplication *self      = user_data;
+  BzInspector   *inspector = NULL;
+
+  g_assert (BZ_IS_APPLICATION (self));
+
+  inspector = bz_inspector_new ();
+  bz_inspector_set_state (inspector, self->state);
+
+  gtk_application_add_window (GTK_APPLICATION (self), GTK_WINDOW (inspector));
+  gtk_window_present (GTK_WINDOW (inspector));
+}
+
+static void
 bz_application_flatseal_action (GSimpleAction *action,
                                 GVariant      *parameter,
                                 gpointer       user_data)
@@ -779,6 +797,7 @@ bz_application_about_action (GSimpleAction *action,
     C_ ("About Dialog Translator Credit", "asen23"),
     C_ ("About Dialog Translator Credit", "renner"),
     C_ ("About Dialog Translator Credit", "robotta"),
+    C_ ("About Dialog Translator Credit", "Peter Dave Hello"),
     /* This array MUST be NULL terminated */
     NULL
   };
@@ -845,6 +864,7 @@ static const GActionEntry app_actions[] = {
   { "toggle-transactions", bz_application_toggle_transactions_action, NULL },
   {              "donate",              bz_application_donate_action, NULL },
   {            "flatseal",            bz_application_flatseal_action, NULL },
+  {    "bazaar-inspector",    bz_application_bazaar_inspector_action, NULL },
 };
 
 static gpointer
@@ -953,6 +973,10 @@ bz_application_init (BzApplication *self)
       GTK_APPLICATION (self),
       "app.toggle-transactions",
       (const char *[]) { "<primary>d", NULL });
+  gtk_application_set_accels_for_action (
+      GTK_APPLICATION (self),
+      "app.bazaar-inspector",
+      (const char *[]) { "<primary><alt><shift>i", NULL });
 }
 
 static void

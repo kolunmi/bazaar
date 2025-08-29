@@ -27,6 +27,8 @@ struct _BzResult
   DexFuture *finally;
   GObject   *object;
   GError    *error;
+  GTimer    *timer;
+  char      *non_error_msg;
 };
 
 G_DEFINE_FINAL_TYPE (BzResult, bz_result, G_TYPE_OBJECT);
@@ -57,6 +59,8 @@ bz_result_dispose (GObject *object)
   dex_clear (&self->finally);
   g_clear_object (&self->object);
   g_clear_pointer (&self->error, g_error_free);
+  g_clear_pointer (&self->timer, g_timer_destroy);
+  g_clear_pointer (&self->non_error_msg, g_free);
 
   G_OBJECT_CLASS (bz_result_parent_class)->dispose (object);
 }
@@ -173,13 +177,15 @@ bz_result_new (DexFuture *future)
   switch (status)
     {
     case DEX_FUTURE_STATUS_PENDING:
+      self->timer   = g_timer_new ();
       self->finally = dex_future_finally (
           dex_ref (future),
           (DexFutureCallback) future_finally,
           g_object_ref (self), g_object_unref);
       break;
     case DEX_FUTURE_STATUS_RESOLVED:
-      self->object = g_value_dup_object (dex_future_get_value (future, NULL));
+      self->object        = g_value_dup_object (dex_future_get_value (future, NULL));
+      self->non_error_msg = g_strdup ("Object was already successfully resolved");
       break;
     case DEX_FUTURE_STATUS_REJECTED:
       {
@@ -232,7 +238,7 @@ bz_result_get_message (BzResult *self)
   if (self->error != NULL)
     return self->error->message;
   else
-    return NULL;
+    return self->non_error_msg;
 }
 
 DexFuture *
@@ -258,12 +264,17 @@ future_finally (DexFuture *future,
   const GValue *value            = NULL;
 
   dex_clear (&self->finally);
+  g_timer_stop (self->timer);
 
   value = dex_future_get_value (future, &local_error);
   if (value != NULL)
     {
-      self->object = g_value_dup_object (value);
+      self->object        = g_value_dup_object (value);
+      self->non_error_msg = g_strdup_printf (
+          "Successfully resolved object in %f seconds",
+          g_timer_elapsed (self->timer, NULL));
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_OBJECT]);
+      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MESSAGE]);
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PENDING]);
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_RESOLVED]);
     }

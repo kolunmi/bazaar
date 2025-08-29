@@ -1,0 +1,130 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzInspector: Adw.Window {
+  title: _("Bazaar Inspector");
+  default-width: 800;
+  default-height: 1000;
+  width-request: 300;
+  height-request: 600;
+
+  Adw.ToolbarView {
+    top-bar-style: raised_border;
+    bottom-bar-style: raised_border;
+    reveal-bottom-bars: false;
+
+    content: Box {
+      orientation: vertical;
+      width-request: 100;
+
+      Label {
+        margin-top: 10;
+        label: _("Active Blocklists");
+      }
+      ScrolledWindow {
+        propagate-natural-height: true;
+        child: ListView {
+          model: NoSelection {
+            model: bind template.state as <$BzStateInfo>.blocklists;
+          };
+          factory: BuilderListItemFactory {
+            template ListItem {
+              child: Label {
+                label: bind template.item as <$GtkStringObject>.string as <string>;
+              };
+            }
+          };
+        };
+      }
+
+      Separator {}
+        
+      Label {
+        margin-top: 10;
+        label: _("Active Curated-Configs");
+      }
+      ScrolledWindow {
+        propagate-natural-height: true;
+        child: ListView {
+          model: NoSelection {
+            model: bind template.state as <$BzStateInfo>.curated-configs;
+          };
+          factory: BuilderListItemFactory {
+            template ListItem {
+              child: Label {
+                label: bind template.item as <$GtkStringObject>.string as <string>;
+              };
+            }
+          };
+        };
+      }
+
+      Separator {}
+      
+      Label {
+        margin-top: 10;
+        label: _("All Entry Groups");
+      }
+      Entry search_entry {
+        placeholder-text: _("Filter...");
+        changed => $entry_changed(template);
+      }
+      ScrolledWindow {
+        vscrollbar-policy: always;
+        propagate-natural-height: true;
+        child: ListView {
+          model: NoSelection {
+            model: FilterListModel filter_model {
+              model: bind template.state as <$BzStateInfo>.all-entry-groups;
+            };      
+          };
+          factory: BuilderListItemFactory {
+            template ListItem {
+              activatable: false;
+              child: Expander {
+                label: bind template.item as <$BzEntryGroup>.id as <string>;
+
+                child: Box {
+                  orientation: vertical;
+                  
+                  Separator {}
+                  ScrolledWindow {
+                    propagate-natural-height: true;
+                    child: ListView {
+                      model: NoSelection {
+                        model: bind template.item as <$BzEntryGroup>.model;
+                      };
+                      factory: BuilderListItemFactory {
+                        template ListItem {
+                          activatable: false;
+                          child: Box {
+                            orientation: horizontal;
+                          
+                            Label {
+                              hexpand: true;
+                              ellipsize: end;
+                              xalign: 0.0;
+                              label: bind template.item as <$GtkStringObject>.string as <string>;
+                            }
+                            Button {
+                              label: _("Decache and Inspect");
+                              clicked => $decache_and_inspect_cb(template);
+                            }
+                          };
+                        }
+                      };
+                    };
+                  }
+                  Separator {}
+                };
+              };
+            }
+          };
+        };
+      }
+    };
+
+    [top]
+    Adw.HeaderBar top_header_bar {}
+  }
+}

@@ -1,0 +1,100 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzEntryInspector: Adw.Window {
+  title: _("Entry Inspector");
+  default-width: 600;
+  default-height: 800;
+  width-request: 300;
+  height-request: 600;
+
+  Adw.ToolbarView {
+    top-bar-style: raised_border;
+    bottom-bar-style: raised_border;
+    reveal-bottom-bars: false;
+
+    content: Box {
+      orientation: vertical;
+      spacing: 5;
+
+      Label {
+        xalign: 0.0;
+        label: bind template.result as <$BzResult>.message as <string>;
+      }
+
+      Label {
+        styles [
+          "heading",
+        ]
+        xalign: 0.0;
+        selectable: true;
+        label: bind template.result as <$BzResult>.object as <$BzEntry>.title;
+      }
+      Label {
+        xalign: 0.0;
+        selectable: true;
+        label: bind template.result as <$BzResult>.object as <$BzEntry>.unique_id;
+      }
+      Label {
+        xalign: 0.0;
+        selectable: true;
+        label: bind template.result as <$BzResult>.object as <$BzEntry>.unique_id_checksum;
+      }
+      Label {
+        xalign: 0.0;
+        selectable: true;
+        label: bind template.result as <$BzResult>.object as <$BzEntry>.id;
+      }
+
+
+      Box {
+        orientation: horizontal;
+        spacing: 5;
+          
+        Image {
+          pixel-size: 16;
+          paintable: bind template.result as <$BzResult>.object as <$BzEntry>.icon-paintable;
+        }
+        Image {
+          pixel-size: 32;
+          paintable: bind template.result as <$BzResult>.object as <$BzEntry>.icon-paintable;
+        }
+        Image {
+          pixel-size: 64;
+          paintable: bind template.result as <$BzResult>.object as <$BzEntry>.icon-paintable;
+        }
+        Image {
+          pixel-size: 128;
+          paintable: bind template.result as <$BzResult>.object as <$BzEntry>.icon-paintable;
+        }
+      }
+
+      Box {
+        orientation: horizontal;
+          
+        Button {
+          label: _("Serialize");
+          clicked => $gen_serialized(template);
+        }
+        CheckButton convert_to_json {
+          label: _("Convert to JSON");
+          active: true;
+        }
+      }
+
+      ScrolledWindow {
+        propagate-natural-height: true;
+        child: TextView {
+          styles [
+            "monospace",
+          ]
+          // wrap-mode: word_char;
+          buffer: TextBuffer text_buffer {};
+        };
+      }
+    };
+
+    [top]
+    Adw.HeaderBar top_header_bar {}
+  }
+}
