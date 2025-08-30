@@ -76,6 +76,7 @@ template $BzFullView: Adw.Bin {
 
                     Box {
                       orientation: vertical;
+                      valign: center;
                       spacing: 15;
 
                       Box {
@@ -100,7 +101,6 @@ template $BzFullView: Adw.Bin {
                           
                           Label {
                             styles [
-                              "title-4",
                               "accent",
                             ]
 
@@ -110,7 +110,6 @@ template $BzFullView: Adw.Bin {
                             natural-wrap-mode: word;
                             label: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.developer;
                           }
-                          
                           Revealer {
                             transition-type: crossfade;
                             reveal-child: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
@@ -127,17 +126,6 @@ template $BzFullView: Adw.Bin {
                               icon-size: normal;
                             };
                           }
-                        }
-                        
-                        Label {
-                          styles [
-                            "title-2",
-                          ]
-
-                          xalign: 0.0;
-                          wrap: true;
-                          wrap-mode: word_char;
-                          label: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.description;
                         }
                       }
                     }
@@ -190,25 +178,7 @@ template $BzFullView: Adw.Bin {
                           tooltip-text: _("Download and install this application");
                           visible: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable) as <bool>) as <bool>;
                           sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
-
-                          child: Box {
-                            orientation: horizontal;
-                            spacing: 5;
-                            hexpand: false;
-
-                            Image {
-                              icon-name: "folder-download-symbolic";
-                            }
-
-                            Label {
-                              styles [
-                                "caption-heading",
-                              ]
-
-                              label: _("Install");
-                            }
-                          };
-
+                          label: _("Install");
                           clicked => $install_cb(template);
                         }
 
@@ -303,20 +273,9 @@ template $BzFullView: Adw.Bin {
                         has-tooltip: true;
                         tooltip-text: _("Support this developer");
                         clicked => $support_cb(template);
-
-                        child: Box {
-                          hexpand: false;
-                          orientation: horizontal;
-                          spacing: 10;
-
-                          Image {
-                            icon-name: "heart-filled-symbolic";
-                          }
-
-                          Label {
+                        child:Label {
                             label: _("Support");
-                          }
-                        };
+                          };
                       }
                     }
 
@@ -358,13 +317,26 @@ template $BzFullView: Adw.Bin {
                   }
 
                   Label {
+                      styles [
+                        "title-2",
+                      ]
+                      margin-start: 5;
+                      margin-top:20;
+                      valign: start;
+                      xalign: 0;
+                      wrap: true;
+                      wrap-mode: word_char;
+                      label: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.description;
+                  }
+
+                  Label {
                     styles [
                       "body",
                     ]
 
-                    margin-start: 10;
+                    margin-start: 5;
                     margin-end: 10;
-                    margin-top: 10;
+                    margin-top: 0;
                     margin-bottom: 10;
                     valign: start;
                     xalign: 0;
@@ -380,13 +352,25 @@ template $BzFullView: Adw.Bin {
                     title: "App Details";
 
                     Adw.ActionRow {
-                      title: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.project-license;
-                      title-selectable: true;
-                      subtitle: bind $pick_license_warning(template.ui-entry as <$BzResult>.object as <$BzEntry>.is-floss) as <string>;
+                      title: _("Download Size");
+                      subtitle: bind $format_size(template.ui-entry as <$BzResult>.object as <$BzEntry>.size) as <string>;
 
                       [prefix]
                       Image {
-                        icon-size: large;
+                        has-tooltip: true;
+                        tooltip-text: _("Download size");
+                        icon-name: "folder-download-symbolic";
+                      }
+                    }
+
+                    Adw.ActionRow {
+                      title: _("License");
+                      subtitle: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.project-license;
+                      title-selectable: true;
+                      activatable-widget: license_button;
+
+                      [prefix]
+                      Image {
                         has-tooltip: true;
                         icon-name: "license-symbolic";
                         visible: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.is-floss;
@@ -394,49 +378,55 @@ template $BzFullView: Adw.Bin {
 
                       [prefix]
                       Image {
-                        icon-size: large;
                         has-tooltip: true;
                         icon-name: "dialog-warning-symbolic";
                         visible: bind $invert_boolean(template.ui-entry as <$BzResult>.object as <$BzEntry>.is-floss) as <bool>;
                       }
-                    }
 
-                    Adw.ActionRow {
-                      title: bind template.entry-group as <$BzEntryGroup>.remote-repos-string;
-
-                      [prefix]
-                      Image {
-                        icon-size: large;
-                        has-tooltip: true;
-                        tooltip-text: _("Remote repo name");
-                        icon-name: "globe-symbolic";
+                      [suffix]
+                      MenuButton license_button {
+                        popover: license_info_popover;
+                        icon-name: "dialog-information-symbolic";
+                        valign: center;
+                        styles ["flat"]
                       }
                     }
 
                     Adw.ActionRow {
                       use-markup: true;
-                      title: bind $format_as_link(template.ui-entry as <$BzResult>.object as <$BzEntry>.url) as <string>;
+                      title: _("Project Website");
+                      subtitle: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.url;
+                      activatable: true;
+                      activated => $open_url_cb() swapped;
 
                       [prefix]
                       Image {
-                        icon-size: large;
                         has-tooltip: true;
-                        tooltip-text: _("Project URL");
+                        tooltip-text: _("Project Website");
+                        icon-name: "globe-symbolic";
+                      }
+
+                      [suffix]
+                      Image {
+                        margin-end: 8;
+                        has-tooltip: true;
+                        tooltip-text: _("Open in browser");
                         icon-name: "external-link-symbolic";
                       }
                     }
 
                     Adw.ActionRow {
-                      title: bind $format_size(template.ui-entry as <$BzResult>.object as <$BzEntry>.size) as <string>;
+                      title: _("Repositories");
+                      subtitle: bind template.entry-group as <$BzEntryGroup>.remote-repos-string;
 
                       [prefix]
                       Image {
-                        icon-size: large;
                         has-tooltip: true;
-                        tooltip-text: _("Download size");
-                        icon-name: "drive-harddisk-symbolic";
+                        tooltip-text: _("Remote repo name");
+                        icon-name: "network-server-symbolic";
                       }
                     }
+
                   }
 
                   Frame {
@@ -564,4 +554,20 @@ template $BzFullView: Adw.Bin {
       };
     }
   };
+}
+
+
+Popover license_info_popover {
+  Label {
+    max-width-chars: 30;
+    justify: center;
+    wrap: true;
+
+    margin-top: 6;
+    margin-bottom: 6;
+    margin-start: 6;
+    margin-end: 6;
+
+   label:bind $pick_license_warning(template.ui-entry as <$BzResult>.object as <$BzEntry>.is-floss) as <string>;
+  }
 }

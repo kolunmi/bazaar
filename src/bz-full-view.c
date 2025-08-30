@@ -194,13 +194,9 @@ format_recent_downloads (gpointer object,
 }
 
 static char *
-format_size (gpointer object,
-             guint64  value)
+format_size(gpointer object, guint64 value)
 {
-  g_autofree char *size = NULL;
-
-  size = g_format_size (value);
-  return g_strdup_printf ("%s Download", size);
+    return g_format_size(value);
 }
 
 static char *
@@ -222,6 +218,28 @@ format_as_link (gpointer    object,
                             value, value, value);
   else
     return g_strdup (_ ("No URL"));
+}
+
+static void
+open_url_cb (gpointer object)
+{
+  BzFullView *self = BZ_FULL_VIEW (object);
+  const char *url;
+  BzEntry *entry;
+  BzResult *result;
+
+  result = BZ_RESULT (self->ui_entry);
+  entry = BZ_ENTRY (bz_result_get_object (result));
+  url = bz_entry_get_url (entry);
+
+  if (url != NULL && *url != '\0') {
+    GError *error = NULL;
+    GtkUriLauncher *launcher = gtk_uri_launcher_new (url);
+    gtk_uri_launcher_launch (launcher, NULL, NULL, NULL, NULL);
+    g_object_unref (launcher);
+  } else {
+    g_warning ("Invalid or empty URL provided");
+  }
 }
 
 static char *
@@ -468,6 +486,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, format_size);
   gtk_widget_class_bind_template_callback (widget_class, format_timestamp);
   gtk_widget_class_bind_template_callback (widget_class, format_as_link);
+  gtk_widget_class_bind_template_callback (widget_class, open_url_cb);
   gtk_widget_class_bind_template_callback (widget_class, share_cb);
   gtk_widget_class_bind_template_callback (widget_class, dl_stats_cb);
   gtk_widget_class_bind_template_callback (widget_class, run_cb);
