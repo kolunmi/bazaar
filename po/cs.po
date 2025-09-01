@@ -492,10 +492,13 @@ msgid ""
 "\"%s\" does not provide a donations link. This does not mean you cannot "
 "support them! Try finding their project page for more information."
 msgstr ""
+"\"%s\" nemá odkaz na stránku s dary. To znamená že je nemůžete "
+"podpořit! Zkuste najít jejich webovou stránku pro více "
+"infomací."
 
 #: src/bz-installed-page.c:269
 msgid "No Donations Link"
-msgstr ""
+msgstr "Žádný odkaz pro dary"
 
 #: src/bz-preferences-dialog.blp:9
 msgid "Preferences"
