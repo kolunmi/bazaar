@@ -43,6 +43,8 @@ struct _BzWindow
 
   BzStateInfo *state;
 
+  GtkEventController *key_controller;
+
   GBinding *search_to_view_binding;
   gboolean  breakpoint_applied;
 
@@ -198,6 +200,16 @@ is_null (gpointer object,
   return value == NULL;
 }
 
+static char *
+get_search_icon_from_state (gpointer object,
+                            gboolean value)
+{
+  return g_strdup (
+      value
+          ? "go-previous-symbolic"
+          : "system-search-symbolic");
+}
+
 static void
 browser_group_selected_cb (BzWindow     *self,
                            BzEntryGroup *group,
@@ -272,6 +284,21 @@ installed_page_remove_cb (BzWindow   *self,
                           BzFullView *view)
 {
   try_transact (self, entry, NULL, TRUE);
+}
+
+static void
+installed_page_show_cb (BzWindow   *self,
+                        BzEntry    *entry,
+                        BzFullView *view)
+{
+  g_autoptr (BzEntryGroup) group = NULL;
+
+  group = bz_application_map_factory_convert_one (
+      bz_state_info_get_application_factory (self->state),
+      gtk_string_object_new (bz_entry_get_id (entry)));
+
+  if (group != NULL)
+    bz_window_show_group (self, group);
 }
 
 static void
@@ -359,6 +386,18 @@ transactions_clear_cb (BzWindow  *self,
 }
 
 static void
+action_escape (GtkWidget  *widget,
+               const char *action_name,
+               GVariant   *parameter)
+{
+  BzWindow *self = BZ_WINDOW (widget);
+
+  adw_overlay_split_view_set_show_sidebar (self->search_split, FALSE);
+  gtk_toggle_button_set_active (self->toggle_transactions, FALSE);
+  set_page (self);
+}
+
+static void
 bz_window_class_init (BzWindowClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
@@ -411,12 +450,14 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzWindow, curated_toggle);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
+  gtk_widget_class_bind_template_callback (widget_class, get_search_icon_from_state);
   gtk_widget_class_bind_template_callback (widget_class, browser_group_selected_cb);
   gtk_widget_class_bind_template_callback (widget_class, search_widget_select_cb);
   gtk_widget_class_bind_template_callback (widget_class, full_view_install_cb);
   gtk_widget_class_bind_template_callback (widget_class, full_view_remove_cb);
   gtk_widget_class_bind_template_callback (widget_class, installed_page_install_cb);
   gtk_widget_class_bind_template_callback (widget_class, installed_page_remove_cb);
+  gtk_widget_class_bind_template_callback (widget_class, installed_page_show_cb);
   gtk_widget_class_bind_template_callback (widget_class, page_toggled_cb);
   gtk_widget_class_bind_template_callback (widget_class, breakpoint_apply_cb);
   gtk_widget_class_bind_template_callback (widget_class, breakpoint_unapply_cb);
@@ -427,6 +468,33 @@ bz_window_class_init (BzWindowClass *klass)
   // gtk_widget_class_bind_template_callback (widget_class, refresh_cb);
   gtk_widget_class_bind_template_callback (widget_class, update_cb);
   gtk_widget_class_bind_template_callback (widget_class, transactions_clear_cb);
+
+  gtk_widget_class_install_action (widget_class, "escape", NULL, action_escape);
+}
+
+static gboolean
+key_pressed (BzWindow              *self,
+             guint                  keyval,
+             guint                  keycode,
+             GdkModifierType        state,
+             GtkEventControllerKey *controller)
+{
+  guint32 unichar = 0;
+  char    buf[32] = { 0 };
+
+  if (adw_overlay_split_view_get_show_sidebar (self->search_split))
+    return FALSE;
+
+  unichar = gdk_keyval_to_unicode (keyval);
+  if (unichar == 0 || !g_unichar_isgraph (unichar))
+    return FALSE;
+
+  adw_overlay_split_view_set_show_sidebar (self->search_split, TRUE);
+
+  g_unichar_to_utf8 (unichar, buf);
+  bz_search_widget_set_text (self->search_widget, buf);
+
+  return TRUE;
 }
 
 static void
@@ -446,6 +514,10 @@ bz_window_init (BzWindow *self)
   //   }
 
   adw_toggle_group_set_active_name (self->title_toggle_group, "curated");
+
+  self->key_controller = gtk_event_controller_key_new ();
+  g_signal_connect_swapped (self->key_controller, "key-pressed", G_CALLBACK (key_pressed), self);
+  gtk_widget_add_controller (GTK_WIDGET (self), self->key_controller);
 }
 
 static void

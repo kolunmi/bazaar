@@ -399,6 +399,7 @@ bz_search_widget_set_text (BzSearchWidget *self,
 {
   g_return_if_fail (BZ_IS_SEARCH_WIDGET (self));
   gtk_editable_set_text (GTK_EDITABLE (self->search_bar), text);
+  gtk_editable_set_position (GTK_EDITABLE (self->search_bar), g_utf8_strlen (text, -1));
 }
 
 void

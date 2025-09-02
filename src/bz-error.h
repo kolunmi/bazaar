@@ -25,7 +25,12 @@
 
 G_BEGIN_DECLS
 
-/* if parent is NULL, search for window ancestor */
+void
+bz_show_alert_for_widget (GtkWidget  *widget,
+                          const char *title,
+                          const char *text,
+                          gboolean    markup);
+
 void
 bz_show_error_for_widget (GtkWidget  *widget,
                           const char *text);

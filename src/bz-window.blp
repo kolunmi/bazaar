@@ -5,8 +5,27 @@ template $BzWindow: Adw.ApplicationWindow {
   title: _("Bazaar");
   default-width: 1220;
   default-height: 900;
-  width-request: 650;
+  width-request: 700;
   height-request: 400;
+
+  ShortcutController {
+    Shortcut {
+      trigger: "Escape";
+      action: "action(escape)";
+    }
+    Shortcut {
+      trigger: "Back";
+      action: "action(escape)";
+    }
+    Shortcut {
+      trigger: "BackSpace";
+      action: "action(escape)";
+    }
+    Shortcut {
+      trigger: "<ctrl>g";
+      action: "action(escape)";
+    }
+  }
 
   content: $BzCometOverlay comet_overlay {
     child: Adw.BreakpointBin breakpoint_bin {
@@ -119,7 +138,7 @@ template $BzWindow: Adw.ApplicationWindow {
             notify::show-sidebar => $search_split_open_changed_cb(template);
 
             sidebar: $BzSearchWidget search_widget {
-              width-request: 400;
+              width-request: 300;
               state: bind template.state;
               select => $search_widget_select_cb(template);
             };
@@ -223,6 +242,7 @@ template $BzWindow: Adw.ApplicationWindow {
                       model: bind template.state as <$BzStateInfo>.all-installed-entries;
                       install => $installed_page_install_cb(template);
                       remove => $installed_page_remove_cb(template);
+                      show-entry => $installed_page_show_cb(template);
                     };
                   }
                 };
@@ -254,7 +274,7 @@ template $BzWindow: Adw.ApplicationWindow {
           ToggleButton search {
             has-tooltip: true;
             tooltip-text: _("Search");
-            icon-name: "system-search-symbolic";
+            icon-name: bind $get_search_icon_from_state(search_split.show-sidebar as <bool>) as <string>;
             active: bind search_split.show-sidebar bidirectional;
           }
 
@@ -406,7 +426,7 @@ template $BzWindow: Adw.ApplicationWindow {
         setters {
           split_view.collapsed: true;
           transactions.width-request: 250;
-          search_widget.width-request: 250;
+          search_widget.width-request: 200;
         }
 
         apply => $breakpoint_apply_cb(template);

@@ -101,35 +101,61 @@ template $BzInstalledPage: Adw.Bin {
                     styles [
                       "linked",
                     ]
-
-                    hexpand: false;
+                      
                     orientation: horizontal;
-                    width-request: 180;
+                    hexpand: false;
+                    
+                    Button {
+                      styles [
+                        "suggested-action",
+                        "card-row-btn",
+                      ]
+                      
+                      has-tooltip: true;
+                      tooltip-text: _("Support this application");
+                      
+                      width-request: 60;
+                      valign: fill;
+                      halign: fill;
+                      hexpand: true;
+                      icon-name: "heart-filled-symbolic";
+                      visible: bind $invert_boolean($is_null(template.item as <$BzEntry>.donation-url) as <bool>) as <bool>;
+                      
+                      clicked => $support_cb(template);
+                    }
 
                     Button {
                       styles [
                         "card-row-btn",
                       ]
+                      
+                      has-tooltip: true;
+                      tooltip-text: _("This application does not provide a donation link");
+                      
+                      width-request: 60;
+                      valign: fill;
+                      halign: fill;
+                      hexpand: true;
+                      icon-name: "heart-outline-thick-symbolic";
+                      visible: bind $is_null(template.item as <$BzEntry>.donation-url) as <bool>;
 
+                      clicked => $no_support_cb(template);
+                    }
+                    
+                    Button {
+                      styles [
+                        "card-row-btn",
+                      ]
+                      
+                      has-tooltip: true;
+                      tooltip-text: _("Run this application");
+
+                      width-request: 60;
                       valign: fill;
                       halign: fill;
                       hexpand: true;
                       icon-name: "media-playback-start-symbolic";
                       clicked => $run_cb(template);
-                    }
-                    
-                    Button {
-                      styles [
-                        "destructive-action",
-                        "card-row-btn",
-                      ]
-
-                      sensitive: bind $invert_boolean(template.item as <$BzEntry>.holding) as <bool>;
-                      valign: fill;
-                      halign: fill;
-                      hexpand: true;
-                      icon-name: "user-trash-symbolic";
-                      clicked => $remove_cb(template);
                     }
 
                     MenuButton {
@@ -137,6 +163,7 @@ template $BzInstalledPage: Adw.Bin {
                         "card-row-btn",
                       ]
 
+                      width-request: 60;
                       valign: fill;
                       halign: fill;
                       hexpand: true;
@@ -202,6 +229,56 @@ template $BzInstalledPage: Adw.Bin {
                             };
 
                             clicked => $edit_permissions_cb(template);
+                          }
+
+                          Button {
+                            styles [
+                              "flat",
+                            ]
+
+                            has-tooltip: true;
+                            tooltip-text: _("View Store Page");
+
+                            child: Box {
+                              orientation: horizontal;
+                              spacing: 6;
+
+                              Image {
+                                icon-name: "eye-outline-filled-symbolic";
+                              }
+
+                              Label {
+                                label: _("View Store Page");
+                              }
+                            };
+
+                            clicked => $view_store_page_cb(template);
+                          }
+                          
+                          Button {
+                            styles [
+                              "flat",
+                              "destructive-action",
+                            ]
+
+                            has-tooltip: true;
+                            tooltip-text: _("Remove");
+                            sensitive: bind $invert_boolean(template.item as <$BzEntry>.holding) as <bool>;
+
+                            child: Box {
+                              orientation: horizontal;
+                              spacing: 6;
+
+                              Image {
+                                icon-name: "user-trash-symbolic";
+                              }
+
+                              Label {
+                                label: _("Remove");
+                              }
+                            };
+
+                            clicked => $remove_cb(template);
                           }
                         };
                       };

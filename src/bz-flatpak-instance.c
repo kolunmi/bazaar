@@ -1605,23 +1605,6 @@ transaction_fiber (TransactionData *data)
   if (system_transaction != NULL &&
       !flatpak_transaction_is_empty (system_transaction))
     {
-      g_autolist (GObject) operations = NULL;
-
-      operations = flatpak_transaction_get_operations (system_transaction);
-      data->n_operations += g_list_length (operations);
-    }
-  if (user_transaction != NULL &&
-      !flatpak_transaction_is_empty (user_transaction))
-    {
-      g_autolist (GObject) operations = NULL;
-
-      operations = flatpak_transaction_get_operations (user_transaction);
-      data->n_operations += g_list_length (operations);
-    }
-
-  if (system_transaction != NULL &&
-      !flatpak_transaction_is_empty (system_transaction))
-    {
       g_signal_connect (system_transaction, "new-operation", G_CALLBACK (transaction_new_operation), data);
       result = flatpak_transaction_run (system_transaction, cancellable, &local_error);
       if (!result)

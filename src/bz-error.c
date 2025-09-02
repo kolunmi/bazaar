@@ -26,6 +26,12 @@
 #include "bz-error.h"
 
 static void
+show_alert (GtkWidget  *widget,
+            const char *title,
+            const char *text,
+            gboolean    markup);
+
+static void
 error_alert_response (AdwAlertDialog *alert,
                       gchar          *response,
                       GtkWidget      *widget);
@@ -40,21 +46,44 @@ unref_dex_closure (gpointer  data,
                    GClosure *closure);
 
 void
+bz_show_alert_for_widget (GtkWidget  *widget,
+                          const char *title,
+                          const char *text,
+                          gboolean    markup)
+{
+  g_return_if_fail (GTK_IS_WIDGET (widget));
+  g_return_if_fail (title != NULL);
+  g_return_if_fail (text != NULL);
+
+  show_alert (widget, title, text, markup);
+}
+
+void
 bz_show_error_for_widget (GtkWidget  *widget,
                           const char *text)
 {
-  AdwDialog *alert = NULL;
-
   g_return_if_fail (GTK_IS_WIDGET (widget));
   g_return_if_fail (text != NULL);
 
+  show_alert (widget, _ ("An Error Occurred"), text, FALSE);
+}
+
+static void
+show_alert (GtkWidget  *widget,
+            const char *title,
+            const char *text,
+            gboolean    markup)
+{
+  AdwDialog *alert = NULL;
+
   alert = adw_alert_dialog_new (NULL, NULL);
   adw_alert_dialog_set_prefer_wide_layout (ADW_ALERT_DIALOG (alert), TRUE);
-  adw_alert_dialog_format_heading (
-      ADW_ALERT_DIALOG (alert), _ ("An Error Occurred"));
-  adw_alert_dialog_format_body (
-      ADW_ALERT_DIALOG (alert),
-      "%s", text);
+  adw_alert_dialog_set_heading (
+      ADW_ALERT_DIALOG (alert), title);
+  adw_alert_dialog_set_body (
+      ADW_ALERT_DIALOG (alert), text);
+  adw_alert_dialog_set_body_use_markup (
+      ADW_ALERT_DIALOG (alert), markup);
   adw_alert_dialog_add_responses (
       ADW_ALERT_DIALOG (alert),
       "close", _ ("Close"),

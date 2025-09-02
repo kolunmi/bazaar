@@ -497,15 +497,18 @@ transaction_progress (BzEntry            *entry,
                       guint64             start_time,
                       QueuedScheduleData *data)
 {
+  BzTransactionManager *self        = data->self;
+  BzTransaction        *transaction = data->transaction;
+
   g_object_set (
-      data->transaction,
+      transaction,
       "pending", is_estimating,
       "status", status,
       "progress", progress,
       NULL);
 
-  data->self->current_progress = progress;
-  g_object_notify_by_pspec (G_OBJECT (data->self), props[PROP_CURRENT_PROGRESS]);
+  self->current_progress = progress;
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CURRENT_PROGRESS]);
 }
 
 static DexFuture *
@@ -1038,19 +1041,21 @@ static DexFuture *
 transaction_finally (DexFuture          *future,
                      QueuedScheduleData *data)
 {
-  g_autoptr (GError) local_error = NULL;
-  const GValue    *value         = NULL;
-  g_autofree char *status        = NULL;
+  g_autoptr (GError) local_error    = NULL;
+  BzTransactionManager *self        = data->self;
+  BzTransaction        *transaction = data->transaction;
+  GTimer               *timer       = data->timer;
+  const GValue         *value       = NULL;
+  g_autofree char      *status      = NULL;
 
   value = dex_future_get_value (future, &local_error);
 
-  g_timer_stop (data->timer);
+  g_timer_stop (timer);
   status = g_strdup_printf (
       _ ("Finished in %.02f seconds"),
       g_timer_elapsed (data->timer, NULL));
-
   g_object_set (
-      data->transaction,
+      transaction,
       "status", status,
       "progress", 1.0,
       "finished", TRUE,
@@ -1058,14 +1063,17 @@ transaction_finally (DexFuture          *future,
       "error", local_error != NULL ? local_error->message : NULL,
       NULL);
 
-  if (value != NULL)
-    g_signal_emit (data->self, signals[SIGNAL_SUCCESS], 0, data->transaction);
-  else
-    g_signal_emit (data->self, signals[SIGNAL_FAILURE], 0, data->transaction);
+  self->current_progress = 1.0;
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CURRENT_PROGRESS]);
 
-  g_clear_object (&data->self->cancellable);
-  data->self->current_task = NULL;
-  dispatch_next (data->self);
+  if (value != NULL)
+    g_signal_emit (self, signals[SIGNAL_SUCCESS], 0, transaction);
+  else
+    g_signal_emit (self, signals[SIGNAL_FAILURE], 0, transaction);
+
+  g_clear_object (&self->cancellable);
+  self->current_task = NULL;
+  dispatch_next (self);
 
   return NULL;
 }

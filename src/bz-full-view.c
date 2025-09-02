@@ -25,7 +25,6 @@
 
 #include "bz-decorated-screenshot.h"
 #include "bz-dynamic-list-view.h"
-#include "bz-env.h"
 #include "bz-error.h"
 #include "bz-flatpak-entry.h"
 #include "bz-full-view.h"
@@ -194,13 +193,9 @@ format_recent_downloads (gpointer object,
 }
 
 static char *
-format_size (gpointer object,
-             guint64  value)
+format_size (gpointer object, guint64 value)
 {
-  g_autofree char *size = NULL;
-
-  size = g_format_size (value);
-  return g_strdup_printf ("%s Download", size);
+  return g_format_size (value);
 }
 
 static char *
@@ -231,6 +226,22 @@ pick_license_warning (gpointer object,
   return value
              ? g_strdup (_ ("This application has a FLOSS license, meaning the source code can be audited for safety."))
              : g_strdup (_ ("This application has a proprietary license, meaning the source code is developed privately and cannot be audited by an independent third party."));
+}
+
+static void
+open_url_cb (BzFullView   *self,
+             AdwActionRow *row)
+{
+  BzEntry    *entry = NULL;
+  const char *url   = NULL;
+
+  entry = BZ_ENTRY (bz_result_get_object (self->ui_entry));
+  url   = bz_entry_get_url (entry);
+
+  if (url != NULL && *url != '\0')
+    g_app_info_launch_default_for_uri (url, NULL, NULL);
+  else
+    g_warning ("Invalid or empty URL provided");
 }
 
 static void
@@ -468,6 +479,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, format_size);
   gtk_widget_class_bind_template_callback (widget_class, format_timestamp);
   gtk_widget_class_bind_template_callback (widget_class, format_as_link);
+  gtk_widget_class_bind_template_callback (widget_class, open_url_cb);
   gtk_widget_class_bind_template_callback (widget_class, share_cb);
   gtk_widget_class_bind_template_callback (widget_class, dl_stats_cb);
   gtk_widget_class_bind_template_callback (widget_class, run_cb);

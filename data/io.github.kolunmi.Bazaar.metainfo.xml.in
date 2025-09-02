@@ -59,6 +59,27 @@
   </screenshots>
 
   <releases>
+    <release version="0.4.4" date="2025-08-30">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.4.4</url>
+    </release>
+    <release version="0.4.3" date="2025-08-26">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.4.3</url>
+    </release>
+    <release version="0.4.2" date="2025-08-26">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.4.2</url>
+    </release>
+    <release version="0.4.1" date="2025-08-24">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.4.1</url>
+    </release>
+    <release version="0.4.0" date="2025-08-21">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.4.0</url>
+    </release>
+    <release version="0.3.2" date="2025-08-17">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.3.2</url>
+    </release>
+    <release version="0.3.1" date="2025-08-16">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.3.1</url>
+    </release>
     <release version="0.3.0" date="2025-08-11">
       <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.3.0</url>
     </release>

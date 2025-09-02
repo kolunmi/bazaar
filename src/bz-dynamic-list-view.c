@@ -441,6 +441,7 @@ refresh (BzDynamicListView *self)
             gtk_flow_box_set_homogeneous (GTK_FLOW_BOX (widget), TRUE);
             gtk_flow_box_set_column_spacing (GTK_FLOW_BOX (widget), 10);
             gtk_flow_box_set_row_spacing (GTK_FLOW_BOX (widget), 10);
+            gtk_flow_box_set_selection_mode (GTK_FLOW_BOX (widget), GTK_SELECTION_NONE);
             gtk_flow_box_bind_model (
                 GTK_FLOW_BOX (widget), self->model,
                 (GtkFlowBoxCreateWidgetFunc) create_child_widget,
@@ -533,19 +534,21 @@ create_child_widget (GObject           *object,
   g_return_val_if_fail (self->child_type != G_TYPE_INVALID && self->child_prop != NULL, NULL);
 
   widget = g_object_new (self->child_type, self->child_prop, object, NULL);
-  if (self->noscroll_kind == BZ_DYNAMIC_LIST_VIEW_KIND_CAROUSEL)
-    {
-      /* Make the widgets a certain card-like size
-       * by default, can be overridden in signal
-       */
-      gtk_widget_set_size_request (widget, 300, 150);
-      gtk_widget_set_margin_top (widget, 15);
-      gtk_widget_set_margin_bottom (widget, 15);
-    }
-
+  gtk_widget_set_receives_default (widget, TRUE);
   g_signal_emit (self, signals[SIGNAL_BIND_WIDGET], 0, widget, object);
 
-  return widget;
+  if (self->noscroll_kind == BZ_DYNAMIC_LIST_VIEW_KIND_FLOW_BOX)
+    {
+      GtkWidget *child = NULL;
+
+      child = gtk_flow_box_child_new ();
+      gtk_widget_set_focusable (GTK_WIDGET (child), FALSE);
+      gtk_flow_box_child_set_child (GTK_FLOW_BOX_CHILD (child), widget);
+
+      return child;
+    }
+  else
+    return widget;
 }
 
 static void

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-25 14:33+0300\n"
+"POT-Creation-Date: 2025-09-01 19:18+0300\n"
 "PO-Revision-Date: 2025-08-12 22:05+0300\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -78,16 +78,16 @@ msgstr "Шукаємо Blender"
 msgid "Download graph for Blender"
 msgstr "Статистика завантажень Blender"
 
-#: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:164
-#: src/bz-installed-page.blp:176
+#: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:191
+#: src/bz-installed-page.blp:203
 msgid "Manage Addons"
 msgstr "Керувати розширеннями"
 
-#: src/bz-app-tile.blp:54 src/bz-full-view.blp:125
+#: src/bz-app-tile.blp:55 src/bz-full-view.blp:125
 msgid "This flatpak is verified by the original developers of the software."
 msgstr "Цей пакунок затверджено розробниками цієї програми"
 
-#: src/bz-application.c:667
+#: src/bz-application.c:703
 msgid ""
 "This functionality is currently disabled. It is recommended you download and "
 "install Flatseal to manage app permissions."
@@ -95,108 +95,113 @@ msgstr ""
 "Цю можливість наразі вимкнено. Для керування дозволами застосунків радимо "
 "встановити Flatseal."
 
-#: src/bz-application.c:743
+#: src/bz-application.c:779
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr ""
 
-#: src/bz-application.c:748
+#: src/bz-application.c:784
 msgctxt "About Dialog Translator Credit"
 msgid "Ahmed Najmawi"
 msgstr ""
 
-#: src/bz-application.c:749
+#: src/bz-application.c:785
 msgctxt "About Dialog Translator Credit"
 msgid "AtomHare"
 msgstr ""
 
-#: src/bz-application.c:750
+#: src/bz-application.c:786
 msgctxt "About Dialog Translator Credit"
 msgid "Azenyr"
 msgstr ""
 
-#: src/bz-application.c:751
+#: src/bz-application.c:787
 msgctxt "About Dialog Translator Credit"
 msgid "Goudarz Jafari"
 msgstr ""
 
-#: src/bz-application.c:752
+#: src/bz-application.c:788
 msgctxt "About Dialog Translator Credit"
 msgid "Jill Fiore (Lumaeris)"
 msgstr ""
 
-#: src/bz-application.c:753
+#: src/bz-application.c:789
 msgctxt "About Dialog Translator Credit"
 msgid "KiKaraage"
 msgstr ""
 
-#: src/bz-application.c:754
+#: src/bz-application.c:790
 msgctxt "About Dialog Translator Credit"
 msgid "Lucosec"
 msgstr ""
 
-#: src/bz-application.c:755
+#: src/bz-application.c:791
 msgctxt "About Dialog Translator Credit"
 msgid "Léane GRASSER"
 msgstr ""
 
-#: src/bz-application.c:756
+#: src/bz-application.c:792
 msgctxt "About Dialog Translator Credit"
 msgid "Marcel Mrówka (Microwave)"
 msgstr ""
 
-#: src/bz-application.c:757
+#: src/bz-application.c:793
 msgctxt "About Dialog Translator Credit"
 msgid "Pietro F."
 msgstr ""
 
-#: src/bz-application.c:758
+#: src/bz-application.c:794
 msgctxt "About Dialog Translator Credit"
 msgid "Shihfu Juan"
 msgstr ""
 
-#: src/bz-application.c:759
+#: src/bz-application.c:795
 msgctxt "About Dialog Translator Credit"
 msgid "Shinsei"
 msgstr ""
 
-#: src/bz-application.c:760
+#: src/bz-application.c:796
 msgctxt "About Dialog Translator Credit"
 msgid "Vlastimil Dědek"
 msgstr ""
 
-#: src/bz-application.c:761
+#: src/bz-application.c:797
 msgctxt "About Dialog Translator Credit"
 msgid "asen23"
 msgstr ""
 
-#: src/bz-application.c:762
+#: src/bz-application.c:798
 msgctxt "About Dialog Translator Credit"
 msgid "renner"
 msgstr ""
 
-#: src/bz-application.c:763
+#: src/bz-application.c:799
 msgctxt "About Dialog Translator Credit"
 msgid "robotta"
 msgstr ""
 
-#: src/bz-application.c:779
+#: src/bz-application.c:800
+msgctxt "About Dialog Translator Credit"
+msgid "Peter Dave Hello"
+msgstr ""
+
+#: src/bz-application.c:816
 msgid "Adam Masciola"
 msgstr ""
 
-#: src/bz-application.c:1183
+#: src/bz-application.c:1233
 msgid "Constructing Flatpak instance..."
 msgstr "Створення примірника Flatpak..."
 
-#: src/bz-application.c:1193
+#: src/bz-application.c:1243
 msgid "Reusing last Flatpak instance..."
 msgstr "Повторне використання примірника Flatpak..."
 
-#: src/bz-application.c:1218
+#: src/bz-application.c:1268
 msgid "Flathub is not registered on this system"
 msgstr "Flathub не зареєстровано на цій системі"
 
-#: src/bz-application.c:1221
+#: src/bz-application.c:1271
 msgid ""
 "Would you like to add Flathub as a remote? If you decline, the Flathub page "
 "will not be available. You can change this later."
@@ -204,42 +209,42 @@ msgstr ""
 "Бажаєте додати Flathub до переліку віддалених сховищ? В іншому разі, "
 "сторінка Flathub буде недоступна. Ви можете змінити це пізніше."
 
-#: src/bz-application.c:1226 src/bz-update-dialog.blp:6
+#: src/bz-application.c:1276 src/bz-update-dialog.blp:6
 msgid "Later"
 msgstr "Пізніше"
 
-#: src/bz-application.c:1227
+#: src/bz-application.c:1277
 #, fuzzy
 msgid "Add Flathub"
 msgstr "Додати Flathub"
 
-#: src/bz-application.c:1259
+#: src/bz-application.c:1309
 #, c-format
 msgid "Identifying installed entries..."
 msgstr "Визначення встановлених надходжень..."
 
-#: src/bz-application.c:1271
+#: src/bz-application.c:1321
 #, c-format
 msgid "Beginning remote entry retrieval while referencing %d blocklist(s)..."
 msgstr "Отримання віддалених надходжень із застосуванням %d чорних списків..."
 
-#: src/bz-application.c:1415
+#: src/bz-application.c:1465
 #, c-format
 msgid "Received %'d entries out of %'d (%0.1f seconds elapsed)"
 msgstr "%'d надходжень із %'d (за %0.1f сек)"
 
-#: src/bz-application.c:1422
+#: src/bz-application.c:1472
 #, c-format
 msgid "Waiting for background indexing tasks to catch up..."
 msgstr "Очікується завершення індексації..."
 
-#: src/bz-application.c:1458
+#: src/bz-application.c:1508
 #, c-format
 msgid "Completed initialization in %0.2f seconds"
 msgstr "Ініціалізовано за %0.2f сек"
 
 #: src/bz-browse-widget.blp:11 src/bz-flathub-page.blp:11
-#: src/bz-full-view.blp:10 src/bz-installed-page.blp:11 src/bz-window.blp:32
+#: src/bz-full-view.blp:10 src/bz-installed-page.blp:11 src/bz-window.blp:51
 msgid "Empty"
 msgstr "Порожньо"
 
@@ -259,15 +264,35 @@ msgstr ""
 msgid "Browser"
 msgstr "Оглядач"
 
-#: src/bz-error.c:54
+#: src/bz-decorated-screenshot.blp:41
+msgid "Open in Image Viewer"
+msgstr "Відкрити в переглядачі зображень"
+
+#: src/bz-decorated-screenshot.blp:56
+msgid "Copy to clipboard"
+msgstr "Копіювати до буфера обміну"
+
+#: src/bz-entry-inspector.blp:5
+msgid "Entry Inspector"
+msgstr "Зневаджувач надходжень"
+
+#: src/bz-entry-inspector.blp:76
+msgid "Serialize"
+msgstr "Серіалізувати"
+
+#: src/bz-entry-inspector.blp:80
+msgid "Convert to JSON"
+msgstr "Перетворити в JSON"
+
+#: src/bz-error.c:68
 msgid "An Error Occurred"
 msgstr "Виникла помилка"
 
-#: src/bz-error.c:60
+#: src/bz-error.c:89
 msgid "Close"
 msgstr "Вийти"
 
-#: src/bz-error.c:61
+#: src/bz-error.c:90
 msgid "Copy and Close"
 msgstr "Копіювати та вийти"
 
@@ -313,31 +338,31 @@ msgstr "Нічого не знайдено"
 msgid "Try a different search query"
 msgstr "Спробуйте інший запит"
 
-#: src/bz-full-view.blp:21 src/bz-window.blp:42
+#: src/bz-full-view.blp:21 src/bz-window.blp:61
 msgid "Content"
 msgstr "Вміст"
 
-#: src/bz-full-view.blp:166
+#: src/bz-full-view.blp:169 src/bz-installed-page.blp:151
 msgid "Run this application"
 msgstr "Запустити цей застосунок"
 
-#: src/bz-full-view.blp:190
+#: src/bz-full-view.blp:193
 msgid "Download and install this application"
 msgstr "Завантажити та встановити цей застосунок"
 
-#: src/bz-full-view.blp:208 src/bz-window.c:845
+#: src/bz-full-view.blp:211 src/bz-window.c:917
 msgid "Install"
 msgstr "Встановити"
 
-#: src/bz-full-view.blp:222
+#: src/bz-full-view.blp:225
 msgid "Uninstall this application"
 msgstr "Видалити цей застосунок"
 
-#: src/bz-full-view.blp:248
+#: src/bz-full-view.blp:255
 msgid "Share this application"
 msgstr "Поділитися цим застосунком"
 
-#: src/bz-full-view.blp:260
+#: src/bz-full-view.blp:267
 msgid ""
 "The number of downloads in the last 30 days. Click to view this "
 "application's download statistics."
@@ -345,40 +370,40 @@ msgstr ""
 "Кількість завантажень за останні 30 днів. Натисніть, аби побачити статистику "
 "завантажень цього застосунку."
 
-#: src/bz-full-view.blp:304
+#: src/bz-full-view.blp:316
 msgid "Support this developer"
 msgstr "Підтримати розробників"
 
-#: src/bz-full-view.blp:317
+#: src/bz-full-view.blp:329
 msgid "Support"
 msgstr "Підтримати"
 
-#: src/bz-full-view.blp:342
+#: src/bz-full-view.blp:358
 msgid "VCS Forge Star Count"
 msgstr "Вподобань на сторінці розробки"
 
-#: src/bz-full-view.blp:411
+#: src/bz-full-view.blp:428
 msgid "Remote repo name"
 msgstr "Назва віддаленого сховища"
 
-#: src/bz-full-view.blp:424
+#: src/bz-full-view.blp:441
 msgid "Project URL"
 msgstr "URL проєкту"
 
-#: src/bz-full-view.blp:436
+#: src/bz-full-view.blp:453
 msgid "Download size"
 msgstr "Розмір завантаження"
 
-#: src/bz-full-view.c:213
+#: src/bz-full-view.c:212
 #, c-format
 msgid "Released %x"
 msgstr "Випуск %x"
 
-#: src/bz-full-view.c:224
+#: src/bz-full-view.c:223
 msgid "No URL"
 msgstr "Без URL"
 
-#: src/bz-full-view.c:232
+#: src/bz-full-view.c:231
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -386,7 +411,7 @@ msgstr ""
 "Цей застосунок має вільну ліцензію. Це означає, що початковий код може бути "
 "перевірено на безпечність."
 
-#: src/bz-full-view.c:233
+#: src/bz-full-view.c:232
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
@@ -394,21 +419,87 @@ msgstr ""
 "Цей застосунок має невільну (власницьку) ліцензію. Це означає, що початковий "
 "код не є публічно доступним і не може бути перевіреним на безпечність."
 
+#: src/bz-inspector.blp:5
+msgid "Bazaar Inspector"
+msgstr "Зневаджувач"
+
+#: src/bz-inspector.blp:22
+msgid "Active Blocklists"
+msgstr "Задіяні чорні списки"
+
+#: src/bz-inspector.blp:44
+msgid "Active Curated-Configs"
+msgstr "Задіяні налаштування підібраного вмісту"
+
+#: src/bz-inspector.blp:66
+msgid "All Entry Groups"
+msgstr "Усі групи надходжень"
+
+#: src/bz-inspector.blp:69
+msgid "Filter..."
+msgstr "Відсіяти..."
+
+#: src/bz-inspector.blp:110
+msgid "Decache and Inspect"
+msgstr "Відкинути кеш та дослідити"
+
 #: src/bz-installed-page.blp:15
 msgid "No Flatpaks Installed"
 msgstr "Не встановлено жодного пакунку Flatpak"
 
-#: src/bz-installed-page.blp:21 src/bz-window.blp:219 src/bz-window.blp:355
+#: src/bz-installed-page.blp:21 src/bz-window.blp:238 src/bz-window.blp:375
 msgid "Installed"
 msgstr "Встановлені"
 
-#: src/bz-installed-page.blp:145
+#: src/bz-installed-page.blp:115
+#, fuzzy
+msgid "Support this application"
+msgstr "Поділитися цим застосунком"
+
+#: src/bz-installed-page.blp:133
+msgid "This application does not provide a donation link"
+msgstr "Цей застосунок не надає посилання для пожертв"
+
+#: src/bz-installed-page.blp:172
 msgid "More actions"
 msgstr "Більше дій"
 
-#: src/bz-installed-page.blp:189 src/bz-installed-page.blp:200
+#: src/bz-installed-page.blp:216 src/bz-installed-page.blp:227
 msgid "Edit Permissions"
 msgstr "Керувати правами"
+
+#: src/bz-installed-page.blp:240 src/bz-installed-page.blp:251
+msgid "View Store Page"
+msgstr "Відкрити сторінку в крамниці"
+
+#: src/bz-installed-page.blp:265 src/bz-installed-page.blp:277
+#: src/bz-window.c:898
+msgid "Remove"
+msgstr "Видалити"
+
+#: src/bz-installed-page.c:252
+#, c-format
+msgid ""
+"\"%s\" does not provide a donations link. This does not mean you cannot "
+"support them! Try looking at their <a href=\"%s\">project page</a> for more "
+"information."
+msgstr ""
+"\"%s\" не надає посилання для пожертв. Та це не означає, що Ви не можете "
+"підтримати проєкт! Відвідайте <a href=\"%s\">сторінку проєкту</a>, аби "
+"дізнатися більше."
+
+#: src/bz-installed-page.c:262
+#, c-format
+msgid ""
+"\"%s\" does not provide a donations link. This does not mean you cannot "
+"support them! Try finding their project page for more information."
+msgstr ""
+"\"%s\" не надає посилання для пожертв. Та це не означає, що Ви не можете "
+"підтримати проєкт! Спробуйте знайти сторінку проєкту, аби дізнатися більше."
+
+#: src/bz-installed-page.c:269
+msgid "No Donations Link"
+msgstr "Без посилання для пожертв"
 
 #: src/bz-preferences-dialog.blp:9
 msgid "Preferences"
@@ -523,100 +614,100 @@ msgstr ""
 msgid "Additionally, %d runtimes and/or addons will be updated."
 msgstr "Крім того, буде оновлено %d середовищ виконання та/або розширень."
 
-#: src/bz-window.blp:36
+#: src/bz-window.blp:55
 msgid "Transactions Will Appear Here"
 msgstr "Дії над застосунками зʼявлятимуться тут"
 
-#: src/bz-window.blp:97
+#: src/bz-window.blp:116
 msgid "Halt the execution of transactions"
 msgstr "Зупинити виконання дій"
 
-#: src/bz-window.blp:105
+#: src/bz-window.blp:124
 msgid "Clear all finished transactions"
 msgstr "Очистити всі завершені дії"
 
-#: src/bz-window.blp:135 src/bz-window.blp:139
+#: src/bz-window.blp:154 src/bz-window.blp:158
 msgid "Offline"
 msgstr "Поза мережею"
 
-#: src/bz-window.blp:145
+#: src/bz-window.blp:164
 msgid "Loading"
 msgstr "Завантажується"
 
-#: src/bz-window.blp:187
+#: src/bz-window.blp:206
 msgid "Browse"
 msgstr "Шукати"
 
-#: src/bz-window.blp:197
+#: src/bz-window.blp:216
 msgid "App View"
 msgstr "Огляд програми"
 
-#: src/bz-window.blp:209 src/bz-window.blp:334
+#: src/bz-window.blp:228 src/bz-window.blp:354
 msgid "Flathub"
 msgstr "Flathub"
 
-#: src/bz-window.blp:239
+#: src/bz-window.blp:259
 msgid "Go Back"
 msgstr "Назад"
 
-#: src/bz-window.blp:256
+#: src/bz-window.blp:276
 msgid "Search"
 msgstr "Пошук"
 
-#: src/bz-window.blp:268
+#: src/bz-window.blp:288
 msgid "Update"
 msgstr "Оновлення"
 
-#: src/bz-window.blp:283
+#: src/bz-window.blp:303
 msgid "Checking for updates"
 msgstr "Пошук оновлень"
 
-#: src/bz-window.blp:298
+#: src/bz-window.blp:318
 msgid "View curated applications"
 msgstr "Оглянути підібрані застосунки"
 
-#: src/bz-window.blp:313
+#: src/bz-window.blp:333
 msgid "Curated"
 msgstr "Підібрані"
 
-#: src/bz-window.blp:319
+#: src/bz-window.blp:339
 msgid "View the latest on Flathub"
 msgstr "Оглянути найновіше на Flathub"
 
-#: src/bz-window.blp:340
+#: src/bz-window.blp:360
 msgid "View installed applications"
 msgstr "Оглянути встановлені застосунки"
 
-#: src/bz-window.blp:369
+#: src/bz-window.blp:389
 msgid "Main Menu"
 msgstr "Головне меню"
 
-#: src/bz-window.blp:380
+#: src/bz-window.blp:400
 msgid "Toggle transaction sidebar"
 msgstr "Перемкнути віконце дій над застосунками"
 
-#: src/bz-window.blp:422
+#: src/bz-window.blp:442
 #, fuzzy
 msgid "_Refresh"
 msgstr "_Оновити"
 
-#: src/bz-window.blp:427
+#: src/bz-window.blp:447
 msgid "_Keyboard Shortcuts"
 msgstr "_Клавіатурні скорочення"
 
-#: src/bz-window.blp:432
+#: src/bz-window.blp:452
 msgid "_About Bazaar"
 msgstr "_Про Базар"
 
-#: src/bz-window.blp:437
+#: src/bz-window.blp:457
 msgid "_Donate to Bazaar ❤️"
 msgstr "_Пожертувати Базару ❤️"
 
-#: src/bz-window.c:492
+#: src/bz-window.c:564
 msgid "Up to date!"
 msgstr "Оновлень не знайдено!"
 
-#: src/bz-window.c:667
+#: src/bz-window.c:739
 msgid ""
 "The ability to inspect and install local .flatpak bundle files is coming "
 "soon! In the meantime, try running\n"
@@ -632,15 +723,15 @@ msgstr ""
 "\n"
 "у терміналі."
 
-#: src/bz-window.c:742
+#: src/bz-window.c:814
 msgid "Can't do that right now!"
 msgstr "Наразі цього не можна зробити!"
 
-#: src/bz-window.c:789
+#: src/bz-window.c:861
 msgid "Confirm Action"
 msgstr "Підтвердити дію"
 
-#: src/bz-window.c:818
+#: src/bz-window.c:890
 #, c-format
 msgid ""
 "You are about to remove the following Flatpak:\n"
@@ -657,15 +748,11 @@ msgstr ""
 "\n"
 "Упевнені?"
 
-#: src/bz-window.c:825 src/bz-window.c:844
+#: src/bz-window.c:897 src/bz-window.c:916
 msgid "Cancel"
 msgstr "Скасувати"
 
-#: src/bz-window.c:826
-msgid "Remove"
-msgstr "Видалити"
-
-#: src/bz-window.c:837
+#: src/bz-window.c:909
 #, c-format
 msgid ""
 "You are about to install the following Flatpak:\n"
@@ -682,15 +769,15 @@ msgstr ""
 "\n"
 "Упевнені?"
 
-#: src/bz-window.c:867
+#: src/bz-window.c:939
 msgid "More details"
 msgstr "Докладніше"
 
-#: src/bz-window.c:993
+#: src/bz-window.c:1065
 msgid "Resume the execution of transactions"
 msgstr "Відновити виконання"
 
-#: src/bz-window.c:999
+#: src/bz-window.c:1071
 msgid "Pause the execution of transactions"
 msgstr "Призупинити виконання"
 

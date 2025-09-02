@@ -76,6 +76,7 @@ template $BzFullView: Adw.Bin {
 
                     Box {
                       orientation: vertical;
+                      valign: center;
                       spacing: 15;
 
                       Box {
@@ -100,7 +101,6 @@ template $BzFullView: Adw.Bin {
                           
                           Label {
                             styles [
-                              "title-4",
                               "accent",
                             ]
 
@@ -128,17 +128,6 @@ template $BzFullView: Adw.Bin {
                             };
                           }
                         }
-                        
-                        Label {
-                          styles [
-                            "title-2",
-                          ]
-
-                          xalign: 0.0;
-                          wrap: true;
-                          wrap-mode: word_char;
-                          label: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.description;
-                        }
                       }
                     }
                   }
@@ -151,210 +140,209 @@ template $BzFullView: Adw.Bin {
                     column-spacing: 3;
                     row-spacing: 3;
 
-                    Box {
+                    FlowBoxChild {
+                      focusable: false;
                       halign: start;
                       hexpand: false;
-                      orientation: horizontal;
-                      spacing: 10;
+                      
+                      child: Box {
+                        orientation: horizontal;
+                        spacing: 10;
 
-                      Button run_button {
-                        styles [
-                          "pill",
-                        ]
+                        Button run_button {
+                          styles [
+                            "pill",
+                          ]
 
-                        has-tooltip: true;
-                        tooltip-text: _("Run this application");
-                        visible: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
-                        sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
+                          has-tooltip: true;
+                          tooltip-text: _("Run this application");
+                          visible: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
+                          sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
                         
-                        icon-name: "media-playback-start-symbolic";
-                        clicked => $run_cb(template);
-                      }
+                          icon-name: "media-playback-start-symbolic";
+                          clicked => $run_cb(template);
+                        }
 
-                      Box {
+                        Box {
+                          styles [
+                            "linked",
+                          ]
+
+                          halign: start;
+                          hexpand: false;
+                          orientation: horizontal;
+
+                          Button {
+                            styles [
+                              "suggested-action",
+                              "pill",
+                            ]
+
+                            has-tooltip: true;
+                            tooltip-text: _("Download and install this application");
+                            visible: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable) as <bool>) as <bool>;
+                            sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
+                            label: _("Install");
+                            clicked => $install_cb(template);
+                          }
+
+                          Button remove_button {
+                            styles [
+                              "destructive-action",
+                              "pill",
+                            ]
+
+                            has-tooltip: true;
+                            tooltip-text: _("Uninstall this application");
+                            visible: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
+                            sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
+                          
+                            icon-name: "user-trash-symbolic";
+                            clicked => $remove_cb(template);
+                          }
+                        }
+                      };
+                    }
+
+                    FlowBoxChild {
+                      focusable: false;
+                      halign: start;
+                      hexpand: false;
+                      
+                      child: Box {
                         styles [
                           "linked",
                         ]
 
-                        halign: start;
-                        hexpand: false;
                         orientation: horizontal;
 
                         Button {
                           styles [
-                            "suggested-action",
                             "pill",
                           ]
 
+                          vexpand: false;
                           has-tooltip: true;
-                          tooltip-text: _("Download and install this application");
-                          visible: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable) as <bool>) as <bool>;
-                          sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
+                          tooltip-text: _("Share this application");
+                          icon-name: "share-alt-symbolic";
+                          clicked => $share_cb(template);
+                        }
+
+                        Button {
+                          styles [
+                            "pill",
+                          ]
+
+                          vexpand: false;
+                          has-tooltip: true;
+                          tooltip-text: _("The number of downloads in the last 30 days. Click to view this application's download statistics.");
+                          visible: bind $invert_boolean($is_null(template.debounced-ui-entry) as <bool>) as <bool>;
+                          sensitive: bind $invert_boolean($is_zero(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <bool>) as <bool>;
+                          clicked => $dl_stats_cb(template);
 
                           child: Box {
-                            orientation: horizontal;
-                            spacing: 5;
                             hexpand: false;
+                            orientation: horizontal;
+                            spacing: 10;
 
                             Image {
-                              icon-name: "folder-download-symbolic";
+                              icon-name: "graph-symbolic";
                             }
 
+                            Adw.Spinner {
+                              visible: bind $is_null(template.debounced-ui-entry) as <bool>;
+                            }
+                          
                             Label {
-                              styles [
-                                "caption-heading",
-                              ]
-
-                              label: _("Install");
+                              label: bind $format_recent_downloads(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <string>;
+                              visible: bind $invert_boolean($is_null(template.debounced-ui-entry) as <bool>) as <bool>;
                             }
                           };
-
-                          clicked => $install_cb(template);
                         }
+                      };
+                    }
 
-                        Button remove_button {
+                    FlowBoxChild {
+                      focusable: false;
+                      halign: start;
+                      hexpand: false;
+                      
+                      visible: bind $invert_boolean($is_null(template.ui-entry as <$BzResult>.object as <$BzEntry>.donation-url) as <bool>) as <bool>;
+
+                      child: Box {
+                        styles [
+                          "linked",
+                        ]
+
+                        orientation: horizontal;
+                      
+                        Button {
                           styles [
-                            "destructive-action",
+                            "pill",
+                            "suggested-action",
+                          ]
+
+                          valign: start;
+                          has-tooltip: true;
+                          tooltip-text: _("Support this developer");
+                          label: _("Support");
+                          clicked => $support_cb(template);
+                        }
+                      };
+                    }
+
+                    FlowBoxChild {
+                      // disabled for now
+                      visible: false;
+                      focusable: false;
+                      halign: start;
+                      hexpand: false;
+                      
+                      child: Box {
+                        styles [
+                          "linked",
+                        ]
+
+                        orientation: horizontal;
+                      
+                        Button {
+                          styles [
                             "pill",
                           ]
 
+                          // visible: bind $invert_boolean($is_null(template.ui-entry as <$BzResult>.object as <$BzEntry>.forge-url as <string>) as <bool>) as <bool>;
+                          valign: start;
                           has-tooltip: true;
-                          tooltip-text: _("Uninstall this application");
-                          visible: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
-                          sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
-                          
-                          icon-name: "user-trash-symbolic";
-                          clicked => $remove_cb(template);
+                          tooltip-text: _("VCS Forge Star Count");
+                          clicked => $forge_cb(template);
+
+                          child: Box {
+                            hexpand: false;
+                            orientation: horizontal;
+                            spacing: 10;
+
+                            Image {
+                              icon-name: "starred-symbolic";
+                            }
+
+                            Label forge_stars_label {}
+                          };
                         }
-                      }
+                      };
                     }
+                  }
 
-                    Box {
+                  Label {
                       styles [
-                        "linked",
+                        "title-2",
                       ]
-
-                      halign: start;
-                      hexpand: false;
-                      orientation: horizontal;
-
-                      Button {
-                        styles [
-                          "pill",
-                        ]
-
-                        vexpand: false;
-                        has-tooltip: true;
-                        tooltip-text: _("Share this application");
-                        icon-name: "share-alt-symbolic";
-                        clicked => $share_cb(template);
-                      }
-
-                      Button {
-                        styles [
-                          "pill",
-                        ]
-
-                        vexpand: false;
-                        has-tooltip: true;
-                        tooltip-text: _("The number of downloads in the last 30 days. Click to view this application's download statistics.");
-                        clicked => $dl_stats_cb(template);
-                        visible: bind $invert_boolean($is_null(template.debounced-ui-entry) as <bool>) as <bool>;
-                        sensitive: bind $invert_boolean($is_zero(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <bool>) as <bool>;
-
-                        child: Box {
-                          hexpand: false;
-                          orientation: horizontal;
-                          spacing: 10;
-
-                          Image {
-                            icon-name: "graph-symbolic";
-                          }
-
-                          Adw.Spinner {
-                            visible: bind $is_null(template.debounced-ui-entry) as <bool>;
-                          }
-                          
-                          Label {
-                            label: bind $format_recent_downloads(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <string>;
-                            visible: bind $invert_boolean($is_null(template.debounced-ui-entry) as <bool>) as <bool>;
-                          }
-                        };
-                      }
-                    }
-
-                    Box {
-                      styles [
-                        "linked",
-                      ]
-
-                      halign: start;
-                      hexpand: false;
-                      orientation: horizontal;
-                      
-                      Button {
-                        styles [
-                          "pill",
-                          "suggested-action",
-                        ]
-
-                        visible: bind $invert_boolean($is_null(template.ui-entry as <$BzResult>.object as <$BzEntry>.donation-url) as <bool>) as <bool>;
-                        valign: start;
-                        has-tooltip: true;
-                        tooltip-text: _("Support this developer");
-                        clicked => $support_cb(template);
-
-                        child: Box {
-                          hexpand: false;
-                          orientation: horizontal;
-                          spacing: 10;
-
-                          Image {
-                            icon-name: "heart-filled-symbolic";
-                          }
-
-                          Label {
-                            label: _("Support");
-                          }
-                        };
-                      }
-                    }
-
-                    Box {
-                      styles [
-                        "linked",
-                      ]
-
-                      halign: start;
-                      hexpand: false;
-                      orientation: horizontal;
-                      
-                      Button {
-                        styles [
-                          "pill",
-                        ]
-
-                        // disabled for now
-                        visible: false;
-                        // visible: bind $invert_boolean($is_null(template.ui-entry as <$BzResult>.object as <$BzEntry>.forge-url as <string>) as <bool>) as <bool>;
-                        valign: start;
-                        has-tooltip: true;
-                        tooltip-text: _("VCS Forge Star Count");
-                        clicked => $forge_cb(template);
-
-                        child: Box {
-                          hexpand: false;
-                          orientation: horizontal;
-                          spacing: 10;
-
-                          Image {
-                            icon-name: "starred-symbolic";
-                          }
-
-                          Label forge_stars_label {}
-                        };
-                      }
-                    }
+                      margin-start: 5;
+                      margin-top: 20;
+                      valign: start;
+                      xalign: 0;
+                      wrap: true;
+                      wrap-mode: word_char;
+                      label: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.description;
                   }
 
                   Label {
@@ -362,9 +350,9 @@ template $BzFullView: Adw.Bin {
                       "body",
                     ]
 
-                    margin-start: 10;
+                    margin-start: 5;
                     margin-end: 10;
-                    margin-top: 10;
+                    margin-top: 0;
                     margin-bottom: 10;
                     valign: start;
                     xalign: 0;
@@ -380,13 +368,25 @@ template $BzFullView: Adw.Bin {
                     title: "App Details";
 
                     Adw.ActionRow {
-                      title: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.project-license;
-                      title-selectable: true;
-                      subtitle: bind $pick_license_warning(template.ui-entry as <$BzResult>.object as <$BzEntry>.is-floss) as <string>;
+                      title: _("Download Size");
+                      subtitle: bind $format_size(template.ui-entry as <$BzResult>.object as <$BzEntry>.size) as <string>;
 
                       [prefix]
                       Image {
-                        icon-size: large;
+                        has-tooltip: true;
+                        tooltip-text: _("Download size");
+                        icon-name: "folder-download-symbolic";
+                      }
+                    }
+
+                    Adw.ActionRow {
+                      title: _("License");
+                      subtitle: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.project-license;
+                      title-selectable: true;
+                      activatable-widget: license_button;
+
+                      [prefix]
+                      Image {
                         has-tooltip: true;
                         icon-name: "license-symbolic";
                         visible: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.is-floss;
@@ -394,49 +394,55 @@ template $BzFullView: Adw.Bin {
 
                       [prefix]
                       Image {
-                        icon-size: large;
                         has-tooltip: true;
                         icon-name: "dialog-warning-symbolic";
                         visible: bind $invert_boolean(template.ui-entry as <$BzResult>.object as <$BzEntry>.is-floss) as <bool>;
                       }
-                    }
 
-                    Adw.ActionRow {
-                      title: bind template.entry-group as <$BzEntryGroup>.remote-repos-string;
-
-                      [prefix]
-                      Image {
-                        icon-size: large;
-                        has-tooltip: true;
-                        tooltip-text: _("Remote repo name");
-                        icon-name: "globe-symbolic";
+                      [suffix]
+                      MenuButton license_button {
+                        popover: license_info_popover;
+                        icon-name: "dialog-information-symbolic";
+                        valign: center;
+                        styles ["flat"]
                       }
                     }
 
                     Adw.ActionRow {
                       use-markup: true;
-                      title: bind $format_as_link(template.ui-entry as <$BzResult>.object as <$BzEntry>.url) as <string>;
+                      title: _("Project Website");
+                      subtitle: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.url;
+                      activatable: true;
+                      activated => $open_url_cb(template);
 
                       [prefix]
                       Image {
-                        icon-size: large;
                         has-tooltip: true;
-                        tooltip-text: _("Project URL");
+                        tooltip-text: _("Project Website");
+                        icon-name: "globe-symbolic";
+                      }
+
+                      [suffix]
+                      Image {
+                        margin-end: 8;
+                        has-tooltip: true;
+                        tooltip-text: _("Open in browser");
                         icon-name: "external-link-symbolic";
                       }
                     }
 
                     Adw.ActionRow {
-                      title: bind $format_size(template.ui-entry as <$BzResult>.object as <$BzEntry>.size) as <string>;
+                      title: _("Repositories");
+                      subtitle: bind template.entry-group as <$BzEntryGroup>.remote-repos-string;
 
                       [prefix]
                       Image {
-                        icon-size: large;
                         has-tooltip: true;
-                        tooltip-text: _("Download size");
-                        icon-name: "drive-harddisk-symbolic";
+                        tooltip-text: _("Remote repo name");
+                        icon-name: "network-server-symbolic";
                       }
                     }
+
                   }
 
                   Frame {
@@ -461,6 +467,7 @@ template $BzFullView: Adw.Bin {
 
                       factory: BuilderListItemFactory {
                         template ListItem {
+                          activatable: false;
                           child: Box {
                             margin-top: 10;
                             margin-bottom: 10;
@@ -564,4 +571,20 @@ template $BzFullView: Adw.Bin {
       };
     }
   };
+}
+
+
+Popover license_info_popover {
+  Label {
+    max-width-chars: 30;
+    justify: center;
+    wrap: true;
+
+    margin-top: 6;
+    margin-bottom: 6;
+    margin-start: 6;
+    margin-end: 6;
+
+   label:bind $pick_license_warning(template.ui-entry as <$BzResult>.object as <$BzEntry>.is-floss) as <string>;
+  }
 }
