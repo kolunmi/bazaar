@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-09-02 15:22+0700\n"
-"PO-Revision-Date: 2025-09-02 16:54+0700\n"
+"PO-Revision-Date: 2025-09-02 16:59+0700\n"
 "Last-Translator: Jill Fiore <contact@lumaeris.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -274,7 +274,7 @@ msgstr "Скопировать в буфер обмена"
 
 #: src/bz-entry-inspector.blp:5
 msgid "Entry Inspector"
-msgstr "Инспектор ввода"
+msgstr "Инспектор элементов"
 
 #: src/bz-entry-inspector.blp:76
 msgid "Serialize"
@@ -450,7 +450,7 @@ msgstr "Активные конфигурации избранных прило�
 
 #: src/bz-inspector.blp:66
 msgid "All Entry Groups"
-msgstr "Все входные группы"
+msgstr "Все группы элементов"
 
 #: src/bz-inspector.blp:69
 msgid "Filter..."
