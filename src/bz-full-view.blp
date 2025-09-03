@@ -128,6 +128,25 @@ template $BzFullView: Adw.Bin {
                             };
                           }
                         }
+
+                        Button {
+                          visible: bind $invert_boolean($is_null(template.ui-entry as <$BzResult>.object as <$BzEntry>.donation-url) as <bool>) as <bool>;
+                          styles [
+                            "pill",
+                            "suggested-action",
+                            "support-button"
+                          ]
+                          margin-top:8;
+                          valign: start;
+                          halign: start;
+                          has-tooltip: true;
+                          tooltip-text: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.donation-url;
+                          clicked => $support_cb(template);
+                          child: Adw.ButtonContent {
+                            label: _("Support");
+                            icon-name: "heart-filled-symbolic";
+                          };
+                        }
                       }
                     }
                   }
@@ -208,86 +227,18 @@ template $BzFullView: Adw.Bin {
                       focusable: false;
                       halign: start;
                       hexpand: false;
-                      
-                      child: Box {
+                      child: Button {
                         styles [
-                          "linked",
+                          "circular",
+                          "flat"
                         ]
 
-                        orientation: horizontal;
-
-                        Button {
-                          styles [
-                            "pill",
-                          ]
-
-                          vexpand: false;
-                          has-tooltip: true;
-                          tooltip-text: _("Share this application");
-                          icon-name: "share-alt-symbolic";
-                          clicked => $share_cb(template);
-                        }
-
-                        Button {
-                          styles [
-                            "pill",
-                          ]
-
-                          vexpand: false;
-                          has-tooltip: true;
-                          tooltip-text: _("The number of downloads in the last 30 days. Click to view this application's download statistics.");
-                          visible: bind $invert_boolean($is_null(template.debounced-ui-entry) as <bool>) as <bool>;
-                          sensitive: bind $invert_boolean($is_zero(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <bool>) as <bool>;
-                          clicked => $dl_stats_cb(template);
-
-                          child: Box {
-                            hexpand: false;
-                            orientation: horizontal;
-                            spacing: 10;
-
-                            Image {
-                              icon-name: "graph-symbolic";
-                            }
-
-                            Adw.Spinner {
-                              visible: bind $is_null(template.debounced-ui-entry) as <bool>;
-                            }
-                          
-                            Label {
-                              label: bind $format_recent_downloads(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <string>;
-                              visible: bind $invert_boolean($is_null(template.debounced-ui-entry) as <bool>) as <bool>;
-                            }
-                          };
-                        }
-                      };
-                    }
-
-                    FlowBoxChild {
-                      focusable: false;
-                      halign: start;
-                      hexpand: false;
-                      
-                      visible: bind $invert_boolean($is_null(template.ui-entry as <$BzResult>.object as <$BzEntry>.donation-url) as <bool>) as <bool>;
-
-                      child: Box {
-                        styles [
-                          "linked",
-                        ]
-
-                        orientation: horizontal;
-                      
-                        Button {
-                          styles [
-                            "pill",
-                            "suggested-action",
-                          ]
-
-                          valign: start;
-                          has-tooltip: true;
-                          tooltip-text: _("Support this developer");
-                          label: _("Support");
-                          clicked => $support_cb(template);
-                        }
+                        vexpand: false;
+                        width-request:45;
+                        has-tooltip: true;
+                        tooltip-text: _("Share this application");
+                        icon-name: "share-alt-symbolic";
+                        clicked => $share_cb(template);
                       };
                     }
 
@@ -428,6 +379,29 @@ template $BzFullView: Adw.Bin {
                         has-tooltip: true;
                         tooltip-text: _("Open in browser");
                         icon-name: "external-link-symbolic";
+                      }
+                    }
+
+                    Adw.ActionRow {
+                      title: _("Download Statistics");
+                      subtitle: bind $format_recent_downloads(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <string>;
+                      sensitive: bind $invert_boolean($is_null(template.debounced-ui-entry) as <bool>) as <bool>;
+                      activatable: true;
+                      activated => $dl_stats_cb(template);
+
+                      [prefix]
+                      Image {
+                        has-tooltip: true;
+                        tooltip-text: _("Download Statistics");
+                        icon-name: "graph-symbolic";
+                      }
+
+                      [suffix]
+                      Image {
+                        margin-end: 8;
+                        has-tooltip: true;
+                        tooltip-text: _("Show Downloads Over Time");
+                        icon-name: "go-next-symbolic";
                       }
                     }
 

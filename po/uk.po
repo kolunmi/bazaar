@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-01 19:18+0300\n"
+"POT-Creation-Date: 2025-09-02 08:53+0300\n"
 "PO-Revision-Date: 2025-08-12 22:05+0300\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -342,27 +342,27 @@ msgstr "Спробуйте інший запит"
 msgid "Content"
 msgstr "Вміст"
 
-#: src/bz-full-view.blp:169 src/bz-installed-page.blp:151
+#: src/bz-full-view.blp:158 src/bz-installed-page.blp:151
 msgid "Run this application"
 msgstr "Запустити цей застосунок"
 
-#: src/bz-full-view.blp:193
+#: src/bz-full-view.blp:182
 msgid "Download and install this application"
 msgstr "Завантажити та встановити цей застосунок"
 
-#: src/bz-full-view.blp:211 src/bz-window.c:917
+#: src/bz-full-view.blp:185 src/bz-window.c:917
 msgid "Install"
 msgstr "Встановити"
 
-#: src/bz-full-view.blp:225
+#: src/bz-full-view.blp:196
 msgid "Uninstall this application"
 msgstr "Видалити цей застосунок"
 
-#: src/bz-full-view.blp:255
+#: src/bz-full-view.blp:226
 msgid "Share this application"
 msgstr "Поділитися цим застосунком"
 
-#: src/bz-full-view.blp:267
+#: src/bz-full-view.blp:238
 msgid ""
 "The number of downloads in the last 30 days. Click to view this "
 "application's download statistics."
@@ -370,40 +370,59 @@ msgstr ""
 "Кількість завантажень за останні 30 днів. Натисніть, аби побачити статистику "
 "завантажень цього застосунку."
 
-#: src/bz-full-view.blp:316
+#: src/bz-full-view.blp:287
 msgid "Support this developer"
 msgstr "Підтримати розробників"
 
-#: src/bz-full-view.blp:329
+#: src/bz-full-view.blp:288
 msgid "Support"
 msgstr "Підтримати"
 
-#: src/bz-full-view.blp:358
+#: src/bz-full-view.blp:316
 msgid "VCS Forge Star Count"
 msgstr "Вподобань на сторінці розробки"
 
-#: src/bz-full-view.blp:428
-msgid "Remote repo name"
-msgstr "Назва віддаленого сховища"
+#: src/bz-full-view.blp:371
+#, fuzzy
+msgid "Download Size"
+msgstr "Розмір завантаження"
 
-#: src/bz-full-view.blp:441
-msgid "Project URL"
-msgstr "URL проєкту"
-
-#: src/bz-full-view.blp:453
+#: src/bz-full-view.blp:377
 msgid "Download size"
 msgstr "Розмір завантаження"
 
-#: src/bz-full-view.c:212
+#: src/bz-full-view.blp:383
+msgid "License"
+msgstr "Ліцензія"
+
+#: src/bz-full-view.blp:413 src/bz-full-view.blp:421
+#, fuzzy
+msgid "Project Website"
+msgstr "URL проєкту"
+
+#: src/bz-full-view.blp:429
+#, fuzzy
+msgid "Open in browser"
+msgstr "Відкрити в оглядачі"
+
+#: src/bz-full-view.blp:435
+msgid "Repositories"
+msgstr "Віддалені сховища"
+
+#: src/bz-full-view.blp:441
+msgid "Remote repo name"
+msgstr "Назва віддаленого сховища"
+
+#: src/bz-full-view.c:208
 #, c-format
 msgid "Released %x"
 msgstr "Випуск %x"
 
-#: src/bz-full-view.c:223
+#: src/bz-full-view.c:219
 msgid "No URL"
 msgstr "Без URL"
 
-#: src/bz-full-view.c:231
+#: src/bz-full-view.c:227
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -411,7 +430,7 @@ msgstr ""
 "Цей застосунок має вільну ліцензію. Це означає, що початковий код може бути "
 "перевірено на безпечність."
 
-#: src/bz-full-view.c:232
+#: src/bz-full-view.c:228
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
@@ -565,7 +584,7 @@ msgstr "Найнижчий мінімальний поріг"
 msgid "Maximize Upper Bound"
 msgstr "Найвищий максимальний поріг"
 
-#: src/bz-transaction-manager.c:1049
+#: src/bz-transaction-manager.c:1055
 #, c-format
 msgid "Finished in %.02f seconds"
 msgstr "Завершено за %.02f сек"

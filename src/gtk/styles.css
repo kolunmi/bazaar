@@ -44,3 +44,9 @@
     font-size: 1.33em;
     font-weight: normal;
 }
+
+.support-button {
+    background-color: alpha(#f06292, 0.25);
+    color: #f06292;
+    padding: 2px 12px;
+}
