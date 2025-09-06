@@ -310,6 +310,21 @@ page_toggled_cb (BzWindow       *self,
 }
 
 static void
+visible_page_changed_cb (AdwViewStack *view_stack,
+                         GParamSpec   *pspec,
+                         gpointer      user_data)
+{
+  const char *visible_child_name = adw_view_stack_get_visible_child_name (view_stack);
+  
+  GtkWidget *window = GTK_WIDGET (user_data);
+  if (g_strcmp0 (visible_child_name, "flathub") == 0) {
+    gtk_widget_add_css_class (window, "flathub");
+  } else {
+    gtk_widget_remove_css_class (window, "flathub");
+  }
+}
+
+static void
 breakpoint_apply_cb (BzWindow      *self,
                      AdwBreakpoint *breakpoint)
 {
@@ -468,6 +483,7 @@ bz_window_class_init (BzWindowClass *klass)
   // gtk_widget_class_bind_template_callback (widget_class, refresh_cb);
   gtk_widget_class_bind_template_callback (widget_class, update_cb);
   gtk_widget_class_bind_template_callback (widget_class, transactions_clear_cb);
+  gtk_widget_class_bind_template_callback (widget_class, visible_page_changed_cb);
 
   gtk_widget_class_install_action (widget_class, "escape", NULL, action_escape);
 }
