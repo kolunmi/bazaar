@@ -23,7 +23,7 @@
 #define MAX_LOAD_RETRIES       3
 #define RETRY_INTERVAL_SECONDS 5
 
-#include <glycin-gtk4-1/glycin-gtk4.h>
+#include <glycin-gtk4-2/glycin-gtk4.h>
 #include <libdex.h>
 
 #include "bz-async-texture.h"
