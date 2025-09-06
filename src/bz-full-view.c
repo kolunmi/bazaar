@@ -544,6 +544,7 @@ bz_full_view_set_entry_group (BzFullView   *self,
   g_clear_object (&self->group_model);
 
   gtk_widget_set_visible (self->forge_stars, FALSE);
+  gtk_revealer_set_reveal_child(GTK_REVEALER(self->forge_stars), FALSE);
   gtk_label_set_label (self->forge_stars_label, "...");
 
   if (group != NULL)
@@ -646,6 +647,7 @@ retrieve_star_string_fiber (BzFullView *self)
   fmt        = g_strdup_printf ("%'zu", star_count);
 
   gtk_widget_set_visible (self->forge_stars, TRUE);
+  gtk_revealer_set_reveal_child(GTK_REVEALER(self->forge_stars), TRUE);
 
 done:
   gtk_label_set_label (self->forge_stars_label, fmt != NULL ? fmt : "?");

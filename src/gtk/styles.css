@@ -51,6 +51,11 @@
     padding: 2px 12px;
 }
 
+.star-button {
+    background-color: alpha(@warning_bg_color, 0.25);
+    color: @warning_color;
+    padding: 2px 12px;
+}
 
 .flathub-page-section {
     padding: 10px;

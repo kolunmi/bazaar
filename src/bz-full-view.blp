@@ -128,24 +128,57 @@ template $BzFullView: Adw.Bin {
                             };
                           }
                         }
+                        Box {
+                          spacing: 8;
+                          Button {
+                            visible: bind $invert_boolean($is_null(template.ui-entry as <$BzResult>.object as <$BzEntry>.donation-url) as <bool>) as <bool>;
+                            styles [
+                              "pill",
+                              "suggested-action",
+                              "support-button"
+                            ]
+                            margin-top:8;
+                            valign: start;
+                            halign: start;
+                            has-tooltip: true;
+                            tooltip-text: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.donation-url;
+                            clicked => $support_cb(template);
+                            child: Adw.ButtonContent {
+                              label: _("Support");
+                              icon-name: "heart-filled-symbolic";
+                            };
+                          }
+                          Revealer forge_stars{
+                            transition-type: slide_down;
+                            reveal-child: false;
+                            child: Button {
+                              styles [
+                                "pill",
+                                "suggested-action",
+                                "star-button"
+                              ]
 
-                        Button {
-                          visible: bind $invert_boolean($is_null(template.ui-entry as <$BzResult>.object as <$BzEntry>.donation-url) as <bool>) as <bool>;
-                          styles [
-                            "pill",
-                            "suggested-action",
-                            "support-button"
-                          ]
-                          margin-top:8;
-                          valign: start;
-                          halign: start;
-                          has-tooltip: true;
-                          tooltip-text: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.donation-url;
-                          clicked => $support_cb(template);
-                          child: Adw.ButtonContent {
-                            label: _("Support");
-                            icon-name: "heart-filled-symbolic";
-                          };
+                              margin-top:8;
+                              valign: start;
+                              halign: start;
+                              has-tooltip: true;
+                              tooltip-text: _("Repository Star Count");
+                              clicked => $forge_cb(template);
+
+                              child: Box {
+                                hexpand: false;
+                                orientation: horizontal;
+                                spacing: 10;
+
+                                Image {
+                                  icon-name: "starred-symbolic";
+                                }
+
+                                Label forge_stars_label {}
+                              };
+                            };
+                          }
+
                         }
                       }
                     }
@@ -239,43 +272,6 @@ template $BzFullView: Adw.Bin {
                         tooltip-text: _("Share this application");
                         icon-name: "share-alt-symbolic";
                         clicked => $share_cb(template);
-                      };
-                    }
-
-                    FlowBoxChild forge_stars {
-                      focusable: false;
-                      halign: start;
-                      hexpand: false;
-                      
-                      child: Box {
-                        styles [
-                          "linked",
-                        ]
-
-                        orientation: horizontal;
-                      
-                        Button {
-                          styles [
-                            "pill",
-                          ]
-
-                          valign: start;
-                          has-tooltip: true;
-                          tooltip-text: _("VCS Forge Star Count");
-                          clicked => $forge_cb(template);
-
-                          child: Box {
-                            hexpand: false;
-                            orientation: horizontal;
-                            spacing: 10;
-
-                            Image {
-                              icon-name: "starred-symbolic";
-                            }
-
-                            Label forge_stars_label {}
-                          };
-                        }
                       };
                     }
                   }
