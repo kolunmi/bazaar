@@ -21,7 +21,7 @@
 }
 
 .app-tile {
-    background-color: alpha(var(--card-bg-color), 0.4);
+    background-color: alpha(var(--card-bg-color), 0.7);
 }
 
 .screenshot {
@@ -51,13 +51,13 @@
     padding: 2px 12px;
 }
 
-
 .flathub-page-section {
-    padding: 10px;
-    background-color: alpha(var(--accent-bg-color), 0.45);
     border-radius: 10px;
 }
 
-.flathub-background {
-    background-color: #251f32;
+window,
+headerbar,
+.global-search {
+  transition: background-color 0.2s ease;
 }
+

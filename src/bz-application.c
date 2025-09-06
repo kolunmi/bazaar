@@ -1002,16 +1002,6 @@ init_service_struct (BzApplication *self)
   g_debug ("Constructing gsettings for %s ...", app_id);
   self->settings = g_settings_new (app_id);
 
-  g_debug ("Loading css provider from resource path %s",
-           "/io/github/kolunmi/Bazaar/gtk/styles.css");
-  self->css = gtk_css_provider_new ();
-  gtk_css_provider_load_from_resource (
-      self->css, "/io/github/kolunmi/Bazaar/gtk/styles.css");
-  gtk_style_context_add_provider_for_display (
-      gdk_display_get_default (),
-      GTK_STYLE_PROVIDER (self->css),
-      GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-
   self->groups         = g_list_store_new (BZ_TYPE_ENTRY_GROUP);
   self->installed_apps = g_list_store_new (BZ_TYPE_ENTRY);
   self->ids_to_groups  = g_hash_table_new_full (

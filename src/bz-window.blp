@@ -33,8 +33,8 @@ template $BzWindow: Adw.ApplicationWindow {
       height-request: 450;
 
       child: Adw.ToolbarView toolbar_view {
-        top-bar-style: raised_border;
-        bottom-bar-style: raised_border;
+        top-bar-style: raised;
+        bottom-bar-style: raised;
         reveal-bottom-bars: false;
 
         content: Adw.OverlaySplitView split_view {
@@ -45,6 +45,7 @@ template $BzWindow: Adw.ApplicationWindow {
           sidebar: Adw.ViewStack transactions_stack {
             enable-transitions: true;
             transition-duration: 200;
+            styles ["transactions-stack"]
 
             Adw.ViewStackPage {
               name: "empty";
@@ -148,6 +149,8 @@ template $BzWindow: Adw.ApplicationWindow {
                 child: Adw.ViewStack main_stack {
                   enable-transitions: true;
                   transition-duration: 200;
+
+                  notify::visible-child => $visible_page_changed_cb();
 
                   Adw.ViewStackPage {
                     name: "offline";
@@ -253,6 +256,10 @@ template $BzWindow: Adw.ApplicationWindow {
 
         [top]
         Adw.HeaderBar top_header_bar {
+          styles [
+            "toplevel-headerbar"
+          ]
+
           [start]
           Button go_back {
             has-tooltip: true;
@@ -415,6 +422,9 @@ template $BzWindow: Adw.ApplicationWindow {
 
         [bottom]
         Adw.HeaderBar bottom_header_bar {
+          styles [
+            "toplevel-headerbar"
+          ]
           show-start-title-buttons: false;
           show-end-title-buttons: false;
         }

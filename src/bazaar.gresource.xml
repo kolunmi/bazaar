@@ -2,7 +2,8 @@
 <gresources>
   <gresource prefix="/io/github/kolunmi/Bazaar/">
     
-    <file>gtk/styles.css</file>
+    <file alias="style.css">gtk/style.css</file>
+    <file alias="style-dark.css">gtk/style-dark.css</file>
 
     <file preprocess="xml-stripblanks">main-config-schema.xml</file>
     <file preprocess="xml-stripblanks">bz-content-provider-config-schema.xml</file>
