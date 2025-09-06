@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-09-06 14:28+0700\n"
-"PO-Revision-Date: 2025-09-06 14:58+0700\n"
+"PO-Revision-Date: 2025-09-06 15:05+0700\n"
 "Last-Translator: Jill Fiore <contact@lumaeris.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -727,7 +727,7 @@ msgstr "_Параметры"
 
 #: src/bz-window.blp:447
 msgid "_Refresh"
-msgstr "П_ерезагрузить"
+msgstr "_Обновить"
 
 #: src/bz-window.blp:452
 msgid "_Keyboard Shortcuts"
@@ -735,7 +735,7 @@ msgstr "_Сочетание клавиш"
 
 #: src/bz-window.blp:457
 msgid "_About Bazaar"
-msgstr "_О Bazaar"
+msgstr "О _Bazaar"
 
 #: src/bz-window.blp:462
 msgid "_Donate to Bazaar ❤️"
@@ -832,7 +832,7 @@ msgstr "Открыть диалог поиска"
 #: src/gtk/help-overlay.blp:19
 msgctxt "shortcut window"
 msgid "Refresh"
-msgstr "Перезагрузить"
+msgstr "Обновить"
 
 #: src/gtk/help-overlay.blp:24
 msgctxt "shortcut window"
