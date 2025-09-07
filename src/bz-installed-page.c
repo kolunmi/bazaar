@@ -171,8 +171,8 @@ static void
 run_cb (GtkListItem *list_item,
         GtkButton   *button)
 {
-  BzEntry         *entry = NULL;
-  BzInstalledPage *self  = NULL;
+  BzEntry         *entry    = NULL;
+  BzInstalledPage *self     = NULL;
   GtkWidget       *menu_btn = NULL;
 
   entry = gtk_list_item_get_item (list_item);
