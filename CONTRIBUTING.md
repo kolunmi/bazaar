@@ -83,4 +83,5 @@ passes these checks, but we also have more criteria than just that before we can
 accept and merge it. We recommend that you check the following things locally
 before you submit your code:
 
-⚠️ **Create a checklist that authors should use before submitting a pull request**
+- [ ] Use the GNU Style Guide
+- [ ] Follow the [GNOME Commit Style](https://handbook.gnome.org/development/commit-messages.html)
