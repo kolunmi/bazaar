@@ -38,15 +38,14 @@ We welcome many different types of contributions including:
 
 ## Find an Issue
 
-We have good first issues for new contributors and help wanted issues suitable
-for any contributor. [good first issue]([TODO](https://github.com/kolunmi/bazaar/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22good%20first%20issue%22)) has extra information to
-help you make your first contribution. [help wanted](https://github.com/kolunmi/bazaar/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22help%20wanted%22) are issues
-suitable for someone who isn't a core maintainer and is good to move onto after
-your first pull request.
+These are the issues that need the most amount of attention and would be an effective way to get started:
+
+- [Help Wanted issues](https://github.com/kolunmi/bazaar/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22help%20wanted%22)
+- [Good first issues](https://github.com/kolunmi/bazaar/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22good%20first%20issue%22)) has extra information to
 
 Sometimes there won’t be any issues with these labels. That’s ok! There is
 likely still something for you to work on. If you want to contribute but you
-don’t know where to start or can't find a suitable issue, you can ⚠️ **explain how people can ask for an issue to work on**.
+don’t know where to start or can't find a suitable issue then feel free to post on the [discussion forum](https://github.com/kolunmi/bazaar/discussions)
 
 Once you see an issue that you'd like to work on, please post a comment saying
 that you want to work on it. Something like "I want to work on this" is fine.
