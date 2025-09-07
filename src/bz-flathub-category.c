@@ -267,27 +267,26 @@ get_category_display_name (const char *category_id)
 static const char *
 get_category_icon_name (const char *category_id)
 {
-  return "application-x-executable";
   if (g_strcmp0 (category_id, "audiovideo") == 0)
-    return "multimedia-symbolic";
+    return NULL;
   if (g_strcmp0 (category_id, "development") == 0)
-    return "applications-development-symbolic";
+    return "io.github.kolumni.Bazaar.Develop";
   if (g_strcmp0 (category_id, "education") == 0)
-    return "applications-education-symbolic";
+    return "io.github.kolumni.Bazaar.Learn";
   if (g_strcmp0 (category_id, "game") == 0)
-    return "applications-games-symbolic";
+    return "io.github.kolumni.Bazaar.Play";
   if (g_strcmp0 (category_id, "graphics") == 0)
-    return "applications-graphics-symbolic";
+    return "io.github.kolumni.Bazaar.Create";
   if (g_strcmp0 (category_id, "network") == 0)
-    return "applications-internet-symbolic";
+    return "io.github.kolumni.Bazaar.Socialize";
   if (g_strcmp0 (category_id, "office") == 0)
-    return "applications-office-symbolic";
+    return "io.github.kolumni.Bazaar.Work";
   if (g_strcmp0 (category_id, "science") == 0)
-    return "applications-science-symbolic";
+    return NULL;
   if (g_strcmp0 (category_id, "system") == 0)
-    return "applications-system-symbolic";
+    return NULL;
   if (g_strcmp0 (category_id, "utility") == 0)
-    return "applications-utilities-symbolic";
+    return NULL;
     
   return "application-x-generic";
 }

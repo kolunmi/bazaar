@@ -76,5 +76,11 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/view-more-horizontal-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/view-more-symbolic.svg</file>
 
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Create.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Develop.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Learn.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Play.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Socialize.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Work.svg</file>
   </gresource>
 </gresources>

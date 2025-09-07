@@ -82,6 +82,20 @@ bz_category_tile_set_property (GObject *object,
     }
 }
 
+static gboolean
+is_null (gpointer object,
+         GObject *value)
+{
+  return value == NULL;
+}
+
+static gboolean
+invert_boolean (gpointer object,
+                gboolean value)
+{
+  return !value;
+}
+
 static void
 bz_category_tile_class_init (BzCategoryTileClass *klass)
 {
@@ -103,6 +117,9 @@ bz_category_tile_class_init (BzCategoryTileClass *klass)
 
   gtk_widget_class_set_css_name (widget_class, "category-tile");
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-category-tile.ui");
+
+  gtk_widget_class_bind_template_callback (widget_class, is_null);
+  gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
 }
 
 static void

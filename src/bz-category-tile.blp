@@ -13,16 +13,17 @@ template $BzCategoryTile: Button {
   child: Box {
     margin-start: 16;
     margin-end: 16;
-    margin-top: 10;
-    margin-bottom: 10;
+    margin-top: 24;
+    margin-bottom: 24;
     orientation: horizontal;
     spacing: 12;
     valign: center;
     halign: center;
     
     Image {
-      pixel-size: 48;
+      pixel-size: 32;
       icon-name: bind template.category as <$BzFlathubCategory>.icon-name;
+      visible: bind $invert_boolean($is_null(template.category as <$BzFlathubCategory>.icon-name) as <bool>) as <bool>;
     }
     
     Label {
