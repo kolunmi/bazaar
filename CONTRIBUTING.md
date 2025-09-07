@@ -32,6 +32,7 @@ We welcome many different types of contributions including:
 * Issue Triage
 * Answering questions in Discussions
 * Release management
+* [Translations](https://github.com/kolunmi/bazaar/blob/master/TRANSLATORS.md) - follow the dedicated instructions in that document
 
 ## Find an Issue
 
