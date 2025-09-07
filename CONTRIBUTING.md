@@ -1,5 +1,7 @@
 # Contributing Guide
 
+Thank you for contributing to Bazaar! Here are some instructions to get you started. 
+
 * [New Contributor Guide](#contributing-guide)
   * [Ways to Contribute](#ways-to-contribute)
   * [Find an Issue](#find-an-issue)
@@ -36,8 +38,6 @@ We welcome many different types of contributions including:
 
 ## Find an Issue
 
-[Help Wanted Issues]()
-
 We have good first issues for new contributors and help wanted issues suitable
 for any contributor. [good first issue]([TODO](https://github.com/kolunmi/bazaar/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22good%20first%20issue%22)) has extra information to
 help you make your first contribution. [help wanted](https://github.com/kolunmi/bazaar/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22help%20wanted%22) are issues
@@ -55,10 +55,8 @@ that you want to work on it. Something like "I want to work on this" is fine.
 
 The best way to reach us with a question when contributing is to ask on:
 
-⚠️ **Pick the way(s) that you prefer people ask for help**
-
-* The original github issue
-* The discussions area
+* The original github issue you want to contribute to
+* The [discussions](https://github.com/kolunmi/bazaar/discussions) area
 
 ## Pull Request Lifecycle
 
