@@ -8,8 +8,8 @@ configure_file(
 )
 
 configure_file(
-  input: 'io.github.kolunmi.bazaar.searchprovider.service.in',
-  output: 'io.github.kolunmi.Bazaar.Searchprovider.service',
+  input: 'io.github.kolunmi.Bazaar.SearchProvider.service.in',
+  output: 'io.github.kolunmi.Bazaar.SearchProvider.service',
   configuration: service_conf,
   install_dir: get_option('datadir') / 'dbus-1' / 'services'
 )
