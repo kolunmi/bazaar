@@ -11,7 +11,7 @@ Thank you for contributing to Bazaar! Here are some instructions to get you star
   * [Sign Your Commits](#sign-your-commits)
   * [Pull Request Checklist](#pull-request-checklist)
 
-Welcome! We are glad that you want to contribute to our project! 💖
+Welcome! We are glad that you are here! 💖
 
 As you get started, you are in the best position to give us feedback on areas of
 our project that we need help with including:
@@ -41,7 +41,7 @@ We welcome many different types of contributions including:
 These are the issues that need the most amount of attention and would be an effective way to get started:
 
 - [Help Wanted issues](https://github.com/kolunmi/bazaar/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22help%20wanted%22)
-- [Good first issues](https://github.com/kolunmi/bazaar/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22good%20first%20issue%22)) has extra information to
+- [Good first issues](https://github.com/kolunmi/bazaar/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22good%20first%20issue%22)
 
 Sometimes there won’t be any issues with these labels. That’s ok! There is
 likely still something for you to work on. If you want to contribute but you
