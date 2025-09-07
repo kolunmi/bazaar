@@ -82,5 +82,10 @@
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Play.svg</file>
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Socialize.svg</file>
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Work.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Audiovideo.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Science.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.System.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Utilities.svg</file>
+
   </gresource>
 </gresources>
