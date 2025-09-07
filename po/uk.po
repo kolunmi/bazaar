@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-07 08:08+0300\n"
+"POT-Creation-Date: 2025-09-08 02:13+0300\n"
 "PO-Revision-Date: 2025-08-12 22:05+0300\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -83,12 +83,13 @@ msgstr "Шукаємо Blender"
 msgid "Download graph for Blender"
 msgstr "Статистика завантажень Blender"
 
-#: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:191
-#: src/bz-installed-page.blp:203
+#: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:192
+#: src/bz-installed-page.blp:204
 msgid "Manage Addons"
 msgstr "Керувати розширеннями"
 
-#: src/bz-app-tile.blp:62 src/bz-full-view.blp:125
+#: src/bz-app-tile.blp:62 src/bz-detailed-app-tile.blp:60
+#: src/bz-full-view.blp:125
 msgid "This flatpak is verified by the original developers of the software."
 msgstr "Цей пакунок затверджено розробниками цієї програми"
 
@@ -339,6 +340,54 @@ msgstr "Нещодавно додані"
 msgid "Popular"
 msgstr "Популярні"
 
+#: src/bz-flatpak-entry.c:561
+msgctxt "Project URL Type"
+msgid "Homepage"
+msgstr "Домашня сторінка"
+
+#: src/bz-flatpak-entry.c:564
+msgctxt "Project URL Type"
+msgid "Bugtracker"
+msgstr "Відстеження помилок"
+
+#: src/bz-flatpak-entry.c:567
+msgctxt "Project URL Type"
+msgid "FAQ"
+msgstr "ЧаПи"
+
+#: src/bz-flatpak-entry.c:570
+msgctxt "Project URL Type"
+msgid "Help"
+msgstr "Допомога"
+
+#: src/bz-flatpak-entry.c:573
+#, fuzzy
+msgctxt "Project URL Type"
+msgid "Donation"
+msgstr "Пожертви"
+
+#: src/bz-flatpak-entry.c:578
+msgctxt "Project URL Type"
+msgid "Translate"
+msgstr "Переклад"
+
+#: src/bz-flatpak-entry.c:581
+#, fuzzy
+msgctxt "Project URL Type"
+msgid "Contact"
+msgstr "Зворотній звʼязок"
+
+#: src/bz-flatpak-entry.c:584
+#, fuzzy
+msgctxt "Project URL Type"
+msgid "VCS Browser"
+msgstr "Початковий код"
+
+#: src/bz-flatpak-entry.c:589
+msgctxt "Project URL Type"
+msgid "Contribute"
+msgstr "Долучитися"
+
 #: src/bz-full-view.blp:14
 msgid "No Results"
 msgstr "Нічого не знайдено"
@@ -360,7 +409,7 @@ msgstr "Підтримати"
 msgid "Repository Star Count"
 msgstr "Вподобань на сторінці розробки"
 
-#: src/bz-full-view.blp:210 src/bz-installed-page.blp:151
+#: src/bz-full-view.blp:210 src/bz-installed-page.blp:168
 msgid "Run this application"
 msgstr "Запустити цей застосунок"
 
@@ -379,6 +428,11 @@ msgstr "Видалити цей застосунок"
 #: src/bz-full-view.blp:272
 msgid "Share this application"
 msgstr "Поділитися цим застосунком"
+
+#: src/bz-full-view.blp:312
+#, fuzzy
+msgid "App Details"
+msgstr "Докладніше"
 
 #: src/bz-full-view.blp:315
 #, fuzzy
@@ -483,55 +537,26 @@ msgstr "Не встановлено жодного пакунку Flatpak"
 msgid "Installed"
 msgstr "Встановлені"
 
-#: src/bz-installed-page.blp:115
+#: src/bz-installed-page.blp:97
 #, fuzzy
 msgid "Support this application"
 msgstr "Поділитися цим застосунком"
 
-#: src/bz-installed-page.blp:133
-msgid "This application does not provide a donation link"
-msgstr "Цей застосунок не надає посилання для пожертв"
-
-#: src/bz-installed-page.blp:172
-msgid "More actions"
-msgstr "Більше дій"
-
-#: src/bz-installed-page.blp:216 src/bz-installed-page.blp:227
-msgid "Edit Permissions"
-msgstr "Керувати правами"
-
-#: src/bz-installed-page.blp:240 src/bz-installed-page.blp:251
-msgid "View Store Page"
-msgstr "Відкрити сторінку в крамниці"
-
-#: src/bz-installed-page.blp:265 src/bz-installed-page.blp:277
-#: src/bz-window.c:921
+#: src/bz-installed-page.blp:122 src/bz-window.c:921
 msgid "Remove"
 msgstr "Видалити"
 
-#: src/bz-installed-page.c:252
-#, c-format
-msgid ""
-"\"%s\" does not provide a donations link. This does not mean you cannot "
-"support them! Try looking at their <a href=\"%s\">project page</a> for more "
-"information."
-msgstr ""
-"\"%s\" не надає посилання для пожертв. Та це не означає, що Ви не можете "
-"підтримати проєкт! Відвідайте <a href=\"%s\">сторінку проєкту</a>, аби "
-"дізнатися більше."
+#: src/bz-installed-page.blp:149
+msgid "More actions"
+msgstr "Більше дій"
 
-#: src/bz-installed-page.c:262
-#, c-format
-msgid ""
-"\"%s\" does not provide a donations link. This does not mean you cannot "
-"support them! Try finding their project page for more information."
-msgstr ""
-"\"%s\" не надає посилання для пожертв. Та це не означає, що Ви не можете "
-"підтримати проєкт! Спробуйте знайти сторінку проєкту, аби дізнатися більше."
+#: src/bz-installed-page.blp:179
+msgid "Run"
+msgstr "Запустити"
 
-#: src/bz-installed-page.c:269
-msgid "No Donations Link"
-msgstr "Без посилання для пожертв"
+#: src/bz-installed-page.blp:242 src/bz-installed-page.blp:253
+msgid "View Store Page"
+msgstr "Відкрити сторінку в крамниці"
 
 #: src/bz-preferences-dialog.blp:9
 msgid "Preferences"
