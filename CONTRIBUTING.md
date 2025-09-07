@@ -133,4 +133,5 @@ accept and merge it. We recommend that you check the following things locally
 before you submit your code:
 
 - [ ] Use the GNU Style Guide
+- [ ] Check the [.clang-format](https://github.com/kolunmi/bazaar/commit/3e17a38197c02a902fa800e4739dec1cf1c500ff) file
 - [ ] Follow the [GNOME Commit Style](https://handbook.gnome.org/development/commit-messages.html)
