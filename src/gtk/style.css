@@ -66,6 +66,11 @@
     border-radius: 10px;
 }
 
+.category-tile {
+	font-weight: 900;
+	font-size: larger;
+}
+
 window,
 headerbar,
 .global-search {
@@ -88,3 +93,4 @@ window.flathub {
 .flathub .sidebar-pane {
   background-color: oklch(from var(--sidebar-bg-color) l calc(c * 4) var(--flathub-bg-hue));
 }
+

@@ -20,6 +20,7 @@
 
 #include "bz-flathub-page.h"
 #include "bz-app-tile.h"
+#include "bz-category-tile.h"
 #include "bz-category-dialog.h"
 #include "bz-detailed-app-tile.h"
 #include "bz-dynamic-list-view.h"
@@ -144,21 +145,21 @@ unbind_widget_cb (BzFlathubPage     *self,
 }
 
 static void
-bind_category_btn_cb (BzFlathubPage     *self,
-                      GtkButton         *button,
-                      BzFlathubCategory *category,
-                      BzDynamicListView *view)
-{
-  g_signal_connect_swapped (button, "clicked", G_CALLBACK (category_clicked), category);
+bind_category_tile_cb (BzFlathubPage     *self,
+                       BzCategoryTile    *tile,
+                       BzFlathubCategory *category,
+                       BzDynamicListView *view)
+{  
+  g_signal_connect_swapped (tile, "clicked", G_CALLBACK (category_clicked), category);
 }
 
 static void
-unbind_category_btn_cb (BzFlathubPage     *self,
-                        GtkButton         *button,
-                        BzFlathubCategory *category,
-                        BzDynamicListView *view)
+unbind_category_tile_cb (BzFlathubPage     *self,
+                         BzCategoryTile    *tile,
+                         BzFlathubCategory *category,
+                         BzDynamicListView *view)
 {
-  g_signal_handlers_disconnect_by_func (button, category_clicked, category);
+  g_signal_handlers_disconnect_by_func (tile, category_clicked, category);
 }
 
 static void
@@ -196,6 +197,7 @@ bz_flathub_page_class_init (BzFlathubPageClass *klass)
       g_cclosure_marshal_VOID__OBJECTv);
 
   g_type_ensure (BZ_TYPE_SECTION_VIEW);
+  g_type_ensure (BZ_TYPE_CATEGORY_TILE);
   g_type_ensure (BZ_TYPE_PATTERNED_BACKGROUND);
   g_type_ensure (BZ_TYPE_DETAILED_APP_TILE);
   g_type_ensure (BZ_TYPE_INHIBITED_SCROLLABLE);
@@ -207,8 +209,8 @@ bz_flathub_page_class_init (BzFlathubPageClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, limit_if_false);
   gtk_widget_class_bind_template_callback (widget_class, bind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, unbind_widget_cb);
-  gtk_widget_class_bind_template_callback (widget_class, bind_category_btn_cb);
-  gtk_widget_class_bind_template_callback (widget_class, unbind_category_btn_cb);
+  gtk_widget_class_bind_template_callback (widget_class, bind_category_tile_cb);
+  gtk_widget_class_bind_template_callback (widget_class, unbind_category_tile_cb);
 }
 
 static void

@@ -19,6 +19,7 @@
  */
 
 #include "bz-flathub-category.h"
+#include <glib/gi18n.h>
 
 struct _BzFlathubCategory
 {
@@ -37,6 +38,8 @@ enum
 
   PROP_MAP_FACTORY,
   PROP_NAME,
+  PROP_DISPLAY_NAME,
+  PROP_ICON_NAME,
   PROP_APPLICATIONS,
 
   LAST_PROP
@@ -73,6 +76,12 @@ bz_flathub_category_get_property (GObject    *object,
       break;
     case PROP_APPLICATIONS:
       g_value_take_object (value, bz_flathub_category_dup_applications (self));
+      break;
+    case PROP_DISPLAY_NAME:
+      g_value_set_string (value, bz_flathub_category_get_display_name (self));
+      break;
+    case PROP_ICON_NAME:
+      g_value_set_string (value, bz_flathub_category_get_icon_name (self));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -124,6 +133,17 @@ bz_flathub_category_class_init (BzFlathubCategoryClass *klass)
           "name",
           NULL, NULL, NULL,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+  props[PROP_DISPLAY_NAME] =
+    g_param_spec_string (
+        "display-name",
+        NULL, NULL, NULL,
+        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
+  props[PROP_ICON_NAME] =
+    g_param_spec_string (
+        "icon-name", 
+        NULL, NULL, NULL,
+        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   props[PROP_APPLICATIONS] =
       g_param_spec_object (
@@ -215,6 +235,75 @@ bz_flathub_category_set_applications (BzFlathubCategory *self,
     self->applications = g_object_ref (applications);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APPLICATIONS]);
+}
+
+static const char *
+get_category_display_name (const char *category_id)
+{
+  if (g_strcmp0 (category_id, "audiovideo") == 0)
+    return _("Audio & Video");
+  if (g_strcmp0 (category_id, "development") == 0)
+    return _("Development");
+  if (g_strcmp0 (category_id, "education") == 0)
+    return _("Education");
+  if (g_strcmp0 (category_id, "game") == 0)
+    return _("Games");
+  if (g_strcmp0 (category_id, "graphics") == 0)
+    return _("Media");
+  if (g_strcmp0 (category_id, "network") == 0)
+    return _("Internet");
+  if (g_strcmp0 (category_id, "office") == 0)
+    return _("Office");
+  if (g_strcmp0 (category_id, "science") == 0)
+    return _("Science");
+  if (g_strcmp0 (category_id, "system") == 0)
+    return _("System");
+  if (g_strcmp0 (category_id, "utility") == 0)
+    return _("Utilities");
+  
+  return category_id;
+}
+
+static const char *
+get_category_icon_name (const char *category_id)
+{
+  return "application-x-executable";
+  if (g_strcmp0 (category_id, "audiovideo") == 0)
+    return "multimedia-symbolic";
+  if (g_strcmp0 (category_id, "development") == 0)
+    return "applications-development-symbolic";
+  if (g_strcmp0 (category_id, "education") == 0)
+    return "applications-education-symbolic";
+  if (g_strcmp0 (category_id, "game") == 0)
+    return "applications-games-symbolic";
+  if (g_strcmp0 (category_id, "graphics") == 0)
+    return "applications-graphics-symbolic";
+  if (g_strcmp0 (category_id, "network") == 0)
+    return "applications-internet-symbolic";
+  if (g_strcmp0 (category_id, "office") == 0)
+    return "applications-office-symbolic";
+  if (g_strcmp0 (category_id, "science") == 0)
+    return "applications-science-symbolic";
+  if (g_strcmp0 (category_id, "system") == 0)
+    return "applications-system-symbolic";
+  if (g_strcmp0 (category_id, "utility") == 0)
+    return "applications-utilities-symbolic";
+    
+  return "application-x-generic";
+}
+
+const char *
+bz_flathub_category_get_display_name (BzFlathubCategory *self)
+{
+  g_return_val_if_fail (BZ_IS_FLATHUB_CATEGORY (self), NULL);
+  return get_category_display_name (self->name);
+}
+
+const char *
+bz_flathub_category_get_icon_name (BzFlathubCategory *self)
+{
+  g_return_val_if_fail (BZ_IS_FLATHUB_CATEGORY (self), NULL);
+  return get_category_icon_name (self->name);
 }
 
 /* End of bz-flathub-category.c */
