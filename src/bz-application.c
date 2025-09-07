@@ -193,15 +193,38 @@ bz_application_command_line (GApplication            *app,
   argv = g_application_command_line_get_arguments (cmdline, &argc);
   g_debug ("Handling gapplication command line; argc=%d", argc);
 
-  if (argv == NULL || argc < 2 || g_strcmp0 (argv[1], "--help") == 0)
+  // This is hack to avoid reorganizing the whole arg parsing logic atm
+  // but ideally it should be done at some point, and made so:
+  // 1. service always autostarts if its not running already
+  // 2. When executing the binary without any arguments, it defaults
+  // to initializing the service (if its not running) and activating
+  // the window.
+  if (argv == NULL || argc < 2)
     {
-      if (self->running)
+      command = "window";
+      window_autostart = TRUE;
+      argv = NULL;
+      argc = 0;
+    }
+  else
+    {
+      command = argv[1];
+      argc--;
+      argv_shallow = g_memdup2 (argv + 1, sizeof (*argv) * argc);
+    }
+
+  if (g_strcmp0 (command, "--help") == 0)
+  {
+    if (self->running)
+      {
         g_application_command_line_printerr (
             cmdline,
             "The Bazaar service is running. The available commands are:\n\n"
             "  window|refresh|open|status|query|transact|quit\n\n"
             "Add \"--help\" to a command to get information specific to that command.\n");
-      else
+      }
+    else
+      {
         g_application_command_line_printerr (
             cmdline,
             "The Bazaar service is not running.\n"
@@ -209,16 +232,10 @@ bz_application_command_line (GApplication            *app,
             "  bazaar service\n"
             "  bazaar window --auto-service\n"
             "Exiting...\n");
+      }
 
-      if (g_strcmp0 (argv[1], "--help") == 0)
-        return EXIT_SUCCESS;
-      else
-        return EXIT_FAILURE;
-    }
-
-  command = argv[1];
-  argc--;
-  argv_shallow = g_memdup2 (argv + 1, sizeof (*argv) * argc);
+    return EXIT_SUCCESS;
+  }
 
   if (g_strcmp0 (command, "window") == 0)
     {
@@ -366,7 +383,7 @@ bz_application_command_line (GApplication            *app,
           gboolean         help         = FALSE;
           gboolean         search       = FALSE;
           g_autofree char *search_text  = NULL;
-          gboolean         auto_service = FALSE;
+          gboolean         auto_service = TRUE;
           GtkWindow       *window       = NULL;
 
           GOptionEntry main_entries[] = {
