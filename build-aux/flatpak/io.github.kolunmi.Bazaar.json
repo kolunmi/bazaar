@@ -46,19 +46,6 @@
           "type": "dir",
           "path": "../.."
         },
-        {
-          "type": "script",
-          "dest-filename": "bazaar-launcher",
-          "commands": [
-            "bazaar window --auto-service \"$@\""
-          ]
-        },
-        {
-          "type": "shell",
-          "commands": [
-            "install -Dpm0755 -t /app/bin ./bazaar-launcher"
-          ]
-        },
         "bazaar-cargo-sources.json",
         {
           "type": "shell",
@@ -353,6 +340,22 @@
               ]
             }
           ]
+        },
+        {
+          "name": "bazaar-launcher",
+          "buildsystem": "simple",
+          "build-commands": [
+              "install -Dpm0755 -t /app/bin bazaar-launcher"
+          ],
+          "sources": [
+              {
+                "type": "script",
+                "dest-filename": "bazaar-launcher",
+                "commands": [
+                  "bazaar window --auto-service \"$@\""
+                ]
+              }
+           ]
         }
       ]
     },
