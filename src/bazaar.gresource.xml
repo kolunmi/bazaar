@@ -50,7 +50,6 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/heart-filled-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/heart-outline-thick-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/horizontal-arrows-disabled-symbolic.svg</file>
-    <file preprocess="xml-stripblanks">icons/scalable/actions/image-missing-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/left-large-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/library-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/license-symbolic.svg</file>

@@ -217,23 +217,8 @@ bz_async_texture_class_init (BzAsyncTextureClass *klass)
 static void
 bz_async_texture_init (BzAsyncTexture *self)
 {
-  static GtkIconPaintable *missing_icon = NULL;
-
   self->retries = 0;
-
-  if (g_once_init_enter_pointer (&missing_icon))
-    {
-      g_autoptr (GFile) resource = NULL;
-
-      resource = g_file_new_for_uri ("resource:///io/github/kolunmi/Bazaar/icons/scalable/actions/image-missing-symbolic.svg");
-      g_once_init_leave_pointer (&missing_icon, gtk_icon_paintable_new_for_file (resource, 256, 1));
-    }
-  self->paintable = g_object_ref (GDK_PAINTABLE (missing_icon));
-  g_signal_connect_swapped (self->paintable, "invalidate-contents",
-                            G_CALLBACK (invalidate_contents), self);
-  g_signal_connect_swapped (self->paintable, "invalidate-size",
-                            G_CALLBACK (invalidate_size), self);
-
+  self->paintable = NULL;
   g_mutex_init (&self->texture_mutex);
 }
 
@@ -243,23 +228,29 @@ paintable_snapshot (GdkPaintable *paintable,
                     double        width,
                     double        height)
 {
-  BzAsyncTexture *self            = BZ_ASYNC_TEXTURE (paintable);
+  BzAsyncTexture *self = BZ_ASYNC_TEXTURE (paintable);
   g_autoptr (GMutexLocker) locker = NULL;
 
   locker = g_mutex_locker_new (&self->texture_mutex);
   maybe_load (self);
-  return gdk_paintable_snapshot (self->paintable, snapshot, width, height);
+  
+  if (self->paintable != NULL)
+    gdk_paintable_snapshot (self->paintable, snapshot, width, height);
 }
 
 static GdkPaintable *
 paintable_get_current_image (GdkPaintable *paintable)
 {
-  BzAsyncTexture *self            = BZ_ASYNC_TEXTURE (paintable);
+  BzAsyncTexture *self = BZ_ASYNC_TEXTURE (paintable);
   g_autoptr (GMutexLocker) locker = NULL;
 
   locker = g_mutex_locker_new (&self->texture_mutex);
   maybe_load (self);
-  return gdk_paintable_get_current_image (self->paintable);
+  
+  if (self->paintable != NULL)
+    return gdk_paintable_get_current_image (self->paintable);
+  
+  return NULL;
 }
 
 static GdkPaintableFlags
@@ -276,34 +267,46 @@ paintable_get_flags (GdkPaintable *paintable)
 static int
 paintable_get_intrinsic_width (GdkPaintable *paintable)
 {
-  BzAsyncTexture *self            = BZ_ASYNC_TEXTURE (paintable);
+  BzAsyncTexture *self = BZ_ASYNC_TEXTURE (paintable);
   g_autoptr (GMutexLocker) locker = NULL;
 
   locker = g_mutex_locker_new (&self->texture_mutex);
   maybe_load (self);
-  return gdk_paintable_get_intrinsic_width (self->paintable);
+  
+  if (self->paintable != NULL)
+    return gdk_paintable_get_intrinsic_width (self->paintable);
+
+  return 0;
 }
 
 static int
 paintable_get_intrinsic_height (GdkPaintable *paintable)
 {
-  BzAsyncTexture *self            = BZ_ASYNC_TEXTURE (paintable);
+  BzAsyncTexture *self = BZ_ASYNC_TEXTURE (paintable);
   g_autoptr (GMutexLocker) locker = NULL;
 
   locker = g_mutex_locker_new (&self->texture_mutex);
   maybe_load (self);
-  return gdk_paintable_get_intrinsic_height (self->paintable);
+  
+  if (self->paintable != NULL)
+    return gdk_paintable_get_intrinsic_height (self->paintable);
+    
+  return 0;
 }
 
 static double
 paintable_get_intrinsic_aspect_ratio (GdkPaintable *paintable)
 {
-  BzAsyncTexture *self            = BZ_ASYNC_TEXTURE (paintable);
+  BzAsyncTexture *self = BZ_ASYNC_TEXTURE (paintable);
   g_autoptr (GMutexLocker) locker = NULL;
 
   locker = g_mutex_locker_new (&self->texture_mutex);
   maybe_load (self);
-  return gdk_paintable_get_intrinsic_aspect_ratio (self->paintable);
+  
+  if (self->paintable != NULL)
+    return gdk_paintable_get_intrinsic_aspect_ratio (self->paintable);
+    
+  return 0.0;
 }
 
 static void
