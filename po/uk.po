@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-08 02:13+0300\n"
+"POT-Creation-Date: 2025-09-08 13:59+0300\n"
 "PO-Revision-Date: 2025-08-12 22:05+0300\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -69,6 +69,10 @@ msgstr ""
 "Базар наголошує на підтримці розробників, що роблять можливим Linux на "
 "стільничних компʼютерах. Він має вкладку \"підібраних\" застосунків, котра "
 "може бути налаштована дистрибутивами, аби створити цілісніший досвід."
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:24 src/bz-application.c:791
+msgid "Adam Masciola"
+msgstr ""
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:49
 #, fuzzy
@@ -189,10 +193,6 @@ msgstr ""
 #: src/bz-application.c:775
 msgctxt "About Dialog Translator Credit"
 msgid "Peter Dave Hello"
-msgstr ""
-
-#: src/bz-application.c:791
-msgid "Adam Masciola"
 msgstr ""
 
 #: src/bz-application.c:1214
@@ -375,7 +375,7 @@ msgstr "Переклад"
 #, fuzzy
 msgctxt "Project URL Type"
 msgid "Contact"
-msgstr "Зворотній звʼязок"
+msgstr "Звʼязок"
 
 #: src/bz-flatpak-entry.c:584
 #, fuzzy
@@ -478,7 +478,7 @@ msgstr "Назва віддаленого сховища"
 #: src/bz-full-view.c:192
 #, c-format
 msgid "%'d downloads in the last month"
-msgstr "%'d завантажень за минулий місяць'"
+msgstr "%'d завантажень за минулий місяць"
 
 #: src/bz-full-view.c:210
 #, c-format
@@ -581,8 +581,8 @@ msgid ""
 "If you do not have an access token, turning this setting on may cause GitHub "
 "to eventually rate limit you."
 msgstr ""
-"Якщо Ви не маєте токен доступу (access token), увімкнення цього налаштування "
-"може призвести до обмеження Вашого зʼєднання з GitHub."
+"Якщо Ви не маєте токену доступу (access token), увімкнення цього "
+"налаштування може призвести до обмеження Вашого зʼєднання з GitHub."
 
 #: src/bz-search-widget.blp:69
 msgid "Type to filter"
