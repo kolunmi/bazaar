@@ -251,7 +251,7 @@ get_category_display_name (const char *category_id)
   if (g_strcmp0 (category_id, "graphics") == 0)
     return _("Graphics");
   if (g_strcmp0 (category_id, "network") == 0)
-    return _("Internet");
+    return _("Networking");
   if (g_strcmp0 (category_id, "office") == 0)
     return _("Office");
   if (g_strcmp0 (category_id, "science") == 0)
@@ -278,7 +278,7 @@ get_category_icon_name (const char *category_id)
   if (g_strcmp0 (category_id, "graphics") == 0)
     return "io.github.kolumni.Bazaar.Create";
   if (g_strcmp0 (category_id, "network") == 0)
-    return "io.github.kolumni.Bazaar.Socialize";
+    return "io.github.kolumni.Bazaar.Network";
   if (g_strcmp0 (category_id, "office") == 0)
     return "io.github.kolumni.Bazaar.Work";
   if (g_strcmp0 (category_id, "science") == 0)

@@ -115,7 +115,6 @@ bz_category_tile_class_init (BzCategoryTileClass *klass)
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
-  gtk_widget_class_set_css_name (widget_class, "category-tile");
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-category-tile.ui");
 
   gtk_widget_class_bind_template_callback (widget_class, is_null);
