@@ -241,25 +241,25 @@ static const char *
 get_category_display_name (const char *category_id)
 {
   if (g_strcmp0 (category_id, "audiovideo") == 0)
-    return _("Audio & Video");
+    return _ ("Audio & Video");
   if (g_strcmp0 (category_id, "development") == 0)
-    return _("Development");
+    return _ ("Development");
   if (g_strcmp0 (category_id, "education") == 0)
-    return _("Education");
+    return _ ("Education");
   if (g_strcmp0 (category_id, "game") == 0)
-    return _("Games");
+    return _ ("Games");
   if (g_strcmp0 (category_id, "graphics") == 0)
-    return _("Graphics");
+    return _ ("Graphics");
   if (g_strcmp0 (category_id, "network") == 0)
-    return _("Networking");
+    return _ ("Networking");
   if (g_strcmp0 (category_id, "office") == 0)
-    return _("Office");
+    return _ ("Office");
   if (g_strcmp0 (category_id, "science") == 0)
-    return _("Science");
+    return _ ("Science");
   if (g_strcmp0 (category_id, "system") == 0)
-    return _("System");
+    return _ ("System");
   if (g_strcmp0 (category_id, "utility") == 0)
-    return _("Utilities");
+    return _ ("Utilities");
   
   return category_id;
 }
