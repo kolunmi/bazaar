@@ -228,7 +228,7 @@ paintable_snapshot (GdkPaintable *paintable,
                     double        width,
                     double        height)
 {
-  BzAsyncTexture *self = BZ_ASYNC_TEXTURE (paintable);
+  BzAsyncTexture *self            = BZ_ASYNC_TEXTURE (paintable);
   g_autoptr (GMutexLocker) locker = NULL;
 
   locker = g_mutex_locker_new (&self->texture_mutex);
@@ -241,7 +241,7 @@ paintable_snapshot (GdkPaintable *paintable,
 static GdkPaintable *
 paintable_get_current_image (GdkPaintable *paintable)
 {
-  BzAsyncTexture *self = BZ_ASYNC_TEXTURE (paintable);
+  BzAsyncTexture *self            = BZ_ASYNC_TEXTURE (paintable);
   g_autoptr (GMutexLocker) locker = NULL;
 
   locker = g_mutex_locker_new (&self->texture_mutex);
@@ -267,7 +267,7 @@ paintable_get_flags (GdkPaintable *paintable)
 static int
 paintable_get_intrinsic_width (GdkPaintable *paintable)
 {
-  BzAsyncTexture *self = BZ_ASYNC_TEXTURE (paintable);
+  BzAsyncTexture *self            = BZ_ASYNC_TEXTURE (paintable);
   g_autoptr (GMutexLocker) locker = NULL;
 
   locker = g_mutex_locker_new (&self->texture_mutex);
@@ -282,7 +282,7 @@ paintable_get_intrinsic_width (GdkPaintable *paintable)
 static int
 paintable_get_intrinsic_height (GdkPaintable *paintable)
 {
-  BzAsyncTexture *self = BZ_ASYNC_TEXTURE (paintable);
+  BzAsyncTexture *self            = BZ_ASYNC_TEXTURE (paintable);
   g_autoptr (GMutexLocker) locker = NULL;
 
   locker = g_mutex_locker_new (&self->texture_mutex);
@@ -297,7 +297,7 @@ paintable_get_intrinsic_height (GdkPaintable *paintable)
 static double
 paintable_get_intrinsic_aspect_ratio (GdkPaintable *paintable)
 {
-  BzAsyncTexture *self = BZ_ASYNC_TEXTURE (paintable);
+  BzAsyncTexture *self            = BZ_ASYNC_TEXTURE (paintable);
   g_autoptr (GMutexLocker) locker = NULL;
 
   locker = g_mutex_locker_new (&self->texture_mutex);
