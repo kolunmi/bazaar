@@ -730,7 +730,7 @@ msgstr "Visualização de Aplicativo"
 
 #: src/bz-window.blp:231 src/bz-window.blp:361
 msgid "Flathub"
-msgstr "TESTEEEEEEE"
+msgstr "Flathub"
 
 #: src/bz-window.blp:266
 msgid "Go Back"
