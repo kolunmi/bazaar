@@ -21,6 +21,7 @@
 #pragma once
 
 #include <adwaita.h>
+
 #include "bz-flathub-category.h"
 
 G_BEGIN_DECLS

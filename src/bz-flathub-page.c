@@ -20,8 +20,8 @@
 
 #include "bz-flathub-page.h"
 #include "bz-app-tile.h"
-#include "bz-category-tile.h"
 #include "bz-category-page.h"
+#include "bz-category-tile.h"
 #include "bz-detailed-app-tile.h"
 #include "bz-dynamic-list-view.h"
 #include "bz-entry-group.h"
@@ -71,8 +71,8 @@ category_clicked (BzFlathubCategory *category,
 
 static void
 category_page_select_cb (BzFlathubPage  *self,
-                        BzEntryGroup   *group,
-                        BzCategoryPage *page);
+                         BzEntryGroup   *group,
+                         BzCategoryPage *page);
 
 static void
 category_page_hiding_cb (BzCategoryPage *page,
@@ -154,7 +154,7 @@ bind_category_tile_cb (BzFlathubPage     *self,
                        BzCategoryTile    *tile,
                        BzFlathubCategory *category,
                        BzDynamicListView *view)
-{  
+{
   g_signal_connect_swapped (tile, "clicked", G_CALLBACK (category_clicked), category);
 }
 
@@ -270,10 +270,10 @@ static void
 category_clicked (BzFlathubCategory *category,
                   GtkButton         *button)
 {
-  GtkWidget *self                   = NULL;
-  GtkWidget *window                 = NULL;
-  GtkWidget *nav_view               = NULL;
-  AdwNavigationPage *category_page  = NULL;
+  GtkWidget         *self          = NULL;
+  GtkWidget         *window        = NULL;
+  GtkWidget         *nav_view      = NULL;
+  AdwNavigationPage *category_page = NULL;
 
   self = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_FLATHUB_PAGE);
   g_assert (self != NULL);
@@ -286,34 +286,30 @@ category_clicked (BzFlathubCategory *category,
   category_page = bz_category_page_new (category);
 
   g_signal_connect_swapped (category_page, "select",
-                           G_CALLBACK (category_page_select_cb), self);
-  
+                            G_CALLBACK (category_page_select_cb), self);
+
   g_signal_connect (category_page, "hiding",
                     G_CALLBACK (category_page_hiding_cb), self);
 
   adw_navigation_view_push (ADW_NAVIGATION_VIEW (nav_view), category_page);
-  
+
   bz_window_set_category_view_mode (BZ_WINDOW (window), TRUE);
 }
 
 static void
-category_page_select_cb (BzFlathubPage *self,
-                         BzEntryGroup  *group,
+category_page_select_cb (BzFlathubPage  *self,
+                         BzEntryGroup   *group,
                          BzCategoryPage *page)
 {
-  GtkWidget *window = NULL;
   g_signal_emit (self, signals[SIGNAL_GROUP_SELECTED], 0, group);
-
-  window = GTK_WIDGET (gtk_widget_get_root (GTK_WIDGET (self)));
-
 }
 
 static void
 category_page_hiding_cb (BzCategoryPage *page,
-                         BzFlathubPage *self)
+                         BzFlathubPage  *self)
 {
   GtkWidget *window = NULL;
-  
+
   window = GTK_WIDGET (gtk_widget_get_root (GTK_WIDGET (self)));
 
   bz_window_set_category_view_mode (BZ_WINDOW (window), FALSE);

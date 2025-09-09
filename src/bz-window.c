@@ -55,7 +55,7 @@ struct _BzWindow
   AdwOverlaySplitView *split_view;
   AdwOverlaySplitView *search_split;
   AdwViewStack        *transactions_stack;
-  AdwNavigationView        *main_stack;
+  AdwNavigationView   *main_stack;
   BzFullView          *full_view;
   GtkToggleButton     *toggle_transactions;
   GtkButton           *go_back;
@@ -316,25 +316,26 @@ page_toggled_cb (BzWindow       *self,
 }
 
 static void
-visible_page_changed_cb (BzWindow *self,
-                        GParamSpec *pspec,
-                        AdwNavigationView *navigation_view)
+visible_page_changed_cb (BzWindow          *self,
+                         GParamSpec        *pspec,
+                         AdwNavigationView *navigation_view)
 {
-    AdwNavigationPage *visible_page = NULL;
-    const char *page_tag = NULL;
-    
-    visible_page = adw_navigation_view_get_visible_page (navigation_view);
-    
-    if (visible_page != NULL) {
-        page_tag = adw_navigation_page_get_tag (visible_page);
-        
-        if (page_tag != NULL && strstr (page_tag, "flathub") != NULL)
-            gtk_widget_add_css_class (GTK_WIDGET (self), "flathub");
-        else
-            gtk_widget_remove_css_class (GTK_WIDGET (self), "flathub");
-    } else {
+  AdwNavigationPage *visible_page = NULL;
+  const char        *page_tag     = NULL;
+
+  visible_page = adw_navigation_view_get_visible_page (navigation_view);
+
+  if (visible_page != NULL)
+    {
+      page_tag = adw_navigation_page_get_tag (visible_page);
+
+      if (page_tag != NULL && strstr (page_tag, "flathub") != NULL)
+        gtk_widget_add_css_class (GTK_WIDGET (self), "flathub");
+      else
         gtk_widget_remove_css_class (GTK_WIDGET (self), "flathub");
     }
+  else
+    gtk_widget_remove_css_class (GTK_WIDGET (self), "flathub");
 }
 
 static void
@@ -788,7 +789,7 @@ bz_window_show_group (BzWindow     *self,
   g_return_if_fail (BZ_IS_ENTRY_GROUP (group));
 
   bz_full_view_set_entry_group (self->full_view, group);
-  adw_navigation_view_replace_with_tags (self->main_stack, (const char*[]){"view"}, 1);
+  adw_navigation_view_replace_with_tags (self->main_stack, (const char *[]) { "view" }, 1);
   gtk_widget_set_visible (GTK_WIDGET (self->go_back), TRUE);
   gtk_widget_set_visible (GTK_WIDGET (self->search), FALSE);
   gtk_revealer_set_reveal_child (self->title_revealer, FALSE);
@@ -1150,7 +1151,7 @@ set_page (BzWindow *self)
   else if (g_strcmp0 (active_name, "flathub") == 0)
     visible_child = bz_state_info_get_online (self->state) ? "flathub" : "offline";
 
-  adw_navigation_view_replace_with_tags (self->main_stack, (const char*[]){visible_child}, 1);
+  adw_navigation_view_replace_with_tags (self->main_stack, (const char *[]) { visible_child }, 1);
   gtk_widget_set_sensitive (GTK_WIDGET (self->title_toggle_group), !bz_state_info_get_busy (self->state));
   gtk_revealer_set_reveal_child (self->title_revealer, !show_search);
   set_bottom_bar (self);
@@ -1166,10 +1167,10 @@ set_page (BzWindow *self)
 
 void
 bz_window_set_category_view_mode (BzWindow *self,
-                                  gboolean enabled)
+                                  gboolean  enabled)
 {
   g_return_if_fail (BZ_IS_WINDOW (self));
-  
+
   gtk_widget_set_visible (GTK_WIDGET (self->go_back), enabled);
   gtk_widget_set_visible (GTK_WIDGET (self->search), !enabled);
   gtk_revealer_set_reveal_child (self->title_revealer, !enabled);
