@@ -146,14 +146,12 @@ template $BzWindow: Adw.ApplicationWindow {
 
             content: Adw.ToastOverlay toasts {
               child: Overlay {
-                child: Adw.ViewStack main_stack {
-                  enable-transitions: true;
-                  transition-duration: 200;
+                child: Adw.NavigationView main_stack {
 
                   notify::visible-child => $visible_page_changed_cb(template);
 
-                  Adw.ViewStackPage {
-                    name: "offline";
+                  Adw.NavigationPage {
+                    tag: "offline";
                     title: _("Offline");
 
                     child: Adw.StatusPage {
@@ -162,8 +160,8 @@ template $BzWindow: Adw.ApplicationWindow {
                     };
                   }
 
-                  Adw.ViewStackPage {
-                    name: "loading";
+                  Adw.NavigationPage {
+                    tag: "loading";
                     title: _("Loading");
 
                     child: Box {
@@ -204,8 +202,8 @@ template $BzWindow: Adw.ApplicationWindow {
                     };
                   }
 
-                  Adw.ViewStackPage {
-                    name: "browse";
+                  Adw.NavigationPage {
+                    tag: "browse";
                     title: _("Browse");
 
                     child: $BzBrowseWidget browse {
@@ -214,8 +212,8 @@ template $BzWindow: Adw.ApplicationWindow {
                     };
                   }
 
-                  Adw.ViewStackPage {
-                    name: "view";
+                  Adw.NavigationPage {
+                    tag: "view";
                     title: _("App View");
 
                     child: $BzFullView full_view {
@@ -226,8 +224,8 @@ template $BzWindow: Adw.ApplicationWindow {
                     };
                   }
 
-                  Adw.ViewStackPage {
-                    name: "flathub";
+                  Adw.NavigationPage {
+                    tag: "flathub";
                     title: _("Flathub");
 
                     child: $BzFlathubPage {
@@ -236,8 +234,8 @@ template $BzWindow: Adw.ApplicationWindow {
                     };
                   }
                   
-                  Adw.ViewStackPage {
-                    name: "installed";
+                  Adw.NavigationPage {
+                    tag: "installed";
                     title: _("Installed");
 
                     child: $BzInstalledPage {

@@ -55,7 +55,7 @@ struct _BzWindow
   AdwOverlaySplitView *split_view;
   AdwOverlaySplitView *search_split;
   AdwViewStack        *transactions_stack;
-  AdwViewStack        *main_stack;
+  AdwNavigationView        *main_stack;
   BzFullView          *full_view;
   GtkToggleButton     *toggle_transactions;
   GtkButton           *go_back;
@@ -781,7 +781,7 @@ bz_window_show_group (BzWindow     *self,
   g_return_if_fail (BZ_IS_ENTRY_GROUP (group));
 
   bz_full_view_set_entry_group (self->full_view, group);
-  adw_view_stack_set_visible_child_name (self->main_stack, "view");
+  adw_navigation_view_replace_with_tags (self->main_stack, (const char*[]){"view"}, 1);
   gtk_widget_set_visible (GTK_WIDGET (self->go_back), TRUE);
   gtk_widget_set_visible (GTK_WIDGET (self->search), FALSE);
   gtk_revealer_set_reveal_child (self->title_revealer, FALSE);
@@ -1143,7 +1143,7 @@ set_page (BzWindow *self)
   else if (g_strcmp0 (active_name, "flathub") == 0)
     visible_child = bz_state_info_get_online (self->state) ? "flathub" : "offline";
 
-  adw_view_stack_set_visible_child_name (self->main_stack, visible_child);
+  adw_navigation_view_replace_with_tags (self->main_stack, (const char*[]){visible_child}, 1);
   gtk_widget_set_sensitive (GTK_WIDGET (self->title_toggle_group), !bz_state_info_get_busy (self->state));
   gtk_revealer_set_reveal_child (self->title_revealer, !show_search);
   set_bottom_bar (self);
