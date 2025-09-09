@@ -316,18 +316,25 @@ page_toggled_cb (BzWindow       *self,
 }
 
 static void
-visible_page_changed_cb (BzWindow     *self,
-                         GParamSpec   *pspec,
-                         AdwViewStack *view_stack)
+visible_page_changed_cb (BzWindow *self,
+                        GParamSpec *pspec,
+                        AdwNavigationView *navigation_view)
 {
-  const char *visible_child_name = NULL;
-
-  visible_child_name = adw_view_stack_get_visible_child_name (view_stack);
-
-  if (g_strcmp0 (visible_child_name, "flathub") == 0)
-    gtk_widget_add_css_class (GTK_WIDGET (self), "flathub");
-  else
-    gtk_widget_remove_css_class (GTK_WIDGET (self), "flathub");
+    AdwNavigationPage *visible_page = NULL;
+    const char *page_tag = NULL;
+    
+    visible_page = adw_navigation_view_get_visible_page (navigation_view);
+    
+    if (visible_page != NULL) {
+        page_tag = adw_navigation_page_get_tag (visible_page);
+        
+        if (page_tag != NULL && strstr (page_tag, "flathub") != NULL)
+            gtk_widget_add_css_class (GTK_WIDGET (self), "flathub");
+        else
+            gtk_widget_remove_css_class (GTK_WIDGET (self), "flathub");
+    } else {
+        gtk_widget_remove_css_class (GTK_WIDGET (self), "flathub");
+    }
 }
 
 static void

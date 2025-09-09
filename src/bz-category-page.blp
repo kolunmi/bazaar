@@ -3,6 +3,7 @@ using Adw 1;
 
 template $BzCategoryPage: Adw.NavigationPage {
   title: bind template.category as <$BzFlathubCategory>.display-name;
+  tag: "flathub-category";
   
   child: ScrolledWindow {
     styles [

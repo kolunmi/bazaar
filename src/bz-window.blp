@@ -148,7 +148,7 @@ template $BzWindow: Adw.ApplicationWindow {
               child: Overlay {
                 child: Adw.NavigationView main_stack {
 
-                  notify::visible-child => $visible_page_changed_cb(template);
+                  notify::visible-page => $visible_page_changed_cb(template);
 
                   Adw.NavigationPage {
                     tag: "offline";
