@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-08 09:15+0700\n"
-"PO-Revision-Date: 2025-09-08 09:24+0700\n"
+"POT-Creation-Date: 2025-09-09 10:35+0700\n"
+"PO-Revision-Date: 2025-09-09 11:14+0700\n"
 "Last-Translator: Jill Fiore <contact@lumaeris.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -269,14 +269,6 @@ msgstr ""
 msgid "Browser"
 msgstr "Обзор"
 
-#: src/bz-decorated-screenshot.blp:41
-msgid "Open in Image Viewer"
-msgstr "Открыть в просмотрщике изображений"
-
-#: src/bz-decorated-screenshot.blp:56
-msgid "Copy to clipboard"
-msgstr "Скопировать в буфер обмена"
-
 #: src/bz-entry-inspector.blp:5
 msgid "Entry Inspector"
 msgstr "Инспектор элементов"
@@ -301,6 +293,46 @@ msgstr "Закрыть"
 msgid "Copy and Close"
 msgstr "Скопировать и закрыть"
 
+#: src/bz-flathub-category.c:244
+msgid "Audio & Video"
+msgstr "Аудио и видео"
+
+#: src/bz-flathub-category.c:246
+msgid "Development"
+msgstr "Разработчикам"
+
+#: src/bz-flathub-category.c:248
+msgid "Education"
+msgstr "Образование"
+
+#: src/bz-flathub-category.c:250
+msgid "Games"
+msgstr "Игры"
+
+#: src/bz-flathub-category.c:252
+msgid "Graphics"
+msgstr "Графика"
+
+#: src/bz-flathub-category.c:254
+msgid "Networking"
+msgstr "Сеть"
+
+#: src/bz-flathub-category.c:256
+msgid "Office"
+msgstr "Продуктивность"
+
+#: src/bz-flathub-category.c:258
+msgid "Science"
+msgstr "Наука"
+
+#: src/bz-flathub-category.c:260
+msgid "System"
+msgstr "Система"
+
+#: src/bz-flathub-category.c:262
+msgid "Utilities"
+msgstr "Утилиты"
+
 #: src/bz-flathub-page.blp:15
 msgid "Flathub Not Added"
 msgstr "Flathub не добавлен"
@@ -318,8 +350,8 @@ msgstr "Приложения недели"
 msgid "Trending"
 msgstr "В тренде"
 
-#: src/bz-flathub-page.blp:99 src/bz-flathub-page.blp:179
-#: src/bz-flathub-page.blp:226 src/bz-flathub-page.blp:273
+#: src/bz-flathub-page.blp:99 src/bz-flathub-page.blp:178
+#: src/bz-flathub-page.blp:225 src/bz-flathub-page.blp:272
 msgid "Show More"
 msgstr "Показать больше"
 
@@ -327,15 +359,15 @@ msgstr "Показать больше"
 msgid "Categories"
 msgstr "Категории"
 
-#: src/bz-flathub-page.blp:173
+#: src/bz-flathub-page.blp:172
 msgid "Recently Updated"
 msgstr "Недавно обновленные"
 
-#: src/bz-flathub-page.blp:220
+#: src/bz-flathub-page.blp:219
 msgid "Recently Added"
 msgstr "Недавно добавленные"
 
-#: src/bz-flathub-page.blp:267
+#: src/bz-flathub-page.blp:266
 msgid "Popular"
 msgstr "Популярное"
 
@@ -412,7 +444,7 @@ msgstr "Запустить это приложение"
 msgid "Download and install this application"
 msgstr "Скачать и установить это приложение"
 
-#: src/bz-full-view.blp:237 src/bz-window.c:940
+#: src/bz-full-view.blp:237 src/bz-window.c:961
 msgid "Install"
 msgstr "Установить"
 
@@ -531,7 +563,7 @@ msgstr "Установленное"
 msgid "Support this application"
 msgstr "Поддержать это приложение"
 
-#: src/bz-installed-page.blp:122 src/bz-window.c:921
+#: src/bz-installed-page.blp:122 src/bz-window.c:942
 msgid "Remove"
 msgstr "Удалить"
 
@@ -619,24 +651,31 @@ msgstr "Уменьшить нижнюю границу"
 msgid "Maximize Upper Bound"
 msgstr "Увеличить верхнюю границу"
 
-#: src/bz-transaction-manager.c:1055
+#: src/bz-transaction-manager.c:1080
 #, c-format
 msgid "Finished in %.02f seconds"
 msgstr "Закончено за %.02f секунд"
 
-#: src/bz-transaction-view.blp:34
-msgid "Installing"
-msgstr "Установка"
+#: src/bz-transaction-view.blp:143
+msgid "Finished Tasks"
+msgstr "Завершённые задачи"
 
-#: src/bz-transaction-view.blp:63
-msgid "Updating"
-msgstr "Обновление"
+#: src/bz-transaction-view.c:111
+#, c-format
+msgid "%s to download"
+msgstr "%s к загрузке"
 
-#: src/bz-transaction-view.blp:92
-msgid "Removing"
-msgstr "Удаление"
+#: src/bz-transaction-view.c:121
+#, c-format
+msgid "%s to install"
+msgstr "%s к установке"
 
-#: src/bz-transaction.c:268
+#: src/bz-transaction-view.c:131
+#, c-format
+msgid "Transferred %s so far"
+msgstr "Всего было загружено %s"
+
+#: src/bz-transaction.c:303
 msgid "Pending"
 msgstr "В ожидании"
 
@@ -761,11 +800,11 @@ msgstr "О _Bazaar"
 msgid "_Donate to Bazaar ❤️"
 msgstr "По_ддержать Bazaar ❤️"
 
-#: src/bz-window.c:586
+#: src/bz-window.c:592
 msgid "Up to date!"
 msgstr "Нет обновлений!"
 
-#: src/bz-window.c:762
+#: src/bz-window.c:770
 msgid ""
 "The ability to inspect and install local .flatpak bundle files is coming "
 "soon! In the meantime, try running\n"
@@ -781,15 +820,15 @@ msgstr ""
 "\n"
 "в командной строке."
 
-#: src/bz-window.c:837
+#: src/bz-window.c:850
 msgid "Can't do that right now!"
 msgstr "Нельзя сделать это прямо сейчас!"
 
-#: src/bz-window.c:884
+#: src/bz-window.c:905
 msgid "Confirm Action"
 msgstr "Подтвердить действие"
 
-#: src/bz-window.c:913
+#: src/bz-window.c:934
 #, c-format
 msgid ""
 "You are about to remove the following Flatpak:\n"
@@ -806,11 +845,11 @@ msgstr ""
 "\n"
 "Вы уверены?"
 
-#: src/bz-window.c:920 src/bz-window.c:939
+#: src/bz-window.c:941 src/bz-window.c:960
 msgid "Cancel"
 msgstr "Отмена"
 
-#: src/bz-window.c:932
+#: src/bz-window.c:953
 #, c-format
 msgid ""
 "You are about to install the following Flatpak:\n"
@@ -827,15 +866,15 @@ msgstr ""
 "\n"
 "Вы уверены?"
 
-#: src/bz-window.c:962
+#: src/bz-window.c:983
 msgid "More details"
 msgstr "Больше подробностей"
 
-#: src/bz-window.c:1088
+#: src/bz-window.c:1109
 msgid "Resume the execution of transactions"
 msgstr "Возобновить выполнение транзакций"
 
-#: src/bz-window.c:1094
+#: src/bz-window.c:1115
 msgid "Pause the execution of transactions"
 msgstr "Приостановить выполнение транзакций"
 
@@ -868,6 +907,21 @@ msgstr "Открыть сочетания клавиш"
 msgctxt "shortcut window"
 msgid "Quit"
 msgstr "Закрыть"
+
+#~ msgid "Open in Image Viewer"
+#~ msgstr "Открыть в просмотрщике изображений"
+
+#~ msgid "Copy to clipboard"
+#~ msgstr "Скопировать в буфер обмена"
+
+#~ msgid "Installing"
+#~ msgstr "Установка"
+
+#~ msgid "Updating"
+#~ msgstr "Обновление"
+
+#~ msgid "Removing"
+#~ msgstr "Удаление"
 
 #~ msgid "VCS Forge Star Count"
 #~ msgstr "Количество звёзд на странице репозитория"
