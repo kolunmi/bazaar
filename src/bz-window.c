@@ -1158,7 +1158,8 @@ set_page (BzWindow *self)
 }
 
 void
-bz_window_set_category_view_mode (BzWindow *self, gboolean enabled)
+bz_window_set_category_view_mode (BzWindow *self,
+                                  gboolean enabled)
 {
   g_return_if_fail (BZ_IS_WINDOW (self));
   

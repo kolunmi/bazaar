@@ -270,10 +270,10 @@ static void
 category_clicked (BzFlathubCategory *category,
                   GtkButton         *button)
 {
-  GtkWidget *self = NULL;
-  GtkWidget *window = NULL;
-  GtkWidget *nav_view = NULL;
-  AdwNavigationPage *category_page = NULL;
+  GtkWidget *self                   = NULL;
+  GtkWidget *window                 = NULL;
+  GtkWidget *nav_view               = NULL;
+  AdwNavigationPage *category_page  = NULL;
 
   self = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_FLATHUB_PAGE);
   g_assert (self != NULL);
@@ -298,8 +298,8 @@ category_clicked (BzFlathubCategory *category,
 
 static void
 category_page_select_cb (BzFlathubPage *self,
-                        BzEntryGroup  *group,
-                        BzCategoryPage *page)
+                         BzEntryGroup  *group,
+                         BzCategoryPage *page)
 {
   GtkWidget *window = NULL;
   g_signal_emit (self, signals[SIGNAL_GROUP_SELECTED], 0, group);
