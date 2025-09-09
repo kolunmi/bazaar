@@ -41,7 +41,8 @@ struct _BzStateInfo
   BzContentProvider       *curated_provider;
   BzFlathubState          *flathub;
   gboolean                 busy;
-  char                    *busy_label;
+  char                    *busy_step_label;
+  char                    *busy_progress_label;
   double                   busy_progress;
   gboolean                 online;
   gboolean                 checking_for_updates;
@@ -71,7 +72,8 @@ enum
   PROP_CURATED_PROVIDER,
   PROP_FLATHUB,
   PROP_BUSY,
-  PROP_BUSY_LABEL,
+  PROP_BUSY_STEP_LABEL,
+  PROP_BUSY_PROGRESS_LABEL,
   PROP_BUSY_PROGRESS,
   PROP_ONLINE,
   PROP_CHECKING_FOR_UPDATES,
@@ -102,7 +104,8 @@ bz_state_info_dispose (GObject *object)
   g_clear_pointer (&self->search_engine, g_object_unref);
   g_clear_pointer (&self->curated_provider, g_object_unref);
   g_clear_pointer (&self->flathub, g_object_unref);
-  g_clear_pointer (&self->busy_label, g_free);
+  g_clear_pointer (&self->busy_step_label, g_free);
+  g_clear_pointer (&self->busy_progress_label, g_free);
   g_clear_pointer (&self->background_task_label, g_free);
 
   G_OBJECT_CLASS (bz_state_info_parent_class)->dispose (object);
@@ -169,8 +172,11 @@ bz_state_info_get_property (GObject    *object,
     case PROP_BUSY:
       g_value_set_boolean (value, bz_state_info_get_busy (self));
       break;
-    case PROP_BUSY_LABEL:
-      g_value_set_string (value, bz_state_info_get_busy_label (self));
+    case PROP_BUSY_STEP_LABEL:
+      g_value_set_string (value, bz_state_info_get_busy_step_label (self));
+      break;
+    case PROP_BUSY_PROGRESS_LABEL:
+      g_value_set_string (value, bz_state_info_get_busy_progress_label (self));
       break;
     case PROP_BUSY_PROGRESS:
       g_value_set_double (value, bz_state_info_get_busy_progress (self));
@@ -250,8 +256,11 @@ bz_state_info_set_property (GObject      *object,
     case PROP_BUSY:
       bz_state_info_set_busy (self, g_value_get_boolean (value));
       break;
-    case PROP_BUSY_LABEL:
-      bz_state_info_set_busy_label (self, g_value_get_string (value));
+    case PROP_BUSY_STEP_LABEL:
+      bz_state_info_set_busy_step_label (self, g_value_get_string (value));
+      break;
+    case PROP_BUSY_PROGRESS_LABEL:
+      bz_state_info_set_busy_progress_label (self, g_value_get_string (value));
       break;
     case PROP_BUSY_PROGRESS:
       bz_state_info_set_busy_progress (self, g_value_get_double (value));
@@ -397,9 +406,15 @@ bz_state_info_class_init (BzStateInfoClass *klass)
           NULL, NULL, FALSE,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
-  props[PROP_BUSY_LABEL] =
+  props[PROP_BUSY_STEP_LABEL] =
       g_param_spec_string (
-          "busy-label",
+          "busy-step-label",
+          NULL, NULL, NULL,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+  
+  props[PROP_BUSY_PROGRESS_LABEL] =
+      g_param_spec_string (
+          "busy-progress-label",
           NULL, NULL, NULL,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
@@ -562,10 +577,17 @@ bz_state_info_get_busy (BzStateInfo *self)
 }
 
 const char *
-bz_state_info_get_busy_label (BzStateInfo *self)
+bz_state_info_get_busy_step_label (BzStateInfo *self)
 {
   g_return_val_if_fail (BZ_IS_STATE_INFO (self), NULL);
-  return self->busy_label;
+  return self->busy_step_label;
+}
+
+const char *
+bz_state_info_get_busy_progress_label (BzStateInfo *self)
+{
+  g_return_val_if_fail (BZ_IS_STATE_INFO (self), NULL);
+  return self->busy_progress_label;
 }
 
 double
@@ -816,16 +838,29 @@ bz_state_info_set_busy (BzStateInfo *self,
 }
 
 void
-bz_state_info_set_busy_label (BzStateInfo *self,
-                              const char  *busy_label)
+bz_state_info_set_busy_step_label (BzStateInfo *self,
+                              const char  *busy_step_label)
 {
   g_return_if_fail (BZ_IS_STATE_INFO (self));
 
-  g_clear_pointer (&self->busy_label, g_free);
-  if (busy_label != NULL)
-    self->busy_label = g_strdup (busy_label);
+  g_clear_pointer (&self->busy_step_label, g_free);
+  if (busy_step_label != NULL)
+    self->busy_step_label = g_strdup (busy_step_label);
 
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_BUSY_LABEL]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_BUSY_STEP_LABEL]);
+}
+
+void
+bz_state_info_set_busy_progress_label (BzStateInfo *self,
+                              const char  *busy_progress_label)
+{
+  g_return_if_fail (BZ_IS_STATE_INFO (self));
+
+  g_clear_pointer (&self->busy_progress_label, g_free);
+  if (busy_progress_label != NULL)
+    self->busy_progress_label = g_strdup (busy_progress_label);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_BUSY_PROGRESS_LABEL]);
 }
 
 void

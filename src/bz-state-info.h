@@ -88,7 +88,10 @@ gboolean
 bz_state_info_get_busy (BzStateInfo *self);
 
 const char *
-bz_state_info_get_busy_label (BzStateInfo *self);
+bz_state_info_get_busy_step_label (BzStateInfo *self);
+
+const char *
+bz_state_info_get_busy_progress_label (BzStateInfo *self);
 
 double
 bz_state_info_get_busy_progress (BzStateInfo *self);
@@ -171,8 +174,12 @@ bz_state_info_set_busy (BzStateInfo *self,
                         gboolean     busy);
 
 void
-bz_state_info_set_busy_label (BzStateInfo *self,
-                              const char  *busy_label);
+bz_state_info_set_busy_step_label (BzStateInfo *self,
+                              const char  *busy_step_label);
+
+void
+bz_state_info_set_busy_progress_label (BzStateInfo *self,
+                              const char  *busy_progress_label);
 
 void
 bz_state_info_set_busy_progress (BzStateInfo *self,

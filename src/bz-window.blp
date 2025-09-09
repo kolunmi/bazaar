@@ -170,27 +170,21 @@ template $BzWindow: Adw.ApplicationWindow {
                       halign: fill;
                       valign: center;
                       orientation: vertical;
-                      spacing: 15;
+                      spacing: 6;
 
-                      Button {
-                        styles [
-                          "flat"
-                        ]
-
-                        halign: center;
-                        
-                        child: Image {
+                      Image {
                           icon-name: "io.github.kolunmi.Bazaar";
-                          pixel-size: 64;
-                        };
+                          pixel-size: 128;
+                          margin-bottom:24;
                       }
-                      
+
                       $BzGlobalProgress {
                         halign: center;
-                        height-request: 20;
-                        expand-size: 150;
+                        height-request: 8;
+                        expand-size: 250;
                         active: bind template.state as <$BzStateInfo>.busy;
                         fraction: bind template.state as <$BzStateInfo>.busy-progress;
+                        margin-bottom:12;
                       }
 
                       Label {
@@ -199,7 +193,17 @@ template $BzWindow: Adw.ApplicationWindow {
                         ]
 
                         ellipsize: end;
-                        label: bind template.state as <$BzStateInfo>.busy-label;
+                        label: bind template.state as <$BzStateInfo>.busy-step-label;
+                      }
+
+                      Label {
+                        styles [
+                          "heading",
+                          "dimmed"
+                        ]
+
+                        ellipsize: end;
+                        label: bind template.state as <$BzStateInfo>.busy-progress-label;
                       }
                     };
                   }

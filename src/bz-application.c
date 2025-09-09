@@ -1195,7 +1195,8 @@ refresh_fiber (BzApplication *self)
 {
   g_autoptr (GError) local_error            = NULL;
   gboolean         has_flathub              = FALSE;
-  g_autofree char *busy_label               = NULL;
+  g_autofree char *busy_step_label          = NULL;
+  g_autofree char *busy_progress_label      = NULL;
   g_autoptr (GHashTable) installed_set      = NULL;
   guint total                               = 0;
   guint out_of                              = 0;
@@ -1211,7 +1212,7 @@ refresh_fiber (BzApplication *self)
 
   if (self->flatpak == NULL)
     {
-      bz_state_info_set_busy_label (self->state, _ ("Constructing Flatpak instance..."));
+      bz_state_info_set_busy_step_label (self->state, _ ("Constructing Flatpak instance..."));
       g_debug ("Constructing flatpak instance for the first time...");
       self->flatpak = dex_await_object (bz_flatpak_instance_new (), &local_error);
       if (self->flatpak == NULL)
@@ -1221,7 +1222,7 @@ refresh_fiber (BzApplication *self)
     }
   else
     {
-      bz_state_info_set_busy_label (self->state, _ ("Reusing last Flatpak instance..."));
+      bz_state_info_set_busy_step_label (self->state, _ ("Reusing last Flatpak instance..."));
       g_debug ("Reusing previous flatpak instance...");
     }
 
@@ -1287,9 +1288,9 @@ refresh_fiber (BzApplication *self)
       bz_flathub_state_update_to_today (self->flathub);
     }
 
-  busy_label = g_strdup_printf (_ ("Identifying installed entries..."));
-  bz_state_info_set_busy_label (self->state, busy_label);
-  g_clear_pointer (&busy_label, g_free);
+  busy_step_label = g_strdup_printf (_ ("Identifying installed entries..."));
+  bz_state_info_set_busy_step_label (self->state, busy_step_label);
+  g_clear_pointer (&busy_step_label, g_free);
 
   installed_set = dex_await_boxed (
       bz_backend_retrieve_install_ids (
@@ -1298,11 +1299,11 @@ refresh_fiber (BzApplication *self)
   if (installed_set == NULL)
     return dex_future_new_for_error (g_steal_pointer (&local_error));
 
-  busy_label = g_strdup_printf (
+  busy_step_label = g_strdup_printf (
       _ ("Beginning remote entry retrieval while referencing %d blocklist(s)..."),
       g_list_model_get_n_items (self->blocklists));
-  bz_state_info_set_busy_label (self->state, busy_label);
-  g_clear_pointer (&busy_label, g_free);
+  bz_state_info_set_busy_step_label (self->state, busy_step_label);
+  g_clear_pointer (&busy_step_label, g_free);
 
   channel            = dex_channel_new (50);
   sys_name_to_addons = g_hash_table_new_full (
@@ -1443,16 +1444,18 @@ refresh_fiber (BzApplication *self)
         g_assert_not_reached ();
 
       bz_state_info_set_busy_progress (self->state, (double) total / (double) out_of);
-      busy_label = g_strdup_printf (_ ("Received %'d entries out of %'d (%0.1f seconds elapsed)"),
-                                    total, out_of, g_timer_elapsed (self->init_timer, NULL));
-      bz_state_info_set_busy_label (self->state, busy_label);
-      g_clear_pointer (&busy_label, g_free);
+      busy_step_label = g_strdup_printf (_ ("Recieving Entries"));
+      busy_progress_label = g_strdup_printf (_ (" %'d of %'d"),
+                                    total, out_of);
+      bz_state_info_set_busy_step_label (self->state, busy_step_label);
+      bz_state_info_set_busy_progress_label (self->state, busy_progress_label);
+      g_clear_pointer (&busy_step_label, g_free);
     }
   g_list_store_sort (self->groups, (GCompareDataFunc) cmp_group, NULL);
 
-  busy_label = g_strdup_printf (_ ("Waiting for background indexing tasks to catch up...")),
-  bz_state_info_set_busy_label (self->state, busy_label);
-  g_clear_pointer (&busy_label, g_free);
+  busy_step_label = g_strdup_printf (_ ("Waiting for background indexing tasks to catch up...")),
+  bz_state_info_set_busy_step_label (self->state, busy_step_label);
+  g_clear_pointer (&busy_step_label, g_free);
 
   dex_await (dex_future_allv (
                  (DexFuture *const *) cache_futures->pdata,
@@ -1485,11 +1488,11 @@ refresh_fiber (BzApplication *self)
 
   gtk_filter_changed (GTK_FILTER (self->application_filter), GTK_FILTER_CHANGE_DIFFERENT);
 
-  busy_label = g_strdup_printf (
+  busy_step_label = g_strdup_printf (
       _ ("Completed initialization in %0.2f seconds"),
       g_timer_elapsed (self->init_timer, NULL));
-  bz_state_info_set_busy_label (self->state, busy_label);
-  g_clear_pointer (&busy_label, g_free);
+  bz_state_info_set_busy_step_label (self->state, busy_step_label);
+  g_clear_pointer (&busy_step_label, g_free);
 
   g_debug ("Checking for updates...");
   bz_state_info_set_checking_for_updates (self->state, TRUE);
