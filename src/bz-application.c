@@ -1444,9 +1444,8 @@ refresh_fiber (BzApplication *self)
         g_assert_not_reached ();
 
       bz_state_info_set_busy_progress (self->state, (double) total / (double) out_of);
-      busy_step_label = g_strdup_printf (_ ("Recieving Entries"));
-      busy_progress_label = g_strdup_printf (_ (" %'d of %'d"),
-                                    total, out_of);
+      busy_step_label     = g_strdup_printf (_ ("Receiving Entries"));
+      busy_progress_label = g_strdup_printf (_ ("%'d of %'d"), total, out_of);
       bz_state_info_set_busy_step_label (self->state, busy_step_label);
       bz_state_info_set_busy_progress_label (self->state, busy_progress_label);
       g_clear_pointer (&busy_step_label, g_free);

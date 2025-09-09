@@ -411,7 +411,7 @@ bz_state_info_class_init (BzStateInfoClass *klass)
           "busy-step-label",
           NULL, NULL, NULL,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
-  
+
   props[PROP_BUSY_PROGRESS_LABEL] =
       g_param_spec_string (
           "busy-progress-label",
@@ -839,7 +839,7 @@ bz_state_info_set_busy (BzStateInfo *self,
 
 void
 bz_state_info_set_busy_step_label (BzStateInfo *self,
-                              const char  *busy_step_label)
+                                   const char  *busy_step_label)
 {
   g_return_if_fail (BZ_IS_STATE_INFO (self));
 
@@ -852,7 +852,7 @@ bz_state_info_set_busy_step_label (BzStateInfo *self,
 
 void
 bz_state_info_set_busy_progress_label (BzStateInfo *self,
-                              const char  *busy_progress_label)
+                                       const char  *busy_progress_label)
 {
   g_return_if_fail (BZ_IS_STATE_INFO (self));
 
