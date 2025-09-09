@@ -75,8 +75,8 @@ category_page_select_cb (BzFlathubPage  *self,
                          BzCategoryPage *page);
 
 static void
-category_page_hiding_cb (BzCategoryPage *page,
-                         BzFlathubPage  *self);
+category_page_hiding_cb (BzFlathubPage  *self,
+                         BzCategoryPage *page);
 
 static void
 bz_flathub_page_dispose (GObject *object)
@@ -285,11 +285,12 @@ category_clicked (BzFlathubCategory *category,
 
   category_page = bz_category_page_new (category);
 
-  g_signal_connect_swapped (category_page, "select",
-                            G_CALLBACK (category_page_select_cb), self);
-
-  g_signal_connect (category_page, "hiding",
-                    G_CALLBACK (category_page_hiding_cb), self);
+  g_signal_connect_swapped (
+      category_page, "select",
+      G_CALLBACK (category_page_select_cb), self);
+  g_signal_connect_swapped (
+      category_page, "hiding",
+      G_CALLBACK (category_page_hiding_cb), self);
 
   adw_navigation_view_push (ADW_NAVIGATION_VIEW (nav_view), category_page);
 
@@ -305,8 +306,8 @@ category_page_select_cb (BzFlathubPage  *self,
 }
 
 static void
-category_page_hiding_cb (BzCategoryPage *page,
-                         BzFlathubPage  *self)
+category_page_hiding_cb (BzFlathubPage  *self,
+                         BzCategoryPage *page)
 {
   GtkWidget *window = NULL;
 
