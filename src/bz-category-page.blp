@@ -1,0 +1,20 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzCategoryPage: Adw.NavigationPage {
+  title: bind template.category as <$BzFlathubCategory>.display-name;
+  child:ScrolledWindow {
+    propagate-natural-width: true;
+    propagate-natural-height: true;
+    
+    child: $BzDynamicListView {
+      scroll: true;
+      child-type: "BzAppTile";
+      child-prop: "group";
+      model: bind template.category as <$BzFlathubCategory>.applications;
+                
+      bind-widget => $bind_widget_cb(template);      
+      unbind-widget => $unbind_widget_cb(template);      
+    };
+  };
+}

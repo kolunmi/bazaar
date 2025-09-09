@@ -21,7 +21,7 @@
 #include "bz-flathub-page.h"
 #include "bz-app-tile.h"
 #include "bz-category-tile.h"
-#include "bz-category-dialog.h"
+#include "bz-category-page.h"
 #include "bz-detailed-app-tile.h"
 #include "bz-dynamic-list-view.h"
 #include "bz-entry-group.h"
@@ -29,6 +29,7 @@
 #include "bz-inhibited-scrollable.h"
 #include "bz-patterned-background.h"
 #include "bz-section-view.h"
+#include "bz-window.h"
 
 struct _BzFlathubPage
 {
@@ -69,9 +70,9 @@ category_clicked (BzFlathubCategory *category,
                   GtkButton         *button);
 
 static void
-category_dialog_select_cb (BzFlathubPage    *self,
-                           BzEntryGroup     *group,
-                           BzCategoryDialog *dialog);
+category_page_select_cb (BzFlathubPage  *self,
+                        BzEntryGroup   *group,
+                        BzCategoryPage *page);
 
 static void
 bz_flathub_page_dispose (GObject *object)
@@ -265,26 +266,34 @@ static void
 category_clicked (BzFlathubCategory *category,
                   GtkButton         *button)
 {
-  GtkWidget *self   = NULL;
+  GtkWidget *self = NULL;
   GtkWidget *window = NULL;
-  AdwDialog *dialog = NULL;
+  GtkWidget *nav_view = NULL;
+  AdwNavigationPage *category_page = NULL;
 
   self = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_FLATHUB_PAGE);
   g_assert (self != NULL);
-  window = gtk_widget_get_ancestor (GTK_WIDGET (button), GTK_TYPE_WINDOW);
+
+  window = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_WINDOW);
   g_assert (window != NULL);
 
-  dialog = bz_category_dialog_new (category);
-  adw_dialog_set_content_width (dialog, 1000);
-  adw_dialog_set_content_height (dialog, 1000);
-  g_signal_connect_swapped (dialog, "select", G_CALLBACK (category_dialog_select_cb), self);
-  adw_dialog_present (dialog, window);
+  nav_view = gtk_widget_get_ancestor (GTK_WIDGET (button), ADW_TYPE_NAVIGATION_VIEW);
+  g_assert (nav_view != NULL);
+
+  category_page = bz_category_page_new (category);
+
+  g_signal_connect_swapped (category_page, "select",
+                           G_CALLBACK (category_page_select_cb), self);
+
+  adw_navigation_view_push (ADW_NAVIGATION_VIEW (nav_view), category_page);
+  
+  bz_window_set_category_view_mode (BZ_WINDOW (window), TRUE);
 }
 
 static void
-category_dialog_select_cb (BzFlathubPage    *self,
-                           BzEntryGroup     *group,
-                           BzCategoryDialog *dialog)
+category_page_select_cb (BzFlathubPage *self,
+                        BzEntryGroup  *group,
+                        BzCategoryPage *page)
 {
   g_signal_emit (self, signals[SIGNAL_GROUP_SELECTED], 0, group);
 }

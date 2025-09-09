@@ -1157,6 +1157,16 @@ set_page (BzWindow *self)
     bz_full_view_set_entry_group (self->full_view, NULL);
 }
 
+void
+bz_window_set_category_view_mode (BzWindow *self, gboolean enabled)
+{
+  g_return_if_fail (BZ_IS_WINDOW (self));
+  
+  gtk_widget_set_visible (GTK_WIDGET (self->go_back), enabled);
+  gtk_widget_set_visible (GTK_WIDGET (self->search), !enabled);
+  gtk_revealer_set_reveal_child (self->title_revealer, !enabled);
+}
+
 static void
 set_bottom_bar (BzWindow *self)
 {

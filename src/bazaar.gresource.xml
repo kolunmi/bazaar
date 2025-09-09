@@ -11,7 +11,7 @@
     <file preprocess="xml-stripblanks">bz-addons-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-app-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-browse-widget.ui</file>
-    <file preprocess="xml-stripblanks">bz-category-dialog.ui</file>
+    <file preprocess="xml-stripblanks">bz-category-page.ui</file>
     <file preprocess="xml-stripblanks">bz-curated-app-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-category-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-decorated-screenshot.ui</file>
