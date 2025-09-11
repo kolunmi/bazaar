@@ -901,7 +901,3 @@ msgstr "Ukončit"
 
 #~ msgid "Hide filtering and sorting behind a crossfade effect"
 #~ msgstr "Skrýt filtrování a řazení za efekt prolínání"# Czech translations for bazaar package.
-# Copyright (C) 2025 THE bazaar'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the bazaar package.
-# Automatically generated, 2025.
-#
