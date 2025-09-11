@@ -372,6 +372,21 @@ template $BzTransactionView: Adw.Bin {
                   ellipsize: end;
                   single-line-mode: true;
                   label: bind template.item as <$BzTransactionTask>.op as <$BzBackendTransactionOpPayload>.name;
+                  visible: bind $is_null(template.item as <$BzTransactionTask>.error) as <bool>;
+                }
+
+                Label {
+                  styles [
+                    "error",
+                  ]
+
+                  valign: center;
+                  hexpand: true;
+                  xalign: 0.0;
+                  ellipsize: end;
+                  single-line-mode: true;
+                  label: bind template.item as <$BzTransactionTask>.op as <$BzBackendTransactionOpPayload>.name;
+                  visible: bind $invert_boolean($is_null(template.item as <$BzTransactionTask>.error) as <bool>) as <bool>;
                 }
 
                 MenuButton {
