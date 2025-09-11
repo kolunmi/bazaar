@@ -184,6 +184,14 @@ is_null (gpointer object,
   return value == NULL;
 }
 
+static gboolean
+logical_and (gpointer object,
+             gboolean value1,
+             gboolean value2)
+{
+  return value1 && value2;
+}
+
 static char *
 format_recent_downloads (gpointer object,
                          int      value)
@@ -478,6 +486,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
+  gtk_widget_class_bind_template_callback (widget_class, logical_and);
   gtk_widget_class_bind_template_callback (widget_class, format_recent_downloads);
   gtk_widget_class_bind_template_callback (widget_class, format_size);
   gtk_widget_class_bind_template_callback (widget_class, format_timestamp);

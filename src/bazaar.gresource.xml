@@ -37,6 +37,7 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/copy-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/cross-large-circle-filled-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/delay-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/download-plus-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/drive-harddisk-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/edit-clear-all-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/external-link-symbolic.svg</file>
