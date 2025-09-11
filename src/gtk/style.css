@@ -45,6 +45,10 @@
     font-weight: normal;
 }
 
+.navigation-sidebar {
+	padding:0;
+}
+
 .support {
     --accent-fg-color : #f06292;
     --accent-bg-color : alpha(#f06292, 0.25);
@@ -61,6 +65,15 @@
     padding: 2px 12px;
     border-radius: 99999px;
 }
+
+.small-pill.dimmed {
+    background-color: alpha(@theme_fg_color, 0.15);
+}
+
+.small-pill.error {
+    background-color: alpha(@error_bg_color, 0.15);
+}
+
 
 .flathub-page-section {
     border-radius: 10px;
