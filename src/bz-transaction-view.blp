@@ -17,7 +17,6 @@ template $BzTransactionView: Adw.Bin {
       Box {
         orientation: vertical;
         spacing: 0;
-        margin-bottom: 10;
 
         ListView {
           styles [
@@ -393,6 +392,7 @@ template $BzTransactionView: Adw.Bin {
                   styles [
                     "circular",
                     "flat",
+                    "error"
                   ]
                   icon-name: "dialog-information-symbolic";
                   visible: bind $invert_boolean($is_null(template.item as <$BzTransactionTask>.error) as <bool>) as <bool>;
