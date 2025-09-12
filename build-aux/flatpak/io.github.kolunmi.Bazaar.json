@@ -3,7 +3,7 @@
   "runtime": "org.gnome.Platform",
   "runtime-version": "48",
   "sdk": "org.gnome.Sdk",
-  "command": "bazaar-launcher",
+  "command": "bazaar",
   "sdk-extensions": [
     "org.freedesktop.Sdk.Extension.rust-stable",
     "org.freedesktop.Sdk.Extension.llvm20"
@@ -340,22 +340,6 @@
               ]
             }
           ]
-        },
-        {
-          "name": "bazaar-launcher",
-          "buildsystem": "simple",
-          "build-commands": [
-              "install -Dpm0755 -t /app/bin bazaar-launcher"
-          ],
-          "sources": [
-              {
-                "type": "script",
-                "dest-filename": "bazaar-launcher",
-                "commands": [
-                  "bazaar window --auto-service \"$@\""
-                ]
-              }
-           ]
         }
       ]
     },
