@@ -34,7 +34,6 @@ msgstr ""
 "Флатпак;Пакунки;Програми;"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:6
-#, fuzzy
 msgid "Show Git Forge Star Counts"
 msgstr "Показувати вподобання зі сторінки розробки"
 
@@ -47,7 +46,6 @@ msgstr ""
 "застосунків"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:8
-#, fuzzy
 msgid "Discover and install applications"
 msgstr "Знаходьте та встановлюйте застосунки"
 
@@ -79,7 +77,6 @@ msgid "The home view displaying flathub apps and categories"
 msgstr "Домашня сторінка із застосунками та категоріями з Flathub"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:53
-#, fuzzy
 msgid "Calligraphy application page"
 msgstr "Сторінка застосунку Calligraphy"
 
@@ -224,7 +221,6 @@ msgid "Later"
 msgstr "Пізніше"
 
 #: src/bz-application.c:1266
-#, fuzzy
 msgid "Add Flathub"
 msgstr "Додати Flathub"
 
@@ -369,7 +365,6 @@ msgstr "Набирають популярність"
 
 #: src/bz-flathub-page.blp:99 src/bz-flathub-page.blp:178
 #: src/bz-flathub-page.blp:225 src/bz-flathub-page.blp:272
-#, fuzzy
 msgid "Show More"
 msgstr "Показати більше"
 
@@ -410,7 +405,6 @@ msgid "Help"
 msgstr "Допомога"
 
 #: src/bz-flatpak-entry.c:573
-#, fuzzy
 msgctxt "Project URL Type"
 msgid "Donation"
 msgstr "Пожертви"
@@ -421,13 +415,11 @@ msgid "Translate"
 msgstr "Переклад"
 
 #: src/bz-flatpak-entry.c:581
-#, fuzzy
 msgctxt "Project URL Type"
 msgid "Contact"
 msgstr "Звʼязок"
 
 #: src/bz-flatpak-entry.c:584
-#, fuzzy
 msgctxt "Project URL Type"
 msgid "VCS Browser"
 msgstr "Початковий код"
@@ -454,17 +446,14 @@ msgid "Support"
 msgstr "Підтримати"
 
 #: src/bz-full-view.blp:165
-#, fuzzy
 msgid "Repository Star Count"
 msgstr "Вподобань на сторінці розробки"
 
 #: src/bz-full-view.blp:210
-#, fuzzy
 msgid "Run Application"
 msgstr "Запустити цей застосунок"
 
 #: src/bz-full-view.blp:225
-#, fuzzy
 msgid "Download & Install Application"
 msgstr "Завантажити й встановити цей застосунок"
 
@@ -473,7 +462,6 @@ msgid "Install"
 msgstr "Встановити"
 
 #: src/bz-full-view.blp:244
-#, fuzzy
 msgid "Uninstall Application"
 msgstr "Видалити цей застосунок"
 
@@ -486,12 +474,10 @@ msgid "Share this application"
 msgstr "Поділитися цим застосунком"
 
 #: src/bz-full-view.blp:325
-#, fuzzy
 msgid "App Details"
 msgstr "Докладніше"
 
 #: src/bz-full-view.blp:328
-#, fuzzy
 msgid "Download Size"
 msgstr "Розмір завантаження"
 
@@ -504,22 +490,18 @@ msgid "License"
 msgstr "Ліцензія"
 
 #: src/bz-full-view.blp:370 src/bz-full-view.blp:378
-#, fuzzy
 msgid "Project Website"
 msgstr "URL проєкту"
 
 #: src/bz-full-view.blp:386
-#, fuzzy
 msgid "Open in browser"
 msgstr "Відкрити в оглядачі"
 
 #: src/bz-full-view.blp:392 src/bz-full-view.blp:401
-#, fuzzy
 msgid "Download Statistics"
 msgstr "Статистика завантажень"
 
 #: src/bz-full-view.blp:409
-#, fuzzy
 msgid "Show Downloads Over Time"
 msgstr "Завантажень протягом часу"
 
@@ -594,7 +576,6 @@ msgid "Installed"
 msgstr "Встановлені"
 
 #: src/bz-installed-page.blp:99
-#, fuzzy
 msgid "Support this application"
 msgstr "Поділитися цим застосунком"
 
@@ -620,7 +601,6 @@ msgid "View Store Page"
 msgstr "Відкрити сторінку в крамниці"
 
 #: src/bz-installed-page.c:649
-#, fuzzy
 msgid "Choose an Installation"
 msgstr "Оберіть встановлення"
 
@@ -641,7 +621,6 @@ msgid "Preferences"
 msgstr "Налаштування"
 
 #: src/bz-preferences-dialog.blp:13
-#, fuzzy
 msgid "Full Application View"
 msgstr "Перегляд сторінок застосунків"
 
@@ -650,7 +629,6 @@ msgid "Change what content is shown when viewing applications"
 msgstr "Визначте, що має бути показано при перегляді сторінок застосунків"
 
 #: src/bz-preferences-dialog.blp:17
-#, fuzzy
 msgid "Git Forge Star Counts"
 msgstr "Вподобань на сторінці розробки"
 
@@ -716,12 +694,10 @@ msgid "Finished in %.02f seconds"
 msgstr "Завершено за %.02f сек"
 
 #: src/bz-transaction-view.blp:85
-#, fuzzy
 msgid "Install Size"
 msgstr "Розмір встановлення"
 
 #: src/bz-transaction-view.blp:169
-#, fuzzy
 msgid "Updated Size"
 msgstr "Розмір після оновлення"
 
@@ -734,7 +710,6 @@ msgid "Freed Space"
 msgstr "Звільнене місце"
 
 #: src/bz-transaction-view.blp:400
-#, fuzzy
 msgid "Error Details"
 msgstr "Подробиці помилки"
 
@@ -844,12 +819,10 @@ msgid "Toggle transaction sidebar"
 msgstr "Перемкнути віконце дій над застосунками"
 
 #: src/bz-window.blp:454
-#, fuzzy
 msgid "_Preferences"
 msgstr "_Налаштування"
 
 #: src/bz-window.blp:459
-#, fuzzy
 msgid "_Refresh"
 msgstr "_Оновити"
 

@@ -40,7 +40,6 @@ msgid "Whether to show the animated icon background on the home page"
 msgstr "Mostrar o ícone de imagem de fundo animada na página inicial"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:8
-#, fuzzy
 msgid "Discover and install applications"
 msgstr "Descobrir e instalar aplicações"
 
@@ -65,7 +64,6 @@ msgstr ""
 "personalizada."
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:49
-#, fuzzy
 msgid "Calligraphy application page"
 msgstr "Página da aplicação Calligraphy"
 
@@ -121,7 +119,6 @@ msgid "Goudarz Jafari"
 msgstr ""
 
 #: src/bz-application.c:752
-#, fuzzy
 msgctxt "About Dialog Translator Credit"
 msgid "Jill Fiore (Lumaeris)"
 msgstr "Jill Fiore"
@@ -210,7 +207,6 @@ msgid "Later"
 msgstr "Mais tarde"
 
 #: src/bz-application.c:1227
-#, fuzzy
 msgid "Add Flathub"
 msgstr "Adicionar o Flathub"
 
@@ -596,7 +592,6 @@ msgid "Toggle transaction sidebar"
 msgstr "Alternar a barra lateral de transações"
 
 #: src/bz-window.blp:423
-#, fuzzy
 msgid "_Refresh"
 msgstr "_Recarregar"
 
