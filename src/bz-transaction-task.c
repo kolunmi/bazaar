@@ -26,6 +26,7 @@ struct _BzTransactionTask
 
   BzBackendTransactionOpPayload         *op;
   BzBackendTransactionOpProgressPayload *last_progress;
+  char                                  *error;
 };
 
 G_DEFINE_FINAL_TYPE (BzTransactionTask, bz_transaction_task, G_TYPE_OBJECT);
@@ -36,6 +37,7 @@ enum
 
   PROP_OP,
   PROP_LAST_PROGRESS,
+  PROP_ERROR,
 
   LAST_PROP
 };
@@ -48,6 +50,7 @@ bz_transaction_task_dispose (GObject *object)
 
   g_clear_pointer (&self->op, g_object_unref);
   g_clear_pointer (&self->last_progress, g_object_unref);
+  g_clear_pointer (&self->error, g_free);
 
   G_OBJECT_CLASS (bz_transaction_task_parent_class)->dispose (object);
 }
@@ -67,6 +70,9 @@ bz_transaction_task_get_property (GObject    *object,
       break;
     case PROP_LAST_PROGRESS:
       g_value_set_object (value, bz_transaction_task_get_last_progress (self));
+      break;
+    case PROP_ERROR:
+      g_value_set_string (value, bz_transaction_task_get_error (self));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -117,6 +123,12 @@ bz_transaction_task_class_init (BzTransactionTaskClass *klass)
           BZ_TYPE_BACKEND_TRANSACTION_OP_PROGRESS_PAYLOAD,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
+  props[PROP_ERROR] =
+      g_param_spec_string (
+          "error",
+          NULL, NULL, NULL,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
   g_object_class_install_properties (object_class, LAST_PROP, props);
 }
 
@@ -145,6 +157,13 @@ bz_transaction_task_get_last_progress (BzTransactionTask *self)
   return self->last_progress;
 }
 
+const char *
+bz_transaction_task_get_error (BzTransactionTask *self)
+{
+  g_return_val_if_fail (BZ_IS_TRANSACTION_TASK (self), NULL);
+  return self->error;
+}
+
 void
 bz_transaction_task_set_op (BzTransactionTask             *self,
                             BzBackendTransactionOpPayload *op)
@@ -169,6 +188,19 @@ bz_transaction_task_set_last_progress (BzTransactionTask                     *se
     self->last_progress = g_object_ref (last_progress);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_LAST_PROGRESS]);
+}
+
+void
+bz_transaction_task_set_error (BzTransactionTask *self,
+                               const char        *error)
+{
+  g_return_if_fail (BZ_IS_TRANSACTION_TASK (self));
+
+  g_clear_pointer (&self->error, g_object_unref);
+  if (error != NULL)
+    self->error = g_strdup (error);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ERROR]);
 }
 
 /* End of bz-transaction-task.c */

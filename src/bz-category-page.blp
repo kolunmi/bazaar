@@ -1,0 +1,62 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzCategoryPage: Adw.NavigationPage {
+  title: bind template.category as <$BzFlathubCategory>.display-name;
+  tag: "flathub-category";
+  
+  child: ScrolledWindow {
+    styles [
+      "transparent"
+    ]
+    
+    hscrollbar-policy: never;
+    
+    child: Adw.ClampScrollable {
+      maximum-size: 1500;
+      tightening-threshold: 1400;
+      
+      child: Viewport {
+        child: Box {
+          margin-start: 25;
+          margin-end: 25;
+          margin-top: 20;
+          margin-bottom: 20;
+          orientation: vertical;
+          spacing: 20;
+          
+          Box {
+            orientation: vertical;
+            spacing: 10;
+            
+            Label {
+              margin-start: 8;
+              styles [
+                "title-1",
+              ]
+              label: bind template.category as <$BzFlathubCategory>.display-name;
+              xalign: 0.0;
+            }
+            
+            $BzDynamicListView {
+              styles [
+                "flathub-page-section",
+              ]
+              
+              hexpand: true;
+              
+              scroll: false;
+              noscroll-kind: flow-box;
+              child-type: "BzAppTile";
+              child-prop: "group";
+              model: bind template.category as <$BzFlathubCategory>.applications;
+              
+              bind-widget => $bind_widget_cb(template);
+              unbind-widget => $unbind_widget_cb(template);
+            }
+          }
+        };
+      };
+    };
+  };
+}

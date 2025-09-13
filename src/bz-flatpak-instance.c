@@ -157,6 +157,7 @@ BZ_DEFINE_DATA (
       GPtrArray         *send_futures;
       GHashTable        *ref_to_entry_hash;
       GHashTable        *op_to_progress_hash;
+      guint              unidentified_op_cnt;
     },
     g_mutex_clear (&self->mutex);
     BZ_RELEASE_DATA (cancellable, g_object_unref);
@@ -1452,9 +1453,12 @@ transaction_fiber (TransactionData *data)
   g_autoptr (GError) local_error     = NULL;
   gboolean result                    = FALSE;
   g_autoptr (GPtrArray) transactions = NULL;
+  g_autoptr (GPtrArray) entries      = NULL;
   g_autoptr (GPtrArray) jobs         = NULL;
+  g_autoptr (GHashTable) errored     = NULL;
 
   transactions = g_ptr_array_new_with_free_func (g_object_unref);
+  entries      = g_ptr_array_new_with_free_func (g_object_unref);
 
   if (installations != NULL)
     {
@@ -1516,6 +1520,7 @@ transaction_fiber (TransactionData *data)
             }
 
           g_ptr_array_add (transactions, g_steal_pointer (&transaction));
+          g_ptr_array_add (entries, g_object_ref (entry));
           g_hash_table_replace (data->ref_to_entry_hash,
                                 g_steal_pointer (&ref_fmt),
                                 g_object_ref (entry));
@@ -1582,6 +1587,7 @@ transaction_fiber (TransactionData *data)
             }
 
           g_ptr_array_add (transactions, g_steal_pointer (&transaction));
+          g_ptr_array_add (entries, g_object_ref (entry));
           g_hash_table_replace (data->ref_to_entry_hash,
                                 g_steal_pointer (&ref_fmt),
                                 g_object_ref (entry));
@@ -1646,6 +1652,7 @@ transaction_fiber (TransactionData *data)
             }
 
           g_ptr_array_add (transactions, g_steal_pointer (&transaction));
+          g_ptr_array_add (entries, g_object_ref (entry));
           g_hash_table_replace (data->ref_to_entry_hash,
                                 g_steal_pointer (&ref_fmt),
                                 g_object_ref (entry));
@@ -1674,23 +1681,36 @@ transaction_fiber (TransactionData *data)
               transaction_job_data_unref));
     }
 
-  result = dex_await (dex_future_all_racev (
-                          (DexFuture *const *) jobs->pdata,
-                          jobs->len),
-                      &local_error);
-  if (!result)
-    {
-      dex_channel_close_send (channel);
-      return dex_future_new_for_error (g_steal_pointer (&local_error));
-    }
-
+  dex_await (dex_future_all_racev (
+                 (DexFuture *const *) jobs->pdata,
+                 jobs->len),
+             NULL);
   dex_await (dex_future_allv (
                  (DexFuture *const *) data->send_futures->pdata,
                  data->send_futures->len),
              NULL);
 
+  errored = g_hash_table_new_full (
+      g_direct_hash, g_direct_equal,
+      g_object_unref, (GDestroyNotify) g_error_free);
+  for (guint i = 0; i < jobs->len; i++)
+    {
+      DexFuture *job   = NULL;
+      BzEntry   *entry = NULL;
+
+      job   = g_ptr_array_index (jobs, i);
+      entry = g_ptr_array_index (entries, i);
+
+      dex_future_get_value (job, &local_error);
+      if (local_error != NULL)
+        g_hash_table_replace (
+            errored,
+            g_object_ref (entry),
+            g_steal_pointer (&local_error));
+    }
+
   dex_channel_close_send (channel);
-  return dex_future_new_true ();
+  return dex_future_new_take_boxed (G_TYPE_HASH_TABLE, g_steal_pointer (&errored));
 }
 
 static DexFuture *
@@ -1735,6 +1755,8 @@ transaction_new_operation (FlatpakTransaction          *transaction,
   entry = find_entry_from_operation (data, operation, NULL);
 
   payload = bz_backend_transaction_op_payload_new ();
+  bz_backend_transaction_op_payload_set_entry (
+      payload, BZ_ENTRY (entry));
   bz_backend_transaction_op_payload_set_name (
       payload, flatpak_transaction_operation_get_ref (operation));
   bz_backend_transaction_op_payload_set_download_size (
@@ -1748,6 +1770,7 @@ transaction_new_operation (FlatpakTransaction          *transaction,
       dex_channel_send (
           data->channel,
           dex_future_new_for_object (payload)));
+  data->unidentified_op_cnt--;
   g_mutex_unlock (&data->mutex);
 
   g_object_set_data_full (
@@ -1801,10 +1824,36 @@ transaction_operation_error (FlatpakTransaction          *object,
                              gint                         details,
                              TransactionData             *data)
 {
+  g_autoptr (BzBackendTransactionOpPayload) payload = NULL;
+
   /* `FLATPAK_TRANSACTION_ERROR_DETAILS_NON_FATAL` is the only
      possible value of `details` */
 
-  return TRUE;
+  g_critical ("Transaction failed to complete: %s", error->message);
+
+  g_mutex_lock (&data->mutex);
+  g_hash_table_replace (
+      data->op_to_progress_hash,
+      g_object_ref (operation),
+      GINT_TO_POINTER (100));
+
+  payload = g_object_steal_data (G_OBJECT (operation), "payload");
+  if (payload != NULL)
+    {
+      g_object_set_data_full (
+          G_OBJECT (payload), "error",
+          g_strdup (error->message), g_free);
+      g_ptr_array_add (
+          data->send_futures,
+          dex_channel_send (
+              data->channel,
+              dex_future_new_for_object (payload)));
+    }
+
+  g_mutex_unlock (&data->mutex);
+
+  /* Don't recover for now */
+  return FALSE;
 }
 
 gboolean
@@ -1816,13 +1865,7 @@ transaction_ready (FlatpakTransaction *object,
   operations = flatpak_transaction_get_operations (object);
 
   g_mutex_lock (&data->mutex);
-  for (GList *l = operations; l != NULL; l = l->next)
-    {
-      g_hash_table_replace (
-          data->op_to_progress_hash,
-          g_object_ref (l->data),
-          GINT_TO_POINTER (0));
-    }
+  data->unidentified_op_cnt += g_list_length (operations);
   g_mutex_unlock (&data->mutex);
 
   return TRUE;
@@ -1914,7 +1957,9 @@ transaction_progress_changed (FlatpakTransactionProgress *progress,
       progress_sum += GPOINTER_TO_INT (val);
       n_ops++;
     }
-  total_progress = (double) progress_sum / (double) (n_ops * 100);
+  total_progress = MIN ((double) progress_sum /
+                            (double) ((n_ops + parent->unidentified_op_cnt) * 100),
+                        1.0);
 
   payload = bz_backend_transaction_op_progress_payload_new ();
   bz_backend_transaction_op_progress_payload_set_op (

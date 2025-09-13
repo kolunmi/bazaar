@@ -299,7 +299,7 @@ bz_transaction_init (BzTransaction *self)
   priv->removals     = g_list_store_new (BZ_TYPE_ENTRY);
   priv->pending      = TRUE;
   priv->current_ops  = g_list_store_new (BZ_TYPE_TRANSACTION_TASK);
-  priv->finished_ops = g_list_store_new (BZ_TYPE_BACKEND_TRANSACTION_OP_PAYLOAD);
+  priv->finished_ops = g_list_store_new (BZ_TYPE_TRANSACTION_TASK);
   priv->status       = g_strdup (_ ("Pending"));
   priv->success      = TRUE;
 }
@@ -538,6 +538,7 @@ bz_transaction_finish_task (BzTransaction                 *self,
   BzTransactionPrivate *priv                   = NULL;
   guint                 op_pos                 = 0;
   gboolean              found_payload_in_tasks = FALSE;
+  g_autoptr (BzTransactionTask) task           = NULL;
 
   g_return_if_fail (BZ_IS_TRANSACTION (self));
   g_return_if_fail (BZ_IS_BACKEND_TRANSACTION_OP_PAYLOAD (payload));
@@ -548,8 +549,36 @@ bz_transaction_finish_task (BzTransaction                 *self,
       priv->current_ops, NULL, (GEqualFuncFull) find_payload_eq_func, payload, &op_pos);
   g_return_if_fail (found_payload_in_tasks);
 
+  task = g_list_model_get_item (G_LIST_MODEL (priv->current_ops), op_pos);
   g_list_store_remove (priv->current_ops, op_pos);
-  g_list_store_append (priv->finished_ops, payload);
+  g_list_store_append (priv->finished_ops, task);
+}
+
+void
+bz_transaction_error_out_task (BzTransaction                 *self,
+                               BzBackendTransactionOpPayload *payload,
+                               const char                    *message)
+{
+  BzTransactionPrivate *priv                   = NULL;
+  guint                 op_pos                 = 0;
+  gboolean              found_payload_in_tasks = FALSE;
+  g_autoptr (BzTransactionTask) task           = NULL;
+
+  g_return_if_fail (BZ_IS_TRANSACTION (self));
+  g_return_if_fail (BZ_IS_BACKEND_TRANSACTION_OP_PAYLOAD (payload));
+  g_return_if_fail (message != NULL);
+
+  priv = bz_transaction_get_instance_private (self);
+
+  found_payload_in_tasks = g_list_store_find_with_equal_func_full (
+      priv->current_ops, NULL, (GEqualFuncFull) find_payload_eq_func, payload, &op_pos);
+  g_return_if_fail (found_payload_in_tasks);
+
+  task = g_list_model_get_item (G_LIST_MODEL (priv->current_ops), op_pos);
+  bz_transaction_task_set_error (task, message);
+
+  g_list_store_remove (priv->current_ops, op_pos);
+  g_list_store_append (priv->finished_ops, task);
 }
 
 static gboolean

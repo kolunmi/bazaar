@@ -26,6 +26,7 @@
 #include "bz-backend-transaction-op-progress-payload.h"
 #include "bz-env.h"
 #include "bz-error.h"
+#include "bz-marshalers.h"
 #include "bz-transaction-manager.h"
 #include "bz-transaction-view.h"
 #include "bz-util.h"
@@ -273,12 +274,13 @@ bz_transaction_manager_class_init (BzTransactionManagerClass *klass)
           G_SIGNAL_RUN_FIRST,
           0,
           NULL, NULL,
-          g_cclosure_marshal_VOID__OBJECT,
-          G_TYPE_NONE, 0);
+          bz_marshal_VOID__OBJECT_BOXED,
+          G_TYPE_NONE,
+          2, BZ_TYPE_TRANSACTION, G_TYPE_HASH_TABLE, 0);
   g_signal_set_va_marshaller (
       signals[SIGNAL_SUCCESS],
       G_TYPE_FROM_CLASS (klass),
-      g_cclosure_marshal_VOID__OBJECTv);
+      bz_marshal_VOID__OBJECT_BOXEDv);
 
   signals[SIGNAL_FAILURE] =
       g_signal_new (
@@ -288,7 +290,8 @@ bz_transaction_manager_class_init (BzTransactionManagerClass *klass)
           0,
           NULL, NULL,
           g_cclosure_marshal_VOID__OBJECT,
-          G_TYPE_NONE, 0);
+          G_TYPE_NONE,
+          1, BZ_TYPE_TRANSACTION, 0);
   g_signal_set_va_marshaller (
       signals[SIGNAL_FAILURE],
       G_TYPE_FROM_CLASS (klass),
@@ -607,8 +610,15 @@ transaction_fiber (QueuedScheduleData *data)
         {
           if (g_hash_table_contains (op_set, object))
             {
-              bz_transaction_finish_task (
-                  transaction, BZ_BACKEND_TRANSACTION_OP_PAYLOAD (object));
+              g_autofree char *error = NULL;
+
+              error = g_object_steal_data (object, "error");
+              if (error != NULL)
+                bz_transaction_error_out_task (
+                    transaction, BZ_BACKEND_TRANSACTION_OP_PAYLOAD (object), error);
+              else
+                bz_transaction_finish_task (
+                    transaction, BZ_BACKEND_TRANSACTION_OP_PAYLOAD (object));
               g_hash_table_remove (op_set, object);
             }
           else
@@ -646,7 +656,7 @@ transaction_fiber (QueuedScheduleData *data)
         }
     }
 
-  result = dex_await (g_steal_pointer (&future), &local_error);
+  result = dex_await (dex_ref (future), &local_error);
   if (!result)
     return dex_future_new_for_error (g_steal_pointer (&local_error));
 
@@ -705,7 +715,7 @@ transaction_fiber (QueuedScheduleData *data)
         }
     }
 
-  return dex_future_new_true ();
+  return g_steal_pointer (&future);
 }
 
 static int
@@ -1092,7 +1102,12 @@ transaction_finally (DexFuture          *future,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CURRENT_PROGRESS]);
 
   if (value != NULL)
-    g_signal_emit (self, signals[SIGNAL_SUCCESS], 0, transaction);
+    {
+      GHashTable *errored = NULL;
+
+      errored = g_value_get_boxed (value);
+      g_signal_emit (self, signals[SIGNAL_SUCCESS], 0, transaction, errored);
+    }
   else
     g_signal_emit (self, signals[SIGNAL_FAILURE], 0, transaction);
 

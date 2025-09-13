@@ -20,10 +20,6 @@
     border-radius: 0;
 }
 
-.app-tile {
-    background-color: alpha(var(--card-bg-color), 0.7);
-}
-
 .screenshot {
     border-radius: 20px;
 }
@@ -45,6 +41,10 @@
     font-weight: normal;
 }
 
+.navigation-sidebar {
+	padding:0;
+}
+
 .support {
     --accent-fg-color : #f06292;
     --accent-bg-color : alpha(#f06292, 0.25);
@@ -61,6 +61,15 @@
     padding: 2px 12px;
     border-radius: 99999px;
 }
+
+.small-pill.dimmed {
+    background-color: alpha(@theme_fg_color, 0.15);
+}
+
+.small-pill.error {
+    background-color: alpha(@error_bg_color, 0.15);
+}
+
 
 .flathub-page-section {
     border-radius: 10px;
@@ -212,4 +221,13 @@ background: shade(#deddda, 1.05);
 }
 .category-tile.category-utility:active {
 background: shade(#deddda, .95);
+}
+
+
+
+
+
+.transaction-sidebar-entry-list {
+    margin: 0;
+    padding: 0;
 }

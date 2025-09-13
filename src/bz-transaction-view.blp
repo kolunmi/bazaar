@@ -2,25 +2,280 @@ using Gtk 4.0;
 using Adw 1;
 
 template $BzTransactionView: Adw.Bin {
-  child: Frame {
-    styles [
-      "card",
-    ]
+  child: Box {
+    styles ["card"]
 
-    child: Box {
+    Box {
       margin-top: 10;
       margin-bottom: 10;
       margin-start: 10;
-      margin-end: 10;
+      margin-end: 5;
       orientation: vertical;
-      spacing: 5;
+      spacing: 0;
+      hexpand: true;
+
+      Box {
+        orientation: vertical;
+        spacing: 0;
+
+        ListView {
+          styles [
+            "navigation-sidebar",
+            "transaction-sidebar-entry-list",
+          ]
+                
+          model: NoSelection {
+            model: bind template.transaction as <$BzTransaction>.installs;
+          };
+
+          factory: BuilderListItemFactory {
+            template ListItem {
+              activatable: false;
+
+              child: Box {
+                margin-top: 2;
+                margin-bottom: 2;
+                
+                orientation: horizontal;
+                spacing: 10;
+
+                Image {
+                  paintable: bind template.item as <$BzEntry>.icon-paintable;
+                  pixel-size: 64;
+                  valign: center;
+                }
+                Box {
+                  valign:center;
+                  orientation: vertical;
+                  spacing:4;
+                  Label {
+                    styles [
+                      "title-2"
+                    ]
+
+                    hexpand: true;
+                    ellipsize: end;
+                    xalign: 0.0;
+                    label: bind template.item as <$BzEntry>.title as <string>;
+                    has-tooltip: true;
+                    tooltip-text: bind template.item as <$BzEntry>.id as <string>;
+                  }
+                  Box {
+                    halign: start;
+                    spacing: 4;
+
+                    styles [
+                      "dimmed",
+                      "small-pill"
+                    ]
+
+                    Image {
+                      icon-name: "drive-harddisk-symbolic";
+                      pixel-size: 16;
+                    }
+
+                    Label {
+                      styles [
+                        "caption-heading"
+                      ]
+                      valign: center;
+                      xalign: 0.0;
+                      label: bind $format_download_size(template.item as <$BzEntry>.size) as <string>;
+                      has-tooltip: true;
+                      tooltip-text: _("Install Size");
+                    }
+                  }
+                }
+
+                Image {
+                  styles [
+                    "success",
+                  ]
+
+                  valign: start;
+                  icon-name: "folder-download-symbolic";
+                  has-tooltip: true;
+                  tooltip-text: _("Install");
+                }
+              };
+            }
+          };
+        }
+        
+        ListView {
+          styles [
+            "navigation-sidebar",
+            "transaction-sidebar-entry-list",
+          ]
+                
+          model: NoSelection {
+            model: bind template.transaction as <$BzTransaction>.updates;
+          };
+
+          factory: BuilderListItemFactory {
+            template ListItem {
+              activatable: false;
+
+              child: Box {
+                margin-top: 2;
+                margin-bottom: 2;
+                
+                orientation: horizontal;
+                spacing: 10;
+
+                Image {
+                  paintable: bind template.item as <$BzEntry>.icon-paintable;
+                  pixel-size: 64;
+                  valign: center;
+                }
+                Box {
+                  valign:center;
+                  orientation: vertical;
+                  spacing:4;
+                  Label {
+                    styles [
+                      "title-2"
+                    ]
+
+                    hexpand: true;
+                    ellipsize: end;
+                    xalign: 0.0;
+                    label: bind template.item as <$BzEntry>.title as <string>;
+                    has-tooltip: true;
+                    tooltip-text: bind template.item as <$BzEntry>.id as <string>;
+                  }
+                  Box {
+                    halign: start;
+                    spacing: 4;
+
+                    styles [
+                      "dimmed",
+                      "small-pill"
+                    ]
+
+                    Image {
+                      icon-name: "drive-harddisk-symbolic";
+                      pixel-size: 16;
+                    }
+
+                    Label {
+                      styles [
+                        "caption-heading"
+                      ]
+                      valign: center;
+                      xalign: 0.0;
+                      label: bind $format_download_size(template.item as <$BzEntry>.size) as <string>;
+                      has-tooltip: true;
+                      tooltip-text: _("Updated Size");
+                    }
+                  }
+                }
+
+                Image {
+                  styles [
+                    "accent",
+                  ]
+                  
+                  valign: start;
+                  icon-name: "software-update-available-symbolic";
+                  has-tooltip: true;
+                  tooltip-text: _("Update");
+                }
+              };
+            }
+          };
+        }
+
+        ListView {
+          styles [
+            "navigation-sidebar",
+            "transaction-sidebar-entry-list",
+          ]
+                
+          model: NoSelection {
+            model: bind template.transaction as <$BzTransaction>.removals;
+          };
+
+          factory: BuilderListItemFactory {
+            template ListItem {
+              activatable: false;
+
+              child: Box {
+                margin-top: 2;
+                margin-bottom: 2;
+                
+                orientation: horizontal;
+                spacing: 10;
+
+                Image {
+                  paintable: bind template.item as <$BzEntry>.icon-paintable;
+                  pixel-size: 64;
+                  valign: center;
+                }
+                Box {
+                  valign:center;
+                  orientation: vertical;
+                  spacing:4;
+                  Label {
+                    styles [
+                      "title-2"
+                    ]
+
+                    hexpand: true;
+                    ellipsize: end;
+                    xalign: 0.0;
+                    label: bind template.item as <$BzEntry>.title as <string>;
+                    has-tooltip: true;
+                    tooltip-text: bind template.item as <$BzEntry>.id as <string>;
+                  }
+                  Box {
+                    halign: start;
+                    spacing: 4;
+
+                    styles [
+                      "small-pill",
+                      "error"
+                    ]
+
+                    Image {
+                      icon-name: "drive-harddisk-symbolic";
+                      pixel-size: 16;
+                    }
+
+                    Label {
+                      styles [
+                        "caption-heading"
+                      ]
+                      valign: center;
+                      xalign: 0.0;
+                      label: bind $format_download_size(template.item as <$BzEntry>.size) as <string>;
+                      has-tooltip: true;
+                      tooltip-text: _("Freed Space");
+                    }
+                  }
+                }
+
+                Image {
+                  styles [
+                    "error",
+                  ]
+                  
+                  valign: start;
+                  icon-name: "user-trash-symbolic";
+                  has-tooltip: true;
+                  tooltip-text: _("Remove");
+                }
+              };
+            }
+          };
+        }
+      }
 
       ListView {
         styles [
           "navigation-sidebar",
+          "transaction-sidebar-entry-list",
         ]
-
-        visible: bind $invert_boolean(template.transaction as <$BzTransaction>.finished) as <bool>;
         
         model: NoSelection {
           model: bind template.transaction as <$BzTransaction>.current-ops;
@@ -34,29 +289,19 @@ template $BzTransactionView: Adw.Bin {
               margin-start: 5;
               margin-end: 5;
               margin-top: 5;
-              margin-bottom: 5;
+              margin-bottom: 15;
                 
               orientation: vertical;
               spacing: 7;
 
               Label {
                 styles [
-                  "title-4",
+                  "dimmed",
+                  "caption-heading"
                 ]
 
                 hexpand: true;
-                ellipsize: middle;
-                xalign: 1.0;
-                label: bind template.item as <$BzTransactionTask>.op as <$BzBackendTransactionOpPayload>.name;
-              }
-                
-              Label {
-                styles [
-                  "accent",
-                ]
-
-                hexpand: true;
-                xalign: 0.0;
+                xalign: 1;
                 ellipsize: end;
                 single-line-mode: true;
                 label: bind template.item as <$BzTransactionTask>.last-progress as <$BzBackendTransactionOpProgressPayload>.status;
@@ -66,125 +311,116 @@ template $BzTransactionView: Adw.Bin {
                 hexpand: "true";
                 fraction: bind template.item as <$BzTransactionTask>.last-progress as <$BzBackendTransactionOpProgressPayload>.progress;
               }
-              
-              // Label {
-              //   styles [
-              //     "dimmed",
-              //   ]
-
-              //   hexpand: true;
-              //   xalign: 0.0;
-              //   ellipsize: end;
-              //   single-line-mode: true;
-              //   label: bind $format_bytes_transferred(template.item as <$BzTransactionTask>.last-progress as <$BzBackendTransactionOpProgressPayload>.bytes-transferred) as <string>;
-              // }
-
-              Box {
-                orientation: horizontal;
-                spacing: 5;
-                  
-                Image {
-                  icon-name: "folder-download-symbolic";
-                }
-                  
-                Label {
-                  hexpand: true;
-                  xalign: 0.0;
-                  ellipsize: end;
-                  single-line-mode: true;
-                  label: bind $format_download_size(template.item as <$BzTransactionTask>.op as <$BzBackendTransactionOpPayload>.download-size) as <string>;
-                }
-              }
-
-              Box {
-                orientation: horizontal;
-                spacing: 5;
-                  
-                Image {
-                  icon-name: "drive-harddisk-symbolic";
-                }
-                  
-                Label {
-                  hexpand: true;
-                  xalign: 0.0;
-                  ellipsize: end;
-                  single-line-mode: true;
-                  label: bind $format_installed_size(template.item as <$BzTransactionTask>.op as <$BzBackendTransactionOpPayload>.installed-size) as <string>;
-                }
-              }
             };
           }
         };
       }
+      
+      ListView {
+        visible: true;
 
-      // $BzProgressBar {
-      //   hexpand: "true";
-      //   margin-bottom: "15";
-      //   margin-start: "15";
-      //   margin-end: "15";
-      //   fraction: bind template.transaction as <$BzTransaction>.progress;
-      //   visible: bind $invert_boolean(template.transaction as <$BzTransaction>.finished) as <bool>;
-      // }
+        styles [
+          "navigation-sidebar",
+          "transaction-sidebar-entry-list",
+        ]
 
-      // Label {
-      //   styles [
-      //     "dimmed",
-      //   ]
+        model: NoSelection {
+          model: bind template.transaction as <$BzTransaction>.finished-ops;
+        };
 
-      //   margin-bottom: 15;
-      //   margin-start: 15;
-      //   margin-end: 15;
-      //   xalign: 0;
-      //   ellipsize: end;
-      //   label: bind template.transaction as <$BzTransaction>.name;
-      // }
+        factory: BuilderListItemFactory {
+          template ListItem {
+            activatable: false;
 
-      Expander {
-        label: _("Finished Tasks");
-        expanded: true;
-        
-        child: ListView {
-          styles [
-            "navigation-sidebar",
-          ]
+            child: Box {
+              orientation: horizontal;
+              spacing: 10;
 
-          model: NoSelection {
-            model: bind template.transaction as <$BzTransaction>.finished-ops;
-          };
+              Image {
+                styles [
+                  "success",
+                ]
+                valign: center;
+                icon-name: "check-plain-symbolic";
+                visible: bind $is_null(template.item as <$BzTransactionTask>.error) as <bool>;
+              }
+                
+              Image {
+                styles [
+                  "error",
+                ]
+                valign: center;
+                icon-name: "cross-large-circle-filled-symbolic";
+                visible: bind $invert_boolean($is_null(template.item as <$BzTransactionTask>.error) as <bool>) as <bool>;
+              }
 
-          factory: BuilderListItemFactory {
-            template ListItem {
-              activatable: false;
-
-              child: Box {
+              Box {
+                valign: center;
                 orientation: horizontal;
                 spacing: 5;
-
-                Image {
-                  styles [
-                    "success",
-                  ]
-                  icon-name: "check-plain-symbolic";
-                }
+                hexpand: true;
                 
                 Label {
                   styles [
                     "dimmed",
                   ]
 
+                  valign: center;
                   hexpand: true;
                   xalign: 0.0;
                   ellipsize: end;
                   single-line-mode: true;
-                  label: bind template.item as <$BzBackendTransactionOpPayload>.name; 
+                  label: bind template.item as <$BzTransactionTask>.op as <$BzBackendTransactionOpPayload>.name;
+                  visible: bind $is_null(template.item as <$BzTransactionTask>.error) as <bool>;
                 }
-              };
-            }
-          };
+
+                Label {
+                  styles [
+                    "error",
+                  ]
+
+                  valign: center;
+                  hexpand: true;
+                  xalign: 0.0;
+                  ellipsize: end;
+                  single-line-mode: true;
+                  label: bind template.item as <$BzTransactionTask>.op as <$BzBackendTransactionOpPayload>.name;
+                  visible: bind $invert_boolean($is_null(template.item as <$BzTransactionTask>.error) as <bool>) as <bool>;
+                }
+
+                MenuButton {
+                  styles [
+                    "circular",
+                    "flat",
+                    "error"
+                  ]
+                  icon-name: "dialog-information-symbolic";
+                  visible: bind $invert_boolean($is_null(template.item as <$BzTransactionTask>.error) as <bool>) as <bool>;
+                  has-tooltip: true;
+                  tooltip-text: _("Error Details");
+                  
+                  popover: Popover {
+                    child: Label {
+                      margin-start: 15;
+                      margin-end: 15;
+                      margin-top: 15;
+                      margin-bottom: 15;
+                    
+                      xalign: 0.0;
+                      max-width-chars: 35;
+                      wrap: true;
+                      wrap-mode: word_char;
+                      selectable: true;
+                  
+                      label: bind template.item as <$BzTransactionTask>.error;
+                    };
+                  };
+                }
+              }
+            };
+          }
         };
       }
-    };
+    }
   };
 }
-
-

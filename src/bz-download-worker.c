@@ -41,9 +41,8 @@ struct _BzDownloadWorker
   char *name;
 
   GSubprocess  *subprocess;
-  MutexBoxData *stdin_mutex;
   GHashTable   *waiting;
-  MutexBoxData *waiting_mutex;
+  MutexBoxData *mutex;
   DexFuture    *task;
 };
 
@@ -72,11 +71,11 @@ BZ_DEFINE_DATA (
     {
       GSubprocess  *subprocess;
       GHashTable   *waiting;
-      MutexBoxData *waiting_mutex;
+      MutexBoxData *mutex;
     },
     BZ_RELEASE_DATA (subprocess, g_object_unref);
     BZ_RELEASE_DATA (waiting, g_hash_table_unref);
-    BZ_RELEASE_DATA (waiting_mutex, mutex_box_data_unref));
+    BZ_RELEASE_DATA (mutex, mutex_box_data_unref));
 static DexFuture *
 monitor_worker_fiber (MonitorWorkerData *data);
 
@@ -88,17 +87,15 @@ BZ_DEFINE_DATA (
       GFile        *src;
       GFile        *dest;
       GSubprocess  *subprocess;
-      MutexBoxData *stdin_mutex;
       GHashTable   *waiting;
-      MutexBoxData *waiting_mutex;
+      MutexBoxData *mutex;
     },
     BZ_RELEASE_DATA (promise, dex_unref);
     BZ_RELEASE_DATA (src, g_object_unref);
     BZ_RELEASE_DATA (dest, g_object_unref);
     BZ_RELEASE_DATA (subprocess, g_object_unref);
-    BZ_RELEASE_DATA (stdin_mutex, mutex_box_data_unref);
     BZ_RELEASE_DATA (waiting, g_hash_table_unref);
-    BZ_RELEASE_DATA (waiting_mutex, mutex_box_data_unref));
+    BZ_RELEASE_DATA (mutex, mutex_box_data_unref));
 static DexFuture *
 invoke_worker_fiber (InvokeWorkerData *data);
 
@@ -142,8 +139,7 @@ bz_download_worker_dispose (GObject *object)
     }
 
   g_clear_pointer (&self->waiting, g_hash_table_unref);
-  g_clear_pointer (&self->waiting_mutex, mutex_box_data_unref);
-  g_clear_pointer (&self->stdin_mutex, mutex_box_data_unref);
+  g_clear_pointer (&self->mutex, mutex_box_data_unref);
 
   g_clear_pointer (&self->name, g_free);
 
@@ -207,14 +203,11 @@ bz_download_worker_class_init (BzDownloadWorkerClass *klass)
 static void
 bz_download_worker_init (BzDownloadWorker *self)
 {
-  self->stdin_mutex = mutex_box_data_new ();
-  g_mutex_init (&self->stdin_mutex->m);
+  self->mutex = mutex_box_data_new ();
+  g_mutex_init (&self->mutex->m);
 
   self->waiting = g_hash_table_new_full (
       g_str_hash, g_str_equal, g_free, dex_unref);
-
-  self->waiting_mutex = mutex_box_data_new ();
-  g_mutex_init (&self->waiting_mutex->m);
 }
 
 static gboolean
@@ -233,10 +226,10 @@ bz_download_worker_initable_init (GInitable    *initable,
   if (self->subprocess == NULL)
     return FALSE;
 
-  data                = monitor_worker_data_new ();
-  data->subprocess    = g_object_ref (self->subprocess);
-  data->waiting       = g_hash_table_ref (self->waiting);
-  data->waiting_mutex = mutex_box_data_ref (self->waiting_mutex);
+  data             = monitor_worker_data_new ();
+  data->subprocess = g_object_ref (self->subprocess);
+  data->waiting    = g_hash_table_ref (self->waiting);
+  data->mutex      = mutex_box_data_ref (self->mutex);
 
   self->task = dex_scheduler_spawn (
       dex_scheduler_get_default (),
@@ -299,14 +292,13 @@ bz_download_worker_invoke (BzDownloadWorker *self,
 
   promise = dex_promise_new ();
 
-  data                = invoke_worker_data_new ();
-  data->promise       = dex_ref (promise);
-  data->src           = g_object_ref (src);
-  data->dest          = g_object_ref (dest);
-  data->subprocess    = g_object_ref (self->subprocess);
-  data->stdin_mutex   = mutex_box_data_ref (self->stdin_mutex);
-  data->waiting       = g_hash_table_ref (self->waiting);
-  data->waiting_mutex = mutex_box_data_ref (self->waiting_mutex);
+  data             = invoke_worker_data_new ();
+  data->promise    = dex_ref (promise);
+  data->src        = g_object_ref (src);
+  data->dest       = g_object_ref (dest);
+  data->subprocess = g_object_ref (self->subprocess);
+  data->waiting    = g_hash_table_ref (self->waiting);
+  data->mutex      = mutex_box_data_ref (self->mutex);
 
   dex_future_disown (dex_scheduler_spawn (
       dex_scheduler_get_default (),
@@ -384,7 +376,7 @@ monitor_worker_fiber (MonitorWorkerData *data)
 {
   GSubprocess  *subprocess                       = data->subprocess;
   GHashTable   *waiting                          = data->waiting;
-  MutexBoxData *waiting_mutex                    = data->waiting_mutex;
+  MutexBoxData *mutex                            = data->mutex;
   g_autoptr (GDataInputStream) subprocess_stdout = NULL;
 
   subprocess_stdout = g_data_input_stream_new (
@@ -427,7 +419,7 @@ monitor_worker_fiber (MonitorWorkerData *data)
         }
       g_variant_get (variant, "(sb)", &dest_path, &success);
 
-      BZ_BEGIN_GUARD_WITH_CONTEXT (&guard, &waiting_mutex->m, &waiting_mutex->g);
+      BZ_BEGIN_GUARD_WITH_CONTEXT (&guard, &mutex->m, &mutex->g);
       {
         promise = g_hash_table_lookup (waiting, dest_path);
         if (promise != NULL)
@@ -459,9 +451,8 @@ invoke_worker_fiber (InvokeWorkerData *data)
   GFile           *src           = data->src;
   GFile           *dest          = data->dest;
   GSubprocess     *subprocess    = data->subprocess;
-  MutexBoxData    *stdin_mutex   = data->stdin_mutex;
   GHashTable      *waiting       = data->waiting;
-  MutexBoxData    *waiting_mutex = data->waiting_mutex;
+  MutexBoxData    *mutex         = data->mutex;
   g_autofree char *src_uri       = NULL;
   g_autofree char *dest_path     = NULL;
   DexPromise      *existing      = NULL;
@@ -473,7 +464,7 @@ invoke_worker_fiber (InvokeWorkerData *data)
   src_uri   = g_file_get_uri (src);
   dest_path = g_file_get_path (dest);
 
-  BZ_BEGIN_GUARD_WITH_CONTEXT (&guard, &waiting_mutex->m, &waiting_mutex->g);
+  BZ_BEGIN_GUARD_WITH_CONTEXT (&guard, &mutex->m, &mutex->g);
   {
     existing = g_hash_table_lookup (waiting, dest_path);
     if (existing != NULL)
@@ -486,33 +477,24 @@ invoke_worker_fiber (InvokeWorkerData *data)
         existing = NULL;
       }
     g_hash_table_replace (waiting, g_strdup (dest_path), dex_ref (promise));
-  }
-  bz_clear_guard (&guard);
 
-  variant = g_variant_new ("(ss)", src_uri, dest_path);
-  output  = g_string_new (NULL);
-  output  = g_variant_print_string (variant, g_steal_pointer (&output), TRUE);
-  g_string_append_c (output, '\n');
+    variant = g_variant_new ("(ss)", src_uri, dest_path);
+    output  = g_string_new (NULL);
+    output  = g_variant_print_string (variant, g_steal_pointer (&output), TRUE);
+    g_string_append_c (output, '\n');
 
-  BZ_BEGIN_GUARD_WITH_CONTEXT (&guard, &stdin_mutex->m, &stdin_mutex->g);
-  {
     stdin_stream  = g_subprocess_get_stdin_pipe (subprocess);
     bytes_written = dex_await_int64 (
         dex_output_stream_write (stdin_stream, output->str, output->len, G_PRIORITY_DEFAULT),
         &local_error);
-  }
-  bz_clear_guard (&guard);
 
-  if (bytes_written < 0)
-    {
-      BZ_BEGIN_GUARD_WITH_CONTEXT (&guard, &waiting_mutex->m, &waiting_mutex->g);
+    if (bytes_written < 0)
       {
         g_hash_table_remove (waiting, dest_path);
+        dex_promise_reject (promise, g_steal_pointer (&local_error));
       }
-      bz_clear_guard (&guard);
-
-      dex_promise_reject (promise, g_steal_pointer (&local_error));
-    }
+  }
+  bz_clear_guard (&guard);
 
   return NULL;
 }

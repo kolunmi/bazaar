@@ -24,9 +24,10 @@ struct _BzBackendTransactionOpPayload
 {
   GObject parent_instance;
 
-  char   *name;
-  guint64 download_size;
-  guint64 installed_size;
+  char    *name;
+  BzEntry *entry;
+  guint64  download_size;
+  guint64  installed_size;
 };
 
 G_DEFINE_FINAL_TYPE (BzBackendTransactionOpPayload, bz_backend_transaction_op_payload, G_TYPE_OBJECT);
@@ -36,6 +37,7 @@ enum
   PROP_0,
 
   PROP_NAME,
+  PROP_ENTRY,
   PROP_DOWNLOAD_SIZE,
   PROP_INSTALLED_SIZE,
 
@@ -49,6 +51,7 @@ bz_backend_transaction_op_payload_dispose (GObject *object)
   BzBackendTransactionOpPayload *self = BZ_BACKEND_TRANSACTION_OP_PAYLOAD (object);
 
   g_clear_pointer (&self->name, g_free);
+  g_clear_pointer (&self->entry, g_object_unref);
 
   G_OBJECT_CLASS (bz_backend_transaction_op_payload_parent_class)->dispose (object);
 }
@@ -65,6 +68,9 @@ bz_backend_transaction_op_payload_get_property (GObject    *object,
     {
     case PROP_NAME:
       g_value_set_string (value, bz_backend_transaction_op_payload_get_name (self));
+      break;
+    case PROP_ENTRY:
+      g_value_set_object (value, bz_backend_transaction_op_payload_get_entry (self));
       break;
     case PROP_DOWNLOAD_SIZE:
       g_value_set_uint64 (value, bz_backend_transaction_op_payload_get_download_size (self));
@@ -90,6 +96,9 @@ bz_backend_transaction_op_payload_set_property (GObject      *object,
     case PROP_NAME:
       bz_backend_transaction_op_payload_set_name (self, g_value_get_string (value));
       break;
+    case PROP_ENTRY:
+      bz_backend_transaction_op_payload_set_entry (self, g_value_get_object (value));
+      break;
     case PROP_DOWNLOAD_SIZE:
       bz_backend_transaction_op_payload_set_download_size (self, g_value_get_uint64 (value));
       break;
@@ -114,6 +123,13 @@ bz_backend_transaction_op_payload_class_init (BzBackendTransactionOpPayloadClass
       g_param_spec_string (
           "name",
           NULL, NULL, NULL,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_ENTRY] =
+      g_param_spec_object (
+          "entry",
+          NULL, NULL,
+          BZ_TYPE_ENTRY,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   props[PROP_DOWNLOAD_SIZE] =
@@ -151,6 +167,13 @@ bz_backend_transaction_op_payload_get_name (BzBackendTransactionOpPayload *self)
   return self->name;
 }
 
+BzEntry *
+bz_backend_transaction_op_payload_get_entry (BzBackendTransactionOpPayload *self)
+{
+  g_return_val_if_fail (BZ_IS_BACKEND_TRANSACTION_OP_PAYLOAD (self), NULL);
+  return self->entry;
+}
+
 guint64
 bz_backend_transaction_op_payload_get_download_size (BzBackendTransactionOpPayload *self)
 {
@@ -176,6 +199,19 @@ bz_backend_transaction_op_payload_set_name (BzBackendTransactionOpPayload *self,
     self->name = g_strdup (name);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_NAME]);
+}
+
+void
+bz_backend_transaction_op_payload_set_entry (BzBackendTransactionOpPayload *self,
+                                             BzEntry                       *entry)
+{
+  g_return_if_fail (BZ_IS_BACKEND_TRANSACTION_OP_PAYLOAD (self));
+
+  g_clear_pointer (&self->entry, g_object_unref);
+  if (entry != NULL)
+    self->entry = g_object_ref (entry);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ENTRY]);
 }
 
 void

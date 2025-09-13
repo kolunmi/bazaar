@@ -37,6 +37,9 @@ bz_transaction_task_get_op (BzTransactionTask *self);
 BzBackendTransactionOpProgressPayload *
 bz_transaction_task_get_last_progress (BzTransactionTask *self);
 
+const char *
+bz_transaction_task_get_error (BzTransactionTask *self);
+
 void
 bz_transaction_task_set_op (BzTransactionTask             *self,
                             BzBackendTransactionOpPayload *op);
@@ -44,6 +47,10 @@ bz_transaction_task_set_op (BzTransactionTask             *self,
 void
 bz_transaction_task_set_last_progress (BzTransactionTask                     *self,
                                        BzBackendTransactionOpProgressPayload *last_progress);
+
+void
+bz_transaction_task_set_error (BzTransactionTask *self,
+                               const char        *error);
 
 G_END_DECLS
 

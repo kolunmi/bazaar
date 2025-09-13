@@ -13,8 +13,6 @@ src/bz-async-texture.c
 src/bz-backend.c
 src/bz-browse-widget.blp
 src/bz-browse-widget.c
-src/bz-category-dialog.blp
-src/bz-category-dialog.c
 src/bz-comet-overlay.c
 src/bz-comet.c
 src/bz-content-provider.c

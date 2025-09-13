@@ -1,4 +1,4 @@
-/* bz-category-dialog.h
+/* bz-category-page.h
  *
  * Copyright 2025 Adam Masciola
  *
@@ -26,10 +26,10 @@
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_CATEGORY_DIALOG (bz_category_dialog_get_type ())
-G_DECLARE_FINAL_TYPE (BzCategoryDialog, bz_category_dialog, BZ, CATEGORY_DIALOG, AdwDialog)
+#define BZ_TYPE_CATEGORY_PAGE (bz_category_page_get_type ())
+G_DECLARE_FINAL_TYPE (BzCategoryPage, bz_category_page, BZ, CATEGORY_PAGE, AdwNavigationPage)
 
-AdwDialog *
-bz_category_dialog_new (BzFlathubCategory *category);
+AdwNavigationPage *
+bz_category_page_new (BzFlathubCategory *category);
 
 G_END_DECLS

@@ -217,7 +217,7 @@ bz_async_texture_class_init (BzAsyncTextureClass *klass)
 static void
 bz_async_texture_init (BzAsyncTexture *self)
 {
-  self->retries = 0;
+  self->retries   = 0;
   self->paintable = NULL;
   g_mutex_init (&self->texture_mutex);
 }
@@ -233,7 +233,7 @@ paintable_snapshot (GdkPaintable *paintable,
 
   locker = g_mutex_locker_new (&self->texture_mutex);
   maybe_load (self);
-  
+
   if (self->paintable != NULL)
     gdk_paintable_snapshot (self->paintable, snapshot, width, height);
 }
@@ -246,10 +246,10 @@ paintable_get_current_image (GdkPaintable *paintable)
 
   locker = g_mutex_locker_new (&self->texture_mutex);
   maybe_load (self);
-  
+
   if (self->paintable != NULL)
     return gdk_paintable_get_current_image (self->paintable);
-  
+
   return NULL;
 }
 
@@ -272,7 +272,7 @@ paintable_get_intrinsic_width (GdkPaintable *paintable)
 
   locker = g_mutex_locker_new (&self->texture_mutex);
   maybe_load (self);
-  
+
   if (self->paintable != NULL)
     return gdk_paintable_get_intrinsic_width (self->paintable);
 
@@ -287,10 +287,10 @@ paintable_get_intrinsic_height (GdkPaintable *paintable)
 
   locker = g_mutex_locker_new (&self->texture_mutex);
   maybe_load (self);
-  
+
   if (self->paintable != NULL)
     return gdk_paintable_get_intrinsic_height (self->paintable);
-    
+
   return 0;
 }
 
@@ -302,10 +302,10 @@ paintable_get_intrinsic_aspect_ratio (GdkPaintable *paintable)
 
   locker = g_mutex_locker_new (&self->texture_mutex);
   maybe_load (self);
-  
+
   if (self->paintable != NULL)
     return gdk_paintable_get_intrinsic_aspect_ratio (self->paintable);
-    
+
   return 0.0;
 }
 

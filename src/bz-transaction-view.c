@@ -107,8 +107,7 @@ format_download_size (gpointer object,
 {
   g_autofree char *size = NULL;
 
-  size = g_format_size (value);
-  return g_strdup_printf (_ ("%s to download"), size);
+  return g_format_size (value);
 }
 
 static char *
@@ -117,8 +116,7 @@ format_installed_size (gpointer object,
 {
   g_autofree char *size = NULL;
 
-  size = g_format_size (value);
-  return g_strdup_printf (_ ("%s to install"), size);
+  return g_format_size (value);
 }
 
 static char *

@@ -22,6 +22,8 @@
 
 #include <gtk/gtk.h>
 
+#include "bz-entry.h"
+
 G_BEGIN_DECLS
 
 #define BZ_TYPE_BACKEND_TRANSACTION_OP_PAYLOAD (bz_backend_transaction_op_payload_get_type ())
@@ -33,6 +35,9 @@ bz_backend_transaction_op_payload_new (void);
 const char *
 bz_backend_transaction_op_payload_get_name (BzBackendTransactionOpPayload *self);
 
+BzEntry *
+bz_backend_transaction_op_payload_get_entry (BzBackendTransactionOpPayload *self);
+
 guint64
 bz_backend_transaction_op_payload_get_download_size (BzBackendTransactionOpPayload *self);
 
@@ -42,6 +47,10 @@ bz_backend_transaction_op_payload_get_installed_size (BzBackendTransactionOpPayl
 void
 bz_backend_transaction_op_payload_set_name (BzBackendTransactionOpPayload *self,
                                             const char                    *name);
+
+void
+bz_backend_transaction_op_payload_set_entry (BzBackendTransactionOpPayload *self,
+                                             BzEntry                       *entry);
 
 void
 bz_backend_transaction_op_payload_set_download_size (BzBackendTransactionOpPayload *self,

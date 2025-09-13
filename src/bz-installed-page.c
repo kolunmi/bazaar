@@ -21,6 +21,7 @@
 #include <glib/gi18n.h>
 
 #include "bz-addons-dialog.h"
+#include "bz-env.h"
 #include "bz-error.h"
 #include "bz-flatpak-entry.h"
 #include "bz-installed-page.h"
@@ -34,12 +35,8 @@ struct _BzInstalledPage
   GListModel  *model;
   BzStateInfo *state;
 
-  GtkSortListModel *sorted;
-
   /* Template widgets */
-  AdwViewStack   *stack;
-  GtkListView    *list_view;
-  GtkNoSelection *no_selection;
+  AdwViewStack *stack;
 };
 
 G_DEFINE_FINAL_TYPE (BzInstalledPage, bz_installed_page, ADW_TYPE_BIN)
@@ -72,13 +69,23 @@ items_changed (BzInstalledPage *self,
                guint            added,
                GListModel      *model);
 
-static gint
-cmp_item (BzEntry         *a,
-          BzEntry         *b,
-          BzInstalledPage *self);
-
 static void
 set_page (BzInstalledPage *self);
+
+static BzEntry *
+find_entry_in_group (BzEntryGroup *group,
+                     gboolean (*test) (BzEntry *entry),
+                     GtkWidget *window,
+                     GError   **error);
+
+static gboolean
+test_is_runnable (BzEntry *entry);
+
+static gboolean
+test_is_support (BzEntry *entry);
+
+static gboolean
+test_has_addons (BzEntry *entry);
 
 static void
 bz_installed_page_dispose (GObject *object)
@@ -89,8 +96,6 @@ bz_installed_page_dispose (GObject *object)
     g_signal_handlers_disconnect_by_func (self->model, items_changed, self);
   g_clear_object (&self->model);
   g_clear_object (&self->state);
-
-  g_clear_object (&self->sorted);
 
   G_OBJECT_CLASS (bz_installed_page_parent_class)->dispose (object);
 }
@@ -152,6 +157,13 @@ is_null (gpointer object,
   return value == NULL;
 }
 
+static gboolean
+is_zero (gpointer object,
+         int      value)
+{
+  return value == 0;
+}
+
 static void
 addon_transact_cb (BzInstalledPage *self,
                    BzEntry         *entry,
@@ -167,74 +179,131 @@ addon_transact_cb (BzInstalledPage *self,
     g_signal_emit (self, signals[SIGNAL_INSTALL], 0, entry);
 }
 
+static DexFuture *
+run_fiber (GtkListItem *list_item)
+{
+  g_autoptr (GError) local_error = NULL;
+  BzInstalledPage *self          = NULL;
+  GtkWidget       *window        = NULL;
+  BzEntryGroup    *group         = NULL;
+  g_autoptr (BzEntry) entry      = NULL;
+  gboolean result                = FALSE;
+
+  self = BZ_INSTALLED_PAGE (gtk_widget_get_ancestor (gtk_list_item_get_child (list_item), BZ_TYPE_INSTALLED_PAGE));
+  g_assert (self != NULL);
+
+  window = gtk_widget_get_ancestor (GTK_WIDGET (self), GTK_TYPE_WINDOW);
+  g_assert (window != NULL);
+
+  group = gtk_list_item_get_item (list_item);
+  entry = find_entry_in_group (group, test_is_runnable, window, &local_error);
+  if (entry == NULL)
+    goto err;
+
+  result = bz_flatpak_entry_launch (
+      BZ_FLATPAK_ENTRY (entry),
+      BZ_FLATPAK_INSTANCE (bz_state_info_get_backend (self->state)),
+      &local_error);
+  if (!result)
+    goto err;
+
+  return NULL;
+
+err:
+  if (local_error != NULL)
+    bz_show_error_for_widget (window, local_error->message);
+  return NULL;
+}
+
 static void
 run_cb (GtkListItem *list_item,
         GtkButton   *button)
 {
-  BzEntry         *entry    = NULL;
-  BzInstalledPage *self     = NULL;
-  GtkWidget       *menu_btn = NULL;
-
-  entry = gtk_list_item_get_item (list_item);
+  GtkWidget *menu_btn = NULL;
 
   menu_btn = gtk_widget_get_ancestor (GTK_WIDGET (button), GTK_TYPE_MENU_BUTTON);
   if (menu_btn != NULL)
     gtk_menu_button_set_active (GTK_MENU_BUTTON (menu_btn), FALSE);
 
-  self = BZ_INSTALLED_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_INSTALLED_PAGE));
+  dex_future_disown (dex_scheduler_spawn (
+      dex_scheduler_get_default (),
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) run_fiber,
+      g_object_ref (list_item),
+      g_object_unref));
+}
+
+static DexFuture *
+support_fiber (GtkListItem *list_item)
+{
+  g_autoptr (GError) local_error = NULL;
+  BzInstalledPage *self          = NULL;
+  GtkWidget       *window        = NULL;
+  BzEntryGroup    *group         = NULL;
+  g_autoptr (BzEntry) entry      = NULL;
+  const char *url                = NULL;
+
+  self = BZ_INSTALLED_PAGE (gtk_widget_get_ancestor (gtk_list_item_get_child (list_item), BZ_TYPE_INSTALLED_PAGE));
   g_assert (self != NULL);
 
-  if (BZ_IS_FLATPAK_ENTRY (entry))
-    {
-      g_autoptr (GError) local_error = NULL;
-      gboolean result                = FALSE;
+  window = gtk_widget_get_ancestor (GTK_WIDGET (self), GTK_TYPE_WINDOW);
+  g_assert (window != NULL);
 
-      result = bz_flatpak_entry_launch (
-          BZ_FLATPAK_ENTRY (entry),
-          BZ_FLATPAK_INSTANCE (bz_state_info_get_backend (self->state)),
-          &local_error);
-      if (!result)
-        {
-          GtkWidget *window = NULL;
+  group = gtk_list_item_get_item (list_item);
+  entry = find_entry_in_group (group, test_is_support, window, &local_error);
+  if (entry == NULL)
+    goto err;
 
-          window = gtk_widget_get_ancestor (GTK_WIDGET (button), GTK_TYPE_WINDOW);
-          if (window != NULL)
-            bz_show_error_for_widget (window, local_error->message);
-        }
-    }
+  url = bz_entry_get_donation_url (entry);
+  g_app_info_launch_default_for_uri (url, NULL, NULL);
+
+  return NULL;
+
+err:
+  if (local_error != NULL)
+    bz_show_error_for_widget (window, local_error->message);
+  return NULL;
 }
 
 static void
 support_cb (GtkListItem *list_item,
             GtkButton   *button)
 {
-  BzEntry    *entry = NULL;
-  const char *url   = NULL;
-
-  entry = gtk_list_item_get_item (list_item);
-
-  url = bz_entry_get_donation_url (entry);
-  g_app_info_launch_default_for_uri (url, NULL, NULL);
-}
-
-static void
-install_addons_cb (GtkListItem *list_item,
-                   GtkButton   *button)
-{
-  BzEntry   *entry               = NULL;
-  GtkWidget *menu_btn            = NULL;
-  g_autoptr (GListModel) model   = NULL;
-  AdwDialog       *addons_dialog = NULL;
-  BzInstalledPage *self          = NULL;
-
-  entry = gtk_list_item_get_item (list_item);
+  GtkWidget *menu_btn = NULL;
 
   menu_btn = gtk_widget_get_ancestor (GTK_WIDGET (button), GTK_TYPE_MENU_BUTTON);
   if (menu_btn != NULL)
     gtk_menu_button_set_active (GTK_MENU_BUTTON (menu_btn), FALSE);
 
-  self = BZ_INSTALLED_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_INSTALLED_PAGE));
+  dex_future_disown (dex_scheduler_spawn (
+      dex_scheduler_get_default (),
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) support_fiber,
+      g_object_ref (list_item),
+      g_object_unref));
+}
+
+static DexFuture *
+install_addons_fiber (GtkListItem *list_item)
+{
+  g_autoptr (GError) local_error = NULL;
+  BzInstalledPage *self          = NULL;
+  GtkWidget       *window        = NULL;
+  BzEntryGroup    *group         = NULL;
+  g_autoptr (BzEntry) entry      = NULL;
+  g_autoptr (GListModel) model   = NULL;
+  AdwDialog *addons_dialog       = NULL;
+
+  self = BZ_INSTALLED_PAGE (gtk_widget_get_ancestor (gtk_list_item_get_child (list_item), BZ_TYPE_INSTALLED_PAGE));
   g_assert (self != NULL);
+
+  window = gtk_widget_get_ancestor (GTK_WIDGET (self), GTK_TYPE_WINDOW);
+  g_assert (window != NULL);
+
+  group = gtk_list_item_get_item (list_item);
+  entry = find_entry_in_group (group, test_has_addons, window, &local_error);
+  if (entry == NULL)
+    goto err;
 
   model = bz_application_map_factory_generate (
       bz_state_info_get_entry_factory (self->state),
@@ -246,46 +315,127 @@ install_addons_cb (GtkListItem *list_item,
   g_signal_connect_swapped (addons_dialog, "transact", G_CALLBACK (addon_transact_cb), self);
 
   adw_dialog_present (addons_dialog, GTK_WIDGET (self));
+
+  return NULL;
+
+err:
+  if (local_error != NULL)
+    bz_show_error_for_widget (window, local_error->message);
+  return NULL;
+}
+
+static void
+install_addons_cb (GtkListItem *list_item,
+                   GtkButton   *button)
+{
+  GtkWidget *menu_btn = NULL;
+
+  menu_btn = gtk_widget_get_ancestor (GTK_WIDGET (button), GTK_TYPE_MENU_BUTTON);
+  if (menu_btn != NULL)
+    gtk_menu_button_set_active (GTK_MENU_BUTTON (menu_btn), FALSE);
+
+  dex_future_disown (dex_scheduler_spawn (
+      dex_scheduler_get_default (),
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) install_addons_fiber,
+      g_object_ref (list_item),
+      g_object_unref));
+}
+
+static DexFuture *
+view_store_page_fiber (GtkListItem *list_item)
+{
+  g_autoptr (GError) local_error = NULL;
+  BzInstalledPage *self          = NULL;
+  GtkWidget       *window        = NULL;
+  BzEntryGroup    *group         = NULL;
+  g_autoptr (BzEntry) entry      = NULL;
+
+  self = BZ_INSTALLED_PAGE (gtk_widget_get_ancestor (gtk_list_item_get_child (list_item), BZ_TYPE_INSTALLED_PAGE));
+  g_assert (self != NULL);
+
+  window = gtk_widget_get_ancestor (GTK_WIDGET (self), GTK_TYPE_WINDOW);
+  g_assert (window != NULL);
+
+  group = gtk_list_item_get_item (list_item);
+  entry = find_entry_in_group (group, NULL, window, &local_error);
+  if (entry == NULL)
+    goto err;
+
+  g_signal_emit (self, signals[SIGNAL_SHOW], 0, entry);
+
+  return NULL;
+
+err:
+  if (local_error != NULL)
+    bz_show_error_for_widget (window, local_error->message);
+  return NULL;
 }
 
 static void
 view_store_page_cb (GtkListItem *list_item,
                     GtkButton   *button)
 {
-  BzEntry   *entry    = NULL;
   GtkWidget *menu_btn = NULL;
-  GtkWidget *self     = NULL;
-
-  entry = gtk_list_item_get_item (list_item);
 
   menu_btn = gtk_widget_get_ancestor (GTK_WIDGET (button), GTK_TYPE_MENU_BUTTON);
   if (menu_btn != NULL)
     gtk_menu_button_set_active (GTK_MENU_BUTTON (menu_btn), FALSE);
 
-  self = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_INSTALLED_PAGE);
+  dex_future_disown (dex_scheduler_spawn (
+      dex_scheduler_get_default (),
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) view_store_page_fiber,
+      g_object_ref (list_item),
+      g_object_unref));
+}
+
+static DexFuture *
+remove_fiber (GtkListItem *list_item)
+{
+  g_autoptr (GError) local_error = NULL;
+  BzInstalledPage *self          = NULL;
+  GtkWidget       *window        = NULL;
+  BzEntryGroup    *group         = NULL;
+  g_autoptr (BzEntry) entry      = NULL;
+
+  self = BZ_INSTALLED_PAGE (gtk_widget_get_ancestor (gtk_list_item_get_child (list_item), BZ_TYPE_INSTALLED_PAGE));
   g_assert (self != NULL);
 
-  g_signal_emit (self, signals[SIGNAL_SHOW], 0, entry);
+  window = gtk_widget_get_ancestor (GTK_WIDGET (self), GTK_TYPE_WINDOW);
+  g_assert (window != NULL);
+
+  group = gtk_list_item_get_item (list_item);
+  entry = find_entry_in_group (group, NULL, window, &local_error);
+  if (entry == NULL)
+    goto err;
+
+  g_signal_emit (self, signals[SIGNAL_REMOVE], 0, entry);
+
+  return NULL;
+
+err:
+  if (local_error != NULL)
+    bz_show_error_for_widget (window, local_error->message);
+  return NULL;
 }
 
 static void
 remove_cb (GtkListItem *list_item,
            GtkButton   *button)
 {
-  BzEntry   *entry    = NULL;
   GtkWidget *menu_btn = NULL;
-  GtkWidget *self     = NULL;
-
-  entry = gtk_list_item_get_item (list_item);
 
   menu_btn = gtk_widget_get_ancestor (GTK_WIDGET (button), GTK_TYPE_MENU_BUTTON);
   if (menu_btn != NULL)
     gtk_menu_button_set_active (GTK_MENU_BUTTON (menu_btn), FALSE);
 
-  self = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_INSTALLED_PAGE);
-  g_assert (self != NULL);
-
-  g_signal_emit (self, signals[SIGNAL_REMOVE], 0, entry);
+  dex_future_disown (dex_scheduler_spawn (
+      dex_scheduler_get_default (),
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) remove_fiber,
+      g_object_ref (list_item),
+      g_object_unref));
 }
 
 static void
@@ -376,13 +526,13 @@ bz_installed_page_class_init (BzInstalledPageClass *klass)
       g_cclosure_marshal_VOID__OBJECTv);
 
   g_type_ensure (BZ_TYPE_SECTION_VIEW);
+  g_type_ensure (BZ_TYPE_ENTRY_GROUP);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-installed-page.ui");
   gtk_widget_class_bind_template_child (widget_class, BzInstalledPage, stack);
-  gtk_widget_class_bind_template_child (widget_class, BzInstalledPage, list_view);
-  gtk_widget_class_bind_template_child (widget_class, BzInstalledPage, no_selection);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
+  gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, run_cb);
   gtk_widget_class_bind_template_callback (widget_class, support_cb);
   gtk_widget_class_bind_template_callback (widget_class, view_store_page_cb);
@@ -395,13 +545,7 @@ bz_installed_page_class_init (BzInstalledPageClass *klass)
 static void
 bz_installed_page_init (BzInstalledPage *self)
 {
-  GtkCustomSorter *custom_sorter = NULL;
-
   gtk_widget_init_template (GTK_WIDGET (self));
-
-  custom_sorter = gtk_custom_sorter_new ((GCompareDataFunc) cmp_item, self, NULL);
-  self->sorted  = gtk_sort_list_model_new (NULL, GTK_SORTER (custom_sorter));
-  gtk_no_selection_set_model (self->no_selection, G_LIST_MODEL (self->sorted));
 }
 
 GtkWidget *
@@ -425,7 +569,6 @@ bz_installed_page_set_model (BzInstalledPage *self,
       self->model = g_object_ref (model);
       g_signal_connect_swapped (model, "items-changed", G_CALLBACK (items_changed), self);
     }
-  gtk_sort_list_model_set_model (self->sorted, model);
   set_page (self);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MODEL]);
@@ -448,37 +591,6 @@ items_changed (BzInstalledPage *self,
   set_page (self);
 }
 
-static gint
-cmp_item (BzEntry         *a,
-          BzEntry         *b,
-          BzInstalledPage *self)
-{
-  gboolean    a_is_application = FALSE;
-  gboolean    b_is_application = FALSE;
-  gboolean    a_is_addon       = FALSE;
-  gboolean    b_is_addon       = FALSE;
-  const char *title_a          = NULL;
-  const char *title_b          = NULL;
-
-  a_is_application = bz_entry_is_of_kinds (a, BZ_ENTRY_KIND_APPLICATION);
-  b_is_application = bz_entry_is_of_kinds (b, BZ_ENTRY_KIND_APPLICATION);
-  a_is_addon       = bz_entry_is_of_kinds (a, BZ_ENTRY_KIND_ADDON);
-  b_is_addon       = bz_entry_is_of_kinds (b, BZ_ENTRY_KIND_ADDON);
-  title_a          = bz_entry_get_title (a);
-  title_b          = bz_entry_get_title (b);
-
-  if (a_is_application && !b_is_application)
-    return -1;
-  else if (!a_is_application && b_is_application)
-    return 1;
-  else if (a_is_addon && !b_is_addon)
-    return -1;
-  else if (!a_is_addon && b_is_addon)
-    return 1;
-  else
-    return g_strcmp0 (title_a, title_b);
-}
-
 static void
 set_page (BzInstalledPage *self)
 {
@@ -487,4 +599,123 @@ set_page (BzInstalledPage *self)
     adw_view_stack_set_visible_child_name (self->stack, "content");
   else
     adw_view_stack_set_visible_child_name (self->stack, "empty");
+}
+
+/* Needs to be run in a fiber */
+static BzEntry *
+find_entry_in_group (BzEntryGroup *group,
+                     gboolean (*test) (BzEntry *entry),
+                     GtkWidget *window,
+                     GError   **error)
+{
+  g_autoptr (GListModel) model     = NULL;
+  guint n_items                    = 0;
+  g_autoptr (GPtrArray) candidates = NULL;
+
+  model = dex_await_object (bz_entry_group_dup_all_into_model (group), error);
+  if (model == NULL)
+    return NULL;
+  n_items = g_list_model_get_n_items (model);
+
+  candidates = g_ptr_array_new_with_free_func (g_object_unref);
+  for (guint i = 0; i < n_items; i++)
+    {
+      g_autoptr (BzEntry) entry = NULL;
+
+      entry = g_list_model_get_item (model, i);
+
+      if (bz_entry_is_installed (entry) &&
+          (test == NULL || test (entry)))
+        g_ptr_array_add (candidates, g_steal_pointer (&entry));
+    }
+
+  if (candidates->len == 0)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "BUG: No entry candidates satisfied this test condition");
+      return NULL;
+    }
+  else if (candidates->len == 1)
+    return g_ptr_array_steal_index_fast (candidates, 0);
+  else if (window != NULL)
+    {
+      AdwDialog       *alert    = NULL;
+      g_autofree char *response = NULL;
+
+      alert = adw_alert_dialog_new (NULL, NULL);
+      adw_alert_dialog_set_prefer_wide_layout (ADW_ALERT_DIALOG (alert), TRUE);
+      adw_alert_dialog_format_heading (
+          ADW_ALERT_DIALOG (alert),
+          _ ("Choose an Installation"));
+      adw_alert_dialog_format_body (
+          ADW_ALERT_DIALOG (alert),
+          _ ("You have multiple versions of this app installed. Which "
+             "one would you like to proceed with? "));
+      adw_alert_dialog_add_responses (
+          ADW_ALERT_DIALOG (alert),
+          "cancel", _ ("Cancel"),
+          NULL);
+      adw_alert_dialog_set_close_response (ADW_ALERT_DIALOG (alert), "cancel");
+      adw_alert_dialog_set_response_appearance (
+          ADW_ALERT_DIALOG (alert), "cancel", ADW_RESPONSE_DESTRUCTIVE);
+
+      for (guint i = 0; i < candidates->len; i++)
+        {
+          BzEntry    *entry     = NULL;
+          const char *unique_id = NULL;
+
+          entry     = g_ptr_array_index (candidates, i);
+          unique_id = bz_entry_get_unique_id (entry);
+
+          adw_alert_dialog_add_responses (
+              ADW_ALERT_DIALOG (alert),
+              unique_id, unique_id,
+              NULL);
+          if (i == 0)
+            adw_alert_dialog_set_default_response (ADW_ALERT_DIALOG (alert), unique_id);
+        }
+
+      adw_dialog_present (alert, GTK_WIDGET (window));
+      response = dex_await_string (
+          bz_make_alert_dialog_future (ADW_ALERT_DIALOG (alert)),
+          NULL);
+
+      if (response != NULL)
+        {
+          for (guint i = 0; i < candidates->len; i++)
+            {
+              BzEntry    *entry     = NULL;
+              const char *unique_id = NULL;
+
+              entry     = g_ptr_array_index (candidates, i);
+              unique_id = bz_entry_get_unique_id (entry);
+
+              if (g_strcmp0 (unique_id, response) == 0)
+                return g_object_ref (entry);
+            }
+        }
+    }
+
+  return NULL;
+}
+
+static gboolean
+test_is_runnable (BzEntry *entry)
+{
+  return BZ_IS_FLATPAK_ENTRY (entry);
+}
+
+static gboolean
+test_is_support (BzEntry *entry)
+{
+  return bz_entry_get_donation_url (entry) != NULL;
+}
+
+static gboolean
+test_has_addons (BzEntry *entry)
+{
+  GListModel *model = NULL;
+
+  model = bz_entry_get_addons (entry);
+  return model != NULL && g_list_model_get_n_items (model) > 0;
 }

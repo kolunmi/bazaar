@@ -79,4 +79,9 @@ void
 bz_transaction_finish_task (BzTransaction                 *self,
                             BzBackendTransactionOpPayload *payload);
 
+void
+bz_transaction_error_out_task (BzTransaction                 *self,
+                               BzBackendTransactionOpPayload *payload,
+                               const char                    *message);
+
 G_END_DECLS
