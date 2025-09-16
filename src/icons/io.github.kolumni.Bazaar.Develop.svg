@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg height="128px" viewBox="0 0 128 128" width="128px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <linearGradient id="a" gradientUnits="userSpaceOnUse" x1="12" x2="116" y1="64" y2="64">
+        <stop offset="0" stop-color="#77767b"/>
+        <stop offset="0.05" stop-color="#c0bfbc"/>
+        <stop offset="0.1" stop-color="#9a9996"/>
+        <stop offset="0.899999" stop-color="#9a9996"/>
+        <stop offset="0.95" stop-color="#c0bfbc"/>
+        <stop offset="1" stop-color="#77767b"/>
+    </linearGradient>
+    <filter id="b" height="100%" width="100%" x="0%" y="0%">
+        <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0"/>
+    </filter>
+    <mask id="c">
+        <g filter="url(#b)">
+            <rect fill-opacity="0.05" height="128" width="128"/>
+        </g>
+    </mask>
+    <radialGradient id="d" cx="63.999996" cy="194.190475" gradientTransform="matrix(4.727273 -0.00000079 0.0000003 1.636364 -230.545471 -205.766182)" gradientUnits="userSpaceOnUse" r="44">
+        <stop offset="0" stop-color="#ffffff"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity="0.094118"/>
+    </radialGradient>
+    <clipPath id="e">
+        <rect height="152" width="192"/>
+    </clipPath>
+    <path d="m 20 22 h 88 c 4.417969 0 8 3.582031 8 8 v 78 c 0 4.417969 -3.582031 8 -8 8 h -88 c -4.417969 0 -8 -3.582031 -8 -8 v -78 c 0 -4.417969 3.582031 -8 8 -8 z m 0 0" fill="url(#a)"/>
+    <path d="m 20 12 h 88 c 4.417969 0 8 3.582031 8 8 v 80 c 0 4.417969 -3.582031 8 -8 8 h -88 c -4.417969 0 -8 -3.582031 -8 -8 v -80 c 0 -4.417969 3.582031 -8 8 -8 z m 0 0" fill="#deddda"/>
+    <path d="m 20 104 h 88 c 2.210938 0 4 -1.789062 4 -4 v -80 c 0 -2.210938 -1.789062 -4 -4 -4 h -88 c -2.210938 0 -4 1.789062 -4 4 v 80 c 0 2.210938 1.789062 4 4 4 z m 0 0" fill="#241f31"/>
+    <g clip-path="url(#e)" mask="url(#c)" transform="matrix(1 0 0 1 -8 -16)">
+        <path d="m 116 116 h -88 v -78 h 88 z m 0 0" fill="url(#d)"/>
+    </g>
+    <path d="m 24 28 h 28 v 4 h -28 z m 0 0" fill="#ff7800"/>
+    <path d="m 24 36 h 16 v 4 h -16 z m 0 0" fill="#deddda"/>
+    <path d="m 32 44 h 42 v 4 h -42 z m 0 0" fill="#3584e4"/>
+    <path d="m 32 52 h 22 v 4 h -22 z m 0 0" fill="#deddda"/>
+    <path d="m 40 60 h 36 v 4 h -36 z m 0 0" fill="#deddda"/>
+    <path d="m 40 68 h 20 v 4 h -20 z m 0 0" fill="#8ff0a4"/>
+    <path d="m 48 76 h 24 v 4 h -24 z m 0 0" fill="#ff7800"/>
+    <path d="m 24 84 h 32 v 4 h -32 z m 0 0" fill="#deddda"/>
+    <path d="m 24 92 h 18 v 4 h -18 z m 0 0" fill="#3584e4"/>
+    <path d="m 32 76 h 14 v 4 h -14 z m 0 0" fill="#8ff0a4"/>
+    <path d="m 62 68 h 20 v 4 h -20 z m 0 0" fill="#deddda"/>
+    <path d="m 78 60 h 18 v 4 h -18 z m 0 0" fill="#3584e4"/>
+</svg>

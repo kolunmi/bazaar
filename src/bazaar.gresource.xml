@@ -11,7 +11,9 @@
     <file preprocess="xml-stripblanks">bz-addons-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-app-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-browse-widget.ui</file>
-    <file preprocess="xml-stripblanks">bz-category-dialog.ui</file>
+    <file preprocess="xml-stripblanks">bz-category-page.ui</file>
+    <file preprocess="xml-stripblanks">bz-curated-app-tile.ui</file>
+    <file preprocess="xml-stripblanks">bz-category-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-decorated-screenshot.ui</file>
     <file preprocess="xml-stripblanks">bz-detailed-app-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-entry-inspector.ui</file>
@@ -35,11 +37,12 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/copy-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/cross-large-circle-filled-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/delay-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/download-plus-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/drive-harddisk-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/edit-clear-all-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/external-link-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/eye-outline-filled-symbolic.svg</file>
-    <file preprocess="xml-stripblanks">icons/scalable/actions/flathub-favicon.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/flathub-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/flatpak-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/folder-download-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/globe-symbolic.svg</file>
@@ -48,7 +51,6 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/heart-filled-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/heart-outline-thick-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/horizontal-arrows-disabled-symbolic.svg</file>
-    <file preprocess="xml-stripblanks">icons/scalable/actions/image-missing-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/left-large-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/library-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/license-symbolic.svg</file>
@@ -73,6 +75,17 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/verified-checkmark-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/view-more-horizontal-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/view-more-symbolic.svg</file>
+
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Create.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Develop.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Learn.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Play.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Network.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Work.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Audiovideo.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Science.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.System.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Utilities.svg</file>
 
   </gresource>
 </gresources>

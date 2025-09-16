@@ -19,8 +19,8 @@
  */
 
 #include "bz-section-view.h"
-#include "bz-app-tile.h"
 #include "bz-async-texture.h"
+#include "bz-curated-app-tile.h"
 #include "bz-dynamic-list-view.h"
 #include "bz-entry-group.h"
 
@@ -68,6 +68,10 @@ static void
 dark_changed (BzSectionView   *self,
               GParamSpec      *pspec,
               AdwStyleManager *mgr);
+
+static void
+refresh_dark_light_classes (BzSectionView   *self,
+                            AdwStyleManager *mgr);
 
 static void
 bz_section_view_dispose (GObject *object)
@@ -137,7 +141,7 @@ is_null (gpointer object,
 
 static void
 bind_widget_cb (BzSectionView     *self,
-                BzAppTile         *tile,
+                BzCuratedAppTile  *tile,
                 BzEntryGroup      *group,
                 BzDynamicListView *view)
 {
@@ -146,7 +150,7 @@ bind_widget_cb (BzSectionView     *self,
 
 static void
 unbind_widget_cb (BzSectionView     *self,
-                  BzAppTile         *tile,
+                  BzCuratedAppTile  *tile,
                   BzEntryGroup      *group,
                   BzDynamicListView *view)
 {
@@ -188,7 +192,7 @@ bz_section_view_class_init (BzSectionViewClass *klass)
       g_cclosure_marshal_VOID__OBJECTv);
 
   g_type_ensure (BZ_TYPE_ASYNC_TEXTURE);
-  g_type_ensure (BZ_TYPE_APP_TILE);
+  g_type_ensure (BZ_TYPE_CURATED_APP_TILE);
   g_type_ensure (BZ_TYPE_DYNAMIC_LIST_VIEW);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-section-view.ui");
@@ -206,48 +210,7 @@ dark_changed (BzSectionView   *self,
               GParamSpec      *pspec,
               AdwStyleManager *mgr)
 {
-  if (self->applied_classes != NULL)
-    {
-      guint n_applied_classes = 0;
-
-      n_applied_classes = g_list_model_get_n_items (self->applied_classes);
-      for (guint i = 0; i < n_applied_classes; i++)
-        {
-          g_autoptr (GtkStringObject) string = NULL;
-          const char *class                  = NULL;
-
-          string = g_list_model_get_item (self->applied_classes, i);
-          class  = gtk_string_object_get_string (string);
-
-          gtk_widget_remove_css_class (GTK_WIDGET (self), class);
-        }
-    }
-  g_clear_object (&self->applied_classes);
-
-  if (self->section == NULL)
-    return;
-
-  if (adw_style_manager_get_dark (mgr))
-    g_object_get (self->section, "dark-classes", &self->applied_classes, NULL);
-  else
-    g_object_get (self->section, "light-classes", &self->applied_classes, NULL);
-
-  if (self->applied_classes != NULL)
-    {
-      guint n_classes = 0;
-
-      n_classes = g_list_model_get_n_items (self->applied_classes);
-      for (guint i = 0; i < n_classes; i++)
-        {
-          g_autoptr (GtkStringObject) string = NULL;
-          const char *class                  = NULL;
-
-          string = g_list_model_get_item (self->applied_classes, i);
-          class  = gtk_string_object_get_string (string);
-
-          gtk_widget_add_css_class (GTK_WIDGET (self), class);
-        }
-    }
+  refresh_dark_light_classes (self, mgr);
 }
 
 static void
@@ -330,6 +293,8 @@ bz_section_view_set_section (BzSectionView    *self,
               gtk_widget_add_css_class (GTK_WIDGET (self), class);
             }
         }
+
+      refresh_dark_light_classes (self, NULL);
     }
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SECTION]);
@@ -350,4 +315,55 @@ tile_clicked (BzEntryGroup *group,
 
   self = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_SECTION_VIEW);
   g_signal_emit (self, signals[SIGNAL_GROUP_ACTIVATED], 0, group);
+}
+
+static void
+refresh_dark_light_classes (BzSectionView   *self,
+                            AdwStyleManager *mgr)
+{
+  if (self->applied_classes != NULL)
+    {
+      guint n_applied_classes = 0;
+
+      n_applied_classes = g_list_model_get_n_items (self->applied_classes);
+      for (guint i = 0; i < n_applied_classes; i++)
+        {
+          g_autoptr (GtkStringObject) string = NULL;
+          const char *class                  = NULL;
+
+          string = g_list_model_get_item (self->applied_classes, i);
+          class  = gtk_string_object_get_string (string);
+
+          gtk_widget_remove_css_class (GTK_WIDGET (self), class);
+        }
+    }
+  g_clear_object (&self->applied_classes);
+
+  if (self->section == NULL)
+    return;
+
+  if (mgr == NULL)
+    mgr = adw_style_manager_get_default ();
+
+  if (adw_style_manager_get_dark (mgr))
+    g_object_get (self->section, "dark-classes", &self->applied_classes, NULL);
+  else
+    g_object_get (self->section, "light-classes", &self->applied_classes, NULL);
+
+  if (self->applied_classes != NULL)
+    {
+      guint n_classes = 0;
+
+      n_classes = g_list_model_get_n_items (self->applied_classes);
+      for (guint i = 0; i < n_classes; i++)
+        {
+          g_autoptr (GtkStringObject) string = NULL;
+          const char *class                  = NULL;
+
+          string = g_list_model_get_item (self->applied_classes, i);
+          class  = gtk_string_object_get_string (string);
+
+          gtk_widget_add_css_class (GTK_WIDGET (self), class);
+        }
+    }
 }

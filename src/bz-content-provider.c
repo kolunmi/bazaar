@@ -18,6 +18,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+#define G_LOG_DOMAIN  "BAZAAR::CURATED-PROVIDER"
+#define BAZAAR_MODULE "curated-provider"
+
 #include "config.h"
 
 #include <libdex.h>
@@ -360,7 +363,8 @@ bz_content_provider_get_has_inputs (BzContentProvider *self)
 {
   g_return_val_if_fail (BZ_IS_CONTENT_PROVIDER (self), FALSE);
   return self->input_files != NULL &&
-         g_list_model_get_n_items (self->input_files) > 0;
+         g_list_model_get_n_items (self->input_files) > 0 &&
+         g_list_model_get_n_items (G_LIST_MODEL (self)) > 0;
 }
 
 static void
@@ -467,7 +471,9 @@ input_file_changed_on_disk (GFileMonitor      *self,
                             GFileMonitorEvent  event_type,
                             InputTrackingData *data)
 {
-  if (event_type == G_FILE_MONITOR_EVENT_CHANGED)
+  if (event_type == G_FILE_MONITOR_EVENT_CHANGED ||
+      event_type == G_FILE_MONITOR_EVENT_CREATED ||
+      event_type == G_FILE_MONITOR_EVENT_DELETED)
     g_idle_add_full (
         G_PRIORITY_DEFAULT,
         (GSourceFunc) commence_reload,
@@ -512,13 +518,16 @@ input_init_finally (DexFuture         *future,
     }
   else
     {
-      g_autoptr (BzContentSection) error_section = NULL;
+      // g_autoptr (BzContentSection) error_section = NULL;
 
-      error_section = g_object_new (
-          BZ_TYPE_CONTENT_SECTION,
-          "error", local_error->message,
-          NULL);
-      g_list_store_append (data->output, error_section);
+      g_critical ("Could not init curated config watch at path %s: %s",
+                  data->path, local_error->message);
+
+      // error_section = g_object_new (
+      //     BZ_TYPE_CONTENT_SECTION,
+      //     "error", local_error->message,
+      //     NULL);
+      // g_list_store_append (data->output, error_section);
     }
 
   return NULL;
@@ -803,15 +812,19 @@ input_load_finally (DexFuture         *future,
     }
   else
     {
-      g_autoptr (BzContentSection) error_section = NULL;
+      // g_autoptr (BzContentSection) error_section = NULL;
 
-      error_section = g_object_new (
-          BZ_TYPE_CONTENT_SECTION,
-          "error", local_error->message,
-          NULL);
-      g_list_store_append (data->output, error_section);
+      g_critical ("Could not load curated config at path %s: %s",
+                  data->path, local_error->message);
+
+      // error_section = g_object_new (
+      //     BZ_TYPE_CONTENT_SECTION,
+      //     "error", local_error->message,
+      //     NULL);
+      // g_list_store_append (data->output, error_section);
     }
 
+  g_object_notify_by_pspec (G_OBJECT (data->self), props[PROP_HAS_INPUTS]);
   return NULL;
 }
 

@@ -18,9 +18,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "config.h"
+#include <glib/gi18n.h>
 
-#include "bz-progress-bar.h"
 #include "bz-transaction-view.h"
 
 struct _BzTransactionView
@@ -28,16 +27,9 @@ struct _BzTransactionView
   AdwBin parent_instance;
 
   BzTransaction *transaction;
-
-  /* Template widgets */
-  GtkWidget    *installs;
-  GtkSeparator *separator_1;
-  GtkWidget    *updates;
-  GtkSeparator *separator_2;
-  GtkWidget    *removals;
 };
 
-G_DEFINE_FINAL_TYPE (BzTransactionView, bz_transaction_view, ADW_TYPE_BIN)
+G_DEFINE_FINAL_TYPE (BzTransactionView, bz_transaction_view, ADW_TYPE_BIN);
 
 enum
 {
@@ -54,7 +46,7 @@ bz_transaction_view_dispose (GObject *object)
 {
   BzTransactionView *self = BZ_TRANSACTION_VIEW (object);
 
-  g_clear_object (&self->transaction);
+  g_clear_pointer (&self->transaction, g_object_unref);
 
   G_OBJECT_CLASS (bz_transaction_view_parent_class)->dispose (object);
 }
@@ -109,35 +101,59 @@ is_null (gpointer object,
   return value == NULL;
 }
 
+static char *
+format_download_size (gpointer object,
+                      guint64  value)
+{
+  g_autofree char *size = NULL;
+
+  return g_format_size (value);
+}
+
+static char *
+format_installed_size (gpointer object,
+                       guint64  value)
+{
+  g_autofree char *size = NULL;
+
+  return g_format_size (value);
+}
+
+static char *
+format_bytes_transferred (gpointer object,
+                          guint64  value)
+{
+  g_autofree char *size = NULL;
+
+  size = g_format_size (value);
+  return g_strdup_printf (_ ("Transferred %s so far"), size);
+}
+
 static void
 bz_transaction_view_class_init (BzTransactionViewClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
-  object_class->dispose      = bz_transaction_view_dispose;
-  object_class->get_property = bz_transaction_view_get_property;
   object_class->set_property = bz_transaction_view_set_property;
+  object_class->get_property = bz_transaction_view_get_property;
+  object_class->dispose      = bz_transaction_view_dispose;
 
   props[PROP_TRANSACTION] =
       g_param_spec_object (
           "transaction",
           NULL, NULL,
           BZ_TYPE_TRANSACTION,
-          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
-  g_type_ensure (BZ_TYPE_PROGRESS_BAR);
-
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-transaction-view.ui");
-  gtk_widget_class_bind_template_child (widget_class, BzTransactionView, installs);
-  gtk_widget_class_bind_template_child (widget_class, BzTransactionView, separator_1);
-  gtk_widget_class_bind_template_child (widget_class, BzTransactionView, updates);
-  gtk_widget_class_bind_template_child (widget_class, BzTransactionView, separator_2);
-  gtk_widget_class_bind_template_child (widget_class, BzTransactionView, removals);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
+  gtk_widget_class_bind_template_callback (widget_class, format_download_size);
+  gtk_widget_class_bind_template_callback (widget_class, format_installed_size);
+  gtk_widget_class_bind_template_callback (widget_class, format_bytes_transferred);
 }
 
 static void
@@ -146,58 +162,10 @@ bz_transaction_view_init (BzTransactionView *self)
   gtk_widget_init_template (GTK_WIDGET (self));
 }
 
-GtkWidget *
-bz_transaction_view_new (BzTransaction *transaction)
+BzTransactionView *
+bz_transaction_view_new (void)
 {
-  return g_object_new (
-      BZ_TYPE_TRANSACTION_VIEW,
-      "transaction", transaction,
-      NULL);
-}
-
-void
-bz_transaction_view_set_transaction (BzTransactionView *self,
-                                     BzTransaction     *transaction)
-{
-  g_return_if_fail (BZ_IS_TRANSACTION_VIEW (self));
-  g_return_if_fail (transaction == NULL || BZ_IS_TRANSACTION (transaction));
-
-  g_clear_object (&self->transaction);
-  if (transaction != NULL)
-    {
-      GListModel *installs       = NULL;
-      GListModel *updates        = NULL;
-      GListModel *removals       = NULL;
-      gboolean    installs_valid = FALSE;
-      gboolean    updates_valid  = FALSE;
-      gboolean    removals_valid = FALSE;
-
-      self->transaction = g_object_ref (transaction);
-
-      installs = bz_transaction_get_installs (transaction);
-      updates  = bz_transaction_get_updates (transaction);
-      removals = bz_transaction_get_removals (transaction);
-
-      installs_valid = installs != NULL && g_list_model_get_n_items (installs) > 0;
-      updates_valid  = updates != NULL && g_list_model_get_n_items (updates) > 0;
-      removals_valid = removals != NULL && g_list_model_get_n_items (removals) > 0;
-
-      gtk_widget_set_visible (self->installs, installs_valid);
-      gtk_widget_set_visible (GTK_WIDGET (self->separator_1), installs_valid && (updates_valid || removals_valid));
-      gtk_widget_set_visible (self->updates, updates_valid);
-      gtk_widget_set_visible (GTK_WIDGET (self->separator_2), updates_valid && removals_valid);
-      gtk_widget_set_visible (self->removals, removals_valid);
-    }
-  else
-    {
-      gtk_widget_set_visible (self->installs, FALSE);
-      gtk_widget_set_visible (GTK_WIDGET (self->separator_1), FALSE);
-      gtk_widget_set_visible (self->updates, FALSE);
-      gtk_widget_set_visible (GTK_WIDGET (self->separator_2), FALSE);
-      gtk_widget_set_visible (self->removals, FALSE);
-    }
-
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TRANSACTION]);
+  return g_object_new (BZ_TYPE_TRANSACTION_VIEW, NULL);
 }
 
 BzTransaction *
@@ -206,3 +174,18 @@ bz_transaction_view_get_transaction (BzTransactionView *self)
   g_return_val_if_fail (BZ_IS_TRANSACTION_VIEW (self), NULL);
   return self->transaction;
 }
+
+void
+bz_transaction_view_set_transaction (BzTransactionView *self,
+                                     BzTransaction     *transaction)
+{
+  g_return_if_fail (BZ_IS_TRANSACTION_VIEW (self));
+
+  g_clear_pointer (&self->transaction, g_object_unref);
+  if (transaction != NULL)
+    self->transaction = g_object_ref (transaction);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TRANSACTION]);
+}
+
+/* End of bz-transaction-view.c */

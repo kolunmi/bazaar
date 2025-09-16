@@ -1,6 +1,6 @@
-/* bz-category-dialog.h
+/* bz-category-tile.h
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2025 Adam Masciola, Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,16 +20,23 @@
 
 #pragma once
 
-#include <adwaita.h>
-
+#include <gtk/gtk.h>
 #include "bz-flathub-category.h"
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_CATEGORY_DIALOG (bz_category_dialog_get_type ())
-G_DECLARE_FINAL_TYPE (BzCategoryDialog, bz_category_dialog, BZ, CATEGORY_DIALOG, AdwDialog)
+#define BZ_TYPE_CATEGORY_TILE (bz_category_tile_get_type ())
 
-AdwDialog *
-bz_category_dialog_new (BzFlathubCategory *category);
+G_DECLARE_FINAL_TYPE (BzCategoryTile, bz_category_tile, BZ, CATEGORY_TILE, GtkButton)
+
+GtkWidget *
+bz_category_tile_new (void);
+
+BzFlathubCategory *
+bz_category_tile_get_category (BzCategoryTile *self);
+
+void
+bz_category_tile_set_category (BzCategoryTile    *self,
+                               BzFlathubCategory *category);
 
 G_END_DECLS

@@ -120,24 +120,28 @@ Here is a basic curated config:
     }
     .main-section banner-text {
       margin: 15px;
+      color: white;
     }
     .background-1 {
       background: linear-gradient(45deg, #170a49, #52136c);
     }
-    .background-1 app-tile {
+    .background-1 title {
+      border-bottom: 5px solid white;
+    }
+    .background-1 app-tile > button {
       background-color: alpha(white, 0.1);
     }
-    .background-1 app-tile:hover {
+    .background-1 app-tile > button:hover {
       background-color: alpha(var(--accent-bg-color), 0.5);
     }
     .background-2 {
       background: linear-gradient(75deg, #51263c, #7104a9);
     }
-    .background-2 app-tile:focus {
+    .background-2 app-tile > button:focus {
       background-color: alpha(var(--accent-bg-color), 0.5);
     }
     .background-2 app-tile-verified-check {
-      color: var(--fg-color);
+      color: orange;
     }
 
   sections:

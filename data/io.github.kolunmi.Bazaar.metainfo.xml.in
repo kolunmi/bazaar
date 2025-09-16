@@ -45,20 +45,33 @@
 
   <screenshots>
     <screenshot type="default">
-      <image>https://github.com/user-attachments/assets/041f3d5b-393a-4a81-baf4-1940ed28827a</image>
+      <image>https://github.com/user-attachments/assets/3f8b6a63-54df-4978-9cbb-feb461aca9c2</image>
+      <caption>The home view displaying flathub apps and categories</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/user-attachments/assets/af7e6462-2e59-4368-a10f-03ee96e2074b</image>
       <caption>Calligraphy application page</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/user-attachments/assets/dcda3b35-a334-446d-b4d7-546fc7ce0597</image>
+      <image>https://github.com/user-attachments/assets/a322ad5b-d88c-492a-b0c2-8c36cb161b19</image>
       <caption>Searching for Blender</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/user-attachments/assets/12e1bf5f-47ee-4038-a939-9582621f1749</image>
+      <image>https://github.com/user-attachments/assets/a32dff95-5453-499f-b510-6bd2f722cae0"</image>
       <caption>Download graph for Blender</caption>
     </screenshot>
   </screenshots>
 
   <releases>
+    <release version="0.4.9" date="2025-09-11">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.4.9</url>
+    </release>
+    <release version="0.4.8" date="2025-09-08">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.4.8</url>
+    </release>
+    <release version="0.4.7" date="2025-09-07">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.4.7</url>
+    </release>
     <release version="0.4.6" date="2025-09-05">
       <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.4.6</url>
     </release>

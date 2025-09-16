@@ -29,14 +29,16 @@ G_BEGIN_DECLS
 #define BZ_TYPE_TRANSACTION_VIEW (bz_transaction_view_get_type ())
 G_DECLARE_FINAL_TYPE (BzTransactionView, bz_transaction_view, BZ, TRANSACTION_VIEW, AdwBin)
 
-GtkWidget *
-bz_transaction_view_new (BzTransaction *transaction);
+BzTransactionView *
+bz_transaction_view_new (void);
+
+BzTransaction *
+bz_transaction_view_get_transaction (BzTransactionView *self);
 
 void
 bz_transaction_view_set_transaction (BzTransactionView *self,
                                      BzTransaction     *transaction);
 
-BzTransaction *
-bz_transaction_view_get_transaction (BzTransactionView *self);
-
 G_END_DECLS
+
+/* End of bz-transaction-view.h */

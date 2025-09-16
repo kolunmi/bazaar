@@ -43,6 +43,7 @@ template $BzWindow: Adw.ApplicationWindow {
           sidebar-position: end;
 
           sidebar: Adw.ViewStack transactions_stack {
+            styles ["sidebar-pane"]
             enable-transitions: true;
             transition-duration: 200;
 
@@ -64,7 +65,7 @@ template $BzWindow: Adw.ApplicationWindow {
                 bottom-bar-style: flat;
 
                 content: ScrolledWindow transactions {
-                  width-request: 400;
+                  width-request: 500;
                   hscrollbar-policy: never;
                   propagate-natural-height: true;
 
@@ -145,14 +146,12 @@ template $BzWindow: Adw.ApplicationWindow {
 
             content: Adw.ToastOverlay toasts {
               child: Overlay {
-                child: Adw.ViewStack main_stack {
-                  enable-transitions: true;
-                  transition-duration: 200;
+                child: Adw.NavigationView main_stack {
 
-                  notify::visible-child => $visible_page_changed_cb(template);
+                  notify::visible-page => $visible_page_changed_cb(template);
 
-                  Adw.ViewStackPage {
-                    name: "offline";
+                  Adw.NavigationPage {
+                    tag: "offline";
                     title: _("Offline");
 
                     child: Adw.StatusPage {
@@ -161,35 +160,29 @@ template $BzWindow: Adw.ApplicationWindow {
                     };
                   }
 
-                  Adw.ViewStackPage {
-                    name: "loading";
+                  Adw.NavigationPage {
+                    tag: "loading";
                     title: _("Loading");
 
                     child: Box {
                       halign: fill;
                       valign: center;
                       orientation: vertical;
-                      spacing: 15;
+                      spacing: 6;
 
-                      Button {
-                        styles [
-                          "flat"
-                        ]
-
-                        halign: center;
-                        
-                        child: Image {
+                      Image {
                           icon-name: "io.github.kolunmi.Bazaar";
-                          pixel-size: 64;
-                        };
+                          pixel-size: 128;
+                          margin-bottom:24;
                       }
-                      
+
                       $BzGlobalProgress {
                         halign: center;
-                        height-request: 20;
-                        expand-size: 150;
+                        height-request: 8;
+                        expand-size: 250;
                         active: bind template.state as <$BzStateInfo>.busy;
                         fraction: bind template.state as <$BzStateInfo>.busy-progress;
+                        margin-bottom:12;
                       }
 
                       Label {
@@ -198,13 +191,23 @@ template $BzWindow: Adw.ApplicationWindow {
                         ]
 
                         ellipsize: end;
-                        label: bind template.state as <$BzStateInfo>.busy-label;
+                        label: bind template.state as <$BzStateInfo>.busy-step-label;
+                      }
+
+                      Label {
+                        styles [
+                          "heading",
+                          "dimmed"
+                        ]
+
+                        ellipsize: end;
+                        label: bind template.state as <$BzStateInfo>.busy-progress-label;
                       }
                     };
                   }
 
-                  Adw.ViewStackPage {
-                    name: "browse";
+                  Adw.NavigationPage {
+                    tag: "browse";
                     title: _("Browse");
 
                     child: $BzBrowseWidget browse {
@@ -213,8 +216,8 @@ template $BzWindow: Adw.ApplicationWindow {
                     };
                   }
 
-                  Adw.ViewStackPage {
-                    name: "view";
+                  Adw.NavigationPage {
+                    tag: "view";
                     title: _("App View");
 
                     child: $BzFullView full_view {
@@ -225,8 +228,8 @@ template $BzWindow: Adw.ApplicationWindow {
                     };
                   }
 
-                  Adw.ViewStackPage {
-                    name: "flathub";
+                  Adw.NavigationPage {
+                    tag: "flathub";
                     title: _("Flathub");
 
                     child: $BzFlathubPage {
@@ -235,13 +238,13 @@ template $BzWindow: Adw.ApplicationWindow {
                     };
                   }
                   
-                  Adw.ViewStackPage {
-                    name: "installed";
+                  Adw.NavigationPage {
+                    tag: "installed";
                     title: _("Installed");
 
                     child: $BzInstalledPage {
                       state: bind template.state;
-                      model: bind template.state as <$BzStateInfo>.all-installed-entries;
+                      model: bind template.state as <$BzStateInfo>.all-installed-entry-groups;
                       install => $installed_page_install_cb(template);
                       remove => $installed_page_remove_cb(template);
                       show-entry => $installed_page_show_cb(template);
@@ -323,6 +326,7 @@ template $BzWindow: Adw.ApplicationWindow {
               Adw.Toggle curated_toggle {
                 tooltip: _("View curated applications");
                 name: "curated";
+                enabled: bind template.state as <$BzStateInfo>.curated-provider as <$BzContentProvider>.has-inputs as <bool>;
 
                 child: Box {
                   halign: center;
@@ -353,7 +357,7 @@ template $BzWindow: Adw.ApplicationWindow {
                   spacing: 6;
 
                   Image {
-                    icon-name: "flatpak-symbolic";
+                    icon-name: "flathub-symbolic";
                   }
 
                   Label {

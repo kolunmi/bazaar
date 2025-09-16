@@ -31,7 +31,7 @@ struct _BzDecoratedScreenshot
   GtkEventController *motion;
 
   /* Template widgets */
-  GtkRevealer *revealer;
+  GtkWidget *buttons;
 };
 
 G_DEFINE_FINAL_TYPE (BzDecoratedScreenshot, bz_decorated_screenshot, ADW_TYPE_BIN);
@@ -155,7 +155,7 @@ bz_decorated_screenshot_class_init (BzDecoratedScreenshotClass *klass)
   g_type_ensure (BZ_TYPE_SCREENSHOT);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-decorated-screenshot.ui");
-  gtk_widget_class_bind_template_child (widget_class, BzDecoratedScreenshot, revealer);
+  gtk_widget_class_bind_template_child (widget_class, BzDecoratedScreenshot, buttons);
   gtk_widget_class_bind_template_callback (widget_class, open_externally_clicked);
   gtk_widget_class_bind_template_callback (widget_class, copy_clicked);
 }
@@ -166,7 +166,7 @@ motion_enter (BzDecoratedScreenshot    *self,
               gdouble                   y,
               GtkEventControllerMotion *controller)
 {
-  gtk_revealer_set_reveal_child (self->revealer, TRUE);
+  // gtk_widget_set_opacity (self->buttons, 0.25);
   // bz_screenshot_set_focus_x (self->screenshot_widget, x);
   // bz_screenshot_set_focus_y (self->screenshot_widget, y);
 }
@@ -185,7 +185,7 @@ static void
 motion_leave (BzDecoratedScreenshot    *self,
               GtkEventControllerMotion *controller)
 {
-  gtk_revealer_set_reveal_child (self->revealer, FALSE);
+  // gtk_widget_set_opacity (self->buttons, 1.0);
   // bz_screenshot_set_focus_x (self->screenshot_widget, -1.0);
   // bz_screenshot_set_focus_y (self->screenshot_widget, -1.0);
 }

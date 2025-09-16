@@ -184,6 +184,14 @@ is_null (gpointer object,
   return value == NULL;
 }
 
+static gboolean
+logical_and (gpointer object,
+             gboolean value1,
+             gboolean value2)
+{
+  return value1 && value2;
+}
+
 static char *
 format_recent_downloads (gpointer object,
                          int      value)
@@ -327,14 +335,14 @@ static void
 install_cb (BzFullView *self,
             GtkButton  *button)
 {
-  g_signal_emit (self, signals[SIGNAL_INSTALL], 0);
+  g_signal_emit (self, signals[SIGNAL_INSTALL], 0, button);
 }
 
 static void
 remove_cb (BzFullView *self,
            GtkButton  *button)
 {
-  g_signal_emit (self, signals[SIGNAL_REMOVE], 0);
+  g_signal_emit (self, signals[SIGNAL_REMOVE], 0, button);
 }
 
 static void
@@ -442,12 +450,12 @@ bz_full_view_class_init (BzFullViewClass *klass)
           G_SIGNAL_RUN_FIRST,
           0,
           NULL, NULL,
-          g_cclosure_marshal_VOID__VOID,
+          g_cclosure_marshal_VOID__OBJECT,
           G_TYPE_NONE, 0);
   g_signal_set_va_marshaller (
       signals[SIGNAL_INSTALL],
       G_TYPE_FROM_CLASS (klass),
-      g_cclosure_marshal_VOID__VOIDv);
+      g_cclosure_marshal_VOID__OBJECTv);
 
   signals[SIGNAL_REMOVE] =
       g_signal_new (
@@ -456,12 +464,12 @@ bz_full_view_class_init (BzFullViewClass *klass)
           G_SIGNAL_RUN_FIRST,
           0,
           NULL, NULL,
-          g_cclosure_marshal_VOID__VOID,
+          g_cclosure_marshal_VOID__OBJECT,
           G_TYPE_NONE, 0);
   g_signal_set_va_marshaller (
       signals[SIGNAL_REMOVE],
       G_TYPE_FROM_CLASS (klass),
-      g_cclosure_marshal_VOID__VOIDv);
+      g_cclosure_marshal_VOID__OBJECTv);
 
   g_type_ensure (BZ_TYPE_DECORATED_SCREENSHOT);
   g_type_ensure (BZ_TYPE_DYNAMIC_LIST_VIEW);
@@ -478,6 +486,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
+  gtk_widget_class_bind_template_callback (widget_class, logical_and);
   gtk_widget_class_bind_template_callback (widget_class, format_recent_downloads);
   gtk_widget_class_bind_template_callback (widget_class, format_size);
   gtk_widget_class_bind_template_callback (widget_class, format_timestamp);
@@ -544,7 +553,7 @@ bz_full_view_set_entry_group (BzFullView   *self,
   g_clear_object (&self->group_model);
 
   gtk_widget_set_visible (self->forge_stars, FALSE);
-  gtk_revealer_set_reveal_child(GTK_REVEALER(self->forge_stars), FALSE);
+  gtk_revealer_set_reveal_child (GTK_REVEALER (self->forge_stars), FALSE);
   gtk_label_set_label (self->forge_stars_label, "...");
 
   if (group != NULL)
@@ -647,7 +656,7 @@ retrieve_star_string_fiber (BzFullView *self)
   fmt        = g_strdup_printf ("%'zu", star_count);
 
   gtk_widget_set_visible (self->forge_stars, TRUE);
-  gtk_revealer_set_reveal_child(GTK_REVEALER(self->forge_stars), TRUE);
+  gtk_revealer_set_reveal_child (GTK_REVEALER (self->forge_stars), TRUE);
 
 done:
   gtk_label_set_label (self->forge_stars_label, fmt != NULL ? fmt : "?");

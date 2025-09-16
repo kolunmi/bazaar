@@ -1,0 +1,9 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzCuratedAppTile: Adw.Bin {
+  child: $BzAppTile {
+    group: bind template.group;
+    clicked => $clicked_cb(template);
+  };
+}

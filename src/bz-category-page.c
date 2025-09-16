@@ -1,4 +1,4 @@
-/* bz-category-dialog.c
+/* bz-category-page.c
  *
  * Copyright 2025 Adam Masciola
  *
@@ -18,20 +18,20 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "bz-category-dialog.h"
+#include "bz-category-page.h"
 #include "bz-app-tile.h"
 #include "bz-dynamic-list-view.h"
 
-struct _BzCategoryDialog
+struct _BzCategoryPage
 {
-  AdwDialog parent_instance;
+  AdwNavigationPage parent_instance;
 
   BzFlathubCategory *category;
 
   /* Template widgets */
 };
 
-G_DEFINE_FINAL_TYPE (BzCategoryDialog, bz_category_dialog, ADW_TYPE_DIALOG)
+G_DEFINE_FINAL_TYPE (BzCategoryPage, bz_category_page, ADW_TYPE_NAVIGATION_PAGE)
 
 enum
 {
@@ -56,22 +56,22 @@ tile_clicked (BzEntryGroup *group,
               GtkButton    *button);
 
 static void
-bz_category_dialog_dispose (GObject *object)
+bz_category_page_dispose (GObject *object)
 {
-  BzCategoryDialog *self = BZ_CATEGORY_DIALOG (object);
+  BzCategoryPage *self = BZ_CATEGORY_PAGE (object);
 
   g_clear_object (&self->category);
 
-  G_OBJECT_CLASS (bz_category_dialog_parent_class)->dispose (object);
+  G_OBJECT_CLASS (bz_category_page_parent_class)->dispose (object);
 }
 
 static void
-bz_category_dialog_get_property (GObject    *object,
-                                 guint       prop_id,
-                                 GValue     *value,
-                                 GParamSpec *pspec)
+bz_category_page_get_property (GObject    *object,
+                               guint       prop_id,
+                               GValue     *value,
+                               GParamSpec *pspec)
 {
-  BzCategoryDialog *self = BZ_CATEGORY_DIALOG (object);
+  BzCategoryPage *self = BZ_CATEGORY_PAGE (object);
 
   switch (prop_id)
     {
@@ -84,12 +84,12 @@ bz_category_dialog_get_property (GObject    *object,
 }
 
 static void
-bz_category_dialog_set_property (GObject      *object,
-                                 guint         prop_id,
-                                 const GValue *value,
-                                 GParamSpec   *pspec)
+bz_category_page_set_property (GObject      *object,
+                               guint         prop_id,
+                               const GValue *value,
+                               GParamSpec   *pspec)
 {
-  BzCategoryDialog *self = BZ_CATEGORY_DIALOG (object);
+  BzCategoryPage *self = BZ_CATEGORY_PAGE (object);
 
   switch (prop_id)
     {
@@ -121,14 +121,14 @@ unbind_widget_cb (BzFlathubCategory *self,
 }
 
 static void
-bz_category_dialog_class_init (BzCategoryDialogClass *klass)
+bz_category_page_class_init (BzCategoryPageClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
-  object_class->dispose      = bz_category_dialog_dispose;
-  object_class->get_property = bz_category_dialog_get_property;
-  object_class->set_property = bz_category_dialog_set_property;
+  object_class->dispose      = bz_category_page_dispose;
+  object_class->get_property = bz_category_page_get_property;
+  object_class->set_property = bz_category_page_set_property;
 
   props[PROP_CATEGORY] =
       g_param_spec_object (
@@ -156,28 +156,28 @@ bz_category_dialog_class_init (BzCategoryDialogClass *klass)
 
   g_type_ensure (BZ_TYPE_APP_TILE);
 
-  gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-category-dialog.ui");
+  gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-category-page.ui");
   gtk_widget_class_bind_template_callback (widget_class, bind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, unbind_widget_cb);
 }
 
 static void
-bz_category_dialog_init (BzCategoryDialog *self)
+bz_category_page_init (BzCategoryPage *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
 }
 
-AdwDialog *
-bz_category_dialog_new (BzFlathubCategory *category)
+AdwNavigationPage *
+bz_category_page_new (BzFlathubCategory *category)
 {
-  BzCategoryDialog *category_dialog = NULL;
+  BzCategoryPage *category_page = NULL;
 
-  category_dialog = g_object_new (
-      BZ_TYPE_CATEGORY_DIALOG,
+  category_page = g_object_new (
+      BZ_TYPE_CATEGORY_PAGE,
       "category", category,
       NULL);
 
-  return ADW_DIALOG (category_dialog);
+  return ADW_NAVIGATION_PAGE (category_page);
 }
 
 static void
@@ -186,7 +186,6 @@ tile_clicked (BzEntryGroup *group,
 {
   GtkWidget *self = NULL;
 
-  self = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_CATEGORY_DIALOG);
+  self = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_CATEGORY_PAGE);
   g_signal_emit (self, signals[SIGNAL_SELECT], 0, group);
-  adw_dialog_close (ADW_DIALOG (self));
 }

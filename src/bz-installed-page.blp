@@ -26,12 +26,14 @@ template $BzInstalledPage: Adw.Bin {
         child: Adw.ClampScrollable {
           maximum-size: 650;
 
-          child: ListView list_view {
+          child: ListView {
             styles [
               "navigation-sidebar",
             ]
 
-            model: NoSelection no_selection {};
+            model: NoSelection {
+              model: bind template.model;
+            };
 
             factory: BuilderListItemFactory {
               template ListItem {
@@ -54,8 +56,8 @@ template $BzInstalledPage: Adw.Bin {
                     margin-bottom: 10;
                     height-request: 32;
                     width-request: 32;
-                    paintable: bind template.item as <$BzEntry>.icon-paintable;
-                    visible: bind $invert_boolean($is_null(template.item as <$BzEntry>.icon-paintable) as <bool>) as <bool>;
+                    paintable: bind template.item as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable;
+                    visible: bind $invert_boolean($is_null(template.item as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable) as <bool>) as <bool>;
                   }
 
                   Image {
@@ -67,8 +69,8 @@ template $BzInstalledPage: Adw.Bin {
                     width-request: 32;
                     height-request: 32;
                     pixel-size: 32;
-                    icon-name: "image-missing-symbolic";
-                    visible: bind $is_null(template.item as <$BzEntry>.icon-paintable) as <bool>;
+                    icon-name: "application-x-executable";
+                    visible: bind $is_null(template.item as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable) as <bool>;
                   }
 
                   Box {
@@ -81,8 +83,8 @@ template $BzInstalledPage: Adw.Bin {
                       ellipsize: end;
                       single-line-mode: true;
                       has-tooltip: true;
-                      tooltip-text: bind template.item as <$BzEntry>.id;
-                      label: bind template.item as <$BzEntry>.title;
+                      tooltip-text: bind template.item as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.id;
+                      label: bind template.item as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.title;
                     }
 
                     Button {
@@ -100,7 +102,7 @@ template $BzInstalledPage: Adw.Bin {
                       height-request: 32;
                       valign: center;
                       icon-name: "heart-filled-symbolic";
-                      visible: bind $invert_boolean($is_null(template.item as <$BzEntry>.donation-url) as <bool>) as <bool>;
+                      visible: bind $invert_boolean($is_null(template.item as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.donation-url) as <bool>) as <bool>;
                       
                       clicked => $support_cb(template);
                     }
@@ -125,7 +127,7 @@ template $BzInstalledPage: Adw.Bin {
                       height-request: 32;
                       valign: center;
                       icon-name: "user-trash-symbolic";
-                      sensitive: bind $invert_boolean(template.item as <$BzEntry>.holding) as <bool>;
+                      sensitive: bind $invert_boolean($is_zero(template.item as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
                       
                       clicked => $remove_cb(template);
                     }
@@ -166,6 +168,7 @@ template $BzInstalledPage: Adw.Bin {
 
                             has-tooltip: true;
                             tooltip-text: _("Run this application");
+                            sensitive: bind $invert_boolean($is_zero(template.item as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
 
                             child: Box {
                               orientation: horizontal;
@@ -190,7 +193,8 @@ template $BzInstalledPage: Adw.Bin {
 
                             has-tooltip: true;
                             tooltip-text: _("Manage Addons");
-                            visible: bind $invert_boolean($is_null(template.item as <$BzEntry>.addons) as <bool>) as <bool>;
+                            visible: bind $invert_boolean($is_null(template.item as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.addons) as <bool>) as <bool>;
+                            sensitive: bind $invert_boolean($is_zero(template.item as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
 
                             child: Box {
                               orientation: horizontal;

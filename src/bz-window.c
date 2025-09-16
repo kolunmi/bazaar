@@ -55,7 +55,7 @@ struct _BzWindow
   AdwOverlaySplitView *split_view;
   AdwOverlaySplitView *search_split;
   AdwViewStack        *transactions_stack;
-  AdwViewStack        *main_stack;
+  AdwNavigationView   *main_stack;
   BzFullView          *full_view;
   GtkToggleButton     *toggle_transactions;
   GtkButton           *go_back;
@@ -94,8 +94,10 @@ BZ_DEFINE_DATA (
       BzWindow     *self;
       BzEntryGroup *group;
       gboolean      remove;
+      GtkWidget    *source;
     },
-    BZ_RELEASE_DATA (group, g_object_unref))
+    BZ_RELEASE_DATA (group, g_object_unref);
+    BZ_RELEASE_DATA (source, g_object_unref))
 
 static void
 install_confirmation_response (AdwAlertDialog *alert,
@@ -108,15 +110,17 @@ update_dialog_response (BzUpdateDialog *dialog,
                         BzWindow       *self);
 
 static void
-transact (BzWindow *self,
-          BzEntry  *entry,
-          gboolean  remove);
+transact (BzWindow  *self,
+          BzEntry   *entry,
+          gboolean   remove,
+          GtkWidget *source);
 
 static void
 try_transact (BzWindow     *self,
               BzEntry      *entry,
               BzEntryGroup *group,
-              gboolean      remove);
+              gboolean      remove,
+              GtkWidget    *source);
 
 static DexFuture *
 ready_to_transact (DexFuture    *future,
@@ -253,21 +257,23 @@ search_widget_select_cb (BzWindow       *self,
       NULL);
 
   remove = installable == 0 && removable > 0;
-  try_transact (self, NULL, group, remove);
+  try_transact (self, NULL, group, remove, NULL);
 }
 
 static void
 full_view_install_cb (BzWindow   *self,
+                      GtkWidget  *source,
                       BzFullView *view)
 {
-  try_transact (self, NULL, bz_full_view_get_entry_group (view), FALSE);
+  try_transact (self, NULL, bz_full_view_get_entry_group (view), FALSE, source);
 }
 
 static void
 full_view_remove_cb (BzWindow   *self,
+                     GtkWidget  *source,
                      BzFullView *view)
 {
-  try_transact (self, NULL, bz_full_view_get_entry_group (view), TRUE);
+  try_transact (self, NULL, bz_full_view_get_entry_group (view), TRUE, source);
 }
 
 static void
@@ -275,7 +281,7 @@ installed_page_install_cb (BzWindow   *self,
                            BzEntry    *entry,
                            BzFullView *view)
 {
-  try_transact (self, entry, NULL, FALSE);
+  try_transact (self, entry, NULL, FALSE, NULL);
 }
 
 static void
@@ -283,7 +289,7 @@ installed_page_remove_cb (BzWindow   *self,
                           BzEntry    *entry,
                           BzFullView *view)
 {
-  try_transact (self, entry, NULL, TRUE);
+  try_transact (self, entry, NULL, TRUE, NULL);
 }
 
 static void
@@ -310,16 +316,24 @@ page_toggled_cb (BzWindow       *self,
 }
 
 static void
-visible_page_changed_cb (BzWindow     *self,
-                         GParamSpec   *pspec,
-                         AdwViewStack *view_stack)
+visible_page_changed_cb (BzWindow          *self,
+                         GParamSpec        *pspec,
+                         AdwNavigationView *navigation_view)
 {
-  const char *visible_child_name = NULL;
+  AdwNavigationPage *visible_page = NULL;
+  const char        *page_tag     = NULL;
 
-  visible_child_name = adw_view_stack_get_visible_child_name (view_stack);
+  visible_page = adw_navigation_view_get_visible_page (navigation_view);
 
-  if (g_strcmp0 (visible_child_name, "flathub") == 0)
-    gtk_widget_add_css_class (GTK_WIDGET (self), "flathub");
+  if (visible_page != NULL)
+    {
+      page_tag = adw_navigation_page_get_tag (visible_page);
+
+      if (page_tag != NULL && strstr (page_tag, "flathub") != NULL)
+        gtk_widget_add_css_class (GTK_WIDGET (self), "flathub");
+      else
+        gtk_widget_remove_css_class (GTK_WIDGET (self), "flathub");
+    }
   else
     gtk_widget_remove_css_class (GTK_WIDGET (self), "flathub");
 }
@@ -498,6 +512,11 @@ key_pressed (BzWindow              *self,
   guint32 unichar = 0;
   char    buf[32] = { 0 };
 
+  /* Ignore if this is a modifier-shortcut of some sort */
+  if (state & ~(GDK_NO_MODIFIER_MASK | GDK_SHIFT_MASK))
+    return FALSE;
+
+  /* Ignore if we are already inside search  */
   if (adw_overlay_split_view_get_show_sidebar (self->search_split))
     return FALSE;
 
@@ -529,7 +548,7 @@ bz_window_init (BzWindow *self)
   //       gtk_widget_set_visible (GTK_WIDGET (self->support_kde), TRUE);
   //   }
 
-  adw_toggle_group_set_active_name (self->title_toggle_group, "curated");
+  adw_toggle_group_set_active_name (self->title_toggle_group, "flathub");
 
   self->key_controller = gtk_event_controller_key_new ();
   g_signal_connect_swapped (self->key_controller, "key-pressed", G_CALLBACK (key_pressed), self);
@@ -559,6 +578,15 @@ has_transactions_changed (BzWindow             *self,
                           BzTransactionManager *manager)
 {
   check_transactions (self);
+}
+
+static void
+has_inputs_changed (BzWindow          *self,
+                    GParamSpec        *pspec,
+                    BzContentProvider *provider)
+{
+  if (!bz_content_provider_get_has_inputs (provider))
+    adw_toggle_group_set_active_name (self->title_toggle_group, "flathub");
 }
 
 static void
@@ -594,6 +622,7 @@ install_confirmation_response (AdwAlertDialog *alert,
 {
   gboolean should_install               = FALSE;
   gboolean should_remove                = FALSE;
+  g_autoptr (GtkWidget) cb_source       = NULL;
   g_autoptr (BzEntry) cb_entry          = NULL;
   g_autoptr (BzEntryGroup) cb_group     = NULL;
   g_autoptr (GListModel) cb_group_model = NULL;
@@ -601,6 +630,7 @@ install_confirmation_response (AdwAlertDialog *alert,
   should_install = g_strcmp0 (response, "install") == 0;
   should_remove  = g_strcmp0 (response, "remove") == 0;
 
+  cb_source      = g_object_steal_data (G_OBJECT (alert), "source");
   cb_entry       = g_object_steal_data (G_OBJECT (alert), "entry");
   cb_group       = g_object_steal_data (G_OBJECT (alert), "group");
   cb_group_model = g_object_steal_data (G_OBJECT (alert), "model");
@@ -631,11 +661,11 @@ install_confirmation_response (AdwAlertDialog *alert,
                 }
 
               if (entry != NULL)
-                transact (self, entry, should_remove);
+                transact (self, entry, should_remove, cb_source);
             }
         }
       else if (cb_entry != NULL)
-        transact (self, cb_entry, should_remove);
+        transact (self, cb_entry, should_remove, cb_source);
     }
 }
 
@@ -698,16 +728,10 @@ bz_window_new (BzStateInfo *state)
                            "notify::has-transactions",
                            G_CALLBACK (has_transactions_changed),
                            window, G_CONNECT_SWAPPED);
-
-  /* TODO: connect to "items-changed" if this ever becomes dynamic */
-  if (g_list_model_get_n_items (
-          bz_state_info_get_curated_configs (state)) == 0)
-    {
-      adw_toggle_group_set_active_name (
-          window->title_toggle_group, "flathub");
-      adw_toggle_group_remove (
-          window->title_toggle_group, window->curated_toggle);
-    }
+  g_signal_connect_object (bz_state_info_get_curated_provider (state),
+                           "notify::has-inputs",
+                           G_CALLBACK (has_inputs_changed),
+                           window, G_CONNECT_SWAPPED);
 
   g_object_notify_by_pspec (G_OBJECT (window), props[PROP_STATE]);
 
@@ -773,16 +797,28 @@ bz_window_show_group (BzWindow     *self,
   g_return_if_fail (BZ_IS_ENTRY_GROUP (group));
 
   bz_full_view_set_entry_group (self->full_view, group);
-  adw_view_stack_set_visible_child_name (self->main_stack, "view");
+  adw_navigation_view_replace_with_tags (self->main_stack, (const char *[]) { "view" }, 1);
   gtk_widget_set_visible (GTK_WIDGET (self->go_back), TRUE);
   gtk_widget_set_visible (GTK_WIDGET (self->search), FALSE);
   gtk_revealer_set_reveal_child (self->title_revealer, FALSE);
 }
 
+void
+bz_window_set_category_view_mode (BzWindow *self,
+                                  gboolean  enabled)
+{
+  g_return_if_fail (BZ_IS_WINDOW (self));
+
+  gtk_widget_set_visible (GTK_WIDGET (self->go_back), enabled);
+  gtk_widget_set_visible (GTK_WIDGET (self->search), !enabled);
+  gtk_revealer_set_reveal_child (self->title_revealer, !enabled);
+}
+
 static void
-transact (BzWindow *self,
-          BzEntry  *entry,
-          gboolean  remove)
+transact (BzWindow  *self,
+          BzEntry   *entry,
+          gboolean   remove,
+          GtkWidget *source)
 {
   g_autoptr (BzTransaction) transaction = NULL;
   GdkPaintable *icon                    = NULL;
@@ -802,6 +838,9 @@ transact (BzWindow *self,
       bz_state_info_get_transaction_manager (self->state),
       transaction);
 
+  if (source == NULL)
+    source = GTK_WIDGET (self->main_stack);
+
   icon = bz_entry_get_icon_paintable (entry);
   if (icon != NULL)
     {
@@ -809,8 +848,8 @@ transact (BzWindow *self,
 
       comet = g_object_new (
           BZ_TYPE_COMET,
-          "from", self->main_stack,
-          "to", self->toggle_transactions,
+          "from", remove ? GTK_WIDGET (self->toggle_transactions) : source,
+          "to", remove ? source : GTK_WIDGET (self->toggle_transactions),
           "paintable", icon,
           NULL);
       bz_comet_overlay_spawn (self->comet_overlay, comet);
@@ -823,7 +862,8 @@ static void
 try_transact (BzWindow     *self,
               BzEntry      *entry,
               BzEntryGroup *group,
-              gboolean      remove)
+              gboolean      remove,
+              GtkWidget    *source)
 {
   g_autoptr (DexFuture) base_future = NULL;
   g_autoptr (TransactData) data     = NULL;
@@ -847,6 +887,7 @@ try_transact (BzWindow     *self,
   data->self   = self;
   data->group  = group != NULL ? g_object_ref (group) : NULL;
   data->remove = remove;
+  data->source = source != NULL ? g_object_ref (source) : NULL;
 
   dex_clear (&self->transact_future);
   self->transact_future = dex_future_finally (
@@ -862,6 +903,7 @@ ready_to_transact (DexFuture    *future,
   BzWindow     *self             = data->self;
   BzEntryGroup *group            = data->group;
   gboolean      remove           = data->remove;
+  GtkWidget    *source           = data->source;
   g_autoptr (GError) local_error = NULL;
   const GValue *value            = NULL;
 
@@ -880,7 +922,13 @@ ready_to_transact (DexFuture    *future,
         entry = g_value_dup_object (value);
 
       alert = adw_alert_dialog_new (NULL, NULL);
-      adw_alert_dialog_format_heading (
+      if (source != NULL)
+        g_object_set_data_full (
+            G_OBJECT (alert),
+            "source", g_object_ref (source),
+            g_object_unref);
+
+      adw_alert_dialog_set_heading (
           ADW_ALERT_DIALOG (alert), _ ("Confirm Action"));
 
       if (model != NULL)
@@ -1108,6 +1156,9 @@ set_page (BzWindow *self)
   gboolean    show_search   = FALSE;
   const char *visible_child = NULL;
 
+  if (self->state == NULL)
+    return;
+
   active_name = adw_toggle_group_get_active_name (self->title_toggle_group);
   show_search = adw_overlay_split_view_get_show_sidebar (self->search_split);
 
@@ -1121,8 +1172,10 @@ set_page (BzWindow *self)
     visible_child = bz_state_info_get_online (self->state) ? "browse" : "offline";
   else if (g_strcmp0 (active_name, "flathub") == 0)
     visible_child = bz_state_info_get_online (self->state) ? "flathub" : "offline";
+  else
+    visible_child = "flathub";
 
-  adw_view_stack_set_visible_child_name (self->main_stack, visible_child);
+  adw_navigation_view_replace_with_tags (self->main_stack, (const char *[]) { visible_child }, 1);
   gtk_widget_set_sensitive (GTK_WIDGET (self->title_toggle_group), !bz_state_info_get_busy (self->state));
   gtk_revealer_set_reveal_child (self->title_revealer, !show_search);
   set_bottom_bar (self);

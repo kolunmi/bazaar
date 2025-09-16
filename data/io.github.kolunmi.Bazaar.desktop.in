@@ -9,4 +9,3 @@ Categories=Utility;
 Keywords=GTK;System;PackageManager;Discover;Flatpak;Software;Store;
 StartupNotify=true
 MimeType=x-scheme-handler/appstream;x-scheme-handler/flatpak;x-scheme-handler/flatpak+https;
-DBusActivatable=true

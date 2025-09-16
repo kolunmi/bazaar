@@ -29,15 +29,6 @@ G_BEGIN_DECLS
 #define BZ_TYPE_BACKEND (bz_backend_get_type ())
 G_DECLARE_INTERFACE (BzBackend, bz_backend, BZ, BACKEND, GObject)
 
-typedef void (*BzBackendTransactionProgressFunc) (
-    BzEntry    *entry,
-    const char *status,
-    gboolean    is_estimating,
-    double      progress,
-    guint64     bytes_transferred,
-    guint64     start_time,
-    gpointer    user_data);
-
 struct _BzBackendInterface
 {
   GTypeInterface parent_iface;
@@ -64,17 +55,15 @@ struct _BzBackendInterface
                                      GCancellable *cancellable);
 
   /* DexFuture* -> gboolean */
-  DexFuture *(*schedule_transaction) (BzBackend                       *self,
-                                      BzEntry                        **installs,
-                                      guint                            n_installs,
-                                      BzEntry                        **updates,
-                                      guint                            n_updates,
-                                      BzEntry                        **removals,
-                                      guint                            n_removals,
-                                      BzBackendTransactionProgressFunc progress_func,
-                                      GCancellable                    *cancellable,
-                                      gpointer                         user_data,
-                                      GDestroyNotify                   destroy_user_data);
+  DexFuture *(*schedule_transaction) (BzBackend    *self,
+                                      BzEntry     **installs,
+                                      guint         n_installs,
+                                      BzEntry     **updates,
+                                      guint         n_updates,
+                                      BzEntry     **removals,
+                                      guint         n_removals,
+                                      DexChannel   *channel,
+                                      GCancellable *cancellable);
 };
 
 DexFuture *
@@ -107,24 +96,20 @@ bz_backend_retrieve_update_ids (BzBackend    *self,
                                 GCancellable *cancellable);
 
 DexFuture *
-bz_backend_schedule_transaction (BzBackend                       *self,
-                                 BzEntry                        **installs,
-                                 guint                            n_installs,
-                                 BzEntry                        **updates,
-                                 guint                            n_updates,
-                                 BzEntry                        **removals,
-                                 guint                            n_removals,
-                                 BzBackendTransactionProgressFunc progress_func,
-                                 GCancellable                    *cancellable,
-                                 gpointer                         user_data,
-                                 GDestroyNotify                   destroy_user_data);
+bz_backend_schedule_transaction (BzBackend    *self,
+                                 BzEntry     **installs,
+                                 guint         n_installs,
+                                 BzEntry     **updates,
+                                 guint         n_updates,
+                                 BzEntry     **removals,
+                                 guint         n_removals,
+                                 DexChannel   *channel,
+                                 GCancellable *cancellable);
 
 DexFuture *
-bz_backend_merge_and_schedule_transactions (BzBackend                       *self,
-                                            GListModel                      *transactions,
-                                            BzBackendTransactionProgressFunc progress_func,
-                                            GCancellable                    *cancellable,
-                                            gpointer                         user_data,
-                                            GDestroyNotify                   destroy_user_data);
+bz_backend_merge_and_schedule_transactions (BzBackend    *self,
+                                            GListModel   *transactions,
+                                            DexChannel   *channel,
+                                            GCancellable *cancellable);
 
 G_END_DECLS

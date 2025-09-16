@@ -35,13 +35,14 @@ struct _BzStateInfo
   BzApplicationMapFactory *entry_factory;
   BzApplicationMapFactory *application_factory;
   GListModel              *all_entries;
-  GListModel              *all_installed_entries;
   GListModel              *all_entry_groups;
+  GListModel              *all_installed_entry_groups;
   BzSearchEngine          *search_engine;
   BzContentProvider       *curated_provider;
   BzFlathubState          *flathub;
   gboolean                 busy;
-  char                    *busy_label;
+  char                    *busy_step_label;
+  char                    *busy_progress_label;
   double                   busy_progress;
   gboolean                 online;
   gboolean                 checking_for_updates;
@@ -65,13 +66,14 @@ enum
   PROP_ENTRY_FACTORY,
   PROP_APPLICATION_FACTORY,
   PROP_ALL_ENTRIES,
-  PROP_ALL_INSTALLED_ENTRIES,
   PROP_ALL_ENTRY_GROUPS,
+  PROP_ALL_INSTALLED_ENTRY_GROUPS,
   PROP_SEARCH_ENGINE,
   PROP_CURATED_PROVIDER,
   PROP_FLATHUB,
   PROP_BUSY,
-  PROP_BUSY_LABEL,
+  PROP_BUSY_STEP_LABEL,
+  PROP_BUSY_PROGRESS_LABEL,
   PROP_BUSY_PROGRESS,
   PROP_ONLINE,
   PROP_CHECKING_FOR_UPDATES,
@@ -97,12 +99,13 @@ bz_state_info_dispose (GObject *object)
   g_clear_pointer (&self->entry_factory, g_object_unref);
   g_clear_pointer (&self->application_factory, g_object_unref);
   g_clear_pointer (&self->all_entries, g_object_unref);
-  g_clear_pointer (&self->all_installed_entries, g_object_unref);
   g_clear_pointer (&self->all_entry_groups, g_object_unref);
+  g_clear_pointer (&self->all_installed_entry_groups, g_object_unref);
   g_clear_pointer (&self->search_engine, g_object_unref);
   g_clear_pointer (&self->curated_provider, g_object_unref);
   g_clear_pointer (&self->flathub, g_object_unref);
-  g_clear_pointer (&self->busy_label, g_free);
+  g_clear_pointer (&self->busy_step_label, g_free);
+  g_clear_pointer (&self->busy_progress_label, g_free);
   g_clear_pointer (&self->background_task_label, g_free);
 
   G_OBJECT_CLASS (bz_state_info_parent_class)->dispose (object);
@@ -151,11 +154,11 @@ bz_state_info_get_property (GObject    *object,
     case PROP_ALL_ENTRIES:
       g_value_set_object (value, bz_state_info_get_all_entries (self));
       break;
-    case PROP_ALL_INSTALLED_ENTRIES:
-      g_value_set_object (value, bz_state_info_get_all_installed_entries (self));
-      break;
     case PROP_ALL_ENTRY_GROUPS:
       g_value_set_object (value, bz_state_info_get_all_entry_groups (self));
+      break;
+    case PROP_ALL_INSTALLED_ENTRY_GROUPS:
+      g_value_set_object (value, bz_state_info_get_all_installed_entry_groups (self));
       break;
     case PROP_SEARCH_ENGINE:
       g_value_set_object (value, bz_state_info_get_search_engine (self));
@@ -169,8 +172,11 @@ bz_state_info_get_property (GObject    *object,
     case PROP_BUSY:
       g_value_set_boolean (value, bz_state_info_get_busy (self));
       break;
-    case PROP_BUSY_LABEL:
-      g_value_set_string (value, bz_state_info_get_busy_label (self));
+    case PROP_BUSY_STEP_LABEL:
+      g_value_set_string (value, bz_state_info_get_busy_step_label (self));
+      break;
+    case PROP_BUSY_PROGRESS_LABEL:
+      g_value_set_string (value, bz_state_info_get_busy_progress_label (self));
       break;
     case PROP_BUSY_PROGRESS:
       g_value_set_double (value, bz_state_info_get_busy_progress (self));
@@ -232,11 +238,11 @@ bz_state_info_set_property (GObject      *object,
     case PROP_ALL_ENTRIES:
       bz_state_info_set_all_entries (self, g_value_get_object (value));
       break;
-    case PROP_ALL_INSTALLED_ENTRIES:
-      bz_state_info_set_all_installed_entries (self, g_value_get_object (value));
-      break;
     case PROP_ALL_ENTRY_GROUPS:
       bz_state_info_set_all_entry_groups (self, g_value_get_object (value));
+      break;
+    case PROP_ALL_INSTALLED_ENTRY_GROUPS:
+      bz_state_info_set_all_installed_entry_groups (self, g_value_get_object (value));
       break;
     case PROP_SEARCH_ENGINE:
       bz_state_info_set_search_engine (self, g_value_get_object (value));
@@ -250,8 +256,11 @@ bz_state_info_set_property (GObject      *object,
     case PROP_BUSY:
       bz_state_info_set_busy (self, g_value_get_boolean (value));
       break;
-    case PROP_BUSY_LABEL:
-      bz_state_info_set_busy_label (self, g_value_get_string (value));
+    case PROP_BUSY_STEP_LABEL:
+      bz_state_info_set_busy_step_label (self, g_value_get_string (value));
+      break;
+    case PROP_BUSY_PROGRESS_LABEL:
+      bz_state_info_set_busy_progress_label (self, g_value_get_string (value));
       break;
     case PROP_BUSY_PROGRESS:
       bz_state_info_set_busy_progress (self, g_value_get_double (value));
@@ -356,16 +365,16 @@ bz_state_info_class_init (BzStateInfoClass *klass)
           G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
-  props[PROP_ALL_INSTALLED_ENTRIES] =
+  props[PROP_ALL_ENTRY_GROUPS] =
       g_param_spec_object (
-          "all-installed-entries",
+          "all-entry-groups",
           NULL, NULL,
           G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
-  props[PROP_ALL_ENTRY_GROUPS] =
+  props[PROP_ALL_INSTALLED_ENTRY_GROUPS] =
       g_param_spec_object (
-          "all-entry-groups",
+          "all-installed-entry-groups",
           NULL, NULL,
           G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
@@ -397,9 +406,15 @@ bz_state_info_class_init (BzStateInfoClass *klass)
           NULL, NULL, FALSE,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
-  props[PROP_BUSY_LABEL] =
+  props[PROP_BUSY_STEP_LABEL] =
       g_param_spec_string (
-          "busy-label",
+          "busy-step-label",
+          NULL, NULL, NULL,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_BUSY_PROGRESS_LABEL] =
+      g_param_spec_string (
+          "busy-progress-label",
           NULL, NULL, NULL,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
@@ -520,17 +535,17 @@ bz_state_info_get_all_entries (BzStateInfo *self)
 }
 
 GListModel *
-bz_state_info_get_all_installed_entries (BzStateInfo *self)
-{
-  g_return_val_if_fail (BZ_IS_STATE_INFO (self), NULL);
-  return self->all_installed_entries;
-}
-
-GListModel *
 bz_state_info_get_all_entry_groups (BzStateInfo *self)
 {
   g_return_val_if_fail (BZ_IS_STATE_INFO (self), NULL);
   return self->all_entry_groups;
+}
+
+GListModel *
+bz_state_info_get_all_installed_entry_groups (BzStateInfo *self)
+{
+  g_return_val_if_fail (BZ_IS_STATE_INFO (self), NULL);
+  return self->all_installed_entry_groups;
 }
 
 BzSearchEngine *
@@ -562,10 +577,17 @@ bz_state_info_get_busy (BzStateInfo *self)
 }
 
 const char *
-bz_state_info_get_busy_label (BzStateInfo *self)
+bz_state_info_get_busy_step_label (BzStateInfo *self)
 {
   g_return_val_if_fail (BZ_IS_STATE_INFO (self), NULL);
-  return self->busy_label;
+  return self->busy_step_label;
+}
+
+const char *
+bz_state_info_get_busy_progress_label (BzStateInfo *self)
+{
+  g_return_val_if_fail (BZ_IS_STATE_INFO (self), NULL);
+  return self->busy_progress_label;
 }
 
 double
@@ -740,19 +762,6 @@ bz_state_info_set_all_entries (BzStateInfo *self,
 }
 
 void
-bz_state_info_set_all_installed_entries (BzStateInfo *self,
-                                         GListModel  *all_installed_entries)
-{
-  g_return_if_fail (BZ_IS_STATE_INFO (self));
-
-  g_clear_pointer (&self->all_installed_entries, g_object_unref);
-  if (all_installed_entries != NULL)
-    self->all_installed_entries = g_object_ref (all_installed_entries);
-
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ALL_INSTALLED_ENTRIES]);
-}
-
-void
 bz_state_info_set_all_entry_groups (BzStateInfo *self,
                                     GListModel  *all_entry_groups)
 {
@@ -763,6 +772,19 @@ bz_state_info_set_all_entry_groups (BzStateInfo *self,
     self->all_entry_groups = g_object_ref (all_entry_groups);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ALL_ENTRY_GROUPS]);
+}
+
+void
+bz_state_info_set_all_installed_entry_groups (BzStateInfo *self,
+                                              GListModel  *all_installed_entry_groups)
+{
+  g_return_if_fail (BZ_IS_STATE_INFO (self));
+
+  g_clear_pointer (&self->all_installed_entry_groups, g_object_unref);
+  if (all_installed_entry_groups != NULL)
+    self->all_installed_entry_groups = g_object_ref (all_installed_entry_groups);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ALL_INSTALLED_ENTRY_GROUPS]);
 }
 
 void
@@ -816,16 +838,29 @@ bz_state_info_set_busy (BzStateInfo *self,
 }
 
 void
-bz_state_info_set_busy_label (BzStateInfo *self,
-                              const char  *busy_label)
+bz_state_info_set_busy_step_label (BzStateInfo *self,
+                                   const char  *busy_step_label)
 {
   g_return_if_fail (BZ_IS_STATE_INFO (self));
 
-  g_clear_pointer (&self->busy_label, g_free);
-  if (busy_label != NULL)
-    self->busy_label = g_strdup (busy_label);
+  g_clear_pointer (&self->busy_step_label, g_free);
+  if (busy_step_label != NULL)
+    self->busy_step_label = g_strdup (busy_step_label);
 
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_BUSY_LABEL]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_BUSY_STEP_LABEL]);
+}
+
+void
+bz_state_info_set_busy_progress_label (BzStateInfo *self,
+                                       const char  *busy_progress_label)
+{
+  g_return_if_fail (BZ_IS_STATE_INFO (self));
+
+  g_clear_pointer (&self->busy_progress_label, g_free);
+  if (busy_progress_label != NULL)
+    self->busy_progress_label = g_strdup (busy_progress_label);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_BUSY_PROGRESS_LABEL]);
 }
 
 void

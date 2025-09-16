@@ -475,6 +475,7 @@ refresh (BzDynamicListView *self)
 
             widget = gtk_flow_box_new ();
             gtk_flow_box_set_homogeneous (GTK_FLOW_BOX (widget), TRUE);
+            gtk_flow_box_set_max_children_per_line (GTK_FLOW_BOX (widget), 5);
             gtk_flow_box_set_selection_mode (GTK_FLOW_BOX (widget), GTK_SELECTION_NONE);
             gtk_flow_box_bind_model (
                 GTK_FLOW_BOX (widget), self->model,

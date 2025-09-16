@@ -146,13 +146,12 @@ template $BzFlathubPage: Adw.Bin {
                
                  scroll: false;
                  noscroll-kind: flow-box;
-                 child-type: "GtkButton";
-                 child-prop: "label";
-                 object-prop: "name";
+                 child-type: "BzCategoryTile";
+                 child-prop: "category";
                  model: bind template.state as <$BzFlathubState>.categories;
                
-                 bind-widget => $bind_category_btn_cb(template);
-                 unbind-widget => $unbind_category_btn_cb(template);
+                 bind-widget => $bind_category_tile_cb(template);
+                 unbind-widget => $unbind_category_tile_cb(template);
                }
              }
 

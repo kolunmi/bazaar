@@ -1,0 +1,18 @@
+BasedOnStyle: GNU
+AlwaysBreakAfterDefinitionReturnType: All
+BreakBeforeBinaryOperators: None
+BinPackParameters: false
+SpaceAfterCStyleCast: true
+PointerAlignment: Right
+ColumnLimit: 0
+
+AlignArrayOfStructures: Right
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: true
+AlignConsecutiveBitFields: true
+AlignConsecutiveDeclarations: true
+AlignConsecutiveMacros: true
+AllowShortCaseLabelsOnASingleLine: true
+AlignEscapedNewlines: true
+AlignOperands: true
+AlignTrailingComments: Always

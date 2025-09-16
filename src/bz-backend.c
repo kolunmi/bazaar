@@ -51,7 +51,7 @@ bz_backend_real_load_local_package (BzBackend    *self,
                                     GFile        *file,
                                     GCancellable *cancellable)
 {
-  return NULL;
+  return dex_future_new_reject (G_IO_ERROR, G_IO_ERROR_UNKNOWN, "Unimplemented");
 }
 
 static DexFuture *
@@ -62,37 +62,35 @@ bz_backend_real_retrieve_remote_entries (BzBackend     *self,
                                          gpointer       user_data,
                                          GDestroyNotify destroy_user_data)
 {
-  return NULL;
+  return dex_future_new_reject (G_IO_ERROR, G_IO_ERROR_UNKNOWN, "Unimplemented");
 }
 
 static DexFuture *
 bz_backend_real_retrieve_install_ids (BzBackend    *self,
                                       GCancellable *cancellable)
 {
-  return NULL;
+  return dex_future_new_reject (G_IO_ERROR, G_IO_ERROR_UNKNOWN, "Unimplemented");
 }
 
 static DexFuture *
 bz_backend_real_retrieve_update_ids (BzBackend    *self,
                                      GCancellable *cancellable)
 {
-  return NULL;
+  return dex_future_new_reject (G_IO_ERROR, G_IO_ERROR_UNKNOWN, "Unimplemented");
 }
 
 static DexFuture *
-bz_backend_real_schedule_transaction (BzBackend                       *self,
-                                      BzEntry                        **installs,
-                                      guint                            n_installs,
-                                      BzEntry                        **updates,
-                                      guint                            n_updates,
-                                      BzEntry                        **removals,
-                                      guint                            n_removals,
-                                      BzBackendTransactionProgressFunc progress_func,
-                                      GCancellable                    *cancellable,
-                                      gpointer                         user_data,
-                                      GDestroyNotify                   destroy_user_data)
+bz_backend_real_schedule_transaction (BzBackend    *self,
+                                      BzEntry     **installs,
+                                      guint         n_installs,
+                                      BzEntry     **updates,
+                                      guint         n_updates,
+                                      BzEntry     **removals,
+                                      guint         n_removals,
+                                      DexChannel   *channel,
+                                      GCancellable *cancellable)
 {
-  return NULL;
+  return dex_future_new_reject (G_IO_ERROR, G_IO_ERROR_UNKNOWN, "Unimplemented");
 }
 
 static void
@@ -197,17 +195,15 @@ bz_backend_retrieve_update_ids (BzBackend    *self,
 }
 
 DexFuture *
-bz_backend_schedule_transaction (BzBackend                       *self,
-                                 BzEntry                        **installs,
-                                 guint                            n_installs,
-                                 BzEntry                        **updates,
-                                 guint                            n_updates,
-                                 BzEntry                        **removals,
-                                 guint                            n_removals,
-                                 BzBackendTransactionProgressFunc progress_func,
-                                 GCancellable                    *cancellable,
-                                 gpointer                         user_data,
-                                 GDestroyNotify                   destroy_user_data)
+bz_backend_schedule_transaction (BzBackend    *self,
+                                 BzEntry     **installs,
+                                 guint         n_installs,
+                                 BzEntry     **updates,
+                                 guint         n_updates,
+                                 BzEntry     **removals,
+                                 guint         n_removals,
+                                 DexChannel   *channel,
+                                 GCancellable *cancellable)
 {
   dex_return_error_if_fail (BZ_IS_BACKEND (self));
   dex_return_error_if_fail ((installs != NULL && n_installs > 0) ||
@@ -237,29 +233,25 @@ bz_backend_schedule_transaction (BzBackend                       *self,
       n_updates,
       removals,
       n_removals,
-      progress_func,
-      cancellable,
-      user_data,
-      destroy_user_data);
+      channel,
+      cancellable);
 }
 
 DexFuture *
-bz_backend_merge_and_schedule_transactions (BzBackend                       *self,
-                                            GListModel                      *transactions,
-                                            BzBackendTransactionProgressFunc progress_func,
-                                            GCancellable                    *cancellable,
-                                            gpointer                         user_data,
-                                            GDestroyNotify                   destroy_user_data)
+bz_backend_merge_and_schedule_transactions (BzBackend    *self,
+                                            GListModel   *transactions,
+                                            DexChannel   *channel,
+                                            GCancellable *cancellable)
 {
   guint n_items                     = 0;
   g_autoptr (GPtrArray) installs_pa = NULL;
   g_autoptr (GPtrArray) updates_pa  = NULL;
   g_autoptr (GPtrArray) removals_pa = NULL;
 
-  g_return_val_if_fail (G_IS_LIST_MODEL (transactions), NULL);
+  dex_return_error_if_fail (G_IS_LIST_MODEL (transactions));
 
   n_items = g_list_model_get_n_items (transactions);
-  g_return_val_if_fail (n_items > 0, NULL);
+  dex_return_error_if_fail (n_items > 0);
 
   installs_pa = g_ptr_array_new_with_free_func (g_object_unref);
   updates_pa  = g_ptr_array_new_with_free_func (g_object_unref);
@@ -303,10 +295,8 @@ bz_backend_merge_and_schedule_transactions (BzBackend                       *sel
       updates_pa->len,
       (BzEntry **) removals_pa->pdata,
       removals_pa->len,
-      progress_func,
-      cancellable,
-      user_data,
-      destroy_user_data);
+      channel,
+      cancellable);
 }
 
 static DexFuture *
@@ -334,7 +324,12 @@ retrieve_with_blocklists_fiber (RetrieveWithBlocklistsData *data)
 
           bytes = dex_await_boxed (dex_file_load_contents_bytes (file), &local_error);
           if (bytes == NULL)
-            return dex_future_new_for_error (g_steal_pointer (&local_error));
+            {
+              g_critical ("Failed to load blocklist from path '%s': %s",
+                          path, local_error->message);
+              g_clear_pointer (&local_error, g_error_free);
+              continue;
+            }
 
           bytes_data = g_bytes_get_data (bytes, NULL);
           lines      = g_strsplit (bytes_data, "\n", -1);

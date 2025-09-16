@@ -26,3 +26,4 @@
 #   BOOL        deprecated alias for BOOLEAN
 
 VOID:OBJECT,OBJECT
+VOID:OBJECT,BOXED

@@ -31,7 +31,6 @@ msgid "GTK;System;PackageManager;Discover;Flatpak;Software;Store;"
 msgstr "GTK;Systém;SprávceBalíčků;Discover;Flatpak;Software;Obchod;"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:6
-#, fuzzy
 msgid "Show Git Forge Star Counts"
 msgstr "Počet Hvězd Git Forge"
 
@@ -44,7 +43,6 @@ msgstr ""
 "plném zobrazení"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:8
-#, fuzzy
 msgid "Discover and install applications"
 msgstr "Objevit a nainstalovat aplikace"
 
@@ -71,7 +69,6 @@ msgid "Adam Masciola"
 msgstr "Adam Masciola"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:49
-#, fuzzy
 msgid "Calligraphy application page"
 msgstr "Stránka aplikace Calligraphy"
 
@@ -215,7 +212,6 @@ msgid "Later"
 msgstr "Později"
 
 #: src/bz-application.c:1268
-#, fuzzy
 msgid "Add Flathub"
 msgstr "Přidat Flathub"
 
@@ -315,7 +311,6 @@ msgstr "Trendy"
 
 #: src/bz-flathub-page.blp:109 src/bz-flathub-page.blp:186
 #: src/bz-flathub-page.blp:231 src/bz-flathub-page.blp:276
-#, fuzzy
 msgid "Show More"
 msgstr "Zobrazit Zkratky"
 
@@ -352,7 +347,6 @@ msgid "Support"
 msgstr "Podpořit"
 
 #: src/bz-full-view.blp:177 src/bz-installed-page.blp:151
-#, fuzzy
 msgid "Run this application"
 msgstr "Sdílej tuto aplikaci"
 
@@ -377,7 +371,6 @@ msgid "VCS Forge Star Count"
 msgstr "Počet Hvězd VCS Forge"
 
 #: src/bz-full-view.blp:319
-#, fuzzy
 msgid "Download Size"
 msgstr "Velikost ke stažení"
 
@@ -390,22 +383,18 @@ msgid "License"
 msgstr "Licence"
 
 #: src/bz-full-view.blp:361 src/bz-full-view.blp:369
-#, fuzzy
 msgid "Project Website"
 msgstr "URL projektu"
 
 #: src/bz-full-view.blp:377
-#, fuzzy
 msgid "Open in browser"
 msgstr "Otevřít v prohlížeči obrázků"
 
 #: src/bz-full-view.blp:383 src/bz-full-view.blp:392
-#, fuzzy
 msgid "Download Statistics"
 msgstr "Velikost ke stažení"
 
 #: src/bz-full-view.blp:400
-#, fuzzy
 msgid "Show Downloads Over Time"
 msgstr "Stažení za čas"
 
@@ -472,7 +461,6 @@ msgid "Decache and Inspect"
 msgstr "Decache and Inspect"
 
 #: src/bz-installed-page.blp:15
-#, fuzzy
 msgid "No Flatpaks Installed"
 msgstr "Žádné Flatpaky Nejsou Nainstalované."
 
@@ -481,7 +469,6 @@ msgid "Installed"
 msgstr "Nainstalované"
 
 #: src/bz-installed-page.blp:115
-#, fuzzy
 msgid "Support this application"
 msgstr "Sdílet tuto aplikaci"
 
@@ -535,7 +522,6 @@ msgid "Preferences"
 msgstr "Možnosti"
 
 #: src/bz-preferences-dialog.blp:13
-#, fuzzy
 msgid "Full Application View"
 msgstr "Stránka aplikace Calligraphy"
 
@@ -544,7 +530,6 @@ msgid "Change what content is shown when viewing applications"
 msgstr "Změnit jaký obsah je zobrazen při prohlížení aplikací"
 
 #: src/bz-preferences-dialog.blp:17
-#, fuzzy
 msgid "Git Forge Star Counts"
 msgstr "Počet Hvězd VCS Forge"
 
@@ -726,12 +711,10 @@ msgid "Toggle transaction sidebar"
 msgstr "Zobraz/skryj přehled translakcí"
 
 #: src/bz-window.blp:442
-#, fuzzy
 msgid "_Preferences"
 msgstr "Možnosti"
 
 #: src/bz-window.blp:447
-#, fuzzy
 msgid "_Refresh"
 msgstr "Obnovit"
 
@@ -748,7 +731,6 @@ msgid "_Donate to Bazaar ❤️"
 msgstr "_Podpořte Vývoj ❤️"
 
 #: src/bz-window.c:570
-#, fuzzy
 msgid "Up to date!"
 msgstr "Vše je aktualizované"
 
@@ -901,7 +883,3 @@ msgstr "Ukončit"
 
 #~ msgid "Hide filtering and sorting behind a crossfade effect"
 #~ msgstr "Skrýt filtrování a řazení za efekt prolínání"# Czech translations for bazaar package.
-# Copyright (C) 2025 THE bazaar'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the bazaar package.
-# Automatically generated, 2025.
-#
