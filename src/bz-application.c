@@ -27,6 +27,7 @@
 
 #include "bz-application-map-factory.h"
 #include "bz-application.h"
+#include "bz-backend-notification.h"
 #include "bz-content-provider.h"
 #include "bz-download-worker.h"
 #include "bz-entry-cache-manager.h"
@@ -60,6 +61,7 @@ struct _BzApplication
   gboolean   running;
   DexFuture *refresh_task;
   GTimer    *init_timer;
+  DexFuture *notif_watch;
 
   BzEntryCacheManager        *cache;
   BzTransactionManager       *transactions;
@@ -67,11 +69,13 @@ struct _BzApplication
   BzGnomeShellSearchProvider *gs_search;
 
   BzFlatpakInstance *flatpak;
+  DexChannel        *channel;
   char              *waiting_to_open_appstream;
   GFile             *waiting_to_open_file;
   BzFlathubState    *flathub;
   BzContentProvider *content_provider;
 
+  GHashTable *last_installed_set;
   GListStore *groups;
   GHashTable *ids_to_groups;
   GListStore *installed_apps;
@@ -114,6 +118,9 @@ transaction_success (BzApplication        *self,
 static DexFuture *
 refresh_fiber (BzApplication *self);
 
+static DexFuture *
+watch_backend_notifs_fiber (BzApplication *self);
+
 static void
 refresh (BzApplication *self);
 
@@ -143,6 +150,8 @@ bz_application_dispose (GObject *object)
 {
   BzApplication *self = BZ_APPLICATION (object);
 
+  dex_clear (&self->refresh_task);
+  dex_clear (&self->notif_watch);
   g_clear_object (&self->settings);
   g_clear_object (&self->blocklists);
   g_clear_object (&self->content_configs);
@@ -164,6 +173,8 @@ bz_application_dispose (GObject *object)
   g_clear_object (&self->state);
   g_clear_pointer (&self->waiting_to_open_appstream, g_free);
   g_clear_pointer (&self->init_timer, g_timer_destroy);
+  g_clear_pointer (&self->last_installed_set, g_hash_table_unref);
+  g_clear_pointer (&self->ids_to_groups, g_hash_table_unref);
 
   G_OBJECT_CLASS (bz_application_parent_class)->dispose (object);
 }
@@ -216,7 +227,7 @@ bz_application_command_line (GApplication            *app,
           g_application_command_line_printerr (
               cmdline,
               "The Bazaar service is running. The available commands are:\n\n"
-              "  window|refresh|open|status|query|transact|quit\n\n"
+              "  window|open|status|query|transact|quit\n\n"
               "Add \"--help\" to a command to get information specific to that command.\n");
         }
       else
@@ -455,35 +466,6 @@ bz_application_command_line (GApplication            *app,
           /* Just take the first one for now */
           location = g_strdup (*locations);
         }
-      else if (g_strcmp0 (command, "refresh") == 0)
-        {
-          gboolean help = FALSE;
-
-          GOptionEntry main_entries[] = {
-            { "help", 0, 0, G_OPTION_ARG_NONE, &help, "Print help" },
-            { NULL }
-          };
-
-          g_option_context_add_main_entries (context, main_entries, NULL);
-          if (!g_option_context_parse (context, &argc, &argv_shallow, &local_error))
-            {
-              g_application_command_line_printerr (cmdline, "%s\n", local_error->message);
-              return EXIT_FAILURE;
-            }
-
-          if (help)
-            {
-              g_autofree char *help_text = NULL;
-
-              g_option_context_set_summary (context, "Options for command \"refresh\"");
-
-              help_text = g_option_context_get_help (context, TRUE, NULL);
-              g_application_command_line_printerr (cmdline, "%s\n", help_text);
-              return EXIT_SUCCESS;
-            }
-
-          refresh (self);
-        }
       else if (g_strcmp0 (command, "status") == 0)
         {
           gboolean help                            = FALSE;
@@ -721,18 +703,6 @@ bz_application_toggle_transactions_action (GSimpleAction *action,
 }
 
 static void
-bz_application_refresh_action (GSimpleAction *action,
-                               GVariant      *parameter,
-                               gpointer       user_data)
-{
-  BzApplication *self = user_data;
-
-  g_assert (BZ_IS_APPLICATION (self));
-
-  refresh (self);
-}
-
-static void
 bz_application_search_action (GSimpleAction *action,
                               GVariant      *parameter,
                               gpointer       user_data)
@@ -848,7 +818,6 @@ static const GActionEntry app_actions[] = {
   {         "preferences",         bz_application_preferences_action, NULL },
   {               "about",               bz_application_about_action, NULL },
   {              "search",              bz_application_search_action,  "s" },
-  {             "refresh",             bz_application_refresh_action, NULL },
   { "toggle-transactions", bz_application_toggle_transactions_action, NULL },
   {              "donate",              bz_application_donate_action, NULL },
   {            "flatseal",            bz_application_flatseal_action, NULL },
@@ -942,10 +911,6 @@ bz_application_init (BzApplication *self)
       GTK_APPLICATION (self),
       "app.search('')",
       (const char *[]) { "<primary>f", NULL });
-  gtk_application_set_accels_for_action (
-      GTK_APPLICATION (self),
-      "app.refresh",
-      (const char *[]) { "<primary>r", NULL });
   gtk_application_set_accels_for_action (
       GTK_APPLICATION (self),
       "app.toggle-transactions",
@@ -1161,12 +1126,16 @@ transaction_success (BzApplication        *self,
   for (guint i = 0; i < n_installs; i++)
     {
       g_autoptr (BzEntry) entry = NULL;
+      const char *unique_id     = NULL;
 
       entry = g_list_model_get_item (installs, i);
       if (g_hash_table_contains (errored, entry))
         continue;
 
       bz_entry_set_installed (entry, TRUE);
+      unique_id = bz_entry_get_unique_id (entry);
+      g_hash_table_add (self->last_installed_set, g_strdup (unique_id));
+
       if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
         {
           BzEntryGroup *group = NULL;
@@ -1188,12 +1157,17 @@ transaction_success (BzApplication        *self,
   for (guint i = 0; i < n_removals; i++)
     {
       g_autoptr (BzEntry) entry = NULL;
+      const char *unique_id     = NULL;
 
       entry = g_list_model_get_item (removals, i);
       if (g_hash_table_contains (errored, entry))
         continue;
 
       bz_entry_set_installed (entry, FALSE);
+      unique_id = bz_entry_get_unique_id (entry);
+      /* TODO this doesn't account for related refs */
+      g_hash_table_remove (self->last_installed_set, unique_id);
+
       if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
         {
           BzEntryGroup *group = NULL;
@@ -1213,6 +1187,74 @@ transaction_success (BzApplication        *self,
     }
 }
 
+static void
+fiber_check_for_updates (BzApplication *self)
+{
+  g_autoptr (GError) local_error   = NULL;
+  g_autoptr (GPtrArray) update_ids = NULL;
+  GtkWindow *window                = NULL;
+
+  g_debug ("Checking for updates...");
+  bz_state_info_set_checking_for_updates (self->state, TRUE);
+
+  update_ids = dex_await_boxed (
+      bz_backend_retrieve_update_ids (BZ_BACKEND (self->flatpak), NULL),
+      &local_error);
+  window = gtk_application_get_active_window (GTK_APPLICATION (self));
+  if (update_ids != NULL)
+    {
+      if (update_ids->len > 0)
+        {
+          g_autoptr (GPtrArray) futures = NULL;
+          g_autoptr (GListStore) store  = NULL;
+
+          futures = g_ptr_array_new_with_free_func (dex_unref);
+          for (guint i = 0; i < update_ids->len; i++)
+            {
+              const char *unique_id = NULL;
+
+              unique_id = g_ptr_array_index (update_ids, i);
+              g_ptr_array_add (futures, bz_entry_cache_manager_get (self->cache, unique_id));
+            }
+
+          dex_await (
+              dex_future_allv ((DexFuture *const *) futures->pdata, futures->len),
+              &local_error);
+
+          store = g_list_store_new (BZ_TYPE_ENTRY);
+          for (guint i = 0; i < futures->len; i++)
+            {
+              DexFuture    *future = NULL;
+              const GValue *value  = NULL;
+
+              future = g_ptr_array_index (futures, i);
+              value  = dex_future_get_value (future, &local_error);
+
+              if (value != NULL)
+                g_list_store_append (store, g_value_get_object (value));
+              else
+                {
+                  const char *unique_id = NULL;
+
+                  unique_id = g_ptr_array_index (update_ids, i);
+                  g_critical ("%s could not be resolved for the update list and thus will not be included: %s",
+                              unique_id, local_error->message);
+                  g_clear_pointer (&local_error, g_error_free);
+                }
+            }
+
+          bz_state_info_set_available_updates (self->state, G_LIST_MODEL (store));
+          // if (window != NULL)
+          //   bz_window_push_update_dialog (BZ_WINDOW (window));
+        }
+    }
+  else if (window != NULL)
+    bz_show_error_for_widget (GTK_WIDGET (window), local_error->message);
+  g_clear_pointer (&local_error, g_error_free);
+
+  bz_state_info_set_checking_for_updates (self->state, FALSE);
+}
+
 static DexFuture *
 refresh_fiber (BzApplication *self)
 {
@@ -1228,7 +1270,6 @@ refresh_fiber (BzApplication *self)
   g_autoptr (GHashTable) sys_name_to_addons = NULL;
   g_autoptr (GHashTable) usr_name_to_addons = NULL;
   g_autoptr (GPtrArray) cache_futures       = NULL;
-  g_autoptr (GPtrArray) update_ids          = NULL;
   GtkWindow    *window                      = NULL;
   gboolean      result                      = FALSE;
   const GValue *sync_value                  = NULL;
@@ -1242,6 +1283,13 @@ refresh_fiber (BzApplication *self)
         return dex_future_new_for_error (g_steal_pointer (&local_error));
       bz_transaction_manager_set_backend (self->transactions, BZ_BACKEND (self->flatpak));
       bz_state_info_set_backend (self->state, BZ_BACKEND (self->flatpak));
+
+      dex_clear (&self->notif_watch);
+      self->notif_watch = dex_scheduler_spawn (
+          dex_scheduler_get_default (),
+          bz_get_dex_stack_size (),
+          (DexFiberFunc) watch_backend_notifs_fiber,
+          self, NULL);
     }
   else
     {
@@ -1477,6 +1525,8 @@ refresh_fiber (BzApplication *self)
       bz_state_info_set_busy_progress_label (self->state, busy_progress_label);
       g_clear_pointer (&busy_step_label, g_free);
     }
+  g_clear_pointer (&self->last_installed_set, g_hash_table_unref);
+  self->last_installed_set = g_steal_pointer (&installed_set);
   g_list_store_sort (self->groups, (GCompareDataFunc) cmp_group, NULL);
   g_list_store_sort (self->installed_apps, (GCompareDataFunc) cmp_group, NULL);
 
@@ -1521,67 +1571,142 @@ refresh_fiber (BzApplication *self)
   bz_state_info_set_busy_step_label (self->state, busy_step_label);
   g_clear_pointer (&busy_step_label, g_free);
 
-  g_debug ("Checking for updates...");
-  bz_state_info_set_checking_for_updates (self->state, TRUE);
-
-  update_ids = dex_await_boxed (
-      bz_backend_retrieve_update_ids (BZ_BACKEND (self->flatpak), NULL),
-      &local_error);
-  window = gtk_application_get_active_window (GTK_APPLICATION (self));
-  if (update_ids != NULL)
-    {
-      if (update_ids->len > 0)
-        {
-          g_autoptr (GPtrArray) futures = NULL;
-          g_autoptr (GListStore) store  = NULL;
-
-          futures = g_ptr_array_new_with_free_func (dex_unref);
-          for (guint i = 0; i < update_ids->len; i++)
-            {
-              const char *unique_id = NULL;
-
-              unique_id = g_ptr_array_index (update_ids, i);
-              g_ptr_array_add (futures, bz_entry_cache_manager_get (self->cache, unique_id));
-            }
-
-          dex_await (
-              dex_future_allv ((DexFuture *const *) futures->pdata, futures->len),
-              &local_error);
-
-          store = g_list_store_new (BZ_TYPE_ENTRY);
-          for (guint i = 0; i < futures->len; i++)
-            {
-              DexFuture    *future = NULL;
-              const GValue *value  = NULL;
-
-              future = g_ptr_array_index (futures, i);
-              value  = dex_future_get_value (future, &local_error);
-
-              if (value != NULL)
-                g_list_store_append (store, g_value_get_object (value));
-              else
-                {
-                  const char *unique_id = NULL;
-
-                  unique_id = g_ptr_array_index (update_ids, i);
-                  g_critical ("%s could not be resolved for the update list and thus will not be included: %s",
-                              unique_id, local_error->message);
-                  g_clear_pointer (&local_error, g_error_free);
-                }
-            }
-
-          bz_state_info_set_available_updates (self->state, G_LIST_MODEL (store));
-          // if (window != NULL)
-          //   bz_window_push_update_dialog (BZ_WINDOW (window));
-        }
-    }
-  else if (window != NULL)
-    bz_show_error_for_widget (GTK_WIDGET (window), local_error->message);
-  g_clear_pointer (&local_error, g_error_free);
-
-  bz_state_info_set_checking_for_updates (self->state, FALSE);
+  bz_state_info_set_background_task_label (self->state, _ ("Checking for updates..."));
+  fiber_check_for_updates (self);
+  bz_state_info_set_background_task_label (self->state, NULL);
 
   return dex_future_new_true ();
+}
+
+static DexFuture *
+watch_backend_notifs_fiber (BzApplication *self)
+{
+  for (;;)
+    {
+      g_autoptr (DexChannel) channel = NULL;
+
+      channel = bz_backend_create_notification_channel (
+          BZ_BACKEND (self->flatpak));
+      if (channel == NULL)
+        break;
+
+      for (;;)
+        {
+          g_autoptr (GError) local_error          = NULL;
+          g_autoptr (BzBackendNotification) notif = NULL;
+          g_autoptr (GHashTable) installed_set    = NULL;
+          g_autoptr (GPtrArray) diff_reads        = NULL;
+          GHashTableIter old_iter                 = { 0 };
+          GHashTableIter new_iter                 = { 0 };
+          g_autoptr (GPtrArray) diff_writes       = NULL;
+
+          notif = dex_await_object (dex_channel_receive (channel), NULL);
+          if (notif == NULL)
+            break;
+
+          if (self->refresh_task != NULL)
+            {
+              g_debug ("Ignoring backend notification since we are currently refreshing");
+              continue;
+            }
+
+          bz_state_info_set_background_task_label (self->state, _ ("Synchronizing..."));
+
+          installed_set = dex_await_boxed (
+              bz_backend_retrieve_install_ids (
+                  BZ_BACKEND (self->flatpak), NULL),
+              &local_error);
+          if (installed_set == NULL)
+            {
+              g_critical ("Failed to enumerate installed entries: %s", local_error->message);
+              bz_state_info_set_background_task_label (self->state, NULL);
+              continue;
+            }
+
+          diff_reads = g_ptr_array_new_with_free_func (dex_unref);
+
+          g_hash_table_iter_init (&old_iter, self->last_installed_set);
+          for (;;)
+            {
+              char *unique_id = NULL;
+
+              if (!g_hash_table_iter_next (
+                      &old_iter, (gpointer *) &unique_id, NULL))
+                break;
+
+              if (!g_hash_table_contains (installed_set, unique_id))
+                g_ptr_array_add (
+                    diff_reads,
+                    bz_entry_cache_manager_get (self->cache, unique_id));
+            }
+
+          g_hash_table_iter_init (&new_iter, installed_set);
+          for (;;)
+            {
+              char *unique_id = NULL;
+
+              if (!g_hash_table_iter_next (
+                      &new_iter, (gpointer *) &unique_id, NULL))
+                break;
+
+              if (!g_hash_table_contains (self->last_installed_set, unique_id))
+                g_ptr_array_add (
+                    diff_reads,
+                    bz_entry_cache_manager_get (self->cache, unique_id));
+            }
+
+          if (diff_reads->len > 0)
+            {
+              dex_await (dex_future_allv (
+                             (DexFuture *const *) diff_reads->pdata,
+                             diff_reads->len),
+                         NULL);
+
+              diff_writes = g_ptr_array_new_with_free_func (dex_unref);
+              for (guint i = 0; i < diff_reads->len; i++)
+                {
+                  DexFuture *future = NULL;
+
+                  future = g_ptr_array_index (diff_reads, i);
+                  if (dex_future_is_resolved (future))
+                    {
+                      BzEntry      *entry           = NULL;
+                      const char   *id              = NULL;
+                      const char   *unique_id       = NULL;
+                      BzEntryGroup *potential_group = NULL;
+                      gboolean      installed       = FALSE;
+
+                      entry           = g_value_get_object (dex_future_get_value (future, NULL));
+                      id              = bz_entry_get_id (entry);
+                      potential_group = g_hash_table_lookup (self->ids_to_groups, id);
+                      if (potential_group != NULL)
+                        bz_entry_group_connect_living (potential_group, entry);
+
+                      unique_id = bz_entry_get_unique_id (entry);
+                      installed = g_hash_table_contains (installed_set, unique_id);
+
+                      bz_entry_set_installed (entry, installed);
+
+                      g_ptr_array_add (
+                          diff_writes,
+                          bz_entry_cache_manager_add (self->cache, entry));
+                    }
+                }
+
+              dex_await (dex_future_allv (
+                             (DexFuture *const *) diff_writes->pdata,
+                             diff_writes->len),
+                         NULL);
+            }
+          g_clear_pointer (&self->last_installed_set, g_hash_table_unref);
+          self->last_installed_set = g_steal_pointer (&installed_set);
+
+          fiber_check_for_updates (self);
+          bz_state_info_set_background_task_label (self->state, NULL);
+        }
+    }
+
+  return NULL;
 }
 
 static DexFuture *
@@ -1594,6 +1719,7 @@ refresh_finally (DexFuture     *future,
   dex_clear (&self->refresh_task);
   if (dex_future_is_rejected (future))
     {
+      bz_state_info_set_background_task_label (self->state, NULL);
       bz_state_info_set_checking_for_updates (self->state, FALSE);
       bz_state_info_set_all_entry_groups (self->state, G_LIST_MODEL (self->groups));
       bz_state_info_set_all_installed_entry_groups (self->state, G_LIST_MODEL (self->installed_apps));

@@ -700,6 +700,19 @@ bz_entry_group_add (BzEntryGroup *self,
     }
 }
 
+void
+bz_entry_group_connect_living (BzEntryGroup *self,
+                               BzEntry      *entry)
+{
+  g_return_if_fail (BZ_IS_ENTRY_GROUP (self));
+  g_return_if_fail (BZ_IS_ENTRY (entry));
+
+  g_signal_handlers_disconnect_by_func (entry, installed_changed, self);
+  g_signal_handlers_disconnect_by_func (entry, holding_changed, self);
+  g_signal_connect_object (entry, "notify::installed", G_CALLBACK (installed_changed), self, G_CONNECT_SWAPPED);
+  g_signal_connect_object (entry, "notify::holding", G_CALLBACK (holding_changed), self, G_CONNECT_SWAPPED);
+}
+
 DexFuture *
 bz_entry_group_dup_all_into_model (BzEntryGroup *self)
 {
@@ -949,10 +962,7 @@ dup_all_into_model_fiber (BzEntryGroup *self)
           BzEntry *entry = NULL;
 
           entry = g_value_get_object (dex_future_get_value (future, NULL));
-          g_signal_handlers_disconnect_by_func (entry, installed_changed, self);
-          g_signal_handlers_disconnect_by_func (entry, holding_changed, self);
-          g_signal_connect_object (entry, "notify::installed", G_CALLBACK (installed_changed), self, G_CONNECT_SWAPPED);
-          g_signal_connect_object (entry, "notify::holding", G_CALLBACK (holding_changed), self, G_CONNECT_SWAPPED);
+          bz_entry_group_connect_living (self, entry);
           g_list_store_append (store, entry);
         }
     }

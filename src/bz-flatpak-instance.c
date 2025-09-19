@@ -23,6 +23,7 @@
 
 #include <xmlb.h>
 
+#include "bz-backend-notification.h"
 #include "bz-backend-transaction-op-payload.h"
 #include "bz-backend-transaction-op-progress-payload.h"
 #include "bz-backend.h"
@@ -40,10 +41,20 @@ struct _BzFlatpakInstance
 {
   GObject parent_instance;
 
-  DexScheduler        *scheduler;
+  DexScheduler *scheduler;
+
   FlatpakInstallation *system;
+  GFileMonitor        *system_events;
+  int                  system_mute;
+
   FlatpakInstallation *user;
-  GPtrArray           *cache_dirs;
+  GFileMonitor        *user_events;
+  int                  user_mute;
+
+  GMutex mute_mutex;
+
+  GPtrArray *notif_channels;
+  GMutex     notif_mutex;
 };
 
 static void
@@ -224,25 +235,12 @@ static void
 transaction_progress_changed (FlatpakTransactionProgress *object,
                               TransactionOperationData   *data);
 
-BZ_DEFINE_DATA (
-    add_cache_dir,
-    AddCacheDir,
-    {
-      BzFlatpakInstance *instance;
-      char              *cache_dir;
-    },
-    BZ_RELEASE_DATA (instance, g_object_unref);
-    BZ_RELEASE_DATA (cache_dir, g_free));
-static DexFuture *
-add_cache_dir_fiber (AddCacheDirData *data);
-
 static void
-add_cache_dir (BzFlatpakInstance *self,
-               const char        *cache_dir);
-static void
-destroy_cache_dir (gpointer ptr);
-static DexFuture *
-remove_cache_dir_fiber (const char *cache_dir);
+installation_event (BzFlatpakInstance *self,
+                    GFile             *file,
+                    GFile             *other_file,
+                    GFileMonitorEvent  event_type,
+                    GFileMonitor      *monitor);
 
 static gint
 cmp_rref (FlatpakRemoteRef *a,
@@ -256,8 +254,12 @@ bz_flatpak_instance_dispose (GObject *object)
 
   dex_clear (&self->scheduler);
   g_clear_object (&self->system);
+  g_clear_object (&self->system_events);
   g_clear_object (&self->user);
-  g_clear_pointer (&self->cache_dirs, g_ptr_array_unref);
+  g_clear_object (&self->user_events);
+  g_mutex_clear (&self->mute_mutex);
+  g_clear_pointer (&self->notif_channels, g_ptr_array_unref);
+  g_mutex_clear (&self->notif_mutex);
 
   G_OBJECT_CLASS (bz_flatpak_instance_parent_class)->dispose (object);
 }
@@ -273,8 +275,27 @@ bz_flatpak_instance_class_init (BzFlatpakInstanceClass *klass)
 static void
 bz_flatpak_instance_init (BzFlatpakInstance *self)
 {
-  self->scheduler  = dex_thread_pool_scheduler_new ();
-  self->cache_dirs = g_ptr_array_new_with_free_func (destroy_cache_dir);
+  self->scheduler   = dex_thread_pool_scheduler_new ();
+  self->system_mute = 0;
+  self->user_mute   = 0;
+  g_mutex_init (&self->mute_mutex);
+  self->notif_channels = g_ptr_array_new_with_free_func (dex_unref);
+  g_mutex_init (&self->notif_mutex);
+}
+
+static DexChannel *
+bz_flatpak_instance_create_notification_channel (BzBackend *backend)
+{
+  BzFlatpakInstance *self        = BZ_FLATPAK_INSTANCE (backend);
+  g_autoptr (DexChannel) channel = NULL;
+
+  channel = dex_channel_new (0);
+
+  g_mutex_lock (&self->notif_mutex);
+  g_ptr_array_add (self->notif_channels, dex_ref (channel));
+  g_mutex_unlock (&self->notif_mutex);
+
+  return g_steal_pointer (&channel);
 }
 
 static DexFuture *
@@ -438,11 +459,12 @@ bz_flatpak_instance_schedule_transaction (BzBackend    *backend,
 static void
 backend_iface_init (BzBackendInterface *iface)
 {
-  iface->load_local_package      = bz_flatpak_instance_load_local_package;
-  iface->retrieve_remote_entries = bz_flatpak_instance_retrieve_remote_refs;
-  iface->retrieve_install_ids    = bz_flatpak_instance_retrieve_install_ids;
-  iface->retrieve_update_ids     = bz_flatpak_instance_retrieve_update_ids;
-  iface->schedule_transaction    = bz_flatpak_instance_schedule_transaction;
+  iface->create_notification_channel = bz_flatpak_instance_create_notification_channel;
+  iface->load_local_package          = bz_flatpak_instance_load_local_package;
+  iface->retrieve_remote_entries     = bz_flatpak_instance_retrieve_remote_refs;
+  iface->retrieve_install_ids        = bz_flatpak_instance_retrieve_install_ids;
+  iface->retrieve_update_ids         = bz_flatpak_instance_retrieve_update_ids;
+  iface->schedule_transaction        = bz_flatpak_instance_schedule_transaction;
 }
 
 FlatpakInstallation *
@@ -524,7 +546,22 @@ init_fiber (InitData *data)
   bz_discard_module_dir ();
 
   instance->system = flatpak_installation_new_system (NULL, &local_error);
-  if (instance->system == NULL)
+  if (instance->system != NULL)
+    {
+      instance->system_events = flatpak_installation_create_monitor (
+          instance->system, NULL, &local_error);
+      if (instance->system_events != NULL)
+        g_signal_connect_swapped (
+            instance->system_events, "changed",
+            G_CALLBACK (installation_event), instance);
+      else
+        {
+          g_warning ("Failed to initialize event watch for system installation: %s",
+                     local_error->message);
+          g_clear_pointer (&local_error, g_error_free);
+        }
+    }
+  else
     {
       g_warning ("Failed to initialize system installation: %s",
                  local_error->message);
@@ -532,7 +569,22 @@ init_fiber (InitData *data)
     }
 
   instance->user = flatpak_installation_new_user (NULL, &local_error);
-  if (instance->user == NULL)
+  if (instance->user != NULL)
+    {
+      instance->user_events = flatpak_installation_create_monitor (
+          instance->user, NULL, &local_error);
+      if (instance->user_events != NULL)
+        g_signal_connect_swapped (
+            instance->user_events, "changed",
+            G_CALLBACK (installation_event), instance);
+      else
+        {
+          g_warning ("Failed to initialize event watch for user installation: %s",
+                     local_error->message);
+          g_clear_pointer (&local_error, g_error_free);
+        }
+    }
+  else
     {
       g_warning ("Failed to initialize user installation: %s",
                  local_error->message);
@@ -809,15 +861,6 @@ retrieve_remote_refs_fiber (GatherRefsData *data)
   gboolean result                           = FALSE;
   g_autoptr (GString) error_string          = NULL;
 
-  while (instance->cache_dirs->len > 0)
-    {
-      char *cache_dir = NULL;
-
-      cache_dir = g_ptr_array_steal_index_fast (instance->cache_dirs, 0);
-      bz_reap_path (cache_dir);
-      g_free (cache_dir);
-    }
-
   if (instance->system != NULL)
     {
       system_remotes = flatpak_installation_list_remotes (
@@ -1007,9 +1050,6 @@ retrieve_refs_for_remote_fiber (RetrieveRefsForRemoteData *data)
   // g_autofree char *remote_icon_name       = NULL;
   g_autoptr (GdkPaintable) remote_icon = NULL;
   g_autoptr (GPtrArray) refs           = NULL;
-  g_autofree char *main_cache          = NULL;
-  g_autofree char *output_dir_path     = NULL;
-  g_autoptr (GFile) output_dir_file    = NULL;
 
   remote_name = flatpak_remote_get_name (remote);
 
@@ -1219,25 +1259,6 @@ retrieve_refs_for_remote_fiber (RetrieveRefsForRemoteData *data)
         remote_name,
         local_error->message);
 
-  main_cache      = bz_dup_module_dir ();
-  output_dir_path = g_build_filename (main_cache, remote_name, NULL);
-  output_dir_file = g_file_new_for_path (output_dir_path);
-
-  result = g_file_make_directory_with_parents (output_dir_file, cancellable, &local_error);
-  if (!result)
-    {
-      if (g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_EXISTS))
-        g_clear_pointer (&local_error, g_error_free);
-      else
-        return dex_future_new_reject (
-            BZ_FLATPAK_ERROR,
-            BZ_FLATPAK_ERROR_IO_MISBEHAVIOR,
-            "Failed to create cache dir for remote '%s': %s",
-            remote_name,
-            local_error->message);
-    }
-  add_cache_dir (instance, output_dir_path);
-
   for (guint i = 0; i < refs->len;)
     {
       FlatpakRemoteRef *rref = NULL;
@@ -1255,10 +1276,7 @@ retrieve_refs_for_remote_fiber (RetrieveRefsForRemoteData *data)
         i++;
     }
   if (refs->len == 0)
-    {
-      destroy_cache_dir (g_steal_pointer (&output_dir_path));
-      return dex_future_new_true ();
-    }
+    return dex_future_new_true ();
 
   result = dex_await (dex_channel_send (
                           channel, dex_future_new_for_int (refs->len)),
@@ -1337,6 +1355,8 @@ retrieve_installs_fiber (GatherRefsData *data)
 
   if (instance->system != NULL)
     {
+      flatpak_installation_drop_caches (
+          instance->system, cancellable, NULL);
       system_refs = flatpak_installation_list_installed_refs (
           instance->system, cancellable, &local_error);
       if (system_refs == NULL)
@@ -1350,6 +1370,8 @@ retrieve_installs_fiber (GatherRefsData *data)
 
   if (instance->user != NULL)
     {
+      flatpak_installation_drop_caches (
+          instance->user, cancellable, NULL);
       user_refs = flatpak_installation_list_installed_refs (
           instance->user, cancellable, &local_error);
       if (user_refs == NULL)
@@ -1798,7 +1820,23 @@ transaction_operation_done (FlatpakTransaction          *object,
                             gint                         result,
                             TransactionData             *data)
 {
+  FlatpakTransactionOperationType kind              = FLATPAK_TRANSACTION_OPERATION_LAST_TYPE;
   g_autoptr (BzBackendTransactionOpPayload) payload = NULL;
+
+  kind = flatpak_transaction_operation_get_operation_type (operation);
+  if (kind == FLATPAK_TRANSACTION_OPERATION_INSTALL ||
+      kind == FLATPAK_TRANSACTION_OPERATION_UPDATE ||
+      kind == FLATPAK_TRANSACTION_OPERATION_INSTALL_BUNDLE ||
+      kind == FLATPAK_TRANSACTION_OPERATION_UNINSTALL)
+    {
+      g_mutex_lock (&data->instance->mute_mutex);
+      if (data->instance->user ==
+          flatpak_transaction_get_installation (object))
+        data->instance->user_mute++;
+      else
+        data->instance->system_mute++;
+      g_mutex_unlock (&data->instance->mute_mutex);
+    }
 
   g_mutex_lock (&data->mutex);
   g_hash_table_replace (
@@ -1987,49 +2025,57 @@ transaction_progress_changed (FlatpakTransactionProgress *progress,
 }
 
 static void
-add_cache_dir (BzFlatpakInstance *self,
-               const char        *cache_dir)
+installation_event (BzFlatpakInstance *self,
+                    GFile             *file,
+                    GFile             *other_file,
+                    GFileMonitorEvent  event_type,
+                    GFileMonitor      *monitor)
 {
-  g_autoptr (AddCacheDirData) data = NULL;
+  gboolean emit = FALSE;
 
-  data            = add_cache_dir_data_new ();
-  data->instance  = g_object_ref (self);
-  data->cache_dir = g_strdup (cache_dir);
+  g_mutex_lock (&self->mute_mutex);
+  if (monitor == self->user_events)
+    {
+      if (self->user_mute > 0)
+        self->user_mute--;
+      else
+        emit = TRUE;
+    }
+  else
+    {
+      if (self->system_mute > 0)
+        self->system_mute--;
+      else
+        emit = TRUE;
+    }
+  g_mutex_unlock (&self->mute_mutex);
 
-  dex_await (dex_scheduler_spawn (
-                 dex_scheduler_get_default (),
-                 bz_get_dex_stack_size (),
-                 (DexFiberFunc) add_cache_dir_fiber,
-                 add_cache_dir_data_ref (data), add_cache_dir_data_unref),
-             NULL);
-}
+  if (!emit)
+    return;
 
-static DexFuture *
-add_cache_dir_fiber (AddCacheDirData *data)
-{
-  g_ptr_array_add (
-      data->instance->cache_dirs,
-      g_steal_pointer (&data->cache_dir));
-  return NULL;
-}
+  g_mutex_lock (&self->notif_mutex);
+  if (self->notif_channels->len > 0)
+    {
+      g_autoptr (BzBackendNotification) notif = NULL;
 
-static void
-destroy_cache_dir (gpointer ptr)
-{
-  char *cache_dir = ptr;
+      notif = bz_backend_notification_new ();
+      bz_backend_notification_set_kind (notif, BZ_BACKEND_NOTIFICATION_KIND_ANY);
 
-  dex_future_disown (dex_scheduler_spawn (
-      bz_get_io_scheduler (),
-      bz_get_dex_stack_size (),
-      (DexFiberFunc) remove_cache_dir_fiber,
-      cache_dir, g_free));
-}
+      for (guint i = 0; i < self->notif_channels->len;)
+        {
+          DexChannel *channel = NULL;
 
-static DexFuture *
-remove_cache_dir_fiber (const char *cache_dir)
-{
-  bz_reap_path (cache_dir);
-  return NULL;
+          channel = g_ptr_array_index (self->notif_channels, i);
+          if (dex_channel_can_send (channel))
+            {
+              dex_future_disown (dex_channel_send (channel, dex_future_new_for_object (notif)));
+              i++;
+            }
+          else
+            g_ptr_array_remove_index_fast (self->notif_channels, i);
+        }
+    }
+  g_mutex_unlock (&self->notif_mutex);
 }
 
 static gint
