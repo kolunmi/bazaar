@@ -22,6 +22,8 @@ template $BzShareDialog: Adw.Dialog {
       hexpand: true;
       margin-start: 5;
       margin-end: 5;
+      margin-top: 5;
+      margin-bottom: 5;
 
       model: NoSelection {
         model: bind template.entry as <$BzEntry>.share-urls;
@@ -35,23 +37,21 @@ template $BzShareDialog: Adw.Dialog {
             margin-top: 5;
             margin-bottom: 5;
             orientation: vertical;
+            spacing: 5;
 
             Label {
               styles [
                 "heading",
               ]
 
-              xalign: 0;
+              xalign: 0.0;
               ellipsize: middle;
               label: bind template.item as <$BzUrl>.name;
             }
 
             Box {
-              styles [
-                "linked",
-              ]
-
               orientation: horizontal;
+              spacing: 10;
 
               Entry {
                 hexpand: true;
@@ -59,18 +59,26 @@ template $BzShareDialog: Adw.Dialog {
                 text: bind template.item as <$BzUrl>.url;
               }
 
-              Button {
-                has-tooltip: true;
-                tooltip-text: _("Copy this link");
-                icon-name: "copy-symbolic";
-                clicked => $copy_cb(template);
-              }
+              Box {
+                styles [
+                  "linked",
+                ]
 
-              Button {
-                has-tooltip: true;
-                tooltip-text: _("Open this link externally");
-                icon-name: "external-link-symbolic";
-                clicked => $follow_link_cb(template);
+                orientation: horizontal;
+                
+                Button {
+                  has-tooltip: true;
+                  tooltip-text: _("Copy this link");
+                  icon-name: "copy-symbolic";
+                  clicked => $copy_cb(template);
+                }
+
+                Button {
+                  has-tooltip: true;
+                  tooltip-text: _("Open this link externally");
+                  icon-name: "external-link-symbolic";
+                  clicked => $follow_link_cb(template);
+                }
               }
             }
           };

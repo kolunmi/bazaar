@@ -264,7 +264,7 @@ share_cb (BzFullView *self,
     return;
 
   share_dialog = bz_share_dialog_new (bz_result_get_object (self->ui_entry));
-  gtk_widget_set_size_request (GTK_WIDGET (share_dialog), 400, -1);
+  adw_dialog_set_content_width (share_dialog, 600);
 
   adw_dialog_present (share_dialog, GTK_WIDGET (self));
 }

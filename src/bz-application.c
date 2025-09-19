@@ -1670,22 +1670,36 @@ watch_backend_notifs_fiber (BzApplication *self)
                   future = g_ptr_array_index (diff_reads, i);
                   if (dex_future_is_resolved (future))
                     {
-                      BzEntry      *entry           = NULL;
-                      const char   *id              = NULL;
-                      const char   *unique_id       = NULL;
-                      BzEntryGroup *potential_group = NULL;
-                      gboolean      installed       = FALSE;
+                      BzEntry      *entry     = NULL;
+                      const char   *id        = NULL;
+                      const char   *unique_id = NULL;
+                      BzEntryGroup *group     = NULL;
+                      gboolean      installed = FALSE;
 
-                      entry           = g_value_get_object (dex_future_get_value (future, NULL));
-                      id              = bz_entry_get_id (entry);
-                      potential_group = g_hash_table_lookup (self->ids_to_groups, id);
-                      if (potential_group != NULL)
-                        bz_entry_group_connect_living (potential_group, entry);
+                      entry = g_value_get_object (dex_future_get_value (future, NULL));
+                      id    = bz_entry_get_id (entry);
+                      group = g_hash_table_lookup (self->ids_to_groups, id);
+                      if (group != NULL)
+                        bz_entry_group_connect_living (group, entry);
 
                       unique_id = bz_entry_get_unique_id (entry);
                       installed = g_hash_table_contains (installed_set, unique_id);
-
                       bz_entry_set_installed (entry, installed);
+
+                      if (group != NULL)
+                        {
+                          gboolean found    = FALSE;
+                          guint    position = 0;
+
+                          found = g_list_store_find (self->installed_apps, group, &position);
+                          if (installed && !found)
+                            g_list_store_insert_sorted (
+                                self->installed_apps, group,
+                                (GCompareDataFunc) cmp_group, NULL);
+                          else if (!installed && found &&
+                                   bz_entry_group_get_removable (group) == 0)
+                            g_list_store_remove (self->installed_apps, position);
+                        }
 
                       g_ptr_array_add (
                           diff_writes,
