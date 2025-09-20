@@ -30,9 +30,8 @@ struct _BzShareDialog
   BzEntry *entry;
 
   /* Template widgets */
-  AdwToastOverlay *toast_overlay;
+  AdwToastOverlay     *toast_overlay;
   AdwPreferencesGroup *urls_group;
-  GList *url_rows;
 };
 
 G_DEFINE_FINAL_TYPE (BzShareDialog, bz_share_dialog, ADW_TYPE_DIALOG)
@@ -48,81 +47,77 @@ enum
 static GParamSpec *props[LAST_PROP] = { 0 };
 
 static void
-copy_cb (GtkButton *button,
-         gpointer   user_data)
+copy_cb (BzShareDialog *self,
+         GtkButton     *button)
 {
-  BzShareDialog *self = BZ_SHARE_DIALOG (user_data);
-  const char    *link;
-  GdkClipboard  *clipboard;
-  AdwToast      *toast;
+  const char   *link      = NULL;
+  GdkClipboard *clipboard = NULL;
+  AdwToast     *toast     = NULL;
 
   link = g_object_get_data (G_OBJECT (button), "url");
 
   clipboard = gdk_display_get_clipboard (gdk_display_get_default ());
   gdk_clipboard_set_text (clipboard, link);
 
-  toast = adw_toast_new (_("Copied!"));
+  toast = adw_toast_new (_ ("Copied!"));
   adw_toast_set_timeout (toast, 1);
   adw_toast_overlay_add_toast (self->toast_overlay, toast);
 }
 
 static void
-follow_link_cb (GtkButton *button,
-                gpointer   user_data)
+follow_link_cb (BzShareDialog *self,
+                GtkButton     *button)
 {
-  const char *link = g_object_get_data (G_OBJECT (button), "url");
+  const char *link = NULL;
 
+  link = g_object_get_data (G_OBJECT (button), "url");
   g_app_info_launch_default_for_uri (link, NULL, NULL);
-}
-
-static void
-clear_url_rows (BzShareDialog *self)
-{
-  g_list_free (self->url_rows);
-  self->url_rows = NULL;
 }
 
 static AdwActionRow *
 create_url_action_row (BzShareDialog *self, BzUrl *url_item)
 {
   g_autofree char *url_string = NULL;
-  g_autofree char *url_title = NULL;
-  AdwActionRow *action_row;
-  GtkBox *suffix_box;
-  GtkButton *copy_button;
-  GtkButton *open_button;
-  GtkSeparator *separator;
+  g_autofree char *url_title  = NULL;
+  AdwActionRow    *action_row;
+  GtkBox          *suffix_box;
+  GtkButton       *copy_button;
+  GtkButton       *open_button;
+  GtkSeparator    *separator;
 
   g_object_get (url_item,
-               "url", &url_string,
-               "name", &url_title,
-               NULL);
+                "url", &url_string,
+                "name", &url_title,
+                NULL);
+
+  /* `PreferenceGroup`s can't be constructed using the list widget
+     framework, so we must do this manually. */
 
   action_row = ADW_ACTION_ROW (adw_action_row_new ());
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (action_row),
-                                url_title ? url_title : url_string);
+                                 url_title ? url_title : url_string);
   adw_action_row_set_subtitle (action_row, url_string);
 
   suffix_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4));
   gtk_widget_set_valign (GTK_WIDGET (suffix_box), GTK_ALIGN_CENTER);
 
   copy_button = GTK_BUTTON (gtk_button_new_from_icon_name ("edit-copy-symbolic"));
-  gtk_widget_set_tooltip_text (GTK_WIDGET (copy_button), _("Copy Link"));
+  gtk_widget_set_tooltip_text (GTK_WIDGET (copy_button), _ ("Copy Link"));
   gtk_button_set_has_frame (copy_button, FALSE);
   g_object_set_data_full (G_OBJECT (copy_button), "url", g_strdup (url_string), g_free);
-  g_signal_connect (copy_button, "clicked",
-                   G_CALLBACK (copy_cb), self);
+  g_signal_connect_swapped (copy_button, "clicked",
+                            G_CALLBACK (copy_cb), self);
 
   separator = GTK_SEPARATOR (gtk_separator_new (GTK_ORIENTATION_VERTICAL));
   gtk_widget_set_margin_top (GTK_WIDGET (separator), 6);
   gtk_widget_set_margin_bottom (GTK_WIDGET (separator), 6);
 
   open_button = GTK_BUTTON (gtk_button_new_from_icon_name ("external-link-symbolic"));
-  gtk_widget_set_tooltip_text (GTK_WIDGET (open_button), _("Open Link"));
+  gtk_widget_set_tooltip_text (GTK_WIDGET (open_button), _ ("Open Link"));
   gtk_button_set_has_frame (open_button, FALSE);
   g_object_set_data_full (G_OBJECT (open_button), "url", g_strdup (url_string), g_free);
-  g_signal_connect (open_button, "clicked",
-                   G_CALLBACK (follow_link_cb), self);
+  g_signal_connect_swapped (open_button, "clicked",
+                            G_CALLBACK (follow_link_cb), self);
 
   gtk_box_append (suffix_box, GTK_WIDGET (copy_button));
   gtk_box_append (suffix_box, GTK_WIDGET (separator));
@@ -137,8 +132,8 @@ create_url_action_row (BzShareDialog *self, BzUrl *url_item)
 static void
 populate_urls (BzShareDialog *self)
 {
-  GListModel *urls_model;
-  guint n_items;
+  g_autoptr (GListModel) urls_model = NULL;
+  guint n_items                     = 0;
 
   if (!self->entry)
     return;
@@ -151,18 +146,13 @@ populate_urls (BzShareDialog *self)
 
   for (guint i = 0; i < n_items; i++)
     {
-      g_autoptr(BzUrl) url_item = NULL;
+      g_autoptr (BzUrl) url_item = NULL;
       AdwActionRow *action_row;
 
-      url_item = g_list_model_get_item (urls_model, i);
+      url_item   = g_list_model_get_item (urls_model, i);
       action_row = create_url_action_row (self, url_item);
-
       adw_preferences_group_add (self->urls_group, GTK_WIDGET (action_row));
-      self->url_rows = g_list_prepend (self->url_rows, action_row);
     }
-
-  if (urls_model)
-    g_object_unref (urls_model);
 }
 
 static void
@@ -170,7 +160,6 @@ bz_share_dialog_dispose (GObject *object)
 {
   BzShareDialog *self = BZ_SHARE_DIALOG (object);
 
-  clear_url_rows (self);
   g_clear_object (&self->entry);
 
   G_OBJECT_CLASS (bz_share_dialog_parent_class)->dispose (object);
