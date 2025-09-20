@@ -2,87 +2,23 @@ using Gtk 4.0;
 using Adw 1;
 
 template $BzShareDialog: Adw.Dialog {
-  child: Adw.ToolbarView {
-    [top]
-    Adw.HeaderBar {
-      title-widget: Label {
-        styles [
-          "heading",
-        ]
+  child: Adw.ToastOverlay toast_overlay {
+    child: Adw.ToolbarView {
+      [top]
+      Adw.HeaderBar {
+        title-widget: Label {
+          styles [
+            "heading",
+          ]
+          label: _("Share");
+        };
+      }
 
-        label: _("Share");
-      };
-    }
-
-    content: ListView {
-      styles [
-        "navigation-sidebar",
-      ]
-
-      hexpand: true;
-      margin-start: 5;
-      margin-end: 5;
-      margin-top: 5;
-      margin-bottom: 5;
-
-      model: NoSelection {
-        model: bind template.entry as <$BzEntry>.share-urls;
-      };
-
-      factory: BuilderListItemFactory {
-        template ListItem {
-          activatable: false;
-
-          child: Box {
-            margin-top: 5;
-            margin-bottom: 5;
-            orientation: vertical;
-            spacing: 5;
-
-            Label {
-              styles [
-                "heading",
-              ]
-
-              xalign: 0.0;
-              ellipsize: middle;
-              label: bind template.item as <$BzUrl>.name;
-            }
-
-            Box {
-              orientation: horizontal;
-              spacing: 10;
-
-              Entry {
-                hexpand: true;
-                editable: false;
-                text: bind template.item as <$BzUrl>.url;
-              }
-
-              Box {
-                styles [
-                  "linked",
-                ]
-
-                orientation: horizontal;
-                
-                Button {
-                  has-tooltip: true;
-                  tooltip-text: _("Copy this link");
-                  icon-name: "copy-symbolic";
-                  clicked => $copy_cb(template);
-                }
-
-                Button {
-                  has-tooltip: true;
-                  tooltip-text: _("Open this link externally");
-                  icon-name: "external-link-symbolic";
-                  clicked => $follow_link_cb(template);
-                }
-              }
-            }
-          };
-        }
+      content: Adw.PreferencesGroup urls_group {
+        margin-top: 6;
+        margin-bottom: 18;
+        margin-start: 18;
+        margin-end: 18;
       };
     };
   };
