@@ -559,7 +559,7 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
           flathub_url = g_strdup_printf ("https://flathub.org/apps/%s", id);
 
           url = bz_url_new ();
-          bz_url_set_name (url, C_ ("Project URL Type", "Flathub Link"));
+          bz_url_set_name (url, C_ ("Project URL Type", "Flathub Page"));
           bz_url_set_url (url, flathub_url);
 
           g_list_store_append (share_urls, url);
@@ -581,7 +581,7 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
                   enum_string = C_ ("Project URL Type", "Homepage");
                   break;
                 case AS_URL_KIND_BUGTRACKER:
-                  enum_string = C_ ("Project URL Type", "Bugtracker");
+                  enum_string = C_ ("Project URL Type", "Issue Tracker");
                   break;
                 case AS_URL_KIND_FAQ:
                   enum_string = C_ ("Project URL Type", "FAQ");
@@ -590,7 +590,7 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
                   enum_string = C_ ("Project URL Type", "Help");
                   break;
                 case AS_URL_KIND_DONATION:
-                  enum_string = C_ ("Project URL Type", "Donation");
+                  enum_string = C_ ("Project URL Type", "Donate");
                   g_clear_pointer (&donation_url, g_free);
                   donation_url = g_strdup (url);
                   break;
@@ -601,7 +601,7 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
                   enum_string = C_ ("Project URL Type", "Contact");
                   break;
                 case AS_URL_KIND_VCS_BROWSER:
-                  enum_string = C_ ("Project URL Type", "VCS Browser");
+                  enum_string = C_ ("Project URL Type", "Source Code");
                   g_clear_pointer (&forge_url, g_free);
                   forge_url = g_strdup (url);
                   break;
