@@ -24,6 +24,8 @@ template $BzCategoryTile: Button {
       pixel-size: 32;
       icon-name: bind template.category as <$BzFlathubCategory>.icon-name;
       visible: bind $invert_boolean($is_null(template.category as <$BzFlathubCategory>.icon-name) as <bool>) as <bool>;
+      
+      styles ["icon-dropshadow"]
     }
     
     Label {
