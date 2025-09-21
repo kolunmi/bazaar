@@ -134,16 +134,16 @@ bz_flathub_category_class_init (BzFlathubCategoryClass *klass)
           NULL, NULL, NULL,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
   props[PROP_DISPLAY_NAME] =
-    g_param_spec_string (
-        "display-name",
-        NULL, NULL, NULL,
-        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+      g_param_spec_string (
+          "display-name",
+          NULL, NULL, NULL,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   props[PROP_ICON_NAME] =
-    g_param_spec_string (
-        "icon-name", 
-        NULL, NULL, NULL,
-        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+      g_param_spec_string (
+          "icon-name",
+          NULL, NULL, NULL,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   props[PROP_APPLICATIONS] =
       g_param_spec_object (
@@ -260,7 +260,7 @@ get_category_display_name (const char *category_id)
     return _ ("System");
   if (g_strcmp0 (category_id, "utility") == 0)
     return _ ("Utilities");
-  
+
   return category_id;
 }
 
@@ -287,7 +287,7 @@ get_category_icon_name (const char *category_id)
     return "io.github.kolumni.Bazaar.System";
   if (g_strcmp0 (category_id, "utility") == 0)
     return "io.github.kolumni.Bazaar.Utilities";
-    
+
   return NULL;
 }
 
