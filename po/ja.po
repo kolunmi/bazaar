@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-09-18 21:19+0900\n"
-"PO-Revision-Date: 2025-09-21 17:38+0900\n"
+"PO-Revision-Date: 2025-09-21 18:03+0900\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: ja\n"
@@ -59,7 +59,7 @@ msgid ""
 "Bazaar features a \"curated\" tab that can be configured by distributors to "
 "allow for a more locallized experience."
 msgstr ""
-"Linux のデスクトップを開発している開発者立ちを支援することは重要です。Bazaar "
+"Linux のデスクトップを開発している開発者たちを支援することは重要です。Bazaar "
 "ではディストリビューターが管理できる「特選アプリ」タブによってユーザーの体験"
 "を最適化することを可能にします。"
 
@@ -242,7 +242,7 @@ msgstr "%'d / %'d"
 #: src/bz-application.c:1483
 #, c-format
 msgid "Waiting for background indexing tasks to catch up..."
-msgstr "x"
+msgstr "バックグラウンドのインデックス処理が終了するのを待っています..."
 
 #: src/bz-application.c:1519
 #, c-format
