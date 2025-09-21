@@ -20,7 +20,9 @@
 
 #include "bz-decorated-screenshot.h"
 #include "bz-error.h"
+#include "bz-window.h"
 #include "bz-screenshot.h"
+#include <glib/gi18n.h>
 
 struct _BzDecoratedScreenshot
 {
@@ -120,17 +122,24 @@ open_externally_clicked (BzDecoratedScreenshot *self,
 
 static void
 copy_clicked (BzDecoratedScreenshot *self,
-              GtkButton             *button)
+              GtkButton *button)
 {
   g_autoptr (GdkTexture) texture = NULL;
   GdkClipboard *clipboard;
-
+  BzWindow *window = NULL;
+  AdwToast *toast = NULL;
+  
   texture = bz_async_texture_dup_texture (self->async_texture);
   /* button shouldn't be clickable if not loaded */
   g_assert (texture != NULL);
-
+  
   clipboard = gdk_display_get_clipboard (gdk_display_get_default ());
   gdk_clipboard_set_texture (clipboard, texture);
+  
+  window = BZ_WINDOW (gtk_widget_get_root (GTK_WIDGET (self)));
+  toast = adw_toast_new (_("Copied!"));
+  adw_toast_set_timeout (toast, 1);
+  bz_window_add_toast (window, toast);
 }
 
 static void
