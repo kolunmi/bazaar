@@ -10,13 +10,30 @@ template $BzPreferencesDialog: Adw.PreferencesDialog {
     use-underline: true;
 
     Adw.PreferencesGroup {
-      title: _("Full Application View");
-      description: _("Change what content is shown when viewing applications");
+      title: _("Application Details");
 
-      Adw.SwitchRow {
+      Adw.SwitchRow git_forge_star_counts_switch{
         title: _("Git Forge Star Counts");
-        subtitle: _("If you do not have an access token, turning this setting on may cause GitHub to eventually rate limit you.");
-        active: bind template.show-git-forge-star-counts bidirectional;
+        subtitle: _("Not having a GitHub acess token may tigger rate limits");
+      }
+    }
+
+    Adw.PreferencesGroup {
+      title: _("Search");
+
+      Adw.SwitchRow search_only_foss_switch{
+        title: _("Only Show Free Software");
+        subtitle: _("Hide proprietary applications from search results");
+      }
+
+      Adw.SwitchRow search_only_flathub_switch{
+        title: _("Show Only Flathub Apps");
+        subtitle: _("Limit search results to applications available on Flathub");
+      }
+
+      Adw.SwitchRow search_debounce_switch{
+        title: _("Debounce Search Results");
+        subtitle: _("Wait for a brief pause to reduce system load");
       }
     }
   }

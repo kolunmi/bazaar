@@ -66,7 +66,7 @@ template $BzSearchWidget: Adw.Bin {
 
       Text search_bar {
         hexpand: true;
-        placeholder-text: _("Type to filter");
+        placeholder-text: _("Search Apps");
       }
 
       Label search_text {}
@@ -79,66 +79,6 @@ template $BzSearchWidget: Adw.Bin {
       Image search_busy {
         visible: false;
         icon-name: "timer-sand-symbolic";
-      }
-
-      MenuButton {
-        styles [
-          "flat",
-        ]
-
-        icon-name: "view-more-horizontal-symbolic";
-        has-tooltip: true;
-        tooltip-text: _("Search Options");
-        direction: down;
-
-        popover: Popover {
-          child: Box {
-            halign: start;
-            orientation: vertical;
-            spacing: 8;
-
-            Box {
-              orientation: vertical;
-              spacing: 3;
-
-              Label {
-                styles [
-                  "heading",
-                ]
-                label: _("Search Options");
-              }
-
-              CheckButton foss_check {
-                label: _("Exclude results with proprietary licenses");
-                toggled => $foss_toggled_cb(template);
-              }
-
-              CheckButton flathub_check {
-                label: _("Exclude results not originating from Flathub");
-                toggled => $flathub_toggled_cb(template);
-              }
-            }
-
-            Separator {}
-
-            Box {
-              orientation: vertical;
-              spacing: 3;
-
-              Label {
-                styles [
-                  "heading",
-                ]
-                label: _("Advanced");
-              }
-
-              CheckButton debounce_check {
-                label: _("Debounce input to prevent instant replies");
-                active: true;
-              }
-            }
-          };
-        };
       }
     }
 
