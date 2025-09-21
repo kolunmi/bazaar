@@ -96,6 +96,10 @@ void
 bz_entry_group_add (BzEntryGroup *self,
                     BzEntry      *entry);
 
+void
+bz_entry_group_connect_living (BzEntryGroup *self,
+                               BzEntry      *entry);
+
 DexFuture *
 bz_entry_group_dup_all_into_model (BzEntryGroup *self);
 

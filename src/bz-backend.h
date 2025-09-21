@@ -33,6 +33,8 @@ struct _BzBackendInterface
 {
   GTypeInterface parent_iface;
 
+  DexChannel *(*create_notification_channel) (BzBackend *self);
+
   /* DexFuture* -> char*|BzEntry* */
   DexFuture *(*load_local_package) (BzBackend    *self,
                                     GFile        *file,
@@ -65,6 +67,9 @@ struct _BzBackendInterface
                                       DexChannel   *channel,
                                       GCancellable *cancellable);
 };
+
+DexChannel *
+bz_backend_create_notification_channel (BzBackend *self);
 
 DexFuture *
 bz_backend_load_local_package (BzBackend    *self,

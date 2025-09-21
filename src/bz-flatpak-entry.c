@@ -423,6 +423,11 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
   unique_id          = bz_flatpak_ref_format_unique (ref, user);
   unique_id_checksum = g_compute_checksum_for_string (G_CHECKSUM_MD5, unique_id, -1);
 
+  if (remote != NULL)
+    remote_name = flatpak_remote_get_name (remote);
+  else if (FLATPAK_IS_BUNDLE_REF (ref))
+    remote_name = flatpak_bundle_ref_get_origin (FLATPAK_BUNDLE_REF (ref));
+
   if (FLATPAK_IS_REMOTE_REF (ref))
     download_size = flatpak_remote_ref_get_download_size (FLATPAK_REMOTE_REF (ref));
   else if (FLATPAK_IS_BUNDLE_REF (ref))
@@ -545,6 +550,21 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
         }
 
       share_urls = g_list_store_new (BZ_TYPE_URL);
+      if (kinds & BZ_ENTRY_KIND_APPLICATION &&
+          g_strcmp0 (remote_name, "flathub") == 0)
+        {
+          g_autofree char *flathub_url = NULL;
+          g_autoptr (BzUrl) url        = NULL;
+
+          flathub_url = g_strdup_printf ("https://flathub.org/apps/%s", id);
+
+          url = bz_url_new ();
+          bz_url_set_name (url, C_ ("Project URL Type", "Flathub Page"));
+          bz_url_set_url (url, flathub_url);
+
+          g_list_store_append (share_urls, url);
+        }
+
       for (int e = AS_URL_KIND_UNKNOWN + 1; e < AS_URL_KIND_LAST; e++)
         {
           const char *url = NULL;
@@ -561,7 +581,7 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
                   enum_string = C_ ("Project URL Type", "Homepage");
                   break;
                 case AS_URL_KIND_BUGTRACKER:
-                  enum_string = C_ ("Project URL Type", "Bugtracker");
+                  enum_string = C_ ("Project URL Type", "Issue Tracker");
                   break;
                 case AS_URL_KIND_FAQ:
                   enum_string = C_ ("Project URL Type", "FAQ");
@@ -570,7 +590,7 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
                   enum_string = C_ ("Project URL Type", "Help");
                   break;
                 case AS_URL_KIND_DONATION:
-                  enum_string = C_ ("Project URL Type", "Donation");
+                  enum_string = C_ ("Project URL Type", "Donate");
                   g_clear_pointer (&donation_url, g_free);
                   donation_url = g_strdup (url);
                   break;
@@ -581,7 +601,7 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
                   enum_string = C_ ("Project URL Type", "Contact");
                   break;
                 case AS_URL_KIND_VCS_BROWSER:
-                  enum_string = C_ ("Project URL Type", "VCS Browser");
+                  enum_string = C_ ("Project URL Type", "Source Code");
                   g_clear_pointer (&forge_url, g_free);
                   forge_url = g_strdup (url);
                   break;
@@ -785,11 +805,6 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
       else
         title = self->flatpak_id;
     }
-
-  if (remote != NULL)
-    remote_name = flatpak_remote_get_name (remote);
-  else if (FLATPAK_IS_BUNDLE_REF (ref))
-    remote_name = flatpak_bundle_ref_get_origin (FLATPAK_BUNDLE_REF (ref));
 
   if (FLATPAK_IS_REMOTE_REF (ref))
     eol = flatpak_remote_ref_get_eol (FLATPAK_REMOTE_REF (ref));

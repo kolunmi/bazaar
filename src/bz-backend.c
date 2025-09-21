@@ -46,6 +46,12 @@ BZ_DEFINE_DATA (
 static DexFuture *
 retrieve_with_blocklists_fiber (RetrieveWithBlocklistsData *data);
 
+static DexChannel *
+bz_backend_real_create_notification_channel (BzBackend *self)
+{
+  return NULL;
+}
+
 static DexFuture *
 bz_backend_real_load_local_package (BzBackend    *self,
                                     GFile        *file,
@@ -96,11 +102,20 @@ bz_backend_real_schedule_transaction (BzBackend    *self,
 static void
 bz_backend_default_init (BzBackendInterface *iface)
 {
-  iface->load_local_package      = bz_backend_real_load_local_package;
-  iface->retrieve_remote_entries = bz_backend_real_retrieve_remote_entries;
-  iface->retrieve_install_ids    = bz_backend_real_retrieve_install_ids;
-  iface->retrieve_update_ids     = bz_backend_real_retrieve_update_ids;
-  iface->schedule_transaction    = bz_backend_real_schedule_transaction;
+  iface->create_notification_channel = bz_backend_real_create_notification_channel;
+  iface->load_local_package          = bz_backend_real_load_local_package;
+  iface->retrieve_remote_entries     = bz_backend_real_retrieve_remote_entries;
+  iface->retrieve_install_ids        = bz_backend_real_retrieve_install_ids;
+  iface->retrieve_update_ids         = bz_backend_real_retrieve_update_ids;
+  iface->schedule_transaction        = bz_backend_real_schedule_transaction;
+}
+
+DexChannel *
+bz_backend_create_notification_channel (BzBackend *self)
+{
+  g_return_val_if_fail (BZ_IS_BACKEND (self), NULL);
+
+  return BZ_BACKEND_GET_IFACE (self)->create_notification_channel (self);
 }
 
 DexFuture *

@@ -58,6 +58,7 @@ template $BzInstalledPage: Adw.Bin {
                     width-request: 32;
                     paintable: bind template.item as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable;
                     visible: bind $invert_boolean($is_null(template.item as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable) as <bool>) as <bool>;
+                    styles ["lowres-icon"]
                   }
 
                   Image {
