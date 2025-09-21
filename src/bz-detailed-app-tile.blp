@@ -1,5 +1,4 @@
 using Gtk 4.0;
-using Adw 1;
 
 template $BzDetailedAppTile: Button {
   styles [
@@ -24,6 +23,8 @@ template $BzDetailedAppTile: Button {
     Image {
       pixel-size: 128;
       paintable: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable;
+
+      styles ["icon-dropshadow"]
     }
 
     Box {

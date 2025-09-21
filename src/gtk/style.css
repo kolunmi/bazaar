@@ -41,10 +41,6 @@
     font-weight: normal;
 }
 
-.navigation-sidebar {
-	padding:0;
-}
-
 .support {
     --accent-fg-color : #f06292;
     --accent-bg-color : alpha(#f06292, 0.25);
