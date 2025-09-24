@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-13 15:41+0200\n"
-"PO-Revision-Date: 2025-09-13 15:54+0200\n"
+"POT-Creation-Date: 2025-09-24 09:43+0200\n"
+"PO-Revision-Date: 2025-09-24 09:57+0200\n"
 "Last-Translator: Pietro F. <pfwork@tutamail.com>\n"
 "Language-Team: Italian\n"
 "Language: it\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Gtranslator 48.0\n"
+"X-Generator: Gtranslator 49.0\n"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:2
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:5
@@ -45,6 +45,35 @@ msgstr ""
 "Se tentare di rilevare e mostrare il “numero di stelle” per i progetti nella "
 "vista completa"
 
+#: data/io.github.kolunmi.Bazaar.gschema.xml:11
+#: src/bz-preferences-dialog.blp:25
+msgid "Only Show Free Software"
+msgstr "Mostra solo Free Software"
+
+#: data/io.github.kolunmi.Bazaar.gschema.xml:12
+msgid "Hide proprietary software when searching"
+msgstr "nascondi software proprietario durante la ricerca"
+
+#: data/io.github.kolunmi.Bazaar.gschema.xml:16
+msgid "Show Only Flathub Content"
+msgstr "Mostra solo i contenuti di Flathub"
+
+#: data/io.github.kolunmi.Bazaar.gschema.xml:17
+msgid "Filter search results to only show applications available on Flathub"
+msgstr ""
+"Filtra i risultati della ricerca per mostrare solo le applicazioni "
+"disponibili su Flathub"
+
+#: data/io.github.kolunmi.Bazaar.gschema.xml:21
+msgid "Debounce Search Inputs"
+msgstr "Ricerca senza rimbalzo"
+
+#: data/io.github.kolunmi.Bazaar.gschema.xml:22
+msgid "Add a delay before searching to prevent instant replies while typing"
+msgstr ""
+"Aggiungere un ritardo nell'elaborazione dei dati per evitare risultati "
+"immediati"
+
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:8
 msgid "Discover and install applications"
 msgstr "Scopri e installa applicazioni"
@@ -68,7 +97,7 @@ msgstr ""
 "il desktop Linux. Bazaar presenta una scheda “Consigliate” che può essere "
 "configurata dai distributori per consentire un'esperienza più personalizzata."
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:24 src/bz-application.c:787
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:24 src/bz-application.c:775
 msgid "Adam Masciola"
 msgstr "Adam Masciola"
 
@@ -88,18 +117,18 @@ msgstr "Ricerca di Blender"
 msgid "Download graph for Blender"
 msgstr "Grafico dei download di Blender"
 
-#: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:195
-#: src/bz-installed-page.blp:208
+#: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:196
+#: src/bz-installed-page.blp:209
 msgid "Manage Addons"
 msgstr "Gestione delle estensioni"
 
-#: src/bz-app-tile.blp:62 src/bz-detailed-app-tile.blp:60
-#: src/bz-full-view.blp:125
+#: src/bz-app-tile.blp:63 src/bz-detailed-app-tile.blp:61
+#: src/bz-full-view.blp:126
 msgid "This flatpak is verified by the original developers of the software."
 msgstr ""
 "Questo flatpak è verificato dagli sviluppatori originali dell'applicazione."
 
-#: src/bz-application.c:674
+#: src/bz-application.c:673
 msgid ""
 "This functionality is currently disabled. It is recommended you download and "
 "install Flatseal to manage app permissions."
@@ -107,109 +136,114 @@ msgstr ""
 "Questa funzionalità è attualmente disabilitata. Si consiglia di scaricare e "
 "installare Flatseal per gestire le autorizzazioni delle app."
 
-#: src/bz-application.c:750
+#: src/bz-application.c:737
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr "Adam Masciola <kolunmi@posteo.net>"
 
-#: src/bz-application.c:755
+#: src/bz-application.c:742
 msgctxt "About Dialog Translator Credit"
 msgid "Ahmed Najmawi"
 msgstr "Ahmed Najmawi"
 
-#: src/bz-application.c:756
+#: src/bz-application.c:743
 msgctxt "About Dialog Translator Credit"
 msgid "AtomHare"
 msgstr "AtomHare"
 
-#: src/bz-application.c:757
+#: src/bz-application.c:744
 msgctxt "About Dialog Translator Credit"
 msgid "Azenyr"
 msgstr "Azenyr"
 
-#: src/bz-application.c:758
+#: src/bz-application.c:745
 msgctxt "About Dialog Translator Credit"
 msgid "Goudarz Jafari"
 msgstr "Goudarz Jafari"
 
-#: src/bz-application.c:759
+#: src/bz-application.c:746
 msgctxt "About Dialog Translator Credit"
 msgid "Jill Fiore (Lumaeris)"
 msgstr "Jill Fiore (Lumaeris)"
 
-#: src/bz-application.c:760
+#: src/bz-application.c:747
 msgctxt "About Dialog Translator Credit"
 msgid "KiKaraage"
 msgstr "KiKaraage"
 
-#: src/bz-application.c:761
+#: src/bz-application.c:748
 msgctxt "About Dialog Translator Credit"
 msgid "Lucosec"
 msgstr "Lucosec"
 
-#: src/bz-application.c:762
+#: src/bz-application.c:749
 msgctxt "About Dialog Translator Credit"
 msgid "Léane GRASSER"
 msgstr "Léane GRASSER"
 
-#: src/bz-application.c:763
+#: src/bz-application.c:750
 msgctxt "About Dialog Translator Credit"
 msgid "Marcel Mrówka (Microwave)"
 msgstr "Marcel Mrówka (Microwave)"
 
-#: src/bz-application.c:764
-msgctxt "About Dialog Translator Credit"
-msgid "Pietro F."
-msgstr "Pietro F."
-
-#: src/bz-application.c:765
-msgctxt "About Dialog Translator Credit"
-msgid "Shihfu Juan"
-msgstr "Shihfu Juan"
-
-#: src/bz-application.c:766
-msgctxt "About Dialog Translator Credit"
-msgid "Shinsei"
-msgstr "Shinsei"
-
-#: src/bz-application.c:767
-msgctxt "About Dialog Translator Credit"
-msgid "Vlastimil Dědek"
-msgstr "Vlastimil Dědek"
-
-#: src/bz-application.c:768
-msgctxt "About Dialog Translator Credit"
-msgid "asen23"
-msgstr "asen23"
-
-#: src/bz-application.c:769
-msgctxt "About Dialog Translator Credit"
-msgid "renner"
-msgstr "renner"
-
-#: src/bz-application.c:770
-msgctxt "About Dialog Translator Credit"
-msgid "robotta"
-msgstr "robotta"
-
-#: src/bz-application.c:771
+#: src/bz-application.c:751
 msgctxt "About Dialog Translator Credit"
 msgid "Peter Dave Hello"
 msgstr "Peter Dave Hello"
 
-#: src/bz-application.c:1222
+#: src/bz-application.c:752
+msgctxt "About Dialog Translator Credit"
+msgid "Pietro F."
+msgstr "Pietro F."
+
+#: src/bz-application.c:753
+msgctxt "About Dialog Translator Credit"
+msgid "Shihfu Juan"
+msgstr "Shihfu Juan"
+
+#: src/bz-application.c:754
+msgctxt "About Dialog Translator Credit"
+msgid "Shinsei"
+msgstr "Shinsei"
+
+#: src/bz-application.c:755
+msgctxt "About Dialog Translator Credit"
+msgid "Vlastimil Dědek"
+msgstr "Vlastimil Dědek"
+
+#: src/bz-application.c:756
+msgctxt "About Dialog Translator Credit"
+msgid "asen23"
+msgstr "asen23"
+
+#: src/bz-application.c:757
+msgctxt "About Dialog Translator Credit"
+msgid "camegone"
+msgstr "camegone"
+
+#: src/bz-application.c:758
+msgctxt "About Dialog Translator Credit"
+msgid "renner"
+msgstr "renner"
+
+#: src/bz-application.c:759
+msgctxt "About Dialog Translator Credit"
+msgid "robotta"
+msgstr "robotta"
+
+#: src/bz-application.c:1280
 msgid "Constructing Flatpak instance..."
 msgstr "Creazione dell'istanza Flatpak..."
 
-#: src/bz-application.c:1232
+#: src/bz-application.c:1297
 msgid "Reusing last Flatpak instance..."
 msgstr "Riutilizzo dell'ultima istanza Flatpak..."
 
-#: src/bz-application.c:1257
+#: src/bz-application.c:1322
 msgid "Flathub is not registered on this system"
 msgstr "Flathub non è registrato su questo sistema"
 
-#: src/bz-application.c:1260
+#: src/bz-application.c:1325
 msgid ""
 "Would you like to add Flathub as a remote? If you decline, the Flathub page "
 "will not be available. You can change this later."
@@ -218,45 +252,53 @@ msgstr ""
 "Flathub non sarà disponibile. Puoi cambiare questa impostazione in un "
 "secondo momento."
 
-#: src/bz-application.c:1265 src/bz-update-dialog.blp:6
+#: src/bz-application.c:1330 src/bz-update-dialog.blp:6
 msgid "Later"
 msgstr "Dopo"
 
-#: src/bz-application.c:1266
+#: src/bz-application.c:1331
 msgid "Add Flathub"
 msgstr "Aggiungi Flathub"
 
-#: src/bz-application.c:1298
+#: src/bz-application.c:1363
 #, c-format
 msgid "Identifying installed entries..."
 msgstr "Identificazione delle voci installate..."
 
-#: src/bz-application.c:1310
+#: src/bz-application.c:1375
 #, c-format
 msgid "Beginning remote entry retrieval while referencing %d blocklist(s)..."
 msgstr "Avvio recupero delle voci remote facendo riferimento a %d blocklist..."
 
-#: src/bz-application.c:1458
+#: src/bz-application.c:1523
 #, c-format
 msgid "Receiving Entries"
 msgstr "Ricezione delle entrare"
 
-#: src/bz-application.c:1459
+#: src/bz-application.c:1524
 #, c-format
 msgid "%'d of %'d"
 msgstr "%'d di %'d"
 
-#: src/bz-application.c:1467
+#: src/bz-application.c:1534
 #, c-format
 msgid "Waiting for background indexing tasks to catch up..."
 msgstr ""
 "In attesa che le attività di indicizzazione in background vengano "
 "completate..."
 
-#: src/bz-application.c:1503
+#: src/bz-application.c:1570
 #, c-format
 msgid "Completed initialization in %0.2f seconds"
 msgstr "Inizializzazione completata in %0.2f secondi"
+
+#: src/bz-application.c:1575
+msgid "Checking for updates..."
+msgstr "Controllo degli aggiornamenti..."
+
+#: src/bz-application.c:1614
+msgid "Synchronizing..."
+msgstr "Sincronizzazione..."
 
 #: src/bz-browse-widget.blp:11 src/bz-flathub-page.blp:11
 #: src/bz-full-view.blp:10 src/bz-installed-page.blp:11 src/bz-window.blp:52
@@ -287,13 +329,17 @@ msgstr "Apri questa immagine nel visualizzatore di immagini di default"
 msgid "Copy this image to the clipboard"
 msgstr "Copia questa immagine negli appunti"
 
+#: src/bz-decorated-screenshot.c:140 src/bz-share-dialog.c:62
+msgid "Copied!"
+msgstr "Copiato!"
+
 #: src/bz-entry-inspector.blp:5
 msgid "Entry Inspector"
-msgstr ""
+msgstr "Ispettore delle entrate"
 
 #: src/bz-entry-inspector.blp:76
 msgid "Serialize"
-msgstr ""
+msgstr "Serializza"
 
 #: src/bz-entry-inspector.blp:80
 msgid "Convert to JSON"
@@ -390,47 +436,52 @@ msgstr "Aggiunte Recentemente"
 msgid "Popular"
 msgstr "Popolari"
 
-#: src/bz-flatpak-entry.c:561
+#: src/bz-flatpak-entry.c:562
+msgctxt "Project URL Type"
+msgid "Flathub Page"
+msgstr "Pagina Flathub"
+
+#: src/bz-flatpak-entry.c:581
 msgctxt "Project URL Type"
 msgid "Homepage"
 msgstr "Sito del Progetto"
 
-#: src/bz-flatpak-entry.c:564
+#: src/bz-flatpak-entry.c:584
 msgctxt "Project URL Type"
-msgid "Bugtracker"
-msgstr "Segnala un Bug"
+msgid "Issue Tracker"
+msgstr "Segnala un problema"
 
-#: src/bz-flatpak-entry.c:567
+#: src/bz-flatpak-entry.c:587
 msgctxt "Project URL Type"
 msgid "FAQ"
 msgstr "FAQ"
 
-#: src/bz-flatpak-entry.c:570
+#: src/bz-flatpak-entry.c:590
 msgctxt "Project URL Type"
 msgid "Help"
 msgstr "Aiuto"
 
-#: src/bz-flatpak-entry.c:573
+#: src/bz-flatpak-entry.c:593
 msgctxt "Project URL Type"
-msgid "Donation"
-msgstr "Donazioni"
+msgid "Donate"
+msgstr "Dona"
 
-#: src/bz-flatpak-entry.c:578
+#: src/bz-flatpak-entry.c:598
 msgctxt "Project URL Type"
 msgid "Translate"
 msgstr "Traduci"
 
-#: src/bz-flatpak-entry.c:581
+#: src/bz-flatpak-entry.c:601
 msgctxt "Project URL Type"
 msgid "Contact"
 msgstr "Contatta"
 
-#: src/bz-flatpak-entry.c:584
+#: src/bz-flatpak-entry.c:604
 msgctxt "Project URL Type"
-msgid "VCS Browser"
-msgstr "Sfoglia il codice sorgente"
+msgid "Source Code"
+msgstr "Codice Sorgente"
 
-#: src/bz-flatpak-entry.c:589
+#: src/bz-flatpak-entry.c:609
 msgctxt "Project URL Type"
 msgid "Contribute"
 msgstr "Contribuisci"
@@ -447,75 +498,75 @@ msgstr "Prova con una ricerca diversa"
 msgid "Content"
 msgstr "Contenuto"
 
-#: src/bz-full-view.blp:147
+#: src/bz-full-view.blp:148
 msgid "Support"
 msgstr "Supporta"
 
-#: src/bz-full-view.blp:165
+#: src/bz-full-view.blp:166
 msgid "Repository Star Count"
 msgstr "Numero di stelle del repository"
 
-#: src/bz-full-view.blp:210
+#: src/bz-full-view.blp:211
 msgid "Run Application"
 msgstr "Avvia questa applicazione"
 
-#: src/bz-full-view.blp:225
+#: src/bz-full-view.blp:226
 msgid "Download & Install Application"
 msgstr "Installa questa applicazione"
 
-#: src/bz-full-view.blp:231 src/bz-transaction-view.blp:98 src/bz-window.c:974
+#: src/bz-full-view.blp:232 src/bz-transaction-view.blp:100 src/bz-window.c:998
 msgid "Install"
 msgstr "Installa"
 
-#: src/bz-full-view.blp:244
+#: src/bz-full-view.blp:245
 msgid "Uninstall Application"
 msgstr "Disinstalla questa applicazione"
 
-#: src/bz-full-view.blp:260
+#: src/bz-full-view.blp:261
 msgid "Install Other Version"
 msgstr "Installa altra versione"
 
-#: src/bz-full-view.blp:285
+#: src/bz-full-view.blp:286
 msgid "Share this application"
 msgstr "Condividi questa applicazione"
 
-#: src/bz-full-view.blp:325
+#: src/bz-full-view.blp:326
 msgid "App Details"
 msgstr "Dettagli dell'app"
 
-#: src/bz-full-view.blp:328
+#: src/bz-full-view.blp:329
 msgid "Download Size"
 msgstr "Dimensione Download"
 
-#: src/bz-full-view.blp:334
+#: src/bz-full-view.blp:335
 msgid "Download size"
 msgstr "Dimensione download"
 
-#: src/bz-full-view.blp:340
+#: src/bz-full-view.blp:341
 msgid "License"
 msgstr "Licenza"
 
-#: src/bz-full-view.blp:370 src/bz-full-view.blp:378
+#: src/bz-full-view.blp:371 src/bz-full-view.blp:379
 msgid "Project Website"
 msgstr "Sito del Progetto"
 
-#: src/bz-full-view.blp:386
+#: src/bz-full-view.blp:387
 msgid "Open in browser"
 msgstr "Apri nel browser"
 
-#: src/bz-full-view.blp:392 src/bz-full-view.blp:401
+#: src/bz-full-view.blp:393 src/bz-full-view.blp:402
 msgid "Download Statistics"
 msgstr "Statistiche di Download"
 
-#: src/bz-full-view.blp:409
+#: src/bz-full-view.blp:410
 msgid "Show Downloads Over Time"
 msgstr "Mostra download nel tempo"
 
-#: src/bz-full-view.blp:415
+#: src/bz-full-view.blp:416
 msgid "Repositories"
 msgstr "Repository"
 
-#: src/bz-full-view.blp:421
+#: src/bz-full-view.blp:422
 msgid "Remote repo name"
 msgstr "Nome del repository remoto"
 
@@ -552,58 +603,58 @@ msgstr ""
 
 #: src/bz-inspector.blp:5
 msgid "Bazaar Inspector"
-msgstr ""
+msgstr "Ispettore di Bazaar"
 
 #: src/bz-inspector.blp:22
 msgid "Active Blocklists"
-msgstr ""
+msgstr "Blocklist attive"
 
 #: src/bz-inspector.blp:44
 msgid "Active Curated-Configs"
-msgstr ""
+msgstr "Configurazioni attive per Consigliate"
 
 #: src/bz-inspector.blp:66
 msgid "All Entry Groups"
-msgstr ""
+msgstr "Tutti i gruppi di ingresso"
 
 #: src/bz-inspector.blp:69
 msgid "Filter..."
-msgstr ""
+msgstr "Filtra..."
 
 #: src/bz-inspector.blp:110
 msgid "Decache and Inspect"
-msgstr ""
+msgstr "Elimina la cache ed Ispeziona"
 
 #: src/bz-installed-page.blp:15
 msgid "No Flatpaks Installed"
 msgstr "Nessun Flatpak Installato"
 
-#: src/bz-installed-page.blp:21 src/bz-window.blp:243 src/bz-window.blp:384
+#: src/bz-installed-page.blp:21 src/bz-window.blp:245 src/bz-window.blp:347
 msgid "Installed"
 msgstr "Installate"
 
-#: src/bz-installed-page.blp:99
+#: src/bz-installed-page.blp:100
 msgid "Support this application"
 msgstr "Supporta questa applicazione"
 
-#: src/bz-installed-page.blp:124 src/bz-transaction-view.blp:266
-#: src/bz-window.c:955
+#: src/bz-installed-page.blp:125 src/bz-transaction-view.blp:272
+#: src/bz-window.c:979
 msgid "Remove"
 msgstr "Rimuovi"
 
-#: src/bz-installed-page.blp:151
+#: src/bz-installed-page.blp:152
 msgid "More actions"
 msgstr "Più azioni"
 
-#: src/bz-installed-page.blp:170
+#: src/bz-installed-page.blp:171
 msgid "Run this application"
 msgstr "Avvia questa applicazione"
 
-#: src/bz-installed-page.blp:182
+#: src/bz-installed-page.blp:183
 msgid "Run"
 msgstr "Avvia"
 
-#: src/bz-installed-page.blp:246 src/bz-installed-page.blp:257
+#: src/bz-installed-page.blp:247 src/bz-installed-page.blp:258
 msgid "View Store Page"
 msgstr "Mostra dettagli nello Store"
 
@@ -618,7 +669,7 @@ msgid ""
 msgstr ""
 "Hai installato più versioni di questa app. Con quale desideri procedere? "
 
-#: src/bz-installed-page.c:656 src/bz-window.c:954 src/bz-window.c:973
+#: src/bz-installed-page.c:656 src/bz-window.c:978 src/bz-window.c:997
 msgid "Cancel"
 msgstr "Annulla"
 
@@ -627,64 +678,58 @@ msgid "Preferences"
 msgstr "Preferenze"
 
 #: src/bz-preferences-dialog.blp:13
-msgid "Full Application View"
-msgstr "Vista completa dell'applicazione"
+msgid "Application Details"
+msgstr "Dettagli dell'app"
 
-#: src/bz-preferences-dialog.blp:14
-msgid "Change what content is shown when viewing applications"
-msgstr ""
-"Modifica i contenuti visualizzati durante la visualizzazione delle "
-"applicazioni"
-
-#: src/bz-preferences-dialog.blp:17
+#: src/bz-preferences-dialog.blp:16
 msgid "Git Forge Star Counts"
 msgstr "Numero di stelle Git Forge"
 
-#: src/bz-preferences-dialog.blp:18
-msgid ""
-"If you do not have an access token, turning this setting on may cause GitHub "
-"to eventually rate limit you."
+#: src/bz-preferences-dialog.blp:17
+msgid "Not having a GitHub access token may trigger rate limits"
 msgstr ""
-"Se non disponi di un token di accesso, attivando questa impostazione GitHub "
-"potrebbe eventualmente limitare la tua velocità di accesso."
+"La mancanza di un token di accesso GitHub può causare limiti di velocità"
+
+#: src/bz-preferences-dialog.blp:22 src/bz-window.blp:287
+msgid "Search"
+msgstr "Cerca"
+
+#: src/bz-preferences-dialog.blp:26
+msgid "Hide proprietary applications from search results"
+msgstr "Nascondi applicazioni proprietarie dai risultati di ricerca"
+
+#: src/bz-preferences-dialog.blp:30
+msgid "Show Only Flathub Apps"
+msgstr "Mostra solo applicazioni da Flathub"
+
+#: src/bz-preferences-dialog.blp:31
+msgid "Limit search results to applications available on Flathub"
+msgstr ""
+"Limita i risultati della ricerca alle applicazioni disponibili su Flathub"
+
+#: src/bz-preferences-dialog.blp:35
+msgid "Debounce Search Results"
+msgstr "Risultati di ricerca senza rimbalzo"
+
+#: src/bz-preferences-dialog.blp:36
+msgid "Wait for a brief pause to reduce system load"
+msgstr "Attendere una breve pausa per ridurre il carico del sistema."
 
 #: src/bz-search-widget.blp:69
-msgid "Type to filter"
-msgstr "Digita per cercare"
-
-#: src/bz-search-widget.blp:91 src/bz-search-widget.blp:108
-msgid "Search Options"
-msgstr "Opzioni di ricerca"
-
-#: src/bz-search-widget.blp:112
-msgid "Exclude results with proprietary licenses"
-msgstr "Escludi risultati con licenza proprietaria"
-
-#: src/bz-search-widget.blp:117
-msgid "Exclude results not originating from Flathub"
-msgstr "Escludi risultati non provenienti da Flathub"
-
-#: src/bz-search-widget.blp:132
-msgid "Advanced"
-msgstr "Avanzate"
-
-#: src/bz-search-widget.blp:136
-msgid "Debounce input to prevent instant replies"
-msgstr ""
-"Aggiungere un ritardo nell'elaborazione dei dati per evitare risultati "
-"immediati"
+msgid "Search Apps"
+msgstr "Cerca Applicazioni"
 
 #: src/bz-share-dialog.blp:13
 msgid "Share"
 msgstr "Condividi"
 
-#: src/bz-share-dialog.blp:64
-msgid "Copy this link"
-msgstr "Copia questo link"
+#: src/bz-share-dialog.c:105
+msgid "Copy Link"
+msgstr "Copia Link"
 
-#: src/bz-share-dialog.blp:71
-msgid "Open this link externally"
-msgstr "Aprire questo link in un'applicazione esterna"
+#: src/bz-share-dialog.c:116
+msgid "Open Link"
+msgstr "Apri Link"
 
 #: src/bz-stats-dialog.blp:15
 msgid "Downloads Over Time"
@@ -703,23 +748,23 @@ msgstr "Massimizzare il limite superiore"
 msgid "Finished in %.02f seconds"
 msgstr "Finito in %.02f secondi"
 
-#: src/bz-transaction-view.blp:85
+#: src/bz-transaction-view.blp:87
 msgid "Install Size"
 msgstr "Dimensione di Installazione"
 
-#: src/bz-transaction-view.blp:169
+#: src/bz-transaction-view.blp:173
 msgid "Updated Size"
 msgstr "Dimensione dell'aggiornamento"
 
-#: src/bz-transaction-view.blp:182 src/bz-window.blp:297
+#: src/bz-transaction-view.blp:186 src/bz-window.blp:299
 msgid "Update"
 msgstr "Aggiorna"
 
-#: src/bz-transaction-view.blp:253
+#: src/bz-transaction-view.blp:259
 msgid "Freed Space"
 msgstr "Spazio liberato"
 
-#: src/bz-transaction-view.blp:400
+#: src/bz-transaction-view.blp:406
 msgid "Error Details"
 msgstr "Dettagli dell'errore"
 
@@ -780,79 +825,67 @@ msgstr "Nessuna connessione"
 msgid "Loading"
 msgstr "Caricamento"
 
-#: src/bz-window.blp:211
+#: src/bz-window.blp:213
 msgid "Browse"
 msgstr "Esplora"
 
-#: src/bz-window.blp:221
+#: src/bz-window.blp:223
 msgid "App View"
 msgstr "Vista dell'App"
 
-#: src/bz-window.blp:233 src/bz-window.blp:363
+#: src/bz-window.blp:235 src/bz-window.blp:340
 msgid "Flathub"
 msgstr "Flathub"
 
-#: src/bz-window.blp:268
+#: src/bz-window.blp:270
 msgid "Go Back"
 msgstr "Vai indietro"
 
-#: src/bz-window.blp:285
-msgid "Search"
-msgstr "Cerca"
-
-#: src/bz-window.blp:312
-msgid "Checking for updates"
-msgstr "Controllo aggiornamenti"
-
-#: src/bz-window.blp:327
+#: src/bz-window.blp:329
 msgid "View curated applications"
 msgstr "Visualizza applicazioni consigliate"
 
-#: src/bz-window.blp:342
+#: src/bz-window.blp:333
 msgid "Curated"
 msgstr "Consigliate"
 
-#: src/bz-window.blp:348
+#: src/bz-window.blp:337
 msgid "View the latest on Flathub"
 msgstr "Visualizza le ultime novità di Flathub"
 
-#: src/bz-window.blp:369
+#: src/bz-window.blp:344
 msgid "View installed applications"
 msgstr "Visualizza applicazioni installate"
 
-#: src/bz-window.blp:398
+#: src/bz-window.blp:359
 msgid "Main Menu"
 msgstr "Menu Principale"
 
-#: src/bz-window.blp:409
+#: src/bz-window.blp:370
 msgid "Toggle transaction sidebar"
 msgstr "Mostra o Nasconde il menu delle operazioni"
 
-#: src/bz-window.blp:454
+#: src/bz-window.blp:415
 msgid "_Preferences"
 msgstr "_Preferenze"
 
-#: src/bz-window.blp:459
-msgid "_Refresh"
-msgstr "_Ricarica"
-
-#: src/bz-window.blp:464
+#: src/bz-window.blp:420
 msgid "_Keyboard Shortcuts"
 msgstr "_Scorciatoie da tastiera"
 
-#: src/bz-window.blp:469
+#: src/bz-window.blp:425
 msgid "_About Bazaar"
 msgstr "_Info su Bazaar"
 
-#: src/bz-window.blp:474
+#: src/bz-window.blp:430
 msgid "_Donate to Bazaar ❤️"
 msgstr "_Dona a Bazaar ❤️"
 
-#: src/bz-window.c:605
+#: src/bz-window.c:614
 msgid "Up to date!"
 msgstr "Aggiornato!"
 
-#: src/bz-window.c:783
+#: src/bz-window.c:786
 msgid ""
 "The ability to inspect and install local .flatpak bundle files is coming "
 "soon! In the meantime, try running\n"
@@ -868,15 +901,15 @@ msgstr ""
 "\n"
 "alla riga di comando."
 
-#: src/bz-window.c:863
+#: src/bz-window.c:887
 msgid "Can't do that right now!"
 msgstr "Non posso farlo adesso!"
 
-#: src/bz-window.c:918
+#: src/bz-window.c:942
 msgid "Confirm Action"
 msgstr "Conferma Azione"
 
-#: src/bz-window.c:947
+#: src/bz-window.c:971
 #, c-format
 msgid ""
 "You are about to remove the following Flatpak:\n"
@@ -893,7 +926,7 @@ msgstr ""
 "\n"
 "Sei sicuro?"
 
-#: src/bz-window.c:966
+#: src/bz-window.c:990
 #, c-format
 msgid ""
 "You are about to install the following Flatpak:\n"
@@ -910,15 +943,15 @@ msgstr ""
 "\n"
 "Sei sicuro?"
 
-#: src/bz-window.c:996
+#: src/bz-window.c:1020
 msgid "More details"
 msgstr "Più dettagli"
 
-#: src/bz-window.c:1122
+#: src/bz-window.c:1146
 msgid "Resume the execution of transactions"
 msgstr "Riprende l'esecuzione delle operazioni"
 
-#: src/bz-window.c:1128
+#: src/bz-window.c:1152
 msgid "Pause the execution of transactions"
 msgstr "Mette in pausa l'esecuzione delle operazioni"
 
@@ -951,6 +984,43 @@ msgstr "Mostra scorciatoie da tastiera"
 msgctxt "shortcut window"
 msgid "Quit"
 msgstr "Esce"
+
+#~ msgctxt "Project URL Type"
+#~ msgid "VCS Browser"
+#~ msgstr "Sfoglia il codice sorgente"
+
+#~ msgid "Full Application View"
+#~ msgstr "Vista completa dell'applicazione"
+
+#~ msgid "Change what content is shown when viewing applications"
+#~ msgstr ""
+#~ "Modifica i contenuti visualizzati durante la visualizzazione delle "
+#~ "applicazioni"
+
+#~ msgid ""
+#~ "If you do not have an access token, turning this setting on may cause "
+#~ "GitHub to eventually rate limit you."
+#~ msgstr ""
+#~ "Se non disponi di un token di accesso, attivando questa impostazione "
+#~ "GitHub potrebbe eventualmente limitare la tua velocità di accesso."
+
+#~ msgid "Type to filter"
+#~ msgstr "Digita per cercare"
+
+#~ msgid "Exclude results with proprietary licenses"
+#~ msgstr "Escludi risultati con licenza proprietaria"
+
+#~ msgid "Exclude results not originating from Flathub"
+#~ msgstr "Escludi risultati non provenienti da Flathub"
+
+#~ msgid "Advanced"
+#~ msgstr "Avanzate"
+
+#~ msgid "Open this link externally"
+#~ msgstr "Aprire questo link in un'applicazione esterna"
+
+#~ msgid "_Refresh"
+#~ msgstr "_Ricarica"
 
 #, c-format
 #~ msgid "Received %'d entries out of %'d (%0.1f seconds elapsed)"
