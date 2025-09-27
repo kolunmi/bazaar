@@ -39,13 +39,24 @@ template $BzTransactionView: Adw.Bin {
                 orientation: horizontal;
                 spacing: 10;
 
-                Image {
-                  paintable: bind template.item as <$BzEntry>.icon-paintable;
-                  pixel-size: 64;
-                  valign: center;
-                                      
-                  styles ["icon-dropshadow"]
+                Overlay {
+                  child: Image {
+                    paintable: bind $get_main_icon(template.item) as <$GdkPaintable>;
+                    pixel-size: 64;
+                    valign: center;
+
+                    styles ["icon-dropshadow"]
+                  };
+
+                  [overlay]
+                  Image {
+                    icon-name: bind $get_sub_icon_name(template.item) as <string>;
+                    pixel-size: 32;
+                    valign: end;
+                    halign: end;
+                  }
                 }
+
                 Box {
                   valign:center;
                   orientation: vertical;
@@ -125,12 +136,22 @@ template $BzTransactionView: Adw.Bin {
                 orientation: horizontal;
                 spacing: 10;
 
-                Image {
-                  paintable: bind template.item as <$BzEntry>.icon-paintable;
-                  pixel-size: 64;
-                  valign: center;
+                Overlay {
+                  child: Image {
+                    paintable: bind $get_main_icon(template.item) as <$GdkPaintable>;
+                    pixel-size: 64;
+                    valign: center;
 
-                  styles ["icon-dropshadow"]
+                    styles ["icon-dropshadow"]
+                  };
+
+                  [overlay]
+                  Image {
+                    icon-name: bind $get_sub_icon_name(template.item) as <string>;
+                    pixel-size: 32;
+                    valign: end;
+                    halign: end;
+                  }
                 }
                 Box {
                   valign:center;
@@ -211,12 +232,22 @@ template $BzTransactionView: Adw.Bin {
                 orientation: horizontal;
                 spacing: 10;
 
-                Image {
-                  paintable: bind template.item as <$BzEntry>.icon-paintable;
-                  pixel-size: 64;
-                  valign: center;
+                Overlay {
+                  child: Image {
+                    paintable: bind $get_main_icon(template.item) as <$GdkPaintable>;
+                    pixel-size: 64;
+                    valign: center;
 
-                  styles ["icon-dropshadow"]
+                    styles ["icon-dropshadow"]
+                  };
+
+                  [overlay]
+                  Image {
+                    icon-name: bind $get_sub_icon_name(template.item) as <string>;
+                    pixel-size: 32;
+                    valign: end;
+                    halign: end;
+                  }
                 }
                 Box {
                   valign:center;

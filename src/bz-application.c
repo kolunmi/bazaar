@@ -744,18 +744,20 @@ bz_application_about_action (GSimpleAction *action,
     C_ ("About Dialog Translator Credit", "Azenyr"),
     C_ ("About Dialog Translator Credit", "Goudarz Jafari"),
     C_ ("About Dialog Translator Credit", "Jill Fiore (Lumaeris)"),
+    C_ ("About Dialog Translator Credit", "João Victor (Leal)"),
     C_ ("About Dialog Translator Credit", "KiKaraage"),
     C_ ("About Dialog Translator Credit", "Lucosec"),
     C_ ("About Dialog Translator Credit", "Léane GRASSER"),
     C_ ("About Dialog Translator Credit", "Marcel Mrówka (Microwave)"),
+    C_ ("About Dialog Translator Credit", "Peter Dave Hello"),
     C_ ("About Dialog Translator Credit", "Pietro F."),
     C_ ("About Dialog Translator Credit", "Shihfu Juan"),
     C_ ("About Dialog Translator Credit", "Shinsei"),
     C_ ("About Dialog Translator Credit", "Vlastimil Dědek"),
     C_ ("About Dialog Translator Credit", "asen23"),
+    C_ ("About Dialog Translator Credit", "camegone"),
     C_ ("About Dialog Translator Credit", "renner"),
     C_ ("About Dialog Translator Credit", "robotta"),
-    C_ ("About Dialog Translator Credit", "Peter Dave Hello"),
     /* This array MUST be NULL terminated */
     NULL
   };
@@ -802,6 +804,18 @@ bz_application_preferences_action (GSimpleAction *action,
 }
 
 static void
+bz_application_refresh_action (GSimpleAction *action,
+                               GVariant      *parameter,
+                               gpointer       user_data)
+{
+  BzApplication *self = user_data;
+
+  g_assert (BZ_IS_APPLICATION (self));
+
+  refresh (self);
+}
+
+static void
 bz_application_quit_action (GSimpleAction *action,
                             GVariant      *parameter,
                             gpointer       user_data)
@@ -815,6 +829,7 @@ bz_application_quit_action (GSimpleAction *action,
 
 static const GActionEntry app_actions[] = {
   {                "quit",                bz_application_quit_action, NULL },
+  {             "refresh",             bz_application_refresh_action, NULL },
   {         "preferences",         bz_application_preferences_action, NULL },
   {               "about",               bz_application_about_action, NULL },
   {              "search",              bz_application_search_action,  "s" },
@@ -850,11 +865,9 @@ map_generic_ids_to_groups (GtkStringObject *string,
   group = g_hash_table_lookup (
       self->ids_to_groups,
       gtk_string_object_get_string (string));
-  /* We previously validated in filter */
-  g_assert (group != NULL);
 
   g_object_unref (string);
-  return g_object_ref (group);
+  return group != NULL ? g_object_ref (group) : NULL;
 }
 
 static gpointer
@@ -907,6 +920,10 @@ bz_application_init (BzApplication *self)
       GTK_APPLICATION (self),
       "app.quit",
       (const char *[]) { "<primary>q", NULL });
+  gtk_application_set_accels_for_action (
+      GTK_APPLICATION (self),
+      "app.refresh",
+      (const char *[]) { "<primary>r", NULL });
   gtk_application_set_accels_for_action (
       GTK_APPLICATION (self),
       "app.search('')",

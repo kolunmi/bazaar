@@ -617,6 +617,7 @@ create_child_widget (GObject           *object,
       GtkWidget *child = NULL;
 
       child = gtk_flow_box_child_new ();
+      gtk_widget_add_css_class (GTK_WIDGET (child), "disable-adw-flow-box-styling");
       gtk_widget_set_focusable (GTK_WIDGET (child), FALSE);
       gtk_flow_box_child_set_child (GTK_FLOW_BOX_CHILD (child), widget);
 

@@ -54,4 +54,11 @@ void
 bz_window_set_category_view_mode (BzWindow *self,
                                   gboolean  enabled);
 
+void
+bz_window_add_toast (BzWindow *self,
+                     AdwToast *toast);
+
+BzStateInfo *
+bz_window_get_state_info (BzWindow *self);
+
 G_END_DECLS

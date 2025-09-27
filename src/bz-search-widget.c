@@ -40,16 +40,13 @@ struct _BzSearchWidget
   DexFuture          *search_query;
 
   /* Template widgets */
-  GtkText        *search_bar;
-  GtkLabel       *search_text;
-  GtkImage       *timeout_busy;
-  GtkImage       *search_busy;
-  GtkCheckButton *foss_check;
-  GtkCheckButton *flathub_check;
-  GtkCheckButton *debounce_check;
-  GtkBox         *content_box;
-  GtkRevealer    *entry_list_revealer;
-  GtkListView    *list_view;
+  GtkText     *search_bar;
+  GtkLabel    *search_text;
+  GtkImage    *timeout_busy;
+  GtkImage    *search_busy;
+  GtkBox      *content_box;
+  GtkRevealer *entry_list_revealer;
+  GtkListView *list_view;
 };
 
 G_DEFINE_FINAL_TYPE (BzSearchWidget, bz_search_widget, ADW_TYPE_BIN)
@@ -253,20 +250,6 @@ action_move (GtkWidget  *widget,
 }
 
 static void
-foss_toggled_cb (BzSearchWidget  *self,
-                 GtkToggleButton *toggle)
-{
-  update_filter (self);
-}
-
-static void
-flathub_toggled_cb (BzSearchWidget  *self,
-                    GtkToggleButton *toggle)
-{
-  update_filter (self);
-}
-
-static void
 bz_search_widget_class_init (BzSearchWidgetClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
@@ -324,9 +307,6 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, search_text);
   gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, timeout_busy);
   gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, search_busy);
-  gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, foss_check);
-  gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, flathub_check);
-  gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, debounce_check);
   gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, content_box);
   gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, entry_list_revealer);
   gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, list_view);
@@ -336,8 +316,6 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, is_valid_string);
   gtk_widget_class_bind_template_callback (widget_class, idx_to_string);
   gtk_widget_class_bind_template_callback (widget_class, score_to_string);
-  gtk_widget_class_bind_template_callback (widget_class, foss_toggled_cb);
-  gtk_widget_class_bind_template_callback (widget_class, flathub_toggled_cb);
 
   gtk_widget_class_install_action (widget_class, "move", "i", action_move);
 }
@@ -421,9 +399,12 @@ static void
 search_changed (GtkEditable    *editable,
                 BzSearchWidget *self)
 {
+  GSettings *settings = NULL;
+
   g_clear_handle_id (&self->search_update_timeout, g_source_remove);
 
-  if (gtk_check_button_get_active (self->debounce_check))
+  settings = bz_state_info_get_settings (self->state);
+  if (settings && g_settings_get_boolean (settings, "search-debounce"))
     {
       self->search_update_timeout = g_timeout_add_once (
           200 /* 200 ms */, (GSourceOnceFunc) update_filter, self);
@@ -487,11 +468,13 @@ search_query_then (DexFuture      *future,
 {
   GPtrArray *results    = NULL;
   guint      old_length = 0;
+  GSettings *settings   = NULL;
 
   results    = g_value_get_boxed (dex_future_get_value (future, NULL));
   old_length = g_list_model_get_n_items (G_LIST_MODEL (self->search_model));
+  settings   = bz_state_info_get_settings (self->state);
 
-  if (gtk_check_button_get_active (self->foss_check))
+  if (settings && g_settings_get_boolean (settings, "search-only-foss"))
     {
       for (guint i = 0; i < results->len;)
         {
@@ -510,7 +493,7 @@ search_query_then (DexFuture      *future,
         }
     }
 
-  if (gtk_check_button_get_active (self->flathub_check))
+  if (settings && g_settings_get_boolean (settings, "search-only-flathub"))
     {
       for (guint i = 0; i < results->len;)
         {

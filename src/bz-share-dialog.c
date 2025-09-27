@@ -94,6 +94,7 @@ create_url_action_row (BzShareDialog *self, BzUrl *url_item)
      framework, so we must do this manually. */
 
   action_row = ADW_ACTION_ROW (adw_action_row_new ());
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (action_row), FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (action_row),
                                  url_title ? url_title : url_string);
   adw_action_row_set_subtitle (action_row, url_string);

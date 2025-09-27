@@ -22,11 +22,15 @@
 
 struct _BzPreferencesDialog
 {
-  AdwDialog parent_instance;
+  AdwPreferencesDialog parent_instance;
 
   GSettings *settings;
 
   /* Template widgets */
+  AdwSwitchRow *git_forge_star_counts_switch;
+  AdwSwitchRow *search_only_foss_switch;
+  AdwSwitchRow *search_only_flathub_switch;
+  AdwSwitchRow *search_debounce_switch;
 };
 
 G_DEFINE_FINAL_TYPE (BzPreferencesDialog, bz_preferences_dialog, ADW_TYPE_PREFERENCES_DIALOG)
@@ -34,27 +38,19 @@ G_DEFINE_FINAL_TYPE (BzPreferencesDialog, bz_preferences_dialog, ADW_TYPE_PREFER
 enum
 {
   PROP_0,
-
   PROP_SETTINGS,
-  PROP_SHOW_GIT_FORGE_STAR_COUNTS,
-
   LAST_PROP
 };
+
 static GParamSpec *props[LAST_PROP] = { 0 };
 
-static void
-setting_changed (GSettings           *settings,
-                 gchar               *key,
-                 BzPreferencesDialog *self);
+static void bind_settings (BzPreferencesDialog *self);
 
 static void
 bz_preferences_dialog_dispose (GObject *object)
 {
   BzPreferencesDialog *self = BZ_PREFERENCES_DIALOG (object);
 
-  if (self->settings != NULL)
-    g_signal_handlers_disconnect_by_func (
-        self->settings, setting_changed, self);
   g_clear_object (&self->settings);
 
   G_OBJECT_CLASS (bz_preferences_dialog_parent_class)->dispose (object);
@@ -73,14 +69,6 @@ bz_preferences_dialog_get_property (GObject    *object,
     case PROP_SETTINGS:
       g_value_set_object (value, self->settings);
       break;
-    case PROP_SHOW_GIT_FORGE_STAR_COUNTS:
-      g_value_set_boolean (
-          value,
-          self->settings != NULL
-              ? g_settings_get_boolean (
-                    self->settings, "show-git-forge-star-counts")
-              : TRUE);
-      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -97,27 +85,37 @@ bz_preferences_dialog_set_property (GObject      *object,
   switch (prop_id)
     {
     case PROP_SETTINGS:
-      if (self->settings != NULL)
-        g_signal_handlers_disconnect_by_func (
-            self->settings, setting_changed, self);
       g_clear_object (&self->settings);
       self->settings = g_value_dup_object (value);
-      if (self->settings != NULL)
-        g_signal_connect (
-            self->settings, "changed",
-            G_CALLBACK (setting_changed), self);
-      g_object_notify_by_pspec (object, props[PROP_SHOW_GIT_FORGE_STAR_COUNTS]);
-      break;
-    case PROP_SHOW_GIT_FORGE_STAR_COUNTS:
-      if (self->settings != NULL)
-        g_settings_set_boolean (
-            self->settings,
-            "show-git-forge-star-counts",
-            g_value_get_boolean (value));
+      bind_settings (self);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
+}
+
+static void
+bind_settings (BzPreferencesDialog *self)
+{
+  if (self->settings == NULL)
+    return;
+
+  /* Bind all boolean settings to their respective switches */
+  g_settings_bind (self->settings, "show-git-forge-star-counts",
+                  self->git_forge_star_counts_switch, "active",
+                  G_SETTINGS_BIND_DEFAULT);
+  
+  g_settings_bind (self->settings, "search-only-foss",
+                  self->search_only_foss_switch, "active",
+                  G_SETTINGS_BIND_DEFAULT);
+  
+  g_settings_bind (self->settings, "search-only-flathub",
+                  self->search_only_flathub_switch, "active",
+                  G_SETTINGS_BIND_DEFAULT);
+  
+  g_settings_bind (self->settings, "search-debounce",
+                  self->search_debounce_switch, "active",
+                  G_SETTINGS_BIND_DEFAULT);
 }
 
 static void
@@ -137,36 +135,20 @@ bz_preferences_dialog_class_init (BzPreferencesDialogClass *klass)
           G_TYPE_SETTINGS,
           G_PARAM_READWRITE);
 
-  props[PROP_SHOW_GIT_FORGE_STAR_COUNTS] =
-      g_param_spec_boolean (
-          "show-git-forge-star-counts",
-          NULL, NULL,
-          TRUE,
-          G_PARAM_READWRITE);
-
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-preferences-dialog.ui");
+  
+  gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, git_forge_star_counts_switch);
+  gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, search_only_foss_switch);
+  gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, search_only_flathub_switch);
+  gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, search_debounce_switch);
 }
 
 static void
 bz_preferences_dialog_init (BzPreferencesDialog *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
-}
-
-static void
-setting_changed (GSettings           *settings,
-                 gchar               *key,
-                 BzPreferencesDialog *self)
-{
-  int prop = 0;
-
-  if (g_strcmp0 (key, "show-git-forge-star-counts") == 0)
-    prop = PROP_SHOW_GIT_FORGE_STAR_COUNTS;
-
-  if (prop > PROP_0 && prop < LAST_PROP)
-    g_object_notify_by_pspec (G_OBJECT (self), props[prop]);
 }
 
 AdwDialog *

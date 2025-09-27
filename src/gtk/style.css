@@ -227,3 +227,10 @@ background: shade(#deddda, .95);
     margin: 0;
     padding: 0;
 }
+
+.disable-adw-flow-box-styling:hover {
+    background-color: transparent;
+}
+.disable-adw-flow-box-styling:focus {
+    background-color: transparent;
+}

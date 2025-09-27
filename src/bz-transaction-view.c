@@ -20,7 +20,13 @@
 
 #include <glib/gi18n.h>
 
+#include "bz-application-map-factory.h"
+#include "bz-entry-group.h"
+#include "bz-entry.h"
+#include "bz-flatpak-entry.h"
+#include "bz-state-info.h"
 #include "bz-transaction-view.h"
+#include "bz-window.h"
 
 struct _BzTransactionView
 {
@@ -129,6 +135,85 @@ format_bytes_transferred (gpointer object,
   return g_strdup_printf (_ ("Transferred %s so far"), size);
 }
 
+static GdkPaintable *
+get_main_icon (GtkListItem *list_item,
+               BzEntry     *entry)
+{
+  GdkPaintable *icon_paintable = NULL;
+
+  if (entry == NULL)
+    goto return_generic;
+
+  icon_paintable = bz_entry_get_icon_paintable (entry);
+  if (icon_paintable != NULL)
+    return g_object_ref (icon_paintable);
+  else if (BZ_IS_FLATPAK_ENTRY (entry))
+    {
+      BzWindow        *window               = NULL;
+      BzStateInfo     *info                 = NULL;
+      const char      *extension_of_ref     = NULL;
+      g_autofree char *extension_of_ref_dup = NULL;
+      char            *generic_id           = NULL;
+      char            *generic_id_term      = NULL;
+      g_autoptr (BzEntryGroup) group        = NULL;
+
+      window = (BzWindow *) gtk_widget_get_ancestor (gtk_list_item_get_child (list_item), BZ_TYPE_WINDOW);
+      if (window == NULL)
+        goto return_generic;
+
+      info = bz_window_get_state_info (window);
+      if (info == NULL)
+        goto return_generic;
+
+      extension_of_ref = bz_flatpak_entry_get_addon_extension_of_ref (BZ_FLATPAK_ENTRY (entry));
+      if (extension_of_ref == NULL)
+        goto return_generic;
+
+      extension_of_ref_dup = g_strdup (extension_of_ref);
+      generic_id           = strchr (extension_of_ref_dup, '/');
+      if (generic_id == NULL)
+        goto return_generic;
+
+      generic_id++;
+      generic_id_term = strchr (generic_id, '/');
+      if (generic_id_term != NULL)
+        *generic_id_term = '\0';
+
+      group = bz_application_map_factory_convert_one (
+          bz_state_info_get_application_factory (info),
+          gtk_string_object_new (generic_id));
+      if (group == NULL)
+        goto return_generic;
+
+      icon_paintable = bz_entry_group_get_icon_paintable (group);
+      if (icon_paintable != NULL)
+        return g_object_ref (icon_paintable);
+    }
+
+return_generic:
+  return (GdkPaintable *) gtk_icon_theme_lookup_icon (
+      gtk_icon_theme_get_for_display (gdk_display_get_default ()),
+      "application-x-executable",
+      NULL, 64, 1,
+      gtk_widget_get_default_direction (),
+      GTK_ICON_LOOKUP_NONE);
+}
+
+static char *
+get_sub_icon_name (gpointer object,
+                   BzEntry *entry)
+{
+  if (entry == NULL)
+    return NULL;
+
+  if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
+    return NULL;
+  else if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_RUNTIME))
+    return g_strdup ("application-x-sharedlib");
+  else
+    return g_strdup ("application-x-addon");
+}
+
 static void
 bz_transaction_view_class_init (BzTransactionViewClass *klass)
 {
@@ -154,6 +239,8 @@ bz_transaction_view_class_init (BzTransactionViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, format_download_size);
   gtk_widget_class_bind_template_callback (widget_class, format_installed_size);
   gtk_widget_class_bind_template_callback (widget_class, format_bytes_transferred);
+  gtk_widget_class_bind_template_callback (widget_class, get_main_icon);
+  gtk_widget_class_bind_template_callback (widget_class, get_sub_icon_name);
 }
 
 static void

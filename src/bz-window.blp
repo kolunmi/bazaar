@@ -329,64 +329,22 @@ template $BzWindow: Adw.ApplicationWindow {
                 tooltip: _("View curated applications");
                 name: "curated";
                 enabled: bind template.state as <$BzStateInfo>.curated-provider as <$BzContentProvider>.has-inputs as <bool>;
-
-                child: Box {
-                  halign: center;
-                  margin-start: 15;
-                  margin-end: 15;
-                  orientation: horizontal;
-                  spacing: 6;
-
-                  Image {
-                    icon-name: "starred-symbolic";
-                  }
-
-                  Label {
-                    label: _("Curated");
-                  }
-                };
+                icon-name: "starred-symbolic";
+                label: _("Curated");
               }
 
               Adw.Toggle {
                 tooltip: _("View the latest on Flathub");
                 name: "flathub";
-
-                child: Box {
-                  halign: center;
-                  margin-start: 15;
-                  margin-end: 15;
-                  orientation: horizontal;
-                  spacing: 6;
-
-                  Image {
-                    icon-name: "flathub-symbolic";
-                  }
-
-                  Label {
-                    label: _("Flathub");
-                  }
-                };
+                icon-name: "flathub-symbolic";
+                label: _("Flathub");
               }
               
               Adw.Toggle {
                 tooltip: _("View installed applications");
                 name: "installed";
-
-                child: Box {
-                  halign: center;
-                  margin-start: 15;
-                  margin-end: 15;
-                  orientation: horizontal;
-                  spacing: 6;
-
-                  Image {
-                    icon-name: "library-symbolic";
-                  }
-
-                  Label {
-                    label: _("Installed");
-                  }
-                };
+                icon-name: "library-symbolic";
+                label: _("Installed");
               }
 
               notify::active-name => $page_toggled_cb(template);
@@ -453,6 +411,16 @@ template $BzWindow: Adw.ApplicationWindow {
 
 menu primary_menu {
   section {
+    item {
+      label: _("_Quit Service");
+      action: "app.quit";
+    }
+
+    item {
+      label: _("_Refresh Content");
+      action: "app.refresh";
+    }
+
     item {
       label: _("_Preferences");
       action: "app.preferences";
