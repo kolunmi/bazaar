@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-27 16:44+0900\n"
-"PO-Revision-Date: 2025-09-27 17:05+0900\n"
+"POT-Creation-Date: 2025-09-27 17:46+0900\n"
+"PO-Revision-Date: 2025-09-27 17:50+0900\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: ja\n"
@@ -95,7 +95,7 @@ msgstr "Flathub のアプリやカテゴリーが表示されるホームペー�
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:53
 msgid "Calligraphy application page"
-msgstr ""
+msgstr "カリグラフィーのアプリケーションページ"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:57
 msgid "Searching for Blender"
@@ -328,7 +328,7 @@ msgstr "コピーしました!"
 
 #: src/bz-entry-inspector.blp:5
 msgid "Entry Inspector"
-msgstr ""
+msgstr "エントリのインスペクター"
 
 #: src/bz-entry-inspector.blp:76
 msgid "Serialize"
@@ -866,7 +866,6 @@ msgid "_Quit Service"
 msgstr "_サービスの停止"
 
 #: src/bz-window.blp:420
-#, fuzzy
 msgid "_Refresh Content"
 msgstr "_再読み込み"
 
