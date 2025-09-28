@@ -85,6 +85,12 @@ void
 bz_dynamic_list_view_set_object_prop (BzDynamicListView *self,
                                       const char        *object_prop);
 
+guint
+bz_dynamic_list_view_get_max_children_per_line (BzDynamicListView *self);
+void
+bz_dynamic_list_view_set_max_children_per_line (BzDynamicListView *self,
+                                                guint              max_children);
+
 G_END_DECLS
 
 /* End of bz-dynamic-list-view.h */

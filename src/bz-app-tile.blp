@@ -40,12 +40,13 @@ template $BzAppTile: Button {
         Label {
           css-name: "app-tile-title";
           styles [
-            "title-2",
+            "heading",
           ]
 
           xalign: 0.0;
           ellipsize: end;
           label: bind template.group as <$BzEntryGroup>.title;
+          max-width-chars: 18;
         }
 
         Revealer {
@@ -69,17 +70,12 @@ template $BzAppTile: Button {
 
       Label {
         css-name: "app-tile-description";
-        styles [
-          "heading",
-          "dimmed",
-        ]
-
         xalign: 0.0;
         yalign: 0.0;
         wrap: true;
         ellipsize: end;
         vexpand: true;
-        lines: 3;
+        lines: 2;
         max-width-chars: 15;
         single-line-mode: true;
         label: bind template.group as <$BzEntryGroup>.description;

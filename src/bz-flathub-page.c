@@ -128,7 +128,7 @@ static guint
 limit_if_false (gpointer object,
                 gboolean value)
 {
-  return value ? 256 : 12;
+  return value ? 96 : 12;
 }
 
 static void

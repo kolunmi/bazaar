@@ -48,6 +48,8 @@ struct _BzFlathubState
 
 G_DEFINE_FINAL_TYPE (BzFlathubState, bz_flathub_state, G_TYPE_OBJECT);
 
+static GListModel *bz_flathub_state_dup_apps_of_the_day_week (BzFlathubState *self);
+
 enum
 {
   PROP_0,
@@ -57,6 +59,7 @@ enum
   PROP_APP_OF_THE_DAY,
   PROP_APP_OF_THE_DAY_GROUP,
   PROP_APPS_OF_THE_WEEK,
+  PROP_APPS_OF_THE_DAY_WEEK,
   PROP_CATEGORIES,
   PROP_RECENTLY_UPDATED,
   PROP_RECENTLY_ADDED,
@@ -118,6 +121,9 @@ bz_flathub_state_get_property (GObject    *object,
     case PROP_APPS_OF_THE_WEEK:
       g_value_take_object (value, bz_flathub_state_dup_apps_of_the_week (self));
       break;
+    case PROP_APPS_OF_THE_DAY_WEEK:
+      g_value_take_object (value, bz_flathub_state_dup_apps_of_the_day_week (self));
+      break;
     case PROP_CATEGORIES:
       g_value_set_object (value, bz_flathub_state_get_categories (self));
       break;
@@ -157,6 +163,7 @@ bz_flathub_state_set_property (GObject      *object,
     case PROP_APP_OF_THE_DAY:
     case PROP_APP_OF_THE_DAY_GROUP:
     case PROP_APPS_OF_THE_WEEK:
+    case PROP_APPS_OF_THE_DAY_WEEK:
     case PROP_CATEGORIES:
     case PROP_RECENTLY_UPDATED:
     case PROP_RECENTLY_ADDED:
@@ -205,6 +212,13 @@ bz_flathub_state_class_init (BzFlathubStateClass *klass)
   props[PROP_APPS_OF_THE_WEEK] =
       g_param_spec_object (
           "apps-of-the-week",
+          NULL, NULL,
+          G_TYPE_LIST_MODEL,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_APPS_OF_THE_DAY_WEEK] =
+      g_param_spec_object (
+          "apps-of-the-day-week",
           NULL, NULL,
           G_TYPE_LIST_MODEL,
           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
@@ -315,6 +329,40 @@ bz_flathub_state_dup_apps_of_the_week (BzFlathubState *self)
 }
 
 GListModel *
+bz_flathub_state_dup_apps_of_the_day_week (BzFlathubState *self)
+{
+  g_autoptr (GtkStringList) combined_list = NULL;
+  g_autoptr (GtkStringObject) string = NULL;
+
+  g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
+  if (self->initializing != NULL)
+    return NULL;
+
+  combined_list = gtk_string_list_new (NULL);
+
+  if (self->app_of_the_day != NULL)
+    {
+      string = gtk_string_object_new (self->app_of_the_day);
+      gtk_string_list_append (combined_list, self->app_of_the_day);
+    }
+
+  if (self->apps_of_the_week != NULL)
+    {
+      guint n_items = g_list_model_get_n_items (G_LIST_MODEL (self->apps_of_the_week));
+      for (guint i = 0; i < n_items; i++)
+        {
+          const char *app_id = gtk_string_list_get_string (self->apps_of_the_week, i);
+          gtk_string_list_append (combined_list, app_id);
+        }
+    }
+
+  if (self->map_factory != NULL)
+    return bz_application_map_factory_generate (self->map_factory, G_LIST_MODEL (combined_list));
+  else
+    return G_LIST_MODEL (g_object_ref (combined_list));
+}
+
+GListModel *
 bz_flathub_state_get_categories (BzFlathubState *self)
 {
   g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
@@ -401,7 +449,7 @@ bz_flathub_state_dup_trending (BzFlathubState *self)
 
 void
 bz_flathub_state_set_for_day (BzFlathubState *self,
-                              const char     *for_day)
+                             const char      *for_day)
 {
   g_return_if_fail (BZ_IS_FLATHUB_STATE (self));
 
@@ -419,6 +467,7 @@ bz_flathub_state_set_for_day (BzFlathubState *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_OF_THE_DAY]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_OF_THE_DAY_GROUP]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APPS_OF_THE_WEEK]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APPS_OF_THE_DAY_WEEK]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CATEGORIES]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_RECENTLY_UPDATED]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_RECENTLY_ADDED]);
@@ -484,7 +533,7 @@ bz_flathub_state_set_map_factory (BzFlathubState          *self,
 static DexFuture *
 initialize_fiber (BzFlathubState *self)
 {
-  const char *for_day            = self->for_day;
+  const char *for_day           = self->for_day;
   g_autoptr (GError) local_error = NULL;
   g_autoptr (GHashTable) futures = NULL;
   g_autoptr (GHashTable) nodes   = NULL;
@@ -492,33 +541,33 @@ initialize_fiber (BzFlathubState *self)
   futures = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, dex_unref);
   nodes   = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, (GDestroyNotify) json_node_unref);
 
-#define ADD_REQUEST(key, ...)                  \
-  G_STMT_START                                 \
-  {                                            \
-    g_autofree char *_request     = NULL;      \
-    g_autoptr (DexFuture) _future = NULL;      \
-                                               \
-    _request = g_strdup_printf (__VA_ARGS__);  \
+#define ADD_REQUEST(key, ...)                 \
+  G_STMT_START                                \
+  {                                           \
+    g_autofree char *_request      = NULL;    \
+    g_autoptr (DexFuture) _future = NULL;    \
+                                              \
+    _request = g_strdup_printf (__VA_ARGS__); \
     _future  = bz_query_flathub_v2_json_take ( \
         g_steal_pointer (&_request));         \
-    g_hash_table_replace (                     \
-        futures,                               \
-        g_strdup (key),                        \
-        g_steal_pointer (&_future));           \
-  }                                            \
+    g_hash_table_replace (                    \
+        futures,                              \
+        g_strdup (key),                       \
+        g_steal_pointer (&_future));          \
+  }                                           \
   G_STMT_END
 
   ADD_REQUEST ("/app-picks/app-of-the-day", "/app-picks/app-of-the-day/%s", for_day);
   ADD_REQUEST ("/app-picks/apps-of-the-week", "/app-picks/apps-of-the-week/%s", for_day);
   ADD_REQUEST ("/collection/category", "/collection/category");
-  ADD_REQUEST ("/collection/recently-updated", "/collection/recently-updated?page=0&per_page=100");
-  ADD_REQUEST ("/collection/recently-added", "/collection/recently-added?page=0&per_page=100");
-  ADD_REQUEST ("/collection/popular", "/collection/popular?page=0&per_page=100");
-  ADD_REQUEST ("/collection/trending", "/collection/trending?page=0&per_page=100");
+  ADD_REQUEST ("/collection/recently-updated", "/collection/recently-updated?page=0&per_page=96");
+  ADD_REQUEST ("/collection/recently-added", "/collection/recently-added?page=0&per_page=96");
+  ADD_REQUEST ("/collection/popular", "/collection/popular?page=0&per_page=96");
+  ADD_REQUEST ("/collection/trending", "/collection/trending?page=0&per_page=96");
 
   while (g_hash_table_size (futures) > 0)
     {
-      GHashTableIter   iter        = { 0 };
+      GHashTableIter    iter     = { 0 };
       g_autofree char *request     = NULL;
       g_autoptr (DexFuture) future = NULL;
       g_autoptr (JsonNode) node    = NULL;
@@ -566,7 +615,7 @@ initialize_fiber (BzFlathubState *self)
   if (g_hash_table_contains (nodes, "/collection/category"))
     {
       JsonArray *array  = NULL;
-      guint      length = 0;
+      guint       length = 0;
 
       array  = json_node_get_array (g_hash_table_lookup (nodes, "/collection/category"));
       length = json_array_get_length (array);
@@ -576,19 +625,19 @@ initialize_fiber (BzFlathubState *self)
           const char *category = NULL;
 
           category = json_array_get_string_element (array, i);
-          ADD_REQUEST (category, "/collection/category/%s?page=0&per_page=50", category);
+          ADD_REQUEST (category, "/collection/category/%s?page=0&per_page=60", category);
         }
 
       while (g_hash_table_size (futures) > 0)
         {
-          GHashTableIter   iter                  = { 0 };
-          g_autofree char *name                  = NULL;
-          g_autoptr (DexFuture) future           = NULL;
-          g_autoptr (JsonNode) node              = NULL;
+          GHashTableIter    iter              = { 0 };
+          g_autofree char *name               = NULL;
+          g_autoptr (DexFuture) future        = NULL;
+          g_autoptr (JsonNode) node           = NULL;
           g_autoptr (BzFlathubCategory) category = NULL;
-          g_autoptr (GtkStringList) store        = NULL;
-          JsonArray *category_array              = NULL;
-          guint      category_length             = 0;
+          g_autoptr (GtkStringList) store      = NULL;
+          JsonArray *category_array           = NULL;
+          guint      category_length          = 0;
 
           g_hash_table_iter_init (&iter, futures);
           g_hash_table_iter_next (&iter, (gpointer *) &name, (gpointer *) &future);
@@ -727,6 +776,7 @@ initialize_finally (DexFuture      *future,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_OF_THE_DAY]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_OF_THE_DAY_GROUP]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APPS_OF_THE_WEEK]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APPS_OF_THE_DAY_WEEK]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CATEGORIES]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_RECENTLY_UPDATED]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_RECENTLY_ADDED]);

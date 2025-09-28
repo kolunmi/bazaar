@@ -21,7 +21,7 @@ template $BzDetailedAppTile: Button {
     can-focus: false;
 
     Image {
-      pixel-size: 128;
+      pixel-size: 96;
       paintable: bind template.group as <$BzEntryGroup>.icon-paintable;
 
       styles ["icon-dropshadow"]
@@ -39,7 +39,7 @@ template $BzDetailedAppTile: Button {
 
         Label {
           styles [
-            "title-1",
+            "title-2",
           ]
 
           xalign: 0.0;
@@ -66,11 +66,6 @@ template $BzDetailedAppTile: Button {
       }
       
       Label {
-        styles [
-          "title-4",
-          "dimmed",
-        ]
-
         xalign: 0.0;
         yalign: 0.0;
         wrap: true;
