@@ -388,10 +388,10 @@ static void
 install_addons_cb (BzFullView *self,
                    GtkButton  *button)
 {
-  BzEntry *entry = NULL;
-  GListModel *model = NULL;
+  BzEntry    *entry                   = NULL;
+  GListModel *model                   = NULL;
   g_autoptr (GListModel) mapped_model = NULL;
-  AdwDialog *addons_dialog = NULL;
+  AdwDialog *addons_dialog            = NULL;
 
   if (self->group == NULL)
     return;
@@ -420,8 +420,8 @@ install_addons_cb (BzFullView *self,
 }
 
 static void
-addon_transact_cb (BzFullView   *self,
-                   BzEntry      *entry,
+addon_transact_cb (BzFullView     *self,
+                   BzEntry        *entry,
                    BzAddonsDialog *dialog)
 {
   gboolean installed = FALSE;
@@ -591,7 +591,6 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, pick_license_warning);
   gtk_widget_class_bind_template_callback (widget_class, install_addons_cb);
   gtk_widget_class_bind_template_callback (widget_class, addon_transact_cb);
-
 }
 
 static void

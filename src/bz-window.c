@@ -276,19 +276,18 @@ full_view_remove_cb (BzWindow   *self,
   try_transact (self, NULL, bz_full_view_get_entry_group (view), TRUE, source);
 }
 
-
 static void
 install_addon_cb (BzWindow   *self,
-                           BzEntry    *entry,
-                           BzFullView *view)
+                  BzEntry    *entry,
+                  BzFullView *view)
 {
   try_transact (self, entry, NULL, FALSE, NULL);
 }
 
 static void
 remove_addon_cb (BzWindow   *self,
-                          BzEntry    *entry,
-                          BzFullView *view)
+                 BzEntry    *entry,
+                 BzFullView *view)
 {
   try_transact (self, entry, NULL, TRUE, NULL);
 }
