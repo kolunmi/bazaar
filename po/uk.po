@@ -630,7 +630,7 @@ msgstr "Встановлені"
 
 #: src/bz-installed-page.blp:100
 msgid "Support this application"
-msgstr "Поділитися цим застосунком"
+msgstr "Підтримати цей застосунок"
 
 #: src/bz-installed-page.blp:125 src/bz-transaction-view.blp:303
 #: src/bz-window.c:986
