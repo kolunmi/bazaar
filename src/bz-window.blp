@@ -227,6 +227,8 @@ template $BzWindow: Adw.ApplicationWindow {
                       transaction-manager: bind template.state as <$BzStateInfo>.transaction-manager;
                       install => $full_view_install_cb(template);
                       remove => $full_view_remove_cb(template);
+                      install-addon => $install_addon_cb(template);
+                      remove-addon => $remove_addon_cb(template);
                     };
                   }
 
@@ -247,8 +249,8 @@ template $BzWindow: Adw.ApplicationWindow {
                     child: $BzInstalledPage {
                       state: bind template.state;
                       model: bind template.state as <$BzStateInfo>.all-installed-entry-groups;
-                      install => $installed_page_install_cb(template);
-                      remove => $installed_page_remove_cb(template);
+                      install => $install_addon_cb(template);
+                      remove => $remove_addon_cb(template);
                       show-entry => $installed_page_show_cb(template);
                     };
                   }

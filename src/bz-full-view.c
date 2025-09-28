@@ -23,6 +23,7 @@
 #include <glib/gi18n.h>
 #include <json-glib/json-glib.h>
 
+#include "bz-addons-dialog.h"
 #include "bz-decorated-screenshot.h"
 #include "bz-dynamic-list-view.h"
 #include "bz-env.h"
@@ -77,6 +78,8 @@ enum
 {
   SIGNAL_INSTALL,
   SIGNAL_REMOVE,
+  SIGNAL_INSTALL_ADDON,
+  SIGNAL_REMOVE_ADDON,
 
   LAST_SIGNAL,
 };
@@ -87,6 +90,10 @@ debounce_timeout (BzFullView *self);
 
 static DexFuture *
 retrieve_star_string_fiber (BzFullView *self);
+
+static void addon_transact_cb (BzFullView     *self,
+                               BzEntry        *entry,
+                               BzAddonsDialog *dialog);
 
 static void
 bz_full_view_dispose (GObject *object)
@@ -378,6 +385,56 @@ forge_cb (BzFullView *self,
 }
 
 static void
+install_addons_cb (BzFullView *self,
+                   GtkButton  *button)
+{
+  BzEntry *entry = NULL;
+  GListModel *model = NULL;
+  g_autoptr (GListModel) mapped_model = NULL;
+  AdwDialog *addons_dialog = NULL;
+
+  if (self->group == NULL)
+    return;
+
+  entry = bz_result_get_object (self->ui_entry);
+  if (entry == NULL)
+    return;
+
+  model = bz_entry_get_addons (entry);
+  if (model == NULL || g_list_model_get_n_items (model) == 0)
+    return;
+
+  mapped_model = bz_application_map_factory_generate (
+      bz_state_info_get_entry_factory (self->state),
+      model);
+
+  addons_dialog = bz_addons_dialog_new (entry, mapped_model);
+  adw_dialog_set_content_width (addons_dialog, 750);
+  gtk_widget_set_size_request (GTK_WIDGET (addons_dialog), 350, -1);
+
+  g_signal_connect_swapped (
+      addons_dialog, "transact",
+      G_CALLBACK (addon_transact_cb), self);
+
+  adw_dialog_present (addons_dialog, GTK_WIDGET (self));
+}
+
+static void
+addon_transact_cb (BzFullView   *self,
+                   BzEntry      *entry,
+                   BzAddonsDialog *dialog)
+{
+  gboolean installed = FALSE;
+
+  g_object_get (entry, "installed", &installed, NULL);
+
+  if (installed)
+    g_signal_emit (self, signals[SIGNAL_REMOVE_ADDON], 0, entry);
+  else
+    g_signal_emit (self, signals[SIGNAL_INSTALL_ADDON], 0, entry);
+}
+
+static void
 screenshots_bind_widget_cb (BzFullView            *self,
                             BzDecoratedScreenshot *screenshot,
                             GdkPaintable          *paintable,
@@ -471,6 +528,36 @@ bz_full_view_class_init (BzFullViewClass *klass)
       G_TYPE_FROM_CLASS (klass),
       g_cclosure_marshal_VOID__OBJECTv);
 
+  signals[SIGNAL_INSTALL_ADDON] =
+      g_signal_new (
+          "install-addon",
+          G_OBJECT_CLASS_TYPE (klass),
+          G_SIGNAL_RUN_FIRST,
+          0,
+          NULL, NULL,
+          g_cclosure_marshal_VOID__OBJECT,
+          G_TYPE_NONE, 1,
+          BZ_TYPE_ENTRY);
+  g_signal_set_va_marshaller (
+      signals[SIGNAL_INSTALL_ADDON],
+      G_TYPE_FROM_CLASS (klass),
+      g_cclosure_marshal_VOID__OBJECTv);
+
+  signals[SIGNAL_REMOVE_ADDON] =
+      g_signal_new (
+          "remove-addon",
+          G_OBJECT_CLASS_TYPE (klass),
+          G_SIGNAL_RUN_FIRST,
+          0,
+          NULL, NULL,
+          g_cclosure_marshal_VOID__OBJECT,
+          G_TYPE_NONE, 1,
+          BZ_TYPE_ENTRY);
+  g_signal_set_va_marshaller (
+      signals[SIGNAL_REMOVE_ADDON],
+      G_TYPE_FROM_CLASS (klass),
+      g_cclosure_marshal_VOID__OBJECTv);
+
   g_type_ensure (BZ_TYPE_DECORATED_SCREENSHOT);
   g_type_ensure (BZ_TYPE_DYNAMIC_LIST_VIEW);
   g_type_ensure (BZ_TYPE_ENTRY);
@@ -502,6 +589,9 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, screenshots_bind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, screenshots_unbind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, pick_license_warning);
+  gtk_widget_class_bind_template_callback (widget_class, install_addons_cb);
+  gtk_widget_class_bind_template_callback (widget_class, addon_transact_cb);
+
 }
 
 static void

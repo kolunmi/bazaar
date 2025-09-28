@@ -220,7 +220,6 @@ template $BzFullView: Adw.Bin {
                       clicked => $install_cb(template);
                     }
 
-
                     Button remove_button {
                       styles [
                         "destructive-action",
@@ -235,6 +234,22 @@ template $BzFullView: Adw.Bin {
                         
                       icon-name: "user-trash-symbolic";
                       clicked => $remove_cb(template);
+                    }
+
+                    Button addons_btn {
+                      styles [
+                        "circular",
+                      ]
+                      visible:bind $logical_and(
+                            $invert_boolean($is_null(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.addons) as <bool>) as <bool>,
+                            $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>
+                      ) as <bool>;
+
+                      width-request:45;
+                      has-tooltip: true;
+                      tooltip-text: _("Manage Add-ons");
+                      clicked => $install_addons_cb(template);
+                      icon-name: "puzzle-piece-symbolic";
                     }
 
                     Button {

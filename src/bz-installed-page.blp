@@ -117,6 +117,31 @@ template $BzInstalledPage: Adw.Bin {
                     
                     Button {
                       styles [
+                        "flat"
+                      ]
+
+                      has-tooltip: true;
+                      tooltip-text: _("Manage Add-ons");
+
+                      width-request: 32;
+                      height-request: 32;
+                      valign: center;
+                      icon-name: "puzzle-piece-symbolic";
+                      sensitive: bind $invert_boolean($is_zero(template.item as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
+                      visible: bind $invert_boolean($is_null(template.item as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.addons) as <bool>) as <bool>;
+
+                      clicked => $install_addons_cb(template);
+                    }
+
+                    Separator {
+                      visible: bind $invert_boolean($is_null(template.item as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.addons) as <bool>) as <bool>;
+                      orientation: vertical;
+                      margin-top: 12;
+                      margin-bottom: 12;
+                    }
+
+                    Button {
+                      styles [
                         "destructive-action",
                         "flat"
                       ]
@@ -186,58 +211,6 @@ template $BzInstalledPage: Adw.Bin {
 
                             clicked => $run_cb(template);
                           }
-
-                          Button {
-                            styles [
-                              "flat",
-                            ]
-
-                            has-tooltip: true;
-                            tooltip-text: _("Manage Addons");
-                            visible: bind $invert_boolean($is_null(template.item as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.addons) as <bool>) as <bool>;
-                            sensitive: bind $invert_boolean($is_zero(template.item as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
-
-                            child: Box {
-                              orientation: horizontal;
-                              spacing: 6;
-
-                              Image {
-                                icon-name: "puzzle-piece-symbolic";
-                              }
-
-                              Label {
-                                label: _("Manage Addons");
-                              }
-                            };
-
-                            clicked => $install_addons_cb(template);
-                          }
-                          /*
-                          Button {
-                            styles [
-                              "flat",
-                            ]
-
-                            has-tooltip: true;
-                            tooltip-text: _("Edit Permissions");
-
-                            child: Box {
-                              orientation: horizontal;
-                              spacing: 6;
-
-                              Image {
-                                icon-name: "sliders-horizontal-symbolic";
-                              }
-
-                              Label {
-                                label: _("Edit Permissions");
-                              }
-                            };
-
-                            clicked => $edit_permissions_cb(template);
-                          }
-                          */
-
                           Button {
                             styles [
                               "flat",
