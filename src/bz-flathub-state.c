@@ -332,7 +332,6 @@ GListModel *
 bz_flathub_state_dup_apps_of_the_day_week (BzFlathubState *self)
 {
   g_autoptr (GtkStringList) combined_list = NULL;
-  g_autoptr (GtkStringObject) string = NULL;
 
   g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
   if (self->initializing != NULL)
@@ -341,10 +340,7 @@ bz_flathub_state_dup_apps_of_the_day_week (BzFlathubState *self)
   combined_list = gtk_string_list_new (NULL);
 
   if (self->app_of_the_day != NULL)
-    {
-      string = gtk_string_object_new (self->app_of_the_day);
-      gtk_string_list_append (combined_list, self->app_of_the_day);
-    }
+    gtk_string_list_append (combined_list, self->app_of_the_day);
 
   if (self->apps_of_the_week != NULL)
     {
@@ -449,7 +445,7 @@ bz_flathub_state_dup_trending (BzFlathubState *self)
 
 void
 bz_flathub_state_set_for_day (BzFlathubState *self,
-                             const char      *for_day)
+                              const char     *for_day)
 {
   g_return_if_fail (BZ_IS_FLATHUB_STATE (self));
 
@@ -533,7 +529,7 @@ bz_flathub_state_set_map_factory (BzFlathubState          *self,
 static DexFuture *
 initialize_fiber (BzFlathubState *self)
 {
-  const char *for_day           = self->for_day;
+  const char *for_day            = self->for_day;
   g_autoptr (GError) local_error = NULL;
   g_autoptr (GHashTable) futures = NULL;
   g_autoptr (GHashTable) nodes   = NULL;
@@ -541,20 +537,20 @@ initialize_fiber (BzFlathubState *self)
   futures = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, dex_unref);
   nodes   = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, (GDestroyNotify) json_node_unref);
 
-#define ADD_REQUEST(key, ...)                 \
-  G_STMT_START                                \
-  {                                           \
-    g_autofree char *_request      = NULL;    \
-    g_autoptr (DexFuture) _future = NULL;    \
-                                              \
-    _request = g_strdup_printf (__VA_ARGS__); \
+#define ADD_REQUEST(key, ...)                  \
+  G_STMT_START                                 \
+  {                                            \
+    g_autofree char *_request     = NULL;      \
+    g_autoptr (DexFuture) _future = NULL;      \
+                                               \
+    _request = g_strdup_printf (__VA_ARGS__);  \
     _future  = bz_query_flathub_v2_json_take ( \
         g_steal_pointer (&_request));         \
-    g_hash_table_replace (                    \
-        futures,                              \
-        g_strdup (key),                       \
-        g_steal_pointer (&_future));          \
-  }                                           \
+    g_hash_table_replace (                     \
+        futures,                               \
+        g_strdup (key),                        \
+        g_steal_pointer (&_future));           \
+  }                                            \
   G_STMT_END
 
   ADD_REQUEST ("/app-picks/app-of-the-day", "/app-picks/app-of-the-day/%s", for_day);
@@ -567,7 +563,7 @@ initialize_fiber (BzFlathubState *self)
 
   while (g_hash_table_size (futures) > 0)
     {
-      GHashTableIter    iter     = { 0 };
+      GHashTableIter   iter        = { 0 };
       g_autofree char *request     = NULL;
       g_autoptr (DexFuture) future = NULL;
       g_autoptr (JsonNode) node    = NULL;
@@ -615,7 +611,7 @@ initialize_fiber (BzFlathubState *self)
   if (g_hash_table_contains (nodes, "/collection/category"))
     {
       JsonArray *array  = NULL;
-      guint       length = 0;
+      guint      length = 0;
 
       array  = json_node_get_array (g_hash_table_lookup (nodes, "/collection/category"));
       length = json_array_get_length (array);
@@ -630,14 +626,14 @@ initialize_fiber (BzFlathubState *self)
 
       while (g_hash_table_size (futures) > 0)
         {
-          GHashTableIter    iter              = { 0 };
-          g_autofree char *name               = NULL;
-          g_autoptr (DexFuture) future        = NULL;
-          g_autoptr (JsonNode) node           = NULL;
+          GHashTableIter   iter                  = { 0 };
+          g_autofree char *name                  = NULL;
+          g_autoptr (DexFuture) future           = NULL;
+          g_autoptr (JsonNode) node              = NULL;
           g_autoptr (BzFlathubCategory) category = NULL;
-          g_autoptr (GtkStringList) store      = NULL;
-          JsonArray *category_array           = NULL;
-          guint      category_length          = 0;
+          g_autoptr (GtkStringList) store        = NULL;
+          JsonArray *category_array              = NULL;
+          guint      category_length             = 0;
 
           g_hash_table_iter_init (&iter, futures);
           g_hash_table_iter_next (&iter, (gpointer *) &name, (gpointer *) &future);

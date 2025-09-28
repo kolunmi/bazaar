@@ -222,11 +222,11 @@ bz_dynamic_list_view_class_init (BzDynamicListViewClass *klass)
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   props[PROP_MAX_CHILDREN_PER_LINE] =
-    g_param_spec_uint (
-        "max-children-per-line",
-        NULL, NULL,
-        1, G_MAXUINT, 4,
-        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+      g_param_spec_uint (
+          "max-children-per-line",
+          NULL, NULL,
+          1, G_MAXUINT, 4,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   props[PROP_CHILD_TYPE] =
       g_param_spec_string (
