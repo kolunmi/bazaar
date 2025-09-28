@@ -219,9 +219,10 @@ background: shade(#deddda, 1.05);
 background: shade(#deddda, .95);
 }
 
-
-
-
+.installed-list-view > * {
+    padding: 0;
+    border-radius: 12px;
+}
 
 .transaction-sidebar-entry-list {
     margin: 0;
