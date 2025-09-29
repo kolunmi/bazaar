@@ -94,6 +94,14 @@ window.flathub {
   background-color: oklch(from var(--sidebar-bg-color) l calc(c * 4) var(--flathub-bg-hue));
 }
 
+.flathub-lotion {
+  color: #fafafa;
+}
+
+.flathub-gunmetal {
+  color:#251f32;
+}
+
 /* Category buttons styling modified from GNOME Software*/
 .category-tile {
 	font-weight: 900;
