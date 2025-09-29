@@ -32,6 +32,7 @@
 #include "bz-full-view.h"
 #include "bz-global-state.h"
 #include "bz-lazy-async-texture-model.h"
+#include "bz-release.h"
 #include "bz-screenshot.h"
 #include "bz-section-view.h"
 #include "bz-share-dialog.h"
@@ -53,10 +54,10 @@ struct _BzFullView
   DexFuture *loading_forge_stars;
 
   /* Template widgets */
-  AdwViewStack          *stack;
-  GtkWidget             *forge_stars;
-  GtkLabel              *forge_stars_label;
-  GtkListBox            *releases_box;
+  AdwViewStack *stack;
+  GtkWidget    *forge_stars;
+  GtkLabel     *forge_stars_label;
+  GtkListBox   *releases_box;
 };
 
 G_DEFINE_FINAL_TYPE (BzFullView, bz_full_view, ADW_TYPE_BIN)
@@ -446,22 +447,22 @@ clear_releases_box (BzFullView *self)
 
 static GtkWidget *
 create_release_row (const char *version,
-                   const char *description,
-                   guint64     timestamp)
+                    const char *description,
+                    guint64     timestamp)
 {
   AdwActionRow *row;
-  GtkBox *content_box;
-  GtkBox *header_box;
-  GtkLabel *version_label;
-  GtkLabel *date_label;
-  GtkLabel *description_label;
-  g_autoptr (GDateTime) date = NULL;
-  g_autofree char *date_str = NULL;
+  GtkBox       *content_box;
+  GtkBox       *header_box;
+  GtkLabel     *version_label;
+  GtkLabel     *date_label;
+  GtkLabel     *description_label;
+  g_autoptr (GDateTime) date    = NULL;
+  g_autofree char *date_str     = NULL;
   g_autofree char *version_text = NULL;
 
   date = g_date_time_new_from_unix_utc (timestamp);
   if (date)
-    date_str = g_date_time_format (date, _("%x"));
+    date_str = g_date_time_format (date, _ ("%x"));
 
   row = ADW_ACTION_ROW (adw_action_row_new ());
   gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), FALSE);
@@ -474,7 +475,7 @@ create_release_row (const char *version,
 
   header_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
 
-  version_text = g_strdup_printf (_("Version %s"), version);
+  version_text  = g_strdup_printf (_ ("Version %s"), version);
   version_label = GTK_LABEL (gtk_label_new (version_text));
   gtk_widget_add_css_class (GTK_WIDGET (version_label), "accent");
   gtk_widget_add_css_class (GTK_WIDGET (version_label), "heading");
@@ -491,8 +492,7 @@ create_release_row (const char *version,
   gtk_box_append (content_box, GTK_WIDGET (header_box));
 
   description_label = GTK_LABEL (gtk_label_new (
-      (description && *description) ? description : _("No details for this release")
-  ));
+      (description && *description) ? description : _ ("No details for this release")));
   gtk_widget_set_halign (GTK_WIDGET (description_label), GTK_ALIGN_FILL);
   gtk_label_set_xalign (description_label, 0.0);
 
@@ -518,9 +518,9 @@ create_release_row (const char *version,
 static void
 populate_releases_box (BzFullView *self)
 {
-  BzEntry *entry;
-  GListModel *version_history = NULL;
-  guint n_items;
+  BzEntry *entry                         = NULL;
+  g_autoptr (GListModel) version_history = NULL;
+  guint n_items                          = 0;
 
   clear_releases_box (self);
 
@@ -536,30 +536,25 @@ populate_releases_box (BzFullView *self)
     return;
 
   n_items = g_list_model_get_n_items (version_history);
-
   for (guint i = 0; i < n_items; i++)
     {
-      g_autoptr (GObject) item = NULL;
-      const char *version = NULL;
-      const char *description = NULL;
-      guint64 timestamp = 0;
-      GtkWidget *row;
+      g_autoptr (BzRelease) release = NULL;
+      const char *version           = NULL;
+      const char *description       = NULL;
+      guint64     timestamp         = 0;
+      GtkWidget  *row               = NULL;
 
-      item = g_list_model_get_item (version_history, i);
-      if (item == NULL)
+      release = g_list_model_get_item (version_history, i);
+      if (release == NULL)
         continue;
 
-      g_object_get (item,
-                    "version", &version,
-                    "description", &description,
-                    "timestamp", &timestamp,
-                    NULL);
+      version     = bz_release_get_version (release);
+      description = bz_release_get_description (release);
+      timestamp   = bz_release_get_timestamp (release);
 
       row = create_release_row (version, description, timestamp);
       gtk_list_box_append (self->releases_box, row);
     }
-
-  g_object_unref (version_history);
 }
 
 static void
@@ -819,8 +814,8 @@ debounce_timeout (BzFullView *self)
   if (bz_result_get_resolved (self->debounced_ui_entry))
     populate_releases_box (self);
 
-    /* Disabled by default in gsettings schema since we don't want to
-     users to be rate limited by github */
+  /* Disabled by default in gsettings schema since we don't want to
+   users to be rate limited by github */
   if (self->state != NULL &&
       g_settings_get_boolean (
           bz_state_info_get_settings (self->state),
