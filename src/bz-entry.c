@@ -949,11 +949,11 @@ bz_entry_real_serialize (BzSerializable  *serializable,
               const char *version                        = NULL;
               const char *description                    = NULL;
 
-              release   = g_list_model_get_item (priv->version_history, i);
-              issues    = bz_release_get_issues (release);
-              timestamp = bz_release_get_timestamp (release);
-              url       = bz_release_get_url (release);
-              version   = bz_release_get_version (release);
+              release     = g_list_model_get_item (priv->version_history, i);
+              issues      = bz_release_get_issues (release);
+              timestamp   = bz_release_get_timestamp (release);
+              url         = bz_release_get_url (release);
+              version     = bz_release_get_version (release);
               description = bz_release_get_description (release);
 
               if (issues != NULL)
@@ -977,16 +977,16 @@ bz_entry_real_serialize (BzSerializable  *serializable,
                     }
                 }
 
-            g_variant_builder_add (
-                sub_builder,
-                "(msmvtmsms)",
-                description,
-                issues_builder != NULL
-                    ? g_variant_builder_end (issues_builder)
-                    : NULL,
-                timestamp,
-                url,
-                version);
+              g_variant_builder_add (
+                  sub_builder,
+                  "(msmvtmsms)",
+                  description,
+                  issues_builder != NULL
+                      ? g_variant_builder_end (issues_builder)
+                      : NULL,
+                  timestamp,
+                  url,
+                  version);
             }
 
           g_variant_builder_add (builder, "{sv}", "version-history", g_variant_builder_end (sub_builder));

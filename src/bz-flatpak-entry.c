@@ -86,10 +86,9 @@ enum
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
 
-
 static char *
-parse_appstream_to_markdown (const char  *description_raw,
-                               GError     **error);
+parse_appstream_to_markdown (const char *description_raw,
+                             GError    **error);
 
 static inline void
 append_markup_escaped (GString    *string,
@@ -462,7 +461,7 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
         }
 
       long_description_raw = as_component_get_description (component);
-      long_description = parse_appstream_to_markdown (long_description_raw, error);
+      long_description     = parse_appstream_to_markdown (long_description_raw, error);
       if (long_description_raw != NULL && long_description == NULL)
         return NULL;
 
@@ -591,18 +590,18 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
 
           for (guint i = 0; i < releases_arr->len; i++)
             {
-              AsRelease *as_release                   = NULL;
-              GPtrArray *as_issues                    = NULL;
-              const char *release_description_raw     = NULL;
-              g_autofree char *release_description    = NULL;
-              g_autoptr (GListStore) issues           = NULL;
-              g_autoptr (BzRelease) release           = NULL;
+              AsRelease       *as_release              = NULL;
+              GPtrArray       *as_issues               = NULL;
+              const char      *release_description_raw = NULL;
+              g_autofree char *release_description     = NULL;
+              g_autoptr (GListStore) issues            = NULL;
+              g_autoptr (BzRelease) release            = NULL;
 
               as_release = g_ptr_array_index (releases_arr, i);
               as_issues  = as_release_get_issues (as_release);
 
               release_description_raw = as_release_get_description (as_release);
-              release_description = parse_appstream_to_markdown (release_description_raw, NULL);
+              release_description     = parse_appstream_to_markdown (release_description_raw, NULL);
 
               if (as_issues != NULL && as_issues->len > 0)
                 {
@@ -1042,8 +1041,8 @@ compile_appstream_description (XbNode  *node,
 }
 
 static char *
-parse_appstream_to_markdown (const char  *description_raw,
-                               GError     **error)
+parse_appstream_to_markdown (const char *description_raw,
+                             GError    **error)
 {
   g_autoptr (XbSilo) silo          = NULL;
   g_autoptr (XbNode) root          = NULL;
