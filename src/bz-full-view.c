@@ -439,7 +439,7 @@ addon_transact_cb (BzFullView     *self,
 static void
 clear_releases_box (BzFullView *self)
 {
-  GtkWidget *child;
+  GtkWidget *child = NULL;
 
   while ((child = gtk_widget_get_first_child (GTK_WIDGET (self->releases_box))))
     gtk_list_box_remove (self->releases_box, child);
@@ -450,15 +450,15 @@ create_release_row (const char *version,
                     const char *description,
                     guint64     timestamp)
 {
-  AdwActionRow *row;
-  GtkBox       *content_box;
-  GtkBox       *header_box;
-  GtkLabel     *version_label;
-  GtkLabel     *date_label;
-  GtkLabel     *description_label;
-  g_autoptr (GDateTime) date    = NULL;
-  g_autofree char *date_str     = NULL;
-  g_autofree char *version_text = NULL;
+  AdwActionRow *row               = NULL;
+  GtkBox       *content_box       = NULL;
+  GtkBox       *header_box        = NULL;
+  GtkLabel     *version_label     = NULL;
+  GtkLabel     *date_label        = NULL;
+  GtkLabel     *description_label = NULL;
+  g_autoptr (GDateTime) date      = NULL;
+  g_autofree char *date_str       = NULL;
+  g_autofree char *version_text   = NULL;
 
   date = g_date_time_new_from_unix_utc (timestamp);
   if (date)
