@@ -16,9 +16,6 @@ template $BzDetailedAppTile: Button {
     Image {
       halign: end;
       valign: start;
-      styles [
-        "dimmed",
-      ]
       icon-name: "app-installed-symbolic";
       icon-size: normal;
       visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
