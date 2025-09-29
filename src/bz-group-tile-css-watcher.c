@@ -229,7 +229,9 @@ bz_group_tile_css_watcher_set_group (BzGroupTileCssWatcher *self,
 static gdouble
 get_luminance (GdkRGBA *rgba)
 {
-  return (0.299 * rgba->red * 255.0) + (0.587 * rgba->green * 255.0) + (0.114 * rgba->blue * 255.0);
+  return (0.299 * rgba->red * 255.0) +
+         (0.587 * rgba->green * 255.0) +
+         (0.114 * rgba->blue * 255.0);
 }
 
 static gboolean
