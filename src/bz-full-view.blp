@@ -417,102 +417,26 @@ template $BzFullView: Adw.Bin {
                         icon-name: "network-server-symbolic";
                       }
                     }
-
                   }
 
-                  Frame {
-                    styles [
-                      "card",
-                    ]
+                  Box {
+                    orientation: vertical;
 
-                    child: ListView {
+                    Label {
                       styles [
-                        "navigation-sidebar",
+                        "heading", "h4"
                       ]
 
-                      margin-start: 5;
-                      margin-end: 5;
-                      margin-top: 5;
-                      margin-bottom: 5;
-                      single-click-activate: true;
+                      label: _("Version History");
+                      xalign: 0;
+                      margin-bottom: 12;
+                    }
 
-                      model: NoSelection {
-                        model: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.version-history;
-                      };
+                    ListBox releases_box {
+                      styles ["boxed-list"]
 
-                      factory: BuilderListItemFactory {
-                        template ListItem {
-                          activatable: false;
-                          child: Box {
-                            margin-top: 10;
-                            margin-bottom: 10;
-                            orientation: vertical;
-                            spacing: 3;
-
-                            Label {
-                              styles [
-                                "accent",
-                                "title-4",
-                              ]
-
-                              ellipsize: end;
-                              xalign: 0.0;
-                              label: bind template.item as <$BzRelease>.version;
-                            }
-
-                            Label {
-                              ellipsize: end;
-                              xalign: 0.0;
-                              label: bind $format_timestamp(template.item as <$BzRelease>.timestamp) as <string>;
-                            }
-
-                            ListView {
-                              styles [
-                                "navigation-sidebar",
-                              ]
-
-                              visible: bind $invert_boolean($is_null(template.item as <$BzRelease>.issues) as <bool>) as <bool>;
-                              margin-start: 25;
-
-                              model: NoSelection {
-                                model: bind template.item as <$BzRelease>.issues;
-                              };
-
-                              factory: BuilderListItemFactory {
-                                template ListItem {
-                                  activatable: false;
-
-                                  child: Box {
-                                    margin-top: 10;
-                                    margin-bottom: 10;
-                                    orientation: vertical;
-                                    spacing: 3;
-
-                                    Label {
-                                      styles [
-                                        "heading",
-                                      ]
-
-                                      wrap: true;
-                                      wrap-mode: word_char;
-                                      xalign: 0.0;
-                                      label: bind template.item as <$BzIssue>.id;
-                                    }
-
-                                    Label {
-                                      ellipsize: end;
-                                      xalign: 0.0;
-                                      use-markup: true;
-                                      label: bind $format_as_link(template.item as <$BzIssue>.url) as <string>;
-                                    }
-                                  };
-                                }
-                              };
-                            }
-                          };
-                        }
-                      };
-                    };
+                      selection-mode: none;
+                    }
                   }
                 };
               }
