@@ -19,7 +19,6 @@
  */
 
 #include <adwaita.h>
-#include <math.h>
 
 #include "bz-group-tile-css-watcher.h"
 
@@ -271,7 +270,7 @@ refresh (BzGroupTileCssWatcher *self)
     {
       g_autoptr (GString) fixed_id = NULL;
       g_autofree char *css_string  = NULL;
-      gboolean is_dark;
+      gboolean         is_dark;
 
       fixed_id = g_string_new (id);
       g_string_replace (fixed_id, ".", "--", 0);
