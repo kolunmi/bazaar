@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-29 21:19+0300\n"
+"POT-Creation-Date: 2025-09-30 19:17+0300\n"
 "PO-Revision-Date: 2025-08-12 22:05+0300\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -125,7 +125,7 @@ msgstr "Статистика завантажень Blender"
 msgid "Manage Addons"
 msgstr "Керувати розширеннями"
 
-#: src/bz-app-tile.blp:78 src/bz-detailed-app-tile.blp:76
+#: src/bz-app-tile.blp:78 src/bz-detailed-app-tile.blp:73
 #: src/bz-full-view.blp:126
 msgid "This flatpak is verified by the original developers of the software."
 msgstr "Цей пакунок затверджено розробниками цієї програми"
@@ -434,52 +434,52 @@ msgstr "Нещодавно додані"
 msgid "Popular"
 msgstr "Популярні"
 
-#: src/bz-flatpak-entry.c:562
+#: src/bz-flatpak-entry.c:519
 msgctxt "Project URL Type"
 msgid "Flathub Page"
 msgstr "Сторінка Flathub"
 
-#: src/bz-flatpak-entry.c:581
+#: src/bz-flatpak-entry.c:538
 msgctxt "Project URL Type"
 msgid "Homepage"
 msgstr "Домашня сторінка"
 
-#: src/bz-flatpak-entry.c:584
+#: src/bz-flatpak-entry.c:541
 msgctxt "Project URL Type"
 msgid "Issue Tracker"
 msgstr "Відстеження помилок"
 
-#: src/bz-flatpak-entry.c:587
+#: src/bz-flatpak-entry.c:544
 msgctxt "Project URL Type"
 msgid "FAQ"
 msgstr "ЧаПи"
 
-#: src/bz-flatpak-entry.c:590
+#: src/bz-flatpak-entry.c:547
 msgctxt "Project URL Type"
 msgid "Help"
 msgstr "Допомога"
 
-#: src/bz-flatpak-entry.c:593
+#: src/bz-flatpak-entry.c:550
 msgctxt "Project URL Type"
 msgid "Donate"
 msgstr "Пожертви"
 
-#: src/bz-flatpak-entry.c:598
+#: src/bz-flatpak-entry.c:555
 msgctxt "Project URL Type"
 msgid "Translate"
 msgstr "Переклад"
 
-#: src/bz-flatpak-entry.c:601
+#: src/bz-flatpak-entry.c:558
 msgctxt "Project URL Type"
 msgid "Contact"
 msgstr "Звʼязок"
 
-#: src/bz-flatpak-entry.c:604
+#: src/bz-flatpak-entry.c:561
 msgctxt "Project URL Type"
 msgid "Source Code"
 msgstr "Початковий код"
 
-#: src/bz-flatpak-entry.c:609
+#: src/bz-flatpak-entry.c:566
 msgctxt "Project URL Type"
 msgid "Contribute"
 msgstr "Долучитися"
@@ -573,21 +573,25 @@ msgstr "Віддалені сховища"
 msgid "Remote repo name"
 msgstr "Назва віддаленого сховища"
 
-#: src/bz-full-view.c:207
+#: src/bz-full-view.blp:430
+msgid "Version History"
+msgstr "Історія змін"
+
+#: src/bz-full-view.c:209
 #, c-format
 msgid "%'d downloads in the last month"
 msgstr "%'d завантажень за минулий місяць"
 
-#: src/bz-full-view.c:225
+#: src/bz-full-view.c:227 src/bz-full-view.c:465
 #, c-format
-msgid "Released %x"
-msgstr "Випуск %x"
+msgid "%x"
+msgstr "%x"
 
-#: src/bz-full-view.c:236
+#: src/bz-full-view.c:238
 msgid "No URL"
 msgstr "Без URL"
 
-#: src/bz-full-view.c:244
+#: src/bz-full-view.c:246
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -595,13 +599,22 @@ msgstr ""
 "Цей застосунок має вільну ліцензію. Це означає, що початковий код може бути "
 "перевірено на безпечність."
 
-#: src/bz-full-view.c:245
+#: src/bz-full-view.c:247
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
 msgstr ""
 "Цей застосунок має невільну (власницьку) ліцензію. Це означає, що початковий "
 "код не є публічно доступним і не може бути перевіреним на безпечність."
+
+#: src/bz-full-view.c:478
+#, c-format
+msgid "Version %s"
+msgstr "Версія %s"
+
+#: src/bz-full-view.c:495
+msgid "No details for this release"
+msgstr "Без подробиць"
 
 #: src/bz-inspector.blp:5
 msgid "Bazaar Inspector"
