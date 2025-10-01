@@ -499,6 +499,27 @@ bz_data_graph_class_init (BzDataGraphClass *klass)
 }
 
 static void
+update_cursor (BzDataGraph *self,
+               gdouble      x,
+               gdouble      y)
+{
+  double widget_width  = gtk_widget_get_width (GTK_WIDGET (self));
+  double widget_height = gtk_widget_get_height (GTK_WIDGET (self));
+
+  if (x >= LABEL_MARGIN &&
+      y >= 0.0 &&
+      x < widget_width - LABEL_MARGIN &&
+      y < widget_height - LABEL_MARGIN)
+    {
+      gtk_widget_set_cursor_from_name (GTK_WIDGET (self), "crosshair");
+    }
+  else
+    {
+      gtk_widget_set_cursor (GTK_WIDGET (self), NULL);
+    }
+}
+
+static void
 motion_enter (BzDataGraph              *self,
               gdouble                   x,
               gdouble                   y,
@@ -506,6 +527,7 @@ motion_enter (BzDataGraph              *self,
 {
   self->motion_x = x;
   self->motion_y = y;
+  update_cursor (self, x, y);
   gtk_widget_queue_draw (GTK_WIDGET (self));
 }
 
@@ -517,6 +539,7 @@ motion_event (BzDataGraph              *self,
 {
   self->motion_x = x;
   self->motion_y = y;
+  update_cursor (self, x, y);
   gtk_widget_queue_draw (GTK_WIDGET (self));
 }
 
@@ -526,14 +549,13 @@ motion_leave (BzDataGraph              *self,
 {
   self->motion_x = -1.0;
   self->motion_y = -1.0;
+  gtk_widget_set_cursor (GTK_WIDGET (self), NULL);
   gtk_widget_queue_draw (GTK_WIDGET (self));
 }
 
 static void
 bz_data_graph_init (BzDataGraph *self)
 {
-  gtk_widget_set_cursor_from_name (GTK_WIDGET (self), "crosshair");
-
   self->motion = gtk_event_controller_motion_new ();
   g_signal_connect_swapped (self->motion, "enter", G_CALLBACK (motion_enter), self);
   g_signal_connect_swapped (self->motion, "motion", G_CALLBACK (motion_event), self);
