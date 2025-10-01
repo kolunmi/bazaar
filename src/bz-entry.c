@@ -1859,7 +1859,7 @@ download_stats_per_day_foreach (JsonObject  *object,
   date = g_date_time_new_from_iso8601 (iso_with_tz, NULL);
 
   if (date != NULL)
-    formatted_label = g_date_time_format (date, "%d %b");
+    formatted_label = g_date_time_format (date, "%-d %b");
   else
     formatted_label = g_strdup (member_name);
 
