@@ -1845,18 +1845,29 @@ download_stats_per_day_foreach (JsonObject  *object,
                                 JsonNode    *member_node,
                                 GListStore  *store)
 {
-  double independent            = 0;
-  double dependent              = 0;
-  g_autoptr (BzDataPoint) point = NULL;
+  double independent                 = 0;
+  double dependent                   = 0;
+  g_autoptr (BzDataPoint) point      = NULL;
+  g_autoptr (GDateTime) date         = NULL;
+  g_autofree char *formatted_label   = NULL;
+  g_autofree char *iso_with_tz       = NULL;
 
   independent = g_list_model_get_n_items (G_LIST_MODEL (store));
   dependent   = json_node_get_int (member_node);
+
+  iso_with_tz = g_strdup_printf ("%sT00:00:00Z", member_name);
+  date = g_date_time_new_from_iso8601 (iso_with_tz, NULL);
+
+  if (date != NULL)
+    formatted_label = g_date_time_format (date, "%d %b");
+  else
+    formatted_label = g_strdup (member_name);
 
   point = g_object_new (
       BZ_TYPE_DATA_POINT,
       "independent", independent,
       "dependent", dependent,
-      "label", member_name,
+      "label", formatted_label,
       NULL);
   g_list_store_append (store, point);
 }

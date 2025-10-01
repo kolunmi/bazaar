@@ -16,33 +16,9 @@ template $BzStatsDialog: Adw.Dialog {
       };
     }
 
-    [bottom]
-    Adw.HeaderBar {
-      show-start-title-buttons: false;
-      show-end-title-buttons: false;
-      show-title: false;
-
-      [end]
-      Box {
-        spacing: 10;
-        homogeneous: true;
-
-        CheckButton {
-          label: _("Minimize Lower Bound");
-          active: bind graph.has-dependent-min bidirectional;
-        }
-
-        CheckButton {
-          label: _("Maximize Upper Bound");
-          active: bind graph.has-dependent-max bidirectional;
-        }
-      }
-    }
-
     content: $BzDataGraph graph {
       model: bind template.model;
-      dependent-min: "0.0";
-      dependent-max: "10000.0";
+      tooltip-prefix:_("Installs:");
     };
   };
 }

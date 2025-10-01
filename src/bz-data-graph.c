@@ -24,8 +24,10 @@
 
 #include "bz-data-graph.h"
 #include "bz-data-point.h"
+#include <math.h>
 
 #define LABEL_MARGIN 75.0
+#define CARD_EDGE_THRESHOLD 160
 
 struct _BzDataGraph
 {
@@ -34,26 +36,17 @@ struct _BzDataGraph
   GListModel *model;
   char       *independent_axis_label;
   char       *dependent_axis_label;
+  char       *tooltip_prefix;
   int         independent_decimals;
   int         dependent_decimals;
-  gboolean    has_dependent_min;
-  double      dependent_min;
-  gboolean    has_dependent_max;
-  double      dependent_max;
   double      transition_progress;
+  double      rounded_axis_max;
 
   GskPath        *path;
   GskPathMeasure *path_measure;
   GskRenderNode  *fg;
 
   gboolean wants_animate_open;
-  double   data_dependent_min;
-  double   data_dependent_max;
-  double   actual_dependent_min;
-  double   actual_dependent_max;
-
-  AdwAnimation *lower_bound_anim;
-  AdwAnimation *upper_bound_anim;
 
   GtkEventController *motion;
   double              motion_x;
@@ -69,12 +62,9 @@ enum
   PROP_MODEL,
   PROP_INDEPENDENT_AXIS_LABEL,
   PROP_DEPENDENT_AXIS_LABEL,
+  PROP_TOOLTIP_PREFIX,
   PROP_INDEPENDENT_DECIMALS,
   PROP_DEPENDENT_DECIMALS,
-  PROP_HAS_DEPENDENT_MIN,
-  PROP_DEPENDENT_MIN,
-  PROP_HAS_DEPENDENT_MAX,
-  PROP_DEPENDENT_MAX,
   PROP_TRANSITION_PROGRESS,
 
   LAST_PROP
@@ -89,27 +79,12 @@ items_changed (GListModel  *model,
                BzDataGraph *self);
 
 static void
-animate_lower_bound_cb (double       value,
-                        BzDataGraph *self);
-
-static void
-animate_upper_bound_cb (double       value,
-                        BzDataGraph *self);
-
-static void
 refresh_path (BzDataGraph *self,
               double       width,
               double       height);
 
-static void
-animate_lower_bound (BzDataGraph *self,
-                     double       from,
-                     double       to);
-
-static void
-animate_upper_bound (BzDataGraph *self,
-                     double       from,
-                     double       to);
+static double
+calculate_axis_tick_value (double value, gboolean round_up);
 
 static void
 bz_data_graph_dispose (GObject *object)
@@ -123,11 +98,10 @@ bz_data_graph_dispose (GObject *object)
   g_clear_object (&self->model);
   g_clear_pointer (&self->independent_axis_label, g_free);
   g_clear_pointer (&self->dependent_axis_label, g_free);
+  g_clear_pointer (&self->tooltip_prefix, g_free);
   g_clear_pointer (&self->path, gsk_path_unref);
   g_clear_pointer (&self->path_measure, gsk_path_measure_unref);
   g_clear_pointer (&self->fg, gsk_render_node_unref);
-  g_clear_object (&self->lower_bound_anim);
-  g_clear_object (&self->upper_bound_anim);
 
   G_OBJECT_CLASS (bz_data_graph_parent_class)->dispose (object);
 }
@@ -151,23 +125,14 @@ bz_data_graph_get_property (GObject    *object,
     case PROP_DEPENDENT_AXIS_LABEL:
       g_value_set_string (value, bz_data_graph_get_dependent_axis_label (self));
       break;
+    case PROP_TOOLTIP_PREFIX:
+      g_value_set_string (value, bz_data_graph_get_tooltip_prefix (self));
+      break;
     case PROP_INDEPENDENT_DECIMALS:
       g_value_set_int (value, bz_data_graph_get_independent_decimals (self));
       break;
     case PROP_DEPENDENT_DECIMALS:
       g_value_set_int (value, bz_data_graph_get_dependent_decimals (self));
-      break;
-    case PROP_HAS_DEPENDENT_MIN:
-      g_value_set_boolean (value, bz_data_graph_get_has_dependent_min (self));
-      break;
-    case PROP_DEPENDENT_MIN:
-      g_value_set_double (value, bz_data_graph_get_dependent_min (self));
-      break;
-    case PROP_HAS_DEPENDENT_MAX:
-      g_value_set_boolean (value, bz_data_graph_get_has_dependent_max (self));
-      break;
-    case PROP_DEPENDENT_MAX:
-      g_value_set_double (value, bz_data_graph_get_dependent_max (self));
       break;
     case PROP_TRANSITION_PROGRESS:
       g_value_set_double (value, bz_data_graph_get_transition_progress (self));
@@ -196,23 +161,14 @@ bz_data_graph_set_property (GObject      *object,
     case PROP_DEPENDENT_AXIS_LABEL:
       bz_data_graph_set_dependent_axis_label (self, g_value_get_string (value));
       break;
+    case PROP_TOOLTIP_PREFIX:
+      bz_data_graph_set_tooltip_prefix (self, g_value_get_string (value));
+      break;
     case PROP_INDEPENDENT_DECIMALS:
       bz_data_graph_set_independent_decimals (self, g_value_get_int (value));
       break;
     case PROP_DEPENDENT_DECIMALS:
       bz_data_graph_set_dependent_decimals (self, g_value_get_int (value));
-      break;
-    case PROP_HAS_DEPENDENT_MIN:
-      bz_data_graph_set_has_dependent_min (self, g_value_get_boolean (value));
-      break;
-    case PROP_DEPENDENT_MIN:
-      bz_data_graph_set_dependent_min (self, g_value_get_double (value));
-      break;
-    case PROP_HAS_DEPENDENT_MAX:
-      bz_data_graph_set_has_dependent_max (self, g_value_get_boolean (value));
-      break;
-    case PROP_DEPENDENT_MAX:
-      bz_data_graph_set_dependent_max (self, g_value_get_double (value));
       break;
     case PROP_TRANSITION_PROGRESS:
       bz_data_graph_set_transition_progress (self, g_value_get_double (value));
@@ -273,7 +229,7 @@ bz_data_graph_snapshot (GtkWidget   *widget,
       transitioning = gsk_path_builder_to_path (builder);
     }
 
-  stroke = gsk_stroke_new (6.0);
+  stroke = gsk_stroke_new (3.0);
   gsk_stroke_set_line_cap (stroke, GSK_LINE_CAP_ROUND);
 
   gtk_snapshot_save (snapshot);
@@ -311,56 +267,156 @@ bz_data_graph_snapshot (GtkWidget   *widget,
       guint hovered_idx                      = 0;
       g_autoptr (BzDataPoint) point          = NULL;
       g_autoptr (GskStroke) crosshair_stroke = NULL;
-      g_autoptr (PangoLayout) layout         = NULL;
-      g_autofree char *layout_text           = NULL;
+      g_autoptr (PangoLayout) layout1        = NULL;
+      g_autoptr (PangoLayout) layout2        = NULL;
+      g_autofree char *line1_text            = NULL;
+      g_autofree char *line2_text            = NULL;
+      double graph_height                    = 0.0;
+      double graph_width                     = 0.0;
+      double fraction                        = 0.0;
+      double point_x                         = 0.0;
+      double point_y                         = 0.0;
+      GskRoundedRect rounded_rect            = { { { 0 } } };
+      GdkRGBA line_color                     = { 0 };
+      PangoRectangle text1_extents           = { 0 };
+      PangoRectangle text2_extents           = { 0 };
+      GskRoundedRect text_bg_rect            = { { { 0 } } };
+      GdkRGBA text_bg_color                  = { 0 };
+      GdkRGBA shadow_color                   = { 0 };
+      double card_width                      = 0.0;
+      double card_height                     = 0.0;
+      double card_x                          = 0.0;
+      double card_y                          = 0.0;
+      double rounded_axis_max                        = 0.0;
+      const char *prefix                     = NULL;
 
       n_items     = g_list_model_get_n_items (self->model);
-      hovered_idx = floor ((double) n_items *
-                           (self->motion_x - LABEL_MARGIN) /
-                           (widget_width - LABEL_MARGIN * 2.0));
-      hovered_idx = CLAMP (hovered_idx, 0, n_items - 1);
+      graph_width = widget_width - LABEL_MARGIN * 2.0;
+      fraction = (self->motion_x - LABEL_MARGIN) / graph_width;
+      hovered_idx = floor ((double) n_items * fraction);
+      if (hovered_idx >= n_items)
+        hovered_idx = n_items - 1;
 
       point = g_list_model_get_item (self->model, hovered_idx);
 
-      crosshair_stroke = gsk_stroke_new (2.0);
-      /* Docs: If `n_dash` is 1, an alternating "on" and "off" pattern with the
-         single dash length provided is assumed. */
-      gsk_stroke_set_dash (crosshair_stroke, (const float[1]) { 5.0 }, 1);
+      if (self->rounded_axis_max > 0.0)
+        {
+          rounded_axis_max = self->rounded_axis_max;
+        }
+      else
+        {
+          double max_dependent = 0.0;
+          for (guint i = 0; i < n_items; i++)
+            {
+              g_autoptr (BzDataPoint) p = g_list_model_get_item (self->model, i);
+              double dep = bz_data_point_get_dependent (p);
+              if (i == 0 || dep > max_dependent)
+                max_dependent = dep;
+            }
+          rounded_axis_max = calculate_axis_tick_value (max_dependent, TRUE);
+        }
 
-#define APPEND_LINE(x0, y0, x1, y1)                                               \
-  G_STMT_START                                                                    \
-  {                                                                               \
-    g_autoptr (GskPathBuilder) builder = NULL;                                    \
-    g_autoptr (GskPath) path           = NULL;                                    \
-                                                                                  \
-    builder = gsk_path_builder_new ();                                            \
-    gsk_path_builder_move_to (builder, (x0), (y0));                               \
-    gsk_path_builder_line_to (builder, (x1), (y1));                               \
-                                                                                  \
-    path = gsk_path_builder_to_path (builder);                                    \
-    gtk_snapshot_append_stroke (snapshot, path, crosshair_stroke, &widget_color); \
-  }                                                                               \
+      graph_height = widget_height - LABEL_MARGIN;
+
+      point_x = ((double) hovered_idx / (double) (n_items - 1)) * graph_width + LABEL_MARGIN;
+      point_y = (1.0 - bz_data_point_get_dependent (point) / rounded_axis_max) * graph_height;
+
+      line_color = widget_color;
+      line_color.alpha = 0.5;
+
+      crosshair_stroke = gsk_stroke_new (1.0);
+
+#define APPEND_LINE(x0, y0, x1, y1, color)                                   \
+  G_STMT_START                                                               \
+  {                                                                          \
+    g_autoptr (GskPathBuilder) builder = NULL;                               \
+    g_autoptr (GskPath) path           = NULL;                               \
+                                                                             \
+    builder = gsk_path_builder_new ();                                       \
+    gsk_path_builder_move_to (builder, (x0), (y0));                          \
+    gsk_path_builder_line_to (builder, (x1), (y1));                          \
+                                                                             \
+    path = gsk_path_builder_to_path (builder);                               \
+    gtk_snapshot_append_stroke (snapshot, path, crosshair_stroke, (color));  \
+  }                                                                          \
   G_STMT_END
 
-      APPEND_LINE (self->motion_x, 0.0, self->motion_x, widget_height - LABEL_MARGIN);
-      APPEND_LINE (LABEL_MARGIN, self->motion_y, widget_width - LABEL_MARGIN, self->motion_y);
+      APPEND_LINE (self->motion_x, 0.0, self->motion_x, widget_height - LABEL_MARGIN, &line_color);
 
 #undef APPEND_LINE
 
-      layout      = pango_layout_new (gtk_widget_get_pango_context (widget));
-      layout_text = g_strdup_printf (
-          "( %s, %0.0f )",
-          bz_data_point_get_label (point),
-          bz_data_point_get_dependent (point));
-      pango_layout_set_text (layout, layout_text, -1);
+      gsk_rounded_rect_init_from_rect (
+          &rounded_rect,
+          &GRAPHENE_RECT_INIT (point_x - 4.0, point_y - 4.0, 8.0, 8.0),
+          4.0);
+      gtk_snapshot_push_rounded_clip (snapshot, &rounded_rect);
+      gtk_snapshot_append_color (snapshot, accent_color, &rounded_rect.bounds);
+      gtk_snapshot_pop (snapshot);
+
+      layout1   = pango_layout_new (gtk_widget_get_pango_context (widget));
+      line1_text = g_strdup (bz_data_point_get_label (point));
+      pango_layout_set_text (layout1, line1_text, -1);
+      pango_layout_get_pixel_extents (layout1, NULL, &text1_extents);
+
+      prefix = self->tooltip_prefix != NULL ? self->tooltip_prefix : ("");
+      layout2   = pango_layout_new (gtk_widget_get_pango_context (widget));
+      line2_text = g_strdup_printf ("%s %.0f", prefix, bz_data_point_get_dependent (point));
+      pango_layout_set_text (layout2, line2_text, -1);
+      pango_layout_get_pixel_extents (layout2, NULL, &text2_extents);
+
+      card_width = MAX (text1_extents.width, text2_extents.width) + 16.0;
+      card_height = text1_extents.height + text2_extents.height + 20.0;
+
+      if (widget_width - self->motion_x < CARD_EDGE_THRESHOLD)
+        {
+          card_x = self->motion_x - card_width - 10.0;
+        }
+      else
+        {
+          card_x = self->motion_x + 10.0;
+        }
+      card_y = self->motion_y + 10.0;
+
+      // The proper way is to make each actual element it's own widget or Gizmo
+      // but that's alot of work
+      if (adw_style_manager_get_dark(style_manager)) {
+          text_bg_color = (GdkRGBA){ 0.18, 0.18, 0.2, 1.0 };
+          shadow_color = (GdkRGBA){ 0.0, 0.0, 0.06, 0.20 };
+      } else {
+          text_bg_color = (GdkRGBA){ 1.0, 1.0, 1.0, 1.0 };
+          shadow_color = (GdkRGBA){ 0.0, 0.0, 0.0, 0.20 };
+      }
+
+      gsk_rounded_rect_init_from_rect (
+          &text_bg_rect,
+          &GRAPHENE_RECT_INIT (card_x, card_y, card_width, card_height),
+          6.0);
+
+      gtk_snapshot_append_outset_shadow (
+          snapshot,
+          &text_bg_rect,
+          &shadow_color,
+          0.0,
+          0.0,
+          1.0,
+          3.0);
+
+      gtk_snapshot_push_rounded_clip (snapshot, &text_bg_rect);
+      gtk_snapshot_append_color (snapshot, &text_bg_color, &text_bg_rect.bounds);
+      gtk_snapshot_pop (snapshot);
 
       gtk_snapshot_save (snapshot);
       gtk_snapshot_translate (
           snapshot,
-          &GRAPHENE_POINT_INIT (
-              self->motion_x + 5.0,
-              self->motion_y + 5.0));
-      gtk_snapshot_append_layout (snapshot, layout, &widget_color);
+          &GRAPHENE_POINT_INIT (card_x + 8.0, card_y + 8.0));
+      gtk_snapshot_append_layout (snapshot, layout1, &widget_color);
+      gtk_snapshot_restore (snapshot);
+
+      gtk_snapshot_save (snapshot);
+      gtk_snapshot_translate (
+          snapshot,
+          &GRAPHENE_POINT_INIT (card_x + 8.0, card_y + 8.0 + text1_extents.height + 4.0));
+      gtk_snapshot_append_layout (snapshot, layout2, &widget_color);
       gtk_snapshot_restore (snapshot);
     }
 
@@ -409,6 +465,12 @@ bz_data_graph_class_init (BzDataGraphClass *klass)
           NULL, NULL, NULL,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
+  props[PROP_TOOLTIP_PREFIX] =
+      g_param_spec_string (
+          "tooltip-prefix",
+          NULL, NULL, NULL,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
   props[PROP_INDEPENDENT_DECIMALS] =
       g_param_spec_int (
           "independent-decimals",
@@ -421,32 +483,6 @@ bz_data_graph_class_init (BzDataGraphClass *klass)
           "dependent-decimals",
           NULL, NULL,
           -1, 4, (int) 0,
-          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
-
-  props[PROP_HAS_DEPENDENT_MIN] =
-      g_param_spec_boolean (
-          "has-dependent-min",
-          NULL, NULL, FALSE,
-          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
-
-  props[PROP_DEPENDENT_MIN] =
-      g_param_spec_double (
-          "dependent-min",
-          NULL, NULL,
-          0.0, G_MAXDOUBLE, 0.0,
-          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
-
-  props[PROP_HAS_DEPENDENT_MAX] =
-      g_param_spec_boolean (
-          "has-dependent-max",
-          NULL, NULL, FALSE,
-          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
-
-  props[PROP_DEPENDENT_MAX] =
-      g_param_spec_double (
-          "dependent-max",
-          NULL, NULL,
-          0.0, G_MAXDOUBLE, 1.0,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   props[PROP_TRANSITION_PROGRESS] =
@@ -496,33 +532,7 @@ motion_leave (BzDataGraph              *self,
 static void
 bz_data_graph_init (BzDataGraph *self)
 {
-  AdwAnimationTarget *lower_bound_transition_target = NULL;
-  AdwSpringParams    *lower_bound_transition_spring = NULL;
-  g_autoptr (AdwAnimation) lower_bound_transition   = NULL;
-  AdwAnimationTarget *upper_bound_transition_target = NULL;
-  AdwSpringParams    *upper_bound_transition_spring = NULL;
-  g_autoptr (AdwAnimation) upper_bound_transition   = NULL;
-
   gtk_widget_set_cursor_from_name (GTK_WIDGET (self), "crosshair");
-
-  self->dependent_min = 0.0;
-  self->dependent_max = 1.0;
-
-  lower_bound_transition_target = adw_callback_animation_target_new (
-      (AdwAnimationTargetFunc) animate_lower_bound_cb, self, NULL);
-  lower_bound_transition_spring = adw_spring_params_new (1.0, 1.0, 300.0);
-  lower_bound_transition        = adw_spring_animation_new (
-      GTK_WIDGET (self), 0.0, 0.0, lower_bound_transition_spring, lower_bound_transition_target);
-  adw_spring_animation_set_epsilon (ADW_SPRING_ANIMATION (lower_bound_transition), 0.000001);
-  self->lower_bound_anim = g_steal_pointer (&lower_bound_transition);
-
-  upper_bound_transition_target = adw_callback_animation_target_new (
-      (AdwAnimationTargetFunc) animate_upper_bound_cb, self, NULL);
-  upper_bound_transition_spring = adw_spring_params_new (1.0, 1.0, 300.0);
-  upper_bound_transition        = adw_spring_animation_new (
-      GTK_WIDGET (self), 0.0, 0.0, upper_bound_transition_spring, upper_bound_transition_target);
-  adw_spring_animation_set_epsilon (ADW_SPRING_ANIMATION (upper_bound_transition), 0.000001);
-  self->upper_bound_anim = g_steal_pointer (&upper_bound_transition);
 
   self->motion = gtk_event_controller_motion_new ();
   g_signal_connect_swapped (self->motion, "enter", G_CALLBACK (motion_enter), self);
@@ -532,6 +542,7 @@ bz_data_graph_init (BzDataGraph *self)
 
   self->motion_x = -1.0;
   self->motion_y = -1.0;
+  self->rounded_axis_max = 0.0;
 }
 
 GtkWidget *
@@ -561,6 +572,13 @@ bz_data_graph_get_dependent_axis_label (BzDataGraph *self)
   return self->dependent_axis_label;
 }
 
+const char *
+bz_data_graph_get_tooltip_prefix (BzDataGraph *self)
+{
+  g_return_val_if_fail (BZ_IS_DATA_GRAPH (self), NULL);
+  return self->tooltip_prefix;
+}
+
 int
 bz_data_graph_get_independent_decimals (BzDataGraph *self)
 {
@@ -573,34 +591,6 @@ bz_data_graph_get_dependent_decimals (BzDataGraph *self)
 {
   g_return_val_if_fail (BZ_IS_DATA_GRAPH (self), 0);
   return self->dependent_decimals;
-}
-
-gboolean
-bz_data_graph_get_has_dependent_min (BzDataGraph *self)
-{
-  g_return_val_if_fail (BZ_IS_DATA_GRAPH (self), FALSE);
-  return self->has_dependent_min;
-}
-
-double
-bz_data_graph_get_dependent_min (BzDataGraph *self)
-{
-  g_return_val_if_fail (BZ_IS_DATA_GRAPH (self), 0.0);
-  return self->dependent_min;
-}
-
-gboolean
-bz_data_graph_get_has_dependent_max (BzDataGraph *self)
-{
-  g_return_val_if_fail (BZ_IS_DATA_GRAPH (self), FALSE);
-  return self->has_dependent_max;
-}
-
-double
-bz_data_graph_get_dependent_max (BzDataGraph *self)
-{
-  g_return_val_if_fail (BZ_IS_DATA_GRAPH (self), 0.0);
-  return self->dependent_max;
 }
 
 double
@@ -658,6 +648,20 @@ bz_data_graph_set_dependent_axis_label (BzDataGraph *self,
 }
 
 void
+bz_data_graph_set_tooltip_prefix (BzDataGraph *self,
+                                   const char  *tooltip_prefix)
+{
+  g_return_if_fail (BZ_IS_DATA_GRAPH (self));
+
+  g_clear_pointer (&self->tooltip_prefix, g_free);
+  if (tooltip_prefix != NULL)
+    self->tooltip_prefix = g_strdup (tooltip_prefix);
+
+  gtk_widget_queue_draw (GTK_WIDGET (self));
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TOOLTIP_PREFIX]);
+}
+
+void
 bz_data_graph_set_independent_decimals (BzDataGraph *self,
                                         int          independent_decimals)
 {
@@ -679,68 +683,6 @@ bz_data_graph_set_dependent_decimals (BzDataGraph *self,
 
   gtk_widget_queue_allocate (GTK_WIDGET (self));
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DEPENDENT_DECIMALS]);
-}
-
-void
-bz_data_graph_set_has_dependent_min (BzDataGraph *self,
-                                     gboolean     has_dependent_min)
-{
-  g_return_if_fail (BZ_IS_DATA_GRAPH (self));
-
-  self->has_dependent_min = has_dependent_min;
-  animate_lower_bound (
-      self,
-      self->actual_dependent_min,
-      has_dependent_min
-          ? self->dependent_min
-          : self->data_dependent_min);
-
-  gtk_widget_queue_allocate (GTK_WIDGET (self));
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_DEPENDENT_MIN]);
-}
-
-void
-bz_data_graph_set_dependent_min (BzDataGraph *self,
-                                 double       dependent_min)
-{
-  g_autoptr (AdwAnimation) transition = NULL;
-
-  g_return_if_fail (BZ_IS_DATA_GRAPH (self));
-
-  self->dependent_min = dependent_min;
-  animate_lower_bound (self, self->dependent_min, dependent_min);
-
-  gtk_widget_queue_allocate (GTK_WIDGET (self));
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DEPENDENT_MIN]);
-}
-
-void
-bz_data_graph_set_has_dependent_max (BzDataGraph *self,
-                                     gboolean     has_dependent_max)
-{
-  g_return_if_fail (BZ_IS_DATA_GRAPH (self));
-
-  self->has_dependent_max = has_dependent_max;
-  if (has_dependent_max)
-    animate_upper_bound (self, self->actual_dependent_max, self->dependent_max);
-  else
-    animate_upper_bound (self, self->actual_dependent_max, self->data_dependent_max);
-
-  gtk_widget_queue_allocate (GTK_WIDGET (self));
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_DEPENDENT_MAX]);
-}
-
-void
-bz_data_graph_set_dependent_max (BzDataGraph *self,
-                                 double       dependent_max)
-{
-  g_return_if_fail (BZ_IS_DATA_GRAPH (self));
-
-  self->dependent_max = dependent_max;
-  animate_upper_bound (self, self->dependent_max, dependent_max);
-
-  gtk_widget_queue_allocate (GTK_WIDGET (self));
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DEPENDENT_MAX]);
 }
 
 void
@@ -774,20 +716,36 @@ items_changed (GListModel  *model,
   gtk_widget_queue_allocate (GTK_WIDGET (self));
 }
 
-static void
-animate_lower_bound_cb (double       value,
-                        BzDataGraph *self)
+static double
+calculate_axis_tick_value (double value, gboolean round_up)
 {
-  self->actual_dependent_min = value;
-  gtk_widget_queue_allocate (GTK_WIDGET (self));
-}
+  double exponent = floor (log10 (value));
+  double fraction = value / pow (10, exponent);
+  double rounded_axis_fraction;
+  if (round_up)
+    {
+      if (fraction <= 1.0)
+        rounded_axis_fraction = 1.0;
+      else if (fraction <= 2.0)
+        rounded_axis_fraction = 2.0;
+      else if (fraction <= 5.0)
+        rounded_axis_fraction = 5.0;
+      else
+        rounded_axis_fraction = 10.0;
+    }
+  else
+    {
+      if (fraction < 1.5)
+        rounded_axis_fraction = 1.0;
+      else if (fraction < 3.0)
+        rounded_axis_fraction = 2.0;
+      else if (fraction < 7.0)
+        rounded_axis_fraction = 5.0;
+      else
+        rounded_axis_fraction = 10.0;
+    }
 
-static void
-animate_upper_bound_cb (double       value,
-                        BzDataGraph *self)
-{
-  self->actual_dependent_max = value;
-  gtk_widget_queue_allocate (GTK_WIDGET (self));
+  return rounded_axis_fraction * pow (10, exponent);
 }
 
 static void
@@ -798,18 +756,19 @@ refresh_path (BzDataGraph *self,
   guint             n_items                = 0;
   double            min_independent        = 0.0;
   double            max_independent        = 0.0;
-  double            min_dependent          = 0.0;
   double            max_dependent          = 0.0;
   PangoContext     *pango                  = NULL;
   PangoFontMetrics *metrics                = NULL;
   double            font_height            = 0.0;
   int               independent_label_step = 0;
-  int               dependent_label_step   = 0;
   g_autoptr (GskPathBuilder) curve_builder = NULL;
   g_autoptr (GtkSnapshot) snapshot         = NULL;
   g_autoptr (GskPathBuilder) grid_builder  = NULL;
   g_autoptr (GskPath) grid                 = NULL;
   g_autoptr (GskStroke) grid_stroke        = NULL;
+  double            rounded_axis_max       = 0.0;
+  double            tick_spacing           = 0.0;
+  int               num_ticks              = 0;
 
   g_clear_pointer (&self->path, gsk_path_unref);
   g_clear_pointer (&self->path_measure, gsk_path_measure_unref);
@@ -838,38 +797,35 @@ refresh_path (BzDataGraph *self,
         {
           min_independent = independent;
           max_independent = independent;
-          min_dependent   = dependent;
           max_dependent   = dependent;
         }
       else
         {
           min_independent = MIN (independent, min_independent);
           max_independent = MAX (independent, max_independent);
-          min_dependent   = MIN (dependent, min_dependent);
           max_dependent   = MAX (dependent, max_dependent);
         }
     }
-  self->data_dependent_min = min_dependent;
-  self->data_dependent_max = max_dependent;
 
-  if (self->has_dependent_min ||
-      adw_animation_get_state (self->lower_bound_anim) == ADW_ANIMATION_PLAYING)
-    min_dependent = MIN (min_dependent, self->actual_dependent_min);
-  else
-    self->actual_dependent_min = min_dependent;
-
-  if (self->has_dependent_max ||
-      adw_animation_get_state (self->upper_bound_anim) == ADW_ANIMATION_PLAYING)
-    max_dependent = MAX (max_dependent, self->actual_dependent_max);
-  else
-    self->actual_dependent_max = max_dependent;
+  rounded_axis_max = calculate_axis_tick_value (max_dependent, TRUE);
 
   pango       = gtk_widget_get_pango_context (GTK_WIDGET (self));
   metrics     = pango_context_get_metrics (pango, NULL, NULL);
   font_height = (double) (int) PANGO_PIXELS_CEIL (pango_font_metrics_get_height (metrics));
   g_clear_pointer (&metrics, pango_font_metrics_unref);
+
+  num_ticks = floor (height / (font_height + 10.0));
+  if (num_ticks < 2)
+    num_ticks = 2;
+
+  tick_spacing = calculate_axis_tick_value (rounded_axis_max / (double) num_ticks, FALSE);
+  if (tick_spacing == 0.0)
+    tick_spacing = 1.0;
+
+  rounded_axis_max = ceil (max_dependent / tick_spacing) * tick_spacing;
+  self->rounded_axis_max = rounded_axis_max;
+
   independent_label_step = MAX (1, n_items / MAX (1, floor (width / MAX (font_height + 10.0, LABEL_MARGIN))));
-  dependent_label_step   = MAX (1, floor (height / (font_height + 10.0)));
 
   curve_builder = gsk_path_builder_new ();
   snapshot      = gtk_snapshot_new ();
@@ -888,7 +844,7 @@ refresh_path (BzDataGraph *self,
       dependent   = bz_data_point_get_dependent (point);
 
       x = (independent - min_independent) / (max_independent - min_independent) * width;
-      y = (1.0 - (dependent - min_dependent) / (max_dependent - min_dependent)) * height;
+      y = (1.0 - dependent / rounded_axis_max) * height;
 
       if (i == 0)
         gsk_path_builder_move_to (curve_builder, x, y);
@@ -931,7 +887,6 @@ refresh_path (BzDataGraph *self,
           gtk_snapshot_save (snapshot);
           gtk_snapshot_translate (snapshot, &GRAPHENE_POINT_INIT (x, height + LABEL_MARGIN / 10.0));
           gtk_snapshot_rotate (snapshot, 25.0);
-          /* white so we can modulate later without regenerating */
           gtk_snapshot_append_layout (snapshot, layout, &(GdkRGBA) { 1.0, 1.0, 1.0, 1.0 });
           gtk_snapshot_restore (snapshot);
 
@@ -944,16 +899,12 @@ refresh_path (BzDataGraph *self,
 
   gtk_snapshot_save (snapshot);
   gtk_snapshot_translate (snapshot, &GRAPHENE_POINT_INIT (-LABEL_MARGIN * 0.75, -font_height / 2.0));
-  for (int i = 0; i < dependent_label_step; i++)
+
+  for (double value = 0.0; value <= rounded_axis_max; value += tick_spacing)
     {
-      double value                   = 0.0;
       char   buf[32]                 = { 0 };
       g_autoptr (PangoLayout) layout = NULL;
-
-      value = min_dependent +
-              (double) (dependent_label_step - i) *
-                  ((max_dependent - min_dependent) /
-                   (double) dependent_label_step);
+      double y_pos                   = (1.0 - value / rounded_axis_max) * height;
 
       switch (self->dependent_decimals)
         {
@@ -977,14 +928,15 @@ refresh_path (BzDataGraph *self,
       layout = pango_layout_new (pango);
       pango_layout_set_text (layout, buf, -1);
 
+      gtk_snapshot_save (snapshot);
+      gtk_snapshot_translate (snapshot, &GRAPHENE_POINT_INIT (0, y_pos));
       gtk_snapshot_append_layout (snapshot, layout, &(GdkRGBA) { 1.0, 1.0, 1.0, 1.0 });
-      gtk_snapshot_translate (snapshot, &GRAPHENE_POINT_INIT (0, font_height + 10.0));
+      gtk_snapshot_restore (snapshot);
 
-      gsk_path_builder_move_to (grid_builder, 0.0, (font_height + 10.0) * (double) i);
-      gsk_path_builder_line_to (grid_builder, width, (font_height + 10.0) * (double) i);
+      gsk_path_builder_move_to (grid_builder, 0.0, y_pos);
+      gsk_path_builder_line_to (grid_builder, width, y_pos);
     }
-  gsk_path_builder_move_to (grid_builder, 0.0, height);
-  gsk_path_builder_line_to (grid_builder, width, height);
+
   gtk_snapshot_restore (snapshot);
 
   grid        = gsk_path_builder_to_path (grid_builder);
@@ -996,40 +948,4 @@ refresh_path (BzDataGraph *self,
   self->path         = gsk_path_builder_to_path (curve_builder);
   self->path_measure = gsk_path_measure_new (self->path);
   self->fg           = gtk_snapshot_to_node (snapshot);
-}
-
-static void
-animate_lower_bound (BzDataGraph *self,
-                     double       from,
-                     double       to)
-{
-  adw_spring_animation_set_initial_velocity (
-      ADW_SPRING_ANIMATION (self->lower_bound_anim),
-      adw_spring_animation_get_velocity (
-          ADW_SPRING_ANIMATION (self->lower_bound_anim)));
-  adw_spring_animation_set_value_from (
-      ADW_SPRING_ANIMATION (self->lower_bound_anim),
-      from);
-  adw_spring_animation_set_value_to (
-      ADW_SPRING_ANIMATION (self->lower_bound_anim),
-      to);
-  adw_animation_play (self->lower_bound_anim);
-}
-
-static void
-animate_upper_bound (BzDataGraph *self,
-                     double       from,
-                     double       to)
-{
-  adw_spring_animation_set_initial_velocity (
-      ADW_SPRING_ANIMATION (self->upper_bound_anim),
-      adw_spring_animation_get_velocity (
-          ADW_SPRING_ANIMATION (self->upper_bound_anim)));
-  adw_spring_animation_set_value_from (
-      ADW_SPRING_ANIMATION (self->upper_bound_anim),
-      from);
-  adw_spring_animation_set_value_to (
-      ADW_SPRING_ANIMATION (self->upper_bound_anim),
-      to);
-  adw_animation_play (self->upper_bound_anim);
 }
