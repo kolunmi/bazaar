@@ -222,9 +222,25 @@ format_timestamp (gpointer object,
                   guint64  value)
 {
   g_autoptr (GDateTime) date = NULL;
-
+  g_autoptr (GDateTime) now = NULL;
   date = g_date_time_new_from_unix_utc (value);
-  return g_date_time_format (date, _ ("%x"));
+  now = g_date_time_new_now_local ();
+  if (g_date_time_get_year (date) < g_date_time_get_year (now))
+    /* Translators: This is a date format for timestamps from previous years. Used in the app releases section.
+     * %B is the full month name, %e is the day, %Y is the year.
+     * Example: "October 1, 2025"
+     * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
+     * Please modify to make it sound natural in your locale.
+     *  */
+    return g_date_time_format (date, _ ("%B %-d, %Y"));
+  else
+    /* Translators: This is a date format for timestamps from the current year. Used in the app releases section.
+     * %B is the full month name, %e is the day.
+     * Example: "October 1"
+     * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
+     * Please modify to make it sound natural in your locale.
+     *  */
+    return g_date_time_format (date, _ ("%B %-d"));
 }
 
 static char *
@@ -460,9 +476,7 @@ create_release_row (const char *version,
   g_autofree char *date_str       = NULL;
   g_autofree char *version_text   = NULL;
 
-  date = g_date_time_new_from_unix_utc (timestamp);
-  if (date)
-    date_str = g_date_time_format (date, _ ("%x"));
+  date_str = format_timestamp (NULL, timestamp);
 
   row = ADW_ACTION_ROW (adw_action_row_new ());
   gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), FALSE);
