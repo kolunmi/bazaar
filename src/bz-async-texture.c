@@ -21,6 +21,7 @@
 #define G_LOG_DOMAIN "BAZAAR::ASYNC-TEXTURE"
 
 #define MAX_CONCURRENT_LOADS   32
+#define HTTP_TIMEOUT_SECONDS   5
 #define MAX_LOAD_RETRIES       3
 #define RETRY_INTERVAL_SECONDS 5
 
@@ -631,7 +632,7 @@ load_fiber_work (LoadData *data)
                       bz_download_worker_get_default (),
                       source, load_file),
                   /* increase the timeout as more failures stack up */
-                  dex_timeout_new_seconds ((data->retries + 1) * 3),
+                  dex_timeout_new_seconds ((data->retries + 1) * HTTP_TIMEOUT_SECONDS),
                   NULL),
               &local_error);
           if (!result)
@@ -689,6 +690,8 @@ load_finally (DexFuture      *future,
 {
   g_autoptr (GError) local_error  = NULL;
   g_autoptr (GMutexLocker) locker = NULL;
+
+  /* Apparently a race condition here? */
 
   locker = g_mutex_locker_new (&self->texture_mutex);
   dex_clear (&self->task);

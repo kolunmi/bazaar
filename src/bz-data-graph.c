@@ -45,13 +45,19 @@ struct _BzDataGraph
   GskPath        *path;
   GskPathMeasure *path_measure;
   GskRenderNode  *fg;
-  gboolean        wants_animate_open;
-  double          data_dependent_min;
-  double          data_dependent_max;
-  double          actual_dependent_min;
-  double          actual_dependent_max;
-  AdwAnimation   *lower_bound_anim;
-  AdwAnimation   *upper_bound_anim;
+
+  gboolean wants_animate_open;
+  double   data_dependent_min;
+  double   data_dependent_max;
+  double   actual_dependent_min;
+  double   actual_dependent_max;
+
+  AdwAnimation *lower_bound_anim;
+  AdwAnimation *upper_bound_anim;
+
+  GtkEventController *motion;
+  double              motion_x;
+  double              motion_y;
 };
 
 G_DEFINE_FINAL_TYPE (BzDataGraph, bz_data_graph, GTK_TYPE_WIDGET)
@@ -224,7 +230,7 @@ bz_data_graph_size_allocate (GtkWidget *widget,
 {
   BzDataGraph *self = BZ_DATA_GRAPH (widget);
 
-  refresh_path (self, (double) width - LABEL_MARGIN * 1.5, (double) height - LABEL_MARGIN);
+  refresh_path (self, (double) width - LABEL_MARGIN * 2.0, (double) height - LABEL_MARGIN);
   gtk_widget_queue_draw (widget);
 }
 
@@ -233,6 +239,8 @@ bz_data_graph_snapshot (GtkWidget   *widget,
                         GtkSnapshot *snapshot)
 {
   BzDataGraph     *self             = BZ_DATA_GRAPH (widget);
+  double           widget_width     = 0.0;
+  double           widget_height    = 0.0;
   AdwStyleManager *style_manager    = NULL;
   g_autoptr (GdkRGBA) accent_color  = NULL;
   GdkRGBA widget_color              = { 0 };
@@ -241,6 +249,9 @@ bz_data_graph_snapshot (GtkWidget   *widget,
 
   if (self->path == NULL)
     return;
+
+  widget_width  = gtk_widget_get_width (widget);
+  widget_height = gtk_widget_get_height (widget);
 
   style_manager = adw_style_manager_get_default ();
   accent_color  = adw_style_manager_get_accent_color_rgba (style_manager);
@@ -290,6 +301,68 @@ bz_data_graph_snapshot (GtkWidget   *widget,
         stroke,
         accent_color);
   gtk_snapshot_restore (snapshot);
+
+  if (self->motion_x >= LABEL_MARGIN &&
+      self->motion_y >= 0.0 &&
+      self->motion_x < widget_width - LABEL_MARGIN &&
+      self->motion_y < widget_height - LABEL_MARGIN)
+    {
+      guint n_items                          = 0;
+      guint hovered_idx                      = 0;
+      g_autoptr (BzDataPoint) point          = NULL;
+      g_autoptr (GskStroke) crosshair_stroke = NULL;
+      g_autoptr (PangoLayout) layout         = NULL;
+      g_autofree char *layout_text           = NULL;
+
+      n_items     = g_list_model_get_n_items (self->model);
+      hovered_idx = floor ((double) n_items *
+                           (self->motion_x - LABEL_MARGIN) /
+                           (widget_width - LABEL_MARGIN * 2.0));
+      hovered_idx = CLAMP (hovered_idx, 0, n_items - 1);
+
+      point = g_list_model_get_item (self->model, hovered_idx);
+
+      crosshair_stroke = gsk_stroke_new (2.0);
+      /* Docs: If `n_dash` is 1, an alternating "on" and "off" pattern with the
+         single dash length provided is assumed. */
+      gsk_stroke_set_dash (crosshair_stroke, (const float[1]) { 5.0 }, 1);
+
+#define APPEND_LINE(x0, y0, x1, y1)                                               \
+  G_STMT_START                                                                    \
+  {                                                                               \
+    g_autoptr (GskPathBuilder) builder = NULL;                                    \
+    g_autoptr (GskPath) path           = NULL;                                    \
+                                                                                  \
+    builder = gsk_path_builder_new ();                                            \
+    gsk_path_builder_move_to (builder, (x0), (y0));                               \
+    gsk_path_builder_line_to (builder, (x1), (y1));                               \
+                                                                                  \
+    path = gsk_path_builder_to_path (builder);                                    \
+    gtk_snapshot_append_stroke (snapshot, path, crosshair_stroke, &widget_color); \
+  }                                                                               \
+  G_STMT_END
+
+      APPEND_LINE (self->motion_x, 0.0, self->motion_x, widget_height - LABEL_MARGIN);
+      APPEND_LINE (LABEL_MARGIN, self->motion_y, widget_width - LABEL_MARGIN, self->motion_y);
+
+#undef APPEND_LINE
+
+      layout      = pango_layout_new (gtk_widget_get_pango_context (widget));
+      layout_text = g_strdup_printf (
+          "( %s, %0.0f )",
+          bz_data_point_get_label (point),
+          bz_data_point_get_dependent (point));
+      pango_layout_set_text (layout, layout_text, -1);
+
+      gtk_snapshot_save (snapshot);
+      gtk_snapshot_translate (
+          snapshot,
+          &GRAPHENE_POINT_INIT (
+              self->motion_x + 5.0,
+              self->motion_y + 5.0));
+      gtk_snapshot_append_layout (snapshot, layout, &widget_color);
+      gtk_snapshot_restore (snapshot);
+    }
 
   if (self->wants_animate_open)
     {
@@ -390,6 +463,37 @@ bz_data_graph_class_init (BzDataGraphClass *klass)
 }
 
 static void
+motion_enter (BzDataGraph              *self,
+              gdouble                   x,
+              gdouble                   y,
+              GtkEventControllerMotion *controller)
+{
+  self->motion_x = x;
+  self->motion_y = y;
+  gtk_widget_queue_draw (GTK_WIDGET (self));
+}
+
+static void
+motion_event (BzDataGraph              *self,
+              gdouble                   x,
+              gdouble                   y,
+              GtkEventControllerMotion *controller)
+{
+  self->motion_x = x;
+  self->motion_y = y;
+  gtk_widget_queue_draw (GTK_WIDGET (self));
+}
+
+static void
+motion_leave (BzDataGraph              *self,
+              GtkEventControllerMotion *controller)
+{
+  self->motion_x = -1.0;
+  self->motion_y = -1.0;
+  gtk_widget_queue_draw (GTK_WIDGET (self));
+}
+
+static void
 bz_data_graph_init (BzDataGraph *self)
 {
   AdwAnimationTarget *lower_bound_transition_target = NULL;
@@ -398,6 +502,8 @@ bz_data_graph_init (BzDataGraph *self)
   AdwAnimationTarget *upper_bound_transition_target = NULL;
   AdwSpringParams    *upper_bound_transition_spring = NULL;
   g_autoptr (AdwAnimation) upper_bound_transition   = NULL;
+
+  gtk_widget_set_cursor_from_name (GTK_WIDGET (self), "crosshair");
 
   self->dependent_min = 0.0;
   self->dependent_max = 1.0;
@@ -417,6 +523,15 @@ bz_data_graph_init (BzDataGraph *self)
       GTK_WIDGET (self), 0.0, 0.0, upper_bound_transition_spring, upper_bound_transition_target);
   adw_spring_animation_set_epsilon (ADW_SPRING_ANIMATION (upper_bound_transition), 0.000001);
   self->upper_bound_anim = g_steal_pointer (&upper_bound_transition);
+
+  self->motion = gtk_event_controller_motion_new ();
+  g_signal_connect_swapped (self->motion, "enter", G_CALLBACK (motion_enter), self);
+  g_signal_connect_swapped (self->motion, "motion", G_CALLBACK (motion_event), self);
+  g_signal_connect_swapped (self->motion, "leave", G_CALLBACK (motion_leave), self);
+  gtk_widget_add_controller (GTK_WIDGET (self), self->motion);
+
+  self->motion_x = -1.0;
+  self->motion_y = -1.0;
 }
 
 GtkWidget *
@@ -680,13 +795,13 @@ refresh_path (BzDataGraph *self,
               double       width,
               double       height)
 {
-  guint             n_items         = 0;
-  double            min_independent = 0.0;
-  double            max_independent = 0.0;
-  double            min_dependent   = 0.0;
-  double            max_dependent   = 0.0;
-  PangoContext     *pango           = NULL;
-  PangoFontMetrics *metrics;
+  guint             n_items                = 0;
+  double            min_independent        = 0.0;
+  double            max_independent        = 0.0;
+  double            min_dependent          = 0.0;
+  double            max_dependent          = 0.0;
+  PangoContext     *pango                  = NULL;
+  PangoFontMetrics *metrics                = NULL;
   double            font_height            = 0.0;
   int               independent_label_step = 0;
   int               dependent_label_step   = 0;

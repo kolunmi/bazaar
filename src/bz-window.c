@@ -277,17 +277,17 @@ full_view_remove_cb (BzWindow   *self,
 }
 
 static void
-installed_page_install_cb (BzWindow   *self,
-                           BzEntry    *entry,
-                           BzFullView *view)
+install_addon_cb (BzWindow   *self,
+                  BzEntry    *entry,
+                  BzFullView *view)
 {
   try_transact (self, entry, NULL, FALSE, NULL);
 }
 
 static void
-installed_page_remove_cb (BzWindow   *self,
-                          BzEntry    *entry,
-                          BzFullView *view)
+remove_addon_cb (BzWindow   *self,
+                 BzEntry    *entry,
+                 BzFullView *view)
 {
   try_transact (self, entry, NULL, TRUE, NULL);
 }
@@ -484,8 +484,8 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, search_widget_select_cb);
   gtk_widget_class_bind_template_callback (widget_class, full_view_install_cb);
   gtk_widget_class_bind_template_callback (widget_class, full_view_remove_cb);
-  gtk_widget_class_bind_template_callback (widget_class, installed_page_install_cb);
-  gtk_widget_class_bind_template_callback (widget_class, installed_page_remove_cb);
+  gtk_widget_class_bind_template_callback (widget_class, install_addon_cb);
+  gtk_widget_class_bind_template_callback (widget_class, remove_addon_cb);
   gtk_widget_class_bind_template_callback (widget_class, installed_page_show_cb);
   gtk_widget_class_bind_template_callback (widget_class, page_toggled_cb);
   gtk_widget_class_bind_template_callback (widget_class, breakpoint_apply_cb);

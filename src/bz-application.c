@@ -59,6 +59,7 @@ struct _BzApplication
   GtkMapListModel *content_configs_to_files;
 
   gboolean   running;
+  GWeakRef   main_window;
   DexFuture *refresh_task;
   GTimer    *init_timer;
   DexFuture *notif_watch;
@@ -124,6 +125,10 @@ watch_backend_notifs_fiber (BzApplication *self);
 static void
 refresh (BzApplication *self);
 
+static gboolean
+window_close_request (BzApplication *self,
+                      GtkWidget     *window);
+
 static GtkWindow *
 new_window (BzApplication *self);
 
@@ -175,6 +180,7 @@ bz_application_dispose (GObject *object)
   g_clear_pointer (&self->init_timer, g_timer_destroy);
   g_clear_pointer (&self->last_installed_set, g_hash_table_unref);
   g_clear_pointer (&self->ids_to_groups, g_hash_table_unref);
+  g_weak_ref_clear (&self->main_window);
 
   G_OBJECT_CLASS (bz_application_parent_class)->dispose (object);
 }
@@ -908,7 +914,9 @@ filter_application_ids (GtkStringObject *string,
 static void
 bz_application_init (BzApplication *self)
 {
-  self->running   = FALSE;
+  self->running = FALSE;
+  g_weak_ref_init (&self->main_window, NULL);
+
   self->gs_search = bz_gnome_shell_search_provider_new ();
 
   g_action_map_add_action_entries (
@@ -1845,13 +1853,54 @@ refresh (BzApplication *self)
 static GtkWindow *
 new_window (BzApplication *self)
 {
-  BzWindow *window = NULL;
+  BzWindow *window                  = NULL;
+  g_autoptr (GtkWidget) main_window = NULL;
+  int width                         = 0;
+  int height                        = 0;
 
   window = bz_window_new (self->state);
   gtk_application_add_window (GTK_APPLICATION (self), GTK_WINDOW (window));
 
+  main_window = g_weak_ref_get (&self->main_window);
+  if (main_window != NULL)
+    {
+      width  = gtk_widget_get_width (main_window);
+      height = gtk_widget_get_height (main_window);
+
+      g_settings_set (self->settings, "window-dimensions", "(ii)", width, height);
+    }
+  else
+    {
+      g_settings_get (self->settings, "window-dimensions", "(ii)", &width, &height);
+
+      g_signal_connect_object (
+          window, "close-request",
+          G_CALLBACK (window_close_request),
+          self, G_CONNECT_SWAPPED);
+      g_weak_ref_init (&self->main_window, window);
+    }
+
+  gtk_window_set_default_size (GTK_WINDOW (window), width, height);
   gtk_window_present (GTK_WINDOW (window));
+
   return GTK_WINDOW (window);
+}
+
+static gboolean
+window_close_request (BzApplication *self,
+                      GtkWidget     *window)
+{
+  int width  = 0;
+  int height = 0;
+
+  width  = gtk_widget_get_width (window);
+  height = gtk_widget_get_height (window);
+
+  g_settings_set (self->settings, "window-dimensions",
+                  "(ii)", width, height);
+
+  /* Do not stop other handlers from being invoked for the signal */
+  return FALSE;
 }
 
 static void

@@ -1,0 +1,33 @@
+using Gtk 4.0;
+using Adw 1;
+
+Adw.ShortcutsDialog shortcuts_dialog {
+  Adw.ShortcutsSection general_section {
+    title: C_("shortcut window", "General");
+
+    Adw.ShortcutsItem {
+      title: C_("shortcut window", "Open Search Dialog");
+      action-name: "app.search('')";
+    }
+
+    Adw.ShortcutsItem {
+      title: C_("shortcut window", "Refresh");
+      action-name: "app.refresh";
+    }
+
+    Adw.ShortcutsItem {
+      title: C_("shortcut window", "Toggle Transaction Manager");
+      action-name: "app.toggle-transactions";
+    }
+
+    Adw.ShortcutsItem {
+      title: C_("shortcut window", "Show Shortcuts");
+      action-name: "app.shortcuts";
+    }
+
+    Adw.ShortcutsItem {
+      title: C_("shortcut window", "Quit");
+      action-name: "app.quit";
+    }
+  }
+}

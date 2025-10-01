@@ -10,73 +10,84 @@ template $BzDetailedAppTile: Button {
   margin-end: 5;
   margin-top: 5;
   margin-bottom: 5;
+  child: Overlay {
 
-  child: Box {
-    margin-start: 12;
-    margin-end: 12;
-    margin-top: 12;
-    margin-bottom: 12;
-    orientation: horizontal;
-    spacing: 15;
-    can-focus: false;
-
+    [overlay]
     Image {
-      pixel-size: 128;
-      paintable: bind template.group as <$BzEntryGroup>.icon-paintable;
-
-      styles ["icon-dropshadow"]
+      halign: end;
+      valign: start;
+      icon-name: "app-installed-symbolic";
+      icon-size: normal;
+      visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
+      margin-top: 12;
+      margin-end: 12;
     }
 
     Box {
-      valign: center;
-      hexpand: true;
-      orientation: vertical;
-      spacing: 5;
+      margin-start: 12;
+      margin-end: 12;
+      margin-top: 12;
+      margin-bottom: 12;
+      orientation: horizontal;
+      spacing: 15;
+      can-focus: false;
+
+      Image {
+        pixel-size: 96;
+        paintable: bind template.group as <$BzEntryGroup>.icon-paintable;
+
+        styles ["icon-dropshadow"]
+      }
 
       Box {
-        orientation: horizontal;
-        spacing: 10;
+        valign: center;
+        hexpand: true;
+        orientation: vertical;
+        spacing: 5;
 
-        Label {
-          styles [
-            "title-1",
-          ]
+        Box {
+          orientation: horizontal;
+          spacing: 10;
 
-          xalign: 0.0;
-          ellipsize: end;
-          label: bind template.group as <$BzEntryGroup>.title;
-        }
-
-        Revealer {
-          transition-type: crossfade;
-          reveal-child: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
-          visible: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
-
-          child: Image {
+          Label {
             styles [
-              "accent",
+              "title-2",
             ]
 
-            has-tooltip: true;
-            tooltip-text: _("This flatpak is verified by the original developers of the software.");
-            icon-name: "verified-checkmark-symbolic";
-            icon-size: normal;
-          };
-        }
-      }
-      
-      Label {
-        styles [
-          "title-4",
-          "dimmed",
-        ]
+            xalign: 0.0;
+            ellipsize: end;
+            label: bind template.group as <$BzEntryGroup>.title;
+          }
 
-        xalign: 0.0;
-        wrap: true;
-        ellipsize: end;
-        max-width-chars: 25;
-        lines: 3;
-        label: bind template.group as <$BzEntryGroup>.description;
+          Revealer {
+            transition-type: crossfade;
+            reveal-child: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
+            visible: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
+
+            child: Image {
+              styles [
+                "accent",
+              ]
+
+              has-tooltip: true;
+              tooltip-text: _("This flatpak is verified by the original developers of the software.");
+              icon-name: "verified-checkmark-symbolic";
+              icon-size: normal;
+            };
+          }
+        }
+
+        Label {
+          xalign: 0.0;
+          yalign: 0.0;
+          wrap: true;
+          ellipsize: end;
+          vexpand: true;
+          lines: 3;
+          max-width-chars: 15;
+          single-line-mode: true;
+          label: bind template.group as <$BzEntryGroup>.description;
+        }
       }
     }
   };

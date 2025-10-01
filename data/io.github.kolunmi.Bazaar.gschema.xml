@@ -21,5 +21,10 @@
       <summary>Debounce Search Inputs</summary>
       <description>Add a delay before searching to prevent instant replies while typing</description>
     </key>
+    <key name="window-dimensions" type="(ii)">
+      <default>(1220, 900)</default>
+      <summary>Saved Window Dimensions</summary>
+      <description>The window dimensions to be used by the next Bazaar window</description>
+    </key>
   </schema>
 </schemalist>

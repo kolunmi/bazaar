@@ -10,76 +10,90 @@ template $BzAppTile: Button {
   margin-end: 5;
   margin-top: 5;
   margin-bottom: 5;
-
-  child: Box {
-    margin-start: 12;
-    margin-end: 12;
-    margin-top: 12;
-    margin-bottom: 12;
-    orientation: horizontal;
-    spacing: 15;
-    can-focus: false;
-
+  child: Overlay {
+    [overlay]
     Image {
-      pixel-size: 64;
-      paintable: bind template.group as <$BzEntryGroup>.icon-paintable;
-
-      styles ["icon-dropshadow"]
+      halign: end;
+      valign: start;
+      styles [
+        "success",
+      ]
+      icon-name: "app-installed-symbolic";
+      icon-size: normal;
+      visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
+      margin-top: 10;
+      margin-end: 10;
     }
 
     Box {
-      valign: center;
-      hexpand: true;
-      orientation: vertical;
-      spacing: 5;
+      margin-start: 12;
+      margin-end: 12;
+      margin-top: 12;
+      margin-bottom: 12;
+      orientation: horizontal;
+      spacing: 15;
+      can-focus: false;
 
-      Box {
-        orientation: horizontal;
-        spacing: 10;
+      Image {
+        pixel-size: 64;
+        paintable: bind template.group as <$BzEntryGroup>.icon-paintable;
 
-        Label {
-          css-name: "app-tile-title";
-          styles [
-            "title-2",
-          ]
-
-          xalign: 0.0;
-          ellipsize: end;
-          label: bind template.group as <$BzEntryGroup>.title;
-        }
-
-        Revealer {
-          transition-type: crossfade;
-          reveal-child: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
-          visible: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
-
-          child: Image {
-            css-name: "app-tile-verified-check";
-            styles [
-              "accent",
-            ]
-
-            has-tooltip: true;
-            tooltip-text: _("This flatpak is verified by the original developers of the software.");
-            icon-name: "verified-checkmark-symbolic";
-            icon-size: normal;
-          };
-        }
+        styles ["icon-dropshadow"]
       }
 
-      Label {
-        css-name: "app-tile-description";
-        styles [
-          "heading",
-          "dimmed",
-        ]
+      Box {
+        valign: center;
+        hexpand: true;
+        orientation: vertical;
+        spacing: 5;
 
-        xalign: 0.0;
-        wrap: true;
-        ellipsize: end;
-        max-width-chars: 35;
-        lines: 3;
-        label: bind template.group as <$BzEntryGroup>.description;
+        Box {
+          orientation: horizontal;
+          spacing: 10;
+
+          Label {
+            css-name: "app-tile-title";
+            styles [
+              "heading",
+            ]
+
+            xalign: 0.0;
+            ellipsize: end;
+            label: bind template.group as <$BzEntryGroup>.title;
+            max-width-chars: 18;
+          }
+
+          Revealer {
+            transition-type: crossfade;
+            reveal-child: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
+            visible: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
+
+            child: Image {
+              css-name: "app-tile-verified-check";
+              styles [
+                "accent",
+              ]
+
+              has-tooltip: true;
+              tooltip-text: _("This flatpak is verified by the original developers of the software.");
+              icon-name: "verified-checkmark-symbolic";
+              icon-size: normal;
+            };
+          }
+        }
+
+        Label {
+          css-name: "app-tile-description";
+          xalign: 0.0;
+          yalign: 0.0;
+          wrap: true;
+          ellipsize: end;
+          vexpand: true;
+          lines: 2;
+          max-width-chars: 15;
+          single-line-mode: true;
+          label: bind template.group as <$BzEntryGroup>.description;
+        }
       }
     }
   };

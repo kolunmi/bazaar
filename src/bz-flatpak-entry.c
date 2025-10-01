@@ -86,11 +86,9 @@ enum
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
 
-static void
-compile_appstream_description (XbNode  *node,
-                               GString *string,
-                               int      parent_kind,
-                               int      idx);
+static char *
+parse_appstream_to_markdown (const char *description_raw,
+                             GError    **error);
 
 static inline void
 append_markup_escaped (GString    *string,
@@ -463,50 +461,9 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
         }
 
       long_description_raw = as_component_get_description (component);
-      if (long_description_raw != NULL)
-        {
-          g_autoptr (XbSilo) silo          = NULL;
-          g_autoptr (XbNode) root          = NULL;
-          g_autoptr (GString) string       = NULL;
-          g_autoptr (GRegex) cleanup_regex = NULL;
-
-          silo = xb_silo_new_from_xml (long_description_raw, error);
-          if (silo == NULL)
-            return NULL;
-
-          root   = xb_silo_get_root (silo);
-          string = g_string_new (NULL);
-
-          /* TODO this sucks big time */
-          cleanup_regex = g_regex_new (
-              "^ +| +$|\\t+|\\A\\s+|\\s+\\z",
-              G_REGEX_MULTILINE,
-              G_REGEX_MATCH_DEFAULT,
-              NULL);
-          g_assert (cleanup_regex != NULL);
-
-          for (int i = 0; root != NULL; i++)
-            {
-              const char *tail = NULL;
-              XbNode     *next = NULL;
-
-              compile_appstream_description (root, string, NO_ELEMENT, i);
-
-              tail = xb_node_get_tail (root);
-              if (tail != NULL)
-                append_markup_escaped (string, tail);
-
-              next = xb_node_get_next (root);
-              g_object_unref (root);
-              root = next;
-            }
-
-          /* Could be better but bleh */
-          g_string_replace (string, "  ", "", 0);
-          long_description = g_regex_replace (
-              cleanup_regex, string->str, -1, 0,
-              "", G_REGEX_MATCH_DEFAULT, NULL);
-        }
+      long_description     = parse_appstream_to_markdown (long_description_raw, error);
+      if (long_description_raw != NULL && long_description == NULL)
+        return NULL;
 
       screenshots = as_component_get_screenshots_all (component);
       if (screenshots != NULL)
@@ -633,13 +590,18 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
 
           for (guint i = 0; i < releases_arr->len; i++)
             {
-              AsRelease *as_release         = NULL;
-              GPtrArray *as_issues          = NULL;
-              g_autoptr (GListStore) issues = NULL;
-              g_autoptr (BzRelease) release = NULL;
+              AsRelease       *as_release              = NULL;
+              GPtrArray       *as_issues               = NULL;
+              const char      *release_description_raw = NULL;
+              g_autofree char *release_description     = NULL;
+              g_autoptr (GListStore) issues            = NULL;
+              g_autoptr (BzRelease) release            = NULL;
 
               as_release = g_ptr_array_index (releases_arr, i);
               as_issues  = as_release_get_issues (as_release);
+
+              release_description_raw = as_release_get_description (as_release);
+              release_description     = parse_appstream_to_markdown (release_description_raw, NULL);
 
               if (as_issues != NULL && as_issues->len > 0)
                 {
@@ -663,6 +625,7 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
 
               release = g_object_new (
                   BZ_TYPE_RELEASE,
+                  "description", release_description,
                   "issues", issues,
                   "timestamp", as_release_get_timestamp (as_release),
                   "url", as_release_get_url (as_release, AS_RELEASE_URL_KIND_DETAILS),
@@ -1043,7 +1006,7 @@ compile_appstream_description (XbNode  *node,
           g_string_append_printf (string, "%d. ", idx);
           break;
         case UNORDERED_LIST:
-          g_string_append (string, "- ");
+          g_string_append (string, "• ");
           break;
         default:
           break;
@@ -1075,6 +1038,57 @@ compile_appstream_description (XbNode  *node,
     g_string_append (string, "</tt>");
   else
     g_string_append (string, "\n");
+}
+
+static char *
+parse_appstream_to_markdown (const char *description_raw,
+                             GError    **error)
+{
+  g_autoptr (XbSilo) silo          = NULL;
+  g_autoptr (XbNode) root          = NULL;
+  g_autoptr (GString) string       = NULL;
+  g_autoptr (GRegex) cleanup_regex = NULL;
+  g_autofree char *cleaned         = NULL;
+
+  if (description_raw == NULL)
+    return NULL;
+
+  silo = xb_silo_new_from_xml (description_raw, error);
+  if (silo == NULL)
+    return NULL;
+
+  root   = xb_silo_get_root (silo);
+  string = g_string_new (NULL);
+
+  cleanup_regex = g_regex_new (
+      "^ +| +$|\\t+|\\A\\s+|\\s+\\z",
+      G_REGEX_MULTILINE,
+      G_REGEX_MATCH_DEFAULT,
+      NULL);
+  g_assert (cleanup_regex != NULL);
+
+  for (int i = 0; root != NULL; i++)
+    {
+      const char *tail = NULL;
+      XbNode     *next = NULL;
+
+      compile_appstream_description (root, string, NO_ELEMENT, i);
+
+      tail = xb_node_get_tail (root);
+      if (tail != NULL)
+        append_markup_escaped (string, tail);
+
+      next = xb_node_get_next (root);
+      g_object_unref (root);
+      root = next;
+    }
+
+  g_string_replace (string, "  ", "", 0);
+  cleaned = g_regex_replace (
+      cleanup_regex, string->str, -1, 0,
+      "", G_REGEX_MATCH_DEFAULT, NULL);
+
+  return g_steal_pointer (&cleaned);
 }
 
 static inline void

@@ -23,6 +23,7 @@
 #include <glib/gi18n.h>
 #include <json-glib/json-glib.h>
 
+#include "bz-addons-dialog.h"
 #include "bz-decorated-screenshot.h"
 #include "bz-dynamic-list-view.h"
 #include "bz-env.h"
@@ -31,6 +32,7 @@
 #include "bz-full-view.h"
 #include "bz-global-state.h"
 #include "bz-lazy-async-texture-model.h"
+#include "bz-release.h"
 #include "bz-screenshot.h"
 #include "bz-section-view.h"
 #include "bz-share-dialog.h"
@@ -55,6 +57,7 @@ struct _BzFullView
   AdwViewStack *stack;
   GtkWidget    *forge_stars;
   GtkLabel     *forge_stars_label;
+  GtkListBox   *releases_box;
 };
 
 G_DEFINE_FINAL_TYPE (BzFullView, bz_full_view, ADW_TYPE_BIN)
@@ -77,6 +80,8 @@ enum
 {
   SIGNAL_INSTALL,
   SIGNAL_REMOVE,
+  SIGNAL_INSTALL_ADDON,
+  SIGNAL_REMOVE_ADDON,
 
   LAST_SIGNAL,
 };
@@ -87,6 +92,10 @@ debounce_timeout (BzFullView *self);
 
 static DexFuture *
 retrieve_star_string_fiber (BzFullView *self);
+
+static void addon_transact_cb (BzFullView     *self,
+                               BzEntry        *entry,
+                               BzAddonsDialog *dialog);
 
 static void
 bz_full_view_dispose (GObject *object)
@@ -215,7 +224,7 @@ format_timestamp (gpointer object,
   g_autoptr (GDateTime) date = NULL;
 
   date = g_date_time_new_from_unix_utc (value);
-  return g_date_time_format (date, _ ("Released %x"));
+  return g_date_time_format (date, _ ("%x"));
 }
 
 static char *
@@ -378,6 +387,177 @@ forge_cb (BzFullView *self,
 }
 
 static void
+install_addons_cb (BzFullView *self,
+                   GtkButton  *button)
+{
+  BzEntry    *entry                   = NULL;
+  GListModel *model                   = NULL;
+  g_autoptr (GListModel) mapped_model = NULL;
+  AdwDialog *addons_dialog            = NULL;
+
+  if (self->group == NULL)
+    return;
+
+  entry = bz_result_get_object (self->ui_entry);
+  if (entry == NULL)
+    return;
+
+  model = bz_entry_get_addons (entry);
+  if (model == NULL || g_list_model_get_n_items (model) == 0)
+    return;
+
+  mapped_model = bz_application_map_factory_generate (
+      bz_state_info_get_entry_factory (self->state),
+      model);
+
+  addons_dialog = bz_addons_dialog_new (entry, mapped_model);
+  adw_dialog_set_content_width (addons_dialog, 750);
+  gtk_widget_set_size_request (GTK_WIDGET (addons_dialog), 350, -1);
+
+  g_signal_connect_swapped (
+      addons_dialog, "transact",
+      G_CALLBACK (addon_transact_cb), self);
+
+  adw_dialog_present (addons_dialog, GTK_WIDGET (self));
+}
+
+static void
+addon_transact_cb (BzFullView     *self,
+                   BzEntry        *entry,
+                   BzAddonsDialog *dialog)
+{
+  gboolean installed = FALSE;
+
+  g_object_get (entry, "installed", &installed, NULL);
+
+  if (installed)
+    g_signal_emit (self, signals[SIGNAL_REMOVE_ADDON], 0, entry);
+  else
+    g_signal_emit (self, signals[SIGNAL_INSTALL_ADDON], 0, entry);
+}
+
+static void
+clear_releases_box (BzFullView *self)
+{
+  GtkWidget *child = NULL;
+
+  while ((child = gtk_widget_get_first_child (GTK_WIDGET (self->releases_box))))
+    gtk_list_box_remove (self->releases_box, child);
+}
+
+static GtkWidget *
+create_release_row (const char *version,
+                    const char *description,
+                    guint64     timestamp)
+{
+  AdwActionRow *row               = NULL;
+  GtkBox       *content_box       = NULL;
+  GtkBox       *header_box        = NULL;
+  GtkLabel     *version_label     = NULL;
+  GtkLabel     *date_label        = NULL;
+  GtkLabel     *description_label = NULL;
+  g_autoptr (GDateTime) date      = NULL;
+  g_autofree char *date_str       = NULL;
+  g_autofree char *version_text   = NULL;
+
+  date = g_date_time_new_from_unix_utc (timestamp);
+  if (date)
+    date_str = g_date_time_format (date, _ ("%x"));
+
+  row = ADW_ACTION_ROW (adw_action_row_new ());
+  gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), FALSE);
+
+  content_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 3));
+  gtk_widget_set_margin_top (GTK_WIDGET (content_box), 15);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (content_box), 15);
+  gtk_widget_set_margin_start (GTK_WIDGET (content_box), 15);
+  gtk_widget_set_margin_end (GTK_WIDGET (content_box), 15);
+
+  header_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
+
+  version_text  = g_strdup_printf (_ ("Version %s"), version);
+  version_label = GTK_LABEL (gtk_label_new (version_text));
+  gtk_widget_add_css_class (GTK_WIDGET (version_label), "accent");
+  gtk_widget_add_css_class (GTK_WIDGET (version_label), "heading");
+  gtk_label_set_ellipsize (version_label, PANGO_ELLIPSIZE_END);
+  gtk_widget_set_halign (GTK_WIDGET (version_label), GTK_ALIGN_START);
+  gtk_widget_set_hexpand (GTK_WIDGET (version_label), TRUE);
+  gtk_box_append (header_box, GTK_WIDGET (version_label));
+
+  date_label = GTK_LABEL (gtk_label_new (date_str ? date_str : ""));
+  gtk_widget_add_css_class (GTK_WIDGET (date_label), "dim-label");
+  gtk_widget_set_halign (GTK_WIDGET (date_label), GTK_ALIGN_END);
+  gtk_box_append (header_box, GTK_WIDGET (date_label));
+
+  gtk_box_append (content_box, GTK_WIDGET (header_box));
+
+  description_label = GTK_LABEL (gtk_label_new (
+      (description && *description) ? description : _ ("No details for this release")));
+  gtk_widget_set_halign (GTK_WIDGET (description_label), GTK_ALIGN_FILL);
+  gtk_label_set_xalign (description_label, 0.0);
+
+  if (description && *description)
+    {
+      gtk_widget_set_margin_top (GTK_WIDGET (description_label), 10);
+      gtk_label_set_wrap (description_label, TRUE);
+      gtk_label_set_use_markup (description_label, TRUE);
+      gtk_label_set_selectable (description_label, TRUE);
+    }
+  else
+    {
+      gtk_widget_set_margin_top (GTK_WIDGET (description_label), 5);
+      gtk_widget_add_css_class (GTK_WIDGET (description_label), "dim-label");
+    }
+
+  gtk_box_append (content_box, GTK_WIDGET (description_label));
+  gtk_list_box_row_set_child (GTK_LIST_BOX_ROW (row), GTK_WIDGET (content_box));
+
+  return GTK_WIDGET (row);
+}
+
+static void
+populate_releases_box (BzFullView *self)
+{
+  BzEntry *entry                         = NULL;
+  g_autoptr (GListModel) version_history = NULL;
+  guint n_items                          = 0;
+
+  clear_releases_box (self);
+
+  if (self->debounced_ui_entry == NULL)
+    return;
+
+  entry = bz_result_get_object (self->debounced_ui_entry);
+  if (entry == NULL)
+    return;
+
+  g_object_get (entry, "version-history", &version_history, NULL);
+  if (version_history == NULL)
+    return;
+
+  n_items = g_list_model_get_n_items (version_history);
+  for (guint i = 0; i < n_items; i++)
+    {
+      g_autoptr (BzRelease) release = NULL;
+      const char *version           = NULL;
+      const char *description       = NULL;
+      guint64     timestamp         = 0;
+      GtkWidget  *row               = NULL;
+
+      release = g_list_model_get_item (version_history, i);
+      if (release == NULL)
+        continue;
+
+      version     = bz_release_get_version (release);
+      description = bz_release_get_description (release);
+      timestamp   = bz_release_get_timestamp (release);
+
+      row = create_release_row (version, description, timestamp);
+      gtk_list_box_append (self->releases_box, row);
+    }
+}
+
+static void
 screenshots_bind_widget_cb (BzFullView            *self,
                             BzDecoratedScreenshot *screenshot,
                             GdkPaintable          *paintable,
@@ -471,6 +651,36 @@ bz_full_view_class_init (BzFullViewClass *klass)
       G_TYPE_FROM_CLASS (klass),
       g_cclosure_marshal_VOID__OBJECTv);
 
+  signals[SIGNAL_INSTALL_ADDON] =
+      g_signal_new (
+          "install-addon",
+          G_OBJECT_CLASS_TYPE (klass),
+          G_SIGNAL_RUN_FIRST,
+          0,
+          NULL, NULL,
+          g_cclosure_marshal_VOID__OBJECT,
+          G_TYPE_NONE, 1,
+          BZ_TYPE_ENTRY);
+  g_signal_set_va_marshaller (
+      signals[SIGNAL_INSTALL_ADDON],
+      G_TYPE_FROM_CLASS (klass),
+      g_cclosure_marshal_VOID__OBJECTv);
+
+  signals[SIGNAL_REMOVE_ADDON] =
+      g_signal_new (
+          "remove-addon",
+          G_OBJECT_CLASS_TYPE (klass),
+          G_SIGNAL_RUN_FIRST,
+          0,
+          NULL, NULL,
+          g_cclosure_marshal_VOID__OBJECT,
+          G_TYPE_NONE, 1,
+          BZ_TYPE_ENTRY);
+  g_signal_set_va_marshaller (
+      signals[SIGNAL_REMOVE_ADDON],
+      G_TYPE_FROM_CLASS (klass),
+      g_cclosure_marshal_VOID__OBJECTv);
+
   g_type_ensure (BZ_TYPE_DECORATED_SCREENSHOT);
   g_type_ensure (BZ_TYPE_DYNAMIC_LIST_VIEW);
   g_type_ensure (BZ_TYPE_ENTRY);
@@ -483,6 +693,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzFullView, stack);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, forge_stars);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, forge_stars_label);
+  gtk_widget_class_bind_template_child (widget_class, BzFullView, releases_box);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
@@ -502,6 +713,8 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, screenshots_bind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, screenshots_unbind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, pick_license_warning);
+  gtk_widget_class_bind_template_callback (widget_class, install_addons_cb);
+  gtk_widget_class_bind_template_callback (widget_class, addon_transact_cb);
 }
 
 static void
@@ -552,6 +765,8 @@ bz_full_view_set_entry_group (BzFullView   *self,
   g_clear_object (&self->debounced_ui_entry);
   g_clear_object (&self->group_model);
 
+  clear_releases_box (self);
+
   gtk_widget_set_visible (self->forge_stars, FALSE);
   gtk_revealer_set_reveal_child (GTK_REVEALER (self->forge_stars), FALSE);
   gtk_label_set_label (self->forge_stars_label, "...");
@@ -596,8 +811,11 @@ debounce_timeout (BzFullView *self)
   self->debounced_ui_entry = g_object_ref (self->ui_entry);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DEBOUNCED_UI_ENTRY]);
 
+  if (bz_result_get_resolved (self->debounced_ui_entry))
+    populate_releases_box (self);
+
   /* Disabled by default in gsettings schema since we don't want to
-     users to be rate limited by github */
+   users to be rate limited by github */
   if (self->state != NULL &&
       g_settings_get_boolean (
           bz_state_info_get_settings (self->state),

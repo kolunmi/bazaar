@@ -937,7 +937,7 @@ bz_entry_real_serialize (BzSerializable  *serializable,
         {
           g_autoptr (GVariantBuilder) sub_builder = NULL;
 
-          sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("a(mvtmsms)"));
+          sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("a(msmvtmsms)"));
           for (guint i = 0; i < n_items; i++)
             {
               g_autoptr (BzRelease) release              = NULL;
@@ -947,12 +947,14 @@ bz_entry_real_serialize (BzSerializable  *serializable,
               guint64     timestamp                      = 0;
               const char *url                            = NULL;
               const char *version                        = NULL;
+              const char *description                    = NULL;
 
-              release   = g_list_model_get_item (priv->version_history, i);
-              issues    = bz_release_get_issues (release);
-              timestamp = bz_release_get_timestamp (release);
-              url       = bz_release_get_url (release);
-              version   = bz_release_get_version (release);
+              release     = g_list_model_get_item (priv->version_history, i);
+              issues      = bz_release_get_issues (release);
+              timestamp   = bz_release_get_timestamp (release);
+              url         = bz_release_get_url (release);
+              version     = bz_release_get_version (release);
+              description = bz_release_get_description (release);
 
               if (issues != NULL)
                 {
@@ -977,7 +979,8 @@ bz_entry_real_serialize (BzSerializable  *serializable,
 
               g_variant_builder_add (
                   sub_builder,
-                  "(mvtmsms)",
+                  "(msmvtmsms)",
+                  description,
                   issues_builder != NULL
                       ? g_variant_builder_end (issues_builder)
                       : NULL,
@@ -1197,10 +1200,11 @@ bz_entry_real_deserialize (BzSerializable *serializable,
               g_autoptr (GListStore) issues_store = NULL;
               guint64          timestamp          = 0;
               g_autofree char *url                = NULL;
+              g_autofree char *description        = NULL;
               g_autofree char *version            = NULL;
               g_autoptr (BzRelease) release       = NULL;
 
-              if (!g_variant_iter_next (version_iter, "(mvtmsms)", &issues, &timestamp, &url, &version))
+              if (!g_variant_iter_next (version_iter, "(msmvtmsms)", &description, &issues, &timestamp, &url, &version))
                 break;
 
               if (issues != NULL)
@@ -1232,6 +1236,7 @@ bz_entry_real_deserialize (BzSerializable *serializable,
               bz_release_set_timestamp (release, timestamp);
               bz_release_set_url (release, url);
               bz_release_set_version (release, version);
+              bz_release_set_description (release, description);
               g_list_store_append (store, release);
             }
 

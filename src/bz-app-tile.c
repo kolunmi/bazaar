@@ -99,6 +99,13 @@ is_null (gpointer object,
   return value == NULL;
 }
 
+static gboolean
+is_zero (gpointer object,
+         int      value)
+{
+  return value == 0;
+}
+
 static void
 bz_app_tile_class_init (BzAppTileClass *klass)
 {
@@ -121,6 +128,7 @@ bz_app_tile_class_init (BzAppTileClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-app-tile.ui");
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
+  gtk_widget_class_bind_template_callback (widget_class, is_zero);
 }
 
 static void

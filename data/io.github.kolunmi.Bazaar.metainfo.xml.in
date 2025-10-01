@@ -63,6 +63,30 @@
   </screenshots>
 
   <releases>
+    <release version="0.5.2" date="2025-09-29">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.5.2</url>
+      <description translate="no">
+        <p>This release includes:</p>
+        <ul>
+          <li>553d041 * chore(po): update Ukrainian translation (#408)</li>
+          <li>711732a * Rework Version History (#407)</li>
+          <li>d2d3771 * Calculate detailed app tiles text color based on luminance of background accent color (#405)</li>
+          <li>3787e6e * Save window size in gsettings</li>
+          <li>18ba76c * AsyncTexture: increase HTTP timeout to 5 seconds</li>
+          <li>980f752 * SearchWidget: prevent invalid item selection</li>
+          <li>ab95593 * Add installed icons to app tiles (#404)</li>
+          <li>203754b * (UI) Improve visiblility of add-on feature (#403)</li>
+          <li>069ce61 * fix installed page list outline ring (#402)</li>
+          <li>da9f7b8 * (UX) Refine the Flathub views to be denser and have less partial lines (#401)</li>
+          <li>a6939ba * fix(po): fix Ukrainian translation (#400)</li>
+          <li>35c9611 * decrease app-tile description width reqs</li>
+          <li>6098be7 * chore(po): update Polish translation (#397)</li>
+          <li>2944d1e * change per section limit to 12 from 9 (#396)</li>
+          <li>0b04284 * Update Japanese Translation (#394)</li>
+          <li>fa60f4f * Move to brand new shiny Adw.ShortcutsDialog (#395)</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.5.1" date="2025-09-27">
       <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.5.1</url>
     </release>

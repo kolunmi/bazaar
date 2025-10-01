@@ -24,6 +24,7 @@ struct _BzRelease
 {
   GObject parent_instance;
 
+  char       *description;
   GListModel *issues;
   guint64     timestamp;
   char       *url;
@@ -36,6 +37,7 @@ enum
 {
   PROP_0,
 
+  PROP_DESCRIPTION,
   PROP_ISSUES,
   PROP_TIMESTAMP,
   PROP_URL,
@@ -50,6 +52,7 @@ bz_release_dispose (GObject *object)
 {
   BzRelease *self = BZ_RELEASE (object);
 
+  g_clear_pointer (&self->description, g_free);
   g_clear_pointer (&self->issues, g_object_unref);
   g_clear_pointer (&self->url, g_free);
   g_clear_pointer (&self->version, g_free);
@@ -67,6 +70,9 @@ bz_release_get_property (GObject    *object,
 
   switch (prop_id)
     {
+    case PROP_DESCRIPTION:
+      g_value_set_string (value, bz_release_get_description (self));
+      break;
     case PROP_ISSUES:
       g_value_set_object (value, bz_release_get_issues (self));
       break;
@@ -94,6 +100,9 @@ bz_release_set_property (GObject      *object,
 
   switch (prop_id)
     {
+    case PROP_DESCRIPTION:
+      bz_release_set_description (self, g_value_get_string (value));
+      break;
     case PROP_ISSUES:
       bz_release_set_issues (self, g_value_get_object (value));
       break;
@@ -119,6 +128,12 @@ bz_release_class_init (BzReleaseClass *klass)
   object_class->set_property = bz_release_set_property;
   object_class->get_property = bz_release_get_property;
   object_class->dispose      = bz_release_dispose;
+
+  props[PROP_DESCRIPTION] =
+      g_param_spec_string (
+          "description",
+          NULL, NULL, NULL,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   props[PROP_ISSUES] =
       g_param_spec_object (
@@ -160,6 +175,17 @@ bz_release_new (void)
   return g_object_new (BZ_TYPE_RELEASE, NULL);
 }
 
+const char *
+bz_release_get_description (BzRelease *self)
+{
+  g_return_val_if_fail (BZ_IS_RELEASE (self), NULL);
+
+  if (self->description == NULL)
+    return NULL;
+
+  return self->description;
+}
+
 GListModel *
 bz_release_get_issues (BzRelease *self)
 {
@@ -186,6 +212,19 @@ bz_release_get_version (BzRelease *self)
 {
   g_return_val_if_fail (BZ_IS_RELEASE (self), NULL);
   return self->version;
+}
+
+void
+bz_release_set_description (BzRelease  *self,
+                            const char *description)
+{
+  g_return_if_fail (BZ_IS_RELEASE (self));
+
+  g_clear_pointer (&self->description, g_free);
+  if (description != NULL)
+    self->description = g_strdup (description);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DESCRIPTION]);
 }
 
 void

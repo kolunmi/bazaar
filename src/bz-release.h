@@ -40,6 +40,9 @@ const char *
 bz_release_get_url (BzRelease *self);
 
 const char *
+bz_release_get_description (BzRelease *self);
+
+const char *
 bz_release_get_version (BzRelease *self);
 
 void
@@ -53,6 +56,10 @@ bz_release_set_timestamp (BzRelease *self,
 void
 bz_release_set_url (BzRelease  *self,
                     const char *url);
+
+void
+bz_release_set_description (BzRelease  *self,
+                            const char *description);
 
 void
 bz_release_set_version (BzRelease  *self,

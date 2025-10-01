@@ -84,5 +84,5 @@ src/bz-window.blp
 src/bz-window.c
 src/bz-yaml-parser.c
 src/dl-worker.c
-src/gtk/help-overlay.blp
+src/gtk/shortcuts-dialog.blp
 src/main.c
