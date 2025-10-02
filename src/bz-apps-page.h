@@ -1,6 +1,6 @@
-/* bz-category-page.h
+/* bz-apps-page.h
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2025 Adam Masciola, Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,14 +22,14 @@
 
 #include <adwaita.h>
 
-#include "bz-flathub-category.h"
-
 G_BEGIN_DECLS
 
-#define BZ_TYPE_CATEGORY_PAGE (bz_category_page_get_type ())
-G_DECLARE_FINAL_TYPE (BzCategoryPage, bz_category_page, BZ, CATEGORY_PAGE, AdwNavigationPage)
+#define BZ_TYPE_APPS_PAGE (bz_apps_page_get_type ())
+
+G_DECLARE_FINAL_TYPE (BzAppsPage, bz_apps_page, BZ, APPS_PAGE, AdwNavigationPage)
 
 AdwNavigationPage *
-bz_category_page_new (BzFlathubCategory *category);
+bz_apps_page_new (const char *title,
+                  GListModel *applications);
 
 G_END_DECLS

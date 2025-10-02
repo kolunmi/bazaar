@@ -804,7 +804,7 @@ bz_window_show_group (BzWindow     *self,
 }
 
 void
-bz_window_set_category_view_mode (BzWindow *self,
+bz_window_set_app_list_view_mode (BzWindow *self,
                                   gboolean  enabled)
 {
   g_return_if_fail (BZ_IS_WINDOW (self));

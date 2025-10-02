@@ -19,6 +19,8 @@
  */
 
 #define G_LOG_DOMAIN "BAZAAR::FLATHUB"
+#define COLLECTION_FETCH_SIZE 192
+#define CATEGORY_FETCH_SIZE 96
 
 #include <json-glib/json-glib.h>
 #include <libdex.h>
@@ -553,13 +555,14 @@ initialize_fiber (BzFlathubState *self)
   }                                            \
   G_STMT_END
 
-  ADD_REQUEST ("/app-picks/app-of-the-day", "/app-picks/app-of-the-day/%s", for_day);
-  ADD_REQUEST ("/app-picks/apps-of-the-week", "/app-picks/apps-of-the-week/%s", for_day);
-  ADD_REQUEST ("/collection/category", "/collection/category");
-  ADD_REQUEST ("/collection/recently-updated", "/collection/recently-updated?page=0&per_page=96");
-  ADD_REQUEST ("/collection/recently-added", "/collection/recently-added?page=0&per_page=96");
-  ADD_REQUEST ("/collection/popular", "/collection/popular?page=0&per_page=96");
-  ADD_REQUEST ("/collection/trending", "/collection/trending?page=0&per_page=96");
+
+  ADD_REQUEST ("/app-picks/app-of-the-day",     "/app-picks/app-of-the-day/%s",                     for_day);
+  ADD_REQUEST ("/app-picks/apps-of-the-week",   "/app-picks/apps-of-the-week/%s",                   for_day);
+  ADD_REQUEST ("/collection/category",          "/collection/category");
+  ADD_REQUEST ("/collection/recently-updated",  "/collection/recently-updated?page=0&per_page=%d",  COLLECTION_FETCH_SIZE);
+  ADD_REQUEST ("/collection/recently-added",    "/collection/recently-added?page=0&per_page=%d",    COLLECTION_FETCH_SIZE);
+  ADD_REQUEST ("/collection/popular",           "/collection/popular?page=0&per_page=%d",           COLLECTION_FETCH_SIZE);
+  ADD_REQUEST ("/collection/trending",          "/collection/trending?page=0&per_page=%d",          COLLECTION_FETCH_SIZE);
 
   while (g_hash_table_size (futures) > 0)
     {
@@ -621,7 +624,7 @@ initialize_fiber (BzFlathubState *self)
           const char *category = NULL;
 
           category = json_array_get_string_element (array, i);
-          ADD_REQUEST (category, "/collection/category/%s?page=0&per_page=60", category);
+          ADD_REQUEST (category, "/collection/category/%s?page=0&per_page=%d", category, CATEGORY_FETCH_SIZE);
         }
 
       while (g_hash_table_size (futures) > 0)

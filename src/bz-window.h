@@ -51,7 +51,7 @@ bz_window_show_group (BzWindow     *self,
                       BzEntryGroup *group);
 
 void
-bz_window_set_category_view_mode (BzWindow *self,
+bz_window_set_app_list_view_mode (BzWindow *self,
                                   gboolean  enabled);
 
 void
