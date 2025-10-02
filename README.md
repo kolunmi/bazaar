@@ -92,3 +92,10 @@ You will need the following dependencies installed, along with a C compiler, mes
 #### Code of Conduct
 
 This project adheres to the [GNOME Code of Conduct](https://conduct.gnome.org/). By participating through any means, including PRs, Issues or Discussions, you are expected to uphold this code.
+
+### What people are saying
+
+- [Why Bazaar Is the Best Flatpak App Store You’re Not Using](https://fossforce.com/2025/10/why-bazaar-is-the-best-flatpak-app-store-youre-not-using/)
+- [Bazaar is a game changer](https://gardinerbryant.com/linux-software-management-is-about-to-change-with-bazaar/)
+- [Bazaar is a Slick New Desktop Flathub Frontend](https://www.omgubuntu.co.uk/2025/08/bazaar-new-flatpak-app-store-gnome-linux)
+- [Bazaar Is the Flatpak Store GNOME Always Needed](https://linuxiac.com/bazaar-is-the-flatpak-store-gnome-always-needed/)
