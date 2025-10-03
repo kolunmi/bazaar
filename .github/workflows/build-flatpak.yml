@@ -9,7 +9,7 @@ jobs:
     name: "Flatpak"
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-48
+      image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-49
       options: --privileged
     steps:
     - uses: actions/checkout@v4
@@ -18,5 +18,5 @@ jobs:
     - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
       with:
         bundle: Bazaar.flatpak
-        manifest-path: build-aux/flatpak/io.github.kolunmi.Bazaar.json
+        manifest-path: build-aux/flatpak/io.github.kolunmi.Bazaar.yaml
         cache-key: flatpak-builder-${{ github.sha }}
