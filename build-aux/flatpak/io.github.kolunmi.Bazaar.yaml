@@ -44,13 +44,8 @@ modules:
       - -Dhardcoded_content_config_path=/run/host/etc/bazaar/config.yaml
       - -Dhardcoded_blocklist_path=/run/host/etc/bazaar/blocklist.txt
     sources:
-      - type: archive
-        url: https://github.com/kolunmi/bazaar/archive/refs/tags/v0.5.3.tar.gz
-        sha256: d56651baaa29f265e0e633a3ddbcb2c0472fb667b748567ae59fb6ebabfd8df2
-        x-checker-data:
-          type: anitya
-          project-id: 379145
-          url-template: https://github.com/kolunmi/bazaar/archive/refs/tags/v$version.tar.gz
+      - type: dir
+        path: "../.."
       - type: script
         dest-filename: bazaar-launcher
         commands:
