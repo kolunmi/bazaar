@@ -65,6 +65,32 @@ bz_world_map_parser_new (void)
   return g_object_new (BZ_TYPE_WORLD_MAP_PARSER, NULL);
 }
 
+static const char *
+get_translated_name (JsonObject *feature_obj, const char *fallback_name)
+{
+  const char * const *language_names = NULL;
+  JsonObject *translations = NULL;
+  const char *translated_name = NULL;
+
+  if (!json_object_has_member (feature_obj, "translations"))
+    return fallback_name;
+
+  translations = json_object_get_object_member (feature_obj, "translations");
+  language_names = g_get_language_names ();
+
+  for (guint i = 0; language_names[i] != NULL; i++)
+    {
+      if (json_object_has_member (translations, language_names[i]))
+        {
+          translated_name = json_object_get_string_member (translations, language_names[i]);
+          if (translated_name != NULL)
+            return translated_name;
+        }
+    }
+
+  return fallback_name;
+}
+
 gboolean
 bz_world_map_parser_load_from_resource (BzWorldMapParser  *self,
                                         const char        *resource_path,
@@ -118,6 +144,7 @@ bz_world_map_parser_load_from_resource (BzWorldMapParser  *self,
       JsonObject            *feature_obj  = NULL;
       const char            *name         = NULL;
       const char            *iso_code     = NULL;
+      const char            *display_name = NULL;
       JsonArray             *coordinates  = NULL;
       g_autoptr (BzCountry)  country      = NULL;
 
@@ -132,8 +159,10 @@ bz_world_map_parser_load_from_resource (BzWorldMapParser  *self,
       if (json_object_has_member (feature_obj, "C"))
         coordinates = json_object_get_array_member (feature_obj, "C");
 
+      display_name = get_translated_name (feature_obj, name);
+
       country = bz_country_new ();
-      bz_country_set_name (country, name);
+      bz_country_set_name (country, display_name);
       bz_country_set_iso_code (country, iso_code);
       bz_country_set_coordinates (country, coordinates);
 
