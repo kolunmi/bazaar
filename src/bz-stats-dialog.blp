@@ -2,23 +2,61 @@ using Gtk 4.0;
 using Adw 1;
 
 template $BzStatsDialog: Adw.Dialog {
+  width-request: 300;
+  height-request: 300;
   child: Adw.ToolbarView {
     bottom-bar-style: raised_border;
 
     [top]
     Adw.HeaderBar {
-      title-widget: Label {
-        styles [
-          "heading",
-        ]
-
-        label: _("Downloads Over Time");
+      title-widget: Adw.ViewSwitcher switcher_title {
+        stack: stack;
+        policy: wide;
       };
     }
 
-    content: $BzDataGraph graph {
-      model: bind template.model;
-      tooltip-prefix:_("Installs:");
+    content: Box {
+      orientation: vertical;
+
+      Adw.ViewStack stack {
+        vexpand: true;
+
+        Adw.ViewStackPage {
+          name: "graph";
+          title: _("Timeline");
+          icon-name: "graph-symbolic";
+
+          child: $BzDataGraph graph {
+            model: bind template.model;
+            tooltip-prefix: _("Installs:");
+          };
+        }
+
+        Adw.ViewStackPage {
+          name: "map";
+          title: _("World");
+          icon-name: "globe-symbolic";
+
+          child: $BzWorldMap world_map {
+              model: bind template.country-model;
+              margin-top:10;
+              margin-bottom: 10;
+          };
+        }
+      }
+
+      Adw.ViewSwitcherBar switcher_bar {
+        stack: stack;
+      }
     };
   };
+
+  Adw.Breakpoint {
+    condition ("max-width: 550sp")
+
+    setters {
+      switcher_title.stack: null;
+      switcher_bar.reveal: true;
+    }
+  }
 }

@@ -1,6 +1,6 @@
-/* bz-stats-dialog.h
+/* bz-world-map.h
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2025 Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,18 +20,22 @@
 
 #pragma once
 
-#include <adwaita.h>
+#include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_STATS_DIALOG (bz_stats_dialog_get_type ())
-G_DECLARE_FINAL_TYPE (BzStatsDialog, bz_stats_dialog, BZ, STATS_DIALOG, AdwDialog)
+#define BZ_TYPE_WORLD_MAP (bz_world_map_get_type ())
 
-AdwDialog *
-bz_stats_dialog_new (GListModel *model,
-                     GListModel *country_model);
+G_DECLARE_FINAL_TYPE (BzWorldMap, bz_world_map, BZ, WORLD_MAP, GtkWidget)
+
+GtkWidget *
+bz_world_map_new (void);
+
+GListModel *
+bz_world_map_get_model (BzWorldMap *self);
 
 void
-bz_stats_dialog_animate_open (BzStatsDialog *self);
+bz_world_map_set_model (BzWorldMap *self,
+                        GListModel *model);
 
 G_END_DECLS

@@ -82,6 +82,7 @@ src/bz-update-dialog.c
 src/bz-url.c
 src/bz-window.blp
 src/bz-window.c
+src/bz-world-map.c
 src/bz-yaml-parser.c
 src/dl-worker.c
 src/gtk/shortcuts-dialog.blp
