@@ -97,7 +97,7 @@ bz_world_map_parser_load_from_resource (BzWorldMapParser  *self,
                                         GError           **error)
 {
   g_autoptr (GBytes) bytes       = NULL;
-  g_autoptr (JsonNode) root      = NULL;
+  JsonNode                      *root        = NULL;
   JsonObject                    *root_object = NULL;
   JsonArray                     *features    = NULL;
   const char                    *json_data   = NULL;
@@ -157,7 +157,10 @@ bz_world_map_parser_load_from_resource (BzWorldMapParser  *self,
         iso_code = json_object_get_string_member (feature_obj, "I");
 
       if (json_object_has_member (feature_obj, "C"))
-        coordinates = json_object_get_array_member (feature_obj, "C");
+        {
+          JsonArray *borrowed_coords = json_object_get_array_member (feature_obj, "C");
+          coordinates = json_array_ref (borrowed_coords);
+        }
 
       display_name = get_translated_name (feature_obj, name);
 

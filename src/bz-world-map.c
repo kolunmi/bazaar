@@ -387,7 +387,6 @@ bz_world_map_dispose (GObject *object)
 
   g_clear_object (&self->countries);
   g_clear_object (&self->model);
-  g_clear_object (&self->parser);
 
   G_OBJECT_CLASS (bz_world_map_parent_class)->dispose (object);
 }
@@ -518,21 +517,21 @@ bz_world_map_snapshot (GtkWidget   *widget,
 
   if (self->hovered_country >= 0 && self->motion_x >= 0.0 && self->motion_y >= 0.0)
     {
-      g_autoptr (BzCountry) country        = g_list_model_get_item (self->countries, self->hovered_country);
-      const char           *iso_code       = bz_country_get_iso_code (country);
-      guint                 download_number = get_downloads_for_country (self, iso_code);
-      const char *country_name              = bz_country_get_name (country);
-      g_autofree char *card_text            = g_strdup_printf (_("%s: %u downloads"), country_name, download_number);
-      g_autoptr (PangoLayout) layout       = pango_layout_new (gtk_widget_get_pango_context (widget));
-      PangoRectangle        text_extents   = { 0 };
-      double                card_width     = 0.0;
-      double                card_height    = 0.0;
-      double                card_x         = 0.0;
-      double                card_y         = 0.0;
-      GskRoundedRect        text_bg_rect   = { { { 0 } } };
-      GdkRGBA               text_bg_color  = { 0 };
-      GdkRGBA               shadow_color   = { 0 };
-      GdkRGBA               text_color     = { 0 };
+      g_autoptr (BzCountry)   country         = g_list_model_get_item (self->countries, self->hovered_country);
+      const char             *iso_code        = bz_country_get_iso_code (country);
+      guint                   download_number = get_downloads_for_country (self, iso_code);
+      const char             *country_name    = bz_country_get_name (country);
+      g_autofree char        *card_text       = g_strdup_printf (_("%s: %u downloads"), country_name, download_number);
+      g_autoptr (PangoLayout) layout          = pango_layout_new (gtk_widget_get_pango_context (widget));
+      PangoRectangle          text_extents    = { 0 };
+      double                  card_width      = 0.0;
+      double                  card_height     = 0.0;
+      double                  card_x          = 0.0;
+      double                  card_y          = 0.0;
+      GskRoundedRect          text_bg_rect    = { { { 0 } } };
+      GdkRGBA                 text_bg_color   = { 0 };
+      GdkRGBA                 shadow_color    = { 0 };
+      GdkRGBA                 text_color      = { 0 };
 
       pango_layout_set_text (layout, card_text, -1);
       pango_layout_get_pixel_extents (layout, NULL, &text_extents);
@@ -637,10 +636,12 @@ bz_world_map_init (BzWorldMap *self)
     {
       self->countries = g_object_ref (bz_world_map_parser_get_countries (self->parser));
       calculate_bounds (self);
+      g_clear_object (&self->parser);
     }
   else
     {
       g_warning ("BzWorldMap: Failed to load countries: %s", error->message);
+      g_clear_object (&self->parser);
     }
 }
 
