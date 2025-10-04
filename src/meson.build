@@ -66,6 +66,8 @@ bz_sources = [
   'bz-comet.c',
   'bz-content-provider.c',
   'bz-content-section.c',
+  'bz-country.c',
+  'bz-country-data-point.c',
   'bz-curated-app-tile.c',
   'bz-data-graph.c',
   'bz-data-point.c',
@@ -117,6 +119,8 @@ bz_sources = [
   'bz-update-dialog.c',
   'bz-url.c',
   'bz-window.c',
+  'bz-world-map.c',
+  'bz-world-map-parser.c',
   'bz-yaml-parser.c',
   'main.c',
 ]
