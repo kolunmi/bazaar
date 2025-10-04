@@ -237,4 +237,3 @@ bz_country_set_value (BzCountry *self,
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_VALUE]);
 }
-

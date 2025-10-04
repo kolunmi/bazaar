@@ -21,8 +21,8 @@
 #include "config.h"
 
 #include "bz-data-graph.h"
-#include "bz-world-map.h"
 #include "bz-stats-dialog.h"
+#include "bz-world-map.h"
 
 struct _BzStatsDialog
 {

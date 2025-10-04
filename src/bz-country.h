@@ -29,19 +29,34 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE (BzCountry, bz_country, BZ, COUNTRY, GObject)
 
-BzCountry  *bz_country_new             (void);
-const char *bz_country_get_name        (BzCountry  *self);
-const char *bz_country_get_iso_code    (BzCountry  *self);
-JsonArray  *bz_country_get_coordinates (BzCountry  *self);
-double      bz_country_get_value       (BzCountry  *self);
-void        bz_country_set_name        (BzCountry  *self,
-                                        const char *name);
-void        bz_country_set_iso_code    (BzCountry  *self,
-                                        const char *iso_code);
-void        bz_country_set_coordinates (BzCountry  *self,
-                                        JsonArray  *coordinates);
-void        bz_country_set_value       (BzCountry  *self,
-                                        double      value);
+BzCountry *
+bz_country_new (void);
+
+const char *
+bz_country_get_name (BzCountry *self);
+
+const char *
+bz_country_get_iso_code (BzCountry *self);
+
+JsonArray *
+bz_country_get_coordinates (BzCountry *self);
+
+double
+bz_country_get_value (BzCountry *self);
+
+void
+bz_country_set_name (BzCountry  *self,
+                     const char *name);
+void
+bz_country_set_iso_code (BzCountry  *self,
+                         const char *iso_code);
+
+void
+bz_country_set_coordinates (BzCountry *self,
+                            JsonArray *coordinates);
+
+void
+bz_country_set_value (BzCountry *self,
+                      double     value);
 
 G_END_DECLS
-

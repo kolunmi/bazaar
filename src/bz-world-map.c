@@ -18,16 +18,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include <glib/gi18n.h>
 #include "config.h"
+#include <glib/gi18n.h>
 
 #include <adwaita.h>
-#include <math.h>
 
-#include "bz-world-map.h"
-#include "bz-world-map-parser.h"
-#include "bz-country.h"
 #include "bz-country-data-point.h"
+#include "bz-country.h"
+#include "bz-world-map-parser.h"
+#include "bz-world-map.h"
 
 #define CARD_EDGE_THRESHOLD 160
 #define OPACITY_MULTIPLIER  2
@@ -89,7 +88,7 @@ get_downloads_for_country (BzWorldMap *self,
   for (guint i = 0; i < n_items; i++)
     {
       g_autoptr (BzCountryDataPoint) point = g_list_model_get_item (self->model, i);
-      const char *country_code = bz_country_data_point_get_country_code (point);
+      const char *country_code             = bz_country_data_point_get_country_code (point);
 
       if (g_strcmp0 (country_code, iso_code) == 0)
         return bz_country_data_point_get_downloads (point);
@@ -113,7 +112,7 @@ calculate_max_downloads (BzWorldMap *self)
   for (guint i = 0; i < n_items; i++)
     {
       g_autoptr (BzCountryDataPoint) point = g_list_model_get_item (self->model, i);
-      guint downloads = bz_country_data_point_get_downloads (point);
+      guint downloads                      = bz_country_data_point_get_downloads (point);
 
       if (downloads > self->max_downloads)
         self->max_downloads = downloads;
@@ -137,7 +136,7 @@ calculate_bounds (BzWorldMap *self)
 
   for (guint i = 0; i < n_items; i++)
     {
-      BzCountry *country = g_list_model_get_item (self->countries, i);
+      BzCountry *country     = g_list_model_get_item (self->countries, i);
       JsonArray *coordinates = bz_country_get_coordinates (country);
 
       if (coordinates != NULL)
@@ -153,8 +152,8 @@ calculate_bounds (BzWorldMap *self)
                   for (guint l = 0; l < json_array_get_length (ring_array); l++)
                     {
                       JsonArray *point_array = json_array_get_array_element (ring_array, l);
-                      double lon = json_array_get_double_element (point_array, 0);
-                      double lat = json_array_get_double_element (point_array, 1);
+                      double     lon         = json_array_get_double_element (point_array, 0);
+                      double     lat         = json_array_get_double_element (point_array, 1);
 
                       if (lon < self->min_lon)
                         self->min_lon = lon;
@@ -210,7 +209,7 @@ build_paths (BzWorldMap *self,
              double      width,
              double      height)
 {
-  guint n_items = 0;
+  guint n_items    = 0;
   guint path_index = 0;
 
   if (self->countries == NULL)
@@ -235,7 +234,7 @@ build_paths (BzWorldMap *self,
   self->n_paths = 0;
   for (guint i = 0; i < n_items; i++)
     {
-      BzCountry *country = g_list_model_get_item (self->countries, i);
+      BzCountry *country     = g_list_model_get_item (self->countries, i);
       JsonArray *coordinates = bz_country_get_coordinates (country);
 
       if (coordinates != NULL)
@@ -250,12 +249,12 @@ build_paths (BzWorldMap *self,
       g_object_unref (country);
     }
 
-  self->country_paths = g_new0 (GskPath *, self->n_paths);
+  self->country_paths   = g_new0 (GskPath *, self->n_paths);
   self->path_to_country = g_new0 (guint, self->n_paths);
 
   for (guint i = 0; i < n_items; i++)
     {
-      BzCountry *country = g_list_model_get_item (self->countries, i);
+      BzCountry *country     = g_list_model_get_item (self->countries, i);
       JsonArray *coordinates = bz_country_get_coordinates (country);
 
       if (coordinates != NULL)
@@ -266,17 +265,17 @@ build_paths (BzWorldMap *self,
 
               for (guint k = 0; k < json_array_get_length (polygon_array); k++)
                 {
-                  JsonArray *ring_array = json_array_get_array_element (polygon_array, k);
+                  JsonArray *ring_array              = json_array_get_array_element (polygon_array, k);
                   g_autoptr (GskPathBuilder) builder = gsk_path_builder_new ();
-                  gboolean first = TRUE;
+                  gboolean first                     = TRUE;
 
                   for (guint l = 0; l < json_array_get_length (ring_array); l++)
                     {
                       JsonArray *point_array = json_array_get_array_element (ring_array, l);
-                      double lon = json_array_get_double_element (point_array, 0);
-                      double lat = json_array_get_double_element (point_array, 1);
-                      double x = 0.0;
-                      double y = 0.0;
+                      double     lon         = json_array_get_double_element (point_array, 0);
+                      double     lat         = json_array_get_double_element (point_array, 1);
+                      double     x           = 0.0;
+                      double     y           = 0.0;
 
                       project_point (self, lon, lat, width, height, &x, &y);
 
@@ -292,7 +291,7 @@ build_paths (BzWorldMap *self,
                     }
 
                   gsk_path_builder_close (builder);
-                  self->country_paths[path_index] = gsk_path_builder_to_path (builder);
+                  self->country_paths[path_index]   = gsk_path_builder_to_path (builder);
                   self->path_to_country[path_index] = i;
                   path_index++;
                 }
@@ -321,24 +320,24 @@ on_style_changed (AdwStyleManager *style_manager,
 }
 
 static void
-motion_event (BzWorldMap              *self,
-              gdouble                  x,
-              gdouble                  y,
+motion_event (BzWorldMap               *self,
+              gdouble                   x,
+              gdouble                   y,
               GtkEventControllerMotion *controller)
 {
-  double map_x = (x - self->offset_x) / self->scale;
-  double map_y = (y - self->offset_y) / self->scale;
-  int old_hovered = self->hovered_country;
+  double map_x       = (x - self->offset_x) / self->scale;
+  double map_y       = (y - self->offset_y) / self->scale;
+  int    old_hovered = self->hovered_country;
 
-  self->motion_x = x;
-  self->motion_y = y;
+  self->motion_x        = x;
+  self->motion_y        = y;
   self->hovered_country = -1;
 
   for (guint i = 0; i < self->n_paths; i++)
     {
       if (gsk_path_in_fill (self->country_paths[i],
-                           &GRAPHENE_POINT_INIT (map_x, map_y),
-                           GSK_FILL_RULE_WINDING))
+                            &GRAPHENE_POINT_INIT (map_x, map_y),
+                            GSK_FILL_RULE_WINDING))
         {
           self->hovered_country = self->path_to_country[i];
           break;
@@ -350,14 +349,14 @@ motion_event (BzWorldMap              *self,
 }
 
 static void
-motion_leave (BzWorldMap              *self,
+motion_leave (BzWorldMap               *self,
               GtkEventControllerMotion *controller)
 {
   if (self->hovered_country != -1)
     {
       self->hovered_country = -1;
-      self->motion_x = -1.0;
-      self->motion_y = -1.0;
+      self->motion_x        = -1.0;
+      self->motion_y        = -1.0;
       gtk_widget_queue_draw (GTK_WIDGET (self));
     }
 }
@@ -445,16 +444,16 @@ static void
 bz_world_map_snapshot (GtkWidget   *widget,
                        GtkSnapshot *snapshot)
 {
-  BzWorldMap              *self          = BZ_WORLD_MAP (widget);
-  double                   widget_width  = gtk_widget_get_width (widget);
-  double                   widget_height = gtk_widget_get_height (widget);
-  AdwStyleManager         *style_manager = adw_style_manager_get_default ();
-  g_autoptr (GdkRGBA)      accent_color  = adw_style_manager_get_accent_color_rgba (style_manager);
-  GdkRGBA                  stroke_color  = { 0 };
-  g_autoptr (GskStroke)    stroke        = gsk_stroke_new (0.5);
-  g_autoptr (GskStroke)    hover_stroke  = gsk_stroke_new (1.5);
-  double                   map_width     = 1000.0;
-  double                   map_height    = 500.0;
+  BzWorldMap      *self              = BZ_WORLD_MAP (widget);
+  double           widget_width      = gtk_widget_get_width (widget);
+  double           widget_height     = gtk_widget_get_height (widget);
+  AdwStyleManager *style_manager     = adw_style_manager_get_default ();
+  g_autoptr (GdkRGBA) accent_color   = adw_style_manager_get_accent_color_rgba (style_manager);
+  GdkRGBA stroke_color               = { 0 };
+  g_autoptr (GskStroke) stroke       = gsk_stroke_new (0.5);
+  g_autoptr (GskStroke) hover_stroke = gsk_stroke_new (1.5);
+  double map_width                   = 1000.0;
+  double map_height                  = 500.0;
 
   if (self->countries == NULL)
     return;
@@ -473,15 +472,15 @@ bz_world_map_snapshot (GtkWidget   *widget,
 
   for (guint i = 0; i < self->n_paths; i++)
     {
-      guint country_idx = self->path_to_country[i];
+      guint country_idx             = self->path_to_country[i];
       g_autoptr (BzCountry) country = g_list_model_get_item (self->countries, country_idx);
-      const char *iso_code = bz_country_get_iso_code (country);
-      guint downloads = get_downloads_for_country (self, iso_code);
-      GdkRGBA fill_color = *accent_color;
+      const char *iso_code          = bz_country_get_iso_code (country);
+      guint       downloads         = get_downloads_for_country (self, iso_code);
+      GdkRGBA     fill_color        = *accent_color;
 
       if (self->max_downloads > 0 && downloads > 0)
         {
-          double ratio = (double) downloads / (double) self->max_downloads;
+          double ratio     = (double) downloads / (double) self->max_downloads;
           fill_color.alpha = CLAMP (ratio * OPACITY_MULTIPLIER, 0.1, 1.0);
         }
       else
@@ -498,7 +497,7 @@ bz_world_map_snapshot (GtkWidget   *widget,
   if (self->hovered_country >= 0)
     {
       GdkRGBA hover_color = stroke_color;
-      hover_color.alpha = 1.0;
+      hover_color.alpha   = 1.0;
 
       gtk_snapshot_save (snapshot);
       gtk_snapshot_translate (snapshot, &GRAPHENE_POINT_INIT (self->offset_x, self->offset_y));
@@ -517,21 +516,21 @@ bz_world_map_snapshot (GtkWidget   *widget,
 
   if (self->hovered_country >= 0 && self->motion_x >= 0.0 && self->motion_y >= 0.0)
     {
-      g_autoptr (BzCountry)   country         = g_list_model_get_item (self->countries, self->hovered_country);
-      const char             *iso_code        = bz_country_get_iso_code (country);
-      guint                   download_number = get_downloads_for_country (self, iso_code);
-      const char             *country_name    = bz_country_get_name (country);
-      g_autofree char        *card_text       = g_strdup_printf (_("%s: %u downloads"), country_name, download_number);
-      g_autoptr (PangoLayout) layout          = pango_layout_new (gtk_widget_get_pango_context (widget));
-      PangoRectangle          text_extents    = { 0 };
-      double                  card_width      = 0.0;
-      double                  card_height     = 0.0;
-      double                  card_x          = 0.0;
-      double                  card_y          = 0.0;
-      GskRoundedRect          text_bg_rect    = { { { 0 } } };
-      GdkRGBA                 text_bg_color   = { 0 };
-      GdkRGBA                 shadow_color    = { 0 };
-      GdkRGBA                 text_color      = { 0 };
+      g_autoptr (BzCountry) country    = g_list_model_get_item (self->countries, self->hovered_country);
+      const char      *iso_code        = bz_country_get_iso_code (country);
+      guint            download_number = get_downloads_for_country (self, iso_code);
+      const char      *country_name    = bz_country_get_name (country);
+      g_autofree char *card_text       = g_strdup_printf (_ ("%s: %u downloads"), country_name, download_number);
+      g_autoptr (PangoLayout) layout   = pango_layout_new (gtk_widget_get_pango_context (widget));
+      PangoRectangle text_extents      = { 0 };
+      double         card_width        = 0.0;
+      double         card_height       = 0.0;
+      double         card_x            = 0.0;
+      double         card_y            = 0.0;
+      GskRoundedRect text_bg_rect      = { { { 0 } } };
+      GdkRGBA        text_bg_color     = { 0 };
+      GdkRGBA        shadow_color      = { 0 };
+      GdkRGBA        text_color        = { 0 };
 
       pango_layout_set_text (layout, card_text, -1);
       pango_layout_get_pixel_extents (layout, NULL, &text_extents);
@@ -611,8 +610,8 @@ bz_world_map_class_init (BzWorldMapClass *klass)
 static void
 bz_world_map_init (BzWorldMap *self)
 {
-  AdwStyleManager    *style_manager = adw_style_manager_get_default ();
-  g_autoptr (GError)  error         = NULL;
+  AdwStyleManager *style_manager = adw_style_manager_get_default ();
+  g_autoptr (GError) error       = NULL;
 
   self->parser          = bz_world_map_parser_new ();
   self->hovered_country = -1;
@@ -631,8 +630,8 @@ bz_world_map_init (BzWorldMap *self)
                     G_CALLBACK (on_style_changed), self);
 
   if (bz_world_map_parser_load_from_resource (self->parser,
-                                               "/io/github/kolunmi/Bazaar/countries.json",
-                                               &error))
+                                              "/io/github/kolunmi/Bazaar/countries.json",
+                                              &error))
     {
       self->countries = g_object_ref (bz_world_map_parser_get_countries (self->parser));
       calculate_bounds (self);

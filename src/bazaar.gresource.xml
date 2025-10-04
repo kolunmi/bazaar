@@ -7,7 +7,9 @@
 
     <file preprocess="xml-stripblanks">main-config-schema.xml</file>
     <file preprocess="xml-stripblanks">bz-content-provider-config-schema.xml</file>
-    
+
+    <file>countries.json</file>
+
     <file preprocess="xml-stripblanks">bz-addons-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-app-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-apps-page.ui</file>
@@ -87,7 +89,6 @@
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Science.svg</file>
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.System.svg</file>
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Utilities.svg</file>
-    <file>countries.json</file>
 
   </gresource>
 </gresources>
