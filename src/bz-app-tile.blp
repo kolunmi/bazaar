@@ -13,11 +13,13 @@ template $BzAppTile: Button {
   child: Overlay {
     [overlay]
     Image {
-      halign: end;
-      valign: start;
+      css-name: "app-tile-installed-indicator";
       styles [
         "success",
       ]
+
+      halign: end;
+      valign: start;
       icon-name: "app-installed-symbolic";
       icon-size: normal;
       visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
@@ -63,23 +65,23 @@ template $BzAppTile: Button {
             max-width-chars: 18;
           }
 
-          Revealer {
-            transition-type: crossfade;
-            reveal-child: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
-            visible: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
+          // Revealer {
+          //   transition-type: crossfade;
+          //   reveal-child: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
+          //   visible: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
 
-            child: Image {
-              css-name: "app-tile-verified-check";
-              styles [
-                "accent",
-              ]
+          //   child: Image {
+          //     css-name: "app-tile-verified-check";
+          //     styles [
+          //       "accent",
+          //     ]
 
-              has-tooltip: true;
-              tooltip-text: _("This flatpak is verified by the original developers of the software.");
-              icon-name: "verified-checkmark-symbolic";
-              icon-size: normal;
-            };
-          }
+          //     has-tooltip: true;
+          //     tooltip-text: _("This flatpak is verified by the original developers of the software.");
+          //     icon-name: "verified-checkmark-symbolic";
+          //     icon-size: normal;
+          //   };
+          // }
         }
 
         Label {

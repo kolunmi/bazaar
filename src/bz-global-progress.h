@@ -72,4 +72,11 @@ bz_global_progress_set_expand_size (BzGlobalProgress *self,
 int
 bz_global_progress_get_expand_size (BzGlobalProgress *self);
 
+void
+bz_global_progress_set_settings (BzGlobalProgress *self,
+                                 GSettings        *settings);
+
+GSettings *
+bz_global_progress_get_settings (BzGlobalProgress *self);
+
 G_END_DECLS

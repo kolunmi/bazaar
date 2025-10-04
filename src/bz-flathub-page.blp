@@ -39,7 +39,7 @@ template $BzFlathubPage: Adw.Bin {
              margin-top: 20;
              margin-bottom: 20;
              orientation: vertical;
-             spacing: 30;
+             spacing: 15;
 
              $BzDynamicListView {
                styles [
@@ -81,11 +81,6 @@ template $BzFlathubPage: Adw.Bin {
                    xalign: 0.0;
                    hexpand: true;
                  }
-
-                 ToggleButton show_more_trending {
-                   label: _("Show More");
-                   active: false;
-                 }
                }
              
                $BzDynamicListView {
@@ -101,13 +96,23 @@ template $BzFlathubPage: Adw.Bin {
                  child-prop: "group";
                  model: SliceListModel {
                    offset: 0;
-                   size: bind $limit_if_false(show_more_trending.active) as <uint>;
+                   size: 12;
                    model: bind template.state as <$BzFlathubState>.trending;
                  };
                
                  bind-widget => $bind_widget_cb(template);      
                  unbind-widget => $unbind_widget_cb(template);      
                }
+               Button {
+                  styles [
+                  "pill"
+                  ]
+
+                   label: _("More Trending");
+                   halign: center;
+                   valign: center;
+                   clicked => $show_more_trending_clicked_cb(template);
+                }
              }
 
              Box {
@@ -160,11 +165,6 @@ template $BzFlathubPage: Adw.Bin {
                    xalign: 0.0;
                    hexpand: true;
                  }
-               
-                 ToggleButton show_more_recently_updated {
-                   label: _("Show More");
-                   active: false;
-                 }
                }
              
                $BzDynamicListView {
@@ -180,12 +180,22 @@ template $BzFlathubPage: Adw.Bin {
                  child-prop: "group";
                  model: SliceListModel {
                    offset: 0;
-                   size: bind $limit_if_false(show_more_recently_updated.active) as <uint>;
+                   size: 12;
                    model: bind template.state as <$BzFlathubState>.recently_updated;
                  };
                
                  bind-widget => $bind_widget_cb(template);      
                  unbind-widget => $unbind_widget_cb(template);      
+               }
+               Button {
+                  styles [
+                  "pill"
+                  ]
+
+                   label: _("More Updated");
+                   halign: center;
+                   valign: center;
+                   clicked => $show_more_recently_updated_clicked_cb(template);
                }
              }
 
@@ -207,11 +217,6 @@ template $BzFlathubPage: Adw.Bin {
                    xalign: 0.0;
                    hexpand: true;
                  }
-               
-                 ToggleButton show_more_recently_added {
-                   label: _("Show More");
-                   active: false;
-                 }
                }
              
                $BzDynamicListView {
@@ -227,12 +232,22 @@ template $BzFlathubPage: Adw.Bin {
                  child-prop: "group";
                  model: SliceListModel {
                    offset: 0;
-                   size: bind $limit_if_false(show_more_recently_added.active) as <uint>;
+                   size: 12;
                    model: bind template.state as <$BzFlathubState>.recently_added;
                  };
                
                  bind-widget => $bind_widget_cb(template);      
                  unbind-widget => $unbind_widget_cb(template);      
+               }
+               Button {
+                  styles [
+                  "pill"
+                  ]
+
+                   label: _("More Added");
+                   halign: center;
+                   valign: center;
+                   clicked => $show_more_recently_added_clicked_cb(template);
                }
              }
            
@@ -254,11 +269,6 @@ template $BzFlathubPage: Adw.Bin {
                    xalign: 0.0;
                    hexpand: true;
                  }
-               
-                 ToggleButton show_more_popular {
-                   label: _("Show More");
-                   active: false;
-                 }
                }
              
                $BzDynamicListView {
@@ -274,12 +284,22 @@ template $BzFlathubPage: Adw.Bin {
                  child-prop: "group";
                  model: SliceListModel {
                    offset: 0;
-                   size: bind $limit_if_false(show_more_popular.active) as <uint>;
+                   size: 12;
                    model: bind template.state as <$BzFlathubState>.popular;
                  };
                
                  bind-widget => $bind_widget_cb(template);      
                  unbind-widget => $unbind_widget_cb(template);      
+               }
+               Button {
+                  styles [
+                  "pill"
+                  ]
+
+                   label: _("More Popular");
+                   halign: center;
+                   valign: center;
+                   clicked => $show_more_popular_clicked_cb(template);
                }
              }
            };

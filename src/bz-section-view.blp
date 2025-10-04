@@ -36,7 +36,7 @@ template $BzSectionView: Adw.Bin {
           ]
 
           can-shrink: true;
-          paintable: bind template.section as <$BzContentSection>.banner;
+          paintable: bind $get_banner(template.section as <$BzContentSection>.banner as <$GdkPaintable>) as <$GdkPaintable>;
           content-fit: bind template.section as <$BzContentSection>.banner-fit;
         };
       };

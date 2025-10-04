@@ -388,15 +388,8 @@ static void
 go_back_cb (BzWindow  *self,
             GtkButton *button)
 {
-  set_page (self);
+  gtk_widget_activate_action (GTK_WIDGET (self), "escape", NULL);
 }
-
-// static void
-// refresh_cb (BzWindow  *self,
-//             GtkButton *button)
-// {
-//   gtk_widget_activate_action (GTK_WIDGET (self), "app.refresh", NULL);
-// }
 
 static void
 update_cb (BzWindow  *self,
@@ -419,11 +412,20 @@ action_escape (GtkWidget  *widget,
                const char *action_name,
                GVariant   *parameter)
 {
-  BzWindow *self = BZ_WINDOW (widget);
+  BzWindow   *self    = BZ_WINDOW (widget);
+  GListModel *stack   = NULL;
+  guint       n_pages = 0;
 
-  adw_overlay_split_view_set_show_sidebar (self->search_split, FALSE);
-  gtk_toggle_button_set_active (self->toggle_transactions, FALSE);
-  set_page (self);
+  stack   = adw_navigation_view_get_navigation_stack (self->main_stack);
+  n_pages = g_list_model_get_n_items (stack);
+
+  adw_navigation_view_pop (self->main_stack);
+  if (n_pages <= 2)
+    {
+      adw_overlay_split_view_set_show_sidebar (self->search_split, FALSE);
+      gtk_toggle_button_set_active (self->toggle_transactions, FALSE);
+      set_page (self);
+    }
 }
 
 static void
@@ -797,14 +799,16 @@ bz_window_show_group (BzWindow     *self,
   g_return_if_fail (BZ_IS_ENTRY_GROUP (group));
 
   bz_full_view_set_entry_group (self->full_view, group);
-  adw_navigation_view_replace_with_tags (self->main_stack, (const char *[]) { "view" }, 1);
+  adw_navigation_view_push_by_tag (self->main_stack, "view");
   gtk_widget_set_visible (GTK_WIDGET (self->go_back), TRUE);
   gtk_widget_set_visible (GTK_WIDGET (self->search), FALSE);
   gtk_revealer_set_reveal_child (self->title_revealer, FALSE);
+
+  set_bottom_bar (self);
 }
 
 void
-bz_window_set_category_view_mode (BzWindow *self,
+bz_window_set_app_list_view_mode (BzWindow *self,
                                   gboolean  enabled)
 {
   g_return_if_fail (BZ_IS_WINDOW (self));
@@ -812,6 +816,8 @@ bz_window_set_category_view_mode (BzWindow *self,
   gtk_widget_set_visible (GTK_WIDGET (self->go_back), enabled);
   gtk_widget_set_visible (GTK_WIDGET (self->search), !enabled);
   gtk_revealer_set_reveal_child (self->title_revealer, !enabled);
+
+  set_bottom_bar (self);
 }
 
 void
@@ -1212,7 +1218,10 @@ set_bottom_bar (BzWindow *self)
   gboolean showing_search  = FALSE;
   gboolean show_bottom_bar = FALSE;
 
-  showing_search  = adw_overlay_split_view_get_show_sidebar (self->search_split);
-  show_bottom_bar = (self->breakpoint_applied && !showing_search);
+  showing_search = adw_overlay_split_view_get_show_sidebar (self->search_split);
+
+  show_bottom_bar = self->breakpoint_applied &&
+                    !showing_search &&
+                    gtk_revealer_get_reveal_child (self->title_revealer);
   adw_toolbar_view_set_reveal_bottom_bars (self->toolbar_view, show_bottom_bar);
 }

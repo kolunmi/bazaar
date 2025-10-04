@@ -651,26 +651,33 @@ input_load_fiber (InputLoadData *data)
 
 #undef GRAB_ENUM
 
-          if (g_hash_table_contains (section_props, "banner"))
-            {
-              const char *string       = NULL;
-              g_autoptr (GFile) source = NULL;
+#define GRAB_BANNER(s)                                   \
+  if (g_hash_table_contains (section_props, (s)))        \
+    {                                                    \
+      const char *string       = NULL;                   \
+      g_autoptr (GFile) source = NULL;                   \
+                                                         \
+      string = g_variant_get_string (                    \
+          g_value_get_variant (                          \
+              g_hash_table_lookup (                      \
+                  section_props, (s))),                  \
+          NULL);                                         \
+      source = g_file_new_for_uri (string);              \
+                                                         \
+      if (source != NULL)                                \
+        {                                                \
+          g_autoptr (BzAsyncTexture) texture = NULL;     \
+                                                         \
+          texture = bz_async_texture_new (source, NULL); \
+          g_object_set (section, (s), texture, NULL);    \
+        }                                                \
+    }
 
-              string = g_variant_get_string (
-                  g_value_get_variant (
-                      g_hash_table_lookup (
-                          section_props, "banner")),
-                  NULL);
-              source = g_file_new_for_uri (string);
+          GRAB_BANNER ("banner");
+          GRAB_BANNER ("light-banner");
+          GRAB_BANNER ("dark-banner");
 
-              if (source != NULL)
-                {
-                  g_autoptr (BzAsyncTexture) texture = NULL;
-
-                  texture = bz_async_texture_new (source, NULL);
-                  g_object_set (section, "banner", texture, NULL);
-                }
-            }
+#undef GRAB_BANNER
 
           if (g_hash_table_contains (section_props, "appids"))
             {

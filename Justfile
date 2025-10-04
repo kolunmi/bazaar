@@ -2,7 +2,7 @@
 
 appid := env("BAZAAR_APPID", "io.github.kolunmi.Bazaar")
 manifest := "./build-aux/flatpak/" + appid + ".json"
-branch := env("BAZAAR_BRANCH", "stable")
+branch := env("BAZAAR_BRANCH", "master")
 just := just_executable()
 
 alias run := run-base

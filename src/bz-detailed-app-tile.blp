@@ -59,22 +59,22 @@ template $BzDetailedAppTile: Button {
             label: bind template.group as <$BzEntryGroup>.title;
           }
 
-          Revealer {
-            transition-type: crossfade;
-            reveal-child: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
-            visible: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
+          // Revealer {
+          //   transition-type: crossfade;
+          //   reveal-child: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
+          //   visible: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
 
-            child: Image {
-              styles [
-                "accent",
-              ]
+          //   child: Image {
+          //     styles [
+          //       "accent",
+          //     ]
 
-              has-tooltip: true;
-              tooltip-text: _("This flatpak is verified by the original developers of the software.");
-              icon-name: "verified-checkmark-symbolic";
-              icon-size: normal;
-            };
-          }
+          //     has-tooltip: true;
+          //     tooltip-text: _("This flatpak is verified by the original developers of the software.");
+          //     icon-name: "verified-checkmark-symbolic";
+          //     icon-size: normal;
+          //   };
+          // }
         }
 
         Label {

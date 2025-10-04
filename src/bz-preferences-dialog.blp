@@ -36,5 +36,31 @@ template $BzPreferencesDialog: Adw.PreferencesDialog {
         subtitle: _("Wait for a brief pause to reduce system load");
       }
     }
+
+    Adw.PreferencesGroup {
+      title: _("Global Progress Bar");
+
+      Adw.ComboRow progress_bar_theme {
+        title: _("Theme");
+        subtitle: _("Choose a fun theme for the global progress bar!");
+        model: StringList {
+          strings [
+            _("Accent Color"),
+            _("Pride Rainbow Flag"),
+            _("Lesbian Pride Flag"),
+            _("Transgender Flag"),
+            _("Nonbinary Flag"),
+            _("Bisexual Flag"),
+            _("Asexual Flag"),
+            _("Pansexual Flag"),
+            _("Aromantic Flag"),
+            _("Genderfluid Flag"),
+            _("Polysexual Flag"),
+            _("Omnisexual Flag"),
+          ]
+        };
+        notify::selected => $global_progress_theme_widget_changed(template);
+      }
+    }
   }
 }

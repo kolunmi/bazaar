@@ -63,6 +63,18 @@
   </screenshots>
 
   <releases>
+    <release version="0.5.3" date="2025-10-02">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.5.3</url>
+      <description translate="no">
+        <p>Some improvements:</p>
+        <ul>
+          <li>Overhaul download history graph; make it interactive</li>
+          <li>Smarter "back" functionality</li>
+          <li>Hide bottom bar more often on small window sizes</li>
+          <li>Make "light-banner" and "dark-banner" keys available to curated configs</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.5.2" date="2025-09-29">
       <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.5.2</url>
       <description translate="no">

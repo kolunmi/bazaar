@@ -20,6 +20,21 @@
 
 #include "bz-preferences-dialog.h"
 
+static const char *bar_themes_ordered[] = {
+  "accent-color",
+  "pride-rainbow-flag",
+  "lesbian-pride-flag",
+  "transgender-flag",
+  "nonbinary-flag",
+  "bisexual-flag",
+  "asexual-flag",
+  "pansexual-flag",
+  "aromantic-flag",
+  "genderfluid-flag",
+  "polysexual-flag",
+  "omnisexual-flag",
+};
+
 struct _BzPreferencesDialog
 {
   AdwPreferencesDialog parent_instance;
@@ -31,18 +46,10 @@ struct _BzPreferencesDialog
   AdwSwitchRow *search_only_foss_switch;
   AdwSwitchRow *search_only_flathub_switch;
   AdwSwitchRow *search_debounce_switch;
+  AdwComboRow  *progress_bar_theme;
 };
 
 G_DEFINE_FINAL_TYPE (BzPreferencesDialog, bz_preferences_dialog, ADW_TYPE_PREFERENCES_DIALOG)
-
-enum
-{
-  PROP_0,
-  PROP_SETTINGS,
-  LAST_PROP
-};
-
-static GParamSpec *props[LAST_PROP] = { 0 };
 
 static void bind_settings (BzPreferencesDialog *self);
 
@@ -57,41 +64,37 @@ bz_preferences_dialog_dispose (GObject *object)
 }
 
 static void
-bz_preferences_dialog_get_property (GObject    *object,
-                                    guint       prop_id,
-                                    GValue     *value,
-                                    GParamSpec *pspec)
+global_progress_theme_widget_changed (BzPreferencesDialog *self,
+                                      GParamSpec          *pspec,
+                                      AdwComboRow         *combo)
 {
-  BzPreferencesDialog *self = BZ_PREFERENCES_DIALOG (object);
+  guint selected = 0;
 
-  switch (prop_id)
-    {
-    case PROP_SETTINGS:
-      g_value_set_object (value, self->settings);
-      break;
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-    }
+  selected = adw_combo_row_get_selected (self->progress_bar_theme);
+  g_assert (selected < G_N_ELEMENTS (bar_themes_ordered));
+
+  g_settings_set_string (self->settings, "global-progress-bar-theme", bar_themes_ordered[selected]);
 }
 
 static void
-bz_preferences_dialog_set_property (GObject      *object,
-                                    guint         prop_id,
-                                    const GValue *value,
-                                    GParamSpec   *pspec)
+global_progress_theme_settings_changed (BzPreferencesDialog *self,
+                                        const char          *key,
+                                        GSettings           *settings)
 {
-  BzPreferencesDialog *self = BZ_PREFERENCES_DIALOG (object);
+  const char *theme = NULL;
+  guint       idx   = 0;
 
-  switch (prop_id)
+  theme = g_settings_get_string (self->settings, "global-progress-bar-theme");
+  for (guint i = 0; i < G_N_ELEMENTS (bar_themes_ordered); i++)
     {
-    case PROP_SETTINGS:
-      g_clear_object (&self->settings);
-      self->settings = g_value_dup_object (value);
-      bind_settings (self);
-      break;
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      if (g_strcmp0 (theme, bar_themes_ordered[i]) == 0)
+        {
+          idx = i;
+          break;
+        }
     }
+
+  adw_combo_row_set_selected (self->progress_bar_theme, idx);
 }
 
 static void
@@ -102,20 +105,27 @@ bind_settings (BzPreferencesDialog *self)
 
   /* Bind all boolean settings to their respective switches */
   g_settings_bind (self->settings, "show-git-forge-star-counts",
-                  self->git_forge_star_counts_switch, "active",
-                  G_SETTINGS_BIND_DEFAULT);
-  
+                   self->git_forge_star_counts_switch, "active",
+                   G_SETTINGS_BIND_DEFAULT);
+
   g_settings_bind (self->settings, "search-only-foss",
-                  self->search_only_foss_switch, "active",
-                  G_SETTINGS_BIND_DEFAULT);
-  
+                   self->search_only_foss_switch, "active",
+                   G_SETTINGS_BIND_DEFAULT);
+
   g_settings_bind (self->settings, "search-only-flathub",
-                  self->search_only_flathub_switch, "active",
-                  G_SETTINGS_BIND_DEFAULT);
-  
+                   self->search_only_flathub_switch, "active",
+                   G_SETTINGS_BIND_DEFAULT);
+
   g_settings_bind (self->settings, "search-debounce",
-                  self->search_debounce_switch, "active",
-                  G_SETTINGS_BIND_DEFAULT);
+                   self->search_debounce_switch, "active",
+                   G_SETTINGS_BIND_DEFAULT);
+
+  g_signal_connect_object (
+      self->settings,
+      "changed::global-progress-bar-theme",
+      G_CALLBACK (global_progress_theme_settings_changed),
+      self, G_CONNECT_SWAPPED);
+  global_progress_theme_settings_changed (self, "global-progress-bar-theme", self->settings);
 }
 
 static void
@@ -124,25 +134,16 @@ bz_preferences_dialog_class_init (BzPreferencesDialogClass *klass)
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
-  object_class->dispose      = bz_preferences_dialog_dispose;
-  object_class->get_property = bz_preferences_dialog_get_property;
-  object_class->set_property = bz_preferences_dialog_set_property;
-
-  props[PROP_SETTINGS] =
-      g_param_spec_object (
-          "settings",
-          NULL, NULL,
-          G_TYPE_SETTINGS,
-          G_PARAM_READWRITE);
-
-  g_object_class_install_properties (object_class, LAST_PROP, props);
+  object_class->dispose = bz_preferences_dialog_dispose;
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-preferences-dialog.ui");
-  
+
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, git_forge_star_counts_switch);
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, search_only_foss_switch);
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, search_only_flathub_switch);
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, search_debounce_switch);
+  gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, progress_bar_theme);
+  gtk_widget_class_bind_template_callback (widget_class, global_progress_theme_widget_changed);
 }
 
 static void
@@ -156,10 +157,11 @@ bz_preferences_dialog_new (GSettings *settings)
 {
   BzPreferencesDialog *dialog = NULL;
 
-  dialog = g_object_new (
-      BZ_TYPE_PREFERENCES_DIALOG,
-      "settings", settings,
-      NULL);
+  g_return_val_if_fail (G_IS_SETTINGS (settings), NULL);
+
+  dialog           = g_object_new (BZ_TYPE_PREFERENCES_DIALOG, NULL);
+  dialog->settings = g_object_ref (settings);
+  bind_settings (dialog);
 
   return ADW_DIALOG (dialog);
 }

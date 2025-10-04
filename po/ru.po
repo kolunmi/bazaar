@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-01 13:14+0700\n"
-"PO-Revision-Date: 2025-10-01 13:19+0700\n"
+"POT-Creation-Date: 2025-10-04 13:50+0700\n"
+"PO-Revision-Date: 2025-10-04 14:08+0700\n"
 "Last-Translator: Jill Fiore <contact@lumaeris.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -74,11 +74,19 @@ msgid "Add a delay before searching to prevent instant replies while typing"
 msgstr ""
 "Добавить время отклика перед выполнением фильтрации быстрых ответов при вводе"
 
-#: data/io.github.kolunmi.Bazaar.gschema.xml:26
+#: data/io.github.kolunmi.Bazaar.gschema.xml:40
+msgid "Global Progress Bar Theme"
+msgstr "Тема оформления глобальной полосы прогресса"
+
+#: data/io.github.kolunmi.Bazaar.gschema.xml:41
+msgid "Describes the look of the global progress bar"
+msgstr "Описывает внешний вид глобальной полосы прогресса"
+
+#: data/io.github.kolunmi.Bazaar.gschema.xml:45
 msgid "Saved Window Dimensions"
 msgstr "Сохранить размер окна"
 
-#: data/io.github.kolunmi.Bazaar.gschema.xml:27
+#: data/io.github.kolunmi.Bazaar.gschema.xml:46
 msgid "The window dimensions to be used by the next Bazaar window"
 msgstr ""
 "Сохранённый размер окна будет использован при повторном открытии Bazaar"
@@ -128,11 +136,6 @@ msgstr "График количества скачиваний Blender"
 #: src/bz-addons-dialog.blp:13
 msgid "Manage Addons"
 msgstr "Управление дополнениями"
-
-#: src/bz-app-tile.blp:78 src/bz-detailed-app-tile.blp:73
-#: src/bz-full-view.blp:126
-msgid "This flatpak is verified by the original developers of the software."
-msgstr "Данный flatpak был верифицирован подлинными разработчиками программы."
 
 #: src/bz-application.c:679
 msgid ""
@@ -415,30 +418,41 @@ msgid "The Flathub remote was not found on any of your flatpak installations"
 msgstr ""
 "Сторонний репозиторий Flathub не был найден среди ваших flatpak установок"
 
-#: src/bz-flathub-page.blp:80
+#: src/bz-flathub-page.blp:80 src/bz-flathub-page.c:176
 msgid "Trending"
 msgstr "В тренде"
 
-#: src/bz-flathub-page.blp:86 src/bz-flathub-page.blp:165
-#: src/bz-flathub-page.blp:212 src/bz-flathub-page.blp:259
-msgid "Show More"
-msgstr "Показать больше"
+#: src/bz-flathub-page.blp:111
+msgid "More Trending"
+msgstr "Больше трендовых"
 
-#: src/bz-flathub-page.blp:122
+#: src/bz-flathub-page.blp:127
 msgid "Categories"
 msgstr "Категории"
 
-#: src/bz-flathub-page.blp:159
+#: src/bz-flathub-page.blp:164 src/bz-flathub-page.c:186
 msgid "Recently Updated"
 msgstr "Недавно обновленные"
 
-#: src/bz-flathub-page.blp:206
+#: src/bz-flathub-page.blp:195
+msgid "More Updated"
+msgstr "Больше обновленных"
+
+#: src/bz-flathub-page.blp:216 src/bz-flathub-page.c:196
 msgid "Recently Added"
 msgstr "Недавно добавленные"
 
-#: src/bz-flathub-page.blp:253
+#: src/bz-flathub-page.blp:247
+msgid "More Added"
+msgstr "Больше новинок"
+
+#: src/bz-flathub-page.blp:268 src/bz-flathub-page.c:206
 msgid "Popular"
 msgstr "Популярное"
+
+#: src/bz-flathub-page.blp:299
+msgid "More Popular"
+msgstr "Больше популярных"
 
 #: src/bz-flatpak-entry.c:519
 msgctxt "Project URL Type"
@@ -502,6 +516,10 @@ msgstr "Попробуйте выполнить другой запрос"
 msgid "Content"
 msgstr "Контент"
 
+#: src/bz-full-view.blp:126
+msgid "This flatpak is verified by the original developers of the software."
+msgstr "Данный flatpak был верифицирован подлинными разработчиками программы."
+
 #: src/bz-full-view.blp:148
 msgid "Support"
 msgstr "Поддержать"
@@ -519,7 +537,7 @@ msgid "Download & Install Application"
 msgstr "Скачать и установить приложение"
 
 #: src/bz-full-view.blp:219 src/bz-transaction-view.blp:111
-#: src/bz-window.c:1005
+#: src/bz-window.c:1011
 msgid "Install"
 msgstr "Установить"
 
@@ -588,16 +606,31 @@ msgstr "История версий"
 msgid "%'d downloads in the last month"
 msgstr "%'d загрузок за прошедший месяц"
 
-#: src/bz-full-view.c:227 src/bz-full-view.c:465
-#, c-format
-msgid "%x"
-msgstr "%x"
+#. Translators: This is a date format for timestamps from previous years. Used in the app releases section.
+#. * %B is the full month name, %e is the day, %Y is the year.
+#. * Example: "October 1, 2025"
+#. * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
+#. * Please modify to make it sound natural in your locale.
+#. *
+#: src/bz-full-view.c:237
+msgid "%B %-d, %Y"
+msgstr "%e %B, %Y"
 
-#: src/bz-full-view.c:238
+#. Translators: This is a date format for timestamps from the current year. Used in the app releases section.
+#. * %B is the full month name, %e is the day.
+#. * Example: "October 1"
+#. * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
+#. * Please modify to make it sound natural in your locale.
+#. *
+#: src/bz-full-view.c:245
+msgid "%B %-d"
+msgstr "%e %B"
+
+#: src/bz-full-view.c:256
 msgid "No URL"
 msgstr "Нет URL"
 
-#: src/bz-full-view.c:246
+#: src/bz-full-view.c:264
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -605,7 +638,7 @@ msgstr ""
 "Это приложение имеет лицензию FLOSS, что значит исходный код может быть "
 "проверен на безопасность."
 
-#: src/bz-full-view.c:247
+#: src/bz-full-view.c:265
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
@@ -614,12 +647,12 @@ msgstr ""
 "разрабатывается в тайне и не может быть проверен независимой третьей "
 "стороной."
 
-#: src/bz-full-view.c:478
+#: src/bz-full-view.c:494
 #, c-format
 msgid "Version %s"
 msgstr "Версия %s"
 
-#: src/bz-full-view.c:495
+#: src/bz-full-view.c:511
 msgid "No details for this release"
 msgstr "Нет подробностей"
 
@@ -651,7 +684,7 @@ msgstr "Декешировать и проверить"
 msgid "No Flatpaks Installed"
 msgstr "Нет установленных Flatpak"
 
-#: src/bz-installed-page.blp:21 src/bz-window.blp:247 src/bz-window.blp:349
+#: src/bz-installed-page.blp:21 src/bz-window.blp:248 src/bz-window.blp:350
 msgid "Installed"
 msgstr "Установленное"
 
@@ -660,7 +693,7 @@ msgid "Support this application"
 msgstr "Поддержать это приложение"
 
 #: src/bz-installed-page.blp:151 src/bz-transaction-view.blp:303
-#: src/bz-window.c:986
+#: src/bz-window.c:992
 msgid "Remove"
 msgstr "Удалить"
 
@@ -692,7 +725,7 @@ msgstr ""
 "Вы установили несколько версий данного приложения. Какое вы хотите выбрать "
 "для продолжения?"
 
-#: src/bz-installed-page.c:656 src/bz-window.c:985 src/bz-window.c:1004
+#: src/bz-installed-page.c:656 src/bz-window.c:991 src/bz-window.c:1010
 msgid "Cancel"
 msgstr "Отмена"
 
@@ -714,7 +747,7 @@ msgstr ""
 "Без токена доступа GitHub возможны временные ограничения в получении "
 "результатов"
 
-#: src/bz-preferences-dialog.blp:22 src/bz-window.blp:289
+#: src/bz-preferences-dialog.blp:22 src/bz-window.blp:290
 msgid "Search"
 msgstr "Поиск"
 
@@ -738,6 +771,66 @@ msgstr "Увеличить время отклика ввода"
 msgid "Wait for a brief pause to reduce system load"
 msgstr "Подождать немного для уменьшения нагрузки на систему"
 
+#: src/bz-preferences-dialog.blp:41
+msgid "Global Progress Bar"
+msgstr "Глобальная полоса прогресса"
+
+#: src/bz-preferences-dialog.blp:44
+msgid "Theme"
+msgstr "Тема оформления"
+
+#: src/bz-preferences-dialog.blp:45
+msgid "Choose a fun theme for the global progress bar!"
+msgstr "Выберите прикольную тему для глобальной полосы прогресса!"
+
+#: src/bz-preferences-dialog.blp:48
+msgid "Accent Color"
+msgstr "Цвет акцента"
+
+#: src/bz-preferences-dialog.blp:49
+msgid "Pride Rainbow Flag"
+msgstr "Радужный флаг гордости"
+
+#: src/bz-preferences-dialog.blp:50
+msgid "Lesbian Pride Flag"
+msgstr "Лесбийский флаг гордости"
+
+#: src/bz-preferences-dialog.blp:51
+msgid "Transgender Flag"
+msgstr "Флаг трансгендеров"
+
+#: src/bz-preferences-dialog.blp:52
+msgid "Nonbinary Flag"
+msgstr "Флаг небинарных"
+
+#: src/bz-preferences-dialog.blp:53
+msgid "Bisexual Flag"
+msgstr "Флаг бисексуалов"
+
+#: src/bz-preferences-dialog.blp:54
+msgid "Asexual Flag"
+msgstr "Флаг асексуалов"
+
+#: src/bz-preferences-dialog.blp:55
+msgid "Pansexual Flag"
+msgstr "Флаг пансексуалов"
+
+#: src/bz-preferences-dialog.blp:56
+msgid "Aromantic Flag"
+msgstr "Флаг аромантиков"
+
+#: src/bz-preferences-dialog.blp:57
+msgid "Genderfluid Flag"
+msgstr "Флаг гендерфлюид"
+
+#: src/bz-preferences-dialog.blp:58
+msgid "Polysexual Flag"
+msgstr "Флаг полисексуалов"
+
+#: src/bz-preferences-dialog.blp:59
+msgid "Omnisexual Flag"
+msgstr "Флаг омнисексуалов"
+
 #: src/bz-search-widget.blp:69
 msgid "Search Apps"
 msgstr "Поиск приложений"
@@ -758,13 +851,9 @@ msgstr "Открыть ссылку"
 msgid "Downloads Over Time"
 msgstr "Количество загрузок"
 
-#: src/bz-stats-dialog.blp:31
-msgid "Minimize Lower Bound"
-msgstr "Уменьшить нижнюю границу"
-
-#: src/bz-stats-dialog.blp:36
-msgid "Maximize Upper Bound"
-msgstr "Увеличить верхнюю границу"
+#: src/bz-stats-dialog.blp:21
+msgid "Installs:"
+msgstr "Установок:"
 
 #: src/bz-transaction-manager.c:1090
 #, c-format
@@ -779,7 +868,7 @@ msgstr "Размер установки"
 msgid "Updated Size"
 msgstr "Размер обновления"
 
-#: src/bz-transaction-view.blp:207 src/bz-window.blp:301
+#: src/bz-transaction-view.blp:207 src/bz-window.blp:302
 msgid "Update"
 msgstr "Обновить"
 
@@ -841,83 +930,83 @@ msgstr "Остановить выполнение транзакций"
 msgid "Clear all finished transactions"
 msgstr "Очистить все завершенные транзакции"
 
-#: src/bz-window.blp:155 src/bz-window.blp:159
+#: src/bz-window.blp:156 src/bz-window.blp:160
 msgid "Offline"
 msgstr "Нет интернета"
 
-#: src/bz-window.blp:165
+#: src/bz-window.blp:166
 msgid "Loading"
 msgstr "Загрузка"
 
-#: src/bz-window.blp:213
+#: src/bz-window.blp:214
 msgid "Browse"
 msgstr "Просмотр"
 
-#: src/bz-window.blp:223
+#: src/bz-window.blp:224
 msgid "App View"
 msgstr "Вид приложения"
 
-#: src/bz-window.blp:237 src/bz-window.blp:342
+#: src/bz-window.blp:238 src/bz-window.blp:343
 msgid "Flathub"
 msgstr "Flathub"
 
-#: src/bz-window.blp:272
+#: src/bz-window.blp:273
 msgid "Go Back"
 msgstr "Назад"
 
-#: src/bz-window.blp:331
+#: src/bz-window.blp:332
 msgid "View curated applications"
 msgstr "Посмотреть избранные приложения"
 
-#: src/bz-window.blp:335
+#: src/bz-window.blp:336
 msgid "Curated"
 msgstr "Избранное"
 
-#: src/bz-window.blp:339
+#: src/bz-window.blp:340
 msgid "View the latest on Flathub"
 msgstr "Посмотреть новое на Flathub"
 
-#: src/bz-window.blp:346
+#: src/bz-window.blp:347
 msgid "View installed applications"
 msgstr "Посмотреть установленные приложения"
 
-#: src/bz-window.blp:361
+#: src/bz-window.blp:362
 msgid "Main Menu"
 msgstr "Главное меню"
 
-#: src/bz-window.blp:372
+#: src/bz-window.blp:373
 msgid "Toggle transaction sidebar"
 msgstr "Переключить боковую панель транзакций"
 
-#: src/bz-window.blp:417
+#: src/bz-window.blp:419
 msgid "_Quit Service"
 msgstr "_Закрыть сервис"
 
-#: src/bz-window.blp:422
+#: src/bz-window.blp:424
 msgid "_Refresh Content"
 msgstr "_Обновить контент"
 
-#: src/bz-window.blp:427
+#: src/bz-window.blp:429
 msgid "_Preferences"
 msgstr "_Параметры"
 
-#: src/bz-window.blp:432
+#: src/bz-window.blp:434
 msgid "_Keyboard Shortcuts"
 msgstr "_Сочетание клавиш"
 
-#: src/bz-window.blp:437
+#: src/bz-window.blp:439
 msgid "_About Bazaar"
 msgstr "О _Bazaar"
 
-#: src/bz-window.blp:442
+#: src/bz-window.blp:444
 msgid "_Donate to Bazaar ❤️"
 msgstr "По_ддержать Bazaar ❤️"
 
-#: src/bz-window.c:614
+#: src/bz-window.c:616
 msgid "Up to date!"
 msgstr "Нет обновлений!"
 
-#: src/bz-window.c:786
+#: src/bz-window.c:788
 msgid ""
 "The ability to inspect and install local .flatpak bundle files is coming "
 "soon! In the meantime, try running\n"
@@ -933,15 +1022,15 @@ msgstr ""
 "\n"
 "в командной строке."
 
-#: src/bz-window.c:894
+#: src/bz-window.c:900
 msgid "Can't do that right now!"
 msgstr "Нельзя сделать это прямо сейчас!"
 
-#: src/bz-window.c:949
+#: src/bz-window.c:955
 msgid "Confirm Action"
 msgstr "Подтвердить действие"
 
-#: src/bz-window.c:978
+#: src/bz-window.c:984
 #, c-format
 msgid ""
 "You are about to remove the following Flatpak:\n"
@@ -958,7 +1047,7 @@ msgstr ""
 "\n"
 "Вы уверены?"
 
-#: src/bz-window.c:997
+#: src/bz-window.c:1003
 #, c-format
 msgid ""
 "You are about to install the following Flatpak:\n"
@@ -975,15 +1064,15 @@ msgstr ""
 "\n"
 "Вы уверены?"
 
-#: src/bz-window.c:1027
+#: src/bz-window.c:1033
 msgid "More details"
 msgstr "Больше подробностей"
 
-#: src/bz-window.c:1153
+#: src/bz-window.c:1159
 msgid "Resume the execution of transactions"
 msgstr "Возобновить выполнение транзакций"
 
-#: src/bz-window.c:1159
+#: src/bz-window.c:1165
 msgid "Pause the execution of transactions"
 msgstr "Приостановить выполнение транзакций"
 
@@ -1016,6 +1105,19 @@ msgstr "Открыть сочетания клавиш"
 msgctxt "shortcut window"
 msgid "Quit"
 msgstr "Закрыть"
+
+#~ msgid "Show More"
+#~ msgstr "Показать больше"
+
+#, c-format
+#~ msgid "%x"
+#~ msgstr "%x"
+
+#~ msgid "Minimize Lower Bound"
+#~ msgstr "Уменьшить нижнюю границу"
+
+#~ msgid "Maximize Upper Bound"
+#~ msgstr "Увеличить верхнюю границу"
 
 #~ msgid "Apps Of The Week"
 #~ msgstr "Приложения недели"

@@ -34,6 +34,7 @@ struct _BzGlobalProgress
   double     actual_fraction;
   double     transition_progress;
   int        expand_size;
+  GSettings *settings;
 
   AdwAnimation *transition_animation;
   AdwAnimation *fraction_animation;
@@ -55,20 +56,41 @@ enum
   PROP_ACTUAL_FRACTION,
   PROP_TRANSITION_PROGRESS,
   PROP_EXPAND_SIZE,
+  PROP_SETTINGS,
 
   LAST_PROP
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
 
 static void
+global_progress_bar_theme_changed (BzGlobalProgress *self,
+                                   const char       *key,
+                                   GSettings        *settings);
+
+static void
+append_striped_flag (GtkSnapshot     *snapshot,
+                     const GdkRGBA    colors[],
+                     const float      offsets[],
+                     const float      sizes[],
+                     guint            n_stripes,
+                     graphene_rect_t *rect);
+
+static void
 bz_global_progress_dispose (GObject *object)
 {
   BzGlobalProgress *self = BZ_GLOBAL_PROGRESS (object);
+
+  if (self->settings != NULL)
+    g_signal_handlers_disconnect_by_func (
+        self->settings,
+        global_progress_bar_theme_changed,
+        self);
 
   g_clear_pointer (&self->child, gtk_widget_unparent);
 
   g_clear_object (&self->transition_animation);
   g_clear_object (&self->fraction_animation);
+  g_clear_object (&self->settings);
 
   g_clear_pointer (&self->transition_spring_up, adw_spring_params_unref);
   g_clear_pointer (&self->transition_spring_down, adw_spring_params_unref);
@@ -106,6 +128,9 @@ bz_global_progress_get_property (GObject *object,
     case PROP_EXPAND_SIZE:
       g_value_set_int (value, bz_global_progress_get_expand_size (self));
       break;
+    case PROP_SETTINGS:
+      g_value_set_object (value, bz_global_progress_get_settings (self));
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -138,6 +163,9 @@ bz_global_progress_set_property (GObject      *object,
       break;
     case PROP_EXPAND_SIZE:
       bz_global_progress_set_expand_size (self, g_value_get_int (value));
+      break;
+    case PROP_SETTINGS:
+      bz_global_progress_set_settings (self, g_value_get_object (value));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -236,10 +264,275 @@ bz_global_progress_snapshot (GtkWidget   *widget,
 
   accent_color->alpha = 0.2;
   gtk_snapshot_append_color (snapshot, accent_color, &total_clip.bounds);
+  accent_color->alpha = 1.0;
 
   gtk_snapshot_push_rounded_clip (snapshot, &fraction_clip);
-  accent_color->alpha = 1.0;
-  gtk_snapshot_append_color (snapshot, accent_color, &fraction_clip.bounds);
+  if (self->settings != NULL)
+    {
+      const char *theme = NULL;
+
+      theme = g_settings_get_string (self->settings, "global-progress-bar-theme");
+
+      if (theme == NULL || g_strcmp0 (theme, "accent-color") == 0)
+        gtk_snapshot_append_color (snapshot, accent_color, &fraction_clip.bounds);
+      else if (g_strcmp0 (theme, "pride-rainbow-flag") == 0)
+        {
+          const GdkRGBA colors[] = {
+            { 228.0 / 255.0,   3.0 / 255.0,   3.0 / 255.0, 1.0 },
+            { 255.0 / 255.0, 140.0 / 255.0,   0.0 / 255.0, 1.0 },
+            { 255.0 / 255.0, 237.0 / 255.0,   0.0 / 255.0, 1.0 },
+            {   0.0 / 255.0, 128.0 / 255.0,  38.0 / 255.0, 1.0 },
+            {   0.0 / 255.0,  76.0 / 255.0, 255.0 / 255.0, 1.0 },
+            { 115.0 / 255.0,  41.0 / 255.0, 130.0 / 255.0, 1.0 },
+          };
+          const float offsets[] = {
+            0.0 / 6.0,
+            1.0 / 6.0,
+            2.0 / 6.0,
+            3.0 / 6.0,
+            4.0 / 6.0,
+            5.0 / 6.0,
+          };
+          const float sizes[] = {
+            1.0 / 6.0,
+            1.0 / 6.0,
+            1.0 / 6.0,
+            1.0 / 6.0,
+            1.0 / 6.0,
+            1.0 / 6.0,
+          };
+          append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
+        }
+      else if (g_strcmp0 (theme, "lesbian-pride-flag") == 0)
+        {
+          const GdkRGBA colors[] = {
+            { 213.0 / 255.0,  45.0 / 255.0,   0.0 / 255.0, 1.0 },
+            { 239.0 / 255.0, 118.0 / 255.0,  39.0 / 255.0, 1.0 },
+            { 255.0 / 255.0, 154.0 / 255.0,  86.0 / 255.0, 1.0 },
+            { 255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 1.0 },
+            { 209.0 / 255.0,  98.0 / 255.0, 164.0 / 255.0, 1.0 },
+            { 181.0 / 255.0,  86.0 / 255.0, 144.0 / 255.0, 1.0 },
+            { 163.0 / 255.0,   2.0 / 255.0,  98.0 / 255.0, 1.0 },
+          };
+          const float offsets[] = {
+            0.0 / 7.0,
+            1.0 / 7.0,
+            2.0 / 7.0,
+            3.0 / 7.0,
+            4.0 / 7.0,
+            5.0 / 7.0,
+            6.0 / 7.0,
+          };
+          const float sizes[] = {
+            1.0 / 7.0,
+            1.0 / 7.0,
+            1.0 / 7.0,
+            1.0 / 7.0,
+            1.0 / 7.0,
+            1.0 / 7.0,
+          };
+          append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
+        }
+      else if (g_strcmp0 (theme, "transgender-flag") == 0)
+        {
+          const GdkRGBA colors[] = {
+            {  91.0 / 255.0, 206.0 / 255.0, 250.0 / 255.0, 1.0 },
+            { 245.0 / 255.0, 169.0 / 255.0, 184.0 / 255.0, 1.0 },
+            { 255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 1.0 },
+          };
+          const float offsets[] = {
+            0.0 / 5.0,
+            1.0 / 5.0,
+            2.0 / 5.0,
+          };
+          const float sizes[] = {
+            5.0 / 5.0,
+            3.0 / 5.0,
+            1.0 / 5.0,
+          };
+          append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
+        }
+      else if (g_strcmp0 (theme, "nonbinary-flag") == 0)
+        {
+          const GdkRGBA colors[] = {
+            { 252.0 / 255.0, 244.0 / 255.0,  52.0 / 255.0, 1.0 },
+            { 255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 1.0 },
+            { 156.0 / 255.0,  89.0 / 255.0, 209.0 / 255.0, 1.0 },
+            {  44.0 / 255.0,  44.0 / 255.0,  44.0 / 255.0, 1.0 },
+          };
+          const float offsets[] = {
+            0.0 / 4.0,
+            1.0 / 4.0,
+            2.0 / 4.0,
+            3.0 / 4.0,
+          };
+          const float sizes[] = {
+            1.0 / 4.0,
+            1.0 / 4.0,
+            1.0 / 4.0,
+            1.0 / 4.0,
+          };
+          append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
+        }
+      else if (g_strcmp0 (theme, "bisexual-flag") == 0)
+        {
+          const GdkRGBA colors[] = {
+            { 214.0 / 255.0,  2.0 / 255.0, 112.0 / 255.0, 1.0 },
+            { 155.0 / 255.0, 79.0 / 255.0, 150.0 / 255.0, 1.0 },
+            {   0.0 / 255.0, 56.0 / 255.0, 168.0 / 255.0, 1.0 },
+          };
+          const float offsets[] = {
+            0.0 / 5.0,
+            2.0 / 5.0,
+            3.0 / 5.0,
+          };
+          const float sizes[] = {
+            2.0 / 5.0,
+            1.0 / 5.0,
+            2.0 / 5.0,
+          };
+          append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
+        }
+      else if (g_strcmp0 (theme, "asexual-flag") == 0)
+        {
+          const GdkRGBA colors[] = {
+            {   0.0 / 255.0,   0.0 / 255.0,   0.0 / 255.0, 1.0 },
+            { 163.0 / 255.0, 163.0 / 255.0, 163.0 / 255.0, 1.0 },
+            { 255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 1.0 },
+            { 128.0 / 255.0,   0.0 / 255.0, 128.0 / 255.0, 1.0 },
+          };
+          const float offsets[] = {
+            0.0 / 4.0,
+            1.0 / 4.0,
+            2.0 / 4.0,
+            3.0 / 4.0,
+          };
+          const float sizes[] = {
+            1.0 / 4.0,
+            1.0 / 4.0,
+            1.0 / 4.0,
+            1.0 / 4.0,
+          };
+          append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
+        }
+      else if (g_strcmp0 (theme, "pansexual-flag") == 0)
+        {
+          const GdkRGBA colors[] = {
+            { 255.0 / 255.0,  33.0 / 255.0, 140.0 / 255.0, 1.0 },
+            { 255.0 / 255.0, 216.0 / 255.0,   0.0 / 255.0, 1.0 },
+            {  33.0 / 255.0, 177.0 / 255.0, 255.0 / 255.0, 1.0 },
+          };
+          const float offsets[] = {
+            0.0 / 3.0,
+            1.0 / 3.0,
+            2.0 / 3.0,
+          };
+          const float sizes[] = {
+            1.0 / 3.0,
+            1.0 / 3.0,
+            1.0 / 3.0,
+          };
+          append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
+        }
+      else if (g_strcmp0 (theme, "aromantic-flag") == 0)
+        {
+          const GdkRGBA colors[] = {
+            {  61.0 / 255.0, 165.0 / 255.0,  66.0 / 255.0, 1.0 },
+            { 167.0 / 255.0, 211.0 / 255.0, 121.0 / 255.0, 1.0 },
+            { 255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 1.0 },
+            { 169.0 / 255.0, 169.0 / 255.0, 169.0 / 255.0, 1.0 },
+            {   0.0 / 255.0,   0.0 / 255.0,   0.0 / 255.0, 1.0 },
+          };
+          const float offsets[] = {
+            0.0 / 5.0,
+            1.0 / 5.0,
+            2.0 / 5.0,
+            3.0 / 5.0,
+            4.0 / 5.0,
+          };
+          const float sizes[] = {
+            1.0 / 5.0,
+            1.0 / 5.0,
+            1.0 / 5.0,
+            1.0 / 5.0,
+            1.0 / 5.0,
+          };
+          append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
+        }
+      else if (g_strcmp0 (theme, "genderfluid-flag") == 0)
+        {
+          const GdkRGBA colors[] = {
+            { 255.0 / 255.0, 118.0 / 255.0, 164.0 / 255.0, 1.0 },
+            { 255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 1.0 },
+            { 192.0 / 255.0,  17.0 / 255.0, 215.0 / 255.0, 1.0 },
+            {   0.0 / 255.0,   0.0 / 255.0,   0.0 / 255.0, 1.0 },
+            {  47.0 / 255.0,  60.0 / 255.0, 190.0 / 255.0, 1.0 },
+          };
+          const float offsets[] = {
+            0.0 / 5.0,
+            1.0 / 5.0,
+            2.0 / 5.0,
+            3.0 / 5.0,
+            4.0 / 5.0,
+          };
+          const float sizes[] = {
+            1.0 / 5.0,
+            1.0 / 5.0,
+            1.0 / 5.0,
+            1.0 / 5.0,
+            1.0 / 5.0,
+          };
+          append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
+        }
+      else if (g_strcmp0 (theme, "polysexual-flag") == 0)
+        {
+          const GdkRGBA colors[] = {
+            { 247.0 / 255.0,  20.0 / 255.0, 186.0 / 255.0, 1.0 },
+            {   1.0 / 255.0, 214.0 / 255.0, 106.0 / 255.0, 1.0 },
+            {  21.0 / 255.0, 148.0 / 255.0, 246.0 / 255.0, 1.0 },
+          };
+          const float offsets[] = {
+            0.0 / 3.0,
+            1.0 / 3.0,
+            2.0 / 3.0,
+          };
+          const float sizes[] = {
+            1.0 / 3.0,
+            1.0 / 3.0,
+            1.0 / 3.0,
+          };
+          append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
+        }
+      else if (g_strcmp0 (theme, "omnisexual-flag") == 0)
+        {
+          const GdkRGBA colors[] = {
+            { 254.0 / 255.0, 154.0 / 255.0, 206.0 / 255.0, 1.0 },
+            { 255.0 / 255.0,  83.0 / 255.0, 191.0 / 255.0, 1.0 },
+            {  32.0 / 255.0,   0.0 / 255.0,  68.0 / 255.0, 1.0 },
+            { 103.0 / 255.0,  96.0 / 255.0, 254.0 / 255.0, 1.0 },
+            { 142.0 / 255.0, 166.0 / 255.0, 255.0 / 255.0, 1.0 },
+          };
+          const float offsets[] = {
+            0.0 / 5.0,
+            1.0 / 5.0,
+            2.0 / 5.0,
+            3.0 / 5.0,
+            4.0 / 5.0,
+          };
+          const float sizes[] = {
+            1.0 / 5.0,
+            1.0 / 5.0,
+            1.0 / 5.0,
+            1.0 / 5.0,
+            1.0 / 5.0,
+          };
+          append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
+        }
+      else
+        gtk_snapshot_append_color (snapshot, accent_color, &fraction_clip.bounds);
+    }
+  else
+    gtk_snapshot_append_color (snapshot, accent_color, &fraction_clip.bounds);
   gtk_snapshot_pop (snapshot);
 
   gtk_snapshot_pop (snapshot);
@@ -295,6 +588,13 @@ bz_global_progress_class_init (BzGlobalProgressClass *klass)
           "expand-size",
           NULL, NULL,
           0, G_MAXINT, 100,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_SETTINGS] =
+      g_param_spec_object (
+          "settings",
+          NULL, NULL,
+          G_TYPE_SETTINGS,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
@@ -510,4 +810,66 @@ bz_global_progress_get_expand_size (BzGlobalProgress *self)
 {
   g_return_val_if_fail (BZ_IS_GLOBAL_PROGRESS (self), FALSE);
   return self->expand_size;
+}
+
+void
+bz_global_progress_set_settings (BzGlobalProgress *self,
+                                 GSettings        *settings)
+{
+  g_return_if_fail (BZ_IS_GLOBAL_PROGRESS (self));
+
+  if (self->settings != NULL)
+    g_signal_handlers_disconnect_by_func (
+        self->settings,
+        global_progress_bar_theme_changed,
+        self);
+  g_clear_object (&self->settings);
+
+  if (settings != NULL)
+    {
+      self->settings = g_object_ref (settings);
+      g_signal_connect_swapped (
+          self->settings,
+          "changed::global-progress-bar-theme",
+          G_CALLBACK (global_progress_bar_theme_changed),
+          self);
+    }
+
+  gtk_widget_queue_draw (GTK_WIDGET (self));
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SETTINGS]);
+}
+
+GSettings *
+bz_global_progress_get_settings (BzGlobalProgress *self)
+{
+  g_return_val_if_fail (BZ_IS_GLOBAL_PROGRESS (self), FALSE);
+  return self->settings;
+}
+
+static void
+global_progress_bar_theme_changed (BzGlobalProgress *self,
+                                   const char       *key,
+                                   GSettings        *settings)
+{
+  gtk_widget_queue_draw (GTK_WIDGET (self));
+}
+
+static void
+append_striped_flag (GtkSnapshot     *snapshot,
+                     const GdkRGBA    colors[],
+                     const float      offsets[],
+                     const float      sizes[],
+                     guint            n_stripes,
+                     graphene_rect_t *rect)
+{
+  for (guint i = 0; i < n_stripes; i++)
+    {
+      graphene_rect_t stripe_rect = { 0 };
+
+      stripe_rect = *rect;
+      stripe_rect.origin.y += stripe_rect.size.height * offsets[i];
+      stripe_rect.size.height *= sizes[i];
+
+      gtk_snapshot_append_color (snapshot, colors + i, &stripe_rect);
+    }
 }

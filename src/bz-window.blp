@@ -148,6 +148,7 @@ template $BzWindow: Adw.ApplicationWindow {
               child: Overlay {
                 child: Adw.NavigationView main_stack {
 
+                  pop-on-escape: false;
                   notify::visible-page => $visible_page_changed_cb(template);
 
                   Adw.NavigationPage {
@@ -376,6 +377,7 @@ template $BzWindow: Adw.ApplicationWindow {
               expand-size: 125;
               active: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
               fraction: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.current-progress;
+              settings: bind template.state as <$BzStateInfo>.settings;
 
               child: Image {
                 halign: end;
