@@ -607,9 +607,12 @@ checking_for_updates_changed (BzWindow    *self,
   if (!busy && !checking_for_updates)
     {
       if (has_updates)
-        bz_comet_overlay_pulse_child (
-            self->comet_overlay,
-            GTK_WIDGET (self->update_button));
+        {
+          bz_comet_overlay_set_pulse_color (self->comet_overlay, NULL);
+          bz_comet_overlay_pulse_child (
+              self->comet_overlay,
+              GTK_WIDGET (self->update_button));
+        }
       else
         adw_toast_overlay_add_toast (
             self->toasts,
@@ -868,6 +871,24 @@ transact (BzWindow  *self,
   if (icon != NULL)
     {
       g_autoptr (BzComet) comet = NULL;
+
+      if (remove)
+        {
+          AdwStyleManager *style_manager = adw_style_manager_get_default ();
+          gboolean         is_dark       = adw_style_manager_get_dark (style_manager);
+          GdkRGBA          destructive_color;
+
+          if (is_dark)
+            destructive_color = (GdkRGBA) { 0.3, 0.2, 0.21, 0.6 };
+          else
+            destructive_color = (GdkRGBA) { 0.95, 0.84, 0.84, 0.6 };
+
+          bz_comet_overlay_set_pulse_color (self->comet_overlay, &destructive_color);
+        }
+      else
+        {
+          bz_comet_overlay_set_pulse_color (self->comet_overlay, NULL);
+        }
 
       comet = g_object_new (
           BZ_TYPE_COMET,

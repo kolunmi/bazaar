@@ -40,6 +40,12 @@ GtkWidget *
 bz_comet_overlay_get_child (BzCometOverlay *self);
 
 void
+bz_comet_overlay_set_pulse_color (BzCometOverlay *self,
+                                  GdkRGBA        *color);
+GdkRGBA *
+bz_comet_overlay_get_pulse_color (BzCometOverlay *self);
+
+void
 bz_comet_overlay_spawn (BzCometOverlay *self,
                         BzComet        *comet);
 
