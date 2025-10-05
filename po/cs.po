@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-09-06 13:08+0200\n"
-"PO-Revision-Date: 2025-10-04 05:43+0200\n"
+"PO-Revision-Date: 2025-10-05 02:08+0200\n"
 "Last-Translator: Vlastimil Dědek <dedek.vlastimil2@proton.me>\n"
 "Language-Team: Czech\n"
 "Language: cs\n"
@@ -57,7 +57,9 @@ msgstr "Zobrazit pouze obsah z Flathubu"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:17
 msgid "Filter search results to only show applications available on Flathub"
-msgstr "Filtrovat výsledky vyhledávání pro zobrazení pouze aplikacích dostupných na Flathubu"
+msgstr ""
+"Filtrovat výsledky vyhledávání pro zobrazení pouze aplikacích dostupných na "
+"Flathubu"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:21
 msgid "Debounce Search Inputs"
@@ -106,7 +108,7 @@ msgstr ""
 "Bazaar má kartu \"vybrané\" která může být nastavena distribucemi pro více "
 "přizpůsobený zážitek"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:24 src/bz-application.c:782
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:24 src/bz-application.c:783
 msgid "Adam Masciola"
 msgstr "Adam Masciola"
 
@@ -143,114 +145,119 @@ msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr "Adam Masciola <kolunmi@posteo.net>"
 
-#: src/bz-application.c:748
+#: src/bz-application.c:744
+msgctxt "About Dialog Developer Credit"
+msgid "Alexander Vanhee"
+msgstr "Alexander Vanhee"
+
+#: src/bz-application.c:749
 msgctxt "About Dialog Translator Credit"
 msgid "Ahmed Najmawi"
 msgstr "Ahmed Najmawi"
 
-#: src/bz-application.c:749
+#: src/bz-application.c:750
 msgctxt "About Dialog Translator Credit"
 msgid "AtomHare"
 msgstr "AtomHare"
 
-#: src/bz-application.c:750
+#: src/bz-application.c:751
 msgctxt "About Dialog Translator Credit"
 msgid "Azenyr"
 msgstr "Azenyr"
 
-#: src/bz-application.c:751
+#: src/bz-application.c:752
 msgctxt "About Dialog Translator Credit"
 msgid "Goudarz Jafari"
 msgstr "Goudarz Jafari"
 
-#: src/bz-application.c:752
+#: src/bz-application.c:753
 msgctxt "About Dialog Translator Credit"
 msgid "Jill Fiore (Lumaeris)"
 msgstr "Jill Fiore (Lumaeris)"
 
-#: src/bz-application.c:753
+#: src/bz-application.c:754
 msgctxt "About Dialog Translator Credit"
 msgid "João Victor (Leal)"
 msgstr "João Victor (Leal)"
 
-#: src/bz-application.c:754
+#: src/bz-application.c:755
 msgctxt "About Dialog Translator Credit"
 msgid "KiKaraage"
 msgstr "KiKaraage"
 
-#: src/bz-application.c:755
+#: src/bz-application.c:756
 msgctxt "About Dialog Translator Credit"
 msgid "Lucosec"
 msgstr "Lucosec"
 
-#: src/bz-application.c:756
+#: src/bz-application.c:757
 msgctxt "About Dialog Translator Credit"
 msgid "Léane GRASSER"
 msgstr "Léane GRASSER"
 
-#: src/bz-application.c:757
+#: src/bz-application.c:758
 msgctxt "About Dialog Translator Credit"
 msgid "Marcel Mrówka (Microwave)"
 msgstr "Marcel Mrówka (Microwave)"
 
-#: src/bz-application.c:758
+#: src/bz-application.c:759
 msgctxt "About Dialog Translator Credit"
 msgid "Peter Dave Hello"
 msgstr "Peter Dave Hello"
 
-#: src/bz-application.c:759
+#: src/bz-application.c:760
 msgctxt "About Dialog Translator Credit"
 msgid "Pietro F."
 msgstr "Pietro F."
 
-#: src/bz-application.c:760
+#: src/bz-application.c:761
 msgctxt "About Dialog Translator Credit"
 msgid "Shihfu Juan"
 msgstr "Shihfu Juan"
 
-#: src/bz-application.c:761
+#: src/bz-application.c:762
 msgctxt "About Dialog Translator Credit"
 msgid "Shinsei"
 msgstr "Shinsei"
 
-#: src/bz-application.c:762
+#: src/bz-application.c:763
 msgctxt "About Dialog Translator Credit"
 msgid "Vlastimil Dědek"
 msgstr "Vlastimil Dědek"
 
-#: src/bz-application.c:763
+#: src/bz-application.c:764
 msgctxt "About Dialog Translator Credit"
 msgid "asen23"
 msgstr "asen23"
 
-#: src/bz-application.c:764
+#: src/bz-application.c:765
 msgctxt "About Dialog Translator Credit"
 msgid "camegone"
 msgstr "camegone"
 
-#: src/bz-application.c:765
+#: src/bz-application.c:766
 msgctxt "About Dialog Translator Credit"
 msgid "renner"
 msgstr "renner"
 
-#: src/bz-application.c:766
+#: src/bz-application.c:767
 msgctxt "About Dialog Translator Credit"
 msgid "robotta"
 msgstr "robotta"
 
-#: src/bz-application.c:1304
+#: src/bz-application.c:1305
 msgid "Constructing Flatpak instance..."
 msgstr "Sestavuji Flatpak instanci..."
 
-#: src/bz-application.c:1321
+#: src/bz-application.c:1322
 msgid "Reusing last Flatpak instance..."
 msgstr "Používám poslední Flatpak instanci..."
 
-#: src/bz-application.c:1346
+#: src/bz-application.c:1347
 msgid "Flathub is not registered on this system"
 msgstr "Flathub není registrovaný na tomto systému"
 
-#: src/bz-application.c:1349
+#: src/bz-application.c:1350
 msgid ""
 "Would you like to add Flathub as a remote? If you decline, the Flathub page "
 "will not be available. You can change this later."
@@ -258,50 +265,51 @@ msgstr ""
 "Přejete si přidat Flathub jako remote? Pokud ne, Flathub karta nebude "
 "dostupná. Toto můžete změnit později."
 
-#: src/bz-application.c:1354 src/bz-update-dialog.blp:6
+#: src/bz-application.c:1355 src/bz-update-dialog.blp:6
 msgid "Later"
 msgstr "Později"
 
-#: src/bz-application.c:1355
+#: src/bz-application.c:1356
 msgid "Add Flathub"
 msgstr "Přidat Flathub"
 
-#: src/bz-application.c:1387
+#: src/bz-application.c:1388
 #, c-format
 msgid "Identifying installed entries..."
 msgstr "Identifikuji instalované položky..."
 
-#: src/bz-application.c:1399
+#: src/bz-application.c:1400
 #, c-format
 msgid "Beginning remote entry retrieval while referencing %d blocklist(s)..."
-msgstr "Probíhá stahování vzdálených položek s odkazem na %d blokovací seznam(y)..."
+msgstr ""
+"Probíhá stahování vzdálených položek s odkazem na %d blokovací seznam(y)..."
 
-#: src/bz-application.c:1547
+#: src/bz-application.c:1548
 #, c-format
 msgid "Receiving Entries"
 msgstr "Získávání položek"
 
-#: src/bz-application.c:1548
+#: src/bz-application.c:1549
 #, c-format
 msgid "%'d of %'d"
 msgstr "%'d z %'d"
 
-#: src/bz-application.c:1558
+#: src/bz-application.c:1559
 #, c-format
 msgid "Waiting for background indexing tasks to catch up..."
 msgstr "Čekám na procesy na pozadí..."
 
-#: src/bz-application.c:1594
+#: src/bz-application.c:1595
 #, c-format
 msgid "Completed initialization in %0.2f seconds"
 msgstr "Dokončeno během %0.2f sekund."
 
-#: src/bz-application.c:1599
+#: src/bz-application.c:1600
 #, fuzzy
 msgid "Checking for updates..."
 msgstr "Kontroluji aktualizace"
 
-#: src/bz-application.c:1638
+#: src/bz-application.c:1639
 msgid "Synchronizing..."
 msgstr "Synchronizuji..."
 
@@ -319,8 +327,8 @@ msgid ""
 "Bazaar was not provided a curated content configuration. Contact your "
 "operating system's support channels for assistance."
 msgstr ""
-"Bazaar nezískal konfiguraci vybraného obsahu."
-"Kontaktujte podporu své distribuce."
+"Bazaar nezískal konfiguraci vybraného obsahu.Kontaktujte podporu své "
+"distribuce."
 
 #: src/bz-browse-widget.blp:22 src/bz-flathub-page.blp:22
 msgid "Browser"
@@ -418,7 +426,7 @@ msgstr "Trendy"
 #: src/bz-flathub-page.blp:111
 #, fuzzy
 msgid "More Trending"
-msgstr "Zobrazit Více"
+msgstr "Více Trendy"
 
 #: src/bz-flathub-page.blp:127
 msgid "Categories"
@@ -431,16 +439,16 @@ msgstr "Nedávno aktualizované"
 #: src/bz-flathub-page.blp:195
 #, fuzzy
 msgid "More Updated"
-msgstr "Zobrazit Více"
+msgstr "Více Aktualizovaných"
 
 #: src/bz-flathub-page.blp:216 src/bz-flathub-page.c:196
 msgid "Recently Added"
-msgstr "Zobrazit Více"
+msgstr "Nedávno přidané"
 
 #: src/bz-flathub-page.blp:247
 #, fuzzy
 msgid "More Added"
-msgstr "Zobrazit Více"
+msgstr "Více přidaných"
 
 #: src/bz-flathub-page.blp:268 src/bz-flathub-page.c:206
 msgid "Popular"
@@ -449,7 +457,7 @@ msgstr "Populární"
 #: src/bz-flathub-page.blp:299
 #, fuzzy
 msgid "More Popular"
-msgstr "Zobrazit Více"
+msgstr "Více Populárních"
 
 #: src/bz-flatpak-entry.c:519
 #, fuzzy
@@ -540,7 +548,7 @@ msgstr "Sdílej tuto aplikaci"
 msgid "Download & Install Application"
 msgstr "Stáhnout a nainstalovat tuto aplikaci"
 
-#: src/bz-full-view.blp:219 src/bz-transaction-view.blp:111
+#: src/bz-full-view.blp:219 src/bz-transaction-view.blp:117
 #: src/bz-window.c:1011
 msgid "Install"
 msgstr "Instalovat"
@@ -621,7 +629,7 @@ msgstr "%'d stažení za poslední měsíc"
 #. *
 #: src/bz-full-view.c:237
 msgid "%B %-d, %Y"
-msgstr "%e %B %Y"
+msgstr "%e. %B %Y"
 
 #. Translators: This is a date format for timestamps from the current year. Used in the app releases section.
 #. * %B is the full month name, %e is the day.
@@ -631,7 +639,7 @@ msgstr "%e %B %Y"
 #. *
 #: src/bz-full-view.c:245
 msgid "%B %-d"
-msgstr "%e %B"
+msgstr "%e. %B"
 
 #: src/bz-full-view.c:256
 msgid "No URL"
@@ -653,12 +661,12 @@ msgstr ""
 "Tato aplikace má proprietární licenci. To znamená že kód je vyvíjen v "
 "soukromý a nemůže být ověřen třetí stranou."
 
-#: src/bz-full-view.c:494
+#: src/bz-full-view.c:496
 #, c-format
 msgid "Version %s"
 msgstr "Verze %s"
 
-#: src/bz-full-view.c:511
+#: src/bz-full-view.c:513
 msgid "No details for this release"
 msgstr "Žádné informace o této verzi"
 
@@ -698,7 +706,7 @@ msgstr "Nainstalované"
 msgid "Support this application"
 msgstr "Sdílet tuto aplikaci"
 
-#: src/bz-installed-page.blp:151 src/bz-transaction-view.blp:303
+#: src/bz-installed-page.blp:151 src/bz-transaction-view.blp:323
 #: src/bz-window.c:992
 msgid "Remove"
 msgstr "Odstranit"
@@ -722,7 +730,7 @@ msgstr "Otevřít Stránku Obchodu"
 #: src/bz-installed-page.c:649
 #, fuzzy
 msgid "Choose an Installation"
-msgstr "Objevit a nainstalovat aplikace"
+msgstr "Vyberte Instalaci"
 
 #: src/bz-installed-page.c:652
 msgid ""
@@ -730,7 +738,7 @@ msgid ""
 "to proceed with? "
 msgstr ""
 "Máte více verzí této aplikace nainstalované."
-"Se kterou chcete pokračovat?"
+"Se kterou chcete pokračovat? "
 
 #: src/bz-installed-page.c:656 src/bz-window.c:991 src/bz-window.c:1010
 msgid "Cancel"
@@ -747,7 +755,7 @@ msgstr "Podrobnosti"
 
 #: src/bz-preferences-dialog.blp:16
 msgid "Git Forge Star Counts"
-msgstr "Počet Hvězd VCS Forge"
+msgstr "Počet Hvězd Git Forge"
 
 #: src/bz-preferences-dialog.blp:17
 msgid "Not having a GitHub access token may trigger rate limits"
@@ -855,44 +863,48 @@ msgstr "Kopírovat odkaz"
 msgid "Open Link"
 msgstr "Otevřít odkaz"
 
-#: src/bz-stats-dialog.blp:15
-msgid "Downloads Over Time"
-msgstr "Stažení za čas"
+#: src/bz-stats-dialog.blp:26
+msgid "Timeline"
+msgstr "Časová osa"
 
-#: src/bz-stats-dialog.blp:21
+#: src/bz-stats-dialog.blp:31
 #, fuzzy
 msgid "Installs:"
 msgstr "Instalovat"
+
+#: src/bz-stats-dialog.blp:37
+msgid "World"
+msgstr "Svět"
 
 #: src/bz-transaction-manager.c:1090
 #, c-format
 msgid "Finished in %.02f seconds"
 msgstr "Dokončeno v %.02f sekundách"
 
-#: src/bz-transaction-view.blp:98
+#: src/bz-transaction-view.blp:104
 #, fuzzy
 msgid "Install Size"
 msgstr "Velikost na disku"
 
-#: src/bz-transaction-view.blp:194
+#: src/bz-transaction-view.blp:207
 #, fuzzy
 msgid "Updated Size"
-msgstr "Aktualizovat"
+msgstr "Velikost aktualizace"
 
-#: src/bz-transaction-view.blp:207 src/bz-window.blp:302
+#: src/bz-transaction-view.blp:220 src/bz-window.blp:302
 msgid "Update"
-msgstr "Aktualizovat"
+msgstr "Aktualizace"
 
-#: src/bz-transaction-view.blp:290
+#: src/bz-transaction-view.blp:310
 msgid "Freed Space"
 msgstr "Uvolněné místo"
 
-#: src/bz-transaction-view.blp:437
+#: src/bz-transaction-view.blp:458
 #, fuzzy
 msgid "Error Details"
 msgstr "Podrobnosti chyby"
 
-#: src/bz-transaction-view.c:135
+#: src/bz-transaction-view.c:139
 #, c-format
 msgid "Transferred %s so far"
 msgstr "Přeneseno %s"
@@ -913,7 +925,8 @@ msgstr "Aktualizace k dispozici"
 msgid ""
 "The following applications are eligible for updates. Would you like to "
 "install them?"
-msgstr "Následující aplikace mají aktualizace."
+msgstr ""
+"Následující aplikace mají aktualizace."
 "Přejete si je nainstalovat?"
 
 #: src/bz-update-dialog.c:134
@@ -1089,6 +1102,11 @@ msgstr "Obnov prováděné translakce"
 msgid "Pause the execution of transactions"
 msgstr "Pozastav prováděné translakce"
 
+#: src/bz-world-map.c:523
+#, c-format
+msgid "%s: %'u downloads"
+msgstr ""
+
 #: src/gtk/shortcuts-dialog.blp:6
 msgctxt "shortcut window"
 msgid "General"
@@ -1118,6 +1136,9 @@ msgstr "Zobrazit Zkratky"
 msgctxt "shortcut window"
 msgid "Quit"
 msgstr "Ukončit"
+
+#~ msgid "Downloads Over Time"
+#~ msgstr "Stažení za čas"
 
 #~ msgid "Apps Of The Week"
 #~ msgstr "Aplikace týdne"
@@ -1256,3 +1277,5 @@ msgstr "Ukončit"
 
 #~ msgid "Hide filtering and sorting behind a crossfade effect"
 #~ msgstr "Skrýt filtrování a řazení za efekt prolínání"
+
+
