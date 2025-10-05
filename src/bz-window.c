@@ -965,26 +965,28 @@ create_entry_radio_buttons (AdwAlertDialog *alert,
                             GListModel     *model,
                             gboolean        remove)
 {
-  GtkWidget      *listbox;
-  GPtrArray      *radios;
-  GtkCheckButton *first_valid_radio;
-  guint           n_entries;
-  int             n_valid_radios;
+  GtkWidget *listbox                = NULL;
+  g_autoptr (GPtrArray) radios      = NULL;
+  GtkCheckButton *first_valid_radio = NULL;
+  guint           n_entries         = 0;
+  int             n_valid_radios    = 0;
 
-  n_entries = g_list_model_get_n_items (model);
-  listbox   = gtk_list_box_new ();
+  listbox = gtk_list_box_new ();
   gtk_list_box_set_selection_mode (GTK_LIST_BOX (listbox), GTK_SELECTION_NONE);
   gtk_widget_add_css_class (listbox, "boxed-list");
 
   radios            = g_ptr_array_new ();
   first_valid_radio = NULL;
-  n_valid_radios    = 0;
+
+  if (model != NULL)
+    n_entries = g_list_model_get_n_items (model);
+  n_valid_radios = 0;
 
   for (guint i = 0; i < n_entries; i++)
     {
-      g_autoptr (BzEntry) entry_variant;
-      GtkWidget *row;
-      GtkWidget *radio;
+      g_autoptr (BzEntry) entry_variant = NULL;
+      GtkWidget *row                    = NULL;
+      GtkWidget *radio                  = NULL;
 
       entry_variant = g_list_model_get_item (model, i);
 
@@ -1009,13 +1011,13 @@ create_entry_radio_buttons (AdwAlertDialog *alert,
       n_valid_radios++;
     }
 
-  g_object_set_data_full (G_OBJECT (alert), "checks", radios,
-                          (GDestroyNotify) g_ptr_array_unref);
+  g_object_set_data_full (
+      G_OBJECT (alert), "checks",
+      g_steal_pointer (&radios),
+      (GDestroyNotify) g_ptr_array_unref);
 
   if (n_valid_radios > 1)
-    {
-      adw_alert_dialog_set_extra_child (alert, listbox);
-    }
+    adw_alert_dialog_set_extra_child (alert, listbox);
 
   return n_valid_radios;
 }
@@ -1025,7 +1027,7 @@ configure_install_dialog (AdwAlertDialog *alert,
                           const char     *title,
                           const char     *id)
 {
-  g_autofree char *heading;
+  g_autofree char *heading = NULL;
 
   heading = g_strdup_printf (_ ("Install %s?"), title);
 
@@ -1047,7 +1049,7 @@ configure_remove_dialog (AdwAlertDialog *alert,
                          const char     *title,
                          const char     *id)
 {
-  g_autofree char *heading;
+  g_autofree char *heading = NULL;
 
   heading = g_strdup_printf (_ ("Remove %s?"), title);
 
@@ -1073,10 +1075,10 @@ create_confirmation_dialog (BzWindow     *self,
                             gboolean      remove,
                             int          *out_n_valid_radios)
 {
-  AdwDialog  *alert;
-  const char *title;
-  const char *id;
-  int         n_valid_radios;
+  AdwDialog  *alert          = NULL;
+  const char *title          = NULL;
+  const char *id             = NULL;
+  int         n_valid_radios = 0;
 
   alert          = adw_alert_dialog_new (NULL, NULL);
   title          = NULL;
@@ -1121,32 +1123,19 @@ static DexFuture *
 ready_to_transact (DexFuture    *future,
                    TransactData *data)
 {
-  BzWindow     *self;
-  BzEntryGroup *group;
-  gboolean      remove;
-  gboolean      auto_confirm;
-  GtkWidget    *source;
-  g_autoptr (GError) local_error;
-  const GValue *value;
-  g_autoptr (GListModel) model;
-  g_autoptr (BzEntry) entry;
-  AdwDialog *alert;
-  int        n_valid_radios;
-
-  self           = data->self;
-  group          = data->group;
-  remove         = data->remove;
-  auto_confirm   = data->auto_confirm;
-  source         = data->source;
-  local_error    = NULL;
-  value          = NULL;
-  model          = NULL;
-  entry          = NULL;
-  alert          = NULL;
-  n_valid_radios = 0;
+  BzWindow     *self             = data->self;
+  BzEntryGroup *group            = data->group;
+  gboolean      remove           = data->remove;
+  gboolean      auto_confirm     = data->auto_confirm;
+  GtkWidget    *source           = data->source;
+  g_autoptr (GError) local_error = NULL;
+  const GValue *value            = NULL;
+  g_autoptr (GListModel) model   = NULL;
+  g_autoptr (BzEntry) entry      = NULL;
+  AdwDialog *alert               = NULL;
+  int        n_valid_radios      = 0;
 
   value = dex_future_get_value (future, &local_error);
-
   if (value != NULL)
     {
       if (G_VALUE_HOLDS (value, G_TYPE_LIST_MODEL))
