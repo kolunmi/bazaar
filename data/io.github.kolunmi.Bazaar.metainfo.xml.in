@@ -63,6 +63,18 @@
   </screenshots>
 
   <releases>
+    <release version="0.5.4" date="2025-10-04">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.5.4</url>
+      <description translate="no">
+        <p>Some improvements:</p>
+        <ul>
+          <li>Make the global progress bar customizable with pride flags! Check preferences</li>
+          <li>Add a new world map page to the download statistics dialog</li>
+          <li>Allow clicking on entries on transaction sidebar to navigate to the original store page</li>
+          <li>Add Alexander Vanhee to the developer credits</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.5.3" date="2025-10-02">
       <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.5.3</url>
       <description translate="no">

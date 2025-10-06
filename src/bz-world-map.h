@@ -1,8 +1,6 @@
-/* bazaar-ui.h
+/* bz-world-map.h
  *
- * This library is part of Bazaar: https://github.com/kolunmi/bazaar
- *
- * Copyright 2025 Adam Masciola
+ * Copyright 2025 Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,13 +18,24 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include <adwaita.h>
+#pragma once
+
+#include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
-void bazaar_ui_init (void);
+#define BZ_TYPE_WORLD_MAP (bz_world_map_get_type ())
 
-#define BZ_TYPE_SCROLLED_WINDOW (bz_scrolled_window_get_type ())
-G_DECLARE_FINAL_TYPE (BzScrolledWindow, bz_scrolled_window, BZ, SCROLLED_WINDOW, AdwBin)
+G_DECLARE_FINAL_TYPE (BzWorldMap, bz_world_map, BZ, WORLD_MAP, GtkWidget)
+
+GtkWidget *
+bz_world_map_new (void);
+
+GListModel *
+bz_world_map_get_model (BzWorldMap *self);
+
+void
+bz_world_map_set_model (BzWorldMap *self,
+                        GListModel *model);
 
 G_END_DECLS

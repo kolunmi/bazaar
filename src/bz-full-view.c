@@ -306,12 +306,14 @@ dl_stats_cb (BzFullView *self,
   if (self->group == NULL)
     return;
 
-  dialog = bz_stats_dialog_new (NULL);
+  ui_entry = bz_result_get_object (self->ui_entry);
+
+  dialog = bz_stats_dialog_new (NULL, NULL);
   adw_dialog_set_content_width (dialog, 2000);
   adw_dialog_set_content_height (dialog, 1500);
 
-  ui_entry = bz_result_get_object (self->ui_entry);
   g_object_bind_property (ui_entry, "download-stats", dialog, "model", G_BINDING_SYNC_CREATE);
+  g_object_bind_property (ui_entry, "download-stats-per-country", dialog, "country-model", G_BINDING_SYNC_CREATE);
 
   adw_dialog_present (dialog, GTK_WIDGET (self));
   bz_stats_dialog_animate_open (BZ_STATS_DIALOG (dialog));
@@ -774,6 +776,9 @@ bz_full_view_set_entry_group (BzFullView   *self,
   g_return_if_fail (BZ_IS_FULL_VIEW (self));
   g_return_if_fail (group == NULL ||
                     BZ_IS_ENTRY_GROUP (group));
+
+  if (group == self->group)
+    return;
 
   g_clear_handle_id (&self->debounce_timeout, g_source_remove);
   g_clear_object (&self->group);

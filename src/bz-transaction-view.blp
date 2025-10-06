@@ -32,84 +32,91 @@ template $BzTransactionView: Adw.Bin {
             template ListItem {
               activatable: false;
 
-              child: Box {
-                margin-top: 2;
-                margin-bottom: 2;
+              child: Button {
+                styles [
+                  "flat",
+                ]
+                clicked => $entry_clicked(template);
+
+                child: Box {
+                  margin-top: 2;
+                  margin-bottom: 2;
                 
-                orientation: horizontal;
-                spacing: 10;
+                  orientation: horizontal;
+                  spacing: 10;
 
-                Overlay {
-                  child: Image {
-                    paintable: bind $get_main_icon(template.item) as <$GdkPaintable>;
-                    pixel-size: 64;
-                    valign: center;
+                  Overlay {
+                    child: Image {
+                      paintable: bind $get_main_icon(template.item) as <$GdkPaintable>;
+                      pixel-size: 64;
+                      valign: center;
 
-                    styles ["icon-dropshadow"]
-                  };
+                      styles ["icon-dropshadow"]
+                    };
 
-                  [overlay]
-                  Image {
-                    icon-name: bind $get_sub_icon_name(template.item) as <string>;
-                    pixel-size: 32;
-                    valign: end;
-                    halign: end;
-                  }
-                }
-
-                Box {
-                  valign:center;
-                  orientation: vertical;
-                  spacing:4;
-                  Label {
-                    styles [
-                      "title-2"
-                    ]
-
-                    hexpand: true;
-                    ellipsize: end;
-                    xalign: 0.0;
-                    label: bind template.item as <$BzEntry>.title as <string>;
-                    has-tooltip: true;
-                    tooltip-text: bind template.item as <$BzEntry>.id as <string>;
-                  }
-                  Box {
-                    halign: start;
-                    spacing: 4;
-
-                    styles [
-                      "dimmed",
-                      "small-pill"
-                    ]
-
+                    [overlay]
                     Image {
-                      icon-name: "drive-harddisk-symbolic";
-                      pixel-size: 16;
+                      icon-name: bind $get_sub_icon_name(template.item) as <string>;
+                      pixel-size: 32;
+                      valign: end;
+                      halign: end;
                     }
+                  }
 
+                  Box {
+                    valign:center;
+                    orientation: vertical;
+                    spacing:4;
                     Label {
                       styles [
-                        "caption-heading"
+                        "title-2"
                       ]
-                      valign: center;
+
+                      hexpand: true;
+                      ellipsize: end;
                       xalign: 0.0;
-                      label: bind $format_download_size(template.item as <$BzEntry>.size) as <string>;
+                      label: bind template.item as <$BzEntry>.title as <string>;
                       has-tooltip: true;
-                      tooltip-text: _("Install Size");
+                      tooltip-text: bind template.item as <$BzEntry>.id as <string>;
+                    }
+                    Box {
+                      halign: start;
+                      spacing: 4;
+
+                      styles [
+                        "dimmed",
+                        "small-pill"
+                      ]
+
+                      Image {
+                        icon-name: "drive-harddisk-symbolic";
+                        pixel-size: 16;
+                      }
+
+                      Label {
+                        styles [
+                          "caption-heading"
+                        ]
+                        valign: center;
+                        xalign: 0.0;
+                        label: bind $format_download_size(template.item as <$BzEntry>.size) as <string>;
+                        has-tooltip: true;
+                        tooltip-text: _("Install Size");
+                      }
                     }
                   }
-                }
 
-                Image {
-                  styles [
-                    "success",
-                  ]
+                  Image {
+                    styles [
+                      "success",
+                    ]
 
-                  valign: start;
-                  icon-name: "folder-download-symbolic";
-                  has-tooltip: true;
-                  tooltip-text: _("Install");
-                }
+                    valign: start;
+                    icon-name: "folder-download-symbolic";
+                    has-tooltip: true;
+                    tooltip-text: _("Install");
+                  }
+                };
               };
             }
           };
@@ -129,83 +136,90 @@ template $BzTransactionView: Adw.Bin {
             template ListItem {
               activatable: false;
 
-              child: Box {
-                margin-top: 2;
-                margin-bottom: 2;
+              child: Button {
+                styles [
+                  "flat",
+                ]
+                clicked => $entry_clicked(template);
+
+                child: Box {
+                  margin-top: 2;
+                  margin-bottom: 2;
                 
-                orientation: horizontal;
-                spacing: 10;
+                  orientation: horizontal;
+                  spacing: 10;
 
-                Overlay {
-                  child: Image {
-                    paintable: bind $get_main_icon(template.item) as <$GdkPaintable>;
-                    pixel-size: 64;
-                    valign: center;
+                  Overlay {
+                    child: Image {
+                      paintable: bind $get_main_icon(template.item) as <$GdkPaintable>;
+                      pixel-size: 64;
+                      valign: center;
 
-                    styles ["icon-dropshadow"]
-                  };
+                      styles ["icon-dropshadow"]
+                    };
 
-                  [overlay]
-                  Image {
-                    icon-name: bind $get_sub_icon_name(template.item) as <string>;
-                    pixel-size: 32;
-                    valign: end;
-                    halign: end;
-                  }
-                }
-                Box {
-                  valign:center;
-                  orientation: vertical;
-                  spacing:4;
-                  Label {
-                    styles [
-                      "title-2"
-                    ]
-
-                    hexpand: true;
-                    ellipsize: end;
-                    xalign: 0.0;
-                    label: bind template.item as <$BzEntry>.title as <string>;
-                    has-tooltip: true;
-                    tooltip-text: bind template.item as <$BzEntry>.id as <string>;
+                    [overlay]
+                    Image {
+                      icon-name: bind $get_sub_icon_name(template.item) as <string>;
+                      pixel-size: 32;
+                      valign: end;
+                      halign: end;
+                    }
                   }
                   Box {
-                    halign: start;
-                    spacing: 4;
-
-                    styles [
-                      "dimmed",
-                      "small-pill"
-                    ]
-
-                    Image {
-                      icon-name: "drive-harddisk-symbolic";
-                      pixel-size: 16;
-                    }
-
+                    valign:center;
+                    orientation: vertical;
+                    spacing:4;
                     Label {
                       styles [
-                        "caption-heading"
+                        "title-2"
                       ]
-                      valign: center;
+
+                      hexpand: true;
+                      ellipsize: end;
                       xalign: 0.0;
-                      label: bind $format_download_size(template.item as <$BzEntry>.size) as <string>;
+                      label: bind template.item as <$BzEntry>.title as <string>;
                       has-tooltip: true;
-                      tooltip-text: _("Updated Size");
+                      tooltip-text: bind template.item as <$BzEntry>.id as <string>;
+                    }
+                    Box {
+                      halign: start;
+                      spacing: 4;
+
+                      styles [
+                        "dimmed",
+                        "small-pill"
+                      ]
+
+                      Image {
+                        icon-name: "drive-harddisk-symbolic";
+                        pixel-size: 16;
+                      }
+
+                      Label {
+                        styles [
+                          "caption-heading"
+                        ]
+                        valign: center;
+                        xalign: 0.0;
+                        label: bind $format_download_size(template.item as <$BzEntry>.size) as <string>;
+                        has-tooltip: true;
+                        tooltip-text: _("Updated Size");
+                      }
                     }
                   }
-                }
 
-                Image {
-                  styles [
-                    "accent",
-                  ]
+                  Image {
+                    styles [
+                      "accent",
+                    ]
                   
-                  valign: start;
-                  icon-name: "software-update-available-symbolic";
-                  has-tooltip: true;
-                  tooltip-text: _("Update");
-                }
+                    valign: start;
+                    icon-name: "software-update-available-symbolic";
+                    has-tooltip: true;
+                    tooltip-text: _("Update");
+                  }
+                };
               };
             }
           };
@@ -225,83 +239,90 @@ template $BzTransactionView: Adw.Bin {
             template ListItem {
               activatable: false;
 
-              child: Box {
-                margin-top: 2;
-                margin-bottom: 2;
+              child: Button {
+                styles [
+                  "flat",
+                ]
+                clicked => $entry_clicked(template);
+
+                child: Box {
+                  margin-top: 2;
+                  margin-bottom: 2;
                 
-                orientation: horizontal;
-                spacing: 10;
+                  orientation: horizontal;
+                  spacing: 10;
 
-                Overlay {
-                  child: Image {
-                    paintable: bind $get_main_icon(template.item) as <$GdkPaintable>;
-                    pixel-size: 64;
-                    valign: center;
+                  Overlay {
+                    child: Image {
+                      paintable: bind $get_main_icon(template.item) as <$GdkPaintable>;
+                      pixel-size: 64;
+                      valign: center;
 
-                    styles ["icon-dropshadow"]
-                  };
+                      styles ["icon-dropshadow"]
+                    };
 
-                  [overlay]
-                  Image {
-                    icon-name: bind $get_sub_icon_name(template.item) as <string>;
-                    pixel-size: 32;
-                    valign: end;
-                    halign: end;
-                  }
-                }
-                Box {
-                  valign:center;
-                  orientation: vertical;
-                  spacing:4;
-                  Label {
-                    styles [
-                      "title-2"
-                    ]
-
-                    hexpand: true;
-                    ellipsize: end;
-                    xalign: 0.0;
-                    label: bind template.item as <$BzEntry>.title as <string>;
-                    has-tooltip: true;
-                    tooltip-text: bind template.item as <$BzEntry>.id as <string>;
+                    [overlay]
+                    Image {
+                      icon-name: bind $get_sub_icon_name(template.item) as <string>;
+                      pixel-size: 32;
+                      valign: end;
+                      halign: end;
+                    }
                   }
                   Box {
-                    halign: start;
-                    spacing: 4;
-
-                    styles [
-                      "small-pill",
-                      "error"
-                    ]
-
-                    Image {
-                      icon-name: "drive-harddisk-symbolic";
-                      pixel-size: 16;
-                    }
-
+                    valign:center;
+                    orientation: vertical;
+                    spacing:4;
                     Label {
                       styles [
-                        "caption-heading"
+                        "title-2"
                       ]
-                      valign: center;
+
+                      hexpand: true;
+                      ellipsize: end;
                       xalign: 0.0;
-                      label: bind $format_download_size(template.item as <$BzEntry>.size) as <string>;
+                      label: bind template.item as <$BzEntry>.title as <string>;
                       has-tooltip: true;
-                      tooltip-text: _("Freed Space");
+                      tooltip-text: bind template.item as <$BzEntry>.id as <string>;
+                    }
+                    Box {
+                      halign: start;
+                      spacing: 4;
+
+                      styles [
+                        "small-pill",
+                        "error"
+                      ]
+
+                      Image {
+                        icon-name: "drive-harddisk-symbolic";
+                        pixel-size: 16;
+                      }
+
+                      Label {
+                        styles [
+                          "caption-heading"
+                        ]
+                        valign: center;
+                        xalign: 0.0;
+                        label: bind $format_download_size(template.item as <$BzEntry>.size) as <string>;
+                        has-tooltip: true;
+                        tooltip-text: _("Freed Space");
+                      }
                     }
                   }
-                }
 
-                Image {
-                  styles [
-                    "error",
-                  ]
+                  Image {
+                    styles [
+                      "error",
+                    ]
                   
-                  valign: start;
-                  icon-name: "user-trash-symbolic";
-                  has-tooltip: true;
-                  tooltip-text: _("Remove");
-                }
+                    valign: start;
+                    icon-name: "user-trash-symbolic";
+                    has-tooltip: true;
+                    tooltip-text: _("Remove");
+                  }
+                };
               };
             }
           };

@@ -37,6 +37,7 @@ struct _BzCometOverlay
 
   GHashTable *nodes;
   GArray     *pulses;
+  GdkRGBA    *pulse_color;
 };
 
 G_DEFINE_FINAL_TYPE (BzCometOverlay, bz_comet_overlay, GTK_TYPE_WIDGET)
@@ -46,6 +47,7 @@ enum
   PROP_0,
 
   PROP_CHILD,
+  PROP_PULSE_COLOR,
 
   LAST_PROP
 };
@@ -73,7 +75,8 @@ pulse_cb (double     value,
 static void
 append_pulse (GtkSnapshot *snapshot,
               double       size,
-              double       opacity);
+              double       opacity,
+              GdkRGBA     *color);
 
 static void
 bz_comet_overlay_dispose (GObject *object)
@@ -83,6 +86,7 @@ bz_comet_overlay_dispose (GObject *object)
   g_clear_pointer (&self->child, gtk_widget_unparent);
   g_clear_pointer (&self->nodes, g_hash_table_unref);
   g_clear_pointer (&self->pulses, g_array_unref);
+  g_clear_pointer (&self->pulse_color, gdk_rgba_free);
 
   G_OBJECT_CLASS (bz_comet_overlay_parent_class)->dispose (object);
 }
@@ -99,6 +103,9 @@ bz_comet_overlay_get_property (GObject    *object,
     {
     case PROP_CHILD:
       g_value_set_object (value, bz_comet_overlay_get_child (self));
+      break;
+    case PROP_PULSE_COLOR:
+      g_value_set_boxed (value, bz_comet_overlay_get_pulse_color (self));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -117,6 +124,9 @@ bz_comet_overlay_set_property (GObject      *object,
     {
     case PROP_CHILD:
       bz_comet_overlay_set_child (self, g_value_get_object (value));
+      break;
+    case PROP_PULSE_COLOR:
+      bz_comet_overlay_set_pulse_color (self, g_value_get_boxed (value));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -153,16 +163,14 @@ static void
 bz_comet_overlay_snapshot (GtkWidget   *widget,
                            GtkSnapshot *snapshot)
 {
-  BzCometOverlay  *self            = BZ_COMET_OVERLAY (widget);
-  AdwStyleManager *style_manager   = NULL;
-  g_autoptr (GdkRGBA) accent_color = NULL;
-  GHashTableIter iter              = { 0 };
+  BzCometOverlay *self  = BZ_COMET_OVERLAY (widget);
+  GdkRGBA        *color = NULL;
+  GHashTableIter  iter  = { 0 };
 
   if (self->child != NULL)
     gtk_widget_snapshot_child (widget, self->child, snapshot);
 
-  style_manager = adw_style_manager_get_default ();
-  accent_color  = adw_style_manager_get_accent_color_rgba (style_manager);
+  color = bz_comet_overlay_get_pulse_color (self);
 
   g_hash_table_iter_init (&iter, self->nodes);
   for (;;)
@@ -178,6 +186,7 @@ bz_comet_overlay_snapshot (GtkWidget   *widget,
       double           pulse_radius           = 0.0;
       GskRoundedRect   clip                   = { 0 };
       graphene_point_t paintable_position     = { 0 };
+      GdkRGBA          clip_color             = { 0 };
 
       if (!g_hash_table_iter_next (
               &iter, (gpointer *) &comet, (gpointer *) &node))
@@ -189,8 +198,10 @@ bz_comet_overlay_snapshot (GtkWidget   *widget,
 
       gsk_path_get_end_point (path, &path_point);
       gsk_path_point_get_position (&path_point, path, &end_position);
-      pulse_radius        = progress / path_length * 150.0;
-      accent_color->alpha = 1.0 - (progress / path_length);
+      pulse_radius = progress / path_length * 150.0;
+
+      clip_color       = *color;
+      clip_color.alpha = color->alpha * (1.0 - (progress / path_length));
 
       clip.bounds = GRAPHENE_RECT_INIT (
           end_position.x - pulse_radius,
@@ -207,7 +218,7 @@ bz_comet_overlay_snapshot (GtkWidget   *widget,
       clip.corner[3].height = pulse_radius;
 
       gtk_snapshot_push_rounded_clip (snapshot, &clip);
-      gtk_snapshot_append_color (snapshot, accent_color, &clip.bounds);
+      gtk_snapshot_append_color (snapshot, &clip_color, &clip.bounds);
       gtk_snapshot_pop (snapshot);
 
       path_measure = gsk_path_measure_new (path);
@@ -227,7 +238,7 @@ bz_comet_overlay_snapshot (GtkWidget   *widget,
       pulse = &g_array_index (self->pulses, PulseState, i);
       gtk_snapshot_save (snapshot);
       gtk_snapshot_translate (snapshot, &GRAPHENE_POINT_INIT (pulse->x, pulse->y));
-      append_pulse (snapshot, pulse->progress * 200.0, 1.0 - pulse->progress);
+      append_pulse (snapshot, pulse->progress * 200.0, 1.0 - pulse->progress, color);
       gtk_snapshot_restore (snapshot);
     }
   g_array_set_size (self->pulses, 0);
@@ -250,6 +261,13 @@ bz_comet_overlay_class_init (BzCometOverlayClass *klass)
           GTK_TYPE_WIDGET,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
+  props[PROP_PULSE_COLOR] =
+      g_param_spec_boxed (
+          "pulse-color",
+          NULL, NULL,
+          GDK_TYPE_RGBA,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   widget_class->size_allocate = bz_comet_overlay_size_allocate;
@@ -259,11 +277,16 @@ bz_comet_overlay_class_init (BzCometOverlayClass *klass)
 static void
 bz_comet_overlay_init (BzCometOverlay *self)
 {
+  AdwStyleManager *style_manager = NULL;
+
   self->nodes = g_hash_table_new_full (
       g_direct_hash, g_direct_equal,
       g_object_unref,
       (GDestroyNotify) gsk_render_node_unref);
   self->pulses = g_array_new (FALSE, FALSE, sizeof (PulseState));
+
+  style_manager     = adw_style_manager_get_default ();
+  self->pulse_color = adw_style_manager_get_accent_color_rgba (style_manager);
 }
 
 GtkWidget *
@@ -299,6 +322,39 @@ bz_comet_overlay_get_child (BzCometOverlay *self)
 {
   g_return_val_if_fail (BZ_IS_COMET_OVERLAY (self), NULL);
   return self->child;
+}
+
+void
+bz_comet_overlay_set_pulse_color (BzCometOverlay *self,
+                                  GdkRGBA        *color)
+{
+  g_return_if_fail (BZ_IS_COMET_OVERLAY (self));
+
+  if (self->pulse_color != NULL && color != NULL &&
+      gdk_rgba_equal (self->pulse_color, color))
+    return;
+
+  g_clear_pointer (&self->pulse_color, gdk_rgba_free);
+
+  if (color != NULL)
+    self->pulse_color = gdk_rgba_copy (color);
+
+  gtk_widget_queue_draw (GTK_WIDGET (self));
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PULSE_COLOR]);
+}
+
+GdkRGBA *
+bz_comet_overlay_get_pulse_color (BzCometOverlay *self)
+{
+  AdwStyleManager *style_manager = NULL;
+
+  g_return_val_if_fail (BZ_IS_COMET_OVERLAY (self), NULL);
+
+  if (self->pulse_color != NULL)
+    return self->pulse_color;
+
+  style_manager = adw_style_manager_get_default ();
+  return adw_style_manager_get_accent_color_rgba (style_manager);
 }
 
 void
@@ -386,8 +442,11 @@ progress_changed (BzComet        *comet,
   double        progress           = 0.0;
   GdkPaintable *paintable          = NULL;
   double        intrinsic_width    = 0;
+  double        t                  = 0.0;
+  double        size_scale         = 0.0;
   double        icon_size          = 0.0;
   double        grad_size          = 0.0;
+  GdkRGBA      *color              = NULL;
   g_autoptr (GtkSnapshot) snapshot = NULL;
 
   path_length = bz_comet_get_path_length (comet);
@@ -395,11 +454,16 @@ progress_changed (BzComet        *comet,
   paintable   = bz_comet_get_paintable (comet);
 
   intrinsic_width = gdk_paintable_get_intrinsic_width (paintable);
-  icon_size       = (path_length - progress) / path_length * intrinsic_width;
-  grad_size       = MAX (1.0, (path_length - progress) / path_length * intrinsic_width * 2.0);
+  t               = progress / path_length;
+  size_scale      = 1.0 - 4.0 * (t - 0.5) * (t - 0.5);
+
+  icon_size = size_scale * intrinsic_width;
+  grad_size = MAX (1.0, (path_length - progress) / path_length * intrinsic_width * 2.0);
+
+  color = bz_comet_overlay_get_pulse_color (self);
 
   snapshot = gtk_snapshot_new ();
-  append_pulse (snapshot, grad_size, 1.0 - (path_length - progress));
+  append_pulse (snapshot, grad_size, 1.0 - (path_length - progress), color);
 
   gtk_snapshot_save (snapshot);
   gtk_snapshot_translate (snapshot, &GRAPHENE_POINT_INIT (-icon_size / 2.0, -icon_size / 2.0));
@@ -507,7 +571,8 @@ pulse_cb (double     value,
 static void
 append_pulse (GtkSnapshot *snapshot,
               double       size,
-              double       opacity)
+              double       opacity,
+              GdkRGBA     *color)
 {
   const GdkRGBA transparent = {
     .red   = 1.0,
@@ -516,18 +581,16 @@ append_pulse (GtkSnapshot *snapshot,
     .alpha = 0.0
   };
 
-  AdwStyleManager *style_manager   = NULL;
-  g_autoptr (GdkRGBA) accent_color = NULL;
-  GskColorStop grad_stops[2]       = { 0 };
+  GdkRGBA      pulse_color   = { 0 };
+  GskColorStop grad_stops[2] = { 0 };
 
   if (size < 1.0)
     return;
 
-  style_manager       = adw_style_manager_get_default ();
-  accent_color        = adw_style_manager_get_accent_color_rgba (style_manager);
-  accent_color->alpha = 0.75 * opacity;
+  pulse_color       = *color;
+  pulse_color.alpha = color->alpha * 0.75 * opacity;
 
-  grad_stops[0].color  = *accent_color;
+  grad_stops[0].color  = pulse_color;
   grad_stops[0].offset = 0.9;
   grad_stops[1].color  = transparent;
   grad_stops[1].offset = 0.9;

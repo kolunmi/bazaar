@@ -26,6 +26,7 @@
 #include <json-glib/json-glib.h>
 
 #include "bz-async-texture.h"
+#include "bz-country-data-point.h"
 #include "bz-data-point.h"
 #include "bz-entry.h"
 #include "bz-env.h"
@@ -85,6 +86,7 @@ typedef struct
   gboolean    is_flathub;
   gboolean    verified;
   GListModel *download_stats;
+  GListModel *download_stats_per_country;
   int         recent_downloads;
 
   GHashTable *flathub_prop_queries;
@@ -107,6 +109,7 @@ enum
   PROP_TITLE,
   PROP_EOL,
   PROP_DESCRIPTION,
+  PROP_DOWNLOAD_STATS_PER_COUNTRY,
   PROP_LONG_DESCRIPTION,
   PROP_REMOTE_REPO_NAME,
   PROP_URL,
@@ -164,6 +167,11 @@ download_stats_per_day_foreach (JsonObject  *object,
                                 const gchar *member_name,
                                 JsonNode    *member_node,
                                 GListStore  *store);
+static void
+download_stats_per_country_foreach (JsonObject  *object,
+                                    const gchar *member_name,
+                                    JsonNode    *member_node,
+                                    GListStore  *store);
 
 static gboolean
 maybe_save_paintable (BzEntryPrivate  *priv,
@@ -336,6 +344,10 @@ bz_entry_get_property (GObject    *object,
       query_flathub (self, PROP_DOWNLOAD_STATS);
       g_value_set_object (value, priv->download_stats);
       break;
+    case PROP_DOWNLOAD_STATS_PER_COUNTRY:
+      query_flathub (self, PROP_DOWNLOAD_STATS_PER_COUNTRY);
+      g_value_set_object (value, priv->download_stats_per_country);
+      break;
     case PROP_RECENT_DOWNLOADS:
       query_flathub (self, PROP_DOWNLOAD_STATS);
       g_value_set_int (value, priv->recent_downloads);
@@ -492,31 +504,40 @@ bz_entry_set_property (GObject      *object,
       priv->verified = g_value_get_boolean (value);
       break;
     case PROP_DOWNLOAD_STATS:
+    case PROP_DOWNLOAD_STATS_PER_COUNTRY:
       {
-        g_clear_object (&priv->download_stats);
-        priv->download_stats = g_value_dup_object (value);
-
-        if (priv->download_stats != NULL)
+        if (prop_id == PROP_DOWNLOAD_STATS)
           {
-            guint n_items          = 0;
-            guint start            = 0;
-            guint recent_downloads = 0;
+            g_clear_object (&priv->download_stats);
+            priv->download_stats = g_value_dup_object (value);
 
-            n_items = g_list_model_get_n_items (priv->download_stats);
-            start   = n_items - MIN (n_items, 30);
-
-            for (guint i = start; i < n_items; i++)
+            if (priv->download_stats != NULL)
               {
-                g_autoptr (BzDataPoint) point = NULL;
+                guint n_items          = 0;
+                guint start            = 0;
+                guint recent_downloads = 0;
 
-                point = g_list_model_get_item (priv->download_stats, i);
-                recent_downloads += bz_data_point_get_dependent (point);
+                n_items = g_list_model_get_n_items (priv->download_stats);
+                start   = n_items - MIN (n_items, 30);
+
+                for (guint i = start; i < n_items; i++)
+                  {
+                    g_autoptr (BzDataPoint) point = NULL;
+
+                    point = g_list_model_get_item (priv->download_stats, i);
+                    recent_downloads += bz_data_point_get_dependent (point);
+                  }
+                priv->recent_downloads = recent_downloads;
               }
-            priv->recent_downloads = recent_downloads;
+            else
+              priv->recent_downloads = 0;
+            g_object_notify_by_pspec (object, props[PROP_RECENT_DOWNLOADS]);
           }
         else
-          priv->recent_downloads = 0;
-        g_object_notify_by_pspec (object, props[PROP_RECENT_DOWNLOADS]);
+          {
+            g_clear_object (&priv->download_stats_per_country);
+            priv->download_stats_per_country = g_value_dup_object (value);
+          }
       }
       break;
     case PROP_RECENT_DOWNLOADS:
@@ -768,6 +789,13 @@ bz_entry_class_init (BzEntryClass *klass)
   props[PROP_DOWNLOAD_STATS] =
       g_param_spec_object (
           "download-stats",
+          NULL, NULL,
+          G_TYPE_LIST_MODEL,
+          G_PARAM_READWRITE);
+
+  props[PROP_DOWNLOAD_STATS_PER_COUNTRY] =
+      g_param_spec_object (
+          "download-stats-per-country",
           NULL, NULL,
           G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE);
@@ -1778,6 +1806,7 @@ query_flathub_fiber (QueryFlathubData *data)
       request = g_strdup_printf ("/verification/%s/status", id);
       break;
     case PROP_DOWNLOAD_STATS:
+    case PROP_DOWNLOAD_STATS_PER_COUNTRY:
       request = g_strdup_printf ("/stats/%s?all=false&days=175", id);
       break;
     default:
@@ -1820,6 +1849,27 @@ query_flathub_fiber (QueryFlathubData *data)
         return dex_future_new_for_object (store);
       }
       break;
+
+    case PROP_DOWNLOAD_STATS_PER_COUNTRY:
+      {
+        JsonObject *per_country      = NULL;
+        g_autoptr (GListStore) store = NULL;
+
+        per_country = json_object_get_object_member (
+            json_node_get_object (node),
+            "installs_per_country");
+
+        store = g_list_store_new (BZ_TYPE_COUNTRY_DATA_POINT);
+
+        json_object_foreach_member (
+            per_country,
+            (JsonObjectForeach) download_stats_per_country_foreach,
+            store);
+
+        return dex_future_new_for_object (store);
+      }
+      break;
+
     default:
       g_assert_not_reached ();
       return NULL;
@@ -1845,18 +1895,18 @@ download_stats_per_day_foreach (JsonObject  *object,
                                 JsonNode    *member_node,
                                 GListStore  *store)
 {
-  double independent                 = 0;
-  double dependent                   = 0;
-  g_autoptr (BzDataPoint) point      = NULL;
-  g_autoptr (GDateTime) date         = NULL;
-  g_autofree char *formatted_label   = NULL;
-  g_autofree char *iso_with_tz       = NULL;
+  double independent               = 0;
+  double dependent                 = 0;
+  g_autoptr (BzDataPoint) point    = NULL;
+  g_autoptr (GDateTime) date       = NULL;
+  g_autofree char *formatted_label = NULL;
+  g_autofree char *iso_with_tz     = NULL;
 
   independent = g_list_model_get_n_items (G_LIST_MODEL (store));
   dependent   = json_node_get_int (member_node);
 
   iso_with_tz = g_strdup_printf ("%sT00:00:00Z", member_name);
-  date = g_date_time_new_from_iso8601 (iso_with_tz, NULL);
+  date        = g_date_time_new_from_iso8601 (iso_with_tz, NULL);
 
   if (date != NULL)
     formatted_label = g_date_time_format (date, "%-d %b");
@@ -1869,6 +1919,26 @@ download_stats_per_day_foreach (JsonObject  *object,
       "dependent", dependent,
       "label", formatted_label,
       NULL);
+  g_list_store_append (store, point);
+}
+
+static void
+download_stats_per_country_foreach (JsonObject  *object,
+                                    const gchar *member_name,
+                                    JsonNode    *member_node,
+                                    GListStore  *store)
+{
+  guint downloads                      = 0;
+  g_autoptr (BzCountryDataPoint) point = NULL;
+
+  downloads = json_node_get_int (member_node);
+
+  point = g_object_new (
+      BZ_TYPE_COUNTRY_DATA_POINT,
+      "country-code", member_name,
+      "downloads", downloads,
+      NULL);
+
   g_list_store_append (store, point);
 }
 

@@ -21,6 +21,7 @@
 #define G_LOG_DOMAIN "BAZAAR::ASYNC-TEXTURE"
 
 #define MAX_CONCURRENT_LOADS   32
+#define CACHE_INVALID_AGE      (G_TIME_SPAN_DAY * 1)
 #define HTTP_TIMEOUT_SECONDS   5
 #define MAX_LOAD_RETRIES       3
 #define RETRY_INTERVAL_SECONDS 5
@@ -489,19 +490,23 @@ load_fiber_work (LoadData *data)
   static BzGuard *gates[MAX_CONCURRENT_LOADS]          = { 0 };
   static GMutex   mutexes[MAX_CONCURRENT_LOADS]        = { 0 };
 
-  GFile        *source            = data->source;
-  char         *source_uri        = data->source_uri;
-  GFile        *cache_into        = data->cache_into;
-  GCancellable *cancellable       = data->cancellable;
-  gboolean      result            = FALSE;
-  g_autoptr (GMutexLocker) locker = NULL;
-  g_autoptr (BzGuard) slot_guard  = NULL;
-  guint    slot_queued            = G_MAXUINT;
-  guint    slot_index             = 0;
-  gboolean is_http                = FALSE;
-  g_autoptr (GdkTexture) texture  = NULL;
-  g_autoptr (GError) local_error  = NULL;
-  g_autoptr (GlyFrame) frame      = NULL;
+  GFile        *source                  = data->source;
+  char         *source_uri              = data->source_uri;
+  GFile        *cache_into              = data->cache_into;
+  char         *cache_into_path         = data->cache_into_path;
+  GCancellable *cancellable             = data->cancellable;
+  gboolean      result                  = FALSE;
+  g_autoptr (GError) local_error        = NULL;
+  g_autoptr (GMutexLocker) locker       = NULL;
+  g_autoptr (BzGuard) slot_guard        = NULL;
+  guint    slot_queued                  = G_MAXUINT;
+  guint    slot_index                   = 0;
+  gboolean is_http                      = FALSE;
+  g_autoptr (GDateTime) now             = NULL;
+  g_autofree char *async_tex_data_path  = NULL;
+  g_autoptr (GFile) async_tex_data_file = NULL;
+  g_autoptr (GdkTexture) texture        = NULL;
+  g_autoptr (GlyFrame) frame            = NULL;
 
   /* Rate limiting to reduce competition for resources */
   locker = g_mutex_locker_new (&queueing_mutex);
@@ -525,40 +530,82 @@ load_fiber_work (LoadData *data)
   g_clear_pointer (&locker, g_mutex_locker_free);
 
   is_http = g_str_has_prefix (source_uri, "http");
-
-  /* TODO: maybe redownload if some time has passed
-   * since the file was modified
-   */
-  if (cache_into != NULL &&
-      g_file_query_exists (cache_into, NULL))
+  now     = g_date_time_new_now_utc ();
+  if (cache_into != NULL)
     {
+      async_tex_data_path = g_strdup_printf ("%s.bz-async-texture-data", cache_into_path);
+      async_tex_data_file = g_file_new_for_path (async_tex_data_path);
+    }
+
+  if (cache_into != NULL &&
+      g_file_query_exists (cache_into, NULL) &&
+      g_file_query_exists (async_tex_data_file, NULL))
+    {
+      g_autoptr (GBytes) bytes     = NULL;
+      g_autoptr (GVariant) variant = NULL;
+      GTimeSpan age_span           = 0;
       g_autoptr (GlyLoader) loader = NULL;
       g_autoptr (GlyImage) image   = NULL;
 
-      loader = gly_loader_new (cache_into);
-      /* We assume we exported this file, so uhhh it is safe to
-         not use sandboxing, since it is faster :-) */
-      gly_loader_set_sandbox_selector (loader, GLY_SANDBOX_SELECTOR_NOT_SANDBOXED);
+      bytes = g_file_load_bytes (async_tex_data_file, NULL, NULL, &local_error);
+      if (bytes != NULL)
+        variant = g_variant_new_from_bytes (G_VARIANT_TYPE ("a{sv}"), bytes, FALSE);
+      if (variant != NULL)
+        {
+          gint64 birth_unix_stamp               = 0;
+          g_autoptr (GDateTime) birth_date_time = NULL;
 
-      image = gly_loader_load (loader, &local_error);
-      if (image != NULL)
-        frame = gly_image_next_frame (image, &local_error);
+          if (g_variant_lookup (
+                  variant,
+                  "birth-unix-stamp", "x",
+                  &birth_unix_stamp))
+            {
+              birth_date_time = g_date_time_new_from_unix_utc (birth_unix_stamp);
+              age_span        = g_date_time_difference (now, birth_date_time);
+            }
+          else
+            local_error = g_error_new (G_IO_ERROR, G_IO_ERROR_NOT_FOUND, "key \"birth-unix-stamp\" was not found");
+        }
+
+      if (variant != NULL && age_span > 0)
+        {
+          if (age_span < CACHE_INVALID_AGE)
+            {
+              loader = gly_loader_new (cache_into);
+              /* We assume we exported this file, so uhhh it is safe to
+                 not use sandboxing, since it is faster :-) */
+              gly_loader_set_sandbox_selector (loader, GLY_SANDBOX_SELECTOR_NOT_SANDBOXED);
+
+              image = gly_loader_load (loader, &local_error);
+              if (image != NULL)
+                frame = gly_image_next_frame (image, &local_error);
+            }
+          else
+            g_debug ("Metadata file %s for cached texture at %s indicates this resource is too old (GTimeSpan: %zu), "
+                     "reaping and fetching from original source at %s instead",
+                     async_tex_data_path, cache_into_path, age_span, source_uri);
+        }
+      else
+        {
+          g_warning ("Couldn't load associated metadata file %s for cached texture at %s, "
+                     "reaping and fetching from original source at %s instead: %s",
+                     async_tex_data_path, cache_into_path, source_uri, local_error->message);
+          g_clear_pointer (&local_error, g_error_free);
+        }
 
       if (frame == NULL)
         {
-          g_autofree char *dest_path = NULL;
-
-          dest_path = g_file_get_path (cache_into);
-          g_warning ("An attempt to revive cached texture at %s has failed, "
-                     "reaping and fetching from original source at %s instead: %s",
-                     dest_path, source_uri, local_error->message);
+          if (local_error != NULL)
+            g_warning ("An attempt to revive cached texture at %s has failed, "
+                       "reaping and fetching from original source at %s instead: %s",
+                       cache_into_path, source_uri, local_error->message);
           g_clear_pointer (&local_error, g_error_free);
 
           if (!g_file_delete (cache_into, NULL, &local_error))
             {
-              g_critical ("Couldn't reap faulty cached texture at %s, this "
+              g_critical ("Couldn't reap cached texture at %s, this "
                           "might lead to unexpected behavior: %s",
-                          dest_path, local_error->message);
+                          cache_into_path, local_error->message);
               g_clear_pointer (&local_error, g_error_free);
             }
         }
@@ -670,6 +717,46 @@ load_fiber_work (LoadData *data)
       frame = gly_image_next_frame (image, &local_error);
       if (frame == NULL)
         return dex_future_new_for_error (g_steal_pointer (&local_error));
+
+      if (async_tex_data_file != NULL)
+        {
+          g_autoptr (GVariantBuilder) builder  = NULL;
+          g_autoptr (GVariant) variant         = NULL;
+          g_autoptr (GBytes) bytes             = NULL;
+          g_autoptr (GFileOutputStream) output = NULL;
+
+          builder = g_variant_builder_new (G_VARIANT_TYPE ("a{sv}"));
+          g_variant_builder_add (
+              builder,
+              "{sv}",
+              "birth-unix-stamp",
+              g_variant_new_int64 (g_date_time_to_unix (now)));
+
+          variant = g_variant_builder_end (builder);
+          bytes   = g_variant_get_data_as_bytes (variant);
+
+          output = g_file_replace (
+              async_tex_data_file,
+              NULL,
+              FALSE,
+              G_FILE_CREATE_REPLACE_DESTINATION,
+              NULL,
+              &local_error);
+          if (output != NULL)
+            {
+              gssize bytes_written = 0;
+
+              bytes_written = g_output_stream_write_bytes (G_OUTPUT_STREAM (output), bytes, NULL, &local_error);
+              if (bytes_written > 0)
+                g_output_stream_close (G_OUTPUT_STREAM (output), NULL, &local_error);
+            }
+
+          if (local_error != NULL)
+            g_critical ("Failed to write async-tex cache metadata to %s ;"
+                        "The image will be fully reloaded next time: %s",
+                        async_tex_data_path, local_error->message);
+          g_clear_pointer (&local_error, g_error_free);
+        }
     }
 
   bz_clear_guard (&slot_guard);

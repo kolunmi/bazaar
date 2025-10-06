@@ -1,6 +1,6 @@
-/* bz-stats-dialog.h
+/* bz-country-data-point.h
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2025 Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,18 +20,29 @@
 
 #pragma once
 
-#include <adwaita.h>
+#include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_STATS_DIALOG (bz_stats_dialog_get_type ())
-G_DECLARE_FINAL_TYPE (BzStatsDialog, bz_stats_dialog, BZ, STATS_DIALOG, AdwDialog)
+#define BZ_TYPE_COUNTRY_DATA_POINT (bz_country_data_point_get_type ())
 
-AdwDialog *
-bz_stats_dialog_new (GListModel *model,
-                     GListModel *country_model);
+G_DECLARE_FINAL_TYPE (BzCountryDataPoint, bz_country_data_point, BZ, COUNTRY_DATA_POINT, GObject)
+
+BzCountryDataPoint *
+bz_country_data_point_new (void);
+
+const char *
+bz_country_data_point_get_country_code (BzCountryDataPoint *self);
+
+guint
+bz_country_data_point_get_downloads (BzCountryDataPoint *self);
 
 void
-bz_stats_dialog_animate_open (BzStatsDialog *self);
+bz_country_data_point_set_country_code (BzCountryDataPoint *self,
+                                        const char         *country_code);
+
+void
+bz_country_data_point_set_downloads (BzCountryDataPoint *self,
+                                     guint               downloads);
 
 G_END_DECLS

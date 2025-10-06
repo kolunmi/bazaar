@@ -741,6 +741,7 @@ bz_application_about_action (GSimpleAction *action,
 
   const char *developers[] = {
     C_ ("About Dialog Developer Credit", "Adam Masciola <kolunmi@posteo.net>"),
+    C_ ("About Dialog Developer Credit", "Alexander Vanhee"),
     /* This array MUST be NULL terminated */
     NULL
   };
@@ -780,9 +781,9 @@ bz_application_about_action (GSimpleAction *action,
       "application-name", "Bazaar",
       "application-icon", "io.github.kolunmi.Bazaar",
       "developer-name", _ ("Adam Masciola"),
+      "developers", developers,
       "translator-credits", translators_string,
       "version", PACKAGE_VERSION,
-      "developers", developers,
       "copyright", "© 2025 Adam Masciola",
       "license-type", GTK_LICENSE_GPL_3_0,
       "website", "https://github.com/kolunmi/bazaar",

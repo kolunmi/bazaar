@@ -360,7 +360,7 @@ bz_data_graph_snapshot (GtkWidget   *widget,
 
       prefix     = self->tooltip_prefix != NULL ? self->tooltip_prefix : ("");
       layout2    = pango_layout_new (gtk_widget_get_pango_context (widget));
-      line2_text = g_strdup_printf ("%s %.0f", prefix, bz_data_point_get_dependent (point));
+      line2_text = g_strdup_printf ("%s %'.0f", prefix, bz_data_point_get_dependent (point));
       pango_layout_set_text (layout2, line2_text, -1);
       pango_layout_get_pixel_extents (layout2, NULL, &text2_extents);
 
