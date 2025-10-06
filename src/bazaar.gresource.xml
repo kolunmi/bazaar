@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/io/github/kolunmi/Bazaar/">
-    
+
     <file alias="style.css">gtk/style.css</file>
-    <file alias="style-dark.css">gtk/style-dark.css</file>
 
     <file preprocess="xml-stripblanks">main-config-schema.xml</file>
     <file preprocess="xml-stripblanks">bz-content-provider-config-schema.xml</file>
@@ -36,6 +35,7 @@
 
     <file preprocess="xml-stripblanks">icons/scalable/actions/app-installed-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/check-plain-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/community-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/connected-squares-x-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/copy-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/cross-large-circle-filled-symbolic.svg</file>
@@ -50,7 +50,7 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/folder-download-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/globe-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/go-previous-symbolic.svg</file>
-    <file preprocess="xml-stripblanks">icons/scalable/actions/graph-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/graph2-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/heart-filled-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/heart-outline-thick-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/horizontal-arrows-disabled-symbolic.svg</file>

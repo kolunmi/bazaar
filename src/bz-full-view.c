@@ -206,15 +206,25 @@ format_recent_downloads (gpointer object,
                          int      value)
 {
   if (value > 0)
-    return g_strdup_printf (_ ("%'d downloads in the last month"), value);
+    return g_strdup_printf (_ ("%'d Downloads"), value);
   else
-    return g_strdup ("---");
+    return g_strdup (_ ("--- Downloads"));
 }
 
 static char *
 format_size (gpointer object, guint64 value)
 {
-  return g_format_size (value);
+  g_autofree char *size_str = g_format_size (value);
+  char            *space    = g_strrstr (size_str, "\xC2\xA0");
+
+  if (space != NULL)
+    {
+      *space = '\0';
+      return g_strdup_printf ("%s <span font_size='x-small'>%s</span>",
+                              size_str, space + 2);
+    }
+
+  return g_strdup (size_str);
 }
 
 static char *
@@ -278,7 +288,28 @@ open_url_cb (BzFullView   *self,
   if (url != NULL && *url != '\0')
     g_app_info_launch_default_for_uri (url, NULL, NULL);
   else
-    g_warning ("Invalid or empty URL provided");
+    g_warning ("Invalid or empty URL provided for Flathub URL CB");
+}
+
+static void
+open_flathub_url_cb (BzFullView *self,
+                     GtkButton  *button)
+{
+  BzEntry    *entry = NULL;
+  const char *id    = NULL;
+  char       *url   = NULL;
+
+  entry = BZ_ENTRY (bz_result_get_object (self->ui_entry));
+  id    = bz_entry_get_id (entry);
+
+  if (id != NULL && *id != '\0')
+    {
+      url = g_strdup_printf ("https://flathub.org/apps/%s", id);
+      g_app_info_launch_default_for_uri (url, NULL, NULL);
+      g_free (url);
+    }
+  else
+    g_warning ("Invalid or empty ID provided");
 }
 
 static void
@@ -721,6 +752,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, format_timestamp);
   gtk_widget_class_bind_template_callback (widget_class, format_as_link);
   gtk_widget_class_bind_template_callback (widget_class, open_url_cb);
+  gtk_widget_class_bind_template_callback (widget_class, open_flathub_url_cb);
   gtk_widget_class_bind_template_callback (widget_class, share_cb);
   gtk_widget_class_bind_template_callback (widget_class, dl_stats_cb);
   gtk_widget_class_bind_template_callback (widget_class, run_cb);

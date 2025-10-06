@@ -665,16 +665,31 @@ bz_entry_group_add (BzEntryGroup *self,
   remote_repo = bz_entry_get_remote_repo_name (entry);
   if (remote_repo != NULL)
     {
-      if (self->remote_repos_string != NULL)
-        {
-          g_autoptr (GString) string = NULL;
+      g_autofree char *capitalized_repo = NULL;
 
-          string = g_string_new_take (g_steal_pointer (&self->remote_repos_string));
-          g_string_append_printf (string, ", %s", remote_repo);
-          self->remote_repos_string = g_string_free_and_steal (g_steal_pointer (&string));
+      if (remote_repo[0] != '\0')
+        {
+          capitalized_repo    = g_strdup (remote_repo);
+          capitalized_repo[0] = g_ascii_toupper (capitalized_repo[0]);
         }
       else
-        self->remote_repos_string = g_strdup (remote_repo);
+        {
+          capitalized_repo = g_strdup (remote_repo);
+        }
+
+      if (self->remote_repos_string != NULL)
+        {
+          g_autofree char *old_string = NULL;
+          if (strstr (self->remote_repos_string, capitalized_repo) == NULL)
+            {
+              old_string                = g_steal_pointer (&self->remote_repos_string);
+              self->remote_repos_string = g_strdup_printf ("%s • %s", old_string, capitalized_repo);
+            }
+        }
+      else
+        {
+          self->remote_repos_string = g_strdup (capitalized_repo);
+        }
     }
 
   if (bz_entry_is_installed (entry))

@@ -53,6 +53,36 @@
     --accent-color: @warning_color;
 }
 
+.grey {
+	--accent-color: alpha(@window_fg_color,0.75);
+	--accent-bg-color: @window_fg_color;
+}
+
+@media (prefers-color-scheme: dark) {
+  .flathub {
+    --accent-color: alpha(#fafafa,0.75);
+    --accent-bg-color: #7847b8;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .flathub {
+    --accent-color: #251f32;
+    --accent-bg-color: #251f32;
+  }
+}
+
+.lozenge {
+	  font-size: 18px;
+	  font-weight: bold;
+	  border-radius: 99999px;
+	  padding: 9px 11px;
+	  min-width: 18px;
+	  min-height: 22px;
+	  color: var(--accent-color);
+	  background-color: alpha(var(--accent-bg-color),0.15);
+}
+
 .small-pill {
     padding: 2px 12px;
     border-radius: 99999px;
@@ -69,6 +99,48 @@
 
 .flathub-page-section {
     border-radius: 10px;
+}
+
+/* Context tile from full-view, modified from GNOME Software */
+.context-tile {
+	border: 1px solid @card_shade_color;
+	border-radius: 0;
+	padding: 24px 12px 21px 12px;
+	outline-offset: 5px;
+	border-bottom: none;
+	border-right: none;
+}
+
+.context-tile:focus:focus-visible {
+	outline-offset: -1px;
+}
+
+.app-context-bar box:first-child .context-tile:first-child {
+	border-top-left-radius: 12px;
+}
+
+.app-context-bar.horizontal box:last-child .context-tile:last-child,
+.app-context-bar.vertical box:first-child .context-tile:last-child {
+	border-top-right-radius: 12px;
+}
+
+.app-context-bar.horizontal box:first-child .context-tile:first-child,
+.app-context-bar.vertical box:last-child .context-tile:first-child {
+	border-bottom-left-radius: 12px;
+}
+
+.app-context-bar box:last-child .context-tile:last-child {
+	border-bottom-right-radius: 12px;
+}
+
+.app-context-bar.horizontal box:first-child .context-tile:first-child,
+.app-context-bar.vertical .context-tile:first-child {
+	border-left: none;
+}
+
+.app-context-bar.horizontal .context-tile,
+.app-context-bar.vertical box:first-child .context-tile {
+	border-top: none;
 }
 
 window,
