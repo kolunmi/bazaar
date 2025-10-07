@@ -206,16 +206,6 @@ is_null (gpointer object,
   return value == NULL;
 }
 
-static char *
-get_search_icon_from_state (gpointer object,
-                            gboolean value)
-{
-  return g_strdup (
-      value
-          ? "go-previous-symbolic"
-          : "system-search-symbolic");
-}
-
 static void
 browser_group_selected_cb (BzWindow     *self,
                            BzEntryGroup *group,
@@ -483,7 +473,6 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzWindow, curated_toggle);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
-  gtk_widget_class_bind_template_callback (widget_class, get_search_icon_from_state);
   gtk_widget_class_bind_template_callback (widget_class, browser_group_selected_cb);
   gtk_widget_class_bind_template_callback (widget_class, search_widget_select_cb);
   gtk_widget_class_bind_template_callback (widget_class, full_view_install_cb);
@@ -1243,13 +1232,13 @@ check_transactions (BzWindow *self)
   if (paused)
     {
       gtk_button_set_icon_name (GTK_BUTTON (self->transactions_pause), "media-playback-start-symbolic");
-      gtk_widget_set_tooltip_text (GTK_WIDGET (self->transactions_pause), _ ("Resume the execution of transactions"));
+      gtk_widget_set_tooltip_text (GTK_WIDGET (self->transactions_pause), _ ("Resume Current Tasks"));
       gtk_widget_add_css_class (GTK_WIDGET (self->transactions_pause), "suggested-action");
     }
   else
     {
       gtk_button_set_icon_name (GTK_BUTTON (self->transactions_pause), "media-playback-pause-symbolic");
-      gtk_widget_set_tooltip_text (GTK_WIDGET (self->transactions_pause), _ ("Pause the execution of transactions"));
+      gtk_widget_set_tooltip_text (GTK_WIDGET (self->transactions_pause), _ ("Pause Current Tasks"));
       gtk_widget_remove_css_class (GTK_WIDGET (self->transactions_pause), "suggested-action");
     }
 
