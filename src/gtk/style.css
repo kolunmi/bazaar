@@ -149,18 +149,16 @@ headerbar,
   transition: background-color 0.2s ease;
 }
 
+.fake-flat-headerbar {
+  background-color: var(--window-bg-color);
+}
+
 .flathub {
   --flathub-bg-hue: 301.44;
 }
 
-.global-search,
-window,
-.toplevel-headerbar,
-.sidebar-pane {
-  transition: background-color 800ms ease-in-out;
-}
 
-.flathub .global-search,
+.flathub .global-search, .flathub .fake-flat-headerbar,
 window.flathub {
   background-color: oklch(from var(--window-bg-color) l calc(c * 4) var(--flathub-bg-hue));
 }

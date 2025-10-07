@@ -86,7 +86,7 @@ template $BzWindow: Adw.ApplicationWindow {
                 show-title: false;
 
                 [end]
-                ToggleButton  {
+                ToggleButton  toggle_transactions_sidebar  {
                   styles [
                     "flat",
                   ]
@@ -314,11 +314,6 @@ template $BzWindow: Adw.ApplicationWindow {
 
             [top]
             Adw.HeaderBar top_header_bar {
-              /*
-              styles [
-                "toplevel-headerbar"
-              ]
-              */
 
               [start]
               Button go_back {
