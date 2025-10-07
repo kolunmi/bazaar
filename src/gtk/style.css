@@ -149,17 +149,22 @@ headerbar,
   transition: background-color 0.2s ease;
 }
 
+.fake-flat-headerbar {
+  background-color: var(--window-bg-color);
+}
+
 .flathub {
   --flathub-bg-hue: 301.44;
 }
 
-.flathub .global-search,
+
+.flathub .global-search, .flathub .fake-flat-headerbar,
 window.flathub {
   background-color: oklch(from var(--window-bg-color) l calc(c * 4) var(--flathub-bg-hue));
 }
 
 .flathub .toplevel-headerbar {
-  background-color: oklch(from var(--headerbar-bg-color) l calc(c * 4) var(--flathub-bg-hue));
+  background-color: oklch(from var(--window-bg-color) l calc(c * 4) var(--flathub-bg-hue));
 }
 
 .flathub .sidebar-pane {

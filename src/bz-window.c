@@ -58,6 +58,7 @@ struct _BzWindow
   AdwNavigationView   *main_stack;
   BzFullView          *full_view;
   GtkToggleButton     *toggle_transactions;
+  GtkToggleButton     *toggle_transactions_sidebar;
   GtkButton           *go_back;
   GtkButton           *search;
   BzSearchWidget      *search_widget;
@@ -206,16 +207,6 @@ is_null (gpointer object,
   return value == NULL;
 }
 
-static char *
-get_search_icon_from_state (gpointer object,
-                            gboolean value)
-{
-  return g_strdup (
-      value
-          ? "go-previous-symbolic"
-          : "system-search-symbolic");
-}
-
 static void
 browser_group_selected_cb (BzWindow     *self,
                            BzEntryGroup *group,
@@ -335,9 +326,25 @@ visible_page_changed_cb (BzWindow          *self,
         gtk_widget_add_css_class (GTK_WIDGET (self), "flathub");
       else
         gtk_widget_remove_css_class (GTK_WIDGET (self), "flathub");
+
+      if (page_tag != NULL && strstr (page_tag, "view") != NULL)
+        {
+
+          adw_toolbar_view_set_top_bar_style (self->toolbar_view, ADW_TOOLBAR_RAISED);
+          gtk_widget_add_css_class (GTK_WIDGET (self->top_header_bar), "fake-flat-headerbar");
+        }
+      else
+        {
+          adw_toolbar_view_set_top_bar_style (self->toolbar_view, ADW_TOOLBAR_FLAT);
+          gtk_widget_remove_css_class (GTK_WIDGET (self->top_header_bar), "fake-flat-headerbar");
+        }
     }
   else
-    gtk_widget_remove_css_class (GTK_WIDGET (self), "flathub");
+    {
+      gtk_widget_remove_css_class (GTK_WIDGET (self), "flathub");
+      adw_toolbar_view_set_top_bar_style (self->toolbar_view, ADW_TOOLBAR_FLAT);
+      gtk_widget_remove_css_class (GTK_WIDGET (self->top_header_bar), "fake-flat-headerbar");
+    }
 }
 
 static void
@@ -467,6 +474,7 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzWindow, full_view);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, toasts);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, toggle_transactions);
+  gtk_widget_class_bind_template_child (widget_class, BzWindow, toggle_transactions_sidebar);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, go_back);
   // gtk_widget_class_bind_template_child (widget_class, BzWindow, refresh);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, search);
@@ -483,7 +491,6 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzWindow, curated_toggle);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
-  gtk_widget_class_bind_template_callback (widget_class, get_search_icon_from_state);
   gtk_widget_class_bind_template_callback (widget_class, browser_group_selected_cb);
   gtk_widget_class_bind_template_callback (widget_class, search_widget_select_cb);
   gtk_widget_class_bind_template_callback (widget_class, full_view_install_cb);
@@ -850,6 +857,7 @@ transact (BzWindow  *self,
 {
   g_autoptr (BzTransaction) transaction = NULL;
   GdkPaintable *icon                    = NULL;
+  GtkWidget    *transaction_target      = NULL;
 
   if (remove)
     transaction = bz_transaction_new_full (
@@ -868,6 +876,11 @@ transact (BzWindow  *self,
 
   if (source == NULL)
     source = GTK_WIDGET (self->main_stack);
+
+  if (adw_overlay_split_view_get_show_sidebar (self->split_view))
+    transaction_target = GTK_WIDGET (self->toggle_transactions_sidebar);
+  else
+    transaction_target = GTK_WIDGET (self->toggle_transactions);
 
   icon = bz_entry_get_icon_paintable (entry);
   if (icon != NULL)
@@ -894,14 +907,12 @@ transact (BzWindow  *self,
 
       comet = g_object_new (
           BZ_TYPE_COMET,
-          "from", remove ? GTK_WIDGET (self->toggle_transactions) : source,
-          "to", remove ? source : GTK_WIDGET (self->toggle_transactions),
+          "from", remove ? transaction_target : source,
+          "to", remove ? source : transaction_target,
           "paintable", icon,
           NULL);
       bz_comet_overlay_spawn (self->comet_overlay, comet);
     }
-
-  // adw_overlay_split_view_set_show_sidebar (self->split_view, TRUE);
 }
 
 static void
@@ -1243,13 +1254,13 @@ check_transactions (BzWindow *self)
   if (paused)
     {
       gtk_button_set_icon_name (GTK_BUTTON (self->transactions_pause), "media-playback-start-symbolic");
-      gtk_widget_set_tooltip_text (GTK_WIDGET (self->transactions_pause), _ ("Resume the execution of transactions"));
+      gtk_widget_set_tooltip_text (GTK_WIDGET (self->transactions_pause), _ ("Resume Current Tasks"));
       gtk_widget_add_css_class (GTK_WIDGET (self->transactions_pause), "suggested-action");
     }
   else
     {
       gtk_button_set_icon_name (GTK_BUTTON (self->transactions_pause), "media-playback-pause-symbolic");
-      gtk_widget_set_tooltip_text (GTK_WIDGET (self->transactions_pause), _ ("Pause the execution of transactions"));
+      gtk_widget_set_tooltip_text (GTK_WIDGET (self->transactions_pause), _ ("Pause Current Tasks"));
       gtk_widget_remove_css_class (GTK_WIDGET (self->transactions_pause), "suggested-action");
     }
 
