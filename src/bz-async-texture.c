@@ -47,12 +47,14 @@ BZ_DEFINE_DATA (
       char         *cache_into_path;
       GCancellable *cancellable;
       int           retries;
+      GWeakRef      self;
     },
     BZ_RELEASE_DATA (source, g_object_unref);
     BZ_RELEASE_DATA (source_uri, g_free);
     BZ_RELEASE_DATA (cache_into, g_object_unref);
     BZ_RELEASE_DATA (cache_into_path, g_free);
-    BZ_RELEASE_DATA (cancellable, g_object_unref));
+    BZ_RELEASE_DATA (cancellable, g_object_unref);
+    g_weak_ref_clear (&self->self);)
 
 struct _BzAsyncTexture
 {
@@ -98,15 +100,15 @@ static DexFuture *
 load_fiber_work (LoadData *data);
 
 static DexFuture *
-load_finally (DexFuture      *future,
-              BzAsyncTexture *self);
+load_finally (DexFuture *future,
+              LoadData  *data);
 
 static void
 maybe_load (BzAsyncTexture *self);
 
 static DexFuture *
-retry_cb (DexFuture      *future,
-          BzAsyncTexture *self);
+retry_cb (DexFuture *future,
+          LoadData  *data);
 
 static gboolean
 idle_notify (BzAsyncTexture *self);
@@ -469,6 +471,7 @@ maybe_load (BzAsyncTexture *self)
   data->cache_into_path = self->cache_into_path != NULL ? g_strdup (self->cache_into_path) : NULL;
   data->cancellable     = g_object_ref (self->cancellable);
   data->retries         = self->retries;
+  g_weak_ref_init (&data->self, self);
 
   future = dex_scheduler_spawn (
       bz_get_io_scheduler (),
@@ -478,7 +481,7 @@ maybe_load (BzAsyncTexture *self)
   future = dex_future_finally (
       future,
       (DexFutureCallback) load_finally,
-      self, NULL);
+      load_data_ref (data), load_data_unref);
   self->task = g_steal_pointer (&future);
 }
 
@@ -772,13 +775,19 @@ load_fiber_work (LoadData *data)
 }
 
 static DexFuture *
-load_finally (DexFuture      *future,
-              BzAsyncTexture *self)
+load_finally (DexFuture *future,
+              LoadData  *data)
 {
   g_autoptr (GError) local_error  = NULL;
+  g_autoptr (BzAsyncTexture) self = NULL;
   g_autoptr (GMutexLocker) locker = NULL;
 
-  /* Apparently a race condition here? */
+  self = g_weak_ref_get (&data->self);
+  if (self == NULL)
+    return dex_future_new_reject (
+        DEX_ERROR,
+        DEX_ERROR_UNKNOWN,
+        "Object was discarded");
 
   locker = g_mutex_locker_new (&self->texture_mutex);
   dex_clear (&self->task);
@@ -818,7 +827,7 @@ load_finally (DexFuture      *future,
           self->retry_future = dex_future_then (
               dex_timeout_new_seconds (RETRY_INTERVAL_SECONDS),
               (DexFutureCallback) retry_cb,
-              self, NULL);
+              load_data_ref (data), load_data_unref);
         }
 
       return dex_ref (future);
@@ -826,10 +835,18 @@ load_finally (DexFuture      *future,
 }
 
 static DexFuture *
-retry_cb (DexFuture      *future,
-          BzAsyncTexture *self)
+retry_cb (DexFuture *future,
+          LoadData  *data)
 {
+  g_autoptr (BzAsyncTexture) self = NULL;
   g_autoptr (GMutexLocker) locker = NULL;
+
+  self = g_weak_ref_get (&data->self);
+  if (self == NULL)
+    return dex_future_new_reject (
+        DEX_ERROR,
+        DEX_ERROR_UNKNOWN,
+        "Object was discarded");
 
   locker = g_mutex_locker_new (&self->texture_mutex);
   dex_clear (self->retry_future);

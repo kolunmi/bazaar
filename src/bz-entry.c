@@ -147,10 +147,11 @@ BZ_DEFINE_DATA (
     query_flathub,
     QueryFlathub,
     {
-      BzEntry *self;
+      GWeakRef self;
       int      prop;
       char    *id;
     },
+    g_weak_ref_clear (&self->self);
     BZ_RELEASE_DATA (id, g_free));
 static DexFuture *
 query_flathub_fiber (QueryFlathubData *data);
@@ -1772,8 +1773,8 @@ query_flathub (BzEntry *self,
   else if (g_hash_table_contains (priv->flathub_prop_queries, GINT_TO_POINTER (prop)))
     return;
 
-  data       = query_flathub_data_new ();
-  data->self = self;
+  data = query_flathub_data_new ();
+  g_weak_ref_init (&data->self, self);
   data->prop = prop;
   data->id   = g_strdup (priv->id);
 
@@ -1880,9 +1881,13 @@ static DexFuture *
 query_flathub_then (DexFuture        *future,
                     QueryFlathubData *data)
 {
-  BzEntry      *self  = data->self;
-  int           prop  = data->prop;
-  const GValue *value = NULL;
+  g_autoptr (BzEntry) self = NULL;
+  int           prop       = data->prop;
+  const GValue *value      = NULL;
+
+  self = g_weak_ref_get (&data->self);
+  if (self == NULL)
+    return NULL;
 
   value = dex_future_get_value (future, NULL);
   g_object_set_property (G_OBJECT (self), props[prop]->name, value);
