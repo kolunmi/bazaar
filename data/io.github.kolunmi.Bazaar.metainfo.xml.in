@@ -45,15 +45,15 @@
 
   <screenshots>
     <screenshot type="default">
-      <image>https://github.com/user-attachments/assets/3f8b6a63-54df-4978-9cbb-feb461aca9c2</image>
-      <caption>The home view displaying flathub apps and categories</caption>
+      <image>https://github.com/user-attachments/assets/4ca1e18d-ebaf-44a7-b50c-110c4af3a346</image>
+      <caption>The home view displaying Flathub apps & categories</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/user-attachments/assets/af7e6462-2e59-4368-a10f-03ee96e2074b</image>
-      <caption>Calligraphy application page</caption>
+      <image>https://github.com/user-attachments/assets/9f363aae-3a9e-4aa5-8206-ea694e1372fa</image>
+      <caption>Nucleus app page</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/user-attachments/assets/a322ad5b-d88c-492a-b0c2-8c36cb161b19</image>
+      <image>https://github.com/user-attachments/assets/3aca172a-9500-4f89-923c-79bc61595a15</image>
       <caption>Searching for Blender</caption>
     </screenshot>
   </screenshots>
