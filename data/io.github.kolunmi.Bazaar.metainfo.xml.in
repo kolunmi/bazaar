@@ -39,8 +39,8 @@
   <content_rating type="oars-1.1" />
 
   <branding>
-    <color type="primary" scheme_preference="light">#993d3d</color>
-    <color type="primary" scheme_preference="dark">#4f1305</color>
+    <color type="primary" scheme_preference="light">#ffbe6f</color>
+    <color type="primary" scheme_preference="dark">#c11c2b</color>
   </branding>
 
   <screenshots>
@@ -55,10 +55,6 @@
     <screenshot>
       <image>https://github.com/user-attachments/assets/a322ad5b-d88c-492a-b0c2-8c36cb161b19</image>
       <caption>Searching for Blender</caption>
-    </screenshot>
-    <screenshot>
-      <image>https://github.com/user-attachments/assets/a32dff95-5453-499f-b510-6bd2f722cae0"</image>
-      <caption>Download graph for Blender</caption>
     </screenshot>
   </screenshots>
 
