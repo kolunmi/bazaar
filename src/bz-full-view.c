@@ -232,14 +232,12 @@ static char *
 format_license (gpointer    object,
                 const char *license)
 {
-  g_autoptr (BzSpdx) spdx = NULL;
-  g_autofree char *name   = NULL;
+  g_autofree char *name = NULL;
 
   if (license == NULL || *license == '\0')
     return g_strdup (_ ("Unknown"));
 
-  spdx = bz_spdx_new ();
-  name = bz_spdx_get_name (spdx, license);
+  name = bz_spdx_get_name (license);
 
   if (name != NULL && *name != '\0')
     return g_steal_pointer (&name);
@@ -290,13 +288,10 @@ static gboolean
 has_link (gpointer    object,
           const char *license)
 {
-  g_autoptr (BzSpdx) spdx = NULL;
-
   if (license == NULL || *license == '\0')
     return FALSE;
 
-  spdx = bz_spdx_new ();
-  return bz_spdx_is_valid (spdx, license);
+  return bz_spdx_is_valid (license);
 }
 
 static char *
@@ -367,7 +362,6 @@ license_cb (BzFullView *self,
   BzEntry         *entry   = NULL;
   const char      *license = NULL;
   g_autofree char *url     = NULL;
-  g_autoptr (BzSpdx) spdx  = NULL;
 
   entry = bz_result_get_object (self->ui_entry);
   if (entry == NULL)
@@ -378,8 +372,7 @@ license_cb (BzFullView *self,
   if (license == NULL || *license == '\0')
     return;
 
-  spdx = bz_spdx_new ();
-  url  = bz_spdx_get_url (spdx, license);
+  url = bz_spdx_get_url (license);
 
   if (url != NULL)
     g_app_info_launch_default_for_uri (url, NULL, NULL);

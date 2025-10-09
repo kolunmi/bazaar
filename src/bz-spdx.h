@@ -20,23 +20,14 @@
 
 #pragma once
 
-#include <glib-object.h>
+#include <glib.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_SPDX (bz_spdx_get_type ())
+gboolean bz_spdx_is_valid (const char *license_id);
 
-G_DECLARE_FINAL_TYPE (BzSpdx, bz_spdx, BZ, SPDX, GObject)
+char *bz_spdx_get_url (const char *license_id);
 
-BzSpdx *bz_spdx_new (void);
-
-gboolean bz_spdx_is_valid (BzSpdx     *self,
-                           const char *license_id);
-
-char *bz_spdx_get_url (BzSpdx     *self,
-                       const char *license_id);
-
-char *bz_spdx_get_name (BzSpdx     *self,
-                        const char *license_id);
+char *bz_spdx_get_name (const char *license_id);
 
 G_END_DECLS

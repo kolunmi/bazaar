@@ -22,36 +22,11 @@
 
 #include "bz-spdx.h"
 
-struct _BzSpdx
-{
-  GObject parent_instance;
-};
-
-G_DEFINE_FINAL_TYPE (BzSpdx, bz_spdx, G_TYPE_OBJECT)
-
-static void
-bz_spdx_class_init (BzSpdxClass *klass)
-{
-}
-
-static void
-bz_spdx_init (BzSpdx *self)
-{
-}
-
-BzSpdx *
-bz_spdx_new (void)
-{
-  return g_object_new (BZ_TYPE_SPDX, NULL);
-}
-
 gboolean
-bz_spdx_is_valid (BzSpdx     *self,
-                  const char *license_id)
+bz_spdx_is_valid (const char *license_id)
 {
   g_autofree char *url = NULL;
 
-  g_return_val_if_fail (BZ_IS_SPDX (self), FALSE);
   g_return_val_if_fail (license_id != NULL, FALSE);
 
   url = as_get_license_url (license_id);
@@ -59,22 +34,18 @@ bz_spdx_is_valid (BzSpdx     *self,
 }
 
 char *
-bz_spdx_get_url (BzSpdx     *self,
-                 const char *license_id)
+bz_spdx_get_url (const char *license_id)
 {
-  g_return_val_if_fail (BZ_IS_SPDX (self), NULL);
   g_return_val_if_fail (license_id != NULL, NULL);
 
   return as_get_license_url (license_id);
 }
 
 char *
-bz_spdx_get_name (BzSpdx     *self,
-                  const char *license_id)
+bz_spdx_get_name (const char *license_id)
 {
   char *result = NULL;
 
-  g_return_val_if_fail (BZ_IS_SPDX (self), NULL);
   g_return_val_if_fail (license_id != NULL, NULL);
 
   if (g_str_has_prefix (license_id, "LicenseRef-proprietary"))
