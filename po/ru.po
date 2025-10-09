@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 17:59+0700\n"
-"PO-Revision-Date: 2025-10-08 18:08+0700\n"
+"POT-Creation-Date: 2025-10-09 14:25+0700\n"
+"PO-Revision-Date: 2025-10-09 14:29+0700\n"
 "Last-Translator: Jill Fiore <contact@lumaeris.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -119,20 +119,16 @@ msgid "Adam Masciola"
 msgstr "Адам Масциола"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:49
-msgid "The home view displaying flathub apps and categories"
+msgid "The home view displaying Flathub apps & categories"
 msgstr "Главный экран, отображающий приложения Flathub и категории"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:53
-msgid "Calligraphy application page"
-msgstr "Страница приложения для изучения"
+msgid "Nucleus app page"
+msgstr "Страница приложения Nucleus"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:57
 msgid "Searching for Blender"
 msgstr "Поиск Blender"
-
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:61
-msgid "Download graph for Blender"
-msgstr "График количества скачиваний Blender"
 
 #: src/bz-addons-dialog.blp:13
 msgid "Manage Addons"
@@ -991,7 +987,7 @@ msgstr "Главное меню"
 
 #: src/bz-window.blp:469
 msgid "_Quit Service"
-msgstr "_Закрыть сервис"
+msgstr "_Завершить сервис"
 
 #: src/bz-window.blp:474
 msgid "_Refresh Content"
@@ -1097,6 +1093,12 @@ msgstr "Открыть сочетания клавиш"
 msgctxt "shortcut window"
 msgid "Quit"
 msgstr "Закрыть"
+
+#~ msgid "Calligraphy application page"
+#~ msgstr "Страница приложения для изучения"
+
+#~ msgid "Download graph for Blender"
+#~ msgstr "График количества скачиваний Blender"
 
 #~ msgid "App Details"
 #~ msgstr "Информация приложения"
