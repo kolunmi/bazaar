@@ -36,6 +36,7 @@
 #include "bz-screenshot.h"
 #include "bz-section-view.h"
 #include "bz-share-dialog.h"
+#include "bz-spdx.h"
 #include "bz-state-info.h"
 #include "bz-stats-dialog.h"
 
@@ -206,7 +207,7 @@ format_recent_downloads (gpointer object,
                          int      value)
 {
   if (value > 0)
-    return g_strdup_printf (_ ("%'d Downloads"), value);
+    return g_strdup_printf (_ ("%'d Monthly Downloads"), value);
   else
     return g_strdup (_ ("--- Downloads"));
 }
@@ -225,6 +226,23 @@ format_size (gpointer object, guint64 value)
     }
 
   return g_strdup (size_str);
+}
+
+static char *
+format_license (gpointer    object,
+                const char *license)
+{
+  g_autofree char *name = NULL;
+
+  if (license == NULL || *license == '\0')
+    return g_strdup (_ ("Unknown"));
+
+  name = bz_spdx_get_name (license);
+
+  if (name != NULL && *name != '\0')
+    return g_steal_pointer (&name);
+  else
+    return g_strdup (license);
 }
 
 static char *
@@ -264,6 +282,16 @@ format_as_link (gpointer    object,
                             value, value, value);
   else
     return g_strdup (_ ("No URL"));
+}
+
+static gboolean
+has_link (gpointer    object,
+          const char *license)
+{
+  if (license == NULL || *license == '\0')
+    return FALSE;
+
+  return bz_spdx_is_valid (license);
 }
 
 static char *
@@ -325,6 +353,31 @@ share_cb (BzFullView *self,
   adw_dialog_set_content_width (share_dialog, 600);
 
   adw_dialog_present (share_dialog, GTK_WIDGET (self));
+}
+
+static void
+license_cb (BzFullView *self,
+            GtkButton  *button)
+{
+  BzEntry         *entry   = NULL;
+  const char      *license = NULL;
+  g_autofree char *url     = NULL;
+
+  entry = bz_result_get_object (self->ui_entry);
+  if (entry == NULL)
+    return;
+
+  g_object_get (entry, "project-license", &license, NULL);
+
+  if (license == NULL || *license == '\0')
+    return;
+
+  url = bz_spdx_get_url (license);
+
+  if (url != NULL)
+    g_app_info_launch_default_for_uri (url, NULL, NULL);
+  else
+    g_warning ("Could not generate URL for license: %s", license);
 }
 
 static void
@@ -751,8 +804,11 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, format_size);
   gtk_widget_class_bind_template_callback (widget_class, format_timestamp);
   gtk_widget_class_bind_template_callback (widget_class, format_as_link);
+  gtk_widget_class_bind_template_callback (widget_class, format_license);
+  gtk_widget_class_bind_template_callback (widget_class, has_link);
   gtk_widget_class_bind_template_callback (widget_class, open_url_cb);
   gtk_widget_class_bind_template_callback (widget_class, open_flathub_url_cb);
+  gtk_widget_class_bind_template_callback (widget_class, license_cb);
   gtk_widget_class_bind_template_callback (widget_class, share_cb);
   gtk_widget_class_bind_template_callback (widget_class, dl_stats_cb);
   gtk_widget_class_bind_template_callback (widget_class, run_cb);

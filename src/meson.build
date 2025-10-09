@@ -112,6 +112,7 @@ bz_sources = [
   'bz-share-dialog.c',
   'bz-state-info.c',
   'bz-stats-dialog.c',
+  'bz-spdx.c',
   'bz-transaction-manager.c',
   'bz-transaction-task.c',
   'bz-transaction-view.c',
