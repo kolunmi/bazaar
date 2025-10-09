@@ -7,6 +7,8 @@ src/bz-addons-dialog.blp
 src/bz-addons-dialog.c
 src/bz-app-tile.blp
 src/bz-app-tile.c
+src/bz-app-size-dialog.c
+src/bz-app-size-dialog.blp
 src/bz-application-map-factory.c
 src/bz-application.c
 src/bz-async-texture.c

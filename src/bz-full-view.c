@@ -24,6 +24,7 @@
 #include <json-glib/json-glib.h>
 
 #include "bz-addons-dialog.h"
+#include "bz-app-size-dialog.h"
 #include "bz-decorated-screenshot.h"
 #include "bz-dynamic-list-view.h"
 #include "bz-env.h"
@@ -401,6 +402,19 @@ dl_stats_cb (BzFullView *self,
 
   adw_dialog_present (dialog, GTK_WIDGET (self));
   bz_stats_dialog_animate_open (BZ_STATS_DIALOG (dialog));
+}
+
+static void
+size_cb (BzFullView *self,
+         GtkButton  *button)
+{
+  AdwDialog *size_dialog = NULL;
+
+  if (self->group == NULL)
+    return;
+
+  size_dialog = bz_app_size_dialog_new (bz_result_get_object (self->ui_entry));
+  adw_dialog_present (size_dialog, GTK_WIDGET (self));
 }
 
 static void
@@ -811,6 +825,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, license_cb);
   gtk_widget_class_bind_template_callback (widget_class, share_cb);
   gtk_widget_class_bind_template_callback (widget_class, dl_stats_cb);
+  gtk_widget_class_bind_template_callback (widget_class, size_cb);
   gtk_widget_class_bind_template_callback (widget_class, run_cb);
   gtk_widget_class_bind_template_callback (widget_class, install_cb);
   gtk_widget_class_bind_template_callback (widget_class, remove_cb);

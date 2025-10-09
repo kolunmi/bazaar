@@ -329,11 +329,13 @@ template $BzFullView: Adw.Bin {
                     Box {
                       homogeneous: true;
 
-                      Box download_size_tile {
+                      Button download_size_tile {
                         styles [
                           "context-tile",
                           "flat",
                         ]
+
+                        clicked => $size_cb(template);
 
                         Box {
                           orientation: vertical;
