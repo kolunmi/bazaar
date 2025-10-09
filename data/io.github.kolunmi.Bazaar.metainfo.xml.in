@@ -59,6 +59,21 @@
   </screenshots>
 
   <releases>
+    <release version="0.5.5" date="2025-10-09">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.5.5</url>
+      <description translate="no">
+        <p>More improvements:</p>
+        <ul>
+          <li>Improve design of transaction dialog</li>
+          <li>Update remove button pulse effect and comet size curve</li>
+          <li>Reap and reload cached textures after a day</li>
+          <li>Eliminate some crashes caused by race conditions</li>
+          <li>Change preferences group to context bar in full view</li>
+          <li>Switch side panels to sidebars and use flat header bar designs</li>
+          <li>Add really useful app size dialog :)</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.5.4" date="2025-10-04">
       <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.5.4</url>
       <description translate="no">
