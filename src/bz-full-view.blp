@@ -384,13 +384,14 @@ template $BzFullView: Adw.Bin {
                       }
 
                       Button license_tile {
-                        can-target: false;
-                        can-focus: false;
-
+                        can-target: bind $has_link(template.ui-entry as <$BzResult>.object as <$BzEntry>.project-license) as <bool>;
+                        can-focus: bind $has_link(template.ui-entry as <$BzResult>.object as <$BzEntry>.project-license) as <bool>;
                         styles [
                           "context-tile",
                           "flat",
                         ]
+
+                        clicked => $license_cb(template);
 
                         Box {
                           Box {
@@ -436,7 +437,7 @@ template $BzFullView: Adw.Bin {
 
                             Label {
                               justify: center;
-                              label: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.project-license;
+                              label: bind $format_license(template.ui-entry as <$BzResult>.object as <$BzEntry>.project-license) as <string>;
                               lines: 3;
                               ellipsize: end;
                               wrap: true;
@@ -478,7 +479,7 @@ template $BzFullView: Adw.Bin {
 
                             Label {
                               justify: center;
-                              label: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.project-license;
+                              label: _("Source code may not be available");
                               lines: 3;
                               ellipsize: end;
                               wrap: true;
@@ -533,7 +534,7 @@ template $BzFullView: Adw.Bin {
 
                           Label download_stats_value {
                             justify: center;
-                            label: _("in the last month");
+                            label: _("Click for details");
                             lines: 3;
                             ellipsize: end;
                             wrap: true;
@@ -652,28 +653,15 @@ template $BzFullView: Adw.Bin {
                     }
                   }
 
-                  Box {
-                    orientation: vertical;
 
-                    Label {
-                      styles [
-                        "heading",
-                        "h4",
-                      ]
+                  ListBox releases_box {
+                    styles [
+                      "boxed-list",
+                    ]
 
-                      label: _("Version History");
-                      xalign: 0;
-                      margin-bottom: 12;
-                    }
-
-                    ListBox releases_box {
-                      styles [
-                        "boxed-list",
-                      ]
-
-                      selection-mode: none;
-                    }
+                    selection-mode: none;
                   }
+
                 };
               }
 
