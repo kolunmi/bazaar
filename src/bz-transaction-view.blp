@@ -8,8 +8,6 @@ template $BzTransactionView: Adw.Bin {
     Box {
       margin-top: 10;
       margin-bottom: 10;
-      margin-start: 10;
-      margin-end: 5;
       orientation: vertical;
       spacing: 0;
       hexpand: true;
@@ -35,6 +33,7 @@ template $BzTransactionView: Adw.Bin {
               child: Button {
                 styles [
                   "flat",
+                  "app-transaction-button"
                 ]
                 clicked => $entry_clicked(template);
 
@@ -139,6 +138,7 @@ template $BzTransactionView: Adw.Bin {
               child: Button {
                 styles [
                   "flat",
+                  "app-transaction-button"
                 ]
                 clicked => $entry_clicked(template);
 
@@ -242,6 +242,7 @@ template $BzTransactionView: Adw.Bin {
               child: Button {
                 styles [
                   "flat",
+                  "app-transaction-button"
                 ]
                 clicked => $entry_clicked(template);
 
@@ -330,6 +331,7 @@ template $BzTransactionView: Adw.Bin {
       }
 
       ListView {
+
         styles [
           "navigation-sidebar",
           "transaction-sidebar-entry-list",
@@ -344,8 +346,8 @@ template $BzTransactionView: Adw.Bin {
             activatable: false;
 
             child: Box {
-              margin-start: 5;
-              margin-end: 5;
+              margin-start: 3;
+              margin-end: 3;
               margin-top: 5;
               margin-bottom: 15;
                 
