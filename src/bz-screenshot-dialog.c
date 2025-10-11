@@ -269,7 +269,6 @@ previous_clicked (BzScreenshotDialog *self)
   guint      n_items = 0;
   guint      n_pages = 0;
   GtkWidget *page    = NULL;
-  BzZoom    *zoom    = NULL;
 
   if (self->screenshots == NULL)
     return;
@@ -279,40 +278,16 @@ previous_clicked (BzScreenshotDialog *self)
     return;
 
   n_pages = adw_carousel_get_n_pages (self->carousel);
-  if (self->current_index < n_pages)
-    {
-      page = adw_carousel_get_nth_page (self->carousel, self->current_index);
-      if (page != NULL && BZ_IS_ZOOM (page))
-        {
-          zoom = BZ_ZOOM (page);
-          g_signal_handlers_disconnect_by_func (zoom, on_zoom_level_changed, self);
-          bz_zoom_reset (zoom);
-        }
-    }
+  if (n_pages == 0)
+    return;
 
   if (self->current_index > 0)
-    self->current_index--;
+    page = adw_carousel_get_nth_page (self->carousel, self->current_index - 1);
   else
-    self->current_index = n_items - 1;
+    page = adw_carousel_get_nth_page (self->carousel, n_items - 1);
 
-  n_pages = adw_carousel_get_n_pages (self->carousel);
-  if (self->current_index < n_pages)
-    {
-      page = adw_carousel_get_nth_page (self->carousel, self->current_index);
-      if (page != NULL)
-        {
-          adw_carousel_scroll_to (self->carousel, page, TRUE);
-          if (BZ_IS_ZOOM (page))
-            {
-              zoom = BZ_ZOOM (page);
-              g_signal_connect (zoom, "notify::zoom-level",
-                                G_CALLBACK (on_zoom_level_changed), self);
-            }
-        }
-    }
-
-  update_is_zoomed (self);
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CURRENT_INDEX]);
+  if (page != NULL)
+    adw_carousel_scroll_to (self->carousel, page, TRUE);
 }
 
 static void
@@ -321,7 +296,6 @@ next_clicked (BzScreenshotDialog *self)
   guint      n_items = 0;
   guint      n_pages = 0;
   GtkWidget *page    = NULL;
-  BzZoom    *zoom    = NULL;
 
   if (self->screenshots == NULL)
     return;
@@ -331,40 +305,16 @@ next_clicked (BzScreenshotDialog *self)
     return;
 
   n_pages = adw_carousel_get_n_pages (self->carousel);
-  if (self->current_index < n_pages)
-    {
-      page = adw_carousel_get_nth_page (self->carousel, self->current_index);
-      if (page != NULL && BZ_IS_ZOOM (page))
-        {
-          zoom = BZ_ZOOM (page);
-          g_signal_handlers_disconnect_by_func (zoom, on_zoom_level_changed, self);
-          bz_zoom_reset (zoom);
-        }
-    }
+  if (n_pages == 0)
+    return;
 
   if (self->current_index < n_items - 1)
-    self->current_index++;
+    page = adw_carousel_get_nth_page (self->carousel, self->current_index + 1);
   else
-    self->current_index = 0;
+    page = adw_carousel_get_nth_page (self->carousel, 0);
 
-  n_pages = adw_carousel_get_n_pages (self->carousel);
-  if (self->current_index < n_pages)
-    {
-      page = adw_carousel_get_nth_page (self->carousel, self->current_index);
-      if (page != NULL)
-        {
-          adw_carousel_scroll_to (self->carousel, page, TRUE);
-          if (BZ_IS_ZOOM (page))
-            {
-              zoom = BZ_ZOOM (page);
-              g_signal_connect (zoom, "notify::zoom-level",
-                                G_CALLBACK (on_zoom_level_changed), self);
-            }
-        }
-    }
-
-  update_is_zoomed (self);
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CURRENT_INDEX]);
+  if (page != NULL)
+    adw_carousel_scroll_to (self->carousel, page, TRUE);
 }
 
 static void
