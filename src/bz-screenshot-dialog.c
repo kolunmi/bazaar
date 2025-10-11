@@ -118,18 +118,6 @@ populate_carousel (BzScreenshotDialog *self)
 
       adw_carousel_append (self->carousel, zoom_widget);
     }
-
-    if (self->current_index < n_items)
-      {
-        GtkWidget *page = adw_carousel_get_nth_page (self->carousel, self->current_index);
-        adw_carousel_scroll_to (self->carousel, page, FALSE);
-
-        if (page != NULL && BZ_IS_ZOOM (page))
-          {
-            g_signal_connect (BZ_ZOOM (page), "notify::zoom-level",
-                              G_CALLBACK (on_zoom_level_changed), self);
-          }
-      }
 }
 
 static void
@@ -167,6 +155,36 @@ on_zoom_level_changed (BzZoom             *zoom,
 }
 
 static void
+bz_screenshot_dialog_constructed (GObject *object)
+{
+  BzScreenshotDialog *self    = BZ_SCREENSHOT_DIALOG (object);
+  GtkWidget          *page    = NULL;
+  BzZoom             *zoom    = NULL;
+  guint               n_pages = 0;
+
+  G_OBJECT_CLASS (bz_screenshot_dialog_parent_class)->constructed (object);
+
+  populate_carousel (self);
+
+  n_pages = adw_carousel_get_n_pages (self->carousel);
+  if (self->current_index < n_pages)
+    {
+      page = adw_carousel_get_nth_page (self->carousel, self->current_index);
+      if (page != NULL)
+        {
+          adw_carousel_scroll_to (self->carousel, page, FALSE);
+
+          if (BZ_IS_ZOOM (page))
+            {
+              zoom = BZ_ZOOM (page);
+              g_signal_connect (zoom, "notify::zoom-level",
+                                G_CALLBACK (on_zoom_level_changed), self);
+            }
+        }
+    }
+}
+
+static void
 bz_screenshot_dialog_set_property (GObject      *object,
                                    guint         prop_id,
                                    const GValue *value,
@@ -178,22 +196,9 @@ bz_screenshot_dialog_set_property (GObject      *object,
     {
     case PROP_SCREENSHOTS:
       g_set_object (&self->screenshots, g_value_get_object (value));
-      populate_carousel (self);
       break;
     case PROP_CURRENT_INDEX:
       self->current_index = g_value_get_uint (value);
-      if (self->carousel != NULL)
-        {
-          guint      n_pages = adw_carousel_get_n_pages (self->carousel);
-          GtkWidget *page    = NULL;
-
-          if (self->current_index < n_pages)
-            {
-              page = adw_carousel_get_nth_page (self->carousel, self->current_index);
-              if (page != NULL)
-                adw_carousel_scroll_to (self->carousel, page, FALSE);
-            }
-        }
       break;
     case PROP_IS_ZOOMED:
     default:
@@ -373,11 +378,10 @@ on_carousel_position_changed (AdwCarousel        *carousel,
   BzZoom    *new_zoom = NULL;
 
   guint new_index = (guint) round (adw_carousel_get_position (carousel));
-  guint n_pages = adw_carousel_get_n_pages (carousel);
+  guint n_pages   = adw_carousel_get_n_pages (carousel);
 
   if (new_index == self->current_index || new_index >= n_pages)
     return;
-
 
   if (self->current_index < n_pages)
     {
@@ -413,9 +417,14 @@ copy_clicked (BzScreenshotDialog *self)
   g_autoptr (BzAsyncTexture) async_texture = NULL;
   g_autoptr (GdkTexture) texture           = NULL;
   GdkClipboard *clipboard;
-  g_autoptr (AdwToast) toast = NULL;
+  AdwToast     *toast   = NULL;
+  guint         n_items = 0;
 
   if (self->screenshots == NULL)
+    return;
+
+  n_items = g_list_model_get_n_items (self->screenshots);
+  if (self->current_index >= n_items)
     return;
 
   async_texture = g_list_model_get_item (self->screenshots, self->current_index);
@@ -479,6 +488,7 @@ bz_screenshot_dialog_class_init (BzScreenshotDialogClass *klass)
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
   object_class->dispose      = bz_screenshot_dialog_dispose;
+  object_class->constructed  = bz_screenshot_dialog_constructed;
   object_class->get_property = bz_screenshot_dialog_get_property;
   object_class->set_property = bz_screenshot_dialog_set_property;
 
@@ -525,9 +535,6 @@ static void
 bz_screenshot_dialog_init (BzScreenshotDialog *self)
 {
   GtkEventController *key_controller = NULL;
-  GtkWidget          *page           = NULL;
-  BzZoom             *zoom           = NULL;
-  guint               n_pages        = 0;
 
   gtk_widget_init_template (GTK_WIDGET (self));
 
@@ -535,18 +542,6 @@ bz_screenshot_dialog_init (BzScreenshotDialog *self)
   g_signal_connect (key_controller, "key-pressed",
                     G_CALLBACK (on_key_pressed), self);
   gtk_widget_add_controller (GTK_WIDGET (self), key_controller);
-
-  n_pages = adw_carousel_get_n_pages (self->carousel);
-  if (self->current_index < n_pages)
-    {
-      page = adw_carousel_get_nth_page (self->carousel, self->current_index);
-      if (page != NULL && BZ_IS_ZOOM (page))
-        {
-          zoom = BZ_ZOOM (page);
-          g_signal_connect (zoom, "notify::zoom-level",
-                            G_CALLBACK (on_zoom_level_changed), self);
-        }
-    }
 }
 
 AdwDialog *

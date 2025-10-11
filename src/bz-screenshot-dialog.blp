@@ -107,8 +107,8 @@ template $BzScreenshotDialog: Adw.Dialog {
         }
         child: Adw.Carousel carousel {
           interactive: bind $invert_boolean(template.is-zoomed) as <bool>;
-          allow-scroll-wheel: false;
-          allow-mouse-drag: false;
+          allow-scroll-wheel: bind $invert_boolean(template.is-zoomed) as <bool>;
+          allow-mouse-drag: bind $invert_boolean(template.is-zoomed) as <bool>;
           allow-long-swipes: false;
           notify::position => $on_carousel_position_changed();
         };
