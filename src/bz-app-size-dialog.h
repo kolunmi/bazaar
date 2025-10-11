@@ -1,6 +1,6 @@
-/* bz-decorated-screenshot.h
+/* bz-app-size-dialog.h
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2025 Adam Masciola, Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,25 +17,19 @@
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
+
 #pragma once
-#include "bz-async-texture.h"
+
+#include "bz-entry.h"
 #include <adwaita.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_DECORATED_SCREENSHOT (bz_decorated_screenshot_get_type ())
-G_DECLARE_FINAL_TYPE (BzDecoratedScreenshot, bz_decorated_screenshot, BZ, DECORATED_SCREENSHOT, AdwBin)
+#define BZ_TYPE_APP_SIZE_DIALOG (bz_app_size_dialog_get_type ())
 
-BzDecoratedScreenshot *
-bz_decorated_screenshot_new (void);
+G_DECLARE_FINAL_TYPE (BzAppSizeDialog, bz_app_size_dialog, BZ, APP_SIZE_DIALOG, AdwDialog)
 
-BzAsyncTexture *
-bz_decorated_screenshot_get_async_texture (BzDecoratedScreenshot *self);
-
-void
-bz_decorated_screenshot_set_async_texture (BzDecoratedScreenshot *self,
-                                           BzAsyncTexture        *async_texture);
+AdwDialog *
+bz_app_size_dialog_new (BzEntry *entry);
 
 G_END_DECLS
-
-/* End of bz-decorated-screenshot.h */

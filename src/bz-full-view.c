@@ -24,6 +24,7 @@
 #include <json-glib/json-glib.h>
 
 #include "bz-addons-dialog.h"
+#include "bz-app-size-dialog.h"
 #include "bz-decorated-screenshot.h"
 #include "bz-dynamic-list-view.h"
 #include "bz-env.h"
@@ -33,9 +34,11 @@
 #include "bz-global-state.h"
 #include "bz-lazy-async-texture-model.h"
 #include "bz-release.h"
+#include "bz-screenshot-dialog.h"
 #include "bz-screenshot.h"
 #include "bz-section-view.h"
 #include "bz-share-dialog.h"
+#include "bz-spdx.h"
 #include "bz-state-info.h"
 #include "bz-stats-dialog.h"
 
@@ -206,7 +209,7 @@ format_recent_downloads (gpointer object,
                          int      value)
 {
   if (value > 0)
-    return g_strdup_printf (_ ("%'d Downloads"), value);
+    return g_strdup_printf (_ ("%'d Monthly Downloads"), value);
   else
     return g_strdup (_ ("--- Downloads"));
 }
@@ -225,6 +228,23 @@ format_size (gpointer object, guint64 value)
     }
 
   return g_strdup (size_str);
+}
+
+static char *
+format_license (gpointer    object,
+                const char *license)
+{
+  g_autofree char *name = NULL;
+
+  if (license == NULL || *license == '\0')
+    return g_strdup (_ ("Unknown"));
+
+  name = bz_spdx_get_name (license);
+
+  if (name != NULL && *name != '\0')
+    return g_steal_pointer (&name);
+  else
+    return g_strdup (license);
 }
 
 static char *
@@ -264,6 +284,16 @@ format_as_link (gpointer    object,
                             value, value, value);
   else
     return g_strdup (_ ("No URL"));
+}
+
+static gboolean
+has_link (gpointer    object,
+          const char *license)
+{
+  if (license == NULL || *license == '\0')
+    return FALSE;
+
+  return bz_spdx_is_valid (license);
 }
 
 static char *
@@ -328,6 +358,31 @@ share_cb (BzFullView *self,
 }
 
 static void
+license_cb (BzFullView *self,
+            GtkButton  *button)
+{
+  BzEntry         *entry   = NULL;
+  const char      *license = NULL;
+  g_autofree char *url     = NULL;
+
+  entry = bz_result_get_object (self->ui_entry);
+  if (entry == NULL)
+    return;
+
+  g_object_get (entry, "project-license", &license, NULL);
+
+  if (license == NULL || *license == '\0')
+    return;
+
+  url = bz_spdx_get_url (license);
+
+  if (url != NULL)
+    g_app_info_launch_default_for_uri (url, NULL, NULL);
+  else
+    g_warning ("Could not generate URL for license: %s", license);
+}
+
+static void
 dl_stats_cb (BzFullView *self,
              GtkButton  *button)
 {
@@ -348,6 +403,19 @@ dl_stats_cb (BzFullView *self,
 
   adw_dialog_present (dialog, GTK_WIDGET (self));
   bz_stats_dialog_animate_open (BZ_STATS_DIALOG (dialog));
+}
+
+static void
+size_cb (BzFullView *self,
+         GtkButton  *button)
+{
+  AdwDialog *size_dialog = NULL;
+
+  if (self->group == NULL)
+    return;
+
+  size_dialog = bz_app_size_dialog_new (bz_result_get_object (self->ui_entry));
+  adw_dialog_present (size_dialog, GTK_WIDGET (self));
 }
 
 static void
@@ -607,6 +675,48 @@ populate_releases_box (BzFullView *self)
 }
 
 static void
+screenshot_clicked_cb (BzFullView            *self,
+                       BzDecoratedScreenshot *screenshot)
+{
+  BzAsyncTexture *async_texture                  = NULL;
+  GListModel     *model                          = NULL;
+  g_autoptr (BzLazyAsyncTextureModel) lazy_model = NULL;
+  AdwDialog *dialog                              = NULL;
+  BzEntry   *entry                               = NULL;
+  guint      index                               = 0;
+  guint      n_items                             = 0;
+
+  async_texture = bz_decorated_screenshot_get_async_texture (screenshot);
+  if (async_texture == NULL || self->debounced_ui_entry == NULL)
+    return;
+
+  entry = bz_result_get_object (self->debounced_ui_entry);
+  if (entry == NULL)
+    return;
+
+  g_object_get (entry, "screenshot-paintables", &model, NULL);
+  if (model == NULL)
+    return;
+
+  lazy_model = bz_lazy_async_texture_model_new ();
+  g_object_set (lazy_model, "model", model, NULL);
+
+  n_items = g_list_model_get_n_items (G_LIST_MODEL (lazy_model));
+  for (guint i = 0; i < n_items; i++)
+    {
+      g_autoptr (BzAsyncTexture) item = g_list_model_get_item (G_LIST_MODEL (lazy_model), i);
+      if (item == async_texture)
+        {
+          index = i;
+          break;
+        }
+    }
+
+  dialog = bz_screenshot_dialog_new (G_LIST_MODEL (lazy_model), index);
+  adw_dialog_present (dialog, GTK_WIDGET (self));
+}
+
+static void
 screenshots_bind_widget_cb (BzFullView            *self,
                             BzDecoratedScreenshot *screenshot,
                             GdkPaintable          *paintable,
@@ -615,6 +725,10 @@ screenshots_bind_widget_cb (BzFullView            *self,
   gtk_widget_set_focusable (GTK_WIDGET (screenshot), TRUE);
   gtk_widget_set_margin_top (GTK_WIDGET (screenshot), 5);
   gtk_widget_set_margin_bottom (GTK_WIDGET (screenshot), 5);
+
+  g_signal_connect_swapped (
+      screenshot, "clicked",
+      G_CALLBACK (screenshot_clicked_cb), self);
 }
 
 static void
@@ -623,6 +737,10 @@ screenshots_unbind_widget_cb (BzFullView            *self,
                               GdkPaintable          *paintable,
                               BzDynamicListView     *view)
 {
+  g_signal_handlers_disconnect_by_func (
+      screenshot,
+      G_CALLBACK (screenshot_clicked_cb),
+      self);
 }
 
 static void
@@ -751,10 +869,14 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, format_size);
   gtk_widget_class_bind_template_callback (widget_class, format_timestamp);
   gtk_widget_class_bind_template_callback (widget_class, format_as_link);
+  gtk_widget_class_bind_template_callback (widget_class, format_license);
+  gtk_widget_class_bind_template_callback (widget_class, has_link);
   gtk_widget_class_bind_template_callback (widget_class, open_url_cb);
   gtk_widget_class_bind_template_callback (widget_class, open_flathub_url_cb);
+  gtk_widget_class_bind_template_callback (widget_class, license_cb);
   gtk_widget_class_bind_template_callback (widget_class, share_cb);
   gtk_widget_class_bind_template_callback (widget_class, dl_stats_cb);
+  gtk_widget_class_bind_template_callback (widget_class, size_cb);
   gtk_widget_class_bind_template_callback (widget_class, run_cb);
   gtk_widget_class_bind_template_callback (widget_class, install_cb);
   gtk_widget_class_bind_template_callback (widget_class, remove_cb);

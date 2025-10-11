@@ -39,30 +39,41 @@
   <content_rating type="oars-1.1" />
 
   <branding>
-    <color type="primary" scheme_preference="light">#993d3d</color>
-    <color type="primary" scheme_preference="dark">#4f1305</color>
+    <color type="primary" scheme_preference="light">#ffbe6f</color>
+    <color type="primary" scheme_preference="dark">#c11c2b</color>
   </branding>
 
   <screenshots>
     <screenshot type="default">
-      <image>https://github.com/user-attachments/assets/3f8b6a63-54df-4978-9cbb-feb461aca9c2</image>
-      <caption>The home view displaying flathub apps and categories</caption>
+      <image>https://github.com/user-attachments/assets/4ca1e18d-ebaf-44a7-b50c-110c4af3a346</image>
+      <caption>The home view displaying Flathub apps &amp; categories</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/user-attachments/assets/af7e6462-2e59-4368-a10f-03ee96e2074b</image>
-      <caption>Calligraphy application page</caption>
+      <image>https://github.com/user-attachments/assets/9f363aae-3a9e-4aa5-8206-ea694e1372fa</image>
+      <caption>Nucleus app page</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/user-attachments/assets/a322ad5b-d88c-492a-b0c2-8c36cb161b19</image>
+      <image>https://github.com/user-attachments/assets/3aca172a-9500-4f89-923c-79bc61595a15</image>
       <caption>Searching for Blender</caption>
-    </screenshot>
-    <screenshot>
-      <image>https://github.com/user-attachments/assets/a32dff95-5453-499f-b510-6bd2f722cae0"</image>
-      <caption>Download graph for Blender</caption>
     </screenshot>
   </screenshots>
 
   <releases>
+    <release version="0.5.5" date="2025-10-09">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.5.5</url>
+      <description translate="no">
+        <p>More improvements:</p>
+        <ul>
+          <li>Improve design of transaction dialog</li>
+          <li>Update remove button pulse effect and comet size curve</li>
+          <li>Reap and reload cached textures after a day</li>
+          <li>Eliminate some crashes caused by race conditions</li>
+          <li>Change preferences group to context bar in full view</li>
+          <li>Switch side panels to sidebars and use flat header bar designs</li>
+          <li>Add really useful app size dialog :)</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.5.4" date="2025-10-04">
       <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.5.4</url>
       <description translate="no">

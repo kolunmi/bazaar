@@ -1,6 +1,6 @@
-/* bz-decorated-screenshot.h
+/* bz-spdx.h
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2025 Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,25 +17,17 @@
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
+
 #pragma once
-#include "bz-async-texture.h"
-#include <adwaita.h>
+
+#include <glib.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_DECORATED_SCREENSHOT (bz_decorated_screenshot_get_type ())
-G_DECLARE_FINAL_TYPE (BzDecoratedScreenshot, bz_decorated_screenshot, BZ, DECORATED_SCREENSHOT, AdwBin)
+gboolean bz_spdx_is_valid (const char *license_id);
 
-BzDecoratedScreenshot *
-bz_decorated_screenshot_new (void);
+char *bz_spdx_get_url (const char *license_id);
 
-BzAsyncTexture *
-bz_decorated_screenshot_get_async_texture (BzDecoratedScreenshot *self);
-
-void
-bz_decorated_screenshot_set_async_texture (BzDecoratedScreenshot *self,
-                                           BzAsyncTexture        *async_texture);
+char *bz_spdx_get_name (const char *license_id);
 
 G_END_DECLS
-
-/* End of bz-decorated-screenshot.h */
