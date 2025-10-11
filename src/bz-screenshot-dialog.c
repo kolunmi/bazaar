@@ -155,11 +155,24 @@ on_zoom_level_changed (BzZoom             *zoom,
 }
 
 static void
+connect_zoom_signal (BzScreenshotDialog *self,
+                     GtkWidget          *page)
+{
+  BzZoom *zoom = NULL;
+
+  if (page != NULL && BZ_IS_ZOOM (page))
+    {
+      zoom = BZ_ZOOM (page);
+      g_signal_connect (zoom, "notify::zoom-level",
+                        G_CALLBACK (on_zoom_level_changed), self);
+    }
+}
+
+static void
 bz_screenshot_dialog_constructed (GObject *object)
 {
   BzScreenshotDialog *self    = BZ_SCREENSHOT_DIALOG (object);
   GtkWidget          *page    = NULL;
-  BzZoom             *zoom    = NULL;
   guint               n_pages = 0;
 
   G_OBJECT_CLASS (bz_screenshot_dialog_parent_class)->constructed (object);
@@ -173,15 +186,11 @@ bz_screenshot_dialog_constructed (GObject *object)
       if (page != NULL)
         {
           adw_carousel_scroll_to (self->carousel, page, FALSE);
-
-          if (BZ_IS_ZOOM (page))
-            {
-              zoom = BZ_ZOOM (page);
-              g_signal_connect (zoom, "notify::zoom-level",
-                                G_CALLBACK (on_zoom_level_changed), self);
-            }
+          connect_zoom_signal (self, page);
         }
     }
+
+  update_is_zoomed (self);
 }
 
 static void
@@ -325,7 +334,6 @@ on_carousel_position_changed (AdwCarousel        *carousel,
   GtkWidget *old_page = NULL;
   GtkWidget *new_page = NULL;
   BzZoom    *old_zoom = NULL;
-  BzZoom    *new_zoom = NULL;
 
   guint new_index = (guint) round (adw_carousel_get_position (carousel));
   guint n_pages   = adw_carousel_get_n_pages (carousel);
@@ -349,12 +357,7 @@ on_carousel_position_changed (AdwCarousel        *carousel,
   if (new_index < n_pages)
     {
       new_page = adw_carousel_get_nth_page (carousel, new_index);
-      if (new_page != NULL && BZ_IS_ZOOM (new_page))
-        {
-          new_zoom = BZ_ZOOM (new_page);
-          g_signal_connect (new_zoom, "notify::zoom-level",
-                            G_CALLBACK (on_zoom_level_changed), self);
-        }
+      connect_zoom_signal (self, new_page);
     }
 
   update_is_zoomed (self);
