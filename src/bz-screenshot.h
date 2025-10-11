@@ -51,4 +51,10 @@ bz_screenshot_set_focus_y (BzScreenshot *self,
 double
 bz_screenshot_get_focus_y (BzScreenshot *self);
 
+void
+bz_screenshot_set_rounded_corners (BzScreenshot *self,
+                                   gboolean      rounded_corners);
+gboolean
+bz_screenshot_get_rounded_corners (BzScreenshot *self);
+
 G_END_DECLS

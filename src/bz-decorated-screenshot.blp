@@ -2,49 +2,15 @@ using Gtk 4.0;
 using Adw 1;
 
 template $BzDecoratedScreenshot: Adw.Bin {
-  Overlay overlay {
+  Button {
+    styles [
+      "flat",
+    ]
+
     child: $BzScreenshot screenshot_widget {
       paintable: bind template.async-texture;
     };
 
-    [overlay]
-    Box buttons {
-      margin-start: 20;
-      margin-end: 20;
-      margin-top: 20;
-      margin-bottom: 20;
-      
-      orientation: vertical;
-      spacing: 5;
-      halign: start;
-      valign: start;
-      visible: bind template.async-texture as <$BzAsyncTexture>.loaded;
-
-      Button {
-        styles [
-          "osd",
-          "circular",
-        ]
-        
-        has-tooltip: true;
-        tooltip-text: _("Open this image in the default image viewer");
-        
-        icon-name: "external-link-symbolic";
-        clicked => $open_externally_clicked(template);
-      }
-
-      Button copy {
-        styles [
-          "osd",
-          "circular",
-        ]
-        
-        has-tooltip: true;
-        tooltip-text: _("Copy this image to the clipboard");
-        
-        icon-name: "copy-symbolic";
-        clicked => $copy_clicked(template);
-      }
-    }
+    clicked => $screenshot_clicked(template);
   }
 }

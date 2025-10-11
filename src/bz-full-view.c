@@ -34,6 +34,7 @@
 #include "bz-global-state.h"
 #include "bz-lazy-async-texture-model.h"
 #include "bz-release.h"
+#include "bz-screenshot-dialog.h"
 #include "bz-screenshot.h"
 #include "bz-section-view.h"
 #include "bz-share-dialog.h"
@@ -674,6 +675,48 @@ populate_releases_box (BzFullView *self)
 }
 
 static void
+screenshot_clicked_cb (BzFullView            *self,
+                       BzDecoratedScreenshot *screenshot)
+{
+  BzAsyncTexture *async_texture                  = NULL;
+  GListModel     *model                          = NULL;
+  g_autoptr (BzLazyAsyncTextureModel) lazy_model = NULL;
+  AdwDialog *dialog                              = NULL;
+  BzEntry   *entry                               = NULL;
+  guint      index                               = 0;
+  guint      n_items                             = 0;
+
+  async_texture = bz_decorated_screenshot_get_async_texture (screenshot);
+  if (async_texture == NULL || self->debounced_ui_entry == NULL)
+    return;
+
+  entry = bz_result_get_object (self->debounced_ui_entry);
+  if (entry == NULL)
+    return;
+
+  g_object_get (entry, "screenshot-paintables", &model, NULL);
+  if (model == NULL)
+    return;
+
+  lazy_model = bz_lazy_async_texture_model_new ();
+  g_object_set (lazy_model, "model", model, NULL);
+
+  n_items = g_list_model_get_n_items (G_LIST_MODEL (lazy_model));
+  for (guint i = 0; i < n_items; i++)
+    {
+      g_autoptr (BzAsyncTexture) item = g_list_model_get_item (G_LIST_MODEL (lazy_model), i);
+      if (item == async_texture)
+        {
+          index = i;
+          break;
+        }
+    }
+
+  dialog = bz_screenshot_dialog_new (G_LIST_MODEL (lazy_model), index);
+  adw_dialog_present (dialog, GTK_WIDGET (self));
+}
+
+static void
 screenshots_bind_widget_cb (BzFullView            *self,
                             BzDecoratedScreenshot *screenshot,
                             GdkPaintable          *paintable,
@@ -682,6 +725,10 @@ screenshots_bind_widget_cb (BzFullView            *self,
   gtk_widget_set_focusable (GTK_WIDGET (screenshot), TRUE);
   gtk_widget_set_margin_top (GTK_WIDGET (screenshot), 5);
   gtk_widget_set_margin_bottom (GTK_WIDGET (screenshot), 5);
+
+  g_signal_connect_swapped (
+      screenshot, "clicked",
+      G_CALLBACK (screenshot_clicked_cb), self);
 }
 
 static void
@@ -690,6 +737,10 @@ screenshots_unbind_widget_cb (BzFullView            *self,
                               GdkPaintable          *paintable,
                               BzDynamicListView     *view)
 {
+  g_signal_handlers_disconnect_by_func (
+      screenshot,
+      G_CALLBACK (screenshot_clicked_cb),
+      self);
 }
 
 static void
