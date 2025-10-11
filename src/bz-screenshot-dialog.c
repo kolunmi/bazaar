@@ -363,6 +363,51 @@ next_clicked (BzScreenshotDialog *self)
 }
 
 static void
+on_carousel_position_changed (AdwCarousel        *carousel,
+                              GParamSpec         *pspec,
+                              BzScreenshotDialog *self)
+{
+  GtkWidget *old_page = NULL;
+  GtkWidget *new_page = NULL;
+  BzZoom    *old_zoom = NULL;
+  BzZoom    *new_zoom = NULL;
+
+  guint new_index = (guint) round (adw_carousel_get_position (carousel));
+  guint n_pages = adw_carousel_get_n_pages (carousel);
+
+  if (new_index == self->current_index || new_index >= n_pages)
+    return;
+
+
+  if (self->current_index < n_pages)
+    {
+      old_page = adw_carousel_get_nth_page (carousel, self->current_index);
+      if (old_page != NULL && BZ_IS_ZOOM (old_page))
+        {
+          old_zoom = BZ_ZOOM (old_page);
+          g_signal_handlers_disconnect_by_func (old_zoom, on_zoom_level_changed, self);
+          bz_zoom_reset (old_zoom);
+        }
+    }
+
+  self->current_index = new_index;
+
+  if (new_index < n_pages)
+    {
+      new_page = adw_carousel_get_nth_page (carousel, new_index);
+      if (new_page != NULL && BZ_IS_ZOOM (new_page))
+        {
+          new_zoom = BZ_ZOOM (new_page);
+          g_signal_connect (new_zoom, "notify::zoom-level",
+                            G_CALLBACK (on_zoom_level_changed), self);
+        }
+    }
+
+  update_is_zoomed (self);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CURRENT_INDEX]);
+}
+
+static void
 copy_clicked (BzScreenshotDialog *self)
 {
   g_autoptr (BzAsyncTexture) async_texture = NULL;
@@ -420,6 +465,13 @@ has_multiple_screenshots (GObject    *object,
   return g_list_model_get_n_items (screenshots) > 1;
 }
 
+static gboolean
+invert_boolean (gpointer object,
+                gboolean value)
+{
+  return !value;
+}
+
 static void
 bz_screenshot_dialog_class_init (BzScreenshotDialogClass *klass)
 {
@@ -460,11 +512,13 @@ bz_screenshot_dialog_class_init (BzScreenshotDialogClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzScreenshotDialog, toast_overlay);
   gtk_widget_class_bind_template_callback (widget_class, zoom_in_clicked);
   gtk_widget_class_bind_template_callback (widget_class, zoom_out_clicked);
+  gtk_widget_class_bind_template_callback (widget_class, on_carousel_position_changed);
   gtk_widget_class_bind_template_callback (widget_class, reset_zoom_clicked);
   gtk_widget_class_bind_template_callback (widget_class, copy_clicked);
   gtk_widget_class_bind_template_callback (widget_class, previous_clicked);
   gtk_widget_class_bind_template_callback (widget_class, next_clicked);
   gtk_widget_class_bind_template_callback (widget_class, has_multiple_screenshots);
+  gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
 }
 
 static void

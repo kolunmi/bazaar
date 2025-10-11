@@ -106,10 +106,11 @@ template $BzScreenshotDialog: Adw.Dialog {
           }
         }
         child: Adw.Carousel carousel {
-          interactive: false;
+          interactive: bind $invert_boolean(template.is-zoomed) as <bool>;
           allow-scroll-wheel: false;
           allow-mouse-drag: false;
           allow-long-swipes: false;
+          notify::position => $on_carousel_position_changed();
         };
       };
     };
