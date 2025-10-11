@@ -43,7 +43,6 @@ struct _BzZoom
   double drag_start_y;
 
   gboolean   is_dragging;
-  GdkCursor *original_cursor;
 
   AdwAnimation *zoom_animation;
   double        target_zoom;
@@ -87,7 +86,6 @@ bz_zoom_dispose (GObject *object)
   self = BZ_ZOOM (object);
 
   g_clear_pointer (&self->child, gtk_widget_unparent);
-  g_clear_object (&self->original_cursor);
   g_clear_object (&self->zoom_animation);
 
   G_OBJECT_CLASS (bz_zoom_parent_class)->dispose (object);
@@ -209,26 +207,15 @@ on_drag_begin (BzZoom     *self,
                double      start_y,
                GtkGesture *gesture)
 {
-  GdkCursor *grab_cursor;
-  GdkCursor *current_cursor;
-
   if (fabs (self->zoom_level - 1.0) < 0.001)
-  {
-    gtk_gesture_set_state (gesture, GTK_EVENT_SEQUENCE_DENIED);
-    return;
-  }
+    {
+      gtk_gesture_set_state (gesture, GTK_EVENT_SEQUENCE_DENIED);
+      return;
+    }
 
   self->drag_start_x = self->pan_x;
   self->drag_start_y = self->pan_y;
   self->is_dragging  = TRUE;
-
-  current_cursor = gtk_widget_get_cursor (GTK_WIDGET (self));
-  if (current_cursor != NULL && self->original_cursor == NULL)
-    self->original_cursor = g_object_ref (current_cursor);
-
-  grab_cursor = gdk_cursor_new_from_name ("grabbing", NULL);
-  gtk_widget_set_cursor (GTK_WIDGET (self), grab_cursor);
-  g_object_unref (grab_cursor);
 }
 
 static void
@@ -253,7 +240,6 @@ on_drag_end (BzZoom     *self,
              GtkGesture *gesture)
 {
   self->is_dragging = FALSE;
-  gtk_widget_set_cursor (GTK_WIDGET (self), self->original_cursor);
 }
 
 static void
