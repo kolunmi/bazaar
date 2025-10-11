@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 13:18+0300\n"
+"POT-Creation-Date: 2025-10-11 10:11+0300\n"
 "PO-Revision-Date: 2025-08-12 22:05+0300\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -115,24 +115,69 @@ msgid "Adam Masciola"
 msgstr ""
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:49
-msgid "The home view displaying flathub apps and categories"
-msgstr "Домашня сторінка із застосунками та категоріями з Flathub"
+msgid "The home view displaying Flathub apps &amp; categories"
+msgstr "Домашня сторінка із застосунками та катеґоріями з Flathub"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:53
-msgid "Calligraphy application page"
-msgstr "Сторінка застосунку Calligraphy"
+msgid "Nucleus app page"
+msgstr "Сторінка застосунку Nucleus"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:57
 msgid "Searching for Blender"
 msgstr "Шукаємо Blender"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:61
-msgid "Download graph for Blender"
-msgstr "Статистика завантажень Blender"
-
 #: src/bz-addons-dialog.blp:13
 msgid "Manage Addons"
 msgstr "Керувати розширеннями"
+
+#: src/bz-app-size-dialog.c:55
+msgid "Of the size of human DNA"
+msgstr "від людської ДНК"
+
+#: src/bz-app-size-dialog.c:55
+msgid "3 billion base pairs"
+msgstr "3 мільярди пар основ"
+
+#: src/bz-app-size-dialog.c:56
+msgid "Of the Linux Kernel"
+msgstr "від ядра Linux"
+
+# NOTE: не потребує перекладу.
+#: src/bz-app-size-dialog.c:56
+msgid "linux-6.17.tar.xz"
+msgstr ""
+
+#: src/bz-app-size-dialog.c:57
+msgid "Of the Apollo 11 guidance computer"
+msgstr "від бортового обчислювача Apollo 11"
+
+#: src/bz-app-size-dialog.c:57
+msgid "Total ROM and RAM"
+msgstr "увесь простір ПЗП та ОЗП"
+
+#: src/bz-app-size-dialog.c:58
+msgid "Of the original Super Mario Bros"
+msgstr "від першого Super Mario Bros"
+
+#: src/bz-app-size-dialog.c:58
+msgid "On the NES"
+msgstr "на NES"
+
+#: src/bz-app-size-dialog.c:59
+msgid "Of the size of Wikipedia"
+msgstr "від усієї Вікіпедії"
+
+#: src/bz-app-size-dialog.c:59
+msgid "Without any media"
+msgstr "без медіявмісту"
+
+#: src/bz-app-size-dialog.blp:43
+msgid "--- MB"
+msgstr "--- МБ"
+
+#: src/bz-app-size-dialog.blp:53 src/bz-full-view.blp:364
+msgid "Download Size"
+msgstr "Розмір завантаження"
 
 #: src/bz-application.c:679
 msgid ""
@@ -557,50 +602,50 @@ msgstr "Встановити іншу версію"
 msgid "Share this application"
 msgstr "Поділитися цим застосунком"
 
-#: src/bz-full-view.blp:362
-msgid "Download Size"
-msgstr "Розмір завантаження"
-
-#: src/bz-full-view.blp:373
+#: src/bz-full-view.blp:375
 msgid "Excludes shared components"
 msgstr "Усунути спільні компоненти"
 
-#: src/bz-full-view.blp:428
+#: src/bz-full-view.blp:431
 msgid "Free Software"
 msgstr "Вільні"
 
-#: src/bz-full-view.blp:470
+#: src/bz-full-view.blp:473
 msgid "Proprietary"
 msgstr "Власницькі"
 
-#: src/bz-full-view.blp:536
-msgid "in the last month"
-msgstr "протягом минулого місяця"
+#: src/bz-full-view.blp:484
+msgid "Source code may not be available"
+msgstr "Початковий код може бути недоступним"
 
-#: src/bz-full-view.blp:602
+#: src/bz-full-view.blp:539
+msgid "Click for details"
+msgstr "Натисніть для докладнощів"
+
+#: src/bz-full-view.blp:605
 msgid "Repositories"
 msgstr "Віддалені сховища"
 
-#: src/bz-full-view.blp:633 src/bz-full-view.blp:641
+#: src/bz-full-view.blp:636 src/bz-full-view.blp:644
 msgid "Project Website"
 msgstr "URL проєкту"
 
-#: src/bz-full-view.blp:649
+#: src/bz-full-view.blp:652
 msgid "Open in browser"
 msgstr "Відкрити в оглядачі"
 
-#: src/bz-full-view.blp:664
-msgid "Version History"
-msgstr "Історія змін"
-
-#: src/bz-full-view.c:209
-#, c-format
-msgid "%'d Downloads"
-msgstr "%'d завантажень"
-
 #: src/bz-full-view.c:211
+#, c-format
+msgid "%'d Monthly Downloads"
+msgstr "%'d щомісячних завантажень"
+
+#: src/bz-full-view.c:213
 msgid "--- Downloads"
 msgstr "--- Завантажень"
+
+#: src/bz-full-view.c:239
+msgid "Unknown"
+msgstr "Невідомо"
 
 #. Translators: This is a date format for timestamps from previous years. Used in the app releases section.
 #. * %B is the full month name, %e is the day, %Y is the year.
@@ -608,7 +653,7 @@ msgstr "--- Завантажень"
 #. * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
 #. * Please modify to make it sound natural in your locale.
 #. *
-#: src/bz-full-view.c:247
+#: src/bz-full-view.c:266
 msgid "%B %-d, %Y"
 msgstr "%-d %B %Y"
 
@@ -618,15 +663,15 @@ msgstr "%-d %B %Y"
 #. * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
 #. * Please modify to make it sound natural in your locale.
 #. *
-#: src/bz-full-view.c:255
+#: src/bz-full-view.c:274
 msgid "%B %-d"
 msgstr "%-d %B"
 
-#: src/bz-full-view.c:266
+#: src/bz-full-view.c:285
 msgid "No URL"
 msgstr "Без URL"
 
-#: src/bz-full-view.c:274
+#: src/bz-full-view.c:303
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -634,7 +679,7 @@ msgstr ""
 "Цей застосунок має вільну ліцензію. Це означає, що початковий код може бути "
 "перевірено на безпечність."
 
-#: src/bz-full-view.c:275
+#: src/bz-full-view.c:304
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
@@ -642,12 +687,12 @@ msgstr ""
 "Цей застосунок має невільну (власницьку) ліцензію. Це означає, що початковий "
 "код не є публічно доступним і не може бути перевіреним на безпечність."
 
-#: src/bz-full-view.c:527
+#: src/bz-full-view.c:594
 #, c-format
 msgid "Version %s"
 msgstr "Версія %s"
 
-#: src/bz-full-view.c:544
+#: src/bz-full-view.c:611
 msgid "No details for this release"
 msgstr "Без подробиць"
 
