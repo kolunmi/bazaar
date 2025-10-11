@@ -105,6 +105,7 @@ bz_sources = [
   'bz-result.c',
   'bz-review.c',
   'bz-screenshot.c',
+  'bz-screenshot-dialog.c',
   'bz-search-engine.c',
   'bz-search-result.c',
   'bz-search-widget.c',
@@ -124,6 +125,7 @@ bz_sources = [
   'bz-world-map.c',
   'bz-world-map-parser.c',
   'bz-yaml-parser.c',
+  'bz-zoom.c',
   'main.c',
 ]
 
@@ -161,6 +163,7 @@ blueprints = custom_target('blueprints',
     'bz-installed-page.blp',
     'bz-preferences-dialog.blp',
     'bz-progress-bar.blp',
+    'bz-screenshot-dialog.blp',
     'bz-search-widget.blp',
     'bz-section-view.blp',
     'bz-share-dialog.blp',
