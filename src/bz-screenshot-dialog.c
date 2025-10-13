@@ -32,6 +32,7 @@ struct _BzScreenshotDialog
 
   GListModel *screenshots;
   guint       current_index;
+  guint       initial_index;
 
   gboolean is_zoomed;
 };
@@ -92,16 +93,22 @@ static void
 populate_carousel (BzScreenshotDialog *self)
 {
   guint n_items = 0;
+  guint i = 0;
 
   if (self->screenshots == NULL)
     return;
 
   n_items = g_list_model_get_n_items (self->screenshots);
-  for (guint i = 0; i < n_items; i++)
+  if (n_items == 0)
+    return;
+
+  for (guint offset = 0; offset < n_items; offset++)
     {
       g_autoptr (BzAsyncTexture) async_texture = NULL;
       GtkWidget *zoom_widget                   = NULL;
       GtkWidget *screenshot                    = NULL;
+
+      i = (self->initial_index + offset) % n_items;
 
       async_texture = g_list_model_get_item (self->screenshots, i);
       if (async_texture == NULL)
@@ -173,22 +180,16 @@ bz_screenshot_dialog_constructed (GObject *object)
 {
   BzScreenshotDialog *self    = BZ_SCREENSHOT_DIALOG (object);
   GtkWidget          *page    = NULL;
-  guint               n_pages = 0;
 
   G_OBJECT_CLASS (bz_screenshot_dialog_parent_class)->constructed (object);
 
   populate_carousel (self);
 
-  n_pages = adw_carousel_get_n_pages (self->carousel);
-  if (self->current_index < n_pages)
-    {
-      page = adw_carousel_get_nth_page (self->carousel, self->current_index);
-      if (page != NULL)
-        {
-          adw_carousel_scroll_to (self->carousel, page, FALSE);
-          connect_zoom_signal (self, page);
-        }
-    }
+  self->current_index = 0;
+
+  page = adw_carousel_get_nth_page (self->carousel, 0);
+  if (page != NULL)
+    connect_zoom_signal (self, page);
 
   update_is_zoomed (self);
 }
@@ -207,7 +208,7 @@ bz_screenshot_dialog_set_property (GObject      *object,
       g_set_object (&self->screenshots, g_value_get_object (value));
       break;
     case PROP_CURRENT_INDEX:
-      self->current_index = g_value_get_uint (value);
+      self->initial_index = g_value_get_uint (value);
       break;
     case PROP_IS_ZOOMED:
     default:
@@ -275,16 +276,8 @@ reset_zoom_clicked (BzScreenshotDialog *self)
 static void
 previous_clicked (BzScreenshotDialog *self)
 {
-  guint      n_items = 0;
   guint      n_pages = 0;
   GtkWidget *page    = NULL;
-
-  if (self->screenshots == NULL)
-    return;
-
-  n_items = g_list_model_get_n_items (self->screenshots);
-  if (n_items == 0)
-    return;
 
   n_pages = adw_carousel_get_n_pages (self->carousel);
   if (n_pages == 0)
@@ -293,7 +286,7 @@ previous_clicked (BzScreenshotDialog *self)
   if (self->current_index > 0)
     page = adw_carousel_get_nth_page (self->carousel, self->current_index - 1);
   else
-    page = adw_carousel_get_nth_page (self->carousel, n_items - 1);
+    page = adw_carousel_get_nth_page (self->carousel, n_pages - 1);
 
   if (page != NULL)
     adw_carousel_scroll_to (self->carousel, page, TRUE);
@@ -302,22 +295,14 @@ previous_clicked (BzScreenshotDialog *self)
 static void
 next_clicked (BzScreenshotDialog *self)
 {
-  guint      n_items = 0;
   guint      n_pages = 0;
   GtkWidget *page    = NULL;
-
-  if (self->screenshots == NULL)
-    return;
-
-  n_items = g_list_model_get_n_items (self->screenshots);
-  if (n_items == 0)
-    return;
 
   n_pages = adw_carousel_get_n_pages (self->carousel);
   if (n_pages == 0)
     return;
 
-  if (self->current_index < n_items - 1)
+  if (self->current_index < n_pages - 1)
     page = adw_carousel_get_nth_page (self->carousel, self->current_index + 1);
   else
     page = adw_carousel_get_nth_page (self->carousel, 0);
@@ -372,15 +357,18 @@ copy_clicked (BzScreenshotDialog *self)
   GdkClipboard *clipboard;
   AdwToast     *toast   = NULL;
   guint         n_items = 0;
+  guint         actual_index = 0;
 
   if (self->screenshots == NULL)
     return;
 
   n_items = g_list_model_get_n_items (self->screenshots);
-  if (self->current_index >= n_items)
+  if (n_items == 0)
     return;
 
-  async_texture = g_list_model_get_item (self->screenshots, self->current_index);
+  actual_index = (self->initial_index + self->current_index) % n_items;
+
+  async_texture = g_list_model_get_item (self->screenshots, actual_index);
   if (async_texture == NULL)
     return;
 
