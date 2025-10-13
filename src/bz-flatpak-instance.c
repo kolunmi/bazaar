@@ -1551,13 +1551,15 @@ transaction_fiber (TransactionData *data)
 
   if (updates != NULL)
     {
+      g_autoptr (FlatpakTransaction) user_transaction = NULL;
+      g_autoptr (FlatpakTransaction) sys_transaction  = NULL;
+
       for (guint i = 0; i < updates->len; i++)
         {
-          BzFlatpakEntry  *entry                     = NULL;
-          FlatpakRef      *ref                       = NULL;
-          gboolean         is_user                   = FALSE;
-          g_autofree char *ref_fmt                   = NULL;
-          g_autoptr (FlatpakTransaction) transaction = NULL;
+          BzFlatpakEntry  *entry   = NULL;
+          FlatpakRef      *ref     = NULL;
+          gboolean         is_user = FALSE;
+          g_autofree char *ref_fmt = NULL;
 
           entry   = g_ptr_array_index (updates, i);
           ref     = bz_flatpak_entry_get_ref (entry);
@@ -1576,23 +1578,34 @@ transaction_fiber (TransactionData *data)
                   ref_fmt);
             }
 
-          transaction = flatpak_transaction_new_for_installation (
-              is_user
-                  ? instance->user
-                  : instance->system,
-              cancellable, &local_error);
-          if (transaction == NULL)
+          if (is_user && user_transaction == NULL)
+            user_transaction = flatpak_transaction_new_for_installation (
+                instance->user,
+                cancellable,
+                &local_error);
+          else if (!is_user && sys_transaction == NULL)
+            sys_transaction = flatpak_transaction_new_for_installation (
+                instance->system,
+                cancellable,
+                &local_error);
+          if ((is_user && user_transaction == NULL) ||
+              (!is_user && sys_transaction == NULL))
             {
               dex_channel_close_send (channel);
               return dex_future_new_reject (
                   BZ_FLATPAK_ERROR,
                   BZ_FLATPAK_ERROR_TRANSACTION_FAILURE,
-                  "Failed to initialize potential transaction for system installation: %s",
+                  "Failed to initialize potential transaction for installation: %s",
                   local_error->message);
             }
 
+          /* Put updates in one transaction to prevent dependency
+             race-conditions, since the update list is most likely coming from
+             this instance */
           result = flatpak_transaction_add_update (
-              transaction,
+              is_user
+                  ? user_transaction
+                  : sys_transaction,
               ref_fmt,
               NULL,
               NULL,
@@ -1608,12 +1621,16 @@ transaction_fiber (TransactionData *data)
                   local_error->message);
             }
 
-          g_ptr_array_add (transactions, g_steal_pointer (&transaction));
           g_ptr_array_add (entries, g_object_ref (entry));
           g_hash_table_replace (data->ref_to_entry_hash,
                                 g_steal_pointer (&ref_fmt),
                                 g_object_ref (entry));
         }
+
+      if (user_transaction != NULL)
+        g_ptr_array_add (transactions, g_steal_pointer (&user_transaction));
+      if (sys_transaction != NULL)
+        g_ptr_array_add (transactions, g_steal_pointer (&sys_transaction));
     }
 
   if (removals != NULL)
@@ -1654,7 +1671,7 @@ transaction_fiber (TransactionData *data)
               return dex_future_new_reject (
                   BZ_FLATPAK_ERROR,
                   BZ_FLATPAK_ERROR_TRANSACTION_FAILURE,
-                  "Failed to initialize potential transaction for system installation: %s",
+                  "Failed to initialize potential transaction for installation: %s",
                   local_error->message);
             }
 
