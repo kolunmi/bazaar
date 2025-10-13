@@ -604,15 +604,15 @@ msgstr "Поділитися цим застосунком"
 
 #: src/bz-full-view.blp:375
 msgid "Excludes shared components"
-msgstr "Усунути спільні компоненти"
+msgstr "Без спільних компонентів"
 
 #: src/bz-full-view.blp:431
 msgid "Free Software"
-msgstr "Вільні"
+msgstr "Вільна ліцензія"
 
 #: src/bz-full-view.blp:473
 msgid "Proprietary"
-msgstr "Власницькі"
+msgstr "Власницька ліцензія"
 
 #: src/bz-full-view.blp:484
 msgid "Source code may not be available"
@@ -888,9 +888,10 @@ msgstr "Копіювати посилання"
 msgid "Open Link"
 msgstr "Відкрити посилання"
 
+# NOTE: https://slovotvir.org.ua/words/taimlain
 #: src/bz-stats-dialog.blp:26
 msgid "Timeline"
-msgstr "Стрічка подій"
+msgstr "Часоряд"
 
 #: src/bz-stats-dialog.blp:31
 msgid "Installs:"
