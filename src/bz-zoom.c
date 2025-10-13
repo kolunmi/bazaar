@@ -42,7 +42,7 @@ struct _BzZoom
   double drag_start_x;
   double drag_start_y;
 
-  gboolean   is_dragging;
+  gboolean is_dragging;
 
   AdwAnimation *zoom_animation;
   double        target_zoom;
@@ -194,10 +194,10 @@ on_scroll (BzZoom                   *self,
            double                    dy,
            GtkEventControllerScroll *controller)
 {
-  GdkEvent     *event;
-  GdkDevice    *device;
+  GdkEvent      *event;
+  GdkDevice     *device;
   GdkInputSource source;
-  double        zoom_factor;
+  double         zoom_factor;
 
   event = gtk_event_controller_get_current_event (GTK_EVENT_CONTROLLER (controller));
   if (event == NULL)

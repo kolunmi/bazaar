@@ -93,7 +93,7 @@ static void
 populate_carousel (BzScreenshotDialog *self)
 {
   guint n_items = 0;
-  guint i = 0;
+  guint i       = 0;
 
   if (self->screenshots == NULL)
     return;
@@ -178,8 +178,8 @@ connect_zoom_signal (BzScreenshotDialog *self,
 static void
 bz_screenshot_dialog_constructed (GObject *object)
 {
-  BzScreenshotDialog *self    = BZ_SCREENSHOT_DIALOG (object);
-  GtkWidget          *page    = NULL;
+  BzScreenshotDialog *self = BZ_SCREENSHOT_DIALOG (object);
+  GtkWidget          *page = NULL;
 
   G_OBJECT_CLASS (bz_screenshot_dialog_parent_class)->constructed (object);
 
@@ -355,8 +355,8 @@ copy_clicked (BzScreenshotDialog *self)
   g_autoptr (BzAsyncTexture) async_texture = NULL;
   g_autoptr (GdkTexture) texture           = NULL;
   GdkClipboard *clipboard;
-  AdwToast     *toast   = NULL;
-  guint         n_items = 0;
+  AdwToast     *toast        = NULL;
+  guint         n_items      = 0;
   guint         actual_index = 0;
 
   if (self->screenshots == NULL)
