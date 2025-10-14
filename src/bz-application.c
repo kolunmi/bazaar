@@ -201,6 +201,7 @@ bz_application_command_line (GApplication            *app,
   g_autoptr (GError) local_error            = NULL;
   gint argc                                 = 0;
   g_auto (GStrv) argv                       = NULL;
+  gboolean help                             = FALSE;
   gboolean no_window                        = FALSE;
   g_auto (GStrv) blocklists_strv            = NULL;
   g_autoptr (GtkStringList) blocklists      = NULL;
@@ -209,6 +210,7 @@ bz_application_command_line (GApplication            *app,
   g_auto (GStrv) locations                  = NULL;
 
   GOptionEntry main_entries[] = {
+    { "help", 0, 0, G_OPTION_ARG_NONE, &help, "Print help" },
     { "no-window", 0, 0, G_OPTION_ARG_NONE, &no_window, "Ensure the service is running without creating a new window" },
     { "extra-blocklist", 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &blocklists_strv, "Add an extra blocklist to read from" },
     { "extra-curated-config", 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &content_configs_strv, "Add an extra yaml file with which to configure the app browser" },
@@ -233,12 +235,26 @@ bz_application_command_line (GApplication            *app,
       argv_shallow = g_memdup2 (argv, sizeof (*argv) * argc);
 
       context = g_option_context_new ("- an app center for GNOME");
-      g_option_context_set_help_enabled (context, TRUE);
+      g_option_context_set_help_enabled (context, FALSE);
       g_option_context_add_main_entries (context, main_entries, NULL);
       if (!g_option_context_parse (context, &argc, &argv_shallow, &local_error))
         {
           g_application_command_line_printerr (cmdline, "%s\n", local_error->message);
           return EXIT_FAILURE;
+        }
+
+      if (help)
+        {
+          g_autofree char *help_text = NULL;
+
+          if (self->running)
+            g_application_command_line_printerr (cmdline, "The Bazaar service is running.\n\n");
+          else
+            g_application_command_line_printerr (cmdline, "The Bazaar service is not running.\n\n");
+
+          help_text = g_option_context_get_help (context, TRUE, NULL);
+          g_application_command_line_printerr (cmdline, "%s\n", help_text);
+          return EXIT_SUCCESS;
         }
     }
 
