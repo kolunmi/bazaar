@@ -83,10 +83,6 @@ append_text (BzAppstreamDescriptionRender *self,
              int                           idx,
              int                           depth);
 
-static char *
-fixup_string (BzAppstreamDescriptionRender *self,
-              const char                   *text);
-
 static void
 bz_appstream_description_render_dispose (GObject *object)
 {
@@ -361,16 +357,23 @@ append_text (BzAppstreamDescriptionRender *self,
              int                           idx,
              int                           depth)
 {
-  g_autofree char *stripped = NULL;
-
-  stripped = fixup_string (self, text);
   if (markup != NULL)
-    g_string_append (markup, stripped);
+    {
+      g_autofree char *escaped = NULL;
+
+      escaped = g_markup_escape_text (text, -1);
+      g_string_append (markup, escaped);
+    }
   else
     {
-      GtkWidget *child = NULL;
+      g_auto (GStrv) tokens  = NULL;
+      g_autofree char *fixed = NULL;
+      GtkWidget       *child = NULL;
 
-      child = gtk_label_new (stripped);
+      tokens = g_regex_split (self->split_regex, text, G_REGEX_MATCH_DEFAULT);
+      fixed  = g_strjoinv (" ", tokens);
+
+      child = gtk_label_new (fixed);
       gtk_label_set_use_markup (GTK_LABEL (child), TRUE);
       gtk_label_set_wrap (GTK_LABEL (child), TRUE);
       gtk_label_set_wrap_mode (GTK_LABEL (child), PANGO_WRAP_WORD_CHAR);
@@ -388,7 +391,7 @@ append_text (BzAppstreamDescriptionRender *self,
 
               prefix_text = g_strdup_printf ("%d", idx);
               prefix      = gtk_label_new (prefix_text);
-              gtk_widget_add_css_class (prefix, "subtitle");
+              gtk_widget_add_css_class (prefix, "caption");
             }
           else
             prefix = gtk_image_new_from_icon_name ("circle-outline-thick-symbolic");
@@ -408,18 +411,6 @@ append_text (BzAppstreamDescriptionRender *self,
 
       gtk_widget_set_margin_start (child, 20 * depth);
     }
-}
-
-static char *
-fixup_string (BzAppstreamDescriptionRender *self,
-              const char                   *text)
-{
-  g_auto (GStrv) tokens = NULL;
-  g_autofree char *raw  = NULL;
-
-  tokens = g_regex_split (self->split_regex, text, G_REGEX_MATCH_DEFAULT);
-  raw    = g_strjoinv (" ", tokens);
-  return g_markup_escape_text (raw, -1);
 }
 
 /* End of bz-appstream-description-render.c */
