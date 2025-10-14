@@ -940,56 +940,57 @@ fiber_check_for_updates (BzApplication *self)
       bz_backend_retrieve_update_ids (BZ_BACKEND (self->flatpak), NULL),
       &local_error);
   window = gtk_application_get_active_window (GTK_APPLICATION (self));
-  if (update_ids != NULL)
+  if (update_ids != NULL &&
+      update_ids->len > 0)
     {
-      if (update_ids->len > 0)
-        {
-          g_autoptr (GPtrArray) futures = NULL;
-          g_autoptr (GListStore) store  = NULL;
+      g_autoptr (GPtrArray) futures = NULL;
+      g_autoptr (GListStore) store  = NULL;
 
-          futures = g_ptr_array_new_with_free_func (dex_unref);
-          for (guint i = 0; i < update_ids->len; i++)
+      futures = g_ptr_array_new_with_free_func (dex_unref);
+      for (guint i = 0; i < update_ids->len; i++)
+        {
+          const char *unique_id = NULL;
+
+          unique_id = g_ptr_array_index (update_ids, i);
+          g_ptr_array_add (futures, bz_entry_cache_manager_get (self->cache, unique_id));
+        }
+
+      dex_await (
+          dex_future_allv ((DexFuture *const *) futures->pdata, futures->len),
+          &local_error);
+
+      store = g_list_store_new (BZ_TYPE_ENTRY);
+      for (guint i = 0; i < futures->len; i++)
+        {
+          DexFuture    *future = NULL;
+          const GValue *value  = NULL;
+
+          future = g_ptr_array_index (futures, i);
+          value  = dex_future_get_value (future, &local_error);
+
+          if (value != NULL)
+            g_list_store_append (store, g_value_get_object (value));
+          else
             {
               const char *unique_id = NULL;
 
               unique_id = g_ptr_array_index (update_ids, i);
-              g_ptr_array_add (futures, bz_entry_cache_manager_get (self->cache, unique_id));
+              g_critical ("%s could not be resolved for the update list and thus will not be included: %s",
+                          unique_id, local_error->message);
+              g_clear_pointer (&local_error, g_error_free);
             }
-
-          dex_await (
-              dex_future_allv ((DexFuture *const *) futures->pdata, futures->len),
-              &local_error);
-
-          store = g_list_store_new (BZ_TYPE_ENTRY);
-          for (guint i = 0; i < futures->len; i++)
-            {
-              DexFuture    *future = NULL;
-              const GValue *value  = NULL;
-
-              future = g_ptr_array_index (futures, i);
-              value  = dex_future_get_value (future, &local_error);
-
-              if (value != NULL)
-                g_list_store_append (store, g_value_get_object (value));
-              else
-                {
-                  const char *unique_id = NULL;
-
-                  unique_id = g_ptr_array_index (update_ids, i);
-                  g_critical ("%s could not be resolved for the update list and thus will not be included: %s",
-                              unique_id, local_error->message);
-                  g_clear_pointer (&local_error, g_error_free);
-                }
-            }
-
-          bz_state_info_set_available_updates (self->state, G_LIST_MODEL (store));
-          // if (window != NULL)
-          //   bz_window_push_update_dialog (BZ_WINDOW (window));
         }
+
+      if (g_list_model_get_n_items (G_LIST_MODEL (store)) > 0)
+        bz_state_info_set_available_updates (self->state, G_LIST_MODEL (store));
     }
-  else if (window != NULL)
-    bz_show_error_for_widget (GTK_WIDGET (window), local_error->message);
-  g_clear_pointer (&local_error, g_error_free);
+  else if (local_error != NULL)
+    {
+      g_critical ("Failed to check for updates: %s", local_error->message);
+
+      if (window != NULL)
+        bz_show_error_for_widget (GTK_WIDGET (window), local_error->message);
+    }
 
   bz_state_info_set_checking_for_updates (self->state, FALSE);
 }
