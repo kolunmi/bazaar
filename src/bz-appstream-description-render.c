@@ -378,23 +378,29 @@ append_text (BzAppstreamDescriptionRender *self,
       gtk_label_set_wrap (GTK_LABEL (child), TRUE);
       gtk_label_set_wrap_mode (GTK_LABEL (child), PANGO_WRAP_WORD_CHAR);
       gtk_label_set_xalign (GTK_LABEL (child), 0.0);
+      gtk_label_set_selectable (GTK_LABEL (child), TRUE);
 
       if (kind == LIST_ITEM)
         {
           GtkWidget *box    = NULL;
           GtkWidget *prefix = NULL;
 
-          box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 10);
+          box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
           if (parent_kind == ORDERED_LIST)
             {
               g_autofree char *prefix_text = NULL;
-
-              prefix_text = g_strdup_printf ("%d", idx);
+              prefix_text = g_strdup_printf ("%d)", idx + 1);
               prefix      = gtk_label_new (prefix_text);
               gtk_widget_add_css_class (prefix, "caption");
             }
           else
-            prefix = gtk_image_new_from_icon_name ("circle-outline-thick-symbolic");
+            {
+              prefix = gtk_image_new_from_icon_name ("circle-filled-symbolic");
+              gtk_image_set_pixel_size (GTK_IMAGE (prefix), 6);
+              gtk_widget_set_margin_top (prefix, 6);
+            }
+          gtk_widget_add_css_class (prefix, "dimmed");
+          gtk_widget_set_valign (prefix, GTK_ALIGN_START);
 
           gtk_box_append (GTK_BOX (box), prefix);
           gtk_box_append (GTK_BOX (box), child);
@@ -409,7 +415,7 @@ append_text (BzAppstreamDescriptionRender *self,
           g_ptr_array_add (self->box_children, child);
         }
 
-      gtk_widget_set_margin_start (child, 20 * depth);
+      gtk_widget_set_margin_start (child, 10 * depth);
     }
 }
 
