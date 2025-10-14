@@ -296,22 +296,8 @@ template $BzFullView: Adw.Bin {
                     label: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.description;
                   }
 
-                  Label {
-                    styles [
-                      "body",
-                    ]
-
-                    margin-start: 5;
-                    margin-end: 10;
-                    margin-top: 0;
-                    margin-bottom: 10;
-                    valign: start;
-                    xalign: 0;
-                    wrap: true;
-                    wrap-mode: word_char;
-                    use-markup: true;
-                    selectable: true;
-                    label: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.long-description;
+                  $BzAppstreamDescriptionRender {
+                    appstream-description: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.long-description;
                   }
 
                   Box context_bar {

@@ -331,7 +331,7 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
   const char      *project_group               = NULL;
   const char      *developer                   = NULL;
   const char      *developer_id                = NULL;
-  g_autofree char *long_description            = NULL;
+  const char      *long_description            = NULL;
   const char      *remote_name                 = NULL;
   const char      *project_url                 = NULL;
   g_autoptr (GPtrArray) as_search_tokens       = NULL;
@@ -433,13 +433,12 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
 
   if (component != NULL)
     {
-      const char    *long_description_raw = NULL;
-      AsDeveloper   *developer_obj        = NULL;
-      GPtrArray     *screenshots          = NULL;
-      AsReleaseList *releases             = NULL;
-      GPtrArray     *releases_arr         = NULL;
-      GPtrArray     *icons                = NULL;
-      AsBranding    *branding             = NULL;
+      AsDeveloper   *developer_obj = NULL;
+      GPtrArray     *screenshots   = NULL;
+      AsReleaseList *releases      = NULL;
+      GPtrArray     *releases_arr  = NULL;
+      GPtrArray     *icons         = NULL;
+      AsBranding    *branding      = NULL;
 
       title = as_component_get_name (component);
       if (title == NULL)
@@ -460,10 +459,7 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
           developer_id = as_developer_get_id (developer_obj);
         }
 
-      long_description_raw = as_component_get_description (component);
-      long_description     = parse_appstream_to_markdown (long_description_raw, error);
-      if (long_description_raw != NULL && long_description == NULL)
-        return NULL;
+      long_description = as_component_get_description (component);
 
       screenshots = as_component_get_screenshots_all (component);
       if (screenshots != NULL)

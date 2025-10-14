@@ -25,6 +25,7 @@
 
 #include "bz-addons-dialog.h"
 #include "bz-app-size-dialog.h"
+#include "bz-appstream-description-render.h"
 #include "bz-decorated-screenshot.h"
 #include "bz-dynamic-list-view.h"
 #include "bz-env.h"
@@ -848,6 +849,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
       G_TYPE_FROM_CLASS (klass),
       g_cclosure_marshal_VOID__OBJECTv);
 
+  g_type_ensure (BZ_TYPE_APPSTREAM_DESCRIPTION_RENDER);
   g_type_ensure (BZ_TYPE_DECORATED_SCREENSHOT);
   g_type_ensure (BZ_TYPE_DYNAMIC_LIST_VIEW);
   g_type_ensure (BZ_TYPE_ENTRY);
