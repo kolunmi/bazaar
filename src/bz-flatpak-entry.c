@@ -86,14 +86,6 @@ enum
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
 
-static char *
-parse_appstream_to_markdown (const char *description_raw,
-                             GError    **error);
-
-static inline void
-append_markup_escaped (GString    *string,
-                       const char *append);
-
 static void
 clear_entry (BzFlatpakEntry *self);
 
@@ -586,18 +578,16 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
 
           for (guint i = 0; i < releases_arr->len; i++)
             {
-              AsRelease       *as_release              = NULL;
-              GPtrArray       *as_issues               = NULL;
-              const char      *release_description_raw = NULL;
-              g_autofree char *release_description     = NULL;
-              g_autoptr (GListStore) issues            = NULL;
-              g_autoptr (BzRelease) release            = NULL;
+              AsRelease  *as_release          = NULL;
+              GPtrArray  *as_issues           = NULL;
+              const char *release_description = NULL;
+              g_autoptr (GListStore) issues   = NULL;
+              g_autoptr (BzRelease) release   = NULL;
 
               as_release = g_ptr_array_index (releases_arr, i);
               as_issues  = as_release_get_issues (as_release);
 
-              release_description_raw = as_release_get_description (as_release);
-              release_description     = parse_appstream_to_markdown (release_description_raw, NULL);
+              release_description = as_release_get_description (as_release);
 
               if (as_issues != NULL && as_issues->len > 0)
                 {
@@ -950,151 +940,6 @@ bz_flatpak_entry_launch (BzFlatpakEntry    *self,
       flatpak_ref_get_commit (ref),
       NULL, error);
 #endif
-}
-
-static void
-compile_appstream_description (XbNode  *node,
-                               GString *string,
-                               int      parent_kind,
-                               int      idx)
-{
-  XbNode     *child   = NULL;
-  const char *element = NULL;
-  const char *text    = NULL;
-  int         kind    = NO_ELEMENT;
-
-  child   = xb_node_get_child (node);
-  element = xb_node_get_element (node);
-  text    = xb_node_get_text (node);
-
-  if (element != NULL)
-    {
-      if (g_strcmp0 (element, "p") == 0)
-        kind = PARAGRAPH;
-      else if (g_strcmp0 (element, "ol") == 0)
-        kind = ORDERED_LIST;
-      else if (g_strcmp0 (element, "ul") == 0)
-        kind = UNORDERED_LIST;
-      else if (g_strcmp0 (element, "li") == 0)
-        kind = LIST_ITEM;
-      else if (g_strcmp0 (element, "code") == 0)
-        kind = CODE;
-      else if (g_strcmp0 (element, "em") == 0)
-        kind = EMPHASIS;
-    }
-
-  if (string->len > 0 &&
-      (kind == PARAGRAPH ||
-       kind == ORDERED_LIST ||
-       kind == UNORDERED_LIST))
-    g_string_append (string, "\n");
-
-  if (kind == EMPHASIS)
-    g_string_append (string, "<b>");
-  else if (kind == CODE)
-    g_string_append (string, "<tt>");
-
-  if (kind == LIST_ITEM)
-    {
-      switch (parent_kind)
-        {
-        case ORDERED_LIST:
-          g_string_append_printf (string, "%d. ", idx);
-          break;
-        case UNORDERED_LIST:
-          g_string_append (string, "• ");
-          break;
-        default:
-          break;
-        }
-    }
-
-  if (text != NULL)
-    append_markup_escaped (string, text);
-
-  for (int i = 0; child != NULL; i++)
-    {
-      const char *tail = NULL;
-      XbNode     *next = NULL;
-
-      compile_appstream_description (child, string, kind, i);
-
-      tail = xb_node_get_tail (child);
-      if (tail != NULL)
-        append_markup_escaped (string, tail);
-
-      next = xb_node_get_next (child);
-      g_object_unref (child);
-      child = next;
-    }
-
-  if (kind == EMPHASIS)
-    g_string_append (string, "</b>");
-  else if (kind == CODE)
-    g_string_append (string, "</tt>");
-  else
-    g_string_append (string, "\n");
-}
-
-static char *
-parse_appstream_to_markdown (const char *description_raw,
-                             GError    **error)
-{
-  g_autoptr (XbSilo) silo          = NULL;
-  g_autoptr (XbNode) root          = NULL;
-  g_autoptr (GString) string       = NULL;
-  g_autoptr (GRegex) cleanup_regex = NULL;
-  g_autofree char *cleaned         = NULL;
-
-  if (description_raw == NULL)
-    return NULL;
-
-  silo = xb_silo_new_from_xml (description_raw, error);
-  if (silo == NULL)
-    return NULL;
-
-  root   = xb_silo_get_root (silo);
-  string = g_string_new (NULL);
-
-  cleanup_regex = g_regex_new (
-      "^ +| +$|\\t+|\\A\\s+|\\s+\\z",
-      G_REGEX_MULTILINE,
-      G_REGEX_MATCH_DEFAULT,
-      NULL);
-  g_assert (cleanup_regex != NULL);
-
-  for (int i = 0; root != NULL; i++)
-    {
-      const char *tail = NULL;
-      XbNode     *next = NULL;
-
-      compile_appstream_description (root, string, NO_ELEMENT, i);
-
-      tail = xb_node_get_tail (root);
-      if (tail != NULL)
-        append_markup_escaped (string, tail);
-
-      next = xb_node_get_next (root);
-      g_object_unref (root);
-      root = next;
-    }
-
-  g_string_replace (string, "  ", "", 0);
-  cleaned = g_regex_replace (
-      cleanup_regex, string->str, -1, 0,
-      "", G_REGEX_MATCH_DEFAULT, NULL);
-
-  return g_steal_pointer (&cleaned);
-}
-
-static inline void
-append_markup_escaped (GString    *string,
-                       const char *append)
-{
-  g_autofree char *escaped = NULL;
-
-  escaped = g_markup_escape_text (append, -1);
-  g_string_append (string, escaped);
 }
 
 static void

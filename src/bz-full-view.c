@@ -570,15 +570,15 @@ create_release_row (const char *version,
                     const char *description,
                     guint64     timestamp)
 {
-  AdwActionRow *row               = NULL;
-  GtkBox       *content_box       = NULL;
-  GtkBox       *header_box        = NULL;
-  GtkLabel     *version_label     = NULL;
-  GtkLabel     *date_label        = NULL;
-  GtkLabel     *description_label = NULL;
-  g_autoptr (GDateTime) date      = NULL;
-  g_autofree char *date_str       = NULL;
-  g_autofree char *version_text   = NULL;
+  AdwActionRow                 *row                = NULL;
+  GtkBox                       *content_box        = NULL;
+  GtkBox                       *header_box         = NULL;
+  GtkLabel                     *version_label      = NULL;
+  GtkLabel                     *date_label         = NULL;
+  BzAppstreamDescriptionRender *description_widget = NULL;
+  g_autoptr (GDateTime) date                       = NULL;
+  g_autofree char *date_str                        = NULL;
+  g_autofree char *version_text                    = NULL;
 
   date_str = format_timestamp (NULL, timestamp);
 
@@ -609,25 +609,23 @@ create_release_row (const char *version,
 
   gtk_box_append (content_box, GTK_WIDGET (header_box));
 
-  description_label = GTK_LABEL (gtk_label_new (
-      (description && *description) ? description : _ ("No details for this release")));
-  gtk_widget_set_halign (GTK_WIDGET (description_label), GTK_ALIGN_FILL);
-  gtk_label_set_xalign (description_label, 0.0);
-
   if (description && *description)
     {
-      gtk_widget_set_margin_top (GTK_WIDGET (description_label), 10);
-      gtk_label_set_wrap (description_label, TRUE);
-      gtk_label_set_use_markup (description_label, TRUE);
-      gtk_label_set_selectable (description_label, TRUE);
+      description_widget = bz_appstream_description_render_new ();
+      bz_appstream_description_render_set_appstream_description (description_widget, description);
+      bz_appstream_description_render_set_selectable (description_widget, TRUE);
+      gtk_widget_set_margin_top (GTK_WIDGET (description_widget), 10);
     }
   else
     {
-      gtk_widget_set_margin_top (GTK_WIDGET (description_label), 5);
-      gtk_widget_add_css_class (GTK_WIDGET (description_label), "dim-label");
+      GtkLabel *fallback_label = GTK_LABEL (gtk_label_new (_ ("No details for this release")));
+      gtk_widget_set_margin_top (GTK_WIDGET (fallback_label), 5);
+      gtk_widget_add_css_class (GTK_WIDGET (fallback_label), "dim-label");
+      gtk_label_set_xalign (fallback_label, 0.0);
+      description_widget = (BzAppstreamDescriptionRender *) fallback_label;
     }
 
-  gtk_box_append (content_box, GTK_WIDGET (description_label));
+  gtk_box_append (content_box, GTK_WIDGET (description_widget));
   gtk_list_box_row_set_child (GTK_LIST_BOX_ROW (row), GTK_WIDGET (content_box));
 
   return GTK_WIDGET (row);

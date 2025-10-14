@@ -38,7 +38,7 @@
 
     <file preprocess="xml-stripblanks">icons/scalable/actions/app-installed-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/check-plain-symbolic.svg</file>
-    <file preprocess="xml-stripblanks">icons/scalable/actions/circle-outline-thick-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/circle-filled-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/community-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/connected-squares-x-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/copy-symbolic.svg</file>
