@@ -117,7 +117,7 @@ rpm -qi bazaar
 ```
 #### Verbose output
 ```
-G_MESSAGES_DEBUG=all bazaar window --auto-service
+G_MESSAGES_DEBUG=all bazaar
 ```
 
 ## Sign Your Commits
