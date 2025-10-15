@@ -41,27 +41,17 @@ template $BzFlathubPage: Adw.Bin {
              orientation: vertical;
              spacing: 15;
 
-             $BzDynamicListView {
-               styles [
-                 "flathub-page-section",
-               ]
-
-               margin-top: 16;
-               hexpand: true;
-               max-children-per-line:3;
-               scroll: false;
-               noscroll-kind: flow-box;
-               child-type: "BzDetailedAppTile";
-               child-prop: "group";
-               model: SliceListModel {
-                 offset: 0;
-                 size: 6;
-                 model: bind template.state as <$BzFlathubState>.apps_of_the_day_week;
-               };
-
-               bind-widget => $bind_widget_cb(template);
-               unbind-widget => $unbind_widget_cb(template);
-             }
+             $BzFeaturedCarousel {
+                margin-start:8;
+                margin-end:8;
+                styles [
+                  "flathub-page-section",
+                ]
+                margin-top: 16;
+                hexpand: true;
+                model: bind template.state as <$BzFlathubState>.apps_of_the_day_week;
+                group-clicked => $featured_carousel_group_clicked_cb(template);
+              }
 
              Box {
                orientation: vertical;

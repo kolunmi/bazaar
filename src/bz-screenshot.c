@@ -21,6 +21,9 @@
 #include "bz-screenshot.h"
 #include "bz-async-texture.h"
 
+#define TOP_HALF_FIXED_WIDTH  700
+#define TOP_HALF_FIXED_HEIGHT 275
+
 struct _BzScreenshot
 {
   GtkWidget parent_instance;
@@ -29,6 +32,7 @@ struct _BzScreenshot
   double        focus_x;
   double        focus_y;
   gboolean      rounded_corners;
+  gboolean      top_half;
 };
 
 G_DEFINE_FINAL_TYPE (BzScreenshot, bz_screenshot, GTK_TYPE_WIDGET)
@@ -41,6 +45,7 @@ enum
   PROP_FOCUS_X,
   PROP_FOCUS_Y,
   PROP_ROUNDED_CORNERS,
+  PROP_TOP_HALF,
 
   LAST_PROP
 };
@@ -97,6 +102,9 @@ bz_screenshot_get_property (GObject    *object,
     case PROP_ROUNDED_CORNERS:
       g_value_set_boolean (value, bz_screenshot_get_rounded_corners (self));
       break;
+    case PROP_TOP_HALF:
+      g_value_set_boolean (value, bz_screenshot_get_top_half (self));
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -124,6 +132,9 @@ bz_screenshot_set_property (GObject      *object,
     case PROP_ROUNDED_CORNERS:
       bz_screenshot_set_rounded_corners (self, g_value_get_boolean (value));
       break;
+    case PROP_TOP_HALF:
+      bz_screenshot_set_top_half (self, g_value_get_boolean (value));
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -132,6 +143,11 @@ bz_screenshot_set_property (GObject      *object,
 static GtkSizeRequestMode
 bz_screenshot_get_request_mode (GtkWidget *widget)
 {
+  BzScreenshot *self = BZ_SCREENSHOT (widget);
+
+  if (self->top_half)
+    return GTK_SIZE_REQUEST_CONSTANT_SIZE;
+
   return GTK_SIZE_REQUEST_HEIGHT_FOR_WIDTH;
 }
 
@@ -149,33 +165,49 @@ bz_screenshot_measure (GtkWidget     *widget,
   if (self->paintable == NULL)
     return;
 
-  if (orientation == GTK_ORIENTATION_VERTICAL)
+  if (self->top_half)
     {
-      int    intrinsic_height;
-      double intrinsic_aspect_rato;
-
-      intrinsic_height      = gdk_paintable_get_intrinsic_height (self->paintable);
-      intrinsic_aspect_rato = gdk_paintable_get_intrinsic_aspect_ratio (self->paintable);
-
-      if (for_size >= 0 && intrinsic_aspect_rato > 0.0)
+      if (orientation == GTK_ORIENTATION_HORIZONTAL)
         {
-          double result;
-
-          result = ceil ((double) for_size / intrinsic_aspect_rato);
-
-          *minimum = (int) MIN (intrinsic_height, result);
-          *natural = (int) MIN (intrinsic_height, result);
+          *minimum = TOP_HALF_FIXED_WIDTH;
+          *natural = TOP_HALF_FIXED_WIDTH;
         }
       else
         {
-          *minimum = 0;
-          *natural = intrinsic_height;
+          *minimum = TOP_HALF_FIXED_HEIGHT;
+          *natural = TOP_HALF_FIXED_HEIGHT;
         }
     }
   else
     {
-      *minimum = 0;
-      *natural = gdk_paintable_get_intrinsic_width (self->paintable);
+      if (orientation == GTK_ORIENTATION_VERTICAL)
+        {
+          int    intrinsic_height;
+          double intrinsic_aspect_ratio;
+
+          intrinsic_height       = gdk_paintable_get_intrinsic_height (self->paintable);
+          intrinsic_aspect_ratio = gdk_paintable_get_intrinsic_aspect_ratio (self->paintable);
+
+          if (for_size >= 0 && intrinsic_aspect_ratio > 0.0)
+            {
+              double result;
+
+              result = ceil ((double) for_size / intrinsic_aspect_ratio);
+
+              *minimum = (int) MIN (intrinsic_height, result);
+              *natural = (int) MIN (intrinsic_height, result);
+            }
+          else
+            {
+              *minimum = 0;
+              *natural = intrinsic_height;
+            }
+        }
+      else
+        {
+          *minimum = 0;
+          *natural = gdk_paintable_get_intrinsic_width (self->paintable);
+        }
     }
 }
 
@@ -196,32 +228,45 @@ bz_screenshot_snapshot (GtkWidget   *widget,
   if (self->paintable == NULL)
     return;
 
-  widget_width  = gtk_widget_get_width (widget);
-  widget_height = gtk_widget_get_height (widget);
+  widget_width     = gtk_widget_get_width (widget);
+  widget_height    = gtk_widget_get_height (widget);
 
   paintable_aspect = gdk_paintable_get_intrinsic_aspect_ratio (self->paintable);
 
-  if (paintable_aspect > 0.0)
+  if (self->top_half)
     {
-      scaled_w = widget_width;
-      scaled_h = scaled_w / paintable_aspect;
+      scaled_w = TOP_HALF_FIXED_WIDTH;
 
-      if (scaled_h > widget_height)
-        {
-          scaled_h = widget_height;
-          scaled_w = scaled_h * paintable_aspect;
-        }
+      if (paintable_aspect > 0.0)
+        scaled_h = scaled_w / paintable_aspect;
+      else
+        scaled_h = widget_height * 2.0;
+
+      x = (widget_width - scaled_w) / 2.0;
+      y = 0;
     }
   else
     {
-      scaled_w = widget_width;
-      scaled_h = widget_height;
+      if (paintable_aspect > 0.0)
+        {
+          scaled_w = widget_width;
+          scaled_h = scaled_w / paintable_aspect;
+
+          if (scaled_h > widget_height)
+            {
+              scaled_h = widget_height;
+              scaled_w = scaled_h * paintable_aspect;
+            }
+        }
+      else
+        {
+          scaled_w = widget_width;
+          scaled_h = widget_height;
+        }
+
+      x = (widget_width - scaled_w) / 2.0;
+      y = (widget_height - scaled_h) / 2.0;
     }
-
-  x = (widget_width - scaled_w) / 2.0;
-  y = (widget_height - scaled_h) / 2.0;
-
-  rect.bounds = GRAPHENE_RECT_INIT (0, 0, widget_width, widget_height);
 
   if (self->rounded_corners)
     {
@@ -234,14 +279,28 @@ bz_screenshot_snapshot (GtkWidget   *widget,
       rect.corner[3].width  = 10.0;
       rect.corner[3].height = 10.0;
 
-      gtk_snapshot_push_rounded_clip (snapshot, &rect);
+      if (self->top_half)
+        {
+          rect.bounds = GRAPHENE_RECT_INIT (x, y, scaled_w, scaled_h);
+          gtk_snapshot_push_rounded_clip (snapshot, &rect);
+          gtk_snapshot_push_clip (snapshot, &GRAPHENE_RECT_INIT (0, 0, widget_width, widget_height));
+        }
+      else
+        {
+          rect.bounds = GRAPHENE_RECT_INIT (0, 0, widget_width, widget_height);
+          gtk_snapshot_push_rounded_clip (snapshot, &rect);
+        }
     }
 
   gtk_snapshot_translate (snapshot, &GRAPHENE_POINT_INIT (x, y));
   gdk_paintable_snapshot (self->paintable, snapshot, scaled_w, scaled_h);
 
   if (self->rounded_corners)
-    gtk_snapshot_pop (snapshot);
+    {
+      gtk_snapshot_pop (snapshot);
+      if (self->top_half)
+        gtk_snapshot_pop (snapshot);
+    }
 }
 
 static void
@@ -282,6 +341,13 @@ bz_screenshot_class_init (BzScreenshotClass *klass)
           TRUE,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
+  props[PROP_TOP_HALF] =
+      g_param_spec_boolean (
+          "top-half",
+          NULL, NULL,
+          FALSE,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   widget_class->get_request_mode = bz_screenshot_get_request_mode;
@@ -295,6 +361,7 @@ bz_screenshot_init (BzScreenshot *self)
   self->focus_x         = -1.0;
   self->focus_y         = -1.0;
   self->rounded_corners = TRUE;
+  self->top_half        = FALSE;
 }
 
 GtkWidget *
@@ -401,6 +468,29 @@ bz_screenshot_get_rounded_corners (BzScreenshot *self)
 {
   g_return_val_if_fail (BZ_IS_SCREENSHOT (self), TRUE);
   return self->rounded_corners;
+}
+
+void
+bz_screenshot_set_top_half (BzScreenshot *self,
+                            gboolean      top_half)
+{
+  g_return_if_fail (BZ_IS_SCREENSHOT (self));
+
+  if (self->top_half == top_half)
+    return;
+
+  self->top_half = top_half;
+  gtk_widget_queue_resize (GTK_WIDGET (self));
+  gtk_widget_queue_draw (GTK_WIDGET (self));
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TOP_HALF]);
+}
+
+gboolean
+bz_screenshot_get_top_half (BzScreenshot *self)
+{
+  g_return_val_if_fail (BZ_IS_SCREENSHOT (self), FALSE);
+  return self->top_half;
 }
 
 static void

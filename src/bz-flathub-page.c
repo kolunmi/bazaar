@@ -25,6 +25,7 @@
 #include "bz-detailed-app-tile.h"
 #include "bz-dynamic-list-view.h"
 #include "bz-entry-group.h"
+#include "bz-featured-carousel.h"
 #include "bz-flathub-category.h"
 #include "bz-inhibited-scrollable.h"
 #include "bz-patterned-background.h"
@@ -83,6 +84,14 @@ apps_page_select_cb (BzFlathubPage *self,
 static void
 apps_page_hiding_cb (BzFlathubPage *self,
                      BzAppsPage    *page);
+
+static void
+featured_carousel_group_clicked_cb (BzFlathubPage      *self,
+                                    BzEntryGroup       *group,
+                                    BzFeaturedCarousel *carousel)
+{
+  g_signal_emit (self, signals[SIGNAL_GROUP_SELECTED], 0, group);
+}
 
 static void
 bz_flathub_page_dispose (GObject *object)
@@ -247,6 +256,7 @@ bz_flathub_page_class_init (BzFlathubPageClass *klass)
   g_type_ensure (BZ_TYPE_INHIBITED_SCROLLABLE);
   g_type_ensure (BZ_TYPE_DYNAMIC_LIST_VIEW);
   g_type_ensure (BZ_TYPE_APP_TILE);
+  g_type_ensure (BZ_TYPE_FEATURED_CAROUSEL);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-flathub-page.ui");
   gtk_widget_class_bind_template_child (widget_class, BzFlathubPage, stack);
@@ -258,6 +268,7 @@ bz_flathub_page_class_init (BzFlathubPageClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, show_more_recently_updated_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, show_more_recently_added_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, show_more_popular_clicked_cb);
+  gtk_widget_class_bind_template_callback (widget_class, featured_carousel_group_clicked_cb);
 }
 
 static void

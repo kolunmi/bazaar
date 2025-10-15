@@ -1,0 +1,82 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzFeaturedTile: Button {
+  styles [
+    "featured-tile",
+  ]
+
+  Overlay {
+    [overlay]
+    Image {
+      halign: end;
+      valign: start;
+      icon-name: "app-installed-symbolic";
+      icon-size: normal;
+      visible: bind template.group as <$BzEntryGroup>.removable;
+      margin-top: 12;
+      margin-end: 12;
+    }
+
+    Box {
+      halign: center;
+      orientation: horizontal;
+      spacing: 125;
+      margin-start: 50;
+      margin-end: 50;
+
+      Box {
+        orientation: vertical;
+        valign: center;
+        margin-top: 50;
+        margin-bottom: 50;
+
+        Image image {
+          paintable: bind template.group as <$BzEntryGroup>.icon-paintable;
+          margin-bottom: 12;
+          pixel-size: 128;
+
+          styles [
+            "icon-dropshadow",
+          ]
+        }
+
+        Label title {
+          xalign: 0.5;
+          halign: center;
+          ellipsize: end;
+          label: bind template.group as <$BzEntryGroup>.title;
+
+          styles [
+            "title-1",
+          ]
+        }
+
+        Adw.Clamp {
+          maximum-size: 350;
+          tightening-threshold: 350;
+
+          Label description {
+            ellipsize: end;
+            xalign: 0.5;
+            lines: 1;
+            justify: center;
+            label: bind template.group as <$BzEntryGroup>.description;
+
+            styles [
+              "caption",
+            ]
+          }
+        }
+      }
+      $BzScreenshot screenshot {
+        visible: bind $invert_boolean(template.narrow) as <bool>;
+        paintable: bind template.first-screenshot;
+        rounded-corners: true;
+        top-half: true;
+        valign: end;
+        margin-top: 20;
+      }
+    }
+  }
+}

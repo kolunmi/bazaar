@@ -131,6 +131,14 @@ unbind_widget_cb (BzAppsPage        *self,
 }
 
 static void
+featured_carousel_group_clicked_cb (BzAppsPage   *self,
+                                    BzEntryGroup *group,
+                                    GtkWidget    *carousel)
+{
+  g_signal_emit (self, signals[SIGNAL_SELECT], 0, group);
+}
+
+static void
 bz_apps_page_class_init (BzAppsPageClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
@@ -175,6 +183,7 @@ bz_apps_page_class_init (BzAppsPageClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-apps-page.ui");
   gtk_widget_class_bind_template_callback (widget_class, bind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, unbind_widget_cb);
+  gtk_widget_class_bind_template_callback (widget_class, featured_carousel_group_clicked_cb);
 }
 
 static void
