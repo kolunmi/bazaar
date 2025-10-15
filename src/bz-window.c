@@ -58,6 +58,7 @@ struct _BzWindow
   AdwNavigationView   *main_stack;
   BzFullView          *full_view;
   GtkToggleButton     *toggle_transactions;
+  GtkToggleButton     *toggle_transactions_sidebar;
   GtkButton           *go_back;
   GtkButton           *search;
   BzSearchWidget      *search_widget;
@@ -94,6 +95,7 @@ BZ_DEFINE_DATA (
       BzWindow     *self;
       BzEntryGroup *group;
       gboolean      remove;
+      gboolean      auto_confirm;
       GtkWidget    *source;
     },
     BZ_RELEASE_DATA (group, g_object_unref);
@@ -120,6 +122,7 @@ try_transact (BzWindow     *self,
               BzEntry      *entry,
               BzEntryGroup *group,
               gboolean      remove,
+              gboolean      auto_confirm,
               GtkWidget    *source);
 
 static DexFuture *
@@ -204,16 +207,6 @@ is_null (gpointer object,
   return value == NULL;
 }
 
-static char *
-get_search_icon_from_state (gpointer object,
-                            gboolean value)
-{
-  return g_strdup (
-      value
-          ? "go-previous-symbolic"
-          : "system-search-symbolic");
-}
-
 static void
 browser_group_selected_cb (BzWindow     *self,
                            BzEntryGroup *group,
@@ -257,7 +250,7 @@ search_widget_select_cb (BzWindow       *self,
       NULL);
 
   remove = installable == 0 && removable > 0;
-  try_transact (self, NULL, group, remove, NULL);
+  try_transact (self, NULL, group, remove, FALSE, NULL);
 }
 
 static void
@@ -265,7 +258,7 @@ full_view_install_cb (BzWindow   *self,
                       GtkWidget  *source,
                       BzFullView *view)
 {
-  try_transact (self, NULL, bz_full_view_get_entry_group (view), FALSE, source);
+  try_transact (self, NULL, bz_full_view_get_entry_group (view), FALSE, TRUE, source);
 }
 
 static void
@@ -273,23 +266,23 @@ full_view_remove_cb (BzWindow   *self,
                      GtkWidget  *source,
                      BzFullView *view)
 {
-  try_transact (self, NULL, bz_full_view_get_entry_group (view), TRUE, source);
+  try_transact (self, NULL, bz_full_view_get_entry_group (view), TRUE, TRUE, source);
 }
 
 static void
-installed_page_install_cb (BzWindow   *self,
-                           BzEntry    *entry,
-                           BzFullView *view)
+install_addon_cb (BzWindow   *self,
+                  BzEntry    *entry,
+                  BzFullView *view)
 {
-  try_transact (self, entry, NULL, FALSE, NULL);
+  try_transact (self, entry, NULL, FALSE, TRUE, NULL);
 }
 
 static void
-installed_page_remove_cb (BzWindow   *self,
-                          BzEntry    *entry,
-                          BzFullView *view)
+remove_addon_cb (BzWindow   *self,
+                 BzEntry    *entry,
+                 BzFullView *view)
 {
-  try_transact (self, entry, NULL, TRUE, NULL);
+  try_transact (self, entry, NULL, TRUE, TRUE, NULL);
 }
 
 static void
@@ -333,9 +326,25 @@ visible_page_changed_cb (BzWindow          *self,
         gtk_widget_add_css_class (GTK_WIDGET (self), "flathub");
       else
         gtk_widget_remove_css_class (GTK_WIDGET (self), "flathub");
+
+      if (page_tag != NULL && strstr (page_tag, "view") != NULL)
+        {
+
+          adw_toolbar_view_set_top_bar_style (self->toolbar_view, ADW_TOOLBAR_RAISED);
+          gtk_widget_add_css_class (GTK_WIDGET (self->top_header_bar), "fake-flat-headerbar");
+        }
+      else
+        {
+          adw_toolbar_view_set_top_bar_style (self->toolbar_view, ADW_TOOLBAR_FLAT);
+          gtk_widget_remove_css_class (GTK_WIDGET (self->top_header_bar), "fake-flat-headerbar");
+        }
     }
   else
-    gtk_widget_remove_css_class (GTK_WIDGET (self), "flathub");
+    {
+      gtk_widget_remove_css_class (GTK_WIDGET (self), "flathub");
+      adw_toolbar_view_set_top_bar_style (self->toolbar_view, ADW_TOOLBAR_FLAT);
+      gtk_widget_remove_css_class (GTK_WIDGET (self->top_header_bar), "fake-flat-headerbar");
+    }
 }
 
 static void
@@ -388,15 +397,8 @@ static void
 go_back_cb (BzWindow  *self,
             GtkButton *button)
 {
-  set_page (self);
+  gtk_widget_activate_action (GTK_WIDGET (self), "escape", NULL);
 }
-
-// static void
-// refresh_cb (BzWindow  *self,
-//             GtkButton *button)
-// {
-//   gtk_widget_activate_action (GTK_WIDGET (self), "app.refresh", NULL);
-// }
 
 static void
 update_cb (BzWindow  *self,
@@ -419,11 +421,20 @@ action_escape (GtkWidget  *widget,
                const char *action_name,
                GVariant   *parameter)
 {
-  BzWindow *self = BZ_WINDOW (widget);
+  BzWindow   *self    = BZ_WINDOW (widget);
+  GListModel *stack   = NULL;
+  guint       n_pages = 0;
 
-  adw_overlay_split_view_set_show_sidebar (self->search_split, FALSE);
-  gtk_toggle_button_set_active (self->toggle_transactions, FALSE);
-  set_page (self);
+  stack   = adw_navigation_view_get_navigation_stack (self->main_stack);
+  n_pages = g_list_model_get_n_items (stack);
+
+  adw_navigation_view_pop (self->main_stack);
+  if (n_pages <= 2)
+    {
+      adw_overlay_split_view_set_show_sidebar (self->search_split, FALSE);
+      gtk_toggle_button_set_active (self->toggle_transactions, FALSE);
+      set_page (self);
+    }
 }
 
 static void
@@ -463,6 +474,7 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzWindow, full_view);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, toasts);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, toggle_transactions);
+  gtk_widget_class_bind_template_child (widget_class, BzWindow, toggle_transactions_sidebar);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, go_back);
   // gtk_widget_class_bind_template_child (widget_class, BzWindow, refresh);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, search);
@@ -479,13 +491,12 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzWindow, curated_toggle);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
-  gtk_widget_class_bind_template_callback (widget_class, get_search_icon_from_state);
   gtk_widget_class_bind_template_callback (widget_class, browser_group_selected_cb);
   gtk_widget_class_bind_template_callback (widget_class, search_widget_select_cb);
   gtk_widget_class_bind_template_callback (widget_class, full_view_install_cb);
   gtk_widget_class_bind_template_callback (widget_class, full_view_remove_cb);
-  gtk_widget_class_bind_template_callback (widget_class, installed_page_install_cb);
-  gtk_widget_class_bind_template_callback (widget_class, installed_page_remove_cb);
+  gtk_widget_class_bind_template_callback (widget_class, install_addon_cb);
+  gtk_widget_class_bind_template_callback (widget_class, remove_addon_cb);
   gtk_widget_class_bind_template_callback (widget_class, installed_page_show_cb);
   gtk_widget_class_bind_template_callback (widget_class, page_toggled_cb);
   gtk_widget_class_bind_template_callback (widget_class, breakpoint_apply_cb);
@@ -605,9 +616,12 @@ checking_for_updates_changed (BzWindow    *self,
   if (!busy && !checking_for_updates)
     {
       if (has_updates)
-        bz_comet_overlay_pulse_child (
-            self->comet_overlay,
-            GTK_WIDGET (self->update_button));
+        {
+          bz_comet_overlay_set_pulse_color (self->comet_overlay, NULL);
+          bz_comet_overlay_pulse_child (
+              self->comet_overlay,
+              GTK_WIDGET (self->update_button));
+        }
       else
         adw_toast_overlay_add_toast (
             self->toasts,
@@ -797,14 +811,16 @@ bz_window_show_group (BzWindow     *self,
   g_return_if_fail (BZ_IS_ENTRY_GROUP (group));
 
   bz_full_view_set_entry_group (self->full_view, group);
-  adw_navigation_view_replace_with_tags (self->main_stack, (const char *[]) { "view" }, 1);
+  adw_navigation_view_push_by_tag (self->main_stack, "view");
   gtk_widget_set_visible (GTK_WIDGET (self->go_back), TRUE);
   gtk_widget_set_visible (GTK_WIDGET (self->search), FALSE);
   gtk_revealer_set_reveal_child (self->title_revealer, FALSE);
+
+  set_bottom_bar (self);
 }
 
 void
-bz_window_set_category_view_mode (BzWindow *self,
+bz_window_set_app_list_view_mode (BzWindow *self,
                                   gboolean  enabled)
 {
   g_return_if_fail (BZ_IS_WINDOW (self));
@@ -812,6 +828,8 @@ bz_window_set_category_view_mode (BzWindow *self,
   gtk_widget_set_visible (GTK_WIDGET (self->go_back), enabled);
   gtk_widget_set_visible (GTK_WIDGET (self->search), !enabled);
   gtk_revealer_set_reveal_child (self->title_revealer, !enabled);
+
+  set_bottom_bar (self);
 }
 
 void
@@ -820,8 +838,15 @@ bz_window_add_toast (BzWindow *self,
 {
   g_return_if_fail (BZ_IS_WINDOW (self));
   g_return_if_fail (ADW_IS_TOAST (toast));
-  
+
   adw_toast_overlay_add_toast (self->toasts, toast);
+}
+
+BzStateInfo *
+bz_window_get_state_info (BzWindow *self)
+{
+  g_return_val_if_fail (BZ_IS_WINDOW (self), NULL);
+  return self->state;
 }
 
 static void
@@ -832,6 +857,7 @@ transact (BzWindow  *self,
 {
   g_autoptr (BzTransaction) transaction = NULL;
   GdkPaintable *icon                    = NULL;
+  GtkWidget    *transaction_target      = NULL;
 
   if (remove)
     transaction = bz_transaction_new_full (
@@ -851,21 +877,42 @@ transact (BzWindow  *self,
   if (source == NULL)
     source = GTK_WIDGET (self->main_stack);
 
+  if (adw_overlay_split_view_get_show_sidebar (self->split_view))
+    transaction_target = GTK_WIDGET (self->toggle_transactions_sidebar);
+  else
+    transaction_target = GTK_WIDGET (self->toggle_transactions);
+
   icon = bz_entry_get_icon_paintable (entry);
   if (icon != NULL)
     {
       g_autoptr (BzComet) comet = NULL;
 
+      if (remove)
+        {
+          AdwStyleManager *style_manager = adw_style_manager_get_default ();
+          gboolean         is_dark       = adw_style_manager_get_dark (style_manager);
+          GdkRGBA          destructive_color;
+
+          if (is_dark)
+            destructive_color = (GdkRGBA) { 0.3, 0.2, 0.21, 0.6 };
+          else
+            destructive_color = (GdkRGBA) { 0.95, 0.84, 0.84, 0.6 };
+
+          bz_comet_overlay_set_pulse_color (self->comet_overlay, &destructive_color);
+        }
+      else
+        {
+          bz_comet_overlay_set_pulse_color (self->comet_overlay, NULL);
+        }
+
       comet = g_object_new (
           BZ_TYPE_COMET,
-          "from", remove ? GTK_WIDGET (self->toggle_transactions) : source,
-          "to", remove ? source : GTK_WIDGET (self->toggle_transactions),
+          "from", remove ? transaction_target : source,
+          "to", remove ? source : transaction_target,
           "paintable", icon,
           NULL);
       bz_comet_overlay_spawn (self->comet_overlay, comet);
     }
-
-  // adw_overlay_split_view_set_show_sidebar (self->split_view, TRUE);
 }
 
 static void
@@ -873,6 +920,7 @@ try_transact (BzWindow     *self,
               BzEntry      *entry,
               BzEntryGroup *group,
               gboolean      remove,
+              gboolean      auto_confirm,
               GtkWidget    *source)
 {
   g_autoptr (DexFuture) base_future = NULL;
@@ -893,17 +941,214 @@ try_transact (BzWindow     *self,
   else if (entry != NULL)
     base_future = dex_future_new_for_object (entry);
 
-  data         = transact_data_new ();
-  data->self   = self;
-  data->group  = group != NULL ? g_object_ref (group) : NULL;
-  data->remove = remove;
-  data->source = source != NULL ? g_object_ref (source) : NULL;
+  data               = transact_data_new ();
+  data->self         = self;
+  data->group        = group != NULL ? g_object_ref (group) : NULL;
+  data->remove       = remove;
+  data->auto_confirm = auto_confirm;
+  data->source       = source != NULL ? g_object_ref (source) : NULL;
 
   dex_clear (&self->transact_future);
   self->transact_future = dex_future_finally (
       g_steal_pointer (&base_future),
       (DexFutureCallback) ready_to_transact,
       transact_data_ref (data), transact_data_unref);
+}
+
+static gboolean
+should_skip_entry (BzEntry *entry,
+                   gboolean remove)
+{
+  gboolean is_installed;
+
+  if (bz_entry_is_holding (entry))
+    return TRUE;
+
+  is_installed = bz_entry_is_installed (entry);
+
+  return (!remove && is_installed) || (remove && !is_installed);
+}
+
+static GtkWidget *
+create_entry_radio_button (BzEntry    *entry,
+                           GtkWidget **out_radio)
+{
+  GtkWidget       *row;
+  GtkWidget       *radio;
+  g_autofree char *label;
+
+  label = g_strdup (bz_entry_get_unique_id (entry));
+
+  row = adw_action_row_new ();
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), label);
+
+  radio = gtk_check_button_new ();
+  adw_action_row_add_prefix (ADW_ACTION_ROW (row), radio);
+  adw_action_row_set_activatable_widget (ADW_ACTION_ROW (row), radio);
+
+  if (out_radio != NULL)
+    *out_radio = radio;
+
+  return row;
+}
+
+static int
+create_entry_radio_buttons (AdwAlertDialog *alert,
+                            GListModel     *model,
+                            gboolean        remove)
+{
+  GtkWidget *listbox                = NULL;
+  g_autoptr (GPtrArray) radios      = NULL;
+  GtkCheckButton *first_valid_radio = NULL;
+  guint           n_entries         = 0;
+  int             n_valid_radios    = 0;
+
+  listbox = gtk_list_box_new ();
+  gtk_list_box_set_selection_mode (GTK_LIST_BOX (listbox), GTK_SELECTION_NONE);
+  gtk_widget_add_css_class (listbox, "boxed-list");
+
+  radios            = g_ptr_array_new ();
+  first_valid_radio = NULL;
+
+  if (model != NULL)
+    n_entries = g_list_model_get_n_items (model);
+  n_valid_radios = 0;
+
+  for (guint i = 0; i < n_entries; i++)
+    {
+      g_autoptr (BzEntry) entry_variant = NULL;
+      GtkWidget *row                    = NULL;
+      GtkWidget *radio                  = NULL;
+
+      entry_variant = g_list_model_get_item (model, i);
+
+      if (should_skip_entry (entry_variant, remove))
+        {
+          g_ptr_array_add (radios, NULL);
+          continue;
+        }
+
+      row = create_entry_radio_button (entry_variant, &radio);
+      g_ptr_array_add (radios, radio);
+
+      if (first_valid_radio != NULL)
+        gtk_check_button_set_group (GTK_CHECK_BUTTON (radio), first_valid_radio);
+      else
+        {
+          gtk_check_button_set_active (GTK_CHECK_BUTTON (radio), TRUE);
+          first_valid_radio = GTK_CHECK_BUTTON (radio);
+        }
+
+      gtk_list_box_append (GTK_LIST_BOX (listbox), row);
+      n_valid_radios++;
+    }
+
+  g_object_set_data_full (
+      G_OBJECT (alert), "checks",
+      g_steal_pointer (&radios),
+      (GDestroyNotify) g_ptr_array_unref);
+
+  if (n_valid_radios > 1)
+    adw_alert_dialog_set_extra_child (alert, listbox);
+
+  return n_valid_radios;
+}
+
+static void
+configure_install_dialog (AdwAlertDialog *alert,
+                          const char     *title,
+                          const char     *id)
+{
+  g_autofree char *heading = NULL;
+
+  heading = g_strdup_printf (_ ("Install %s?"), title);
+
+  adw_alert_dialog_set_heading (alert, heading);
+  adw_alert_dialog_set_body (alert, _ ("May install additional shared components"));
+
+  adw_alert_dialog_add_responses (alert,
+                                  "cancel", _ ("Cancel"),
+                                  "install", _ ("Install"),
+                                  NULL);
+
+  adw_alert_dialog_set_response_appearance (alert, "install", ADW_RESPONSE_SUGGESTED);
+  adw_alert_dialog_set_default_response (alert, "install");
+  adw_alert_dialog_set_close_response (alert, "cancel");
+}
+
+static void
+configure_remove_dialog (AdwAlertDialog *alert,
+                         const char     *title,
+                         const char     *id)
+{
+  g_autofree char *heading = NULL;
+
+  heading = g_strdup_printf (_ ("Remove %s?"), title);
+
+  adw_alert_dialog_set_heading (alert, heading);
+  adw_alert_dialog_set_body (alert, _ ("Settings & user data will be kept"));
+
+  adw_alert_dialog_add_responses (alert,
+                                  "cancel", _ ("Cancel"),
+                                  "remove", _ ("Remove"),
+                                  NULL);
+
+  adw_alert_dialog_set_response_appearance (alert, "remove", ADW_RESPONSE_DESTRUCTIVE);
+  adw_alert_dialog_set_default_response (alert, "remove");
+  adw_alert_dialog_set_close_response (alert, "cancel");
+}
+
+static AdwDialog *
+create_confirmation_dialog (BzWindow     *self,
+                            BzEntryGroup *group,
+                            GListModel   *model,
+                            BzEntry      *entry,
+                            GtkWidget    *source,
+                            gboolean      remove,
+                            int          *out_n_valid_radios)
+{
+  AdwDialog  *alert          = NULL;
+  const char *title          = NULL;
+  const char *id             = NULL;
+  int         n_valid_radios = 0;
+
+  alert          = adw_alert_dialog_new (NULL, NULL);
+  title          = NULL;
+  id             = NULL;
+  n_valid_radios = 0;
+
+  if (source != NULL)
+    g_object_set_data_full (G_OBJECT (alert), "source",
+                            g_object_ref (source), g_object_unref);
+
+  if (model != NULL)
+    {
+      g_object_set_data_full (G_OBJECT (alert), "group",
+                              g_object_ref (group), g_object_unref);
+      g_object_set_data_full (G_OBJECT (alert), "model",
+                              g_object_ref (model), g_object_unref);
+      title = bz_entry_group_get_title (group);
+      id    = bz_entry_group_get_id (group);
+    }
+  else
+    {
+      g_object_set_data_full (G_OBJECT (alert), "entry",
+                              g_object_ref (entry), g_object_unref);
+      title = bz_entry_get_title (entry);
+      id    = bz_entry_get_id (entry);
+    }
+
+  if (remove)
+    configure_remove_dialog (ADW_ALERT_DIALOG (alert), title, id);
+  else
+    configure_install_dialog (ADW_ALERT_DIALOG (alert), title, id);
+
+  n_valid_radios = create_entry_radio_buttons (ADW_ALERT_DIALOG (alert), model, remove);
+
+  if (out_n_valid_radios != NULL)
+    *out_n_valid_radios = n_valid_radios;
+
+  return alert;
 }
 
 static DexFuture *
@@ -913,177 +1158,43 @@ ready_to_transact (DexFuture    *future,
   BzWindow     *self             = data->self;
   BzEntryGroup *group            = data->group;
   gboolean      remove           = data->remove;
+  gboolean      auto_confirm     = data->auto_confirm;
   GtkWidget    *source           = data->source;
   g_autoptr (GError) local_error = NULL;
   const GValue *value            = NULL;
+  g_autoptr (GListModel) model   = NULL;
+  g_autoptr (BzEntry) entry      = NULL;
+  AdwDialog *alert               = NULL;
+  int        n_valid_radios      = 0;
 
   value = dex_future_get_value (future, &local_error);
   if (value != NULL)
     {
-      g_autoptr (GListModel) model = NULL;
-      g_autoptr (BzEntry) entry    = NULL;
-      AdwDialog  *alert            = NULL;
-      const char *title            = NULL;
-      const char *id               = NULL;
-
       if (G_VALUE_HOLDS (value, G_TYPE_LIST_MODEL))
         model = g_value_dup_object (value);
       else
         entry = g_value_dup_object (value);
 
-      alert = adw_alert_dialog_new (NULL, NULL);
-      if (source != NULL)
-        g_object_set_data_full (
-            G_OBJECT (alert),
-            "source", g_object_ref (source),
-            g_object_unref);
+      alert = create_confirmation_dialog (self, group, model, entry, source, remove, &n_valid_radios);
 
-      adw_alert_dialog_set_heading (
-          ADW_ALERT_DIALOG (alert), _ ("Confirm Action"));
-
-      if (model != NULL)
+      if (auto_confirm && n_valid_radios <= 1)
         {
-          g_object_set_data_full (
-              G_OBJECT (alert),
-              "group", g_object_ref (group),
-              g_object_unref);
-          g_object_set_data_full (
-              G_OBJECT (alert),
-              "model", g_object_ref (model),
-              g_object_unref);
-          title = bz_entry_group_get_title (group);
-          id    = bz_entry_group_get_id (group);
+          const char *response_id = remove ? "remove" : "install";
+          g_object_ref_sink (alert);
+          install_confirmation_response (ADW_ALERT_DIALOG (alert), (gchar *) response_id, self);
+          g_object_unref (alert);
         }
       else
         {
-          g_object_set_data_full (
-              G_OBJECT (alert),
-              "entry", g_object_ref (entry),
-              g_object_unref);
-          title = bz_entry_get_title (entry);
-          id    = bz_entry_get_id (entry);
+          g_signal_connect (alert, "response",
+                            G_CALLBACK (install_confirmation_response), self);
+          adw_dialog_present (alert, GTK_WIDGET (self));
         }
-
-      if (remove)
-        {
-          adw_alert_dialog_format_body_markup (
-              ADW_ALERT_DIALOG (alert),
-              _ ("You are about to remove the following Flatpak:\n\n"
-                 "<b>%s</b>\n"
-                 "<tt>%s</tt>\n\n"
-                 "Are you sure?"),
-              title, id);
-          adw_alert_dialog_add_responses (
-              ADW_ALERT_DIALOG (alert),
-              "cancel", _ ("Cancel"),
-              "remove", _ ("Remove"),
-              NULL);
-          adw_alert_dialog_set_response_appearance (
-              ADW_ALERT_DIALOG (alert), "remove", ADW_RESPONSE_DESTRUCTIVE);
-          adw_alert_dialog_set_default_response (ADW_ALERT_DIALOG (alert), "remove");
-          adw_alert_dialog_set_close_response (ADW_ALERT_DIALOG (alert), "cancel");
-        }
-      else
-        {
-          adw_alert_dialog_format_body_markup (
-              ADW_ALERT_DIALOG (alert),
-              _ ("You are about to install the following Flatpak:\n\n"
-                 "<b>%s</b>\n"
-                 "<tt>%s</tt>\n\n"
-                 "Are you sure?"),
-              title, id);
-          adw_alert_dialog_add_responses (
-              ADW_ALERT_DIALOG (alert),
-              "cancel", _ ("Cancel"),
-              "install", _ ("Install"),
-              NULL);
-          adw_alert_dialog_set_response_appearance (
-              ADW_ALERT_DIALOG (alert), "install", ADW_RESPONSE_SUGGESTED);
-          adw_alert_dialog_set_default_response (ADW_ALERT_DIALOG (alert), "install");
-          adw_alert_dialog_set_close_response (ADW_ALERT_DIALOG (alert), "cancel");
-        }
-
-      if (group != NULL)
-        {
-          guint n_entries = 0;
-
-          n_entries = g_list_model_get_n_items (model);
-          if (n_entries > 0)
-            {
-              GtkWidget      *box               = NULL;
-              GtkWidget      *expander          = NULL;
-              GPtrArray      *checks            = NULL;
-              GtkCheckButton *first_valid_check = NULL;
-              int             n_valid_checks    = FALSE;
-
-              box      = gtk_box_new (GTK_ORIENTATION_VERTICAL, 5);
-              expander = gtk_expander_new (_ ("More details"));
-
-              gtk_expander_set_child (GTK_EXPANDER (expander), box);
-              adw_alert_dialog_set_extra_child (ADW_ALERT_DIALOG (alert), expander);
-
-              checks = g_ptr_array_new ();
-
-              for (guint i = 0; i < n_entries; i++)
-                {
-                  g_autoptr (BzEntry) entry_variant = NULL;
-                  gboolean         is_installed     = FALSE;
-                  g_autofree char *label            = NULL;
-                  GtkWidget       *check            = NULL;
-                  GtkWidget       *check_label      = NULL;
-
-                  entry_variant = g_list_model_get_item (model, i);
-                  is_installed  = bz_entry_is_installed (entry_variant);
-
-                  if (bz_entry_is_holding (entry_variant) ||
-                      (!remove && is_installed) ||
-                      (remove && !is_installed))
-                    {
-                      g_ptr_array_add (checks, NULL);
-                      continue;
-                    }
-
-                  label = g_strdup (bz_entry_get_unique_id (entry_variant));
-
-                  check = gtk_check_button_new ();
-                  g_ptr_array_add (checks, check);
-
-                  gtk_widget_set_has_tooltip (check, TRUE);
-                  gtk_widget_set_tooltip_text (check, label);
-
-                  check_label = gtk_label_new (label);
-                  gtk_label_set_wrap (GTK_LABEL (check_label), TRUE);
-                  gtk_label_set_wrap_mode (GTK_LABEL (check_label), PANGO_WRAP_WORD_CHAR);
-                  gtk_check_button_set_child (GTK_CHECK_BUTTON (check), check_label);
-
-                  if (first_valid_check != NULL)
-                    gtk_check_button_set_group (GTK_CHECK_BUTTON (check), first_valid_check);
-                  else
-                    {
-                      gtk_check_button_set_active (GTK_CHECK_BUTTON (check), TRUE);
-                      first_valid_check = GTK_CHECK_BUTTON (check);
-                    }
-
-                  gtk_box_append (GTK_BOX (box), check);
-                  n_valid_checks++;
-                }
-
-              g_object_set_data_full (
-                  G_OBJECT (alert),
-                  "checks",
-                  checks,
-                  (GDestroyNotify) g_ptr_array_unref);
-
-              if (n_valid_checks == 1)
-                gtk_widget_set_sensitive (GTK_WIDGET (first_valid_check), FALSE);
-            }
-        }
-
-      g_signal_connect (alert, "response", G_CALLBACK (install_confirmation_response), self);
-      adw_dialog_present (alert, GTK_WIDGET (self));
     }
   else
-    bz_show_error_for_widget (GTK_WIDGET (self), local_error->message);
+    {
+      bz_show_error_for_widget (GTK_WIDGET (self), local_error->message);
+    }
 
   dex_clear (&self->transact_future);
   return NULL;
@@ -1143,13 +1254,13 @@ check_transactions (BzWindow *self)
   if (paused)
     {
       gtk_button_set_icon_name (GTK_BUTTON (self->transactions_pause), "media-playback-start-symbolic");
-      gtk_widget_set_tooltip_text (GTK_WIDGET (self->transactions_pause), _ ("Resume the execution of transactions"));
+      gtk_widget_set_tooltip_text (GTK_WIDGET (self->transactions_pause), _ ("Resume Current Tasks"));
       gtk_widget_add_css_class (GTK_WIDGET (self->transactions_pause), "suggested-action");
     }
   else
     {
       gtk_button_set_icon_name (GTK_BUTTON (self->transactions_pause), "media-playback-pause-symbolic");
-      gtk_widget_set_tooltip_text (GTK_WIDGET (self->transactions_pause), _ ("Pause the execution of transactions"));
+      gtk_widget_set_tooltip_text (GTK_WIDGET (self->transactions_pause), _ ("Pause Current Tasks"));
       gtk_widget_remove_css_class (GTK_WIDGET (self->transactions_pause), "suggested-action");
     }
 
@@ -1205,7 +1316,10 @@ set_bottom_bar (BzWindow *self)
   gboolean showing_search  = FALSE;
   gboolean show_bottom_bar = FALSE;
 
-  showing_search  = adw_overlay_split_view_get_show_sidebar (self->search_split);
-  show_bottom_bar = (self->breakpoint_applied && !showing_search);
+  showing_search = adw_overlay_split_view_get_show_sidebar (self->search_split);
+
+  show_bottom_bar = self->breakpoint_applied &&
+                    !showing_search &&
+                    gtk_revealer_get_reveal_child (self->title_revealer);
   adw_toolbar_view_set_reveal_bottom_bars (self->toolbar_view, show_bottom_bar);
 }

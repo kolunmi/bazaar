@@ -38,7 +38,7 @@ z poziomu terminala w folderze projektu uruchom następujące komendy:
 meson setup build --prefix=/usr/local
 ninja -C build
 sudo ninja -C build install
-bazaar window --auto-service
+bazaar
 ```
 
 Musisz mieć zainstalowane następujące zależności, w tym kompilator C, meson oraz ninja:

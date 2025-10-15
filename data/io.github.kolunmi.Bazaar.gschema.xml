@@ -21,5 +21,29 @@
       <summary>Debounce Search Inputs</summary>
       <description>Add a delay before searching to prevent instant replies while typing</description>
     </key>
+    <key name="global-progress-bar-theme" type="s">
+      <choices>
+        <choice value="accent-color"/>
+        <choice value="pride-rainbow-flag"/>
+        <choice value="lesbian-pride-flag"/>
+        <choice value="transgender-flag"/>
+        <choice value="nonbinary-flag"/>
+        <choice value="bisexual-flag"/>
+        <choice value="asexual-flag"/>
+        <choice value="pansexual-flag"/>
+        <choice value="aromantic-flag"/>
+        <choice value="genderfluid-flag"/>
+        <choice value="polysexual-flag"/>
+        <choice value="omnisexual-flag"/>
+      </choices>
+      <default>'accent-color'</default>
+      <summary>Global Progress Bar Theme</summary>
+      <description>Describes the look of the global progress bar</description>
+    </key>
+    <key name="window-dimensions" type="(ii)">
+      <default>(1220, 900)</default>
+      <summary>Saved Window Dimensions</summary>
+      <description>The window dimensions to be used by the next Bazaar window</description>
+    </key>
   </schema>
 </schemalist>

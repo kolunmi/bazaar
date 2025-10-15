@@ -1,6 +1,6 @@
-/* bz-category-page.h
+/* bz-country-data-point.h
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2025 Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,16 +20,29 @@
 
 #pragma once
 
-#include <adwaita.h>
-
-#include "bz-flathub-category.h"
+#include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_CATEGORY_PAGE (bz_category_page_get_type ())
-G_DECLARE_FINAL_TYPE (BzCategoryPage, bz_category_page, BZ, CATEGORY_PAGE, AdwNavigationPage)
+#define BZ_TYPE_COUNTRY_DATA_POINT (bz_country_data_point_get_type ())
 
-AdwNavigationPage *
-bz_category_page_new (BzFlathubCategory *category);
+G_DECLARE_FINAL_TYPE (BzCountryDataPoint, bz_country_data_point, BZ, COUNTRY_DATA_POINT, GObject)
+
+BzCountryDataPoint *
+bz_country_data_point_new (void);
+
+const char *
+bz_country_data_point_get_country_code (BzCountryDataPoint *self);
+
+guint
+bz_country_data_point_get_downloads (BzCountryDataPoint *self);
+
+void
+bz_country_data_point_set_country_code (BzCountryDataPoint *self,
+                                        const char         *country_code);
+
+void
+bz_country_data_point_set_downloads (BzCountryDataPoint *self,
+                                     guint               downloads);
 
 G_END_DECLS

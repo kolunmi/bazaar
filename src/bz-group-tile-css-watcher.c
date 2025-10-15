@@ -22,6 +22,8 @@
 
 #include "bz-group-tile-css-watcher.h"
 
+#define LUMINANCE_THRESHOLD 130.0
+
 struct _BzGroupTileCssWatcher
 {
   GObject parent_instance;
@@ -32,6 +34,8 @@ struct _BzGroupTileCssWatcher
   GtkCssProvider *css;
   char           *light_class;
   char           *dark_class;
+  char           *light_text_class;
+  char           *dark_text_class;
 };
 
 G_DEFINE_FINAL_TYPE (BzGroupTileCssWatcher, bz_group_tile_css_watcher, G_TYPE_OBJECT);
@@ -140,6 +144,7 @@ dark_changed (BzGroupTileCssWatcher *self,
               AdwStyleManager       *mgr)
 {
   g_autoptr (GtkWidget) widget = NULL;
+  gboolean is_dark;
 
   if (self->css == NULL)
     return;
@@ -148,13 +153,15 @@ dark_changed (BzGroupTileCssWatcher *self,
   if (widget == NULL)
     return;
 
+  is_dark = adw_style_manager_get_dark (adw_style_manager_get_default ());
+
   gtk_widget_remove_css_class (widget, self->light_class);
   gtk_widget_remove_css_class (widget, self->dark_class);
-  gtk_widget_add_css_class (
-      widget,
-      adw_style_manager_get_dark (adw_style_manager_get_default ())
-          ? self->dark_class
-          : self->light_class);
+  gtk_widget_remove_css_class (widget, self->light_text_class);
+  gtk_widget_remove_css_class (widget, self->dark_text_class);
+
+  gtk_widget_add_css_class (widget, is_dark ? self->dark_class : self->light_class);
+  gtk_widget_add_css_class (widget, is_dark ? self->dark_text_class : self->light_text_class);
 }
 
 static void
@@ -219,6 +226,28 @@ bz_group_tile_css_watcher_set_group (BzGroupTileCssWatcher *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_GROUP]);
 }
 
+static gdouble
+get_luminance (GdkRGBA *rgba)
+{
+  return (0.299 * rgba->red * 255.0) +
+         (0.587 * rgba->green * 255.0) +
+         (0.114 * rgba->blue * 255.0);
+}
+
+static gboolean
+color_is_light (const char *hex_color)
+{
+  GdkRGBA rgba;
+  gdouble luminance;
+
+  if (hex_color == NULL || !gdk_rgba_parse (&rgba, hex_color))
+    return FALSE;
+
+  luminance = get_luminance (&rgba);
+
+  return luminance > LUMINANCE_THRESHOLD;
+}
+
 static void
 refresh (BzGroupTileCssWatcher *self)
 {
@@ -243,12 +272,23 @@ refresh (BzGroupTileCssWatcher *self)
     {
       g_autoptr (GString) fixed_id = NULL;
       g_autofree char *css_string  = NULL;
+      gboolean         is_dark;
 
       fixed_id = g_string_new (id);
       g_string_replace (fixed_id, ".", "--", 0);
 
       self->light_class = g_strdup_printf ("%s-light", fixed_id->str);
       self->dark_class  = g_strdup_printf ("%s-dark", fixed_id->str);
+
+      self->light_text_class = g_strdup (
+          color_is_light (light_accent_color != NULL ? light_accent_color : dark_accent_color)
+              ? "flathub-gunmetal"
+              : "flathub-lotion");
+
+      self->dark_text_class = g_strdup (
+          color_is_light (dark_accent_color != NULL ? dark_accent_color : light_accent_color)
+              ? "flathub-gunmetal"
+              : "flathub-lotion");
 
       css_string = g_strdup_printf (
           ".%s{background-color:%s;}\n"
@@ -266,11 +306,10 @@ refresh (BzGroupTileCssWatcher *self)
           GTK_STYLE_PROVIDER (self->css),
           GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
-      gtk_widget_add_css_class (
-          widget,
-          adw_style_manager_get_dark (adw_style_manager_get_default ())
-              ? self->dark_class
-              : self->light_class);
+      is_dark = adw_style_manager_get_dark (adw_style_manager_get_default ());
+
+      gtk_widget_add_css_class (widget, is_dark ? self->dark_class : self->light_class);
+      gtk_widget_add_css_class (widget, is_dark ? self->dark_text_class : self->light_text_class);
     }
 }
 
@@ -283,16 +322,20 @@ clear (BzGroupTileCssWatcher *self)
   if (widget != NULL)
     {
       if (self->light_class != NULL)
-        gtk_widget_remove_css_class (
-            widget,
-            self->light_class);
+        gtk_widget_remove_css_class (widget, self->light_class);
       if (self->dark_class != NULL)
-        gtk_widget_remove_css_class (
-            widget,
-            self->dark_class);
+        gtk_widget_remove_css_class (widget, self->dark_class);
+      if (self->light_text_class != NULL)
+        gtk_widget_remove_css_class (widget, self->light_text_class);
+      if (self->dark_text_class != NULL)
+        gtk_widget_remove_css_class (widget, self->dark_text_class);
     }
+
   g_clear_pointer (&self->light_class, g_free);
   g_clear_pointer (&self->dark_class, g_free);
+  g_clear_pointer (&self->light_text_class, g_free);
+  g_clear_pointer (&self->dark_text_class, g_free);
+
   if (self->css != NULL)
     gtk_style_context_remove_provider_for_display (
         gdk_display_get_default (),

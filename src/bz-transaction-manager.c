@@ -53,6 +53,7 @@ struct _BzTransactionManager
   gboolean    paused;
   GListStore *transactions;
   double      current_progress;
+  gboolean    pending;
 
   DexFuture    *current_task;
   GCancellable *cancellable;
@@ -72,6 +73,7 @@ enum
   PROP_TRANSACTIONS,
   PROP_HAS_TRANSACTIONS,
   PROP_ACTIVE,
+  PROP_PENDING,
   PROP_CURRENT_PROGRESS,
 
   LAST_PROP
@@ -173,6 +175,9 @@ bz_transaction_manager_get_property (GObject    *object,
     case PROP_ACTIVE:
       g_value_set_boolean (value, bz_transaction_manager_get_active (self));
       break;
+    case PROP_PENDING:
+      g_value_set_boolean (value, bz_transaction_manager_get_pending (self));
+      break;
     case PROP_CURRENT_PROGRESS:
       g_value_set_double (value, self->current_progress);
       break;
@@ -203,6 +208,7 @@ bz_transaction_manager_set_property (GObject      *object,
     case PROP_TRANSACTIONS:
     case PROP_HAS_TRANSACTIONS:
     case PROP_ACTIVE:
+    case PROP_PENDING:
     case PROP_CURRENT_PROGRESS:
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -254,6 +260,12 @@ bz_transaction_manager_class_init (BzTransactionManagerClass *klass)
   props[PROP_ACTIVE] =
       g_param_spec_boolean (
           "active",
+          NULL, NULL, FALSE,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
+  props[PROP_PENDING] =
+      g_param_spec_boolean (
+          "pending",
           NULL, NULL, FALSE,
           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
@@ -384,6 +396,13 @@ bz_transaction_manager_get_active (BzTransactionManager *self)
 }
 
 gboolean
+bz_transaction_manager_get_pending (BzTransactionManager *self)
+{
+  g_return_val_if_fail (BZ_IS_TRANSACTION_MANAGER (self), FALSE);
+  return self->current_task != NULL && self->pending;
+}
+
+gboolean
 bz_transaction_manager_get_has_transactions (BzTransactionManager *self)
 {
   g_return_val_if_fail (BZ_IS_TRANSACTION_MANAGER (self), FALSE);
@@ -448,6 +467,7 @@ bz_transaction_manager_cancel_current (BzTransactionManager *self)
       task = g_steal_pointer (&self->current_task);
 
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ACTIVE]);
+      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PENDING]);
       return task;
     }
   else
@@ -494,21 +514,27 @@ transaction_fiber (QueuedScheduleData *data)
   BzTransaction        *transaction = data->transaction;
   DexChannel           *channel     = data->channel;
   // GTimer               *timer       = data->timer;
-  GCancellable *cancellable      = data->cancellable;
-  g_autoptr (GError) local_error = NULL;
-  gboolean result                = FALSE;
-  guint    n_installs            = 0;
-  guint    n_updates             = 0;
-  guint    n_removals            = 0;
-  g_autoptr (GListStore) store   = NULL;
-  g_autoptr (DexFuture) future   = NULL;
-  g_autoptr (GHashTable) op_set  = NULL;
+  GCancellable *cancellable          = data->cancellable;
+  g_autoptr (GError) local_error     = NULL;
+  gboolean result                    = FALSE;
+  guint    n_installs                = 0;
+  guint    n_updates                 = 0;
+  guint    n_removals                = 0;
+  g_autoptr (GListStore) store       = NULL;
+  g_autoptr (DexFuture) future       = NULL;
+  g_autoptr (GHashTable) op_set      = NULL;
+  g_autoptr (GHashTable) pending_set = NULL;
 
   g_object_set (
       transaction,
       "status", "Starting up...",
       "progress", 0.0,
       NULL);
+
+  self->current_progress = 0.0;
+  self->pending          = TRUE;
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CURRENT_PROGRESS]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PENDING]);
 
 #define COUNT(type)                                  \
   G_STMT_START                                       \
@@ -597,7 +623,8 @@ transaction_fiber (QueuedScheduleData *data)
       channel,
       cancellable);
 
-  op_set = g_hash_table_new_full (g_direct_hash, g_direct_equal, g_object_unref, NULL);
+  op_set      = g_hash_table_new_full (g_direct_hash, g_direct_equal, g_object_unref, NULL);
+  pending_set = g_hash_table_new_full (g_direct_hash, g_direct_equal, g_object_unref, NULL);
   for (;;)
     {
       g_autoptr (GObject) object = NULL;
@@ -620,6 +647,14 @@ transaction_fiber (QueuedScheduleData *data)
                 bz_transaction_finish_task (
                     transaction, BZ_BACKEND_TRANSACTION_OP_PAYLOAD (object));
               g_hash_table_remove (op_set, object);
+
+              if (g_hash_table_contains (pending_set, object))
+                {
+                  g_hash_table_remove (pending_set, object);
+                  self->pending = g_hash_table_size (pending_set) ==
+                                  g_hash_table_size (op_set);
+                  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PENDING]);
+                }
             }
           else
             {
@@ -653,6 +688,21 @@ transaction_fiber (QueuedScheduleData *data)
 
           self->current_progress = total_progress;
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CURRENT_PROGRESS]);
+
+          if (is_estimating && !g_hash_table_contains (pending_set, object))
+            {
+              g_hash_table_add (pending_set, g_object_ref (object));
+              self->pending = g_hash_table_size (pending_set) ==
+                              g_hash_table_size (op_set);
+              g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PENDING]);
+            }
+          else if (!is_estimating && g_hash_table_contains (pending_set, object))
+            {
+              g_hash_table_remove (pending_set, object);
+              self->pending = g_hash_table_size (pending_set) ==
+                              g_hash_table_size (op_set);
+              g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PENDING]);
+            }
         }
     }
 
@@ -1149,4 +1199,5 @@ dispatch_next (BzTransactionManager *self)
 
 done:
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ACTIVE]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PENDING]);
 }

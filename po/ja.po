@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-18 21:19+0900\n"
-"PO-Revision-Date: 2025-09-21 18:03+0900\n"
+"POT-Creation-Date: 2025-10-06 13:47+0900\n"
+"PO-Revision-Date: 2025-10-06 14:02+0900\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: ja\n"
@@ -41,6 +41,48 @@ msgid ""
 "full view"
 msgstr "「スターの数」をプロジェクトの詳細画面で表示するかどうか"
 
+#: data/io.github.kolunmi.Bazaar.gschema.xml:11
+#: src/bz-preferences-dialog.blp:25
+msgid "Only Show Free Software"
+msgstr "フリーのソフトウェアのみ表示"
+
+#: data/io.github.kolunmi.Bazaar.gschema.xml:12
+msgid "Hide proprietary software when searching"
+msgstr "検索結果からプロプライエタリのソフトウェアを除外します"
+
+#: data/io.github.kolunmi.Bazaar.gschema.xml:16
+msgid "Show Only Flathub Content"
+msgstr "Flathub の内容のみ表示"
+
+#: data/io.github.kolunmi.Bazaar.gschema.xml:17
+msgid "Filter search results to only show applications available on Flathub"
+msgstr "検索結果を Flathub で利用可能なアプリのみに限定する"
+
+#: data/io.github.kolunmi.Bazaar.gschema.xml:21
+msgid "Debounce Search Inputs"
+msgstr "検索の遅延"
+
+#: data/io.github.kolunmi.Bazaar.gschema.xml:22
+msgid "Add a delay before searching to prevent instant replies while typing"
+msgstr ""
+"入力してから検索されるまでに遅延を設け、即座に結果が表示されないようにする"
+
+#: data/io.github.kolunmi.Bazaar.gschema.xml:40
+msgid "Global Progress Bar Theme"
+msgstr "全体のプログレスバーのテーマ"
+
+#: data/io.github.kolunmi.Bazaar.gschema.xml:41
+msgid "Describes the look of the global progress bar"
+msgstr "全体のプログレスバーの見た目を変更する"
+
+#: data/io.github.kolunmi.Bazaar.gschema.xml:45
+msgid "Saved Window Dimensions"
+msgstr "保存したウィンドウサイズ"
+
+#: data/io.github.kolunmi.Bazaar.gschema.xml:46
+msgid "The window dimensions to be used by the next Bazaar window"
+msgstr "次回 Bazaar のウィンドウを表示する時に使用されるウィンドウの寸法"
+
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:8
 msgid "Discover and install applications"
 msgstr "アプリケーションを検索、インストールする"
@@ -69,7 +111,7 @@ msgstr "Flathub のアプリやカテゴリーが表示されるホームペー�
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:53
 msgid "Calligraphy application page"
-msgstr ""
+msgstr "カリグラフィーのアプリケーションページ"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:57
 msgid "Searching for Blender"
@@ -79,17 +121,124 @@ msgstr "Blender を検索中"
 msgid "Download graph for Blender"
 msgstr "Blender のグラフをダウンロード"
 
-#: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:195
-#: src/bz-installed-page.blp:208
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:69
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:81
+msgid "Some improvements:"
+msgstr "改善点:"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:71
+msgid ""
+"Make the global progress bar customizable with pride flags! Check preferences"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:72
+msgid "Add a new world map page to the download statistics dialog"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:73
+msgid ""
+"Allow clicking on entries on transaction sidebar to navigate to the original "
+"store page"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:74
+msgid "Add Alexander Vanhee to the developer credits"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:83
+msgid "Overhaul download history graph; make it interactive"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:84
+msgid "Smarter \"back\" functionality"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:85
+msgid "Hide bottom bar more often on small window sizes"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:86
+msgid ""
+"Make \"light-banner\" and \"dark-banner\" keys available to curated configs"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:93
+msgid "This release includes:"
+msgstr "今回のリリースに含まれる変更:"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:95
+msgid "553d041 * chore(po): update Ukrainian translation (#408)"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:96
+msgid "711732a * Rework Version History (#407)"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:97
+msgid ""
+"d2d3771 * Calculate detailed app tiles text color based on luminance of "
+"background accent color (#405)"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:98
+msgid "3787e6e * Save window size in gsettings"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:99
+msgid "18ba76c * AsyncTexture: increase HTTP timeout to 5 seconds"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:100
+msgid "980f752 * SearchWidget: prevent invalid item selection"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:101
+msgid "ab95593 * Add installed icons to app tiles (#404)"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:102
+msgid "203754b * (UI) Improve visiblility of add-on feature (#403)"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:103
+msgid "069ce61 * fix installed page list outline ring (#402)"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:104
+msgid ""
+"da9f7b8 * (UX) Refine the Flathub views to be denser and have less partial "
+"lines (#401)"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:105
+msgid "a6939ba * fix(po): fix Ukrainian translation (#400)"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:106
+msgid "35c9611 * decrease app-tile description width reqs"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:107
+msgid "6098be7 * chore(po): update Polish translation (#397)"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:108
+msgid "2944d1e * change per section limit to 12 from 9 (#396)"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:109
+msgid "0b04284 * Update Japanese Translation (#394)"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:110
+msgid "fa60f4f * Move to brand new shiny Adw.ShortcutsDialog (#395)"
+msgstr ""
+
+#: src/bz-addons-dialog.blp:13
 msgid "Manage Addons"
 msgstr "アドオンを管理する"
 
-#: src/bz-app-tile.blp:62 src/bz-detailed-app-tile.blp:60
-#: src/bz-full-view.blp:125
-msgid "This flatpak is verified by the original developers of the software."
-msgstr "この flatpak はオリジナルの開発元によって検証済みです。"
-
-#: src/bz-application.c:691
+#: src/bz-application.c:679
 msgid ""
 "This functionality is currently disabled. It is recommended you download and "
 "install Flatseal to manage app permissions."
@@ -97,113 +246,128 @@ msgstr ""
 "この機能は現在無効になっています。アプリの権限を管理するためには、Flatseal を"
 "インストールすることを推奨します。"
 
-#: src/bz-application.c:767
+#: src/bz-application.c:743
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr ""
 
-#: src/bz-application.c:772
+#: src/bz-application.c:744
+msgctxt "About Dialog Developer Credit"
+msgid "Alexander Vanhee"
+msgstr ""
+
+#: src/bz-application.c:749
 msgctxt "About Dialog Translator Credit"
 msgid "Ahmed Najmawi"
 msgstr ""
 
-#: src/bz-application.c:773
+#: src/bz-application.c:750
 msgctxt "About Dialog Translator Credit"
 msgid "AtomHare"
 msgstr ""
 
-#: src/bz-application.c:774
+#: src/bz-application.c:751
 msgctxt "About Dialog Translator Credit"
 msgid "Azenyr"
 msgstr ""
 
-#: src/bz-application.c:775
+#: src/bz-application.c:752
 msgctxt "About Dialog Translator Credit"
 msgid "Goudarz Jafari"
 msgstr ""
 
-#: src/bz-application.c:776
+#: src/bz-application.c:753
 msgctxt "About Dialog Translator Credit"
 msgid "Jill Fiore (Lumaeris)"
 msgstr ""
 
-#: src/bz-application.c:777
+#: src/bz-application.c:754
+msgctxt "About Dialog Translator Credit"
+msgid "João Victor (Leal)"
+msgstr ""
+
+#: src/bz-application.c:755
 msgctxt "About Dialog Translator Credit"
 msgid "KiKaraage"
 msgstr ""
 
-#: src/bz-application.c:778
+#: src/bz-application.c:756
 msgctxt "About Dialog Translator Credit"
 msgid "Lucosec"
 msgstr ""
 
-#: src/bz-application.c:779
+#: src/bz-application.c:757
 msgctxt "About Dialog Translator Credit"
 msgid "Léane GRASSER"
 msgstr ""
 
-#: src/bz-application.c:780
+#: src/bz-application.c:758
 msgctxt "About Dialog Translator Credit"
 msgid "Marcel Mrówka (Microwave)"
 msgstr ""
 
-#: src/bz-application.c:781
-msgctxt "About Dialog Translator Credit"
-msgid "Pietro F."
-msgstr ""
-
-#: src/bz-application.c:782
-msgctxt "About Dialog Translator Credit"
-msgid "Shihfu Juan"
-msgstr ""
-
-#: src/bz-application.c:783
-msgctxt "About Dialog Translator Credit"
-msgid "Shinsei"
-msgstr ""
-
-#: src/bz-application.c:784
-msgctxt "About Dialog Translator Credit"
-msgid "Vlastimil Dědek"
-msgstr ""
-
-#: src/bz-application.c:785
-msgctxt "About Dialog Translator Credit"
-msgid "asen23"
-msgstr ""
-
-#: src/bz-application.c:786
-msgctxt "About Dialog Translator Credit"
-msgid "renner"
-msgstr ""
-
-#: src/bz-application.c:787
-msgctxt "About Dialog Translator Credit"
-msgid "robotta"
-msgstr ""
-
-#: src/bz-application.c:788
+#: src/bz-application.c:759
 msgctxt "About Dialog Translator Credit"
 msgid "Peter Dave Hello"
 msgstr ""
 
-#: src/bz-application.c:804
+#: src/bz-application.c:760
+msgctxt "About Dialog Translator Credit"
+msgid "Pietro F."
+msgstr ""
+
+#: src/bz-application.c:761
+msgctxt "About Dialog Translator Credit"
+msgid "Shihfu Juan"
+msgstr ""
+
+#: src/bz-application.c:762
+msgctxt "About Dialog Translator Credit"
+msgid "Shinsei"
+msgstr ""
+
+#: src/bz-application.c:763
+msgctxt "About Dialog Translator Credit"
+msgid "Vlastimil Dědek"
+msgstr ""
+
+#: src/bz-application.c:764
+msgctxt "About Dialog Translator Credit"
+msgid "asen23"
+msgstr ""
+
+#: src/bz-application.c:765
+msgctxt "About Dialog Translator Credit"
+msgid "camegone"
+msgstr ""
+
+#: src/bz-application.c:766
+msgctxt "About Dialog Translator Credit"
+msgid "renner"
+msgstr ""
+
+#: src/bz-application.c:767
+msgctxt "About Dialog Translator Credit"
+msgid "robotta"
+msgstr ""
+
+#: src/bz-application.c:783
 msgid "Adam Masciola"
 msgstr ""
 
-#: src/bz-application.c:1238
+#: src/bz-application.c:1305
 msgid "Constructing Flatpak instance..."
 msgstr "Flatpak のインスタンスを生成中..."
 
-#: src/bz-application.c:1248
+#: src/bz-application.c:1322
 msgid "Reusing last Flatpak instance..."
 msgstr "Flatpak のインスタンスを再利用中..."
 
-#: src/bz-application.c:1273
+#: src/bz-application.c:1347
 msgid "Flathub is not registered on this system"
 msgstr "Flathub がシステムに登録されていません"
 
-#: src/bz-application.c:1276
+#: src/bz-application.c:1350
 msgid ""
 "Would you like to add Flathub as a remote? If you decline, the Flathub page "
 "will not be available. You can change this later."
@@ -211,43 +375,51 @@ msgstr ""
 "Flathub をリモートのリポジトリに追加しますか? 拒否した場合、Flathub ページは"
 "利用できません。これは、あとから変更可能です。"
 
-#: src/bz-application.c:1281 src/bz-update-dialog.blp:6
+#: src/bz-application.c:1355 src/bz-update-dialog.blp:6
 msgid "Later"
 msgstr "後で"
 
-#: src/bz-application.c:1282
+#: src/bz-application.c:1356
 msgid "Add Flathub"
 msgstr "Flathub を追加"
 
-#: src/bz-application.c:1314
+#: src/bz-application.c:1388
 #, c-format
 msgid "Identifying installed entries..."
-msgstr ""
+msgstr "インストール済みのエントリを特定中..."
 
-#: src/bz-application.c:1326
+#: src/bz-application.c:1400
 #, c-format
 msgid "Beginning remote entry retrieval while referencing %d blocklist(s)..."
 msgstr "%d 件のブロックリストを参照しながらリモートのエントリの取得開始中..."
 
-#: src/bz-application.c:1474
+#: src/bz-application.c:1548
 #, c-format
 msgid "Receiving Entries"
 msgstr "エントリを受信中"
 
-#: src/bz-application.c:1475
+#: src/bz-application.c:1549
 #, c-format
 msgid "%'d of %'d"
 msgstr "%'d / %'d"
 
-#: src/bz-application.c:1483
+#: src/bz-application.c:1559
 #, c-format
 msgid "Waiting for background indexing tasks to catch up..."
 msgstr "バックグラウンドのインデックス処理が終了するのを待っています..."
 
-#: src/bz-application.c:1519
+#: src/bz-application.c:1595
 #, c-format
 msgid "Completed initialization in %0.2f seconds"
 msgstr "%0.2f で初期化を完了しました"
+
+#: src/bz-application.c:1600
+msgid "Checking for updates..."
+msgstr "更新を確認中..."
+
+#: src/bz-application.c:1639
+msgid "Synchronizing..."
+msgstr "同期中..."
 
 #: src/bz-browse-widget.blp:11 src/bz-flathub-page.blp:11
 #: src/bz-full-view.blp:10 src/bz-installed-page.blp:11 src/bz-window.blp:52
@@ -278,9 +450,13 @@ msgstr "この画像をデフォルトの画像ビューアーで開く"
 msgid "Copy this image to the clipboard"
 msgstr "この画像をクリップボードにコピーする"
 
+#: src/bz-decorated-screenshot.c:140 src/bz-share-dialog.c:62
+msgid "Copied!"
+msgstr "コピーしました!"
+
 #: src/bz-entry-inspector.blp:5
 msgid "Entry Inspector"
-msgstr ""
+msgstr "エントリのインスペクター"
 
 #: src/bz-entry-inspector.blp:76
 msgid "Serialize"
@@ -352,76 +528,92 @@ msgstr ""
 "このコンピューター上のどの flatpak にも Flathub リモートレポジトリが見つかり"
 "ませんでした"
 
-#: src/bz-flathub-page.blp:53
-msgid "Apps Of The Week"
-msgstr "今週のアプリ"
-
-#: src/bz-flathub-page.blp:93
+#: src/bz-flathub-page.blp:80 src/bz-flathub-page.c:176
 msgid "Trending"
 msgstr "話題のアプリ"
 
-#: src/bz-flathub-page.blp:99 src/bz-flathub-page.blp:178
-#: src/bz-flathub-page.blp:225 src/bz-flathub-page.blp:272
-msgid "Show More"
+#: src/bz-flathub-page.blp:111
+#, fuzzy
+msgid "More Trending"
 msgstr "もっと見る"
 
-#: src/bz-flathub-page.blp:135
+#: src/bz-flathub-page.blp:127
 msgid "Categories"
 msgstr "カテゴリー"
 
-#: src/bz-flathub-page.blp:172
+#: src/bz-flathub-page.blp:164 src/bz-flathub-page.c:186
 msgid "Recently Updated"
 msgstr "最近更新されたアプリ"
 
-#: src/bz-flathub-page.blp:219
+#: src/bz-flathub-page.blp:195
+#, fuzzy
+msgid "More Updated"
+msgstr "もっと見る"
+
+#: src/bz-flathub-page.blp:216 src/bz-flathub-page.c:196
 msgid "Recently Added"
 msgstr "最近追加されたアプリ"
 
-#: src/bz-flathub-page.blp:266
+#: src/bz-flathub-page.blp:247
+#, fuzzy
+msgid "More Added"
+msgstr "もっと見る"
+
+#: src/bz-flathub-page.blp:268 src/bz-flathub-page.c:206
 msgid "Popular"
 msgstr "人気のアプリ"
 
-#: src/bz-flatpak-entry.c:561
+#: src/bz-flathub-page.blp:299
+#, fuzzy
+msgid "More Popular"
+msgstr "もっと見る"
+
+#: src/bz-flatpak-entry.c:519
+msgctxt "Project URL Type"
+msgid "Flathub Page"
+msgstr "Flathub ページ"
+
+#: src/bz-flatpak-entry.c:538
 msgctxt "Project URL Type"
 msgid "Homepage"
 msgstr "ホームページ"
 
-#: src/bz-flatpak-entry.c:564
+#: src/bz-flatpak-entry.c:541
 msgctxt "Project URL Type"
-msgid "Bugtracker"
+msgid "Issue Tracker"
 msgstr "バグトラッカー"
 
-#: src/bz-flatpak-entry.c:567
+#: src/bz-flatpak-entry.c:544
 msgctxt "Project URL Type"
 msgid "FAQ"
 msgstr "よくある質問"
 
-#: src/bz-flatpak-entry.c:570
+#: src/bz-flatpak-entry.c:547
 msgctxt "Project URL Type"
 msgid "Help"
 msgstr "ヘルプ"
 
-#: src/bz-flatpak-entry.c:573
+#: src/bz-flatpak-entry.c:550
 msgctxt "Project URL Type"
-msgid "Donation"
+msgid "Donate"
 msgstr "寄付"
 
-#: src/bz-flatpak-entry.c:578
+#: src/bz-flatpak-entry.c:555
 msgctxt "Project URL Type"
 msgid "Translate"
 msgstr "翻訳"
 
-#: src/bz-flatpak-entry.c:581
+#: src/bz-flatpak-entry.c:558
 msgctxt "Project URL Type"
 msgid "Contact"
 msgstr "連絡先"
 
-#: src/bz-flatpak-entry.c:584
+#: src/bz-flatpak-entry.c:561
 msgctxt "Project URL Type"
-msgid "VCS Browser"
-msgstr "VCS ブラウザー"
+msgid "Source Code"
+msgstr "ソースコード"
 
-#: src/bz-flatpak-entry.c:589
+#: src/bz-flatpak-entry.c:566
 msgctxt "Project URL Type"
 msgid "Contribute"
 msgstr "貢献する"
@@ -436,95 +628,123 @@ msgstr "別の語句で検索してみてください"
 
 #: src/bz-full-view.blp:21 src/bz-window.blp:62
 msgid "Content"
-msgstr ""
+msgstr "内容"
 
-#: src/bz-full-view.blp:147
+#: src/bz-full-view.blp:126
+msgid "This flatpak is verified by the original developers of the software."
+msgstr "この flatpak はオリジナルの開発元によって検証済みです。"
+
+#: src/bz-full-view.blp:148
 msgid "Support"
 msgstr "支援する"
 
-#: src/bz-full-view.blp:165
+#: src/bz-full-view.blp:166
 msgid "Repository Star Count"
 msgstr "リポジトリーのスター数"
 
-#: src/bz-full-view.blp:210
+#: src/bz-full-view.blp:198
 msgid "Run Application"
 msgstr "アプリケーションを実行"
 
-#: src/bz-full-view.blp:225
+#: src/bz-full-view.blp:213
 msgid "Download & Install Application"
 msgstr "アプリケーションをダウンロードしてインストールする"
 
-#: src/bz-full-view.blp:231 src/bz-transaction-view.blp:98 src/bz-window.c:988
+#: src/bz-full-view.blp:219 src/bz-transaction-view.blp:117
+#: src/bz-window.c:1060
 msgid "Install"
 msgstr "インストール"
 
-#: src/bz-full-view.blp:244
+#: src/bz-full-view.blp:231
 msgid "Uninstall Application"
 msgstr "このアプリケーションをアンインストール"
 
-#: src/bz-full-view.blp:260
+#: src/bz-full-view.blp:250 src/bz-installed-page.blp:125
+msgid "Manage Add-ons"
+msgstr "アドオンを管理する"
+
+#: src/bz-full-view.blp:263
 msgid "Install Other Version"
 msgstr "ほかのバージョンをインストール"
 
-#: src/bz-full-view.blp:285
+#: src/bz-full-view.blp:281
 msgid "Share this application"
 msgstr "このアプリケーションを共有する"
 
-#: src/bz-full-view.blp:325
+#: src/bz-full-view.blp:320
 msgid "App Details"
 msgstr "アプリの詳細"
 
-#: src/bz-full-view.blp:328
+#: src/bz-full-view.blp:323
 msgid "Download Size"
 msgstr "ダウンロードサイズ"
 
-#: src/bz-full-view.blp:334
+#: src/bz-full-view.blp:329
 msgid "Download size"
 msgstr "ダウンロードサイズ"
 
-#: src/bz-full-view.blp:340
+#: src/bz-full-view.blp:335
 msgid "License"
 msgstr "ライセンス"
 
-#: src/bz-full-view.blp:370 src/bz-full-view.blp:378
+#: src/bz-full-view.blp:365 src/bz-full-view.blp:373
 msgid "Project Website"
 msgstr "プロジェクトのウェブサイト"
 
-#: src/bz-full-view.blp:386
+#: src/bz-full-view.blp:381
 msgid "Open in browser"
 msgstr "ブラウザーで開く"
 
-#: src/bz-full-view.blp:392 src/bz-full-view.blp:401
+#: src/bz-full-view.blp:387 src/bz-full-view.blp:396
 msgid "Download Statistics"
 msgstr "ダウンロードの統計"
 
-#: src/bz-full-view.blp:409
+#: src/bz-full-view.blp:404
 msgid "Show Downloads Over Time"
 msgstr "過去の期間に対するダウンロード数のグラフを表示する"
 
-#: src/bz-full-view.blp:415
+#: src/bz-full-view.blp:410
 msgid "Repositories"
 msgstr "リポジトリー"
 
-#: src/bz-full-view.blp:421
+#: src/bz-full-view.blp:416
 msgid "Remote repo name"
 msgstr "リモートのリポジトリーの名前"
 
-#: src/bz-full-view.c:200
+#: src/bz-full-view.blp:430
+msgid "Version History"
+msgstr "バージョン履歴"
+
+#: src/bz-full-view.c:209
 #, c-format
 msgid "%'d downloads in the last month"
 msgstr "過去1ヶ月の間に %'d ダウンロード"
 
-#: src/bz-full-view.c:218
-#, c-format
-msgid "Released %x"
-msgstr "リリース日 %x"
+#. Translators: This is a date format for timestamps from previous years. Used in the app releases section.
+#. * %B is the full month name, %e is the day, %Y is the year.
+#. * Example: "October 1, 2025"
+#. * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
+#. * Please modify to make it sound natural in your locale.
+#. *
+#: src/bz-full-view.c:237
+msgid "%B %-d, %Y"
+msgstr "%Y/%0M/%0d"
 
-#: src/bz-full-view.c:229
+#. Translators: This is a date format for timestamps from the current year. Used in the app releases section.
+#. * %B is the full month name, %e is the day.
+#. * Example: "October 1"
+#. * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
+#. * Please modify to make it sound natural in your locale.
+#. *
+#: src/bz-full-view.c:245
+msgid "%B %-d"
+msgstr "%0M/%0d"
+
+#: src/bz-full-view.c:256
 msgid "No URL"
 msgstr "URL がありません"
 
-#: src/bz-full-view.c:237
+#: src/bz-full-view.c:264
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -532,7 +752,7 @@ msgstr ""
 "このアプリケーションはフリーのOSSライセンスで公開されており、安全のためにソー"
 "スコードを確認することができます。"
 
-#: src/bz-full-view.c:238
+#: src/bz-full-view.c:265
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
@@ -540,6 +760,15 @@ msgstr ""
 "このアプリケーションはプロプライエタリなライセンスで公開されており、ソース"
 "コードはプライベートで開発されているため、独立した第三者による検査を受けるこ"
 "とができません。"
+
+#: src/bz-full-view.c:496
+#, c-format
+msgid "Version %s"
+msgstr "バージョン %s"
+
+#: src/bz-full-view.c:513
+msgid "No details for this release"
+msgstr "このリリースの詳細情報がありません"
 
 #: src/bz-inspector.blp:5
 msgid "Bazaar Inspector"
@@ -569,32 +798,32 @@ msgstr ""
 msgid "No Flatpaks Installed"
 msgstr "Flatpak がインストールされていません"
 
-#: src/bz-installed-page.blp:21 src/bz-window.blp:243 src/bz-window.blp:385
+#: src/bz-installed-page.blp:21 src/bz-window.blp:248 src/bz-window.blp:350
 msgid "Installed"
 msgstr "インストール済み"
 
-#: src/bz-installed-page.blp:99
+#: src/bz-installed-page.blp:101
 msgid "Support this application"
 msgstr "このアプリケーションを支援する"
 
-#: src/bz-installed-page.blp:124 src/bz-transaction-view.blp:266
-#: src/bz-window.c:969
+#: src/bz-installed-page.blp:151 src/bz-transaction-view.blp:323
+#: src/bz-window.c:1082
 msgid "Remove"
 msgstr "削除する"
 
-#: src/bz-installed-page.blp:151
+#: src/bz-installed-page.blp:178
 msgid "More actions"
 msgstr "詳細コマンド"
 
-#: src/bz-installed-page.blp:170
+#: src/bz-installed-page.blp:197
 msgid "Run this application"
 msgstr "このアプリケーションを実行する"
 
-#: src/bz-installed-page.blp:182
+#: src/bz-installed-page.blp:209
 msgid "Run"
 msgstr "実行"
 
-#: src/bz-installed-page.blp:246 src/bz-installed-page.blp:257
+#: src/bz-installed-page.blp:221 src/bz-installed-page.blp:232
 msgid "View Store Page"
 msgstr "ストアページを表示"
 
@@ -610,7 +839,7 @@ msgstr ""
 "あなたはこのアプリの複数のバージョンをインストールしています。どれを選択して"
 "続けますか?"
 
-#: src/bz-installed-page.c:656 src/bz-window.c:968 src/bz-window.c:987
+#: src/bz-installed-page.c:656 src/bz-window.c:1059 src/bz-window.c:1081
 msgid "Cancel"
 msgstr "キャンセル"
 
@@ -619,99 +848,156 @@ msgid "Preferences"
 msgstr "設定"
 
 #: src/bz-preferences-dialog.blp:13
-msgid "Full Application View"
-msgstr "アプリケーションページの表示"
+msgid "Application Details"
+msgstr "アプリケーションの詳細"
 
-#: src/bz-preferences-dialog.blp:14
-msgid "Change what content is shown when viewing applications"
-msgstr "アプリケーションを見ているときに表示される内容を変更します"
-
-#: src/bz-preferences-dialog.blp:17
+#: src/bz-preferences-dialog.blp:16
 msgid "Git Forge Star Counts"
 msgstr "Git Forge のスター数"
 
-#: src/bz-preferences-dialog.blp:18
-msgid ""
-"If you do not have an access token, turning this setting on may cause GitHub "
-"to eventually rate limit you."
+#: src/bz-preferences-dialog.blp:17
+msgid "Not having a GitHub access token may trigger rate limits"
 msgstr ""
-"あなたがアクセストークンを持っていない場合、この設定をオンにしていると "
-"Github からレート制限をされる恐れがあります。"
+"GitHub のアクセストークン無しではレート制限の原因となる可能性があります"
+
+#: src/bz-preferences-dialog.blp:22 src/bz-window.blp:290
+msgid "Search"
+msgstr "検索"
+
+#: src/bz-preferences-dialog.blp:26
+msgid "Hide proprietary applications from search results"
+msgstr "プロプライエタリのソフトウェアを検索結果から除外する"
+
+#: src/bz-preferences-dialog.blp:30
+msgid "Show Only Flathub Apps"
+msgstr "Flathub のアプリのみ表示"
+
+#: src/bz-preferences-dialog.blp:31
+msgid "Limit search results to applications available on Flathub"
+msgstr "検索結果を Flathub で利用可能なアプリのみに限定する"
+
+#: src/bz-preferences-dialog.blp:35
+msgid "Debounce Search Results"
+msgstr "検索の遅延"
+
+#: src/bz-preferences-dialog.blp:36
+msgid "Wait for a brief pause to reduce system load"
+msgstr "システムの負荷を減らすため、少しの待ち時間を追加する"
+
+#: src/bz-preferences-dialog.blp:41
+msgid "Global Progress Bar"
+msgstr "全体のプログレスバー"
+
+#: src/bz-preferences-dialog.blp:44
+msgid "Theme"
+msgstr "テーマ"
+
+#: src/bz-preferences-dialog.blp:45
+msgid "Choose a fun theme for the global progress bar!"
+msgstr "全体のプログレスバーを好きなテーマで彩りましょう!"
+
+#: src/bz-preferences-dialog.blp:48
+msgid "Accent Color"
+msgstr "アクセントカラー"
+
+#: src/bz-preferences-dialog.blp:49
+msgid "Pride Rainbow Flag"
+msgstr "プライドレインボー フラッグ"
+
+#: src/bz-preferences-dialog.blp:50
+msgid "Lesbian Pride Flag"
+msgstr "レズビアン プライド フラッグ"
+
+#: src/bz-preferences-dialog.blp:51
+msgid "Transgender Flag"
+msgstr "トランスジェンダー フラッグ"
+
+#: src/bz-preferences-dialog.blp:52
+msgid "Nonbinary Flag"
+msgstr "ノンバイナリー フラッグ"
+
+#: src/bz-preferences-dialog.blp:53
+msgid "Bisexual Flag"
+msgstr "バイセクシュアル フラッグ"
+
+#: src/bz-preferences-dialog.blp:54
+msgid "Asexual Flag"
+msgstr "アセクシュアル フラッグ"
+
+#: src/bz-preferences-dialog.blp:55
+msgid "Pansexual Flag"
+msgstr "パンセクシュアル フラッグ"
+
+#: src/bz-preferences-dialog.blp:56
+msgid "Aromantic Flag"
+msgstr "アロマンティック フラッグ"
+
+#: src/bz-preferences-dialog.blp:57
+msgid "Genderfluid Flag"
+msgstr "ジェンダーフルイド フラッグ"
+
+#: src/bz-preferences-dialog.blp:58
+msgid "Polysexual Flag"
+msgstr "ポリセクシュアル フラッグ"
+
+#: src/bz-preferences-dialog.blp:59
+msgid "Omnisexual Flag"
+msgstr "オムニセクシュアル フラッグ"
 
 #: src/bz-search-widget.blp:69
-msgid "Type to filter"
-msgstr "入力して検索"
-
-#: src/bz-search-widget.blp:91 src/bz-search-widget.blp:108
-msgid "Search Options"
-msgstr "検索設定"
-
-#: src/bz-search-widget.blp:112
-msgid "Exclude results with proprietary licenses"
-msgstr "プロプライエタリなライセンスの結果を除外"
-
-#: src/bz-search-widget.blp:117
-msgid "Exclude results not originating from Flathub"
-msgstr "Flathub 以外からの結果を除外"
-
-#: src/bz-search-widget.blp:132
-msgid "Advanced"
-msgstr "高度なオプション"
-
-#: src/bz-search-widget.blp:136
-msgid "Debounce input to prevent instant replies"
-msgstr "繰り返しの入力では結果を表示しないようにする"
+msgid "Search Apps"
+msgstr "アプリ検索"
 
 #: src/bz-share-dialog.blp:13
 msgid "Share"
 msgstr "共有"
 
-#: src/bz-share-dialog.blp:64
-msgid "Copy this link"
-msgstr "このリンクをコピーする"
+#: src/bz-share-dialog.c:106
+msgid "Copy Link"
+msgstr "リンクをコピーする"
 
-#: src/bz-share-dialog.blp:71
-msgid "Open this link externally"
-msgstr "このリンクを外部で開く"
+#: src/bz-share-dialog.c:117
+msgid "Open Link"
+msgstr "リンクを開く"
 
-#: src/bz-stats-dialog.blp:15
-msgid "Downloads Over Time"
-msgstr "ダウンロード数の推移"
+#: src/bz-stats-dialog.blp:26
+msgid "Timeline"
+msgstr "時系列"
 
 #: src/bz-stats-dialog.blp:31
-msgid "Minimize Lower Bound"
-msgstr "グラフの下限を最小化"
+msgid "Installs:"
+msgstr "インストール数:"
 
-#: src/bz-stats-dialog.blp:36
-msgid "Maximize Upper Bound"
-msgstr "グラフの上限を最大化"
+#: src/bz-stats-dialog.blp:37
+msgid "World"
+msgstr "地域別"
 
 #: src/bz-transaction-manager.c:1090
 #, c-format
 msgid "Finished in %.02f seconds"
 msgstr "%.02f 秒で完了しました"
 
-#: src/bz-transaction-view.blp:85
+#: src/bz-transaction-view.blp:104
 msgid "Install Size"
 msgstr "インストールサイズ"
 
-#: src/bz-transaction-view.blp:169
+#: src/bz-transaction-view.blp:207
 msgid "Updated Size"
 msgstr "更新後のサイズ"
 
-#: src/bz-transaction-view.blp:182 src/bz-window.blp:297
+#: src/bz-transaction-view.blp:220 src/bz-window.blp:302
 msgid "Update"
 msgstr "更新"
 
-#: src/bz-transaction-view.blp:253
+#: src/bz-transaction-view.blp:310
 msgid "Freed Space"
 msgstr "解放された容量"
 
-#: src/bz-transaction-view.blp:400
+#: src/bz-transaction-view.blp:458
 msgid "Error Details"
 msgstr "エラーの詳細"
 
-#: src/bz-transaction-view.c:129
+#: src/bz-transaction-view.c:139
 #, c-format
 msgid "Transferred %s so far"
 msgstr ""
@@ -748,7 +1034,7 @@ msgstr ""
 #: src/bz-update-dialog.c:142
 #, c-format
 msgid "Additionally, %d runtimes and/or addons will be updated."
-msgstr "さらに、 %d 個のランタイムや、アドオンが更新されます。"
+msgstr "さらに %d 個のランタイムや、アドオンが更新されます。"
 
 #: src/bz-window.blp:56
 msgid "Transactions Will Appear Here"
@@ -762,87 +1048,83 @@ msgstr "現在進行中のダウンロードを停止"
 msgid "Clear all finished transactions"
 msgstr "ダウンロード済みのものを全て非表示"
 
-#: src/bz-window.blp:155 src/bz-window.blp:159
+#: src/bz-window.blp:156 src/bz-window.blp:160
 msgid "Offline"
 msgstr "オフライン"
 
-#: src/bz-window.blp:165
+#: src/bz-window.blp:166
 msgid "Loading"
 msgstr "読み込み中"
 
-#: src/bz-window.blp:211
+#: src/bz-window.blp:214
 msgid "Browse"
 msgstr ""
 
-#: src/bz-window.blp:221
+#: src/bz-window.blp:224
 msgid "App View"
 msgstr "アプリ表示"
 
-#: src/bz-window.blp:233 src/bz-window.blp:364
+#: src/bz-window.blp:238 src/bz-window.blp:343
 msgid "Flathub"
 msgstr "Flathub"
 
-#: src/bz-window.blp:268
+#: src/bz-window.blp:273
 msgid "Go Back"
 msgstr "戻る"
 
-#: src/bz-window.blp:285
-msgid "Search"
-msgstr "検索"
-
-#: src/bz-window.blp:312
-msgid "Checking for updates"
-msgstr "更新を確認中"
-
-#: src/bz-window.blp:327
+#: src/bz-window.blp:332
 msgid "View curated applications"
 msgstr "厳選されたアプリケーションを表示する"
 
-#: src/bz-window.blp:343
+#: src/bz-window.blp:336
 msgid "Curated"
 msgstr "特選アプリ"
 
-#: src/bz-window.blp:349
+#: src/bz-window.blp:340
 msgid "View the latest on Flathub"
 msgstr "Flathub の最新のアプリを表示する"
 
-#: src/bz-window.blp:370
+#: src/bz-window.blp:347
 msgid "View installed applications"
 msgstr "インストール済みのアプリケーションを表示する"
 
-#: src/bz-window.blp:399
+#: src/bz-window.blp:362
 msgid "Main Menu"
 msgstr "メインメニュー"
 
-#: src/bz-window.blp:410
+#: src/bz-window.blp:373
 msgid "Toggle transaction sidebar"
 msgstr "ダウンロードのサイドバーを表示/非表示"
 
-#: src/bz-window.blp:455
+#: src/bz-window.blp:419
+msgid "_Quit Service"
+msgstr "_サービスの停止"
+
+#: src/bz-window.blp:424
+msgid "_Refresh Content"
+msgstr "_再読み込み"
+
+#: src/bz-window.blp:429
 msgid "_Preferences"
 msgstr "_設定"
 
-#: src/bz-window.blp:460
-msgid "_Refresh"
-msgstr "_再読み込み"
-
-#: src/bz-window.blp:465
+#: src/bz-window.blp:434
 msgid "_Keyboard Shortcuts"
 msgstr "_キーボードショートカット"
 
-#: src/bz-window.blp:470
+#: src/bz-window.blp:439
 msgid "_About Bazaar"
 msgstr "_Bazaar について"
 
-#: src/bz-window.blp:475
+#: src/bz-window.blp:444
 msgid "_Donate to Bazaar ❤️"
 msgstr "_Bazaar に寄付する❤️"
 
-#: src/bz-window.c:614
+#: src/bz-window.c:621
 msgid "Up to date!"
 msgstr "最新です!"
 
-#: src/bz-window.c:786
+#: src/bz-window.c:793
 msgid ""
 "The ability to inspect and install local .flatpak bundle files is coming "
 "soon! In the meantime, try running\n"
@@ -858,86 +1140,153 @@ msgstr ""
 "\n"
 "をコマンドラインで実行してください。"
 
-#: src/bz-window.c:877
+#: src/bz-window.c:924
 msgid "Can't do that right now!"
 msgstr "今すぐにはできません!"
 
-#: src/bz-window.c:932
-msgid "Confirm Action"
-msgstr "操作の確認"
-
-#: src/bz-window.c:961
+#: src/bz-window.c:1053
 #, c-format
-msgid ""
-"You are about to remove the following Flatpak:\n"
-"\n"
-"<b>%s</b>\n"
-"<tt>%s</tt>\n"
-"\n"
-"Are you sure?"
-msgstr ""
-"あなたは以下の Flatpak をアンインストールしようとしています:\n"
-"\n"
-"<b>%s</b>\n"
-"<tt>%s</tt>\n"
-"\n"
-"アンインストールしてもよろしいですか?"
+msgid "Install %s?"
+msgstr "%s をインストールしますか?"
 
-#: src/bz-window.c:980
+#: src/bz-window.c:1056
+msgid "May install additional shared components"
+msgstr "追加の共有のコンポーネントがインストールされることがあります"
+
+#: src/bz-window.c:1075
 #, c-format
-msgid ""
-"You are about to install the following Flatpak:\n"
-"\n"
-"<b>%s</b>\n"
-"<tt>%s</tt>\n"
-"\n"
-"Are you sure?"
-msgstr ""
-"あなたは以下の Flatpak をインストールしようとしています:\n"
-"\n"
-"<b>%s</b>\n"
-"<tt>%s</tt>\n"
-"\n"
-"インストールしてもよろしいですか?"
+msgid "Remove %s?"
+msgstr "%s を削除しますか?"
 
-#: src/bz-window.c:1010
-msgid "More details"
-msgstr "もっと見る"
+#: src/bz-window.c:1078
+msgid "Settings & user data will be kept"
+msgstr "設定とユーザーデータは保持されます"
 
-#: src/bz-window.c:1136
+#: src/bz-window.c:1246
 msgid "Resume the execution of transactions"
 msgstr "ダウンロードを再開する"
 
-#: src/bz-window.c:1142
+#: src/bz-window.c:1252
 msgid "Pause the execution of transactions"
 msgstr "実行中のダウンロードを一時停止する"
 
-#: src/gtk/help-overlay.blp:11
+#: src/bz-world-map.c:523
+#, c-format
+msgid "%s: %'u downloads"
+msgstr "%s: %'u ダウンロード"
+
+#: src/gtk/shortcuts-dialog.blp:6
 msgctxt "shortcut window"
 msgid "General"
 msgstr "一般"
 
-#: src/gtk/help-overlay.blp:14
+#: src/gtk/shortcuts-dialog.blp:9
 msgctxt "shortcut window"
 msgid "Open Search Dialog"
 msgstr "検索ダイアログを表示"
 
-#: src/gtk/help-overlay.blp:19
+#: src/gtk/shortcuts-dialog.blp:14
 msgctxt "shortcut window"
 msgid "Refresh"
 msgstr "再読み込み"
 
-#: src/gtk/help-overlay.blp:24
+#: src/gtk/shortcuts-dialog.blp:19
 msgctxt "shortcut window"
 msgid "Toggle Transaction Manager"
-msgstr "ダウンロードマネーじゃーの表示/非表示"
+msgstr "ダウンロードマネージャーの表示/非表示"
 
-#: src/gtk/help-overlay.blp:29
+#: src/gtk/shortcuts-dialog.blp:24
 msgctxt "shortcut window"
 msgid "Show Shortcuts"
 msgstr "ショートカットを表示"
 
-#: src/gtk/help-overlay.blp:34
+#: src/gtk/shortcuts-dialog.blp:29
 msgctxt "shortcut window"
 msgid "Quit"
 msgstr "アプリを閉じる"
+
+#~ msgid "Show More"
+#~ msgstr "もっと見る"
+
+#~ msgid "Downloads Over Time"
+#~ msgstr "ダウンロード数の推移"
+
+#~ msgid "Minimize Lower Bound"
+#~ msgstr "グラフの下限を最小化"
+
+#~ msgid "Maximize Upper Bound"
+#~ msgstr "グラフの上限を最大化"
+
+#~ msgid "Confirm Action"
+#~ msgstr "操作の確認"
+
+#, c-format
+#~ msgid ""
+#~ "You are about to remove the following Flatpak:\n"
+#~ "\n"
+#~ "<b>%s</b>\n"
+#~ "<tt>%s</tt>\n"
+#~ "\n"
+#~ "Are you sure?"
+#~ msgstr ""
+#~ "あなたは以下の Flatpak をアンインストールしようとしています:\n"
+#~ "\n"
+#~ "<b>%s</b>\n"
+#~ "<tt>%s</tt>\n"
+#~ "\n"
+#~ "アンインストールしてもよろしいですか?"
+
+#, c-format
+#~ msgid ""
+#~ "You are about to install the following Flatpak:\n"
+#~ "\n"
+#~ "<b>%s</b>\n"
+#~ "<tt>%s</tt>\n"
+#~ "\n"
+#~ "Are you sure?"
+#~ msgstr ""
+#~ "あなたは以下の Flatpak をインストールしようとしています:\n"
+#~ "\n"
+#~ "<b>%s</b>\n"
+#~ "<tt>%s</tt>\n"
+#~ "\n"
+#~ "インストールしてもよろしいですか?"
+
+#~ msgid "Apps Of The Week"
+#~ msgstr "今週のアプリ"
+
+#, c-format
+#~ msgid "Released %x"
+#~ msgstr "リリース日 %x"
+
+#~ msgctxt "Project URL Type"
+#~ msgid "VCS Browser"
+#~ msgstr "VCS ブラウザー"
+
+#~ msgid "Full Application View"
+#~ msgstr "アプリケーションページの表示"
+
+#~ msgid "Change what content is shown when viewing applications"
+#~ msgstr "アプリケーションを見ているときに表示される内容を変更します"
+
+#~ msgid ""
+#~ "If you do not have an access token, turning this setting on may cause "
+#~ "GitHub to eventually rate limit you."
+#~ msgstr ""
+#~ "あなたがアクセストークンを持っていない場合、この設定をオンにしていると "
+#~ "Github からレート制限をされる恐れがあります。"
+
+#~ msgid "Type to filter"
+#~ msgstr "入力して検索"
+
+#~ msgid "Exclude results with proprietary licenses"
+#~ msgstr "プロプライエタリなライセンスの結果を除外"
+
+#~ msgid "Exclude results not originating from Flathub"
+#~ msgstr "Flathub 以外からの結果を除外"
+
+#~ msgid "Advanced"
+#~ msgstr "高度なオプション"
+
+#~ msgid "Open this link externally"
+#~ msgstr "このリンクを外部で開く"

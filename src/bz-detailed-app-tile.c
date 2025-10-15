@@ -91,6 +91,20 @@ bz_detailed_app_tile_set_property (GObject      *object,
     }
 }
 
+static gboolean
+invert_boolean (gpointer object,
+                gboolean value)
+{
+  return !value;
+}
+
+static gboolean
+is_zero (gpointer object,
+         int      value)
+{
+  return value == 0;
+}
+
 static void
 bz_detailed_app_tile_class_init (BzDetailedAppTileClass *klass)
 {
@@ -111,6 +125,9 @@ bz_detailed_app_tile_class_init (BzDetailedAppTileClass *klass)
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-detailed-app-tile.ui");
+
+  gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
+  gtk_widget_class_bind_template_callback (widget_class, is_zero);
 }
 
 static void

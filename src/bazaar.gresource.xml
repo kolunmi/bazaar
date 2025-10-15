@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/io/github/kolunmi/Bazaar/">
-    
+
     <file alias="style.css">gtk/style.css</file>
-    <file alias="style-dark.css">gtk/style-dark.css</file>
 
     <file preprocess="xml-stripblanks">main-config-schema.xml</file>
     <file preprocess="xml-stripblanks">bz-content-provider-config-schema.xml</file>
-    
+
+    <file>countries.json</file>
+
     <file preprocess="xml-stripblanks">bz-addons-dialog.ui</file>
+    <file preprocess="xml-stripblanks">bz-app-size-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-app-tile.ui</file>
+    <file preprocess="xml-stripblanks">bz-apps-page.ui</file>
+    <file preprocess="xml-stripblanks">bz-appstream-description-render.ui</file>
     <file preprocess="xml-stripblanks">bz-browse-widget.ui</file>
-    <file preprocess="xml-stripblanks">bz-category-page.ui</file>
-    <file preprocess="xml-stripblanks">bz-curated-app-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-category-tile.ui</file>
+    <file preprocess="xml-stripblanks">bz-curated-app-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-decorated-screenshot.ui</file>
     <file preprocess="xml-stripblanks">bz-detailed-app-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-entry-inspector.ui</file>
@@ -23,6 +26,7 @@
     <file preprocess="xml-stripblanks">bz-installed-page.ui</file>
     <file preprocess="xml-stripblanks">bz-preferences-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-progress-bar.ui</file>
+    <file preprocess="xml-stripblanks">bz-screenshot-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-search-widget.ui</file>
     <file preprocess="xml-stripblanks">bz-section-view.ui</file>
     <file preprocess="xml-stripblanks">bz-share-dialog.ui</file>
@@ -30,9 +34,12 @@
     <file preprocess="xml-stripblanks">bz-transaction-view.ui</file>
     <file preprocess="xml-stripblanks">bz-update-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-window.ui</file>
-    <file preprocess="xml-stripblanks">gtk/help-overlay.ui</file>
+    <file alias="shortcuts-dialog.ui" preprocess="xml-stripblanks">gtk/shortcuts-dialog.ui</file>
 
+    <file preprocess="xml-stripblanks">icons/scalable/actions/app-installed-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/check-plain-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/circle-filled-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/community-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/connected-squares-x-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/copy-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/cross-large-circle-filled-symbolic.svg</file>
@@ -47,7 +54,7 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/folder-download-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/globe-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/go-previous-symbolic.svg</file>
-    <file preprocess="xml-stripblanks">icons/scalable/actions/graph-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/graph2-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/heart-filled-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/heart-outline-thick-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/horizontal-arrows-disabled-symbolic.svg</file>
@@ -75,6 +82,8 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/verified-checkmark-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/view-more-horizontal-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/view-more-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/zoom-minus-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/zoom-plus-symbolic.svg</file>
 
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Create.svg</file>
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Develop.svg</file>

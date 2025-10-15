@@ -582,6 +582,15 @@ read_task_fiber (ReadTaskData *data)
         living_entry = g_weak_ref_get (&living->wr);
         if (living_entry != NULL)
           {
+            bz_clear_guard (&guard);
+            BZ_BEGIN_GUARD_WITH_CONTEXT (&guard,
+                                         &task_data->reading_mutex,
+                                         &task_data->reading_gate);
+            {
+              g_hash_table_remove (task_data->reading_hash, unique_id_checksum);
+            }
+            bz_clear_guard (&guard);
+
             dex_promise_resolve_object (promise, g_object_ref (living_entry));
             return dex_future_new_for_object (living_entry);
           }

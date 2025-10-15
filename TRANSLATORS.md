@@ -117,5 +117,5 @@ killall bazaar
 ```
 
 ```
-LANGUAGE=de bazaar window --auto-service
+LANGUAGE=de bazaar
 ```

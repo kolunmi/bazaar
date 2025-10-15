@@ -23,6 +23,9 @@
 #include <glib/gi18n.h>
 #include <json-glib/json-glib.h>
 
+#include "bz-addons-dialog.h"
+#include "bz-app-size-dialog.h"
+#include "bz-appstream-description-render.h"
 #include "bz-decorated-screenshot.h"
 #include "bz-dynamic-list-view.h"
 #include "bz-env.h"
@@ -31,9 +34,12 @@
 #include "bz-full-view.h"
 #include "bz-global-state.h"
 #include "bz-lazy-async-texture-model.h"
+#include "bz-release.h"
+#include "bz-screenshot-dialog.h"
 #include "bz-screenshot.h"
 #include "bz-section-view.h"
 #include "bz-share-dialog.h"
+#include "bz-spdx.h"
 #include "bz-state-info.h"
 #include "bz-stats-dialog.h"
 
@@ -55,6 +61,7 @@ struct _BzFullView
   AdwViewStack *stack;
   GtkWidget    *forge_stars;
   GtkLabel     *forge_stars_label;
+  GtkListBox   *releases_box;
 };
 
 G_DEFINE_FINAL_TYPE (BzFullView, bz_full_view, ADW_TYPE_BIN)
@@ -77,6 +84,8 @@ enum
 {
   SIGNAL_INSTALL,
   SIGNAL_REMOVE,
+  SIGNAL_INSTALL_ADDON,
+  SIGNAL_REMOVE_ADDON,
 
   LAST_SIGNAL,
 };
@@ -87,6 +96,10 @@ debounce_timeout (BzFullView *self);
 
 static DexFuture *
 retrieve_star_string_fiber (BzFullView *self);
+
+static void addon_transact_cb (BzFullView     *self,
+                               BzEntry        *entry,
+                               BzAddonsDialog *dialog);
 
 static void
 bz_full_view_dispose (GObject *object)
@@ -197,15 +210,42 @@ format_recent_downloads (gpointer object,
                          int      value)
 {
   if (value > 0)
-    return g_strdup_printf (_ ("%'d downloads in the last month"), value);
+    return g_strdup_printf (_ ("%'d Monthly Downloads"), value);
   else
-    return g_strdup ("---");
+    return g_strdup (_ ("--- Downloads"));
 }
 
 static char *
 format_size (gpointer object, guint64 value)
 {
-  return g_format_size (value);
+  g_autofree char *size_str = g_format_size (value);
+  char            *space    = g_strrstr (size_str, "\xC2\xA0");
+
+  if (space != NULL)
+    {
+      *space = '\0';
+      return g_strdup_printf ("%s <span font_size='x-small'>%s</span>",
+                              size_str, space + 2);
+    }
+
+  return g_strdup (size_str);
+}
+
+static char *
+format_license (gpointer    object,
+                const char *license)
+{
+  g_autofree char *name = NULL;
+
+  if (license == NULL || *license == '\0')
+    return g_strdup (_ ("Unknown"));
+
+  name = bz_spdx_get_name (license);
+
+  if (name != NULL && *name != '\0')
+    return g_steal_pointer (&name);
+  else
+    return g_strdup (license);
 }
 
 static char *
@@ -213,9 +253,27 @@ format_timestamp (gpointer object,
                   guint64  value)
 {
   g_autoptr (GDateTime) date = NULL;
+  g_autoptr (GDateTime) now  = NULL;
 
   date = g_date_time_new_from_unix_utc (value);
-  return g_date_time_format (date, _ ("Released %x"));
+  now  = g_date_time_new_now_local ();
+
+  if (g_date_time_get_year (date) < g_date_time_get_year (now))
+    /* Translators: This is a date format for timestamps from previous years. Used in the app releases section.
+     * %B is the full month name, %e is the day, %Y is the year.
+     * Example: "October 1, 2025"
+     * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
+     * Please modify to make it sound natural in your locale.
+     *  */
+    return g_date_time_format (date, _ ("%B %-d, %Y"));
+  else
+    /* Translators: This is a date format for timestamps from the current year. Used in the app releases section.
+     * %B is the full month name, %e is the day.
+     * Example: "October 1"
+     * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
+     * Please modify to make it sound natural in your locale.
+     *  */
+    return g_date_time_format (date, _ ("%B %-d"));
 }
 
 static char *
@@ -227,6 +285,16 @@ format_as_link (gpointer    object,
                             value, value, value);
   else
     return g_strdup (_ ("No URL"));
+}
+
+static gboolean
+has_link (gpointer    object,
+          const char *license)
+{
+  if (license == NULL || *license == '\0')
+    return FALSE;
+
+  return bz_spdx_is_valid (license);
 }
 
 static char *
@@ -251,7 +319,28 @@ open_url_cb (BzFullView   *self,
   if (url != NULL && *url != '\0')
     g_app_info_launch_default_for_uri (url, NULL, NULL);
   else
-    g_warning ("Invalid or empty URL provided");
+    g_warning ("Invalid or empty URL provided for Flathub URL CB");
+}
+
+static void
+open_flathub_url_cb (BzFullView *self,
+                     GtkButton  *button)
+{
+  BzEntry    *entry = NULL;
+  const char *id    = NULL;
+  char       *url   = NULL;
+
+  entry = BZ_ENTRY (bz_result_get_object (self->ui_entry));
+  id    = bz_entry_get_id (entry);
+
+  if (id != NULL && *id != '\0')
+    {
+      url = g_strdup_printf ("https://flathub.org/apps/%s", id);
+      g_app_info_launch_default_for_uri (url, NULL, NULL);
+      g_free (url);
+    }
+  else
+    g_warning ("Invalid or empty ID provided");
 }
 
 static void
@@ -270,6 +359,31 @@ share_cb (BzFullView *self,
 }
 
 static void
+license_cb (BzFullView *self,
+            GtkButton  *button)
+{
+  BzEntry         *entry   = NULL;
+  const char      *license = NULL;
+  g_autofree char *url     = NULL;
+
+  entry = bz_result_get_object (self->ui_entry);
+  if (entry == NULL)
+    return;
+
+  g_object_get (entry, "project-license", &license, NULL);
+
+  if (license == NULL || *license == '\0')
+    return;
+
+  url = bz_spdx_get_url (license);
+
+  if (url != NULL)
+    g_app_info_launch_default_for_uri (url, NULL, NULL);
+  else
+    g_warning ("Could not generate URL for license: %s", license);
+}
+
+static void
 dl_stats_cb (BzFullView *self,
              GtkButton  *button)
 {
@@ -279,15 +393,30 @@ dl_stats_cb (BzFullView *self,
   if (self->group == NULL)
     return;
 
-  dialog = bz_stats_dialog_new (NULL);
+  ui_entry = bz_result_get_object (self->ui_entry);
+
+  dialog = bz_stats_dialog_new (NULL, NULL);
   adw_dialog_set_content_width (dialog, 2000);
   adw_dialog_set_content_height (dialog, 1500);
 
-  ui_entry = bz_result_get_object (self->ui_entry);
   g_object_bind_property (ui_entry, "download-stats", dialog, "model", G_BINDING_SYNC_CREATE);
+  g_object_bind_property (ui_entry, "download-stats-per-country", dialog, "country-model", G_BINDING_SYNC_CREATE);
 
   adw_dialog_present (dialog, GTK_WIDGET (self));
   bz_stats_dialog_animate_open (BZ_STATS_DIALOG (dialog));
+}
+
+static void
+size_cb (BzFullView *self,
+         GtkButton  *button)
+{
+  AdwDialog *size_dialog = NULL;
+
+  if (self->group == NULL)
+    return;
+
+  size_dialog = bz_app_size_dialog_new (bz_result_get_object (self->ui_entry));
+  adw_dialog_present (size_dialog, GTK_WIDGET (self));
 }
 
 static void
@@ -378,6 +507,215 @@ forge_cb (BzFullView *self,
 }
 
 static void
+install_addons_cb (BzFullView *self,
+                   GtkButton  *button)
+{
+  BzEntry    *entry                   = NULL;
+  GListModel *model                   = NULL;
+  g_autoptr (GListModel) mapped_model = NULL;
+  AdwDialog *addons_dialog            = NULL;
+
+  if (self->group == NULL)
+    return;
+
+  entry = bz_result_get_object (self->ui_entry);
+  if (entry == NULL)
+    return;
+
+  model = bz_entry_get_addons (entry);
+  if (model == NULL || g_list_model_get_n_items (model) == 0)
+    return;
+
+  mapped_model = bz_application_map_factory_generate (
+      bz_state_info_get_entry_factory (self->state),
+      model);
+
+  addons_dialog = bz_addons_dialog_new (entry, mapped_model);
+  adw_dialog_set_content_width (addons_dialog, 750);
+  gtk_widget_set_size_request (GTK_WIDGET (addons_dialog), 350, -1);
+
+  g_signal_connect_swapped (
+      addons_dialog, "transact",
+      G_CALLBACK (addon_transact_cb), self);
+
+  adw_dialog_present (addons_dialog, GTK_WIDGET (self));
+}
+
+static void
+addon_transact_cb (BzFullView     *self,
+                   BzEntry        *entry,
+                   BzAddonsDialog *dialog)
+{
+  gboolean installed = FALSE;
+
+  g_object_get (entry, "installed", &installed, NULL);
+
+  if (installed)
+    g_signal_emit (self, signals[SIGNAL_REMOVE_ADDON], 0, entry);
+  else
+    g_signal_emit (self, signals[SIGNAL_INSTALL_ADDON], 0, entry);
+}
+
+static void
+clear_releases_box (BzFullView *self)
+{
+  GtkWidget *child = NULL;
+
+  while ((child = gtk_widget_get_first_child (GTK_WIDGET (self->releases_box))))
+    gtk_list_box_remove (self->releases_box, child);
+}
+
+static GtkWidget *
+create_release_row (const char *version,
+                    const char *description,
+                    guint64     timestamp)
+{
+  AdwActionRow                 *row                = NULL;
+  GtkBox                       *content_box        = NULL;
+  GtkBox                       *header_box         = NULL;
+  GtkLabel                     *version_label      = NULL;
+  GtkLabel                     *date_label         = NULL;
+  BzAppstreamDescriptionRender *description_widget = NULL;
+  g_autoptr (GDateTime) date                       = NULL;
+  g_autofree char *date_str                        = NULL;
+  g_autofree char *version_text                    = NULL;
+
+  date_str = format_timestamp (NULL, timestamp);
+
+  row = ADW_ACTION_ROW (adw_action_row_new ());
+  gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), FALSE);
+
+  content_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 3));
+  gtk_widget_set_margin_top (GTK_WIDGET (content_box), 15);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (content_box), 15);
+  gtk_widget_set_margin_start (GTK_WIDGET (content_box), 15);
+  gtk_widget_set_margin_end (GTK_WIDGET (content_box), 15);
+
+  header_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
+
+  version_text  = g_strdup_printf (_ ("Version %s"), version);
+  version_label = GTK_LABEL (gtk_label_new (version_text));
+  gtk_widget_add_css_class (GTK_WIDGET (version_label), "accent");
+  gtk_widget_add_css_class (GTK_WIDGET (version_label), "heading");
+  gtk_label_set_ellipsize (version_label, PANGO_ELLIPSIZE_END);
+  gtk_widget_set_halign (GTK_WIDGET (version_label), GTK_ALIGN_START);
+  gtk_widget_set_hexpand (GTK_WIDGET (version_label), TRUE);
+  gtk_box_append (header_box, GTK_WIDGET (version_label));
+
+  date_label = GTK_LABEL (gtk_label_new (date_str ? date_str : ""));
+  gtk_widget_add_css_class (GTK_WIDGET (date_label), "dim-label");
+  gtk_widget_set_halign (GTK_WIDGET (date_label), GTK_ALIGN_END);
+  gtk_box_append (header_box, GTK_WIDGET (date_label));
+
+  gtk_box_append (content_box, GTK_WIDGET (header_box));
+
+  if (description && *description)
+    {
+      description_widget = bz_appstream_description_render_new ();
+      bz_appstream_description_render_set_appstream_description (description_widget, description);
+      bz_appstream_description_render_set_selectable (description_widget, TRUE);
+      gtk_widget_set_margin_top (GTK_WIDGET (description_widget), 10);
+    }
+  else
+    {
+      GtkLabel *fallback_label = GTK_LABEL (gtk_label_new (_ ("No details for this release")));
+      gtk_widget_set_margin_top (GTK_WIDGET (fallback_label), 5);
+      gtk_widget_add_css_class (GTK_WIDGET (fallback_label), "dim-label");
+      gtk_label_set_xalign (fallback_label, 0.0);
+      description_widget = (BzAppstreamDescriptionRender *) fallback_label;
+    }
+
+  gtk_box_append (content_box, GTK_WIDGET (description_widget));
+  gtk_list_box_row_set_child (GTK_LIST_BOX_ROW (row), GTK_WIDGET (content_box));
+
+  return GTK_WIDGET (row);
+}
+
+static void
+populate_releases_box (BzFullView *self)
+{
+  BzEntry *entry                         = NULL;
+  g_autoptr (GListModel) version_history = NULL;
+  guint n_items                          = 0;
+
+  clear_releases_box (self);
+
+  if (self->debounced_ui_entry == NULL)
+    return;
+
+  entry = bz_result_get_object (self->debounced_ui_entry);
+  if (entry == NULL)
+    return;
+
+  g_object_get (entry, "version-history", &version_history, NULL);
+  if (version_history == NULL)
+    return;
+
+  n_items = g_list_model_get_n_items (version_history);
+  for (guint i = 0; i < n_items; i++)
+    {
+      g_autoptr (BzRelease) release = NULL;
+      const char *version           = NULL;
+      const char *description       = NULL;
+      guint64     timestamp         = 0;
+      GtkWidget  *row               = NULL;
+
+      release = g_list_model_get_item (version_history, i);
+      if (release == NULL)
+        continue;
+
+      version     = bz_release_get_version (release);
+      description = bz_release_get_description (release);
+      timestamp   = bz_release_get_timestamp (release);
+
+      row = create_release_row (version, description, timestamp);
+      gtk_list_box_append (self->releases_box, row);
+    }
+}
+
+static void
+screenshot_clicked_cb (BzFullView            *self,
+                       BzDecoratedScreenshot *screenshot)
+{
+  BzAsyncTexture *async_texture                  = NULL;
+  GListModel     *model                          = NULL;
+  g_autoptr (BzLazyAsyncTextureModel) lazy_model = NULL;
+  AdwDialog *dialog                              = NULL;
+  BzEntry   *entry                               = NULL;
+  guint      index                               = 0;
+  guint      n_items                             = 0;
+
+  async_texture = bz_decorated_screenshot_get_async_texture (screenshot);
+  if (async_texture == NULL || self->debounced_ui_entry == NULL)
+    return;
+
+  entry = bz_result_get_object (self->debounced_ui_entry);
+  if (entry == NULL)
+    return;
+
+  g_object_get (entry, "screenshot-paintables", &model, NULL);
+  if (model == NULL)
+    return;
+
+  lazy_model = bz_lazy_async_texture_model_new ();
+  g_object_set (lazy_model, "model", model, NULL);
+
+  n_items = g_list_model_get_n_items (G_LIST_MODEL (lazy_model));
+  for (guint i = 0; i < n_items; i++)
+    {
+      g_autoptr (BzAsyncTexture) item = g_list_model_get_item (G_LIST_MODEL (lazy_model), i);
+      if (item == async_texture)
+        {
+          index = i;
+          break;
+        }
+    }
+
+  dialog = bz_screenshot_dialog_new (G_LIST_MODEL (lazy_model), index);
+  adw_dialog_present (dialog, GTK_WIDGET (self));
+}
+
+static void
 screenshots_bind_widget_cb (BzFullView            *self,
                             BzDecoratedScreenshot *screenshot,
                             GdkPaintable          *paintable,
@@ -386,6 +724,10 @@ screenshots_bind_widget_cb (BzFullView            *self,
   gtk_widget_set_focusable (GTK_WIDGET (screenshot), TRUE);
   gtk_widget_set_margin_top (GTK_WIDGET (screenshot), 5);
   gtk_widget_set_margin_bottom (GTK_WIDGET (screenshot), 5);
+
+  g_signal_connect_swapped (
+      screenshot, "clicked",
+      G_CALLBACK (screenshot_clicked_cb), self);
 }
 
 static void
@@ -394,6 +736,10 @@ screenshots_unbind_widget_cb (BzFullView            *self,
                               GdkPaintable          *paintable,
                               BzDynamicListView     *view)
 {
+  g_signal_handlers_disconnect_by_func (
+      screenshot,
+      G_CALLBACK (screenshot_clicked_cb),
+      self);
 }
 
 static void
@@ -471,6 +817,37 @@ bz_full_view_class_init (BzFullViewClass *klass)
       G_TYPE_FROM_CLASS (klass),
       g_cclosure_marshal_VOID__OBJECTv);
 
+  signals[SIGNAL_INSTALL_ADDON] =
+      g_signal_new (
+          "install-addon",
+          G_OBJECT_CLASS_TYPE (klass),
+          G_SIGNAL_RUN_FIRST,
+          0,
+          NULL, NULL,
+          g_cclosure_marshal_VOID__OBJECT,
+          G_TYPE_NONE, 1,
+          BZ_TYPE_ENTRY);
+  g_signal_set_va_marshaller (
+      signals[SIGNAL_INSTALL_ADDON],
+      G_TYPE_FROM_CLASS (klass),
+      g_cclosure_marshal_VOID__OBJECTv);
+
+  signals[SIGNAL_REMOVE_ADDON] =
+      g_signal_new (
+          "remove-addon",
+          G_OBJECT_CLASS_TYPE (klass),
+          G_SIGNAL_RUN_FIRST,
+          0,
+          NULL, NULL,
+          g_cclosure_marshal_VOID__OBJECT,
+          G_TYPE_NONE, 1,
+          BZ_TYPE_ENTRY);
+  g_signal_set_va_marshaller (
+      signals[SIGNAL_REMOVE_ADDON],
+      G_TYPE_FROM_CLASS (klass),
+      g_cclosure_marshal_VOID__OBJECTv);
+
+  g_type_ensure (BZ_TYPE_APPSTREAM_DESCRIPTION_RENDER);
   g_type_ensure (BZ_TYPE_DECORATED_SCREENSHOT);
   g_type_ensure (BZ_TYPE_DYNAMIC_LIST_VIEW);
   g_type_ensure (BZ_TYPE_ENTRY);
@@ -483,6 +860,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzFullView, stack);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, forge_stars);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, forge_stars_label);
+  gtk_widget_class_bind_template_child (widget_class, BzFullView, releases_box);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
@@ -491,9 +869,14 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, format_size);
   gtk_widget_class_bind_template_callback (widget_class, format_timestamp);
   gtk_widget_class_bind_template_callback (widget_class, format_as_link);
+  gtk_widget_class_bind_template_callback (widget_class, format_license);
+  gtk_widget_class_bind_template_callback (widget_class, has_link);
   gtk_widget_class_bind_template_callback (widget_class, open_url_cb);
+  gtk_widget_class_bind_template_callback (widget_class, open_flathub_url_cb);
+  gtk_widget_class_bind_template_callback (widget_class, license_cb);
   gtk_widget_class_bind_template_callback (widget_class, share_cb);
   gtk_widget_class_bind_template_callback (widget_class, dl_stats_cb);
+  gtk_widget_class_bind_template_callback (widget_class, size_cb);
   gtk_widget_class_bind_template_callback (widget_class, run_cb);
   gtk_widget_class_bind_template_callback (widget_class, install_cb);
   gtk_widget_class_bind_template_callback (widget_class, remove_cb);
@@ -502,6 +885,8 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, screenshots_bind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, screenshots_unbind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, pick_license_warning);
+  gtk_widget_class_bind_template_callback (widget_class, install_addons_cb);
+  gtk_widget_class_bind_template_callback (widget_class, addon_transact_cb);
 }
 
 static void
@@ -546,11 +931,16 @@ bz_full_view_set_entry_group (BzFullView   *self,
   g_return_if_fail (group == NULL ||
                     BZ_IS_ENTRY_GROUP (group));
 
+  if (group == self->group)
+    return;
+
   g_clear_handle_id (&self->debounce_timeout, g_source_remove);
   g_clear_object (&self->group);
   g_clear_object (&self->ui_entry);
   g_clear_object (&self->debounced_ui_entry);
   g_clear_object (&self->group_model);
+
+  clear_releases_box (self);
 
   gtk_widget_set_visible (self->forge_stars, FALSE);
   gtk_revealer_set_reveal_child (GTK_REVEALER (self->forge_stars), FALSE);
@@ -596,8 +986,11 @@ debounce_timeout (BzFullView *self)
   self->debounced_ui_entry = g_object_ref (self->ui_entry);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DEBOUNCED_UI_ENTRY]);
 
+  if (bz_result_get_resolved (self->debounced_ui_entry))
+    populate_releases_box (self);
+
   /* Disabled by default in gsettings schema since we don't want to
-     users to be rate limited by github */
+   users to be rate limited by github */
   if (self->state != NULL &&
       g_settings_get_boolean (
           bz_state_info_get_settings (self->state),

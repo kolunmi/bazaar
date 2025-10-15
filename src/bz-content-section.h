@@ -32,4 +32,7 @@ struct _BzContentSectionClass
   GObjectClass parent_class;
 };
 
+void
+bz_content_section_notify_dark_light (BzContentSection *self);
+
 G_END_DECLS

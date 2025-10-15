@@ -28,7 +28,8 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (BzStatsDialog, bz_stats_dialog, BZ, STATS_DIALOG, AdwDialog)
 
 AdwDialog *
-bz_stats_dialog_new (GListModel *model);
+bz_stats_dialog_new (GListModel *model,
+                     GListModel *country_model);
 
 void
 bz_stats_dialog_animate_open (BzStatsDialog *self);

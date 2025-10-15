@@ -7,6 +7,8 @@ src/bz-addons-dialog.blp
 src/bz-addons-dialog.c
 src/bz-app-tile.blp
 src/bz-app-tile.c
+src/bz-app-size-dialog.c
+src/bz-app-size-dialog.blp
 src/bz-application-map-factory.c
 src/bz-application.c
 src/bz-async-texture.c
@@ -82,7 +84,8 @@ src/bz-update-dialog.c
 src/bz-url.c
 src/bz-window.blp
 src/bz-window.c
+src/bz-world-map.c
 src/bz-yaml-parser.c
 src/dl-worker.c
-src/gtk/help-overlay.blp
+src/gtk/shortcuts-dialog.blp
 src/main.c

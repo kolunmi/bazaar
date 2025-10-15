@@ -32,122 +32,177 @@ template $BzWindow: Adw.ApplicationWindow {
       width-request: 550;
       height-request: 450;
 
-      child: Adw.ToolbarView toolbar_view {
-        top-bar-style: raised;
-        bottom-bar-style: raised;
-        reveal-bottom-bars: false;
+      child: Adw.OverlaySplitView search_split {
+        show-sidebar: false;
+        sidebar-width-fraction: 0.25;
+        min-sidebar-width: 250;
+        max-sidebar-width: 400;
+        notify::show-sidebar => $search_split_open_changed_cb(template);
+
+        sidebar: Adw.NavigationPage {
+          title: _("Search");
+          tag: "search";
+
+          child: Adw.ToolbarView {
+            [top]
+            Adw.HeaderBar {
+              show-title: true;
+              title-widget: Label {
+                label: _("Bazaar");
+                styles ["heading"]
+              };
+
+              [start]
+              ToggleButton {
+                has-tooltip: true;
+                tooltip-text: _("Search");
+                icon-name: "system-search-symbolic";
+                active: bind search_split.show-sidebar bidirectional;
+              }
+            }
+
+            content: $BzSearchWidget search_widget {
+              state: bind template.state;
+              select => $search_widget_select_cb(template);
+            };
+          };
+        };
 
         content: Adw.OverlaySplitView split_view {
           show-sidebar: false;
           pin-sidebar: true;
           sidebar-position: end;
+          sidebar-width-fraction: 0.25;
+          min-sidebar-width: 250;
+          max-sidebar-width: 400;
 
-          sidebar: Adw.ViewStack transactions_stack {
-            styles ["sidebar-pane"]
-            enable-transitions: true;
-            transition-duration: 200;
+          sidebar: Adw.NavigationPage {
+            title: _("Transactions");
+            tag: "transactions";
 
-            Adw.ViewStackPage {
-              name: "empty";
-              title: _("Empty");
+            child: Adw.ToolbarView {
+              [top]
+              Adw.HeaderBar {
+                show-title: false;
 
-              child: Adw.StatusPage {
-                icon-name: "folder-download-symbolic";
-                title: _("Transactions Will Appear Here");
-              };
-            }
+                [end]
+                ToggleButton  toggle_transactions_sidebar  {
+                  styles [
+                    "flat",
+                  ]
 
-            Adw.ViewStackPage {
-              name: "content";
-              title: _("Content");
+                  has-tooltip: true;
+                  tooltip-text: _("Toggle transaction sidebar");
+                  active: bind split_view.show-sidebar bidirectional;
 
-              child: Adw.ToolbarView {
-                bottom-bar-style: flat;
+                  child: $BzGlobalProgress {
+                    expand-size: 125;
+                    active: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
+                    pending: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.pending;
+                    fraction: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.current-progress;
+                    settings: bind template.state as <$BzStateInfo>.settings;
 
-                content: ScrolledWindow transactions {
-                  width-request: 500;
-                  hscrollbar-policy: never;
-                  propagate-natural-height: true;
-
-                  child: ListView list_view {
-                    styles [
-                      "navigation-sidebar",
-                    ]
-
-                    model: NoSelection no_selection {
-                      model: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.transactions;
-                    };
-
-                    factory: BuilderListItemFactory {
-                      template ListItem {
-                        activatable: false;
-
-                        child: $BzTransactionView {
-                          margin-start: "5";
-                          margin-end: "5";
-                          margin-top: "10";
-                          margin-bottom: "10";
-                          transaction: bind template.item;
-                        };
-                      }
+                    child: Image {
+                      halign: end;
+                      icon-name: "folder-download-symbolic";
                     };
                   };
-                };
+                }
+              }
 
-                [bottom]
-                Adw.HeaderBar {
-                  show-start-title-buttons: false;
-                  show-end-title-buttons: false;
-                  show-title: false;
+              [bottom]
+              Box {
+                styles [
+                  "linked",
+                ]
+                margin-top: 8;
+                margin-end: 8;
+                margin-bottom: 8;
+                halign: end;
 
-                  [end]
-                  Box {
-                    styles [
-                      "linked",
-                    ]
+                ToggleButton transactions_pause {
+                  has-tooltip: true;
+                  active: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.paused;
+                  toggled => $pause_transactions_cb(template);
+                }
 
-                    ToggleButton transactions_pause {
-                      has-tooltip: true;
-                      active: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.paused;
-                      toggled => $pause_transactions_cb(template);
-                    }
+                Button transactions_stop {
+                  has-tooltip: true;
+                  tooltip-text: _("Stop Active Tasks");
+                  icon-name: "media-playback-stop-symbolic";
+                  sensitive: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
+                  clicked => $stop_transactions_cb(template);
+                }
 
-                    Button transactions_stop {
-                      has-tooltip: true;
-                      tooltip-text: _("Halt the execution of transactions");
-                      icon-name: "media-playback-stop-symbolic";
-                      sensitive: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
-                      clicked => $stop_transactions_cb(template);
-                    }
+                Button transactions_clear {
+                  has-tooltip: true;
+                  tooltip-text: _("Clear History");
+                  icon-name: "edit-clear-all-symbolic";
+                  clicked => $transactions_clear_cb(template);
+                }
+              }
 
-                    Button transactions_clear {
-                      has-tooltip: true;
-                      tooltip-text: _("Clear all finished transactions");
-                      icon-name: "edit-clear-all-symbolic";
-                      clicked => $transactions_clear_cb(template);
-                    }
-                  }
+              content: Adw.ViewStack transactions_stack {
+                enable-transitions: true;
+                transition-duration: 200;
+
+                Adw.ViewStackPage {
+                  name: "empty";
+                  title: _("Empty");
+
+                  child: Adw.StatusPage {
+                    icon-name: "folder-download-symbolic";
+                    title: _("No Tasks Yet");
+                  };
+                }
+
+                Adw.ViewStackPage {
+                  name: "content";
+                  title: _("Content");
+
+                  child: ScrolledWindow transactions {
+                    hscrollbar-policy: never;
+                    propagate-natural-height: true;
+
+                    child: ListView list_view {
+                      styles [
+                        "navigation-sidebar",
+                      ]
+
+                      model: NoSelection no_selection {
+                        model: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.transactions;
+                      };
+
+                      factory: BuilderListItemFactory {
+                        template ListItem {
+                          activatable: false;
+
+                          child: $BzTransactionView {
+                            margin-start: "5";
+                            margin-end: "5";
+                            margin-top: "10";
+                            margin-bottom: "10";
+                            transaction: bind template.item;
+                          };
+                        }
+                      };
+                    };
+                  };
                 }
               };
-            }
+            };
           };
 
-          content: Adw.OverlaySplitView search_split {
-            show-sidebar: false;
-            pin-sidebar: true;
-            sidebar-position: start;
-            notify::show-sidebar => $search_split_open_changed_cb(template);
-
-            sidebar: $BzSearchWidget search_widget {
-              width-request: 300;
-              state: bind template.state;
-              select => $search_widget_select_cb(template);
-            };
+          content: Adw.ToolbarView toolbar_view {
+            top-bar-style: flat;
+            bottom-bar-style: flat;
+            reveal-bottom-bars: false;
 
             content: Adw.ToastOverlay toasts {
               child: Overlay {
                 child: Adw.NavigationView main_stack {
 
+                  pop-on-escape: false;
                   notify::visible-page => $visible_page_changed_cb(template);
 
                   Adw.NavigationPage {
@@ -227,6 +282,8 @@ template $BzWindow: Adw.ApplicationWindow {
                       transaction-manager: bind template.state as <$BzStateInfo>.transaction-manager;
                       install => $full_view_install_cb(template);
                       remove => $full_view_remove_cb(template);
+                      install-addon => $install_addon_cb(template);
+                      remove-addon => $remove_addon_cb(template);
                     };
                   }
 
@@ -247,150 +304,151 @@ template $BzWindow: Adw.ApplicationWindow {
                     child: $BzInstalledPage {
                       state: bind template.state;
                       model: bind template.state as <$BzStateInfo>.all-installed-entry-groups;
-                      install => $installed_page_install_cb(template);
-                      remove => $installed_page_remove_cb(template);
+                      install => $install_addon_cb(template);
+                      remove => $remove_addon_cb(template);
                       show-entry => $installed_page_show_cb(template);
                     };
                   }
                 };
               };
             };
-          };
-        };
 
-        [top]
-        Adw.HeaderBar top_header_bar {
-          styles [
-            "toplevel-headerbar"
-          ]
+            [top]
+            Adw.HeaderBar top_header_bar {
 
-          [start]
-          Button go_back {
-            has-tooltip: true;
-            tooltip-text: _("Go Back");
-            icon-name: "go-previous-symbolic";
-            clicked => $go_back_cb(template);
-          }
-
-          // [start]
-          // Button refresh {
-          //   has-tooltip: true;
-          //   tooltip-text: _("Refresh");
-          //   icon-name: "view-refresh-symbolic";
-          //   sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.busy) as <bool>;
-          //   clicked => $refresh_cb(template);
-          // }
-
-          [start]
-          ToggleButton search {
-            has-tooltip: true;
-            tooltip-text: _("Search");
-            icon-name: bind $get_search_icon_from_state(search_split.show-sidebar as <bool>) as <string>;
-            active: bind search_split.show-sidebar bidirectional;
-          }
-
-          [start]
-          Button update_button {
-            styles [
-              "suggested-action",
-            ]
-
-            has-tooltip: true;
-            tooltip-text: _("Update");
-            icon-name: "software-update-available-symbolic";
-            visible: bind $invert_boolean($is_null(template.state as <$BzStateInfo>.available-updates) as <bool>) as <bool>;
-            clicked => $update_cb(template);
-          }
-
-          [start]
-          Box {
-            orientation: horizontal;
-            spacing: 10;
-            visible: bind $invert_boolean($is_null(template.state as <$BzStateInfo>.background-task-label) as <bool>) as <bool>;
-
-            Adw.Spinner {}
-
-            Label {
-              label: bind template.state as <$BzStateInfo>.background-task-label as <string>;
-            }
-          }
-          
-          title-widget: Revealer title_revealer {
-            transition-type: crossfade;
-            transition-duration: 200;
-
-            child: Adw.ToggleGroup title_toggle_group {
-              styles [
-                "flat",
-              ]
-              homogeneous: true;
-
-              Adw.Toggle curated_toggle {
-                tooltip: _("View curated applications");
-                name: "curated";
-                enabled: bind template.state as <$BzStateInfo>.curated-provider as <$BzContentProvider>.has-inputs as <bool>;
-                icon-name: "starred-symbolic";
-                label: _("Curated");
+              [start]
+              Button go_back {
+                has-tooltip: true;
+                tooltip-text: _("Go Back");
+                icon-name: "go-previous-symbolic";
+                clicked => $go_back_cb(template);
               }
 
-              Adw.Toggle {
-                tooltip: _("View the latest on Flathub");
-                name: "flathub";
-                icon-name: "flathub-symbolic";
-                label: _("Flathub");
+              [start]
+              Revealer {
+              transition-type: slide_left;
+              reveal-child: bind $invert_boolean(search_split.show-sidebar as <bool>) as <bool>;
+
+              child:ToggleButton search {
+                  has-tooltip: true;
+                  tooltip-text: _("Search");
+                  icon-name: "system-search-symbolic";
+                  active: bind search_split.show-sidebar bidirectional;
+                };
               }
               
-              Adw.Toggle {
-                tooltip: _("View installed applications");
-                name: "installed";
-                icon-name: "library-symbolic";
-                label: _("Installed");
+              [start]
+              Button update_button {
+                styles [
+                  "suggested-action",
+                ]
+
+                has-tooltip: true;
+                tooltip-text: _("Update");
+                icon-name: "software-update-available-symbolic";
+                visible: bind $invert_boolean($is_null(template.state as <$BzStateInfo>.available-updates) as <bool>) as <bool>;
+                clicked => $update_cb(template);
               }
 
-              notify::active-name => $page_toggled_cb(template);
-            };
-          };
+              [start]
+              Box {
+                orientation: horizontal;
+                spacing: 10;
+                visible: bind $invert_boolean($is_null(template.state as <$BzStateInfo>.background-task-label) as <bool>) as <bool>;
 
-          [end]
-          MenuButton {
-            primary: true;
-            icon-name: "open-menu-symbolic";
-            has-tooltip: true;
-            tooltip-text: _("Main Menu");
-            menu-model: primary_menu;
-          }
+                Adw.Spinner {}
 
-          [end]
-          ToggleButton toggle_transactions {
-            styles [
-              "flat",
-            ]
+                Label {
+                  label: bind template.state as <$BzStateInfo>.background-task-label as <string>;
+                }
+              }
 
-            has-tooltip: true;
-            tooltip-text: _("Toggle transaction sidebar");
-            active: bind split_view.show-sidebar bidirectional;
+              title-widget: Revealer title_revealer {
+                transition-type: crossfade;
+                transition-duration: 200;
 
-            child: $BzGlobalProgress {
-              expand-size: 125;
-              active: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
-              fraction: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.current-progress;
+                child: Adw.ToggleGroup title_toggle_group {
+                  styles [
+                    "flat",
+                  ]
+                  homogeneous: true;
 
-              child: Image {
-                halign: end;
-                icon-name: "folder-download-symbolic";
+                  Adw.Toggle curated_toggle {
+                    tooltip: _("View curated applications");
+                    name: "curated";
+                    enabled: bind template.state as <$BzStateInfo>.curated-provider as <$BzContentProvider>.has-inputs as <bool>;
+                    icon-name: "starred-symbolic";
+                    label: _("Curated");
+                  }
+
+                  Adw.Toggle {
+                    tooltip: _("View the latest on Flathub");
+                    name: "flathub";
+                    icon-name: "flathub-symbolic";
+                    label: _("Flathub");
+                  }
+
+                  Adw.Toggle {
+                    tooltip: _("View installed applications");
+                    name: "installed";
+                    icon-name: "library-symbolic";
+                    label: _("Installed");
+                  }
+
+                  notify::active-name => $page_toggled_cb(template);
+                };
               };
-            };
-          }
-        }
 
-        [bottom]
-        Adw.HeaderBar bottom_header_bar {
-          styles [
-            "toplevel-headerbar"
-          ]
-          show-start-title-buttons: false;
-          show-end-title-buttons: false;
-        }
+
+              [end]
+              Revealer {
+                transition-type: slide_right;
+                reveal-child:  bind $invert_boolean(split_view.show-sidebar as <bool>) as <bool>;
+
+                child: ToggleButton toggle_transactions {
+                    styles [
+                      "flat",
+                    ]
+
+                    has-tooltip: true;
+                    tooltip-text: _("Toggle transaction sidebar");
+                    active: bind split_view.show-sidebar bidirectional;
+
+                    child: $BzGlobalProgress {
+                      expand-size: 125;
+                      active: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
+                      pending: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.pending;
+                      fraction: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.current-progress;
+                      settings: bind template.state as <$BzStateInfo>.settings;
+
+                      child: Image {
+                        halign: end;
+                        icon-name: "folder-download-symbolic";
+                      };
+                    };
+                  };
+              }
+
+              [end]
+              MenuButton {
+                primary: true;
+                icon-name: "open-menu-symbolic";
+                has-tooltip: true;
+                tooltip-text: _("Main Menu");
+                menu-model: primary_menu;
+              }
+            }
+
+            [bottom]
+            Adw.HeaderBar bottom_header_bar {
+              styles [
+                "toplevel-headerbar"
+              ]
+              show-start-title-buttons: false;
+              show-end-title-buttons: false;
+            }
+          };
+        };
       };
 
       Adw.Breakpoint {
@@ -398,8 +456,6 @@ template $BzWindow: Adw.ApplicationWindow {
 
         setters {
           split_view.collapsed: true;
-          transactions.width-request: 250;
-          search_widget.width-request: 200;
         }
 
         apply => $breakpoint_apply_cb(template);
@@ -412,13 +468,23 @@ template $BzWindow: Adw.ApplicationWindow {
 menu primary_menu {
   section {
     item {
+      label: _("_Quit Service");
+      action: "app.quit";
+    }
+
+    item {
+      label: _("_Refresh Content");
+      action: "app.refresh";
+    }
+
+    item {
       label: _("_Preferences");
       action: "app.preferences";
     }
     
     item {
       label: _("_Keyboard Shortcuts");
-      action: "win.show-help-overlay";
+      action: "app.shortcuts";
     }
 
     item {

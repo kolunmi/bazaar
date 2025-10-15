@@ -1,0 +1,62 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzAppSizeDialog: Adw.Dialog {
+  content-height: 500;
+  content-width: 600;
+
+  child: Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {
+      show-title: false;
+    }
+
+    content: Adw.Clamp {
+      maximum-size: 600;
+
+      child: Box {
+        orientation: vertical;
+        margin-top: 6;
+        margin-bottom: 18;
+        margin-start: 18;
+        margin-end: 18;
+
+        Box {
+          orientation: vertical;
+          margin-bottom: 24;
+          spacing: 12;
+
+          Box {
+            halign: center;
+
+            styles [
+              "title-1",
+              "lozenge",
+              "grey",
+            ]
+
+            Label size_label {
+              margin-end: 8;
+              margin-start: 8;
+              margin-top: 6;
+              margin-bottom: 6;
+              label: _("--- MB");
+              use-markup: true;
+            }
+          }
+
+          Label {
+            styles [
+              "title-2",
+            ]
+
+            label: _("Download Size");
+          }
+        }
+
+        Adw.PreferencesGroup comparisons_group {
+        }
+      };
+    };
+  };
+}

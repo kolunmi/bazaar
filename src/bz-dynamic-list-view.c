@@ -38,6 +38,7 @@ struct _BzDynamicListView
   GType                 child_type;
   char                 *child_prop;
   char                 *object_prop;
+  guint                 max_children_per_line;
 
   char *child_type_string;
 };
@@ -54,6 +55,7 @@ enum
   PROP_CHILD_TYPE,
   PROP_CHILD_PROP,
   PROP_OBJECT_PROP,
+  PROP_MAX_CHILDREN_PER_LINE,
 
   LAST_PROP
 };
@@ -146,6 +148,9 @@ bz_dynamic_list_view_get_property (GObject    *object,
     case PROP_OBJECT_PROP:
       g_value_set_string (value, bz_dynamic_list_view_get_object_prop (self));
       break;
+    case PROP_MAX_CHILDREN_PER_LINE:
+      g_value_set_uint (value, bz_dynamic_list_view_get_max_children_per_line (self));
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -179,6 +184,9 @@ bz_dynamic_list_view_set_property (GObject      *object,
     case PROP_OBJECT_PROP:
       bz_dynamic_list_view_set_object_prop (self, g_value_get_string (value));
       break;
+    case PROP_MAX_CHILDREN_PER_LINE:
+      bz_dynamic_list_view_set_max_children_per_line (self, g_value_get_uint (value));
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -211,6 +219,13 @@ bz_dynamic_list_view_class_init (BzDynamicListViewClass *klass)
           "noscroll-kind",
           NULL, NULL,
           BZ_TYPE_DYNAMIC_LIST_VIEW_KIND, BZ_DYNAMIC_LIST_VIEW_KIND_LIST_BOX,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_MAX_CHILDREN_PER_LINE] =
+      g_param_spec_uint (
+          "max-children-per-line",
+          NULL, NULL,
+          1, G_MAXUINT, 4,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   props[PROP_CHILD_TYPE] =
@@ -269,8 +284,9 @@ bz_dynamic_list_view_class_init (BzDynamicListViewClass *klass)
 static void
 bz_dynamic_list_view_init (BzDynamicListView *self)
 {
-  self->child_type    = G_TYPE_INVALID;
-  self->noscroll_kind = BZ_DYNAMIC_LIST_VIEW_KIND_LIST_BOX;
+  self->child_type            = G_TYPE_INVALID;
+  self->noscroll_kind         = BZ_DYNAMIC_LIST_VIEW_KIND_LIST_BOX;
+  self->max_children_per_line = 4;
 }
 
 BzDynamicListView *
@@ -319,6 +335,13 @@ bz_dynamic_list_view_get_object_prop (BzDynamicListView *self)
 {
   g_return_val_if_fail (BZ_IS_DYNAMIC_LIST_VIEW (self), NULL);
   return self->object_prop;
+}
+
+guint
+bz_dynamic_list_view_get_max_children_per_line (BzDynamicListView *self)
+{
+  g_return_val_if_fail (BZ_IS_DYNAMIC_LIST_VIEW (self), 4);
+  return self->max_children_per_line;
 }
 
 void
@@ -416,6 +439,28 @@ bz_dynamic_list_view_set_object_prop (BzDynamicListView *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_OBJECT_PROP]);
 }
 
+void
+bz_dynamic_list_view_set_max_children_per_line (BzDynamicListView *self,
+                                                guint              max_children)
+{
+  GtkWidget *child;
+
+  g_return_if_fail (BZ_IS_DYNAMIC_LIST_VIEW (self));
+  g_return_if_fail (max_children > 0);
+
+  self->max_children_per_line = max_children;
+
+  child = adw_bin_get_child (ADW_BIN (self));
+  if (child != NULL &&
+      self->noscroll_kind == BZ_DYNAMIC_LIST_VIEW_KIND_FLOW_BOX &&
+      !self->scroll)
+    {
+      gtk_flow_box_set_max_children_per_line (GTK_FLOW_BOX (child), max_children);
+    }
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MAX_CHILDREN_PER_LINE]);
+}
+
 static void
 refresh (BzDynamicListView *self)
 {
@@ -475,7 +520,7 @@ refresh (BzDynamicListView *self)
 
             widget = gtk_flow_box_new ();
             gtk_flow_box_set_homogeneous (GTK_FLOW_BOX (widget), TRUE);
-            gtk_flow_box_set_max_children_per_line (GTK_FLOW_BOX (widget), 5);
+            gtk_flow_box_set_max_children_per_line (GTK_FLOW_BOX (widget), self->max_children_per_line);
             gtk_flow_box_set_selection_mode (GTK_FLOW_BOX (widget), GTK_SELECTION_NONE);
             gtk_flow_box_bind_model (
                 GTK_FLOW_BOX (widget), self->model,
@@ -617,6 +662,7 @@ create_child_widget (GObject           *object,
       GtkWidget *child = NULL;
 
       child = gtk_flow_box_child_new ();
+      gtk_widget_add_css_class (GTK_WIDGET (child), "disable-adw-flow-box-styling");
       gtk_widget_set_focusable (GTK_WIDGET (child), FALSE);
       gtk_flow_box_child_set_child (GTK_FLOW_BOX_CHILD (child), widget);
 

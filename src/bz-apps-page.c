@@ -1,6 +1,6 @@
-/* bz-category-page.c
+/* bz-apps-page.c
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2025 Adam Masciola, Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,26 +18,28 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "bz-category-page.h"
+#include "bz-apps-page.h"
 #include "bz-app-tile.h"
 #include "bz-dynamic-list-view.h"
 
-struct _BzCategoryPage
+struct _BzAppsPage
 {
   AdwNavigationPage parent_instance;
 
-  BzFlathubCategory *category;
+  char       *title;
+  GListModel *applications;
 
   /* Template widgets */
 };
 
-G_DEFINE_FINAL_TYPE (BzCategoryPage, bz_category_page, ADW_TYPE_NAVIGATION_PAGE)
+G_DEFINE_FINAL_TYPE (BzAppsPage, bz_apps_page, ADW_TYPE_NAVIGATION_PAGE)
 
 enum
 {
   PROP_0,
 
-  PROP_CATEGORY,
+  PROP_PAGE_TITLE,
+  PROP_APPLICATIONS,
 
   LAST_PROP
 };
@@ -56,27 +58,31 @@ tile_clicked (BzEntryGroup *group,
               GtkButton    *button);
 
 static void
-bz_category_page_dispose (GObject *object)
+bz_apps_page_dispose (GObject *object)
 {
-  BzCategoryPage *self = BZ_CATEGORY_PAGE (object);
+  BzAppsPage *self = BZ_APPS_PAGE (object);
 
-  g_clear_object (&self->category);
+  g_clear_pointer (&self->title, g_free);
+  g_clear_object (&self->applications);
 
-  G_OBJECT_CLASS (bz_category_page_parent_class)->dispose (object);
+  G_OBJECT_CLASS (bz_apps_page_parent_class)->dispose (object);
 }
 
 static void
-bz_category_page_get_property (GObject    *object,
-                               guint       prop_id,
-                               GValue     *value,
-                               GParamSpec *pspec)
+bz_apps_page_get_property (GObject    *object,
+                           guint       prop_id,
+                           GValue     *value,
+                           GParamSpec *pspec)
 {
-  BzCategoryPage *self = BZ_CATEGORY_PAGE (object);
+  BzAppsPage *self = BZ_APPS_PAGE (object);
 
   switch (prop_id)
     {
-    case PROP_CATEGORY:
-      g_value_set_object (value, self->category);
+    case PROP_PAGE_TITLE:
+      g_value_set_string (value, self->title);
+      break;
+    case PROP_APPLICATIONS:
+      g_value_set_object (value, self->applications);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -84,18 +90,22 @@ bz_category_page_get_property (GObject    *object,
 }
 
 static void
-bz_category_page_set_property (GObject      *object,
-                               guint         prop_id,
-                               const GValue *value,
-                               GParamSpec   *pspec)
+bz_apps_page_set_property (GObject      *object,
+                           guint         prop_id,
+                           const GValue *value,
+                           GParamSpec   *pspec)
 {
-  BzCategoryPage *self = BZ_CATEGORY_PAGE (object);
+  BzAppsPage *self = BZ_APPS_PAGE (object);
 
   switch (prop_id)
     {
-    case PROP_CATEGORY:
-      g_clear_object (&self->category);
-      self->category = g_value_dup_object (value);
+    case PROP_PAGE_TITLE:
+      g_clear_pointer (&self->title, g_free);
+      self->title = g_value_dup_string (value);
+      break;
+    case PROP_APPLICATIONS:
+      g_clear_object (&self->applications);
+      self->applications = g_value_dup_object (value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -103,7 +113,7 @@ bz_category_page_set_property (GObject      *object,
 }
 
 static void
-bind_widget_cb (BzFlathubCategory *self,
+bind_widget_cb (BzAppsPage        *self,
                 BzAppTile         *tile,
                 BzEntryGroup      *group,
                 BzDynamicListView *view)
@@ -112,7 +122,7 @@ bind_widget_cb (BzFlathubCategory *self,
 }
 
 static void
-unbind_widget_cb (BzFlathubCategory *self,
+unbind_widget_cb (BzAppsPage        *self,
                   BzAppTile         *tile,
                   BzEntryGroup      *group,
                   BzDynamicListView *view)
@@ -121,21 +131,27 @@ unbind_widget_cb (BzFlathubCategory *self,
 }
 
 static void
-bz_category_page_class_init (BzCategoryPageClass *klass)
+bz_apps_page_class_init (BzAppsPageClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
-  object_class->dispose      = bz_category_page_dispose;
-  object_class->get_property = bz_category_page_get_property;
-  object_class->set_property = bz_category_page_set_property;
+  object_class->dispose      = bz_apps_page_dispose;
+  object_class->get_property = bz_apps_page_get_property;
+  object_class->set_property = bz_apps_page_set_property;
 
-  props[PROP_CATEGORY] =
+  props[PROP_PAGE_TITLE] =
+      g_param_spec_string (
+          "page-title",
+          NULL, NULL, NULL,
+          G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
+
+  props[PROP_APPLICATIONS] =
       g_param_spec_object (
-          "category",
+          "applications",
           NULL, NULL,
-          BZ_TYPE_FLATHUB_CATEGORY,
-          G_PARAM_READWRITE);
+          G_TYPE_LIST_MODEL,
+          G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
@@ -156,28 +172,32 @@ bz_category_page_class_init (BzCategoryPageClass *klass)
 
   g_type_ensure (BZ_TYPE_APP_TILE);
 
-  gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-category-page.ui");
+  gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-apps-page.ui");
   gtk_widget_class_bind_template_callback (widget_class, bind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, unbind_widget_cb);
 }
 
 static void
-bz_category_page_init (BzCategoryPage *self)
+bz_apps_page_init (BzAppsPage *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
 }
 
 AdwNavigationPage *
-bz_category_page_new (BzFlathubCategory *category)
+bz_apps_page_new (const char *title,
+                  GListModel *applications)
 {
-  BzCategoryPage *category_page = NULL;
+  BzAppsPage *apps_page = NULL;
 
-  category_page = g_object_new (
-      BZ_TYPE_CATEGORY_PAGE,
-      "category", category,
+  apps_page = g_object_new (
+      BZ_TYPE_APPS_PAGE,
+      "page-title", title,
+      "applications", applications,
       NULL);
 
-  return ADW_NAVIGATION_PAGE (category_page);
+  adw_navigation_page_set_title (ADW_NAVIGATION_PAGE (apps_page), title);
+
+  return ADW_NAVIGATION_PAGE (apps_page);
 }
 
 static void
@@ -186,6 +206,6 @@ tile_clicked (BzEntryGroup *group,
 {
   GtkWidget *self = NULL;
 
-  self = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_CATEGORY_PAGE);
+  self = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_APPS_PAGE);
   g_signal_emit (self, signals[SIGNAL_SELECT], 0, group);
 }

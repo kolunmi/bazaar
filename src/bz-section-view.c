@@ -20,6 +20,7 @@
 
 #include "bz-section-view.h"
 #include "bz-async-texture.h"
+#include "bz-content-section.h"
 #include "bz-curated-app-tile.h"
 #include "bz-dynamic-list-view.h"
 #include "bz-entry-group.h"
@@ -139,6 +140,25 @@ is_null (gpointer object,
   return value == NULL;
 }
 
+static GdkPaintable *
+get_banner (BzSectionView *self,
+            GdkPaintable  *value)
+{
+  g_autoptr (GdkPaintable) paintable = NULL;
+
+  if (self->section == NULL)
+    return NULL;
+
+  g_object_get (
+      self->section,
+      adw_style_manager_get_dark (self->style_manager)
+          ? "dark-banner"
+          : "light-banner",
+      &paintable,
+      NULL);
+  return g_steal_pointer (&paintable);
+}
+
 static void
 bind_widget_cb (BzSectionView     *self,
                 BzCuratedAppTile  *tile,
@@ -201,6 +221,7 @@ bz_section_view_class_init (BzSectionViewClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzSectionView, banner_text);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
+  gtk_widget_class_bind_template_callback (widget_class, get_banner);
   gtk_widget_class_bind_template_callback (widget_class, bind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, unbind_widget_cb);
 }
@@ -211,6 +232,9 @@ dark_changed (BzSectionView   *self,
               AdwStyleManager *mgr)
 {
   refresh_dark_light_classes (self, mgr);
+
+  if (self->section != NULL)
+    bz_content_section_notify_dark_light (self->section);
 }
 
 static void
