@@ -21,8 +21,8 @@
 #include "bz-screenshot.h"
 #include "bz-async-texture.h"
 
-#define TOP_HALF_FIXED_WIDTH  700
-#define TOP_HALF_FIXED_HEIGHT 275
+#define TOP_HALF_FIXED_WIDTH  650
+#define TOP_HALF_FIXED_HEIGHT 265
 
 struct _BzScreenshot
 {
