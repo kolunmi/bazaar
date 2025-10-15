@@ -64,6 +64,9 @@ gboolean
 bz_transaction_manager_get_active (BzTransactionManager *self);
 
 gboolean
+bz_transaction_manager_get_pending (BzTransactionManager *self);
+
+gboolean
 bz_transaction_manager_get_has_transactions (BzTransactionManager *self);
 
 void
