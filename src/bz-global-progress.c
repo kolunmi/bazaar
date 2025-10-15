@@ -246,6 +246,8 @@ bz_global_progress_snapshot (GtkWidget   *widget,
   double            width          = 0;
   double            height         = 0;
   double            corner_radius  = 0.0;
+  double            inner_radius   = 0.0;
+  double            gap            = 0.0;
   GskRoundedRect    total_clip     = { 0 };
   graphene_rect_t   fraction_rect  = { 0 };
   graphene_rect_t   pending_rect   = { 0 };
@@ -263,6 +265,8 @@ bz_global_progress_snapshot (GtkWidget   *widget,
   width         = gtk_widget_get_width (widget);
   height        = gtk_widget_get_height (widget);
   corner_radius = height * 0.5 * (0.3 * self->transition_progress + 0.2);
+  gap           = height * 0.1;
+  inner_radius  = MAX(corner_radius - gap, 0.0);
 
   total_clip.bounds           = GRAPHENE_RECT_INIT (0.0, 0.0, width, height);
   total_clip.corner[0].width  = corner_radius;
@@ -290,14 +294,14 @@ bz_global_progress_snapshot (GtkWidget   *widget,
       &pending_rect,
       self->pending_progress,
       &fraction_clip.bounds);
-  fraction_clip.corner[0].width  = corner_radius;
-  fraction_clip.corner[0].height = corner_radius;
-  fraction_clip.corner[1].width  = corner_radius;
-  fraction_clip.corner[1].height = corner_radius;
-  fraction_clip.corner[2].width  = corner_radius;
-  fraction_clip.corner[2].height = corner_radius;
-  fraction_clip.corner[3].width  = corner_radius;
-  fraction_clip.corner[3].height = corner_radius;
+  fraction_clip.corner[0].width  = inner_radius;
+  fraction_clip.corner[0].height = inner_radius;
+  fraction_clip.corner[1].width  = inner_radius;
+  fraction_clip.corner[1].height = inner_radius;
+  fraction_clip.corner[2].width  = inner_radius;
+  fraction_clip.corner[2].height = inner_radius;
+  fraction_clip.corner[3].width  = inner_radius;
+  fraction_clip.corner[3].height = inner_radius;
 
   gtk_snapshot_push_rounded_clip (snapshot, &total_clip);
   gtk_snapshot_push_opacity (snapshot, CLAMP (self->transition_progress, 0.0, 1.0));
