@@ -211,7 +211,7 @@ transaction_operation_error (FlatpakTransaction          *object,
                              GError                      *error,
                              gint                         details,
                              TransactionData             *data);
-gboolean
+static gboolean
 transaction_ready (FlatpakTransaction *object,
                    TransactionData    *data);
 
@@ -1911,7 +1911,7 @@ transaction_operation_error (FlatpakTransaction          *object,
   return FALSE;
 }
 
-gboolean
+static gboolean
 transaction_ready (FlatpakTransaction *object,
                    TransactionData    *data)
 {
