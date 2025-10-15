@@ -59,7 +59,8 @@ static guint signals[LAST_SIGNAL] = { 0, };
 
 static void
 show_relative_page (BzFeaturedCarousel *self,
-                    gint delta)
+                    gint                delta,
+                    gboolean            use_custom_spring)
 {
   gdouble current_page;
   guint n_pages;
@@ -84,6 +85,19 @@ show_relative_page (BzFeaturedCarousel *self,
   if (!adw_get_enable_animations (GTK_WIDGET (self)))
     animate = FALSE;
 
+  if (use_custom_spring)
+    {
+      g_autoptr (AdwSpringParams) spring_params = NULL;
+      spring_params = adw_spring_params_new (0.90, 1.65, 100.0);
+      adw_carousel_set_scroll_params (self->carousel, spring_params);
+    }
+  else
+    {
+      g_autoptr (AdwSpringParams) spring_params = NULL;
+      spring_params = adw_spring_params_new (1, 0.5, 500);
+      adw_carousel_set_scroll_params (self->carousel, spring_params);
+    }
+
   adw_carousel_scroll_to (self->carousel, new_page_widget, animate);
 }
 
@@ -93,7 +107,7 @@ rotate_cb (gpointer user_data)
   BzFeaturedCarousel *self;
 
   self = BZ_FEATURED_CAROUSEL (user_data);
-  show_relative_page (self, +1);
+  show_relative_page (self, +1, TRUE);
 
   return G_SOURCE_CONTINUE;
 }
@@ -162,7 +176,7 @@ next_button_clicked_cb (GtkButton *button,
   BzFeaturedCarousel *self;
 
   self = BZ_FEATURED_CAROUSEL (user_data);
-  show_relative_page (self, +1);
+  show_relative_page (self, +1, FALSE);
 }
 
 static void
@@ -172,7 +186,7 @@ previous_button_clicked_cb (GtkButton *button,
   BzFeaturedCarousel *self;
 
   self = BZ_FEATURED_CAROUSEL (user_data);
-  show_relative_page (self, -1);
+  show_relative_page (self, -1, FALSE);
 }
 
 static void
