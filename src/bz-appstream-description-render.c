@@ -366,14 +366,25 @@ append_text (BzAppstreamDescriptionRender *self,
     }
   else
     {
-      g_auto (GStrv) tokens  = NULL;
-      g_autofree char *fixed = NULL;
-      GtkWidget       *child = NULL;
+      g_auto (GStrv) tokens     = NULL;
+      g_autoptr (GString) fixed = NULL;
+      GtkWidget *child          = NULL;
 
       tokens = g_regex_split (self->split_regex, text, G_REGEX_MATCH_DEFAULT);
-      fixed  = g_strjoinv (" ", tokens);
+      fixed  = g_string_new (NULL);
+      for (guint i = 0; tokens[i] != NULL; i++)
+        {
+          if (*tokens[i] == '\0')
+            /* Avoid extra whitespace */
+            continue;
 
-      child = gtk_label_new (fixed);
+          if (fixed->len > 0)
+            g_string_append_printf (fixed, " %s", tokens[i]);
+          else
+            g_string_append (fixed, tokens[i]);
+        }
+
+      child = gtk_label_new (fixed->str);
       gtk_label_set_use_markup (GTK_LABEL (child), TRUE);
       gtk_label_set_wrap (GTK_LABEL (child), TRUE);
       gtk_label_set_wrap_mode (GTK_LABEL (child), PANGO_WRAP_WORD_CHAR);
@@ -389,6 +400,7 @@ append_text (BzAppstreamDescriptionRender *self,
           if (parent_kind == ORDERED_LIST)
             {
               g_autofree char *prefix_text = NULL;
+
               prefix_text = g_strdup_printf ("%d)", idx + 1);
               prefix      = gtk_label_new (prefix_text);
               gtk_widget_add_css_class (prefix, "caption");
@@ -404,18 +416,14 @@ append_text (BzAppstreamDescriptionRender *self,
 
           gtk_box_append (GTK_BOX (box), prefix);
           gtk_box_append (GTK_BOX (box), child);
-          gtk_box_append (self->box, box);
-          g_ptr_array_add (self->box_children, box);
 
           child = box;
         }
-      else
-        {
-          gtk_box_append (self->box, child);
-          g_ptr_array_add (self->box_children, child);
-        }
 
       gtk_widget_set_margin_start (child, 10 * depth);
+
+      gtk_box_append (self->box, child);
+      g_ptr_array_add (self->box_children, child);
     }
 }
 
