@@ -41,6 +41,9 @@ bz_flathub_category_get_name (BzFlathubCategory *self);
 GListModel *
 bz_flathub_category_dup_applications (BzFlathubCategory *self);
 
+GListModel *
+bz_flathub_category_dup_quality_applications (BzFlathubCategory *self);
+
 void
 bz_flathub_category_set_map_factory (BzFlathubCategory       *self,
                                      BzApplicationMapFactory *map_factory);
@@ -52,6 +55,10 @@ bz_flathub_category_set_name (BzFlathubCategory *self,
 void
 bz_flathub_category_set_applications (BzFlathubCategory *self,
                                       GListModel        *applications);
+
+void
+bz_flathub_category_set_quality_applications (BzFlathubCategory *self,
+                                              GListModel        *applications);
 
 const char *
 bz_flathub_category_get_display_name (BzFlathubCategory *self);

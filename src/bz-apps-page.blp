@@ -19,16 +19,17 @@ template $BzAppsPage: Adw.NavigationPage {
         margin-top: 24;
         margin-bottom: 24;
 
-       $BzFeaturedCarousel {
-          margin-start:8;
-          margin-end:8;
+        $BzFeaturedCarousel {
+          margin-start: 8;
+          margin-end: 8;
           margin-top: 16;
           hexpand: true;
+          visible: bind $is_not_null(template.carousel-applications) as <bool>;
           model: SliceListModel {
-             offset: 0;
-             size: 5;
-             model: bind template.applications;
-           };
+                   offset: 0;
+                   size: 7;
+                   model: bind template.carousel-applications;
+                 };
           group-clicked => $featured_carousel_group_clicked_cb(template);
         }
 

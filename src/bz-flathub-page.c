@@ -323,12 +323,13 @@ static void
 category_clicked (BzFlathubCategory *category,
                   GtkButton         *button)
 {
-  GtkWidget         *self      = NULL;
-  GtkWidget         *window    = NULL;
-  GtkWidget         *nav_view  = NULL;
-  AdwNavigationPage *apps_page = NULL;
-  g_autoptr (GListModel) model = NULL;
-  const char *title            = NULL;
+  GtkWidget         *self               = NULL;
+  GtkWidget         *window             = NULL;
+  GtkWidget         *nav_view           = NULL;
+  AdwNavigationPage *apps_page          = NULL;
+  g_autoptr (GListModel) model          = NULL;
+  g_autoptr (GListModel) carousel_model = NULL;
+  const char *title                     = NULL;
 
   self = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_FLATHUB_PAGE);
   g_assert (self != NULL);
@@ -338,10 +339,18 @@ category_clicked (BzFlathubCategory *category,
   nav_view = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
   g_assert (nav_view != NULL);
 
-  title = bz_flathub_category_get_display_name (category);
-  model = bz_flathub_category_dup_applications (category);
+  title          = bz_flathub_category_get_display_name (category);
+  model          = bz_flathub_category_dup_applications (category);
+  carousel_model = bz_flathub_category_dup_quality_applications (category);
 
-  apps_page = bz_apps_page_new (title, model);
+  if (carousel_model != NULL && g_list_model_get_n_items (carousel_model) > 0)
+    {
+      apps_page = bz_apps_page_new_with_carousel (title, model, carousel_model);
+    }
+  else
+    {
+      apps_page = bz_apps_page_new (title, model);
+    }
 
   g_signal_connect_swapped (
       apps_page, "select",
