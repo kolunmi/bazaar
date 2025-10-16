@@ -1,0 +1,70 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzFeaturedCarousel: Box {
+  orientation: vertical;
+  spacing: 12;
+
+  styles [
+    "featured-carousel",
+  ]
+
+  Overlay {
+    [overlay]
+    Button previous_button {
+      halign: start;
+      valign: center;
+      width-request: 48;
+      height-request: 48;
+      margin-start: 12;
+      icon-name: "go-previous-symbolic";
+
+      clicked => $previous_button_clicked_cb();
+
+      styles [
+        "circular",
+        "flat",
+        "image-button",
+      ]
+
+      accessibility {
+        label: _("Previous");
+      }
+    }
+
+    [overlay]
+    Button next_button {
+      halign: end;
+      valign: center;
+      width-request: 48;
+      height-request: 48;
+      margin-end: 12;
+      icon-name: "go-next-symbolic";
+
+      clicked => $next_button_clicked_cb();
+
+      styles [
+        "circular",
+        "flat",
+        "image-button",
+      ]
+
+      accessibility {
+        label: _("Next");
+      }
+    }
+
+    Adw.Carousel carousel {
+      styles ["card"]
+      notify::position => $carousel_notify_position_cb();
+    }
+  }
+
+  Adw.CarouselIndicatorDots dots {
+    carousel: carousel;
+  }
+
+  EventControllerKey {
+    key-pressed => $key_pressed_cb();
+  }
+}

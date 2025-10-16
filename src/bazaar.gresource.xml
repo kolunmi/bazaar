@@ -10,21 +10,25 @@
     <file>countries.json</file>
 
     <file preprocess="xml-stripblanks">bz-addons-dialog.ui</file>
+    <file preprocess="xml-stripblanks">bz-app-size-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-app-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-apps-page.ui</file>
-    <file preprocess="xml-stripblanks">bz-app-size-dialog.ui</file>
+    <file preprocess="xml-stripblanks">bz-appstream-description-render.ui</file>
     <file preprocess="xml-stripblanks">bz-browse-widget.ui</file>
-    <file preprocess="xml-stripblanks">bz-curated-app-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-category-tile.ui</file>
+    <file preprocess="xml-stripblanks">bz-curated-app-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-decorated-screenshot.ui</file>
     <file preprocess="xml-stripblanks">bz-detailed-app-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-entry-inspector.ui</file>
+    <file preprocess="xml-stripblanks">bz-featured-carousel.ui</file>
+    <file preprocess="xml-stripblanks">bz-featured-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-flathub-page.ui</file>
     <file preprocess="xml-stripblanks">bz-full-view.ui</file>
     <file preprocess="xml-stripblanks">bz-inspector.ui</file>
     <file preprocess="xml-stripblanks">bz-installed-page.ui</file>
     <file preprocess="xml-stripblanks">bz-preferences-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-progress-bar.ui</file>
+    <file preprocess="xml-stripblanks">bz-screenshot-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-search-widget.ui</file>
     <file preprocess="xml-stripblanks">bz-section-view.ui</file>
     <file preprocess="xml-stripblanks">bz-share-dialog.ui</file>
@@ -36,6 +40,7 @@
 
     <file preprocess="xml-stripblanks">icons/scalable/actions/app-installed-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/check-plain-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/circle-filled-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/community-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/connected-squares-x-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/copy-symbolic.svg</file>
@@ -79,6 +84,8 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/verified-checkmark-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/view-more-horizontal-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/view-more-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/zoom-minus-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/zoom-plus-symbolic.svg</file>
 
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Create.svg</file>
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Develop.svg</file>

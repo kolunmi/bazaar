@@ -60,42 +60,6 @@
       ],
       "modules": [
         {
-          "name": "blueprint-compiler",
-          "buildsystem": "meson",
-          "cleanup": [
-            "*"
-          ],
-          "sources": [
-            {
-              "type": "git",
-              "url": "https://gitlab.gnome.org/GNOME/blueprint-compiler.git",
-              "tag": "0.18.0",
-              "commit": "07c9c9df9cd1b6b4454ecba21ee58211e9144a4b",
-              "x-checker-data": {
-                "type": "anitya",
-                "project-id": 279929,
-                "tag-template": "$version"
-              }
-            }
-          ]
-        },
-        {
-          "name": "libdex",
-          "buildsystem": "meson",
-          "sources": [
-            {
-              "type": "archive",
-              "url": "https://gitlab.gnome.org/GNOME/libdex/-/archive/0.11.1/libdex-0.11.1.tar.gz",
-              "sha256": "a1702bc063b7004515d32e24692790d64383902542b2ee6e3b4a7a43770432e7",
-              "x-checker-data": {
-                "type": "anitya",
-                "project-id": 328356,
-                "url-template": "https://gitlab.gnome.org/GNOME/libdex/-/archive/$version/libdex-$version.tar.gz"
-              }
-            }
-          ]
-        },
-        {
           "name": "flatpak",
           "buildsystem": "meson",
           "config-opts": [

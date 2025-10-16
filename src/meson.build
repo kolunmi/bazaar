@@ -6,7 +6,7 @@ libdex_opts = [
 ]
 
 libadwaita_dep       = dependency('libadwaita-1', version: '>= 1.7')
-libdex_dep           = dependency('libdex-1', version: '>= 0.11.1', default_options: libdex_opts)
+libdex_dep           = dependency('libdex-1', version: '>= 1.0.0', default_options: libdex_opts)
 flatpak_dep          = dependency('flatpak', version: '>= 1.9')
 appstream_dep        = dependency('appstream', version: '>= 1.0')
 xmlb_dep             = dependency('xmlb', version: '>= 0.3.4')
@@ -51,11 +51,12 @@ gdbus_src = gnome.gdbus_codegen(
 
 bz_sources = [
   'bz-addons-dialog.c',
-  'bz-app-tile.c',
   'bz-app-size-dialog.c',
-  'bz-apps-page.c',
+  'bz-app-tile.c',
   'bz-application-map-factory.c',
   'bz-application.c',
+  'bz-apps-page.c',
+  'bz-appstream-description-render.c',
   'bz-async-texture.c',
   'bz-backend-notification.c',
   'bz-backend-transaction-op-payload.c',
@@ -67,8 +68,8 @@ bz_sources = [
   'bz-comet.c',
   'bz-content-provider.c',
   'bz-content-section.c',
-  'bz-country.c',
   'bz-country-data-point.c',
+  'bz-country.c',
   'bz-curated-app-tile.c',
   'bz-data-graph.c',
   'bz-data-point.c',
@@ -82,6 +83,8 @@ bz_sources = [
   'bz-entry.c',
   'bz-env.c',
   'bz-error.c',
+  'bz-featured-carousel.c',
+  'bz-featured-tile.c',
   'bz-flathub-category.c',
   'bz-flathub-page.c',
   'bz-flathub-state.c',
@@ -104,6 +107,7 @@ bz_sources = [
   'bz-release.c',
   'bz-result.c',
   'bz-review.c',
+  'bz-screenshot-dialog.c',
   'bz-screenshot.c',
   'bz-search-engine.c',
   'bz-search-result.c',
@@ -111,9 +115,9 @@ bz_sources = [
   'bz-section-view.c',
   'bz-serializable.c',
   'bz-share-dialog.c',
+  'bz-spdx.c',
   'bz-state-info.c',
   'bz-stats-dialog.c',
-  'bz-spdx.c',
   'bz-transaction-manager.c',
   'bz-transaction-task.c',
   'bz-transaction-view.c',
@@ -121,9 +125,10 @@ bz_sources = [
   'bz-update-dialog.c',
   'bz-url.c',
   'bz-window.c',
-  'bz-world-map.c',
   'bz-world-map-parser.c',
+  'bz-world-map.c',
   'bz-yaml-parser.c',
+  'bz-zoom.c',
   'main.c',
 ]
 
@@ -146,21 +151,25 @@ bz_deps = [
 blueprints = custom_target('blueprints',
   input: files(
     'bz-addons-dialog.blp',
-    'bz-app-tile.blp',
     'bz-app-size-dialog.blp',
+    'bz-app-tile.blp',
     'bz-apps-page.blp',
+    'bz-appstream-description-render.blp',
     'bz-browse-widget.blp',
     'bz-category-tile.blp',
     'bz-curated-app-tile.blp',
     'bz-decorated-screenshot.blp',
     'bz-detailed-app-tile.blp',
     'bz-entry-inspector.blp',
+    'bz-featured-carousel.blp',
+    'bz-featured-tile.blp',
     'bz-flathub-page.blp',
     'bz-full-view.blp',
     'bz-inspector.blp',
     'bz-installed-page.blp',
     'bz-preferences-dialog.blp',
     'bz-progress-bar.blp',
+    'bz-screenshot-dialog.blp',
     'bz-search-widget.blp',
     'bz-section-view.blp',
     'bz-share-dialog.blp',

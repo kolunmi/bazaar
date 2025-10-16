@@ -70,7 +70,7 @@ on the cli and type these commands inside the project root:
 meson setup build --prefix=/usr/local
 ninja -C build
 sudo ninja -C build install
-bazaar window --auto-service
+bazaar
 ```
 
 You will need the following dependencies installed, along with a C compiler, meson, and ninja:

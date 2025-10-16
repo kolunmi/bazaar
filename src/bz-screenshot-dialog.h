@@ -1,6 +1,6 @@
-/* bz-apps-page.h
+/* bz-screenshot-dialog.h
  *
- * Copyright 2025 Adam Masciola, Alexander Vanhee
+ * Copyright 2025 Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,21 +20,16 @@
 
 #pragma once
 
+#include "bz-async-texture.h"
 #include <adwaita.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_APPS_PAGE (bz_apps_page_get_type ())
+#define BZ_TYPE_SCREENSHOT_DIALOG (bz_screenshot_dialog_get_type ())
 
-G_DECLARE_FINAL_TYPE (BzAppsPage, bz_apps_page, BZ, APPS_PAGE, AdwNavigationPage)
+G_DECLARE_FINAL_TYPE (BzScreenshotDialog, bz_screenshot_dialog, BZ, SCREENSHOT_DIALOG, AdwDialog)
 
-AdwNavigationPage *
-bz_apps_page_new (const char *title,
-                  GListModel *applications);
-
-AdwNavigationPage *
-bz_apps_page_new_with_carousel (const char *title,
-                                GListModel *applications,
-                                GListModel *carousel_applications);
+AdwDialog *bz_screenshot_dialog_new (GListModel *screenshots,
+                                     guint       initial_index);
 
 G_END_DECLS

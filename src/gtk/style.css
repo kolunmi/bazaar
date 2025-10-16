@@ -161,7 +161,6 @@ headerbar,
   --flathub-bg-hue: 301.44;
 }
 
-
 .flathub .global-search, .flathub .fake-flat-headerbar,
 window.flathub {
   background-color: oklch(from var(--window-bg-color) l calc(c * 4) var(--flathub-bg-hue));
@@ -181,6 +180,23 @@ window.flathub {
 
 .flathub-gunmetal {
   color:#251f32;
+}
+
+.header-osd windowcontrols button image {
+  background-color: rgba(0, 0, 0, 0.65);
+  color: white;
+  background-image: none;
+}
+
+.osd-box {
+  border-radius: 12px;
+  background-color: rgba(0, 0, 0, 0.65);
+  padding: 6px;
+  color: white;
+}
+
+.view-dark {
+  background-color: #1d1d20;
 }
 
 /* Category buttons styling modified from GNOME Software*/

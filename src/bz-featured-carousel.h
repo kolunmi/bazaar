@@ -1,6 +1,6 @@
-/* bz-apps-page.h
+/* bz-featured-tile.c
  *
- * Copyright 2025 Adam Masciola, Alexander Vanhee
+ * Copyright 2025 Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,17 +24,15 @@
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_APPS_PAGE (bz_apps_page_get_type ())
+#define BZ_TYPE_FEATURED_CAROUSEL (bz_featured_carousel_get_type ())
 
-G_DECLARE_FINAL_TYPE (BzAppsPage, bz_apps_page, BZ, APPS_PAGE, AdwNavigationPage)
+G_DECLARE_FINAL_TYPE (BzFeaturedCarousel, bz_featured_carousel, BZ, FEATURED_CAROUSEL, GtkBox)
 
-AdwNavigationPage *
-bz_apps_page_new (const char *title,
-                  GListModel *applications);
+BzFeaturedCarousel *bz_featured_carousel_new (void);
 
-AdwNavigationPage *
-bz_apps_page_new_with_carousel (const char *title,
-                                GListModel *applications,
-                                GListModel *carousel_applications);
+GListModel *bz_featured_carousel_get_model (BzFeaturedCarousel *self);
+
+void bz_featured_carousel_set_model (BzFeaturedCarousel *self,
+                                     GListModel         *model);
 
 G_END_DECLS

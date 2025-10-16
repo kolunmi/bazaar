@@ -25,6 +25,7 @@
 
 #include "bz-addons-dialog.h"
 #include "bz-app-size-dialog.h"
+#include "bz-appstream-description-render.h"
 #include "bz-decorated-screenshot.h"
 #include "bz-dynamic-list-view.h"
 #include "bz-env.h"
@@ -34,6 +35,7 @@
 #include "bz-global-state.h"
 #include "bz-lazy-async-texture-model.h"
 #include "bz-release.h"
+#include "bz-screenshot-dialog.h"
 #include "bz-screenshot.h"
 #include "bz-section-view.h"
 #include "bz-share-dialog.h"
@@ -568,15 +570,15 @@ create_release_row (const char *version,
                     const char *description,
                     guint64     timestamp)
 {
-  AdwActionRow *row               = NULL;
-  GtkBox       *content_box       = NULL;
-  GtkBox       *header_box        = NULL;
-  GtkLabel     *version_label     = NULL;
-  GtkLabel     *date_label        = NULL;
-  GtkLabel     *description_label = NULL;
-  g_autoptr (GDateTime) date      = NULL;
-  g_autofree char *date_str       = NULL;
-  g_autofree char *version_text   = NULL;
+  AdwActionRow                 *row                = NULL;
+  GtkBox                       *content_box        = NULL;
+  GtkBox                       *header_box         = NULL;
+  GtkLabel                     *version_label      = NULL;
+  GtkLabel                     *date_label         = NULL;
+  BzAppstreamDescriptionRender *description_widget = NULL;
+  g_autoptr (GDateTime) date                       = NULL;
+  g_autofree char *date_str                        = NULL;
+  g_autofree char *version_text                    = NULL;
 
   date_str = format_timestamp (NULL, timestamp);
 
@@ -607,25 +609,23 @@ create_release_row (const char *version,
 
   gtk_box_append (content_box, GTK_WIDGET (header_box));
 
-  description_label = GTK_LABEL (gtk_label_new (
-      (description && *description) ? description : _ ("No details for this release")));
-  gtk_widget_set_halign (GTK_WIDGET (description_label), GTK_ALIGN_FILL);
-  gtk_label_set_xalign (description_label, 0.0);
-
   if (description && *description)
     {
-      gtk_widget_set_margin_top (GTK_WIDGET (description_label), 10);
-      gtk_label_set_wrap (description_label, TRUE);
-      gtk_label_set_use_markup (description_label, TRUE);
-      gtk_label_set_selectable (description_label, TRUE);
+      description_widget = bz_appstream_description_render_new ();
+      bz_appstream_description_render_set_appstream_description (description_widget, description);
+      bz_appstream_description_render_set_selectable (description_widget, TRUE);
+      gtk_widget_set_margin_top (GTK_WIDGET (description_widget), 10);
     }
   else
     {
-      gtk_widget_set_margin_top (GTK_WIDGET (description_label), 5);
-      gtk_widget_add_css_class (GTK_WIDGET (description_label), "dim-label");
+      GtkLabel *fallback_label = GTK_LABEL (gtk_label_new (_ ("No details for this release")));
+      gtk_widget_set_margin_top (GTK_WIDGET (fallback_label), 5);
+      gtk_widget_add_css_class (GTK_WIDGET (fallback_label), "dim-label");
+      gtk_label_set_xalign (fallback_label, 0.0);
+      description_widget = (BzAppstreamDescriptionRender *) fallback_label;
     }
 
-  gtk_box_append (content_box, GTK_WIDGET (description_label));
+  gtk_box_append (content_box, GTK_WIDGET (description_widget));
   gtk_list_box_row_set_child (GTK_LIST_BOX_ROW (row), GTK_WIDGET (content_box));
 
   return GTK_WIDGET (row);
@@ -674,6 +674,48 @@ populate_releases_box (BzFullView *self)
 }
 
 static void
+screenshot_clicked_cb (BzFullView            *self,
+                       BzDecoratedScreenshot *screenshot)
+{
+  BzAsyncTexture *async_texture                  = NULL;
+  GListModel     *model                          = NULL;
+  g_autoptr (BzLazyAsyncTextureModel) lazy_model = NULL;
+  AdwDialog *dialog                              = NULL;
+  BzEntry   *entry                               = NULL;
+  guint      index                               = 0;
+  guint      n_items                             = 0;
+
+  async_texture = bz_decorated_screenshot_get_async_texture (screenshot);
+  if (async_texture == NULL || self->debounced_ui_entry == NULL)
+    return;
+
+  entry = bz_result_get_object (self->debounced_ui_entry);
+  if (entry == NULL)
+    return;
+
+  g_object_get (entry, "screenshot-paintables", &model, NULL);
+  if (model == NULL)
+    return;
+
+  lazy_model = bz_lazy_async_texture_model_new ();
+  g_object_set (lazy_model, "model", model, NULL);
+
+  n_items = g_list_model_get_n_items (G_LIST_MODEL (lazy_model));
+  for (guint i = 0; i < n_items; i++)
+    {
+      g_autoptr (BzAsyncTexture) item = g_list_model_get_item (G_LIST_MODEL (lazy_model), i);
+      if (item == async_texture)
+        {
+          index = i;
+          break;
+        }
+    }
+
+  dialog = bz_screenshot_dialog_new (G_LIST_MODEL (lazy_model), index);
+  adw_dialog_present (dialog, GTK_WIDGET (self));
+}
+
+static void
 screenshots_bind_widget_cb (BzFullView            *self,
                             BzDecoratedScreenshot *screenshot,
                             GdkPaintable          *paintable,
@@ -682,6 +724,10 @@ screenshots_bind_widget_cb (BzFullView            *self,
   gtk_widget_set_focusable (GTK_WIDGET (screenshot), TRUE);
   gtk_widget_set_margin_top (GTK_WIDGET (screenshot), 5);
   gtk_widget_set_margin_bottom (GTK_WIDGET (screenshot), 5);
+
+  g_signal_connect_swapped (
+      screenshot, "clicked",
+      G_CALLBACK (screenshot_clicked_cb), self);
 }
 
 static void
@@ -690,6 +736,10 @@ screenshots_unbind_widget_cb (BzFullView            *self,
                               GdkPaintable          *paintable,
                               BzDynamicListView     *view)
 {
+  g_signal_handlers_disconnect_by_func (
+      screenshot,
+      G_CALLBACK (screenshot_clicked_cb),
+      self);
 }
 
 static void
@@ -797,6 +847,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
       G_TYPE_FROM_CLASS (klass),
       g_cclosure_marshal_VOID__OBJECTv);
 
+  g_type_ensure (BZ_TYPE_APPSTREAM_DESCRIPTION_RENDER);
   g_type_ensure (BZ_TYPE_DECORATED_SCREENSHOT);
   g_type_ensure (BZ_TYPE_DYNAMIC_LIST_VIEW);
   g_type_ensure (BZ_TYPE_ENTRY);
