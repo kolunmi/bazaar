@@ -25,7 +25,7 @@ struct _BzBackendTransactionOpPayload
   GObject parent_instance;
 
   char    *name;
-  BzEntry *entry;
+  GWeakRef entry;
   guint64  download_size;
   guint64  installed_size;
 };
@@ -51,7 +51,7 @@ bz_backend_transaction_op_payload_dispose (GObject *object)
   BzBackendTransactionOpPayload *self = BZ_BACKEND_TRANSACTION_OP_PAYLOAD (object);
 
   g_clear_pointer (&self->name, g_free);
-  g_clear_pointer (&self->entry, g_object_unref);
+  g_weak_ref_clear (&self->entry);
 
   G_OBJECT_CLASS (bz_backend_transaction_op_payload_parent_class)->dispose (object);
 }
@@ -70,7 +70,7 @@ bz_backend_transaction_op_payload_get_property (GObject    *object,
       g_value_set_string (value, bz_backend_transaction_op_payload_get_name (self));
       break;
     case PROP_ENTRY:
-      g_value_set_object (value, bz_backend_transaction_op_payload_get_entry (self));
+      g_value_take_object (value, bz_backend_transaction_op_payload_dup_entry (self));
       break;
     case PROP_DOWNLOAD_SIZE:
       g_value_set_uint64 (value, bz_backend_transaction_op_payload_get_download_size (self));
@@ -152,6 +152,7 @@ bz_backend_transaction_op_payload_class_init (BzBackendTransactionOpPayloadClass
 static void
 bz_backend_transaction_op_payload_init (BzBackendTransactionOpPayload *self)
 {
+  g_weak_ref_init (&self->entry, NULL);
 }
 
 BzBackendTransactionOpPayload *
@@ -168,10 +169,10 @@ bz_backend_transaction_op_payload_get_name (BzBackendTransactionOpPayload *self)
 }
 
 BzEntry *
-bz_backend_transaction_op_payload_get_entry (BzBackendTransactionOpPayload *self)
+bz_backend_transaction_op_payload_dup_entry (BzBackendTransactionOpPayload *self)
 {
   g_return_val_if_fail (BZ_IS_BACKEND_TRANSACTION_OP_PAYLOAD (self), NULL);
-  return self->entry;
+  return g_weak_ref_get (&self->entry);
 }
 
 guint64
@@ -207,9 +208,7 @@ bz_backend_transaction_op_payload_set_entry (BzBackendTransactionOpPayload *self
 {
   g_return_if_fail (BZ_IS_BACKEND_TRANSACTION_OP_PAYLOAD (self));
 
-  g_clear_pointer (&self->entry, g_object_unref);
-  if (entry != NULL)
-    self->entry = g_object_ref (entry);
+  g_weak_ref_init (&self->entry, entry);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ENTRY]);
 }
