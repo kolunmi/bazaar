@@ -21,6 +21,7 @@
 #pragma once
 
 #include "bz-entry.h"
+#include "bz-transaction-entry-tracker.h"
 #include "bz-transaction-task.h"
 
 G_BEGIN_DECLS

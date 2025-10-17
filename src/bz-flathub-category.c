@@ -28,6 +28,7 @@ struct _BzFlathubCategory
   BzApplicationMapFactory *map_factory;
   char                    *name;
   GListModel              *applications;
+  GListModel              *quality_applications;
 };
 
 G_DEFINE_FINAL_TYPE (BzFlathubCategory, bz_flathub_category, G_TYPE_OBJECT);
@@ -41,6 +42,7 @@ enum
   PROP_DISPLAY_NAME,
   PROP_ICON_NAME,
   PROP_APPLICATIONS,
+  PROP_QUALITY_APPLICATIONS,
 
   LAST_PROP
 };
@@ -54,6 +56,7 @@ bz_flathub_category_dispose (GObject *object)
   g_clear_pointer (&self->map_factory, g_object_unref);
   g_clear_pointer (&self->name, g_free);
   g_clear_pointer (&self->applications, g_object_unref);
+  g_clear_pointer (&self->quality_applications, g_object_unref);
 
   G_OBJECT_CLASS (bz_flathub_category_parent_class)->dispose (object);
 }
@@ -76,6 +79,9 @@ bz_flathub_category_get_property (GObject    *object,
       break;
     case PROP_APPLICATIONS:
       g_value_take_object (value, bz_flathub_category_dup_applications (self));
+      break;
+    case PROP_QUALITY_APPLICATIONS:
+      g_value_take_object (value, bz_flathub_category_dup_quality_applications (self));
       break;
     case PROP_DISPLAY_NAME:
       g_value_set_string (value, bz_flathub_category_get_display_name (self));
@@ -106,6 +112,9 @@ bz_flathub_category_set_property (GObject      *object,
       break;
     case PROP_APPLICATIONS:
       bz_flathub_category_set_applications (self, g_value_get_object (value));
+      break;
+    case PROP_QUALITY_APPLICATIONS:
+      bz_flathub_category_set_quality_applications (self, g_value_get_object (value));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -148,6 +157,13 @@ bz_flathub_category_class_init (BzFlathubCategoryClass *klass)
   props[PROP_APPLICATIONS] =
       g_param_spec_object (
           "applications",
+          NULL, NULL,
+          G_TYPE_LIST_MODEL,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_QUALITY_APPLICATIONS] =
+      g_param_spec_object (
+          "quality-applications",
           NULL, NULL,
           G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
@@ -197,6 +213,23 @@ bz_flathub_category_dup_applications (BzFlathubCategory *self)
     return NULL;
 }
 
+GListModel *
+bz_flathub_category_dup_quality_applications (BzFlathubCategory *self)
+{
+  g_return_val_if_fail (BZ_IS_FLATHUB_CATEGORY (self), NULL);
+
+  if (self->quality_applications != NULL)
+    {
+      if (self->map_factory != NULL)
+        return bz_application_map_factory_generate (
+            self->map_factory, G_LIST_MODEL (self->quality_applications));
+      else
+        return G_LIST_MODEL (g_object_ref (self->quality_applications));
+    }
+  else
+    return NULL;
+}
+
 void
 bz_flathub_category_set_map_factory (BzFlathubCategory       *self,
                                      BzApplicationMapFactory *map_factory)
@@ -235,6 +268,19 @@ bz_flathub_category_set_applications (BzFlathubCategory *self,
     self->applications = g_object_ref (applications);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APPLICATIONS]);
+}
+
+void
+bz_flathub_category_set_quality_applications (BzFlathubCategory *self,
+                                              GListModel        *applications)
+{
+  g_return_if_fail (BZ_IS_FLATHUB_CATEGORY (self));
+
+  g_clear_pointer (&self->quality_applications, g_object_unref);
+  if (applications != NULL)
+    self->quality_applications = g_object_ref (applications);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_QUALITY_APPLICATIONS]);
 }
 
 static const char *

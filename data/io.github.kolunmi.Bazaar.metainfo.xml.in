@@ -9,14 +9,12 @@
   <description>
     <p>
       A new app store for GNOME with a focus on discovering and installing
-      applications and add-ons from Flatpak remotes, particularly
-      Flathub
+      applications and addons from Flatpak remotes, particularly Flathub.
     </p>
     <p>
-      It emphasizes supporting the
-      developers who make the Linux desktop possible. Bazaar features a
-      "curated" tab that can be configured by distributors to allow for a
-      more locallized experience.
+      It emphasizes supporting the developers who make the Linux desktop
+      possible. Bazaar features a "curated" tab that can be configured by
+      distributors to allow for a more localized experience.
     </p>
   </description>
 
@@ -45,8 +43,8 @@
 
   <screenshots>
     <screenshot type="default">
-      <image>https://github.com/user-attachments/assets/4ca1e18d-ebaf-44a7-b50c-110c4af3a346</image>
-      <caption>The home view displaying Flathub apps &amp; categories</caption>
+      <image>https://github.com/user-attachments/assets/fb004294-b6e8-4701-bd2d-f4bbb63dc20e</image>
+      <caption>The home view displaying Flathub apps</caption>
     </screenshot>
     <screenshot>
       <image>https://github.com/user-attachments/assets/9f363aae-3a9e-4aa5-8206-ea694e1372fa</image>
@@ -59,6 +57,19 @@
   </screenshots>
 
   <releases>
+    <release version="0.5.6" date="2025-10-15">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.5.6</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>Add interactive screenshot dialog</li>
+          <li>Fix empty update dialogs</li>
+          <li>Greatly improve look of app description rendering</li>
+          <li>Add pending state to the global progress bar</li>
+          <li>Add featured apps carousel</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.5.5" date="2025-10-09">
       <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.5.5</url>
       <description translate="no">

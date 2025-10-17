@@ -1,6 +1,6 @@
-/* bz-apps-page.h
+/* bz-featured-tile.h
  *
- * Copyright 2025 Adam Masciola, Alexander Vanhee
+ * Copyright 2025 Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,21 +20,20 @@
 
 #pragma once
 
-#include <adwaita.h>
+#include <gtk/gtk.h>
+#include "bz-entry-group.h"
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_APPS_PAGE (bz_apps_page_get_type ())
+#define BZ_TYPE_FEATURED_TILE (bz_featured_tile_get_type ())
 
-G_DECLARE_FINAL_TYPE (BzAppsPage, bz_apps_page, BZ, APPS_PAGE, AdwNavigationPage)
+G_DECLARE_FINAL_TYPE (BzFeaturedTile, bz_featured_tile, BZ, FEATURED_TILE, GtkButton)
 
-AdwNavigationPage *
-bz_apps_page_new (const char *title,
-                  GListModel *applications);
+BzFeaturedTile *bz_featured_tile_new (BzEntryGroup *group);
 
-AdwNavigationPage *
-bz_apps_page_new_with_carousel (const char *title,
-                                GListModel *applications,
-                                GListModel *carousel_applications);
+BzEntryGroup *bz_featured_tile_get_group (BzFeaturedTile *self);
+
+void bz_featured_tile_set_group (BzFeaturedTile *self,
+                                  BzEntryGroup   *group);
 
 G_END_DECLS

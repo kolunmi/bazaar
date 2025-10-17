@@ -7,19 +7,17 @@ Bazaar
 <p align="center">Discover and install applications</p>
 
 <div align="center">
-<img height="512" alt="Image" src="https://github.com/user-attachments/assets/6e2a3f5b-1a92-47ce-89b4-61864a452fd5" />
+    <picture>
+        <source srcset="https://github.com/user-attachments/assets/cc545658-31fc-4cc5-b512-a4c17a2af454" media="(prefers-color-scheme: dark)">
+        <img height="512" alt="Screenshot showing Bazaar's Flathub page" src="https://github.com/user-attachments/assets/b712f5de-ea5f-4f06-b834-d41b9265a192">
+    </picture>
 </div>
 
-<div align="center">
-<img height="512" alt="Image" src="https://github.com/user-attachments/assets/0a149911-7edb-48c4-84e7-d4e64be80c0d" />
-</div>
-
-Bazaar is a new app store for GNOME with a focus on discovering and
-installing applications and add-ons from Flatpak remotes, particularly
-[Flathub](https://flathub.org/). It emphasizes supporting the
-developers who make the Linux desktop possible. Bazaar features a
-"curated" tab that can be configured by distributors to allow for a
-more locallized experience.
+Bazaar is a new app store for GNOME with a focus on discovering and installing
+applications and add-ons from Flatpak remotes, particularly
+[Flathub](https://flathub.org/). It emphasizes supporting the developers who
+make the Linux desktop possible. Bazaar features a "curated" tab that can be
+configured by distributors to allow for a more localized experience.
 
 Bazaar is fast and highly multi-threaded, guaranteeing a smooth
 experience in the user interface. You can queue as many downloads as 
@@ -34,10 +32,6 @@ use on the KDE Plasma desktop.
 
 Thanks to [Jakub Steiner](http://jimmac.eu) for designing Bazaar's
 icon.
-
-The screenshot above showing the curated tab features
-[Aurora](https://getaurora.dev/en)'s
-[config](https://github.com/ublue-os/aurora/blob/9e66ef4f4624afa96fd6050f096c835ef0f81ad9/system_files/shared/usr/share/ublue-os/bazaar/config.yaml).
 
 ### Installing
 
@@ -70,15 +64,15 @@ on the cli and type these commands inside the project root:
 meson setup build --prefix=/usr/local
 ninja -C build
 sudo ninja -C build install
-bazaar window --auto-service
+bazaar
 ```
 
 You will need the following dependencies installed, along with a C compiler, meson, and ninja:
 | Dep Name                                                | `pkg-config` Name | Min Version            | Justification                                       |
 |---------------------------------------------------------|-------------------|------------------------|-----------------------------------------------------|
 | [gtk4](https://gitlab.gnome.org/GNOME/gtk/)             | `gtk4`            | enforced by libadwaita | GUI                                                 |
-| [libadwaita](https://gitlab.gnome.org/GNOME/libadwaita) | `libadwaita-1`    | `1.7`                  | GNOME styling                                       |
-| [libdex](https://gitlab.gnome.org/GNOME/libdex)         | `libdex-1`        | `0.11.1`               | Async helpers                                       |
+| [libadwaita](https://gitlab.gnome.org/GNOME/libadwaita) | `libadwaita-1`    | `1.8`                  | GNOME styling                                       |
+| [libdex](https://gitlab.gnome.org/GNOME/libdex)         | `libdex-1`        | `1.0`                  | Async helpers                                       |
 | [flatpak](https://github.com/flatpak/flatpak)           | `flatpak`         | `1.9`                  | Flatpak installation management                     |
 | [appstream](https://github.com/ximion/appstream)        | `appstream`       | `1.0`                  | Download application metadata                       |
 | [xmlb](https://github.com/hughsie/libxmlb)              | `xmlb`            | `0.3.4`                | Handle binary xml appstream bundles/Parse plain xml |

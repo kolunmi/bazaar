@@ -8,8 +8,8 @@ template $BzAppsPage: Adw.NavigationPage {
     hscrollbar-policy: never;
 
     Adw.Clamp {
-      maximum-size: 1200;
-      tightening-threshold: 800;
+      maximum-size: 1500;
+      tightening-threshold: 1400;
 
       Box {
         orientation: vertical;
@@ -18,6 +18,20 @@ template $BzAppsPage: Adw.NavigationPage {
         margin-end: 12;
         margin-top: 24;
         margin-bottom: 24;
+
+        $BzFeaturedCarousel {
+          margin-start: 8;
+          margin-end: 8;
+          margin-top: 16;
+          hexpand: true;
+          visible: bind $is_not_null(template.carousel-applications) as <bool>;
+          model: SliceListModel {
+                   offset: 0;
+                   size: 7;
+                   model: bind template.carousel-applications;
+                 };
+          group-clicked => $featured_carousel_group_clicked_cb(template);
+        }
 
         Label {
           margin-start: 8;

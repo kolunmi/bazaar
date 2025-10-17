@@ -45,6 +45,13 @@ gboolean
 bz_global_progress_get_active (BzGlobalProgress *self);
 
 void
+bz_global_progress_set_pending (BzGlobalProgress *self,
+                                gboolean          pending);
+
+gboolean
+bz_global_progress_get_pending (BzGlobalProgress *self);
+
+void
 bz_global_progress_set_fraction (BzGlobalProgress *self,
                                  double            fraction);
 
@@ -64,6 +71,13 @@ bz_global_progress_set_transition_progress (BzGlobalProgress *self,
 
 double
 bz_global_progress_get_transition_progress (BzGlobalProgress *self);
+
+void
+bz_global_progress_set_pending_progress (BzGlobalProgress *self,
+                                         double            progress);
+
+double
+bz_global_progress_get_pending_progress (BzGlobalProgress *self);
 
 void
 bz_global_progress_set_expand_size (BzGlobalProgress *self,

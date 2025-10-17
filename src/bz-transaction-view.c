@@ -140,11 +140,16 @@ format_bytes_transferred (gpointer object,
 }
 
 static GdkPaintable *
-get_main_icon (GtkListItem *list_item,
-               BzEntry     *entry)
+get_main_icon (GtkListItem               *list_item,
+               BzTransactionEntryTracker *tracker)
 {
+  BzEntry      *entry          = NULL;
   GdkPaintable *icon_paintable = NULL;
 
+  if (tracker == NULL)
+    goto return_generic;
+
+  entry = bz_transaction_entry_tracker_get_entry (tracker);
   if (entry == NULL)
     goto return_generic;
 
@@ -181,9 +186,15 @@ return_generic:
 }
 
 static char *
-get_sub_icon_name (gpointer object,
-                   BzEntry *entry)
+get_sub_icon_name (gpointer                   object,
+                   BzTransactionEntryTracker *tracker)
 {
+  BzEntry *entry = NULL;
+
+  if (tracker == NULL)
+    return NULL;
+
+  entry = bz_transaction_entry_tracker_get_entry (tracker);
   if (entry == NULL)
     return NULL;
 
@@ -199,11 +210,13 @@ static void
 entry_clicked (GtkListItem *list_item,
                GtkButton   *button)
 {
-  BzEntry  *entry                = NULL;
-  BzWindow *window               = NULL;
-  g_autoptr (BzEntryGroup) group = NULL;
+  BzTransactionEntryTracker *tracker = NULL;
+  BzEntry                   *entry   = NULL;
+  BzWindow                  *window  = NULL;
+  g_autoptr (BzEntryGroup) group     = NULL;
 
-  entry = gtk_list_item_get_item (list_item);
+  tracker = gtk_list_item_get_item (list_item);
+  entry   = bz_transaction_entry_tracker_get_entry (tracker);
 
   window = (BzWindow *) gtk_widget_get_ancestor (gtk_list_item_get_child (list_item), BZ_TYPE_WINDOW);
   if (window == NULL)
