@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-10-18 03:49+0900\n"
-"PO-Revision-Date: 2025-10-18 04:18+0900\n"
+"PO-Revision-Date: 2025-10-18 04:40+0900\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: ja\n"
@@ -811,7 +811,7 @@ msgstr "不明"
 #. *
 #: src/bz-full-view.c:268
 msgid "%B %-d, %Y"
-msgstr "%Y/%0M/%0d"
+msgstr "%Y/%0m/%0d"
 
 #. Translators: This is a date format for timestamps from the current year. Used in the app releases section.
 #. * %B is the full month name, %e is the day.
@@ -821,7 +821,7 @@ msgstr "%Y/%0M/%0d"
 #. *
 #: src/bz-full-view.c:276
 msgid "%B %-d"
-msgstr "%0M/%0d"
+msgstr "%0m/%0d"
 
 #: src/bz-full-view.c:287
 msgid "No URL"
