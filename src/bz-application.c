@@ -644,6 +644,10 @@ bz_application_init (BzApplication *self)
       (const char *[]) { "<primary>q", NULL });
   gtk_application_set_accels_for_action (
       GTK_APPLICATION (self),
+      "app.preferences",
+      (const char *[]) { "<primary>comma", NULL });
+  gtk_application_set_accels_for_action (
+      GTK_APPLICATION (self),
       "app.refresh",
       (const char *[]) { "<primary>r", NULL });
   gtk_application_set_accels_for_action (
