@@ -807,11 +807,16 @@ void
 bz_window_show_group (BzWindow     *self,
                       BzEntryGroup *group)
 {
+  AdwNavigationPage *visible_page = NULL;
+
   g_return_if_fail (BZ_IS_WINDOW (self));
   g_return_if_fail (BZ_IS_ENTRY_GROUP (group));
 
   bz_full_view_set_entry_group (self->full_view, group);
-  adw_navigation_view_push_by_tag (self->main_stack, "view");
+
+  visible_page = adw_navigation_view_get_visible_page (self->main_stack);
+  if (visible_page != adw_navigation_view_find_page (self->main_stack, "view"))
+    adw_navigation_view_push_by_tag (self->main_stack, "view");
   gtk_widget_set_visible (GTK_WIDGET (self->go_back), TRUE);
   gtk_widget_set_visible (GTK_WIDGET (self->search), FALSE);
   gtk_revealer_set_reveal_child (self->title_revealer, FALSE);

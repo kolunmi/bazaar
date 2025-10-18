@@ -73,12 +73,16 @@ template $BzWindow: Adw.ApplicationWindow {
           pin-sidebar: true;
           sidebar-position: end;
           sidebar-width-fraction: 0.25;
-          min-sidebar-width: 250;
+          min-sidebar-width: 300;
           max-sidebar-width: 400;
 
           sidebar: Adw.NavigationPage {
-            title: _("Transactions");
+            title: _("Tasks");
             tag: "transactions";
+
+            styles [
+              "sidebar-pane"
+            ]
 
             child: Adw.ToolbarView {
               [top]
@@ -167,7 +171,10 @@ template $BzWindow: Adw.ApplicationWindow {
                     child: ListView list_view {
                       styles [
                         "navigation-sidebar",
+                        "transaction-list-view"
                       ]
+
+                      margin-top: 6;
 
                       model: NoSelection no_selection {
                         model: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.transactions;
@@ -178,10 +185,6 @@ template $BzWindow: Adw.ApplicationWindow {
                           activatable: false;
 
                           child: $BzTransactionView {
-                            margin-start: "5";
-                            margin-end: "5";
-                            margin-top: "10";
-                            margin-bottom: "10";
                             transaction: bind template.item;
                           };
                         }

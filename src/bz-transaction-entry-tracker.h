@@ -26,6 +26,13 @@
 
 G_BEGIN_DECLS
 
+typedef enum
+{
+  BZ_TRANSACTION_TYPE_INSTALL,
+  BZ_TRANSACTION_TYPE_UPDATE,
+  BZ_TRANSACTION_TYPE_REMOVAL
+} BzTransactionType;
+
 #define BZ_TYPE_TRANSACTION_ENTRY_TRACKER (bz_transaction_entry_tracker_get_type ())
 G_DECLARE_FINAL_TYPE (BzTransactionEntryTracker, bz_transaction_entry_tracker, BZ, TRANSACTION_ENTRY_TRACKER, GObject)
 
@@ -41,6 +48,9 @@ bz_transaction_entry_tracker_get_current_ops (BzTransactionEntryTracker *self);
 GListModel *
 bz_transaction_entry_tracker_get_finished_ops (BzTransactionEntryTracker *self);
 
+BzTransactionType
+bz_transaction_entry_tracker_get_type_enum (BzTransactionEntryTracker *self);
+
 void
 bz_transaction_entry_tracker_set_entry (BzTransactionEntryTracker *self,
                                         BzEntry                   *entry);
@@ -53,6 +63,9 @@ void
 bz_transaction_entry_tracker_set_finished_ops (BzTransactionEntryTracker *self,
                                                GListModel                *finished_ops);
 
-G_END_DECLS
+void
+bz_transaction_entry_tracker_set_type_enum (BzTransactionEntryTracker *self,
+                                            BzTransactionType          type);
 
+G_END_DECLS
 /* End of bz-transaction-entry-tracker.h */
