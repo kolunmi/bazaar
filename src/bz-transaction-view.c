@@ -280,25 +280,21 @@ return_generic:
       GTK_ICON_LOOKUP_NONE);
 }
 
-static char *
-get_sub_icon_name (gpointer                   object,
-                   BzTransactionEntryTracker *tracker)
+static gboolean
+is_entry_kind (gpointer                   object,
+               BzTransactionEntryTracker *tracker,
+               int                        kind)
 {
   BzEntry *entry = NULL;
 
   if (tracker == NULL)
-    return NULL;
+    return FALSE;
 
   entry = bz_transaction_entry_tracker_get_entry (tracker);
   if (entry == NULL)
-    return NULL;
+    return FALSE;
 
-  if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
-    return NULL;
-  else if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_RUNTIME))
-    return g_strdup ("application-x-sharedlib");
-  else
-    return g_strdup ("application-x-addon");
+  return bz_entry_is_of_kinds (entry, kind);
 }
 
 static void
@@ -351,7 +347,7 @@ bz_transaction_view_class_init (BzTransactionViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, format_bytes_transferred);
   gtk_widget_class_bind_template_callback (widget_class, format_download_progress);
   gtk_widget_class_bind_template_callback (widget_class, get_main_icon);
-  gtk_widget_class_bind_template_callback (widget_class, get_sub_icon_name);
+  gtk_widget_class_bind_template_callback (widget_class, is_entry_kind);
   gtk_widget_class_bind_template_callback (widget_class, entry_clicked);
   gtk_widget_class_bind_template_callback (widget_class, create_app_id_filter);
   gtk_widget_class_bind_template_callback (widget_class, is_transaction_type);
