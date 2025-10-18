@@ -96,13 +96,21 @@
     background-color: alpha(@error_bg_color, 0.15);
 }
 
+.download-size-pill{
+  padding: 2px 8px;
+}
 
 .flathub-page-section {
     border-radius: 10px;
 }
 
 .app-transaction-button{
-    padding: 5px;
+    padding: 0;
+}
+
+.transaction-list-view row {
+    margin: 0;
+    padding: 0;
 }
 
 /* Context tile from full-view, modified from GNOME Software */

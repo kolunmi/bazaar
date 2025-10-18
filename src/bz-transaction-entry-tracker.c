@@ -24,10 +24,13 @@ struct _BzTransactionEntryTracker
 {
   GObject parent_instance;
 
-  BzEntry    *entry;
-  GListModel *current_ops;
-  GListModel *finished_ops;
+  BzEntry          *entry;
+  GListModel       *current_ops;
+  GListModel       *finished_ops;
+  BzTransactionType type;
 };
+
+G_DEFINE_ENUM_TYPE (BzTransactionType, bz_transaction_entry_type, G_DEFINE_ENUM_VALUE (BZ_TRANSACTION_TYPE_INSTALL, "install"), G_DEFINE_ENUM_VALUE (BZ_TRANSACTION_TYPE_UPDATE, "update"), G_DEFINE_ENUM_VALUE (BZ_TRANSACTION_TYPE_REMOVAL, "removal"))
 
 G_DEFINE_FINAL_TYPE (BzTransactionEntryTracker, bz_transaction_entry_tracker, G_TYPE_OBJECT);
 
@@ -38,6 +41,7 @@ enum
   PROP_ENTRY,
   PROP_CURRENT_OPS,
   PROP_FINISHED_OPS,
+  PROP_TYPE,
 
   LAST_PROP
 };
@@ -74,6 +78,9 @@ bz_transaction_entry_tracker_get_property (GObject    *object,
     case PROP_FINISHED_OPS:
       g_value_set_object (value, bz_transaction_entry_tracker_get_finished_ops (self));
       break;
+    case PROP_TYPE:
+      g_value_set_enum (value, self->type);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -97,6 +104,9 @@ bz_transaction_entry_tracker_set_property (GObject      *object,
       break;
     case PROP_FINISHED_OPS:
       bz_transaction_entry_tracker_set_finished_ops (self, g_value_get_object (value));
+      break;
+    case PROP_TYPE:
+      self->type = g_value_get_enum (value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -133,6 +143,14 @@ bz_transaction_entry_tracker_class_init (BzTransactionEntryTrackerClass *klass)
           G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
+  props[PROP_TYPE] =
+      g_param_spec_enum (
+          "type",
+          NULL, NULL,
+          bz_transaction_entry_type_get_type (),
+          BZ_TRANSACTION_TYPE_INSTALL,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
   g_object_class_install_properties (object_class, LAST_PROP, props);
 }
 
@@ -166,6 +184,13 @@ bz_transaction_entry_tracker_get_finished_ops (BzTransactionEntryTracker *self)
 {
   g_return_val_if_fail (BZ_IS_TRANSACTION_ENTRY_TRACKER (self), NULL);
   return self->finished_ops;
+}
+
+BzTransactionType
+bz_transaction_entry_tracker_get_type_enum (BzTransactionEntryTracker *self)
+{
+  g_return_val_if_fail (BZ_IS_TRANSACTION_ENTRY_TRACKER (self), BZ_TRANSACTION_TYPE_INSTALL);
+  return self->type;
 }
 
 void
@@ -205,6 +230,15 @@ bz_transaction_entry_tracker_set_finished_ops (BzTransactionEntryTracker *self,
     self->finished_ops = g_object_ref (finished_ops);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_FINISHED_OPS]);
+}
+
+void
+bz_transaction_entry_tracker_set_type_enum (BzTransactionEntryTracker *self,
+                                            BzTransactionType          type)
+{
+  g_return_if_fail (BZ_IS_TRANSACTION_ENTRY_TRACKER (self));
+  self->type = type;
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TYPE]);
 }
 
 /* End of bz-transaction-entry-tracker.c */

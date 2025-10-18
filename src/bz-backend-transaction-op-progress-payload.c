@@ -296,7 +296,7 @@ bz_backend_transaction_op_progress_payload_set_progress (BzBackendTransactionOpP
 {
   g_return_if_fail (BZ_IS_BACKEND_TRANSACTION_OP_PROGRESS_PAYLOAD (self));
 
-  self->progress = progress;
+  self->progress = CLAMP (progress, 0.0, 0.999999);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PROGRESS]);
 }
