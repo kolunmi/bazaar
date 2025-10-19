@@ -241,6 +241,7 @@ template $BzWindow: Adw.ApplicationWindow {
                         height-request: 8;
                         expand-size: 250;
                         active: bind template.state as <$BzStateInfo>.busy;
+                        pending: bind $is_double_zero(template.state as <$BzStateInfo>.busy-progress as <double>) as <bool>;
                         fraction: bind template.state as <$BzStateInfo>.busy-progress;
                         margin-bottom:12;
                       }

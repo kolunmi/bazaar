@@ -201,6 +201,13 @@ invert_boolean (gpointer object,
 }
 
 static gboolean
+is_double_zero (gpointer object,
+                double   value)
+{
+  return value == 0.0;
+}
+
+static gboolean
 is_null (gpointer object,
          GObject *value)
 {
@@ -473,6 +480,7 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzWindow, bottom_header_bar);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, curated_toggle);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
+  gtk_widget_class_bind_template_callback (widget_class, is_double_zero);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, browser_group_selected_cb);
   gtk_widget_class_bind_template_callback (widget_class, search_widget_select_cb);
