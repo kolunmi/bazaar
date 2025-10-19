@@ -36,7 +36,7 @@ template $BzFlathubPage: Adw.Bin {
            child: Box {
              margin-start: 25;
              margin-end: 25;
-             margin-top: 20;
+             margin-top: 5;
              margin-bottom: 20;
              orientation: vertical;
              spacing: 15;
@@ -105,36 +105,21 @@ template $BzFlathubPage: Adw.Bin {
                 }
              }
 
-             Box {
-               orientation: vertical;
-               spacing: 10;
-
-               Label {
-                 margin-start: 8;
-                 styles [
-                   "title-1",
-                 ]
-                 label: _("Categories");
-                 xalign: 0.0;
-                 hexpand: true;
-               }
+             $BzDynamicListView {
+               styles [
+                 "flathub-page-section",
+               ]
              
-               $BzDynamicListView {
-                 styles [
-                   "flathub-page-section",
-                 ]
-               
-                 hexpand: true;
-                 max-children-per-line:5;
-                 scroll: false;
-                 noscroll-kind: flow-box;
-                 child-type: "BzCategoryTile";
-                 child-prop: "category";
-                 model: bind template.state as <$BzFlathubState>.categories;
-               
-                 bind-widget => $bind_category_tile_cb(template);
-                 unbind-widget => $unbind_category_tile_cb(template);
-               }
+               hexpand: true;
+               max-children-per-line:5;
+               scroll: false;
+               noscroll-kind: flow-box;
+               child-type: "BzCategoryTile";
+               child-prop: "category";
+               model: bind template.state as <$BzFlathubState>.categories;
+
+               bind-widget => $bind_category_tile_cb(template);
+               unbind-widget => $unbind_category_tile_cb(template);
              }
 
              Box {
