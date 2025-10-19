@@ -58,10 +58,14 @@ struct _BzFullView
   DexFuture *loading_forge_stars;
 
   /* Template widgets */
-  AdwViewStack *stack;
-  GtkWidget    *forge_stars;
-  GtkLabel     *forge_stars_label;
-  GtkListBox   *releases_box;
+  AdwViewStack      *stack;
+  GtkScrolledWindow *main_scroll;
+  GtkScrolledWindow *info_scroll;
+  BzDynamicListView *screenshots;
+  GtkWidget         *shadow_overlay;
+  GtkWidget         *forge_stars;
+  GtkLabel          *forge_stars_label;
+  GtkListBox        *releases_box;
 };
 
 G_DEFINE_FINAL_TYPE (BzFullView, bz_full_view, ADW_TYPE_BIN)
@@ -743,6 +747,62 @@ screenshots_unbind_widget_cb (BzFullView            *self,
 }
 
 static void
+update_fake_shadow (BzFullView *self)
+{
+  GtkAdjustment *adj_main          = NULL;
+  GtkAdjustment *adj_info          = NULL;
+  GtkAdjustment *adj_screenshots   = NULL;
+  double         value_main        = 0.0;
+  double         value_info        = 0.0;
+  double         value_screenshots = 0.0;
+  gboolean       should_show       = FALSE;
+
+  adj_main        = gtk_scrolled_window_get_vadjustment (self->main_scroll);
+  adj_info        = gtk_scrolled_window_get_vadjustment (self->info_scroll);
+  adj_screenshots = bz_dynamic_list_view_get_vadjustment (self->screenshots);
+
+  if (adj_main != NULL)
+    value_main = gtk_adjustment_get_value (adj_main);
+
+  if (adj_info != NULL)
+    value_info = gtk_adjustment_get_value (adj_info);
+
+  if (adj_screenshots != NULL)
+    value_screenshots = gtk_adjustment_get_value (adj_screenshots);
+
+  should_show = (value_main > 0.0 || value_info > 0.0 || value_screenshots > 0.0);
+
+  if (should_show)
+    gtk_widget_add_css_class (self->shadow_overlay, "active");
+  else
+    gtk_widget_remove_css_class (self->shadow_overlay, "active");
+}
+
+static void
+on_scroll_adjustment_changed (GtkAdjustment *adjustment,
+                              BzFullView    *self)
+{
+  update_fake_shadow (self);
+}
+
+static void
+on_screenshots_vadjustment_notify (BzDynamicListView *screenshots,
+                                   GParamSpec        *pspec,
+                                   BzFullView        *self)
+{
+  GtkAdjustment *new_adj = NULL;
+
+  new_adj = bz_dynamic_list_view_get_vadjustment (screenshots);
+  if (new_adj != NULL)
+    {
+      g_signal_connect (new_adj, "value-changed",
+                        G_CALLBACK (on_scroll_adjustment_changed), self);
+    }
+
+  update_fake_shadow (self);
+}
+
+static void
 bz_full_view_class_init (BzFullViewClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
@@ -858,9 +918,13 @@ bz_full_view_class_init (BzFullViewClass *klass)
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-full-view.ui");
   gtk_widget_class_bind_template_child (widget_class, BzFullView, stack);
+  gtk_widget_class_bind_template_child (widget_class, BzFullView, shadow_overlay);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, forge_stars);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, forge_stars_label);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, releases_box);
+  gtk_widget_class_bind_template_child (widget_class, BzFullView, screenshots);
+  gtk_widget_class_bind_template_child (widget_class, BzFullView, main_scroll);
+  gtk_widget_class_bind_template_child (widget_class, BzFullView, info_scroll);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
@@ -892,7 +956,29 @@ bz_full_view_class_init (BzFullViewClass *klass)
 static void
 bz_full_view_init (BzFullView *self)
 {
+  GtkAdjustment *adj_main = NULL;
+  GtkAdjustment *adj_info = NULL;
+
   gtk_widget_init_template (GTK_WIDGET (self));
+
+  adj_main = gtk_scrolled_window_get_vadjustment (self->main_scroll);
+  adj_info = gtk_scrolled_window_get_vadjustment (self->info_scroll);
+
+  if (adj_main != NULL)
+    g_signal_connect (adj_main, "value-changed",
+                      G_CALLBACK (on_scroll_adjustment_changed), self);
+
+  if (adj_info != NULL)
+    g_signal_connect (adj_info, "value-changed",
+                      G_CALLBACK (on_scroll_adjustment_changed), self);
+
+  if (self->screenshots != NULL)
+    {
+      g_signal_connect (self->screenshots, "notify::vadjustment",
+                        G_CALLBACK (on_screenshots_vadjustment_notify), self);
+
+      on_screenshots_vadjustment_notify (self->screenshots, NULL, self);
+    }
 }
 
 GtkWidget *

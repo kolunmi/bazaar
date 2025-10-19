@@ -315,35 +315,18 @@ visible_page_changed_cb (BzWindow          *self,
 {
   AdwNavigationPage *visible_page = NULL;
   const char        *page_tag     = NULL;
-
-  visible_page = adw_navigation_view_get_visible_page (navigation_view);
-
+  visible_page                    = adw_navigation_view_get_visible_page (navigation_view);
   if (visible_page != NULL)
     {
       page_tag = adw_navigation_page_get_tag (visible_page);
-
       if (page_tag != NULL && strstr (page_tag, "flathub") != NULL)
         gtk_widget_add_css_class (GTK_WIDGET (self), "flathub");
       else
         gtk_widget_remove_css_class (GTK_WIDGET (self), "flathub");
-
-      if (page_tag != NULL && strstr (page_tag, "view") != NULL)
-        {
-
-          adw_toolbar_view_set_top_bar_style (self->toolbar_view, ADW_TOOLBAR_RAISED);
-          gtk_widget_add_css_class (GTK_WIDGET (self->top_header_bar), "fake-flat-headerbar");
-        }
-      else
-        {
-          adw_toolbar_view_set_top_bar_style (self->toolbar_view, ADW_TOOLBAR_FLAT);
-          gtk_widget_remove_css_class (GTK_WIDGET (self->top_header_bar), "fake-flat-headerbar");
-        }
     }
   else
     {
       gtk_widget_remove_css_class (GTK_WIDGET (self), "flathub");
-      adw_toolbar_view_set_top_bar_style (self->toolbar_view, ADW_TOOLBAR_FLAT);
-      gtk_widget_remove_css_class (GTK_WIDGET (self->top_header_bar), "fake-flat-headerbar");
     }
 }
 
