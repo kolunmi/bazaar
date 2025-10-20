@@ -8,7 +8,7 @@ Version:        %{shortcommit}
 Release:        1%{?dist}
 Summary:        A new app store idea for GNOME. 
 
-License:        GPL-3.0-only
+License:        GPL-3.0-or-later
 URL:            https://github.com/kolunmi/bazaar
 Source0:        %{url}/archive/%{commit}.tar.gz
 
