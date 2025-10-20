@@ -64,6 +64,9 @@ struct _BzApplication
   GTimer    *init_timer;
   DexFuture *notif_watch;
 
+  DexFuture *periodic_sync;
+  guint      periodic_timeout;
+
   BzEntryCacheManager        *cache;
   BzTransactionManager       *transactions;
   BzSearchEngine             *search_engine;
@@ -122,6 +125,9 @@ refresh_fiber (BzApplication *self);
 static DexFuture *
 watch_backend_notifs_fiber (BzApplication *self);
 
+static DexFuture *
+update_check_fiber (BzApplication *self);
+
 static void
 refresh (BzApplication *self);
 
@@ -157,6 +163,8 @@ bz_application_dispose (GObject *object)
 
   dex_clear (&self->refresh_task);
   dex_clear (&self->notif_watch);
+  dex_clear (&self->periodic_sync);
+  g_clear_handle_id (&self->periodic_timeout, g_source_remove);
   g_clear_object (&self->settings);
   g_clear_object (&self->blocklists);
   g_clear_object (&self->content_configs);
@@ -1464,6 +1472,35 @@ watch_backend_notifs_fiber (BzApplication *self)
 }
 
 static DexFuture *
+update_check_fiber (BzApplication *self)
+{
+  bz_state_info_set_background_task_label (self->state, _ ("Checking for updates..."));
+  fiber_check_for_updates (self);
+  bz_state_info_set_background_task_label (self->state, NULL);
+
+  return dex_future_new_true ();
+}
+
+static gboolean
+periodic_timeout_cb (BzApplication *self)
+{
+  /* If for some reason the last update check is still happening, let it
+     finish */
+  if (self->periodic_sync == NULL ||
+      !dex_future_is_pending (self->periodic_sync))
+    {
+      dex_clear (&self->periodic_sync);
+      self->periodic_sync = dex_scheduler_spawn (
+          dex_scheduler_get_default (),
+          bz_get_dex_stack_size (),
+          (DexFiberFunc) update_check_fiber,
+          self, NULL);
+    }
+
+  return G_SOURCE_CONTINUE;
+}
+
+static DexFuture *
 refresh_finally (DexFuture     *future,
                  BzApplication *self)
 {
@@ -1480,6 +1517,11 @@ refresh_finally (DexFuture     *future,
       bz_search_engine_set_model (self->search_engine, G_LIST_MODEL (self->groups));
       bz_state_info_set_busy (self->state, FALSE);
     }
+
+  dex_clear (&self->periodic_sync);
+  g_clear_handle_id (&self->periodic_timeout, g_source_remove);
+  self->periodic_timeout = g_timeout_add_seconds (
+      60, (GSourceFunc) periodic_timeout_cb, self);
 
   value = dex_future_get_value (future, &local_error);
   if (value != NULL)
@@ -1535,6 +1577,9 @@ refresh (BzApplication *self)
     }
 
   g_debug ("Refreshing complete application state...");
+
+  dex_clear (&self->periodic_sync);
+  g_clear_handle_id (&self->periodic_timeout, g_source_remove);
 
   bz_state_info_set_all_entry_groups (self->state, NULL);
   bz_state_info_set_all_installed_entry_groups (self->state, NULL);

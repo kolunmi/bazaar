@@ -2,6 +2,11 @@ on:
   push:
     branches: [master]
   pull_request:
+    paths-ignore:
+      - "**.md"
+      - "docs/*"
+      - "screenshots/*"
+      - "translators.sh"
 name: CI Build Flatpak
 jobs:
 

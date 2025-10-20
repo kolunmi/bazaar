@@ -92,6 +92,8 @@ void
 bz_dynamic_list_view_set_max_children_per_line (BzDynamicListView *self,
                                                 guint              max_children);
 
+GtkAdjustment *bz_dynamic_list_view_get_vadjustment (BzDynamicListView *self);
+
 G_END_DECLS
 
 /* End of bz-dynamic-list-view.h */

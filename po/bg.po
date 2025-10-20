@@ -1,109 +1,100 @@
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# Copyright (C) 2025 THE bazaar'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the bazaar package.
+# Automatically generated, 2025.
+# twlvnn kraftwerk <kraft_werk@tutanota.com>, 2025
 #
-# SPDX-FileCopyrightText: 2025 renner <renner0@posteo.de>
 msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-10-18 06:40+0200\n"
-"PO-Revision-Date: 2025-10-18 18:23+0200\n"
-"Last-Translator: renner <renner0@posteo.de>\n"
-"Language-Team: German\n"
-"Language: de\n"
+"PO-Revision-Date: 2025-10-19 11:04+0200\n"
+"Last-Translator: twlvnn kraftwerk <kraft_werk@tutanota.com>\n"
+"Language-Team: Bulgarian\n"
+"Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 25.08.2\n"
+"X-Generator: Poedit 3.8\n"
 
-#: data/io.github.kolunmi.Bazaar.desktop.in:2
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:5
-#: src/bz-window.blp:51
+#: data/io.github.kolunmi.Bazaar.desktop.in:2 data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:5 src/bz-window.blp:51
 msgid "Bazaar"
-msgstr "Bazaar"
+msgstr "Базар"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:3
 msgid "Add, remove or update flatpak software on this computer"
-msgstr "Hinzufügen, Entfernen oder Aktualisieren von Anwendungen auf diesem Computer"
+msgstr "Добавяйте, премахвайте или обновете flatpak софтуер на този компютър"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:9
 msgid "GTK;System;PackageManager;Discover;Flatpak;Software;Store;"
-msgstr "GTK;System;Paketverwaltung;Discover;Flatpak;Software;Store"
+msgstr "GTK;System;PackageManager;Discover;Flatpak;Software;Store;система;мениджър на пакети;откриване;софтуер;програми;"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:6
 msgid "Show Git Forge Star Counts"
-msgstr "Git Forge Sterneanzahl anzeigen"
+msgstr "Показване на броя на звездите в Git Forge"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:7
-msgid ""
-"Whether to attempt to detect and show \"star counts\" for projects in the "
-"full view"
-msgstr ""
-"Ob versucht werden soll, die Sternanzahl für Projekte in der"
-"Vollansicht anzuzeigen"
+msgid "Whether to attempt to detect and show \"star counts\" for projects in the full view"
+msgstr "Дали да се опита да се засече и покаже „броя на звездите“ за проектите в пълния изглед"
 
-#: data/io.github.kolunmi.Bazaar.gschema.xml:11
-#: src/bz-preferences-dialog.blp:25
+#: data/io.github.kolunmi.Bazaar.gschema.xml:11 src/bz-preferences-dialog.blp:25
 msgid "Only Show Free Software"
-msgstr "Nur freie Software anzeigen"
+msgstr "Показване само на свободен софтуер"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:12
 msgid "Hide proprietary software when searching"
-msgstr "Proprietäre Anwendungen in Suchergebnissen ausblenden"
+msgstr "Скриване на собственически софтуер при търсене"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:16
 msgid "Show Only Flathub Content"
-msgstr "Nur Flathub-Anwendungen anzeigen"
+msgstr "Показване само на Flathub съдържание"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:17
 msgid "Filter search results to only show applications available on Flathub"
-msgstr "Suchergebnisse auf Anwendungen beschränken, die auf Flathub verfügbar sind"
+msgstr "Филтриране на резултатите от търсенето, за да се показват само програмите, налични в Flathub"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:21
 msgid "Debounce Search Inputs"
-msgstr "Sucheingaben verzögern"
+msgstr "Забавяне на входа за търсене"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:22
 msgid "Add a delay before searching to prevent instant replies while typing"
-msgstr "Eine Verzögerung hinzufügen, um sofortige Antworten während der Eingabe zu verhindern"
+msgstr "Добавяне на закъснение преди търсенето, за да се предотвратят незабавни резултати по време на писане"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:40
 msgid "Global Progress Bar Theme"
-msgstr "Globales Fortschrittsbalken-Design"
+msgstr "Тема за глобалната лента за напредък"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:41
 msgid "Describes the look of the global progress bar"
-msgstr "Beschreibt das Aussehen des globalen Fortschrittsbalkens"
+msgstr "Описва вида на глобалната лента за напредък"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:45
 msgid "Saved Window Dimensions"
-msgstr "Gespeicherte Fensterabmessungen"
+msgstr "Запазени размери на прозореца"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:46
 msgid "The window dimensions to be used by the next Bazaar window"
-msgstr "Die Fensterabmessungen, die vom nächsten Bazaar-Fenster verwendet werden sollen"
+msgstr "Размерите на прозореца, които ще се използват от следващия прозорец на Базар"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:8
 msgid "Discover and install applications"
-msgstr "Anwendungen entdecken und installieren"
+msgstr "Открийте и инсталирайте програми"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:10
-msgid ""
-"A new app store for GNOME with a focus on discovering and installing "
-"applications and addons from Flatpak remotes, particularly Flathub."
+msgid "A new app store for GNOME with a focus on discovering and installing applications and addons from Flatpak remotes, particularly Flathub."
 msgstr ""
-"Ein neuer App Store für GNOME mit Schwerpunkt auf der Suche und Installation "
-"von Anwendungen und Erweiterung aus Flatpak-Remotes, insbesondere Flathub."
+"Нов магазин за програми за GNOME, предназначен за откриването и инсталирането на програми и добавки от Flatpak отдалечени хранилища, по-"
+"специфично Flathub."
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:14
 msgid ""
-"It emphasizes supporting the developers who make the Linux desktop possible. "
-"Bazaar features a \"curated\" tab that can be configured by distributors to "
-"allow for a more localized experience."
+"It emphasizes supporting the developers who make the Linux desktop possible. Bazaar features a \"curated\" tab that can be configured by "
+"distributors to allow for a more localized experience."
 msgstr ""
-"Es legt Wert darauf, die Entwickler zu unterstützen, die den Linux-Desktop möglich machen. "
-"Bazaar verfügt über ein „vorgestellt”-Unterfenster, der von Distributoren eingerichtet werden kann, um eine lokalisiertere Erfahrung zu ermöglichen."
+"Той взема под внимание подкрепата на разработчиците, които правят Луникс за настолни компютри възможен. Bazaar разполага с раздел „подбрани“, "
+"който може да бъде настроен от дистрибуторите, за да позволи по-специализирано потребителско изживяване."
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:22 src/bz-application.c:496
 msgid "Adam Masciola"
@@ -111,31 +102,31 @@ msgstr "Adam Masciola"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:47
 msgid "The home view displaying Flathub apps"
-msgstr "Die Startseitenansicht mit den Flathub-Anwendungen"
+msgstr "Началната страница, показваща програми на Flathub"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:51
 msgid "Nucleus app page"
-msgstr "Seite der Nucleus Anwendung"
+msgstr "Страницата на Nucleus"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:55
 msgid "Searching for Blender"
-msgstr "Nach Blender suchen"
+msgstr "Търсене за Blender"
 
 #: src/bz-addons-dialog.blp:13
 msgid "Manage Addons"
-msgstr "Erweiterungen verwalten"
+msgstr "Управление на добавки"
 
 #: src/bz-app-size-dialog.c:55
 msgid "Of the size of human DNA"
-msgstr "Der Größe der menschlichen DNA"
+msgstr ""
 
 #: src/bz-app-size-dialog.c:55
 msgid "3 billion base pairs"
-msgstr "3 Milliarden Basenpaare"
+msgstr ""
 
 #: src/bz-app-size-dialog.c:56
 msgid "Of the Linux Kernel"
-msgstr "Des Linux Kernels"
+msgstr ""
 
 #: src/bz-app-size-dialog.c:56
 msgid "linux-6.17.tar.xz"
@@ -143,44 +134,39 @@ msgstr "linux-6.17.tar.xz"
 
 #: src/bz-app-size-dialog.c:57
 msgid "Of the Apollo 11 guidance computer"
-msgstr "Des Apollo 11 Guidance-Computers"
+msgstr ""
 
 #: src/bz-app-size-dialog.c:57
 msgid "Total ROM and RAM"
-msgstr "Gesamt-ROM und RAM"
+msgstr ""
 
 #: src/bz-app-size-dialog.c:58
 msgid "Of the original Super Mario Bros"
-msgstr "Des ursprünglichen Super Mario Bros."
+msgstr ""
 
 #: src/bz-app-size-dialog.c:58
 msgid "On the NES"
-msgstr "Auf dem NES"
+msgstr ""
 
 #: src/bz-app-size-dialog.c:59
 msgid "Of the size of Wikipedia"
-msgstr "Der Größe von Wikipedia"
+msgstr ""
 
 #: src/bz-app-size-dialog.c:59
 msgid "Without any media"
-msgstr "Ohne jegliche Medien"
+msgstr ""
 
 #: src/bz-app-size-dialog.blp:43
 msgid "--- MB"
-msgstr "--- MB"
+msgstr "--- МБ"
 
 #: src/bz-app-size-dialog.blp:53 src/bz-full-view.blp:351
 msgid "Download Size"
-msgstr "Downloadgröße"
+msgstr "Размер за изтегляне"
 
 #: src/bz-application.c:392
-msgid ""
-"This functionality is currently disabled. It is recommended you download and "
-"install Flatseal to manage app permissions."
-msgstr ""
-"Diese Funktion ist derzeit nicht freigeschaltet. Es wird empfohlen, Flatseal "
-"herunterzuladen und zu installieren, um Berechtigungen von Anwendungen "
-"einzustellen."
+msgid "This functionality is currently disabled. It is recommended you download and install Flatseal to manage app permissions."
+msgstr "Тази функционалност е деактивирана в момента. Препоръчваме да изтеглите и инсталирате Flatseal, за да управлявате права̀та на програмите."
 
 #: src/bz-application.c:456
 msgctxt "About Dialog Developer Credit"
@@ -289,350 +275,338 @@ msgstr "robotta"
 
 #: src/bz-application.c:1019
 msgid "Constructing Flatpak instance..."
-msgstr "Flatpak-Instanz wird erstellt …"
+msgstr "Изграждане на Flatpak инстанция..."
 
 #: src/bz-application.c:1036
 msgid "Reusing last Flatpak instance..."
-msgstr "Letzte Flatpak-Instanz wiederverwenden …"
+msgstr "Преизползване на последната Flatpak инстанция…"
 
 #: src/bz-application.c:1061
 msgid "Flathub is not registered on this system"
-msgstr "Flathub ist auf diesem System nicht eingerichtet"
+msgstr "Flathub не е регистриран в тази система"
 
 #: src/bz-application.c:1064
-msgid ""
-"Would you like to add Flathub as a remote? If you decline, the Flathub page "
-"will not be available. You can change this later."
+msgid "Would you like to add Flathub as a remote? If you decline, the Flathub page will not be available. You can change this later."
 msgstr ""
-"Möchten Sie Flathub hinzufügen? Wenn Sie ablehnen, ist die Flathub-Seite "
-"nicht verfügbar. Sie können dies später ändern."
+"Искате ли да добавите Flathub като отдалечено хранилище? Ако откажете, страницата на Flathub няма да бъде достъпна. Може да промените това по-"
+"късно."
 
 #: src/bz-application.c:1069 src/bz-update-dialog.blp:6
 msgid "Later"
-msgstr "Später"
+msgstr "По-късно"
 
 #: src/bz-application.c:1070
 msgid "Add Flathub"
-msgstr "Flathub hinzufügen"
+msgstr "Добавяне на Flathub"
 
 #: src/bz-application.c:1102
 #, c-format
 msgid "Identifying installed entries..."
-msgstr "Installierte Einträge werden erkannt …"
+msgstr "Идентифициране на инсталираните записи..."
 
 #: src/bz-application.c:1114
 #, c-format
 msgid "Beginning remote entry retrieval while referencing %d blocklist(s)..."
-msgstr ""
-"Abfragenbeginn der Gegenstelleneinträge unter Bezugnahme auf %d "
-"Blockliste(n) …"
+msgstr "Получаване на отдалечените записи и четене от %d списък(а) за блокиране..."
 
 #: src/bz-application.c:1262
 #, c-format
 msgid "Receiving Entries"
-msgstr "Einträge empfangen"
+msgstr "Получаване на записите"
 
 #: src/bz-application.c:1263
 #, c-format
 msgid "%'d of %'d"
-msgstr "%'d von %'d"
+msgstr "%'d от %'d"
 
 #: src/bz-application.c:1273
 #, c-format
 msgid "Waiting for background indexing tasks to catch up..."
-msgstr "Warten auf Hintergrund-Indizierung …"
+msgstr "Изчакване на задачите за индексиране във фона да настигнат…"
 
 #: src/bz-application.c:1309
 #, c-format
 msgid "Completed initialization in %0.2f seconds"
-msgstr "Initialisierung in %0.2f Sekunden abgeschlossen"
+msgstr "Инициализацията завърши за %0.2f секунди"
 
 #: src/bz-application.c:1314
 msgid "Checking for updates..."
-msgstr "Es wird nach Aktualisierungen gesucht …"
+msgstr "Проверяване за обновления..."
 
 #: src/bz-application.c:1353
 msgid "Synchronizing..."
-msgstr "Abgleichen …"
+msgstr "Синхронизиране..."
 
-#: src/bz-browse-widget.blp:11 src/bz-flathub-page.blp:11
-#: src/bz-full-view.blp:10 src/bz-installed-page.blp:11 src/bz-window.blp:151
+#: src/bz-browse-widget.blp:11 src/bz-flathub-page.blp:11 src/bz-full-view.blp:10 src/bz-installed-page.blp:11 src/bz-window.blp:151
 msgid "Empty"
-msgstr "Leer"
+msgstr "Празно"
 
 #: src/bz-browse-widget.blp:15
 msgid "No Curated Applications"
-msgstr "Keine vorgestellten Anwendungen"
+msgstr "Няма подбрани програми"
 
 #: src/bz-browse-widget.blp:16
-msgid ""
-"Bazaar was not provided a curated content configuration. Contact your "
-"operating system's support channels for assistance."
-msgstr ""
-"Bazaar wurde nicht mit vorgestellten Inhalten eingerichtet. Nehmen Sie "
-"Kontakt mit den Entwicklern Ihres Betriebssystems auf, um Hilfe zu erhalten."
+msgid "Bazaar was not provided a curated content configuration. Contact your operating system's support channels for assistance."
+msgstr "Bazaar не разполага с настройки за подбрано съдържание. Свържете се с каналите за поддръжка на вашата операционна система за помощ."
 
 #: src/bz-browse-widget.blp:22 src/bz-flathub-page.blp:22
 msgid "Browser"
-msgstr "Browser"
+msgstr "Браузър"
 
 #: src/bz-entry-inspector.blp:5
 msgid "Entry Inspector"
-msgstr "Eintragsinspektor"
+msgstr "Инспектор на записите"
 
 #: src/bz-entry-inspector.blp:76
 msgid "Serialize"
-msgstr "Serialisierung der Anfrage ist fehlgeschlagen"
+msgstr "Сериализиране"
 
 #: src/bz-entry-inspector.blp:80
 msgid "Convert to JSON"
-msgstr "In JSON umwandeln"
+msgstr "Преобразуване в JSON"
 
 #: src/bz-error.c:68
 msgid "An Error Occurred"
-msgstr "Es ist ein Fehler aufgetreten"
+msgstr "Възникна грешка"
 
 #: src/bz-error.c:89
 msgid "Close"
-msgstr "Schließen"
+msgstr "Затваряне"
 
 #: src/bz-error.c:90
 msgid "Copy and Close"
-msgstr "Kopieren und Schließen"
+msgstr "Копиране и затваряне"
 
 #: src/bz-flathub-category.c:290
 msgid "Audio & Video"
-msgstr "Audio & Video"
+msgstr "Аудио & видео"
 
 #: src/bz-flathub-category.c:292
 msgid "Development"
-msgstr "Entwicklung"
+msgstr "Разработка"
 
 #: src/bz-flathub-category.c:294
 msgid "Education"
-msgstr "Bildung"
+msgstr "Образование"
 
 #: src/bz-flathub-category.c:296
 msgid "Games"
-msgstr "Spiele"
+msgstr "Игри"
 
 #: src/bz-flathub-category.c:298
 msgid "Graphics"
-msgstr "Grafik"
+msgstr "Графика"
 
 #: src/bz-flathub-category.c:300
 msgid "Networking"
-msgstr "Netzwerk"
+msgstr "Интернет"
 
 #: src/bz-flathub-category.c:302
 msgid "Office"
-msgstr "Büro"
+msgstr "Офис"
 
 #: src/bz-flathub-category.c:304
 msgid "Science"
-msgstr "Wissenschaft"
+msgstr "Наука"
 
 #: src/bz-flathub-category.c:306
 msgid "System"
-msgstr "System"
+msgstr "Система"
 
 #: src/bz-flathub-category.c:308
 msgid "Utilities"
-msgstr "Dienstprogramme"
+msgstr "Инструменти"
 
 #: src/bz-flathub-page.blp:15
 msgid "Flathub Not Added"
-msgstr "Flathub wurde nicht hinzugefügt"
+msgstr "Flathub не беше добавен"
 
 #: src/bz-flathub-page.blp:16
 msgid "The Flathub remote was not found on any of your flatpak installations"
-msgstr "Flathub wurde auf keiner Ihrer Flatpak-Installationen gefunden."
+msgstr "Отдалеченото Flathub хранилище не беше намерено в нито една от вашите инсталации на flatpak"
 
 #: src/bz-flathub-page.blp:70 src/bz-flathub-page.c:185
 msgid "Trending"
-msgstr "Im Trend"
+msgstr "Популярни"
 
 #: src/bz-flathub-page.blp:101
 msgid "More Trending"
-msgstr "Mehr von „Im Trend“"
+msgstr "Още набиращи популярност"
 
 #: src/bz-flathub-page.blp:117
 msgid "Categories"
-msgstr "Kategorien"
+msgstr "Категории"
 
 #: src/bz-flathub-page.blp:154 src/bz-flathub-page.c:195
 msgid "Recently Updated"
-msgstr "Kürzlich aktualisiert"
+msgstr "Наскоро обновени"
 
 #: src/bz-flathub-page.blp:185
 msgid "More Updated"
-msgstr "Mehr von „Kürzlich aktualisiert“"
+msgstr "Още обновени"
 
 #: src/bz-flathub-page.blp:206 src/bz-flathub-page.c:205
 msgid "Recently Added"
-msgstr "Kürzlich hinzugefügt"
+msgstr "Наскоро добавени"
 
 #: src/bz-flathub-page.blp:237
 msgid "More Added"
-msgstr "Mehr von „Kürzlich hinzugefügt“"
+msgstr "Още добавени"
 
 #: src/bz-flathub-page.blp:258 src/bz-flathub-page.c:215
 msgid "Popular"
-msgstr "Beliebt"
+msgstr "Популярни"
 
 #: src/bz-flathub-page.blp:289
 msgid "More Popular"
-msgstr "Mehr von „Beliebt“"
+msgstr "Още популярни"
 
 #: src/bz-flatpak-entry.c:507
 msgctxt "Project URL Type"
 msgid "Flathub Page"
-msgstr "Flathub-Seite"
+msgstr "Flathub страницата"
 
 #: src/bz-flatpak-entry.c:526
 msgctxt "Project URL Type"
 msgid "Homepage"
-msgstr "Startseite"
+msgstr "Начална страница"
 
 #: src/bz-flatpak-entry.c:529
 msgctxt "Project URL Type"
 msgid "Issue Tracker"
-msgstr "Bugtracker"
+msgstr "Система за проблеми"
 
 #: src/bz-flatpak-entry.c:532
 msgctxt "Project URL Type"
 msgid "FAQ"
-msgstr "FAQ"
+msgstr "ЧЗВ"
 
 #: src/bz-flatpak-entry.c:535
 msgctxt "Project URL Type"
 msgid "Help"
-msgstr "Hilfe"
+msgstr "Помощ"
 
 #: src/bz-flatpak-entry.c:538
 msgctxt "Project URL Type"
 msgid "Donate"
-msgstr "Spenden"
+msgstr "Дарете"
 
 #: src/bz-flatpak-entry.c:543
 msgctxt "Project URL Type"
 msgid "Translate"
-msgstr "Übersetzen"
+msgstr "Превод"
 
 #: src/bz-flatpak-entry.c:546
 msgctxt "Project URL Type"
 msgid "Contact"
-msgstr "Kontakt"
+msgstr "Контакти"
 
 #: src/bz-flatpak-entry.c:549
 msgctxt "Project URL Type"
 msgid "Source Code"
-msgstr "Quellcode"
+msgstr "Изходен код"
 
 #: src/bz-flatpak-entry.c:554
 msgctxt "Project URL Type"
 msgid "Contribute"
-msgstr "Mitmachen"
+msgstr "Допринесете"
 
 #: src/bz-full-view.blp:14
 msgid "No Results"
-msgstr "Keine Ergebnisse"
+msgstr "Няма резултати"
 
 #: src/bz-full-view.blp:15
 msgid "Try a different search query"
-msgstr "Versuchen Sie eine andere Suchanfrage"
+msgstr "Oпитайте различно търсене"
 
 #: src/bz-full-view.blp:21 src/bz-window.blp:161
 msgid "Content"
-msgstr "Inhalt"
+msgstr "Съдържание"
 
 #: src/bz-full-view.blp:129
 msgid "This flatpak is verified by the original developers of the software."
-msgstr ""
-"Diese Anwendung wurde von den ursprünglichen Entwicklern der Software "
-"verifiziert."
+msgstr "Този flatpak е проверен от оригиналните разработчици на софтуера."
 
 #: src/bz-full-view.blp:156
 msgid "Support"
-msgstr "Unterstützen"
+msgstr "Подкрепи"
 
 #: src/bz-full-view.blp:176
 msgid "Repository Star Count"
-msgstr "Repository Sterneanzahl"
+msgstr "Брой звезди на хранилището"
 
 #: src/bz-full-view.blp:207
 msgid "Run Application"
-msgstr "Anwendung ausführen"
+msgstr "Изпълняване на програмата"
 
 #: src/bz-full-view.blp:221
 msgid "Download & Install Application"
-msgstr "Anwendung herunterladen & installieren"
+msgstr "Изтегляне и инсталиране на програмата"
 
-#: src/bz-full-view.blp:224 src/bz-transaction-view.blp:108
-#: src/bz-window.c:1071
+#: src/bz-full-view.blp:224 src/bz-transaction-view.blp:108 src/bz-window.c:1071
 msgid "Install"
-msgstr "Installieren"
+msgstr "Инсталиране"
 
 #: src/bz-full-view.blp:236
 msgid "Uninstall Application"
-msgstr "Anwendung deinstallieren"
+msgstr "Деинсталиране на програмата"
 
 #: src/bz-full-view.blp:251 src/bz-installed-page.blp:125
 msgid "Manage Add-ons"
-msgstr "Erweiterungen verwalten"
+msgstr "Управление на добавки"
 
 #: src/bz-full-view.blp:264
 msgid "Install Other Version"
-msgstr "Andere Version installieren"
+msgstr "Инсталиране на друга версия"
 
 #: src/bz-full-view.blp:279
 msgid "Share this application"
-msgstr "Diese Anwendung teilen"
+msgstr "Споделете тази програма"
 
 #: src/bz-full-view.blp:362
 msgid "Excludes shared components"
-msgstr "Gemeinsame Komponenten ausgeschlossen"
+msgstr "Изключва споделени компоненти"
 
 #: src/bz-full-view.blp:418
 msgid "Free Software"
-msgstr "Freie Software"
+msgstr "Свободен софтуер"
 
 #: src/bz-full-view.blp:460
 msgid "Proprietary"
-msgstr "Proprietär"
+msgstr "Собственически"
 
 #: src/bz-full-view.blp:471
 msgid "Source code may not be available"
-msgstr "Der Quellcode ist möglicherweise nicht verfügbar."
+msgstr "Изходният код може да не е наличен"
 
 #: src/bz-full-view.blp:526
 msgid "Click for details"
-msgstr "Klicken Sie, um Details anzusehen"
+msgstr "Натиснете за подробности"
 
 #: src/bz-full-view.blp:592
 msgid "Repositories"
-msgstr "Repositories"
+msgstr "Хранилища"
 
 #: src/bz-full-view.blp:623 src/bz-full-view.blp:631
 msgid "Project Website"
-msgstr "Projekt-Webseite"
+msgstr "Уеб сайт на проекта"
 
 #: src/bz-full-view.blp:639
 msgid "Open in browser"
-msgstr "Im Webbrowser öffnen"
+msgstr "Отваряне в Интернет браузър"
 
 #: src/bz-full-view.c:213
 #, c-format
 msgid "%'d Monthly Downloads"
-msgstr "%'d monatliche Downloads"
+msgstr "%'d месечни изтегляния"
 
 #: src/bz-full-view.c:215
 msgid "--- Downloads"
-msgstr "--- Downloads"
+msgstr "--- изтегляния"
 
 #: src/bz-full-view.c:241
 msgid "Unknown"
-msgstr "Unbekannt"
+msgstr "Неизвестно"
 
 #. Translators: This is a date format for timestamps from previous years. Used in the app releases section.
 #. * %B is the full month name, %e is the day, %Y is the year.
@@ -642,7 +616,7 @@ msgstr "Unbekannt"
 #. *
 #: src/bz-full-view.c:268
 msgid "%B %-d, %Y"
-msgstr "%B %-d, %Y"
+msgstr "%-d %B, %Y"
 
 #. Translators: This is a date format for timestamps from the current year. Used in the app releases section.
 #. * %B is the full month name, %e is the day.
@@ -652,330 +626,311 @@ msgstr "%B %-d, %Y"
 #. *
 #: src/bz-full-view.c:276
 msgid "%B %-d"
-msgstr "%B %-d"
+msgstr "%-d %B"
 
 #: src/bz-full-view.c:287
 msgid "No URL"
-msgstr "Keine URL"
+msgstr "Няма адрес"
 
 #: src/bz-full-view.c:305
-msgid ""
-"This application has a FLOSS license, meaning the source code can be audited "
-"for safety."
-msgstr ""
-"Diese Anwendung steht unter einer FLOSS-Lizenz, was bedeutet, dass der "
-"Quellcode auf Sicherheit geprüft werden kann."
+msgid "This application has a FLOSS license, meaning the source code can be audited for safety."
+msgstr "Това приложение има FLOSS лиценз, което означава, че изходният код може да бъде проверен за сигурност."
 
 #: src/bz-full-view.c:306
 msgid ""
-"This application has a proprietary license, meaning the source code is "
-"developed privately and cannot be audited by an independent third party."
+"This application has a proprietary license, meaning the source code is developed privately and cannot be audited by an independent third party."
 msgstr ""
-"Diese Anwendung hat eine proprietäre Lizenz, das bedeute, dass der Quellcode "
-"privat entwickelt wird und kann nicht von einer unabhängigen dritten Partei "
-"überprüft werden."
+"Тази програма има собственически лиценз, което означава, че изходният код е разработен частно и не може да бъде проверен от независими трети "
+"лица."
 
 #: src/bz-full-view.c:596
 #, c-format
 msgid "Version %s"
-msgstr "Version: %s"
+msgstr "Версия %s"
 
 #: src/bz-full-view.c:621
 msgid "No details for this release"
-msgstr "Keine Details für diese Veröffentlichung"
+msgstr "Няма подробности за това издание"
 
 #: src/bz-inspector.blp:5
 msgid "Bazaar Inspector"
-msgstr "Bazaar-Inspektor"
+msgstr "Базар инспектор"
 
 #: src/bz-inspector.blp:22
 msgid "Active Blocklists"
-msgstr "Aktive Blocklisten"
+msgstr "Активни списъци за блокиране"
 
 #: src/bz-inspector.blp:44
 msgid "Active Curated-Configs"
-msgstr "Aktive Vorgestellte Einrichtung"
+msgstr ""
 
 #: src/bz-inspector.blp:66
 msgid "All Entry Groups"
-msgstr "Alle Eintragsgruppen"
+msgstr "Всички групи за запис"
 
 #: src/bz-inspector.blp:69
 msgid "Filter..."
-msgstr "Filtern ..."
+msgstr "Филтриране…"
 
 #: src/bz-inspector.blp:110
 msgid "Decache and Inspect"
-msgstr "Entcachen und Inspizieren"
+msgstr "Декаширане и изследване"
 
 #: src/bz-installed-page.blp:15
 msgid "No Flatpaks Installed"
-msgstr "Keine Anwendungen installiert"
+msgstr "Няма инсталирани Flatpak програми"
 
 #: src/bz-installed-page.blp:21 src/bz-window.blp:302 src/bz-window.blp:395
 msgid "Installed"
-msgstr "Installiert"
+msgstr "Инсталирани"
 
 #: src/bz-installed-page.blp:101
 msgid "Support this application"
-msgstr "Diese Anwendung unterstützen"
+msgstr "Подкрепете тази програма"
 
 #: src/bz-installed-page.blp:151 src/bz-window.c:1093
 msgid "Remove"
-msgstr "Entfernen"
+msgstr "Премахване"
 
 #: src/bz-installed-page.blp:178
 msgid "More actions"
-msgstr "Weitere Aktionen"
+msgstr "Допълнителни действия"
 
 #: src/bz-installed-page.blp:197
 msgid "Run this application"
-msgstr "Diese Anwendung ausführen"
+msgstr "Изпълняване на тази програма"
 
 #: src/bz-installed-page.blp:209
 msgid "Run"
-msgstr "Ausführen"
+msgstr "Изпълняване"
 
 #: src/bz-installed-page.blp:221 src/bz-installed-page.blp:232
 msgid "View Store Page"
-msgstr "Store-Seite anzeigen"
+msgstr "Вижте страницата в магазина"
 
 #: src/bz-installed-page.c:649
 msgid "Choose an Installation"
-msgstr "Installationsart auswählen"
+msgstr "Изберете инсталация"
 
 #: src/bz-installed-page.c:652
-msgid ""
-"You have multiple versions of this app installed. Which one would you like "
-"to proceed with? "
-msgstr ""
-"Sie haben mehrere Versionen dieser Anwendung installiert."
-"Mit welcher möchten Sie fortfahren?"
+msgid "You have multiple versions of this app installed. Which one would you like to proceed with? "
+msgstr "Имате инсталирани няколко версии на тази програма. Коя от тях искате да използвате? "
 
 #: src/bz-installed-page.c:656 src/bz-window.c:1070 src/bz-window.c:1092
 msgid "Cancel"
-msgstr "Abbrechen"
+msgstr "Отказване"
 
 #: src/bz-preferences-dialog.blp:9
 msgid "Preferences"
-msgstr "Einstellungen"
+msgstr "Настройки"
 
 #: src/bz-preferences-dialog.blp:13
 msgid "Application Details"
-msgstr "Anwendungsdetails"
+msgstr "Подробности за програмата"
 
 #: src/bz-preferences-dialog.blp:16
 msgid "Git Forge Star Counts"
-msgstr "Git Forge Sterneanzahl"
+msgstr "Брой звезди в Git Forge"
 
 #: src/bz-preferences-dialog.blp:17
 msgid "Not having a GitHub access token may trigger rate limits"
-msgstr "Wenn Sie keinen GitHub-Token haben, kann dies zu Ratenbegrenzungen führen."
+msgstr "Липсата на токен за достъп до GitHub може да доведе до ограничения на скоростта"
 
-#: src/bz-preferences-dialog.blp:22 src/bz-window.blp:43 src/bz-window.blp:58
-#: src/bz-window.blp:334
+#: src/bz-preferences-dialog.blp:22 src/bz-window.blp:43 src/bz-window.blp:58 src/bz-window.blp:334
 msgid "Search"
-msgstr "Suchen"
+msgstr "Търсене"
 
 #: src/bz-preferences-dialog.blp:26
 msgid "Hide proprietary applications from search results"
-msgstr "Proprietäre Anwendungen in Suchergebnissen ausblenden"
+msgstr "Скриване на собственическите програми от резултатите от търсенето"
 
 #: src/bz-preferences-dialog.blp:30
 msgid "Show Only Flathub Apps"
-msgstr "Nur Flathub-Anwendungen anzeigen"
+msgstr "Показване само на Flathub програми"
 
 #: src/bz-preferences-dialog.blp:31
 msgid "Limit search results to applications available on Flathub"
-msgstr "Suchergebnisse auf Anwendungen beschränken, die auf Flathub verfügbar sind"
+msgstr "Ограничаване на резултатите от търсенето до програмите, налични в Flathub"
 
 #: src/bz-preferences-dialog.blp:35
 msgid "Debounce Search Results"
-msgstr "Suchergebnisse verzögern"
+msgstr "Забавяне на резултатите за търсене"
 
 #: src/bz-preferences-dialog.blp:36
 msgid "Wait for a brief pause to reduce system load"
-msgstr "EIne kurze Weile warten, um die Systemlast zu verringern"
+msgstr "Изчакване за кратко, за да се намали натоварването на системата"
 
 #: src/bz-preferences-dialog.blp:41
 msgid "Global Progress Bar"
-msgstr "Globale Fortschrittsbalken"
+msgstr "Глобална лента за напредъка"
 
 #: src/bz-preferences-dialog.blp:44
 msgid "Theme"
-msgstr "Design"
+msgstr "Тема"
 
 #: src/bz-preferences-dialog.blp:45
 msgid "Choose a fun theme for the global progress bar!"
-msgstr "Wählen Sie ein tolles Design für den globalen Fortschrittsbalken."
+msgstr "Изберете забавна тема за глобалната лента за напредъка!"
 
 #: src/bz-preferences-dialog.blp:48
 msgid "Accent Color"
-msgstr "Akzentfarbe"
+msgstr "Акцентиращ цвят"
 
 #: src/bz-preferences-dialog.blp:49
 msgid "Pride Rainbow Flag"
-msgstr "Pride-Regenbogenflagge"
+msgstr "Прайд ЛГБТ флаг"
 
 #: src/bz-preferences-dialog.blp:50
 msgid "Lesbian Pride Flag"
-msgstr "Lesben-Pride-Flagge"
+msgstr ""
 
 #: src/bz-preferences-dialog.blp:51
 msgid "Transgender Flag"
-msgstr "Transgender-Flagge"
+msgstr ""
 
 #: src/bz-preferences-dialog.blp:52
 msgid "Nonbinary Flag"
-msgstr "Nichtbinären-Flagge"
+msgstr ""
 
 #: src/bz-preferences-dialog.blp:53
 msgid "Bisexual Flag"
-msgstr "Bisexuellenflagge"
+msgstr ""
 
 #: src/bz-preferences-dialog.blp:54
 msgid "Asexual Flag"
-msgstr "Asexuellenflagge"
+msgstr ""
 
 #: src/bz-preferences-dialog.blp:55
 msgid "Pansexual Flag"
-msgstr "Pansexuellenflagge"
+msgstr ""
 
 #: src/bz-preferences-dialog.blp:56
 msgid "Aromantic Flag"
-msgstr "Aromantischenflagge"
+msgstr ""
 
 #: src/bz-preferences-dialog.blp:57
 msgid "Genderfluid Flag"
-msgstr "Genderfluidenflagge"
+msgstr ""
 
 #: src/bz-preferences-dialog.blp:58
 msgid "Polysexual Flag"
-msgstr "Polysexuellenflagge"
+msgstr ""
 
 #: src/bz-preferences-dialog.blp:59
 msgid "Omnisexual Flag"
-msgstr "Omnisexuellenflagge"
+msgstr ""
 
 #: src/bz-search-widget.blp:69
 msgid "Search Apps"
-msgstr "Anwedungen suchen"
+msgstr "Търсете програми"
 
 #: src/bz-share-dialog.blp:13
 msgid "Share"
-msgstr "Teilen"
+msgstr "Споделяне"
 
 #: src/bz-share-dialog.c:62
 msgid "Copied!"
-msgstr "Kopiert."
+msgstr "Копирано!"
 
 #: src/bz-share-dialog.c:106
 msgid "Copy Link"
-msgstr "Link kopieren"
+msgstr "Копиране на връзката"
 
 #: src/bz-share-dialog.c:117
 msgid "Open Link"
-msgstr "Link öffnen"
+msgstr "Отваряне на връзката"
 
 #: src/bz-stats-dialog.blp:26
 msgid "Timeline"
-msgstr "Zeitleiste"
+msgstr "Хронология"
 
 #: src/bz-stats-dialog.blp:31
 msgid "Installs:"
-msgstr "Installationen:"
+msgstr "Инсталации:"
 
 #: src/bz-stats-dialog.blp:37
 msgid "World"
-msgstr "Welt"
+msgstr "Глобално"
 
 #: src/bz-transaction-manager.c:1140
 #, c-format
 msgid "Finished in %.02f seconds"
-msgstr "In %.02f Sekunden abgeschlossen"
+msgstr "Завърши за %.02f секунди"
 
 #: src/bz-transaction-view.blp:95
 msgid "Install Size"
-msgstr "Installationsgöße"
+msgstr "Размер за инсталирани"
 
 #: src/bz-transaction-view.blp:238
 msgid "Error Details"
-msgstr "Fehlerdetails"
+msgstr "Подробности за грешката"
 
 #: src/bz-transaction-view.c:139
 #, c-format
 msgid "Transferred %s so far"
-msgstr "%s bis jetzt übertragen"
+msgstr "Прехвърлени са %s до момента"
 
 #: src/bz-transaction.c:336
 msgid "Pending"
-msgstr "Ausstehend"
+msgstr "В опашката"
 
 #: src/bz-update-dialog.blp:7
 msgid "Install Now"
-msgstr "Jetzt installieren"
+msgstr "Инсталиране сега"
 
 #: src/bz-update-dialog.blp:10
 msgid "Updates Are Available"
-msgstr "Es sind Aktualisierungen verfügbar"
+msgstr "Налични са обновления"
 
 #: src/bz-update-dialog.blp:11
-msgid ""
-"The following applications are eligible for updates. Would you like to "
-"install them?"
-msgstr ""
-"Für die folgenden Anwendungen sind Aktualisierungen erhältlich. Möchten Sie "
-"diese installieren?"
+msgid "The following applications are eligible for updates. Would you like to install them?"
+msgstr "Следните програми имат обновления. Искате ли да ги инсталирате?"
 
 #: src/bz-update-dialog.c:134
 #, c-format
-msgid ""
-"%d runtimes and/or addons are eligible for updates. Would you like to "
-"install them?"
-msgstr ""
-"%d Laufzeitumgebungen und/oder Erweiterungen haben neue Aktualisierungen "
-"erhalten. Möchten Sie diese installieren?"
+msgid "%d runtimes and/or addons are eligible for updates. Would you like to install them?"
+msgstr "%d среди за изпълнение и/или добавки имат обновления. Искате ли да ги инсталирате?"
 
 #: src/bz-update-dialog.c:142
 #, c-format
 msgid "Additionally, %d runtimes and/or addons will be updated."
-msgstr "Zusätzlich werden %d Laufzeitumgebungen und/oder Erweiterungen aktualisiert."
+msgstr "Освен това, %d среди за изпълнение и/или добавки ще бъдат обновени."
 
 #: src/bz-window.blp:80
 msgid "Transactions"
-msgstr "Aufgaben"
+msgstr "Операции"
 
 #: src/bz-window.blp:95 src/bz-window.blp:414
 msgid "Toggle transaction sidebar"
-msgstr "Seitenleiste für Transaktionen anzeigen"
+msgstr "Превключване на страничната лента за операции"
 
 #: src/bz-window.blp:131
 msgid "Stop Active Tasks"
-msgstr "Aktiven Aufgaben stoppen"
+msgstr "Спиране на работещите задачи"
 
 #: src/bz-window.blp:139
 msgid "Clear History"
-msgstr "Verlauf leeren"
+msgstr "Изчистване на историята"
 
 #: src/bz-window.blp:155
 msgid "No Tasks Yet"
-msgstr "Noch keine Aufgaben"
+msgstr "Все още няма задачи"
 
 #: src/bz-window.blp:210 src/bz-window.blp:214
 msgid "Offline"
-msgstr "Offline"
+msgstr "Няма връзка"
 
 #: src/bz-window.blp:220
 msgid "Loading"
-msgstr "Wird geladen"
+msgstr "Зареждане"
 
 #: src/bz-window.blp:268
 msgid "Browse"
-msgstr "Durchsuchen"
+msgstr "Разглеждане"
 
 #: src/bz-window.blp:278
 msgid "App View"
-msgstr "Anwendungsansicht"
+msgstr "Изглед на програмата"
 
 #: src/bz-window.blp:292 src/bz-window.blp:388
 msgid "Flathub"
@@ -983,140 +938,138 @@ msgstr "Flathub"
 
 #: src/bz-window.blp:322
 msgid "Go Back"
-msgstr "Zurück"
+msgstr "Назад"
 
 #: src/bz-window.blp:347
 msgid "Update"
-msgstr "Aktualisieren"
+msgstr "Обновяване"
 
 #: src/bz-window.blp:377
 msgid "View curated applications"
-msgstr "Vorgestellte Anwendungen ansehen"
+msgstr "Вижте подбрани програми"
 
 #: src/bz-window.blp:381
 msgid "Curated"
-msgstr "Vorgestellt"
+msgstr "Подбрани"
 
 #: src/bz-window.blp:385
 msgid "View the latest on Flathub"
-msgstr "Das neueste auf Flathub ansehen"
+msgstr "Вижте най-новите програми във Flathub"
 
 #: src/bz-window.blp:392
 msgid "View installed applications"
-msgstr "Installierte Anwendungen anzeigen"
+msgstr "Вижте инсталираните програми"
 
 #: src/bz-window.blp:437
 msgid "Main Menu"
-msgstr "Hauptmenü"
+msgstr "Основно меню"
 
 #: src/bz-window.blp:471
 msgid "_Quit Service"
-msgstr "Dienst _beenden"
+msgstr "_Спиране на услугата"
 
 #: src/bz-window.blp:476
 msgid "_Refresh Content"
-msgstr "Inhalt _aktualisieren"
+msgstr "_Опресняване на съдържанието"
 
 #: src/bz-window.blp:481
 msgid "_Preferences"
-msgstr "_Einstellungen"
+msgstr "_Настройки"
 
 #: src/bz-window.blp:486
 msgid "_Keyboard Shortcuts"
-msgstr "_Tastaturkurzbefehle"
+msgstr "_Клавишни комбинации"
 
 #: src/bz-window.blp:491
 msgid "_About Bazaar"
-msgstr "Ü_ber Bazaar"
+msgstr "_Относно Базар"
 
 #: src/bz-window.blp:496
 msgid "_Donate to Bazaar ❤️"
-msgstr "An Bazaar _spenden ❤️"
+msgstr "_Дарете за Базар ❤️"
 
 #: src/bz-window.c:628
 msgid "Up to date!"
-msgstr "Auf neuestem Stand"
+msgstr "Всичко е обновено!"
 
 #: src/bz-window.c:800
 msgid ""
-"The ability to inspect and install local .flatpak bundle files is coming "
-"soon! In the meantime, try running\n"
+"The ability to inspect and install local .flatpak bundle files is coming soon! In the meantime, try running\n"
 "\n"
 "flatpak install --bundle your-bundle.flatpak\n"
 "\n"
 "on the command line."
 msgstr ""
-"Die Möglichkeit, lokale .flatpak-Bundle-Dateien zu überprüfen und zu "
-"installieren, wird in Kürze verfügbar sein!\n"
-"In der Zwischenzeit können Sie versuchen, folgenden Befehl in der "
-"Befehlszeile auszuführen:\n"
+"Функцията за проверяване и инсталиране на локални .flatpak пакетни файлове ще бъде достъпна скоро! Междувременно, опитайте да изпълните\n"
 "\n"
-"flatpak install --bundle dein-bundle.flatpak"
+"flatpak install --bundle your-bundle.flatpak\n"
+"\n"
+"в командния ред."
 
 #: src/bz-window.c:935
 msgid "Can't do that right now!"
-msgstr "Das kann momentan nicht getan werden."
+msgstr "Това действие не може да се извърши сега!"
 
 #: src/bz-window.c:1064
 #, c-format
 msgid "Install %s?"
-msgstr "%s installieren?"
+msgstr "Инсталиране на %s?"
 
 #: src/bz-window.c:1067
 msgid "May install additional shared components"
-msgstr "Es könnten zusätzliche gemeinsam genutzte Komponenten installiert werden"
+msgstr "Може да инсталира допълнителни споделени компоненти"
 
 #: src/bz-window.c:1086
 #, c-format
 msgid "Remove %s?"
-msgstr "%s entfernen?"
+msgstr "Премахване на %s?"
 
 #: src/bz-window.c:1089
 msgid "Settings & user data will be kept"
-msgstr "Einstellungen und Benutzerdaten werden beibehalten"
+msgstr "Настройките и потребителските данни ще бъдат запазени"
 
 #: src/bz-window.c:1257
 msgid "Resume Current Tasks"
-msgstr "Die aktuelle Ausgabe fortsetzen"
+msgstr "Възобновяване на текущите задачи"
 
 #: src/bz-window.c:1263
 msgid "Pause Current Tasks"
-msgstr "Die aktuelle Aufgabe pausieren"
+msgstr "Пауза на текущите задачи"
 
 #: src/bz-world-map.c:523
 #, c-format
 msgid "%s: %'u downloads"
-msgstr "%s: %u Downloads"
+msgstr "%s: %'u изтегляния"
 
 #: src/gtk/shortcuts-dialog.blp:6
 msgctxt "shortcut window"
 msgid "General"
-msgstr "Allgemein"
+msgstr "Общи"
 
 #: src/gtk/shortcuts-dialog.blp:9
 msgctxt "shortcut window"
 msgid "Open Search Dialog"
-msgstr "Suchdialog öffnen"
+msgstr "Отваряне на търсачката"
 
 #: src/gtk/shortcuts-dialog.blp:14
 msgctxt "shortcut window"
 msgid "Refresh"
-msgstr "Aktualisieren"
+msgstr "Опресняване"
 
 #: src/gtk/shortcuts-dialog.blp:19
 msgctxt "shortcut window"
 msgid "Toggle Transaction Manager"
-msgstr "Transaktionsverwaltung umschalten"
+msgstr "Превключване на мениджъра на операциите"
 
 #: src/gtk/shortcuts-dialog.blp:24
 msgctxt "shortcut window"
 msgid "Show Shortcuts"
-msgstr "Kurzbefehle anzeigen"
+msgstr "Показване на клавишните комбинации"
 
 #: src/gtk/shortcuts-dialog.blp:29
 msgctxt "shortcut window"
 msgid "Quit"
-msgstr "Beenden"
+msgstr "Спиране на програмата"
 
 #~ msgid "Show Animated Background"
 #~ msgstr "Animierten Hintergrund anzeigen"
@@ -1124,12 +1077,8 @@ msgstr "Beenden"
 #~ msgid "Whether to show the animated icon background on the home page"
 #~ msgstr "Den animierten Hintergrund auf der Startseite anzeigen"
 
-#~ msgid ""
-#~ "It emphasizes supporting the developers who make the Linux desktop "
-#~ "possible."
-#~ msgstr ""
-#~ "Es legt Wert darauf, die Entwickler zu unterstützen, die den Linux-"
-#~ "Desktop möglich machen."
+#~ msgid "It emphasizes supporting the developers who make the Linux desktop possible."
+#~ msgstr "Es legt Wert darauf, die Entwickler zu unterstützen, die den Linux-Desktop möglich machen."
 
 #~ msgid "Calligraphy application page"
 #~ msgstr "Calligraphy"
@@ -1147,12 +1096,8 @@ msgstr "Beenden"
 #~ msgid "Show More"
 #~ msgstr "Mehr anzeigen"
 
-#~ msgid ""
-#~ "The number of downloads in the last 30 days. Click to view this "
-#~ "application's download statistics."
-#~ msgstr ""
-#~ "Die Anzahl der Downloads in den letzten 30 Tagen. Klicken Sie hier, um "
-#~ "die Download-Statistiken für diese Anwendung anzuzeigen."
+#~ msgid "The number of downloads in the last 30 days. Click to view this application's download statistics."
+#~ msgstr "Die Anzahl der Downloads in den letzten 30 Tagen. Klicken Sie hier, um die Download-Statistiken für diese Anwendung anzuzeigen."
 
 #~ msgid "Support this developer"
 #~ msgstr "Diesen Entwickler unterstützen"
@@ -1272,5 +1217,4 @@ msgstr "Beenden"
 #~ msgstr "Übereinstimmung mit regulären Ausdrücken"
 
 #~ msgid "Hide filtering and sorting behind a crossfade effect"
-#~ msgstr ""
-#~ "Filterung und Sortierung hinter einem Überblendungseffekt verstecken"
+#~ msgstr "Filterung und Sortierung hinter einem Überblendungseffekt verstecken"

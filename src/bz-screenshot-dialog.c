@@ -143,8 +143,18 @@ update_is_zoomed (BzScreenshotDialog *self)
   page = adw_carousel_get_nth_page (self->carousel, self->current_index);
   if (page != NULL && BZ_IS_ZOOM (page))
     {
+      GtkWidget *screenshot = NULL;
+
       zoom = BZ_ZOOM (page);
       g_object_get (zoom, "zoom-level", &zoom_level, NULL);
+
+      screenshot = bz_zoom_get_child (zoom);
+      if (screenshot != NULL)
+        bz_screenshot_set_filter (
+            BZ_SCREENSHOT (screenshot),
+            zoom_level == 1.0
+                ? GSK_SCALING_FILTER_TRILINEAR
+                : GSK_SCALING_FILTER_NEAREST);
     }
 
   self->is_zoomed = (zoom_level != 1.0);
