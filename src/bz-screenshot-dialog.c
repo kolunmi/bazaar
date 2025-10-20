@@ -152,7 +152,7 @@ update_is_zoomed (BzScreenshotDialog *self)
       if (screenshot != NULL)
         bz_screenshot_set_filter (
             BZ_SCREENSHOT (screenshot),
-            zoom_level == 1.0
+            zoom_level <= 4.5
                 ? GSK_SCALING_FILTER_TRILINEAR
                 : GSK_SCALING_FILTER_NEAREST);
     }
