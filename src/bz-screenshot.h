@@ -64,4 +64,11 @@ bz_screenshot_set_top_half (BzScreenshot *self,
 gboolean
 bz_screenshot_get_top_half (BzScreenshot *self);
 
+void
+bz_screenshot_set_filter (BzScreenshot    *self,
+                          GskScalingFilter filter);
+
+GskScalingFilter
+bz_screenshot_get_filter (BzScreenshot *self);
+
 G_END_DECLS

@@ -281,9 +281,13 @@ bz_zoom_snapshot (GtkWidget   *widget,
   graphene_point_init (&point, width / 2.0 + self->pan_x, height / 2.0 + self->pan_y);
   transform = gsk_transform_translate (transform, &point);
 
-  transform = gsk_transform_scale (transform, self->zoom_level, self->zoom_level);
+  /* See bz_zoom_size_allocate */
+  // transform = gsk_transform_scale (transform, self->zoom_level, self->zoom_level);
 
-  graphene_point_init (&point, -width / 2.0, -height / 2.0);
+  graphene_point_init (
+      &point,
+      -(width * self->zoom_level) / 2.0,
+      -(height * self->zoom_level) / 2.0);
   transform = gsk_transform_translate (transform, &point);
 
   gtk_snapshot_save (snapshot);
@@ -330,7 +334,14 @@ bz_zoom_size_allocate (GtkWidget *widget,
   self = BZ_ZOOM (widget);
 
   if (self->child)
-    gtk_widget_allocate (self->child, width, height, baseline, NULL);
+    /* TODO: maybe add a property to control whether the child is artificially
+       scaled? */
+    gtk_widget_allocate (
+        self->child,
+        self->zoom_level * width,
+        self->zoom_level * height,
+        baseline,
+        NULL);
 
   bz_zoom_constrain_pan (self);
 }
@@ -474,7 +485,7 @@ bz_zoom_set_zoom_level (BzZoom *self,
 
   self->zoom_level = new_zoom;
   bz_zoom_constrain_pan (self);
-  gtk_widget_queue_draw (GTK_WIDGET (self));
+  gtk_widget_queue_resize (GTK_WIDGET (self));
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ZOOM_LEVEL]);
 }
 
@@ -587,7 +598,7 @@ bz_zoom_zoom_at_point (BzZoom *self,
   self->pan_y = center_y - widget_center_y - new_content_y;
 
   bz_zoom_constrain_pan (self);
-  gtk_widget_queue_draw (GTK_WIDGET (self));
+  gtk_widget_queue_resize (GTK_WIDGET (self));
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ZOOM_LEVEL]);
 }
 
@@ -600,7 +611,7 @@ on_animation_value (double  value,
   self->pan_y      = self->start_pan_y + (self->target_pan_y - self->start_pan_y) * value;
 
   bz_zoom_constrain_pan (self);
-  gtk_widget_queue_draw (GTK_WIDGET (self));
+  gtk_widget_queue_resize (GTK_WIDGET (self));
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ZOOM_LEVEL]);
 }
 

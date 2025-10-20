@@ -28,11 +28,12 @@ struct _BzScreenshot
 {
   GtkWidget parent_instance;
 
-  GdkPaintable *paintable;
-  double        focus_x;
-  double        focus_y;
-  gboolean      rounded_corners;
-  gboolean      top_half;
+  GdkPaintable    *paintable;
+  double           focus_x;
+  double           focus_y;
+  gboolean         rounded_corners;
+  gboolean         top_half;
+  GskScalingFilter filter;
 };
 
 G_DEFINE_FINAL_TYPE (BzScreenshot, bz_screenshot, GTK_TYPE_WIDGET)
@@ -46,6 +47,7 @@ enum
   PROP_FOCUS_Y,
   PROP_ROUNDED_CORNERS,
   PROP_TOP_HALF,
+  PROP_FILTER,
 
   LAST_PROP
 };
@@ -105,6 +107,9 @@ bz_screenshot_get_property (GObject    *object,
     case PROP_TOP_HALF:
       g_value_set_boolean (value, bz_screenshot_get_top_half (self));
       break;
+    case PROP_FILTER:
+      g_value_set_enum (value, bz_screenshot_get_filter (self));
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -134,6 +139,9 @@ bz_screenshot_set_property (GObject      *object,
       break;
     case PROP_TOP_HALF:
       bz_screenshot_set_top_half (self, g_value_get_boolean (value));
+      break;
+    case PROP_FILTER:
+      bz_screenshot_set_filter (self, g_value_get_enum (value));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -228,8 +236,8 @@ bz_screenshot_snapshot (GtkWidget   *widget,
   if (self->paintable == NULL)
     return;
 
-  widget_width     = gtk_widget_get_width (widget);
-  widget_height    = gtk_widget_get_height (widget);
+  widget_width  = gtk_widget_get_width (widget);
+  widget_height = gtk_widget_get_height (widget);
 
   paintable_aspect = gdk_paintable_get_intrinsic_aspect_ratio (self->paintable);
 
@@ -293,7 +301,30 @@ bz_screenshot_snapshot (GtkWidget   *widget,
     }
 
   gtk_snapshot_translate (snapshot, &GRAPHENE_POINT_INIT (x, y));
-  gdk_paintable_snapshot (self->paintable, snapshot, scaled_w, scaled_h);
+
+  /* TODO: doesn't handle all cases properly */
+  if (self->filter == GSK_SCALING_FILTER_NEAREST &&
+      BZ_IS_ASYNC_TEXTURE (self->paintable))
+    {
+      g_autoptr (GdkTexture) texture = NULL;
+
+      texture = bz_async_texture_dup_texture (BZ_ASYNC_TEXTURE (self->paintable));
+      if (texture != NULL)
+        gtk_snapshot_append_scaled_texture (
+            snapshot,
+            texture,
+            self->filter,
+            &GRAPHENE_RECT_INIT (0.0, 0.0, scaled_w, scaled_h));
+    }
+  else if (self->filter == GSK_SCALING_FILTER_NEAREST &&
+           GDK_IS_TEXTURE (self->paintable))
+    gtk_snapshot_append_scaled_texture (
+        snapshot,
+        GDK_TEXTURE (self->paintable),
+        self->filter,
+        &GRAPHENE_RECT_INIT (0.0, 0.0, scaled_w, scaled_h));
+  else
+    gdk_paintable_snapshot (self->paintable, snapshot, scaled_w, scaled_h);
 
   if (self->rounded_corners)
     {
@@ -348,6 +379,14 @@ bz_screenshot_class_init (BzScreenshotClass *klass)
           FALSE,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
+  props[PROP_FILTER] =
+      g_param_spec_enum (
+          "filter",
+          NULL, NULL,
+          GSK_TYPE_SCALING_FILTER,
+          GSK_SCALING_FILTER_TRILINEAR,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   widget_class->get_request_mode = bz_screenshot_get_request_mode;
@@ -362,6 +401,7 @@ bz_screenshot_init (BzScreenshot *self)
   self->focus_y         = -1.0;
   self->rounded_corners = TRUE;
   self->top_half        = FALSE;
+  self->filter          = GSK_SCALING_FILTER_TRILINEAR;
 }
 
 GtkWidget *
@@ -491,6 +531,28 @@ bz_screenshot_get_top_half (BzScreenshot *self)
 {
   g_return_val_if_fail (BZ_IS_SCREENSHOT (self), FALSE);
   return self->top_half;
+}
+
+void
+bz_screenshot_set_filter (BzScreenshot    *self,
+                          GskScalingFilter filter)
+{
+  g_return_if_fail (BZ_IS_SCREENSHOT (self));
+
+  if (self->filter == filter)
+    return;
+
+  self->filter = filter;
+  gtk_widget_queue_draw (GTK_WIDGET (self));
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_FILTER]);
+}
+
+GskScalingFilter
+bz_screenshot_get_filter (BzScreenshot *self)
+{
+  g_return_val_if_fail (BZ_IS_SCREENSHOT (self), FALSE);
+  return self->filter;
 }
 
 static void

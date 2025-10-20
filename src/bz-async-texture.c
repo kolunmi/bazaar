@@ -401,7 +401,10 @@ bz_async_texture_dup_texture (BzAsyncTexture *self)
   g_return_val_if_fail (BZ_IS_ASYNC_TEXTURE (self), NULL);
 
   locker = g_mutex_locker_new (&self->texture_mutex);
-  return g_object_ref (GDK_TEXTURE (self->paintable));
+  if (GDK_IS_TEXTURE (self->paintable))
+    return (GdkTexture *) g_object_ref (self->paintable);
+  else
+    return NULL;
 }
 
 DexFuture *
