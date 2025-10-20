@@ -613,10 +613,11 @@ checking_for_updates_changed (BzWindow    *self,
               self->comet_overlay,
               GTK_WIDGET (self->update_button));
         }
-      else
-        adw_toast_overlay_add_toast (
-            self->toasts,
-            adw_toast_new_format (_ ("Up to date!")));
+      /* TODO: this can be intrusive when idling checking for updates */
+      // else
+      //   adw_toast_overlay_add_toast (
+      //       self->toasts,
+      //       adw_toast_new_format (_ ("Up to date!")));
     }
 }
 
