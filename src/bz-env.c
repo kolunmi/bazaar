@@ -32,7 +32,13 @@ bz_get_dex_stack_size (void)
       const char *envvar = NULL;
       guint64     value  = 0;
 
-      value = MAX (4096 * 32, dex_get_min_stack_size ());
+      /* Ensure we have enough space for gtk/glycin
+
+         Some routines try to optimize by putting stuff on the stack, see
+         https://gitlab.gnome.org/GNOME/libdex/-/issues/27#note_2582332
+
+         2025-10-21 22:47:02 eva */
+      value = MAX (8388608, dex_get_min_stack_size ());
 
       envvar = g_getenv ("BAZAAR_DEX_STACK_SIZE");
       if (envvar != NULL)
