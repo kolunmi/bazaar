@@ -2,7 +2,7 @@ using Gtk 4.0;
 using Adw 1;
 
 template $BzAddonsDialog: Adw.Dialog {
-  content-width: 750;
+  content-width: 550;
   child: Adw.ToolbarView {
     [top]
     Adw.HeaderBar {
@@ -21,8 +21,8 @@ template $BzAddonsDialog: Adw.Dialog {
       hscrollbar-policy: never;
 
       child: Adw.Clamp {
-        maximum-size: 600;
-        tightening-threshold: 400;
+        maximum-size: 500;
+        tightening-threshold: 500;
 
         child: Box {
           orientation: vertical;
