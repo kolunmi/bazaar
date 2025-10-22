@@ -535,8 +535,6 @@ install_addons_cb (BzFullView *self,
       model);
 
   addons_dialog = bz_addons_dialog_new (entry, mapped_model);
-  adw_dialog_set_content_width (addons_dialog, 750);
-  gtk_widget_set_size_request (GTK_WIDGET (addons_dialog), 350, -1);
 
   g_signal_connect_swapped (
       addons_dialog, "transact",
