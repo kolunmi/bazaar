@@ -164,24 +164,9 @@ create_release_row (const char *version,
 }
 
 static void
-bz_releases_dialog_dispose (GObject *object)
-{
-  BzReleasesDialog *self  = (BzReleasesDialog *) object;
-  GtkWidget        *child = NULL;
-
-  while ((child = gtk_widget_get_first_child (GTK_WIDGET (self->releases_box))) != NULL)
-    gtk_list_box_remove (self->releases_box, child);
-
-  G_OBJECT_CLASS (bz_releases_dialog_parent_class)->dispose (object);
-}
-
-static void
 bz_releases_dialog_class_init (BzReleasesDialogClass *klass)
 {
-  GObjectClass   *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
-
-  object_class->dispose = bz_releases_dialog_dispose;
 
   gtk_widget_class_set_template_from_resource (widget_class,
                                                "/io/github/kolunmi/Bazaar/bz-releases-dialog.ui");
