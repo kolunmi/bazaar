@@ -1,0 +1,37 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzReleasesDialog: Adw.Dialog {
+  title: _("Version History");
+  content-width: 550;
+  content-height: 600;
+
+  child: Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {
+      show-title: true;
+    }
+
+    content: ScrolledWindow {
+      propagate-natural-height: true;
+      vexpand: true;
+      hscrollbar-policy: never;
+
+      child: Adw.Clamp {
+        maximum-size: 500;
+        tightening-threshold: 600;
+        margin-top: 24;
+        margin-bottom: 24;
+        margin-start: 12;
+        margin-end: 12;
+
+        child: ListBox releases_box {
+          styles ["boxed-list"]
+
+          valign: start;
+          selection-mode: none;
+        };
+      };
+    };
+  };
+}

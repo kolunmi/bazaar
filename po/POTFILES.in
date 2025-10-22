@@ -60,6 +60,9 @@ src/bz-preferences-dialog.c
 src/bz-progress-bar.blp
 src/bz-progress-bar.c
 src/bz-release.c
+src/bz-releases-dialog.blp
+src/bz-releases-list.blp
+src/bz-releases-list.c
 src/bz-result.c
 src/bz-review.c
 src/bz-screenshot.c

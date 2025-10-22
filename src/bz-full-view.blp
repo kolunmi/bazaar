@@ -653,16 +653,9 @@ template $BzFullView: Adw.Bin {
                         }
                       }
                     }
-
-
-                    ListBox releases_box {
-                      styles [
-                        "boxed-list",
-                      ]
-
-                      selection-mode: none;
+                    $BzReleasesList releases_list {
+                      version-history: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.version-history;
                     }
-
                   };
                 }
 
