@@ -861,7 +861,7 @@ retry_cb (DexFuture *future,
         "Object was discarded");
 
   locker = g_mutex_locker_new (&self->texture_mutex);
-  dex_clear (self->retry_future);
+  dex_clear (&self->retry_future);
 
   maybe_load (self);
   return NULL;
