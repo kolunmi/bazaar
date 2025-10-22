@@ -72,8 +72,8 @@ static void
 update_button_for_entry (GtkButton *button,
                          BzEntry   *entry)
 {
-  gboolean   installed = FALSE;
-  gboolean   holding   = FALSE;
+  gboolean    installed = FALSE;
+  gboolean    holding   = FALSE;
   const char *icon_name;
   const char *tooltip_text;
 
@@ -85,14 +85,14 @@ update_button_for_entry (GtkButton *button,
   if (installed)
     {
       icon_name    = "user-trash-symbolic";
-      tooltip_text = _("Remove");
+      tooltip_text = _ ("Remove");
       gtk_widget_remove_css_class (GTK_WIDGET (button), "suggested-action");
       gtk_widget_add_css_class (GTK_WIDGET (button), "destructive-action");
     }
   else
     {
       icon_name    = "folder-download-symbolic";
-      tooltip_text = _("Install");
+      tooltip_text = _ ("Install");
       gtk_widget_remove_css_class (GTK_WIDGET (button), "destructive-action");
       gtk_widget_add_css_class (GTK_WIDGET (button), "suggested-action");
     }
@@ -172,7 +172,7 @@ update_action_row_from_result (AdwActionRow   *action_row,
 static void
 result_resolved_cb (BzResult   *result,
                     GParamSpec *pspec,
-                    gpointer   user_data)
+                    gpointer    user_data)
 {
   AdwActionRow   *action_row;
   BzAddonsDialog *self;
@@ -181,7 +181,7 @@ result_resolved_cb (BzResult   *result,
     return;
 
   action_row = g_object_get_data (G_OBJECT (result), "action-row");
-  self = g_object_get_data (G_OBJECT (result), "dialog");
+  self       = g_object_get_data (G_OBJECT (result), "dialog");
 
   if (action_row == NULL || self == NULL)
     return;
@@ -230,7 +230,7 @@ populate_addons (BzAddonsDialog *self)
   for (guint i = 0; i < n_items; i++)
     {
       g_autoptr (BzResult) result = NULL;
-      AdwActionRow         *action_row;
+      AdwActionRow *action_row;
 
       result = g_list_model_get_item (self->model, i);
       if (!result)
