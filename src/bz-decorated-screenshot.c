@@ -24,13 +24,13 @@
 
 struct _BzDecoratedScreenshot
 {
-  GtkWidget parent_instance;
+  GtkButton parent_instance;
 
   BzAsyncTexture *async_texture;
   /* Template widgets */
 };
 
-G_DEFINE_FINAL_TYPE (BzDecoratedScreenshot, bz_decorated_screenshot, ADW_TYPE_BIN)
+G_DEFINE_FINAL_TYPE (BzDecoratedScreenshot, bz_decorated_screenshot, GTK_TYPE_BUTTON)
 
 enum
 {
@@ -42,20 +42,14 @@ enum
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
 
-enum
-{
-  CLICKED,
-
-  LAST_SIGNAL
-};
-static guint signals[LAST_SIGNAL] = { 0 };
-
 static void
 bz_decorated_screenshot_dispose (GObject *object)
 {
   BzDecoratedScreenshot *self = BZ_DECORATED_SCREENSHOT (object);
 
   g_clear_pointer (&self->async_texture, g_object_unref);
+
+  gtk_widget_dispose_template (GTK_WIDGET (self), BZ_TYPE_DECORATED_SCREENSHOT);
 
   G_OBJECT_CLASS (bz_decorated_screenshot_parent_class)->dispose (object);
 }
@@ -97,13 +91,6 @@ bz_decorated_screenshot_set_property (GObject      *object,
 }
 
 static void
-screenshot_clicked (BzDecoratedScreenshot *self,
-                    GtkButton             *button)
-{
-  g_signal_emit (self, signals[CLICKED], 0);
-}
-
-static void
 bz_decorated_screenshot_class_init (BzDecoratedScreenshotClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
@@ -122,20 +109,7 @@ bz_decorated_screenshot_class_init (BzDecoratedScreenshotClass *klass)
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
-  signals[CLICKED] =
-      g_signal_new ("clicked",
-                    G_TYPE_FROM_CLASS (klass),
-                    G_SIGNAL_RUN_LAST,
-                    0,
-                    NULL, NULL,
-                    NULL,
-                    G_TYPE_NONE,
-                    0);
-
-  g_type_ensure (BZ_TYPE_SCREENSHOT);
-
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-decorated-screenshot.ui");
-  gtk_widget_class_bind_template_callback (widget_class, screenshot_clicked);
 }
 
 static void

@@ -1,0 +1,97 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzScreenshotsCarousel : Gtk.Widget {
+  accessibility {
+    label: _("Screenshots Carousel");
+  }
+
+  styles ["screenshot-carousel", "view" ,"frame"]
+
+  layout-manager: Gtk.BinLayout {};
+
+  Gtk.Overlay {
+    halign: fill;
+    valign: fill;
+
+    [overlay]
+    Gtk.Box {
+      orientation: horizontal;
+      halign: fill;
+      valign: center;
+      spacing: 12;
+
+      Gtk.Revealer prev_button_revealer {
+        transition-type: crossfade;
+        reveal-child: false;
+        hexpand: true;
+
+        Gtk.Button prev_button {
+          icon-name: "go-previous-symbolic";
+          valign: center;
+          halign: start;
+          clicked => $on_prev_clicked() swapped;
+
+          styles ["circular", "osd"]
+        }
+      }
+
+      Gtk.Revealer next_button_revealer {
+        transition-type: crossfade;
+        reveal-child: false;
+
+        Gtk.Button next_button {
+          icon-name: "go-next-symbolic";
+          valign: center;
+          clicked => $on_next_clicked() swapped;
+
+          styles ["circular", "osd"]
+        }
+      }
+    }
+
+    child: Gtk.Box {
+      orientation: vertical;
+      halign: fill;
+      valign: fill;
+
+      styles ["carousel-box"]
+
+      Adw.Carousel carousel {
+        vexpand: true;
+        hexpand: true;
+        valign: center;
+        height-request: 450;
+        allow-mouse-drag: true;
+        allow-scroll-wheel: false;
+        allow-long-swipes: true;
+
+        notify::position => $on_notify_position() swapped;
+        notify::n-pages => $on_notify_n_pages() swapped;
+      }
+      Box {
+        styles ["indicator-box"]
+
+        Adw.CarouselIndicatorDots carousel_indicator {
+          carousel: carousel;
+          opacity: 0;
+          hexpand:true;
+
+          halign: center;
+
+          styles ["boxed-indicator"]
+        }
+
+        Button {
+          halign: end;
+          icon-name: "four-arrows-pointing-outward-symbolic";
+          tooltip-text: _("Open in Dialog Viewer");
+
+          clicked => $on_expand_clicked() swapped;
+
+          styles ["flat"]
+        }
+      }
+    };
+  }
+}
