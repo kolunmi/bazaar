@@ -203,6 +203,16 @@
   background-color: var(--view-bg-color);
 }
 
+.decorated-screenshot {
+  margin: 0;
+  padding: 5px;
+  border-radius: 0;
+}
+
+.indicator-box button {
+  margin: 0 4px 4px 0;
+}
+
 window,
 headerbar,
 .global-search {

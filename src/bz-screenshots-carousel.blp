@@ -69,12 +69,28 @@ template $BzScreenshotsCarousel : Gtk.Widget {
         notify::position => $on_notify_position() swapped;
         notify::n-pages => $on_notify_n_pages() swapped;
       }
+      Box {
+        styles ["indicator-box"]
 
-      Adw.CarouselIndicatorDots carousel_indicator {
-        carousel: carousel;
-        visible: false;
+        Adw.CarouselIndicatorDots carousel_indicator {
+          carousel: carousel;
+          opacity: 0;
+          hexpand:true;
 
-        styles ["boxed-indicator"]
+          halign: center;
+
+          styles ["boxed-indicator"]
+        }
+
+        Button {
+          halign: end;
+          icon-name: "four-arrows-pointing-outward-symbolic";
+          tooltip-text: _("Open in Dialog Viewer");
+
+          clicked => $on_expand_clicked() swapped;
+
+          styles ["flat"]
+        }
       }
     };
   }

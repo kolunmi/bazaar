@@ -28,7 +28,6 @@ struct _BzDecoratedScreenshot
 
   BzAsyncTexture *async_texture;
   /* Template widgets */
-  BzScreenshot *screenshot_widget;
 };
 
 G_DEFINE_FINAL_TYPE (BzDecoratedScreenshot, bz_decorated_screenshot, GTK_TYPE_BUTTON)
@@ -110,10 +109,7 @@ bz_decorated_screenshot_class_init (BzDecoratedScreenshotClass *klass)
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
-  g_type_ensure (BZ_TYPE_SCREENSHOT);
-
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-decorated-screenshot.ui");
-  gtk_widget_class_bind_template_child (widget_class, BzDecoratedScreenshot, screenshot_widget);
 }
 
 static void

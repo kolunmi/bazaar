@@ -69,7 +69,7 @@ update_button_visibility (BzScreenshotsCarousel *self)
   position = adw_carousel_get_position (self->carousel);
   n_pages  = adw_carousel_get_n_pages (self->carousel);
 
-  gtk_widget_set_visible (self->carousel_indicator, n_pages > 1);
+  gtk_widget_set_opacity (self->carousel_indicator, n_pages > 1);
   gtk_revealer_set_reveal_child (GTK_REVEALER (self->prev_button_revealer), position >= 0.5);
   gtk_revealer_set_reveal_child (GTK_REVEALER (self->next_button_revealer), position < n_pages - 1.5);
 }
@@ -134,14 +134,30 @@ on_notify_n_pages (BzScreenshotsCarousel *self)
 }
 
 static void
+open_screenshot_dialog_at_index (BzScreenshotsCarousel *self, guint index)
+{
+  AdwDialog *dialog = NULL;
+  guint      n_items;
+
+  if (!self->model)
+    return;
+
+  n_items = g_list_model_get_n_items (self->model);
+  if (index >= n_items)
+    return;
+
+  dialog = bz_screenshot_dialog_new (self->model, index);
+  adw_dialog_present (dialog, GTK_WIDGET (gtk_widget_get_root (GTK_WIDGET (self))));
+}
+
+static void
 on_screenshot_clicked (BzDecoratedScreenshot *screenshot, BzScreenshotsCarousel *self)
 {
   BzAsyncTexture *async_texture = NULL;
-  AdwDialog      *dialog        = NULL;
   guint           index         = 0;
   guint           n_items       = 0;
 
-  if (!self->carousel || !self->model)
+  if (!self->model)
     return;
 
   async_texture = bz_decorated_screenshot_get_async_texture (screenshot);
@@ -161,8 +177,28 @@ on_screenshot_clicked (BzDecoratedScreenshot *screenshot, BzScreenshotsCarousel 
         }
     }
 
-  dialog = bz_screenshot_dialog_new (self->model, index);
-  adw_dialog_present (dialog, GTK_WIDGET (gtk_widget_get_root (GTK_WIDGET (self))));
+  open_screenshot_dialog_at_index (self, index);
+}
+
+static void
+on_expand_clicked (BzScreenshotsCarousel *self)
+{
+  gdouble position;
+  guint   index;
+  guint   n_pages;
+
+  if (!self->carousel || !self->model)
+    return;
+
+  n_pages = adw_carousel_get_n_pages (self->carousel);
+  if (n_pages == 0)
+    return;
+
+  position = adw_carousel_get_position (self->carousel);
+  index    = (guint) round (position);
+  index    = MIN (index, n_pages - 1);
+
+  open_screenshot_dialog_at_index (self, index);
 }
 
 static void
@@ -305,6 +341,7 @@ bz_screenshots_carousel_class_init (BzScreenshotsCarouselClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, on_next_clicked);
   gtk_widget_class_bind_template_callback (widget_class, on_notify_position);
   gtk_widget_class_bind_template_callback (widget_class, on_notify_n_pages);
+  gtk_widget_class_bind_template_callback (widget_class, on_expand_clicked);
 
   gtk_widget_class_set_layout_manager_type (widget_class, GTK_TYPE_BIN_LAYOUT);
   gtk_widget_class_set_css_name (widget_class, "screenshot-carousel");
