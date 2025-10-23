@@ -26,7 +26,6 @@
 #include "bz-addons-dialog.h"
 #include "bz-app-size-dialog.h"
 #include "bz-appstream-description-render.h"
-#include "bz-decorated-screenshot.h"
 #include "bz-dynamic-list-view.h"
 #include "bz-env.h"
 #include "bz-error.h"
@@ -35,8 +34,7 @@
 #include "bz-global-state.h"
 #include "bz-lazy-async-texture-model.h"
 #include "bz-releases-list.h"
-#include "bz-screenshot-dialog.h"
-#include "bz-screenshot.h"
+#include "bz-screenshots-carousel.h"
 #include "bz-section-view.h"
 #include "bz-share-dialog.h"
 #include "bz-spdx.h"
@@ -60,7 +58,6 @@ struct _BzFullView
 
   /* Template widgets */
   AdwViewStack      *stack;
-  BzDynamicListView *screenshots;
   GtkWidget         *shadow_overlay;
   GtkWidget         *forge_stars;
   GtkLabel          *forge_stars_label;
@@ -528,74 +525,7 @@ addon_transact_cb (BzFullView     *self,
     g_signal_emit (self, signals[SIGNAL_INSTALL_ADDON], 0, entry);
 }
 
-static void
-screenshot_clicked_cb (BzFullView            *self,
-                       BzDecoratedScreenshot *screenshot)
-{
-  BzAsyncTexture *async_texture                  = NULL;
-  GListModel     *model                          = NULL;
-  g_autoptr (BzLazyAsyncTextureModel) lazy_model = NULL;
-  AdwDialog *dialog                              = NULL;
-  BzEntry   *entry                               = NULL;
-  guint      index                               = 0;
-  guint      n_items                             = 0;
 
-  async_texture = bz_decorated_screenshot_get_async_texture (screenshot);
-  if (async_texture == NULL || self->debounced_ui_entry == NULL)
-    return;
-
-  entry = bz_result_get_object (self->debounced_ui_entry);
-  if (entry == NULL)
-    return;
-
-  g_object_get (entry, "screenshot-paintables", &model, NULL);
-  if (model == NULL)
-    return;
-
-  lazy_model = bz_lazy_async_texture_model_new ();
-  g_object_set (lazy_model, "model", model, NULL);
-
-  n_items = g_list_model_get_n_items (G_LIST_MODEL (lazy_model));
-  for (guint i = 0; i < n_items; i++)
-    {
-      g_autoptr (BzAsyncTexture) item = g_list_model_get_item (G_LIST_MODEL (lazy_model), i);
-      if (item == async_texture)
-        {
-          index = i;
-          break;
-        }
-    }
-
-  dialog = bz_screenshot_dialog_new (G_LIST_MODEL (lazy_model), index);
-  adw_dialog_present (dialog, GTK_WIDGET (self));
-}
-
-static void
-screenshots_bind_widget_cb (BzFullView            *self,
-                            BzDecoratedScreenshot *screenshot,
-                            GdkPaintable          *paintable,
-                            BzDynamicListView     *view)
-{
-  gtk_widget_set_focusable (GTK_WIDGET (screenshot), TRUE);
-  gtk_widget_set_margin_top (GTK_WIDGET (screenshot), 5);
-  gtk_widget_set_margin_bottom (GTK_WIDGET (screenshot), 5);
-
-  g_signal_connect_swapped (
-      screenshot, "clicked",
-      G_CALLBACK (screenshot_clicked_cb), self);
-}
-
-static void
-screenshots_unbind_widget_cb (BzFullView            *self,
-                              BzDecoratedScreenshot *screenshot,
-                              GdkPaintable          *paintable,
-                              BzDynamicListView     *view)
-{
-  g_signal_handlers_disconnect_by_func (
-      screenshot,
-      G_CALLBACK (screenshot_clicked_cb),
-      self);
-}
 
 
 static void
@@ -704,21 +634,19 @@ bz_full_view_class_init (BzFullViewClass *klass)
       g_cclosure_marshal_VOID__OBJECTv);
 
   g_type_ensure (BZ_TYPE_APPSTREAM_DESCRIPTION_RENDER);
-  g_type_ensure (BZ_TYPE_DECORATED_SCREENSHOT);
   g_type_ensure (BZ_TYPE_DYNAMIC_LIST_VIEW);
   g_type_ensure (BZ_TYPE_ENTRY);
   g_type_ensure (BZ_TYPE_ENTRY_GROUP);
   g_type_ensure (BZ_TYPE_LAZY_ASYNC_TEXTURE_MODEL);
-  g_type_ensure (BZ_TYPE_SCREENSHOT);
   g_type_ensure (BZ_TYPE_SECTION_VIEW);
   g_type_ensure (BZ_TYPE_RELEASES_LIST);
+  g_type_ensure (BZ_TYPE_SCREENSHOTS_CAROUSEL);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-full-view.ui");
   gtk_widget_class_bind_template_child (widget_class, BzFullView, stack);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, shadow_overlay);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, forge_stars);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, forge_stars_label);
-  gtk_widget_class_bind_template_child (widget_class, BzFullView, screenshots);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
@@ -739,8 +667,6 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, remove_cb);
   gtk_widget_class_bind_template_callback (widget_class, support_cb);
   gtk_widget_class_bind_template_callback (widget_class, forge_cb);
-  gtk_widget_class_bind_template_callback (widget_class, screenshots_bind_widget_cb);
-  gtk_widget_class_bind_template_callback (widget_class, screenshots_unbind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, pick_license_warning);
   gtk_widget_class_bind_template_callback (widget_class, install_addons_cb);
   gtk_widget_class_bind_template_callback (widget_class, addon_transact_cb);

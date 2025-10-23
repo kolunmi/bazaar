@@ -44,8 +44,6 @@ template $BzFullView: Adw.Bin {
             child: Box main_box {
               orientation: vertical;
               vexpand: false;
-              margin-start: 15;
-              margin-end: 15;
               margin-top: 15;
               margin-bottom: 15;
               spacing: 20;
@@ -287,25 +285,14 @@ template $BzFullView: Adw.Bin {
                     visible: bind $invert_boolean(template.debounced-ui-entry as <$BzResult>.resolved as <bool>) as <bool>;
                   }
 
-                $BzDynamicListView screenshots {
-
-                  vexpand: true;
-                  scroll: true;
-                  noscroll-kind: carousel;
-                  hexpand: true;
-
-                  child-type: "BzDecoratedScreenshot";
-                  child-prop: "async-texture";
-                  visible: bind template.debounced-ui-entry as <$BzResult>.resolved as <bool>;
-
-                  model: $BzLazyAsyncTextureModel {
-                    model: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.screenshot-paintables;
-                  };
-
-                  bind-widget => $screenshots_bind_widget_cb(template);
-                  unbind-widget => $screenshots_unbind_widget_cb(template);
-                }
-
+                  $BzScreenshotsCarousel screenshots {
+                    vexpand: true;
+                    hexpand: true;
+                    visible: bind template.debounced-ui-entry as <$BzResult>.resolved as <bool>;
+                    model: $BzLazyAsyncTextureModel {
+                      model: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.screenshot-paintables;
+                    };
+                  }
               }
 
 

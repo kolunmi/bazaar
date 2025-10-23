@@ -31,6 +31,7 @@
     <file preprocess="xml-stripblanks">bz-releases-list.ui</file>
     <file preprocess="xml-stripblanks">bz-releases-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-screenshot-dialog.ui</file>
+    <file preprocess="xml-stripblanks">bz-screenshots-carousel.ui</file>
     <file preprocess="xml-stripblanks">bz-search-widget.ui</file>
     <file preprocess="xml-stripblanks">bz-section-view.ui</file>
     <file preprocess="xml-stripblanks">bz-share-dialog.ui</file>

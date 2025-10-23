@@ -191,6 +191,18 @@
 	border-top: none;
 }
 
+.screenshot-carousel.frame {
+	border-width: 1px 0;
+}
+
+.screenshot-carousel button{
+	margin: 12px;
+}
+
+.carousel-box {
+  background-color: var(--view-bg-color);
+}
+
 window,
 headerbar,
 .global-search {

@@ -1,6 +1,6 @@
-/* bz-decorated-screenshot.h
+/* bz-screenshots-carousel.h
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2025 Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,25 +17,22 @@
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
+
 #pragma once
-#include "bz-async-texture.h"
-#include <adwaita.h>
+
+#include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_DECORATED_SCREENSHOT (bz_decorated_screenshot_get_type ())
-G_DECLARE_FINAL_TYPE (BzDecoratedScreenshot, bz_decorated_screenshot, BZ, DECORATED_SCREENSHOT, GtkButton)
+#define BZ_TYPE_SCREENSHOTS_CAROUSEL (bz_screenshots_carousel_get_type ())
 
-BzDecoratedScreenshot *
-bz_decorated_screenshot_new (void);
+G_DECLARE_FINAL_TYPE (BzScreenshotsCarousel, bz_screenshots_carousel, BZ, SCREENSHOTS_CAROUSEL, GtkWidget)
 
-BzAsyncTexture *
-bz_decorated_screenshot_get_async_texture (BzDecoratedScreenshot *self);
+GtkWidget *bz_screenshots_carousel_new (void);
 
-void
-bz_decorated_screenshot_set_async_texture (BzDecoratedScreenshot *self,
-                                           BzAsyncTexture        *async_texture);
+void bz_screenshots_carousel_set_model (BzScreenshotsCarousel *self,
+                                        GListModel            *model);
+
+GListModel *bz_screenshots_carousel_get_model (BzScreenshotsCarousel *self);
 
 G_END_DECLS
-
-/* End of bz-decorated-screenshot.h */

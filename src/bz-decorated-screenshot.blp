@@ -1,8 +1,6 @@
 using Gtk 4.0;
-using Adw 1;
 
-template $BzDecoratedScreenshot: Adw.Bin {
-  Button {
+template $BzDecoratedScreenshot: Button {
     styles [
       "flat",
     ]
@@ -10,7 +8,4 @@ template $BzDecoratedScreenshot: Adw.Bin {
     child: $BzScreenshot screenshot_widget {
       paintable: bind template.async-texture;
     };
-
-    clicked => $screenshot_clicked(template);
-  }
 }
