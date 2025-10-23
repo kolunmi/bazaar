@@ -42,6 +42,7 @@
 #include "bz-spdx.h"
 #include "bz-state-info.h"
 #include "bz-stats-dialog.h"
+#include "bz-util.h"
 
 struct _BzFullView
 {
@@ -98,7 +99,7 @@ static void
 debounce_timeout (BzFullView *self);
 
 static DexFuture *
-retrieve_star_string_fiber (BzFullView *self);
+retrieve_star_string_fiber (GWeakRef *wr);
 
 static void addon_transact_cb (BzFullView     *self,
                                BzEntry        *entry,
@@ -933,13 +934,14 @@ debounce_timeout (BzFullView *self)
           dex_scheduler_get_default (),
           bz_get_dex_stack_size (),
           (DexFiberFunc) retrieve_star_string_fiber,
-          self, NULL);
+          bz_track_weak (self), bz_weak_release);
     }
 }
 
 static DexFuture *
-retrieve_star_string_fiber (BzFullView *self)
+retrieve_star_string_fiber (GWeakRef *wr)
 {
+  g_autoptr (BzFullView) self    = NULL;
   g_autoptr (GError) local_error = NULL;
   g_autoptr (BzEntry) entry      = NULL;
   const char      *forge_link    = NULL;
@@ -948,6 +950,8 @@ retrieve_star_string_fiber (BzFullView *self)
   JsonObject      *object        = NULL;
   gint64           star_count    = 0;
   g_autofree char *fmt           = NULL;
+
+  bz_weak_get_or_return_reject (self, wr);
 
   entry = dex_await_object (bz_result_dup_future (self->ui_entry), NULL);
   if (entry == NULL)

@@ -1042,7 +1042,7 @@ refresh_fiber (BzApplication *self)
           dex_scheduler_get_default (),
           bz_get_dex_stack_size (),
           (DexFiberFunc) watch_backend_notifs_fiber,
-          self, NULL);
+          g_object_ref (self), g_object_unref);
     }
   else
     {
@@ -1499,7 +1499,7 @@ periodic_timeout_cb (BzApplication *self)
           dex_scheduler_get_default (),
           bz_get_dex_stack_size (),
           (DexFiberFunc) update_check_fiber,
-          self, NULL);
+          g_object_ref (self), g_object_unref);
     }
 
   return G_SOURCE_CONTINUE;
@@ -1608,10 +1608,10 @@ refresh (BzApplication *self)
       dex_scheduler_get_default (),
       bz_get_dex_stack_size (),
       (DexFiberFunc) refresh_fiber,
-      self, NULL);
+      g_object_ref (self), g_object_unref);
   future = dex_future_finally (
       future, (DexFutureCallback) refresh_finally,
-      self, NULL);
+      g_object_ref (self), g_object_unref);
   self->refresh_task = g_steal_pointer (&future);
 }
 

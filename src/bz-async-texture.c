@@ -794,12 +794,7 @@ load_finally (DexFuture *future,
   g_autoptr (BzAsyncTexture) self = NULL;
   g_autoptr (GMutexLocker) locker = NULL;
 
-  self = g_weak_ref_get (&data->self);
-  if (self == NULL)
-    return dex_future_new_reject (
-        DEX_ERROR,
-        DEX_ERROR_UNKNOWN,
-        "Object was discarded");
+  bz_weak_get_or_return_reject (self, &data->self);
 
   locker = g_mutex_locker_new (&self->texture_mutex);
   dex_clear (&self->task);
@@ -853,12 +848,7 @@ retry_cb (DexFuture *future,
   g_autoptr (BzAsyncTexture) self = NULL;
   g_autoptr (GMutexLocker) locker = NULL;
 
-  self = g_weak_ref_get (&data->self);
-  if (self == NULL)
-    return dex_future_new_reject (
-        DEX_ERROR,
-        DEX_ERROR_UNKNOWN,
-        "Object was discarded");
+  bz_weak_get_or_return_reject (self, &data->self);
 
   locker = g_mutex_locker_new (&self->texture_mutex);
   dex_clear (&self->retry_future);

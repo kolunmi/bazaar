@@ -31,6 +31,7 @@
 #include "bz-flathub-state.h"
 #include "bz-global-state.h"
 #include "bz-io.h"
+#include "bz-util.h"
 
 struct _BzFlathubState
 {
@@ -76,10 +77,10 @@ enum
 static GParamSpec *props[LAST_PROP] = { 0 };
 
 static DexFuture *
-initialize_fiber (BzFlathubState *self);
+initialize_fiber (GWeakRef *wr);
 static DexFuture *
-initialize_finally (DexFuture      *future,
-                    BzFlathubState *self);
+initialize_finally (DexFuture *future,
+                    GWeakRef  *wr);
 
 static void
 bz_flathub_state_dispose (GObject *object)
@@ -525,11 +526,11 @@ bz_flathub_state_set_for_day (BzFlathubState *self,
           bz_get_io_scheduler (),
           bz_get_dex_stack_size (),
           (DexFiberFunc) initialize_fiber,
-          self, NULL);
+          bz_track_weak (self), bz_weak_release);
       future = dex_future_finally (
           future,
           (DexFutureCallback) initialize_finally,
-          self, NULL);
+          bz_track_weak (self), bz_weak_release);
       self->initializing = g_steal_pointer (&future);
     }
 
@@ -566,13 +567,17 @@ bz_flathub_state_set_map_factory (BzFlathubState          *self,
 }
 
 static DexFuture *
-initialize_fiber (BzFlathubState *self)
+initialize_fiber (GWeakRef *wr)
 {
-  const char *for_day                = self->for_day;
+  g_autoptr (BzFlathubState) self    = NULL;
+  const char *for_day                = NULL;
   g_autoptr (GError) local_error     = NULL;
   g_autoptr (GHashTable) futures     = NULL;
   g_autoptr (GHashTable) nodes       = NULL;
   g_autoptr (GHashTable) quality_set = NULL;
+
+  bz_weak_get_or_return_reject (self, wr);
+  for_day = self->for_day;
 
   futures     = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, dex_unref);
   nodes       = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, (GDestroyNotify) json_node_unref);
@@ -824,10 +829,13 @@ initialize_fiber (BzFlathubState *self)
 }
 
 static DexFuture *
-initialize_finally (DexFuture      *future,
-                    BzFlathubState *self)
+initialize_finally (DexFuture *future,
+                    GWeakRef  *wr)
 {
-  guint n_categories = 0;
+  g_autoptr (BzFlathubState) self = NULL;
+  guint n_categories              = 0;
+
+  bz_weak_get_or_return_reject (self, wr);
 
   n_categories = g_list_model_get_n_items (G_LIST_MODEL (self->categories));
   for (guint i = 0; i < n_categories; i++)

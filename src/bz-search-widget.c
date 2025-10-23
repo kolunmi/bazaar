@@ -24,6 +24,7 @@
 #include "bz-screenshot.h"
 #include "bz-search-result.h"
 #include "bz-state-info.h"
+#include "bz-util.h"
 
 struct _BzSearchWidget
 {
@@ -90,8 +91,8 @@ list_activate (GtkListView    *list_view,
                BzSearchWidget *self);
 
 static DexFuture *
-search_query_then (DexFuture      *future,
-                   BzSearchWidget *self);
+search_query_then (DexFuture *future,
+                   GWeakRef  *wr);
 
 static void
 update_filter (BzSearchWidget *self);
@@ -463,12 +464,15 @@ list_activate (GtkListView    *list_view,
 }
 
 static DexFuture *
-search_query_then (DexFuture      *future,
-                   BzSearchWidget *self)
+search_query_then (DexFuture *future,
+                   GWeakRef  *wr)
 {
-  GPtrArray *results    = NULL;
-  guint      old_length = 0;
-  GSettings *settings   = NULL;
+  g_autoptr (BzSearchWidget) self = NULL;
+  GPtrArray *results              = NULL;
+  guint      old_length           = 0;
+  GSettings *settings             = NULL;
+
+  bz_weak_get_or_return_reject (self, wr);
 
   results    = g_value_get_boxed (dex_future_get_value (future, NULL));
   old_length = g_list_model_get_n_items (G_LIST_MODEL (self->search_model));
@@ -580,17 +584,15 @@ update_filter (BzSearchWidget *self)
   future = bz_search_engine_query (
       engine,
       (const char *const *) terms);
-  if (dex_future_is_resolved (future))
-    search_query_then (future, self);
-  else
-    {
-      future = dex_future_then (
-          future,
-          (DexFutureCallback) search_query_then,
-          self, NULL);
-      self->search_query = g_steal_pointer (&future);
-      gtk_widget_set_visible (GTK_WIDGET (self->search_busy), TRUE);
-    }
+  gtk_widget_set_visible (
+      GTK_WIDGET (self->search_busy),
+      dex_future_is_pending (future));
+
+  future = dex_future_then (
+      future,
+      (DexFutureCallback) search_query_then,
+      bz_track_weak (self), bz_weak_release);
+  self->search_query = g_steal_pointer (&future);
 }
 
 static void
