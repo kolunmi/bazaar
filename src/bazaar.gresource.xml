@@ -43,6 +43,7 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/app-installed-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/check-plain-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/circle-filled-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/code-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/community-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/connected-squares-x-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/copy-symbolic.svg</file>
@@ -83,6 +84,7 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/software-update-available-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/starred-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/timer-sand-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/translations-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/user-trash-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/verified-checkmark-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/view-more-horizontal-symbolic.svg</file>

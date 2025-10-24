@@ -80,17 +80,20 @@ follow_link_cb (BzShareList *self,
 static AdwActionRow *
 create_url_action_row (BzShareList *self, BzUrl *url_item)
 {
-  g_autofree char *url_string = NULL;
-  g_autofree char *url_title  = NULL;
+  g_autofree char *url_string  = NULL;
+  g_autofree char *url_title   = NULL;
+  g_autofree char *icon_name   = NULL;
   AdwActionRow    *action_row;
   GtkBox          *suffix_box;
   GtkButton       *copy_button;
   GtkButton       *open_button;
   GtkSeparator    *separator;
+  GtkImage        *prefix_icon;
 
   g_object_get (url_item,
                 "url", &url_string,
                 "name", &url_title,
+                "icon-name", &icon_name,
                 NULL);
 
   action_row = ADW_ACTION_ROW (adw_action_row_new ());
@@ -98,6 +101,13 @@ create_url_action_row (BzShareList *self, BzUrl *url_item)
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (action_row),
                                  url_title ? url_title : url_string);
   adw_action_row_set_subtitle (action_row, url_string);
+
+  if (icon_name != NULL && icon_name[0] != '\0')
+    {
+      prefix_icon = GTK_IMAGE (gtk_image_new_from_icon_name (icon_name));
+      gtk_image_set_icon_size (prefix_icon, GTK_ICON_SIZE_NORMAL);
+      adw_action_row_add_prefix (action_row, GTK_WIDGET (prefix_icon));
+    }
 
   suffix_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4));
   gtk_widget_set_valign (GTK_WIDGET (suffix_box), GTK_ALIGN_CENTER);

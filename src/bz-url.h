@@ -36,6 +36,9 @@ bz_url_get_name (BzUrl *self);
 const char *
 bz_url_get_url (BzUrl *self);
 
+const char *
+bz_url_get_icon_name (BzUrl *self);
+
 void
 bz_url_set_name (BzUrl      *self,
                  const char *name);
@@ -43,6 +46,10 @@ bz_url_set_name (BzUrl      *self,
 void
 bz_url_set_url (BzUrl      *self,
                 const char *url);
+
+void
+bz_url_set_icon_name (BzUrl      *self,
+                      const char *icon_name);
 
 G_END_DECLS
 

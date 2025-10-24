@@ -26,6 +26,7 @@ struct _BzUrl
 
   char *name;
   char *url;
+  char *icon_name;
 };
 
 G_DEFINE_FINAL_TYPE (BzUrl, bz_url, G_TYPE_OBJECT);
@@ -36,6 +37,7 @@ enum
 
   PROP_NAME,
   PROP_URL,
+  PROP_ICON_NAME,
 
   LAST_PROP
 };
@@ -48,6 +50,7 @@ bz_url_dispose (GObject *object)
 
   g_clear_pointer (&self->name, g_free);
   g_clear_pointer (&self->url, g_free);
+  g_clear_pointer (&self->icon_name, g_free);
 
   G_OBJECT_CLASS (bz_url_parent_class)->dispose (object);
 }
@@ -67,6 +70,9 @@ bz_url_get_property (GObject    *object,
       break;
     case PROP_URL:
       g_value_set_string (value, bz_url_get_url (self));
+      break;
+    case PROP_ICON_NAME:
+      g_value_set_string (value, bz_url_get_icon_name (self));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -88,6 +94,9 @@ bz_url_set_property (GObject      *object,
       break;
     case PROP_URL:
       bz_url_set_url (self, g_value_get_string (value));
+      break;
+    case PROP_ICON_NAME:
+      bz_url_set_icon_name (self, g_value_get_string (value));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -112,6 +121,12 @@ bz_url_class_init (BzUrlClass *klass)
   props[PROP_URL] =
       g_param_spec_string (
           "url",
+          NULL, NULL, NULL,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_ICON_NAME] =
+      g_param_spec_string (
+          "icon-name",
           NULL, NULL, NULL,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
@@ -143,6 +158,13 @@ bz_url_get_url (BzUrl *self)
   return self->url;
 }
 
+const char *
+bz_url_get_icon_name (BzUrl *self)
+{
+  g_return_val_if_fail (BZ_IS_URL (self), NULL);
+  return self->icon_name;
+}
+
 void
 bz_url_set_name (BzUrl      *self,
                  const char *name)
@@ -169,4 +191,16 @@ bz_url_set_url (BzUrl      *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_URL]);
 }
 
+void
+bz_url_set_icon_name (BzUrl      *self,
+                      const char *icon_name)
+{
+  g_return_if_fail (BZ_IS_URL (self));
+
+  g_clear_pointer (&self->icon_name, g_free);
+  if (icon_name != NULL)
+    self->icon_name = g_strdup (icon_name);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ICON_NAME]);
+}
 /* End of bz-url.c */

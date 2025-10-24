@@ -203,10 +203,9 @@ template $BzFullView: Adw.Bin {
                           ]
 
                           has-tooltip: true;
-                          tooltip-text: _("Run Application");
+                          label: _("Open");
                           visible: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
                           sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
-                          icon-name: "media-playback-start-symbolic";
                           clicked => $run_cb(template);
                         }
 
