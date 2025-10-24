@@ -197,20 +197,6 @@ template $BzFullView: Adw.Bin {
                         spacing: 10;
                         valign: center;
 
-                        Button {
-                          styles [
-                            "circular",
-                            "flat",
-                          ]
-
-                          vexpand: false;
-                          width-request: 45;
-                          has-tooltip: true;
-                          tooltip-text: _("Share this application");
-                          icon-name: "share-alt-symbolic";
-                          clicked => $share_cb(template);
-                        }
-
                         Button run_button {
                           styles [
                             "pill",
@@ -647,32 +633,10 @@ template $BzFullView: Adw.Bin {
                     }
                   }
 
-                  Adw.PreferencesGroup {
-                    hexpand: false;
-
-                    Adw.ActionRow {
-                      use-markup: true;
-                      title: _("Project Website");
-                      subtitle: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.url;
-                      activatable: true;
-                      activated => $open_url_cb(template);
-
-                      [prefix]
-                      Image {
-                        has-tooltip: true;
-                        tooltip-text: _("Project Website");
-                        icon-name: "globe-symbolic";
-                      }
-
-                      [suffix]
-                      Image {
-                        margin-end: 8;
-                        has-tooltip: true;
-                        tooltip-text: _("Open in browser");
-                        icon-name: "external-link-symbolic";
-                      }
-                    }
+                  $BzShareList {
+                      urls: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.share-urls;
                   }
+
 
                   $BzReleasesList releases_list {
                     version-history: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.version-history;

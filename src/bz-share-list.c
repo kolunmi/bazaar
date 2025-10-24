@@ -1,4 +1,4 @@
-/* bz-share-dialog.c
+/* bz-share-list.c
  *
  * Copyright 2025 Adam Masciola
  *
@@ -18,55 +18,58 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "bz-share-dialog.h"
-#include "bz-entry.h"
+#include "bz-share-list.h"
 #include "bz-url.h"
+#include "bz-window.h"
 #include <glib/gi18n.h>
 
-struct _BzShareDialog
+struct _BzShareList
 {
-  AdwDialog parent_instance;
+  GtkBox parent_instance;
 
-  BzEntry *entry;
+  GListModel *urls;
 
-  /* Template widgets */
-  AdwToastOverlay     *toast_overlay;
-  AdwPreferencesGroup *urls_group;
+  AdwPreferencesGroup *group;
 };
 
-G_DEFINE_FINAL_TYPE (BzShareDialog, bz_share_dialog, ADW_TYPE_DIALOG)
+G_DEFINE_FINAL_TYPE (BzShareList, bz_share_list, GTK_TYPE_BOX)
 
 enum
 {
   PROP_0,
 
-  PROP_ENTRY,
+  PROP_URLS,
 
   LAST_PROP
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
 
 static void
-copy_cb (BzShareDialog *self,
-         GtkButton     *button)
+copy_cb (BzShareList *self,
+         GtkButton   *button)
 {
   const char   *link      = NULL;
   GdkClipboard *clipboard = NULL;
   AdwToast     *toast     = NULL;
+  GtkRoot      *root      = NULL;
 
   link = g_object_get_data (G_OBJECT (button), "url");
 
   clipboard = gdk_display_get_clipboard (gdk_display_get_default ());
   gdk_clipboard_set_text (clipboard, link);
 
-  toast = adw_toast_new (_ ("Copied!"));
-  adw_toast_set_timeout (toast, 1);
-  adw_toast_overlay_add_toast (self->toast_overlay, toast);
+  root = gtk_widget_get_root (GTK_WIDGET (self));
+  if (root && BZ_IS_WINDOW (root))
+    {
+      toast = adw_toast_new (_ ("Copied!"));
+      adw_toast_set_timeout (toast, 1);
+      bz_window_add_toast (BZ_WINDOW (root), toast);
+    }
 }
 
 static void
-follow_link_cb (BzShareDialog *self,
-                GtkButton     *button)
+follow_link_cb (BzShareList *self,
+                GtkButton   *button)
 {
   const char *link = NULL;
 
@@ -75,7 +78,7 @@ follow_link_cb (BzShareDialog *self,
 }
 
 static AdwActionRow *
-create_url_action_row (BzShareDialog *self, BzUrl *url_item)
+create_url_action_row (BzShareList *self, BzUrl *url_item)
 {
   g_autofree char *url_string = NULL;
   g_autofree char *url_title  = NULL;
@@ -89,9 +92,6 @@ create_url_action_row (BzShareDialog *self, BzUrl *url_item)
                 "url", &url_string,
                 "name", &url_title,
                 NULL);
-
-  /* `PreferenceGroup`s can't be constructed using the list widget
-     framework, so we must do this manually. */
 
   action_row = ADW_ACTION_ROW (adw_action_row_new ());
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (action_row), FALSE);
@@ -131,53 +131,57 @@ create_url_action_row (BzShareDialog *self, BzUrl *url_item)
 }
 
 static void
-populate_urls (BzShareDialog *self)
+populate_urls (BzShareList *self)
 {
-  g_autoptr (GListModel) urls_model = NULL;
-  guint n_items                     = 0;
+  guint n_items = 0;
 
-  if (!self->entry)
+  if (self->group)
+    {
+      gtk_box_remove (GTK_BOX (self), GTK_WIDGET (self->group));
+      self->group = NULL;
+    }
+
+  self->group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
+  gtk_box_append (GTK_BOX (self), GTK_WIDGET (self->group));
+
+  if (!self->urls)
     return;
 
-  g_object_get (self->entry, "share-urls", &urls_model, NULL);
-  if (!urls_model)
-    return;
-
-  n_items = g_list_model_get_n_items (urls_model);
+  n_items = g_list_model_get_n_items (self->urls);
 
   for (guint i = 0; i < n_items; i++)
     {
       g_autoptr (BzUrl) url_item = NULL;
       AdwActionRow *action_row;
 
-      url_item   = g_list_model_get_item (urls_model, i);
+      url_item   = g_list_model_get_item (self->urls, i);
       action_row = create_url_action_row (self, url_item);
-      adw_preferences_group_add (self->urls_group, GTK_WIDGET (action_row));
+      adw_preferences_group_add (self->group, GTK_WIDGET (action_row));
     }
 }
 
 static void
-bz_share_dialog_dispose (GObject *object)
+bz_share_list_dispose (GObject *object)
 {
-  BzShareDialog *self = BZ_SHARE_DIALOG (object);
+  BzShareList *self = BZ_SHARE_LIST (object);
 
-  g_clear_object (&self->entry);
+  g_clear_object (&self->urls);
 
-  G_OBJECT_CLASS (bz_share_dialog_parent_class)->dispose (object);
+  G_OBJECT_CLASS (bz_share_list_parent_class)->dispose (object);
 }
 
 static void
-bz_share_dialog_get_property (GObject    *object,
-                              guint       prop_id,
-                              GValue     *value,
-                              GParamSpec *pspec)
+bz_share_list_get_property (GObject    *object,
+                            guint       prop_id,
+                            GValue     *value,
+                            GParamSpec *pspec)
 {
-  BzShareDialog *self = BZ_SHARE_DIALOG (object);
+  BzShareList *self = BZ_SHARE_LIST (object);
 
   switch (prop_id)
     {
-    case PROP_ENTRY:
-      g_value_set_object (value, self->entry);
+    case PROP_URLS:
+      g_value_set_object (value, self->urls);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -185,18 +189,18 @@ bz_share_dialog_get_property (GObject    *object,
 }
 
 static void
-bz_share_dialog_set_property (GObject      *object,
-                              guint         prop_id,
-                              const GValue *value,
-                              GParamSpec   *pspec)
+bz_share_list_set_property (GObject      *object,
+                            guint         prop_id,
+                            const GValue *value,
+                            GParamSpec   *pspec)
 {
-  BzShareDialog *self = BZ_SHARE_DIALOG (object);
+  BzShareList *self = BZ_SHARE_LIST (object);
 
   switch (prop_id)
     {
-    case PROP_ENTRY:
-      g_clear_object (&self->entry);
-      self->entry = g_value_dup_object (value);
+    case PROP_URLS:
+      g_clear_object (&self->urls);
+      self->urls = g_value_dup_object (value);
       populate_urls (self);
       break;
     default:
@@ -205,46 +209,34 @@ bz_share_dialog_set_property (GObject      *object,
 }
 
 static void
-bz_share_dialog_class_init (BzShareDialogClass *klass)
+bz_share_list_class_init (BzShareListClass *klass)
 {
-  GObjectClass   *object_class = G_OBJECT_CLASS (klass);
-  GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  object_class->dispose      = bz_share_dialog_dispose;
-  object_class->get_property = bz_share_dialog_get_property;
-  object_class->set_property = bz_share_dialog_set_property;
+  object_class->dispose      = bz_share_list_dispose;
+  object_class->get_property = bz_share_list_get_property;
+  object_class->set_property = bz_share_list_set_property;
 
-  props[PROP_ENTRY] =
+  props[PROP_URLS] =
       g_param_spec_object (
-          "entry",
+          "urls",
           NULL, NULL,
-          BZ_TYPE_ENTRY,
+          G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   g_type_ensure (BZ_TYPE_URL);
-
-  gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-share-dialog.ui");
-  gtk_widget_class_bind_template_child (widget_class, BzShareDialog, toast_overlay);
-  gtk_widget_class_bind_template_child (widget_class, BzShareDialog, urls_group);
 }
 
 static void
-bz_share_dialog_init (BzShareDialog *self)
+bz_share_list_init (BzShareList *self)
 {
-  gtk_widget_init_template (GTK_WIDGET (self));
+  gtk_orientable_set_orientation (GTK_ORIENTABLE (self), GTK_ORIENTATION_VERTICAL);
 }
 
-AdwDialog *
-bz_share_dialog_new (BzEntry *entry)
+GtkWidget *
+bz_share_list_new (void)
 {
-  BzShareDialog *share_dialog = NULL;
-
-  share_dialog = g_object_new (
-      BZ_TYPE_SHARE_DIALOG,
-      "entry", entry,
-      NULL);
-
-  return ADW_DIALOG (share_dialog);
+  return g_object_new (BZ_TYPE_SHARE_LIST, NULL);
 }

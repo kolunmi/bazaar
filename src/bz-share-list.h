@@ -1,4 +1,4 @@
-/* bz-share-dialog.h
+/* bz-share-list.h
  *
  * Copyright 2025 Adam Masciola
  *
@@ -22,14 +22,13 @@
 
 #include <adwaita.h>
 
-#include "bz-entry.h"
-
 G_BEGIN_DECLS
 
-#define BZ_TYPE_SHARE_DIALOG (bz_share_dialog_get_type ())
-G_DECLARE_FINAL_TYPE (BzShareDialog, bz_share_dialog, BZ, SHARE_DIALOG, AdwDialog)
+#define BZ_TYPE_SHARE_LIST (bz_share_list_get_type ())
 
-AdwDialog *
-bz_share_dialog_new (BzEntry *entry);
+G_DECLARE_FINAL_TYPE (BzShareList, bz_share_list, BZ, SHARE_LIST, GtkBox)
+
+GtkWidget *
+bz_share_list_new (void);
 
 G_END_DECLS
