@@ -63,8 +63,24 @@ The best way to reach us with a question when contributing is to ask on:
 
 ⚠️ **Explain your pull request process**
 
-#### Verbose output
+### Building
+
+GNOME Builder or
+
+```sh
+just build-flatpak
 ```
+
+See [Flatpak Docs](https://docs.flatpak.org/en/latest/flatpak-builder.html)
+
+### Find out which version is installed for bug reports
+
+```sh
+flatpak info io.github.kolunmi.Bazaar
+```
+
+#### Verbose output
+```sh
 G_MESSAGES_DEBUG=all flatpak run io.github.kolunmi.Bazaar
 ```
 
