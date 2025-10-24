@@ -29,6 +29,7 @@ template $BzFullView: Adw.Bin {
 
           setters {
             context_bar.orientation: vertical;
+            not_icon.orientation : vertical;
           }
         }
 
@@ -73,13 +74,17 @@ template $BzFullView: Adw.Bin {
                       ]
                     }
 
-                    Box {
-                      orientation: vertical;
-                      valign: center;
+                    Box not_icon {
+                      orientation: horizontal;
+                      baseline-position: center;
+                      halign: fill;
+                      hexpand: true;
                       spacing: 15;
 
                       Box {
                         orientation: vertical;
+                        valign: center;
+                        hexpand: true;
                         spacing: 3;
 
                         Label {
@@ -186,94 +191,95 @@ template $BzFullView: Adw.Bin {
                           }
                         }
                       }
-                    }
-                  }
 
-                  Box {
-                    orientation: horizontal;
-                    spacing: 10;
+                      Box {
+                        orientation: horizontal;
+                        spacing: 10;
+                        valign: center;
 
-                    Button run_button {
-                      styles [
-                        "pill",
-                      ]
+                        Button {
+                          styles [
+                            "circular",
+                            "flat",
+                          ]
 
-                      has-tooltip: true;
-                      tooltip-text: _("Run Application");
-                      visible: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
-                      sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
-                      icon-name: "media-playback-start-symbolic";
-                      clicked => $run_cb(template);
-                    }
+                          vexpand: false;
+                          width-request: 45;
+                          has-tooltip: true;
+                          tooltip-text: _("Share this application");
+                          icon-name: "share-alt-symbolic";
+                          clicked => $share_cb(template);
+                        }
 
-                    Button {
-                      styles [
-                        "suggested-action",
-                        "pill",
-                      ]
+                        Button run_button {
+                          styles [
+                            "pill",
+                          ]
 
-                      has-tooltip: true;
-                      tooltip-text: _("Download & Install Application");
-                      visible: bind $logical_and($invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable) as <bool>) as <bool>, $is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
-                      sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
-                      label: _("Install");
-                      clicked => $install_cb(template);
-                    }
+                          has-tooltip: true;
+                          tooltip-text: _("Run Application");
+                          visible: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
+                          sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
+                          icon-name: "media-playback-start-symbolic";
+                          clicked => $run_cb(template);
+                        }
 
-                    Button remove_button {
-                      styles [
-                        "destructive-action",
-                        "circular",
-                      ]
+                        Button {
+                          styles [
+                            "suggested-action",
+                            "pill",
+                          ]
 
-                      width-request: 45;
-                      has-tooltip: true;
-                      tooltip-text: _("Uninstall Application");
-                      visible: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
-                      sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
-                      icon-name: "user-trash-symbolic";
-                      clicked => $remove_cb(template);
-                    }
+                          has-tooltip: true;
+                          tooltip-text: _("Download & Install Application");
+                          visible: bind $logical_and($invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable) as <bool>) as <bool>, $is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
+                          sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
+                          label: _("Install");
+                          clicked => $install_cb(template);
+                        }
 
-                    Button addons_btn {
-                      styles [
-                        "circular",
-                      ]
+                        Button remove_button {
+                          styles [
+                            "destructive-action",
+                            "circular",
+                          ]
 
-                      visible: bind $logical_and($invert_boolean($is_null(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.addons) as <bool>) as <bool>, $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>) as <bool>;
-                      width-request: 45;
-                      has-tooltip: true;
-                      tooltip-text: _("Manage Add-ons");
-                      clicked => $install_addons_cb(template);
-                      icon-name: "puzzle-piece-symbolic";
-                    }
+                          width-request: 45;
+                          has-tooltip: true;
+                          tooltip-text: _("Uninstall Application");
+                          visible: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
+                          sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
+                          icon-name: "user-trash-symbolic";
+                          clicked => $remove_cb(template);
+                        }
 
-                    Button {
-                      styles [
-                        "circular",
-                      ]
+                        Button addons_btn {
+                          styles [
+                            "circular",
+                          ]
 
-                      width-request: 45;
-                      has-tooltip: true;
-                      icon-name: "download-plus-symbolic";
-                      tooltip-text: _("Install Other Version");
-                      visible: bind $logical_and($invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable) as <bool>) as <bool>, $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>) as <bool>;
-                      sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
-                      clicked => $install_cb(template);
-                    }
+                          visible: bind $logical_and($invert_boolean($is_null(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.addons) as <bool>) as <bool>, $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>) as <bool>;
+                          width-request: 45;
+                          has-tooltip: true;
+                          tooltip-text: _("Manage Add-ons");
+                          clicked => $install_addons_cb(template);
+                          icon-name: "puzzle-piece-symbolic";
+                        }
 
-                    Button {
-                      styles [
-                        "circular",
-                        "flat",
-                      ]
+                        Button {
+                          styles [
+                            "circular",
+                          ]
 
-                      vexpand: false;
-                      width-request: 45;
-                      has-tooltip: true;
-                      tooltip-text: _("Share this application");
-                      icon-name: "share-alt-symbolic";
-                      clicked => $share_cb(template);
+                          width-request: 45;
+                          has-tooltip: true;
+                          icon-name: "download-plus-symbolic";
+                          tooltip-text: _("Install Other Version");
+                          visible: bind $logical_and($invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable) as <bool>) as <bool>, $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>) as <bool>;
+                          sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
+                          clicked => $install_cb(template);
+                        }
+                      }
                     }
                   }
                 };
@@ -281,24 +287,25 @@ template $BzFullView: Adw.Bin {
 
               Box screenshot_box {
                 Adw.Spinner {
-                    vexpand: true;
-                    visible: bind $invert_boolean(template.debounced-ui-entry as <$BzResult>.resolved as <bool>) as <bool>;
-                  }
+                  vexpand: true;
+                  visible: bind $invert_boolean(template.debounced-ui-entry as <$BzResult>.resolved as <bool>) as <bool>;
+                }
 
-                  $BzScreenshotsCarousel screenshots {
-                    vexpand: true;
-                    hexpand: true;
-                    visible: bind template.debounced-ui-entry as <$BzResult>.resolved as <bool>;
-                    model: $BzLazyAsyncTextureModel {
-                      model: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.screenshot-paintables;
-                    };
-                  }
+                $BzScreenshotsCarousel screenshots {
+                  vexpand: true;
+                  hexpand: true;
+                  visible: bind template.debounced-ui-entry as <$BzResult>.resolved as <bool>;
+
+                  model: $BzLazyAsyncTextureModel {
+                    model: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.screenshot-paintables;
+                  };
+                }
               }
-
 
               Adw.Clamp {
                 maximum-size: 800;
                 tightening-threshold: 1000;
+
                 child: Box bottom_box {
                   orientation: vertical;
                   margin-start: 20;
