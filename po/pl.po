@@ -34,7 +34,7 @@ msgstr "Zarządzaj oprogramowaniem flatpak na tym komputerze"
 msgid "GTK;System;PackageManager;Discover;Flatpak;Software;Store;"
 msgstr ""
 "GTK;System;PackageManager;Discover;Flatpak;Software;Store; Zarządzanie "
-"Oprogramowaniem;Odkrywaj;Odkrywca;Oprogramowanie;Sklep"
+"Oprogramowaniem;Odkrywaj;Odkrywca;Oprogramowanie;Sklep;Bazar;"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:6
 msgid "Show Git Forge Star Counts"
