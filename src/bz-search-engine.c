@@ -359,25 +359,21 @@ items_changed (BzSearchEngine *self,
 static DexFuture *
 query_task_fiber (QueryTaskData *data)
 {
-  char     **terms                 = data->terms;
-  GPtrArray *shallow_mirror        = data->shallow_mirror;
-  g_autoptr (GArray) term_istrings = NULL;
-  g_autoptr (GArray) scores        = NULL;
-  g_autoptr (GPtrArray) results    = NULL;
+  char           **terms                      = data->terms;
+  GPtrArray       *shallow_mirror             = data->shallow_mirror;
+  g_autofree char *joined                     = NULL;
+  double           threshold                  = 0.0;
+  g_autoptr (IndexedStringData) query_istring = NULL;
+  g_autoptr (GArray) scores                   = NULL;
+  g_autoptr (GPtrArray) results               = NULL;
 
-  term_istrings = g_array_new (FALSE, TRUE, sizeof (IndexedStringData));
-  g_array_set_clear_func (term_istrings, indexed_string_data_deinit);
-  g_array_set_size (term_istrings, g_strv_length (terms));
-  for (guint i = 0; terms[i] != NULL; i++)
-    {
-      IndexedStringData *istring = NULL;
+  joined    = g_strjoinv (" ", terms);
+  threshold = (double) strlen (joined) / (double) g_strv_length (terms);
 
-      istring = &g_array_index (term_istrings, IndexedStringData, i);
-      index_string (terms[i], istring);
-    }
+  query_istring = indexed_string_data_new ();
+  index_string (joined, query_istring);
 
   scores = g_array_new (FALSE, FALSE, sizeof (Score));
-
   for (guint i = 0; i < shallow_mirror->len; i++)
     {
       GroupData *group_data = NULL;
@@ -387,29 +383,21 @@ query_task_fiber (QueryTaskData *data)
       for (guint j = 0; j < group_data->istrings->len; j++)
         {
           IndexedStringData *token_istring = NULL;
-          double             token_score   = 1.0;
+          double             token_score   = 0.0;
 
           token_istring = &g_array_index (group_data->istrings, IndexedStringData, j);
-          for (guint k = 0; k < term_istrings->len; k++)
-            {
-              IndexedStringData *term_istring = NULL;
-              double             mult         = 0.0;
+          token_score   = test_strings (query_istring, token_istring);
 
-              term_istring = &g_array_index (term_istrings, IndexedStringData, k);
+          /* earliest tokens are the most important, also normalize against
+             amount of group istrings */
+          token_score *= (double) group_data->istrings->len /
+                         (double) (j + 1) /
+                         (double) group_data->istrings->len;
 
-              mult = test_strings (term_istring, token_istring);
-              /* highly reward multiple terms hitting the same token */
-              token_score *= mult;
-            }
-
-          /* correct for the decay of multiple terms */
-          token_score *= (double) term_istrings->len;
-          /* earliest tokens are the most important */
-          token_score *= 16.0 / (double) (j + 1);
           score += token_score;
         }
 
-      if (score > (double) term_istrings->len)
+      if (score > threshold)
         {
           Score append = { 0 };
 
@@ -524,11 +512,7 @@ test_strings (IndexedStringData *query,
   guint  last_best_idx = G_MAXUINT;
   guint  misses        = 0;
   double score         = 0.0;
-  int    length_diff   = 0;
-
-  /* Quick check of exact match before doing complex stuff */
-  if (g_strstr_len (against->ptr, -1, query->ptr))
-    return ((double) query->utf8_len / (double) against->utf8_len) * (double) query->utf8_len;
+  // int    length_diff   = 0;
 
   for (guint i = 0; i < query->utf8_len; i++)
     {
@@ -578,9 +562,9 @@ test_strings (IndexedStringData *query,
   /* Penalize the query for including chars that didn't match at all */
   score /= (double) (misses + 1);
 
-  length_diff = ABS ((int) against->utf8_len - (int) query->utf8_len);
-  /* Penalize the query for being a different length */
-  score /= (double) (length_diff + 1);
+  // length_diff = ABS ((int) against->utf8_len - (int) query->utf8_len);
+  // /* Penalize the query for being a different length */
+  // score /= (double) (length_diff + 1);
 
   return score;
 }
