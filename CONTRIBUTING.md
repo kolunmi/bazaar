@@ -57,13 +57,7 @@ The best way to reach us with a question when contributing is to ask on:
 * The original github issue you want to contribute to
 * The [discussions](https://github.com/kolunmi/bazaar/discussions) area
 
-## Pull Request Lifecycle
-
-[Instructions](https://contribute.cncf.io/maintainers/github/templates/required/contributing/#pull-request-lifecycle)
-
-⚠️ **Explain your pull request process**
-
-### Building
+## Building
 
 GNOME Builder or
 
@@ -79,10 +73,16 @@ See [Flatpak Docs](https://docs.flatpak.org/en/latest/flatpak-builder.html)
 flatpak info io.github.kolunmi.Bazaar
 ```
 
-#### Verbose output
+### Verbose output
 ```sh
 G_MESSAGES_DEBUG=all flatpak run io.github.kolunmi.Bazaar
 ```
+
+## Pull Request Lifecycle
+
+[Instructions](https://contribute.cncf.io/maintainers/github/templates/required/contributing/#pull-request-lifecycle)
+
+⚠️ **Explain your pull request process**
 
 ## Sign Your Commits
 
