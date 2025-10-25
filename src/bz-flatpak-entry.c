@@ -506,6 +506,7 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
           url = bz_url_new ();
           bz_url_set_name (url, C_ ("Project URL Type", "Flathub Page"));
           bz_url_set_url (url, flathub_url);
+          bz_url_set_icon_name (url, "flathub-symbolic");
 
           g_list_store_append (share_urls, url);
         }
@@ -518,40 +519,50 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
           if (url != NULL)
             {
               const char *enum_string     = NULL;
+              const char *icon_name       = NULL;
               g_autoptr (BzUrl) share_url = NULL;
 
               switch (e)
                 {
                 case AS_URL_KIND_HOMEPAGE:
-                  enum_string = C_ ("Project URL Type", "Homepage");
+                  enum_string = C_ ("Project URL Type", "Project Website");
+                  icon_name = "globe-symbolic";
                   break;
                 case AS_URL_KIND_BUGTRACKER:
                   enum_string = C_ ("Project URL Type", "Issue Tracker");
+                  icon_name = "computer-fail-symbolic";
                   break;
                 case AS_URL_KIND_FAQ:
                   enum_string = C_ ("Project URL Type", "FAQ");
+                  icon_name = "help-faq-symbolic";
                   break;
                 case AS_URL_KIND_HELP:
                   enum_string = C_ ("Project URL Type", "Help");
+                  icon_name = "help-browser-symbolic";
                   break;
                 case AS_URL_KIND_DONATION:
                   enum_string = C_ ("Project URL Type", "Donate");
+                  icon_name = "heart-filled-symbolic";
                   g_clear_pointer (&donation_url, g_free);
                   donation_url = g_strdup (url);
                   break;
                 case AS_URL_KIND_TRANSLATE:
                   enum_string = C_ ("Project URL Type", "Translate");
+                  icon_name = "translations-symbolic";
                   break;
                 case AS_URL_KIND_CONTACT:
                   enum_string = C_ ("Project URL Type", "Contact");
+                  icon_name = "mail-send-symbolic";
                   break;
                 case AS_URL_KIND_VCS_BROWSER:
                   enum_string = C_ ("Project URL Type", "Source Code");
+                  icon_name = "code-symbolic";
                   g_clear_pointer (&forge_url, g_free);
                   forge_url = g_strdup (url);
                   break;
                 case AS_URL_KIND_CONTRIBUTE:
                   enum_string = C_ ("Project URL Type", "Contribute");
+                  icon_name = "system-users-symbolic";
                   break;
                 default:
                   break;
@@ -561,6 +572,7 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
                   BZ_TYPE_URL,
                   "name", enum_string,
                   "url", url,
+                  "icon-name", icon_name,
                   NULL);
               g_list_store_append (share_urls, share_url);
             }
