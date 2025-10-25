@@ -205,8 +205,8 @@
 
 .decorated-screenshot {
   margin: 0;
-  padding: 5px;
-  border-radius: 0;
+  padding: 0;
+  background-color: transparent;
 }
 
 .indicator-box button {
