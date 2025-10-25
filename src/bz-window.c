@@ -48,6 +48,8 @@ struct _BzWindow
   GBinding *search_to_view_binding;
   gboolean  breakpoint_applied;
 
+  GSimpleAction *narrow_action;
+
   DexFuture *transact_future;
 
   /* Template widgets */
@@ -343,6 +345,8 @@ breakpoint_apply_cb (BzWindow      *self,
 {
   self->breakpoint_applied = TRUE;
 
+  g_simple_action_set_state (self->narrow_action, g_variant_new_boolean (TRUE));
+
   adw_header_bar_set_title_widget (self->top_header_bar, NULL);
   adw_header_bar_set_title_widget (self->bottom_header_bar, NULL);
   adw_header_bar_set_title_widget (self->bottom_header_bar, GTK_WIDGET (self->title_revealer));
@@ -355,6 +359,8 @@ breakpoint_unapply_cb (BzWindow      *self,
                        AdwBreakpoint *breakpoint)
 {
   self->breakpoint_applied = FALSE;
+
+  g_simple_action_set_state (self->narrow_action, g_variant_new_boolean (FALSE));
 
   adw_header_bar_set_title_widget (self->top_header_bar, NULL);
   adw_header_bar_set_title_widget (self->bottom_header_bar, NULL);
@@ -555,6 +561,15 @@ bz_window_init (BzWindow *self)
   self->key_controller = gtk_event_controller_key_new ();
   g_signal_connect_swapped (self->key_controller, "key-pressed", G_CALLBACK (key_pressed), self);
   gtk_widget_add_controller (GTK_WIDGET (self), self->key_controller);
+
+  self->narrow_action = g_simple_action_new_stateful (
+    "narrow",
+    NULL,
+    g_variant_new_boolean (FALSE)
+  );
+
+  g_action_map_add_action (G_ACTION_MAP (self), G_ACTION (self->narrow_action));
+  gtk_widget_insert_action_group (GTK_WIDGET (self), "win", G_ACTION_GROUP (self));
 }
 
 static void

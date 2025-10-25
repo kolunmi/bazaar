@@ -25,10 +25,14 @@ template $BzFullView: Adw.Bin {
         height-request: 200;
 
         Adw.Breakpoint breakpoint {
-          condition ("max-width: 600px")
+          condition ("max-width: 700px")
 
           setters {
             context_bar.orientation: vertical;
+            top_box.margin-start: 10;
+            top_box.margin-end: 10;
+            bottom_box.margin-start: 10;
+            bottom_box.margin-end: 10;
           }
         }
 
@@ -54,8 +58,8 @@ template $BzFullView: Adw.Bin {
 
                 child: Box top_box {
                   orientation: vertical;
-                  margin-start: 20;
-                  margin-end: 20;
+                  margin-start: 25;
+                  margin-end: 25;
                   spacing: 20;
 
                   Box header_box {
@@ -301,8 +305,8 @@ template $BzFullView: Adw.Bin {
                 tightening-threshold: 1000;
                 child: Box bottom_box {
                   orientation: vertical;
-                  margin-start: 20;
-                  margin-end: 20;
+                  margin-start: 25;
+                  margin-end: 25;
                   margin-bottom: 20;
                   spacing: 20;
 

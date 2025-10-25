@@ -287,17 +287,17 @@ static const char *
 get_category_display_name (const char *category_id)
 {
   if (g_strcmp0 (category_id, "audiovideo") == 0)
-    return _ ("Audio & Video");
+    return _ ("Media");
   if (g_strcmp0 (category_id, "development") == 0)
-    return _ ("Development");
+    return _ ("Develop");
   if (g_strcmp0 (category_id, "education") == 0)
-    return _ ("Education");
+    return _ ("Learn");
   if (g_strcmp0 (category_id, "game") == 0)
-    return _ ("Games");
+    return _ ("Game");
   if (g_strcmp0 (category_id, "graphics") == 0)
-    return _ ("Graphics");
+    return _ ("Visual");
   if (g_strcmp0 (category_id, "network") == 0)
-    return _ ("Networking");
+    return _ ("Network");
   if (g_strcmp0 (category_id, "office") == 0)
     return _ ("Office");
   if (g_strcmp0 (category_id, "science") == 0)
@@ -305,7 +305,7 @@ get_category_display_name (const char *category_id)
   if (g_strcmp0 (category_id, "system") == 0)
     return _ ("System");
   if (g_strcmp0 (category_id, "utility") == 0)
-    return _ ("Utilities");
+    return _ ("Tools");
 
   return category_id;
 }
