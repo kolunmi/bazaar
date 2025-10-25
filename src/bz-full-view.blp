@@ -20,461 +20,369 @@ template $BzFullView: Adw.Bin {
       name: "content";
       title: _("Content");
 
-      child: Adw.BreakpointBin breakpoint_bin {
-        width-request: 200;
-        height-request: 200;
-
-        Adw.Breakpoint breakpoint {
-          condition ("max-width: 600px")
+      child: Adw.BreakpointBin {
+        width-request: 360;
+        height-request: 450;
+        Adw.Breakpoint {
+          condition ("max-width: 700px")
 
           setters {
             context_bar.orientation: vertical;
-            not_icon.orientation : vertical;
           }
         }
 
-        child: Overlay {
-          [overlay]
-          Box shadow_overlay {
-            valign: start;
-            height-request: 3;
-            can-target: false;
+        child: Adw.BreakpointBin breakpoint_bin {
+          width-request: 360;
+          height-request: 450;
+
+          Adw.Breakpoint breakpoint {
+            condition ("max-width: 500px")
+
+            setters {
+              top_box.margin-start: 10;
+              top_box.margin-end: 10;
+              bottom_box.margin-start: 10;
+              bottom_box.margin-end: 10;
+              not_icon.orientation : vertical;
+              app_icon.valign: start;
+              app_icon.pixel-size: 96;
+            }
           }
 
-          child: ScrolledWindow main_scroll {
-            child: Box main_box {
-              orientation: vertical;
-              vexpand: false;
-              margin-top: 15;
-              margin-bottom: 15;
-              spacing: 20;
+          child: Overlay {
+            [overlay]
+            Box shadow_overlay {
+              valign: start;
+              height-request: 3;
+              can-target: false;
+            }
 
-              Adw.Clamp {
-                maximum-size: 800;
-                tightening-threshold: 1000;
+            child: ScrolledWindow main_scroll {
+              child: Box main_box {
+                orientation: vertical;
+                vexpand: false;
+                margin-top: 15;
+                margin-bottom: 15;
+                spacing: 20;
 
-                child: Box top_box {
-                  orientation: vertical;
-                  margin-start: 20;
-                  margin-end: 20;
-                  spacing: 20;
+                Adw.Clamp {
+                  maximum-size: 800;
+                  tightening-threshold: 1000;
 
-                  Box header_box {
-                    orientation: horizontal;
+                  child: Box top_box {
+                    orientation: vertical;
+                    margin-start: 25;
+                    margin-end: 25;
                     spacing: 20;
 
-                    Image {
-                      valign: center;
-                      halign: center;
-                      pixel-size: 128;
-                      paintable: bind template.entry-group as <$BzEntryGroup>.icon-paintable;
-
-                      styles [
-                        "icon-dropshadow",
-                      ]
-                    }
-
-                    Box not_icon {
+                    Box header_box {
                       orientation: horizontal;
-                      baseline-position: center;
-                      halign: fill;
-                      hexpand: true;
-                      spacing: 15;
+                      spacing: 20;
 
-                      Box {
-                        orientation: vertical;
+                      Image app_icon{
                         valign: center;
+                        halign: center;
+                        pixel-size: 128;
+                        paintable: bind template.entry-group as <$BzEntryGroup>.icon-paintable;
+
+                        styles [
+                          "icon-dropshadow",
+                        ]
+                      }
+
+                      Box not_icon {
+                        orientation: horizontal;
+                        baseline-position: center;
+                        halign: fill;
                         hexpand: true;
-                        spacing: 3;
-
-                        Label {
-                          styles [
-                            "title-1",
-                          ]
-
-                          xalign: 0.0;
-                          wrap: true;
-                          wrap-mode: word_char;
-                          natural-wrap-mode: word;
-                          label: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.title;
-                        }
+                        spacing: 15;
 
                         Box {
-                          orientation: horizontal;
-                          spacing: 10;
+                          orientation: vertical;
+                          valign: center;
+                          hexpand: true;
+                          spacing: 3;
 
                           Label {
                             styles [
-                              "accent",
+                              "title-1",
+                              "app-title"
                             ]
 
                             xalign: 0.0;
                             wrap: true;
                             wrap-mode: word_char;
                             natural-wrap-mode: word;
-                            label: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.developer;
+                            label: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.title;
                           }
 
-                          Revealer {
-                            transition-type: crossfade;
-                            reveal-child: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
-                            visible: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
+                          Box {
+                            orientation: horizontal;
+                            spacing: 10;
 
-                            child: Image {
+                            Label {
                               styles [
                                 "accent",
+                                "app-developer"
                               ]
 
-                              has-tooltip: true;
-                              tooltip-text: _("This flatpak is verified by the original developers of the software.");
-                              icon-name: "verified-checkmark-symbolic";
-                              icon-size: normal;
-                            };
-                          }
-                        }
+                              xalign: 0.0;
+                              wrap: true;
+                              wrap-mode: word_char;
+                              natural-wrap-mode: word;
+                              label: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.developer;
+                            }
 
-                        Box {
-                          spacing: 8;
+                            Revealer {
+                              transition-type: crossfade;
+                              reveal-child: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
+                              visible: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
 
-                          Button {
-                            visible: bind $invert_boolean($is_null(template.ui-entry as <$BzResult>.object as <$BzEntry>.donation-url) as <bool>) as <bool>;
+                              child: Image {
+                                styles [
+                                  "accent",
+                                ]
 
-                            styles [
-                              "small-pill",
-                              "suggested-action",
-                              "support",
-                            ]
-
-                            margin-top: 8;
-                            valign: start;
-                            halign: start;
-                            has-tooltip: true;
-                            tooltip-text: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.donation-url;
-                            clicked => $support_cb(template);
-
-                            child: Adw.ButtonContent {
-                              label: _("Support");
-                              icon-name: "heart-filled-symbolic";
-                            };
+                                has-tooltip: true;
+                                tooltip-text: _("This flatpak is verified by the original developers of the software.");
+                                icon-name: "verified-checkmark-symbolic";
+                                icon-size: normal;
+                              };
+                            }
                           }
 
-                          Revealer forge_stars {
-                            transition-type: slide_down;
-                            reveal-child: false;
+                          Box {
+                            spacing: 8;
 
-                            child: Button {
+                            Button {
+                              visible: bind $invert_boolean($is_null(template.ui-entry as <$BzResult>.object as <$BzEntry>.donation-url) as <bool>) as <bool>;
+
                               styles [
                                 "small-pill",
                                 "suggested-action",
-                                "star",
+                                "support",
                               ]
 
                               margin-top: 8;
                               valign: start;
                               halign: start;
                               has-tooltip: true;
-                              tooltip-text: _("Repository Star Count");
-                              clicked => $forge_cb(template);
+                              tooltip-text: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.donation-url;
+                              clicked => $support_cb(template);
 
-                              child: Box {
-                                hexpand: false;
-                                orientation: horizontal;
-                                spacing: 10;
-
-                                Image {
-                                  icon-name: "starred-symbolic";
-                                }
-
-                                Label forge_stars_label {}
+                              child: Adw.ButtonContent {
+                                label: _("Support");
+                                icon-name: "heart-filled-symbolic";
                               };
-                            };
+                            }
+
+                            Revealer forge_stars {
+                              transition-type: slide_down;
+                              reveal-child: false;
+
+                              child: Button {
+                                styles [
+                                  "small-pill",
+                                  "suggested-action",
+                                  "star",
+                                ]
+
+                                margin-top: 8;
+                                valign: start;
+                                halign: start;
+                                has-tooltip: true;
+                                tooltip-text: _("Repository Star Count");
+                                clicked => $forge_cb(template);
+
+                                child: Box {
+                                  hexpand: false;
+                                  orientation: horizontal;
+                                  spacing: 10;
+
+                                  Image {
+                                    icon-name: "starred-symbolic";
+                                  }
+
+                                  Label forge_stars_label {}
+                                };
+                              };
+                            }
                           }
                         }
-                      }
 
-                      Box {
-                        orientation: horizontal;
-                        spacing: 10;
-                        valign: center;
+                        Box {
+                          orientation: horizontal;
+                          spacing: 10;
+                          valign: center;
 
-                        Button run_button {
-                          styles [
-                            "pill",
-                          ]
+                          Button run_button {
+                            styles [
+                              "pill",
+                            ]
 
-                          has-tooltip: true;
-                          label: _("Open");
-                          visible: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
-                          sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
-                          clicked => $run_cb(template);
-                        }
+                            has-tooltip: true;
+                            label: _("Open");
+                            visible: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
+                            sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
+                            clicked => $run_cb(template);
+                          }
 
-                        Button {
-                          styles [
-                            "suggested-action",
-                            "pill",
-                          ]
+                          Button {
+                            styles [
+                              "suggested-action",
+                              "pill",
+                            ]
 
-                          has-tooltip: true;
-                          tooltip-text: _("Download & Install Application");
-                          visible: bind $logical_and($invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable) as <bool>) as <bool>, $is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
-                          sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
-                          label: _("Install");
-                          clicked => $install_cb(template);
-                        }
+                            has-tooltip: true;
+                            tooltip-text: _("Download & Install Application");
+                            visible: bind $logical_and($invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable) as <bool>) as <bool>, $is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
+                            sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
+                            label: _("Install");
+                            clicked => $install_cb(template);
+                          }
 
-                        Button remove_button {
-                          styles [
-                            "destructive-action",
-                            "circular",
-                          ]
+                          Button remove_button {
+                            styles [
+                              "destructive-action",
+                              "circular",
+                            ]
 
-                          width-request: 45;
-                          has-tooltip: true;
-                          tooltip-text: _("Uninstall Application");
-                          visible: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
-                          sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
-                          icon-name: "user-trash-symbolic";
-                          clicked => $remove_cb(template);
-                        }
+                            width-request: 45;
+                            has-tooltip: true;
+                            tooltip-text: _("Uninstall Application");
+                            visible: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
+                            sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
+                            icon-name: "user-trash-symbolic";
+                            clicked => $remove_cb(template);
+                          }
 
-                        Button addons_btn {
-                          styles [
-                            "circular",
-                          ]
+                          Button addons_btn {
+                            styles [
+                              "circular",
+                            ]
 
-                          visible: bind $logical_and($invert_boolean($is_null(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.addons) as <bool>) as <bool>, $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>) as <bool>;
-                          width-request: 45;
-                          has-tooltip: true;
-                          tooltip-text: _("Manage Add-ons");
-                          clicked => $install_addons_cb(template);
-                          icon-name: "puzzle-piece-symbolic";
-                        }
+                            visible: bind $logical_and($invert_boolean($is_null(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.addons) as <bool>) as <bool>, $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>) as <bool>;
+                            width-request: 45;
+                            has-tooltip: true;
+                            tooltip-text: _("Manage Add-ons");
+                            clicked => $install_addons_cb(template);
+                            icon-name: "puzzle-piece-symbolic";
+                          }
 
-                        Button {
-                          styles [
-                            "circular",
-                          ]
+                          Button {
+                            styles [
+                              "circular",
+                            ]
 
-                          width-request: 45;
-                          has-tooltip: true;
-                          icon-name: "download-plus-symbolic";
-                          tooltip-text: _("Install Other Version");
-                          visible: bind $logical_and($invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable) as <bool>) as <bool>, $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>) as <bool>;
-                          sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
-                          clicked => $install_cb(template);
+                            width-request: 45;
+                            has-tooltip: true;
+                            icon-name: "download-plus-symbolic";
+                            tooltip-text: _("Install Other Version");
+                            visible: bind $logical_and($invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable) as <bool>) as <bool>, $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>) as <bool>;
+                            sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
+                            clicked => $install_cb(template);
+                          }
                         }
                       }
                     }
-                  }
-                };
-              }
-
-              Box screenshot_box {
-                Adw.Spinner {
-                  vexpand: true;
-                  visible: bind $invert_boolean(template.debounced-ui-entry as <$BzResult>.resolved as <bool>) as <bool>;
-                }
-
-                $BzScreenshotsCarousel screenshots {
-                  vexpand: true;
-                  hexpand: true;
-                  visible: bind template.debounced-ui-entry as <$BzResult>.resolved as <bool>;
-
-                  model: $BzLazyAsyncTextureModel {
-                    model: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.screenshot-paintables;
                   };
                 }
-              }
 
-              Adw.Clamp {
-                maximum-size: 800;
-                tightening-threshold: 1000;
-
-                child: Box bottom_box {
-                  orientation: vertical;
-                  margin-start: 20;
-                  margin-end: 20;
-                  margin-bottom: 20;
-                  spacing: 20;
-
-                  Label {
-                    styles [
-                      "title-2",
-                    ]
-
-                    margin-start: 5;
-                    margin-top: 20;
-                    valign: start;
-                    xalign: 0;
-                    wrap: true;
-                    wrap-mode: word_char;
-                    label: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.description;
+                Box screenshot_box {
+                  Adw.Spinner {
+                    vexpand: true;
+                    visible: bind $invert_boolean(template.debounced-ui-entry as <$BzResult>.resolved as <bool>) as <bool>;
                   }
 
-                  $BzAppstreamDescriptionRender {
-                    appstream-description: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.long-description;
-                    margin-start: 5;
+                  $BzScreenshotsCarousel screenshots {
+                    vexpand: true;
+                    hexpand: true;
+                    visible: bind template.debounced-ui-entry as <$BzResult>.resolved as <bool>;
+
+                    model: $BzLazyAsyncTextureModel {
+                      model: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.screenshot-paintables;
+                    };
                   }
+                }
 
-                  Box context_bar {
-                    hexpand: false;
-                    homogeneous: true;
-                    spacing: 0;
-                    orientation: horizontal;
-                    halign: fill;
+                Adw.Clamp {
+                  maximum-size: 800;
+                  tightening-threshold: 1000;
 
-                    styles [
-                      "app-context-bar",
-                      "card",
-                    ]
+                  child: Box bottom_box {
+                    orientation: vertical;
+                    margin-start: 25;
+                    margin-end: 25;
+                    margin-bottom: 20;
+                    spacing: 20;
 
-                    Box {
+                    Label {
+                      styles [
+                        "title-2",
+                      ]
+
+                      margin-start: 5;
+                      margin-top: 20;
+                      valign: start;
+                      xalign: 0;
+                      wrap: true;
+                      wrap-mode: word_char;
+                      label: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.description;
+                    }
+
+                    $BzAppstreamDescriptionRender {
+                      appstream-description: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.long-description;
+                      margin-start: 5;
+                    }
+
+                    Box context_bar {
+                      hexpand: false;
                       homogeneous: true;
+                      spacing: 0;
+                      orientation: horizontal;
+                      halign: fill;
 
-                      Button download_size_tile {
-                        styles [
-                          "context-tile",
-                          "flat",
-                        ]
+                      styles [
+                        "app-context-bar",
+                        "card",
+                      ]
 
-                        clicked => $size_cb(template);
+                      Box {
+                        homogeneous: true;
 
-                        Box {
-                          orientation: vertical;
-                          spacing: 4;
-                          hexpand: true;
+                        Button download_size_tile {
+                          styles [
+                            "context-tile",
+                            "flat",
+                          ]
 
-                          Label download_size_value {
-                            justify: center;
-                            label: bind $format_size(template.ui-entry as <$BzResult>.object as <$BzEntry>.size) as <string>;
-                            lines: 3;
-                            ellipsize: end;
-                            halign: center;
-                            wrap: true;
-                            xalign: 0.5;
-                            use-markup: true;
-                            margin-bottom: 4;
+                          clicked => $size_cb(template);
 
-                            styles [
-                              "lozenge",
-                              "grey",
-                            ]
-                          }
-
-                          Label {
-                            justify: center;
-                            label: _("Download Size");
-                            wrap: true;
-                            xalign: 0.5;
-
-                            styles [
-                              "heading",
-                            ]
-                          }
-
-                          Label {
-                            justify: center;
-                            label: _("Excludes shared components");
-                            lines: 3;
-                            ellipsize: end;
-                            wrap: true;
-                            xalign: 0.5;
-
-                            styles [
-                              "caption",
-                            ]
-                          }
-                        }
-                      }
-
-                      Button license_tile {
-                        can-target: bind $has_link(template.ui-entry as <$BzResult>.object as <$BzEntry>.project-license) as <bool>;
-                        can-focus: bind $has_link(template.ui-entry as <$BzResult>.object as <$BzEntry>.project-license) as <bool>;
-
-                        styles [
-                          "context-tile",
-                          "flat",
-                        ]
-
-                        clicked => $license_cb(template);
-
-                        Box {
                           Box {
                             orientation: vertical;
                             spacing: 4;
-                            visible: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.is-floss as <bool>;
                             hexpand: true;
 
-                            Box {
-                              halign: center;
-                              spacing: 8;
-                              margin-bottom: 4;
-
-                              Image {
-                                icon-name: "community-symbolic";
-
-                                styles [
-                                  "lozenge",
-                                  "success",
-                                ]
-                              }
-
-                              Image {
-                                icon-name: "license-symbolic";
-
-                                styles [
-                                  "lozenge",
-                                  "success",
-                                ]
-                              }
-                            }
-
-                            Label {
+                            Label download_size_value {
                               justify: center;
-                              label: _("Free Software");
-                              wrap: true;
-                              xalign: 0.5;
-
-                              styles [
-                                "heading",
-                              ]
-                            }
-
-                            Label {
-                              justify: center;
-                              label: bind $format_license(template.ui-entry as <$BzResult>.object as <$BzEntry>.project-license) as <string>;
+                              label: bind $format_size(template.ui-entry as <$BzResult>.object as <$BzEntry>.size) as <string>;
                               lines: 3;
                               ellipsize: end;
+                              halign: center;
                               wrap: true;
                               xalign: 0.5;
-
-                              styles [
-                                "caption",
-                              ]
-                            }
-                          }
-
-                          Box {
-                            orientation: vertical;
-                            spacing: 4;
-                            visible: bind $invert_boolean(template.ui-entry as <$BzResult>.object as <$BzEntry>.is-floss) as <bool>;
-                            hexpand: true;
-
-                            Image {
-                              icon-name: "license-symbolic";
-                              halign: center;
+                              use-markup: true;
                               margin-bottom: 4;
 
                               styles [
                                 "lozenge",
-                                "warning",
+                                "grey",
                               ]
                             }
 
                             Label {
                               justify: center;
-                              label: _("Proprietary");
+                              label: _("Download Size");
                               wrap: true;
                               xalign: 0.5;
 
@@ -485,7 +393,7 @@ template $BzFullView: Adw.Bin {
 
                             Label {
                               justify: center;
-                              label: _("Source code may not be available");
+                              label: _("Excludes shared components");
                               lines: 3;
                               ellipsize: end;
                               wrap: true;
@@ -497,8 +405,118 @@ template $BzFullView: Adw.Bin {
                             }
                           }
                         }
+
+                        Button license_tile {
+                          can-target: bind $has_link(template.ui-entry as <$BzResult>.object as <$BzEntry>.project-license) as <bool>;
+                          can-focus: bind $has_link(template.ui-entry as <$BzResult>.object as <$BzEntry>.project-license) as <bool>;
+
+                          styles [
+                            "context-tile",
+                            "flat",
+                          ]
+
+                          clicked => $license_cb(template);
+
+                          Box {
+                            Box {
+                              orientation: vertical;
+                              spacing: 4;
+                              visible: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.is-floss as <bool>;
+                              hexpand: true;
+
+                              Box {
+                                halign: center;
+                                spacing: 8;
+                                margin-bottom: 4;
+
+                                Image {
+                                  icon-name: "community-symbolic";
+
+                                  styles [
+                                    "lozenge",
+                                    "success",
+                                  ]
+                                }
+
+                                Image {
+                                  icon-name: "license-symbolic";
+
+                                  styles [
+                                    "lozenge",
+                                    "success",
+                                  ]
+                                }
+                              }
+
+                              Label {
+                                justify: center;
+                                label: _("Free Software");
+                                wrap: true;
+                                xalign: 0.5;
+
+                                styles [
+                                  "heading",
+                                ]
+                              }
+
+                              Label {
+                                justify: center;
+                                label: bind $format_license(template.ui-entry as <$BzResult>.object as <$BzEntry>.project-license) as <string>;
+                                lines: 3;
+                                ellipsize: end;
+                                wrap: true;
+                                xalign: 0.5;
+
+                                styles [
+                                  "caption",
+                                ]
+                              }
+                            }
+
+                            Box {
+                              orientation: vertical;
+                              spacing: 4;
+                              visible: bind $invert_boolean(template.ui-entry as <$BzResult>.object as <$BzEntry>.is-floss) as <bool>;
+                              hexpand: true;
+
+                              Image {
+                                icon-name: "license-symbolic";
+                                halign: center;
+                                margin-bottom: 4;
+
+                                styles [
+                                  "lozenge",
+                                  "warning",
+                                ]
+                              }
+
+                              Label {
+                                justify: center;
+                                label: _("Proprietary");
+                                wrap: true;
+                                xalign: 0.5;
+
+                                styles [
+                                  "heading",
+                                ]
+                              }
+
+                              Label {
+                                justify: center;
+                                label: _("Source code may not be available");
+                                lines: 3;
+                                ellipsize: end;
+                                wrap: true;
+                                xalign: 0.5;
+
+                                styles [
+                                  "caption",
+                                ]
+                              }
+                            }
+                          }
+                        }
                       }
-                    }
 
                     Box {
                       homogeneous: true;
@@ -646,6 +664,7 @@ template $BzFullView: Adw.Bin {
           };
         };
       };
+    };
     }
   };
 }

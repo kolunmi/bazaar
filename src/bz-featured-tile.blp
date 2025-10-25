@@ -22,7 +22,7 @@ template $BzFeaturedTile: Button {
       halign: center;
       orientation: horizontal;
       spacing: 125;
-      margin-start: 50;
+      margin-start: bind $get_start_margin(template.narrow) as <int>;
       margin-end: 20;
 
       Box {

@@ -71,7 +71,13 @@ template $BzSectionView: Adw.Bin {
               "browser-banner-title",
             ]
 
+            wrap: true;
+            wrap-mode: word_char;
             ellipsize: end;
+            lines: 3;
+            margin-start: 25;
+            margin-end: 25;
+
             visible: bind $invert_boolean($is_null(template.section as <$BzContentSection>.title) as <bool>) as <bool>;
             xalign: bind template.section as <$BzContentSection>.banner-text-label-xalign;
             label: bind template.section as <$BzContentSection>.title;
@@ -84,7 +90,13 @@ template $BzSectionView: Adw.Bin {
               "browser-banner-subtitle",
             ]
 
+            wrap: true;
+            wrap-mode: word_char;
             ellipsize: end;
+            lines: 3;
+            margin-start: 25;
+            margin-end: 25;
+
             visible: bind $invert_boolean($is_null(template.section as <$BzContentSection>.subtitle) as <bool>) as <bool>;
             xalign: bind template.section as <$BzContentSection>.banner-text-label-xalign;
             label: bind template.section as <$BzContentSection>.subtitle;
@@ -97,7 +109,13 @@ template $BzSectionView: Adw.Bin {
               "browser-banner-description",
             ]
 
+            wrap: true;
+            wrap-mode: word_char;
             ellipsize: end;
+            lines: 10;
+            margin-start: 25;
+            margin-end: 25;
+
             visible: bind $invert_boolean($is_null(template.section as <$BzContentSection>.description) as <bool>) as <bool>;
             xalign: bind template.section as <$BzContentSection>.banner-text-label-xalign;
             label: bind template.section as <$BzContentSection>.description;

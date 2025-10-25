@@ -149,6 +149,14 @@
     padding: 0;
 }
 
+window.narrow .app-title {
+  font-size: 16pt;
+}
+
+window.narrow .app-developer {
+	font-size: small;
+}
+
 /* Context tile from full-view, modified from GNOME Software */
 .context-tile {
 	border: 1px solid @card_shade_color;

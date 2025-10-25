@@ -136,6 +136,7 @@ create_url_action_row (BzShareList *self, BzUrl *url_item)
 
   adw_action_row_add_suffix (action_row, GTK_WIDGET (suffix_box));
   adw_action_row_set_activatable_widget (action_row, GTK_WIDGET (open_button));
+  adw_action_row_set_subtitle_lines (action_row, 1);
 
   return action_row;
 }
