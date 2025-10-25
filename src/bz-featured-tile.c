@@ -19,8 +19,8 @@
  */
 
 #include "bz-featured-tile.h"
-#include "bz-group-tile-css-watcher.h"
 #include "bz-entry.h"
+#include "bz-group-tile-css-watcher.h"
 #include "bz-screenshot.h"
 
 #define BZ_TYPE_FEATURED_TILE_LAYOUT (bz_featured_tile_layout_get_type ())
@@ -29,7 +29,7 @@ G_DECLARE_FINAL_TYPE (BzFeaturedTileLayout, bz_featured_tile_layout, BZ, FEATURE
 struct _BzFeaturedTileLayout
 {
   GtkLayoutManager parent_instance;
-  gboolean narrow_mode;
+  gboolean         narrow_mode;
 };
 
 G_DEFINE_FINAL_TYPE (BzFeaturedTileLayout, bz_featured_tile_layout, GTK_TYPE_LAYOUT_MANAGER)
@@ -44,18 +44,18 @@ static guint layout_signals[LAYOUT_SIGNAL_LAST] = { 0 };
 
 static void
 bz_featured_tile_layout_measure (GtkLayoutManager *layout_manager,
-                                  GtkWidget        *widget,
-                                  GtkOrientation    orientation,
-                                  int               for_size,
-                                  int              *minimum,
-                                  int              *natural,
-                                  int              *minimum_baseline,
-                                  int              *natural_baseline)
+                                 GtkWidget        *widget,
+                                 GtkOrientation    orientation,
+                                 int               for_size,
+                                 int              *minimum,
+                                 int              *natural,
+                                 int              *minimum_baseline,
+                                 int              *natural_baseline)
 {
   GtkWidget *child;
 
-  *minimum = 0;
-  *natural = 0;
+  *minimum          = 0;
+  *natural          = 0;
   *minimum_baseline = -1;
   *natural_baseline = -1;
 
@@ -79,14 +79,14 @@ bz_featured_tile_layout_measure (GtkLayoutManager *layout_manager,
 
 static void
 bz_featured_tile_layout_allocate (GtkLayoutManager *layout_manager,
-                                   GtkWidget        *widget,
-                                   gint              width,
-                                   gint              height,
-                                   gint              baseline)
+                                  GtkWidget        *widget,
+                                  gint              width,
+                                  gint              height,
+                                  gint              baseline)
 {
   BzFeaturedTileLayout *self;
-  GtkWidget *child;
-  gboolean narrow_mode;
+  GtkWidget            *child;
+  gboolean              narrow_mode;
 
   self = BZ_FEATURED_TILE_LAYOUT (layout_manager);
 
@@ -113,7 +113,7 @@ bz_featured_tile_layout_class_init (BzFeaturedTileLayoutClass *klass)
 
   layout_manager_class = GTK_LAYOUT_MANAGER_CLASS (klass);
 
-  layout_manager_class->measure = bz_featured_tile_layout_measure;
+  layout_manager_class->measure  = bz_featured_tile_layout_measure;
   layout_manager_class->allocate = bz_featured_tile_layout_allocate;
 
   layout_signals[LAYOUT_SIGNAL_NARROW_MODE_CHANGED] =
@@ -133,8 +133,8 @@ struct _BzFeaturedTile
   GtkButton parent_instance;
 
   BzEntryGroup *group;
-  gboolean narrow_mode;
-  guint refresh_id;
+  gboolean      narrow_mode;
+  guint         refresh_id;
 
   BzGroupTileCssWatcher *css;
 
@@ -145,7 +145,7 @@ struct _BzFeaturedTile
   GtkWidget *screenshot;
 
   GdkPaintable *first_screenshot;
-  gboolean has_screenshot;
+  gboolean      has_screenshot;
 };
 
 G_DEFINE_FINAL_TYPE (BzFeaturedTile, bz_featured_tile, GTK_TYPE_BUTTON)
@@ -160,7 +160,9 @@ enum
   LAST_PROP
 };
 
-static GParamSpec *props[LAST_PROP] = { NULL, };
+static GParamSpec *props[LAST_PROP] = {
+  NULL,
+};
 
 static void bz_featured_tile_refresh (BzFeaturedTile *self);
 static void update_screenshot (BzFeaturedTile *self);
@@ -170,7 +172,7 @@ bz_featured_tile_refresh_idle_cb (gpointer user_data)
 {
   BzFeaturedTile *self;
 
-  self = user_data;
+  self             = user_data;
   self->refresh_id = 0;
   bz_featured_tile_refresh (self);
 
@@ -188,8 +190,8 @@ schedule_refresh (BzFeaturedTile *self)
 
 static void
 bz_featured_tile_layout_narrow_mode_changed_cb (GtkLayoutManager *layout_manager,
-                                                 gboolean          narrow_mode,
-                                                 gpointer          user_data)
+                                                gboolean          narrow_mode,
+                                                gpointer          user_data)
 {
   BzFeaturedTile *self;
 
@@ -226,7 +228,7 @@ static void
 update_screenshot (BzFeaturedTile *self)
 {
   g_autoptr (BzResult) ui_entry_result = NULL;
-  g_autoptr (GListModel) screenshots = NULL;
+  g_autoptr (GListModel) screenshots   = NULL;
   BzEntry *ui_entry;
   gboolean has_screenshot = FALSE;
 
@@ -273,7 +275,7 @@ update_screenshot (BzFeaturedTile *self)
     }
 
   self->first_screenshot = g_list_model_get_item (screenshots, 0);
-  has_screenshot = TRUE;
+  has_screenshot         = TRUE;
 
   notify_properties (self, has_screenshot);
 }
@@ -317,9 +319,9 @@ bz_featured_tile_dispose (GObject *object)
 
 static void
 bz_featured_tile_get_property (GObject    *object,
-                                guint       prop_id,
-                                GValue     *value,
-                                GParamSpec *pspec)
+                               guint       prop_id,
+                               GValue     *value,
+                               GParamSpec *pspec)
 {
   BzFeaturedTile *self;
 
@@ -347,9 +349,9 @@ bz_featured_tile_get_property (GObject    *object,
 
 static void
 bz_featured_tile_set_property (GObject      *object,
-                                guint         prop_id,
-                                const GValue *value,
-                                GParamSpec   *pspec)
+                               guint         prop_id,
+                               const GValue *value,
+                               GParamSpec   *pspec)
 {
   BzFeaturedTile *self;
 
@@ -372,13 +374,13 @@ bz_featured_tile_set_property (GObject      *object,
 static void
 bz_featured_tile_class_init (BzFeaturedTileClass *klass)
 {
-  GObjectClass *object_class;
+  GObjectClass   *object_class;
   GtkWidgetClass *widget_class;
 
   object_class = G_OBJECT_CLASS (klass);
   widget_class = GTK_WIDGET_CLASS (klass);
 
-  object_class->dispose = bz_featured_tile_dispose;
+  object_class->dispose      = bz_featured_tile_dispose;
   object_class->get_property = bz_featured_tile_get_property;
   object_class->set_property = bz_featured_tile_set_property;
 
@@ -452,7 +454,7 @@ bz_featured_tile_get_group (BzFeaturedTile *self)
 
 void
 bz_featured_tile_set_group (BzFeaturedTile *self,
-                             BzEntryGroup   *group)
+                            BzEntryGroup   *group)
 {
   g_return_if_fail (BZ_IS_FEATURED_TILE (self));
   g_return_if_fail (group == NULL || BZ_IS_ENTRY_GROUP (group));

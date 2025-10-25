@@ -299,15 +299,15 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
       g_cclosure_marshal_VOID__OBJECTv);
 
   signals[SIGNAL_PREVIEW_CHANGED] =
-    g_signal_new (
-        "preview-changed",
-        G_OBJECT_CLASS_TYPE (klass),
-        G_SIGNAL_RUN_FIRST,
-        0,
-        NULL, NULL,
-        NULL,
-        G_TYPE_NONE, 2,
-        BZ_TYPE_ENTRY_GROUP, G_TYPE_BOOLEAN);
+      g_signal_new (
+          "preview-changed",
+          G_OBJECT_CLASS_TYPE (klass),
+          G_SIGNAL_RUN_FIRST,
+          0,
+          NULL, NULL,
+          NULL,
+          G_TYPE_NONE, 2,
+          BZ_TYPE_ENTRY_GROUP, G_TYPE_BOOLEAN);
 
   widget_class->grab_focus = bz_search_widget_grab_focus;
 
@@ -341,7 +341,7 @@ bz_search_widget_init (BzSearchWidget *self)
 
   gtk_widget_init_template (GTK_WIDGET (self));
 
- /* TODO: move all this to blueprint */
+  /* TODO: move all this to blueprint */
 
   self->selection_model = gtk_single_selection_new (NULL);
   gtk_list_view_set_model (self->list_view, GTK_SELECTION_MODEL (self->selection_model));
@@ -449,7 +449,7 @@ selected_item_changed (GtkSingleSelection *model,
                        GParamSpec         *pspec,
                        BzSearchWidget     *self)
 {
-  guint selected = 0;
+  guint    selected = 0;
   gboolean from_search;
 
   g_clear_object (&self->previewing);
@@ -462,10 +462,10 @@ selected_item_changed (GtkSingleSelection *model,
       result           = g_list_model_get_item (G_LIST_MODEL (model), selected);
       self->previewing = g_object_ref (bz_search_result_get_group (result));
 
-      from_search = self->search_in_progress;
+      from_search              = self->search_in_progress;
       self->search_in_progress = FALSE;
 
-      g_signal_emit(self, signals[SIGNAL_PREVIEW_CHANGED], 0, self->previewing, from_search);
+      g_signal_emit (self, signals[SIGNAL_PREVIEW_CHANGED], 0, self->previewing, from_search);
     }
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PREVIEWING]);
