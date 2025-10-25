@@ -791,6 +791,10 @@ retrieve_star_string_fiber (GWeakRef *wr)
   if (forge_link == NULL)
     goto done;
 
+  // Remove trailing `/` from forge URLs if it exists
+  if (g_str_has_suffix (forge_link, "/"))
+    forge_link = g_strndup (forge_link, strlen (forge_link) - 1);
+
   if (g_regex_match_simple (
           "https://github.com/.*/.*",
           forge_link,
