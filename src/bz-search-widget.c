@@ -34,6 +34,7 @@ struct _BzSearchWidget
   BzEntryGroup *selected;
   gboolean      remove;
   BzEntryGroup *previewing;
+  gboolean      search_in_progress;
 
   GListStore         *search_model;
   GtkSingleSelection *selection_model;
@@ -67,6 +68,7 @@ static GParamSpec *props[LAST_PROP] = { 0 };
 enum
 {
   SIGNAL_SELECT,
+  SIGNAL_PREVIEW_CHANGED,
 
   LAST_SIGNAL,
 };
@@ -296,6 +298,17 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
       G_TYPE_FROM_CLASS (klass),
       g_cclosure_marshal_VOID__OBJECTv);
 
+  signals[SIGNAL_PREVIEW_CHANGED] =
+      g_signal_new (
+          "preview-changed",
+          G_OBJECT_CLASS_TYPE (klass),
+          G_SIGNAL_RUN_FIRST,
+          0,
+          NULL, NULL,
+          NULL,
+          G_TYPE_NONE, 2,
+          BZ_TYPE_ENTRY_GROUP, G_TYPE_BOOLEAN);
+
   widget_class->grab_focus = bz_search_widget_grab_focus;
 
   g_type_ensure (BZ_TYPE_ASYNC_TEXTURE);
@@ -436,7 +449,8 @@ selected_item_changed (GtkSingleSelection *model,
                        GParamSpec         *pspec,
                        BzSearchWidget     *self)
 {
-  guint selected = 0;
+  guint    selected = 0;
+  gboolean from_search;
 
   g_clear_object (&self->previewing);
 
@@ -447,6 +461,11 @@ selected_item_changed (GtkSingleSelection *model,
 
       result           = g_list_model_get_item (G_LIST_MODEL (model), selected);
       self->previewing = g_object_ref (bz_search_result_get_group (result));
+
+      from_search              = self->search_in_progress;
+      self->search_in_progress = FALSE;
+
+      g_signal_emit (self, signals[SIGNAL_PREVIEW_CHANGED], 0, self->previewing, from_search);
     }
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PREVIEWING]);
@@ -580,6 +599,8 @@ update_filter (BzSearchWidget *self)
   if (n_terms == 0)
     g_strv_builder_add (builder, "");
   terms = g_strv_builder_end (builder);
+
+  self->search_in_progress = TRUE;
 
   future = bz_search_engine_query (
       engine,
