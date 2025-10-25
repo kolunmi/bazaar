@@ -5,8 +5,8 @@ template $BzWindow: Adw.ApplicationWindow {
   title: _("Bazaar");
   default-width: 1220;
   default-height: 900;
-  width-request: 350;
-  height-request: 400;
+  width-request: 360;
+  height-request: 550;
 
   ShortcutController {
     Shortcut {
@@ -29,11 +29,11 @@ template $BzWindow: Adw.ApplicationWindow {
 
   content: $BzCometOverlay comet_overlay {
     child: Adw.BreakpointBin search_breakpoint_bin {
-      width-request: 350;
+      width-request: 360;
       height-request: 450;
 
       child: Adw.BreakpointBin split_breakpoint_bin {
-        width-request: 350;
+        width-request: 360;
         height-request: 450;
 
         child: Adw.OverlaySplitView search_split {
@@ -58,17 +58,18 @@ template $BzWindow: Adw.ApplicationWindow {
                 };
 
                 [start]
-                ToggleButton {
+                Button {
                   has-tooltip: true;
-                  tooltip-text: _("Search");
-                  icon-name: "system-search-symbolic";
-                  active: bind search_split.show-sidebar bidirectional;
+                  tooltip-text: _("Go Home");
+                  icon-name: "user-home-symbolic";
+                  clicked => $go_home_cb(template);
                 }
               }
 
               content: $BzSearchWidget search_widget {
                 state: bind template.state;
                 select => $search_widget_select_cb(template);
+                preview-changed => $search_widget_preview_changed_cb(template);
               };
             };
           };
@@ -416,7 +417,7 @@ template $BzWindow: Adw.ApplicationWindow {
                       tooltip-text: _("Toggle transaction sidebar");
                       active: bind split_view.show-sidebar bidirectional;
 
-                      child: $BzGlobalProgress {
+                      child: $BzGlobalProgress download_bar {
                         expand-size: 125;
                         active: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
                         pending: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.pending;
@@ -468,6 +469,7 @@ template $BzWindow: Adw.ApplicationWindow {
         setters {
           background_task_label.visible: false;
           search_split.collapsed: true;
+          download_bar.expand-size: 60;
         }
 
         apply => $breakpoint_apply_cb(template);

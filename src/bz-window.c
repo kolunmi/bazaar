@@ -230,16 +230,31 @@ search_split_open_changed_cb (BzWindow            *self,
                               AdwOverlaySplitView *view)
 {
   gboolean show_sidebar = FALSE;
+  BzEntryGroup *previewing = NULL;
 
   g_clear_object (&self->search_to_view_binding);
   show_sidebar = adw_overlay_split_view_get_show_sidebar (view);
 
   if (show_sidebar)
-    self->search_to_view_binding = g_object_bind_property (
-        self->search_widget, "previewing",
-        self->full_view, "entry-group",
-        G_BINDING_SYNC_CREATE);
+    {
+      self->search_to_view_binding = g_object_bind_property (
+          self->search_widget, "previewing",
+          self->full_view, "entry-group",
+          G_BINDING_SYNC_CREATE);
+      set_page (self);
+    }
+  else
+    {
+      previewing = bz_search_widget_get_previewing (self->search_widget);
+      if (previewing != NULL)
+        bz_full_view_set_entry_group (self->full_view, previewing);
+    }
+}
 
+static void
+go_home_cb (BzWindow *self)
+{
+  adw_overlay_split_view_set_show_sidebar (self->search_split, FALSE);
   set_page (self);
 }
 
@@ -260,6 +275,20 @@ search_widget_select_cb (BzWindow       *self,
 
   remove = installable == 0 && removable > 0;
   try_transact (self, NULL, group, remove, FALSE, NULL);
+}
+
+static void
+search_widget_preview_changed_cb (BzSearchWidget *widget,
+                                  BzEntryGroup   *group,
+                                  gboolean        from_search,
+                                  gpointer        user_data)
+{
+  BzWindow *self;
+
+  self = BZ_WINDOW (gtk_widget_get_root (GTK_WIDGET (widget)));
+
+  if (self->breakpoint_applied && !from_search)
+    adw_overlay_split_view_set_show_sidebar (self->search_split, FALSE);
 }
 
 static void
@@ -506,6 +535,8 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, update_cb);
   gtk_widget_class_bind_template_callback (widget_class, transactions_clear_cb);
   gtk_widget_class_bind_template_callback (widget_class, visible_page_changed_cb);
+  gtk_widget_class_bind_template_callback (widget_class, go_home_cb);
+  gtk_widget_class_bind_template_callback (widget_class, search_widget_preview_changed_cb);
 
   gtk_widget_class_install_action (widget_class, "escape", NULL, action_escape);
 }
