@@ -36,7 +36,7 @@
 #include "bz-releases-list.h"
 #include "bz-screenshots-carousel.h"
 #include "bz-section-view.h"
-#include "bz-share-dialog.h"
+#include "bz-share-list.h"
 #include "bz-spdx.h"
 #include "bz-state-info.h"
 #include "bz-stats-dialog.h"
@@ -312,21 +312,6 @@ open_flathub_url_cb (BzFullView *self,
     }
   else
     g_warning ("Invalid or empty ID provided");
-}
-
-static void
-share_cb (BzFullView *self,
-          GtkButton  *button)
-{
-  AdwDialog *share_dialog = NULL;
-
-  if (self->group == NULL)
-    return;
-
-  share_dialog = bz_share_dialog_new (bz_result_get_object (self->ui_entry));
-  adw_dialog_set_content_width (share_dialog, 600);
-
-  adw_dialog_present (share_dialog, GTK_WIDGET (self));
 }
 
 static void
@@ -641,6 +626,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   g_type_ensure (BZ_TYPE_SECTION_VIEW);
   g_type_ensure (BZ_TYPE_RELEASES_LIST);
   g_type_ensure (BZ_TYPE_SCREENSHOTS_CAROUSEL);
+  g_type_ensure (BZ_TYPE_SHARE_LIST);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-full-view.ui");
   gtk_widget_class_bind_template_child (widget_class, BzFullView, stack);
@@ -659,7 +645,6 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, open_url_cb);
   gtk_widget_class_bind_template_callback (widget_class, open_flathub_url_cb);
   gtk_widget_class_bind_template_callback (widget_class, license_cb);
-  gtk_widget_class_bind_template_callback (widget_class, share_cb);
   gtk_widget_class_bind_template_callback (widget_class, dl_stats_cb);
   gtk_widget_class_bind_template_callback (widget_class, size_cb);
   gtk_widget_class_bind_template_callback (widget_class, run_cb);

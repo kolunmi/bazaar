@@ -260,7 +260,8 @@ on_model_items_changed (GListModel            *model,
 static void
 bz_screenshots_carousel_dispose (GObject *object)
 {
-  BzScreenshotsCarousel *self = BZ_SCREENSHOTS_CAROUSEL (object);
+  BzScreenshotsCarousel *self       = BZ_SCREENSHOTS_CAROUSEL (object);
+  GtkWidget             *root_child = gtk_widget_get_first_child (GTK_WIDGET (self));
 
   if (self->model && self->items_changed_id)
     {
@@ -269,6 +270,9 @@ bz_screenshots_carousel_dispose (GObject *object)
     }
 
   g_clear_object (&self->model);
+
+  if (root_child != NULL)
+    gtk_widget_unparent (root_child);
 
   gtk_widget_dispose_template (GTK_WIDGET (self), BZ_TYPE_SCREENSHOTS_CAROUSEL);
 
