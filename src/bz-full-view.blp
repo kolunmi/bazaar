@@ -23,6 +23,7 @@ template $BzFullView: Adw.Bin {
       child: Adw.BreakpointBin {
         width-request: 360;
         height-request: 450;
+
         Adw.Breakpoint {
           condition ("max-width: 700px")
 
@@ -44,9 +45,11 @@ template $BzFullView: Adw.Bin {
               top_box.margin-end: 10;
               bottom_box.margin-start: 10;
               bottom_box.margin-end: 10;
-              not_icon.orientation : vertical;
+              not_icon.orientation: vertical;
               app_icon.valign: start;
               app_icon.pixel-size: 96;
+              device_support_desktop_small.visible: true;
+              device_support_desktop_wide.visible: false;
             }
           }
 
@@ -80,7 +83,7 @@ template $BzFullView: Adw.Bin {
                       orientation: horizontal;
                       spacing: 20;
 
-                      Image app_icon{
+                      Image app_icon {
                         valign: center;
                         halign: center;
                         pixel-size: 128;
@@ -107,7 +110,7 @@ template $BzFullView: Adw.Bin {
                           Label {
                             styles [
                               "title-1",
-                              "app-title"
+                              "app-title",
                             ]
 
                             xalign: 0.0;
@@ -124,7 +127,7 @@ template $BzFullView: Adw.Bin {
                             Label {
                               styles [
                                 "accent",
-                                "app-developer"
+                                "app-developer",
                               ]
 
                               xalign: 0.0;
@@ -287,260 +290,426 @@ template $BzFullView: Adw.Bin {
                       }
                     }
 
-Box context_bar {
-  hexpand: false;
-  homogeneous: true;
-  spacing: 0;
-  orientation: horizontal;
-  halign: fill;
+                    Box context_bar {
+                      hexpand: false;
+                      homogeneous: true;
+                      spacing: 0;
+                      orientation: horizontal;
+                      halign: fill;
 
-  styles [
-    "app-context-bar",
-  ]
+                      styles [
+                        "app-context-bar",
+                      ]
 
-  Box {
-    homogeneous: true;
+                      Box {
+                        homogeneous: true;
 
-    Button download_size_tile {
-      styles [
-        "context-tile",
-        "flat",
-      ]
+                        Button download_size_tile {
+                          styles [
+                            "context-tile",
+                            "flat",
+                          ]
 
-      clicked => $size_cb(template);
+                          clicked => $size_cb(template);
 
-      Box {
-        orientation: vertical;
-        spacing: 4;
-        hexpand: true;
+                          Box {
+                            orientation: vertical;
+                            spacing: 4;
+                            hexpand: true;
 
-        Label download_size_value {
-          justify: center;
-          label: bind $format_size(template.ui-entry as <$BzResult>.object as <$BzEntry>.size) as <string>;
-          lines: 3;
-          ellipsize: end;
-          halign: center;
-          wrap: true;
-          xalign: 0.5;
-          use-markup: true;
-          margin-bottom: 4;
+                            Label download_size_value {
+                              justify: center;
+                              label: bind $format_size(template.ui-entry as <$BzResult>.object as <$BzEntry>.size) as <string>;
+                              lines: 3;
+                              ellipsize: end;
+                              halign: center;
+                              wrap: true;
+                              xalign: 0.5;
+                              use-markup: true;
+                              margin-bottom: 4;
 
-          styles [
-            "lozenge",
-            "grey",
-          ]
-        }
+                              styles [
+                                "lozenge",
+                                "grey",
+                              ]
+                            }
 
-        Label {
-          styles [
-            "context-tile-text"
-          ]
+                            Label {
+                              styles [
+                                "context-tile-text",
+                              ]
 
-          justify: center;
-          label: _("Download");
-          wrap: true;
-          xalign: 0.5;
-        }
-      }
-    }
+                              justify: center;
+                              label: _("Download");
+                              wrap: true;
+                              xalign: 0.5;
+                            }
+                          }
+                        }
 
-    Button license_tile {
-      can-target: bind $has_link(template.ui-entry as <$BzResult>.object as <$BzEntry>.project-license) as <bool>;
-      can-focus: bind $has_link(template.ui-entry as <$BzResult>.object as <$BzEntry>.project-license) as <bool>;
+                        Button license_tile {
+                          can-target: bind $has_link(template.ui-entry as <$BzResult>.object as <$BzEntry>.project-license) as <bool>;
+                          can-focus: bind $has_link(template.ui-entry as <$BzResult>.object as <$BzEntry>.project-license) as <bool>;
 
-      styles [
-        "context-tile",
-        "flat",
-      ]
+                          styles [
+                            "context-tile",
+                            "flat",
+                          ]
 
-      clicked => $license_cb(template);
+                          clicked => $license_cb(template);
+                          has-tooltip: true;
+                          tooltip-text: bind $format_license(template.ui-entry as <$BzResult>.object as <$BzEntry>.project-license) as <string>;
 
-      has-tooltip: true;
-      tooltip-text: bind $format_license(template.ui-entry as <$BzResult>.object as <$BzEntry>.project-license) as <string>;
+                          Box {
+                            Box {
+                              orientation: vertical;
+                              spacing: 4;
+                              visible: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.is-floss as <bool>;
+                              hexpand: true;
 
-      Box {
-        Box {
-          orientation: vertical;
-          spacing: 4;
-          visible: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.is-floss as <bool>;
-          hexpand: true;
+                              Box {
+                                halign: center;
+                                spacing: 6;
+                                margin-bottom: 4;
 
-          Box {
-            halign: center;
-            spacing: 6;
-            margin-bottom: 4;
+                                styles [
+                                  "lozenge",
+                                  "grey",
+                                ]
 
-            styles [
-              "lozenge",
-              "success",
-            ]
+                                Image {
+                                  icon-name: "community-symbolic";
+                                }
 
-            Image {
-              icon-name: "community-symbolic";
-            }
+                                Image {
+                                  icon-name: "license-symbolic";
+                                }
+                              }
 
-            Image {
-              icon-name: "license-symbolic";
-            }
-          }
+                              Label {
+                                justify: center;
+                                label: _("Free");
+                                wrap: true;
+                                xalign: 0.5;
 
-          Label {
-            justify: center;
-            label: _("Free");
+                                styles [
+                                  "context-tile-text",
+                                ]
+                              }
+                            }
 
-            wrap: true;
-            xalign: 0.5;
+                            Box {
+                              orientation: vertical;
+                              spacing: 4;
+                              visible: bind $invert_boolean(template.ui-entry as <$BzResult>.object as <$BzEntry>.is-floss) as <bool>;
+                              hexpand: true;
 
-            styles [
-              "context-tile-text",
-            ]
-          }
-        }
+                              Box {
+                                styles [
+                                  "lozenge",
+                                  "warning",
+                                ]
 
-        Box {
-          orientation: vertical;
-          spacing: 4;
-          visible: bind $invert_boolean(template.ui-entry as <$BzResult>.object as <$BzEntry>.is-floss) as <bool>;
-          hexpand: true;
-          Box {
-            styles [
-              "lozenge",
-              "warning",
-            ]
-            spacing: 6;
-            orientation: horizontal;
-            halign: center;
+                                spacing: 6;
+                                orientation: horizontal;
+                                halign: center;
 
-            Image {
-              icon-name: "license-symbolic";
-            }
+                                Image {
+                                  icon-name: "license-symbolic";
+                                }
 
-            Image {
-              icon-name: "proprietary-code-symbolic";
-            }
-          }
+                                Image {
+                                  icon-name: "proprietary-code-symbolic";
+                                }
+                              }
 
-          Label {
-            justify: center;
-            label: _("Proprietary");
-            wrap: true;
-            xalign: 0.5;
+                              Label {
+                                justify: center;
+                                label: _("Proprietary");
+                                wrap: true;
+                                xalign: 0.5;
 
-            styles [
-              "context-tile-text",
-            ]
-          }
-        }
-      }
-    }
-  }
+                                styles [
+                                  "context-tile-text",
+                                ]
+                              }
+                            }
+                          }
+                        }
 
-Box {
-  homogeneous: true;
+                        Button formfactor_support_tile {
+                          styles [
+                            "context-tile",
+                            "flat",
+                          ]
 
-  Button download_stats_tile {
-    styles [
-      "context-tile",
-      "flat",
-    ]
+                          can-target: false;
 
-    sensitive: bind $invert_boolean($is_null(template.debounced-ui-entry) as <bool>) as <bool>;
-    clicked => $dl_stats_cb(template);
+                          Box {
+                            Box {
+                              orientation: vertical;
+                              spacing: 4;
+                              hexpand: true;
+                              visible: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.is-mobile-friendly as <bool>;
 
-    Box {
-      orientation: vertical;
-      spacing: 4;
+                              Box {
+                                spacing: 6;
+                                halign: center;
+                                margin-bottom: 4;
 
-      Label monthly_downloads_value {
-        justify: center;
-        label: bind $format_recent_downloads(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <string>;
-        lines: 3;
-        ellipsize: end;
-        halign: center;
-        wrap: true;
-        xalign: 0.5;
-        use-markup: true;
-        margin-bottom: 4;
+                                styles [
+                                  "lozenge",
+                                  "grey",
+                                  "wide-image",
+                                ]
 
-        styles [
-          "lozenge",
-          "grey",
-        ]
-      }
+                                Image {
+                                  icon-name: "device-support-adaptive-symbolic";
+                                  pixel-size: 56;
+                                }
+                              }
 
-      Label {
-        justify: center;
-        label: _("Downloads/mo");
-        wrap: true;
-        xalign: 0.5;
+                              Label {
+                                styles [
+                                  "context-tile-text",
+                                ]
 
-        styles [
-          "context-tile-text",
-        ]
-      }
-    }
-  }
+                                justify: center;
+                                label: _("Adaptive");
+                                wrap: true;
+                                xalign: 0.5;
+                              }
+                            }
 
-  Button {
-    styles [
-      "context-tile",
-      "flat",
-    ]
+                            Box {
+                              orientation: vertical;
+                              spacing: 4;
+                              hexpand: true;
+                              visible: bind $invert_boolean(template.ui-entry as <$BzResult>.object as <$BzEntry>.is-mobile-friendly) as <bool>;
 
-    can-target: bind template.entry-group as <$BzEntryGroup>.is_flathub as <bool>;
-    clicked => $open_flathub_url_cb(template);
+                              Image device_support_desktop_wide {
+                                visible: true;
+                                icon-name: "device-support-desktop-symbolic";
+                                margin-bottom: 4;
+                                halign: center;
 
-    Box {
-      orientation: vertical;
-      spacing: 4;
+                                styles [
+                                  "lozenge",
+                                  "grey",
+                                  "wide-image",
+                                ]
+                              }
 
-      Box {
-        spacing: 6;
-        halign: center;
-        margin-bottom: 4;
-        visible: bind template.entry-group as <$BzEntryGroup>.is_flathub as <bool>;
+                              Image device_support_desktop_small {
+                                visible: false;
+                                icon-name: "device-support-desktop-symbolic";
+                                margin-bottom: 4;
+                                halign: center;
 
-        styles [
-          "lozenge",
-          "flathub",
-        ]
+                                styles [
+                                  "lozenge",
+                                  "error",
+                                  "wide-image",
+                                ]
+                              }
 
-        Image {
-          icon-name: "network-server-symbolic";
-        }
+                              Label {
+                                styles [
+                                  "context-tile-text",
+                                ]
 
-        Image {
-          icon-name: "flathub-symbolic";
-        }
-      }
+                                justify: center;
+                                label: _("Desktop Only");
+                                wrap: true;
+                                xalign: 0.5;
+                              }
+                            }
+                          }
+                        }
+                      }
 
-      Image {
-        halign: center;
-        margin-bottom: 4;
-        icon-name: "network-server-symbolic";
+                      Box {
+                        homogeneous: true;
 
-        styles [
-          "lozenge",
-          "grey",
-        ]
+                        Button age_rating_tile {
+                          styles [
+                            "context-tile",
+                            "flat",
+                          ]
 
-        visible: bind $invert_boolean(template.entry-group as <$BzEntryGroup>.is_flathub as <bool>) as <bool>;
-      }
-      Label {
-        justify: center;
-        label: bind template.entry-group as <$BzEntryGroup>.remote-repos-string;
-        lines: 3;
-        ellipsize: end;
-        wrap: true;
-        xalign: 0.5;
+                          can-target: false;
 
-        styles [
-          "context-tile-text",
-        ]
-      }
-    }
-  }
-}}
+                          Box {
+                            orientation: vertical;
+                            spacing: 4;
+                            hexpand: true;
+
+                            Image {
+                              halign: center;
+                              margin-bottom: 4;
+                              icon-name: "parent-symbolic";
+                              visible: bind $is_between(0, 0, template.ui-entry as <$BzResult>.object as <$BzEntry>.age-rating as <int>) as <bool>;
+
+                              styles [
+                                "lozenge",
+                                "grey",
+                                "wide-image",
+                              ]
+                            }
+
+                            Label {
+                              visible: bind $is_between(1, 17, template.ui-entry as <$BzResult>.object as <$BzEntry>.age-rating as <int>) as <bool>;
+                              halign: center;
+                              margin-bottom: 4;
+                              label: bind $format_age_rating(template.ui-entry as <$BzResult>.object as <$BzEntry>.age-rating as <int>) as <string>;
+
+                              styles [
+                                "lozenge",
+                                "grey",
+                                "wide-image",
+                              ]
+                            }
+
+                            Label {
+                              visible: bind $is_between(18, 100, template.ui-entry as <$BzResult>.object as <$BzEntry>.age-rating as <int>) as <bool>;
+                              halign: center;
+                              margin-bottom: 4;
+                              label: bind $format_age_rating(template.ui-entry as <$BzResult>.object as <$BzEntry>.age-rating as <int>) as <string>;
+
+                              styles [
+                                "lozenge",
+                                "error",
+                                "wide-image",
+                              ]
+                            }
+
+                            Label {
+                              styles [
+                                "context-tile-text",
+                              ]
+
+                              visible: bind $is_between(0, 0, template.ui-entry as <$BzResult>.object as <$BzEntry>.age-rating as <int>) as <bool>;
+                              justify: center;
+                              label: _("All Ages");
+                              wrap: true;
+                              xalign: 0.5;
+                            }
+
+                            Label {
+                              styles [
+                                "context-tile-text",
+                              ]
+
+                              visible: bind $is_between(1, 100, template.ui-entry as <$BzResult>.object as <$BzEntry>.age-rating as <int>) as <bool>;
+                              justify: center;
+                              label: _("Age Rating");
+                              wrap: true;
+                              xalign: 0.5;
+                            }
+                          }
+                        }
+
+                        Button download_stats_tile {
+                          styles [
+                            "context-tile",
+                            "flat",
+                          ]
+
+                          can-target: bind $invert_boolean($is_null(template.debounced-ui-entry) as <bool>) as <bool>;
+                          clicked => $dl_stats_cb(template);
+
+                          Box {
+                            orientation: vertical;
+                            spacing: 4;
+
+                            Label monthly_downloads_value {
+                              justify: center;
+                              label: bind $format_recent_downloads(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <string>;
+                              halign: center;
+                              use-markup: true;
+                              margin-bottom: 4;
+
+                              styles [
+                                "lozenge",
+                                "grey",
+                              ]
+                            }
+
+                            Label {
+                              justify: center;
+                              label: _("Downloads/mo");
+                              wrap: true;
+                              xalign: 0.5;
+
+                              styles [
+                                "context-tile-text",
+                              ]
+                            }
+                          }
+                        }
+
+                        Button {
+                          styles [
+                            "context-tile",
+                            "flat",
+                          ]
+
+                          can-target: bind template.entry-group as <$BzEntryGroup>.is_flathub as <bool>;
+                          clicked => $open_flathub_url_cb(template);
+
+                          Box {
+                            orientation: vertical;
+                            spacing: 4;
+
+                            Box {
+                              spacing: 6;
+                              halign: center;
+                              margin-bottom: 4;
+                              visible: bind template.entry-group as <$BzEntryGroup>.is_flathub as <bool>;
+
+                              styles [
+                                "lozenge",
+                                "flathub",
+                              ]
+
+                              Image {
+                                icon-name: "network-server-symbolic";
+                              }
+
+                              Image {
+                                icon-name: "flathub-symbolic";
+                              }
+                            }
+
+                            Image {
+                              halign: center;
+                              margin-bottom: 4;
+                              icon-name: "network-server-symbolic";
+
+                              styles [
+                                "lozenge",
+                                "grey",
+                              ]
+
+                              visible: bind $invert_boolean(template.entry-group as <$BzEntryGroup>.is_flathub as <bool>) as <bool>;
+                            }
+
+                            Label {
+                              justify: center;
+                              label: bind template.entry-group as <$BzEntryGroup>.remote-repos-string;
+                              lines: 3;
+                              ellipsize: end;
+                              wrap: true;
+                              xalign: 0.5;
+
+                              styles [
+                                "context-tile-text",
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
                   };
                 }
 
@@ -591,21 +760,20 @@ Box {
                       margin-start: 5;
                     }
 
-                  $BzShareList {
+                    $BzShareList {
                       urls: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.share-urls;
-                  }
+                    }
 
-
-                  $BzReleasesList releases_list {
-                    version-history: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.version-history;
-                  }
-                };
-              }
+                    $BzReleasesList releases_list {
+                      version-history: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.version-history;
+                    }
+                  };
+                }
+              };
             };
           };
         };
       };
-    };
     }
   };
 }

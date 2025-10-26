@@ -57,10 +57,10 @@ struct _BzFullView
   DexFuture *loading_forge_stars;
 
   /* Template widgets */
-  AdwViewStack      *stack;
-  GtkWidget         *shadow_overlay;
-  GtkWidget         *forge_stars;
-  GtkLabel          *forge_stars_label;
+  AdwViewStack *stack;
+  GtkWidget    *shadow_overlay;
+  GtkWidget    *forge_stars;
+  GtkLabel     *forge_stars_label;
 };
 
 G_DEFINE_FINAL_TYPE (BzFullView, bz_full_view, ADW_TYPE_BIN)
@@ -204,6 +204,15 @@ logical_and (gpointer object,
   return value1 && value2;
 }
 
+static gboolean
+is_between (gpointer object,
+            gint     min_value,
+            gint     max_value,
+            gint     value)
+{
+  return value >= min_value && value <= max_value;
+}
+
 static char *
 format_with_small_suffix (char *number, const char *suffix)
 {
@@ -227,7 +236,7 @@ format_recent_downloads (gpointer object,
                          int      value)
 {
   g_autofree char *number_str = NULL;
-  const char      *suffix = NULL;
+  const char      *suffix     = NULL;
 
   if (value <= 0)
     return g_strdup (_ ("---"));
@@ -235,12 +244,12 @@ format_recent_downloads (gpointer object,
   if (value >= 1000000)
     {
       number_str = g_strdup_printf ("%.2f", value / 1000000.0);
-      suffix = "M";
+      suffix     = "M";
     }
   else if (value >= 1000)
     {
       number_str = g_strdup_printf ("%.2f", value / 1000.0);
-      suffix = "K";
+      suffix     = "K";
     }
   else
     {
@@ -262,6 +271,15 @@ format_size (gpointer object, guint64 value)
       return format_with_small_suffix (size_str, space + 2);
     }
   return g_strdup (size_str);
+}
+
+static char *
+format_age_rating (gpointer object, gint value)
+{
+  if (value == 0)
+    return g_strdup (_ ("All"));
+
+  return g_strdup_printf ("%d+", value);
 }
 
 static char *
@@ -544,9 +562,6 @@ addon_transact_cb (BzFullView     *self,
     g_signal_emit (self, signals[SIGNAL_INSTALL_ADDON], 0, entry);
 }
 
-
-
-
 static void
 bz_full_view_class_init (BzFullViewClass *klass)
 {
@@ -670,9 +685,11 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
+  gtk_widget_class_bind_template_callback (widget_class, is_between);
   gtk_widget_class_bind_template_callback (widget_class, logical_and);
   gtk_widget_class_bind_template_callback (widget_class, format_recent_downloads);
   gtk_widget_class_bind_template_callback (widget_class, format_size);
+  gtk_widget_class_bind_template_callback (widget_class, format_age_rating);
   gtk_widget_class_bind_template_callback (widget_class, format_as_link);
   gtk_widget_class_bind_template_callback (widget_class, format_license);
   gtk_widget_class_bind_template_callback (widget_class, has_link);

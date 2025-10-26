@@ -159,13 +159,17 @@ window.narrow .app-developer {
 
 .context-tile {
 	border-radius: 10px;
-	padding: 6px;
-	outline-offset: 5px;
+	padding: 4px;
 }
 
 .context-tile-text {
 	font-size: 10pt;
 	font-weight: 500;
+}
+
+.wide-image image {
+	margin-top: -28px;
+	margin-bottom: -28px;
 }
 
 .screenshot-carousel.frame {
