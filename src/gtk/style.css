@@ -107,7 +107,7 @@
 	  font-size: 18px;
 	  font-weight: bold;
 	  border-radius: 99999px;
-	  padding: 9px 11px;
+	  padding: 5px 11px;
 	  min-width: 18px;
 	  min-height: 22px;
 	  color: var(--accent-color);
@@ -157,46 +157,19 @@ window.narrow .app-developer {
 	font-size: small;
 }
 
-/* Context tile from full-view, modified from GNOME Software */
 .context-tile {
-	border: 1px solid @card_shade_color;
-	border-radius: 0;
-	padding: 24px 12px 21px 12px;
-	outline-offset: 5px;
-	border-bottom: none;
-	border-right: none;
+	border-radius: 10px;
+	padding: 4px;
 }
 
-.context-tile:focus:focus-visible {
-	outline-offset: -1px;
+.context-tile-text {
+	font-size: 10pt;
+	font-weight: 500;
 }
 
-.app-context-bar box:first-child .context-tile:first-child {
-	border-top-left-radius: 12px;
-}
-
-.app-context-bar.horizontal box:last-child .context-tile:last-child,
-.app-context-bar.vertical box:first-child .context-tile:last-child {
-	border-top-right-radius: 12px;
-}
-
-.app-context-bar.horizontal box:first-child .context-tile:first-child,
-.app-context-bar.vertical box:last-child .context-tile:first-child {
-	border-bottom-left-radius: 12px;
-}
-
-.app-context-bar box:last-child .context-tile:last-child {
-	border-bottom-right-radius: 12px;
-}
-
-.app-context-bar.horizontal box:first-child .context-tile:first-child,
-.app-context-bar.vertical .context-tile:first-child {
-	border-left: none;
-}
-
-.app-context-bar.horizontal .context-tile,
-.app-context-bar.vertical box:first-child .context-tile {
-	border-top: none;
+.wide-image image {
+	margin-top: -28px;
+	margin-bottom: -28px;
 }
 
 .screenshot-carousel.frame {
