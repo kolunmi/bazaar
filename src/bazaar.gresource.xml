@@ -74,6 +74,7 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/people-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/power-profile-performance-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/puzzle-piece-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/proprietary-code-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/regex-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/right-large-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/sad-computer-symbolic.svg</file>

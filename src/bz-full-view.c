@@ -205,13 +205,49 @@ logical_and (gpointer object,
 }
 
 static char *
+format_with_small_suffix (char *number, const char *suffix)
+{
+  char *dot = g_strrstr (number, ".");
+
+  if (dot != NULL)
+    {
+      char *end = dot + strlen (dot) - 1;
+      while (end > dot && *end == '0')
+        *end-- = '\0';
+      if (end == dot)
+        *dot = '\0';
+    }
+
+  return g_strdup_printf ("%s\xC2\xA0<span font_size='x-small'>%s</span>",
+                          number, suffix);
+}
+
+static char *
 format_recent_downloads (gpointer object,
                          int      value)
 {
-  if (value > 0)
-    return g_strdup_printf (_ ("%'d Monthly Downloads"), value);
+  g_autofree char *number_str = NULL;
+  const char      *suffix = NULL;
+
+  if (value <= 0)
+    return g_strdup (_ ("---"));
+
+  if (value >= 1000000)
+    {
+      number_str = g_strdup_printf ("%.2f", value / 1000000.0);
+      suffix = "M";
+    }
+  else if (value >= 1000)
+    {
+      number_str = g_strdup_printf ("%.2f", value / 1000.0);
+      suffix = "K";
+    }
   else
-    return g_strdup (_ ("--- Downloads"));
+    {
+      return g_strdup_printf (_ ("%'d"), value);
+    }
+
+  return format_with_small_suffix (number_str, suffix);
 }
 
 static char *
@@ -223,10 +259,8 @@ format_size (gpointer object, guint64 value)
   if (space != NULL)
     {
       *space = '\0';
-      return g_strdup_printf ("%s <span font_size='x-small'>%s</span>",
-                              size_str, space + 2);
+      return format_with_small_suffix (size_str, space + 2);
     }
-
   return g_strdup (size_str);
 }
 
