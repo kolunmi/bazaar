@@ -771,15 +771,16 @@ debounce_timeout (BzFullView *self)
 static DexFuture *
 retrieve_star_string_fiber (GWeakRef *wr)
 {
-  g_autoptr (BzFullView) self    = NULL;
-  g_autoptr (GError) local_error = NULL;
-  g_autoptr (BzEntry) entry      = NULL;
-  const char      *forge_link    = NULL;
-  g_autofree char *star_url      = NULL;
-  g_autoptr (JsonNode) node      = NULL;
-  JsonObject      *object        = NULL;
-  gint64           star_count    = 0;
-  g_autofree char *fmt           = NULL;
+  g_autoptr (BzFullView) self         = NULL;
+  g_autoptr (GError) local_error      = NULL;
+  g_autoptr (BzEntry) entry           = NULL;
+  const char      *forge_link         = NULL;
+  g_autofree char *forge_link_trimmed = NULL;
+  g_autofree char *star_url           = NULL;
+  g_autoptr (JsonNode) node           = NULL;
+  JsonObject      *object             = NULL;
+  gint64           star_count         = 0;
+  g_autofree char *fmt                = NULL;
 
   bz_weak_get_or_return_reject (self, wr);
 
@@ -790,6 +791,13 @@ retrieve_star_string_fiber (GWeakRef *wr)
   forge_link = bz_entry_get_forge_url (entry);
   if (forge_link == NULL)
     goto done;
+
+  // Remove trailing `/` from forge URLs if it exists
+  if (g_str_has_suffix (forge_link, "/"))
+    {
+      forge_link_trimmed = g_strndup (forge_link, strlen (forge_link) - 1);
+      forge_link         = forge_link_trimmed;
+    }
 
   if (g_regex_match_simple (
           "https://github.com/.*/.*",
