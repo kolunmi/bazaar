@@ -325,8 +325,8 @@ items_changed (BzSearchEngine *self,
     }
 
       ADD_INDEXED_STRING (id, -1.0);
-      ADD_INDEXED_STRING (title, 1.0);
-      ADD_INDEXED_STRING (developer, 1.0);
+      ADD_INDEXED_STRING (title, 2.0);
+      ADD_INDEXED_STRING (developer, 2.0);
       ADD_INDEXED_STRING (description, -1.0);
 
 #undef ADD_INDEXED_STRING
@@ -389,10 +389,13 @@ query_task_fiber (QueryTaskData *data)
 
           token_istring = &g_array_index (group_data->istrings, IndexedStringData, j);
           if (strstr (token_istring->ptr, query_istring->ptr) != NULL)
-            token_score = (double) (query_istring->utf8_len + token_istring->utf8_len) / 2.0;
+            {
+              token_score = (double) (query_istring->utf8_len + token_istring->utf8_len) / 2.0;
+              if (token_istring->weight > 0.0)
+                token_score *= token_istring->weight;
+            }
           else if (token_istring->weight > 0.0)
-            token_score = test_strings (query_istring, token_istring) *
-                          token_istring->weight;
+            token_score = test_strings (query_istring, token_istring);
 
           score += token_score;
         }
