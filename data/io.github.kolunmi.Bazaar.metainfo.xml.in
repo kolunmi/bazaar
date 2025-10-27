@@ -64,6 +64,18 @@
   </screenshots>
 
   <releases>
+    <release version="0.5.7" date="2025-10-27">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.5.7</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>Rework full view layout</li>
+          <li>Improve progress bar theme selection</li>
+          <li>Reduce quantity and improve quality of search results</li>
+          <li>Allow the application window to fit on mobile screen sizes</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.5.6" date="2025-10-15">
       <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.5.6</url>
       <description translate="no">
