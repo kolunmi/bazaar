@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-26 11:01+0700\n"
-"PO-Revision-Date: 2025-10-26 11:05+0700\n"
+"POT-Creation-Date: 2025-10-27 17:09+0700\n"
+"PO-Revision-Date: 2025-10-27 17:11+0700\n"
 "Last-Translator: Jill Fiore <contact@lumaeris.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -114,23 +114,23 @@ msgstr ""
 "возможным. Bazaar внедряет вкладку \"Избранное\", которая настраивается "
 "дистрибьюторами для обеспечения более ориентированного опыта."
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:22 src/bz-application.c:505
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29 src/bz-application.c:505
 msgid "Adam Masciola"
 msgstr "Адам Масциола"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:47
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:54
 msgid "The home view displaying Flathub apps"
 msgstr "Главный экран, отображающий приложения Flathub"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:51
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:58
 msgid "Nucleus app page"
 msgstr "Страница приложения Nucleus"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:55
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:62
 msgid "Searching for Blender"
 msgstr "Поиск Blender"
 
-#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:267
+#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:271
 #: src/bz-installed-page.blp:132
 msgid "Manage Add-ons"
 msgstr "Управление дополнениями"
@@ -140,7 +140,7 @@ msgstr "Управление дополнениями"
 msgid "Remove"
 msgstr "Удалить"
 
-#: src/bz-addons-dialog.c:95 src/bz-full-view.blp:240
+#: src/bz-addons-dialog.c:95 src/bz-full-view.blp:244
 #: src/bz-transaction-view.blp:186 src/bz-window.c:1103
 msgid "Install"
 msgstr "Установить"
@@ -189,7 +189,7 @@ msgstr "Исключая медиафайлы"
 msgid "--- MB"
 msgstr "--- МБ"
 
-#: src/bz-app-size-dialog.blp:53 src/bz-full-view.blp:385
+#: src/bz-app-size-dialog.blp:53
 msgid "Download Size"
 msgstr "Размер скачивания"
 
@@ -504,52 +504,52 @@ msgstr "Популярное"
 msgid "More Popular"
 msgstr "Больше популярных"
 
-#: src/bz-flatpak-entry.c:507
+#: src/bz-flatpak-entry.c:558
 msgctxt "Project URL Type"
 msgid "Flathub Page"
 msgstr "Страница Flathub"
 
-#: src/bz-flatpak-entry.c:528
+#: src/bz-flatpak-entry.c:579
 msgctxt "Project URL Type"
 msgid "Project Website"
 msgstr "Веб-сайт проекта"
 
-#: src/bz-flatpak-entry.c:532
+#: src/bz-flatpak-entry.c:583
 msgctxt "Project URL Type"
 msgid "Issue Tracker"
 msgstr "Отслеживание ошибок"
 
-#: src/bz-flatpak-entry.c:536
+#: src/bz-flatpak-entry.c:587
 msgctxt "Project URL Type"
 msgid "FAQ"
 msgstr "Часто задаваемые вопросы"
 
-#: src/bz-flatpak-entry.c:540
+#: src/bz-flatpak-entry.c:591
 msgctxt "Project URL Type"
 msgid "Help"
 msgstr "Помощь"
 
-#: src/bz-flatpak-entry.c:544
+#: src/bz-flatpak-entry.c:595
 msgctxt "Project URL Type"
 msgid "Donate"
 msgstr "Пожертвовать"
 
-#: src/bz-flatpak-entry.c:550
+#: src/bz-flatpak-entry.c:601
 msgctxt "Project URL Type"
 msgid "Translate"
 msgstr "Перевод"
 
-#: src/bz-flatpak-entry.c:554
+#: src/bz-flatpak-entry.c:605
 msgctxt "Project URL Type"
 msgid "Contact"
 msgstr "Связаться"
 
-#: src/bz-flatpak-entry.c:558
+#: src/bz-flatpak-entry.c:609
 msgctxt "Project URL Type"
 msgid "Source Code"
 msgstr "Исходный код"
 
-#: src/bz-flatpak-entry.c:564
+#: src/bz-flatpak-entry.c:615
 msgctxt "Project URL Type"
 msgid "Contribute"
 msgstr "Сделать вклад"
@@ -560,82 +560,94 @@ msgstr "Нет результатов"
 
 #: src/bz-full-view.blp:15
 msgid "Try a different search query"
-msgstr "Попробуйте выполнить другой запрос"
+msgstr "Попробуйте выполнить другой поисковый запрос"
 
 #: src/bz-full-view.blp:21 src/bz-window.blp:171
 msgid "Content"
 msgstr "Контент"
 
-#: src/bz-full-view.blp:147
+#: src/bz-full-view.blp:151
 msgid "This flatpak is verified by the original developers of the software."
 msgstr "Данный flatpak был верифицирован подлинными разработчиками программы."
 
-#: src/bz-full-view.blp:174
+#: src/bz-full-view.blp:178
 msgid "Support"
 msgstr "Поддержать"
 
-#: src/bz-full-view.blp:194
+#: src/bz-full-view.blp:198
 msgid "Repository Star Count"
 msgstr "Количество звёзд репозитория"
 
-#: src/bz-full-view.blp:224
+#: src/bz-full-view.blp:228
 msgid "Open"
 msgstr "Открыть"
 
-#: src/bz-full-view.blp:237
+#: src/bz-full-view.blp:241
 msgid "Download & Install Application"
 msgstr "Скачать и установить приложение"
 
-#: src/bz-full-view.blp:252
+#: src/bz-full-view.blp:256
 msgid "Uninstall Application"
 msgstr "Удалить приложение"
 
-#: src/bz-full-view.blp:280
+#: src/bz-full-view.blp:284
 msgid "Install Other Version"
 msgstr "Установить другую версию"
 
-#: src/bz-full-view.blp:396
-msgid "Excludes shared components"
-msgstr "Исключая общие компоненты"
+#: src/bz-full-view.blp:343
+msgid "Download"
+msgstr "Загрузка"
 
-#: src/bz-full-view.blp:453
-msgid "Free Software"
-msgstr "Свободное ПО"
+#: src/bz-full-view.blp:391
+msgid "Free"
+msgstr "Свободное"
 
-#: src/bz-full-view.blp:495
+#: src/bz-full-view.blp:428
 msgid "Proprietary"
-msgstr "Проприетарное ПО"
+msgstr "Проприетарное"
 
-#: src/bz-full-view.blp:506
-msgid "Source code may not be available"
-msgstr "Исходный код может быть недоступен"
+#: src/bz-full-view.blp:478
+msgid "Adaptive"
+msgstr "Адаптивное"
 
-#: src/bz-full-view.blp:561
-msgid "Click for details"
-msgstr "Нажмите для подробностей"
+#: src/bz-full-view.blp:522
+msgid "Desktop Only"
+msgstr "Только для ПК"
 
-#: src/bz-full-view.blp:627
-msgid "Repositories"
-msgstr "Репозитории"
+#: src/bz-full-view.blp:593
+msgid "All Ages"
+msgstr "Для всех"
 
-#: src/bz-full-view.c:212
+#: src/bz-full-view.blp:605
+msgid "Age Rating"
+msgstr "Возраст"
+
+#: src/bz-full-view.blp:640
+msgid "Downloads/mo"
+msgstr "Загрузок/м"
+
+#: src/bz-full-view.c:242
+msgid "---"
+msgstr "---"
+
+#: src/bz-full-view.c:256
 #, c-format
-msgid "%'d Monthly Downloads"
-msgstr "%'d загрузок в месяц"
+msgid "%'d"
+msgstr "%'d"
 
-#: src/bz-full-view.c:214
-msgid "--- Downloads"
-msgstr "--- Загрузки"
+#: src/bz-full-view.c:280
+msgid "All"
+msgstr "Все"
 
-#: src/bz-full-view.c:240
+#: src/bz-full-view.c:292
 msgid "Unknown"
 msgstr "Неизвестно"
 
-#: src/bz-full-view.c:258
+#: src/bz-full-view.c:310
 msgid "No URL"
 msgstr "Нет URL"
 
-#: src/bz-full-view.c:276
+#: src/bz-full-view.c:328
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -643,7 +655,7 @@ msgstr ""
 "Это приложение имеет лицензию FLOSS, что значит исходный код может быть "
 "проверен на безопасность."
 
-#: src/bz-full-view.c:277
+#: src/bz-full-view.c:329
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
@@ -1095,6 +1107,25 @@ msgstr "Открыть сочетания клавиш"
 msgctxt "shortcut window"
 msgid "Quit"
 msgstr "Закрыть"
+
+#~ msgid "Excludes shared components"
+#~ msgstr "Исключая общие компоненты"
+
+#~ msgid "Free Software"
+#~ msgstr "Свободное ПО"
+
+#~ msgid "Source code may not be available"
+#~ msgstr "Исходный код может быть недоступен"
+
+#~ msgid "Click for details"
+#~ msgstr "Нажмите для подробностей"
+
+#~ msgid "Repositories"
+#~ msgstr "Репозитории"
+
+#, c-format
+#~ msgid "%'d Monthly Downloads"
+#~ msgstr "%'d загрузок в месяц"
 
 #~ msgid "Manage Addons"
 #~ msgstr "Управление дополнениями"
