@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-27 07:00+0100\n"
-"PO-Revision-Date: 2025-10-27 07:23+0100\n"
+"POT-Creation-Date: 2025-10-27 15:30+0100\n"
+"PO-Revision-Date: 2025-10-27 15:46+0100\n"
 "Last-Translator: Marcel Mrówka <micro.mail88@gmail.com>\n"
 "Language-Team: Polish\n"
 "Language: pl\n"
@@ -176,7 +176,7 @@ msgstr "oryginalnej wersji Super Mario Bros"
 
 #: src/bz-app-size-dialog.c:58
 msgid "On the NES"
-msgstr "na konsolę NES"
+msgstr "na konsoli NES"
 
 #: src/bz-app-size-dialog.c:59
 msgid "Of the size of Wikipedia"
@@ -184,7 +184,7 @@ msgstr "rozmiaru Wikipedii"
 
 #: src/bz-app-size-dialog.c:59
 msgid "Without any media"
-msgstr "bez żadnych mediów"
+msgstr "bez żadnych multimediów"
 
 #: src/bz-app-size-dialog.blp:43
 msgid "--- MB"
@@ -622,7 +622,7 @@ msgstr "Tylko na komputery"
 
 #: src/bz-full-view.blp:593
 msgid "All Ages"
-msgstr "Od 0+ lat"
+msgstr "Od 0 lat"
 
 #: src/bz-full-view.blp:605
 msgid "Age Rating"
@@ -630,7 +630,7 @@ msgstr "Próg wiekowy"
 
 #: src/bz-full-view.blp:640
 msgid "Downloads/mo"
-msgstr "Pobrań/mies."
+msgstr "Pobrań/mc"
 
 #: src/bz-full-view.c:242
 msgid "---"
