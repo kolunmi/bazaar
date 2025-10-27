@@ -76,6 +76,7 @@ BZ_DEFINE_DATA (
       char        *ptr;
       glong        utf8_len;
       IndexedChar *chars;
+      double       weight;
     },
     BZ_RELEASE_DATA (ptr, g_free);
     BZ_RELEASE_DATA (chars, g_free))
@@ -232,7 +233,6 @@ DexFuture *
 bz_search_engine_query (BzSearchEngine    *self,
                         const char *const *terms)
 {
-
   g_return_val_if_fail (BZ_IS_SEARCH_ENGINE (self), NULL);
   g_return_val_if_fail (terms != NULL && *terms != NULL, NULL);
 
@@ -314,19 +314,20 @@ items_changed (BzSearchEngine *self,
       data->istrings = g_array_new (FALSE, TRUE, sizeof (IndexedStringData));
       g_array_set_clear_func (data->istrings, indexed_string_data_deinit);
 
-#define ADD_INDEXED_STRING(_s)                     \
+#define ADD_INDEXED_STRING(_s, _weight)            \
   if ((_s) != NULL)                                \
     {                                              \
       IndexedStringData append = { 0 };            \
                                                    \
       index_string ((_s), &append);                \
+      append.weight = (_weight);                   \
       g_array_append_val (data->istrings, append); \
     }
 
-      ADD_INDEXED_STRING (id);
-      ADD_INDEXED_STRING (title);
-      ADD_INDEXED_STRING (developer);
-      ADD_INDEXED_STRING (description);
+      ADD_INDEXED_STRING (id, -1.0);
+      ADD_INDEXED_STRING (title, 1.0);
+      ADD_INDEXED_STRING (developer, 1.0);
+      ADD_INDEXED_STRING (description, -1.0);
 
 #undef ADD_INDEXED_STRING
 
@@ -346,6 +347,7 @@ items_changed (BzSearchEngine *self,
               istring = &g_array_index (data->istrings, IndexedStringData, old_len + j);
 
               index_string (token, istring);
+              istring->weight = -1.0;
             }
         }
 
@@ -386,13 +388,11 @@ query_task_fiber (QueryTaskData *data)
           double             token_score   = 0.0;
 
           token_istring = &g_array_index (group_data->istrings, IndexedStringData, j);
-          token_score   = test_strings (query_istring, token_istring);
-
-          /* earliest tokens are the most important, also normalize against
-             amount of group istrings */
-          token_score *= (double) group_data->istrings->len /
-                         (double) (j + 1) /
-                         (double) group_data->istrings->len;
+          if (strstr (token_istring->ptr, query_istring->ptr) != NULL)
+            token_score = (double) (query_istring->utf8_len + token_istring->utf8_len) / 2.0;
+          else if (token_istring->weight > 0.0)
+            token_score = test_strings (query_istring, token_istring) *
+                          token_istring->weight;
 
           score += token_score;
         }
@@ -512,7 +512,6 @@ test_strings (IndexedStringData *query,
   guint  last_best_idx = G_MAXUINT;
   guint  misses        = 0;
   double score         = 0.0;
-  // int    length_diff   = 0;
 
   for (guint i = 0; i < query->utf8_len; i++)
     {
@@ -561,10 +560,6 @@ test_strings (IndexedStringData *query,
 
   /* Penalize the query for including chars that didn't match at all */
   score /= (double) (misses + 1);
-
-  // length_diff = ABS ((int) against->utf8_len - (int) query->utf8_len);
-  // /* Penalize the query for being a different length */
-  // score /= (double) (length_diff + 1);
 
   return score;
 }
