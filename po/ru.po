@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-27 09:39+0700\n"
-"PO-Revision-Date: 2025-10-27 10:01+0700\n"
+"POT-Creation-Date: 2025-10-27 17:09+0700\n"
+"PO-Revision-Date: 2025-10-27 17:11+0700\n"
 "Last-Translator: Jill Fiore <contact@lumaeris.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -560,7 +560,7 @@ msgstr "Нет результатов"
 
 #: src/bz-full-view.blp:15
 msgid "Try a different search query"
-msgstr "Попробуйте выполнить другой запрос"
+msgstr "Попробуйте выполнить другой поисковый запрос"
 
 #: src/bz-full-view.blp:21 src/bz-window.blp:171
 msgid "Content"
@@ -612,15 +612,15 @@ msgstr "Адаптивное"
 
 #: src/bz-full-view.blp:522
 msgid "Desktop Only"
-msgstr "Для настольных ПК"
+msgstr "Только для ПК"
 
 #: src/bz-full-view.blp:593
 msgid "All Ages"
-msgstr "Для всех возрастов"
+msgstr "Для всех"
 
 #: src/bz-full-view.blp:605
 msgid "Age Rating"
-msgstr "Возрастное ограничение"
+msgstr "Возраст"
 
 #: src/bz-full-view.blp:640
 msgid "Downloads/mo"
