@@ -542,26 +542,36 @@ load_fiber_work (LoadData *data)
 
       g_debug ("Allowing %d concurrent texture loads", concurrent_loads);
     }
-
-  /* Rate limiting to reduce competition for resources */
-  for (guint i = 0; i < concurrent_loads; i++)
-    {
-      if (ongoing_queued[i] < slot_queued)
-        {
-          slot_queued = ongoing_queued[i];
-          slot_index  = i;
-        }
-    }
-  ongoing_queued[slot_index]++;
   g_clear_pointer (&locker, g_mutex_locker_free);
 
-  BZ_BEGIN_GUARD_WITH_CONTEXT (&slot_guard,
-                               &mutexes[slot_index],
-                               &gates[slot_index]);
+#define RATE_LIMIT_BEGIN()                                  \
+  G_STMT_START                                              \
+  {                                                         \
+    locker = g_mutex_locker_new (&queueing_mutex);          \
+                                                            \
+    /* Rate limiting to reduce competition for resources */ \
+    for (guint i = 0; i < concurrent_loads; i++)            \
+      {                                                     \
+        if (ongoing_queued[i] < slot_queued)                \
+          {                                                 \
+            slot_queued = ongoing_queued[i];                \
+            slot_index  = i;                                \
+          }                                                 \
+      }                                                     \
+    ongoing_queued[slot_index]++;                           \
+    g_clear_pointer (&locker, g_mutex_locker_free);         \
+                                                            \
+    BZ_BEGIN_GUARD_WITH_CONTEXT (&slot_guard,               \
+                                 &mutexes[slot_index],      \
+                                 &gates[slot_index]);       \
+                                                            \
+    locker = g_mutex_locker_new (&queueing_mutex);          \
+    ongoing_queued[slot_index]--;                           \
+    g_clear_pointer (&locker, g_mutex_locker_free);         \
+  }                                                         \
+  G_STMT_END
 
-  locker = g_mutex_locker_new (&queueing_mutex);
-  ongoing_queued[slot_index]--;
-  g_clear_pointer (&locker, g_mutex_locker_free);
+#define RATE_LIMIT_END() bz_clear_guard (&slot_guard)
 
   is_http = g_str_has_prefix (source_uri, "http");
   now     = g_date_time_new_now_utc ();
@@ -605,6 +615,8 @@ load_fiber_work (LoadData *data)
         {
           if (age_span < CACHE_INVALID_AGE)
             {
+              RATE_LIMIT_BEGIN ();
+
               loader = gly_loader_new (cache_into);
               /* We assume we exported this file, so uhhh it is safe to
                  not use sandboxing, since it is faster :-) */
@@ -613,6 +625,8 @@ load_fiber_work (LoadData *data)
               image = gly_loader_load (loader, &local_error);
               if (image != NULL)
                 frame = gly_image_next_frame (image, &local_error);
+
+              RATE_LIMIT_END ();
             }
           else
             g_debug ("Metadata file %s for cached texture at %s indicates this resource is too old (GTimeSpan: %zu), "
@@ -736,6 +750,8 @@ load_fiber_work (LoadData *data)
             load_file = g_object_ref (source);
         }
 
+      RATE_LIMIT_BEGIN ();
+
       loader = gly_loader_new (load_file);
 #ifdef SANDBOXED_LIBFLATPAK
       gly_loader_set_sandbox_selector (loader, GLY_SANDBOX_SELECTOR_NOT_SANDBOXED);
@@ -751,6 +767,8 @@ load_fiber_work (LoadData *data)
       frame = gly_image_next_frame (image, &local_error);
       if (frame == NULL)
         return dex_future_new_for_error (g_steal_pointer (&local_error));
+
+      RATE_LIMIT_END ();
 
       if (async_tex_data_file != NULL)
         {
@@ -792,8 +810,6 @@ load_fiber_work (LoadData *data)
           g_clear_pointer (&local_error, g_error_free);
         }
     }
-
-  bz_clear_guard (&slot_guard);
 
   texture = gly_gtk_frame_get_texture (frame);
   if (texture == NULL)
