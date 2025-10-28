@@ -1,0 +1,171 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzLicenseDialog: Adw.Dialog {
+  content-width: 400;
+
+  child: Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {
+      show-title: false;
+    }
+
+    content: Adw.Clamp {
+      maximum-size: 600;
+
+      child: Box {
+        orientation: vertical;
+        margin-top: 6;
+        margin-bottom: 18;
+        margin-start: 18;
+        margin-end: 18;
+
+        Box {
+          visible: bind template.entry as <$BzEntry>.is-floss as <bool>;
+          orientation: vertical;
+          margin-bottom: 24;
+          spacing: 12;
+          valign: center;
+          vexpand: true;
+
+          Box {
+            halign: center;
+            spacing: 12;
+
+            Image {
+              icon-name: "heart-outline-thick-symbolic";
+              pixel-size: 24;
+              halign: center;
+
+              styles [
+                "circular-lozenge",
+                "success",
+                "large",
+              ]
+            }
+
+            Image {
+              icon-name: "community-symbolic";
+              pixel-size: 24;
+              halign: center;
+
+              styles [
+                "circular-lozenge",
+                "success",
+                "large",
+              ]
+            }
+
+            Image {
+              icon-name: "thumbs-up-outline-symbolic";
+              pixel-size: 24;
+              halign: center;
+
+              styles [
+                "circular-lozenge",
+                "success",
+                "large",
+              ]
+            }
+          }
+
+          Label {
+            styles [
+              "title-2",
+            ]
+
+            label: _("Community Built");
+          }
+        }
+
+        Box {
+          visible: bind $invert_boolean(template.entry as <$BzEntry>.is-floss as <bool>) as <bool>;
+          orientation: vertical;
+          margin-bottom: 24;
+          spacing: 12;
+          valign: center;
+          vexpand: true;
+
+          Box {
+            halign: center;
+            spacing: 12;
+
+            Image {
+              icon-name: "hand-openyay-symbolic";
+              pixel-size: 24;
+              halign: center;
+
+              styles [
+                "circular-lozenge",
+                "warning",
+                "large",
+              ]
+            }
+
+            Image {
+              icon-name: "proprietary-code-symbolic";
+              pixel-size: 24;
+              halign: center;
+
+              styles [
+                "circular-lozenge",
+                "warning",
+                "large",
+              ]
+            }
+
+            Image {
+              icon-name: "license-symbolic";
+              pixel-size: 24;
+              halign: center;
+
+              styles [
+                "circular-lozenge",
+                "warning",
+                "large",
+              ]
+            }
+          }
+
+          Label {
+            styles [
+              "title-2",
+            ]
+
+            label: _("Proprietary");
+          }
+        }
+
+        ListBox {
+          selection-mode: none;
+
+          styles [
+            "boxed-list",
+          ]
+
+          ListBoxRow {
+            vexpand:true;
+            Label {
+              label: bind $get_license_info(template.entry as <$BzEntry>) as <string>;
+              valign: start;
+              margin-top: 12;
+              margin-bottom: 12;
+              margin-start: 12;
+              margin-end: 12;
+              use-markup: true;
+              wrap: true;
+              wrap-mode: word_char;
+            }
+          }
+
+          Adw.ButtonRow show_all_button {
+            visible: bind template.entry as <$BzEntry>.is-floss as <bool>;
+            title: _("Get Involved");
+            end-icon-name: "external-link-symbolic";
+            activated => $contribute_cb(template);
+          }
+        }
+      };
+    };
+  };
+}

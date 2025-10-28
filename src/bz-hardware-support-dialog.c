@@ -267,36 +267,6 @@ entry_notify_cb (GObject    *obj,
 }
 
 static void
-bz_hardware_support_dialog_dispose (GObject *object)
-{
-  BzHardwareSupportDialog *self = BZ_HARDWARE_SUPPORT_DIALOG (object);
-
-  bz_hardware_support_dialog_set_entry (self, NULL);
-
-  gtk_widget_dispose_template (GTK_WIDGET (self), BZ_TYPE_HARDWARE_SUPPORT_DIALOG);
-
-  G_OBJECT_CLASS (bz_hardware_support_dialog_parent_class)->dispose (object);
-}
-
-static void
-bz_hardware_support_dialog_get_property (GObject    *object,
-                                         guint       prop_id,
-                                         GValue     *value,
-                                         GParamSpec *pspec)
-{
-  BzHardwareSupportDialog *self = BZ_HARDWARE_SUPPORT_DIALOG (object);
-
-  switch (prop_id)
-    {
-    case PROP_ENTRY:
-      g_value_set_object (value, bz_hardware_support_dialog_get_entry (self));
-      break;
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-    }
-}
-
-static void
 bz_hardware_support_dialog_set_property (GObject      *object,
                                          guint         prop_id,
                                          const GValue *value,
@@ -307,11 +277,39 @@ bz_hardware_support_dialog_set_property (GObject      *object,
   switch (prop_id)
     {
     case PROP_ENTRY:
-      bz_hardware_support_dialog_set_entry (self, g_value_get_object (value));
+      self->entry = g_value_dup_object (value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
+}
+
+static void
+bz_hardware_support_dialog_constructed (GObject *object)
+{
+  BzHardwareSupportDialog *self = BZ_HARDWARE_SUPPORT_DIALOG (object);
+
+  G_OBJECT_CLASS (bz_hardware_support_dialog_parent_class)->constructed (object);
+
+  if (self->entry != NULL)
+    {
+      self->entry_notify_handler = g_signal_connect (self->entry, "notify",
+                                                     G_CALLBACK (entry_notify_cb), self);
+      update_ui (self);
+    }
+}
+
+static void
+bz_hardware_support_dialog_dispose (GObject *object)
+{
+  BzHardwareSupportDialog *self = BZ_HARDWARE_SUPPORT_DIALOG (object);
+
+  g_clear_signal_handler (&self->entry_notify_handler, self->entry);
+  g_clear_object (&self->entry);
+
+  gtk_widget_dispose_template (GTK_WIDGET (self), BZ_TYPE_HARDWARE_SUPPORT_DIALOG);
+
+  G_OBJECT_CLASS (bz_hardware_support_dialog_parent_class)->dispose (object);
 }
 
 static void
@@ -321,7 +319,7 @@ bz_hardware_support_dialog_class_init (BzHardwareSupportDialogClass *klass)
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
   object_class->set_property = bz_hardware_support_dialog_set_property;
-  object_class->get_property = bz_hardware_support_dialog_get_property;
+  object_class->constructed  = bz_hardware_support_dialog_constructed;
   object_class->dispose      = bz_hardware_support_dialog_dispose;
 
   props[PROP_ENTRY] =
@@ -329,7 +327,7 @@ bz_hardware_support_dialog_class_init (BzHardwareSupportDialogClass *klass)
           "entry",
           NULL, NULL,
           BZ_TYPE_ENTRY,
-          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+          G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
@@ -352,35 +350,4 @@ bz_hardware_support_dialog_new (BzEntry *entry)
   return g_object_new (BZ_TYPE_HARDWARE_SUPPORT_DIALOG,
                        "entry", entry,
                        NULL);
-}
-
-BzEntry *
-bz_hardware_support_dialog_get_entry (BzHardwareSupportDialog *self)
-{
-  g_return_val_if_fail (BZ_IS_HARDWARE_SUPPORT_DIALOG (self), NULL);
-  return self->entry;
-}
-
-void
-bz_hardware_support_dialog_set_entry (BzHardwareSupportDialog *self,
-                                      BzEntry                 *entry)
-{
-  g_return_if_fail (BZ_IS_HARDWARE_SUPPORT_DIALOG (self));
-
-  if (self->entry == entry)
-    return;
-
-  g_clear_signal_handler (&self->entry_notify_handler, self->entry);
-
-  g_clear_pointer (&self->entry, g_object_unref);
-  if (entry != NULL)
-    {
-      self->entry                = g_object_ref (entry);
-      self->entry_notify_handler = g_signal_connect (self->entry, "notify",
-                                                     G_CALLBACK (entry_notify_cb), self);
-    }
-
-  update_ui (self);
-
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ENTRY]);
 }

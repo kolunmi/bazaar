@@ -1,4 +1,4 @@
-/* bz-hardware-support-dialog.h
+/* bz-license-dialog.h
  *
  * Copyright 2025 Alexander Vanhee
  *
@@ -22,13 +22,14 @@
 
 #include "bz-entry.h"
 #include <adwaita.h>
-#include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_HARDWARE_SUPPORT_DIALOG (bz_hardware_support_dialog_get_type ())
-G_DECLARE_FINAL_TYPE (BzHardwareSupportDialog, bz_hardware_support_dialog, BZ, HARDWARE_SUPPORT_DIALOG, AdwDialog)
+#define BZ_TYPE_LICENSE_DIALOG (bz_license_dialog_get_type ())
 
-BzHardwareSupportDialog *bz_hardware_support_dialog_new (BzEntry *entry);
+G_DECLARE_FINAL_TYPE (BzLicenseDialog, bz_license_dialog, BZ, LICENSE_DIALOG, AdwDialog)
+
+AdwDialog *
+bz_license_dialog_new (BzEntry *entry);
 
 G_END_DECLS

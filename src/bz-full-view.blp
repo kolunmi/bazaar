@@ -322,13 +322,11 @@ template $BzFullView: Adw.Bin {
                         }
 
                         $BzContextTile license_tile {
-                          can-target: bind $has_link(template.ui-entry as <$BzResult>.object as <$BzEntry>.project-license) as <bool>;
-                          can-focus: bind $has_link(template.ui-entry as <$BzResult>.object as <$BzEntry>.project-license) as <bool>;
                           label: bind $get_license_label(template.ui-entry as <$BzResult>.object as <$BzEntry>.is-floss) as <string>;
                           lozenge-style: bind $bool_to_string(template.ui-entry as <$BzResult>.object as <$BzEntry>.is-floss, "grey", "warning") as <string>;
                           clicked => $license_cb(template);
                           has-tooltip: true;
-                          tooltip-text: bind $format_license(template.ui-entry as <$BzResult>.object as <$BzEntry>.project-license) as <string>;
+                          tooltip-text: bind $format_license_tooltip(template.ui-entry as <$BzResult>.object as <$BzEntry>.project-license) as <string>;
 
                           lozenge-child: Box {
                             spacing: 6;
@@ -395,6 +393,8 @@ template $BzFullView: Adw.Bin {
                         homogeneous: true;
 
                         $BzContextTile {
+                          has-tooltip: true;
+                          tooltip-text: bind $get_age_rating_tooltip(template.ui-entry as <$BzResult>.object as <$BzEntry>.age-rating) as <string>;
                           can-target: false;
                           label: bind $get_age_rating_label(template.ui-entry as <$BzResult>.object as <$BzEntry>.age-rating) as <string>;
                           lozenge-style: bind $get_age_rating_style(template.ui-entry as <$BzResult>.object as <$BzEntry>.age-rating) as <string>;
@@ -416,6 +416,8 @@ template $BzFullView: Adw.Bin {
                           can-target: bind $invert_boolean($is_null(template.debounced-ui-entry) as <bool>) as <bool>;
                           clicked => $dl_stats_cb(template);
                           label: _("Downloads/mo");
+                          has-tooltip: true;
+                          tooltip-text: bind $format_recent_downloads_tooltip(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <string>;
                           lozenge-style: "grey";
 
                           lozenge-child: Label {

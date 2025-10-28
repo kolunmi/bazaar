@@ -28,6 +28,7 @@
     <file preprocess="xml-stripblanks">bz-hardware-support-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-inspector.ui</file>
     <file preprocess="xml-stripblanks">bz-installed-page.ui</file>
+    <file preprocess="xml-stripblanks">bz-license-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-preferences-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-progress-bar.ui</file>
     <file preprocess="xml-stripblanks">bz-releases-list.ui</file>
@@ -67,6 +68,7 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/globe-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/go-previous-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/graph2-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/hand-openyay-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/heart-filled-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/heart-outline-thick-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/horizontal-arrows-disabled-symbolic.svg</file>
@@ -91,6 +93,7 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/sliders-horizontal-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/software-update-available-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/starred-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/thumbs-up-outline-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/timer-sand-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/translations-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/user-trash-symbolic.svg</file>
