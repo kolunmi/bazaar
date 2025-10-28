@@ -16,6 +16,7 @@
     <file preprocess="xml-stripblanks">bz-appstream-description-render.ui</file>
     <file preprocess="xml-stripblanks">bz-browse-widget.ui</file>
     <file preprocess="xml-stripblanks">bz-category-tile.ui</file>
+    <file preprocess="xml-stripblanks">bz-context-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-curated-app-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-decorated-screenshot.ui</file>
     <file preprocess="xml-stripblanks">bz-detailed-app-tile.ui</file>
@@ -24,6 +25,7 @@
     <file preprocess="xml-stripblanks">bz-featured-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-flathub-page.ui</file>
     <file preprocess="xml-stripblanks">bz-full-view.ui</file>
+    <file preprocess="xml-stripblanks">bz-hardware-support-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-inspector.ui</file>
     <file preprocess="xml-stripblanks">bz-installed-page.ui</file>
     <file preprocess="xml-stripblanks">bz-preferences-dialog.ui</file>
@@ -51,6 +53,8 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/delay-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/device-support-adaptive-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/device-support-desktop-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/device-support-touch-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/device-supported-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/download-plus-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/drive-harddisk-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/edit-clear-all-symbolic.svg</file>
