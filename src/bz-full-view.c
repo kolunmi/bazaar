@@ -282,6 +282,13 @@ format_size (gpointer object, guint64 value)
 }
 
 static char *
+format_size_tooltip (gpointer object, guint64 value)
+{
+  g_autofree char *size_str = g_format_size (value);
+  return g_strdup_printf (_ ("Download size of %s"), size_str);
+}
+
+static char *
 format_age_rating (gpointer object, gint value)
 {
   if (value <= 2)
@@ -364,6 +371,13 @@ get_formfactor_label (gpointer object,
                       gboolean is_mobile_friendly)
 {
   return g_strdup (is_mobile_friendly ? _ ("Adaptive") : _ ("Desktop Only"));
+}
+
+static char *
+get_formfactor_tooltip (gpointer object, gboolean is_mobile_friendly)
+{
+  return g_strdup (is_mobile_friendly ? _ ("Works on desktop, tablets, and phones")
+                                      : _ ("May not work on mobile devices"));
 }
 
 static char *
@@ -769,6 +783,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, format_recent_downloads);
   gtk_widget_class_bind_template_callback (widget_class, format_recent_downloads_tooltip);
   gtk_widget_class_bind_template_callback (widget_class, format_size);
+  gtk_widget_class_bind_template_callback (widget_class, format_size_tooltip);
   gtk_widget_class_bind_template_callback (widget_class, format_age_rating);
   gtk_widget_class_bind_template_callback (widget_class, get_age_rating_label);
   gtk_widget_class_bind_template_callback (widget_class, get_age_rating_tooltip);
@@ -778,6 +793,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, get_license_label);
   gtk_widget_class_bind_template_callback (widget_class, get_license_icon);
   gtk_widget_class_bind_template_callback (widget_class, get_formfactor_label);
+  gtk_widget_class_bind_template_callback (widget_class, get_formfactor_tooltip);
   gtk_widget_class_bind_template_callback (widget_class, has_link);
   gtk_widget_class_bind_template_callback (widget_class, open_url_cb);
   gtk_widget_class_bind_template_callback (widget_class, open_flathub_url_cb);

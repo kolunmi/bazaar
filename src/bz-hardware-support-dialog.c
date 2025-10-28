@@ -189,14 +189,14 @@ update_list (BzHardwareSupportDialog *self)
   is_mobile_friendly   = bz_entry_get_is_mobile_friendly (self->entry);
 
   row = create_support_row ("phone-symbolic",
-                            _ ("Phone support"),
-                            is_mobile_friendly ? _ ("Works on phones") : _ ("Not designed for phones"),
+                            _ ("Mobile support"),
+                            is_mobile_friendly ? _ ("Works on mobile devices") : _ ("May not work well on mobile devices"),
                             is_mobile_friendly);
   gtk_list_box_append (self->list, GTK_WIDGET (row));
 
   row = create_support_row ("device-support-desktop-symbolic",
                             _ ("Desktop support"),
-                            _ ("Works on desktop displays"),
+                            _ ("Works well on large screens"),
                             TRUE);
   gtk_list_box_append (self->list, GTK_WIDGET (row));
 

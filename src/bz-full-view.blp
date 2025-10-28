@@ -148,7 +148,7 @@ template $BzFullView: Adw.Bin {
                                 ]
 
                                 has-tooltip: true;
-                                tooltip-text: _("This flatpak is verified by the original developers of the software.");
+                                tooltip-text: _("Verified by the original developers");
                                 icon-name: "verified-checkmark-symbolic";
                                 icon-size: normal;
                               };
@@ -306,6 +306,8 @@ template $BzFullView: Adw.Bin {
 
                         $BzContextTile download_size_tile {
                           label: _("Download");
+                          has-tooltip: true;
+                          tooltip-text: bind $format_size_tooltip(template.ui-entry as <$BzResult>.object as <$BzEntry>.size) as <string>;
                           lozenge-style: "grey";
                           clicked => $size_cb(template);
 
@@ -343,6 +345,8 @@ template $BzFullView: Adw.Bin {
 
                         $BzContextTile formfactor_support_tile_wide {
                           label: bind $get_formfactor_label(template.ui-entry as <$BzResult>.object as <$BzEntry>.is-mobile-friendly) as <string>;
+                          has-tooltip: true;
+                          tooltip-text: bind $get_formfactor_tooltip(template.ui-entry as <$BzResult>.object as <$BzEntry>.is-mobile-friendly) as <string>;
                           clicked => $formfactor_cb(template);
                           lozenge-style: "grey";
 
@@ -367,6 +371,8 @@ template $BzFullView: Adw.Bin {
                         $BzContextTile formfactor_support_tile_narrow {
                           visible: false;
                           label: bind $get_formfactor_label(template.ui-entry as <$BzResult>.object as <$BzEntry>.is-mobile-friendly) as <string>;
+                          has-tooltip: true;
+                          tooltip-text: bind $get_formfactor_tooltip(template.ui-entry as <$BzResult>.object as <$BzEntry>.is-mobile-friendly) as <string>;
                           lozenge-style: bind $bool_to_string(template.ui-entry as <$BzResult>.object as <$BzEntry>.is-mobile-friendly, "grey", "error") as <string>;
                           clicked => $formfactor_cb(template);
 
