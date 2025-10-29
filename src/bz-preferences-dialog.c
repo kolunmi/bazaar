@@ -29,18 +29,18 @@ typedef struct
 } BarTheme;
 
 static const BarTheme bar_themes[] = {
-  {       "accent-color",  "accent-color-theme",       N_ ("Accent Color") },
-  { "pride-rainbow-flag", "pride-rainbow-theme", N_ ("Pride Rainbow Flag") },
-  { "lesbian-pride-flag", "lesbian-pride-theme", N_ ("Lesbian Pride Flag") },
-  {   "transgender-flag",   "transgender-theme",   N_ ("Transgender Flag") },
-  {     "nonbinary-flag",     "nonbinary-theme",     N_ ("Nonbinary Flag") },
-  {      "bisexual-flag",      "bisexual-theme",      N_ ("Bisexual Flag") },
-  {       "asexual-flag",       "asexual-theme",       N_ ("Asexual Flag") },
-  {     "pansexual-flag",     "pansexual-theme",     N_ ("Pansexual Flag") },
-  {     "aromantic-flag",     "aromantic-theme",     N_ ("Aromantic Flag") },
-  {   "genderfluid-flag",   "genderfluid-theme",   N_ ("Genderfluid Flag") },
-  {    "polysexual-flag",    "polysexual-theme",    N_ ("Polysexual Flag") },
-  {    "omnisexual-flag",    "omnisexual-theme",    N_ ("Omnisexual Flag") },
+  {       "accent-color",  "accent-color-theme",             N_ ("Accent Color") },
+  { "pride-rainbow-flag", "pride-rainbow-theme",             N_ ("Pride Colors") },
+  { "lesbian-pride-flag", "lesbian-pride-theme",     N_ ("Lesbian Pride Colors") },
+  {   "transgender-flag",   "transgender-theme", N_ ("Transgender Pride Colors") },
+  {     "nonbinary-flag",     "nonbinary-theme",   N_ ("Nonbinary Pride Colors") },
+  {      "bisexual-flag",      "bisexual-theme",    N_ ("Bisexual Pride Colors") },
+  {       "asexual-flag",       "asexual-theme",     N_ ("Asexual Pride Colors") },
+  {     "pansexual-flag",     "pansexual-theme",   N_ ("Pansexual Pride Colors") },
+  {     "aromantic-flag",     "aromantic-theme",   N_ ("Aromantic Pride Colors") },
+  {   "genderfluid-flag",   "genderfluid-theme", N_ ("Genderfluid Pride Colors") },
+  {    "polysexual-flag",    "polysexual-theme",  N_ ("Polysexual Pride Colors") },
+  {    "omnisexual-flag",    "omnisexual-theme",  N_ ("Omnisexual Pride Colors") },
 };
 
 struct _BzPreferencesDialog
