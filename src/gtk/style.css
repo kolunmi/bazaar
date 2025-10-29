@@ -131,7 +131,6 @@
 	min-height: 30px;
 }
 
-
 button.context-tile:hover .lozenge {
   background-color: alpha(var(--accent-bg-color),0.25);
 }
@@ -222,6 +221,14 @@ button.context-tile {
 
 .indicator-box button {
   margin: 0 4px 4px 0;
+}
+
+.pip-button.osd-box {
+  padding: 0;
+}
+
+.pip-button > button {
+  margin: 5px;
 }
 
 window,
