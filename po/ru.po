@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-27 17:09+0700\n"
-"PO-Revision-Date: 2025-10-27 17:11+0700\n"
+"POT-Creation-Date: 2025-10-29 13:42+0700\n"
+"PO-Revision-Date: 2025-10-29 15:05+0700\n"
 "Last-Translator: Jill Fiore <contact@lumaeris.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -504,52 +504,52 @@ msgstr "Популярное"
 msgid "More Popular"
 msgstr "Больше популярных"
 
-#: src/bz-flatpak-entry.c:558
+#: src/bz-flatpak-entry.c:552
 msgctxt "Project URL Type"
 msgid "Flathub Page"
 msgstr "Страница Flathub"
 
-#: src/bz-flatpak-entry.c:579
+#: src/bz-flatpak-entry.c:573
 msgctxt "Project URL Type"
 msgid "Project Website"
 msgstr "Веб-сайт проекта"
 
-#: src/bz-flatpak-entry.c:583
+#: src/bz-flatpak-entry.c:577
 msgctxt "Project URL Type"
 msgid "Issue Tracker"
 msgstr "Отслеживание ошибок"
 
-#: src/bz-flatpak-entry.c:587
+#: src/bz-flatpak-entry.c:581
 msgctxt "Project URL Type"
 msgid "FAQ"
 msgstr "Часто задаваемые вопросы"
 
-#: src/bz-flatpak-entry.c:591
+#: src/bz-flatpak-entry.c:585
 msgctxt "Project URL Type"
 msgid "Help"
 msgstr "Помощь"
 
-#: src/bz-flatpak-entry.c:595
+#: src/bz-flatpak-entry.c:589
 msgctxt "Project URL Type"
 msgid "Donate"
 msgstr "Пожертвовать"
 
-#: src/bz-flatpak-entry.c:601
+#: src/bz-flatpak-entry.c:595
 msgctxt "Project URL Type"
 msgid "Translate"
 msgstr "Перевод"
 
-#: src/bz-flatpak-entry.c:605
+#: src/bz-flatpak-entry.c:599
 msgctxt "Project URL Type"
 msgid "Contact"
 msgstr "Связаться"
 
-#: src/bz-flatpak-entry.c:609
+#: src/bz-flatpak-entry.c:603
 msgctxt "Project URL Type"
 msgid "Source Code"
 msgstr "Исходный код"
 
-#: src/bz-flatpak-entry.c:615
+#: src/bz-flatpak-entry.c:609
 msgctxt "Project URL Type"
 msgid "Contribute"
 msgstr "Сделать вклад"
@@ -567,8 +567,8 @@ msgid "Content"
 msgstr "Контент"
 
 #: src/bz-full-view.blp:151
-msgid "This flatpak is verified by the original developers of the software."
-msgstr "Данный flatpak был верифицирован подлинными разработчиками программы."
+msgid "Verified by the original developers"
+msgstr "Верифицировано подлинными разработчиками"
 
 #: src/bz-full-view.blp:178
 msgid "Support"
@@ -594,60 +594,105 @@ msgstr "Удалить приложение"
 msgid "Install Other Version"
 msgstr "Установить другую версию"
 
-#: src/bz-full-view.blp:343
+#: src/bz-full-view.blp:308
 msgid "Download"
-msgstr "Загрузка"
+msgstr "Размер"
 
-#: src/bz-full-view.blp:391
-msgid "Free"
-msgstr "Свободное"
-
-#: src/bz-full-view.blp:428
-msgid "Proprietary"
-msgstr "Проприетарное"
-
-#: src/bz-full-view.blp:478
-msgid "Adaptive"
-msgstr "Адаптивное"
-
-#: src/bz-full-view.blp:522
-msgid "Desktop Only"
-msgstr "Только для ПК"
-
-#: src/bz-full-view.blp:593
-msgid "All Ages"
-msgstr "Для всех"
-
-#: src/bz-full-view.blp:605
-msgid "Age Rating"
-msgstr "Возраст"
-
-#: src/bz-full-view.blp:640
+#: src/bz-full-view.blp:424
 msgid "Downloads/mo"
-msgstr "Загрузок/м"
+msgstr "Загрузок/мес"
 
-#: src/bz-full-view.c:242
+#: src/bz-full-view.c:251
 msgid "---"
 msgstr "---"
 
-#: src/bz-full-view.c:256
+#. Translators: M is the suffix for millions, \xC2\xA0 is a non-breaking space
+#: src/bz-full-view.c:255
 #, c-format
-msgid "%'d"
-msgstr "%'d"
+msgid "%.2f M"
+msgstr "%.2f M"
 
-#: src/bz-full-view.c:280
-msgid "All"
-msgstr "Все"
+#. Translators: K is the suffix for thousands, \xC2\xA0 is a non-breaking space
+#: src/bz-full-view.c:258
+#, c-format
+msgid "%.2f K"
+msgstr "%.2f K"
 
-#: src/bz-full-view.c:292
+#: src/bz-full-view.c:267
+#, c-format
+msgid "%d downloads in the last 30 days"
+msgstr "%d загрузок за последние 30 дней"
+
+#: src/bz-full-view.c:288
+#, c-format
+msgid "Download size of %s"
+msgstr "Размер скачивания %s"
+
+#. Translators: Age rating format, e.g. "12+" for ages 12 and up
+#: src/bz-full-view.c:298
+#, c-format
+msgid "%d+"
+msgstr "%d+"
+
+#: src/bz-full-view.c:306
+msgid "All Ages"
+msgstr "Для всех"
+
+#: src/bz-full-view.c:308
+msgid "Age Rating"
+msgstr "Возраст"
+
+#: src/bz-full-view.c:316
+msgid "Suitable for all ages"
+msgstr "Предназначено для всех возрастов"
+
+#: src/bz-full-view.c:318
+#, c-format
+msgid "Suitable for ages %d and up"
+msgstr "Предназначено для лиц старше %d лет"
+
+#: src/bz-full-view.c:338
 msgid "Unknown"
 msgstr "Неизвестно"
 
-#: src/bz-full-view.c:310
+#: src/bz-full-view.c:341
+msgid "Proprietary Software"
+msgstr "Проприетарное программное обеспечение"
+
+#: src/bz-full-view.c:345
+#, c-format
+msgid "Free software licensed under %s"
+msgstr "Свободное программное обеспечение, лицензированное под %s"
+
+#: src/bz-full-view.c:353
+msgid "Free"
+msgstr "Свободное"
+
+#: src/bz-full-view.c:353
+msgid "Proprietary"
+msgstr "Проприетарное"
+
+#: src/bz-full-view.c:373
+msgid "Adaptive"
+msgstr "Адаптивное"
+
+#: src/bz-full-view.c:373
+msgid "Desktop Only"
+msgstr "Только для ПК"
+
+#: src/bz-full-view.c:379
+msgid "Works on desktop, tablets, and phones"
+msgstr "Работает на настольных компьютерах, планшетах и телефонах"
+
+#: src/bz-full-view.c:380
+msgid "May not work on mobile devices"
+msgstr "Может не работать на мобильных устройствах"
+
+#: src/bz-full-view.c:391
 msgid "No URL"
 msgstr "Нет URL"
 
-#: src/bz-full-view.c:328
+#: src/bz-full-view.c:409
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -655,7 +700,7 @@ msgstr ""
 "Это приложение имеет лицензию FLOSS, что значит исходный код может быть "
 "проверен на безопасность."
 
-#: src/bz-full-view.c:329
+#: src/bz-full-view.c:410
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
@@ -663,6 +708,100 @@ msgstr ""
 "Это приложение имеет проприетарную лицензию, что значит исходный код "
 "разрабатывается в тайне и не может быть проверен независимой третьей "
 "стороной."
+
+#: src/bz-hardware-support-dialog.c:69
+msgid "Keyboard support"
+msgstr "Поддержка клавиатуры"
+
+#: src/bz-hardware-support-dialog.c:71
+msgid "Requires keyboards"
+msgstr "Требуется использовать клавиатуру"
+
+#: src/bz-hardware-support-dialog.c:72
+msgid "Recommends keyboards"
+msgstr "Рекомендуется использовать клавиатуру"
+
+#: src/bz-hardware-support-dialog.c:73
+msgid "Supports keyboards"
+msgstr "Поддерживает клавиатуру"
+
+#: src/bz-hardware-support-dialog.c:74
+msgid "Unknown support for keyboards"
+msgstr "Неизвестная поддержка клавиатуры"
+
+#: src/bz-hardware-support-dialog.c:76
+msgid "Mouse support"
+msgstr "Поддержка мыши"
+
+#: src/bz-hardware-support-dialog.c:78
+msgid "Requires mice or pointing devices"
+msgstr "Требуется использовать мышь или указательные устройства"
+
+#: src/bz-hardware-support-dialog.c:79
+msgid "Recommends mice or pointing devices"
+msgstr "Рекомендуется использовать мышь или указательные устройства"
+
+#: src/bz-hardware-support-dialog.c:80
+msgid "Supports mice or pointing devices"
+msgstr "Поддерживает мышь или указательные устройства"
+
+#: src/bz-hardware-support-dialog.c:81
+msgid "Unknown support for mice or pointing devices"
+msgstr "Неизвестная поддержка мыши и указательных устройств"
+
+#: src/bz-hardware-support-dialog.c:83
+msgid "Touchscreen support"
+msgstr "Поддержка сенсорного экрана"
+
+#: src/bz-hardware-support-dialog.c:85
+msgid "Requires touchscreens"
+msgstr "Требуется использовать сенсорный экран"
+
+#: src/bz-hardware-support-dialog.c:86
+msgid "Recommends touchscreens"
+msgstr "Рекомендуется использовать сенсорный экран"
+
+#: src/bz-hardware-support-dialog.c:87
+msgid "Supports touchscreens"
+msgstr "Поддерживает сенсорные экраны"
+
+#: src/bz-hardware-support-dialog.c:88
+msgid "Unknown support for touchscreens"
+msgstr "Неизвестная поддержка сенсорных экран"
+
+#: src/bz-hardware-support-dialog.c:192
+msgid "Mobile support"
+msgstr "Поддержка мобильных устройств"
+
+#: src/bz-hardware-support-dialog.c:193
+msgid "Works on mobile devices"
+msgstr "Работает на мобильных устройствах"
+
+#: src/bz-hardware-support-dialog.c:193
+msgid "May not work well on mobile devices"
+msgstr "Может не работать хорошо на мобильных устройствах"
+
+#: src/bz-hardware-support-dialog.c:198
+msgid "Desktop support"
+msgstr "Поддержка настольных компьютеров"
+
+#: src/bz-hardware-support-dialog.c:199
+msgid "Works well on large screens"
+msgstr "Работает хорошо на больших экранах"
+
+#: src/bz-hardware-support-dialog.c:233
+#, c-format
+msgid "%s works best on specific hardware"
+msgstr "%s работает лучше на определённых устройствах"
+
+#: src/bz-hardware-support-dialog.c:240
+#, c-format
+msgid "%s works on most devices"
+msgstr "%s работает на большинстве устройств"
+
+#: src/bz-hardware-support-dialog.blp:6 src/bz-hardware-support-dialog.blp:47
+msgid "Hardware Support"
+msgstr "Поддержка оборудования"
 
 #: src/bz-inspector.blp:5
 msgid "Bazaar Inspector"
@@ -731,6 +870,43 @@ msgstr ""
 #: src/bz-installed-page.c:656 src/bz-window.c:1102 src/bz-window.c:1124
 msgid "Cancel"
 msgstr "Отмена"
+
+#: src/bz-license-dialog.c:115
+msgid ""
+"This app is not developed in the open, so only its developers know how it "
+"works. It may be insecure in ways that are hard to detect, and it may change "
+"without oversight.\n"
+"\n"
+"You may not be able to contribute to this app."
+msgstr ""
+"Это приложение не разрабатывается открыто, поэтому только его разработчики "
+"знают как оно работает. Оно может быть небезопасным в некоторых местах, "
+"которые сложно опознать, и оно может измениться без предупреждения.\n"
+"\n"
+"Вы возможно не сможете внести свой вклад в это приложение."
+
+#: src/bz-license-dialog.c:124
+msgid ""
+"This app is developed in the open by an international community.\n"
+"\n"
+"You can participate and help make it even better."
+msgstr ""
+"Это приложение разрабатывается открыто международным сообществом.\n"
+"\n"
+"Вы можете внести свой вклад и сделать это приложение ещё лучше."
+
+#: src/bz-license-dialog.c:135
+#, c-format
+msgid ""
+"This app is developed in the open by an international community, and "
+"released under the <a href=\"%s\">%s</a> license.\n"
+"\n"
+"You can participate and help make it even better."
+msgstr ""
+"Это приложение разрабатывается открыто международным сообществом и "
+"выпускается под лицензией <a href=\"%s\">%s</a>.\n"
+"\n"
+"Вы можете внести свой вклад и сделать это приложение ещё лучше."
 
 #: src/bz-preferences-dialog.blp:19
 msgid "Preferences"
@@ -1108,6 +1284,9 @@ msgctxt "shortcut window"
 msgid "Quit"
 msgstr "Закрыть"
 
+#~ msgid "All"
+#~ msgstr "Все"
+
 #~ msgid "Excludes shared components"
 #~ msgstr "Исключая общие компоненты"
 
@@ -1383,9 +1562,6 @@ msgstr "Закрыть"
 #~ msgstr ""
 #~ "Количество скачиваний за эти 30 дней. Нажмите, чтобы открыть статистику "
 #~ "скачиваний приложения."
-
-#~ msgid "Support this developer"
-#~ msgstr "Поддержать этого разработчика"
 
 #~ msgid "How the application looks"
 #~ msgstr "Как выглядит приложение"
