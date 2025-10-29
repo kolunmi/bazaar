@@ -29,6 +29,7 @@ struct _BzFlathubCategory
   char                    *name;
   GListModel              *applications;
   GListModel              *quality_applications;
+  int                      total_entries;
 };
 
 G_DEFINE_FINAL_TYPE (BzFlathubCategory, bz_flathub_category, G_TYPE_OBJECT);
@@ -43,6 +44,7 @@ enum
   PROP_ICON_NAME,
   PROP_APPLICATIONS,
   PROP_QUALITY_APPLICATIONS,
+  PROP_TOTAL_ENTRIES,
 
   LAST_PROP
 };
@@ -89,6 +91,9 @@ bz_flathub_category_get_property (GObject    *object,
     case PROP_ICON_NAME:
       g_value_set_string (value, bz_flathub_category_get_icon_name (self));
       break;
+    case PROP_TOTAL_ENTRIES:
+      g_value_set_int (value, bz_flathub_category_get_total_entries (self));
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -115,6 +120,9 @@ bz_flathub_category_set_property (GObject      *object,
       break;
     case PROP_QUALITY_APPLICATIONS:
       bz_flathub_category_set_quality_applications (self, g_value_get_object (value));
+      break;
+    case PROP_TOTAL_ENTRIES:
+      bz_flathub_category_set_total_entries (self, g_value_get_int (value));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -166,6 +174,12 @@ bz_flathub_category_class_init (BzFlathubCategoryClass *klass)
           "quality-applications",
           NULL, NULL,
           G_TYPE_LIST_MODEL,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+  props[PROP_TOTAL_ENTRIES] =
+      g_param_spec_int (
+          "total-entries",
+          NULL, NULL,
+          0, G_MAXINT, 0,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
@@ -230,6 +244,13 @@ bz_flathub_category_dup_quality_applications (BzFlathubCategory *self)
     return NULL;
 }
 
+int
+bz_flathub_category_get_total_entries (BzFlathubCategory *self)
+{
+  g_return_val_if_fail (BZ_IS_FLATHUB_CATEGORY (self), 0);
+  return self->total_entries;
+}
+
 void
 bz_flathub_category_set_map_factory (BzFlathubCategory       *self,
                                      BzApplicationMapFactory *map_factory)
@@ -283,23 +304,37 @@ bz_flathub_category_set_quality_applications (BzFlathubCategory *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_QUALITY_APPLICATIONS]);
 }
 
+void
+bz_flathub_category_set_total_entries (BzFlathubCategory *self,
+                                       int                total_entries)
+{
+  g_return_if_fail (BZ_IS_FLATHUB_CATEGORY (self));
+
+  if (self->total_entries == total_entries)
+    return;
+
+  self->total_entries = total_entries;
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TOTAL_ENTRIES]);
+}
+
 static const char *
 get_category_display_name (const char *category_id)
 {
   if (g_strcmp0 (category_id, "audiovideo") == 0)
     return _ ("Audio & Video");
   if (g_strcmp0 (category_id, "development") == 0)
-    return _ ("Development");
+    return _ ("Developer Tools");
   if (g_strcmp0 (category_id, "education") == 0)
     return _ ("Education");
   if (g_strcmp0 (category_id, "game") == 0)
-    return _ ("Games");
+    return _ ("Gaming");
   if (g_strcmp0 (category_id, "graphics") == 0)
-    return _ ("Graphics");
+    return _ ("Graphics & Photography");
   if (g_strcmp0 (category_id, "network") == 0)
     return _ ("Networking");
   if (g_strcmp0 (category_id, "office") == 0)
-    return _ ("Office");
+    return _ ("Productivity");
   if (g_strcmp0 (category_id, "science") == 0)
     return _ ("Science");
   if (g_strcmp0 (category_id, "system") == 0)

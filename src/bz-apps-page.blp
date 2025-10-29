@@ -4,57 +4,83 @@ using Adw 1;
 template $BzAppsPage: Adw.NavigationPage {
   tag: "flathub-apps-list";
 
-  Gtk.ScrolledWindow {
-    hscrollbar-policy: never;
+  Adw.BreakpointBin {
+    width-request: 360;
+    height-request: 450;
 
-    Adw.Clamp {
-      maximum-size: 1500;
-      tightening-threshold: 1400;
+    child: Gtk.ScrolledWindow {
+      hscrollbar-policy: never;
 
-      Box {
-        orientation: vertical;
-        spacing: 10;
-        margin-start: 12;
-        margin-end: 12;
-        margin-top: 24;
-        margin-bottom: 24;
+      Adw.Clamp {
+        maximum-size: 1500;
+        tightening-threshold: 1400;
 
-        $BzFeaturedCarousel {
-          margin-start: 8;
-          margin-end: 8;
-          margin-top: 16;
-          hexpand: true;
-          visible: bind $is_not_null(template.carousel-applications) as <bool>;
-          model: SliceListModel {
-                   offset: 0;
-                   size: 7;
-                   model: bind template.carousel-applications;
-                 };
-          group-clicked => $featured_carousel_group_clicked_cb(template);
+        Box content_box {
+          orientation: vertical;
+          spacing: 10;
+          margin-start: 25;
+          margin-end: 25;
+          margin-top: 8;
+          margin-bottom: 24;
+
+          $BzFeaturedCarousel {
+            margin-start: 8;
+            margin-end: 8;
+            hexpand: true;
+            visible: bind $is_not_null(template.carousel-applications) as <bool>;
+            model: SliceListModel {
+              offset: 0;
+              size: 7;
+              model: bind template.carousel-applications;
+            };
+            group-clicked => $featured_carousel_group_clicked_cb(template);
+          }
+
+          Box {
+            margin-start: 8;
+            orientation: vertical;
+            Label title {
+              styles [
+                "title-1",
+              ]
+              label: bind template.page-title;
+              xalign: 0.0;
+              wrap: true;
+              wrap-mode: word_char;
+            }
+
+            Label subtitle {
+              visible: bind $is_not_empty_string(template.page-subtitle) as <bool>;
+              label: bind template.page-subtitle;
+              margin-top: 4;
+              xalign: 0.0;
+            }
+          }
+
+          $BzDynamicListView {
+            styles [
+              "flathub-page-section",
+            ]
+            hexpand: true;
+            scroll: false;
+            noscroll-kind: flow-box;
+            child-type: "BzAppTile";
+            child-prop: "group";
+            model: bind template.applications;
+            bind-widget => $bind_widget_cb(template);
+            unbind-widget => $unbind_widget_cb(template);
+          }
         }
+      }
+    };
 
-        Label {
-          margin-start: 8;
-          styles [
-            "title-1",
-          ]
-          label: bind template.page-title;
-          xalign: 0.0;
-        }
-
-        $BzDynamicListView {
-          styles [
-            "flathub-page-section",
-          ]
-          hexpand: true;
-          scroll: false;
-          noscroll-kind: flow-box;
-          child-type: "BzAppTile";
-          child-prop: "group";
-          model: bind template.applications;
-          bind-widget => $bind_widget_cb(template);
-          unbind-widget => $unbind_widget_cb(template);
-        }
+    Adw.Breakpoint {
+      condition ("max-width: 700px")
+      setters {
+        content_box.margin-start: 5;
+        content_box.margin-end: 5;
+        title.halign: center;
+        subtitle.halign: center;
       }
     }
   }

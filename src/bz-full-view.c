@@ -26,17 +26,20 @@
 #include "bz-addons-dialog.h"
 #include "bz-app-size-dialog.h"
 #include "bz-appstream-description-render.h"
+#include "bz-context-tile.h"
 #include "bz-dynamic-list-view.h"
 #include "bz-env.h"
 #include "bz-error.h"
 #include "bz-flatpak-entry.h"
 #include "bz-full-view.h"
 #include "bz-global-state.h"
+#include "bz-hardware-support-dialog.h"
 #include "bz-lazy-async-texture-model.h"
+#include "bz-license-dialog.h"
 #include "bz-releases-list.h"
 #include "bz-screenshots-carousel.h"
 #include "bz-section-view.h"
-#include "bz-share-dialog.h"
+#include "bz-share-list.h"
 #include "bz-spdx.h"
 #include "bz-state-info.h"
 #include "bz-stats-dialog.h"
@@ -50,6 +53,7 @@ struct _BzFullView
   BzTransactionManager *transactions;
   BzEntryGroup         *group;
   BzResult             *ui_entry;
+  gboolean              debounce;
   BzResult             *debounced_ui_entry;
   BzResult             *group_model;
 
@@ -57,10 +61,10 @@ struct _BzFullView
   DexFuture *loading_forge_stars;
 
   /* Template widgets */
-  AdwViewStack      *stack;
-  GtkWidget         *shadow_overlay;
-  GtkWidget         *forge_stars;
-  GtkLabel          *forge_stars_label;
+  AdwViewStack *stack;
+  GtkWidget    *shadow_overlay;
+  GtkWidget    *forge_stars;
+  GtkLabel     *forge_stars_label;
 };
 
 G_DEFINE_FINAL_TYPE (BzFullView, bz_full_view, ADW_TYPE_BIN)
@@ -73,6 +77,7 @@ enum
   PROP_TRANSACTION_MANAGER,
   PROP_ENTRY_GROUP,
   PROP_UI_ENTRY,
+  PROP_DEBOUNCE,
   PROP_DEBOUNCED_UI_ENTRY,
 
   LAST_PROP
@@ -140,6 +145,9 @@ bz_full_view_get_property (GObject    *object,
     case PROP_UI_ENTRY:
       g_value_set_object (value, self->ui_entry);
       break;
+    case PROP_DEBOUNCE:
+      g_value_set_boolean (value, self->debounce);
+      break;
     case PROP_DEBOUNCED_UI_ENTRY:
       g_value_set_object (value, self->debounced_ui_entry);
       break;
@@ -167,6 +175,9 @@ bz_full_view_set_property (GObject      *object,
       break;
     case PROP_ENTRY_GROUP:
       bz_full_view_set_entry_group (self, g_value_get_object (value));
+      break;
+    case PROP_DEBOUNCE:
+      bz_full_view_set_debounce (self, g_value_get_boolean (value));
       break;
     case PROP_UI_ENTRY:
     case PROP_DEBOUNCED_UI_ENTRY:
@@ -204,14 +215,64 @@ logical_and (gpointer object,
   return value1 && value2;
 }
 
+static gboolean
+is_between (gpointer object,
+            gint     min_value,
+            gint     max_value,
+            gint     value)
+{
+  return value >= min_value && value <= max_value;
+}
+
+static char *
+bool_to_string (gpointer object,
+                gboolean condition,
+                char    *if_true,
+                char    *if_false)
+{
+  return g_strdup (condition ? if_true : if_false);
+}
+
+static char *
+format_with_small_suffix (char *number, const char *suffix)
+{
+  char *dot = g_strrstr (number, ".");
+
+  if (dot != NULL)
+    {
+      char *end = dot + strlen (dot) - 1;
+      while (end > dot && *end == '0')
+        *end-- = '\0';
+      if (end == dot)
+        *dot = '\0';
+    }
+
+  return g_strdup_printf ("%s\xC2\xA0<span font_size='x-small'>%s</span>",
+                          number, suffix);
+}
+
 static char *
 format_recent_downloads (gpointer object,
                          int      value)
 {
-  if (value > 0)
-    return g_strdup_printf (_ ("%'d Monthly Downloads"), value);
+  if (value <= 0)
+    return g_strdup (_ ("---"));
+
+  if (value >= 1000000)
+    /* Translators: M is the suffix for millions, \xC2\xA0 is a non-breaking space */
+    return g_strdup_printf (_ ("%.2f\xC2\xA0M"), value / 1000000.0);
+  else if (value >= 1000)
+    /* Translators: K is the suffix for thousands, \xC2\xA0 is a non-breaking space */
+    return g_strdup_printf (_ ("%.2f\xC2\xA0K"), value / 1000.0);
   else
-    return g_strdup (_ ("--- Downloads"));
+    return g_strdup_printf ("%'d", value);
+}
+
+static char *
+format_recent_downloads_tooltip (gpointer object,
+                                 int      value)
+{
+  return g_strdup_printf (_ ("%d downloads in the last 30 days"), value);
 }
 
 static char *
@@ -223,28 +284,108 @@ format_size (gpointer object, guint64 value)
   if (space != NULL)
     {
       *space = '\0';
-      return g_strdup_printf ("%s <span font_size='x-small'>%s</span>",
-                              size_str, space + 2);
+      return format_with_small_suffix (size_str, space + 2);
     }
-
   return g_strdup (size_str);
 }
 
 static char *
-format_license (gpointer    object,
-                const char *license)
+format_size_tooltip (gpointer object, guint64 value)
+{
+  g_autofree char *size_str = g_format_size (value);
+  return g_strdup_printf (_ ("Download size of %s"), size_str);
+}
+
+static char *
+format_age_rating (gpointer object, gint value)
+{
+  if (value <= 2)
+    value = 3;
+
+  /* Translators: Age rating format, e.g. "12+" for ages 12 and up */
+  return g_strdup_printf (_ ("%d+"), value);
+}
+
+static char *
+get_age_rating_label (gpointer object,
+                      int      age_rating)
+{
+  if (age_rating == 0)
+    return g_strdup (_ ("All Ages"));
+  else
+    return g_strdup (_ ("Age Rating"));
+}
+
+static char *
+get_age_rating_tooltip (gpointer object,
+                        gint     value)
+{
+  if (value == 0)
+    return g_strdup (_ ("Suitable for all ages"));
+
+  return g_strdup_printf (_ ("Suitable for ages %d and up"), value);
+}
+
+static char *
+get_age_rating_style (gpointer object,
+                      int      age_rating)
+{
+  if (age_rating >= 18)
+    return g_strdup ("error");
+  else
+    return g_strdup ("grey");
+}
+
+static char *
+format_license_tooltip (gpointer    object,
+                        const char *license)
 {
   g_autofree char *name = NULL;
 
   if (license == NULL || *license == '\0')
     return g_strdup (_ ("Unknown"));
 
+  if (g_strcmp0 (license, "LicenseRef-proprietary") == 0)
+    return g_strdup (_ ("Proprietary Software"));
+
   name = bz_spdx_get_name (license);
 
-  if (name != NULL && *name != '\0')
-    return g_steal_pointer (&name);
-  else
-    return g_strdup (license);
+  return g_strdup_printf (_ ("Free software licensed under %s"),
+                          (name != NULL && *name != '\0') ? name : license);
+}
+
+static char *
+get_license_label (gpointer object,
+                   gboolean is_floss)
+{
+  return g_strdup (is_floss ? _ ("Free") : _ ("Proprietary"));
+}
+
+static char *
+get_license_icon (gpointer object,
+                  gboolean is_floss,
+                  int      index)
+{
+  const char *icons[][2] = {
+    {   "license-symbolic", "proprietary-code-symbolic" },
+    { "community-symbolic",          "license-symbolic" }
+  };
+
+  return g_strdup (icons[is_floss ? 1 : 0][index]);
+}
+
+static char *
+get_formfactor_label (gpointer object,
+                      gboolean is_mobile_friendly)
+{
+  return g_strdup (is_mobile_friendly ? _ ("Adaptive") : _ ("Desktop Only"));
+}
+
+static char *
+get_formfactor_tooltip (gpointer object, gboolean is_mobile_friendly)
+{
+  return g_strdup (is_mobile_friendly ? _ ("Works on desktop, tablets, and phones")
+                                      : _ ("May not work on mobile devices"));
 }
 
 static char *
@@ -315,43 +456,21 @@ open_flathub_url_cb (BzFullView *self,
 }
 
 static void
-share_cb (BzFullView *self,
-          GtkButton  *button)
+license_cb (BzFullView *self,
+            GtkButton  *button)
 {
-  AdwDialog *share_dialog = NULL;
+  AdwDialog *dialog   = NULL;
+  BzEntry   *ui_entry = NULL;
 
   if (self->group == NULL)
     return;
 
-  share_dialog = bz_share_dialog_new (bz_result_get_object (self->ui_entry));
-  adw_dialog_set_content_width (share_dialog, 600);
-
-  adw_dialog_present (share_dialog, GTK_WIDGET (self));
-}
-
-static void
-license_cb (BzFullView *self,
-            GtkButton  *button)
-{
-  BzEntry         *entry   = NULL;
-  const char      *license = NULL;
-  g_autofree char *url     = NULL;
-
-  entry = bz_result_get_object (self->ui_entry);
-  if (entry == NULL)
+  ui_entry = bz_result_get_object (self->ui_entry);
+  if (ui_entry == NULL)
     return;
 
-  g_object_get (entry, "project-license", &license, NULL);
-
-  if (license == NULL || *license == '\0')
-    return;
-
-  url = bz_spdx_get_url (license);
-
-  if (url != NULL)
-    g_app_info_launch_default_for_uri (url, NULL, NULL);
-  else
-    g_warning ("Could not generate URL for license: %s", license);
+  dialog = bz_license_dialog_new (ui_entry);
+  adw_dialog_present (dialog, GTK_WIDGET (self));
 }
 
 static void
@@ -388,6 +507,22 @@ size_cb (BzFullView *self,
 
   size_dialog = bz_app_size_dialog_new (bz_result_get_object (self->ui_entry));
   adw_dialog_present (size_dialog, GTK_WIDGET (self));
+}
+
+static void
+formfactor_cb (BzFullView *self,
+               GtkButton  *button)
+{
+  AdwDialog *dialog   = NULL;
+  BzEntry   *ui_entry = NULL;
+
+  if (self->group == NULL)
+    return;
+
+  ui_entry = bz_result_get_object (self->ui_entry);
+  dialog   = ADW_DIALOG (bz_hardware_support_dialog_new (ui_entry));
+
+  adw_dialog_present (dialog, GTK_WIDGET (self));
 }
 
 static void
@@ -525,9 +660,6 @@ addon_transact_cb (BzFullView     *self,
     g_signal_emit (self, signals[SIGNAL_INSTALL_ADDON], 0, entry);
 }
 
-
-
-
 static void
 bz_full_view_class_init (BzFullViewClass *klass)
 {
@@ -565,6 +697,13 @@ bz_full_view_class_init (BzFullViewClass *klass)
           NULL, NULL,
           BZ_TYPE_RESULT,
           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_DEBOUNCE] =
+      g_param_spec_boolean (
+          "debounce",
+          NULL, NULL,
+          FALSE,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   props[PROP_DEBOUNCED_UI_ENTRY] =
       g_param_spec_object (
@@ -637,10 +776,13 @@ bz_full_view_class_init (BzFullViewClass *klass)
   g_type_ensure (BZ_TYPE_DYNAMIC_LIST_VIEW);
   g_type_ensure (BZ_TYPE_ENTRY);
   g_type_ensure (BZ_TYPE_ENTRY_GROUP);
+  g_type_ensure (BZ_TYPE_HARDWARE_SUPPORT_DIALOG);
   g_type_ensure (BZ_TYPE_LAZY_ASYNC_TEXTURE_MODEL);
   g_type_ensure (BZ_TYPE_SECTION_VIEW);
   g_type_ensure (BZ_TYPE_RELEASES_LIST);
   g_type_ensure (BZ_TYPE_SCREENSHOTS_CAROUSEL);
+  g_type_ensure (BZ_TYPE_SHARE_LIST);
+  g_type_ensure (BZ_TYPE_CONTEXT_TILE);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-full-view.ui");
   gtk_widget_class_bind_template_child (widget_class, BzFullView, stack);
@@ -650,18 +792,30 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
+  gtk_widget_class_bind_template_callback (widget_class, is_between);
   gtk_widget_class_bind_template_callback (widget_class, logical_and);
+  gtk_widget_class_bind_template_callback (widget_class, bool_to_string);
   gtk_widget_class_bind_template_callback (widget_class, format_recent_downloads);
+  gtk_widget_class_bind_template_callback (widget_class, format_recent_downloads_tooltip);
   gtk_widget_class_bind_template_callback (widget_class, format_size);
+  gtk_widget_class_bind_template_callback (widget_class, format_size_tooltip);
+  gtk_widget_class_bind_template_callback (widget_class, format_age_rating);
+  gtk_widget_class_bind_template_callback (widget_class, get_age_rating_label);
+  gtk_widget_class_bind_template_callback (widget_class, get_age_rating_tooltip);
+  gtk_widget_class_bind_template_callback (widget_class, get_age_rating_style);
   gtk_widget_class_bind_template_callback (widget_class, format_as_link);
-  gtk_widget_class_bind_template_callback (widget_class, format_license);
+  gtk_widget_class_bind_template_callback (widget_class, format_license_tooltip);
+  gtk_widget_class_bind_template_callback (widget_class, get_license_label);
+  gtk_widget_class_bind_template_callback (widget_class, get_license_icon);
+  gtk_widget_class_bind_template_callback (widget_class, get_formfactor_label);
+  gtk_widget_class_bind_template_callback (widget_class, get_formfactor_tooltip);
   gtk_widget_class_bind_template_callback (widget_class, has_link);
   gtk_widget_class_bind_template_callback (widget_class, open_url_cb);
   gtk_widget_class_bind_template_callback (widget_class, open_flathub_url_cb);
   gtk_widget_class_bind_template_callback (widget_class, license_cb);
-  gtk_widget_class_bind_template_callback (widget_class, share_cb);
   gtk_widget_class_bind_template_callback (widget_class, dl_stats_cb);
   gtk_widget_class_bind_template_callback (widget_class, size_cb);
+  gtk_widget_class_bind_template_callback (widget_class, formfactor_cb);
   gtk_widget_class_bind_template_callback (widget_class, run_cb);
   gtk_widget_class_bind_template_callback (widget_class, install_cb);
   gtk_widget_class_bind_template_callback (widget_class, remove_cb);
@@ -731,13 +885,17 @@ bz_full_view_set_entry_group (BzFullView   *self,
     {
       g_autoptr (DexFuture) future = NULL;
 
-      self->group            = g_object_ref (group);
-      self->ui_entry         = bz_entry_group_dup_ui_entry (group);
-      self->debounce_timeout = g_timeout_add_once (
-          300, (GSourceOnceFunc) debounce_timeout, self);
+      self->group    = g_object_ref (group);
+      self->ui_entry = bz_entry_group_dup_ui_entry (group);
 
       future            = bz_entry_group_dup_all_into_model (group);
       self->group_model = bz_result_new (future);
+
+      if (self->debounce)
+        self->debounce_timeout = g_timeout_add_once (
+            300, (GSourceOnceFunc) debounce_timeout, self);
+      else
+        debounce_timeout (self);
 
       adw_view_stack_set_visible_child_name (self->stack, "content");
     }
@@ -754,6 +912,33 @@ bz_full_view_get_entry_group (BzFullView *self)
 {
   g_return_val_if_fail (BZ_IS_FULL_VIEW (self), NULL);
   return self->group;
+}
+
+void
+bz_full_view_set_debounce (BzFullView *self,
+                           gboolean    debounce)
+{
+  g_return_if_fail (BZ_IS_FULL_VIEW (self));
+
+  if (!!debounce == !!self->debounce)
+    return;
+
+  self->debounce = debounce;
+  if (!debounce &&
+      self->debounce_timeout > 0)
+    {
+      g_clear_handle_id (&self->debounce_timeout, g_source_remove);
+      debounce_timeout (self);
+    }
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DEBOUNCE]);
+}
+
+gboolean
+bz_full_view_get_debounce (BzFullView *self)
+{
+  g_return_val_if_fail (BZ_IS_FULL_VIEW (self), FALSE);
+  return self->debounce;
 }
 
 static void
@@ -786,15 +971,16 @@ debounce_timeout (BzFullView *self)
 static DexFuture *
 retrieve_star_string_fiber (GWeakRef *wr)
 {
-  g_autoptr (BzFullView) self    = NULL;
-  g_autoptr (GError) local_error = NULL;
-  g_autoptr (BzEntry) entry      = NULL;
-  const char      *forge_link    = NULL;
-  g_autofree char *star_url      = NULL;
-  g_autoptr (JsonNode) node      = NULL;
-  JsonObject      *object        = NULL;
-  gint64           star_count    = 0;
-  g_autofree char *fmt           = NULL;
+  g_autoptr (BzFullView) self         = NULL;
+  g_autoptr (GError) local_error      = NULL;
+  g_autoptr (BzEntry) entry           = NULL;
+  const char      *forge_link         = NULL;
+  g_autofree char *forge_link_trimmed = NULL;
+  g_autofree char *star_url           = NULL;
+  g_autoptr (JsonNode) node           = NULL;
+  JsonObject      *object             = NULL;
+  gint64           star_count         = 0;
+  g_autofree char *fmt                = NULL;
 
   bz_weak_get_or_return_reject (self, wr);
 
@@ -805,6 +991,13 @@ retrieve_star_string_fiber (GWeakRef *wr)
   forge_link = bz_entry_get_forge_url (entry);
   if (forge_link == NULL)
     goto done;
+
+  // Remove trailing `/` from forge URLs if it exists
+  if (g_str_has_suffix (forge_link, "/"))
+    {
+      forge_link_trimmed = g_strndup (forge_link, strlen (forge_link) - 1);
+      forge_link         = forge_link_trimmed;
+    }
 
   if (g_regex_match_simple (
           "https://github.com/.*/.*",

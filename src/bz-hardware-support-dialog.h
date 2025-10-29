@@ -1,6 +1,6 @@
-/* bz-share-dialog.h
+/* bz-hardware-support-dialog.h
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2025 Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,16 +20,15 @@
 
 #pragma once
 
-#include <adwaita.h>
-
 #include "bz-entry.h"
+#include <adwaita.h>
+#include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_SHARE_DIALOG (bz_share_dialog_get_type ())
-G_DECLARE_FINAL_TYPE (BzShareDialog, bz_share_dialog, BZ, SHARE_DIALOG, AdwDialog)
+#define BZ_TYPE_HARDWARE_SUPPORT_DIALOG (bz_hardware_support_dialog_get_type ())
+G_DECLARE_FINAL_TYPE (BzHardwareSupportDialog, bz_hardware_support_dialog, BZ, HARDWARE_SUPPORT_DIALOG, AdwDialog)
 
-AdwDialog *
-bz_share_dialog_new (BzEntry *entry);
+BzHardwareSupportDialog *bz_hardware_support_dialog_new (BzEntry *entry);
 
 G_END_DECLS

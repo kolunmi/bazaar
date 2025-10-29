@@ -24,26 +24,19 @@
 #include "bz-env.h"
 #include "bz-util.h"
 
-BZ_DEFINE_DATA (
-    mutex_box,
-    MutexBox,
-    {
-      GMutex     m;
-      DexFuture *g;
-    },
-    BZ_RELEASE_DATA (g, dex_unref);
-    g_mutex_clear (&self->m);)
-
 struct _BzDownloadWorker
 {
   GObject parent_instance;
 
   char *name;
 
-  GSubprocess  *subprocess;
-  GHashTable   *waiting;
-  MutexBoxData *mutex;
-  DexFuture    *task;
+  GSubprocess *subprocess;
+  GHashTable  *waiting;
+  GMutex       read_mutex;
+  DexFuture   *task;
+
+  BzGuard *write_gate;
+  GMutex   write_mutex;
 };
 
 static void
@@ -65,39 +58,27 @@ enum
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
 
-BZ_DEFINE_DATA (
-    monitor_worker,
-    MonitorWorker,
-    {
-      GSubprocess  *subprocess;
-      GHashTable   *waiting;
-      MutexBoxData *mutex;
-    },
-    BZ_RELEASE_DATA (subprocess, g_object_unref);
-    BZ_RELEASE_DATA (waiting, g_hash_table_unref);
-    BZ_RELEASE_DATA (mutex, mutex_box_data_unref));
 static DexFuture *
-monitor_worker_fiber (MonitorWorkerData *data);
+monitor_worker_fiber (GWeakRef *wr);
 
 BZ_DEFINE_DATA (
     invoke_worker,
     InvokeWorker,
     {
-      DexPromise   *promise;
-      GFile        *src;
-      GFile        *dest;
-      GSubprocess  *subprocess;
-      GHashTable   *waiting;
-      MutexBoxData *mutex;
+      GWeakRef   *self;
+      DexPromise *promise;
+      GFile      *src;
+      GFile      *dest;
     },
+    BZ_RELEASE_DATA (self, bz_weak_release);
     BZ_RELEASE_DATA (promise, dex_unref);
     BZ_RELEASE_DATA (src, g_object_unref);
-    BZ_RELEASE_DATA (dest, g_object_unref);
-    BZ_RELEASE_DATA (subprocess, g_object_unref);
-    BZ_RELEASE_DATA (waiting, g_hash_table_unref);
-    BZ_RELEASE_DATA (mutex, mutex_box_data_unref));
+    BZ_RELEASE_DATA (dest, g_object_unref));
 static DexFuture *
 invoke_worker_fiber (InvokeWorkerData *data);
+
+static void
+terminate (BzDownloadWorker *self);
 
 static void
 plumb_data_input_stream_read_line_async (GDataInputStream   *stream,
@@ -113,34 +94,18 @@ plumb_data_input_stream_read_line_finish (GDataInputStream *stream,
 static void
 bz_download_worker_dispose (GObject *object)
 {
-  BzDownloadWorker *self         = BZ_DOWNLOAD_WORKER (object);
-  GHashTableIter    waiting_iter = { 0 };
+  BzDownloadWorker *self = BZ_DOWNLOAD_WORKER (object);
+
+  terminate (self);
 
   dex_clear (&self->task);
   g_clear_object (&self->subprocess);
 
-  g_hash_table_iter_init (&waiting_iter, self->waiting);
-  for (;;)
-    {
-      char       *dest_path = NULL;
-      DexPromise *promise   = NULL;
+  g_mutex_clear (&self->write_mutex);
+  bz_clear_guard (&self->write_gate);
 
-      if (!g_hash_table_iter_next (
-              &waiting_iter,
-              (gpointer *) &dest_path,
-              (gpointer *) &promise))
-        break;
-
-      dex_promise_reject (
-          promise,
-          g_error_new (G_IO_ERROR,
-                       G_IO_ERROR_CANCELLED,
-                       "The subprocess was terminated"));
-    }
-
+  g_mutex_clear (&self->read_mutex);
   g_clear_pointer (&self->waiting, g_hash_table_unref);
-  g_clear_pointer (&self->mutex, mutex_box_data_unref);
-
   g_clear_pointer (&self->name, g_free);
 
   G_OBJECT_CLASS (bz_download_worker_parent_class)->dispose (object);
@@ -203,8 +168,8 @@ bz_download_worker_class_init (BzDownloadWorkerClass *klass)
 static void
 bz_download_worker_init (BzDownloadWorker *self)
 {
-  self->mutex = mutex_box_data_new ();
-  g_mutex_init (&self->mutex->m);
+  g_mutex_init (&self->read_mutex);
+  g_mutex_init (&self->write_mutex);
 
   self->waiting = g_hash_table_new_full (
       g_str_hash, g_str_equal, g_free, dex_unref);
@@ -215,8 +180,7 @@ bz_download_worker_initable_init (GInitable    *initable,
                                   GCancellable *cancellable,
                                   GError      **error)
 {
-  BzDownloadWorker *self             = BZ_DOWNLOAD_WORKER (initable);
-  g_autoptr (MonitorWorkerData) data = NULL;
+  BzDownloadWorker *self = BZ_DOWNLOAD_WORKER (initable);
 
   self->subprocess = g_subprocess_new (
       G_SUBPROCESS_FLAGS_STDIN_PIPE |
@@ -226,17 +190,11 @@ bz_download_worker_initable_init (GInitable    *initable,
   if (self->subprocess == NULL)
     return FALSE;
 
-  data             = monitor_worker_data_new ();
-  data->subprocess = g_object_ref (self->subprocess);
-  data->waiting    = g_hash_table_ref (self->waiting);
-  data->mutex      = mutex_box_data_ref (self->mutex);
-
   self->task = dex_scheduler_spawn (
       dex_scheduler_get_default (),
       bz_get_dex_stack_size (),
       (DexFiberFunc) monitor_worker_fiber,
-      monitor_worker_data_ref (data),
-      monitor_worker_data_unref);
+      bz_track_weak (self), bz_weak_release);
 
   return TRUE;
 }
@@ -292,13 +250,11 @@ bz_download_worker_invoke (BzDownloadWorker *self,
 
   promise = dex_promise_new ();
 
-  data             = invoke_worker_data_new ();
-  data->promise    = dex_ref (promise);
-  data->src        = g_object_ref (src);
-  data->dest       = g_object_ref (dest);
-  data->subprocess = g_object_ref (self->subprocess);
-  data->waiting    = g_hash_table_ref (self->waiting);
-  data->mutex      = mutex_box_data_ref (self->mutex);
+  data          = invoke_worker_data_new ();
+  data->self    = bz_track_weak (self);
+  data->promise = dex_ref (promise);
+  data->src     = g_object_ref (src);
+  data->dest    = g_object_ref (dest);
 
   dex_future_disown (dex_scheduler_spawn (
       dex_scheduler_get_default (),
@@ -325,7 +281,7 @@ bz_download_worker_get_default (void)
       workers = g_ptr_array_new_with_free_func (g_object_unref);
 
       /* TODO: make number of workers controllable with envvar */
-#define N_WORKERS 5
+#define N_WORKERS 8
 
       for (guint i = 0; i < N_WORKERS; i++)
         {
@@ -372,25 +328,21 @@ bz_download_worker_get_default (void)
 }
 
 static DexFuture *
-monitor_worker_fiber (MonitorWorkerData *data)
+monitor_worker_fiber (GWeakRef *wr)
 {
-  GSubprocess  *subprocess                       = data->subprocess;
-  GHashTable   *waiting                          = data->waiting;
-  MutexBoxData *mutex                            = data->mutex;
+  g_autoptr (BzDownloadWorker) self              = NULL;
+  g_autoptr (GInputStream) input_stream          = NULL;
   g_autoptr (GDataInputStream) subprocess_stdout = NULL;
 
-  subprocess_stdout = g_data_input_stream_new (
-      g_subprocess_get_stdout_pipe (subprocess));
+  bz_weak_get_or_return_reject (self, wr);
+  input_stream      = g_object_ref (g_subprocess_get_stdout_pipe (self->subprocess));
+  subprocess_stdout = g_data_input_stream_new (g_object_ref (input_stream));
+  g_clear_object (&self);
 
   for (;;)
     {
       g_autoptr (GError) local_error = NULL;
-      g_autoptr (BzGuard) guard      = NULL;
       g_autofree char *line          = NULL;
-      g_autoptr (GVariant) variant   = NULL;
-      g_autofree char *dest_path     = NULL;
-      gboolean         success       = FALSE;
-      DexPromise      *promise       = NULL;
 
       line = dex_await_string (
           dex_async_pair_new (
@@ -404,99 +356,177 @@ monitor_worker_fiber (MonitorWorkerData *data)
           if (local_error != NULL)
             g_critical ("Could not read stdout from download worker subprocess: %s",
                         local_error->message);
-
-          /* give up on this subprocess and wait to be disposed */
-          return NULL;
+          goto err;
         }
 
-      variant = g_variant_parse (G_VARIANT_TYPE ("(sb)"),
-                                 line, NULL, NULL, &local_error);
-      if (variant == NULL)
+      do
         {
-          g_critical ("Could not interpret stdout from download worker subprocess: %s",
-                      local_error->message);
-          continue;
-        }
-      g_variant_get (variant, "(sb)", &dest_path, &success);
+          g_autoptr (GVariant) variant = NULL;
+          g_autofree char *dest_path   = NULL;
+          gboolean         success     = FALSE;
+          DexPromise      *promise     = NULL;
 
-      BZ_BEGIN_GUARD_WITH_CONTEXT (&guard, &mutex->m, &mutex->g);
-      {
-        promise = g_hash_table_lookup (waiting, dest_path);
-        if (promise != NULL)
-          {
-            if (success)
-              dex_promise_resolve_boolean (promise, TRUE);
-            else
-              dex_promise_reject (
-                  promise,
-                  g_error_new (G_IO_ERROR,
-                               G_IO_ERROR_UNKNOWN,
-                               "The subprocess reported an error downloading '%s'", dest_path));
-            promise = NULL;
-            g_hash_table_remove (waiting, dest_path);
-          }
-      }
-      bz_clear_guard (&guard);
+          if (line == NULL)
+            {
+              line = g_data_input_stream_read_line_utf8 (subprocess_stdout, NULL, NULL, &local_error);
+              if (line == NULL)
+                {
+                  if (local_error != NULL)
+                    g_critical ("Could not read stdout from download worker subprocess: %s",
+                                local_error->message);
+                  goto err;
+                }
+            }
+
+          variant = g_variant_parse (G_VARIANT_TYPE ("(sb)"),
+                                     line, NULL, NULL, &local_error);
+          if (variant == NULL)
+            {
+              g_critical ("Could not interpret stdout from download worker subprocess: %s",
+                          local_error->message);
+              goto err;
+            }
+          g_variant_get (variant, "(sb)", &dest_path, &success);
+
+          bz_weak_get_or_return_reject (self, wr);
+          g_mutex_lock (&self->read_mutex);
+
+          promise = g_hash_table_lookup (self->waiting, dest_path);
+          if (promise != NULL)
+            {
+              if (success)
+                dex_promise_resolve_boolean (promise, TRUE);
+              else
+                dex_promise_reject (
+                    promise,
+                    g_error_new (G_IO_ERROR,
+                                 G_IO_ERROR_UNKNOWN,
+                                 "The subprocess reported an error downloading '%s'", dest_path));
+              promise = NULL;
+              g_hash_table_remove (self->waiting, dest_path);
+            }
+
+          g_mutex_unlock (&self->read_mutex);
+          g_clear_object (&self);
+
+          g_clear_pointer (&line, g_free);
+        }
+      while (g_input_stream_has_pending (input_stream));
     }
 
-  return NULL;
+  return dex_future_new_true ();
+
+err:
+  bz_weak_get_or_return_reject (self, wr);
+
+  /* give up on this subprocess and wait to be disposed */
+  g_mutex_lock (&self->read_mutex);
+  terminate (self);
+  g_mutex_unlock (&self->read_mutex);
+
+  return dex_future_new_false ();
 }
 
 static DexFuture *
 invoke_worker_fiber (InvokeWorkerData *data)
 {
-  g_autoptr (GError) local_error = NULL;
-  g_autoptr (BzGuard) guard      = NULL;
-  DexPromise      *promise       = data->promise;
-  GFile           *src           = data->src;
-  GFile           *dest          = data->dest;
-  GSubprocess     *subprocess    = data->subprocess;
-  GHashTable      *waiting       = data->waiting;
-  MutexBoxData    *mutex         = data->mutex;
-  g_autofree char *src_uri       = NULL;
-  g_autofree char *dest_path     = NULL;
-  DexPromise      *existing      = NULL;
-  g_autoptr (GVariant) variant   = NULL;
-  g_autoptr (GString) output     = NULL;
-  GOutputStream *stdin_stream    = NULL;
-  gint64         bytes_written   = -1;
+  g_autoptr (BzDownloadWorker) self      = NULL;
+  g_autoptr (GError) local_error         = NULL;
+  g_autoptr (BzGuard) guard              = NULL;
+  DexPromise      *promise               = data->promise;
+  GFile           *src                   = data->src;
+  GFile           *dest                  = data->dest;
+  g_autofree char *src_uri               = NULL;
+  g_autofree char *dest_path             = NULL;
+  DexPromise      *existing              = NULL;
+  g_autoptr (GVariant) variant           = NULL;
+  g_autoptr (GString) output             = NULL;
+  g_autoptr (GOutputStream) stdin_stream = NULL;
+  gint64 bytes_written                   = -1;
 
   src_uri   = g_file_get_uri (src);
   dest_path = g_file_get_path (dest);
 
-  BZ_BEGIN_GUARD_WITH_CONTEXT (&guard, &mutex->m, &mutex->g);
-  {
-    existing = g_hash_table_lookup (waiting, dest_path);
-    if (existing != NULL)
-      {
-        dex_promise_reject (
-            existing,
-            g_error_new (G_IO_ERROR,
-                         G_IO_ERROR_CANCELLED,
-                         "The operation was replaced"));
-        existing = NULL;
-      }
-    g_hash_table_replace (waiting, g_strdup (dest_path), dex_ref (promise));
+  bz_weak_get_or_return_reject (self, data->self);
+  g_mutex_lock (&self->read_mutex);
+  existing = g_hash_table_lookup (self->waiting, dest_path);
+  if (existing != NULL)
+    {
+      dex_promise_reject (
+          existing,
+          g_error_new (G_IO_ERROR,
+                       G_IO_ERROR_CANCELLED,
+                       "The operation was replaced"));
+      existing = NULL;
+    }
+  g_hash_table_replace (self->waiting, g_strdup (dest_path), dex_ref (promise));
+  g_mutex_unlock (&self->read_mutex);
 
-    variant = g_variant_new ("(ss)", src_uri, dest_path);
-    output  = g_string_new (NULL);
-    output  = g_variant_print_string (variant, g_steal_pointer (&output), TRUE);
-    g_string_append_c (output, '\n');
+  variant = g_variant_new ("(ss)", src_uri, dest_path);
+  output  = g_string_new (NULL);
+  output  = g_variant_print_string (variant, g_steal_pointer (&output), TRUE);
+  g_string_append_c (output, '\n');
 
-    stdin_stream  = g_subprocess_get_stdin_pipe (subprocess);
-    bytes_written = dex_await_int64 (
-        dex_output_stream_write (stdin_stream, output->str, output->len, G_PRIORITY_DEFAULT),
-        &local_error);
+  stdin_stream = g_object_ref (g_subprocess_get_stdin_pipe (self->subprocess));
 
-    if (bytes_written < 0)
-      {
-        g_hash_table_remove (waiting, dest_path);
-        dex_promise_reject (promise, g_steal_pointer (&local_error));
-      }
-  }
+  BZ_BEGIN_GUARD_WITH_CONTEXT (&guard, &self->write_mutex, &self->write_gate);
+  g_clear_object (&self);
+
+  bytes_written = dex_await_int64 (
+      dex_future_first (
+          dex_output_stream_write (
+              stdin_stream,
+              output->str,
+              output->len,
+              G_PRIORITY_DEFAULT),
+          dex_ref (promise),
+          NULL),
+      &local_error);
   bz_clear_guard (&guard);
 
-  return NULL;
+  /* Check if we've been cancelled */
+  if (!dex_future_is_pending (DEX_FUTURE (promise)))
+    return dex_future_new_false ();
+
+  if (bytes_written < 0)
+    {
+      bz_weak_get_or_return_reject (self, data->self);
+      g_mutex_lock (&self->read_mutex);
+
+      g_hash_table_remove (self->waiting, dest_path);
+      dex_promise_reject (promise, g_steal_pointer (&local_error));
+
+      g_mutex_unlock (&self->read_mutex);
+      g_clear_object (&self);
+    }
+
+  return dex_future_new_true ();
+}
+
+static void
+terminate (BzDownloadWorker *self)
+{
+  GHashTableIter waiting_iter = { 0 };
+
+  g_hash_table_iter_init (&waiting_iter, self->waiting);
+  for (;;)
+    {
+      g_autofree char *dest_path     = NULL;
+      g_autoptr (DexPromise) promise = NULL;
+
+      if (!g_hash_table_iter_next (
+              &waiting_iter,
+              (gpointer *) &dest_path,
+              (gpointer *) &promise))
+        break;
+      g_hash_table_iter_steal (&waiting_iter);
+
+      dex_promise_reject (
+          promise,
+          g_error_new (G_IO_ERROR,
+                       G_IO_ERROR_CANCELLED,
+                       "The subprocess was terminated"));
+    }
 }
 
 static void
@@ -518,7 +548,7 @@ plumb_data_input_stream_read_line_finish (GDataInputStream *stream,
                                           GAsyncResult     *result,
                                           gpointer          user_data)
 {
-  return g_data_input_stream_read_line_finish (
+  return g_data_input_stream_read_line_finish_utf8 (
       stream,
       result,
       NULL,

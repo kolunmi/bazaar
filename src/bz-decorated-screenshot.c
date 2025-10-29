@@ -113,9 +113,29 @@ bz_decorated_screenshot_class_init (BzDecoratedScreenshotClass *klass)
 }
 
 static void
+on_enter_notify (GtkEventController *controller, gpointer user_data)
+{
+  g_autoptr (GdkCursor) cursor = gdk_cursor_new_from_name ("pointer", NULL);
+  gtk_widget_set_cursor (GTK_WIDGET (user_data), cursor);
+}
+
+static void
+on_leave_notify (GtkEventController *controller, gpointer user_data)
+{
+  gtk_widget_set_cursor (GTK_WIDGET (user_data), NULL);
+}
+
+static void
 bz_decorated_screenshot_init (BzDecoratedScreenshot *self)
 {
+  GtkEventController *enter_leave = gtk_event_controller_motion_new ();
+
   gtk_widget_init_template (GTK_WIDGET (self));
+
+  g_signal_connect (enter_leave, "enter", G_CALLBACK (on_enter_notify), GTK_WIDGET (self));
+  g_signal_connect (enter_leave, "leave", G_CALLBACK (on_leave_notify), GTK_WIDGET (self));
+
+  gtk_widget_add_controller (GTK_WIDGET (self), enter_leave);
 }
 
 BzDecoratedScreenshot *

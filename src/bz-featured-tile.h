@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <gtk/gtk.h>
 #include "bz-entry-group.h"
+#include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
@@ -34,6 +34,11 @@ BzFeaturedTile *bz_featured_tile_new (BzEntryGroup *group);
 BzEntryGroup *bz_featured_tile_get_group (BzFeaturedTile *self);
 
 void bz_featured_tile_set_group (BzFeaturedTile *self,
-                                  BzEntryGroup   *group);
+                                 BzEntryGroup   *group);
+
+gboolean bz_featured_tile_get_is_aotd (BzFeaturedTile *self);
+
+void bz_featured_tile_set_is_aotd (BzFeaturedTile *self,
+                                   gboolean        is_aotd);
 
 G_END_DECLS
