@@ -29,7 +29,7 @@ msgstr "Hinzufügen, Entfernen oder Aktualisieren von Anwendungen auf diesem Com
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:9
 msgid "GTK;System;PackageManager;Discover;Flatpak;Software;Store;"
-msgstr "GTK;System;Paketverwaltung;Discover;Flatpak;Software;Store"
+msgstr "GTK;System;Paketverwaltung;Discover;Flatpak;Software;Store;"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:6
 msgid "Show Git Forge Star Counts"
