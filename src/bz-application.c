@@ -1526,7 +1526,8 @@ refresh_finally (DexFuture     *future,
   dex_clear (&self->periodic_sync);
   g_clear_handle_id (&self->periodic_timeout, g_source_remove);
   self->periodic_timeout = g_timeout_add_seconds (
-      60, (GSourceFunc) periodic_timeout_cb, self);
+      /* Check every ten minutes*/
+      60 * 10, (GSourceFunc) periodic_timeout_cb, self);
 
   value = dex_future_get_value (future, &local_error);
   if (value != NULL)
