@@ -282,6 +282,7 @@ template $BzWindow: Adw.ApplicationWindow {
                       child: $BzFullView full_view {
                         state: bind template.state;
                         transaction-manager: bind template.state as <$BzStateInfo>.transaction-manager;
+                        debounce: bind search_split.show-sidebar as <bool>;
                         install => $full_view_install_cb(template);
                         remove => $full_view_remove_cb(template);
                         install-addon => $install_addon_cb(template);

@@ -53,6 +53,7 @@ struct _BzFullView
   BzTransactionManager *transactions;
   BzEntryGroup         *group;
   BzResult             *ui_entry;
+  gboolean              debounce;
   BzResult             *debounced_ui_entry;
   BzResult             *group_model;
 
@@ -76,6 +77,7 @@ enum
   PROP_TRANSACTION_MANAGER,
   PROP_ENTRY_GROUP,
   PROP_UI_ENTRY,
+  PROP_DEBOUNCE,
   PROP_DEBOUNCED_UI_ENTRY,
 
   LAST_PROP
@@ -143,6 +145,9 @@ bz_full_view_get_property (GObject    *object,
     case PROP_UI_ENTRY:
       g_value_set_object (value, self->ui_entry);
       break;
+    case PROP_DEBOUNCE:
+      g_value_set_boolean (value, self->debounce);
+      break;
     case PROP_DEBOUNCED_UI_ENTRY:
       g_value_set_object (value, self->debounced_ui_entry);
       break;
@@ -170,6 +175,9 @@ bz_full_view_set_property (GObject      *object,
       break;
     case PROP_ENTRY_GROUP:
       bz_full_view_set_entry_group (self, g_value_get_object (value));
+      break;
+    case PROP_DEBOUNCE:
+      bz_full_view_set_debounce (self, g_value_get_boolean (value));
       break;
     case PROP_UI_ENTRY:
     case PROP_DEBOUNCED_UI_ENTRY:
@@ -690,6 +698,13 @@ bz_full_view_class_init (BzFullViewClass *klass)
           BZ_TYPE_RESULT,
           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
+  props[PROP_DEBOUNCE] =
+      g_param_spec_boolean (
+          "debounce",
+          NULL, NULL,
+          FALSE,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
   props[PROP_DEBOUNCED_UI_ENTRY] =
       g_param_spec_object (
           "debounced-ui-entry",
@@ -870,13 +885,17 @@ bz_full_view_set_entry_group (BzFullView   *self,
     {
       g_autoptr (DexFuture) future = NULL;
 
-      self->group            = g_object_ref (group);
-      self->ui_entry         = bz_entry_group_dup_ui_entry (group);
-      self->debounce_timeout = g_timeout_add_once (
-          300, (GSourceOnceFunc) debounce_timeout, self);
+      self->group    = g_object_ref (group);
+      self->ui_entry = bz_entry_group_dup_ui_entry (group);
 
       future            = bz_entry_group_dup_all_into_model (group);
       self->group_model = bz_result_new (future);
+
+      if (self->debounce)
+        self->debounce_timeout = g_timeout_add_once (
+            300, (GSourceOnceFunc) debounce_timeout, self);
+      else
+        debounce_timeout (self);
 
       adw_view_stack_set_visible_child_name (self->stack, "content");
     }
@@ -893,6 +912,33 @@ bz_full_view_get_entry_group (BzFullView *self)
 {
   g_return_val_if_fail (BZ_IS_FULL_VIEW (self), NULL);
   return self->group;
+}
+
+void
+bz_full_view_set_debounce (BzFullView *self,
+                           gboolean    debounce)
+{
+  g_return_if_fail (BZ_IS_FULL_VIEW (self));
+
+  if (!!debounce == !!self->debounce)
+    return;
+
+  self->debounce = debounce;
+  if (!debounce &&
+      self->debounce_timeout > 0)
+    {
+      g_clear_handle_id (&self->debounce_timeout, g_source_remove);
+      debounce_timeout (self);
+    }
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DEBOUNCE]);
+}
+
+gboolean
+bz_full_view_get_debounce (BzFullView *self)
+{
+  g_return_val_if_fail (BZ_IS_FULL_VIEW (self), FALSE);
+  return self->debounce;
 }
 
 static void
