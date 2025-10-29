@@ -1,12 +1,16 @@
 using Gtk 4.0;
 using Adw 1;
 
-template $BzScreenshotsCarousel : Gtk.Widget {
+template $BzScreenshotsCarousel: Gtk.Widget {
   accessibility {
     label: _("Screenshots Carousel");
   }
 
-  styles ["screenshot-carousel", "view", "frame"]
+  styles [
+    "screenshot-carousel",
+    "view",
+    "frame",
+  ]
 
   layout-manager: Gtk.BinLayout {};
 
@@ -18,7 +22,10 @@ template $BzScreenshotsCarousel : Gtk.Widget {
       orientation: vertical;
       halign: fill;
       valign: fill;
-      styles ["carousel-box"]
+
+      styles [
+        "carousel-box",
+      ]
 
       Adw.Carousel carousel {
         vexpand: true;
@@ -37,7 +44,11 @@ template $BzScreenshotsCarousel : Gtk.Widget {
         opacity: 0;
         hexpand: true;
         halign: center;
-        styles ["boxed-indicator", "indicator-box"]
+
+        styles [
+          "boxed-indicator",
+          "indicator-box",
+        ]
       }
     };
 
@@ -53,7 +64,11 @@ template $BzScreenshotsCarousel : Gtk.Widget {
         valign: center;
         halign: start;
         clicked => $on_prev_clicked() swapped;
-        styles ["circular", "osd"]
+
+        styles [
+          "circular",
+          "osd",
+        ]
       }
     }
 
@@ -68,20 +83,35 @@ template $BzScreenshotsCarousel : Gtk.Widget {
         icon-name: "go-next-symbolic";
         valign: center;
         clicked => $on_next_clicked() swapped;
-        styles ["circular", "osd"]
+
+        styles [
+          "circular",
+          "osd",
+        ]
       }
     }
 
     [overlay]
-    Gtk.Button {
+    Box {
+      styles [
+        "osd-box",
+        "pip-button",
+      ]
+
+      margin-end: 8;
+      margin-bottom: 8;
       halign: end;
       valign: end;
-      icon-name: "four-arrows-pointing-outward-symbolic";
-      tooltip-text: _("Open in Dialog Viewer");
-      clicked => $on_expand_clicked() swapped;
-      styles ["flat"]
-      margin-end: 3;
-      margin-bottom: 5;
+
+      Gtk.Button {
+        icon-name: "pip-out-symbolic";
+        tooltip-text: _("Open Screenshot Viewer");
+        clicked => $on_expand_clicked() swapped;
+
+        styles [
+          "flat",
+        ]
+      }
     }
   }
 }
