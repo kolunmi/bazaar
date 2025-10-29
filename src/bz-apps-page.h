@@ -37,4 +37,8 @@ bz_apps_page_new_with_carousel (const char *title,
                                 GListModel *applications,
                                 GListModel *carousel_applications);
 
+void
+bz_apps_page_set_subtitle (BzAppsPage *self,
+                           const char *subtitle);
+
 G_END_DECLS

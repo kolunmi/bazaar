@@ -29,6 +29,7 @@ struct _BzAppsPage
   char       *title;
   GListModel *applications;
   GListModel *carousel_applications;
+  char       *subtitle;
 
   /* Template widgets */
 };
@@ -42,6 +43,7 @@ enum
   PROP_PAGE_TITLE,
   PROP_APPLICATIONS,
   PROP_CAROUSEL_APPLICATIONS,
+  PROP_PAGE_SUBTITLE,
 
   LAST_PROP
 };
@@ -67,6 +69,7 @@ bz_apps_page_dispose (GObject *object)
   g_clear_pointer (&self->title, g_free);
   g_clear_object (&self->applications);
   g_clear_object (&self->carousel_applications);
+  g_clear_pointer (&self->subtitle, g_free);
 
   G_OBJECT_CLASS (bz_apps_page_parent_class)->dispose (object);
 }
@@ -89,6 +92,9 @@ bz_apps_page_get_property (GObject    *object,
       break;
     case PROP_CAROUSEL_APPLICATIONS:
       g_value_set_object (value, self->carousel_applications);
+      break;
+    case PROP_PAGE_SUBTITLE:
+      g_value_set_string (value, self->subtitle);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -116,6 +122,10 @@ bz_apps_page_set_property (GObject      *object,
     case PROP_CAROUSEL_APPLICATIONS:
       g_clear_object (&self->carousel_applications);
       self->carousel_applications = g_value_dup_object (value);
+      break;
+    case PROP_PAGE_SUBTITLE:
+      g_clear_pointer (&self->subtitle, g_free);
+      self->subtitle = g_value_dup_string (value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -145,6 +155,13 @@ is_not_null (gpointer object,
              GObject *value)
 {
   return value != NULL;
+}
+
+static gboolean
+is_not_empty_string (gpointer    object,
+                     const char *str)
+{
+  return str != NULL && str[0] != '\0';
 }
 
 static void
@@ -184,6 +201,11 @@ bz_apps_page_class_init (BzAppsPageClass *klass)
           NULL, NULL,
           G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
+  props[PROP_PAGE_SUBTITLE] =
+      g_param_spec_string (
+          "page-subtitle",
+          NULL, NULL, NULL,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
@@ -206,6 +228,7 @@ bz_apps_page_class_init (BzAppsPageClass *klass)
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-apps-page.ui");
   gtk_widget_class_bind_template_callback (widget_class, is_not_null);
+  gtk_widget_class_bind_template_callback (widget_class, is_not_empty_string);
   gtk_widget_class_bind_template_callback (widget_class, bind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, unbind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, featured_carousel_group_clicked_cb);
@@ -241,6 +264,22 @@ bz_apps_page_new_with_carousel (const char *title,
   adw_navigation_page_set_title (ADW_NAVIGATION_PAGE (apps_page), title);
 
   return ADW_NAVIGATION_PAGE (apps_page);
+}
+
+void
+bz_apps_page_set_subtitle (BzAppsPage *self,
+                           const char *subtitle)
+{
+  g_return_if_fail (BZ_IS_APPS_PAGE (self));
+
+  if (g_strcmp0 (self->subtitle, subtitle) == 0)
+    return;
+
+  g_clear_pointer (&self->subtitle, g_free);
+  if (subtitle != NULL)
+    self->subtitle = g_strdup (subtitle);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PAGE_SUBTITLE]);
 }
 
 static void

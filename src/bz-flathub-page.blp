@@ -2,298 +2,370 @@ using Gtk 4.0;
 using Adw 1;
 
 template $BzFlathubPage: Adw.Bin {
- child: Adw.BreakpointBin {
-   width-request: 360;
-   height-request: 450;
+  child: Adw.BreakpointBin {
+    width-request: 360;
+    height-request: 450;
 
-   child: Adw.ViewStack stack {
-     enable-transitions: true;
-     transition-duration: 400;
+    child: Adw.ViewStack stack {
+      enable-transitions: true;
+      transition-duration: 400;
 
-     Adw.ViewStackPage {
-       name: "empty";
-       title: _("Empty");
+      Adw.ViewStackPage {
+        name: "empty";
+        title: _("Empty");
 
-       child: Adw.StatusPage {
-         icon-name: "flatpak-symbolic";
-         title: _("Flathub Not Added");
-         description: _("The Flathub remote was not found on any of your flatpak installations");
-       };
-     }
+        child: Adw.StatusPage {
+          icon-name: "flathub-symbolic";
+          title: _("Flathub Not Added");
+          description: _("The Flathub remote was not found on any of your Flatpak installations");
+        };
+      }
 
-     Adw.ViewStackPage {
-       name: "content";
-       title: _("Browser");
+      Adw.ViewStackPage {
+        name: "content";
+        title: _("Browser");
 
-       child: ScrolledWindow {
-         styles [
-           "transparent"
-         ]
+        child: ScrolledWindow {
+          styles [
+            "transparent",
+          ]
 
-         hscrollbar-policy: never;
+          hscrollbar-policy: never;
 
-         child: Adw.ClampScrollable {
-           maximum-size: 1500;
-           tightening-threshold: 1400;
+          child: Adw.ClampScrollable {
+            maximum-size: 1500;
+            tightening-threshold: 1400;
 
-           child: Viewport {
-             child: Box content_box {
-               margin-start: 25;
-               margin-end: 25;
-               margin-top: 5;
-               margin-bottom: 20;
-               orientation: vertical;
-               spacing: 15;
+            child: Viewport {
+              child: Box content_box {
+                margin-start: 25;
+                margin-end: 25;
+                margin-top: 5;
+                margin-bottom: 20;
+                orientation: vertical;
+                spacing: 15;
 
-               $BzFeaturedCarousel {
-                  margin-start:8;
-                  margin-end:8;
+                $BzFeaturedCarousel {
+                  margin-start: 8;
+                  margin-end: 8;
+
                   styles [
                     "flathub-page-section",
                   ]
+
                   margin-top: 16;
                   hexpand: true;
-                  model: bind template.state as <$BzFlathubState>.apps_of_the_day_week;
+                  model: bind template.state as <$BzFlathubState>.apps_of_the_week;
                   group-clicked => $featured_carousel_group_clicked_cb(template);
                 }
 
-               Box {
-                 orientation: vertical;
-                 spacing: 10;
+                Adw.ToggleGroup section_toggles {
+                  halign: center;
+                  homogeneous: true;
 
-                 Box {
-                   orientation: horizontal;
-                   spacing: 10;
-                   margin-start: 8;
-                   margin-end: 8;
+                  styles [
+                    "round",
+                  ]
 
-                   Label {
-                     styles [
-                       "title-1",
-                     ]
-                     label: _("Trending");
-                     xalign: 0.0;
-                     hexpand: true;
-                   }
-                 }
-               
-                 $BzDynamicListView {
-                   styles [
-                     "flathub-page-section",
-                   ]
-
-                   hexpand: true;
-
-                   scroll: false;
-                   noscroll-kind: flow-box;
-                   child-type: "BzAppTile";
-                   child-prop: "group";
-                   model: SliceListModel {
-                     offset: 0;
-                     size: 12;
-                     model: bind template.state as <$BzFlathubState>.trending;
-                   };
-
-                   bind-widget => $bind_widget_cb(template);
-                   unbind-widget => $unbind_widget_cb(template);
-                 }
-                 Button {
-                    styles [
-                    "pill"
-                    ]
-
-                     label: _("More Trending");
-                     halign: center;
-                     valign: center;
-                     clicked => $show_more_trending_clicked_cb(template);
+                  Adw.Toggle {
+                    label: _("Trending");
+                    name: "trending";
                   }
-               }
 
-               $BzDynamicListView {
-                 styles [
-                   "flathub-page-section",
-                 ]
-               
-                 hexpand: true;
-                 max-children-per-line:5;
-                 scroll: false;
-                 noscroll-kind: flow-box;
-                 child-type: "BzCategoryTile";
-                 child-prop: "category";
-                 model: bind template.state as <$BzFlathubState>.categories;
+                  Adw.Toggle {
+                    label: _("Popular");
+                    name: "popular";
+                  }
 
-                 bind-widget => $bind_category_tile_cb(template);
-                 unbind-widget => $unbind_category_tile_cb(template);
-               }
+                  Adw.Toggle {
+                    label: _("New");
+                    name: "recently_added";
+                  }
 
-               Box {
-                 orientation: vertical;
-                 spacing: 10;
-               
-                 Box {
-                   orientation: horizontal;
-                   spacing: 10;
-                   margin-start: 8;
-                   margin-end: 8;
+                  Adw.Toggle {
+                    label: _("Updated");
+                    name: "recently_updated";
+                  }
+                }
 
-                   Label {
-                     styles [
-                       "title-1",
-                     ]
-                     label: _("Recently Updated");
-                     xalign: 0.0;
-                     hexpand: true;
-                   }
-                 }
+                Adw.ViewStack sections_stack {
+                  enable-transitions: true;
+                  vhomogeneous: false;
+                  transition-duration: 300;
+                  visible-child-name: bind section_toggles.active-name;
 
-                 $BzDynamicListView {
-                   styles [
-                     "flathub-page-section",
-                   ]
+                  Adw.ViewStackPage {
+                    name: "trending";
+                    title: _("Trending");
 
-                   hexpand: true;
+                    child: Box {
+                      orientation: vertical;
+                      spacing: 10;
 
-                   scroll: false;
-                   noscroll-kind: flow-box;
-                   child-type: "BzAppTile";
-                   child-prop: "group";
-                   model: SliceListModel {
-                     offset: 0;
-                     size: 12;
-                     model: bind template.state as <$BzFlathubState>.recently_updated;
-                   };
+                      $BzDynamicListView {
+                        styles [
+                          "flathub-page-section",
+                        ]
 
-                   bind-widget => $bind_widget_cb(template);
-                   unbind-widget => $unbind_widget_cb(template);
-                 }
-                 Button {
-                    styles [
-                    "pill"
-                    ]
+                        hexpand: true;
+                        scroll: false;
+                        noscroll-kind: flow-box;
+                        child-type: "BzAppTile";
+                        child-prop: "group";
 
-                     label: _("More Updated");
-                     halign: center;
-                     valign: center;
-                     clicked => $show_more_recently_updated_clicked_cb(template);
-                 }
-               }
+                        model: SliceListModel {
+                          offset: 0;
+                          size: 12;
+                          model: bind template.state as <$BzFlathubState>.trending;
+                        };
 
-               Box {
-                 orientation: vertical;
-                 spacing: 10;
-               
-                 Box {
-                   orientation: horizontal;
-                   spacing: 10;
-                   margin-start: 8;
-                   margin-end: 8;
+                        bind-widget => $bind_widget_cb(template);
+                        unbind-widget => $unbind_widget_cb(template);
+                      }
 
-                   Label {
-                     styles [
-                       "title-1",
-                     ]
-                     label: _("Recently Added");
-                     xalign: 0.0;
-                     hexpand: true;
-                   }
-                 }
+                      Button {
+                        styles [
+                          "pill",
+                        ]
 
-                 $BzDynamicListView {
-                   styles [
-                     "flathub-page-section",
-                   ]
+                        label: _("More Trending");
+                        halign: center;
+                        valign: center;
+                        clicked => $show_more_trending_clicked_cb(template);
+                      }
+                    };
+                  }
 
-                   hexpand: true;
+                  Adw.ViewStackPage {
+                    name: "recently_updated";
+                    title: _("Recently Updated");
 
-                   scroll: false;
-                   noscroll-kind: flow-box;
-                   child-type: "BzAppTile";
-                   child-prop: "group";
-                   model: SliceListModel {
-                     offset: 0;
-                     size: 12;
-                     model: bind template.state as <$BzFlathubState>.recently_added;
-                   };
+                    child: Box {
+                      orientation: vertical;
+                      spacing: 10;
 
-                   bind-widget => $bind_widget_cb(template);
-                   unbind-widget => $unbind_widget_cb(template);
-                 }
-                 Button {
-                    styles [
-                    "pill"
-                    ]
+                      $BzDynamicListView {
+                        styles [
+                          "flathub-page-section",
+                        ]
 
-                     label: _("More Added");
-                     halign: center;
-                     valign: center;
-                     clicked => $show_more_recently_added_clicked_cb(template);
-                 }
-               }
-             
-               Box {
-                 orientation: vertical;
-                 spacing: 10;
-               
-                 Box {
-                   orientation: horizontal;
-                   spacing: 10;
-                   margin-start: 8;
-                   margin-end: 8;
+                        hexpand: true;
+                        scroll: false;
+                        noscroll-kind: flow-box;
+                        child-type: "BzAppTile";
+                        child-prop: "group";
 
-                   Label {
-                     styles [
-                       "title-1",
-                     ]
-                     label: _("Popular");
-                     xalign: 0.0;
-                     hexpand: true;
-                   }
-                 }
+                        model: SliceListModel {
+                          offset: 0;
+                          size: 12;
+                          model: bind template.state as <$BzFlathubState>.recently_updated;
+                        };
 
-                 $BzDynamicListView {
-                   styles [
-                     "flathub-page-section",
-                   ]
+                        bind-widget => $bind_widget_cb(template);
+                        unbind-widget => $unbind_widget_cb(template);
+                      }
 
-                   hexpand: true;
+                      Button {
+                        styles [
+                          "pill",
+                        ]
 
-                   scroll: false;
-                   noscroll-kind: flow-box;
-                   child-type: "BzAppTile";
-                   child-prop: "group";
-                   model: SliceListModel {
-                     offset: 0;
-                     size: 12;
-                     model: bind template.state as <$BzFlathubState>.popular;
-                   };
+                        label: _("More Updated");
+                        halign: center;
+                        valign: center;
+                        clicked => $show_more_recently_updated_clicked_cb(template);
+                      }
+                    };
+                  }
 
-                   bind-widget => $bind_widget_cb(template);
-                   unbind-widget => $unbind_widget_cb(template);
-                 }
-                 Button {
-                    styles [
-                    "pill"
-                    ]
+                  Adw.ViewStackPage {
+                    name: "recently_added";
+                    title: _("Recently Added");
 
-                     label: _("More Popular");
-                     halign: center;
-                     valign: center;
-                     clicked => $show_more_popular_clicked_cb(template);
-                 }
-               }
-             };
-           };
-         };
-       };
-     }
-   };
+                    child: Box {
+                      orientation: vertical;
+                      spacing: 10;
 
-   Adw.Breakpoint {
-     condition ("max-width: 700px")
-     setters {
-       content_box.margin-start: 5;
-       content_box.margin-end: 5;
-     }
-   }
- };
+                      $BzDynamicListView {
+                        styles [
+                          "flathub-page-section",
+                        ]
+
+                        hexpand: true;
+                        scroll: false;
+                        noscroll-kind: flow-box;
+                        child-type: "BzAppTile";
+                        child-prop: "group";
+
+                        model: SliceListModel {
+                          offset: 0;
+                          size: 12;
+                          model: bind template.state as <$BzFlathubState>.recently_added;
+                        };
+
+                        bind-widget => $bind_widget_cb(template);
+                        unbind-widget => $unbind_widget_cb(template);
+                      }
+
+                      Button {
+                        styles [
+                          "pill",
+                        ]
+
+                        label: _("More New");
+                        halign: center;
+                        valign: center;
+                        clicked => $show_more_recently_added_clicked_cb(template);
+                      }
+                    };
+                  }
+
+                  Adw.ViewStackPage {
+                    name: "popular";
+                    title: _("Popular");
+
+                    child: Box {
+                      orientation: vertical;
+                      spacing: 10;
+
+                      $BzDynamicListView {
+                        styles [
+                          "flathub-page-section",
+                        ]
+
+                        hexpand: true;
+                        scroll: false;
+                        noscroll-kind: flow-box;
+                        child-type: "BzAppTile";
+                        child-prop: "group";
+
+                        model: SliceListModel {
+                          offset: 0;
+                          size: 12;
+                          model: bind template.state as <$BzFlathubState>.popular;
+                        };
+
+                        bind-widget => $bind_widget_cb(template);
+                        unbind-widget => $unbind_widget_cb(template);
+                      }
+
+                      Button {
+                        styles [
+                          "pill",
+                        ]
+
+                        label: _("More Popular");
+                        halign: center;
+                        valign: center;
+                        clicked => $show_more_popular_clicked_cb(template);
+                      }
+                    };
+                  }
+                }
+                $BzFlathubCategorySection section_productivity {
+                  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "office") as <$BzFlathubCategory>;
+                  max-items: 12;
+                  group-selected => $category_section_group_selected_cb() swapped;
+                }
+
+                $BzFeaturedCarousel {
+                  margin-start: 8;
+                  margin-end: 8;
+
+                  styles [
+                    "flathub-page-section",
+                  ]
+
+                  margin-top: 16;
+                  hexpand: true;
+
+                  model: SliceListModel {
+                    offset: 0;
+                    size: 1;
+                    model: bind template.state as <$BzFlathubState>.apps_of_the_day_week;
+                  };
+                  is-aotd: true;
+                  group-clicked => $featured_carousel_group_clicked_cb(template);
+                }
+
+                $BzFlathubCategorySection section_graphics {
+                  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "graphics") as <$BzFlathubCategory>;
+                  max-items: 12;
+                  group-selected => $category_section_group_selected_cb() swapped;
+                }
+
+                $BzFlathubCategorySection section_audiovideo {
+                  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "audiovideo") as <$BzFlathubCategory>;
+                  max-items: 12;
+                  group-selected => $category_section_group_selected_cb() swapped;
+                }
+
+                $BzFlathubCategorySection section_education {
+                  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "education") as <$BzFlathubCategory>;
+                  max-items: 12;
+                  group-selected => $category_section_group_selected_cb() swapped;
+                }
+
+                $BzFlathubCategorySection section_network {
+                  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "network") as <$BzFlathubCategory>;
+                  max-items: 12;
+                  group-selected => $category_section_group_selected_cb() swapped;
+                }
+
+                $BzFlathubCategorySection section_game {
+                  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "game") as <$BzFlathubCategory>;
+                  max-items: 12;
+                  group-selected => $category_section_group_selected_cb() swapped;
+                }
+
+                $BzFlathubCategorySection section_development {
+                  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "development") as <$BzFlathubCategory>;
+                  max-items: 12;
+                  group-selected => $category_section_group_selected_cb() swapped;
+                }
+
+                $BzFlathubCategorySection section_science {
+                  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "science") as <$BzFlathubCategory>;
+                  max-items: 12;
+                  group-selected => $category_section_group_selected_cb() swapped;
+                }
+
+                $BzFlathubCategorySection section_system {
+                  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "system") as <$BzFlathubCategory>;
+                  max-items: 12;
+                  group-selected => $category_section_group_selected_cb() swapped;
+                }
+
+                $BzFlathubCategorySection section_utility {
+                  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "utility") as <$BzFlathubCategory>;
+                  max-items: 12;
+                  group-selected => $category_section_group_selected_cb() swapped;
+                }
+              };
+            };
+          };
+        };
+      }
+    };
+
+    Adw.Breakpoint {
+      condition ("max-width: 700px")
+
+      setters {
+        content_box.margin-start: 5;
+        content_box.margin-end: 5;
+        section_toggles.homogeneous: false;
+        section_productivity.max-items: 6;
+        section_graphics.max-items: 6;
+        section_audiovideo.max-items: 6;
+        section_education.max-items: 6;
+        section_network.max-items: 6;
+        section_game.max-items: 6;
+        section_development.max-items: 6;
+        section_science.max-items: 6;
+        section_system.max-items: 6;
+        section_utility.max-items: 6;
+      }
+    }
+  };
 }

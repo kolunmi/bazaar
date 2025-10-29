@@ -1,4 +1,4 @@
-/* bz-featured-tile.c
+/* bz-featured-carousel.c
  *
  * Copyright 2025 Alexander Vanhee
  *
@@ -19,8 +19,8 @@
  */
 
 #include "bz-featured-carousel.h"
-#include "bz-featured-tile.h"
 #include "bz-entry-group.h"
+#include "bz-featured-tile.h"
 
 #define FEATURED_ROTATE_TIME 5
 
@@ -28,13 +28,14 @@ struct _BzFeaturedCarousel
 {
   GtkBox parent_instance;
 
-  GListModel *model;
-  guint rotation_timer_id;
+  GListModel   *model;
+  gboolean      is_aotd;
+  guint         rotation_timer_id;
   unsigned long settings_notify_id;
 
-  AdwCarousel *carousel;
-  GtkButton *next_button;
-  GtkButton *previous_button;
+  AdwCarousel              *carousel;
+  GtkButton                *next_button;
+  GtkButton                *previous_button;
   AdwCarouselIndicatorDots *dots;
 };
 
@@ -44,10 +45,13 @@ enum
 {
   PROP_0,
   PROP_MODEL,
+  PROP_IS_AOTD,
   LAST_PROP
 };
 
-static GParamSpec *props[LAST_PROP] = { NULL, };
+static GParamSpec *props[LAST_PROP] = {
+  NULL,
+};
 
 enum
 {
@@ -55,27 +59,29 @@ enum
   LAST_SIGNAL
 };
 
-static guint signals[LAST_SIGNAL] = { 0, };
+static guint signals[LAST_SIGNAL] = {
+  0,
+};
 
 static void
 show_relative_page (BzFeaturedCarousel *self,
                     gint                delta,
                     gboolean            use_custom_spring)
 {
-  gdouble current_page;
-  guint n_pages;
-  guint new_page;
+  gdouble    current_page;
+  guint      n_pages;
+  guint      new_page;
   GtkWidget *new_page_widget;
-  gboolean animate;
+  gboolean   animate;
 
   current_page = adw_carousel_get_position (self->carousel);
-  n_pages = adw_carousel_get_n_pages (self->carousel);
-  animate = TRUE;
+  n_pages      = adw_carousel_get_n_pages (self->carousel);
+  animate      = TRUE;
 
   if (n_pages == 0)
     return;
 
-  new_page = ((guint) current_page + delta + n_pages) % n_pages;
+  new_page        = ((guint) current_page + delta + n_pages) % n_pages;
   new_page_widget = adw_carousel_get_nth_page (self->carousel, new_page);
   g_assert (new_page_widget != NULL);
 
@@ -88,13 +94,13 @@ show_relative_page (BzFeaturedCarousel *self,
   if (use_custom_spring)
     {
       g_autoptr (AdwSpringParams) spring_params = NULL;
-      spring_params = adw_spring_params_new (0.90, 1.65, 100.0);
+      spring_params                             = adw_spring_params_new (0.90, 1.65, 100.0);
       adw_carousel_set_scroll_params (self->carousel, spring_params);
     }
   else
     {
       g_autoptr (AdwSpringParams) spring_params = NULL;
-      spring_params = adw_spring_params_new (1, 0.5, 500);
+      spring_params                             = adw_spring_params_new (1, 0.5, 500);
       adw_carousel_set_scroll_params (self->carousel, spring_params);
     }
 
@@ -148,8 +154,8 @@ maybe_start_rotation_timer (BzFeaturedCarousel *self)
 
 static void
 carousel_notify_position_cb (GObject    *object,
-                              GParamSpec *pspec,
-                              gpointer    user_data)
+                             GParamSpec *pspec,
+                             gpointer    user_data)
 {
   BzFeaturedCarousel *self;
 
@@ -160,8 +166,8 @@ carousel_notify_position_cb (GObject    *object,
 
 static void
 carousel_notify_settings_cb (GObject    *object,
-                              GParamSpec *pspec,
-                              gpointer    user_data)
+                             GParamSpec *pspec,
+                             gpointer    user_data)
 {
   BzFeaturedCarousel *self;
 
@@ -181,7 +187,7 @@ next_button_clicked_cb (GtkButton *button,
 
 static void
 previous_button_clicked_cb (GtkButton *button,
-                             gpointer   user_data)
+                            gpointer   user_data)
 {
   BzFeaturedCarousel *self;
 
@@ -194,9 +200,9 @@ tile_clicked_cb (BzFeaturedTile *tile,
                  gpointer        user_data)
 {
   BzFeaturedCarousel *self;
-  BzEntryGroup *group;
+  BzEntryGroup       *group;
 
-  self = BZ_FEATURED_CAROUSEL (user_data);
+  self  = BZ_FEATURED_CAROUSEL (user_data);
   group = bz_featured_tile_get_group (tile);
   g_signal_emit (self, signals[SIGNAL_GROUP_CLICKED], 0, group);
 }
@@ -230,48 +236,58 @@ key_pressed_cb (GtkEventControllerKey *controller,
 }
 
 static void
+rebuild_carousel (BzFeaturedCarousel *self)
+{
+  guint n_items;
+
+  stop_rotation_timer (self);
+
+  while (adw_carousel_get_n_pages (self->carousel) > 0)
+    adw_carousel_remove (self->carousel, adw_carousel_get_nth_page (self->carousel, 0));
+
+  if (self->model == NULL)
+    {
+      gtk_widget_set_visible (GTK_WIDGET (self->next_button), FALSE);
+      gtk_widget_set_visible (GTK_WIDGET (self->previous_button), FALSE);
+      return;
+    }
+
+  n_items = g_list_model_get_n_items (self->model);
+
+  for (guint i = 0; i < n_items; i++)
+    {
+      g_autoptr (BzEntryGroup) group = NULL;
+      BzFeaturedTile *tile;
+
+      group = g_list_model_get_item (self->model, i);
+      tile  = bz_featured_tile_new (group);
+
+      bz_featured_tile_set_is_aotd (tile, self->is_aotd && (i == 0));
+
+      gtk_widget_set_hexpand (GTK_WIDGET (tile), TRUE);
+      gtk_widget_set_vexpand (GTK_WIDGET (tile), TRUE);
+      gtk_widget_set_can_focus (GTK_WIDGET (tile), FALSE);
+
+      g_signal_connect (tile, "clicked",
+                        G_CALLBACK (tile_clicked_cb), self);
+
+      adw_carousel_append (self->carousel, GTK_WIDGET (tile));
+    }
+
+  gtk_widget_set_visible (GTK_WIDGET (self->next_button), n_items > 1);
+  gtk_widget_set_visible (GTK_WIDGET (self->previous_button), n_items > 1);
+
+  maybe_start_rotation_timer (self);
+}
+
+static void
 model_items_changed_cb (BzFeaturedCarousel *self,
                         guint               position,
                         guint               removed,
                         guint               added,
                         GListModel         *model)
 {
-  guint i;
-  guint n_items;
-
-  for (i = 0; i < removed; i++)
-    {
-      GtkWidget *page;
-
-      page = adw_carousel_get_nth_page (self->carousel, position);
-      if (page)
-        adw_carousel_remove (self->carousel, page);
-    }
-
-  for (i = 0; i < added; i++)
-    {
-      g_autoptr (BzEntryGroup) group = NULL;
-      GtkWidget *tile;
-
-      group = g_list_model_get_item (model, position + i);
-      tile = GTK_WIDGET (bz_featured_tile_new (group));
-
-      gtk_widget_set_hexpand (tile, TRUE);
-      gtk_widget_set_vexpand (tile, TRUE);
-      gtk_widget_set_can_focus (tile, FALSE);
-
-      g_signal_connect (tile, "clicked",
-                        G_CALLBACK (tile_clicked_cb), self);
-
-      adw_carousel_insert (self->carousel, tile, position + i);
-    }
-
-  n_items = g_list_model_get_n_items (model);
-
-  gtk_widget_set_visible (GTK_WIDGET (self->next_button), n_items > 1);
-  gtk_widget_set_visible (GTK_WIDGET (self->previous_button), n_items > 1);
-
-  maybe_start_rotation_timer (self);
+  rebuild_carousel (self);
 }
 
 static void
@@ -317,9 +333,9 @@ bz_featured_carousel_dispose (GObject *object)
 
 static void
 bz_featured_carousel_get_property (GObject    *object,
-                                    guint       prop_id,
-                                    GValue     *value,
-                                    GParamSpec *pspec)
+                                   guint       prop_id,
+                                   GValue     *value,
+                                   GParamSpec *pspec)
 {
   BzFeaturedCarousel *self;
 
@@ -330,6 +346,9 @@ bz_featured_carousel_get_property (GObject    *object,
     case PROP_MODEL:
       g_value_set_object (value, bz_featured_carousel_get_model (self));
       break;
+    case PROP_IS_AOTD:
+      g_value_set_boolean (value, bz_featured_carousel_get_is_aotd (self));
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -338,9 +357,9 @@ bz_featured_carousel_get_property (GObject    *object,
 
 static void
 bz_featured_carousel_set_property (GObject      *object,
-                                    guint         prop_id,
-                                    const GValue *value,
-                                    GParamSpec   *pspec)
+                                   guint         prop_id,
+                                   const GValue *value,
+                                   GParamSpec   *pspec)
 {
   BzFeaturedCarousel *self;
 
@@ -351,6 +370,9 @@ bz_featured_carousel_set_property (GObject      *object,
     case PROP_MODEL:
       bz_featured_carousel_set_model (self, g_value_get_object (value));
       break;
+    case PROP_IS_AOTD:
+      bz_featured_carousel_set_is_aotd (self, g_value_get_boolean (value));
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -360,7 +382,7 @@ bz_featured_carousel_set_property (GObject      *object,
 static void
 bz_featured_carousel_class_init (BzFeaturedCarouselClass *klass)
 {
-  GObjectClass *object_class;
+  GObjectClass   *object_class;
   GtkWidgetClass *widget_class;
 
   object_class = G_OBJECT_CLASS (klass);
@@ -368,15 +390,20 @@ bz_featured_carousel_class_init (BzFeaturedCarouselClass *klass)
 
   object_class->get_property = bz_featured_carousel_get_property;
   object_class->set_property = bz_featured_carousel_set_property;
-  object_class->dispose = bz_featured_carousel_dispose;
+  object_class->dispose      = bz_featured_carousel_dispose;
 
-  widget_class->map = bz_featured_carousel_map;
+  widget_class->map   = bz_featured_carousel_map;
   widget_class->unmap = bz_featured_carousel_unmap;
 
   props[PROP_MODEL] =
       g_param_spec_object ("model", NULL, NULL,
                            G_TYPE_LIST_MODEL,
                            G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY | G_PARAM_STATIC_STRINGS);
+
+  props[PROP_IS_AOTD] =
+      g_param_spec_boolean ("is-aotd", NULL, NULL,
+                            FALSE,
+                            G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
@@ -409,10 +436,10 @@ bz_featured_carousel_init (BzFeaturedCarousel *self)
 
   adw_carousel_set_allow_scroll_wheel (self->carousel, FALSE);
 
-  settings = gtk_widget_get_settings (GTK_WIDGET (self));
+  settings                 = gtk_widget_get_settings (GTK_WIDGET (self));
   self->settings_notify_id = g_signal_connect (settings, "notify::gtk-enable-animations",
-                                                G_CALLBACK (carousel_notify_settings_cb),
-                                                self);
+                                               G_CALLBACK (carousel_notify_settings_cb),
+                                               self);
 }
 
 BzFeaturedCarousel *
@@ -430,10 +457,8 @@ bz_featured_carousel_get_model (BzFeaturedCarousel *self)
 
 void
 bz_featured_carousel_set_model (BzFeaturedCarousel *self,
-                                 GListModel         *model)
+                                GListModel         *model)
 {
-  guint n_items;
-
   g_return_if_fail (BZ_IS_FEATURED_CAROUSEL (self));
   g_return_if_fail (model == NULL || G_IS_LIST_MODEL (model));
 
@@ -443,22 +468,36 @@ bz_featured_carousel_set_model (BzFeaturedCarousel *self,
   if (self->model != NULL)
     g_signal_handlers_disconnect_by_func (self->model, model_items_changed_cb, self);
 
-  stop_rotation_timer (self);
-
-  while (adw_carousel_get_n_pages (self->carousel) > 0)
-    adw_carousel_remove (self->carousel, adw_carousel_get_nth_page (self->carousel, 0));
-
   g_set_object (&self->model, model);
 
   if (model != NULL)
-    {
-      n_items = g_list_model_get_n_items (model);
+    g_signal_connect_swapped (model, "items-changed",
+                              G_CALLBACK (model_items_changed_cb), self);
 
-      g_signal_connect_swapped (model, "items-changed",
-                                G_CALLBACK (model_items_changed_cb), self);
-
-      model_items_changed_cb (self, 0, 0, n_items, model);
-    }
+  rebuild_carousel (self);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MODEL]);
+}
+
+gboolean
+bz_featured_carousel_get_is_aotd (BzFeaturedCarousel *self)
+{
+  g_return_val_if_fail (BZ_IS_FEATURED_CAROUSEL (self), FALSE);
+  return self->is_aotd;
+}
+
+void
+bz_featured_carousel_set_is_aotd (BzFeaturedCarousel *self,
+                                  gboolean            is_aotd)
+{
+  g_return_if_fail (BZ_IS_FEATURED_CAROUSEL (self));
+
+  if (self->is_aotd == is_aotd)
+    return;
+
+  self->is_aotd = is_aotd;
+
+  rebuild_carousel (self);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_IS_AOTD]);
 }

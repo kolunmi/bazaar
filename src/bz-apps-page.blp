@@ -20,13 +20,12 @@ template $BzAppsPage: Adw.NavigationPage {
           spacing: 10;
           margin-start: 25;
           margin-end: 25;
-          margin-top: 24;
+          margin-top: 8;
           margin-bottom: 24;
 
           $BzFeaturedCarousel {
             margin-start: 8;
             margin-end: 8;
-            margin-top: 16;
             hexpand: true;
             visible: bind $is_not_null(template.carousel-applications) as <bool>;
             model: SliceListModel {
@@ -37,13 +36,25 @@ template $BzAppsPage: Adw.NavigationPage {
             group-clicked => $featured_carousel_group_clicked_cb(template);
           }
 
-          Label {
+          Box {
             margin-start: 8;
-            styles [
-              "title-1",
-            ]
-            label: bind template.page-title;
-            xalign: 0.0;
+            orientation: vertical;
+            Label title {
+              styles [
+                "title-1",
+              ]
+              label: bind template.page-title;
+              xalign: 0.0;
+              wrap: true;
+              wrap-mode: word_char;
+            }
+
+            Label subtitle {
+              visible: bind $is_not_empty_string(template.page-subtitle) as <bool>;
+              label: bind template.page-subtitle;
+              margin-top: 4;
+              xalign: 0.0;
+            }
           }
 
           $BzDynamicListView {
@@ -68,6 +79,8 @@ template $BzAppsPage: Adw.NavigationPage {
       setters {
         content_box.margin-start: 5;
         content_box.margin-end: 5;
+        title.halign: center;
+        subtitle.halign: center;
       }
     }
   }

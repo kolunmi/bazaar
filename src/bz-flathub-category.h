@@ -66,6 +66,13 @@ bz_flathub_category_get_display_name (BzFlathubCategory *self);
 const char *
 bz_flathub_category_get_icon_name (BzFlathubCategory *self);
 
+int
+bz_flathub_category_get_total_entries (BzFlathubCategory *self);
+
+void
+bz_flathub_category_set_total_entries (BzFlathubCategory *self,
+                                       int                total_entries);
+
 G_END_DECLS
 
 /* End of bz-flathub-category.h */
