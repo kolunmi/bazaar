@@ -32,8 +32,11 @@ struct _BzDownloadWorker
 
   GSubprocess *subprocess;
   GHashTable  *waiting;
-  GMutex       mutex;
+  GMutex       read_mutex;
   DexFuture   *task;
+
+  BzGuard *write_gate;
+  GMutex   write_mutex;
 };
 
 static void
@@ -98,7 +101,10 @@ bz_download_worker_dispose (GObject *object)
   dex_clear (&self->task);
   g_clear_object (&self->subprocess);
 
-  g_mutex_clear (&self->mutex);
+  g_mutex_clear (&self->write_mutex);
+  bz_clear_guard (&self->write_gate);
+
+  g_mutex_clear (&self->read_mutex);
   g_clear_pointer (&self->waiting, g_hash_table_unref);
   g_clear_pointer (&self->name, g_free);
 
@@ -162,7 +168,8 @@ bz_download_worker_class_init (BzDownloadWorkerClass *klass)
 static void
 bz_download_worker_init (BzDownloadWorker *self)
 {
-  g_mutex_init (&self->mutex);
+  g_mutex_init (&self->read_mutex);
+  g_mutex_init (&self->write_mutex);
 
   self->waiting = g_hash_table_new_full (
       g_str_hash, g_str_equal, g_free, dex_unref);
@@ -274,7 +281,7 @@ bz_download_worker_get_default (void)
       workers = g_ptr_array_new_with_free_func (g_object_unref);
 
       /* TODO: make number of workers controllable with envvar */
-#define N_WORKERS 5
+#define N_WORKERS 8
 
       for (guint i = 0; i < N_WORKERS; i++)
         {
@@ -361,7 +368,7 @@ monitor_worker_fiber (GWeakRef *wr)
 
           if (line == NULL)
             {
-              line = g_data_input_stream_read_line (subprocess_stdout, NULL, NULL, &local_error);
+              line = g_data_input_stream_read_line_utf8 (subprocess_stdout, NULL, NULL, &local_error);
               if (line == NULL)
                 {
                   if (local_error != NULL)
@@ -382,7 +389,7 @@ monitor_worker_fiber (GWeakRef *wr)
           g_variant_get (variant, "(sb)", &dest_path, &success);
 
           bz_weak_get_or_return_reject (self, wr);
-          g_mutex_lock (&self->mutex);
+          g_mutex_lock (&self->read_mutex);
 
           promise = g_hash_table_lookup (self->waiting, dest_path);
           if (promise != NULL)
@@ -399,7 +406,7 @@ monitor_worker_fiber (GWeakRef *wr)
               g_hash_table_remove (self->waiting, dest_path);
             }
 
-          g_mutex_unlock (&self->mutex);
+          g_mutex_unlock (&self->read_mutex);
           g_clear_object (&self);
 
           g_clear_pointer (&line, g_free);
@@ -413,9 +420,9 @@ err:
   bz_weak_get_or_return_reject (self, wr);
 
   /* give up on this subprocess and wait to be disposed */
-  g_mutex_lock (&self->mutex);
+  g_mutex_lock (&self->read_mutex);
   terminate (self);
-  g_mutex_unlock (&self->mutex);
+  g_mutex_unlock (&self->read_mutex);
 
   return dex_future_new_false ();
 }
@@ -441,7 +448,7 @@ invoke_worker_fiber (InvokeWorkerData *data)
   dest_path = g_file_get_path (dest);
 
   bz_weak_get_or_return_reject (self, data->self);
-  g_mutex_lock (&self->mutex);
+  g_mutex_lock (&self->read_mutex);
   existing = g_hash_table_lookup (self->waiting, dest_path);
   if (existing != NULL)
     {
@@ -453,7 +460,7 @@ invoke_worker_fiber (InvokeWorkerData *data)
       existing = NULL;
     }
   g_hash_table_replace (self->waiting, g_strdup (dest_path), dex_ref (promise));
-  g_mutex_unlock (&self->mutex);
+  g_mutex_unlock (&self->read_mutex);
 
   variant = g_variant_new ("(ss)", src_uri, dest_path);
   output  = g_string_new (NULL);
@@ -461,21 +468,35 @@ invoke_worker_fiber (InvokeWorkerData *data)
   g_string_append_c (output, '\n');
 
   stdin_stream = g_object_ref (g_subprocess_get_stdin_pipe (self->subprocess));
+
+  BZ_BEGIN_GUARD_WITH_CONTEXT (&guard, &self->write_mutex, &self->write_gate);
   g_clear_object (&self);
 
   bytes_written = dex_await_int64 (
-      dex_output_stream_write (stdin_stream, output->str, output->len, G_PRIORITY_DEFAULT),
+      dex_future_first (
+          dex_output_stream_write (
+              stdin_stream,
+              output->str,
+              output->len,
+              G_PRIORITY_DEFAULT),
+          dex_ref (promise),
+          NULL),
       &local_error);
+  bz_clear_guard (&guard);
+
+  /* Check if we've been cancelled */
+  if (!dex_future_is_pending (DEX_FUTURE (promise)))
+    return dex_future_new_false ();
 
   if (bytes_written < 0)
     {
       bz_weak_get_or_return_reject (self, data->self);
-      g_mutex_lock (&self->mutex);
+      g_mutex_lock (&self->read_mutex);
 
       g_hash_table_remove (self->waiting, dest_path);
       dex_promise_reject (promise, g_steal_pointer (&local_error));
 
-      g_mutex_unlock (&self->mutex);
+      g_mutex_unlock (&self->read_mutex);
       g_clear_object (&self);
     }
 
