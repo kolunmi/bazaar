@@ -7,6 +7,8 @@ on:
       - "docs/*"
       - "screenshots/*"
       - "translators.sh"
+      - ".github/ISSUE_TEMPLATE/**"
+
 name: CI Build Flatpak
 jobs:
 
