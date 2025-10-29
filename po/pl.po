@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-27 15:30+0100\n"
-"PO-Revision-Date: 2025-10-27 15:46+0100\n"
+"POT-Creation-Date: 2025-10-29 15:15+0100\n"
+"PO-Revision-Date: 2025-10-29 15:37+0100\n"
 "Last-Translator: Marcel Mrówka <micro.mail88@gmail.com>\n"
 "Language-Team: Polish\n"
 "Language: pl\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 |"
 "| n%100>=20) ? 1 : 2);\n"
-"X-Generator: Lokalize 25.08.1\n"
+"X-Generator: Lokalize 25.08.2\n"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:2
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:5
@@ -508,52 +508,52 @@ msgstr "Popularne"
 msgid "More Popular"
 msgstr "Więcej popularnych"
 
-#: src/bz-flatpak-entry.c:558
+#: src/bz-flatpak-entry.c:552
 msgctxt "Project URL Type"
 msgid "Flathub Page"
 msgstr "Strona Flathub"
 
-#: src/bz-flatpak-entry.c:579
+#: src/bz-flatpak-entry.c:573
 msgctxt "Project URL Type"
 msgid "Project Website"
 msgstr "Strona projektu"
 
-#: src/bz-flatpak-entry.c:583
+#: src/bz-flatpak-entry.c:577
 msgctxt "Project URL Type"
 msgid "Issue Tracker"
 msgstr "Issue Tracker"
 
-#: src/bz-flatpak-entry.c:587
+#: src/bz-flatpak-entry.c:581
 msgctxt "Project URL Type"
 msgid "FAQ"
 msgstr "FAQ"
 
-#: src/bz-flatpak-entry.c:591
+#: src/bz-flatpak-entry.c:585
 msgctxt "Project URL Type"
 msgid "Help"
 msgstr "Pomoc"
 
-#: src/bz-flatpak-entry.c:595
+#: src/bz-flatpak-entry.c:589
 msgctxt "Project URL Type"
 msgid "Donate"
 msgstr "Przekaż darowiznę"
 
-#: src/bz-flatpak-entry.c:601
+#: src/bz-flatpak-entry.c:595
 msgctxt "Project URL Type"
 msgid "Translate"
 msgstr "Tłumacz"
 
-#: src/bz-flatpak-entry.c:605
+#: src/bz-flatpak-entry.c:599
 msgctxt "Project URL Type"
 msgid "Contact"
 msgstr "Skontaktuj się"
 
-#: src/bz-flatpak-entry.c:609
+#: src/bz-flatpak-entry.c:603
 msgctxt "Project URL Type"
 msgid "Source Code"
 msgstr "Kod źródłowy"
 
-#: src/bz-flatpak-entry.c:615
+#: src/bz-flatpak-entry.c:609
 msgctxt "Project URL Type"
 msgid "Contribute"
 msgstr "Miej wkład"
@@ -571,10 +571,8 @@ msgid "Content"
 msgstr "Zawartość"
 
 #: src/bz-full-view.blp:151
-msgid "This flatpak is verified by the original developers of the software."
-msgstr ""
-"Ten flatpak został zweryfikowany przez oryginalnych twórców tego "
-"oprogramowania."
+msgid "Verified by the original developers"
+msgstr "Zweryfikowane przez oryginalnych twórców "
 
 #: src/bz-full-view.blp:178
 msgid "Support"
@@ -600,60 +598,105 @@ msgstr "Odinstaluj aplikację"
 msgid "Install Other Version"
 msgstr "Zainstaluj inną wersję"
 
-#: src/bz-full-view.blp:343
+#: src/bz-full-view.blp:308
 msgid "Download"
-msgstr "Pobierz"
+msgstr "Rozmiar do pobrania"
 
-#: src/bz-full-view.blp:391
-msgid "Free"
-msgstr "Wolne"
-
-#: src/bz-full-view.blp:428
-msgid "Proprietary"
-msgstr "Własnościowe"
-
-#: src/bz-full-view.blp:478
-msgid "Adaptive"
-msgstr "Zmienne"
-
-#: src/bz-full-view.blp:522
-msgid "Desktop Only"
-msgstr "Tylko na komputery"
-
-#: src/bz-full-view.blp:593
-msgid "All Ages"
-msgstr "Od 0 lat"
-
-#: src/bz-full-view.blp:605
-msgid "Age Rating"
-msgstr "Próg wiekowy"
-
-#: src/bz-full-view.blp:640
+#: src/bz-full-view.blp:424
 msgid "Downloads/mo"
 msgstr "Pobrań/mc"
 
-#: src/bz-full-view.c:242
+#: src/bz-full-view.c:251
 msgid "---"
 msgstr "---"
 
-#: src/bz-full-view.c:256
+#. Translators: M is the suffix for millions, \xC2\xA0 is a non-breaking space
+#: src/bz-full-view.c:255
 #, c-format
-msgid "%'d"
-msgstr "%'d"
+msgid "%.2f M"
+msgstr "%.2f mln"
 
-#: src/bz-full-view.c:280
-msgid "All"
-msgstr "0+"
+#. Translators: K is the suffix for thousands, \xC2\xA0 is a non-breaking space
+#: src/bz-full-view.c:258
+#, c-format
+msgid "%.2f K"
+msgstr "%.2f tys."
 
-#: src/bz-full-view.c:292
+#: src/bz-full-view.c:267
+#, c-format
+msgid "%d downloads in the last 30 days"
+msgstr "%'d pobrań w ciągu ostatnich 30 dni"
+
+#: src/bz-full-view.c:288
+#, c-format
+msgid "Download size of %s"
+msgstr "Rozmiar do pobrania %s"
+
+#. Translators: Age rating format, e.g. "12+" for ages 12 and up
+#: src/bz-full-view.c:298
+#, c-format
+msgid "%d+"
+msgstr "%d+"
+
+#: src/bz-full-view.c:306
+msgid "All Ages"
+msgstr "Od 0 lat"
+
+#: src/bz-full-view.c:308
+msgid "Age Rating"
+msgstr "Próg wiekowy"
+
+#: src/bz-full-view.c:316
+msgid "Suitable for all ages"
+msgstr "Odpowiednie dla każdego wieku"
+
+#: src/bz-full-view.c:318
+#, c-format
+msgid "Suitable for ages %d and up"
+msgstr "Odpowiednie od %d lat"
+
+#: src/bz-full-view.c:338
 msgid "Unknown"
 msgstr "Nieznane"
 
-#: src/bz-full-view.c:310
+#: src/bz-full-view.c:341
+msgid "Proprietary Software"
+msgstr "Oprogramowanie własnościowe"
+
+#: src/bz-full-view.c:345
+#, c-format
+msgid "Free software licensed under %s"
+msgstr "Wolne oprogramowanie pod licencją %s"
+
+#: src/bz-full-view.c:353
+msgid "Free"
+msgstr "Wolne"
+
+#: src/bz-full-view.c:353
+msgid "Proprietary"
+msgstr "Własnościowe"
+
+#: src/bz-full-view.c:373
+msgid "Adaptive"
+msgstr "Zmienne"
+
+#: src/bz-full-view.c:373
+msgid "Desktop Only"
+msgstr "Tylko na komputery"
+
+#: src/bz-full-view.c:379
+msgid "Works on desktop, tablets, and phones"
+msgstr "Działa na komputerach, tabletach, telefonach"
+
+#: src/bz-full-view.c:380
+msgid "May not work on mobile devices"
+msgstr "Może nie działać na urządzeniach mobilnych"
+
+#: src/bz-full-view.c:391
 msgid "No URL"
 msgstr "Brak adresu URL"
 
-#: src/bz-full-view.c:328
+#: src/bz-full-view.c:409
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -661,13 +704,107 @@ msgstr ""
 "Ta aplikacja ma licencję FLOSS — oznacza to, że jej kod źródłowy może być "
 "audytowany pod kątem bezpieczeństwa."
 
-#: src/bz-full-view.c:329
+#: src/bz-full-view.c:410
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
 msgstr ""
 "Ta aplikacja ma licencję własnościową — oznacza to, że jej kod źródłowy jest "
 "tworzony prywatnie i niezależne osoby trzecie nie mogą go audytować."
+
+#: src/bz-hardware-support-dialog.c:69
+msgid "Keyboard support"
+msgstr "Wsparcie klawiatury"
+
+#: src/bz-hardware-support-dialog.c:71
+msgid "Requires keyboards"
+msgstr "Wymaga posiadania klawiatury"
+
+#: src/bz-hardware-support-dialog.c:72
+msgid "Recommends keyboards"
+msgstr "Zaleca posiadanie klawiatury"
+
+#: src/bz-hardware-support-dialog.c:73
+msgid "Supports keyboards"
+msgstr "Wspiera klawiaturę"
+
+#: src/bz-hardware-support-dialog.c:74
+msgid "Unknown support for keyboards"
+msgstr "Wsparcie klawiatur jest nieznane"
+
+#: src/bz-hardware-support-dialog.c:76
+msgid "Mouse support"
+msgstr "Wsparcie myszki"
+
+#: src/bz-hardware-support-dialog.c:78
+msgid "Requires mice or pointing devices"
+msgstr "Wymaga myszki lub innego urządzenia wskazującego"
+
+#: src/bz-hardware-support-dialog.c:79
+msgid "Recommends mice or pointing devices"
+msgstr "Zaleca korzystanie z myszki lub innego urządzenia wskazującego"
+
+#: src/bz-hardware-support-dialog.c:80
+msgid "Supports mice or pointing devices"
+msgstr "Wspiera myszki i inne urządzenia wskazujące"
+
+#: src/bz-hardware-support-dialog.c:81
+msgid "Unknown support for mice or pointing devices"
+msgstr "Wsparcie myszek i innych urządzeń wskazujących jest nieznane"
+
+#: src/bz-hardware-support-dialog.c:83
+msgid "Touchscreen support"
+msgstr "Wsparcie ekranów dotykowych"
+
+#: src/bz-hardware-support-dialog.c:85
+msgid "Requires touchscreens"
+msgstr "Wymaga ekranu dotykowego"
+
+#: src/bz-hardware-support-dialog.c:86
+msgid "Recommends touchscreens"
+msgstr "Zaleca korzystanie z ekranu dotykowego"
+
+#: src/bz-hardware-support-dialog.c:87
+msgid "Supports touchscreens"
+msgstr "Wspira ekrany dotykowe"
+
+#: src/bz-hardware-support-dialog.c:88
+msgid "Unknown support for touchscreens"
+msgstr "Wsparcie ekranów dotykowych jest nieznane"
+
+#: src/bz-hardware-support-dialog.c:192
+msgid "Mobile support"
+msgstr "Wsparcie urządzeń mobilnych"
+
+#: src/bz-hardware-support-dialog.c:193
+msgid "Works on mobile devices"
+msgstr "Działa na urządzeniach mobilnych"
+
+#: src/bz-hardware-support-dialog.c:193
+msgid "May not work well on mobile devices"
+msgstr "Może nie działać najlepiej na urządzeniach mobilnych"
+
+#: src/bz-hardware-support-dialog.c:198
+msgid "Desktop support"
+msgstr "Wspiera komputery"
+
+#: src/bz-hardware-support-dialog.c:199
+msgid "Works well on large screens"
+msgstr "Doskonale działa na dużych ekranach"
+
+#: src/bz-hardware-support-dialog.c:233
+#, c-format
+msgid "%s works best on specific hardware"
+msgstr "%s działa najlepiej na konkretnym sprzęcie"
+
+#: src/bz-hardware-support-dialog.c:240
+#, c-format
+msgid "%s works on most devices"
+msgstr "%s działa na większości urządzeń"
+
+#: src/bz-hardware-support-dialog.blp:6 src/bz-hardware-support-dialog.blp:47
+msgid "Hardware Support"
+msgstr "Wsparcie sprzętu"
 
 #: src/bz-inspector.blp:5
 msgid "Bazaar Inspector"
@@ -719,7 +856,7 @@ msgstr "Uruchom"
 
 #: src/bz-installed-page.blp:228 src/bz-installed-page.blp:239
 msgid "View Store Page"
-msgstr "Pokaż stronę sklepu"
+msgstr "Pokaż stronę sklepową aplikacji"
 
 #: src/bz-installed-page.c:649
 msgid "Choose an Installation"
@@ -735,6 +872,43 @@ msgstr ""
 #: src/bz-installed-page.c:656 src/bz-window.c:1102 src/bz-window.c:1124
 msgid "Cancel"
 msgstr "Anuluj"
+
+#: src/bz-license-dialog.c:115
+msgid ""
+"This app is not developed in the open, so only its developers know how it "
+"works. It may be insecure in ways that are hard to detect, and it may change "
+"without oversight.\n"
+"\n"
+"You may not be able to contribute to this app."
+msgstr ""
+"Ta aplikacja nie jest tworzona jako wolna, zatem tylko jej twórcy wiedzą "
+"jak działa. Może być niewykrywalnie niebezpieczna, oraz zmieniać się "
+"bez ostrzeżenia.\n"
+"\n"
+"Nie będziesz mógł mieć wkładu w proces tworzenia tej aplikacji."
+
+#: src/bz-license-dialog.c:124
+msgid ""
+"This app is developed in the open by an international community.\n"
+"\n"
+"You can participate and help make it even better."
+msgstr ""
+"Ta aplikacja jest tworzona jako wolna przez międzynarodową społeczność.\n"
+"\n"
+"Możesz mieć wkład w proces tworzenia i ulepszania jej."
+
+#: src/bz-license-dialog.c:135
+#, c-format
+msgid ""
+"This app is developed in the open by an international community, and "
+"released under the <a href=\"%s\">%s</a> license.\n"
+"\n"
+"You can participate and help make it even better."
+msgstr ""
+"Ta aplikacja jest tworzona jako wolna przez międzynarodową społeczność i jest "
+"wydawana z licencją <a href=\"%s\">%s</a>.\n"
+"\n"
+"Możesz mieć wkład w proces tworzenia i ulepszania jej."
 
 #: src/bz-preferences-dialog.blp:19
 msgid "Preferences"
@@ -1112,6 +1286,9 @@ msgctxt "shortcut window"
 msgid "Quit"
 msgstr "Wyjdź"
 
+#~ msgid "All"
+#~ msgstr "0+"
+
 #~ msgid "Audio & Video"
 #~ msgstr "Multimedia"
 
@@ -1194,10 +1371,6 @@ msgstr "Wyjdź"
 
 #~ msgid "Remote repo name"
 #~ msgstr "Nazwa repozytorium"
-
-#, c-format
-#~ msgid "%'d downloads in the last month"
-#~ msgstr "%'d pobrań w zeszłym miesiącu"
 
 #~ msgid "%B %-d, %Y"
 #~ msgstr "%-d %B, %Y"
@@ -1375,9 +1548,6 @@ msgstr "Wyjdź"
 #~ msgstr ""
 #~ "Jest to liczba pobrań z ostatnich 30 dni. Naciśnij, aby zobaczyć "
 #~ "statystyki pobrań tej aplikacji."
-
-#~ msgid "Support this developer"
-#~ msgstr "Przekaż darowiznę twórcy"
 
 #~ msgid "How the application looks"
 #~ msgstr "Jak aplikacja się prezentuje"
