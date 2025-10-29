@@ -20,6 +20,8 @@
 
 #define G_LOG_DOMAIN "BAZAAR::DL-WORKER-SUBPROCESS"
 
+#include <stdio.h>
+
 #include "bz-env.h"
 #include "bz-global-state.h"
 #include "bz-util.h"
@@ -171,6 +173,7 @@ done:
 static DexFuture *
 print_fiber (char *output)
 {
-  g_print ("%s\n", output);
+  fprintf (stdout, "%s\n", output);
+  fflush (stdout);
   return NULL;
 }

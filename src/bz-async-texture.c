@@ -22,9 +22,9 @@
 
 #define MAX_CONCURRENT_LOADS   32
 #define CACHE_INVALID_AGE      (G_TIME_SPAN_DAY * 1)
-#define HTTP_TIMEOUT_SECONDS   5
+#define HTTP_TIMEOUT_SECONDS   10
 #define MAX_LOAD_RETRIES       3
-#define RETRY_INTERVAL_SECONDS 5
+#define RETRY_INTERVAL_SECONDS 1
 
 #include "config.h"
 
