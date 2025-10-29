@@ -34,6 +34,7 @@ src/bz-entry-inspector.c
 src/bz-entry.c
 src/bz-env.c
 src/bz-error.c
+src/bz-featured-tile.blp
 src/bz-flathub-category.c
 src/bz-flathub-category-section.c
 src/bz-flathub-page.blp

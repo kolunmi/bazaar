@@ -55,7 +55,7 @@ template $BzFlathubPage: Adw.Bin {
 
                   margin-top: 16;
                   hexpand: true;
-                  model: bind template.state as <$BzFlathubState>.apps_of_the_day_week;
+                  model: bind template.state as <$BzFlathubState>.apps_of_the_week;
                   group-clicked => $featured_carousel_group_clicked_cb(template);
                 }
 
@@ -262,65 +262,85 @@ template $BzFlathubPage: Adw.Bin {
                     };
                   }
                 }
-$BzFlathubCategorySection section_productivity {
-  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "office") as <$BzFlathubCategory>;
-  max-items: 12;
-  group-selected => $category_section_group_selected_cb() swapped;
-}
+                $BzFlathubCategorySection section_productivity {
+                  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "office") as <$BzFlathubCategory>;
+                  max-items: 12;
+                  group-selected => $category_section_group_selected_cb() swapped;
+                }
 
-$BzFlathubCategorySection section_graphics {
-  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "graphics") as <$BzFlathubCategory>;
-  max-items: 12;
-  group-selected => $category_section_group_selected_cb() swapped;
-}
+                $BzFeaturedCarousel {
+                  margin-start: 8;
+                  margin-end: 8;
 
-$BzFlathubCategorySection section_audiovideo {
-  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "audiovideo") as <$BzFlathubCategory>;
-  max-items: 12;
-  group-selected => $category_section_group_selected_cb() swapped;
-}
+                  styles [
+                    "flathub-page-section",
+                  ]
 
-$BzFlathubCategorySection section_education {
-  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "education") as <$BzFlathubCategory>;
-  max-items: 12;
-  group-selected => $category_section_group_selected_cb() swapped;
-}
+                  margin-top: 16;
+                  hexpand: true;
 
-$BzFlathubCategorySection section_network {
-  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "network") as <$BzFlathubCategory>;
-  max-items: 12;
-  group-selected => $category_section_group_selected_cb() swapped;
-}
+                  model: SliceListModel {
+                    offset: 0;
+                    size: 1;
+                    model: bind template.state as <$BzFlathubState>.apps_of_the_day_week;
+                  };
+                  is-aotd: true;
+                  group-clicked => $featured_carousel_group_clicked_cb(template);
+                }
 
-$BzFlathubCategorySection section_game {
-  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "game") as <$BzFlathubCategory>;
-  max-items: 12;
-  group-selected => $category_section_group_selected_cb() swapped;
-}
+                $BzFlathubCategorySection section_graphics {
+                  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "graphics") as <$BzFlathubCategory>;
+                  max-items: 12;
+                  group-selected => $category_section_group_selected_cb() swapped;
+                }
 
-$BzFlathubCategorySection section_development {
-  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "development") as <$BzFlathubCategory>;
-  max-items: 12;
-  group-selected => $category_section_group_selected_cb() swapped;
-}
+                $BzFlathubCategorySection section_audiovideo {
+                  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "audiovideo") as <$BzFlathubCategory>;
+                  max-items: 12;
+                  group-selected => $category_section_group_selected_cb() swapped;
+                }
 
-$BzFlathubCategorySection section_science {
-  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "science") as <$BzFlathubCategory>;
-  max-items: 12;
-  group-selected => $category_section_group_selected_cb() swapped;
-}
+                $BzFlathubCategorySection section_education {
+                  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "education") as <$BzFlathubCategory>;
+                  max-items: 12;
+                  group-selected => $category_section_group_selected_cb() swapped;
+                }
 
-$BzFlathubCategorySection section_system {
-  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "system") as <$BzFlathubCategory>;
-  max-items: 12;
-  group-selected => $category_section_group_selected_cb() swapped;
-}
+                $BzFlathubCategorySection section_network {
+                  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "network") as <$BzFlathubCategory>;
+                  max-items: 12;
+                  group-selected => $category_section_group_selected_cb() swapped;
+                }
 
-$BzFlathubCategorySection section_utility {
-  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "utility") as <$BzFlathubCategory>;
-  max-items: 12;
-  group-selected => $category_section_group_selected_cb() swapped;
-}
+                $BzFlathubCategorySection section_game {
+                  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "game") as <$BzFlathubCategory>;
+                  max-items: 12;
+                  group-selected => $category_section_group_selected_cb() swapped;
+                }
+
+                $BzFlathubCategorySection section_development {
+                  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "development") as <$BzFlathubCategory>;
+                  max-items: 12;
+                  group-selected => $category_section_group_selected_cb() swapped;
+                }
+
+                $BzFlathubCategorySection section_science {
+                  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "science") as <$BzFlathubCategory>;
+                  max-items: 12;
+                  group-selected => $category_section_group_selected_cb() swapped;
+                }
+
+                $BzFlathubCategorySection section_system {
+                  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "system") as <$BzFlathubCategory>;
+                  max-items: 12;
+                  group-selected => $category_section_group_selected_cb() swapped;
+                }
+
+                $BzFlathubCategorySection section_utility {
+                  category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "utility") as <$BzFlathubCategory>;
+                  max-items: 12;
+                  group-selected => $category_section_group_selected_cb() swapped;
+                }
               };
             };
           };

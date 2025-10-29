@@ -1,4 +1,4 @@
-/* bz-featured-tile.c
+/* bz-featured-carousel.c
  *
  * Copyright 2025 Alexander Vanhee
  *
@@ -34,5 +34,10 @@ GListModel *bz_featured_carousel_get_model (BzFeaturedCarousel *self);
 
 void bz_featured_carousel_set_model (BzFeaturedCarousel *self,
                                      GListModel         *model);
+
+gboolean bz_featured_carousel_get_is_aotd (BzFeaturedCarousel *self);
+
+void bz_featured_carousel_set_is_aotd (BzFeaturedCarousel *self,
+                                       gboolean            is_aotd);
 
 G_END_DECLS
