@@ -511,8 +511,8 @@ terminate (BzDownloadWorker *self)
   g_hash_table_iter_init (&waiting_iter, self->waiting);
   for (;;)
     {
-      char       *dest_path = NULL;
-      DexPromise *promise   = NULL;
+      g_autofree char *dest_path     = NULL;
+      g_autoptr (DexPromise) promise = NULL;
 
       if (!g_hash_table_iter_next (
               &waiting_iter,
