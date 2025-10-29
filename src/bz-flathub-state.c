@@ -701,8 +701,10 @@ initialize_fiber (GWeakRef *wr)
           g_autoptr (BzFlathubCategory) category  = NULL;
           g_autoptr (GtkStringList) store         = NULL;
           g_autoptr (GtkStringList) quality_store = NULL;
-          JsonArray *category_array               = NULL;
-          guint      category_length              = 0;
+          JsonObject *response_object             = NULL;
+          JsonArray  *category_array              = NULL;
+          guint       category_length             = 0;
+          int         total_hits                  = 0;
 
           g_hash_table_iter_init (&iter, futures);
           g_hash_table_iter_next (&iter, (gpointer *) &name, (gpointer *) &future);
@@ -720,9 +722,11 @@ initialize_fiber (GWeakRef *wr)
           quality_store = gtk_string_list_new (NULL);
           bz_flathub_category_set_name (category, name);
           bz_flathub_category_set_applications (category, G_LIST_MODEL (store));
-
-          category_array  = json_object_get_array_member (json_node_get_object (node), "hits");
+          response_object = json_node_get_object (node);
+          category_array  = json_object_get_array_member (response_object, "hits");
           category_length = json_array_get_length (category_array);
+          total_hits      = json_object_get_int_member (response_object, "totalHits");
+          bz_flathub_category_set_total_entries (category, total_hits);
 
           for (guint i = 0; i < category_length; i++)
             {

@@ -35,6 +35,7 @@ src/bz-entry.c
 src/bz-env.c
 src/bz-error.c
 src/bz-flathub-category.c
+src/bz-flathub-category-section.c
 src/bz-flathub-page.blp
 src/bz-flathub-page.c
 src/bz-flathub-state.c
