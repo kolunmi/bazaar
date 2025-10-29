@@ -112,6 +112,32 @@
 	  min-height: 22px;
 	  color: var(--accent-color);
 	  background-color: alpha(var(--accent-bg-color),0.15);
+	  transition: background-color 150ms ease;
+}
+
+.circular-lozenge {
+	font-weight: bold;
+	border-radius: 99999px;
+	padding: 9px 11px;
+	min-width: 18px;
+	min-height: 22px;
+	color: var(--accent-color);
+	background-color: alpha(var(--accent-bg-color),0.15);
+}
+
+.circular-lozenge.large {
+	padding: 15px 18px;
+	min-width: 24px;
+	min-height: 30px;
+}
+
+
+button.context-tile:hover .lozenge {
+  background-color: alpha(var(--accent-bg-color),0.25);
+}
+
+button.context-tile:active .lozenge {
+  background-color: alpha(var(--accent-bg-color),0.35);
 }
 
 .small-pill {
@@ -162,12 +188,16 @@ window.narrow .app-developer {
 	padding: 4px;
 }
 
+button.context-tile {
+  background-color: transparent;
+}
+
 .context-tile-text {
 	font-size: 10pt;
 	font-weight: 500;
 }
 
-.wide-image image {
+.wide-image {
 	margin-top: -28px;
 	margin-bottom: -28px;
 }

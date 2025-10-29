@@ -325,13 +325,7 @@ calculate_is_mobile_friendly (guint required_controls,
                               gint  min_display_length,
                               gint  max_display_length)
 {
-  gboolean supports_touch;
-  gboolean fits_mobile_display;
-
-  supports_touch      = (supported_controls & BZ_CONTROL_TOUCH) != 0;
-  fits_mobile_display = min_display_length == 0 || min_display_length < 500;
-
-  return supports_touch && fits_mobile_display;
+  return (supported_controls & BZ_CONTROL_TOUCH) != 0;
 }
 
 BzFlatpakEntry *

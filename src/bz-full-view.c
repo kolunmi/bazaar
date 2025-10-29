@@ -26,13 +26,16 @@
 #include "bz-addons-dialog.h"
 #include "bz-app-size-dialog.h"
 #include "bz-appstream-description-render.h"
+#include "bz-context-tile.h"
 #include "bz-dynamic-list-view.h"
 #include "bz-env.h"
 #include "bz-error.h"
 #include "bz-flatpak-entry.h"
 #include "bz-full-view.h"
 #include "bz-global-state.h"
+#include "bz-hardware-support-dialog.h"
 #include "bz-lazy-async-texture-model.h"
+#include "bz-license-dialog.h"
 #include "bz-releases-list.h"
 #include "bz-screenshots-carousel.h"
 #include "bz-section-view.h"
@@ -214,6 +217,15 @@ is_between (gpointer object,
 }
 
 static char *
+bool_to_string (gpointer object,
+                gboolean condition,
+                char    *if_true,
+                char    *if_false)
+{
+  return g_strdup (condition ? if_true : if_false);
+}
+
+static char *
 format_with_small_suffix (char *number, const char *suffix)
 {
   char *dot = g_strrstr (number, ".");
@@ -235,28 +247,24 @@ static char *
 format_recent_downloads (gpointer object,
                          int      value)
 {
-  g_autofree char *number_str = NULL;
-  const char      *suffix     = NULL;
-
   if (value <= 0)
     return g_strdup (_ ("---"));
 
   if (value >= 1000000)
-    {
-      number_str = g_strdup_printf ("%.2f", value / 1000000.0);
-      suffix     = "M";
-    }
+    /* Translators: M is the suffix for millions, \xC2\xA0 is a non-breaking space */
+    return g_strdup_printf (_ ("%.2f\xC2\xA0M"), value / 1000000.0);
   else if (value >= 1000)
-    {
-      number_str = g_strdup_printf ("%.2f", value / 1000.0);
-      suffix     = "K";
-    }
+    /* Translators: K is the suffix for thousands, \xC2\xA0 is a non-breaking space */
+    return g_strdup_printf (_ ("%.2f\xC2\xA0K"), value / 1000.0);
   else
-    {
-      return g_strdup_printf (_ ("%'d"), value);
-    }
+    return g_strdup_printf ("%'d", value);
+}
 
-  return format_with_small_suffix (number_str, suffix);
+static char *
+format_recent_downloads_tooltip (gpointer object,
+                                 int      value)
+{
+  return g_strdup_printf (_ ("%d downloads in the last 30 days"), value);
 }
 
 static char *
@@ -274,29 +282,102 @@ format_size (gpointer object, guint64 value)
 }
 
 static char *
-format_age_rating (gpointer object, gint value)
+format_size_tooltip (gpointer object, guint64 value)
 {
-  if (value == 0)
-    return g_strdup (_ ("All"));
-
-  return g_strdup_printf ("%d+", value);
+  g_autofree char *size_str = g_format_size (value);
+  return g_strdup_printf (_ ("Download size of %s"), size_str);
 }
 
 static char *
-format_license (gpointer    object,
-                const char *license)
+format_age_rating (gpointer object, gint value)
+{
+  if (value <= 2)
+    value = 3;
+
+  /* Translators: Age rating format, e.g. "12+" for ages 12 and up */
+  return g_strdup_printf (_ ("%d+"), value);
+}
+
+static char *
+get_age_rating_label (gpointer object,
+                      int      age_rating)
+{
+  if (age_rating == 0)
+    return g_strdup (_ ("All Ages"));
+  else
+    return g_strdup (_ ("Age Rating"));
+}
+
+static char *
+get_age_rating_tooltip (gpointer object,
+                        gint     value)
+{
+  if (value == 0)
+    return g_strdup (_ ("Suitable for all ages"));
+
+  return g_strdup_printf (_ ("Suitable for ages %d and up"), value);
+}
+
+static char *
+get_age_rating_style (gpointer object,
+                      int      age_rating)
+{
+  if (age_rating >= 18)
+    return g_strdup ("error");
+  else
+    return g_strdup ("grey");
+}
+
+static char *
+format_license_tooltip (gpointer    object,
+                        const char *license)
 {
   g_autofree char *name = NULL;
 
   if (license == NULL || *license == '\0')
     return g_strdup (_ ("Unknown"));
 
+  if (g_strcmp0 (license, "LicenseRef-proprietary") == 0)
+    return g_strdup (_ ("Proprietary Software"));
+
   name = bz_spdx_get_name (license);
 
-  if (name != NULL && *name != '\0')
-    return g_steal_pointer (&name);
-  else
-    return g_strdup (license);
+  return g_strdup_printf (_ ("Free software licensed under %s"),
+                          (name != NULL && *name != '\0') ? name : license);
+}
+
+static char *
+get_license_label (gpointer object,
+                   gboolean is_floss)
+{
+  return g_strdup (is_floss ? _ ("Free") : _ ("Proprietary"));
+}
+
+static char *
+get_license_icon (gpointer object,
+                  gboolean is_floss,
+                  int      index)
+{
+  const char *icons[][2] = {
+    {   "license-symbolic", "proprietary-code-symbolic" },
+    { "community-symbolic",          "license-symbolic" }
+  };
+
+  return g_strdup (icons[is_floss ? 1 : 0][index]);
+}
+
+static char *
+get_formfactor_label (gpointer object,
+                      gboolean is_mobile_friendly)
+{
+  return g_strdup (is_mobile_friendly ? _ ("Adaptive") : _ ("Desktop Only"));
+}
+
+static char *
+get_formfactor_tooltip (gpointer object, gboolean is_mobile_friendly)
+{
+  return g_strdup (is_mobile_friendly ? _ ("Works on desktop, tablets, and phones")
+                                      : _ ("May not work on mobile devices"));
 }
 
 static char *
@@ -370,25 +451,18 @@ static void
 license_cb (BzFullView *self,
             GtkButton  *button)
 {
-  BzEntry         *entry   = NULL;
-  const char      *license = NULL;
-  g_autofree char *url     = NULL;
+  AdwDialog *dialog   = NULL;
+  BzEntry   *ui_entry = NULL;
 
-  entry = bz_result_get_object (self->ui_entry);
-  if (entry == NULL)
+  if (self->group == NULL)
     return;
 
-  g_object_get (entry, "project-license", &license, NULL);
-
-  if (license == NULL || *license == '\0')
+  ui_entry = bz_result_get_object (self->ui_entry);
+  if (ui_entry == NULL)
     return;
 
-  url = bz_spdx_get_url (license);
-
-  if (url != NULL)
-    g_app_info_launch_default_for_uri (url, NULL, NULL);
-  else
-    g_warning ("Could not generate URL for license: %s", license);
+  dialog = bz_license_dialog_new (ui_entry);
+  adw_dialog_present (dialog, GTK_WIDGET (self));
 }
 
 static void
@@ -425,6 +499,22 @@ size_cb (BzFullView *self,
 
   size_dialog = bz_app_size_dialog_new (bz_result_get_object (self->ui_entry));
   adw_dialog_present (size_dialog, GTK_WIDGET (self));
+}
+
+static void
+formfactor_cb (BzFullView *self,
+               GtkButton  *button)
+{
+  AdwDialog *dialog   = NULL;
+  BzEntry   *ui_entry = NULL;
+
+  if (self->group == NULL)
+    return;
+
+  ui_entry = bz_result_get_object (self->ui_entry);
+  dialog   = ADW_DIALOG (bz_hardware_support_dialog_new (ui_entry));
+
+  adw_dialog_present (dialog, GTK_WIDGET (self));
 }
 
 static void
@@ -671,11 +761,13 @@ bz_full_view_class_init (BzFullViewClass *klass)
   g_type_ensure (BZ_TYPE_DYNAMIC_LIST_VIEW);
   g_type_ensure (BZ_TYPE_ENTRY);
   g_type_ensure (BZ_TYPE_ENTRY_GROUP);
+  g_type_ensure (BZ_TYPE_HARDWARE_SUPPORT_DIALOG);
   g_type_ensure (BZ_TYPE_LAZY_ASYNC_TEXTURE_MODEL);
   g_type_ensure (BZ_TYPE_SECTION_VIEW);
   g_type_ensure (BZ_TYPE_RELEASES_LIST);
   g_type_ensure (BZ_TYPE_SCREENSHOTS_CAROUSEL);
   g_type_ensure (BZ_TYPE_SHARE_LIST);
+  g_type_ensure (BZ_TYPE_CONTEXT_TILE);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-full-view.ui");
   gtk_widget_class_bind_template_child (widget_class, BzFullView, stack);
@@ -687,17 +779,28 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, is_between);
   gtk_widget_class_bind_template_callback (widget_class, logical_and);
+  gtk_widget_class_bind_template_callback (widget_class, bool_to_string);
   gtk_widget_class_bind_template_callback (widget_class, format_recent_downloads);
+  gtk_widget_class_bind_template_callback (widget_class, format_recent_downloads_tooltip);
   gtk_widget_class_bind_template_callback (widget_class, format_size);
+  gtk_widget_class_bind_template_callback (widget_class, format_size_tooltip);
   gtk_widget_class_bind_template_callback (widget_class, format_age_rating);
+  gtk_widget_class_bind_template_callback (widget_class, get_age_rating_label);
+  gtk_widget_class_bind_template_callback (widget_class, get_age_rating_tooltip);
+  gtk_widget_class_bind_template_callback (widget_class, get_age_rating_style);
   gtk_widget_class_bind_template_callback (widget_class, format_as_link);
-  gtk_widget_class_bind_template_callback (widget_class, format_license);
+  gtk_widget_class_bind_template_callback (widget_class, format_license_tooltip);
+  gtk_widget_class_bind_template_callback (widget_class, get_license_label);
+  gtk_widget_class_bind_template_callback (widget_class, get_license_icon);
+  gtk_widget_class_bind_template_callback (widget_class, get_formfactor_label);
+  gtk_widget_class_bind_template_callback (widget_class, get_formfactor_tooltip);
   gtk_widget_class_bind_template_callback (widget_class, has_link);
   gtk_widget_class_bind_template_callback (widget_class, open_url_cb);
   gtk_widget_class_bind_template_callback (widget_class, open_flathub_url_cb);
   gtk_widget_class_bind_template_callback (widget_class, license_cb);
   gtk_widget_class_bind_template_callback (widget_class, dl_stats_cb);
   gtk_widget_class_bind_template_callback (widget_class, size_cb);
+  gtk_widget_class_bind_template_callback (widget_class, formfactor_cb);
   gtk_widget_class_bind_template_callback (widget_class, run_cb);
   gtk_widget_class_bind_template_callback (widget_class, install_cb);
   gtk_widget_class_bind_template_callback (widget_class, remove_cb);

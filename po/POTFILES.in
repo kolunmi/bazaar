@@ -46,6 +46,8 @@ src/bz-global-progress.c
 src/bz-global-state.c
 src/bz-gnome-shell-search-provider.c
 src/bz-group-tile-css-watcher.c
+src/bz-hardware-support-dialog.c
+src/bz-hardware-support-dialog.blp
 src/bz-inhibited-scrollable.c
 src/bz-inspector.blp
 src/bz-inspector.c
@@ -54,6 +56,8 @@ src/bz-installed-page.c
 src/bz-io.c
 src/bz-issue.c
 src/bz-lazy-async-texture-model.c
+src/bz-license-dialog.c
+src/bz-license-dialog.h
 src/bz-patterned-background.c
 src/bz-preferences-dialog.blp
 src/bz-preferences-dialog.c
