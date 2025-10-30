@@ -1,0 +1,117 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzScreenshotsCarousel: Gtk.Widget {
+  accessibility {
+    label: _("Screenshots Carousel");
+  }
+
+  styles [
+    "screenshot-carousel",
+    "view",
+    "frame",
+  ]
+
+  layout-manager: Gtk.BinLayout {};
+
+  Gtk.Overlay {
+    halign: fill;
+    valign: fill;
+
+    child: Gtk.Box {
+      orientation: vertical;
+      halign: fill;
+      valign: fill;
+
+      styles [
+        "carousel-box",
+      ]
+
+      Adw.Carousel carousel {
+        vexpand: true;
+        hexpand: true;
+        valign: center;
+        height-request: 450;
+        allow-mouse-drag: true;
+        allow-scroll-wheel: false;
+        allow-long-swipes: true;
+        notify::position => $on_notify_position() swapped;
+        notify::n-pages => $on_notify_n_pages() swapped;
+      }
+
+      Adw.CarouselIndicatorDots carousel_indicator {
+        carousel: carousel;
+        opacity: 0;
+        hexpand: true;
+        halign: center;
+
+        styles [
+          "boxed-indicator",
+          "indicator-box",
+        ]
+      }
+    };
+
+    [overlay]
+    Gtk.Revealer prev_button_revealer {
+      transition-type: crossfade;
+      reveal-child: false;
+      halign: start;
+      valign: center;
+
+      Gtk.Button prev_button {
+        icon-name: "go-previous-symbolic";
+        valign: center;
+        halign: start;
+        clicked => $on_prev_clicked() swapped;
+
+        styles [
+          "circular",
+          "osd",
+        ]
+      }
+    }
+
+    [overlay]
+    Gtk.Revealer next_button_revealer {
+      transition-type: crossfade;
+      reveal-child: false;
+      halign: end;
+      valign: center;
+
+      Gtk.Button next_button {
+        icon-name: "go-next-symbolic";
+        valign: center;
+        clicked => $on_next_clicked() swapped;
+
+        styles [
+          "circular",
+          "osd",
+        ]
+      }
+    }
+
+    [overlay]
+    Box {
+      styles [
+        "osd-box",
+        "pip-button",
+      ]
+
+      margin-end: 8;
+      margin-bottom: 8;
+      halign: end;
+      valign: end;
+
+      Gtk.Button {
+        icon-name: "pip-out-symbolic";
+        tooltip-text: _("Open Screenshot Viewer");
+        clicked => $on_expand_clicked() swapped;
+
+        styles [
+          "flat",
+        ]
+      }
+    }
+  }
+}

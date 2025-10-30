@@ -2,7 +2,7 @@
 
 INSTR="$1"
 
-VERSION=0.5.5
+VERSION=0.5.9
 
 case "$INSTR" in
     get-vcs)

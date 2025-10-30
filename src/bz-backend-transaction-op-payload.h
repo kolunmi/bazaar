@@ -36,7 +36,7 @@ const char *
 bz_backend_transaction_op_payload_get_name (BzBackendTransactionOpPayload *self);
 
 BzEntry *
-bz_backend_transaction_op_payload_get_entry (BzBackendTransactionOpPayload *self);
+bz_backend_transaction_op_payload_dup_entry (BzBackendTransactionOpPayload *self);
 
 guint64
 bz_backend_transaction_op_payload_get_download_size (BzBackendTransactionOpPayload *self);

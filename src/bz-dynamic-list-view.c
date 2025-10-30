@@ -40,7 +40,8 @@ struct _BzDynamicListView
   char                 *object_prop;
   guint                 max_children_per_line;
 
-  char *child_type_string;
+  char              *child_type_string;
+  GtkScrolledWindow *scrolled_window;
 };
 
 G_DEFINE_FINAL_TYPE (BzDynamicListView, bz_dynamic_list_view, ADW_TYPE_BIN);
@@ -56,6 +57,7 @@ enum
   PROP_CHILD_PROP,
   PROP_OBJECT_PROP,
   PROP_MAX_CHILDREN_PER_LINE,
+  PROP_VADJUSTMENT,
 
   LAST_PROP
 };
@@ -151,6 +153,9 @@ bz_dynamic_list_view_get_property (GObject    *object,
     case PROP_MAX_CHILDREN_PER_LINE:
       g_value_set_uint (value, bz_dynamic_list_view_get_max_children_per_line (self));
       break;
+    case PROP_VADJUSTMENT:
+      g_value_set_object (value, bz_dynamic_list_view_get_vadjustment (self));
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -245,6 +250,13 @@ bz_dynamic_list_view_class_init (BzDynamicListViewClass *klass)
           "object-prop",
           NULL, NULL, NULL,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_VADJUSTMENT] =
+      g_param_spec_object (
+          "vadjustment",
+          NULL, NULL,
+          GTK_TYPE_ADJUSTMENT,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
@@ -342,6 +354,17 @@ bz_dynamic_list_view_get_max_children_per_line (BzDynamicListView *self)
 {
   g_return_val_if_fail (BZ_IS_DYNAMIC_LIST_VIEW (self), 4);
   return self->max_children_per_line;
+}
+
+GtkAdjustment *
+bz_dynamic_list_view_get_vadjustment (BzDynamicListView *self)
+{
+  g_return_val_if_fail (BZ_IS_DYNAMIC_LIST_VIEW (self), NULL);
+
+  if (self->scrolled_window == NULL)
+    return NULL;
+
+  return gtk_scrolled_window_get_vadjustment (self->scrolled_window);
 }
 
 void
@@ -466,7 +489,10 @@ refresh (BzDynamicListView *self)
 {
   if (self->model != NULL)
     g_signal_handlers_disconnect_by_func (self->model, items_changed, self);
+
+  self->scrolled_window = NULL;
   adw_bin_set_child (ADW_BIN (self), NULL);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_VADJUSTMENT]);
 
   if (self->model == NULL ||
       self->child_prop == NULL ||
@@ -495,6 +521,10 @@ refresh (BzDynamicListView *self)
       g_signal_connect_swapped (factory, "unbind", G_CALLBACK (list_item_factory_unbind), self);
 
       gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (window), view);
+
+      self->scrolled_window = GTK_SCROLLED_WINDOW (window);
+      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_VADJUSTMENT]);
+
       adw_bin_set_child (ADW_BIN (self), window);
     }
   else

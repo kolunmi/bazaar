@@ -201,6 +201,13 @@ invert_boolean (gpointer object,
 }
 
 static gboolean
+is_double_zero (gpointer object,
+                double   value)
+{
+  return value == 0.0;
+}
+
+static gboolean
 is_null (gpointer object,
          GObject *value)
 {
@@ -220,17 +227,32 @@ search_split_open_changed_cb (BzWindow            *self,
                               GParamSpec          *pspec,
                               AdwOverlaySplitView *view)
 {
-  gboolean show_sidebar = FALSE;
+  gboolean      show_sidebar = FALSE;
+  BzEntryGroup *previewing   = NULL;
 
   g_clear_object (&self->search_to_view_binding);
   show_sidebar = adw_overlay_split_view_get_show_sidebar (view);
 
   if (show_sidebar)
-    self->search_to_view_binding = g_object_bind_property (
-        self->search_widget, "previewing",
-        self->full_view, "entry-group",
-        G_BINDING_SYNC_CREATE);
+    {
+      self->search_to_view_binding = g_object_bind_property (
+          self->search_widget, "previewing",
+          self->full_view, "entry-group",
+          G_BINDING_SYNC_CREATE);
+      set_page (self);
+    }
+  else
+    {
+      previewing = bz_search_widget_get_previewing (self->search_widget);
+      if (previewing != NULL)
+        bz_full_view_set_entry_group (self->full_view, previewing);
+    }
+}
 
+static void
+go_home_cb (BzWindow *self)
+{
+  adw_overlay_split_view_set_show_sidebar (self->search_split, FALSE);
   set_page (self);
 }
 
@@ -251,6 +273,20 @@ search_widget_select_cb (BzWindow       *self,
 
   remove = installable == 0 && removable > 0;
   try_transact (self, NULL, group, remove, FALSE, NULL);
+}
+
+static void
+search_widget_preview_changed_cb (BzSearchWidget *widget,
+                                  BzEntryGroup   *group,
+                                  gboolean        from_search,
+                                  gpointer        user_data)
+{
+  BzWindow *self;
+
+  self = BZ_WINDOW (gtk_widget_get_root (GTK_WIDGET (widget)));
+
+  if (self->breakpoint_applied && !from_search)
+    adw_overlay_split_view_set_show_sidebar (self->search_split, FALSE);
 }
 
 static void
@@ -315,35 +351,18 @@ visible_page_changed_cb (BzWindow          *self,
 {
   AdwNavigationPage *visible_page = NULL;
   const char        *page_tag     = NULL;
-
-  visible_page = adw_navigation_view_get_visible_page (navigation_view);
-
+  visible_page                    = adw_navigation_view_get_visible_page (navigation_view);
   if (visible_page != NULL)
     {
       page_tag = adw_navigation_page_get_tag (visible_page);
-
       if (page_tag != NULL && strstr (page_tag, "flathub") != NULL)
         gtk_widget_add_css_class (GTK_WIDGET (self), "flathub");
       else
         gtk_widget_remove_css_class (GTK_WIDGET (self), "flathub");
-
-      if (page_tag != NULL && strstr (page_tag, "view") != NULL)
-        {
-
-          adw_toolbar_view_set_top_bar_style (self->toolbar_view, ADW_TOOLBAR_RAISED);
-          gtk_widget_add_css_class (GTK_WIDGET (self->top_header_bar), "fake-flat-headerbar");
-        }
-      else
-        {
-          adw_toolbar_view_set_top_bar_style (self->toolbar_view, ADW_TOOLBAR_FLAT);
-          gtk_widget_remove_css_class (GTK_WIDGET (self->top_header_bar), "fake-flat-headerbar");
-        }
     }
   else
     {
       gtk_widget_remove_css_class (GTK_WIDGET (self), "flathub");
-      adw_toolbar_view_set_top_bar_style (self->toolbar_view, ADW_TOOLBAR_FLAT);
-      gtk_widget_remove_css_class (GTK_WIDGET (self->top_header_bar), "fake-flat-headerbar");
     }
 }
 
@@ -357,6 +376,8 @@ breakpoint_apply_cb (BzWindow      *self,
   adw_header_bar_set_title_widget (self->bottom_header_bar, NULL);
   adw_header_bar_set_title_widget (self->bottom_header_bar, GTK_WIDGET (self->title_revealer));
 
+  gtk_widget_add_css_class (GTK_WIDGET (self), "narrow");
+
   set_bottom_bar (self);
 }
 
@@ -369,6 +390,8 @@ breakpoint_unapply_cb (BzWindow      *self,
   adw_header_bar_set_title_widget (self->top_header_bar, NULL);
   adw_header_bar_set_title_widget (self->bottom_header_bar, NULL);
   adw_header_bar_set_title_widget (self->top_header_bar, GTK_WIDGET (self->title_revealer));
+
+  gtk_widget_remove_css_class (GTK_WIDGET (self), "narrow");
 
   set_bottom_bar (self);
 }
@@ -490,6 +513,7 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzWindow, bottom_header_bar);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, curated_toggle);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
+  gtk_widget_class_bind_template_callback (widget_class, is_double_zero);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, browser_group_selected_cb);
   gtk_widget_class_bind_template_callback (widget_class, search_widget_select_cb);
@@ -509,6 +533,8 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, update_cb);
   gtk_widget_class_bind_template_callback (widget_class, transactions_clear_cb);
   gtk_widget_class_bind_template_callback (widget_class, visible_page_changed_cb);
+  gtk_widget_class_bind_template_callback (widget_class, go_home_cb);
+  gtk_widget_class_bind_template_callback (widget_class, search_widget_preview_changed_cb);
 
   gtk_widget_class_install_action (widget_class, "escape", NULL, action_escape);
 }
@@ -622,10 +648,11 @@ checking_for_updates_changed (BzWindow    *self,
               self->comet_overlay,
               GTK_WIDGET (self->update_button));
         }
-      else
-        adw_toast_overlay_add_toast (
-            self->toasts,
-            adw_toast_new_format (_ ("Up to date!")));
+      /* TODO: this can be intrusive when idling checking for updates */
+      // else
+      //   adw_toast_overlay_add_toast (
+      //       self->toasts,
+      //       adw_toast_new_format (_ ("Up to date!")));
     }
 }
 
@@ -807,11 +834,16 @@ void
 bz_window_show_group (BzWindow     *self,
                       BzEntryGroup *group)
 {
+  AdwNavigationPage *visible_page = NULL;
+
   g_return_if_fail (BZ_IS_WINDOW (self));
   g_return_if_fail (BZ_IS_ENTRY_GROUP (group));
 
   bz_full_view_set_entry_group (self->full_view, group);
-  adw_navigation_view_push_by_tag (self->main_stack, "view");
+
+  visible_page = adw_navigation_view_get_visible_page (self->main_stack);
+  if (visible_page != adw_navigation_view_find_page (self->main_stack, "view"))
+    adw_navigation_view_push_by_tag (self->main_stack, "view");
   gtk_widget_set_visible (GTK_WIDGET (self->go_back), TRUE);
   gtk_widget_set_visible (GTK_WIDGET (self->search), FALSE);
   gtk_revealer_set_reveal_child (self->title_revealer, FALSE);

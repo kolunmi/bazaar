@@ -211,14 +211,13 @@ transaction_operation_error (FlatpakTransaction          *object,
                              GError                      *error,
                              gint                         details,
                              TransactionData             *data);
-gboolean
+static gboolean
 transaction_ready (FlatpakTransaction *object,
                    TransactionData    *data);
 
 static BzFlatpakEntry *
 find_entry_from_operation (TransactionData             *data,
-                           FlatpakTransactionOperation *operation,
-                           int                         *n_operations);
+                           FlatpakTransactionOperation *operation);
 
 BZ_DEFINE_DATA (
     transaction_operation,
@@ -1047,9 +1046,8 @@ retrieve_refs_for_remote_fiber (RetrieveRefsForRemoteData *data)
   g_autoptr (AsMetadata) metadata         = NULL;
   AsComponentBox *components              = NULL;
   g_autoptr (GHashTable) component_hash   = NULL;
-  // g_autofree char *remote_icon_name       = NULL;
-  g_autoptr (GdkPaintable) remote_icon = NULL;
-  g_autoptr (GPtrArray) refs           = NULL;
+  g_autoptr (GdkPaintable) remote_icon    = NULL;
+  g_autoptr (GPtrArray) refs              = NULL;
 
   remote_name = flatpak_remote_get_name (remote);
 
@@ -1198,56 +1196,6 @@ retrieve_refs_for_remote_fiber (RetrieveRefsForRemoteData *data)
           (blocked_names_hash == NULL || !g_hash_table_contains (blocked_names_hash, id)))
         g_hash_table_replace (component_hash, g_strdup (id), g_object_ref (component));
     }
-
-  /* Disabled for now, as it is causing issues and
-   * we shouldn't be using GFile for http
-   */
-
-  // remote_icon_name = flatpak_remote_get_icon (remote);
-  // if (remote_icon_name != NULL)
-  //   {
-  //     g_autoptr (GFile) remote_icon_file = NULL;
-
-  //     remote_icon_file = g_file_new_for_uri (remote_icon_name);
-  //     if (remote_icon_file != NULL)
-  //       {
-  //         g_autoptr (GlyLoader) loader = NULL;
-  //         g_autoptr (GlyImage) image   = NULL;
-  //         g_autoptr (GlyFrame) frame   = NULL;
-  //         GdkTexture *texture          = NULL;
-
-  //         loader = gly_loader_new (remote_icon_file);
-  //         image  = gly_loader_load (loader, &local_error);
-  //         if (image == NULL)
-  //           {
-  //             error_future = dex_future_new_reject (
-  //                 BZ_FLATPAK_ERROR,
-  //                 BZ_FLATPAK_ERROR_GLYCIN_FAILURE,
-  //                 "Failed to download icon from uri %s for remote '%s': %s",
-  //                 remote_icon_name,
-  //                 remote_name,
-  //                 local_error->message);
-  //             goto done;
-  //           }
-
-  //         frame = gly_image_next_frame (image, &local_error);
-  //         if (frame == NULL)
-  //           {
-  //             error_future = dex_future_new_reject (
-  //                 BZ_FLATPAK_ERROR,
-  //                 BZ_FLATPAK_ERROR_GLYCIN_FAILURE,
-  //                 "Failed to decode frame from downloaded icon from uri %s for remote '%s': %s",
-  //                 remote_icon_name,
-  //                 remote_name,
-  //                 local_error->message);
-  //             goto done;
-  //           }
-
-  //         texture = gly_gtk_frame_get_texture (frame);
-  //         if (texture != NULL)
-  //           remote_icon = GDK_PAINTABLE (texture);
-  //       }
-  //   }
 
   refs = flatpak_installation_list_remote_refs_sync (
       installation, remote_name, cancellable, &local_error);
@@ -1551,13 +1499,15 @@ transaction_fiber (TransactionData *data)
 
   if (updates != NULL)
     {
+      g_autoptr (FlatpakTransaction) user_transaction = NULL;
+      g_autoptr (FlatpakTransaction) sys_transaction  = NULL;
+
       for (guint i = 0; i < updates->len; i++)
         {
-          BzFlatpakEntry  *entry                     = NULL;
-          FlatpakRef      *ref                       = NULL;
-          gboolean         is_user                   = FALSE;
-          g_autofree char *ref_fmt                   = NULL;
-          g_autoptr (FlatpakTransaction) transaction = NULL;
+          BzFlatpakEntry  *entry   = NULL;
+          FlatpakRef      *ref     = NULL;
+          gboolean         is_user = FALSE;
+          g_autofree char *ref_fmt = NULL;
 
           entry   = g_ptr_array_index (updates, i);
           ref     = bz_flatpak_entry_get_ref (entry);
@@ -1576,23 +1526,34 @@ transaction_fiber (TransactionData *data)
                   ref_fmt);
             }
 
-          transaction = flatpak_transaction_new_for_installation (
-              is_user
-                  ? instance->user
-                  : instance->system,
-              cancellable, &local_error);
-          if (transaction == NULL)
+          if (is_user && user_transaction == NULL)
+            user_transaction = flatpak_transaction_new_for_installation (
+                instance->user,
+                cancellable,
+                &local_error);
+          else if (!is_user && sys_transaction == NULL)
+            sys_transaction = flatpak_transaction_new_for_installation (
+                instance->system,
+                cancellable,
+                &local_error);
+          if ((is_user && user_transaction == NULL) ||
+              (!is_user && sys_transaction == NULL))
             {
               dex_channel_close_send (channel);
               return dex_future_new_reject (
                   BZ_FLATPAK_ERROR,
                   BZ_FLATPAK_ERROR_TRANSACTION_FAILURE,
-                  "Failed to initialize potential transaction for system installation: %s",
+                  "Failed to initialize potential transaction for installation: %s",
                   local_error->message);
             }
 
+          /* Put updates in one transaction to prevent dependency
+             race-conditions, since the update list is most likely coming from
+             this instance */
           result = flatpak_transaction_add_update (
-              transaction,
+              is_user
+                  ? user_transaction
+                  : sys_transaction,
               ref_fmt,
               NULL,
               NULL,
@@ -1608,12 +1569,16 @@ transaction_fiber (TransactionData *data)
                   local_error->message);
             }
 
-          g_ptr_array_add (transactions, g_steal_pointer (&transaction));
           g_ptr_array_add (entries, g_object_ref (entry));
           g_hash_table_replace (data->ref_to_entry_hash,
                                 g_steal_pointer (&ref_fmt),
                                 g_object_ref (entry));
         }
+
+      if (user_transaction != NULL)
+        g_ptr_array_add (transactions, g_steal_pointer (&user_transaction));
+      if (sys_transaction != NULL)
+        g_ptr_array_add (transactions, g_steal_pointer (&sys_transaction));
     }
 
   if (removals != NULL)
@@ -1654,7 +1619,7 @@ transaction_fiber (TransactionData *data)
               return dex_future_new_reject (
                   BZ_FLATPAK_ERROR,
                   BZ_FLATPAK_ERROR_TRANSACTION_FAILURE,
-                  "Failed to initialize potential transaction for system installation: %s",
+                  "Failed to initialize potential transaction for installation: %s",
                   local_error->message);
             }
 
@@ -1774,7 +1739,7 @@ transaction_new_operation (FlatpakTransaction          *transaction,
     return;
 
   flatpak_transaction_progress_set_update_frequency (progress, 100);
-  entry = find_entry_from_operation (data, operation, NULL);
+  entry = find_entry_from_operation (data, operation);
 
   payload = bz_backend_transaction_op_payload_new ();
   bz_backend_transaction_op_payload_set_entry (
@@ -1894,7 +1859,7 @@ transaction_operation_error (FlatpakTransaction          *object,
   return FALSE;
 }
 
-gboolean
+static gboolean
 transaction_ready (FlatpakTransaction *object,
                    TransactionData    *data)
 {
@@ -1911,53 +1876,33 @@ transaction_ready (FlatpakTransaction *object,
 
 static BzFlatpakEntry *
 find_entry_from_operation (TransactionData             *data,
-                           FlatpakTransactionOperation *operation,
-                           int                         *n_operations)
+                           FlatpakTransactionOperation *operation)
 {
-  GPtrArray *related_to_ops = NULL;
+  GPtrArray      *related_to_ops = NULL;
+  const char     *ref_fmt        = NULL;
+  BzFlatpakEntry *entry          = NULL;
 
   related_to_ops = flatpak_transaction_operation_get_related_to_ops (operation);
-  // /* count all deps if applicable */
-  // if (n_operations != NULL && related_to_ops != NULL)
-  //   {
-  //     *n_operations += related_to_ops->len;
 
-  //     for (guint i = 0; i < related_to_ops->len; i++)
-  //       {
-  //         FlatpakTransactionOperation *related_op = NULL;
+  ref_fmt = flatpak_transaction_operation_get_ref (operation);
+  entry   = g_hash_table_lookup (data->ref_to_entry_hash, ref_fmt);
+  if (entry != NULL)
+    return entry;
 
-  //         related_op = g_ptr_array_index (related_to_ops, i);
-  //         find_entry_from_operation (NULL, related_op, n_operations);
-  //       }
-  //   }
-
-  if (data != NULL)
+  if (related_to_ops != NULL)
     {
-      const char     *ref_fmt = NULL;
-      BzFlatpakEntry *entry   = NULL;
-
-      ref_fmt = flatpak_transaction_operation_get_ref (operation);
-      entry   = g_hash_table_lookup (data->ref_to_entry_hash, ref_fmt);
-      if (entry != NULL)
-        return entry;
-
-      if (related_to_ops != NULL)
+      for (guint i = 0; i < related_to_ops->len; i++)
         {
-          for (guint i = 0; i < related_to_ops->len; i++)
-            {
-              FlatpakTransactionOperation *related_op = NULL;
+          FlatpakTransactionOperation *related_op = NULL;
 
-              related_op = g_ptr_array_index (related_to_ops, i);
-              entry      = find_entry_from_operation (data, related_op, NULL);
-              if (entry != NULL)
-                break;
-            }
+          related_op = g_ptr_array_index (related_to_ops, i);
+          entry      = find_entry_from_operation (data, related_op);
+          if (entry != NULL)
+            break;
         }
-
-      return entry;
     }
-  else
-    return NULL;
+
+  return entry;
 }
 
 static void

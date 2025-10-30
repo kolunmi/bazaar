@@ -19,20 +19,28 @@
  */
 
 #include "bz-preferences-dialog.h"
+#include <glib/gi18n.h>
 
-static const char *bar_themes_ordered[] = {
-  "accent-color",
-  "pride-rainbow-flag",
-  "lesbian-pride-flag",
-  "transgender-flag",
-  "nonbinary-flag",
-  "bisexual-flag",
-  "asexual-flag",
-  "pansexual-flag",
-  "aromantic-flag",
-  "genderfluid-flag",
-  "polysexual-flag",
-  "omnisexual-flag",
+typedef struct
+{
+  const char *id;
+  const char *style_class;
+  const char *tooltip;
+} BarTheme;
+
+static const BarTheme bar_themes[] = {
+  {       "accent-color",  "accent-color-theme",             N_ ("Accent Color") },
+  { "pride-rainbow-flag", "pride-rainbow-theme",             N_ ("Pride Colors") },
+  { "lesbian-pride-flag", "lesbian-pride-theme",     N_ ("Lesbian Pride Colors") },
+  {   "transgender-flag",   "transgender-theme", N_ ("Transgender Pride Colors") },
+  {     "nonbinary-flag",     "nonbinary-theme",   N_ ("Nonbinary Pride Colors") },
+  {      "bisexual-flag",      "bisexual-theme",    N_ ("Bisexual Pride Colors") },
+  {       "asexual-flag",       "asexual-theme",     N_ ("Asexual Pride Colors") },
+  {     "pansexual-flag",     "pansexual-theme",   N_ ("Pansexual Pride Colors") },
+  {     "aromantic-flag",     "aromantic-theme",   N_ ("Aromantic Pride Colors") },
+  {   "genderfluid-flag",   "genderfluid-theme", N_ ("Genderfluid Pride Colors") },
+  {    "polysexual-flag",    "polysexual-theme",  N_ ("Polysexual Pride Colors") },
+  {    "omnisexual-flag",    "omnisexual-theme",  N_ ("Omnisexual Pride Colors") },
 };
 
 struct _BzPreferencesDialog
@@ -46,12 +54,15 @@ struct _BzPreferencesDialog
   AdwSwitchRow *search_only_foss_switch;
   AdwSwitchRow *search_only_flathub_switch;
   AdwSwitchRow *search_debounce_switch;
-  AdwComboRow  *progress_bar_theme;
+  GtkFlowBox   *flag_buttons_box;
+
+  GtkToggleButton *flag_buttons[G_N_ELEMENTS (bar_themes)];
 };
 
 G_DEFINE_FINAL_TYPE (BzPreferencesDialog, bz_preferences_dialog, ADW_TYPE_PREFERENCES_DIALOG)
 
 static void bind_settings (BzPreferencesDialog *self);
+static void create_flag_buttons (BzPreferencesDialog *self);
 
 static void
 bz_preferences_dialog_dispose (GObject *object)
@@ -64,16 +75,19 @@ bz_preferences_dialog_dispose (GObject *object)
 }
 
 static void
-global_progress_theme_widget_changed (BzPreferencesDialog *self,
-                                      GParamSpec          *pspec,
-                                      AdwComboRow         *combo)
+flag_button_toggled (GtkToggleButton     *button,
+                     BzPreferencesDialog *self)
 {
-  guint selected = 0;
+  const char *theme_id = NULL;
 
-  selected = adw_combo_row_get_selected (self->progress_bar_theme);
-  g_assert (selected < G_N_ELEMENTS (bar_themes_ordered));
+  if (!gtk_toggle_button_get_active (button))
+    return;
 
-  g_settings_set_string (self->settings, "global-progress-bar-theme", bar_themes_ordered[selected]);
+  theme_id = g_object_get_data (G_OBJECT (button), "theme-id");
+  if (theme_id != NULL)
+    {
+      g_settings_set_string (self->settings, "global-progress-bar-theme", theme_id);
+    }
 }
 
 static void
@@ -82,19 +96,54 @@ global_progress_theme_settings_changed (BzPreferencesDialog *self,
                                         GSettings           *settings)
 {
   const char *theme = NULL;
-  guint       idx   = 0;
 
   theme = g_settings_get_string (self->settings, "global-progress-bar-theme");
-  for (guint i = 0; i < G_N_ELEMENTS (bar_themes_ordered); i++)
+
+  for (guint i = 0; i < G_N_ELEMENTS (bar_themes); i++)
     {
-      if (g_strcmp0 (theme, bar_themes_ordered[i]) == 0)
+      if (g_strcmp0 (theme, bar_themes[i].id) == 0)
         {
-          idx = i;
+          gtk_toggle_button_set_active (self->flag_buttons[i], TRUE);
           break;
         }
     }
+}
 
-  adw_combo_row_set_selected (self->progress_bar_theme, idx);
+static void
+create_flag_buttons (BzPreferencesDialog *self)
+{
+  GtkToggleButton *first_button = NULL;
+
+  for (guint i = 0; i < G_N_ELEMENTS (bar_themes); i++)
+    {
+      GtkToggleButton *button = NULL;
+
+      button = GTK_TOGGLE_BUTTON (gtk_toggle_button_new ());
+
+      gtk_widget_set_tooltip_text (GTK_WIDGET (button), bar_themes[i].tooltip);
+      gtk_widget_add_css_class (GTK_WIDGET (button), "accent-button");
+      gtk_widget_add_css_class (GTK_WIDGET (button), bar_themes[i].style_class);
+
+      g_object_set_data_full (G_OBJECT (button),
+                              "theme-id",
+                              g_strdup (bar_themes[i].id),
+                              g_free);
+
+      if (i == 0)
+        {
+          first_button = button;
+        }
+      else
+        {
+          gtk_toggle_button_set_group (button, first_button);
+        }
+
+      g_signal_connect (button, "toggled",
+                        G_CALLBACK (flag_button_toggled), self);
+
+      self->flag_buttons[i] = button;
+      gtk_flow_box_append (self->flag_buttons_box, GTK_WIDGET (button));
+    }
 }
 
 static void
@@ -142,14 +191,14 @@ bz_preferences_dialog_class_init (BzPreferencesDialogClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, search_only_foss_switch);
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, search_only_flathub_switch);
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, search_debounce_switch);
-  gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, progress_bar_theme);
-  gtk_widget_class_bind_template_callback (widget_class, global_progress_theme_widget_changed);
+  gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, flag_buttons_box);
 }
 
 static void
 bz_preferences_dialog_init (BzPreferencesDialog *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
+  create_flag_buttons (self);
 }
 
 AdwDialog *

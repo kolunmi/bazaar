@@ -47,4 +47,11 @@ bz_full_view_set_entry_group (BzFullView   *self,
 BzEntryGroup *
 bz_full_view_get_entry_group (BzFullView *self);
 
+void
+bz_full_view_set_debounce (BzFullView *self,
+                           gboolean    debounce);
+
+gboolean
+bz_full_view_get_debounce (BzFullView *self);
+
 G_END_DECLS

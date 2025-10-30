@@ -10,23 +10,34 @@
     <file>countries.json</file>
 
     <file preprocess="xml-stripblanks">bz-addons-dialog.ui</file>
+    <file preprocess="xml-stripblanks">bz-app-size-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-app-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-apps-page.ui</file>
+    <file preprocess="xml-stripblanks">bz-appstream-description-render.ui</file>
     <file preprocess="xml-stripblanks">bz-browse-widget.ui</file>
-    <file preprocess="xml-stripblanks">bz-curated-app-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-category-tile.ui</file>
+    <file preprocess="xml-stripblanks">bz-context-tile.ui</file>
+    <file preprocess="xml-stripblanks">bz-curated-app-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-decorated-screenshot.ui</file>
     <file preprocess="xml-stripblanks">bz-detailed-app-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-entry-inspector.ui</file>
+    <file preprocess="xml-stripblanks">bz-featured-carousel.ui</file>
+    <file preprocess="xml-stripblanks">bz-featured-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-flathub-page.ui</file>
+    <file preprocess="xml-stripblanks">bz-flathub-category-section.ui</file>
     <file preprocess="xml-stripblanks">bz-full-view.ui</file>
+    <file preprocess="xml-stripblanks">bz-hardware-support-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-inspector.ui</file>
     <file preprocess="xml-stripblanks">bz-installed-page.ui</file>
+    <file preprocess="xml-stripblanks">bz-license-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-preferences-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-progress-bar.ui</file>
+    <file preprocess="xml-stripblanks">bz-releases-list.ui</file>
+    <file preprocess="xml-stripblanks">bz-releases-dialog.ui</file>
+    <file preprocess="xml-stripblanks">bz-screenshot-dialog.ui</file>
+    <file preprocess="xml-stripblanks">bz-screenshots-carousel.ui</file>
     <file preprocess="xml-stripblanks">bz-search-widget.ui</file>
     <file preprocess="xml-stripblanks">bz-section-view.ui</file>
-    <file preprocess="xml-stripblanks">bz-share-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-stats-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-transaction-view.ui</file>
     <file preprocess="xml-stripblanks">bz-update-dialog.ui</file>
@@ -35,11 +46,17 @@
 
     <file preprocess="xml-stripblanks">icons/scalable/actions/app-installed-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/check-plain-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/circle-filled-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/code-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/community-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/connected-squares-x-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/copy-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/cross-large-circle-filled-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/delay-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/device-support-adaptive-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/device-support-desktop-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/device-support-touch-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/device-supported-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/download-plus-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/drive-harddisk-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/edit-clear-all-symbolic.svg</file>
@@ -51,6 +68,7 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/globe-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/go-previous-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/graph2-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/hand-openyay-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/heart-filled-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/heart-outline-thick-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/horizontal-arrows-disabled-symbolic.svg</file>
@@ -61,9 +79,12 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/media-playback-start-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/media-playback-stop-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/newspaper-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/parent-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/people-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/pip-out-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/power-profile-performance-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/puzzle-piece-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/proprietary-code-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/regex-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/right-large-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/sad-computer-symbolic.svg</file>
@@ -73,11 +94,15 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/sliders-horizontal-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/software-update-available-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/starred-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/thumbs-up-outline-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/timer-sand-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/translations-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/user-trash-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/verified-checkmark-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/view-more-horizontal-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/view-more-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/zoom-minus-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/zoom-plus-symbolic.svg</file>
 
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Create.svg</file>
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Develop.svg</file>

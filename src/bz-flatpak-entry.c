@@ -86,14 +86,6 @@ enum
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
 
-static char *
-parse_appstream_to_markdown (const char *description_raw,
-                             GError    **error);
-
-static inline void
-append_markup_escaped (GString    *string,
-                       const char *append);
-
 static void
 clear_entry (BzFlatpakEntry *self);
 
@@ -302,6 +294,40 @@ serializable_iface_init (BzSerializableInterface *iface)
   iface->deserialize = bz_flatpak_entry_real_deserialize;
 }
 
+static guint
+parse_control_value (const char *value)
+{
+  if (g_strcmp0 (value, "pointing") == 0)
+    return BZ_CONTROL_POINTING;
+  else if (g_strcmp0 (value, "keyboard") == 0)
+    return BZ_CONTROL_KEYBOARD;
+  else if (g_strcmp0 (value, "console") == 0)
+    return BZ_CONTROL_CONSOLE;
+  else if (g_strcmp0 (value, "tablet") == 0)
+    return BZ_CONTROL_TABLET;
+  else if (g_strcmp0 (value, "touch") == 0)
+    return BZ_CONTROL_TOUCH;
+  else if (g_strcmp0 (value, "gamepad") == 0)
+    return BZ_CONTROL_GAMEPAD;
+  else if (g_strcmp0 (value, "tv-remote") == 0)
+    return BZ_CONTROL_TV_REMOTE;
+  else if (g_strcmp0 (value, "voice") == 0)
+    return BZ_CONTROL_VOICE;
+  else if (g_strcmp0 (value, "vision") == 0)
+    return BZ_CONTROL_VISION;
+  else
+    return 0;
+}
+
+static gboolean
+calculate_is_mobile_friendly (guint required_controls,
+                              guint supported_controls,
+                              gint  min_display_length,
+                              gint  max_display_length)
+{
+  return (supported_controls & BZ_CONTROL_TOUCH) != 0;
+}
+
 BzFlatpakEntry *
 bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
                               gboolean           user,
@@ -331,7 +357,7 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
   const char      *project_group               = NULL;
   const char      *developer                   = NULL;
   const char      *developer_id                = NULL;
-  g_autofree char *long_description            = NULL;
+  const char      *long_description            = NULL;
   const char      *remote_name                 = NULL;
   const char      *project_url                 = NULL;
   g_autoptr (GPtrArray) as_search_tokens       = NULL;
@@ -346,8 +372,16 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
   double           average_rating              = 0.0;
   g_autofree char *ratings_summary             = NULL;
   g_autoptr (GListStore) version_history       = NULL;
-  const char *accent_color_light               = NULL;
-  const char *accent_color_dark                = NULL;
+  const char      *accent_color_light          = NULL;
+  const char      *accent_color_dark           = NULL;
+  guint            required_controls           = 0;
+  guint            recommended_controls        = 0;
+  guint            supported_controls          = 0;
+  gint             min_display_length          = 0;
+  gint             max_display_length          = 0;
+  gboolean         is_mobile_friendly          = FALSE;
+  AsContentRating *content_rating              = NULL;
+  gint             age_rating                  = 0;
 
   g_return_val_if_fail (BZ_IS_FLATPAK_INSTANCE (instance), NULL);
   g_return_val_if_fail (FLATPAK_IS_REF (ref), NULL);
@@ -433,13 +467,15 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
 
   if (component != NULL)
     {
-      const char    *long_description_raw = NULL;
       AsDeveloper   *developer_obj        = NULL;
       GPtrArray     *screenshots          = NULL;
       AsReleaseList *releases             = NULL;
       GPtrArray     *releases_arr         = NULL;
       GPtrArray     *icons                = NULL;
       AsBranding    *branding             = NULL;
+      GPtrArray     *requires_relations   = NULL;
+      GPtrArray     *recommends_relations = NULL;
+      GPtrArray     *supports_relations   = NULL;
 
       title = as_component_get_name (component);
       if (title == NULL)
@@ -460,10 +496,7 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
           developer_id = as_developer_get_id (developer_obj);
         }
 
-      long_description_raw = as_component_get_description (component);
-      long_description     = parse_appstream_to_markdown (long_description_raw, error);
-      if (long_description_raw != NULL && long_description == NULL)
-        return NULL;
+      long_description = as_component_get_description (component);
 
       screenshots = as_component_get_screenshots_all (component);
       if (screenshots != NULL)
@@ -518,6 +551,7 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
           url = bz_url_new ();
           bz_url_set_name (url, C_ ("Project URL Type", "Flathub Page"));
           bz_url_set_url (url, flathub_url);
+          bz_url_set_icon_name (url, "flathub-symbolic");
 
           g_list_store_append (share_urls, url);
         }
@@ -530,40 +564,50 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
           if (url != NULL)
             {
               const char *enum_string     = NULL;
+              const char *icon_name       = NULL;
               g_autoptr (BzUrl) share_url = NULL;
 
               switch (e)
                 {
                 case AS_URL_KIND_HOMEPAGE:
-                  enum_string = C_ ("Project URL Type", "Homepage");
+                  enum_string = C_ ("Project URL Type", "Project Website");
+                  icon_name   = "globe-symbolic";
                   break;
                 case AS_URL_KIND_BUGTRACKER:
                   enum_string = C_ ("Project URL Type", "Issue Tracker");
+                  icon_name   = "computer-fail-symbolic";
                   break;
                 case AS_URL_KIND_FAQ:
                   enum_string = C_ ("Project URL Type", "FAQ");
+                  icon_name   = "help-faq-symbolic";
                   break;
                 case AS_URL_KIND_HELP:
                   enum_string = C_ ("Project URL Type", "Help");
+                  icon_name   = "help-browser-symbolic";
                   break;
                 case AS_URL_KIND_DONATION:
                   enum_string = C_ ("Project URL Type", "Donate");
+                  icon_name   = "heart-filled-symbolic";
                   g_clear_pointer (&donation_url, g_free);
                   donation_url = g_strdup (url);
                   break;
                 case AS_URL_KIND_TRANSLATE:
                   enum_string = C_ ("Project URL Type", "Translate");
+                  icon_name   = "translations-symbolic";
                   break;
                 case AS_URL_KIND_CONTACT:
                   enum_string = C_ ("Project URL Type", "Contact");
+                  icon_name   = "mail-send-symbolic";
                   break;
                 case AS_URL_KIND_VCS_BROWSER:
                   enum_string = C_ ("Project URL Type", "Source Code");
+                  icon_name   = "code-symbolic";
                   g_clear_pointer (&forge_url, g_free);
                   forge_url = g_strdup (url);
                   break;
                 case AS_URL_KIND_CONTRIBUTE:
                   enum_string = C_ ("Project URL Type", "Contribute");
+                  icon_name   = "system-users-symbolic";
                   break;
                 default:
                   break;
@@ -573,6 +617,7 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
                   BZ_TYPE_URL,
                   "name", enum_string,
                   "url", url,
+                  "icon-name", icon_name,
                   NULL);
               g_list_store_append (share_urls, share_url);
             }
@@ -590,18 +635,16 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
 
           for (guint i = 0; i < releases_arr->len; i++)
             {
-              AsRelease       *as_release              = NULL;
-              GPtrArray       *as_issues               = NULL;
-              const char      *release_description_raw = NULL;
-              g_autofree char *release_description     = NULL;
-              g_autoptr (GListStore) issues            = NULL;
-              g_autoptr (BzRelease) release            = NULL;
+              AsRelease  *as_release          = NULL;
+              GPtrArray  *as_issues           = NULL;
+              const char *release_description = NULL;
+              g_autoptr (GListStore) issues   = NULL;
+              g_autoptr (BzRelease) release   = NULL;
 
               as_release = g_ptr_array_index (releases_arr, i);
               as_issues  = as_release_get_issues (as_release);
 
-              release_description_raw = as_release_get_description (as_release);
-              release_description     = parse_appstream_to_markdown (release_description_raw, NULL);
+              release_description = as_release_get_description (as_release);
 
               if (as_issues != NULL && as_issues->len > 0)
                 {
@@ -735,6 +778,85 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
           accent_color_dark = as_branding_get_color (
               branding, AS_COLOR_KIND_PRIMARY, AS_COLOR_SCHEME_KIND_DARK);
         }
+
+      content_rating = as_component_get_content_rating (component, "oars-1.1");
+      if (content_rating != NULL)
+        {
+          age_rating = (gint) as_content_rating_get_minimum_age (content_rating);
+        }
+
+      requires_relations   = as_component_get_requires (component);
+      recommends_relations = as_component_get_recommends (component);
+      supports_relations   = as_component_get_supports (component);
+
+      if (requires_relations != NULL)
+        {
+          for (guint i = 0; i < requires_relations->len; i++)
+            {
+              AsRelation        *relation  = g_ptr_array_index (requires_relations, i);
+              AsRelationItemKind item_kind = as_relation_get_item_kind (relation);
+
+              if (item_kind == AS_RELATION_ITEM_KIND_CONTROL)
+                {
+                  AsControlKind control_kind = as_relation_get_value_control_kind (relation);
+                  const char   *control_str  = as_control_kind_to_string (control_kind);
+                  if (control_str != NULL)
+                    required_controls |= parse_control_value (control_str);
+                }
+              else if (item_kind == AS_RELATION_ITEM_KIND_DISPLAY_LENGTH)
+                {
+                  AsRelationCompare compare = as_relation_get_compare (relation);
+                  gint              value   = as_relation_get_value_int (relation);
+                  if (compare == AS_RELATION_COMPARE_GE)
+                    min_display_length = value;
+                }
+            }
+        }
+
+      if (recommends_relations != NULL)
+        {
+          for (guint i = 0; i < recommends_relations->len; i++)
+            {
+              AsRelation        *relation  = g_ptr_array_index (recommends_relations, i);
+              AsRelationItemKind item_kind = as_relation_get_item_kind (relation);
+
+              if (item_kind == AS_RELATION_ITEM_KIND_CONTROL)
+                {
+                  AsControlKind control_kind = as_relation_get_value_control_kind (relation);
+                  const char   *control_str  = as_control_kind_to_string (control_kind);
+                  if (control_str != NULL)
+                    recommended_controls |= parse_control_value (control_str);
+                }
+            }
+        }
+
+      if (supports_relations != NULL)
+        {
+          for (guint i = 0; i < supports_relations->len; i++)
+            {
+              AsRelation        *relation  = g_ptr_array_index (supports_relations, i);
+              AsRelationItemKind item_kind = as_relation_get_item_kind (relation);
+
+              if (item_kind == AS_RELATION_ITEM_KIND_CONTROL)
+                {
+                  AsControlKind control_kind = as_relation_get_value_control_kind (relation);
+                  const char   *control_str  = as_control_kind_to_string (control_kind);
+                  if (control_str != NULL)
+                    supported_controls |= parse_control_value (control_str);
+                }
+              else if (item_kind == AS_RELATION_ITEM_KIND_DISPLAY_LENGTH)
+                {
+                  AsRelationCompare compare = as_relation_get_compare (relation);
+                  gint              value   = as_relation_get_value_int (relation);
+                  if (compare == AS_RELATION_COMPARE_LE)
+                    max_display_length = value;
+                }
+            }
+        }
+      is_mobile_friendly = calculate_is_mobile_friendly (required_controls,
+                                                         supported_controls,
+                                                         min_display_length,
+                                                         max_display_length);
     }
 
   if (icon_paintable == NULL && FLATPAK_IS_BUNDLE_REF (ref))
@@ -817,6 +939,13 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
       "version-history", version_history,
       "light-accent-color", accent_color_light,
       "dark-accent-color", accent_color_dark,
+      "required-controls", required_controls,
+      "recommended-controls", recommended_controls,
+      "supported-controls", supported_controls,
+      "min-display-length", min_display_length,
+      "max-display-length", max_display_length,
+      "is-mobile-friendly", is_mobile_friendly,
+      "age-rating", age_rating,
       NULL);
 
   return g_steal_pointer (&self);
@@ -954,151 +1083,6 @@ bz_flatpak_entry_launch (BzFlatpakEntry    *self,
       flatpak_ref_get_commit (ref),
       NULL, error);
 #endif
-}
-
-static void
-compile_appstream_description (XbNode  *node,
-                               GString *string,
-                               int      parent_kind,
-                               int      idx)
-{
-  XbNode     *child   = NULL;
-  const char *element = NULL;
-  const char *text    = NULL;
-  int         kind    = NO_ELEMENT;
-
-  child   = xb_node_get_child (node);
-  element = xb_node_get_element (node);
-  text    = xb_node_get_text (node);
-
-  if (element != NULL)
-    {
-      if (g_strcmp0 (element, "p") == 0)
-        kind = PARAGRAPH;
-      else if (g_strcmp0 (element, "ol") == 0)
-        kind = ORDERED_LIST;
-      else if (g_strcmp0 (element, "ul") == 0)
-        kind = UNORDERED_LIST;
-      else if (g_strcmp0 (element, "li") == 0)
-        kind = LIST_ITEM;
-      else if (g_strcmp0 (element, "code") == 0)
-        kind = CODE;
-      else if (g_strcmp0 (element, "em") == 0)
-        kind = EMPHASIS;
-    }
-
-  if (string->len > 0 &&
-      (kind == PARAGRAPH ||
-       kind == ORDERED_LIST ||
-       kind == UNORDERED_LIST))
-    g_string_append (string, "\n");
-
-  if (kind == EMPHASIS)
-    g_string_append (string, "<b>");
-  else if (kind == CODE)
-    g_string_append (string, "<tt>");
-
-  if (kind == LIST_ITEM)
-    {
-      switch (parent_kind)
-        {
-        case ORDERED_LIST:
-          g_string_append_printf (string, "%d. ", idx);
-          break;
-        case UNORDERED_LIST:
-          g_string_append (string, "• ");
-          break;
-        default:
-          break;
-        }
-    }
-
-  if (text != NULL)
-    append_markup_escaped (string, text);
-
-  for (int i = 0; child != NULL; i++)
-    {
-      const char *tail = NULL;
-      XbNode     *next = NULL;
-
-      compile_appstream_description (child, string, kind, i);
-
-      tail = xb_node_get_tail (child);
-      if (tail != NULL)
-        append_markup_escaped (string, tail);
-
-      next = xb_node_get_next (child);
-      g_object_unref (child);
-      child = next;
-    }
-
-  if (kind == EMPHASIS)
-    g_string_append (string, "</b>");
-  else if (kind == CODE)
-    g_string_append (string, "</tt>");
-  else
-    g_string_append (string, "\n");
-}
-
-static char *
-parse_appstream_to_markdown (const char *description_raw,
-                             GError    **error)
-{
-  g_autoptr (XbSilo) silo          = NULL;
-  g_autoptr (XbNode) root          = NULL;
-  g_autoptr (GString) string       = NULL;
-  g_autoptr (GRegex) cleanup_regex = NULL;
-  g_autofree char *cleaned         = NULL;
-
-  if (description_raw == NULL)
-    return NULL;
-
-  silo = xb_silo_new_from_xml (description_raw, error);
-  if (silo == NULL)
-    return NULL;
-
-  root   = xb_silo_get_root (silo);
-  string = g_string_new (NULL);
-
-  cleanup_regex = g_regex_new (
-      "^ +| +$|\\t+|\\A\\s+|\\s+\\z",
-      G_REGEX_MULTILINE,
-      G_REGEX_MATCH_DEFAULT,
-      NULL);
-  g_assert (cleanup_regex != NULL);
-
-  for (int i = 0; root != NULL; i++)
-    {
-      const char *tail = NULL;
-      XbNode     *next = NULL;
-
-      compile_appstream_description (root, string, NO_ELEMENT, i);
-
-      tail = xb_node_get_tail (root);
-      if (tail != NULL)
-        append_markup_escaped (string, tail);
-
-      next = xb_node_get_next (root);
-      g_object_unref (root);
-      root = next;
-    }
-
-  g_string_replace (string, "  ", "", 0);
-  cleaned = g_regex_replace (
-      cleanup_regex, string->str, -1, 0,
-      "", G_REGEX_MATCH_DEFAULT, NULL);
-
-  return g_steal_pointer (&cleaned);
-}
-
-static inline void
-append_markup_escaped (GString    *string,
-                       const char *append)
-{
-  g_autofree char *escaped = NULL;
-
-  escaped = g_markup_escape_text (append, -1);
-  g_string_append (string, escaped);
 }
 
 static void

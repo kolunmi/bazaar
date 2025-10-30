@@ -24,7 +24,7 @@
 #define CACHE_INVALID_AGE      (G_TIME_SPAN_DAY * 1)
 #define HTTP_TIMEOUT_SECONDS   5
 #define MAX_LOAD_RETRIES       3
-#define RETRY_INTERVAL_SECONDS 5
+#define RETRY_INTERVAL_SECONDS 1
 
 #include "config.h"
 
@@ -401,7 +401,10 @@ bz_async_texture_dup_texture (BzAsyncTexture *self)
   g_return_val_if_fail (BZ_IS_ASYNC_TEXTURE (self), NULL);
 
   locker = g_mutex_locker_new (&self->texture_mutex);
-  return g_object_ref (GDK_TEXTURE (self->paintable));
+  if (GDK_IS_TEXTURE (self->paintable))
+    return (GdkTexture *) g_object_ref (self->paintable);
+  else
+    return NULL;
 }
 
 DexFuture *
@@ -413,7 +416,16 @@ bz_async_texture_dup_future (BzAsyncTexture *self)
 
   locker = g_mutex_locker_new (&self->texture_mutex);
   maybe_load (self);
-  return dex_ref (self->task);
+
+  if (self->task != NULL)
+    return dex_ref (self->task);
+  else if (GDK_IS_TEXTURE (self->paintable))
+    return dex_future_new_for_object (self->paintable);
+  else
+    return dex_future_new_reject (
+        G_IO_ERROR,
+        G_IO_ERROR_FAILED,
+        "texture is in an invalid state");
 }
 
 void
@@ -489,6 +501,7 @@ static DexFuture *
 load_fiber_work (LoadData *data)
 {
   static GMutex   queueing_mutex                       = { 0 };
+  static guint    concurrent_loads                     = 0;
   static guint    ongoing_queued[MAX_CONCURRENT_LOADS] = { 0 };
   static BzGuard *gates[MAX_CONCURRENT_LOADS]          = { 0 };
   static GMutex   mutexes[MAX_CONCURRENT_LOADS]        = { 0 };
@@ -511,26 +524,54 @@ load_fiber_work (LoadData *data)
   g_autoptr (GdkTexture) texture        = NULL;
   g_autoptr (GlyFrame) frame            = NULL;
 
-  /* Rate limiting to reduce competition for resources */
   locker = g_mutex_locker_new (&queueing_mutex);
-  for (guint i = 0; i < G_N_ELEMENTS (gates); i++)
+  if (concurrent_loads == 0)
     {
-      if (ongoing_queued[i] < slot_queued)
-        {
-          slot_queued = ongoing_queued[i];
-          slot_index  = i;
-        }
+      /* Ensure we don't overload the system with work; aim for # of logical
+         processors divided by 2
+
+        See:
+          https://github.com/kolunmi/bazaar/issues/497
+          https://docs.gtk.org/glib/func.get_num_processors.html
+
+        Eva Thu, 23 Oct 2025 14:19:44 -0700
+        */
+      concurrent_loads = MIN (
+          MAX_CONCURRENT_LOADS,
+          MAX (1, g_get_num_processors () / 2));
+
+      g_debug ("Allowing %d concurrent texture loads", concurrent_loads);
     }
-  ongoing_queued[slot_index]++;
   g_clear_pointer (&locker, g_mutex_locker_free);
 
-  BZ_BEGIN_GUARD_WITH_CONTEXT (&slot_guard,
-                               &mutexes[slot_index],
-                               &gates[slot_index]);
+#define RATE_LIMIT_BEGIN()                                  \
+  G_STMT_START                                              \
+  {                                                         \
+    locker = g_mutex_locker_new (&queueing_mutex);          \
+                                                            \
+    /* Rate limiting to reduce competition for resources */ \
+    for (guint i = 0; i < concurrent_loads; i++)            \
+      {                                                     \
+        if (ongoing_queued[i] < slot_queued)                \
+          {                                                 \
+            slot_queued = ongoing_queued[i];                \
+            slot_index  = i;                                \
+          }                                                 \
+      }                                                     \
+    ongoing_queued[slot_index]++;                           \
+    g_clear_pointer (&locker, g_mutex_locker_free);         \
+                                                            \
+    BZ_BEGIN_GUARD_WITH_CONTEXT (&slot_guard,               \
+                                 &mutexes[slot_index],      \
+                                 &gates[slot_index]);       \
+                                                            \
+    locker = g_mutex_locker_new (&queueing_mutex);          \
+    ongoing_queued[slot_index]--;                           \
+    g_clear_pointer (&locker, g_mutex_locker_free);         \
+  }                                                         \
+  G_STMT_END
 
-  locker = g_mutex_locker_new (&queueing_mutex);
-  ongoing_queued[slot_index]--;
-  g_clear_pointer (&locker, g_mutex_locker_free);
+#define RATE_LIMIT_END() bz_clear_guard (&slot_guard)
 
   is_http = g_str_has_prefix (source_uri, "http");
   now     = g_date_time_new_now_utc ();
@@ -574,6 +615,8 @@ load_fiber_work (LoadData *data)
         {
           if (age_span < CACHE_INVALID_AGE)
             {
+              RATE_LIMIT_BEGIN ();
+
               loader = gly_loader_new (cache_into);
               /* We assume we exported this file, so uhhh it is safe to
                  not use sandboxing, since it is faster :-) */
@@ -582,6 +625,8 @@ load_fiber_work (LoadData *data)
               image = gly_loader_load (loader, &local_error);
               if (image != NULL)
                 frame = gly_image_next_frame (image, &local_error);
+
+              RATE_LIMIT_END ();
             }
           else
             g_debug ("Metadata file %s for cached texture at %s indicates this resource is too old (GTimeSpan: %zu), "
@@ -705,6 +750,8 @@ load_fiber_work (LoadData *data)
             load_file = g_object_ref (source);
         }
 
+      RATE_LIMIT_BEGIN ();
+
       loader = gly_loader_new (load_file);
 #ifdef SANDBOXED_LIBFLATPAK
       gly_loader_set_sandbox_selector (loader, GLY_SANDBOX_SELECTOR_NOT_SANDBOXED);
@@ -720,6 +767,8 @@ load_fiber_work (LoadData *data)
       frame = gly_image_next_frame (image, &local_error);
       if (frame == NULL)
         return dex_future_new_for_error (g_steal_pointer (&local_error));
+
+      RATE_LIMIT_END ();
 
       if (async_tex_data_file != NULL)
         {
@@ -762,8 +811,6 @@ load_fiber_work (LoadData *data)
         }
     }
 
-  bz_clear_guard (&slot_guard);
-
   texture = gly_gtk_frame_get_texture (frame);
   if (texture == NULL)
     return dex_future_new_reject (
@@ -782,12 +829,7 @@ load_finally (DexFuture *future,
   g_autoptr (BzAsyncTexture) self = NULL;
   g_autoptr (GMutexLocker) locker = NULL;
 
-  self = g_weak_ref_get (&data->self);
-  if (self == NULL)
-    return dex_future_new_reject (
-        DEX_ERROR,
-        DEX_ERROR_UNKNOWN,
-        "Object was discarded");
+  bz_weak_get_or_return_reject (self, &data->self);
 
   locker = g_mutex_locker_new (&self->texture_mutex);
   dex_clear (&self->task);
@@ -841,15 +883,10 @@ retry_cb (DexFuture *future,
   g_autoptr (BzAsyncTexture) self = NULL;
   g_autoptr (GMutexLocker) locker = NULL;
 
-  self = g_weak_ref_get (&data->self);
-  if (self == NULL)
-    return dex_future_new_reject (
-        DEX_ERROR,
-        DEX_ERROR_UNKNOWN,
-        "Object was discarded");
+  bz_weak_get_or_return_reject (self, &data->self);
 
   locker = g_mutex_locker_new (&self->texture_mutex);
-  dex_clear (self->retry_future);
+  dex_clear (&self->retry_future);
 
   maybe_load (self);
   return NULL;

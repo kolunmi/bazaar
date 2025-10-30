@@ -11,10 +11,10 @@ Some basic rules:
 
 ## Basic Process
 
-Fork the project (so you can open a pr later) and clone the repo. Then
+Fork the project (so you can open a PR later) and clone the repo. Then
 make sure your current directory is the bazaar project root:
 
-```
+```sh
 # Replace '...' with the URL of your Bazaar fork
 # for which you have write permissions
 git clone ...
@@ -89,33 +89,36 @@ meson compile bazaar-update-po
 ```
 
 You are now ready to open your `po` file in your text editor or
-translation editor (POEdit, GTr`anslator, Lokalize, etc.)and begin translating.
-When you are done, commit your changes and submit a pull request on github.
+translation editor ([POEdit](https://flathub.org/apps/net.poedit.Poedit), [GTranslator](https://flathub.org/apps/org.gnome.Gtranslator), [Lokalize](https://flathub.org/apps/org.kde.lokalize), etc.)and begin translating.
+When you are done, commit your changes and submit a pull request on GitHub.
+Make sure to only commit files that are related to your translation.
 
 ## Update existing translations
 
 Generate a fresh `.pot` file again (if necessary) with the commands from above.
 
-```
+```sh
 msgmerge --update --verbose po/de.po po/bazaar.pot
 ```
 
-
 ## Test your translations
+Replace "de" with your [Language code](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes)!
 
-Adjust for your [Language code](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes)!
-
-```
+```sh
 msgfmt po/de.po -o bazaar.mo
-sudo cp bazaar.mo /usr/share/locale/de/LC_MESSAGES/
 ```
 
-Make sure to kill all the background processes from bazaar first
-
+Copy the `.mo` file so Bazaar can see it
+```sh
+sudo cp bazaar.mo /var/lib/flatpak/runtime/io.github.kolunmi.Bazaar.Locale/x86_64/stable/active/files/de/share/de/LC_MESSAGES/
 ```
+
+Make sure to kill the background process from Bazaar first so the desired changes/language will be used.
+```sh
 killall bazaar
 ```
 
-```
-LANGUAGE=de bazaar window --auto-service
+Override the used Language and launch Bazaar
+```sh
+LANGUAGE=de flatpak run io.github.kolunmi.Bazaar
 ```

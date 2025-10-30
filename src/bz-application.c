@@ -64,6 +64,9 @@ struct _BzApplication
   GTimer    *init_timer;
   DexFuture *notif_watch;
 
+  DexFuture *periodic_sync;
+  guint      periodic_timeout;
+
   BzEntryCacheManager        *cache;
   BzTransactionManager       *transactions;
   BzSearchEngine             *search_engine;
@@ -122,6 +125,9 @@ refresh_fiber (BzApplication *self);
 static DexFuture *
 watch_backend_notifs_fiber (BzApplication *self);
 
+static DexFuture *
+update_check_fiber (BzApplication *self);
+
 static void
 refresh (BzApplication *self);
 
@@ -157,6 +163,8 @@ bz_application_dispose (GObject *object)
 
   dex_clear (&self->refresh_task);
   dex_clear (&self->notif_watch);
+  dex_clear (&self->periodic_sync);
+  g_clear_handle_id (&self->periodic_timeout, g_source_remove);
   g_clear_object (&self->settings);
   g_clear_object (&self->blocklists);
   g_clear_object (&self->content_configs);
@@ -188,415 +196,128 @@ bz_application_dispose (GObject *object)
 static void
 bz_application_activate (GApplication *app)
 {
+  BzApplication *self = BZ_APPLICATION (app);
+
+  new_window (self);
 }
 
 static int
 bz_application_command_line (GApplication            *app,
                              GApplicationCommandLine *cmdline)
 {
-  BzApplication *self               = BZ_APPLICATION (app);
-  g_autoptr (GError) local_error    = NULL;
-  gint argc                         = 0;
-  g_auto (GStrv) argv               = NULL;
-  g_autofree GStrv argv_shallow     = NULL;
-  const char      *command          = NULL;
-  gboolean         window_autostart = FALSE;
-  g_autofree char *location         = NULL;
+  BzApplication *self                       = BZ_APPLICATION (app);
+  g_autoptr (GError) local_error            = NULL;
+  gint argc                                 = 0;
+  g_auto (GStrv) argv                       = NULL;
+  gboolean help                             = FALSE;
+  gboolean no_window                        = FALSE;
+  g_auto (GStrv) blocklists_strv            = NULL;
+  g_autoptr (GtkStringList) blocklists      = NULL;
+  g_auto (GStrv) content_configs_strv       = NULL;
+  g_autoptr (GtkStringList) content_configs = NULL;
+  g_auto (GStrv) locations                  = NULL;
+
+  GOptionEntry main_entries[] = {
+    { "help", 0, 0, G_OPTION_ARG_NONE, &help, "Print help" },
+    { "no-window", 0, 0, G_OPTION_ARG_NONE, &no_window, "Ensure the service is running without creating a new window" },
+    { "extra-blocklist", 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &blocklists_strv, "Add an extra blocklist to read from" },
+    { "extra-curated-config", 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &content_configs_strv, "Add an extra yaml file with which to configure the app browser" },
+    /* Here for backwards compat */
+    { "extra-content-config", 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &content_configs_strv, "Add an extra yaml file with which to configure the app browser (backwards compat)" },
+    { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &locations, "flatpakref file to open" },
+    { NULL }
+  };
 
   argv = g_application_command_line_get_arguments (cmdline, &argc);
-  g_debug ("Handling gapplication command line; argc=%d", argc);
-
-  // This is hack to avoid reorganizing the whole arg parsing logic atm
-  // but ideally it should be done at some point, and made so:
-  // 1. service always autostarts if its not running already
-  // 2. When executing the binary without any arguments, it defaults
-  // to initializing the service (if its not running) and activating
-  // the window.
-  if (argv == NULL || argc < 2)
+  g_debug ("Handling gapplication command line; argc=%d, argv= \\", argc);
+  for (guint i = 0; i < argc; i++)
     {
-      command          = "window";
-      window_autostart = TRUE;
-      argv             = NULL;
-      argc             = 0;
-    }
-  else
-    {
-      command = argv[1];
-      argc--;
-      argv_shallow = g_memdup2 (argv + 1, sizeof (*argv) * argc);
+      g_debug ("  [%d] %s", i, argv[i]);
     }
 
-  if (g_strcmp0 (command, "--help") == 0)
+  if (argv != NULL && argc > 0)
     {
-      if (self->running)
-        {
-          g_application_command_line_printerr (
-              cmdline,
-              "The Bazaar service is running. The available commands are:\n\n"
-              "  window|open|status|query|transact|quit\n\n"
-              "Add \"--help\" to a command to get information specific to that command.\n");
-        }
-      else
-        {
-          g_application_command_line_printerr (
-              cmdline,
-              "The Bazaar service is not running.\n"
-              "The following commands will start the daemon:\n"
-              "  bazaar service\n"
-              "  bazaar window --auto-service\n"
-              "Exiting...\n");
-        }
+      g_autofree GStrv argv_shallow      = NULL;
+      g_autoptr (GOptionContext) context = NULL;
 
-      return EXIT_SUCCESS;
-    }
-
-  if (g_strcmp0 (command, "window") == 0)
-    {
-      g_autoptr (GOptionContext) pre_context = NULL;
-
-      GOptionEntry entries[] = {
-        { "auto-service", 0, 0, G_OPTION_ARG_NONE, &window_autostart, NULL },
-        { NULL }
-      };
-
-      pre_context = g_option_context_new (NULL);
-      g_option_context_set_help_enabled (pre_context, FALSE);
-      g_option_context_set_ignore_unknown_options (pre_context, TRUE);
-      g_option_context_add_main_entries (pre_context, entries, NULL);
-      g_option_context_parse (pre_context, &argc, &argv_shallow, NULL);
-    }
-
-  if (window_autostart || g_strcmp0 (command, "service") == 0)
-    {
-      g_autoptr (GOptionContext) context        = NULL;
-      gboolean help                             = FALSE;
-      gboolean is_running                       = FALSE;
-      g_auto (GStrv) blocklists_strv            = NULL;
-      g_autoptr (GtkStringList) blocklists      = NULL;
-      g_auto (GStrv) content_configs_strv       = NULL;
-      g_autoptr (GtkStringList) content_configs = NULL;
-      g_auto (GStrv) locations                  = NULL;
-
-      GOptionEntry main_entries[] = {
-        { "help", 0, 0, G_OPTION_ARG_NONE, &help, "Print help" },
-        { "is-running", 0, 0, G_OPTION_ARG_NONE, &is_running, "Exit successfully if the Bazaar service is running" },
-        { "extra-blocklist", 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &blocklists_strv, "Add an extra blocklist to read from" },
-        { "extra-content-config", 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &content_configs_strv, "Add an extra yaml file with which to configure the app browser" },
-        { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &locations, "flatpakref file to open" },
-        { NULL }
-      };
+      argv_shallow = g_memdup2 (argv, sizeof (*argv) * argc);
 
       context = g_option_context_new ("- an app center for GNOME");
       g_option_context_set_help_enabled (context, FALSE);
       g_option_context_add_main_entries (context, main_entries, NULL);
-      g_option_context_set_ignore_unknown_options (context, window_autostart);
       if (!g_option_context_parse (context, &argc, &argv_shallow, &local_error))
         {
           g_application_command_line_printerr (cmdline, "%s\n", local_error->message);
           return EXIT_FAILURE;
         }
 
-      if (!window_autostart)
+      if (help)
         {
-          if (help)
-            {
-              g_autofree char *help_text = NULL;
+          g_autofree char *help_text = NULL;
 
-              g_option_context_set_summary (context, "Options for command \"service\"");
-
-              help_text = g_option_context_get_help (context, TRUE, NULL);
-              g_application_command_line_printerr (cmdline, "%s\n", help_text);
-              return EXIT_SUCCESS;
-            }
-
-          if (is_running)
-            return self->running ? EXIT_SUCCESS : EXIT_FAILURE;
-        }
-
-      if (!self->running || !window_autostart)
-        {
           if (self->running)
-            {
-              g_application_command_line_printerr (
-                  cmdline,
-                  "The Bazaar service is already running.\n"
-                  "Invoke \"bazaar --help\" to for available commands.\n");
-              return EXIT_FAILURE;
-            }
+            g_application_command_line_printerr (cmdline, "The Bazaar service is running.\n\n");
+          else
+            g_application_command_line_printerr (cmdline, "The Bazaar service is not running.\n\n");
 
-          g_debug ("Starting daemon!");
-          g_application_hold (G_APPLICATION (self));
-          self->running = TRUE;
+          help_text = g_option_context_get_help (context, TRUE, NULL);
+          g_application_command_line_printerr (cmdline, "%s\n", help_text);
+          return EXIT_SUCCESS;
+        }
+    }
 
-          init_service_struct (self);
+  if (!self->running)
+    {
+      g_debug ("Starting daemon!");
+      g_application_hold (G_APPLICATION (self));
+      self->running = TRUE;
 
-          blocklists = gtk_string_list_new (NULL);
+      init_service_struct (self);
+
+      blocklists = gtk_string_list_new (NULL);
 #ifdef HARDCODED_BLOCKLIST
-          g_debug ("Bazaar was configured with a hardcoded blocklist at %s, adding that now...",
-                   HARDCODED_BLOCKLIST);
-          gtk_string_list_append (blocklists, HARDCODED_BLOCKLIST);
+      g_debug ("Bazaar was configured with a hardcoded blocklist at %s, adding that now...",
+               HARDCODED_BLOCKLIST);
+      gtk_string_list_append (blocklists, HARDCODED_BLOCKLIST);
 #endif
-          if (blocklists_strv != NULL)
-            gtk_string_list_splice (
-                blocklists,
-                g_list_model_get_n_items (G_LIST_MODEL (blocklists)),
-                0,
-                (const char *const *) blocklists_strv);
+      if (blocklists_strv != NULL)
+        gtk_string_list_splice (
+            blocklists,
+            g_list_model_get_n_items (G_LIST_MODEL (blocklists)),
+            0,
+            (const char *const *) blocklists_strv);
 
-          content_configs = gtk_string_list_new (NULL);
+      content_configs = gtk_string_list_new (NULL);
 #ifdef HARDCODED_CONTENT_CONFIG
-          g_debug ("Bazaar was configured with a hardcoded curated content config at %s, adding that now...",
-                   HARDCODED_CONTENT_CONFIG);
-          gtk_string_list_append (content_configs, HARDCODED_CONTENT_CONFIG);
+      g_debug ("Bazaar was configured with a hardcoded curated content config at %s, adding that now...",
+               HARDCODED_CONTENT_CONFIG);
+      gtk_string_list_append (content_configs, HARDCODED_CONTENT_CONFIG);
 #endif
-          if (content_configs_strv != NULL)
-            gtk_string_list_splice (
-                content_configs,
-                g_list_model_get_n_items (G_LIST_MODEL (content_configs)),
-                0,
-                (const char *const *) content_configs_strv);
+      if (content_configs_strv != NULL)
+        gtk_string_list_splice (
+            content_configs,
+            g_list_model_get_n_items (G_LIST_MODEL (content_configs)),
+            0,
+            (const char *const *) content_configs_strv);
 
-          g_clear_object (&self->blocklists);
-          g_clear_object (&self->content_configs);
-          self->blocklists      = G_LIST_MODEL (g_steal_pointer (&blocklists));
-          self->content_configs = G_LIST_MODEL (g_steal_pointer (&content_configs));
+      g_clear_object (&self->blocklists);
+      g_clear_object (&self->content_configs);
+      self->blocklists      = G_LIST_MODEL (g_steal_pointer (&blocklists));
+      self->content_configs = G_LIST_MODEL (g_steal_pointer (&content_configs));
 
-          refresh (self);
+      refresh (self);
 
-          gtk_map_list_model_set_model (
-              self->content_configs_to_files, self->content_configs);
-          bz_state_info_set_blocklists (self->state, self->blocklists);
-          bz_state_info_set_curated_configs (self->state, self->content_configs);
-        }
-
-      if (locations != NULL && *locations != NULL)
-        {
-          g_clear_pointer (&location, g_free);
-          location = g_strdup (*locations);
-        }
-    }
-  else if (!self->running)
-    {
-      g_application_command_line_printerr (
-          cmdline,
-          "The Bazaar service is not running.\n"
-          "Invoke \"bazaar service\" to initialize the daemon.\n");
-      return EXIT_FAILURE;
+      gtk_map_list_model_set_model (
+          self->content_configs_to_files, self->content_configs);
+      bz_state_info_set_blocklists (self->state, self->blocklists);
+      bz_state_info_set_curated_configs (self->state, self->content_configs);
     }
 
-  if (g_strcmp0 (command, "service") != 0)
-    {
-      g_autoptr (GOptionContext) context = NULL;
+  if (!no_window)
+    new_window (self);
 
-      context = g_option_context_new ("- an app center for GNOME");
-      g_option_context_set_help_enabled (context, FALSE);
-
-      if (g_strcmp0 (command, "window") == 0)
-        {
-          gboolean         help         = FALSE;
-          gboolean         search       = FALSE;
-          g_autofree char *search_text  = NULL;
-          gboolean         auto_service = TRUE;
-          GtkWindow       *window       = NULL;
-
-          GOptionEntry main_entries[] = {
-            { "help", 0, 0, G_OPTION_ARG_NONE, &help, "Print help" },
-            { "search", 0, 0, G_OPTION_ARG_NONE, &search, "Immediately open the search dialog upon startup" },
-            { "search-text", 0, 0, G_OPTION_ARG_STRING, &search_text, "Specify the initial text used with --search" },
-            { "auto-service", 0, 0, G_OPTION_ARG_NONE, &auto_service, "Initialize the Bazaar service if not already running" },
-            { NULL }
-          };
-
-          g_option_context_add_main_entries (context, main_entries, NULL);
-          if (!g_option_context_parse (context, &argc, &argv_shallow, &local_error))
-            {
-              g_application_command_line_printerr (cmdline, "%s\n", local_error->message);
-              return EXIT_FAILURE;
-            }
-
-          if (help)
-            {
-              g_autofree char *help_text = NULL;
-
-              g_option_context_set_summary (context, "Options for command \"window\"");
-
-              help_text = g_option_context_get_help (context, TRUE, NULL);
-              g_application_command_line_printerr (cmdline, "%s\n", help_text);
-              return EXIT_SUCCESS;
-            }
-
-          window = new_window (self);
-          if (search)
-            bz_window_search (BZ_WINDOW (window), search_text);
-        }
-      else if (g_strcmp0 (command, "open") == 0)
-        {
-          gboolean help            = FALSE;
-          g_auto (GStrv) locations = NULL;
-
-          GOptionEntry main_entries[] = {
-            { "help", 0, 0, G_OPTION_ARG_NONE, &help, "Print help" },
-            { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &locations, "flatpakref file to open" },
-            { NULL }
-          };
-
-          g_option_context_add_main_entries (context, main_entries, NULL);
-          if (!g_option_context_parse (context, &argc, &argv_shallow, &local_error))
-            {
-              g_application_command_line_printerr (cmdline, "%s\n", local_error->message);
-              return EXIT_FAILURE;
-            }
-
-          if (help)
-            {
-              g_autofree char *help_text = NULL;
-
-              g_option_context_set_summary (context, "Options for command \"open\"");
-
-              help_text = g_option_context_get_help (context, TRUE, NULL);
-              g_application_command_line_printerr (cmdline, "%s\n", help_text);
-              return EXIT_SUCCESS;
-            }
-
-          if (locations == NULL || *locations == NULL)
-            {
-              g_application_command_line_printerr (cmdline, "Command \"open\" requires a file path argument\n");
-              return EXIT_FAILURE;
-            }
-
-          /* Ensure there is instant visual feedback for the user */
-          if (gtk_application_get_active_window (GTK_APPLICATION (self)) == NULL)
-            new_window (self);
-
-          g_clear_pointer (&location, g_free);
-          /* Just take the first one for now */
-          location = g_strdup (*locations);
-        }
-      else if (g_strcmp0 (command, "status") == 0)
-        {
-          gboolean help                            = FALSE;
-          gboolean current_only                    = FALSE;
-          g_autoptr (GListModel) transaction_model = NULL;
-          guint    n_transactions                  = 0;
-          gboolean current_found_candidate         = FALSE;
-
-          GOptionEntry main_entries[] = {
-            { "help", 0, 0, G_OPTION_ARG_NONE, &help, "Print help" },
-            { "current-only", 0, 0, G_OPTION_ARG_NONE, &current_only, "Only output the currently active transaction" },
-            { NULL }
-          };
-
-          g_option_context_add_main_entries (context, main_entries, NULL);
-          if (!g_option_context_parse (context, &argc, &argv_shallow, &local_error))
-            {
-              g_application_command_line_printerr (cmdline, "%s\n", local_error->message);
-              return EXIT_FAILURE;
-            }
-
-          if (help)
-            {
-              g_autofree char *help_text = NULL;
-
-              g_option_context_set_summary (context, "Options for command \"status\"");
-
-              help_text = g_option_context_get_help (context, TRUE, NULL);
-              g_application_command_line_printerr (cmdline, "%s\n", help_text);
-              return EXIT_SUCCESS;
-            }
-
-          g_object_get (self->transactions, "transactions", &transaction_model, NULL);
-          n_transactions = g_list_model_get_n_items (G_LIST_MODEL (transaction_model));
-
-          for (guint i = 0; i < n_transactions; i++)
-            {
-              g_autoptr (BzTransaction) transaction = NULL;
-              g_autofree char *name                 = NULL;
-              g_autoptr (GListModel) installs       = NULL;
-              g_autoptr (GListModel) updates        = NULL;
-              g_autoptr (GListModel) removals       = NULL;
-              gboolean         pending              = FALSE;
-              g_autofree char *status               = NULL;
-              double           progress             = 0.0;
-              gboolean         finished             = FALSE;
-              gboolean         success              = FALSE;
-              g_autofree char *error                = NULL;
-
-              transaction = g_list_model_get_item (transaction_model, i);
-              g_object_get (
-                  transaction,
-                  "name", &name,
-                  "installs", &installs,
-                  "updates", &updates,
-                  "removals", &removals,
-                  "pending", &pending,
-                  "status", &status,
-                  "progress", &progress,
-                  "finished", &finished,
-                  "success", &success,
-                  "error", &error,
-                  NULL);
-
-              if (current_only)
-                {
-                  if (pending || finished)
-                    continue;
-                  current_found_candidate = TRUE;
-                }
-
-              g_application_command_line_print (
-                  cmdline,
-                  "%s:\n"
-                  "  number of installs: %d\n"
-                  "  number of updates: %d\n"
-                  "  number of removals: %d\n"
-                  "  status: %s\n"
-                  "  progress: %.02f%%\n"
-                  "  finished: %s\n"
-                  "  success: %s\n"
-                  "  error: %s\n\n",
-                  name,
-                  g_list_model_get_n_items (installs),
-                  g_list_model_get_n_items (updates),
-                  g_list_model_get_n_items (removals),
-                  status != NULL ? status : "N/A",
-                  progress * 100.0,
-                  finished ? "true" : "false",
-                  success ? "true" : "false",
-                  error != NULL ? error : "N/A");
-
-              if (current_only)
-                break;
-            }
-
-          if (n_transactions == 0 || (current_only && !current_found_candidate))
-            g_application_command_line_printerr (cmdline, "No active transactions\n");
-        }
-      else if (g_strcmp0 (command, "query") == 0)
-        {
-          g_application_command_line_printerr (cmdline, "This feature is currently disabled\n");
-        }
-      else if (g_strcmp0 (command, "transact") == 0)
-        {
-          g_application_command_line_printerr (cmdline, "This feature is currently disabled\n");
-        }
-      else if (g_strcmp0 (command, "quit") == 0)
-        {
-          g_application_quit (G_APPLICATION (self));
-          self->running = FALSE;
-        }
-      else
-        {
-          g_application_command_line_printerr (
-              cmdline,
-              "Unrecognized command \"%s\"\n"
-              "Invoke \"bazaar --help\" to for available commands.\n",
-              command);
-          return EXIT_FAILURE;
-        }
-    }
-
-  if (location != NULL)
-    command_line_open_location (self, cmdline, location);
+  if (locations != NULL && *locations != NULL)
+    command_line_open_location (self, cmdline, locations[0]);
 
   return EXIT_SUCCESS;
 }
@@ -758,6 +479,7 @@ bz_application_about_action (GSimpleAction *action,
     C_ ("About Dialog Translator Credit", "Marcel Mrówka (Microwave)"),
     C_ ("About Dialog Translator Credit", "Peter Dave Hello"),
     C_ ("About Dialog Translator Credit", "Pietro F."),
+    C_ ("About Dialog Translator Credit", "Sabri Ünal"),
     C_ ("About Dialog Translator Credit", "Shihfu Juan"),
     C_ ("About Dialog Translator Credit", "Shinsei"),
     C_ ("About Dialog Translator Credit", "Vlastimil Dědek"),
@@ -929,6 +651,10 @@ bz_application_init (BzApplication *self)
       GTK_APPLICATION (self),
       "app.quit",
       (const char *[]) { "<primary>q", NULL });
+  gtk_application_set_accels_for_action (
+      GTK_APPLICATION (self),
+      "app.preferences",
+      (const char *[]) { "<primary>comma", NULL });
   gtk_application_set_accels_for_action (
       GTK_APPLICATION (self),
       "app.refresh",
@@ -1227,56 +953,57 @@ fiber_check_for_updates (BzApplication *self)
       bz_backend_retrieve_update_ids (BZ_BACKEND (self->flatpak), NULL),
       &local_error);
   window = gtk_application_get_active_window (GTK_APPLICATION (self));
-  if (update_ids != NULL)
+  if (update_ids != NULL &&
+      update_ids->len > 0)
     {
-      if (update_ids->len > 0)
-        {
-          g_autoptr (GPtrArray) futures = NULL;
-          g_autoptr (GListStore) store  = NULL;
+      g_autoptr (GPtrArray) futures = NULL;
+      g_autoptr (GListStore) store  = NULL;
 
-          futures = g_ptr_array_new_with_free_func (dex_unref);
-          for (guint i = 0; i < update_ids->len; i++)
+      futures = g_ptr_array_new_with_free_func (dex_unref);
+      for (guint i = 0; i < update_ids->len; i++)
+        {
+          const char *unique_id = NULL;
+
+          unique_id = g_ptr_array_index (update_ids, i);
+          g_ptr_array_add (futures, bz_entry_cache_manager_get (self->cache, unique_id));
+        }
+
+      dex_await (
+          dex_future_allv ((DexFuture *const *) futures->pdata, futures->len),
+          &local_error);
+
+      store = g_list_store_new (BZ_TYPE_ENTRY);
+      for (guint i = 0; i < futures->len; i++)
+        {
+          DexFuture    *future = NULL;
+          const GValue *value  = NULL;
+
+          future = g_ptr_array_index (futures, i);
+          value  = dex_future_get_value (future, &local_error);
+
+          if (value != NULL)
+            g_list_store_append (store, g_value_get_object (value));
+          else
             {
               const char *unique_id = NULL;
 
               unique_id = g_ptr_array_index (update_ids, i);
-              g_ptr_array_add (futures, bz_entry_cache_manager_get (self->cache, unique_id));
+              g_critical ("%s could not be resolved for the update list and thus will not be included: %s",
+                          unique_id, local_error->message);
+              g_clear_pointer (&local_error, g_error_free);
             }
-
-          dex_await (
-              dex_future_allv ((DexFuture *const *) futures->pdata, futures->len),
-              &local_error);
-
-          store = g_list_store_new (BZ_TYPE_ENTRY);
-          for (guint i = 0; i < futures->len; i++)
-            {
-              DexFuture    *future = NULL;
-              const GValue *value  = NULL;
-
-              future = g_ptr_array_index (futures, i);
-              value  = dex_future_get_value (future, &local_error);
-
-              if (value != NULL)
-                g_list_store_append (store, g_value_get_object (value));
-              else
-                {
-                  const char *unique_id = NULL;
-
-                  unique_id = g_ptr_array_index (update_ids, i);
-                  g_critical ("%s could not be resolved for the update list and thus will not be included: %s",
-                              unique_id, local_error->message);
-                  g_clear_pointer (&local_error, g_error_free);
-                }
-            }
-
-          bz_state_info_set_available_updates (self->state, G_LIST_MODEL (store));
-          // if (window != NULL)
-          //   bz_window_push_update_dialog (BZ_WINDOW (window));
         }
+
+      if (g_list_model_get_n_items (G_LIST_MODEL (store)) > 0)
+        bz_state_info_set_available_updates (self->state, G_LIST_MODEL (store));
     }
-  else if (window != NULL)
-    bz_show_error_for_widget (GTK_WIDGET (window), local_error->message);
-  g_clear_pointer (&local_error, g_error_free);
+  else if (local_error != NULL)
+    {
+      g_critical ("Failed to check for updates: %s", local_error->message);
+
+      if (window != NULL)
+        bz_show_error_for_widget (GTK_WIDGET (window), local_error->message);
+    }
 
   bz_state_info_set_checking_for_updates (self->state, FALSE);
 }
@@ -1315,7 +1042,7 @@ refresh_fiber (BzApplication *self)
           dex_scheduler_get_default (),
           bz_get_dex_stack_size (),
           (DexFiberFunc) watch_backend_notifs_fiber,
-          self, NULL);
+          g_object_ref (self), g_object_unref);
     }
   else
     {
@@ -1750,6 +1477,35 @@ watch_backend_notifs_fiber (BzApplication *self)
 }
 
 static DexFuture *
+update_check_fiber (BzApplication *self)
+{
+  bz_state_info_set_background_task_label (self->state, _ ("Checking for updates..."));
+  fiber_check_for_updates (self);
+  bz_state_info_set_background_task_label (self->state, NULL);
+
+  return dex_future_new_true ();
+}
+
+static gboolean
+periodic_timeout_cb (BzApplication *self)
+{
+  /* If for some reason the last update check is still happening, let it
+     finish */
+  if (self->periodic_sync == NULL ||
+      !dex_future_is_pending (self->periodic_sync))
+    {
+      dex_clear (&self->periodic_sync);
+      self->periodic_sync = dex_scheduler_spawn (
+          dex_scheduler_get_default (),
+          bz_get_dex_stack_size (),
+          (DexFiberFunc) update_check_fiber,
+          g_object_ref (self), g_object_unref);
+    }
+
+  return G_SOURCE_CONTINUE;
+}
+
+static DexFuture *
 refresh_finally (DexFuture     *future,
                  BzApplication *self)
 {
@@ -1766,6 +1522,12 @@ refresh_finally (DexFuture     *future,
       bz_search_engine_set_model (self->search_engine, G_LIST_MODEL (self->groups));
       bz_state_info_set_busy (self->state, FALSE);
     }
+
+  dex_clear (&self->periodic_sync);
+  g_clear_handle_id (&self->periodic_timeout, g_source_remove);
+  self->periodic_timeout = g_timeout_add_seconds (
+      /* Check every ten minutes*/
+      60 * 10, (GSourceFunc) periodic_timeout_cb, self);
 
   value = dex_future_get_value (future, &local_error);
   if (value != NULL)
@@ -1822,6 +1584,9 @@ refresh (BzApplication *self)
 
   g_debug ("Refreshing complete application state...");
 
+  dex_clear (&self->periodic_sync);
+  g_clear_handle_id (&self->periodic_timeout, g_source_remove);
+
   bz_state_info_set_all_entry_groups (self->state, NULL);
   bz_state_info_set_all_installed_entry_groups (self->state, NULL);
   bz_state_info_set_flathub (self->state, NULL);
@@ -1844,10 +1609,10 @@ refresh (BzApplication *self)
       dex_scheduler_get_default (),
       bz_get_dex_stack_size (),
       (DexFiberFunc) refresh_fiber,
-      self, NULL);
+      g_object_ref (self), g_object_unref);
   future = dex_future_finally (
       future, (DexFutureCallback) refresh_finally,
-      self, NULL);
+      g_object_ref (self), g_object_unref);
   self->refresh_task = g_steal_pointer (&future);
 }
 

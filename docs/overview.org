@@ -45,15 +45,15 @@ basics of managing software through the GUI:
   the command line
 
 ** CLI Usage
-You can start the bazaar daemon in two ways:
+You can start the bazaar daemon like this:
 #+begin_example
-  bazaar service [ARGS] [PACKAGE PATH/URI]
-  bazaar window --auto-service [ARGS] [PACKAGE PATH/URI]
+  bazaar [ARGS] [PACKAGE PATH/URI]
 #+end_example
 
-The latter will start the service if it hasn't been started already,
-then open a window. =bazaar window= by itself will fail if the service
-is not currently running.
+To avoid spawning a window, use:
+#+begin_example
+  bazaar --no-window [ARGS] [PACKAGE PATH/URI]
+#+end_example
 
 =[PACKAGE PATH/URI]= could be a =.flatpakref= file. flatpak+https and
 regular https is supported.

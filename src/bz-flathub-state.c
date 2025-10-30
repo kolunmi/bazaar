@@ -18,9 +18,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#define G_LOG_DOMAIN "BAZAAR::FLATHUB"
-#define COLLECTION_FETCH_SIZE 192
-#define CATEGORY_FETCH_SIZE 96
+#define G_LOG_DOMAIN                 "BAZAAR::FLATHUB"
+#define COLLECTION_FETCH_SIZE        192
+#define CATEGORY_FETCH_SIZE          96
+#define QUALITY_MODERATION_PAGE_SIZE 300
 
 #include <json-glib/json-glib.h>
 #include <libdex.h>
@@ -30,6 +31,7 @@
 #include "bz-flathub-state.h"
 #include "bz-global-state.h"
 #include "bz-io.h"
+#include "bz-util.h"
 
 struct _BzFlathubState
 {
@@ -44,6 +46,7 @@ struct _BzFlathubState
   GtkStringList           *recently_added;
   GtkStringList           *popular;
   GtkStringList           *trending;
+  GtkStringList           *quality_moderation;
 
   DexFuture *initializing;
 };
@@ -67,16 +70,17 @@ enum
   PROP_RECENTLY_ADDED,
   PROP_POPULAR,
   PROP_TRENDING,
+  PROP_QUALITY_MODERATION,
 
   LAST_PROP
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
 
 static DexFuture *
-initialize_fiber (BzFlathubState *self);
+initialize_fiber (GWeakRef *wr);
 static DexFuture *
-initialize_finally (DexFuture      *future,
-                    BzFlathubState *self);
+initialize_finally (DexFuture *future,
+                    GWeakRef  *wr);
 
 static void
 bz_flathub_state_dispose (GObject *object)
@@ -94,6 +98,7 @@ bz_flathub_state_dispose (GObject *object)
   g_clear_pointer (&self->recently_added, g_object_unref);
   g_clear_pointer (&self->popular, g_object_unref);
   g_clear_pointer (&self->trending, g_object_unref);
+  g_clear_pointer (&self->quality_moderation, g_object_unref);
 
   G_OBJECT_CLASS (bz_flathub_state_parent_class)->dispose (object);
 }
@@ -141,6 +146,9 @@ bz_flathub_state_get_property (GObject    *object,
     case PROP_TRENDING:
       g_value_take_object (value, bz_flathub_state_dup_trending (self));
       break;
+    case PROP_QUALITY_MODERATION:
+      g_value_take_object (value, bz_flathub_state_dup_quality_moderation (self));
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -171,6 +179,7 @@ bz_flathub_state_set_property (GObject      *object,
     case PROP_RECENTLY_ADDED:
     case PROP_POPULAR:
     case PROP_TRENDING:
+    case PROP_QUALITY_MODERATION:
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -256,6 +265,13 @@ bz_flathub_state_class_init (BzFlathubStateClass *klass)
   props[PROP_TRENDING] =
       g_param_spec_object (
           "trending",
+          NULL, NULL,
+          G_TYPE_LIST_MODEL,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_QUALITY_MODERATION] =
+      g_param_spec_object (
+          "quality-moderation",
           NULL, NULL,
           G_TYPE_LIST_MODEL,
           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
@@ -445,6 +461,25 @@ bz_flathub_state_dup_trending (BzFlathubState *self)
     return NULL;
 }
 
+GListModel *
+bz_flathub_state_dup_quality_moderation (BzFlathubState *self)
+{
+  g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
+  if (self->initializing != NULL)
+    return NULL;
+
+  if (self->quality_moderation != NULL)
+    {
+      if (self->map_factory != NULL)
+        return bz_application_map_factory_generate (
+            self->map_factory, G_LIST_MODEL (self->quality_moderation));
+      else
+        return G_LIST_MODEL (g_object_ref (self->quality_moderation));
+    }
+  else
+    return NULL;
+}
+
 void
 bz_flathub_state_set_for_day (BzFlathubState *self,
                               const char     *for_day)
@@ -461,6 +496,7 @@ bz_flathub_state_set_for_day (BzFlathubState *self,
   g_clear_pointer (&self->recently_added, g_object_unref);
   g_clear_pointer (&self->popular, g_object_unref);
   g_clear_pointer (&self->trending, g_object_unref);
+  g_clear_pointer (&self->quality_moderation, g_object_unref);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_OF_THE_DAY]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_OF_THE_DAY_GROUP]);
@@ -471,28 +507,30 @@ bz_flathub_state_set_for_day (BzFlathubState *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_RECENTLY_ADDED]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_POPULAR]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TRENDING]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_QUALITY_MODERATION]);
 
   if (for_day != NULL)
     {
       g_autoptr (DexFuture) future = NULL;
 
-      self->for_day          = g_strdup (for_day);
-      self->apps_of_the_week = gtk_string_list_new (NULL);
-      self->categories       = g_list_store_new (BZ_TYPE_FLATHUB_CATEGORY);
-      self->recently_updated = gtk_string_list_new (NULL);
-      self->recently_added   = gtk_string_list_new (NULL);
-      self->popular          = gtk_string_list_new (NULL);
-      self->trending         = gtk_string_list_new (NULL);
+      self->for_day            = g_strdup (for_day);
+      self->apps_of_the_week   = gtk_string_list_new (NULL);
+      self->categories         = g_list_store_new (BZ_TYPE_FLATHUB_CATEGORY);
+      self->recently_updated   = gtk_string_list_new (NULL);
+      self->recently_added     = gtk_string_list_new (NULL);
+      self->popular            = gtk_string_list_new (NULL);
+      self->trending           = gtk_string_list_new (NULL);
+      self->quality_moderation = gtk_string_list_new (NULL);
 
       future = dex_scheduler_spawn (
           bz_get_io_scheduler (),
           bz_get_dex_stack_size (),
           (DexFiberFunc) initialize_fiber,
-          self, NULL);
+          bz_track_weak (self), bz_weak_release);
       future = dex_future_finally (
           future,
           (DexFutureCallback) initialize_finally,
-          self, NULL);
+          bz_track_weak (self), bz_weak_release);
       self->initializing = g_steal_pointer (&future);
     }
 
@@ -529,15 +567,21 @@ bz_flathub_state_set_map_factory (BzFlathubState          *self,
 }
 
 static DexFuture *
-initialize_fiber (BzFlathubState *self)
+initialize_fiber (GWeakRef *wr)
 {
-  const char *for_day            = self->for_day;
-  g_autoptr (GError) local_error = NULL;
-  g_autoptr (GHashTable) futures = NULL;
-  g_autoptr (GHashTable) nodes   = NULL;
+  g_autoptr (BzFlathubState) self    = NULL;
+  const char *for_day                = NULL;
+  g_autoptr (GError) local_error     = NULL;
+  g_autoptr (GHashTable) futures     = NULL;
+  g_autoptr (GHashTable) nodes       = NULL;
+  g_autoptr (GHashTable) quality_set = NULL;
 
-  futures = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, dex_unref);
-  nodes   = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, (GDestroyNotify) json_node_unref);
+  bz_weak_get_or_return_reject (self, wr);
+  for_day = self->for_day;
+
+  futures     = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, dex_unref);
+  nodes       = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, (GDestroyNotify) json_node_unref);
+  quality_set = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 
 #define ADD_REQUEST(key, ...)                  \
   G_STMT_START                                 \
@@ -555,14 +599,14 @@ initialize_fiber (BzFlathubState *self)
   }                                            \
   G_STMT_END
 
-
-  ADD_REQUEST ("/app-picks/app-of-the-day",     "/app-picks/app-of-the-day/%s",                     for_day);
-  ADD_REQUEST ("/app-picks/apps-of-the-week",   "/app-picks/apps-of-the-week/%s",                   for_day);
-  ADD_REQUEST ("/collection/category",          "/collection/category");
-  ADD_REQUEST ("/collection/recently-updated",  "/collection/recently-updated?page=0&per_page=%d",  COLLECTION_FETCH_SIZE);
-  ADD_REQUEST ("/collection/recently-added",    "/collection/recently-added?page=0&per_page=%d",    COLLECTION_FETCH_SIZE);
-  ADD_REQUEST ("/collection/popular",           "/collection/popular?page=0&per_page=%d",           COLLECTION_FETCH_SIZE);
-  ADD_REQUEST ("/collection/trending",          "/collection/trending?page=0&per_page=%d",          COLLECTION_FETCH_SIZE);
+  ADD_REQUEST ("/app-picks/app-of-the-day", "/app-picks/app-of-the-day/%s", for_day);
+  ADD_REQUEST ("/app-picks/apps-of-the-week", "/app-picks/apps-of-the-week/%s", for_day);
+  ADD_REQUEST ("/collection/category", "/collection/category");
+  ADD_REQUEST ("/collection/recently-updated", "/collection/recently-updated?page=0&per_page=%d", COLLECTION_FETCH_SIZE);
+  ADD_REQUEST ("/collection/recently-added", "/collection/recently-added?page=0&per_page=%d", COLLECTION_FETCH_SIZE);
+  ADD_REQUEST ("/collection/popular", "/collection/popular?page=0&per_page=%d", COLLECTION_FETCH_SIZE);
+  ADD_REQUEST ("/collection/trending", "/collection/trending?page=0&per_page=%d", COLLECTION_FETCH_SIZE);
+  ADD_REQUEST ("/quality-moderation/passing-apps", "/quality-moderation/passing-apps?page=1&page_size=%d", QUALITY_MODERATION_PAGE_SIZE);
 
   while (g_hash_table_size (futures) > 0)
     {
@@ -582,6 +626,27 @@ initialize_fiber (BzFlathubState *self)
           return dex_future_new_for_error (g_steal_pointer (&local_error));
         }
       g_hash_table_replace (nodes, g_steal_pointer (&request), g_steal_pointer (&node));
+    }
+
+  if (g_hash_table_contains (nodes, "/quality-moderation/passing-apps"))
+    {
+      JsonObject *object = NULL;
+      JsonArray  *array  = NULL;
+      guint       length = 0;
+
+      object = json_node_get_object (g_hash_table_lookup (nodes, "/quality-moderation/passing-apps"));
+      array  = json_object_get_array_member (object, "apps");
+      length = json_array_get_length (array);
+
+      for (guint i = 0; i < length; i++)
+        {
+          const char *app_id = NULL;
+
+          app_id = json_array_get_string_element (array, i);
+
+          gtk_string_list_append (self->quality_moderation, app_id);
+          g_hash_table_add (quality_set, g_strdup (app_id));
+        }
     }
 
   if (g_hash_table_contains (nodes, "/app-picks/app-of-the-day"))
@@ -629,14 +694,17 @@ initialize_fiber (BzFlathubState *self)
 
       while (g_hash_table_size (futures) > 0)
         {
-          GHashTableIter   iter                  = { 0 };
-          g_autofree char *name                  = NULL;
-          g_autoptr (DexFuture) future           = NULL;
-          g_autoptr (JsonNode) node              = NULL;
-          g_autoptr (BzFlathubCategory) category = NULL;
-          g_autoptr (GtkStringList) store        = NULL;
-          JsonArray *category_array              = NULL;
-          guint      category_length             = 0;
+          GHashTableIter   iter                   = { 0 };
+          g_autofree char *name                   = NULL;
+          g_autoptr (DexFuture) future            = NULL;
+          g_autoptr (JsonNode) node               = NULL;
+          g_autoptr (BzFlathubCategory) category  = NULL;
+          g_autoptr (GtkStringList) store         = NULL;
+          g_autoptr (GtkStringList) quality_store = NULL;
+          JsonObject *response_object             = NULL;
+          JsonArray  *category_array              = NULL;
+          guint       category_length             = 0;
+          int         total_hits                  = 0;
 
           g_hash_table_iter_init (&iter, futures);
           g_hash_table_iter_next (&iter, (gpointer *) &name, (gpointer *) &future);
@@ -649,23 +717,33 @@ initialize_fiber (BzFlathubState *self)
               return dex_future_new_for_error (g_steal_pointer (&local_error));
             }
 
-          category = bz_flathub_category_new ();
-          store    = gtk_string_list_new (NULL);
+          category      = bz_flathub_category_new ();
+          store         = gtk_string_list_new (NULL);
+          quality_store = gtk_string_list_new (NULL);
           bz_flathub_category_set_name (category, name);
           bz_flathub_category_set_applications (category, G_LIST_MODEL (store));
-
-          category_array  = json_object_get_array_member (json_node_get_object (node), "hits");
+          response_object = json_node_get_object (node);
+          category_array  = json_object_get_array_member (response_object, "hits");
           category_length = json_array_get_length (category_array);
+          total_hits      = json_object_get_int_member (response_object, "totalHits");
+          bz_flathub_category_set_total_entries (category, total_hits);
 
           for (guint i = 0; i < category_length; i++)
             {
               JsonObject *element = NULL;
+              const char *app_id  = NULL;
 
               element = json_array_get_object_element (category_array, i);
-              gtk_string_list_append (
-                  store,
-                  json_object_get_string_member (element, "app_id"));
+              app_id  = json_object_get_string_member (element, "app_id");
+              gtk_string_list_append (store, app_id);
+
+              if (g_hash_table_contains (quality_set, app_id))
+                {
+                  gtk_string_list_append (quality_store, app_id);
+                }
             }
+
+          bz_flathub_category_set_quality_applications (category, G_LIST_MODEL (quality_store));
 
           g_list_store_append (self->categories, category);
         }
@@ -755,10 +833,13 @@ initialize_fiber (BzFlathubState *self)
 }
 
 static DexFuture *
-initialize_finally (DexFuture      *future,
-                    BzFlathubState *self)
+initialize_finally (DexFuture *future,
+                    GWeakRef  *wr)
 {
-  guint n_categories = 0;
+  g_autoptr (BzFlathubState) self = NULL;
+  guint n_categories              = 0;
+
+  bz_weak_get_or_return_reject (self, wr);
 
   n_categories = g_list_model_get_n_items (G_LIST_MODEL (self->categories));
   for (guint i = 0; i < n_categories; i++)
@@ -781,6 +862,7 @@ initialize_finally (DexFuture      *future,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_RECENTLY_ADDED]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_POPULAR]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TRENDING]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_QUALITY_MODERATION]);
 
   return NULL;
 }

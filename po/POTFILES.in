@@ -7,6 +7,8 @@ src/bz-addons-dialog.blp
 src/bz-addons-dialog.c
 src/bz-app-tile.blp
 src/bz-app-tile.c
+src/bz-app-size-dialog.c
+src/bz-app-size-dialog.blp
 src/bz-application-map-factory.c
 src/bz-application.c
 src/bz-async-texture.c
@@ -32,7 +34,9 @@ src/bz-entry-inspector.c
 src/bz-entry.c
 src/bz-env.c
 src/bz-error.c
+src/bz-featured-tile.blp
 src/bz-flathub-category.c
+src/bz-flathub-category-section.c
 src/bz-flathub-page.blp
 src/bz-flathub-page.c
 src/bz-flathub-state.c
@@ -44,6 +48,8 @@ src/bz-global-progress.c
 src/bz-global-state.c
 src/bz-gnome-shell-search-provider.c
 src/bz-group-tile-css-watcher.c
+src/bz-hardware-support-dialog.c
+src/bz-hardware-support-dialog.blp
 src/bz-inhibited-scrollable.c
 src/bz-inspector.blp
 src/bz-inspector.c
@@ -52,12 +58,17 @@ src/bz-installed-page.c
 src/bz-io.c
 src/bz-issue.c
 src/bz-lazy-async-texture-model.c
+src/bz-license-dialog.c
+src/bz-license-dialog.h
 src/bz-patterned-background.c
 src/bz-preferences-dialog.blp
 src/bz-preferences-dialog.c
 src/bz-progress-bar.blp
 src/bz-progress-bar.c
 src/bz-release.c
+src/bz-releases-dialog.blp
+src/bz-releases-list.blp
+src/bz-releases-list.c
 src/bz-result.c
 src/bz-review.c
 src/bz-screenshot.c
@@ -68,8 +79,8 @@ src/bz-search-widget.c
 src/bz-section-view.blp
 src/bz-section-view.c
 src/bz-serializable.c
-src/bz-share-dialog.blp
-src/bz-share-dialog.c
+src/bz-share-list.blp
+src/bz-share-list.c
 src/bz-state-info.c
 src/bz-stats-dialog.blp
 src/bz-stats-dialog.c

@@ -126,3 +126,40 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC (BzGuard, bz_guard_destroy);
     BZ_BEGIN_GUARD_WITH_CONTEXT (_guard, &_mutex, &_gate); \
   }                                                        \
   G_STMT_END
+
+/* Use with dex_scheduler_spawn */
+G_GNUC_UNUSED
+static GWeakRef *
+bz_track_weak (gpointer object)
+{
+  GWeakRef *wr = NULL;
+
+  if (object == NULL)
+    return NULL;
+
+  wr = g_new0 (typeof (*wr), 1);
+  g_weak_ref_init (wr, object);
+  return wr;
+}
+
+G_GNUC_UNUSED
+static void
+bz_weak_release (gpointer ptr)
+{
+  GWeakRef *wr = ptr;
+
+  g_weak_ref_clear (wr);
+  g_free (wr);
+}
+
+#define bz_weak_get_or_return_reject(self, wr) \
+  G_STMT_START                                 \
+  {                                            \
+    (self) = g_weak_ref_get (wr);              \
+    if ((self) == NULL)                        \
+      return dex_future_new_reject (           \
+          G_IO_ERROR,                          \
+          G_IO_ERROR_CANCELLED,                \
+          "Object was discarded");             \
+  }                                            \
+  G_STMT_END
