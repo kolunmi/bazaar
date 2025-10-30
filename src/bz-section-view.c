@@ -24,6 +24,7 @@
 #include "bz-curated-app-tile.h"
 #include "bz-dynamic-list-view.h"
 #include "bz-entry-group.h"
+#include "bz-markdown-render.h"
 
 struct _BzSectionView
 {
@@ -211,9 +212,10 @@ bz_section_view_class_init (BzSectionViewClass *klass)
       G_TYPE_FROM_CLASS (klass),
       g_cclosure_marshal_VOID__OBJECTv);
 
-  g_type_ensure (BZ_TYPE_ASYNC_TEXTURE);
   g_type_ensure (BZ_TYPE_CURATED_APP_TILE);
   g_type_ensure (BZ_TYPE_DYNAMIC_LIST_VIEW);
+  g_type_ensure (BZ_TYPE_MARKDOWN_RENDER);
+  g_type_ensure (BZ_TYPE_ASYNC_TEXTURE);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-section-view.ui");
   gtk_widget_class_bind_template_child (widget_class, BzSectionView, banner_text_overlay);

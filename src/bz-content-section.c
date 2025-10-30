@@ -21,12 +21,21 @@
 #include "bz-content-section.h"
 #include "bz-entry-group.h"
 
+G_DEFINE_ENUM_TYPE (
+    BzContentSectionType,
+    bz_content_section_type,
+    G_DEFINE_ENUM_VALUE (BZ_CONTENT_SECTION_TYPE_CATEGORY, "category"),
+    G_DEFINE_ENUM_VALUE (BZ_CONTENT_SECTION_TYPE_ARTICLE, "article"));
+
 typedef struct
 {
-  char         *error;
-  GListModel   *classes;
-  GListModel   *light_classes;
-  GListModel   *dark_classes;
+  char       *error;
+  GListModel *classes;
+  GListModel *light_classes;
+  GListModel *dark_classes;
+
+  BzContentSectionType section_type;
+
   char         *title;
   char         *subtitle;
   char         *description;
@@ -39,6 +48,7 @@ typedef struct
   GtkContentFit banner_fit;
   GListModel   *groups;
   int           rows;
+  char         *markdown;
 } BzContentSectionPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (BzContentSection, bz_content_section, G_TYPE_OBJECT)
@@ -51,9 +61,13 @@ enum
   PROP_CLASSES,
   PROP_LIGHT_CLASSES,
   PROP_DARK_CLASSES,
+
+  PROP_SECTION_TYPE,
   PROP_TITLE,
   PROP_SUBTITLE,
   PROP_DESCRIPTION,
+  PROP_APPIDS,
+
   PROP_BANNER_TEXT_HALIGN,
   PROP_BANNER_TEXT_VALIGN,
   PROP_BANNER_TEXT_LABEL_XALIGN,
@@ -63,8 +77,9 @@ enum
   PROP_DARK_BANNER,
   PROP_BANNER_HEIGHT,
   PROP_BANNER_FIT,
-  PROP_APPIDS,
   PROP_ROWS,
+
+  PROP_MARKDOWN,
 
   LAST_PROP
 };
@@ -86,6 +101,7 @@ bz_content_section_dispose (GObject *object)
   g_clear_object (&priv->light_banner);
   g_clear_object (&priv->dark_banner);
   g_clear_object (&priv->groups);
+  g_clear_pointer (&priv->markdown, g_free);
 
   G_OBJECT_CLASS (bz_content_section_parent_class)->dispose (object);
 }
@@ -112,6 +128,9 @@ bz_content_section_get_property (GObject    *object,
       break;
     case PROP_DARK_CLASSES:
       g_value_set_object (value, priv->dark_classes);
+      break;
+    case PROP_SECTION_TYPE:
+      g_value_set_enum (value, priv->section_type);
       break;
     case PROP_TITLE:
       g_value_set_string (value, priv->title);
@@ -164,6 +183,9 @@ bz_content_section_get_property (GObject    *object,
     case PROP_ROWS:
       g_value_set_int (value, priv->rows);
       break;
+    case PROP_MARKDOWN:
+      g_value_set_string (value, priv->markdown);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -195,6 +217,9 @@ bz_content_section_set_property (GObject      *object,
     case PROP_DARK_CLASSES:
       g_clear_object (&priv->dark_classes);
       priv->dark_classes = g_value_dup_object (value);
+      break;
+    case PROP_SECTION_TYPE:
+      priv->section_type = g_value_get_enum (value);
       break;
     case PROP_TITLE:
       g_clear_pointer (&priv->title, g_free);
@@ -245,6 +270,10 @@ bz_content_section_set_property (GObject      *object,
     case PROP_ROWS:
       priv->rows = g_value_get_int (value);
       break;
+    case PROP_MARKDOWN:
+      g_clear_pointer (&priv->markdown, g_free);
+      priv->markdown = g_value_dup_string (value);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -284,6 +313,14 @@ bz_content_section_class_init (BzContentSectionClass *klass)
           "dark-classes",
           NULL, NULL,
           G_TYPE_LIST_MODEL,
+          G_PARAM_READWRITE);
+
+  props[PROP_SECTION_TYPE] =
+      g_param_spec_enum (
+          "section-type",
+          NULL, NULL,
+          BZ_TYPE_CONTENT_SECTION_TYPE,
+          BZ_CONTENT_SECTION_TYPE_CATEGORY,
           G_PARAM_READWRITE);
 
   props[PROP_TITLE] =
@@ -370,11 +407,18 @@ bz_content_section_class_init (BzContentSectionClass *klass)
           G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE);
 
+  /* Deprecated */
   props[PROP_ROWS] =
       g_param_spec_int (
           "rows",
           NULL, NULL,
           1, 16, 3,
+          G_PARAM_READWRITE);
+
+  props[PROP_MARKDOWN] =
+      g_param_spec_string (
+          "markdown",
+          NULL, NULL, NULL,
           G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
@@ -385,6 +429,7 @@ bz_content_section_init (BzContentSection *self)
 {
   BzContentSectionPrivate *priv = bz_content_section_get_instance_private (self);
 
+  priv->section_type             = BZ_CONTENT_SECTION_TYPE_CATEGORY;
   priv->rows                     = 3;
   priv->banner_text_halign       = GTK_ALIGN_START;
   priv->banner_text_valign       = GTK_ALIGN_START;

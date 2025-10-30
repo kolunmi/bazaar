@@ -27,6 +27,15 @@ G_BEGIN_DECLS
 #define BZ_TYPE_CONTENT_SECTION (bz_content_section_get_type ())
 G_DECLARE_DERIVABLE_TYPE (BzContentSection, bz_content_section, BZ, CONTENT_SECTION, GObject)
 
+typedef enum
+{
+  BZ_CONTENT_SECTION_TYPE_CATEGORY,
+  BZ_CONTENT_SECTION_TYPE_ARTICLE,
+} BzContentSectionType;
+
+GType bz_content_section_type_get_type (void);
+#define BZ_TYPE_CONTENT_SECTION_TYPE (bz_content_section_type_get_type ())
+
 struct _BzContentSectionClass
 {
   GObjectClass parent_class;

@@ -601,6 +601,7 @@ input_load_fiber (InputLoadData *data)
           GRAB_STRING ("title");
           GRAB_STRING ("subtitle");
           GRAB_STRING ("description");
+          GRAB_STRING ("markdown");
 
 #undef GRAB_STRING
 

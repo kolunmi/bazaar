@@ -124,6 +124,18 @@ template $BzSectionView: Adw.Bin {
       }
     }
 
+    $BzMarkdownRender {
+      margin-start: 20;
+      margin-end: 20;
+      margin-top: 10;
+      margin-bottom: 10;
+
+      halign: center;
+
+      visible: bind $invert_boolean($is_null(template.section as <$BzContentSection>.markdown as <string>) as <bool>) as <bool>;
+      markdown: bind template.section as <$BzContentSection>.markdown as <string>;
+    }
+
     $BzDynamicListView {
       margin-start: 20;
       margin-end: 20;
