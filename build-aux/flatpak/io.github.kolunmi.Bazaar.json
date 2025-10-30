@@ -281,7 +281,18 @@
               ]
             }
           ]
-        }
+        },
+          {
+              "name": "md4c",
+              "buildsystem": "cmake",
+              "sources": [
+                  {
+                      "type": "git",
+                      "url": "https://github.com/mity/md4c.git",
+                      "tag": "release-0.5.2"
+                  }
+              ]
+          }
       ]
     },
     {

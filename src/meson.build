@@ -15,6 +15,7 @@ libsoup_dep          = dependency('libsoup-3.0', version: '>= 3.6.0')
 json_glib_dep        = dependency('json-glib-1.0', version: '>= 1.10.0')
 glycin_dep           = dependency('glycin-2', version: '>= 2.0')
 glycin_gtk4_dep      = dependency('glycin-gtk4-2', version: '>= 2.0')
+md4c_dep             = dependency('md4c', version: '>= 0.5.2')
 
 
 dl_worker_sources = [
@@ -86,8 +87,8 @@ bz_sources = [
   'bz-error.c',
   'bz-featured-carousel.c',
   'bz-featured-tile.c',
-  'bz-flathub-category.c',
   'bz-flathub-category-section.c',
+  'bz-flathub-category.c',
   'bz-flathub-page.c',
   'bz-flathub-state.c',
   'bz-flatpak-entry.c',
@@ -105,6 +106,7 @@ bz_sources = [
   'bz-issue.c',
   'bz-lazy-async-texture-model.c',
   'bz-license-dialog.c',
+  'bz-markdown-render.c',
   'bz-patterned-background.c',
   'bz-preferences-dialog.c',
   'bz-progress-bar.c',
@@ -153,6 +155,7 @@ bz_deps = [
   libdex_dep,
   glycin_dep,
   glycin_gtk4_dep,
+  md4c_dep,
 ]
 
 blueprints = custom_target('blueprints',
@@ -171,17 +174,18 @@ blueprints = custom_target('blueprints',
     'bz-entry-inspector.blp',
     'bz-featured-carousel.blp',
     'bz-featured-tile.blp',
-    'bz-flathub-page.blp',
     'bz-flathub-category-section.blp',
+    'bz-flathub-page.blp',
     'bz-full-view.blp',
     'bz-hardware-support-dialog.blp',
     'bz-inspector.blp',
     'bz-installed-page.blp',
     'bz-license-dialog.blp',
+    'bz-markdown-render.blp',
     'bz-preferences-dialog.blp',
     'bz-progress-bar.blp',
-    'bz-releases-list.blp',
     'bz-releases-dialog.blp',
+    'bz-releases-list.blp',
     'bz-screenshot-dialog.blp',
     'bz-screenshots-carousel.blp',
     'bz-search-widget.blp',
