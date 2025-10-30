@@ -14,16 +14,16 @@ template $BzReleasesList: Adw.Bin {
       valign: start;
     }
 
-    ListBox {
+    ListBox show_all_box {
+      visible: false;
       styles [
         "boxed-list",
       ]
 
       selection-mode: none;
 
-      Adw.ButtonRow show_all_button {
+      Adw.ButtonRow {
         title: _("Version History");
-        visible: false;
         activated => $show_all_releases_cb();
         end-icon-name: "go-next-symbolic";
       }

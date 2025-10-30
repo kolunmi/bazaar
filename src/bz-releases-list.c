@@ -49,8 +49,8 @@ struct _BzReleasesList
   GListModel *version_history;
 
   /* Template widgets */
-  GtkListBox   *preview_box;
-  AdwButtonRow *show_all_button;
+  GtkListBox *preview_box;
+  GtkBox     *show_all_box;
 };
 
 G_DEFINE_FINAL_TYPE (BzReleasesList, bz_releases_list, ADW_TYPE_BIN)
@@ -231,7 +231,7 @@ clear_preview_box (BzReleasesList *self)
 
   while ((child = gtk_widget_get_first_child (GTK_WIDGET (self->preview_box))) != NULL)
     {
-      if (child == GTK_WIDGET (self->show_all_button))
+      if (child == GTK_WIDGET (self->show_all_box))
         break;
       gtk_list_box_remove (self->preview_box, child);
     }
@@ -248,7 +248,7 @@ populate_preview_box (BzReleasesList *self)
 
   if (self->version_history == NULL)
     {
-      gtk_widget_set_visible (GTK_WIDGET (self->show_all_button), FALSE);
+      gtk_widget_set_visible (GTK_WIDGET (self->show_all_box), FALSE);
       return;
     }
 
@@ -256,7 +256,7 @@ populate_preview_box (BzReleasesList *self)
 
   if (n_items == 0)
     {
-      gtk_widget_set_visible (GTK_WIDGET (self->show_all_button), FALSE);
+      gtk_widget_set_visible (GTK_WIDGET (self->show_all_box), FALSE);
       return;
     }
 
@@ -280,7 +280,7 @@ populate_preview_box (BzReleasesList *self)
         }
     }
 
-  gtk_widget_set_visible (GTK_WIDGET (self->show_all_button), n_items > 1);
+  gtk_widget_set_visible (GTK_WIDGET (self->show_all_box), n_items > 1);
 }
 
 static void
@@ -374,7 +374,7 @@ bz_releases_list_class_init (BzReleasesListClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class,
                                                "/io/github/kolunmi/Bazaar/bz-releases-list.ui");
   gtk_widget_class_bind_template_child (widget_class, BzReleasesList, preview_box);
-  gtk_widget_class_bind_template_child (widget_class, BzReleasesList, show_all_button);
+  gtk_widget_class_bind_template_child (widget_class, BzReleasesList, show_all_box);
   gtk_widget_class_bind_template_callback (widget_class, show_all_releases_cb);
 }
 
@@ -410,7 +410,7 @@ bz_releases_list_set_version_history (BzReleasesList *self,
   else
     {
       clear_preview_box (self);
-      gtk_widget_set_visible (GTK_WIDGET (self->show_all_button), FALSE);
+      gtk_widget_set_visible (GTK_WIDGET (self->show_all_box), FALSE);
     }
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_VERSION_HISTORY]);
