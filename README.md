@@ -9,7 +9,7 @@ Bazaar
 <div align="center">
     <picture>
         <source srcset="https://github.com/user-attachments/assets/cc545658-31fc-4cc5-b512-a4c17a2af454" media="(prefers-color-scheme: dark)">
-        <img height="512" alt="Screenshot showing Bazaar's Flathub page" src="https://github.com/user-attachments/assets/b712f5de-ea5f-4f06-b834-d41b9265a192">
+        <img width="512" alt="Screenshot showing Bazaar's Flathub page" src="https://github.com/user-attachments/assets/b712f5de-ea5f-4f06-b834-d41b9265a192" style="max-width: 100%; height: auto;">
     </picture>
 </div>
 
