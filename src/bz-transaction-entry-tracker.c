@@ -30,7 +30,12 @@ struct _BzTransactionEntryTracker
   BzTransactionType type;
 };
 
-G_DEFINE_ENUM_TYPE (BzTransactionType, bz_transaction_entry_type, G_DEFINE_ENUM_VALUE (BZ_TRANSACTION_TYPE_INSTALL, "install"), G_DEFINE_ENUM_VALUE (BZ_TRANSACTION_TYPE_UPDATE, "update"), G_DEFINE_ENUM_VALUE (BZ_TRANSACTION_TYPE_REMOVAL, "removal"))
+G_DEFINE_ENUM_TYPE (
+    BzTransactionType,
+    bz_transaction_entry_type,
+    G_DEFINE_ENUM_VALUE (BZ_TRANSACTION_TYPE_INSTALL, "install"),
+    G_DEFINE_ENUM_VALUE (BZ_TRANSACTION_TYPE_UPDATE, "update"),
+    G_DEFINE_ENUM_VALUE (BZ_TRANSACTION_TYPE_REMOVAL, "removal"))
 
 G_DEFINE_FINAL_TYPE (BzTransactionEntryTracker, bz_transaction_entry_tracker, G_TYPE_OBJECT);
 
