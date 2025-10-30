@@ -1604,6 +1604,9 @@ refresh (BzApplication *self)
   bz_state_info_set_available_updates (self->state, NULL);
   bz_state_info_set_online (self->state, FALSE);
 
+  if (self->cache == NULL)
+    self->cache = bz_entry_cache_manager_new ();
+
   g_timer_start (self->init_timer);
   future = dex_scheduler_spawn (
       dex_scheduler_get_default (),
