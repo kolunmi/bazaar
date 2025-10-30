@@ -163,3 +163,48 @@ bz_weak_release (gpointer ptr)
           "Object was discarded");             \
   }                                            \
   G_STMT_END
+
+G_GNUC_UNUSED
+static void
+_bz_debug_print_when_disposed_cb (gpointer ptr);
+
+BZ_DEFINE_DATA (
+    _bz_debug_dispose_cb,
+    _BzDebugDisposeCb,
+    {
+      GType       type;
+      const char *loc;
+      guint64     time;
+    },
+    _bz_debug_print_when_disposed_cb (self);)
+
+G_GNUC_UNUSED
+static void
+_bz_debug_print_when_disposed_cb (gpointer ptr)
+{
+  _BzDebugDisposeCbData *data = ptr;
+
+  g_print ("%zu OBJECT DISPOSE: type %s; from %s at %zu\n",
+           g_get_monotonic_time (),
+           g_type_name (data->type),
+           data->loc,
+           data->time);
+}
+
+#define BZ_DEBUG_PRINT_WHEN_DISPOSED(_object)       \
+  G_STMT_START                                      \
+  {                                                 \
+    g_autoptr (_BzDebugDisposeCbData) _data = NULL; \
+                                                    \
+    _data       = _bz_debug_dispose_cb_data_new (); \
+    _data->type = G_OBJECT_TYPE (_object);          \
+    _data->loc  = G_STRLOC;                         \
+    _data->time = g_get_monotonic_time ();          \
+                                                    \
+    g_object_set_data_full (                        \
+        G_OBJECT (_object),                         \
+        "BZ_DEBUG_PRINT_WHEN_DISPOSED",             \
+        _bz_debug_dispose_cb_data_ref (_data),      \
+        _bz_debug_dispose_cb_data_unref);           \
+  }                                                 \
+  G_STMT_END
