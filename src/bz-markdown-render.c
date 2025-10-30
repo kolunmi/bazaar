@@ -452,9 +452,11 @@ text (MD_TEXTTYPE    type,
 
   g_assert (ctx->markup != NULL);
 
-  if (type == MD_TEXT_SOFTBR)
+  if (type == MD_TEXT_SOFTBR &&
+      ctx->markup->len > 0)
     g_string_append_c (ctx->markup, ' ');
-  else if (type == MD_TEXT_BR)
+  else if (type == MD_TEXT_BR &&
+           ctx->markup->len > 0)
     g_string_append_c (ctx->markup, '\n');
   else
     {
@@ -477,6 +479,13 @@ terminate_block (MD_BLOCKTYPE type,
   g_assert (ctx->block_stack->len > 0);
   if (ctx->block_stack->len > 1)
     parent = g_array_index (ctx->block_stack, int, ctx->block_stack->len - 2);
+
+  if (ctx->markup != NULL)
+    {
+      if (ctx->markup->len > 0 &&
+          !g_unichar_isgraph (ctx->markup->str[ctx->markup->len - 1]))
+        g_string_truncate (ctx->markup, ctx->markup->len - 1);
+    }
 
 #define SET_DEFAULTS(_label_widget)                                            \
   G_STMT_START                                                                 \
