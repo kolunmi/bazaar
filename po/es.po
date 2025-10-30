@@ -11,10 +11,10 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-10-30 01:38+0100\n"
-"PO-Revision-Date: 2025-10-30 02:55+0100\n"
+"PO-Revision-Date: 2025-10-30 12:15+0100\n"
 "Last-Translator: robotta <>\n"
-"Language-Team: Abkhazian\n"
-"Language: ab\n"
+"Language-Team: Spanish\n"
+"Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -93,7 +93,7 @@ msgstr "Las dimensiones de la venta que usará la siguiente ventana de Bazaar"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:8
 msgid "Discover and install applications"
-msgstr "Descubir e instalar aplicaciones"
+msgstr "Descubrir e instalar aplicaciones"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:10
 msgid ""
