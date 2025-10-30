@@ -30,6 +30,7 @@
 #include "bz-dynamic-list-view.h"
 #include "bz-env.h"
 #include "bz-error.h"
+#include "bz-fading-clamp.h"
 #include "bz-flatpak-entry.h"
 #include "bz-full-view.h"
 #include "bz-global-state.h"
@@ -61,10 +62,11 @@ struct _BzFullView
   DexFuture *loading_forge_stars;
 
   /* Template widgets */
-  AdwViewStack *stack;
-  GtkWidget    *shadow_overlay;
-  GtkWidget    *forge_stars;
-  GtkLabel     *forge_stars_label;
+  AdwViewStack    *stack;
+  GtkWidget       *shadow_overlay;
+  GtkWidget       *forge_stars;
+  GtkLabel        *forge_stars_label;
+  GtkToggleButton *description_toggle;
 };
 
 G_DEFINE_FINAL_TYPE (BzFullView, bz_full_view, ADW_TYPE_BIN)
@@ -660,6 +662,20 @@ addon_transact_cb (BzFullView     *self,
     g_signal_emit (self, signals[SIGNAL_INSTALL_ADDON], 0, entry);
 }
 
+static int
+get_description_max_height (gpointer object,
+                            gboolean active)
+{
+  return active ? 10000 : 170;
+}
+
+static char *
+get_description_toggle_text (gpointer object,
+                             gboolean active)
+{
+  return g_strdup (active ? _ ("Show Less") : _ ("Show More"));
+}
+
 static void
 bz_full_view_class_init (BzFullViewClass *klass)
 {
@@ -776,6 +792,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   g_type_ensure (BZ_TYPE_DYNAMIC_LIST_VIEW);
   g_type_ensure (BZ_TYPE_ENTRY);
   g_type_ensure (BZ_TYPE_ENTRY_GROUP);
+  g_type_ensure (BZ_TYPE_FADING_CLAMP);
   g_type_ensure (BZ_TYPE_HARDWARE_SUPPORT_DIALOG);
   g_type_ensure (BZ_TYPE_LAZY_ASYNC_TEXTURE_MODEL);
   g_type_ensure (BZ_TYPE_SECTION_VIEW);
@@ -789,6 +806,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzFullView, shadow_overlay);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, forge_stars);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, forge_stars_label);
+  gtk_widget_class_bind_template_child (widget_class, BzFullView, description_toggle);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
@@ -824,6 +842,8 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, pick_license_warning);
   gtk_widget_class_bind_template_callback (widget_class, install_addons_cb);
   gtk_widget_class_bind_template_callback (widget_class, addon_transact_cb);
+  gtk_widget_class_bind_template_callback (widget_class, get_description_max_height);
+  gtk_widget_class_bind_template_callback (widget_class, get_description_toggle_text);
 }
 
 static void
@@ -880,6 +900,7 @@ bz_full_view_set_entry_group (BzFullView   *self,
   gtk_widget_set_visible (self->forge_stars, FALSE);
   gtk_revealer_set_reveal_child (GTK_REVEALER (self->forge_stars), FALSE);
   gtk_label_set_label (self->forge_stars_label, "...");
+  gtk_toggle_button_set_active (self->description_toggle, FALSE);
 
   if (group != NULL)
     {

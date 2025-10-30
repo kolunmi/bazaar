@@ -86,6 +86,7 @@ bz_sources = [
   'bz-error.c',
   'bz-featured-carousel.c',
   'bz-featured-tile.c',
+  'bz-fading-clamp.c',
   'bz-flathub-category.c',
   'bz-flathub-category-section.c',
   'bz-flathub-page.c',
