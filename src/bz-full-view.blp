@@ -487,9 +487,27 @@ template $BzFullView: Adw.Bin {
                       label: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.description;
                     }
 
-                    $BzAppstreamDescriptionRender {
-                      appstream-description: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.long-description;
-                      margin-start: 5;
+                    $BzFadingClamp fading_clamp {
+                      max-height: bind $get_description_max_height(description_toggle.active) as <int>;
+                      min-max-height: 170;
+
+                      child: $BzAppstreamDescriptionRender {
+                        appstream-description: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.long-description;
+                        margin-start: 5;
+                      };
+
+                    }
+
+                    ToggleButton description_toggle {
+                      styles ["circular"]
+
+                      visible: bind fading_clamp.will-change;
+                      halign: center;
+                      child: Label {
+                        label: bind $get_description_toggle_text(description_toggle.active) as <string>;
+                        margin-start: 10;
+                        margin-end: 10;
+                      };
                     }
                     Adw.PreferencesGroup {
                       visible: bind $logical_and($invert_boolean($is_null(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.addons) as <bool>) as <bool>, $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>) as <bool>;
