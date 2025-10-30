@@ -628,9 +628,18 @@ terminate_block (MD_BLOCKTYPE type,
 
     case MD_BLOCK_CODE:
       {
-        child = gtk_label_new (ctx->markup->str);
-        SET_DEFAULTS (child);
-        gtk_widget_add_css_class (child, "monospace");
+        GtkWidget *label = NULL;
+
+        label = gtk_label_new (ctx->markup->str);
+        SET_DEFAULTS (label);
+        gtk_widget_add_css_class (label, "monospace");
+        gtk_widget_set_margin_start (label, 5);
+        gtk_widget_set_margin_end (label, 5);
+        gtk_widget_set_margin_top (label, 5);
+        gtk_widget_set_margin_bottom (label, 5);
+
+        child = gtk_frame_new (NULL);
+        gtk_frame_set_child (GTK_FRAME (child), label);
       }
       break;
 
