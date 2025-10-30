@@ -60,7 +60,6 @@ typedef struct
   char      *beginning;
   GString   *markup;
   GArray    *block_stack;
-  GArray    *span_stack;
   int        indent;
   int        list_index;
   MD_CHAR    list_prefix;
@@ -93,7 +92,9 @@ text (MD_TEXTTYPE    type,
       void          *user_data);
 
 static const MD_PARSER parser = {
-  .flags       = 0,
+  .flags = MD_FLAG_COLLAPSEWHITESPACE |
+           MD_FLAG_NOHTMLBLOCKS |
+           MD_FLAG_NOHTMLSPANS,
   .enter_block = enter_block,
   .leave_block = leave_block,
   .enter_span  = enter_span,
@@ -265,7 +266,6 @@ regenerate (BzMarkdownRender *self)
   ctx.beginning    = self->markdown;
   ctx.markup       = NULL;
   ctx.block_stack  = g_array_new (FALSE, TRUE, sizeof (int));
-  ctx.span_stack   = g_array_new (FALSE, TRUE, sizeof (int));
   ctx.indent       = 0;
   ctx.list_index   = 0;
   ctx.list_prefix  = '\0';
@@ -279,7 +279,6 @@ regenerate (BzMarkdownRender *self)
   if (ctx.markup != NULL)
     g_string_free (ctx.markup, TRUE);
   g_array_unref (ctx.block_stack);
-  g_array_unref (ctx.span_stack);
 
   if (iresult != 0)
     {
@@ -345,7 +344,56 @@ enter_span (MD_SPANTYPE type,
             void       *detail,
             void       *user_data)
 {
-  // ParseCtx *ctx = user_data;
+  ParseCtx *ctx = user_data;
+
+  g_assert (ctx->markup != NULL);
+
+  switch (type)
+    {
+    case MD_SPAN_EM:
+      g_string_append (ctx->markup, "<b>");
+      break;
+    case MD_SPAN_STRONG:
+      g_string_append (ctx->markup, "<big>");
+      break;
+    case MD_SPAN_A:
+      {
+        MD_SPAN_A_DETAIL *a_detail = detail;
+        g_autofree char  *href     = NULL;
+        g_autofree char  *title    = NULL;
+
+        href = g_strndup (a_detail->href.text, a_detail->href.size);
+        if (a_detail->title.text != NULL)
+          title = g_strndup (a_detail->title.text, a_detail->title.size);
+
+        g_string_append_printf (
+            ctx->markup,
+            "<a href=\"%s\" title=\"%s\">",
+            href,
+            title != NULL ? title : href);
+      }
+      break;
+    case MD_SPAN_IMG:
+      g_warning ("Images aren't implemented yet!");
+      break;
+    case MD_SPAN_CODE:
+      g_string_append (ctx->markup, "<tt>");
+      break;
+    case MD_SPAN_DEL:
+      g_string_append (ctx->markup, "<s>");
+      break;
+    case MD_SPAN_U:
+      g_string_append (ctx->markup, "<u>");
+      break;
+    case MD_SPAN_LATEXMATH:
+    case MD_SPAN_LATEXMATH_DISPLAY:
+    case MD_SPAN_WIKILINK:
+    default:
+      g_critical ("Unsupported markdown event (Did you use latex/wikilinks?)");
+      return 1;
+      break;
+    }
+
   return 0;
 }
 
@@ -354,7 +402,42 @@ leave_span (MD_SPANTYPE type,
             void       *detail,
             void       *user_data)
 {
-  // ParseCtx *ctx = user_data;
+  ParseCtx *ctx = user_data;
+
+  g_assert (ctx->markup != NULL);
+
+  switch (type)
+    {
+    case MD_SPAN_EM:
+      g_string_append (ctx->markup, "</b>");
+      break;
+    case MD_SPAN_STRONG:
+      g_string_append (ctx->markup, "</big>");
+      break;
+    case MD_SPAN_A:
+      g_string_append (ctx->markup, "</a>");
+      break;
+    case MD_SPAN_IMG:
+      // g_warning ("Images aren't implemented yet!");
+      break;
+    case MD_SPAN_CODE:
+      g_string_append (ctx->markup, "</tt>");
+      break;
+    case MD_SPAN_DEL:
+      g_string_append (ctx->markup, "</s>");
+      break;
+    case MD_SPAN_U:
+      g_string_append (ctx->markup, "</u>");
+      break;
+    case MD_SPAN_LATEXMATH:
+    case MD_SPAN_LATEXMATH_DISPLAY:
+    case MD_SPAN_WIKILINK:
+    default:
+      g_critical ("Unsupported markdown event (Did you use latex/wikilinks?)");
+      return 1;
+      break;
+    }
+
   return 0;
 }
 
@@ -369,8 +452,15 @@ text (MD_TEXTTYPE    type,
 
   g_assert (ctx->markup != NULL);
 
-  escaped = g_markup_escape_text (buf, size);
-  g_string_append (ctx->markup, escaped);
+  if (type == MD_TEXT_SOFTBR)
+    g_string_append_c (ctx->markup, ' ');
+  else if (type == MD_TEXT_BR)
+    g_string_append_c (ctx->markup, '\n');
+  else
+    {
+      escaped = g_markup_escape_text (buf, size);
+      g_string_append (ctx->markup, escaped);
+    }
 
   return 0;
 }
@@ -432,16 +522,16 @@ terminate_block (MD_BLOCKTYPE type,
       {
         // MD_BLOCK_UL_DETAIL *ul_detail = detail;
 
-        g_assert (ctx->markup == NULL);
-        ctx->indent--;
+        if (ctx->markup == NULL)
+          ctx->indent--;
       }
       break;
     case MD_BLOCK_OL:
       {
         // MD_BLOCK_OL_DETAIL *ol_detail = detail;
 
-        g_assert (ctx->markup == NULL);
-        ctx->indent--;
+        if (ctx->markup == NULL)
+          ctx->indent--;
       }
       break;
     case MD_BLOCK_LI:
@@ -481,7 +571,7 @@ terminate_block (MD_BLOCKTYPE type,
         label = gtk_label_new (ctx->markup->str);
         SET_DEFAULTS (label);
 
-        child = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+        child = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
         gtk_box_append (GTK_BOX (child), prefix);
         gtk_box_append (GTK_BOX (child), label);
 
