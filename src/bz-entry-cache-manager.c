@@ -388,13 +388,11 @@ write_task_fiber (WriteTaskData *data)
   {
     writing_future = g_hash_table_lookup (task_data->writing_hash, unique_id_checksum);
     if (writing_future != NULL)
-      dex_promise_reject (
-          DEX_PROMISE (g_steal_pointer (&writing_future)),
-          g_error_new (
-              BZ_ENTRY_CACHE_ERROR,
-              BZ_ENTRY_CACHE_ERROR_CACHE_FAILED,
-              "Entry with unique ID '%s' is already being cached right now",
-              unique_id_checksum));
+      return dex_future_new_reject (
+          BZ_ENTRY_CACHE_ERROR,
+          BZ_ENTRY_CACHE_ERROR_CACHE_FAILED,
+          "Entry with unique ID '%s' is already being cached right now",
+          unique_id_checksum);
 
     promise = dex_promise_new ();
     g_hash_table_replace (task_data->writing_hash,
@@ -493,18 +491,17 @@ write_task_fiber (WriteTaskData *data)
     g_timer_start (living->cached);
   }
 done:
-  bz_clear_guard (&other_guard);
   bz_clear_guard (&slot_guard);
-
-  if (ret_error != NULL)
-    dex_promise_reject (promise, g_error_copy (ret_error));
-  else
-    dex_promise_resolve_boolean (promise, TRUE);
 
   BZ_BEGIN_GUARD_WITH_CONTEXT (&other_guard,
                                &task_data->writing_mutex,
                                &task_data->writing_gate);
   {
+    if (ret_error != NULL)
+      dex_promise_reject (promise, g_error_copy (ret_error));
+    else
+      dex_promise_resolve_boolean (promise, TRUE);
+
     g_hash_table_remove (task_data->writing_hash, unique_id_checksum);
   }
   bz_clear_guard (&other_guard);
@@ -653,26 +650,23 @@ read_task_fiber (ReadTaskData *data)
   g_weak_ref_init (&living->wr, entry);
 
 done:
-  bz_clear_guard (&guard);
-
   BZ_BEGIN_GUARD_WITH_CONTEXT (&guard,
                                &task_data->reading_mutex,
                                &task_data->reading_gate);
   {
+    if (ret_error != NULL)
+      dex_promise_reject (promise, g_error_copy (ret_error));
+    else
+      dex_promise_resolve_object (promise, g_object_ref (entry));
+
     g_hash_table_remove (task_data->reading_hash, unique_id_checksum);
   }
   bz_clear_guard (&guard);
 
   if (ret_error != NULL)
-    {
-      dex_promise_reject (promise, g_error_copy (ret_error));
-      return dex_future_new_for_error (g_steal_pointer (&ret_error));
-    }
+    return dex_future_new_for_error (g_steal_pointer (&ret_error));
   else
-    {
-      dex_promise_resolve_object (promise, g_object_ref (entry));
-      return dex_future_new_for_object (entry);
-    }
+    return dex_future_new_for_object (entry);
 }
 
 static DexFuture *

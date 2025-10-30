@@ -1156,7 +1156,7 @@ refresh_fiber (BzApplication *self)
 
       if (G_VALUE_HOLDS_OBJECT (value))
         {
-          g_autoptr (BzEntry) entry        = NULL;
+          BzEntry    *entry                = NULL;
           const char *id                   = NULL;
           const char *unique_id            = NULL;
           gboolean    user                 = FALSE;
@@ -1164,7 +1164,7 @@ refresh_fiber (BzApplication *self)
           const char *flatpak_id           = NULL;
           g_autoptr (DexFuture) cache_task = NULL;
 
-          entry     = g_value_dup_object (value);
+          entry     = g_value_get_object (value);
           id        = bz_entry_get_id (entry);
           unique_id = bz_entry_get_unique_id (entry);
           user      = bz_flatpak_entry_is_user (BZ_FLATPAK_ENTRY (entry));
@@ -1277,6 +1277,7 @@ refresh_fiber (BzApplication *self)
       bz_state_info_set_busy_step_label (self->state, busy_step_label);
       bz_state_info_set_busy_progress_label (self->state, busy_progress_label);
       g_clear_pointer (&busy_step_label, g_free);
+      g_clear_pointer (&busy_progress_label, g_free);
     }
   g_clear_pointer (&self->last_installed_set, g_hash_table_unref);
   self->last_installed_set = g_steal_pointer (&installed_set);
@@ -1291,6 +1292,7 @@ refresh_fiber (BzApplication *self)
                  (DexFuture *const *) cache_futures->pdata,
                  cache_futures->len),
              NULL);
+  g_clear_pointer (&cache_futures, g_ptr_array_unref);
 
   result = dex_await (dex_ref (sync_future), &local_error);
   if (!result)
@@ -1308,6 +1310,7 @@ refresh_fiber (BzApplication *self)
       if (window != NULL)
         bz_show_error_for_widget (GTK_WIDGET (window), warning);
     }
+  dex_clear (&sync_future);
 
   g_debug ("Finished synchronizing with remotes, notifying UI...");
   bz_state_info_set_online (self->state, TRUE);

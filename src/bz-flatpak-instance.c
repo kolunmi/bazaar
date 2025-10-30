@@ -1244,11 +1244,10 @@ retrieve_refs_for_remote_fiber (RetrieveRefsForRemoteData *data)
 
   for (guint i = 0; i < refs->len; i++)
     {
-      FlatpakRemoteRef *rref               = NULL;
-      const char       *name               = NULL;
-      AsComponent      *component          = NULL;
-      g_autoptr (BzFlatpakEntry) entry     = NULL;
-      g_autoptr (DexFuture) channel_future = NULL;
+      FlatpakRemoteRef *rref           = NULL;
+      const char       *name           = NULL;
+      AsComponent      *component      = NULL;
+      g_autoptr (BzFlatpakEntry) entry = NULL;
 
       rref      = g_ptr_array_index (refs, i);
       name      = flatpak_ref_get_name (FLATPAK_REF (rref));
