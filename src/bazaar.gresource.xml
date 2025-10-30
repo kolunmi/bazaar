@@ -14,6 +14,7 @@
     <file preprocess="xml-stripblanks">bz-app-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-apps-page.ui</file>
     <file preprocess="xml-stripblanks">bz-appstream-description-render.ui</file>
+    <file preprocess="xml-stripblanks">bz-markdown-render.ui</file>
     <file preprocess="xml-stripblanks">bz-browse-widget.ui</file>
     <file preprocess="xml-stripblanks">bz-category-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-context-tile.ui</file>

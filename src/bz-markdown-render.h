@@ -27,7 +27,7 @@ G_BEGIN_DECLS
 #define BZ_TYPE_MARKDOWN_RENDER (bz_markdown_render_get_type ())
 G_DECLARE_FINAL_TYPE (BzMarkdownRender, bz_markdown_render, BZ, MARKDOWN_RENDER, AdwBin)
 
-BzMarkdownRender *
+GtkWidget *
 bz_markdown_render_new (void);
 
 const char *
