@@ -387,11 +387,11 @@ bz_transaction_new_full (BzEntry **installs,
   G_STMT_END
 
   for (guint i = 0; i < n_installs; i++)
-    ADD_ENTRY (installs, installs[i], BZ_TRANSACTION_TYPE_INSTALL);
+    ADD_ENTRY (installs, installs[i], BZ_TRANSACTION_ENTRY_TYPE_INSTALL);
   for (guint i = 0; i < n_updates; i++)
-    ADD_ENTRY (updates, updates[i], BZ_TRANSACTION_TYPE_UPDATE);
+    ADD_ENTRY (updates, updates[i], BZ_TRANSACTION_ENTRY_TYPE_UPDATE);
   for (guint i = 0; i < n_removals; i++)
-    ADD_ENTRY (removals, removals[i], BZ_TRANSACTION_TYPE_REMOVAL);
+    ADD_ENTRY (removals, removals[i], BZ_TRANSACTION_ENTRY_TYPE_REMOVAL);
 
 #undef ADD_ENTRY
 
