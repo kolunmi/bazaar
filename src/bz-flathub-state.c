@@ -46,6 +46,7 @@ struct _BzFlathubState
   GtkStringList           *recently_added;
   GtkStringList           *popular;
   GtkStringList           *trending;
+  GtkStringList           *mobile;
   GtkStringList           *quality_moderation;
 
   DexFuture *initializing;
@@ -70,6 +71,7 @@ enum
   PROP_RECENTLY_ADDED,
   PROP_POPULAR,
   PROP_TRENDING,
+  PROP_MOBILE,
   PROP_QUALITY_MODERATION,
 
   LAST_PROP
@@ -98,6 +100,7 @@ bz_flathub_state_dispose (GObject *object)
   g_clear_pointer (&self->recently_added, g_object_unref);
   g_clear_pointer (&self->popular, g_object_unref);
   g_clear_pointer (&self->trending, g_object_unref);
+  g_clear_pointer (&self->mobile, g_object_unref);
   g_clear_pointer (&self->quality_moderation, g_object_unref);
 
   G_OBJECT_CLASS (bz_flathub_state_parent_class)->dispose (object);
@@ -146,6 +149,9 @@ bz_flathub_state_get_property (GObject    *object,
     case PROP_TRENDING:
       g_value_take_object (value, bz_flathub_state_dup_trending (self));
       break;
+    case PROP_MOBILE:
+      g_value_take_object (value, bz_flathub_state_dup_mobile (self));
+      break;
     case PROP_QUALITY_MODERATION:
       g_value_take_object (value, bz_flathub_state_dup_quality_moderation (self));
       break;
@@ -179,6 +185,7 @@ bz_flathub_state_set_property (GObject      *object,
     case PROP_RECENTLY_ADDED:
     case PROP_POPULAR:
     case PROP_TRENDING:
+    case PROP_MOBILE:
     case PROP_QUALITY_MODERATION:
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -268,6 +275,13 @@ bz_flathub_state_class_init (BzFlathubStateClass *klass)
           NULL, NULL,
           G_TYPE_LIST_MODEL,
           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_MOBILE] =
+    g_param_spec_object (
+        "mobile",
+        NULL, NULL,
+        G_TYPE_LIST_MODEL,
+        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   props[PROP_QUALITY_MODERATION] =
       g_param_spec_object (
@@ -462,6 +476,25 @@ bz_flathub_state_dup_trending (BzFlathubState *self)
 }
 
 GListModel *
+bz_flathub_state_dup_mobile (BzFlathubState *self)
+{
+  g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
+  if (self->initializing != NULL)
+    return NULL;
+
+  if (self->mobile != NULL)
+    {
+      if (self->map_factory != NULL)
+        return bz_application_map_factory_generate (
+            self->map_factory, G_LIST_MODEL (self->mobile));
+      else
+        return G_LIST_MODEL (g_object_ref (self->mobile));
+    }
+  else
+    return NULL;
+}
+
+GListModel *
 bz_flathub_state_dup_quality_moderation (BzFlathubState *self)
 {
   g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
@@ -496,6 +529,7 @@ bz_flathub_state_set_for_day (BzFlathubState *self,
   g_clear_pointer (&self->recently_added, g_object_unref);
   g_clear_pointer (&self->popular, g_object_unref);
   g_clear_pointer (&self->trending, g_object_unref);
+  g_clear_pointer (&self->mobile, g_object_unref);
   g_clear_pointer (&self->quality_moderation, g_object_unref);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_OF_THE_DAY]);
@@ -507,6 +541,7 @@ bz_flathub_state_set_for_day (BzFlathubState *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_RECENTLY_ADDED]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_POPULAR]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TRENDING]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MOBILE]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_QUALITY_MODERATION]);
 
   if (for_day != NULL)
@@ -520,6 +555,7 @@ bz_flathub_state_set_for_day (BzFlathubState *self,
       self->recently_added     = gtk_string_list_new (NULL);
       self->popular            = gtk_string_list_new (NULL);
       self->trending           = gtk_string_list_new (NULL);
+      self->mobile             = gtk_string_list_new (NULL);
       self->quality_moderation = gtk_string_list_new (NULL);
 
       future = dex_scheduler_spawn (
@@ -606,6 +642,7 @@ initialize_fiber (GWeakRef *wr)
   ADD_REQUEST ("/collection/recently-added", "/collection/recently-added?page=0&per_page=%d", COLLECTION_FETCH_SIZE);
   ADD_REQUEST ("/collection/popular", "/collection/popular?page=0&per_page=%d", COLLECTION_FETCH_SIZE);
   ADD_REQUEST ("/collection/trending", "/collection/trending?page=0&per_page=%d", COLLECTION_FETCH_SIZE);
+  ADD_REQUEST ("/collection/mobile", "/collection/mobile?page=0&per_page=%d", COLLECTION_FETCH_SIZE);
   ADD_REQUEST ("/quality-moderation/passing-apps", "/quality-moderation/passing-apps?page=1&page_size=%d", QUALITY_MODERATION_PAGE_SIZE);
 
   while (g_hash_table_size (futures) > 0)
@@ -828,6 +865,26 @@ initialize_fiber (GWeakRef *wr)
               json_object_get_string_member (element, "app_id"));
         }
     }
+  if (g_hash_table_contains (nodes, "/collection/mobile"))
+  {
+    JsonObject *object = NULL;
+    JsonArray  *array  = NULL;
+    guint       length = 0;
+
+    object = json_node_get_object (g_hash_table_lookup (nodes, "/collection/mobile"));
+    array  = json_object_get_array_member (object, "hits");
+    length = json_array_get_length (array);
+
+    for (guint i = 0; i < length; i++)
+      {
+        JsonObject *element = NULL;
+
+        element = json_array_get_object_element (array, i);
+        gtk_string_list_append (
+            self->mobile,
+            json_object_get_string_member (element, "app_id"));
+      }
+  }
 
   return dex_future_new_true ();
 }
@@ -862,6 +919,7 @@ initialize_finally (DexFuture *future,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_RECENTLY_ADDED]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_POPULAR]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TRENDING]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MOBILE]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_QUALITY_MODERATION]);
 
   return NULL;
