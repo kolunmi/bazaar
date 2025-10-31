@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-30 04:35+0900\n"
-"PO-Revision-Date: 2025-10-30 05:11+0900\n"
+"POT-Creation-Date: 2025-10-31 20:02+0900\n"
+"PO-Revision-Date: 2025-10-31 20:08+0900\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: ja\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 3.7\n"
+"X-Generator: Poedit 3.8\n"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:3
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:5
@@ -313,7 +313,7 @@ msgstr ""
 msgid "fa60f4f * Move to brand new shiny Adw.ShortcutsDialog (#395)"
 msgstr ""
 
-#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:271
+#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:527
 #: src/bz-installed-page.blp:132
 msgid "Manage Add-ons"
 msgstr "アドオンを管理する"
@@ -548,25 +548,25 @@ msgstr "エントリを受信中"
 msgid "%'d of %'d"
 msgstr "%'d / %'d"
 
-#: src/bz-application.c:1286
+#: src/bz-application.c:1287
 #, c-format
 msgid "Waiting for background indexing tasks to catch up..."
 msgstr "バックグラウンドのインデックス処理が終了するのを待っています..."
 
-#: src/bz-application.c:1322
+#: src/bz-application.c:1325
 #, c-format
 msgid "Completed initialization in %0.2f seconds"
 msgstr "%0.2f で初期化を完了しました"
 
-#: src/bz-application.c:1327 src/bz-application.c:1482
+#: src/bz-application.c:1330 src/bz-application.c:1485
 msgid "Checking for updates..."
 msgstr "更新を確認中..."
 
-#: src/bz-application.c:1366
+#: src/bz-application.c:1369
 msgid "Synchronizing..."
 msgstr "同期中..."
 
-#: src/bz-browse-widget.blp:11 src/bz-flathub-page.blp:15
+#: src/bz-browse-widget.blp:11 src/bz-flathub-page.blp:19
 #: src/bz-full-view.blp:10 src/bz-installed-page.blp:15 src/bz-window.blp:161
 msgid "Empty"
 msgstr "空"
@@ -583,7 +583,7 @@ msgstr ""
 "Bazaar が読み込める特選アプリの情報がありませんでした。あなたが使用している "
 "OS のサポートチャンネルに連絡してください。"
 
-#: src/bz-browse-widget.blp:22 src/bz-flathub-page.blp:26
+#: src/bz-browse-widget.blp:22 src/bz-flathub-page.blp:30
 msgid "Browser"
 msgstr "ブラウザー"
 
@@ -665,55 +665,55 @@ msgstr "アプリケーション総数: %d"
 msgid "More %s"
 msgstr "%s をもっと見る"
 
-#: src/bz-flathub-page.blp:19
+#: src/bz-flathub-page.blp:23
 msgid "Flathub Not Added"
 msgstr "Flathub が見つかりません"
 
-#: src/bz-flathub-page.blp:20
+#: src/bz-flathub-page.blp:24
 msgid "The Flathub remote was not found on any of your Flatpak installations"
 msgstr ""
 "このコンピューター上のどの flatpak にも Flathub リモートレポジトリが見つかり"
 "ませんでした"
 
-#: src/bz-flathub-page.blp:71 src/bz-flathub-page.blp:99
+#: src/bz-flathub-page.blp:80 src/bz-flathub-page.blp:109
 #: src/bz-flathub-page.c:168
 msgid "Trending"
 msgstr "話題のアプリ"
 
-#: src/bz-flathub-page.blp:76 src/bz-flathub-page.blp:225
+#: src/bz-flathub-page.blp:85 src/bz-flathub-page.blp:235
 #: src/bz-flathub-page.c:198
 msgid "Popular"
 msgstr "人気のアプリ"
 
-#: src/bz-flathub-page.blp:81
+#: src/bz-flathub-page.blp:90
 msgid "New"
 msgstr "新しいアプリ"
 
-#: src/bz-flathub-page.blp:86
+#: src/bz-flathub-page.blp:95
 msgid "Updated"
 msgstr "更新されたアプリ"
 
-#: src/bz-flathub-page.blp:131
+#: src/bz-flathub-page.blp:141
 msgid "More Trending"
 msgstr "話題のアプリをもっと見る"
 
-#: src/bz-flathub-page.blp:141 src/bz-flathub-page.c:178
+#: src/bz-flathub-page.blp:151 src/bz-flathub-page.c:178
 msgid "Recently Updated"
 msgstr "最近更新されたアプリ"
 
-#: src/bz-flathub-page.blp:173
+#: src/bz-flathub-page.blp:183
 msgid "More Updated"
 msgstr "更新されたものをもっと見る"
 
-#: src/bz-flathub-page.blp:183 src/bz-flathub-page.c:188
+#: src/bz-flathub-page.blp:193 src/bz-flathub-page.c:188
 msgid "Recently Added"
 msgstr "最近追加されたアプリ"
 
-#: src/bz-flathub-page.blp:215
+#: src/bz-flathub-page.blp:225
 msgid "More New"
 msgstr "新着アプリをもっと見る"
 
-#: src/bz-flathub-page.blp:257
+#: src/bz-flathub-page.blp:267
 msgid "More Popular"
 msgstr "人気アプリをもっと見る"
 
@@ -803,109 +803,109 @@ msgstr "アプリケーションをダウンロードしてインストールす
 msgid "Uninstall Application"
 msgstr "このアプリケーションをアンインストール"
 
-#: src/bz-full-view.blp:284
+#: src/bz-full-view.blp:271
 msgid "Install Other Version"
 msgstr "ほかのバージョンをインストール"
 
-#: src/bz-full-view.blp:308
+#: src/bz-full-view.blp:295
 msgid "Download"
 msgstr "ダウンロード"
 
-#: src/bz-full-view.blp:424
+#: src/bz-full-view.blp:411
 msgid "Downloads/mo"
 msgstr "月間ダウンロード"
 
-#: src/bz-full-view.c:259
+#: src/bz-full-view.c:261
 msgid "---"
 msgstr ""
 
 #. Translators: M is the suffix for millions, \xC2\xA0 is a non-breaking space
-#: src/bz-full-view.c:263
+#: src/bz-full-view.c:265
 #, c-format
 msgid "%.2f M"
 msgstr ""
 
 #. Translators: K is the suffix for thousands, \xC2\xA0 is a non-breaking space
-#: src/bz-full-view.c:266
+#: src/bz-full-view.c:268
 #, c-format
 msgid "%.2f K"
 msgstr ""
 
-#: src/bz-full-view.c:275
+#: src/bz-full-view.c:277
 #, c-format
 msgid "%d downloads in the last 30 days"
 msgstr "過去1ヶ月の間に %d ダウンロード"
 
-#: src/bz-full-view.c:296
+#: src/bz-full-view.c:298
 #, c-format
 msgid "Download size of %s"
 msgstr "ダウンロードサイズ: %s"
 
 #. Translators: Age rating format, e.g. "12+" for ages 12 and up
-#: src/bz-full-view.c:306
+#: src/bz-full-view.c:308
 #, c-format
 msgid "%d+"
 msgstr ""
 
-#: src/bz-full-view.c:314
+#: src/bz-full-view.c:316
 msgid "All Ages"
 msgstr "全年齢"
 
-#: src/bz-full-view.c:316
+#: src/bz-full-view.c:318
 msgid "Age Rating"
 msgstr "年齢レーティング"
 
-#: src/bz-full-view.c:324
+#: src/bz-full-view.c:326
 msgid "Suitable for all ages"
 msgstr "全ての年齢のユーザーに適している"
 
-#: src/bz-full-view.c:326
+#: src/bz-full-view.c:328
 #, c-format
 msgid "Suitable for ages %d and up"
 msgstr "%d 歳以上のユーザーに適している"
 
-#: src/bz-full-view.c:346
+#: src/bz-full-view.c:348
 msgid "Unknown"
 msgstr "不明"
 
-#: src/bz-full-view.c:349
+#: src/bz-full-view.c:351
 msgid "Proprietary Software"
 msgstr "プロプライエタリ ソフトウェア"
 
-#: src/bz-full-view.c:353
+#: src/bz-full-view.c:355
 #, c-format
 msgid "Free software licensed under %s"
-msgstr ""
+msgstr "%s ライセンスのもと公開されているフリーソフト"
 
-#: src/bz-full-view.c:361
+#: src/bz-full-view.c:363
 msgid "Free"
 msgstr "フリー"
 
-#: src/bz-full-view.c:361
+#: src/bz-full-view.c:363
 msgid "Proprietary"
 msgstr "プロプライエタリ"
 
-#: src/bz-full-view.c:381
+#: src/bz-full-view.c:383
 msgid "Adaptive"
-msgstr ""
+msgstr "幅広いデバイスに対応"
 
-#: src/bz-full-view.c:381
+#: src/bz-full-view.c:383
 msgid "Desktop Only"
 msgstr "デスクトップのみ"
 
-#: src/bz-full-view.c:387
+#: src/bz-full-view.c:389
 msgid "Works on desktop, tablets, and phones"
 msgstr "デスクトップ、タブレット、携帯電話で動きます"
 
-#: src/bz-full-view.c:388
+#: src/bz-full-view.c:390
 msgid "May not work on mobile devices"
 msgstr "モバイル端末では動かない可能性があります"
 
-#: src/bz-full-view.c:399
+#: src/bz-full-view.c:401
 msgid "No URL"
 msgstr "URL がありません"
 
-#: src/bz-full-view.c:417
+#: src/bz-full-view.c:419
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -913,7 +913,7 @@ msgstr ""
 "このアプリケーションはフリーのOSSライセンスで公開されており、安全のためにソー"
 "スコードを確認することができます。"
 
-#: src/bz-full-view.c:418
+#: src/bz-full-view.c:420
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
@@ -921,6 +921,14 @@ msgstr ""
 "このアプリケーションはプロプライエタリなライセンスで公開されており、ソース"
 "コードはプライベートで開発されているため、独立した第三者による検査を受けるこ"
 "とができません。"
+
+#: src/bz-full-view.c:676
+msgid "Show Less"
+msgstr "折り畳む"
+
+#: src/bz-full-view.c:676
+msgid "Show More"
+msgstr "もっと見る"
 
 #: src/bz-hardware-support-dialog.c:69
 msgid "Keyboard support"
@@ -1176,50 +1184,50 @@ msgid "Accent Color"
 msgstr "アクセントカラー"
 
 #: src/bz-preferences-dialog.c:33
-msgid "Pride Rainbow Flag"
-msgstr "プライドレインボー フラッグ"
+msgid "Pride Colors"
+msgstr "プライドカラー"
 
 #: src/bz-preferences-dialog.c:34
-msgid "Lesbian Pride Flag"
-msgstr "レズビアン プライド フラッグ"
+msgid "Lesbian Pride Colors"
+msgstr "レズビアン プライド カラー"
 
 #: src/bz-preferences-dialog.c:35
-msgid "Transgender Flag"
-msgstr "トランスジェンダー フラッグ"
+msgid "Transgender Pride Colors"
+msgstr "トランスジェンダー プライド カラー"
 
 #: src/bz-preferences-dialog.c:36
-msgid "Nonbinary Flag"
-msgstr "ノンバイナリー フラッグ"
+msgid "Nonbinary Pride Colors"
+msgstr "ノンバイナリー プライド カラー"
 
 #: src/bz-preferences-dialog.c:37
-msgid "Bisexual Flag"
-msgstr "バイセクシュアル フラッグ"
+msgid "Bisexual Pride Colors"
+msgstr "バイセクシュアル プライド カラー"
 
 #: src/bz-preferences-dialog.c:38
-msgid "Asexual Flag"
-msgstr "アセクシュアル フラッグ"
+msgid "Asexual Pride Colors"
+msgstr "アセクシュアル プライド カラー"
 
 #: src/bz-preferences-dialog.c:39
-msgid "Pansexual Flag"
-msgstr "パンセクシュアル フラッグ"
+msgid "Pansexual Pride Colors"
+msgstr "パンセクシュアル プライド カラー"
 
 #: src/bz-preferences-dialog.c:40
-msgid "Aromantic Flag"
-msgstr "アロマンティック フラッグ"
+msgid "Aromantic Pride Colors"
+msgstr "アロマンティック プライド カラー"
 
 #: src/bz-preferences-dialog.c:41
-msgid "Genderfluid Flag"
-msgstr "ジェンダーフルイド フラッグ"
+msgid "Genderfluid Pride Colors"
+msgstr "ジェンダーフルイド プライド カラー"
 
 #: src/bz-preferences-dialog.c:42
-msgid "Polysexual Flag"
-msgstr "ポリセクシュアル フラッグ"
+msgid "Polysexual Pride Colors"
+msgstr "ポリセクシュアル プライド カラー"
 
 #: src/bz-preferences-dialog.c:43
-msgid "Omnisexual Flag"
-msgstr "オムニセクシュアル フラッグ"
+msgid "Omnisexual Pride Colors"
+msgstr "オムニセクシュアル プライド カラー"
 
-#: src/bz-releases-dialog.blp:5 src/bz-releases-list.blp:11
+#: src/bz-releases-dialog.blp:5 src/bz-releases-list.blp:26
 msgid "Version History"
 msgstr "バージョン履歴"
 
@@ -1389,28 +1397,28 @@ msgid "Main Menu"
 msgstr "メインメニュー"
 
 #: src/bz-window.blp:486
-msgid "_Quit Service"
-msgstr "_サービスの停止"
+msgid "_Donate to Bazaar ❤️"
+msgstr "Bazaar に寄付する❤️(_D)"
 
 #: src/bz-window.blp:491
 msgid "_Refresh Content"
-msgstr "_再読み込み"
+msgstr "再読み込み(_R)"
 
-#: src/bz-window.blp:496
+#: src/bz-window.blp:498
 msgid "_Preferences"
-msgstr "_設定"
+msgstr "設定(_P)"
 
-#: src/bz-window.blp:501
+#: src/bz-window.blp:503
 msgid "_Keyboard Shortcuts"
-msgstr "_キーボードショートカット"
+msgstr "キーボードショートカット(_K)"
 
-#: src/bz-window.blp:506
+#: src/bz-window.blp:508
 msgid "_About Bazaar"
-msgstr "_Bazaar について"
+msgstr "Bazaar について(_A)"
 
-#: src/bz-window.blp:511
-msgid "_Donate to Bazaar ❤️"
-msgstr "_Bazaar に寄付する❤️"
+#: src/bz-window.blp:515
+msgid "_Quit Bazaar"
+msgstr "Bazaar を終了(_Q)"
 
 #: src/bz-window.c:827
 msgid ""
@@ -1497,6 +1505,18 @@ msgstr "ショートカットを表示"
 msgctxt "shortcut window"
 msgid "Quit"
 msgstr "アプリを閉じる"
+
+#~ msgid "Pride Rainbow Flag"
+#~ msgstr "プライドレインボー フラッグ"
+
+#~ msgid "Bisexual Flag"
+#~ msgstr "バイセクシュアル フラッグ"
+
+#~ msgid "Asexual Flag"
+#~ msgstr "アセクシュアル フラッグ"
+
+#~ msgid "_Quit Service"
+#~ msgstr "_サービスの停止"
 
 #~ msgid "Games"
 #~ msgstr "ゲーム"
@@ -1610,9 +1630,6 @@ msgstr "アプリを閉じる"
 
 #~ msgid "Pause the execution of transactions"
 #~ msgstr "実行中のダウンロードを一時停止する"
-
-#~ msgid "Show More"
-#~ msgstr "もっと見る"
 
 #~ msgid "Downloads Over Time"
 #~ msgstr "ダウンロード数の推移"
