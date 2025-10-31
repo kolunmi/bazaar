@@ -25,6 +25,8 @@
 #define WATCH_CLEANUP_INTERVAL_MSEC       5000
 #define WATCH_RECACHE_INTERVAL_SEC_DOUBLE 4.0
 
+#include <malloc.h>
+
 #include "bz-entry-cache-manager.h"
 #include "bz-env.h"
 #include "bz-flatpak-entry.h"
@@ -750,6 +752,10 @@ watch_fiber (OngoingTaskData *task_data)
               pruned++;
             }
         }
+
+#ifdef __GLIBC__
+      malloc_trim (0);
+#endif
 
       g_debug ("Sweep report: finished in %.4f seconds, including time to acquire guards\n"
                "  Out of a total of %d entries considered:\n"

@@ -24,6 +24,7 @@
 
 // #include <bazaar-ui.h>
 #include <glib/gi18n.h>
+#include <malloc.h>
 
 #include "bz-application-map-factory.h"
 #include "bz-application.h"
@@ -1293,6 +1294,9 @@ refresh_fiber (BzApplication *self)
                  cache_futures->len),
              NULL);
   g_clear_pointer (&cache_futures, g_ptr_array_unref);
+#ifdef __GLIBC__
+  malloc_trim (0);
+#endif
 
   result = dex_await (dex_ref (sync_future), &local_error);
   if (!result)
@@ -1571,6 +1575,11 @@ refresh_finally (DexFuture     *future,
       open_flatpakref_take (self, g_steal_pointer (&self->waiting_to_open_file));
     }
 
+/* yassss */
+#ifdef __GLIBC__
+  malloc_trim (0);
+#endif
+
   return NULL;
 }
 
@@ -1617,6 +1626,10 @@ refresh (BzApplication *self)
       future, (DexFutureCallback) refresh_finally,
       g_object_ref (self), g_object_unref);
   self->refresh_task = g_steal_pointer (&future);
+
+#ifdef __GLIBC__
+  malloc_trim (0);
+#endif
 }
 
 static GtkWindow *

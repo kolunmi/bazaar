@@ -21,6 +21,7 @@
 #define G_LOG_DOMAIN  "BAZAAR::FLATPAK"
 #define BAZAAR_MODULE "flatpak"
 
+#include <malloc.h>
 #include <xmlb.h>
 
 #include "bz-backend-notification.h"
@@ -1136,6 +1137,16 @@ retrieve_refs_for_remote_fiber (RetrieveRefsForRemoteData *data)
       XB_BUILDER_COMPILE_FLAG_NATIVE_LANGS,
       cancellable,
       &local_error);
+
+#ifdef __GLIBC__
+  /* From gnome-software/plugins/core/gs-plugin-appstream.c
+   *
+   * https://gitlab.gnome.org/GNOME/gnome-software/-/issues/941
+   * libxmlb <= 0.3.22 makes lots of temporary heap allocations parsing large XMLs
+   * trim the heap after parsing to control RSS growth. */
+  malloc_trim (0);
+#endif
+
   if (silo == NULL)
     return dex_future_new_reject (
         BZ_FLATPAK_ERROR,
