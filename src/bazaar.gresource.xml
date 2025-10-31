@@ -105,6 +105,8 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/zoom-minus-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/zoom-plus-symbolic.svg</file>
 
+    <file preprocess="xml-stripblanks">icons/scalable/actions/on-the-go-symbolic.svg</file>
+
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Create.svg</file>
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Develop.svg</file>
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Learn.svg</file>

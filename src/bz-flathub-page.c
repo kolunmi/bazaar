@@ -198,6 +198,16 @@ show_more_popular_clicked_cb (BzFlathubPage *self,
   show_more_clicked (_ ("Popular"), model, button);
 }
 
+static void
+show_more_mobile_clicked_cb (BzFlathubPage *self,
+                               GtkButton     *button)
+{
+  g_autoptr (GListModel) model = NULL;
+
+  model = bz_flathub_state_dup_mobile (self->state);
+  show_more_clicked (_ ("Mobile Apps"), model, button);
+}
+
 static gpointer
 get_category_by_name_cb (gpointer    object,
                          gpointer    categories_obj,
@@ -279,6 +289,7 @@ bz_flathub_page_class_init (BzFlathubPageClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, show_more_recently_updated_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, show_more_recently_added_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, show_more_popular_clicked_cb);
+  gtk_widget_class_bind_template_callback (widget_class, show_more_mobile_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, featured_carousel_group_clicked_cb);
 }
 

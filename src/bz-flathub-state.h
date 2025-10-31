@@ -74,6 +74,9 @@ bz_flathub_state_dup_trending (BzFlathubState *self);
 GListModel *
 bz_flathub_state_dup_quality_moderation (BzFlathubState *self);
 
+GListModel *
+bz_flathub_state_dup_mobile (BzFlathubState *self);
+
 void
 bz_flathub_state_update_to_today (BzFlathubState *self);
 
