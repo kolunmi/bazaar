@@ -20,6 +20,25 @@ template $BzPreferencesDialog: Adw.PreferencesDialog {
     use-underline: true;
 
     Adw.PreferencesGroup {
+      title: _("Search");
+
+      Adw.SwitchRow search_only_foss_switch {
+        title: _("Free Software Only");
+        subtitle: _("Hide proprietary applications from search results");
+      }
+
+      Adw.SwitchRow search_only_flathub_switch {
+        title: _("Flathub Results Only");
+        subtitle: _("Limit search results to applications only available on Flathub");
+      }
+
+      Adw.SwitchRow search_debounce_switch {
+        title: _("Delay Search Results");
+        subtitle: _("Improve results performance by debouncing search terms");
+      }
+    }
+
+    Adw.PreferencesGroup {
       title: _("Application Details");
 
       Adw.ActionRow {
@@ -45,25 +64,6 @@ template $BzPreferencesDialog: Adw.PreferencesDialog {
             valign: center;
           }
         }
-      }
-    }
-
-    Adw.PreferencesGroup {
-      title: _("Search");
-
-      Adw.SwitchRow search_only_foss_switch {
-        title: _("Free Software Only");
-        subtitle: _("Hide proprietary applications from search results");
-      }
-
-      Adw.SwitchRow search_only_flathub_switch {
-        title: _("Flathub Results Only");
-        subtitle: _("Limit search results to applications only available on Flathub");
-      }
-
-      Adw.SwitchRow search_debounce_switch {
-        title: _("Delay Search Results");
-        subtitle: _("Improve results performance by debouncing search terms");
       }
     }
 
@@ -107,7 +107,6 @@ Popover forge_popover {
       label: _("Bazaar can fetch and display the star count from an application's source code repository on a remote Git forge. \n For projects on GitHub, rate limits may cause them not to appear.");
       wrap: true;
       wrap-mode: word_char;
-      justify: center;
       max-width-chars: 30;
       halign: center;
       margin-start: 6;
