@@ -27,6 +27,7 @@
 #include "bz-dynamic-list-view.h"
 #include "bz-flathub-state.h"
 #include "bz-group-tile-css-watcher.h"
+#include "bz-rich-app-tile.h"
 #include "bz-screenshot.h"
 #include "bz-search-result.h"
 #include "bz-state-info.h"
@@ -337,6 +338,15 @@ unbind_category_tile_cb (BzSearchWidget    *self,
 }
 
 static void
+reset_search_cb (BzSearchWidget *self,
+                 GtkButton  *button)
+{
+
+  bz_search_widget_set_text (self, "");
+  bz_search_widget_refresh (self);
+}
+
+static void
 bz_search_widget_class_init (BzSearchWidgetClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
@@ -414,6 +424,7 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
   g_type_ensure (BZ_TYPE_CATEGORY_TILE);
   g_type_ensure (BZ_TYPE_DYNAMIC_LIST_VIEW);
   g_type_ensure (BZ_TYPE_GROUP_TILE_CSS_WATCHER);
+  g_type_ensure (BZ_TYPE_RICH_APP_TILE);
   g_type_ensure (BZ_TYPE_SCREENSHOT);
   g_type_ensure (BZ_TYPE_SEARCH_RESULT);
 
@@ -431,6 +442,7 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, is_valid_string);
   gtk_widget_class_bind_template_callback (widget_class, idx_to_string);
   gtk_widget_class_bind_template_callback (widget_class, score_to_string);
+  gtk_widget_class_bind_template_callback (widget_class, reset_search_cb);
   gtk_widget_class_bind_template_callback (widget_class, no_results_found_subtitle);
 
   gtk_widget_class_install_action (widget_class, "move", "i", action_move);

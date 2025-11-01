@@ -1,0 +1,84 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzRichAppTile: Adw.Bin {
+  child: Box {
+    orientation: vertical;
+    overflow: hidden;
+    styles [
+      "card",
+      "rich-tile-card",
+    ]
+    Overlay {
+      [overlay]
+      Image {
+
+        halign: end;
+        valign: end;
+        icon-name: "app-installed-symbolic";
+        icon-size: normal;
+        visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
+        margin-bottom: 10;
+        margin-end: 10;
+      }
+      Box {
+        height-request: 200;
+        styles [
+          "category-tile",
+          "category-graphics",
+        ]
+      }
+    }
+    Box {
+      margin-start: 12;
+      margin-end: 12;
+      margin-top: 12;
+      margin-bottom: 12;
+      orientation: horizontal;
+      spacing: 15;
+      can-focus: false;
+      Image {
+        pixel-size: 64;
+        paintable: bind template.group as <$BzEntryGroup>.icon-paintable;
+        styles [
+          "icon-dropshadow",
+        ]
+      }
+      Box {
+        valign: center;
+        hexpand: true;
+        orientation: vertical;
+        spacing: 5;
+        Box {
+          orientation: horizontal;
+          spacing: 10;
+          Label {
+            css-name: "app-tile-title";
+            styles [
+              "heading",
+            ]
+            xalign: 0.0;
+            ellipsize: end;
+            label: bind template.group as <$BzEntryGroup>.title;
+            max-width-chars: 18;
+          }
+        }
+        Label {
+          css-name: "app-tile-description";
+          xalign: 0.0;
+          yalign: 0.0;
+          wrap: true;
+          ellipsize: end;
+          vexpand: true;
+          lines: 2;
+          max-width-chars: 15;
+          single-line-mode: true;
+          label: bind template.group as <$BzEntryGroup>.description;
+          styles [
+            "dimmed",
+          ]
+        }
+      }
+    }
+  };
+}

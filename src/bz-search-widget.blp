@@ -61,21 +61,24 @@ template $BzSearchWidget: Adw.Bin {
       condition ("max-width: 700sp")
 
       setters {
-        empty_box.margin-start: 5;
-        empty_box.margin-end: 5;
-        search_box.width-request: 300;
+        empty_box.margin-start: 7;
+        empty_box.margin-end: 7;
+        search_box_clamp.margin-start: 12;
+        search_box_clamp.margin-end: 12;
       }
     }
 
     child: Box {
       orientation: vertical;
 
-      Box {
-        Box search_box {
-          halign: center;
-          width-request: 400;
-          margin-top: 20;
-          margin-bottom: 20;
+      Adw.Clamp search_box_clamp {
+        margin-start: 12;
+        margin-end: 12;
+        maximum-size: 375;
+        child: Box search_box {
+          halign: fill;
+          margin-top: 10;
+          margin-bottom: 10;
           Box {
             spacing: 8;
             Image {
@@ -92,10 +95,19 @@ template $BzSearchWidget: Adw.Bin {
               width-request: 16;
               height-request: 16;
             }
+            Revealer {
+              reveal-child: bind $is_valid_string(search_bar.text) as <bool>;
+              transition-type: slide_right;
+              child: Button clear_button {
+                icon-name: "edit-clear-symbolic";
+                styles ["flat", "circular", "clear-button"]
+                clicked => $reset_search_cb(template);
+              };
+            }
 
             styles ["search-box"]
           }
-        }
+        };
       }
 
       Stack search_stack {
@@ -110,8 +122,8 @@ template $BzSearchWidget: Adw.Bin {
             tightening-threshold: 900;
             valign: start;
             child: Box empty_box {
-              margin-start: 12;
-              margin-end: 12;
+              margin-start: 7;
+              margin-end: 7;
               $BzDynamicListView {
                styles [
                  "flathub-page-section",
@@ -144,12 +156,12 @@ template $BzSearchWidget: Adw.Bin {
               hscrollbar-policy: never;
 
               child: Adw.ClampScrollable {
-                maximum-size: 900;
-                tightening-threshold: 800;
+                maximum-size: 400;
+                tightening-threshold: 500;
 
                 child: ListView list_view {
                   styles [
-                    "navigation-sidebar",
+                    "search-list", "navigation-sidebar",
                   ]
 
                   single-click-activate: true;
@@ -157,68 +169,8 @@ template $BzSearchWidget: Adw.Bin {
 
                   factory: BuilderListItemFactory {
                     template ListItem {
-                      child: Box {
-                        orientation: horizontal;
-                        margin-top: 8;
-                        margin-bottom: 8;
-                        margin-start: 3;
-                        margin-end: 3;
-                        spacing: 20;
-
-                        Image {
-                          styles [
-                            "icon-dropshadow",
-                          ]
-
-                          pixel-size: 32;
-                          paintable: bind template.item as <$BzSearchResult>.group as <$BzEntryGroup>.icon-paintable;
-                        }
-
-                        Box {
-                          hexpand: true;
-                          valign: center;
-                          orientation: vertical;
-                          spacing: 3;
-
-                          Box {
-                            orientation: horizontal;
-                            spacing: 10;
-
-                            Label {
-                              styles [
-                                "heading",
-                              ]
-
-                              hexpand: true;
-                              xalign: 0.0;
-                              width-chars: 13;
-                              ellipsize: end;
-                              single-line-mode: true;
-                              label: bind template.item as <$BzSearchResult>.group as <$BzEntryGroup>.title;
-                            }
-
-                            Image {
-                              styles [
-                                "success",
-                              ]
-
-                              icon-name: "app-installed-symbolic";
-                              icon-size: normal;
-                              visible: bind $invert_boolean($is_zero(template.item as <$BzSearchResult>.group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
-                            }
-                          }
-
-                          Label {
-                            styles [
-                              "dim-label",
-                            ]
-
-                            xalign: 0.0;
-                            ellipsize: end;
-                            single-line-mode: true;
-                            label: bind template.item as <$BzSearchResult>.group as <$BzEntryGroup>.description;
-                          }
-                        }
+                      child: $BzRichAppTile {
+                        group: bind template.item as <$BzSearchResult>.group as <$BzEntryGroup>;
                       };
                     }
                   };
