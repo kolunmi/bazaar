@@ -23,6 +23,7 @@
 #include <adwaita.h>
 
 #include "bz-entry-group.h"
+#include "bz-flathub-state.h"
 
 G_BEGIN_DECLS
 
@@ -56,5 +57,12 @@ bz_search_widget_get_previewing (BzSearchWidget *self);
 
 void
 bz_search_widget_refresh (BzSearchWidget *self);
+
+void
+bz_search_widget_set_flathub_state (BzSearchWidget *self,
+                                    BzFlathubState *flathub_state);
+
+BzFlathubState *
+bz_search_widget_get_flathub_state (BzSearchWidget *self);
 
 G_END_DECLS

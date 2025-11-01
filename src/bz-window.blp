@@ -240,6 +240,7 @@ template $BzWindow: Adw.ApplicationWindow {
                   child: $BzSearchWidget search_widget {
                       state: bind template.state;
                       select => $search_widget_select_cb(template);
+                      group-selected => $browser_group_selected_cb(template);
                     };
                 }
 

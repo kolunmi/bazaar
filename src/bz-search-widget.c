@@ -19,12 +19,19 @@
  */
 
 #include "bz-search-widget.h"
+#include <glib/gi18n.h>
+
+#include "bz-apps-page.h"
 #include "bz-async-texture.h"
+#include "bz-category-tile.h"
+#include "bz-dynamic-list-view.h"
+#include "bz-flathub-state.h"
 #include "bz-group-tile-css-watcher.h"
 #include "bz-screenshot.h"
 #include "bz-search-result.h"
 #include "bz-state-info.h"
 #include "bz-util.h"
+#include "bz-window.h"
 
 struct _BzSearchWidget
 {
@@ -67,6 +74,7 @@ enum
 {
   SIGNAL_SELECT,
   SIGNAL_PREVIEW_CHANGED,
+  SIGNAL_GROUP_SELECTED,
 
   LAST_SIGNAL,
 };
@@ -214,6 +222,16 @@ score_to_string (gpointer object,
   return g_strdup_printf ("%0.1f", value);
 }
 
+static char *
+no_results_found_subtitle (gpointer    object,
+                           const char *search_text)
+{
+  if (search_text == NULL || *search_text == '\0')
+    return g_strdup ("");
+
+  return g_strdup_printf (_ ("No results found for \"%s\" in Flathub"), search_text);
+}
+
 static void
 action_move (GtkWidget  *widget,
              const char *action_name,
@@ -248,6 +266,74 @@ action_move (GtkWidget  *widget,
   gtk_list_view_scroll_to (
       self->list_view, selected,
       GTK_LIST_SCROLL_SELECT, NULL);
+}
+
+static void
+apps_page_select_cb (BzSearchWidget *self,
+                     BzEntryGroup   *group,
+                     BzAppsPage     *page)
+{
+  g_signal_emit (self, signals[SIGNAL_GROUP_SELECTED], 0, group);
+}
+
+static void
+category_clicked (BzFlathubCategory *category,
+                  GtkButton         *button)
+{
+  GtkWidget         *self               = NULL;
+  GtkWidget         *window             = NULL;
+  GtkWidget         *nav_view           = NULL;
+  AdwNavigationPage *apps_page          = NULL;
+  g_autoptr (GListModel) model          = NULL;
+  g_autoptr (GListModel) carousel_model = NULL;
+  const char *title                     = NULL;
+
+  self = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_SEARCH_WIDGET);
+  g_assert (self != NULL);
+
+  window = GTK_WIDGET (gtk_widget_get_root (GTK_WIDGET (self)));
+
+  nav_view = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
+  g_assert (nav_view != NULL);
+
+  title          = bz_flathub_category_get_display_name (category);
+  model          = bz_flathub_category_dup_applications (category);
+  carousel_model = bz_flathub_category_dup_quality_applications (category);
+
+  if (carousel_model != NULL && g_list_model_get_n_items (carousel_model) > 0)
+    {
+      apps_page = bz_apps_page_new_with_carousel (title, model, carousel_model);
+    }
+  else
+    {
+      apps_page = bz_apps_page_new (title, model);
+    }
+
+  g_signal_connect_swapped (
+      apps_page, "select",
+      G_CALLBACK (apps_page_select_cb), self);
+
+  adw_navigation_view_push (ADW_NAVIGATION_VIEW (nav_view), apps_page);
+
+  bz_window_set_app_list_view_mode (BZ_WINDOW (window), TRUE);
+}
+
+static void
+bind_category_tile_cb (BzSearchWidget    *self,
+                       BzCategoryTile    *tile,
+                       BzFlathubCategory *category,
+                       BzDynamicListView *view)
+{
+  g_signal_connect_swapped (tile, "clicked", G_CALLBACK (category_clicked), category);
+}
+
+static void
+unbind_category_tile_cb (BzSearchWidget    *self,
+                         BzCategoryTile    *tile,
+                         BzFlathubCategory *category,
+                         BzDynamicListView *view)
+{
+  g_signal_handlers_disconnect_by_func (tile, category_clicked, category);
 }
 
 static void
@@ -307,9 +393,26 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
           G_TYPE_NONE, 2,
           BZ_TYPE_ENTRY_GROUP, G_TYPE_BOOLEAN);
 
+  signals[SIGNAL_GROUP_SELECTED] =
+      g_signal_new (
+          "group-selected",
+          G_OBJECT_CLASS_TYPE (klass),
+          G_SIGNAL_RUN_FIRST,
+          0,
+          NULL, NULL,
+          g_cclosure_marshal_VOID__OBJECT,
+          G_TYPE_NONE, 1,
+          BZ_TYPE_ENTRY_GROUP);
+  g_signal_set_va_marshaller (
+      signals[SIGNAL_GROUP_SELECTED],
+      G_TYPE_FROM_CLASS (klass),
+      g_cclosure_marshal_VOID__OBJECTv);
+
   widget_class->grab_focus = bz_search_widget_grab_focus;
 
   g_type_ensure (BZ_TYPE_ASYNC_TEXTURE);
+  g_type_ensure (BZ_TYPE_CATEGORY_TILE);
+  g_type_ensure (BZ_TYPE_DYNAMIC_LIST_VIEW);
   g_type_ensure (BZ_TYPE_GROUP_TILE_CSS_WATCHER);
   g_type_ensure (BZ_TYPE_SCREENSHOT);
   g_type_ensure (BZ_TYPE_SEARCH_RESULT);
@@ -320,12 +423,15 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, content_box);
   gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, search_stack);
   gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, list_view);
+  gtk_widget_class_bind_template_callback (widget_class, bind_category_tile_cb);
+  gtk_widget_class_bind_template_callback (widget_class, unbind_category_tile_cb);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, is_valid_string);
   gtk_widget_class_bind_template_callback (widget_class, idx_to_string);
   gtk_widget_class_bind_template_callback (widget_class, score_to_string);
+  gtk_widget_class_bind_template_callback (widget_class, no_results_found_subtitle);
 
   gtk_widget_class_install_action (widget_class, "move", "i", action_move);
 }
@@ -483,9 +589,9 @@ search_query_then (DexFuture *future,
                    GWeakRef  *wr)
 {
   g_autoptr (BzSearchWidget) self = NULL;
-  GPtrArray *results              = NULL;
-  guint      old_length           = 0;
-  GSettings *settings             = NULL;
+  GPtrArray  *results             = NULL;
+  guint       old_length          = 0;
+  GSettings  *settings            = NULL;
   const char *page_name           = NULL;
 
   bz_weak_get_or_return_reject (self, wr);
@@ -551,7 +657,7 @@ search_query_then (DexFuture *future,
   else
     {
       const char *search_text = gtk_editable_get_text (GTK_EDITABLE (self->search_bar));
-      page_name = (search_text && *search_text) ? "no-results" : "empty";
+      page_name               = (search_text && *search_text) ? "no-results" : "empty";
     }
 
   gtk_stack_set_visible_child_name (self->search_stack, page_name);
@@ -569,7 +675,7 @@ update_filter (BzSearchWidget *self)
   guint n_terms                    = 0;
   g_auto (GStrv) terms             = NULL;
   g_autoptr (DexFuture) future     = NULL;
-  g_autofree gchar **tokens = NULL;
+  g_autofree gchar **tokens        = NULL;
 
   g_clear_handle_id (&self->search_update_timeout, g_source_remove);
   dex_clear (&self->search_query);
@@ -647,5 +753,8 @@ emit_idx (BzSearchWidget *self,
 
   if (bz_entry_group_get_installable_and_available (group) > 0 ||
       bz_entry_group_get_removable_and_available (group) > 0)
-    g_signal_emit (self, signals[SIGNAL_SELECT], 0, group);
+    {
+      g_signal_emit (self, signals[SIGNAL_SELECT], 0, group);
+      g_signal_emit (self, signals[SIGNAL_GROUP_SELECTED], 0, group);
+    }
 }

@@ -89,10 +89,30 @@ template $BzSearchWidget: Adw.Bin {
 
       StackPage {
         name: "empty";
-        child: Adw.StatusPage {
-          icon-name: "system-search-symbolic";
-          title: _("Search for Apps");
-          description: _("Start typing to search for apps, games, and software");
+        child: ScrolledWindow {
+          hscrollbar-policy: never;
+          child: Adw.Clamp {
+          maximum-size: 1000;
+          tightening-threshold: 900;
+          valign: start;
+          child: Box {
+            $BzDynamicListView {
+             styles [
+               "flathub-page-section",
+             ]
+
+             hexpand: true;
+             max-children-per-line:3;
+             scroll: false;
+             noscroll-kind: flow-box;
+             child-type: "BzCategoryTile";
+             child-prop: "category";
+             model: bind template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories;
+
+             bind-widget => $bind_category_tile_cb(template);
+             unbind-widget => $unbind_category_tile_cb(template);
+           }
+        };};
         };
       }
 
@@ -197,8 +217,8 @@ template $BzSearchWidget: Adw.Bin {
         child: Adw.StatusPage {
           vexpand: true;
           icon-name: "edit-find-symbolic";
-          title: _("No Results Found");
-          description: _("Try a different search term");
+          title: _("No Applications Found");
+          description: bind $no_results_found_subtitle(search_bar.text) as <string>;
         };
       }
     }
