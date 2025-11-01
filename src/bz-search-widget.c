@@ -43,11 +43,9 @@ struct _BzSearchWidget
 
   /* Template widgets */
   GtkText     *search_bar;
-  GtkLabel    *search_text;
-  GtkImage    *timeout_busy;
-  GtkImage    *search_busy;
+  AdwSpinner  *search_busy;
   GtkBox      *content_box;
-  GtkRevealer *entry_list_revealer;
+  GtkStack    *search_stack;
   GtkListView *list_view;
 };
 
@@ -318,11 +316,9 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-search-widget.ui");
   gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, search_bar);
-  gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, search_text);
-  gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, timeout_busy);
   gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, search_busy);
   gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, content_box);
-  gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, entry_list_revealer);
+  gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, search_stack);
   gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, list_view);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
@@ -422,7 +418,7 @@ search_changed (GtkEditable    *editable,
     {
       self->search_update_timeout = g_timeout_add_once (
           200 /* 200 ms */, (GSourceOnceFunc) update_filter, self);
-      gtk_widget_set_visible (GTK_WIDGET (self->timeout_busy), TRUE);
+      gtk_widget_set_visible (GTK_WIDGET (self->search_busy), TRUE);
     }
   else
     update_filter (self);
@@ -490,6 +486,7 @@ search_query_then (DexFuture *future,
   GPtrArray *results              = NULL;
   guint      old_length           = 0;
   GSettings *settings             = NULL;
+  const char *page_name           = NULL;
 
   bz_weak_get_or_return_reject (self, wr);
 
@@ -544,11 +541,20 @@ search_query_then (DexFuture *future,
       self->selection_model, G_LIST_MODEL (self->search_model));
 
   gtk_widget_set_visible (GTK_WIDGET (self->search_busy), FALSE);
-  gtk_revealer_set_reveal_child (self->entry_list_revealer, results->len > 0);
 
   if (results->len > 0)
-    /* Here to combat weird list view scrolling behavior */
-    gtk_list_view_scroll_to (self->list_view, 0, GTK_LIST_SCROLL_SELECT, NULL);
+    {
+      page_name = "results";
+      /* Here to combat weird list view scrolling behavior */
+      gtk_list_view_scroll_to (self->list_view, 0, GTK_LIST_SCROLL_SELECT, NULL);
+    }
+  else
+    {
+      const char *search_text = gtk_editable_get_text (GTK_EDITABLE (self->search_bar));
+      page_name = (search_text && *search_text) ? "no-results" : "empty";
+    }
+
+  gtk_stack_set_visible_child_name (self->search_stack, page_name);
 
   dex_clear (&self->search_query);
   return NULL;
@@ -563,11 +569,12 @@ update_filter (BzSearchWidget *self)
   guint n_terms                    = 0;
   g_auto (GStrv) terms             = NULL;
   g_autoptr (DexFuture) future     = NULL;
+  g_autofree gchar **tokens = NULL;
 
   g_clear_handle_id (&self->search_update_timeout, g_source_remove);
   dex_clear (&self->search_query);
 
-  gtk_widget_set_visible (GTK_WIDGET (self->timeout_busy), FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->search_busy), FALSE);
 
   if (self->state == NULL)
     return;
@@ -576,28 +583,39 @@ update_filter (BzSearchWidget *self)
     return;
 
   search_text = gtk_editable_get_text (GTK_EDITABLE (self->search_bar));
-  builder     = g_strv_builder_new ();
 
-  if (search_text != NULL &&
-      *search_text != '\0')
+  if (search_text == NULL || *search_text == '\0')
     {
-      g_autofree gchar **tokens = NULL;
+      g_list_store_remove_all (self->search_model);
+      gtk_single_selection_set_model (
+          self->selection_model, G_LIST_MODEL (self->search_model));
+      gtk_stack_set_visible_child_name (self->search_stack, "empty");
+      return;
+    }
 
-      tokens = g_strsplit_set (search_text, " \t\n", -1);
-      for (gchar **token = tokens; *token != NULL; token++)
+  builder = g_strv_builder_new ();
+
+  tokens = g_strsplit_set (search_text, " \t\n", -1);
+  for (gchar **token = tokens; *token != NULL; token++)
+    {
+      if (**token != '\0')
         {
-          if (**token != '\0')
-            {
-              g_strv_builder_take (builder, *token);
-              n_terms++;
-            }
-          else
-            g_free (*token);
+          g_strv_builder_take (builder, *token);
+          n_terms++;
         }
+      else
+        g_free (*token);
     }
 
   if (n_terms == 0)
-    g_strv_builder_add (builder, "");
+    {
+      g_list_store_remove_all (self->search_model);
+      gtk_single_selection_set_model (
+          self->selection_model, G_LIST_MODEL (self->search_model));
+      gtk_stack_set_visible_child_name (self->search_stack, "empty");
+      return;
+    }
+
   terms = g_strv_builder_end (builder);
 
   self->search_in_progress = TRUE;

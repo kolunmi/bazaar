@@ -1,18 +1,16 @@
-.global-search search {
-    padding: 12px;
-    border-bottom: 1px solid var(--border-color);
+.search-box {
+  padding: 8px 12px;
+  border-radius: 9999px;
+  background-color: var(--card-bg-color);
 }
-.global-search search > label {
-    font-size: 1.33333em;
-    margin-left: 6px;
-    margin-right: 6px;
+
+@media (prefers-color-scheme: light) {
+  .search-box {
+    background-color: var(--shade-color);
+  }
 }
-.global-search search > text {
-    font-size: 1.33333em;
-    margin-left: 6px;
-    margin-right: 6px;
-}
-.global-search search > text placeholder {
+
+.search-box > text placeholder {
     opacity: 0.55;
 }
 

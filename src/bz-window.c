@@ -223,18 +223,7 @@ search_widget_select_cb (BzWindow       *self,
                          BzEntryGroup   *group,
                          BzSearchWidget *search)
 {
-  int      installable = 0;
-  int      removable   = 0;
-  gboolean remove      = FALSE;
-
-  g_object_get (
-      group,
-      "installable", &installable,
-      "removable", &removable,
-      NULL);
-
-  remove = installable == 0 && removable > 0;
-  try_transact (self, NULL, group, remove, FALSE, NULL);
+  bz_window_show_group (self, group);
 }
 
 static void
@@ -516,20 +505,9 @@ key_pressed (BzWindow              *self,
 static void
 bz_window_init (BzWindow *self)
 {
-  // const char *desktop = NULL;
-
   gtk_widget_init_template (GTK_WIDGET (self));
 
-  // desktop = g_getenv ("XDG_CURRENT_DESKTOP");
-  // if (desktop != NULL)
-  //   {
-  //     if (g_strcmp0 (desktop, "GNOME") == 0)
-  //       gtk_widget_set_visible (GTK_WIDGET (self->support_gnome), TRUE);
-  //     else if (g_strcmp0 (desktop, "KDE") == 0)
-  //       gtk_widget_set_visible (GTK_WIDGET (self->support_kde), TRUE);
-  //   }
-
-  adw_toggle_group_set_active_name (self->title_toggle_group, "search");
+  adw_toggle_group_set_active_name (self->title_toggle_group, "flathub");
 
   self->key_controller = gtk_event_controller_key_new ();
   g_signal_connect_swapped (self->key_controller, "key-pressed", G_CALLBACK (key_pressed), self);
