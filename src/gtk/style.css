@@ -26,6 +26,10 @@
   min-height: 24px;
 }
 
+.search-grid {
+  background-color: var(--window-bg-color);
+}
+
 .search-grid > child {
 	padding: 0;
 	margin: 6px 6px;
