@@ -19,12 +19,10 @@
  */
 
 #include "bz-rich-app-tile.h"
-#include "adwaita.h"
-#include "bz-decorated-screenshot.h"
 #include "bz-entry.h"
 #include "bz-group-tile-css-watcher.h"
 #include "bz-rounded-picture.h"
-#include "bz-screenshot.h"
+#include "bz-util.h"
 
 struct _BzRichAppTile
 {
@@ -33,6 +31,7 @@ struct _BzRichAppTile
   GdkPaintable          *first_screenshot;
   gboolean               has_screenshot;
   BzGroupTileCssWatcher *css;
+  DexFuture             *ui_entry_resolve;
 
   GtkWidget *picture_box;
 };
@@ -60,14 +59,6 @@ static guint signals[LAST_SIGNAL];
 
 static void update_screenshot (BzRichAppTile *self);
 
-static void
-ui_entry_resolved_cb (BzResult      *result,
-                      GParamSpec    *pspec,
-                      BzRichAppTile *self)
-{
-  update_screenshot (self);
-}
-
 static inline void
 notify_properties (BzRichAppTile *self, gboolean has_screenshot)
 {
@@ -79,69 +70,72 @@ notify_properties (BzRichAppTile *self, gboolean has_screenshot)
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_FIRST_SCREENSHOT]);
 }
 
+static DexFuture *
+ui_entry_resolved_finally (DexFuture *future,
+                           GWeakRef  *wr)
+{
+  g_autoptr (BzRichAppTile) self = NULL;
+  const GValue *value            = NULL;
+  gboolean      has_screenshot   = FALSE;
+
+  bz_weak_get_or_return_reject (self, wr);
+
+  value = dex_future_get_value (future, NULL);
+  if (value != NULL)
+    {
+      BzEntry *ui_entry                  = NULL;
+      g_autoptr (GListModel) screenshots = NULL;
+
+      ui_entry = g_value_get_object (value);
+
+      g_object_get (ui_entry, "screenshot-paintables", &screenshots, NULL);
+      if (screenshots != NULL &&
+          g_list_model_get_n_items (screenshots) > 0)
+        {
+          self->first_screenshot = g_list_model_get_item (screenshots, 0);
+          has_screenshot         = TRUE;
+        }
+    }
+
+  dex_clear (&self->ui_entry_resolve);
+  notify_properties (self, has_screenshot);
+
+  return NULL;
+}
+
 static void
 update_screenshot (BzRichAppTile *self)
 {
   g_autoptr (BzResult) ui_entry_result = NULL;
   g_autoptr (GListModel) screenshots   = NULL;
-  BzEntry *ui_entry;
-  gboolean has_screenshot = FALSE;
 
+  dex_clear (&self->ui_entry_resolve);
   g_clear_object (&self->first_screenshot);
 
   if (self->group == NULL)
     {
-      notify_properties (self, has_screenshot);
+      notify_properties (self, FALSE);
       return;
     }
 
-  ui_entry_result = bz_entry_group_dup_ui_entry (self->group);
-  if (ui_entry_result == NULL)
-    {
-      notify_properties (self, has_screenshot);
-      return;
-    }
-
-  if (!bz_result_get_resolved (ui_entry_result))
-    {
-      g_signal_connect (ui_entry_result, "notify::resolved",
-                        G_CALLBACK (ui_entry_resolved_cb), self);
-      return;
-    }
-
-  ui_entry = bz_result_get_object (ui_entry_result);
-  if (ui_entry == NULL)
-    {
-      notify_properties (self, has_screenshot);
-      return;
-    }
-
-  g_object_get (ui_entry, "screenshot-paintables", &screenshots, NULL);
-  if (screenshots == NULL)
-    {
-      notify_properties (self, has_screenshot);
-      return;
-    }
-
-  if (g_list_model_get_n_items (screenshots) == 0)
-    {
-      notify_properties (self, has_screenshot);
-      return;
-    }
-
-  self->first_screenshot = g_list_model_get_item (screenshots, 0);
-  has_screenshot         = TRUE;
-
-  notify_properties (self, has_screenshot);
+  ui_entry_result        = bz_entry_group_dup_ui_entry (self->group);
+  self->ui_entry_resolve = dex_future_finally (
+      bz_result_dup_future (ui_entry_result),
+      (DexFutureCallback) ui_entry_resolved_finally,
+      bz_track_weak (self),
+      bz_weak_release);
 }
 
 static void
 bz_rich_app_tile_dispose (GObject *object)
 {
   BzRichAppTile *self = BZ_RICH_APP_TILE (object);
+
   g_clear_object (&self->group);
   g_clear_object (&self->first_screenshot);
   g_clear_object (&self->css);
+  dex_clear (&self->ui_entry_resolve);
+
   G_OBJECT_CLASS (bz_rich_app_tile_parent_class)->dispose (object);
 }
 
@@ -220,9 +214,11 @@ bz_rich_app_tile_class_init (BzRichAppTileClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
-  object_class->set_property   = bz_rich_app_tile_set_property;
-  object_class->get_property   = bz_rich_app_tile_get_property;
-  object_class->dispose        = bz_rich_app_tile_dispose;
+
+  object_class->set_property = bz_rich_app_tile_set_property;
+  object_class->get_property = bz_rich_app_tile_get_property;
+  object_class->dispose      = bz_rich_app_tile_dispose;
+
   props[PROP_GROUP] =
       g_param_spec_object (
           "group",
@@ -231,14 +227,18 @@ bz_rich_app_tile_class_init (BzRichAppTileClass *klass)
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   props[PROP_FIRST_SCREENSHOT] =
-      g_param_spec_object ("first-screenshot", NULL, NULL,
-                           GDK_TYPE_PAINTABLE,
-                           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+      g_param_spec_object (
+          "first-screenshot",
+          NULL, NULL,
+          GDK_TYPE_PAINTABLE,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   props[PROP_HAS_SCREENSHOT] =
-      g_param_spec_boolean ("has-screenshot", NULL, NULL,
-                            FALSE,
-                            G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+      g_param_spec_boolean (
+          "has-screenshot",
+          NULL, NULL,
+          FALSE,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
@@ -288,13 +288,13 @@ bz_rich_app_tile_set_group (BzRichAppTile *self,
                             BzEntryGroup  *group)
 {
   g_return_if_fail (BZ_IS_RICH_APP_TILE (self));
-  g_clear_object (&self->group);
-  if (group != NULL)
-    {
-      self->group = g_object_ref (group);
-      update_screenshot (self);
-    }
 
+  g_clear_object (&self->group);
+
+  if (group != NULL)
+    self->group = g_object_ref (group);
+
+  update_screenshot (self);
   bz_group_tile_css_watcher_set_group (self->css, group);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_GROUP]);

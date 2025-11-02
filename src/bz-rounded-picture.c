@@ -272,10 +272,11 @@ bz_rounded_picture_set_paintable (BzRoundedPicture *self,
       g_signal_handlers_disconnect_by_func (self->paintable, invalidate_size, self);
     }
 
-  g_set_object (&self->paintable, paintable);
-
-  if (self->paintable != NULL)
+  g_clear_object (&self->paintable);
+  if (paintable != NULL)
     {
+      self->paintable = g_object_ref (paintable);
+
       g_signal_connect_swapped (self->paintable, "invalidate-contents",
                                 G_CALLBACK (invalidate_contents), self);
       g_signal_connect_swapped (self->paintable, "invalidate-size",
