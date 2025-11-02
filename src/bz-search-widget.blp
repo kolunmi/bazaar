@@ -2,10 +2,6 @@ using Gtk 4.0;
 using Adw 1;
 
 template $BzSearchWidget: Adw.Bin {
-  styles [
-    "global-search",
-  ]
-
   ShortcutController {
     Shortcut {
       trigger: "<primary>p";
@@ -56,122 +52,179 @@ template $BzSearchWidget: Adw.Bin {
     }
   }
 
-  child: Box {
-    orientation: vertical;
+  child: Adw.BreakpointBin {
+    width-request: 360;
+    height-request: 294;
 
-    Box {
-      css-name: "search";
-      orientation: horizontal;
-      spacing: 5;
+    Adw.Breakpoint {
+      condition ("max-width: 1000sp")
 
-      Text search_bar {
-        hexpand: true;
-        placeholder-text: _("Search Apps");
-      }
-
-      Label search_text {}
-
-      Image timeout_busy {
-        visible: false;
-        icon-name: "delay-symbolic";
-      }
-
-      Image search_busy {
-        visible: false;
-        icon-name: "timer-sand-symbolic";
+      setters {
+        grid_view.min-columns: 2;
+        grid_view.max-columns: 2;
+        clamp_scrollable.maximum-size: 700;
       }
     }
 
-    Revealer entry_list_revealer {
-      transition-type: crossfade;
+    Adw.Breakpoint {
+      condition ("max-width: 700sp")
 
-      child: Box content_box {
-        orientation: horizontal;
-        visible: bind $invert_boolean($is_null(list_view.model as <SingleSelection>.selected-item) as <bool>) as <bool>;
+      setters {
+        empty_box.margin-start: 7;
+        empty_box.margin-end: 7;
+        search_box_clamp.margin-start: 12;
+        search_box_clamp.margin-end: 12;
+        grid_view.min-columns: 1;
+        grid_view.max-columns: 1;
+        clamp_scrollable.maximum-size: 400;
+      }
+    }
 
-        ScrolledWindow entry_list_scroll {
-          hexpand: true;
-          vexpand: true;
-          hscrollbar-policy: never;
+    child: Box {
+      orientation: vertical;
 
-          child: ListView list_view {
+      Adw.Clamp search_box_clamp {
+        margin-start: 12;
+        margin-end: 12;
+        maximum-size: 375;
+
+        child: Box search_box {
+          halign: fill;
+          margin-top: 10;
+          margin-bottom: 10;
+
+          Box {
+            spacing: 8;
+
+            Image {
+              icon-name: "system-search-symbolic";
+            }
+
+            Text search_bar {
+              hexpand: true;
+              placeholder-text: _("Search Apps, Games, Software");
+            }
+
+            Adw.Spinner search_busy {
+              visible: false;
+              width-request: 16;
+              height-request: 16;
+            }
+
+            Revealer {
+              reveal-child: bind $is_valid_string(search_bar.text) as <bool>;
+              transition-type: slide_right;
+
+              child: Button clear_button {
+                icon-name: "edit-clear-symbolic";
+
+                styles [
+                  "flat",
+                  "circular",
+                  "clear-button",
+                ]
+
+                clicked => $reset_search_cb(template);
+              };
+            }
+
             styles [
-              "navigation-sidebar",
+              "search-box",
             ]
+          }
+        };
+      }
 
-            single-click-activate: false;
-            tab-behavior: item;
+      Stack search_stack {
+        transition-type: crossfade;
 
-            factory: BuilderListItemFactory {
-              template ListItem {
-                child: Box {
-                  orientation: horizontal;
-                  margin-top: 8;
-                  margin-bottom: 8;
-                  margin-start: 3;
-                  margin-end: 3;
-                  spacing: 20;
+        StackPage {
+          name: "empty";
 
-                  Image {
-                    styles [
-                      "icon-dropshadow",
-                    ]
-                    
-                    pixel-size: 32;
-                    paintable: bind template.item as <$BzSearchResult>.group as <$BzEntryGroup>.icon-paintable;
-                  }
+          child: ScrolledWindow {
+            hscrollbar-policy: never;
 
-                  Box {
-                    hexpand: true;
-                    valign: center;
-                    orientation: vertical;
-                    spacing: 3;
+            child: Adw.Clamp {
+              maximum-size: 1000;
+              tightening-threshold: 900;
+              valign: start;
 
-                    Box {
-                      orientation: horizontal;
-                      spacing: 10;
-                    
-                      Label {
-                        styles [
-                          "heading",
-                        ]
+              child: Box empty_box {
+                margin-start: 7;
+                margin-end: 7;
 
-                        hexpand: true;
-                        xalign: 0.0;
-                        width-chars: 13;
-                        ellipsize: end;
-                        single-line-mode: true;
-                        label: bind template.item as <$BzSearchResult>.group as <$BzEntryGroup>.title;
-                      }
+                margin-top: 20;
 
-                      Image {
-                        styles [
-                          "success",
-                        ]
+                $BzDynamicListView {
+                  styles [
+                    "flathub-page-section",
+                  ]
 
-                        icon-name: "app-installed-symbolic";
-                        icon-size: normal;
-                        visible: bind $invert_boolean($is_zero(template.item as <$BzSearchResult>.group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
-                      }
-                    }
-
-                    Label {
-                      styles [
-                        "dim-label",
-                      ]
-
-                      xalign: 0.0;
-                      ellipsize: end;
-                      single-line-mode: true;
-                      label: bind template.item as <$BzSearchResult>.group as <$BzEntryGroup>.description;
-                    }
-                  }
-                };
-              }
+                  hexpand: true;
+                  max-children-per-line: 3;
+                  scroll: false;
+                  noscroll-kind: flow-box;
+                  child-type: "BzCategoryTile";
+                  child-prop: "category";
+                  model: bind template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories;
+                  bind-widget => $bind_category_tile_cb(template);
+                  unbind-widget => $unbind_category_tile_cb(template);
+                }
+              };
             };
           };
         }
-      };
-    }
+
+        StackPage {
+          name: "results";
+
+          child: Box content_box {
+            orientation: horizontal;
+            visible: bind $invert_boolean($is_null(grid_view.model as <SingleSelection>.selected-item) as <bool>) as <bool>;
+
+            ScrolledWindow entry_grid_scroll {
+              hexpand: true;
+              vexpand: true;
+              hscrollbar-policy: never;
+
+              child: Adw.ClampScrollable clamp_scrollable {
+                maximum-size: 1000;
+                tightening-threshold: 900;
+
+                child: GridView grid_view {
+                  styles [
+                    "search-grid",
+                  ]
+
+                  single-click-activate: true;
+                  min-columns: 3;
+                  max-columns: 3;
+
+                  factory: BuilderListItemFactory {
+                    template ListItem {
+                      child: $BzRichAppTile {
+                        group: bind template.item as <$BzSearchResult>.group as <$BzEntryGroup>;
+                        install-clicked => $tile_install_clicked_cb(template);
+                      };
+                    }
+                  };
+                };
+              };
+            }
+          };
+        }
+
+        StackPage {
+          name: "no-results";
+
+          child: Adw.StatusPage {
+            vexpand: true;
+            icon-name: "edit-find-symbolic";
+            title: _("No Applications Found");
+            description: bind $no_results_found_subtitle(search_bar.text) as <string>;
+          };
+        }
+      }
+    };
   };
 }

@@ -5,11 +5,12 @@ template $BzCategoryTile: Button {
     "card",
     "category-tile",
   ]
+
   margin-start: 5;
   margin-end: 5;
   margin-top: 5;
   margin-bottom: 5;
-  
+
   child: Box {
     margin-start: 16;
     margin-end: 16;
@@ -19,19 +20,21 @@ template $BzCategoryTile: Button {
     spacing: 12;
     valign: center;
     halign: center;
-    
+
     Image {
       pixel-size: 32;
       icon-name: bind template.category as <$BzFlathubCategory>.icon-name;
       visible: bind $invert_boolean($is_null(template.category as <$BzFlathubCategory>.icon-name) as <bool>) as <bool>;
-      
-      styles ["icon-dropshadow"]
+
+      styles [
+        "icon-dropshadow",
+      ]
     }
-    
+
     Label {
       css-name: "category-tile-label";
       xalign: 0.0;
-      label: bind template.category as <$BzFlathubCategory>.display-name;
+      label: bind template.category as <$BzFlathubCategory>.short-name;
     }
   };
 }
