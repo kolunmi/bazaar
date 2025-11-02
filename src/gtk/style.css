@@ -33,6 +33,10 @@
 	transition: background-color 200ms;
 }
 
+.narrow .search-grid > child {
+	margin: 6px 12px;
+}
+
 .card-row-btn {
     border-radius: 0;
 }
