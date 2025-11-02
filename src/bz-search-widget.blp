@@ -57,6 +57,16 @@ template $BzSearchWidget: Adw.Bin {
     height-request: 294;
 
     Adw.Breakpoint {
+      condition ("max-width: 1000sp")
+
+      setters {
+        grid_view.min-columns: 2;
+        grid_view.max-columns: 2;
+        clamp_scrollable.maximum-size: 700;
+      }
+    }
+
+    Adw.Breakpoint {
       condition ("max-width: 700sp")
 
       setters {
@@ -176,8 +186,8 @@ template $BzSearchWidget: Adw.Bin {
               hscrollbar-policy: never;
 
               child: Adw.ClampScrollable clamp_scrollable {
-                maximum-size: 700;
-                tightening-threshold: 600;
+                maximum-size: 1000;
+                tightening-threshold: 900;
 
                 child: GridView grid_view {
                   styles [
@@ -185,8 +195,8 @@ template $BzSearchWidget: Adw.Bin {
                   ]
 
                   single-click-activate: true;
-                  min-columns: 2;
-                  max-columns: 2;
+                  min-columns: 3;
+                  max-columns: 3;
 
                   factory: BuilderListItemFactory {
                     template ListItem {
