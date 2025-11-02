@@ -13,14 +13,17 @@ template $BzWindow: Adw.ApplicationWindow {
       trigger: "Escape";
       action: "action(escape)";
     }
+
     Shortcut {
       trigger: "Back";
       action: "action(escape)";
     }
+
     Shortcut {
       trigger: "BackSpace";
       action: "action(escape)";
     }
+
     Shortcut {
       trigger: "<ctrl>g";
       action: "action(escape)";
@@ -45,7 +48,7 @@ template $BzWindow: Adw.ApplicationWindow {
           tag: "transactions";
 
           styles [
-            "sidebar-pane"
+            "sidebar-pane",
           ]
 
           child: Adw.ToolbarView {
@@ -83,6 +86,7 @@ template $BzWindow: Adw.ApplicationWindow {
               styles [
                 "linked",
               ]
+
               margin-top: 8;
               margin-end: 8;
               margin-bottom: 8;
@@ -135,7 +139,7 @@ template $BzWindow: Adw.ApplicationWindow {
                   child: ListView list_view {
                     styles [
                       "navigation-sidebar",
-                      "transaction-list-view"
+                      "transaction-list-view",
                     ]
 
                     margin-top: 6;
@@ -168,7 +172,6 @@ template $BzWindow: Adw.ApplicationWindow {
           content: Adw.ToastOverlay toasts {
             child: Overlay {
               child: Adw.NavigationView main_stack {
-
                 pop-on-escape: false;
                 notify::visible-page => $visible_page_changed_cb(template);
 
@@ -197,7 +200,9 @@ template $BzWindow: Adw.ApplicationWindow {
                       pixel-size: 128;
                       margin-bottom: 24;
 
-                      styles ["icon-dropshadow"]
+                      styles [
+                        "icon-dropshadow",
+                      ]
                     }
 
                     $BzGlobalProgress {
@@ -238,9 +243,9 @@ template $BzWindow: Adw.ApplicationWindow {
                   title: _("Search");
 
                   child: $BzSearchWidget search_widget {
-                      state: bind template.state;
-                      select => $search_widget_select_cb(template);
-                    };
+                    state: bind template.state;
+                    select => $search_widget_select_cb(template);
+                  };
                 }
 
                 Adw.NavigationPage {
@@ -286,7 +291,6 @@ template $BzWindow: Adw.ApplicationWindow {
 
           [top]
           Adw.HeaderBar top_header_bar {
-
             [start]
             Button go_back {
               has-tooltip: true;
@@ -331,6 +335,7 @@ template $BzWindow: Adw.ApplicationWindow {
                 styles [
                   "flat",
                 ]
+
                 homogeneous: true;
 
                 Adw.Toggle curated_toggle {
@@ -361,7 +366,6 @@ template $BzWindow: Adw.ApplicationWindow {
                   icon-name: "system-search-symbolic";
                   label: _("Search");
                 }
-
 
                 notify::active-name => $page_toggled_cb(template);
               };
@@ -409,8 +413,9 @@ template $BzWindow: Adw.ApplicationWindow {
           [bottom]
           Adw.HeaderBar bottom_header_bar {
             styles [
-              "toplevel-headerbar"
+              "toplevel-headerbar",
             ]
+
             show-start-title-buttons: false;
             show-end-title-buttons: false;
           }

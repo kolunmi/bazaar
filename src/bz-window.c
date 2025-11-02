@@ -45,7 +45,7 @@ struct _BzWindow
 
   GtkEventController *key_controller;
 
-  gboolean  breakpoint_applied;
+  gboolean breakpoint_applied;
 
   DexFuture *transact_future;
 
@@ -496,8 +496,8 @@ key_pressed (BzWindow              *self,
              GdkModifierType        state,
              GtkEventControllerKey *controller)
 {
-  guint32 unichar = 0;
-  char    buf[32] = { 0 };
+  guint32     unichar     = 0;
+  char        buf[32]     = { 0 };
   const char *active_name = NULL;
 
   /* Ignore if this is a modifier-shortcut of some sort */

@@ -43,10 +43,10 @@ struct _BzSearchWidget
   gboolean      remove;
   gboolean      search_in_progress;
 
-  GListStore         *search_model;
-  GtkSelectionModel  *selection_model;
-  guint               search_update_timeout;
-  DexFuture          *search_query;
+  GListStore        *search_model;
+  GtkSelectionModel *selection_model;
+  guint              search_update_timeout;
+  DexFuture         *search_query;
 
   /* Template widgets */
   GtkText     *search_bar;
@@ -84,7 +84,6 @@ search_changed (GtkEditable    *editable,
 static void
 search_activate (GtkText        *text,
                  BzSearchWidget *self);
-
 
 static void
 grid_activate (GtkGridView    *grid_view,
@@ -332,18 +331,18 @@ reset_search_cb (BzSearchWidget *self,
 }
 
 static void
-tile_install_clicked_cb (GtkListItem    *list_item,
-                         BzRichAppTile  *tile)
+tile_install_clicked_cb (GtkListItem   *list_item,
+                         BzRichAppTile *tile)
 {
-  BzSearchWidget *self = NULL;
+  BzSearchWidget *self   = NULL;
   BzSearchResult *result = NULL;
-  BzEntryGroup   *group = NULL;
+  BzEntryGroup   *group  = NULL;
 
   self = BZ_SEARCH_WIDGET (gtk_widget_get_ancestor (GTK_WIDGET (tile), BZ_TYPE_SEARCH_WIDGET));
   g_assert (self != NULL);
 
   result = gtk_list_item_get_item (list_item);
-  group = bz_search_result_get_group (result);
+  group  = bz_search_result_get_group (result);
 
   g_signal_emit (self, signals[SIGNAL_SELECT], 0, group, TRUE);
 }
@@ -505,20 +504,20 @@ static void
 search_activate (GtkText        *text,
                  BzSearchWidget *self)
 {
-  GtkSelectionModel *model = NULL;
-  guint              n_items = 0;
+  GtkSelectionModel *model          = NULL;
+  guint              n_items        = 0;
   g_autoptr (BzSearchResult) result = NULL;
-  BzEntryGroup *group = NULL;
+  BzEntryGroup *group               = NULL;
 
   g_clear_object (&self->selected);
 
-  model = gtk_grid_view_get_model (self->grid_view);
+  model   = gtk_grid_view_get_model (self->grid_view);
   n_items = g_list_model_get_n_items (G_LIST_MODEL (model));
 
   if (n_items > 0)
     {
       result = g_list_model_get_item (G_LIST_MODEL (model), 0);
-      group = bz_search_result_get_group (result);
+      group  = bz_search_result_get_group (result);
 
       if (bz_entry_group_get_installable_and_available (group) > 0 ||
           bz_entry_group_get_removable_and_available (group) > 0)

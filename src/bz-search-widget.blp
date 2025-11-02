@@ -2,7 +2,6 @@ using Gtk 4.0;
 using Adw 1;
 
 template $BzSearchWidget: Adw.Bin {
-
   ShortcutController {
     Shortcut {
       trigger: "<primary>p";
@@ -78,12 +77,15 @@ template $BzSearchWidget: Adw.Bin {
         margin-start: 12;
         margin-end: 12;
         maximum-size: 375;
+
         child: Box search_box {
           halign: fill;
           margin-top: 10;
           margin-bottom: 10;
+
           Box {
             spacing: 8;
+
             Image {
               icon-name: "system-search-symbolic";
             }
@@ -98,17 +100,27 @@ template $BzSearchWidget: Adw.Bin {
               width-request: 16;
               height-request: 16;
             }
+
             Revealer {
               reveal-child: bind $is_valid_string(search_bar.text) as <bool>;
               transition-type: slide_right;
+
               child: Button clear_button {
                 icon-name: "edit-clear-symbolic";
-                styles ["flat", "circular", "clear-button"]
+
+                styles [
+                  "flat",
+                  "circular",
+                  "clear-button",
+                ]
+
                 clicked => $reset_search_cb(template);
               };
             }
 
-            styles ["search-box"]
+            styles [
+              "search-box",
+            ]
           }
         };
       }
@@ -118,37 +130,42 @@ template $BzSearchWidget: Adw.Bin {
 
         StackPage {
           name: "empty";
+
           child: ScrolledWindow {
             hscrollbar-policy: never;
+
             child: Adw.Clamp {
-            maximum-size: 1000;
-            tightening-threshold: 900;
-            valign: start;
-            child: Box empty_box {
-              margin-start: 7;
-              margin-end: 7;
-              $BzDynamicListView {
-               styles [
-                 "flathub-page-section",
-               ]
+              maximum-size: 1000;
+              tightening-threshold: 900;
+              valign: start;
 
-               hexpand: true;
-               max-children-per-line:3;
-               scroll: false;
-               noscroll-kind: flow-box;
-               child-type: "BzCategoryTile";
-               child-prop: "category";
-               model: bind template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories;
+              child: Box empty_box {
+                margin-start: 7;
+                margin-end: 7;
 
-               bind-widget => $bind_category_tile_cb(template);
-               unbind-widget => $unbind_category_tile_cb(template);
-             }
-          };};
+                $BzDynamicListView {
+                  styles [
+                    "flathub-page-section",
+                  ]
+
+                  hexpand: true;
+                  max-children-per-line: 3;
+                  scroll: false;
+                  noscroll-kind: flow-box;
+                  child-type: "BzCategoryTile";
+                  child-prop: "category";
+                  model: bind template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories;
+                  bind-widget => $bind_category_tile_cb(template);
+                  unbind-widget => $unbind_category_tile_cb(template);
+                }
+              };
+            };
           };
         }
 
         StackPage {
           name: "results";
+
           child: Box content_box {
             orientation: horizontal;
             visible: bind $invert_boolean($is_null(grid_view.model as <SingleSelection>.selected-item) as <bool>) as <bool>;
@@ -158,7 +175,7 @@ template $BzSearchWidget: Adw.Bin {
               vexpand: true;
               hscrollbar-policy: never;
 
-              child: Adw.ClampScrollable clamp_scrollable{
+              child: Adw.ClampScrollable clamp_scrollable {
                 maximum-size: 700;
                 tightening-threshold: 600;
 
@@ -187,6 +204,7 @@ template $BzSearchWidget: Adw.Bin {
 
         StackPage {
           name: "no-results";
+
           child: Adw.StatusPage {
             vexpand: true;
             icon-name: "edit-find-symbolic";

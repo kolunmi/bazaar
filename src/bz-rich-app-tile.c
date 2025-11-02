@@ -19,19 +19,19 @@
  */
 
 #include "bz-rich-app-tile.h"
-#include "bz-entry.h"
-#include "bz-group-tile-css-watcher.h"
 #include "adwaita.h"
 #include "bz-decorated-screenshot.h"
-#include "bz-screenshot.h"
+#include "bz-entry.h"
+#include "bz-group-tile-css-watcher.h"
 #include "bz-rounded-picture.h"
+#include "bz-screenshot.h"
 
 struct _BzRichAppTile
 {
-  AdwBin parent_instance;
-  BzEntryGroup *group;
-  GdkPaintable *first_screenshot;
-  gboolean has_screenshot;
+  AdwBin                 parent_instance;
+  BzEntryGroup          *group;
+  GdkPaintable          *first_screenshot;
+  gboolean               has_screenshot;
   BzGroupTileCssWatcher *css;
 
   GtkWidget *picture_box;
@@ -147,9 +147,9 @@ bz_rich_app_tile_dispose (GObject *object)
 
 static void
 bz_rich_app_tile_get_property (GObject    *object,
-                          guint       prop_id,
-                          GValue     *value,
-                          GParamSpec *pspec)
+                               guint       prop_id,
+                               GValue     *value,
+                               GParamSpec *pspec)
 {
   BzRichAppTile *self = BZ_RICH_APP_TILE (object);
   switch (prop_id)
@@ -170,9 +170,9 @@ bz_rich_app_tile_get_property (GObject    *object,
 
 static void
 bz_rich_app_tile_set_property (GObject      *object,
-                          guint         prop_id,
-                          const GValue *value,
-                          GParamSpec   *pspec)
+                               guint         prop_id,
+                               const GValue *value,
+                               GParamSpec   *pspec)
 {
   BzRichAppTile *self = BZ_RICH_APP_TILE (object);
   switch (prop_id)
@@ -220,9 +220,9 @@ bz_rich_app_tile_class_init (BzRichAppTileClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
-  object_class->set_property = bz_rich_app_tile_set_property;
-  object_class->get_property = bz_rich_app_tile_get_property;
-  object_class->dispose      = bz_rich_app_tile_dispose;
+  object_class->set_property   = bz_rich_app_tile_set_property;
+  object_class->get_property   = bz_rich_app_tile_get_property;
+  object_class->dispose        = bz_rich_app_tile_dispose;
   props[PROP_GROUP] =
       g_param_spec_object (
           "group",
@@ -284,8 +284,8 @@ bz_rich_app_tile_get_group (BzRichAppTile *self)
 }
 
 void
-bz_rich_app_tile_set_group (BzRichAppTile    *self,
-                       BzEntryGroup *group)
+bz_rich_app_tile_set_group (BzRichAppTile *self,
+                            BzEntryGroup  *group)
 {
   g_return_if_fail (BZ_IS_RICH_APP_TILE (self));
   g_clear_object (&self->group);

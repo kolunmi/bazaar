@@ -162,10 +162,10 @@ bz_flathub_category_class_init (BzFlathubCategoryClass *klass)
           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   props[PROP_SHORT_NAME] =
-    g_param_spec_string (
-        "short-name",
-        NULL, NULL, NULL,
-        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+      g_param_spec_string (
+          "short-name",
+          NULL, NULL, NULL,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   props[PROP_ICON_NAME] =
       g_param_spec_string (

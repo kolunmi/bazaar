@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <gtk/gtk.h>
 #include "adwaita.h"
+#include <gtk/gtk.h>
 
 #include "bz-entry-group.h"
 
@@ -38,8 +38,8 @@ BzEntryGroup *
 bz_rich_app_tile_get_group (BzRichAppTile *self);
 
 void
-bz_rich_app_tile_set_group (BzRichAppTile    *self,
-                            BzEntryGroup *group);
+bz_rich_app_tile_set_group (BzRichAppTile *self,
+                            BzEntryGroup  *group);
 
 G_END_DECLS
 /* End of bz-rich-app-tile.h */
