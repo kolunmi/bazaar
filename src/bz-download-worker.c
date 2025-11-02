@@ -478,7 +478,7 @@ invoke_worker_fiber (InvokeWorkerData *data)
               stdin_stream,
               output->str,
               output->len,
-              G_PRIORITY_DEFAULT),
+              G_PRIORITY_DEFAULT_IDLE),
           dex_ref (promise),
           NULL),
       &local_error);
@@ -537,7 +537,7 @@ plumb_data_input_stream_read_line_async (GDataInputStream   *stream,
 {
   g_data_input_stream_read_line_async (
       stream,
-      G_PRIORITY_DEFAULT,
+      G_PRIORITY_DEFAULT_IDLE,
       cancellable,
       callback,
       user_data);
