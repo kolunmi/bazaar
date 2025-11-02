@@ -221,9 +221,28 @@ browser_group_selected_cb (BzWindow     *self,
 static void
 search_widget_select_cb (BzWindow       *self,
                          BzEntryGroup   *group,
+                         gboolean        should_install,
                          BzSearchWidget *search)
 {
-  bz_window_show_group (self, group);
+  if (should_install)
+    {
+      int      installable = 0;
+      int      removable   = 0;
+      gboolean remove      = FALSE;
+
+      g_object_get (
+          group,
+          "installable", &installable,
+          "removable", &removable,
+          NULL);
+
+      remove = installable == 0 && removable > 0;
+      try_transact (self, NULL, group, remove, FALSE, NULL);
+    }
+  else
+    {
+      bz_window_show_group (self, group);
+    }
 }
 
 static void

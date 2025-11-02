@@ -4,9 +4,17 @@
   background-color: var(--card-bg-color);
 }
 
+.rich-screenshot-box {
+	background-color: var(--sidebar-bg-color);
+}
+
 @media (prefers-color-scheme: light) {
   .search-box {
     background-color: var(--shade-color);
+  }
+
+  .rich-screenshot-box {
+	  background-color: var(--sidebar-bg-color);
   }
 }
 
@@ -22,6 +30,7 @@
 	padding: 0;
 	margin: 6px 6px;
 	border-radius: 12px;
+	transition: background-color 200ms;
 }
 
 .card-row-btn {
@@ -30,10 +39,6 @@
 
 .screenshot {
     border-radius: 20px;
-}
-
-.rich-screenshot-box {
-	background-color: var(--sidebar-bg-color);
 }
 
 .browser-banner {

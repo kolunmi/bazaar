@@ -41,6 +41,7 @@ enum
   PROP_MAP_FACTORY,
   PROP_NAME,
   PROP_DISPLAY_NAME,
+  PROP_SHORT_NAME,
   PROP_ICON_NAME,
   PROP_APPLICATIONS,
   PROP_QUALITY_APPLICATIONS,
@@ -88,6 +89,10 @@ bz_flathub_category_get_property (GObject    *object,
     case PROP_DISPLAY_NAME:
       g_value_set_string (value, bz_flathub_category_get_display_name (self));
       break;
+    case PROP_SHORT_NAME:
+      g_value_set_string (value, bz_flathub_category_get_short_name (self));
+      break;
+
     case PROP_ICON_NAME:
       g_value_set_string (value, bz_flathub_category_get_icon_name (self));
       break;
@@ -155,6 +160,12 @@ bz_flathub_category_class_init (BzFlathubCategoryClass *klass)
           "display-name",
           NULL, NULL, NULL,
           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
+  props[PROP_SHORT_NAME] =
+    g_param_spec_string (
+        "short-name",
+        NULL, NULL, NULL,
+        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   props[PROP_ICON_NAME] =
       g_param_spec_string (
@@ -346,6 +357,33 @@ get_category_display_name (const char *category_id)
 }
 
 static const char *
+get_category_short_name (const char *category_id)
+{
+  if (g_strcmp0 (category_id, "audiovideo") == 0)
+    return _ ("Media");
+  if (g_strcmp0 (category_id, "development") == 0)
+    return _ ("Develop");
+  if (g_strcmp0 (category_id, "education") == 0)
+    return _ ("Learn");
+  if (g_strcmp0 (category_id, "game") == 0)
+    return _ ("Play");
+  if (g_strcmp0 (category_id, "graphics") == 0)
+    return _ ("Create");
+  if (g_strcmp0 (category_id, "network") == 0)
+    return _ ("Internet");
+  if (g_strcmp0 (category_id, "office") == 0)
+    return _ ("Work");
+  if (g_strcmp0 (category_id, "science") == 0)
+    return _ ("Science");
+  if (g_strcmp0 (category_id, "system") == 0)
+    return _ ("System");
+  if (g_strcmp0 (category_id, "utility") == 0)
+    return _ ("Tools");
+
+  return category_id;
+}
+
+static const char *
 get_category_icon_name (const char *category_id)
 {
   if (g_strcmp0 (category_id, "audiovideo") == 0)
@@ -377,6 +415,13 @@ bz_flathub_category_get_display_name (BzFlathubCategory *self)
 {
   g_return_val_if_fail (BZ_IS_FLATHUB_CATEGORY (self), NULL);
   return get_category_display_name (self->name);
+}
+
+const char *
+bz_flathub_category_get_short_name (BzFlathubCategory *self)
+{
+  g_return_val_if_fail (BZ_IS_FLATHUB_CATEGORY (self), NULL);
+  return get_category_short_name (self->name);
 }
 
 const char *

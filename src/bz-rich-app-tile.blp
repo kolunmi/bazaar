@@ -9,39 +9,27 @@ template $BzRichAppTile: Adw.Bin {
       "card",
       "rich-tile-card",
     ]
-    Overlay {
-      [overlay]
-      Image {
 
-        halign: end;
-        valign: end;
-        icon-name: "app-installed-symbolic";
-        icon-size: normal;
-        visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
-        margin-bottom: 10;
-        margin-end: 10;
-      }
-      Box picture_box{
-        height-request: 200;
-
-        styles ["rich-screenshot-box"]
-
-        Box {
-          margin-start: 12;
-          margin-end: 12;
-          margin-top: 12;
-          margin-bottom: 12;
-          $BzRoundedPicture {
-            halign: center;
-            hexpand: true;
-            valign: center;
-            paintable: bind template.first-screenshot;
-            radius: 6;
-          }
+    Box picture_box {
+      height-request: 200;
+      styles [
+        "rich-screenshot-box",
+      ]
+      Box {
+        margin-start: 12;
+        margin-end: 12;
+        margin-top: 12;
+        margin-bottom: 12;
+        $BzRoundedPicture {
+          halign: center;
+          hexpand: true;
+          valign: center;
+          paintable: bind template.first-screenshot;
+          radius: 6;
         }
-
       }
     }
+
     Box {
       margin-start: 12;
       margin-end: 12;
@@ -62,25 +50,22 @@ template $BzRichAppTile: Adw.Bin {
         hexpand: true;
         orientation: vertical;
         spacing: 5;
-        Box {
-          orientation: horizontal;
-          spacing: 10;
-          Label {
-            css-name: "app-tile-title";
-            styles [
-              "heading",
-            ]
-            xalign: 0.0;
-            ellipsize: end;
-            label: bind template.group as <$BzEntryGroup>.title;
-            max-width-chars: 18;
-          }
+        Label {
+          css-name: "app-tile-title";
+          styles [
+            "heading",
+          ]
+          xalign: 0.0;
+          ellipsize: end;
+          label: bind template.group as <$BzEntryGroup>.title;
+          max-width-chars: 18;
         }
         Label {
           css-name: "app-tile-description";
           xalign: 0.0;
           yalign: 0.0;
           wrap: true;
+          wrap-mode: word_char;
           ellipsize: end;
           vexpand: true;
           lines: 2;
@@ -90,6 +75,22 @@ template $BzRichAppTile: Adw.Bin {
           styles [
             "dimmed",
           ]
+        }
+      }
+      Box {
+        Button {
+          visible: bind $is_zero(template.group as <$BzEntryGroup>.removable) as <bool>;
+          styles ["suggested-action"]
+          label: _("Install");
+          valign: center;
+          clicked => $install_button_clicked_cb(template);
+        }
+        Button {
+          visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
+          styles ["destructive-action"]
+          label: _("Remove");
+          valign: center;
+          clicked => $install_button_clicked_cb(template);
         }
       }
     }

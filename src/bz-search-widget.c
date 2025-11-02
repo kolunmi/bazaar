@@ -41,11 +41,10 @@ struct _BzSearchWidget
   BzStateInfo  *state;
   BzEntryGroup *selected;
   gboolean      remove;
-  BzEntryGroup *previewing;
   gboolean      search_in_progress;
 
   GListStore         *search_model;
-  GtkSingleSelection *selection_model;
+  GtkSelectionModel  *selection_model;
   guint               search_update_timeout;
   DexFuture          *search_query;
 
@@ -64,7 +63,6 @@ enum
   PROP_0,
 
   PROP_STATE,
-  PROP_PREVIEWING,
   PROP_TEXT,
 
   LAST_PROP
@@ -74,8 +72,6 @@ static GParamSpec *props[LAST_PROP] = { 0 };
 enum
 {
   SIGNAL_SELECT,
-  SIGNAL_PREVIEW_CHANGED,
-  SIGNAL_GROUP_SELECTED,
 
   LAST_SIGNAL,
 };
@@ -89,10 +85,6 @@ static void
 search_activate (GtkText        *text,
                  BzSearchWidget *self);
 
-static void
-selected_item_changed (GtkSingleSelection *model,
-                       GParamSpec         *pspec,
-                       BzSearchWidget     *self);
 
 static void
 grid_activate (GtkGridView    *grid_view,
@@ -121,7 +113,6 @@ bz_search_widget_dispose (GObject *object)
 
   g_clear_object (&self->state);
   g_clear_object (&self->selected);
-  g_clear_object (&self->previewing);
   g_clear_object (&self->selection_model);
 
   G_OBJECT_CLASS (bz_search_widget_parent_class)->dispose (object);
@@ -142,9 +133,6 @@ bz_search_widget_get_property (GObject    *object,
       break;
     case PROP_TEXT:
       g_value_set_string (value, bz_search_widget_get_text (self));
-      break;
-    case PROP_PREVIEWING:
-      g_value_set_object (value, bz_search_widget_get_previewing (self));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -168,7 +156,6 @@ bz_search_widget_set_property (GObject      *object,
     case PROP_TEXT:
       bz_search_widget_set_text (self, g_value_get_string (value));
       break;
-    case PROP_PREVIEWING:
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -272,7 +259,7 @@ apps_page_select_cb (BzSearchWidget *self,
                      BzEntryGroup   *group,
                      BzAppsPage     *page)
 {
-  g_signal_emit (self, signals[SIGNAL_GROUP_SELECTED], 0, group);
+  g_signal_emit (self, signals[SIGNAL_SELECT], 0, group, FALSE);
 }
 
 static void
@@ -345,6 +332,23 @@ reset_search_cb (BzSearchWidget *self,
 }
 
 static void
+tile_install_clicked_cb (GtkListItem    *list_item,
+                         BzRichAppTile  *tile)
+{
+  BzSearchWidget *self = NULL;
+  BzSearchResult *result = NULL;
+  BzEntryGroup   *group = NULL;
+
+  self = BZ_SEARCH_WIDGET (gtk_widget_get_ancestor (GTK_WIDGET (tile), BZ_TYPE_SEARCH_WIDGET));
+  g_assert (self != NULL);
+
+  result = gtk_list_item_get_item (list_item);
+  group = bz_search_result_get_group (result);
+
+  g_signal_emit (self, signals[SIGNAL_SELECT], 0, group, TRUE);
+}
+
+static void
 bz_search_widget_class_init (BzSearchWidgetClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
@@ -366,14 +370,6 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
           "text",
           NULL, NULL, NULL,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
-
-  props[PROP_PREVIEWING] =
-      g_param_spec_object (
-          "previewing",
-          NULL, NULL,
-          BZ_TYPE_ENTRY_GROUP,
-          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
-
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   signals[SIGNAL_SELECT] =
@@ -383,38 +379,10 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
           G_SIGNAL_RUN_FIRST,
           0,
           NULL, NULL,
-          g_cclosure_marshal_VOID__OBJECT,
-          G_TYPE_NONE, 0);
-  g_signal_set_va_marshaller (
-      signals[SIGNAL_SELECT],
-      G_TYPE_FROM_CLASS (klass),
-      g_cclosure_marshal_VOID__OBJECTv);
-
-  signals[SIGNAL_PREVIEW_CHANGED] =
-      g_signal_new (
-          "preview-changed",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
           NULL,
           G_TYPE_NONE, 2,
-          BZ_TYPE_ENTRY_GROUP, G_TYPE_BOOLEAN);
-
-  signals[SIGNAL_GROUP_SELECTED] =
-      g_signal_new (
-          "group-selected",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
-          g_cclosure_marshal_VOID__OBJECT,
-          G_TYPE_NONE, 1,
-          BZ_TYPE_ENTRY_GROUP);
-  g_signal_set_va_marshaller (
-      signals[SIGNAL_GROUP_SELECTED],
-      G_TYPE_FROM_CLASS (klass),
-      g_cclosure_marshal_VOID__OBJECTv);
+          BZ_TYPE_ENTRY_GROUP,
+          G_TYPE_BOOLEAN);
 
   widget_class->grab_focus = bz_search_widget_grab_focus;
 
@@ -434,6 +402,7 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, grid_view);
   gtk_widget_class_bind_template_callback (widget_class, bind_category_tile_cb);
   gtk_widget_class_bind_template_callback (widget_class, unbind_category_tile_cb);
+  gtk_widget_class_bind_template_callback (widget_class, tile_install_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
@@ -455,9 +424,8 @@ bz_search_widget_init (BzSearchWidget *self)
 
   /* TODO: move all this to blueprint */
 
-  self->selection_model = gtk_single_selection_new (NULL);
-  gtk_grid_view_set_model (self->grid_view, GTK_SELECTION_MODEL (self->selection_model));
-  g_signal_connect (self->selection_model, "notify::selected-item", G_CALLBACK (selected_item_changed), self);
+  self->selection_model = GTK_SELECTION_MODEL (gtk_no_selection_new (NULL));
+  gtk_grid_view_set_model (self->grid_view, self->selection_model);
 
   g_signal_connect (self->search_bar, "changed", G_CALLBACK (search_changed), self);
   g_signal_connect (self->search_bar, "activate", G_CALLBACK (search_activate), self);
@@ -490,13 +458,6 @@ bz_search_widget_get_selected (BzSearchWidget *self,
   if (remove != NULL)
     *remove = self->remove;
   return self->selected;
-}
-
-BzEntryGroup *
-bz_search_widget_get_previewing (BzSearchWidget *self)
-{
-  g_return_val_if_fail (BZ_IS_SEARCH_WIDGET (self), NULL);
-  return self->previewing;
 }
 
 void
@@ -544,43 +505,27 @@ static void
 search_activate (GtkText        *text,
                  BzSearchWidget *self)
 {
-  GtkSelectionModel *model        = NULL;
-  guint              selected_idx = 0;
+  GtkSelectionModel *model = NULL;
+  guint              n_items = 0;
+  g_autoptr (BzSearchResult) result = NULL;
+  BzEntryGroup *group = NULL;
 
   g_clear_object (&self->selected);
 
-  model        = gtk_grid_view_get_model (self->grid_view);
-  selected_idx = gtk_single_selection_get_selected (GTK_SINGLE_SELECTION (model));
+  model = gtk_grid_view_get_model (self->grid_view);
+  n_items = g_list_model_get_n_items (G_LIST_MODEL (model));
 
-  if (selected_idx != GTK_INVALID_LIST_POSITION)
-    emit_idx (self, G_LIST_MODEL (model), selected_idx);
-}
-
-static void
-selected_item_changed (GtkSingleSelection *model,
-                       GParamSpec         *pspec,
-                       BzSearchWidget     *self)
-{
-  guint    selected = 0;
-  gboolean from_search;
-
-  g_clear_object (&self->previewing);
-
-  selected = gtk_single_selection_get_selected (model);
-  if (selected != GTK_INVALID_LIST_POSITION)
+  if (n_items > 0)
     {
-      g_autoptr (BzSearchResult) result = NULL;
+      result = g_list_model_get_item (G_LIST_MODEL (model), 0);
+      group = bz_search_result_get_group (result);
 
-      result           = g_list_model_get_item (G_LIST_MODEL (model), selected);
-      self->previewing = g_object_ref (bz_search_result_get_group (result));
-
-      from_search              = self->search_in_progress;
-      self->search_in_progress = FALSE;
-
-      g_signal_emit (self, signals[SIGNAL_PREVIEW_CHANGED], 0, self->previewing, from_search);
+      if (bz_entry_group_get_installable_and_available (group) > 0 ||
+          bz_entry_group_get_removable_and_available (group) > 0)
+        {
+          g_signal_emit (self, signals[SIGNAL_SELECT], 0, group, TRUE);
+        }
     }
-
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PREVIEWING]);
 }
 
 static void
@@ -653,8 +598,8 @@ search_query_then (DexFuture *future,
       0, old_length,
       (gpointer *) results->pdata,
       results->len);
-  gtk_single_selection_set_model (
-      self->selection_model, G_LIST_MODEL (self->search_model));
+  gtk_no_selection_set_model (
+      GTK_NO_SELECTION (self->selection_model), G_LIST_MODEL (self->search_model));
 
   gtk_widget_set_visible (GTK_WIDGET (self->search_busy), FALSE);
 
@@ -702,8 +647,8 @@ update_filter (BzSearchWidget *self)
   if (search_text == NULL || *search_text == '\0')
     {
       g_list_store_remove_all (self->search_model);
-      gtk_single_selection_set_model (
-          self->selection_model, G_LIST_MODEL (self->search_model));
+      gtk_no_selection_set_model (
+          GTK_NO_SELECTION (self->selection_model), G_LIST_MODEL (self->search_model));
       gtk_stack_set_visible_child_name (self->search_stack, "empty");
       return;
     }
@@ -725,8 +670,8 @@ update_filter (BzSearchWidget *self)
   if (n_terms == 0)
     {
       g_list_store_remove_all (self->search_model);
-      gtk_single_selection_set_model (
-          self->selection_model, G_LIST_MODEL (self->search_model));
+      gtk_no_selection_set_model (
+          GTK_NO_SELECTION (self->selection_model), G_LIST_MODEL (self->search_model));
       gtk_stack_set_visible_child_name (self->search_stack, "empty");
       return;
     }
@@ -763,7 +708,6 @@ emit_idx (BzSearchWidget *self,
   if (bz_entry_group_get_installable_and_available (group) > 0 ||
       bz_entry_group_get_removable_and_available (group) > 0)
     {
-      g_signal_emit (self, signals[SIGNAL_SELECT], 0, group);
-      g_signal_emit (self, signals[SIGNAL_GROUP_SELECTED], 0, group);
+      g_signal_emit (self, signals[SIGNAL_SELECT], 0, group, FALSE);
     }
 }

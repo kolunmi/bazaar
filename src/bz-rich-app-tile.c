@@ -1,6 +1,6 @@
 /* bz-rich-app-tile.c
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2025 Adam Masciola, Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
+
 #include "bz-rich-app-tile.h"
 #include "bz-entry.h"
 #include "bz-group-tile-css-watcher.h"
@@ -24,6 +25,7 @@
 #include "bz-decorated-screenshot.h"
 #include "bz-screenshot.h"
 #include "bz-rounded-picture.h"
+
 struct _BzRichAppTile
 {
   AdwBin parent_instance;
@@ -47,6 +49,14 @@ enum
 };
 
 static GParamSpec *props[LAST_PROP] = { 0 };
+
+enum
+{
+  SIGNAL_INSTALL_CLICKED,
+  LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL];
 
 static void update_screenshot (BzRichAppTile *self);
 
@@ -199,6 +209,13 @@ is_zero (gpointer object,
 }
 
 static void
+install_button_clicked_cb (BzRichAppTile *self,
+                           GtkButton     *button)
+{
+  g_signal_emit (self, signals[SIGNAL_INSTALL_CLICKED], 0);
+}
+
+static void
 bz_rich_app_tile_class_init (BzRichAppTileClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
@@ -223,12 +240,24 @@ bz_rich_app_tile_class_init (BzRichAppTileClass *klass)
                             FALSE,
                             G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
-  g_type_ensure (BZ_TYPE_ROUNDED_PICTURE);
   g_object_class_install_properties (object_class, LAST_PROP, props);
+
+  signals[SIGNAL_INSTALL_CLICKED] =
+      g_signal_new (
+          "install-clicked",
+          G_OBJECT_CLASS_TYPE (klass),
+          G_SIGNAL_RUN_FIRST,
+          0,
+          NULL, NULL,
+          NULL,
+          G_TYPE_NONE, 0);
+
+  g_type_ensure (BZ_TYPE_ROUNDED_PICTURE);
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-rich-app-tile.ui");
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
+  gtk_widget_class_bind_template_callback (widget_class, install_button_clicked_cb);
   gtk_widget_class_bind_template_child (widget_class, BzRichAppTile, picture_box);
 }
 

@@ -240,7 +240,6 @@ template $BzWindow: Adw.ApplicationWindow {
                   child: $BzSearchWidget search_widget {
                       state: bind template.state;
                       select => $search_widget_select_cb(template);
-                      group-selected => $browser_group_selected_cb(template);
                     };
                 }
 
@@ -313,6 +312,7 @@ template $BzWindow: Adw.ApplicationWindow {
             Box {
               orientation: horizontal;
               spacing: 10;
+              margin-start: 4;
               visible: bind $invert_boolean($is_null(template.state as <$BzStateInfo>.background-task-label) as <bool>) as <bool>;
 
               Adw.Spinner {}

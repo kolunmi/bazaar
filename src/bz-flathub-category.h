@@ -64,6 +64,9 @@ const char *
 bz_flathub_category_get_display_name (BzFlathubCategory *self);
 
 const char *
+bz_flathub_category_get_short_name (BzFlathubCategory *self);
+
+const char *
 bz_flathub_category_get_icon_name (BzFlathubCategory *self);
 
 int
