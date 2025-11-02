@@ -21,12 +21,25 @@ template $BzRichAppTile: Adw.Bin {
         margin-bottom: 10;
         margin-end: 10;
       }
-      Box {
+      Box picture_box{
         height-request: 200;
-        styles [
-          "category-tile",
-          "category-graphics",
-        ]
+
+        styles ["rich-screenshot-box"]
+
+        Box {
+          margin-start: 12;
+          margin-end: 12;
+          margin-top: 12;
+          margin-bottom: 12;
+          $BzRoundedPicture {
+            halign: center;
+            hexpand: true;
+            valign: center;
+            paintable: bind template.first-screenshot;
+            radius: 6;
+          }
+        }
+
       }
     }
     Box {

@@ -65,6 +65,8 @@ template $BzSearchWidget: Adw.Bin {
         empty_box.margin-end: 7;
         search_box_clamp.margin-start: 12;
         search_box_clamp.margin-end: 12;
+        grid_view.min-columns: 1;
+        grid_view.max-columns: 1;
       }
     }
 
@@ -148,24 +150,25 @@ template $BzSearchWidget: Adw.Bin {
           name: "results";
           child: Box content_box {
             orientation: horizontal;
-            visible: bind $invert_boolean($is_null(list_view.model as <SingleSelection>.selected-item) as <bool>) as <bool>;
+            visible: bind $invert_boolean($is_null(grid_view.model as <SingleSelection>.selected-item) as <bool>) as <bool>;
 
-            ScrolledWindow entry_list_scroll {
+            ScrolledWindow entry_grid_scroll {
               hexpand: true;
               vexpand: true;
               hscrollbar-policy: never;
 
               child: Adw.ClampScrollable {
-                maximum-size: 400;
-                tightening-threshold: 500;
+                maximum-size: 700;
+                tightening-threshold: 600;
 
-                child: ListView list_view {
+                child: GridView grid_view {
                   styles [
-                    "search-list", "navigation-sidebar",
+                    "search-grid",
                   ]
 
                   single-click-activate: true;
-                  tab-behavior: item;
+                  min-columns: 2;
+                  max-columns: 2;
 
                   factory: BuilderListItemFactory {
                     template ListItem {

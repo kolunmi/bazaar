@@ -18,9 +18,10 @@
   min-height: 24px;
 }
 
-.search-list > row {
+.search-grid > child {
 	padding: 0;
 	margin: 6px 6px;
+	border-radius: 12px;
 }
 
 .card-row-btn {
@@ -29,6 +30,10 @@
 
 .screenshot {
     border-radius: 20px;
+}
+
+.rich-screenshot-box {
+	background-color: var(--sidebar-bg-color);
 }
 
 .browser-banner {

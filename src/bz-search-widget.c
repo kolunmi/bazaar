@@ -54,7 +54,7 @@ struct _BzSearchWidget
   AdwSpinner  *search_busy;
   GtkBox      *content_box;
   GtkStack    *search_stack;
-  GtkListView *list_view;
+  GtkGridView *grid_view;
 };
 
 G_DEFINE_FINAL_TYPE (BzSearchWidget, bz_search_widget, ADW_TYPE_BIN)
@@ -95,7 +95,7 @@ selected_item_changed (GtkSingleSelection *model,
                        BzSearchWidget     *self);
 
 static void
-list_activate (GtkListView    *list_view,
+grid_activate (GtkGridView    *grid_view,
                guint           position,
                BzSearchWidget *self);
 
@@ -243,7 +243,7 @@ action_move (GtkWidget  *widget,
   guint              selected = 0;
   guint              n_items  = 0;
 
-  model   = gtk_list_view_get_model (self->list_view);
+  model   = gtk_grid_view_get_model (self->grid_view);
   n_items = g_list_model_get_n_items (G_LIST_MODEL (model));
 
   if (n_items == 0)
@@ -264,9 +264,7 @@ action_move (GtkWidget  *widget,
         selected = (selected + offset) % n_items;
     }
 
-  gtk_list_view_scroll_to (
-      self->list_view, selected,
-      GTK_LIST_SCROLL_SELECT, NULL);
+  gtk_widget_activate_action (GTK_WIDGET (self->grid_view), "list.scroll-to-item", "u", selected);
 }
 
 static void
@@ -339,7 +337,7 @@ unbind_category_tile_cb (BzSearchWidget    *self,
 
 static void
 reset_search_cb (BzSearchWidget *self,
-                 GtkButton  *button)
+                 GtkButton      *button)
 {
 
   bz_search_widget_set_text (self, "");
@@ -433,7 +431,7 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, search_busy);
   gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, content_box);
   gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, search_stack);
-  gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, list_view);
+  gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, grid_view);
   gtk_widget_class_bind_template_callback (widget_class, bind_category_tile_cb);
   gtk_widget_class_bind_template_callback (widget_class, unbind_category_tile_cb);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
@@ -458,12 +456,12 @@ bz_search_widget_init (BzSearchWidget *self)
   /* TODO: move all this to blueprint */
 
   self->selection_model = gtk_single_selection_new (NULL);
-  gtk_list_view_set_model (self->list_view, GTK_SELECTION_MODEL (self->selection_model));
+  gtk_grid_view_set_model (self->grid_view, GTK_SELECTION_MODEL (self->selection_model));
   g_signal_connect (self->selection_model, "notify::selected-item", G_CALLBACK (selected_item_changed), self);
 
   g_signal_connect (self->search_bar, "changed", G_CALLBACK (search_changed), self);
   g_signal_connect (self->search_bar, "activate", G_CALLBACK (search_activate), self);
-  g_signal_connect (self->list_view, "activate", G_CALLBACK (list_activate), self);
+  g_signal_connect (self->grid_view, "activate", G_CALLBACK (grid_activate), self);
 }
 
 GtkWidget *
@@ -535,7 +533,7 @@ search_changed (GtkEditable    *editable,
   if (settings && g_settings_get_boolean (settings, "search-debounce"))
     {
       self->search_update_timeout = g_timeout_add_once (
-          200 /* 200 ms */, (GSourceOnceFunc) update_filter, self);
+          200, (GSourceOnceFunc) update_filter, self);
       gtk_widget_set_visible (GTK_WIDGET (self->search_busy), TRUE);
     }
   else
@@ -551,7 +549,7 @@ search_activate (GtkText        *text,
 
   g_clear_object (&self->selected);
 
-  model        = gtk_list_view_get_model (self->list_view);
+  model        = gtk_grid_view_get_model (self->grid_view);
   selected_idx = gtk_single_selection_get_selected (GTK_SINGLE_SELECTION (model));
 
   if (selected_idx != GTK_INVALID_LIST_POSITION)
@@ -586,13 +584,13 @@ selected_item_changed (GtkSingleSelection *model,
 }
 
 static void
-list_activate (GtkListView    *list_view,
+grid_activate (GtkGridView    *grid_view,
                guint           position,
                BzSearchWidget *self)
 {
   GtkSelectionModel *model = NULL;
 
-  model = gtk_list_view_get_model (self->list_view);
+  model = gtk_grid_view_get_model (self->grid_view);
   emit_idx (self, G_LIST_MODEL (model), position);
 }
 
@@ -663,8 +661,7 @@ search_query_then (DexFuture *future,
   if (results->len > 0)
     {
       page_name = "results";
-      /* Here to combat weird list view scrolling behavior */
-      gtk_list_view_scroll_to (self->list_view, 0, GTK_LIST_SCROLL_SELECT, NULL);
+      gtk_widget_activate_action (GTK_WIDGET (self->grid_view), "list.scroll-to-item", "u", 0);
     }
   else
     {
