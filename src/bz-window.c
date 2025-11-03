@@ -483,6 +483,7 @@ key_pressed (BzWindow              *self,
   adw_view_stack_set_visible_child_name (self->main_view_stack, "search");
 
   g_unichar_to_utf8 (unichar, buf);
+  gtk_widget_grab_focus (GTK_WIDGET (self->search_widget));
   bz_search_widget_set_text (self->search_widget, buf);
 
   return TRUE;
@@ -1148,6 +1149,8 @@ search (BzWindow   *self,
     }
 
   adw_view_stack_set_visible_child_name (self->main_view_stack, "search");
+  adw_navigation_view_pop_to_tag (self->navigation_view, "main");
+  gtk_widget_grab_focus (GTK_WIDGET (self->search_widget));
 }
 
 static void
@@ -1209,8 +1212,6 @@ set_page (BzWindow *self)
   selected_view_stack_page_name = adw_view_stack_get_visible_child_name (self->main_view_stack);
   selected_navigation_page_name = adw_navigation_view_get_visible_page_tag (self->navigation_view);
 
-  if (g_strcmp0 (selected_view_stack_page_name, "search") == 0)
-    gtk_widget_grab_focus (GTK_WIDGET (self->search_widget));
-  else if (g_strcmp0 (selected_navigation_page_name, "view") != 0)
+  if (g_strcmp0 (selected_navigation_page_name, "view") != 0)
     bz_full_view_set_entry_group (self->full_view, NULL);
 }
