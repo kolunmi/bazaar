@@ -78,10 +78,6 @@ apps_page_select_cb (BzFlathubPage *self,
                      BzAppsPage    *page);
 
 static void
-apps_page_hiding_cb (BzFlathubPage *self,
-                     BzAppsPage    *page);
-
-static void
 category_section_group_selected_cb (BzFlathubPage            *self,
                                     BzEntryGroup             *group,
                                     BzFlathubCategorySection *section);
@@ -364,13 +360,8 @@ show_more_clicked (const char *title,
   g_signal_connect_swapped (
       apps_page, "select",
       G_CALLBACK (apps_page_select_cb), self);
-  g_signal_connect_swapped (
-      apps_page, "hiding",
-      G_CALLBACK (apps_page_hiding_cb), self);
 
   adw_navigation_view_push (ADW_NAVIGATION_VIEW (nav_view), apps_page);
-
-  bz_window_set_app_list_view_mode (BZ_WINDOW (window), TRUE);
 }
 
 static void
@@ -387,15 +378,4 @@ category_section_group_selected_cb (BzFlathubPage            *self,
                                     BzFlathubCategorySection *section)
 {
   g_signal_emit (self, signals[SIGNAL_GROUP_SELECTED], 0, group);
-}
-
-static void
-apps_page_hiding_cb (BzFlathubPage *self,
-                     BzAppsPage    *page)
-{
-  GtkWidget *window = NULL;
-
-  window = GTK_WIDGET (gtk_widget_get_root (GTK_WIDGET (self)));
-
-  bz_window_set_app_list_view_mode (BZ_WINDOW (window), FALSE);
 }

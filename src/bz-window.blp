@@ -287,14 +287,6 @@ template $BzWindow: Adw.ApplicationWindow {
                 [top]
                 Adw.HeaderBar top_header_bar {
                   [start]
-                  Button go_back {
-                    has-tooltip: true;
-                    tooltip-text: _("Go Back");
-                    icon-name: "go-previous-symbolic";
-                    clicked => $go_back_cb(template);
-                  }
-
-                  [start]
                   Button update_button {
                     styles [
                       "suggested-action",
