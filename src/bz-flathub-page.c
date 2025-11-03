@@ -18,7 +18,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "bz-flathub-page.h"
+#include <glib/gi18n.h>
+
 #include "bz-app-tile.h"
 #include "bz-apps-page.h"
 #include "bz-detailed-app-tile.h"
@@ -27,11 +28,10 @@
 #include "bz-featured-carousel.h"
 #include "bz-flathub-category-section.h"
 #include "bz-flathub-category.h"
+#include "bz-flathub-page.h"
 #include "bz-inhibited-scrollable.h"
-#include "bz-patterned-background.h"
 #include "bz-section-view.h"
 #include "bz-window.h"
-#include <glib/gi18n.h>
 
 struct _BzFlathubPage
 {
@@ -200,7 +200,7 @@ show_more_popular_clicked_cb (BzFlathubPage *self,
 
 static void
 show_more_mobile_clicked_cb (BzFlathubPage *self,
-                               GtkButton     *button)
+                             GtkButton     *button)
 {
   g_autoptr (GListModel) model = NULL;
 
@@ -272,7 +272,6 @@ bz_flathub_page_class_init (BzFlathubPageClass *klass)
 
   g_type_ensure (BZ_TYPE_SECTION_VIEW);
   g_type_ensure (BZ_TYPE_FLATHUB_CATEGORY_SECTION);
-  g_type_ensure (BZ_TYPE_PATTERNED_BACKGROUND);
   g_type_ensure (BZ_TYPE_DETAILED_APP_TILE);
   g_type_ensure (BZ_TYPE_INHIBITED_SCROLLABLE);
   g_type_ensure (BZ_TYPE_DYNAMIC_LIST_VIEW);

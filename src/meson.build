@@ -109,7 +109,6 @@ bz_sources = [
   'bz-lazy-async-texture-model.c',
   'bz-license-dialog.c',
   'bz-markdown-render.c',
-  'bz-patterned-background.c',
   'bz-preferences-dialog.c',
   'bz-progress-bar.c',
   'bz-release.c',
