@@ -42,12 +42,6 @@ struct _BzFlathubState
   char                    *app_of_the_day;
   GtkStringList           *apps_of_the_week;
   GListStore              *categories;
-  GtkStringList           *recently_updated;
-  GtkStringList           *recently_added;
-  GtkStringList           *popular;
-  GtkStringList           *trending;
-  GtkStringList           *mobile;
-  GtkStringList           *quality_moderation;
 
   DexFuture *initializing;
 };
@@ -67,12 +61,6 @@ enum
   PROP_APPS_OF_THE_WEEK,
   PROP_APPS_OF_THE_DAY_WEEK,
   PROP_CATEGORIES,
-  PROP_RECENTLY_UPDATED,
-  PROP_RECENTLY_ADDED,
-  PROP_POPULAR,
-  PROP_TRENDING,
-  PROP_MOBILE,
-  PROP_QUALITY_MODERATION,
 
   LAST_PROP
 };
@@ -96,12 +84,6 @@ bz_flathub_state_dispose (GObject *object)
   g_clear_pointer (&self->app_of_the_day, g_free);
   g_clear_pointer (&self->apps_of_the_week, g_object_unref);
   g_clear_pointer (&self->categories, g_object_unref);
-  g_clear_pointer (&self->recently_updated, g_object_unref);
-  g_clear_pointer (&self->recently_added, g_object_unref);
-  g_clear_pointer (&self->popular, g_object_unref);
-  g_clear_pointer (&self->trending, g_object_unref);
-  g_clear_pointer (&self->mobile, g_object_unref);
-  g_clear_pointer (&self->quality_moderation, g_object_unref);
 
   G_OBJECT_CLASS (bz_flathub_state_parent_class)->dispose (object);
 }
@@ -137,24 +119,6 @@ bz_flathub_state_get_property (GObject    *object,
     case PROP_CATEGORIES:
       g_value_set_object (value, bz_flathub_state_get_categories (self));
       break;
-    case PROP_RECENTLY_UPDATED:
-      g_value_take_object (value, bz_flathub_state_dup_recently_updated (self));
-      break;
-    case PROP_RECENTLY_ADDED:
-      g_value_take_object (value, bz_flathub_state_dup_recently_added (self));
-      break;
-    case PROP_POPULAR:
-      g_value_take_object (value, bz_flathub_state_dup_popular (self));
-      break;
-    case PROP_TRENDING:
-      g_value_take_object (value, bz_flathub_state_dup_trending (self));
-      break;
-    case PROP_MOBILE:
-      g_value_take_object (value, bz_flathub_state_dup_mobile (self));
-      break;
-    case PROP_QUALITY_MODERATION:
-      g_value_take_object (value, bz_flathub_state_dup_quality_moderation (self));
-      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -181,12 +145,6 @@ bz_flathub_state_set_property (GObject      *object,
     case PROP_APPS_OF_THE_WEEK:
     case PROP_APPS_OF_THE_DAY_WEEK:
     case PROP_CATEGORIES:
-    case PROP_RECENTLY_UPDATED:
-    case PROP_RECENTLY_ADDED:
-    case PROP_POPULAR:
-    case PROP_TRENDING:
-    case PROP_MOBILE:
-    case PROP_QUALITY_MODERATION:
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -244,48 +202,6 @@ bz_flathub_state_class_init (BzFlathubStateClass *klass)
   props[PROP_CATEGORIES] =
       g_param_spec_object (
           "categories",
-          NULL, NULL,
-          G_TYPE_LIST_MODEL,
-          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
-
-  props[PROP_RECENTLY_UPDATED] =
-      g_param_spec_object (
-          "recently-updated",
-          NULL, NULL,
-          G_TYPE_LIST_MODEL,
-          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
-
-  props[PROP_RECENTLY_ADDED] =
-      g_param_spec_object (
-          "recently-added",
-          NULL, NULL,
-          G_TYPE_LIST_MODEL,
-          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
-
-  props[PROP_POPULAR] =
-      g_param_spec_object (
-          "popular",
-          NULL, NULL,
-          G_TYPE_LIST_MODEL,
-          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
-
-  props[PROP_TRENDING] =
-      g_param_spec_object (
-          "trending",
-          NULL, NULL,
-          G_TYPE_LIST_MODEL,
-          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
-
-  props[PROP_MOBILE] =
-    g_param_spec_object (
-        "mobile",
-        NULL, NULL,
-        G_TYPE_LIST_MODEL,
-        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
-
-  props[PROP_QUALITY_MODERATION] =
-      g_param_spec_object (
-          "quality-moderation",
           NULL, NULL,
           G_TYPE_LIST_MODEL,
           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
@@ -399,120 +315,6 @@ bz_flathub_state_get_categories (BzFlathubState *self)
   return G_LIST_MODEL (self->categories);
 }
 
-GListModel *
-bz_flathub_state_dup_recently_updated (BzFlathubState *self)
-{
-  g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
-  if (self->initializing != NULL)
-    return NULL;
-
-  if (self->recently_updated != NULL)
-    {
-      if (self->map_factory != NULL)
-        return bz_application_map_factory_generate (
-            self->map_factory, G_LIST_MODEL (self->recently_updated));
-      else
-        return G_LIST_MODEL (g_object_ref (self->recently_updated));
-    }
-  else
-    return NULL;
-}
-
-GListModel *
-bz_flathub_state_dup_recently_added (BzFlathubState *self)
-{
-  g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
-  if (self->initializing != NULL)
-    return NULL;
-
-  if (self->recently_added != NULL)
-    {
-      if (self->map_factory != NULL)
-        return bz_application_map_factory_generate (
-            self->map_factory, G_LIST_MODEL (self->recently_added));
-      else
-        return G_LIST_MODEL (g_object_ref (self->recently_added));
-    }
-  else
-    return NULL;
-}
-
-GListModel *
-bz_flathub_state_dup_popular (BzFlathubState *self)
-{
-  g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
-  if (self->initializing != NULL)
-    return NULL;
-
-  if (self->popular != NULL)
-    {
-      if (self->map_factory != NULL)
-        return bz_application_map_factory_generate (
-            self->map_factory, G_LIST_MODEL (self->popular));
-      else
-        return G_LIST_MODEL (g_object_ref (self->popular));
-    }
-  else
-    return NULL;
-}
-
-GListModel *
-bz_flathub_state_dup_trending (BzFlathubState *self)
-{
-  g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
-  if (self->initializing != NULL)
-    return NULL;
-
-  if (self->trending != NULL)
-    {
-      if (self->map_factory != NULL)
-        return bz_application_map_factory_generate (
-            self->map_factory, G_LIST_MODEL (self->trending));
-      else
-        return G_LIST_MODEL (g_object_ref (self->trending));
-    }
-  else
-    return NULL;
-}
-
-GListModel *
-bz_flathub_state_dup_mobile (BzFlathubState *self)
-{
-  g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
-  if (self->initializing != NULL)
-    return NULL;
-
-  if (self->mobile != NULL)
-    {
-      if (self->map_factory != NULL)
-        return bz_application_map_factory_generate (
-            self->map_factory, G_LIST_MODEL (self->mobile));
-      else
-        return G_LIST_MODEL (g_object_ref (self->mobile));
-    }
-  else
-    return NULL;
-}
-
-GListModel *
-bz_flathub_state_dup_quality_moderation (BzFlathubState *self)
-{
-  g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
-  if (self->initializing != NULL)
-    return NULL;
-
-  if (self->quality_moderation != NULL)
-    {
-      if (self->map_factory != NULL)
-        return bz_application_map_factory_generate (
-            self->map_factory, G_LIST_MODEL (self->quality_moderation));
-      else
-        return G_LIST_MODEL (g_object_ref (self->quality_moderation));
-    }
-  else
-    return NULL;
-}
-
 void
 bz_flathub_state_set_for_day (BzFlathubState *self,
                               const char     *for_day)
@@ -525,38 +327,20 @@ bz_flathub_state_set_for_day (BzFlathubState *self,
   g_clear_pointer (&self->app_of_the_day, g_free);
   g_clear_pointer (&self->apps_of_the_week, g_object_unref);
   g_clear_pointer (&self->categories, g_object_unref);
-  g_clear_pointer (&self->recently_updated, g_object_unref);
-  g_clear_pointer (&self->recently_added, g_object_unref);
-  g_clear_pointer (&self->popular, g_object_unref);
-  g_clear_pointer (&self->trending, g_object_unref);
-  g_clear_pointer (&self->mobile, g_object_unref);
-  g_clear_pointer (&self->quality_moderation, g_object_unref);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_OF_THE_DAY]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_OF_THE_DAY_GROUP]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APPS_OF_THE_WEEK]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APPS_OF_THE_DAY_WEEK]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CATEGORIES]);
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_RECENTLY_UPDATED]);
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_RECENTLY_ADDED]);
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_POPULAR]);
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TRENDING]);
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MOBILE]);
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_QUALITY_MODERATION]);
 
   if (for_day != NULL)
     {
       g_autoptr (DexFuture) future = NULL;
 
-      self->for_day            = g_strdup (for_day);
-      self->apps_of_the_week   = gtk_string_list_new (NULL);
-      self->categories         = g_list_store_new (BZ_TYPE_FLATHUB_CATEGORY);
-      self->recently_updated   = gtk_string_list_new (NULL);
-      self->recently_added     = gtk_string_list_new (NULL);
-      self->popular            = gtk_string_list_new (NULL);
-      self->trending           = gtk_string_list_new (NULL);
-      self->mobile             = gtk_string_list_new (NULL);
-      self->quality_moderation = gtk_string_list_new (NULL);
+      self->for_day          = g_strdup (for_day);
+      self->apps_of_the_week = gtk_string_list_new (NULL);
+      self->categories       = g_list_store_new (BZ_TYPE_FLATHUB_CATEGORY);
 
       future = dex_scheduler_spawn (
           bz_get_io_scheduler (),
@@ -600,6 +384,52 @@ bz_flathub_state_set_map_factory (BzFlathubState          *self,
     self->map_factory = g_object_ref (map_factory);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MAP_FACTORY]);
+}
+
+static void
+add_collection_category (BzFlathubState *self,
+                         const char     *name,
+                         JsonNode       *node,
+                         GHashTable     *quality_set)
+{
+  g_autoptr (BzFlathubCategory) category  = NULL;
+  g_autoptr (GtkStringList) store         = NULL;
+  g_autoptr (GtkStringList) quality_store = NULL;
+  JsonObject *response_object             = NULL;
+  JsonArray  *hits_array                  = NULL;
+  guint       hits_length                 = 0;
+  int         total_hits                  = 0;
+
+  category      = bz_flathub_category_new ();
+  store         = gtk_string_list_new (NULL);
+  quality_store = gtk_string_list_new (NULL);
+  bz_flathub_category_set_name (category, name);
+  bz_flathub_category_set_is_spotlight (category, TRUE);
+  bz_flathub_category_set_applications (category, G_LIST_MODEL (store));
+
+  response_object = json_node_get_object (node);
+  hits_array      = json_object_get_array_member (response_object, "hits");
+  hits_length     = json_array_get_length (hits_array);
+  total_hits      = json_object_get_int_member (response_object, "totalHits");
+  bz_flathub_category_set_total_entries (category, total_hits);
+
+  for (guint i = 0; i < hits_length; i++)
+    {
+      JsonObject *element = NULL;
+      const char *app_id  = NULL;
+
+      element = json_array_get_object_element (hits_array, i);
+      app_id  = json_object_get_string_member (element, "app_id");
+      gtk_string_list_append (store, app_id);
+
+      if (g_hash_table_contains (quality_set, app_id))
+        {
+          gtk_string_list_append (quality_store, app_id);
+        }
+    }
+
+  bz_flathub_category_set_quality_applications (category, G_LIST_MODEL (quality_store));
+  g_list_store_append (self->categories, category);
 }
 
 static DexFuture *
@@ -680,8 +510,6 @@ initialize_fiber (GWeakRef *wr)
           const char *app_id = NULL;
 
           app_id = json_array_get_string_element (array, i);
-
-          gtk_string_list_append (self->quality_moderation, app_id);
           g_hash_table_add (quality_set, g_strdup (app_id));
         }
     }
@@ -713,6 +541,33 @@ initialize_fiber (GWeakRef *wr)
               json_object_get_string_member (element, "app_id"));
         }
     }
+
+  if (g_hash_table_contains (nodes, "/collection/trending"))
+    add_collection_category (self, "trending",
+                             g_hash_table_lookup (nodes, "/collection/trending"),
+                             quality_set);
+
+  if (g_hash_table_contains (nodes, "/collection/popular"))
+    add_collection_category (self, "popular",
+                             g_hash_table_lookup (nodes, "/collection/popular"),
+                             quality_set);
+
+  if (g_hash_table_contains (nodes, "/collection/recently-added"))
+    add_collection_category (self, "recently-added",
+                             g_hash_table_lookup (nodes, "/collection/recently-added"),
+                             quality_set);
+
+  if (g_hash_table_contains (nodes, "/collection/recently-updated"))
+    add_collection_category (self, "recently-updated",
+                             g_hash_table_lookup (nodes, "/collection/recently-updated"),
+                             quality_set);
+
+  if (g_hash_table_contains (nodes, "/collection/mobile"))
+    add_collection_category (self, "mobile",
+                             g_hash_table_lookup (nodes, "/collection/mobile"),
+                             quality_set);
+
+  /* Add regular categories */
   if (g_hash_table_contains (nodes, "/collection/category"))
     {
       JsonArray *array  = NULL;
@@ -785,106 +640,6 @@ initialize_fiber (GWeakRef *wr)
           g_list_store_append (self->categories, category);
         }
     }
-  if (g_hash_table_contains (nodes, "/collection/recently-updated"))
-    {
-      JsonObject *object = NULL;
-      JsonArray  *array  = NULL;
-      guint       length = 0;
-
-      object = json_node_get_object (g_hash_table_lookup (nodes, "/collection/recently-updated"));
-      array  = json_object_get_array_member (object, "hits");
-      length = json_array_get_length (array);
-
-      for (guint i = 0; i < length; i++)
-        {
-          JsonObject *element = NULL;
-
-          element = json_array_get_object_element (array, i);
-          gtk_string_list_append (
-              self->recently_updated,
-              json_object_get_string_member (element, "app_id"));
-        }
-    }
-  if (g_hash_table_contains (nodes, "/collection/recently-added"))
-    {
-      JsonObject *object = NULL;
-      JsonArray  *array  = NULL;
-      guint       length = 0;
-
-      object = json_node_get_object (g_hash_table_lookup (nodes, "/collection/recently-added"));
-      array  = json_object_get_array_member (object, "hits");
-      length = json_array_get_length (array);
-
-      for (guint i = 0; i < length; i++)
-        {
-          JsonObject *element = NULL;
-
-          element = json_array_get_object_element (array, i);
-          gtk_string_list_append (
-              self->recently_added,
-              json_object_get_string_member (element, "app_id"));
-        }
-    }
-  if (g_hash_table_contains (nodes, "/collection/popular"))
-    {
-      JsonObject *object = NULL;
-      JsonArray  *array  = NULL;
-      guint       length = 0;
-
-      object = json_node_get_object (g_hash_table_lookup (nodes, "/collection/popular"));
-      array  = json_object_get_array_member (object, "hits");
-      length = json_array_get_length (array);
-
-      for (guint i = 0; i < length; i++)
-        {
-          JsonObject *element = NULL;
-
-          element = json_array_get_object_element (array, i);
-          gtk_string_list_append (
-              self->popular,
-              json_object_get_string_member (element, "app_id"));
-        }
-    }
-  if (g_hash_table_contains (nodes, "/collection/trending"))
-    {
-      JsonObject *object = NULL;
-      JsonArray  *array  = NULL;
-      guint       length = 0;
-
-      object = json_node_get_object (g_hash_table_lookup (nodes, "/collection/trending"));
-      array  = json_object_get_array_member (object, "hits");
-      length = json_array_get_length (array);
-
-      for (guint i = 0; i < length; i++)
-        {
-          JsonObject *element = NULL;
-
-          element = json_array_get_object_element (array, i);
-          gtk_string_list_append (
-              self->trending,
-              json_object_get_string_member (element, "app_id"));
-        }
-    }
-  if (g_hash_table_contains (nodes, "/collection/mobile"))
-  {
-    JsonObject *object = NULL;
-    JsonArray  *array  = NULL;
-    guint       length = 0;
-
-    object = json_node_get_object (g_hash_table_lookup (nodes, "/collection/mobile"));
-    array  = json_object_get_array_member (object, "hits");
-    length = json_array_get_length (array);
-
-    for (guint i = 0; i < length; i++)
-      {
-        JsonObject *element = NULL;
-
-        element = json_array_get_object_element (array, i);
-        gtk_string_list_append (
-            self->mobile,
-            json_object_get_string_member (element, "app_id"));
-      }
-  }
 
   return dex_future_new_true ();
 }
@@ -915,12 +670,6 @@ initialize_finally (DexFuture *future,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APPS_OF_THE_WEEK]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APPS_OF_THE_DAY_WEEK]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CATEGORIES]);
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_RECENTLY_UPDATED]);
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_RECENTLY_ADDED]);
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_POPULAR]);
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TRENDING]);
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MOBILE]);
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_QUALITY_MODERATION]);
 
   return NULL;
 }
