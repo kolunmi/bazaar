@@ -18,7 +18,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "bz-search-widget.h"
 #include <glib/gi18n.h>
 
 #include "bz-apps-page.h"
@@ -30,6 +29,7 @@
 #include "bz-rich-app-tile.h"
 #include "bz-screenshot.h"
 #include "bz-search-result.h"
+#include "bz-search-widget.h"
 #include "bz-state-info.h"
 #include "bz-util.h"
 #include "bz-window.h"
@@ -490,7 +490,8 @@ search_changed (GtkEditable    *editable,
   g_clear_handle_id (&self->search_update_timeout, g_source_remove);
 
   settings = bz_state_info_get_settings (self->state);
-  if (settings && g_settings_get_boolean (settings, "search-debounce"))
+  if (settings != NULL &&
+      g_settings_get_boolean (settings, "search-debounce"))
     {
       self->search_update_timeout = g_timeout_add_once (
           200, (GSourceOnceFunc) update_filter, self);
@@ -554,7 +555,8 @@ search_query_then (DexFuture *future,
   old_length = g_list_model_get_n_items (G_LIST_MODEL (self->search_model));
   settings   = bz_state_info_get_settings (self->state);
 
-  if (settings && g_settings_get_boolean (settings, "search-only-foss"))
+  if (settings != NULL &&
+      g_settings_get_boolean (settings, "search-only-foss"))
     {
       for (guint i = 0; i < results->len;)
         {
@@ -573,7 +575,8 @@ search_query_then (DexFuture *future,
         }
     }
 
-  if (settings && g_settings_get_boolean (settings, "search-only-flathub"))
+  if (settings != NULL &&
+      g_settings_get_boolean (settings, "search-only-flathub"))
     {
       for (guint i = 0; i < results->len;)
         {
