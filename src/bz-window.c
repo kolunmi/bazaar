@@ -1193,7 +1193,6 @@ check_transactions (BzWindow *self)
 static void
 set_page (BzWindow *self)
 {
-  const char *selected_view_stack_page_name = NULL;
   const char *selected_navigation_page_name = NULL;
   const char *visible_child_name            = NULL;
 
@@ -1209,7 +1208,6 @@ set_page (BzWindow *self)
 
   gtk_stack_set_visible_child_name (self->main_stack, visible_child_name);
 
-  selected_view_stack_page_name = adw_view_stack_get_visible_child_name (self->main_view_stack);
   selected_navigation_page_name = adw_navigation_view_get_visible_page_tag (self->navigation_view);
 
   if (g_strcmp0 (selected_navigation_page_name, "view") != 0)
