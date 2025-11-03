@@ -60,6 +60,7 @@ struct _BzFullView
 
   guint      debounce_timeout;
   DexFuture *loading_forge_stars;
+  GMenuModel *main_menu;
 
   /* Template widgets */
   AdwViewStack    *stack;
@@ -81,6 +82,7 @@ enum
   PROP_UI_ENTRY,
   PROP_DEBOUNCE,
   PROP_DEBOUNCED_UI_ENTRY,
+  PROP_MAIN_MENU,
 
   LAST_PROP
 };
@@ -118,6 +120,7 @@ bz_full_view_dispose (GObject *object)
   g_clear_object (&self->ui_entry);
   g_clear_object (&self->debounced_ui_entry);
   g_clear_object (&self->group_model);
+  g_clear_object (&self->main_menu);
 
   dex_clear (&self->loading_forge_stars);
   g_clear_handle_id (&self->debounce_timeout, g_source_remove);
@@ -153,6 +156,9 @@ bz_full_view_get_property (GObject    *object,
     case PROP_DEBOUNCED_UI_ENTRY:
       g_value_set_object (value, self->debounced_ui_entry);
       break;
+    case PROP_MAIN_MENU:
+      g_value_set_object (value, self->main_menu);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -183,6 +189,11 @@ bz_full_view_set_property (GObject      *object,
       break;
     case PROP_UI_ENTRY:
     case PROP_DEBOUNCED_UI_ENTRY:
+    case PROP_MAIN_MENU:
+      if (self->main_menu)
+        g_object_unref(self->main_menu);
+      self->main_menu = g_value_dup_object(value);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -727,6 +738,13 @@ bz_full_view_class_init (BzFullViewClass *klass)
           NULL, NULL,
           BZ_TYPE_RESULT,
           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_MAIN_MENU] =
+      g_param_spec_object(
+        "main-menu",
+        NULL, NULL,
+        G_TYPE_MENU_MODEL,
+        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
