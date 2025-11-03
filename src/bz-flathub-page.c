@@ -38,6 +38,7 @@ struct _BzFlathubPage
   AdwBin parent_instance;
 
   BzFlathubState *state;
+  gboolean online;
 
   /* Template widgets */
   AdwViewStack *stack;
@@ -50,6 +51,7 @@ enum
   PROP_0,
 
   PROP_STATE,
+  PROP_ONLINE,
 
   LAST_PROP
 };
@@ -113,6 +115,9 @@ bz_flathub_page_get_property (GObject    *object,
     case PROP_STATE:
       g_value_set_object (value, bz_flathub_page_get_state (self));
       break;
+    case PROP_ONLINE:
+      g_value_set_boolean (value, self->online);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -130,6 +135,14 @@ bz_flathub_page_set_property (GObject      *object,
     {
     case PROP_STATE:
       bz_flathub_page_set_state (self, g_value_get_object (value));
+      break;
+    case PROP_ONLINE:
+      self->online = g_value_get_boolean (value);
+      if (self->online)
+        bz_flathub_page_set_state (self, bz_flathub_page_get_state (self));
+      else
+        adw_view_stack_set_visible_child_name (self->stack, "offline");
+
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -248,6 +261,13 @@ bz_flathub_page_class_init (BzFlathubPageClass *klass)
           NULL, NULL,
           BZ_TYPE_FLATHUB_STATE,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_ONLINE] =
+      g_param_spec_boolean (
+          "online",
+          NULL, NULL,
+          FALSE,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 

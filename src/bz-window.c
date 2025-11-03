@@ -1201,8 +1201,6 @@ set_page (BzWindow *self)
 
   if (bz_state_info_get_busy (self->state))
     visible_child_name = "loading";
-  else if (!bz_state_info_get_online (self->state))
-    visible_child_name = "offline";
   else
     visible_child_name = "main";
 

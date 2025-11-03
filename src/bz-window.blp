@@ -180,15 +180,6 @@ template $BzWindow: Adw.ApplicationWindow {
 
                 content: Stack main_stack {
                   StackPage {
-                    name: "offline";
-
-                    child: Adw.StatusPage {
-                      icon-name: "connected-squares-x";
-                      title: _("Offline");
-                    };
-                  }
-
-                  StackPage {
                     name: "loading";
 
                     child: Box {
@@ -241,6 +232,7 @@ template $BzWindow: Adw.ApplicationWindow {
 
                         child: $BzBrowseWidget browse {
                           content-provider: bind template.state as <$BzStateInfo>.curated-provider;
+                          online: bind template.state as <$BzStateInfo>.online;
                           group-selected => $browser_group_selected_cb(template);
                         };
                       }
@@ -252,6 +244,7 @@ template $BzWindow: Adw.ApplicationWindow {
 
                         child: $BzFlathubPage {
                           state: bind template.state as <$BzStateInfo>.flathub;
+                          online: bind template.state as <$BzStateInfo>.online;
                           group-selected => $browser_group_selected_cb(template);
                         };
                       }

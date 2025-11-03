@@ -30,6 +30,7 @@ struct _BzBrowseWidget
   AdwBin parent_instance;
 
   BzContentProvider *provider;
+  gboolean online;
 
   /* Template widgets */
   AdwViewStack *stack;
@@ -42,6 +43,7 @@ enum
   PROP_0,
 
   PROP_CONTENT_PROVIDER,
+  PROP_ONLINE,
 
   LAST_PROP
 };
@@ -91,6 +93,9 @@ bz_browse_widget_get_property (GObject    *object,
     case PROP_CONTENT_PROVIDER:
       g_value_set_object (value, bz_browse_widget_get_content_provider (self));
       break;
+    case PROP_ONLINE:
+      g_value_set_boolean (value, self->online);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -108,6 +113,14 @@ bz_browse_widget_set_property (GObject      *object,
     {
     case PROP_CONTENT_PROVIDER:
       bz_browse_widget_set_content_provider (self, g_value_get_object (value));
+      break;
+    case PROP_ONLINE:
+      self->online = g_value_get_boolean (value);
+      if (self->online)
+        set_page (self);
+      else
+        adw_view_stack_set_visible_child_name (self->stack, "offline");
+
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -143,6 +156,13 @@ bz_browse_widget_class_init (BzBrowseWidgetClass *klass)
           NULL, NULL,
           BZ_TYPE_CONTENT_PROVIDER,
           G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_ONLINE] =
+      g_param_spec_boolean (
+          "online",
+          NULL, NULL,
+          FALSE,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 

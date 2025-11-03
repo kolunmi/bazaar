@@ -26,6 +26,16 @@ template $BzFlathubPage: Adw.Bin {
         }
 
         Adw.ViewStackPage {
+          name: "offline";
+          title: _("Offline");
+
+          child: Adw.StatusPage {
+            icon-name: "connected-squares-x";
+            title: _("Offline");
+          };
+        }
+
+        Adw.ViewStackPage {
           name: "content";
           title: _("Browser");
 
