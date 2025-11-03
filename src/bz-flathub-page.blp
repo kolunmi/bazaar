@@ -383,7 +383,7 @@ template $BzFlathubPage: Adw.Bin {
                         }
                       }
 
-                      $BzDynamicListView {
+                      $BzDynamicListView otg_list{
                         styles [
                           "flathub-page-section",
                         ]
@@ -393,11 +393,11 @@ template $BzFlathubPage: Adw.Bin {
                         noscroll-kind: flow-box;
                         child-type: "BzAppTile";
                         child-prop: "group";
-                        max-children-per-line: 2;
+                        max-children-per-line: 3;
 
-                        model: SliceListModel {
+                        model: SliceListModel otg_slice {
                           offset: 0;
-                          size: 6;
+                          size: 9;
                           model: bind template.state as <$BzFlathubState>.mobile;
                         };
 
@@ -462,6 +462,16 @@ template $BzFlathubPage: Adw.Bin {
         }
       };
 
+
+      Adw.Breakpoint {
+        condition ("max-width: 1150sp")
+
+        setters {
+          otg_list.max-children-per-line: 2;
+          otg_slice.size: 6;
+        }
+      }
+
       Adw.Breakpoint {
         condition ("max-width: 700px")
 
@@ -482,6 +492,7 @@ template $BzFlathubPage: Adw.Bin {
           section_science.max-items: 6;
           section_system.max-items: 6;
           section_utility.max-items: 6;
+          otg_slice.size: 6;
         }
       }
     };
