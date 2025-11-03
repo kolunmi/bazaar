@@ -1199,12 +1199,13 @@ set_page (BzWindow *self)
   if (self->state == NULL)
     return;
 
-  if (bz_state_info_get_busy (self->state))
-    visible_child_name = "loading";
-  else
-    visible_child_name = "main";
-
-  gtk_stack_set_visible_child_name (self->main_stack, visible_child_name);
+  if (bz_state_info_get_busy (self->state)) {
+    gtk_stack_set_visible_child_name (self->main_stack, "loading");
+    adw_navigation_view_pop_to_tag (self->navigation_view, "main");
+  }
+  else {
+    gtk_stack_set_visible_child_name (self->main_stack, "main");
+  }
 
   selected_navigation_page_name = adw_navigation_view_get_visible_page_tag (self->navigation_view);
 
