@@ -53,23 +53,19 @@ struct _BzWindow
   BzCometOverlay      *comet_overlay;
   AdwOverlaySplitView *split_view;
   AdwViewStack        *transactions_stack;
-  AdwNavigationView   *main_stack;
+  AdwNavigationView   *navigation_view;
   BzFullView          *full_view;
   GtkToggleButton     *toggle_transactions;
   GtkToggleButton     *toggle_transactions_sidebar;
   GtkButton           *go_back;
   BzSearchWidget      *search_widget;
   GtkButton           *update_button;
-  GtkRevealer         *title_revealer;
-  AdwToggleGroup      *title_toggle_group;
   GtkToggleButton     *transactions_pause;
   GtkButton           *transactions_stop;
   GtkButton           *transactions_clear;
   AdwToastOverlay     *toasts;
-  AdwToolbarView      *toolbar_view;
-  AdwHeaderBar        *top_header_bar;
-  AdwHeaderBar        *bottom_header_bar;
-  AdwToggle           *curated_toggle;
+  AdwViewStack        *main_view_stack;
+  GtkStack            *main_stack;
   // GtkButton           *refresh;
 };
 
@@ -140,9 +136,6 @@ check_transactions (BzWindow *self);
 
 static void
 set_page (BzWindow *self);
-
-static void
-set_bottom_bar (BzWindow *self);
 
 static void
 bz_window_dispose (GObject *object)
@@ -328,13 +321,7 @@ breakpoint_apply_cb (BzWindow      *self,
 {
   self->breakpoint_applied = TRUE;
 
-  adw_header_bar_set_title_widget (self->top_header_bar, NULL);
-  adw_header_bar_set_title_widget (self->bottom_header_bar, NULL);
-  adw_header_bar_set_title_widget (self->bottom_header_bar, GTK_WIDGET (self->title_revealer));
-
   gtk_widget_add_css_class (GTK_WIDGET (self), "narrow");
-
-  set_bottom_bar (self);
 }
 
 static void
@@ -343,13 +330,7 @@ breakpoint_unapply_cb (BzWindow      *self,
 {
   self->breakpoint_applied = FALSE;
 
-  adw_header_bar_set_title_widget (self->top_header_bar, NULL);
-  adw_header_bar_set_title_widget (self->bottom_header_bar, NULL);
-  adw_header_bar_set_title_widget (self->top_header_bar, GTK_WIDGET (self->title_revealer));
-
   gtk_widget_remove_css_class (GTK_WIDGET (self), "narrow");
-
-  set_bottom_bar (self);
 }
 
 static void
@@ -404,10 +385,10 @@ action_escape (GtkWidget  *widget,
   GListModel *stack   = NULL;
   guint       n_pages = 0;
 
-  stack   = adw_navigation_view_get_navigation_stack (self->main_stack);
+  stack   = adw_navigation_view_get_navigation_stack (self->navigation_view);
   n_pages = g_list_model_get_n_items (stack);
 
-  adw_navigation_view_pop (self->main_stack);
+  adw_navigation_view_pop (self->navigation_view);
   if (n_pages <= 2)
     {
       gtk_toggle_button_set_active (self->toggle_transactions, FALSE);
@@ -447,7 +428,7 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzWindow, comet_overlay);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, split_view);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, transactions_stack);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, main_stack);
+  gtk_widget_class_bind_template_child (widget_class, BzWindow, navigation_view);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, full_view);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, toasts);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, toggle_transactions);
@@ -456,15 +437,11 @@ bz_window_class_init (BzWindowClass *klass)
   // gtk_widget_class_bind_template_child (widget_class, BzWindow, refresh);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, search_widget);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, update_button);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, title_revealer);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, title_toggle_group);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, transactions_pause);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, transactions_stop);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, transactions_clear);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, toolbar_view);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, top_header_bar);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, bottom_header_bar);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, curated_toggle);
+  gtk_widget_class_bind_template_child (widget_class, BzWindow, main_view_stack);
+  gtk_widget_class_bind_template_child (widget_class, BzWindow, main_stack);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_double_zero);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
@@ -505,7 +482,7 @@ key_pressed (BzWindow              *self,
     return FALSE;
 
   /* Ignore if we are already on search page */
-  active_name = adw_toggle_group_get_active_name (self->title_toggle_group);
+  active_name = adw_view_stack_get_visible_child_name (self->main_view_stack);
   if (g_strcmp0 (active_name, "search") == 0)
     return FALSE;
 
@@ -513,7 +490,7 @@ key_pressed (BzWindow              *self,
   if (unichar == 0 || !g_unichar_isgraph (unichar))
     return FALSE;
 
-  adw_toggle_group_set_active_name (self->title_toggle_group, "search");
+  adw_view_stack_set_visible_child_name (self->main_view_stack, "search");
 
   g_unichar_to_utf8 (unichar, buf);
   bz_search_widget_set_text (self->search_widget, buf);
@@ -526,7 +503,7 @@ bz_window_init (BzWindow *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
 
-  adw_toggle_group_set_active_name (self->title_toggle_group, "flathub");
+  adw_view_stack_set_visible_child_name (self->main_view_stack, "flathub");
 
   self->key_controller = gtk_event_controller_key_new ();
   g_signal_connect_swapped (self->key_controller, "key-pressed", G_CALLBACK (key_pressed), self);
@@ -564,7 +541,7 @@ has_inputs_changed (BzWindow          *self,
                     BzContentProvider *provider)
 {
   if (!bz_content_provider_get_has_inputs (provider))
-    adw_toggle_group_set_active_name (self->title_toggle_group, "flathub");
+    adw_view_stack_set_visible_child_name (self->main_view_stack, "flathub");
 }
 
 static void
@@ -782,13 +759,10 @@ bz_window_show_group (BzWindow     *self,
 
   bz_full_view_set_entry_group (self->full_view, group);
 
-  visible_page = adw_navigation_view_get_visible_page (self->main_stack);
-  if (visible_page != adw_navigation_view_find_page (self->main_stack, "view"))
-    adw_navigation_view_push_by_tag (self->main_stack, "view");
+  visible_page = adw_navigation_view_get_visible_page (self->navigation_view);
+  if (visible_page != adw_navigation_view_find_page (self->navigation_view, "view"))
+    adw_navigation_view_push_by_tag (self->navigation_view, "view");
   gtk_widget_set_visible (GTK_WIDGET (self->go_back), TRUE);
-  gtk_revealer_set_reveal_child (self->title_revealer, FALSE);
-
-  set_bottom_bar (self);
 }
 
 void
@@ -798,9 +772,6 @@ bz_window_set_app_list_view_mode (BzWindow *self,
   g_return_if_fail (BZ_IS_WINDOW (self));
 
   gtk_widget_set_visible (GTK_WIDGET (self->go_back), enabled);
-  gtk_revealer_set_reveal_child (self->title_revealer, !enabled);
-
-  set_bottom_bar (self);
 }
 
 void
@@ -846,7 +817,7 @@ transact (BzWindow  *self,
       transaction);
 
   if (source == NULL)
-    source = GTK_WIDGET (self->main_stack);
+    source = GTK_WIDGET (self->navigation_view);
 
   if (adw_overlay_split_view_get_show_sidebar (self->split_view))
     transaction_target = GTK_WIDGET (self->toggle_transactions_sidebar);
@@ -1196,7 +1167,7 @@ search (BzWindow   *self,
       bz_search_widget_set_text (self->search_widget, initial);
     }
 
-  adw_toggle_group_set_active_name (self->title_toggle_group, "search");
+  adw_view_stack_set_visible_child_name (self->main_view_stack, "search");
 }
 
 static void
@@ -1239,47 +1210,27 @@ check_transactions (BzWindow *self)
 static void
 set_page (BzWindow *self)
 {
-  const char *active_name   = NULL;
-  const char *visible_child = NULL;
+  const char *selected_view_stack_page_name = NULL;
+  const char *selected_navigation_page_name = NULL;
+  const char *visible_child_name            = NULL;
 
   if (self->state == NULL)
     return;
 
-  active_name = adw_toggle_group_get_active_name (self->title_toggle_group);
-
   if (bz_state_info_get_busy (self->state))
-    visible_child = "loading";
-  else if (g_strcmp0 (active_name, "search") == 0)
-    visible_child = "search";
-  else if (g_strcmp0 (active_name, "installed") == 0)
-    visible_child = "installed";
-  else if (g_strcmp0 (active_name, "curated") == 0)
-    visible_child = bz_state_info_get_online (self->state) ? "browse" : "offline";
-  else if (g_strcmp0 (active_name, "flathub") == 0)
-    visible_child = bz_state_info_get_online (self->state) ? "flathub" : "offline";
+    visible_child_name = "loading";
+  else if (!bz_state_info_get_online (self->state))
+    visible_child_name = "offline";
   else
-    visible_child = "flathub";
+    visible_child_name = "main";
 
-  adw_navigation_view_replace_with_tags (self->main_stack, (const char *[]) { visible_child }, 1);
-  gtk_widget_set_sensitive (GTK_WIDGET (self->title_toggle_group), !bz_state_info_get_busy (self->state));
+  gtk_stack_set_visible_child_name (self->main_stack, visible_child_name);
 
-  gtk_revealer_set_reveal_child (self->title_revealer, TRUE);
-  gtk_widget_set_visible (GTK_WIDGET (self->go_back), FALSE);
+  selected_view_stack_page_name = adw_view_stack_get_visible_child_name (self->main_view_stack);
+  selected_navigation_page_name = adw_navigation_view_get_visible_page_tag (self->navigation_view);
 
-  set_bottom_bar (self);
-
-  if (g_strcmp0 (visible_child, "search") == 0)
+  if (g_strcmp0 (selected_view_stack_page_name, "search") == 0)
     gtk_widget_grab_focus (GTK_WIDGET (self->search_widget));
-  else if (g_strcmp0 (visible_child, "view") != 0)
+  else if (g_strcmp0 (selected_navigation_page_name, "view") != 0)
     bz_full_view_set_entry_group (self->full_view, NULL);
-}
-
-static void
-set_bottom_bar (BzWindow *self)
-{
-  gboolean show_bottom_bar = FALSE;
-
-  show_bottom_bar = self->breakpoint_applied &&
-                    gtk_revealer_get_reveal_child (self->title_revealer);
-  adw_toolbar_view_set_reveal_bottom_bars (self->toolbar_view, show_bottom_bar);
 }
