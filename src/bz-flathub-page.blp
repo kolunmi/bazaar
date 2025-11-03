@@ -88,12 +88,12 @@ template $BzFlathubPage: Adw.Bin {
 
                       Adw.Toggle {
                         label: _("New");
-                        name: "recently_added";
+                        name: "recently-added";
                       }
 
                       Adw.Toggle {
                         label: _("Updated");
-                        name: "recently_updated";
+                        name: "recently-updated";
                       }
                     }
                   }
@@ -108,125 +108,32 @@ template $BzFlathubPage: Adw.Bin {
                       name: "trending";
                       title: _("Trending");
 
-                      child: Box {
-                        orientation: vertical;
-                        spacing: 10;
-
-                        $BzDynamicListView {
-                          styles [
-                            "flathub-page-section",
-                          ]
-
-                          hexpand: true;
-                          scroll: false;
-                          noscroll-kind: flow-box;
-                          child-type: "BzAppTile";
-                          child-prop: "group";
-
-                          model: SliceListModel {
-                            offset: 0;
-                            size: 12;
-                            model: bind template.state as <$BzFlathubState>.trending;
-                          };
-
-                          bind-widget => $bind_widget_cb(template);
-                          unbind-widget => $unbind_widget_cb(template);
-                        }
-
-                        Button {
-                          styles [
-                            "pill",
-                          ]
-
-                          label: _("More Trending");
-                          halign: center;
-                          valign: center;
-                          clicked => $show_more_trending_clicked_cb(template);
-                        }
+                      child: $BzFlathubCategorySection section_trending {
+                        category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "trending") as <$BzFlathubCategory>;
+                        max-items: 12;
+                        group-selected => $category_section_group_selected_cb() swapped;
                       };
                     }
 
                     Adw.ViewStackPage {
-                      name: "recently_updated";
+                      name: "recently-updated";
                       title: _("Recently Updated");
 
-                      child: Box {
-                        orientation: vertical;
-                        spacing: 10;
-
-                        $BzDynamicListView {
-                          styles [
-                            "flathub-page-section",
-                          ]
-
-                          hexpand: true;
-                          scroll: false;
-                          noscroll-kind: flow-box;
-                          child-type: "BzAppTile";
-                          child-prop: "group";
-
-                          model: SliceListModel {
-                            offset: 0;
-                            size: 12;
-                            model: bind template.state as <$BzFlathubState>.recently_updated;
-                          };
-
-                          bind-widget => $bind_widget_cb(template);
-                          unbind-widget => $unbind_widget_cb(template);
-                        }
-
-                        Button {
-                          styles [
-                            "pill",
-                          ]
-
-                          label: _("More Updated");
-                          halign: center;
-                          valign: center;
-                          clicked => $show_more_recently_updated_clicked_cb(template);
-                        }
+                      child: $BzFlathubCategorySection section_recently_updated {
+                        category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "recently-updated") as <$BzFlathubCategory>;
+                        max-items: 12;
+                        group-selected => $category_section_group_selected_cb() swapped;
                       };
                     }
 
                     Adw.ViewStackPage {
-                      name: "recently_added";
+                      name: "recently-added";
                       title: _("Recently Added");
 
-                      child: Box {
-                        orientation: vertical;
-                        spacing: 10;
-
-                        $BzDynamicListView {
-                          styles [
-                            "flathub-page-section",
-                          ]
-
-                          hexpand: true;
-                          scroll: false;
-                          noscroll-kind: flow-box;
-                          child-type: "BzAppTile";
-                          child-prop: "group";
-
-                          model: SliceListModel {
-                            offset: 0;
-                            size: 12;
-                            model: bind template.state as <$BzFlathubState>.recently_added;
-                          };
-
-                          bind-widget => $bind_widget_cb(template);
-                          unbind-widget => $unbind_widget_cb(template);
-                        }
-
-                        Button {
-                          styles [
-                            "pill",
-                          ]
-
-                          label: _("More New");
-                          halign: center;
-                          valign: center;
-                          clicked => $show_more_recently_added_clicked_cb(template);
-                        }
+                      child: $BzFlathubCategorySection section_recently_added {
+                        category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "recently-added") as <$BzFlathubCategory>;
+                        max-items: 12;
+                        group-selected => $category_section_group_selected_cb() swapped;
                       };
                     }
 
@@ -234,41 +141,10 @@ template $BzFlathubPage: Adw.Bin {
                       name: "popular";
                       title: _("Popular");
 
-                      child: Box {
-                        orientation: vertical;
-                        spacing: 10;
-
-                        $BzDynamicListView {
-                          styles [
-                            "flathub-page-section",
-                          ]
-
-                          hexpand: true;
-                          scroll: false;
-                          noscroll-kind: flow-box;
-                          child-type: "BzAppTile";
-                          child-prop: "group";
-
-                          model: SliceListModel {
-                            offset: 0;
-                            size: 12;
-                            model: bind template.state as <$BzFlathubState>.popular;
-                          };
-
-                          bind-widget => $bind_widget_cb(template);
-                          unbind-widget => $unbind_widget_cb(template);
-                        }
-
-                        Button {
-                          styles [
-                            "pill",
-                          ]
-
-                          label: _("More Popular");
-                          halign: center;
-                          valign: center;
-                          clicked => $show_more_popular_clicked_cb(template);
-                        }
+                      child: $BzFlathubCategorySection section_popular {
+                        category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "popular") as <$BzFlathubCategory>;
+                        max-items: 12;
+                        group-selected => $category_section_group_selected_cb() swapped;
                       };
                     }
                   }
@@ -398,7 +274,7 @@ template $BzFlathubPage: Adw.Bin {
                         model: SliceListModel otg_slice {
                           offset: 0;
                           size: 9;
-                          model: bind template.state as <$BzFlathubState>.mobile;
+                          model: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "mobile") as <$BzFlathubCategory>.applications;
                         };
 
                         bind-widget => $bind_widget_cb(template);

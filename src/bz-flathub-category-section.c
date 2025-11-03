@@ -104,6 +104,7 @@ on_more_button_clicked (GtkButton                *button,
   const char      *title                = NULL;
   g_autofree char *subtitle             = NULL;
   int              total_entries        = 0;
+  gboolean         is_spotlight         = FALSE;
 
   if (self->category == NULL)
     return;
@@ -118,24 +119,33 @@ on_more_button_clicked (GtkButton                *button,
   if (nav_view == NULL)
     return;
 
-  title          = bz_flathub_category_get_display_name (self->category);
-  model          = bz_flathub_category_dup_applications (self->category);
-  carousel_model = bz_flathub_category_dup_quality_applications (self->category);
-  total_entries  = bz_flathub_category_get_total_entries (self->category);
+  title        = bz_flathub_category_get_display_name (self->category);
+  model        = bz_flathub_category_dup_applications (self->category);
+  is_spotlight = bz_flathub_category_get_is_spotlight (self->category);
 
-  if (carousel_model != NULL && g_list_model_get_n_items (carousel_model) > 0)
-    {
-      apps_page = bz_apps_page_new_with_carousel (title, model, carousel_model);
-    }
-  else
+  if (is_spotlight)
     {
       apps_page = bz_apps_page_new (title, model);
     }
-
-  if (total_entries > 0)
+  else
     {
-      subtitle = g_strdup_printf (_ ("%d applications"), total_entries);
-      bz_apps_page_set_subtitle (BZ_APPS_PAGE (apps_page), subtitle);
+      carousel_model = bz_flathub_category_dup_quality_applications (self->category);
+      total_entries  = bz_flathub_category_get_total_entries (self->category);
+
+      if (carousel_model != NULL && g_list_model_get_n_items (carousel_model) > 0)
+        {
+          apps_page = bz_apps_page_new_with_carousel (title, model, carousel_model);
+        }
+      else
+        {
+          apps_page = bz_apps_page_new (title, model);
+        }
+
+      if (total_entries > 0)
+        {
+          subtitle = g_strdup_printf (_ ("%d applications"), total_entries);
+          bz_apps_page_set_subtitle (BZ_APPS_PAGE (apps_page), subtitle);
+        }
     }
 
   g_signal_connect_swapped (
@@ -244,6 +254,13 @@ bz_flathub_category_section_set_property (GObject      *object,
     }
 }
 
+static gboolean
+invert_boolean (gpointer object,
+                gboolean value)
+{
+  return !value;
+}
+
 static void
 bz_flathub_category_section_class_init (BzFlathubCategorySectionClass *klass)
 {
@@ -291,6 +308,7 @@ bz_flathub_category_section_class_init (BzFlathubCategorySectionClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzFlathubCategorySection, section_list);
   gtk_widget_class_bind_template_child (widget_class, BzFlathubCategorySection, more_button);
 
+  gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, on_more_button_clicked);
   gtk_widget_class_bind_template_callback (widget_class, bind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, unbind_widget_cb);

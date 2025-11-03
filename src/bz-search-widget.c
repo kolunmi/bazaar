@@ -271,7 +271,10 @@ category_clicked (BzFlathubCategory *category,
   AdwNavigationPage *apps_page          = NULL;
   g_autoptr (GListModel) model          = NULL;
   g_autoptr (GListModel) carousel_model = NULL;
-  const char *title                     = NULL;
+  const char      *title                = NULL;
+  g_autofree char *subtitle             = NULL;
+  int              total_entries        = 0;
+  gboolean         is_spotlight         = FALSE;
 
   self = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_SEARCH_WIDGET);
   g_assert (self != NULL);
@@ -281,17 +284,33 @@ category_clicked (BzFlathubCategory *category,
   nav_view = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
   g_assert (nav_view != NULL);
 
-  title          = bz_flathub_category_get_display_name (category);
-  model          = bz_flathub_category_dup_applications (category);
-  carousel_model = bz_flathub_category_dup_quality_applications (category);
+  title        = bz_flathub_category_get_display_name (category);
+  model        = bz_flathub_category_dup_applications (category);
+  is_spotlight = bz_flathub_category_get_is_spotlight (category);
 
-  if (carousel_model != NULL && g_list_model_get_n_items (carousel_model) > 0)
+  if (is_spotlight)
     {
-      apps_page = bz_apps_page_new_with_carousel (title, model, carousel_model);
+      apps_page = bz_apps_page_new (title, model);
     }
   else
     {
-      apps_page = bz_apps_page_new (title, model);
+      carousel_model = bz_flathub_category_dup_quality_applications (category);
+      total_entries  = bz_flathub_category_get_total_entries (category);
+
+      if (carousel_model != NULL && g_list_model_get_n_items (carousel_model) > 0)
+        {
+          apps_page = bz_apps_page_new_with_carousel (title, model, carousel_model);
+        }
+      else
+        {
+          apps_page = bz_apps_page_new (title, model);
+        }
+
+      if (total_entries > 0)
+        {
+          subtitle = g_strdup_printf (_ ("%d applications"), total_entries);
+          bz_apps_page_set_subtitle (BZ_APPS_PAGE (apps_page), subtitle);
+        }
     }
 
   g_signal_connect_swapped (

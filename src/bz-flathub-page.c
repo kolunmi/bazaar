@@ -63,6 +63,10 @@ enum
 };
 static guint signals[LAST_SIGNAL];
 
+static BzFlathubCategory *
+get_category_by_name (GListModel *categories,
+                      const char *name);
+
 static void
 tile_clicked (BzEntryGroup *group,
               GtkButton    *button);
@@ -159,63 +163,29 @@ unbind_widget_cb (BzFlathubPage     *self,
 }
 
 static void
-show_more_trending_clicked_cb (BzFlathubPage *self,
-                               GtkButton     *button)
-{
-  g_autoptr (GListModel) model = NULL;
-
-  model = bz_flathub_state_dup_trending (self->state);
-  show_more_clicked (_ ("Trending"), model, button);
-}
-
-static void
-show_more_recently_updated_clicked_cb (BzFlathubPage *self,
-                                       GtkButton     *button)
-{
-  g_autoptr (GListModel) model = NULL;
-
-  model = bz_flathub_state_dup_recently_updated (self->state);
-  show_more_clicked (_ ("Recently Updated"), model, button);
-}
-
-static void
-show_more_recently_added_clicked_cb (BzFlathubPage *self,
-                                     GtkButton     *button)
-{
-  g_autoptr (GListModel) model = NULL;
-
-  model = bz_flathub_state_dup_recently_added (self->state);
-  show_more_clicked (_ ("Recently Added"), model, button);
-}
-
-static void
-show_more_popular_clicked_cb (BzFlathubPage *self,
-                              GtkButton     *button)
-{
-  g_autoptr (GListModel) model = NULL;
-
-  model = bz_flathub_state_dup_popular (self->state);
-  show_more_clicked (_ ("Popular"), model, button);
-}
-
-static void
 show_more_mobile_clicked_cb (BzFlathubPage *self,
                              GtkButton     *button)
 {
-  g_autoptr (GListModel) model = NULL;
+  g_autoptr (GListModel) model           = NULL;
+  g_autoptr (BzFlathubCategory) category = NULL;
 
-  model = bz_flathub_state_dup_mobile (self->state);
+  category = get_category_by_name (bz_flathub_state_get_categories (self->state), "mobile");
+  if (category == NULL)
+    return;
+
+  model = bz_flathub_category_dup_applications (category);
+  if (model == NULL)
+    return;
+
   show_more_clicked (_ ("Mobile Apps"), model, button);
 }
 
-static gpointer
-get_category_by_name_cb (gpointer    object,
-                         gpointer    categories_obj,
-                         const char *name)
+static BzFlathubCategory *
+get_category_by_name (GListModel *categories,
+                      const char *name)
 {
-  GListModel *categories = G_LIST_MODEL (categories_obj);
-  guint       n_items;
-  guint       i;
+  guint n_items;
+  guint i;
 
   if (categories == NULL)
     return NULL;
@@ -234,6 +204,14 @@ get_category_by_name_cb (gpointer    object,
     }
 
   return NULL;
+}
+
+static gpointer
+get_category_by_name_cb (gpointer    object,
+                         gpointer    categories_obj,
+                         const char *name)
+{
+  return get_category_by_name (G_LIST_MODEL (categories_obj), name);
 }
 
 static void
@@ -284,10 +262,6 @@ bz_flathub_page_class_init (BzFlathubPageClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, unbind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, category_section_group_selected_cb);
   gtk_widget_class_bind_template_callback (widget_class, get_category_by_name_cb);
-  gtk_widget_class_bind_template_callback (widget_class, show_more_trending_clicked_cb);
-  gtk_widget_class_bind_template_callback (widget_class, show_more_recently_updated_clicked_cb);
-  gtk_widget_class_bind_template_callback (widget_class, show_more_recently_added_clicked_cb);
-  gtk_widget_class_bind_template_callback (widget_class, show_more_popular_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, show_more_mobile_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, featured_carousel_group_clicked_cb);
 }
