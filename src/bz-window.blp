@@ -311,6 +311,7 @@ template $BzWindow: Adw.ApplicationWindow {
                   Adw.ViewSwitcher {
                     stack: main_view_stack;
                     policy: wide;
+                    sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.busy) as <bool>;
                   }
 
                   [end]
@@ -356,6 +357,7 @@ template $BzWindow: Adw.ApplicationWindow {
                 Adw.ViewSwitcherBar {
                   stack: main_view_stack;
                   reveal: true;
+                  sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.busy) as <bool>;
                 }
               };
             }
