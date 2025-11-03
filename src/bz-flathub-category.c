@@ -384,6 +384,33 @@ get_category_short_name (const char *category_id)
 }
 
 static const char *
+get_category_more_of_name (const char *category_id)
+{
+  if (g_strcmp0 (category_id, "audiovideo") == 0)
+    return _ ("More Audio & Video");
+  if (g_strcmp0 (category_id, "development") == 0)
+    return _ ("More Developer Tools");
+  if (g_strcmp0 (category_id, "education") == 0)
+    return _ ("More Education");
+  if (g_strcmp0 (category_id, "game") == 0)
+    return _ ("More Gaming");
+  if (g_strcmp0 (category_id, "graphics") == 0)
+    return _ ("More Graphics & Photography");
+  if (g_strcmp0 (category_id, "network") == 0)
+    return _ ("More Networking");
+  if (g_strcmp0 (category_id, "office") == 0)
+    return _ ("More Productivity");
+  if (g_strcmp0 (category_id, "science") == 0)
+    return _ ("More Science");
+  if (g_strcmp0 (category_id, "system") == 0)
+    return _ ("More System");
+  if (g_strcmp0 (category_id, "utility") == 0)
+    return _ ("More Utilities");
+
+  return category_id;
+}
+
+static const char *
 get_category_icon_name (const char *category_id)
 {
   if (g_strcmp0 (category_id, "audiovideo") == 0)
@@ -422,6 +449,13 @@ bz_flathub_category_get_short_name (BzFlathubCategory *self)
 {
   g_return_val_if_fail (BZ_IS_FLATHUB_CATEGORY (self), NULL);
   return get_category_short_name (self->name);
+}
+
+const char *
+bz_flathub_category_get_more_of_name (BzFlathubCategory *self)
+{
+  g_return_val_if_fail (BZ_IS_FLATHUB_CATEGORY (self), NULL);
+  return get_category_more_of_name (self->name);
 }
 
 const char *
