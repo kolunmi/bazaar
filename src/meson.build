@@ -129,6 +129,7 @@ bz_sources = [
   'bz-spdx.c',
   'bz-state-info.c',
   'bz-stats-dialog.c',
+  'bz-themed-entry-group-rect.c',
   'bz-transaction-entry-tracker.c',
   'bz-transaction-manager.c',
   'bz-transaction-task.c',

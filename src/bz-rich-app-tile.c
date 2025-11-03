@@ -22,16 +22,16 @@
 #include "bz-entry.h"
 #include "bz-group-tile-css-watcher.h"
 #include "bz-rounded-picture.h"
+#include "bz-themed-entry-group-rect.h"
 #include "bz-util.h"
 
 struct _BzRichAppTile
 {
-  AdwBin                 parent_instance;
-  BzEntryGroup          *group;
-  GdkPaintable          *first_screenshot;
-  gboolean               has_screenshot;
-  BzGroupTileCssWatcher *css;
-  DexFuture             *ui_entry_resolve;
+  AdwBin        parent_instance;
+  BzEntryGroup *group;
+  GdkPaintable *first_screenshot;
+  gboolean      has_screenshot;
+  DexFuture    *ui_entry_resolve;
 
   GtkWidget *picture_box;
 };
@@ -133,7 +133,6 @@ bz_rich_app_tile_dispose (GObject *object)
 
   g_clear_object (&self->group);
   g_clear_object (&self->first_screenshot);
-  g_clear_object (&self->css);
   dex_clear (&self->ui_entry_resolve);
 
   G_OBJECT_CLASS (bz_rich_app_tile_parent_class)->dispose (object);
@@ -253,6 +252,8 @@ bz_rich_app_tile_class_init (BzRichAppTileClass *klass)
           G_TYPE_NONE, 0);
 
   g_type_ensure (BZ_TYPE_ROUNDED_PICTURE);
+  g_type_ensure (BZ_TYPE_THEMED_ENTRY_GROUP_RECT);
+
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-rich-app-tile.ui");
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
@@ -265,9 +266,6 @@ static void
 bz_rich_app_tile_init (BzRichAppTile *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
-
-  self->css = bz_group_tile_css_watcher_new ();
-  bz_group_tile_css_watcher_set_widget (self->css, self->picture_box);
 }
 
 GtkWidget *
@@ -295,7 +293,6 @@ bz_rich_app_tile_set_group (BzRichAppTile *self,
     self->group = g_object_ref (group);
 
   update_screenshot (self);
-  bz_group_tile_css_watcher_set_group (self->css, group);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_GROUP]);
 }
