@@ -363,14 +363,11 @@ show_more_clicked (const char *title,
                    GtkButton  *button)
 {
   GtkWidget         *self      = NULL;
-  GtkWidget         *window    = NULL;
   GtkWidget         *nav_view  = NULL;
   AdwNavigationPage *apps_page = NULL;
 
   self = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_FLATHUB_PAGE);
   g_assert (self != NULL);
-
-  window = GTK_WIDGET (gtk_widget_get_root (GTK_WIDGET (self)));
 
   nav_view = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
   g_assert (nav_view != NULL);
