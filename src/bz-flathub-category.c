@@ -75,8 +75,8 @@ static const CategoryInfo category_info[] = {
   {          "utility",              N_ ("Utilities"),    N_ ("Tools"),              N_ ("More Utilities"),  "io.github.kolumni.Bazaar.Utilities" },
   {         "trending",               N_ ("Trending"), N_ ("Trending"),               N_ ("More Trending"),   "io.github.kolumni.Bazaar.Trending" },
   {          "popular",                N_ ("Popular"),  N_ ("Popular"),                N_ ("More Popular"),    "io.github.kolumni.Bazaar.Popular" },
-  {   "recently-added",                    N_ ("New"),      N_ ("New"),                    N_ ("More New"),        "io.github.kolumni.Bazaar.New" },
-  { "recently-updated",                N_ ("Updated"),  N_ ("Updated"),                N_ ("More Updated"),    "io.github.kolumni.Bazaar.Updated" },
+  {   "recently-added",         N_ ("Recently Added"),      N_ ("New"),                    N_ ("More New"),        "io.github.kolumni.Bazaar.New" },
+  { "recently-updated",       N_ ("Recently Updated"),  N_ ("Updated"),                N_ ("More Updated"),    "io.github.kolumni.Bazaar.Updated" },
   {           "mobile",                 N_ ("Mobile"),   N_ ("Mobile"),                 N_ ("More Mobile"),     "io.github.kolumni.Bazaar.Mobile" },
   {               NULL,                          NULL,            NULL,                              NULL,                                  NULL }
 };
