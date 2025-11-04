@@ -38,6 +38,7 @@ struct _BzFlathubPage
   AdwBin parent_instance;
 
   BzFlathubState *state;
+  gboolean online;
 
   /* Template widgets */
   AdwViewStack *stack;
@@ -50,6 +51,7 @@ enum
   PROP_0,
 
   PROP_STATE,
+  PROP_ONLINE,
 
   LAST_PROP
 };
@@ -79,10 +81,6 @@ show_more_clicked (const char *title,
 static void
 apps_page_select_cb (BzFlathubPage *self,
                      BzEntryGroup  *group,
-                     BzAppsPage    *page);
-
-static void
-apps_page_hiding_cb (BzFlathubPage *self,
                      BzAppsPage    *page);
 
 static void
@@ -121,6 +119,9 @@ bz_flathub_page_get_property (GObject    *object,
     case PROP_STATE:
       g_value_set_object (value, bz_flathub_page_get_state (self));
       break;
+    case PROP_ONLINE:
+      g_value_set_boolean (value, self->online);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -138,6 +139,14 @@ bz_flathub_page_set_property (GObject      *object,
     {
     case PROP_STATE:
       bz_flathub_page_set_state (self, g_value_get_object (value));
+      break;
+    case PROP_ONLINE:
+      self->online = g_value_get_boolean (value);
+      if (self->online)
+        bz_flathub_page_set_state (self, bz_flathub_page_get_state (self));
+      else
+        adw_view_stack_set_visible_child_name (self->stack, "offline");
+
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -231,6 +240,13 @@ bz_flathub_page_class_init (BzFlathubPageClass *klass)
           BZ_TYPE_FLATHUB_STATE,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
+  props[PROP_ONLINE] =
+      g_param_spec_boolean (
+          "online",
+          NULL, NULL,
+          FALSE,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   signals[SIGNAL_GROUP_SELECTED] =
@@ -320,14 +336,11 @@ show_more_clicked (const char *title,
                    GtkButton  *button)
 {
   GtkWidget         *self      = NULL;
-  GtkWidget         *window    = NULL;
   GtkWidget         *nav_view  = NULL;
   AdwNavigationPage *apps_page = NULL;
 
   self = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_FLATHUB_PAGE);
   g_assert (self != NULL);
-
-  window = GTK_WIDGET (gtk_widget_get_root (GTK_WIDGET (self)));
 
   nav_view = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
   g_assert (nav_view != NULL);
@@ -337,13 +350,8 @@ show_more_clicked (const char *title,
   g_signal_connect_swapped (
       apps_page, "select",
       G_CALLBACK (apps_page_select_cb), self);
-  g_signal_connect_swapped (
-      apps_page, "hiding",
-      G_CALLBACK (apps_page_hiding_cb), self);
 
   adw_navigation_view_push (ADW_NAVIGATION_VIEW (nav_view), apps_page);
-
-  bz_window_set_app_list_view_mode (BZ_WINDOW (window), TRUE);
 }
 
 static void
@@ -360,15 +368,4 @@ category_section_group_selected_cb (BzFlathubPage            *self,
                                     BzFlathubCategorySection *section)
 {
   g_signal_emit (self, signals[SIGNAL_GROUP_SELECTED], 0, group);
-}
-
-static void
-apps_page_hiding_cb (BzFlathubPage *self,
-                     BzAppsPage    *page)
-{
-  GtkWidget *window = NULL;
-
-  window = GTK_WIDGET (gtk_widget_get_root (GTK_WIDGET (self)));
-
-  bz_window_set_app_list_view_mode (BZ_WINDOW (window), FALSE);
 }

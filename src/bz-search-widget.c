@@ -318,8 +318,6 @@ category_clicked (BzFlathubCategory *category,
       G_CALLBACK (apps_page_select_cb), self);
 
   adw_navigation_view_push (ADW_NAVIGATION_VIEW (nav_view), apps_page);
-
-  bz_window_set_app_list_view_mode (BZ_WINDOW (window), TRUE);
 }
 
 static void

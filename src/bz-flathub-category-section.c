@@ -68,18 +68,6 @@ apps_page_select_cb_forwarding (BzFlathubPage *flathub_page,
 }
 
 static void
-apps_page_hiding_cb_forwarding (BzFlathubPage *flathub_page,
-                                BzAppsPage    *page)
-{
-  GtkWidget *window = NULL;
-
-  window = GTK_WIDGET (gtk_widget_get_root (GTK_WIDGET (flathub_page)));
-
-  if (window != NULL)
-    bz_window_set_app_list_view_mode (BZ_WINDOW (window), FALSE);
-}
-
-static void
 tile_clicked (BzEntryGroup *group,
               GtkButton    *button)
 {
@@ -151,14 +139,8 @@ on_more_button_clicked (GtkButton                *button,
   g_signal_connect_swapped (
       apps_page, "select",
       G_CALLBACK (apps_page_select_cb_forwarding), flathub_page);
-  g_signal_connect_swapped (
-      apps_page, "hiding",
-      G_CALLBACK (apps_page_hiding_cb_forwarding), flathub_page);
 
   adw_navigation_view_push (ADW_NAVIGATION_VIEW (nav_view), apps_page);
-
-  if (window != NULL)
-    bz_window_set_app_list_view_mode (BZ_WINDOW (window), TRUE);
 }
 
 static void
@@ -351,7 +333,7 @@ bz_flathub_category_section_set_category (BzFlathubCategorySection *self,
       display_name = bz_flathub_category_get_display_name (category);
       gtk_label_set_text (self->section_title, display_name);
 
-      more_label = g_strdup_printf (_ ("More %s"), display_name);
+      more_label = g_strdup (bz_flathub_category_get_more_of_name (category));
       gtk_button_set_label (self->more_button, more_label);
 
       update_model (self);
