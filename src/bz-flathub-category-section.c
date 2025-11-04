@@ -333,7 +333,7 @@ bz_flathub_category_section_set_category (BzFlathubCategorySection *self,
       display_name = bz_flathub_category_get_display_name (category);
       gtk_label_set_text (self->section_title, display_name);
 
-      more_label = g_strdup_printf (_ ("More %s"), display_name);
+      more_label = g_strdup (bz_flathub_category_get_more_of_name (category));
       gtk_button_set_label (self->more_button, more_label);
 
       update_model (self);

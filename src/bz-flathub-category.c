@@ -58,26 +58,27 @@ typedef struct
   const char *id;
   const char *display_name;
   const char *short_name;
+  const char *more_of_name;
   const char *icon_name;
 } CategoryInfo;
 
 static const CategoryInfo category_info[] = {
-  {       "audiovideo",          N_ ("Audio & Video"),    N_ ("Media"), "io.github.kolumni.Bazaar.Audiovideo" },
-  {      "development",        N_ ("Developer Tools"),  N_ ("Develop"),    "io.github.kolumni.Bazaar.Develop" },
-  {        "education",              N_ ("Education"),    N_ ("Learn"),      "io.github.kolumni.Bazaar.Learn" },
-  {             "game",                 N_ ("Gaming"),     N_ ("Play"),       "io.github.kolumni.Bazaar.Play" },
-  {         "graphics", N_ ("Graphics & Photography"),   N_ ("Create"),     "io.github.kolumni.Bazaar.Create" },
-  {          "network",             N_ ("Networking"), N_ ("Internet"),    "io.github.kolumni.Bazaar.Network" },
-  {           "office",           N_ ("Productivity"),     N_ ("Work"),       "io.github.kolumni.Bazaar.Work" },
-  {          "science",                N_ ("Science"),  N_ ("Science"),    "io.github.kolumni.Bazaar.Science" },
-  {           "system",                 N_ ("System"),   N_ ("System"),     "io.github.kolumni.Bazaar.System" },
-  {          "utility",              N_ ("Utilities"),    N_ ("Tools"),  "io.github.kolumni.Bazaar.Utilities" },
-  {         "trending",               N_ ("Trending"), N_ ("Trending"),   "io.github.kolumni.Bazaar.Trending" },
-  {          "popular",                N_ ("Popular"),  N_ ("Popular"),    "io.github.kolumni.Bazaar.Popular" },
-  {   "recently-added",                    N_ ("New"),      N_ ("New"),        "io.github.kolumni.Bazaar.New" },
-  { "recently-updated",                N_ ("Updated"),  N_ ("Updated"),    "io.github.kolumni.Bazaar.Updated" },
-  {           "mobile",                 N_ ("Mobile"),   N_ ("Mobile"),     "io.github.kolumni.Bazaar.Mobile" },
-  {               NULL,                          NULL,            NULL,                                  NULL }
+  {       "audiovideo",          N_ ("Audio & Video"),    N_ ("Media"),          N_ ("More Audio & Video"), "io.github.kolumni.Bazaar.Audiovideo" },
+  {      "development",        N_ ("Developer Tools"),  N_ ("Develop"),        N_ ("More Developer Tools"),    "io.github.kolumni.Bazaar.Develop" },
+  {        "education",              N_ ("Education"),    N_ ("Learn"),              N_ ("More Education"),      "io.github.kolumni.Bazaar.Learn" },
+  {             "game",                 N_ ("Gaming"),     N_ ("Play"),                 N_ ("More Gaming"),       "io.github.kolumni.Bazaar.Play" },
+  {         "graphics", N_ ("Graphics & Photography"),   N_ ("Create"), N_ ("More Graphics & Photography"),     "io.github.kolumni.Bazaar.Create" },
+  {          "network",             N_ ("Networking"), N_ ("Internet"),             N_ ("More Networking"),    "io.github.kolumni.Bazaar.Network" },
+  {           "office",           N_ ("Productivity"),     N_ ("Work"),           N_ ("More Productivity"),       "io.github.kolumni.Bazaar.Work" },
+  {          "science",                N_ ("Science"),  N_ ("Science"),                N_ ("More Science"),    "io.github.kolumni.Bazaar.Science" },
+  {           "system",                 N_ ("System"),   N_ ("System"),                 N_ ("More System"),     "io.github.kolumni.Bazaar.System" },
+  {          "utility",              N_ ("Utilities"),    N_ ("Tools"),              N_ ("More Utilities"),  "io.github.kolumni.Bazaar.Utilities" },
+  {         "trending",               N_ ("Trending"), N_ ("Trending"),               N_ ("More Trending"),   "io.github.kolumni.Bazaar.Trending" },
+  {          "popular",                N_ ("Popular"),  N_ ("Popular"),                N_ ("More Popular"),    "io.github.kolumni.Bazaar.Popular" },
+  {   "recently-added",         N_ ("Recently Added"),      N_ ("New"),                    N_ ("More New"),        "io.github.kolumni.Bazaar.New" },
+  { "recently-updated",       N_ ("Recently Updated"),  N_ ("Updated"),                N_ ("More Updated"),    "io.github.kolumni.Bazaar.Updated" },
+  {           "mobile",                 N_ ("Mobile"),   N_ ("Mobile"),                 N_ ("More Mobile"),     "io.github.kolumni.Bazaar.Mobile" },
+  {               NULL,                          NULL,            NULL,                              NULL,                                  NULL }
 };
 
 static const CategoryInfo *
@@ -426,6 +427,17 @@ bz_flathub_category_get_short_name (BzFlathubCategory *self)
 }
 
 const char *
+bz_flathub_category_get_more_of_name (BzFlathubCategory *self)
+{
+  const CategoryInfo *info;
+
+  g_return_val_if_fail (BZ_IS_FLATHUB_CATEGORY (self), NULL);
+
+  info = get_category_info (self->name);
+  return info ? _ (info->more_of_name) : self->name;
+}
+
+const char *
 bz_flathub_category_get_icon_name (BzFlathubCategory *self)
 {
   const CategoryInfo *info;
@@ -435,5 +447,4 @@ bz_flathub_category_get_icon_name (BzFlathubCategory *self)
   info = get_category_info (self->name);
   return info ? info->icon_name : NULL;
 }
-
 /* End of bz-flathub-category.c */
