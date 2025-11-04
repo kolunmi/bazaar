@@ -229,13 +229,14 @@ template $BzWindow: Adw.ApplicationWindow {
 
                       Adw.ViewStackPage {
                         name: "browse";
-                        title: _("Browse");
+                        title: _("Curated");
                         icon-name: "starred-symbolic";
 
                         child: $BzBrowseWidget browse {
                           content-provider: bind template.state as <$BzStateInfo>.curated-provider;
                           online: bind template.state as <$BzStateInfo>.online;
                           group-selected => $browser_group_selected_cb(template);
+                          browse-flathub => $browse_flathub_cb(template);
                         };
                       }
 

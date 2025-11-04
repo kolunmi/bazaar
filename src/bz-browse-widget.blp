@@ -11,9 +11,16 @@ template $BzBrowseWidget: Adw.Bin {
       title: _("Empty");
 
       child: Adw.StatusPage {
-        icon-name: "horizontal-arrows-disabled-symbolic";
-        title: _("No Curated Applications");
-        description: _("Bazaar was not provided a curated content configuration. Contact your operating system's support channels for assistance.");
+        icon-name: "starred-symbolic";
+        title: _("No Curation");
+        description: _("There is no curation information provided on this system. You can still browse applications on Flathub");
+        child: Button {
+          label: _("Browse Flathub");
+          halign: center;
+          clicked => $browse_flathub_cb(template);
+
+          styles ["pill"]
+        };
       };
     }
 

@@ -342,6 +342,13 @@ main_view_stack_changed_cb (BzWindow     *self,
 }
 
 static void
+browse_flathub_cb (BzWindow       *self,
+                   BzBrowseWidget *widget)
+{
+  adw_view_stack_set_visible_child_name (self->main_view_stack, "flathub");
+}
+
+static void
 breakpoint_apply_cb (BzWindow      *self,
                      AdwBreakpoint *breakpoint)
 {
@@ -480,6 +487,7 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, transactions_clear_cb);
   gtk_widget_class_bind_template_callback (widget_class, visible_page_changed_cb);
   gtk_widget_class_bind_template_callback (widget_class, main_view_stack_changed_cb);
+  gtk_widget_class_bind_template_callback (widget_class, browse_flathub_cb);
 
   gtk_widget_class_install_action (widget_class, "escape", NULL, action_escape);
 }

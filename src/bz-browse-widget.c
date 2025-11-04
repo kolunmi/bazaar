@@ -52,6 +52,7 @@ static GParamSpec *props[LAST_PROP] = { 0 };
 enum
 {
   SIGNAL_GROUP_SELECTED,
+  SIGNAL_BROWSE_FLATHUB,
 
   LAST_SIGNAL,
 };
@@ -141,6 +142,13 @@ group_activated_cb (GtkListItem   *list_item,
 }
 
 static void
+browse_flathub_cb (BzBrowseWidget *self,
+                   GtkButton      *button)
+{
+  g_signal_emit (self, signals[SIGNAL_BROWSE_FLATHUB], 0);
+}
+
+static void
 bz_browse_widget_class_init (BzBrowseWidgetClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
@@ -181,12 +189,23 @@ bz_browse_widget_class_init (BzBrowseWidgetClass *klass)
       G_TYPE_FROM_CLASS (klass),
       g_cclosure_marshal_VOID__OBJECTv);
 
+  signals[SIGNAL_BROWSE_FLATHUB] =
+    g_signal_new (
+        "browse-flathub",
+        G_OBJECT_CLASS_TYPE (klass),
+        G_SIGNAL_RUN_FIRST,
+        0,
+        NULL, NULL,
+        g_cclosure_marshal_VOID__VOID,
+        G_TYPE_NONE, 0);
+
   g_type_ensure (BZ_TYPE_SECTION_VIEW);
   g_type_ensure (BZ_TYPE_INHIBITED_SCROLLABLE);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-browse-widget.ui");
   gtk_widget_class_bind_template_child (widget_class, BzBrowseWidget, stack);
   gtk_widget_class_bind_template_callback (widget_class, group_activated_cb);
+  gtk_widget_class_bind_template_callback (widget_class, browse_flathub_cb);
 }
 
 static void
