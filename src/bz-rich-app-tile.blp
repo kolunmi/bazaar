@@ -97,10 +97,10 @@ template $BzRichAppTile: Adw.Bin {
           visible: bind $is_zero(template.group as <$BzEntryGroup>.removable) as <bool>;
 
           styles [
-            "suggested-action",
+            "medium-pill",
           ]
 
-          label: _("Install");
+          label: _("Get");
           valign: center;
           clicked => $install_button_clicked_cb(template);
         }
@@ -110,9 +110,10 @@ template $BzRichAppTile: Adw.Bin {
 
           styles [
             "destructive-action",
+            "circular"
           ]
 
-          label: _("Remove");
+          icon-name: "user-trash-symbolic";
           valign: center;
           clicked => $install_button_clicked_cb(template);
         }

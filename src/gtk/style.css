@@ -114,6 +114,10 @@
 	--accent-bg-color: @window_fg_color;
 }
 
+.grey-bg {
+  background-color: var(@window_fg_color);
+}
+
 @media (prefers-color-scheme: dark) {
   .flathub {
     --accent-color: alpha(#fafafa,0.75);
@@ -167,6 +171,10 @@ button.context-tile:active .lozenge {
 .small-pill {
     padding: 2px 12px;
     border-radius: 99999px;
+}
+
+.medium-pill {
+	border-radius: 99999px;
 }
 
 .colored {
