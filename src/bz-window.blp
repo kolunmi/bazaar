@@ -225,6 +225,8 @@ template $BzWindow: Adw.ApplicationWindow {
                     name: "main";
 
                     child: Adw.ViewStack main_view_stack {
+                      notify::visible-child-name => $main_view_stack_changed_cb(template);
+
                       Adw.ViewStackPage {
                         name: "browse";
                         title: _("Browse");
