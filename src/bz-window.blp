@@ -371,6 +371,7 @@ template $BzWindow: Adw.ApplicationWindow {
               child: $BzFullView full_view {
                 state: bind template.state;
                 transaction-manager: bind template.state as <$BzStateInfo>.transaction-manager;
+                show-sidebar: bind split_view.show-sidebar bidirectional;
                 debounce: false;
                 main-menu: primary_menu;
                 install => $full_view_install_cb(template);
