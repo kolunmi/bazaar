@@ -18,7 +18,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "bz-search-widget.h"
 #include <glib/gi18n.h>
 
 #include "bz-apps-page.h"
@@ -30,6 +29,7 @@
 #include "bz-rich-app-tile.h"
 #include "bz-screenshot.h"
 #include "bz-search-result.h"
+#include "bz-search-widget.h"
 #include "bz-state-info.h"
 #include "bz-util.h"
 #include "bz-window.h"
@@ -271,7 +271,10 @@ category_clicked (BzFlathubCategory *category,
   AdwNavigationPage *apps_page          = NULL;
   g_autoptr (GListModel) model          = NULL;
   g_autoptr (GListModel) carousel_model = NULL;
-  const char *title                     = NULL;
+  const char      *title                = NULL;
+  g_autofree char *subtitle             = NULL;
+  int              total_entries        = 0;
+  gboolean         is_spotlight         = FALSE;
 
   self = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_SEARCH_WIDGET);
   g_assert (self != NULL);
@@ -281,17 +284,33 @@ category_clicked (BzFlathubCategory *category,
   nav_view = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
   g_assert (nav_view != NULL);
 
-  title          = bz_flathub_category_get_display_name (category);
-  model          = bz_flathub_category_dup_applications (category);
-  carousel_model = bz_flathub_category_dup_quality_applications (category);
+  title        = bz_flathub_category_get_display_name (category);
+  model        = bz_flathub_category_dup_applications (category);
+  is_spotlight = bz_flathub_category_get_is_spotlight (category);
 
-  if (carousel_model != NULL && g_list_model_get_n_items (carousel_model) > 0)
+  if (is_spotlight)
     {
-      apps_page = bz_apps_page_new_with_carousel (title, model, carousel_model);
+      apps_page = bz_apps_page_new (title, model);
     }
   else
     {
-      apps_page = bz_apps_page_new (title, model);
+      carousel_model = bz_flathub_category_dup_quality_applications (category);
+      total_entries  = bz_flathub_category_get_total_entries (category);
+
+      if (carousel_model != NULL && g_list_model_get_n_items (carousel_model) > 0)
+        {
+          apps_page = bz_apps_page_new_with_carousel (title, model, carousel_model);
+        }
+      else
+        {
+          apps_page = bz_apps_page_new (title, model);
+        }
+
+      if (total_entries > 0)
+        {
+          subtitle = g_strdup_printf (_ ("%d applications"), total_entries);
+          bz_apps_page_set_subtitle (BZ_APPS_PAGE (apps_page), subtitle);
+        }
     }
 
   g_signal_connect_swapped (
@@ -490,7 +509,8 @@ search_changed (GtkEditable    *editable,
   g_clear_handle_id (&self->search_update_timeout, g_source_remove);
 
   settings = bz_state_info_get_settings (self->state);
-  if (settings && g_settings_get_boolean (settings, "search-debounce"))
+  if (settings != NULL &&
+      g_settings_get_boolean (settings, "search-debounce"))
     {
       self->search_update_timeout = g_timeout_add_once (
           200, (GSourceOnceFunc) update_filter, self);
@@ -554,7 +574,8 @@ search_query_then (DexFuture *future,
   old_length = g_list_model_get_n_items (G_LIST_MODEL (self->search_model));
   settings   = bz_state_info_get_settings (self->state);
 
-  if (settings && g_settings_get_boolean (settings, "search-only-foss"))
+  if (settings != NULL &&
+      g_settings_get_boolean (settings, "search-only-foss"))
     {
       for (guint i = 0; i < results->len;)
         {
@@ -573,7 +594,8 @@ search_query_then (DexFuture *future,
         }
     }
 
-  if (settings && g_settings_get_boolean (settings, "search-only-flathub"))
+  if (settings != NULL &&
+      g_settings_get_boolean (settings, "search-only-flathub"))
     {
       for (guint i = 0; i < results->len;)
         {

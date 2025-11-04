@@ -409,6 +409,61 @@ window.flathub {
 	font-size: larger;
 }
 
+.category-tile.category-recently-updated {
+  background: linear-gradient(285deg, #26a269, #f9ef69);
+  color: #0c3020;
+}
+.category-tile.category-recently-updated:hover {
+  background: linear-gradient(285deg, shade(#26a269, 1.1), shade(#f9ef69, 1.1));
+}
+.category-tile.category-recently-updated:active {
+  background: linear-gradient(285deg, shade(#26a269, 0.95), shade(#f9ef69, 0.95));
+}
+
+.category-tile.category-recently-added {
+  background: linear-gradient(90deg, #d98b6b, #b36a4f);
+  color: white;
+}
+.category-tile.category-recently-added:hover {
+  background: linear-gradient(90deg, #e09d81, #c17c62);
+}
+.category-tile.category-recently-added:active {
+  background: linear-gradient(90deg, #c17c62, #9e5744);
+}
+
+.category-tile.category-trending {
+	background: linear-gradient(135deg, #99c1f1, #3584e4);
+	color: white;
+}
+.category-tile.category-trending:hover {
+	background: linear-gradient(135deg, shade(#99c1f1, 1.1), shade(#3584e4, 1.1));
+}
+.category-tile.category-trending:active {
+	background: linear-gradient(135deg, shade(#99c1f1, .95), shade(#3584e4, .95));
+}
+
+.category-tile.category-popular {
+	background: linear-gradient(45deg, #ffbf6f, #f7ef74);
+	color: rgba(0, 0, 0, 0.8);
+}
+.category-tile.category-popular:hover {
+	background: linear-gradient(45deg, shade(#ffbf6f, 1.1), shade(#f7ef74, 1.1));
+}
+.category-tile.category-popular:active {
+	background: linear-gradient(45deg, shade(#ffbf6f, .95), shade(#f7ef74, .95));
+}
+
+.category-tile.category-mobile {
+	background: linear-gradient(135deg, #c6eaf8, #c4f3c9);
+	color: rgba(0, 0, 0, 0.8);
+}
+.category-tile.category-mobile:hover {
+	background: linear-gradient(135deg, shade(#c6eaf8, 1.1), shade(#c4f3c9, 1.1));
+}
+.category-tile.category-mobile:active {
+	background: linear-gradient(135deg, shade(#c6eaf8, .95), shade(#c4f3c9, .95));
+}
+
 .category-tile.category-graphics {
 	background: linear-gradient(180deg, #ce8cd7 0%, #2861c6 100%);
 	color: white;

@@ -79,6 +79,13 @@ void
 bz_flathub_category_set_total_entries (BzFlathubCategory *self,
                                        int                total_entries);
 
+gboolean
+bz_flathub_category_get_is_spotlight (BzFlathubCategory *self);
+
+void
+bz_flathub_category_set_is_spotlight (BzFlathubCategory *self,
+                                      gboolean           is_spotlight);
+
 G_END_DECLS
 
 /* End of bz-flathub-category.h */

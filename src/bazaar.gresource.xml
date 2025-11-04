@@ -118,6 +118,11 @@
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Science.svg</file>
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.System.svg</file>
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Utilities.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Mobile.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Trending.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Popular.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.New.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Updated.svg</file>
 
   </gresource>
 </gresources>

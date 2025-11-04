@@ -30,6 +30,7 @@ struct _BzFlathubCategory
   GListModel              *applications;
   GListModel              *quality_applications;
   int                      total_entries;
+  gboolean                 is_spotlight;
 };
 
 G_DEFINE_FINAL_TYPE (BzFlathubCategory, bz_flathub_category, G_TYPE_OBJECT);
@@ -46,10 +47,50 @@ enum
   PROP_APPLICATIONS,
   PROP_QUALITY_APPLICATIONS,
   PROP_TOTAL_ENTRIES,
+  PROP_IS_SPOTLIGHT,
 
   LAST_PROP
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
+
+typedef struct
+{
+  const char *id;
+  const char *display_name;
+  const char *short_name;
+  const char *more_of_name;
+  const char *icon_name;
+} CategoryInfo;
+
+static const CategoryInfo category_info[] = {
+  {       "audiovideo",          N_ ("Audio & Video"),    N_ ("Media"),          N_ ("More Audio & Video"), "io.github.kolumni.Bazaar.Audiovideo" },
+  {      "development",        N_ ("Developer Tools"),  N_ ("Develop"),        N_ ("More Developer Tools"),    "io.github.kolumni.Bazaar.Develop" },
+  {        "education",              N_ ("Education"),    N_ ("Learn"),              N_ ("More Education"),      "io.github.kolumni.Bazaar.Learn" },
+  {             "game",                 N_ ("Gaming"),     N_ ("Play"),                 N_ ("More Gaming"),       "io.github.kolumni.Bazaar.Play" },
+  {         "graphics", N_ ("Graphics & Photography"),   N_ ("Create"), N_ ("More Graphics & Photography"),     "io.github.kolumni.Bazaar.Create" },
+  {          "network",             N_ ("Networking"), N_ ("Internet"),             N_ ("More Networking"),    "io.github.kolumni.Bazaar.Network" },
+  {           "office",           N_ ("Productivity"),     N_ ("Work"),           N_ ("More Productivity"),       "io.github.kolumni.Bazaar.Work" },
+  {          "science",                N_ ("Science"),  N_ ("Science"),                N_ ("More Science"),    "io.github.kolumni.Bazaar.Science" },
+  {           "system",                 N_ ("System"),   N_ ("System"),                 N_ ("More System"),     "io.github.kolumni.Bazaar.System" },
+  {          "utility",              N_ ("Utilities"),    N_ ("Tools"),              N_ ("More Utilities"),  "io.github.kolumni.Bazaar.Utilities" },
+  {         "trending",               N_ ("Trending"), N_ ("Trending"),               N_ ("More Trending"),   "io.github.kolumni.Bazaar.Trending" },
+  {          "popular",                N_ ("Popular"),  N_ ("Popular"),                N_ ("More Popular"),    "io.github.kolumni.Bazaar.Popular" },
+  {   "recently-added",                    N_ ("New"),      N_ ("New"),                    N_ ("More New"),        "io.github.kolumni.Bazaar.New" },
+  { "recently-updated",                N_ ("Updated"),  N_ ("Updated"),                N_ ("More Updated"),    "io.github.kolumni.Bazaar.Updated" },
+  {           "mobile",                 N_ ("Mobile"),   N_ ("Mobile"),                 N_ ("More Mobile"),     "io.github.kolumni.Bazaar.Mobile" },
+  {               NULL,                          NULL,            NULL,                              NULL,                                  NULL }
+};
+
+static const CategoryInfo *
+get_category_info (const char *category_id)
+{
+  for (int i = 0; category_info[i].id != NULL; i++)
+    {
+      if (g_strcmp0 (category_info[i].id, category_id) == 0)
+        return &category_info[i];
+    }
+  return NULL;
+}
 
 static void
 bz_flathub_category_dispose (GObject *object)
@@ -92,12 +133,14 @@ bz_flathub_category_get_property (GObject    *object,
     case PROP_SHORT_NAME:
       g_value_set_string (value, bz_flathub_category_get_short_name (self));
       break;
-
     case PROP_ICON_NAME:
       g_value_set_string (value, bz_flathub_category_get_icon_name (self));
       break;
     case PROP_TOTAL_ENTRIES:
       g_value_set_int (value, bz_flathub_category_get_total_entries (self));
+      break;
+    case PROP_IS_SPOTLIGHT:
+      g_value_set_boolean (value, bz_flathub_category_get_is_spotlight (self));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -128,6 +171,9 @@ bz_flathub_category_set_property (GObject      *object,
       break;
     case PROP_TOTAL_ENTRIES:
       bz_flathub_category_set_total_entries (self, g_value_get_int (value));
+      break;
+    case PROP_IS_SPOTLIGHT:
+      bz_flathub_category_set_is_spotlight (self, g_value_get_boolean (value));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -186,11 +232,19 @@ bz_flathub_category_class_init (BzFlathubCategoryClass *klass)
           NULL, NULL,
           G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
   props[PROP_TOTAL_ENTRIES] =
       g_param_spec_int (
           "total-entries",
           NULL, NULL,
           0, G_MAXINT, 0,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_IS_SPOTLIGHT] =
+      g_param_spec_boolean (
+          "is-spotlight",
+          NULL, NULL,
+          FALSE,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
@@ -262,6 +316,13 @@ bz_flathub_category_get_total_entries (BzFlathubCategory *self)
   return self->total_entries;
 }
 
+gboolean
+bz_flathub_category_get_is_spotlight (BzFlathubCategory *self)
+{
+  g_return_val_if_fail (BZ_IS_FLATHUB_CATEGORY (self), FALSE);
+  return self->is_spotlight;
+}
+
 void
 bz_flathub_category_set_map_factory (BzFlathubCategory       *self,
                                      BzApplicationMapFactory *map_factory)
@@ -329,140 +390,61 @@ bz_flathub_category_set_total_entries (BzFlathubCategory *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TOTAL_ENTRIES]);
 }
 
-static const char *
-get_category_display_name (const char *category_id)
+void
+bz_flathub_category_set_is_spotlight (BzFlathubCategory *self,
+                                      gboolean           is_spotlight)
 {
-  if (g_strcmp0 (category_id, "audiovideo") == 0)
-    return _ ("Audio & Video");
-  if (g_strcmp0 (category_id, "development") == 0)
-    return _ ("Developer Tools");
-  if (g_strcmp0 (category_id, "education") == 0)
-    return _ ("Education");
-  if (g_strcmp0 (category_id, "game") == 0)
-    return _ ("Gaming");
-  if (g_strcmp0 (category_id, "graphics") == 0)
-    return _ ("Graphics & Photography");
-  if (g_strcmp0 (category_id, "network") == 0)
-    return _ ("Networking");
-  if (g_strcmp0 (category_id, "office") == 0)
-    return _ ("Productivity");
-  if (g_strcmp0 (category_id, "science") == 0)
-    return _ ("Science");
-  if (g_strcmp0 (category_id, "system") == 0)
-    return _ ("System");
-  if (g_strcmp0 (category_id, "utility") == 0)
-    return _ ("Utilities");
+  g_return_if_fail (BZ_IS_FLATHUB_CATEGORY (self));
 
-  return category_id;
-}
+  if (self->is_spotlight == is_spotlight)
+    return;
 
-static const char *
-get_category_short_name (const char *category_id)
-{
-  if (g_strcmp0 (category_id, "audiovideo") == 0)
-    return _ ("Media");
-  if (g_strcmp0 (category_id, "development") == 0)
-    return _ ("Develop");
-  if (g_strcmp0 (category_id, "education") == 0)
-    return _ ("Learn");
-  if (g_strcmp0 (category_id, "game") == 0)
-    return _ ("Play");
-  if (g_strcmp0 (category_id, "graphics") == 0)
-    return _ ("Create");
-  if (g_strcmp0 (category_id, "network") == 0)
-    return _ ("Internet");
-  if (g_strcmp0 (category_id, "office") == 0)
-    return _ ("Work");
-  if (g_strcmp0 (category_id, "science") == 0)
-    return _ ("Science");
-  if (g_strcmp0 (category_id, "system") == 0)
-    return _ ("System");
-  if (g_strcmp0 (category_id, "utility") == 0)
-    return _ ("Tools");
+  self->is_spotlight = is_spotlight;
 
-  return category_id;
-}
-
-static const char *
-get_category_more_of_name (const char *category_id)
-{
-  if (g_strcmp0 (category_id, "audiovideo") == 0)
-    return _ ("More Audio & Video");
-  if (g_strcmp0 (category_id, "development") == 0)
-    return _ ("More Developer Tools");
-  if (g_strcmp0 (category_id, "education") == 0)
-    return _ ("More Education");
-  if (g_strcmp0 (category_id, "game") == 0)
-    return _ ("More Gaming");
-  if (g_strcmp0 (category_id, "graphics") == 0)
-    return _ ("More Graphics & Photography");
-  if (g_strcmp0 (category_id, "network") == 0)
-    return _ ("More Networking");
-  if (g_strcmp0 (category_id, "office") == 0)
-    return _ ("More Productivity");
-  if (g_strcmp0 (category_id, "science") == 0)
-    return _ ("More Science");
-  if (g_strcmp0 (category_id, "system") == 0)
-    return _ ("More System");
-  if (g_strcmp0 (category_id, "utility") == 0)
-    return _ ("More Utilities");
-
-  return category_id;
-}
-
-static const char *
-get_category_icon_name (const char *category_id)
-{
-  if (g_strcmp0 (category_id, "audiovideo") == 0)
-    return "io.github.kolumni.Bazaar.Audiovideo";
-  if (g_strcmp0 (category_id, "development") == 0)
-    return "io.github.kolumni.Bazaar.Develop";
-  if (g_strcmp0 (category_id, "education") == 0)
-    return "io.github.kolumni.Bazaar.Learn";
-  if (g_strcmp0 (category_id, "game") == 0)
-    return "io.github.kolumni.Bazaar.Play";
-  if (g_strcmp0 (category_id, "graphics") == 0)
-    return "io.github.kolumni.Bazaar.Create";
-  if (g_strcmp0 (category_id, "network") == 0)
-    return "io.github.kolumni.Bazaar.Network";
-  if (g_strcmp0 (category_id, "office") == 0)
-    return "io.github.kolumni.Bazaar.Work";
-  if (g_strcmp0 (category_id, "science") == 0)
-    return "io.github.kolumni.Bazaar.Science";
-  if (g_strcmp0 (category_id, "system") == 0)
-    return "io.github.kolumni.Bazaar.System";
-  if (g_strcmp0 (category_id, "utility") == 0)
-    return "io.github.kolumni.Bazaar.Utilities";
-
-  return NULL;
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_IS_SPOTLIGHT]);
 }
 
 const char *
 bz_flathub_category_get_display_name (BzFlathubCategory *self)
 {
+  const CategoryInfo *info;
+
   g_return_val_if_fail (BZ_IS_FLATHUB_CATEGORY (self), NULL);
-  return get_category_display_name (self->name);
+
+  info = get_category_info (self->name);
+  return info ? _ (info->display_name) : self->name;
 }
 
 const char *
 bz_flathub_category_get_short_name (BzFlathubCategory *self)
 {
+  const CategoryInfo *info;
+
   g_return_val_if_fail (BZ_IS_FLATHUB_CATEGORY (self), NULL);
-  return get_category_short_name (self->name);
+
+  info = get_category_info (self->name);
+  return info ? _ (info->short_name) : self->name;
 }
 
 const char *
 bz_flathub_category_get_more_of_name (BzFlathubCategory *self)
 {
+  const CategoryInfo *info;
+
   g_return_val_if_fail (BZ_IS_FLATHUB_CATEGORY (self), NULL);
-  return get_category_more_of_name (self->name);
+
+  info = get_category_info (self->name);
+  return info ? _ (info->more_of_name) : self->name;
 }
 
 const char *
 bz_flathub_category_get_icon_name (BzFlathubCategory *self)
 {
-  g_return_val_if_fail (BZ_IS_FLATHUB_CATEGORY (self), NULL);
-  return get_category_icon_name (self->name);
-}
+  const CategoryInfo *info;
 
+  g_return_val_if_fail (BZ_IS_FLATHUB_CATEGORY (self), NULL);
+
+  info = get_category_info (self->name);
+  return info ? info->icon_name : NULL;
+}
 /* End of bz-flathub-category.c */

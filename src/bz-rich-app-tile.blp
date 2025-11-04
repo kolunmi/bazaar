@@ -11,14 +11,16 @@ template $BzRichAppTile: Adw.Bin {
       "rich-tile-card",
     ]
 
-    Box picture_box {
+    $BzThemedEntryGroupRect picture_box {
       height-request: 200;
 
       styles [
         "rich-screenshot-box",
       ]
 
-      Box {
+      group: bind template.group as <$BzEntryGroup>;
+
+      child: Box {
         margin-start: 12;
         margin-end: 12;
         margin-top: 12;
@@ -31,7 +33,7 @@ template $BzRichAppTile: Adw.Bin {
           paintable: bind template.first-screenshot;
           radius: 6;
         }
-      }
+      };
     }
 
     Box {
