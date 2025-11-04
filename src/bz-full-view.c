@@ -57,9 +57,11 @@ struct _BzFullView
   gboolean              debounce;
   BzResult             *debounced_ui_entry;
   BzResult             *group_model;
+  gboolean              show_sidebar;
 
   guint      debounce_timeout;
   DexFuture *loading_forge_stars;
+  GMenuModel *main_menu;
 
   /* Template widgets */
   AdwViewStack    *stack;
@@ -81,6 +83,8 @@ enum
   PROP_UI_ENTRY,
   PROP_DEBOUNCE,
   PROP_DEBOUNCED_UI_ENTRY,
+  PROP_MAIN_MENU,
+  PROP_SHOW_SIDEBAR,
 
   LAST_PROP
 };
@@ -118,6 +122,7 @@ bz_full_view_dispose (GObject *object)
   g_clear_object (&self->ui_entry);
   g_clear_object (&self->debounced_ui_entry);
   g_clear_object (&self->group_model);
+  g_clear_object (&self->main_menu);
 
   dex_clear (&self->loading_forge_stars);
   g_clear_handle_id (&self->debounce_timeout, g_source_remove);
@@ -153,6 +158,12 @@ bz_full_view_get_property (GObject    *object,
     case PROP_DEBOUNCED_UI_ENTRY:
       g_value_set_object (value, self->debounced_ui_entry);
       break;
+    case PROP_MAIN_MENU:
+      g_value_set_object (value, self->main_menu);
+      break;
+    case PROP_SHOW_SIDEBAR:
+      g_value_set_boolean (value, self->show_sidebar);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -183,6 +194,15 @@ bz_full_view_set_property (GObject      *object,
       break;
     case PROP_UI_ENTRY:
     case PROP_DEBOUNCED_UI_ENTRY:
+    case PROP_MAIN_MENU:
+      if (self->main_menu)
+        g_object_unref(self->main_menu);
+      self->main_menu = g_value_dup_object(value);
+      break;
+    case PROP_SHOW_SIDEBAR:
+      self->show_sidebar = g_value_get_boolean (value);
+      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SHOW_SIDEBAR]);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -727,6 +747,20 @@ bz_full_view_class_init (BzFullViewClass *klass)
           NULL, NULL,
           BZ_TYPE_RESULT,
           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_MAIN_MENU] =
+      g_param_spec_object(
+        "main-menu",
+        NULL, NULL,
+        G_TYPE_MENU_MODEL,
+        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  props[PROP_SHOW_SIDEBAR] =
+    g_param_spec_boolean(
+      "show-sidebar",
+      NULL, NULL,
+      FALSE,
+      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
