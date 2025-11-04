@@ -366,7 +366,7 @@ template $BzWindow: Adw.ApplicationWindow {
 
             Adw.NavigationPage {
               tag: "view";
-              title: _("App View");
+              title: bind full_view.ui-entry as <$BzResult>.object as <$BzEntry>.title;
 
               child: $BzFullView full_view {
                 state: bind template.state;
