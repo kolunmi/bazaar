@@ -28,6 +28,7 @@
 #include "bz-async-texture.h"
 #include "bz-country-data-point.h"
 #include "bz-data-point.h"
+#include "bz-entry-group.h"
 #include "bz-entry.h"
 #include "bz-env.h"
 #include "bz-global-state.h"
@@ -93,6 +94,7 @@ typedef struct
   char         *project_group;
   char         *developer;
   char         *developer_id;
+  GList        *developer_apps;
   GListModel   *screenshot_paintables;
   GListModel   *share_urls;
   char         *donation_url;
@@ -152,6 +154,7 @@ enum
   PROP_PROJECT_GROUP,
   PROP_DEVELOPER,
   PROP_DEVELOPER_ID,
+  PROP_DEVELOPER_APPS,
   PROP_SCREENSHOT_PAINTABLES,
   PROP_SHARE_URLS,
   PROP_DONATION_URL,
@@ -185,6 +188,7 @@ BZ_DEFINE_DATA (
       GWeakRef self;
       int      prop;
       char    *id;
+      char    *developer;
     },
     g_weak_ref_clear (&self->self);
     BZ_RELEASE_DATA (id, g_free));
@@ -338,6 +342,10 @@ bz_entry_get_property (GObject    *object,
       break;
     case PROP_DEVELOPER_ID:
       g_value_set_string (value, priv->developer_id);
+      break;
+    case PROP_DEVELOPER_APPS:
+      query_flathub (self, PROP_DEVELOPER_APPS);
+      g_value_set_pointer (value, priv->developer_apps);
       break;
     case PROP_SCREENSHOT_PAINTABLES:
       g_value_set_object (value, priv->screenshot_paintables);
@@ -514,6 +522,10 @@ bz_entry_set_property (GObject      *object,
     case PROP_DEVELOPER_ID:
       g_clear_pointer (&priv->developer_id, g_free);
       priv->developer_id = g_value_dup_string (value);
+      break;
+    case PROP_DEVELOPER_APPS:
+      g_list_free_full (priv->developer_apps, g_free);
+      priv->developer_apps = g_value_get_pointer (value);
       break;
     case PROP_SCREENSHOT_PAINTABLES:
       g_clear_object (&priv->screenshot_paintables);
@@ -786,6 +798,11 @@ bz_entry_class_init (BzEntryClass *klass)
           "developer-id",
           NULL, NULL, NULL,
           G_PARAM_READWRITE);
+
+  props[PROP_DEVELOPER_APPS] =
+      g_param_spec_pointer ("developer-apps",
+                            NULL, NULL,
+                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   props[PROP_SCREENSHOT_PAINTABLES] =
       g_param_spec_object (
@@ -2053,8 +2070,9 @@ query_flathub (BzEntry *self,
 
   data = query_flathub_data_new ();
   g_weak_ref_init (&data->self, self);
-  data->prop = prop;
-  data->id   = g_strdup (priv->id);
+  data->prop         = prop;
+  data->id           = g_strdup (priv->id);
+  data->developer    = g_strdup (priv->developer);
 
   future = dex_scheduler_spawn (
       bz_get_io_scheduler (),
@@ -2075,6 +2093,7 @@ query_flathub_fiber (QueryFlathubData *data)
 {
   int   prop                     = data->prop;
   char *id                       = data->id;
+  char *developer                = data->developer;
   g_autoptr (GError) local_error = NULL;
   g_autofree char *request       = NULL;
   g_autoptr (JsonNode) node      = NULL;
@@ -2087,6 +2106,9 @@ query_flathub_fiber (QueryFlathubData *data)
     case PROP_DOWNLOAD_STATS:
     case PROP_DOWNLOAD_STATS_PER_COUNTRY:
       request = g_strdup_printf ("/stats/%s?all=false&days=175", id);
+      break;
+    case PROP_DEVELOPER_APPS:
+      request = g_strdup_printf ("/collection/developer/%s", developer);
       break;
     default:
       g_assert_not_reached ();
@@ -2149,6 +2171,29 @@ query_flathub_fiber (QueryFlathubData *data)
       }
       break;
 
+    case PROP_DEVELOPER_APPS:
+      {
+        JsonObject *response_obj = NULL;
+        JsonArray  *apps_array   = NULL;
+        GList      *app_ids      = NULL;
+
+        response_obj = json_node_get_object (node);
+
+        apps_array = json_object_get_array_member (response_obj, "hits");
+
+        for (guint i = 0; i < json_array_get_length (apps_array); i++)
+          {
+            JsonObject *app_obj = json_array_get_object_element (apps_array, i);
+            const char *app_id  = json_object_get_string_member (app_obj, "app_id");
+
+            if (app_id != NULL)
+              app_ids = g_list_prepend (app_ids, g_strdup (app_id));
+          }
+
+        return dex_future_new_for_pointer (app_ids);
+      }
+      break;
+
     default:
       g_assert_not_reached ();
       return NULL;
@@ -2168,7 +2213,15 @@ query_flathub_then (DexFuture        *future,
     return NULL;
 
   value = dex_future_get_value (future, NULL);
-  g_object_set_property (G_OBJECT (self), props[prop]->name, value);
+  if (prop == PROP_DEVELOPER_APPS)
+    {
+      GList *app_ids = g_value_get_pointer (value);
+      g_object_set (G_OBJECT (self), "developer-apps", app_ids, NULL);
+    }
+  else
+    {
+      g_object_set_property (G_OBJECT (self), props[prop]->name, value);
+    }
   return NULL;
 }
 
@@ -2478,6 +2531,7 @@ clear_entry (BzEntry *self)
   g_clear_pointer (&priv->project_group, g_free);
   g_clear_pointer (&priv->developer, g_free);
   g_clear_pointer (&priv->developer_id, g_free);
+  g_list_free_full (priv->developer_apps, g_free);
   g_clear_object (&priv->screenshot_paintables);
   g_clear_object (&priv->share_urls);
   g_clear_pointer (&priv->donation_url, g_free);

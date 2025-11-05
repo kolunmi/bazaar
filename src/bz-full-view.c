@@ -23,8 +23,10 @@
 #include <glib/gi18n.h>
 #include <json-glib/json-glib.h>
 
+#include "bz-application.h"
 #include "bz-addons-dialog.h"
 #include "bz-app-size-dialog.h"
+#include "bz-app-tile.h"
 #include "bz-appstream-description-render.h"
 #include "bz-context-tile.h"
 #include "bz-dynamic-list-view.h"
@@ -64,6 +66,7 @@ struct _BzFullView
   GMenuModel *main_menu;
 
   /* Template widgets */
+  GtkScrolledWindow *main_scroll;
   AdwViewStack    *stack;
   GtkWidget       *shadow_overlay;
   GtkWidget       *forge_stars;
@@ -281,11 +284,11 @@ format_recent_downloads (gpointer object,
     return g_strdup (_ ("---"));
 
   if (value >= 1000000)
-    /* Translators: M is the suffix for millions, \xC2\xA0 is a non-breaking space */
-    return g_strdup_printf (_ ("%.2f\xC2\xA0M"), value / 1000000.0);
+    /* Translators: M is the suffix for millions */
+    return g_strdup_printf (_ ("%.2fM"), value / 1000000.0);
   else if (value >= 1000)
-    /* Translators: K is the suffix for thousands, \xC2\xA0 is a non-breaking space */
-    return g_strdup_printf (_ ("%.2f\xC2\xA0K"), value / 1000.0);
+    /* Translators: K is the suffix for thousands*/
+    return g_strdup_printf (_ ("%.2fK"), value / 1000.0);
   else
     return g_strdup_printf ("%'d", value);
 }
@@ -354,6 +357,10 @@ get_age_rating_style (gpointer object,
 {
   if (age_rating >= 18)
     return g_strdup ("error");
+  else if (age_rating >= 15)
+    return g_strdup ("warning");
+  else if (age_rating >= 12)
+    return g_strdup ("dark-blue");
   else
     return g_strdup ("grey");
 }
@@ -438,6 +445,109 @@ pick_license_warning (gpointer object,
   return value
              ? g_strdup (_ ("This application has a FLOSS license, meaning the source code can be audited for safety."))
              : g_strdup (_ ("This application has a proprietary license, meaning the source code is developed privately and cannot be audited by an independent third party."));
+}
+
+static char *
+format_other_apps_label (gpointer object, const char *developer)
+{
+    if (!developer || *developer == '\0')
+        return g_strdup (_("Other Apps by this Developer"));
+
+    return g_strdup_printf (_("Other Apps by %s"), developer);
+}
+
+static GList *
+filter_own_app_id (BzEntry *entry, GList *app_ids)
+{
+    const char *own_id;
+    GList *filtered = NULL;
+
+    if (!app_ids || !entry)
+        return NULL;
+
+    own_id = bz_entry_get_id (entry);
+    if (!own_id)
+        return NULL;
+
+    for (GList *l = app_ids; l; l = l->next)
+        if (g_strcmp0 (l->data, own_id) != 0)
+            filtered = g_list_prepend (filtered, l->data);
+
+    return g_list_reverse (filtered);
+}
+
+static gboolean
+has_other_apps (gpointer object, GList *app_ids, BzEntry *entry )
+{
+
+    g_autoptr (GList) filtered = filter_own_app_id (BZ_ENTRY (entry), app_ids);
+    return filtered != NULL;
+}
+
+static GListModel *
+get_developer_apps_entries (gpointer object, GList *app_ids, BzEntry *entry)
+{
+    g_autoptr (GList) filtered = filter_own_app_id (BZ_ENTRY (entry), app_ids);
+    BzApplication *app;
+    BzApplicationMapFactory *factory;
+    GtkStringList *string_list;
+
+    if (!filtered)
+        return NULL;
+
+    app = BZ_APPLICATION (g_application_get_default ());
+    if (!app)
+        return NULL;
+
+    factory = bz_application_get_application_map_factory (app);
+    if (!factory)
+        return NULL;
+
+    string_list = gtk_string_list_new (NULL);
+    for (GList *l = filtered; l; l = l->next)
+        gtk_string_list_append (string_list, l->data);
+
+    return bz_application_map_factory_generate (factory, G_LIST_MODEL (string_list));
+}
+
+static gboolean
+scroll_to_top_idle (GtkAdjustment *vadj)
+{
+  gtk_adjustment_set_value (vadj, 0.0);
+  return G_SOURCE_REMOVE;
+}
+
+static void
+app_tile_clicked_cb (BzFullView *self,
+                    BzAppTile  *tile)
+{
+  GtkAdjustment *vadj;
+  BzEntryGroup *group = bz_app_tile_get_group (tile);
+
+  bz_full_view_set_entry_group (self, group);
+
+  vadj = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (self->main_scroll));
+  g_idle_add_once ((GSourceOnceFunc) scroll_to_top_idle, vadj);
+}
+
+static void
+bind_app_tile_cb (BzFullView        *self,
+                BzAppTile         *tile,
+                BzEntryGroup      *group,
+                BzDynamicListView *view)
+{
+  g_signal_connect_swapped (tile, "clicked",
+                           G_CALLBACK (app_tile_clicked_cb),
+                           self);
+}
+
+static void
+unbind_app_tile_cb (BzFullView        *self,
+                  BzAppTile         *tile,
+                  BzEntryGroup      *group,
+                  BzDynamicListView *view)
+{
+  g_signal_handlers_disconnect_by_func (tile, G_CALLBACK (app_tile_clicked_cb), self);
 }
 
 static void
@@ -837,6 +947,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-full-view.ui");
   gtk_widget_class_bind_template_child (widget_class, BzFullView, stack);
+  gtk_widget_class_bind_template_child (widget_class, BzFullView, main_scroll);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, shadow_overlay);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, forge_stars);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, forge_stars_label);
@@ -862,6 +973,9 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, get_formfactor_label);
   gtk_widget_class_bind_template_callback (widget_class, get_formfactor_tooltip);
   gtk_widget_class_bind_template_callback (widget_class, has_link);
+  gtk_widget_class_bind_template_callback (widget_class, format_other_apps_label);
+  gtk_widget_class_bind_template_callback (widget_class, get_developer_apps_entries);
+  gtk_widget_class_bind_template_callback (widget_class, has_other_apps);
   gtk_widget_class_bind_template_callback (widget_class, open_url_cb);
   gtk_widget_class_bind_template_callback (widget_class, open_flathub_url_cb);
   gtk_widget_class_bind_template_callback (widget_class, license_cb);
@@ -876,6 +990,8 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, pick_license_warning);
   gtk_widget_class_bind_template_callback (widget_class, install_addons_cb);
   gtk_widget_class_bind_template_callback (widget_class, addon_transact_cb);
+  gtk_widget_class_bind_template_callback (widget_class, bind_app_tile_cb);
+  gtk_widget_class_bind_template_callback (widget_class, unbind_app_tile_cb);
   gtk_widget_class_bind_template_callback (widget_class, get_description_max_height);
   gtk_widget_class_bind_template_callback (widget_class, get_description_toggle_text);
 }

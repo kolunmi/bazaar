@@ -1,11 +1,11 @@
 using Gtk 4.0;
+using Gio 2.0;
 using Adw 1;
 
 template $BzFullView: Adw.Bin {
   child: Adw.ToolbarView {
     [top]
     Adw.HeaderBar {
-
       [end]
       Revealer {
         transition-type: slide_right;
@@ -90,6 +90,8 @@ template $BzFullView: Adw.Bin {
                 top_box.margin-end: 10;
                 bottom_box.margin-start: 10;
                 bottom_box.margin-end: 10;
+                other_apps_box.margin-start: 2;
+                other_apps_box.margin-end: 2;
                 not_icon.orientation: vertical;
                 app_icon.valign: start;
                 app_icon.pixel-size: 96;
@@ -335,7 +337,7 @@ template $BzFullView: Adw.Bin {
                           homogeneous: true;
 
                           $BzContextTile download_size_tile {
-                            label: _("Download");
+                            label: _("Size");
                             has-tooltip: true;
                             tooltip-text: bind $format_size_tooltip(template.ui-entry as <$BzResult>.object as <$BzEntry>.size) as <string>;
                             lozenge-style: "grey";
@@ -451,7 +453,7 @@ template $BzFullView: Adw.Bin {
                           $BzContextTile {
                             can-target: bind $invert_boolean($is_null(template.debounced-ui-entry) as <bool>) as <bool>;
                             clicked => $dl_stats_cb(template);
-                            label: _("Downloads/mo");
+                            label: _("Downloads /mo");
                             has-tooltip: true;
                             tooltip-text: bind $format_recent_downloads_tooltip(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <string>;
                             lozenge-style: "grey";
@@ -506,79 +508,125 @@ template $BzFullView: Adw.Bin {
                   }
 
                   Adw.Clamp {
-                    maximum-size: 800;
+                    maximum-size: 766;
                     tightening-threshold: 1000;
 
-                    child: Box bottom_box {
+                    child: Box {
                       orientation: vertical;
-                      margin-start: 25;
-                      margin-end: 25;
-                      margin-bottom: 20;
-                      spacing: 20;
 
-                      Label {
-                        styles [
-                          "title-2",
-                        ]
+                      Box bottom_box {
+                        orientation: vertical;
+                        margin-start: 25;
+                        margin-end: 25;
+                        margin-bottom: 20;
+                        spacing: 20;
 
-                        margin-start: 5;
-                        margin-top: 20;
-                        valign: start;
-                        xalign: 0;
-                        wrap: true;
-                        wrap-mode: word_char;
-                        label: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.description;
-                      }
+                        Label {
+                          styles [
+                            "title-2",
+                          ]
 
-                      $BzFadingClamp fading_clamp {
-                        max-height: bind $get_description_max_height(description_toggle.active) as <int>;
-                        min-max-height: 170;
-
-                        child: $BzAppstreamDescriptionRender {
-                          appstream-description: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.long-description;
                           margin-start: 5;
-                        };
+                          margin-top: 20;
+                          valign: start;
+                          xalign: 0;
+                          wrap: true;
+                          wrap-mode: word_char;
+                          label: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.description;
+                        }
 
-                      }
+                        $BzFadingClamp fading_clamp {
+                          max-height: bind $get_description_max_height(description_toggle.active) as <int>;
+                          min-max-height: 170;
 
-                      ToggleButton description_toggle {
-                        styles ["circular"]
+                          child: $BzAppstreamDescriptionRender {
+                            appstream-description: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.long-description;
+                            margin-start: 5;
+                          };
+                        }
 
-                        visible: bind fading_clamp.will-change;
-                        halign: center;
-                        child: Label {
-                          label: bind $get_description_toggle_text(description_toggle.active) as <string>;
-                          margin-start: 10;
-                          margin-end: 10;
-                        };
-                      }
-                      Adw.PreferencesGroup {
-                        visible: bind $logical_and($invert_boolean($is_null(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.addons) as <bool>) as <bool>, $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>) as <bool>;
+                        ToggleButton description_toggle {
+                          styles [
+                            "circular",
+                          ]
 
-                        Adw.ActionRow  {
-                          [prefix]
-                          Image {
-                            icon-name: "puzzle-piece-symbolic";
+                          visible: bind fading_clamp.will-change;
+                          halign: center;
+
+                          child: Label {
+                            label: bind $get_description_toggle_text(description_toggle.active) as <string>;
+                            margin-start: 10;
+                            margin-end: 10;
+                          };
+                        }
+
+                        Adw.PreferencesGroup {
+                          visible: bind $logical_and($invert_boolean($is_null(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.addons) as <bool>) as <bool>, $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>) as <bool>;
+
+                          Adw.ActionRow {
+                            [prefix]
+                            Image {
+                              icon-name: "puzzle-piece-symbolic";
+                            }
+
+                            [suffix]
+                            Image {
+                              icon-name: "go-next-symbolic";
+
+                              styles [
+                                "dimmed",
+                              ]
+                            }
+
+                            title: _("Manage Add-ons");
+                            activatable: true;
+                            activated => $install_addons_cb(template);
                           }
+                        }
 
-                          [suffix]
-                          Image {
-                            icon-name: "go-next-symbolic";
-                            styles ["dimmed"]
-                          }
+                        $BzShareList {
+                          urls: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.share-urls;
+                        }
 
-                          title: _("Manage Add-ons");
-                          activatable: true;
-                          activated => $install_addons_cb(template);
+                        $BzReleasesList releases_list {
+                          version-history: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.version-history;
                         }
                       }
 
-                      $BzShareList {
-                        urls: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.share-urls;
-                      }
+                      Box other_apps_box {
+                        orientation: vertical;
+                        margin-start: 17;
+                        margin-end: 17;
+                        visible: bind $has_other_apps(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer-apps, template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>) as <bool>;
 
-                      $BzReleasesList releases_list {
-                        version-history: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.version-history;
+                        Label {
+                          styles [
+                            "heading",
+                            "h4",
+                          ]
+
+                          label: bind $format_other_apps_label(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer) as <string>;
+                          xalign: 0;
+                          margin-bottom: 6;
+                          margin-start: 12;
+                        }
+
+                        $BzDynamicListView {
+                          hexpand: true;
+                          scroll: false;
+                          noscroll-kind: flow-box;
+                          child-type: "BzAppTile";
+                          child-prop: "group";
+                          max-children-per-line: 2;
+                          bind-widget => $bind_app_tile_cb(template);
+                          unbind-widget => $unbind_app_tile_cb(template);
+
+                          model: SliceListModel {
+                            offset: 0;
+                            size:100;
+                            model: bind $get_developer_apps_entries(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer-apps, template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>) as <Gio.ListModel>;
+                          };
+                        }
                       }
                     };
                   }

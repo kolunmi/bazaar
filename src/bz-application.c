@@ -1789,3 +1789,10 @@ cmp_group (BzEntryGroup *a,
 
   return g_strcmp0 (title_a, title_b);
 }
+
+BzApplicationMapFactory *
+bz_application_get_application_map_factory (BzApplication *self)
+{
+  g_return_val_if_fail (BZ_IS_APPLICATION (self), NULL);
+  return self->application_factory;
+}
