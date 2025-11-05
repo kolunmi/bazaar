@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
 DEPS=(
+    meson
+    ninja
+
     gtk4-devel
     libadwaita-devel
     libdex-devel
@@ -13,6 +16,9 @@ DEPS=(
     libsoup3-devel
     json-glib-devel
     md4c-devel
+
+    # lsp
+    clangd
 )
 
 dnf install ${DEPS[@]}
