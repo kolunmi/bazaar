@@ -169,6 +169,10 @@ button.context-tile:active .lozenge {
     border-radius: 99999px;
 }
 
+.medium-pill {
+	border-radius: 99999px;
+}
+
 .colored {
     background-color: var(--accent-bg-color);
     color: var(--accent-color);
