@@ -211,12 +211,22 @@ template $BzWindow: Adw.ApplicationWindow {
                       Label {
                         styles [
                           "dim-label",
-                          "title-2",
+                          "heading",
                         ]
 
                         halign: center;
                         ellipsize: end;
                         label: bind template.state as <$BzStateInfo>.busy-progress-label;
+                      }
+
+                      Label {
+                        styles [
+                          "title-4",
+                        ]
+
+                        halign: center;
+                        ellipsize: end;
+                        label: bind template.state as <$BzStateInfo>.busy-step-label;
                       }
                     };
                   }
