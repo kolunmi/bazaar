@@ -971,7 +971,7 @@ fiber_check_for_updates (BzApplication *self)
 
       dex_await (
           dex_future_allv ((DexFuture *const *) futures->pdata, futures->len),
-          &local_error);
+          NULL);
 
       store = g_list_store_new (BZ_TYPE_ENTRY);
       for (guint i = 0; i < futures->len; i++)
