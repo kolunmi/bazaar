@@ -3,24 +3,26 @@
 # This file is distributed under the same license as the bazaar package.
 # Automatically generated, 2025.
 #
+# SPDX-FileCopyrightText: 2025 faoquad <faoquad@noreply.codeberg.org>
 msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-20 13:37+0300\n"
-"PO-Revision-Date: 2025-08-12 22:05+0300\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
+"POT-Creation-Date: 2025-11-05 02:19+0200\n"
+"PO-Revision-Date: 2025-11-05 05:29+0200\n"
+"Last-Translator: faoquad <faoquad@noreply.codeberg.org>\n"
+"Language-Team: Ukrainian <>\n"
 "Language: uk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<="
+"4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Lokalize 25.08.2\n"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:3
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:5
-#: src/bz-window.blp:51
+#: src/bz-window.blp:174
 msgid "Bazaar"
 msgstr "Базар"
 
@@ -47,7 +49,6 @@ msgstr ""
 "застосунків"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:11
-#: src/bz-preferences-dialog.blp:25
 msgid "Only Show Free Software"
 msgstr "Показувати лише вільні застосунки"
 
@@ -110,25 +111,32 @@ msgstr ""
 "стільничних компʼютерах. Він має вкладку \"підібраних\" застосунків, котра "
 "може бути налаштована дистрибутивами, аби створити цілісніший досвід."
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:22 src/bz-application.c:504
-msgid "Adam Masciola"
-msgstr ""
-
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:47
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:54
 msgid "The home view displaying Flathub apps"
 msgstr "Домашня сторінка із застосунками з Flathub"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:51
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:58
 msgid "Nucleus app page"
 msgstr "Сторінка застосунку Nucleus"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:55
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:62
 msgid "Searching for Blender"
 msgstr "Шукаємо Blender"
 
-#: src/bz-addons-dialog.blp:13
-msgid "Manage Addons"
+#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:570
+#: src/bz-installed-page.blp:132
+msgid "Manage Add-ons"
 msgstr "Керувати розширеннями"
+
+#: src/bz-addons-dialog.c:88 src/bz-installed-page.blp:158
+#: src/bz-transaction-view.blp:212 src/bz-window.c:1052
+msgid "Remove"
+msgstr "Видалити"
+
+#: src/bz-addons-dialog.c:95 src/bz-full-view.blp:287
+#: src/bz-transaction-view.blp:186 src/bz-window.c:1030
+msgid "Install"
+msgstr "Встановити"
 
 #: src/bz-app-size-dialog.c:55
 msgid "Of the size of human DNA"
@@ -142,10 +150,10 @@ msgstr "3 мільярди пар основ"
 msgid "Of the Linux Kernel"
 msgstr "від ядра Linux"
 
-# NOTE: не потребує перекладу.
+# Не потребує перекладу.
 #: src/bz-app-size-dialog.c:56
 msgid "linux-6.17.tar.xz"
-msgstr ""
+msgstr "linux-6.17.tar.xz"
 
 #: src/bz-app-size-dialog.c:57
 msgid "Of the Apollo 11 guidance computer"
@@ -175,11 +183,11 @@ msgstr "без медіявмісту"
 msgid "--- MB"
 msgstr "--- МБ"
 
-#: src/bz-app-size-dialog.blp:53 src/bz-full-view.blp:363
+#: src/bz-app-size-dialog.blp:53
 msgid "Download Size"
 msgstr "Розмір завантаження"
 
-#: src/bz-application.c:400
+#: src/bz-application.c:401
 msgid ""
 "This functionality is currently disabled. It is recommended you download and "
 "install Flatseal to manage app permissions."
@@ -187,124 +195,133 @@ msgstr ""
 "Цю можливість наразі вимкнено. Для керування дозволами застосунків радимо "
 "встановити Flatseal."
 
-#: src/bz-application.c:464
+#: src/bz-application.c:465
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr ""
 
-#: src/bz-application.c:465
+#: src/bz-application.c:466
 msgctxt "About Dialog Developer Credit"
 msgid "Alexander Vanhee"
 msgstr ""
 
-#: src/bz-application.c:470
+#: src/bz-application.c:471
 msgctxt "About Dialog Translator Credit"
 msgid "Ahmed Najmawi"
 msgstr ""
 
-#: src/bz-application.c:471
+#: src/bz-application.c:472
 msgctxt "About Dialog Translator Credit"
 msgid "AtomHare"
 msgstr ""
 
-#: src/bz-application.c:472
+#: src/bz-application.c:473
 msgctxt "About Dialog Translator Credit"
 msgid "Azenyr"
 msgstr ""
 
-#: src/bz-application.c:473
+#: src/bz-application.c:474
 msgctxt "About Dialog Translator Credit"
 msgid "Goudarz Jafari"
 msgstr ""
 
-#: src/bz-application.c:474
+#: src/bz-application.c:475
 msgctxt "About Dialog Translator Credit"
 msgid "Jill Fiore (Lumaeris)"
 msgstr ""
 
-#: src/bz-application.c:475
+#: src/bz-application.c:476
 msgctxt "About Dialog Translator Credit"
 msgid "João Victor (Leal)"
 msgstr ""
 
-#: src/bz-application.c:476
+#: src/bz-application.c:477
 msgctxt "About Dialog Translator Credit"
 msgid "KiKaraage"
 msgstr ""
 
-#: src/bz-application.c:477
+#: src/bz-application.c:478
 msgctxt "About Dialog Translator Credit"
 msgid "Lucosec"
 msgstr ""
 
-#: src/bz-application.c:478
+#: src/bz-application.c:479
 msgctxt "About Dialog Translator Credit"
 msgid "Léane GRASSER"
 msgstr ""
 
-#: src/bz-application.c:479
+#: src/bz-application.c:480
 msgctxt "About Dialog Translator Credit"
 msgid "Marcel Mrówka (Microwave)"
 msgstr ""
 
-#: src/bz-application.c:480
+#: src/bz-application.c:481
 msgctxt "About Dialog Translator Credit"
 msgid "Peter Dave Hello"
 msgstr ""
 
-#: src/bz-application.c:481
+#: src/bz-application.c:482
 msgctxt "About Dialog Translator Credit"
 msgid "Pietro F."
 msgstr ""
 
-#: src/bz-application.c:482
-msgctxt "About Dialog Translator Credit"
-msgid "Shihfu Juan"
-msgstr ""
-
 #: src/bz-application.c:483
 msgctxt "About Dialog Translator Credit"
-msgid "Shinsei"
+msgid "Sabri Ünal"
 msgstr ""
 
 #: src/bz-application.c:484
 msgctxt "About Dialog Translator Credit"
-msgid "Vlastimil Dědek"
+msgid "Shihfu Juan"
 msgstr ""
 
 #: src/bz-application.c:485
 msgctxt "About Dialog Translator Credit"
-msgid "asen23"
+msgid "Shinsei"
 msgstr ""
 
 #: src/bz-application.c:486
 msgctxt "About Dialog Translator Credit"
-msgid "camegone"
+msgid "Vlastimil Dědek"
 msgstr ""
 
 #: src/bz-application.c:487
 msgctxt "About Dialog Translator Credit"
-msgid "renner"
+msgid "asen23"
 msgstr ""
 
 #: src/bz-application.c:488
 msgctxt "About Dialog Translator Credit"
+msgid "camegone"
+msgstr ""
+
+#: src/bz-application.c:489
+msgctxt "About Dialog Translator Credit"
+msgid "renner"
+msgstr ""
+
+#: src/bz-application.c:490
+msgctxt "About Dialog Translator Credit"
 msgid "robotta"
 msgstr ""
 
-#: src/bz-application.c:1027
+#: src/bz-application.c:506
+msgid "Adam Masciola"
+msgstr ""
+
+#: src/bz-application.c:1033
 msgid "Constructing Flatpak instance..."
 msgstr "Створення примірника Flatpak..."
 
-#: src/bz-application.c:1044
+#: src/bz-application.c:1050
 msgid "Reusing last Flatpak instance..."
 msgstr "Повторне використання примірника Flatpak..."
 
-#: src/bz-application.c:1069
+#: src/bz-application.c:1075
 msgid "Flathub is not registered on this system"
 msgstr "Flathub не зареєстровано на цій системі"
 
-#: src/bz-application.c:1072
+#: src/bz-application.c:1078
 msgid ""
 "Would you like to add Flathub as a remote? If you decline, the Flathub page "
 "will not be available. You can change this later."
@@ -312,70 +329,79 @@ msgstr ""
 "Бажаєте додати Flathub до переліку віддалених сховищ? В іншому разі, "
 "сторінка Flathub буде недоступна. Ви можете змінити це пізніше."
 
-#: src/bz-application.c:1077 src/bz-update-dialog.blp:6
+#: src/bz-application.c:1083 src/bz-update-dialog.blp:6
 msgid "Later"
 msgstr "Пізніше"
 
-#: src/bz-application.c:1078
+#: src/bz-application.c:1084
 msgid "Add Flathub"
 msgstr "Додати Flathub"
 
-#: src/bz-application.c:1110
+#: src/bz-application.c:1116
 #, c-format
 msgid "Identifying installed entries..."
 msgstr "Визначення встановлених надходжень..."
 
-#: src/bz-application.c:1122
+#: src/bz-application.c:1128
 #, c-format
 msgid "Beginning remote entry retrieval while referencing %d blocklist(s)..."
 msgstr "Отримання віддалених надходжень із застосуванням %d чорних списків..."
 
-#: src/bz-application.c:1270
+#: src/bz-application.c:1276
 #, c-format
 msgid "Receiving Entries"
 msgstr "Отримуємо надходження"
 
-#: src/bz-application.c:1271
+#: src/bz-application.c:1277
 #, c-format
 msgid "%'d of %'d"
 msgstr "%'d із %'d"
 
-#: src/bz-application.c:1281
+#: src/bz-application.c:1288
 #, c-format
 msgid "Waiting for background indexing tasks to catch up..."
 msgstr "Очікується завершення індексації..."
 
-#: src/bz-application.c:1317
+#: src/bz-application.c:1329
 #, c-format
 msgid "Completed initialization in %0.2f seconds"
 msgstr "Ініціалізовано за %0.2f сек"
 
-#: src/bz-application.c:1322 src/bz-application.c:1477
+#: src/bz-application.c:1334 src/bz-application.c:1489
 msgid "Checking for updates..."
 msgstr "Шукаємо оновлення"
 
-#: src/bz-application.c:1361
+#: src/bz-application.c:1373
 msgid "Synchronizing..."
 msgstr "Синхронізуємо..."
 
-#: src/bz-browse-widget.blp:11 src/bz-flathub-page.blp:11
-#: src/bz-full-view.blp:12 src/bz-installed-page.blp:11 src/bz-window.blp:155
+#: src/bz-browse-widget.blp:11 src/bz-flathub-page.blp:19
+#: src/bz-full-view.blp:53 src/bz-installed-page.blp:15 src/bz-window.blp:123
 msgid "Empty"
 msgstr "Порожньо"
 
 #: src/bz-browse-widget.blp:15
-msgid "No Curated Applications"
-msgstr "Жодного підібраного застосунку"
+msgid "No Curation"
+msgstr "Жодного підібраного вмісту"
 
 #: src/bz-browse-widget.blp:16
 msgid ""
-"Bazaar was not provided a curated content configuration. Contact your "
-"operating system's support channels for assistance."
+"There is no curation information provided on this system. You can still "
+"browse applications on Flathub"
 msgstr ""
-"Базару не було надано налаштування підібраного вмісту. По допомогу, "
-"зверніться до каналу підтримки Вашої операційної системи."
+"Ваша операційна система не надає підібранoго вмісту. Ви все ще можете шукати з"
+"астосунки на Flathub"
 
-#: src/bz-browse-widget.blp:22 src/bz-flathub-page.blp:22
+#: src/bz-browse-widget.blp:18
+msgid "Browse Flathub"
+msgstr "Оглянути Flathub"
+
+#: src/bz-browse-widget.blp:29 src/bz-browse-widget.blp:33
+#: src/bz-flathub-page.blp:30 src/bz-flathub-page.blp:34
+msgid "Offline"
+msgstr "Поза мережею"
+
+#: src/bz-browse-widget.blp:39 src/bz-flathub-page.blp:40
 msgid "Browser"
 msgstr "Оглядач"
 
@@ -403,259 +429,398 @@ msgstr "Вийти"
 msgid "Copy and Close"
 msgstr "Копіювати та вийти"
 
-#: src/bz-flathub-category.c:290
+#: src/bz-featured-tile.blp:89
+msgid "App of the Day"
+msgstr "Застосунок дня"
+
+#: src/bz-flathub-category.c:66
 msgid "Audio & Video"
 msgstr "Звук та відео"
 
-#: src/bz-flathub-category.c:292
-msgid "Development"
+#: src/bz-flathub-category.c:66
+msgid "Media"
+msgstr "Медіа"
+
+#: src/bz-flathub-category.c:66
+msgid "More Audio & Video"
+msgstr "Ще"
+
+#: src/bz-flathub-category.c:67
+msgid "Developer Tools"
 msgstr "Розробка"
 
-#: src/bz-flathub-category.c:294
+#: src/bz-flathub-category.c:67
+msgid "Develop"
+msgstr "Розробка"
+
+#: src/bz-flathub-category.c:67
+msgid "More Developer Tools"
+msgstr "Ще"
+
+#: src/bz-flathub-category.c:68
 msgid "Education"
 msgstr "Освіта"
 
-#: src/bz-flathub-category.c:296
-msgid "Games"
+#: src/bz-flathub-category.c:68
+msgid "Learn"
+msgstr "Освіта"
+
+#: src/bz-flathub-category.c:68
+msgid "More Education"
+msgstr "Ще"
+
+#: src/bz-flathub-category.c:69
+msgid "Gaming"
 msgstr "Ігри"
 
-#: src/bz-flathub-category.c:298
-msgid "Graphics"
-msgstr "Графіка"
+#: src/bz-flathub-category.c:69
+msgid "Play"
+msgstr "Відтворення"
 
-#: src/bz-flathub-category.c:300
+#: src/bz-flathub-category.c:69
+msgid "More Gaming"
+msgstr "Ще"
+
+#: src/bz-flathub-category.c:70
+msgid "Graphics & Photography"
+msgstr "Графіка та фотографія"
+
+#: src/bz-flathub-category.c:70
+msgid "Create"
+msgstr "Створення"
+
+#: src/bz-flathub-category.c:70
+msgid "More Graphics & Photography"
+msgstr "Ще"
+
+#: src/bz-flathub-category.c:71
 msgid "Networking"
 msgstr "Мережа"
 
-#: src/bz-flathub-category.c:302
-msgid "Office"
-msgstr "Офіс"
+#: src/bz-flathub-category.c:71
+msgid "Internet"
+msgstr "Інтернет"
 
-#: src/bz-flathub-category.c:304
+#: src/bz-flathub-category.c:71
+msgid "More Networking"
+msgstr "Ще"
+
+#: src/bz-flathub-category.c:72
+msgid "Productivity"
+msgstr "Продуктивність"
+
+#: src/bz-flathub-category.c:72
+msgid "Work"
+msgstr "Робота"
+
+#: src/bz-flathub-category.c:72
+msgid "More Productivity"
+msgstr "Ще"
+
+#: src/bz-flathub-category.c:73
 msgid "Science"
 msgstr "Наука"
 
-#: src/bz-flathub-category.c:306
+#: src/bz-flathub-category.c:73
+msgid "More Science"
+msgstr "Ще"
+
+#: src/bz-flathub-category.c:74
 msgid "System"
 msgstr "Система"
 
-#: src/bz-flathub-category.c:308
+#: src/bz-flathub-category.c:74
+msgid "More System"
+msgstr "Ще"
+
+#: src/bz-flathub-category.c:75
 msgid "Utilities"
 msgstr "Утиліти"
 
-#: src/bz-flathub-page.blp:15
-msgid "Flathub Not Added"
-msgstr "Flathub не додано"
+#: src/bz-flathub-category.c:75
+msgid "Tools"
+msgstr "Утиліти"
 
-#: src/bz-flathub-page.blp:16
-msgid "The Flathub remote was not found on any of your flatpak installations"
-msgstr "Сховище Flathub не було знайдено на жодному з Ваших встановлень"
+#: src/bz-flathub-category.c:75
+msgid "More Utilities"
+msgstr "Ще"
 
-#: src/bz-flathub-page.blp:70 src/bz-flathub-page.c:185
+#: src/bz-flathub-category.c:76 src/bz-flathub-page.blp:90
+#: src/bz-flathub-page.blp:119
 msgid "Trending"
 msgstr "Набирають популярність"
 
-#: src/bz-flathub-page.blp:101
+#: src/bz-flathub-category.c:76
 msgid "More Trending"
 msgstr "Показати більше"
 
-#: src/bz-flathub-page.blp:139 src/bz-flathub-page.c:195
-msgid "Recently Updated"
-msgstr "Нещодавно оновлені"
-
-#: src/bz-flathub-page.blp:170
-msgid "More Updated"
-msgstr "Показати більше"
-
-#: src/bz-flathub-page.blp:191 src/bz-flathub-page.c:205
-msgid "Recently Added"
-msgstr "Нещодавно додані"
-
-#: src/bz-flathub-page.blp:222
-msgid "More Added"
-msgstr "Показати більше"
-
-#: src/bz-flathub-page.blp:243 src/bz-flathub-page.c:215
+#: src/bz-flathub-category.c:77 src/bz-flathub-page.blp:95
+#: src/bz-flathub-page.blp:152
 msgid "Popular"
 msgstr "Популярні"
 
-#: src/bz-flathub-page.blp:274
+#: src/bz-flathub-category.c:77
 msgid "More Popular"
 msgstr "Показати більше"
 
-#: src/bz-flatpak-entry.c:507
+#: src/bz-flathub-category.c:78 src/bz-flathub-page.blp:141
+msgid "Recently Added"
+msgstr "Нещодавно додані"
+
+#: src/bz-flathub-category.c:78 src/bz-flathub-page.blp:100
+msgid "New"
+msgstr "Нові"
+
+#: src/bz-flathub-category.c:78
+msgid "More New"
+msgstr "Ще"
+
+#: src/bz-flathub-category.c:79 src/bz-flathub-page.blp:130
+msgid "Recently Updated"
+msgstr "Нещодавно оновлені"
+
+#: src/bz-flathub-category.c:79 src/bz-flathub-page.blp:105
+msgid "Updated"
+msgstr "Оновлення"
+
+#: src/bz-flathub-category.c:79
+msgid "More Updated"
+msgstr "Показати більше"
+
+#: src/bz-flathub-category.c:80
+msgid "Mobile"
+msgstr "Мобільні пристрої"
+
+#: src/bz-flathub-category.c:80
+msgid "More Mobile"
+msgstr "Ще"
+
+#: src/bz-flathub-category-section.c:134 src/bz-search-widget.c:311
+#, c-format
+msgid "%d applications"
+msgstr "Запустити цей застосунок"
+
+#: src/bz-flathub-page.blp:23
+msgid "Flathub Not Added"
+msgstr "Flathub не додано"
+
+#: src/bz-flathub-page.blp:24
+msgid "The Flathub remote was not found on any of your Flatpak installations"
+msgstr "Сховище Flathub не було знайдено на жодному з Ваших встановлень"
+
+#: src/bz-flathub-page.blp:242
+msgid "On the go"
+msgstr "на NES"
+
+#: src/bz-flathub-page.blp:254
+msgid "Apps for your Linux phones and tablets"
+msgstr "Застосунки для Ваших смартфонів та планшетів на Linux"
+
+#: src/bz-flathub-page.blp:265 src/bz-flathub-page.blp:300
+msgid "More Mobile apps"
+msgstr "Ще"
+
+#: src/bz-flathub-page.c:189
+msgid "Mobile Apps"
+msgstr "Застосунки для мобільних пристроїв"
+
+#: src/bz-flatpak-entry.c:552
 msgctxt "Project URL Type"
 msgid "Flathub Page"
 msgstr "Сторінка Flathub"
 
-#: src/bz-flatpak-entry.c:526
+#: src/bz-flatpak-entry.c:573
 msgctxt "Project URL Type"
-msgid "Homepage"
-msgstr "Домашня сторінка"
+msgid "Project Website"
+msgstr "URL проєкту"
 
-#: src/bz-flatpak-entry.c:529
+#: src/bz-flatpak-entry.c:577
 msgctxt "Project URL Type"
 msgid "Issue Tracker"
 msgstr "Відстеження помилок"
 
-#: src/bz-flatpak-entry.c:532
+#: src/bz-flatpak-entry.c:581
 msgctxt "Project URL Type"
 msgid "FAQ"
 msgstr "ЧаПи"
 
-#: src/bz-flatpak-entry.c:535
+#: src/bz-flatpak-entry.c:585
 msgctxt "Project URL Type"
 msgid "Help"
 msgstr "Допомога"
 
-#: src/bz-flatpak-entry.c:538
+#: src/bz-flatpak-entry.c:589
 msgctxt "Project URL Type"
 msgid "Donate"
 msgstr "Пожертви"
 
-#: src/bz-flatpak-entry.c:543
+#: src/bz-flatpak-entry.c:595
 msgctxt "Project URL Type"
 msgid "Translate"
 msgstr "Переклад"
 
-#: src/bz-flatpak-entry.c:546
+#: src/bz-flatpak-entry.c:599
 msgctxt "Project URL Type"
 msgid "Contact"
 msgstr "Звʼязок"
 
-#: src/bz-flatpak-entry.c:549
+#: src/bz-flatpak-entry.c:603
 msgctxt "Project URL Type"
 msgid "Source Code"
 msgstr "Початковий код"
 
-#: src/bz-flatpak-entry.c:554
+#: src/bz-flatpak-entry.c:609
 msgctxt "Project URL Type"
 msgid "Contribute"
 msgstr "Долучитися"
 
-#: src/bz-full-view.blp:16
+#: src/bz-full-view.blp:20 src/bz-window.blp:66 src/bz-window.blp:331
+msgid "Toggle transaction sidebar"
+msgstr "Перемкнути віконце дій над застосунками"
+
+#: src/bz-full-view.blp:43 src/bz-window.blp:354
+msgid "Main Menu"
+msgstr "Головне меню"
+
+#: src/bz-full-view.blp:57
 msgid "No Results"
 msgstr "Нічого не знайдено"
 
-#: src/bz-full-view.blp:17
+#: src/bz-full-view.blp:58
 msgid "Try a different search query"
 msgstr "Спробуйте інший запит"
 
-#: src/bz-full-view.blp:23 src/bz-window.blp:165
+#: src/bz-full-view.blp:64 src/bz-window.blp:133
 msgid "Content"
 msgstr "Вміст"
 
-#: src/bz-full-view.blp:141
-msgid "This flatpak is verified by the original developers of the software."
-msgstr "Цей пакунок затверджено розробниками цієї програми"
+#: src/bz-full-view.blp:194
+msgid "Verified by the original developers"
+msgstr "Затверджено розробниками цієї програми"
 
-#: src/bz-full-view.blp:168
+#: src/bz-full-view.blp:221
 msgid "Support"
 msgstr "Підтримати"
 
-#: src/bz-full-view.blp:188
+#: src/bz-full-view.blp:241
 msgid "Repository Star Count"
 msgstr "Вподобань на сторінці розробки"
 
-#: src/bz-full-view.blp:219
-msgid "Run Application"
-msgstr "Запустити цей застосунок"
+#: src/bz-full-view.blp:271
+msgid "Open"
+msgstr "Відкрити посилання"
 
-#: src/bz-full-view.blp:233
+#: src/bz-full-view.blp:284
 msgid "Download & Install Application"
 msgstr "Завантажити й встановити цей застосунок"
 
-#: src/bz-full-view.blp:236 src/bz-transaction-view.blp:186
-#: src/bz-window.c:1068
-msgid "Install"
-msgstr "Встановити"
-
-#: src/bz-full-view.blp:248
+#: src/bz-full-view.blp:299
 msgid "Uninstall Application"
 msgstr "Видалити цей застосунок"
 
-#: src/bz-full-view.blp:263 src/bz-installed-page.blp:125
-msgid "Manage Add-ons"
-msgstr "Керувати розширеннями"
-
-#: src/bz-full-view.blp:276
+#: src/bz-full-view.blp:314
 msgid "Install Other Version"
 msgstr "Встановити іншу версію"
 
-#: src/bz-full-view.blp:291
-msgid "Share this application"
-msgstr "Поділитися цим застосунком"
+#: src/bz-full-view.blp:338
+msgid "Download"
+msgstr "Розмір завантаження"
 
-#: src/bz-full-view.blp:374
-msgid "Excludes shared components"
-msgstr "Без спільних компонентів"
+#: src/bz-full-view.blp:454
+msgid "Downloads/mo"
+msgstr "зав./міс."
 
-#: src/bz-full-view.blp:430
-msgid "Free Software"
-msgstr "Вільна ліцензія"
+#: src/bz-full-view.c:281
+msgid "---"
+msgstr "---"
 
-#: src/bz-full-view.blp:472
-msgid "Proprietary"
-msgstr "Власницька ліцензія"
-
-#: src/bz-full-view.blp:483
-msgid "Source code may not be available"
-msgstr "Початковий код може бути недоступним"
-
-#: src/bz-full-view.blp:538
-msgid "Click for details"
-msgstr "Натисніть для докладнощів"
-
-#: src/bz-full-view.blp:604
-msgid "Repositories"
-msgstr "Віддалені сховища"
-
-#: src/bz-full-view.blp:635 src/bz-full-view.blp:643
-msgid "Project Website"
-msgstr "URL проєкту"
-
-#: src/bz-full-view.blp:651
-msgid "Open in browser"
-msgstr "Відкрити в оглядачі"
-
-#: src/bz-full-view.c:217
+#. Translators: M is the suffix for millions, \xC2\xA0 is a non-breaking space
+#: src/bz-full-view.c:285
 #, c-format
-msgid "%'d Monthly Downloads"
-msgstr "%'d щомісячних завантажень"
+msgid "%.2f M"
+msgstr "%.2f млн."
 
-#: src/bz-full-view.c:219
-msgid "--- Downloads"
-msgstr "--- Завантажень"
+#. Translators: K is the suffix for thousands, \xC2\xA0 is a non-breaking space
+#: src/bz-full-view.c:288
+#, c-format
+msgid "%.2f K"
+msgstr "%.2f тис."
 
-#: src/bz-full-view.c:245
+#: src/bz-full-view.c:297
+#, c-format
+msgid "%d downloads in the last 30 days"
+msgstr "%d завантажень протягом останніх 30 днів"
+
+#: src/bz-full-view.c:318
+#, c-format
+msgid "Download size of %s"
+msgstr "Розмір завантаження"
+
+#. Translators: Age rating format, e.g. "12+" for ages 12 and up
+#: src/bz-full-view.c:328
+#, c-format
+msgid "%d+"
+msgstr "%d+"
+
+#: src/bz-full-view.c:336
+msgid "All Ages"
+msgstr "Без обмежень"
+
+#: src/bz-full-view.c:338
+msgid "Age Rating"
+msgstr "Вікове обмеження"
+
+#: src/bz-full-view.c:346
+msgid "Suitable for all ages"
+msgstr "Без обмежень за віком"
+
+#: src/bz-full-view.c:348
+#, c-format
+msgid "Suitable for ages %d and up"
+msgstr "%d та старше"
+
+#: src/bz-full-view.c:368
 msgid "Unknown"
 msgstr "Невідомо"
 
-#. Translators: This is a date format for timestamps from previous years. Used in the app releases section.
-#. * %B is the full month name, %e is the day, %Y is the year.
-#. * Example: "October 1, 2025"
-#. * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
-#. * Please modify to make it sound natural in your locale.
-#. *
-#: src/bz-full-view.c:272
-msgid "%B %-d, %Y"
-msgstr "%-d %B %Y"
+#: src/bz-full-view.c:371
+msgid "Proprietary Software"
+msgstr "Власницька ліцензія"
 
-#. Translators: This is a date format for timestamps from the current year. Used in the app releases section.
-#. * %B is the full month name, %e is the day.
-#. * Example: "October 1"
-#. * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
-#. * Please modify to make it sound natural in your locale.
-#. *
-#: src/bz-full-view.c:280
-msgid "%B %-d"
-msgstr "%-d %B"
+#: src/bz-full-view.c:375
+#, c-format
+msgid "Free software licensed under %s"
+msgstr "Вільне ПЗ за ліцензією %s"
 
-#: src/bz-full-view.c:291
+#: src/bz-full-view.c:383
+msgid "Free"
+msgstr "Вільна ліцензія"
+
+#: src/bz-full-view.c:383
+msgid "Proprietary"
+msgstr "Власницька ліцензія"
+
+#: src/bz-full-view.c:403
+msgid "Adaptive"
+msgstr "Адаптивний"
+
+#: src/bz-full-view.c:403
+msgid "Desktop Only"
+msgstr "Лише для стільниць"
+
+#: src/bz-full-view.c:409
+msgid "Works on desktop, tablets, and phones"
+msgstr "Працює на стільницях, планшетах і смартфонах"
+
+#: src/bz-full-view.c:410
+msgid "May not work on mobile devices"
+msgstr "Може не працювати на мобільних пристроях"
+
+#: src/bz-full-view.c:421
 msgid "No URL"
 msgstr "Без URL"
 
-#: src/bz-full-view.c:309
+#: src/bz-full-view.c:439
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -663,7 +828,7 @@ msgstr ""
 "Цей застосунок має вільну ліцензію. Це означає, що початковий код може бути "
 "перевірено на безпечність."
 
-#: src/bz-full-view.c:310
+#: src/bz-full-view.c:440
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
@@ -671,14 +836,107 @@ msgstr ""
 "Цей застосунок має невільну (власницьку) ліцензію. Це означає, що початковий "
 "код не є публічно доступним і не може бути перевіреним на безпечність."
 
-#: src/bz-full-view.c:600
-#, c-format
-msgid "Version %s"
-msgstr "Версія %s"
+#: src/bz-full-view.c:696
+msgid "Show Less"
+msgstr "Менше"
 
-#: src/bz-full-view.c:625
-msgid "No details for this release"
-msgstr "Без подробиць"
+#: src/bz-full-view.c:696
+msgid "Show More"
+msgstr "Показати клавіатурні скорочення"
+
+#: src/bz-hardware-support-dialog.c:69
+msgid "Keyboard support"
+msgstr "Підтримка клавіатури"
+
+#: src/bz-hardware-support-dialog.c:71
+msgid "Requires keyboards"
+msgstr "Вимагає клавіатуру"
+
+#: src/bz-hardware-support-dialog.c:72
+msgid "Recommends keyboards"
+msgstr "Бажана клавіатура"
+
+#: src/bz-hardware-support-dialog.c:73
+msgid "Supports keyboards"
+msgstr "Підтримує клавіатуру"
+
+#: src/bz-hardware-support-dialog.c:74
+msgid "Unknown support for keyboards"
+msgstr "Невідома підтримка клавіатури"
+
+#: src/bz-hardware-support-dialog.c:76
+msgid "Mouse support"
+msgstr "Підтримка миші"
+
+#: src/bz-hardware-support-dialog.c:78
+msgid "Requires mice or pointing devices"
+msgstr "Вимагає мишу або вказівний пристрій"
+
+#: src/bz-hardware-support-dialog.c:79
+msgid "Recommends mice or pointing devices"
+msgstr "Бажані миша або вказівний пристрій"
+
+#: src/bz-hardware-support-dialog.c:80
+msgid "Supports mice or pointing devices"
+msgstr "Підтримує мишу або вказівний пристрій"
+
+#: src/bz-hardware-support-dialog.c:81
+msgid "Unknown support for mice or pointing devices"
+msgstr "Невідома підтримка миші або вказівних пристроїв"
+
+#: src/bz-hardware-support-dialog.c:83
+msgid "Touchscreen support"
+msgstr "Підтримка сенсорних екранів"
+
+#: src/bz-hardware-support-dialog.c:85
+msgid "Requires touchscreens"
+msgstr "Вимагає сенсорний екран"
+
+#: src/bz-hardware-support-dialog.c:86
+msgid "Recommends touchscreens"
+msgstr "Бажаний сенсорний екран"
+
+#: src/bz-hardware-support-dialog.c:87
+msgid "Supports touchscreens"
+msgstr "Підтримує сенсорний екран"
+
+#: src/bz-hardware-support-dialog.c:88
+msgid "Unknown support for touchscreens"
+msgstr "Невідома підтримка сенсорного екрану"
+
+#: src/bz-hardware-support-dialog.c:192
+msgid "Mobile support"
+msgstr "Підтримка мобільних пристроїв"
+
+#: src/bz-hardware-support-dialog.c:193
+msgid "Works on mobile devices"
+msgstr "Працює на мобільних пристроях"
+
+#: src/bz-hardware-support-dialog.c:193
+msgid "May not work well on mobile devices"
+msgstr "Обмежена підтримка на мобільних пристроях"
+
+#: src/bz-hardware-support-dialog.c:198
+msgid "Desktop support"
+msgstr "Підтримка стільниць"
+
+#: src/bz-hardware-support-dialog.c:199
+msgid "Works well on large screens"
+msgstr "Працює добре на великих екранах"
+
+#: src/bz-hardware-support-dialog.c:233
+#, c-format
+msgid "%s works best on specific hardware"
+msgstr "%s найліпше працює на певних пристроях"
+
+#: src/bz-hardware-support-dialog.c:240
+#, c-format
+msgid "%s works on most devices"
+msgstr "%s працює на більшості пристроїв"
+
+#: src/bz-hardware-support-dialog.blp:6 src/bz-hardware-support-dialog.blp:47
+msgid "Hardware Support"
+msgstr "Підтримати"
 
 #: src/bz-inspector.blp:5
 msgid "Bazaar Inspector"
@@ -704,36 +962,31 @@ msgstr "Відсіяти..."
 msgid "Decache and Inspect"
 msgstr "Відкинути кеш та дослідити"
 
-#: src/bz-installed-page.blp:15
+#: src/bz-installed-page.blp:19
 msgid "No Flatpaks Installed"
 msgstr "Не встановлено жодного пакунку Flatpak"
 
-#: src/bz-installed-page.blp:21 src/bz-window.blp:306 src/bz-window.blp:399
+#: src/bz-installed-page.blp:25 src/bz-window.blp:257
 msgid "Installed"
 msgstr "Встановлені"
 
-#: src/bz-installed-page.blp:101
+#: src/bz-installed-page.blp:108
 msgid "Support this application"
 msgstr "Підтримати цей застосунок"
 
-#: src/bz-installed-page.blp:151 src/bz-transaction-view.blp:212
-#: src/bz-window.c:1090
-msgid "Remove"
-msgstr "Видалити"
-
-#: src/bz-installed-page.blp:178
+#: src/bz-installed-page.blp:185
 msgid "More actions"
 msgstr "Більше дій"
 
-#: src/bz-installed-page.blp:197
+#: src/bz-installed-page.blp:204
 msgid "Run this application"
 msgstr "Запустити цей застосунок"
 
-#: src/bz-installed-page.blp:209
+#: src/bz-installed-page.blp:216
 msgid "Run"
 msgstr "Запустити"
 
-#: src/bz-installed-page.blp:221 src/bz-installed-page.blp:232
+#: src/bz-installed-page.blp:228 src/bz-installed-page.blp:239
 msgid "View Store Page"
 msgstr "Відкрити сторінку в крамниці"
 
@@ -749,134 +1002,201 @@ msgstr ""
 "Ви маєте декілька встановлених версій цього застосунку. З котрою з них Ви "
 "бажаєте продовжити?"
 
-#: src/bz-installed-page.c:656 src/bz-window.c:1067 src/bz-window.c:1089
+#: src/bz-installed-page.c:656 src/bz-window.c:1029 src/bz-window.c:1051
 msgid "Cancel"
 msgstr "Скасувати"
 
-#: src/bz-preferences-dialog.blp:9
+# Згідно перекладу на Flathub
+#: src/bz-license-dialog.c:115
+msgid ""
+"This app is not developed in the open, so only its developers know how it "
+"works. It may be insecure in ways that are hard to detect, and it may change "
+"without oversight.\n"
+"\n"
+"You may not be able to contribute to this app."
+msgstr ""
+"Цей застосунок не розробляється у відкритому доступі, тому лише його "
+"розробники знають, як він працює. Він може мати вразливості, які важко "
+"виявити, і може змінюватися без нагляду.\n"
+"\n"
+"Ви можете не мати можливості долучитися до проєкту."
+
+# Згідно перекладу на Flathub
+#: src/bz-license-dialog.c:124
+msgid ""
+"This app is developed in the open by an international community.\n"
+"\n"
+"You can participate and help make it even better."
+msgstr ""
+"Цей застосунок розробляється у відкритому доступі міжнародною спільнотою.\n"
+"\n"
+"Ви можете долучитися до проєкту та зробити його ліпшим."
+
+# Згідно перекладу на Flathub
+#: src/bz-license-dialog.c:135
+#, c-format
+msgid ""
+"This app is developed in the open by an international community, and "
+"released under the <a href=\"%s\">%s</a> license.\n"
+"\n"
+"You can participate and help make it even better."
+msgstr ""
+"Цей застосунок розробляється у відкритому доступі міжнародною спільнотою та "
+"випускається під <a href=\"%s\">%s</a>.\n"
+"\n"
+"Ви можете долучитися до проєкту та "
+"зробити його ліпшим."
+
+#: src/bz-preferences-dialog.blp:19
 msgid "Preferences"
 msgstr "Налаштування"
 
-#: src/bz-preferences-dialog.blp:13
-msgid "Application Details"
-msgstr "Докладнощі застосунку"
-
-#: src/bz-preferences-dialog.blp:16
-msgid "Git Forge Star Counts"
-msgstr "Вподобань на сторінці розробки"
-
-#: src/bz-preferences-dialog.blp:17
-msgid "Not having a GitHub access token may trigger rate limits"
-msgstr ""
-"Відсутність токену доступу GitHub може призвести до обмеження Вашого "
-"зʼєднання з GitHub"
-
-#: src/bz-preferences-dialog.blp:22 src/bz-window.blp:43 src/bz-window.blp:58
-#: src/bz-window.blp:338
+#: src/bz-preferences-dialog.blp:23 src/bz-window.blp:271
 msgid "Search"
 msgstr "Пошук"
 
 #: src/bz-preferences-dialog.blp:26
+msgid "Free Software Only"
+msgstr "Вільна ліцензія"
+
+#: src/bz-preferences-dialog.blp:27
 msgid "Hide proprietary applications from search results"
 msgstr "Ховати власницькі (пропрієтарні) застосунки з пошуку"
 
-#: src/bz-preferences-dialog.blp:30
-msgid "Show Only Flathub Apps"
-msgstr "Показувати лише вміст з Flathub"
-
 #: src/bz-preferences-dialog.blp:31
-msgid "Limit search results to applications available on Flathub"
+msgid "Flathub Results Only"
+msgstr "Надходження лише з Flathub"
+
+#: src/bz-preferences-dialog.blp:32
+msgid "Limit search results to applications only available on Flathub"
 msgstr "Відсіювати надходження, що не походять з Flathub"
 
-#: src/bz-preferences-dialog.blp:35
-msgid "Debounce Search Results"
+#: src/bz-preferences-dialog.blp:36
+msgid "Delay Search Results"
 msgstr "Чекати вводу"
 
-#: src/bz-preferences-dialog.blp:36
-msgid "Wait for a brief pause to reduce system load"
-msgstr "Чекати на закінчення вводу, аби попередити миттєві надходження."
+#: src/bz-preferences-dialog.blp:37
+msgid "Improve results performance by debouncing search terms"
+msgstr "Поліпшити швидкодію пошуку, затримуючи відправлення пошукових запитів"
 
-#: src/bz-preferences-dialog.blp:41
-msgid "Global Progress Bar"
-msgstr "Загальна смужка поступу"
-
-#: src/bz-preferences-dialog.blp:44
-msgid "Theme"
-msgstr "Вигляд"
+#: src/bz-preferences-dialog.blp:42
+msgid "Application Details"
+msgstr "Докладнощі застосунку"
 
 #: src/bz-preferences-dialog.blp:45
-msgid "Choose a fun theme for the global progress bar!"
+msgid "Display Star Count"
+msgstr "Вподобань на сторінці розробки"
+
+#: src/bz-preferences-dialog.blp:46
+msgid "Show the star count of an application's source code repository"
+msgstr "Показувати кількість уподобань на сторінках розробки застосунків"
+
+#: src/bz-preferences-dialog.blp:71
+msgid "Progress Bar"
+msgstr "Загальна смужка поступу"
+
+#: src/bz-preferences-dialog.blp:72
+msgid "Choose a theme for the progress bar!"
 msgstr "Оберіть цікавий зовнішній вигляд для смужки поступу!"
 
-#: src/bz-preferences-dialog.blp:48
+#: src/bz-preferences-dialog.blp:107
+msgid ""
+"Bazaar can fetch and display the star count from an application's source "
+"code repository on a remote Git forge. \n"
+" For projects on GitHub, rate limits may cause them not to appear."
+msgstr ""
+"Базар може виявляти та показувати кількість уподобань зі сторінок розробки поч"
+"аткового коду у віддаленому сховищі Git.\n"
+"Для проєктів на GitHub, обмеження запитів (rate limit) може призвести до їхньо"
+"го незʼявлення."
+
+#: src/bz-preferences-dialog.c:32
 msgid "Accent Color"
 msgstr "Акцентний колір"
 
-#: src/bz-preferences-dialog.blp:49
-msgid "Pride Rainbow Flag"
-msgstr "Веселковий прапор"
+#: src/bz-preferences-dialog.c:33
+msgid "Pride Colors"
+msgstr "Барви Гордості"
 
-#: src/bz-preferences-dialog.blp:50
-msgid "Lesbian Pride Flag"
+#: src/bz-preferences-dialog.c:34
+msgid "Lesbian Pride Colors"
 msgstr "Лесбійський прапор"
 
-#: src/bz-preferences-dialog.blp:51
-msgid "Transgender Flag"
+#: src/bz-preferences-dialog.c:35
+msgid "Transgender Pride Colors"
 msgstr "Трансґендерний прапор"
 
-#: src/bz-preferences-dialog.blp:52
-msgid "Nonbinary Flag"
+#: src/bz-preferences-dialog.c:36
+msgid "Nonbinary Pride Colors"
 msgstr "Небінарний прапор"
 
-#: src/bz-preferences-dialog.blp:53
-msgid "Bisexual Flag"
-msgstr "Бісексуальний прапор"
+#: src/bz-preferences-dialog.c:37
+msgid "Bisexual Pride Colors"
+msgstr "Бісексуальні барви Гордості"
 
-#: src/bz-preferences-dialog.blp:54
-msgid "Asexual Flag"
-msgstr "Асексуальний прапор"
+#: src/bz-preferences-dialog.c:38
+msgid "Asexual Pride Colors"
+msgstr "Асексуальні барви Гордості"
 
-#: src/bz-preferences-dialog.blp:55
-msgid "Pansexual Flag"
+#: src/bz-preferences-dialog.c:39
+msgid "Pansexual Pride Colors"
 msgstr "Пансексуальний прапор"
 
-#: src/bz-preferences-dialog.blp:56
-msgid "Aromantic Flag"
+#: src/bz-preferences-dialog.c:40
+msgid "Aromantic Pride Colors"
 msgstr "Аромантичний прапор"
 
-#: src/bz-preferences-dialog.blp:57
-msgid "Genderfluid Flag"
+#: src/bz-preferences-dialog.c:41
+msgid "Genderfluid Pride Colors"
 msgstr "Ґендерфлюїдний прапор"
 
-#: src/bz-preferences-dialog.blp:58
-msgid "Polysexual Flag"
+#: src/bz-preferences-dialog.c:42
+msgid "Polysexual Pride Colors"
 msgstr "Полісексуальний прапор"
 
-#: src/bz-preferences-dialog.blp:59
-msgid "Omnisexual Flag"
+#: src/bz-preferences-dialog.c:43
+msgid "Omnisexual Pride Colors"
 msgstr "Омнісексуальний прапор"
 
-#: src/bz-search-widget.blp:69
-msgid "Search Apps"
-msgstr "Шукати застосунки"
+#: src/bz-releases-dialog.blp:5 src/bz-releases-list.blp:26
+msgid "Version History"
+msgstr "Версія %s"
 
-#: src/bz-share-dialog.blp:13
-msgid "Share"
-msgstr "Поділитися"
+#: src/bz-releases-list.c:128
+#, c-format
+msgid "Version %s"
+msgstr "Версія %s"
 
-#: src/bz-share-dialog.c:62
+#: src/bz-releases-list.c:153
+msgid "No details for this release"
+msgstr "Без подробиць"
+
+#: src/bz-search-widget.blp:105
+msgid "Search Apps, Games, Software"
+msgstr "Шукайте застосунки, ігри та програми"
+
+#: src/bz-search-widget.blp:223
+msgid "No Applications Found"
+msgstr "Жодного підібраного застосунку"
+
+#: src/bz-search-widget.c:219
+#, c-format
+msgid "No results found for \"%s\" in Flathub"
+msgstr "Не знайдено збігів для «%s» на Flathub"
+
+#: src/bz-share-list.c:64
 msgid "Copied!"
 msgstr "Скопійовано!"
 
-#: src/bz-share-dialog.c:106
+#: src/bz-share-list.c:116
 msgid "Copy Link"
 msgstr "Копіювати посилання"
 
-#: src/bz-share-dialog.c:117
+#: src/bz-share-list.c:127
 msgid "Open Link"
 msgstr "Відкрити посилання"
 
-# NOTE: https://slovotvir.org.ua/words/taimlain
+# https://slovotvir.org.ua/words/taimlain
 #: src/bz-stats-dialog.blp:26
 msgid "Timeline"
 msgstr "Часоряд"
@@ -906,7 +1226,7 @@ msgstr "Середовище виконання"
 msgid "Install Size"
 msgstr "Розмір встановлення"
 
-#: src/bz-transaction-view.blp:199 src/bz-window.blp:351
+#: src/bz-transaction-view.blp:199 src/bz-window.blp:292
 msgid "Update"
 msgstr "Оновлення"
 
@@ -947,95 +1267,55 @@ msgstr ""
 msgid "Additionally, %d runtimes and/or addons will be updated."
 msgstr "Крім того, буде оновлено %d середовищ виконання та/або розширень."
 
-#: src/bz-window.blp:80
+#: src/bz-window.blp:47
 msgid "Tasks"
 msgstr "Дії"
 
-#: src/bz-window.blp:99 src/bz-window.blp:418
-msgid "Toggle transaction sidebar"
-msgstr "Перемкнути віконце дій над застосунками"
-
-#: src/bz-window.blp:135
+#: src/bz-window.blp:103
 msgid "Stop Active Tasks"
 msgstr "Зупинити активні дії"
 
-#: src/bz-window.blp:143
+#: src/bz-window.blp:111
 msgid "Clear History"
 msgstr "Очистити історію"
 
-#: src/bz-window.blp:159
+#: src/bz-window.blp:127
 msgid "No Tasks Yet"
 msgstr "Жодних дій"
 
-#: src/bz-window.blp:213 src/bz-window.blp:217
-msgid "Offline"
-msgstr "Поза мережею"
-
-#: src/bz-window.blp:223
-msgid "Loading"
-msgstr "Завантажується"
-
-#: src/bz-window.blp:272
-msgid "Browse"
-msgstr "Шукати"
-
-#: src/bz-window.blp:282
-msgid "App View"
-msgstr "Огляд програми"
-
-#: src/bz-window.blp:296 src/bz-window.blp:392
-msgid "Flathub"
-msgstr "Flathub"
-
-#: src/bz-window.blp:326
-msgid "Go Back"
-msgstr "Назад"
-
-#: src/bz-window.blp:381
-msgid "View curated applications"
-msgstr "Оглянути підібрані застосунки"
-
-#: src/bz-window.blp:385
+#: src/bz-window.blp:232
 msgid "Curated"
 msgstr "Підібрані"
 
-#: src/bz-window.blp:389
-msgid "View the latest on Flathub"
-msgstr "Оглянути найновіше на Flathub"
+#: src/bz-window.blp:245
+msgid "Flathub"
+msgstr "Flathub"
 
-#: src/bz-window.blp:396
-msgid "View installed applications"
-msgstr "Оглянути встановлені застосунки"
-
-#: src/bz-window.blp:441
-msgid "Main Menu"
-msgstr "Головне меню"
-
-#: src/bz-window.blp:475
-msgid "_Quit Service"
-msgstr "_Вийти"
-
-#: src/bz-window.blp:480
-msgid "_Refresh Content"
-msgstr "_Оновити"
-
-#: src/bz-window.blp:485
-msgid "_Preferences"
-msgstr "_Налаштування"
-
-#: src/bz-window.blp:490
-msgid "_Keyboard Shortcuts"
-msgstr "_Клавіатурні скорочення"
-
-#: src/bz-window.blp:495
-msgid "_About Bazaar"
-msgstr "_Про Базар"
-
-#: src/bz-window.blp:500
+#: src/bz-window.blp:416
 msgid "_Donate to Bazaar ❤️"
 msgstr "_Пожертувати Базару ❤️"
 
-#: src/bz-window.c:792
+#: src/bz-window.blp:421
+msgid "_Refresh Content"
+msgstr "_Оновити"
+
+#: src/bz-window.blp:428
+msgid "_Preferences"
+msgstr "_Налаштування"
+
+#: src/bz-window.blp:433
+msgid "_Keyboard Shortcuts"
+msgstr "_Клавіатурні скорочення"
+
+#: src/bz-window.blp:438
+msgid "_About Bazaar"
+msgstr "_Про Базар"
+
+#: src/bz-window.blp:445
+msgid "_Quit Bazaar"
+msgstr "_Про Базар"
+
+#: src/bz-window.c:772
 msgid ""
 "The ability to inspect and install local .flatpak bundle files is coming "
 "soon! In the meantime, try running\n"
@@ -1051,33 +1331,33 @@ msgstr ""
 "\n"
 "у терміналі."
 
-#: src/bz-window.c:932
+#: src/bz-window.c:894
 msgid "Can't do that right now!"
 msgstr "Наразі цього не можна зробити!"
 
-#: src/bz-window.c:1061
+#: src/bz-window.c:1023
 #, c-format
 msgid "Install %s?"
 msgstr "Встановити %s?"
 
-#: src/bz-window.c:1064
+#: src/bz-window.c:1026
 msgid "May install additional shared components"
 msgstr "Можуть бути встановлені додаткові компоненти"
 
-#: src/bz-window.c:1083
+#: src/bz-window.c:1045
 #, c-format
 msgid "Remove %s?"
 msgstr "Видалити %s?"
 
-#: src/bz-window.c:1086
+#: src/bz-window.c:1048
 msgid "Settings & user data will be kept"
 msgstr "Налаштування та користувацькі дані буде збережено"
 
-#: src/bz-window.c:1254
+#: src/bz-window.c:1213
 msgid "Resume Current Tasks"
 msgstr "Відновити активні дії"
 
-#: src/bz-window.c:1260
+#: src/bz-window.c:1219
 msgid "Pause Current Tasks"
 msgstr "Призупинити активні дії"
 
@@ -1098,20 +1378,25 @@ msgstr "Відкрити вікно пошуку"
 
 #: src/gtk/shortcuts-dialog.blp:14
 msgctxt "shortcut window"
+msgid "Open Preferences"
+msgstr "Налаштування"
+
+#: src/gtk/shortcuts-dialog.blp:19
+msgctxt "shortcut window"
 msgid "Refresh"
 msgstr "Оновити"
 
-#: src/gtk/shortcuts-dialog.blp:19
+#: src/gtk/shortcuts-dialog.blp:24
 msgctxt "shortcut window"
 msgid "Toggle Transaction Manager"
 msgstr "Перемкнути віконце дій над застосунками"
 
-#: src/gtk/shortcuts-dialog.blp:24
+#: src/gtk/shortcuts-dialog.blp:29
 msgctxt "shortcut window"
 msgid "Show Shortcuts"
 msgstr "Показати клавіатурні скорочення"
 
-#: src/gtk/shortcuts-dialog.blp:29
+#: src/gtk/shortcuts-dialog.blp:34
 msgctxt "shortcut window"
 msgid "Quit"
 msgstr "Вийти"
