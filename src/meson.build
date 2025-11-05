@@ -15,7 +15,7 @@ libsoup_dep          = dependency('libsoup-3.0', version: '>= 3.6.0')
 json_glib_dep        = dependency('json-glib-1.0', version: '>= 1.10.0')
 glycin_dep           = dependency('glycin-2', version: '>= 2.0')
 glycin_gtk4_dep      = dependency('glycin-gtk4-2', version: '>= 2.0')
-md4c_dep             = dependency('md4c', version: '>= 0.5.2')
+md4c_dep             = dependency('md4c', version: '>= 0.5.1')
 
 
 dl_worker_sources = [

@@ -3,6 +3,9 @@
 DEPS=(
     meson
     ninja
+    cmake
+    blueprint-compiler
+    desktop-file-utils
 
     gtk4-devel
     libadwaita-devel
