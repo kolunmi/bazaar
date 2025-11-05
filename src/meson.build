@@ -5,6 +5,7 @@ libdex_opts = [
   'introspection=disabled',
 ]
 
+gtk_dep              = dependency('gtk4')
 libadwaita_dep       = dependency('libadwaita-1', version: '>= 1.7')
 libdex_dep           = dependency('libdex-1', version: '>= 1.0.0', default_options: libdex_opts)
 flatpak_dep          = dependency('flatpak', version: '>= 1.9')
@@ -146,7 +147,6 @@ bz_sources = [
 ]
 
 bz_deps = [
-  # bazaar_ui_dep,
   math,
   gtk_dep,
   libadwaita_dep,

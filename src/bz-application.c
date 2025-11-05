@@ -22,7 +22,6 @@
 
 #include "config.h"
 
-// #include <bazaar-ui.h>
 #include <glib/gi18n.h>
 #include <malloc.h>
 
@@ -684,8 +683,6 @@ init_service_struct (BzApplication *self)
   g_autoptr (GBytes) config_bytes = NULL;
 #endif
   GtkCustomFilter *filter = NULL;
-
-  // bazaar_ui_init ();
 
 #ifdef HARDCODED_MAIN_CONFIG
   config_file  = g_file_new_for_path (HARDCODED_MAIN_CONFIG);
