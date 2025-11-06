@@ -16,13 +16,13 @@ template $BzCategoryTile: Button {
     margin-end: 16;
     margin-top: 24;
     margin-bottom: 24;
-    orientation: horizontal;
+    orientation: vertical;
     spacing: 12;
     valign: center;
     halign: center;
 
     Image {
-      pixel-size: 32;
+      pixel-size: 48;
       icon-name: bind template.category as <$BzFlathubCategory>.icon-name;
       visible: bind $invert_boolean($is_null(template.category as <$BzFlathubCategory>.icon-name) as <bool>) as <bool>;
 
@@ -33,7 +33,8 @@ template $BzCategoryTile: Button {
 
     Label {
       css-name: "category-tile-label";
-      xalign: 0.0;
+      halign: center;
+      xalign: 0.5;
       label: bind template.category as <$BzFlathubCategory>.short-name;
     }
   };
