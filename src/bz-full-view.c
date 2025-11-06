@@ -456,41 +456,51 @@ format_other_apps_label (gpointer object, const char *developer)
     return g_strdup_printf (_("Other Apps by %s"), developer);
 }
 
-static GList *
-filter_own_app_id (BzEntry *entry, GList *app_ids)
+static gpointer
+filter_own_app_id (BzEntry *entry, GtkStringList *app_ids)
 {
     const char *own_id;
-    GList *filtered = NULL;
+    g_autoptr (GtkStringList) filtered = NULL;
+    guint       n_items  = 0;
 
-    if (!app_ids || !entry)
+    if (!BZ_IS_ENTRY(entry) || !GTK_IS_STRING_LIST(app_ids))
         return NULL;
 
     own_id = bz_entry_get_id (entry);
     if (!own_id)
         return NULL;
 
-    for (GList *l = app_ids; l; l = l->next)
-        if (g_strcmp0 (l->data, own_id) != 0)
-            filtered = g_list_prepend (filtered, l->data);
+    filtered = gtk_string_list_new (NULL);
+    n_items  = g_list_model_get_n_items (G_LIST_MODEL (app_ids));
 
-    return g_list_reverse (filtered);
+    for (guint i = 0; i < n_items; i++)
+      {
+        const char *id = NULL;
+
+        id = gtk_string_list_get_string (app_ids, i);
+        if (g_strcmp0 (id, own_id) != 0)
+          gtk_string_list_append (filtered, id);
+      }
+
+    if (g_list_model_get_n_items (G_LIST_MODEL (filtered)) > 0)
+      return g_steal_pointer (&filtered);
+    else
+      return NULL;
 }
 
 static gboolean
-has_other_apps (gpointer object, GList *app_ids, BzEntry *entry )
+has_other_apps (gpointer object, GtkStringList *app_ids, BzEntry *entry )
 {
-
-    g_autoptr (GList) filtered = filter_own_app_id (BZ_ENTRY (entry), app_ids);
+    g_autoptr (GtkStringList) filtered = filter_own_app_id (BZ_ENTRY (entry), app_ids);
     return filtered != NULL;
 }
 
 static GListModel *
-get_developer_apps_entries (gpointer object, GList *app_ids, BzEntry *entry)
+get_developer_apps_entries (gpointer object, GtkStringList *app_ids, BzEntry *entry)
 {
     BzFullView *self = BZ_FULL_VIEW (object);
-    g_autoptr (GList) filtered = filter_own_app_id (BZ_ENTRY (entry), app_ids);
+    g_autoptr (GtkStringList) filtered = filter_own_app_id (BZ_ENTRY (entry), app_ids);
     BzApplicationMapFactory *factory;
-    GtkStringList *string_list;
 
     if (!filtered)
         return NULL;
@@ -499,11 +509,7 @@ get_developer_apps_entries (gpointer object, GList *app_ids, BzEntry *entry)
     if (!factory)
         return NULL;
 
-    string_list = gtk_string_list_new (NULL);
-    for (GList *l = filtered; l; l = l->next)
-        gtk_string_list_append (string_list, l->data);
-
-    return bz_application_map_factory_generate (factory, G_LIST_MODEL (string_list));
+    return bz_application_map_factory_generate (factory, G_LIST_MODEL (filtered));
 }
 
 static gboolean
