@@ -190,7 +190,8 @@ BZ_DEFINE_DATA (
       char    *developer;
     },
     g_weak_ref_clear (&self->self);
-    BZ_RELEASE_DATA (id, g_free));
+    BZ_RELEASE_DATA (id, g_free);
+    BZ_RELEASE_DATA (developer, g_free));
 static DexFuture *
 query_flathub_fiber (QueryFlathubData *data);
 static DexFuture *
