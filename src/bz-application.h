@@ -21,14 +21,10 @@
 #pragma once
 
 #include <adwaita.h>
-#include <bz-application-map-factory.h>
 
 G_BEGIN_DECLS
 
 #define BZ_TYPE_APPLICATION (bz_application_get_type ())
 G_DECLARE_FINAL_TYPE (BzApplication, bz_application, BZ, APPLICATION, AdwApplication)
-
-BzApplicationMapFactory
-*bz_application_get_application_map_factory (BzApplication *self);
 
 G_END_DECLS

@@ -487,19 +487,15 @@ has_other_apps (gpointer object, GList *app_ids, BzEntry *entry )
 static GListModel *
 get_developer_apps_entries (gpointer object, GList *app_ids, BzEntry *entry)
 {
+    BzFullView *self = BZ_FULL_VIEW (object);
     g_autoptr (GList) filtered = filter_own_app_id (BZ_ENTRY (entry), app_ids);
-    BzApplication *app;
     BzApplicationMapFactory *factory;
     GtkStringList *string_list;
 
     if (!filtered)
         return NULL;
 
-    app = BZ_APPLICATION (g_application_get_default ());
-    if (!app)
-        return NULL;
-
-    factory = bz_application_get_application_map_factory (app);
+    factory = bz_state_info_get_application_factory (self->state);
     if (!factory)
         return NULL;
 
