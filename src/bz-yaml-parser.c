@@ -18,8 +18,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+#define G_LOG_DOMAIN "BAZAAR::YAML"
+
 #include "config.h"
 
+#include <gtk/gtk.h>
 #include <xmlb.h>
 #include <yaml.h>
 
@@ -101,6 +104,15 @@ parse_scalar (const GVariantType *vtype,
               yaml_event_t       *event,
               GError            **error);
 
+static GObject *
+parse_object (BzYamlParser  *self,
+              yaml_parser_t *parser,
+              yaml_event_t  *event,
+              GType          object_gtype,
+              GHashTable    *type_hints,
+              const char    *prop_path,
+              GError       **error);
+
 static void
 destroy_gvalue (GValue *value);
 
@@ -120,6 +132,8 @@ bz_yaml_parser_class_init (BzYamlParserClass *klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
   object_class->dispose = bz_yaml_parser_dispose;
+
+  g_type_ensure (GTK_TYPE_STRING_OBJECT);
 }
 
 static void
@@ -250,24 +264,25 @@ compile_schema (XbNode *node)
         ERROR_OUT ("object must have a class");
 
       gtype = g_type_from_name (class);
-      if (class == G_TYPE_INVALID || !g_type_is_a (gtype, G_TYPE_OBJECT))
+      if (gtype == G_TYPE_INVALID || !g_type_is_a (gtype, G_TYPE_OBJECT))
         ERROR_OUT ("'%s' is not a valid object class", class);
 
       schema->kind              = KIND_OBJECT;
       schema->object.type       = gtype;
       schema->object.type_hints = g_hash_table_new_full (
-          g_str_hash, g_str_equal, g_free, g_free);
+          g_str_hash, g_str_equal, g_free, NULL);
 
       gtype_class = g_type_class_ref (gtype);
 
       child = xb_node_get_child (node);
       while (child != NULL)
         {
-          const char *child_element = NULL;
-          const char *name          = NULL;
-          GParamSpec *property      = NULL;
-          const char *type          = NULL;
-          XbNode     *next          = NULL;
+          const char *child_element  = NULL;
+          const char *name           = NULL;
+          GParamSpec *property       = NULL;
+          const char *typehint_name  = NULL;
+          GType       typehint_gtype = G_TYPE_INVALID;
+          XbNode     *next           = NULL;
 
           child_element = xb_node_get_element (child);
           if (g_strcmp0 (child_element, "typehint") != 0)
@@ -281,16 +296,18 @@ compile_schema (XbNode *node)
           if (property == NULL)
             ERROR_OUT ("typehint property '%s' is invalid", name);
 
-          type = xb_node_get_attr (child, "type");
-          if (type == NULL)
+          typehint_name = xb_node_get_attr (child, "type");
+          if (typehint_name == NULL)
             ERROR_OUT ("typehint must have a type");
-          if (!g_variant_type_is_basic ((const GVariantType *) type))
-            ERROR_OUT ("invalid variant type for typehint '%s'", type);
+
+          typehint_gtype = g_type_from_name (typehint_name);
+          if (typehint_gtype == G_TYPE_INVALID || !g_type_is_a (typehint_gtype, G_TYPE_OBJECT))
+            ERROR_OUT ("'%s' is not a valid object class", typehint_name);
 
           g_hash_table_replace (
               schema->object.type_hints,
               g_strdup (name),
-              g_strdup (type));
+              GSIZE_TO_POINTER (typehint_gtype));
 
           next = xb_node_get_next (child);
           g_object_unref (child);
@@ -443,179 +460,24 @@ parse (BzYamlParser   *self,
       break;
     case KIND_OBJECT:
       {
-        g_autoptr (GTypeClass) gtype_class = NULL;
-        g_autoptr (GHashTable) mappings    = NULL;
-        GValue *value                      = NULL;
+        g_autoptr (GObject) object = NULL;
+        GValue *value              = NULL;
 
-        EXPECT (YAML_MAPPING_START_EVENT, "object mapping");
-
-        gtype_class = g_type_class_ref (schema->object.type);
-        mappings    = g_hash_table_new_full (
-            g_str_hash, g_str_equal,
-            g_free, (GDestroyNotify) destroy_gvalue);
-
-        for (;;)
-          {
-            g_autofree char *property = NULL;
-            GParamSpec      *spec     = NULL;
-
-            NEXT_EVENT ();
-
-            if (event->type == YAML_MAPPING_END_EVENT)
-              break;
-            EXPECT (YAML_SCALAR_EVENT, "scalar key");
-
-            property = g_strdup ((const char *) event->data.scalar.value);
-            spec     = g_object_class_find_property (G_OBJECT_CLASS (gtype_class), property);
-            if (spec == NULL)
-              {
-                g_set_error (
-                    error,
-                    BZ_YAML_ERROR,
-                    BZ_YAML_ERROR_DOES_NOT_CONFORM,
-                    "Failed to validate YAML against schema at line %zu, column %zu: "
-                    "property '%s' doesn't exist on type %s",
-                    event->start_mark.line,
-                    event->start_mark.column,
-                    property,
-                    g_type_name (schema->object.type));
-                yaml_event_delete (event);
-                return FALSE;
-              }
-
-            NEXT_EVENT ();
-
-            if (g_type_is_a (spec->value_type, G_TYPE_LIST_MODEL))
-              {
-                g_autoptr (GPtrArray) list = NULL;
-                const char *type_hint      = NULL;
-                GValue     *append         = NULL;
-
-                EXPECT (YAML_SEQUENCE_START_EVENT, "sequence");
-
-                list      = g_ptr_array_new_with_free_func ((GDestroyNotify) destroy_gvalue);
-                type_hint = g_hash_table_lookup (schema->object.type_hints, property);
-                if (type_hint == NULL)
-                  type_hint = "s";
-
-                for (;;)
-                  {
-                    GValue *list_value = NULL;
-
-                    NEXT_EVENT ();
-
-                    if (event->type == YAML_SEQUENCE_END_EVENT)
-                      break;
-                    EXPECT (YAML_SCALAR_EVENT, "scalar list value");
-
-                    list_value = parse_scalar (
-                        (const GVariantType *) type_hint,
-                        event->data.scalar.value,
-                        event,
-                        error);
-                    if (list_value == NULL)
-                      {
-                        yaml_event_delete (event);
-                        return FALSE;
-                      }
-
-                    g_ptr_array_add (list, list_value);
-                  }
-
-                append = g_new0 (typeof (*append), 1);
-                g_value_init (append, G_TYPE_PTR_ARRAY);
-                g_value_set_boxed (append, list);
-                g_hash_table_replace (mappings, g_steal_pointer (&property), append);
-              }
-            else if (g_type_is_a (spec->value_type, G_TYPE_ENUM))
-              {
-                g_autoptr (GEnumClass) class = NULL;
-                GEnumValue *enum_value       = NULL;
-                GValue     *append           = NULL;
-
-                EXPECT (YAML_SCALAR_EVENT, "scalar enum value");
-
-                class = g_type_class_ref (spec->value_type);
-
-                enum_value = g_enum_get_value_by_nick (
-                    class, (const char *) event->data.scalar.value);
-                if (enum_value == NULL)
-                  enum_value = g_enum_get_value_by_name (
-                      class, (const char *) event->data.scalar.value);
-
-                if (enum_value == NULL)
-                  {
-                    g_set_error (
-                        error,
-                        BZ_YAML_ERROR,
-                        BZ_YAML_ERROR_BAD_SCALAR,
-                        "Failed to parse scalar enum at line %zu, column %zu: "
-                        "'%s' does not exist in type %s",
-                        event->start_mark.line,
-                        event->start_mark.column,
-                        (const char *) event->data.scalar.value,
-                        g_type_name (spec->value_type));
-                    yaml_event_delete (event);
-                    return FALSE;
-                  }
-
-                append = g_new0 (typeof (*append), 1);
-                g_value_init (append, spec->value_type);
-                g_value_set_enum (append, enum_value->value);
-                g_hash_table_replace (mappings, g_steal_pointer (&property), append);
-              }
-            else
-              {
-                const GVariantType *type   = NULL;
-                GValue             *append = NULL;
-
-                EXPECT (YAML_SCALAR_EVENT, "scalar value");
-
-                switch (spec->value_type)
-                  {
-                  case G_TYPE_BOOLEAN:
-                    type = G_VARIANT_TYPE_BOOLEAN;
-                    break;
-                  case G_TYPE_INT:
-                    type = G_VARIANT_TYPE_INT32;
-                    break;
-                  case G_TYPE_INT64:
-                    type = G_VARIANT_TYPE_INT64;
-                    break;
-                  case G_TYPE_UINT:
-                    type = G_VARIANT_TYPE_UINT32;
-                    break;
-                  case G_TYPE_UINT64:
-                    type = G_VARIANT_TYPE_UINT64;
-                    break;
-                  case G_TYPE_DOUBLE:
-                  case G_TYPE_FLOAT:
-                    type = G_VARIANT_TYPE_DOUBLE;
-                    break;
-                  case G_TYPE_STRING:
-                  default:
-                    type = G_VARIANT_TYPE_STRING;
-                    break;
-                  }
-
-                append = parse_scalar (
-                    type,
-                    event->data.scalar.value,
-                    event,
-                    error);
-                if (append == NULL)
-                  {
-                    yaml_event_delete (event);
-                    return FALSE;
-                  }
-
-                g_hash_table_replace (mappings, g_steal_pointer (&property), append);
-              }
-          }
+        object = parse_object (
+            self,
+            parser,
+            event,
+            schema->object.type,
+            schema->object.type_hints,
+            NULL,
+            error);
+        if (object == NULL)
+          /* event is already cleaned up */
+          return FALSE;
 
         value = g_new0 (typeof (*value), 1);
-        g_value_init (value, G_TYPE_HASH_TABLE);
-        g_value_set_boxed (value, mappings);
+        g_value_init (value, schema->object.type);
+        g_value_set_object (value, object);
         g_hash_table_replace (output, join_path_stack (path_stack), value);
       }
       break;
@@ -757,7 +619,6 @@ join_path_stack (GPtrArray *path_stack)
       const char *component = NULL;
 
       component = g_ptr_array_index (path_stack, i);
-
       g_string_append_printf (string, "/%s", component);
     }
 
@@ -804,6 +665,264 @@ parse_scalar (const GVariantType *vtype,
   g_value_set_variant (value, g_steal_pointer (&variant));
 
   return value;
+}
+
+static GObject *
+parse_object (BzYamlParser  *self,
+              yaml_parser_t *parser,
+              yaml_event_t  *event,
+              GType          object_gtype,
+              GHashTable    *type_hints,
+              const char    *prop_path,
+              GError       **error)
+{
+  g_autoptr (GTypeClass) gtype_class = NULL;
+  g_autoptr (GObject) object         = NULL;
+
+  EXPECT (YAML_MAPPING_START_EVENT, "object mapping");
+
+  gtype_class = g_type_class_ref (object_gtype);
+  object      = g_object_new (object_gtype, NULL);
+
+  for (;;)
+    {
+      g_autofree char *property = NULL;
+      GParamSpec      *spec     = NULL;
+
+      NEXT_EVENT ();
+
+      if (event->type == YAML_MAPPING_END_EVENT)
+        break;
+      EXPECT (YAML_SCALAR_EVENT, "scalar key");
+
+      property = g_strdup ((const char *) event->data.scalar.value);
+      spec     = g_object_class_find_property (G_OBJECT_CLASS (gtype_class), property);
+      if (spec == NULL)
+        {
+          g_set_error (
+              error,
+              BZ_YAML_ERROR,
+              BZ_YAML_ERROR_DOES_NOT_CONFORM,
+              "Failed to validate YAML against schema at line %zu, column %zu: "
+              "property '%s' doesn't exist on type %s",
+              event->start_mark.line,
+              event->start_mark.column,
+              property,
+              g_type_name (object_gtype));
+          yaml_event_delete (event);
+          return FALSE;
+        }
+
+      NEXT_EVENT ();
+
+      if (g_type_is_a (spec->value_type, G_TYPE_LIST_MODEL))
+        {
+          g_autofree char *replace_prop_path = NULL;
+          GType            element_gtype     = 0;
+          g_autoptr (GListModel) list        = NULL;
+
+          EXPECT (YAML_SEQUENCE_START_EVENT, "sequence");
+
+          if (prop_path != NULL)
+            replace_prop_path = g_strdup_printf ("%s.%s", prop_path, property);
+
+          element_gtype = GPOINTER_TO_SIZE (g_hash_table_lookup (
+              type_hints, replace_prop_path != NULL ? replace_prop_path : property));
+
+          if (element_gtype == GTK_TYPE_STRING_OBJECT)
+            {
+              list = (GListModel *) gtk_string_list_new (NULL);
+
+              for (;;)
+                {
+                  NEXT_EVENT ();
+
+                  if (event->type == YAML_SEQUENCE_END_EVENT)
+                    break;
+                  EXPECT (YAML_SCALAR_EVENT, "scalar list value");
+
+                  gtk_string_list_append (
+                      GTK_STRING_LIST (list),
+                      (const char *) event->data.scalar.value);
+                }
+            }
+          else
+            {
+              if (element_gtype == 0)
+                element_gtype = G_TYPE_OBJECT;
+
+              list = (GListModel *) g_list_store_new (element_gtype);
+
+              for (;;)
+                {
+                  g_autoptr (GObject) child_object = NULL;
+
+                  NEXT_EVENT ();
+                  if (event->type == YAML_SEQUENCE_END_EVENT)
+                    break;
+
+                  child_object = parse_object (
+                      self,
+                      parser,
+                      event,
+                      element_gtype,
+                      type_hints,
+                      replace_prop_path != NULL ? replace_prop_path : property,
+                      error);
+                  if (child_object == NULL)
+                    /* event is already cleaned up */
+                    return FALSE;
+
+                  g_list_store_append (G_LIST_STORE (list), child_object);
+                }
+            }
+
+          g_object_set (object, property, list, NULL);
+        }
+      else if (g_type_is_a (spec->value_type, G_TYPE_OBJECT))
+        {
+          g_autofree char *replace_prop_path = NULL;
+          g_autoptr (GObject) prop_object    = NULL;
+
+          if (prop_path != NULL)
+            replace_prop_path = g_strdup_printf ("%s.%s", prop_path, property);
+
+          prop_object = parse_object (
+              self,
+              parser,
+              event,
+              spec->value_type,
+              type_hints,
+              replace_prop_path != NULL ? replace_prop_path : property,
+              error);
+          if (prop_object == NULL)
+            /* event is already cleaned up */
+            return FALSE;
+
+          g_object_set (object, property, prop_object, NULL);
+        }
+      else if (g_type_is_a (spec->value_type, G_TYPE_ENUM))
+        {
+          g_autoptr (GEnumClass) class = NULL;
+          GEnumValue *enum_value       = NULL;
+
+          EXPECT (YAML_SCALAR_EVENT, "scalar enum value");
+
+          class = g_type_class_ref (spec->value_type);
+
+          enum_value = g_enum_get_value_by_nick (
+              class, (const char *) event->data.scalar.value);
+          if (enum_value == NULL)
+            enum_value = g_enum_get_value_by_name (
+                class, (const char *) event->data.scalar.value);
+
+          if (enum_value == NULL)
+            {
+              g_set_error (
+                  error,
+                  BZ_YAML_ERROR,
+                  BZ_YAML_ERROR_BAD_SCALAR,
+                  "Failed to parse scalar enum at line %zu, column %zu: "
+                  "'%s' does not exist in type %s",
+                  event->start_mark.line,
+                  event->start_mark.column,
+                  (const char *) event->data.scalar.value,
+                  g_type_name (spec->value_type));
+              yaml_event_delete (event);
+              return FALSE;
+            }
+
+          g_object_set (object, property, enum_value->value, NULL);
+        }
+      else
+        {
+          g_autoptr (GError) local_error = NULL;
+          const GVariantType *vtype      = NULL;
+          g_autoptr (GVariant) variant   = NULL;
+
+          EXPECT (YAML_SCALAR_EVENT, "scalar value");
+
+          switch (spec->value_type)
+            {
+            case G_TYPE_BOOLEAN:
+              vtype = G_VARIANT_TYPE_BOOLEAN;
+              break;
+            case G_TYPE_INT:
+              vtype = G_VARIANT_TYPE_INT32;
+              break;
+            case G_TYPE_INT64:
+              vtype = G_VARIANT_TYPE_INT64;
+              break;
+            case G_TYPE_UINT:
+              vtype = G_VARIANT_TYPE_UINT32;
+              break;
+            case G_TYPE_UINT64:
+              vtype = G_VARIANT_TYPE_UINT64;
+              break;
+            case G_TYPE_DOUBLE:
+            case G_TYPE_FLOAT:
+              vtype = G_VARIANT_TYPE_DOUBLE;
+              break;
+            case G_TYPE_STRING:
+            default:
+              vtype = G_VARIANT_TYPE_STRING;
+              break;
+            }
+
+          if (g_variant_type_equal (vtype, G_VARIANT_TYPE_STRING))
+            variant = g_variant_new_string ((const char *) event->data.scalar.value);
+          else
+            {
+              variant = g_variant_parse (
+                  vtype,
+                  (const char *) event->data.scalar.value,
+                  NULL,
+                  NULL,
+                  &local_error);
+              if (variant == NULL)
+                {
+                  g_set_error (
+                      error,
+                      BZ_YAML_ERROR,
+                      BZ_YAML_ERROR_BAD_SCALAR,
+                      "Failed to parse scalar variant at line %zu, column %zu: %s",
+                      event->start_mark.line,
+                      event->start_mark.column,
+                      local_error->message);
+                  return FALSE;
+                }
+            }
+
+          switch (spec->value_type)
+            {
+            case G_TYPE_BOOLEAN:
+              g_object_set (object, property, g_variant_get_boolean (variant), NULL);
+              break;
+            case G_TYPE_INT:
+              g_object_set (object, property, g_variant_get_int32 (variant), NULL);
+              break;
+            case G_TYPE_INT64:
+              g_object_set (object, property, g_variant_get_int64 (variant), NULL);
+              break;
+            case G_TYPE_UINT:
+              g_object_set (object, property, g_variant_get_uint32 (variant), NULL);
+              break;
+            case G_TYPE_UINT64:
+              g_object_set (object, property, g_variant_get_uint64 (variant), NULL);
+              break;
+            case G_TYPE_DOUBLE:
+            case G_TYPE_FLOAT:
+              g_object_set (object, property, g_variant_get_double (variant), NULL);
+              break;
+            case G_TYPE_STRING:
+            default:
+              g_object_set (object, property, g_variant_get_string (variant, NULL), NULL);
+              break;
+            }
+        }
+    }
+
+  return g_steal_pointer (&object);
 }
 
 static void

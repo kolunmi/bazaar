@@ -6,8 +6,10 @@
   <mapping key="sections">
     <list>
       <object class="BzContentSection">
-        <typehint name="appids" type="s"/>
-        <typehint name="classes" type="s"/>
+        <typehint name="classes" type="GtkStringObject"/>
+        <typehint name="light-classes" type="GtkStringObject"/>
+        <typehint name="dark-classes" type="GtkStringObject"/>
+        <typehint name="appids" type="GtkStringObject"/>
       </object>
     </list>
   </mapping>
