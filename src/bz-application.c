@@ -73,7 +73,6 @@ struct _BzApplication
   BzGnomeShellSearchProvider *gs_search;
 
   BzFlatpakInstance *flatpak;
-  DexChannel        *channel;
   char              *waiting_to_open_appstream;
   GFile             *waiting_to_open_file;
   BzFlathubState    *flathub;
