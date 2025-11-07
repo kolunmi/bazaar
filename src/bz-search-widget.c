@@ -24,7 +24,6 @@
 #include "bz-async-texture.h"
 #include "bz-category-tile.h"
 #include "bz-dynamic-list-view.h"
-#include "bz-flathub-state.h"
 #include "bz-group-tile-css-watcher.h"
 #include "bz-rich-app-tile.h"
 #include "bz-screenshot.h"
@@ -32,7 +31,6 @@
 #include "bz-search-widget.h"
 #include "bz-state-info.h"
 #include "bz-util.h"
-#include "bz-window.h"
 
 struct _BzSearchWidget
 {
@@ -161,13 +159,6 @@ bz_search_widget_set_property (GObject      *object,
 }
 
 static gboolean
-bz_search_widget_grab_focus (GtkWidget *widget)
-{
-  BzSearchWidget *self = BZ_SEARCH_WIDGET (widget);
-  return gtk_widget_grab_focus (GTK_WIDGET (self->search_bar));
-}
-
-static gboolean
 invert_boolean (gpointer object,
                 gboolean value)
 {
@@ -266,7 +257,6 @@ category_clicked (BzFlathubCategory *category,
                   GtkButton         *button)
 {
   GtkWidget         *self               = NULL;
-  GtkWidget         *window             = NULL;
   GtkWidget         *nav_view           = NULL;
   AdwNavigationPage *apps_page          = NULL;
   g_autoptr (GListModel) model          = NULL;
@@ -278,8 +268,6 @@ category_clicked (BzFlathubCategory *category,
 
   self = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_SEARCH_WIDGET);
   g_assert (self != NULL);
-
-  window = GTK_WIDGET (gtk_widget_get_root (GTK_WIDGET (self)));
 
   nav_view = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
   g_assert (nav_view != NULL);
@@ -342,7 +330,6 @@ static void
 reset_search_cb (BzSearchWidget *self,
                  GtkButton      *button)
 {
-
   bz_search_widget_set_text (self, "");
   bz_search_widget_refresh (self);
 }
@@ -399,8 +386,6 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
           G_TYPE_NONE, 2,
           BZ_TYPE_ENTRY_GROUP,
           G_TYPE_BOOLEAN);
-
-  widget_class->grab_focus = bz_search_widget_grab_focus;
 
   g_type_ensure (BZ_TYPE_ASYNC_TEXTURE);
   g_type_ensure (BZ_TYPE_CATEGORY_TILE);
@@ -481,8 +466,16 @@ bz_search_widget_set_text (BzSearchWidget *self,
                            const char     *text)
 {
   g_return_if_fail (BZ_IS_SEARCH_WIDGET (self));
+
   gtk_editable_set_text (GTK_EDITABLE (self->search_bar), text);
-  gtk_editable_set_position (GTK_EDITABLE (self->search_bar), g_utf8_strlen (text, -1));
+  if (text != NULL)
+    gtk_editable_set_position (GTK_EDITABLE (self->search_bar), g_utf8_strlen (text, -1));
+}
+
+const char *
+bz_search_widget_get_text (BzSearchWidget *self)
+{
+  return gtk_editable_get_text (GTK_EDITABLE (self->search_bar));
 }
 
 void
@@ -492,10 +485,23 @@ bz_search_widget_refresh (BzSearchWidget *self)
   update_filter (self);
 }
 
-const char *
-bz_search_widget_get_text (BzSearchWidget *self)
+gboolean
+bz_search_widget_ensure_active (BzSearchWidget *self,
+                                const char     *initial)
 {
-  return gtk_editable_get_text (GTK_EDITABLE (self->search_bar));
+  const char *text = NULL;
+
+  g_return_val_if_fail (BZ_IS_SEARCH_WIDGET (self), FALSE);
+
+  text = gtk_editable_get_text (GTK_EDITABLE (self->search_bar));
+  if (text != NULL && *text != '\0' &&
+      gtk_widget_has_focus (GTK_WIDGET (self->search_bar)))
+    return FALSE;
+
+  gtk_widget_grab_focus (GTK_WIDGET (self->search_bar));
+  bz_search_widget_set_text (self, initial);
+
+  return TRUE;
 }
 
 static void

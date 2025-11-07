@@ -499,30 +499,20 @@ key_pressed (BzWindow              *self,
              GdkModifierType        state,
              GtkEventControllerKey *controller)
 {
-  guint32     unichar     = 0;
-  char        buf[32]     = { 0 };
-  const char *active_name = NULL;
+  gunichar unichar = 0;
+  char     buf[32] = { 0 };
 
   /* Ignore if this is a modifier-shortcut of some sort */
   if (state & ~(GDK_NO_MODIFIER_MASK | GDK_SHIFT_MASK))
     return FALSE;
 
-  /* Ignore if we are already on search page */
-  active_name = adw_view_stack_get_visible_child_name (self->main_view_stack);
-  if (g_strcmp0 (active_name, "search") == 0)
-    return FALSE;
-
   unichar = gdk_keyval_to_unicode (keyval);
   if (unichar == 0 || !g_unichar_isgraph (unichar))
     return FALSE;
+  g_unichar_to_utf8 (unichar, buf);
 
   adw_view_stack_set_visible_child_name (self->main_view_stack, "search");
-
-  g_unichar_to_utf8 (unichar, buf);
-  gtk_widget_grab_focus (GTK_WIDGET (self->search_widget));
-  bz_search_widget_set_text (self->search_widget, buf);
-
-  return TRUE;
+  return bz_search_widget_ensure_active (self->search_widget, buf);
 }
 
 static void
@@ -1235,13 +1225,15 @@ set_page (BzWindow *self)
   if (self->state == NULL)
     return;
 
-  if (bz_state_info_get_busy (self->state)) {
-    gtk_stack_set_visible_child_name (self->main_stack, "loading");
-    adw_navigation_view_pop_to_tag (self->navigation_view, "main");
-  }
-  else {
-    gtk_stack_set_visible_child_name (self->main_stack, "main");
-  }
+  if (bz_state_info_get_busy (self->state))
+    {
+      gtk_stack_set_visible_child_name (self->main_stack, "loading");
+      adw_navigation_view_pop_to_tag (self->navigation_view, "main");
+    }
+  else
+    {
+      gtk_stack_set_visible_child_name (self->main_stack, "main");
+    }
 
   selected_navigation_page_name = adw_navigation_view_get_visible_page_tag (self->navigation_view);
 
