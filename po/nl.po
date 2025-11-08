@@ -84,13 +84,15 @@ msgstr ""
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:8
 msgid "Discover and install applications"
-msgstr "Bekijk geïnstalleerde applicaties"
+msgstr "Ontdek en installeer applicaties"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:10
 msgid ""
 "A new app store for GNOME with a focus on discovering and installing "
 "applications and addons from Flatpak remotes, particularly Flathub."
 msgstr ""
+"Een nieuwe appstore voor GNOME, gericht op het ontdekken en installeren "
+"van applicaties en add-ons van Flatpak bronnen, vooral Flathub."
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:14
 msgid ""
@@ -98,6 +100,9 @@ msgid ""
 "Bazaar features a \"curated\" tab that can be configured by distributors to "
 "allow for a more localized experience."
 msgstr ""
+"Het legt de nadruk op het ondersteunen van de ontwikkelaars die de Linux desktop mogelijk maken. "
+"Bazaar heeft een \"gecureerde\" tab die door distributeurs kan worden aangepast "
+"voor een meer gelokaliseerde ervaring."
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29 src/bz-application.c:478
 msgid "Adam Masciola"
@@ -105,15 +110,15 @@ msgstr "Adam Masciola"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:54
 msgid "The home view displaying Flathub apps"
-msgstr ""
+msgstr "Het startscherm dat Flathub apps weergeeft"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:58
 msgid "Nucleus app page"
-msgstr ""
+msgstr "Nucleus apppagina"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:62
 msgid "Searching for Blender"
-msgstr ""
+msgstr "Zoeken naar Blender"
 
 #: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:581
 #: src/bz-installed-page.blp:132
