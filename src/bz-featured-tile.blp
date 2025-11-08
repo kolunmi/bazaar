@@ -54,18 +54,46 @@ template $BzFeaturedTile: Button {
         Adw.Clamp {
           maximum-size: 350;
           tightening-threshold: 350;
+          Box {
+            orientation: vertical;
+            Label description {
+              ellipsize: end;
+              xalign: 0.5;
+              lines: 1;
+              justify: center;
+              label: bind template.group as <$BzEntryGroup>.description;
 
-          Label description {
-            ellipsize: end;
-            xalign: 0.5;
-            lines: 1;
-            justify: center;
-            label: bind template.group as <$BzEntryGroup>.description;
+              styles [
+                "caption",
+              ]
+            }
 
-            styles [
-              "caption",
-            ]
+            Box {
+              spacing: 4;
+              halign: center;
+              margin-top: 4;
+
+              visible: bind template.is-aotd;
+
+              Image {
+                icon-name: "starred-symbolic";
+                pixel-size: 12;
+              }
+
+              Label {
+                ellipsize: end;
+                xalign: 0.5;
+                lines: 1;
+                justify: center;
+                label: _("App of the Day");
+
+                styles [
+                  "caption",
+                ]
+              }
+            }
           }
+
         }
       }
       $BzScreenshot screenshot {

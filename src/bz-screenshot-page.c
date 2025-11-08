@@ -1,4 +1,4 @@
-/* bz-screenshot-dialog.c
+/* bz-screenshot-page.c
  *
  * Copyright 2025 Alexander Vanhee
  *
@@ -18,14 +18,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "bz-screenshot-dialog.h"
+#include "bz-screenshot-page.h"
 #include "bz-screenshot.h"
 #include "bz-zoom.h"
 #include <glib/gi18n.h>
 
-struct _BzScreenshotDialog
+struct _BzScreenshotPage
 {
-  AdwDialog parent_instance;
+  AdwNavigationPage parent_instance;
 
   AdwCarousel     *carousel;
   AdwToastOverlay *toast_overlay;
@@ -37,11 +37,11 @@ struct _BzScreenshotDialog
   gboolean is_zoomed;
 };
 
-G_DEFINE_FINAL_TYPE (BzScreenshotDialog, bz_screenshot_dialog, ADW_TYPE_DIALOG)
+G_DEFINE_FINAL_TYPE (BzScreenshotPage, bz_screenshot_page, ADW_TYPE_NAVIGATION_PAGE)
 
-static void on_zoom_level_changed (BzZoom             *zoom,
-                                   GParamSpec         *pspec,
-                                   BzScreenshotDialog *self);
+static void on_zoom_level_changed (BzZoom           *zoom,
+                                   GParamSpec       *pspec,
+                                   BzScreenshotPage *self);
 
 enum
 {
@@ -56,22 +56,22 @@ enum
 static GParamSpec *props[LAST_PROP] = { 0 };
 
 static void
-bz_screenshot_dialog_dispose (GObject *object)
+bz_screenshot_page_dispose (GObject *object)
 {
-  BzScreenshotDialog *self = BZ_SCREENSHOT_DIALOG (object);
+  BzScreenshotPage *self = BZ_SCREENSHOT_PAGE (object);
 
   g_clear_object (&self->screenshots);
 
-  G_OBJECT_CLASS (bz_screenshot_dialog_parent_class)->dispose (object);
+  G_OBJECT_CLASS (bz_screenshot_page_parent_class)->dispose (object);
 }
 
 static void
-bz_screenshot_dialog_get_property (GObject    *object,
-                                   guint       prop_id,
-                                   GValue     *value,
-                                   GParamSpec *pspec)
+bz_screenshot_page_get_property (GObject    *object,
+                                 guint       prop_id,
+                                 GValue     *value,
+                                 GParamSpec *pspec)
 {
-  BzScreenshotDialog *self = BZ_SCREENSHOT_DIALOG (object);
+  BzScreenshotPage *self = BZ_SCREENSHOT_PAGE (object);
 
   switch (prop_id)
     {
@@ -90,7 +90,7 @@ bz_screenshot_dialog_get_property (GObject    *object,
 }
 
 static void
-populate_carousel (BzScreenshotDialog *self)
+populate_carousel (BzScreenshotPage *self)
 {
   guint n_items = 0;
   guint i       = 0;
@@ -117,6 +117,10 @@ populate_carousel (BzScreenshotDialog *self)
       screenshot = bz_screenshot_new ();
       bz_screenshot_set_paintable (BZ_SCREENSHOT (screenshot), GDK_PAINTABLE (async_texture));
       bz_screenshot_set_rounded_corners (BZ_SCREENSHOT (screenshot), FALSE);
+      gtk_widget_set_margin_top (screenshot, 25);
+      gtk_widget_set_margin_bottom (screenshot, 25);
+      gtk_widget_set_margin_start (screenshot, 25);
+      gtk_widget_set_margin_end (screenshot, 25);
 
       zoom_widget = bz_zoom_new ();
       gtk_widget_set_hexpand (zoom_widget, TRUE);
@@ -128,7 +132,7 @@ populate_carousel (BzScreenshotDialog *self)
 }
 
 static void
-update_is_zoomed (BzScreenshotDialog *self)
+update_is_zoomed (BzScreenshotPage *self)
 {
   GtkWidget *page       = NULL;
   BzZoom    *zoom       = NULL;
@@ -152,7 +156,7 @@ update_is_zoomed (BzScreenshotDialog *self)
       if (screenshot != NULL)
         bz_screenshot_set_filter (
             BZ_SCREENSHOT (screenshot),
-            zoom_level == 1.0
+            zoom_level <= 4.5
                 ? GSK_SCALING_FILTER_TRILINEAR
                 : GSK_SCALING_FILTER_NEAREST);
     }
@@ -164,16 +168,16 @@ update_is_zoomed (BzScreenshotDialog *self)
 }
 
 static void
-on_zoom_level_changed (BzZoom             *zoom,
-                       GParamSpec         *pspec,
-                       BzScreenshotDialog *self)
+on_zoom_level_changed (BzZoom           *zoom,
+                       GParamSpec       *pspec,
+                       BzScreenshotPage *self)
 {
   update_is_zoomed (self);
 }
 
 static void
-connect_zoom_signal (BzScreenshotDialog *self,
-                     GtkWidget          *page)
+connect_zoom_signal (BzScreenshotPage *self,
+                     GtkWidget        *page)
 {
   BzZoom *zoom = NULL;
 
@@ -186,12 +190,12 @@ connect_zoom_signal (BzScreenshotDialog *self,
 }
 
 static void
-bz_screenshot_dialog_constructed (GObject *object)
+bz_screenshot_page_constructed (GObject *object)
 {
-  BzScreenshotDialog *self = BZ_SCREENSHOT_DIALOG (object);
-  GtkWidget          *page = NULL;
+  BzScreenshotPage *self = BZ_SCREENSHOT_PAGE (object);
+  GtkWidget        *page = NULL;
 
-  G_OBJECT_CLASS (bz_screenshot_dialog_parent_class)->constructed (object);
+  G_OBJECT_CLASS (bz_screenshot_page_parent_class)->constructed (object);
 
   populate_carousel (self);
 
@@ -205,12 +209,12 @@ bz_screenshot_dialog_constructed (GObject *object)
 }
 
 static void
-bz_screenshot_dialog_set_property (GObject      *object,
-                                   guint         prop_id,
-                                   const GValue *value,
-                                   GParamSpec   *pspec)
+bz_screenshot_page_set_property (GObject      *object,
+                                 guint         prop_id,
+                                 const GValue *value,
+                                 GParamSpec   *pspec)
 {
-  BzScreenshotDialog *self = BZ_SCREENSHOT_DIALOG (object);
+  BzScreenshotPage *self = BZ_SCREENSHOT_PAGE (object);
 
   switch (prop_id)
     {
@@ -227,7 +231,7 @@ bz_screenshot_dialog_set_property (GObject      *object,
 }
 
 static void
-zoom_in_clicked (BzScreenshotDialog *self)
+zoom_in_clicked (BzScreenshotPage *self)
 {
   GtkWidget *page    = NULL;
   BzZoom    *zoom    = NULL;
@@ -246,7 +250,7 @@ zoom_in_clicked (BzScreenshotDialog *self)
 }
 
 static void
-zoom_out_clicked (BzScreenshotDialog *self)
+zoom_out_clicked (BzScreenshotPage *self)
 {
   GtkWidget *page    = NULL;
   BzZoom    *zoom    = NULL;
@@ -265,7 +269,7 @@ zoom_out_clicked (BzScreenshotDialog *self)
 }
 
 static void
-reset_zoom_clicked (BzScreenshotDialog *self)
+reset_zoom_clicked (BzScreenshotPage *self)
 {
   GtkWidget *page    = NULL;
   BzZoom    *zoom    = NULL;
@@ -284,7 +288,7 @@ reset_zoom_clicked (BzScreenshotDialog *self)
 }
 
 static void
-previous_clicked (BzScreenshotDialog *self)
+previous_clicked (BzScreenshotPage *self)
 {
   guint      n_pages = 0;
   GtkWidget *page    = NULL;
@@ -303,7 +307,7 @@ previous_clicked (BzScreenshotDialog *self)
 }
 
 static void
-next_clicked (BzScreenshotDialog *self)
+next_clicked (BzScreenshotPage *self)
 {
   guint      n_pages = 0;
   GtkWidget *page    = NULL;
@@ -322,9 +326,9 @@ next_clicked (BzScreenshotDialog *self)
 }
 
 static void
-on_carousel_position_changed (AdwCarousel        *carousel,
-                              GParamSpec         *pspec,
-                              BzScreenshotDialog *self)
+on_carousel_position_changed (AdwCarousel      *carousel,
+                              GParamSpec       *pspec,
+                              BzScreenshotPage *self)
 {
   GtkWidget *old_page = NULL;
   GtkWidget *new_page = NULL;
@@ -360,7 +364,7 @@ on_carousel_position_changed (AdwCarousel        *carousel,
 }
 
 static void
-copy_clicked (BzScreenshotDialog *self)
+copy_clicked (BzScreenshotPage *self)
 {
   g_autoptr (BzAsyncTexture) async_texture = NULL;
   g_autoptr (GdkTexture) texture           = NULL;
@@ -399,7 +403,7 @@ on_key_pressed (GtkEventControllerKey *controller,
                 guint                  keyval,
                 guint                  keycode,
                 GdkModifierType        state,
-                BzScreenshotDialog    *self)
+                BzScreenshotPage      *self)
 {
   if (keyval == GDK_KEY_Left)
     {
@@ -433,15 +437,15 @@ invert_boolean (gpointer object,
 }
 
 static void
-bz_screenshot_dialog_class_init (BzScreenshotDialogClass *klass)
+bz_screenshot_page_class_init (BzScreenshotPageClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
-  object_class->dispose      = bz_screenshot_dialog_dispose;
-  object_class->constructed  = bz_screenshot_dialog_constructed;
-  object_class->get_property = bz_screenshot_dialog_get_property;
-  object_class->set_property = bz_screenshot_dialog_set_property;
+  object_class->dispose      = bz_screenshot_page_dispose;
+  object_class->constructed  = bz_screenshot_page_constructed;
+  object_class->get_property = bz_screenshot_page_get_property;
+  object_class->set_property = bz_screenshot_page_set_property;
 
   props[PROP_SCREENSHOTS] =
       g_param_spec_object (
@@ -468,9 +472,9 @@ bz_screenshot_dialog_class_init (BzScreenshotDialogClass *klass)
 
   g_type_ensure (BZ_TYPE_ZOOM);
 
-  gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-screenshot-dialog.ui");
-  gtk_widget_class_bind_template_child (widget_class, BzScreenshotDialog, carousel);
-  gtk_widget_class_bind_template_child (widget_class, BzScreenshotDialog, toast_overlay);
+  gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-screenshot-page.ui");
+  gtk_widget_class_bind_template_child (widget_class, BzScreenshotPage, carousel);
+  gtk_widget_class_bind_template_child (widget_class, BzScreenshotPage, toast_overlay);
   gtk_widget_class_bind_template_callback (widget_class, zoom_in_clicked);
   gtk_widget_class_bind_template_callback (widget_class, zoom_out_clicked);
   gtk_widget_class_bind_template_callback (widget_class, on_carousel_position_changed);
@@ -483,7 +487,7 @@ bz_screenshot_dialog_class_init (BzScreenshotDialogClass *klass)
 }
 
 static void
-bz_screenshot_dialog_init (BzScreenshotDialog *self)
+bz_screenshot_page_init (BzScreenshotPage *self)
 {
   GtkEventController *key_controller = NULL;
 
@@ -495,12 +499,12 @@ bz_screenshot_dialog_init (BzScreenshotDialog *self)
   gtk_widget_add_controller (GTK_WIDGET (self), key_controller);
 }
 
-AdwDialog *
-bz_screenshot_dialog_new (GListModel *screenshots,
-                          guint       initial_index)
+AdwNavigationPage *
+bz_screenshot_page_new (GListModel *screenshots,
+                        guint       initial_index)
 {
   return g_object_new (
-      BZ_TYPE_SCREENSHOT_DIALOG,
+      BZ_TYPE_SCREENSHOT_PAGE,
       "screenshots", screenshots,
       "current-index", initial_index,
       NULL);

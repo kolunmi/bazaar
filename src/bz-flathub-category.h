@@ -64,7 +64,27 @@ const char *
 bz_flathub_category_get_display_name (BzFlathubCategory *self);
 
 const char *
+bz_flathub_category_get_short_name (BzFlathubCategory *self);
+
+const char *
+bz_flathub_category_get_more_of_name (BzFlathubCategory *self);
+
+const char *
 bz_flathub_category_get_icon_name (BzFlathubCategory *self);
+
+int
+bz_flathub_category_get_total_entries (BzFlathubCategory *self);
+
+void
+bz_flathub_category_set_total_entries (BzFlathubCategory *self,
+                                       int                total_entries);
+
+gboolean
+bz_flathub_category_get_is_spotlight (BzFlathubCategory *self);
+
+void
+bz_flathub_category_set_is_spotlight (BzFlathubCategory *self,
+                                      gboolean           is_spotlight);
 
 G_END_DECLS
 

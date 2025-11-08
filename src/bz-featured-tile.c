@@ -19,8 +19,8 @@
  */
 
 #include "bz-featured-tile.h"
-#include "bz-group-tile-css-watcher.h"
 #include "bz-entry.h"
+#include "bz-group-tile-css-watcher.h"
 #include "bz-screenshot.h"
 
 #define BZ_TYPE_FEATURED_TILE_LAYOUT (bz_featured_tile_layout_get_type ())
@@ -29,9 +29,9 @@ G_DECLARE_FINAL_TYPE (BzFeaturedTileLayout, bz_featured_tile_layout, BZ, FEATURE
 struct _BzFeaturedTileLayout
 {
   GtkLayoutManager parent_instance;
-  gboolean narrow_mode;
-  GtkWidget *content_box;
-  int last_width;
+  gboolean         narrow_mode;
+  GtkWidget       *content_box;
+  int              last_width;
 };
 
 G_DEFINE_FINAL_TYPE (BzFeaturedTileLayout, bz_featured_tile_layout, GTK_TYPE_LAYOUT_MANAGER)
@@ -46,18 +46,18 @@ static guint layout_signals[LAYOUT_SIGNAL_LAST] = { 0 };
 
 static void
 bz_featured_tile_layout_measure (GtkLayoutManager *layout_manager,
-                                  GtkWidget        *widget,
-                                  GtkOrientation    orientation,
-                                  int               for_size,
-                                  int              *minimum,
-                                  int              *natural,
-                                  int              *minimum_baseline,
-                                  int              *natural_baseline)
+                                 GtkWidget        *widget,
+                                 GtkOrientation    orientation,
+                                 int               for_size,
+                                 int              *minimum,
+                                 int              *natural,
+                                 int              *minimum_baseline,
+                                 int              *natural_baseline)
 {
   GtkWidget *child;
 
-  *minimum = 0;
-  *natural = 0;
+  *minimum          = 0;
+  *natural          = 0;
   *minimum_baseline = -1;
   *natural_baseline = -1;
 
@@ -81,19 +81,19 @@ bz_featured_tile_layout_measure (GtkLayoutManager *layout_manager,
 
 static void
 bz_featured_tile_layout_allocate (GtkLayoutManager *layout_manager,
-                                   GtkWidget        *widget,
-                                   gint              width,
-                                   gint              height,
-                                   gint              baseline)
+                                  GtkWidget        *widget,
+                                  gint              width,
+                                  gint              height,
+                                  gint              baseline)
 {
   BzFeaturedTileLayout *self;
-  GtkWidget *child;
-  gboolean narrow_mode;
-  int spacing;
-  const int NARROW_THRESHOLD = 950;
-  const int MIN_SPACING = 15;
-  const int MAX_SPACING = 128;
-  const int MAX_WIDTH = 1300;
+  GtkWidget            *child;
+  gboolean              narrow_mode;
+  int                   spacing;
+  const int             NARROW_THRESHOLD = 950;
+  const int             MIN_SPACING = 15;
+  const int             MAX_SPACING = 128;
+  const int             MAX_WIDTH = 1300;
 
   self = BZ_FEATURED_TILE_LAYOUT (layout_manager);
 
@@ -142,7 +142,7 @@ bz_featured_tile_layout_class_init (BzFeaturedTileLayoutClass *klass)
 
   layout_manager_class = GTK_LAYOUT_MANAGER_CLASS (klass);
 
-  layout_manager_class->measure = bz_featured_tile_layout_measure;
+  layout_manager_class->measure  = bz_featured_tile_layout_measure;
   layout_manager_class->allocate = bz_featured_tile_layout_allocate;
 
   layout_signals[LAYOUT_SIGNAL_NARROW_MODE_CHANGED] =
@@ -163,8 +163,9 @@ struct _BzFeaturedTile
   GtkButton parent_instance;
 
   BzEntryGroup *group;
-  gboolean narrow_mode;
-  guint refresh_id;
+  gboolean      narrow_mode;
+  gboolean      is_aotd;
+  guint         refresh_id;
 
   BzGroupTileCssWatcher *css;
 
@@ -176,7 +177,7 @@ struct _BzFeaturedTile
   GtkWidget *content_box;
 
   GdkPaintable *first_screenshot;
-  gboolean has_screenshot;
+  gboolean      has_screenshot;
 };
 
 G_DEFINE_FINAL_TYPE (BzFeaturedTile, bz_featured_tile, GTK_TYPE_BUTTON)
@@ -188,10 +189,13 @@ enum
   PROP_FIRST_SCREENSHOT,
   PROP_HAS_SCREENSHOT,
   PROP_NARROW,
+  PROP_IS_AOTD,
   LAST_PROP
 };
 
-static GParamSpec *props[LAST_PROP] = { NULL, };
+static GParamSpec *props[LAST_PROP] = {
+  NULL,
+};
 
 static void bz_featured_tile_refresh (BzFeaturedTile *self);
 static void update_screenshot (BzFeaturedTile *self);
@@ -201,7 +205,7 @@ bz_featured_tile_refresh_idle_cb (gpointer user_data)
 {
   BzFeaturedTile *self;
 
-  self = user_data;
+  self             = user_data;
   self->refresh_id = 0;
   bz_featured_tile_refresh (self);
 
@@ -219,8 +223,8 @@ schedule_refresh (BzFeaturedTile *self)
 
 static void
 bz_featured_tile_layout_narrow_mode_changed_cb (GtkLayoutManager *layout_manager,
-                                                 gboolean          narrow_mode,
-                                                 gpointer          user_data)
+                                                gboolean          narrow_mode,
+                                                gpointer          user_data)
 {
   BzFeaturedTile *self;
 
@@ -257,7 +261,7 @@ static void
 update_screenshot (BzFeaturedTile *self)
 {
   g_autoptr (BzResult) ui_entry_result = NULL;
-  g_autoptr (GListModel) screenshots = NULL;
+  g_autoptr (GListModel) screenshots   = NULL;
   BzEntry *ui_entry;
   gboolean has_screenshot = FALSE;
 
@@ -304,7 +308,7 @@ update_screenshot (BzFeaturedTile *self)
     }
 
   self->first_screenshot = g_list_model_get_item (screenshots, 0);
-  has_screenshot = TRUE;
+  has_screenshot         = TRUE;
 
   notify_properties (self, has_screenshot);
 }
@@ -325,6 +329,12 @@ invert_boolean (gpointer object,
   return !value;
 }
 
+static int
+get_start_margin (gpointer object, gboolean narrow)
+{
+  return narrow ? 20 : 50;
+}
+
 static void
 bz_featured_tile_dispose (GObject *object)
 {
@@ -342,9 +352,9 @@ bz_featured_tile_dispose (GObject *object)
 
 static void
 bz_featured_tile_get_property (GObject    *object,
-                                guint       prop_id,
-                                GValue     *value,
-                                GParamSpec *pspec)
+                               guint       prop_id,
+                               GValue     *value,
+                               GParamSpec *pspec)
 {
   BzFeaturedTile *self;
 
@@ -364,6 +374,9 @@ bz_featured_tile_get_property (GObject    *object,
     case PROP_NARROW:
       g_value_set_boolean (value, self->narrow_mode);
       break;
+    case PROP_IS_AOTD:
+      g_value_set_boolean (value, bz_featured_tile_get_is_aotd (self));
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -372,9 +385,9 @@ bz_featured_tile_get_property (GObject    *object,
 
 static void
 bz_featured_tile_set_property (GObject      *object,
-                                guint         prop_id,
-                                const GValue *value,
-                                GParamSpec   *pspec)
+                               guint         prop_id,
+                               const GValue *value,
+                               GParamSpec   *pspec)
 {
   BzFeaturedTile *self;
 
@@ -384,6 +397,9 @@ bz_featured_tile_set_property (GObject      *object,
     {
     case PROP_GROUP:
       bz_featured_tile_set_group (self, g_value_get_object (value));
+      break;
+    case PROP_IS_AOTD:
+      bz_featured_tile_set_is_aotd (self, g_value_get_boolean (value));
       break;
     case PROP_FIRST_SCREENSHOT:
     case PROP_HAS_SCREENSHOT:
@@ -397,13 +413,13 @@ bz_featured_tile_set_property (GObject      *object,
 static void
 bz_featured_tile_class_init (BzFeaturedTileClass *klass)
 {
-  GObjectClass *object_class;
+  GObjectClass   *object_class;
   GtkWidgetClass *widget_class;
 
   object_class = G_OBJECT_CLASS (klass);
   widget_class = GTK_WIDGET_CLASS (klass);
 
-  object_class->dispose = bz_featured_tile_dispose;
+  object_class->dispose      = bz_featured_tile_dispose;
   object_class->get_property = bz_featured_tile_get_property;
   object_class->set_property = bz_featured_tile_set_property;
 
@@ -427,12 +443,18 @@ bz_featured_tile_class_init (BzFeaturedTileClass *klass)
                             FALSE,
                             G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
+  props[PROP_IS_AOTD] =
+      g_param_spec_boolean ("is-aotd", NULL, NULL,
+                            FALSE,
+                            G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY | G_PARAM_STATIC_STRINGS);
+
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   g_type_ensure (BZ_TYPE_SCREENSHOT);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-featured-tile.ui");
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
+  gtk_widget_class_bind_template_callback (widget_class, get_start_margin);
 
   gtk_widget_class_bind_template_child (widget_class, BzFeaturedTile, image);
   gtk_widget_class_bind_template_child (widget_class, BzFeaturedTile, title);
@@ -482,7 +504,7 @@ bz_featured_tile_get_group (BzFeaturedTile *self)
 
 void
 bz_featured_tile_set_group (BzFeaturedTile *self,
-                             BzEntryGroup   *group)
+                            BzEntryGroup   *group)
 {
   g_return_if_fail (BZ_IS_FEATURED_TILE (self));
   g_return_if_fail (group == NULL || BZ_IS_ENTRY_GROUP (group));
@@ -504,4 +526,24 @@ bz_featured_tile_set_group (BzFeaturedTile *self,
   bz_group_tile_css_watcher_set_group (self->css, group);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_GROUP]);
+}
+
+gboolean
+bz_featured_tile_get_is_aotd (BzFeaturedTile *self)
+{
+  g_return_val_if_fail (BZ_IS_FEATURED_TILE (self), FALSE);
+  return self->is_aotd;
+}
+
+void
+bz_featured_tile_set_is_aotd (BzFeaturedTile *self,
+                              gboolean        is_aotd)
+{
+  g_return_if_fail (BZ_IS_FEATURED_TILE (self));
+
+  if (self->is_aotd == is_aotd)
+    return;
+
+  self->is_aotd = is_aotd;
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_IS_AOTD]);
 }

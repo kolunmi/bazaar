@@ -4,63 +4,115 @@ using Adw 1;
 template $BzPreferencesDialog: Adw.PreferencesDialog {
   content-height: 500;
   search-enabled: true;
+  width-request: 350;
+  height-request: 500;
+
+  Adw.Breakpoint {
+    condition ("max-width: 625sp")
+
+    setters {
+      flag_buttons_box.max-children-per-line: 6;
+    }
+  }
 
   Adw.PreferencesPage {
     title: _("Preferences");
     use-underline: true;
 
     Adw.PreferencesGroup {
-      title: _("Application Details");
-
-      Adw.SwitchRow git_forge_star_counts_switch{
-        title: _("Git Forge Star Counts");
-        subtitle: _("Not having a GitHub access token may trigger rate limits");
-      }
-    }
-
-    Adw.PreferencesGroup {
       title: _("Search");
 
-      Adw.SwitchRow search_only_foss_switch{
-        title: _("Only Show Free Software");
+      Adw.SwitchRow search_only_foss_switch {
+        title: _("Free Software Only");
         subtitle: _("Hide proprietary applications from search results");
       }
 
-      Adw.SwitchRow search_only_flathub_switch{
-        title: _("Show Only Flathub Apps");
-        subtitle: _("Limit search results to applications available on Flathub");
+      Adw.SwitchRow search_only_flathub_switch {
+        title: _("Flathub Results Only");
+        subtitle: _("Limit search results to applications only available on Flathub");
       }
 
-      Adw.SwitchRow search_debounce_switch{
-        title: _("Debounce Search Results");
-        subtitle: _("Wait for a brief pause to reduce system load");
+      Adw.SwitchRow search_debounce_switch {
+        title: _("Delay Search Results");
+        subtitle: _("Improve results performance by debouncing search terms");
       }
     }
 
     Adw.PreferencesGroup {
-      title: _("Global Progress Bar");
+      title: _("Application Details");
 
-      Adw.ComboRow progress_bar_theme {
-        title: _("Theme");
-        subtitle: _("Choose a fun theme for the global progress bar!");
-        model: StringList {
-          strings [
-            _("Accent Color"),
-            _("Pride Rainbow Flag"),
-            _("Lesbian Pride Flag"),
-            _("Transgender Flag"),
-            _("Nonbinary Flag"),
-            _("Bisexual Flag"),
-            _("Asexual Flag"),
-            _("Pansexual Flag"),
-            _("Aromantic Flag"),
-            _("Genderfluid Flag"),
-            _("Polysexual Flag"),
-            _("Omnisexual Flag"),
-          ]
+      Adw.ActionRow {
+        title: _("Display Star Count");
+        subtitle: _("Show the star count of an application's source code repository");
+        activatable-widget: git_forge_star_counts_switch;
+
+        [suffix]
+        Box {
+          valign: center;
+          spacing: 8;
+
+          MenuButton {
+            icon-name: "info-outline-symbolic";
+            popover: forge_popover;
+
+            styles [
+              "flat",
+            ]
+          }
+
+          Switch git_forge_star_counts_switch {
+            valign: center;
+          }
+        }
+      }
+    }
+
+    Adw.PreferencesGroup {
+      title: _("Progress Bar");
+      description: _("Choose a theme for the progress bar!");
+
+      Adw.ActionRow {
+        child: Box {
+          margin-top: 6;
+          margin-bottom: 6;
+          halign: center;
+
+          FlowBox flag_buttons_box {
+            styles [
+              "accent-button-box",
+            ]
+
+            orientation: horizontal;
+            column-spacing: 4;
+            row-spacing: 4;
+            halign: center;
+            homogeneous: true;
+            max-children-per-line: 12;
+            selection-mode: none;
+          }
         };
-        notify::selected => $global_progress_theme_widget_changed(template);
       }
     }
   }
+}
+
+Popover forge_popover {
+  has-arrow: true;
+  name: "plain_popover";
+
+  child: Box plain-popover-box {
+    name: "plain-popover-box";
+
+    Label {
+      label: _("Bazaar can fetch and display the star count from an application's source code repository on a remote Git forge. \n For projects on GitHub, rate limits may cause them not to appear.");
+      wrap: true;
+      wrap-mode: word_char;
+      max-width-chars: 30;
+      halign: center;
+      margin-start: 6;
+      margin-end: 6;
+      margin-top: 6;
+      margin-bottom: 6;
+    }
+  };
 }

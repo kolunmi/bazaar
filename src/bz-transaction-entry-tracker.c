@@ -24,13 +24,18 @@ struct _BzTransactionEntryTracker
 {
   GObject parent_instance;
 
-  BzEntry          *entry;
-  GListModel       *current_ops;
-  GListModel       *finished_ops;
-  BzTransactionType type;
+  BzEntry               *entry;
+  GListModel            *current_ops;
+  GListModel            *finished_ops;
+  BzTransactionEntryType type;
 };
 
-G_DEFINE_ENUM_TYPE (BzTransactionType, bz_transaction_entry_type, G_DEFINE_ENUM_VALUE (BZ_TRANSACTION_TYPE_INSTALL, "install"), G_DEFINE_ENUM_VALUE (BZ_TRANSACTION_TYPE_UPDATE, "update"), G_DEFINE_ENUM_VALUE (BZ_TRANSACTION_TYPE_REMOVAL, "removal"))
+G_DEFINE_ENUM_TYPE (
+    BzTransactionEntryType,
+    bz_transaction_entry_type,
+    G_DEFINE_ENUM_VALUE (BZ_TRANSACTION_ENTRY_TYPE_INSTALL, "install"),
+    G_DEFINE_ENUM_VALUE (BZ_TRANSACTION_ENTRY_TYPE_UPDATE, "update"),
+    G_DEFINE_ENUM_VALUE (BZ_TRANSACTION_ENTRY_TYPE_REMOVAL, "removal"))
 
 G_DEFINE_FINAL_TYPE (BzTransactionEntryTracker, bz_transaction_entry_tracker, G_TYPE_OBJECT);
 
@@ -148,7 +153,7 @@ bz_transaction_entry_tracker_class_init (BzTransactionEntryTrackerClass *klass)
           "type",
           NULL, NULL,
           bz_transaction_entry_type_get_type (),
-          BZ_TRANSACTION_TYPE_INSTALL,
+          BZ_TRANSACTION_ENTRY_TYPE_INSTALL,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
@@ -186,10 +191,10 @@ bz_transaction_entry_tracker_get_finished_ops (BzTransactionEntryTracker *self)
   return self->finished_ops;
 }
 
-BzTransactionType
+BzTransactionEntryType
 bz_transaction_entry_tracker_get_type_enum (BzTransactionEntryTracker *self)
 {
-  g_return_val_if_fail (BZ_IS_TRANSACTION_ENTRY_TRACKER (self), BZ_TRANSACTION_TYPE_INSTALL);
+  g_return_val_if_fail (BZ_IS_TRANSACTION_ENTRY_TRACKER (self), BZ_TRANSACTION_ENTRY_TYPE_INSTALL);
   return self->type;
 }
 
@@ -234,7 +239,7 @@ bz_transaction_entry_tracker_set_finished_ops (BzTransactionEntryTracker *self,
 
 void
 bz_transaction_entry_tracker_set_type_enum (BzTransactionEntryTracker *self,
-                                            BzTransactionType          type)
+                                            BzTransactionEntryType     type)
 {
   g_return_if_fail (BZ_IS_TRANSACTION_ENTRY_TRACKER (self));
   self->type = type;

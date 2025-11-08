@@ -1,6 +1,6 @@
-/* bz-patterned-background.h
+/* bz-rich-app-tile.h
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2025 Adam Masciola, Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,30 +20,26 @@
 
 #pragma once
 
+#include "adwaita.h"
 #include <gtk/gtk.h>
+
+#include "bz-entry-group.h"
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_PATTERNED_BACKGROUND (bz_patterned_background_get_type ())
-G_DECLARE_FINAL_TYPE (BzPatternedBackground, bz_patterned_background, BZ, PATTERNED_BACKGROUND, GtkWidget)
+#define BZ_TYPE_RICH_APP_TILE (bz_rich_app_tile_get_type ())
 
-BzPatternedBackground *
-bz_patterned_background_new (void);
+G_DECLARE_FINAL_TYPE (BzRichAppTile, bz_rich_app_tile, BZ, RICH_APP_TILE, AdwBin)
 
 GtkWidget *
-bz_patterned_background_get_widget (BzPatternedBackground *self);
+bz_rich_app_tile_new (void);
+
+BzEntryGroup *
+bz_rich_app_tile_get_group (BzRichAppTile *self);
 
 void
-bz_patterned_background_set_widget (BzPatternedBackground *self,
-                                    GtkWidget             *widget);
-
-const char *
-bz_patterned_background_get_tint (BzPatternedBackground *self);
-
-void
-bz_patterned_background_set_tint (BzPatternedBackground *self,
-                                  const char            *tint);
+bz_rich_app_tile_set_group (BzRichAppTile *self,
+                            BzEntryGroup  *group);
 
 G_END_DECLS
-
-/* End of bz-patterned-background.h */
+/* End of bz-rich-app-tile.h */

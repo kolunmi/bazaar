@@ -294,6 +294,40 @@ serializable_iface_init (BzSerializableInterface *iface)
   iface->deserialize = bz_flatpak_entry_real_deserialize;
 }
 
+static guint
+parse_control_value (const char *value)
+{
+  if (g_strcmp0 (value, "pointing") == 0)
+    return BZ_CONTROL_POINTING;
+  else if (g_strcmp0 (value, "keyboard") == 0)
+    return BZ_CONTROL_KEYBOARD;
+  else if (g_strcmp0 (value, "console") == 0)
+    return BZ_CONTROL_CONSOLE;
+  else if (g_strcmp0 (value, "tablet") == 0)
+    return BZ_CONTROL_TABLET;
+  else if (g_strcmp0 (value, "touch") == 0)
+    return BZ_CONTROL_TOUCH;
+  else if (g_strcmp0 (value, "gamepad") == 0)
+    return BZ_CONTROL_GAMEPAD;
+  else if (g_strcmp0 (value, "tv-remote") == 0)
+    return BZ_CONTROL_TV_REMOTE;
+  else if (g_strcmp0 (value, "voice") == 0)
+    return BZ_CONTROL_VOICE;
+  else if (g_strcmp0 (value, "vision") == 0)
+    return BZ_CONTROL_VISION;
+  else
+    return 0;
+}
+
+static gboolean
+calculate_is_mobile_friendly (guint required_controls,
+                              guint supported_controls,
+                              gint  min_display_length,
+                              gint  max_display_length)
+{
+  return (supported_controls & BZ_CONTROL_TOUCH) != 0;
+}
+
 BzFlatpakEntry *
 bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
                               gboolean           user,
@@ -338,8 +372,16 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
   double           average_rating              = 0.0;
   g_autofree char *ratings_summary             = NULL;
   g_autoptr (GListStore) version_history       = NULL;
-  const char *accent_color_light               = NULL;
-  const char *accent_color_dark                = NULL;
+  const char      *accent_color_light          = NULL;
+  const char      *accent_color_dark           = NULL;
+  guint            required_controls           = 0;
+  guint            recommended_controls        = 0;
+  guint            supported_controls          = 0;
+  gint             min_display_length          = 0;
+  gint             max_display_length          = 0;
+  gboolean         is_mobile_friendly          = FALSE;
+  AsContentRating *content_rating              = NULL;
+  gint             age_rating                  = 0;
 
   g_return_val_if_fail (BZ_IS_FLATPAK_INSTANCE (instance), NULL);
   g_return_val_if_fail (FLATPAK_IS_REF (ref), NULL);
@@ -425,12 +467,15 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
 
   if (component != NULL)
     {
-      AsDeveloper   *developer_obj = NULL;
-      GPtrArray     *screenshots   = NULL;
-      AsReleaseList *releases      = NULL;
-      GPtrArray     *releases_arr  = NULL;
-      GPtrArray     *icons         = NULL;
-      AsBranding    *branding      = NULL;
+      AsDeveloper   *developer_obj        = NULL;
+      GPtrArray     *screenshots          = NULL;
+      AsReleaseList *releases             = NULL;
+      GPtrArray     *releases_arr         = NULL;
+      GPtrArray     *icons                = NULL;
+      AsBranding    *branding             = NULL;
+      GPtrArray     *requires_relations   = NULL;
+      GPtrArray     *recommends_relations = NULL;
+      GPtrArray     *supports_relations   = NULL;
 
       title = as_component_get_name (component);
       if (title == NULL)
@@ -506,6 +551,7 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
           url = bz_url_new ();
           bz_url_set_name (url, C_ ("Project URL Type", "Flathub Page"));
           bz_url_set_url (url, flathub_url);
+          bz_url_set_icon_name (url, "flathub-symbolic");
 
           g_list_store_append (share_urls, url);
         }
@@ -518,40 +564,50 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
           if (url != NULL)
             {
               const char *enum_string     = NULL;
+              const char *icon_name       = NULL;
               g_autoptr (BzUrl) share_url = NULL;
 
               switch (e)
                 {
                 case AS_URL_KIND_HOMEPAGE:
-                  enum_string = C_ ("Project URL Type", "Homepage");
+                  enum_string = C_ ("Project URL Type", "Project Website");
+                  icon_name   = "globe-symbolic";
                   break;
                 case AS_URL_KIND_BUGTRACKER:
                   enum_string = C_ ("Project URL Type", "Issue Tracker");
+                  icon_name   = "computer-fail-symbolic";
                   break;
                 case AS_URL_KIND_FAQ:
                   enum_string = C_ ("Project URL Type", "FAQ");
+                  icon_name   = "help-faq-symbolic";
                   break;
                 case AS_URL_KIND_HELP:
                   enum_string = C_ ("Project URL Type", "Help");
+                  icon_name   = "help-browser-symbolic";
                   break;
                 case AS_URL_KIND_DONATION:
                   enum_string = C_ ("Project URL Type", "Donate");
+                  icon_name   = "heart-filled-symbolic";
                   g_clear_pointer (&donation_url, g_free);
                   donation_url = g_strdup (url);
                   break;
                 case AS_URL_KIND_TRANSLATE:
                   enum_string = C_ ("Project URL Type", "Translate");
+                  icon_name   = "translations-symbolic";
                   break;
                 case AS_URL_KIND_CONTACT:
                   enum_string = C_ ("Project URL Type", "Contact");
+                  icon_name   = "mail-send-symbolic";
                   break;
                 case AS_URL_KIND_VCS_BROWSER:
                   enum_string = C_ ("Project URL Type", "Source Code");
+                  icon_name   = "code-symbolic";
                   g_clear_pointer (&forge_url, g_free);
                   forge_url = g_strdup (url);
                   break;
                 case AS_URL_KIND_CONTRIBUTE:
                   enum_string = C_ ("Project URL Type", "Contribute");
+                  icon_name   = "system-users-symbolic";
                   break;
                 default:
                   break;
@@ -561,6 +617,7 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
                   BZ_TYPE_URL,
                   "name", enum_string,
                   "url", url,
+                  "icon-name", icon_name,
                   NULL);
               g_list_store_append (share_urls, share_url);
             }
@@ -721,6 +778,85 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
           accent_color_dark = as_branding_get_color (
               branding, AS_COLOR_KIND_PRIMARY, AS_COLOR_SCHEME_KIND_DARK);
         }
+
+      content_rating = as_component_get_content_rating (component, "oars-1.1");
+      if (content_rating != NULL)
+        {
+          age_rating = (gint) as_content_rating_get_minimum_age (content_rating);
+        }
+
+      requires_relations   = as_component_get_requires (component);
+      recommends_relations = as_component_get_recommends (component);
+      supports_relations   = as_component_get_supports (component);
+
+      if (requires_relations != NULL)
+        {
+          for (guint i = 0; i < requires_relations->len; i++)
+            {
+              AsRelation        *relation  = g_ptr_array_index (requires_relations, i);
+              AsRelationItemKind item_kind = as_relation_get_item_kind (relation);
+
+              if (item_kind == AS_RELATION_ITEM_KIND_CONTROL)
+                {
+                  AsControlKind control_kind = as_relation_get_value_control_kind (relation);
+                  const char   *control_str  = as_control_kind_to_string (control_kind);
+                  if (control_str != NULL)
+                    required_controls |= parse_control_value (control_str);
+                }
+              else if (item_kind == AS_RELATION_ITEM_KIND_DISPLAY_LENGTH)
+                {
+                  AsRelationCompare compare = as_relation_get_compare (relation);
+                  gint              value   = as_relation_get_value_int (relation);
+                  if (compare == AS_RELATION_COMPARE_GE)
+                    min_display_length = value;
+                }
+            }
+        }
+
+      if (recommends_relations != NULL)
+        {
+          for (guint i = 0; i < recommends_relations->len; i++)
+            {
+              AsRelation        *relation  = g_ptr_array_index (recommends_relations, i);
+              AsRelationItemKind item_kind = as_relation_get_item_kind (relation);
+
+              if (item_kind == AS_RELATION_ITEM_KIND_CONTROL)
+                {
+                  AsControlKind control_kind = as_relation_get_value_control_kind (relation);
+                  const char   *control_str  = as_control_kind_to_string (control_kind);
+                  if (control_str != NULL)
+                    recommended_controls |= parse_control_value (control_str);
+                }
+            }
+        }
+
+      if (supports_relations != NULL)
+        {
+          for (guint i = 0; i < supports_relations->len; i++)
+            {
+              AsRelation        *relation  = g_ptr_array_index (supports_relations, i);
+              AsRelationItemKind item_kind = as_relation_get_item_kind (relation);
+
+              if (item_kind == AS_RELATION_ITEM_KIND_CONTROL)
+                {
+                  AsControlKind control_kind = as_relation_get_value_control_kind (relation);
+                  const char   *control_str  = as_control_kind_to_string (control_kind);
+                  if (control_str != NULL)
+                    supported_controls |= parse_control_value (control_str);
+                }
+              else if (item_kind == AS_RELATION_ITEM_KIND_DISPLAY_LENGTH)
+                {
+                  AsRelationCompare compare = as_relation_get_compare (relation);
+                  gint              value   = as_relation_get_value_int (relation);
+                  if (compare == AS_RELATION_COMPARE_LE)
+                    max_display_length = value;
+                }
+            }
+        }
+      is_mobile_friendly = calculate_is_mobile_friendly (required_controls,
+                                                         supported_controls,
+                                                         min_display_length,
+                                                         max_display_length);
     }
 
   if (icon_paintable == NULL && FLATPAK_IS_BUNDLE_REF (ref))
@@ -803,6 +939,13 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
       "version-history", version_history,
       "light-accent-color", accent_color_light,
       "dark-accent-color", accent_color_dark,
+      "required-controls", required_controls,
+      "recommended-controls", recommended_controls,
+      "supported-controls", supported_controls,
+      "min-display-length", min_display_length,
+      "max-display-length", max_display_length,
+      "is-mobile-friendly", is_mobile_friendly,
+      "age-rating", age_rating,
       NULL);
 
   return g_steal_pointer (&self);

@@ -2,6 +2,7 @@ using Gtk 4.0;
 using Adw 1;
 
 template $BzAddonsDialog: Adw.Dialog {
+  content-width: 550;
   child: Adw.ToolbarView {
     [top]
     Adw.HeaderBar {
@@ -10,89 +11,27 @@ template $BzAddonsDialog: Adw.Dialog {
           "heading",
         ]
 
-        label: _("Manage Addons");
+        label: _("Manage Add-ons");
       };
     }
 
     content: ScrolledWindow {
       propagate-natural-height: true;
-      overflow: hidden;
       vexpand: true;
       hscrollbar-policy: never;
 
-      child: ListView {
-        styles [
-          "navigation-sidebar",
-        ]
+      child: Adw.Clamp {
+        maximum-size: 500;
+        tightening-threshold: 500;
 
-        hexpand: true;
-        margin-start: 5;
-        margin-end: 5;
+        child: Box {
+          orientation: vertical;
+          margin-top: 24;
+          margin-bottom: 24;
+          margin-start: 12;
+          margin-end: 12;
 
-        model: NoSelection {
-          model: bind template.model;
-        };
-
-        factory: BuilderListItemFactory {
-          template ListItem {
-            activatable: false;
-
-            child: Box {
-              margin-top: 5;
-              margin-bottom: 5;
-              orientation: horizontal;
-              spacing: 15;
-
-              Box {
-                hexpand: true;
-                orientation: vertical;
-                spacing: 5;
-
-                Label {
-                  styles [
-                    "heading",
-                  ]
-
-                  xalign: 0;
-                  ellipsize: middle;
-                  label: bind template.item as <$BzResult>.object as <$BzEntry>.title;
-                }
-
-                Label {
-                  styles [
-                    "dimmed",
-                  ]
-
-                  xalign: 0;
-                  wrap: true;
-                  label: bind template.item as <$BzResult>.object as <$BzEntry>.description;
-                }
-              }
-
-              Button {
-                styles [
-                  "suggested-action",
-                ]
-
-                valign: center;
-                icon-name: "folder-download-symbolic";
-                visible: bind $invert_boolean(template.item as <$BzResult>.object as <$BzEntry>.installed) as <bool>;
-                sensitive: bind $invert_boolean(template.item as <$BzResult>.object as <$BzEntry>.holding) as <bool>;
-                clicked => $transact_cb(template);
-              }
-
-              Button {
-                styles [
-                  "destructive-action",
-                ]
-
-                valign: center;
-                icon-name: "user-trash-symbolic";
-                visible: bind template.item as <$BzResult>.object as <$BzEntry>.installed;
-                sensitive: bind $invert_boolean(template.item as <$BzResult>.object as <$BzEntry>.holding) as <bool>;
-                clicked => $transact_cb(template);
-              }
-            };
+          Adw.PreferencesGroup addons_group {
           }
         };
       };

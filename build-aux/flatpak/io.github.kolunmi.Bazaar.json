@@ -7,7 +7,6 @@
   "tags": "nightly",
   "desktop-file-name-suffix": " (Nightly)",
   "sdk-extensions": [
-    "org.freedesktop.Sdk.Extension.rust-stable",
     "org.freedesktop.Sdk.Extension.llvm20"
   ],
   "finish-args": [
@@ -281,7 +280,18 @@
               ]
             }
           ]
-        }
+        },
+          {
+              "name": "md4c",
+              "buildsystem": "cmake",
+              "sources": [
+                  {
+                      "type": "git",
+                      "url": "https://github.com/mity/md4c.git",
+                      "tag": "release-0.5.2"
+                  }
+              ]
+          }
       ]
     },
     {

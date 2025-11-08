@@ -2,285 +2,404 @@ using Gtk 4.0;
 using Adw 1;
 
 template $BzFlathubPage: Adw.Bin {
- child: Adw.ViewStack stack {
-   enable-transitions: true;
-   transition-duration: 400;
+  child: Adw.BreakpointBin {
+    width-request: 360;
+    height-request: 450;
 
-   Adw.ViewStackPage {
-     name: "empty";
-     title: _("Empty");
+    child: Adw.BreakpointBin {
+      width-request: 360;
+      height-request: 450;
 
-     child: Adw.StatusPage {
-       icon-name: "flatpak-symbolic";
-       title: _("Flathub Not Added");
-       description: _("The Flathub remote was not found on any of your flatpak installations");
-     };
-   }
-   
-   Adw.ViewStackPage {
-     name: "content";
-     title: _("Browser");
+      child: Adw.ViewStack stack {
+        enable-transitions: true;
+        transition-duration: 400;
 
-     child: ScrolledWindow {
-       styles [
-         "transparent"
-       ]
+        Adw.ViewStackPage {
+          name: "empty";
+          title: _("Empty");
 
-       hscrollbar-policy: never;
+          child: Adw.StatusPage {
+            icon-name: "flathub-symbolic";
+            title: _("Flathub Not Added");
+            description: _("The Flathub remote was not found on any of your Flatpak installations");
+          };
+        }
 
-       child: Adw.ClampScrollable {
-         maximum-size: 1500;
-         tightening-threshold: 1400;
+        Adw.ViewStackPage {
+          name: "offline";
+          title: _("Offline");
 
-         child: Viewport {
-           child: Box {
-             margin-start: 25;
-             margin-end: 25;
-             margin-top: 5;
-             margin-bottom: 20;
-             orientation: vertical;
-             spacing: 15;
+          child: Adw.StatusPage {
+            icon-name: "connected-squares-x";
+            title: _("Offline");
+          };
+        }
 
-             $BzFeaturedCarousel {
-                margin-start:8;
-                margin-end:8;
-                styles [
-                  "flathub-page-section",
-                ]
-                margin-top: 16;
-                hexpand: true;
-                model: bind template.state as <$BzFlathubState>.apps_of_the_day_week;
-                group-clicked => $featured_carousel_group_clicked_cb(template);
-              }
+        Adw.ViewStackPage {
+          name: "content";
+          title: _("Browser");
 
-             Box {
-               orientation: vertical;
-               spacing: 10;
+          child: ScrolledWindow {
+            styles [
+              "transparent",
+            ]
 
-               Box {
-                 orientation: horizontal;
-                 spacing: 10;
-                 margin-start: 8;
-                 margin-end: 8;
-               
-                 Label {
-                   styles [
-                     "title-1",
-                   ]
-                   label: _("Trending");
-                   xalign: 0.0;
-                   hexpand: true;
-                 }
-               }
-             
-               $BzDynamicListView {
-                 styles [
-                   "flathub-page-section",
-                 ]
-               
-                 hexpand: true;
-               
-                 scroll: false;
-                 noscroll-kind: flow-box;
-                 child-type: "BzAppTile";
-                 child-prop: "group";
-                 model: SliceListModel {
-                   offset: 0;
-                   size: 12;
-                   model: bind template.state as <$BzFlathubState>.trending;
-                 };
-               
-                 bind-widget => $bind_widget_cb(template);      
-                 unbind-widget => $unbind_widget_cb(template);      
-               }
-               Button {
-                  styles [
-                  "pill"
-                  ]
+            hscrollbar-policy: never;
 
-                   label: _("More Trending");
-                   halign: center;
-                   valign: center;
-                   clicked => $show_more_trending_clicked_cb(template);
-                }
-             }
+            child: Adw.ClampScrollable {
+              maximum-size: 1500;
+              tightening-threshold: 1400;
 
-             $BzDynamicListView {
-               styles [
-                 "flathub-page-section",
-               ]
-             
-               hexpand: true;
-               max-children-per-line:5;
-               scroll: false;
-               noscroll-kind: flow-box;
-               child-type: "BzCategoryTile";
-               child-prop: "category";
-               model: bind template.state as <$BzFlathubState>.categories;
+              child: Viewport {
+                child: Box content_box {
+                  margin-start: 25;
+                  margin-end: 25;
+                  margin-top: 5;
+                  margin-bottom: 20;
+                  orientation: vertical;
+                  spacing: 15;
 
-               bind-widget => $bind_category_tile_cb(template);
-               unbind-widget => $unbind_category_tile_cb(template);
-             }
+                  $BzFeaturedCarousel {
+                    margin-start: 8;
+                    margin-end: 8;
 
-             Box {
-               orientation: vertical;
-               spacing: 10;
-             
-               Box {
-                 orientation: horizontal;
-                 spacing: 10;
-                 margin-start: 8;
-                 margin-end: 8;
-               
-                 Label {
-                   styles [
-                     "title-1",
-                   ]
-                   label: _("Recently Updated");
-                   xalign: 0.0;
-                   hexpand: true;
-                 }
-               }
-             
-               $BzDynamicListView {
-                 styles [
-                   "flathub-page-section",
-                 ]
-               
-                 hexpand: true;
-               
-                 scroll: false;
-                 noscroll-kind: flow-box;
-                 child-type: "BzAppTile";
-                 child-prop: "group";
-                 model: SliceListModel {
-                   offset: 0;
-                   size: 12;
-                   model: bind template.state as <$BzFlathubState>.recently_updated;
-                 };
-               
-                 bind-widget => $bind_widget_cb(template);      
-                 unbind-widget => $unbind_widget_cb(template);      
-               }
-               Button {
-                  styles [
-                  "pill"
-                  ]
+                    styles [
+                      "flathub-page-section",
+                    ]
 
-                   label: _("More Updated");
-                   halign: center;
-                   valign: center;
-                   clicked => $show_more_recently_updated_clicked_cb(template);
-               }
-             }
+                    margin-top: 16;
+                    hexpand: true;
+                    model: bind template.state as <$BzFlathubState>.apps_of_the_week;
+                    group-clicked => $featured_carousel_group_clicked_cb(template);
+                  }
 
-             Box {
-               orientation: vertical;
-               spacing: 10;
-             
-               Box {
-                 orientation: horizontal;
-                 spacing: 10;
-                 margin-start: 8;
-                 margin-end: 8;
-               
-                 Label {
-                   styles [
-                     "title-1",
-                   ]
-                   label: _("Recently Added");
-                   xalign: 0.0;
-                   hexpand: true;
-                 }
-               }
-             
-               $BzDynamicListView {
-                 styles [
-                   "flathub-page-section",
-                 ]
-               
-                 hexpand: true;
-               
-                 scroll: false;
-                 noscroll-kind: flow-box;
-                 child-type: "BzAppTile";
-                 child-prop: "group";
-                 model: SliceListModel {
-                   offset: 0;
-                   size: 12;
-                   model: bind template.state as <$BzFlathubState>.recently_added;
-                 };
-               
-                 bind-widget => $bind_widget_cb(template);      
-                 unbind-widget => $unbind_widget_cb(template);      
-               }
-               Button {
-                  styles [
-                  "pill"
-                  ]
+                  Box section_toggles_box {
+                    halign: center;
+                    width-request: 800;
 
-                   label: _("More Added");
-                   halign: center;
-                   valign: center;
-                   clicked => $show_more_recently_added_clicked_cb(template);
-               }
-             }
-           
-             Box {
-               orientation: vertical;
-               spacing: 10;
-             
-               Box {
-                 orientation: horizontal;
-                 spacing: 10;
-                 margin-start: 8;
-                 margin-end: 8;
-               
-                 Label {
-                   styles [
-                     "title-1",
-                   ]
-                   label: _("Popular");
-                   xalign: 0.0;
-                   hexpand: true;
-                 }
-               }
-             
-               $BzDynamicListView {
-                 styles [
-                   "flathub-page-section",
-                 ]
-               
-                 hexpand: true;
-               
-                 scroll: false;
-                 noscroll-kind: flow-box;
-                 child-type: "BzAppTile";
-                 child-prop: "group";
-                 model: SliceListModel {
-                   offset: 0;
-                   size: 12;
-                   model: bind template.state as <$BzFlathubState>.popular;
-                 };
-               
-                 bind-widget => $bind_widget_cb(template);      
-                 unbind-widget => $unbind_widget_cb(template);      
-               }
-               Button {
-                  styles [
-                  "pill"
-                  ]
+                    Adw.ToggleGroup section_toggles {
+                      hexpand: true;
+                      halign: fill;
+                      homogeneous: true;
 
-                   label: _("More Popular");
-                   halign: center;
-                   valign: center;
-                   clicked => $show_more_popular_clicked_cb(template);
-               }
-             }
-           };
-         };
-       };
-     };
-   }
- };
+                      styles [
+                        "round",
+                      ]
+
+                      Adw.Toggle {
+                        label: _("Trending");
+                        name: "trending";
+                      }
+
+                      Adw.Toggle {
+                        label: _("Popular");
+                        name: "popular";
+                      }
+
+                      Adw.Toggle {
+                        label: _("New");
+                        name: "recently-added";
+                      }
+
+                      Adw.Toggle {
+                        label: _("Updated");
+                        name: "recently-updated";
+                      }
+                    }
+                  }
+
+                  Adw.ViewStack sections_stack {
+                    enable-transitions: true;
+                    vhomogeneous: false;
+                    transition-duration: 300;
+                    visible-child-name: bind section_toggles.active-name;
+
+                    Adw.ViewStackPage {
+                      name: "trending";
+                      title: _("Trending");
+
+                      child: $BzFlathubCategorySection section_trending {
+                        category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "trending") as <$BzFlathubCategory>;
+                        max-items: 12;
+                        group-selected => $category_section_group_selected_cb() swapped;
+                      };
+                    }
+
+                    Adw.ViewStackPage {
+                      name: "recently-updated";
+                      title: _("Recently Updated");
+
+                      child: $BzFlathubCategorySection section_recently_updated {
+                        category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "recently-updated") as <$BzFlathubCategory>;
+                        max-items: 12;
+                        group-selected => $category_section_group_selected_cb() swapped;
+                      };
+                    }
+
+                    Adw.ViewStackPage {
+                      name: "recently-added";
+                      title: _("Recently Added");
+
+                      child: $BzFlathubCategorySection section_recently_added {
+                        category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "recently-added") as <$BzFlathubCategory>;
+                        max-items: 12;
+                        group-selected => $category_section_group_selected_cb() swapped;
+                      };
+                    }
+
+                    Adw.ViewStackPage {
+                      name: "popular";
+                      title: _("Popular");
+
+                      child: $BzFlathubCategorySection section_popular {
+                        category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "popular") as <$BzFlathubCategory>;
+                        max-items: 12;
+                        group-selected => $category_section_group_selected_cb() swapped;
+                      };
+                    }
+                  }
+
+                  $BzFlathubCategorySection section_productivity {
+                    category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "office") as <$BzFlathubCategory>;
+                    max-items: 12;
+                    group-selected => $category_section_group_selected_cb() swapped;
+                  }
+
+                  $BzFeaturedCarousel {
+                    margin-start: 8;
+                    margin-end: 8;
+
+                    styles [
+                      "flathub-page-section",
+                    ]
+
+                    margin-top: 16;
+                    hexpand: true;
+
+                    model: SliceListModel {
+                      offset: 0;
+                      size: 1;
+                      model: bind template.state as <$BzFlathubState>.apps_of_the_day_week;
+                    };
+
+                    is-aotd: true;
+                    group-clicked => $featured_carousel_group_clicked_cb(template);
+                  }
+
+                  $BzFlathubCategorySection section_graphics {
+                    category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "graphics") as <$BzFlathubCategory>;
+                    max-items: 12;
+                    group-selected => $category_section_group_selected_cb() swapped;
+                  }
+
+                  $BzFlathubCategorySection section_audiovideo {
+                    category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "audiovideo") as <$BzFlathubCategory>;
+                    max-items: 12;
+                    group-selected => $category_section_group_selected_cb() swapped;
+                  }
+
+                  $BzFlathubCategorySection section_education {
+                    category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "education") as <$BzFlathubCategory>;
+                    max-items: 12;
+                    group-selected => $category_section_group_selected_cb() swapped;
+                  }
+
+                  Box otg_box {
+                    margin-start: 8;
+                    margin-end: 8;
+                    margin-top: 8;
+                    margin-bottom: 8;
+
+                    styles [
+                      "otg",
+                      "card",
+                    ]
+
+                    Box otg_padding_box {
+                      orientation: horizontal;
+                      margin-start: 24;
+                      margin-end: 24;
+                      margin-top: 24;
+                      margin-bottom: 24;
+
+                      Box otg_title_box {
+                        orientation: vertical;
+                        spacing: 12;
+                        width-request: 285;
+                        valign: center;
+
+                        Image otg_image {
+                          icon-name: "on-the-go-symbolic";
+                          pixel-size: 256;
+                          halign: start;
+
+                          styles [
+                            "otg-image",
+                          ]
+                        }
+
+                        Label otg_title {
+                          label: _("On the go");
+                          halign: start;
+                          wrap: true;
+                          wrap-mode: word_char;
+
+                          styles [
+                            "otg-title",
+                            "title-1",
+                          ]
+                        }
+
+                        Label otg_subtitle {
+                          label: _("Apps for your Linux phones and tablets");
+                          halign: start;
+                          wrap: true;
+                          wrap-mode: word_char;
+                        }
+
+                        Button otg_more_button_top {
+                          styles [
+                            "pill",
+                          ]
+
+                          label: _("More Mobile apps");
+                          halign: start;
+                          valign: center;
+                          clicked => $show_more_mobile_clicked_cb(template);
+                        }
+                      }
+
+                      $BzDynamicListView otg_list{
+                        styles [
+                          "flathub-page-section",
+                        ]
+
+                        hexpand: true;
+                        scroll: false;
+                        noscroll-kind: flow-box;
+                        child-type: "BzAppTile";
+                        child-prop: "group";
+                        max-children-per-line: 3;
+
+                        model: SliceListModel otg_slice {
+                          offset: 0;
+                          size: 9;
+                          model: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "mobile") as <$BzFlathubCategory>.applications;
+                        };
+
+                        bind-widget => $bind_widget_cb(template);
+                        unbind-widget => $unbind_widget_cb(template);
+                      }
+
+                      Button otg_more_button_bottom {
+                        styles [
+                          "pill",
+                        ]
+
+                        visible: false;
+                        label: _("More Mobile apps");
+                        halign: center;
+                        valign: center;
+                        margin-bottom: 12;
+                        clicked => $show_more_mobile_clicked_cb(template);
+                      }
+                    }
+                  }
+
+                  $BzFlathubCategorySection section_network {
+                    category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "network") as <$BzFlathubCategory>;
+                    max-items: 12;
+                    group-selected => $category_section_group_selected_cb() swapped;
+                  }
+
+                  $BzFlathubCategorySection section_game {
+                    category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "game") as <$BzFlathubCategory>;
+                    max-items: 12;
+                    group-selected => $category_section_group_selected_cb() swapped;
+                  }
+
+                  $BzFlathubCategorySection section_development {
+                    category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "development") as <$BzFlathubCategory>;
+                    max-items: 12;
+                    group-selected => $category_section_group_selected_cb() swapped;
+                  }
+
+                  $BzFlathubCategorySection section_science {
+                    category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "science") as <$BzFlathubCategory>;
+                    max-items: 12;
+                    group-selected => $category_section_group_selected_cb() swapped;
+                  }
+
+                  $BzFlathubCategorySection section_system {
+                    category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "system") as <$BzFlathubCategory>;
+                    max-items: 12;
+                    group-selected => $category_section_group_selected_cb() swapped;
+                  }
+
+                  $BzFlathubCategorySection section_utility {
+                    category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "utility") as <$BzFlathubCategory>;
+                    max-items: 12;
+                    group-selected => $category_section_group_selected_cb() swapped;
+                  }
+                };
+              };
+            };
+          };
+        }
+      };
+
+
+      Adw.Breakpoint {
+        condition ("max-width: 1150sp")
+
+        setters {
+          otg_list.max-children-per-line: 2;
+          otg_slice.size: 6;
+        }
+      }
+
+      Adw.Breakpoint {
+        condition ("max-width: 700px")
+
+        setters {
+          content_box.margin-start: 5;
+          content_box.margin-end: 5;
+          otg_padding_box.margin-start: 6;
+          otg_padding_box.margin-end: 6;
+          otg_padding_box.margin-bottom: 6;
+          section_toggles.homogeneous: false;
+          section_productivity.max-items: 6;
+          section_graphics.max-items: 6;
+          section_audiovideo.max-items: 6;
+          section_education.max-items: 6;
+          section_network.max-items: 6;
+          section_game.max-items: 6;
+          section_development.max-items: 6;
+          section_science.max-items: 6;
+          section_system.max-items: 6;
+          section_utility.max-items: 6;
+          otg_slice.size: 6;
+        }
+      }
+    };
+
+    Adw.Breakpoint {
+      condition ("max-width: 900px")
+
+      setters {
+        section_toggles_box.width-request: -1;
+        otg_padding_box.orientation: vertical;
+        otg_padding_box.spacing: 6;
+        otg_title_box.halign: center;
+        otg_title_box.width-request: -1;
+        otg_title.justify: center;
+        otg_subtitle.justify: center;
+        otg_image.halign: center;
+        otg_title.halign: center;
+        otg_subtitle.halign: center;
+        otg_more_button_bottom.visible: true;
+        otg_more_button_top.visible: false;
+      }
+    }
+  };
 }

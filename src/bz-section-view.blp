@@ -22,23 +22,17 @@ template $BzSectionView: Adw.Bin {
     Overlay {
       hexpand: true;
 
-      child: Revealer {
-        transition-type: crossfade;
-        transition-duration: 500;
+      child: Picture {
+        css-name: "banner";
         height-request: bind template.section as <$BzContentSection>.banner-height;
-        reveal-child: bind template.section as <$BzContentSection>.banner as <$BzAsyncTexture>.loaded;
 
-        child: Picture {
-          css-name: "banner";
+        styles [
+          "browser-banner",
+        ]
 
-          styles [
-            "browser-banner",
-          ]
-
-          can-shrink: true;
-          paintable: bind $get_banner(template.section as <$BzContentSection>.banner as <$GdkPaintable>) as <$GdkPaintable>;
-          content-fit: bind template.section as <$BzContentSection>.banner-fit;
-        };
+        can-shrink: true;
+        paintable: bind $get_banner(template.section as <$BzContentSection>.banner as <string>) as <$GdkPaintable>;
+        content-fit: bind template.section as <$BzContentSection>.banner-fit;
       };
 
       [overlay]
@@ -71,7 +65,13 @@ template $BzSectionView: Adw.Bin {
               "browser-banner-title",
             ]
 
+            wrap: true;
+            wrap-mode: word_char;
             ellipsize: end;
+            lines: 3;
+            margin-start: 25;
+            margin-end: 25;
+
             visible: bind $invert_boolean($is_null(template.section as <$BzContentSection>.title) as <bool>) as <bool>;
             xalign: bind template.section as <$BzContentSection>.banner-text-label-xalign;
             label: bind template.section as <$BzContentSection>.title;
@@ -84,7 +84,13 @@ template $BzSectionView: Adw.Bin {
               "browser-banner-subtitle",
             ]
 
+            wrap: true;
+            wrap-mode: word_char;
             ellipsize: end;
+            lines: 3;
+            margin-start: 25;
+            margin-end: 25;
+
             visible: bind $invert_boolean($is_null(template.section as <$BzContentSection>.subtitle) as <bool>) as <bool>;
             xalign: bind template.section as <$BzContentSection>.banner-text-label-xalign;
             label: bind template.section as <$BzContentSection>.subtitle;
@@ -97,13 +103,31 @@ template $BzSectionView: Adw.Bin {
               "browser-banner-description",
             ]
 
+            wrap: true;
+            wrap-mode: word_char;
             ellipsize: end;
+            lines: 10;
+            margin-start: 25;
+            margin-end: 25;
+
             visible: bind $invert_boolean($is_null(template.section as <$BzContentSection>.description) as <bool>) as <bool>;
             xalign: bind template.section as <$BzContentSection>.banner-text-label-xalign;
             label: bind template.section as <$BzContentSection>.description;
           }
         }
       }
+    }
+
+    $BzMarkdownRender {
+      margin-start: 20;
+      margin-end: 20;
+      margin-top: 10;
+      margin-bottom: 10;
+
+      halign: center;
+
+      visible: bind $invert_boolean($is_null(template.section as <$BzContentSection>.markdown as <string>) as <bool>) as <bool>;
+      markdown: bind template.section as <$BzContentSection>.markdown as <string>;
     }
 
     $BzDynamicListView {

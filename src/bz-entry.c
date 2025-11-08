@@ -45,6 +45,27 @@ G_DEFINE_FLAGS_TYPE (
     G_DEFINE_ENUM_VALUE (BZ_ENTRY_KIND_RUNTIME, "runtime"),
     G_DEFINE_ENUM_VALUE (BZ_ENTRY_KIND_ADDON, "addon"))
 
+G_DEFINE_FLAGS_TYPE (
+    BzControlType,
+    bz_control_type,
+    G_DEFINE_ENUM_VALUE (BZ_CONTROL_NONE, "none"),
+    G_DEFINE_ENUM_VALUE (BZ_CONTROL_POINTING, "pointing"),
+    G_DEFINE_ENUM_VALUE (BZ_CONTROL_KEYBOARD, "keyboard"),
+    G_DEFINE_ENUM_VALUE (BZ_CONTROL_CONSOLE, "console"),
+    G_DEFINE_ENUM_VALUE (BZ_CONTROL_TABLET, "tablet"),
+    G_DEFINE_ENUM_VALUE (BZ_CONTROL_TOUCH, "touch"),
+    G_DEFINE_ENUM_VALUE (BZ_CONTROL_GAMEPAD, "gamepad"),
+    G_DEFINE_ENUM_VALUE (BZ_CONTROL_TV_REMOTE, "tv-remote"),
+    G_DEFINE_ENUM_VALUE (BZ_CONTROL_VOICE, "voice"),
+    G_DEFINE_ENUM_VALUE (BZ_CONTROL_VISION, "vision"))
+
+G_DEFINE_ENUM_TYPE (
+    BzRelationType,
+    bz_relation_type,
+    G_DEFINE_ENUM_VALUE (BZ_RELATION_REQUIRES, "requires"),
+    G_DEFINE_ENUM_VALUE (BZ_RELATION_RECOMMENDS, "recommends"),
+    G_DEFINE_ENUM_VALUE (BZ_RELATION_SUPPORTS, "supports"))
+
 typedef struct
 {
   gint     hold;
@@ -72,6 +93,7 @@ typedef struct
   char         *project_group;
   char         *developer;
   char         *developer_id;
+  GListModel   *developer_apps;
   GListModel   *screenshot_paintables;
   GListModel   *share_urls;
   char         *donation_url;
@@ -82,6 +104,13 @@ typedef struct
   GListModel   *version_history;
   char         *light_accent_color;
   char         *dark_accent_color;
+  gboolean      is_mobile_friendly;
+  guint         required_controls;
+  guint         recommended_controls;
+  guint         supported_controls;
+  gint          min_display_length;
+  gint          max_display_length;
+  gint          age_rating;
 
   gboolean    is_flathub;
   gboolean    verified;
@@ -124,6 +153,7 @@ enum
   PROP_PROJECT_GROUP,
   PROP_DEVELOPER,
   PROP_DEVELOPER_ID,
+  PROP_DEVELOPER_APPS,
   PROP_SCREENSHOT_PAINTABLES,
   PROP_SHARE_URLS,
   PROP_DONATION_URL,
@@ -138,6 +168,13 @@ enum
   PROP_RECENT_DOWNLOADS,
   PROP_LIGHT_ACCENT_COLOR,
   PROP_DARK_ACCENT_COLOR,
+  PROP_IS_MOBILE_FRIENDLY,
+  PROP_REQUIRED_CONTROLS,
+  PROP_RECOMMENDED_CONTROLS,
+  PROP_SUPPORTED_CONTROLS,
+  PROP_MIN_DISPLAY_LENGTH,
+  PROP_MAX_DISPLAY_LENGTH,
+  PROP_AGE_RATING,
 
   LAST_PROP
 };
@@ -150,9 +187,11 @@ BZ_DEFINE_DATA (
       GWeakRef self;
       int      prop;
       char    *id;
+      char    *developer;
     },
     g_weak_ref_clear (&self->self);
-    BZ_RELEASE_DATA (id, g_free));
+    BZ_RELEASE_DATA (id, g_free);
+    BZ_RELEASE_DATA (developer, g_free));
 static DexFuture *
 query_flathub_fiber (QueryFlathubData *data);
 static DexFuture *
@@ -185,7 +224,7 @@ make_async_texture (GVariant *parse);
 
 static DexFuture *
 icon_paintable_future_then (DexFuture *future,
-                            BzEntry   *entry);
+                            GWeakRef  *wr);
 
 BZ_DEFINE_DATA (
     load_mini_icon,
@@ -304,6 +343,10 @@ bz_entry_get_property (GObject    *object,
     case PROP_DEVELOPER_ID:
       g_value_set_string (value, priv->developer_id);
       break;
+    case PROP_DEVELOPER_APPS:
+      query_flathub (self, PROP_DEVELOPER_APPS);
+      g_value_set_object (value, priv->developer_apps);
+      break;
     case PROP_SCREENSHOT_PAINTABLES:
       g_value_set_object (value, priv->screenshot_paintables);
       break;
@@ -333,6 +376,27 @@ bz_entry_get_property (GObject    *object,
       break;
     case PROP_DARK_ACCENT_COLOR:
       g_value_set_string (value, priv->dark_accent_color);
+      break;
+    case PROP_IS_MOBILE_FRIENDLY:
+      g_value_set_boolean (value, priv->is_mobile_friendly);
+      break;
+    case PROP_REQUIRED_CONTROLS:
+      g_value_set_flags (value, priv->required_controls);
+      break;
+    case PROP_RECOMMENDED_CONTROLS:
+      g_value_set_flags (value, priv->recommended_controls);
+      break;
+    case PROP_SUPPORTED_CONTROLS:
+      g_value_set_flags (value, priv->supported_controls);
+      break;
+    case PROP_MIN_DISPLAY_LENGTH:
+      g_value_set_int (value, priv->min_display_length);
+      break;
+    case PROP_MAX_DISPLAY_LENGTH:
+      g_value_set_int (value, priv->max_display_length);
+      break;
+    case PROP_AGE_RATING:
+      g_value_set_int (value, priv->age_rating);
       break;
     case PROP_IS_FLATHUB:
       g_value_set_boolean (value, priv->is_flathub);
@@ -459,6 +523,10 @@ bz_entry_set_property (GObject      *object,
       g_clear_pointer (&priv->developer_id, g_free);
       priv->developer_id = g_value_dup_string (value);
       break;
+    case PROP_DEVELOPER_APPS:
+      g_clear_object (&priv->developer_apps);
+      priv->developer_apps = g_value_dup_object (value);
+      break;
     case PROP_SCREENSHOT_PAINTABLES:
       g_clear_object (&priv->screenshot_paintables);
       priv->screenshot_paintables = g_value_dup_object (value);
@@ -497,6 +565,27 @@ bz_entry_set_property (GObject      *object,
     case PROP_DARK_ACCENT_COLOR:
       g_clear_pointer (&priv->dark_accent_color, g_free);
       priv->dark_accent_color = g_value_dup_string (value);
+      break;
+    case PROP_IS_MOBILE_FRIENDLY:
+      priv->is_mobile_friendly = g_value_get_boolean (value);
+      break;
+    case PROP_REQUIRED_CONTROLS:
+      priv->required_controls = g_value_get_flags (value);
+      break;
+    case PROP_RECOMMENDED_CONTROLS:
+      priv->recommended_controls = g_value_get_flags (value);
+      break;
+    case PROP_SUPPORTED_CONTROLS:
+      priv->supported_controls = g_value_get_flags (value);
+      break;
+    case PROP_MIN_DISPLAY_LENGTH:
+      priv->min_display_length = g_value_get_int (value);
+      break;
+    case PROP_MAX_DISPLAY_LENGTH:
+      priv->max_display_length = g_value_get_int (value);
+      break;
+    case PROP_AGE_RATING:
+      priv->age_rating = g_value_get_int (value);
       break;
     case PROP_IS_FLATHUB:
       priv->is_flathub = g_value_get_boolean (value);
@@ -710,6 +799,13 @@ bz_entry_class_init (BzEntryClass *klass)
           NULL, NULL, NULL,
           G_PARAM_READWRITE);
 
+  props[PROP_DEVELOPER_APPS] =
+      g_param_spec_object (
+          "developer-apps",
+          NULL, NULL,
+          G_TYPE_LIST_MODEL,
+          G_PARAM_READWRITE);
+
   props[PROP_SCREENSHOT_PAINTABLES] =
       g_param_spec_object (
           "screenshot-paintables",
@@ -774,6 +870,61 @@ bz_entry_class_init (BzEntryClass *klass)
           "dark-accent-color",
           NULL, NULL, NULL,
           G_PARAM_READWRITE);
+
+  props[PROP_IS_MOBILE_FRIENDLY] =
+      g_param_spec_boolean (
+          "is-mobile-friendly",
+          NULL, NULL,
+          FALSE,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  props[PROP_REQUIRED_CONTROLS] =
+      g_param_spec_flags (
+          "required-controls",
+          NULL, NULL,
+          BZ_TYPE_CONTROL_TYPE,
+          BZ_CONTROL_NONE,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  props[PROP_RECOMMENDED_CONTROLS] =
+      g_param_spec_flags (
+          "recommended-controls",
+          NULL, NULL,
+          BZ_TYPE_CONTROL_TYPE,
+          BZ_CONTROL_NONE,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  props[PROP_SUPPORTED_CONTROLS] =
+      g_param_spec_flags (
+          "supported-controls",
+          NULL, NULL,
+          BZ_TYPE_CONTROL_TYPE,
+          BZ_CONTROL_NONE,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  props[PROP_MIN_DISPLAY_LENGTH] =
+      g_param_spec_int (
+          "min-display-length",
+          NULL, NULL,
+          0, G_MAXINT,
+          0,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  props[PROP_MAX_DISPLAY_LENGTH] =
+      g_param_spec_int (
+          "max-display-length",
+          NULL, NULL,
+          0, G_MAXINT,
+          0,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  props[PROP_AGE_RATING] =
+      g_param_spec_int (
+          "age-rating",
+          NULL, NULL,
+          0, G_MAXINT,
+          0,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   props[PROP_IS_FLATHUB] =
       g_param_spec_boolean (
@@ -938,17 +1089,19 @@ bz_entry_real_serialize (BzSerializable  *serializable,
         {
           g_autoptr (GVariantBuilder) sub_builder = NULL;
 
-          sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("a(ss)"));
+          sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("a(sss)"));
           for (guint i = 0; i < n_items; i++)
             {
               g_autoptr (BzUrl) url = NULL;
               const char *name      = NULL;
               const char *url_str   = NULL;
+              const char *icon_name = NULL;
 
-              url     = g_list_model_get_item (priv->share_urls, i);
-              name    = bz_url_get_name (url);
-              url_str = bz_url_get_url (url);
-              g_variant_builder_add (sub_builder, "(ss)", name, url_str);
+              url       = g_list_model_get_item (priv->share_urls, i);
+              name      = bz_url_get_name (url);
+              url_str   = bz_url_get_url (url);
+              icon_name = bz_url_get_icon_name (url);
+              g_variant_builder_add (sub_builder, "(sss)", name, url_str, icon_name ? icon_name : "");
             }
           g_variant_builder_add (builder, "{sv}", "share-urls", g_variant_builder_end (sub_builder));
         }
@@ -1025,6 +1178,18 @@ bz_entry_real_serialize (BzSerializable  *serializable,
     g_variant_builder_add (builder, "{sv}", "light-accent-color", g_variant_new_string (priv->light_accent_color));
   if (priv->dark_accent_color != NULL)
     g_variant_builder_add (builder, "{sv}", "dark-accent-color", g_variant_new_string (priv->dark_accent_color));
+  g_variant_builder_add (builder, "{sv}", "is-mobile-friendly", g_variant_new_boolean (priv->is_mobile_friendly));
+  if (priv->required_controls != BZ_CONTROL_NONE)
+    g_variant_builder_add (builder, "{sv}", "required-controls", g_variant_new_uint32 (priv->required_controls));
+  if (priv->recommended_controls != BZ_CONTROL_NONE)
+    g_variant_builder_add (builder, "{sv}", "recommended-controls", g_variant_new_uint32 (priv->recommended_controls));
+  if (priv->supported_controls != BZ_CONTROL_NONE)
+    g_variant_builder_add (builder, "{sv}", "supported-controls", g_variant_new_uint32 (priv->supported_controls));
+  if (priv->min_display_length > 0)
+    g_variant_builder_add (builder, "{sv}", "min-display-length", g_variant_new_int32 (priv->min_display_length));
+  if (priv->max_display_length > 0)
+    g_variant_builder_add (builder, "{sv}", "max-display-length", g_variant_new_int32 (priv->max_display_length));
+  g_variant_builder_add (builder, "{sv}", "age-rating", g_variant_new_int32 (priv->age_rating));
   g_variant_builder_add (builder, "{sv}", "is-flathub", g_variant_new_boolean (priv->is_flathub));
   if (priv->is_flathub)
     {
@@ -1197,15 +1362,17 @@ bz_entry_real_deserialize (BzSerializable *serializable,
           url_iter = g_variant_iter_new (value);
           for (;;)
             {
-              g_autofree char *name    = NULL;
-              g_autofree char *url_str = NULL;
-              g_autoptr (BzUrl) url    = NULL;
+              g_autofree char *name      = NULL;
+              g_autofree char *url_str   = NULL;
+              g_autoptr (BzUrl) url      = NULL;
+              g_autofree char *icon_name = NULL;
 
-              if (!g_variant_iter_next (url_iter, "(ss)", &name, &url_str))
+              if (!g_variant_iter_next (url_iter, "(sss)", &name, &url_str, &icon_name))
                 break;
               url = bz_url_new ();
               bz_url_set_name (url, name);
               bz_url_set_url (url, url_str);
+              bz_url_set_icon_name (url, icon_name);
               g_list_store_append (store, url);
             }
 
@@ -1275,6 +1442,20 @@ bz_entry_real_deserialize (BzSerializable *serializable,
         priv->light_accent_color = g_variant_dup_string (value, NULL);
       else if (g_strcmp0 (key, "dark-accent-color") == 0)
         priv->dark_accent_color = g_variant_dup_string (value, NULL);
+      else if (g_strcmp0 (key, "is-mobile-friendly") == 0)
+        priv->is_mobile_friendly = g_variant_get_boolean (value);
+      else if (g_strcmp0 (key, "required-controls") == 0 && g_variant_is_of_type (value, G_VARIANT_TYPE_UINT32))
+        priv->required_controls = g_variant_get_uint32 (value);
+      else if (g_strcmp0 (key, "recommended-controls") == 0 && g_variant_is_of_type (value, G_VARIANT_TYPE_UINT32))
+        priv->recommended_controls = g_variant_get_uint32 (value);
+      else if (g_strcmp0 (key, "supported-controls") == 0 && g_variant_is_of_type (value, G_VARIANT_TYPE_UINT32))
+        priv->supported_controls = g_variant_get_uint32 (value);
+      else if (g_strcmp0 (key, "min-display-length") == 0)
+        priv->min_display_length = g_variant_get_int32 (value);
+      else if (g_strcmp0 (key, "max-display-length") == 0)
+        priv->max_display_length = g_variant_get_int32 (value);
+      else if (g_strcmp0 (key, "age-rating") == 0)
+        priv->age_rating = g_variant_get_int32 (value);
       else if (g_strcmp0 (key, "is-flathub") == 0)
         priv->is_flathub = g_variant_get_boolean (value);
 
@@ -1663,6 +1844,122 @@ bz_entry_get_dark_accent_color (BzEntry *self)
 }
 
 gboolean
+bz_entry_get_is_mobile_friendly (BzEntry *self)
+{
+  BzEntryPrivate *priv = bz_entry_get_instance_private (self);
+
+  g_return_val_if_fail (BZ_IS_ENTRY (self), FALSE);
+
+  return priv->is_mobile_friendly;
+}
+
+guint
+bz_entry_get_required_controls (BzEntry *self)
+{
+  BzEntryPrivate *priv = bz_entry_get_instance_private (self);
+
+  g_return_val_if_fail (BZ_IS_ENTRY (self), BZ_CONTROL_NONE);
+
+  return priv->required_controls;
+}
+
+guint
+bz_entry_get_recommended_controls (BzEntry *self)
+{
+  BzEntryPrivate *priv = bz_entry_get_instance_private (self);
+
+  g_return_val_if_fail (BZ_IS_ENTRY (self), BZ_CONTROL_NONE);
+
+  return priv->recommended_controls;
+}
+
+guint
+bz_entry_get_supported_controls (BzEntry *self)
+{
+  BzEntryPrivate *priv = bz_entry_get_instance_private (self);
+
+  g_return_val_if_fail (BZ_IS_ENTRY (self), BZ_CONTROL_NONE);
+
+  return priv->supported_controls;
+}
+
+gboolean
+bz_entry_has_control (BzEntry       *self,
+                      BzControlType  control,
+                      BzRelationType relation)
+{
+  BzEntryPrivate *priv = bz_entry_get_instance_private (self);
+
+  g_return_val_if_fail (BZ_IS_ENTRY (self), FALSE);
+
+  switch (relation)
+    {
+    case BZ_RELATION_REQUIRES:
+      return (priv->required_controls & control) != 0;
+    case BZ_RELATION_RECOMMENDS:
+      return (priv->recommended_controls & control) != 0;
+    case BZ_RELATION_SUPPORTS:
+      return (priv->supported_controls & control) != 0;
+    default:
+      return FALSE;
+    }
+}
+
+gint
+bz_entry_get_min_display_length (BzEntry *self)
+{
+  BzEntryPrivate *priv = bz_entry_get_instance_private (self);
+
+  g_return_val_if_fail (BZ_IS_ENTRY (self), 0);
+
+  return priv->min_display_length;
+}
+
+gint
+bz_entry_get_max_display_length (BzEntry *self)
+{
+  BzEntryPrivate *priv = bz_entry_get_instance_private (self);
+
+  g_return_val_if_fail (BZ_IS_ENTRY (self), 0);
+
+  return priv->max_display_length;
+}
+
+gboolean
+bz_entry_supports_form_factor (BzEntry *self,
+                               guint    available_controls,
+                               gint     display_length)
+{
+  BzEntryPrivate *priv = bz_entry_get_instance_private (self);
+
+  g_return_val_if_fail (BZ_IS_ENTRY (self), FALSE);
+
+  if (priv->required_controls != BZ_CONTROL_NONE)
+    {
+      if ((priv->required_controls & available_controls) != priv->required_controls)
+        return FALSE;
+    }
+
+  if (priv->min_display_length > 0 && display_length < priv->min_display_length)
+    return FALSE;
+
+  if (priv->max_display_length > 0 && display_length > priv->max_display_length)
+    return FALSE;
+
+  return TRUE;
+}
+
+gint
+bz_entry_get_age_rating (BzEntry *self)
+{
+  BzEntryPrivate *priv = bz_entry_get_instance_private (self);
+
+  g_return_val_if_fail (BZ_IS_ENTRY (self), 0);
+
+  return priv->age_rating;
+}
+
+gboolean
 bz_entry_get_is_flathub (BzEntry *self)
 {
   BzEntryPrivate *priv = NULL;
@@ -1689,7 +1986,7 @@ bz_entry_load_mini_icon (BzEntry *self)
       priv->mini_icon_future = dex_future_then (
           bz_async_texture_dup_future (BZ_ASYNC_TEXTURE (priv->icon_paintable)),
           (DexFutureCallback) icon_paintable_future_then,
-          self, NULL);
+          bz_track_weak (self), bz_weak_release);
       return dex_ref (priv->mini_icon_future);
     }
   else
@@ -1775,8 +2072,9 @@ query_flathub (BzEntry *self,
 
   data = query_flathub_data_new ();
   g_weak_ref_init (&data->self, self);
-  data->prop = prop;
-  data->id   = g_strdup (priv->id);
+  data->prop      = prop;
+  data->id        = g_strdup (priv->id);
+  data->developer = g_strdup (priv->developer);
 
   future = dex_scheduler_spawn (
       bz_get_io_scheduler (),
@@ -1797,6 +2095,7 @@ query_flathub_fiber (QueryFlathubData *data)
 {
   int   prop                     = data->prop;
   char *id                       = data->id;
+  char *developer                = data->developer;
   g_autoptr (GError) local_error = NULL;
   g_autofree char *request       = NULL;
   g_autoptr (JsonNode) node      = NULL;
@@ -1809,6 +2108,9 @@ query_flathub_fiber (QueryFlathubData *data)
     case PROP_DOWNLOAD_STATS:
     case PROP_DOWNLOAD_STATS_PER_COUNTRY:
       request = g_strdup_printf ("/stats/%s?all=false&days=175", id);
+      break;
+    case PROP_DEVELOPER_APPS:
+      request = g_strdup_printf ("/collection/developer/%s", developer);
       break;
     default:
       g_assert_not_reached ();
@@ -1868,6 +2170,29 @@ query_flathub_fiber (QueryFlathubData *data)
             store);
 
         return dex_future_new_for_object (store);
+      }
+      break;
+
+    case PROP_DEVELOPER_APPS:
+      {
+        JsonObject *response_obj          = NULL;
+        JsonArray  *apps_array            = NULL;
+        g_autoptr (GtkStringList) app_ids = NULL;
+
+        response_obj = json_node_get_object (node);
+        apps_array   = json_object_get_array_member (response_obj, "hits");
+
+        app_ids = gtk_string_list_new (NULL);
+        for (guint i = 0; i < json_array_get_length (apps_array); i++)
+          {
+            JsonObject *app_obj = json_array_get_object_element (apps_array, i);
+            const char *app_id  = json_object_get_string_member (app_obj, "app_id");
+
+            if (app_id != NULL)
+              gtk_string_list_append (app_ids, app_id);
+          }
+
+        return dex_future_new_for_object (app_ids);
       }
       break;
 
@@ -2060,12 +2385,14 @@ make_async_texture (GVariant *parse)
 
 static DexFuture *
 icon_paintable_future_then (DexFuture *future,
-                            BzEntry   *self)
+                            GWeakRef  *wr)
 {
+  g_autoptr (BzEntry) self          = NULL;
   BzEntryPrivate *priv              = NULL;
   const char     *icon_path         = NULL;
   g_autoptr (LoadMiniIconData) data = NULL;
 
+  bz_weak_get_or_return_reject (self, wr);
   priv = bz_entry_get_instance_private (self);
 
   /* ? */
@@ -2198,6 +2525,7 @@ clear_entry (BzEntry *self)
   g_clear_pointer (&priv->project_group, g_free);
   g_clear_pointer (&priv->developer, g_free);
   g_clear_pointer (&priv->developer_id, g_free);
+  g_clear_object (&priv->developer_apps);
   g_clear_object (&priv->screenshot_paintables);
   g_clear_object (&priv->share_urls);
   g_clear_pointer (&priv->donation_url, g_free);

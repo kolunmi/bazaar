@@ -1,0 +1,45 @@
+using Gtk 4.0;
+
+template $BzFlathubCategorySection : Box {
+  orientation: vertical;
+  spacing: 10;
+
+  Box {
+    orientation: horizontal;
+    spacing: 10;
+    margin-start: 8;
+    margin-end: 8;
+
+    Label section_title {
+      styles [
+        "title-1",
+      ]
+      visible: bind $invert_boolean(template.category as <$BzFlathubCategory>.is-spotlight) as <bool>;
+      xalign: 0.0;
+      hexpand: true;
+    }
+  }
+
+  $BzDynamicListView section_list {
+    styles [
+      "flathub-page-section",
+    ]
+    hexpand: true;
+    scroll: false;
+    noscroll-kind: flow-box;
+    child-type: "BzAppTile";
+    child-prop: "group";
+
+    bind-widget => $bind_widget_cb();
+    unbind-widget => $unbind_widget_cb();
+  }
+
+  Button more_button {
+    styles [
+      "pill",
+    ]
+    halign: center;
+    valign: center;
+    clicked => $on_more_button_clicked();
+  }
+}

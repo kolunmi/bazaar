@@ -18,6 +18,13 @@
     </p>
   </description>
 
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+    <control>touch</control>
+    <display_length compare="ge">360</display_length>
+  </supports>
+
   <developer id="io.github.kolunmi">
     <name>Adam Masciola</name>
   </developer>
@@ -47,16 +54,38 @@
       <caption>The home view displaying Flathub apps</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/user-attachments/assets/9f363aae-3a9e-4aa5-8206-ea694e1372fa</image>
+      <image>https://github.com/user-attachments/assets/6286520c-ad27-41e3-891e-28ff42084e89</image>
       <caption>Nucleus app page</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/user-attachments/assets/3aca172a-9500-4f89-923c-79bc61595a15</image>
+      <image>https://github.com/user-attachments/assets/894f4bfc-fea7-46cf-8594-8bb377f314e7</image>
       <caption>Searching for Blender</caption>
     </screenshot>
   </screenshots>
 
   <releases>
+    <release version="0.5.8" date="2025-10-29">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.5.8</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>Fix slow/inconsistent image loading</li>
+          <li>Fix context row in full view</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.5.7" date="2025-10-27">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.5.7</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>Rework full view layout</li>
+          <li>Improve progress bar theme selection</li>
+          <li>Reduce quantity and improve quality of search results</li>
+          <li>Allow the application window to fit on mobile screen sizes</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.5.6" date="2025-10-15">
       <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.5.6</url>
       <description translate="no">

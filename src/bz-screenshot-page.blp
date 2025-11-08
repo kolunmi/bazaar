@@ -1,21 +1,41 @@
 using Gtk 4.0;
 using Adw 1;
-template $BzScreenshotDialog: Adw.Dialog {
-  content-width: 1600;
-  content-height: 900;
+
+template $BzScreenshotPage: Adw.NavigationPage {
+  title: _("Screenshots");
+
   child: Adw.ToastOverlay toast_overlay {
     child: Adw.ToolbarView {
       top-bar-style: flat;
       extend-content-to-top-edge: true;
-      styles ["view-dark"]
+
+      styles [
+        "view-dark",
+      ]
+
       [top]
       Adw.HeaderBar {
         styles [
           "flat",
           "header-osd",
         ]
+
         show-title: false;
+
+        [end]
+        Box {
+          Button copy_button {
+            icon-name: "edit-copy-symbolic";
+            tooltip-text: _("Copy Image");
+            clicked => $copy_clicked() swapped;
+
+            styles [
+              "flat",
+            ]
+          }
+        }
       }
+
       content: Overlay {
         [overlay]
         Box {
@@ -25,44 +45,38 @@ template $BzScreenshotDialog: Adw.Dialog {
           margin-bottom: 12;
           margin-start: 12;
           spacing: 6;
+
           Box navigation_controls {
             orientation: horizontal;
             spacing: 6;
             visible: bind $has_multiple_screenshots(template.screenshots) as <bool>;
+
             styles [
               "osd-box",
             ]
+
             Button previous_button {
               icon-name: "go-previous-symbolic";
               tooltip-text: _("Previous Screenshot");
               clicked => $previous_clicked() swapped;
+
               styles [
                 "flat",
               ]
             }
+
             Button next_button {
               icon-name: "go-next-symbolic";
               tooltip-text: _("Next Screenshot");
               clicked => $next_clicked() swapped;
-              styles [
-                "flat",
-              ]
-            }
-          }
-          Box {
-            styles [
-              "osd-box",
-            ]
-            Button copy_button {
-              icon-name: "copy-symbolic";
-              tooltip-text: _("Copy Image");
-              clicked => $copy_clicked() swapped;
+
               styles [
                 "flat",
               ]
             }
           }
         }
+
         [overlay]
         Box {
           orientation: horizontal;
@@ -70,41 +84,51 @@ template $BzScreenshotDialog: Adw.Dialog {
           valign: end;
           margin-bottom: 12;
           margin-end: 12;
+
           Box zoom_controls {
             orientation: horizontal;
+
             styles [
               "osd-box",
             ]
+
             Revealer {
               reveal-child: bind template.is-zoomed as <bool>;
               transition-type: slide_right;
+
               Button reset_zoom_button {
                 icon-name: "zoom-original-symbolic";
                 tooltip-text: _("Reset View");
                 clicked => $reset_zoom_clicked() swapped;
+
                 styles [
                   "flat",
                 ]
               }
             }
+
             Button zoom_out_button {
               icon-name: "zoom-minus-symbolic";
               tooltip-text: _("Zoom Out");
               clicked => $zoom_out_clicked() swapped;
+
               styles [
                 "flat",
               ]
             }
+
             Button zoom_in_button {
               icon-name: "zoom-plus-symbolic";
               tooltip-text: _("Zoom In");
               clicked => $zoom_in_clicked() swapped;
+
               styles [
                 "flat",
               ]
             }
           }
         }
+
         child: Adw.Carousel carousel {
           can-focus: false;
           interactive: bind $invert_boolean(template.is-zoomed) as <bool>;

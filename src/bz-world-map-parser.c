@@ -157,10 +157,7 @@ bz_world_map_parser_load_from_resource (BzWorldMapParser  *self,
         iso_code = json_object_get_string_member (feature_obj, "I");
 
       if (json_object_has_member (feature_obj, "C"))
-        {
-          JsonArray *borrowed_coords = json_object_get_array_member (feature_obj, "C");
-          coordinates = json_array_ref (borrowed_coords);
-        }
+        coordinates = json_object_get_array_member (feature_obj, "C");
 
       display_name = get_translated_name (feature_obj, name);
 

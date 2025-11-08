@@ -1,4 +1,4 @@
-/* bz-screenshot-dialog.h
+/* bz-rounded-picture.h
  *
  * Copyright 2025 Alexander Vanhee
  *
@@ -20,16 +20,29 @@
 
 #pragma once
 
-#include "bz-async-texture.h"
-#include <adwaita.h>
+#include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_SCREENSHOT_DIALOG (bz_screenshot_dialog_get_type ())
+#define BZ_TYPE_ROUNDED_PICTURE (bz_rounded_picture_get_type ())
 
-G_DECLARE_FINAL_TYPE (BzScreenshotDialog, bz_screenshot_dialog, BZ, SCREENSHOT_DIALOG, AdwDialog)
+G_DECLARE_FINAL_TYPE (BzRoundedPicture, bz_rounded_picture, BZ, ROUNDED_PICTURE, GtkWidget)
 
-AdwDialog *bz_screenshot_dialog_new (GListModel *screenshots,
-                                     guint       initial_index);
+GtkWidget *
+bz_rounded_picture_new (void);
+
+void
+bz_rounded_picture_set_paintable (BzRoundedPicture *self,
+                                  GdkPaintable     *paintable);
+
+GdkPaintable *
+bz_rounded_picture_get_paintable (BzRoundedPicture *self);
+
+void
+bz_rounded_picture_set_radius (BzRoundedPicture *self,
+                               double            radius);
+
+double
+bz_rounded_picture_get_radius (BzRoundedPicture *self);
 
 G_END_DECLS

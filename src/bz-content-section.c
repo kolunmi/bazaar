@@ -21,24 +21,34 @@
 #include "bz-content-section.h"
 #include "bz-entry-group.h"
 
+G_DEFINE_ENUM_TYPE (
+    BzContentSectionType,
+    bz_content_section_type,
+    G_DEFINE_ENUM_VALUE (BZ_CONTENT_SECTION_TYPE_CATEGORY, "category"),
+    G_DEFINE_ENUM_VALUE (BZ_CONTENT_SECTION_TYPE_ARTICLE, "article"));
+
 typedef struct
 {
-  char         *error;
-  GListModel   *classes;
-  GListModel   *light_classes;
-  GListModel   *dark_classes;
+  char       *error;
+  GListModel *classes;
+  GListModel *light_classes;
+  GListModel *dark_classes;
+
+  BzContentSectionType section_type;
+
   char         *title;
   char         *subtitle;
   char         *description;
   GtkAlign      banner_text_halign;
   GtkAlign      banner_text_valign;
   double        banner_text_label_xalign;
-  GdkPaintable *light_banner;
-  GdkPaintable *dark_banner;
+  char         *light_banner;
+  char         *dark_banner;
   int           banner_height;
   GtkContentFit banner_fit;
   GListModel   *groups;
   int           rows;
+  char         *markdown;
 } BzContentSectionPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (BzContentSection, bz_content_section, G_TYPE_OBJECT)
@@ -51,9 +61,13 @@ enum
   PROP_CLASSES,
   PROP_LIGHT_CLASSES,
   PROP_DARK_CLASSES,
+
+  PROP_SECTION_TYPE,
   PROP_TITLE,
   PROP_SUBTITLE,
   PROP_DESCRIPTION,
+  PROP_APPIDS,
+
   PROP_BANNER_TEXT_HALIGN,
   PROP_BANNER_TEXT_VALIGN,
   PROP_BANNER_TEXT_LABEL_XALIGN,
@@ -63,8 +77,9 @@ enum
   PROP_DARK_BANNER,
   PROP_BANNER_HEIGHT,
   PROP_BANNER_FIT,
-  PROP_APPIDS,
   PROP_ROWS,
+
+  PROP_MARKDOWN,
 
   LAST_PROP
 };
@@ -83,9 +98,10 @@ bz_content_section_dispose (GObject *object)
   g_clear_pointer (&priv->title, g_free);
   g_clear_pointer (&priv->subtitle, g_free);
   g_clear_pointer (&priv->description, g_free);
-  g_clear_object (&priv->light_banner);
-  g_clear_object (&priv->dark_banner);
+  g_clear_pointer (&priv->light_banner, g_free);
+  g_clear_pointer (&priv->dark_banner, g_free);
   g_clear_object (&priv->groups);
+  g_clear_pointer (&priv->markdown, g_free);
 
   G_OBJECT_CLASS (bz_content_section_parent_class)->dispose (object);
 }
@@ -113,6 +129,9 @@ bz_content_section_get_property (GObject    *object,
     case PROP_DARK_CLASSES:
       g_value_set_object (value, priv->dark_classes);
       break;
+    case PROP_SECTION_TYPE:
+      g_value_set_enum (value, priv->section_type);
+      break;
     case PROP_TITLE:
       g_value_set_string (value, priv->title);
       break;
@@ -132,21 +151,21 @@ bz_content_section_get_property (GObject    *object,
       g_value_set_double (value, priv->banner_text_label_xalign);
       break;
     case PROP_BANNER:
-      g_value_set_object (
+      g_value_set_string (
           value,
           priv->light_banner != NULL
               ? priv->light_banner
               : priv->dark_banner);
       break;
     case PROP_LIGHT_BANNER:
-      g_value_set_object (
+      g_value_set_string (
           value,
           priv->light_banner != NULL
               ? priv->light_banner
               : priv->dark_banner);
       break;
     case PROP_DARK_BANNER:
-      g_value_set_object (
+      g_value_set_string (
           value,
           priv->dark_banner != NULL
               ? priv->dark_banner
@@ -163,6 +182,9 @@ bz_content_section_get_property (GObject    *object,
       break;
     case PROP_ROWS:
       g_value_set_int (value, priv->rows);
+      break;
+    case PROP_MARKDOWN:
+      g_value_set_string (value, priv->markdown);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -196,6 +218,9 @@ bz_content_section_set_property (GObject      *object,
       g_clear_object (&priv->dark_classes);
       priv->dark_classes = g_value_dup_object (value);
       break;
+    case PROP_SECTION_TYPE:
+      priv->section_type = g_value_get_enum (value);
+      break;
     case PROP_TITLE:
       g_clear_pointer (&priv->title, g_free);
       priv->title = g_value_dup_string (value);
@@ -218,18 +243,18 @@ bz_content_section_set_property (GObject      *object,
       priv->banner_text_label_xalign = g_value_get_double (value);
       break;
     case PROP_BANNER:
-      g_clear_object (&priv->light_banner);
-      priv->light_banner = g_value_dup_object (value);
+      g_clear_pointer (&priv->light_banner, g_free);
+      priv->light_banner = g_value_dup_string (value);
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_LIGHT_BANNER]);
       break;
     case PROP_LIGHT_BANNER:
-      g_clear_object (&priv->light_banner);
-      priv->light_banner = g_value_dup_object (value);
+      g_clear_pointer (&priv->light_banner, g_free);
+      priv->light_banner = g_value_dup_string (value);
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_BANNER]);
       break;
     case PROP_DARK_BANNER:
-      g_clear_object (&priv->dark_banner);
-      priv->dark_banner = g_value_dup_object (value);
+      g_clear_pointer (&priv->dark_banner, g_free);
+      priv->dark_banner = g_value_dup_string (value);
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_BANNER]);
       break;
     case PROP_BANNER_HEIGHT:
@@ -244,6 +269,10 @@ bz_content_section_set_property (GObject      *object,
       break;
     case PROP_ROWS:
       priv->rows = g_value_get_int (value);
+      break;
+    case PROP_MARKDOWN:
+      g_clear_pointer (&priv->markdown, g_free);
+      priv->markdown = g_value_dup_string (value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -284,6 +313,14 @@ bz_content_section_class_init (BzContentSectionClass *klass)
           "dark-classes",
           NULL, NULL,
           G_TYPE_LIST_MODEL,
+          G_PARAM_READWRITE);
+
+  props[PROP_SECTION_TYPE] =
+      g_param_spec_enum (
+          "section-type",
+          NULL, NULL,
+          BZ_TYPE_CONTENT_SECTION_TYPE,
+          BZ_CONTENT_SECTION_TYPE_CATEGORY,
           G_PARAM_READWRITE);
 
   props[PROP_TITLE] =
@@ -328,24 +365,21 @@ bz_content_section_class_init (BzContentSectionClass *klass)
           G_PARAM_READWRITE);
 
   props[PROP_BANNER] =
-      g_param_spec_object (
+      g_param_spec_string (
           "banner",
-          NULL, NULL,
-          GDK_TYPE_PAINTABLE,
+          NULL, NULL, NULL,
           G_PARAM_READWRITE);
 
   props[PROP_LIGHT_BANNER] =
-      g_param_spec_object (
+      g_param_spec_string (
           "light-banner",
-          NULL, NULL,
-          GDK_TYPE_PAINTABLE,
+          NULL, NULL, NULL,
           G_PARAM_READWRITE);
 
   props[PROP_DARK_BANNER] =
-      g_param_spec_object (
+      g_param_spec_string (
           "dark-banner",
-          NULL, NULL,
-          GDK_TYPE_PAINTABLE,
+          NULL, NULL, NULL,
           G_PARAM_READWRITE);
 
   props[PROP_BANNER_HEIGHT] =
@@ -370,11 +404,18 @@ bz_content_section_class_init (BzContentSectionClass *klass)
           G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE);
 
+  /* Deprecated */
   props[PROP_ROWS] =
       g_param_spec_int (
           "rows",
           NULL, NULL,
           1, 16, 3,
+          G_PARAM_READWRITE);
+
+  props[PROP_MARKDOWN] =
+      g_param_spec_string (
+          "markdown",
+          NULL, NULL, NULL,
           G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
@@ -385,6 +426,7 @@ bz_content_section_init (BzContentSection *self)
 {
   BzContentSectionPrivate *priv = bz_content_section_get_instance_private (self);
 
+  priv->section_type             = BZ_CONTENT_SECTION_TYPE_CATEGORY;
   priv->rows                     = 3;
   priv->banner_text_halign       = GTK_ALIGN_START;
   priv->banner_text_valign       = GTK_ALIGN_START;

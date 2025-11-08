@@ -24,7 +24,7 @@
 G_BEGIN_DECLS
 
 #define BZ_TYPE_DECORATED_SCREENSHOT (bz_decorated_screenshot_get_type ())
-G_DECLARE_FINAL_TYPE (BzDecoratedScreenshot, bz_decorated_screenshot, BZ, DECORATED_SCREENSHOT, AdwBin)
+G_DECLARE_FINAL_TYPE (BzDecoratedScreenshot, bz_decorated_screenshot, BZ, DECORATED_SCREENSHOT, GtkButton)
 
 BzDecoratedScreenshot *
 bz_decorated_screenshot_new (void);

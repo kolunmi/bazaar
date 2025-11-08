@@ -1,0 +1,122 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzRichAppTile: Adw.Bin {
+  child: Box {
+    orientation: vertical;
+    overflow: hidden;
+
+    styles [
+      "card",
+      "rich-tile-card",
+    ]
+
+    $BzThemedEntryGroupRect picture_box {
+      height-request: 200;
+
+      styles [
+        "rich-screenshot-box",
+      ]
+
+      group: bind template.group as <$BzEntryGroup>;
+
+      child: Box {
+        margin-start: 12;
+        margin-end: 12;
+        margin-top: 12;
+        margin-bottom: 12;
+
+        $BzRoundedPicture {
+          halign: center;
+          hexpand: true;
+          valign: center;
+          paintable: bind template.first-screenshot;
+          radius: 6;
+        }
+      };
+    }
+
+    Box {
+      margin-start: 12;
+      margin-end: 12;
+      margin-top: 12;
+      margin-bottom: 12;
+      orientation: horizontal;
+      spacing: 15;
+      can-focus: false;
+
+      Image {
+        pixel-size: 64;
+        paintable: bind template.group as <$BzEntryGroup>.icon-paintable;
+
+        styles [
+          "icon-dropshadow",
+        ]
+      }
+
+      Box {
+        valign: center;
+        hexpand: true;
+        orientation: vertical;
+        spacing: 5;
+
+        Label {
+          css-name: "app-tile-title";
+
+          styles [
+            "heading",
+          ]
+
+          xalign: 0.0;
+          ellipsize: end;
+          label: bind template.group as <$BzEntryGroup>.title;
+          max-width-chars: 18;
+        }
+
+        Label {
+          css-name: "app-tile-description";
+          xalign: 0.0;
+          yalign: 0.0;
+          wrap: true;
+          wrap-mode: word_char;
+          ellipsize: end;
+          vexpand: true;
+          lines: 2;
+          max-width-chars: 15;
+          single-line-mode: true;
+          label: bind template.group as <$BzEntryGroup>.description;
+
+          styles [
+            "dimmed",
+          ]
+        }
+      }
+
+      Box {
+        Button {
+          visible: bind $is_zero(template.group as <$BzEntryGroup>.removable) as <bool>;
+
+          styles [
+            "medium-pill",
+          ]
+
+          label: _("Get");
+          valign: center;
+          clicked => $install_button_clicked_cb(template);
+        }
+
+        Button {
+          visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
+
+          styles [
+            "circular"
+          ]
+
+          icon-name: "user-trash-symbolic";
+          valign: center;
+          clicked => $install_button_clicked_cb(template);
+        }
+      }
+    }
+  };
+}

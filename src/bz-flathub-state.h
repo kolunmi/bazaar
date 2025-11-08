@@ -59,21 +59,6 @@ bz_flathub_state_dup_apps_of_the_week (BzFlathubState *self);
 GListModel *
 bz_flathub_state_get_categories (BzFlathubState *self);
 
-GListModel *
-bz_flathub_state_dup_recently_updated (BzFlathubState *self);
-
-GListModel *
-bz_flathub_state_dup_recently_added (BzFlathubState *self);
-
-GListModel *
-bz_flathub_state_dup_popular (BzFlathubState *self);
-
-GListModel *
-bz_flathub_state_dup_trending (BzFlathubState *self);
-
-GListModel *
-bz_flathub_state_dup_quality_moderation (BzFlathubState *self);
-
 void
 bz_flathub_state_update_to_today (BzFlathubState *self);
 

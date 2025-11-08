@@ -51,18 +51,6 @@ items_changed (BzSearchEngine *self,
                guint           added,
                GListModel     *model);
 
-BZ_DEFINE_DATA (
-    query_task,
-    QueryTask,
-    {
-      char     **terms;
-      GPtrArray *shallow_mirror;
-    },
-    BZ_RELEASE_DATA (terms, g_strfreev);
-    BZ_RELEASE_DATA (shallow_mirror, g_ptr_array_unref))
-static DexFuture *
-query_task_fiber (QueryTaskData *data);
-
 typedef struct
 {
   gunichar     ch;
@@ -76,6 +64,7 @@ BZ_DEFINE_DATA (
       char        *ptr;
       glong        utf8_len;
       IndexedChar *chars;
+      double       weight;
     },
     BZ_RELEASE_DATA (ptr, g_free);
     BZ_RELEASE_DATA (chars, g_free))
@@ -115,6 +104,33 @@ cmp_scores (Score *a,
 #define SAME_CLASS     0.2
 #define SAME_CLUSTER   0.1
 #define NO_MATCH       0.0
+
+BZ_DEFINE_DATA (
+    query_task,
+    QueryTask,
+    {
+      char     **terms;
+      GPtrArray *shallow_mirror;
+    },
+    BZ_RELEASE_DATA (terms, g_strfreev);
+    BZ_RELEASE_DATA (shallow_mirror, g_ptr_array_unref))
+static DexFuture *
+query_task_fiber (QueryTaskData *data);
+
+BZ_DEFINE_DATA (
+    query_sub_task,
+    QuerySubTask,
+    {
+      IndexedStringData *query_istring;
+      GPtrArray         *shallow_mirror;
+      double             threshold;
+      guint              work_offset;
+      guint              work_length;
+    },
+    BZ_RELEASE_DATA (query_istring, indexed_string_data_ref);
+    BZ_RELEASE_DATA (shallow_mirror, g_ptr_array_unref));
+static DexFuture *
+query_sub_task_fiber (QuerySubTaskData *data);
 
 static void
 bz_search_engine_dispose (GObject *object)
@@ -232,7 +248,6 @@ DexFuture *
 bz_search_engine_query (BzSearchEngine    *self,
                         const char *const *terms)
 {
-
   g_return_val_if_fail (BZ_IS_SEARCH_ENGINE (self), NULL);
   g_return_val_if_fail (terms != NULL && *terms != NULL, NULL);
 
@@ -314,19 +329,20 @@ items_changed (BzSearchEngine *self,
       data->istrings = g_array_new (FALSE, TRUE, sizeof (IndexedStringData));
       g_array_set_clear_func (data->istrings, indexed_string_data_deinit);
 
-#define ADD_INDEXED_STRING(_s)                     \
+#define ADD_INDEXED_STRING(_s, _weight)            \
   if ((_s) != NULL)                                \
     {                                              \
       IndexedStringData append = { 0 };            \
                                                    \
       index_string ((_s), &append);                \
+      append.weight = (_weight);                   \
       g_array_append_val (data->istrings, append); \
     }
 
-      ADD_INDEXED_STRING (id);
-      ADD_INDEXED_STRING (title);
-      ADD_INDEXED_STRING (developer);
-      ADD_INDEXED_STRING (description);
+      ADD_INDEXED_STRING (id, -1.0);
+      ADD_INDEXED_STRING (title, 1.0);
+      ADD_INDEXED_STRING (developer, 1.0);
+      ADD_INDEXED_STRING (description, -1.0);
 
 #undef ADD_INDEXED_STRING
 
@@ -346,6 +362,7 @@ items_changed (BzSearchEngine *self,
               istring = &g_array_index (data->istrings, IndexedStringData, old_len + j);
 
               index_string (token, istring);
+              istring->weight = -1.0;
             }
         }
 
@@ -359,66 +376,72 @@ items_changed (BzSearchEngine *self,
 static DexFuture *
 query_task_fiber (QueryTaskData *data)
 {
-  char     **terms                 = data->terms;
-  GPtrArray *shallow_mirror        = data->shallow_mirror;
-  g_autoptr (GArray) term_istrings = NULL;
-  g_autoptr (GArray) scores        = NULL;
-  g_autoptr (GPtrArray) results    = NULL;
+  char     **terms                            = data->terms;
+  GPtrArray *shallow_mirror                   = data->shallow_mirror;
+  g_autoptr (GError) local_error              = NULL;
+  gboolean         result                     = FALSE;
+  g_autofree char *joined                     = NULL;
+  double           threshold                  = 0.0;
+  g_autoptr (IndexedStringData) query_istring = NULL;
+  guint n_sub_tasks                           = 0;
+  guint scores_per_task                       = 0;
+  g_autoptr (GPtrArray) sub_futures           = NULL;
+  g_autoptr (GArray) scores                   = NULL;
+  g_autoptr (GPtrArray) results               = NULL;
 
-  term_istrings = g_array_new (FALSE, TRUE, sizeof (IndexedStringData));
-  g_array_set_clear_func (term_istrings, indexed_string_data_deinit);
-  g_array_set_size (term_istrings, g_strv_length (terms));
-  for (guint i = 0; terms[i] != NULL; i++)
+  joined    = g_strjoinv (" ", terms);
+  threshold = (double) strlen (joined) / (double) g_strv_length (terms);
+
+  query_istring = indexed_string_data_new ();
+  index_string (joined, query_istring);
+
+  n_sub_tasks     = MAX (1, MIN (shallow_mirror->len / 512, g_get_num_processors ()));
+  scores_per_task = shallow_mirror->len / n_sub_tasks;
+
+  sub_futures = g_ptr_array_new_with_free_func (dex_unref);
+  for (guint i = 0; i < n_sub_tasks; i++)
     {
-      IndexedStringData *istring = NULL;
+      g_autoptr (QuerySubTaskData) sub_data = NULL;
+      g_autoptr (DexFuture) future          = NULL;
 
-      istring = &g_array_index (term_istrings, IndexedStringData, i);
-      index_string (terms[i], istring);
+      sub_data                 = query_sub_task_data_new ();
+      sub_data->query_istring  = indexed_string_data_ref (query_istring);
+      sub_data->shallow_mirror = g_ptr_array_ref (shallow_mirror);
+      sub_data->threshold      = threshold;
+      sub_data->work_offset    = i * scores_per_task;
+      sub_data->work_length    = scores_per_task;
+
+      if (i >= n_sub_tasks - 1)
+        sub_data->work_length += shallow_mirror->len % n_sub_tasks;
+
+      future = dex_scheduler_spawn (
+          dex_thread_pool_scheduler_get_default (),
+          bz_get_dex_stack_size (),
+          (DexFiberFunc) query_sub_task_fiber,
+          query_sub_task_data_ref (sub_data),
+          query_sub_task_data_unref);
+
+      g_ptr_array_add (sub_futures, g_steal_pointer (&future));
     }
+
+  result = dex_await (dex_future_allv (
+                          (DexFuture *const *) sub_futures->pdata, sub_futures->len),
+                      &local_error);
+  if (!result)
+    return dex_future_new_for_error (g_steal_pointer (&local_error));
 
   scores = g_array_new (FALSE, FALSE, sizeof (Score));
-
-  for (guint i = 0; i < shallow_mirror->len; i++)
+  for (guint i = 0; i < sub_futures->len; i++)
     {
-      GroupData *group_data = NULL;
-      double     score      = 0.0;
+      DexFuture *future     = NULL;
+      GArray    *scores_out = NULL;
 
-      group_data = g_ptr_array_index (shallow_mirror, i);
-      for (guint j = 0; j < group_data->istrings->len; j++)
-        {
-          IndexedStringData *token_istring = NULL;
-          double             token_score   = 1.0;
+      future     = g_ptr_array_index (sub_futures, i);
+      scores_out = g_value_get_boxed (dex_future_get_value (future, NULL));
 
-          token_istring = &g_array_index (group_data->istrings, IndexedStringData, j);
-          for (guint k = 0; k < term_istrings->len; k++)
-            {
-              IndexedStringData *term_istring = NULL;
-              double             mult         = 0.0;
-
-              term_istring = &g_array_index (term_istrings, IndexedStringData, k);
-
-              mult = test_strings (term_istring, token_istring);
-              /* highly reward multiple terms hitting the same token */
-              token_score *= mult;
-            }
-
-          /* correct for the decay of multiple terms */
-          token_score *= (double) term_istrings->len;
-          /* earliest tokens are the most important */
-          token_score *= 16.0 / (double) (j + 1);
-          score += token_score;
-        }
-
-      if (score > (double) term_istrings->len)
-        {
-          Score append = { 0 };
-
-          append.idx = i;
-          append.val = score;
-          g_array_append_val (scores, append);
-        }
+      if (scores_out->len > 0)
+        g_array_append_vals (scores, scores_out->data, scores_out->len);
     }
-
   if (scores->len > 0)
     g_array_sort (scores, (GCompareFunc) cmp_scores);
 
@@ -426,24 +449,73 @@ query_task_fiber (QueryTaskData *data)
   g_ptr_array_set_size (results, scores->len);
   for (guint i = 0; i < scores->len; i++)
     {
-      Score     *score                  = NULL;
-      GroupData *group_data             = NULL;
-      g_autoptr (BzSearchResult) result = NULL;
+      Score     *score                   = NULL;
+      GroupData *group_data              = NULL;
+      g_autoptr (BzSearchResult) sresult = NULL;
 
       score      = &g_array_index (scores, Score, i);
       group_data = g_ptr_array_index (shallow_mirror, score->idx);
 
-      result = bz_search_result_new ();
-      bz_search_result_set_group (result, group_data->group);
-      bz_search_result_set_original_index (result, score->idx);
-      bz_search_result_set_score (result, score->val);
+      sresult = bz_search_result_new ();
+      bz_search_result_set_group (sresult, group_data->group);
+      bz_search_result_set_original_index (sresult, score->idx);
+      bz_search_result_set_score (sresult, score->val);
 
-      g_ptr_array_index (results, i) = g_steal_pointer (&result);
+      g_ptr_array_index (results, i) = g_steal_pointer (&sresult);
     }
 
   return dex_future_new_take_boxed (
       G_TYPE_PTR_ARRAY,
       g_steal_pointer (&results));
+}
+
+static DexFuture *
+query_sub_task_fiber (QuerySubTaskData *data)
+{
+  GPtrArray         *shallow_mirror = data->shallow_mirror;
+  IndexedStringData *query_istring  = data->query_istring;
+  double             threshold      = data->threshold;
+  guint              work_offset    = data->work_offset;
+  guint              work_length    = data->work_length;
+  g_autoptr (GArray) scores_out     = NULL;
+
+  scores_out = g_array_new (FALSE, FALSE, sizeof (Score));
+
+  for (guint i = 0; i < work_length; i++)
+    {
+      GroupData *group_data = NULL;
+      double     score      = 0.0;
+
+      group_data = g_ptr_array_index (shallow_mirror, work_offset + i);
+      for (guint j = 0; j < group_data->istrings->len; j++)
+        {
+          IndexedStringData *token_istring = NULL;
+          double             token_score   = 0.0;
+
+          token_istring = &g_array_index (group_data->istrings, IndexedStringData, j);
+          if (strstr (token_istring->ptr, query_istring->ptr) != NULL)
+            token_score = threshold * (1.0 + ((double) query_istring->utf8_len /
+                                              (double) token_istring->utf8_len));
+          else if (token_istring->weight > 0.0)
+            token_score = test_strings (query_istring, token_istring);
+
+          if (token_istring->weight > 0.0)
+            token_score *= token_istring->weight;
+
+          score += token_score;
+        }
+
+      if (score > threshold)
+        {
+          Score append = { 0 };
+
+          append.idx = work_offset + i;
+          append.val = score;
+          g_array_append_val (scores_out, append);
+        }
+    }
+
+  return dex_future_new_take_boxed (G_TYPE_ARRAY, g_steal_pointer (&scores_out));
 }
 
 static inline void
@@ -524,11 +596,6 @@ test_strings (IndexedStringData *query,
   guint  last_best_idx = G_MAXUINT;
   guint  misses        = 0;
   double score         = 0.0;
-  int    length_diff   = 0;
-
-  /* Quick check of exact match before doing complex stuff */
-  if (g_strstr_len (against->ptr, -1, query->ptr))
-    return ((double) query->utf8_len / (double) against->utf8_len) * (double) query->utf8_len;
 
   for (guint i = 0; i < query->utf8_len; i++)
     {
@@ -577,10 +644,6 @@ test_strings (IndexedStringData *query,
 
   /* Penalize the query for including chars that didn't match at all */
   score /= (double) (misses + 1);
-
-  length_diff = ABS ((int) against->utf8_len - (int) query->utf8_len);
-  /* Penalize the query for being a different length */
-  score /= (double) (length_diff + 1);
 
   return score;
 }

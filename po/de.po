@@ -29,7 +29,7 @@ msgstr "Hinzufügen, Entfernen oder Aktualisieren von Anwendungen auf diesem Com
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:9
 msgid "GTK;System;PackageManager;Discover;Flatpak;Software;Store;"
-msgstr "GTK;System;Paketverwaltung;Discover;Flatpak;Software;Store"
+msgstr "GTK;System;Paketverwaltung;Discover;Flatpak;Software;Store;"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:6
 msgid "Show Git Forge Star Counts"
@@ -191,6 +191,11 @@ msgstr "Adam Masciola <kolunmi@posteo.net>"
 msgctxt "About Dialog Developer Credit"
 msgid "Alexander Vanhee"
 msgstr "Alexander Vanhee"
+
+#. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
+#: src/bz-application.c:481
+msgid "translator-credits"
+msgstr "renner\nMandarinoo"
 
 #: src/bz-application.c:462
 msgctxt "About Dialog Translator Credit"
@@ -1264,9 +1269,6 @@ msgstr "Beenden"
 
 #~ msgid "Main Bazaar window showing Blender"
 #~ msgstr "Bazaar-Hauptfenster zeigt Blender"
-
-#~ msgid "translator-credits"
-#~ msgstr "renner, Mandarinoo"
 
 #~ msgid "Match using regular expressions"
 #~ msgstr "Übereinstimmung mit regulären Ausdrücken"

@@ -5,6 +5,7 @@ libdex_opts = [
   'introspection=disabled',
 ]
 
+gtk_dep              = dependency('gtk4')
 libadwaita_dep       = dependency('libadwaita-1', version: '>= 1.7')
 libdex_dep           = dependency('libdex-1', version: '>= 1.0.0', default_options: libdex_opts)
 flatpak_dep          = dependency('flatpak', version: '>= 1.9')
@@ -15,6 +16,7 @@ libsoup_dep          = dependency('libsoup-3.0', version: '>= 3.6.0')
 json_glib_dep        = dependency('json-glib-1.0', version: '>= 1.10.0')
 glycin_dep           = dependency('glycin-2', version: '>= 2.0')
 glycin_gtk4_dep      = dependency('glycin-gtk4-2', version: '>= 2.0')
+md4c_dep             = dependency('md4c', version: '>= 0.5.1')
 
 
 dl_worker_sources = [
@@ -68,6 +70,7 @@ bz_sources = [
   'bz-comet.c',
   'bz-content-provider.c',
   'bz-content-section.c',
+  'bz-context-tile.c',
   'bz-country-data-point.c',
   'bz-country.c',
   'bz-curated-app-tile.c',
@@ -85,6 +88,9 @@ bz_sources = [
   'bz-error.c',
   'bz-featured-carousel.c',
   'bz-featured-tile.c',
+  'bz-fading-clamp.c',
+  'bz-flathub-category.c',
+  'bz-flathub-category-section.c',
   'bz-flathub-category.c',
   'bz-flathub-page.c',
   'bz-flathub-state.c',
@@ -95,29 +101,36 @@ bz_sources = [
   'bz-global-state.c',
   'bz-gnome-shell-search-provider.c',
   'bz-group-tile-css-watcher.c',
+  'bz-hardware-support-dialog.c',
   'bz-inhibited-scrollable.c',
   'bz-inspector.c',
   'bz-installed-page.c',
   'bz-io.c',
   'bz-issue.c',
   'bz-lazy-async-texture-model.c',
-  'bz-patterned-background.c',
+  'bz-license-dialog.c',
+  'bz-markdown-render.c',
   'bz-preferences-dialog.c',
   'bz-progress-bar.c',
   'bz-release.c',
+  'bz-releases-list.c',
   'bz-result.c',
   'bz-review.c',
-  'bz-screenshot-dialog.c',
+  'bz-rich-app-tile.c',
+  'bz-rounded-picture.c',
+  'bz-screenshot-page.c',
   'bz-screenshot.c',
+  'bz-screenshots-carousel.c',
   'bz-search-engine.c',
   'bz-search-result.c',
   'bz-search-widget.c',
   'bz-section-view.c',
   'bz-serializable.c',
-  'bz-share-dialog.c',
+  'bz-share-list.c',
   'bz-spdx.c',
   'bz-state-info.c',
   'bz-stats-dialog.c',
+  'bz-themed-entry-group-rect.c',
   'bz-transaction-entry-tracker.c',
   'bz-transaction-manager.c',
   'bz-transaction-task.c',
@@ -134,7 +147,6 @@ bz_sources = [
 ]
 
 bz_deps = [
-  # bazaar_ui_dep,
   math,
   gtk_dep,
   libadwaita_dep,
@@ -147,6 +159,7 @@ bz_deps = [
   libdex_dep,
   glycin_dep,
   glycin_gtk4_dep,
+  md4c_dep,
 ]
 
 blueprints = custom_target('blueprints',
@@ -158,22 +171,30 @@ blueprints = custom_target('blueprints',
     'bz-appstream-description-render.blp',
     'bz-browse-widget.blp',
     'bz-category-tile.blp',
+    'bz-context-tile.blp',
     'bz-curated-app-tile.blp',
     'bz-decorated-screenshot.blp',
     'bz-detailed-app-tile.blp',
     'bz-entry-inspector.blp',
     'bz-featured-carousel.blp',
     'bz-featured-tile.blp',
+    'bz-flathub-category-section.blp',
     'bz-flathub-page.blp',
     'bz-full-view.blp',
+    'bz-hardware-support-dialog.blp',
     'bz-inspector.blp',
     'bz-installed-page.blp',
+    'bz-license-dialog.blp',
+    'bz-markdown-render.blp',
     'bz-preferences-dialog.blp',
     'bz-progress-bar.blp',
-    'bz-screenshot-dialog.blp',
+    'bz-releases-dialog.blp',
+    'bz-releases-list.blp',
+    'bz-rich-app-tile.blp',
+    'bz-screenshot-page.blp',
+    'bz-screenshots-carousel.blp',
     'bz-search-widget.blp',
     'bz-section-view.blp',
-    'bz-share-dialog.blp',
     'bz-stats-dialog.blp',
     'bz-transaction-view.blp',
     'bz-update-dialog.blp',

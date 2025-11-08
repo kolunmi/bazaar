@@ -21,6 +21,7 @@
 #define G_LOG_DOMAIN  "BAZAAR::FLATPAK"
 #define BAZAAR_MODULE "flatpak"
 
+#include <malloc.h>
 #include <xmlb.h>
 
 #include "bz-backend-notification.h"
@@ -53,8 +54,9 @@ struct _BzFlatpakInstance
 
   GMutex mute_mutex;
 
-  GPtrArray *notif_channels;
   GMutex     notif_mutex;
+  GPtrArray *notif_channels;
+  DexFuture *notif_send;
 };
 
 static void
@@ -241,6 +243,27 @@ installation_event (BzFlatpakInstance *self,
                     GFileMonitorEvent  event_type,
                     GFileMonitor      *monitor);
 
+static void
+send_notif (BzFlatpakInstance     *self,
+            DexChannel            *channel,
+            BzBackendNotification *notif,
+            gboolean               lock);
+
+BZ_DEFINE_DATA (
+    wait_notif,
+    WaitNotif,
+    {
+      GWeakRef               self;
+      DexChannel            *channel;
+      BzBackendNotification *notif;
+    },
+    g_weak_ref_clear (&self->self);
+    BZ_RELEASE_DATA (channel, dex_unref);
+    BZ_RELEASE_DATA (notif, g_object_unref));
+static DexFuture *
+wait_notif_finally (DexFuture     *future,
+                    WaitNotifData *data);
+
 static gint
 cmp_rref (FlatpakRemoteRef *a,
           FlatpakRemoteRef *b,
@@ -252,12 +275,16 @@ bz_flatpak_instance_dispose (GObject *object)
   BzFlatpakInstance *self = BZ_FLATPAK_INSTANCE (object);
 
   dex_clear (&self->scheduler);
+
   g_clear_object (&self->system);
   g_clear_object (&self->system_events);
   g_clear_object (&self->user);
   g_clear_object (&self->user_events);
+
   g_mutex_clear (&self->mute_mutex);
+
   g_clear_pointer (&self->notif_channels, g_ptr_array_unref);
+  dex_clear (&self->notif_send);
   g_mutex_clear (&self->notif_mutex);
 
   G_OBJECT_CLASS (bz_flatpak_instance_parent_class)->dispose (object);
@@ -1136,6 +1163,16 @@ retrieve_refs_for_remote_fiber (RetrieveRefsForRemoteData *data)
       XB_BUILDER_COMPILE_FLAG_NATIVE_LANGS,
       cancellable,
       &local_error);
+
+#ifdef __GLIBC__
+  /* From gnome-software/plugins/core/gs-plugin-appstream.c
+   *
+   * https://gitlab.gnome.org/GNOME/gnome-software/-/issues/941
+   * libxmlb <= 0.3.22 makes lots of temporary heap allocations parsing large XMLs
+   * trim the heap after parsing to control RSS growth. */
+  malloc_trim (0);
+#endif
+
   if (silo == NULL)
     return dex_future_new_reject (
         BZ_FLATPAK_ERROR,
@@ -1244,11 +1281,10 @@ retrieve_refs_for_remote_fiber (RetrieveRefsForRemoteData *data)
 
   for (guint i = 0; i < refs->len; i++)
     {
-      FlatpakRemoteRef *rref               = NULL;
-      const char       *name               = NULL;
-      AsComponent      *component          = NULL;
-      g_autoptr (BzFlatpakEntry) entry     = NULL;
-      g_autoptr (DexFuture) channel_future = NULL;
+      FlatpakRemoteRef *rref           = NULL;
+      const char       *name           = NULL;
+      AsComponent      *component      = NULL;
+      g_autoptr (BzFlatpakEntry) entry = NULL;
 
       rref      = g_ptr_array_index (refs, i);
       name      = flatpak_ref_get_name (FLATPAK_REF (rref));
@@ -2013,7 +2049,7 @@ installation_event (BzFlatpakInstance *self,
           channel = g_ptr_array_index (self->notif_channels, i);
           if (dex_channel_can_send (channel))
             {
-              dex_future_disown (dex_channel_send (channel, dex_future_new_for_object (notif)));
+              send_notif (self, channel, notif, FALSE);
               i++;
             }
           else
@@ -2021,6 +2057,59 @@ installation_event (BzFlatpakInstance *self,
         }
     }
   g_mutex_unlock (&self->notif_mutex);
+}
+
+static void
+send_notif (BzFlatpakInstance     *self,
+            DexChannel            *channel,
+            BzBackendNotification *notif,
+            gboolean               lock)
+{
+  g_autoptr (GMutexLocker) locker = NULL;
+
+  if (lock)
+    locker = g_mutex_locker_new (&self->notif_mutex);
+
+  if (self->notif_send == NULL ||
+      !dex_future_is_pending (self->notif_send))
+    {
+      dex_clear (&self->notif_send);
+      self->notif_send = dex_channel_send (
+          channel,
+          dex_future_new_for_object (notif));
+    }
+  else
+    {
+      g_autoptr (WaitNotifData) data = NULL;
+
+      data = wait_notif_data_new ();
+      g_weak_ref_init (&data->self, self);
+      data->channel = dex_ref (channel);
+      data->notif   = g_object_ref (notif);
+
+      self->notif_send = dex_future_finally (
+          g_steal_pointer (&self->notif_send),
+          (DexFutureCallback) wait_notif_finally,
+          wait_notif_data_ref (data),
+          wait_notif_data_unref);
+    }
+}
+
+static DexFuture *
+wait_notif_finally (DexFuture     *future,
+                    WaitNotifData *data)
+{
+  g_autoptr (BzFlatpakInstance) self = NULL;
+  g_autoptr (GMutexLocker) locker    = NULL;
+
+  bz_weak_get_or_return_reject (self, &data->self);
+  locker = g_mutex_locker_new (&self->notif_mutex);
+
+  if (future == self->notif_send)
+    dex_clear (&self->notif_send);
+  send_notif (self, data->channel, data->notif, FALSE);
+
+  return dex_future_new_true ();
 }
 
 static gint

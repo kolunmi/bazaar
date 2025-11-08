@@ -18,8 +18,11 @@ template $BzInspector: Adw.Window {
       width-request: 100;
 
       Label {
-        margin-top: 10;
+        styles [
+          "heading"
+        ]
         label: _("Active Blocklists");
+        xalign: 0.0;
       }
       ScrolledWindow {
         propagate-natural-height: true;
@@ -27,21 +30,16 @@ template $BzInspector: Adw.Window {
           model: NoSelection {
             model: bind template.state as <$BzStateInfo>.blocklists;
           };
-          factory: BuilderListItemFactory {
-            template ListItem {
-              child: Label {
-                label: bind template.item as <$GtkStringObject>.string as <string>;
-              };
-            }
-          };
+          factory: string_list_factory;
         };
       }
 
-      Separator {}
-        
       Label {
-        margin-top: 10;
+        styles [
+          "heading"
+        ]
         label: _("Active Curated-Configs");
+        xalign: 0.0;
       }
       ScrolledWindow {
         propagate-natural-height: true;
@@ -49,23 +47,23 @@ template $BzInspector: Adw.Window {
           model: NoSelection {
             model: bind template.state as <$BzStateInfo>.curated-configs;
           };
-          factory: BuilderListItemFactory {
-            template ListItem {
-              child: Label {
-                label: bind template.item as <$GtkStringObject>.string as <string>;
-              };
-            }
-          };
+          factory: string_list_factory;
         };
       }
 
-      Separator {}
-      
       Label {
+        styles [
+          "heading"
+        ]
         margin-top: 10;
         label: _("All Entry Groups");
+        xalign: 0.0;
       }
       Entry search_entry {
+        margin-start: 10;
+        margin-end: 10;
+        margin-top: 8;
+        margin-bottom: 8;
         placeholder-text: _("Filter...");
         changed => $entry_changed(template);
       }
@@ -126,5 +124,37 @@ template $BzInspector: Adw.Window {
 
     [top]
     Adw.HeaderBar top_header_bar {}
+  }
+}
+
+BuilderListItemFactory string_list_factory {
+  template ListItem {
+    selectable: false;
+    activatable: false;
+    child: Box {
+      orientation: horizontal;
+      spacing: 10;
+
+      Label {
+        styles [
+          "dimmed",
+          "bz-monospace",
+        ]
+        width-request: 30;
+        label: bind $format_uint(template.position) as <string>;
+        xalign: 1.0;
+      }
+      Label {
+        styles [
+          "bz-monospace",
+        ]
+
+        margin-top: 2;
+        margin-bottom: 2;
+        xalign: 0.0;
+        selectable: true;
+        label: bind template.item as <$GtkStringObject>.string as <string>;
+      }
+    };
   }
 }
