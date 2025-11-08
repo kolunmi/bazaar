@@ -730,9 +730,5 @@ emit_idx (BzSearchWidget *self,
   result = g_list_model_get_item (G_LIST_MODEL (model), selected_idx);
   group  = bz_search_result_get_group (result);
 
-  if (bz_entry_group_get_installable_and_available (group) > 0 ||
-      bz_entry_group_get_removable_and_available (group) > 0)
-    {
-      g_signal_emit (self, signals[SIGNAL_SELECT], 0, group, FALSE);
-    }
+  g_signal_emit (self, signals[SIGNAL_SELECT], 0, group, FALSE);
 }
