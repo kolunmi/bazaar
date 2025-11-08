@@ -186,6 +186,11 @@ msgctxt "About Dialog Developer Credit"
 msgid "Alexander Vanhee"
 msgstr "Alexander Vanhee"
 
+#. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
+#: src/bz-application.c:481
+msgid "translator-credits"
+msgstr "أحمد النجماوي <iramosu@protonmail.com>"
+
 #: src/bz-application.c:462
 msgctxt "About Dialog Translator Credit"
 msgid "Ahmed Najmawi"
@@ -1289,9 +1294,6 @@ msgstr "اخرُج"
 
 #~ msgid "Main Bazaar window showing Blender"
 #~ msgstr "نافذة بازار الرئيسية تعرض تطبيق بلندر"
-
-#~ msgid "translator-credits"
-#~ msgstr "أحمد النجماوي <iramosu@protonmail.com>"
 
 #~ msgid "Match using regular expressions"
 #~ msgstr "طابِق باستخدام التعابير النمطية"

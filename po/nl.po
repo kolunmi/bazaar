@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-08 09:11+0100\n"
+"POT-Creation-Date: 2025-11-08 13:52+0100\n"
 "PO-Revision-Date: 2025-07-15 07:56+0200\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -63,7 +63,6 @@ msgid "Debounce Search Inputs"
 msgstr ""
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:22
-
 msgid "Add a delay before searching to prevent instant replies while typing"
 msgstr "Ontwijk input om onmiddelijke antwoorden te vermijden"
 
@@ -84,7 +83,6 @@ msgid "The window dimensions to be used by the next Bazaar window"
 msgstr ""
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:8
-
 msgid "Discover and install applications"
 msgstr "Bekijk geïnstalleerde applicaties"
 
@@ -101,7 +99,7 @@ msgid ""
 "allow for a more localized experience."
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29 src/bz-application.c:504
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29 src/bz-application.c:478
 msgid "Adam Masciola"
 msgstr "Adam Masciola"
 
@@ -119,7 +117,6 @@ msgstr ""
 
 #: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:581
 #: src/bz-installed-page.blp:132
-
 msgid "Manage Add-ons"
 msgstr "Beheer Addons"
 
@@ -178,7 +175,6 @@ msgid "--- MB"
 msgstr "--- MB"
 
 #: src/bz-app-size-dialog.blp:53
-
 msgid "Download Size"
 msgstr "Download Grootte"
 
@@ -198,173 +194,76 @@ msgctxt "About Dialog Developer Credit"
 msgid "Alexander Vanhee"
 msgstr "Alexander Vanhee"
 
-#: src/bz-application.c:469
-msgctxt "About Dialog Translator Credit"
-msgid "Ahmed Najmawi"
-msgstr "Admed Najmawi"
-
-#: src/bz-application.c:470
-msgctxt "About Dialog Translator Credit"
-msgid "AtomHare"
-msgstr "AtomHare"
-
-#: src/bz-application.c:471
-msgctxt "About Dialog Translator Credit"
-msgid "Azenyr"
-msgstr ""
-
-#: src/bz-application.c:472
-msgctxt "About Dialog Translator Credit"
-msgid "Goudarz Jafari"
-msgstr ""
-
-#: src/bz-application.c:473
-
-msgctxt "About Dialog Translator Credit"
-msgid "Jill Fiore (Lumaeris)"
-msgstr "Jill Fiore"
-
-#: src/bz-application.c:474
-msgctxt "About Dialog Translator Credit"
-msgid "João Victor (Leal)"
-msgstr ""
-
-#: src/bz-application.c:475
-msgctxt "About Dialog Translator Credit"
-msgid "KiKaraage"
-msgstr ""
-
-#: src/bz-application.c:476
-msgctxt "About Dialog Translator Credit"
-msgid "Lucosec"
-msgstr "Lucosec"
-
-#: src/bz-application.c:477
-msgctxt "About Dialog Translator Credit"
-msgid "Léane GRASSER"
-msgstr ""
-
-#: src/bz-application.c:478
-msgctxt "About Dialog Translator Credit"
-msgid "Marcel Mrówka (Microwave)"
-msgstr ""
-
-#: src/bz-application.c:479
-msgctxt "About Dialog Translator Credit"
-msgid "Peter Dave Hello"
-msgstr ""
-
-#: src/bz-application.c:480
-msgctxt "About Dialog Translator Credit"
-msgid "Pietro F."
-msgstr ""
-
+#. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
 #: src/bz-application.c:481
-msgctxt "About Dialog Translator Credit"
-msgid "Sabri Ünal"
-msgstr ""
+msgid "translator-credits"
+msgstr "Alexander Vanhee, 2025"
 
-#: src/bz-application.c:482
-msgctxt "About Dialog Translator Credit"
-msgid "Shihfu Juan"
-msgstr "Shihfu Juan"
-
-#: src/bz-application.c:483
-msgctxt "About Dialog Translator Credit"
-msgid "Shinsei"
-msgstr ""
-
-#: src/bz-application.c:484
-msgctxt "About Dialog Translator Credit"
-msgid "Vlastimil Dědek"
-msgstr "Vlastimil Dědek"
-
-#: src/bz-application.c:485
-msgctxt "About Dialog Translator Credit"
-msgid "asen23"
-msgstr "asen23"
-
-#: src/bz-application.c:486
-msgctxt "About Dialog Translator Credit"
-msgid "camegone"
-msgstr ""
-
-#: src/bz-application.c:487
-msgctxt "About Dialog Translator Credit"
-msgid "renner"
-msgstr "renner"
-
-#: src/bz-application.c:488
-msgctxt "About Dialog Translator Credit"
-msgid "robotta"
-msgstr "robotta"
-
-#: src/bz-application.c:1029
+#: src/bz-application.c:1004
 msgid "Constructing Flatpak instance..."
 msgstr "Flatpak-instantie wordt aangemaakt..."
 
-#: src/bz-application.c:1046
+#: src/bz-application.c:1021
 msgid "Reusing last Flatpak instance..."
 msgstr "Laatste Flatpak-instantie wordt hergebruikt..."
 
-#: src/bz-application.c:1071
+#: src/bz-application.c:1046
 msgid "Flathub is not registered on this system"
 msgstr "Flathub is niet geregistreerd op dit systeem"
 
-
-#: src/bz-application.c:1074
+#: src/bz-application.c:1049
 msgid ""
 "Would you like to add Flathub as a remote? If you decline, the Flathub page "
 "will not be available. You can change this later."
 msgstr ""
-"Wil je Flathub als een remote toevoegen? Als je dit niet toestaat, zal de Flathub-pagina "
-"niet beschikbaar zijn. Je kan dit nog later wijzigen."
+"Wil je Flathub als een remote toevoegen? Als je dit niet toestaat, zal de "
+"Flathub-pagina niet beschikbaar zijn. Je kan dit nog later wijzigen."
 
-#: src/bz-application.c:1079 src/bz-update-dialog.blp:6
+#: src/bz-application.c:1054 src/bz-update-dialog.blp:6
 msgid "Later"
 msgstr "Later"
 
-#: src/bz-application.c:1080
-
+#: src/bz-application.c:1055
 msgid "Add Flathub"
 msgstr "Flathub Toevoegen"
 
-#: src/bz-application.c:1112
+#: src/bz-application.c:1087
 #, c-format
 msgid "Identifying installed entries..."
 msgstr "Bezig met geïnstalleerde items te identificeren..."
 
-#: src/bz-application.c:1124
+#: src/bz-application.c:1099
 #, c-format
 msgid "Beginning remote entry retrieval while referencing %d blocklist(s)..."
-msgstr "Bezig met ophalen van externe items terwijl %d blocklist(s) worden geraadpleegd..."
+msgstr ""
+"Bezig met ophalen van externe items terwijl %d blocklist(s) worden "
+"geraadpleegd..."
 
-#: src/bz-application.c:1272
+#: src/bz-application.c:1247
 #, c-format
 msgid "Receiving Entries"
 msgstr "Items aan het Ontvangen"
 
-#: src/bz-application.c:1273
+#: src/bz-application.c:1248
 #, c-format
 msgid "%'d of %'d"
 msgstr "%'d van de %'d"
 
-#: src/bz-application.c:1284
+#: src/bz-application.c:1259
 #, c-format
 msgid "Waiting for background indexing tasks to catch up..."
 msgstr "Aan het wachten tot achtergrondindexering is bijgewerkt..."
 
-#: src/bz-application.c:1325
+#: src/bz-application.c:1300
 #, c-format
 msgid "Completed initialization in %0.2f seconds"
 msgstr "Initialisatie voltooid in %0.2f seconden"
 
-#: src/bz-application.c:1330 src/bz-application.c:1485
-
+#: src/bz-application.c:1305 src/bz-application.c:1460
 msgid "Checking for updates..."
 msgstr "Controleren voor updates..."
 
-#: src/bz-application.c:1369
+#: src/bz-application.c:1344
 msgid "Synchronizing..."
 msgstr "Synchroniseren..."
 
@@ -374,7 +273,6 @@ msgid "Empty"
 msgstr "Leeg"
 
 #: src/bz-browse-widget.blp:15
-
 msgid "No Curation"
 msgstr "Geen Gecureerde Apps"
 
@@ -382,11 +280,11 @@ msgstr "Geen Gecureerde Apps"
 msgid ""
 "There is no curation information provided on this system. You can still "
 "browse applications on Flathub"
-msgstr "Er is geen curatie-info beschikbaar op dit systeem. Je kan nog steeds "
-"apps op Flathub bekijken"
+msgstr ""
+"Er is geen curatie-info beschikbaar op dit systeem. Je kan nog steeds apps "
+"op Flathub bekijken"
 
 #: src/bz-browse-widget.blp:18
-
 msgid "Browse Flathub"
 msgstr "Naar Flathub"
 
@@ -545,7 +443,6 @@ msgid "Trending"
 msgstr "Trending"
 
 #: src/bz-flathub-category.c:76
-
 msgid "More Trending"
 msgstr "Meer Trending"
 
@@ -555,7 +452,6 @@ msgid "Popular"
 msgstr "Populair"
 
 #: src/bz-flathub-category.c:77
-
 msgid "More Popular"
 msgstr "Meer Populair"
 
@@ -568,7 +464,6 @@ msgid "New"
 msgstr "Niew"
 
 #: src/bz-flathub-category.c:78
-
 msgid "More New"
 msgstr "Meer Niew"
 
@@ -577,12 +472,10 @@ msgid "Recently Updated"
 msgstr "Onlangs Bijgewerkt"
 
 #: src/bz-flathub-category.c:79 src/bz-flathub-page.blp:105
-
 msgid "Updated"
 msgstr "Bijgewerkt"
 
 #: src/bz-flathub-category.c:79
-
 msgid "More Updated"
 msgstr "Meer Bijgewerkt"
 
@@ -595,6 +488,7 @@ msgid "More Mobile"
 msgstr "Meer Onderweg"
 
 #: src/bz-flathub-category-section.c:134 src/bz-search-widget.c:299
+#, c-format
 msgid "%d applications"
 msgstr "%d applicaties"
 
@@ -623,13 +517,11 @@ msgid "Mobile Apps"
 msgstr "Mobiele Apps"
 
 #: src/bz-flatpak-entry.c:552
-
 msgctxt "Project URL Type"
 msgid "Flathub Page"
 msgstr "Flathub Pagina"
 
 #: src/bz-flatpak-entry.c:573
-
 msgctxt "Project URL Type"
 msgid "Project Website"
 msgstr "Projectwebsite"
@@ -660,7 +552,6 @@ msgid "Translate"
 msgstr "Vertalen"
 
 #: src/bz-flatpak-entry.c:599
-
 msgctxt "Project URL Type"
 msgid "Contact"
 msgstr "Contact"
@@ -696,7 +587,6 @@ msgid "Content"
 msgstr "Content"
 
 #: src/bz-full-view.blp:196
-
 msgid "Verified by the original developers"
 msgstr "Geverifieerd door de originele ontwikelaars"
 
@@ -713,12 +603,10 @@ msgid "Open"
 msgstr "Openen"
 
 #: src/bz-full-view.blp:286
-
 msgid "Download & Install Application"
 msgstr "App Downloaden & Uitvoeren"
 
 #: src/bz-full-view.blp:301
-
 msgid "Uninstall Application"
 msgstr "Verwijder deze Applicatie"
 
@@ -731,7 +619,6 @@ msgid "Size"
 msgstr "Grootte"
 
 #: src/bz-full-view.blp:456
-
 msgid "Downloads /mo"
 msgstr "Downloads p/m"
 
@@ -757,6 +644,7 @@ msgid "%d downloads in the last 30 days"
 msgstr "%d downloads in de afgelopen 30 dagen"
 
 #: src/bz-full-view.c:321
+#, c-format
 msgid "Download size of %s"
 msgstr "Downloadgrootte van %s"
 
@@ -842,7 +730,6 @@ msgstr ""
 "partij."
 
 #: src/bz-full-view.c:454
-
 msgid "Other Apps by this Developer"
 msgstr "Andere Apps van deze Ontwikkelaar"
 
@@ -986,7 +873,6 @@ msgid "Installed"
 msgstr "Geïnstalleerd"
 
 #: src/bz-installed-page.blp:108
-
 msgid "Support this application"
 msgstr "Deel deze applicatie"
 
@@ -1014,7 +900,8 @@ msgstr "Kies een Installatie"
 msgid ""
 "You have multiple versions of this app installed. Which one would you like "
 "to proceed with? "
-msgstr "Je hebt meerdere versies van deze app geïnstalleerd. Welke wil je gebruiken?"
+msgstr ""
+"Je hebt meerdere versies van deze app geïnstalleerd. Welke wil je gebruiken?"
 
 #: src/bz-installed-page.c:656 src/bz-window.c:1019 src/bz-window.c:1041
 msgid "Cancel"
@@ -1028,12 +915,11 @@ msgid ""
 "\n"
 "You may not be able to contribute to this app."
 msgstr ""
-"Deze app wordt niet openbaar ontwikkeld, dus alleen de ontwikkelaars weten hoe "
-"het werkt. De app kan op moeilijk te detecteren manieren onveilig zijn en kan "
-"zonder toezicht veranderen.\n"
+"Deze app wordt niet openbaar ontwikkeld, dus alleen de ontwikkelaars weten "
+"hoe het werkt. De app kan op moeilijk te detecteren manieren onveilig zijn "
+"en kan zonder toezicht veranderen.\n"
 "\n"
 "Het kan zijn dat je niet kunt bijdragen aan deze app."
-
 
 #: src/bz-license-dialog.c:124
 msgid ""
@@ -1118,7 +1004,8 @@ msgid ""
 msgstr ""
 "Bazaar kan het aantal sterren van de broncode repository van een app ophalen "
 "en weergeven vanuit een externe Git server.\n"
-"Voor projecten op GitHub kunnen API limieten ervoor zorgen dat ze niet verschijnen."
+"Voor projecten op GitHub kunnen API limieten ervoor zorgen dat ze niet "
+"verschijnen."
 
 #: src/bz-preferences-dialog.c:32
 msgid "Accent Color"
@@ -1181,12 +1068,15 @@ msgstr "Versie %s"
 msgid "No details for this release"
 msgstr "Geen details voor deze versie"
 
+#: src/bz-rich-app-tile.blp:103
+msgid "Get"
+msgstr "Haal"
+
 #: src/bz-search-widget.blp:105
 msgid "Search Apps, Games, Software"
 msgstr "Zoek Apps, Games, Software"
 
 #: src/bz-search-widget.blp:223
-
 msgid "No Applications Found"
 msgstr "Geen Applicaties Gevonden"
 
@@ -1200,7 +1090,6 @@ msgid "Copied!"
 msgstr "Gekopieerd!"
 
 #: src/bz-share-list.c:116
-
 msgid "Copy Link"
 msgstr "Kopieer Link"
 
@@ -1213,7 +1102,6 @@ msgid "Timeline"
 msgstr "Tijdlijn"
 
 #: src/bz-stats-dialog.blp:31
-
 msgid "Installs:"
 msgstr "Installaties:"
 
@@ -1235,7 +1123,6 @@ msgid "Runtime"
 msgstr "Runtime"
 
 #: src/bz-transaction-view.blp:145 src/bz-transaction-view.blp:171
-
 msgid "Install Size"
 msgstr "Geïnstalleerde Grootte"
 
@@ -1264,7 +1151,8 @@ msgstr "Er zijn Updates Beschikbaar"
 msgid ""
 "The following applications are eligible for updates. Would you like to "
 "install them?"
-msgstr "De volgende applicaties hebben updates beschikbaar. Wil je deze Installeren?"
+msgstr ""
+"De volgende applicaties hebben updates beschikbaar. Wil je deze Installeren?"
 
 #: src/bz-update-dialog.c:134
 #, c-format
@@ -1307,12 +1195,10 @@ msgid "_Donate to Bazaar ❤️"
 msgstr "_Doneer aan Bazaar ❤️"
 
 #: src/bz-window.blp:432
-
 msgid "_Refresh Content"
 msgstr "_Ververs Content"
 
 #: src/bz-window.blp:439
-
 msgid "_Preferences"
 msgstr "_Voorkeuren"
 
@@ -1325,7 +1211,6 @@ msgid "_About Bazaar"
 msgstr "_Over Bazaar"
 
 #: src/bz-window.blp:456
-
 msgid "_Quit Bazaar"
 msgstr "_Sluit Bazaar"
 
@@ -1349,6 +1234,7 @@ msgid "Can't do that right now!"
 msgstr "Dit is nu niet mogelijk!"
 
 #: src/bz-window.c:1013
+#, c-format
 msgid "Install %s?"
 msgstr "%s Installeren?"
 
@@ -1357,6 +1243,7 @@ msgid "May install additional shared components"
 msgstr "Kan extra gedeelde componenten installeren"
 
 #: src/bz-window.c:1035
+#, c-format
 msgid "Remove %s?"
 msgstr "%s Verwijderen?"
 
@@ -1388,7 +1275,6 @@ msgid "Open Search Dialog"
 msgstr "Open zoekdialoog"
 
 #: src/gtk/shortcuts-dialog.blp:14
-
 msgctxt "shortcut window"
 msgid "Open Preferences"
 msgstr "Voorkeuren"
@@ -1412,3 +1298,39 @@ msgstr "Toon Snelkoppelingen"
 msgctxt "shortcut window"
 msgid "Quit"
 msgstr "Sluit Af"
+
+#~ msgctxt "About Dialog Translator Credit"
+#~ msgid "Ahmed Najmawi"
+#~ msgstr "Admed Najmawi"
+
+#~ msgctxt "About Dialog Translator Credit"
+#~ msgid "AtomHare"
+#~ msgstr "AtomHare"
+
+#~ msgctxt "About Dialog Translator Credit"
+#~ msgid "Jill Fiore (Lumaeris)"
+#~ msgstr "Jill Fiore"
+
+#~ msgctxt "About Dialog Translator Credit"
+#~ msgid "Lucosec"
+#~ msgstr "Lucosec"
+
+#~ msgctxt "About Dialog Translator Credit"
+#~ msgid "Shihfu Juan"
+#~ msgstr "Shihfu Juan"
+
+#~ msgctxt "About Dialog Translator Credit"
+#~ msgid "Vlastimil Dědek"
+#~ msgstr "Vlastimil Dědek"
+
+#~ msgctxt "About Dialog Translator Credit"
+#~ msgid "asen23"
+#~ msgstr "asen23"
+
+#~ msgctxt "About Dialog Translator Credit"
+#~ msgid "renner"
+#~ msgstr "renner"
+
+#~ msgctxt "About Dialog Translator Credit"
+#~ msgid "robotta"
+#~ msgstr "robotta"
