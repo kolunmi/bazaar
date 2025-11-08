@@ -454,10 +454,9 @@ bz_application_about_action (GSimpleAction *action,
                              GVariant      *parameter,
                              gpointer       user_data)
 {
-  BzApplication   *self               = user_data;
-  GtkWindow       *window             = NULL;
-  AdwDialog       *dialog             = NULL;
-  g_autofree char *translators_string = NULL;
+  BzApplication *self   = user_data;
+  GtkWindow     *window = NULL;
+  AdwDialog     *dialog = NULL;
 
   const char *developers[] = {
     C_ ("About Dialog Developer Credit", "Adam Masciola <kolunmi@posteo.net>"),
