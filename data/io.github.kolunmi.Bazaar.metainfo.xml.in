@@ -50,16 +50,20 @@
 
   <screenshots>
     <screenshot type="default">
-      <image>https://github.com/user-attachments/assets/fb004294-b6e8-4701-bd2d-f4bbb63dc20e</image>
-      <caption>The home view displaying Flathub apps</caption>
+      <image>https://github.com/user-attachments/assets/24983333-e049-4ec7-a68d-786833edb90c</image>
+      <caption>The home page displaying Flathub apps</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/user-attachments/assets/6286520c-ad27-41e3-891e-28ff42084e89</image>
+      <image>https://github.com/user-attachments/assets/670bcd04-1e54-4f4c-b199-e5bd1400c6b8</image>
       <caption>Nucleus app page</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/user-attachments/assets/894f4bfc-fea7-46cf-8594-8bb377f314e7</image>
-      <caption>Searching for Blender</caption>
+      <image>https://github.com/user-attachments/assets/15276907-8c63-46b3-84b4-2ec07f5c85b4</image>
+      <caption>Search page</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/user-attachments/assets/24db66aa-eb6b-4fbf-9a37-db2bd4d063c5</image>
+      <caption>Category page</caption>
     </screenshot>
   </screenshots>
 
