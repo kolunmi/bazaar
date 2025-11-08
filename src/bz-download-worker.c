@@ -430,12 +430,12 @@ err:
 static DexFuture *
 invoke_worker_fiber (InvokeWorkerData *data)
 {
+  DexPromise *promise                    = data->promise;
+  GFile      *src                        = data->src;
+  GFile      *dest                       = data->dest;
   g_autoptr (BzDownloadWorker) self      = NULL;
   g_autoptr (GError) local_error         = NULL;
   g_autoptr (BzGuard) guard              = NULL;
-  DexPromise      *promise               = data->promise;
-  GFile           *src                   = data->src;
-  GFile           *dest                  = data->dest;
   g_autofree char *src_uri               = NULL;
   g_autofree char *dest_path             = NULL;
   DexPromise      *existing              = NULL;
