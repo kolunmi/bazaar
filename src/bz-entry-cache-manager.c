@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#define G_LOG_DOMAIN  "BAZAAR::CACHE"
+#define G_LOG_DOMAIN  "BAZAAR::ENTRY-CACHE"
 #define BAZAAR_MODULE "entry-cache"
 
 #define MAX_CONCURRENT_WRITES             4
@@ -104,7 +104,14 @@ enum
 static GParamSpec *props[LAST_PROP] = { 0 };
 
 static DexFuture *
-watch_fiber (OngoingTaskData *task_data);
+watch_init_fiber (OngoingTaskData *task_data);
+
+static DexFuture *
+watch_cb (DexFuture       *future,
+          OngoingTaskData *task_data);
+
+static DexFuture *
+watch_work_fiber (OngoingTaskData *task_data);
 
 BZ_DEFINE_DATA (
     living_entry,
@@ -245,7 +252,7 @@ bz_entry_cache_manager_init (BzEntryCacheManager *self)
   self->watch_task = dex_scheduler_spawn (
       self->scheduler,
       bz_get_dex_stack_size (),
-      (DexFiberFunc) watch_fiber,
+      (DexFiberFunc) watch_init_fiber,
       ongoing_task_data_ref (self->task_data),
       ongoing_task_data_unref);
 }
@@ -672,100 +679,123 @@ done:
 }
 
 static DexFuture *
-watch_fiber (OngoingTaskData *task_data)
+watch_init_fiber (OngoingTaskData *task_data)
 {
   bz_discard_module_dir ();
   dex_promise_resolve_boolean (task_data->init, TRUE);
 
+  return dex_future_finally_loop (
+      dex_timeout_new_msec (WATCH_CLEANUP_INTERVAL_MSEC),
+      (DexFutureCallback) watch_cb,
+      ongoing_task_data_ref (task_data),
+      ongoing_task_data_unref);
+}
+
+static DexFuture *
+watch_cb (DexFuture       *future,
+          OngoingTaskData *task_data)
+{
+  return dex_scheduler_spawn (
+      task_data->scheduler,
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) watch_work_fiber,
+      ongoing_task_data_ref (task_data),
+      ongoing_task_data_unref);
+}
+
+static DexFuture *
+watch_work_fiber (OngoingTaskData *task_data)
+{
+  g_autoptr (BzGuard) guard0        = NULL;
+  GHashTableIter iter               = { 0 };
+  g_autoptr (GTimer) timer          = NULL;
+  g_autoptr (GPtrArray) write_backs = NULL;
+  guint total                       = 0;
+  guint skipped                     = 0;
+  guint written                     = 0;
+  guint pruned                      = 0;
+
+  timer       = g_timer_new ();
+  write_backs = g_ptr_array_new_with_free_func (dex_unref);
+
+  BZ_BEGIN_GUARD_WITH_CONTEXT (&guard0, &task_data->alive_mutex, &task_data->alive_gate);
+  BZ_BEGIN_GUARD_WITH_CONTEXT (&guard0, &task_data->reading_mutex, &task_data->reading_gate);
+  BZ_BEGIN_GUARD_WITH_CONTEXT (&guard0, &task_data->writing_mutex, &task_data->writing_gate);
+
+  g_hash_table_iter_init (&iter, task_data->alive_hash);
   for (;;)
     {
-      g_autoptr (GError) local_error = NULL;
-      g_autoptr (BzGuard) guard0     = NULL;
-      GHashTableIter iter            = { 0 };
-      g_autoptr (GTimer) timer       = NULL;
-      guint total                    = 0;
-      guint skipped                  = 0;
-      guint written                  = 0;
-      guint pruned                   = 0;
+      char            *unique_id_checksum = NULL;
+      LivingEntryData *living             = NULL;
+      g_autoptr (BzGuard) guard1          = NULL;
+      g_autoptr (BzEntry) entry           = NULL;
 
-      if (!dex_await (dex_timeout_new_msec (WATCH_CLEANUP_INTERVAL_MSEC), &local_error) &&
-          !g_error_matches (local_error, DEX_ERROR, DEX_ERROR_TIMED_OUT))
+      if (!g_hash_table_iter_next (&iter, (gpointer *) &unique_id_checksum, (gpointer *) &living))
+        break;
+      total++;
+
+      if (g_hash_table_contains (task_data->reading_hash, unique_id_checksum) ||
+          g_hash_table_contains (task_data->writing_hash, unique_id_checksum))
         {
-          g_critical ("Cannot continue entry garbage collection: %s", local_error->message);
-          return NULL;
+          skipped++;
+          continue;
         }
 
-      timer = g_timer_new ();
+      BZ_BEGIN_GUARD_WITH_CONTEXT (&guard1, &living->mutex, &living->gate);
 
-      BZ_BEGIN_GUARD_WITH_CONTEXT (&guard0, &task_data->alive_mutex, &task_data->alive_gate);
-      BZ_BEGIN_GUARD_WITH_CONTEXT (&guard0, &task_data->reading_mutex, &task_data->reading_gate);
-      BZ_BEGIN_GUARD_WITH_CONTEXT (&guard0, &task_data->writing_mutex, &task_data->writing_gate);
-
-      g_hash_table_iter_init (&iter, task_data->alive_hash);
-      for (;;)
+      entry = g_weak_ref_get (&living->wr);
+      if (entry != NULL)
         {
-          char *unique_id_checksum           = NULL;
-          g_autoptr (LivingEntryData) living = NULL;
-          g_autoptr (BzGuard) guard1         = NULL;
-          g_autoptr (BzEntry) entry          = NULL;
-
-          if (!g_hash_table_iter_next (&iter, (gpointer *) &unique_id_checksum, (gpointer *) &living))
-            break;
-          total++;
-          living_entry_data_ref (living);
-
-          if (g_hash_table_contains (task_data->reading_hash, unique_id_checksum) ||
-              g_hash_table_contains (task_data->writing_hash, unique_id_checksum))
+          if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION) &&
+              g_timer_elapsed (living->cached, NULL) > WATCH_RECACHE_INTERVAL_SEC_DOUBLE)
             {
-              skipped++;
-              continue;
-            }
+              g_autoptr (WriteTaskData) data = NULL;
+              g_autoptr (DexFuture) future   = NULL;
 
-          BZ_BEGIN_GUARD_WITH_CONTEXT (&guard1, &living->mutex, &living->gate);
+              data                     = write_task_data_new ();
+              data->task_data          = ongoing_task_data_ref (task_data);
+              data->unique_id_checksum = g_strdup (unique_id_checksum);
+              data->entry              = g_object_ref (entry);
 
-          entry = g_weak_ref_get (&living->wr);
-          if (entry != NULL)
-            {
-              if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION) &&
-                  g_timer_elapsed (living->cached, NULL) > WATCH_RECACHE_INTERVAL_SEC_DOUBLE)
-                {
-                  g_autoptr (WriteTaskData) data = NULL;
-
-                  data                     = write_task_data_new ();
-                  data->task_data          = ongoing_task_data_ref (task_data);
-                  data->unique_id_checksum = g_strdup (unique_id_checksum);
-                  data->entry              = g_object_ref (entry);
-
-                  dex_future_disown (dex_scheduler_spawn (
-                      task_data->scheduler,
-                      bz_get_dex_stack_size (),
-                      (DexFiberFunc) write_task_fiber,
-                      write_task_data_ref (data),
-                      write_task_data_unref));
-                  written++;
-                }
-            }
-          else
-            {
-              bz_clear_guard (&guard1);
-              g_hash_table_iter_remove (&iter);
-              pruned++;
+              future = dex_scheduler_spawn (
+                  task_data->scheduler,
+                  bz_get_dex_stack_size (),
+                  (DexFiberFunc) write_task_fiber,
+                  write_task_data_ref (data),
+                  write_task_data_unref);
+              g_ptr_array_add (write_backs, g_steal_pointer (&future));
+              written++;
             }
         }
+      else
+        {
+          bz_clear_guard (&guard1);
+          g_hash_table_iter_remove (&iter);
+          pruned++;
+        }
+    }
+
+  bz_clear_guard (&guard0);
+  if (write_backs->len > 0)
+    dex_await (dex_future_allv (
+                   (DexFuture *const *) write_backs->pdata,
+                   write_backs->len),
+               NULL);
 
 #ifdef __GLIBC__
-      malloc_trim (0);
+  malloc_trim (0);
 #endif
 
-      g_debug ("Sweep report: finished in %.4f seconds, including time to acquire guards\n"
-               "  Out of a total of %d entries considered:\n"
-               "    %d were skipped due to active tasks being associated with them\n"
-               "    %d application entries were kept alive but written to back to disk\n"
-               "    %d entries were forgotten by the application and were pruned\n"
-               "  Another sweep will take place in %d msec",
-               g_timer_elapsed (timer, NULL),
-               total, skipped, written, pruned, WATCH_CLEANUP_INTERVAL_MSEC);
-    }
+  g_debug ("Sweep report: finished in %.4f seconds, including time to acquire guards\n"
+           "  Out of a total of %d entries considered:\n"
+           "    %d were skipped due to active tasks being associated with them\n"
+           "    %d application entries were kept alive but written to back to disk\n"
+           "    %d entries were forgotten by the application and were pruned\n"
+           "  Another sweep will take place in %d msec",
+           g_timer_elapsed (timer, NULL),
+           total, skipped, written, pruned, WATCH_CLEANUP_INTERVAL_MSEC);
+
+  return dex_timeout_new_msec (WATCH_CLEANUP_INTERVAL_MSEC);
 }
 
 /* End of bz-entry-cache-manager.c */
