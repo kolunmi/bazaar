@@ -500,6 +500,7 @@ template $BzFullView: Adw.Bin {
                       vexpand: true;
                       hexpand: true;
                       visible: bind template.debounced-ui-entry as <$BzResult>.resolved as <bool>;
+                      clicked => $screenshot_clicked_cb() swapped;
 
                       model: $BzLazyAsyncTextureModel {
                         model: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.screenshot-paintables;
