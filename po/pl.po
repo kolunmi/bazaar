@@ -211,6 +211,11 @@ msgctxt "About Dialog Developer Credit"
 msgid "Alexander Vanhee"
 msgstr "Alexander Vanhee"
 
+#. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
+#: src/bz-application.c:481
+msgid "translator-credits"
+msgstr "Marcel Mrówka <micro.mail88@gmail.com>, 2025"
+
 #: src/bz-application.c:469
 msgctxt "About Dialog Translator Credit"
 msgid "Ahmed Najmawi"
@@ -1749,9 +1754,6 @@ msgstr "Wyjdź"
 #~ msgctxt "About Dialog Translator Credit"
 #~ msgid "Microwave"
 #~ msgstr "Microwave"
-
-#~ msgid "translator-credits"
-#~ msgstr "Marcel Mrówka"
 
 #~ msgid "Match using regular expressions"
 #~ msgstr "Porównywaj używając zwyczajnych wyrażeń"

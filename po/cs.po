@@ -196,6 +196,11 @@ msgctxt "About Dialog Developer Credit"
 msgid "Alexander Vanhee"
 msgstr "Alexander Vanhee"
 
+#. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
+#: src/bz-application.c:481
+msgid "translator-credits"
+msgstr "Vlastimil Dědek"
+
 #: src/bz-application.c:470
 msgctxt "About Dialog Translator Credit"
 msgid "Ahmed Najmawi"
@@ -1378,9 +1383,6 @@ msgstr "Ukončit"
 
 #~ msgid "Main Bazaar window showing Blender"
 #~ msgstr "Hlavní okno Bazaaru ukazující Blender"
-
-#~ msgid "translator-credits"
-#~ msgstr "translator-credits"
 
 #~ msgid "BzInstalledPage"
 #~ msgstr "BzInstalledPage"

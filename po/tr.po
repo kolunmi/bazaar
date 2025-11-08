@@ -198,9 +198,9 @@ msgid "Alexander Vanhee"
 msgstr "Alexander Vanhee"
 
 #. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
-#: src/bz-application.c:474
+#: src/bz-application.c:481
 msgid "translator-credits"
-msgstr "Sabri Ünal <yakushabb@gmail.com>"
+msgstr "Sabri Ünal <yakushabb@gmail.com>, 2025"
 
 #: src/bz-application.c:995
 msgid "Constructing Flatpak instance..."

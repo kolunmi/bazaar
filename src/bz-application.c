@@ -465,37 +465,11 @@ bz_application_about_action (GSimpleAction *action,
     /* This array MUST be NULL terminated */
     NULL
   };
-  const char *translators[] = {
-    C_ ("About Dialog Translator Credit", "Ahmed Najmawi"),
-    C_ ("About Dialog Translator Credit", "AtomHare"),
-    C_ ("About Dialog Translator Credit", "Azenyr"),
-    C_ ("About Dialog Translator Credit", "Goudarz Jafari"),
-    C_ ("About Dialog Translator Credit", "Jill Fiore (Lumaeris)"),
-    C_ ("About Dialog Translator Credit", "João Victor (Leal)"),
-    C_ ("About Dialog Translator Credit", "KiKaraage"),
-    C_ ("About Dialog Translator Credit", "Lucosec"),
-    C_ ("About Dialog Translator Credit", "Léane GRASSER"),
-    C_ ("About Dialog Translator Credit", "Marcel Mrówka (Microwave)"),
-    C_ ("About Dialog Translator Credit", "Peter Dave Hello"),
-    C_ ("About Dialog Translator Credit", "Pietro F."),
-    C_ ("About Dialog Translator Credit", "Sabri Ünal"),
-    C_ ("About Dialog Translator Credit", "Shihfu Juan"),
-    C_ ("About Dialog Translator Credit", "Shinsei"),
-    C_ ("About Dialog Translator Credit", "Vlastimil Dědek"),
-    C_ ("About Dialog Translator Credit", "asen23"),
-    C_ ("About Dialog Translator Credit", "camegone"),
-    C_ ("About Dialog Translator Credit", "renner"),
-    C_ ("About Dialog Translator Credit", "robotta"),
-    /* This array MUST be NULL terminated */
-    NULL
-  };
 
   g_assert (BZ_IS_APPLICATION (self));
 
   window = gtk_application_get_active_window (GTK_APPLICATION (self));
   dialog = adw_about_dialog_new ();
-
-  translators_string = g_strjoinv ("\n", (gchar **) translators);
 
   g_object_set (
       dialog,
@@ -503,7 +477,8 @@ bz_application_about_action (GSimpleAction *action,
       "application-icon", "io.github.kolunmi.Bazaar",
       "developer-name", _ ("Adam Masciola"),
       "developers", developers,
-      "translator-credits", translators_string,
+      // Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
+      "translator-credits", _ ("translator-credits"),
       "version", PACKAGE_VERSION,
       "copyright", "© 2025 Adam Masciola",
       "license-type", GTK_LICENSE_GPL_3_0,
