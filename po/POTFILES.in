@@ -56,7 +56,6 @@ src/bz-inspector.c
 src/bz-installed-page.blp
 src/bz-installed-page.c
 src/bz-io.c
-src/bz-issue.c
 src/bz-lazy-async-texture-model.c
 src/bz-license-dialog.c
 src/bz-license-dialog.h
@@ -81,7 +80,6 @@ src/bz-section-view.c
 src/bz-serializable.c
 src/bz-share-list.blp
 src/bz-share-list.c
-src/bz-state-info.c
 src/bz-stats-dialog.blp
 src/bz-stats-dialog.c
 src/bz-transaction-manager.c
@@ -90,7 +88,6 @@ src/bz-transaction-view.c
 src/bz-transaction.c
 src/bz-update-dialog.blp
 src/bz-update-dialog.c
-src/bz-url.c
 src/bz-window.blp
 src/bz-window.c
 src/bz-world-map.c
