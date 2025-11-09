@@ -67,6 +67,9 @@ unset INCLUDES
 unset PROPS
 
 while IFS= read -r line; do
+
+    [ -z "$line" ] && continue
+
     KEY="${line%%=*}"
     VAL="${line#*=}"
 
@@ -94,6 +97,7 @@ ${VAL}"
             ;;
         *)  die "unknown key '${KEY}' in ${SPEC_FILE}" ;;
     esac
+
 done < "$SPEC_FILE"
 
 if [ -z "$PREF" ] ||
