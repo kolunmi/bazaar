@@ -70,6 +70,10 @@
     font-weight: normal;
 }
 
+.installed-size {
+	font-weight: 500;
+}
+
 .support {
     --accent-fg-color : #f06292;
     --accent-bg-color : alpha(#f06292, 0.25);

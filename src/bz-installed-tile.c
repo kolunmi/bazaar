@@ -40,10 +40,7 @@ struct _BzInstalledTile
   GtkLabel      *title_label;
   GtkButton     *support_button;
   GtkButton     *addons_button;
-  GtkSeparator  *addons_separator;
   GtkButton     *remove_button;
-  GtkMenuButton *menu_button;
-  GtkButton     *run_button;
   GtkButton     *view_store_button;
 };
 
@@ -63,9 +60,6 @@ find_entry_in_group (BzEntryGroup *group,
                      gboolean (*test) (BzEntry *entry),
                      GtkWidget *window,
                      GError   **error);
-
-static gboolean
-test_is_runnable (BzEntry *entry);
 
 static gboolean
 test_is_support (BzEntry *entry);
@@ -140,6 +134,12 @@ is_zero (gpointer object,
   return value == 0;
 }
 
+static char *
+format_size (gpointer object, guint64 value)
+{
+  return g_format_size (value);
+}
+
 static void
 addon_transact_cb (BzInstalledTile *self,
                    BzEntry         *entry,
@@ -157,64 +157,6 @@ addon_transact_cb (BzInstalledTile *self,
     g_signal_emit_by_name (page, "remove", entry);
   else
     g_signal_emit_by_name (page, "install", entry);
-}
-
-static DexFuture *
-run_fiber (BzInstalledTile *tile)
-{
-  g_autoptr (GError) local_error = NULL;
-  BzInstalledPage *page          = NULL;
-  BzStateInfo     *state         = NULL;
-  GtkWidget       *window        = NULL;
-  g_autoptr (BzEntry) entry      = NULL;
-  gboolean result                = FALSE;
-
-  page = BZ_INSTALLED_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (tile), BZ_TYPE_INSTALLED_PAGE));
-  g_assert (page != NULL);
-
-  window = gtk_widget_get_ancestor (GTK_WIDGET (tile), GTK_TYPE_WINDOW);
-  g_assert (window != NULL);
-
-  g_object_get (page, "state", &state, NULL);
-  g_assert (state != NULL);
-
-  entry = find_entry_in_group (tile->group, test_is_runnable, window, &local_error);
-  if (entry == NULL)
-    goto err;
-
-  result = bz_flatpak_entry_launch (
-      BZ_FLATPAK_ENTRY (entry),
-      BZ_FLATPAK_INSTANCE (bz_state_info_get_backend (state)),
-      &local_error);
-  if (!result)
-    goto err;
-
-  g_clear_object (&state);
-  return NULL;
-
-err:
-  if (local_error != NULL)
-    bz_show_error_for_widget (window, local_error->message);
-  g_clear_object (&state);
-  return NULL;
-}
-
-static void
-run_cb (BzInstalledTile *self,
-        GtkButton       *button)
-{
-  GtkWidget *menu_btn = NULL;
-
-  menu_btn = gtk_widget_get_ancestor (GTK_WIDGET (button), GTK_TYPE_MENU_BUTTON);
-  if (menu_btn != NULL)
-    gtk_menu_button_set_active (GTK_MENU_BUTTON (menu_btn), FALSE);
-
-  dex_future_disown (dex_scheduler_spawn (
-      dex_scheduler_get_default (),
-      bz_get_dex_stack_size (),
-      (DexFiberFunc) run_fiber,
-      g_object_ref (self),
-      g_object_unref));
 }
 
 static DexFuture *
@@ -344,12 +286,6 @@ static void
 view_store_page_cb (BzInstalledTile *self,
                     GtkButton       *button)
 {
-  GtkWidget *menu_btn = NULL;
-
-  menu_btn = gtk_widget_get_ancestor (GTK_WIDGET (button), GTK_TYPE_MENU_BUTTON);
-  if (menu_btn != NULL)
-    gtk_menu_button_set_active (GTK_MENU_BUTTON (menu_btn), FALSE);
-
   dex_future_disown (dex_scheduler_spawn (
       dex_scheduler_get_default (),
       bz_get_dex_stack_size (),
@@ -425,15 +361,12 @@ bz_installed_tile_class_init (BzInstalledTileClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzInstalledTile, title_label);
   gtk_widget_class_bind_template_child (widget_class, BzInstalledTile, support_button);
   gtk_widget_class_bind_template_child (widget_class, BzInstalledTile, addons_button);
-  gtk_widget_class_bind_template_child (widget_class, BzInstalledTile, addons_separator);
   gtk_widget_class_bind_template_child (widget_class, BzInstalledTile, remove_button);
-  gtk_widget_class_bind_template_child (widget_class, BzInstalledTile, menu_button);
-  gtk_widget_class_bind_template_child (widget_class, BzInstalledTile, run_button);
   gtk_widget_class_bind_template_child (widget_class, BzInstalledTile, view_store_button);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
-  gtk_widget_class_bind_template_callback (widget_class, run_cb);
+  gtk_widget_class_bind_template_callback (widget_class, format_size);
   gtk_widget_class_bind_template_callback (widget_class, support_cb);
   gtk_widget_class_bind_template_callback (widget_class, install_addons_cb);
   gtk_widget_class_bind_template_callback (widget_class, view_store_page_cb);
@@ -565,12 +498,6 @@ find_entry_in_group (BzEntryGroup *group,
     }
 
   return NULL;
-}
-
-static gboolean
-test_is_runnable (BzEntry *entry)
-{
-  return BZ_IS_FLATPAK_ENTRY (entry);
 }
 
 static gboolean

@@ -7,37 +7,37 @@ template $BzInstalledTile: Box {
 
   orientation: horizontal;
   margin-top: 3;
-  margin-bottom: 3;
-  spacing: 15;
+  margin-bottom: 5;
+  spacing: 10;
 
   Picture icon_picture {
     margin-start: 10;
     margin-top: 10;
     margin-bottom: 10;
-    height-request: 32;
-    width-request: 32;
+    height-request: 64;
+    width-request: 64;
     paintable: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable;
     visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable) as <bool>) as <bool>;
-    styles ["lowres-icon"]
+    styles ["icon-dropshadow"]
   }
 
   Image fallback_icon {
     valign: center;
     halign: center;
     margin-start: 10;
-    margin-top: 10;
-    margin-bottom: 10;
-    width-request: 32;
-    height-request: 32;
-    pixel-size: 32;
+    margin-top: 5;
+    margin-bottom: 5;
+    width-request: 64;
+    height-request: 64;
+    pixel-size: 64;
     icon-name: "application-x-executable";
     visible: bind $is_null(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable) as <bool>;
   }
 
   Box {
-    orientation: horizontal;
-    spacing: 8;
-    hexpand: true;
+    orientation: vertical;
+    valign: center;
+    spacing: 4;
 
     Label title_label {
       xalign: 0.0;
@@ -48,32 +48,39 @@ template $BzInstalledTile: Box {
       label: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.title;
     }
 
-    Button support_button {
-      styles [
-        "circular",
-        "flat",
-        "suggested-action",
-        "support"
-      ]
-
-      has-tooltip: true;
-      tooltip-text: _("Support this application");
-
-      width-request: 32;
-      height-request: 32;
-      valign: center;
-      icon-name: "heart-filled-symbolic";
-      visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.donation-url) as <bool>) as <bool>;
-
-      clicked => $support_cb() swapped;
+    Label {
+      halign: start;
+      label: bind $format_size(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.size) as <string>;
+      styles ["dimmed", "caption", "installed-size"]
     }
+  }
+
+  Button support_button {
+    styles [
+      "circular",
+      "flat",
+      "suggested-action",
+      "support"
+    ]
+
+    has-tooltip: true;
+    tooltip-text: _("Support this application");
+
+    width-request: 32;
+    height-request: 32;
+    valign: center;
+    icon-name: "heart-filled-symbolic";
+    visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.donation-url) as <bool>) as <bool>;
+
+    clicked => $support_cb() swapped;
   }
 
   Box {
     orientation: horizontal;
-    hexpand: false;
     spacing: 8;
     margin-end: 8;
+    hexpand: true;
+    halign: end;
 
     Button addons_button {
       styles [
@@ -93,17 +100,9 @@ template $BzInstalledTile: Box {
       clicked => $install_addons_cb() swapped;
     }
 
-    Separator addons_separator {
-      visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.addons) as <bool>) as <bool>;
-      orientation: vertical;
-      margin-top: 12;
-      margin-bottom: 12;
-    }
-
     Button remove_button {
       styles [
-        "destructive-action",
-        "flat"
+        "flat",
       ]
 
       has-tooltip: true;
@@ -118,85 +117,20 @@ template $BzInstalledTile: Box {
       clicked => $remove_cb() swapped;
     }
 
-    Separator {
-      orientation: vertical;
-      margin-top: 12;
-      margin-bottom: 12;
-    }
-
-    MenuButton menu_button {
+    Button view_store_button {
       styles [
-        "flat"
+        "flat",
       ]
+
+      has-tooltip: true;
+      tooltip-text: _("View Store Page");
 
       width-request: 32;
       height-request: 32;
       valign: center;
-      icon-name: "view-more-symbolic";
-      has-tooltip: true;
-      tooltip-text: _("More actions");
-      direction: right;
+      icon-name: "eye-outline-filled-symbolic";
 
-      popover: Popover {
-        child: Box {
-          margin-start: 2;
-          margin-end: 2;
-          margin-top: 2;
-          margin-bottom: 2;
-          orientation: vertical;
-          homogeneous: true;
-          spacing: 10;
-
-          Button run_button {
-            styles [
-              "flat",
-            ]
-
-            has-tooltip: true;
-            tooltip-text: _("Run this application");
-            sensitive: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
-
-            child: Box {
-              orientation: horizontal;
-              spacing: 6;
-
-              Image {
-                icon-name: "media-playback-start-symbolic";
-              }
-
-              Label {
-                label: _("Run");
-              }
-            };
-
-            clicked => $run_cb() swapped;
-          }
-
-          Button view_store_button {
-            styles [
-              "flat",
-            ]
-
-            has-tooltip: true;
-            tooltip-text: _("View Store Page");
-
-            child: Box {
-              orientation: horizontal;
-              spacing: 6;
-
-              Image {
-                icon-name: "eye-outline-filled-symbolic";
-              }
-
-              Label {
-                label: _("View Store Page");
-              }
-            };
-
-            clicked => $view_store_page_cb() swapped;
-          }
-        };
-      };
+      clicked => $view_store_page_cb() swapped;
     }
   }
 }
