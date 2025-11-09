@@ -74,7 +74,6 @@ src/bz-rich-app-tile.blp
 src/bz-rich-app-tile.c
 src/bz-screenshot.c
 src/bz-search-engine.c
-src/bz-search-result.c
 src/bz-search-widget.blp
 src/bz-search-widget.c
 src/bz-section-view.blp

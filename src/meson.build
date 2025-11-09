@@ -121,7 +121,6 @@ bz_sources = [
   'bz-screenshot.c',
   'bz-screenshots-carousel.c',
   'bz-search-engine.c',
-  'bz-search-result.c',
   'bz-search-widget.c',
   'bz-section-view.c',
   'bz-serializable.c',
@@ -173,8 +172,9 @@ gen_gobject_code = generator(
 
 gobject_specs = files(
   'bz-issue.txt',
-  'bz-url.txt',
+  'bz-search-result.txt',
   'bz-state-info.txt',
+  'bz-url.txt',
 )
 
 gen_gobject_srcs = []
