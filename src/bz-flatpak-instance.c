@@ -1868,7 +1868,7 @@ transaction_operation_error (FlatpakTransaction          *object,
   /* `FLATPAK_TRANSACTION_ERROR_DETAILS_NON_FATAL` is the only
      possible value of `details` */
 
-  g_critical ("Transaction failed to complete: %s", error->message);
+  g_warning ("Transaction failed to complete: %s", error->message);
 
   g_mutex_lock (&data->mutex);
   g_hash_table_replace (

@@ -489,7 +489,7 @@ initialize_fiber (GWeakRef *wr)
       node = dex_await_boxed (g_steal_pointer (&future), &local_error);
       if (node == NULL)
         {
-          g_critical ("Failed to complete request '%s' from flathub: %s", request, local_error->message);
+          g_warning ("Failed to complete request '%s' from flathub: %s", request, local_error->message);
           return dex_future_new_for_error (g_steal_pointer (&local_error));
         }
       g_hash_table_replace (nodes, g_steal_pointer (&request), g_steal_pointer (&node));
@@ -605,7 +605,7 @@ initialize_fiber (GWeakRef *wr)
           node = dex_await_boxed (g_steal_pointer (&future), &local_error);
           if (node == NULL)
             {
-              g_critical ("Failed to retrieve category '%s' from flathub: %s", name, local_error->message);
+              g_warning ("Failed to retrieve category '%s' from flathub: %s", name, local_error->message);
               return dex_future_new_for_error (g_steal_pointer (&local_error));
             }
 

@@ -342,7 +342,8 @@ compile_schema (XbNode *node)
           XbNode *next                   = NULL;
 
           child_element = xb_node_get_element (child);
-          g_assert (g_strcmp0 (child_element, "mapping") == 0);
+          if (g_strcmp0 (child_element, "mapping") != 0)
+            ERROR_OUT ("\"mapping\" is the only valid child element of \"mappings\"");
 
           key = xb_node_get_attr (child, "key");
           if (key == NULL)
