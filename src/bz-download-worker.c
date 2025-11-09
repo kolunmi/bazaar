@@ -290,8 +290,8 @@ bz_download_worker_get_default (void)
 
           worker = bz_download_worker_new ("default", &local_error);
           if (worker == NULL)
-            g_critical ("FATAL!!! The default download worker could not be spawned: %s",
-                        local_error->message);
+            g_warning ("FATAL!!! The default download worker could not be spawned: %s",
+                       local_error->message);
           g_assert (worker != NULL);
 
           g_ptr_array_add (workers, g_steal_pointer (&worker));
@@ -313,8 +313,8 @@ bz_download_worker_get_default (void)
 
           worker = bz_download_worker_new ("default", &local_error);
           if (worker == NULL)
-            g_critical ("FATAL!!! The default download worker could not be spawned: %s",
-                        local_error->message);
+            g_warning ("FATAL!!! The default download worker could not be spawned: %s",
+                       local_error->message);
           g_assert (worker != NULL);
 
           *loc = g_steal_pointer (&worker);
@@ -354,8 +354,8 @@ monitor_worker_fiber (GWeakRef *wr)
       if (line == NULL)
         {
           if (local_error != NULL)
-            g_critical ("Could not read stdout from download worker subprocess: %s",
-                        local_error->message);
+            g_warning ("Could not read stdout from download worker subprocess: %s",
+                       local_error->message);
           goto err;
         }
 
@@ -372,8 +372,8 @@ monitor_worker_fiber (GWeakRef *wr)
               if (line == NULL)
                 {
                   if (local_error != NULL)
-                    g_critical ("Could not read stdout from download worker subprocess: %s",
-                                local_error->message);
+                    g_warning ("Could not read stdout from download worker subprocess: %s",
+                               local_error->message);
                   goto err;
                 }
             }
@@ -382,8 +382,8 @@ monitor_worker_fiber (GWeakRef *wr)
                                      line, NULL, NULL, &local_error);
           if (variant == NULL)
             {
-              g_critical ("Could not interpret stdout from download worker subprocess: %s",
-                          local_error->message);
+              g_warning ("Could not interpret stdout from download worker subprocess: %s",
+                         local_error->message);
               goto err;
             }
           g_variant_get (variant, "(sb)", &dest_path, &success);
@@ -430,12 +430,12 @@ err:
 static DexFuture *
 invoke_worker_fiber (InvokeWorkerData *data)
 {
+  DexPromise *promise                    = data->promise;
+  GFile      *src                        = data->src;
+  GFile      *dest                       = data->dest;
   g_autoptr (BzDownloadWorker) self      = NULL;
   g_autoptr (GError) local_error         = NULL;
   g_autoptr (BzGuard) guard              = NULL;
-  DexPromise      *promise               = data->promise;
-  GFile           *src                   = data->src;
-  GFile           *dest                  = data->dest;
   g_autofree char *src_uri               = NULL;
   g_autofree char *dest_path             = NULL;
   DexPromise      *existing              = NULL;
@@ -478,7 +478,7 @@ invoke_worker_fiber (InvokeWorkerData *data)
               stdin_stream,
               output->str,
               output->len,
-              G_PRIORITY_DEFAULT),
+              G_PRIORITY_DEFAULT_IDLE),
           dex_ref (promise),
           NULL),
       &local_error);
@@ -537,7 +537,7 @@ plumb_data_input_stream_read_line_async (GDataInputStream   *stream,
 {
   g_data_input_stream_read_line_async (
       stream,
-      G_PRIORITY_DEFAULT,
+      G_PRIORITY_DEFAULT_IDLE,
       cancellable,
       callback,
       user_data);

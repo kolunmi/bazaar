@@ -107,13 +107,7 @@ else
   endforeach
   add_project_arguments(project_c_args, language: 'c')
 
-
-  # needed by both bazaar and bazaar-ui
-  gtk_dep = dependency('gtk4')
-
-
   subdir('data')
-  # subdir('bazaar-ui')
   subdir('src')
   subdir('po')
 

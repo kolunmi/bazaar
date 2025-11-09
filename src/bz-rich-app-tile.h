@@ -1,6 +1,6 @@
-/* bz-url.h
+/* bz-rich-app-tile.h
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2025 Adam Masciola, Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,37 +20,26 @@
 
 #pragma once
 
+#include "adwaita.h"
 #include <gtk/gtk.h>
+
+#include "bz-entry-group.h"
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_URL (bz_url_get_type ())
-G_DECLARE_FINAL_TYPE (BzUrl, bz_url, BZ, URL, GObject)
+#define BZ_TYPE_RICH_APP_TILE (bz_rich_app_tile_get_type ())
 
-BzUrl *
-bz_url_new (void);
+G_DECLARE_FINAL_TYPE (BzRichAppTile, bz_rich_app_tile, BZ, RICH_APP_TILE, AdwBin)
 
-const char *
-bz_url_get_name (BzUrl *self);
+GtkWidget *
+bz_rich_app_tile_new (void);
 
-const char *
-bz_url_get_url (BzUrl *self);
-
-const char *
-bz_url_get_icon_name (BzUrl *self);
+BzEntryGroup *
+bz_rich_app_tile_get_group (BzRichAppTile *self);
 
 void
-bz_url_set_name (BzUrl      *self,
-                 const char *name);
-
-void
-bz_url_set_url (BzUrl      *self,
-                const char *url);
-
-void
-bz_url_set_icon_name (BzUrl      *self,
-                      const char *icon_name);
+bz_rich_app_tile_set_group (BzRichAppTile *self,
+                            BzEntryGroup  *group);
 
 G_END_DECLS
-
-/* End of bz-url.h */
+/* End of bz-rich-app-tile.h */

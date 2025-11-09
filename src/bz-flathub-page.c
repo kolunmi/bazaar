@@ -18,7 +18,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "bz-flathub-page.h"
+#include <glib/gi18n.h>
+
 #include "bz-app-tile.h"
 #include "bz-apps-page.h"
 #include "bz-detailed-app-tile.h"
@@ -27,17 +28,17 @@
 #include "bz-featured-carousel.h"
 #include "bz-flathub-category-section.h"
 #include "bz-flathub-category.h"
+#include "bz-flathub-page.h"
 #include "bz-inhibited-scrollable.h"
-#include "bz-patterned-background.h"
 #include "bz-section-view.h"
 #include "bz-window.h"
-#include <glib/gi18n.h>
 
 struct _BzFlathubPage
 {
   AdwBin parent_instance;
 
   BzFlathubState *state;
+  gboolean online;
 
   /* Template widgets */
   AdwViewStack *stack;
@@ -50,6 +51,7 @@ enum
   PROP_0,
 
   PROP_STATE,
+  PROP_ONLINE,
 
   LAST_PROP
 };
@@ -63,6 +65,10 @@ enum
 };
 static guint signals[LAST_SIGNAL];
 
+static BzFlathubCategory *
+get_category_by_name (GListModel *categories,
+                      const char *name);
+
 static void
 tile_clicked (BzEntryGroup *group,
               GtkButton    *button);
@@ -75,10 +81,6 @@ show_more_clicked (const char *title,
 static void
 apps_page_select_cb (BzFlathubPage *self,
                      BzEntryGroup  *group,
-                     BzAppsPage    *page);
-
-static void
-apps_page_hiding_cb (BzFlathubPage *self,
                      BzAppsPage    *page);
 
 static void
@@ -117,6 +119,9 @@ bz_flathub_page_get_property (GObject    *object,
     case PROP_STATE:
       g_value_set_object (value, bz_flathub_page_get_state (self));
       break;
+    case PROP_ONLINE:
+      g_value_set_boolean (value, self->online);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -134,6 +139,14 @@ bz_flathub_page_set_property (GObject      *object,
     {
     case PROP_STATE:
       bz_flathub_page_set_state (self, g_value_get_object (value));
+      break;
+    case PROP_ONLINE:
+      self->online = g_value_get_boolean (value);
+      if (self->online)
+        bz_flathub_page_set_state (self, bz_flathub_page_get_state (self));
+      else
+        adw_view_stack_set_visible_child_name (self->stack, "offline");
+
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -159,53 +172,29 @@ unbind_widget_cb (BzFlathubPage     *self,
 }
 
 static void
-show_more_trending_clicked_cb (BzFlathubPage *self,
-                               GtkButton     *button)
+show_more_mobile_clicked_cb (BzFlathubPage *self,
+                             GtkButton     *button)
 {
-  g_autoptr (GListModel) model = NULL;
+  g_autoptr (GListModel) model           = NULL;
+  g_autoptr (BzFlathubCategory) category = NULL;
 
-  model = bz_flathub_state_dup_trending (self->state);
-  show_more_clicked (_ ("Trending"), model, button);
+  category = get_category_by_name (bz_flathub_state_get_categories (self->state), "mobile");
+  if (category == NULL)
+    return;
+
+  model = bz_flathub_category_dup_applications (category);
+  if (model == NULL)
+    return;
+
+  show_more_clicked (_ ("Mobile Apps"), model, button);
 }
 
-static void
-show_more_recently_updated_clicked_cb (BzFlathubPage *self,
-                                       GtkButton     *button)
+static BzFlathubCategory *
+get_category_by_name (GListModel *categories,
+                      const char *name)
 {
-  g_autoptr (GListModel) model = NULL;
-
-  model = bz_flathub_state_dup_recently_updated (self->state);
-  show_more_clicked (_ ("Recently Updated"), model, button);
-}
-
-static void
-show_more_recently_added_clicked_cb (BzFlathubPage *self,
-                                     GtkButton     *button)
-{
-  g_autoptr (GListModel) model = NULL;
-
-  model = bz_flathub_state_dup_recently_added (self->state);
-  show_more_clicked (_ ("Recently Added"), model, button);
-}
-
-static void
-show_more_popular_clicked_cb (BzFlathubPage *self,
-                              GtkButton     *button)
-{
-  g_autoptr (GListModel) model = NULL;
-
-  model = bz_flathub_state_dup_popular (self->state);
-  show_more_clicked (_ ("Popular"), model, button);
-}
-
-static gpointer
-get_category_by_name_cb (gpointer    object,
-                         gpointer    categories_obj,
-                         const char *name)
-{
-  GListModel *categories = G_LIST_MODEL (categories_obj);
-  guint       n_items;
-  guint       i;
+  guint n_items;
+  guint i;
 
   if (categories == NULL)
     return NULL;
@@ -226,6 +215,14 @@ get_category_by_name_cb (gpointer    object,
   return NULL;
 }
 
+static gpointer
+get_category_by_name_cb (gpointer    object,
+                         gpointer    categories_obj,
+                         const char *name)
+{
+  return get_category_by_name (G_LIST_MODEL (categories_obj), name);
+}
+
 static void
 bz_flathub_page_class_init (BzFlathubPageClass *klass)
 {
@@ -242,6 +239,13 @@ bz_flathub_page_class_init (BzFlathubPageClass *klass)
           NULL, NULL,
           BZ_TYPE_FLATHUB_STATE,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_ONLINE] =
+      g_param_spec_boolean (
+          "online",
+          NULL, NULL,
+          FALSE,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
@@ -262,7 +266,6 @@ bz_flathub_page_class_init (BzFlathubPageClass *klass)
 
   g_type_ensure (BZ_TYPE_SECTION_VIEW);
   g_type_ensure (BZ_TYPE_FLATHUB_CATEGORY_SECTION);
-  g_type_ensure (BZ_TYPE_PATTERNED_BACKGROUND);
   g_type_ensure (BZ_TYPE_DETAILED_APP_TILE);
   g_type_ensure (BZ_TYPE_INHIBITED_SCROLLABLE);
   g_type_ensure (BZ_TYPE_DYNAMIC_LIST_VIEW);
@@ -275,10 +278,7 @@ bz_flathub_page_class_init (BzFlathubPageClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, unbind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, category_section_group_selected_cb);
   gtk_widget_class_bind_template_callback (widget_class, get_category_by_name_cb);
-  gtk_widget_class_bind_template_callback (widget_class, show_more_trending_clicked_cb);
-  gtk_widget_class_bind_template_callback (widget_class, show_more_recently_updated_clicked_cb);
-  gtk_widget_class_bind_template_callback (widget_class, show_more_recently_added_clicked_cb);
-  gtk_widget_class_bind_template_callback (widget_class, show_more_popular_clicked_cb);
+  gtk_widget_class_bind_template_callback (widget_class, show_more_mobile_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, featured_carousel_group_clicked_cb);
 }
 
@@ -336,14 +336,11 @@ show_more_clicked (const char *title,
                    GtkButton  *button)
 {
   GtkWidget         *self      = NULL;
-  GtkWidget         *window    = NULL;
   GtkWidget         *nav_view  = NULL;
   AdwNavigationPage *apps_page = NULL;
 
   self = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_FLATHUB_PAGE);
   g_assert (self != NULL);
-
-  window = GTK_WIDGET (gtk_widget_get_root (GTK_WIDGET (self)));
 
   nav_view = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
   g_assert (nav_view != NULL);
@@ -353,13 +350,8 @@ show_more_clicked (const char *title,
   g_signal_connect_swapped (
       apps_page, "select",
       G_CALLBACK (apps_page_select_cb), self);
-  g_signal_connect_swapped (
-      apps_page, "hiding",
-      G_CALLBACK (apps_page_hiding_cb), self);
 
   adw_navigation_view_push (ADW_NAVIGATION_VIEW (nav_view), apps_page);
-
-  bz_window_set_app_list_view_mode (BZ_WINDOW (window), TRUE);
 }
 
 static void
@@ -376,15 +368,4 @@ category_section_group_selected_cb (BzFlathubPage            *self,
                                     BzFlathubCategorySection *section)
 {
   g_signal_emit (self, signals[SIGNAL_GROUP_SELECTED], 0, group);
-}
-
-static void
-apps_page_hiding_cb (BzFlathubPage *self,
-                     BzAppsPage    *page)
-{
-  GtkWidget *window = NULL;
-
-  window = GTK_WIDGET (gtk_widget_get_root (GTK_WIDGET (self)));
-
-  bz_window_set_app_list_view_mode (BZ_WINDOW (window), FALSE);
 }

@@ -42,8 +42,8 @@ typedef struct
   GtkAlign      banner_text_halign;
   GtkAlign      banner_text_valign;
   double        banner_text_label_xalign;
-  GdkPaintable *light_banner;
-  GdkPaintable *dark_banner;
+  char         *light_banner;
+  char         *dark_banner;
   int           banner_height;
   GtkContentFit banner_fit;
   GListModel   *groups;
@@ -98,8 +98,8 @@ bz_content_section_dispose (GObject *object)
   g_clear_pointer (&priv->title, g_free);
   g_clear_pointer (&priv->subtitle, g_free);
   g_clear_pointer (&priv->description, g_free);
-  g_clear_object (&priv->light_banner);
-  g_clear_object (&priv->dark_banner);
+  g_clear_pointer (&priv->light_banner, g_free);
+  g_clear_pointer (&priv->dark_banner, g_free);
   g_clear_object (&priv->groups);
   g_clear_pointer (&priv->markdown, g_free);
 
@@ -151,21 +151,21 @@ bz_content_section_get_property (GObject    *object,
       g_value_set_double (value, priv->banner_text_label_xalign);
       break;
     case PROP_BANNER:
-      g_value_set_object (
+      g_value_set_string (
           value,
           priv->light_banner != NULL
               ? priv->light_banner
               : priv->dark_banner);
       break;
     case PROP_LIGHT_BANNER:
-      g_value_set_object (
+      g_value_set_string (
           value,
           priv->light_banner != NULL
               ? priv->light_banner
               : priv->dark_banner);
       break;
     case PROP_DARK_BANNER:
-      g_value_set_object (
+      g_value_set_string (
           value,
           priv->dark_banner != NULL
               ? priv->dark_banner
@@ -243,18 +243,18 @@ bz_content_section_set_property (GObject      *object,
       priv->banner_text_label_xalign = g_value_get_double (value);
       break;
     case PROP_BANNER:
-      g_clear_object (&priv->light_banner);
-      priv->light_banner = g_value_dup_object (value);
+      g_clear_pointer (&priv->light_banner, g_free);
+      priv->light_banner = g_value_dup_string (value);
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_LIGHT_BANNER]);
       break;
     case PROP_LIGHT_BANNER:
-      g_clear_object (&priv->light_banner);
-      priv->light_banner = g_value_dup_object (value);
+      g_clear_pointer (&priv->light_banner, g_free);
+      priv->light_banner = g_value_dup_string (value);
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_BANNER]);
       break;
     case PROP_DARK_BANNER:
-      g_clear_object (&priv->dark_banner);
-      priv->dark_banner = g_value_dup_object (value);
+      g_clear_pointer (&priv->dark_banner, g_free);
+      priv->dark_banner = g_value_dup_string (value);
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_BANNER]);
       break;
     case PROP_BANNER_HEIGHT:
@@ -365,24 +365,21 @@ bz_content_section_class_init (BzContentSectionClass *klass)
           G_PARAM_READWRITE);
 
   props[PROP_BANNER] =
-      g_param_spec_object (
+      g_param_spec_string (
           "banner",
-          NULL, NULL,
-          GDK_TYPE_PAINTABLE,
+          NULL, NULL, NULL,
           G_PARAM_READWRITE);
 
   props[PROP_LIGHT_BANNER] =
-      g_param_spec_object (
+      g_param_spec_string (
           "light-banner",
-          NULL, NULL,
-          GDK_TYPE_PAINTABLE,
+          NULL, NULL, NULL,
           G_PARAM_READWRITE);
 
   props[PROP_DARK_BANNER] =
-      g_param_spec_object (
+      g_param_spec_string (
           "dark-banner",
-          NULL, NULL,
-          GDK_TYPE_PAINTABLE,
+          NULL, NULL, NULL,
           G_PARAM_READWRITE);
 
   props[PROP_BANNER_HEIGHT] =

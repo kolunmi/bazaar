@@ -1,4 +1,4 @@
-/* bz-screenshot-dialog.h
+/* bz-screenshot-page.h
  *
  * Copyright 2025 Alexander Vanhee
  *
@@ -25,11 +25,11 @@
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_SCREENSHOT_DIALOG (bz_screenshot_dialog_get_type ())
+#define BZ_TYPE_SCREENSHOT_PAGE (bz_screenshot_page_get_type ())
 
-G_DECLARE_FINAL_TYPE (BzScreenshotDialog, bz_screenshot_dialog, BZ, SCREENSHOT_DIALOG, AdwDialog)
+G_DECLARE_FINAL_TYPE (BzScreenshotPage, bz_screenshot_page, BZ, SCREENSHOT_PAGE, AdwNavigationPage)
 
-AdwDialog *bz_screenshot_dialog_new (GListModel *screenshots,
-                                     guint       initial_index);
+AdwNavigationPage *bz_screenshot_page_new (GListModel *screenshots,
+                                           guint       initial_index);
 
 G_END_DECLS

@@ -35,7 +35,8 @@
     <file preprocess="xml-stripblanks">bz-progress-bar.ui</file>
     <file preprocess="xml-stripblanks">bz-releases-list.ui</file>
     <file preprocess="xml-stripblanks">bz-releases-dialog.ui</file>
-    <file preprocess="xml-stripblanks">bz-screenshot-dialog.ui</file>
+    <file preprocess="xml-stripblanks">bz-rich-app-tile.ui</file>
+    <file preprocess="xml-stripblanks">bz-screenshot-page.ui</file>
     <file preprocess="xml-stripblanks">bz-screenshots-carousel.ui</file>
     <file preprocess="xml-stripblanks">bz-search-widget.ui</file>
     <file preprocess="xml-stripblanks">bz-section-view.ui</file>
@@ -105,6 +106,8 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/zoom-minus-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/zoom-plus-symbolic.svg</file>
 
+    <file preprocess="xml-stripblanks">icons/scalable/actions/on-the-go-symbolic.svg</file>
+
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Create.svg</file>
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Develop.svg</file>
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Learn.svg</file>
@@ -115,6 +118,11 @@
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Science.svg</file>
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.System.svg</file>
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Utilities.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Mobile.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Trending.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Popular.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.New.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Updated.svg</file>
 
   </gresource>
 </gresources>

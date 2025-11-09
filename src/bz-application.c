@@ -22,8 +22,8 @@
 
 #include "config.h"
 
-// #include <bazaar-ui.h>
 #include <glib/gi18n.h>
+#include <malloc.h>
 
 #include "bz-application-map-factory.h"
 #include "bz-application.h"
@@ -73,7 +73,6 @@ struct _BzApplication
   BzGnomeShellSearchProvider *gs_search;
 
   BzFlatpakInstance *flatpak;
-  DexChannel        *channel;
   char              *waiting_to_open_appstream;
   GFile             *waiting_to_open_file;
   BzFlathubState    *flathub;
@@ -455,38 +454,13 @@ bz_application_about_action (GSimpleAction *action,
                              GVariant      *parameter,
                              gpointer       user_data)
 {
-  BzApplication   *self               = user_data;
-  GtkWindow       *window             = NULL;
-  AdwDialog       *dialog             = NULL;
-  g_autofree char *translators_string = NULL;
+  BzApplication *self   = user_data;
+  GtkWindow     *window = NULL;
+  AdwDialog     *dialog = NULL;
 
   const char *developers[] = {
     C_ ("About Dialog Developer Credit", "Adam Masciola <kolunmi@posteo.net>"),
     C_ ("About Dialog Developer Credit", "Alexander Vanhee"),
-    /* This array MUST be NULL terminated */
-    NULL
-  };
-  const char *translators[] = {
-    C_ ("About Dialog Translator Credit", "Ahmed Najmawi"),
-    C_ ("About Dialog Translator Credit", "AtomHare"),
-    C_ ("About Dialog Translator Credit", "Azenyr"),
-    C_ ("About Dialog Translator Credit", "Goudarz Jafari"),
-    C_ ("About Dialog Translator Credit", "Jill Fiore (Lumaeris)"),
-    C_ ("About Dialog Translator Credit", "João Victor (Leal)"),
-    C_ ("About Dialog Translator Credit", "KiKaraage"),
-    C_ ("About Dialog Translator Credit", "Lucosec"),
-    C_ ("About Dialog Translator Credit", "Léane GRASSER"),
-    C_ ("About Dialog Translator Credit", "Marcel Mrówka (Microwave)"),
-    C_ ("About Dialog Translator Credit", "Peter Dave Hello"),
-    C_ ("About Dialog Translator Credit", "Pietro F."),
-    C_ ("About Dialog Translator Credit", "Sabri Ünal"),
-    C_ ("About Dialog Translator Credit", "Shihfu Juan"),
-    C_ ("About Dialog Translator Credit", "Shinsei"),
-    C_ ("About Dialog Translator Credit", "Vlastimil Dědek"),
-    C_ ("About Dialog Translator Credit", "asen23"),
-    C_ ("About Dialog Translator Credit", "camegone"),
-    C_ ("About Dialog Translator Credit", "renner"),
-    C_ ("About Dialog Translator Credit", "robotta"),
     /* This array MUST be NULL terminated */
     NULL
   };
@@ -496,15 +470,14 @@ bz_application_about_action (GSimpleAction *action,
   window = gtk_application_get_active_window (GTK_APPLICATION (self));
   dialog = adw_about_dialog_new ();
 
-  translators_string = g_strjoinv ("\n", (gchar **) translators);
-
   g_object_set (
       dialog,
       "application-name", "Bazaar",
       "application-icon", "io.github.kolunmi.Bazaar",
       "developer-name", _ ("Adam Masciola"),
       "developers", developers,
-      "translator-credits", translators_string,
+      // Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
+      "translator-credits", _ ("translator-credits"),
       "version", PACKAGE_VERSION,
       "copyright", "© 2025 Adam Masciola",
       "license-type", GTK_LICENSE_GPL_3_0,
@@ -684,8 +657,6 @@ init_service_struct (BzApplication *self)
 #endif
   GtkCustomFilter *filter = NULL;
 
-  // bazaar_ui_init ();
-
 #ifdef HARDCODED_MAIN_CONFIG
   config_file  = g_file_new_for_path (HARDCODED_MAIN_CONFIG);
   config_bytes = g_file_load_bytes (config_file, NULL, NULL, &local_error);
@@ -702,12 +673,12 @@ init_service_struct (BzApplication *self)
       if (parse_results != NULL)
         self->config = g_steal_pointer (&parse_results);
       else
-        g_critical ("Could not load main config at %s: %s",
-                    HARDCODED_MAIN_CONFIG, local_error->message);
+        g_warning ("Could not load main config at %s: %s",
+                   HARDCODED_MAIN_CONFIG, local_error->message);
     }
   else
-    g_critical ("Could not load main config at %s: %s",
-                HARDCODED_MAIN_CONFIG, local_error->message);
+    g_warning ("Could not load main config at %s: %s",
+               HARDCODED_MAIN_CONFIG, local_error->message);
 
   g_clear_pointer (&local_error, g_error_free);
 #endif
@@ -970,7 +941,7 @@ fiber_check_for_updates (BzApplication *self)
 
       dex_await (
           dex_future_allv ((DexFuture *const *) futures->pdata, futures->len),
-          &local_error);
+          NULL);
 
       store = g_list_store_new (BZ_TYPE_ENTRY);
       for (guint i = 0; i < futures->len; i++)
@@ -988,8 +959,8 @@ fiber_check_for_updates (BzApplication *self)
               const char *unique_id = NULL;
 
               unique_id = g_ptr_array_index (update_ids, i);
-              g_critical ("%s could not be resolved for the update list and thus will not be included: %s",
-                          unique_id, local_error->message);
+              g_warning ("%s could not be resolved for the update list and thus will not be included: %s",
+                         unique_id, local_error->message);
               g_clear_pointer (&local_error, g_error_free);
             }
         }
@@ -999,7 +970,7 @@ fiber_check_for_updates (BzApplication *self)
     }
   else if (local_error != NULL)
     {
-      g_critical ("Failed to check for updates: %s", local_error->message);
+      g_warning ("Failed to check for updates: %s", local_error->message);
 
       if (window != NULL)
         bz_show_error_for_widget (GTK_WIDGET (window), local_error->message);
@@ -1293,6 +1264,9 @@ refresh_fiber (BzApplication *self)
                  cache_futures->len),
              NULL);
   g_clear_pointer (&cache_futures, g_ptr_array_unref);
+#ifdef __GLIBC__
+  malloc_trim (0);
+#endif
 
   result = dex_await (dex_ref (sync_future), &local_error);
   if (!result)
@@ -1374,7 +1348,7 @@ watch_backend_notifs_fiber (BzApplication *self)
               &local_error);
           if (installed_set == NULL)
             {
-              g_critical ("Failed to enumerate installed entries: %s", local_error->message);
+              g_warning ("Failed to enumerate installed entries: %s", local_error->message);
               bz_state_info_set_background_task_label (self->state, NULL);
               continue;
             }
@@ -1571,6 +1545,11 @@ refresh_finally (DexFuture     *future,
       open_flatpakref_take (self, g_steal_pointer (&self->waiting_to_open_file));
     }
 
+/* yassss */
+#ifdef __GLIBC__
+  malloc_trim (0);
+#endif
+
   return NULL;
 }
 
@@ -1617,6 +1596,10 @@ refresh (BzApplication *self)
       future, (DexFutureCallback) refresh_finally,
       g_object_ref (self), g_object_unref);
   self->refresh_task = g_steal_pointer (&future);
+
+#ifdef __GLIBC__
+  malloc_trim (0);
+#endif
 }
 
 static GtkWindow *

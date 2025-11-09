@@ -1,19 +1,48 @@
-.global-search search {
-    padding: 12px;
-    border-bottom: 1px solid var(--border-color);
+.bz-monospace {
+    font-family: monospace;
 }
-.global-search search > label {
-    font-size: 1.33333em;
-    margin-left: 6px;
-    margin-right: 6px;
+
+.search-box {
+  padding: 8px 12px;
+  border-radius: 9999px;
+  background-color: var(--card-bg-color);
 }
-.global-search search > text {
-    font-size: 1.33333em;
-    margin-left: 6px;
-    margin-right: 6px;
+
+.rich-screenshot-box {
+	background-color: var(--sidebar-bg-color);
 }
-.global-search search > text placeholder {
+
+@media (prefers-color-scheme: light) {
+  .search-box {
+    background-color: var(--shade-color);
+  }
+
+  .rich-screenshot-box {
+	  background-color: var(--sidebar-bg-color);
+  }
+}
+
+.search-box > text placeholder {
     opacity: 0.55;
+}
+
+.clear-button {
+  min-height: 24px;
+}
+
+.search-grid {
+  background-color: var(--window-bg-color);
+}
+
+.search-grid > child {
+	padding: 0;
+	margin: 6px 6px;
+	border-radius: 12px;
+	transition: background-color 200ms;
+}
+
+.narrow .search-grid > child {
+	margin: 6px 12px;
 }
 
 .card-row-btn {
@@ -53,12 +82,6 @@
     --accent-color: @warning_color;
 }
 
-.support {
-    --accent-fg-color : #f06292;
-    --accent-bg-color : alpha(#f06292, 0.25);
-    --accent-color : #f06292;
-}
-
 .green {
     --accent-fg-color : #8ff0a4;
     --accent-bg-color : alpha(#2ec27e, 0.25);
@@ -68,6 +91,12 @@
 .blue {
     --accent-fg-color : #99c1f1;
     --accent-bg-color : alpha(#1a5fb4, 0.25);
+    --accent-color : #99c1f1;
+}
+
+.dark-blue {
+    --accent-fg-color : #99c1f1;
+    --accent-bg-color : #1a5fb4;
     --accent-color : #99c1f1;
 }
 
@@ -81,6 +110,11 @@
         --accent-fg-color : #1a5fb4;
         --accent-bg-color : alpha(#99c1f1, 0.25);
         --accent-color : #1a5fb4;
+    }
+    .dark-blue {
+        --accent-fg-color : #1C71D8;
+        --accent-bg-color : #1C71D8;
+        --accent-color : #1C71D8;
     }
 }
 
@@ -142,6 +176,10 @@ button.context-tile:active .lozenge {
 .small-pill {
     padding: 2px 12px;
     border-radius: 99999px;
+}
+
+.medium-pill {
+	border-radius: 99999px;
 }
 
 .colored {
@@ -213,6 +251,33 @@ button.context-tile {
   background-color: var(--view-bg-color);
 }
 
+.otg {
+  background: linear-gradient(to right, #2f3d9f, #682889);
+}
+
+@media (prefers-color-scheme: light) {
+  .otg {
+    background: linear-gradient(to right, #c6eaf8, #c4f3c9);
+  }
+}
+
+.otg .card:not(:hover):not(:active) {
+  background: transparent;
+}
+
+.otg .card {
+  box-shadow: none;
+}
+
+.otg-image {
+	margin-top: -75px;
+	margin-bottom: -75px;
+}
+
+.otg-title {
+	font-size: 3.5em;
+}
+
 .decorated-screenshot {
   margin: 0;
   padding: 0;
@@ -276,7 +341,13 @@ window.flathub {
 }
 
 .view-dark {
-  background-color: #1d1d20;
+  background-color: black;
+  color: white;
+}
+
+.header-osd box.horizontal:not(.end) {
+	background-color: rgba(0, 0, 0, 0.65);
+	border-radius: 10px;
 }
 
 .accent-button {
@@ -353,127 +424,191 @@ window.flathub {
 
 /* Category buttons styling modified from GNOME Software*/
 .category-tile {
-	font-weight: 900;
-	font-size: larger;
+  font-weight: 700;
+  font-size: 14pt;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  padding-left: 32px;
+  padding-right: 32px;
+}
+
+window.narrow .category-tile {
+  font-size: 14pt;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+/* All background gradients are at 135deg for consistency */
+
+.category-tile.category-recently-updated {
+  background: linear-gradient(135deg, #f9ef69, #26a269);
+  color: #0c3020;
+  text-shadow: 0 1px rgba(255, 255, 255, 0.35);
+}
+.category-tile.category-recently-updated:hover {
+  background: linear-gradient(135deg, shade(#f9ef69, 1.1), shade(#26a269, 1.1));
+}
+.category-tile.category-recently-updated:active {
+  background: linear-gradient(135deg, shade(#f9ef69, 0.95), shade(#26a269, 0.95));
+}
+
+.category-tile.category-recently-added {
+  background: linear-gradient(135deg, #99a3eb, #495ade);
+}
+.category-tile.category-recently-added:hover {
+  background: linear-gradient(135deg, shade(#99a3eb, 1.1), shade(#495ade, 1.1));
+}
+.category-tile.category-recently-added:active {
+  background: linear-gradient(135deg, shade(#99a3eb, .95), shade(#495ade, .95));
+}
+
+.category-tile.category-trending {
+  background: linear-gradient(135deg, #99c1f1, #3584e4);
+}
+.category-tile.category-trending:hover {
+  background: linear-gradient(135deg, shade(#99c1f1, 1.1), shade(#3584e4, 1.1));
+}
+.category-tile.category-trending:active {
+  background: linear-gradient(135deg, shade(#99c1f1, .95), shade(#3584e4, .95));
+}
+
+.category-tile.category-popular {
+  background: linear-gradient(135deg, #f7ef74, #ffbf6f);
+  color: rgba(0, 0, 0, 0.8);
+  text-shadow: 0 1px rgba(255, 255, 255, 0.35);
+}
+.category-tile.category-popular:hover {
+  background: linear-gradient(135deg, shade(#f7ef74, 1.1), shade(#ffbf6f, 1.1));
+}
+.category-tile.category-popular:active {
+  background: linear-gradient(135deg, shade(#f7ef74, .95), shade(#ffbf6f, .95));
+}
+
+.category-tile.category-mobile {
+  background: linear-gradient(135deg, #c6eaf8, #c4f3c9);
+  color: rgba(0, 0, 0, 0.8);
+  text-shadow: 0 1px rgba(255, 255, 255, 0.35);
+}
+.category-tile.category-mobile:hover {
+  background: linear-gradient(135deg, shade(#c6eaf8, 1.1), shade(#c4f3c9, 1.1));
+}
+.category-tile.category-mobile:active {
+  background: linear-gradient(135deg, shade(#c6eaf8, .95), shade(#c4f3c9, .95));
 }
 
 .category-tile.category-graphics {
-	background: linear-gradient(180deg, #ce8cd7 0%, #2861c6 100%);
-	color: white;
+  background: linear-gradient(135deg, #ce8cd7 0%, #2861c6 100%);
 }
 .category-tile.category-graphics:hover {
-	background: linear-gradient(180deg, shade(#ce8cd7, 1.07) 0%, shade(#2861c6, 1.1) 100%);
+  background: linear-gradient(135deg, shade(#ce8cd7, 1.07) 0%, shade(#2861c6, 1.1) 100%);
 }
 .category-tile.category-graphics:active {
-	background: linear-gradient(180deg, shade(#ce8cd7, .95) 0%, shade(#2861c6, .95) 100%);
+  background: linear-gradient(135deg, shade(#ce8cd7, .95) 0%, shade(#2861c6, .95) 100%);
 }
 
 .category-tile.category-development {
-	background: #333337;
-	color: white;
+  background: linear-gradient(135deg, #444449 30%, #333337 100%);
 }
 .category-tile.category-development:hover {
-	background: shade(#333337, 1.2);
+  background: linear-gradient(135deg, shade(#444449, 1.06) 30%, shade(#333337, 1.06) 100%);
 }
 .category-tile.category-development:active {
-	background-color: shade(#333337, .95);
+  background: linear-gradient(135deg, shade(#444449, .95) 30%, shade(#333337, .95) 100%);
 }
 
 .category-tile.category-education {
-	background: linear-gradient(180deg, #2ec27e 30%, #27a66c 100%);
-	color: white;
+  background: linear-gradient(135deg, #2ec27e 30%, #27a66c 100%);
 }
 .category-tile.category-education:hover {
-	background: linear-gradient(180deg, shade(#2ec27e, 1.06) 30%, shade(#27a66c, 1.06) 100%);
+  background: linear-gradient(135deg, shade(#2ec27e, 1.06) 30%, shade(#27a66c, 1.06) 100%);
 }
 .category-tile.category-education:active {
-	background: linear-gradient(180deg, shade(#2ec27e, .95) 30%, shade(#27a66c, .95) 100%);
+  background: linear-gradient(135deg, shade(#2ec27e, .95) 30%, shade(#27a66c, .95) 100%);
 }
 
 .category-tile.category-game {
-	background: linear-gradient(75deg, #f9e2a7 0%, #eb5ec3 50%, #6d53e0 100%);
-	color: #393484;
+  background: linear-gradient(135deg, #f9e2a7 0%, #eb5ec3 50%, #6d53e0 100%);
+  color: #393484;
+  text-shadow: 0 1px rgba(255, 255, 255, 0.35);
 }
 .category-tile.category-game:hover {
-	background: linear-gradient(75deg, shade(#f9e2a7, 1.07) 0%, shade(#eb5ec3, 1.07) 50%, shade(#6d53e0, 1.07) 100%);
+  background: linear-gradient(135deg, shade(#f9e2a7, 1.07) 0%, shade(#eb5ec3, 1.07) 50%, shade(#6d53e0, 1.07) 100%);
 }
 .category-tile.category-game:active {
-	background: linear-gradient(75deg, shade(#f9e2a7, .97) 0%, shade(#eb5ec3, .95) 50%, shade(#6d53e0, 1.07) 100%);
+  background: linear-gradient(135deg, shade(#f9e2a7, .97) 0%, shade(#eb5ec3, .95) 50%, shade(#6d53e0, 1.07) 100%);
 }
 
 .category-tile.category-network {
-    background: #dc322f;
-    color: white;
+  background: linear-gradient(135deg, #ff6b35, #ed333b);
 }
 .category-tile.category-network:hover {
-    background: shade(#dc322f, 1.15);
+  background: linear-gradient(135deg, shade(#ff6b35, 1.1), shade(#ed333b, 1.1));
 }
 .category-tile.category-network:active {
-    background: shade(#dc322f, .95);
+  background: linear-gradient(135deg, shade(#ff6b35, .95), shade(#ed333b, .95));
 }
 
 .category-tile.category-office {
-	padding: 1px;
-	color: #1c71d8;
-	background-color:#fdf8d7;
-	background-image: linear-gradient(#deddda 1px, transparent 1px),
-	                  linear-gradient(90deg, #deddda 1px, transparent 1px);
-	background-size: 10px 10px, 10px 10px;
-	background-position: -1px -4px, center -1px;
+  padding: 1px;
+  color: #1c71d8;
+  text-shadow: 0 1px rgba(255, 255, 255, 0.35);
+  background-color: #fdf8d7;
+  background-image: linear-gradient(#deddda 1px, transparent 1px),
+                    linear-gradient(90deg, #deddda 1px, transparent 1px);
+  background-size: 10px 10px, 10px 10px;
+  background-position: -1px -4px, center -1px;
 }
 .category-tile.category-office:hover {
-	background-color: shade(#fdf8d7, 1.03);
-	background-image: linear-gradient(shade(#deddda, 1.04) 1px, transparent 1px),
-	                  linear-gradient(90deg, shade(#deddda, 1.04) 1px, transparent 1px);
+  background-color: shade(#fdf8d7, 1.03);
+  background-image: linear-gradient(shade(#deddda, 1.04) 1px, transparent 1px),
+                    linear-gradient(90deg, shade(#deddda, 1.04) 1px, transparent 1px);
 }
 .category-tile.category-office:active {
-	background-color: shade(#fdf8d7, .93);
-	background-image: linear-gradient(shade(#deddda, .97) 1px, transparent 1px),
-	                  linear-gradient(90deg, shade(#deddda, .97) 1px, transparent 1px);
+  background-color: shade(#fdf8d7, .93);
+  background-image: linear-gradient(shade(#deddda, .97) 1px, transparent 1px),
+                    linear-gradient(90deg, shade(#deddda, .97) 1px, transparent 1px);
 }
 
 .category-tile.category-audiovideo {
-    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffcd3c 100%);
-    color: white;
+  background: linear-gradient(135deg, #ffcd3c 0%, #ff6b35 100%);
 }
 .category-tile.category-audiovideo:hover {
-    background: linear-gradient(135deg, shade(#ff6b35, 1.08) 0%, shade(#f7931e, 1.08) 50%, shade(#ffcd3c, 1.08) 100%);
+  background: linear-gradient(135deg, shade(#ffcd3c, 1.08) 0%, shade(#ff6b35, 1.08) 100%);
 }
 .category-tile.category-audiovideo:active {
-    background: linear-gradient(135deg, shade(#ff6b35, .95) 0%, shade(#f7931e, .95) 50%, shade(#ffcd3c, .95) 100%);
+  background: linear-gradient(135deg, shade(#ffcd3c, .95) 0%, shade(#ff6b35, .95) 100%);
 }
 
 .category-tile.category-science {
-   background: linear-gradient(45deg, #1a5fb4 0%, #3584e4 50%, #26a269 100%);
-   color: white;
+  background: linear-gradient(135deg, #8ff0a4 0%, #1c71d8 100%);
 }
 .category-tile.category-science:hover {
-   background: linear-gradient(45deg, shade(#1a5fb4, 1.1) 0%, shade(#3584e4, 1.1) 50%, shade(#26a269, 1.1) 100%);
+  background: linear-gradient(135deg, shade(#8ff0a4, 1.1) 0%, shade(#1c71d8, 1.1) 100%);
 }
 .category-tile.category-science:active {
-   background: linear-gradient(45deg, shade(#1a5fb4, .95) 0%, shade(#3584e4, .95) 50%, shade(#26a269, .95) 100%);
+  background: linear-gradient(135deg, shade(#8ff0a4, .95) 0%, shade(#1c71d8, .95) 100%);
 }
 
 .category-tile.category-system {
-background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
-color: white;
+  background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
 }
 .category-tile.category-system:hover {
-background: linear-gradient(135deg, shade(#6c757d, 1.15) 0%, shade(#495057, 1.15) 100%);
+  background: linear-gradient(135deg, shade(#6c757d, 1.15) 0%, shade(#495057, 1.15) 100%);
 }
 .category-tile.category-system:active {
-background: linear-gradient(135deg, shade(#6c757d, .95) 0%, shade(#495057, .95) 100%);
+  background: linear-gradient(135deg, shade(#6c757d, .95) 0%, shade(#495057, .95) 100%);
 }
 
 .category-tile.category-utility {
-background: #deddda;
-color: #ee5f50;
+  color: #ee5f50;
+  text-shadow: 0 1px rgba(255, 255, 255, 0.35);
+  background: linear-gradient(135deg, #f6f5f4 0%, #deddda 100%);
 }
 .category-tile.category-utility:hover {
-background: shade(#deddda, 1.05);
+  background: linear-gradient(135deg, shade(#f6f5f4, 1.08) 0%, shade(#deddda, 1.08) 100%);
 }
 .category-tile.category-utility:active {
-background: shade(#deddda, .95);
+  background: linear-gradient(135deg, shade(#f6f5f4, .95) 0%, shade(#deddda, .95) 100%);
 }
 
 .installed-list-view > * {

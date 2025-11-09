@@ -25,6 +25,7 @@
 
 #include "bz-addons-dialog.h"
 #include "bz-app-size-dialog.h"
+#include "bz-app-tile.h"
 #include "bz-appstream-description-render.h"
 #include "bz-context-tile.h"
 #include "bz-dynamic-list-view.h"
@@ -38,6 +39,7 @@
 #include "bz-lazy-async-texture-model.h"
 #include "bz-license-dialog.h"
 #include "bz-releases-list.h"
+#include "bz-screenshot-page.h"
 #include "bz-screenshots-carousel.h"
 #include "bz-section-view.h"
 #include "bz-share-list.h"
@@ -57,16 +59,19 @@ struct _BzFullView
   gboolean              debounce;
   BzResult             *debounced_ui_entry;
   BzResult             *group_model;
+  gboolean              show_sidebar;
 
-  guint      debounce_timeout;
-  DexFuture *loading_forge_stars;
+  guint       debounce_timeout;
+  DexFuture  *loading_forge_stars;
+  GMenuModel *main_menu;
 
   /* Template widgets */
-  AdwViewStack    *stack;
-  GtkWidget       *shadow_overlay;
-  GtkWidget       *forge_stars;
-  GtkLabel        *forge_stars_label;
-  GtkToggleButton *description_toggle;
+  GtkScrolledWindow *main_scroll;
+  AdwViewStack      *stack;
+  GtkWidget         *shadow_overlay;
+  GtkWidget         *forge_stars;
+  GtkLabel          *forge_stars_label;
+  GtkToggleButton   *description_toggle;
 };
 
 G_DEFINE_FINAL_TYPE (BzFullView, bz_full_view, ADW_TYPE_BIN)
@@ -81,6 +86,8 @@ enum
   PROP_UI_ENTRY,
   PROP_DEBOUNCE,
   PROP_DEBOUNCED_UI_ENTRY,
+  PROP_MAIN_MENU,
+  PROP_SHOW_SIDEBAR,
 
   LAST_PROP
 };
@@ -118,6 +125,7 @@ bz_full_view_dispose (GObject *object)
   g_clear_object (&self->ui_entry);
   g_clear_object (&self->debounced_ui_entry);
   g_clear_object (&self->group_model);
+  g_clear_object (&self->main_menu);
 
   dex_clear (&self->loading_forge_stars);
   g_clear_handle_id (&self->debounce_timeout, g_source_remove);
@@ -153,6 +161,12 @@ bz_full_view_get_property (GObject    *object,
     case PROP_DEBOUNCED_UI_ENTRY:
       g_value_set_object (value, self->debounced_ui_entry);
       break;
+    case PROP_MAIN_MENU:
+      g_value_set_object (value, self->main_menu);
+      break;
+    case PROP_SHOW_SIDEBAR:
+      g_value_set_boolean (value, self->show_sidebar);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -183,6 +197,15 @@ bz_full_view_set_property (GObject      *object,
       break;
     case PROP_UI_ENTRY:
     case PROP_DEBOUNCED_UI_ENTRY:
+    case PROP_MAIN_MENU:
+      if (self->main_menu)
+        g_object_unref (self->main_menu);
+      self->main_menu = g_value_dup_object (value);
+      break;
+    case PROP_SHOW_SIDEBAR:
+      self->show_sidebar = g_value_get_boolean (value);
+      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SHOW_SIDEBAR]);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -261,11 +284,11 @@ format_recent_downloads (gpointer object,
     return g_strdup (_ ("---"));
 
   if (value >= 1000000)
-    /* Translators: M is the suffix for millions, \xC2\xA0 is a non-breaking space */
-    return g_strdup_printf (_ ("%.2f\xC2\xA0M"), value / 1000000.0);
+    /* Translators: M is the suffix for millions */
+    return g_strdup_printf (_ ("%.2fM"), value / 1000000.0);
   else if (value >= 1000)
-    /* Translators: K is the suffix for thousands, \xC2\xA0 is a non-breaking space */
-    return g_strdup_printf (_ ("%.2f\xC2\xA0K"), value / 1000.0);
+    /* Translators: K is the suffix for thousands*/
+    return g_strdup_printf (_ ("%.2fK"), value / 1000.0);
   else
     return g_strdup_printf ("%'d", value);
 }
@@ -334,6 +357,10 @@ get_age_rating_style (gpointer object,
 {
   if (age_rating >= 18)
     return g_strdup ("error");
+  else if (age_rating >= 15)
+    return g_strdup ("warning");
+  else if (age_rating >= 12)
+    return g_strdup ("dark-blue");
   else
     return g_strdup ("grey");
 }
@@ -420,6 +447,111 @@ pick_license_warning (gpointer object,
              : g_strdup (_ ("This application has a proprietary license, meaning the source code is developed privately and cannot be audited by an independent third party."));
 }
 
+static char *
+format_other_apps_label (gpointer object, const char *developer)
+{
+  if (!developer || *developer == '\0')
+    return g_strdup (_ ("Other Apps by this Developer"));
+
+  return g_strdup_printf (_ ("Other Apps by %s"), developer);
+}
+
+static gpointer
+filter_own_app_id (BzEntry *entry, GtkStringList *app_ids)
+{
+  const char *own_id;
+  g_autoptr (GtkStringList) filtered = NULL;
+  guint n_items                      = 0;
+
+  if (!BZ_IS_ENTRY (entry) || !GTK_IS_STRING_LIST (app_ids))
+    return NULL;
+
+  own_id = bz_entry_get_id (entry);
+  if (!own_id)
+    return NULL;
+
+  filtered = gtk_string_list_new (NULL);
+  n_items  = g_list_model_get_n_items (G_LIST_MODEL (app_ids));
+
+  for (guint i = 0; i < n_items; i++)
+    {
+      const char *id = NULL;
+
+      id = gtk_string_list_get_string (app_ids, i);
+      if (g_strcmp0 (id, own_id) != 0)
+        gtk_string_list_append (filtered, id);
+    }
+
+  if (g_list_model_get_n_items (G_LIST_MODEL (filtered)) > 0)
+    return g_steal_pointer (&filtered);
+  else
+    return NULL;
+}
+
+static gboolean
+has_other_apps (gpointer object, GtkStringList *app_ids, BzEntry *entry)
+{
+  g_autoptr (GtkStringList) filtered = filter_own_app_id (BZ_ENTRY (entry), app_ids);
+  return filtered != NULL;
+}
+
+static GListModel *
+get_developer_apps_entries (gpointer object, GtkStringList *app_ids, BzEntry *entry)
+{
+  BzFullView *self                   = BZ_FULL_VIEW (object);
+  g_autoptr (GtkStringList) filtered = filter_own_app_id (BZ_ENTRY (entry), app_ids);
+  BzApplicationMapFactory *factory;
+
+  if (!filtered)
+    return NULL;
+
+  factory = bz_state_info_get_application_factory (self->state);
+  if (!factory)
+    return NULL;
+
+  return bz_application_map_factory_generate (factory, G_LIST_MODEL (filtered));
+}
+
+static gboolean
+scroll_to_top_idle (GtkAdjustment *vadj)
+{
+  gtk_adjustment_set_value (vadj, 0.0);
+  return G_SOURCE_REMOVE;
+}
+
+static void
+app_tile_clicked_cb (BzFullView *self,
+                     BzAppTile  *tile)
+{
+  GtkAdjustment *vadj;
+  BzEntryGroup  *group = bz_app_tile_get_group (tile);
+
+  bz_full_view_set_entry_group (self, group);
+
+  vadj = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (self->main_scroll));
+  g_idle_add_once ((GSourceOnceFunc) scroll_to_top_idle, vadj);
+}
+
+static void
+bind_app_tile_cb (BzFullView        *self,
+                  BzAppTile         *tile,
+                  BzEntryGroup      *group,
+                  BzDynamicListView *view)
+{
+  g_signal_connect_swapped (tile, "clicked",
+                            G_CALLBACK (app_tile_clicked_cb),
+                            self);
+}
+
+static void
+unbind_app_tile_cb (BzFullView        *self,
+                    BzAppTile         *tile,
+                    BzEntryGroup      *group,
+                    BzDynamicListView *view)
+{
+  g_signal_handlers_disconnect_by_func (tile, G_CALLBACK (app_tile_clicked_cb), self);
+}
+
 static void
 open_url_cb (BzFullView   *self,
              AdwActionRow *row)
@@ -496,6 +628,26 @@ dl_stats_cb (BzFullView *self,
 
   adw_dialog_present (dialog, GTK_WIDGET (self));
   bz_stats_dialog_animate_open (BZ_STATS_DIALOG (dialog));
+}
+
+static void
+screenshot_clicked_cb (BzFullView            *self,
+                       guint                  index,
+                       BzScreenshotsCarousel *carousel)
+{
+  GListModel        *screenshots = NULL;
+  AdwNavigationPage *page        = NULL;
+  GtkWidget         *nav_view    = NULL;
+
+  screenshots = bz_screenshots_carousel_get_model (carousel);
+  if (screenshots == NULL)
+    return;
+
+  page = bz_screenshot_page_new (screenshots, index);
+
+  nav_view = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
+  if (nav_view != NULL)
+    adw_navigation_view_push (ADW_NAVIGATION_VIEW (nav_view), page);
 }
 
 static void
@@ -728,6 +880,20 @@ bz_full_view_class_init (BzFullViewClass *klass)
           BZ_TYPE_RESULT,
           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
+  props[PROP_MAIN_MENU] =
+      g_param_spec_object (
+          "main-menu",
+          NULL, NULL,
+          G_TYPE_MENU_MODEL,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  props[PROP_SHOW_SIDEBAR] =
+      g_param_spec_boolean (
+          "show-sidebar",
+          NULL, NULL,
+          FALSE,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   signals[SIGNAL_INSTALL] =
@@ -803,6 +969,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-full-view.ui");
   gtk_widget_class_bind_template_child (widget_class, BzFullView, stack);
+  gtk_widget_class_bind_template_child (widget_class, BzFullView, main_scroll);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, shadow_overlay);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, forge_stars);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, forge_stars_label);
@@ -828,10 +995,14 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, get_formfactor_label);
   gtk_widget_class_bind_template_callback (widget_class, get_formfactor_tooltip);
   gtk_widget_class_bind_template_callback (widget_class, has_link);
+  gtk_widget_class_bind_template_callback (widget_class, format_other_apps_label);
+  gtk_widget_class_bind_template_callback (widget_class, get_developer_apps_entries);
+  gtk_widget_class_bind_template_callback (widget_class, has_other_apps);
   gtk_widget_class_bind_template_callback (widget_class, open_url_cb);
   gtk_widget_class_bind_template_callback (widget_class, open_flathub_url_cb);
   gtk_widget_class_bind_template_callback (widget_class, license_cb);
   gtk_widget_class_bind_template_callback (widget_class, dl_stats_cb);
+  gtk_widget_class_bind_template_callback (widget_class, screenshot_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, size_cb);
   gtk_widget_class_bind_template_callback (widget_class, formfactor_cb);
   gtk_widget_class_bind_template_callback (widget_class, run_cb);
@@ -842,6 +1013,8 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, pick_license_warning);
   gtk_widget_class_bind_template_callback (widget_class, install_addons_cb);
   gtk_widget_class_bind_template_callback (widget_class, addon_transact_cb);
+  gtk_widget_class_bind_template_callback (widget_class, bind_app_tile_cb);
+  gtk_widget_class_bind_template_callback (widget_class, unbind_app_tile_cb);
   gtk_widget_class_bind_template_callback (widget_class, get_description_max_height);
   gtk_widget_class_bind_template_callback (widget_class, get_description_toggle_text);
 }

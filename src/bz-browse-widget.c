@@ -30,6 +30,7 @@ struct _BzBrowseWidget
   AdwBin parent_instance;
 
   BzContentProvider *provider;
+  gboolean online;
 
   /* Template widgets */
   AdwViewStack *stack;
@@ -42,6 +43,7 @@ enum
   PROP_0,
 
   PROP_CONTENT_PROVIDER,
+  PROP_ONLINE,
 
   LAST_PROP
 };
@@ -50,6 +52,7 @@ static GParamSpec *props[LAST_PROP] = { 0 };
 enum
 {
   SIGNAL_GROUP_SELECTED,
+  SIGNAL_BROWSE_FLATHUB,
 
   LAST_SIGNAL,
 };
@@ -91,6 +94,9 @@ bz_browse_widget_get_property (GObject    *object,
     case PROP_CONTENT_PROVIDER:
       g_value_set_object (value, bz_browse_widget_get_content_provider (self));
       break;
+    case PROP_ONLINE:
+      g_value_set_boolean (value, self->online);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -108,6 +114,14 @@ bz_browse_widget_set_property (GObject      *object,
     {
     case PROP_CONTENT_PROVIDER:
       bz_browse_widget_set_content_provider (self, g_value_get_object (value));
+      break;
+    case PROP_ONLINE:
+      self->online = g_value_get_boolean (value);
+      if (self->online)
+        set_page (self);
+      else
+        adw_view_stack_set_visible_child_name (self->stack, "offline");
+
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -128,6 +142,13 @@ group_activated_cb (GtkListItem   *list_item,
 }
 
 static void
+browse_flathub_cb (BzBrowseWidget *self,
+                   GtkButton      *button)
+{
+  g_signal_emit (self, signals[SIGNAL_BROWSE_FLATHUB], 0);
+}
+
+static void
 bz_browse_widget_class_init (BzBrowseWidgetClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
@@ -143,6 +164,13 @@ bz_browse_widget_class_init (BzBrowseWidgetClass *klass)
           NULL, NULL,
           BZ_TYPE_CONTENT_PROVIDER,
           G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_ONLINE] =
+      g_param_spec_boolean (
+          "online",
+          NULL, NULL,
+          FALSE,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
@@ -161,12 +189,23 @@ bz_browse_widget_class_init (BzBrowseWidgetClass *klass)
       G_TYPE_FROM_CLASS (klass),
       g_cclosure_marshal_VOID__OBJECTv);
 
+  signals[SIGNAL_BROWSE_FLATHUB] =
+    g_signal_new (
+        "browse-flathub",
+        G_OBJECT_CLASS_TYPE (klass),
+        G_SIGNAL_RUN_FIRST,
+        0,
+        NULL, NULL,
+        g_cclosure_marshal_VOID__VOID,
+        G_TYPE_NONE, 0);
+
   g_type_ensure (BZ_TYPE_SECTION_VIEW);
   g_type_ensure (BZ_TYPE_INHIBITED_SCROLLABLE);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-browse-widget.ui");
   gtk_widget_class_bind_template_child (widget_class, BzBrowseWidget, stack);
   gtk_widget_class_bind_template_callback (widget_class, group_activated_cb);
+  gtk_widget_class_bind_template_callback (widget_class, browse_flathub_cb);
 }
 
 static void

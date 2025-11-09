@@ -1,6 +1,6 @@
-/* bz-issue.h
+/* bz-rounded-picture.h
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2025 Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,26 +24,25 @@
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_ISSUE (bz_issue_get_type ())
-G_DECLARE_FINAL_TYPE (BzIssue, bz_issue, BZ, ISSUE, GObject)
+#define BZ_TYPE_ROUNDED_PICTURE (bz_rounded_picture_get_type ())
 
-BzIssue *
-bz_issue_new (void);
+G_DECLARE_FINAL_TYPE (BzRoundedPicture, bz_rounded_picture, BZ, ROUNDED_PICTURE, GtkWidget)
 
-const char *
-bz_issue_get_id (BzIssue *self);
-
-const char *
-bz_issue_get_url (BzIssue *self);
+GtkWidget *
+bz_rounded_picture_new (void);
 
 void
-bz_issue_set_id (BzIssue    *self,
-                 const char *id);
+bz_rounded_picture_set_paintable (BzRoundedPicture *self,
+                                  GdkPaintable     *paintable);
+
+GdkPaintable *
+bz_rounded_picture_get_paintable (BzRoundedPicture *self);
 
 void
-bz_issue_set_url (BzIssue    *self,
-                  const char *url);
+bz_rounded_picture_set_radius (BzRoundedPicture *self,
+                               double            radius);
+
+double
+bz_rounded_picture_get_radius (BzRoundedPicture *self);
 
 G_END_DECLS
-
-/* End of bz-issue.h */

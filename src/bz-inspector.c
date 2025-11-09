@@ -130,6 +130,13 @@ decache_and_inspect_cb (GtkListItem *list_item,
     }
 }
 
+static char *
+format_uint (gpointer object,
+             guint    value)
+{
+  return g_strdup_printf ("%d", value);
+}
+
 static void
 bz_inspector_class_init (BzInspectorClass *klass)
 {
@@ -154,6 +161,7 @@ bz_inspector_class_init (BzInspectorClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzInspector, filter_model);
   gtk_widget_class_bind_template_callback (widget_class, decache_and_inspect_cb);
   gtk_widget_class_bind_template_callback (widget_class, entry_changed);
+  gtk_widget_class_bind_template_callback (widget_class, format_uint);
 }
 
 static void

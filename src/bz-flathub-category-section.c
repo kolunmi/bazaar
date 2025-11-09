@@ -68,18 +68,6 @@ apps_page_select_cb_forwarding (BzFlathubPage *flathub_page,
 }
 
 static void
-apps_page_hiding_cb_forwarding (BzFlathubPage *flathub_page,
-                                BzAppsPage    *page)
-{
-  GtkWidget *window = NULL;
-
-  window = GTK_WIDGET (gtk_widget_get_root (GTK_WIDGET (flathub_page)));
-
-  if (window != NULL)
-    bz_window_set_app_list_view_mode (BZ_WINDOW (window), FALSE);
-}
-
-static void
 tile_clicked (BzEntryGroup *group,
               GtkButton    *button)
 {
@@ -104,6 +92,7 @@ on_more_button_clicked (GtkButton                *button,
   const char      *title                = NULL;
   g_autofree char *subtitle             = NULL;
   int              total_entries        = 0;
+  gboolean         is_spotlight         = FALSE;
 
   if (self->category == NULL)
     return;
@@ -118,37 +107,40 @@ on_more_button_clicked (GtkButton                *button,
   if (nav_view == NULL)
     return;
 
-  title          = bz_flathub_category_get_display_name (self->category);
-  model          = bz_flathub_category_dup_applications (self->category);
-  carousel_model = bz_flathub_category_dup_quality_applications (self->category);
-  total_entries  = bz_flathub_category_get_total_entries (self->category);
+  title        = bz_flathub_category_get_display_name (self->category);
+  model        = bz_flathub_category_dup_applications (self->category);
+  is_spotlight = bz_flathub_category_get_is_spotlight (self->category);
 
-  if (carousel_model != NULL && g_list_model_get_n_items (carousel_model) > 0)
-    {
-      apps_page = bz_apps_page_new_with_carousel (title, model, carousel_model);
-    }
-  else
+  if (is_spotlight)
     {
       apps_page = bz_apps_page_new (title, model);
     }
-
-  if (total_entries > 0)
+  else
     {
-      subtitle = g_strdup_printf (_ ("%d applications"), total_entries);
-      bz_apps_page_set_subtitle (BZ_APPS_PAGE (apps_page), subtitle);
+      carousel_model = bz_flathub_category_dup_quality_applications (self->category);
+      total_entries  = bz_flathub_category_get_total_entries (self->category);
+
+      if (carousel_model != NULL && g_list_model_get_n_items (carousel_model) > 0)
+        {
+          apps_page = bz_apps_page_new_with_carousel (title, model, carousel_model);
+        }
+      else
+        {
+          apps_page = bz_apps_page_new (title, model);
+        }
+
+      if (total_entries > 0)
+        {
+          subtitle = g_strdup_printf (_ ("%d applications"), total_entries);
+          bz_apps_page_set_subtitle (BZ_APPS_PAGE (apps_page), subtitle);
+        }
     }
 
   g_signal_connect_swapped (
       apps_page, "select",
       G_CALLBACK (apps_page_select_cb_forwarding), flathub_page);
-  g_signal_connect_swapped (
-      apps_page, "hiding",
-      G_CALLBACK (apps_page_hiding_cb_forwarding), flathub_page);
 
   adw_navigation_view_push (ADW_NAVIGATION_VIEW (nav_view), apps_page);
-
-  if (window != NULL)
-    bz_window_set_app_list_view_mode (BZ_WINDOW (window), TRUE);
 }
 
 static void
@@ -244,6 +236,13 @@ bz_flathub_category_section_set_property (GObject      *object,
     }
 }
 
+static gboolean
+invert_boolean (gpointer object,
+                gboolean value)
+{
+  return !value;
+}
+
 static void
 bz_flathub_category_section_class_init (BzFlathubCategorySectionClass *klass)
 {
@@ -291,6 +290,7 @@ bz_flathub_category_section_class_init (BzFlathubCategorySectionClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzFlathubCategorySection, section_list);
   gtk_widget_class_bind_template_child (widget_class, BzFlathubCategorySection, more_button);
 
+  gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, on_more_button_clicked);
   gtk_widget_class_bind_template_callback (widget_class, bind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, unbind_widget_cb);
@@ -333,7 +333,7 @@ bz_flathub_category_section_set_category (BzFlathubCategorySection *self,
       display_name = bz_flathub_category_get_display_name (category);
       gtk_label_set_text (self->section_title, display_name);
 
-      more_label = g_strdup_printf (_ ("More %s"), display_name);
+      more_label = g_strdup (bz_flathub_category_get_more_of_name (category));
       gtk_button_set_label (self->more_button, more_label);
 
       update_model (self);

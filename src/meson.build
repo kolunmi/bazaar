@@ -5,6 +5,7 @@ libdex_opts = [
   'introspection=disabled',
 ]
 
+gtk_dep              = dependency('gtk4')
 libadwaita_dep       = dependency('libadwaita-1', version: '>= 1.7')
 libdex_dep           = dependency('libdex-1', version: '>= 1.0.0', default_options: libdex_opts)
 flatpak_dep          = dependency('flatpak', version: '>= 1.9')
@@ -15,7 +16,7 @@ libsoup_dep          = dependency('libsoup-3.0', version: '>= 3.6.0')
 json_glib_dep        = dependency('json-glib-1.0', version: '>= 1.10.0')
 glycin_dep           = dependency('glycin-2', version: '>= 2.0')
 glycin_gtk4_dep      = dependency('glycin-gtk4-2', version: '>= 2.0')
-md4c_dep             = dependency('md4c', version: '>= 0.5.2')
+md4c_dep             = dependency('md4c', version: '>= 0.5.1')
 
 
 dl_worker_sources = [
@@ -105,18 +106,18 @@ bz_sources = [
   'bz-inspector.c',
   'bz-installed-page.c',
   'bz-io.c',
-  'bz-issue.c',
   'bz-lazy-async-texture-model.c',
   'bz-license-dialog.c',
   'bz-markdown-render.c',
-  'bz-patterned-background.c',
   'bz-preferences-dialog.c',
   'bz-progress-bar.c',
   'bz-release.c',
   'bz-releases-list.c',
   'bz-result.c',
   'bz-review.c',
-  'bz-screenshot-dialog.c',
+  'bz-rich-app-tile.c',
+  'bz-rounded-picture.c',
+  'bz-screenshot-page.c',
   'bz-screenshot.c',
   'bz-screenshots-carousel.c',
   'bz-search-engine.c',
@@ -126,15 +127,14 @@ bz_sources = [
   'bz-serializable.c',
   'bz-share-list.c',
   'bz-spdx.c',
-  'bz-state-info.c',
   'bz-stats-dialog.c',
+  'bz-themed-entry-group-rect.c',
   'bz-transaction-entry-tracker.c',
   'bz-transaction-manager.c',
   'bz-transaction-task.c',
   'bz-transaction-view.c',
   'bz-transaction.c',
   'bz-update-dialog.c',
-  'bz-url.c',
   'bz-window.c',
   'bz-world-map-parser.c',
   'bz-world-map.c',
@@ -144,7 +144,6 @@ bz_sources = [
 ]
 
 bz_deps = [
-  # bazaar_ui_dep,
   math,
   gtk_dep,
   libadwaita_dep,
@@ -159,6 +158,36 @@ bz_deps = [
   glycin_gtk4_dep,
   md4c_dep,
 ]
+
+gen_gobject = find_program('./gen_gobject.sh')
+gen_gobject_header = generator(
+  gen_gobject,
+  output: '@BASENAME@.h',
+  arguments: ['--header', '@INPUT@', '@OUTPUT@'],
+)
+gen_gobject_code = generator(
+  gen_gobject,
+  output: '@BASENAME@.c',
+  arguments: ['--code', '@INPUT@', '@OUTPUT@'],
+)
+
+gobject_specs = files(
+  'bz-issue.txt',
+  'bz-url.txt',
+  'bz-state-info.txt',
+)
+
+gen_gobject_srcs = []
+foreach f : gobject_specs
+  header = gen_gobject_header.process(f)
+  code = gen_gobject_code.process(f)
+  gen_gobject_srcs += [header, code]
+endforeach
+
+generated_gobjects = declare_dependency(
+  sources: gen_gobject_srcs,
+)
+bz_deps += [ generated_gobjects ]
 
 blueprints = custom_target('blueprints',
   input: files(
@@ -188,7 +217,8 @@ blueprints = custom_target('blueprints',
     'bz-progress-bar.blp',
     'bz-releases-dialog.blp',
     'bz-releases-list.blp',
-    'bz-screenshot-dialog.blp',
+    'bz-rich-app-tile.blp',
+    'bz-screenshot-page.blp',
     'bz-screenshots-carousel.blp',
     'bz-search-widget.blp',
     'bz-section-view.blp',
