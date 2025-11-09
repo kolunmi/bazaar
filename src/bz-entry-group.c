@@ -939,7 +939,7 @@ dup_all_into_model_fiber (BzEntryGroup *self)
   n_resolved = g_list_model_get_n_items (G_LIST_MODEL (store));
   if (n_resolved == 0)
     {
-      g_critical ("No entries for %s were able to be resolved", self->id);
+      g_warning ("No entries for %s were able to be resolved", self->id);
       return dex_future_new_reject (
           G_IO_ERROR,
           G_IO_ERROR_UNKNOWN,
@@ -947,7 +947,7 @@ dup_all_into_model_fiber (BzEntryGroup *self)
           self->id);
     }
   if (n_resolved != n_items)
-    g_critical ("Some entries for %s failed to resolve", self->id);
+    g_warning ("Some entries for %s failed to resolve", self->id);
 
   return dex_future_new_for_object (store);
 }

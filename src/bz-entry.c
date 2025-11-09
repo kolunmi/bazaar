@@ -2121,8 +2121,8 @@ query_flathub_fiber (QueryFlathubData *data)
   if (node == NULL)
     {
       if (!g_error_matches (local_error, DEX_ERROR, DEX_ERROR_FIBER_CANCELLED))
-        g_critical ("Could not retrieve property %s for %s from flathub: %s",
-                    props[prop]->name, id, local_error->message);
+        g_warning ("Could not retrieve property %s for %s from flathub: %s",
+                   props[prop]->name, id, local_error->message);
       return dex_future_new_for_error (g_steal_pointer (&local_error));
     }
 

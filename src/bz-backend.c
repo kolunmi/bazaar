@@ -340,8 +340,8 @@ retrieve_with_blocklists_fiber (RetrieveWithBlocklistsData *data)
           bytes = dex_await_boxed (dex_file_load_contents_bytes (file), &local_error);
           if (bytes == NULL)
             {
-              g_critical ("Failed to load blocklist from path '%s': %s",
-                          path, local_error->message);
+              g_warning ("Failed to load blocklist from path '%s': %s",
+                         path, local_error->message);
               g_clear_pointer (&local_error, g_error_free);
               continue;
             }

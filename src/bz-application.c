@@ -673,12 +673,12 @@ init_service_struct (BzApplication *self)
       if (parse_results != NULL)
         self->config = g_steal_pointer (&parse_results);
       else
-        g_critical ("Could not load main config at %s: %s",
-                    HARDCODED_MAIN_CONFIG, local_error->message);
+        g_warning ("Could not load main config at %s: %s",
+                   HARDCODED_MAIN_CONFIG, local_error->message);
     }
   else
-    g_critical ("Could not load main config at %s: %s",
-                HARDCODED_MAIN_CONFIG, local_error->message);
+    g_warning ("Could not load main config at %s: %s",
+               HARDCODED_MAIN_CONFIG, local_error->message);
 
   g_clear_pointer (&local_error, g_error_free);
 #endif
@@ -959,8 +959,8 @@ fiber_check_for_updates (BzApplication *self)
               const char *unique_id = NULL;
 
               unique_id = g_ptr_array_index (update_ids, i);
-              g_critical ("%s could not be resolved for the update list and thus will not be included: %s",
-                          unique_id, local_error->message);
+              g_warning ("%s could not be resolved for the update list and thus will not be included: %s",
+                         unique_id, local_error->message);
               g_clear_pointer (&local_error, g_error_free);
             }
         }
@@ -970,7 +970,7 @@ fiber_check_for_updates (BzApplication *self)
     }
   else if (local_error != NULL)
     {
-      g_critical ("Failed to check for updates: %s", local_error->message);
+      g_warning ("Failed to check for updates: %s", local_error->message);
 
       if (window != NULL)
         bz_show_error_for_widget (GTK_WIDGET (window), local_error->message);
@@ -1348,7 +1348,7 @@ watch_backend_notifs_fiber (BzApplication *self)
               &local_error);
           if (installed_set == NULL)
             {
-              g_critical ("Failed to enumerate installed entries: %s", local_error->message);
+              g_warning ("Failed to enumerate installed entries: %s", local_error->message);
               bz_state_info_set_background_task_label (self->state, NULL);
               continue;
             }

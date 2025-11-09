@@ -55,13 +55,13 @@ bz_get_dex_stack_size (void)
 
               parse_result = g_variant_get_uint64 (variant);
               if (parse_result < dex_get_min_stack_size ())
-                g_critical ("BAZAAR_DEX_STACK_SIZE must be greater than %zu on this system",
-                            dex_get_min_stack_size ());
+                g_warning ("BAZAAR_DEX_STACK_SIZE must be greater than %zu on this system",
+                           dex_get_min_stack_size ());
               else
                 value = parse_result;
             }
           else
-            g_critical ("BAZAAR_DEX_STACK_SIZE is invalid: %s", local_error->message);
+            g_warning ("BAZAAR_DEX_STACK_SIZE is invalid: %s", local_error->message);
         }
 
       g_once_init_leave (&stack_size, value);

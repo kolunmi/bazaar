@@ -105,7 +105,7 @@ read_stdin (MainData *data)
       if (string == NULL)
         {
           if (local_error != NULL)
-            g_critical ("FATAL: Failure reading stdin channel: %s", local_error->message);
+            g_warning ("FATAL: Failure reading stdin channel: %s", local_error->message);
           g_main_loop_quit (data->loop);
           return NULL;
         }
@@ -120,8 +120,8 @@ read_stdin (MainData *data)
           &local_error);
       if (variant == NULL)
         {
-          g_critical ("Failure parsing variant text '%s' into structure: %s\n",
-                      string, local_error->message);
+          g_warning ("Failure parsing variant text '%s' into structure: %s\n",
+                     string, local_error->message);
           g_main_loop_quit (data->loop);
           continue;
         }
@@ -162,7 +162,7 @@ download_fiber (DownloadData *data)
       NULL, &local_error);
   if (dest_output == NULL)
     {
-      g_critical ("%s", local_error->message);
+      g_warning ("%s", local_error->message);
       goto done;
     }
 
@@ -172,7 +172,7 @@ download_fiber (DownloadData *data)
                        &local_error);
   if (!success)
     {
-      g_critical ("%s", local_error->message);
+      g_warning ("%s", local_error->message);
       goto done;
     }
 

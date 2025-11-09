@@ -691,9 +691,9 @@ load_fiber_work (LoadData *data)
 
               if (!g_file_delete (cache_into, NULL, &local_error))
                 {
-                  g_critical ("Couldn't reap cached texture at %s, this "
-                              "might lead to unexpected behavior: %s",
-                              cache_into_path, local_error->message);
+                  g_warning ("Couldn't reap cached texture at %s, this "
+                             "might lead to unexpected behavior: %s",
+                             cache_into_path, local_error->message);
                   g_clear_pointer (&local_error, g_error_free);
                 }
             }
@@ -863,9 +863,9 @@ load_fiber_work (LoadData *data)
           RATE_LIMIT_END ();
 
           if (local_error != NULL)
-            g_critical ("Failed to write async-tex cache metadata to %s ;"
-                        "The image will be fully reloaded next time: %s",
-                        async_tex_data_path, local_error->message);
+            g_warning ("Failed to write async-tex cache metadata to %s ;"
+                       "The image will be fully reloaded next time: %s",
+                       async_tex_data_path, local_error->message);
           g_clear_pointer (&local_error, g_error_free);
         }
     }
