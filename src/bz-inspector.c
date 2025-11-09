@@ -27,6 +27,9 @@ struct _BzInspector
 
   BzStateInfo *state;
 
+  GBinding *debug_mode_binding;
+
+  GtkCheckButton     *debug_mode_check;
   GtkEditable        *search_entry;
   GtkFilterListModel *filter_model;
 };
@@ -53,6 +56,8 @@ bz_inspector_dispose (GObject *object)
   BzInspector *self = BZ_INSPECTOR (object);
 
   g_clear_pointer (&self->state, g_object_unref);
+
+  g_clear_object (&self->debug_mode_binding);
 
   G_OBJECT_CLASS (bz_inspector_parent_class)->dispose (object);
 }
@@ -157,6 +162,7 @@ bz_inspector_class_init (BzInspectorClass *klass)
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-inspector.ui");
+  gtk_widget_class_bind_template_child (widget_class, BzInspector, debug_mode_check);
   gtk_widget_class_bind_template_child (widget_class, BzInspector, search_entry);
   gtk_widget_class_bind_template_child (widget_class, BzInspector, filter_model);
   gtk_widget_class_bind_template_callback (widget_class, decache_and_inspect_cb);
@@ -195,8 +201,16 @@ bz_inspector_set_state (BzInspector *self,
   g_return_if_fail (BZ_IS_INSPECTOR (self));
 
   g_clear_pointer (&self->state, g_object_unref);
+  g_clear_pointer (&self->debug_mode_binding, g_object_unref);
+
   if (state != NULL)
-    self->state = g_object_ref (state);
+    {
+      self->state              = g_object_ref (state);
+      self->debug_mode_binding = g_object_bind_property (
+          state, "debug-mode",
+          self->debug_mode_check, "active",
+          G_BINDING_BIDIRECTIONAL);
+    }
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_STATE]);
 }

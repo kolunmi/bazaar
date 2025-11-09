@@ -151,7 +151,7 @@ bz_fading_clamp_get_request_mode (GtkWidget *widget)
 static void
 bz_fading_clamp_measure (GtkWidget *widget, GtkOrientation orientation, int for_size, int *minimum, int *natural, int *minimum_baseline, int *natural_baseline)
 {
-  int target_height;
+  int            target_height;
   BzFadingClamp *self = BZ_FADING_CLAMP (widget);
 
   if (!self->child)
@@ -210,16 +210,11 @@ bz_fading_clamp_snapshot (GtkWidget *widget, GtkSnapshot *snapshot)
 {
   BzFadingClamp   *self = BZ_FADING_CLAMP (widget);
   int              width, height, natural_height;
-  graphene_rect_t  clip_rect;
-  GtkSettings     *settings;
-  gboolean         dark_theme;
-  GdkRGBA          bg;
   int              gradient_start;
   graphene_rect_t  gradient_rect;
-  GskColorStop     stops[4];
+  GskColorStop     stops[2];
   graphene_point_t start_point, end_point;
   int              effective_fade_height;
-  int              hidden_content;
 
   if (!self->child || !gtk_widget_get_visible (self->child))
     return;
@@ -229,36 +224,35 @@ bz_fading_clamp_snapshot (GtkWidget *widget, GtkSnapshot *snapshot)
 
   gtk_widget_measure (self->child, GTK_ORIENTATION_VERTICAL, width, NULL, &natural_height, NULL, NULL);
 
-  graphene_rect_init (&clip_rect, 0, 0, width, height);
-  gtk_snapshot_push_clip (snapshot, &clip_rect);
-  gtk_widget_snapshot_child (widget, self->child, snapshot);
+  if (natural_height <= height)
+    {
+      gtk_widget_snapshot_child (widget, self->child, snapshot);
+      return;
+    }
+
+  effective_fade_height = MIN (natural_height - height, FADE_HEIGHT);
+
+  gtk_snapshot_push_mask (snapshot, GSK_MASK_MODE_ALPHA);
+
+  gradient_start = height - effective_fade_height;
+  graphene_rect_init (&gradient_rect, 0, 0, width, height);
+
+  stops[0] = (GskColorStop) {
+    (float) gradient_start / height, { 1, 1, 1, 1 }
+  };
+  stops[1] = (GskColorStop) {
+    1.0, { 1, 1, 1, 0 }
+  };
+
+  graphene_point_init (&start_point, 0, 0);
+  graphene_point_init (&end_point, 0, height);
+  gtk_snapshot_append_linear_gradient (snapshot, &gradient_rect, &start_point, &end_point, stops, 2);
+
   gtk_snapshot_pop (snapshot);
 
-  if (natural_height > height)
-    {
-      hidden_content        = natural_height - height;
-      effective_fade_height = MIN (hidden_content, FADE_HEIGHT);
+  gtk_widget_snapshot_child (widget, self->child, snapshot);
 
-      if (effective_fade_height > 0)
-        {
-          settings   = gtk_widget_get_settings (widget);
-          dark_theme = FALSE;
-          g_object_get (settings, "gtk-application-prefer-dark-theme", &dark_theme, NULL);
-          bg = dark_theme ? (GdkRGBA) { 0.13, 0.13, 0.15, 1.0 } : (GdkRGBA) { 0.98, 0.98, 0.98, 1.0 };
-
-          gradient_start = height - effective_fade_height;
-          graphene_rect_init (&gradient_rect, 0, gradient_start, width, effective_fade_height);
-
-          stops[0] = (GskColorStop) {0.0, { bg.red, bg.green, bg.blue, 0.0 }};
-          stops[1] = (GskColorStop) {0.3, { bg.red, bg.green, bg.blue, 0.5 }};
-          stops[2] = (GskColorStop) {0.7, { bg.red, bg.green, bg.blue, 0.9 }};
-          stops[3] = (GskColorStop) {1.0, { bg.red, bg.green, bg.blue, 1.0 }};
-
-          graphene_point_init (&start_point, 0, gradient_start);
-          graphene_point_init (&end_point, 0, height);
-          gtk_snapshot_append_linear_gradient (snapshot, &gradient_rect, &start_point, &end_point, stops, 4);
-        }
-    }
+  gtk_snapshot_pop (snapshot);
 }
 
 static void
