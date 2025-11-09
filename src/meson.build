@@ -61,8 +61,6 @@ bz_sources = [
   'bz-appstream-description-render.c',
   'bz-async-texture.c',
   'bz-backend-notification.c',
-  'bz-backend-transaction-op-payload.c',
-  'bz-backend-transaction-op-progress-payload.c',
   'bz-backend.c',
   'bz-browse-widget.c',
   'bz-category-tile.c',
@@ -171,6 +169,8 @@ gen_gobject_code = generator(
 )
 
 gobject_specs = files(
+  'bz-backend-transaction-op-payload.txt',
+  'bz-backend-transaction-op-progress-payload.txt',
   'bz-issue.txt',
   'bz-search-result.txt',
   'bz-state-info.txt',
