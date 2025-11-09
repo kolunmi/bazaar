@@ -617,7 +617,8 @@ window.narrow .category-tile {
 
 .installed-list-view > * {
     padding: 0;
-    border-radius: 12px;
+    transition: background-color 200ms;
+    margin: 6px 0px;
 }
 
 .transaction-sidebar-entry-list {

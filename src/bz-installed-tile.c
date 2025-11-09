@@ -21,12 +21,12 @@
 #include <glib/gi18n.h>
 
 #include "bz-addons-dialog.h"
+#include "bz-entry-group.h"
 #include "bz-env.h"
 #include "bz-error.h"
 #include "bz-flatpak-entry.h"
 #include "bz-installed-page.h"
 #include "bz-installed-tile.h"
-#include "bz-entry-group.h"
 #include "bz-state-info.h"
 
 struct _BzInstalledTile
@@ -35,13 +35,12 @@ struct _BzInstalledTile
 
   BzEntryGroup *group;
 
-  GtkPicture    *icon_picture;
-  GtkImage      *fallback_icon;
-  GtkLabel      *title_label;
-  GtkButton     *support_button;
-  GtkButton     *addons_button;
-  GtkButton     *remove_button;
-  GtkButton     *view_store_button;
+  GtkPicture *icon_picture;
+  GtkImage   *fallback_icon;
+  GtkLabel   *title_label;
+  GtkButton  *support_button;
+  GtkButton  *addons_button;
+  GtkButton  *remove_button;
 };
 
 G_DEFINE_FINAL_TYPE (BzInstalledTile, bz_installed_tile, GTK_TYPE_BOX)
@@ -79,9 +78,9 @@ bz_installed_tile_dispose (GObject *object)
 
 static void
 bz_installed_tile_get_property (GObject    *object,
-                                 guint       prop_id,
-                                 GValue     *value,
-                                 GParamSpec *pspec)
+                                guint       prop_id,
+                                GValue     *value,
+                                GParamSpec *pspec)
 {
   BzInstalledTile *self = BZ_INSTALLED_TILE (object);
 
@@ -97,9 +96,9 @@ bz_installed_tile_get_property (GObject    *object,
 
 static void
 bz_installed_tile_set_property (GObject      *object,
-                                 guint         prop_id,
-                                 const GValue *value,
-                                 GParamSpec   *pspec)
+                                guint         prop_id,
+                                const GValue *value,
+                                GParamSpec   *pspec)
 {
   BzInstalledTile *self = BZ_INSTALLED_TILE (object);
 
@@ -145,8 +144,8 @@ addon_transact_cb (BzInstalledTile *self,
                    BzEntry         *entry,
                    BzAddonsDialog  *dialog)
 {
-  BzInstalledPage *page   = NULL;
-  gboolean installed      = FALSE;
+  BzInstalledPage *page      = NULL;
+  gboolean         installed = FALSE;
 
   page = BZ_INSTALLED_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (self), BZ_TYPE_INSTALLED_PAGE));
   g_assert (page != NULL);
@@ -163,7 +162,7 @@ static DexFuture *
 support_fiber (BzInstalledTile *tile)
 {
   g_autoptr (GError) local_error = NULL;
-  GtkWidget       *window        = NULL;
+  GtkWidget *window              = NULL;
   g_autoptr (BzEntry) entry      = NULL;
   const char *url                = NULL;
 
@@ -255,46 +254,6 @@ install_addons_cb (BzInstalledTile *self,
 }
 
 static DexFuture *
-view_store_page_fiber (BzInstalledTile *tile)
-{
-  g_autoptr (GError) local_error = NULL;
-  BzInstalledPage *page          = NULL;
-  GtkWidget       *window        = NULL;
-  g_autoptr (BzEntry) entry      = NULL;
-
-  page = BZ_INSTALLED_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (tile), BZ_TYPE_INSTALLED_PAGE));
-  g_assert (page != NULL);
-
-  window = gtk_widget_get_ancestor (GTK_WIDGET (tile), GTK_TYPE_WINDOW);
-  g_assert (window != NULL);
-
-  entry = find_entry_in_group (tile->group, NULL, window, &local_error);
-  if (entry == NULL)
-    goto err;
-
-  g_signal_emit_by_name (page, "show-entry", entry);
-
-  return NULL;
-
-err:
-  if (local_error != NULL)
-    bz_show_error_for_widget (window, local_error->message);
-  return NULL;
-}
-
-static void
-view_store_page_cb (BzInstalledTile *self,
-                    GtkButton       *button)
-{
-  dex_future_disown (dex_scheduler_spawn (
-      dex_scheduler_get_default (),
-      bz_get_dex_stack_size (),
-      (DexFiberFunc) view_store_page_fiber,
-      g_object_ref (self),
-      g_object_unref));
-}
-
-static DexFuture *
 remove_fiber (BzInstalledTile *tile)
 {
   g_autoptr (GError) local_error = NULL;
@@ -362,14 +321,12 @@ bz_installed_tile_class_init (BzInstalledTileClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzInstalledTile, support_button);
   gtk_widget_class_bind_template_child (widget_class, BzInstalledTile, addons_button);
   gtk_widget_class_bind_template_child (widget_class, BzInstalledTile, remove_button);
-  gtk_widget_class_bind_template_child (widget_class, BzInstalledTile, view_store_button);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, format_size);
   gtk_widget_class_bind_template_callback (widget_class, support_cb);
   gtk_widget_class_bind_template_callback (widget_class, install_addons_cb);
-  gtk_widget_class_bind_template_callback (widget_class, view_store_page_cb);
   gtk_widget_class_bind_template_callback (widget_class, remove_cb);
 }
 
@@ -387,7 +344,7 @@ bz_installed_tile_new (void)
 
 void
 bz_installed_tile_set_group (BzInstalledTile *self,
-                              BzEntryGroup    *group)
+                             BzEntryGroup    *group)
 {
   g_return_if_fail (BZ_IS_INSTALLED_TILE (self));
   g_return_if_fail (group == NULL || BZ_IS_ENTRY_GROUP (group));

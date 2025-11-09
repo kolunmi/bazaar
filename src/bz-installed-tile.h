@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <adwaita.h>
 #include "bz-entry-group.h"
+#include <adwaita.h>
 
 G_BEGIN_DECLS
 
@@ -34,7 +34,7 @@ bz_installed_tile_new (void);
 
 void
 bz_installed_tile_set_group (BzInstalledTile *self,
-                              BzEntryGroup    *group);
+                             BzEntryGroup    *group);
 
 BzEntryGroup *
 bz_installed_tile_get_group (BzInstalledTile *self);

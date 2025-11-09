@@ -6,8 +6,6 @@ template $BzInstalledTile: Box {
   ]
 
   orientation: horizontal;
-  margin-top: 3;
-  margin-bottom: 5;
   spacing: 10;
 
   Picture icon_picture {
@@ -117,20 +115,11 @@ template $BzInstalledTile: Box {
       clicked => $remove_cb() swapped;
     }
 
-    Button view_store_button {
-      styles [
-        "flat",
-      ]
-
-      has-tooltip: true;
-      tooltip-text: _("View Store Page");
-
-      width-request: 32;
-      height-request: 32;
-      valign: center;
-      icon-name: "eye-outline-filled-symbolic";
-
-      clicked => $view_store_page_cb() swapped;
+    Image {
+      pixel-size: 14;
+      icon-name: "go-next-symbolic";
+      margin-end: 4;
+      styles ["dimmed"]
     }
   }
 }

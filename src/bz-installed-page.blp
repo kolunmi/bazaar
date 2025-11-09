@@ -36,8 +36,12 @@ template $BzInstalledPage: Adw.Bin {
                 "installed-list-view"
               ]
 
+              activate => $row_activated_cb() swapped;
+              single-click-activate: true;
+
               margin-start: 25;
               margin-end: 25;
+              overflow: visible;
 
               model: NoSelection {
                 model: bind template.model;
@@ -45,7 +49,7 @@ template $BzInstalledPage: Adw.Bin {
 
               factory: BuilderListItemFactory {
                 template ListItem {
-                  activatable: false;
+                  activatable: true;
                   selectable: false;
 
                   child: $BzInstalledTile {
