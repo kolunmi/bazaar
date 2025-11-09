@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-07 06:21+0200\n"
-"PO-Revision-Date: 2025-11-07 06:24+0200\n"
+"POT-Creation-Date: 2025-11-09 15:07+0200\n"
+"PO-Revision-Date: 2025-11-09 15:18+0200\n"
 "Last-Translator: faoquad <faoquad@noreply.codeberg.org>\n"
 "Language-Team: Ukrainian <>\n"
 "Language: uk\n"
@@ -112,7 +112,7 @@ msgstr ""
 "може бути налаштована дистрибутивами, аби створити цілісніший досвід."
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:54
-msgid "The home view displaying Flathub apps"
+msgid "The home page displaying Flathub apps"
 msgstr "Домашня сторінка із застосунками з Flathub"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:58
@@ -120,21 +120,25 @@ msgid "Nucleus app page"
 msgstr "Сторінка застосунку Nucleus"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:62
-msgid "Searching for Blender"
-msgstr "Шукаємо Blender"
+msgid "Search page"
+msgstr "Сторінка пошуку"
 
-#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:581
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:66
+msgid "Category page"
+msgstr "Сторінка пошуку з категоріями"
+
+#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:582
 #: src/bz-installed-page.blp:132
 msgid "Manage Add-ons"
 msgstr "Керувати розширеннями"
 
 #: src/bz-addons-dialog.c:88 src/bz-installed-page.blp:158
-#: src/bz-transaction-view.blp:212 src/bz-window.c:1052
+#: src/bz-transaction-view.blp:212 src/bz-window.c:1042
 msgid "Remove"
 msgstr "Видалити"
 
 #: src/bz-addons-dialog.c:95 src/bz-full-view.blp:289
-#: src/bz-transaction-view.blp:186 src/bz-window.c:1030
+#: src/bz-transaction-view.blp:186 src/bz-window.c:1020
 msgid "Install"
 msgstr "Встановити"
 
@@ -187,7 +191,7 @@ msgstr "--- МБ"
 msgid "Download Size"
 msgstr "Розмір завантаження"
 
-#: src/bz-application.c:401
+#: src/bz-application.c:399
 msgid ""
 "This functionality is currently disabled. It is recommended you download and "
 "install Flatseal to manage app permissions."
@@ -195,138 +199,38 @@ msgstr ""
 "Цю можливість наразі вимкнено. Для керування дозволами застосунків радимо "
 "встановити Flatseal."
 
-#: src/bz-application.c:465
+#: src/bz-application.c:462
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr ""
 
-#: src/bz-application.c:466
+#: src/bz-application.c:463
 msgctxt "About Dialog Developer Credit"
 msgid "Alexander Vanhee"
 msgstr ""
 
-#. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
-#: src/bz-application.c:481
-msgid "translator-credits"
-msgstr "faoquad <faoquad@noreply.codeberg.org>, 2025"
-
-#: src/bz-application.c:471
-msgctxt "About Dialog Translator Credit"
-msgid "Ahmed Najmawi"
-msgstr ""
-
-#: src/bz-application.c:472
-msgctxt "About Dialog Translator Credit"
-msgid "AtomHare"
-msgstr ""
-
-#: src/bz-application.c:473
-msgctxt "About Dialog Translator Credit"
-msgid "Azenyr"
-msgstr ""
-
-#: src/bz-application.c:474
-msgctxt "About Dialog Translator Credit"
-msgid "Goudarz Jafari"
-msgstr ""
-
-#: src/bz-application.c:475
-msgctxt "About Dialog Translator Credit"
-msgid "Jill Fiore (Lumaeris)"
-msgstr ""
-
-#: src/bz-application.c:476
-msgctxt "About Dialog Translator Credit"
-msgid "João Victor (Leal)"
-msgstr ""
-
 #: src/bz-application.c:477
-msgctxt "About Dialog Translator Credit"
-msgid "KiKaraage"
-msgstr ""
-
-#: src/bz-application.c:478
-msgctxt "About Dialog Translator Credit"
-msgid "Lucosec"
-msgstr ""
-
-#: src/bz-application.c:479
-msgctxt "About Dialog Translator Credit"
-msgid "Léane GRASSER"
-msgstr ""
-
-#: src/bz-application.c:480
-msgctxt "About Dialog Translator Credit"
-msgid "Marcel Mrówka (Microwave)"
-msgstr ""
-
-#: src/bz-application.c:481
-msgctxt "About Dialog Translator Credit"
-msgid "Peter Dave Hello"
-msgstr ""
-
-#: src/bz-application.c:482
-msgctxt "About Dialog Translator Credit"
-msgid "Pietro F."
-msgstr ""
-
-#: src/bz-application.c:482
-msgctxt "About Dialog Translator Credit"
-msgid "Sabri Ünal"
-msgstr ""
-
-#: src/bz-application.c:483
-msgctxt "About Dialog Translator Credit"
-msgid "Shihfu Juan"
-msgstr ""
-
-#: src/bz-application.c:484
-msgctxt "About Dialog Translator Credit"
-msgid "Shinsei"
-msgstr ""
-
-#: src/bz-application.c:485
-msgctxt "About Dialog Translator Credit"
-msgid "Vlastimil Dědek"
-msgstr ""
-
-#: src/bz-application.c:486
-msgctxt "About Dialog Translator Credit"
-msgid "asen23"
-msgstr ""
-
-#: src/bz-application.c:487
-msgctxt "About Dialog Translator Credit"
-msgid "camegone"
-msgstr ""
-
-#: src/bz-application.c:488
-msgctxt "About Dialog Translator Credit"
-msgid "renner"
-msgstr ""
-
-#: src/bz-application.c:489
-msgctxt "About Dialog Translator Credit"
-msgid "robotta"
-msgstr ""
-
-#: src/bz-application.c:505
 msgid "Adam Masciola"
 msgstr ""
 
-#: src/bz-application.c:1030
+#. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
+#: src/bz-application.c:480
+msgid "translator-credits"
+msgstr "faoquad <faoquad@noreply.codeberg.org>, 2025"
+
+#: src/bz-application.c:1003
 msgid "Constructing Flatpak instance..."
 msgstr "Створення примірника Flatpak..."
 
-#: src/bz-application.c:1047
+#: src/bz-application.c:1020
 msgid "Reusing last Flatpak instance..."
 msgstr "Повторне використання примірника Flatpak..."
 
-#: src/bz-application.c:1072
+#: src/bz-application.c:1045
 msgid "Flathub is not registered on this system"
 msgstr "Flathub не зареєстровано на цій системі"
 
-#: src/bz-application.c:1075
+#: src/bz-application.c:1048
 msgid ""
 "Would you like to add Flathub as a remote? If you decline, the Flathub page "
 "will not be available. You can change this later."
@@ -334,49 +238,49 @@ msgstr ""
 "Бажаєте додати Flathub до переліку віддалених сховищ? В іншому разі, "
 "сторінка Flathub буде недоступна. Ви можете змінити це пізніше."
 
-#: src/bz-application.c:1080 src/bz-update-dialog.blp:6
+#: src/bz-application.c:1053 src/bz-update-dialog.blp:6
 msgid "Later"
 msgstr "Пізніше"
 
-#: src/bz-application.c:1081
+#: src/bz-application.c:1054
 msgid "Add Flathub"
 msgstr "Додати Flathub"
 
-#: src/bz-application.c:1113
+#: src/bz-application.c:1086
 #, c-format
 msgid "Identifying installed entries..."
 msgstr "Визначення встановлених надходжень..."
 
-#: src/bz-application.c:1125
+#: src/bz-application.c:1098
 #, c-format
 msgid "Beginning remote entry retrieval while referencing %d blocklist(s)..."
 msgstr "Отримання віддалених надходжень із застосуванням %d чорних списків..."
 
-#: src/bz-application.c:1273
+#: src/bz-application.c:1246
 #, c-format
 msgid "Receiving Entries"
 msgstr "Отримуємо надходження"
 
-#: src/bz-application.c:1274
+#: src/bz-application.c:1247
 #, c-format
 msgid "%'d of %'d"
 msgstr "%'d із %'d"
 
-#: src/bz-application.c:1285
+#: src/bz-application.c:1258
 #, c-format
 msgid "Waiting for background indexing tasks to catch up..."
 msgstr "Очікується завершення індексації..."
 
-#: src/bz-application.c:1326
+#: src/bz-application.c:1299
 #, c-format
 msgid "Completed initialization in %0.2f seconds"
 msgstr "Ініціалізовано за %0.2f сек"
 
-#: src/bz-application.c:1331 src/bz-application.c:1486
+#: src/bz-application.c:1304 src/bz-application.c:1459
 msgid "Checking for updates..."
 msgstr "Шукаємо оновлення"
 
-#: src/bz-application.c:1370
+#: src/bz-application.c:1343
 msgid "Synchronizing..."
 msgstr "Синхронізуємо..."
 
@@ -434,7 +338,7 @@ msgstr "Вийти"
 msgid "Copy and Close"
 msgstr "Копіювати та вийти"
 
-#: src/bz-featured-tile.blp:89
+#: src/bz-featured-tile.blp:88
 msgid "App of the Day"
 msgstr "Застосунок дня"
 
@@ -600,7 +504,7 @@ msgstr "Мобільні пристрої"
 msgid "More Mobile"
 msgstr "Ще"
 
-#: src/bz-flathub-category-section.c:134 src/bz-search-widget.c:311
+#: src/bz-flathub-category-section.c:134 src/bz-search-widget.c:299
 #, c-format
 msgid "%d applications"
 msgstr "Запустити цей застосунок"
@@ -850,11 +754,11 @@ msgstr "Більше від розробників"
 msgid "Other Apps by %s"
 msgstr "Більше від %s"
 
-#: src/bz-full-view.c:808
+#: src/bz-full-view.c:828
 msgid "Show Less"
 msgstr "Менше"
 
-#: src/bz-full-view.c:808
+#: src/bz-full-view.c:828
 msgid "Show More"
 msgstr "Показати клавіатурні скорочення"
 
@@ -1016,7 +920,7 @@ msgstr ""
 "Ви маєте декілька встановлених версій цього застосунку. З котрою з них Ви "
 "бажаєте продовжити?"
 
-#: src/bz-installed-page.c:656 src/bz-window.c:1029 src/bz-window.c:1051
+#: src/bz-installed-page.c:656 src/bz-window.c:1019 src/bz-window.c:1041
 msgid "Cancel"
 msgstr "Скасувати"
 
@@ -1184,6 +1088,11 @@ msgstr "Версія %s"
 msgid "No details for this release"
 msgstr "Без подробиць"
 
+# Сирець підказує, що це кнопка завантаження
+#: src/bz-rich-app-tile.blp:103
+msgid "Get"
+msgstr "Завантажити"
+
 #: src/bz-search-widget.blp:105
 msgid "Search Apps, Games, Software"
 msgstr "Шукайте застосунки, ігри та програми"
@@ -1192,7 +1101,7 @@ msgstr "Шукайте застосунки, ігри та програми"
 msgid "No Applications Found"
 msgstr "Жодного підібраного застосунку"
 
-#: src/bz-search-widget.c:219
+#: src/bz-search-widget.c:210
 #, c-format
 msgid "No results found for \"%s\" in Flathub"
 msgstr "Не знайдено збігів для «%s» на Flathub"
@@ -1328,7 +1237,7 @@ msgstr "_Про Базар"
 msgid "_Quit Bazaar"
 msgstr "_Про Базар"
 
-#: src/bz-window.c:772
+#: src/bz-window.c:762
 msgid ""
 "The ability to inspect and install local .flatpak bundle files is coming "
 "soon! In the meantime, try running\n"
@@ -1344,33 +1253,33 @@ msgstr ""
 "\n"
 "у терміналі."
 
-#: src/bz-window.c:894
+#: src/bz-window.c:884
 msgid "Can't do that right now!"
 msgstr "Наразі цього не можна зробити!"
 
-#: src/bz-window.c:1023
+#: src/bz-window.c:1013
 #, c-format
 msgid "Install %s?"
 msgstr "Встановити %s?"
 
-#: src/bz-window.c:1026
+#: src/bz-window.c:1016
 msgid "May install additional shared components"
 msgstr "Можуть бути встановлені додаткові компоненти"
 
-#: src/bz-window.c:1045
+#: src/bz-window.c:1035
 #, c-format
 msgid "Remove %s?"
 msgstr "Видалити %s?"
 
-#: src/bz-window.c:1048
+#: src/bz-window.c:1038
 msgid "Settings & user data will be kept"
 msgstr "Налаштування та користувацькі дані буде збережено"
 
-#: src/bz-window.c:1213
+#: src/bz-window.c:1203
 msgid "Resume Current Tasks"
 msgstr "Відновити активні дії"
 
-#: src/bz-window.c:1219
+#: src/bz-window.c:1209
 msgid "Pause Current Tasks"
 msgstr "Призупинити активні дії"
 
