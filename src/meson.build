@@ -127,7 +127,6 @@ bz_sources = [
   'bz-serializable.c',
   'bz-share-list.c',
   'bz-spdx.c',
-  'bz-state-info.c',
   'bz-stats-dialog.c',
   'bz-themed-entry-group-rect.c',
   'bz-transaction-entry-tracker.c',
@@ -175,6 +174,7 @@ gen_gobject_code = generator(
 gobject_specs = files(
   'bz-issue.txt',
   'bz-url.txt',
+  'bz-state-info.txt',
 )
 
 gen_gobject_srcs = []

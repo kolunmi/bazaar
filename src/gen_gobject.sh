@@ -268,10 +268,13 @@ print_init_properties () {
         printf '          NULL, NULL,'
         case "$LOC_PTYPE" in
             uchar|uint|ulong|uint64|unichar)
-                printf '\n          0, G_MAX%s, (%s) 0,\n' "$(to_upper "$LOC_PTYPE")" "$LOC_CTYPE"
+                printf '\n          0, G_MAX%s, 0,\n' "$(to_upper "$LOC_PTYPE")"
                 ;;
-            char|int|long|int64|float|double)
-                printf '\n          G_MIN%s, G_MAX%s, (%s) 0,\n' "$(to_upper "$LOC_PTYPE")" "$(to_upper "$LOC_PTYPE")" "$LOC_CTYPE"
+            char|int|long|int64)
+                printf '\n          G_MIN%s, G_MAX%s, 0,\n' "$(to_upper "$LOC_PTYPE")" "$(to_upper "$LOC_PTYPE")"
+                ;;
+            float|double)
+                printf '\n          0.0, G_MAX%s, 0.0,\n' "$(to_upper "$LOC_PTYPE")"
                 ;;
             boolean)
                 printf ' FALSE,\n'
