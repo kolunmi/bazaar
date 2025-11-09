@@ -106,7 +106,6 @@ bz_sources = [
   'bz-inspector.c',
   'bz-installed-page.c',
   'bz-io.c',
-  'bz-issue.c',
   'bz-lazy-async-texture-model.c',
   'bz-license-dialog.c',
   'bz-markdown-render.c',
@@ -137,7 +136,6 @@ bz_sources = [
   'bz-transaction-view.c',
   'bz-transaction.c',
   'bz-update-dialog.c',
-  'bz-url.c',
   'bz-window.c',
   'bz-world-map-parser.c',
   'bz-world-map.c',
@@ -161,6 +159,35 @@ bz_deps = [
   glycin_gtk4_dep,
   md4c_dep,
 ]
+
+gen_gobject = find_program('./gen_gobject.sh')
+gen_gobject_header = generator(
+  gen_gobject,
+  output: '@BASENAME@.h',
+  arguments: ['--header', '@INPUT@', '@OUTPUT@'],
+)
+gen_gobject_code = generator(
+  gen_gobject,
+  output: '@BASENAME@.c',
+  arguments: ['--code', '@INPUT@', '@OUTPUT@'],
+)
+
+gobject_specs = files(
+  'bz-issue.txt',
+  'bz-url.txt',
+)
+
+gen_gobject_srcs = []
+foreach f : gobject_specs
+  header = gen_gobject_header.process(f)
+  code = gen_gobject_code.process(f)
+  gen_gobject_srcs += [header, code]
+endforeach
+
+generated_gobjects = declare_dependency(
+  sources: gen_gobject_srcs,
+)
+bz_deps += [ generated_gobjects ]
 
 blueprints = custom_target('blueprints',
   input: files(

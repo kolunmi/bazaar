@@ -4,61 +4,117 @@
 # author: kolunmi
 
 die() {
-    echo "Usage: $0 [prefix] [name] [parent-prefix] [parent-name] [author] [properties] [header] [code]" 1>&2
-    echo "  [prefix]        lower case prefix,      EX: my" 1>&2
-    echo "  [name]          lower case class name,  EX: class" 1>&2
-    echo "  [parent-prefix] prefix of parent class, EX: g" 1>&2
-    echo "  [parent-name]   name of parent class,   EX: object" 1>&2
-    echo "  [author]        author name,            EX: <your name>" 1>&2
-    echo "  [properties]    properties input file,  EX: properties.txt" 1>&2
-    echo "  [header]        .h output file,         EX: my-class.h" 1>&2
-    echo "  [code]          .c output file,         EX: my-class.c" 1>&2
+    echo "Usage: $0 [--header|--code] [spec] [output]" 1>&2
+    echo "  [--header|--code] whether to output the header (.h) or code (.c)" 1>&2
+    echo "  [spec]            spec keyfile" 1>&2
+    echo "  [output]          output file" 1>&2
     echo "" 1>&2
-    echo "  The properties input file must contain newline" 1>&2
-    echo "  separated properties with the form:" 1>&2
-    echo "    [name] [ctype] [gtype] [spec-type] [free (optional)] [ref (optional)]" 1>&2
-    echo "    EX: my_widget GtkWidget GTK_TYPE_WIDGET object" 1>&2
-    echo "    EX: my_string char G_TYPE_STRING string" 1>&2
-    echo "    EX: my_int int G_TYPE_INT int" 1>&2
-    echo "    EX: my_ptr_array GPtrArray G_TYPE_PTR_ARRAY boxed g_ptr_array_unref g_ptr_array_ref" 1>&2
+    echo "  The spec file should contain these keys:" 1>&2
+    echo "    [prefix]        lower case prefix,             EX: my" 1>&2
+    echo "    [name]          lower case class name,         EX: class" 1>&2
+    echo "    [parent-prefix] prefix of parent class,        EX: g" 1>&2
+    echo "    [parent-name]   name of parent class,          EX: object" 1>&2
+    echo "    [author]        author name,                   EX: <your name>" 1>&2
+    echo "    [include]       #include for the header file, (can have multiple)" 1>&2
+    echo "                       EX: <gtk/gtk.h>" 1>&2
+    echo "                       EX: \"my-other-class.h\"" 1>&2
+    echo "    [property]      property spec (can have multiple),     EX: (see below)" 1>&2
+    echo "" 1>&2
+    echo "      The properties are parsed with the form:" 1>&2
+    echo "        [name] [ctype] [gtype] [spec-type] [free (optional)] [ref (optional)]" 1>&2
+    echo "        EX: my_widget GtkWidget GTK_TYPE_WIDGET object" 1>&2
+    echo "        EX: my_string char G_TYPE_STRING string" 1>&2
+    echo "        EX: my_int int G_TYPE_INT int" 1>&2
+    echo "        EX: my_ptr_array GPtrArray G_TYPE_PTR_ARRAY boxed g_ptr_array_unref g_ptr_array_ref" 1>&2
     echo "" 1>&2
     echo "$@, aborting!" 1>&2
     exit 1
 }
 
-if [ "$#" -ne 8 ]; then
+
+if [ "$#" -ne 3 ]; then
     die wrong number of args
 fi
 
-PREF="$1"
-NAME="$2"
-PAR_PREF="$3"
-PAR_NAME="$4"
-AUTHOR="$5"
-PROPS="$6"
-H_FILE="$7"
-C_FILE="$8"
+OUTPUT_TYPE="$1"
+SPEC_FILE="$2"
+OUTPUT_FILE="$3"
+
+if [ -z "$OUTPUT_TYPE" ] ||
+       [ -z "$SPEC_FILE" ] ||
+       [ -z "$OUTPUT_FILE" ]; then
+    die one or more args are empty
+fi
+
+case "$OUTPUT_TYPE" in
+    --header|--code) ;;
+    *) die arg 1 must be '--header' or '--code' ;;
+esac
+
+if ! [ -f "$SPEC_FILE" ]; then
+    die "$SPEC_FILE isn't a file"
+fi
+# if [ -e "$OUTPUT_FILE" ]; then
+#     die "$OUTPUT_FILE already exists"
+# fi
+
+unset PREF
+unset NAME
+unset PAR_PREF
+unset PAR_NAME
+unset AUTHOR
+unset INCLUDES
+unset PROPS
+
+while IFS= read -r line; do
+    KEY="${line%%=*}"
+    VAL="${line#*=}"
+
+    case "$KEY" in
+        prefix)          PREF="$VAL" ;;
+        name)            NAME="$VAL" ;;
+        parent-prefix)   PAR_PREF="$VAL" ;;
+        parent-name)     PAR_NAME="$VAL" ;;
+        author)          AUTHOR="$VAL" ;;
+        include)
+            if [ -n "$INCLUDES" ]; then
+                INCLUDES="${INCLUDES}
+#include ${VAL}"
+            else
+                INCLUDES="#include ${VAL}"
+            fi
+            ;;
+        property)
+            if [ -n "$PROPS" ]; then
+                PROPS="${PROPS}
+${VAL}"
+            else
+                PROPS="$VAL"
+            fi
+            ;;
+        *)  die "unknown key '${KEY}' in ${SPEC_FILE}" ;;
+    esac
+done < "$SPEC_FILE"
 
 if [ -z "$PREF" ] ||
        [ -z "$NAME" ] ||
        [ -z "$PAR_PREF" ] ||
        [ -z "$PAR_NAME" ] ||
        [ -z "$AUTHOR" ] ||
-       [ -z "$PROPS" ] ||
-       [ -z "$H_FILE" ] ||
-       [ -z "$C_FILE" ]; then
-    die one or more args are empty
+       [ -z "$PROPS" ]; then
+    die "one or more params in $SPEC_FILE are empty"
 fi
 
-if ! [ -f "$PROPS" ]; then
-    die "$PROPS isn't a file"
-fi
-
-for f in "$C_FILE" "$H_FILE"; do
-    if [ -e "$f" ]; then
-        die "$f" already exists
-    fi
-done
+case "$OUTPUT_TYPE" in
+    --header)
+        H_FILE="$OUTPUT_FILE"
+        C_FILE="${OUTPUT_FILE%\.h}.c"
+        ;;
+    --code)
+        H_FILE="${OUTPUT_FILE%\.c}.h"
+        C_FILE="$OUTPUT_FILE"
+        ;;
+esac
 
 to_upper() {
     echo "$1" | tr '[a-z]' '[A-Z]'
@@ -108,7 +164,9 @@ print_struct () {
             *) printf '*'
         esac
         printf "%s;\n" "$LOC_NAME"
-    done < "$PROPS"
+    done <<EOF
+$PROPS
+EOF
 }
 
 print_enums () {
@@ -122,7 +180,9 @@ print_enums () {
         LOC_PTYPE="$4"
         
         printf '  PROP_%s,\n' "$(to_upper $LOC_NAME)"
-    done < "$PROPS"
+    done <<EOF
+$PROPS
+EOF
     printf '\n  LAST_PROP\n'
 }
 
@@ -153,7 +213,9 @@ print_dispose () {
                 printf ');\n'
                 ;;
         esac
-    done < "$PROPS"
+    done <<EOF
+$PROPS
+EOF
 }
 
 
@@ -169,7 +231,9 @@ print_get_property () {
         printf '    case PROP_%s:\n' "$(to_upper $LOC_NAME)"
         printf '      g_value_set_%s (value, %s_get_%s (self));\n' "$LOC_PTYPE" "$SNAKE" "$LOC_NAME"
         printf '      break;\n'
-    done < "$PROPS"
+    done <<EOF
+$PROPS
+EOF
 }
 
 print_set_property () {
@@ -184,7 +248,9 @@ print_set_property () {
         printf '    case PROP_%s:\n' "$(to_upper $LOC_NAME)"
         printf '      %s_set_%s (self, g_value_get_%s (value));\n' "$SNAKE" "$LOC_NAME" "$LOC_PTYPE" 
         printf '      break;\n'
-    done < "$PROPS"
+    done <<EOF
+$PROPS
+EOF
 }
 
 print_init_properties () {
@@ -218,7 +284,9 @@ print_init_properties () {
                 ;;
         esac
         printf '          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);\n\n'
-    done < "$PROPS"
+    done <<EOF
+$PROPS
+EOF
 }
 
 
@@ -278,7 +346,9 @@ print_get_property_methods () {
             printf '}\n\n'
         fi
         
-    done < "$PROPS"
+    done <<EOF
+$PROPS
+EOF
 }
 
 
@@ -352,11 +422,13 @@ print_set_property_methods () {
             printf '}\n\n'
         fi
         
-    done < "$PROPS"
+    done <<EOF
+$PROPS
+EOF
 }
 
 
-cat > "$H_FILE" <<EOF
+[ "$OUTPUT_TYPE" = --header ] && cat > "$H_FILE" <<EOF
 /* $H_FILE
  *
  * Copyright $YEAR $AUTHOR
@@ -379,7 +451,8 @@ cat > "$H_FILE" <<EOF
 
 #pragma once
 
-#include <gtk/gtk.h>
+#include <glib-object.h>
+$INCLUDES
 
 G_BEGIN_DECLS
 
@@ -399,7 +472,7 @@ EOF
 
 
 
-cat > "$C_FILE" <<EOF
+[ "$OUTPUT_TYPE" = --code ] && cat > "$C_FILE" <<EOF
 /* $C_FILE
  *
  * Copyright $YEAR $AUTHOR
@@ -506,3 +579,6 @@ $(print_set_property_methods)
 
 /* End of $C_FILE */
 EOF
+
+
+exit 0
