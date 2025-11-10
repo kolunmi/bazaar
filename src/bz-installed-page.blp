@@ -51,6 +51,7 @@ template $BzInstalledPage: Adw.Bin {
                 template ListItem {
                   activatable: true;
                   selectable: false;
+                  focusable: false;
 
                   child: $BzInstalledTile {
                     group: bind template.item as <$BzEntryGroup>;
