@@ -43,14 +43,6 @@ template $BzWindow: Adw.ApplicationWindow {
       show-end-title-buttons: false;
 
       [start]
-      Label {
-        styles [
-          "heading",
-        ]
-        label: "-- DEBUG MODE --";
-      }
-
-      [start]
       Box {
         visible: bind $invert_boolean($is_null(full_view.entry_group as <$BzEntryGroup>) as <bool>) as <bool>;
         orientation: horizontal;
