@@ -366,6 +366,18 @@ bz_application_class_init (BzApplicationClass *klass)
 }
 
 static void
+bz_application_toggle_debug_mode_action (GSimpleAction *action,
+                                         GVariant      *parameter,
+                                         gpointer       user_data)
+{
+  BzApplication *self       = user_data;
+  gboolean       debug_mode = FALSE;
+
+  debug_mode = bz_state_info_get_debug_mode (self->state);
+  bz_state_info_set_debug_mode (self->state, !debug_mode);
+}
+
+static void
 bz_application_bazaar_inspector_action (GSimpleAction *action,
                                         GVariant      *parameter,
                                         gpointer       user_data)
@@ -539,6 +551,7 @@ static const GActionEntry app_actions[] = {
   {              "donate",              bz_application_donate_action, NULL },
   {            "flatseal",            bz_application_flatseal_action, NULL },
   {    "bazaar-inspector",    bz_application_bazaar_inspector_action, NULL },
+  {   "toggle-debug-mode",   bz_application_toggle_debug_mode_action, NULL },
 };
 
 static gpointer
@@ -644,6 +657,10 @@ bz_application_init (BzApplication *self)
       GTK_APPLICATION (self),
       "app.bazaar-inspector",
       (const char *[]) { "<primary><alt><shift>i", NULL });
+  gtk_application_set_accels_for_action (
+      GTK_APPLICATION (self),
+      "app.toggle-debug-mode",
+      (const char *[]) { "<primary><alt>d", NULL });
 }
 
 static void
