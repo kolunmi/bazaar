@@ -310,6 +310,7 @@ template $BzWindow: Adw.ApplicationWindow {
                             state: bind template.state as <$BzStateInfo>.flathub;
                             online: bind template.state as <$BzStateInfo>.online;
                             group-selected => $browser_group_selected_cb(template);
+                            open-search => $open_search_cb(template);
                           };
                         }
 
