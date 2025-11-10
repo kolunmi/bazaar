@@ -22,8 +22,7 @@
 
 #include <adwaita.h>
 
-#include "bz-entry-group.h"
-#include "bz-flathub-state.h"
+#include "bz-state-info.h"
 
 G_BEGIN_DECLS
 
@@ -35,11 +34,12 @@ bz_search_widget_new (GListModel *model,
                       const char *initial);
 
 void
-bz_search_widget_set_model (BzSearchWidget *self,
-                            GListModel     *model);
+bz_search_widget_set_state (BzSearchWidget *self,
+                            BzStateInfo    *state);
 
-GListModel *
-bz_search_widget_get_model (BzSearchWidget *self);
+BzStateInfo *
+bz_search_widget_get_state (BzSearchWidget *self);
+
 
 void
 bz_search_widget_set_text (BzSearchWidget *self,

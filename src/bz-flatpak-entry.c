@@ -50,6 +50,7 @@ struct _BzFlatpakEntry
   BzEntry parent_instance;
 
   gboolean user;
+  char    *flatpak_name;
   char    *flatpak_id;
   char    *application_name;
   char    *application_runtime;
@@ -73,8 +74,8 @@ enum
 {
   PROP_0,
 
-  PROP_INSTANCE,
   PROP_USER,
+  PROP_FLATPAK_NAME,
   PROP_FLATPAK_ID,
   PROP_APPLICATION_NAME,
   PROP_APPLICATION_RUNTIME,
@@ -146,8 +147,8 @@ bz_flatpak_entry_set_property (GObject      *object,
 
   switch (prop_id)
     {
-    case PROP_INSTANCE:
     case PROP_USER:
+    case PROP_FLATPAK_NAME:
     case PROP_FLATPAK_ID:
     case PROP_APPLICATION_NAME:
     case PROP_APPLICATION_RUNTIME:
@@ -168,18 +169,17 @@ bz_flatpak_entry_class_init (BzFlatpakEntryClass *klass)
   object_class->get_property = bz_flatpak_entry_get_property;
   object_class->dispose      = bz_flatpak_entry_dispose;
 
-  props[PROP_INSTANCE] =
-      g_param_spec_object (
-          "instance",
-          NULL, NULL,
-          BZ_TYPE_FLATPAK_INSTANCE,
-          G_PARAM_READABLE);
-
   props[PROP_USER] =
       g_param_spec_boolean (
           "user",
           NULL, NULL,
           FALSE,
+          G_PARAM_READABLE);
+
+  props[PROP_FLATPAK_NAME] =
+      g_param_spec_string (
+          "flatpak-name",
+          NULL, NULL, NULL,
           G_PARAM_READABLE);
 
   props[PROP_FLATPAK_ID] =
@@ -446,7 +446,8 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
   //   }
   module_dir = bz_dup_module_dir ();
 
-  self->flatpak_id = flatpak_ref_format_ref (ref);
+  self->flatpak_name = g_strdup (flatpak_ref_get_name (ref));
+  self->flatpak_id   = flatpak_ref_format_ref (ref);
 
   id                 = flatpak_ref_get_name (ref);
   unique_id          = bz_flatpak_ref_format_unique (ref, user);
@@ -988,6 +989,13 @@ bz_flatpak_entry_is_user (BzFlatpakEntry *self)
 }
 
 const char *
+bz_flatpak_entry_get_flatpak_name (BzFlatpakEntry *self)
+{
+  g_return_val_if_fail (BZ_IS_FLATPAK_ENTRY (self), NULL);
+  return self->flatpak_name;
+}
+
+const char *
 bz_flatpak_entry_get_flatpak_id (BzFlatpakEntry *self)
 {
   g_return_val_if_fail (BZ_IS_FLATPAK_ENTRY (self), NULL);
@@ -999,6 +1007,13 @@ bz_flatpak_entry_get_application_name (BzFlatpakEntry *self)
 {
   g_return_val_if_fail (BZ_IS_FLATPAK_ENTRY (self), NULL);
   return self->application_name;
+}
+
+const char *
+bz_flatpak_entry_get_application_runtime (BzFlatpakEntry *self)
+{
+  g_return_val_if_fail (BZ_IS_FLATPAK_ENTRY (self), NULL);
+  return self->application_runtime;
 }
 
 const char *

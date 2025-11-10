@@ -1242,21 +1242,21 @@ retrieve_refs_for_remote_fiber (RetrieveRefsForRemoteData *data)
         remote_name,
         local_error->message);
 
-  for (guint i = 0; i < refs->len;)
+  if (blocked_names_hash != NULL)
     {
-      FlatpakRemoteRef *rref = NULL;
-      const char       *name = NULL;
+      for (guint i = 0; i < refs->len;)
+        {
+          FlatpakRemoteRef *rref = NULL;
+          const char       *name = NULL;
 
-      rref = g_ptr_array_index (refs, i);
-      name = flatpak_ref_get_name (FLATPAK_REF (rref));
+          rref = g_ptr_array_index (refs, i);
+          name = flatpak_ref_get_name (FLATPAK_REF (rref));
 
-      if (flatpak_remote_ref_get_eol (rref) != NULL ||
-          flatpak_remote_ref_get_eol_rebase (rref) != NULL ||
-          (blocked_names_hash != NULL &&
-           g_hash_table_contains (blocked_names_hash, name)))
-        g_ptr_array_remove_index_fast (refs, i);
-      else
-        i++;
+          if (g_hash_table_contains (blocked_names_hash, name))
+            g_ptr_array_remove_index_fast (refs, i);
+          else
+            i++;
+        }
     }
   if (refs->len == 0)
     return dex_future_new_true ();
@@ -2113,18 +2113,23 @@ cmp_rref (FlatpakRemoteRef *a,
           FlatpakRemoteRef *b,
           GHashTable       *hash)
 {
-  AsComponent    *a_comp = NULL;
-  AsComponent    *b_comp = NULL;
-  AsComponentKind a_kind = AS_COMPONENT_KIND_UNKNOWN;
-  AsComponentKind b_kind = AS_COMPONENT_KIND_UNKNOWN;
+  FlatpakRefKind  a_fkind = 0;
+  FlatpakRefKind  b_fkind = 0;
+  AsComponent    *a_comp  = NULL;
+  AsComponent    *b_comp  = NULL;
+  AsComponentKind a_kind  = AS_COMPONENT_KIND_UNKNOWN;
+  AsComponentKind b_kind  = AS_COMPONENT_KIND_UNKNOWN;
+
+  a_fkind = flatpak_ref_get_kind (FLATPAK_REF (a));
+  b_fkind = flatpak_ref_get_kind (FLATPAK_REF (b));
 
   a_comp = g_hash_table_lookup (hash, flatpak_ref_get_name (FLATPAK_REF (a)));
   b_comp = g_hash_table_lookup (hash, flatpak_ref_get_name (FLATPAK_REF (b)));
 
   if (a_comp == NULL)
-    return -1;
+    return a_fkind == FLATPAK_REF_KIND_RUNTIME ? -1 : 1;
   if (b_comp == NULL)
-    return 1;
+    return b_fkind == FLATPAK_REF_KIND_RUNTIME ? 1 : -1;
 
   a_kind = as_component_get_kind (a_comp);
   b_kind = as_component_get_kind (b_comp);

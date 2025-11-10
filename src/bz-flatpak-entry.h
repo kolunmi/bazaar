@@ -32,10 +32,16 @@ gboolean
 bz_flatpak_entry_is_user (BzFlatpakEntry *self);
 
 const char *
+bz_flatpak_entry_get_flatpak_name (BzFlatpakEntry *self);
+
+const char *
 bz_flatpak_entry_get_flatpak_id (BzFlatpakEntry *self);
 
 const char *
 bz_flatpak_entry_get_application_name (BzFlatpakEntry *self);
+
+const char *
+bz_flatpak_entry_get_application_runtime (BzFlatpakEntry *self);
 
 const char *
 bz_flatpak_entry_get_runtime_name (BzFlatpakEntry *self);
