@@ -1260,7 +1260,6 @@ static void
 set_page (BzWindow *self)
 {
   const char *selected_navigation_page_name = NULL;
-  const char *visible_child_name            = NULL;
 
   if (self->state == NULL)
     return;
