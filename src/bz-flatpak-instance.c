@@ -765,8 +765,8 @@ static DexFuture *
 load_local_ref_fiber (LoadLocalRefData *data)
 {
   // GCancellable      *cancellable    = data->cancellable;
-  BzFlatpakInstance *instance       = data->instance;
-  GFile             *file           = data->file;
+  // BzFlatpakInstance *instance       = data->instance;
+  GFile *file                       = data->file;
   g_autoptr (GError) local_error    = NULL;
   g_autofree char *uri              = NULL;
   g_autofree char *path             = NULL;
@@ -849,11 +849,9 @@ load_local_ref_fiber (LoadLocalRefData *data)
         local_error->message);
 
   entry = bz_flatpak_entry_new_for_ref (
-      instance,
-      FALSE,
-      NULL,
       FLATPAK_REF (bref),
       NULL,
+      FALSE,
       NULL,
       NULL,
       &local_error);
@@ -1298,13 +1296,11 @@ retrieve_refs_for_remote_fiber (RetrieveRefsForRemoteData *data)
         }
 
       entry = bz_flatpak_entry_new_for_ref (
-          instance,
-          installation == instance->user,
-          remote,
           FLATPAK_REF (rref),
+          remote,
+          installation == instance->user,
           component,
           appstream_dir_path,
-          remote_icon,
           NULL);
       if (entry != NULL)
         result = dex_await (

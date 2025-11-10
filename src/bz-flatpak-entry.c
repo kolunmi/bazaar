@@ -329,14 +329,12 @@ calculate_is_mobile_friendly (guint required_controls,
 }
 
 BzFlatpakEntry *
-bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
-                              gboolean           user,
-                              FlatpakRemote     *remote,
-                              FlatpakRef        *ref,
-                              AsComponent       *component,
-                              const char        *appstream_dir,
-                              GdkPaintable      *remote_icon,
-                              GError           **error)
+bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
+                              FlatpakRemote *remote,
+                              gboolean       user,
+                              AsComponent   *component,
+                              const char    *appstream_dir,
+                              GError       **error)
 {
   g_autoptr (BzFlatpakEntry) self              = NULL;
   GBytes *bytes                                = NULL;
@@ -383,7 +381,6 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
   AsContentRating *content_rating              = NULL;
   gint             age_rating                  = 0;
 
-  g_return_val_if_fail (BZ_IS_FLATPAK_INSTANCE (instance), NULL);
   g_return_val_if_fail (FLATPAK_IS_REF (ref), NULL);
   g_return_val_if_fail (FLATPAK_IS_REMOTE_REF (ref) || FLATPAK_IS_BUNDLE_REF (ref), NULL);
   g_return_val_if_fail (component == NULL || appstream_dir != NULL, NULL);
@@ -920,7 +917,6 @@ bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
       "url", project_url,
       "size", download_size,
       "search-tokens", search_tokens,
-      "remote-repo-icon", remote_icon,
       "metadata-license", metadata_license,
       "project-license", project_license,
       "is-floss", is_floss,
