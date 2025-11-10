@@ -233,6 +233,8 @@ bz_flatpak_entry_real_serialize (BzSerializable  *serializable,
   BzFlatpakEntry *self = BZ_FLATPAK_ENTRY (serializable);
 
   g_variant_builder_add (builder, "{sv}", "user", g_variant_new_boolean (self->user));
+  if (self->flatpak_name != NULL)
+    g_variant_builder_add (builder, "{sv}", "flatpak-name", g_variant_new_string (self->flatpak_name));
   if (self->flatpak_id != NULL)
     g_variant_builder_add (builder, "{sv}", "flatpak-id", g_variant_new_string (self->flatpak_id));
   if (self->application_name != NULL)
@@ -270,6 +272,8 @@ bz_flatpak_entry_real_deserialize (BzSerializable *serializable,
 
       if (g_strcmp0 (key, "user") == 0)
         self->user = g_variant_get_boolean (value);
+      else if (g_strcmp0 (key, "flatpak-name") == 0)
+        self->flatpak_name = g_variant_dup_string (value, NULL);
       else if (g_strcmp0 (key, "flatpak-id") == 0)
         self->flatpak_id = g_variant_dup_string (value, NULL);
       else if (g_strcmp0 (key, "application-name") == 0)
@@ -1099,6 +1103,7 @@ bz_flatpak_entry_launch (BzFlatpakEntry    *self,
 static void
 clear_entry (BzFlatpakEntry *self)
 {
+  g_clear_pointer (&self->flatpak_name, g_free);
   g_clear_pointer (&self->flatpak_id, g_free);
   g_clear_pointer (&self->application_name, g_free);
   g_clear_pointer (&self->application_runtime, g_free);
