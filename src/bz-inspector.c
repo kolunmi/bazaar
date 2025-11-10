@@ -209,7 +209,7 @@ bz_inspector_set_state (BzInspector *self,
       self->debug_mode_binding = g_object_bind_property (
           state, "debug-mode",
           self->debug_mode_check, "active",
-          G_BINDING_BIDIRECTIONAL);
+          G_BINDING_BIDIRECTIONAL | G_BINDING_SYNC_CREATE);
     }
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_STATE]);

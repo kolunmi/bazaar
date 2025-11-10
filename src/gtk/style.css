@@ -1,3 +1,8 @@
+.bz-debug {
+    background-color: darkorange;
+    color: black;
+}
+
 .bz-monospace {
     font-family: monospace;
 }

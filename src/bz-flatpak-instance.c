@@ -765,8 +765,8 @@ static DexFuture *
 load_local_ref_fiber (LoadLocalRefData *data)
 {
   // GCancellable      *cancellable    = data->cancellable;
-  BzFlatpakInstance *instance       = data->instance;
-  GFile             *file           = data->file;
+  // BzFlatpakInstance *instance       = data->instance;
+  GFile *file                       = data->file;
   g_autoptr (GError) local_error    = NULL;
   g_autofree char *uri              = NULL;
   g_autofree char *path             = NULL;
@@ -849,11 +849,9 @@ load_local_ref_fiber (LoadLocalRefData *data)
         local_error->message);
 
   entry = bz_flatpak_entry_new_for_ref (
-      instance,
-      FALSE,
-      NULL,
       FLATPAK_REF (bref),
       NULL,
+      FALSE,
       NULL,
       NULL,
       &local_error);
@@ -1244,21 +1242,21 @@ retrieve_refs_for_remote_fiber (RetrieveRefsForRemoteData *data)
         remote_name,
         local_error->message);
 
-  for (guint i = 0; i < refs->len;)
+  if (blocked_names_hash != NULL)
     {
-      FlatpakRemoteRef *rref = NULL;
-      const char       *name = NULL;
+      for (guint i = 0; i < refs->len;)
+        {
+          FlatpakRemoteRef *rref = NULL;
+          const char       *name = NULL;
 
-      rref = g_ptr_array_index (refs, i);
-      name = flatpak_ref_get_name (FLATPAK_REF (rref));
+          rref = g_ptr_array_index (refs, i);
+          name = flatpak_ref_get_name (FLATPAK_REF (rref));
 
-      if (flatpak_remote_ref_get_eol (rref) != NULL ||
-          flatpak_remote_ref_get_eol_rebase (rref) != NULL ||
-          (blocked_names_hash != NULL &&
-           g_hash_table_contains (blocked_names_hash, name)))
-        g_ptr_array_remove_index_fast (refs, i);
-      else
-        i++;
+          if (g_hash_table_contains (blocked_names_hash, name))
+            g_ptr_array_remove_index_fast (refs, i);
+          else
+            i++;
+        }
     }
   if (refs->len == 0)
     return dex_future_new_true ();
@@ -1298,13 +1296,11 @@ retrieve_refs_for_remote_fiber (RetrieveRefsForRemoteData *data)
         }
 
       entry = bz_flatpak_entry_new_for_ref (
-          instance,
-          installation == instance->user,
-          remote,
           FLATPAK_REF (rref),
+          remote,
+          installation == instance->user,
           component,
           appstream_dir_path,
-          remote_icon,
           NULL);
       if (entry != NULL)
         result = dex_await (
@@ -2117,18 +2113,23 @@ cmp_rref (FlatpakRemoteRef *a,
           FlatpakRemoteRef *b,
           GHashTable       *hash)
 {
-  AsComponent    *a_comp = NULL;
-  AsComponent    *b_comp = NULL;
-  AsComponentKind a_kind = AS_COMPONENT_KIND_UNKNOWN;
-  AsComponentKind b_kind = AS_COMPONENT_KIND_UNKNOWN;
+  FlatpakRefKind  a_fkind = 0;
+  FlatpakRefKind  b_fkind = 0;
+  AsComponent    *a_comp  = NULL;
+  AsComponent    *b_comp  = NULL;
+  AsComponentKind a_kind  = AS_COMPONENT_KIND_UNKNOWN;
+  AsComponentKind b_kind  = AS_COMPONENT_KIND_UNKNOWN;
+
+  a_fkind = flatpak_ref_get_kind (FLATPAK_REF (a));
+  b_fkind = flatpak_ref_get_kind (FLATPAK_REF (b));
 
   a_comp = g_hash_table_lookup (hash, flatpak_ref_get_name (FLATPAK_REF (a)));
   b_comp = g_hash_table_lookup (hash, flatpak_ref_get_name (FLATPAK_REF (b)));
 
   if (a_comp == NULL)
-    return -1;
+    return a_fkind == FLATPAK_REF_KIND_RUNTIME ? -1 : 1;
   if (b_comp == NULL)
-    return 1;
+    return b_fkind == FLATPAK_REF_KIND_RUNTIME ? 1 : -1;
 
   a_kind = as_component_get_kind (a_comp);
   b_kind = as_component_get_kind (b_comp);

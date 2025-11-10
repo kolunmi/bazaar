@@ -2026,6 +2026,8 @@ bz_entry_calc_usefulness (BzEntry *self)
   score += priv->screenshot_paintables != NULL ? 5 : 0;
   score += priv->share_urls != NULL ? 5 : 0;
 
+  score -= priv->eol != NULL ? 500 : 0;
+
   return score;
 }
 

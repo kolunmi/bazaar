@@ -18,13 +18,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "bz-flathub-category-section.h"
+#include <glib/gi18n.h>
+
 #include "bz-apps-page.h"
 #include "bz-entry-group.h"
+#include "bz-flathub-category-section.h"
 #include "bz-flathub-category.h"
 #include "bz-flathub-page.h"
-#include "bz-window.h"
-#include <glib/gi18n.h>
 
 struct _BzFlathubCategorySection
 {
@@ -84,7 +84,6 @@ on_more_button_clicked (GtkButton                *button,
                         BzFlathubCategorySection *self)
 {
   GtkWidget         *flathub_page       = NULL;
-  GtkWidget         *window             = NULL;
   GtkWidget         *nav_view           = NULL;
   AdwNavigationPage *apps_page          = NULL;
   g_autoptr (GListModel) model          = NULL;
@@ -101,7 +100,6 @@ on_more_button_clicked (GtkButton                *button,
   if (flathub_page == NULL)
     return;
 
-  window   = GTK_WIDGET (gtk_widget_get_root (GTK_WIDGET (self)));
   nav_view = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
 
   if (nav_view == NULL)

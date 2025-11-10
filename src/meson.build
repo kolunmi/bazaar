@@ -61,8 +61,6 @@ bz_sources = [
   'bz-appstream-description-render.c',
   'bz-async-texture.c',
   'bz-backend-notification.c',
-  'bz-backend-transaction-op-payload.c',
-  'bz-backend-transaction-op-progress-payload.c',
   'bz-backend.c',
   'bz-browse-widget.c',
   'bz-category-tile.c',
@@ -112,10 +110,8 @@ bz_sources = [
   'bz-markdown-render.c',
   'bz-preferences-dialog.c',
   'bz-progress-bar.c',
-  'bz-release.c',
   'bz-releases-list.c',
   'bz-result.c',
-  'bz-review.c',
   'bz-rich-app-tile.c',
   'bz-rounded-picture.c',
   'bz-screenshot-page.c',
@@ -131,7 +127,6 @@ bz_sources = [
   'bz-themed-entry-group-rect.c',
   'bz-transaction-entry-tracker.c',
   'bz-transaction-manager.c',
-  'bz-transaction-task.c',
   'bz-transaction-view.c',
   'bz-transaction.c',
   'bz-update-dialog.c',
@@ -172,9 +167,13 @@ gen_gobject_code = generator(
 )
 
 gobject_specs = files(
+  'bz-backend-transaction-op-payload.txt',
+  'bz-backend-transaction-op-progress-payload.txt',
   'bz-issue.txt',
+  'bz-release.txt',
   'bz-search-result.txt',
   'bz-state-info.txt',
+  'bz-transaction-task.txt',
   'bz-url.txt',
 )
 

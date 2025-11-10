@@ -19,6 +19,7 @@ property=application_factory BzApplicationMapFactory BZ_TYPE_APPLICATION_MAP_FAC
 property=available_updates GListModel G_TYPE_LIST_MODEL object
 property=backend BzBackend BZ_TYPE_BACKEND object
 property=background_task_label char G_TYPE_STRING string
+property=hide_eol gboolean G_TYPE_BOOLEAN boolean
 property=blocklists GListModel G_TYPE_LIST_MODEL object
 property=busy gboolean G_TYPE_BOOLEAN boolean
 property=busy_progress double G_TYPE_DOUBLE double

@@ -843,7 +843,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
           "state",
           NULL, NULL,
           BZ_TYPE_STATE_INFO,
-          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   props[PROP_TRANSACTION_MANAGER] =
       g_param_spec_object (
