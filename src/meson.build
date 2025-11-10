@@ -128,7 +128,6 @@ bz_sources = [
   'bz-themed-entry-group-rect.c',
   'bz-transaction-entry-tracker.c',
   'bz-transaction-manager.c',
-  'bz-transaction-task.c',
   'bz-transaction-view.c',
   'bz-transaction.c',
   'bz-update-dialog.c',
@@ -174,6 +173,7 @@ gobject_specs = files(
   'bz-issue.txt',
   'bz-search-result.txt',
   'bz-state-info.txt',
+  'bz-transaction-task.txt',
   'bz-url.txt',
 )
 
