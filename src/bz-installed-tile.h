@@ -1,6 +1,6 @@
-/* bz-installed-page.h
+/* bz-installed-tile.h
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2025 Adam Masciola, Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,21 +20,23 @@
 
 #pragma once
 
+#include "bz-entry-group.h"
 #include <adwaita.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_INSTALLED_PAGE (bz_installed_page_get_type ())
-G_DECLARE_FINAL_TYPE (BzInstalledPage, bz_installed_page, BZ, INSTALLED_PAGE, AdwBin)
+#define BZ_TYPE_INSTALLED_TILE (bz_installed_tile_get_type ())
+
+G_DECLARE_FINAL_TYPE (BzInstalledTile, bz_installed_tile, BZ, INSTALLED_TILE, GtkBox)
 
 GtkWidget *
-bz_installed_page_new (void);
+bz_installed_tile_new (void);
 
 void
-bz_installed_page_set_model (BzInstalledPage *self,
-                             GListModel      *model);
+bz_installed_tile_set_group (BzInstalledTile *self,
+                             BzEntryGroup    *group);
 
-GListModel *
-bz_installed_page_get_model (BzInstalledPage *self);
+BzEntryGroup *
+bz_installed_tile_get_group (BzInstalledTile *self);
 
 G_END_DECLS
