@@ -1,0 +1,13 @@
+prefix=bz
+name=release
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+include=<gio/gio.h>
+
+property=description char G_TYPE_STRING string
+property=issues GListModel G_TYPE_LIST_MODEL object
+property=timestamp guint64 G_TYPE_UINT64 uint64
+property=url char G_TYPE_STRING string
+property=version char G_TYPE_STRING string
