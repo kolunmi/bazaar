@@ -241,6 +241,13 @@ invert_boolean (gpointer object,
   return !value;
 }
 
+static gboolean
+is_null (gpointer object,
+         GObject *value)
+{
+  return value == NULL;
+}
+
 static void
 bz_flathub_category_section_class_init (BzFlathubCategorySectionClass *klass)
 {
@@ -289,6 +296,7 @@ bz_flathub_category_section_class_init (BzFlathubCategorySectionClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzFlathubCategorySection, more_button);
 
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
+  gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, on_more_button_clicked);
   gtk_widget_class_bind_template_callback (widget_class, bind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, unbind_widget_cb);

@@ -60,6 +60,7 @@ static GParamSpec *props[LAST_PROP] = { 0 };
 enum
 {
   SIGNAL_GROUP_SELECTED,
+  SIGNAL_OPEN_SEARCH,
 
   LAST_SIGNAL,
 };
@@ -68,6 +69,20 @@ static guint signals[LAST_SIGNAL];
 static BzFlathubCategory *
 get_category_by_name (GListModel *categories,
                       const char *name);
+
+static gboolean
+invert_boolean (gpointer object,
+                gboolean value)
+{
+  return !value;
+}
+
+static gboolean
+is_null (gpointer object,
+         GObject *value)
+{
+  return value == NULL;
+}
 
 static void
 tile_clicked (BzEntryGroup *group,
@@ -224,6 +239,13 @@ get_category_by_name_cb (gpointer    object,
 }
 
 static void
+open_search_cb (BzFlathubPage *self,
+                   GtkButton      *button)
+{
+  g_signal_emit (self, signals[SIGNAL_OPEN_SEARCH], 0);
+}
+
+static void
 bz_flathub_page_class_init (BzFlathubPageClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
@@ -264,8 +286,19 @@ bz_flathub_page_class_init (BzFlathubPageClass *klass)
       G_TYPE_FROM_CLASS (klass),
       g_cclosure_marshal_VOID__OBJECTv);
 
+  signals[SIGNAL_OPEN_SEARCH] =
+    g_signal_new (
+        "open-search",
+        G_OBJECT_CLASS_TYPE (klass),
+        G_SIGNAL_RUN_FIRST,
+        0,
+        NULL, NULL,
+        g_cclosure_marshal_VOID__VOID,
+        G_TYPE_NONE, 0);
+
   g_type_ensure (BZ_TYPE_SECTION_VIEW);
   g_type_ensure (BZ_TYPE_FLATHUB_CATEGORY_SECTION);
+  g_type_ensure (BZ_TYPE_FLATHUB_CATEGORY);
   g_type_ensure (BZ_TYPE_DETAILED_APP_TILE);
   g_type_ensure (BZ_TYPE_INHIBITED_SCROLLABLE);
   g_type_ensure (BZ_TYPE_DYNAMIC_LIST_VIEW);
@@ -274,12 +307,15 @@ bz_flathub_page_class_init (BzFlathubPageClass *klass)
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-flathub-page.ui");
   gtk_widget_class_bind_template_child (widget_class, BzFlathubPage, stack);
+  gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
+  gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, bind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, unbind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, category_section_group_selected_cb);
   gtk_widget_class_bind_template_callback (widget_class, get_category_by_name_cb);
   gtk_widget_class_bind_template_callback (widget_class, show_more_mobile_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, featured_carousel_group_clicked_cb);
+  gtk_widget_class_bind_template_callback (widget_class, open_search_cb);
 }
 
 static void

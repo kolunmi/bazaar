@@ -188,6 +188,15 @@ is_null (gpointer object,
 }
 
 static gboolean
+is_empty (gpointer object,
+          GListModel *model)
+{
+  if (model == NULL)
+    return TRUE;
+  return g_list_model_get_n_items (model) == 0;
+}
+
+static gboolean
 is_valid_string (gpointer    object,
                  const char *value)
 {
@@ -415,6 +424,7 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
+  gtk_widget_class_bind_template_callback (widget_class, is_empty);
   gtk_widget_class_bind_template_callback (widget_class, is_valid_string);
   gtk_widget_class_bind_template_callback (widget_class, idx_to_string);
   gtk_widget_class_bind_template_callback (widget_class, score_to_string);
