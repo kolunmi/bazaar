@@ -44,7 +44,6 @@ src/bz-flatpak-entry.c
 src/bz-flatpak-instance.c
 src/bz-full-view.blp
 src/bz-full-view.c
-src/bz-global-progress.c
 src/bz-global-state.c
 src/bz-gnome-shell-search-provider.c
 src/bz-group-tile-css-watcher.c
@@ -63,12 +62,10 @@ src/bz-preferences-dialog.blp
 src/bz-preferences-dialog.c
 src/bz-progress-bar.blp
 src/bz-progress-bar.c
-src/bz-release.c
 src/bz-releases-dialog.blp
 src/bz-releases-list.blp
 src/bz-releases-list.c
 src/bz-result.c
-src/bz-review.c
 src/bz-rich-app-tile.blp
 src/bz-rich-app-tile.c
 src/bz-screenshot.c
