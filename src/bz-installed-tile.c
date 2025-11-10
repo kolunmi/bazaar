@@ -153,9 +153,9 @@ addon_transact_cb (BzInstalledTile *self,
   g_object_get (entry, "installed", &installed, NULL);
 
   if (installed)
-    g_signal_emit_by_name (page, "remove", entry);
+    g_signal_emit_by_name (page, "remove-addon", entry);
   else
-    g_signal_emit_by_name (page, "install", entry);
+    g_signal_emit_by_name (page, "install-addon", entry);
 }
 
 static DexFuture *
@@ -225,7 +225,6 @@ install_addons_fiber (BzInstalledTile *tile)
       bz_entry_get_addons (entry));
 
   addons_dialog = bz_addons_dialog_new (entry, model);
-  adw_dialog_set_content_width (addons_dialog, 750);
   gtk_widget_set_size_request (GTK_WIDGET (addons_dialog), 350, -1);
   g_signal_connect_swapped (addons_dialog, "transact", G_CALLBACK (addon_transact_cb), tile);
 

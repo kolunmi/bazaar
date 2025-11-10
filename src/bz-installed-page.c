@@ -54,7 +54,8 @@ static GParamSpec *props[LAST_PROP] = { 0 };
 enum
 {
   SIGNAL_REMOVE,
-  SIGNAL_INSTALL,
+  SIGNAL_REMOVE_ADDON,
+  SIGNAL_INSTALL_ADDON,
   SIGNAL_SHOW,
 
   LAST_SIGNAL,
@@ -229,21 +230,6 @@ bz_installed_page_class_init (BzInstalledPageClass *klass)
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
-  signals[SIGNAL_INSTALL] =
-      g_signal_new (
-          "install",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
-          g_cclosure_marshal_VOID__OBJECT,
-          G_TYPE_NONE, 1,
-          BZ_TYPE_ENTRY);
-  g_signal_set_va_marshaller (
-      signals[SIGNAL_INSTALL],
-      G_TYPE_FROM_CLASS (klass),
-      g_cclosure_marshal_VOID__OBJECTv);
-
   signals[SIGNAL_REMOVE] =
       g_signal_new (
           "remove",
@@ -256,6 +242,36 @@ bz_installed_page_class_init (BzInstalledPageClass *klass)
           BZ_TYPE_ENTRY);
   g_signal_set_va_marshaller (
       signals[SIGNAL_REMOVE],
+      G_TYPE_FROM_CLASS (klass),
+      g_cclosure_marshal_VOID__OBJECTv);
+
+  signals[SIGNAL_INSTALL_ADDON] =
+      g_signal_new (
+          "install-addon",
+          G_OBJECT_CLASS_TYPE (klass),
+          G_SIGNAL_RUN_FIRST,
+          0,
+          NULL, NULL,
+          g_cclosure_marshal_VOID__OBJECT,
+          G_TYPE_NONE, 1,
+          BZ_TYPE_ENTRY);
+  g_signal_set_va_marshaller (
+      signals[SIGNAL_INSTALL_ADDON],
+      G_TYPE_FROM_CLASS (klass),
+      g_cclosure_marshal_VOID__OBJECTv);
+
+  signals[SIGNAL_REMOVE_ADDON] =
+      g_signal_new (
+          "remove-addon",
+          G_OBJECT_CLASS_TYPE (klass),
+          G_SIGNAL_RUN_FIRST,
+          0,
+          NULL, NULL,
+          g_cclosure_marshal_VOID__OBJECT,
+          G_TYPE_NONE, 1,
+          BZ_TYPE_ENTRY);
+  g_signal_set_va_marshaller (
+      signals[SIGNAL_REMOVE_ADDON],
       G_TYPE_FROM_CLASS (klass),
       g_cclosure_marshal_VOID__OBJECTv);
 

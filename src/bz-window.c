@@ -250,7 +250,7 @@ full_view_remove_cb (BzWindow   *self,
                      GtkWidget  *source,
                      BzFullView *view)
 {
-  try_transact (self, NULL, bz_full_view_get_entry_group (view), TRUE, TRUE, source);
+  try_transact (self, NULL, bz_full_view_get_entry_group (view), TRUE, FALSE, source);
 }
 
 static void
@@ -267,6 +267,14 @@ remove_addon_cb (BzWindow   *self,
                  BzFullView *view)
 {
   try_transact (self, entry, NULL, TRUE, TRUE, NULL);
+}
+
+static void
+remove_installed_cb (BzWindow   *self,
+                 BzEntry    *entry,
+                 BzFullView *view)
+{
+  try_transact (self, entry, NULL, TRUE, FALSE, NULL);
 }
 
 static void
@@ -476,6 +484,7 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, full_view_remove_cb);
   gtk_widget_class_bind_template_callback (widget_class, install_addon_cb);
   gtk_widget_class_bind_template_callback (widget_class, remove_addon_cb);
+  gtk_widget_class_bind_template_callback (widget_class, remove_installed_cb);
   gtk_widget_class_bind_template_callback (widget_class, installed_page_show_cb);
   gtk_widget_class_bind_template_callback (widget_class, page_toggled_cb);
   gtk_widget_class_bind_template_callback (widget_class, breakpoint_apply_cb);
@@ -1035,7 +1044,9 @@ configure_remove_dialog (AdwAlertDialog *alert,
   heading = g_strdup_printf (_ ("Remove %s?"), title);
 
   adw_alert_dialog_set_heading (alert, heading);
-  adw_alert_dialog_set_body (alert, _ ("Settings & user data will be kept"));
+  adw_alert_dialog_set_body (
+    alert,g_strdup_printf (_("It will not be possible to use %s after it is uninstalled.\n\nSettings and user data will be kept."),title)
+  );
 
   adw_alert_dialog_add_responses (alert,
                                   "cancel", _ ("Cancel"),
