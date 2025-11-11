@@ -88,12 +88,12 @@ template $BzSearchWidget: Adw.Bin {
         margin-end: 12;
         maximum-size: 375;
 
-        child: Box search_box {
+        child: Adw.Bin {
           halign: fill;
           margin-top: 10;
           margin-bottom: 10;
 
-          Box {
+          child: Box {
             spacing: 8;
 
             Image {
@@ -131,7 +131,7 @@ template $BzSearchWidget: Adw.Bin {
             styles [
               "search-box",
             ]
-          }
+          };
         };
       }
 
