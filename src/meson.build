@@ -6,7 +6,7 @@ libdex_opts = [
 ]
 
 gtk_dep              = dependency('gtk4')
-libadwaita_dep       = dependency('libadwaita-1', version: '>= 1.7')
+libadwaita_dep       = dependency('libadwaita-1', version: '>= 1.8')
 libdex_dep           = dependency('libdex-1', version: '>= 1.0.0', default_options: libdex_opts)
 flatpak_dep          = dependency('flatpak', version: '>= 1.9')
 appstream_dep        = dependency('appstream', version: '>= 1.0')
