@@ -252,7 +252,6 @@ bz_global_progress_snapshot (GtkWidget   *widget,
   graphene_rect_t   fraction_rect  = { 0 };
   graphene_rect_t   pending_rect   = { 0 };
   GskRoundedRect    fraction_clip  = { 0 };
-  AdwStyleManager  *style_manager  = NULL;
   g_autoptr (GdkRGBA) accent_color = NULL;
 
   if (self->child != NULL)
@@ -306,8 +305,8 @@ bz_global_progress_snapshot (GtkWidget   *widget,
   gtk_snapshot_push_rounded_clip (snapshot, &total_clip);
   gtk_snapshot_push_opacity (snapshot, CLAMP (self->transition_progress, 0.0, 1.0));
 
-  style_manager = adw_style_manager_get_default ();
-  accent_color  = adw_style_manager_get_accent_color_rgba (style_manager);
+  accent_color = g_new0 (GdkRGBA, 1);
+  gtk_widget_get_color (widget, accent_color);
 
   accent_color->alpha = 0.2;
   gtk_snapshot_append_color (snapshot, accent_color, &total_clip.bounds);
@@ -662,6 +661,8 @@ bz_global_progress_class_init (BzGlobalProgressClass *klass)
   widget_class->measure       = bz_global_progress_measure;
   widget_class->size_allocate = bz_global_progress_size_allocate;
   widget_class->snapshot      = bz_global_progress_snapshot;
+
+  gtk_widget_class_set_css_name (widget_class, "global-progress");
 }
 
 static gboolean
