@@ -1,0 +1,12 @@
+prefix=bz
+name=country
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+include=<json-glib/json-glib.h>
+
+property=name char G_TYPE_STRING string
+property=iso_code char G_TYPE_STRING string
+property=coordinates JsonArray JSON_TYPE_ARRAY boxed json_array_unref json_array_ref
+property=value double G_TYPE_DOUBLE double

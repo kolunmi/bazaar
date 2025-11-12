@@ -1,0 +1,15 @@
+prefix=bz
+name=comet
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+include=<gtk/gtk.h>
+
+property=name char G_TYPE_STRING string
+property=from GtkWidget GTK_TYPE_WIDGET object
+property=to GtkWidget GTK_TYPE_WIDGET object
+property=paintable GdkPaintable GDK_TYPE_PAINTABLE object
+property=path GskPath GSK_TYPE_PATH boxed gsk_path_unref gsk_path_ref
+property=path_length double G_TYPE_DOUBLE double
+property=progress double G_TYPE_DOUBLE double

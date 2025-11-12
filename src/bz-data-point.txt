@@ -1,0 +1,9 @@
+prefix=bz
+name=data_point
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+property=independent double G_TYPE_DOUBLE double
+property=dependent double G_TYPE_DOUBLE double
+property=label char G_TYPE_STRING string
