@@ -254,6 +254,9 @@ bz_global_progress_snapshot (GtkWidget   *widget,
   GskRoundedRect    fraction_clip  = { 0 };
   g_autoptr (GdkRGBA) accent_color = NULL;
 
+  accent_color = g_new0 (GdkRGBA, 1);
+  gtk_widget_get_color (widget, accent_color);
+
   if (self->child != NULL)
     {
       gtk_snapshot_push_opacity (snapshot, CLAMP (1.0 - self->transition_progress, 0.0, 1.0));
@@ -304,9 +307,6 @@ bz_global_progress_snapshot (GtkWidget   *widget,
 
   gtk_snapshot_push_rounded_clip (snapshot, &total_clip);
   gtk_snapshot_push_opacity (snapshot, CLAMP (self->transition_progress, 0.0, 1.0));
-
-  accent_color = g_new0 (GdkRGBA, 1);
-  gtk_widget_get_color (widget, accent_color);
 
   accent_color->alpha = 0.2;
   gtk_snapshot_append_color (snapshot, accent_color, &total_clip.bounds);
