@@ -1,0 +1,8 @@
+<p>This release comes with the following improvements:</p>
+<ul>
+  <li>Add "On the go" section and mobile category</li>
+  <li>Greatly decrease reported memory usage</li>
+  <li>Rework search UI</li>
+  <li>Rework page stack navigation</li>
+  <li>Change screenshot dialog to page</li>
+</ul>

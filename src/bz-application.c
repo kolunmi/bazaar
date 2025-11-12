@@ -474,6 +474,8 @@ bz_application_about_action (GSimpleAction *action,
   BzApplication *self   = user_data;
   GtkWindow     *window = NULL;
   AdwDialog     *dialog = NULL;
+  g_autoptr(GBytes) release_notes_bytes = NULL;
+  const char *release_notes_text = NULL;
 
   const char *developers[] = {
     C_ ("About Dialog Developer Credit", "Adam Masciola <kolunmi@posteo.net>"),
@@ -486,6 +488,14 @@ bz_application_about_action (GSimpleAction *action,
 
   window = gtk_application_get_active_window (GTK_APPLICATION (self));
   dialog = adw_about_dialog_new ();
+
+  release_notes_bytes = g_resources_lookup_data (
+      "/io/github/kolunmi/Bazaar/release-notes.xml",
+      G_RESOURCE_LOOKUP_FLAGS_NONE,
+      NULL);
+
+  if (release_notes_bytes != NULL)
+    release_notes_text = g_bytes_get_data (release_notes_bytes, NULL);
 
   g_object_set (
       dialog,
@@ -500,6 +510,7 @@ bz_application_about_action (GSimpleAction *action,
       "license-type", GTK_LICENSE_GPL_3_0,
       "website", "https://github.com/kolunmi/bazaar",
       "issue-url", "https://github.com/kolunmi/bazaar/issues",
+      "release-notes", release_notes_text,
       NULL);
 
   adw_dialog_present (dialog, GTK_WIDGET (window));
