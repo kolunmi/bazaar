@@ -6,7 +6,7 @@ libdex_opts = [
 ]
 
 gtk_dep              = dependency('gtk4')
-libadwaita_dep       = dependency('libadwaita-1', version: '>= 1.7')
+libadwaita_dep       = dependency('libadwaita-1', version: '>= 1.8')
 libdex_dep           = dependency('libdex-1', version: '>= 1.0.0', default_options: libdex_opts)
 flatpak_dep          = dependency('flatpak', version: '>= 1.9')
 appstream_dep        = dependency('appstream', version: '>= 1.0')
@@ -61,21 +61,14 @@ bz_sources = [
   'bz-appstream-description-render.c',
   'bz-async-texture.c',
   'bz-backend-notification.c',
-  'bz-backend-transaction-op-payload.c',
-  'bz-backend-transaction-op-progress-payload.c',
   'bz-backend.c',
   'bz-browse-widget.c',
   'bz-category-tile.c',
   'bz-comet-overlay.c',
-  'bz-comet.c',
   'bz-content-provider.c',
-  'bz-content-section.c',
   'bz-context-tile.c',
-  'bz-country-data-point.c',
-  'bz-country.c',
   'bz-curated-app-tile.c',
   'bz-data-graph.c',
-  'bz-data-point.c',
   'bz-decorated-screenshot.c',
   'bz-detailed-app-tile.c',
   'bz-download-worker.c',
@@ -104,6 +97,7 @@ bz_sources = [
   'bz-hardware-support-dialog.c',
   'bz-inhibited-scrollable.c',
   'bz-inspector.c',
+  'bz-installed-tile.c',
   'bz-installed-page.c',
   'bz-io.c',
   'bz-lazy-async-texture-model.c',
@@ -111,17 +105,14 @@ bz_sources = [
   'bz-markdown-render.c',
   'bz-preferences-dialog.c',
   'bz-progress-bar.c',
-  'bz-release.c',
   'bz-releases-list.c',
   'bz-result.c',
-  'bz-review.c',
   'bz-rich-app-tile.c',
   'bz-rounded-picture.c',
   'bz-screenshot-page.c',
   'bz-screenshot.c',
   'bz-screenshots-carousel.c',
   'bz-search-engine.c',
-  'bz-search-result.c',
   'bz-search-widget.c',
   'bz-section-view.c',
   'bz-serializable.c',
@@ -131,7 +122,6 @@ bz_sources = [
   'bz-themed-entry-group-rect.c',
   'bz-transaction-entry-tracker.c',
   'bz-transaction-manager.c',
-  'bz-transaction-task.c',
   'bz-transaction-view.c',
   'bz-transaction.c',
   'bz-update-dialog.c',
@@ -172,9 +162,19 @@ gen_gobject_code = generator(
 )
 
 gobject_specs = files(
+  'bz-backend-transaction-op-payload.txt',
+  'bz-backend-transaction-op-progress-payload.txt',
+  'bz-comet.txt',
+  'bz-content-section.txt',
+  'bz-country-data-point.txt',
+  'bz-country.txt',
+  'bz-data-point.txt',
   'bz-issue.txt',
-  'bz-url.txt',
+  'bz-release.txt',
+  'bz-search-result.txt',
   'bz-state-info.txt',
+  'bz-transaction-task.txt',
+  'bz-url.txt',
 )
 
 gen_gobject_srcs = []
@@ -210,6 +210,7 @@ blueprints = custom_target('blueprints',
     'bz-full-view.blp',
     'bz-hardware-support-dialog.blp',
     'bz-inspector.blp',
+    'bz-installed-tile.blp',
     'bz-installed-page.blp',
     'bz-license-dialog.blp',
     'bz-markdown-render.blp',

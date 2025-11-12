@@ -1,3 +1,8 @@
+.bz-debug {
+    background-color: darkorange;
+    color: black;
+}
+
 .bz-monospace {
     font-family: monospace;
 }
@@ -68,6 +73,10 @@
 .browser-banner-description {
     font-size: 1.33em;
     font-weight: normal;
+}
+
+.installed-size {
+	font-weight: 500;
 }
 
 .support {
@@ -613,7 +622,8 @@ window.narrow .category-tile {
 
 .installed-list-view > * {
     padding: 0;
-    border-radius: 12px;
+    transition: background-color 200ms;
+    margin: 6px 0px;
 }
 
 .transaction-sidebar-entry-list {

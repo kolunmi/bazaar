@@ -16,6 +16,11 @@ template $BzInspector: Adw.Window {
     content: Box {
       orientation: vertical;
       width-request: 100;
+      spacing: 10;
+
+      CheckButton debug_mode_check {
+        label: _("Enable Global Debug Mode");
+      }
 
       Label {
         styles [

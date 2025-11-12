@@ -1,0 +1,125 @@
+using Gtk 4.0;
+
+template $BzInstalledTile: Box {
+  styles [
+    "card",
+  ]
+
+  orientation: horizontal;
+  spacing: 10;
+
+  Picture icon_picture {
+    margin-start: 10;
+    margin-top: 10;
+    margin-bottom: 10;
+    height-request: 64;
+    width-request: 64;
+    paintable: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable;
+    visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable) as <bool>) as <bool>;
+    styles ["icon-dropshadow"]
+  }
+
+  Image fallback_icon {
+    valign: center;
+    halign: center;
+    margin-start: 10;
+    margin-top: 5;
+    margin-bottom: 5;
+    width-request: 64;
+    height-request: 64;
+    pixel-size: 64;
+    icon-name: "application-x-executable";
+    visible: bind $is_null(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable) as <bool>;
+  }
+
+  Box {
+    orientation: vertical;
+    valign: center;
+    spacing: 4;
+
+    Label title_label {
+      xalign: 0.0;
+      ellipsize: end;
+      single-line-mode: true;
+      has-tooltip: true;
+      tooltip-text: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.id;
+      label: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.title;
+    }
+
+    Label {
+      halign: start;
+      label: bind $format_size(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.size) as <string>;
+      styles ["dimmed", "caption", "installed-size"]
+    }
+  }
+
+  Button support_button {
+    styles [
+      "circular",
+      "flat",
+      "suggested-action",
+      "support"
+    ]
+
+    has-tooltip: true;
+    tooltip-text: _("Support this application");
+
+    width-request: 32;
+    height-request: 32;
+    valign: center;
+    icon-name: "heart-filled-symbolic";
+    visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.donation-url) as <bool>) as <bool>;
+
+    clicked => $support_cb() swapped;
+  }
+
+  Box {
+    orientation: horizontal;
+    spacing: 8;
+    margin-end: 8;
+    hexpand: true;
+    halign: end;
+
+    Button addons_button {
+      styles [
+        "flat"
+      ]
+
+      has-tooltip: true;
+      tooltip-text: _("Manage Add-ons");
+
+      width-request: 32;
+      height-request: 32;
+      valign: center;
+      icon-name: "puzzle-piece-symbolic";
+      sensitive: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
+      visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.addons) as <bool>) as <bool>;
+
+      clicked => $install_addons_cb() swapped;
+    }
+
+    Button remove_button {
+      styles [
+        "flat",
+      ]
+
+      has-tooltip: true;
+      tooltip-text: _("Remove");
+
+      width-request: 32;
+      height-request: 32;
+      valign: center;
+      icon-name: "user-trash-symbolic";
+      sensitive: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
+
+      clicked => $remove_cb() swapped;
+    }
+
+    Image {
+      pixel-size: 14;
+      icon-name: "go-next-symbolic";
+      margin-end: 4;
+      styles ["dimmed"]
+    }
+  }
+}

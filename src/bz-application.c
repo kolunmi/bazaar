@@ -87,6 +87,9 @@ struct _BzApplication
   GtkCustomFilter         *application_filter;
   BzApplicationMapFactory *application_factory;
 
+  GtkCustomFilter    *group_filter;
+  GtkFilterListModel *group_filter_model;
+
   BzStateInfo *state;
 };
 
@@ -177,6 +180,8 @@ bz_application_dispose (GObject *object)
   g_clear_object (&self->waiting_to_open_file);
   g_clear_object (&self->entry_factory);
   g_clear_object (&self->application_filter);
+  g_clear_object (&self->group_filter_model);
+  g_clear_object (&self->group_filter);
   g_clear_object (&self->application_factory);
   g_clear_object (&self->flathub);
   g_clear_object (&self->cache);
@@ -366,6 +371,18 @@ bz_application_class_init (BzApplicationClass *klass)
 }
 
 static void
+bz_application_toggle_debug_mode_action (GSimpleAction *action,
+                                         GVariant      *parameter,
+                                         gpointer       user_data)
+{
+  BzApplication *self       = user_data;
+  gboolean       debug_mode = FALSE;
+
+  debug_mode = bz_state_info_get_debug_mode (self->state);
+  bz_state_info_set_debug_mode (self->state, !debug_mode);
+}
+
+static void
 bz_application_bazaar_inspector_action (GSimpleAction *action,
                                         GVariant      *parameter,
                                         gpointer       user_data)
@@ -539,6 +556,7 @@ static const GActionEntry app_actions[] = {
   {              "donate",              bz_application_donate_action, NULL },
   {            "flatseal",            bz_application_flatseal_action, NULL },
   {    "bazaar-inspector",    bz_application_bazaar_inspector_action, NULL },
+  {   "toggle-debug-mode",   bz_application_toggle_debug_mode_action, NULL },
 };
 
 static gpointer
@@ -596,15 +614,34 @@ static gboolean
 filter_application_ids (GtkStringObject *string,
                         BzApplication   *self)
 {
-  gboolean result = FALSE;
+  BzEntryGroup *group = NULL;
 
   if (bz_state_info_get_busy (self->state))
     return FALSE;
 
-  result = g_hash_table_contains (
+  group = g_hash_table_lookup (
       self->ids_to_groups,
       gtk_string_object_get_string (string));
-  return result;
+  if (group != NULL &&
+      bz_state_info_get_hide_eol (self->state) &&
+      bz_entry_group_get_eol (group) != NULL)
+    return FALSE;
+
+  return group != NULL;
+}
+
+static gboolean
+filter_entry_groups (BzEntryGroup  *group,
+                     BzApplication *self)
+{
+  if (bz_state_info_get_busy (self->state))
+    return FALSE;
+
+  if (bz_state_info_get_hide_eol (self->state) &&
+      bz_entry_group_get_eol (group) != NULL)
+    return FALSE;
+
+  return TRUE;
 }
 
 static void
@@ -644,6 +681,20 @@ bz_application_init (BzApplication *self)
       GTK_APPLICATION (self),
       "app.bazaar-inspector",
       (const char *[]) { "<primary><alt><shift>i", NULL });
+  gtk_application_set_accels_for_action (
+      GTK_APPLICATION (self),
+      "app.toggle-debug-mode",
+      (const char *[]) { "<primary><alt>d", NULL });
+}
+
+static void
+hide_eol_changed (BzApplication *self,
+                  const char    *key,
+                  GSettings     *settings)
+{
+  bz_state_info_set_hide_eol (self->state, g_settings_get_boolean (self->settings, "hide-eol"));
+  gtk_filter_changed (GTK_FILTER (self->group_filter), GTK_FILTER_CHANGE_DIFFERENT);
+  gtk_filter_changed (GTK_FILTER (self->application_filter), GTK_FILTER_CHANGE_DIFFERENT);
 }
 
 static void
@@ -687,10 +738,18 @@ init_service_struct (BzApplication *self)
 
   (void) bz_download_worker_get_default ();
 
+  self->state = bz_state_info_new ();
+
   app_id = g_application_get_application_id (G_APPLICATION (self));
   g_assert (app_id != NULL);
   g_debug ("Constructing gsettings for %s ...", app_id);
   self->settings = g_settings_new (app_id);
+  bz_state_info_set_hide_eol (self->state, g_settings_get_boolean (self->settings, "hide-eol"));
+  g_signal_connect_swapped (
+      self->settings,
+      "changed::hide-eol",
+      G_CALLBACK (hide_eol_changed),
+      self);
 
   self->groups         = g_list_store_new (BZ_TYPE_ENTRY_GROUP);
   self->installed_apps = g_list_store_new (BZ_TYPE_ENTRY_GROUP);
@@ -703,13 +762,20 @@ init_service_struct (BzApplication *self)
 
   filter = gtk_custom_filter_new (
       (GtkCustomFilterFunc) filter_application_ids, self, NULL);
-  self->application_filter  = g_object_ref_sink (filter);
+  self->application_filter  = g_object_ref_sink (g_steal_pointer (&filter));
   self->application_factory = bz_application_map_factory_new (
       (GtkMapListModelMapFunc) map_generic_ids_to_groups,
-      self, NULL, NULL, GTK_FILTER (filter));
+      self, NULL, NULL, GTK_FILTER (self->application_filter));
+
+  filter = gtk_custom_filter_new (
+      (GtkCustomFilterFunc) filter_entry_groups, self, NULL);
+  self->group_filter       = g_object_ref_sink (g_steal_pointer (&filter));
+  self->group_filter_model = gtk_filter_list_model_new (
+      g_object_ref (G_LIST_MODEL (self->groups)),
+      g_object_ref (GTK_FILTER (self->group_filter)));
 
   self->search_engine = bz_search_engine_new ();
-  bz_search_engine_set_model (self->search_engine, G_LIST_MODEL (self->groups));
+  bz_search_engine_set_model (self->search_engine, G_LIST_MODEL (self->group_filter_model));
   bz_gnome_shell_search_provider_set_engine (self->gs_search, self->search_engine);
 
   self->content_provider         = bz_content_provider_new ();
@@ -728,7 +794,6 @@ init_service_struct (BzApplication *self)
   g_signal_connect_swapped (self->transactions, "success",
                             G_CALLBACK (transaction_success), self);
 
-  self->state = bz_state_info_new ();
   bz_state_info_set_application_factory (self->state, self->application_factory);
   bz_state_info_set_blocklists (self->state, self->blocklists);
   bz_state_info_set_curated_provider (self->state, self->content_provider);
@@ -991,6 +1056,7 @@ refresh_fiber (BzApplication *self)
   guint out_of                              = 0;
   g_autoptr (DexChannel) channel            = NULL;
   g_autoptr (DexFuture) sync_future         = NULL;
+  g_autoptr (GHashTable) eol_runtimes       = NULL;
   g_autoptr (GHashTable) sys_name_to_addons = NULL;
   g_autoptr (GHashTable) usr_name_to_addons = NULL;
   g_autoptr (GPtrArray) cache_futures       = NULL;
@@ -1083,9 +1149,7 @@ refresh_fiber (BzApplication *self)
       bz_flathub_state_update_to_today (self->flathub);
     }
 
-  busy_step_label = g_strdup_printf (_ ("Identifying installed entries..."));
-  bz_state_info_set_busy_step_label (self->state, busy_step_label);
-  g_clear_pointer (&busy_step_label, g_free);
+  bz_state_info_set_busy_step_label (self->state, _ ("Identifying installed entries..."));
 
   installed_set = dex_await_boxed (
       bz_backend_retrieve_install_ids (
@@ -1094,13 +1158,9 @@ refresh_fiber (BzApplication *self)
   if (installed_set == NULL)
     return dex_future_new_for_error (g_steal_pointer (&local_error));
 
-  busy_step_label = g_strdup_printf (
-      _ ("Beginning remote entry retrieval while referencing %d blocklist(s)..."),
-      g_list_model_get_n_items (self->blocklists));
-  bz_state_info_set_busy_step_label (self->state, busy_step_label);
-  g_clear_pointer (&busy_step_label, g_free);
-
-  channel            = dex_channel_new (100);
+  channel      = dex_channel_new (100);
+  eol_runtimes = g_hash_table_new_full (
+      g_str_hash, g_str_equal, g_free, g_object_unref);
   sys_name_to_addons = g_hash_table_new_full (
       g_str_hash, g_str_equal, g_free, (GDestroyNotify) g_ptr_array_unref);
   usr_name_to_addons = g_hash_table_new_full (
@@ -1113,6 +1173,7 @@ refresh_fiber (BzApplication *self)
       self->blocklists,
       NULL, self, NULL);
 
+  bz_state_info_set_busy_step_label (self->state, _ ("Receiving Entries"));
   for (;;)
     {
       g_autoptr (DexFuture) channel_future = NULL;
@@ -1127,13 +1188,12 @@ refresh_fiber (BzApplication *self)
 
       if (G_VALUE_HOLDS_OBJECT (value))
         {
-          BzEntry    *entry                = NULL;
-          const char *id                   = NULL;
-          const char *unique_id            = NULL;
-          gboolean    user                 = FALSE;
-          gboolean    installed            = FALSE;
-          const char *flatpak_id           = NULL;
-          g_autoptr (DexFuture) cache_task = NULL;
+          BzEntry    *entry      = NULL;
+          const char *id         = NULL;
+          const char *unique_id  = NULL;
+          gboolean    user       = FALSE;
+          gboolean    installed  = FALSE;
+          const char *flatpak_id = NULL;
 
           entry     = g_value_get_object (value);
           id        = bz_entry_get_id (entry);
@@ -1174,12 +1234,19 @@ refresh_fiber (BzApplication *self)
 
           if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
             {
-              BzEntryGroup *group = NULL;
+              BzEntryGroup *group        = NULL;
+              const char   *runtime_name = NULL;
+              BzEntry      *eol_runtime  = NULL;
 
               group = g_hash_table_lookup (self->ids_to_groups, id);
+
+              runtime_name = bz_flatpak_entry_get_application_runtime (BZ_FLATPAK_ENTRY (entry));
+              if (runtime_name != NULL)
+                eol_runtime = g_hash_table_lookup (eol_runtimes, runtime_name);
+
               if (group != NULL)
                 {
-                  bz_entry_group_add (group, entry);
+                  bz_entry_group_add (group, entry, eol_runtime);
                   if (installed && !g_list_store_find (self->installed_apps, group, NULL))
                     g_list_store_append (self->installed_apps, group);
                 }
@@ -1192,10 +1259,29 @@ refresh_fiber (BzApplication *self)
 
                   g_list_store_append (self->groups, new_group);
                   g_hash_table_replace (self->ids_to_groups, g_strdup (id), g_object_ref (new_group));
-                  bz_entry_group_add (new_group, entry);
+                  bz_entry_group_add (new_group, entry, eol_runtime);
 
                   if (installed)
                     g_list_store_append (self->installed_apps, new_group);
+                }
+            }
+
+          if (flatpak_id != NULL &&
+              bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_RUNTIME) &&
+              g_str_has_prefix (flatpak_id, "runtime/"))
+            {
+              const char *eol = NULL;
+
+              eol = bz_entry_get_eol (entry);
+              if (eol != NULL)
+                {
+                  g_autofree char *stripped = NULL;
+
+                  stripped = g_strdup (flatpak_id + strlen ("runtime/"));
+                  g_hash_table_replace (
+                      eol_runtimes,
+                      g_steal_pointer (&stripped),
+                      g_object_ref (entry));
                 }
             }
 
@@ -1232,8 +1318,9 @@ refresh_fiber (BzApplication *self)
                            unique_id);
             }
 
-          cache_task = bz_entry_cache_manager_add (self->cache, entry);
-          g_ptr_array_add (cache_futures, g_steal_pointer (&cache_task));
+          g_ptr_array_add (
+              cache_futures,
+              bz_entry_cache_manager_add (self->cache, entry));
 
           total++;
         }
@@ -1243,13 +1330,14 @@ refresh_fiber (BzApplication *self)
         g_assert_not_reached ();
 
       bz_state_info_set_busy_progress (self->state, (double) total / (double) out_of);
-      busy_step_label     = g_strdup_printf (_ ("Receiving Entries"));
       busy_progress_label = g_strdup_printf (_ ("%'d of %'d"), total, out_of);
-      bz_state_info_set_busy_step_label (self->state, busy_step_label);
       bz_state_info_set_busy_progress_label (self->state, busy_progress_label);
-      g_clear_pointer (&busy_step_label, g_free);
       g_clear_pointer (&busy_progress_label, g_free);
     }
+  g_clear_pointer (&eol_runtimes, g_hash_table_unref);
+  g_clear_pointer (&sys_name_to_addons, g_hash_table_unref);
+  g_clear_pointer (&usr_name_to_addons, g_hash_table_unref);
+
   g_clear_pointer (&self->last_installed_set, g_hash_table_unref);
   self->last_installed_set = g_steal_pointer (&installed_set);
   g_list_store_sort (self->groups, (GCompareDataFunc) cmp_group, NULL);
@@ -1289,9 +1377,10 @@ refresh_fiber (BzApplication *self)
   g_debug ("Finished synchronizing with remotes, notifying UI...");
   bz_state_info_set_online (self->state, TRUE);
   bz_state_info_set_all_entry_groups (self->state, G_LIST_MODEL (self->groups));
-  bz_search_engine_set_model (self->search_engine, G_LIST_MODEL (self->groups));
+  bz_search_engine_set_model (self->search_engine, G_LIST_MODEL (self->group_filter_model));
   bz_state_info_set_busy (self->state, FALSE);
 
+  gtk_filter_changed (GTK_FILTER (self->group_filter), GTK_FILTER_CHANGE_DIFFERENT);
   gtk_filter_changed (GTK_FILTER (self->application_filter), GTK_FILTER_CHANGE_DIFFERENT);
   bz_state_info_set_all_installed_entry_groups (self->state, G_LIST_MODEL (self->installed_apps));
 
@@ -1496,7 +1585,7 @@ refresh_finally (DexFuture     *future,
       bz_state_info_set_checking_for_updates (self->state, FALSE);
       bz_state_info_set_all_entry_groups (self->state, G_LIST_MODEL (self->groups));
       bz_state_info_set_all_installed_entry_groups (self->state, G_LIST_MODEL (self->installed_apps));
-      bz_search_engine_set_model (self->search_engine, G_LIST_MODEL (self->groups));
+      bz_search_engine_set_model (self->search_engine, G_LIST_MODEL (self->group_filter_model));
       bz_state_info_set_busy (self->state, FALSE);
     }
 

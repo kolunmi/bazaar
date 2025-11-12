@@ -890,6 +890,7 @@ parse_object (BzYamlParser  *self,
                       event->start_mark.line,
                       event->start_mark.column,
                       local_error->message);
+                  yaml_event_delete (event);
                   return FALSE;
                 }
             }

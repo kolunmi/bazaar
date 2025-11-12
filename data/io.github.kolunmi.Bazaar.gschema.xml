@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="bazaar">
   <schema id="io.github.kolunmi.Bazaar" path="/io/github/kolunmi/Bazaar/">
+    <key name="hide-eol" type="b">
+      <default>false</default>
+      <summary>Hide EOL Entries</summary>
+      <description>Hide EOL entries and entries depending on them</description>
+    </key>
     <key name="show-git-forge-star-counts" type="b">
       <default>false</default>
       <summary>Show Git Forge Star Counts</summary>

@@ -672,14 +672,20 @@ input_load_finally (DexFuture         *future,
 
       if (sections->pdata != NULL && sections->len > 0)
         {
-          if (self->factory != NULL)
+          for (guint i = 0; i < sections->len; i++)
             {
-              for (guint i = 0; i < sections->len; i++)
+              BzContentSection *section = NULL;
+
+              section = g_ptr_array_index (sections, i);
+
+              bz_content_section_set_banner_height (
+                  section,
+                  CLAMP (bz_content_section_get_banner_height (section), 100, 1000));
+
+              if (self->factory != NULL)
                 {
-                  BzContentSection *section     = NULL;
                   g_autoptr (GListModel) appids = NULL;
 
-                  section = g_ptr_array_index (sections, i);
                   g_object_get (section, "appids", &appids, NULL);
 
                   if (appids != NULL)

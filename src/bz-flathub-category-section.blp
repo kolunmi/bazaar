@@ -3,6 +3,7 @@ using Gtk 4.0;
 template $BzFlathubCategorySection : Box {
   orientation: vertical;
   spacing: 10;
+  visible: bind $invert_boolean($is_null(template.category as <$BzFlathubCategory>) as <bool>) as <bool>;
 
   Box {
     orientation: horizontal;

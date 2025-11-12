@@ -1,6 +1,6 @@
-/* bz-country-data-point.h
+/* bz-installed-tile.h
  *
- * Copyright 2025 Alexander Vanhee
+ * Copyright 2025 Adam Masciola, Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,29 +20,23 @@
 
 #pragma once
 
-#include <gtk/gtk.h>
+#include "bz-entry-group.h"
+#include <adwaita.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_COUNTRY_DATA_POINT (bz_country_data_point_get_type ())
+#define BZ_TYPE_INSTALLED_TILE (bz_installed_tile_get_type ())
 
-G_DECLARE_FINAL_TYPE (BzCountryDataPoint, bz_country_data_point, BZ, COUNTRY_DATA_POINT, GObject)
+G_DECLARE_FINAL_TYPE (BzInstalledTile, bz_installed_tile, BZ, INSTALLED_TILE, GtkBox)
 
-BzCountryDataPoint *
-bz_country_data_point_new (void);
-
-const char *
-bz_country_data_point_get_country_code (BzCountryDataPoint *self);
-
-guint
-bz_country_data_point_get_downloads (BzCountryDataPoint *self);
+GtkWidget *
+bz_installed_tile_new (void);
 
 void
-bz_country_data_point_set_country_code (BzCountryDataPoint *self,
-                                        const char         *country_code);
+bz_installed_tile_set_group (BzInstalledTile *self,
+                             BzEntryGroup    *group);
 
-void
-bz_country_data_point_set_downloads (BzCountryDataPoint *self,
-                                     guint               downloads);
+BzEntryGroup *
+bz_installed_tile_get_group (BzInstalledTile *self);
 
 G_END_DECLS

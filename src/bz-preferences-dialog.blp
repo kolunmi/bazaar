@@ -93,6 +93,15 @@ template $BzPreferencesDialog: Adw.PreferencesDialog {
         };
       }
     }
+
+    Adw.PreferencesGroup {
+      title: _("End of Life Apps");
+
+      Adw.SwitchRow hide_eol_switch {
+        title: _("Hide EOL Apps");
+        subtitle: _("Hide apps which are no longer supported by their developers");
+      }
+    }
   }
 }
 

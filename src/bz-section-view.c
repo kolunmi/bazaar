@@ -240,7 +240,7 @@ dark_changed (BzSectionView   *self,
   refresh_dark_light_classes (self, mgr);
 
   if (self->section != NULL)
-    bz_content_section_notify_dark_light (self->section);
+    g_object_notify (G_OBJECT (self->section), "banner");
 }
 
 static void
