@@ -204,6 +204,11 @@ msgctxt "About Dialog Developer Credit"
 msgid "Alexander Vanhee"
 msgstr ""
 
+#. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
+#: src/bz-application.c:481
+msgid "translator-credits"
+msgstr "Atom <29772841+AtomHare@users.noreply.github.com>, 2025\nLéane GRASSER <leane.grasser@proton.me>, 2025"
+
 #: src/bz-application.c:470
 msgctxt "About Dialog Translator Credit"
 msgid "Ahmed Najmawi"
@@ -1355,9 +1360,6 @@ msgstr "Quitter"
 
 #~ msgid "Removing"
 #~ msgstr "Suppression"
-
-#~ msgid "translator-credits"
-#~ msgstr "translator-credits"
 
 #~ msgid "BzInstalledPage"
 #~ msgstr "BzInstalledPage"

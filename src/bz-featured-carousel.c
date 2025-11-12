@@ -247,12 +247,14 @@ rebuild_carousel (BzFeaturedCarousel *self)
 
   if (self->model == NULL)
     {
+      gtk_widget_set_visible (GTK_WIDGET (self), FALSE);
       gtk_widget_set_visible (GTK_WIDGET (self->next_button), FALSE);
       gtk_widget_set_visible (GTK_WIDGET (self->previous_button), FALSE);
       return;
     }
 
   n_items = g_list_model_get_n_items (self->model);
+  gtk_widget_set_visible (GTK_WIDGET (self), n_items > 0);
 
   for (guint i = 0; i < n_items; i++)
     {

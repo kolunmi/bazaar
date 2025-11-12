@@ -1,6 +1,6 @@
-/* bz-url.h
+/* bz-installed-tile.h
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2025 Adam Masciola, Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,37 +20,23 @@
 
 #pragma once
 
-#include <gtk/gtk.h>
+#include "bz-entry-group.h"
+#include <adwaita.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_URL (bz_url_get_type ())
-G_DECLARE_FINAL_TYPE (BzUrl, bz_url, BZ, URL, GObject)
+#define BZ_TYPE_INSTALLED_TILE (bz_installed_tile_get_type ())
 
-BzUrl *
-bz_url_new (void);
+G_DECLARE_FINAL_TYPE (BzInstalledTile, bz_installed_tile, BZ, INSTALLED_TILE, GtkBox)
 
-const char *
-bz_url_get_name (BzUrl *self);
-
-const char *
-bz_url_get_url (BzUrl *self);
-
-const char *
-bz_url_get_icon_name (BzUrl *self);
+GtkWidget *
+bz_installed_tile_new (void);
 
 void
-bz_url_set_name (BzUrl      *self,
-                 const char *name);
+bz_installed_tile_set_group (BzInstalledTile *self,
+                             BzEntryGroup    *group);
 
-void
-bz_url_set_url (BzUrl      *self,
-                const char *url);
-
-void
-bz_url_set_icon_name (BzUrl      *self,
-                      const char *icon_name);
+BzEntryGroup *
+bz_installed_tile_get_group (BzInstalledTile *self);
 
 G_END_DECLS
-
-/* End of bz-url.h */

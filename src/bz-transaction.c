@@ -551,7 +551,7 @@ bz_transaction_add_task (BzTransaction                 *self,
 {
   BzTransactionPrivate *priv                    = NULL;
   g_autoptr (BzTransactionTask) task            = NULL;
-  g_autoptr (BzEntry) entry                     = NULL;
+  BzEntry *entry                                = NULL;
   g_autoptr (BzTransactionEntryTracker) tracker = NULL;
   gboolean result                               = FALSE;
 
@@ -565,7 +565,7 @@ bz_transaction_add_task (BzTransaction                 *self,
 
   g_list_store_append (priv->current_ops, task);
 
-  entry  = bz_backend_transaction_op_payload_dup_entry (payload);
+  entry  = bz_backend_transaction_op_payload_get_entry (payload);
   result = find_and_maybe_transfer (
       priv->trackers,
       NULL,
@@ -707,11 +707,11 @@ static void
 tracker_transfer (BzTransactionPrivate          *priv,
                   BzBackendTransactionOpPayload *payload)
 {
-  g_autoptr (BzEntry) entry                     = NULL;
+  BzEntry *entry                                = NULL;
   g_autoptr (BzTransactionEntryTracker) tracker = NULL;
   gboolean result                               = FALSE;
 
-  entry = bz_backend_transaction_op_payload_dup_entry (payload);
+  entry = bz_backend_transaction_op_payload_get_entry (payload);
 
   result = find_and_maybe_transfer (
       priv->trackers,

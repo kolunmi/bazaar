@@ -44,8 +44,10 @@ struct _BzEntryGroup
   gboolean      is_flathub;
   GPtrArray    *search_tokens;
   char         *remote_repos_string;
+  char         *eol;
 
-  int max_usefulness;
+  int      max_usefulness;
+  gboolean has_non_eol;
 
   int installable;
   int updatable;
@@ -77,6 +79,7 @@ enum
   PROP_SEARCH_TOKENS,
   PROP_UI_ENTRY,
   PROP_REMOTE_REPOS_STRING,
+  PROP_EOL,
   PROP_INSTALLABLE,
   PROP_UPDATABLE,
   PROP_REMOVABLE,
@@ -98,10 +101,6 @@ holding_changed (BzEntryGroup *self,
                  GParamSpec   *pspec,
                  BzEntry      *entry);
 
-static void
-sync_props (BzEntryGroup *self,
-            BzEntry      *entry);
-
 static DexFuture *
 dup_all_into_model_fiber (BzEntryGroup *self);
 
@@ -122,6 +121,7 @@ bz_entry_group_dispose (GObject *object)
   g_clear_object (&self->mini_icon);
   g_clear_pointer (&self->search_tokens, g_ptr_array_unref);
   g_clear_pointer (&self->remote_repos_string, g_free);
+  g_clear_pointer (&self->eol, g_free);
   g_weak_ref_clear (&self->ui_entry);
 
   G_OBJECT_CLASS (bz_entry_group_parent_class)->dispose (object);
@@ -172,6 +172,9 @@ bz_entry_group_get_property (GObject    *object,
       break;
     case PROP_SEARCH_TOKENS:
       g_value_set_boxed (value, bz_entry_group_get_search_tokens (self));
+      break;
+    case PROP_EOL:
+      g_value_set_string (value, bz_entry_group_get_eol (self));
       break;
     case PROP_UI_ENTRY:
       g_value_take_object (value, bz_entry_group_dup_ui_entry (self));
@@ -224,6 +227,7 @@ bz_entry_group_set_property (GObject      *object,
     case PROP_DARK_ACCENT_COLOR:
     case PROP_IS_FLATHUB:
     case PROP_SEARCH_TOKENS:
+    case PROP_EOL:
     case PROP_UI_ENTRY:
     case PROP_REMOTE_REPOS_STRING:
     case PROP_INSTALLABLE:
@@ -320,6 +324,12 @@ bz_entry_group_class_init (BzEntryGroupClass *klass)
           "search-tokens",
           NULL, NULL,
           G_TYPE_PTR_ARRAY,
+          G_PARAM_READABLE);
+
+  props[PROP_EOL] =
+      g_param_spec_string (
+          "eol",
+          NULL, NULL, NULL,
           G_PARAM_READABLE);
 
   props[PROP_UI_ENTRY] =
@@ -485,6 +495,13 @@ bz_entry_group_get_search_tokens (BzEntryGroup *self)
   return self->search_tokens;
 }
 
+const char *
+bz_entry_group_get_eol (BzEntryGroup *self)
+{
+  g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), NULL);
+  return self->eol;
+}
+
 BzResult *
 bz_entry_group_dup_ui_entry (BzEntryGroup *self)
 {
@@ -572,7 +589,8 @@ bz_entry_group_get_removable_and_available (BzEntryGroup *self)
 
 void
 bz_entry_group_add (BzEntryGroup *self,
-                    BzEntry      *entry)
+                    BzEntry      *entry,
+                    BzEntry      *runtime)
 {
   const char *unique_id                        = NULL;
   g_autoptr (GtkStringObject) unique_id_string = NULL;
@@ -581,6 +599,7 @@ bz_entry_group_add (BzEntryGroup *self,
 
   g_return_if_fail (BZ_IS_ENTRY_GROUP (self));
   g_return_if_fail (BZ_IS_ENTRY (entry));
+  g_return_if_fail (runtime == NULL || BZ_IS_ENTRY (runtime));
 
   if (self->id == NULL)
     {
@@ -591,11 +610,115 @@ bz_entry_group_add (BzEntryGroup *self,
   unique_id        = bz_entry_get_unique_id (entry);
   unique_id_string = gtk_string_object_new (unique_id);
 
+  if (!self->has_non_eol)
+    {
+      const char *eol = NULL;
+
+      eol = bz_entry_get_eol (entry);
+      if (eol == NULL && runtime != NULL)
+        eol = bz_entry_get_eol (runtime);
+
+      g_clear_pointer (&self->eol, g_free);
+      if (eol != NULL)
+        self->eol = g_strdup (eol);
+      else
+        self->has_non_eol = TRUE;
+
+      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_EOL]);
+    }
+
   usefulness = bz_entry_calc_usefulness (entry);
   if (usefulness > self->max_usefulness)
     {
+      const char   *title              = NULL;
+      const char   *developer          = NULL;
+      const char   *description        = NULL;
+      GdkPaintable *icon_paintable     = NULL;
+      GIcon        *mini_icon          = NULL;
+      GPtrArray    *search_tokens      = NULL;
+      gboolean      is_floss           = FALSE;
+      const char   *light_accent_color = NULL;
+      const char   *dark_accent_color  = NULL;
+      gboolean      is_flathub         = FALSE;
+
       g_list_store_insert (self->store, 0, unique_id_string);
-      sync_props (self, entry);
+
+      title              = bz_entry_get_title (entry);
+      developer          = bz_entry_get_developer (entry);
+      description        = bz_entry_get_description (entry);
+      icon_paintable     = bz_entry_get_icon_paintable (entry);
+      mini_icon          = bz_entry_get_mini_icon (entry);
+      search_tokens      = bz_entry_get_search_tokens (entry);
+      is_floss           = bz_entry_get_is_foss (entry);
+      light_accent_color = bz_entry_get_light_accent_color (entry);
+      dark_accent_color  = bz_entry_get_dark_accent_color (entry);
+      is_flathub         = bz_entry_get_is_flathub (entry);
+
+      if (title != NULL)
+        {
+          g_clear_pointer (&self->title, g_free);
+          self->title = g_strdup (title);
+          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TITLE]);
+        }
+      if (developer != NULL)
+        {
+          g_clear_pointer (&self->developer, g_free);
+          self->developer = g_strdup (developer);
+          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DEVELOPER]);
+        }
+      if (description != NULL)
+        {
+          g_clear_pointer (&self->description, g_free);
+          self->description = g_strdup (description);
+          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DESCRIPTION]);
+        }
+      /* only grab icon paintable if we don't have it already to reduce
+         flickering in UI */
+      if (icon_paintable != NULL &&
+          (self->icon_paintable == NULL ||
+           (BZ_IS_ASYNC_TEXTURE (self->icon_paintable) &&
+            !bz_async_texture_get_loaded (BZ_ASYNC_TEXTURE (self->icon_paintable)) &&
+            !bz_async_texture_is_loading (BZ_ASYNC_TEXTURE (self->icon_paintable)))))
+        {
+          g_clear_object (&self->icon_paintable);
+          self->icon_paintable = g_object_ref (icon_paintable);
+          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ICON_PAINTABLE]);
+        }
+      if (mini_icon != NULL)
+        {
+          g_clear_object (&self->mini_icon);
+          self->mini_icon = g_object_ref (mini_icon);
+          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MINI_ICON]);
+        }
+      if (search_tokens != NULL)
+        {
+          g_clear_pointer (&self->search_tokens, g_ptr_array_unref);
+          self->search_tokens = g_ptr_array_ref (search_tokens);
+          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SEARCH_TOKENS]);
+        }
+      if (is_floss != self->is_floss)
+        {
+          self->is_floss = is_floss;
+          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_IS_FLOSS]);
+        }
+      if (light_accent_color != NULL)
+        {
+          g_clear_pointer (&self->light_accent_color, g_free);
+          self->light_accent_color = g_strdup (light_accent_color);
+          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_LIGHT_ACCENT_COLOR]);
+        }
+      if (dark_accent_color != NULL)
+        {
+          g_clear_pointer (&self->dark_accent_color, g_free);
+          self->dark_accent_color = g_strdup (dark_accent_color);
+          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DARK_ACCENT_COLOR]);
+        }
+      if (is_flathub != self->is_flathub)
+        {
+          self->is_flathub = is_flathub;
+          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_IS_FLATHUB]);
+        }
+
       self->max_usefulness = usefulness;
     }
   else
@@ -802,98 +925,6 @@ holding_changed (BzEntryGroup *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLABLE_AND_AVAILABLE]);
 }
 
-static void
-sync_props (BzEntryGroup *self,
-            BzEntry      *entry)
-{
-  const char   *title              = NULL;
-  const char   *developer          = NULL;
-  const char   *description        = NULL;
-  GdkPaintable *icon_paintable     = NULL;
-  GIcon        *mini_icon          = NULL;
-  GPtrArray    *search_tokens      = NULL;
-  gboolean      is_floss           = FALSE;
-  const char   *light_accent_color = NULL;
-  const char   *dark_accent_color  = NULL;
-  gboolean      is_flathub         = FALSE;
-
-  title              = bz_entry_get_title (entry);
-  developer          = bz_entry_get_developer (entry);
-  description        = bz_entry_get_description (entry);
-  icon_paintable     = bz_entry_get_icon_paintable (entry);
-  mini_icon          = bz_entry_get_mini_icon (entry);
-  search_tokens      = bz_entry_get_search_tokens (entry);
-  is_floss           = bz_entry_get_is_foss (entry);
-  light_accent_color = bz_entry_get_light_accent_color (entry);
-  dark_accent_color  = bz_entry_get_dark_accent_color (entry);
-  is_flathub         = bz_entry_get_is_flathub (entry);
-
-  if (title != NULL)
-    {
-      g_clear_pointer (&self->title, g_free);
-      self->title = g_strdup (title);
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TITLE]);
-    }
-  if (developer != NULL)
-    {
-      g_clear_pointer (&self->developer, g_free);
-      self->developer = g_strdup (developer);
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DEVELOPER]);
-    }
-  if (description != NULL)
-    {
-      g_clear_pointer (&self->description, g_free);
-      self->description = g_strdup (description);
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DESCRIPTION]);
-    }
-  /* only grab icon paintable if we don't have it already to reduce
-     flickering in UI */
-  if (icon_paintable != NULL &&
-      (self->icon_paintable == NULL ||
-       (BZ_IS_ASYNC_TEXTURE (self->icon_paintable) &&
-        !bz_async_texture_get_loaded (BZ_ASYNC_TEXTURE (self->icon_paintable)) &&
-        !bz_async_texture_is_loading (BZ_ASYNC_TEXTURE (self->icon_paintable)))))
-    {
-      g_clear_object (&self->icon_paintable);
-      self->icon_paintable = g_object_ref (icon_paintable);
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ICON_PAINTABLE]);
-    }
-  if (mini_icon != NULL)
-    {
-      g_clear_object (&self->mini_icon);
-      self->mini_icon = g_object_ref (mini_icon);
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MINI_ICON]);
-    }
-  if (search_tokens != NULL)
-    {
-      g_clear_pointer (&self->search_tokens, g_ptr_array_unref);
-      self->search_tokens = g_ptr_array_ref (search_tokens);
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SEARCH_TOKENS]);
-    }
-  if (is_floss != self->is_floss)
-    {
-      self->is_floss = is_floss;
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_IS_FLOSS]);
-    }
-  if (light_accent_color != NULL)
-    {
-      g_clear_pointer (&self->light_accent_color, g_free);
-      self->light_accent_color = g_strdup (light_accent_color);
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_LIGHT_ACCENT_COLOR]);
-    }
-  if (dark_accent_color != NULL)
-    {
-      g_clear_pointer (&self->dark_accent_color, g_free);
-      self->dark_accent_color = g_strdup (dark_accent_color);
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DARK_ACCENT_COLOR]);
-    }
-  if (is_flathub != self->is_flathub)
-    {
-      self->is_flathub = is_flathub;
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_IS_FLATHUB]);
-    }
-}
-
 static DexFuture *
 dup_all_into_model_fiber (BzEntryGroup *self)
 {
@@ -939,7 +970,7 @@ dup_all_into_model_fiber (BzEntryGroup *self)
   n_resolved = g_list_model_get_n_items (G_LIST_MODEL (store));
   if (n_resolved == 0)
     {
-      g_critical ("No entries for %s were able to be resolved", self->id);
+      g_warning ("No entries for %s were able to be resolved", self->id);
       return dex_future_new_reject (
           G_IO_ERROR,
           G_IO_ERROR_UNKNOWN,
@@ -947,7 +978,7 @@ dup_all_into_model_fiber (BzEntryGroup *self)
           self->id);
     }
   if (n_resolved != n_items)
-    g_critical ("Some entries for %s failed to resolve", self->id);
+    g_warning ("Some entries for %s failed to resolve", self->id);
 
   return dex_future_new_for_object (store);
 }

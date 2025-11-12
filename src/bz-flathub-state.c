@@ -42,6 +42,7 @@ struct _BzFlathubState
   char                    *app_of_the_day;
   GtkStringList           *apps_of_the_week;
   GListStore              *categories;
+  gboolean                 has_connection_error;
 
   DexFuture *initializing;
 };
@@ -61,6 +62,7 @@ enum
   PROP_APPS_OF_THE_WEEK,
   PROP_APPS_OF_THE_DAY_WEEK,
   PROP_CATEGORIES,
+  PROP_HAS_CONNECTION_ERROR,
 
   LAST_PROP
 };
@@ -71,6 +73,8 @@ initialize_fiber (GWeakRef *wr);
 static DexFuture *
 initialize_finally (DexFuture *future,
                     GWeakRef  *wr);
+static gboolean
+bz_flathub_state_get_has_connection_error (BzFlathubState *self);
 
 static void
 bz_flathub_state_dispose (GObject *object)
@@ -119,6 +123,9 @@ bz_flathub_state_get_property (GObject    *object,
     case PROP_CATEGORIES:
       g_value_set_object (value, bz_flathub_state_get_categories (self));
       break;
+    case PROP_HAS_CONNECTION_ERROR:
+      g_value_set_boolean (value, bz_flathub_state_get_has_connection_error (self));
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -145,6 +152,7 @@ bz_flathub_state_set_property (GObject      *object,
     case PROP_APPS_OF_THE_WEEK:
     case PROP_APPS_OF_THE_DAY_WEEK:
     case PROP_CATEGORIES:
+    case PROP_HAS_CONNECTION_ERROR:
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -204,6 +212,12 @@ bz_flathub_state_class_init (BzFlathubStateClass *klass)
           "categories",
           NULL, NULL,
           G_TYPE_LIST_MODEL,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+  props[PROP_HAS_CONNECTION_ERROR] =
+      g_param_spec_boolean (
+          "has-connection-error",
+          NULL, NULL,
+          FALSE,
           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
@@ -315,6 +329,13 @@ bz_flathub_state_get_categories (BzFlathubState *self)
   return G_LIST_MODEL (self->categories);
 }
 
+static gboolean
+bz_flathub_state_get_has_connection_error (BzFlathubState *self)
+{
+  g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), FALSE);
+  return self->has_connection_error;
+}
+
 void
 bz_flathub_state_set_for_day (BzFlathubState *self,
                               const char     *for_day)
@@ -327,6 +348,7 @@ bz_flathub_state_set_for_day (BzFlathubState *self,
   g_clear_pointer (&self->app_of_the_day, g_free);
   g_clear_pointer (&self->apps_of_the_week, g_object_unref);
   g_clear_pointer (&self->categories, g_object_unref);
+  self->has_connection_error = FALSE;
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_OF_THE_DAY]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_OF_THE_DAY_GROUP]);
@@ -355,6 +377,7 @@ bz_flathub_state_set_for_day (BzFlathubState *self,
     }
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_FOR_DAY]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_CONNECTION_ERROR]);
 }
 
 void
@@ -441,6 +464,8 @@ initialize_fiber (GWeakRef *wr)
   g_autoptr (GHashTable) futures     = NULL;
   g_autoptr (GHashTable) nodes       = NULL;
   g_autoptr (GHashTable) quality_set = NULL;
+  guint total_requests               = 0;
+  guint successful_requests          = 0;
 
   bz_weak_get_or_return_reject (self, wr);
   for_day = self->for_day;
@@ -475,6 +500,8 @@ initialize_fiber (GWeakRef *wr)
   ADD_REQUEST ("/collection/mobile", "/collection/mobile?page=0&per_page=%d", COLLECTION_FETCH_SIZE);
   ADD_REQUEST ("/quality-moderation/passing-apps", "/quality-moderation/passing-apps?page=1&page_size=%d", QUALITY_MODERATION_PAGE_SIZE);
 
+  total_requests = g_hash_table_size (futures);
+
   while (g_hash_table_size (futures) > 0)
     {
       GHashTableIter   iter        = { 0 };
@@ -489,10 +516,12 @@ initialize_fiber (GWeakRef *wr)
       node = dex_await_boxed (g_steal_pointer (&future), &local_error);
       if (node == NULL)
         {
-          g_critical ("Failed to complete request '%s' from flathub: %s", request, local_error->message);
-          return dex_future_new_for_error (g_steal_pointer (&local_error));
+          g_warning ("Failed to complete request '%s' from flathub: %s", request, local_error->message);
+          g_clear_error (&local_error);
+          continue;
         }
       g_hash_table_replace (nodes, g_steal_pointer (&request), g_steal_pointer (&node));
+      successful_requests++;
     }
 
   if (g_hash_table_contains (nodes, "/quality-moderation/passing-apps"))
@@ -584,6 +613,8 @@ initialize_fiber (GWeakRef *wr)
           ADD_REQUEST (category, "/collection/category/%s?page=0&per_page=%d", category, CATEGORY_FETCH_SIZE);
         }
 
+      total_requests += g_hash_table_size (futures);
+
       while (g_hash_table_size (futures) > 0)
         {
           GHashTableIter   iter                   = { 0 };
@@ -605,9 +636,12 @@ initialize_fiber (GWeakRef *wr)
           node = dex_await_boxed (g_steal_pointer (&future), &local_error);
           if (node == NULL)
             {
-              g_critical ("Failed to retrieve category '%s' from flathub: %s", name, local_error->message);
-              return dex_future_new_for_error (g_steal_pointer (&local_error));
+              g_warning ("Failed to retrieve category '%s' from flathub: %s", name, local_error->message);
+              g_clear_error (&local_error);
+              continue;
             }
+
+          successful_requests++;
 
           category      = bz_flathub_category_new ();
           store         = gtk_string_list_new (NULL);
@@ -639,6 +673,14 @@ initialize_fiber (GWeakRef *wr)
 
           g_list_store_append (self->categories, category);
         }
+    }
+
+  if (successful_requests == 0)
+    {
+      self->has_connection_error = TRUE;
+      return dex_future_new_for_error (
+          g_error_new (G_IO_ERROR, G_IO_ERROR_FAILED,
+                       "All Flathub API requests failed"));
     }
 
   return dex_future_new_true ();

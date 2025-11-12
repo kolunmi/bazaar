@@ -68,6 +68,9 @@ bz_entry_group_get_is_flathub (BzEntryGroup *self);
 GPtrArray *
 bz_entry_group_get_search_tokens (BzEntryGroup *self);
 
+const char *
+bz_entry_group_get_eol (BzEntryGroup *self);
+
 BzResult *
 bz_entry_group_dup_ui_entry (BzEntryGroup *self);
 
@@ -94,7 +97,8 @@ bz_entry_group_get_removable_and_available (BzEntryGroup *self);
 
 void
 bz_entry_group_add (BzEntryGroup *self,
-                    BzEntry      *entry);
+                    BzEntry      *entry,
+                    BzEntry      *runtime);
 
 void
 bz_entry_group_connect_living (BzEntryGroup *self,

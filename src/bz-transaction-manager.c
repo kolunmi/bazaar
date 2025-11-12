@@ -806,7 +806,7 @@ execute_hook (BzTransactionManager *self,
   GRAB_STRING (hook, "/shell", shell);
   if (shell == NULL)
     {
-      g_critical ("Main Config: hook definition must have shell code, skipping this hook");
+      g_warning ("Main Config: hook definition must have shell code, skipping this hook");
       return HOOK_CONTINUE;
     }
 
@@ -838,12 +838,12 @@ execute_hook (BzTransactionManager *self,
           if (dialog_title == NULL ||
               dialog_body == NULL)
             {
-              g_critical ("Main Config: dialog definition must have a title and body, skipping this hook");
+              g_warning ("Main Config: dialog definition must have a title and body, skipping this hook");
               return HOOK_CONTINUE;
             }
           if (dialog_default_response == NULL)
             {
-              g_critical ("Main Config: dialog definition must have a default response, skipping this hook");
+              g_warning ("Main Config: dialog definition must have a default response, skipping this hook");
               return HOOK_CONTINUE;
             }
           dialog = g_object_ref_sink (adw_alert_dialog_new (dialog_title, dialog_body));
@@ -865,14 +865,14 @@ execute_hook (BzTransactionManager *self,
                   GRAB_STRING (config_opt, "/id", opt_id);
                   if (opt_id == NULL)
                     {
-                      g_critical ("Main Config: dialog option definition must have an id, skipping this hook");
+                      g_warning ("Main Config: dialog option definition must have an id, skipping this hook");
                       return HOOK_CONTINUE;
                     }
 
                   GRAB_STRING (config_opt, "/string", opt_string);
                   if (opt_string == NULL)
                     {
-                      g_critical ("Main Config: dialog option definition must have a string, skipping this hook");
+                      g_warning ("Main Config: dialog option definition must have a string, skipping this hook");
                       return HOOK_CONTINUE;
                     }
 
@@ -903,7 +903,7 @@ execute_hook (BzTransactionManager *self,
             }
           if (n_opts == 0)
             {
-              g_critical ("Main Config: dialog definition must have options, skipping this hook");
+              g_warning ("Main Config: dialog definition must have options, skipping this hook");
               return HOOK_CONTINUE;
             }
 
@@ -980,20 +980,20 @@ execute_hook (BzTransactionManager *self,
                   bz_make_alert_dialog_future (ADW_ALERT_DIALOG (current_dialog->dialog)),
                   &local_error);
               if (response == NULL)
-                g_critical ("Failed to resolve response from dialog "
-                            "\"%s\", assuming default response \"%s\": %s",
-                            current_dialog->id,
-                            adw_alert_dialog_get_default_response (
-                                ADW_ALERT_DIALOG (current_dialog->dialog)),
-                            local_error->message);
+                g_warning ("Failed to resolve response from dialog "
+                           "\"%s\", assuming default response \"%s\": %s",
+                           current_dialog->id,
+                           adw_alert_dialog_get_default_response (
+                               ADW_ALERT_DIALOG (current_dialog->dialog)),
+                           local_error->message);
               g_clear_pointer (&local_error, g_error_free);
             }
           else
-            g_critical ("A window was not available to present dialog "
-                        "\"%s\" on, assuming default response \"%s\"",
-                        current_dialog->id,
-                        adw_alert_dialog_get_default_response (
-                            ADW_ALERT_DIALOG (current_dialog->dialog)));
+            g_warning ("A window was not available to present dialog "
+                       "\"%s\" on, assuming default response \"%s\"",
+                       current_dialog->id,
+                       adw_alert_dialog_get_default_response (
+                           ADW_ALERT_DIALOG (current_dialog->dialog)));
 
           g_subprocess_launcher_setenv (launcher, "BAZAAR_HOOK_DIALOG_ID", current_dialog->id, TRUE);
           g_subprocess_launcher_setenv (
@@ -1026,7 +1026,7 @@ execute_hook (BzTransactionManager *self,
           NULL);
       if (subprocess == NULL)
         {
-          g_critical ("Hook failed to spawn, abandoning it now: %s", local_error->message);
+          g_warning ("Hook failed to spawn, abandoning it now: %s", local_error->message);
           return HOOK_CONTINUE;
         }
 
@@ -1035,7 +1035,7 @@ execute_hook (BzTransactionManager *self,
           &local_error);
       if (!result)
         {
-          g_critical ("Hook failed to exit cleanly, abandoning it now: %s", local_error->message);
+          g_warning ("Hook failed to exit cleanly, abandoning it now: %s", local_error->message);
           return HOOK_CONTINUE;
         }
 
@@ -1043,7 +1043,7 @@ execute_hook (BzTransactionManager *self,
       stdout_bytes = g_input_stream_read_bytes (stdout_pipe, 1024, NULL, &local_error);
       if (!stdout_bytes)
         {
-          g_critical ("Failed to read stdout pipe of hook, abandoning it now: %s", local_error->message);
+          g_warning ("Failed to read stdout pipe of hook, abandoning it now: %s", local_error->message);
           return HOOK_CONTINUE;
         }
 
@@ -1116,8 +1116,8 @@ execute_hook (BzTransactionManager *self,
       else
         g_assert_not_reached ();
 
-      g_critical ("Received invalid response from hook for stage \"%s\", abandoning it now",
-                  hook_stage);
+      g_warning ("Received invalid response from hook for stage \"%s\", abandoning it now",
+                 hook_stage);
       return HOOK_CONTINUE;
     }
 }

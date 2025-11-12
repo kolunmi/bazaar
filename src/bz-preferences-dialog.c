@@ -55,6 +55,7 @@ struct _BzPreferencesDialog
   AdwSwitchRow *search_only_flathub_switch;
   AdwSwitchRow *search_debounce_switch;
   GtkFlowBox   *flag_buttons_box;
+  AdwSwitchRow *hide_eol_switch;
 
   GtkToggleButton *flag_buttons[G_N_ELEMENTS (bar_themes)];
 };
@@ -169,6 +170,10 @@ bind_settings (BzPreferencesDialog *self)
                    self->search_debounce_switch, "active",
                    G_SETTINGS_BIND_DEFAULT);
 
+  g_settings_bind (self->settings, "hide-eol",
+                   self->hide_eol_switch, "active",
+                   G_SETTINGS_BIND_DEFAULT);
+
   g_signal_connect_object (
       self->settings,
       "changed::global-progress-bar-theme",
@@ -192,6 +197,7 @@ bz_preferences_dialog_class_init (BzPreferencesDialogClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, search_only_flathub_switch);
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, search_debounce_switch);
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, flag_buttons_box);
+  gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, hide_eol_switch);
 }
 
 static void

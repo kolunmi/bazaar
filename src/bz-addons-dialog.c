@@ -86,15 +86,11 @@ update_button_for_entry (GtkButton *button,
     {
       icon_name    = "user-trash-symbolic";
       tooltip_text = _ ("Remove");
-      gtk_widget_remove_css_class (GTK_WIDGET (button), "suggested-action");
-      gtk_widget_add_css_class (GTK_WIDGET (button), "destructive-action");
     }
   else
     {
       icon_name    = "folder-download-symbolic";
       tooltip_text = _ ("Install");
-      gtk_widget_remove_css_class (GTK_WIDGET (button), "destructive-action");
-      gtk_widget_add_css_class (GTK_WIDGET (button), "suggested-action");
     }
 
   gtk_button_set_icon_name (button, icon_name);

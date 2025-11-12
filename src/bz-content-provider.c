@@ -26,7 +26,6 @@
 #include <libdex.h>
 #include <yaml.h>
 
-#include "bz-async-texture.h"
 #include "bz-content-provider.h"
 #include "bz-content-section.h"
 #include "bz-env.h"
@@ -101,18 +100,23 @@ BZ_DEFINE_DATA (
     input_tracking,
     InputTracking,
     {
-      BzContentProvider *self;
-      char              *path;
-      GFileMonitor      *monitor;
-      DexFuture         *task;
-      GListStore        *output;
-      GtkCssProvider    *css;
+      GMutex          mutex;
+      GWeakRef        self;
+      char           *path;
+      GFileMonitor   *monitor;
+      GListStore     *output;
+      GtkCssProvider *css;
+      DexFuture      *init;
+      DexFuture      *task;
     },
+    g_mutex_clear (&self->mutex);
+    g_weak_ref_clear (&self->self);
     BZ_RELEASE_DATA (path, g_free);
     BZ_RELEASE_DATA (monitor, g_object_unref);
-    BZ_RELEASE_DATA (task, dex_unref);
     BZ_RELEASE_DATA (output, g_object_unref);
-    BZ_RELEASE_DATA (css, destroy_css))
+    BZ_RELEASE_DATA (css, destroy_css);
+    BZ_RELEASE_DATA (init, dex_unref);
+    BZ_RELEASE_DATA (task, dex_unref))
 static DexFuture *
 input_init_finally (DexFuture         *future,
                     InputTrackingData *data);
@@ -121,25 +125,25 @@ input_load_finally (DexFuture         *future,
                     InputTrackingData *data);
 
 static void
-impl_model_changed (GListModel        *impl_model,
+impl_model_changed (BzContentProvider *self,
                     guint              position,
                     guint              removed,
                     guint              added,
-                    BzContentProvider *self);
+                    GListModel        *impl_model);
 
 static void
-input_files_changed (GListModel        *input_files,
+input_files_changed (BzContentProvider *self,
                      guint              position,
                      guint              removed,
                      guint              added,
-                     BzContentProvider *self);
+                     GListModel        *input_files);
 
 static void
-input_file_changed_on_disk (GFileMonitor      *self,
+input_file_changed_on_disk (InputTrackingData *data,
                             GFile             *file,
                             GFile             *other_file,
                             GFileMonitorEvent  event_type,
-                            InputTrackingData *data);
+                            GFileMonitor      *monitor);
 
 static gboolean
 commence_reload (InputTrackingData *data);
@@ -253,9 +257,11 @@ bz_content_provider_init (BzContentProvider *self)
   self->outputs    = g_list_store_new (G_TYPE_LIST_MODEL);
   self->impl_model = gtk_flatten_list_model_new (g_object_ref (G_LIST_MODEL (self->outputs)));
 
-  g_signal_connect (
-      self->impl_model, "items-changed",
-      G_CALLBACK (impl_model_changed), self);
+  g_signal_connect_swapped (
+      self->impl_model,
+      "items-changed",
+      G_CALLBACK (impl_model_changed),
+      self);
 }
 
 static GType
@@ -317,14 +323,16 @@ bz_content_provider_set_input_files (BzContentProvider *self,
   if (input_files != NULL)
     {
       self->input_files = g_object_ref (input_files);
-      g_signal_connect (
-          input_files, "items-changed",
-          G_CALLBACK (input_files_changed), self);
+      g_signal_connect_swapped (
+          input_files,
+          "items-changed",
+          G_CALLBACK (input_files_changed),
+          self);
 
       input_files_changed (
-          input_files, 0, old_length,
+          self, 0, old_length,
           g_list_model_get_n_items (input_files),
-          self);
+          input_files);
     }
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INPUT_FILES]);
@@ -368,22 +376,22 @@ bz_content_provider_get_has_inputs (BzContentProvider *self)
 }
 
 static void
-impl_model_changed (GListModel        *impl_model,
+impl_model_changed (BzContentProvider *self,
                     guint              position,
                     guint              removed,
                     guint              added,
-                    BzContentProvider *self)
+                    GListModel        *impl_model)
 {
   g_list_model_items_changed (
       G_LIST_MODEL (self), position, removed, added);
 }
 
 static void
-input_files_changed (GListModel        *input_files,
+input_files_changed (BzContentProvider *self,
                      guint              position,
                      guint              removed,
                      guint              added,
-                     BzContentProvider *self)
+                     GListModel        *input_files)
 {
   gboolean                emit_has_inputs = FALSE;
   g_autofree GFile      **additions       = NULL;
@@ -404,7 +412,10 @@ input_files_changed (GListModel        *input_files,
           data = g_hash_table_lookup (self->input_tracking, removal);
           g_assert (data != NULL);
 
+          g_mutex_lock (&data->mutex);
           dex_clear (&data->task);
+          g_mutex_unlock (&data->mutex);
+
           g_hash_table_remove (self->input_tracking, removal);
         }
     }
@@ -428,9 +439,9 @@ input_files_changed (GListModel        *input_files,
 
   for (guint i = 0; i < added; i++)
     {
-      g_autoptr (InputInitData) init_data = NULL;
-      g_autoptr (InputTrackingData) data  = NULL;
-      g_autoptr (DexFuture) future        = NULL;
+      g_autoptr (InputInitData) init_data         = NULL;
+      g_autoptr (InputTrackingData) tracking_data = NULL;
+      g_autoptr (DexFuture) future                = NULL;
 
       init_data       = input_init_data_new ();
       init_data->file = g_object_ref (additions[i]);
@@ -442,22 +453,25 @@ input_files_changed (GListModel        *input_files,
           input_init_data_ref (init_data),
           input_init_data_unref);
 
-      data         = input_tracking_data_new ();
-      data->self   = self;
-      data->path   = g_file_get_path (additions[i]);
-      data->output = g_steal_pointer (&new_outputs[i]);
+      tracking_data = input_tracking_data_new ();
+      g_mutex_init (&tracking_data->mutex);
+      g_weak_ref_init (&tracking_data->self, self);
+      tracking_data->path   = g_file_get_path (additions[i]);
+      tracking_data->output = g_steal_pointer (&new_outputs[i]);
 
+      g_mutex_lock (&tracking_data->mutex);
       future = dex_future_finally (
           future,
           (DexFutureCallback) input_init_finally,
-          input_tracking_data_ref (data),
+          input_tracking_data_ref (tracking_data),
           input_tracking_data_unref);
-      dex_future_disown (g_steal_pointer (&future));
+      tracking_data->init = g_steal_pointer (&future);
+      g_mutex_unlock (&tracking_data->mutex);
 
       g_hash_table_replace (
           self->input_tracking,
           g_steal_pointer (&additions[i]),
-          input_tracking_data_ref (data));
+          input_tracking_data_ref (tracking_data));
     }
 
   if (emit_has_inputs)
@@ -465,11 +479,11 @@ input_files_changed (GListModel        *input_files,
 }
 
 static void
-input_file_changed_on_disk (GFileMonitor      *self,
+input_file_changed_on_disk (InputTrackingData *data,
                             GFile             *file,
                             GFile             *other_file,
                             GFileMonitorEvent  event_type,
-                            InputTrackingData *data)
+                            GFileMonitor      *monitor)
 {
   if (event_type == G_FILE_MONITOR_EVENT_CHANGED ||
       event_type == G_FILE_MONITOR_EVENT_CREATED ||
@@ -500,8 +514,15 @@ static DexFuture *
 input_init_finally (DexFuture         *future,
                     InputTrackingData *data)
 {
-  g_autoptr (GError) local_error = NULL;
-  const GValue *value            = NULL;
+  g_autoptr (BzContentProvider) self = NULL;
+  g_autoptr (GError) local_error     = NULL;
+  g_autoptr (GMutexLocker) locker    = NULL;
+  const GValue *value                = NULL;
+
+  locker = g_mutex_locker_new (&data->mutex);
+
+  dex_clear (&data->init);
+  bz_weak_get_or_return_reject (self, &data->self);
 
   g_list_store_remove_all (data->output);
 
@@ -509,19 +530,21 @@ input_init_finally (DexFuture         *future,
   if (value != NULL)
     {
       data->monitor = g_value_dup_object (value);
-      g_signal_connect (
-          data->monitor, "changed",
+      g_signal_connect_swapped (
+          data->monitor,
+          "changed",
           G_CALLBACK (input_file_changed_on_disk),
           data);
 
+      g_clear_pointer (&locker, g_mutex_locker_free);
       commence_reload (data);
     }
   else
     {
       // g_autoptr (BzContentSection) error_section = NULL;
 
-      g_critical ("Could not init curated config watch at path %s: %s",
-                  data->path, local_error->message);
+      g_warning ("Could not init curated config watch at path %s: %s",
+                 data->path, local_error->message);
 
       // error_section = g_object_new (
       //     BZ_TYPE_CONTENT_SECTION,
@@ -576,166 +599,14 @@ input_load_fiber (InputLoadData *data)
 
       for (guint i = 0; i < list->len; i++)
         {
-          GHashTable *section_props            = NULL;
-          g_autoptr (BzContentSection) section = NULL;
+          BzContentSection *section = NULL;
 
-          section_props = g_value_get_boxed (
+          section = g_value_get_object (
               g_hash_table_lookup (
                   g_value_get_boxed (
                       g_ptr_array_index (list, i)),
                   "/"));
-          section = g_object_new (BZ_TYPE_CONTENT_SECTION, NULL);
-
-#define GRAB_STRING(s)                            \
-  if (g_hash_table_contains (section_props, (s))) \
-    g_object_set (                                \
-        section,                                  \
-        (s),                                      \
-        g_variant_get_string (                    \
-            g_value_get_variant (                 \
-                g_hash_table_lookup (             \
-                    section_props, (s))),         \
-            NULL),                                \
-        NULL);
-
-          GRAB_STRING ("title");
-          GRAB_STRING ("subtitle");
-          GRAB_STRING ("description");
-          GRAB_STRING ("markdown");
-
-#undef GRAB_STRING
-
-#define GRAB_INT(s)                               \
-  if (g_hash_table_contains (section_props, (s))) \
-    g_object_set (                                \
-        section,                                  \
-        (s),                                      \
-        g_variant_get_int32 (                     \
-            g_value_get_variant (                 \
-                g_hash_table_lookup (             \
-                    section_props, (s)))),        \
-        NULL);
-
-          GRAB_INT ("banner-height");
-          GRAB_INT ("rows");
-
-#undef GRAB_INT
-
-#define GRAB_DOUBLE(s)                            \
-  if (g_hash_table_contains (section_props, (s))) \
-    g_object_set (                                \
-        section,                                  \
-        (s),                                      \
-        g_variant_get_double (                    \
-            g_value_get_variant (                 \
-                g_hash_table_lookup (             \
-                    section_props, (s)))),        \
-        NULL);
-
-          GRAB_DOUBLE ("banner-text-label-xalign");
-
-#undef GRAB_DOUBLE
-
-#define GRAB_ENUM(s)                              \
-  if (g_hash_table_contains (section_props, (s))) \
-    g_object_set (                                \
-        section,                                  \
-        (s),                                      \
-        g_value_get_enum (                        \
-            g_hash_table_lookup (                 \
-                section_props, (s))),             \
-        NULL);
-
-          GRAB_ENUM ("banner-text-valign");
-          GRAB_ENUM ("banner-text-halign");
-          GRAB_ENUM ("banner-fit");
-
-#undef GRAB_ENUM
-
-#define GRAB_BANNER(s)                                   \
-  if (g_hash_table_contains (section_props, (s)))        \
-    {                                                    \
-      const char *string       = NULL;                   \
-      g_autoptr (GFile) source = NULL;                   \
-                                                         \
-      string = g_variant_get_string (                    \
-          g_value_get_variant (                          \
-              g_hash_table_lookup (                      \
-                  section_props, (s))),                  \
-          NULL);                                         \
-      source = g_file_new_for_uri (string);              \
-                                                         \
-      if (source != NULL)                                \
-        {                                                \
-          g_autoptr (BzAsyncTexture) texture = NULL;     \
-                                                         \
-          texture = bz_async_texture_new (source, NULL); \
-          g_object_set (section, (s), texture, NULL);    \
-        }                                                \
-    }
-
-          GRAB_BANNER ("banner");
-          GRAB_BANNER ("light-banner");
-          GRAB_BANNER ("dark-banner");
-
-#undef GRAB_BANNER
-
-          if (g_hash_table_contains (section_props, "appids"))
-            {
-              GPtrArray *appids                 = NULL;
-              g_autoptr (GtkStringList) strlist = NULL;
-
-              appids = g_value_get_boxed (
-                  g_hash_table_lookup (section_props, "appids"));
-              strlist = gtk_string_list_new (NULL);
-
-              for (guint j = 0; j < appids->len; j++)
-                {
-                  const char *appid = NULL;
-
-                  appid = g_variant_get_string (
-                      g_value_get_variant (
-                          g_ptr_array_index (appids, j)),
-                      NULL);
-
-                  gtk_string_list_append (strlist, appid);
-                }
-
-              g_object_set (section, "appids", strlist, NULL);
-            }
-
-#define GRAB_CLASSES(key)                              \
-  if (g_hash_table_contains (section_props, (key)))    \
-    {                                                  \
-      GPtrArray *classes                = NULL;        \
-      g_autoptr (GtkStringList) strlist = NULL;        \
-                                                       \
-      classes = g_value_get_boxed (                    \
-          g_hash_table_lookup (section_props, (key))); \
-      strlist = gtk_string_list_new (NULL);            \
-                                                       \
-      for (guint j = 0; j < classes->len; j++)         \
-        {                                              \
-          const char *class = NULL;                    \
-                                                       \
-          class = g_variant_get_string (               \
-              g_value_get_variant (                    \
-                  g_ptr_array_index (classes, j)),     \
-              NULL);                                   \
-                                                       \
-          gtk_string_list_append (strlist, class);     \
-        }                                              \
-                                                       \
-      g_object_set (section, (key), strlist, NULL);    \
-    }
-
-          GRAB_CLASSES ("classes")
-          GRAB_CLASSES ("dark-classes")
-          GRAB_CLASSES ("light-classes")
-
-#undef GRAB_CLASSES
-
-          g_ptr_array_add (sections, g_steal_pointer (&section));
+          g_ptr_array_add (sections, g_object_ref (section));
         }
     }
 
@@ -758,11 +629,17 @@ static DexFuture *
 input_load_finally (DexFuture         *future,
                     InputTrackingData *data)
 {
-  g_autoptr (GError) local_error = NULL;
-  const GValue *value            = NULL;
+  g_autoptr (BzContentProvider) self = NULL;
+  g_autoptr (GError) local_error     = NULL;
+  g_autoptr (GMutexLocker) locker    = NULL;
+  const GValue *value                = NULL;
+
+  locker = g_mutex_locker_new (&data->mutex);
 
   g_list_store_remove_all (data->output);
   g_clear_pointer (&data->css, destroy_css);
+
+  bz_weak_get_or_return_reject (self, &data->self);
 
   value = dex_future_get_value (future, &local_error);
   if (value != NULL)
@@ -795,21 +672,27 @@ input_load_finally (DexFuture         *future,
 
       if (sections->pdata != NULL && sections->len > 0)
         {
-          if (data->self->factory != NULL)
+          for (guint i = 0; i < sections->len; i++)
             {
-              for (guint i = 0; i < sections->len; i++)
+              BzContentSection *section = NULL;
+
+              section = g_ptr_array_index (sections, i);
+
+              bz_content_section_set_banner_height (
+                  section,
+                  CLAMP (bz_content_section_get_banner_height (section), 100, 1000));
+
+              if (self->factory != NULL)
                 {
-                  BzContentSection *section     = NULL;
                   g_autoptr (GListModel) appids = NULL;
 
-                  section = g_ptr_array_index (sections, i);
                   g_object_get (section, "appids", &appids, NULL);
 
                   if (appids != NULL)
                     {
                       g_autoptr (GListModel) converted = NULL;
 
-                      converted = bz_application_map_factory_generate (data->self->factory, appids);
+                      converted = bz_application_map_factory_generate (self->factory, appids);
                       g_object_set (section, "appids", converted, NULL);
                     }
                 }
@@ -822,8 +705,8 @@ input_load_finally (DexFuture         *future,
     {
       // g_autoptr (BzContentSection) error_section = NULL;
 
-      g_critical ("Could not load curated config at path %s: %s",
-                  data->path, local_error->message);
+      g_warning ("Could not load curated config at path %s: %s",
+                 data->path, local_error->message);
 
       // error_section = g_object_new (
       //     BZ_TYPE_CONTENT_SECTION,
@@ -832,21 +715,28 @@ input_load_finally (DexFuture         *future,
       // g_list_store_append (data->output, error_section);
     }
 
-  g_object_notify_by_pspec (G_OBJECT (data->self), props[PROP_HAS_INPUTS]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_INPUTS]);
   return NULL;
 }
 
 static gboolean
 commence_reload (InputTrackingData *data)
 {
+  g_autoptr (BzContentProvider) self  = NULL;
+  g_autoptr (GMutexLocker) locker     = NULL;
   g_autoptr (InputLoadData) load_data = NULL;
-  DexFuture *future                   = NULL;
+  g_autoptr (DexFuture) future        = NULL;
 
+  locker = g_mutex_locker_new (&data->mutex);
   dex_clear (&data->task);
+
+  self = g_weak_ref_get (&data->self);
+  if (self == NULL)
+    goto done;
 
   load_data         = input_load_data_new ();
   load_data->file   = g_file_new_for_path (data->path);
-  load_data->parser = g_object_ref (data->self->yaml_parser);
+  load_data->parser = g_object_ref (self->yaml_parser);
 
   future = dex_scheduler_spawn (
       bz_get_io_scheduler (),
@@ -859,8 +749,9 @@ commence_reload (InputTrackingData *data)
       (DexFutureCallback) input_load_finally,
       input_tracking_data_ref (data),
       input_tracking_data_unref);
-  data->task = future;
+  data->task = g_steal_pointer (&future);
 
+done:
   return G_SOURCE_REMOVE;
 }
 

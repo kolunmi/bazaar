@@ -81,6 +81,7 @@ You will need the following dependencies installed, along with a C compiler, mes
 | [libyaml](https://github.com/yaml/libyaml)              | `yaml-0.1`        | `0.2.5`                | Parse YAML configs                                  |
 | [libsoup](https://gitlab.gnome.org/GNOME/libsoup)       | `libsoup-3.0`     | `3.6.0`                | HTTP operations                                     |
 | [json-glib](https://gitlab.gnome.org/GNOME/json-glib)   | `json-glib-1.0`   | `1.10.0`               | Parse HTTP replies from Flathub                     |
+| [md4c](https://github.com/mity/md4c)                    | `md4c`            | `0.5.1`                | Parse markdown (.md)                                |
 
 
 #### Code of Conduct

@@ -54,8 +54,9 @@ struct _BzFlatpakInstance
 
   GMutex mute_mutex;
 
-  GPtrArray *notif_channels;
   GMutex     notif_mutex;
+  GPtrArray *notif_channels;
+  DexFuture *notif_send;
 };
 
 static void
@@ -242,6 +243,27 @@ installation_event (BzFlatpakInstance *self,
                     GFileMonitorEvent  event_type,
                     GFileMonitor      *monitor);
 
+static void
+send_notif (BzFlatpakInstance     *self,
+            DexChannel            *channel,
+            BzBackendNotification *notif,
+            gboolean               lock);
+
+BZ_DEFINE_DATA (
+    wait_notif,
+    WaitNotif,
+    {
+      GWeakRef               self;
+      DexChannel            *channel;
+      BzBackendNotification *notif;
+    },
+    g_weak_ref_clear (&self->self);
+    BZ_RELEASE_DATA (channel, dex_unref);
+    BZ_RELEASE_DATA (notif, g_object_unref));
+static DexFuture *
+wait_notif_finally (DexFuture     *future,
+                    WaitNotifData *data);
+
 static gint
 cmp_rref (FlatpakRemoteRef *a,
           FlatpakRemoteRef *b,
@@ -253,12 +275,16 @@ bz_flatpak_instance_dispose (GObject *object)
   BzFlatpakInstance *self = BZ_FLATPAK_INSTANCE (object);
 
   dex_clear (&self->scheduler);
+
   g_clear_object (&self->system);
   g_clear_object (&self->system_events);
   g_clear_object (&self->user);
   g_clear_object (&self->user_events);
+
   g_mutex_clear (&self->mute_mutex);
+
   g_clear_pointer (&self->notif_channels, g_ptr_array_unref);
+  dex_clear (&self->notif_send);
   g_mutex_clear (&self->notif_mutex);
 
   G_OBJECT_CLASS (bz_flatpak_instance_parent_class)->dispose (object);
@@ -739,8 +765,8 @@ static DexFuture *
 load_local_ref_fiber (LoadLocalRefData *data)
 {
   // GCancellable      *cancellable    = data->cancellable;
-  BzFlatpakInstance *instance       = data->instance;
-  GFile             *file           = data->file;
+  // BzFlatpakInstance *instance       = data->instance;
+  GFile *file                       = data->file;
   g_autoptr (GError) local_error    = NULL;
   g_autofree char *uri              = NULL;
   g_autofree char *path             = NULL;
@@ -823,11 +849,9 @@ load_local_ref_fiber (LoadLocalRefData *data)
         local_error->message);
 
   entry = bz_flatpak_entry_new_for_ref (
-      instance,
-      FALSE,
-      NULL,
       FLATPAK_REF (bref),
       NULL,
+      FALSE,
       NULL,
       NULL,
       &local_error);
@@ -1218,21 +1242,21 @@ retrieve_refs_for_remote_fiber (RetrieveRefsForRemoteData *data)
         remote_name,
         local_error->message);
 
-  for (guint i = 0; i < refs->len;)
+  if (blocked_names_hash != NULL)
     {
-      FlatpakRemoteRef *rref = NULL;
-      const char       *name = NULL;
+      for (guint i = 0; i < refs->len;)
+        {
+          FlatpakRemoteRef *rref = NULL;
+          const char       *name = NULL;
 
-      rref = g_ptr_array_index (refs, i);
-      name = flatpak_ref_get_name (FLATPAK_REF (rref));
+          rref = g_ptr_array_index (refs, i);
+          name = flatpak_ref_get_name (FLATPAK_REF (rref));
 
-      if (flatpak_remote_ref_get_eol (rref) != NULL ||
-          flatpak_remote_ref_get_eol_rebase (rref) != NULL ||
-          (blocked_names_hash != NULL &&
-           g_hash_table_contains (blocked_names_hash, name)))
-        g_ptr_array_remove_index_fast (refs, i);
-      else
-        i++;
+          if (g_hash_table_contains (blocked_names_hash, name))
+            g_ptr_array_remove_index_fast (refs, i);
+          else
+            i++;
+        }
     }
   if (refs->len == 0)
     return dex_future_new_true ();
@@ -1272,13 +1296,11 @@ retrieve_refs_for_remote_fiber (RetrieveRefsForRemoteData *data)
         }
 
       entry = bz_flatpak_entry_new_for_ref (
-          instance,
-          installation == instance->user,
-          remote,
           FLATPAK_REF (rref),
+          remote,
+          installation == instance->user,
           component,
           appstream_dir_path,
-          remote_icon,
           NULL);
       if (entry != NULL)
         result = dex_await (
@@ -1842,7 +1864,7 @@ transaction_operation_error (FlatpakTransaction          *object,
   /* `FLATPAK_TRANSACTION_ERROR_DETAILS_NON_FATAL` is the only
      possible value of `details` */
 
-  g_critical ("Transaction failed to complete: %s", error->message);
+  g_warning ("Transaction failed to complete: %s", error->message);
 
   g_mutex_lock (&data->mutex);
   g_hash_table_replace (
@@ -2023,7 +2045,7 @@ installation_event (BzFlatpakInstance *self,
           channel = g_ptr_array_index (self->notif_channels, i);
           if (dex_channel_can_send (channel))
             {
-              dex_future_disown (dex_channel_send (channel, dex_future_new_for_object (notif)));
+              send_notif (self, channel, notif, FALSE);
               i++;
             }
           else
@@ -2033,23 +2055,81 @@ installation_event (BzFlatpakInstance *self,
   g_mutex_unlock (&self->notif_mutex);
 }
 
+static void
+send_notif (BzFlatpakInstance     *self,
+            DexChannel            *channel,
+            BzBackendNotification *notif,
+            gboolean               lock)
+{
+  g_autoptr (GMutexLocker) locker = NULL;
+
+  if (lock)
+    locker = g_mutex_locker_new (&self->notif_mutex);
+
+  if (self->notif_send == NULL ||
+      !dex_future_is_pending (self->notif_send))
+    {
+      dex_clear (&self->notif_send);
+      self->notif_send = dex_channel_send (
+          channel,
+          dex_future_new_for_object (notif));
+    }
+  else
+    {
+      g_autoptr (WaitNotifData) data = NULL;
+
+      data = wait_notif_data_new ();
+      g_weak_ref_init (&data->self, self);
+      data->channel = dex_ref (channel);
+      data->notif   = g_object_ref (notif);
+
+      self->notif_send = dex_future_finally (
+          g_steal_pointer (&self->notif_send),
+          (DexFutureCallback) wait_notif_finally,
+          wait_notif_data_ref (data),
+          wait_notif_data_unref);
+    }
+}
+
+static DexFuture *
+wait_notif_finally (DexFuture     *future,
+                    WaitNotifData *data)
+{
+  g_autoptr (BzFlatpakInstance) self = NULL;
+  g_autoptr (GMutexLocker) locker    = NULL;
+
+  bz_weak_get_or_return_reject (self, &data->self);
+  locker = g_mutex_locker_new (&self->notif_mutex);
+
+  if (future == self->notif_send)
+    dex_clear (&self->notif_send);
+  send_notif (self, data->channel, data->notif, FALSE);
+
+  return dex_future_new_true ();
+}
+
 static gint
 cmp_rref (FlatpakRemoteRef *a,
           FlatpakRemoteRef *b,
           GHashTable       *hash)
 {
-  AsComponent    *a_comp = NULL;
-  AsComponent    *b_comp = NULL;
-  AsComponentKind a_kind = AS_COMPONENT_KIND_UNKNOWN;
-  AsComponentKind b_kind = AS_COMPONENT_KIND_UNKNOWN;
+  FlatpakRefKind  a_fkind = 0;
+  FlatpakRefKind  b_fkind = 0;
+  AsComponent    *a_comp  = NULL;
+  AsComponent    *b_comp  = NULL;
+  AsComponentKind a_kind  = AS_COMPONENT_KIND_UNKNOWN;
+  AsComponentKind b_kind  = AS_COMPONENT_KIND_UNKNOWN;
+
+  a_fkind = flatpak_ref_get_kind (FLATPAK_REF (a));
+  b_fkind = flatpak_ref_get_kind (FLATPAK_REF (b));
 
   a_comp = g_hash_table_lookup (hash, flatpak_ref_get_name (FLATPAK_REF (a)));
   b_comp = g_hash_table_lookup (hash, flatpak_ref_get_name (FLATPAK_REF (b)));
 
   if (a_comp == NULL)
-    return -1;
+    return a_fkind == FLATPAK_REF_KIND_RUNTIME ? -1 : 1;
   if (b_comp == NULL)
-    return 1;
+    return b_fkind == FLATPAK_REF_KIND_RUNTIME ? 1 : -1;
 
   a_kind = as_component_get_kind (a_comp);
   b_kind = as_component_get_kind (b_comp);

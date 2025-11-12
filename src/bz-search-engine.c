@@ -389,8 +389,9 @@ query_task_fiber (QueryTaskData *data)
   g_autoptr (GArray) scores                   = NULL;
   g_autoptr (GPtrArray) results               = NULL;
 
-  joined    = g_strjoinv (" ", terms);
-  threshold = (double) strlen (joined) / (double) g_strv_length (terms);
+  joined = g_strjoinv (" ", terms);
+  // threshold = (double) strlen (joined) / (double) g_strv_length (terms);
+  threshold = (double) strlen (joined);
 
   query_istring = indexed_string_data_new ();
   index_string (joined, query_istring);
@@ -627,12 +628,12 @@ test_strings (IndexedStringData *query,
               diff = (int) best_idx - (int) last_best_idx;
               if (diff > 1)
                 /* Penalize the query for fragmentation */
-                best_score /= (double) diff;
+                best_score /= (double) diff / 2.0;
               else if (diff < 0)
                 /* Penalize the query more harshly for
                  * transposing and fragmentation
                  */
-                best_score /= 1.5 * (double) ABS (diff);
+                best_score /= (double) ABS (diff);
             }
 
           score += best_score;

@@ -25,6 +25,7 @@
 #include "bz-browse-widget.h"
 #include "bz-comet-overlay.h"
 #include "bz-entry-group.h"
+#include "bz-entry-inspector.h"
 #include "bz-error.h"
 #include "bz-flathub-page.h"
 #include "bz-full-view.h"
@@ -65,6 +66,7 @@ struct _BzWindow
   AdwToastOverlay     *toasts;
   AdwViewStack        *main_view_stack;
   GtkStack            *main_stack;
+  GtkLabel            *debug_id_label;
   // GtkButton           *refresh;
 };
 
@@ -250,7 +252,7 @@ full_view_remove_cb (BzWindow   *self,
                      GtkWidget  *source,
                      BzFullView *view)
 {
-  try_transact (self, NULL, bz_full_view_get_entry_group (view), TRUE, TRUE, source);
+  try_transact (self, NULL, bz_full_view_get_entry_group (view), TRUE, FALSE, source);
 }
 
 static void
@@ -267,6 +269,14 @@ remove_addon_cb (BzWindow   *self,
                  BzFullView *view)
 {
   try_transact (self, entry, NULL, TRUE, TRUE, NULL);
+}
+
+static void
+remove_installed_cb (BzWindow   *self,
+                 BzEntry    *entry,
+                 BzFullView *view)
+{
+  try_transact (self, entry, NULL, TRUE, FALSE, NULL);
 }
 
 static void
@@ -349,6 +359,13 @@ browse_flathub_cb (BzWindow       *self,
 }
 
 static void
+open_search_cb (BzWindow       *self,
+                BzSearchWidget *widget)
+{
+  adw_view_stack_set_visible_child_name (self->main_view_stack, "search");
+}
+
+static void
 breakpoint_apply_cb (BzWindow      *self,
                      AdwBreakpoint *breakpoint)
 {
@@ -422,6 +439,41 @@ action_escape (GtkWidget  *widget,
     }
 }
 
+static char *
+format_progress (gpointer object,
+                 double   value)
+{
+  return g_strdup_printf ("%.0f%%", 100.0 * value);
+}
+
+static void
+debug_id_inspect_cb (BzWindow  *self,
+                     GtkButton *button)
+{
+  BzEntryGroup    *group             = NULL;
+  g_autofree char *unique_id         = NULL;
+  g_autoptr (GtkStringObject) string = NULL;
+  g_autoptr (BzResult) result        = NULL;
+
+  group = bz_full_view_get_entry_group (self->full_view);
+  if (group == NULL)
+    return;
+  unique_id = bz_entry_group_dup_ui_entry_id (group);
+
+  result = bz_application_map_factory_convert_one (
+      bz_state_info_get_entry_factory (self->state),
+      gtk_string_object_new (unique_id));
+  if (result != NULL)
+    {
+      BzEntryInspector *inspector = NULL;
+
+      inspector = bz_entry_inspector_new ();
+      bz_entry_inspector_set_result (inspector, result);
+
+      gtk_window_present (GTK_WINDOW (inspector));
+    }
+}
+
 static void
 bz_window_class_init (BzWindowClass *klass)
 {
@@ -467,6 +519,7 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzWindow, transactions_clear);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, main_view_stack);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, main_stack);
+  gtk_widget_class_bind_template_child (widget_class, BzWindow, debug_id_label);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_double_zero);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
@@ -476,6 +529,7 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, full_view_remove_cb);
   gtk_widget_class_bind_template_callback (widget_class, install_addon_cb);
   gtk_widget_class_bind_template_callback (widget_class, remove_addon_cb);
+  gtk_widget_class_bind_template_callback (widget_class, remove_installed_cb);
   gtk_widget_class_bind_template_callback (widget_class, installed_page_show_cb);
   gtk_widget_class_bind_template_callback (widget_class, page_toggled_cb);
   gtk_widget_class_bind_template_callback (widget_class, breakpoint_apply_cb);
@@ -488,6 +542,9 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, visible_page_changed_cb);
   gtk_widget_class_bind_template_callback (widget_class, main_view_stack_changed_cb);
   gtk_widget_class_bind_template_callback (widget_class, browse_flathub_cb);
+  gtk_widget_class_bind_template_callback (widget_class, open_search_cb);
+  gtk_widget_class_bind_template_callback (widget_class, format_progress);
+  gtk_widget_class_bind_template_callback (widget_class, debug_id_inspect_cb);
 
   gtk_widget_class_install_action (widget_class, "escape", NULL, action_escape);
 }
@@ -499,30 +556,20 @@ key_pressed (BzWindow              *self,
              GdkModifierType        state,
              GtkEventControllerKey *controller)
 {
-  guint32     unichar     = 0;
-  char        buf[32]     = { 0 };
-  const char *active_name = NULL;
+  gunichar unichar = 0;
+  char     buf[32] = { 0 };
 
   /* Ignore if this is a modifier-shortcut of some sort */
   if (state & ~(GDK_NO_MODIFIER_MASK | GDK_SHIFT_MASK))
     return FALSE;
 
-  /* Ignore if we are already on search page */
-  active_name = adw_view_stack_get_visible_child_name (self->main_view_stack);
-  if (g_strcmp0 (active_name, "search") == 0)
-    return FALSE;
-
   unichar = gdk_keyval_to_unicode (keyval);
   if (unichar == 0 || !g_unichar_isgraph (unichar))
     return FALSE;
+  g_unichar_to_utf8 (unichar, buf);
 
   adw_view_stack_set_visible_child_name (self->main_view_stack, "search");
-
-  g_unichar_to_utf8 (unichar, buf);
-  gtk_widget_grab_focus (GTK_WIDGET (self->search_widget));
-  bz_search_widget_set_text (self->search_widget, buf);
-
-  return TRUE;
+  return bz_search_widget_ensure_active (self->search_widget, buf);
 }
 
 static void
@@ -1045,7 +1092,9 @@ configure_remove_dialog (AdwAlertDialog *alert,
   heading = g_strdup_printf (_ ("Remove %s?"), title);
 
   adw_alert_dialog_set_heading (alert, heading);
-  adw_alert_dialog_set_body (alert, _ ("Settings & user data will be kept"));
+  adw_alert_dialog_set_body (
+    alert,g_strdup_printf (_("It will not be possible to use %s after it is uninstalled.\n\nSettings and user data will be kept."),title)
+  );
 
   adw_alert_dialog_add_responses (alert,
                                   "cancel", _ ("Cancel"),
@@ -1230,18 +1279,19 @@ static void
 set_page (BzWindow *self)
 {
   const char *selected_navigation_page_name = NULL;
-  const char *visible_child_name            = NULL;
 
   if (self->state == NULL)
     return;
 
-  if (bz_state_info_get_busy (self->state)) {
-    gtk_stack_set_visible_child_name (self->main_stack, "loading");
-    adw_navigation_view_pop_to_tag (self->navigation_view, "main");
-  }
-  else {
-    gtk_stack_set_visible_child_name (self->main_stack, "main");
-  }
+  if (bz_state_info_get_busy (self->state))
+    {
+      gtk_stack_set_visible_child_name (self->main_stack, "loading");
+      adw_navigation_view_pop_to_tag (self->navigation_view, "main");
+    }
+  else
+    {
+      gtk_stack_set_visible_child_name (self->main_stack, "main");
+    }
 
   selected_navigation_page_name = adw_navigation_view_get_visible_page_tag (self->navigation_view);
 

@@ -4,10 +4,9 @@
   "runtime-version": "49",
   "sdk": "org.gnome.Sdk",
   "command": "bazaar",
-  "tags": "nightly",
+  "tags": [ "nightly" ],
   "desktop-file-name-suffix": " (Nightly)",
   "sdk-extensions": [
-    "org.freedesktop.Sdk.Extension.rust-stable",
     "org.freedesktop.Sdk.Extension.llvm20"
   ],
   "finish-args": [

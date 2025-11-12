@@ -30,6 +30,8 @@ struct _BzFeaturedTileLayout
 {
   GtkLayoutManager parent_instance;
   gboolean         narrow_mode;
+  GtkWidget       *content_box;
+  int              last_width;
 };
 
 G_DEFINE_FINAL_TYPE (BzFeaturedTileLayout, bz_featured_tile_layout, GTK_TYPE_LAYOUT_MANAGER)
@@ -87,8 +89,36 @@ bz_featured_tile_layout_allocate (GtkLayoutManager *layout_manager,
   BzFeaturedTileLayout *self;
   GtkWidget            *child;
   gboolean              narrow_mode;
+  int                   spacing;
+  const int             NARROW_THRESHOLD = 950;
+  const int             MIN_SPACING      = 15;
+  const int             MAX_SPACING      = 128;
+  const int             MAX_WIDTH        = 1300;
 
   self = BZ_FEATURED_TILE_LAYOUT (layout_manager);
+
+  narrow_mode = (width < NARROW_THRESHOLD);
+
+  if (self->content_box != NULL && self->last_width != width)
+    {
+      self->last_width = width;
+
+      if (narrow_mode)
+        {
+          spacing = 100;
+        }
+      else
+        {
+          if (width < NARROW_THRESHOLD)
+            spacing = MIN_SPACING;
+          else if (width >= MAX_WIDTH)
+            spacing = MAX_SPACING;
+          else
+            spacing = MIN_SPACING + ((width - NARROW_THRESHOLD) * (MAX_SPACING - MIN_SPACING)) / (MAX_WIDTH - NARROW_THRESHOLD);
+        }
+
+      gtk_box_set_spacing (GTK_BOX (self->content_box), spacing);
+    }
 
   for (child = gtk_widget_get_first_child (widget);
        child != NULL;
@@ -98,7 +128,6 @@ bz_featured_tile_layout_allocate (GtkLayoutManager *layout_manager,
         gtk_widget_allocate (child, width, height, -1, NULL);
     }
 
-  narrow_mode = (width < 1250);
   if (self->narrow_mode != narrow_mode)
     {
       self->narrow_mode = narrow_mode;
@@ -126,6 +155,7 @@ bz_featured_tile_layout_class_init (BzFeaturedTileLayoutClass *klass)
 static void
 bz_featured_tile_layout_init (BzFeaturedTileLayout *self)
 {
+  self->last_width = -1;
 }
 
 struct _BzFeaturedTile
@@ -144,6 +174,7 @@ struct _BzFeaturedTile
   GtkWidget *title;
   GtkWidget *description;
   GtkWidget *screenshot;
+  GtkWidget *content_box;
 
   GdkPaintable *first_screenshot;
   gboolean      has_screenshot;
@@ -429,6 +460,7 @@ bz_featured_tile_class_init (BzFeaturedTileClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzFeaturedTile, title);
   gtk_widget_class_bind_template_child (widget_class, BzFeaturedTile, description);
   gtk_widget_class_bind_template_child (widget_class, BzFeaturedTile, screenshot);
+  gtk_widget_class_bind_template_child (widget_class, BzFeaturedTile, content_box);
 
   gtk_widget_class_set_css_name (widget_class, "featured-tile");
   gtk_widget_class_set_layout_manager_type (widget_class, BZ_TYPE_FEATURED_TILE_LAYOUT);
@@ -437,7 +469,8 @@ bz_featured_tile_class_init (BzFeaturedTileClass *klass)
 static void
 bz_featured_tile_init (BzFeaturedTile *self)
 {
-  GtkLayoutManager *layout_manager;
+  GtkLayoutManager     *layout_manager;
+  BzFeaturedTileLayout *tile_layout;
 
   gtk_widget_init_template (GTK_WIDGET (self));
 
@@ -446,6 +479,10 @@ bz_featured_tile_init (BzFeaturedTile *self)
 
   layout_manager = gtk_widget_get_layout_manager (GTK_WIDGET (self));
   g_warn_if_fail (layout_manager != NULL);
+
+  tile_layout              = BZ_FEATURED_TILE_LAYOUT (layout_manager);
+  tile_layout->content_box = self->content_box;
+
   g_signal_connect_object (layout_manager, "narrow-mode-changed",
                            G_CALLBACK (bz_featured_tile_layout_narrow_mode_changed_cb), self, 0);
 }

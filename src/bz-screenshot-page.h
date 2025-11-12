@@ -1,4 +1,4 @@
-/* bz-country-data-point.h
+/* bz-screenshot-page.h
  *
  * Copyright 2025 Alexander Vanhee
  *
@@ -20,29 +20,16 @@
 
 #pragma once
 
-#include <gtk/gtk.h>
+#include "bz-async-texture.h"
+#include <adwaita.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_COUNTRY_DATA_POINT (bz_country_data_point_get_type ())
+#define BZ_TYPE_SCREENSHOT_PAGE (bz_screenshot_page_get_type ())
 
-G_DECLARE_FINAL_TYPE (BzCountryDataPoint, bz_country_data_point, BZ, COUNTRY_DATA_POINT, GObject)
+G_DECLARE_FINAL_TYPE (BzScreenshotPage, bz_screenshot_page, BZ, SCREENSHOT_PAGE, AdwNavigationPage)
 
-BzCountryDataPoint *
-bz_country_data_point_new (void);
-
-const char *
-bz_country_data_point_get_country_code (BzCountryDataPoint *self);
-
-guint
-bz_country_data_point_get_downloads (BzCountryDataPoint *self);
-
-void
-bz_country_data_point_set_country_code (BzCountryDataPoint *self,
-                                        const char         *country_code);
-
-void
-bz_country_data_point_set_downloads (BzCountryDataPoint *self,
-                                     guint               downloads);
+AdwNavigationPage *bz_screenshot_page_new (GListModel *screenshots,
+                                           guint       initial_index);
 
 G_END_DECLS

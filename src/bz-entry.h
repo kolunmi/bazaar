@@ -112,6 +112,9 @@ bz_entry_get_title (BzEntry *self);
 const char *
 bz_entry_get_developer (BzEntry *self);
 
+GList *
+bz_entry_get_developer_apps (BzEntry *self);
+
 const char *
 bz_entry_get_eol (BzEntry *self);
 

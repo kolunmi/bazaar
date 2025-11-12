@@ -1,0 +1,8 @@
+prefix=bz
+name=country_data_point
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+property=country_code char G_TYPE_STRING string
+property=downloads guint G_TYPE_UINT uint

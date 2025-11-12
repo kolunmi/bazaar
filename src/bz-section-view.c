@@ -141,10 +141,12 @@ is_null (gpointer object,
   return value == NULL;
 }
 
-static GdkPaintable *
+static BzAsyncTexture *
 get_banner (BzSectionView *self,
             GdkPaintable  *value)
 {
+  g_autofree char *uri               = NULL;
+  g_autoptr (GFile) source           = NULL;
   g_autoptr (GdkPaintable) paintable = NULL;
 
   if (self->section == NULL)
@@ -155,9 +157,11 @@ get_banner (BzSectionView *self,
       adw_style_manager_get_dark (self->style_manager)
           ? "dark-banner"
           : "light-banner",
-      &paintable,
+      &uri,
       NULL);
-  return g_steal_pointer (&paintable);
+
+  source = g_file_new_for_uri (uri);
+  return bz_async_texture_new_lazy (source, NULL);
 }
 
 static void
@@ -236,7 +240,7 @@ dark_changed (BzSectionView   *self,
   refresh_dark_light_classes (self, mgr);
 
   if (self->section != NULL)
-    bz_content_section_notify_dark_light (self->section);
+    g_object_notify (G_OBJECT (self->section), "banner");
 }
 
 static void

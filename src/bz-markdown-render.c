@@ -389,7 +389,7 @@ enter_span (MD_SPANTYPE type,
     case MD_SPAN_LATEXMATH_DISPLAY:
     case MD_SPAN_WIKILINK:
     default:
-      g_critical ("Unsupported markdown event (Did you use latex/wikilinks?)");
+      g_warning ("Unsupported markdown event (Did you use latex/wikilinks?)");
       return 1;
       break;
     }
@@ -433,7 +433,7 @@ leave_span (MD_SPANTYPE type,
     case MD_SPAN_LATEXMATH_DISPLAY:
     case MD_SPAN_WIKILINK:
     default:
-      g_critical ("Unsupported markdown event (Did you use latex/wikilinks?)");
+      g_warning ("Unsupported markdown event (Did you use latex/wikilinks?)");
       return 1;
       break;
     }
@@ -659,7 +659,7 @@ terminate_block (MD_BLOCKTYPE type,
     case MD_BLOCK_TH:
     case MD_BLOCK_TD:
     default:
-      g_critical ("Unsupported markdown event (Did you use html/tables?)");
+      g_warning ("Unsupported markdown event (Did you use html/tables?)");
       return 1;
     }
 

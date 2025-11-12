@@ -203,6 +203,11 @@ msgctxt "About Dialog Developer Credit"
 msgid "Alexander Vanhee"
 msgstr "Alexander Vanhee"
 
+#. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
+#: src/bz-application.c:481
+msgid "translator-credits"
+msgstr "Benedek Dévényi <rdbende@proton.me>, 2025"
+
 #: src/bz-application.c:471
 msgctxt "About Dialog Translator Credit"
 msgid "Ahmed Najmawi"

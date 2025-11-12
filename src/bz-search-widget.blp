@@ -141,37 +141,47 @@ template $BzSearchWidget: Adw.Bin {
         StackPage {
           name: "empty";
 
-          child: ScrolledWindow {
-            hscrollbar-policy: never;
+          child: Box {
+            Adw.StatusPage {
+              visible: bind $is_empty(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories) as <bool>;
+              hexpand: true;
+              icon-name: "system-search-symbolic";
+              title: _("Categories Unavailable");
+              description: _("Search for apps using the search bar above.");
+            }
 
-            child: Adw.Clamp {
-              maximum-size: 1000;
-              tightening-threshold: 900;
-              valign: start;
+            ScrolledWindow {
+              hscrollbar-policy: never;
+              visible: bind $invert_boolean($is_empty(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories) as <bool>) as <bool>;
 
-              child: Box empty_box {
-                margin-start: 7;
-                margin-end: 7;
+              child: Adw.Clamp {
+                maximum-size: 1000;
+                tightening-threshold: 900;
+                valign: start;
 
-                margin-top: 20;
+                child: Box empty_box {
+                  margin-start: 7;
+                  margin-end: 7;
+                  margin-top: 20;
 
-                $BzDynamicListView {
-                  styles [
-                    "flathub-page-section",
-                  ]
+                  $BzDynamicListView {
+                    styles [
+                      "flathub-page-section",
+                    ]
 
-                  hexpand: true;
-                  max-children-per-line: 3;
-                  scroll: false;
-                  noscroll-kind: flow-box;
-                  child-type: "BzCategoryTile";
-                  child-prop: "category";
-                  model: bind template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories;
-                  bind-widget => $bind_category_tile_cb(template);
-                  unbind-widget => $unbind_category_tile_cb(template);
-                }
+                    hexpand: true;
+                    max-children-per-line: 4;
+                    scroll: false;
+                    noscroll-kind: flow-box;
+                    child-type: "BzCategoryTile";
+                    child-prop: "category";
+                    model: bind template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories;
+                    bind-widget => $bind_category_tile_cb(template);
+                    unbind-widget => $unbind_category_tile_cb(template);
+                  }
+                };
               };
-            };
+            }
           };
         }
 

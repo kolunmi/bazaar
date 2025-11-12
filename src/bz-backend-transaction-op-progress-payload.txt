@@ -1,0 +1,15 @@
+prefix=bz
+name=backend_transaction_op_progress_payload
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+include="bz-backend-transaction-op-payload.h"
+
+property=op BzBackendTransactionOpPayload BZ_TYPE_BACKEND_TRANSACTION_OP_PAYLOAD object
+property=status char G_TYPE_STRING string
+property=is_estimating gboolean G_TYPE_BOOLEAN boolean
+property=progress double G_TYPE_DOUBLE double
+property=total_progress double G_TYPE_DOUBLE double
+property=bytes_transferred guint64 G_TYPE_UINT64 uint64
+property=start_time guint64 G_TYPE_UINT64 uint64

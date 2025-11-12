@@ -31,8 +31,8 @@ GtkWidget *
 bz_installed_page_new (void);
 
 void
-bz_installed_page_set_model (BzInstalledPage    *self,
-                            GListModel *model);
+bz_installed_page_set_model (BzInstalledPage *self,
+                             GListModel      *model);
 
 GListModel *
 bz_installed_page_get_model (BzInstalledPage *self);
