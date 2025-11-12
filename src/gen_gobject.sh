@@ -15,9 +15,11 @@ die() {
     echo "    [parent-prefix] prefix of parent class,        EX: g" 1>&2
     echo "    [parent-name]   name of parent class,          EX: object" 1>&2
     echo "    [author]        author name,                   EX: <your name>" 1>&2
-    echo "    [include]       #include for the header file, (can have multiple)" 1>&2
+    echo "    [include]       #include for the header file (can have multiple)" 1>&2
     echo "                       EX: <gtk/gtk.h>" 1>&2
     echo "                       EX: \"my-other-class.h\"" 1>&2
+    echo "    [enum]          declare an enum type (can have multiple)" 1>&2
+    echo "                       EX: my fruit_type apple orange pear" 1>&2
     echo "    [property]      property spec (can have multiple),     EX: (see below)" 1>&2
     echo "" 1>&2
     echo "      The properties are parsed with the form:" 1>&2
@@ -64,6 +66,7 @@ unset PAR_PREF
 unset PAR_NAME
 unset AUTHOR
 unset INCLUDES
+unset ENUMS
 unset PROPS
 
 while IFS= read -r line; do
@@ -85,6 +88,14 @@ while IFS= read -r line; do
 #include ${VAL}"
             else
                 INCLUDES="#include ${VAL}"
+            fi
+            ;;
+        enum)
+            if [ -n "$ENUMS" ]; then
+                ENUMS="${ENUMS}
+${VAL}"
+            else
+                ENUMS="$VAL"
             fi
             ;;
         property)
@@ -152,9 +163,67 @@ PAR_HYPHEN="$(to_hyphened "${PAR_PREF}")-${PAR_HYPHEN_NAME}"
 
 YEAR="$(date +'%Y')"
 
+print_enums () {
+    HEADER="$1"
+
+    [ -z "$ENUMS" ] && return
+
+    if [ "$HEADER" == header ]; then
+        while IFS= read -r line; do
+            set -- $line
+
+            LOC_PREF="$1"
+            LOC_NAME="$2"
+
+            LOC_SNAKE="${LOC_PREF}_${LOC_NAME}"
+            LOC_SNAKE_UPPER="$(to_upper "$LOC_SNAKE")"
+            LOC_TYPE="$(to_upper "$LOC_PREF")_TYPE_$(to_upper "$LOC_NAME")"
+            LOC_PASCAL="$(to_pascal "${LOC_SNAKE}")"
+            shift 2
+
+            printf 'typedef enum\n{\n'
+            for enum in "$@"; do
+                LOC_ENUM_SYMBOL="${LOC_SNAKE_UPPER}_$(to_upper "$enum")"
+                printf '  %s,\n' "$LOC_ENUM_SYMBOL"
+            done
+            printf '} %s;\n' "$LOC_PASCAL"
+
+            printf 'GType %s_get_type (void);\n' "$LOC_SNAKE"
+            printf '#define %s (%s_get_type ())\n\n' "$LOC_TYPE" "$LOC_SNAKE"
+
+        done <<EOF
+$ENUMS
+EOF
+    else
+        while IFS= read -r line; do
+            set -- $line
+
+            LOC_PREF="$1"
+            LOC_NAME="$2"
+
+            LOC_SNAKE="${LOC_PREF}_${LOC_NAME}"
+            LOC_SNAKE_UPPER="$(to_upper "$LOC_SNAKE")"
+            LOC_TYPE="$(to_upper "$LOC_PREF")_TYPE_$(to_upper "$LOC_NAME")"
+            LOC_PASCAL="$(to_pascal "${LOC_SNAKE}")"
+            shift 2
+
+            printf 'G_DEFINE_ENUM_TYPE (\n'
+            printf '    %s,\n' "$LOC_PASCAL"
+            printf '    %s' "$LOC_SNAKE"
+            for enum in "$@"; do
+                LOC_ENUM_SYMBOL="${LOC_SNAKE_UPPER}_$(to_upper "$enum")"
+                printf ',\n    G_DEFINE_ENUM_VALUE (%s, "%s")' "$LOC_ENUM_SYMBOL" "$enum"
+            done
+            printf ');\n\n'
+
+        done <<EOF
+$ENUMS
+EOF
+    fi
+}
 
 print_struct () {
-    while read -r line; do
+    while IFS= read -r line; do
         set -- $line
         
         LOC_NAME="$1"
@@ -173,9 +242,9 @@ $PROPS
 EOF
 }
 
-print_enums () {
+print_prop_enums () {
     printf '  PROP_0,\n\n'
-    while read -r line; do
+    while IFS= read -r line; do
         set -- $line
         
         LOC_NAME="$1"
@@ -191,7 +260,7 @@ EOF
 }
 
 print_dispose () {
-    while read -r line; do
+    while IFS= read -r line; do
         set -- $line
         
         LOC_NAME="$1"
@@ -224,7 +293,7 @@ EOF
 
 
 print_get_property () {
-    while read -r line; do
+    while IFS= read -r line; do
         set -- $line
         
         LOC_NAME="$1"
@@ -241,7 +310,7 @@ EOF
 }
 
 print_set_property () {
-    while read -r line; do
+    while IFS= read -r line; do
         set -- $line
         
         LOC_NAME="$1"
@@ -258,7 +327,7 @@ EOF
 }
 
 print_init_properties () {
-    while read -r line; do
+    while IFS= read -r line; do
         set -- $line
         
         LOC_NAME="$1"
@@ -286,6 +355,9 @@ print_init_properties () {
             string)
                 printf ' NULL,\n'
                 ;;
+            enum)
+                printf '\n          %s, 0,\n' "$LOC_GTYPE"
+                ;;
             *)
                 printf '\n          %s,\n' "$LOC_GTYPE"
                 ;;
@@ -312,7 +384,7 @@ print_functions () {
 print_get_property_methods () {
     HEADER="$1"
     
-    while read -r line; do
+    while IFS= read -r line; do
         set -- $line
         
         LOC_NAME="$1"
@@ -335,7 +407,7 @@ print_get_property_methods () {
         else
             printf '{\n  g_return_val_if_fail (%s_IS_%s (self), ' "$MACRO_PREF" "$MACRO_NAME"
             case "$LOC_PTYPE" in
-                uchar|uint|ulong|uint64|unichar|char|int|long|int64)
+                uchar|uint|ulong|uint64|unichar|char|int|long|int64|enum)
                     printf '0'
                     ;;
                 float|double)
@@ -362,7 +434,7 @@ EOF
 print_set_property_methods () {
     HEADER="$1"
     
-    while read -r line; do
+    while IFS= read -r line; do
         set -- $line
         
         LOC_NAME="$1"
@@ -463,6 +535,8 @@ $INCLUDES
 
 G_BEGIN_DECLS
 
+$(print_enums header)
+
 #define $TYPE (${SNAKE}_get_type ())
 G_DECLARE_FINAL_TYPE ($PASCAL, $SNAKE, $MACRO_PREF, $MACRO_NAME, $PAR_PASCAL)
 
@@ -502,6 +576,8 @@ EOF
 
 #include "$H_FILE"
 
+$(print_enums)
+
 struct _${PASCAL}
 {
   $PAR_PASCAL parent_instance;
@@ -513,7 +589,7 @@ G_DEFINE_FINAL_TYPE ($PASCAL, $SNAKE, $PAR_TYPE);
 
 enum
 {
-$(print_enums)
+$(print_prop_enums)
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
 
