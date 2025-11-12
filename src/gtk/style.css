@@ -139,6 +139,14 @@
   }
 }
 
+global-progress {
+  color: var(--accent-bg-color);
+}
+
+global-progress image {
+  color: var(--window-fg-color);
+}
+
 @media (prefers-color-scheme: light) {
   .flathub {
     --accent-color: #251f32;
