@@ -703,9 +703,11 @@ hide_eol_changed (BzApplication *self,
                   const char    *key,
                   GSettings     *settings)
 {
+  g_object_freeze_notify (G_OBJECT (self->state));
   bz_state_info_set_hide_eol (self->state, g_settings_get_boolean (self->settings, "hide-eol"));
   gtk_filter_changed (GTK_FILTER (self->group_filter), GTK_FILTER_CHANGE_DIFFERENT);
   gtk_filter_changed (GTK_FILTER (self->application_filter), GTK_FILTER_CHANGE_DIFFERENT);
+  g_object_thaw_notify (G_OBJECT (self->state));
 }
 
 static void
