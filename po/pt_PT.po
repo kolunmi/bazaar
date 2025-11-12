@@ -44,7 +44,7 @@ msgstr "Tentar detectar e mostrar a contagem de estrelas para projetos na vista 
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:11
 msgid "Only Show Free Software"
-msgstr "Apenas mostrar software livre"
+msgstr "Mostrar apenas software livre"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:12
 msgid "Hide proprietary software when searching"
@@ -52,7 +52,7 @@ msgstr "Ocultar software proprietário ao pesquisar"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:16
 msgid "Show Only Flathub Content"
-msgstr "Apenas mostrar conteúdo do Flathub"
+msgstr "Mostrar apenas conteúdo do Flathub"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:17
 msgid "Filter search results to only show applications available on Flathub"
