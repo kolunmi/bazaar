@@ -452,9 +452,10 @@ template $BzFullView: Adw.Bin {
 
                           $BzContextTile {
                             can-target: bind $invert_boolean($is_null(template.debounced-ui-entry) as <bool>) as <bool>;
+                            sensitive: bind  $invert_boolean($is_null(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <bool>) as <bool>;
                             clicked => $dl_stats_cb(template);
                             label: _("Downloads /mo");
-                            has-tooltip: true;
+                            has-tooltip: bind  $invert_boolean($is_null(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <bool>) as <bool>;
                             tooltip-text: bind $format_recent_downloads_tooltip(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <string>;
                             lozenge-style: "grey";
 
