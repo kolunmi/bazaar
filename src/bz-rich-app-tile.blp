@@ -1,13 +1,12 @@
 using Gtk 4.0;
-using Adw 1;
 
-template $BzRichAppTile: Adw.Bin {
+template $BzRichAppTile: $BzListTile {
+  overflow: hidden;
+
   child: Box {
     orientation: vertical;
-    overflow: hidden;
 
     styles [
-      "card",
       "rich-tile-card",
     ]
 
@@ -56,7 +55,6 @@ template $BzRichAppTile: Adw.Bin {
       margin-bottom: 12;
       orientation: horizontal;
       spacing: 15;
-      can-focus: false;
 
       Image {
         pixel-size: 64;
