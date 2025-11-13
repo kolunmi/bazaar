@@ -139,6 +139,14 @@
   }
 }
 
+global-progress {
+  color: var(--accent-bg-color);
+}
+
+global-progress image {
+  color: var(--window-fg-color);
+}
+
 @media (prefers-color-scheme: light) {
   .flathub {
     --accent-color: #251f32;
@@ -193,6 +201,11 @@ button.context-tile:active .lozenge {
 
 .colored {
     background-color: var(--accent-bg-color);
+    color: var(--accent-color);
+}
+
+.card.eol {
+    background-color: alpha(var(--accent-bg-color),0.15);
     color: var(--accent-color);
 }
 

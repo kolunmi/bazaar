@@ -61,9 +61,17 @@ template $BzBrowseWidget: Adw.Bin {
                   selectable: false;
                   focusable: false;
 
-                  child: $BzSectionView {
-                    section: bind template.item;
-                    group-activated => $group_activated_cb(template);
+                  child: $BzDynamicListView {
+                    hexpand: true;
+                    scroll: false;
+                    noscroll-kind: h-box;
+                    child-type: "BzSectionView";
+                    child-prop: "section";
+
+                    bind-widget => $bind_section_view_cb(template);
+                    unbind-widget => $unbind_section_view_cb(template);
+
+                    model: bind template.item as <$BzCuratedRow>.sections;
                   };
                 }
               };

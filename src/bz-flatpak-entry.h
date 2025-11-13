@@ -38,6 +38,9 @@ const char *
 bz_flatpak_entry_get_flatpak_id (BzFlatpakEntry *self);
 
 const char *
+bz_flatpak_entry_get_flatpak_version (BzFlatpakEntry *self);
+
+const char *
 bz_flatpak_entry_get_application_name (BzFlatpakEntry *self);
 
 const char *

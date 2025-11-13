@@ -9,6 +9,8 @@ include="bz-entry-group.h"
 
 enum=bz content_section_type category article
 
+property=expand_in_row gboolean G_TYPE_BOOLEAN boolean
+
 property=section_type BzContentSectionType BZ_TYPE_CONTENT_SECTION_TYPE enum
 property=error char G_TYPE_STRING string
 

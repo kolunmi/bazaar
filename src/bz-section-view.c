@@ -145,20 +145,23 @@ static BzAsyncTexture *
 get_banner (BzSectionView *self,
             GdkPaintable  *value)
 {
-  g_autofree char *uri               = NULL;
+  gboolean    is_dark                = FALSE;
+  const char *uri                    = NULL;
   g_autoptr (GFile) source           = NULL;
   g_autoptr (GdkPaintable) paintable = NULL;
 
   if (self->section == NULL)
     return NULL;
 
-  g_object_get (
-      self->section,
-      adw_style_manager_get_dark (self->style_manager)
-          ? "dark-banner"
-          : "light-banner",
-      &uri,
-      NULL);
+  is_dark = adw_style_manager_get_dark (self->style_manager);
+  if (is_dark)
+    uri = bz_content_section_get_dark_banner (self->section);
+  else
+    uri = bz_content_section_get_light_banner (self->section);
+  if (uri == NULL)
+    uri = bz_content_section_get_banner (self->section);
+  if (uri == NULL)
+    return NULL;
 
   source = g_file_new_for_uri (uri);
   return bz_async_texture_new_lazy (source, NULL);

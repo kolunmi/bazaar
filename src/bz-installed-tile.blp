@@ -51,6 +51,15 @@ template $BzInstalledTile: Box {
       label: bind $format_size(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.size) as <string>;
       styles ["dimmed", "caption", "installed-size"]
     }
+
+    Label {
+      xalign: 0.0;
+      ellipsize: end;
+      single-line-mode: true;
+      visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.eol) as <bool>) as <bool>;
+      label: _("Stopped Receiving Updates");
+      styles ["warning", "caption"]
+    }
   }
 
   Button support_button {

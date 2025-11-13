@@ -133,7 +133,20 @@ template $BzFullView: Adw.Bin {
                           halign: center;
                           pixel-size: 128;
                           paintable: bind template.entry-group as <$BzEntryGroup>.icon-paintable;
+                          visible: bind $invert_boolean($is_null(template.entry-group as <$BzEntryGroup>.icon-paintable) as <bool>) as <bool>;
 
+                          styles [
+                            "icon-dropshadow",
+                          ]
+                        }
+
+                        Image fallback_icon {
+                          valign: center;
+                          halign: center;
+                          pixel-size: 128;
+
+                          icon-name: "application-x-executable";
+                          visible: bind $is_null(template.entry-group as <$BzEntryGroup>.icon-paintable) as <bool>;
                           styles [
                             "icon-dropshadow",
                           ]
@@ -174,7 +187,7 @@ template $BzFullView: Adw.Bin {
                                   "accent",
                                   "app-developer",
                                 ]
-
+                                visible: bind $invert_boolean($is_null(template.ui-entry as <$BzResult>.object as <$BzEntry>.developer) as <bool>) as <bool>;
                                 xalign: 0.0;
                                 wrap: true;
                                 wrap-mode: word_char;
@@ -452,9 +465,10 @@ template $BzFullView: Adw.Bin {
 
                           $BzContextTile {
                             can-target: bind $invert_boolean($is_null(template.debounced-ui-entry) as <bool>) as <bool>;
+                            sensitive: bind  $invert_boolean($is_null(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <bool>) as <bool>;
                             clicked => $dl_stats_cb(template);
                             label: _("Downloads /mo");
-                            has-tooltip: true;
+                            has-tooltip: bind  $invert_boolean($is_null(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <bool>) as <bool>;
                             tooltip-text: bind $format_recent_downloads_tooltip(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <string>;
                             lozenge-style: "grey";
 
@@ -486,6 +500,35 @@ template $BzFullView: Adw.Bin {
                             };
                           }
                         }
+                      }
+                      Box {
+                        visible: bind $invert_boolean($is_null(template.entry-group as <$BzEntryGroup>.eol) as <bool>) as <bool>;
+                        orientation: vertical;
+                        spacing: 8;
+
+                        styles ["card" , "eol", "warning"]
+                        Label {
+                          label: _("Stopped Receiving Core Updates");
+                          margin-top:8;
+                          margin-start: 8;
+                          margin-end: 8;
+                          wrap: true;
+                          wrap-mode: word_char;
+                          justify: center;
+
+                          styles ["title-4"]
+                        }
+
+                        Label {
+                          label: _("This app uses a runtime that no longer recieves updates or security fixes. It may become unsafe to use.");
+                          margin-bottom: 8;
+                          margin-start: 8;
+                          margin-end: 8;
+                          wrap: true;
+                          wrap-mode: word_char;
+                          justify: center;
+                        }
+
                       }
                     };
                   }

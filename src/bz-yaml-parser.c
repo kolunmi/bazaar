@@ -292,9 +292,13 @@ compile_schema (XbNode *node)
           if (name == NULL)
             ERROR_OUT ("typehint must have a name");
 
-          property = g_object_class_find_property (G_OBJECT_CLASS (gtype_class), name);
-          if (property == NULL)
-            ERROR_OUT ("typehint property '%s' is invalid", name);
+          /* TODO: implement recursive checking */
+          if (strchr (name, '.') == NULL)
+            {
+              property = g_object_class_find_property (G_OBJECT_CLASS (gtype_class), name);
+              if (property == NULL)
+                ERROR_OUT ("typehint property '%s' is invalid", name);
+            }
 
           typehint_name = xb_node_get_attr (child, "type");
           if (typehint_name == NULL)

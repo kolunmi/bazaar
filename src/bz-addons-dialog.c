@@ -18,10 +18,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+#include <glib/gi18n.h>
+
 #include "bz-addons-dialog.h"
 #include "bz-entry.h"
+#include "bz-flatpak-entry.h"
 #include "bz-result.h"
-#include <glib/gi18n.h>
 
 struct _BzAddonsDialog
 {
@@ -127,21 +129,25 @@ update_action_row_from_result (AdwActionRow   *action_row,
                                BzResult       *result,
                                BzAddonsDialog *self)
 {
-  BzEntry         *entry;
-  g_autofree char *title       = NULL;
-  g_autofree char *description = NULL;
-  GtkButton       *action_button;
+  BzEntry         *entry           = NULL;
+  const char      *flatpak_version = NULL;
+  const char      *title           = NULL;
+  const char      *description     = NULL;
+  g_autofree char *title_text      = NULL;
+  GtkButton       *action_button   = NULL;
 
   entry = bz_result_get_object (result);
   if (entry == NULL)
     return;
 
-  g_object_get (entry,
-                "title", &title,
-                "description", &description,
-                NULL);
+  flatpak_version = bz_flatpak_entry_get_flatpak_version (BZ_FLATPAK_ENTRY (entry));
+  title           = bz_entry_get_title (entry);
+  description     = bz_entry_get_description (entry);
 
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (action_row), title);
+  title_text = g_strdup_printf ("<b>%s</b> <small><tt>%s</tt></small>", title, flatpak_version);
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (action_row), title_text);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (action_row), TRUE);
+
   adw_action_row_set_subtitle (action_row, description);
 
   action_button = GTK_BUTTON (gtk_button_new ());

@@ -2141,6 +2141,15 @@ query_flathub_fiber (QueryFlathubData *data)
         JsonObject *per_day          = NULL;
         g_autoptr (GListStore) store = NULL;
 
+        if (!JSON_NODE_HOLDS_OBJECT (node))
+          {
+            g_debug ("No data for property %s for %s from flathub",
+                       props[prop]->name, id);
+            return dex_future_new_for_error (
+                g_error_new (G_IO_ERROR, G_IO_ERROR_INVALID_DATA,
+                             "Unexpected JSON response format"));
+          }
+
         per_day = json_object_get_object_member (
             json_node_get_object (node),
             "installs_per_day");
