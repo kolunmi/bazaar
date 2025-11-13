@@ -444,23 +444,15 @@ template $BzFullView: Adw.Bin {
                           homogeneous: true;
 
                           $BzContextTile {
+                            clicked => $age_rating_cb(template);
                             has-tooltip: true;
-                            tooltip-text: bind $get_age_rating_tooltip(template.ui-entry as <$BzResult>.object as <$BzEntry>.age-rating) as <string>;
-                            can-target: false;
-                            label: bind $get_age_rating_label(template.ui-entry as <$BzResult>.object as <$BzEntry>.age-rating) as <string>;
-                            lozenge-style: bind $get_age_rating_style(template.ui-entry as <$BzResult>.object as <$BzEntry>.age-rating) as <string>;
+                            tooltip-text: bind $get_age_rating_tooltip(template.ui-entry as <$BzResult>.object as <$BzEntry>.content-rating) as <string>;
+                            label: bind $get_age_rating_label(template.ui-entry as <$BzResult>.object as <$BzEntry>.content-rating) as <string>;
+                            lozenge-style: bind $get_age_rating_style(template.ui-entry as <$BzResult>.object as <$BzEntry>.content-rating) as <string>;
 
-                            lozenge-child: Box {
-                              Label {
-                                visible: bind $is_between(0, 17, template.ui-entry as <$BzResult>.object as <$BzEntry>.age-rating as <int>) as <bool>;
-                                label: bind $format_age_rating(template.ui-entry as <$BzResult>.object as <$BzEntry>.age-rating as <int>) as <string>;
-                              }
-
-                              Label {
-                                visible: bind $is_between(18, 100, template.ui-entry as <$BzResult>.object as <$BzEntry>.age-rating as <int>) as <bool>;
-                                label: bind $format_age_rating(template.ui-entry as <$BzResult>.object as <$BzEntry>.age-rating as <int>) as <string>;
-                              }
-                            };
+                            lozenge-child: Label {
+                                label: bind $format_age_rating(template.ui-entry as <$BzResult>.object as <$BzEntry>.content-rating) as <string>;
+                              };
                           }
 
                           $BzContextTile {

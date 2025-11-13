@@ -177,6 +177,7 @@ global-progress image {
 }
 
 .circular-lozenge.large {
+	font-size: 24px;
 	padding: 15px 18px;
 	min-width: 24px;
 	min-height: 30px;

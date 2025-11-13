@@ -1,0 +1,74 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzAgeRatingDialog: Adw.Dialog {
+  content-height: 550;
+  content-width: 640;
+  title: _("Age Rating");
+
+  Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {
+      show-title: false;
+    }
+
+    content: ScrolledWindow {
+      hscrollbar-policy: never;
+
+      Adw.Clamp {
+        maximum-size: 600;
+        tightening-threshold: 400;
+
+        Box {
+          orientation: vertical;
+          spacing: 24;
+          margin-start: 24;
+          margin-end: 24;
+          margin-top: 24;
+          margin-bottom: 24;
+
+          Box {
+            orientation: vertical;
+            spacing: 12;
+
+            Box {
+              orientation: vertical;
+              spacing: 12;
+              halign: center;
+
+              Label lozenge {
+                label: _("?");
+                halign: center;
+
+                styles [
+                  "circular-lozenge",
+                  "large",
+                ]
+              }
+
+              Label title_label {
+                label: _("Age Rating");
+                justify: center;
+                wrap: true;
+                wrap-mode: word_char;
+                xalign: 0.5;
+
+                styles [
+                  "title-2",
+                ]
+              }
+            }
+          }
+
+          ListBox list {
+            selection-mode: none;
+
+            styles [
+              "boxed-list",
+            ]
+          }
+        }
+      }
+    };
+  }
+}

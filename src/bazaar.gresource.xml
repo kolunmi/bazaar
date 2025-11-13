@@ -11,6 +11,7 @@
     <file>countries.json</file>
 
     <file preprocess="xml-stripblanks">bz-addons-dialog.ui</file>
+    <file preprocess="xml-stripblanks">bz-age-rating-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-app-size-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-app-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-apps-page.ui</file>
@@ -107,6 +108,32 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/view-more-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/zoom-minus-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/zoom-plus-symbolic.svg</file>
+
+    <file alias="icons/scalable/actions/advertising-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/advertising-symbolic.svg</file>
+    <file alias="icons/scalable/actions/advertising-none-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/advertising-none-symbolic.svg</file>
+    <file alias="icons/scalable/actions/alcohol-use-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/alcohol-use-symbolic.svg</file>
+    <file alias="icons/scalable/actions/alcohol-use-none-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/alcohol-use-none-symbolic.svg</file>
+    <file alias="icons/scalable/actions/audio-chat-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/audio-chat-symbolic.svg</file>
+    <file alias="icons/scalable/actions/audio-chat-none-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/audio-chat-none-symbolic.svg</file>
+    <file alias="icons/scalable/actions/contacts-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/contacts-symbolic.svg</file>
+    <file alias="icons/scalable/actions/drug-use-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/drug-use-symbolic.svg</file>
+    <file alias="icons/scalable/actions/drug-use-none-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/drug-use-none-symbolic.svg</file>
+    <file alias="icons/scalable/actions/gambling-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/gambling-symbolic.svg</file>
+    <file alias="icons/scalable/actions/gambling-none-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/gambling-none-symbolic.svg</file>
+    <file alias="icons/scalable/actions/human-remains-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/human-remains-symbolic.svg</file>
+    <file alias="icons/scalable/actions/messaging-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/messaging-symbolic.svg</file>
+    <file alias="icons/scalable/actions/messaging-none-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/messaging-none-symbolic.svg</file>
+    <file alias="icons/scalable/actions/money-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/money-symbolic.svg</file>
+    <file alias="icons/scalable/actions/money-none-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/money-none-symbolic.svg</file>
+    <file alias="icons/scalable/actions/nudity-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/nudity-symbolic.svg</file>
+    <file alias="icons/scalable/actions/nudity-none-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/nudity-none-symbolic.svg</file>
+    <file alias="icons/scalable/actions/smoking-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/smoking-symbolic.svg</file>
+    <file alias="icons/scalable/actions/smoking-none-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/smoking-none-symbolic.svg</file>
+    <file alias="icons/scalable/actions/social-info-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/social-info-symbolic.svg</file>
+    <file alias="icons/scalable/actions/strong-language-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/strong-language-symbolic.svg</file>
+    <file alias="icons/scalable/actions/strong-language-none-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/strong-language-none-symbolic.svg</file>
+    <file alias="icons/scalable/actions/violence-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/violence-symbolic.svg</file>
+    <file alias="icons/scalable/actions/violence-none-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/violence-none-symbolic.svg</file>
 
     <file preprocess="xml-stripblanks">icons/scalable/actions/on-the-go-symbolic.svg</file>
 
