@@ -2,6 +2,8 @@ using Gtk 4.0;
 using Adw 1;
 
 template $BzSectionView: Adw.Bin {
+  hexpand: bind template.section as <$BzContentSection>.expand_in_row;
+
   child: Box {
     orientation: vertical;
     spacing: 5;

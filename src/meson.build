@@ -166,6 +166,7 @@ gobject_specs = files(
   'bz-backend-transaction-op-progress-payload.txt',
   'bz-comet.txt',
   'bz-content-section.txt',
+  'bz-curated-row.txt',
   'bz-country-data-point.txt',
   'bz-country.txt',
   'bz-data-point.txt',

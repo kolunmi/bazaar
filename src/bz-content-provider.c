@@ -28,6 +28,7 @@
 
 #include "bz-content-provider.h"
 #include "bz-content-section.h"
+#include "bz-curated-row.h"
 #include "bz-env.h"
 #include "bz-io.h"
 #include "bz-util.h"
@@ -245,6 +246,7 @@ bz_content_provider_class_init (BzContentProviderClass *klass)
 static void
 bz_content_provider_init (BzContentProvider *self)
 {
+  g_type_ensure (BZ_TYPE_CURATED_ROW);
   g_type_ensure (BZ_TYPE_CONTENT_SECTION);
   self->yaml_parser = bz_yaml_parser_new_for_resource_schema (
       "/io/github/kolunmi/Bazaar/bz-content-provider-config-schema.xml");
@@ -267,7 +269,7 @@ bz_content_provider_init (BzContentProvider *self)
 static GType
 list_model_get_item_type (GListModel *list)
 {
-  return BZ_TYPE_CONTENT_SECTION;
+  return BZ_TYPE_CURATED_ROW;
 }
 
 static guint
@@ -429,7 +431,7 @@ input_files_changed (BzContentProvider *self,
 
       new_outputs = g_malloc0_n (added, sizeof (*new_outputs));
       for (guint i = 0; i < added; i++)
-        new_outputs[i] = g_list_store_new (BZ_TYPE_CONTENT_SECTION);
+        new_outputs[i] = g_list_store_new (BZ_TYPE_CURATED_ROW);
     }
 
   g_list_store_splice (self->input_mirror, position, removed,
@@ -562,14 +564,14 @@ input_load_fiber (InputLoadData *data)
   GFile        *file                   = data->file;
   BzYamlParser *parser                 = data->parser;
   g_autoptr (GPtrArray) css            = NULL;
-  g_autoptr (GPtrArray) sections       = NULL;
+  g_autoptr (GPtrArray) rows           = NULL;
   g_autoptr (GError) local_error       = NULL;
   g_autoptr (GBytes) bytes             = NULL;
   g_autoptr (GHashTable) parse_results = NULL;
   g_autoptr (GHashTable) dict          = NULL;
 
-  css      = g_ptr_array_new_with_free_func (g_free);
-  sections = g_ptr_array_new_with_free_func (g_object_unref);
+  css  = g_ptr_array_new_with_free_func (g_free);
+  rows = g_ptr_array_new_with_free_func (g_object_unref);
 
   bytes = dex_await_boxed (dex_file_load_contents_bytes (file), &local_error);
   if (bytes == NULL)
@@ -591,22 +593,22 @@ input_load_fiber (InputLoadData *data)
       g_ptr_array_add (css, g_strdup (css_string));
     }
 
-  if (g_hash_table_contains (parse_results, "/sections"))
+  if (g_hash_table_contains (parse_results, "/rows"))
     {
       GPtrArray *list = NULL;
 
-      list = g_value_get_boxed (g_hash_table_lookup (parse_results, "/sections"));
+      list = g_value_get_boxed (g_hash_table_lookup (parse_results, "/rows"));
 
       for (guint i = 0; i < list->len; i++)
         {
-          BzContentSection *section = NULL;
+          BzCuratedRow *row = NULL;
 
-          section = g_value_get_object (
+          row = g_value_get_object (
               g_hash_table_lookup (
                   g_value_get_boxed (
                       g_ptr_array_index (list, i)),
                   "/"));
-          g_ptr_array_add (sections, g_object_ref (section));
+          g_ptr_array_add (rows, g_object_ref (row));
         }
     }
 
@@ -617,8 +619,8 @@ input_load_fiber (InputLoadData *data)
       dict, g_strdup ("css"),
       g_steal_pointer (&css));
   g_hash_table_replace (
-      dict, g_strdup ("sections"),
-      g_steal_pointer (&sections));
+      dict, g_strdup ("rows"),
+      g_steal_pointer (&rows));
 
   return dex_future_new_take_boxed (
       G_TYPE_HASH_TABLE,
@@ -644,16 +646,16 @@ input_load_finally (DexFuture         *future,
   value = dex_future_get_value (future, &local_error);
   if (value != NULL)
     {
-      GHashTable *dict     = NULL;
-      GPtrArray  *css      = NULL;
-      GPtrArray  *sections = NULL;
+      GHashTable *dict = NULL;
+      GPtrArray  *css  = NULL;
+      GPtrArray  *rows = NULL;
 
-      dict     = g_value_get_boxed (value);
-      css      = g_hash_table_lookup (dict, "css");
-      sections = g_hash_table_lookup (dict, "sections");
+      dict = g_value_get_boxed (value);
+      css  = g_hash_table_lookup (dict, "css");
+      rows = g_hash_table_lookup (dict, "rows");
 
       g_assert (css != NULL);
-      g_assert (sections != NULL);
+      g_assert (rows != NULL);
 
       if (css->pdata != NULL && css->len > 0)
         {
@@ -670,35 +672,47 @@ input_load_finally (DexFuture         *future,
               GTK_STYLE_PROVIDER_PRIORITY_USER);
         }
 
-      if (sections->pdata != NULL && sections->len > 0)
+      if (rows->pdata != NULL && rows->len > 0)
         {
-          for (guint i = 0; i < sections->len; i++)
+          for (guint i = 0; i < rows->len; i++)
             {
-              BzContentSection *section = NULL;
+              /* TODO: move this functionality to blueprint */
 
-              section = g_ptr_array_index (sections, i);
+              BzCuratedRow *row        = NULL;
+              GListModel   *sections   = NULL;
+              guint         n_sections = 0;
 
-              bz_content_section_set_banner_height (
-                  section,
-                  CLAMP (bz_content_section_get_banner_height (section), 100, 1000));
+              row        = g_ptr_array_index (rows, i);
+              sections   = bz_curated_row_get_sections (row);
+              n_sections = g_list_model_get_n_items (sections);
 
-              if (self->factory != NULL)
+              for (guint j = 0; j < n_sections; j++)
                 {
-                  g_autoptr (GListModel) appids = NULL;
+                  g_autoptr (BzContentSection) section = NULL;
 
-                  g_object_get (section, "appids", &appids, NULL);
+                  section = g_list_model_get_item (sections, j);
 
-                  if (appids != NULL)
+                  bz_content_section_set_banner_height (
+                      section,
+                      CLAMP (bz_content_section_get_banner_height (section), 100, 1000));
+
+                  if (self->factory != NULL)
                     {
-                      g_autoptr (GListModel) converted = NULL;
+                      GListModel *appids = NULL;
 
-                      converted = bz_application_map_factory_generate (self->factory, appids);
-                      g_object_set (section, "appids", converted, NULL);
+                      appids = bz_content_section_get_appids (section);
+                      if (appids != NULL)
+                        {
+                          g_autoptr (GListModel) converted = NULL;
+
+                          converted = bz_application_map_factory_generate (self->factory, appids);
+                          bz_content_section_set_appids (section, converted);
+                        }
                     }
                 }
             }
 
-          g_list_store_splice (data->output, 0, 0, sections->pdata, sections->len);
+          g_list_store_splice (data->output, 0, 0, rows->pdata, rows->len);
         }
     }
   else
