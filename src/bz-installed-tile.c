@@ -30,7 +30,7 @@
 
 struct _BzInstalledTile
 {
-  GtkBox parent_instance;
+  BzListTile parent_instance;
 
   BzEntryGroup *group;
 
@@ -42,7 +42,7 @@ struct _BzInstalledTile
   GtkButton  *remove_button;
 };
 
-G_DEFINE_FINAL_TYPE (BzInstalledTile, bz_installed_tile, GTK_TYPE_BOX)
+G_DEFINE_FINAL_TYPE (BzInstalledTile, bz_installed_tile, BZ_TYPE_LIST_TILE)
 
 enum
 {
@@ -310,6 +310,7 @@ bz_installed_tile_class_init (BzInstalledTileClass *klass)
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
+  g_type_ensure (BZ_TYPE_LIST_TILE);
   g_type_ensure (BZ_TYPE_ENTRY_GROUP);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-installed-tile.ui");
