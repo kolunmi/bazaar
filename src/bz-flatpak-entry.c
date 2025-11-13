@@ -52,6 +52,7 @@ struct _BzFlatpakEntry
   gboolean user;
   char    *flatpak_name;
   char    *flatpak_id;
+  char    *flatpak_version;
   char    *application_name;
   char    *application_runtime;
   char    *application_command;
@@ -77,6 +78,7 @@ enum
   PROP_USER,
   PROP_FLATPAK_NAME,
   PROP_FLATPAK_ID,
+  PROP_FLATPAK_VERSION,
   PROP_APPLICATION_NAME,
   PROP_APPLICATION_RUNTIME,
   PROP_APPLICATION_COMMAND,
@@ -117,6 +119,9 @@ bz_flatpak_entry_get_property (GObject    *object,
     case PROP_FLATPAK_ID:
       g_value_set_string (value, self->flatpak_id);
       break;
+    case PROP_FLATPAK_VERSION:
+      g_value_set_string (value, self->flatpak_version);
+      break;
     case PROP_APPLICATION_NAME:
       g_value_set_string (value, self->application_name);
       break;
@@ -150,6 +155,7 @@ bz_flatpak_entry_set_property (GObject      *object,
     case PROP_USER:
     case PROP_FLATPAK_NAME:
     case PROP_FLATPAK_ID:
+    case PROP_FLATPAK_VERSION:
     case PROP_APPLICATION_NAME:
     case PROP_APPLICATION_RUNTIME:
     case PROP_APPLICATION_COMMAND:
@@ -185,6 +191,12 @@ bz_flatpak_entry_class_init (BzFlatpakEntryClass *klass)
   props[PROP_FLATPAK_ID] =
       g_param_spec_string (
           "flatpak-id",
+          NULL, NULL, NULL,
+          G_PARAM_READABLE);
+
+  props[PROP_FLATPAK_VERSION] =
+      g_param_spec_string (
+          "flatpak-version",
           NULL, NULL, NULL,
           G_PARAM_READABLE);
 
@@ -237,6 +249,8 @@ bz_flatpak_entry_real_serialize (BzSerializable  *serializable,
     g_variant_builder_add (builder, "{sv}", "flatpak-name", g_variant_new_string (self->flatpak_name));
   if (self->flatpak_id != NULL)
     g_variant_builder_add (builder, "{sv}", "flatpak-id", g_variant_new_string (self->flatpak_id));
+  if (self->flatpak_version != NULL)
+    g_variant_builder_add (builder, "{sv}", "flatpak-version", g_variant_new_string (self->flatpak_version));
   if (self->application_name != NULL)
     g_variant_builder_add (builder, "{sv}", "application-name", g_variant_new_string (self->application_name));
   if (self->application_runtime != NULL)
@@ -276,6 +290,8 @@ bz_flatpak_entry_real_deserialize (BzSerializable *serializable,
         self->flatpak_name = g_variant_dup_string (value, NULL);
       else if (g_strcmp0 (key, "flatpak-id") == 0)
         self->flatpak_id = g_variant_dup_string (value, NULL);
+      else if (g_strcmp0 (key, "flatpak-version") == 0)
+        self->flatpak_version = g_variant_dup_string (value, NULL);
       else if (g_strcmp0 (key, "application-name") == 0)
         self->application_name = g_variant_dup_string (value, NULL);
       else if (g_strcmp0 (key, "application-runtime") == 0)
@@ -450,8 +466,9 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
   //   }
   module_dir = bz_dup_module_dir ();
 
-  self->flatpak_name = g_strdup (flatpak_ref_get_name (ref));
-  self->flatpak_id   = flatpak_ref_format_ref (ref);
+  self->flatpak_name    = g_strdup (flatpak_ref_get_name (ref));
+  self->flatpak_id      = flatpak_ref_format_ref (ref);
+  self->flatpak_version = g_strdup (flatpak_ref_get_branch (ref));
 
   id                 = flatpak_ref_get_name (ref);
   unique_id          = bz_flatpak_ref_format_unique (ref, user);
@@ -1007,6 +1024,13 @@ bz_flatpak_entry_get_flatpak_id (BzFlatpakEntry *self)
 }
 
 const char *
+bz_flatpak_entry_get_flatpak_version (BzFlatpakEntry *self)
+{
+  g_return_val_if_fail (BZ_IS_FLATPAK_ENTRY (self), NULL);
+  return self->flatpak_version;
+}
+
+const char *
 bz_flatpak_entry_get_application_name (BzFlatpakEntry *self)
 {
   g_return_val_if_fail (BZ_IS_FLATPAK_ENTRY (self), NULL);
@@ -1105,6 +1129,7 @@ clear_entry (BzFlatpakEntry *self)
 {
   g_clear_pointer (&self->flatpak_name, g_free);
   g_clear_pointer (&self->flatpak_id, g_free);
+  g_clear_pointer (&self->flatpak_version, g_free);
   g_clear_pointer (&self->application_name, g_free);
   g_clear_pointer (&self->application_runtime, g_free);
   g_clear_pointer (&self->application_command, g_free);
