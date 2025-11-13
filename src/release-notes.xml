@@ -1,8 +1,6 @@
 <p>This release comes with the following improvements:</p>
 <ul>
-  <li>Add "On the go" section and mobile category</li>
-  <li>Greatly decrease reported memory usage</li>
-  <li>Rework search UI</li>
-  <li>Rework page stack navigation</li>
-  <li>Change screenshot dialog to page</li>
+  <li>Add "hide-eol" preferences option to prevent Bazaar from showing end-of-life applications or applications which depend on end-of-life runtimes</li>
+  <li>Fix global progress bar theme sometimes not syncing with preferences</li>
+  <li>Show version next to addon name in the addons dialog</li>
 </ul>
