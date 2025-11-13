@@ -117,6 +117,7 @@ typedef struct
   GListModel *download_stats;
   GListModel *download_stats_per_country;
   int         recent_downloads;
+  int         total_downloads;
 
   GHashTable *flathub_prop_queries;
   DexFuture  *mini_icon_future;
@@ -166,6 +167,7 @@ enum
   PROP_VERIFIED,
   PROP_DOWNLOAD_STATS,
   PROP_RECENT_DOWNLOADS,
+  PROP_TOTAL_DOWNLOADS,
   PROP_LIGHT_ACCENT_COLOR,
   PROP_DARK_ACCENT_COLOR,
   PROP_IS_MOBILE_FRIENDLY,
@@ -417,6 +419,12 @@ bz_entry_get_property (GObject    *object,
       query_flathub (self, PROP_DOWNLOAD_STATS);
       g_value_set_int (value, priv->recent_downloads);
       break;
+
+    case PROP_TOTAL_DOWNLOADS:
+      query_flathub (self, PROP_TOTAL_DOWNLOADS);
+      g_value_set_int (value, priv->total_downloads);
+      break;
+
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -632,6 +640,9 @@ bz_entry_set_property (GObject      *object,
       break;
     case PROP_RECENT_DOWNLOADS:
       priv->recent_downloads = g_value_get_int (value);
+      break;
+    case PROP_TOTAL_DOWNLOADS:
+      priv->total_downloads = g_value_get_int (value);
       break;
     case PROP_HOLDING:
     default:
@@ -955,6 +966,13 @@ bz_entry_class_init (BzEntryClass *klass)
   props[PROP_RECENT_DOWNLOADS] =
       g_param_spec_int (
           "recent-downloads",
+          NULL, NULL,
+          0, G_MAXINT, 0,
+          G_PARAM_READWRITE);
+
+  props[PROP_TOTAL_DOWNLOADS] =
+      g_param_spec_int (
+          "total-downloads",
           NULL, NULL,
           0, G_MAXINT, 0,
           G_PARAM_READWRITE);
@@ -2109,6 +2127,7 @@ query_flathub_fiber (QueryFlathubData *data)
       break;
     case PROP_DOWNLOAD_STATS:
     case PROP_DOWNLOAD_STATS_PER_COUNTRY:
+    case PROP_TOTAL_DOWNLOADS:
       request = g_strdup_printf ("/stats/%s?all=false&days=175", id);
       break;
     case PROP_DEVELOPER_APPS:
@@ -2144,7 +2163,7 @@ query_flathub_fiber (QueryFlathubData *data)
         if (!JSON_NODE_HOLDS_OBJECT (node))
           {
             g_debug ("No data for property %s for %s from flathub",
-                       props[prop]->name, id);
+                     props[prop]->name, id);
             return dex_future_new_for_error (
                 g_error_new (G_IO_ERROR, G_IO_ERROR_INVALID_DATA,
                              "Unexpected JSON response format"));
@@ -2181,6 +2200,16 @@ query_flathub_fiber (QueryFlathubData *data)
             store);
 
         return dex_future_new_for_object (store);
+      }
+      break;
+    case PROP_TOTAL_DOWNLOADS:
+      {
+        int total_downloads = 0;
+
+        if (json_object_has_member (json_node_get_object (node), "installs_total"))
+          total_downloads = json_object_get_int_member (json_node_get_object (node), "installs_total");
+
+        return dex_future_new_for_int (total_downloads);
       }
       break;
 

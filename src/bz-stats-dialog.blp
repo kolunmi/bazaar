@@ -26,9 +26,25 @@ template $BzStatsDialog: Adw.Dialog {
           title: _("Timeline");
           icon-name: "graph2-symbolic";
 
-          child: $BzDataGraph graph {
-            model: bind template.model;
-            tooltip-prefix: _("Installs:");
+          child: Box {
+            orientation: vertical;
+
+              Label {
+                label: bind $format_total_downloads(template.total-downloads) as <string>;
+                halign: end;
+                hexpand: true;
+                margin-end: 34;
+                margin-bottom: 2;
+
+                styles ["dimmed"]
+              }
+
+            $BzDataGraph graph {
+              model: bind template.model;
+              tooltip-prefix: _("Installs:");
+              vexpand: true;
+              hexpand: true;
+            }
           };
         }
 
