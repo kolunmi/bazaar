@@ -27,7 +27,7 @@
 
 struct _BzRichAppTile
 {
-  AdwBin        parent_instance;
+  BzListTile    parent_instance;
   BzEntryGroup *group;
   GdkPaintable *first_screenshot;
   gboolean      has_screenshot;
@@ -36,7 +36,7 @@ struct _BzRichAppTile
   GtkWidget *picture_box;
 };
 
-G_DEFINE_FINAL_TYPE (BzRichAppTile, bz_rich_app_tile, ADW_TYPE_BIN);
+G_DEFINE_FINAL_TYPE (BzRichAppTile, bz_rich_app_tile, BZ_TYPE_LIST_TILE);
 
 enum
 {
@@ -251,6 +251,7 @@ bz_rich_app_tile_class_init (BzRichAppTileClass *klass)
           NULL,
           G_TYPE_NONE, 0);
 
+  g_type_ensure (BZ_TYPE_LIST_TILE);
   g_type_ensure (BZ_TYPE_ROUNDED_PICTURE);
   g_type_ensure (BZ_TYPE_THEMED_ENTRY_GROUP_RECT);
 
