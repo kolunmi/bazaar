@@ -261,6 +261,8 @@ bz_rich_app_tile_class_init (BzRichAppTileClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, install_button_clicked_cb);
   gtk_widget_class_bind_template_child (widget_class, BzRichAppTile, picture_box);
+
+  gtk_widget_class_set_accessible_role (widget_class, GTK_ACCESSIBLE_ROLE_BUTTON);
 }
 
 static void
