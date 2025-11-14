@@ -3,6 +3,11 @@ using Gtk 4.0;
 template $BzRichAppTile: $BzListTile {
   overflow: hidden;
 
+  accessibility {
+    labelled-by: title;
+    described-by: description;
+  }
+
   child: Box {
     orientation: vertical;
 
@@ -73,7 +78,7 @@ template $BzRichAppTile: $BzListTile {
         orientation: vertical;
         spacing: 5;
 
-        Label {
+        Label title {
           css-name: "app-tile-title";
 
           styles [
@@ -86,7 +91,7 @@ template $BzRichAppTile: $BzListTile {
           max-width-chars: 18;
         }
 
-        Label {
+        Label description {
           visible: bind $is_null(template.group as <$BzEntryGroup>.eol) as <bool>;
           css-name: "app-tile-description";
           xalign: 0.0;
