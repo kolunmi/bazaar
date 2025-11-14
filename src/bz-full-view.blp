@@ -20,7 +20,7 @@ template $BzFullView: Adw.Bin {
           tooltip-text: _("Toggle transaction sidebar");
           active: bind template.show-sidebar bidirectional;
 
-          child: $BzGlobalProgress {
+          child: $BzGlobalProgress download_bar {
             expand-size: 125;
             active: bind template.transaction-manager as <$BzTransactionManager>.active;
             pending: bind template.transaction-manager as <$BzTransactionManager>.pending;
@@ -72,7 +72,9 @@ template $BzFullView: Adw.Bin {
 
             setters {
               context_bar.orientation: vertical;
-              context_bar.spacing: 12;
+              context_bar.spacing: 4;
+              header_box.spacing: 12;
+              download_bar.expand-size: 60;
               formfactor_support_tile_wide.visible: false;
               formfactor_support_tile_narrow.visible: true;
             }
@@ -92,7 +94,8 @@ template $BzFullView: Adw.Bin {
                 bottom_box.margin-end: 10;
                 other_apps_box.margin-start: 2;
                 other_apps_box.margin-end: 2;
-                not_icon.orientation: vertical;
+                wide_install_controls.visible: false;
+                narrow_install_controls.visible: true;
                 app_icon.valign: start;
                 app_icon.pixel-size: 96;
               }
@@ -144,9 +147,9 @@ template $BzFullView: Adw.Bin {
                           valign: center;
                           halign: center;
                           pixel-size: 128;
-
                           icon-name: "application-x-executable";
                           visible: bind $is_null(template.entry-group as <$BzEntryGroup>.icon-paintable) as <bool>;
+
                           styles [
                             "icon-dropshadow",
                           ]
@@ -187,6 +190,7 @@ template $BzFullView: Adw.Bin {
                                   "accent",
                                   "app-developer",
                                 ]
+
                                 visible: bind $invert_boolean($is_null(template.ui-entry as <$BzResult>.object as <$BzEntry>.developer) as <bool>) as <bool>;
                                 xalign: 0.0;
                                 wrap: true;
@@ -272,12 +276,12 @@ template $BzFullView: Adw.Bin {
                             }
                           }
 
-                          Box {
+                          Box wide_install_controls {
                             orientation: horizontal;
                             spacing: 10;
                             valign: center;
 
-                            Button run_button {
+                            Button {
                               styles [
                                 "pill",
                               ]
@@ -303,7 +307,7 @@ template $BzFullView: Adw.Bin {
                               clicked => $install_cb(template);
                             }
 
-                            Button remove_button {
+                            Button {
                               styles [
                                 "destructive-action",
                                 "circular",
@@ -465,10 +469,10 @@ template $BzFullView: Adw.Bin {
 
                           $BzContextTile {
                             can-target: bind $invert_boolean($is_null(template.debounced-ui-entry) as <bool>) as <bool>;
-                            sensitive: bind  $invert_boolean($is_null(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <bool>) as <bool>;
+                            sensitive: bind $invert_boolean($is_null(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <bool>) as <bool>;
                             clicked => $dl_stats_cb(template);
                             label: _("Downloads /mo");
-                            has-tooltip: bind  $invert_boolean($is_null(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <bool>) as <bool>;
+                            has-tooltip: bind $invert_boolean($is_null(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <bool>) as <bool>;
                             tooltip-text: bind $format_recent_downloads_tooltip(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <string>;
                             lozenge-style: "grey";
 
@@ -501,22 +505,100 @@ template $BzFullView: Adw.Bin {
                           }
                         }
                       }
+
+                      Box narrow_install_controls {
+                        orientation: horizontal;
+                        spacing: 8;
+                        margin-start: 4;
+                        margin-end: 4;
+                        valign: center;
+                        visible: false;
+
+                        Box {
+                          homogeneous: true;
+                          spacing: 8;
+                          hexpand: true;
+
+                          Button {
+                            styles [
+                              "suggested-action",
+                              "pill",
+                            ]
+
+                            hexpand: true;
+                            has-tooltip: true;
+                            tooltip-text: _("Download & Install Application");
+                            visible: bind $logical_and($invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable) as <bool>) as <bool>, $is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
+                            sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
+                            label: _("Install");
+                            clicked => $install_cb(template);
+                          }
+
+                          Button {
+                            styles [
+                              "destructive-action",
+                              "circular",
+                            ]
+
+                            hexpand: true;
+                            visible: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
+                            sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
+                            label: _("Remove");
+                            clicked => $remove_cb(template);
+                          }
+
+                          Button {
+                            styles [
+                              "pill",
+                            ]
+
+                            hexpand: true;
+                            has-tooltip: true;
+                            label: _("Open");
+                            visible: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
+                            sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
+                            clicked => $run_cb(template);
+                          }
+                        }
+
+                        Button {
+                          styles [
+                            "circular",
+                          ]
+
+                          width-request: 45;
+                          has-tooltip: true;
+                          icon-name: "download-plus-symbolic";
+                          tooltip-text: _("Install Other Version");
+                          visible: bind $logical_and($invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable) as <bool>) as <bool>, $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>) as <bool>;
+                          sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
+                          clicked => $install_cb(template);
+                        }
+                      }
+
                       Box {
                         visible: bind $invert_boolean($is_null(template.entry-group as <$BzEntryGroup>.eol) as <bool>) as <bool>;
                         orientation: vertical;
                         spacing: 8;
 
-                        styles ["card" , "eol", "warning"]
+                        styles [
+                          "card",
+                          "eol",
+                          "warning",
+                        ]
+
                         Label {
                           label: _("Stopped Receiving Core Updates");
-                          margin-top:8;
+                          margin-top: 8;
                           margin-start: 8;
                           margin-end: 8;
                           wrap: true;
                           wrap-mode: word_char;
                           justify: center;
 
-                          styles ["title-4"]
+                          styles [
+                            "title-4",
+                          ]
                         }
 
                         Label {
@@ -528,7 +610,6 @@ template $BzFullView: Adw.Bin {
                           wrap-mode: word_char;
                           justify: center;
                         }
-
                       }
                     };
                   }
@@ -599,8 +680,8 @@ template $BzFullView: Adw.Bin {
 
                           child: Label {
                             label: bind $get_description_toggle_text(description_toggle.active) as <string>;
-                            margin-start: 10;
-                            margin-end: 10;
+                            margin-start: 16;
+                            margin-end: 16;
                           };
                         }
 
@@ -667,7 +748,7 @@ template $BzFullView: Adw.Bin {
 
                           model: SliceListModel {
                             offset: 0;
-                            size:100;
+                            size: 100;
                             model: bind $get_developer_apps_entries(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer-apps, template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>) as <Gio.ListModel>;
                           };
                         }
