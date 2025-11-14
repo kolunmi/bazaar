@@ -146,13 +146,13 @@ row_activated_fiber (gpointer user_data)
 {
   g_autoptr (GError) local_error = NULL;
   BzInstalledPage *self          = NULL;
-  guint            position      = 0;
+  BzInstalledTile *tile          = NULL;
   GtkWidget       *window        = NULL;
-  g_autoptr (BzEntryGroup) group = NULL;
+  BzEntryGroup    *group         = NULL;
   g_autoptr (BzEntry) entry      = NULL;
 
   self     = ((gpointer *) user_data)[0];
-  position = GPOINTER_TO_UINT (((gpointer *) user_data)[1]);
+  tile     = ((gpointer *) user_data)[1];
   g_free (user_data);
 
   window = gtk_widget_get_ancestor (GTK_WIDGET (self), GTK_TYPE_WINDOW);
@@ -164,7 +164,7 @@ row_activated_fiber (gpointer user_data)
       return NULL;
     }
 
-  group = g_list_model_get_item (self->model, position);
+  group = bz_installed_tile_get_group (tile);
   if (group == NULL)
     {
       g_object_unref (self);
@@ -188,13 +188,18 @@ err:
 }
 
 static void
-row_activated_cb (BzInstalledPage *self,
-                  guint            position,
-                  GtkListView     *list_view)
+tile_activated_cb (BzInstalledTile *tile)
 {
   gpointer *data = g_new (gpointer, 2);
-  data[0]        = g_object_ref (self);
-  data[1]        = GUINT_TO_POINTER (position);
+  BzInstalledPage *self = NULL;
+
+  g_assert (BZ_IS_INSTALLED_TILE (tile));
+
+  self = BZ_INSTALLED_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (tile),
+                                                     BZ_TYPE_INSTALLED_PAGE));
+
+  data[0] = g_object_ref (self);
+  data[1] = g_object_ref (tile);
 
   dex_future_disown (dex_scheduler_spawn (
       dex_scheduler_get_default (),
@@ -297,7 +302,7 @@ bz_installed_page_class_init (BzInstalledPageClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-installed-page.ui");
   gtk_widget_class_bind_template_child (widget_class, BzInstalledPage, stack);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
-  gtk_widget_class_bind_template_callback (widget_class, row_activated_cb);
+  gtk_widget_class_bind_template_callback (widget_class, tile_activated_cb);
 }
 
 static void
