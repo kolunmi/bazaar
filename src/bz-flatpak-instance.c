@@ -1763,9 +1763,25 @@ transaction_new_operation (FlatpakTransaction          *transaction,
                            FlatpakTransactionProgress  *progress,
                            TransactionData             *data)
 {
-  BzFlatpakEntry *entry                               = NULL;
+  FlatpakTransactionOperationType kind                = 0;
+  BzFlatpakEntry                 *entry               = NULL;
   g_autoptr (BzBackendTransactionOpPayload) payload   = NULL;
   g_autoptr (TransactionOperationData) operation_data = NULL;
+
+  kind = flatpak_transaction_operation_get_operation_type (operation);
+  if (kind == FLATPAK_TRANSACTION_OPERATION_INSTALL ||
+      kind == FLATPAK_TRANSACTION_OPERATION_UPDATE ||
+      kind == FLATPAK_TRANSACTION_OPERATION_INSTALL_BUNDLE ||
+      kind == FLATPAK_TRANSACTION_OPERATION_UNINSTALL)
+    {
+      g_mutex_lock (&data->instance->mute_mutex);
+      if (data->instance->user ==
+          flatpak_transaction_get_installation (transaction))
+        data->instance->user_mute++;
+      else
+        data->instance->system_mute++;
+      g_mutex_unlock (&data->instance->mute_mutex);
+    }
 
   if (data->channel == NULL)
     return;
@@ -1811,29 +1827,13 @@ transaction_new_operation (FlatpakTransaction          *transaction,
 }
 
 static void
-transaction_operation_done (FlatpakTransaction          *object,
+transaction_operation_done (FlatpakTransaction          *transaction,
                             FlatpakTransactionOperation *operation,
                             gchar                       *commit,
                             gint                         result,
                             TransactionData             *data)
 {
-  FlatpakTransactionOperationType kind              = FLATPAK_TRANSACTION_OPERATION_LAST_TYPE;
   g_autoptr (BzBackendTransactionOpPayload) payload = NULL;
-
-  kind = flatpak_transaction_operation_get_operation_type (operation);
-  if (kind == FLATPAK_TRANSACTION_OPERATION_INSTALL ||
-      kind == FLATPAK_TRANSACTION_OPERATION_UPDATE ||
-      kind == FLATPAK_TRANSACTION_OPERATION_INSTALL_BUNDLE ||
-      kind == FLATPAK_TRANSACTION_OPERATION_UNINSTALL)
-    {
-      g_mutex_lock (&data->instance->mute_mutex);
-      if (data->instance->user ==
-          flatpak_transaction_get_installation (object))
-        data->instance->user_mute++;
-      else
-        data->instance->system_mute++;
-      g_mutex_unlock (&data->instance->mute_mutex);
-    }
 
   g_mutex_lock (&data->mutex);
   g_hash_table_replace (
