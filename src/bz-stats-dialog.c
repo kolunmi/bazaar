@@ -19,6 +19,7 @@
  */
 
 #include "config.h"
+#include <glib/gi18n.h>
 
 #include "bz-data-graph.h"
 #include "bz-stats-dialog.h"
@@ -30,6 +31,7 @@ struct _BzStatsDialog
 
   GListModel *model;
   GListModel *country_model;
+  int         total_downloads;
 
   /* Template widgets */
   BzDataGraph *graph;
@@ -44,6 +46,7 @@ enum
 
   PROP_MODEL,
   PROP_COUNTRY_MODEL,
+  PROP_TOTAL_DOWNLOADS,
 
   LAST_PROP
 };
@@ -76,6 +79,9 @@ bz_stats_dialog_get_property (GObject    *object,
     case PROP_COUNTRY_MODEL:
       g_value_set_object (value, self->country_model);
       break;
+    case PROP_TOTAL_DOWNLOADS:
+      g_value_set_int (value, self->total_downloads);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -99,9 +105,28 @@ bz_stats_dialog_set_property (GObject      *object,
       g_clear_object (&self->country_model);
       self->country_model = g_value_dup_object (value);
       break;
+    case PROP_TOTAL_DOWNLOADS:
+      self->total_downloads = g_value_get_int (value);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
+}
+
+static char *
+format_total_downloads (gpointer object,
+                        int      value)
+{
+  if (value <= 0)
+    return g_strdup ("---");
+  if (value >= 1000000)
+    /* Translators: M is the suffix for millions */
+    return g_strdup_printf ("%.2fM Total Installs", value / 1000000.0);
+  else if (value >= 1000)
+    /* Translators: K is the suffix for thousands*/
+    return g_strdup_printf ("%.2fK Total Installs", value / 1000.0);
+  else
+    return g_strdup_printf ("%'d Total Installs", value);
 }
 
 static void
@@ -128,12 +153,20 @@ bz_stats_dialog_class_init (BzStatsDialogClass *klass)
           G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE);
 
+  props[PROP_TOTAL_DOWNLOADS] =
+      g_param_spec_int (
+          "total-downloads",
+          NULL, NULL,
+          0, G_MAXINT, 0,
+          G_PARAM_READWRITE);
+
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   g_type_ensure (BZ_TYPE_DATA_GRAPH);
   g_type_ensure (BZ_TYPE_WORLD_MAP);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-stats-dialog.ui");
+  gtk_widget_class_bind_template_callback (widget_class, format_total_downloads);
   gtk_widget_class_bind_template_child (widget_class, BzStatsDialog, graph);
   gtk_widget_class_bind_template_child (widget_class, BzStatsDialog, world_map);
 }
@@ -146,7 +179,8 @@ bz_stats_dialog_init (BzStatsDialog *self)
 
 AdwDialog *
 bz_stats_dialog_new (GListModel *model,
-                     GListModel *country_model)
+                     GListModel *country_model,
+                     int         total_downloads)
 {
   BzStatsDialog *stats_dialog = NULL;
 
@@ -154,6 +188,7 @@ bz_stats_dialog_new (GListModel *model,
       BZ_TYPE_STATS_DIALOG,
       "model", model,
       "country-model", country_model,
+      "total-downloads", total_downloads,
       NULL);
 
   return ADW_DIALOG (stats_dialog);
