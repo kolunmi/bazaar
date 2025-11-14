@@ -57,6 +57,8 @@ struct _BzEntryGroup
   int removable_available;
 
   GWeakRef ui_entry;
+
+  GMutex mutex;
 };
 
 G_DEFINE_FINAL_TYPE (BzEntryGroup, bz_entry_group, G_TYPE_OBJECT)
@@ -122,7 +124,9 @@ bz_entry_group_dispose (GObject *object)
   g_clear_pointer (&self->search_tokens, g_ptr_array_unref);
   g_clear_pointer (&self->remote_repos_string, g_free);
   g_clear_pointer (&self->eol, g_free);
+
   g_weak_ref_clear (&self->ui_entry);
+  g_mutex_clear (&self->mutex);
 
   G_OBJECT_CLASS (bz_entry_group_parent_class)->dispose (object);
 }
@@ -396,6 +400,7 @@ bz_entry_group_init (BzEntryGroup *self)
   self->store          = g_list_store_new (GTK_TYPE_STRING_OBJECT);
   self->max_usefulness = -1;
   g_weak_ref_init (&self->ui_entry, NULL);
+  g_mutex_init (&self->mutex);
 }
 
 BzEntryGroup *
@@ -409,6 +414,13 @@ bz_entry_group_new (BzApplicationMapFactory *factory)
   group->factory = g_object_ref (factory);
 
   return group;
+}
+
+GMutexLocker *
+bz_entry_group_lock (BzEntryGroup *self)
+{
+  g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), NULL);
+  return g_mutex_locker_new (&self->mutex);
 }
 
 GListModel *
@@ -592,6 +604,7 @@ bz_entry_group_add (BzEntryGroup *self,
                     BzEntry      *entry,
                     BzEntry      *runtime)
 {
+  g_autoptr (GMutexLocker) locker              = NULL;
   const char *unique_id                        = NULL;
   g_autoptr (GtkStringObject) unique_id_string = NULL;
   const char *remote_repo                      = NULL;
@@ -600,6 +613,8 @@ bz_entry_group_add (BzEntryGroup *self,
   g_return_if_fail (BZ_IS_ENTRY_GROUP (self));
   g_return_if_fail (BZ_IS_ENTRY (entry));
   g_return_if_fail (runtime == NULL || BZ_IS_ENTRY (runtime));
+
+  locker = g_mutex_locker_new (&self->mutex);
 
   if (self->id == NULL)
     {
@@ -841,8 +856,12 @@ void
 bz_entry_group_connect_living (BzEntryGroup *self,
                                BzEntry      *entry)
 {
+  g_autoptr (GMutexLocker) locker = NULL;
+
   g_return_if_fail (BZ_IS_ENTRY_GROUP (self));
   g_return_if_fail (BZ_IS_ENTRY (entry));
+
+  locker = g_mutex_locker_new (&self->mutex);
 
   g_signal_handlers_disconnect_by_func (entry, installed_changed, self);
   g_signal_handlers_disconnect_by_func (entry, holding_changed, self);
@@ -871,6 +890,10 @@ installed_changed (BzEntryGroup *self,
                    GParamSpec   *pspec,
                    BzEntry      *entry)
 {
+  g_autoptr (GMutexLocker) locker = NULL;
+
+  locker = g_mutex_locker_new (&self->mutex);
+
   if (bz_entry_is_installed (entry))
     {
       self->installable--;
@@ -906,6 +929,10 @@ holding_changed (BzEntryGroup *self,
                  GParamSpec   *pspec,
                  BzEntry      *entry)
 {
+  g_autoptr (GMutexLocker) locker = NULL;
+
+  locker = g_mutex_locker_new (&self->mutex);
+
   if (bz_entry_is_holding (entry))
     {
       if (bz_entry_is_installed (entry))
