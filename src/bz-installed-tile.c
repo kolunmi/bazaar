@@ -327,6 +327,8 @@ bz_installed_tile_class_init (BzInstalledTileClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, support_cb);
   gtk_widget_class_bind_template_callback (widget_class, install_addons_cb);
   gtk_widget_class_bind_template_callback (widget_class, remove_cb);
+  
+  gtk_widget_class_set_accessible_role (widget_class, GTK_ACCESSIBLE_ROLE_BUTTON);
 }
 
 static void

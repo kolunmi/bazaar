@@ -1,6 +1,11 @@
 using Gtk 4.0;
 
 template $BzInstalledTile: $BzListTile {
+  accessibility {
+    labelled-by: title_label;
+    described-by: description_label;
+  }
+
   child: Box {
     orientation: horizontal;
     spacing: 10;
