@@ -16,11 +16,8 @@ src/bz-backend.c
 src/bz-browse-widget.blp
 src/bz-browse-widget.c
 src/bz-comet-overlay.c
-src/bz-comet.c
 src/bz-content-provider.c
-src/bz-content-section.c
 src/bz-data-graph.c
-src/bz-data-point.c
 src/bz-decorated-screenshot.blp
 src/bz-decorated-screenshot.c
 src/bz-detailed-app-tile.blp
@@ -56,6 +53,7 @@ src/bz-installed-page.blp
 src/bz-installed-page.c
 src/bz-io.c
 src/bz-lazy-async-texture-model.c
+src/bz-license-dialog.blp
 src/bz-license-dialog.c
 src/bz-license-dialog.h
 src/bz-preferences-dialog.blp
