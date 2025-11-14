@@ -358,6 +358,26 @@ unbind_category_tile_cb (BzSearchWidget    *self,
 }
 
 static void
+tile_activated_cb (GtkListItem   *list_item,
+                   BzRichAppTile *tile)
+{
+  BzSearchWidget *self   = NULL;
+  BzSearchResult *result = NULL;
+  BzEntryGroup   *group  = NULL;
+
+  g_assert (GTK_IS_LIST_ITEM (list_item));
+  g_assert (BZ_IS_RICH_APP_TILE (tile));
+
+  self = BZ_SEARCH_WIDGET (gtk_widget_get_ancestor (GTK_WIDGET (tile),
+                                                    BZ_TYPE_SEARCH_WIDGET));
+
+  result = gtk_list_item_get_item (list_item);
+  group  = bz_search_result_get_group (result);
+
+  g_signal_emit (self, signals[SIGNAL_SELECT], 0, group, FALSE);
+}
+
+static void
 reset_search_cb (BzSearchWidget *self,
                  GtkButton      *button)
 {
@@ -444,6 +464,7 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, score_to_string);
   gtk_widget_class_bind_template_callback (widget_class, reset_search_cb);
   gtk_widget_class_bind_template_callback (widget_class, no_results_found_subtitle);
+  gtk_widget_class_bind_template_callback (widget_class, tile_activated_cb);
 
   gtk_widget_class_install_action (widget_class, "move", "i", action_move);
 }

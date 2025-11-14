@@ -207,7 +207,6 @@ template $BzSearchWidget: Adw.Bin {
                     "search-grid",
                   ]
 
-                  single-click-activate: true;
                   min-columns: 3;
                   max-columns: 3;
 
@@ -216,6 +215,7 @@ template $BzSearchWidget: Adw.Bin {
                       child: $BzRichAppTile {
                         group: bind template.item as <$BzSearchResult>.group as <$BzEntryGroup>;
                         install-clicked => $tile_install_clicked_cb(template);
+                        activated => $tile_activated_cb(template);
                       };
                     }
                   };
