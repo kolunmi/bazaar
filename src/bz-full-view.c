@@ -24,6 +24,7 @@
 #include <json-glib/json-glib.h>
 
 #include "bz-addons-dialog.h"
+#include "bz-age-rating-dialog.h"
 #include "bz-app-size-dialog.h"
 #include "bz-app-tile.h"
 #include "bz-appstream-description-render.h"
@@ -240,15 +241,6 @@ logical_and (gpointer object,
   return value1 && value2;
 }
 
-static gboolean
-is_between (gpointer object,
-            gint     min_value,
-            gint     max_value,
-            gint     value)
-{
-  return value >= min_value && value <= max_value;
-}
-
 static char *
 bool_to_string (gpointer object,
                 gboolean condition,
@@ -322,44 +314,73 @@ format_size_tooltip (gpointer object, guint64 value)
 }
 
 static char *
-format_age_rating (gpointer object, gint value)
+format_age_rating (gpointer         object,
+                   AsContentRating *content_rating)
 {
-  if (value <= 2)
-    value = 3;
+  guint age;
+
+  if (content_rating == NULL)
+    return g_strdup ("?");
+
+  age = as_content_rating_get_minimum_age (content_rating);
+
+  if (age < 3)
+    age = 3;
 
   /* Translators: Age rating format, e.g. "12+" for ages 12 and up */
-  return g_strdup_printf (_ ("%d+"), value);
+  return g_strdup_printf (_ ("%d+"), age);
 }
 
 static char *
-get_age_rating_label (gpointer object,
-                      int      age_rating)
+get_age_rating_label (gpointer         object,
+                      AsContentRating *content_rating)
 {
-  if (age_rating == 0)
+  guint age;
+
+  if (content_rating == NULL)
+    return g_strdup (_ ("Age Rating"));
+
+  age = as_content_rating_get_minimum_age (content_rating);
+
+  if (age == 0)
     return g_strdup (_ ("All Ages"));
   else
     return g_strdup (_ ("Age Rating"));
 }
 
 static char *
-get_age_rating_tooltip (gpointer object,
-                        gint     value)
+get_age_rating_tooltip (gpointer         object,
+                        AsContentRating *content_rating)
 {
-  if (value == 0)
+  guint age;
+
+  if (content_rating == NULL)
+    return g_strdup (_ ("Age rating information unavailable"));
+
+  age = as_content_rating_get_minimum_age (content_rating);
+
+  if (age == 0)
     return g_strdup (_ ("Suitable for all ages"));
 
-  return g_strdup_printf (_ ("Suitable for ages %d and up"), value);
+  return g_strdup_printf (_ ("Suitable for ages %d and up"), age);
 }
 
 static char *
-get_age_rating_style (gpointer object,
-                      int      age_rating)
+get_age_rating_style (gpointer         object,
+                      AsContentRating *content_rating)
 {
-  if (age_rating >= 18)
+  guint age;
+
+  if (content_rating == NULL)
+    return g_strdup ("grey");
+
+  age = as_content_rating_get_minimum_age (content_rating);
+
+  if (age >= 18)
     return g_strdup ("error");
-  else if (age_rating >= 15)
+  else if (age >= 15)
     return g_strdup ("warning");
-  else if (age_rating >= 12)
+  else if (age >= 12)
     return g_strdup ("dark-blue");
   else
     return g_strdup ("grey");
@@ -605,6 +626,24 @@ license_cb (BzFullView *self,
 
   dialog = bz_license_dialog_new (ui_entry);
   adw_dialog_present (dialog, GTK_WIDGET (self));
+}
+
+static void
+age_rating_cb (BzFullView *self,
+               GtkButton  *button)
+{
+  BzAgeRatingDialog *dialog   = NULL;
+  BzEntry           *ui_entry = NULL;
+
+  if (self->group == NULL)
+    return;
+
+  ui_entry = bz_result_get_object (self->ui_entry);
+  if (ui_entry == NULL)
+    return;
+
+  dialog = bz_age_rating_dialog_new (ui_entry);
+  adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (self));
 }
 
 static void
@@ -978,13 +1017,13 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
-  gtk_widget_class_bind_template_callback (widget_class, is_between);
   gtk_widget_class_bind_template_callback (widget_class, logical_and);
   gtk_widget_class_bind_template_callback (widget_class, bool_to_string);
   gtk_widget_class_bind_template_callback (widget_class, format_recent_downloads);
   gtk_widget_class_bind_template_callback (widget_class, format_recent_downloads_tooltip);
   gtk_widget_class_bind_template_callback (widget_class, format_size);
   gtk_widget_class_bind_template_callback (widget_class, format_size_tooltip);
+  gtk_widget_class_bind_template_callback (widget_class, age_rating_cb);
   gtk_widget_class_bind_template_callback (widget_class, format_age_rating);
   gtk_widget_class_bind_template_callback (widget_class, get_age_rating_label);
   gtk_widget_class_bind_template_callback (widget_class, get_age_rating_tooltip);

@@ -5,6 +5,8 @@ data/io.github.kolunmi.Bazaar.gschema.xml
 data/io.github.kolunmi.Bazaar.metainfo.xml.in
 src/bz-addons-dialog.blp
 src/bz-addons-dialog.c
+src/bz-age-rating-dialog.blp
+src/bz-age-rating-dialog.c
 src/bz-app-tile.blp
 src/bz-app-tile.c
 src/bz-app-size-dialog.c

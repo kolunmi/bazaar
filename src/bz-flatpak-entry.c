@@ -398,8 +398,7 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
   gint             min_display_length          = 0;
   gint             max_display_length          = 0;
   gboolean         is_mobile_friendly          = FALSE;
-  AsContentRating *content_rating              = NULL;
-  gint             age_rating                  = 0;
+  g_autoptr (AsContentRating) content_rating   = NULL;
 
   g_return_val_if_fail (FLATPAK_IS_REF (ref), NULL);
   g_return_val_if_fail (FLATPAK_IS_REMOTE_REF (ref) || FLATPAK_IS_BUNDLE_REF (ref), NULL);
@@ -801,7 +800,13 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
       content_rating = as_component_get_content_rating (component, "oars-1.1");
       if (content_rating != NULL)
         {
-          age_rating = (gint) as_content_rating_get_minimum_age (content_rating);
+          g_object_ref (content_rating);
+        }
+      else
+        {
+          content_rating = as_component_get_content_rating (component, "oars-1.0");
+          if (content_rating != NULL)
+            g_object_ref (content_rating);
         }
 
       requires_relations   = as_component_get_requires (component);
@@ -963,7 +968,7 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
       "min-display-length", min_display_length,
       "max-display-length", max_display_length,
       "is-mobile-friendly", is_mobile_friendly,
-      "age-rating", age_rating,
+      "content-rating", content_rating,
       NULL);
 
   return g_steal_pointer (&self);

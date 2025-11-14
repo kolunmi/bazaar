@@ -71,46 +71,46 @@ typedef struct
   gint     hold;
   gboolean installed;
 
-  guint         kinds;
-  GListModel   *addons;
-  char         *id;
-  char         *unique_id;
-  char         *unique_id_checksum;
-  char         *title;
-  char         *eol;
-  char         *description;
-  char         *long_description;
-  char         *remote_repo_name;
-  char         *url;
-  guint64       size;
-  GdkPaintable *icon_paintable;
-  GIcon        *mini_icon;
-  GdkPaintable *remote_repo_icon;
-  GPtrArray    *search_tokens;
-  char         *metadata_license;
-  char         *project_license;
-  gboolean      is_floss;
-  char         *project_group;
-  char         *developer;
-  char         *developer_id;
-  GListModel   *developer_apps;
-  GListModel   *screenshot_paintables;
-  GListModel   *share_urls;
-  char         *donation_url;
-  char         *forge_url;
-  GListModel   *reviews;
-  double        average_rating;
-  char         *ratings_summary;
-  GListModel   *version_history;
-  char         *light_accent_color;
-  char         *dark_accent_color;
-  gboolean      is_mobile_friendly;
-  guint         required_controls;
-  guint         recommended_controls;
-  guint         supported_controls;
-  gint          min_display_length;
-  gint          max_display_length;
-  gint          age_rating;
+  guint            kinds;
+  GListModel      *addons;
+  char            *id;
+  char            *unique_id;
+  char            *unique_id_checksum;
+  char            *title;
+  char            *eol;
+  char            *description;
+  char            *long_description;
+  char            *remote_repo_name;
+  char            *url;
+  guint64          size;
+  GdkPaintable    *icon_paintable;
+  GIcon           *mini_icon;
+  GdkPaintable    *remote_repo_icon;
+  GPtrArray       *search_tokens;
+  char            *metadata_license;
+  char            *project_license;
+  gboolean         is_floss;
+  char            *project_group;
+  char            *developer;
+  char            *developer_id;
+  GListModel      *developer_apps;
+  GListModel      *screenshot_paintables;
+  GListModel      *share_urls;
+  char            *donation_url;
+  char            *forge_url;
+  GListModel      *reviews;
+  double           average_rating;
+  char            *ratings_summary;
+  GListModel      *version_history;
+  char            *light_accent_color;
+  char            *dark_accent_color;
+  gboolean         is_mobile_friendly;
+  guint            required_controls;
+  guint            recommended_controls;
+  guint            supported_controls;
+  gint             min_display_length;
+  gint             max_display_length;
+  AsContentRating *content_rating;
 
   gboolean    is_flathub;
   gboolean    verified;
@@ -176,7 +176,7 @@ enum
   PROP_SUPPORTED_CONTROLS,
   PROP_MIN_DISPLAY_LENGTH,
   PROP_MAX_DISPLAY_LENGTH,
-  PROP_AGE_RATING,
+  PROP_CONTENT_RATING,
 
   LAST_PROP
 };
@@ -397,8 +397,8 @@ bz_entry_get_property (GObject    *object,
     case PROP_MAX_DISPLAY_LENGTH:
       g_value_set_int (value, priv->max_display_length);
       break;
-    case PROP_AGE_RATING:
-      g_value_set_int (value, priv->age_rating);
+    case PROP_CONTENT_RATING:
+      g_value_set_object (value, priv->content_rating);
       break;
     case PROP_IS_FLATHUB:
       g_value_set_boolean (value, priv->is_flathub);
@@ -592,8 +592,9 @@ bz_entry_set_property (GObject      *object,
     case PROP_MAX_DISPLAY_LENGTH:
       priv->max_display_length = g_value_get_int (value);
       break;
-    case PROP_AGE_RATING:
-      priv->age_rating = g_value_get_int (value);
+    case PROP_CONTENT_RATING:
+      g_clear_object (&priv->content_rating);
+      priv->content_rating = g_value_dup_object (value);
       break;
     case PROP_IS_FLATHUB:
       priv->is_flathub = g_value_get_boolean (value);
@@ -929,12 +930,11 @@ bz_entry_class_init (BzEntryClass *klass)
           0,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-  props[PROP_AGE_RATING] =
-      g_param_spec_int (
-          "age-rating",
+  props[PROP_CONTENT_RATING] =
+      g_param_spec_object (
+          "content-rating",
           NULL, NULL,
-          0, G_MAXINT,
-          0,
+          AS_TYPE_CONTENT_RATING,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   props[PROP_IS_FLATHUB] =
@@ -1207,7 +1207,27 @@ bz_entry_real_serialize (BzSerializable  *serializable,
     g_variant_builder_add (builder, "{sv}", "min-display-length", g_variant_new_int32 (priv->min_display_length));
   if (priv->max_display_length > 0)
     g_variant_builder_add (builder, "{sv}", "max-display-length", g_variant_new_int32 (priv->max_display_length));
-  g_variant_builder_add (builder, "{sv}", "age-rating", g_variant_new_int32 (priv->age_rating));
+  if (priv->content_rating != NULL)
+    {
+      const gchar *kind                       = as_content_rating_get_kind (priv->content_rating);
+      g_autoptr (GVariantBuilder) sub_builder = NULL;
+      g_autofree const gchar **rating_ids     = NULL;
+
+      sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("a(ss)"));
+      rating_ids  = as_content_rating_get_all_rating_ids ();
+
+      for (gsize i = 0; rating_ids[i] != NULL; i++)
+        {
+          AsContentRatingValue value     = as_content_rating_get_value (priv->content_rating, rating_ids[i]);
+          const gchar         *value_str = as_content_rating_value_to_string (value);
+
+          if (value != AS_CONTENT_RATING_VALUE_UNKNOWN)
+            g_variant_builder_add (sub_builder, "(ss)", rating_ids[i], value_str);
+        }
+
+      g_variant_builder_add (builder, "{sv}", "content-rating-kind", g_variant_new_string (kind ? kind : "oars-1.1"));
+      g_variant_builder_add (builder, "{sv}", "content-rating-values", g_variant_builder_end (sub_builder));
+    }
   g_variant_builder_add (builder, "{sv}", "is-flathub", g_variant_new_boolean (priv->is_flathub));
   if (priv->is_flathub)
     {
@@ -1472,55 +1492,41 @@ bz_entry_real_deserialize (BzSerializable *serializable,
         priv->min_display_length = g_variant_get_int32 (value);
       else if (g_strcmp0 (key, "max-display-length") == 0)
         priv->max_display_length = g_variant_get_int32 (value);
-      else if (g_strcmp0 (key, "age-rating") == 0)
-        priv->age_rating = g_variant_get_int32 (value);
+      else if (g_strcmp0 (key, "content-rating-kind") == 0)
+        {
+          g_autofree gchar *kind = NULL;
+
+          kind = g_variant_dup_string (value, NULL);
+
+          if (priv->content_rating == NULL)
+            priv->content_rating = as_content_rating_new ();
+
+          as_content_rating_set_kind (priv->content_rating, kind);
+        }
+      else if (g_strcmp0 (key, "content-rating-values") == 0)
+        {
+          g_autoptr (GVariantIter) rating_iter = NULL;
+
+          if (priv->content_rating == NULL)
+            priv->content_rating = as_content_rating_new ();
+
+          rating_iter = g_variant_iter_new (value);
+          for (;;)
+            {
+              g_autofree gchar    *rating_id        = NULL;
+              g_autofree gchar    *rating_value_str = NULL;
+              AsContentRatingValue rating_value;
+
+              if (!g_variant_iter_next (rating_iter, "(ss)", &rating_id, &rating_value_str))
+                break;
+
+              rating_value = as_content_rating_value_from_string (rating_value_str);
+              if (rating_value != AS_CONTENT_RATING_VALUE_UNKNOWN)
+                as_content_rating_set_value (priv->content_rating, rating_id, rating_value);
+            }
+        }
       else if (g_strcmp0 (key, "is-flathub") == 0)
         priv->is_flathub = g_variant_get_boolean (value);
-
-      /* Disabling these since it updates so often and downloading is cheap */
-      // else if (g_strcmp0 (key, "verified") == 0)
-      //   {
-      //     priv->verified = g_variant_get_boolean (value);
-      //     if (priv->flathub_prop_queries == NULL)
-      //       priv->flathub_prop_queries = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, dex_unref);
-      //     g_hash_table_replace (priv->flathub_prop_queries, GINT_TO_POINTER (PROP_VERIFIED), dex_future_new_true ());
-      //   }
-      // else if (g_strcmp0 (key, "download-stats") == 0)
-      //   {
-      //     g_autoptr (GListStore) store        = NULL;
-      //     g_autoptr (GVariantIter) point_iter = NULL;
-
-      //     store = g_list_store_new (BZ_TYPE_DATA_POINT);
-
-      //     point_iter = g_variant_iter_new (value);
-      //     for (;;)
-      //       {
-      //         double           independent  = 0.0;
-      //         double           dependent    = 0.0;
-      //         g_autofree char *label        = NULL;
-      //         g_autoptr (BzDataPoint) point = NULL;
-
-      //         if (!g_variant_iter_next (point_iter, "(ddms)", &independent, &dependent, &label))
-      //           break;
-      //         point = bz_data_point_new ();
-      //         bz_data_point_set_independent (point, independent);
-      //         bz_data_point_set_dependent (point, dependent);
-      //         bz_data_point_set_label (point, label);
-      //         g_list_store_append (store, point);
-      //       }
-
-      //     priv->download_stats = G_LIST_MODEL (g_steal_pointer (&store));
-      //     if (priv->flathub_prop_queries == NULL)
-      //       priv->flathub_prop_queries = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, dex_unref);
-      //     g_hash_table_replace (priv->flathub_prop_queries, GINT_TO_POINTER (PROP_DOWNLOAD_STATS), dex_future_new_true ());
-      //   }
-      // else if (g_strcmp0 (key, "recent-downloads") == 0)
-      //   {
-      //     priv->recent_downloads = g_variant_get_int32 (value);
-      //     if (priv->flathub_prop_queries == NULL)
-      //       priv->flathub_prop_queries = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, dex_unref);
-      //     g_hash_table_replace (priv->flathub_prop_queries, GINT_TO_POINTER (PROP_RECENT_DOWNLOADS), dex_future_new_true ());
-      //   }
     }
 
   return TRUE;
@@ -1967,14 +1973,14 @@ bz_entry_supports_form_factor (BzEntry *self,
   return TRUE;
 }
 
-gint
-bz_entry_get_age_rating (BzEntry *self)
+AsContentRating *
+bz_entry_get_content_rating (BzEntry *self)
 {
   BzEntryPrivate *priv = bz_entry_get_instance_private (self);
 
-  g_return_val_if_fail (BZ_IS_ENTRY (self), 0);
+  g_return_val_if_fail (BZ_IS_ENTRY (self), NULL);
 
-  return priv->age_rating;
+  return priv->content_rating;
 }
 
 gboolean
@@ -2576,4 +2582,5 @@ clear_entry (BzEntry *self)
   g_clear_pointer (&priv->light_accent_color, g_free);
   g_clear_pointer (&priv->dark_accent_color, g_free);
   g_clear_object (&priv->download_stats);
+  g_clear_object (&priv->content_rating);
 }
