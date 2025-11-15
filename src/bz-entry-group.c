@@ -42,7 +42,7 @@ struct _BzEntryGroup
   char         *light_accent_color;
   char         *dark_accent_color;
   gboolean      is_flathub;
-  GPtrArray    *search_tokens;
+  char         *search_tokens;
   char         *remote_repos_string;
   char         *eol;
 
@@ -121,7 +121,7 @@ bz_entry_group_dispose (GObject *object)
   g_clear_pointer (&self->dark_accent_color, g_free);
   g_clear_object (&self->icon_paintable);
   g_clear_object (&self->mini_icon);
-  g_clear_pointer (&self->search_tokens, g_ptr_array_unref);
+  g_clear_pointer (&self->search_tokens, g_free);
   g_clear_pointer (&self->remote_repos_string, g_free);
   g_clear_pointer (&self->eol, g_free);
 
@@ -324,10 +324,9 @@ bz_entry_group_class_init (BzEntryGroupClass *klass)
           G_PARAM_READABLE);
 
   props[PROP_SEARCH_TOKENS] =
-      g_param_spec_boxed (
+      g_param_spec_string (
           "search-tokens",
-          NULL, NULL,
-          G_TYPE_PTR_ARRAY,
+          NULL, NULL, NULL,
           G_PARAM_READABLE);
 
   props[PROP_EOL] =
@@ -500,7 +499,7 @@ bz_entry_group_get_is_flathub (BzEntryGroup *self)
   return self->is_flathub;
 }
 
-GPtrArray *
+const char *
 bz_entry_group_get_search_tokens (BzEntryGroup *self)
 {
   g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), NULL);
@@ -650,7 +649,7 @@ bz_entry_group_add (BzEntryGroup *self,
       const char   *description        = NULL;
       GdkPaintable *icon_paintable     = NULL;
       GIcon        *mini_icon          = NULL;
-      GPtrArray    *search_tokens      = NULL;
+      const char   *search_tokens      = NULL;
       gboolean      is_floss           = FALSE;
       const char   *light_accent_color = NULL;
       const char   *dark_accent_color  = NULL;
@@ -707,8 +706,8 @@ bz_entry_group_add (BzEntryGroup *self,
         }
       if (search_tokens != NULL)
         {
-          g_clear_pointer (&self->search_tokens, g_ptr_array_unref);
-          self->search_tokens = g_ptr_array_ref (search_tokens);
+          g_clear_pointer (&self->search_tokens, g_free);
+          self->search_tokens = g_strdup (search_tokens);
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SEARCH_TOKENS]);
         }
       if (is_floss != self->is_floss)
@@ -743,7 +742,7 @@ bz_entry_group_add (BzEntryGroup *self,
       const char   *description        = NULL;
       GdkPaintable *icon_paintable     = NULL;
       GIcon        *mini_icon          = NULL;
-      GPtrArray    *search_tokens      = NULL;
+      const char   *search_tokens      = NULL;
       const char   *light_accent_color = NULL;
       const char   *dark_accent_color  = NULL;
 
@@ -785,7 +784,7 @@ bz_entry_group_add (BzEntryGroup *self,
         }
       if (search_tokens != NULL && self->search_tokens == NULL)
         {
-          self->search_tokens = g_ptr_array_ref (search_tokens);
+          self->search_tokens = g_strdup (search_tokens);
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SEARCH_TOKENS]);
         }
       if (light_accent_color != NULL && self->light_accent_color == NULL)

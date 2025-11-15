@@ -140,7 +140,7 @@ bz_entry_get_screenshot_paintables (BzEntry *self);
 GIcon *
 bz_entry_get_mini_icon (BzEntry *self);
 
-GPtrArray *
+const char *
 bz_entry_get_search_tokens (BzEntry *self);
 
 GListModel *

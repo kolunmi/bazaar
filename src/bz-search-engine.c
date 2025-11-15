@@ -369,7 +369,7 @@ query_sub_task_fiber (QuerySubTaskData *data)
       const char   *title             = NULL;
       const char   *developer         = NULL;
       const char   *description       = NULL;
-      GPtrArray    *search_tokens     = NULL;
+      const char   *search_tokens     = NULL;
       double        score             = 0.0;
 
       group  = g_ptr_array_index (shallow_mirror, work_offset + i);
@@ -392,17 +392,7 @@ query_sub_task_fiber (QuerySubTaskData *data)
       score += EVALUATE_STRING (title, TRUE) * 1.333;
       score += EVALUATE_STRING (developer, FALSE) * 1.0;
       score += EVALUATE_STRING (description, FALSE) * 1.0;
-
-      if (search_tokens != NULL)
-        {
-          for (guint j = 0; j < search_tokens->len; j++)
-            {
-              const char *token = NULL;
-
-              token = g_ptr_array_index (search_tokens, j);
-              score += EVALUATE_STRING (token, FALSE) * 1.0;
-            }
-        }
+      score += EVALUATE_STRING (search_tokens, FALSE) * 1.0;
 
 #undef EVALUATE_STRING
 

@@ -379,7 +379,7 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
   const char      *remote_name                 = NULL;
   const char      *project_url                 = NULL;
   g_autoptr (GPtrArray) as_search_tokens       = NULL;
-  g_autoptr (GPtrArray) search_tokens          = NULL;
+  g_autofree char *search_tokens               = NULL;
   g_autoptr (GdkPaintable) icon_paintable      = NULL;
   g_autoptr (GIcon) mini_icon                  = NULL;
   g_autoptr (GListStore) screenshot_paintables = NULL;
@@ -390,14 +390,14 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
   double           average_rating              = 0.0;
   g_autofree char *ratings_summary             = NULL;
   g_autoptr (GListStore) version_history       = NULL;
-  const char      *accent_color_light          = NULL;
-  const char      *accent_color_dark           = NULL;
-  guint            required_controls           = 0;
-  guint            recommended_controls        = 0;
-  guint            supported_controls          = 0;
-  gint             min_display_length          = 0;
-  gint             max_display_length          = 0;
-  gboolean         is_mobile_friendly          = FALSE;
+  const char *accent_color_light               = NULL;
+  const char *accent_color_dark                = NULL;
+  guint       required_controls                = 0;
+  guint       recommended_controls             = 0;
+  guint       supported_controls               = 0;
+  gint        min_display_length               = 0;
+  gint        max_display_length               = 0;
+  gboolean    is_mobile_friendly               = FALSE;
   g_autoptr (AsContentRating) content_rating   = NULL;
 
   g_return_val_if_fail (FLATPAK_IS_REF (ref), NULL);
@@ -920,14 +920,20 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
 
   if (as_search_tokens != NULL)
     {
-      search_tokens = g_ptr_array_new_with_free_func (g_free);
+      g_autoptr (GStrvBuilder) builder = NULL;
+      g_auto (GStrv) strv              = NULL;
+
+      builder = g_strv_builder_new ();
       for (guint i = 0; i < as_search_tokens->len; i++)
         {
           const char *token = NULL;
 
           token = g_ptr_array_index (as_search_tokens, i);
-          g_ptr_array_add (search_tokens, g_strdup (token));
+          g_strv_builder_add (builder, token);
         }
+
+      strv          = g_strv_builder_end (builder);
+      search_tokens = g_strjoinv (" ", strv);
     }
 
   g_object_set (

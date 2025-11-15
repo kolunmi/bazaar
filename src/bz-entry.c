@@ -86,7 +86,7 @@ typedef struct
   GdkPaintable    *icon_paintable;
   GIcon           *mini_icon;
   GdkPaintable    *remote_repo_icon;
-  GPtrArray       *search_tokens;
+  char            *search_tokens;
   char            *metadata_license;
   char            *project_license;
   gboolean         is_floss;
@@ -501,8 +501,8 @@ bz_entry_set_property (GObject      *object,
       priv->mini_icon = g_value_dup_object (value);
       break;
     case PROP_SEARCH_TOKENS:
-      g_clear_pointer (&priv->search_tokens, g_ptr_array_unref);
-      priv->search_tokens = g_value_dup_boxed (value);
+      g_clear_pointer (&priv->search_tokens, g_free);
+      priv->search_tokens = g_value_dup_string (value);
       break;
     case PROP_REMOTE_REPO_ICON:
       g_clear_object (&priv->remote_repo_icon);
@@ -762,10 +762,9 @@ bz_entry_class_init (BzEntryClass *klass)
           G_PARAM_READWRITE);
 
   props[PROP_SEARCH_TOKENS] =
-      g_param_spec_boxed (
+      g_param_spec_string (
           "search-tokens",
-          NULL, NULL,
-          G_TYPE_PTR_ARRAY,
+          NULL, NULL, NULL,
           G_PARAM_READWRITE);
 
   props[PROP_REMOTE_REPO_ICON] =
@@ -1049,20 +1048,8 @@ bz_entry_real_serialize (BzSerializable  *serializable,
     }
   if (priv->remote_repo_icon != NULL)
     maybe_save_paintable (priv, "remote-repo-icon", priv->remote_repo_icon, builder);
-  if (priv->search_tokens != NULL && priv->search_tokens->len > 0)
-    {
-      g_autoptr (GVariantBuilder) sub_builder = NULL;
-
-      sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("as"));
-      for (guint i = 0; i < priv->search_tokens->len; i++)
-        {
-          const char *token = NULL;
-
-          token = g_ptr_array_index (priv->search_tokens, i);
-          g_variant_builder_add (sub_builder, "s", token);
-        }
-      g_variant_builder_add (builder, "{sv}", "search-tokens", g_variant_builder_end (sub_builder));
-    }
+  if (priv->search_tokens != NULL)
+    g_variant_builder_add (builder, "{sv}", "search-tokens", g_variant_new_string (priv->search_tokens));
   if (priv->metadata_license != NULL)
     g_variant_builder_add (builder, "{sv}", "metadata-license", g_variant_new_string (priv->metadata_license));
   if (priv->project_license != NULL)
@@ -1341,23 +1328,7 @@ bz_entry_real_deserialize (BzSerializable *serializable,
       else if (g_strcmp0 (key, "remote-repo-icon") == 0)
         priv->remote_repo_icon = make_async_texture (value);
       else if (g_strcmp0 (key, "search-tokens") == 0)
-        {
-          g_autoptr (GPtrArray) search_tokens = NULL;
-          g_autoptr (GVariantIter) token_iter = NULL;
-
-          search_tokens = g_ptr_array_new_with_free_func (g_free);
-
-          token_iter = g_variant_iter_new (value);
-          for (;;)
-            {
-              g_autofree char *token = NULL;
-
-              if (!g_variant_iter_next (token_iter, "s", &token))
-                break;
-              g_ptr_array_add (search_tokens, g_steal_pointer (&token));
-            }
-          priv->search_tokens = g_steal_pointer (&search_tokens);
-        }
+        priv->search_tokens = g_variant_dup_string (value, NULL);
       else if (g_strcmp0 (key, "metadata-license") == 0)
         priv->metadata_license = g_variant_dup_string (value, NULL);
       else if (g_strcmp0 (key, "project-license") == 0)
@@ -1779,7 +1750,7 @@ bz_entry_get_mini_icon (BzEntry *self)
   return priv->mini_icon;
 }
 
-GPtrArray *
+const char *
 bz_entry_get_search_tokens (BzEntry *self)
 {
   BzEntryPrivate *priv = NULL;
@@ -2565,7 +2536,7 @@ clear_entry (BzEntry *self)
   g_clear_object (&priv->icon_paintable);
   g_clear_object (&priv->mini_icon);
   g_clear_object (&priv->remote_repo_icon);
-  g_clear_pointer (&priv->search_tokens, g_ptr_array_unref);
+  g_clear_pointer (&priv->search_tokens, g_free);
   g_clear_pointer (&priv->metadata_license, g_free);
   g_clear_pointer (&priv->project_license, g_free);
   g_clear_pointer (&priv->project_group, g_free);

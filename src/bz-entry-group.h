@@ -70,7 +70,7 @@ bz_entry_group_get_dark_accent_color (BzEntryGroup *self);
 gboolean
 bz_entry_group_get_is_flathub (BzEntryGroup *self);
 
-GPtrArray *
+const char *
 bz_entry_group_get_search_tokens (BzEntryGroup *self);
 
 const char *
