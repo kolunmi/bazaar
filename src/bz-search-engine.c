@@ -368,6 +368,7 @@ query_sub_task_fiber (QuerySubTaskData *data)
       const char   *id                = NULL;
       const char   *title             = NULL;
       const char   *developer         = NULL;
+      const char   *description       = NULL;
       GPtrArray    *search_tokens     = NULL;
       double        score             = 0.0;
 
@@ -377,6 +378,7 @@ query_sub_task_fiber (QuerySubTaskData *data)
       id            = bz_entry_group_get_id (group);
       title         = bz_entry_group_get_title (group);
       developer     = bz_entry_group_get_developer (group);
+      description   = bz_entry_group_get_description (group);
       search_tokens = bz_entry_group_get_search_tokens (group);
 
       if (id != NULL && g_strcmp0 (query_utf8, id) == 0)
@@ -387,8 +389,9 @@ query_sub_task_fiber (QuerySubTaskData *data)
        ? (test_strings (query_utf8, (_s), (_fuzzy))) \
        : 0.0)
 
-      score += EVALUATE_STRING (title, TRUE) * 1.111;
+      score += EVALUATE_STRING (title, TRUE) * 1.333;
       score += EVALUATE_STRING (developer, FALSE) * 1.0;
+      score += EVALUATE_STRING (description, FALSE) * 1.0;
 
       if (search_tokens != NULL)
         {
@@ -451,14 +454,14 @@ test_strings (const char *query,
     {
       if (fuzzy)
         {
-          double against_token_score = 0.0;
+          double      against_token_score = 0.0;
+          const char *last_best_char      = NULL;
 
           UTF8_FOREACH_FORWARD_WITH_END (q, q_s, q_e)
           {
-            const char *last_best_char = NULL;
-            gunichar    query_ch       = 0;
-            const char *best_char      = NULL;
-            double      best_score     = 0.0;
+            gunichar    query_ch   = 0;
+            const char *best_char  = NULL;
+            double      best_score = 0.0;
 
             query_ch = g_unichar_tolower (g_utf8_get_char (q));
 
@@ -489,9 +492,9 @@ test_strings (const char *query,
 
                     diff = (gssize) best_char - (gssize) last_best_char;
                     if (diff > 1)
-                      best_score -= (double) diff * 1.0;
+                      best_score /= (double) diff * 1.0;
                     else if (diff < 0)
-                      best_score -= (double) ABS (diff) * 2.0;
+                      best_score /= (double) ABS (diff) * 2.0;
                   }
 
                 against_token_score += best_score;
