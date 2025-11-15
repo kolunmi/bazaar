@@ -28,6 +28,7 @@ struct _BzContextTile
   char *lozenge_style;
 
   /* Template widgets */
+  GtkButton *ring_button;
   GtkBox   *lozenge;
   GtkLabel *label;
 };
@@ -142,6 +143,7 @@ bz_context_tile_class_init (BzContextTileClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-context-tile.ui");
   gtk_widget_class_bind_template_child (widget_class, BzContextTile, lozenge);
   gtk_widget_class_bind_template_child (widget_class, BzContextTile, label);
+  gtk_widget_class_bind_template_child (widget_class, BzContextTile, ring_button);
 }
 
 static void
@@ -158,11 +160,23 @@ on_leave_notify (GtkEventController *controller, gpointer user_data)
 }
 
 static void
+on_ring_button_clicked (GtkButton *ring_button,
+                        gpointer   user_data)
+{
+  BzContextTile *self = BZ_CONTEXT_TILE (user_data);
+  g_signal_emit_by_name (self, "clicked");
+}
+
+static void
 bz_context_tile_init (BzContextTile *self)
 {
   GtkEventController *enter_leave = gtk_event_controller_motion_new ();
 
   gtk_widget_init_template (GTK_WIDGET (self));
+
+  g_signal_connect (self->ring_button, "clicked",
+                    G_CALLBACK (on_ring_button_clicked),
+                    self);
 
   g_signal_connect (enter_leave, "enter", G_CALLBACK (on_enter_notify), GTK_WIDGET (self));
   g_signal_connect (enter_leave, "leave", G_CALLBACK (on_leave_notify), GTK_WIDGET (self));

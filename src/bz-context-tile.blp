@@ -6,18 +6,29 @@ template $BzContextTile: Button {
     "flat",
   ]
 
+  focusable: false;
+
   Box {
     orientation: vertical;
     spacing: 4;
     hexpand: true;
 
-    Box lozenge {
+    Button ring_button {
+      styles [
+        "lozenge-ring-button",
+      ]
+
       halign: center;
+      valign: center;
       margin-bottom: 4;
 
-      styles [
-        "lozenge",
-      ]
+      child: Box lozenge {
+        styles [
+          "lozenge",
+        ]
+
+        halign: center;
+      };
     }
 
     Label label {
