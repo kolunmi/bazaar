@@ -21,19 +21,8 @@ template $BzScreenshotPage: Adw.NavigationPage {
         ]
 
         show-title: false;
-
-        [end]
-        Box {
-          Button copy_button {
-            icon-name: "edit-copy-symbolic";
-            tooltip-text: _("Copy Image");
-            clicked => $copy_clicked() swapped;
-
-            styles [
-              "flat",
-            ]
-          }
-        }
+        show-end-title-buttons: false;
+        show-start-title-buttons: false;
       }
 
       content: Overlay {
@@ -75,6 +64,23 @@ template $BzScreenshotPage: Adw.NavigationPage {
               ]
             }
           }
+
+          Box {
+            styles [
+              "osd-box",
+            ]
+
+            Button copy_button {
+              icon-name: "edit-copy-symbolic";
+              tooltip-text: _("Copy Image");
+              clicked => $copy_clicked() swapped;
+
+              styles [
+                "flat",
+              ]
+            }
+          }
+
         }
 
         [overlay]
