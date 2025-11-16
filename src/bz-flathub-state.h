@@ -62,6 +62,10 @@ bz_flathub_state_get_categories (BzFlathubState *self);
 void
 bz_flathub_state_update_to_today (BzFlathubState *self);
 
+BzResult *
+bz_flathub_state_search_keyword (BzFlathubState *self,
+                                 const char     *keyword);
+
 G_END_DECLS
 
 /* End of bz-flathub-state.h */

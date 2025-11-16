@@ -1543,7 +1543,7 @@ bz_entry_real_deserialize (BzSerializable *serializable,
           keywords_iter = g_variant_iter_new (value);
           for (;;)
             {
-              g_autofree char *keyword               = NULL;
+              g_autofree char *keyword           = NULL;
               g_autoptr (GtkStringObject) string = NULL;
 
               if (!g_variant_iter_next (keywords_iter, "s", &keyword))

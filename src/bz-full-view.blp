@@ -742,7 +742,7 @@ template $BzFullView: Adw.Bin {
 
                             model: SliceListModel {
                               offset: 0;
-                              size: 100;
+                              size: 10;
                               model: bind $get_developer_apps_entries(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer-apps, template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>) as <Gio.ListModel>;
                             };
                           }
@@ -753,6 +753,7 @@ template $BzFullView: Adw.Bin {
                           margin-top: 8;
 
                           flathub-state: bind template.state as <$BzStateInfo>.flathub;
+                          select => $tag_list_select_cb(template);
 
                           prefix: Label {
                             label: _("Tags:");
@@ -760,7 +761,7 @@ template $BzFullView: Adw.Bin {
                           };
 
                           model: SliceListModel {
-                            size: 10;
+                            size: 5;
                             model: bind template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.keywords;
                           };
                         }

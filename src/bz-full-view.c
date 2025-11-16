@@ -575,6 +575,18 @@ unbind_app_tile_cb (BzFullView        *self,
 }
 
 static void
+tag_list_select_cb (BzFullView   *self,
+                    BzEntryGroup *group)
+{
+  GtkAdjustment *vadj;
+
+  bz_full_view_set_entry_group (self, group);
+
+  vadj = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (self->main_scroll));
+  g_idle_add_once ((GSourceOnceFunc) scroll_to_top_idle, vadj);
+}
+
+static void
 open_url_cb (BzFullView   *self,
              AdwActionRow *row)
 {
@@ -1059,6 +1071,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, unbind_app_tile_cb);
   gtk_widget_class_bind_template_callback (widget_class, get_description_max_height);
   gtk_widget_class_bind_template_callback (widget_class, get_description_toggle_text);
+  gtk_widget_class_bind_template_callback (widget_class, tag_list_select_cb);
 }
 
 static void

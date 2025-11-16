@@ -399,7 +399,7 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
   gint        max_display_length               = 0;
   gboolean    is_mobile_friendly               = FALSE;
   g_autoptr (AsContentRating) content_rating   = NULL;
-  GPtrArray     *as_keywords                   = NULL;
+  GPtrArray *as_keywords                       = NULL;
   g_autoptr (GListStore) keywords              = NULL;
 
   g_return_val_if_fail (FLATPAK_IS_REF (ref), NULL);

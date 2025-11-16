@@ -2,7 +2,6 @@ using Gtk 4.0;
 using Adw 1;
 
 template $BzAppsPage: Adw.NavigationPage {
-  tag: "flathub-apps-list";
 
   Adw.ToolbarView {
     [top]
@@ -91,6 +90,7 @@ template $BzAppsPage: Adw.NavigationPage {
               ]
               hexpand: true;
               scroll: false;
+              valign: start;
               noscroll-kind: flow-box;
               child-type: "BzAppTile";
               child-prop: "group";

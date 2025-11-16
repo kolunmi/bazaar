@@ -19,7 +19,11 @@
  */
 
 #include "bz-tag-list.h"
+#include "bz-apps-page.h"
 #include "bz-flathub-state.h"
+#include "bz-window.h"
+
+#include <glib/gi18n.h>
 #include <libdex.h>
 
 struct _BzTagList
@@ -44,10 +48,108 @@ enum
 
 static GParamSpec *props[LAST_PROP] = { 0 };
 
+enum
+{
+  SIGNAL_SELECT,
+  LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL];
+
+static void
+apps_page_select_cb (BzTagList    *self,
+                     BzEntryGroup *group,
+                     BzAppsPage   *page)
+{
+  GtkWidget *nav_view = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
+  adw_navigation_view_pop (ADW_NAVIGATION_VIEW (nav_view));
+  g_signal_emit (self, signals[SIGNAL_SELECT], 0, group);
+}
+
+static void
+on_search_complete (DexFuture *future,
+                    gpointer   user_data)
+{
+  BzTagList         *self      = BZ_TAG_LIST (user_data);
+  const char        *tag       = g_object_get_data (G_OBJECT (self), "current-tag");
+  GtkRoot           *root      = gtk_widget_get_root (GTK_WIDGET (self));
+  GtkWidget         *nav_view  = NULL;
+  AdwNavigationPage *apps_page = NULL;
+  g_autoptr (GListModel) model = NULL;
+  g_autofree char *title       = NULL;
+  g_autofree char *subtitle    = NULL;
+  const GValue    *value       = NULL;
+  GError          *error       = NULL;
+  guint            n_items;
+
+  value = dex_future_get_value (future, &error);
+  if (value == NULL)
+    {
+      AdwToast *toast = adw_toast_new (_ ("Search failed"));
+      bz_window_add_toast (BZ_WINDOW (root), toast);
+      g_warning ("Search failed: %s", error->message);
+      g_error_free (error);
+      return;
+    }
+
+  model = g_value_get_object (value);
+  if (model == NULL)
+    return;
+
+  n_items = g_list_model_get_n_items (model);
+
+  if (n_items <= 1)
+    {
+      AdwToast *toast = adw_toast_new (_ ("No Results Found"));
+      bz_window_add_toast (BZ_WINDOW (root), toast);
+    }
+  else
+    {
+      nav_view  = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
+      title     = g_strdup_printf (_ ("Apps Tagged \"%s\""), tag);
+      apps_page = bz_apps_page_new (title, model);
+      subtitle  = g_strdup_printf (_ ("%d applications"), n_items);
+      bz_apps_page_set_subtitle (BZ_APPS_PAGE (apps_page), subtitle);
+
+      g_signal_connect_swapped (
+          apps_page, "select",
+          G_CALLBACK (apps_page_select_cb), self);
+
+      adw_navigation_view_push (ADW_NAVIGATION_VIEW (nav_view), apps_page);
+    }
+}
+
 static void
 tag_button_clicked_cb (BzTagList *self,
                        GtkButton *button)
 {
+  g_autoptr (BzResult) result  = NULL;
+  g_autoptr (DexFuture) future = NULL;
+  const char *tag              = NULL;
+
+  g_return_if_fail (BZ_IS_TAG_LIST (self));
+  g_return_if_fail (GTK_IS_BUTTON (button));
+
+  if (self->flathub_state == NULL)
+    return;
+
+  tag = gtk_button_get_label (button);
+  if (tag == NULL || *tag == '\0')
+    return;
+
+  g_object_set_data_full (G_OBJECT (self), "current-tag", g_strdup (tag), g_free);
+
+  result = bz_flathub_state_search_keyword (self->flathub_state, tag);
+  if (result == NULL)
+    return;
+
+  future = bz_result_dup_future (result);
+
+  (void) dex_future_finally (
+      g_steal_pointer (&future),
+      (DexFutureCallback) on_search_complete,
+      self,
+      NULL);
 }
 
 static void
@@ -210,6 +312,14 @@ bz_tag_list_class_init (BzTagListClass *klass)
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
+
+  signals[SIGNAL_SELECT] =
+      g_signal_new ("select",
+                    G_TYPE_FROM_CLASS (klass),
+                    G_SIGNAL_RUN_LAST,
+                    0, NULL, NULL,
+                    g_cclosure_marshal_VOID__OBJECT,
+                    G_TYPE_NONE, 1, BZ_TYPE_ENTRY_GROUP);
 }
 
 static void
