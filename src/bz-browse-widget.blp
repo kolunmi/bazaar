@@ -45,36 +45,30 @@ template $BzBrowseWidget: Adw.Bin {
 
         hscrollbar-policy: never;
 
-        child: $BzInhibitedScrollable {
-          scrollable: Adw.ClampScrollable {
-            maximum-size: 1500;
-            tightening-threshold: 1400;
+        child: Adw.ClampScrollable {
+          maximum-size: 1800;
+          tightening-threshold: 1500;
 
-            child: ListView {
-              model: NoSelection {
-                model: bind template.content-provider;
-              };
+          child: ListView {
+            model: NoSelection {
+              model: bind template.content-provider;
+            };
 
-              factory: BuilderListItemFactory {
-                template ListItem {
-                  activatable: false;
-                  selectable: false;
-                  focusable: false;
+            factory: BuilderListItemFactory {
+              template ListItem {
+                activatable: false;
+                selectable: false;
+                focusable: false;
 
-                  child: $BzDynamicListView {
-                    hexpand: true;
-                    scroll: false;
-                    noscroll-kind: h-box;
-                    child-type: "BzSectionView";
-                    child-prop: "section";
-
-                    bind-widget => $bind_section_view_cb(template);
-                    unbind-widget => $unbind_section_view_cb(template);
-
-                    model: bind template.item as <$BzCuratedRow>.sections;
-                  };
-                }
-              };
+                child: $BzDynamicListView {
+                  hexpand: true;
+                  scroll: false;
+                  noscroll-kind: list-box;
+                  child-type: "BzRowView";
+                  child-prop: "row";
+                  model: bind template.item as <$BzRootCuratedConfig>.rows;
+                };
+              }
             };
           };
         };

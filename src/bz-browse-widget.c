@@ -25,7 +25,7 @@
 #include "bz-dynamic-list-view.h"
 #include "bz-entry-group.h"
 #include "bz-inhibited-scrollable.h"
-#include "bz-section-view.h"
+#include "bz-row-view.h"
 
 struct _BzBrowseWidget
 {
@@ -131,39 +131,6 @@ bz_browse_widget_set_property (GObject      *object,
 }
 
 static void
-group_activated_cb (GtkListItem   *list_item,
-                    BzEntryGroup  *group,
-                    BzSectionView *view)
-{
-  GtkWidget *self = NULL;
-
-  self = gtk_widget_get_ancestor (GTK_WIDGET (view), BZ_TYPE_BROWSE_WIDGET);
-  g_assert (self != NULL);
-
-  g_signal_emit (self, signals[SIGNAL_GROUP_SELECTED], 0, group);
-}
-
-static void
-bind_section_view_cb (GtkListItem       *list_item,
-                      BzSectionView     *section_view,
-                      BzContentSection  *section,
-                      BzDynamicListView *view)
-{
-  g_signal_connect_swapped (section_view, "group-activated",
-                            G_CALLBACK (group_activated_cb),
-                            list_item);
-}
-
-static void
-unbind_section_view_cb (GtkListItem       *list_item,
-                        BzSectionView     *section_view,
-                        BzContentSection  *section,
-                        BzDynamicListView *view)
-{
-  g_signal_handlers_disconnect_by_func (section_view, group_activated_cb, list_item);
-}
-
-static void
 browse_flathub_cb (BzBrowseWidget *self,
                    GtkButton      *button)
 {
@@ -221,15 +188,13 @@ bz_browse_widget_class_init (BzBrowseWidgetClass *klass)
           g_cclosure_marshal_VOID__VOID,
           G_TYPE_NONE, 0);
 
-  g_type_ensure (BZ_TYPE_SECTION_VIEW);
+  g_type_ensure (BZ_TYPE_ROW_VIEW);
   g_type_ensure (BZ_TYPE_CURATED_ROW);
   g_type_ensure (BZ_TYPE_DYNAMIC_LIST_VIEW);
   g_type_ensure (BZ_TYPE_INHIBITED_SCROLLABLE);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-browse-widget.ui");
   gtk_widget_class_bind_template_child (widget_class, BzBrowseWidget, stack);
-  gtk_widget_class_bind_template_callback (widget_class, bind_section_view_cb);
-  gtk_widget_class_bind_template_callback (widget_class, unbind_section_view_cb);
   gtk_widget_class_bind_template_callback (widget_class, browse_flathub_cb);
 }
 

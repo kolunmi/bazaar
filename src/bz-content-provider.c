@@ -27,10 +27,10 @@
 #include <yaml.h>
 
 #include "bz-content-provider.h"
-#include "bz-content-section.h"
-#include "bz-curated-row.h"
+#include "bz-curated-section.h"
 #include "bz-env.h"
 #include "bz-io.h"
+#include "bz-root-curated-config.h"
 #include "bz-util.h"
 #include "bz-yaml-parser.h"
 
@@ -94,28 +94,23 @@ BZ_DEFINE_DATA (
 static DexFuture *
 input_load_fiber (InputLoadData *data);
 
-static void
-destroy_css (GtkCssProvider *css);
-
 BZ_DEFINE_DATA (
     input_tracking,
     InputTracking,
     {
-      GMutex          mutex;
-      GWeakRef        self;
-      char           *path;
-      GFileMonitor   *monitor;
-      GListStore     *output;
-      GtkCssProvider *css;
-      DexFuture      *init;
-      DexFuture      *task;
+      GMutex        mutex;
+      GWeakRef      self;
+      char         *path;
+      GFileMonitor *monitor;
+      GListStore   *output;
+      DexFuture    *init;
+      DexFuture    *task;
     },
     g_mutex_clear (&self->mutex);
     g_weak_ref_clear (&self->self);
     BZ_RELEASE_DATA (path, g_free);
     BZ_RELEASE_DATA (monitor, g_object_unref);
     BZ_RELEASE_DATA (output, g_object_unref);
-    BZ_RELEASE_DATA (css, destroy_css);
     BZ_RELEASE_DATA (init, dex_unref);
     BZ_RELEASE_DATA (task, dex_unref))
 static DexFuture *
@@ -246,8 +241,9 @@ bz_content_provider_class_init (BzContentProviderClass *klass)
 static void
 bz_content_provider_init (BzContentProvider *self)
 {
+  g_type_ensure (BZ_TYPE_ROOT_CURATED_CONFIG);
   g_type_ensure (BZ_TYPE_CURATED_ROW);
-  g_type_ensure (BZ_TYPE_CONTENT_SECTION);
+  g_type_ensure (BZ_TYPE_CURATED_SECTION);
   self->yaml_parser = bz_yaml_parser_new_for_resource_schema (
       "/io/github/kolunmi/Bazaar/bz-content-provider-config-schema.xml");
 
@@ -431,7 +427,7 @@ input_files_changed (BzContentProvider *self,
 
       new_outputs = g_malloc0_n (added, sizeof (*new_outputs));
       for (guint i = 0; i < added; i++)
-        new_outputs[i] = g_list_store_new (BZ_TYPE_CURATED_ROW);
+        new_outputs[i] = g_list_store_new (BZ_TYPE_ROOT_CURATED_CONFIG);
     }
 
   g_list_store_splice (self->input_mirror, position, removed,
@@ -542,18 +538,8 @@ input_init_finally (DexFuture         *future,
       commence_reload (data);
     }
   else
-    {
-      // g_autoptr (BzContentSection) error_section = NULL;
-
-      g_warning ("Could not init curated config watch at path %s: %s",
-                 data->path, local_error->message);
-
-      // error_section = g_object_new (
-      //     BZ_TYPE_CONTENT_SECTION,
-      //     "error", local_error->message,
-      //     NULL);
-      // g_list_store_append (data->output, error_section);
-    }
+    g_warning ("Could not init curated config watch at path %s: %s",
+               data->path, local_error->message);
 
   return NULL;
 }
@@ -563,15 +549,10 @@ input_load_fiber (InputLoadData *data)
 {
   GFile        *file                   = data->file;
   BzYamlParser *parser                 = data->parser;
-  g_autoptr (GPtrArray) css            = NULL;
-  g_autoptr (GPtrArray) rows           = NULL;
   g_autoptr (GError) local_error       = NULL;
   g_autoptr (GBytes) bytes             = NULL;
   g_autoptr (GHashTable) parse_results = NULL;
-  g_autoptr (GHashTable) dict          = NULL;
-
-  css  = g_ptr_array_new_with_free_func (g_free);
-  rows = g_ptr_array_new_with_free_func (g_object_unref);
+  BzRootCuratedConfig *config          = NULL;
 
   bytes = dex_await_boxed (dex_file_load_contents_bytes (file), &local_error);
   if (bytes == NULL)
@@ -581,50 +562,10 @@ input_load_fiber (InputLoadData *data)
   if (parse_results == NULL)
     return dex_future_new_for_error (g_steal_pointer (&local_error));
 
-  if (g_hash_table_contains (parse_results, "/css"))
-    {
-      const char *css_string = NULL;
+  config = g_value_get_object (g_hash_table_lookup (parse_results, "/"));
+  g_assert (config != NULL);
 
-      css_string = g_variant_get_string (
-          g_value_get_variant (
-              g_hash_table_lookup (
-                  parse_results, "/css")),
-          NULL);
-      g_ptr_array_add (css, g_strdup (css_string));
-    }
-
-  if (g_hash_table_contains (parse_results, "/rows"))
-    {
-      GPtrArray *list = NULL;
-
-      list = g_value_get_boxed (g_hash_table_lookup (parse_results, "/rows"));
-
-      for (guint i = 0; i < list->len; i++)
-        {
-          BzCuratedRow *row = NULL;
-
-          row = g_value_get_object (
-              g_hash_table_lookup (
-                  g_value_get_boxed (
-                      g_ptr_array_index (list, i)),
-                  "/"));
-          g_ptr_array_add (rows, g_object_ref (row));
-        }
-    }
-
-  dict = g_hash_table_new_full (
-      g_str_hash, g_str_equal,
-      g_free, (GDestroyNotify) g_ptr_array_unref);
-  g_hash_table_replace (
-      dict, g_strdup ("css"),
-      g_steal_pointer (&css));
-  g_hash_table_replace (
-      dict, g_strdup ("rows"),
-      g_steal_pointer (&rows));
-
-  return dex_future_new_take_boxed (
-      G_TYPE_HASH_TABLE,
-      g_steal_pointer (&dict));
+  return dex_future_new_for_object (config);
 }
 
 static DexFuture *
@@ -637,97 +578,21 @@ input_load_finally (DexFuture         *future,
   const GValue *value                = NULL;
 
   locker = g_mutex_locker_new (&data->mutex);
-
   g_list_store_remove_all (data->output);
-  g_clear_pointer (&data->css, destroy_css);
 
   bz_weak_get_or_return_reject (self, &data->self);
 
   value = dex_future_get_value (future, &local_error);
   if (value != NULL)
     {
-      GHashTable *dict = NULL;
-      GPtrArray  *css  = NULL;
-      GPtrArray  *rows = NULL;
+      BzRootCuratedConfig *config = NULL;
 
-      dict = g_value_get_boxed (value);
-      css  = g_hash_table_lookup (dict, "css");
-      rows = g_hash_table_lookup (dict, "rows");
-
-      g_assert (css != NULL);
-      g_assert (rows != NULL);
-
-      if (css->pdata != NULL && css->len > 0)
-        {
-          const char *css_string = NULL;
-
-          css_string = g_ptr_array_index (css, 0);
-
-          data->css = gtk_css_provider_new ();
-          gtk_css_provider_load_from_string (
-              data->css, css_string);
-          gtk_style_context_add_provider_for_display (
-              gdk_display_get_default (),
-              GTK_STYLE_PROVIDER (data->css),
-              GTK_STYLE_PROVIDER_PRIORITY_USER);
-        }
-
-      if (rows->pdata != NULL && rows->len > 0)
-        {
-          for (guint i = 0; i < rows->len; i++)
-            {
-              /* TODO: move this functionality to blueprint */
-
-              BzCuratedRow *row        = NULL;
-              GListModel   *sections   = NULL;
-              guint         n_sections = 0;
-
-              row        = g_ptr_array_index (rows, i);
-              sections   = bz_curated_row_get_sections (row);
-              n_sections = g_list_model_get_n_items (sections);
-
-              for (guint j = 0; j < n_sections; j++)
-                {
-                  g_autoptr (BzContentSection) section = NULL;
-
-                  section = g_list_model_get_item (sections, j);
-
-                  bz_content_section_set_banner_height (
-                      section,
-                      CLAMP (bz_content_section_get_banner_height (section), 100, 1000));
-
-                  if (self->factory != NULL)
-                    {
-                      GListModel *appids = NULL;
-
-                      appids = bz_content_section_get_appids (section);
-                      if (appids != NULL)
-                        {
-                          g_autoptr (GListModel) converted = NULL;
-
-                          converted = bz_application_map_factory_generate (self->factory, appids);
-                          bz_content_section_set_appids (section, converted);
-                        }
-                    }
-                }
-            }
-
-          g_list_store_splice (data->output, 0, 0, rows->pdata, rows->len);
-        }
+      config = g_value_get_object (value);
+      g_list_store_append (data->output, config);
     }
   else
-    {
-      // g_autoptr (BzContentSection) error_section = NULL;
-
-      g_warning ("Could not load curated config at path %s: %s",
-                 data->path, local_error->message);
-
-      // error_section = g_object_new (
-      //     BZ_TYPE_CONTENT_SECTION,
-      //     "error", local_error->message,
-      //     NULL);
-      // g_list_store_append (data->output, error_section);
-    }
+    g_warning ("Could not load curated config at path %s: %s",
+               data->path, local_error->message);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_INPUTS]);
   return NULL;
@@ -767,13 +632,4 @@ commence_reload (InputTrackingData *data)
 
 done:
   return G_SOURCE_REMOVE;
-}
-
-static void
-destroy_css (GtkCssProvider *css)
-{
-  gtk_style_context_remove_provider_for_display (
-      gdk_display_get_default (),
-      GTK_STYLE_PROVIDER (css));
-  g_object_unref (css);
 }

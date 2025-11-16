@@ -19,9 +19,10 @@
  */
 
 #include "bz-section-view.h"
+#include "bz-application.h"
 #include "bz-async-texture.h"
-#include "bz-content-section.h"
 #include "bz-curated-app-tile.h"
+#include "bz-curated-section.h"
 #include "bz-dynamic-list-view.h"
 #include "bz-entry-group.h"
 #include "bz-markdown-render.h"
@@ -30,7 +31,7 @@ struct _BzSectionView
 {
   AdwBin parent_instance;
 
-  BzContentSection *section;
+  BzCuratedSection *section;
   GListModel       *classes;
 
   AdwStyleManager *style_manager;
@@ -155,16 +156,36 @@ get_banner (BzSectionView *self,
 
   is_dark = adw_style_manager_get_dark (self->style_manager);
   if (is_dark)
-    uri = bz_content_section_get_dark_banner (self->section);
+    uri = bz_curated_section_get_dark_banner (self->section);
   else
-    uri = bz_content_section_get_light_banner (self->section);
+    uri = bz_curated_section_get_light_banner (self->section);
   if (uri == NULL)
-    uri = bz_content_section_get_banner (self->section);
+    uri = bz_curated_section_get_banner (self->section);
   if (uri == NULL)
     return NULL;
 
   source = g_file_new_for_uri (uri);
   return bz_async_texture_new_lazy (source, NULL);
+}
+
+static int
+clamp_banner_height (gpointer object,
+                     int      value)
+{
+  return CLAMP (value, 100, 1000);
+}
+
+static GListModel *
+convert_to_groups (gpointer    object,
+                   GListModel *value)
+{
+  BzStateInfo             *info    = NULL;
+  BzApplicationMapFactory *factory = NULL;
+
+  info    = bz_state_info_get_default ();
+  factory = bz_state_info_get_application_factory (info);
+
+  return bz_application_map_factory_generate (factory, value);
 }
 
 static void
@@ -199,8 +220,8 @@ bz_section_view_class_init (BzSectionViewClass *klass)
       g_param_spec_object (
           "section",
           NULL, NULL,
-          BZ_TYPE_CONTENT_SECTION,
-          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
+          BZ_TYPE_CURATED_SECTION,
+          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
@@ -231,6 +252,8 @@ bz_section_view_class_init (BzSectionViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, get_banner);
+  gtk_widget_class_bind_template_callback (widget_class, clamp_banner_height);
+  gtk_widget_class_bind_template_callback (widget_class, convert_to_groups);
   gtk_widget_class_bind_template_callback (widget_class, bind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, unbind_widget_cb);
 }
@@ -270,7 +293,7 @@ bz_section_view_init (BzSectionView *self)
 }
 
 GtkWidget *
-bz_section_view_new (BzContentSection *section)
+bz_section_view_new (BzCuratedSection *section)
 {
   return g_object_new (
       BZ_TYPE_SECTION_VIEW,
@@ -280,10 +303,10 @@ bz_section_view_new (BzContentSection *section)
 
 void
 bz_section_view_set_section (BzSectionView    *self,
-                             BzContentSection *section)
+                             BzCuratedSection *section)
 {
   g_return_if_fail (BZ_IS_SECTION_VIEW (self));
-  g_return_if_fail (section == NULL || BZ_IS_CONTENT_SECTION (section));
+  g_return_if_fail (section == NULL || BZ_IS_CURATED_SECTION (section));
 
   g_clear_object (&self->section);
 
@@ -333,7 +356,7 @@ bz_section_view_set_section (BzSectionView    *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SECTION]);
 }
 
-BzContentSection *
+BzCuratedSection *
 bz_section_view_get_section (BzSectionView *self)
 {
   g_return_val_if_fail (BZ_IS_SECTION_VIEW (self), NULL);

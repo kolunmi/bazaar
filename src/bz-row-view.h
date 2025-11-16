@@ -1,4 +1,4 @@
-/* bz-application.h
+/* bz-row-view.h
  *
  * Copyright 2025 Adam Masciola
  *
@@ -22,14 +22,21 @@
 
 #include <adwaita.h>
 
-#include "bz-state-info.h"
+#include "bz-curated-row.h"
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_APPLICATION (bz_application_get_type ())
-G_DECLARE_FINAL_TYPE (BzApplication, bz_application, BZ, APPLICATION, AdwApplication)
+#define BZ_TYPE_ROW_VIEW (bz_row_view_get_type ())
+G_DECLARE_FINAL_TYPE (BzRowView, bz_row_view, BZ, ROW_VIEW, AdwBin)
 
-BzStateInfo *
-bz_state_info_get_default (void);
+GtkWidget *
+bz_row_view_new (BzCuratedRow *row);
+
+void
+bz_row_view_set_row (BzRowView    *self,
+                             BzCuratedRow *row);
+
+BzCuratedRow *
+bz_row_view_get_row (BzRowView *self);
 
 G_END_DECLS

@@ -562,6 +562,10 @@ refresh (BzDynamicListView *self)
             GtkWidget *widget = NULL;
 
             widget = gtk_list_box_new ();
+            gtk_list_box_set_selection_mode (
+                GTK_LIST_BOX (widget),
+                GTK_SELECTION_NONE);
+
             gtk_list_box_bind_model (
                 GTK_LIST_BOX (widget), self->model,
                 (GtkListBoxCreateWidgetFunc) create_child_widget,
@@ -713,19 +717,40 @@ create_child_widget (GObject           *object,
   gtk_widget_set_receives_default (widget, TRUE);
   g_signal_emit (self, signals[SIGNAL_BIND_WIDGET], 0, widget, object);
 
-  if (self->noscroll_kind == BZ_DYNAMIC_LIST_VIEW_KIND_FLOW_BOX)
+  switch (self->noscroll_kind)
     {
-      GtkWidget *child = NULL;
+    case BZ_DYNAMIC_LIST_VIEW_KIND_LIST_BOX:
+      {
+        GtkWidget *child = NULL;
 
-      child = gtk_flow_box_child_new ();
-      gtk_widget_add_css_class (GTK_WIDGET (child), "disable-adw-flow-box-styling");
-      gtk_widget_set_focusable (GTK_WIDGET (child), FALSE);
-      gtk_flow_box_child_set_child (GTK_FLOW_BOX_CHILD (child), widget);
+        child = gtk_list_box_row_new ();
+        gtk_widget_add_css_class (GTK_WIDGET (child), "disable-adw-flow-box-styling");
+        gtk_widget_set_focusable (GTK_WIDGET (child), FALSE);
 
-      return child;
+        gtk_list_box_row_set_selectable (GTK_LIST_BOX_ROW (child), FALSE);
+        gtk_list_box_row_set_child (GTK_LIST_BOX_ROW (child), widget);
+
+        return child;
+      }
+    case BZ_DYNAMIC_LIST_VIEW_KIND_FLOW_BOX:
+      {
+        GtkWidget *child = NULL;
+
+        child = gtk_flow_box_child_new ();
+        gtk_widget_add_css_class (GTK_WIDGET (child), "disable-adw-flow-box-styling");
+        gtk_widget_set_focusable (GTK_WIDGET (child), FALSE);
+
+        gtk_flow_box_child_set_child (GTK_FLOW_BOX_CHILD (child), widget);
+
+        return child;
+      }
+    case BZ_DYNAMIC_LIST_VIEW_KIND_HBOX:
+    case BZ_DYNAMIC_LIST_VIEW_KIND_VBOX:
+    case BZ_DYNAMIC_LIST_VIEW_KIND_CAROUSEL:
+    case BZ_DYNAMIC_LIST_VIEW_N_KINDS:
+    default:
+      return widget;
     }
-  else
-    return widget;
 }
 
 static void

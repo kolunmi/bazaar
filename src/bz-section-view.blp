@@ -1,8 +1,9 @@
 using Gtk 4.0;
+using Gio 2.0;
 using Adw 1;
 
 template $BzSectionView: Adw.Bin {
-  hexpand: bind template.section as <$BzContentSection>.expand_in_row;
+  hexpand: bind template.section as <$BzCuratedSection>.expand_in_row;
 
   child: Box {
     orientation: vertical;
@@ -17,8 +18,8 @@ template $BzSectionView: Adw.Bin {
       wrap: true;
       wrap-mode: word_char;
       xalign: 0;
-      visible: bind $invert_boolean($is_null(template.section as <$BzContentSection>.error) as <bool>) as <bool>;
-      label: bind template.section as <$BzContentSection>.error;
+      visible: bind $invert_boolean($is_null(template.section as <$BzCuratedSection>.error) as <bool>) as <bool>;
+      label: bind template.section as <$BzCuratedSection>.error;
     }
 
     Overlay {
@@ -26,15 +27,15 @@ template $BzSectionView: Adw.Bin {
 
       child: Picture {
         css-name: "banner";
-        height-request: bind template.section as <$BzContentSection>.banner-height;
+        height-request: bind $clamp_banner_height(template.section as <$BzCuratedSection>.banner-height) as <int>;
 
         styles [
           "browser-banner",
         ]
 
         can-shrink: true;
-        paintable: bind $get_banner(template.section as <$BzContentSection>.banner as <string>) as <$GdkPaintable>;
-        content-fit: bind template.section as <$BzContentSection>.banner-fit;
+        paintable: bind $get_banner(template.section as <$BzCuratedSection>.banner as <string>) as <$GdkPaintable>;
+        content-fit: bind template.section as <$BzCuratedSection>.banner-fit;
       };
 
       [overlay]
@@ -47,8 +48,8 @@ template $BzSectionView: Adw.Bin {
           css-name: "banner-text-bg";
         };
 
-        halign: bind template.section as <$BzContentSection>.banner-text-halign;
-        valign: bind template.section as <$BzContentSection>.banner-text-valign;
+        halign: bind template.section as <$BzCuratedSection>.banner-text-halign;
+        valign: bind template.section as <$BzCuratedSection>.banner-text-valign;
 
         [overlay]
         Box banner_text {
@@ -74,9 +75,9 @@ template $BzSectionView: Adw.Bin {
             margin-start: 25;
             margin-end: 25;
 
-            visible: bind $invert_boolean($is_null(template.section as <$BzContentSection>.title) as <bool>) as <bool>;
-            xalign: bind template.section as <$BzContentSection>.banner-text-label-xalign;
-            label: bind template.section as <$BzContentSection>.title;
+            visible: bind $invert_boolean($is_null(template.section as <$BzCuratedSection>.title) as <bool>) as <bool>;
+            xalign: bind template.section as <$BzCuratedSection>.banner-text-label-xalign;
+            label: bind template.section as <$BzCuratedSection>.title;
           }
 
           Label {
@@ -93,9 +94,9 @@ template $BzSectionView: Adw.Bin {
             margin-start: 25;
             margin-end: 25;
 
-            visible: bind $invert_boolean($is_null(template.section as <$BzContentSection>.subtitle) as <bool>) as <bool>;
-            xalign: bind template.section as <$BzContentSection>.banner-text-label-xalign;
-            label: bind template.section as <$BzContentSection>.subtitle;
+            visible: bind $invert_boolean($is_null(template.section as <$BzCuratedSection>.subtitle) as <bool>) as <bool>;
+            xalign: bind template.section as <$BzCuratedSection>.banner-text-label-xalign;
+            label: bind template.section as <$BzCuratedSection>.subtitle;
           }
 
           Label {
@@ -112,9 +113,9 @@ template $BzSectionView: Adw.Bin {
             margin-start: 25;
             margin-end: 25;
 
-            visible: bind $invert_boolean($is_null(template.section as <$BzContentSection>.description) as <bool>) as <bool>;
-            xalign: bind template.section as <$BzContentSection>.banner-text-label-xalign;
-            label: bind template.section as <$BzContentSection>.description;
+            visible: bind $invert_boolean($is_null(template.section as <$BzCuratedSection>.description) as <bool>) as <bool>;
+            xalign: bind template.section as <$BzCuratedSection>.banner-text-label-xalign;
+            label: bind template.section as <$BzCuratedSection>.description;
           }
         }
       }
@@ -128,8 +129,8 @@ template $BzSectionView: Adw.Bin {
 
       halign: center;
 
-      visible: bind $invert_boolean($is_null(template.section as <$BzContentSection>.markdown as <string>) as <bool>) as <bool>;
-      markdown: bind template.section as <$BzContentSection>.markdown as <string>;
+      visible: bind $invert_boolean($is_null(template.section as <$BzCuratedSection>.markdown as <string>) as <bool>) as <bool>;
+      markdown: bind template.section as <$BzCuratedSection>.markdown as <string>;
     }
 
     $BzDynamicListView {
@@ -142,7 +143,7 @@ template $BzSectionView: Adw.Bin {
       noscroll-kind: flow-box;
       child-type: "BzCuratedAppTile";
       child-prop: "group";
-      model: bind template.section as <$BzContentSection>.appids;
+      model: bind $convert_to_groups(template.section as <$BzCuratedSection>.appids) as <Gio.ListModel>;
       bind-widget => $bind_widget_cb(template);      
       unbind-widget => $unbind_widget_cb(template);      
     }

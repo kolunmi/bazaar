@@ -1,5 +1,5 @@
 prefix=bz
-name=content_section
+name=curated_section
 parent-prefix=g
 parent-name=object
 author=AUTOGEN

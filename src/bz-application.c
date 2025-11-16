@@ -471,11 +471,11 @@ bz_application_about_action (GSimpleAction *action,
                              GVariant      *parameter,
                              gpointer       user_data)
 {
-  BzApplication *self   = user_data;
-  GtkWindow     *window = NULL;
-  AdwDialog     *dialog = NULL;
-  g_autoptr(GBytes) release_notes_bytes = NULL;
-  const char *release_notes_text = NULL;
+  BzApplication *self                    = user_data;
+  GtkWindow     *window                  = NULL;
+  AdwDialog     *dialog                  = NULL;
+  g_autoptr (GBytes) release_notes_bytes = NULL;
+  const char *release_notes_text         = NULL;
 
   const char *developers[] = {
     C_ ("About Dialog Developer Credit", "Adam Masciola <kolunmi@posteo.net>"),
@@ -696,6 +696,22 @@ bz_application_init (BzApplication *self)
       GTK_APPLICATION (self),
       "app.toggle-debug-mode",
       (const char *[]) { "<primary><alt>d", NULL });
+}
+
+BzStateInfo *
+bz_state_info_get_default (void)
+{
+  GApplication  *app  = NULL;
+  BzApplication *self = NULL;
+
+  app = g_application_get_default ();
+  if G_UNLIKELY (app == NULL)
+    return NULL;
+
+  self = (BzApplication *) app;
+  g_assert (BZ_IS_APPLICATION (self));
+
+  return self->state;
 }
 
 static void
