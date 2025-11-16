@@ -43,7 +43,7 @@ enum
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
 
-static inline double
+static double
 test_strings (const char *query,
               const char *against,
               gboolean    fuzzy);
@@ -429,7 +429,7 @@ query_sub_task_fiber (QuerySubTaskData *data)
        _start_var != NULL && *_start_var != '\0';                                                                      \
        _start_var = _end_var, _end_var = utf8_skip_to_next_of_class (&_start_var, G_UNICODE_SPACE_SEPARATOR))
 
-static inline double
+static double
 test_strings (const char *query,
               const char *against,
               gboolean    fuzzy)
@@ -504,7 +504,7 @@ test_strings (const char *query,
 
           if (q_len <= a_len &&
               memmem (a_s, a_len, q_s, q_len) != NULL)
-            query_token_score += (double) q_len;
+            query_token_score += (double) g_utf8_strlen (q_s, q_len);
         }
     }
 
