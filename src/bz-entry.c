@@ -111,6 +111,7 @@ typedef struct
   gint             min_display_length;
   gint             max_display_length;
   AsContentRating *content_rating;
+  GListModel      *keywords;
 
   gboolean    is_flathub;
   gboolean    verified;
@@ -177,6 +178,7 @@ enum
   PROP_MIN_DISPLAY_LENGTH,
   PROP_MAX_DISPLAY_LENGTH,
   PROP_CONTENT_RATING,
+  PROP_KEYWORDS,
 
   LAST_PROP
 };
@@ -400,6 +402,9 @@ bz_entry_get_property (GObject    *object,
     case PROP_CONTENT_RATING:
       g_value_set_object (value, priv->content_rating);
       break;
+    case PROP_KEYWORDS:
+      g_value_set_object (value, priv->keywords);
+      break;
     case PROP_IS_FLATHUB:
       g_value_set_boolean (value, priv->is_flathub);
       break;
@@ -595,6 +600,10 @@ bz_entry_set_property (GObject      *object,
     case PROP_CONTENT_RATING:
       g_clear_object (&priv->content_rating);
       priv->content_rating = g_value_dup_object (value);
+      break;
+    case PROP_KEYWORDS:
+      g_clear_object (&priv->keywords);
+      priv->keywords = g_value_dup_object (value);
       break;
     case PROP_IS_FLATHUB:
       priv->is_flathub = g_value_get_boolean (value);
@@ -936,6 +945,13 @@ bz_entry_class_init (BzEntryClass *klass)
           AS_TYPE_CONTENT_RATING,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
+  props[PROP_KEYWORDS] =
+      g_param_spec_object (
+          "keywords",
+          NULL, NULL,
+          G_TYPE_LIST_MODEL,
+          G_PARAM_READWRITE);
+
   props[PROP_IS_FLATHUB] =
       g_param_spec_boolean (
           "is-flathub",
@@ -1214,6 +1230,27 @@ bz_entry_real_serialize (BzSerializable  *serializable,
 
       g_variant_builder_add (builder, "{sv}", "content-rating-kind", g_variant_new_string (kind ? kind : "oars-1.1"));
       g_variant_builder_add (builder, "{sv}", "content-rating-values", g_variant_builder_end (sub_builder));
+    }
+  if (priv->keywords != NULL)
+    {
+      guint n_items = 0;
+
+      n_items = g_list_model_get_n_items (priv->keywords);
+      if (n_items > 0)
+        {
+          g_autoptr (GVariantBuilder) sub_builder = NULL;
+
+          sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("as"));
+          for (guint i = 0; i < n_items; i++)
+            {
+              g_autoptr (GtkStringObject) string = NULL;
+
+              string = g_list_model_get_item (priv->keywords, i);
+              g_variant_builder_add (sub_builder, "s", gtk_string_object_get_string (string));
+            }
+
+          g_variant_builder_add (builder, "{sv}", "keywords", g_variant_builder_end (sub_builder));
+        }
     }
   g_variant_builder_add (builder, "{sv}", "is-flathub", g_variant_new_boolean (priv->is_flathub));
   if (priv->is_flathub)
@@ -1495,6 +1532,27 @@ bz_entry_real_deserialize (BzSerializable *serializable,
               if (rating_value != AS_CONTENT_RATING_VALUE_UNKNOWN)
                 as_content_rating_set_value (priv->content_rating, rating_id, rating_value);
             }
+        }
+      else if (g_strcmp0 (key, "keywords") == 0)
+        {
+          g_autoptr (GListStore) store           = NULL;
+          g_autoptr (GVariantIter) keywords_iter = NULL;
+
+          store = g_list_store_new (GTK_TYPE_STRING_OBJECT);
+
+          keywords_iter = g_variant_iter_new (value);
+          for (;;)
+            {
+              g_autofree char *keyword               = NULL;
+              g_autoptr (GtkStringObject) string = NULL;
+
+              if (!g_variant_iter_next (keywords_iter, "s", &keyword))
+                break;
+              string = gtk_string_object_new (keyword);
+              g_list_store_append (store, string);
+            }
+
+          priv->keywords = G_LIST_MODEL (g_steal_pointer (&store));
         }
       else if (g_strcmp0 (key, "is-flathub") == 0)
         priv->is_flathub = g_variant_get_boolean (value);
@@ -2554,4 +2612,5 @@ clear_entry (BzEntry *self)
   g_clear_pointer (&priv->dark_accent_color, g_free);
   g_clear_object (&priv->download_stats);
   g_clear_object (&priv->content_rating);
+  g_clear_object (&priv->keywords);
 }
