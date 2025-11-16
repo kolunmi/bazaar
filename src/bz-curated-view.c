@@ -1,4 +1,4 @@
-/* bz-browse-widget.c
+/* bz-curated-view.c
  *
  * Copyright 2025 Adam Masciola
  *
@@ -20,14 +20,15 @@
 
 #include "config.h"
 
-#include "bz-browse-widget.h"
+#include "bz-curated-view.h"
 #include "bz-curated-row.h"
 #include "bz-dynamic-list-view.h"
 #include "bz-entry-group.h"
 #include "bz-inhibited-scrollable.h"
+#include "bz-root-curated-config.h"
 #include "bz-row-view.h"
 
-struct _BzBrowseWidget
+struct _BzCuratedView
 {
   AdwBin parent_instance;
 
@@ -38,7 +39,7 @@ struct _BzBrowseWidget
   AdwViewStack *stack;
 };
 
-G_DEFINE_FINAL_TYPE (BzBrowseWidget, bz_browse_widget, ADW_TYPE_BIN)
+G_DEFINE_FINAL_TYPE (BzCuratedView, bz_curated_view, ADW_TYPE_BIN)
 
 enum
 {
@@ -65,36 +66,36 @@ items_changed (GListModel     *model,
                guint           position,
                guint           removed,
                guint           added,
-               BzBrowseWidget *self);
+               BzCuratedView *self);
 
 static void
-set_page (BzBrowseWidget *self);
+set_page (BzCuratedView *self);
 
 static void
-bz_browse_widget_dispose (GObject *object)
+bz_curated_view_dispose (GObject *object)
 {
-  BzBrowseWidget *self = BZ_BROWSE_WIDGET (object);
+  BzCuratedView *self = BZ_CURATED_VIEW (object);
 
   if (self->provider != NULL)
     g_signal_handlers_disconnect_by_func (
         self->provider, items_changed, self);
   g_clear_object (&self->provider);
 
-  G_OBJECT_CLASS (bz_browse_widget_parent_class)->dispose (object);
+  G_OBJECT_CLASS (bz_curated_view_parent_class)->dispose (object);
 }
 
 static void
-bz_browse_widget_get_property (GObject    *object,
+bz_curated_view_get_property (GObject    *object,
                                guint       prop_id,
                                GValue     *value,
                                GParamSpec *pspec)
 {
-  BzBrowseWidget *self = BZ_BROWSE_WIDGET (object);
+  BzCuratedView *self = BZ_CURATED_VIEW (object);
 
   switch (prop_id)
     {
     case PROP_CONTENT_PROVIDER:
-      g_value_set_object (value, bz_browse_widget_get_content_provider (self));
+      g_value_set_object (value, bz_curated_view_get_content_provider (self));
       break;
     case PROP_ONLINE:
       g_value_set_boolean (value, self->online);
@@ -105,17 +106,17 @@ bz_browse_widget_get_property (GObject    *object,
 }
 
 static void
-bz_browse_widget_set_property (GObject      *object,
+bz_curated_view_set_property (GObject      *object,
                                guint         prop_id,
                                const GValue *value,
                                GParamSpec   *pspec)
 {
-  BzBrowseWidget *self = BZ_BROWSE_WIDGET (object);
+  BzCuratedView *self = BZ_CURATED_VIEW (object);
 
   switch (prop_id)
     {
     case PROP_CONTENT_PROVIDER:
-      bz_browse_widget_set_content_provider (self, g_value_get_object (value));
+      bz_curated_view_set_content_provider (self, g_value_get_object (value));
       break;
     case PROP_ONLINE:
       self->online = g_value_get_boolean (value);
@@ -131,21 +132,21 @@ bz_browse_widget_set_property (GObject      *object,
 }
 
 static void
-browse_flathub_cb (BzBrowseWidget *self,
+browse_flathub_cb (BzCuratedView *self,
                    GtkButton      *button)
 {
   g_signal_emit (self, signals[SIGNAL_BROWSE_FLATHUB], 0);
 }
 
 static void
-bz_browse_widget_class_init (BzBrowseWidgetClass *klass)
+bz_curated_view_class_init (BzCuratedViewClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
-  object_class->dispose      = bz_browse_widget_dispose;
-  object_class->get_property = bz_browse_widget_get_property;
-  object_class->set_property = bz_browse_widget_set_property;
+  object_class->dispose      = bz_curated_view_dispose;
+  object_class->get_property = bz_curated_view_get_property;
+  object_class->set_property = bz_curated_view_set_property;
 
   props[PROP_CONTENT_PROVIDER] =
       g_param_spec_object (
@@ -189,32 +190,33 @@ bz_browse_widget_class_init (BzBrowseWidgetClass *klass)
           G_TYPE_NONE, 0);
 
   g_type_ensure (BZ_TYPE_ROW_VIEW);
+  g_type_ensure (BZ_TYPE_ROOT_CURATED_CONFIG);
   g_type_ensure (BZ_TYPE_CURATED_ROW);
   g_type_ensure (BZ_TYPE_DYNAMIC_LIST_VIEW);
   g_type_ensure (BZ_TYPE_INHIBITED_SCROLLABLE);
 
-  gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-browse-widget.ui");
-  gtk_widget_class_bind_template_child (widget_class, BzBrowseWidget, stack);
+  gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-curated-view.ui");
+  gtk_widget_class_bind_template_child (widget_class, BzCuratedView, stack);
   gtk_widget_class_bind_template_callback (widget_class, browse_flathub_cb);
 }
 
 static void
-bz_browse_widget_init (BzBrowseWidget *self)
+bz_curated_view_init (BzCuratedView *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
 }
 
 GtkWidget *
-bz_browse_widget_new (void)
+bz_curated_view_new (void)
 {
-  return g_object_new (BZ_TYPE_BROWSE_WIDGET, NULL);
+  return g_object_new (BZ_TYPE_CURATED_VIEW, NULL);
 }
 
 void
-bz_browse_widget_set_content_provider (BzBrowseWidget    *self,
+bz_curated_view_set_content_provider (BzCuratedView    *self,
                                        BzContentProvider *provider)
 {
-  g_return_if_fail (BZ_IS_BROWSE_WIDGET (self));
+  g_return_if_fail (BZ_IS_CURATED_VIEW (self));
   g_return_if_fail (provider == NULL || BZ_IS_CONTENT_PROVIDER (provider));
 
   if (self->provider != NULL)
@@ -236,9 +238,9 @@ bz_browse_widget_set_content_provider (BzBrowseWidget    *self,
 }
 
 BzContentProvider *
-bz_browse_widget_get_content_provider (BzBrowseWidget *self)
+bz_curated_view_get_content_provider (BzCuratedView *self)
 {
-  g_return_val_if_fail (BZ_IS_BROWSE_WIDGET (self), NULL);
+  g_return_val_if_fail (BZ_IS_CURATED_VIEW (self), NULL);
   return self->provider;
 }
 
@@ -247,13 +249,13 @@ items_changed (GListModel     *model,
                guint           position,
                guint           removed,
                guint           added,
-               BzBrowseWidget *self)
+               BzCuratedView *self)
 {
   set_page (self);
 }
 
 static void
-set_page (BzBrowseWidget *self)
+set_page (BzCuratedView *self)
 {
   adw_view_stack_set_visible_child_name (
       self->stack,

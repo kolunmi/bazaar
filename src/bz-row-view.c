@@ -19,7 +19,7 @@
  */
 
 #include "bz-row-view.h"
-#include "bz-browse-widget.h"
+#include "bz-curated-view.h"
 #include "bz-dynamic-list-view.h"
 #include "bz-section-view.h"
 
@@ -111,7 +111,7 @@ group_activated_cb (GtkListItem  *list_item,
 {
   GtkWidget *self = NULL;
 
-  self = gtk_widget_get_ancestor (GTK_WIDGET (view), BZ_TYPE_BROWSE_WIDGET);
+  self = gtk_widget_get_ancestor (GTK_WIDGET (view), BZ_TYPE_CURATED_VIEW);
   g_assert (self != NULL);
 
   g_signal_emit_by_name (self, "group-selected", group);

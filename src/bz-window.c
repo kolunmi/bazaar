@@ -22,8 +22,8 @@
 
 #include <glib/gi18n.h>
 
-#include "bz-browse-widget.h"
 #include "bz-comet-overlay.h"
+#include "bz-curated-view.h"
 #include "bz-entry-group.h"
 #include "bz-entry-inspector.h"
 #include "bz-error.h"
@@ -273,8 +273,8 @@ remove_addon_cb (BzWindow   *self,
 
 static void
 remove_installed_cb (BzWindow   *self,
-                 BzEntry    *entry,
-                 BzFullView *view)
+                     BzEntry    *entry,
+                     BzFullView *view)
 {
   try_transact (self, entry, NULL, TRUE, FALSE, NULL);
 }
@@ -352,8 +352,8 @@ main_view_stack_changed_cb (BzWindow     *self,
 }
 
 static void
-browse_flathub_cb (BzWindow       *self,
-                   BzBrowseWidget *widget)
+browse_flathub_cb (BzWindow      *self,
+                   BzCuratedView *widget)
 {
   adw_view_stack_set_visible_child_name (self->main_view_stack, "flathub");
 }
@@ -497,7 +497,7 @@ bz_window_class_init (BzWindowClass *klass)
   g_type_ensure (BZ_TYPE_SEARCH_WIDGET);
   g_type_ensure (BZ_TYPE_GLOBAL_PROGRESS);
   g_type_ensure (BZ_TYPE_PROGRESS_BAR);
-  g_type_ensure (BZ_TYPE_BROWSE_WIDGET);
+  g_type_ensure (BZ_TYPE_CURATED_VIEW);
   g_type_ensure (BZ_TYPE_FULL_VIEW);
   g_type_ensure (BZ_TYPE_INSTALLED_PAGE);
   g_type_ensure (BZ_TYPE_FLATHUB_PAGE);
@@ -1093,8 +1093,7 @@ configure_remove_dialog (AdwAlertDialog *alert,
 
   adw_alert_dialog_set_heading (alert, heading);
   adw_alert_dialog_set_body (
-    alert,g_strdup_printf (_("It will not be possible to use %s after it is uninstalled.\n\nSettings and user data will be kept."),title)
-  );
+      alert, g_strdup_printf (_ ("It will not be possible to use %s after it is uninstalled.\n\nSettings and user data will be kept."), title));
 
   adw_alert_dialog_add_responses (alert,
                                   "cancel", _ ("Cancel"),

@@ -1,4 +1,4 @@
-/* bz-browse-widget.h
+/* bz-curated-view.h
  *
  * Copyright 2025 Adam Masciola
  *
@@ -26,17 +26,17 @@
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_BROWSE_WIDGET (bz_browse_widget_get_type ())
-G_DECLARE_FINAL_TYPE (BzBrowseWidget, bz_browse_widget, BZ, BROWSE_WIDGET, AdwBin)
+#define BZ_TYPE_CURATED_VIEW (bz_curated_view_get_type ())
+G_DECLARE_FINAL_TYPE (BzCuratedView, bz_curated_view, BZ, CURATED_VIEW, AdwBin)
 
 GtkWidget *
-bz_browse_widget_new (void);
+bz_curated_view_new (void);
 
 void
-bz_browse_widget_set_content_provider (BzBrowseWidget    *self,
-                                       BzContentProvider *provider);
+bz_curated_view_set_content_provider (BzCuratedView    *self,
+                                      BzContentProvider *provider);
 
 BzContentProvider *
-bz_browse_widget_get_content_provider (BzBrowseWidget *self);
+bz_curated_view_get_content_provider (BzCuratedView *self);
 
 G_END_DECLS
