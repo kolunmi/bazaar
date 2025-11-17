@@ -79,6 +79,7 @@ src/bz-share-list.blp
 src/bz-share-list.c
 src/bz-stats-dialog.blp
 src/bz-stats-dialog.c
+src/bz-tag-list.c
 src/bz-transaction-manager.c
 src/bz-transaction-view.blp
 src/bz-transaction-view.c

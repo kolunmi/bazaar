@@ -399,6 +399,8 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
   gint        max_display_length               = 0;
   gboolean    is_mobile_friendly               = FALSE;
   g_autoptr (AsContentRating) content_rating   = NULL;
+  GPtrArray *as_keywords                       = NULL;
+  g_autoptr (GListStore) keywords              = NULL;
 
   g_return_val_if_fail (FLATPAK_IS_REF (ref), NULL);
   g_return_val_if_fail (FLATPAK_IS_REMOTE_REF (ref) || FLATPAK_IS_BUNDLE_REF (ref), NULL);
@@ -935,7 +937,24 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
       strv          = g_strv_builder_end (builder);
       search_tokens = g_strjoinv (" ", strv);
     }
+  if (component != NULL)
+    {
+      as_keywords = as_component_get_keywords (component);
+      if (as_keywords != NULL && as_keywords->len > 0)
+        {
+          keywords = g_list_store_new (GTK_TYPE_STRING_OBJECT);
 
+          for (guint i = 0; i < as_keywords->len; i++)
+            {
+              const char *keyword                     = NULL;
+              g_autoptr (GtkStringObject) keyword_obj = NULL;
+
+              keyword     = g_ptr_array_index (as_keywords, i);
+              keyword_obj = gtk_string_object_new (keyword);
+              g_list_store_append (keywords, keyword_obj);
+            }
+        }
+    }
   g_object_set (
       self,
       "kinds", kinds,
@@ -975,6 +994,7 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
       "max-display-length", max_display_length,
       "is-mobile-friendly", is_mobile_friendly,
       "content-rating", content_rating,
+      "keywords", keywords,
       NULL);
 
   return g_steal_pointer (&self);

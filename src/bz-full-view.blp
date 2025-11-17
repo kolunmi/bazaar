@@ -714,34 +714,55 @@ template $BzFullView: Adw.Bin {
                         orientation: vertical;
                         margin-start: 17;
                         margin-end: 17;
-                        visible: bind $has_other_apps(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer-apps, template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>) as <bool>;
 
-                        Label {
-                          styles [
-                            "heading",
-                            "h4",
-                          ]
+                        Box {
+                          orientation: vertical;
+                          visible: bind $has_other_apps(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer-apps, template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>) as <bool>;
+                          Label {
+                            styles [
+                              "heading",
+                              "h4",
+                            ]
 
-                          label: bind $format_other_apps_label(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer) as <string>;
-                          xalign: 0;
-                          margin-bottom: 6;
-                          margin-start: 12;
+                            label: bind $format_other_apps_label(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer) as <string>;
+                            xalign: 0;
+                            margin-bottom: 6;
+                            margin-start: 12;
+                          }
+
+                          $BzDynamicListView {
+                            hexpand: true;
+                            scroll: false;
+                            noscroll-kind: flow-box;
+                            child-type: "BzAppTile";
+                            child-prop: "group";
+                            max-children-per-line: 2;
+                            bind-widget => $bind_app_tile_cb(template);
+                            unbind-widget => $unbind_app_tile_cb(template);
+
+                            model: SliceListModel {
+                              offset: 0;
+                              size: 10;
+                              model: bind $get_developer_apps_entries(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer-apps, template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>) as <Gio.ListModel>;
+                            };
+                          }
                         }
+                        $BzTagList {
+                          margin-start: 12;
+                          margin-end: 12;
+                          margin-top: 8;
 
-                        $BzDynamicListView {
-                          hexpand: true;
-                          scroll: false;
-                          noscroll-kind: flow-box;
-                          child-type: "BzAppTile";
-                          child-prop: "group";
-                          max-children-per-line: 2;
-                          bind-widget => $bind_app_tile_cb(template);
-                          unbind-widget => $unbind_app_tile_cb(template);
+                          flathub-state: bind template.state as <$BzStateInfo>.flathub;
+                          select => $tag_list_select_cb(template);
+
+                          prefix: Label {
+                            label: _("Tags:");
+                            styles ["dimmed"]
+                          };
 
                           model: SliceListModel {
-                            offset: 0;
-                            size: 100;
-                            model: bind $get_developer_apps_entries(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer-apps, template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>) as <Gio.ListModel>;
+                            size: 5;
+                            model: bind template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.keywords;
                           };
                         }
                       }
