@@ -34,5 +34,3 @@ property=banner_text_label_xalign double G_TYPE_DOUBLE double
 
 property=markdown char G_TYPE_STRING string
 property=appids GListModel G_TYPE_LIST_MODEL object
-
-property=rows int G_TYPE_INT int
