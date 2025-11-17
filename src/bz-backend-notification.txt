@@ -1,0 +1,13 @@
+prefix=bz
+name=backend_notification
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+enum=bz backend_notification_kind any installation update removal
+
+include="bz-entry.h"
+
+property=kind BzBackendNotificationKind BZ_TYPE_BACKEND_NOTIFICATION_KIND enum
+property=entry BzEntry BZ_TYPE_ENTRY object
+property=description char G_TYPE_STRING string
