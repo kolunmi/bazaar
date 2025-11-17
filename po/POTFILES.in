@@ -15,10 +15,10 @@ src/bz-application-map-factory.c
 src/bz-application.c
 src/bz-async-texture.c
 src/bz-backend.c
-src/bz-browse-widget.blp
-src/bz-browse-widget.c
 src/bz-comet-overlay.c
 src/bz-content-provider.c
+src/bz-curated-view.blp
+src/bz-curated-view.c
 src/bz-data-graph.c
 src/bz-decorated-screenshot.blp
 src/bz-decorated-screenshot.c
