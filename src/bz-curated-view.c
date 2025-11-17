@@ -20,8 +20,8 @@
 
 #include "config.h"
 
-#include "bz-curated-view.h"
 #include "bz-curated-row.h"
+#include "bz-curated-view.h"
 #include "bz-dynamic-list-view.h"
 #include "bz-entry-group.h"
 #include "bz-inhibited-scrollable.h"
@@ -34,6 +34,8 @@ struct _BzCuratedView
 
   BzContentProvider *provider;
   gboolean           online;
+
+  GPtrArray *css_providers;
 
   /* Template widgets */
   AdwViewStack *stack;
@@ -62,14 +64,17 @@ enum
 static guint signals[LAST_SIGNAL];
 
 static void
-items_changed (GListModel     *model,
-               guint           position,
-               guint           removed,
-               guint           added,
+items_changed (GListModel    *model,
+               guint          position,
+               guint          removed,
+               guint          added,
                BzCuratedView *self);
 
 static void
 set_page (BzCuratedView *self);
+
+static void
+release_css_provider (gpointer ptr);
 
 static void
 bz_curated_view_dispose (GObject *object)
@@ -81,14 +86,16 @@ bz_curated_view_dispose (GObject *object)
         self->provider, items_changed, self);
   g_clear_object (&self->provider);
 
+  g_clear_pointer (&self->css_providers, g_ptr_array_unref);
+
   G_OBJECT_CLASS (bz_curated_view_parent_class)->dispose (object);
 }
 
 static void
 bz_curated_view_get_property (GObject    *object,
-                               guint       prop_id,
-                               GValue     *value,
-                               GParamSpec *pspec)
+                              guint       prop_id,
+                              GValue     *value,
+                              GParamSpec *pspec)
 {
   BzCuratedView *self = BZ_CURATED_VIEW (object);
 
@@ -107,9 +114,9 @@ bz_curated_view_get_property (GObject    *object,
 
 static void
 bz_curated_view_set_property (GObject      *object,
-                               guint         prop_id,
-                               const GValue *value,
-                               GParamSpec   *pspec)
+                              guint         prop_id,
+                              const GValue *value,
+                              GParamSpec   *pspec)
 {
   BzCuratedView *self = BZ_CURATED_VIEW (object);
 
@@ -133,7 +140,7 @@ bz_curated_view_set_property (GObject      *object,
 
 static void
 browse_flathub_cb (BzCuratedView *self,
-                   GtkButton      *button)
+                   GtkButton     *button)
 {
   g_signal_emit (self, signals[SIGNAL_BROWSE_FLATHUB], 0);
 }
@@ -203,6 +210,7 @@ bz_curated_view_class_init (BzCuratedViewClass *klass)
 static void
 bz_curated_view_init (BzCuratedView *self)
 {
+  self->css_providers = g_ptr_array_new_with_free_func (release_css_provider);
   gtk_widget_init_template (GTK_WIDGET (self));
 }
 
@@ -213,26 +221,40 @@ bz_curated_view_new (void)
 }
 
 void
-bz_curated_view_set_content_provider (BzCuratedView    *self,
-                                       BzContentProvider *provider)
+bz_curated_view_set_content_provider (BzCuratedView     *self,
+                                      BzContentProvider *provider)
 {
   g_return_if_fail (BZ_IS_CURATED_VIEW (self));
   g_return_if_fail (provider == NULL || BZ_IS_CONTENT_PROVIDER (provider));
 
   if (self->provider != NULL)
-    g_signal_handlers_disconnect_by_func (
-        self->provider, items_changed, self);
+    {
+      g_signal_handlers_disconnect_by_func (
+          self->provider, items_changed, self);
+      items_changed (
+          G_LIST_MODEL (self->provider),
+          0,
+          g_list_model_get_n_items (G_LIST_MODEL (self->provider)),
+          0,
+          self);
+    }
   g_clear_object (&self->provider);
 
   if (provider != NULL)
     {
       self->provider = g_object_ref (provider);
+      items_changed (
+          G_LIST_MODEL (provider),
+          0,
+          0,
+          g_list_model_get_n_items (G_LIST_MODEL (self->provider)),
+          self);
       g_signal_connect (
           self->provider, "items-changed",
           G_CALLBACK (items_changed), self);
     }
-
-  set_page (self);
+  else
+    set_page (self);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CONTENT_PROVIDER]);
 }
@@ -245,12 +267,37 @@ bz_curated_view_get_content_provider (BzCuratedView *self)
 }
 
 static void
-items_changed (GListModel     *model,
-               guint           position,
-               guint           removed,
-               guint           added,
+items_changed (GListModel    *model,
+               guint          position,
+               guint          removed,
+               guint          added,
                BzCuratedView *self)
 {
+  if (removed > 0)
+    g_ptr_array_remove_range (self->css_providers, position, removed);
+
+  for (guint i = 0; i < added; i++)
+    {
+      g_autoptr (BzRootCuratedConfig) config = NULL;
+      const char *css                        = NULL;
+      g_autoptr (GtkCssProvider) provider    = NULL;
+
+      config = g_list_model_get_item (model, position + i);
+      css    = bz_root_curated_config_get_css (config);
+
+      provider = gtk_css_provider_new ();
+      if (css != NULL)
+        gtk_css_provider_load_from_string (provider, css);
+      gtk_style_context_add_provider_for_display (
+          gdk_display_get_default (),
+          GTK_STYLE_PROVIDER (provider),
+          GTK_STYLE_PROVIDER_PRIORITY_USER);
+
+      g_ptr_array_insert (self->css_providers,
+                          position + i,
+                          g_steal_pointer (&provider));
+    }
+
   set_page (self);
 }
 
@@ -263,4 +310,15 @@ set_page (BzCuratedView *self)
               g_list_model_get_n_items (G_LIST_MODEL (self->provider)) > 0
           ? "content"
           : "empty");
+}
+
+static void
+release_css_provider (gpointer ptr)
+{
+  GtkCssProvider *provider = ptr;
+
+  gtk_style_context_remove_provider_for_display (
+      gdk_display_get_default (),
+      GTK_STYLE_PROVIDER (provider));
+  g_object_unref (provider);
 }
