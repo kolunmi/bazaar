@@ -228,6 +228,16 @@ is_zero (gpointer object,
 }
 
 static gboolean
+is_longer (gpointer    object,
+          GListModel *model,
+          int         value)
+{
+  if (model == NULL)
+    return FALSE;
+  return g_list_model_get_n_items (model) > value;
+}
+
+static gboolean
 is_null (gpointer object,
          GObject *value)
 {
@@ -1032,6 +1042,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, logical_and);
+  gtk_widget_class_bind_template_callback (widget_class, is_longer);
   gtk_widget_class_bind_template_callback (widget_class, bool_to_string);
   gtk_widget_class_bind_template_callback (widget_class, format_recent_downloads);
   gtk_widget_class_bind_template_callback (widget_class, format_recent_downloads_tooltip);

@@ -742,9 +742,22 @@ template $BzFullView: Adw.Bin {
 
                             model: SliceListModel {
                               offset: 0;
-                              size: 10;
+                              size: 6;
                               model: bind $get_developer_apps_entries(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer-apps, template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>) as <Gio.ListModel>;
                             };
+                          }
+                          Button {
+                            visible: bind $is_longer(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer-apps, 6) as <bool>;
+                            child: Label {
+                              label: _("Show More");
+                              margin-start: 16;
+                              margin-end: 16;
+                            };
+                            halign: center;
+                            margin-top: 6;
+                            margin-bottom: 8;
+
+                            styles ["circular"]
                           }
                         }
                         $BzTagList {
