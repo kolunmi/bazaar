@@ -76,6 +76,11 @@ static void
 refresh_dark_light_classes (BzSectionView   *self,
                             AdwStyleManager *mgr);
 
+static BzAsyncTexture *
+choose_image (const char *default_variant_uri,
+              const char *light_variant_uri,
+              const char *dark_variant_uri);
+
 static void
 bz_section_view_dispose (GObject *object)
 {
@@ -143,35 +148,56 @@ is_null (gpointer object,
 }
 
 static BzAsyncTexture *
-get_banner (BzSectionView *self,
-            GdkPaintable  *value)
+get_banner (gpointer               object,
+            BzCuratedCategoryInfo *info)
 {
-  gboolean    is_dark                = FALSE;
-  const char *uri                    = NULL;
-  g_autoptr (GFile) source           = NULL;
-  g_autoptr (GdkPaintable) paintable = NULL;
+  const char *banner       = NULL;
+  const char *light_banner = NULL;
+  const char *dark_banner  = NULL;
 
-  if (self->section == NULL)
+  if (!BZ_IS_CURATED_CATEGORY_INFO (info))
     return NULL;
 
-  is_dark = adw_style_manager_get_dark (self->style_manager);
-  if (is_dark)
-    uri = bz_curated_section_get_dark_banner (self->section);
-  else
-    uri = bz_curated_section_get_light_banner (self->section);
-  if (uri == NULL)
-    uri = bz_curated_section_get_banner (self->section);
-  if (uri == NULL)
+  banner       = bz_curated_category_info_get_banner (info);
+  light_banner = bz_curated_category_info_get_light_banner (info);
+  dark_banner  = bz_curated_category_info_get_dark_banner (info);
+
+  return choose_image (banner, light_banner, dark_banner);
+}
+
+static BzAsyncTexture *
+get_image (gpointer            object,
+           BzCuratedImageInfo *info)
+{
+  const char *image       = NULL;
+  const char *light_image = NULL;
+  const char *dark_image  = NULL;
+
+  if (!BZ_IS_CURATED_IMAGE_INFO (info))
     return NULL;
 
-  source = g_file_new_for_uri (uri);
-  return bz_async_texture_new_lazy (source, NULL);
+  image       = bz_curated_image_info_get_uri (info);
+  light_image = bz_curated_image_info_get_light_uri (info);
+  dark_image  = bz_curated_image_info_get_dark_uri (info);
+
+  return choose_image (image, light_image, dark_image);
 }
 
 static int
 clamp_banner_height (gpointer object,
                      int      value)
 {
+  if (value == 0)
+    return 300;
+  return CLAMP (value, 100, 1000);
+}
+
+static int
+clamp_image_dimension (gpointer object,
+                       int      value)
+{
+  if (value == 0)
+    return 200;
   return CLAMP (value, 100, 1000);
 }
 
@@ -252,7 +278,9 @@ bz_section_view_class_init (BzSectionViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, get_banner);
+  gtk_widget_class_bind_template_callback (widget_class, get_image);
   gtk_widget_class_bind_template_callback (widget_class, clamp_banner_height);
+  gtk_widget_class_bind_template_callback (widget_class, clamp_image_dimension);
   gtk_widget_class_bind_template_callback (widget_class, convert_to_groups);
   gtk_widget_class_bind_template_callback (widget_class, bind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, unbind_widget_cb);
@@ -266,7 +294,11 @@ dark_changed (BzSectionView   *self,
   refresh_dark_light_classes (self, mgr);
 
   if (self->section != NULL)
-    g_object_notify (G_OBJECT (self->section), "banner");
+    {
+      g_object_notify (G_OBJECT (self->section), "category");
+      g_object_notify (G_OBJECT (self->section), "markdown");
+      g_object_notify (G_OBJECT (self->section), "image");
+    }
 }
 
 static void
@@ -422,4 +454,28 @@ refresh_dark_light_classes (BzSectionView   *self,
           gtk_widget_add_css_class (GTK_WIDGET (self), class);
         }
     }
+}
+
+static BzAsyncTexture *
+choose_image (const char *default_variant_uri,
+              const char *light_variant_uri,
+              const char *dark_variant_uri)
+{
+  gboolean    is_dark                = FALSE;
+  const char *uri                    = NULL;
+  g_autoptr (GFile) source           = NULL;
+  g_autoptr (GdkPaintable) paintable = NULL;
+
+  is_dark = adw_style_manager_get_dark (adw_style_manager_get_default ());
+  if (is_dark)
+    uri = dark_variant_uri;
+  else
+    uri = light_variant_uri;
+  if (uri == NULL)
+    uri = default_variant_uri;
+  if (uri == NULL)
+    return NULL;
+
+  source = g_file_new_for_uri (uri);
+  return bz_async_texture_new_lazy (source, NULL);
 }
