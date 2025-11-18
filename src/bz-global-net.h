@@ -1,4 +1,4 @@
-/* bz-global-state.h
+/* bz-global-net.h
  *
  * Copyright 2025 Adam Masciola
  *

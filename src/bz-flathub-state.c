@@ -30,7 +30,7 @@
 #include "bz-env.h"
 #include "bz-flathub-category.h"
 #include "bz-flathub-state.h"
-#include "bz-global-state.h"
+#include "bz-global-net.h"
 #include "bz-io.h"
 #include "bz-util.h"
 

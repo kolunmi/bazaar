@@ -30,7 +30,7 @@
 #include "bz-backend.h"
 #include "bz-env.h"
 #include "bz-flatpak-private.h"
-#include "bz-global-state.h"
+#include "bz-global-net.h"
 #include "bz-io.h"
 #include "bz-util.h"
 

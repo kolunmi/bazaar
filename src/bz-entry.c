@@ -30,7 +30,7 @@
 #include "bz-data-point.h"
 #include "bz-entry.h"
 #include "bz-env.h"
-#include "bz-global-state.h"
+#include "bz-global-net.h"
 #include "bz-io.h"
 #include "bz-issue.h"
 #include "bz-release.h"

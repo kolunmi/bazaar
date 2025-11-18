@@ -21,7 +21,7 @@ md4c_dep             = dependency('md4c', version: '>= 0.5.1')
 
 dl_worker_sources = [
   'bz-env.c',
-  'bz-global-state.c',
+  'bz-global-net.c',
   'dl-worker.c',
 ]
 
@@ -91,7 +91,7 @@ bz_sources = [
   'bz-flatpak-instance.c',
   'bz-full-view.c',
   'bz-global-progress.c',
-  'bz-global-state.c',
+  'bz-global-net.c',
   'bz-gnome-shell-search-provider.c',
   'bz-group-tile-css-watcher.c',
   'bz-hardware-support-dialog.c',

@@ -35,7 +35,7 @@
 #include "bz-fading-clamp.h"
 #include "bz-flatpak-entry.h"
 #include "bz-full-view.h"
-#include "bz-global-state.h"
+#include "bz-global-net.h"
 #include "bz-hardware-support-dialog.h"
 #include "bz-lazy-async-texture-model.h"
 #include "bz-license-dialog.h"
