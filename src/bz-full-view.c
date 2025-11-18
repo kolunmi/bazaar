@@ -118,9 +118,13 @@ debounce_timeout (BzFullView *self);
 static DexFuture *
 retrieve_star_string_fiber (GWeakRef *wr);
 
-static void addon_transact_cb (BzFullView     *self,
-                               BzEntry        *entry,
-                               BzAddonsDialog *dialog);
+static void
+addon_transact_cb (BzFullView     *self,
+                   BzEntry        *entry,
+                   BzAddonsDialog *dialog);
+
+static void
+grab_first_button (BzFullView *self);
 
 static void
 bz_full_view_dispose (GObject *object)
@@ -1182,21 +1186,6 @@ bz_full_view_get_transaction_manager (BzFullView *self)
 }
 
 void
-grab_first_button (BzFullView *self)
-{
-  g_return_if_fail (BZ_IS_FULL_VIEW (self));
-
-  if (gtk_widget_get_visible (self->wide_open_button))
-    gtk_widget_grab_focus (self->wide_open_button);
-  else if (gtk_widget_get_visible (self->wide_install_button))
-    gtk_widget_grab_focus (self->wide_install_button);
-  else if (gtk_widget_get_visible (self->narrow_install_button))
-    gtk_widget_grab_focus (self->narrow_install_button);
-  else if (gtk_widget_get_visible (self->narrow_open_button))
-    gtk_widget_grab_focus (self->narrow_open_button);
-}
-
-void
 bz_full_view_set_entry_group (BzFullView   *self,
                               BzEntryGroup *group)
 {
@@ -1369,4 +1358,19 @@ retrieve_star_string_fiber (GWeakRef *wr)
 done:
   gtk_label_set_label (self->forge_stars_label, fmt != NULL ? fmt : "?");
   return NULL;
+}
+
+static void
+grab_first_button (BzFullView *self)
+{
+  g_return_if_fail (BZ_IS_FULL_VIEW (self));
+
+  if (gtk_widget_get_visible (self->wide_open_button))
+    gtk_widget_grab_focus (self->wide_open_button);
+  else if (gtk_widget_get_visible (self->wide_install_button))
+    gtk_widget_grab_focus (self->wide_install_button);
+  else if (gtk_widget_get_visible (self->narrow_install_button))
+    gtk_widget_grab_focus (self->narrow_install_button);
+  else if (gtk_widget_get_visible (self->narrow_open_button))
+    gtk_widget_grab_focus (self->narrow_open_button);
 }
