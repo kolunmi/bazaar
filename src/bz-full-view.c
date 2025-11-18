@@ -574,13 +574,13 @@ more_apps_button_clicked_cb (BzFullView *self,
 {
   g_autoptr (GListModel) model = NULL;
   guint              n_items;
-  g_autofree char   *title     = NULL;
-  g_autofree char   *subtitle  = NULL;
-  AdwNavigationPage *apps_page = NULL;
-  GtkWidget         *nav_view  = NULL;
-  GListModel        *app_ids   = NULL;
-  BzEntry           *entry     = NULL;
-  const char        *developer = NULL;
+  g_autofree char   *title       = NULL;
+  g_autofree char   *subtitle    = NULL;
+  AdwNavigationPage *apps_page   = NULL;
+  GtkWidget         *nav_view    = NULL;
+  g_autoptr (GListModel) app_ids = NULL;
+  BzEntry    *entry              = NULL;
+  const char *developer          = NULL;
 
   g_return_if_fail (BZ_IS_FULL_VIEW (self));
   g_return_if_fail (GTK_IS_BUTTON (button));
