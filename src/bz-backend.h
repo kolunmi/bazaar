@@ -41,12 +41,8 @@ struct _BzBackendInterface
                                     GCancellable *cancellable);
 
   /* DexFuture* -> gboolean */
-  DexFuture *(*retrieve_remote_entries) (BzBackend     *self,
-                                         DexChannel    *channel,
-                                         GPtrArray     *blocked_names,
-                                         GCancellable  *cancellable,
-                                         gpointer       user_data,
-                                         GDestroyNotify destroy_user_data);
+  DexFuture *(*retrieve_remote_entries) (BzBackend    *self,
+                                         GCancellable *cancellable);
 
   /* DexFuture* -> GHashTable* */
   DexFuture *(*retrieve_install_ids) (BzBackend    *self,
@@ -77,20 +73,8 @@ bz_backend_load_local_package (BzBackend    *self,
                                GCancellable *cancellable);
 
 DexFuture *
-bz_backend_retrieve_remote_entries (BzBackend     *self,
-                                    DexChannel    *channel,
-                                    GPtrArray     *blocked_names,
-                                    GCancellable  *cancellable,
-                                    gpointer       user_data,
-                                    GDestroyNotify destroy_user_data);
-
-DexFuture *
-bz_backend_retrieve_remote_entries_with_blocklists (BzBackend     *self,
-                                                    DexChannel    *channel,
-                                                    GListModel    *blocklists,
-                                                    GCancellable  *cancellable,
-                                                    gpointer       user_data,
-                                                    GDestroyNotify destroy_user_data);
+bz_backend_retrieve_remote_entries (BzBackend    *self,
+                                    GCancellable *cancellable);
 
 DexFuture *
 bz_backend_retrieve_install_ids (BzBackend    *self,
