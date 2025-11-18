@@ -281,7 +281,7 @@ template $BzFullView: Adw.Bin {
                             spacing: 10;
                             valign: center;
 
-                            Button {
+                            Button wide_open_button {
                               styles [
                                 "pill",
                               ]
@@ -293,7 +293,7 @@ template $BzFullView: Adw.Bin {
                               clicked => $run_cb(template);
                             }
 
-                            Button {
+                            Button wide_install_button {
                               styles [
                                 "suggested-action",
                                 "pill",
@@ -511,7 +511,7 @@ template $BzFullView: Adw.Bin {
                           spacing: 8;
                           hexpand: true;
 
-                          Button {
+                          Button narrow_install_button {
                             styles [
                               "suggested-action",
                               "pill",
@@ -539,7 +539,7 @@ template $BzFullView: Adw.Bin {
                             clicked => $remove_cb(template);
                           }
 
-                          Button {
+                          Button narrow_open_button {
                             styles [
                               "pill",
                             ]
@@ -742,9 +742,19 @@ template $BzFullView: Adw.Bin {
 
                             model: SliceListModel {
                               offset: 0;
-                              size: 10;
+                              size: 6;
                               model: bind $get_developer_apps_entries(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer-apps, template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>) as <Gio.ListModel>;
                             };
+                          }
+                          Button {
+                            visible: bind $is_longer(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer-apps, 6) as <bool>;
+                            label: bind $format_more_other_apps_label(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer) as <string>;
+                            clicked => $more_apps_button_clicked_cb(template);
+                            halign: center;
+                            margin-top: 6;
+                            margin-bottom: 8;
+
+                            styles ["pill"]
                           }
                         }
                         $BzTagList {

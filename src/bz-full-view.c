@@ -27,6 +27,7 @@
 #include "bz-age-rating-dialog.h"
 #include "bz-app-size-dialog.h"
 #include "bz-app-tile.h"
+#include "bz-apps-page.h"
 #include "bz-appstream-description-render.h"
 #include "bz-context-tile.h"
 #include "bz-dynamic-list-view.h"
@@ -74,6 +75,11 @@ struct _BzFullView
   GtkWidget         *forge_stars;
   GtkLabel          *forge_stars_label;
   GtkToggleButton   *description_toggle;
+
+  GtkWidget *wide_open_button;
+  GtkWidget *wide_install_button;
+  GtkWidget *narrow_install_button;
+  GtkWidget *narrow_open_button;
 };
 
 G_DEFINE_FINAL_TYPE (BzFullView, bz_full_view, ADW_TYPE_BIN)
@@ -112,9 +118,13 @@ debounce_timeout (BzFullView *self);
 static DexFuture *
 retrieve_star_string_fiber (GWeakRef *wr);
 
-static void addon_transact_cb (BzFullView     *self,
-                               BzEntry        *entry,
-                               BzAddonsDialog *dialog);
+static void
+addon_transact_cb (BzFullView     *self,
+                   BzEntry        *entry,
+                   BzAddonsDialog *dialog);
+
+static void
+grab_first_button (BzFullView *self);
 
 static void
 bz_full_view_dispose (GObject *object)
@@ -225,6 +235,16 @@ is_zero (gpointer object,
          int      value)
 {
   return value == 0;
+}
+
+static gboolean
+is_longer (gpointer    object,
+           GListModel *model,
+           int         value)
+{
+  if (model == NULL)
+    return FALSE;
+  return g_list_model_get_n_items (model) > value;
 }
 
 static gboolean
@@ -472,6 +492,14 @@ pick_license_warning (gpointer object,
 static char *
 format_other_apps_label (gpointer object, const char *developer)
 {
+  if (!developer || *developer == '\0' || strlen (developer) > 12)
+    return g_strdup (_ ("More Apps"));
+  return g_strdup_printf (_ ("More Apps by %s"), developer);
+}
+
+static char *
+format_more_other_apps_label (gpointer object, const char *developer)
+{
   if (!developer || *developer == '\0')
     return g_strdup (_ ("Other Apps by this Developer"));
 
@@ -534,24 +562,71 @@ get_developer_apps_entries (gpointer object, GtkStringList *app_ids, BzEntry *en
   return bz_application_map_factory_generate (factory, G_LIST_MODEL (filtered));
 }
 
-static gboolean
-scroll_to_top_idle (GtkAdjustment *vadj)
+static void
+apps_page_select_cb (BzFullView        *self,
+                     BzEntryGroup      *group,
+                     AdwNavigationPage *page)
 {
-  gtk_adjustment_set_value (vadj, 0.0);
-  return G_SOURCE_REMOVE;
+  GtkWidget *nav_view = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
+  adw_navigation_view_pop (ADW_NAVIGATION_VIEW (nav_view));
+  bz_full_view_set_entry_group (self, group);
+}
+
+static void
+more_apps_button_clicked_cb (BzFullView *self,
+                             GtkButton  *button)
+{
+  g_autoptr (GListModel) model = NULL;
+  guint              n_items;
+  g_autofree char   *title       = NULL;
+  g_autofree char   *subtitle    = NULL;
+  AdwNavigationPage *apps_page   = NULL;
+  GtkWidget         *nav_view    = NULL;
+  g_autoptr (GListModel) app_ids = NULL;
+  BzEntry    *entry              = NULL;
+  const char *developer          = NULL;
+
+  g_return_if_fail (BZ_IS_FULL_VIEW (self));
+  g_return_if_fail (GTK_IS_BUTTON (button));
+
+  entry = bz_result_get_object (self->ui_entry);
+  if (entry == NULL)
+    return;
+
+  g_object_get (entry, "developer-apps", &app_ids, NULL);
+
+  model = bz_application_map_factory_generate (
+      bz_state_info_get_application_factory (self->state),
+      app_ids);
+
+  n_items = g_list_model_get_n_items (model);
+
+  developer = bz_entry_get_developer (entry);
+  if (developer != NULL && *developer != '\0')
+    title = g_strdup_printf (_ ("Other Apps by %s"), developer);
+  else
+    title = g_strdup (_ ("Other Apps"));
+
+  subtitle = g_strdup_printf (ngettext ("%d application", "%d applications", n_items), n_items);
+
+  apps_page = bz_apps_page_new (title, model);
+  bz_apps_page_set_subtitle (BZ_APPS_PAGE (apps_page), subtitle);
+
+  g_signal_connect_swapped (
+      apps_page, "select",
+      G_CALLBACK (apps_page_select_cb), self);
+
+  nav_view = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
+  if (nav_view != NULL)
+    adw_navigation_view_push (ADW_NAVIGATION_VIEW (nav_view), apps_page);
 }
 
 static void
 app_tile_clicked_cb (BzFullView *self,
                      BzAppTile  *tile)
 {
-  GtkAdjustment *vadj;
-  BzEntryGroup  *group = bz_app_tile_get_group (tile);
-
+  BzEntryGroup *group = bz_app_tile_get_group (tile);
   bz_full_view_set_entry_group (self, group);
-
-  vadj = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (self->main_scroll));
-  g_idle_add_once ((GSourceOnceFunc) scroll_to_top_idle, vadj);
 }
 
 static void
@@ -578,12 +653,7 @@ static void
 tag_list_select_cb (BzFullView   *self,
                     BzEntryGroup *group)
 {
-  GtkAdjustment *vadj;
-
   bz_full_view_set_entry_group (self, group);
-
-  vadj = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (self->main_scroll));
-  g_idle_add_once ((GSourceOnceFunc) scroll_to_top_idle, vadj);
 }
 
 static void
@@ -1028,10 +1098,15 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzFullView, forge_stars);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, forge_stars_label);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, description_toggle);
+  gtk_widget_class_bind_template_child (widget_class, BzFullView, wide_open_button);
+  gtk_widget_class_bind_template_child (widget_class, BzFullView, wide_install_button);
+  gtk_widget_class_bind_template_child (widget_class, BzFullView, narrow_install_button);
+  gtk_widget_class_bind_template_child (widget_class, BzFullView, narrow_open_button);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, logical_and);
+  gtk_widget_class_bind_template_callback (widget_class, is_longer);
   gtk_widget_class_bind_template_callback (widget_class, bool_to_string);
   gtk_widget_class_bind_template_callback (widget_class, format_recent_downloads);
   gtk_widget_class_bind_template_callback (widget_class, format_recent_downloads_tooltip);
@@ -1050,7 +1125,9 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, get_formfactor_tooltip);
   gtk_widget_class_bind_template_callback (widget_class, has_link);
   gtk_widget_class_bind_template_callback (widget_class, format_other_apps_label);
+  gtk_widget_class_bind_template_callback (widget_class, format_more_other_apps_label);
   gtk_widget_class_bind_template_callback (widget_class, get_developer_apps_entries);
+  gtk_widget_class_bind_template_callback (widget_class, more_apps_button_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, has_other_apps);
   gtk_widget_class_bind_template_callback (widget_class, open_url_cb);
   gtk_widget_class_bind_template_callback (widget_class, open_flathub_url_cb);
@@ -1150,6 +1227,10 @@ bz_full_view_set_entry_group (BzFullView   *self,
     }
   else
     adw_view_stack_set_visible_child_name (self->stack, "empty");
+
+  grab_first_button (self);
+
+  gtk_adjustment_set_value (gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (self->main_scroll)), 0.0);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ENTRY_GROUP]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_UI_ENTRY]);
@@ -1277,4 +1358,19 @@ retrieve_star_string_fiber (GWeakRef *wr)
 done:
   gtk_label_set_label (self->forge_stars_label, fmt != NULL ? fmt : "?");
   return NULL;
+}
+
+static void
+grab_first_button (BzFullView *self)
+{
+  g_return_if_fail (BZ_IS_FULL_VIEW (self));
+
+  if (gtk_widget_get_visible (self->wide_open_button))
+    gtk_widget_grab_focus (self->wide_open_button);
+  else if (gtk_widget_get_visible (self->wide_install_button))
+    gtk_widget_grab_focus (self->wide_install_button);
+  else if (gtk_widget_get_visible (self->narrow_install_button))
+    gtk_widget_grab_focus (self->narrow_install_button);
+  else if (gtk_widget_get_visible (self->narrow_open_button))
+    gtk_widget_grab_focus (self->narrow_open_button);
 }
