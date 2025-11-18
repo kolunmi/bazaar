@@ -428,21 +428,12 @@ bz_flatpak_instance_schedule_transaction (BzBackend    *backend,
   BzFlatpakEntry   **removals_dup  = NULL;
   g_autoptr (TransactionData) data = NULL;
 
-  if (n_installs > 0)
-    {
-      for (guint i = 0; i < n_installs; i++)
-        g_return_val_if_fail (BZ_IS_FLATPAK_ENTRY (installs[i]), NULL);
-    }
-  if (n_updates > 0)
-    {
-      for (guint i = 0; i < n_updates; i++)
-        g_return_val_if_fail (BZ_IS_FLATPAK_ENTRY (updates[i]), NULL);
-    }
-  if (n_removals > 0)
-    {
-      for (guint i = 0; i < n_removals; i++)
-        g_return_val_if_fail (BZ_IS_FLATPAK_ENTRY (removals[i]), NULL);
-    }
+  for (guint i = 0; i < n_installs; i++)
+    dex_return_error_if_fail (BZ_IS_FLATPAK_ENTRY (installs[i]));
+  for (guint i = 0; i < n_updates; i++)
+    dex_return_error_if_fail (BZ_IS_FLATPAK_ENTRY (updates[i]));
+  for (guint i = 0; i < n_removals; i++)
+    dex_return_error_if_fail (BZ_IS_FLATPAK_ENTRY (removals[i]));
 
   if (n_installs > 0)
     {
