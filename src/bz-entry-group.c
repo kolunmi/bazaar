@@ -729,7 +729,7 @@ bz_entry_group_add (BzEntryGroup *self,
   usefulness = bz_entry_calc_usefulness (entry);
   existing   = gtk_string_list_find (self->unique_ids, unique_id);
 
-  if (usefulness > self->max_usefulness)
+  if (usefulness >= self->max_usefulness)
     {
       if (existing != G_MAXUINT)
         gtk_string_list_remove (self->unique_ids, existing);

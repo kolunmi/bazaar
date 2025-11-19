@@ -134,9 +134,6 @@ static DexFuture *
 init_finally (DexFuture *future,
               GWeakRef  *wr);
 
-static DexFuture *
-update_check_fiber (BzApplication *self);
-
 static gboolean
 window_close_request (BzApplication *self,
                       GtkWidget     *window);
@@ -1068,20 +1065,6 @@ init_fiber (GWeakRef *wr)
       bz_flathub_state_update_to_today (self->flathub);
     }
 
-  self->flatpak_notifs = bz_backend_create_notification_channel (
-      BZ_BACKEND (self->flatpak));
-  self->notif_watch = dex_future_then_loop (
-      dex_channel_receive (self->flatpak_notifs),
-      (DexFutureCallback) watch_backend_notifs_then_loop_cb,
-      bz_track_weak (self),
-      bz_weak_release);
-
-  result = dex_await (bz_backend_retrieve_remote_entries (
-                          BZ_BACKEND (self->flatpak), NULL),
-                      &local_error);
-  if (!result)
-    return dex_future_new_for_error (g_steal_pointer (&local_error));
-
   return dex_future_new_true ();
 }
 
@@ -1407,8 +1390,6 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
         GHashTableIter new_iter              = { 0 };
         g_autoptr (GPtrArray) diff_writes    = NULL;
 
-        goto done;
-
         bz_state_info_set_background_task_label (self->state, _ ("Synchronizing..."));
 
         installed_set = dex_await_boxed (
@@ -1561,16 +1542,6 @@ watch_backend_notifs_then_loop_cb (DexFuture *future,
   return g_steal_pointer (&ret_future);
 }
 
-static DexFuture *
-update_check_fiber (BzApplication *self)
-{
-  bz_state_info_set_background_task_label (self->state, _ ("Checking for updates..."));
-  fiber_check_for_updates (self);
-  bz_state_info_set_background_task_label (self->state, NULL);
-
-  return dex_future_new_true ();
-}
-
 static gboolean
 periodic_timeout_cb (BzApplication *self)
 {
@@ -1580,11 +1551,9 @@ periodic_timeout_cb (BzApplication *self)
       !dex_future_is_pending (self->periodic_sync))
     {
       dex_clear (&self->periodic_sync);
-      self->periodic_sync = dex_scheduler_spawn (
-          dex_scheduler_get_default (),
-          bz_get_dex_stack_size (),
-          (DexFiberFunc) update_check_fiber,
-          g_object_ref (self), g_object_unref);
+      if (self->n_incoming == 0)
+        self->periodic_sync = bz_backend_retrieve_remote_entries (
+            BZ_BACKEND (self->flatpak), NULL);
     }
 
   return G_SOURCE_CONTINUE;
@@ -1603,6 +1572,16 @@ init_finally (DexFuture *future,
   value = dex_future_get_value (future, &local_error);
   if (value != NULL)
     {
+      self->flatpak_notifs = bz_backend_create_notification_channel (
+          BZ_BACKEND (self->flatpak));
+      self->notif_watch = dex_future_then_loop (
+          dex_channel_receive (self->flatpak_notifs),
+          (DexFutureCallback) watch_backend_notifs_then_loop_cb,
+          bz_track_weak (self),
+          bz_weak_release);
+      self->periodic_sync = bz_backend_retrieve_remote_entries (
+          BZ_BACKEND (self->flatpak), NULL);
+
       self->periodic_timeout = g_timeout_add_seconds (
           /* Check every ten minutes*/
           60 * 10, (GSourceFunc) periodic_timeout_cb, self);
