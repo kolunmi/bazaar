@@ -239,45 +239,16 @@ template $BzWindow: Adw.ApplicationWindow {
                         orientation: vertical;
                         spacing: 6;
 
-                        Image {
-                          icon-name: "io.github.kolunmi.Bazaar";
-                          pixel-size: 128;
+                        Adw.Spinner {
+                          width-request: 64;
+                          height-request: 64;
+                          margin-bottom: 18;
+                        }
+
+                        Label {
+                          label: _("Refreshing Store Content");
                           margin-bottom: 24;
-
-                          styles [
-                            "icon-dropshadow",
-                          ]
-                        }
-
-                        $BzGlobalProgress {
-                          halign: center;
-                          height-request: 8;
-                          expand-size: 250;
-                          active: bind template.state as <$BzStateInfo>.busy;
-                          pending: bind $is_double_zero(template.state as <$BzStateInfo>.busy-progress as <double>) as <bool>;
-                          fraction: bind template.state as <$BzStateInfo>.busy-progress;
-                          margin-bottom: 12;
-                        }
-
-                        Label {
-                          styles [
-                            "dim-label",
-                            "heading",
-                          ]
-
-                          halign: center;
-                          ellipsize: end;
-                          label: bind template.state as <$BzStateInfo>.busy-progress-label;
-                        }
-
-                        Label {
-                          styles [
-                            "title-4",
-                          ]
-
-                          halign: center;
-                          ellipsize: end;
-                          label: bind template.state as <$BzStateInfo>.busy-step-label;
+                          styles ["title-3"]
                         }
                       };
                     }
