@@ -389,7 +389,7 @@ query_sub_task_fiber (QuerySubTaskData *data)
        ? (test_strings (query_utf8, (_s), (_fuzzy))) \
        : 0.0)
 
-      score += EVALUATE_STRING (title, TRUE) * 1.333;
+      score += EVALUATE_STRING (title, TRUE) * 1.0;
       score += EVALUATE_STRING (developer, FALSE) * 1.0;
       score += EVALUATE_STRING (description, FALSE) * 1.0;
       score += EVALUATE_STRING (search_tokens, FALSE) * 1.0;
