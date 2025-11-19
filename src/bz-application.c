@@ -1282,14 +1282,20 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
     case BZ_BACKEND_NOTIFICATION_KIND_UPDATE_DONE:
     case BZ_BACKEND_NOTIFICATION_KIND_REMOVE_DONE:
       {
-        BzEntry    *entry     = NULL;
-        const char *unique_id = NULL;
+        const char *unique_id     = NULL;
+        g_autoptr (BzEntry) entry = NULL;
 
-        entry = bz_backend_notification_get_entry (notif);
+        unique_id = bz_backend_notification_get_unique_id (notif);
+        entry     = dex_await_object (
+            bz_entry_cache_manager_get (self->cache, unique_id),
+            &local_error);
         if (entry == NULL)
-          break;
-
-        unique_id = bz_entry_get_unique_id (entry);
+          {
+            g_warning ("Backend notification references an entry "
+                       "which couldn't be decached: %s",
+                       local_error->message);
+            goto done;
+          }
 
         switch (kind)
           {
@@ -1313,7 +1319,6 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
                         g_list_store_insert_sorted (self->installed_apps, group, (GCompareDataFunc) cmp_group, NULL);
                     }
                 }
-              dex_await (bz_entry_cache_manager_add (self->cache, entry), NULL);
             }
             break;
           case BZ_BACKEND_NOTIFICATION_KIND_UPDATE_DONE:
@@ -1340,7 +1345,6 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
                         g_list_store_remove (self->installed_apps, position);
                     }
                 }
-              dex_await (bz_entry_cache_manager_add (self->cache, entry), NULL);
             }
             break;
           case BZ_BACKEND_NOTIFICATION_KIND_ERROR:
@@ -1350,6 +1354,8 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
           default:
             g_assert_not_reached ();
           };
+
+        dex_await (bz_entry_cache_manager_add (self->cache, entry), NULL);
       }
       break;
     case BZ_BACKEND_NOTIFICATION_KIND_EXTERNAL_CHANGE:

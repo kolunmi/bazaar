@@ -1815,13 +1815,17 @@ transaction_operation_done (FlatpakTransaction          *transaction,
                             gint                         result,
                             TransactionData             *data)
 {
-  g_autoptr (BzBackendTransactionOpPayload) payload = NULL;
   g_autoptr (BzFlatpakInstance) self                = NULL;
-  BzEntry                        *entry             = NULL;
-  const char                     *ref               = NULL;
+  g_autoptr (BzBackendTransactionOpPayload) payload = NULL;
   FlatpakTransactionOperationType op_type           = 0;
   BzBackendNotificationKind       notif_kind        = 0;
+  const char                     *origin            = NULL;
+  const char                     *ref               = NULL;
+  gboolean                        is_user           = FALSE;
+  g_autofree char                *unique_id         = NULL;
   g_autoptr (BzBackendNotification) notif           = NULL;
+
+  bz_weak_get_or_return (self, data->self);
 
   g_mutex_lock (&data->mutex);
   g_hash_table_replace (
@@ -1838,10 +1842,8 @@ transaction_operation_done (FlatpakTransaction          *transaction,
             dex_future_new_for_object (payload)));
   g_mutex_unlock (&data->mutex);
 
-  bz_weak_get_or_return (self, data->self);
-  if (payload != NULL)
-    entry = bz_backend_transaction_op_payload_get_entry (payload);
-  ref = flatpak_transaction_operation_get_ref (operation);
+  if (result == FLATPAK_TRANSACTION_RESULT_NO_CHANGE)
+    return;
 
   op_type = flatpak_transaction_operation_get_operation_type (operation);
   switch (op_type)
@@ -1861,11 +1863,14 @@ transaction_operation_done (FlatpakTransaction          *transaction,
       g_assert_not_reached ();
     }
 
+  origin    = flatpak_transaction_operation_get_remote (operation);
+  ref       = flatpak_transaction_operation_get_ref (operation);
+  is_user   = flatpak_transaction_get_installation (transaction) == self->user;
+  unique_id = bz_flatpak_ref_parts_format_unique (origin, ref, is_user);
+
   notif = bz_backend_notification_new ();
   bz_backend_notification_set_kind (notif, notif_kind);
-  if (entry != NULL)
-    bz_backend_notification_set_entry (notif, entry);
-  bz_backend_notification_set_id (notif, ref);
+  bz_backend_notification_set_unique_id (notif, unique_id);
   send_notif_all (self, notif, TRUE);
 }
 

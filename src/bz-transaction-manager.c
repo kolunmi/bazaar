@@ -101,7 +101,9 @@ BZ_DEFINE_DATA (
       GCancellable         *cancellable;
     },
     BZ_RELEASE_DATA (backend, g_object_unref);
-    BZ_RELEASE_DATA (transaction, bz_transaction_dismiss);
+    if (self->transaction != NULL)
+        bz_transaction_release (self->transaction);
+    BZ_RELEASE_DATA (transaction, g_object_unref);
     BZ_RELEASE_DATA (channel, dex_unref);
     BZ_RELEASE_DATA (timer, g_timer_destroy);
     BZ_RELEASE_DATA (cancellable, g_object_unref));
@@ -286,9 +288,9 @@ bz_transaction_manager_class_init (BzTransactionManagerClass *klass)
           G_SIGNAL_RUN_FIRST,
           0,
           NULL, NULL,
-          bz_marshal_VOID__OBJECT_BOXED,
+          g_cclosure_marshal_VOID__OBJECT,
           G_TYPE_NONE,
-          2, BZ_TYPE_TRANSACTION, G_TYPE_HASH_TABLE, 0);
+          1, BZ_TYPE_TRANSACTION, 0);
   g_signal_set_va_marshaller (
       signals[SIGNAL_SUCCESS],
       G_TYPE_FROM_CLASS (klass),
@@ -454,24 +456,19 @@ bz_transaction_manager_add (BzTransactionManager *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_TRANSACTIONS]);
 }
 
-DexFuture *
+void
 bz_transaction_manager_cancel_current (BzTransactionManager *self)
 {
-  dex_return_error_if_fail (BZ_IS_TRANSACTION_MANAGER (self));
+  g_return_if_fail (BZ_IS_TRANSACTION_MANAGER (self));
 
-  if (self->current_task != NULL)
-    {
-      DexFuture *task = NULL;
+  if (self->current_task == NULL)
+    return;
 
-      g_cancellable_cancel (self->cancellable);
-      task = g_steal_pointer (&self->current_task);
+  g_cancellable_cancel (self->cancellable);
+  dex_clear (&self->current_task);
 
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ACTIVE]);
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PENDING]);
-      return task;
-    }
-  else
-    return NULL;
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ACTIVE]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PENDING]);
 }
 
 void
@@ -706,7 +703,7 @@ transaction_fiber (QueuedScheduleData *data)
         }
     }
 
-  result = dex_await (dex_ref (future), &local_error);
+  result = dex_await (g_steal_pointer (&future), &local_error);
   if (!result)
     return dex_future_new_for_error (g_steal_pointer (&local_error));
 
@@ -765,7 +762,7 @@ transaction_fiber (QueuedScheduleData *data)
         }
     }
 
-  return g_steal_pointer (&future);
+  return dex_future_new_true ();
 }
 
 static int
@@ -1152,17 +1149,12 @@ transaction_finally (DexFuture          *future,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CURRENT_PROGRESS]);
 
   if (value != NULL)
-    {
-      GHashTable *errored = NULL;
-
-      errored = g_value_get_boxed (value);
-      g_signal_emit (self, signals[SIGNAL_SUCCESS], 0, transaction, errored);
-    }
+    g_signal_emit (self, signals[SIGNAL_SUCCESS], 0, transaction);
   else
     g_signal_emit (self, signals[SIGNAL_FAILURE], 0, transaction);
 
   g_clear_object (&self->cancellable);
-  self->current_task = NULL;
+  dex_clear (&self->current_task);
   dispatch_next (self);
 
   return NULL;

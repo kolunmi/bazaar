@@ -73,7 +73,7 @@ void
 bz_transaction_manager_add (BzTransactionManager *self,
                             BzTransaction        *transaction);
 
-DexFuture *
+void
 bz_transaction_manager_cancel_current (BzTransactionManager *self);
 
 void

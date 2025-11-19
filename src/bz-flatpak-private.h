@@ -39,6 +39,11 @@ bz_flatpak_instance_get_user_installation (BzFlatpakInstance *self);
 /* BzFlatpakEntry */
 
 char *
+bz_flatpak_ref_parts_format_unique (const char *origin,
+                                    const char *fmt,
+                                    gboolean    user);
+
+char *
 bz_flatpak_ref_format_unique (FlatpakRef *ref,
                               gboolean    user);
 
