@@ -6,20 +6,16 @@ template $BzFlathubCategorySection : Box {
   visible: bind $invert_boolean($is_null(template.category as <$BzFlathubCategory>) as <bool>) as <bool>;
   margin-bottom: 12;
 
-  Box {
-    orientation: horizontal;
-    spacing: 10;
-    margin-start: 8;
-    margin-end: 8;
-
-    Label section_title {
-      styles [
-        "title-1",
-      ]
-      visible: bind $invert_boolean(template.category as <$BzFlathubCategory>.is-spotlight) as <bool>;
-      xalign: 0.0;
-      hexpand: true;
-    }
+  Label section_title {
+    styles [
+      "title-1",
+    ]
+    visible: bind $invert_boolean(template.category as <$BzFlathubCategory>.is-spotlight) as <bool>;
+    xalign: 0.0;
+    hexpand: true;
+    margin-start: 3;
+    margin-end: 3;
+    margin-bottom: 5;
   }
 
   $BzDynamicListView section_list {
@@ -31,6 +27,8 @@ template $BzFlathubCategorySection : Box {
     noscroll-kind: flow-box;
     child-type: "BzAppTile";
     child-prop: "group";
+    row-spacing: bind $get_spacing(template.compact) as <int>;
+    column-spacing: bind $get_spacing(template.compact) as <int>;
 
     bind-widget => $bind_widget_cb();
     unbind-widget => $unbind_widget_cb();
@@ -42,6 +40,7 @@ template $BzFlathubCategorySection : Box {
     ]
     halign: center;
     valign: center;
+    margin-top: 5;
     clicked => $on_more_button_clicked();
   }
 }

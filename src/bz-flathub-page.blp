@@ -71,16 +71,16 @@ template $BzFlathubPage: Adw.Bin {
 
                 child: Viewport {
                   child: Box content_box {
-                    margin-start: 25;
-                    margin-end: 25;
+                    margin-start: 30;
+                    margin-end: 30;
                     margin-top: 5;
                     margin-bottom: 50;
                     orientation: vertical;
                     spacing: 15;
 
                     $BzFeaturedCarousel {
-                      margin-start: 8;
-                      margin-end: 8;
+                      margin-start: 3;
+                      margin-end: 3;
 
                       styles [
                         "flathub-page-section",
@@ -144,8 +144,8 @@ template $BzFlathubPage: Adw.Bin {
 
                         child: $BzFlathubCategorySection section_trending {
                           category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "trending") as <$BzFlathubCategory>;
-                          max-items: 12;
                           group-selected => $category_section_group_selected_cb() swapped;
+                          min-items: 12;
                         };
                       }
 
@@ -155,8 +155,8 @@ template $BzFlathubPage: Adw.Bin {
 
                         child: $BzFlathubCategorySection section_recently_updated {
                           category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "recently-updated") as <$BzFlathubCategory>;
-                          max-items: 12;
                           group-selected => $category_section_group_selected_cb() swapped;
+                          min-items: 12;
                         };
                       }
 
@@ -166,8 +166,8 @@ template $BzFlathubPage: Adw.Bin {
 
                         child: $BzFlathubCategorySection section_recently_added {
                           category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "recently-added") as <$BzFlathubCategory>;
-                          max-items: 12;
                           group-selected => $category_section_group_selected_cb() swapped;
+                          min-items: 12;
                         };
                       }
 
@@ -177,21 +177,20 @@ template $BzFlathubPage: Adw.Bin {
 
                         child: $BzFlathubCategorySection section_popular {
                           category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "popular") as <$BzFlathubCategory>;
-                          max-items: 12;
                           group-selected => $category_section_group_selected_cb() swapped;
+                          min-items: 12;
                         };
                       }
                     }
 
                     $BzFlathubCategorySection section_productivity {
                       category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "office") as <$BzFlathubCategory>;
-                      max-items: 12;
                       group-selected => $category_section_group_selected_cb() swapped;
                     }
 
                     $BzFeaturedCarousel {
-                      margin-start: 8;
-                      margin-end: 8;
+                      margin-start: 3;
+                      margin-end: 3;
 
                       styles [
                         "flathub-page-section",
@@ -212,26 +211,23 @@ template $BzFlathubPage: Adw.Bin {
 
                     $BzFlathubCategorySection section_graphics {
                       category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "graphics") as <$BzFlathubCategory>;
-                      max-items: 12;
                       group-selected => $category_section_group_selected_cb() swapped;
                     }
 
                     $BzFlathubCategorySection section_audiovideo {
                       category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "audiovideo") as <$BzFlathubCategory>;
-                      max-items: 12;
                       group-selected => $category_section_group_selected_cb() swapped;
                     }
 
                     $BzFlathubCategorySection section_education {
                       category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "education") as <$BzFlathubCategory>;
-                      max-items: 12;
                       group-selected => $category_section_group_selected_cb() swapped;
                     }
 
                     Box otg_box {
                       visible: bind $invert_boolean($is_null($get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "mobile") as <$BzFlathubCategory>) as <bool>) as <bool>;
-                      margin-start: 8;
-                      margin-end: 8;
+                      margin-start: 3;
+                      margin-end: 3;
                       margin-top: 8;
                       margin-bottom: 8;
 
@@ -334,37 +330,31 @@ template $BzFlathubPage: Adw.Bin {
 
                     $BzFlathubCategorySection section_network {
                       category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "network") as <$BzFlathubCategory>;
-                      max-items: 12;
                       group-selected => $category_section_group_selected_cb() swapped;
                     }
 
                     $BzFlathubCategorySection section_game {
                       category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "game") as <$BzFlathubCategory>;
-                      max-items: 12;
                       group-selected => $category_section_group_selected_cb() swapped;
                     }
 
                     $BzFlathubCategorySection section_development {
                       category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "development") as <$BzFlathubCategory>;
-                      max-items: 12;
                       group-selected => $category_section_group_selected_cb() swapped;
                     }
 
                     $BzFlathubCategorySection section_science {
                       category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "science") as <$BzFlathubCategory>;
-                      max-items: 12;
                       group-selected => $category_section_group_selected_cb() swapped;
                     }
 
                     $BzFlathubCategorySection section_system {
                       category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "system") as <$BzFlathubCategory>;
-                      max-items: 12;
                       group-selected => $category_section_group_selected_cb() swapped;
                     }
 
                     $BzFlathubCategorySection section_utility {
                       category: bind $get_category_by_name_cb(template.state as <$BzFlathubState>.categories, "utility") as <$BzFlathubCategory>;
-                      max-items: 12;
                       group-selected => $category_section_group_selected_cb() swapped;
                     }
                   };
@@ -388,22 +378,26 @@ template $BzFlathubPage: Adw.Bin {
         condition ("max-width: 700px")
 
         setters {
-          content_box.margin-start: 5;
-          content_box.margin-end: 5;
+          content_box.margin-start: 10;
+          content_box.margin-end: 10;
           otg_padding_box.margin-start: 6;
           otg_padding_box.margin-end: 6;
           otg_padding_box.margin-bottom: 6;
           section_toggles.homogeneous: false;
-          section_productivity.max-items: 6;
-          section_graphics.max-items: 6;
-          section_audiovideo.max-items: 6;
-          section_education.max-items: 6;
-          section_network.max-items: 6;
-          section_game.max-items: 6;
-          section_development.max-items: 6;
-          section_science.max-items: 6;
-          section_system.max-items: 6;
-          section_utility.max-items: 6;
+          section_trending.compact: true;
+          section_popular.compact: true;
+          section_recently_added.compact: true;
+          section_recently_updated.compact: true;
+          section_productivity.compact: true;
+          section_graphics.compact: true;
+          section_audiovideo.compact: true;
+          section_education.compact: true;
+          section_network.compact: true;
+          section_game.compact: true;
+          section_development.compact: true;
+          section_science.compact: true;
+          section_system.compact: true;
+          section_utility.compact: true;
           otg_slice.size: 6;
         }
       }
