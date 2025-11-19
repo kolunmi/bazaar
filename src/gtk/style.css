@@ -280,14 +280,17 @@ button.context-tile {
   background-color: var(--view-bg-color);
 }
 
-.otg {
-  background: linear-gradient(to right, #2f3d9f, #682889);
+toggle-group.huge,
+toggle-group.huge * {
+  border-radius: 9999px;
 }
 
-@media (prefers-color-scheme: light) {
-  .otg {
-    background: linear-gradient(to right, #c6eaf8, #c4f3c9);
-  }
+.huge > toggle {
+  padding: 3px 12px;
+}
+
+.otg {
+  background: linear-gradient(to right, #2f3d9f, #682889);
 }
 
 .otg .card:not(:hover):not(:active) {
@@ -298,9 +301,23 @@ button.context-tile {
   box-shadow: none;
 }
 
+@media (prefers-color-scheme: light) {
+  .otg {
+    background: linear-gradient(to right, #c6eaf8, #c4f3c9);
+  }
+
+  .otg .card:hover {
+    background: rgba(255, 255, 255, 0.50);
+  }
+
+  .otg .card:active {
+    background: rgba(255, 255, 255, 0.75);
+  }
+}
+
 .otg-image {
-	margin-top: -75px;
-	margin-bottom: -75px;
+	margin-top: -95px;
+	margin-bottom: -95px;
 }
 
 .otg-title {

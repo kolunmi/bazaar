@@ -74,7 +74,7 @@ template $BzFlathubPage: Adw.Bin {
                     margin-start: 25;
                     margin-end: 25;
                     margin-top: 5;
-                    margin-bottom: 20;
+                    margin-bottom: 50;
                     orientation: vertical;
                     spacing: 15;
 
@@ -103,6 +103,7 @@ template $BzFlathubPage: Adw.Bin {
 
                         styles [
                           "round",
+                          "huge"
                         ]
 
                         Adw.Toggle {
@@ -255,6 +256,7 @@ template $BzFlathubPage: Adw.Bin {
                           Image otg_image {
                             icon-name: "on-the-go-symbolic";
                             pixel-size: 256;
+                            margin-bottom: 10;
                             halign: start;
 
                             styles [
@@ -263,7 +265,7 @@ template $BzFlathubPage: Adw.Bin {
                           }
 
                           Label otg_title {
-                            label: _("On the go");
+                            label: _("On the Go");
                             halign: start;
                             wrap: true;
                             wrap-mode: word_char;
@@ -286,7 +288,7 @@ template $BzFlathubPage: Adw.Bin {
                               "pill",
                             ]
 
-                            label: _("More Mobile apps");
+                            label: _("More Mobile Apps");
                             halign: start;
                             valign: center;
                             clicked => $show_more_mobile_clicked_cb(template);
@@ -419,6 +421,8 @@ template $BzFlathubPage: Adw.Bin {
         otg_title.justify: center;
         otg_subtitle.justify: center;
         otg_image.halign: center;
+        otg_image.margin-top: 15;
+        otg_image.margin-bottom: 5;
         otg_title.halign: center;
         otg_subtitle.halign: center;
         otg_more_button_bottom.visible: true;
