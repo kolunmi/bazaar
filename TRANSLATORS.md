@@ -122,3 +122,13 @@ Override the used Language and launch Bazaar
 ```sh
 LANGUAGE=de flatpak run io.github.kolunmi.Bazaar
 ```
+
+# Notes From Translators
+
+Both automatic and manual processes may generate entries marked as `fuzzy`.
+This means that for such entries, `gettext` attempted to derive previously
+existing translation. Some translation suites, like Lokalize, will utilize this
+marking to set strings as unreviewed and remove when the entry is marked
+finished. When working with pot-files using text editor, be sure to remove
+`fuzzy` marks yourself from entries you deem finished, else your translation
+will not appear in Bazaar.
