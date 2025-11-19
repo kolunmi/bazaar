@@ -114,7 +114,8 @@ template $BzRichAppTile: Adw.Bin {
 
       Box {
         Button {
-          visible: bind $is_zero(template.group as <$BzEntryGroup>.removable) as <bool>;
+          visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.installable) as <bool>) as <bool>;
+          sensitive: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
 
           styles [
             "medium-pill",
@@ -127,6 +128,7 @@ template $BzRichAppTile: Adw.Bin {
 
         Button {
           visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
+          sensitive: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
 
           styles [
             "circular"
