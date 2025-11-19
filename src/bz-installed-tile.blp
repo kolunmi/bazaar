@@ -14,8 +14,8 @@ template $BzInstalledTile: Box {
     margin-bottom: 10;
     height-request: 64;
     width-request: 64;
-    paintable: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable;
-    visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable) as <bool>) as <bool>;
+    paintable: bind template.group as <$BzEntryGroup>.icon-paintable;
+    visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.icon-paintable) as <bool>) as <bool>;
     styles ["icon-dropshadow"]
   }
 
@@ -29,7 +29,7 @@ template $BzInstalledTile: Box {
     height-request: 64;
     pixel-size: 64;
     icon-name: "application-x-executable";
-    visible: bind $is_null(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable) as <bool>;
+    visible: bind $is_null(template.group as <$BzEntryGroup>.icon-paintable) as <bool>;
   }
 
   Box {
@@ -42,13 +42,13 @@ template $BzInstalledTile: Box {
       ellipsize: end;
       single-line-mode: true;
       has-tooltip: true;
-      tooltip-text: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.id;
-      label: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.title;
+      tooltip-text: bind template.group as <$BzEntryGroup>.id;
+      label: bind template.group as <$BzEntryGroup>.title;
     }
 
     Label {
       halign: start;
-      label: bind $format_size(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.size) as <string>;
+      label: bind $format_size(template.group as <$BzEntryGroup>.size) as <string>;
       styles ["dimmed", "caption", "installed-size"]
     }
 
@@ -77,7 +77,7 @@ template $BzInstalledTile: Box {
     height-request: 32;
     valign: center;
     icon-name: "heart-filled-symbolic";
-    visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.donation-url) as <bool>) as <bool>;
+    visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.donation-url) as <bool>) as <bool>;
 
     clicked => $support_cb() swapped;
   }
@@ -102,7 +102,7 @@ template $BzInstalledTile: Box {
       valign: center;
       icon-name: "puzzle-piece-symbolic";
       sensitive: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
-      visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.addons) as <bool>) as <bool>;
+      visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.n-addons as <int>) as <bool>) as <bool>;
 
       clicked => $install_addons_cb() swapped;
     }

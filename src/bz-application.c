@@ -63,6 +63,7 @@ struct _BzApplication
   GTimer     *init_timer;
   DexChannel *flatpak_notifs;
   DexFuture  *notif_watch;
+  int         n_incoming;
   GHashTable *eol_runtimes;
   GHashTable *sys_name_to_addons;
   GHashTable *usr_name_to_addons;
@@ -819,8 +820,8 @@ init_service_struct (BzApplication *self)
   if (self->config != NULL)
     bz_transaction_manager_set_config (self->transactions, self->config);
 
+  bz_state_info_set_all_installed_entry_groups (self->state, G_LIST_MODEL (self->installed_apps));
   bz_state_info_set_application_factory (self->state, self->application_factory);
-  bz_state_info_set_blocklists (self->state, self->blocklists);
   bz_state_info_set_curated_provider (self->state, self->content_provider);
   bz_state_info_set_entry_factory (self->state, self->entry_factory);
   bz_state_info_set_flathub (self->state, self->flathub);
@@ -995,6 +996,7 @@ init_fiber (GWeakRef *wr)
   gboolean result                = FALSE;
 
   bz_weak_get_or_return_reject (self, wr);
+  bz_state_info_set_background_task_label (self->state, _ ("Performing setup..."));
 
   g_clear_object (&self->flatpak);
   self->flatpak = dex_await_object (bz_flatpak_instance_new (), &local_error);
@@ -1141,6 +1143,26 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
       }
       break;
     case BZ_BACKEND_NOTIFICATION_KIND_TELL_INCOMING:
+      {
+        int n_incoming = 0;
+
+        n_incoming = bz_backend_notification_get_n_incoming (notif);
+        self->n_incoming += n_incoming;
+
+        if (n_incoming > 0)
+          {
+            g_autofree char *label = NULL;
+
+            label = g_strdup_printf (_ ("Receiving %d entries..."), self->n_incoming);
+            bz_state_info_set_background_task_label (self->state, label);
+          }
+        else
+          {
+            bz_state_info_set_background_task_label (self->state, _ ("Checking for updates..."));
+            fiber_check_for_updates (self);
+            bz_state_info_set_background_task_label (self->state, NULL);
+          }
+      }
       break;
     case BZ_BACKEND_NOTIFICATION_KIND_REPLACE_ENTRY:
       {
@@ -1220,6 +1242,9 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
                 if (installed)
                   g_list_store_append (self->installed_apps, new_group);
               }
+
+            if (eol_runtime != NULL)
+              g_hash_table_remove (self->eol_runtimes, runtime_name);
           }
 
         if (flatpak_id != NULL &&
@@ -1274,8 +1299,24 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
                          unique_id);
           }
 
-        if (dex_await (bz_entry_cache_manager_add (self->cache, entry), NULL))
+        if (dex_await (bz_entry_cache_manager_add (self->cache, entry), NULL) &&
+            bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
           gtk_filter_changed (GTK_FILTER (self->appid_filter), GTK_FILTER_CHANGE_LESS_STRICT);
+
+        self->n_incoming--;
+        if (self->n_incoming > 0)
+          {
+            g_autofree char *label = NULL;
+
+            label = g_strdup_printf (_ ("Receiving %d entries..."), self->n_incoming);
+            bz_state_info_set_background_task_label (self->state, label);
+          }
+        else
+          {
+            bz_state_info_set_background_task_label (self->state, _ ("Checking for updates..."));
+            fiber_check_for_updates (self);
+            bz_state_info_set_background_task_label (self->state, NULL);
+          }
       }
       break;
     case BZ_BACKEND_NOTIFICATION_KIND_INSTALL_DONE:
