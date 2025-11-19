@@ -256,11 +256,11 @@ bz_dynamic_list_view_class_init (BzDynamicListViewClass *klass)
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   props[PROP_ROW_SPACING] =
-    g_param_spec_uint (
-        "row-spacing",
-        NULL, NULL,
-        0, G_MAXUINT, 5,
-        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+      g_param_spec_uint (
+          "row-spacing",
+          NULL, NULL,
+          0, G_MAXUINT, 5,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   props[PROP_COLUMN_SPACING] =
       g_param_spec_uint (

@@ -172,7 +172,7 @@ static void
 update_model (BzFlathubCategorySection *self)
 {
   GtkExpression *expression;
-  guint max_items;
+  guint          max_items;
 
   if (self->category == NULL)
     return;
@@ -331,7 +331,7 @@ bz_flathub_category_section_class_init (BzFlathubCategorySectionClass *klass)
 static void
 bz_flathub_category_section_init (BzFlathubCategorySection *self)
 {
-  self->compact = FALSE;
+  self->compact   = FALSE;
   self->min_items = 0;
 
   gtk_widget_init_template (GTK_WIDGET (self));
