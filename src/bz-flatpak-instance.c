@@ -1816,6 +1816,12 @@ transaction_operation_done (FlatpakTransaction          *transaction,
                             TransactionData             *data)
 {
   g_autoptr (BzBackendTransactionOpPayload) payload = NULL;
+  g_autoptr (BzFlatpakInstance) self                = NULL;
+  BzEntry                        *entry             = NULL;
+  const char                     *ref               = NULL;
+  FlatpakTransactionOperationType op_type           = 0;
+  BzBackendNotificationKind       notif_kind        = 0;
+  g_autoptr (BzBackendNotification) notif           = NULL;
 
   g_mutex_lock (&data->mutex);
   g_hash_table_replace (
@@ -1830,8 +1836,37 @@ transaction_operation_done (FlatpakTransaction          *transaction,
         dex_channel_send (
             data->channel,
             dex_future_new_for_object (payload)));
-
   g_mutex_unlock (&data->mutex);
+
+  bz_weak_get_or_return (self, data->self);
+  if (payload != NULL)
+    entry = bz_backend_transaction_op_payload_get_entry (payload);
+  ref = flatpak_transaction_operation_get_ref (operation);
+
+  op_type = flatpak_transaction_operation_get_operation_type (operation);
+  switch (op_type)
+    {
+    case FLATPAK_TRANSACTION_OPERATION_INSTALL:
+    case FLATPAK_TRANSACTION_OPERATION_INSTALL_BUNDLE:
+      notif_kind = BZ_BACKEND_NOTIFICATION_KIND_INSTALL_DONE;
+      break;
+    case FLATPAK_TRANSACTION_OPERATION_UPDATE:
+      notif_kind = BZ_BACKEND_NOTIFICATION_KIND_UPDATE_DONE;
+      break;
+    case FLATPAK_TRANSACTION_OPERATION_UNINSTALL:
+      notif_kind = BZ_BACKEND_NOTIFICATION_KIND_REMOVE_DONE;
+      break;
+    case FLATPAK_TRANSACTION_OPERATION_LAST_TYPE:
+    default:
+      g_assert_not_reached ();
+    }
+
+  notif = bz_backend_notification_new ();
+  bz_backend_notification_set_kind (notif, notif_kind);
+  if (entry != NULL)
+    bz_backend_notification_set_entry (notif, entry);
+  bz_backend_notification_set_id (notif, ref);
+  send_notif_all (self, notif, TRUE);
 }
 
 static gboolean

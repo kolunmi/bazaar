@@ -126,12 +126,6 @@ static void
 open_generic_id (BzApplication *self,
                  const char    *generic_id);
 
-static void
-transaction_success (BzApplication        *self,
-                     BzTransaction        *transaction,
-                     GHashTable           *errored,
-                     BzTransactionManager *manager);
-
 static DexFuture *
 init_fiber (GWeakRef *wr);
 
@@ -161,6 +155,10 @@ static void
 command_line_open_location (BzApplication           *self,
                             GApplicationCommandLine *cmdline,
                             const char              *path);
+
+static DexFuture *
+watch_backend_notifs_then_loop_cb (DexFuture *future,
+                                   GWeakRef  *wr);
 
 static gint
 cmp_group (BzEntryGroup *a,
@@ -599,9 +597,6 @@ map_generic_ids_to_groups (GtkStringObject *string,
 {
   BzEntryGroup *group = NULL;
 
-  if (bz_state_info_get_busy (self->state))
-    return NULL;
-
   group = g_hash_table_lookup (
       self->ids_to_groups,
       gtk_string_object_get_string (string));
@@ -648,9 +643,6 @@ static gboolean
 filter_entry_groups (BzEntryGroup  *group,
                      BzApplication *self)
 {
-  if (bz_state_info_get_busy (self->state))
-    return FALSE;
-
   if (bz_state_info_get_hide_eol (self->state) &&
       bz_entry_group_get_eol (group) != NULL)
     return FALSE;
@@ -826,8 +818,6 @@ init_service_struct (BzApplication *self)
   self->transactions = bz_transaction_manager_new ();
   if (self->config != NULL)
     bz_transaction_manager_set_config (self->transactions, self->config);
-  g_signal_connect_swapped (self->transactions, "success",
-                            G_CALLBACK (transaction_success), self);
 
   bz_state_info_set_application_factory (self->state, self->application_factory);
   bz_state_info_set_blocklists (self->state, self->blocklists);
@@ -924,89 +914,6 @@ open_generic_id (BzApplication *self,
 
       message = g_strdup_printf ("ID '%s' was not found", generic_id);
       bz_show_error_for_widget (GTK_WIDGET (window), message);
-    }
-}
-
-static void
-transaction_success (BzApplication        *self,
-                     BzTransaction        *transaction,
-                     GHashTable           *errored,
-                     BzTransactionManager *manager)
-{
-  GListModel *installs   = NULL;
-  GListModel *removals   = NULL;
-  guint       n_installs = 0;
-  guint       n_removals = 0;
-
-  installs = bz_transaction_get_installs (transaction);
-  removals = bz_transaction_get_removals (transaction);
-
-  if (installs != NULL)
-    n_installs = g_list_model_get_n_items (installs);
-  if (removals != NULL)
-    n_removals = g_list_model_get_n_items (removals);
-
-  for (guint i = 0; i < n_installs; i++)
-    {
-      g_autoptr (BzEntry) entry = NULL;
-      const char *unique_id     = NULL;
-
-      entry = g_list_model_get_item (installs, i);
-      if (g_hash_table_contains (errored, entry))
-        continue;
-
-      bz_entry_set_installed (entry, TRUE);
-      unique_id = bz_entry_get_unique_id (entry);
-      g_hash_table_add (self->installed_set, g_strdup (unique_id));
-
-      if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
-        {
-          BzEntryGroup *group = NULL;
-
-          group = g_hash_table_lookup (self->ids_to_groups, bz_entry_get_id (entry));
-          if (group != NULL)
-            {
-              gboolean found    = FALSE;
-              guint    position = 0;
-
-              found = g_list_store_find (self->installed_apps, group, &position);
-              if (!found)
-                g_list_store_insert_sorted (self->installed_apps, group, (GCompareDataFunc) cmp_group, NULL);
-            }
-        }
-      dex_future_disown (bz_entry_cache_manager_add (self->cache, entry));
-    }
-
-  for (guint i = 0; i < n_removals; i++)
-    {
-      g_autoptr (BzEntry) entry = NULL;
-      const char *unique_id     = NULL;
-
-      entry = g_list_model_get_item (removals, i);
-      if (g_hash_table_contains (errored, entry))
-        continue;
-
-      bz_entry_set_installed (entry, FALSE);
-      unique_id = bz_entry_get_unique_id (entry);
-      /* TODO this doesn't account for related refs */
-      g_hash_table_remove (self->installed_set, unique_id);
-
-      if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
-        {
-          BzEntryGroup *group = NULL;
-
-          group = g_hash_table_lookup (self->ids_to_groups, bz_entry_get_id (entry));
-          if (group != NULL && !bz_entry_group_get_removable (group))
-            {
-              gboolean found    = FALSE;
-              guint    position = 0;
-
-              found = g_list_store_find (self->installed_apps, group, &position);
-              if (found)
-                g_list_store_remove (self->installed_apps, position);
-            }
-        }
-      dex_future_disown (bz_entry_cache_manager_add (self->cache, entry));
     }
 }
 
@@ -1158,6 +1065,20 @@ init_fiber (GWeakRef *wr)
       g_debug ("Updating Flathub state...");
       bz_flathub_state_update_to_today (self->flathub);
     }
+
+  self->flatpak_notifs = bz_backend_create_notification_channel (
+      BZ_BACKEND (self->flatpak));
+  self->notif_watch = dex_future_then_loop (
+      dex_channel_receive (self->flatpak_notifs),
+      (DexFutureCallback) watch_backend_notifs_then_loop_cb,
+      bz_track_weak (self),
+      bz_weak_release);
+
+  result = dex_await (bz_backend_retrieve_remote_entries (
+                          BZ_BACKEND (self->flatpak), NULL),
+                      &local_error);
+  if (!result)
+    return dex_future_new_for_error (g_steal_pointer (&local_error));
 
   return dex_future_new_true ();
 }
@@ -1355,6 +1276,80 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
 
         if (dex_await (bz_entry_cache_manager_add (self->cache, entry), NULL))
           gtk_filter_changed (GTK_FILTER (self->appid_filter), GTK_FILTER_CHANGE_LESS_STRICT);
+      }
+      break;
+    case BZ_BACKEND_NOTIFICATION_KIND_INSTALL_DONE:
+    case BZ_BACKEND_NOTIFICATION_KIND_UPDATE_DONE:
+    case BZ_BACKEND_NOTIFICATION_KIND_REMOVE_DONE:
+      {
+        BzEntry    *entry     = NULL;
+        const char *unique_id = NULL;
+
+        entry = bz_backend_notification_get_entry (notif);
+        if (entry == NULL)
+          break;
+
+        unique_id = bz_entry_get_unique_id (entry);
+
+        switch (kind)
+          {
+          case BZ_BACKEND_NOTIFICATION_KIND_INSTALL_DONE:
+            {
+              bz_entry_set_installed (entry, TRUE);
+              g_hash_table_replace (self->installed_set, g_strdup (unique_id), NULL);
+
+              if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
+                {
+                  BzEntryGroup *group = NULL;
+
+                  group = g_hash_table_lookup (self->ids_to_groups, bz_entry_get_id (entry));
+                  if (group != NULL)
+                    {
+                      gboolean found    = FALSE;
+                      guint    position = 0;
+
+                      found = g_list_store_find (self->installed_apps, group, &position);
+                      if (!found)
+                        g_list_store_insert_sorted (self->installed_apps, group, (GCompareDataFunc) cmp_group, NULL);
+                    }
+                }
+              dex_await (bz_entry_cache_manager_add (self->cache, entry), NULL);
+            }
+            break;
+          case BZ_BACKEND_NOTIFICATION_KIND_UPDATE_DONE:
+            {
+            }
+            break;
+          case BZ_BACKEND_NOTIFICATION_KIND_REMOVE_DONE:
+            {
+              bz_entry_set_installed (entry, FALSE);
+              g_hash_table_remove (self->installed_set, unique_id);
+
+              if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
+                {
+                  BzEntryGroup *group = NULL;
+
+                  group = g_hash_table_lookup (self->ids_to_groups, bz_entry_get_id (entry));
+                  if (group != NULL && !bz_entry_group_get_removable (group))
+                    {
+                      gboolean found    = FALSE;
+                      guint    position = 0;
+
+                      found = g_list_store_find (self->installed_apps, group, &position);
+                      if (found)
+                        g_list_store_remove (self->installed_apps, position);
+                    }
+                }
+              dex_await (bz_entry_cache_manager_add (self->cache, entry), NULL);
+            }
+            break;
+          case BZ_BACKEND_NOTIFICATION_KIND_ERROR:
+          case BZ_BACKEND_NOTIFICATION_KIND_TELL_INCOMING:
+          case BZ_BACKEND_NOTIFICATION_KIND_REPLACE_ENTRY:
+          case BZ_BACKEND_NOTIFICATION_KIND_EXTERNAL_CHANGE:
+          default:
+            g_assert_not_reached ();
+          };
       }
       break;
     case BZ_BACKEND_NOTIFICATION_KIND_EXTERNAL_CHANGE:
@@ -1561,16 +1556,6 @@ init_finally (DexFuture *future,
   value = dex_future_get_value (future, &local_error);
   if (value != NULL)
     {
-      self->flatpak_notifs = bz_backend_create_notification_channel (
-          BZ_BACKEND (self->flatpak));
-      self->notif_watch = dex_future_then_loop (
-          dex_channel_receive (self->flatpak_notifs),
-          (DexFutureCallback) watch_backend_notifs_then_loop_cb,
-          bz_track_weak (self),
-          bz_weak_release);
-      dex_future_disown (bz_backend_retrieve_remote_entries (
-          BZ_BACKEND (self->flatpak), NULL));
-
       self->periodic_timeout = g_timeout_add_seconds (
           /* Check every ten minutes*/
           60 * 10, (GSourceFunc) periodic_timeout_cb, self);

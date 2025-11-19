@@ -4,7 +4,7 @@ parent-prefix=g
 parent-name=object
 author=AUTOGEN
 
-enum=bz backend_notification_kind error tell_incoming replace_entry external_change
+enum=bz backend_notification_kind error tell_incoming replace_entry install_done update_done remove_done external_change
 
 include="bz-entry.h"
 
@@ -12,3 +12,4 @@ property=kind BzBackendNotificationKind BZ_TYPE_BACKEND_NOTIFICATION_KIND enum
 property=error char G_TYPE_STRING string
 property=n_incoming int G_TYPE_INT int
 property=entry BzEntry BZ_TYPE_ENTRY object
+property=id char G_TYPE_STRING string
