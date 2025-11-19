@@ -22,6 +22,7 @@
 #include "bz-entry.h"
 #include "bz-group-tile-css-watcher.h"
 #include "bz-screenshot.h"
+#include "bz-util.h"
 
 #define BZ_TYPE_FEATURED_TILE_LAYOUT (bz_featured_tile_layout_get_type ())
 G_DECLARE_FINAL_TYPE (BzFeaturedTileLayout, bz_featured_tile_layout, BZ, FEATURED_TILE_LAYOUT, GtkLayoutManager)
@@ -201,14 +202,18 @@ static void bz_featured_tile_refresh (BzFeaturedTile *self);
 static void update_screenshot (BzFeaturedTile *self);
 
 static gboolean
-bz_featured_tile_refresh_idle_cb (gpointer user_data)
+bz_featured_tile_refresh_idle_cb (GWeakRef *wr)
 {
-  BzFeaturedTile *self;
+  g_autoptr (BzFeaturedTile) self = NULL;
 
-  self             = user_data;
+  self = g_weak_ref_get (wr);
+  if (self == NULL)
+    goto done;
+
   self->refresh_id = 0;
   bz_featured_tile_refresh (self);
 
+done:
   return G_SOURCE_REMOVE;
 }
 
@@ -218,7 +223,11 @@ schedule_refresh (BzFeaturedTile *self)
   if (self->refresh_id != 0)
     return;
 
-  self->refresh_id = g_idle_add (bz_featured_tile_refresh_idle_cb, self);
+  self->refresh_id = g_idle_add_full (
+      G_PRIORITY_DEFAULT,
+      (GSourceFunc) bz_featured_tile_refresh_idle_cb,
+      bz_track_weak (self),
+      bz_weak_release);
 }
 
 static void
@@ -343,6 +352,9 @@ bz_featured_tile_dispose (GObject *object)
   self = BZ_FEATURED_TILE (object);
 
   g_clear_handle_id (&self->refresh_id, g_source_remove);
+  if (self->group != NULL)
+    g_signal_handlers_disconnect_by_func (self->group, schedule_refresh, self);
+
   g_clear_object (&self->group);
   g_clear_object (&self->css);
   g_clear_object (&self->first_screenshot);
@@ -510,7 +522,6 @@ bz_featured_tile_set_group (BzFeaturedTile *self,
   g_return_if_fail (group == NULL || BZ_IS_ENTRY_GROUP (group));
 
   g_clear_handle_id (&self->refresh_id, g_source_remove);
-
   if (self->group != NULL)
     g_signal_handlers_disconnect_by_func (self->group, schedule_refresh, self);
 
