@@ -1205,7 +1205,7 @@ retrieve_refs_for_remote_fiber (RetrieveRefsForRemoteData *data)
     }
 
   components     = as_metadata_get_components (metadata);
-  component_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_object_unref);
+  component_hash = g_hash_table_new (g_str_hash, g_str_equal);
   for (guint i = 0; i < as_component_box_len (components); i++)
     {
       AsComponent *component = NULL;
@@ -1214,7 +1214,7 @@ retrieve_refs_for_remote_fiber (RetrieveRefsForRemoteData *data)
       component = as_component_box_index (components, i);
       id        = as_component_get_id (component);
 
-      g_hash_table_replace (component_hash, g_strdup (id), g_object_ref (component));
+      g_hash_table_replace (component_hash, (gpointer) id, component);
     }
 
   refs = flatpak_installation_list_remote_refs_sync (
