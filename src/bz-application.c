@@ -20,6 +20,8 @@
 
 #define G_LOG_DOMAIN "BAZAAR::CORE"
 
+#define MAX_IDS_PER_BLOCKLIST 2048
+
 #include "config.h"
 
 #include <glib/gi18n.h>
@@ -54,6 +56,7 @@ struct _BzApplication
   GSettings       *settings;
   GHashTable      *config;
   GListModel      *blocklists;
+  GPtrArray       *blocked_ids;
   GListModel      *content_configs;
   GtkCssProvider  *css;
   GtkMapListModel *content_configs_to_files;
@@ -158,6 +161,13 @@ static DexFuture *
 watch_backend_notifs_then_loop_cb (DexFuture *future,
                                    GWeakRef  *wr);
 
+static void
+blocklists_changed (BzApplication *self,
+                    guint          position,
+                    guint          removed,
+                    guint          added,
+                    GListModel    *model);
+
 static gint
 cmp_group (BzEntryGroup *a,
            BzEntryGroup *b,
@@ -198,6 +208,7 @@ bz_application_dispose (GObject *object)
   g_clear_pointer (&self->eol_runtimes, g_hash_table_unref);
   g_clear_pointer (&self->sys_name_to_addons, g_hash_table_unref);
   g_clear_pointer (&self->usr_name_to_addons, g_hash_table_unref);
+  g_clear_pointer (&self->blocked_ids, g_ptr_array_unref);
   g_weak_ref_clear (&self->main_window);
 
   G_OBJECT_CLASS (bz_application_parent_class)->dispose (object);
@@ -287,6 +298,7 @@ bz_application_command_line (GApplication            *app,
       init_service_struct (self);
 
       blocklists = gtk_string_list_new (NULL);
+      g_signal_connect_swapped (blocklists, "items-changed", G_CALLBACK (blocklists_changed), self);
 #ifdef HARDCODED_BLOCKLIST
       g_debug ("Bazaar was configured with a hardcoded blocklist at %s, adding that now...",
                HARDCODED_BLOCKLIST);
@@ -620,6 +632,29 @@ map_ids_to_entries (GtkStringObject *string,
   return g_steal_pointer (&result);
 }
 
+static inline gboolean
+validate_group_for_ui (BzApplication *self,
+                       BzEntryGroup  *group)
+{
+  const char *id = NULL;
+
+  if (bz_state_info_get_hide_eol (self->state) &&
+      bz_entry_group_get_eol (group) != NULL)
+    return FALSE;
+
+  id = bz_entry_group_get_id (group);
+  for (guint i = 0; i < self->blocked_ids->len; i++)
+    {
+      GHashTable *set = NULL;
+
+      set = g_ptr_array_index (self->blocked_ids, i);
+      if (g_hash_table_contains (set, id))
+        return FALSE;
+    }
+
+  return TRUE;
+}
+
 static gboolean
 filter_application_ids (GtkStringObject *string,
                         BzApplication   *self)
@@ -629,23 +664,17 @@ filter_application_ids (GtkStringObject *string,
   group = g_hash_table_lookup (
       self->ids_to_groups,
       gtk_string_object_get_string (string));
-  if (group != NULL &&
-      bz_state_info_get_hide_eol (self->state) &&
-      bz_entry_group_get_eol (group) != NULL)
+  if (group != NULL)
+    return validate_group_for_ui (self, group);
+  else
     return FALSE;
-
-  return group != NULL;
 }
 
 static gboolean
 filter_entry_groups (BzEntryGroup  *group,
                      BzApplication *self)
 {
-  if (bz_state_info_get_hide_eol (self->state) &&
-      bz_entry_group_get_eol (group) != NULL)
-    return FALSE;
-
-  return TRUE;
+  return validate_group_for_ui (self, group);
 }
 
 static void
@@ -770,6 +799,8 @@ init_service_struct (BzApplication *self)
       G_CALLBACK (hide_eol_changed),
       self);
 
+  self->blocked_ids = g_ptr_array_new_with_free_func (
+      (GDestroyNotify) g_hash_table_unref);
   self->groups         = g_list_store_new (BZ_TYPE_ENTRY_GROUP);
   self->installed_apps = g_list_store_new (BZ_TYPE_ENTRY_GROUP);
   self->ids_to_groups  = g_hash_table_new_full (
@@ -1217,10 +1248,10 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
 
                 g_debug ("Creating new application group for id %s", id);
                 new_group = bz_entry_group_new (self->entry_factory);
+                bz_entry_group_add (new_group, entry, eol_runtime);
 
                 g_list_store_append (self->groups, new_group);
                 g_hash_table_replace (self->ids_to_groups, g_strdup (id), g_object_ref (new_group));
-                bz_entry_group_add (new_group, entry, eol_runtime);
 
                 if (installed)
                   g_list_store_append (self->installed_apps, new_group);
@@ -1727,6 +1758,94 @@ command_line_open_location (BzApplication           *self,
       else
         open_flatpakref_take (self, g_file_new_for_path (location));
     }
+}
+
+static void
+blocklists_changed (BzApplication *self,
+                    guint          position,
+                    guint          removed,
+                    guint          added,
+                    GListModel    *model)
+{
+  g_autoptr (GError) local_error = NULL;
+  gboolean result                = FALSE;
+
+  if (removed > 0)
+    g_ptr_array_remove_range (self->blocked_ids, position, removed);
+
+  for (guint i = 0; i < added; i++)
+    {
+      g_autoptr (GtkStringObject) string = NULL;
+      const char      *filename          = NULL;
+      g_autofree char *contents          = NULL;
+      g_autoptr (GHashTable) set         = NULL;
+
+      string   = g_list_model_get_item (model, position + i);
+      filename = gtk_string_object_get_string (string);
+
+      /* IO on main thread but this will basically never happen except at the
+         beginning of the program and when using the debug menu */
+      result = g_file_get_contents (filename, &contents, NULL, &local_error);
+      if (!result)
+        {
+          g_warning ("Unable to read blocklist at path %s: %s", filename, local_error->message);
+          g_clear_error (&local_error);
+        }
+
+      set = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+      if (contents != NULL)
+        {
+          guint n_ids = 0;
+          char *beg   = NULL;
+          char *end   = NULL;
+
+          for (beg = contents, end = g_utf8_strchr (beg, -1, '\n');
+               beg != NULL && *beg != '\0';
+               beg = end + 1, end = g_utf8_strchr (beg, -1, '\n'))
+            {
+              g_autofree char *id = NULL;
+
+              if (end == NULL)
+                g_warning ("Blocklist at %s has no terminating newline", filename);
+              if (g_str_has_prefix (beg, "#") ||
+                  (end != NULL && end - beg <= 1) ||
+                  (end == NULL && *beg == '\0'))
+                {
+                  if (end != NULL)
+                    continue;
+                  else
+                    break;
+                }
+
+              if (end != NULL)
+                id = g_strndup (beg, end - beg);
+              else
+                id = g_strdup (beg);
+              if (g_hash_table_contains (set, id))
+                g_warning ("Duplicate id %s detected in blocklist at %s", id, filename);
+              else
+                {
+                  g_debug ("Adding %s to blocked IDs", id);
+                  g_hash_table_replace (set, g_steal_pointer (&id), NULL);
+                }
+
+              if (end == NULL)
+                break;
+              if (++n_ids > MAX_IDS_PER_BLOCKLIST)
+                {
+                  g_warning ("Blocklist at %s has a lot of IDs, "
+                             "automatically truncating to %d",
+                             filename, MAX_IDS_PER_BLOCKLIST);
+                  break;
+                }
+            }
+        }
+
+      g_ptr_array_insert (self->blocked_ids, position + i, g_steal_pointer (&set));
+    }
+
+  gtk_filter_changed (GTK_FILTER (self->group_filter), GTK_FILTER_CHANGE_DIFFERENT);
+  gtk_filter_changed (GTK_FILTER (self->appid_filter), GTK_FILTER_CHANGE_DIFFERENT);
 }
 
 static gint
