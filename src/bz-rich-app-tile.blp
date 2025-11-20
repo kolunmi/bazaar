@@ -114,7 +114,7 @@ template $BzRichAppTile: Adw.Bin {
 
       Box {
         Button {
-          visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.installable) as <bool>) as <bool>;
+          visible: bind $is_zero(template.group as <$BzEntryGroup>.removable) as <bool>;
           sensitive: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
 
           styles [
