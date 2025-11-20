@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <appstream.h>
 #include <gtk/gtk.h>
 #include <libdex.h>
 
@@ -139,7 +140,7 @@ bz_entry_get_screenshot_paintables (BzEntry *self);
 GIcon *
 bz_entry_get_mini_icon (BzEntry *self);
 
-GPtrArray *
+const char *
 bz_entry_get_search_tokens (BzEntry *self);
 
 GListModel *
@@ -196,6 +197,9 @@ bz_entry_supports_form_factor (BzEntry *self,
 
 gint
 bz_entry_get_age_rating (BzEntry *self);
+
+AsContentRating *
+bz_entry_get_content_rating (BzEntry *self);
 
 DexFuture *
 bz_entry_load_mini_icon (BzEntry *self);

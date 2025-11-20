@@ -22,6 +22,7 @@
 #define COLLECTION_FETCH_SIZE        192
 #define CATEGORY_FETCH_SIZE          96
 #define QUALITY_MODERATION_PAGE_SIZE 300
+#define KEYWORD_SEARCH_PAGE_SIZE     48
 
 #include <json-glib/json-glib.h>
 #include <libdex.h>
@@ -29,7 +30,7 @@
 #include "bz-env.h"
 #include "bz-flathub-category.h"
 #include "bz-flathub-state.h"
-#include "bz-global-state.h"
+#include "bz-global-net.h"
 #include "bz-io.h"
 #include "bz-util.h"
 
@@ -714,6 +715,92 @@ initialize_finally (DexFuture *future,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CATEGORIES]);
 
   return NULL;
+}
+
+static DexFuture *
+search_keyword_fiber (gpointer user_data)
+{
+  g_autoptr (GtkStringList) results = NULL;
+  g_autoptr (JsonNode) node         = NULL;
+  g_autoptr (GError) error          = NULL;
+  char            *keyword          = user_data;
+  g_autofree char *request          = NULL;
+  JsonObject      *object           = NULL;
+  JsonArray       *array            = NULL;
+  guint            length           = 0;
+
+  request = g_strdup_printf ("/collection/keyword?keyword=%s&page=1&per_page=%d&locale=en",
+                             keyword, KEYWORD_SEARCH_PAGE_SIZE);
+
+  node = dex_await_boxed (bz_query_flathub_v2_json_take (g_steal_pointer (&request)), &error);
+
+  if (node == NULL)
+    {
+      return dex_future_new_for_error (g_steal_pointer (&error));
+    }
+
+  results = gtk_string_list_new (NULL);
+
+  object = json_node_get_object (node);
+  array  = json_object_get_array_member (object, "hits");
+  length = json_array_get_length (array);
+
+  for (guint i = 0; i < length; i++)
+    {
+      JsonObject *element = NULL;
+      const char *app_id  = NULL;
+
+      element = json_array_get_object_element (array, i);
+      app_id  = json_object_get_string_member (element, "app_id");
+      gtk_string_list_append (results, app_id);
+    }
+  return dex_future_new_take_object (g_steal_pointer (&results));
+}
+
+static DexFuture *
+search_keyword_finally (DexFuture *future,
+                        GWeakRef  *wr)
+{
+  g_autoptr (BzFlathubState) self = NULL;
+  const GValue *value             = NULL;
+  GListModel   *model             = NULL;
+
+  bz_weak_get_or_return_reject (self, wr);
+
+  value = dex_future_get_value (future, NULL);
+  if (value == NULL)
+    return dex_ref (future);
+
+  model = g_value_get_object (value);
+
+  if (self->map_factory != NULL)
+    return dex_future_new_take_object (
+        bz_application_map_factory_generate (self->map_factory, model));
+
+  return dex_ref (future);
+}
+
+BzResult *
+bz_flathub_state_search_keyword (BzFlathubState *self,
+                                 const char     *keyword)
+{
+  g_autoptr (DexFuture) future = NULL;
+  g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
+  g_return_val_if_fail (keyword != NULL, NULL);
+
+  future = dex_scheduler_spawn (
+      bz_get_io_scheduler (),
+      bz_get_dex_stack_size (),
+      search_keyword_fiber,
+      g_strdup (keyword),
+      g_free);
+  future = dex_future_finally (
+      future,
+      (DexFutureCallback) search_keyword_finally,
+      bz_track_weak (self),
+      bz_weak_release);
+
+  return bz_result_new (g_steal_pointer (&future));
 }
 
 /* End of bz-flathub-state.c */

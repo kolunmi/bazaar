@@ -225,12 +225,12 @@ EOF
 print_struct () {
     while IFS= read -r line; do
         set -- $line
-        
+
         LOC_NAME="$1"
         LOC_CTYPE="$2"
         LOC_GTYPE="$3"
         LOC_PTYPE="$4"
-        
+
         printf '  %s ' "$LOC_CTYPE"
         case "$LOC_PTYPE" in
             char|uchar|boolean|int|uint|long|ulong|int64|uint64|unichar|enum|flags|float|double) ;;
@@ -246,12 +246,12 @@ print_prop_enums () {
     printf '  PROP_0,\n\n'
     while IFS= read -r line; do
         set -- $line
-        
+
         LOC_NAME="$1"
         LOC_CTYPE="$2"
         LOC_GTYPE="$3"
         LOC_PTYPE="$4"
-        
+
         printf '  PROP_%s,\n' "$(to_upper $LOC_NAME)"
     done <<EOF
 $PROPS
@@ -262,18 +262,18 @@ EOF
 print_dispose () {
     while IFS= read -r line; do
         set -- $line
-        
+
         LOC_NAME="$1"
         LOC_CTYPE="$2"
         LOC_GTYPE="$3"
         LOC_PTYPE="$4"
         LOC_FREE="$5"
-        
+
         case "$LOC_PTYPE" in
             char|uchar|boolean|int|uint|long|ulong|int64|uint64|unichar|enum|flags|float|double) ;;
             *)
                 printf '  g_clear_pointer (&self->%s, ' "${LOC_NAME}"
-                
+
                 if [ -n "$LOC_FREE" ]; then
                     printf "$LOC_FREE"
                 else
@@ -295,7 +295,7 @@ EOF
 print_get_property () {
     while IFS= read -r line; do
         set -- $line
-        
+
         LOC_NAME="$1"
         LOC_CTYPE="$2"
         LOC_GTYPE="$3"
@@ -312,14 +312,14 @@ EOF
 print_set_property () {
     while IFS= read -r line; do
         set -- $line
-        
+
         LOC_NAME="$1"
         LOC_CTYPE="$2"
         LOC_GTYPE="$3"
         LOC_PTYPE="$4"
-        
+
         printf '    case PROP_%s:\n' "$(to_upper $LOC_NAME)"
-        printf '      %s_set_%s (self, g_value_get_%s (value));\n' "$SNAKE" "$LOC_NAME" "$LOC_PTYPE" 
+        printf '      %s_set_%s (self, g_value_get_%s (value));\n' "$SNAKE" "$LOC_NAME" "$LOC_PTYPE"
         printf '      break;\n'
     done <<EOF
 $PROPS
@@ -329,12 +329,12 @@ EOF
 print_init_properties () {
     while IFS= read -r line; do
         set -- $line
-        
+
         LOC_NAME="$1"
         LOC_CTYPE="$2"
         LOC_GTYPE="$3"
         LOC_PTYPE="$4"
-        
+
         printf '  props[PROP_%s] =\n' "$(to_upper $LOC_NAME)"
         printf '      g_param_spec_%s (\n' "$LOC_PTYPE"
         printf '          "%s",\n' "$(to_hyphened "$LOC_NAME")"
@@ -383,10 +383,10 @@ print_functions () {
 
 print_get_property_methods () {
     HEADER="$1"
-    
+
     while IFS= read -r line; do
         set -- $line
-        
+
         LOC_NAME="$1"
         LOC_CTYPE="$2"
         LOC_GTYPE="$3"
@@ -401,7 +401,7 @@ print_get_property_methods () {
             *) printf ' *'
         esac
         printf '\n%s_get_%s (%s *self)' "$SNAKE" "$LOC_NAME" "$PASCAL"
-        
+
         if [ "$HEADER" == header ]; then
             printf ';\n\n'
         else
@@ -424,7 +424,7 @@ print_get_property_methods () {
             printf '  return self->%s;\n' "$LOC_NAME"
             printf '}\n\n'
         fi
-        
+
     done <<EOF
 $PROPS
 EOF
@@ -433,10 +433,10 @@ EOF
 
 print_set_property_methods () {
     HEADER="$1"
-    
+
     while IFS= read -r line; do
         set -- $line
-        
+
         LOC_NAME="$1"
         LOC_CTYPE="$2"
         LOC_GTYPE="$3"
@@ -454,17 +454,25 @@ print_set_property_methods () {
             *) printf '*'
         esac
         printf '%s)' "$LOC_NAME"
-        
+
         if [ "$HEADER" == header ]; then
             printf ';\n\n'
         else
             printf '{\n  g_return_if_fail (%s_IS_%s (self));\n\n' "$MACRO_PREF" "$MACRO_NAME"
 
+            printf '  if ('
+            case "$LOC_PTYPE" in
+                boolean) printf '!!%s == !!self->%s' "$LOC_NAME" "$LOC_NAME" ;;
+                string) printf '%s == self->%s || (%s != NULL && self->%s != NULL && g_strcmp0(%s, self->%s) == 0)' "$LOC_NAME" "$LOC_NAME" "$LOC_NAME" "$LOC_NAME" "$LOC_NAME" "$LOC_NAME";;
+                *) printf '%s == self->%s' "$LOC_NAME" "$LOC_NAME" ;;
+            esac
+            printf ')\n    return;\n\n'
+
             case "$LOC_PTYPE" in
                 char|uchar|boolean|int|uint|long|ulong|int64|uint64|unichar|enum|flags|float|double) ;;
                 *)
                     printf '  g_clear_pointer (&self->%s, ' "$LOC_NAME"
-                    
+
                     if [ -n "$LOC_FREE" ]; then
                         printf "$LOC_FREE"
                     else
@@ -496,11 +504,11 @@ print_set_property_methods () {
                 esac
             fi
             printf ';\n\n'
-            
+
             printf '  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_%s]);\n' "$(to_upper $LOC_NAME)"
             printf '}\n\n'
         fi
-        
+
     done <<EOF
 $PROPS
 EOF

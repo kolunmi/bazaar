@@ -1,6 +1,10 @@
-/* bz-global-state.h
+/* bz-age-rating-dialog.h
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2021 Endless OS Foundation LLC
+ * Copyright 2025 Alexander Vanhee
+ *
+ * Author: Philip Withnall <pwithnall@endlessos.org> (GNOME Software)
+ * Adapted for Bazaar by Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,25 +24,16 @@
 
 #pragma once
 
-#include <libdex.h>
-#include <libsoup/soup.h>
+#include "bz-entry.h"
+#include <adwaita.h>
+#include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
-DexFuture *
-bz_send_with_global_http_session (SoupMessage *message);
+#define BZ_TYPE_AGE_RATING_DIALOG (bz_age_rating_dialog_get_type ())
 
-DexFuture *
-bz_send_with_global_http_session_then_splice_into (SoupMessage   *message,
-                                                   GOutputStream *output);
+G_DECLARE_FINAL_TYPE (BzAgeRatingDialog, bz_age_rating_dialog, BZ, AGE_RATING_DIALOG, AdwDialog)
 
-DexFuture *
-bz_https_query_json (const char *uri);
-
-DexFuture *
-bz_query_flathub_v2_json (const char *request);
-
-DexFuture *
-bz_query_flathub_v2_json_take (char *request);
+BzAgeRatingDialog *bz_age_rating_dialog_new (BzEntry *entry);
 
 G_END_DECLS

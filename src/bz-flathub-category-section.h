@@ -29,12 +29,21 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE (BzFlathubCategorySection, bz_flathub_category_section, BZ, FLATHUB_CATEGORY_SECTION, GtkBox)
 
-GtkWidget         *bz_flathub_category_section_new (void);
-void               bz_flathub_category_section_set_category (BzFlathubCategorySection *self,
-                                                             BzFlathubCategory        *category);
+GtkWidget *bz_flathub_category_section_new (void);
+
+void bz_flathub_category_section_set_category (BzFlathubCategorySection *self,
+                                               BzFlathubCategory        *category);
+
 BzFlathubCategory *bz_flathub_category_section_get_category (BzFlathubCategorySection *self);
-void               bz_flathub_category_section_set_max_items (BzFlathubCategorySection *self,
-                                                              guint                     max_items);
-guint              bz_flathub_category_section_get_max_items (BzFlathubCategorySection *self);
+
+void bz_flathub_category_section_set_compact (BzFlathubCategorySection *self,
+                                              gboolean                  compact);
+
+gboolean bz_flathub_category_section_get_compact (BzFlathubCategorySection *self);
+
+void bz_flathub_category_section_set_min_items (BzFlathubCategorySection *self,
+                                                guint                     min_items);
+
+guint bz_flathub_category_section_get_min_items (BzFlathubCategorySection *self);
 
 G_END_DECLS

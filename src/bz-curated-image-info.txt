@@ -1,0 +1,16 @@
+prefix=bz
+name=curated_image_info
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+include=<gtk/gtk.h>
+
+property=uri char G_TYPE_STRING string
+property=light_uri char G_TYPE_STRING string
+property=dark_uri char G_TYPE_STRING string
+
+property=width int G_TYPE_INT int
+property=height int G_TYPE_INT int
+property=can_shrink gboolean G_TYPE_BOOLEAN boolean
+property=fit GtkContentFit GTK_TYPE_CONTENT_FIT enum

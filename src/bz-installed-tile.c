@@ -24,7 +24,6 @@
 #include "bz-entry-group.h"
 #include "bz-env.h"
 #include "bz-error.h"
-#include "bz-flatpak-entry.h"
 #include "bz-installed-page.h"
 #include "bz-installed-tile.h"
 #include "bz-state-info.h"
@@ -348,8 +347,11 @@ bz_installed_tile_set_group (BzInstalledTile *self,
   g_return_if_fail (BZ_IS_INSTALLED_TILE (self));
   g_return_if_fail (group == NULL || BZ_IS_ENTRY_GROUP (group));
 
-  if (g_set_object (&self->group, group))
-    g_object_notify_by_pspec (G_OBJECT (self), props[PROP_GROUP]);
+  g_clear_object (&self->group);
+  if (group != NULL)
+    self->group = g_object_ref (group);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_GROUP]);
 }
 
 BzEntryGroup *

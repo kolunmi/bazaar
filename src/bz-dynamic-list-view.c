@@ -24,6 +24,8 @@
 G_DEFINE_ENUM_TYPE (
     BzDynamicListViewKind,
     bz_dynamic_list_view_kind,
+    G_DEFINE_ENUM_VALUE (BZ_DYNAMIC_LIST_VIEW_KIND_HBOX, "h-box"),
+    G_DEFINE_ENUM_VALUE (BZ_DYNAMIC_LIST_VIEW_KIND_VBOX, "v-box"),
     G_DEFINE_ENUM_VALUE (BZ_DYNAMIC_LIST_VIEW_KIND_LIST_BOX, "list-box"),
     G_DEFINE_ENUM_VALUE (BZ_DYNAMIC_LIST_VIEW_KIND_FLOW_BOX, "flow-box"),
     G_DEFINE_ENUM_VALUE (BZ_DYNAMIC_LIST_VIEW_KIND_CAROUSEL, "carousel"))
@@ -39,9 +41,13 @@ struct _BzDynamicListView
   char                 *child_prop;
   char                 *object_prop;
   guint                 max_children_per_line;
+  guint                 row_spacing;
+  guint                 column_spacing;
 
   char              *child_type_string;
   GtkScrolledWindow *scrolled_window;
+
+  GPtrArray *box_children;
 };
 
 G_DEFINE_FINAL_TYPE (BzDynamicListView, bz_dynamic_list_view, ADW_TYPE_BIN);
@@ -58,6 +64,8 @@ enum
   PROP_OBJECT_PROP,
   PROP_MAX_CHILDREN_PER_LINE,
   PROP_VADJUSTMENT,
+  PROP_ROW_SPACING,
+  PROP_COLUMN_SPACING,
 
   LAST_PROP
 };
@@ -119,6 +127,8 @@ bz_dynamic_list_view_dispose (GObject *object)
   g_clear_pointer (&self->object_prop, g_free);
   g_clear_pointer (&self->child_type_string, g_free);
 
+  g_clear_pointer (&self->box_children, g_ptr_array_unref);
+
   G_OBJECT_CLASS (bz_dynamic_list_view_parent_class)->dispose (object);
 }
 
@@ -156,6 +166,12 @@ bz_dynamic_list_view_get_property (GObject    *object,
     case PROP_VADJUSTMENT:
       g_value_set_object (value, bz_dynamic_list_view_get_vadjustment (self));
       break;
+    case PROP_ROW_SPACING:
+      g_value_set_uint (value, bz_dynamic_list_view_get_row_spacing (self));
+      break;
+    case PROP_COLUMN_SPACING:
+      g_value_set_uint (value, bz_dynamic_list_view_get_column_spacing (self));
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -191,6 +207,12 @@ bz_dynamic_list_view_set_property (GObject      *object,
       break;
     case PROP_MAX_CHILDREN_PER_LINE:
       bz_dynamic_list_view_set_max_children_per_line (self, g_value_get_uint (value));
+      break;
+    case PROP_ROW_SPACING:
+      bz_dynamic_list_view_set_row_spacing (self, g_value_get_uint (value));
+      break;
+    case PROP_COLUMN_SPACING:
+      bz_dynamic_list_view_set_column_spacing (self, g_value_get_uint (value));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -231,6 +253,20 @@ bz_dynamic_list_view_class_init (BzDynamicListViewClass *klass)
           "max-children-per-line",
           NULL, NULL,
           1, G_MAXUINT, 4,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_ROW_SPACING] =
+      g_param_spec_uint (
+          "row-spacing",
+          NULL, NULL,
+          0, G_MAXUINT, 5,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_COLUMN_SPACING] =
+      g_param_spec_uint (
+          "column-spacing",
+          NULL, NULL,
+          0, G_MAXUINT, 5,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   props[PROP_CHILD_TYPE] =
@@ -299,6 +335,9 @@ bz_dynamic_list_view_init (BzDynamicListView *self)
   self->child_type            = G_TYPE_INVALID;
   self->noscroll_kind         = BZ_DYNAMIC_LIST_VIEW_KIND_LIST_BOX;
   self->max_children_per_line = 4;
+  self->row_spacing           = 5;
+  self->column_spacing        = 5;
+  self->box_children          = g_ptr_array_new ();
 }
 
 BzDynamicListView *
@@ -484,6 +523,62 @@ bz_dynamic_list_view_set_max_children_per_line (BzDynamicListView *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MAX_CHILDREN_PER_LINE]);
 }
 
+guint
+bz_dynamic_list_view_get_row_spacing (BzDynamicListView *self)
+{
+  g_return_val_if_fail (BZ_IS_DYNAMIC_LIST_VIEW (self), 5);
+  return self->row_spacing;
+}
+
+guint
+bz_dynamic_list_view_get_column_spacing (BzDynamicListView *self)
+{
+  g_return_val_if_fail (BZ_IS_DYNAMIC_LIST_VIEW (self), 5);
+  return self->column_spacing;
+}
+
+void
+bz_dynamic_list_view_set_row_spacing (BzDynamicListView *self,
+                                      guint              row_spacing)
+{
+  GtkWidget *child;
+
+  g_return_if_fail (BZ_IS_DYNAMIC_LIST_VIEW (self));
+
+  self->row_spacing = row_spacing;
+
+  child = adw_bin_get_child (ADW_BIN (self));
+  if (child != NULL &&
+      self->noscroll_kind == BZ_DYNAMIC_LIST_VIEW_KIND_FLOW_BOX &&
+      !self->scroll)
+    {
+      gtk_flow_box_set_row_spacing (GTK_FLOW_BOX (child), row_spacing);
+    }
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ROW_SPACING]);
+}
+
+void
+bz_dynamic_list_view_set_column_spacing (BzDynamicListView *self,
+                                         guint              column_spacing)
+{
+  GtkWidget *child;
+
+  g_return_if_fail (BZ_IS_DYNAMIC_LIST_VIEW (self));
+
+  self->column_spacing = column_spacing;
+
+  child = adw_bin_get_child (ADW_BIN (self));
+  if (child != NULL &&
+      self->noscroll_kind == BZ_DYNAMIC_LIST_VIEW_KIND_FLOW_BOX &&
+      !self->scroll)
+    {
+      gtk_flow_box_set_column_spacing (GTK_FLOW_BOX (child), column_spacing);
+    }
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_COLUMN_SPACING]);
+}
+
 static void
 refresh (BzDynamicListView *self)
 {
@@ -491,6 +586,7 @@ refresh (BzDynamicListView *self)
     g_signal_handlers_disconnect_by_func (self->model, items_changed, self);
 
   self->scrolled_window = NULL;
+  g_ptr_array_set_size (self->box_children, 0);
   adw_bin_set_child (ADW_BIN (self), NULL);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_VADJUSTMENT]);
 
@@ -531,11 +627,33 @@ refresh (BzDynamicListView *self)
     {
       switch (self->noscroll_kind)
         {
+        case BZ_DYNAMIC_LIST_VIEW_KIND_HBOX:
+        case BZ_DYNAMIC_LIST_VIEW_KIND_VBOX:
+          {
+            GtkWidget *widget = NULL;
+
+            if (self->noscroll_kind == BZ_DYNAMIC_LIST_VIEW_KIND_VBOX)
+              widget = gtk_box_new (GTK_ORIENTATION_VERTICAL, 10);
+            else
+              widget = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 10);
+
+            g_signal_connect (
+                self->model, "items-changed",
+                G_CALLBACK (items_changed), self);
+
+            adw_bin_set_child (ADW_BIN (self), widget);
+            items_changed (self->model, 0, 0, g_list_model_get_n_items (self->model), self);
+          }
+          break;
         case BZ_DYNAMIC_LIST_VIEW_KIND_LIST_BOX:
           {
             GtkWidget *widget = NULL;
 
             widget = gtk_list_box_new ();
+            gtk_list_box_set_selection_mode (
+                GTK_LIST_BOX (widget),
+                GTK_SELECTION_NONE);
+
             gtk_list_box_bind_model (
                 GTK_LIST_BOX (widget), self->model,
                 (GtkListBoxCreateWidgetFunc) create_child_widget,
@@ -551,6 +669,8 @@ refresh (BzDynamicListView *self)
             widget = gtk_flow_box_new ();
             gtk_flow_box_set_homogeneous (GTK_FLOW_BOX (widget), TRUE);
             gtk_flow_box_set_max_children_per_line (GTK_FLOW_BOX (widget), self->max_children_per_line);
+            gtk_flow_box_set_row_spacing (GTK_FLOW_BOX (widget), self->row_spacing);
+            gtk_flow_box_set_column_spacing (GTK_FLOW_BOX (widget), self->column_spacing);
             gtk_flow_box_set_selection_mode (GTK_FLOW_BOX (widget), GTK_SELECTION_NONE);
             gtk_flow_box_bind_model (
                 GTK_FLOW_BOX (widget), self->model,
@@ -687,19 +807,40 @@ create_child_widget (GObject           *object,
   gtk_widget_set_receives_default (widget, TRUE);
   g_signal_emit (self, signals[SIGNAL_BIND_WIDGET], 0, widget, object);
 
-  if (self->noscroll_kind == BZ_DYNAMIC_LIST_VIEW_KIND_FLOW_BOX)
+  switch (self->noscroll_kind)
     {
-      GtkWidget *child = NULL;
+    case BZ_DYNAMIC_LIST_VIEW_KIND_LIST_BOX:
+      {
+        GtkWidget *child = NULL;
 
-      child = gtk_flow_box_child_new ();
-      gtk_widget_add_css_class (GTK_WIDGET (child), "disable-adw-flow-box-styling");
-      gtk_widget_set_focusable (GTK_WIDGET (child), FALSE);
-      gtk_flow_box_child_set_child (GTK_FLOW_BOX_CHILD (child), widget);
+        child = gtk_list_box_row_new ();
+        gtk_widget_add_css_class (GTK_WIDGET (child), "disable-adw-flow-box-styling");
+        gtk_widget_set_focusable (GTK_WIDGET (child), FALSE);
 
-      return child;
+        gtk_list_box_row_set_selectable (GTK_LIST_BOX_ROW (child), FALSE);
+        gtk_list_box_row_set_child (GTK_LIST_BOX_ROW (child), widget);
+
+        return child;
+      }
+    case BZ_DYNAMIC_LIST_VIEW_KIND_FLOW_BOX:
+      {
+        GtkWidget *child = NULL;
+
+        child = gtk_flow_box_child_new ();
+        gtk_widget_add_css_class (GTK_WIDGET (child), "disable-adw-flow-box-styling");
+        gtk_widget_set_focusable (GTK_WIDGET (child), FALSE);
+
+        gtk_flow_box_child_set_child (GTK_FLOW_BOX_CHILD (child), widget);
+
+        return child;
+      }
+    case BZ_DYNAMIC_LIST_VIEW_KIND_HBOX:
+    case BZ_DYNAMIC_LIST_VIEW_KIND_VBOX:
+    case BZ_DYNAMIC_LIST_VIEW_KIND_CAROUSEL:
+    case BZ_DYNAMIC_LIST_VIEW_N_KINDS:
+    default:
+      return widget;
     }
-  else
-    return widget;
 }
 
 static void
@@ -709,15 +850,36 @@ items_changed (GListModel        *model,
                guint              added,
                BzDynamicListView *self)
 {
-  GtkWidget *carousel = NULL;
+  GtkWidget *bin_child = NULL;
 
-  carousel = adw_bin_get_child (ADW_BIN (self));
-  g_return_if_fail (ADW_IS_CAROUSEL (carousel));
+  bin_child = adw_bin_get_child (ADW_BIN (self));
 
   for (guint i = 0; i < removed; i++)
-    adw_carousel_remove (
-        ADW_CAROUSEL (carousel),
-        adw_carousel_get_nth_page (ADW_CAROUSEL (carousel), position));
+    {
+      switch (self->noscroll_kind)
+        {
+        case BZ_DYNAMIC_LIST_VIEW_KIND_HBOX:
+        case BZ_DYNAMIC_LIST_VIEW_KIND_VBOX:
+          {
+            GtkWidget *child = NULL;
+
+            child = g_ptr_array_index (self->box_children, position);
+            gtk_box_remove (GTK_BOX (bin_child), g_steal_pointer (&child));
+            g_ptr_array_remove_index (self->box_children, position);
+          }
+          break;
+        case BZ_DYNAMIC_LIST_VIEW_KIND_CAROUSEL:
+          adw_carousel_remove (
+              ADW_CAROUSEL (bin_child),
+              adw_carousel_get_nth_page (ADW_CAROUSEL (bin_child), position));
+          break;
+        case BZ_DYNAMIC_LIST_VIEW_KIND_LIST_BOX:
+        case BZ_DYNAMIC_LIST_VIEW_KIND_FLOW_BOX:
+        case BZ_DYNAMIC_LIST_VIEW_N_KINDS:
+        default:
+          g_assert_not_reached ();
+        }
+    }
 
   for (guint i = 0; i < added; i++)
     {
@@ -726,7 +888,32 @@ items_changed (GListModel        *model,
 
       object = g_list_model_get_item (model, position + i);
       widget = create_child_widget (object, self);
-      adw_carousel_insert (ADW_CAROUSEL (carousel), widget, position + i);
+
+      switch (self->noscroll_kind)
+        {
+        case BZ_DYNAMIC_LIST_VIEW_KIND_HBOX:
+        case BZ_DYNAMIC_LIST_VIEW_KIND_VBOX:
+          {
+            if (position + i < self->box_children->len)
+              {
+                GtkWidget *sibling = NULL;
+
+                sibling = g_ptr_array_index (self->box_children, position + i);
+                gtk_box_insert_child_after (GTK_BOX (bin_child), widget, sibling);
+              }
+            else
+              gtk_box_append (GTK_BOX (bin_child), widget);
+          }
+          break;
+        case BZ_DYNAMIC_LIST_VIEW_KIND_CAROUSEL:
+          adw_carousel_insert (ADW_CAROUSEL (bin_child), widget, position + i);
+          break;
+        case BZ_DYNAMIC_LIST_VIEW_KIND_LIST_BOX:
+        case BZ_DYNAMIC_LIST_VIEW_KIND_FLOW_BOX:
+        case BZ_DYNAMIC_LIST_VIEW_N_KINDS:
+        default:
+          g_assert_not_reached ();
+        }
     }
 }
 

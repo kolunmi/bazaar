@@ -74,6 +74,7 @@ template $BzRichAppTile: Adw.Bin {
         }
 
         Label {
+          visible: bind $is_null(template.group as <$BzEntryGroup>.eol) as <bool>;
           css-name: "app-tile-description";
           xalign: 0.0;
           yalign: 0.0;
@@ -90,11 +91,31 @@ template $BzRichAppTile: Adw.Bin {
             "dimmed",
           ]
         }
+
+        Label {
+          visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.eol) as <bool>) as <bool>;
+          css-name: "app-tile-description";
+          xalign: 0.0;
+          yalign: 0.0;
+          wrap: true;
+          wrap-mode: word_char;
+          ellipsize: end;
+          vexpand: true;
+          lines: 2;
+          max-width-chars: 15;
+          single-line-mode: true;
+          label: _("Stopped Receiving Updates");
+
+          styles [
+            "warning",
+          ]
+        }
       }
 
       Box {
         Button {
-          visible: bind $is_zero(template.group as <$BzEntryGroup>.removable) as <bool>;
+          visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.installable) as <bool>) as <bool>;
+          sensitive: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
 
           styles [
             "medium-pill",
@@ -107,6 +128,7 @@ template $BzRichAppTile: Adw.Bin {
 
         Button {
           visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
+          sensitive: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
 
           styles [
             "circular"

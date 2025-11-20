@@ -52,6 +52,7 @@ struct _BzFlatpakEntry
   gboolean user;
   char    *flatpak_name;
   char    *flatpak_id;
+  char    *flatpak_version;
   char    *application_name;
   char    *application_runtime;
   char    *application_command;
@@ -77,6 +78,7 @@ enum
   PROP_USER,
   PROP_FLATPAK_NAME,
   PROP_FLATPAK_ID,
+  PROP_FLATPAK_VERSION,
   PROP_APPLICATION_NAME,
   PROP_APPLICATION_RUNTIME,
   PROP_APPLICATION_COMMAND,
@@ -117,6 +119,9 @@ bz_flatpak_entry_get_property (GObject    *object,
     case PROP_FLATPAK_ID:
       g_value_set_string (value, self->flatpak_id);
       break;
+    case PROP_FLATPAK_VERSION:
+      g_value_set_string (value, self->flatpak_version);
+      break;
     case PROP_APPLICATION_NAME:
       g_value_set_string (value, self->application_name);
       break;
@@ -150,6 +155,7 @@ bz_flatpak_entry_set_property (GObject      *object,
     case PROP_USER:
     case PROP_FLATPAK_NAME:
     case PROP_FLATPAK_ID:
+    case PROP_FLATPAK_VERSION:
     case PROP_APPLICATION_NAME:
     case PROP_APPLICATION_RUNTIME:
     case PROP_APPLICATION_COMMAND:
@@ -185,6 +191,12 @@ bz_flatpak_entry_class_init (BzFlatpakEntryClass *klass)
   props[PROP_FLATPAK_ID] =
       g_param_spec_string (
           "flatpak-id",
+          NULL, NULL, NULL,
+          G_PARAM_READABLE);
+
+  props[PROP_FLATPAK_VERSION] =
+      g_param_spec_string (
+          "flatpak-version",
           NULL, NULL, NULL,
           G_PARAM_READABLE);
 
@@ -237,6 +249,8 @@ bz_flatpak_entry_real_serialize (BzSerializable  *serializable,
     g_variant_builder_add (builder, "{sv}", "flatpak-name", g_variant_new_string (self->flatpak_name));
   if (self->flatpak_id != NULL)
     g_variant_builder_add (builder, "{sv}", "flatpak-id", g_variant_new_string (self->flatpak_id));
+  if (self->flatpak_version != NULL)
+    g_variant_builder_add (builder, "{sv}", "flatpak-version", g_variant_new_string (self->flatpak_version));
   if (self->application_name != NULL)
     g_variant_builder_add (builder, "{sv}", "application-name", g_variant_new_string (self->application_name));
   if (self->application_runtime != NULL)
@@ -276,6 +290,8 @@ bz_flatpak_entry_real_deserialize (BzSerializable *serializable,
         self->flatpak_name = g_variant_dup_string (value, NULL);
       else if (g_strcmp0 (key, "flatpak-id") == 0)
         self->flatpak_id = g_variant_dup_string (value, NULL);
+      else if (g_strcmp0 (key, "flatpak-version") == 0)
+        self->flatpak_version = g_variant_dup_string (value, NULL);
       else if (g_strcmp0 (key, "application-name") == 0)
         self->application_name = g_variant_dup_string (value, NULL);
       else if (g_strcmp0 (key, "application-runtime") == 0)
@@ -363,7 +379,7 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
   const char      *remote_name                 = NULL;
   const char      *project_url                 = NULL;
   g_autoptr (GPtrArray) as_search_tokens       = NULL;
-  g_autoptr (GPtrArray) search_tokens          = NULL;
+  g_autofree char *search_tokens               = NULL;
   g_autoptr (GdkPaintable) icon_paintable      = NULL;
   g_autoptr (GIcon) mini_icon                  = NULL;
   g_autoptr (GListStore) screenshot_paintables = NULL;
@@ -374,16 +390,17 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
   double           average_rating              = 0.0;
   g_autofree char *ratings_summary             = NULL;
   g_autoptr (GListStore) version_history       = NULL;
-  const char      *accent_color_light          = NULL;
-  const char      *accent_color_dark           = NULL;
-  guint            required_controls           = 0;
-  guint            recommended_controls        = 0;
-  guint            supported_controls          = 0;
-  gint             min_display_length          = 0;
-  gint             max_display_length          = 0;
-  gboolean         is_mobile_friendly          = FALSE;
-  AsContentRating *content_rating              = NULL;
-  gint             age_rating                  = 0;
+  const char *accent_color_light               = NULL;
+  const char *accent_color_dark                = NULL;
+  guint       required_controls                = 0;
+  guint       recommended_controls             = 0;
+  guint       supported_controls               = 0;
+  gint        min_display_length               = 0;
+  gint        max_display_length               = 0;
+  gboolean    is_mobile_friendly               = FALSE;
+  g_autoptr (AsContentRating) content_rating   = NULL;
+  GPtrArray *as_keywords                       = NULL;
+  g_autoptr (GListStore) keywords              = NULL;
 
   g_return_val_if_fail (FLATPAK_IS_REF (ref), NULL);
   g_return_val_if_fail (FLATPAK_IS_REMOTE_REF (ref) || FLATPAK_IS_BUNDLE_REF (ref), NULL);
@@ -450,8 +467,9 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
   //   }
   module_dir = bz_dup_module_dir ();
 
-  self->flatpak_name = g_strdup (flatpak_ref_get_name (ref));
-  self->flatpak_id   = flatpak_ref_format_ref (ref);
+  self->flatpak_name    = g_strdup (flatpak_ref_get_name (ref));
+  self->flatpak_id      = flatpak_ref_format_ref (ref);
+  self->flatpak_version = g_strdup (flatpak_ref_get_branch (ref));
 
   id                 = flatpak_ref_get_name (ref);
   unique_id          = bz_flatpak_ref_format_unique (ref, user);
@@ -784,7 +802,13 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
       content_rating = as_component_get_content_rating (component, "oars-1.1");
       if (content_rating != NULL)
         {
-          age_rating = (gint) as_content_rating_get_minimum_age (content_rating);
+          g_object_ref (content_rating);
+        }
+      else
+        {
+          content_rating = as_component_get_content_rating (component, "oars-1.0");
+          if (content_rating != NULL)
+            g_object_ref (content_rating);
         }
 
       requires_relations   = as_component_get_requires (component);
@@ -898,16 +922,39 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
 
   if (as_search_tokens != NULL)
     {
-      search_tokens = g_ptr_array_new_with_free_func (g_free);
+      g_autoptr (GStrvBuilder) builder = NULL;
+      g_auto (GStrv) strv              = NULL;
+
+      builder = g_strv_builder_new ();
       for (guint i = 0; i < as_search_tokens->len; i++)
         {
           const char *token = NULL;
 
           token = g_ptr_array_index (as_search_tokens, i);
-          g_ptr_array_add (search_tokens, g_strdup (token));
+          g_strv_builder_add (builder, token);
+        }
+
+      strv          = g_strv_builder_end (builder);
+      search_tokens = g_strjoinv (" ", strv);
+    }
+  if (component != NULL)
+    {
+      as_keywords = as_component_get_keywords (component);
+      if (as_keywords != NULL && as_keywords->len > 0)
+        {
+          keywords = g_list_store_new (GTK_TYPE_STRING_OBJECT);
+
+          for (guint i = 0; i < as_keywords->len; i++)
+            {
+              const char *keyword                     = NULL;
+              g_autoptr (GtkStringObject) keyword_obj = NULL;
+
+              keyword     = g_ptr_array_index (as_keywords, i);
+              keyword_obj = gtk_string_object_new (keyword);
+              g_list_store_append (keywords, keyword_obj);
+            }
         }
     }
-
   g_object_set (
       self,
       "kinds", kinds,
@@ -946,10 +993,22 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
       "min-display-length", min_display_length,
       "max-display-length", max_display_length,
       "is-mobile-friendly", is_mobile_friendly,
-      "age-rating", age_rating,
+      "content-rating", content_rating,
+      "keywords", keywords,
       NULL);
 
   return g_steal_pointer (&self);
+}
+
+char *
+bz_flatpak_ref_parts_format_unique (const char *origin,
+                                    const char *fmt,
+                                    gboolean    user)
+{
+  return g_strdup_printf (
+      "FLATPAK-%s::%s::%s",
+      user ? "USER" : "SYSTEM",
+      origin, fmt);
 }
 
 char *
@@ -968,10 +1027,7 @@ bz_flatpak_ref_format_unique (FlatpakRef *ref,
   else if (FLATPAK_IS_INSTALLED_REF (ref))
     origin = flatpak_installed_ref_get_origin (FLATPAK_INSTALLED_REF (ref));
 
-  return g_strdup_printf (
-      "FLATPAK-%s::%s::%s",
-      user ? "USER" : "SYSTEM",
-      origin, fmt);
+  return bz_flatpak_ref_parts_format_unique (origin, fmt, user);
 }
 
 FlatpakRef *
@@ -983,6 +1039,19 @@ bz_flatpak_entry_get_ref (BzFlatpakEntry *self)
     self->ref = flatpak_ref_parse (self->flatpak_id, NULL);
 
   return self->ref;
+}
+
+char *
+bz_flatpak_id_format_unique (const char *flatpak_id,
+                             gboolean    user)
+{
+  g_autoptr (FlatpakRef) ref = NULL;
+
+  ref = flatpak_ref_parse (flatpak_id, NULL);
+  if (ref == NULL)
+    return NULL;
+
+  return bz_flatpak_ref_format_unique (ref, user);
 }
 
 gboolean
@@ -1004,6 +1073,13 @@ bz_flatpak_entry_get_flatpak_id (BzFlatpakEntry *self)
 {
   g_return_val_if_fail (BZ_IS_FLATPAK_ENTRY (self), NULL);
   return self->flatpak_id;
+}
+
+const char *
+bz_flatpak_entry_get_flatpak_version (BzFlatpakEntry *self)
+{
+  g_return_val_if_fail (BZ_IS_FLATPAK_ENTRY (self), NULL);
+  return self->flatpak_version;
 }
 
 const char *
@@ -1032,28 +1108,6 @@ bz_flatpak_entry_get_addon_extension_of_ref (BzFlatpakEntry *self)
 {
   g_return_val_if_fail (BZ_IS_FLATPAK_ENTRY (self), NULL);
   return self->addon_extension_of_ref;
-}
-
-char *
-bz_flatpak_entry_extract_id_from_unique_id (const char *unique_id)
-{
-  g_auto (GStrv) tokens      = NULL;
-  g_autoptr (FlatpakRef) ref = NULL;
-  const char *name           = NULL;
-
-  tokens = g_strsplit (unique_id, "::", 3);
-  if (g_strv_length (tokens) != 3)
-    return NULL;
-
-  ref = flatpak_ref_parse (tokens[2], NULL);
-  if (ref == NULL)
-    return NULL;
-
-  name = flatpak_ref_get_name (ref);
-  if (name == NULL)
-    return NULL;
-
-  return g_strdup (name);
 }
 
 gboolean
@@ -1105,6 +1159,7 @@ clear_entry (BzFlatpakEntry *self)
 {
   g_clear_pointer (&self->flatpak_name, g_free);
   g_clear_pointer (&self->flatpak_id, g_free);
+  g_clear_pointer (&self->flatpak_version, g_free);
   g_clear_pointer (&self->application_name, g_free);
   g_clear_pointer (&self->application_runtime, g_free);
   g_clear_pointer (&self->application_command, g_free);

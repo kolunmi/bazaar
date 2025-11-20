@@ -1,0 +1,7 @@
+prefix=bz
+name=curated_markdown_info
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+property=string char G_TYPE_STRING string

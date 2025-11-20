@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-11-11 20:04+0200\n"
-"PO-Revision-Date: 2025-11-12 02:13+0200\n"
+"PO-Revision-Date: 2025-11-16 22:05+0200\n"
 "Last-Translator: faoquad <faoquad@noreply.codeberg.org>\n"
 "Language-Team: Ukrainian <>\n"
 "Language: uk\n"
@@ -352,7 +352,7 @@ msgstr "Медіа"
 
 #: src/bz-flathub-category.c:66
 msgid "More Audio & Video"
-msgstr "Ще"
+msgstr "Показати більше"
 
 #: src/bz-flathub-category.c:67
 msgid "Developer Tools"
@@ -364,7 +364,7 @@ msgstr "Розробка"
 
 #: src/bz-flathub-category.c:67
 msgid "More Developer Tools"
-msgstr "Ще"
+msgstr "Показати більше"
 
 #: src/bz-flathub-category.c:68
 msgid "Education"
@@ -376,7 +376,7 @@ msgstr "Освіта"
 
 #: src/bz-flathub-category.c:68
 msgid "More Education"
-msgstr "Ще"
+msgstr "Показати більше"
 
 #: src/bz-flathub-category.c:69
 msgid "Gaming"
@@ -384,11 +384,11 @@ msgstr "Ігри"
 
 #: src/bz-flathub-category.c:69
 msgid "Play"
-msgstr "Відтворення"
+msgstr "Ігри"
 
 #: src/bz-flathub-category.c:69
 msgid "More Gaming"
-msgstr "Ще"
+msgstr "Показати більше"
 
 #: src/bz-flathub-category.c:70
 msgid "Graphics & Photography"
@@ -396,11 +396,11 @@ msgstr "Графіка та фотографія"
 
 #: src/bz-flathub-category.c:70
 msgid "Create"
-msgstr "Створення"
+msgstr "Творчість"
 
 #: src/bz-flathub-category.c:70
 msgid "More Graphics & Photography"
-msgstr "Ще"
+msgstr "Показати більше"
 
 #: src/bz-flathub-category.c:71
 msgid "Networking"
@@ -412,7 +412,7 @@ msgstr "Інтернет"
 
 #: src/bz-flathub-category.c:71
 msgid "More Networking"
-msgstr "Ще"
+msgstr "Показати більше"
 
 #: src/bz-flathub-category.c:72
 msgid "Productivity"
@@ -424,7 +424,7 @@ msgstr "Робота"
 
 #: src/bz-flathub-category.c:72
 msgid "More Productivity"
-msgstr "Ще"
+msgstr "Показати більше"
 
 #: src/bz-flathub-category.c:73
 msgid "Science"
@@ -432,7 +432,7 @@ msgstr "Наука"
 
 #: src/bz-flathub-category.c:73
 msgid "More Science"
-msgstr "Ще"
+msgstr "Показати більше"
 
 #: src/bz-flathub-category.c:74
 msgid "System"
@@ -440,7 +440,7 @@ msgstr "Система"
 
 #: src/bz-flathub-category.c:74
 msgid "More System"
-msgstr "Ще"
+msgstr "Показати більше"
 
 #: src/bz-flathub-category.c:75
 msgid "Utilities"
@@ -452,7 +452,7 @@ msgstr "Утиліти"
 
 #: src/bz-flathub-category.c:75
 msgid "More Utilities"
-msgstr "Ще"
+msgstr "Показати більше"
 
 #: src/bz-flathub-category.c:76 src/bz-flathub-page.blp:109
 #: src/bz-flathub-page.blp:142
@@ -482,7 +482,7 @@ msgstr "Нові"
 
 #: src/bz-flathub-category.c:78
 msgid "More New"
-msgstr "Ще"
+msgstr "Показати більше"
 
 #: src/bz-flathub-category.c:79 src/bz-flathub-page.blp:153
 msgid "Recently Updated"
@@ -490,7 +490,7 @@ msgstr "Нещодавно оновлені"
 
 #: src/bz-flathub-category.c:79 src/bz-flathub-page.blp:127
 msgid "Updated"
-msgstr "Оновлення"
+msgstr "Оновлені"
 
 #: src/bz-flathub-category.c:79
 msgid "More Updated"
@@ -502,12 +502,12 @@ msgstr "Мобільні пристрої"
 
 #: src/bz-flathub-category.c:80
 msgid "More Mobile"
-msgstr "Ще"
+msgstr "Показати більше"
 
 #: src/bz-flathub-category-section.c:132 src/bz-search-widget.c:314
 #, c-format
 msgid "%d applications"
-msgstr "Запустити цей застосунок"
+msgstr "%d застосунків"
 
 #: src/bz-flathub-page.blp:23
 msgid "Flathub Not Added"
@@ -535,7 +535,7 @@ msgstr "Шукати застосунки"
 
 #: src/bz-flathub-page.blp:266
 msgid "On the go"
-msgstr "на NES"
+msgstr "На ходу"
 
 #: src/bz-flathub-page.blp:278
 msgid "Apps for your Linux phones and tablets"
@@ -543,7 +543,7 @@ msgstr "Застосунки для Ваших смартфонів та пла�
 
 #: src/bz-flathub-page.blp:289 src/bz-flathub-page.blp:324
 msgid "More Mobile apps"
-msgstr "Ще"
+msgstr "Показати більше"
 
 #: src/bz-flathub-page.c:204
 msgid "Mobile Apps"
@@ -633,7 +633,7 @@ msgstr "Вподобань на сторінці розробки"
 
 #: src/bz-full-view.blp:273
 msgid "Open"
-msgstr "Відкрити посилання"
+msgstr "Запустити"
 
 #: src/bz-full-view.blp:286
 msgid "Download & Install Application"
@@ -772,11 +772,11 @@ msgstr "Більше від %s"
 
 #: src/bz-full-view.c:828
 msgid "Show Less"
-msgstr "Менше"
+msgstr "Згорнути"
 
 #: src/bz-full-view.c:828
 msgid "Show More"
-msgstr "Показати клавіатурні скорочення"
+msgstr "Розгорнути"
 
 #: src/bz-hardware-support-dialog.c:69
 msgid "Keyboard support"
@@ -1010,7 +1010,7 @@ msgstr "Показувати кількість уподобань на стор
 
 #: src/bz-preferences-dialog.blp:71
 msgid "Progress Bar"
-msgstr "Загальна смужка поступу"
+msgstr "Смужка поступу"
 
 #: src/bz-preferences-dialog.blp:72
 msgid "Choose a theme for the progress bar!"
@@ -1090,7 +1090,7 @@ msgstr "Омнісексуальний прапор"
 
 #: src/bz-releases-dialog.blp:5 src/bz-releases-list.blp:26
 msgid "Version History"
-msgstr "Версія %s"
+msgstr "Історія версій"
 
 #: src/bz-releases-list.c:128
 #, c-format
@@ -1264,7 +1264,7 @@ msgstr "_Про Базар"
 
 #: src/bz-window.blp:510
 msgid "_Quit Bazaar"
-msgstr "_Про Базар"
+msgstr "_Вийти"
 
 #: src/bz-window.blp:519
 msgid "Open Bazaar Inspector"

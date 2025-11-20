@@ -1,4 +1,4 @@
-/* bz-global-state.c
+/* bz-global-net.c
  *
  * Copyright 2025 Adam Masciola
  *
@@ -23,7 +23,7 @@
 #include <json-glib/json-glib.h>
 
 #include "bz-env.h"
-#include "bz-global-state.h"
+#include "bz-global-net.h"
 #include "bz-util.h"
 
 BZ_DEFINE_DATA (
