@@ -92,8 +92,6 @@ template $BzFullView: Adw.Bin {
                 top_box.margin-end: 10;
                 bottom_box.margin-start: 10;
                 bottom_box.margin-end: 10;
-                other_apps_box.margin-start: 2;
-                other_apps_box.margin-end: 2;
                 wide_install_controls.visible: false;
                 narrow_install_controls.visible: true;
                 app_icon.valign: start;
@@ -708,12 +706,6 @@ template $BzFullView: Adw.Bin {
                         $BzReleasesList releases_list {
                           version-history: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.version-history;
                         }
-                      }
-
-                      Box other_apps_box {
-                        orientation: vertical;
-                        margin-start: 17;
-                        margin-end: 17;
 
                         Box {
                           orientation: vertical;
@@ -727,7 +719,7 @@ template $BzFullView: Adw.Bin {
                             label: bind $format_other_apps_label(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer) as <string>;
                             xalign: 0;
                             margin-bottom: 6;
-                            margin-start: 12;
+                            margin-start: 3;
                           }
 
                           $BzDynamicListView {
@@ -751,17 +743,14 @@ template $BzFullView: Adw.Bin {
                             label: bind $format_more_other_apps_label(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer) as <string>;
                             clicked => $more_apps_button_clicked_cb(template);
                             halign: center;
-                            margin-top: 6;
+                            margin-top: 11;
                             margin-bottom: 8;
 
                             styles ["pill"]
                           }
                         }
                         $BzTagList {
-                          margin-start: 12;
-                          margin-end: 12;
                           margin-top: 8;
-
                           flathub-state: bind template.state as <$BzStateInfo>.flathub;
                           select => $tag_list_select_cb(template);
 
@@ -775,6 +764,7 @@ template $BzFullView: Adw.Bin {
                             model: bind template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.keywords;
                           };
                         }
+
                       }
                     };
                   }

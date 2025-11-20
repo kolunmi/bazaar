@@ -35,7 +35,8 @@ struct _BzFlathubCategorySection
   GtkButton *more_button;
 
   BzFlathubCategory *category;
-  guint              max_items;
+  gboolean           compact;
+  guint              min_items;
   GtkSliceListModel *slice_model;
 };
 
@@ -45,7 +46,8 @@ enum
 {
   PROP_0,
   PROP_CATEGORY,
-  PROP_MAX_ITEMS,
+  PROP_COMPACT,
+  PROP_MIN_ITEMS,
   LAST_PROP
 };
 
@@ -159,22 +161,33 @@ unbind_widget_cb (BzFlathubCategorySection *self,
   g_signal_handlers_disconnect_by_func (tile, G_CALLBACK (tile_clicked), group);
 }
 
+static int
+get_spacing (gpointer object,
+             gboolean compact)
+{
+  return compact ? 3 : 5;
+}
+
 static void
 update_model (BzFlathubCategorySection *self)
 {
   GtkExpression *expression;
+  guint          max_items;
 
   if (self->category == NULL)
     return;
 
+  max_items = self->compact ? 6 : 12;
+  max_items = MAX (max_items, self->min_items);
+
   if (self->slice_model != NULL)
     {
-      gtk_slice_list_model_set_size (self->slice_model, self->max_items);
+      gtk_slice_list_model_set_size (self->slice_model, max_items);
       return;
     }
 
   expression        = gtk_property_expression_new (BZ_TYPE_FLATHUB_CATEGORY, NULL, "applications");
-  self->slice_model = gtk_slice_list_model_new (NULL, 0, self->max_items);
+  self->slice_model = gtk_slice_list_model_new (NULL, 0, max_items);
 
   gtk_expression_bind (expression, self->slice_model, "model", self->category);
 
@@ -205,8 +218,11 @@ bz_flathub_category_section_get_property (GObject    *object,
     case PROP_CATEGORY:
       g_value_set_object (value, bz_flathub_category_section_get_category (self));
       break;
-    case PROP_MAX_ITEMS:
-      g_value_set_uint (value, bz_flathub_category_section_get_max_items (self));
+    case PROP_COMPACT:
+      g_value_set_boolean (value, bz_flathub_category_section_get_compact (self));
+      break;
+    case PROP_MIN_ITEMS:
+      g_value_set_uint (value, bz_flathub_category_section_get_min_items (self));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -226,8 +242,11 @@ bz_flathub_category_section_set_property (GObject      *object,
     case PROP_CATEGORY:
       bz_flathub_category_section_set_category (self, g_value_get_object (value));
       break;
-    case PROP_MAX_ITEMS:
-      bz_flathub_category_section_set_max_items (self, g_value_get_uint (value));
+    case PROP_COMPACT:
+      bz_flathub_category_section_set_compact (self, g_value_get_boolean (value));
+      break;
+    case PROP_MIN_ITEMS:
+      bz_flathub_category_section_set_min_items (self, g_value_get_uint (value));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -265,11 +284,17 @@ bz_flathub_category_section_class_init (BzFlathubCategorySectionClass *klass)
           BZ_TYPE_FLATHUB_CATEGORY,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
-  props[PROP_MAX_ITEMS] =
+  props[PROP_COMPACT] =
+      g_param_spec_boolean (
+          "compact",
+          NULL, NULL, FALSE,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_MIN_ITEMS] =
       g_param_spec_uint (
-          "max-items",
+          "min-items",
           NULL, NULL,
-          1, G_MAXUINT, 12,
+          0, G_MAXUINT, 0,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
@@ -300,12 +325,14 @@ bz_flathub_category_section_class_init (BzFlathubCategorySectionClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, on_more_button_clicked);
   gtk_widget_class_bind_template_callback (widget_class, bind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, unbind_widget_cb);
+  gtk_widget_class_bind_template_callback (widget_class, get_spacing);
 }
 
 static void
 bz_flathub_category_section_init (BzFlathubCategorySection *self)
 {
-  self->max_items = 12;
+  self->compact   = FALSE;
+  self->min_items = 0;
 
   gtk_widget_init_template (GTK_WIDGET (self));
 }
@@ -356,25 +383,47 @@ bz_flathub_category_section_get_category (BzFlathubCategorySection *self)
 }
 
 void
-bz_flathub_category_section_set_max_items (BzFlathubCategorySection *self,
-                                           guint                     max_items)
+bz_flathub_category_section_set_compact (BzFlathubCategorySection *self,
+                                         gboolean                  compact)
 {
   g_return_if_fail (BZ_IS_FLATHUB_CATEGORY_SECTION (self));
-  g_return_if_fail (max_items > 0);
 
-  if (self->max_items == max_items)
+  if (self->compact == compact)
     return;
 
-  self->max_items = max_items;
+  self->compact = compact;
 
   update_model (self);
 
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MAX_ITEMS]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_COMPACT]);
+}
+
+gboolean
+bz_flathub_category_section_get_compact (BzFlathubCategorySection *self)
+{
+  g_return_val_if_fail (BZ_IS_FLATHUB_CATEGORY_SECTION (self), FALSE);
+  return self->compact;
+}
+
+void
+bz_flathub_category_section_set_min_items (BzFlathubCategorySection *self,
+                                           guint                     min_items)
+{
+  g_return_if_fail (BZ_IS_FLATHUB_CATEGORY_SECTION (self));
+
+  if (self->min_items == min_items)
+    return;
+
+  self->min_items = min_items;
+
+  update_model (self);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MIN_ITEMS]);
 }
 
 guint
-bz_flathub_category_section_get_max_items (BzFlathubCategorySection *self)
+bz_flathub_category_section_get_min_items (BzFlathubCategorySection *self)
 {
   g_return_val_if_fail (BZ_IS_FLATHUB_CATEGORY_SECTION (self), 0);
-  return self->max_items;
+  return self->min_items;
 }
