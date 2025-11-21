@@ -101,6 +101,8 @@ Generate a fresh `.pot` file again (if necessary) with the commands from above.
 msgmerge --update --verbose po/de.po po/bazaar.pot
 ```
 
+Please make the previous update step a separate commit in your PR so it is easier to review. Thanks!
+
 ## Test your translations
 Replace "de" with your [Language code](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes)!
 
