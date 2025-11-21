@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-11-18 03:02+0100\n"
-"PO-Revision-Date: 2025-11-21 16:57+0100\n"
+"PO-Revision-Date: 2025-11-21 21:55+0100\n"
 "Last-Translator: Mimolet <theMimolet@proton.me>\n"
 "Language-Team: French\n"
 "Language: fr\n"
@@ -129,7 +129,7 @@ msgstr ""
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29 src/bz-application.c:504
 msgid "Adam Masciola"
-msgstr "Adam Masciola"
+msgstr ""
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:54
 msgid "The home page displaying Flathub apps"
@@ -517,7 +517,7 @@ msgstr "Du noyau Linux"
 
 #: src/bz-app-size-dialog.c:56
 msgid "linux-6.17.tar.xz"
-msgstr "linux-6.17.tar.xz"
+msgstr ""
 
 #: src/bz-app-size-dialog.c:57
 msgid "Of the Apollo 11 guidance computer"
@@ -554,12 +554,12 @@ msgstr ""
 #: src/bz-application.c:481
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
-msgstr "Adam Masciola <kolunmi@posteo.net>"
+msgstr ""
 
 #: src/bz-application.c:482
 msgctxt "About Dialog Developer Credit"
 msgid "Alexander Vanhee"
-msgstr "Alexander Vanhee"
+msgstr ""
 
 #. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
 #: src/bz-application.c:507
@@ -604,7 +604,7 @@ msgstr "Identification des entrées installées..."
 
 #: src/bz-application.c:1205
 msgid "Receiving Entries"
-msgstr "Réception des entrées"
+msgstr "Chargement des applications..."
 
 #: src/bz-application.c:1362
 #, c-format
@@ -614,7 +614,7 @@ msgstr "%'d sur %'d"
 #: src/bz-application.c:1375
 #, c-format
 msgid "Waiting for background indexing tasks to catch up..."
-msgstr "En attente du rattrapage des tâches d'indexation en arrière-plan..."
+msgstr "En attente des tâches d'indexation en arrière-plan..."
 
 #: src/bz-application.c:1417
 #, c-format
@@ -636,19 +636,19 @@ msgstr "Vide"
 
 #: src/bz-curated-view.blp:15
 msgid "No Curation"
-msgstr "Aucune recommandation"
+msgstr "Aucune Recommandation"
 
 #: src/bz-curated-view.blp:16
 msgid ""
 "There is no curation information provided on this system. You can still "
 "browse applications on Flathub"
 msgstr ""
-"Il n'y a aucune recommandations sur ce système. Vous pouvez toujours "
+"Il n'y a aucune recommandation sur ce système, mais vous pouvez toujours "
 "chercher des applications sur Flathub "
 
 #: src/bz-curated-view.blp:18
 msgid "Browse Flathub"
-msgstr "Flathub"
+msgstr "Chercher sur Flathub"
 
 #: src/bz-curated-view.blp:29 src/bz-curated-view.blp:33
 #: src/bz-flathub-page.blp:30 src/bz-flathub-page.blp:34
@@ -685,7 +685,7 @@ msgstr "Copier et fermer"
 
 #: src/bz-featured-tile.blp:88
 msgid "App of the Day"
-msgstr "Applications du jour"
+msgstr "Application du jour"
 
 #: src/bz-flathub-category-section.c:132 src/bz-search-widget.c:314
 #: src/bz-tag-list.c:110
@@ -695,16 +695,15 @@ msgstr "%d applications"
 
 #: src/bz-flathub-category.c:66
 msgid "Audio & Video"
-msgstr "Audio et vidéo"
+msgstr "Audio & Vidéo"
 
 #: src/bz-flathub-category.c:66
 msgid "Media"
 msgstr "Media"
 
 #: src/bz-flathub-category.c:66
-#, fuzzy
 msgid "More Audio & Video"
-msgstr "Plus d'Audio et Vidéo"
+msgstr "Plus d'Audio & Vidéo"
 
 #: src/bz-flathub-category.c:67
 msgid "Developer Tools"
@@ -716,7 +715,7 @@ msgstr "Développement"
 
 #: src/bz-flathub-category.c:67
 msgid "More Developer Tools"
-msgstr "Plus d'outils de développement"
+msgstr "Plus d'Outils de Développement"
 
 #: src/bz-flathub-category.c:68
 msgid "Education"
@@ -727,7 +726,6 @@ msgid "Learn"
 msgstr "Apprendre"
 
 #: src/bz-flathub-category.c:68
-#, fuzzy
 msgid "More Education"
 msgstr "Plus d'Éducation"
 
@@ -740,7 +738,6 @@ msgid "Play"
 msgstr "Jouer"
 
 #: src/bz-flathub-category.c:69
-#, fuzzy
 msgid "More Gaming"
 msgstr "Plus de Jeux-vidéo"
 
@@ -753,7 +750,6 @@ msgid "Create"
 msgstr "Créer"
 
 #: src/bz-flathub-category.c:70
-#, fuzzy
 msgid "More Graphics & Photography"
 msgstr "Plus de Graphismes & Photographie"
 
@@ -766,7 +762,6 @@ msgid "Internet"
 msgstr "Internet"
 
 #: src/bz-flathub-category.c:71
-#, fuzzy
 msgid "More Networking"
 msgstr "Plus de Réseau"
 
@@ -779,7 +774,6 @@ msgid "Work"
 msgstr "Travailler"
 
 #: src/bz-flathub-category.c:72
-#, fuzzy
 msgid "More Productivity"
 msgstr "Plus de Productivité"
 
@@ -788,7 +782,6 @@ msgid "Science"
 msgstr "Sciences"
 
 #: src/bz-flathub-category.c:73
-#, fuzzy
 msgid "More Science"
 msgstr "Plus de Science"
 
@@ -797,7 +790,6 @@ msgid "System"
 msgstr "Système"
 
 #: src/bz-flathub-category.c:74
-#, fuzzy
 msgid "More System"
 msgstr "Plus de Système"
 
@@ -810,7 +802,6 @@ msgid "Tools"
 msgstr "Outils"
 
 #: src/bz-flathub-category.c:75
-#, fuzzy
 msgid "More Utilities"
 msgstr "Plus d'Utilitaires"
 
@@ -842,7 +833,7 @@ msgstr "Nouveautés"
 
 #: src/bz-flathub-category.c:78
 msgid "More New"
-msgstr "Plus de Nouveautés"
+msgstr "Plus de nouveautés"
 
 #: src/bz-flathub-category.c:79 src/bz-flathub-page.blp:153
 msgid "Recently Updated"
@@ -850,7 +841,7 @@ msgstr "Mises à jour récemment"
 
 #: src/bz-flathub-category.c:79 src/bz-flathub-page.blp:127
 msgid "Updated"
-msgstr "Mis-à-jour"
+msgstr "Mises à jour"
 
 #: src/bz-flathub-category.c:79
 msgid "More Updated"
@@ -890,16 +881,14 @@ msgid "Search Apps"
 msgstr "Rechercher des applications"
 
 #: src/bz-flathub-page.blp:266
-#, fuzzy
 msgid "On the go"
-msgstr "Pour la route"
+msgstr "En mode nomade"
 
 #: src/bz-flathub-page.blp:278
 msgid "Apps for your Linux phones and tablets"
 msgstr "Applications pour vos appareils mobiles"
 
 #: src/bz-flathub-page.blp:289 src/bz-flathub-page.blp:324
-#, fuzzy
 msgid "More Mobile apps"
 msgstr "Plus d'applications mobiles"
 
@@ -1015,15 +1004,15 @@ msgstr "Téléchargements / mois"
 
 #: src/bz-full-view.blp:583
 msgid "Stopped Receiving Core Updates"
-msgstr "A arrêté de recevoir des mises à jour majeures"
+msgstr "Ne reçoit plus de mises à jour"
 
 #: src/bz-full-view.blp:597
 msgid ""
 "This app uses a runtime that no longer recieves updates or security fixes. "
 "It may become unsafe to use."
 msgstr ""
-"Cette application utilise un runtime qui ne reçoit plus de mises-à-jour ou "
-"de correctifs de sécurité. Son utilisation pourrait devenir dangereuse."
+"Cette application utilise un environnement d'exécution qui n'est plus pris "
+"en charge. Son utilisation pourrait devenir risquée."
 
 #: src/bz-full-view.blp:769
 msgid "Tags:"
@@ -1099,11 +1088,11 @@ msgstr "Adaptatif"
 
 #: src/bz-full-view.c:452
 msgid "Desktop Only"
-msgstr "Ordinateur seulement"
+msgstr "Ordinateur"
 
 #: src/bz-full-view.c:458
 msgid "Works on desktop, tablets, and phones"
-msgstr "Marche sur ordinateur, tablettes et téléphones"
+msgstr "Fonctionne sur ordinateur, tablettes et téléphones"
 
 #: src/bz-full-view.c:459
 msgid "May not work on mobile devices"
@@ -1140,16 +1129,16 @@ msgstr "Plus d'applications par %s"
 
 #: src/bz-full-view.c:504
 msgid "Other Apps by this Developer"
-msgstr "Autres applications par ce développeur"
+msgstr "D'autres applications par ce développeur"
 
 #: src/bz-full-view.c:506 src/bz-full-view.c:606
 #, c-format
 msgid "Other Apps by %s"
-msgstr "Autre applications par %s"
+msgstr "D'autres applications par %s"
 
 #: src/bz-full-view.c:608
 msgid "Other Apps"
-msgstr "Autres applis"
+msgstr "D'autres applications"
 
 #: src/bz-full-view.c:610
 #, c-format
@@ -1184,7 +1173,7 @@ msgstr "Recommande l'usage d'un clavier"
 
 #: src/bz-hardware-support-dialog.c:73
 msgid "Supports keyboards"
-msgstr "Supporte les claviers"
+msgstr "Prend en charge les claviers"
 
 #: src/bz-hardware-support-dialog.c:74
 msgid "Unknown support for keyboards"
@@ -1192,7 +1181,7 @@ msgstr "Prise en charge des claviers inconnue"
 
 #: src/bz-hardware-support-dialog.c:76
 msgid "Mouse support"
-msgstr "Support de la "
+msgstr "Support des souris"
 
 #: src/bz-hardware-support-dialog.c:78
 msgid "Requires mice or pointing devices"
@@ -1212,7 +1201,7 @@ msgstr "Prise en charge des souris et des appareils de pointage inconnue"
 
 #: src/bz-hardware-support-dialog.c:83
 msgid "Touchscreen support"
-msgstr "Écrans tactiles pris en charge "
+msgstr "Support des écrans tactiles "
 
 #: src/bz-hardware-support-dialog.c:85
 msgid "Requires touchscreens"
@@ -1224,7 +1213,7 @@ msgstr "Recommande les écrans tactiles"
 
 #: src/bz-hardware-support-dialog.c:87
 msgid "Supports touchscreens"
-msgstr "Support des écrans tactiles"
+msgstr "Prend en charge les écrans tactiles"
 
 #: src/bz-hardware-support-dialog.c:88
 msgid "Unknown support for touchscreens"
@@ -1232,23 +1221,23 @@ msgstr "Prise en charge des écrans tactiles inconnue"
 
 #: src/bz-hardware-support-dialog.c:192
 msgid "Mobile support"
-msgstr "Appareils mobiles pris en charge"
+msgstr "Support des appareils mobiles"
 
 #: src/bz-hardware-support-dialog.c:193
 msgid "Works on mobile devices"
-msgstr "Marche sur des appareils mobiles"
+msgstr "Fonctionne sur les appareils mobiles"
 
 #: src/bz-hardware-support-dialog.c:193
 msgid "May not work well on mobile devices"
-msgstr "Ne pourrait pas bien marcher sur les appareils mobiles"
+msgstr "Ne pourrait pas bien fonctionner sur les appareils mobiles"
 
 #: src/bz-hardware-support-dialog.c:198
 msgid "Desktop support"
-msgstr "Ordinateurs pris en charge"
+msgstr "Support des ordinateurs"
 
 #: src/bz-hardware-support-dialog.c:199
 msgid "Works well on large screens"
-msgstr "Marche bien sur les grands écrans"
+msgstr "Fonctionne bien sur PC"
 
 #: src/bz-hardware-support-dialog.c:233
 #, c-format
@@ -1318,7 +1307,7 @@ msgstr "Par la communauté"
 
 #: src/bz-license-dialog.blp:176
 msgid "Get Involved"
-msgstr "Participer"
+msgstr "Contribuer"
 
 #: src/bz-license-dialog.c:115
 msgid ""
@@ -1328,9 +1317,10 @@ msgid ""
 "\n"
 "You may not be able to contribute to this app."
 msgstr ""
-"Cette application n'a pas son code source d'ouvert, donc seuls ses "
-"développeurs savent comment elle marche.  Il peut s’agir d’un manque de "
-"sécurité difficile à détecter, et cela peut changer sans surveillance.\n"
+"Cette application n'est pas développée avec son code source ouvert, donc "
+"seuls ses développeurs savent comment elle fonctionne. Elle peut présenter "
+"des failles de sécurité difficiles à détecter et peut évoluer sans "
+"supervision.\n"
 "\n"
 "Vous ne pourrez peut-être pas contribuer à cette application."
 
@@ -1343,7 +1333,7 @@ msgstr ""
 "Cette application est développée avec son code source ouvert par une "
 "communauté internationale.\n"
 "\n"
-"Vous pouvez contribuer et la rendre meilleure."
+"Vous pouvez contribuer à son amélioration."
 
 #: src/bz-license-dialog.c:135
 #, c-format
@@ -1357,7 +1347,7 @@ msgstr ""
 "communauté internationale, et est parue sous la licence <a href=\"%s\">%s</"
 "a>.\n"
 "\n"
-"Vous pouvez contribuer et la rendre meilleure."
+"Vous pouvez contribuer à son amélioration."
 
 #: src/bz-preferences-dialog.blp:19
 msgid "Preferences"
@@ -1365,7 +1355,7 @@ msgstr "Préférences"
 
 #: src/bz-preferences-dialog.blp:23 src/bz-window.blp:334
 msgid "Search"
-msgstr "Rechercher"
+msgstr "Recherches"
 
 #: src/bz-preferences-dialog.blp:26
 msgid "Free Software Only"
@@ -1394,7 +1384,7 @@ msgstr "Améliorer la performance des résultats avec du \"debounce\" "
 
 #: src/bz-preferences-dialog.blp:42
 msgid "Application Details"
-msgstr "Détails de l'application"
+msgstr "Détails des applications"
 
 #: src/bz-preferences-dialog.blp:45
 msgid "Display Star Count"
@@ -1403,7 +1393,7 @@ msgstr "Afficher le nombre d'étoiles"
 #: src/bz-preferences-dialog.blp:46
 msgid "Show the star count of an application's source code repository"
 msgstr ""
-"Affiche le nombre d'étoiles du répertoire du code source d'une application"
+"Affiche le nombre d'étoiles du répertoire du code source des applications"
 
 #: src/bz-preferences-dialog.blp:71
 msgid "Progress Bar"
@@ -1424,7 +1414,7 @@ msgstr "Masquer les applications en fin de vie"
 #: src/bz-preferences-dialog.blp:102
 msgid "Hide apps which are no longer supported by their developers"
 msgstr ""
-"Masque les applications qui ne sont plus pris en charge par leurs "
+"Masque les applications qui ne sont plus prises en charge par leurs "
 "développeurs"
 
 #: src/bz-preferences-dialog.blp:116
@@ -1434,8 +1424,9 @@ msgid ""
 " For projects on GitHub, rate limits may cause them not to appear."
 msgstr ""
 "Bazaar peut récupérer et afficher le nombre d'étoiles à partir du répertoire "
-"du code source d'une application sur une forge Git distante.\n"
-"-> Pour les projets sur GitHub, les limites de débit peuvent empêcher leur "
+"du code source des applications sur une forge Git distante.\n"
+"\n"
+"Pour les projets sur GitHub, les limites de débit peuvent empêcher leur "
 "apparition."
 
 #: src/bz-preferences-dialog.c:32
@@ -1501,7 +1492,7 @@ msgstr "Aucune information à propos de cette version"
 
 #: src/bz-rich-app-tile.blp:107
 msgid "Stopped Receiving Updates"
-msgstr "A arrêté de recevoir des mises-à-jour"
+msgstr "Ne reçoit plus de mises à jour"
 
 #: src/bz-rich-app-tile.blp:123
 msgid "Get"
@@ -1509,7 +1500,7 @@ msgstr "Installer"
 
 #: src/bz-search-widget.blp:105
 msgid "Search Apps, Games, Software"
-msgstr "Cherchez des applications, des jeux, des logiciels"
+msgstr "Recherchez Applis, Jeux et Logiciels"
 
 #: src/bz-search-widget.blp:149
 msgid "Categories Unavailable"
@@ -1627,14 +1618,12 @@ msgstr ""
 "De plus, %d environnements d'exécution et/ou extensions seront mis à jour."
 
 #: src/bz-window.blp:66
-#, fuzzy
 msgid "Inspect UI Entry"
-msgstr "Inspecter une entrée d'Interface"
+msgstr "Inspecter une entrée d'interface"
 
 #: src/bz-window.blp:73
-#, fuzzy
 msgid "All Debug Actions"
-msgstr "Toutes les actions de debut"
+msgstr "Toutes les actions de debug"
 
 #: src/bz-window.blp:98
 msgid "Tasks"
