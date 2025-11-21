@@ -70,8 +70,8 @@ template $BzSearchWidget: Adw.Bin {
       condition ("max-width: 700sp")
 
       setters {
-        empty_box.margin-start: 7;
-        empty_box.margin-end: 7;
+        empty_box.margin-start: 10;
+        empty_box.margin-end: 10;
         search_box_clamp.margin-start: 12;
         search_box_clamp.margin-end: 12;
         grid_view.min-columns: 1;
@@ -160,9 +160,10 @@ template $BzSearchWidget: Adw.Bin {
                 valign: start;
 
                 child: Box empty_box {
-                  margin-start: 7;
-                  margin-end: 7;
+                  margin-start: 30;
+                  margin-end: 30;
                   margin-top: 20;
+                  margin-bottom: 50;
 
                   $BzDynamicListView {
                     styles [
