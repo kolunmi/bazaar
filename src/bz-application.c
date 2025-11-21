@@ -44,6 +44,7 @@
 #include "bz-preferences-dialog.h"
 #include "bz-result.h"
 #include "bz-root-blocklist.h"
+#include "bz-root-curated-config.h"
 #include "bz-state-info.h"
 #include "bz-transaction-manager.h"
 #include "bz-util.h"
@@ -54,15 +55,16 @@ struct _BzApplication
 {
   AdwApplication parent_instance;
 
-  BzYamlParser *blocklist_parser;
+  BzYamlParser      *blocklist_parser;
+  BzContentProvider *blocklists_provider;
 
   GSettings       *settings;
   GHashTable      *config;
-  GListModel      *blocklists;
+  GtkStringList   *blocklists;
   GPtrArray       *blocklist_regexes;
-  GListModel      *content_configs;
-  GtkCssProvider  *css;
-  GtkMapListModel *content_configs_to_files;
+  GtkStringList   *curated_configs;
+  GtkMapListModel *blocklists_to_files;
+  GtkMapListModel *curated_configs_to_files;
 
   gboolean    running;
   GWeakRef    main_window;
@@ -84,7 +86,8 @@ struct _BzApplication
 
   BzFlatpakInstance *flatpak;
   BzFlathubState    *flathub;
-  BzContentProvider *content_provider;
+  BzYamlParser      *curated_parser;
+  BzContentProvider *curated_provider;
 
   GHashTable *installed_set;
   GListStore *groups;
@@ -135,7 +138,9 @@ BZ_DEFINE_DATA (
     BZ_RELEASE_DATA (file, g_object_unref))
 
 static void
-init_service_struct (BzApplication *self);
+init_service_struct (BzApplication *self,
+                     GtkStringList *blocklists,
+                     GtkStringList *curated_configs);
 
 static DexFuture *
 open_flatpakref_fiber (OpenFlatpakrefData *data);
@@ -197,13 +202,15 @@ bz_application_dispose (GObject *object)
   dex_clear (&self->flatpak_notifs);
   g_clear_handle_id (&self->periodic_timeout, g_source_remove);
   g_clear_object (&self->blocklist_parser);
+  g_clear_object (&self->curated_parser);
   g_clear_object (&self->settings);
   g_clear_object (&self->blocklists);
-  g_clear_object (&self->content_configs);
+  g_clear_object (&self->curated_configs);
   g_clear_object (&self->transactions);
-  g_clear_object (&self->content_provider);
-  g_clear_object (&self->content_configs_to_files);
-  g_clear_object (&self->css);
+  g_clear_object (&self->curated_provider);
+  g_clear_object (&self->blocklists_provider);
+  g_clear_object (&self->curated_configs_to_files);
+  g_clear_object (&self->blocklists_to_files);
   g_clear_object (&self->search_engine);
   g_clear_object (&self->gs_search);
   g_clear_object (&self->flatpak);
@@ -310,10 +317,10 @@ bz_application_command_line (GApplication            *app,
       g_application_hold (G_APPLICATION (self));
       self->running = TRUE;
 
-      init_service_struct (self);
+      blocklists      = gtk_string_list_new (NULL);
+      content_configs = gtk_string_list_new (NULL);
+      init_service_struct (self, blocklists, content_configs);
 
-      blocklists = gtk_string_list_new (NULL);
-      g_signal_connect_swapped (blocklists, "items-changed", G_CALLBACK (blocklists_changed), self);
 #ifdef HARDCODED_BLOCKLIST
       g_debug ("Bazaar was configured with a hardcoded blocklist at %s, adding that now...",
                HARDCODED_BLOCKLIST);
@@ -326,7 +333,6 @@ bz_application_command_line (GApplication            *app,
             0,
             (const char *const *) blocklists_strv);
 
-      content_configs = gtk_string_list_new (NULL);
 #ifdef HARDCODED_CONTENT_CONFIG
       g_debug ("Bazaar was configured with a hardcoded curated content config at %s, adding that now...",
                HARDCODED_CONTENT_CONFIG);
@@ -338,14 +344,6 @@ bz_application_command_line (GApplication            *app,
             g_list_model_get_n_items (G_LIST_MODEL (content_configs)),
             0,
             (const char *const *) content_configs_strv);
-
-      self->blocklists      = G_LIST_MODEL (g_steal_pointer (&blocklists));
-      self->content_configs = G_LIST_MODEL (g_steal_pointer (&content_configs));
-
-      gtk_map_list_model_set_model (
-          self->content_configs_to_files, self->content_configs);
-      bz_state_info_set_blocklists (self->state, self->blocklists);
-      bz_state_info_set_curated_configs (self->state, self->content_configs);
 
       g_timer_start (self->init_timer);
       init = dex_scheduler_spawn (
@@ -775,7 +773,9 @@ hide_eol_changed (BzApplication *self,
 }
 
 static void
-init_service_struct (BzApplication *self)
+init_service_struct (BzApplication *self,
+                     GtkStringList *blocklists,
+                     GtkStringList *curated_configs)
 {
   const char *app_id = NULL;
 #ifdef HARDCODED_MAIN_CONFIG
@@ -815,11 +815,31 @@ init_service_struct (BzApplication *self)
 
   (void) bz_download_worker_get_default ();
 
+  self->blocklists          = g_object_ref (blocklists);
+  self->blocklists_to_files = gtk_map_list_model_new (
+      NULL, (GtkMapListModelMapFunc) map_strings_to_files, NULL, NULL);
+  gtk_map_list_model_set_model (
+      self->blocklists_to_files,
+      G_LIST_MODEL (self->blocklists));
+
+  self->curated_configs          = g_object_ref (curated_configs);
+  self->curated_configs_to_files = gtk_map_list_model_new (
+      NULL, (GtkMapListModelMapFunc) map_strings_to_files, NULL, NULL);
+  gtk_map_list_model_set_model (
+      self->curated_configs_to_files,
+      G_LIST_MODEL (self->curated_configs));
+
   g_type_ensure (BZ_TYPE_ROOT_BLOCKLIST);
   g_type_ensure (BZ_TYPE_BLOCKLIST);
   g_type_ensure (BZ_TYPE_BLOCKLIST_CONDITION);
   self->blocklist_parser = bz_yaml_parser_new_for_resource_schema (
       "/io/github/kolunmi/Bazaar/blocklist-schema.xml");
+
+  g_type_ensure (BZ_TYPE_ROOT_CURATED_CONFIG);
+  g_type_ensure (BZ_TYPE_CURATED_ROW);
+  g_type_ensure (BZ_TYPE_CURATED_SECTION);
+  self->curated_parser = bz_yaml_parser_new_for_resource_schema (
+      "/io/github/kolunmi/Bazaar/bz-content-provider-config-schema.xml");
 
   self->cache = bz_entry_cache_manager_new ();
   self->state = bz_state_info_new ();
@@ -837,6 +857,12 @@ init_service_struct (BzApplication *self)
 
   self->blocklist_regexes = g_ptr_array_new_with_free_func (
       (GDestroyNotify) g_ptr_array_unref);
+  self->blocklists_provider = bz_content_provider_new ();
+  bz_content_provider_set_parser (self->blocklists_provider, self->blocklist_parser);
+  bz_content_provider_set_input_files (
+      self->blocklists_provider, G_LIST_MODEL (self->blocklists_to_files));
+  g_signal_connect_swapped (self->blocklists_provider, "items-changed", G_CALLBACK (blocklists_changed), self);
+
   self->groups         = g_list_store_new (BZ_TYPE_ENTRY_GROUP);
   self->installed_apps = g_list_store_new (BZ_TYPE_ENTRY_GROUP);
   self->ids_to_groups  = g_hash_table_new_full (
@@ -870,12 +896,10 @@ init_service_struct (BzApplication *self)
   bz_search_engine_set_model (self->search_engine, G_LIST_MODEL (self->group_filter_model));
   bz_gnome_shell_search_provider_set_engine (self->gs_search, self->search_engine);
 
-  self->content_provider         = bz_content_provider_new ();
-  self->content_configs_to_files = gtk_map_list_model_new (
-      NULL, (GtkMapListModelMapFunc) map_strings_to_files, NULL, NULL);
+  self->curated_provider = bz_content_provider_new ();
   bz_content_provider_set_input_files (
-      self->content_provider, G_LIST_MODEL (self->content_configs_to_files));
-  bz_content_provider_set_factory (self->content_provider, self->application_factory);
+      self->curated_provider, G_LIST_MODEL (self->curated_configs_to_files));
+  bz_content_provider_set_parser (self->curated_provider, self->curated_parser);
 
   self->flathub = bz_flathub_state_new ();
   bz_flathub_state_set_map_factory (self->flathub, self->application_factory);
@@ -886,7 +910,9 @@ init_service_struct (BzApplication *self)
 
   bz_state_info_set_all_installed_entry_groups (self->state, G_LIST_MODEL (self->installed_apps));
   bz_state_info_set_application_factory (self->state, self->application_factory);
-  bz_state_info_set_curated_provider (self->state, self->content_provider);
+  bz_state_info_set_blocklists (self->state, G_LIST_MODEL (self->blocklists));
+  bz_state_info_set_curated_configs (self->state, G_LIST_MODEL (self->curated_configs));
+  bz_state_info_set_curated_provider (self->state, self->curated_provider);
   bz_state_info_set_entry_factory (self->state, self->entry_factory);
   bz_state_info_set_flathub (self->state, self->flathub);
   bz_state_info_set_main_config (self->state, self->config);
@@ -1804,84 +1830,51 @@ blocklists_changed (BzApplication *self,
                     GListModel    *model)
 {
   g_autoptr (GError) local_error = NULL;
-  gboolean result                = FALSE;
 
   if (removed > 0)
     g_ptr_array_remove_range (self->blocklist_regexes, position, removed);
 
   for (guint i = 0; i < added; i++)
     {
-      g_autoptr (GtkStringObject) string = NULL;
-      const char      *filename          = NULL;
-      gsize            length            = 0;
-      g_autofree char *contents          = NULL;
-      g_autoptr (BzRootBlocklist) root   = NULL;
-      g_autoptr (GPtrArray) regex_datas  = NULL;
+      g_autoptr (BzRootBlocklist) root  = NULL;
+      g_autoptr (GPtrArray) regex_datas = NULL;
+      GListModel *blocklists            = NULL;
 
-      string   = g_list_model_get_item (model, position + i);
-      filename = gtk_string_object_get_string (string);
-
-      /* IO on main thread but this will basically never happen except at the
-         beginning of the program and when using the debug menu */
-      result = g_file_get_contents (filename, &contents, &length, &local_error);
-      if (result)
-        {
-          g_autoptr (GBytes) bytes             = NULL;
-          g_autoptr (GHashTable) parse_results = NULL;
-
-          bytes         = g_bytes_new_take (g_steal_pointer (&contents), length);
-          parse_results = bz_yaml_parser_process_bytes (self->blocklist_parser, bytes, &local_error);
-          if (parse_results != NULL)
-            root = g_value_dup_object (g_hash_table_lookup (parse_results, "/"));
-          else
-            {
-              g_warning ("Unable to parse blocklist at path %s: %s", filename, local_error->message);
-              g_clear_error (&local_error);
-            }
-        }
-      else
-        {
-          g_warning ("Unable to read blocklist at path %s: %s", filename, local_error->message);
-          g_clear_error (&local_error);
-        }
-
+      root        = g_list_model_get_item (model, position + i);
       regex_datas = g_ptr_array_new_with_free_func (blocklist_regex_data_unref);
-      if (root != NULL)
+
+      blocklists = bz_root_blocklist_get_blocklists (root);
+      if (blocklists != NULL)
         {
-          GListModel *blocklists = NULL;
+          guint n_blocklists = 0;
 
-          blocklists = bz_root_blocklist_get_blocklists (root);
-          if (blocklists != NULL)
+          n_blocklists = g_list_model_get_n_items (blocklists);
+          for (guint blocklist_idx = 0; blocklist_idx < n_blocklists; blocklist_idx++)
             {
-              guint n_blocklists = 0;
+              g_autoptr (BzBlocklist) blocklist   = NULL;
+              GListModel *allow                   = NULL;
+              GListModel *allow_regex             = NULL;
+              GListModel *block                   = NULL;
+              GListModel *block_regex             = NULL;
+              g_autoptr (BlocklistRegexData) data = NULL;
 
-              n_blocklists = g_list_model_get_n_items (blocklists);
-              for (guint blocklist_idx = 0; blocklist_idx < n_blocklists; blocklist_idx++)
+              blocklist   = g_list_model_get_item (blocklists, blocklist_idx);
+              allow       = bz_blocklist_get_allow (blocklist);
+              allow_regex = bz_blocklist_get_allow_regex (blocklist);
+              block       = bz_blocklist_get_block (blocklist);
+              block_regex = bz_blocklist_get_block_regex (blocklist);
+
+              if (allow == NULL &&
+                  allow_regex == NULL &&
+                  block == NULL &&
+                  block_regex == NULL)
                 {
-                  g_autoptr (BzBlocklist) blocklist   = NULL;
-                  GListModel *allow                   = NULL;
-                  GListModel *allow_regex             = NULL;
-                  GListModel *block                   = NULL;
-                  GListModel *block_regex             = NULL;
-                  g_autoptr (BlocklistRegexData) data = NULL;
+                  g_warning ("Blocklist file has an empty blocklist, ignoring");
+                  continue;
+                }
 
-                  blocklist   = g_list_model_get_item (blocklists, blocklist_idx);
-                  allow       = bz_blocklist_get_allow (blocklist);
-                  allow_regex = bz_blocklist_get_allow_regex (blocklist);
-                  block       = bz_blocklist_get_block (blocklist);
-                  block_regex = bz_blocklist_get_block_regex (blocklist);
-
-                  if (allow == NULL &&
-                      allow_regex == NULL &&
-                      block == NULL &&
-                      block_regex == NULL)
-                    {
-                      g_warning ("Blocklist file at path %s has an empty blocklist which will be ignored", filename);
-                      continue;
-                    }
-
-                  data           = blocklist_regex_data_new ();
-                  data->priority = bz_blocklist_get_priority (blocklist);
+              data           = blocklist_regex_data_new ();
+              data->priority = bz_blocklist_get_priority (blocklist);
 
 #define BUILD_REGEX(_name, _builder)                                                             \
   if (_name != NULL)                                                                             \
@@ -1903,9 +1896,9 @@ blocklists_changed (BzApplication *self,
             g_strv_builder_add (_builder, _string);                                              \
           else                                                                                   \
             {                                                                                    \
-              g_warning ("Blocklist file at path %s has an invalid "                             \
+              g_warning ("Blocklist file has an invalid "                                        \
                          "regular expression '%s': %s",                                          \
-                         filename, _string, local_error->message);                               \
+                         _string, local_error->message);                                         \
               g_clear_error (&local_error);                                                      \
             }                                                                                    \
         }                                                                                        \
@@ -1954,16 +1947,15 @@ blocklists_changed (BzApplication *self,
         }                                                               \
     }
 
-                  GATHER (allow);
-                  GATHER (block);
+              GATHER (allow);
+              GATHER (block);
 
 #undef GATHER
 #undef BUILD_REGEX_ESCAPED
 #undef BUILD_REGEX
 
-                  if (data->allow != NULL || data->block != NULL)
-                    g_ptr_array_add (regex_datas, g_steal_pointer (&data));
-                }
+              if (data->allow != NULL || data->block != NULL)
+                g_ptr_array_add (regex_datas, g_steal_pointer (&data));
             }
         }
 

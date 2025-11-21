@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "bz-application-map-factory.h"
+#include "bz-yaml-parser.h"
 
 G_BEGIN_DECLS
 
@@ -47,11 +47,11 @@ GListModel *
 bz_content_provider_get_input_files (BzContentProvider *self);
 
 void
-bz_content_provider_set_factory (BzContentProvider       *self,
-                                 BzApplicationMapFactory *factory);
+bz_content_provider_set_parser (BzContentProvider *self,
+                                BzYamlParser      *parser);
 
-BzApplicationMapFactory *
-bz_content_provider_get_factory (BzContentProvider *self);
+BzYamlParser *
+bz_content_provider_get_parser (BzContentProvider *self);
 
 gboolean
 bz_content_provider_get_has_inputs (BzContentProvider *self);
