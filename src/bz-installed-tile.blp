@@ -20,16 +20,15 @@ template $BzInstalledTile: Box {
   }
 
   Image fallback_icon {
-    valign: center;
-    halign: center;
     margin-start: 10;
-    margin-top: 5;
-    margin-bottom: 5;
-    width-request: 64;
+    margin-top: 10;
+    margin-bottom: 10;
     height-request: 64;
+    width-request: 64;
     pixel-size: 64;
     icon-name: "application-x-executable";
     visible: bind $is_null(template.group as <$BzEntryGroup>.icon-paintable) as <bool>;
+    styles ["icon-dropshadow"]
   }
 
   Box {
