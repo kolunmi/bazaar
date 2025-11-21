@@ -1,0 +1,12 @@
+prefix=bz
+name=root_blocklist
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+include=<gtk/gtk.h>
+
+include="bz-blocklist.h"
+ensure=BZ_TYPE_BLOCKLIST
+
+property=blocklists GListModel G_TYPE_LIST_MODEL object

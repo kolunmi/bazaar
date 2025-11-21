@@ -43,6 +43,7 @@
 #include "bz-inspector.h"
 #include "bz-preferences-dialog.h"
 #include "bz-result.h"
+#include "bz-root-blocklist.h"
 #include "bz-state-info.h"
 #include "bz-transaction-manager.h"
 #include "bz-util.h"
@@ -53,10 +54,12 @@ struct _BzApplication
 {
   AdwApplication parent_instance;
 
+  BzYamlParser *blocklist_parser;
+
   GSettings       *settings;
   GHashTable      *config;
   GListModel      *blocklists;
-  GPtrArray       *blocked_ids;
+  GPtrArray       *blocklist_regexes;
   GListModel      *content_configs;
   GtkCssProvider  *css;
   GtkMapListModel *content_configs_to_files;
@@ -99,6 +102,17 @@ struct _BzApplication
 };
 
 G_DEFINE_FINAL_TYPE (BzApplication, bz_application, ADW_TYPE_APPLICATION)
+
+BZ_DEFINE_DATA (
+    blocklist_regex,
+    BlocklistRegex,
+    {
+      int     priority;
+      GRegex *block;
+      GRegex *allow;
+    },
+    BZ_RELEASE_DATA (block, g_regex_unref);
+    BZ_RELEASE_DATA (allow, g_regex_unref))
 
 BZ_DEFINE_DATA (
     respond_to_flatpak,
@@ -182,6 +196,7 @@ bz_application_dispose (GObject *object)
   dex_clear (&self->notif_watch);
   dex_clear (&self->flatpak_notifs);
   g_clear_handle_id (&self->periodic_timeout, g_source_remove);
+  g_clear_object (&self->blocklist_parser);
   g_clear_object (&self->settings);
   g_clear_object (&self->blocklists);
   g_clear_object (&self->content_configs);
@@ -208,7 +223,7 @@ bz_application_dispose (GObject *object)
   g_clear_pointer (&self->eol_runtimes, g_hash_table_unref);
   g_clear_pointer (&self->sys_name_to_addons, g_hash_table_unref);
   g_clear_pointer (&self->usr_name_to_addons, g_hash_table_unref);
-  g_clear_pointer (&self->blocked_ids, g_ptr_array_unref);
+  g_clear_pointer (&self->blocklist_regexes, g_ptr_array_unref);
   g_weak_ref_clear (&self->main_window);
 
   G_OBJECT_CLASS (bz_application_parent_class)->dispose (object);
@@ -636,23 +651,38 @@ static inline gboolean
 validate_group_for_ui (BzApplication *self,
                        BzEntryGroup  *group)
 {
-  const char *id = NULL;
+  const char *id               = NULL;
+  int         allowed_priority = G_MAXINT;
+  int         blocked_priority = G_MAXINT;
 
   if (bz_state_info_get_hide_eol (self->state) &&
       bz_entry_group_get_eol (group) != NULL)
     return FALSE;
 
   id = bz_entry_group_get_id (group);
-  for (guint i = 0; i < self->blocked_ids->len; i++)
+  for (guint i = 0; i < self->blocklist_regexes->len; i++)
     {
-      GHashTable *set = NULL;
+      GPtrArray *regex_datas = NULL;
 
-      set = g_ptr_array_index (self->blocked_ids, i);
-      if (g_hash_table_contains (set, id))
-        return FALSE;
+      regex_datas = g_ptr_array_index (self->blocklist_regexes, i);
+      for (guint j = 0; j < regex_datas->len; j++)
+        {
+          BlocklistRegexData *data = NULL;
+
+          data = g_ptr_array_index (regex_datas, j);
+
+          if (data->allow != NULL &&
+              data->priority < allowed_priority &&
+              g_regex_match (data->allow, id, G_REGEX_MATCH_DEFAULT, NULL))
+            allowed_priority = data->priority;
+          if (data->block != NULL &&
+              data->priority < blocked_priority &&
+              g_regex_match (data->block, id, G_REGEX_MATCH_DEFAULT, NULL))
+            blocked_priority = data->priority;
+        }
     }
 
-  return TRUE;
+  return allowed_priority <= blocked_priority;
 }
 
 static gboolean
@@ -785,6 +815,12 @@ init_service_struct (BzApplication *self)
 
   (void) bz_download_worker_get_default ();
 
+  g_type_ensure (BZ_TYPE_ROOT_BLOCKLIST);
+  g_type_ensure (BZ_TYPE_BLOCKLIST);
+  g_type_ensure (BZ_TYPE_BLOCKLIST_CONDITION);
+  self->blocklist_parser = bz_yaml_parser_new_for_resource_schema (
+      "/io/github/kolunmi/Bazaar/blocklist-schema.xml");
+
   self->cache = bz_entry_cache_manager_new ();
   self->state = bz_state_info_new ();
 
@@ -799,8 +835,8 @@ init_service_struct (BzApplication *self)
       G_CALLBACK (hide_eol_changed),
       self);
 
-  self->blocked_ids = g_ptr_array_new_with_free_func (
-      (GDestroyNotify) g_hash_table_unref);
+  self->blocklist_regexes = g_ptr_array_new_with_free_func (
+      (GDestroyNotify) g_ptr_array_unref);
   self->groups         = g_list_store_new (BZ_TYPE_ENTRY_GROUP);
   self->installed_apps = g_list_store_new (BZ_TYPE_ENTRY_GROUP);
   self->ids_to_groups  = g_hash_table_new_full (
@@ -1771,77 +1807,169 @@ blocklists_changed (BzApplication *self,
   gboolean result                = FALSE;
 
   if (removed > 0)
-    g_ptr_array_remove_range (self->blocked_ids, position, removed);
+    g_ptr_array_remove_range (self->blocklist_regexes, position, removed);
 
   for (guint i = 0; i < added; i++)
     {
       g_autoptr (GtkStringObject) string = NULL;
       const char      *filename          = NULL;
+      gsize            length            = 0;
       g_autofree char *contents          = NULL;
-      g_autoptr (GHashTable) set         = NULL;
+      g_autoptr (BzRootBlocklist) root   = NULL;
+      g_autoptr (GPtrArray) regex_datas  = NULL;
 
       string   = g_list_model_get_item (model, position + i);
       filename = gtk_string_object_get_string (string);
 
       /* IO on main thread but this will basically never happen except at the
          beginning of the program and when using the debug menu */
-      result = g_file_get_contents (filename, &contents, NULL, &local_error);
-      if (!result)
+      result = g_file_get_contents (filename, &contents, &length, &local_error);
+      if (result)
+        {
+          g_autoptr (GBytes) bytes             = NULL;
+          g_autoptr (GHashTable) parse_results = NULL;
+
+          bytes         = g_bytes_new_take (g_steal_pointer (&contents), length);
+          parse_results = bz_yaml_parser_process_bytes (self->blocklist_parser, bytes, &local_error);
+          if (parse_results != NULL)
+            root = g_value_dup_object (g_hash_table_lookup (parse_results, "/"));
+          else
+            {
+              g_warning ("Unable to parse blocklist at path %s: %s", filename, local_error->message);
+              g_clear_error (&local_error);
+            }
+        }
+      else
         {
           g_warning ("Unable to read blocklist at path %s: %s", filename, local_error->message);
           g_clear_error (&local_error);
         }
 
-      set = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
-      if (contents != NULL)
+      regex_datas = g_ptr_array_new_with_free_func (blocklist_regex_data_unref);
+      if (root != NULL)
         {
-          guint n_ids = 0;
-          char *beg   = NULL;
-          char *end   = NULL;
+          GListModel *blocklists = NULL;
 
-          for (beg = contents, end = g_utf8_strchr (beg, -1, '\n');
-               beg != NULL && *beg != '\0';
-               beg = end + 1, end = g_utf8_strchr (beg, -1, '\n'))
+          blocklists = bz_root_blocklist_get_blocklists (root);
+          if (blocklists != NULL)
             {
-              g_autofree char *id = NULL;
+              guint n_blocklists = 0;
 
-              if (end == NULL)
-                g_warning ("Blocklist at %s has no terminating newline", filename);
-              if (g_str_has_prefix (beg, "#") ||
-                  (end != NULL && end - beg <= 1) ||
-                  (end == NULL && *beg == '\0'))
+              n_blocklists = g_list_model_get_n_items (blocklists);
+              for (guint blocklist_idx = 0; blocklist_idx < n_blocklists; blocklist_idx++)
                 {
-                  if (end != NULL)
-                    continue;
-                  else
-                    break;
-                }
+                  g_autoptr (BzBlocklist) blocklist   = NULL;
+                  GListModel *allow                   = NULL;
+                  GListModel *allow_regex             = NULL;
+                  GListModel *block                   = NULL;
+                  GListModel *block_regex             = NULL;
+                  g_autoptr (BlocklistRegexData) data = NULL;
 
-              if (end != NULL)
-                id = g_strndup (beg, end - beg);
-              else
-                id = g_strdup (beg);
-              if (g_hash_table_contains (set, id))
-                g_warning ("Duplicate id %s detected in blocklist at %s", id, filename);
-              else
-                {
-                  g_debug ("Adding %s to blocked IDs", id);
-                  g_hash_table_replace (set, g_steal_pointer (&id), NULL);
-                }
+                  blocklist   = g_list_model_get_item (blocklists, blocklist_idx);
+                  allow       = bz_blocklist_get_allow (blocklist);
+                  allow_regex = bz_blocklist_get_allow_regex (blocklist);
+                  block       = bz_blocklist_get_block (blocklist);
+                  block_regex = bz_blocklist_get_block_regex (blocklist);
 
-              if (end == NULL)
-                break;
-              if (++n_ids > MAX_IDS_PER_BLOCKLIST)
-                {
-                  g_warning ("Blocklist at %s has a lot of IDs, "
-                             "automatically truncating to %d",
-                             filename, MAX_IDS_PER_BLOCKLIST);
-                  break;
+                  if (allow == NULL &&
+                      allow_regex == NULL &&
+                      block == NULL &&
+                      block_regex == NULL)
+                    {
+                      g_warning ("Blocklist file at path %s has an empty blocklist which will be ignored", filename);
+                      continue;
+                    }
+
+                  data           = blocklist_regex_data_new ();
+                  data->priority = bz_blocklist_get_priority (blocklist);
+
+#define BUILD_REGEX(_name, _builder)                                                             \
+  if (_name != NULL)                                                                             \
+    {                                                                                            \
+      guint _n_strings = 0;                                                                      \
+                                                                                                 \
+      _n_strings = g_list_model_get_n_items (_name);                                             \
+      for (guint _i = 0; _i < _n_strings; _i++)                                                  \
+        {                                                                                        \
+          g_autoptr (GtkStringObject) _object = NULL;                                            \
+          const char *_string                 = NULL;                                            \
+          g_autoptr (GRegex) _regex           = NULL;                                            \
+                                                                                                 \
+          _object = g_list_model_get_item (_name, _i);                                           \
+          _string = gtk_string_object_get_string (_object);                                      \
+          _regex  = g_regex_new (_string, G_REGEX_DEFAULT, G_REGEX_MATCH_DEFAULT, &local_error); \
+                                                                                                 \
+          if (_regex != NULL)                                                                    \
+            g_strv_builder_add (_builder, _string);                                              \
+          else                                                                                   \
+            {                                                                                    \
+              g_warning ("Blocklist file at path %s has an invalid "                             \
+                         "regular expression '%s': %s",                                          \
+                         filename, _string, local_error->message);                               \
+              g_clear_error (&local_error);                                                      \
+            }                                                                                    \
+        }                                                                                        \
+    }
+
+#define BUILD_REGEX_ESCAPED(_name, _builder)                                   \
+  if (_name != NULL)                                                           \
+    {                                                                          \
+      guint _n_strings = 0;                                                    \
+                                                                               \
+      _n_strings = g_list_model_get_n_items (_name);                           \
+      for (guint _i = 0; _i < _n_strings; _i++)                                \
+        {                                                                      \
+          g_autoptr (GtkStringObject) _object = NULL;                          \
+          const char *_string                 = NULL;                          \
+                                                                               \
+          _object = g_list_model_get_item (_name, _i);                         \
+          _string = gtk_string_object_get_string (_object);                    \
+                                                                               \
+          g_strv_builder_take (_builder, g_regex_escape_string (_string, -1)); \
+        }                                                                      \
+    }
+
+#define GATHER(name)                                                    \
+  if (name != NULL ||                                                   \
+      name##_regex != NULL)                                             \
+    {                                                                   \
+      g_autoptr (GStrvBuilder) _builder = NULL;                         \
+      g_auto (GStrv) _patterns          = NULL;                         \
+                                                                        \
+      _builder = g_strv_builder_new ();                                 \
+                                                                        \
+      BUILD_REGEX_ESCAPED (name, _builder)                              \
+      BUILD_REGEX (name##_regex, _builder)                              \
+                                                                        \
+      _patterns = g_strv_builder_end (_builder);                        \
+      if (_patterns != NULL)                                            \
+        {                                                               \
+          g_autofree char *_joined       = NULL;                        \
+          g_autofree char *_regex_string = NULL;                        \
+                                                                        \
+          _joined       = g_strjoinv ("|", _patterns);                  \
+          _regex_string = g_strdup_printf ("^(%s)$", _joined);          \
+          data->name    = g_regex_new (_regex_string, G_REGEX_OPTIMIZE, \
+                                       G_REGEX_MATCH_DEFAULT, NULL);    \
+        }                                                               \
+    }
+
+                  GATHER (allow);
+                  GATHER (block);
+
+#undef GATHER
+#undef BUILD_REGEX_ESCAPED
+#undef BUILD_REGEX
+
+                  if (data->allow != NULL || data->block != NULL)
+                    g_ptr_array_add (regex_datas, g_steal_pointer (&data));
                 }
             }
         }
 
-      g_ptr_array_insert (self->blocked_ids, position + i, g_steal_pointer (&set));
+      g_ptr_array_insert (self->blocklist_regexes,
+                          position + i,
+                          g_steal_pointer (&regex_datas));
     }
 
   gtk_filter_changed (GTK_FILTER (self->group_filter), GTK_FILTER_CHANGE_DIFFERENT);

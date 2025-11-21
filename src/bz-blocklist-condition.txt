@@ -1,0 +1,15 @@
+prefix=bz
+name=blocklist_condition
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+enum=bz blocklist_condition_post_process_kind identity invert_boolean
+
+include="bz-blocklist-condition-match-envvar.h"
+include="bz-blocklist-condition-match-locale.h"
+
+property=match_envvar BzBlocklistConditionMatchEnvvar BZ_TYPE_BLOCKLIST_CONDITION_MATCH_ENVVAR object
+property=match_locale BzBlocklistConditionMatchLocale BZ_TYPE_BLOCKLIST_CONDITION_MATCH_LOCALE object
+
+property=post_process BzBlocklistConditionPostProcessKind BZ_TYPE_BLOCKLIST_CONDITION_POST_PROCESS_KIND enum
