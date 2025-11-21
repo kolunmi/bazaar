@@ -36,11 +36,11 @@ msgstr "GTK;System;PackageManager;Discover;Flatpak;Software;Store;"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:6
 msgid "Hide EOL Entries"
-msgstr "Nascondi Entrate EOL"
+msgstr "Nascondi voci EOL"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:7
 msgid "Hide EOL entries and entries depending on them"
-msgstr "Nascondi entrate EOL e entrate che dipendono da esse"
+msgstr "Nascondi voci EOL e voci che dipendono da esse"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:11
 msgid "Show Git Forge Star Counts"
@@ -262,7 +262,7 @@ msgstr "Identificazione delle voci installate..."
 
 #: src/bz-application.c:1176
 msgid "Receiving Entries"
-msgstr "Ricezione delle entrare"
+msgstr "Ricezione delle voci"
 
 #: src/bz-application.c:1333
 #, c-format
@@ -321,7 +321,7 @@ msgstr "Browser"
 
 #: src/bz-entry-inspector.blp:5
 msgid "Entry Inspector"
-msgstr "Ispettore delle entrate"
+msgstr "Ispettore delle voci"
 
 #: src/bz-entry-inspector.blp:76
 msgid "Serialize"
@@ -898,7 +898,7 @@ msgstr "Configurazioni attive per Consigliate"
 
 #: src/bz-inspector.blp:64
 msgid "All Entry Groups"
-msgstr "Tutti i gruppi di ingresso"
+msgstr "Tutti i gruppi di voci"
 
 #: src/bz-inspector.blp:72
 msgid "Filter..."
