@@ -668,9 +668,6 @@ window.narrow .category-tile {
     padding: 0;
 }
 
-.disable-adw-flow-box-styling:hover {
-    background-color: transparent;
-}
-.disable-adw-flow-box-styling:focus {
+.disable-adw-flow-box-styling {
     background-color: transparent;
 }
