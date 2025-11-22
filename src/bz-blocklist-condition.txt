@@ -4,7 +4,7 @@ parent-prefix=g
 parent-name=object
 author=AUTOGEN
 
-enum=bz blocklist_condition_post_process_kind identity invert_boolean
+enum=bz blocklist_condition_post_process_kind identity invert
 
 include="bz-blocklist-condition-match-envvar.h"
 include="bz-blocklist-condition-match-locale.h"

@@ -908,6 +908,7 @@ init_service_struct (BzApplication *self,
   if (self->config != NULL)
     bz_transaction_manager_set_config (self->transactions, self->config);
 
+  bz_state_info_set_all_entry_groups (self->state, G_LIST_MODEL (self->groups));
   bz_state_info_set_all_installed_entry_groups (self->state, G_LIST_MODEL (self->installed_apps));
   bz_state_info_set_application_factory (self->state, self->application_factory);
   bz_state_info_set_blocklists (self->state, G_LIST_MODEL (self->blocklists));
@@ -1849,16 +1850,17 @@ blocklists_changed (BzApplication *self,
           guint n_blocklists = 0;
 
           n_blocklists = g_list_model_get_n_items (blocklists);
-          for (guint blocklist_idx = 0; blocklist_idx < n_blocklists; blocklist_idx++)
+          for (guint j = 0; j < n_blocklists; j++)
             {
               g_autoptr (BzBlocklist) blocklist   = NULL;
+              GListModel *conditions              = NULL;
               GListModel *allow                   = NULL;
               GListModel *allow_regex             = NULL;
               GListModel *block                   = NULL;
               GListModel *block_regex             = NULL;
               g_autoptr (BlocklistRegexData) data = NULL;
 
-              blocklist   = g_list_model_get_item (blocklists, blocklist_idx);
+              blocklist   = g_list_model_get_item (blocklists, j);
               allow       = bz_blocklist_get_allow (blocklist);
               allow_regex = bz_blocklist_get_allow_regex (blocklist);
               block       = bz_blocklist_get_block (blocklist);
@@ -1871,6 +1873,129 @@ blocklists_changed (BzApplication *self,
                 {
                   g_warning ("Blocklist file has an empty blocklist, ignoring");
                   continue;
+                }
+
+              conditions = bz_blocklist_get_conditions (blocklist);
+              if (conditions != NULL)
+                {
+                  guint    n_conditions = 0;
+                  gboolean ignore       = FALSE;
+
+                  n_conditions = g_list_model_get_n_items (conditions);
+                  for (guint k = 0; k < n_conditions; k++)
+                    {
+                      gboolean condition_result                        = FALSE;
+                      g_autoptr (BzBlocklistCondition) condition       = NULL;
+                      BzBlocklistConditionMatchEnvvar    *match_envvar = NULL;
+                      BzBlocklistConditionMatchLocale    *match_locale = NULL;
+                      BzBlocklistConditionPostProcessKind postprocess  = BZ_BLOCKLIST_CONDITION_POST_PROCESS_KIND_IDENTITY;
+
+                      condition    = g_list_model_get_item (conditions, k);
+                      match_envvar = bz_blocklist_condition_get_match_envvar (condition);
+                      match_locale = bz_blocklist_condition_get_match_locale (condition);
+                      postprocess  = bz_blocklist_condition_get_post_process (condition);
+
+                      if (match_envvar == NULL &&
+                          match_locale == NULL)
+                        {
+                          g_warning ("Blocklist file has an empty condition");
+                          continue;
+                        }
+
+                      if (!condition_result &&
+                          match_envvar != NULL)
+                        {
+                          const char *var   = NULL;
+                          const char *regex = NULL;
+
+                          var   = bz_blocklist_condition_match_envvar_get_var (match_envvar);
+                          regex = bz_blocklist_condition_match_envvar_get_regex (match_envvar);
+
+                          if (var != NULL &&
+                              regex != NULL)
+                            {
+                              g_autoptr (GRegex) compiled = NULL;
+                              const char *value           = NULL;
+
+                              compiled = g_regex_new (
+                                  regex,
+                                  G_REGEX_ANCHORED,
+                                  G_REGEX_MATCH_ANCHORED,
+                                  &local_error);
+                              if (compiled == NULL)
+                                {
+                                  g_warning ("Blocklist condition contains invalid regex: %s",
+                                             local_error->message);
+                                  g_clear_error (&local_error);
+                                  continue;
+                                }
+
+                              value = g_getenv (var);
+                              if (value != NULL &&
+                                  g_regex_match (
+                                      compiled, value,
+                                      G_REGEX_MATCH_ANCHORED, NULL))
+                                condition_result = TRUE;
+                              if (postprocess == BZ_BLOCKLIST_CONDITION_POST_PROCESS_KIND_INVERT)
+                                condition_result = !condition_result;
+                            }
+                          else
+                            g_warning ("Blocklist file has a envvar condition "
+                                       "missing a var and/or a regex pattern");
+                        }
+
+                      if (!condition_result &&
+                          match_locale != NULL)
+                        {
+                          const char *regex = NULL;
+
+                          regex = bz_blocklist_condition_match_locale_get_regex (match_locale);
+
+                          if (regex != NULL)
+                            {
+                              g_autoptr (GRegex) compiled = NULL;
+                              const char *const *locales  = NULL;
+
+                              compiled = g_regex_new (
+                                  regex,
+                                  G_REGEX_ANCHORED,
+                                  G_REGEX_MATCH_ANCHORED,
+                                  &local_error);
+                              if (compiled == NULL)
+                                {
+                                  g_warning ("Blocklist condition contains invalid regex: %s",
+                                             local_error->message);
+                                  g_clear_error (&local_error);
+                                  continue;
+                                }
+
+                              locales = g_get_language_names ();
+                              for (guint l = 0; locales[l] != NULL; l++)
+                                {
+                                  if (g_regex_match (
+                                          compiled, locales[i],
+                                          G_REGEX_MATCH_ANCHORED, NULL))
+                                    condition_result = TRUE;
+                                  if (condition_result)
+                                    break;
+                                }
+                              if (postprocess == BZ_BLOCKLIST_CONDITION_POST_PROCESS_KIND_INVERT)
+                                condition_result = !condition_result;
+                            }
+                          else
+                            g_warning ("Blocklist file has a match-locale "
+                                       "condition missing a regex pattern");
+                        }
+
+                      if (!condition_result)
+                        {
+                          ignore = TRUE;
+                          break;
+                        }
+                    }
+
+                  if (ignore)
+                    continue;
                 }
 
               data           = blocklist_regex_data_new ();
