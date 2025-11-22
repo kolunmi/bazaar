@@ -263,6 +263,7 @@ template $BzWindow: Adw.ApplicationWindow {
                           name: "browse";
                           title: _("Curated");
                           icon-name: "starred-symbolic";
+                          visible: bind template.state as <$BzStateInfo>.curated-provider as <$BzContentProvider>.has-inputs;
 
                           child: $BzCuratedView browse {
                             content-provider: bind template.state as <$BzStateInfo>.curated-provider;
