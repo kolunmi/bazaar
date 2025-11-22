@@ -222,7 +222,8 @@ EOF
             printf '    %s' "$LOC_SNAKE"
             for enum in "$@"; do
                 LOC_ENUM_SYMBOL="${LOC_SNAKE_UPPER}_$(to_upper "$enum")"
-                printf ',\n    G_DEFINE_ENUM_VALUE (%s, "%s")' "$LOC_ENUM_SYMBOL" "$enum"
+                LOC_ENUM_NICK="$(to_hyphened "$enum")"
+                printf ',\n    G_DEFINE_ENUM_VALUE (%s, "%s")' "$LOC_ENUM_SYMBOL" "$LOC_ENUM_NICK"
             done
             printf ');\n\n'
 

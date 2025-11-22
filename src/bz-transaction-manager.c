@@ -47,8 +47,8 @@ struct _BzTransactionManager
 {
   GObject parent_instance;
 
-  GHashTable *config;
-  BzBackend  *backend;
+  BzMainConfig *config;
+  BzBackend    *backend;
 
   gboolean    paused;
   GListStore *transactions;
@@ -123,8 +123,9 @@ transaction_fiber (QueuedScheduleData *data);
 
 static int
 execute_hook (BzTransactionManager *self,
-              GHashTable           *hook,
-              const char           *ts_kind,
+              BzHook               *hook,
+              const char           *hook_type,
+              const char           *ts_type,
               const char           *ts_appid);
 
 static DexFuture *
@@ -139,7 +140,7 @@ bz_transaction_manager_dispose (GObject *object)
 {
   BzTransactionManager *self = BZ_TRANSACTION_MANAGER (object);
 
-  g_clear_pointer (&self->config, g_hash_table_unref);
+  g_clear_object (&self->config);
   g_clear_object (&self->backend);
   g_clear_object (&self->transactions);
   g_queue_clear_full (&self->queue, queued_schedule_data_unref);
@@ -227,10 +228,10 @@ bz_transaction_manager_class_init (BzTransactionManagerClass *klass)
   object_class->set_property = bz_transaction_manager_set_property;
 
   props[PROP_CONFIG] =
-      g_param_spec_boxed (
+      g_param_spec_object (
           "config",
           NULL, NULL,
-          G_TYPE_HASH_TABLE,
+          BZ_TYPE_MAIN_CONFIG,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   props[PROP_BACKEND] =
@@ -327,18 +328,18 @@ bz_transaction_manager_new (void)
 
 void
 bz_transaction_manager_set_config (BzTransactionManager *self,
-                                   GHashTable           *config)
+                                   BzMainConfig         *config)
 {
   g_return_if_fail (BZ_IS_TRANSACTION_MANAGER (self));
 
-  g_clear_pointer (&self->config, g_hash_table_unref);
+  g_clear_object (&self->config);
   if (config != NULL)
-    self->config = g_hash_table_ref (config);
+    self->config = g_object_ref (config);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CONFIG]);
 }
 
-GHashTable *
+BzMainConfig *
 bz_transaction_manager_get_config (BzTransactionManager *self)
 {
   g_return_val_if_fail (BZ_IS_TRANSACTION_MANAGER (self), NULL);
@@ -552,11 +553,14 @@ transaction_fiber (QueuedScheduleData *data)
 
   /* TODO: make reading config less bad */
   if (self->config != NULL &&
-      g_hash_table_contains (self->config, "/hooks"))
+      bz_main_config_get_hooks (self->config) != NULL)
     {
-      GPtrArray *hooks = NULL;
+      GListModel *hooks   = NULL;
+      guint       n_hooks = 0;
 
-      hooks = g_value_get_boxed (g_hash_table_lookup (self->config, "/hooks"));
+      hooks   = bz_main_config_get_hooks (self->config);
+      n_hooks = g_list_model_get_n_items (hooks);
+
       for (guint i = 0; i < n_installs + n_updates + n_removals; i++)
         {
           const char *ts_kind       = NULL;
@@ -586,18 +590,17 @@ transaction_fiber (QueuedScheduleData *data)
             }
           ts_appid = bz_entry_get_id (entry);
 
-          for (guint k = 0; k < hooks->len; k++)
+          for (guint j = 0; j < n_hooks; j++)
             {
-              GHashTable *hook        = NULL;
-              GValue     *when        = NULL;
-              int         hook_result = HOOK_CONTINUE;
+              g_autoptr (BzHook) hook  = NULL;
+              BzHookSignal when        = 0;
+              int          hook_result = HOOK_CONTINUE;
 
-              hook = g_value_get_boxed (g_ptr_array_index (hooks, k));
-              when = g_hash_table_lookup (hook, "/when");
-              if (when != NULL &&
-                  g_strcmp0 (g_variant_get_string (g_value_get_variant (when), NULL),
-                             "before-transaction") == 0)
-                hook_result = execute_hook (self, hook, ts_kind, ts_appid);
+              hook = g_list_model_get_item (hooks, j);
+              when = bz_hook_get_when (hook);
+
+              if (when == BZ_HOOK_SIGNAL_BEFORE_TRANSACTION)
+                hook_result = execute_hook (self, hook, "before-transaction", ts_kind, ts_appid);
 
               if (hook_result == HOOK_CONFIRM ||
                   hook_result == HOOK_STOP)
@@ -709,11 +712,14 @@ transaction_fiber (QueuedScheduleData *data)
 
   /* FIXME: duplicate code */
   if (self->config != NULL &&
-      g_hash_table_contains (self->config, "/hooks"))
+      bz_main_config_get_hooks (self->config) != NULL)
     {
-      GPtrArray *hooks = NULL;
+      GListModel *hooks   = NULL;
+      guint       n_hooks = 0;
 
-      hooks = g_value_get_boxed (g_hash_table_lookup (self->config, "/hooks"));
+      hooks   = bz_main_config_get_hooks (self->config);
+      n_hooks = g_list_model_get_n_items (hooks);
+
       for (guint i = 0; i < n_installs + n_updates + n_removals; i++)
         {
           const char *ts_kind       = NULL;
@@ -743,18 +749,17 @@ transaction_fiber (QueuedScheduleData *data)
             }
           ts_appid = bz_entry_get_id (entry);
 
-          for (guint k = 0; k < hooks->len; k++)
+          for (guint j = 0; j < n_hooks; j++)
             {
-              GHashTable *hook        = NULL;
-              GValue     *when        = NULL;
-              int         hook_result = HOOK_CONTINUE;
+              g_autoptr (BzHook) hook  = NULL;
+              BzHookSignal when        = 0;
+              int          hook_result = HOOK_CONTINUE;
 
-              hook = g_value_get_boxed (g_ptr_array_index (hooks, k));
-              when = g_hash_table_lookup (hook, "/when");
-              if (when != NULL &&
-                  g_strcmp0 (g_variant_get_string (g_value_get_variant (when), NULL),
-                             "after-transaction") == 0)
-                hook_result = execute_hook (self, hook, ts_kind, ts_appid);
+              hook = g_list_model_get_item (hooks, j);
+              when = bz_hook_get_when (hook);
+
+              if (when == BZ_HOOK_SIGNAL_AFTER_TRANSACTION)
+                hook_result = execute_hook (self, hook, "after-transaction", ts_kind, ts_appid);
 
               if (hook_result == HOOK_STOP)
                 break;
@@ -767,7 +772,8 @@ transaction_fiber (QueuedScheduleData *data)
 
 static int
 execute_hook (BzTransactionManager *self,
-              GHashTable           *hook,
+              BzHook               *hook,
+              const char           *hook_type,
               const char           *ts_type,
               const char           *ts_appid)
 {
@@ -775,7 +781,6 @@ execute_hook (BzTransactionManager *self,
   g_autofree char *timestamp_sec        = NULL;
   g_autofree char *timestamp_usec       = NULL;
   const char      *id                   = NULL;
-  const char      *type                 = NULL;
   const char      *shell                = NULL;
   g_autoptr (GPtrArray) dialogs         = NULL;
   g_autoptr (DialogData) current_dialog = NULL;
@@ -786,21 +791,8 @@ execute_hook (BzTransactionManager *self,
   timestamp_sec  = g_strdup_printf ("%zu", g_date_time_to_unix (date));
   timestamp_usec = g_strdup_printf ("%zu", g_date_time_to_unix_usec (date));
 
-#define GRAB_STRING(hash, key, into)              \
-  if (g_hash_table_contains ((hash), (key)))      \
-    (into) = g_variant_get_string (               \
-        g_value_get_variant (                     \
-            g_hash_table_lookup ((hash), (key))), \
-        NULL);
-#define GRAB_BOOL(hash, key, into)           \
-  if (g_hash_table_contains ((hash), (key))) \
-    (into) = g_variant_get_boolean (         \
-        g_value_get_variant (                \
-            g_hash_table_lookup ((hash), (key))));
-
-  GRAB_STRING (hook, "/id", id);
-  GRAB_STRING (hook, "/when", type);
-  GRAB_STRING (hook, "/shell", shell);
+  id    = bz_hook_get_id (hook);
+  shell = bz_hook_get_shell (hook);
   if (shell == NULL)
     {
       g_warning ("Main Config: hook definition must have shell code, skipping this hook");
@@ -808,30 +800,33 @@ execute_hook (BzTransactionManager *self,
     }
 
   dialogs = g_ptr_array_new_with_free_func (dialog_data_unref);
-  if (g_hash_table_contains (hook, "/dialogs"))
+  if (bz_hook_get_dialogs (hook) != NULL)
     {
-      GPtrArray *config_dialogs = NULL;
+      GListModel *config_dialogs = NULL;
+      guint       n_dialogs      = 0;
 
-      config_dialogs = g_value_get_boxed (g_hash_table_lookup (hook, "/dialogs"));
-      for (guint i = 0; i < config_dialogs->len; i++)
+      config_dialogs = bz_hook_get_dialogs (hook);
+      n_dialogs      = g_list_model_get_n_items (config_dialogs);
+
+      for (guint i = 0; i < n_dialogs; i++)
         {
-          GHashTable *config_dialog           = NULL;
-          const char *dialog_id               = NULL;
-          const char *dialog_title            = NULL;
-          const char *dialog_body             = NULL;
-          gboolean    dialog_body_use_markup  = FALSE;
-          const char *dialog_default_response = NULL;
-          g_autoptr (AdwDialog) dialog        = NULL;
-          guint n_opts                        = 0;
-          g_autoptr (DialogData) data         = NULL;
+          g_autoptr (BzHookDialog) config_dialog = NULL;
+          const char *dialog_id                  = NULL;
+          const char *dialog_title               = NULL;
+          const char *dialog_body                = NULL;
+          gboolean    dialog_body_use_markup     = FALSE;
+          const char *dialog_default_response    = NULL;
+          g_autoptr (AdwDialog) dialog           = NULL;
+          guint n_opts                           = 0;
+          g_autoptr (DialogData) data            = NULL;
 
-          config_dialog = g_value_get_boxed (g_ptr_array_index (config_dialogs, i));
+          config_dialog           = g_list_model_get_item (config_dialogs, i);
+          dialog_id               = bz_hook_dialog_get_id (config_dialog);
+          dialog_title            = bz_hook_dialog_get_title (config_dialog);
+          dialog_body             = bz_hook_dialog_get_body (config_dialog);
+          dialog_body_use_markup  = bz_hook_dialog_get_body_use_markup (config_dialog);
+          dialog_default_response = bz_hook_dialog_get_default_response_id (config_dialog);
 
-          GRAB_STRING (config_dialog, "/id", dialog_id);
-          GRAB_STRING (config_dialog, "/title", dialog_title);
-          GRAB_STRING (config_dialog, "/body", dialog_body);
-          GRAB_BOOL (config_dialog, "/body-use-markup", dialog_body_use_markup);
-          GRAB_STRING (config_dialog, "/default-response-id", dialog_default_response);
           if (dialog_title == NULL ||
               dialog_body == NULL)
             {
@@ -845,35 +840,38 @@ execute_hook (BzTransactionManager *self,
             }
           dialog = g_object_ref_sink (adw_alert_dialog_new (dialog_title, dialog_body));
 
-          if (g_hash_table_contains (config_dialog, "/options"))
+          if (bz_hook_dialog_get_options (config_dialog) != NULL)
             {
-              GPtrArray *config_opts = NULL;
+              GListModel *config_opts = NULL;
+              guint       n_options   = 0;
 
-              config_opts = g_value_get_boxed (g_hash_table_lookup (config_dialog, "/options"));
-              for (guint k = 0; k < config_opts->len; k++)
+              config_opts = bz_hook_dialog_get_options (config_dialog);
+              n_options   = g_list_model_get_n_items (config_opts);
+
+              for (guint j = 0; j < n_options; j++)
                 {
-                  GHashTable *config_opt = NULL;
-                  const char *opt_id     = NULL;
-                  const char *opt_string = NULL;
-                  const char *opt_style  = NULL;
+                  g_autoptr (BzHookDialogOption) config_opt = NULL;
+                  const char *opt_id                        = NULL;
+                  const char *opt_string                    = NULL;
+                  const char *opt_style                     = NULL;
 
-                  config_opt = g_value_get_boxed (g_ptr_array_index (config_opts, k));
+                  config_opt = g_list_model_get_item (config_opts, j);
 
-                  GRAB_STRING (config_opt, "/id", opt_id);
+                  opt_id = bz_hook_dialog_option_get_id (config_opt);
                   if (opt_id == NULL)
                     {
                       g_warning ("Main Config: dialog option definition must have an id, skipping this hook");
                       return HOOK_CONTINUE;
                     }
 
-                  GRAB_STRING (config_opt, "/string", opt_string);
+                  opt_string = bz_hook_dialog_option_get_string (config_opt);
                   if (opt_string == NULL)
                     {
                       g_warning ("Main Config: dialog option definition must have a string, skipping this hook");
                       return HOOK_CONTINUE;
                     }
 
-                  GRAB_STRING (config_opt, "/style", opt_style);
+                  opt_style = bz_hook_dialog_option_get_style (config_opt);
 
                   adw_alert_dialog_add_response (ADW_ALERT_DIALOG (dialog), opt_id, opt_string);
                   if (opt_style != NULL)
@@ -918,9 +916,6 @@ execute_hook (BzTransactionManager *self,
         }
     }
 
-#undef GRAB_BOOL
-#undef GRAB_STRING
-
   for (guint stage = 0;; stage++)
     {
       g_autoptr (GError) local_error           = NULL;
@@ -946,7 +941,7 @@ execute_hook (BzTransactionManager *self,
       g_subprocess_launcher_setenv (launcher, "BAZAAR_HOOK_STAGE_IDX", stage_str, TRUE);
 
       g_subprocess_launcher_setenv (launcher, "BAZAAR_HOOK_ID", id, TRUE);
-      g_subprocess_launcher_setenv (launcher, "BAZAAR_HOOK_TYPE", type, TRUE);
+      g_subprocess_launcher_setenv (launcher, "BAZAAR_HOOK_TYPE", hook_type, TRUE);
 
       g_subprocess_launcher_setenv (launcher, "BAZAAR_HOOK_WAS_ABORTED", hook_aborted ? "true" : "false", TRUE);
 

@@ -59,7 +59,7 @@ struct _BzApplication
   BzContentProvider *blocklists_provider;
 
   GSettings       *settings;
-  GHashTable      *config;
+  BzMainConfig    *config;
   GtkStringList   *blocklists;
   GPtrArray       *blocklist_regexes;
   GtkStringList   *curated_configs;
@@ -785,6 +785,7 @@ init_service_struct (BzApplication *self,
 #endif
   GtkCustomFilter *filter = NULL;
 
+  g_type_ensure (BZ_TYPE_MAIN_CONFIG);
 #ifdef HARDCODED_MAIN_CONFIG
   config_file  = g_file_new_for_path (HARDCODED_MAIN_CONFIG);
   config_bytes = g_file_load_bytes (config_file, NULL, NULL, &local_error);
@@ -799,7 +800,7 @@ init_service_struct (BzApplication *self,
       parse_results = bz_yaml_parser_process_bytes (
           parser, config_bytes, &local_error);
       if (parse_results != NULL)
-        self->config = g_steal_pointer (&parse_results);
+        self->config = g_value_dup_object (g_hash_table_lookup (parse_results, "/"));
       else
         g_warning ("Could not load main config at %s: %s",
                    HARDCODED_MAIN_CONFIG, local_error->message);
@@ -808,7 +809,7 @@ init_service_struct (BzApplication *self,
     g_warning ("Could not load main config at %s: %s",
                HARDCODED_MAIN_CONFIG, local_error->message);
 
-  g_clear_pointer (&local_error, g_error_free);
+  g_clear_error (&local_error);
 #endif
 
   self->init_timer = g_timer_new ();
@@ -905,8 +906,7 @@ init_service_struct (BzApplication *self,
   bz_flathub_state_set_map_factory (self->flathub, self->application_factory);
 
   self->transactions = bz_transaction_manager_new ();
-  if (self->config != NULL)
-    bz_transaction_manager_set_config (self->transactions, self->config);
+  bz_transaction_manager_set_config (self->transactions, self->config);
 
   bz_state_info_set_all_entry_groups (self->state, G_LIST_MODEL (self->groups));
   bz_state_info_set_all_installed_entry_groups (self->state, G_LIST_MODEL (self->installed_apps));
