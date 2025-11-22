@@ -40,6 +40,7 @@ struct _BzSearchWidget
   gboolean      remove;
   gboolean      search_in_progress;
 
+  BzContentProvider *blocklists_provider;
   GListStore        *search_model;
   GtkSelectionModel *selection_model;
   guint              search_update_timeout;
@@ -92,6 +93,13 @@ hide_eol_changed (BzSearchWidget *self,
                   GParamSpec     *pspec,
                   BzStateInfo    *info);
 
+static void
+blocklists_items_changed (BzSearchWidget *self,
+                          guint           position,
+                          guint           removed,
+                          guint           added,
+                          GListModel     *model);
+
 static DexFuture *
 search_query_then (DexFuture *future,
                    GWeakRef  *wr);
@@ -111,12 +119,16 @@ bz_search_widget_dispose (GObject *object)
 
   if (self->state != NULL)
     g_signal_handlers_disconnect_by_func (self->state, hide_eol_changed, self);
+  if (self->blocklists_provider != NULL)
+    g_signal_handlers_disconnect_by_func (self->blocklists_provider, blocklists_items_changed, self);
 
   g_clear_handle_id (&self->search_update_timeout, g_source_remove);
   dex_clear (&self->search_query);
 
   g_clear_object (&self->state);
   g_clear_object (&self->selected);
+  g_clear_object (&self->blocklists_provider);
+  g_clear_object (&self->search_model);
   g_clear_object (&self->selection_model);
 
   G_OBJECT_CLASS (bz_search_widget_parent_class)->dispose (object);
@@ -487,6 +499,10 @@ bz_search_widget_set_state (BzSearchWidget *self,
     g_signal_handlers_disconnect_by_func (self->state, hide_eol_changed, self);
   g_clear_object (&self->state);
 
+  if (self->blocklists_provider != NULL)
+    g_signal_handlers_disconnect_by_func (self->blocklists_provider, blocklists_items_changed, self);
+  g_clear_object (&self->blocklists_provider);
+
   if (state != NULL)
     {
       self->state = g_object_ref (state);
@@ -495,6 +511,18 @@ bz_search_widget_set_state (BzSearchWidget *self,
           "notify::hide-eol",
           G_CALLBACK (hide_eol_changed),
           self);
+
+      g_object_get (
+          state,
+          "blocklists-provider", &self->blocklists_provider,
+          NULL);
+      if (self->blocklists_provider != NULL)
+        g_signal_connect_data (
+            self->blocklists_provider,
+            "items-changed",
+            G_CALLBACK (blocklists_items_changed),
+            self, NULL,
+            G_CONNECT_SWAPPED | G_CONNECT_AFTER);
     }
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_STATE]);
@@ -615,6 +643,16 @@ static void
 hide_eol_changed (BzSearchWidget *self,
                   GParamSpec     *pspec,
                   BzStateInfo    *info)
+{
+  update_filter (self);
+}
+
+static void
+blocklists_items_changed (BzSearchWidget *self,
+                          guint           position,
+                          guint           removed,
+                          guint           added,
+                          GListModel     *model)
 {
   update_filter (self);
 }
