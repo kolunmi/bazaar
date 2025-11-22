@@ -26,12 +26,25 @@ template $BzRichAppTile: Adw.Bin {
         margin-top: 12;
         margin-bottom: 12;
 
+        Image {
+          icon-name: "image-missing-symbolic";
+          pixel-size: 96;
+          halign: center;
+          valign: center;
+          hexpand: true;
+
+          visible: bind $is_null(template.first-screenshot) as <bool>;
+
+        }
+
         $BzRoundedPicture {
           halign: center;
           hexpand: true;
           valign: center;
           paintable: bind template.first-screenshot;
           radius: 6;
+
+          visible: bind $invert_boolean($is_null(template.first-screenshot) as <bool>) as <bool>;
         }
       };
     }
@@ -48,6 +61,8 @@ template $BzRichAppTile: Adw.Bin {
       Image {
         pixel-size: 64;
         paintable: bind template.group as <$BzEntryGroup>.icon-paintable;
+
+        visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.icon-paintable) as <bool>) as <bool>;
 
         styles [
           "icon-dropshadow",
