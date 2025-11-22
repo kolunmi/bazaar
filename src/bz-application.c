@@ -1119,16 +1119,16 @@ init_fiber (GWeakRef *wr)
           adw_alert_dialog_set_prefer_wide_layout (ADW_ALERT_DIALOG (alert), TRUE);
           adw_alert_dialog_format_heading (
               ADW_ALERT_DIALOG (alert),
-              _ ("Flathub is not registered on this system"));
+              _ ("Set Up Flathub"));
           adw_alert_dialog_format_body (
               ADW_ALERT_DIALOG (alert),
-              _ ("Would you like to add Flathub as a remote? "
-                 "If you decline, the Flathub page will not be available. "
-                 "You can change this later."));
+              _ ("Flathub is not set up on this system. "
+                 "You will not be able to browse and install applications in Bazaar if its unavailable.\n\n"
+                 "You can still use Bazaar to browse and remove already installed apps."));
           adw_alert_dialog_add_responses (
               ADW_ALERT_DIALOG (alert),
               "later", _ ("Later"),
-              "add", _ ("Add Flathub"),
+              "add", _ ("Set Up Flathub"),
               NULL);
           adw_alert_dialog_set_response_appearance (
               ADW_ALERT_DIALOG (alert), "add", ADW_RESPONSE_SUGGESTED);
