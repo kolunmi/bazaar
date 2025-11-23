@@ -37,8 +37,7 @@ struct _BzFlathubPage
 {
   AdwBin parent_instance;
 
-  BzFlathubState *state;
-  gboolean online;
+  BzStateInfo *state;
 
   /* Template widgets */
   AdwViewStack *stack;
@@ -51,7 +50,6 @@ enum
   PROP_0,
 
   PROP_STATE,
-  PROP_ONLINE,
 
   LAST_PROP
 };
@@ -69,6 +67,14 @@ static guint signals[LAST_SIGNAL];
 static BzFlathubCategory *
 get_category_by_name (GListModel *categories,
                       const char *name);
+
+static void
+online_changed (BzFlathubPage *self,
+                GParamSpec    *pspec,
+                BzStateInfo   *info);
+
+static void
+check_online (BzFlathubPage *self);
 
 static gboolean
 invert_boolean (gpointer object,
@@ -116,6 +122,8 @@ bz_flathub_page_dispose (GObject *object)
 {
   BzFlathubPage *self = BZ_FLATHUB_PAGE (object);
 
+  if (self->state != NULL)
+    g_signal_handlers_disconnect_by_func (self->state, online_changed, self);
   g_clear_object (&self->state);
 
   G_OBJECT_CLASS (bz_flathub_page_parent_class)->dispose (object);
@@ -134,9 +142,6 @@ bz_flathub_page_get_property (GObject    *object,
     case PROP_STATE:
       g_value_set_object (value, bz_flathub_page_get_state (self));
       break;
-    case PROP_ONLINE:
-      g_value_set_boolean (value, self->online);
-      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -154,14 +159,6 @@ bz_flathub_page_set_property (GObject      *object,
     {
     case PROP_STATE:
       bz_flathub_page_set_state (self, g_value_get_object (value));
-      break;
-    case PROP_ONLINE:
-      self->online = g_value_get_boolean (value);
-      if (self->online)
-        bz_flathub_page_set_state (self, bz_flathub_page_get_state (self));
-      else
-        adw_view_stack_set_visible_child_name (self->stack, "offline");
-
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -193,7 +190,10 @@ show_more_mobile_clicked_cb (BzFlathubPage *self,
   g_autoptr (GListModel) model           = NULL;
   g_autoptr (BzFlathubCategory) category = NULL;
 
-  category = get_category_by_name (bz_flathub_state_get_categories (self->state), "mobile");
+  category = get_category_by_name (
+      bz_flathub_state_get_categories (
+          bz_state_info_get_flathub (self->state)),
+      "mobile");
   if (category == NULL)
     return;
 
@@ -240,7 +240,7 @@ get_category_by_name_cb (gpointer    object,
 
 static void
 open_search_cb (BzFlathubPage *self,
-                   GtkButton      *button)
+                GtkButton     *button)
 {
   g_signal_emit (self, signals[SIGNAL_OPEN_SEARCH], 0);
 }
@@ -259,15 +259,8 @@ bz_flathub_page_class_init (BzFlathubPageClass *klass)
       g_param_spec_object (
           "state",
           NULL, NULL,
-          BZ_TYPE_FLATHUB_STATE,
+          BZ_TYPE_STATE_INFO,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
-
-  props[PROP_ONLINE] =
-      g_param_spec_boolean (
-          "online",
-          NULL, NULL,
-          FALSE,
-          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
@@ -287,14 +280,14 @@ bz_flathub_page_class_init (BzFlathubPageClass *klass)
       g_cclosure_marshal_VOID__OBJECTv);
 
   signals[SIGNAL_OPEN_SEARCH] =
-    g_signal_new (
-        "open-search",
-        G_OBJECT_CLASS_TYPE (klass),
-        G_SIGNAL_RUN_FIRST,
-        0,
-        NULL, NULL,
-        g_cclosure_marshal_VOID__VOID,
-        G_TYPE_NONE, 0);
+      g_signal_new (
+          "open-search",
+          G_OBJECT_CLASS_TYPE (klass),
+          G_SIGNAL_RUN_FIRST,
+          0,
+          NULL, NULL,
+          g_cclosure_marshal_VOID__VOID,
+          G_TYPE_NONE, 0);
 
   g_type_ensure (BZ_TYPE_SECTION_VIEW);
   g_type_ensure (BZ_TYPE_FLATHUB_CATEGORY_SECTION);
@@ -331,25 +324,32 @@ bz_flathub_page_new (void)
 }
 
 void
-bz_flathub_page_set_state (BzFlathubPage  *self,
-                           BzFlathubState *state)
+bz_flathub_page_set_state (BzFlathubPage *self,
+                           BzStateInfo   *state)
 {
   g_return_if_fail (BZ_IS_FLATHUB_PAGE (self));
-  g_return_if_fail (state == NULL || BZ_IS_FLATHUB_STATE (state));
+  g_return_if_fail (state == NULL || BZ_IS_STATE_INFO (state));
+
+  if (self->state != NULL)
+    g_signal_handlers_disconnect_by_func (self->state, online_changed, self);
 
   g_clear_object (&self->state);
   if (state != NULL)
     {
       self->state = g_object_ref (state);
-      adw_view_stack_set_visible_child_name (self->stack, "content");
+      g_signal_connect_swapped (
+          state,
+          "notify::online",
+          G_CALLBACK (online_changed),
+          self);
     }
-  else
-    adw_view_stack_set_visible_child_name (self->stack, "empty");
+
+  check_online (self);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_STATE]);
 }
 
-BzFlathubState *
+BzStateInfo *
 bz_flathub_page_get_state (BzFlathubPage *self)
 {
   g_return_val_if_fail (BZ_IS_FLATHUB_PAGE (self), NULL);
@@ -404,4 +404,26 @@ category_section_group_selected_cb (BzFlathubPage            *self,
                                     BzFlathubCategorySection *section)
 {
   g_signal_emit (self, signals[SIGNAL_GROUP_SELECTED], 0, group);
+}
+
+static void
+online_changed (BzFlathubPage *self,
+                GParamSpec    *pspec,
+                BzStateInfo   *info)
+{
+  check_online (self);
+}
+
+static void
+check_online (BzFlathubPage *self)
+{
+  const char *page = NULL;
+
+  if (self->state != NULL &&
+      bz_state_info_get_online (self->state))
+    page = "content";
+  else
+    page = "offline";
+
+  adw_view_stack_set_visible_child_name (self->stack, page);
 }

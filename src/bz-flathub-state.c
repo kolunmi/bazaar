@@ -143,7 +143,7 @@ bz_flathub_state_set_property (GObject      *object,
   switch (prop_id)
     {
     case PROP_FOR_DAY:
-      bz_flathub_state_set_for_day (self, g_value_get_string (value));
+      dex_future_disown (bz_flathub_state_set_for_day (self, g_value_get_string (value)));
       break;
     case PROP_MAP_FACTORY:
       bz_flathub_state_set_map_factory (self, g_value_get_object (value));
@@ -337,11 +337,11 @@ bz_flathub_state_get_has_connection_error (BzFlathubState *self)
   return self->has_connection_error;
 }
 
-void
+DexFuture *
 bz_flathub_state_set_for_day (BzFlathubState *self,
                               const char     *for_day)
 {
-  g_return_if_fail (BZ_IS_FLATHUB_STATE (self));
+  dex_return_error_if_fail (BZ_IS_FLATHUB_STATE (self));
 
   dex_clear (&self->initializing);
 
@@ -350,12 +350,6 @@ bz_flathub_state_set_for_day (BzFlathubState *self,
   g_clear_pointer (&self->apps_of_the_week, g_object_unref);
   g_clear_pointer (&self->categories, g_object_unref);
   self->has_connection_error = FALSE;
-
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_OF_THE_DAY]);
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_OF_THE_DAY_GROUP]);
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APPS_OF_THE_WEEK]);
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APPS_OF_THE_DAY_WEEK]);
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CATEGORIES]);
 
   if (for_day != NULL)
     {
@@ -376,24 +370,37 @@ bz_flathub_state_set_for_day (BzFlathubState *self,
           bz_track_weak (self), bz_weak_release);
       self->initializing = g_steal_pointer (&future);
     }
+  else
+    {
+      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_OF_THE_DAY]);
+      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_OF_THE_DAY_GROUP]);
+      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APPS_OF_THE_WEEK]);
+      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APPS_OF_THE_DAY_WEEK]);
+      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CATEGORIES]);
+    }
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_FOR_DAY]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_CONNECTION_ERROR]);
+
+  if (self->initializing != NULL)
+    return dex_ref (self->initializing);
+  else
+    return dex_future_new_true ();
 }
 
-void
+DexFuture *
 bz_flathub_state_update_to_today (BzFlathubState *self)
 {
   g_autoptr (GDateTime) datetime = NULL;
   g_autofree gchar *for_day      = NULL;
 
-  g_return_if_fail (BZ_IS_FLATHUB_STATE (self));
+  dex_return_error_if_fail (BZ_IS_FLATHUB_STATE (self));
 
   datetime = g_date_time_new_now_utc ();
   for_day  = g_date_time_format (datetime, "%F");
 
   g_debug ("Syncing with flathub for day: %s", for_day);
-  bz_flathub_state_set_for_day (self, for_day);
+  return bz_flathub_state_set_for_day (self, for_day);
 }
 
 void
@@ -465,7 +472,6 @@ initialize_fiber (GWeakRef *wr)
   g_autoptr (GHashTable) futures     = NULL;
   g_autoptr (GHashTable) nodes       = NULL;
   g_autoptr (GHashTable) quality_set = NULL;
-  guint total_requests               = 0;
   guint successful_requests          = 0;
 
   bz_weak_get_or_return_reject (self, wr);
@@ -500,8 +506,6 @@ initialize_fiber (GWeakRef *wr)
   ADD_REQUEST ("/collection/trending", "/collection/trending?page=0&per_page=%d", COLLECTION_FETCH_SIZE);
   ADD_REQUEST ("/collection/mobile", "/collection/mobile?page=0&per_page=%d", COLLECTION_FETCH_SIZE);
   ADD_REQUEST ("/quality-moderation/passing-apps", "/quality-moderation/passing-apps?page=1&page_size=%d", QUALITY_MODERATION_PAGE_SIZE);
-
-  total_requests = g_hash_table_size (futures);
 
   while (g_hash_table_size (futures) > 0)
     {
@@ -614,8 +618,6 @@ initialize_fiber (GWeakRef *wr)
           ADD_REQUEST (category, "/collection/category/%s?page=0&per_page=%d", category, CATEGORY_FETCH_SIZE);
         }
 
-      total_requests += g_hash_table_size (futures);
-
       while (g_hash_table_size (futures) > 0)
         {
           GHashTableIter   iter                   = { 0 };
@@ -705,7 +707,7 @@ initialize_finally (DexFuture *future,
       g_object_bind_property (self, "map-factory", category, "map-factory", G_BINDING_SYNC_CREATE);
     }
 
-  self->initializing = NULL;
+  dex_clear (&self->initializing);
   g_debug ("Done syncing flathub state; notifying property listeners...");
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_OF_THE_DAY]);

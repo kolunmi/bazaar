@@ -162,12 +162,19 @@ static void
 open_generic_id (BzApplication *self,
                  const char    *generic_id);
 
+static inline DexFuture *
+make_sync_future (BzApplication *self);
+
 static DexFuture *
 init_fiber (GWeakRef *wr);
 
 static DexFuture *
 init_finally (DexFuture *future,
               GWeakRef  *wr);
+
+static DexFuture *
+init_sync_finally (DexFuture *future,
+                   GWeakRef  *wr);
 
 static gboolean
 window_close_request (BzApplication *self,
@@ -1290,12 +1297,6 @@ init_fiber (GWeakRef *wr)
         }
     }
 
-  if (bz_state_info_get_flathub (self->state) != NULL)
-    {
-      g_debug ("Updating Flathub state...");
-      bz_flathub_state_update_to_today (self->flathub);
-    }
-
   return dex_future_new_true ();
 }
 
@@ -1783,11 +1784,19 @@ periodic_timeout_cb (BzApplication *self)
     {
       dex_clear (&self->periodic_sync);
       if (self->n_incoming == 0)
-        self->periodic_sync = bz_backend_retrieve_remote_entries (
-            BZ_BACKEND (self->flatpak), NULL);
+        self->periodic_sync = make_sync_future (self);
     }
 
   return G_SOURCE_CONTINUE;
+}
+
+static inline DexFuture *
+make_sync_future (BzApplication *self)
+{
+  return dex_future_all_race (
+      bz_backend_retrieve_remote_entries (BZ_BACKEND (self->flatpak), NULL),
+      bz_flathub_state_update_to_today (self->flathub),
+      NULL);
 }
 
 static DexFuture *
@@ -1803,6 +1812,8 @@ init_finally (DexFuture *future,
   value = dex_future_get_value (future, &local_error);
   if (value != NULL)
     {
+      g_autoptr (DexFuture) sync_future = NULL;
+
       self->flatpak_notifs = bz_backend_create_notification_channel (
           BZ_BACKEND (self->flatpak));
       self->notif_watch = dex_future_then_loop (
@@ -1810,23 +1821,57 @@ init_finally (DexFuture *future,
           (DexFutureCallback) watch_backend_notifs_then_loop_cb,
           bz_track_weak (self),
           bz_weak_release);
-      self->periodic_sync = bz_backend_retrieve_remote_entries (
-          BZ_BACKEND (self->flatpak), NULL);
+
+      sync_future = make_sync_future (self);
+      sync_future = dex_future_finally (
+          sync_future,
+          (DexFutureCallback) init_sync_finally,
+          bz_track_weak (self),
+          bz_weak_release);
+      self->periodic_sync = g_steal_pointer (&sync_future);
 
       self->periodic_timeout = g_timeout_add_seconds (
           /* Check every ten minutes*/
           60 * 10, (GSourceFunc) periodic_timeout_cb, self);
-
-      bz_state_info_set_online (self->state, TRUE);
-      g_debug ("We are online!");
     }
   else
     {
       GtkWindow *window = NULL;
 
-      g_debug ("Failed to achieve online status, reason: %s", local_error->message);
       bz_state_info_set_online (self->state, FALSE);
+      window = gtk_application_get_active_window (GTK_APPLICATION (self));
+      if (window != NULL)
+        {
+          g_autofree char *error_string = NULL;
 
+          error_string = g_strdup_printf (
+              "Could not initialize: %s",
+              local_error->message);
+          bz_show_error_for_widget (GTK_WIDGET (window), error_string);
+        }
+    }
+
+  return dex_future_new_true ();
+}
+
+static DexFuture *
+init_sync_finally (DexFuture *future,
+                   GWeakRef  *wr)
+{
+  g_autoptr (BzApplication) self = NULL;
+  g_autoptr (GError) local_error = NULL;
+  const GValue *value            = NULL;
+
+  bz_weak_get_or_return_reject (self, wr);
+
+  value = dex_future_get_value (future, &local_error);
+  if (value != NULL)
+    bz_state_info_set_online (self->state, TRUE);
+  else
+    {
+      GtkWindow *window = NULL;
+
+      bz_state_info_set_online (self->state, FALSE);
       window = gtk_application_get_active_window (GTK_APPLICATION (self));
       if (window != NULL)
         {

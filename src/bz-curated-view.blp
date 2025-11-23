@@ -51,7 +51,7 @@ template $BzCuratedView: Adw.Bin {
 
           child: ListView {
             model: NoSelection {
-              model: bind template.content-provider;
+              model: bind template.state as <$BzStateInfo>.curated-provider;
             };
 
             factory: BuilderListItemFactory {

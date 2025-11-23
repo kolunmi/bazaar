@@ -23,6 +23,7 @@
 #include <adwaita.h>
 
 #include "bz-content-provider.h"
+#include "bz-state-info.h"
 
 G_BEGIN_DECLS
 
@@ -33,10 +34,10 @@ GtkWidget *
 bz_curated_view_new (void);
 
 void
-bz_curated_view_set_content_provider (BzCuratedView    *self,
-                                      BzContentProvider *provider);
+bz_curated_view_set_state (BzCuratedView *self,
+                           BzStateInfo   *state);
 
-BzContentProvider *
-bz_curated_view_get_content_provider (BzCuratedView *self);
+BzStateInfo *
+bz_curated_view_get_state (BzCuratedView *self);
 
 G_END_DECLS

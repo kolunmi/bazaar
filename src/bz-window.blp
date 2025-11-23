@@ -266,8 +266,7 @@ template $BzWindow: Adw.ApplicationWindow {
                           visible: bind template.state as <$BzStateInfo>.curated-provider as <$BzContentProvider>.has-inputs;
 
                           child: $BzCuratedView browse {
-                            content-provider: bind template.state as <$BzStateInfo>.curated-provider;
-                            online: bind template.state as <$BzStateInfo>.online;
+                            state: bind template.state as <$BzStateInfo>;
                             group-selected => $browser_group_selected_cb(template);
                             browse-flathub => $browse_flathub_cb(template);
                           };
@@ -279,8 +278,7 @@ template $BzWindow: Adw.ApplicationWindow {
                           icon-name: "flathub-symbolic";
 
                           child: $BzFlathubPage {
-                            state: bind template.state as <$BzStateInfo>.flathub;
-                            online: bind template.state as <$BzStateInfo>.online;
+                            state: bind template.state as <$BzStateInfo>;
                             group-selected => $browser_group_selected_cb(template);
                             open-search => $open_search_cb(template);
                           };
