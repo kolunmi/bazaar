@@ -840,7 +840,7 @@ init_service_struct (BzApplication *self,
   g_type_ensure (BZ_TYPE_CURATED_ROW);
   g_type_ensure (BZ_TYPE_CURATED_SECTION);
   self->curated_parser = bz_yaml_parser_new_for_resource_schema (
-      "/io/github/kolunmi/Bazaar/bz-content-provider-config-schema.xml");
+      "/io/github/kolunmi/Bazaar/curated-config-schema.xml");
 
   self->cache = bz_entry_cache_manager_new ();
   self->state = bz_state_info_new ();
