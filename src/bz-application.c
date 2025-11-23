@@ -852,6 +852,22 @@ init_service_struct (BzApplication *self,
 
   (void) bz_download_worker_get_default ();
 
+  if (self->config != NULL &&
+      bz_main_config_get_yaml_blocklist_paths (self->config) != NULL)
+    {
+      GListModel *paths   = NULL;
+      guint       n_paths = 0;
+
+      paths   = bz_main_config_get_yaml_blocklist_paths (self->config);
+      n_paths = g_list_model_get_n_items (paths);
+      for (guint i = 0; i < n_paths; i++)
+        {
+          g_autoptr (GtkStringObject) string = NULL;
+
+          string = g_list_model_get_item (paths, i);
+          gtk_string_list_append (blocklists, gtk_string_object_get_string (string));
+        }
+    }
   self->blocklists          = g_object_ref (blocklists);
   self->blocklists_to_files = gtk_map_list_model_new (
       NULL, (GtkMapListModelMapFunc) map_strings_to_files, NULL, NULL);
@@ -859,6 +875,22 @@ init_service_struct (BzApplication *self,
       self->blocklists_to_files,
       G_LIST_MODEL (self->blocklists));
 
+  if (self->config != NULL &&
+      bz_main_config_get_txt_blocklist_paths (self->config) != NULL)
+    {
+      GListModel *paths   = NULL;
+      guint       n_paths = 0;
+
+      paths   = bz_main_config_get_txt_blocklist_paths (self->config);
+      n_paths = g_list_model_get_n_items (paths);
+      for (guint i = 0; i < n_paths; i++)
+        {
+          g_autoptr (GtkStringObject) string = NULL;
+
+          string = g_list_model_get_item (paths, i);
+          gtk_string_list_append (txt_blocklists, gtk_string_object_get_string (string));
+        }
+    }
   self->txt_blocklists          = g_object_ref (txt_blocklists);
   self->txt_blocklists_to_files = gtk_map_list_model_new (
       NULL, (GtkMapListModelMapFunc) map_strings_to_files, NULL, NULL);
@@ -866,6 +898,22 @@ init_service_struct (BzApplication *self,
       self->txt_blocklists_to_files,
       G_LIST_MODEL (self->txt_blocklists));
 
+  if (self->config != NULL &&
+      bz_main_config_get_curated_config_paths (self->config) != NULL)
+    {
+      GListModel *paths   = NULL;
+      guint       n_paths = 0;
+
+      paths   = bz_main_config_get_curated_config_paths (self->config);
+      n_paths = g_list_model_get_n_items (paths);
+      for (guint i = 0; i < n_paths; i++)
+        {
+          g_autoptr (GtkStringObject) string = NULL;
+
+          string = g_list_model_get_item (paths, i);
+          gtk_string_list_append (curated_configs, gtk_string_object_get_string (string));
+        }
+    }
   self->curated_configs          = g_object_ref (curated_configs);
   self->curated_configs_to_files = gtk_map_list_model_new (
       NULL, (GtkMapListModelMapFunc) map_strings_to_files, NULL, NULL);
