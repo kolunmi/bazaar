@@ -672,7 +672,7 @@ map_ids_to_entries (GtkStringObject *string,
   return g_steal_pointer (&result);
 }
 
-static inline gboolean
+static gboolean
 validate_group_for_ui (BzApplication *self,
                        BzEntryGroup  *group)
 {
@@ -682,6 +682,12 @@ validate_group_for_ui (BzApplication *self,
 
   if (bz_state_info_get_hide_eol (self->state) &&
       bz_entry_group_get_eol (group) != NULL)
+    return FALSE;
+  if (bz_state_info_get_show_only_foss (self->state) &&
+      !bz_entry_group_get_is_floss (group))
+    return FALSE;
+  if (bz_state_info_get_show_only_flathub (self->state) &&
+      !bz_entry_group_get_is_flathub (group))
     return FALSE;
 
   id = bz_entry_group_get_id (group);
@@ -796,14 +802,19 @@ bz_state_info_get_default (void)
 }
 
 static void
-hide_eol_changed (BzApplication *self,
-                  const char    *key,
-                  GSettings     *settings)
+show_hide_app_setting_changed (BzApplication *self,
+                               const char    *key,
+                               GSettings     *settings)
 {
   g_object_freeze_notify (G_OBJECT (self->state));
+
   bz_state_info_set_hide_eol (self->state, g_settings_get_boolean (self->settings, "hide-eol"));
+  bz_state_info_set_show_only_foss (self->state, g_settings_get_boolean (self->settings, "show-only-foss"));
+  bz_state_info_set_show_only_flathub (self->state, g_settings_get_boolean (self->settings, "show-only-flathub"));
+
   gtk_filter_changed (GTK_FILTER (self->group_filter), GTK_FILTER_CHANGE_DIFFERENT);
   gtk_filter_changed (GTK_FILTER (self->appid_filter), GTK_FILTER_CHANGE_DIFFERENT);
+
   g_object_thaw_notify (G_OBJECT (self->state));
 }
 
@@ -943,11 +954,32 @@ init_service_struct (BzApplication *self,
   g_assert (app_id != NULL);
   g_debug ("Constructing gsettings for %s ...", app_id);
   self->settings = g_settings_new (app_id);
-  bz_state_info_set_hide_eol (self->state, g_settings_get_boolean (self->settings, "hide-eol"));
+
+  bz_state_info_set_hide_eol (
+      self->state,
+      g_settings_get_boolean (self->settings, "hide-eol"));
   g_signal_connect_swapped (
       self->settings,
       "changed::hide-eol",
-      G_CALLBACK (hide_eol_changed),
+      G_CALLBACK (show_hide_app_setting_changed),
+      self);
+
+  bz_state_info_set_show_only_foss (
+      self->state,
+      g_settings_get_boolean (self->settings, "show-only-foss"));
+  g_signal_connect_swapped (
+      self->settings,
+      "changed::show-only-foss",
+      G_CALLBACK (show_hide_app_setting_changed),
+      self);
+
+  bz_state_info_set_show_only_flathub (
+      self->state,
+      g_settings_get_boolean (self->settings, "show-only-flathub"));
+  g_signal_connect_swapped (
+      self->settings,
+      "changed::show-only-flathub",
+      G_CALLBACK (show_hide_app_setting_changed),
       self);
 
   self->blocklist_regexes = g_ptr_array_new_with_free_func (
@@ -1023,6 +1055,8 @@ init_service_struct (BzApplication *self,
   bz_state_info_set_search_engine (self->state, self->search_engine);
   bz_state_info_set_settings (self->state, self->settings);
   bz_state_info_set_transaction_manager (self->state, self->transactions);
+  bz_state_info_set_txt_blocklists (self->state, G_LIST_MODEL (self->txt_blocklists));
+  bz_state_info_set_txt_blocklists_provider (self->state, self->txt_blocklists_provider);
 }
 
 static DexFuture *

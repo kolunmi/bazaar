@@ -158,11 +158,11 @@ bind_settings (BzPreferencesDialog *self)
                    self->git_forge_star_counts_switch, "active",
                    G_SETTINGS_BIND_DEFAULT);
 
-  g_settings_bind (self->settings, "search-only-foss",
+  g_settings_bind (self->settings, "show-only-foss",
                    self->search_only_foss_switch, "active",
                    G_SETTINGS_BIND_DEFAULT);
 
-  g_settings_bind (self->settings, "search-only-flathub",
+  g_settings_bind (self->settings, "show-only-flathub",
                    self->search_only_flathub_switch, "active",
                    G_SETTINGS_BIND_DEFAULT);
 

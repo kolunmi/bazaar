@@ -11,15 +11,15 @@
       <summary>Show Git Forge Star Counts</summary>
       <description>Whether to attempt to detect and show "star counts" for projects in the full view</description>
     </key>
-    <key name="search-only-foss" type="b">
+    <key name="show-only-foss" type="b">
       <default>false</default>
       <summary>Only Show Free Software</summary>
-      <description>Hide proprietary software when searching</description>
+      <description>Hide proprietary software</description>
     </key>
-    <key name="search-only-flathub" type="b">
+    <key name="show-only-flathub" type="b">
       <default>false</default>
       <summary>Show Only Flathub Content</summary>
-      <description>Filter search results to only show applications available on Flathub</description>
+      <description>Hide applications which do not originate from Flathub</description>
     </key>
     <key name="search-debounce" type="b">
       <default>true</default>
