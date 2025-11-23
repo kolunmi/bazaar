@@ -1872,6 +1872,8 @@ init_sync_finally (DexFuture *future,
       GtkWindow *window = NULL;
 
       bz_state_info_set_online (self->state, FALSE);
+      bz_state_info_set_background_task_label (self->state, NULL);
+
       window = gtk_application_get_active_window (GTK_APPLICATION (self));
       if (window != NULL)
         {
