@@ -336,11 +336,6 @@ template $BzWindow: Adw.ApplicationWindow {
                       visible: bind $invert_boolean($is_null(template.state as <$BzStateInfo>.background-task-label) as <bool>) as <bool>;
 
                       Adw.Spinner {}
-
-                      Label background_task_label {
-                        visible: true;
-                        label: bind template.state as <$BzStateInfo>.background-task-label as <string>;
-                      }
                     }
 
                     [title]
@@ -430,7 +425,6 @@ template $BzWindow: Adw.ApplicationWindow {
           condition ("max-width: 700px")
 
           setters {
-            background_task_label.visible: false;
             download_bar.expand-size: 60;
             top_header_bar.title-widget: null;
             toolbar_view.reveal-bottom-bars: true;
