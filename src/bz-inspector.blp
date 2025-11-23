@@ -18,6 +18,27 @@ template $BzInspector: Adw.Window {
       width-request: 100;
       spacing: 10;
 
+      Box {
+        styles [
+          "bz-debug"
+        ]
+
+        orientation: horizontal;
+        spacing: 10;
+
+        Label {
+          styles [
+            "heading"
+          ]
+          label: _("Background Task Info:");
+          xalign: 0.0;
+        }
+        Label {
+          label: bind template.state as <$BzStateInfo>.background-task-label as <string>;
+          xalign: 0.0;
+        }
+      }
+
       CheckButton debug_mode_check {
         label: _("Enable Global Debug Mode");
       }
@@ -79,7 +100,7 @@ template $BzInspector: Adw.Window {
           model: NoSelection {
             model: FilterListModel filter_model {
               model: bind template.state as <$BzStateInfo>.all-entry-groups;
-            };      
+            };
           };
           factory: BuilderListItemFactory {
             template ListItem {
@@ -89,7 +110,7 @@ template $BzInspector: Adw.Window {
 
                 child: Box {
                   orientation: vertical;
-                  
+
                   Separator {}
                   ScrolledWindow {
                     propagate-natural-height: true;
@@ -102,7 +123,7 @@ template $BzInspector: Adw.Window {
                           activatable: false;
                           child: Box {
                             orientation: horizontal;
-                          
+
                             Label {
                               hexpand: true;
                               ellipsize: end;

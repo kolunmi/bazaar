@@ -76,8 +76,17 @@ template $BzWindow: Adw.ApplicationWindow {
 
       [end]
       Label {
+        styles [
+          "caption-heading",
+        ]
         visible: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active as <bool>;
         label: bind $format_progress(template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.current-progress as <double>) as <string>;
+      }
+
+      [end]
+      Label {
+        visible: bind $invert_boolean($is_null(template.state as <$BzStateInfo>.background-task-label as <string>) as <bool>) as <bool>;
+        label: bind template.state as <$BzStateInfo>.background-task-label as <string>;
       }
     }
 
