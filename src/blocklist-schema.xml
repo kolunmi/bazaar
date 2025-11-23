@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<object class="BzRootBlocklist">
+  <typehint name="blocklists" type="BzBlocklist"/>
+  <typehint name="blocklists.conditions" type="BzBlocklistCondition"/>
+  <typehint name="blocklists.allow" type="GtkStringObject"/>
+  <typehint name="blocklists.allow-regex" type="GtkStringObject"/>
+  <typehint name="blocklists.block" type="GtkStringObject"/>
+  <typehint name="blocklists.block-regex" type="GtkStringObject"/>
+</object>

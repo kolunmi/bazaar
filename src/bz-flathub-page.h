@@ -22,7 +22,7 @@
 
 #include <adwaita.h>
 
-#include "bz-flathub-state.h"
+#include "bz-state-info.h"
 
 G_BEGIN_DECLS
 
@@ -33,10 +33,10 @@ GtkWidget *
 bz_flathub_page_new (void);
 
 void
-bz_flathub_page_set_state (BzFlathubPage  *self,
-                           BzFlathubState *state);
+bz_flathub_page_set_state (BzFlathubPage *self,
+                           BzStateInfo   *state);
 
-BzFlathubState *
+BzStateInfo *
 bz_flathub_page_get_state (BzFlathubPage *self);
 
 G_END_DECLS

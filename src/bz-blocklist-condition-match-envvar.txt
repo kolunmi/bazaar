@@ -1,0 +1,8 @@
+prefix=bz
+name=blocklist_condition_match_envvar
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+property=var char G_TYPE_STRING string
+property=regex char G_TYPE_STRING string

@@ -145,7 +145,6 @@ contribute_cb (BzLicenseDialog *self)
   GListModel *share_urls = NULL;
   BzUrl      *first_url  = NULL;
   const char *url        = NULL;
-  GtkRoot    *root       = NULL;
 
   if (self->entry == NULL || !BZ_IS_ENTRY (self->entry))
     return;
@@ -165,10 +164,7 @@ contribute_cb (BzLicenseDialog *self)
       url = bz_url_get_url (first_url);
 
       if (url != NULL && *url != '\0')
-        {
-          root = gtk_widget_get_root (GTK_WIDGET (self));
-          gtk_show_uri (GTK_WINDOW (root), url, GDK_CURRENT_TIME);
-        }
+        g_app_info_launch_default_for_uri (url, NULL, NULL);
 
       g_object_unref (first_url);
     }

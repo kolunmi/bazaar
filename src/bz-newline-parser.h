@@ -1,6 +1,6 @@
-/* bz-curated-view.h
+/* bz-newline-parser.h
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2025 Eva M
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,24 +20,15 @@
 
 #pragma once
 
-#include <adwaita.h>
-
-#include "bz-content-provider.h"
-#include "bz-state-info.h"
+#include <gio/gio.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_CURATED_VIEW (bz_curated_view_get_type ())
-G_DECLARE_FINAL_TYPE (BzCuratedView, bz_curated_view, BZ, CURATED_VIEW, AdwBin)
+#define BZ_TYPE_NEWLINE_PARSER (bz_newline_parser_get_type ())
+G_DECLARE_FINAL_TYPE (BzNewlineParser, bz_newline_parser, BZ, NEWLINE_PARSER, GObject)
 
-GtkWidget *
-bz_curated_view_new (void);
-
-void
-bz_curated_view_set_state (BzCuratedView *self,
-                           BzStateInfo   *state);
-
-BzStateInfo *
-bz_curated_view_get_state (BzCuratedView *self);
+BzNewlineParser *
+bz_newline_parser_new (gboolean comments,
+                       guint    max_lines);
 
 G_END_DECLS

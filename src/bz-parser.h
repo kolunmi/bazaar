@@ -1,6 +1,6 @@
-/* bz-curated-view.h
+/* bz-parser.h
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2025 Eva M
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,24 +20,25 @@
 
 #pragma once
 
-#include <adwaita.h>
-
-#include "bz-content-provider.h"
-#include "bz-state-info.h"
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_CURATED_VIEW (bz_curated_view_get_type ())
-G_DECLARE_FINAL_TYPE (BzCuratedView, bz_curated_view, BZ, CURATED_VIEW, AdwBin)
+#define BZ_TYPE_PARSER (bz_parser_get_type ())
+G_DECLARE_INTERFACE (BzParser, bz_parser, BZ, PARSER, GObject)
 
-GtkWidget *
-bz_curated_view_new (void);
+struct _BzParserInterface
+{
+  GTypeInterface parent_iface;
 
-void
-bz_curated_view_set_state (BzCuratedView *self,
-                           BzStateInfo   *state);
+  GHashTable *(*process_bytes) (BzParser *self,
+                                GBytes   *bytes,
+                                GError  **error);
+};
 
-BzStateInfo *
-bz_curated_view_get_state (BzCuratedView *self);
+GHashTable *
+bz_parser_process_bytes (BzParser *self,
+                         GBytes   *bytes,
+                         GError  **error);
 
 G_END_DECLS

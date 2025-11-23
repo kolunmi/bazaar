@@ -26,6 +26,7 @@
 #include "bz-installed-tile.h"
 #include "bz-section-view.h"
 #include "bz-state-info.h"
+#include "bz-util.h"
 
 struct _BzInstalledPage
 {
@@ -142,66 +143,54 @@ is_zero (gpointer object,
 }
 
 static DexFuture *
-row_activated_fiber (gpointer user_data)
+row_activated_fiber (GWeakRef *wr)
 {
-  g_autoptr (GError) local_error = NULL;
-  BzInstalledPage *self          = NULL;
-  guint            position      = 0;
-  GtkWidget       *window        = NULL;
-  g_autoptr (BzEntryGroup) group = NULL;
-  g_autoptr (BzEntry) entry      = NULL;
+  g_autoptr (GError) local_error   = NULL;
+  g_autoptr (BzInstalledTile) tile = NULL;
+  BzInstalledPage *self            = NULL;
+  GtkWidget       *window          = NULL;
+  BzEntryGroup    *group           = NULL;
+  g_autoptr (BzEntry) entry        = NULL;
 
-  self     = ((gpointer *) user_data)[0];
-  position = GPOINTER_TO_UINT (((gpointer *) user_data)[1]);
-  g_free (user_data);
+  bz_weak_get_or_return_reject (tile, wr);
+
+  self = (BzInstalledPage *) gtk_widget_get_ancestor (GTK_WIDGET (tile), BZ_TYPE_INSTALLED_PAGE);
+  if (self == NULL)
+    return NULL;
+  if (self->model == NULL)
+    goto err;
 
   window = gtk_widget_get_ancestor (GTK_WIDGET (self), GTK_TYPE_WINDOW);
-  g_assert (window != NULL);
+  if (window == NULL)
+    goto err;
 
-  if (self->model == NULL)
-    {
-      g_object_unref (self);
-      return NULL;
-    }
-
-  group = g_list_model_get_item (self->model, position);
+  group = bz_installed_tile_get_group (tile);
   if (group == NULL)
-    {
-      g_object_unref (self);
-      return NULL;
-    }
+    goto err;
 
   entry = find_entry_in_group (group, NULL, window, &local_error);
   if (entry == NULL)
     goto err;
 
   g_signal_emit (self, signals[SIGNAL_SHOW], 0, entry);
-
-  g_object_unref (self);
   return NULL;
 
 err:
   if (local_error != NULL)
     bz_show_error_for_widget (window, local_error->message);
-  g_object_unref (self);
   return NULL;
 }
 
 static void
-row_activated_cb (BzInstalledPage *self,
-                  guint            position,
-                  GtkListView     *list_view)
+tile_activated_cb (BzInstalledTile *tile)
 {
-  gpointer *data = g_new (gpointer, 2);
-  data[0]        = g_object_ref (self);
-  data[1]        = GUINT_TO_POINTER (position);
+  g_assert (BZ_IS_INSTALLED_TILE (tile));
 
   dex_future_disown (dex_scheduler_spawn (
       dex_scheduler_get_default (),
       bz_get_dex_stack_size (),
       (DexFiberFunc) row_activated_fiber,
-      data,
-      NULL));
+      bz_track_weak (tile), bz_weak_release));
 }
 
 static void
@@ -297,7 +286,7 @@ bz_installed_page_class_init (BzInstalledPageClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-installed-page.ui");
   gtk_widget_class_bind_template_child (widget_class, BzInstalledPage, stack);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
-  gtk_widget_class_bind_template_callback (widget_class, row_activated_cb);
+  gtk_widget_class_bind_template_callback (widget_class, tile_activated_cb);
 }
 
 static void

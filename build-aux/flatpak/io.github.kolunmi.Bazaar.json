@@ -6,9 +6,6 @@
   "command": "bazaar",
   "tags": [ "nightly" ],
   "desktop-file-name-suffix": " (Nightly)",
-  "sdk-extensions": [
-    "org.freedesktop.Sdk.Extension.llvm20"
-  ],
   "finish-args": [
     "--share=network",
     "--share=ipc",
@@ -24,6 +21,7 @@
   "cleanup": [
     "/include",
     "/lib/pkgconfig",
+    "/lib/cmake",
     "/share/applications/mimeinfo.cache",
     "/share/bash-completion",
     "/share/icons/hicolor/icon-theme.cache",
@@ -32,9 +30,6 @@
     "*.la",
     "*.a"
   ],
-  "build-options": {
-    "append-path": "/usr/lib/sdk/rust-stable/bin:/usr/lib/sdk/llvm20/bin"
-  },
   "modules": [
     {
       "name": "bazaar",
@@ -48,16 +43,28 @@
         {
           "type": "dir",
           "path": "../.."
-        },
-        "bazaar-cargo-sources.json",
-        {
-          "type": "shell",
-          "commands": [
-            "install -Dpm0644 cargo/config .cargo/config.toml"
-          ]
         }
       ],
       "modules": [
+        {
+          "name": "md4c",
+          "buildsystem": "cmake",
+          "config-opts": [
+            "-DBUILD_MD2HTML_EXECUTABLE=Off"
+          ],
+          "sources": [
+            {
+              "type": "git",
+              "url": "https://github.com/mity/md4c.git",
+              "commit": "729e6b8b320caa96328968ab27d7db2235e4fb47",
+              "tag": "release-0.5.2",
+              "x-checker-data": {
+                "type": "git",
+                "tag-pattern": "^release-([\\d.]+)$"
+              }
+            }
+          ]
+        },
         {
           "name": "flatpak",
           "buildsystem": "meson",
@@ -87,20 +94,23 @@
             "/share/dbus-1/services/org.freedesktop.*",
             "/share/flatpak/triggers",
             "/share/gdm",
-            "/share/zsh"
+            "/share/zsh",
+            "/share/fish",
+            "/lib/sysusers.d",
+            "/lib/tmpfiles.d"
           ],
           "post-install": [
             "install -Dpm0755 -t /app/bin /usr/bin/update-{mime,desktop}-database"
           ],
           "sources": [
             {
-              "type": "archive",
-              "url": "https://github.com/flatpak/flatpak/archive/refs/tags/1.16.1.tar.gz",
-              "sha256": "281aa7e35efa0899fefaf7eba923e8ff117f7c03726c7f73b2ac296dae2daf37",
+              "type": "git",
+              "url": "https://github.com/flatpak/flatpak",
+              "commit": "b676905d91aa3c4e524ca663784d4cf085c465d7",
+              "tag": "1.16.1",
               "x-checker-data": {
-                "type": "anitya",
-                "project-id": 6377,
-                "url-template": "https://github.com/flatpak/flatpak/archive/refs/tags/$version.tar.gz"
+                "type": "git",
+                "url-template": "$version"
               }
             }
           ],
@@ -204,8 +214,8 @@
                     {
                       "type": "git",
                       "url": "https://github.com/ostreedev/ostree",
-                      "tag": "v2025.4",
-                      "commit": "1a9350c94395cf743fc43e715931998fd67c520b",
+                      "tag": "v2025.6",
+                      "commit": "82185d9aaf0a79b100378f13a54c3d5d3763a971",
                       "x-checker-data": {
                         "type": "anitya",
                         "project-id": 10899,
@@ -266,13 +276,13 @@
                   ],
                   "sources": [
                     {
-                      "type": "archive",
-                      "url": "https://github.com/flatpak/xdg-dbus-proxy/archive/refs/tags/0.1.6.tar.gz",
-                      "sha256": "ee9c1d665f4e3b025a83d522d478ff7930070f2817fc2cb446db0dca93c990b1",
+                      "type": "git",
+                      "url": "https://github.com/flatpak/xdg-dbus-proxy",
+                      "commit": "1c1989e56f94b9eb3b7567f8a6e8a0aa16cba496",
+                      "tag": "0.1.6",
                       "x-checker-data": {
-                        "type": "anitya",
-                        "project-id": 58434,
-                        "url-template": "https://github.com/flatpak/xdg-dbus-proxy/archive/refs/tags/$version.tar.gz"
+                        "type": "git",
+                        "url-template": "$version"
                       }
                     }
                   ]
@@ -280,18 +290,7 @@
               ]
             }
           ]
-        },
-          {
-              "name": "md4c",
-              "buildsystem": "cmake",
-              "sources": [
-                  {
-                      "type": "git",
-                      "url": "https://github.com/mity/md4c.git",
-                      "tag": "release-0.5.2"
-                  }
-              ]
-          }
+        }
       ]
     },
     {
@@ -304,13 +303,13 @@
       ],
       "sources": [
         {
-          "type": "archive",
-          "url": "https://github.com/containers/bubblewrap/archive/refs/tags/v0.11.0.tar.gz",
-          "sha256": "cfeeb15fcc47d177d195f06fdf0847e93ee3aa6bf46f6ac0a141fa142759e2c3",
+          "type": "git",
+          "url": "https://github.com/containers/bubblewrap",
+          "commit": "9ca3b05ec787acfb4b17bed37db5719fa777834f",
+          "tag": "v0.11.0",
           "x-checker-data": {
-            "type": "anitya",
-            "project-id": 10937,
-            "url-template": "https://github.com/containers/bubblewrap/archive/refs/tags/v$version.tar.gz"
+            "type": "git",
+            "url-template": "$version"
           }
         }
       ]

@@ -76,8 +76,17 @@ template $BzWindow: Adw.ApplicationWindow {
 
       [end]
       Label {
+        styles [
+          "caption-heading",
+        ]
         visible: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active as <bool>;
         label: bind $format_progress(template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.current-progress as <double>) as <string>;
+      }
+
+      [end]
+      Label {
+        visible: bind $invert_boolean($is_null(template.state as <$BzStateInfo>.background-task-label as <string>) as <bool>) as <bool>;
+        label: bind template.state as <$BzStateInfo>.background-task-label as <string>;
       }
     }
 
@@ -239,45 +248,16 @@ template $BzWindow: Adw.ApplicationWindow {
                         orientation: vertical;
                         spacing: 6;
 
-                        Image {
-                          icon-name: "io.github.kolunmi.Bazaar";
-                          pixel-size: 128;
+                        Adw.Spinner {
+                          width-request: 64;
+                          height-request: 64;
+                          margin-bottom: 18;
+                        }
+
+                        Label {
+                          label: _("Refreshing Store Content");
                           margin-bottom: 24;
-
-                          styles [
-                            "icon-dropshadow",
-                          ]
-                        }
-
-                        $BzGlobalProgress {
-                          halign: center;
-                          height-request: 8;
-                          expand-size: 250;
-                          active: bind template.state as <$BzStateInfo>.busy;
-                          pending: bind $is_double_zero(template.state as <$BzStateInfo>.busy-progress as <double>) as <bool>;
-                          fraction: bind template.state as <$BzStateInfo>.busy-progress;
-                          margin-bottom: 12;
-                        }
-
-                        Label {
-                          styles [
-                            "dim-label",
-                            "heading",
-                          ]
-
-                          halign: center;
-                          ellipsize: end;
-                          label: bind template.state as <$BzStateInfo>.busy-progress-label;
-                        }
-
-                        Label {
-                          styles [
-                            "title-4",
-                          ]
-
-                          halign: center;
-                          ellipsize: end;
-                          label: bind template.state as <$BzStateInfo>.busy-step-label;
+                          styles ["title-3"]
                         }
                       };
                     }
@@ -292,10 +272,10 @@ template $BzWindow: Adw.ApplicationWindow {
                           name: "browse";
                           title: _("Curated");
                           icon-name: "starred-symbolic";
+                          visible: bind template.state as <$BzStateInfo>.curated-provider as <$BzContentProvider>.has-inputs;
 
                           child: $BzCuratedView browse {
-                            content-provider: bind template.state as <$BzStateInfo>.curated-provider;
-                            online: bind template.state as <$BzStateInfo>.online;
+                            state: bind template.state as <$BzStateInfo>;
                             group-selected => $browser_group_selected_cb(template);
                             browse-flathub => $browse_flathub_cb(template);
                           };
@@ -307,8 +287,7 @@ template $BzWindow: Adw.ApplicationWindow {
                           icon-name: "flathub-symbolic";
 
                           child: $BzFlathubPage {
-                            state: bind template.state as <$BzStateInfo>.flathub;
-                            online: bind template.state as <$BzStateInfo>.online;
+                            state: bind template.state as <$BzStateInfo>;
                             group-selected => $browser_group_selected_cb(template);
                             open-search => $open_search_cb(template);
                           };
@@ -366,11 +345,6 @@ template $BzWindow: Adw.ApplicationWindow {
                       visible: bind $invert_boolean($is_null(template.state as <$BzStateInfo>.background-task-label) as <bool>) as <bool>;
 
                       Adw.Spinner {}
-
-                      Label background_task_label {
-                        visible: true;
-                        label: bind template.state as <$BzStateInfo>.background-task-label as <string>;
-                      }
                     }
 
                     [title]
@@ -460,7 +434,6 @@ template $BzWindow: Adw.ApplicationWindow {
           condition ("max-width: 700px")
 
           setters {
-            background_task_label.visible: false;
             download_bar.expand-size: 60;
             top_header_bar.title-widget: null;
             toolbar_view.reveal-bottom-bars: true;

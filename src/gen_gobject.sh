@@ -20,6 +20,7 @@ die() {
     echo "                       EX: \"my-other-class.h\"" 1>&2
     echo "    [enum]          declare an enum type (can have multiple)" 1>&2
     echo "                       EX: my fruit_type apple orange pear" 1>&2
+    echo "    [ensure]        ensure another type (can have multiple),  EX: GTK_TYPE_WIDGET" 1>&2
     echo "    [property]      property spec (can have multiple),     EX: (see below)" 1>&2
     echo "" 1>&2
     echo "      The properties are parsed with the form:" 1>&2
@@ -66,6 +67,7 @@ unset PAR_PREF
 unset PAR_NAME
 unset AUTHOR
 unset INCLUDES
+unset ENSURES
 unset ENUMS
 unset PROPS
 
@@ -96,6 +98,14 @@ while IFS= read -r line; do
 ${VAL}"
             else
                 ENUMS="$VAL"
+            fi
+            ;;
+        ensure)
+            if [ -n "$ENSURES" ]; then
+                ENSURES="${ENSURES}
+  g_type_ensure (${VAL});"
+            else
+                ENSURES="  g_type_ensure (${VAL});"
             fi
             ;;
         property)
@@ -212,7 +222,8 @@ EOF
             printf '    %s' "$LOC_SNAKE"
             for enum in "$@"; do
                 LOC_ENUM_SYMBOL="${LOC_SNAKE_UPPER}_$(to_upper "$enum")"
-                printf ',\n    G_DEFINE_ENUM_VALUE (%s, "%s")' "$LOC_ENUM_SYMBOL" "$enum"
+                LOC_ENUM_NICK="$(to_hyphened "$enum")"
+                printf ',\n    G_DEFINE_ENUM_VALUE (%s, "%s")' "$LOC_ENUM_SYMBOL" "$LOC_ENUM_NICK"
             done
             printf ');\n\n'
 
@@ -647,6 +658,8 @@ static void
 ${SNAKE}_class_init (${PASCAL}Class *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
+
+$ENSURES
 
   object_class->set_property = ${SNAKE}_set_property;
   object_class->get_property = ${SNAKE}_get_property;

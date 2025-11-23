@@ -1,6 +1,6 @@
-/* bz-curated-view.h
+/* bz-list-tile.h
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2025 Hari Rana <theevilskeleton@riseup.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,31 +13,31 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 #pragma once
 
-#include <adwaita.h>
-
-#include "bz-content-provider.h"
-#include "bz-state-info.h"
+#include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_CURATED_VIEW (bz_curated_view_get_type ())
-G_DECLARE_FINAL_TYPE (BzCuratedView, bz_curated_view, BZ, CURATED_VIEW, AdwBin)
+#define BZ_TYPE_LIST_TILE (bz_list_tile_get_type())
 
-GtkWidget *
-bz_curated_view_new (void);
+G_DECLARE_DERIVABLE_TYPE (BzListTile, bz_list_tile, BZ, LIST_TILE, GtkWidget)
 
-void
-bz_curated_view_set_state (BzCuratedView *self,
-                           BzStateInfo   *state);
+struct _BzListTileClass
+{
+  GtkWidgetClass parent_class;
+};
 
-BzStateInfo *
-bz_curated_view_get_state (BzCuratedView *self);
+BzListTile *bz_list_tile_new       (void);
+
+GtkWidget  *bz_list_tile_get_child (BzListTile *self);
+
+void        bz_list_tile_set_child (BzListTile *self,
+                                    GtkWidget  *child);
 
 G_END_DECLS

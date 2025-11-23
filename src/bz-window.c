@@ -230,7 +230,7 @@ search_widget_select_cb (BzWindow       *self,
           "removable", &removable,
           NULL);
 
-      remove = installable == 0 && removable > 0;
+      remove = removable > 0;
       try_transact (self, NULL, group, remove, FALSE, NULL);
     }
   else

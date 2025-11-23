@@ -32,10 +32,10 @@ struct _BzCuratedView
 {
   AdwBin parent_instance;
 
-  BzContentProvider *provider;
-  gboolean           online;
+  BzStateInfo *state;
 
-  GPtrArray *css_providers;
+  BzContentProvider *curated_provider;
+  GPtrArray         *css_providers;
 
   /* Template widgets */
   AdwViewStack *stack;
@@ -47,8 +47,7 @@ enum
 {
   PROP_0,
 
-  PROP_CONTENT_PROVIDER,
-  PROP_ONLINE,
+  PROP_STATE,
 
   LAST_PROP
 };
@@ -64,11 +63,16 @@ enum
 static guint signals[LAST_SIGNAL];
 
 static void
-items_changed (GListModel    *model,
+items_changed (BzCuratedView *self,
                guint          position,
                guint          removed,
                guint          added,
-               BzCuratedView *self);
+               GListModel    *model);
+
+static void
+online_changed (BzCuratedView *self,
+                GParamSpec    *pspec,
+                BzStateInfo   *info);
 
 static void
 set_page (BzCuratedView *self);
@@ -81,11 +85,16 @@ bz_curated_view_dispose (GObject *object)
 {
   BzCuratedView *self = BZ_CURATED_VIEW (object);
 
-  if (self->provider != NULL)
+  if (self->state != NULL)
     g_signal_handlers_disconnect_by_func (
-        self->provider, items_changed, self);
-  g_clear_object (&self->provider);
+        self->state, online_changed, self);
+  if (self->curated_provider != NULL)
+    g_signal_handlers_disconnect_by_func (
+        self->curated_provider, items_changed, self);
 
+  g_clear_object (&self->state);
+
+  g_clear_object (&self->curated_provider);
   g_clear_pointer (&self->css_providers, g_ptr_array_unref);
 
   G_OBJECT_CLASS (bz_curated_view_parent_class)->dispose (object);
@@ -101,11 +110,8 @@ bz_curated_view_get_property (GObject    *object,
 
   switch (prop_id)
     {
-    case PROP_CONTENT_PROVIDER:
-      g_value_set_object (value, bz_curated_view_get_content_provider (self));
-      break;
-    case PROP_ONLINE:
-      g_value_set_boolean (value, self->online);
+    case PROP_STATE:
+      g_value_set_object (value, bz_curated_view_get_state (self));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -122,16 +128,8 @@ bz_curated_view_set_property (GObject      *object,
 
   switch (prop_id)
     {
-    case PROP_CONTENT_PROVIDER:
-      bz_curated_view_set_content_provider (self, g_value_get_object (value));
-      break;
-    case PROP_ONLINE:
-      self->online = g_value_get_boolean (value);
-      if (self->online)
-        set_page (self);
-      else
-        adw_view_stack_set_visible_child_name (self->stack, "offline");
-
+    case PROP_STATE:
+      bz_curated_view_set_state (self, g_value_get_object (value));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -155,19 +153,12 @@ bz_curated_view_class_init (BzCuratedViewClass *klass)
   object_class->get_property = bz_curated_view_get_property;
   object_class->set_property = bz_curated_view_set_property;
 
-  props[PROP_CONTENT_PROVIDER] =
+  props[PROP_STATE] =
       g_param_spec_object (
-          "content-provider",
+          "state",
           NULL, NULL,
-          BZ_TYPE_CONTENT_PROVIDER,
+          BZ_TYPE_STATE_INFO,
           G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
-
-  props[PROP_ONLINE] =
-      g_param_spec_boolean (
-          "online",
-          NULL, NULL,
-          FALSE,
-          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
@@ -221,57 +212,74 @@ bz_curated_view_new (void)
 }
 
 void
-bz_curated_view_set_content_provider (BzCuratedView     *self,
-                                      BzContentProvider *provider)
+bz_curated_view_set_state (BzCuratedView *self,
+                           BzStateInfo   *state)
 {
   g_return_if_fail (BZ_IS_CURATED_VIEW (self));
-  g_return_if_fail (provider == NULL || BZ_IS_CONTENT_PROVIDER (provider));
+  g_return_if_fail (state == NULL || BZ_IS_STATE_INFO (state));
 
-  if (self->provider != NULL)
+  if (self->state != NULL)
+    g_signal_handlers_disconnect_by_func (
+        self->state, online_changed, self);
+  if (self->curated_provider != NULL)
     {
       g_signal_handlers_disconnect_by_func (
-          self->provider, items_changed, self);
+          self->curated_provider, items_changed, self);
       items_changed (
-          G_LIST_MODEL (self->provider),
+          self,
           0,
-          g_list_model_get_n_items (G_LIST_MODEL (self->provider)),
+          g_list_model_get_n_items (G_LIST_MODEL (self->curated_provider)),
           0,
-          self);
+          G_LIST_MODEL (self->curated_provider));
     }
-  g_clear_object (&self->provider);
+  g_clear_object (&self->state);
+  g_clear_object (&self->curated_provider);
 
-  if (provider != NULL)
+  if (state != NULL)
     {
-      self->provider = g_object_ref (provider);
-      items_changed (
-          G_LIST_MODEL (provider),
-          0,
-          0,
-          g_list_model_get_n_items (G_LIST_MODEL (self->provider)),
+      self->state = g_object_ref (state);
+      g_signal_connect_swapped (
+          state,
+          "notify::online",
+          G_CALLBACK (online_changed),
           self);
-      g_signal_connect (
-          self->provider, "items-changed",
-          G_CALLBACK (items_changed), self);
+
+      g_object_get (
+          state,
+          "curated-provider", &self->curated_provider,
+          NULL);
+      if (self->curated_provider != NULL)
+        {
+          items_changed (
+              self,
+              0,
+              0,
+              g_list_model_get_n_items (G_LIST_MODEL (self->curated_provider)),
+              G_LIST_MODEL (self->curated_provider));
+          g_signal_connect_swapped (
+              self->curated_provider, "items-changed",
+              G_CALLBACK (items_changed), self);
+        }
     }
   else
     set_page (self);
 
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CONTENT_PROVIDER]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_STATE]);
 }
 
-BzContentProvider *
-bz_curated_view_get_content_provider (BzCuratedView *self)
+BzStateInfo *
+bz_curated_view_get_state (BzCuratedView *self)
 {
   g_return_val_if_fail (BZ_IS_CURATED_VIEW (self), NULL);
-  return self->provider;
+  return self->state;
 }
 
 static void
-items_changed (GListModel    *model,
+items_changed (BzCuratedView *self,
                guint          position,
                guint          removed,
                guint          added,
-               BzCuratedView *self)
+               GListModel    *model)
 {
   if (removed > 0)
     g_ptr_array_remove_range (self->css_providers, position, removed);
@@ -302,14 +310,28 @@ items_changed (GListModel    *model,
 }
 
 static void
+online_changed (BzCuratedView *self,
+                GParamSpec    *pspec,
+                BzStateInfo   *info)
+{
+  set_page (self);
+}
+
+static void
 set_page (BzCuratedView *self)
 {
-  adw_view_stack_set_visible_child_name (
-      self->stack,
-      self->provider != NULL &&
-              g_list_model_get_n_items (G_LIST_MODEL (self->provider)) > 0
-          ? "content"
-          : "empty");
+  const char *page = NULL;
+
+  if (self->state != NULL &&
+      !bz_state_info_get_online (self->state))
+    page = "offline";
+  else if (self->curated_provider != NULL &&
+           g_list_model_get_n_items (G_LIST_MODEL (self->curated_provider)) > 0)
+    page = "content";
+  else
+    page = "empty";
+
+  adw_view_stack_set_visible_child_name (self->stack, page);
 }
 
 static void

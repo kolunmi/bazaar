@@ -21,13 +21,14 @@
 #pragma once
 
 #include "bz-entry-group.h"
+#include "bz-list-tile.h"
 #include <adwaita.h>
 
 G_BEGIN_DECLS
 
 #define BZ_TYPE_INSTALLED_TILE (bz_installed_tile_get_type ())
 
-G_DECLARE_FINAL_TYPE (BzInstalledTile, bz_installed_tile, BZ, INSTALLED_TILE, GtkBox)
+G_DECLARE_FINAL_TYPE (BzInstalledTile, bz_installed_tile, BZ, INSTALLED_TILE, BzListTile)
 
 GtkWidget *
 bz_installed_tile_new (void);

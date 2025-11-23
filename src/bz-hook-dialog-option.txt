@@ -1,0 +1,11 @@
+prefix=bz
+name=hook_dialog_option
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+include=<gtk/gtk.h>
+
+property=id char G_TYPE_STRING string
+property=string char G_TYPE_STRING string
+property=style char G_TYPE_STRING string

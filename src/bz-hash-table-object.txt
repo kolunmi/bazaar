@@ -1,0 +1,7 @@
+prefix=bz
+name=hash_table_object
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+property=hash_table GHashTable G_TYPE_HASH_TABLE boxed g_hash_table_unref g_hash_table_ref

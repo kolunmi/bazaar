@@ -101,6 +101,8 @@ Generate a fresh `.pot` file again (if necessary) with the commands from above.
 msgmerge --update --verbose po/de.po po/bazaar.pot
 ```
 
+Please make the previous update step a separate commit in your PR so it is easier to review. Thanks!
+
 ## Test your translations
 Replace "de" with your [Language code](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes)!
 
@@ -122,3 +124,13 @@ Override the used Language and launch Bazaar
 ```sh
 LANGUAGE=de flatpak run io.github.kolunmi.Bazaar
 ```
+
+# Notes From Translators
+
+Both automatic and manual processes may generate entries marked as `fuzzy`.
+This means that for such entries, `gettext` attempted to derive previously
+existing translation. Some translation suites, like Lokalize, will utilize this
+marking to set strings as unreviewed and remove when the entry is marked
+finished. When working with pot-files using text editor, be sure to remove
+`fuzzy` marks yourself from entries you deem finished, else your translation
+will not appear in Bazaar.

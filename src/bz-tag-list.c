@@ -18,14 +18,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "bz-tag-list.h"
-#include "bz-apps-page.h"
-#include "bz-flathub-state.h"
-#include "bz-util.h"
-#include "bz-window.h"
-
 #include <glib/gi18n.h>
 #include <libdex.h>
+
+#include "bz-apps-page.h"
+#include "bz-flathub-state.h"
+#include "bz-tag-list.h"
+#include "bz-util.h"
+#include "bz-window.h"
 
 struct _BzTagList
 {

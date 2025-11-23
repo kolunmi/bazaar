@@ -51,8 +51,8 @@ struct _BzPreferencesDialog
 
   /* Template widgets */
   AdwSwitchRow *git_forge_star_counts_switch;
-  AdwSwitchRow *search_only_foss_switch;
-  AdwSwitchRow *search_only_flathub_switch;
+  AdwSwitchRow *only_foss_switch;
+  AdwSwitchRow *only_flathub_switch;
   AdwSwitchRow *search_debounce_switch;
   GtkFlowBox   *flag_buttons_box;
   AdwSwitchRow *hide_eol_switch;
@@ -158,12 +158,12 @@ bind_settings (BzPreferencesDialog *self)
                    self->git_forge_star_counts_switch, "active",
                    G_SETTINGS_BIND_DEFAULT);
 
-  g_settings_bind (self->settings, "search-only-foss",
-                   self->search_only_foss_switch, "active",
+  g_settings_bind (self->settings, "show-only-foss",
+                   self->only_foss_switch, "active",
                    G_SETTINGS_BIND_DEFAULT);
 
-  g_settings_bind (self->settings, "search-only-flathub",
-                   self->search_only_flathub_switch, "active",
+  g_settings_bind (self->settings, "show-only-flathub",
+                   self->only_flathub_switch, "active",
                    G_SETTINGS_BIND_DEFAULT);
 
   g_settings_bind (self->settings, "search-debounce",
@@ -193,8 +193,8 @@ bz_preferences_dialog_class_init (BzPreferencesDialogClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-preferences-dialog.ui");
 
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, git_forge_star_counts_switch);
-  gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, search_only_foss_switch);
-  gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, search_only_flathub_switch);
+  gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, only_foss_switch);
+  gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, only_flathub_switch);
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, search_debounce_switch);
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, flag_buttons_box);
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, hide_eol_switch);

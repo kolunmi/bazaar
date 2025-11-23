@@ -5,7 +5,8 @@
     <file alias="style.css">gtk/style.css</file>
 
     <file preprocess="xml-stripblanks">main-config-schema.xml</file>
-    <file preprocess="xml-stripblanks">bz-content-provider-config-schema.xml</file>
+    <file preprocess="xml-stripblanks">blocklist-schema.xml</file>
+    <file preprocess="xml-stripblanks">curated-config-schema.xml</file>
     <file>release-notes.xml</file>
 
     <file>countries.json</file>

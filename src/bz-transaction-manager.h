@@ -21,6 +21,7 @@
 #pragma once
 
 #include "bz-backend.h"
+#include "bz-main-config.h"
 #include "bz-transaction.h"
 
 G_BEGIN_DECLS
@@ -41,9 +42,9 @@ bz_transaction_manager_new (void);
 
 void
 bz_transaction_manager_set_config (BzTransactionManager *self,
-                                   GHashTable           *config);
+                                   BzMainConfig         *config);
 
-GHashTable *
+BzMainConfig *
 bz_transaction_manager_get_config (BzTransactionManager *self);
 
 void

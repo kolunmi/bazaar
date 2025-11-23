@@ -18,34 +18,24 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#define G_LOG_DOMAIN  "BAZAAR::CURATED-PROVIDER"
-#define BAZAAR_MODULE "curated-provider"
+#define G_LOG_DOMAIN "BAZAAR::CONTENT-PROVIDER"
 
 #include "config.h"
 
+#include <gtk/gtk.h>
 #include <libdex.h>
-#include <yaml.h>
 
 #include "bz-content-provider.h"
-#include "bz-curated-section.h"
 #include "bz-env.h"
 #include "bz-io.h"
-#include "bz-root-curated-config.h"
 #include "bz-util.h"
-#include "bz-yaml-parser.h"
-
-/* clang-format off */
-G_DEFINE_QUARK (bz-content-yaml-error-quark, bz_content_yaml_error);
-/* clang-format on */
 
 struct _BzContentProvider
 {
   GObject parent_instance;
 
-  BzYamlParser *yaml_parser;
-
-  GListModel              *input_files;
-  BzApplicationMapFactory *factory;
+  GListModel *input_files;
+  BzParser   *parser;
 
   GListStore *input_mirror;
   GHashTable *input_tracking;
@@ -67,7 +57,7 @@ enum
   PROP_0,
 
   PROP_INPUT_FILES,
-  PROP_FACTORY,
+  PROP_PARSER,
   PROP_HAS_INPUTS,
 
   LAST_PROP
@@ -86,8 +76,8 @@ BZ_DEFINE_DATA (
     input_load,
     InputLoad,
     {
-      GFile        *file;
-      BzYamlParser *parser;
+      GFile    *file;
+      BzParser *parser;
     },
     BZ_RELEASE_DATA (file, g_object_unref);
     BZ_RELEASE_DATA (parser, g_object_unref))
@@ -149,9 +139,8 @@ bz_content_provider_dispose (GObject *object)
 {
   BzContentProvider *self = BZ_CONTENT_PROVIDER (object);
 
-  g_clear_object (&self->yaml_parser);
   g_clear_object (&self->input_files);
-  g_clear_object (&self->factory);
+  g_clear_object (&self->parser);
   g_clear_object (&self->input_mirror);
   g_clear_pointer (&self->input_tracking, g_hash_table_unref);
   g_clear_object (&self->outputs);
@@ -173,8 +162,8 @@ bz_content_provider_get_property (GObject    *object,
     case PROP_INPUT_FILES:
       g_value_set_object (value, bz_content_provider_get_input_files (self));
       break;
-    case PROP_FACTORY:
-      g_value_set_object (value, bz_content_provider_get_factory (self));
+    case PROP_PARSER:
+      g_value_set_object (value, bz_content_provider_get_parser (self));
       break;
     case PROP_HAS_INPUTS:
       g_value_set_boolean (value, bz_content_provider_get_has_inputs (self));
@@ -197,8 +186,8 @@ bz_content_provider_set_property (GObject      *object,
     case PROP_INPUT_FILES:
       bz_content_provider_set_input_files (self, g_value_get_object (value));
       break;
-    case PROP_FACTORY:
-      bz_content_provider_set_factory (self, g_value_get_object (value));
+    case PROP_PARSER:
+      bz_content_provider_set_parser (self, g_value_get_object (value));
       break;
     case PROP_HAS_INPUTS:
     default:
@@ -222,11 +211,11 @@ bz_content_provider_class_init (BzContentProviderClass *klass)
           G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
-  props[PROP_FACTORY] =
+  props[PROP_PARSER] =
       g_param_spec_object (
-          "factory",
+          "parser",
           NULL, NULL,
-          BZ_TYPE_APPLICATION_MAP_FACTORY,
+          BZ_TYPE_PARSER,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   props[PROP_HAS_INPUTS] =
@@ -241,12 +230,6 @@ bz_content_provider_class_init (BzContentProviderClass *klass)
 static void
 bz_content_provider_init (BzContentProvider *self)
 {
-  g_type_ensure (BZ_TYPE_ROOT_CURATED_CONFIG);
-  g_type_ensure (BZ_TYPE_CURATED_ROW);
-  g_type_ensure (BZ_TYPE_CURATED_SECTION);
-  self->yaml_parser = bz_yaml_parser_new_for_resource_schema (
-      "/io/github/kolunmi/Bazaar/bz-content-provider-config-schema.xml");
-
   self->input_mirror   = g_list_store_new (G_TYPE_FILE);
   self->input_tracking = g_hash_table_new_full (
       g_direct_hash, g_direct_equal,
@@ -265,7 +248,7 @@ bz_content_provider_init (BzContentProvider *self)
 static GType
 list_model_get_item_type (GListModel *list)
 {
-  return BZ_TYPE_CURATED_ROW;
+  return G_TYPE_OBJECT;
 }
 
 static guint
@@ -344,24 +327,39 @@ bz_content_provider_get_input_files (BzContentProvider *self)
 }
 
 void
-bz_content_provider_set_factory (BzContentProvider       *self,
-                                 BzApplicationMapFactory *factory)
+bz_content_provider_set_parser (BzContentProvider *self,
+                                BzParser          *parser)
 {
+  GHashTableIter iter = { 0 };
+
   g_return_if_fail (BZ_IS_CONTENT_PROVIDER (self));
-  g_return_if_fail (factory == NULL || BZ_IS_APPLICATION_MAP_FACTORY (factory));
+  g_return_if_fail (parser == NULL || BZ_IS_PARSER (parser));
 
-  g_clear_object (&self->factory);
-  if (factory != NULL)
-    self->factory = g_object_ref (factory);
+  g_clear_object (&self->parser);
+  if (parser != NULL)
+    self->parser = g_object_ref (parser);
 
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INPUT_FILES]);
+  g_hash_table_iter_init (&iter, self->input_tracking);
+  for (;;)
+    {
+      GFile             *file = NULL;
+      InputTrackingData *data = NULL;
+
+      if (!g_hash_table_iter_next (
+              &iter, (gpointer *) &file, (gpointer *) &data))
+        break;
+
+      commence_reload (data);
+    }
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PARSER]);
 }
 
-BzApplicationMapFactory *
-bz_content_provider_get_factory (BzContentProvider *self)
+BzParser *
+bz_content_provider_get_parser (BzContentProvider *self)
 {
   g_return_val_if_fail (BZ_IS_CONTENT_PROVIDER (self), NULL);
-  return self->factory;
+  return self->parser;
 }
 
 gboolean
@@ -427,7 +425,7 @@ input_files_changed (BzContentProvider *self,
 
       new_outputs = g_malloc0_n (added, sizeof (*new_outputs));
       for (guint i = 0; i < added; i++)
-        new_outputs[i] = g_list_store_new (BZ_TYPE_ROOT_CURATED_CONFIG);
+        new_outputs[i] = g_list_store_new (G_TYPE_OBJECT);
     }
 
   g_list_store_splice (self->input_mirror, position, removed,
@@ -538,7 +536,7 @@ input_init_finally (DexFuture         *future,
       commence_reload (data);
     }
   else
-    g_warning ("Could not init curated config watch at path %s: %s",
+    g_warning ("Could not init object watch at path %s: %s",
                data->path, local_error->message);
 
   return NULL;
@@ -547,25 +545,28 @@ input_init_finally (DexFuture         *future,
 static DexFuture *
 input_load_fiber (InputLoadData *data)
 {
-  GFile        *file                   = data->file;
-  BzYamlParser *parser                 = data->parser;
+  GFile    *file                       = data->file;
+  BzParser *parser                     = data->parser;
   g_autoptr (GError) local_error       = NULL;
   g_autoptr (GBytes) bytes             = NULL;
   g_autoptr (GHashTable) parse_results = NULL;
-  BzRootCuratedConfig *config          = NULL;
+  GObject *object                      = NULL;
 
   bytes = dex_await_boxed (dex_file_load_contents_bytes (file), &local_error);
   if (bytes == NULL)
     return dex_future_new_for_error (g_steal_pointer (&local_error));
 
-  parse_results = bz_yaml_parser_process_bytes (parser, bytes, &local_error);
+  parse_results = bz_parser_process_bytes (parser, bytes, &local_error);
   if (parse_results == NULL)
     return dex_future_new_for_error (g_steal_pointer (&local_error));
 
-  config = g_value_get_object (g_hash_table_lookup (parse_results, "/"));
-  g_assert (config != NULL);
+  object = g_value_get_object (g_hash_table_lookup (parse_results, "/"));
+  if (object == NULL)
+    return dex_future_new_reject (G_IO_ERROR,
+                                  G_IO_ERROR_UNKNOWN,
+                                  "Parser returned invalid results");
 
-  return dex_future_new_for_object (config);
+  return dex_future_new_for_object (object);
 }
 
 static DexFuture *
@@ -584,14 +585,9 @@ input_load_finally (DexFuture         *future,
 
   value = dex_future_get_value (future, &local_error);
   if (value != NULL)
-    {
-      BzRootCuratedConfig *config = NULL;
-
-      config = g_value_get_object (value);
-      g_list_store_append (data->output, config);
-    }
+    g_list_store_append (data->output, g_value_get_object (value));
   else
-    g_warning ("Could not load curated config at path %s: %s",
+    g_warning ("Could not load object at path %s: %s",
                data->path, local_error->message);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_INPUTS]);
@@ -613,9 +609,12 @@ commence_reload (InputTrackingData *data)
   if (self == NULL)
     goto done;
 
+  if (self->parser == NULL)
+    goto done;
+
   load_data         = input_load_data_new ();
   load_data->file   = g_file_new_for_path (data->path);
-  load_data->parser = g_object_ref (self->yaml_parser);
+  load_data->parser = g_object_ref (self->parser);
 
   future = dex_scheduler_spawn (
       bz_get_io_scheduler (),
