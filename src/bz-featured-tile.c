@@ -30,9 +30,10 @@ G_DECLARE_FINAL_TYPE (BzFeaturedTileLayout, bz_featured_tile_layout, BZ, FEATURE
 struct _BzFeaturedTileLayout
 {
   GtkLayoutManager parent_instance;
-  gboolean         narrow_mode;
-  GtkWidget       *content_box;
-  int              last_width;
+
+  gboolean   narrow_mode;
+  GtkWidget *content_box;
+  int        last_width;
 };
 
 G_DEFINE_FINAL_TYPE (BzFeaturedTileLayout, bz_featured_tile_layout, GTK_TYPE_LAYOUT_MANAGER)
@@ -179,6 +180,7 @@ struct _BzFeaturedTile
 
   GdkPaintable *first_screenshot;
   gboolean      has_screenshot;
+  DexFuture    *ui_entry_resolve;
 };
 
 G_DEFINE_FINAL_TYPE (BzFeaturedTile, bz_featured_tile, GTK_TYPE_BUTTON)
@@ -247,14 +249,6 @@ bz_featured_tile_layout_narrow_mode_changed_cb (GtkLayoutManager *layout_manager
     }
 }
 
-static void
-ui_entry_resolved_cb (BzResult       *result,
-                      GParamSpec     *pspec,
-                      BzFeaturedTile *self)
-{
-  update_screenshot (self);
-}
-
 static inline void
 notify_properties (BzFeaturedTile *self, gboolean has_screenshot)
 {
@@ -266,60 +260,61 @@ notify_properties (BzFeaturedTile *self, gboolean has_screenshot)
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_FIRST_SCREENSHOT]);
 }
 
+static DexFuture *
+ui_entry_resolved_finally (DexFuture *future,
+                           GWeakRef  *wr)
+{
+  g_autoptr (BzFeaturedTile) self = NULL;
+  const GValue *value             = NULL;
+  gboolean      has_screenshot    = FALSE;
+
+  bz_weak_get_or_return_reject (self, wr);
+
+  value = dex_future_get_value (future, NULL);
+  if (value != NULL)
+    {
+      BzEntry *ui_entry                  = NULL;
+      g_autoptr (GListModel) screenshots = NULL;
+
+      ui_entry = g_value_get_object (value);
+
+      g_object_get (ui_entry, "screenshot-paintables", &screenshots, NULL);
+      if (screenshots != NULL &&
+          g_list_model_get_n_items (screenshots) > 0)
+        {
+          self->first_screenshot = g_list_model_get_item (screenshots, 0);
+          has_screenshot         = TRUE;
+        }
+    }
+
+  dex_clear (&self->ui_entry_resolve);
+  notify_properties (self, has_screenshot);
+
+  return NULL;
+}
+
+/* FIXME: duplicate code from rich-app-tile */
 static void
 update_screenshot (BzFeaturedTile *self)
 {
   g_autoptr (BzResult) ui_entry_result = NULL;
   g_autoptr (GListModel) screenshots   = NULL;
-  BzEntry *ui_entry;
-  gboolean has_screenshot = FALSE;
 
+  dex_clear (&self->ui_entry_resolve);
   g_clear_object (&self->first_screenshot);
 
   if (self->group == NULL)
     {
-      notify_properties (self, has_screenshot);
+      notify_properties (self, FALSE);
       return;
     }
 
-  ui_entry_result = bz_entry_group_dup_ui_entry (self->group);
-  if (ui_entry_result == NULL)
-    {
-      notify_properties (self, has_screenshot);
-      return;
-    }
-
-  if (!bz_result_get_resolved (ui_entry_result))
-    {
-      g_signal_connect (ui_entry_result, "notify::resolved",
-                        G_CALLBACK (ui_entry_resolved_cb), self);
-      return;
-    }
-
-  ui_entry = bz_result_get_object (ui_entry_result);
-  if (ui_entry == NULL)
-    {
-      notify_properties (self, has_screenshot);
-      return;
-    }
-
-  g_object_get (ui_entry, "screenshot-paintables", &screenshots, NULL);
-  if (screenshots == NULL)
-    {
-      notify_properties (self, has_screenshot);
-      return;
-    }
-
-  if (g_list_model_get_n_items (screenshots) == 0)
-    {
-      notify_properties (self, has_screenshot);
-      return;
-    }
-
-  self->first_screenshot = g_list_model_get_item (screenshots, 0);
-  has_screenshot         = TRUE;
-
-  notify_properties (self, has_screenshot);
+  ui_entry_result        = bz_entry_group_dup_ui_entry (self->group);
+  self->ui_entry_resolve = dex_future_finally (
+      bz_result_dup_future (ui_entry_result),
+      (DexFutureCallback) ui_entry_resolved_finally,
+      bz_track_weak (self),
+      bz_weak_release);
 }
 
 static void
@@ -525,10 +520,11 @@ bz_featured_tile_set_group (BzFeaturedTile *self,
   if (self->group != NULL)
     g_signal_handlers_disconnect_by_func (self->group, schedule_refresh, self);
 
-  g_set_object (&self->group, group);
-
-  if (self->group != NULL)
+  g_clear_object (&self->group);
+  if (group != NULL)
     {
+      self->group = g_object_ref (group);
+
       g_signal_connect_swapped (group, "notify",
                                 G_CALLBACK (schedule_refresh), self);
       schedule_refresh (self);
