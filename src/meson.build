@@ -71,6 +71,7 @@ bz_sources = [
   'bz-data-graph.c',
   'bz-decorated-screenshot.c',
   'bz-detailed-app-tile.c',
+  'bz-developer-badge.c',
   'bz-download-worker.c',
   'bz-dynamic-list-view.c',
   'bz-entry-cache-manager.c',
@@ -195,6 +196,7 @@ gobject_specs = files(
   'bz-state-info.txt',
   'bz-transaction-task.txt',
   'bz-url.txt',
+  'bz-verification-status.txt',
 )
 
 gen_gobject_srcs = []
@@ -223,6 +225,7 @@ blueprints = custom_target('blueprints',
     'bz-curated-view.blp',
     'bz-decorated-screenshot.blp',
     'bz-detailed-app-tile.blp',
+    'bz-developer-badge.blp',
     'bz-entry-inspector.blp',
     'bz-featured-carousel.blp',
     'bz-featured-tile.blp',

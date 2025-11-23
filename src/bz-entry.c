@@ -37,6 +37,7 @@
 #include "bz-serializable.h"
 #include "bz-url.h"
 #include "bz-util.h"
+#include "bz-verification-status.h"
 
 G_DEFINE_FLAGS_TYPE (
     BzEntryKind,
@@ -113,12 +114,12 @@ typedef struct
   AsContentRating *content_rating;
   GListModel      *keywords;
 
-  gboolean    is_flathub;
-  gboolean    verified;
-  GListModel *download_stats;
-  GListModel *download_stats_per_country;
-  int         recent_downloads;
-  int         total_downloads;
+  gboolean              is_flathub;
+  BzVerificationStatus *verification_status;
+  GListModel           *download_stats;
+  GListModel           *download_stats_per_country;
+  int                   recent_downloads;
+  int                   total_downloads;
 
   GHashTable *flathub_prop_queries;
   DexFuture  *mini_icon_future;
@@ -165,7 +166,7 @@ enum
   PROP_RATINGS_SUMMARY,
   PROP_VERSION_HISTORY,
   PROP_IS_FLATHUB,
-  PROP_VERIFIED,
+  PROP_VERIFICATION_STATUS,
   PROP_DOWNLOAD_STATS,
   PROP_RECENT_DOWNLOADS,
   PROP_TOTAL_DOWNLOADS,
@@ -408,9 +409,8 @@ bz_entry_get_property (GObject    *object,
     case PROP_IS_FLATHUB:
       g_value_set_boolean (value, priv->is_flathub);
       break;
-    case PROP_VERIFIED:
-      query_flathub (self, PROP_VERIFIED);
-      g_value_set_boolean (value, priv->verified);
+    case PROP_VERIFICATION_STATUS:
+      g_value_set_object (value, priv->verification_status);
       break;
     case PROP_DOWNLOAD_STATS:
       query_flathub (self, PROP_DOWNLOAD_STATS);
@@ -608,8 +608,9 @@ bz_entry_set_property (GObject      *object,
     case PROP_IS_FLATHUB:
       priv->is_flathub = g_value_get_boolean (value);
       break;
-    case PROP_VERIFIED:
-      priv->verified = g_value_get_boolean (value);
+    case PROP_VERIFICATION_STATUS:
+      g_clear_object (&priv->verification_status);
+      priv->verification_status = g_value_dup_object (value);
       break;
     case PROP_DOWNLOAD_STATS:
     case PROP_DOWNLOAD_STATS_PER_COUNTRY:
@@ -958,10 +959,11 @@ bz_entry_class_init (BzEntryClass *klass)
           NULL, NULL, FALSE,
           G_PARAM_READWRITE);
 
-  props[PROP_VERIFIED] =
-      g_param_spec_boolean (
-          "verified",
-          NULL, NULL, FALSE,
+  props[PROP_VERIFICATION_STATUS] =
+      g_param_spec_object (
+          "verification-status",
+          NULL, NULL,
+          BZ_TYPE_VERIFICATION_STATUS,
           G_PARAM_READWRITE);
 
   props[PROP_DOWNLOAD_STATS] =
@@ -1252,13 +1254,46 @@ bz_entry_real_serialize (BzSerializable  *serializable,
           g_variant_builder_add (builder, "{sv}", "keywords", g_variant_builder_end (sub_builder));
         }
     }
+
+  if (priv->verification_status != NULL)
+  {
+    gboolean verified                 = FALSE;
+    g_autofree char *method           = NULL;
+    g_autofree char *website          = NULL;
+    g_autofree char *login_name       = NULL;
+    g_autofree char *login_provider   = NULL;
+    g_autofree char *timestamp        = NULL;
+    gboolean login_is_organization    = FALSE;
+
+    g_object_get (priv->verification_status,
+                  "verified", &verified,
+                  "method", &method,
+                  "website", &website,
+                  "login-name", &login_name,
+                  "login-provider", &login_provider,
+                  "timestamp", &timestamp,
+                  "login-is-organization", &login_is_organization,
+                  NULL);
+
+    g_variant_builder_add (builder, "{sv}", "verification-verified", g_variant_new_boolean (verified));
+    if (method != NULL)
+      g_variant_builder_add (builder, "{sv}", "verification-method", g_variant_new_string (method));
+    if (website != NULL)
+      g_variant_builder_add (builder, "{sv}", "verification-website", g_variant_new_string (website));
+    if (login_name != NULL)
+      g_variant_builder_add (builder, "{sv}", "verification-login-name", g_variant_new_string (login_name));
+    if (login_provider != NULL)
+      g_variant_builder_add (builder, "{sv}", "verification-login-provider", g_variant_new_string (login_provider));
+    if (timestamp != NULL)
+      g_variant_builder_add (builder, "{sv}", "verification-timestamp", g_variant_new_string (timestamp));
+    g_variant_builder_add (builder, "{sv}", "verification-login-is-organization", g_variant_new_boolean (login_is_organization));
+  }
+
   g_variant_builder_add (builder, "{sv}", "is-flathub", g_variant_new_boolean (priv->is_flathub));
   if (priv->is_flathub)
     {
       if (priv->flathub_prop_queries != NULL)
         {
-          if (g_hash_table_contains (priv->flathub_prop_queries, GINT_TO_POINTER (PROP_VERIFIED)))
-            g_variant_builder_add (builder, "{sv}", "verified", g_variant_new_boolean (priv->verified));
           if (g_hash_table_contains (priv->flathub_prop_queries, GINT_TO_POINTER (PROP_DOWNLOAD_STATS)) &&
               priv->download_stats != NULL)
             {
@@ -1553,6 +1588,48 @@ bz_entry_real_deserialize (BzSerializable *serializable,
             }
 
           priv->keywords = G_LIST_MODEL (g_steal_pointer (&store));
+        }
+      else if (g_strcmp0 (key, "verification-verified") == 0)
+        {
+          if (priv->verification_status == NULL)
+            priv->verification_status = bz_verification_status_new ();
+          g_object_set (priv->verification_status, "verified", g_variant_get_boolean (value), NULL);
+        }
+      else if (g_strcmp0 (key, "verification-method") == 0)
+        {
+          if (priv->verification_status == NULL)
+            priv->verification_status = bz_verification_status_new ();
+          g_object_set (priv->verification_status, "method", g_variant_get_string (value, NULL), NULL);
+        }
+      else if (g_strcmp0 (key, "verification-website") == 0)
+        {
+          if (priv->verification_status == NULL)
+            priv->verification_status = bz_verification_status_new ();
+          g_object_set (priv->verification_status, "website", g_variant_get_string (value, NULL), NULL);
+        }
+      else if (g_strcmp0 (key, "verification-login-name") == 0)
+        {
+          if (priv->verification_status == NULL)
+            priv->verification_status = bz_verification_status_new ();
+          g_object_set (priv->verification_status, "login-name", g_variant_get_string (value, NULL), NULL);
+        }
+      else if (g_strcmp0 (key, "verification-login-provider") == 0)
+        {
+          if (priv->verification_status == NULL)
+            priv->verification_status = bz_verification_status_new ();
+          g_object_set (priv->verification_status, "login-provider", g_variant_get_string (value, NULL), NULL);
+        }
+      else if (g_strcmp0 (key, "verification-timestamp") == 0)
+        {
+          if (priv->verification_status == NULL)
+            priv->verification_status = bz_verification_status_new ();
+          g_object_set (priv->verification_status, "timestamp", g_variant_get_string (value, NULL), NULL);
+        }
+      else if (g_strcmp0 (key, "verification-login-is-organization") == 0)
+        {
+          if (priv->verification_status == NULL)
+            priv->verification_status = bz_verification_status_new ();
+          g_object_set (priv->verification_status, "login-is-organization", g_variant_get_boolean (value), NULL);
         }
       else if (g_strcmp0 (key, "is-flathub") == 0)
         priv->is_flathub = g_variant_get_boolean (value);
@@ -2157,9 +2234,6 @@ query_flathub_fiber (QueryFlathubData *data)
 
   switch (prop)
     {
-    case PROP_VERIFIED:
-      request = g_strdup_printf ("/verification/%s/status", id);
-      break;
     case PROP_DOWNLOAD_STATS:
     case PROP_DOWNLOAD_STATS_PER_COUNTRY:
     case PROP_TOTAL_DOWNLOADS:
@@ -2184,12 +2258,6 @@ query_flathub_fiber (QueryFlathubData *data)
 
   switch (prop)
     {
-    case PROP_VERIFIED:
-      return dex_future_new_for_boolean (
-          json_object_get_boolean_member (
-              json_node_get_object (node),
-              "verified"));
-      break;
     case PROP_DOWNLOAD_STATS:
       {
         JsonObject *per_day          = NULL;
@@ -2610,7 +2678,9 @@ clear_entry (BzEntry *self)
   g_clear_object (&priv->version_history);
   g_clear_pointer (&priv->light_accent_color, g_free);
   g_clear_pointer (&priv->dark_accent_color, g_free);
+  g_clear_object (&priv->verification_status);
   g_clear_object (&priv->download_stats);
+  g_clear_object (&priv->download_stats_per_country);
   g_clear_object (&priv->content_rating);
   g_clear_object (&priv->keywords);
 }

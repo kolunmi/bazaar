@@ -30,6 +30,7 @@
 #include "bz-apps-page.h"
 #include "bz-appstream-description-render.h"
 #include "bz-context-tile.h"
+#include "bz-developer-badge.h"
 #include "bz-dynamic-list-view.h"
 #include "bz-env.h"
 #include "bz-error.h"
@@ -50,6 +51,7 @@
 #include "bz-stats-dialog.h"
 #include "bz-tag-list.h"
 #include "bz-util.h"
+#include "bz-verification-status.h"
 
 struct _BzFullView
 {
@@ -1078,6 +1080,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
       g_cclosure_marshal_VOID__OBJECTv);
 
   g_type_ensure (BZ_TYPE_APPSTREAM_DESCRIPTION_RENDER);
+  g_type_ensure (BZ_TYPE_DEVELOPER_BADGE);
   g_type_ensure (BZ_TYPE_DYNAMIC_LIST_VIEW);
   g_type_ensure (BZ_TYPE_ENTRY);
   g_type_ensure (BZ_TYPE_ENTRY_GROUP);
@@ -1090,6 +1093,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   g_type_ensure (BZ_TYPE_SHARE_LIST);
   g_type_ensure (BZ_TYPE_TAG_LIST);
   g_type_ensure (BZ_TYPE_CONTEXT_TILE);
+  g_type_ensure (BZ_TYPE_VERIFICATION_STATUS);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-full-view.ui");
   gtk_widget_class_bind_template_child (widget_class, BzFullView, stack);
