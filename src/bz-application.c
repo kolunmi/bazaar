@@ -40,7 +40,9 @@
 #include "bz-flatpak-entry.h"
 #include "bz-flatpak-instance.h"
 #include "bz-gnome-shell-search-provider.h"
+#include "bz-hash-table-object.h"
 #include "bz-inspector.h"
+#include "bz-newline-parser.h"
 #include "bz-parser.h"
 #include "bz-preferences-dialog.h"
 #include "bz-result.h"
@@ -56,15 +58,24 @@ struct _BzApplication
 {
   AdwApplication parent_instance;
 
+  GSettings    *settings;
+  BzMainConfig *config;
+
   BzYamlParser      *blocklist_parser;
   BzContentProvider *blocklists_provider;
 
-  GSettings       *settings;
-  BzMainConfig    *config;
+  BzNewlineParser   *txt_blocklist_parser;
+  BzContentProvider *txt_blocklists_provider;
+
   GtkStringList   *blocklists;
-  GPtrArray       *blocklist_regexes;
-  GtkStringList   *curated_configs;
   GtkMapListModel *blocklists_to_files;
+  GPtrArray       *blocklist_regexes;
+
+  GtkStringList   *txt_blocklists;
+  GtkMapListModel *txt_blocklists_to_files;
+  GPtrArray       *txt_blocked_id_sets;
+
+  GtkStringList   *curated_configs;
   GtkMapListModel *curated_configs_to_files;
 
   gboolean    running;
@@ -141,6 +152,7 @@ BZ_DEFINE_DATA (
 static void
 init_service_struct (BzApplication *self,
                      GtkStringList *blocklists,
+                     GtkStringList *txt_blocklists,
                      GtkStringList *curated_configs);
 
 static DexFuture *
@@ -188,6 +200,13 @@ blocklists_changed (BzApplication *self,
                     guint          added,
                     GListModel    *model);
 
+static void
+txt_blocklists_changed (BzApplication *self,
+                        guint          position,
+                        guint          removed,
+                        guint          added,
+                        GListModel    *model);
+
 static gint
 cmp_group (BzEntryGroup *a,
            BzEntryGroup *b,
@@ -203,15 +222,19 @@ bz_application_dispose (GObject *object)
   dex_clear (&self->flatpak_notifs);
   g_clear_handle_id (&self->periodic_timeout, g_source_remove);
   g_clear_object (&self->blocklist_parser);
+  g_clear_object (&self->txt_blocklist_parser);
   g_clear_object (&self->curated_parser);
   g_clear_object (&self->settings);
   g_clear_object (&self->blocklists);
+  g_clear_object (&self->txt_blocklists);
   g_clear_object (&self->curated_configs);
   g_clear_object (&self->transactions);
   g_clear_object (&self->curated_provider);
   g_clear_object (&self->blocklists_provider);
+  g_clear_object (&self->txt_blocklists_provider);
   g_clear_object (&self->curated_configs_to_files);
   g_clear_object (&self->blocklists_to_files);
+  g_clear_object (&self->txt_blocklists_to_files);
   g_clear_object (&self->search_engine);
   g_clear_object (&self->gs_search);
   g_clear_object (&self->flatpak);
@@ -232,6 +255,7 @@ bz_application_dispose (GObject *object)
   g_clear_pointer (&self->sys_name_to_addons, g_hash_table_unref);
   g_clear_pointer (&self->usr_name_to_addons, g_hash_table_unref);
   g_clear_pointer (&self->blocklist_regexes, g_ptr_array_unref);
+  g_clear_pointer (&self->txt_blocked_id_sets, g_ptr_array_unref);
   g_weak_ref_clear (&self->main_window);
 
   G_OBJECT_CLASS (bz_application_parent_class)->dispose (object);
@@ -249,17 +273,15 @@ static int
 bz_application_command_line (GApplication            *app,
                              GApplicationCommandLine *cmdline)
 {
-  BzApplication *self                       = BZ_APPLICATION (app);
-  g_autoptr (GError) local_error            = NULL;
-  gint argc                                 = 0;
-  g_auto (GStrv) argv                       = NULL;
-  gboolean help                             = FALSE;
-  gboolean no_window                        = FALSE;
-  g_auto (GStrv) blocklists_strv            = NULL;
-  g_autoptr (GtkStringList) blocklists      = NULL;
-  g_auto (GStrv) content_configs_strv       = NULL;
-  g_autoptr (GtkStringList) content_configs = NULL;
-  g_auto (GStrv) locations                  = NULL;
+  BzApplication *self                 = BZ_APPLICATION (app);
+  g_autoptr (GError) local_error      = NULL;
+  gint argc                           = 0;
+  g_auto (GStrv) argv                 = NULL;
+  gboolean help                       = FALSE;
+  gboolean no_window                  = FALSE;
+  g_auto (GStrv) blocklists_strv      = NULL;
+  g_auto (GStrv) content_configs_strv = NULL;
+  g_auto (GStrv) locations            = NULL;
 
   GOptionEntry main_entries[] = {
     { "help", 0, 0, G_OPTION_ARG_NONE, &help, "Print help" },
@@ -312,25 +334,29 @@ bz_application_command_line (GApplication            *app,
 
   if (!self->running)
     {
-      g_autoptr (DexFuture) init = NULL;
+      g_autoptr (GtkStringList) blocklists      = NULL;
+      g_autoptr (GtkStringList) txt_blocklists  = NULL;
+      g_autoptr (GtkStringList) content_configs = NULL;
+      g_autoptr (DexFuture) init                = NULL;
 
       g_debug ("Starting daemon!");
       g_application_hold (G_APPLICATION (self));
       self->running = TRUE;
 
       blocklists      = gtk_string_list_new (NULL);
+      txt_blocklists  = gtk_string_list_new (NULL);
       content_configs = gtk_string_list_new (NULL);
-      init_service_struct (self, blocklists, content_configs);
+      init_service_struct (self, blocklists, txt_blocklists, content_configs);
 
 #ifdef HARDCODED_BLOCKLIST
-      g_debug ("Bazaar was configured with a hardcoded blocklist at %s, adding that now...",
+      g_debug ("Bazaar was configured with a hardcoded txt blocklist at %s, adding that now...",
                HARDCODED_BLOCKLIST);
-      gtk_string_list_append (blocklists, HARDCODED_BLOCKLIST);
+      gtk_string_list_append (txt_blocklists, HARDCODED_BLOCKLIST);
 #endif
       if (blocklists_strv != NULL)
         gtk_string_list_splice (
-            blocklists,
-            g_list_model_get_n_items (G_LIST_MODEL (blocklists)),
+            txt_blocklists,
+            g_list_model_get_n_items (G_LIST_MODEL (txt_blocklists)),
             0,
             (const char *const *) blocklists_strv);
 
@@ -659,6 +685,15 @@ validate_group_for_ui (BzApplication *self,
     return FALSE;
 
   id = bz_entry_group_get_id (group);
+  for (guint i = 0; i < self->txt_blocked_id_sets->len; i++)
+    {
+      GHashTable *set = NULL;
+
+      set = g_ptr_array_index (self->txt_blocked_id_sets, i);
+      if (g_hash_table_contains (set, id))
+        return FALSE;
+    }
+
   for (guint i = 0; i < self->blocklist_regexes->len; i++)
     {
       GPtrArray *regex_datas = NULL;
@@ -680,7 +715,6 @@ validate_group_for_ui (BzApplication *self,
             blocked_priority = data->priority;
         }
     }
-
   return allowed_priority <= blocked_priority;
 }
 
@@ -776,6 +810,7 @@ hide_eol_changed (BzApplication *self,
 static void
 init_service_struct (BzApplication *self,
                      GtkStringList *blocklists,
+                     GtkStringList *txt_blocklists,
                      GtkStringList *curated_configs)
 {
   const char *app_id = NULL;
@@ -824,6 +859,13 @@ init_service_struct (BzApplication *self,
       self->blocklists_to_files,
       G_LIST_MODEL (self->blocklists));
 
+  self->txt_blocklists          = g_object_ref (txt_blocklists);
+  self->txt_blocklists_to_files = gtk_map_list_model_new (
+      NULL, (GtkMapListModelMapFunc) map_strings_to_files, NULL, NULL);
+  gtk_map_list_model_set_model (
+      self->txt_blocklists_to_files,
+      G_LIST_MODEL (self->txt_blocklists));
+
   self->curated_configs          = g_object_ref (curated_configs);
   self->curated_configs_to_files = gtk_map_list_model_new (
       NULL, (GtkMapListModelMapFunc) map_strings_to_files, NULL, NULL);
@@ -836,6 +878,9 @@ init_service_struct (BzApplication *self,
   g_type_ensure (BZ_TYPE_BLOCKLIST_CONDITION);
   self->blocklist_parser = bz_yaml_parser_new_for_resource_schema (
       "/io/github/kolunmi/Bazaar/blocklist-schema.xml");
+
+  self->txt_blocklist_parser = bz_newline_parser_new (
+      TRUE, MAX_IDS_PER_BLOCKLIST);
 
   g_type_ensure (BZ_TYPE_ROOT_CURATED_CONFIG);
   g_type_ensure (BZ_TYPE_CURATED_ROW);
@@ -864,6 +909,14 @@ init_service_struct (BzApplication *self,
   bz_content_provider_set_input_files (
       self->blocklists_provider, G_LIST_MODEL (self->blocklists_to_files));
   g_signal_connect_swapped (self->blocklists_provider, "items-changed", G_CALLBACK (blocklists_changed), self);
+
+  self->txt_blocked_id_sets = g_ptr_array_new_with_free_func (
+      (GDestroyNotify) g_hash_table_unref);
+  self->txt_blocklists_provider = bz_content_provider_new ();
+  bz_content_provider_set_parser (self->txt_blocklists_provider, BZ_PARSER (self->txt_blocklist_parser));
+  bz_content_provider_set_input_files (
+      self->txt_blocklists_provider, G_LIST_MODEL (self->txt_blocklists_to_files));
+  g_signal_connect_swapped (self->txt_blocklists_provider, "items-changed", G_CALLBACK (txt_blocklists_changed), self);
 
   self->groups         = g_list_store_new (BZ_TYPE_ENTRY_GROUP);
   self->installed_apps = g_list_store_new (BZ_TYPE_ENTRY_GROUP);
@@ -2089,6 +2142,33 @@ blocklists_changed (BzApplication *self,
       g_ptr_array_insert (self->blocklist_regexes,
                           position + i,
                           g_steal_pointer (&regex_datas));
+    }
+
+  gtk_filter_changed (GTK_FILTER (self->group_filter), GTK_FILTER_CHANGE_DIFFERENT);
+  gtk_filter_changed (GTK_FILTER (self->appid_filter), GTK_FILTER_CHANGE_DIFFERENT);
+}
+
+static void
+txt_blocklists_changed (BzApplication *self,
+                        guint          position,
+                        guint          removed,
+                        guint          added,
+                        GListModel    *model)
+{
+  if (removed > 0)
+    g_ptr_array_remove_range (self->txt_blocked_id_sets, position, removed);
+
+  for (guint i = 0; i < added; i++)
+    {
+      g_autoptr (BzHashTableObject) obj = NULL;
+      GHashTable *set                   = NULL;
+
+      obj = g_list_model_get_item (model, position + i);
+      set = bz_hash_table_object_get_hash_table (obj);
+
+      g_ptr_array_insert (self->txt_blocked_id_sets,
+                          position + i,
+                          g_hash_table_ref (set));
     }
 
   gtk_filter_changed (GTK_FILTER (self->group_filter), GTK_FILTER_CHANGE_DIFFERENT);

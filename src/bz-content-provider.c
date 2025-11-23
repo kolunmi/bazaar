@@ -561,7 +561,10 @@ input_load_fiber (InputLoadData *data)
     return dex_future_new_for_error (g_steal_pointer (&local_error));
 
   object = g_value_get_object (g_hash_table_lookup (parse_results, "/"));
-  g_assert (object != NULL);
+  if (object == NULL)
+    return dex_future_new_reject (G_IO_ERROR,
+                                  G_IO_ERROR_UNKNOWN,
+                                  "Parser returned invalid results");
 
   return dex_future_new_for_object (object);
 }
