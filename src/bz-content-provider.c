@@ -24,24 +24,18 @@
 
 #include <gtk/gtk.h>
 #include <libdex.h>
-#include <yaml.h>
 
 #include "bz-content-provider.h"
 #include "bz-env.h"
 #include "bz-io.h"
 #include "bz-util.h"
-#include "bz-yaml-parser.h"
-
-/* clang-format off */
-G_DEFINE_QUARK (bz-content-yaml-error-quark, bz_content_yaml_error);
-/* clang-format on */
 
 struct _BzContentProvider
 {
   GObject parent_instance;
 
-  GListModel   *input_files;
-  BzYamlParser *parser;
+  GListModel *input_files;
+  BzParser   *parser;
 
   GListStore *input_mirror;
   GHashTable *input_tracking;
@@ -82,8 +76,8 @@ BZ_DEFINE_DATA (
     input_load,
     InputLoad,
     {
-      GFile        *file;
-      BzYamlParser *parser;
+      GFile    *file;
+      BzParser *parser;
     },
     BZ_RELEASE_DATA (file, g_object_unref);
     BZ_RELEASE_DATA (parser, g_object_unref))
@@ -221,7 +215,7 @@ bz_content_provider_class_init (BzContentProviderClass *klass)
       g_param_spec_object (
           "parser",
           NULL, NULL,
-          BZ_TYPE_YAML_PARSER,
+          BZ_TYPE_PARSER,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   props[PROP_HAS_INPUTS] =
@@ -334,12 +328,12 @@ bz_content_provider_get_input_files (BzContentProvider *self)
 
 void
 bz_content_provider_set_parser (BzContentProvider *self,
-                                BzYamlParser      *parser)
+                                BzParser          *parser)
 {
   GHashTableIter iter = { 0 };
 
   g_return_if_fail (BZ_IS_CONTENT_PROVIDER (self));
-  g_return_if_fail (parser == NULL || BZ_IS_YAML_PARSER (parser));
+  g_return_if_fail (parser == NULL || BZ_IS_PARSER (parser));
 
   g_clear_object (&self->parser);
   if (parser != NULL)
@@ -361,7 +355,7 @@ bz_content_provider_set_parser (BzContentProvider *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PARSER]);
 }
 
-BzYamlParser *
+BzParser *
 bz_content_provider_get_parser (BzContentProvider *self)
 {
   g_return_val_if_fail (BZ_IS_CONTENT_PROVIDER (self), NULL);
@@ -551,8 +545,8 @@ input_init_finally (DexFuture         *future,
 static DexFuture *
 input_load_fiber (InputLoadData *data)
 {
-  GFile        *file                   = data->file;
-  BzYamlParser *parser                 = data->parser;
+  GFile    *file                       = data->file;
+  BzParser *parser                     = data->parser;
   g_autoptr (GError) local_error       = NULL;
   g_autoptr (GBytes) bytes             = NULL;
   g_autoptr (GHashTable) parse_results = NULL;
@@ -562,7 +556,7 @@ input_load_fiber (InputLoadData *data)
   if (bytes == NULL)
     return dex_future_new_for_error (g_steal_pointer (&local_error));
 
-  parse_results = bz_yaml_parser_process_bytes (parser, bytes, &local_error);
+  parse_results = bz_parser_process_bytes (parser, bytes, &local_error);
   if (parse_results == NULL)
     return dex_future_new_for_error (g_steal_pointer (&local_error));
 

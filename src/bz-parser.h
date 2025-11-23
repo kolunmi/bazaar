@@ -1,6 +1,6 @@
-/* bz-yaml-parser.h
+/* bz-parser.h
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2025 Eva M
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,24 +20,25 @@
 
 #pragma once
 
-#include <gio/gio.h>
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 
-#define BZ_YAML_ERROR (bz_yaml_error_quark ())
-GQuark bz_yaml_error_quark (void);
+#define BZ_TYPE_PARSER (bz_parser_get_type ())
+G_DECLARE_INTERFACE (BzParser, bz_parser, BZ, PARSER, GObject)
 
-typedef enum
+struct _BzParserInterface
 {
-  BZ_YAML_ERROR_INVALID_YAML = 0,
-  BZ_YAML_ERROR_DOES_NOT_CONFORM,
-  BZ_YAML_ERROR_BAD_SCALAR,
-} BzYamlError;
+  GTypeInterface parent_iface;
 
-#define BZ_TYPE_YAML_PARSER (bz_yaml_parser_get_type ())
-G_DECLARE_FINAL_TYPE (BzYamlParser, bz_yaml_parser, BZ, YAML_PARSER, GObject)
+  GHashTable *(*process_bytes) (BzParser *self,
+                                GBytes   *bytes,
+                                GError  **error);
+};
 
-BzYamlParser *
-bz_yaml_parser_new_for_resource_schema (const char *path);
+GHashTable *
+bz_parser_process_bytes (BzParser *self,
+                         GBytes   *bytes,
+                         GError  **error);
 
 G_END_DECLS

@@ -26,6 +26,7 @@
 #include <xmlb.h>
 #include <yaml.h>
 
+#include "bz-parser.h"
 #include "bz-util.h"
 #include "bz-yaml-parser.h"
 
@@ -71,7 +72,14 @@ struct _BzYamlParser
   SchemaNodeData *schema;
 };
 
-G_DEFINE_FINAL_TYPE (BzYamlParser, bz_yaml_parser, G_TYPE_OBJECT)
+static void
+parser_iface_init (BzParserInterface *iface);
+
+G_DEFINE_FINAL_TYPE_WITH_CODE (
+    BzYamlParser,
+    bz_yaml_parser,
+    G_TYPE_OBJECT,
+    G_IMPLEMENT_INTERFACE (BZ_TYPE_PARSER, parser_iface_init))
 
 enum
 {
@@ -141,44 +149,12 @@ bz_yaml_parser_init (BzYamlParser *self)
 {
 }
 
-BzYamlParser *
-bz_yaml_parser_new_for_resource_schema (const char *path)
+static GHashTable *
+bz_yaml_parser_real_process_bytes (BzParser *iface_self,
+                                   GBytes   *bytes,
+                                   GError  **error)
 {
-  g_autoptr (GError) local_error    = NULL;
-  g_autoptr (GBytes) bytes          = NULL;
-  const char *resource_data         = NULL;
-  g_autoptr (XbSilo) silo           = NULL;
-  g_autoptr (XbNode) root           = NULL;
-  g_autoptr (SchemaNodeData) schema = NULL;
-  g_autoptr (BzYamlParser) parser   = NULL;
-
-  g_return_val_if_fail (path != NULL, NULL);
-
-  bytes = g_resources_lookup_data (
-      path, G_RESOURCE_LOOKUP_FLAGS_NONE, &local_error);
-  if (bytes == NULL)
-    g_critical ("Could not load internal resource: %s", local_error->message);
-  g_assert (bytes != NULL);
-  resource_data = g_bytes_get_data (bytes, NULL);
-
-  silo = xb_silo_new_from_xml (resource_data, &local_error);
-  if (silo == NULL)
-    g_critical ("Could not parse internal xml resource: %s", local_error->message);
-  g_assert (silo != NULL);
-
-  root = xb_silo_get_root (silo);
-
-  parser         = g_object_new (BZ_TYPE_YAML_PARSER, NULL);
-  parser->schema = compile_schema (root);
-
-  return g_steal_pointer (&parser);
-}
-
-GHashTable *
-bz_yaml_parser_process_bytes (BzYamlParser *self,
-                              GBytes       *bytes,
-                              GError      **error)
-{
+  BzYamlParser *self               = BZ_YAML_PARSER (iface_self);
   g_autoptr (GError) local_error   = NULL;
   gsize         bytes_size         = 0;
   const guchar *bytes_data         = NULL;
@@ -220,6 +196,45 @@ bz_yaml_parser_process_bytes (BzYamlParser *self,
       g_propagate_error (error, g_steal_pointer (&local_error));
       return NULL;
     }
+}
+
+static void
+parser_iface_init (BzParserInterface *iface)
+{
+  iface->process_bytes = bz_yaml_parser_real_process_bytes;
+}
+
+BzYamlParser *
+bz_yaml_parser_new_for_resource_schema (const char *path)
+{
+  g_autoptr (GError) local_error    = NULL;
+  g_autoptr (GBytes) bytes          = NULL;
+  const char *resource_data         = NULL;
+  g_autoptr (XbSilo) silo           = NULL;
+  g_autoptr (XbNode) root           = NULL;
+  g_autoptr (SchemaNodeData) schema = NULL;
+  g_autoptr (BzYamlParser) parser   = NULL;
+
+  g_return_val_if_fail (path != NULL, NULL);
+
+  bytes = g_resources_lookup_data (
+      path, G_RESOURCE_LOOKUP_FLAGS_NONE, &local_error);
+  if (bytes == NULL)
+    g_critical ("Could not load internal resource: %s", local_error->message);
+  g_assert (bytes != NULL);
+  resource_data = g_bytes_get_data (bytes, NULL);
+
+  silo = xb_silo_new_from_xml (resource_data, &local_error);
+  if (silo == NULL)
+    g_critical ("Could not parse internal xml resource: %s", local_error->message);
+  g_assert (silo != NULL);
+
+  root = xb_silo_get_root (silo);
+
+  parser         = g_object_new (BZ_TYPE_YAML_PARSER, NULL);
+  parser->schema = compile_schema (root);
+
+  return g_steal_pointer (&parser);
 }
 
 static SchemaNodeData *

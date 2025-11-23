@@ -20,18 +20,11 @@
 
 #pragma once
 
-#include "bz-yaml-parser.h"
+#include <gtk/gtk.h>
+
+#include "bz-parser.h"
 
 G_BEGIN_DECLS
-
-#define BZ_CONTENT_YAML_ERROR (bz_content_yaml_error_quark ())
-GQuark bz_content_yaml_error_quark (void);
-
-typedef enum
-{
-  BZ_CONTENT_YAML_ERROR_INVALID_YAML = 0,
-  BZ_CONTENT_YAML_ERROR_INVALID_STRUCTURE,
-} BzContentYamlError;
 
 #define BZ_TYPE_CONTENT_PROVIDER (bz_content_provider_get_type ())
 G_DECLARE_FINAL_TYPE (BzContentProvider, bz_content_provider, BZ, CONTENT_PROVIDER, GObject)
@@ -48,9 +41,9 @@ bz_content_provider_get_input_files (BzContentProvider *self);
 
 void
 bz_content_provider_set_parser (BzContentProvider *self,
-                                BzYamlParser      *parser);
+                                BzParser          *parser);
 
-BzYamlParser *
+BzParser *
 bz_content_provider_get_parser (BzContentProvider *self);
 
 gboolean

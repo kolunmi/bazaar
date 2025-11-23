@@ -41,6 +41,7 @@
 #include "bz-flatpak-instance.h"
 #include "bz-gnome-shell-search-provider.h"
 #include "bz-inspector.h"
+#include "bz-parser.h"
 #include "bz-preferences-dialog.h"
 #include "bz-result.h"
 #include "bz-root-blocklist.h"
@@ -797,8 +798,8 @@ init_service_struct (BzApplication *self,
       parser = bz_yaml_parser_new_for_resource_schema (
           "/io/github/kolunmi/Bazaar/main-config-schema.xml");
 
-      parse_results = bz_yaml_parser_process_bytes (
-          parser, config_bytes, &local_error);
+      parse_results = bz_parser_process_bytes (
+          BZ_PARSER (parser), config_bytes, &local_error);
       if (parse_results != NULL)
         self->config = g_value_dup_object (g_hash_table_lookup (parse_results, "/"));
       else
@@ -859,7 +860,7 @@ init_service_struct (BzApplication *self,
   self->blocklist_regexes = g_ptr_array_new_with_free_func (
       (GDestroyNotify) g_ptr_array_unref);
   self->blocklists_provider = bz_content_provider_new ();
-  bz_content_provider_set_parser (self->blocklists_provider, self->blocklist_parser);
+  bz_content_provider_set_parser (self->blocklists_provider, BZ_PARSER (self->blocklist_parser));
   bz_content_provider_set_input_files (
       self->blocklists_provider, G_LIST_MODEL (self->blocklists_to_files));
   g_signal_connect_swapped (self->blocklists_provider, "items-changed", G_CALLBACK (blocklists_changed), self);
@@ -900,7 +901,7 @@ init_service_struct (BzApplication *self,
   self->curated_provider = bz_content_provider_new ();
   bz_content_provider_set_input_files (
       self->curated_provider, G_LIST_MODEL (self->curated_configs_to_files));
-  bz_content_provider_set_parser (self->curated_provider, self->curated_parser);
+  bz_content_provider_set_parser (self->curated_provider, BZ_PARSER (self->curated_parser));
 
   self->flathub = bz_flathub_state_new ();
   bz_flathub_state_set_map_factory (self->flathub, self->application_factory);
