@@ -676,7 +676,7 @@ msgstr "Kopieren und Schließen"
 
 #: src/bz-featured-tile.blp:88
 msgid "App of the Day"
-msgstr "App des Tages"
+msgstr "Anwendung des Tages"
 
 #: src/bz-flathub-category.c:66
 msgid "Audio & Video"
