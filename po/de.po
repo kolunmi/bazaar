@@ -162,7 +162,7 @@ msgstr "Installieren"
 #: src/bz-age-rating-dialog.blp:7 src/bz-age-rating-dialog.blp:50
 #: src/bz-full-view.c:342 src/bz-full-view.c:349
 msgid "Age Rating"
-msgstr "Altersfreigabe"
+msgstr "Alterseinstufung"
 
 #: src/bz-age-rating-dialog.blp:40 src/bz-age-rating-dialog.c:790
 msgid "?"
