@@ -1297,6 +1297,21 @@ init_fiber (GWeakRef *wr)
         }
     }
 
+  self->installed_set = dex_await_boxed (
+      bz_backend_retrieve_install_ids (
+          BZ_BACKEND (self->flatpak), NULL),
+      &local_error);
+  if (self->installed_set == NULL)
+    {
+      g_warning ("Unable to enumerate installed entries from flatpak backend; "
+                 "no entries will appear to be installed: %s",
+                 local_error->message);
+      g_clear_error (&local_error);
+
+      self->installed_set = g_hash_table_new_full (
+          g_str_hash, g_str_equal, g_free, NULL);
+    }
+
   return dex_future_new_true ();
 }
 
@@ -1306,6 +1321,9 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
   g_autoptr (BzApplication) self      = NULL;
   BzBackendNotification *notif        = data->notif;
   g_autoptr (GError) local_error      = NULL;
+  GtkWindow     *window               = NULL;
+  GdkFrameClock *clock                = NULL;
+  double         reread_timeout       = 0.0;
   g_autoptr (GPtrArray) build_futures = NULL;
   g_autoptr (DexFuture) read_future   = NULL;
   g_autoptr (GTimer) timer            = NULL;
@@ -1314,29 +1332,35 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
 
   bz_weak_get_or_return_reject (self, data->self);
 
-  if (self->installed_set == NULL)
+  window = gtk_application_get_active_window (GTK_APPLICATION (self));
+  if (window != NULL)
+    clock = gtk_widget_get_frame_clock (GTK_WIDGET (window));
+  if (clock != NULL)
     {
-      self->installed_set = dex_await_boxed (
-          bz_backend_retrieve_install_ids (
-              BZ_BACKEND (self->flatpak), NULL),
-          &local_error);
-      if (self->installed_set == NULL)
-        {
-          g_warning ("Unable to enumerate installed entries from flatpak backend; "
-                     "no entries will appear to be installed: %s",
-                     local_error->message);
-          g_clear_error (&local_error);
+      gint64 refresh_interval  = 0;
+      gint64 presentation_time = 0;
 
-          self->installed_set = g_hash_table_new_full (
-              g_str_hash, g_str_equal, g_free, NULL);
-        }
+      gdk_frame_clock_get_refresh_info (
+          clock,
+          g_get_monotonic_time (),
+          &refresh_interval,
+          &presentation_time);
+      reread_timeout = (double) refresh_interval / (double) G_USEC_PER_SEC;
+
+      /* take no longer than half a refresh interval */
+      reread_timeout /= 2.0;
     }
+  else
+    reread_timeout = 1.0 / 60.0;
+
+  clock  = NULL;
+  window = NULL;
 
   build_futures = g_ptr_array_new_with_free_func (dex_unref);
   read_future   = dex_future_new_for_object (notif);
   /* this value defines how long we are allowed to spend adding to
      `build-futures` to await later */
-#define REREAD_TIMEOUT 0.0266
+
   timer = g_timer_new ();
   while (dex_future_is_resolved (read_future))
     {
@@ -1348,8 +1372,7 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
         {
         case BZ_BACKEND_NOTIFICATION_KIND_ERROR:
           {
-            const char *error  = NULL;
-            GtkWindow  *window = NULL;
+            const char *error = NULL;
 
             error = bz_backend_notification_get_error (notif);
             if (error == NULL)
@@ -1717,12 +1740,11 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
         }
 
       dex_clear (&read_future);
-      if (g_timer_elapsed (timer, NULL) > REREAD_TIMEOUT)
+      if (g_timer_elapsed (timer, NULL) > reread_timeout)
         break;
 
       read_future = dex_channel_receive (self->flatpak_notifs);
     }
-#undef REREAD_TIMEOUT
 
   if (build_futures->len > 0)
     dex_await (
@@ -1730,6 +1752,12 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
             (DexFuture *const *) build_futures->pdata,
             build_futures->len),
         NULL);
+
+  if (update_filter)
+    {
+      gtk_filter_changed (GTK_FILTER (self->group_filter), GTK_FILTER_CHANGE_LESS_STRICT);
+      gtk_filter_changed (GTK_FILTER (self->appid_filter), GTK_FILTER_CHANGE_LESS_STRICT);
+    }
 
   if (update_labels)
     {
@@ -1746,12 +1774,6 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
           fiber_check_for_updates (self);
           bz_state_info_set_background_task_label (self->state, NULL);
         }
-    }
-
-  if (update_filter)
-    {
-      gtk_filter_changed (GTK_FILTER (self->group_filter), GTK_FILTER_CHANGE_LESS_STRICT);
-      gtk_filter_changed (GTK_FILTER (self->appid_filter), GTK_FILTER_CHANGE_LESS_STRICT);
     }
 
   if (read_future == NULL)
