@@ -1457,7 +1457,7 @@ msgstr "Keine Details für diese Veröffentlichung"
 
 #: src/bz-rich-app-tile.blp:107
 msgid "Stopped Receiving Updates"
-msgstr "Erhält keine Updates mehr"
+msgstr "Erhält keine Aktualisierungen mehr"
 
 #: src/bz-rich-app-tile.blp:123
 msgid "Get"
