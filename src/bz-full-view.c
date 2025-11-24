@@ -51,7 +51,6 @@
 #include "bz-stats-dialog.h"
 #include "bz-tag-list.h"
 #include "bz-util.h"
-#include "bz-verification-status.h"
 
 struct _BzFullView
 {
@@ -1093,7 +1092,6 @@ bz_full_view_class_init (BzFullViewClass *klass)
   g_type_ensure (BZ_TYPE_SHARE_LIST);
   g_type_ensure (BZ_TYPE_TAG_LIST);
   g_type_ensure (BZ_TYPE_CONTEXT_TILE);
-  g_type_ensure (BZ_TYPE_VERIFICATION_STATUS);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-full-view.ui");
   gtk_widget_class_bind_template_child (widget_class, BzFullView, stack);
