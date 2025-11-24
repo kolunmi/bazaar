@@ -1639,7 +1639,7 @@ msgstr "Ü_ber Bazaar"
 
 #: src/bz-window.blp:510
 msgid "_Quit Bazaar"
-msgstr "Bazaar B_eenden"
+msgstr "Bazaar b_eenden"
 
 #: src/bz-window.blp:519
 #, fuzzy
