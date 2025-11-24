@@ -103,6 +103,7 @@ bz_sources = [
   'bz-io.c',
   'bz-lazy-async-texture-model.c',
   'bz-license-dialog.c',
+  'bz-list-tile.c',
   'bz-markdown-render.c',
   'bz-newline-parser.c',
   'bz-parser.c',

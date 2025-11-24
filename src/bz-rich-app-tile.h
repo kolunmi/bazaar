@@ -24,12 +24,13 @@
 #include <gtk/gtk.h>
 
 #include "bz-entry-group.h"
+#include "bz-list-tile.h"
 
 G_BEGIN_DECLS
 
 #define BZ_TYPE_RICH_APP_TILE (bz_rich_app_tile_get_type ())
 
-G_DECLARE_FINAL_TYPE (BzRichAppTile, bz_rich_app_tile, BZ, RICH_APP_TILE, AdwBin)
+G_DECLARE_FINAL_TYPE (BzRichAppTile, bz_rich_app_tile, BZ, RICH_APP_TILE, BzListTile)
 
 GtkWidget *
 bz_rich_app_tile_new (void);
