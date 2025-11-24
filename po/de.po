@@ -997,7 +997,7 @@ msgstr "Andere Version installieren"
 
 #: src/bz-full-view.blp:357
 msgid "Size"
-msgstr "Grße"
+msgstr "Größe"
 
 #: src/bz-full-view.blp:466
 msgid "Downloads /mo"
