@@ -1373,7 +1373,7 @@ msgstr "Globale Fortschrittsbalken"
 
 #: src/bz-preferences-dialog.blp:72
 msgid "Choose a theme for the progress bar!"
-msgstr "Wählen Sie ein tolles Design für den globalen Fortschrittsbalken!"
+msgstr "Wählen Sie ein tolles Design für den globalen Fortschrittsbalken."
 
 #: src/bz-preferences-dialog.blp:98
 msgid "End of Life Apps"
