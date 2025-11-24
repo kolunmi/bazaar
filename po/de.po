@@ -1162,7 +1162,7 @@ msgstr ""
 
 #: src/bz-hardware-support-dialog.c:76
 msgid "Mouse support"
-msgstr "Unterstützt Maus"
+msgstr "Mausunterstützung"
 
 #: src/bz-hardware-support-dialog.c:78
 msgid "Requires mice or pointing devices"
