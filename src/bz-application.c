@@ -1297,6 +1297,21 @@ init_fiber (GWeakRef *wr)
         }
     }
 
+  self->installed_set = dex_await_boxed (
+      bz_backend_retrieve_install_ids (
+          BZ_BACKEND (self->flatpak), NULL),
+      &local_error);
+  if (self->installed_set == NULL)
+    {
+      g_warning ("Unable to enumerate installed entries from flatpak backend; "
+                 "no entries will appear to be installed: %s",
+                 local_error->message);
+      g_clear_error (&local_error);
+
+      self->installed_set = g_hash_table_new_full (
+          g_str_hash, g_str_equal, g_free, NULL);
+    }
+
   return dex_future_new_true ();
 }
 
@@ -1316,24 +1331,6 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
   gboolean update_filter              = FALSE;
 
   bz_weak_get_or_return_reject (self, data->self);
-
-  if (self->installed_set == NULL)
-    {
-      self->installed_set = dex_await_boxed (
-          bz_backend_retrieve_install_ids (
-              BZ_BACKEND (self->flatpak), NULL),
-          &local_error);
-      if (self->installed_set == NULL)
-        {
-          g_warning ("Unable to enumerate installed entries from flatpak backend; "
-                     "no entries will appear to be installed: %s",
-                     local_error->message);
-          g_clear_error (&local_error);
-
-          self->installed_set = g_hash_table_new_full (
-              g_str_hash, g_str_equal, g_free, NULL);
-        }
-    }
 
   window = gtk_application_get_active_window (GTK_APPLICATION (self));
   if (window != NULL)
