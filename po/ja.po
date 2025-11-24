@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-24 07:06+0900\n"
-"PO-Revision-Date: 2025-11-24 17:28+0900\n"
+"POT-Creation-Date: 2025-11-24 17:31+0900\n"
+"PO-Revision-Date: 2025-11-24 17:32+0900\n"
 "Last-Translator: camegone <hoge_huga@example.com>\n"
 "Language-Team: Japanese <kde-i18n-doc@kde.org>\n"
 "Language: ja\n"
@@ -804,16 +804,16 @@ msgstr ""
 msgid "Later"
 msgstr "後で"
 
-#: src/bz-application.c:1606
+#: src/bz-application.c:1629
 msgid "Synchronizing..."
 msgstr "同期中..."
 
-#: src/bz-application.c:1740
+#: src/bz-application.c:1768
 #, c-format
 msgid "Receiving %d entries..."
 msgstr "%d 件のエントリを受信中..."
 
-#: src/bz-application.c:1745
+#: src/bz-application.c:1773
 msgid "Checking for updates..."
 msgstr "更新を確認中..."
 
@@ -1615,6 +1615,9 @@ msgid ""
 "code repository on a remote Git forge. \n"
 " For projects on GitHub, rate limits may cause them not to appear."
 msgstr ""
+"Bazzarは Git forge のリモートにあるアプリケーションのリポジトリに付けられたス"
+"ターの数を取得して、表示できます。\n"
+"GitHub のプロジェクトでは、レート制限により表示されないことがあります。"
 
 #: src/bz-preferences-dialog.c:32
 msgid "Accent Color"
