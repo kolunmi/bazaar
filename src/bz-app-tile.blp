@@ -10,9 +10,6 @@ template $BzAppTile: Button {
     [overlay]
     Image {
       css-name: "app-tile-installed-indicator";
-      styles [
-        "success",
-      ]
 
       halign: end;
       valign: start;
@@ -64,7 +61,7 @@ template $BzAppTile: Button {
 
           Image {
              styles [
-               "accent",
+               "verified",
              ]
             visible: bind template.group as <$BzEntryGroup>.is-verified;
             icon-name: "verified-checkmark-symbolic";

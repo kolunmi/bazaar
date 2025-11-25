@@ -300,7 +300,7 @@ bz_developer_badge_set_entry (BzDeveloperBadge *self,
 
   if (g_set_object (&self->entry, entry))
     {
-      gtk_widget_remove_css_class (GTK_WIDGET (self), "accent");
+      gtk_widget_remove_css_class (GTK_WIDGET (self), "verified");
       gtk_widget_remove_css_class (GTK_WIDGET (self), "dimmed");
 
       if (entry != NULL)
@@ -311,7 +311,7 @@ bz_developer_badge_set_entry (BzDeveloperBadge *self,
               g_object_get (status, "verified", &verified, NULL);
               g_object_unref (status);
             }
-          gtk_widget_add_css_class (GTK_WIDGET (self), verified ? "accent" : "dimmed");
+          gtk_widget_add_css_class (GTK_WIDGET (self), verified ? "verified" : "dimmed");
         }
 
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ENTRY]);
