@@ -24,6 +24,8 @@ src/bz-decorated-screenshot.blp
 src/bz-decorated-screenshot.c
 src/bz-detailed-app-tile.blp
 src/bz-detailed-app-tile.c
+src/bz-developer-badge.blp
+src/bz-developer-badge.c
 src/bz-download-worker.c
 src/bz-dynamic-list-view.c
 src/bz-entry-cache-manager.c

@@ -33,6 +33,7 @@
 #include "bz-release.h"
 #include "bz-serializable.h"
 #include "bz-url.h"
+#include "bz-verification-status.h"
 
 enum
 {
@@ -356,51 +357,52 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
                               const char    *appstream_dir,
                               GError       **error)
 {
-  g_autoptr (BzFlatpakEntry) self              = NULL;
-  GBytes *bytes                                = NULL;
-  g_autoptr (GKeyFile) key_file                = NULL;
-  gboolean         result                      = FALSE;
-  guint            kinds                       = 0;
-  g_autofree char *module_dir                  = NULL;
-  const char      *id                          = NULL;
-  g_autofree char *unique_id                   = NULL;
-  g_autofree char *unique_id_checksum          = NULL;
-  guint64          download_size               = 0;
-  const char      *title                       = NULL;
-  const char      *eol                         = NULL;
-  const char      *description                 = NULL;
-  const char      *metadata_license            = NULL;
-  const char      *project_license             = NULL;
-  gboolean         is_floss                    = FALSE;
-  const char      *project_group               = NULL;
-  const char      *developer                   = NULL;
-  const char      *developer_id                = NULL;
-  const char      *long_description            = NULL;
-  const char      *remote_name                 = NULL;
-  const char      *project_url                 = NULL;
-  g_autoptr (GPtrArray) as_search_tokens       = NULL;
-  g_autofree char *search_tokens               = NULL;
-  g_autoptr (GdkPaintable) icon_paintable      = NULL;
-  g_autoptr (GIcon) mini_icon                  = NULL;
-  g_autoptr (GListStore) screenshot_paintables = NULL;
-  g_autoptr (GListStore) share_urls            = NULL;
-  g_autofree char *donation_url                = NULL;
-  g_autofree char *forge_url                   = NULL;
-  g_autoptr (GListStore) native_reviews        = NULL;
-  double           average_rating              = 0.0;
-  g_autofree char *ratings_summary             = NULL;
-  g_autoptr (GListStore) version_history       = NULL;
-  const char *accent_color_light               = NULL;
-  const char *accent_color_dark                = NULL;
-  guint       required_controls                = 0;
-  guint       recommended_controls             = 0;
-  guint       supported_controls               = 0;
-  gint        min_display_length               = 0;
-  gint        max_display_length               = 0;
-  gboolean    is_mobile_friendly               = FALSE;
-  g_autoptr (AsContentRating) content_rating   = NULL;
-  GPtrArray *as_keywords                       = NULL;
-  g_autoptr (GListStore) keywords              = NULL;
+  g_autoptr (BzFlatpakEntry) self                      = NULL;
+  GBytes *bytes                                        = NULL;
+  g_autoptr (GKeyFile) key_file                        = NULL;
+  gboolean         result                              = FALSE;
+  guint            kinds                               = 0;
+  g_autofree char *module_dir                          = NULL;
+  const char      *id                                  = NULL;
+  g_autofree char *unique_id                           = NULL;
+  g_autofree char *unique_id_checksum                  = NULL;
+  guint64          download_size                       = 0;
+  const char      *title                               = NULL;
+  const char      *eol                                 = NULL;
+  const char      *description                         = NULL;
+  const char      *metadata_license                    = NULL;
+  const char      *project_license                     = NULL;
+  gboolean         is_floss                            = FALSE;
+  const char      *project_group                       = NULL;
+  const char      *developer                           = NULL;
+  const char      *developer_id                        = NULL;
+  const char      *long_description                    = NULL;
+  const char      *remote_name                         = NULL;
+  const char      *project_url                         = NULL;
+  g_autoptr (GPtrArray) as_search_tokens               = NULL;
+  g_autofree char *search_tokens                       = NULL;
+  g_autoptr (GdkPaintable) icon_paintable              = NULL;
+  g_autoptr (GIcon) mini_icon                          = NULL;
+  g_autoptr (GListStore) screenshot_paintables         = NULL;
+  g_autoptr (GListStore) share_urls                    = NULL;
+  g_autofree char *donation_url                        = NULL;
+  g_autofree char *forge_url                           = NULL;
+  g_autoptr (GListStore) native_reviews                = NULL;
+  double           average_rating                      = 0.0;
+  g_autofree char *ratings_summary                     = NULL;
+  g_autoptr (GListStore) version_history               = NULL;
+  const char *accent_color_light                       = NULL;
+  const char *accent_color_dark                        = NULL;
+  guint       required_controls                        = 0;
+  guint       recommended_controls                     = 0;
+  guint       supported_controls                       = 0;
+  gint        min_display_length                       = 0;
+  gint        max_display_length                       = 0;
+  gboolean    is_mobile_friendly                       = FALSE;
+  g_autoptr (AsContentRating) content_rating           = NULL;
+  GPtrArray *as_keywords                               = NULL;
+  g_autoptr (GListStore) keywords                      = NULL;
+  g_autoptr (BzVerificationStatus) verification_status = NULL;
 
   g_return_val_if_fail (FLATPAK_IS_REF (ref), NULL);
   g_return_val_if_fail (FLATPAK_IS_REMOTE_REF (ref) || FLATPAK_IS_BUNDLE_REF (ref), NULL);
@@ -955,6 +957,48 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
             }
         }
     }
+
+  if (component != NULL && g_strcmp0 (remote_name, "flathub") == 0)
+    {
+      const char *verified_str     = NULL;
+      const char *method           = NULL;
+      const char *website          = NULL;
+      const char *login_name       = NULL;
+      const char *login_provider   = NULL;
+      const char *timestamp        = NULL;
+      const char *login_is_org_str = NULL;
+      gboolean    verified         = FALSE;
+      gboolean    login_is_org     = FALSE;
+      GHashTable *custom_fields    = NULL;
+
+      custom_fields = as_component_get_custom (component);
+
+      if (custom_fields != NULL)
+        {
+          verified_str     = g_hash_table_lookup (custom_fields, "flathub::verification::verified");
+          method           = g_hash_table_lookup (custom_fields, "flathub::verification::method");
+          website          = g_hash_table_lookup (custom_fields, "flathub::verification::website");
+          login_name       = g_hash_table_lookup (custom_fields, "flathub::verification::login_name");
+          login_provider   = g_hash_table_lookup (custom_fields, "flathub::verification::login_provider");
+          timestamp        = g_hash_table_lookup (custom_fields, "flathub::verification::timestamp");
+          login_is_org_str = g_hash_table_lookup (custom_fields, "flathub::verification::login_is_organization");
+        }
+
+      verified     = (verified_str != NULL && g_strcmp0 (verified_str, "true") == 0);
+      login_is_org = (login_is_org_str != NULL && g_strcmp0 (login_is_org_str, "true") == 0);
+
+      verification_status = bz_verification_status_new ();
+      g_object_set (verification_status,
+                    "verified", verified,
+                    "method", method,
+                    "website", website,
+                    "login-name", login_name,
+                    "login-provider", login_provider,
+                    "timestamp", timestamp,
+                    "login-is-organization", login_is_org,
+                    NULL);
+    }
+
   g_object_set (
       self,
       "kinds", kinds,
@@ -995,6 +1039,7 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
       "is-mobile-friendly", is_mobile_friendly,
       "content-rating", content_rating,
       "keywords", keywords,
+      "verification-status", verification_status,
       NULL);
 
   return g_steal_pointer (&self);

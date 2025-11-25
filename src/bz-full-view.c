@@ -30,6 +30,7 @@
 #include "bz-apps-page.h"
 #include "bz-appstream-description-render.h"
 #include "bz-context-tile.h"
+#include "bz-developer-badge.h"
 #include "bz-dynamic-list-view.h"
 #include "bz-env.h"
 #include "bz-error.h"
@@ -1078,6 +1079,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
       g_cclosure_marshal_VOID__OBJECTv);
 
   g_type_ensure (BZ_TYPE_APPSTREAM_DESCRIPTION_RENDER);
+  g_type_ensure (BZ_TYPE_DEVELOPER_BADGE);
   g_type_ensure (BZ_TYPE_DYNAMIC_LIST_VIEW);
   g_type_ensure (BZ_TYPE_ENTRY);
   g_type_ensure (BZ_TYPE_ENTRY_GROUP);

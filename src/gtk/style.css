@@ -255,6 +255,15 @@ window.narrow .app-title {
   font-size: 16pt;
 }
 
+.developer-badge > button {
+	padding: 0;
+  	background-color: transparent;
+}
+
+.developer-badge:focus > button {
+	border-radius: 5px;
+}
+
 window.narrow .app-developer {
 	font-size: small;
 }

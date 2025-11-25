@@ -1,0 +1,56 @@
+using Gtk 4.0;
+
+template $BzDeveloperBadge: Box {
+  orientation: horizontal;
+  spacing: 3;
+  halign: start;
+  visible: bind $invert_boolean($is_null(template.entry as <$BzEntry>.developer) as <bool>) as <bool>;
+
+  Label developer_label {
+    label: bind $get_developer_name(template.entry) as <string>;
+    xalign: 0.0;
+    wrap: true;
+    wrap-mode: word_char;
+    natural-wrap-mode: word;
+
+    styles [
+      "app-developer",
+    ]
+  }
+
+  MenuButton info_button {
+    icon-name: bind $get_icon_name(template.entry as <$BzEntry>.verification-status) as <string>;
+    popover: popover;
+    visible: bind $invert_boolean($is_null(template.entry as <$BzEntry>.verification-status) as <bool>) as <bool>;
+
+    styles [
+      "developer-badge",
+    ]
+
+    EventControllerMotion {
+      enter => $on_info_button_enter();
+      leave => $on_info_button_leave();
+    }
+  }
+}
+
+Popover popover {
+  has-arrow: true;
+  position: right;
+
+  child: Box {
+    orientation: vertical;
+    margin-top: 12;
+    margin-bottom: 12;
+    margin-start: 12;
+    margin-end: 12;
+
+    Label popover_label {
+      label: bind $get_popover_text(template.entry, template.entry as <$BzEntry>.verification-status) as <string>;
+      wrap: true;
+      xalign: 0.0;
+      max-width-chars: 40;
+      use-markup: true;
+    }
+  };
+}
