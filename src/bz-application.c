@@ -1739,17 +1739,21 @@ static void
 fiber_replace_entry (BzApplication *self,
                      BzEntry       *entry)
 {
-  const char *id         = NULL;
-  const char *unique_id  = NULL;
-  gboolean    user       = FALSE;
-  gboolean    installed  = FALSE;
-  const char *flatpak_id = NULL;
+  const char *id                 = NULL;
+  const char *unique_id          = NULL;
+  const char *unique_id_checksum = NULL;
+  gboolean    user               = FALSE;
+  gboolean    installed          = FALSE;
+  const char *flatpak_id         = NULL;
 
-  id        = bz_entry_get_id (entry);
-  unique_id = bz_entry_get_unique_id (entry);
-  user      = bz_flatpak_entry_is_user (BZ_FLATPAK_ENTRY (entry));
-  if (id == NULL || unique_id == NULL)
+  id                 = bz_entry_get_id (entry);
+  unique_id          = bz_entry_get_unique_id (entry);
+  unique_id_checksum = bz_entry_get_unique_id_checksum (entry);
+  if (id == NULL ||
+      unique_id == NULL ||
+      unique_id_checksum == NULL)
     return;
+  user = bz_flatpak_entry_is_user (BZ_FLATPAK_ENTRY (entry));
 
   installed = g_hash_table_contains (self->installed_set, unique_id);
   bz_entry_set_installed (entry, installed);
