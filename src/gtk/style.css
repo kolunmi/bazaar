@@ -419,8 +419,8 @@ window.flathub {
   border-radius: 9999px;
   padding: 3px;
   background: var(--flag-gradient, var(--accent-bg-color));
-  min-width: 32px;
-  min-height: 32px;
+  min-width: 28px;
+  min-height: 28px;
   outline: none;
   background-clip: content-box;
   background-origin: content-box;
