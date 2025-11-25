@@ -33,6 +33,7 @@ typedef enum
 {
   BZ_ENTRY_CACHE_ERROR_CACHE_FAILED = 0,
   BZ_ENTRY_CACHE_ERROR_DECACHE_FAILED,
+  BZ_ENTRY_CACHE_ERROR_ENUMERATE_FAILED,
 } BzEntry_CacheError;
 
 #define BZ_TYPE_ENTRY_CACHE_MANAGER (bz_entry_cache_manager_get_type ())
@@ -55,6 +56,13 @@ bz_entry_cache_manager_add (BzEntryCacheManager *self,
 DexFuture *
 bz_entry_cache_manager_get (BzEntryCacheManager *self,
                             const char          *unique_id);
+
+DexFuture *
+bz_entry_cache_manager_get_by_checksum (BzEntryCacheManager *self,
+                                        const char          *unique_id_checksum);
+
+DexFuture *
+bz_entry_cache_manager_enumerate_disk (BzEntryCacheManager *self);
 
 G_END_DECLS
 
