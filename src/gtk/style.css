@@ -161,13 +161,6 @@ global-progress image {
   color: var(--window-fg-color);
 }
 
-@media (prefers-color-scheme: light) {
-  .flathub {
-    --accent-color: #251f32;
-    --accent-bg-color: #251f32;
-  }
-}
-
 .lozenge {
 	  font-size: 18px;
 	  font-weight: bold;
