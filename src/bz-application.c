@@ -965,6 +965,7 @@ init_service_struct (BzApplication *self,
 
   self->cache = bz_entry_cache_manager_new ();
   self->state = bz_state_info_new ();
+  bz_state_info_set_busy (self->state, TRUE);
 
   app_id = g_application_get_application_id (G_APPLICATION (self));
   g_assert (app_id != NULL);
@@ -1243,6 +1244,7 @@ init_fiber (GWeakRef *wr)
   bz_weak_get_or_return_reject (self, wr);
 
   bz_state_info_set_online (self->state, TRUE);
+  bz_state_info_set_busy (self->state, TRUE);
   bz_state_info_set_background_task_label (self->state, _ ("Performing setup..."));
 
   g_clear_object (&self->flatpak);
@@ -1983,6 +1985,7 @@ init_finally (DexFuture *future,
           bz_show_error_for_widget (GTK_WIDGET (window), error_string);
         }
     }
+  bz_state_info_set_busy (self->state, FALSE);
 
   return dex_future_new_true ();
 }
