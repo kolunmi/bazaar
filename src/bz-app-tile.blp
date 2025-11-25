@@ -47,7 +47,8 @@ template $BzAppTile: Button {
 
         Box {
           orientation: horizontal;
-          spacing: 10;
+          spacing: 6;
+          margin-end: 12;
 
           Label {
             css-name: "app-tile-title";
@@ -61,23 +62,14 @@ template $BzAppTile: Button {
             max-width-chars: 18;
           }
 
-          // Revealer {
-          //   transition-type: crossfade;
-          //   reveal-child: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
-          //   visible: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
-
-          //   child: Image {
-          //     css-name: "app-tile-verified-check";
-          //     styles [
-          //       "accent",
-          //     ]
-
-          //     has-tooltip: true;
-          //     tooltip-text: _("This flatpak is verified by the original developers of the software.");
-          //     icon-name: "verified-checkmark-symbolic";
-          //     icon-size: normal;
-          //   };
-          // }
+          Image {
+             styles [
+               "accent",
+             ]
+            visible: bind template.group as <$BzEntryGroup>.is-verified;
+            icon-name: "verified-checkmark-symbolic";
+            pixel-size: 14;
+          }
         }
 
         Label {

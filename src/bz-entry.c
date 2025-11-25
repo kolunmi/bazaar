@@ -1797,6 +1797,21 @@ bz_entry_get_developer (BzEntry *self)
   return priv->developer;
 }
 
+gboolean
+bz_entry_is_verified (BzEntry *self)
+{
+  BzEntryPrivate *priv = NULL;
+  gboolean verified = FALSE;
+
+  g_return_val_if_fail (BZ_IS_ENTRY (self), FALSE);
+  priv = bz_entry_get_instance_private (self);
+
+  if (priv->verification_status != NULL)
+    g_object_get (priv->verification_status, "verified", &verified, NULL);
+
+  return verified;
+}
+
 const char *
 bz_entry_get_eol (BzEntry *self)
 {

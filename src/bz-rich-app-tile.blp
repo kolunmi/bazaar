@@ -78,17 +78,29 @@ template $BzRichAppTile: $BzListTile {
         orientation: vertical;
         spacing: 5;
 
-        Label title {
-          css-name: "app-tile-title";
+        Box {
+          spacing: 6;
+          Label title {
+            css-name: "app-tile-title";
 
-          styles [
-            "heading",
-          ]
+            styles [
+              "heading",
+            ]
 
-          xalign: 0.0;
-          ellipsize: end;
-          label: bind template.group as <$BzEntryGroup>.title;
-          max-width-chars: 18;
+            xalign: 0.0;
+            ellipsize: end;
+            label: bind template.group as <$BzEntryGroup>.title;
+            max-width-chars: 18;
+          }
+
+          Image {
+             styles [
+               "accent",
+             ]
+            visible: bind template.group as <$BzEntryGroup>.is-verified;
+            icon-name: "verified-checkmark-symbolic";
+            pixel-size: 14;
+          }
         }
 
         Label description {
