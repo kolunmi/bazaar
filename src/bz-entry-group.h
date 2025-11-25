@@ -70,6 +70,9 @@ bz_entry_group_get_dark_accent_color (BzEntryGroup *self);
 gboolean
 bz_entry_group_get_is_flathub (BzEntryGroup *self);
 
+gboolean
+bz_entry_group_get_is_verified (BzEntryGroup *self);
+
 const char *
 bz_entry_group_get_search_tokens (BzEntryGroup *self);
 
