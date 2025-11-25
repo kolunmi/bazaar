@@ -487,6 +487,10 @@ window.flathub {
   --flag-gradient: linear-gradient(to bottom, #FF9CCE 0%, #FF9CCE 20%, #FF52BF 20%, #FF52BF 40%, #200044 40%, #200044 60%, #675FFF 60%, #675FFF 80%, #8DA7FF 80%, #8DA7FF 100%);
 }
 
+.accent-button.twodimensionalsexual-theme {
+  --flag-gradient: linear-gradient(to bottom,#f3d364 0%, #f3d364 20%,#ffffff 20%, #ffffff 40%, #7caced 40%, #7caced 60%, #ffffff 60%, #ffffff 80%, #f3d364 80%, #f3d364 100%);
+}
+
 /* Category buttons styling modified from GNOME Software*/
 .category-tile {
   font-weight: 700;

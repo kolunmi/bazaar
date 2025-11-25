@@ -1088,6 +1088,10 @@ msgstr "Полісексуальний прапор"
 msgid "Omnisexual Pride Colors"
 msgstr "Омнісексуальний прапор"
 
+#: src/bz-preferences-dialog.c:44
+msgid "2Dsexual Pride Colors"
+msgstr "2Dсексуалів гордості прапор"
+
 #: src/bz-releases-dialog.blp:5 src/bz-releases-list.blp:26
 msgid "Version History"
 msgstr "Історія версій"

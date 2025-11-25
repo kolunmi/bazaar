@@ -882,6 +882,10 @@ msgstr "Polysexual Vlajka"
 msgid "Omnisexual Flag"
 msgstr "Omnisexual Vlajka"
 
+#: src/bz-preferences-dialog.c:44
+msgid "2Dsexual Flag"
+msgstr "2Dseksuellenflagge"
+
 #: src/bz-search-widget.blp:69
 #, fuzzy
 msgid "Search Apps"

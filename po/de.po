@@ -862,6 +862,10 @@ msgstr "Polysexuellenflagge"
 msgid "Omnisexual Flag"
 msgstr "Omnisexuellenflagge"
 
+#: src/bz-preferences-dialog.c:44
+msgid "2Dsexual Flag"
+msgstr "2Dseksuellenflagge"
+
 #: src/bz-search-widget.blp:69
 msgid "Search Apps"
 msgstr "Anwedungen suchen"

@@ -1425,6 +1425,10 @@ msgstr "Polysexual Pride Colors"
 msgid "Omnisexual Pride Colors"
 msgstr "Omnisexual Pride Colors"
 
+#: src/bz-preferences-dialog.c:44
+msgid "2Dsexual Pride Colors"
+msgstr "2dsexual Pride Colors"
+
 #: src/bz-releases-dialog.blp:5 src/bz-releases-list.blp:26
 msgid "Version History"
 msgstr "Sürüm Geçmişi"

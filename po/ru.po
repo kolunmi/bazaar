@@ -1440,6 +1440,10 @@ msgstr "Цвета гордости полисексуалов"
 msgid "Omnisexual Pride Colors"
 msgstr "Цвета гордости омнисексуалов"
 
+#: src/bz-preferences-dialog.c:44
+msgid "2Dsexual Pride Colors"
+msgstr "Цвета гордости 2Dсексуалов"
+
 #: src/bz-releases-dialog.blp:5 src/bz-releases-list.blp:26
 msgid "Version History"
 msgstr "История версий"

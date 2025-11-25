@@ -825,6 +825,10 @@ msgstr ""
 msgid "Omnisexual Flag"
 msgstr ""
 
+#: src/bz-preferences-dialog.c:44
+msgid "2Dsexual Flag"
+msgstr ""
+
 #: src/bz-search-widget.blp:69
 msgid "Search Apps"
 msgstr "Търсете програми"

@@ -41,6 +41,7 @@ static const BarTheme bar_themes[] = {
   {   "genderfluid-flag",   "genderfluid-theme", N_ ("Genderfluid Pride Colors") },
   {    "polysexual-flag",    "polysexual-theme",  N_ ("Polysexual Pride Colors") },
   {    "omnisexual-flag",    "omnisexual-theme",  N_ ("Omnisexual Pride Colors") },
+  {    "twodimensionalsexual-flag",      "twodimensionalsexual-theme",    N_ ("2D Sexual Pride Colors") },
 };
 
 struct _BzPreferencesDialog

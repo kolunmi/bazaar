@@ -850,6 +850,10 @@ msgstr "علم التعدد الجنسي"
 msgid "Omnisexual Flag"
 msgstr "علم الشمولية الجنسية"
 
+#: src/bz-preferences-dialog.c:44
+msgid "2Dsexual Flag"
+msgstr "علم الشمولية الجنسية"
+
 #: src/bz-search-widget.blp:69
 msgid "Search Apps"
 msgstr "ابحث التطبيقات"

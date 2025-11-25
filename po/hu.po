@@ -1063,6 +1063,10 @@ msgstr "Poliszexuális színek"
 msgid "Omnisexual Pride Colors"
 msgstr "Omniszexuális színek"
 
+#: src/bz-preferences-dialog.c:44
+msgid "2Dsexual Pride Colors"
+msgstr "2Dseksuális színek"
+
 #: src/bz-releases-dialog.blp:5 src/bz-releases-list.blp:26
 msgid "Version History"
 msgstr "Verziótörténet"

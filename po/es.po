@@ -1040,6 +1040,10 @@ msgstr "Colores del Orgullo Polisexual"
 msgid "Omnisexual Pride Colors"
 msgstr "Colores del Orgullo Omnisexual "
 
+#: src/bz-preferences-dialog.c:44
+msgid "2Dsexual Pride Colors"
+msgstr "Colores del Orgullo 2Dsexual"
+
 #: src/bz-releases-dialog.blp:5 src/bz-releases-list.blp:25
 msgid "Version History"
 msgstr "Historial de versiones"

@@ -574,6 +574,25 @@ bz_global_progress_snapshot (GtkWidget   *widget,
           };
           append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
         }
+      else if (g_strcmp0 (theme, "twodimensionalsexual-flag") == 0)
+        {
+          const GdkRGBA colors[] = {
+            { 243.0 / 255.0, 211.0 / 255.0, 100.0 / 255.0, 1.0 },
+            { 255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 1.0 },
+            { 124.0 / 255.0, 172.0 / 255.0, 237.0 / 255.0, 1.0 },
+          };
+          const float offsets[] = {
+            0.0 / 3.0,
+            1.0 / 3.0,
+            2.0 / 3.0,
+          };
+          const float sizes[] = {
+            1.0 / 3.0,
+            1.0 / 3.0,
+            1.0 / 3.0,
+          };
+          append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
+        }
       else
         gtk_snapshot_append_color (snapshot, accent_color, &fraction_clip.bounds);
     }

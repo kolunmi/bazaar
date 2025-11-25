@@ -873,6 +873,10 @@ msgstr "Bandeira Polissexual"
 msgid "Omnisexual Flag"
 msgstr "Bandeira Omnissexual"
 
+#: src/bz-preferences-dialog.blp:60
+msgid "2Dsexual Flag"
+msgstr "Bandeira 2Dsexual"
+
 #: src/bz-search-widget.blp:69
 msgid "Search Apps"
 msgstr "Procurar Apps"

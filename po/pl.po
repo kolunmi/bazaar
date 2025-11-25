@@ -1174,6 +1174,10 @@ msgstr "Kolory dumy osób polyseksualnych"
 msgid "Omnisexual Pride Colors"
 msgstr "Kolory dumy osób omniseksualnych"
 
+#: src/bz-preferences-dialog.c:44
+msgid "2Dsexual Pride Colors"
+msgstr "Kolory dumy osób 2dsexualnych"
+
 #: src/bz-releases-dialog.blp:5 src/bz-releases-list.blp:26
 msgid "Version History"
 msgstr "Historia wersji"
