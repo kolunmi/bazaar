@@ -18,9 +18,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "bz-apps-page.h"
+#include <glib/gi18n.h>
+
 #include "bz-app-tile.h"
+#include "bz-apps-page.h"
 #include "bz-dynamic-list-view.h"
+#include "bz-flathub-category.h"
 
 struct _BzAppsPage
 {
@@ -264,6 +267,54 @@ bz_apps_page_new_with_carousel (const char *title,
   adw_navigation_page_set_title (ADW_NAVIGATION_PAGE (apps_page), title);
 
   return ADW_NAVIGATION_PAGE (apps_page);
+}
+
+AdwNavigationPage *
+bz_apps_page_new_from_category (BzFlathubCategory *category)
+{
+  g_autoptr (GListModel) model          = NULL;
+  g_autoptr (GListModel) carousel_model = NULL;
+  AdwNavigationPage *apps_page          = NULL;
+  const char        *title              = NULL;
+  g_autofree char   *subtitle           = NULL;
+  int                total_entries      = 0;
+  gboolean           is_spotlight       = FALSE;
+
+  g_return_val_if_fail (BZ_IS_FLATHUB_CATEGORY (category), NULL);
+
+  model = bz_flathub_category_dup_applications (category);
+  if (model == NULL)
+    return NULL;
+
+  title        = bz_flathub_category_get_display_name (category);
+  is_spotlight = bz_flathub_category_get_is_spotlight (category);
+
+  if (is_spotlight)
+    {
+      apps_page = bz_apps_page_new (title, model);
+    }
+  else
+    {
+      carousel_model = bz_flathub_category_dup_quality_applications (category);
+      total_entries  = bz_flathub_category_get_total_entries (category);
+
+      if (carousel_model != NULL && g_list_model_get_n_items (carousel_model) > 0)
+        {
+          apps_page = bz_apps_page_new_with_carousel (title, model, carousel_model);
+        }
+      else
+        {
+          apps_page = bz_apps_page_new (title, model);
+        }
+
+      if (total_entries > 0)
+        {
+          subtitle = g_strdup_printf (_ ("%d Applications"), total_entries);
+          bz_apps_page_set_subtitle (BZ_APPS_PAGE (apps_page), subtitle);
+        }
+    }
+
+  return apps_page;
 }
 
 void

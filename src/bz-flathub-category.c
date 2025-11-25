@@ -78,7 +78,7 @@ static const CategoryInfo category_info[] = {
   {   "recently-added",         N_ ("Recently Added"),      N_ ("New"),                    N_ ("More New"),        "io.github.kolumni.Bazaar.New" },
   { "recently-updated",       N_ ("Recently Updated"),  N_ ("Updated"),                N_ ("More Updated"),    "io.github.kolumni.Bazaar.Updated" },
   {           "mobile",                 N_ ("Mobile"),   N_ ("Mobile"),                 N_ ("More Mobile"),     "io.github.kolumni.Bazaar.Mobile" },
-  {               NULL,                          NULL,            NULL,                              NULL,                                  NULL }
+  {               NULL,                          NULL,            NULL,                               NULL,                                  NULL }
 };
 
 static const CategoryInfo *

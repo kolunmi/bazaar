@@ -608,7 +608,7 @@ more_apps_button_clicked_cb (BzFullView *self,
   else
     title = g_strdup (_ ("Other Apps"));
 
-  subtitle = g_strdup_printf (ngettext ("%d application", "%d applications", n_items), n_items);
+  subtitle = g_strdup_printf (ngettext ("%d Application", "%d Applications", n_items), n_items);
 
   apps_page = bz_apps_page_new (title, model);
   bz_apps_page_set_subtitle (BZ_APPS_PAGE (apps_page), subtitle);

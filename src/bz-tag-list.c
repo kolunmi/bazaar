@@ -107,7 +107,7 @@ search_finally (DexFuture *future,
 
           tag      = g_object_get_data (G_OBJECT (self), "current-tag");
           title    = g_strdup_printf (_ ("Apps Tagged \"%s\""), tag);
-          subtitle = g_strdup_printf (_ ("%d applications"), n_items);
+          subtitle = g_strdup_printf (_ ("%d Applications"), n_items);
 
           apps_page = bz_apps_page_new (title, model);
           bz_apps_page_set_subtitle (BZ_APPS_PAGE (apps_page), subtitle);

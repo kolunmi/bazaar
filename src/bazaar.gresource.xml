@@ -139,6 +139,7 @@
     <file alias="icons/scalable/actions/violence-none-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/violence-none-symbolic.svg</file>
 
     <file preprocess="xml-stripblanks">icons/scalable/actions/on-the-go-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/we-love-games-symbolic.svg</file>
 
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Create.svg</file>
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Develop.svg</file>

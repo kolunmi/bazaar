@@ -95,9 +95,9 @@ tile_clicked (BzEntryGroup *group,
               GtkButton    *button);
 
 static void
-show_more_clicked (const char *title,
-                   GListModel *model,
-                   GtkButton  *button);
+show_more_clicked (BzFlathubPage *self,
+                   GtkButton     *button,
+                   const char    *category_name);
 
 static void
 apps_page_select_cb (BzFlathubPage *self,
@@ -184,24 +184,17 @@ unbind_widget_cb (BzFlathubPage     *self,
 }
 
 static void
-show_more_mobile_clicked_cb (BzFlathubPage *self,
-                             GtkButton     *button)
+show_more_mobile_cb (BzFlathubPage *self,
+                     GtkButton     *button)
 {
-  g_autoptr (GListModel) model           = NULL;
-  g_autoptr (BzFlathubCategory) category = NULL;
+  show_more_clicked (self, button, "mobile");
+}
 
-  category = get_category_by_name (
-      bz_flathub_state_get_categories (
-          bz_state_info_get_flathub (self->state)),
-      "mobile");
-  if (category == NULL)
-    return;
-
-  model = bz_flathub_category_dup_applications (category);
-  if (model == NULL)
-    return;
-
-  show_more_clicked (_ ("Mobile Apps"), model, button);
+static void
+show_more_gaming_cb (BzFlathubPage *self,
+                     GtkButton     *button)
+{
+  show_more_clicked (self, button, "game");
 }
 
 static BzFlathubCategory *
@@ -306,7 +299,8 @@ bz_flathub_page_class_init (BzFlathubPageClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, unbind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, category_section_group_selected_cb);
   gtk_widget_class_bind_template_callback (widget_class, get_category_by_name_cb);
-  gtk_widget_class_bind_template_callback (widget_class, show_more_mobile_clicked_cb);
+  gtk_widget_class_bind_template_callback (widget_class, show_more_mobile_cb);
+  gtk_widget_class_bind_template_callback (widget_class, show_more_gaming_cb);
   gtk_widget_class_bind_template_callback (widget_class, featured_carousel_group_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, open_search_cb);
 }
@@ -367,21 +361,25 @@ tile_clicked (BzEntryGroup *group,
 }
 
 static void
-show_more_clicked (const char *title,
-                   GListModel *model,
-                   GtkButton  *button)
+show_more_clicked (BzFlathubPage *self,
+                   GtkButton     *button,
+                   const char    *category_name)
 {
-  GtkWidget         *self      = NULL;
-  GtkWidget         *nav_view  = NULL;
-  AdwNavigationPage *apps_page = NULL;
+  g_autoptr (BzFlathubCategory) category = NULL;
+  GtkWidget         *nav_view            = NULL;
+  AdwNavigationPage *apps_page           = NULL;
 
-  self = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_FLATHUB_PAGE);
-  g_assert (self != NULL);
+  category = get_category_by_name (
+      bz_flathub_state_get_categories (
+          bz_state_info_get_flathub (self->state)),
+      category_name);
+  if (category == NULL)
+    return;
+
+  apps_page = bz_apps_page_new_from_category (category);
 
   nav_view = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
   g_assert (nav_view != NULL);
-
-  apps_page = bz_apps_page_new (title, model);
 
   g_signal_connect_swapped (
       apps_page, "select",
