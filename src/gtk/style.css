@@ -309,11 +309,15 @@ toggle-group.huge * {
   background: linear-gradient(to right, #2f3d9f, #682889);
 }
 
-.otg .card:not(:hover):not(:active) {
+.wlg {
+  background: linear-gradient(to right, #821756, #136673);
+}
+
+.sp-section .card:not(:hover):not(:active) {
   background: transparent;
 }
 
-.otg .card {
+.sp-section .card {
   box-shadow: none;
 }
 
@@ -322,21 +326,25 @@ toggle-group.huge * {
     background: linear-gradient(to right, #c6eaf8, #c4f3c9);
   }
 
-  .otg .card:hover {
+  .wlg {
+    background: linear-gradient(to right, #fdcde0, #b0e5f0);
+  }
+
+  .sp-section .card:hover {
     background: rgba(255, 255, 255, 0.50);
   }
 
-  .otg .card:active {
+  .sp-section .card:active {
     background: rgba(255, 255, 255, 0.75);
   }
 }
 
-.otg-image {
+.sp-section-image {
 	margin-top: -95px;
 	margin-bottom: -95px;
 }
 
-.otg-title {
+.sp-section-title {
 	font-size: 3.5em;
 }
 
