@@ -18,7 +18,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#define G_LOG_DOMAIN "BAZAAR::CORE"
+#define G_LOG_DOMAIN  "BAZAAR::CORE"
+#define BAZAAR_MODULE "core"
 
 #define MAX_IDS_PER_BLOCKLIST 2048
 
@@ -42,12 +43,14 @@
 #include "bz-gnome-shell-search-provider.h"
 #include "bz-hash-table-object.h"
 #include "bz-inspector.h"
+#include "bz-io.h"
 #include "bz-newline-parser.h"
 #include "bz-parser.h"
 #include "bz-preferences-dialog.h"
 #include "bz-result.h"
 #include "bz-root-blocklist.h"
 #include "bz-root-curated-config.h"
+#include "bz-serializable.h"
 #include "bz-state-info.h"
 #include "bz-transaction-manager.h"
 #include "bz-util.h"
@@ -153,6 +156,9 @@ static DexFuture *
 init_fiber (GWeakRef *wr);
 
 static DexFuture *
+cache_flathub_fiber (GWeakRef *wr);
+
+static DexFuture *
 respond_to_flatpak_fiber (RespondToFlatpakData *data);
 
 static DexFuture *
@@ -167,6 +173,10 @@ init_sync_finally (DexFuture *future,
                    GWeakRef  *wr);
 
 static DexFuture *
+flathub_update_then (DexFuture *future,
+                     GWeakRef  *wr);
+
+static DexFuture *
 watch_backend_notifs_then_loop_cb (DexFuture *future,
                                    GWeakRef  *wr);
 
@@ -176,6 +186,10 @@ fiber_replace_entry (BzApplication *self,
 
 static void
 fiber_check_for_updates (BzApplication *self);
+
+static GFile *
+fiber_dup_flathub_cache_file (char   **path_out,
+                              GError **error);
 
 static gboolean
 periodic_timeout_cb (BzApplication *self);
@@ -739,11 +753,13 @@ bz_state_info_get_default (void)
 static DexFuture *
 init_fiber (GWeakRef *wr)
 {
-  g_autoptr (BzApplication) self    = NULL;
-  g_autoptr (GError) local_error    = NULL;
-  gboolean has_flathub              = FALSE;
-  gboolean result                   = FALSE;
-  g_autoptr (GHashTable) cached_set = NULL;
+  g_autoptr (BzApplication) self       = NULL;
+  g_autoptr (GError) local_error       = NULL;
+  gboolean has_flathub                 = FALSE;
+  gboolean result                      = FALSE;
+  g_autoptr (GHashTable) cached_set    = NULL;
+  g_autofree char *flathub_cache       = NULL;
+  g_autoptr (GFile) flathub_cache_file = NULL;
 
   bz_weak_get_or_return_reject (self, wr);
 
@@ -898,6 +914,98 @@ init_fiber (GWeakRef *wr)
     {
       g_warning ("Unable to enumerate cached entries: %s", local_error->message);
       g_clear_error (&local_error);
+    }
+
+  flathub_cache_file = fiber_dup_flathub_cache_file (&flathub_cache, &local_error);
+  if (flathub_cache_file != NULL)
+    {
+      if (dex_await_boolean (dex_file_query_exists (flathub_cache_file), NULL))
+        {
+          g_autoptr (GBytes) bytes = NULL;
+
+          bytes = dex_await_boxed (
+              dex_file_load_contents_bytes (flathub_cache_file),
+              &local_error);
+          if (bytes != NULL)
+            {
+              g_autoptr (GVariant) variant = NULL;
+
+              variant = g_variant_new_from_bytes (G_VARIANT_TYPE_VARDICT, bytes, FALSE);
+              if (variant == NULL)
+                {
+                  g_warning ("Failed to interpret cached flathub state from %s: %s",
+                             flathub_cache, local_error->message);
+                  g_clear_error (&local_error);
+                }
+
+              result = bz_serializable_deserialize (
+                  BZ_SERIALIZABLE (self->flathub), variant, &local_error);
+              if (result)
+                bz_state_info_set_busy (self->state, FALSE);
+              else
+                {
+                  g_warning ("Failed to deserialize cached flathub state from %s: %s",
+                             flathub_cache, local_error->message);
+                  g_clear_error (&local_error);
+                }
+            }
+          else
+            {
+              g_warning ("Failed to decache cache flathub state from %s: %s",
+                         flathub_cache, local_error->message);
+              g_clear_error (&local_error);
+            }
+        }
+    }
+  else
+    {
+      g_warning ("Unable to ensure cache directory: %s", local_error->message);
+      g_clear_error (&local_error);
+    }
+
+  return dex_future_new_true ();
+}
+
+static DexFuture *
+cache_flathub_fiber (GWeakRef *wr)
+{
+  g_autoptr (BzApplication) self       = NULL;
+  g_autoptr (GError) local_error       = NULL;
+  gboolean         result              = FALSE;
+  g_autofree char *flathub_cache       = NULL;
+  g_autoptr (GFile) flathub_cache_file = NULL;
+
+  bz_weak_get_or_return_reject (self, wr);
+
+  flathub_cache_file = fiber_dup_flathub_cache_file (&flathub_cache, &local_error);
+  if (flathub_cache_file != NULL)
+    {
+      g_autoptr (GVariantBuilder) builder = NULL;
+      g_autoptr (GVariant) variant        = NULL;
+      g_autoptr (GBytes) bytes            = NULL;
+
+      builder = g_variant_builder_new (G_VARIANT_TYPE_VARDICT);
+      bz_serializable_serialize (BZ_SERIALIZABLE (self->flathub), builder);
+      variant = g_variant_builder_end (builder);
+      bytes   = g_variant_get_data_as_bytes (variant);
+
+      result = dex_await (
+          dex_file_replace_contents_bytes (
+              flathub_cache_file, bytes,
+              NULL, FALSE,
+              G_FILE_CREATE_REPLACE_DESTINATION),
+          &local_error);
+      if (!result)
+        {
+          g_warning ("Failed to cache flathub state to %s: %s",
+                     flathub_cache, local_error->message);
+          return dex_future_new_for_error (g_steal_pointer (&local_error));
+        }
+    }
+  else
+    {
+      g_warning ("Unable to ensure cache directory: %s", local_error->message);
+      return dex_future_new_for_error (g_steal_pointer (&local_error));
     }
 
   return dex_future_new_true ();
@@ -1344,6 +1452,7 @@ init_finally (DexFuture *future,
       GtkWindow *window = NULL;
 
       bz_state_info_set_online (self->state, FALSE);
+      bz_state_info_set_busy (self->state, FALSE);
       window = gtk_application_get_active_window (GTK_APPLICATION (self));
       if (window != NULL)
         {
@@ -1355,7 +1464,6 @@ init_finally (DexFuture *future,
           bz_show_error_for_widget (GTK_WIDGET (window), error_string);
         }
     }
-  bz_state_info_set_busy (self->state, FALSE);
 
   return dex_future_new_true ();
 }
@@ -1391,8 +1499,23 @@ init_sync_finally (DexFuture *future,
           bz_show_error_for_widget (GTK_WIDGET (window), error_string);
         }
     }
+  bz_state_info_set_busy (self->state, FALSE);
 
   return dex_future_new_true ();
+}
+
+static DexFuture *
+flathub_update_then (DexFuture *future,
+                     GWeakRef  *wr)
+{
+  g_autoptr (BzApplication) self = NULL;
+
+  bz_weak_get_or_return_reject (self, wr);
+  return dex_scheduler_spawn (
+      dex_scheduler_get_default (),
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) cache_flathub_fiber,
+      bz_track_weak (self), bz_weak_release);
 }
 
 static DexFuture *
@@ -1634,6 +1757,33 @@ fiber_check_for_updates (BzApplication *self)
     }
 
   bz_state_info_set_checking_for_updates (self->state, FALSE);
+}
+
+static GFile *
+fiber_dup_flathub_cache_file (char   **path_out,
+                              GError **error)
+{
+  gboolean         result           = FALSE;
+  g_autofree char *module_dir       = NULL;
+  g_autoptr (GFile) module_dir_file = NULL;
+  g_autofree char *path             = NULL;
+  g_autoptr (GFile) file            = NULL;
+
+  module_dir      = bz_dup_module_dir ();
+  module_dir_file = g_file_new_for_path (module_dir);
+  result          = dex_await (
+      dex_file_make_directory_with_parents (
+          module_dir_file),
+      error);
+  if (!result)
+    return NULL;
+
+  path = g_build_filename (module_dir, "flathub-cache", NULL);
+  file = g_file_new_for_path (path);
+
+  if (path_out != NULL)
+    *path_out = g_steal_pointer (&path);
+  return g_steal_pointer (&file);
 }
 
 static gboolean
@@ -2518,8 +2668,19 @@ validate_group_for_ui (BzApplication *self,
 static inline DexFuture *
 make_sync_future (BzApplication *self)
 {
+  g_autoptr (DexFuture) backend_future = NULL;
+  g_autoptr (DexFuture) flathub_future = NULL;
+
+  backend_future = bz_backend_retrieve_remote_entries (BZ_BACKEND (self->flatpak), NULL);
+
+  flathub_future = bz_flathub_state_update_to_today (self->flathub);
+  flathub_future = dex_future_then (
+      flathub_future,
+      (DexFutureCallback) flathub_update_then,
+      bz_track_weak (self), bz_weak_release);
+
   return dex_future_all_race (
-      bz_backend_retrieve_remote_entries (BZ_BACKEND (self->flatpak), NULL),
-      bz_flathub_state_update_to_today (self->flathub),
+      g_steal_pointer (&backend_future),
+      g_steal_pointer (&flathub_future),
       NULL);
 }

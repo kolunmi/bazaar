@@ -32,6 +32,7 @@
 #include "bz-flathub-state.h"
 #include "bz-global-net.h"
 #include "bz-io.h"
+#include "bz-serializable.h"
 #include "bz-util.h"
 
 struct _BzFlathubState
@@ -48,7 +49,14 @@ struct _BzFlathubState
   DexFuture *initializing;
 };
 
-G_DEFINE_FINAL_TYPE (BzFlathubState, bz_flathub_state, G_TYPE_OBJECT);
+static void
+serializable_iface_init (BzSerializableInterface *iface);
+
+G_DEFINE_FINAL_TYPE_WITH_CODE (
+    BzFlathubState,
+    bz_flathub_state,
+    G_TYPE_OBJECT,
+    G_IMPLEMENT_INTERFACE (BZ_TYPE_SERIALIZABLE, serializable_iface_init))
 
 static GListModel *bz_flathub_state_dup_apps_of_the_day_week (BzFlathubState *self);
 
@@ -74,21 +82,17 @@ initialize_fiber (GWeakRef *wr);
 static DexFuture *
 initialize_finally (DexFuture *future,
                     GWeakRef  *wr);
-static gboolean
-bz_flathub_state_get_has_connection_error (BzFlathubState *self);
+
+static void
+clear (BzFlathubState *self);
 
 static void
 bz_flathub_state_dispose (GObject *object)
 {
   BzFlathubState *self = BZ_FLATHUB_STATE (object);
 
-  dex_clear (&self->initializing);
-
-  g_clear_pointer (&self->for_day, g_free);
   g_clear_pointer (&self->map_factory, g_object_unref);
-  g_clear_pointer (&self->app_of_the_day, g_free);
-  g_clear_pointer (&self->apps_of_the_week, g_object_unref);
-  g_clear_pointer (&self->categories, g_object_unref);
+  clear (self);
 
   G_OBJECT_CLASS (bz_flathub_state_parent_class)->dispose (object);
 }
@@ -229,6 +233,164 @@ bz_flathub_state_init (BzFlathubState *self)
 {
 }
 
+static void
+bz_flathub_state_real_serialize (BzSerializable  *serializable,
+                                 GVariantBuilder *builder)
+{
+  BzFlathubState *self = BZ_FLATHUB_STATE (serializable);
+
+  if (self->initializing != NULL)
+    return;
+
+  if (self->for_day != NULL)
+    g_variant_builder_add (builder, "{sv}", "for-day", g_variant_new_string (self->for_day));
+  if (self->app_of_the_day != NULL)
+    g_variant_builder_add (builder, "{sv}", "app-of-the-day", g_variant_new_string (self->app_of_the_day));
+  if (self->apps_of_the_week != NULL)
+    {
+      guint n_items = 0;
+
+      n_items = g_list_model_get_n_items (G_LIST_MODEL (self->apps_of_the_week));
+      if (n_items > 0)
+        {
+          g_autoptr (GVariantBuilder) sub_builder = NULL;
+
+          sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("as"));
+          for (guint i = 0; i < n_items; i++)
+            {
+              const char *string = NULL;
+
+              string = gtk_string_list_get_string (self->apps_of_the_week, i);
+              g_variant_builder_add (sub_builder, "s", string);
+            }
+
+          g_variant_builder_add (builder, "{sv}", "apps-of-the-week", g_variant_builder_end (sub_builder));
+        }
+    }
+  if (self->categories != NULL)
+    {
+      guint n_items = 0;
+
+      n_items = g_list_model_get_n_items (G_LIST_MODEL (self->categories));
+      if (n_items > 0)
+        {
+          g_autoptr (GVariantBuilder) sub_builder = NULL;
+
+          sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("av"));
+          for (guint i = 0; i < n_items; i++)
+            {
+              g_autoptr (BzFlathubCategory) category       = NULL;
+              g_autoptr (GVariantBuilder) category_builder = NULL;
+
+              category         = g_list_model_get_item (G_LIST_MODEL (self->categories), i);
+              category_builder = g_variant_builder_new (G_VARIANT_TYPE_VARDICT);
+
+              bz_serializable_serialize (BZ_SERIALIZABLE (category), category_builder);
+              g_variant_builder_add (sub_builder, "v", g_variant_builder_end (category_builder));
+            }
+
+          g_variant_builder_add (builder, "{sv}", "categories", g_variant_builder_end (sub_builder));
+        }
+    }
+}
+
+static gboolean
+bz_flathub_state_real_deserialize (BzSerializable *serializable,
+                                   GVariant       *import,
+                                   GError        **error)
+{
+  BzFlathubState *self          = BZ_FLATHUB_STATE (serializable);
+  gboolean        result        = FALSE;
+  g_autoptr (GVariantIter) iter = NULL;
+
+  if (self->initializing != NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_BUSY,
+                   "Cannot perform serialization operations while initializing!");
+      return FALSE;
+    }
+
+  clear (self);
+
+  iter = g_variant_iter_new (import);
+  for (;;)
+    {
+      g_autofree char *key       = NULL;
+      g_autoptr (GVariant) value = NULL;
+
+      /* TODO automate this, this is awful */
+      if (!g_variant_iter_next (iter, "{sv}", &key, &value))
+        break;
+
+      if (g_strcmp0 (key, "for-day") == 0)
+        self->for_day = g_variant_dup_string (value, NULL);
+      else if (g_strcmp0 (key, "app-of-the-day") == 0)
+        self->app_of_the_day = g_variant_dup_string (value, NULL);
+      else if (g_strcmp0 (key, "apps-of-the-week") == 0)
+        {
+          g_autoptr (GtkStringList) list     = NULL;
+          g_autoptr (GVariantIter) list_iter = NULL;
+
+          list = gtk_string_list_new (NULL);
+
+          list_iter = g_variant_iter_new (value);
+          for (;;)
+            {
+              g_autofree char *id = NULL;
+
+              if (!g_variant_iter_next (list_iter, "s", &id))
+                break;
+              gtk_string_list_append (list, id);
+            }
+
+          self->apps_of_the_week = g_steal_pointer (&list);
+        }
+      else if (g_strcmp0 (key, "categories") == 0)
+        {
+          g_autoptr (GListStore) categories        = NULL;
+          g_autoptr (GVariantIter) categories_iter = NULL;
+
+          categories = g_list_store_new (BZ_TYPE_FLATHUB_CATEGORY);
+
+          categories_iter = g_variant_iter_new (value);
+          for (;;)
+            {
+              g_autoptr (GVariant) category_import   = NULL;
+              g_autoptr (BzFlathubCategory) category = NULL;
+
+              if (!g_variant_iter_next (categories_iter, "v", &category_import))
+                break;
+
+              category = bz_flathub_category_new ();
+              result   = bz_serializable_deserialize (
+                  BZ_SERIALIZABLE (category), category_import, error);
+              if (!result)
+                return FALSE;
+
+              g_object_bind_property (self, "map-factory", category, "map-factory", G_BINDING_SYNC_CREATE);
+              g_list_store_append (categories, category);
+            }
+
+          self->categories = g_steal_pointer (&categories);
+        }
+    }
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_OF_THE_DAY]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_OF_THE_DAY_GROUP]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APPS_OF_THE_WEEK]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APPS_OF_THE_DAY_WEEK]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CATEGORIES]);
+
+  return TRUE;
+}
+
+static void
+serializable_iface_init (BzSerializableInterface *iface)
+{
+  iface->serialize   = bz_flathub_state_real_serialize;
+  iface->deserialize = bz_flathub_state_real_deserialize;
+}
+
 BzFlathubState *
 bz_flathub_state_new (void)
 {
@@ -330,7 +492,7 @@ bz_flathub_state_get_categories (BzFlathubState *self)
   return G_LIST_MODEL (self->categories);
 }
 
-static gboolean
+gboolean
 bz_flathub_state_get_has_connection_error (BzFlathubState *self)
 {
   g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), FALSE);
@@ -343,13 +505,7 @@ bz_flathub_state_set_for_day (BzFlathubState *self,
 {
   dex_return_error_if_fail (BZ_IS_FLATHUB_STATE (self));
 
-  dex_clear (&self->initializing);
-
-  g_clear_pointer (&self->for_day, g_free);
-  g_clear_pointer (&self->app_of_the_day, g_free);
-  g_clear_pointer (&self->apps_of_the_week, g_object_unref);
-  g_clear_pointer (&self->categories, g_object_unref);
-  self->has_connection_error = FALSE;
+  clear (self);
 
   if (for_day != NULL)
     {
@@ -803,6 +959,17 @@ bz_flathub_state_search_keyword (BzFlathubState *self,
       bz_weak_release);
 
   return bz_result_new (g_steal_pointer (&future));
+}
+
+static void
+clear (BzFlathubState *self)
+{
+  dex_clear (&self->initializing);
+  g_clear_pointer (&self->for_day, g_free);
+  g_clear_pointer (&self->app_of_the_day, g_free);
+  g_clear_pointer (&self->apps_of_the_week, g_object_unref);
+  g_clear_pointer (&self->categories, g_object_unref);
+  self->has_connection_error = FALSE;
 }
 
 /* End of bz-flathub-state.c */
