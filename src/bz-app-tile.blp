@@ -45,7 +45,7 @@ template $BzAppTile: Button {
         Box {
           orientation: horizontal;
           spacing: 6;
-          margin-end: 12;
+          margin-end: 15;
 
           Label {
             css-name: "app-tile-title";
@@ -56,7 +56,6 @@ template $BzAppTile: Button {
             xalign: 0.0;
             ellipsize: end;
             label: bind template.group as <$BzEntryGroup>.title;
-            max-width-chars: 18;
           }
 
           Image {
