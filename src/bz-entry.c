@@ -1256,38 +1256,38 @@ bz_entry_real_serialize (BzSerializable  *serializable,
     }
 
   if (priv->verification_status != NULL)
-  {
-    gboolean verified                 = FALSE;
-    g_autofree char *method           = NULL;
-    g_autofree char *website          = NULL;
-    g_autofree char *login_name       = NULL;
-    g_autofree char *login_provider   = NULL;
-    g_autofree char *timestamp        = NULL;
-    gboolean login_is_organization    = FALSE;
+    {
+      gboolean         verified              = FALSE;
+      g_autofree char *method                = NULL;
+      g_autofree char *website               = NULL;
+      g_autofree char *login_name            = NULL;
+      g_autofree char *login_provider        = NULL;
+      g_autofree char *timestamp             = NULL;
+      gboolean         login_is_organization = FALSE;
 
-    g_object_get (priv->verification_status,
-                  "verified", &verified,
-                  "method", &method,
-                  "website", &website,
-                  "login-name", &login_name,
-                  "login-provider", &login_provider,
-                  "timestamp", &timestamp,
-                  "login-is-organization", &login_is_organization,
-                  NULL);
+      g_object_get (priv->verification_status,
+                    "verified", &verified,
+                    "method", &method,
+                    "website", &website,
+                    "login-name", &login_name,
+                    "login-provider", &login_provider,
+                    "timestamp", &timestamp,
+                    "login-is-organization", &login_is_organization,
+                    NULL);
 
-    g_variant_builder_add (builder, "{sv}", "verification-verified", g_variant_new_boolean (verified));
-    if (method != NULL)
-      g_variant_builder_add (builder, "{sv}", "verification-method", g_variant_new_string (method));
-    if (website != NULL)
-      g_variant_builder_add (builder, "{sv}", "verification-website", g_variant_new_string (website));
-    if (login_name != NULL)
-      g_variant_builder_add (builder, "{sv}", "verification-login-name", g_variant_new_string (login_name));
-    if (login_provider != NULL)
-      g_variant_builder_add (builder, "{sv}", "verification-login-provider", g_variant_new_string (login_provider));
-    if (timestamp != NULL)
-      g_variant_builder_add (builder, "{sv}", "verification-timestamp", g_variant_new_string (timestamp));
-    g_variant_builder_add (builder, "{sv}", "verification-login-is-organization", g_variant_new_boolean (login_is_organization));
-  }
+      g_variant_builder_add (builder, "{sv}", "verification-verified", g_variant_new_boolean (verified));
+      if (method != NULL)
+        g_variant_builder_add (builder, "{sv}", "verification-method", g_variant_new_string (method));
+      if (website != NULL)
+        g_variant_builder_add (builder, "{sv}", "verification-website", g_variant_new_string (website));
+      if (login_name != NULL)
+        g_variant_builder_add (builder, "{sv}", "verification-login-name", g_variant_new_string (login_name));
+      if (login_provider != NULL)
+        g_variant_builder_add (builder, "{sv}", "verification-login-provider", g_variant_new_string (login_provider));
+      if (timestamp != NULL)
+        g_variant_builder_add (builder, "{sv}", "verification-timestamp", g_variant_new_string (timestamp));
+      g_variant_builder_add (builder, "{sv}", "verification-login-is-organization", g_variant_new_boolean (login_is_organization));
+    }
 
   g_variant_builder_add (builder, "{sv}", "is-flathub", g_variant_new_boolean (priv->is_flathub));
   if (priv->is_flathub)
@@ -1800,8 +1800,8 @@ bz_entry_get_developer (BzEntry *self)
 gboolean
 bz_entry_is_verified (BzEntry *self)
 {
-  BzEntryPrivate *priv = NULL;
-  gboolean verified = FALSE;
+  BzEntryPrivate *priv     = NULL;
+  gboolean        verified = FALSE;
 
   g_return_val_if_fail (BZ_IS_ENTRY (self), FALSE);
   priv = bz_entry_get_instance_private (self);
