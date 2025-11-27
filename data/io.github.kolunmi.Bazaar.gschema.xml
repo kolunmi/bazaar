@@ -29,6 +29,11 @@
     <key name="global-progress-bar-theme" type="s">
       <choices>
         <choice value="accent-color"/>
+        <choice value="construction"/>
+        <choice value="blueprint"/>
+        <choice value="mpl-viridis"/>
+        <choice value="mpl-plasma"/>
+        <choice value="aqua-blue"/>
         <choice value="pride-rainbow-flag"/>
         <choice value="lesbian-pride-flag"/>
         <choice value="transgender-flag"/>

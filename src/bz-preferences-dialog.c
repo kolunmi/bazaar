@@ -30,6 +30,11 @@ typedef struct
 
 static const BarTheme bar_themes[] = {
   {       "accent-color",  "accent-color-theme",             N_ ("Accent Color") },
+  {       "construction",  "construction-theme",       N_ ("Under Construction") },
+  {          "blueprint",     "blueprint-theme",                N_ ("Blueprint") },
+  {        "mpl-viridis",   "mpl-viridis-theme",       N_ ("MatPlotLib Viridis") },
+  {         "mpl-plasma",    "mpl-plasma-theme",        N_ ("MatPlotLib Plasma") },
+  {          "aqua-blue",     "aqua-blue-theme",                N_ ("Aqua Blue") },
   { "pride-rainbow-flag", "pride-rainbow-theme",             N_ ("Pride Colors") },
   { "lesbian-pride-flag", "lesbian-pride-theme",     N_ ("Lesbian Pride Colors") },
   {   "transgender-flag",   "transgender-theme", N_ ("Transgender Pride Colors") },
