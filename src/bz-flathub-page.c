@@ -31,7 +31,6 @@
 #include "bz-flathub-page.h"
 #include "bz-inhibited-scrollable.h"
 #include "bz-section-view.h"
-#include "bz-window.h"
 
 struct _BzFlathubPage
 {
@@ -69,9 +68,9 @@ get_category_by_name (GListModel *categories,
                       const char *name);
 
 static void
-online_changed (BzFlathubPage *self,
-                GParamSpec    *pspec,
-                BzStateInfo   *info);
+invalidating_state_changed (BzFlathubPage *self,
+                            GParamSpec    *pspec,
+                            BzStateInfo   *info);
 
 static void
 check_online (BzFlathubPage *self);
@@ -123,7 +122,7 @@ bz_flathub_page_dispose (GObject *object)
   BzFlathubPage *self = BZ_FLATHUB_PAGE (object);
 
   if (self->state != NULL)
-    g_signal_handlers_disconnect_by_func (self->state, online_changed, self);
+    g_signal_handlers_disconnect_by_func (self->state, invalidating_state_changed, self);
   g_clear_object (&self->state);
 
   G_OBJECT_CLASS (bz_flathub_page_parent_class)->dispose (object);
@@ -325,7 +324,7 @@ bz_flathub_page_set_state (BzFlathubPage *self,
   g_return_if_fail (state == NULL || BZ_IS_STATE_INFO (state));
 
   if (self->state != NULL)
-    g_signal_handlers_disconnect_by_func (self->state, online_changed, self);
+    g_signal_handlers_disconnect_by_func (self->state, invalidating_state_changed, self);
 
   g_clear_object (&self->state);
   if (state != NULL)
@@ -333,8 +332,13 @@ bz_flathub_page_set_state (BzFlathubPage *self,
       self->state = g_object_ref (state);
       g_signal_connect_swapped (
           state,
+          "notify::flathub",
+          G_CALLBACK (invalidating_state_changed),
+          self);
+      g_signal_connect_swapped (
+          state,
           "notify::online",
-          G_CALLBACK (online_changed),
+          G_CALLBACK (invalidating_state_changed),
           self);
     }
 
@@ -405,9 +409,9 @@ category_section_group_selected_cb (BzFlathubPage            *self,
 }
 
 static void
-online_changed (BzFlathubPage *self,
-                GParamSpec    *pspec,
-                BzStateInfo   *info)
+invalidating_state_changed (BzFlathubPage *self,
+                            GParamSpec    *pspec,
+                            BzStateInfo   *info)
 {
   check_online (self);
 }
@@ -415,10 +419,12 @@ online_changed (BzFlathubPage *self,
 static void
 check_online (BzFlathubPage *self)
 {
-  const char *page = NULL;
+  BzFlathubState *flathub = NULL;
+  const char     *page    = NULL;
 
-  if (self->state != NULL &&
-      bz_state_info_get_online (self->state))
+  if (self->state != NULL)
+    flathub = bz_state_info_get_flathub (self->state);
+  if (flathub != NULL)
     page = "content";
   else
     page = "offline";

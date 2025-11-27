@@ -101,6 +101,8 @@ struct _BzApplication
 
   BzFlatpakInstance *flatpak;
   BzFlathubState    *flathub;
+  BzFlathubState    *tmp_flathub;
+
   BzYamlParser      *curated_parser;
   BzContentProvider *curated_provider;
 
@@ -173,8 +175,8 @@ init_sync_finally (DexFuture *future,
                    GWeakRef  *wr);
 
 static DexFuture *
-flathub_update_then (DexFuture *future,
-                     GWeakRef  *wr);
+flathub_update_finally (DexFuture *future,
+                        GWeakRef  *wr);
 
 static DexFuture *
 watch_backend_notifs_then_loop_cb (DexFuture *future,
@@ -277,7 +279,7 @@ static gboolean
 validate_group_for_ui (BzApplication *self,
                        BzEntryGroup  *group);
 
-static inline DexFuture *
+static DexFuture *
 make_sync_future (BzApplication *self);
 
 static void
@@ -312,6 +314,7 @@ bz_application_dispose (GObject *object)
   g_clear_object (&self->group_filter);
   g_clear_object (&self->application_factory);
   g_clear_object (&self->flathub);
+  g_clear_object (&self->tmp_flathub);
   g_clear_object (&self->cache);
   g_clear_object (&self->groups);
   g_clear_object (&self->installed_apps);
@@ -780,9 +783,7 @@ init_fiber (GWeakRef *wr)
   if (local_error != NULL)
     return dex_future_new_for_error (g_steal_pointer (&local_error));
 
-  if (has_flathub)
-    bz_state_info_set_flathub (self->state, self->flathub);
-  else
+  if (!has_flathub)
     {
       GtkWindow       *window   = NULL;
       g_autofree char *response = NULL;
@@ -825,9 +826,11 @@ init_fiber (GWeakRef *wr)
               bz_flatpak_instance_ensure_has_flathub (self->flatpak, NULL),
               &local_error);
           if (!result)
-            return dex_future_new_for_error (g_steal_pointer (&local_error));
-
-          bz_state_info_set_flathub (self->state, self->flathub);
+            {
+              g_warning ("Failed to install flathub: %s",
+                         local_error->message);
+              g_clear_error (&local_error);
+            }
         }
     }
 
@@ -928,7 +931,8 @@ init_fiber (GWeakRef *wr)
               &local_error);
           if (bytes != NULL)
             {
-              g_autoptr (GVariant) variant = NULL;
+              g_autoptr (GVariant) variant       = NULL;
+              g_autoptr (BzFlathubState) flathub = NULL;
 
               variant = g_variant_new_from_bytes (G_VARIANT_TYPE_VARDICT, bytes, FALSE);
               if (variant == NULL)
@@ -938,10 +942,16 @@ init_fiber (GWeakRef *wr)
                   g_clear_error (&local_error);
                 }
 
-              result = bz_serializable_deserialize (
-                  BZ_SERIALIZABLE (self->flathub), variant, &local_error);
+              flathub = bz_flathub_state_new ();
+              result  = bz_serializable_deserialize (
+                  BZ_SERIALIZABLE (flathub), variant, &local_error);
               if (result)
-                bz_state_info_set_busy (self->state, FALSE);
+                {
+                  bz_state_info_set_busy (self->state, FALSE);
+                  self->flathub = g_steal_pointer (&flathub);
+                  bz_flathub_state_set_map_factory (self->flathub, self->application_factory);
+                  bz_state_info_set_flathub (self->state, self->flathub);
+                }
               else
                 {
                   g_warning ("Failed to deserialize cached flathub state from %s: %s",
@@ -999,13 +1009,13 @@ cache_flathub_fiber (GWeakRef *wr)
         {
           g_warning ("Failed to cache flathub state to %s: %s",
                      flathub_cache, local_error->message);
-          return dex_future_new_for_error (g_steal_pointer (&local_error));
+          g_clear_error (&local_error);
         }
     }
   else
     {
       g_warning ("Unable to ensure cache directory: %s", local_error->message);
-      return dex_future_new_for_error (g_steal_pointer (&local_error));
+      g_clear_error (&local_error);
     }
 
   return dex_future_new_true ();
@@ -1474,48 +1484,44 @@ init_sync_finally (DexFuture *future,
 {
   g_autoptr (BzApplication) self = NULL;
   g_autoptr (GError) local_error = NULL;
-  const GValue *value            = NULL;
 
   bz_weak_get_or_return_reject (self, wr);
 
-  value = dex_future_get_value (future, &local_error);
-  if (value != NULL)
-    bz_state_info_set_online (self->state, TRUE);
-  else
-    {
-      GtkWindow *window = NULL;
-
-      bz_state_info_set_online (self->state, FALSE);
-      bz_state_info_set_background_task_label (self->state, NULL);
-
-      window = gtk_application_get_active_window (GTK_APPLICATION (self));
-      if (window != NULL)
-        {
-          g_autofree char *error_string = NULL;
-
-          error_string = g_strdup_printf (
-              "Could not initialize: %s",
-              local_error->message);
-          bz_show_error_for_widget (GTK_WIDGET (window), error_string);
-        }
-    }
+  bz_state_info_set_background_task_label (self->state, NULL);
   bz_state_info_set_busy (self->state, FALSE);
 
   return dex_future_new_true ();
 }
 
 static DexFuture *
-flathub_update_then (DexFuture *future,
-                     GWeakRef  *wr)
+flathub_update_finally (DexFuture *future,
+                        GWeakRef  *wr)
 {
   g_autoptr (BzApplication) self = NULL;
 
   bz_weak_get_or_return_reject (self, wr);
-  return dex_scheduler_spawn (
-      dex_scheduler_get_default (),
-      bz_get_dex_stack_size (),
-      (DexFiberFunc) cache_flathub_fiber,
-      bz_track_weak (self), bz_weak_release);
+
+  if (dex_future_is_resolved (future))
+    {
+      g_clear_object (&self->flathub);
+      g_assert (self->tmp_flathub != NULL);
+      self->flathub = g_steal_pointer (&self->tmp_flathub);
+      bz_flathub_state_set_map_factory (self->flathub, self->application_factory);
+      bz_state_info_set_online (self->state, TRUE);
+      bz_state_info_set_flathub (self->state, self->flathub);
+
+      return dex_scheduler_spawn (
+          dex_scheduler_get_default (),
+          bz_get_dex_stack_size (),
+          (DexFiberFunc) cache_flathub_fiber,
+          bz_track_weak (self), bz_weak_release);
+    }
+  else
+    {
+      g_clear_object (&self->tmp_flathub);
+      bz_state_info_set_online (self->state, FALSE);
+      return dex_ref (future);
+    }
 }
 
 static DexFuture *
@@ -1789,16 +1795,16 @@ fiber_dup_flathub_cache_file (char   **path_out,
 static gboolean
 periodic_timeout_cb (BzApplication *self)
 {
-  /* If for some reason the last update check is still happening, let it
-     finish */
-  if (self->periodic_sync == NULL ||
-      !dex_future_is_pending (self->periodic_sync))
-    {
-      dex_clear (&self->periodic_sync);
-      if (self->n_incoming == 0)
-        self->periodic_sync = make_sync_future (self);
-    }
+  if (self->periodic_sync != NULL &&
+      dex_future_is_pending (self->periodic_sync))
+    /* If for some reason the last update check is still happening, let it
+       finish */
+    goto done;
 
+  dex_clear (&self->periodic_sync);
+  self->periodic_sync = make_sync_future (self);
+
+done:
   return G_SOURCE_CONTINUE;
 }
 
@@ -2352,9 +2358,6 @@ init_service_struct (BzApplication *self,
       self->curated_provider, G_LIST_MODEL (self->curated_configs_to_files));
   bz_content_provider_set_parser (self->curated_provider, BZ_PARSER (self->curated_parser));
 
-  self->flathub = bz_flathub_state_new ();
-  bz_flathub_state_set_map_factory (self->flathub, self->application_factory);
-
   self->transactions = bz_transaction_manager_new ();
   bz_transaction_manager_set_config (self->transactions, self->config);
 
@@ -2366,7 +2369,6 @@ init_service_struct (BzApplication *self,
   bz_state_info_set_curated_configs (self->state, G_LIST_MODEL (self->curated_configs));
   bz_state_info_set_curated_provider (self->state, self->curated_provider);
   bz_state_info_set_entry_factory (self->state, self->entry_factory);
-  bz_state_info_set_flathub (self->state, self->flathub);
   bz_state_info_set_main_config (self->state, self->config);
   bz_state_info_set_search_engine (self->state, self->search_engine);
   bz_state_info_set_settings (self->state, self->settings);
@@ -2665,22 +2667,27 @@ validate_group_for_ui (BzApplication *self,
   return allowed_priority <= blocked_priority;
 }
 
-static inline DexFuture *
+static DexFuture *
 make_sync_future (BzApplication *self)
 {
   g_autoptr (DexFuture) backend_future = NULL;
   g_autoptr (DexFuture) flathub_future = NULL;
+  g_autoptr (DexFuture) ret_future     = NULL;
 
   backend_future = bz_backend_retrieve_remote_entries (BZ_BACKEND (self->flatpak), NULL);
 
-  flathub_future = bz_flathub_state_update_to_today (self->flathub);
-  flathub_future = dex_future_then (
+  g_clear_object (&self->tmp_flathub);
+  self->tmp_flathub = bz_flathub_state_new ();
+
+  flathub_future = bz_flathub_state_update_to_today (self->tmp_flathub);
+  flathub_future = dex_future_finally (
       flathub_future,
-      (DexFutureCallback) flathub_update_then,
+      (DexFutureCallback) flathub_update_finally,
       bz_track_weak (self), bz_weak_release);
 
-  return dex_future_all_race (
-      g_steal_pointer (&backend_future),
-      g_steal_pointer (&flathub_future),
+  ret_future = dex_future_all (
+      dex_ref (backend_future),
+      dex_ref (flathub_future),
       NULL);
+  return g_steal_pointer (&ret_future);
 }
