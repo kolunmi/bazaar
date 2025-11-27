@@ -67,7 +67,7 @@ struct _BzWindow
   AdwViewStack        *main_view_stack;
   GtkStack            *main_stack;
   GtkLabel            *debug_id_label;
-  // GtkButton           *refresh;
+  GtkButton           *sync_button;
 };
 
 G_DEFINE_FINAL_TYPE (BzWindow, bz_window, ADW_TYPE_APPLICATION_WINDOW)
@@ -404,6 +404,15 @@ stop_transactions_cb (BzWindow  *self,
 }
 
 static void
+sync_cb (BzWindow  *self,
+         GtkButton *button)
+{
+  g_action_group_activate_action (
+      G_ACTION_GROUP (g_application_get_default ()),
+      "sync-remotes", NULL);
+}
+
+static void
 update_cb (BzWindow  *self,
            GtkButton *button)
 {
@@ -511,7 +520,7 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzWindow, toasts);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, toggle_transactions);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, toggle_transactions_sidebar);
-  // gtk_widget_class_bind_template_child (widget_class, BzWindow, refresh);
+  gtk_widget_class_bind_template_child (widget_class, BzWindow, sync_button);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, search_widget);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, update_button);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, transactions_pause);
@@ -536,7 +545,7 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, breakpoint_unapply_cb);
   gtk_widget_class_bind_template_callback (widget_class, pause_transactions_cb);
   gtk_widget_class_bind_template_callback (widget_class, stop_transactions_cb);
-  // gtk_widget_class_bind_template_callback (widget_class, refresh_cb);
+  gtk_widget_class_bind_template_callback (widget_class, sync_cb);
   gtk_widget_class_bind_template_callback (widget_class, update_cb);
   gtk_widget_class_bind_template_callback (widget_class, transactions_clear_cb);
   gtk_widget_class_bind_template_callback (widget_class, visible_page_changed_cb);

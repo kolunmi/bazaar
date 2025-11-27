@@ -325,6 +325,16 @@ template $BzWindow: Adw.ApplicationWindow {
                   [top]
                   Adw.HeaderBar top_header_bar {
                     [start]
+                    Button sync_button {
+                      has-tooltip: true;
+                      tooltip-text: _("Sync");
+                      icon-name: "view-refresh-symbolic";
+                      visible: bind $invert_boolean(template.state as <$BzStateInfo>.online as <bool>) as <bool>;
+                      sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.syncing as <bool>) as <bool>;
+                      clicked => $sync_cb(template);
+                    }
+
+                    [start]
                     Button update_button {
                       styles [
                         "suggested-action",

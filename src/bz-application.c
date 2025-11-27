@@ -167,6 +167,10 @@ static DexFuture *
 open_flatpakref_fiber (OpenFlatpakrefData *data);
 
 static DexFuture *
+backend_sync_finally (DexFuture *future,
+                      GWeakRef  *wr);
+
+static DexFuture *
 init_finally (DexFuture *future,
               GWeakRef  *wr);
 
@@ -608,6 +612,23 @@ bz_application_search_action (GSimpleAction *action,
 }
 
 static void
+bz_application_sync_remotes_action (GSimpleAction *action,
+                                    GVariant      *parameter,
+                                    gpointer       user_data)
+{
+  BzApplication *self = user_data;
+
+  g_assert (BZ_IS_APPLICATION (self));
+
+  if (self->periodic_sync != NULL &&
+      dex_future_is_pending (self->periodic_sync))
+    return;
+
+  dex_clear (&self->periodic_sync);
+  self->periodic_sync = make_sync_future (self);
+}
+
+static void
 bz_application_about_action (GSimpleAction *action,
                              GVariant      *parameter,
                              gpointer       user_data)
@@ -690,6 +711,7 @@ static const GActionEntry app_actions[] = {
   {                "quit",                bz_application_quit_action, NULL },
   {         "preferences",         bz_application_preferences_action, NULL },
   {               "about",               bz_application_about_action, NULL },
+  {        "sync-remotes",        bz_application_sync_remotes_action, NULL },
   {              "search",              bz_application_search_action,  "s" },
   { "toggle-transactions", bz_application_toggle_transactions_action, NULL },
   {              "donate",              bz_application_donate_action, NULL },
@@ -1494,6 +1516,20 @@ init_sync_finally (DexFuture *future,
 }
 
 static DexFuture *
+backend_sync_finally (DexFuture *future,
+                      GWeakRef  *wr)
+{
+  g_autoptr (BzApplication) self = NULL;
+
+  bz_weak_get_or_return_reject (self, wr);
+
+  bz_state_info_set_online (self->state, dex_future_is_resolved (future));
+  bz_state_info_set_syncing (self->state, FALSE);
+
+  return dex_future_new_true ();
+}
+
+static DexFuture *
 flathub_update_finally (DexFuture *future,
                         GWeakRef  *wr)
 {
@@ -1507,7 +1543,6 @@ flathub_update_finally (DexFuture *future,
       g_assert (self->tmp_flathub != NULL);
       self->flathub = g_steal_pointer (&self->tmp_flathub);
       bz_flathub_state_set_map_factory (self->flathub, self->application_factory);
-      bz_state_info_set_online (self->state, TRUE);
       bz_state_info_set_flathub (self->state, self->flathub);
 
       return dex_scheduler_spawn (
@@ -1519,7 +1554,6 @@ flathub_update_finally (DexFuture *future,
   else
     {
       g_clear_object (&self->tmp_flathub);
-      bz_state_info_set_online (self->state, FALSE);
       return dex_ref (future);
     }
 }
@@ -2674,13 +2708,17 @@ make_sync_future (BzApplication *self)
   g_autoptr (DexFuture) flathub_future = NULL;
   g_autoptr (DexFuture) ret_future     = NULL;
 
+  bz_state_info_set_syncing (self->state, TRUE);
   backend_future = bz_backend_retrieve_remote_entries (BZ_BACKEND (self->flatpak), NULL);
+  backend_future = dex_future_finally (
+      backend_future,
+      (DexFutureCallback) backend_sync_finally,
+      bz_track_weak (self), bz_weak_release);
 
   g_clear_object (&self->tmp_flathub);
   self->tmp_flathub = bz_flathub_state_new ();
-
-  flathub_future = bz_flathub_state_update_to_today (self->tmp_flathub);
-  flathub_future = dex_future_finally (
+  flathub_future    = bz_flathub_state_update_to_today (self->tmp_flathub);
+  flathub_future    = dex_future_finally (
       flathub_future,
       (DexFutureCallback) flathub_update_finally,
       bz_track_weak (self), bz_weak_release);
