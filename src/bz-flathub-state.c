@@ -904,11 +904,12 @@ search_keyword_finally (DexFuture *future,
   return dex_ref (future);
 }
 
-BzResult *
+DexFuture *
 bz_flathub_state_search_keyword (BzFlathubState *self,
                                  const char     *keyword)
 {
   g_autoptr (DexFuture) future = NULL;
+
   g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
   g_return_val_if_fail (keyword != NULL, NULL);
 
@@ -923,7 +924,7 @@ bz_flathub_state_search_keyword (BzFlathubState *self,
       (DexFutureCallback) search_keyword_finally,
       bz_track_weak (self),
       bz_weak_release);
-  return bz_result_new (future);
+  return g_steal_pointer (&future);
 }
 
 static void
