@@ -1797,7 +1797,7 @@ transaction_new_operation (FlatpakTransaction          *transaction,
 
   operation_data         = transaction_operation_data_new ();
   operation_data->parent = transaction_data_ref (data);
-  operation_data->entry  = entry != NULL ? g_object_ref (entry) : NULL;
+  operation_data->entry  = bz_object_maybe_ref (entry);
   operation_data->op     = g_object_ref (payload);
 
   g_signal_connect_data (

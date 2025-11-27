@@ -327,8 +327,8 @@ bz_async_texture_new (GFile *source,
   self                  = g_object_new (BZ_TYPE_ASYNC_TEXTURE, NULL);
   self->source          = g_object_ref (source);
   self->source_uri      = g_file_get_uri (source);
-  self->cache_into      = cache_into != NULL ? g_object_ref (cache_into) : NULL;
-  self->cache_into_path = cache_into != NULL ? g_file_get_path (cache_into) : NULL;
+  self->cache_into      = bz_object_maybe_ref (cache_into);
+  self->cache_into_path = bz_maybe (cache_into, g_file_get_path);
   self->lazy            = FALSE;
 
   maybe_load (self);
@@ -347,8 +347,8 @@ bz_async_texture_new_lazy (GFile *source,
   self                  = g_object_new (BZ_TYPE_ASYNC_TEXTURE, NULL);
   self->source          = g_object_ref (source);
   self->source_uri      = g_file_get_uri (source);
-  self->cache_into      = cache_into != NULL ? g_object_ref (cache_into) : NULL;
-  self->cache_into_path = cache_into != NULL ? g_file_get_path (cache_into) : NULL;
+  self->cache_into      = bz_object_maybe_ref (cache_into);
+  self->cache_into_path = bz_maybe (cache_into, g_file_get_path);
   self->lazy            = TRUE;
 
   return self;
@@ -479,8 +479,8 @@ maybe_load (BzAsyncTexture *self)
   data                  = load_data_new ();
   data->source          = g_object_ref (self->source);
   data->source_uri      = g_strdup (self->source_uri);
-  data->cache_into      = self->cache_into != NULL ? g_object_ref (self->cache_into) : NULL;
-  data->cache_into_path = self->cache_into_path != NULL ? g_strdup (self->cache_into_path) : NULL;
+  data->cache_into      = bz_object_maybe_ref (self->cache_into);
+  data->cache_into_path = bz_maybe_strdup (self->cache_into_path);
   data->cancellable     = g_object_ref (self->cancellable);
   data->retries         = self->retries;
   g_weak_ref_init (&data->self, self);

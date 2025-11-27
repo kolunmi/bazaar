@@ -949,10 +949,10 @@ try_transact (BzWindow     *self,
 
   data               = transact_data_new ();
   data->self         = self;
-  data->group        = group != NULL ? g_object_ref (group) : NULL;
+  data->group        = bz_object_maybe_ref (group);
   data->remove       = remove;
   data->auto_confirm = auto_confirm;
-  data->source       = source != NULL ? g_object_ref (source) : NULL;
+  data->source       = bz_object_maybe_ref (source);
 
   dex_clear (&self->transact_future);
   self->transact_future = dex_future_finally (

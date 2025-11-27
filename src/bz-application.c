@@ -2527,7 +2527,7 @@ map_generic_ids_to_groups (GtkStringObject *string,
       gtk_string_object_get_string (string));
 
   g_object_unref (string);
-  return group != NULL ? g_object_ref (group) : NULL;
+  return bz_object_maybe_ref (group);
 }
 
 static gpointer
