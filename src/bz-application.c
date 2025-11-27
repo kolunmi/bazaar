@@ -1476,8 +1476,8 @@ init_finally (DexFuture *future,
       self->periodic_sync = g_steal_pointer (&sync_future);
 
       self->periodic_timeout = g_timeout_add_seconds (
-          /* Check every ten minutes*/
-          60 * 10, (GSourceFunc) periodic_timeout_cb, self);
+          /* Check every hour */
+          60 * 60, (GSourceFunc) periodic_timeout_cb, self);
     }
   else
     {
