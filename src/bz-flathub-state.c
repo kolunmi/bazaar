@@ -910,8 +910,8 @@ bz_flathub_state_search_keyword (BzFlathubState *self,
 {
   g_autoptr (DexFuture) future = NULL;
 
-  g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
-  g_return_val_if_fail (keyword != NULL, NULL);
+  dex_return_error_if_fail (BZ_IS_FLATHUB_STATE (self));
+  dex_return_error_if_fail (keyword != NULL);
 
   future = dex_scheduler_spawn (
       bz_get_io_scheduler (),
