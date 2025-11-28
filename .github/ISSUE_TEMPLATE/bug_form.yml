@@ -28,11 +28,38 @@ body:
   - type: textarea
     id: version
     attributes:
-      label: Output of `flatpak info io.github.kolunmi.Bazaar`. If you are on Bazzite please run `rpm -qi bazaar`
-      description: Please check the current version of Bazaar (Main Window > About Bazaar) so we can more easily indentify issues.
-      render: shell
+      label: Version
+      description: |
+        Please check the current version of Bazaar (Main Window > About Bazaar) so we can more easily indentify issues.
+        Output of `flatpak info io.github.kolunmi.Bazaar`. If you are on Bazzite please run `rpm -qi bazaar`
     validations:
       required: true
+
+  - type: textarea
+    id: flatpak-remotes
+    attributes:
+      label: Configured Flatpak Remotes
+      description: |
+        Currently there are issues with user remotes.
+        Please run `flatpak remotes`.
+      placeholder: |
+        Name                       Options
+        flathub                    system
+    validations:
+      required: true
+
+  - type: textarea
+    id: hardware
+    attributes:
+      label: Hardware
+      description: |
+        If you are reporting performance issues or crashes then please fill this out.
+      placeholder: |
+        CPU: Ryzen 5 7600
+        GPU: RX 6750 XT
+        RAM: 16GB
+    validations:
+      required: false
 
   - type: textarea
     id: extra-context
