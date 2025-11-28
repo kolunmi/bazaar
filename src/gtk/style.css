@@ -695,3 +695,8 @@ window.narrow .category-tile {
 .disable-adw-flow-box-styling {
     background-color: transparent;
 }
+
+curated-list-view,
+curated-list-view list {
+  background: var(--bg-color);
+}
