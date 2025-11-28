@@ -39,10 +39,6 @@ template $BzCuratedView: Adw.Bin {
       title: _("Browser");
 
       child: ScrolledWindow {
-        styles [
-          "view",
-        ]
-
         hscrollbar-policy: never;
 
         child: Adw.ClampScrollable {
@@ -50,6 +46,7 @@ template $BzCuratedView: Adw.Bin {
           tightening-threshold: 1500;
 
           child: ListView {
+            css-name: "curated-list-view";
             model: NoSelection {
               model: bind template.state as <$BzStateInfo>.curated-provider;
             };
