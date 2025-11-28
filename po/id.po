@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-11-28 06:38+0700\n"
-"PO-Revision-Date: 2025-11-28 22:50+0700\n"
+"PO-Revision-Date: 2025-11-28 23:12+0700\n"
 "Last-Translator: KiKaraage <kikaraage@tuta.io>\n"
 "Language-Team: Indonesian\n"
 "Language: id\n"
@@ -35,9 +35,7 @@ msgstr ""
 # Added "Aplikasi" and "Pusat Aplikasi" (App Center) to search queries
 #: data/io.github.kolunmi.Bazaar.desktop.in:9
 msgid "GTK;System;PackageManager;Discover;Flatpak;Software;Store;"
-msgstr ""
-"GTK;Sistem;Manajer Paket;Discover;Flatpak;Perangkat "
-"Lunak;Toko;Aplikasi;Pusat Aplikasi;"
+msgstr "GTK;Sistem;ManajerPaket;Discover;Flatpak;PerangkatLunak;Toko;Aplikasi;PusatAplikasi;"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:6
 msgid "Hide EOL Entries"
@@ -218,7 +216,7 @@ msgstr ""
 
 #: src/bz-age-rating-dialog.c:163
 msgid "Narcotics"
-msgstr "Narkoba"
+msgstr "Narkotika"
 
 #: src/bz-age-rating-dialog.c:164
 msgid "No information regarding references to illicit drugs"
@@ -395,7 +393,7 @@ msgstr "Tidak ada info mengenai penyebutan referensi terkait perbudakan"
 
 #: src/bz-age-rating-dialog.c:307
 msgid "Does not include references to drugs"
-msgstr "Tidak memuat referensi terkait obat terlarang"
+msgstr "Tidak memuat referensi terkait obat-obatan terlarang"
 
 #: src/bz-age-rating-dialog.c:309
 msgid ""
@@ -408,7 +406,7 @@ msgstr "Tidak memuat iklan atau transaksi keuangan"
 
 #: src/bz-age-rating-dialog.c:313
 msgid "Does not include sex or nudity"
-msgstr "Tidak memuat konten bermuatan seksual"
+msgstr "Tidak memuat konten seksual"
 
 #: src/bz-age-rating-dialog.c:315
 msgid "Does not include uncontrolled chat functionality"
@@ -416,7 +414,7 @@ msgstr "Tidak memuat kemampuan obrolan tanpa moderasi"
 
 #: src/bz-age-rating-dialog.c:317
 msgid "Does not include violence"
-msgstr "Tidak "
+msgstr "Tidak memuat konten kekerasan"
 
 #: src/bz-age-rating-dialog.c:352
 msgid "Drugs"
@@ -622,7 +620,7 @@ msgstr ""
 
 #: src/bz-curated-view.blp:18
 msgid "Browse Flathub"
-msgstr "Jelajahi Flathub"
+msgstr "Jelajah Flathub"
 
 #: src/bz-curated-view.blp:29 src/bz-curated-view.blp:33
 #: src/bz-flathub-page.blp:30 src/bz-flathub-page.blp:34
@@ -1321,7 +1319,7 @@ msgstr "Batal"
 
 #: src/bz-license-dialog.blp:77
 msgid "Community Built"
-msgstr "Dibangun oleh Komunitas"
+msgstr "Dibangun Bersama"
 
 #: src/bz-license-dialog.blp:176
 msgid "Get Involved"
@@ -1459,7 +1457,7 @@ msgstr "Warna Bangga Transgender"
 
 #: src/bz-preferences-dialog.c:36
 msgid "Nonbinary Pride Colors"
-msgstr "Warna Bangga Nonbiner"
+msgstr "Warna Bangga Non-biner"
 
 #: src/bz-preferences-dialog.c:37
 msgid "Bisexual Pride Colors"
