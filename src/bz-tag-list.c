@@ -85,8 +85,8 @@ search_finally (DexFuture *future,
   value = dex_future_get_value (future, &local_error);
   if (value != NULL)
     {
-      g_autoptr (GListModel) model = NULL;
-      guint n_items                = 0;
+      GListModel *model   = NULL;
+      guint       n_items = 0;
 
       model   = g_value_get_object (value);
       n_items = g_list_model_get_n_items (model);

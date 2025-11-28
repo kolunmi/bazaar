@@ -842,12 +842,11 @@ initialize_finally (DexFuture *future,
 }
 
 static DexFuture *
-search_keyword_fiber (gpointer user_data)
+search_keyword_fiber (char *keyword)
 {
+  g_autoptr (GError) local_error    = NULL;
   g_autoptr (GtkStringList) results = NULL;
   g_autoptr (JsonNode) node         = NULL;
-  g_autoptr (GError) error          = NULL;
-  char            *keyword          = user_data;
   g_autofree char *request          = NULL;
   JsonObject      *object           = NULL;
   JsonArray       *array            = NULL;
@@ -856,12 +855,12 @@ search_keyword_fiber (gpointer user_data)
   request = g_strdup_printf ("/collection/keyword?keyword=%s&page=1&per_page=%d&locale=en",
                              keyword, KEYWORD_SEARCH_PAGE_SIZE);
 
-  node = dex_await_boxed (bz_query_flathub_v2_json_take (g_steal_pointer (&request)), &error);
-
+  node = dex_await_boxed (
+      bz_query_flathub_v2_json_take (
+          g_steal_pointer (&request)),
+      &local_error);
   if (node == NULL)
-    {
-      return dex_future_new_for_error (g_steal_pointer (&error));
-    }
+    return dex_future_new_for_error (g_steal_pointer (&local_error));
 
   results = gtk_string_list_new (NULL);
 
@@ -916,7 +915,7 @@ bz_flathub_state_search_keyword (BzFlathubState *self,
   future = dex_scheduler_spawn (
       bz_get_io_scheduler (),
       bz_get_dex_stack_size (),
-      search_keyword_fiber,
+      (DexFiberFunc) search_keyword_fiber,
       g_strdup (keyword),
       g_free);
   future = dex_future_finally (

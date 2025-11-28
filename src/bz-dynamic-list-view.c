@@ -708,8 +708,6 @@ list_item_factory_setup (BzDynamicListView        *self,
 {
   GtkWidget *child = NULL;
 
-  g_return_if_fail (self->child_type != G_TYPE_INVALID && self->child_prop != NULL);
-
   child = g_object_new (self->child_type, NULL);
   gtk_list_item_set_child (item, child);
 }
@@ -719,7 +717,7 @@ list_item_factory_teardown (BzDynamicListView        *self,
                             GtkListItem              *item,
                             GtkSignalListItemFactory *factory)
 {
-  g_return_if_fail (self->child_type != G_TYPE_INVALID && self->child_prop != NULL);
+  gtk_list_item_set_child (item, NULL);
 }
 
 static void
@@ -729,8 +727,6 @@ list_item_factory_bind (BzDynamicListView        *self,
 {
   GObject   *object = NULL;
   GtkWidget *child  = NULL;
-
-  g_return_if_fail (self->child_type != G_TYPE_INVALID && self->child_prop != NULL);
 
   object = gtk_list_item_get_item (item);
   child  = gtk_list_item_get_child (item);
@@ -767,8 +763,6 @@ list_item_factory_unbind (BzDynamicListView        *self,
   GBinding  *binding         = NULL;
   g_autoptr (GObject) object = NULL;
 
-  g_return_if_fail (self->child_type != G_TYPE_INVALID && self->child_prop != NULL);
-
   child   = gtk_list_item_get_child (item);
   binding = g_object_steal_data (G_OBJECT (item), "binding");
 
@@ -792,8 +786,6 @@ create_child_widget (GObject           *object,
                      BzDynamicListView *self)
 {
   GtkWidget *widget = NULL;
-
-  g_return_val_if_fail (self->child_type != G_TYPE_INVALID && self->child_prop != NULL, NULL);
 
   widget = g_object_new (self->child_type, NULL);
   if (self->object_prop != NULL)
