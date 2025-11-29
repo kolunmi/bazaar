@@ -575,6 +575,31 @@ bz_global_progress_snapshot (GtkWidget   *widget,
           };
           append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
         }
+      else if (g_strcmp0 (theme, "aroace-flag") == 0)
+        {
+          const GdkRGBA colors[] = {
+            { 226.0 / 255.0, 140.0 / 255.0, 0.0 / 255.0, 1.0 },
+            { 236.0 / 255.0,  205.0 / 255.0, 0.0 / 255.0, 1.0 },
+            {  255.0 / 255.0,   255.0 / 255.0,  255.0 / 255.0, 1.0 },
+            { 98.0 / 255.0,  174.0 / 255.0, 220.0 / 255.0, 1.0 },
+            { 32.0 / 255.0, 56.0 / 255.0, 86.0 / 255.0, 1.0 },
+          };
+          const float offsets[G_N_ELEMENTS (colors)] = {
+            0.0 / 5.0,
+            1.0 / 5.0,
+            2.0 / 5.0,
+            3.0 / 5.0,
+            4.0 / 5.0,
+          };
+          const float sizes[G_N_ELEMENTS (colors)] = {
+            1.0 / 5.0,
+            1.0 / 5.0,
+            1.0 / 5.0,
+            1.0 / 5.0,
+            1.0 / 5.0,
+          };
+          append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
+        }
       else
         gtk_snapshot_append_color (snapshot, accent_color, &fraction_clip.bounds);
     }

@@ -492,6 +492,10 @@ window.flathub {
   --flag-gradient: linear-gradient(to bottom, #FF9CCE 0%, #FF9CCE 20%, #FF52BF 20%, #FF52BF 40%, #200044 40%, #200044 60%, #675FFF 60%, #675FFF 80%, #8DA7FF 80%, #8DA7FF 100%);
 }
 
+.accent-button.aroace-theme {
+  --flag-gradient: linear-gradient(to bottom, #E28C00 0%, #E28C00 20%, #ECCD00 20%, #ECCD00 40%, #FFFFFF 40%, #FFFFFF 60%, #62AEDC 60%, #62AEDC 80%, #203856 80%, #203856 100%);
+}
+
 /* Category buttons styling modified from GNOME Software*/
 .category-tile {
   font-weight: 700;
