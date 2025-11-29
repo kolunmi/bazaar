@@ -504,6 +504,10 @@ window.flathub {
   --flag-gradient: linear-gradient(to bottom, #B57EDC 0%, #B57EDC 33.333%, #FFFFFF 33.333%, #FFFFFF 66.666%, #4A8123 66.666%, #4A8123 100%);
 }
 
+.accent-button.intersex-theme {
+  --flag-gradient: linear-gradient(to bottom, #FFD800 0%, #FFD800 40%, #7902AA 40%, #7902AA 60%, #FFD800 60%, #FFD800 100%);
+}
+
 /* Category buttons styling modified from GNOME Software*/
 .category-tile {
   font-weight: 700;
