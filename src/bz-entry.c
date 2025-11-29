@@ -2237,6 +2237,13 @@ query_flathub (BzEntry *self,
       g_steal_pointer (&future));
 }
 
+static gint compare_dates (gconstpointer a, gconstpointer b, gpointer user_data)
+{
+  double date_a = bz_data_point_get_independent ((BzDataPoint *) a);
+  double date_b = bz_data_point_get_independent ((BzDataPoint *) b);
+  return (date_a > date_b) - (date_a < date_b);
+}
+
 static DexFuture *
 query_flathub_fiber (QueryFlathubData *data)
 {
@@ -2297,6 +2304,7 @@ query_flathub_fiber (QueryFlathubData *data)
             (JsonObjectForeach) download_stats_per_day_foreach,
             store);
 
+        g_list_store_sort (store, (GCompareDataFunc) compare_dates, NULL);
         return dex_future_new_for_object (store);
       }
       break;
@@ -2390,16 +2398,13 @@ download_stats_per_day_foreach (JsonObject  *object,
   g_autofree char *formatted_label = NULL;
   g_autofree char *iso_with_tz     = NULL;
 
-  independent = g_list_model_get_n_items (G_LIST_MODEL (store));
   dependent   = json_node_get_int (member_node);
 
   iso_with_tz = g_strdup_printf ("%sT00:00:00Z", member_name);
   date        = g_date_time_new_from_iso8601 (iso_with_tz, NULL);
 
-  if (date != NULL)
-    formatted_label = g_date_time_format (date, "%-d %b");
-  else
-    formatted_label = g_strdup (member_name);
+  formatted_label = g_date_time_format (date, "%-d %b");
+  independent = (double) g_date_time_to_unix (date);
 
   point = g_object_new (
       BZ_TYPE_DATA_POINT,
