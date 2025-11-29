@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-11-29 11:22-0400\n"
-"PO-Revision-Date: 2025-11-29 17:52-0400\n"
+"PO-Revision-Date: 2025-11-29 18:18-0400\n"
 "Last-Translator: Rin Koito <mouichidouryuuseigun@gmail.com>\n"
 "Language-Team: Brazilian Portuguese\n"
 "Language: pt_BR\n"
@@ -1403,7 +1403,7 @@ msgstr ""
 
 #: src/bz-preferences-dialog.blp:36
 msgid "Hide EOL Apps"
-msgstr "Ocultar Aplicativos com fim de vida (EOL)"
+msgstr "Ocultar Aplicativos em fim de vida (EOL)"
 
 #: src/bz-preferences-dialog.blp:37
 msgid "Hide apps which are no longer supported by their developers"
