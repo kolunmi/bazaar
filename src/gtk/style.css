@@ -500,6 +500,10 @@ window.flathub {
   --flag-gradient: linear-gradient(to bottom, #000000 0%, #000000 14.285714286%, #BCC4C7 14.285714286%, #BCC4C7 28.571428571%, #FFFFFF 28.571428571%, #FFFFFF 42.857142857%, #B7F684 42.857142857%, #B7F684 57.142857143%, #FFFFFF 57.142857143%, #BCC4C7 57.142857143%, #BCC4C7 71.428571429%, #000000 71.428571429%, #000000 100%);
 }
 
+.accent-button.genderqueer-theme {
+  --flag-gradient: linear-gradient(to bottom, #B57EDC 0%, #B57EDC 33.333%, #FFFFFF 33.333%, #FFFFFF 66.666%, #4A8123 66.666%, #4A8123 100%);
+}
+
 /* Category buttons styling modified from GNOME Software*/
 .category-tile {
   font-weight: 700;

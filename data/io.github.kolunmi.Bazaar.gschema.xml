@@ -42,6 +42,7 @@
         <choice value="omnisexual-flag"/>
         <choice value="aroace-flag"/>
         <choice value="agender-flag"/>
+        <choice value="genderqueer-flag"/>
       </choices>
       <default>'accent-color'</default>
       <summary>Global Progress Bar Theme</summary>

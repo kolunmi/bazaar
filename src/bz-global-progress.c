@@ -631,6 +631,25 @@ bz_global_progress_snapshot (GtkWidget   *widget,
           };
           append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
         }
+      else if (g_strcmp0 (theme, "genderqueer-flag") == 0)
+        {
+          const GdkRGBA colors[] = {
+            { 181.0 / 255.0,  126.0 / 255.0, 220.0 / 255.0, 1.0 },
+            {  255.0 / 255.0,   255.0 / 255.0,  255.0 / 255.0, 1.0 },
+            {  74.0 / 255.0, 129.0 / 255.0, 35.0 / 255.0, 1.0 },
+          };
+          const float offsets[G_N_ELEMENTS (colors)] = {
+            0.0 / 3.0,
+            1.0 / 3.0,
+            2.0 / 3.0,
+          };
+          const float sizes[G_N_ELEMENTS (colors)] = {
+            1.0 / 3.0,
+            1.0 / 3.0,
+            1.0 / 3.0,
+          };
+          append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
+        }
       else
         gtk_snapshot_append_color (snapshot, accent_color, &fraction_clip.bounds);
     }
