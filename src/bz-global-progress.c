@@ -669,6 +669,37 @@ bz_global_progress_snapshot (GtkWidget   *widget,
           };
           append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
         }
+      else if (g_strcmp0 (theme, "demigender-flag") == 0)
+        {
+          const GdkRGBA colors[] = {
+            { 127.0 / 255.0, 127.0 / 255.0, 127.0 / 255.0, 1.0 },
+            { 195.0 / 255.0, 195.0 / 255.0, 195.0 / 255.0, 1.0 },
+            { 251.0 / 255.0, 255.0 / 255.0, 116.0 / 255.0, 1.0 },
+            { 255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 1.0 },
+            { 251.0 / 255.0, 255.0 / 255.0, 116.0 / 255.0, 1.0 },
+            { 195.0 / 255.0, 195.0 / 255.0, 195.0 / 255.0, 1.0 },
+            { 127.0 / 255.0, 127.0 / 255.0, 127.0 / 255.0, 1.0 },
+          };
+          const float offsets[G_N_ELEMENTS (colors)] = {
+            0.0 / 7.0,
+            1.0 / 7.0,
+            2.0 / 7.0,
+            3.0 / 7.0,
+            4.0 / 7.0,
+            5.0 / 7.0,
+            6.0 / 7.0,
+          };
+          const float sizes[G_N_ELEMENTS (colors)] = {
+            0.0 / 7.0,
+            1.0 / 7.0,
+            2.0 / 7.0,
+            3.0 / 7.0,
+            4.0 / 7.0,
+            5.0 / 7.0,
+            6.0 / 7.0,
+          };
+          append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
+        }
       else
         gtk_snapshot_append_color (snapshot, accent_color, &fraction_clip.bounds);
     }
