@@ -700,6 +700,31 @@ bz_global_progress_snapshot (GtkWidget   *widget,
           };
           append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
         }
+      else if (g_strcmp0 (theme, "biromantic-flag") == 0)
+        {
+          const GdkRGBA colors[] = {
+            { 136.0 / 255.0, 105.0 / 255.0, 165.0 / 255.0, 1.0 },
+            { 216.0 / 255.0, 167.0 / 255.0, 216.0 / 255.0, 1.0 },
+            { 255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 1.0 },
+            { 253.0 / 255.0, 177.0 / 255.0, 141.0 / 255.0, 1.0 },
+            {  21.0 / 255.0,  22.0 / 255.0,  56.0 / 255.0, 1.0 },
+          };
+          const float offsets[G_N_ELEMENTS (colors)] = {
+            0.0 / 5.0,
+            1.0 / 5.0,
+            2.0 / 5.0,
+            3.0 / 5.0,
+            4.0 / 5.0,
+          };
+          const float sizes[G_N_ELEMENTS (colors)] = {
+            1.0 / 5.0,
+            1.0 / 5.0,
+            1.0 / 5.0,
+            1.0 / 5.0,
+            1.0 / 5.0,
+          };
+          append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
+        }
       else
         gtk_snapshot_append_color (snapshot, accent_color, &fraction_clip.bounds);
     }

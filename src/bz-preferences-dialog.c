@@ -46,6 +46,7 @@ static const BarTheme bar_themes[] = {
   {   "genderqueer-flag",   "genderqueer-theme", N_ ("Genderqueer Pride Colors") },
   {      "intersex-flag",      "intersex-theme",    N_ ("Intersex Pride Colors") },
   {    "demigender-flag",    "demigender-theme",  N_ ("Demigender Pride Colors") },
+  {    "biromantic-flag",    "biromantic-theme",  N_ ("Biromantic Pride Colors") },
 };
 
 struct _BzPreferencesDialog
