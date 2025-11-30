@@ -294,15 +294,26 @@ static char *
 format_recent_downloads (gpointer object,
                          int      value)
 {
+  double result;
+  int    digits;
+
   if (value <= 0)
     return g_strdup (_ ("---"));
 
   if (value >= 1000000)
-    /* Translators: M is the suffix for millions */
-    return g_strdup_printf (_ ("%.2fM"), value / 1000000.0);
+    {
+      result = value / 1000000.0;
+      digits = (int) log10 (result) + 1;
+      /* Translators: M is the suffix for millions */
+      return g_strdup_printf (_ ("%.*fM"), 3 - digits, result);
+    }
   else if (value >= 1000)
-    /* Translators: K is the suffix for thousands*/
-    return g_strdup_printf (_ ("%.2fK"), value / 1000.0);
+    {
+      result = value / 1000.0;
+      digits = (int) log10 (result) + 1;
+      /* Translators: K is the suffix for thousands*/
+      return g_strdup_printf (_ ("%.*fK"), 3 - digits, result);
+    }
   else
     return g_strdup_printf ("%'d", value);
 }
@@ -319,10 +330,21 @@ format_size (gpointer object, guint64 value)
 {
   g_autofree char *size_str = g_format_size (value);
   char            *space    = g_strrstr (size_str, "\xC2\xA0");
+  char            *decimal  = NULL;
+  int              digits   = 0;
 
   if (space != NULL)
     {
       *space = '\0';
+      for (char *p = size_str; *p != '\0' && *p != '.'; p++)
+        if (g_ascii_isdigit (*p))
+          digits++;
+      if (digits >= 3)
+        {
+          decimal = g_strrstr (size_str, ".");
+          if (decimal != NULL)
+            *decimal = '\0';
+        }
       return format_with_small_suffix (size_str, space + 2);
     }
   return g_strdup (size_str);

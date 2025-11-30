@@ -5,7 +5,8 @@ using Adw 1;
 template $BzFullView: Adw.Bin {
   child: Adw.ToolbarView {
     [top]
-    Adw.HeaderBar {
+    Adw.HeaderBar header_bar {
+
       [end]
       Revealer {
         transition-type: slide_right;
@@ -74,10 +75,12 @@ template $BzFullView: Adw.Bin {
               context_bar.orientation: vertical;
               context_bar.spacing: 4;
               header_box.spacing: 12;
+              app_name_box.spacing: 0;
               download_bar.expand-size: 60;
               formfactor_support_tile_wide.visible: false;
               formfactor_support_tile_narrow.visible: true;
               screenshots.compact: true;
+              header_bar.show-title: false;
             }
           }
 
@@ -93,6 +96,7 @@ template $BzFullView: Adw.Bin {
                 top_box.margin-end: 10;
                 bottom_box.margin-start: 10;
                 bottom_box.margin-end: 10;
+                bottom_box.margin-top: 5;
                 wide_install_controls.visible: false;
                 narrow_install_controls.visible: true;
                 app_icon.valign: start;
@@ -161,7 +165,7 @@ template $BzFullView: Adw.Bin {
                           hexpand: true;
                           spacing: 15;
 
-                          Box {
+                          Box app_name_box {
                             orientation: vertical;
                             valign: center;
                             hexpand: true;
@@ -395,12 +399,7 @@ template $BzFullView: Adw.Bin {
                             lozenge-child: Box {
                               Image {
                                 visible: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.is-mobile-friendly as <bool>;
-                                icon-name: "device-support-adaptive-symbolic";
-                                pixel-size: 56;
-
-                                styles [
-                                  "wide-image",
-                                ]
+                                icon-name: "smartphone2-symbolic";
                               }
 
                               Image {
@@ -604,30 +603,33 @@ template $BzFullView: Adw.Bin {
                         margin-start: 25;
                         margin-end: 25;
                         margin-bottom: 20;
+                        margin-top: 20;
                         spacing: 20;
+                        Box {
+                          spacing: 10;
+                          orientation: vertical;
+                          Label {
+                            styles [
+                              "title-2",
+                            ]
 
-                        Label {
-                          styles [
-                            "title-2",
-                          ]
-
-                          margin-start: 5;
-                          margin-top: 20;
-                          valign: start;
-                          xalign: 0;
-                          wrap: true;
-                          wrap-mode: word_char;
-                          label: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.description;
-                        }
-
-                        $BzFadingClamp fading_clamp {
-                          max-height: bind $get_description_max_height(description_toggle.active) as <int>;
-                          min-max-height: 170;
-
-                          child: $BzAppstreamDescriptionRender {
-                            appstream-description: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.long-description;
                             margin-start: 5;
-                          };
+                            valign: start;
+                            xalign: 0;
+                            wrap: true;
+                            wrap-mode: word_char;
+                            label: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.description;
+                          }
+
+                          $BzFadingClamp fading_clamp {
+                            max-height: bind $get_description_max_height(description_toggle.active) as <int>;
+                            min-max-height: 170;
+
+                            child: $BzAppstreamDescriptionRender {
+                              appstream-description: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.long-description;
+                              margin-start: 5;
+                            };
+                          }
                         }
 
                         ToggleButton description_toggle {

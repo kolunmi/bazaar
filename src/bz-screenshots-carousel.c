@@ -211,7 +211,7 @@ on_expand_clicked (BzScreenshotsCarousel *self)
 static int
 get_carousel_height (BzScreenshotsCarousel *self)
 {
-  return self->compact ? 300 : 450;
+  return self->compact ? 250 : 450;
 }
 
 static void
