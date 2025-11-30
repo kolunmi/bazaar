@@ -28,11 +28,20 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE (BzScreenshotsCarousel, bz_screenshots_carousel, BZ, SCREENSHOTS_CAROUSEL, GtkWidget)
 
-GtkWidget *bz_screenshots_carousel_new (void);
+GtkWidget *
+bz_screenshots_carousel_new (void);
 
-void bz_screenshots_carousel_set_model (BzScreenshotsCarousel *self,
-                                        GListModel            *model);
+void
+bz_screenshots_carousel_set_model (BzScreenshotsCarousel *self,
+                                   GListModel            *model);
 
-GListModel *bz_screenshots_carousel_get_model (BzScreenshotsCarousel *self);
+GListModel *
+bz_screenshots_carousel_get_model (BzScreenshotsCarousel *self);
+
+void
+bz_screenshots_carousel_set_compact (BzScreenshotsCarousel *self,
+                                     gboolean               compact);
+gboolean
+bz_screenshots_carousel_get_compact (BzScreenshotsCarousel *self);
 
 G_END_DECLS

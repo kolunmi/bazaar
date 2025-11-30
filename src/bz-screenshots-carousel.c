@@ -42,6 +42,7 @@ struct _BzScreenshotsCarousel
   GtkWidget   *next_button_revealer;
 
   GListModel *model;
+  gboolean    compact;
   gulong      items_changed_id;
 };
 
@@ -51,6 +52,7 @@ enum
 {
   PROP_0,
   PROP_MODEL,
+  PROP_COMPACT,
   N_PROPS
 };
 
@@ -206,6 +208,12 @@ on_expand_clicked (BzScreenshotsCarousel *self)
   open_screenshot_at_index (self, index);
 }
 
+static int
+get_carousel_height (BzScreenshotsCarousel *self)
+{
+  return self->compact ? 250 : 450;
+}
+
 static void
 clear_carousel (BzScreenshotsCarousel *self)
 {
@@ -297,6 +305,9 @@ bz_screenshots_carousel_get_property (GObject    *object,
     case PROP_MODEL:
       g_value_set_object (value, self->model);
       break;
+    case PROP_COMPACT:
+      g_value_set_boolean (value, self->compact);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -314,6 +325,9 @@ bz_screenshots_carousel_set_property (GObject      *object,
     {
     case PROP_MODEL:
       bz_screenshots_carousel_set_model (self, g_value_get_object (value));
+      break;
+    case PROP_COMPACT:
+      bz_screenshots_carousel_set_compact (self, g_value_get_boolean (value));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -336,6 +350,13 @@ bz_screenshots_carousel_class_init (BzScreenshotsCarouselClass *klass)
                            NULL,
                            G_TYPE_LIST_MODEL,
                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  properties[PROP_COMPACT] =
+      g_param_spec_boolean ("compact",
+                            NULL,
+                            NULL,
+                            FALSE,
+                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, N_PROPS, properties);
 
@@ -362,6 +383,7 @@ bz_screenshots_carousel_class_init (BzScreenshotsCarouselClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, on_notify_position);
   gtk_widget_class_bind_template_callback (widget_class, on_notify_n_pages);
   gtk_widget_class_bind_template_callback (widget_class, on_expand_clicked);
+  gtk_widget_class_bind_template_callback (widget_class, get_carousel_height);
 
   gtk_widget_class_set_layout_manager_type (widget_class, GTK_TYPE_BIN_LAYOUT);
   gtk_widget_class_set_css_name (widget_class, "screenshot-carousel");
@@ -415,4 +437,21 @@ bz_screenshots_carousel_get_model (BzScreenshotsCarousel *self)
 {
   g_return_val_if_fail (BZ_IS_SCREENSHOTS_CAROUSEL (self), NULL);
   return self->model;
+}
+
+void
+bz_screenshots_carousel_set_compact (BzScreenshotsCarousel *self, gboolean compact)
+{
+  g_return_if_fail (BZ_IS_SCREENSHOTS_CAROUSEL (self));
+  if (self->compact == compact)
+    return;
+  self->compact = compact;
+  g_object_notify_by_pspec (G_OBJECT (self), properties[PROP_COMPACT]);
+}
+
+gboolean
+bz_screenshots_carousel_get_compact (BzScreenshotsCarousel *self)
+{
+  g_return_val_if_fail (BZ_IS_SCREENSHOTS_CAROUSEL (self), FALSE);
+  return self->compact;
 }
