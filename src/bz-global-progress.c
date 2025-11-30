@@ -621,13 +621,13 @@ bz_global_progress_snapshot (GtkWidget   *widget,
             6.0 / 7.0,
           };
           const float sizes[G_N_ELEMENTS (colors)] = {
-            0.0 / 7.0,
             1.0 / 7.0,
-            2.0 / 7.0,
-            3.0 / 7.0,
-            4.0 / 7.0,
-            5.0 / 7.0,
-            6.0 / 7.0,
+            1.0 / 7.0,
+            1.0 / 7.0,
+            1.0 / 7.0,
+            1.0 / 7.0,
+            1.0 / 7.0,
+            1.0 / 7.0,
           };
           append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
         }
@@ -690,13 +690,13 @@ bz_global_progress_snapshot (GtkWidget   *widget,
             6.0 / 7.0,
           };
           const float sizes[G_N_ELEMENTS (colors)] = {
-            0.0 / 7.0,
             1.0 / 7.0,
-            2.0 / 7.0,
-            3.0 / 7.0,
-            4.0 / 7.0,
-            5.0 / 7.0,
-            6.0 / 7.0,
+            1.0 / 7.0,
+            1.0 / 7.0,
+            1.0 / 7.0,
+            1.0 / 7.0,
+            1.0 / 7.0,
+            1.0 / 7.0,
           };
           append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
         }
