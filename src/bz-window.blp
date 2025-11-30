@@ -329,7 +329,7 @@ template $BzWindow: Adw.ApplicationWindow {
                       has-tooltip: true;
                       tooltip-text: _("Sync");
                       icon-name: "view-refresh-symbolic";
-                      visible: bind $invert_boolean(template.state as <$BzStateInfo>.online as <bool>) as <bool>;
+                      visible: bind template.state as <$BzStateInfo>.metered_connection as <bool>;
                       sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.syncing as <bool>) as <bool>;
                       clicked => $sync_cb(template);
                     }
