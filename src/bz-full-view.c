@@ -765,8 +765,6 @@ dl_stats_cb (BzFullView *self,
   ui_entry = bz_result_get_object (self->ui_entry);
 
   dialog = bz_stats_dialog_new (NULL, NULL, 0);
-  adw_dialog_set_content_width (dialog, 2000);
-  adw_dialog_set_content_height (dialog, 1500);
 
   g_object_bind_property (ui_entry, "download-stats", dialog, "model", G_BINDING_SYNC_CREATE);
   g_object_bind_property (ui_entry, "download-stats-per-country", dialog, "country-model", G_BINDING_SYNC_CREATE);
