@@ -1063,6 +1063,9 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
   window = gtk_application_get_active_window (GTK_APPLICATION (self));
   if (window != NULL)
     clock = gtk_widget_get_frame_clock (GTK_WIDGET (window));
+
+  /* `reread_timeout` defines how long we are allowed to spend adding to
+   `build-futures` on which we will await later */
   if (clock != NULL)
     {
       gint64 refresh_interval  = 0;
@@ -1086,8 +1089,6 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
 
   build_futures = g_ptr_array_new_with_free_func (dex_unref);
   read_future   = dex_future_new_for_object (notif);
-  /* this value defines how long we are allowed to spend adding to
-     `build-futures` to await later */
 
   timer = g_timer_new ();
   while (dex_future_is_resolved (read_future))
