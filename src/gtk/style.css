@@ -492,6 +492,30 @@ window.flathub {
   --flag-gradient: linear-gradient(to bottom, #FF9CCE 0%, #FF9CCE 20%, #FF52BF 20%, #FF52BF 40%, #200044 40%, #200044 60%, #675FFF 60%, #675FFF 80%, #8DA7FF 80%, #8DA7FF 100%);
 }
 
+.accent-button.aroace-theme {
+  --flag-gradient: linear-gradient(to bottom, #E28C00 0%, #E28C00 20%, #ECCD00 20%, #ECCD00 40%, #FFFFFF 40%, #FFFFFF 60%, #62AEDC 60%, #62AEDC 80%, #203856 80%, #203856 100%);
+}
+
+.accent-button.agender-theme {
+  --flag-gradient: linear-gradient(to bottom, #000000 0%, #000000 14.285714286%, #BCC4C7 14.285714286%, #BCC4C7 28.571428571%, #FFFFFF 28.571428571%, #FFFFFF 42.857142857%, #B7F684 42.857142857%, #B7F684 57.142857143%, #FFFFFF 57.142857143%, #FFFFFF 71.428571429%, #BCC4C7 71.428571429%, #BCC4C7 85.714285714%, #000000 85.714285714%, #000000 100%);
+}
+
+.accent-button.genderqueer-theme {
+  --flag-gradient: linear-gradient(to bottom, #B57EDC 0%, #B57EDC 33.333%, #FFFFFF 33.333%, #FFFFFF 66.666%, #4A8123 66.666%, #4A8123 100%);
+}
+
+.accent-button.intersex-theme {
+  --flag-gradient: linear-gradient(to bottom, #FFD800 0%, #FFD800 40%, #7902AA 40%, #7902AA 60%, #FFD800 60%, #FFD800 100%);
+}
+
+.accent-button.demigender-theme {
+  --flag-gradient: linear-gradient(to bottom, #7F7F7F 0%, #7F7F7F 14.285714286%, #C3C3C3 14.285714286%, #C3C3C3 28.571428571%, #FBFF74 28.571428571%, #FBFF74 42.857142857%, #FFFFFF 42.857142857%, #FFFFFF 57.142857143%, #FBFF74 57.142857143%, #FBFF74 57.142857143%, #C3C3C3 71.428571429%, #C3C3C3 85.714285714%, #7F7F7F 85.714285714%, #7F7F7F 100%);
+}
+
+.accent-button.biromantic-theme {
+  --flag-gradient: linear-gradient(to bottom, #8869A5 0%, #8869A5 20%, #D8A7D8 20%, #D8A7D8 40%, #FFFFFF 40%, #FFFFFF 60%, #FDB18D 60%, #FDB18D 80%, #151638 80%, #151638 100%);
+}
+
 /* Category buttons styling modified from GNOME Software*/
 .category-tile {
   font-weight: 700;
