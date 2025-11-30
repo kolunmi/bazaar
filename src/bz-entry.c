@@ -2237,10 +2237,13 @@ query_flathub (BzEntry *self,
       g_steal_pointer (&future));
 }
 
-static gint compare_dates (gconstpointer a, gconstpointer b, gpointer user_data)
+static gint
+compare_dates (BzDataPoint *a,
+               BzDataPoint *b)
 {
-  double date_a = bz_data_point_get_independent ((BzDataPoint *) a);
-  double date_b = bz_data_point_get_independent ((BzDataPoint *) b);
+  double date_a = bz_data_point_get_independent (a);
+  double date_b = bz_data_point_get_independent (b);
+
   return (date_a > date_b) - (date_a < date_b);
 }
 
