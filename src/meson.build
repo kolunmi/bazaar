@@ -17,6 +17,7 @@ json_glib_dep        = dependency('json-glib-1.0', version: '>= 1.10.0')
 glycin_dep           = dependency('glycin-2', version: '>= 2.0')
 glycin_gtk4_dep      = dependency('glycin-gtk4-2', version: '>= 2.0')
 md4c_dep             = dependency('md4c', version: '>= 0.5.1')
+webkit_dep           = dependency('webkitgtk-6.0', version: '>= 2.50.2')
 
 
 dl_worker_sources = [
@@ -104,6 +105,7 @@ bz_sources = [
   'bz-lazy-async-texture-model.c',
   'bz-license-dialog.c',
   'bz-list-tile.c',
+  'bz-login-page.c',
   'bz-markdown-render.c',
   'bz-newline-parser.c',
   'bz-parser.c',
@@ -153,6 +155,7 @@ bz_deps = [
   glycin_dep,
   glycin_gtk4_dep,
   md4c_dep,
+  webkit_dep,
 ]
 
 gen_gobject = find_program('./gen_gobject.sh')
@@ -184,6 +187,7 @@ gobject_specs = files(
   'bz-curated-row.txt',
   'bz-curated-section.txt',
   'bz-data-point.txt',
+  'bz-flathub-auth-provider.txt',
   'bz-hash-table-object.txt',
   'bz-hook-dialog-option.txt',
   'bz-hook-dialog.txt',
@@ -238,6 +242,7 @@ blueprints = custom_target('blueprints',
     'bz-installed-page.blp',
     'bz-installed-tile.blp',
     'bz-license-dialog.blp',
+    'bz-login-page.blp',
     'bz-markdown-render.blp',
     'bz-preferences-dialog.blp',
     'bz-progress-bar.blp',

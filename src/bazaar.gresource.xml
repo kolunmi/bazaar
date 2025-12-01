@@ -35,6 +35,7 @@
     <file preprocess="xml-stripblanks">bz-installed-page.ui</file>
     <file preprocess="xml-stripblanks">bz-installed-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-license-dialog.ui</file>
+    <file preprocess="xml-stripblanks">bz-login-page.ui</file>
     <file preprocess="xml-stripblanks">bz-markdown-render.ui</file>
     <file preprocess="xml-stripblanks">bz-preferences-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-progress-bar.ui</file>

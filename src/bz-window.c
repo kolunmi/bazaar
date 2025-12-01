@@ -31,6 +31,7 @@
 #include "bz-full-view.h"
 #include "bz-global-progress.h"
 #include "bz-installed-page.h"
+#include "bz-login-page.h"
 #include "bz-progress-bar.h"
 #include "bz-search-widget.h"
 #include "bz-transaction-manager.h"
@@ -471,6 +472,18 @@ format_progress (gpointer object,
 }
 
 static void
+action_flathub_login (GtkWidget  *widget,
+                   const char *action_name,
+                   GVariant   *parameter)
+{
+  BzWindow          *self       = BZ_WINDOW (widget);
+  AdwNavigationPage *login_page = NULL;
+
+  login_page = bz_login_page_new ();
+  adw_navigation_view_push (self->navigation_view, login_page);
+}
+
+static void
 debug_id_inspect_cb (BzWindow  *self,
                      GtkButton *button)
 {
@@ -572,6 +585,7 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, debug_id_inspect_cb);
 
   gtk_widget_class_install_action (widget_class, "escape", NULL, action_escape);
+  gtk_widget_class_install_action (widget_class, "window.flathub-login", NULL, action_flathub_login);
 }
 
 static gboolean
