@@ -79,7 +79,7 @@ struct _BzApplication
   BzYamlParser               *curated_parser;
   DexChannel                 *flatpak_notifs;
   DexFuture                  *notif_watch;
-  DexFuture                  *periodic_sync;
+  DexFuture                  *sync;
   GHashTable                 *eol_runtimes;
   GHashTable                 *ids_to_groups;
   GHashTable                 *installed_set;
@@ -285,7 +285,7 @@ bz_application_dispose (GObject *object)
 {
   BzApplication *self = BZ_APPLICATION (object);
 
-  dex_clear (&self->periodic_sync);
+  dex_clear (&self->sync);
   dex_clear (&self->notif_watch);
   dex_clear (&self->flatpak_notifs);
   g_clear_handle_id (&self->periodic_timeout_source, g_source_remove);
@@ -615,12 +615,12 @@ bz_application_sync_remotes_action (GSimpleAction *action,
 
   g_assert (BZ_IS_APPLICATION (self));
 
-  if (self->periodic_sync != NULL &&
-      dex_future_is_pending (self->periodic_sync))
+  if (self->sync != NULL &&
+      dex_future_is_pending (self->sync))
     return;
 
-  dex_clear (&self->periodic_sync);
-  self->periodic_sync = make_sync_future (self);
+  dex_clear (&self->sync);
+  self->sync = make_sync_future (self);
 }
 
 static void
@@ -1469,7 +1469,7 @@ init_finally (DexFuture *future,
           (DexFutureCallback) init_sync_finally,
           bz_track_weak (self),
           bz_weak_release);
-      self->periodic_sync = g_steal_pointer (&sync_future);
+      self->sync = g_steal_pointer (&sync_future);
 
       self->periodic_timeout_source = g_timeout_add_seconds (
           /* Check every hour */
@@ -1502,15 +1502,8 @@ init_sync_finally (DexFuture *future,
 {
   g_autoptr (BzApplication) self = NULL;
   g_autoptr (GError) local_error = NULL;
-  GNetworkMonitor *network       = NULL;
 
   bz_weak_get_or_return_reject (self, wr);
-
-  network = g_network_monitor_get_default ();
-  if (network != NULL)
-    /* Ensure our network status is up to date, since we only connected to the
-       signal in `init_service_struct` */
-    g_object_notify (G_OBJECT (network), "connectivity");
 
   bz_state_info_set_background_task_label (self->state, NULL);
   bz_state_info_set_busy (self->state, FALSE);
@@ -1835,20 +1828,20 @@ periodic_timeout_cb (BzApplication *self)
   gboolean have_connection    = FALSE;
   gboolean metered_connection = FALSE;
 
-  if (self->periodic_sync != NULL &&
-      dex_future_is_pending (self->periodic_sync))
+  if (self->sync != NULL &&
+      dex_future_is_pending (self->sync))
     /* If for some reason the last update check is still happening, let it
        finish */
     goto done;
 
-  dex_clear (&self->periodic_sync);
+  dex_clear (&self->sync);
 
   have_connection    = bz_state_info_get_have_connection (self->state);
   metered_connection = bz_state_info_get_metered_connection (self->state);
   if (have_connection && !metered_connection)
     /* Do not do periodic sync on metered connections. The user will have to
        manually refresh instead. */
-    self->periodic_sync = make_sync_future (self);
+    self->sync = make_sync_future (self);
 
 done:
   return G_SOURCE_CONTINUE;
@@ -1858,13 +1851,25 @@ static gboolean
 scheduled_timeout_cb (GWeakRef *wr)
 {
   g_autoptr (BzApplication) self = NULL;
+  gboolean have_connection       = FALSE;
 
   /* Use weak ref here since the source tag of this callback won't be tracked by
      the main application obj */
   self = g_weak_ref_get (wr);
-  if (self != NULL)
-    periodic_timeout_cb (self);
+  if (self == NULL)
+    goto done;
 
+  if (self->sync != NULL &&
+      dex_future_is_pending (self->sync))
+    goto done;
+
+  dex_clear (&self->sync);
+
+  have_connection = bz_state_info_get_have_connection (self->state);
+  if (have_connection)
+    self->sync = make_sync_future (self);
+
+done:
   return G_SOURCE_REMOVE;
 }
 
@@ -1886,19 +1891,19 @@ network_status_changed (BzApplication   *self,
   have_connection = connectivity == G_NETWORK_CONNECTIVITY_FULL;
   is_metered      = g_network_monitor_get_network_metered (network);
 
-  if ((!was_connected &&
-       have_connection &&
-       !is_metered) ||
-      (was_metered &&
-       !is_metered))
-    {
-      dex_clear (&self->periodic_sync);
-      /* Wait a bit to prevent flakiness */
-      g_timeout_add_full (
-          G_PRIORITY_DEFAULT,
-          500, (GSourceFunc) scheduled_timeout_cb,
-          bz_track_weak (self), bz_weak_release);
-    }
+  if (!bz_state_info_get_busy (self->state) &&
+      (self->sync == NULL ||
+       !dex_future_is_pending (self->sync)) &&
+      ((!was_connected &&
+        have_connection &&
+        !is_metered) ||
+       (was_metered &&
+        !is_metered)))
+    /* Wait a bit to prevent flakiness */
+    g_timeout_add_full (
+        G_PRIORITY_DEFAULT,
+        500, (GSourceFunc) scheduled_timeout_cb,
+        bz_track_weak (self), bz_weak_release);
 
   bz_state_info_set_have_connection (self->state, have_connection);
   bz_state_info_set_metered_connection (self->state, is_metered);
@@ -2370,7 +2375,18 @@ init_service_struct (BzApplication *self,
 
   network = g_network_monitor_get_default ();
   if (network != NULL)
-    g_signal_connect_swapped (network, "notify", G_CALLBACK (network_status_changed), self);
+    {
+      GNetworkConnectivity connectivity = 0;
+      gboolean             metered      = FALSE;
+
+      connectivity = g_network_monitor_get_connectivity (network);
+      bz_state_info_set_have_connection (self->state, connectivity == G_NETWORK_CONNECTIVITY_FULL);
+
+      metered = g_network_monitor_get_network_metered (network);
+      bz_state_info_set_metered_connection (self->state, metered);
+
+      g_signal_connect_swapped (network, "notify", G_CALLBACK (network_status_changed), self);
+    }
   else
     g_warning ("Unable to detect networking device! Continuing anyway...");
 
