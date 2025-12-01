@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-29 16:03+0200\n"
-"PO-Revision-Date: 2025-11-30 00:49+0200\n"
+"POT-Creation-Date: 2025-11-30 22:07+0200\n"
+"PO-Revision-Date: 2025-12-01 05:49+0200\n"
 "Last-Translator: faoquad <faoquad@noreply.codeberg.org>\n"
 "Language-Team: Ukrainian <>\n"
 "Language: uk\n"
@@ -896,8 +896,8 @@ msgid "More Mobile apps"
 msgstr "Показати більше"
 
 #: src/bz-flathub-page.blp:379
-msgid "We ♥ Games"
-msgstr "Ми ♥ ігри"
+msgid "We​ ♥​ Games"
+msgstr "Ми​ ♥​ ігри"
 
 #: src/bz-flathub-page.blp:392
 msgid "Games and apps to run your favorite titles"
@@ -1033,14 +1033,14 @@ msgstr "---"
 #. Translators: M is the suffix for millions
 #: src/bz-full-view.c:302
 #, c-format
-msgid "%.2fM"
-msgstr "%.2fмлн."
+msgid "%.*fM"
+msgstr "%.*f млн"
 
 #. Translators: K is the suffix for thousands
 #: src/bz-full-view.c:305
 #, c-format
-msgid "%.2fK"
-msgstr "%.2fтис."
+msgid "%.*fK"
+msgstr "%.*f тис."
 
 #: src/bz-full-view.c:314
 #, c-format
@@ -1487,6 +1487,30 @@ msgstr "Полісексуальний прапор"
 #: src/bz-preferences-dialog.c:43
 msgid "Omnisexual Pride Colors"
 msgstr "Омнісексуальний прапор"
+
+#: src/bz-preferences-dialog.c:44
+msgid "Aroace Pride Colors"
+msgstr "Прапор ароейс"
+
+#: src/bz-preferences-dialog.c:45
+msgid "Agender Pride Colors"
+msgstr "Аґендерний прапор"
+
+#: src/bz-preferences-dialog.c:46
+msgid "Genderqueer Pride Colors"
+msgstr "Ґендерквірний прапор"
+
+#: src/bz-preferences-dialog.c:47
+msgid "Intersex Pride Colors"
+msgstr "Інтерсексуальний прапор"
+
+#: src/bz-preferences-dialog.c:48
+msgid "Demigender Pride Colors"
+msgstr "Деміґендерний прапор"
+
+#: src/bz-preferences-dialog.c:49
+msgid "Biromantic Pride Colors"
+msgstr "Біромантичний прапор"
 
 #: src/bz-releases-dialog.blp:5 src/bz-releases-list.blp:26
 msgid "Version History"
