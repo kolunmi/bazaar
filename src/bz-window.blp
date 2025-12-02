@@ -477,6 +477,7 @@ menu primary_menu {
     item {
       label: _("_Login with Flathub");
       action: "window.flathub-login";
+      hidden-when: "action-disabled";
     }
 
     item {

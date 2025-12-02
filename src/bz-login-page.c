@@ -180,7 +180,7 @@ on_decide_policy (WebKitWebView           *webview,
   WebKitURIRequest       *request;
   const char             *uri;
   g_autoptr (GUri) parsed_uri = NULL;
-  GHashTable *params = NULL;
+  g_autoptr (GHashTable) params = NULL;
   const char *code, *state, *error;
 
   if (decision_type != WEBKIT_POLICY_DECISION_TYPE_NAVIGATION_ACTION)
@@ -213,11 +213,9 @@ on_decide_policy (WebKitWebView           *webview,
       self->oauth_completed = TRUE;
       webkit_policy_decision_ignore (decision);
       complete_oauth (self, code, state, error);
-      g_hash_table_unref (params);
       return TRUE;
     }
 
-  g_hash_table_unref (params);
   return FALSE;
 }
 
@@ -287,9 +285,14 @@ on_user_info_loaded (GObject      *source_object,
   g_autoptr (GBytes) bytes = NULL;
   g_autoptr (GError) error = NULL;
   g_autoptr (JsonObject) obj = NULL;
+  g_autoptr (GFile) avatar_file = NULL;
+  g_autoptr (BzAsyncTexture) async_texture = NULL;
   JsonObject *default_account = NULL;
   const char *displayname;
-  const char *avatar_url;
+  const char *avatar_url = NULL;
+
+  if (self->webview != NULL)
+    webkit_web_view_load_uri (self->webview, "about:blank");
 
   bytes = soup_session_send_and_read_finish (SOUP_SESSION (source_object), res, &error);
   if (error != NULL)
@@ -314,25 +317,19 @@ on_user_info_loaded (GObject      *source_object,
   if (json_object_has_member (obj, "default_account"))
     {
       default_account = json_object_get_object_member (obj, "default_account");
-      avatar_url      = json_object_get_string_member (default_account, "avatar");
+      avatar_url = json_object_get_string_member (default_account, "avatar");
     }
 
   gtk_label_set_text (self->welcome_label, g_strdup_printf ("Hello, %s!", displayname));
   adw_avatar_set_text (self->finish_avatar, displayname);
-
-  if (avatar_url != NULL && avatar_url[0] != '\0')
-    {
-      g_autoptr (GFile) avatar_file = g_file_new_for_uri (avatar_url);
-      BzAsyncTexture *async_texture = bz_async_texture_new (avatar_file, NULL);
-
-      adw_avatar_set_custom_image (self->finish_avatar, GDK_PAINTABLE (async_texture));
-      g_object_unref (async_texture);
-    }
-
   gtk_stack_set_visible_child_name (self->main_stack, "finish");
 
-  if (self->webview != NULL)
-    webkit_web_view_load_uri (self->webview, "about:blank");
+  if (avatar_url == NULL || avatar_url[0] == '\0')
+    return;
+
+  avatar_file = g_file_new_for_uri (avatar_url);
+  async_texture = bz_async_texture_new (avatar_file, NULL);
+  adw_avatar_set_custom_image (self->finish_avatar, GDK_PAINTABLE (async_texture));
 }
 
 static void

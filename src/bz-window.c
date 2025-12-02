@@ -476,6 +476,9 @@ on_login_complete (BzLoginPage *login_page,
                    const char  *jwt,
                    gpointer     user_data)
 {
+  BzWindow *self = BZ_WINDOW (user_data);
+
+  gtk_widget_action_set_enabled (GTK_WIDGET (self), "window.flathub-login", FALSE);
   g_print ("Login complete, JWT: %s\n", jwt);
 }
 
