@@ -472,14 +472,26 @@ format_progress (gpointer object,
 }
 
 static void
+on_login_complete (BzLoginPage *login_page,
+                   const char  *jwt,
+                   gpointer     user_data)
+{
+  g_print ("Login complete, JWT: %s\n", jwt);
+}
+
+static void
 action_flathub_login (GtkWidget  *widget,
-                   const char *action_name,
-                   GVariant   *parameter)
+                      const char *action_name,
+                      GVariant   *parameter)
 {
   BzWindow          *self       = BZ_WINDOW (widget);
   AdwNavigationPage *login_page = NULL;
 
   login_page = bz_login_page_new ();
+
+  g_signal_connect (login_page, "login-complete",
+                    G_CALLBACK (on_login_complete), self);
+
   adw_navigation_view_push (self->navigation_view, login_page);
 }
 

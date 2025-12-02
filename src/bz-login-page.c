@@ -65,7 +65,7 @@ static guint signals[LAST_SIGNAL];
 static void
 show_error (BzLoginPage *self, const char *message)
 {
-  gtk_stack_set_visible_child_name (self->main_stack, "start");
+  gtk_stack_set_visible_child_name (self->main_stack, "error");
   adw_status_page_set_description (self->error_status_page, message);
 }
 
@@ -490,6 +490,13 @@ static void
 on_close_clicked (GtkButton   *button,
                   BzLoginPage *self)
 {
+  AdwNavigationView *navigation_view;
+  navigation_view = ADW_NAVIGATION_VIEW (gtk_widget_get_ancestor (GTK_WIDGET (self),
+                                                                   ADW_TYPE_NAVIGATION_VIEW));
+
+  if (navigation_view != NULL)
+    adw_navigation_view_pop (navigation_view);
+
   g_signal_emit (self, signals[SIGNAL_LOGIN_COMPLETE], 0, self->session_cookie);
 }
 

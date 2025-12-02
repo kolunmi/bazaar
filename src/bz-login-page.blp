@@ -30,7 +30,6 @@ template $BzLoginPage: Adw.NavigationPage {
         child: Adw.StatusPage error_status_page {
           icon-name: "computer-fail-symbolic";
           title: _("Something Went Wrong");
-          description: _("Connect your Flathub account to Bazaar to manage your favorited apps.");
         };
       }
 
@@ -104,7 +103,7 @@ template $BzLoginPage: Adw.NavigationPage {
 
                 Button {
                   label: _("Finish");
-                  clicked => $on_close_clicked() swapped;
+                  clicked => $on_close_clicked();
 
                   styles [
                     "pill",
