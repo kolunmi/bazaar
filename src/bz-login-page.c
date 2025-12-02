@@ -65,8 +65,9 @@ static guint signals[LAST_SIGNAL];
 static void
 show_error (BzLoginPage *self, const char *message)
 {
+  g_autofree char *escaped_message = g_markup_escape_text (message, -1);
   gtk_stack_set_visible_child_name (self->main_stack, "error");
-  adw_status_page_set_description (self->error_status_page, message);
+  adw_status_page_set_description (self->error_status_page, escaped_message);
 }
 
 static JsonObject *
@@ -87,8 +88,9 @@ parse_json_response (GBytes *bytes, GError **error)
 
 
 static SoupMessage *
-create_api_request (const char *method, const char *url)
+create_flathub_request (const char *method, const char *route)
 {
+  g_autofree char *url = g_strdup_printf ("https://flathub.org/api/v2%s", route);
   SoupMessage *msg = soup_message_new (method, url);
   soup_message_headers_append (soup_message_get_request_headers (msg),
                                "accept", "application/json");
@@ -125,7 +127,7 @@ complete_oauth (BzLoginPage *self,
 {
   g_autoptr (JsonBuilder) builder     = json_builder_new ();
   g_autoptr (JsonGenerator) generator = json_generator_new ();
-  g_autofree char *url                = NULL;
+  g_autofree char *route              = NULL;
   g_autofree char *json_data          = NULL;
   SoupMessage     *msg                = NULL;
 
@@ -153,10 +155,10 @@ complete_oauth (BzLoginPage *self,
   json_generator_set_root (generator, json_builder_get_root (builder));
   json_data = json_generator_to_data (generator, NULL);
 
-  url = g_strdup_printf ("https://flathub.org/api/v2/auth/login/%s",
-                         bz_flathub_auth_provider_get_method (self->current_provider));
+  route = g_strdup_printf ("/auth/login/%s",
+                           bz_flathub_auth_provider_get_method (self->current_provider));
 
-  msg = soup_message_new ("POST", url);
+  msg = soup_message_new ("POST", g_strdup_printf ("https://flathub.org/api/v2%s", route));
   soup_message_headers_append (soup_message_get_request_headers (msg),
                                "accept", "application/json");
   soup_message_headers_append (soup_message_get_request_headers (msg),
@@ -222,7 +224,7 @@ on_decide_policy (WebKitWebView           *webview,
 static void
 get_user_info (BzLoginPage *self)
 {
-  SoupMessage *msg = create_api_request ("GET", "https://flathub.org/api/v2/auth/userinfo");
+  SoupMessage *msg = create_flathub_request ("GET", "/auth/userinfo");
 
   soup_session_send_and_read_async (self->session, msg, G_PRIORITY_DEFAULT,
                                     NULL, on_user_info_loaded, self);
@@ -382,7 +384,7 @@ on_provider_row_activated (GtkButton   *button,
 {
   BzFlathubAuthProvider *provider;
   SoupMessage           *msg;
-  g_autofree char       *url = NULL;
+  g_autofree char       *route = NULL;
 
   provider = g_object_get_data (G_OBJECT (button), "provider");
   if (provider == NULL)
@@ -393,10 +395,10 @@ on_provider_row_activated (GtkButton   *button,
 
   gtk_stack_set_visible_child_name (self->main_stack, "loading");
 
-  url = g_strdup_printf ("https://flathub.org/api/v2/auth/login/%s",
-                         bz_flathub_auth_provider_get_method (provider));
+  route = g_strdup_printf ("/auth/login/%s",
+                           bz_flathub_auth_provider_get_method (provider));
 
-  msg = create_api_request ("GET", url);
+  msg = create_flathub_request ("GET", route);
 
   soup_session_send_and_read_async (self->session, msg, G_PRIORITY_DEFAULT,
                                     NULL, on_login_response, self);
@@ -477,7 +479,7 @@ load_providers (BzLoginPage *self)
 
   gtk_stack_set_visible_child_name (self->main_stack, "loading");
 
-  msg = create_api_request ("GET", "https://flathub.org/api/v2/auth/login");
+  msg = create_flathub_request ("GET", "/auth/login");
 
   soup_session_send_and_read_async (self->session, msg, G_PRIORITY_DEFAULT,
                                     NULL, on_providers_loaded, self);
