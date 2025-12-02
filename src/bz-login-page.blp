@@ -25,24 +25,30 @@ template $BzLoginPage: Adw.NavigationPage {
       }
 
       StackPage {
+        name: "error";
+
+        child: Adw.StatusPage error_status_page {
+          icon-name: "computer-fail-symbolic";
+          title: _("Something Went Wrong");
+          description: _("Connect your Flathub account to Bazaar to manage your favorited apps.");
+        };
+      }
+
+      StackPage {
         name: "start";
 
         child: Adw.Clamp {
-          child: Box {
-            valign: center;
-            orientation: vertical;
-            spacing: 24;
+          child: Adw.StatusPage {
+            icon-name: "flathub-symbolic";
+            title: _("Connect with Flathub");
+            description: _("Connect your Flathub account to Bazaar to manage your favorited apps.");
 
-            Adw.StatusPage start_status_page {
-              icon-name: "flathub-symbolic";
-              title: _("Connect with Flathub");
-              description: _("Connect your Flathub account to Bazaar to manage your favorited apps.");
-            }
-
-            Adw.PreferencesGroup provider_preferences_group {
+            child: Adw.PreferencesGroup provider_preferences_group {
+              margin-start: 10;
+              margin-end: 10;
               hexpand: true;
               halign: fill;
-            }
+            };
           };
         };
       }

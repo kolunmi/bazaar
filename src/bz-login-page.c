@@ -45,7 +45,7 @@ struct _BzLoginPage
 
   /* Template widgets */
   GtkStack          *main_stack;
-  AdwStatusPage     *start_status_page;
+  AdwStatusPage     *error_status_page;
   AdwPreferencesGroup *provider_preferences_group;
   GtkScrolledWindow *browser_scroll;
   AdwAvatar         *finish_avatar;
@@ -61,6 +61,39 @@ enum
 };
 
 static guint signals[LAST_SIGNAL];
+
+static void
+show_error (BzLoginPage *self, const char *message)
+{
+  gtk_stack_set_visible_child_name (self->main_stack, "start");
+  adw_status_page_set_description (self->error_status_page, message);
+}
+
+static JsonObject *
+parse_json_response (GBytes *bytes, GError **error)
+{
+  JsonNode *root;
+  g_autoptr (JsonParser) parser = json_parser_new ();
+
+  if (!json_parser_load_from_data (parser,
+                                   g_bytes_get_data (bytes, NULL),
+                                   g_bytes_get_size (bytes),
+                                   error))
+    return NULL;
+
+  root = json_parser_get_root (parser);
+  return json_node_dup_object (root);
+}
+
+
+static SoupMessage *
+create_api_request (const char *method, const char *url)
+{
+  SoupMessage *msg = soup_message_new (method, url);
+  soup_message_headers_append (soup_message_get_request_headers (msg),
+                               "accept", "application/json");
+  return msg;
+}
 
 static void
 load_webkit_library (BzLoginPage *self)
@@ -90,17 +123,14 @@ complete_oauth (BzLoginPage *self,
                 const char  *state,
                 const char  *error)
 {
-  g_autoptr (JsonBuilder) builder     = NULL;
-  g_autoptr (JsonGenerator) generator = NULL;
-  g_autoptr (JsonNode) root           = NULL;
-  g_autoptr (GBytes) bytes            = NULL;
+  g_autoptr (JsonBuilder) builder     = json_builder_new ();
+  g_autoptr (JsonGenerator) generator = json_generator_new ();
+  g_autofree char *url                = NULL;
   g_autofree char *json_data          = NULL;
   SoupMessage     *msg                = NULL;
-  g_autofree char *url                = NULL;
 
   gtk_stack_set_visible_child_name (self->main_stack, "loading");
 
-  builder = json_builder_new ();
   json_builder_begin_object (builder);
 
   if (error != NULL)
@@ -120,9 +150,7 @@ complete_oauth (BzLoginPage *self,
 
   json_builder_end_object (builder);
 
-  root      = json_builder_get_root (builder);
-  generator = json_generator_new ();
-  json_generator_set_root (generator, root);
+  json_generator_set_root (generator, json_builder_get_root (builder));
   json_data = json_generator_to_data (generator, NULL);
 
   url = g_strdup_printf ("https://flathub.org/api/v2/auth/login/%s",
@@ -134,15 +162,11 @@ complete_oauth (BzLoginPage *self,
   soup_message_headers_append (soup_message_get_request_headers (msg),
                                "Content-Type", "application/json");
 
-  bytes = g_bytes_new (json_data, strlen (json_data));
-  soup_message_set_request_body_from_bytes (msg, "application/json", bytes);
+  soup_message_set_request_body_from_bytes (msg, "application/json",
+                                            g_bytes_new (json_data, strlen (json_data)));
 
-  soup_session_send_and_read_async (self->session,
-                                    msg,
-                                    G_PRIORITY_DEFAULT,
-                                    NULL,
-                                    on_oauth_complete,
-                                    self);
+  soup_session_send_and_read_async (self->session, msg, G_PRIORITY_DEFAULT,
+                                    NULL, on_oauth_complete, self);
 }
 
 static gboolean
@@ -151,15 +175,13 @@ on_decide_policy (WebKitWebView           *webview,
                   WebKitPolicyDecisionType decision_type,
                   gpointer                 user_data)
 {
-  BzLoginPage            *self       = BZ_LOGIN_PAGE (user_data);
-  WebKitNavigationAction *nav_action = NULL;
-  WebKitURIRequest       *request    = NULL;
-  const char             *uri        = NULL;
-  g_autoptr (GUri) parsed_uri        = NULL;
-  GHashTable *params                 = NULL;
-  const char *code                   = NULL;
-  const char *state                  = NULL;
-  const char *error                  = NULL;
+  BzLoginPage            *self = BZ_LOGIN_PAGE (user_data);
+  WebKitNavigationAction *nav_action;
+  WebKitURIRequest       *request;
+  const char             *uri;
+  g_autoptr (GUri) parsed_uri = NULL;
+  GHashTable *params = NULL;
+  const char *code, *state, *error;
 
   if (decision_type != WEBKIT_POLICY_DECISION_TYPE_NAVIGATION_ACTION)
     return FALSE;
@@ -202,18 +224,10 @@ on_decide_policy (WebKitWebView           *webview,
 static void
 get_user_info (BzLoginPage *self)
 {
-  SoupMessage *msg = NULL;
+  SoupMessage *msg = create_api_request ("GET", "https://flathub.org/api/v2/auth/userinfo");
 
-  msg = soup_message_new ("GET", "https://flathub.org/api/v2/auth/userinfo");
-  soup_message_headers_append (soup_message_get_request_headers (msg),
-                               "accept", "application/json");
-
-  soup_session_send_and_read_async (self->session,
-                                    msg,
-                                    G_PRIORITY_DEFAULT,
-                                    NULL,
-                                    on_user_info_loaded,
-                                    self);
+  soup_session_send_and_read_async (self->session, msg, G_PRIORITY_DEFAULT,
+                                    NULL, on_user_info_loaded, self);
 }
 
 static void
@@ -221,42 +235,29 @@ on_oauth_complete (GObject      *source_object,
                    GAsyncResult *res,
                    gpointer      user_data)
 {
-  BzLoginPage *self             = BZ_LOGIN_PAGE (user_data);
-  g_autoptr (GBytes) bytes      = NULL;
-  g_autoptr (GError) error      = NULL;
-  g_autoptr (JsonParser) parser = NULL;
-  JsonNode   *root              = NULL;
-  JsonObject *obj               = NULL;
-  const char *status            = NULL;
-  GSList     *cookies           = NULL;
-  GSList     *l                 = NULL;
+  BzLoginPage *self = BZ_LOGIN_PAGE (user_data);
+  g_autoptr (GBytes) bytes = NULL;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (JsonObject) obj = NULL;
+  const char *status;
+  GSList *cookies, *l;
 
-  bytes = soup_session_send_and_read_finish (SOUP_SESSION (source_object),
-                                             res, &error);
+  bytes = soup_session_send_and_read_finish (SOUP_SESSION (source_object), res, &error);
   if (error != NULL)
     {
       g_warning ("OAuth complete error: %s", error->message);
-      gtk_stack_set_visible_child_name (self->main_stack, "start");
-      adw_status_page_set_description (self->start_status_page,
-                                       g_strdup_printf ("Error: %s", error->message));
+      show_error (self, g_strdup_printf ("Error: %s", error->message));
       return;
     }
 
-  parser = json_parser_new ();
-  if (!json_parser_load_from_data (parser,
-                                   g_bytes_get_data (bytes, NULL),
-                                   g_bytes_get_size (bytes),
-                                   &error))
+  obj = parse_json_response (bytes, &error);
+  if (obj == NULL)
     {
       g_warning ("Failed to parse OAuth response: %s", error->message);
-      gtk_stack_set_visible_child_name (self->main_stack, "start");
-      adw_status_page_set_description (self->start_status_page,
-                                       g_strdup_printf ("Error: %s", error->message));
+      show_error (self, g_strdup_printf ("Error: %s", error->message));
       return;
     }
 
-  root   = json_parser_get_root (parser);
-  obj    = json_node_get_object (root);
   status = json_object_get_string_member (obj, "status");
 
   cookies = soup_cookie_jar_all_cookies (self->cookie_jar);
@@ -272,15 +273,9 @@ on_oauth_complete (GObject      *source_object,
   g_slist_free_full (cookies, (GDestroyNotify) soup_cookie_free);
 
   if (g_strcmp0 (status, "ok") == 0 || g_strcmp0 (status, "success") == 0)
-    {
-      get_user_info (self);
-    }
+    get_user_info (self);
   else
-    {
-      gtk_stack_set_visible_child_name (self->main_stack, "start");
-      adw_status_page_set_description (self->start_status_page,
-                                       "Authentication failed");
-    }
+    show_error (self, "Authentication failed");
 }
 
 static void
@@ -288,42 +283,29 @@ on_user_info_loaded (GObject      *source_object,
                      GAsyncResult *res,
                      gpointer      user_data)
 {
-  BzLoginPage *self             = BZ_LOGIN_PAGE (user_data);
-  g_autoptr (GBytes) bytes      = NULL;
-  g_autoptr (GError) error      = NULL;
-  g_autoptr (JsonParser) parser = NULL;
-  JsonNode   *root              = NULL;
-  JsonObject *obj               = NULL;
-  JsonObject *default_account   = NULL;
-  const char *displayname       = NULL;
-  const char *avatar_url        = NULL;
+  BzLoginPage *self = BZ_LOGIN_PAGE (user_data);
+  g_autoptr (GBytes) bytes = NULL;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (JsonObject) obj = NULL;
+  JsonObject *default_account = NULL;
+  const char *displayname;
+  const char *avatar_url;
 
-  bytes = soup_session_send_and_read_finish (SOUP_SESSION (source_object),
-                                             res, &error);
+  bytes = soup_session_send_and_read_finish (SOUP_SESSION (source_object), res, &error);
   if (error != NULL)
     {
       g_warning ("User info load error: %s", error->message);
-      gtk_stack_set_visible_child_name (self->main_stack, "start");
-      adw_status_page_set_description (self->start_status_page,
-                                       g_strdup_printf ("Error: %s", error->message));
+      show_error (self, g_strdup_printf ("Error: %s", error->message));
       return;
     }
 
-  parser = json_parser_new ();
-  if (!json_parser_load_from_data (parser,
-                                   g_bytes_get_data (bytes, NULL),
-                                   g_bytes_get_size (bytes),
-                                   &error))
+  obj = parse_json_response (bytes, &error);
+  if (obj == NULL)
     {
       g_warning ("Failed to parse user info: %s", error->message);
-      gtk_stack_set_visible_child_name (self->main_stack, "start");
-      adw_status_page_set_description (self->start_status_page,
-                                       g_strdup_printf ("Error: %s", error->message));
+      show_error (self, g_strdup_printf ("Error: %s", error->message));
       return;
     }
-
-  root = json_parser_get_root (parser);
-  obj  = json_node_get_object (root);
 
   displayname = json_object_get_string_member (obj, "displayname");
   if (displayname == NULL)
@@ -335,20 +317,15 @@ on_user_info_loaded (GObject      *source_object,
       avatar_url      = json_object_get_string_member (default_account, "avatar");
     }
 
-  gtk_label_set_text (self->welcome_label,
-                      g_strdup_printf ("Hello, %s!", displayname));
+  gtk_label_set_text (self->welcome_label, g_strdup_printf ("Hello, %s!", displayname));
   adw_avatar_set_text (self->finish_avatar, displayname);
 
   if (avatar_url != NULL && avatar_url[0] != '\0')
     {
-      g_autoptr (GFile) avatar_file = NULL;
-      BzAsyncTexture *async_texture = NULL;
+      g_autoptr (GFile) avatar_file = g_file_new_for_uri (avatar_url);
+      BzAsyncTexture *async_texture = bz_async_texture_new (avatar_file, NULL);
 
-      avatar_file   = g_file_new_for_uri (avatar_url);
-      async_texture = bz_async_texture_new (avatar_file, NULL);
-
-      adw_avatar_set_custom_image (self->finish_avatar,
-                                   GDK_PAINTABLE (async_texture));
+      adw_avatar_set_custom_image (self->finish_avatar, GDK_PAINTABLE (async_texture));
       g_object_unref (async_texture);
     }
 
@@ -363,38 +340,26 @@ on_login_response (GObject      *source_object,
                    GAsyncResult *res,
                    gpointer      user_data)
 {
-  BzLoginPage *self             = BZ_LOGIN_PAGE (user_data);
-  g_autoptr (GBytes) bytes      = NULL;
-  g_autoptr (GError) error      = NULL;
-  g_autoptr (JsonParser) parser = NULL;
-  JsonNode   *root              = NULL;
-  JsonObject *obj               = NULL;
-  const char *redirect          = NULL;
+  BzLoginPage *self = BZ_LOGIN_PAGE (user_data);
+  g_autoptr (GBytes) bytes = NULL;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (JsonObject) obj = NULL;
+  const char *redirect;
 
-  bytes = soup_session_send_and_read_finish (SOUP_SESSION (source_object),
-                                             res, &error);
+  bytes = soup_session_send_and_read_finish (SOUP_SESSION (source_object), res, &error);
   if (error != NULL)
     {
-      gtk_stack_set_visible_child_name (self->main_stack, "start");
-      adw_status_page_set_description (self->start_status_page,
-                                       g_strdup_printf ("Error: %s", error->message));
+      show_error (self, g_strdup_printf ("Error: %s", error->message));
       return;
     }
 
-  parser = json_parser_new ();
-  if (!json_parser_load_from_data (parser,
-                                   g_bytes_get_data (bytes, NULL),
-                                   g_bytes_get_size (bytes),
-                                   &error))
+  obj = parse_json_response (bytes, &error);
+  if (obj == NULL)
     {
-      gtk_stack_set_visible_child_name (self->main_stack, "start");
-      adw_status_page_set_description (self->start_status_page,
-                                       g_strdup_printf ("Error: %s", error->message));
+      show_error (self, g_strdup_printf ("Error: %s", error->message));
       return;
     }
 
-  root     = json_parser_get_root (parser);
-  obj      = json_node_get_object (root);
   redirect = json_object_get_string_member (obj, "redirect");
 
   if (redirect != NULL)
@@ -411,20 +376,16 @@ on_login_response (GObject      *source_object,
       webkit_web_view_load_uri (self->webview, self->auth_redirect_url);
     }
   else
-    {
-      gtk_stack_set_visible_child_name (self->main_stack, "start");
-      adw_status_page_set_description (self->start_status_page,
-                                       "Error: No redirect URL received");
-    }
+    show_error (self, "Error: No redirect URL received");
 }
 
 static void
 on_provider_row_activated (GtkButton   *button,
                             BzLoginPage *self)
 {
-  BzFlathubAuthProvider *provider = NULL;
-  SoupMessage           *msg      = NULL;
-  g_autofree char       *url      = NULL;
+  BzFlathubAuthProvider *provider;
+  SoupMessage           *msg;
+  g_autofree char       *url = NULL;
 
   provider = g_object_get_data (G_OBJECT (button), "provider");
   if (provider == NULL)
@@ -438,16 +399,10 @@ on_provider_row_activated (GtkButton   *button,
   url = g_strdup_printf ("https://flathub.org/api/v2/auth/login/%s",
                          bz_flathub_auth_provider_get_method (provider));
 
-  msg = soup_message_new ("GET", url);
-  soup_message_headers_append (soup_message_get_request_headers (msg),
-                               "accept", "application/json");
+  msg = create_api_request ("GET", url);
 
-  soup_session_send_and_read_async (self->session,
-                                    msg,
-                                    G_PRIORITY_DEFAULT,
-                                    NULL,
-                                    on_login_response,
-                                    self);
+  soup_session_send_and_read_async (self->session, msg, G_PRIORITY_DEFAULT,
+                                    NULL, on_login_response, self);
 }
 
 static void
@@ -455,22 +410,18 @@ on_providers_loaded (GObject      *source_object,
                      GAsyncResult *res,
                      gpointer      user_data)
 {
-  BzLoginPage *self             = BZ_LOGIN_PAGE (user_data);
-  g_autoptr (GBytes) bytes      = NULL;
-  g_autoptr (GError) error      = NULL;
+  BzLoginPage *self = BZ_LOGIN_PAGE (user_data);
+  g_autoptr (GBytes) bytes = NULL;
+  g_autoptr (GError) error = NULL;
   g_autoptr (JsonParser) parser = NULL;
-  JsonNode  *root               = NULL;
-  JsonArray *array              = NULL;
-  guint      i                  = 0;
+  JsonNode  *root;
+  JsonArray *array;
+  guint      i;
 
-  bytes = soup_session_send_and_read_finish (SOUP_SESSION (source_object),
-                                             res, &error);
+  bytes = soup_session_send_and_read_finish (SOUP_SESSION (source_object), res, &error);
   if (error != NULL)
     {
-      gtk_stack_set_visible_child_name (self->main_stack, "start");
-      adw_status_page_set_description (
-          self->start_status_page,
-          g_strdup_printf ("Error loading providers: %s", error->message));
+      show_error (self, g_strdup_printf ("Error loading providers: %s", error->message));
       return;
     }
 
@@ -480,10 +431,7 @@ on_providers_loaded (GObject      *source_object,
                                    g_bytes_get_size (bytes),
                                    &error))
     {
-      gtk_stack_set_visible_child_name (self->main_stack, "start");
-      adw_status_page_set_description (
-          self->start_status_page,
-          g_strdup_printf ("Error parsing providers: %s", error->message));
+      show_error (self, g_strdup_printf ("Error parsing providers: %s", error->message));
       return;
     }
 
@@ -492,31 +440,20 @@ on_providers_loaded (GObject      *source_object,
 
   for (i = 0; i < json_array_get_length (array); i++)
     {
-      JsonObject            *provider_obj = NULL;
-      BzFlathubAuthProvider *provider     = NULL;
-      const char            *method       = NULL;
-      const char            *name         = NULL;
-      GtkWidget             *row          = NULL;
-      GtkWidget             *prefix_icon  = NULL;
-      GtkWidget             *suffix_icon  = NULL;
-      g_autofree char       *row_title    = NULL;
-      g_autofree char       *icon_name    = NULL;
+      JsonObject            *provider_obj = json_array_get_object_element (array, i);
+      BzFlathubAuthProvider *provider     = bz_flathub_auth_provider_new ();
+      const char            *method       = json_object_get_string_member (provider_obj, "method");
+      const char            *name         = json_object_get_string_member (provider_obj, "name");
+      GtkWidget             *row          = adw_action_row_new ();
+      GtkWidget             *prefix_icon, *suffix_icon;
+      g_autofree char       *icon_name    = g_strdup_printf ("io.github.kolunmi.Bazaar.%s", method);
 
-      provider_obj = json_array_get_object_element (array, i);
-      method       = json_object_get_string_member (provider_obj, "method");
-      name         = json_object_get_string_member (provider_obj, "name");
-
-      provider = bz_flathub_auth_provider_new ();
       bz_flathub_auth_provider_set_name (provider, name);
       bz_flathub_auth_provider_set_method (provider, method);
 
       self->providers = g_list_append (self->providers, provider);
 
-      row_title = g_strdup_printf ("%s", name);
-      row       = adw_action_row_new ();
-      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), row_title);
-
-      icon_name = g_strdup_printf ("io.github.kolunmi.Bazaar.%s", method);
+      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), name);
 
       prefix_icon = gtk_image_new_from_icon_name (icon_name);
       gtk_image_set_icon_size(GTK_IMAGE (prefix_icon), GTK_ICON_SIZE_LARGE);
@@ -528,8 +465,7 @@ on_providers_loaded (GObject      *source_object,
 
       g_object_set_data (G_OBJECT (row), "provider", provider);
       gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW(row), true);
-      g_signal_connect (row, "activated",
-                        G_CALLBACK (on_provider_row_activated), self);
+      g_signal_connect (row, "activated", G_CALLBACK (on_provider_row_activated), self);
 
       adw_preferences_group_add (self->provider_preferences_group, row);
     }
@@ -540,20 +476,14 @@ on_providers_loaded (GObject      *source_object,
 static void
 load_providers (BzLoginPage *self)
 {
-  SoupMessage *msg = NULL;
+  SoupMessage *msg;
 
   gtk_stack_set_visible_child_name (self->main_stack, "loading");
 
-  msg = soup_message_new ("GET", "https://flathub.org/api/v2/auth/login");
-  soup_message_headers_append (soup_message_get_request_headers (msg),
-                               "accept", "application/json");
+  msg = create_api_request ("GET", "https://flathub.org/api/v2/auth/login");
 
-  soup_session_send_and_read_async (self->session,
-                                    msg,
-                                    G_PRIORITY_DEFAULT,
-                                    NULL,
-                                    on_providers_loaded,
-                                    self);
+  soup_session_send_and_read_async (self->session, msg, G_PRIORITY_DEFAULT,
+                                    NULL, on_providers_loaded, self);
 }
 
 static void
@@ -605,7 +535,7 @@ bz_login_page_class_init (BzLoginPageClass *klass)
                                                "/io/github/kolunmi/Bazaar/bz-login-page.ui");
 
   gtk_widget_class_bind_template_child (widget_class, BzLoginPage, main_stack);
-  gtk_widget_class_bind_template_child (widget_class, BzLoginPage, start_status_page);
+  gtk_widget_class_bind_template_child (widget_class, BzLoginPage, error_status_page);
   gtk_widget_class_bind_template_child (widget_class, BzLoginPage, provider_preferences_group);
   gtk_widget_class_bind_template_child (widget_class, BzLoginPage, browser_scroll);
   gtk_widget_class_bind_template_child (widget_class, BzLoginPage, finish_avatar);
@@ -621,8 +551,7 @@ bz_login_page_init (BzLoginPage *self)
 
   self->session    = soup_session_new ();
   self->cookie_jar = soup_cookie_jar_new ();
-  soup_cookie_jar_set_accept_policy (self->cookie_jar,
-                                     SOUP_COOKIE_JAR_ACCEPT_ALWAYS);
+  soup_cookie_jar_set_accept_policy (self->cookie_jar, SOUP_COOKIE_JAR_ACCEPT_ALWAYS);
   soup_session_add_feature (self->session, SOUP_SESSION_FEATURE (self->cookie_jar));
 
   self->webkit_loaded   = FALSE;
