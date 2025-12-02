@@ -497,8 +497,10 @@ on_providers_loaded (GObject      *source_object,
       const char            *method       = NULL;
       const char            *name         = NULL;
       GtkWidget             *row          = NULL;
-      GtkWidget             *icon         = NULL;
+      GtkWidget             *prefix_icon  = NULL;
+      GtkWidget             *suffix_icon  = NULL;
       g_autofree char       *row_title    = NULL;
+      g_autofree char       *icon_name    = NULL;
 
       provider_obj = json_array_get_object_element (array, i);
       method       = json_object_get_string_member (provider_obj, "method");
@@ -514,8 +516,15 @@ on_providers_loaded (GObject      *source_object,
       row       = adw_action_row_new ();
       adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), row_title);
 
-      icon = gtk_image_new_from_icon_name ("go-next-symbolic");
-      adw_action_row_add_suffix (ADW_ACTION_ROW (row), icon);
+      icon_name = g_strdup_printf ("io.github.kolunmi.Bazaar.%s", method);
+
+      prefix_icon = gtk_image_new_from_icon_name (icon_name);
+      gtk_image_set_icon_size(GTK_IMAGE (prefix_icon), GTK_ICON_SIZE_LARGE);
+      gtk_widget_add_css_class(prefix_icon, "lowres-icon");
+      adw_action_row_add_prefix (ADW_ACTION_ROW (row), prefix_icon);
+
+      suffix_icon = gtk_image_new_from_icon_name ("go-next-symbolic");
+      adw_action_row_add_suffix (ADW_ACTION_ROW (row), suffix_icon);
 
       g_object_set_data (G_OBJECT (row), "provider", provider);
       gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW(row), true);

@@ -8,94 +8,107 @@ template $BzLoginPage: Adw.NavigationPage {
     [top]
     Adw.HeaderBar {}
 
-    content:Stack main_stack {
-        transition-type: crossfade;
+    content: Stack main_stack {
+      transition-type: crossfade;
 
-        StackPage {
-          name: "loading";
-          child: Adw.Spinner {
-            hexpand: true;
-            vexpand: true;
-            halign: center;
+      StackPage {
+        name: "loading";
+
+        child: Adw.Spinner {
+          hexpand: true;
+          vexpand: true;
+          halign: center;
+          valign: center;
+          width-request: 64;
+          height-request: 64;
+        };
+      }
+
+      StackPage {
+        name: "start";
+
+        child: Adw.Clamp {
+          child: Box {
             valign: center;
-            width-request: 64;
-            height-request: 64;
+            orientation: vertical;
+            spacing: 24;
+
+            Adw.StatusPage start_status_page {
+              icon-name: "flathub-symbolic";
+              title: _("Connect with Flathub");
+              description: _("Connect your Flathub account to Bazaar to manage your favorited apps.");
+            }
+
+            Adw.PreferencesGroup provider_preferences_group {
+              hexpand: true;
+              halign: fill;
+            }
           };
-        }
+        };
+      }
 
-        StackPage {
-          name: "start";
-          child: Adw.StatusPage start_status_page {
-            icon-name: "flathub-symbolic";
-            title: _("Connect with Flathub");
-            description: _("Connect your Flathub account to Bazaar to manage your favorited apps.");
+      StackPage {
+        name: "browser";
 
-            child: Adw.PreferencesGroup provider_preferences_group {
+        child: ScrolledWindow browser_scroll {
+          vexpand: true;
+        };
+      }
+
+      StackPage {
+        name: "finish";
+
+        child: ScrolledWindow {
+          hscrollbar-policy: never;
+
+          child: Adw.Clamp {
+            maximum-size: 600;
+
+            child: Box {
+              orientation: vertical;
+              vexpand: true;
               halign: center;
-              width-request: 300;
-            };
-          };
-        }
+              valign: center;
 
-        StackPage {
-          name: "browser";
-          child: ScrolledWindow browser_scroll {
-            vexpand: true;
-          };
-        }
-
-        StackPage {
-          name: "finish";
-          child: ScrolledWindow {
-            hscrollbar-policy: never;
-
-            child: Adw.Clamp {
-              maximum-size: 600;
-
-              child: Box {
+              Box {
                 orientation: vertical;
-                vexpand: true;
+                spacing: 15;
                 halign: center;
                 valign: center;
 
-                Box {
-                  orientation: vertical;
-                  spacing: 15;
-                  halign: center;
-                  valign: center;
-
-                  Adw.Avatar finish_avatar {
-                    size: 96;
-                    show-initials: true;
-                  }
-
-                  Label welcome_label {
-                    halign: center;
-
-                    styles [
-                      "title-1",
-                    ]
-                  }
+                Adw.Avatar finish_avatar {
+                  size: 96;
+                  show-initials: true;
                 }
 
-                Box {
-                  orientation: horizontal;
-                  spacing: 10;
+                Label welcome_label {
                   halign: center;
-                  margin-top: 20;
 
-                  Button {
-                    label: _("Finish");
-                    clicked => $on_close_clicked() swapped;
-                    styles [
-                      "pill",
-                    ]
-                  }
+                  styles [
+                    "title-1",
+                  ]
                 }
-              };
+              }
+
+              Box {
+                orientation: horizontal;
+                spacing: 10;
+                halign: center;
+                margin-top: 20;
+
+                Button {
+                  label: _("Finish");
+                  clicked => $on_close_clicked() swapped;
+
+                  styles [
+                    "pill",
+                  ]
+                }
+              }
             };
           };
-        }
-      };
+        };
+      }
+    };
   };
 }

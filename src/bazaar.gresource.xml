@@ -159,5 +159,11 @@
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.New.svg</file>
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Updated.svg</file>
 
+    <file preprocess="xml-stripblanks">icons/io.github.kolunmi.Bazaar.github.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolunmi.Bazaar.gitlab.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolunmi.Bazaar.gnome.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolunmi.Bazaar.kde.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolunmi.Bazaar.google.svg</file>
+
   </gresource>
 </gresources>
