@@ -349,6 +349,11 @@ template $BzWindow: Adw.ApplicationWindow {
                         visible: bind $invert_boolean($is_null(template.state as <$BzStateInfo>.background-task-label) as <bool>) as <bool>;
 
                         Adw.Spinner {}
+
+                        Label {
+                          label: bind template.state as <$BzStateInfo>.background-task-label;
+                          ellipsize: end;
+                        }
                       }
 
                       [title]
