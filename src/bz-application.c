@@ -615,10 +615,6 @@ bz_application_sync_remotes_action (GSimpleAction *action,
 
   g_assert (BZ_IS_APPLICATION (self));
 
-  if (self->sync != NULL &&
-      dex_future_is_pending (self->sync))
-    return;
-
   dex_clear (&self->sync);
   self->sync = make_sync_future (self);
 }
@@ -1859,12 +1855,7 @@ scheduled_timeout_cb (GWeakRef *wr)
   if (self == NULL)
     goto done;
 
-  if (self->sync != NULL &&
-      dex_future_is_pending (self->sync))
-    goto done;
-
   dex_clear (&self->sync);
-
   have_connection = bz_state_info_get_have_connection (self->state);
   if (have_connection)
     self->sync = make_sync_future (self);

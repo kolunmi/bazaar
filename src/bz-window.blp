@@ -402,8 +402,18 @@ template $BzWindow: Adw.ApplicationWindow {
                       }
                     }
                     Adw.Banner {
+                      sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.syncing as <bool>) as <bool>;
                       revealed: bind template.state as <$BzStateInfo>.metered_connection as <bool>;
                       title: _("Network connection is metered — automatic store data sync is paused");
+                      button-label: _("Sync Manually");
+                      button-clicked => $sync_cb(template);
+                    }
+                    Adw.Banner {
+                      sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.syncing as <bool>) as <bool>;
+                      revealed: bind $logical_and($invert_boolean(template.state as <$BzStateInfo>.metered_connection as <bool>) as <bool>,
+                                                  $logical_and(template.state as <$BzStateInfo>.have_connection as <bool>,
+                                                  $invert_boolean(template.state as <$BzStateInfo>.online as <bool>) as <bool>) as <bool>) as <bool>;
+                      title: _("You have a network connection but are viewing a cached version of Flathub");
                       button-label: _("Sync Manually");
                       button-clicked => $sync_cb(template);
                     }
