@@ -932,9 +932,7 @@ transact (BzWindow  *self,
           bz_comet_overlay_set_pulse_color (self->comet_overlay, &destructive_color);
         }
       else
-        {
-          bz_comet_overlay_set_pulse_color (self->comet_overlay, NULL);
-        }
+        bz_comet_overlay_set_pulse_color (self->comet_overlay, NULL);
 
       comet = g_object_new (
           BZ_TYPE_COMET,
