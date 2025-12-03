@@ -615,6 +615,10 @@ bz_application_sync_remotes_action (GSimpleAction *action,
 
   g_assert (BZ_IS_APPLICATION (self));
 
+  if (self->sync != NULL &&
+      dex_future_is_pending (self->sync))
+    return;
+
   dex_clear (&self->sync);
   self->sync = make_sync_future (self);
 }
@@ -1883,8 +1887,6 @@ network_status_changed (BzApplication   *self,
   is_metered      = g_network_monitor_get_network_metered (network);
 
   if (!bz_state_info_get_busy (self->state) &&
-      (self->sync == NULL ||
-       !dex_future_is_pending (self->sync)) &&
       ((!was_connected &&
         have_connection &&
         !is_metered) ||
