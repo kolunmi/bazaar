@@ -389,6 +389,10 @@ window.flathub {
   background-color: oklch(from var(--sidebar-bg-color) l calc(c * 4) var(--flathub-bg-hue));
 }
 
+.flathub banner  > * > * {
+  background-color: oklch(from var(--card-bg-color) l calc(c * 4) var(--flathub-bg-hue));
+}
+
 .flathub-lotion {
   color: #fafafa;
 }
