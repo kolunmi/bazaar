@@ -30,7 +30,6 @@
 #include "bz-decorated-screenshot.h"
 #include <adwaita.h>
 
-#define TARGET_LUMINANCE     0.5
 #define LIGHT_MIX_PERCENTAGE 25
 #define DARK_MIX_PERCENTAGE  4
 
@@ -573,40 +572,11 @@ bz_screenshots_carousel_get_dark_accent_color (BzScreenshotsCarousel *self)
 }
 
 static void
-normalize_color_intensity (const char *color_str, char **out_normalized)
-{
-  GdkRGBA rgba;
-  gdouble luminance, factor;
-
-  if (color_str == NULL || !gdk_rgba_parse (&rgba, color_str))
-    {
-      *out_normalized = NULL;
-      return;
-    }
-
-  luminance = 0.2126 * rgba.red + 0.7152 * rgba.green + 0.0722 * rgba.blue;
-
-  if (luminance > 0.01)
-    {
-      factor = TARGET_LUMINANCE / luminance;
-      factor = CLAMP (factor, 0.3, 3.0);
-
-      rgba.red   = CLAMP (rgba.red * factor, 0.0, 1.0);
-      rgba.green = CLAMP (rgba.green * factor, 0.0, 1.0);
-      rgba.blue  = CLAMP (rgba.blue * factor, 0.0, 1.0);
-    }
-
-  *out_normalized = gdk_rgba_to_string (&rgba);
-}
-
-static void
 refresh_css (BzScreenshotsCarousel *self)
 {
-  g_autofree char *css_string       = NULL;
-  g_autofree char *light_bg         = NULL;
-  g_autofree char *dark_bg          = NULL;
-  g_autofree char *normalized_light = NULL;
-  g_autofree char *normalized_dark  = NULL;
+  g_autofree char *css_string = NULL;
+  g_autofree char *light_bg   = NULL;
+  g_autofree char *dark_bg    = NULL;
   gboolean         is_dark;
 
   clear_css (self);
@@ -618,28 +588,23 @@ refresh_css (BzScreenshotsCarousel *self)
   self->light_class = g_strdup ("screenshot-carousel-light");
   self->dark_class  = g_strdup ("screenshot-carousel-dark");
 
-  if (self->light_accent_color != NULL)
-    normalize_color_intensity (self->light_accent_color, &normalized_light);
-  if (self->dark_accent_color != NULL)
-    normalize_color_intensity (self->dark_accent_color, &normalized_dark);
-
-  if (normalized_light != NULL && normalized_dark != NULL)
+  if (self->light_accent_color != NULL && self->dark_accent_color != NULL)
     light_bg = g_strdup_printf ("color-mix(in srgb, %s %d%%, rgb(255,255,255))",
-                                normalized_light, LIGHT_MIX_PERCENTAGE);
-  else if (normalized_light != NULL)
-    light_bg = g_strdup (normalized_light);
-  else if (normalized_dark != NULL)
+                                self->light_accent_color, LIGHT_MIX_PERCENTAGE);
+  else if (self->light_accent_color != NULL)
+    light_bg = g_strdup (self->light_accent_color);
+  else if (self->dark_accent_color != NULL)
     light_bg = g_strdup_printf ("color-mix(in srgb, %s %d%%, rgb(255,255,255))",
-                                normalized_dark, LIGHT_MIX_PERCENTAGE);
+                                self->dark_accent_color, LIGHT_MIX_PERCENTAGE);
 
-  if (normalized_light != NULL && normalized_dark != NULL)
+  if (self->light_accent_color != NULL && self->dark_accent_color != NULL)
     dark_bg = g_strdup_printf ("color-mix(in srgb, %s %d%%, rgb(29,29,32))",
-                               normalized_dark, DARK_MIX_PERCENTAGE);
-  else if (normalized_dark != NULL)
-    dark_bg = g_strdup (normalized_dark);
-  else if (normalized_light != NULL)
+                               self->dark_accent_color, DARK_MIX_PERCENTAGE);
+  else if (self->dark_accent_color != NULL)
+    dark_bg = g_strdup (self->dark_accent_color);
+  else if (self->light_accent_color != NULL)
     dark_bg = g_strdup_printf ("color-mix(in srgb, %s %d%%, rgb(29,29,32))",
-                               normalized_light, DARK_MIX_PERCENTAGE);
+                               self->light_accent_color, DARK_MIX_PERCENTAGE);
 
   css_string = g_strdup_printf (
       ".%s{background-color:%s;}\n"
