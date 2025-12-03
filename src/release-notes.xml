@@ -1,6 +1,13 @@
 <p>This release comes with the following improvements:</p>
 <ul>
-  <li>Add "hide-eol" preferences option to prevent Bazaar from showing end-of-life applications or applications which depend on end-of-life runtimes</li>
-  <li>Fix global progress bar theme sometimes not syncing with preferences</li>
-  <li>Show version next to addon name in the addons dialog</li>
+  <li>Reworked loading to be substantially faster after first start via async loading</li>
+  <li>A gaming section on the Flathub page</li>
+  <li>Improved UI on mobile, especially on app pages</li>
+  <li>Verified badges next to most places where apps are shown</li>
+  <li>A popover that explains what verification and non-verification mean</li>
+  <li>An "other apps by" page for when a developer has more than 6 apps</li>
+  <li>Tags that show other apps with the same tag when pressed</li>
+  <li>An age rating dialog</li>
+  <li>Changed search filters into global content filters</li>
+  <li>5 new pride flags</li>
 </ul>
