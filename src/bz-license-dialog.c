@@ -97,45 +97,82 @@ invert_boolean (gpointer object,
 }
 
 static char *
+get_label_cb (gpointer object,
+              BzEntry *entry)
+{
+  const char *license;
+  gboolean    is_floss = FALSE;
+
+  if (entry == NULL)
+    return g_strdup (_ ("Unknown License"));
+
+  g_object_get (entry, "is-floss", &is_floss, "project-license", &license, NULL);
+
+  if (license == NULL || *license == '\0')
+    return g_strdup (_ ("Unknown License"));
+
+  if (is_floss)
+    return g_strdup (_ ("Community Built"));
+
+  if (g_strcmp0 (license, "LicenseRef-proprietary") == 0)
+    return g_strdup (_ ("Proprietary"));
+
+  return g_strdup (_ ("Special License"));
+}
+
+static char *
 get_license_info (gpointer object,
                   BzEntry *entry)
 {
   const char      *license      = NULL;
-  gboolean         is_foss      = FALSE;
+  gboolean         is_floss     = FALSE;
   g_autofree char *license_name = NULL;
   g_autofree char *license_url  = NULL;
 
   if (entry == NULL)
     return g_strdup ("");
 
-  g_object_get (entry, "is-floss", &is_foss, NULL);
+  g_object_get (entry, "is-floss", &is_floss, "project-license", &license, NULL);
 
-  if (!is_foss)
+  if (is_floss && bz_spdx_is_valid (license))
     {
-      return g_strdup (_ ("This app is not developed in the open, so only its developers know how it works. "
-                          "It may be insecure in ways that are hard to detect, and it may change without oversight.\n\n"
-                          "You may not be able to contribute to this app."));
+      g_autofree char *link = NULL;
+
+      license_name = bz_spdx_get_name (license);
+      if (license_name == NULL || *license_name == '\0')
+        license_name = g_strdup (license);
+
+      license_url = bz_spdx_get_url (license);
+      link        = g_strdup_printf ("<a href=\"%s\">%s</a>", license_url, license_name);
+
+      return g_strdup_printf (_ ("This app is developed in the open by an international community, "
+                                 "and released under the %s license.\n\n"
+                                 "You can participate and help make it even better."),
+                              link);
     }
 
-  g_object_get (entry, "project-license", &license, NULL);
-
-  if (license == NULL || *license == '\0')
+  if (is_floss)
     {
       return g_strdup (_ ("This app is developed in the open by an international community.\n\n"
                           "You can participate and help make it even better."));
     }
 
-  license_name = bz_spdx_get_name (license);
+  if (license == NULL || *license == '\0')
+    return g_strdup (_ ("The license of this app is not known"));
 
+  if ((g_strcmp0 (license, "LicenseRef-proprietary") == 0))
+    {
+      return g_strdup (_ ("This app is not developed in the open, so only its developers know how it works. "
+                          "It may be insecure in ways that are hard to detect, and it may change without oversight.\n\n"
+                          "You may or may not be able to contribute to this app."));
+    }
+
+  license_name = bz_spdx_get_name (license);
   if (license_name == NULL || *license_name == '\0')
     license_name = g_strdup (license);
 
-  license_url = bz_spdx_get_url (license);
-
-  return g_strdup_printf (_ ("This app is developed in the open by an international community, "
-                             "and released under the <a href=\"%s\">%s</a> license.\n\n"
-                             "You can participate and help make it even better."),
-                          license_url,
+  return g_strdup_printf (_ ("This app is developed under the special license %s.\n\n"
+                             "You may or may not be able to contribute to this app."),
                           license_name);
 }
 
@@ -196,6 +233,7 @@ bz_license_dialog_class_init (BzLicenseDialogClass *klass)
       "/io/github/kolunmi/Bazaar/bz-license-dialog.ui");
 
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
+  gtk_widget_class_bind_template_callback (widget_class, get_label_cb);
   gtk_widget_class_bind_template_callback (widget_class, get_license_info);
   gtk_widget_class_bind_template_callback (widget_class, contribute_cb);
 }

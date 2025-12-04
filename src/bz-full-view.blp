@@ -344,11 +344,11 @@ template $BzFullView: Adw.Bin {
                           }
 
                           $BzContextTile license_tile {
-                            label: bind $get_license_label(template.ui-entry as <$BzResult>.object as <$BzEntry>.is-floss) as <string>;
+                            label: bind $get_license_label(template.ui-entry as <$BzResult>.object as <$BzEntry>) as <string>;
                             lozenge-style: bind $bool_to_string(template.ui-entry as <$BzResult>.object as <$BzEntry>.is-floss, "grey", "warning") as <string>;
                             clicked => $license_cb(template);
                             has-tooltip: true;
-                            tooltip-text: bind $format_license_tooltip(template.ui-entry as <$BzResult>.object as <$BzEntry>.project-license) as <string>;
+                            tooltip-text: bind $format_license_tooltip(template.ui-entry as <$BzResult>.object as <$BzEntry>) as <string>;
 
                             lozenge-child: Box {
                               spacing: 6;

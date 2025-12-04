@@ -21,7 +21,6 @@ template $BzLicenseDialog: Adw.Dialog {
         margin-end: 18;
 
         Box {
-          visible: bind template.entry as <$BzEntry>.is-floss as <bool>;
           orientation: vertical;
           margin-bottom: 24;
           spacing: 12;
@@ -29,6 +28,7 @@ template $BzLicenseDialog: Adw.Dialog {
           vexpand: true;
 
           Box {
+            visible: bind template.entry as <$BzEntry>.is-floss as <bool>;
             halign: center;
             spacing: 12;
 
@@ -69,24 +69,8 @@ template $BzLicenseDialog: Adw.Dialog {
             }
           }
 
-          Label {
-            styles [
-              "title-2",
-            ]
-
-            label: _("Community Built");
-          }
-        }
-
-        Box {
-          visible: bind $invert_boolean(template.entry as <$BzEntry>.is-floss as <bool>) as <bool>;
-          orientation: vertical;
-          margin-bottom: 24;
-          spacing: 12;
-          valign: center;
-          vexpand: true;
-
           Box {
+            visible: bind $invert_boolean(template.entry as <$BzEntry>.is-floss as <bool>) as <bool>;
             halign: center;
             spacing: 12;
 
@@ -132,7 +116,7 @@ template $BzLicenseDialog: Adw.Dialog {
               "title-2",
             ]
 
-            label: _("Proprietary");
+            label: bind $get_label_cb(template.entry as <$BzEntry>) as <string>;
           }
         }
 
