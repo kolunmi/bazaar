@@ -1479,7 +1479,7 @@ transaction_fiber (TransactionData *data)
               return dex_future_new_reject (
                   BZ_FLATPAK_ERROR,
                   BZ_FLATPAK_ERROR_TRANSACTION_FAILURE,
-                  "Failed to initialize potential transaction for system installation: %s",
+                  "Failed to initialize potential transaction for installation: %s",
                   local_error->message);
             }
 
