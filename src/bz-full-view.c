@@ -813,14 +813,25 @@ screenshot_clicked_cb (BzFullView            *self,
                        BzScreenshotsCarousel *carousel)
 {
   GListModel        *screenshots = NULL;
+  GListModel        *captions    = NULL;
   AdwNavigationPage *page        = NULL;
   GtkWidget         *nav_view    = NULL;
+  BzEntry           *entry       = NULL;
 
   screenshots = bz_screenshots_carousel_get_model (carousel);
   if (screenshots == NULL)
     return;
 
-  page = bz_screenshot_page_new (screenshots, index);
+  if (self->ui_entry != NULL)
+    {
+      entry = bz_result_get_object (self->ui_entry);
+      if (entry != NULL)
+        g_object_get (entry, "screenshot-captions", &captions, NULL);
+    }
+
+  page = bz_screenshot_page_new (screenshots, captions, index);
+
+  g_clear_object (&captions);
 
   nav_view = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
   if (nav_view != NULL)
