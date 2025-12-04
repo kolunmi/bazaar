@@ -32,6 +32,7 @@
 #include "bz-flathub-state.h"
 #include "bz-global-net.h"
 #include "bz-io.h"
+#include "bz-serializable.h"
 #include "bz-util.h"
 
 struct _BzFlathubState
@@ -48,7 +49,14 @@ struct _BzFlathubState
   DexFuture *initializing;
 };
 
-G_DEFINE_FINAL_TYPE (BzFlathubState, bz_flathub_state, G_TYPE_OBJECT);
+static void
+serializable_iface_init (BzSerializableInterface *iface);
+
+G_DEFINE_FINAL_TYPE_WITH_CODE (
+    BzFlathubState,
+    bz_flathub_state,
+    G_TYPE_OBJECT,
+    G_IMPLEMENT_INTERFACE (BZ_TYPE_SERIALIZABLE, serializable_iface_init))
 
 static GListModel *bz_flathub_state_dup_apps_of_the_day_week (BzFlathubState *self);
 
@@ -74,8 +82,12 @@ initialize_fiber (GWeakRef *wr);
 static DexFuture *
 initialize_finally (DexFuture *future,
                     GWeakRef  *wr);
-static gboolean
-bz_flathub_state_get_has_connection_error (BzFlathubState *self);
+
+static void
+notify_all (BzFlathubState *self);
+
+static void
+clear (BzFlathubState *self);
 
 static void
 bz_flathub_state_dispose (GObject *object)
@@ -83,12 +95,8 @@ bz_flathub_state_dispose (GObject *object)
   BzFlathubState *self = BZ_FLATHUB_STATE (object);
 
   dex_clear (&self->initializing);
-
-  g_clear_pointer (&self->for_day, g_free);
   g_clear_pointer (&self->map_factory, g_object_unref);
-  g_clear_pointer (&self->app_of_the_day, g_free);
-  g_clear_pointer (&self->apps_of_the_week, g_object_unref);
-  g_clear_pointer (&self->categories, g_object_unref);
+  clear (self);
 
   G_OBJECT_CLASS (bz_flathub_state_parent_class)->dispose (object);
 }
@@ -229,6 +237,161 @@ bz_flathub_state_init (BzFlathubState *self)
 {
 }
 
+static void
+bz_flathub_state_real_serialize (BzSerializable  *serializable,
+                                 GVariantBuilder *builder)
+{
+  BzFlathubState *self = BZ_FLATHUB_STATE (serializable);
+
+  if (self->initializing != NULL &&
+      dex_future_is_pending (self->initializing))
+    return;
+
+  if (self->for_day != NULL)
+    g_variant_builder_add (builder, "{sv}", "for-day", g_variant_new_string (self->for_day));
+  if (self->app_of_the_day != NULL)
+    g_variant_builder_add (builder, "{sv}", "app-of-the-day", g_variant_new_string (self->app_of_the_day));
+  if (self->apps_of_the_week != NULL)
+    {
+      guint n_items = 0;
+
+      n_items = g_list_model_get_n_items (G_LIST_MODEL (self->apps_of_the_week));
+      if (n_items > 0)
+        {
+          g_autoptr (GVariantBuilder) sub_builder = NULL;
+
+          sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("as"));
+          for (guint i = 0; i < n_items; i++)
+            {
+              const char *string = NULL;
+
+              string = gtk_string_list_get_string (self->apps_of_the_week, i);
+              g_variant_builder_add (sub_builder, "s", string);
+            }
+
+          g_variant_builder_add (builder, "{sv}", "apps-of-the-week", g_variant_builder_end (sub_builder));
+        }
+    }
+  if (self->categories != NULL)
+    {
+      guint n_items = 0;
+
+      n_items = g_list_model_get_n_items (G_LIST_MODEL (self->categories));
+      if (n_items > 0)
+        {
+          g_autoptr (GVariantBuilder) sub_builder = NULL;
+
+          sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("av"));
+          for (guint i = 0; i < n_items; i++)
+            {
+              g_autoptr (BzFlathubCategory) category       = NULL;
+              g_autoptr (GVariantBuilder) category_builder = NULL;
+
+              category         = g_list_model_get_item (G_LIST_MODEL (self->categories), i);
+              category_builder = g_variant_builder_new (G_VARIANT_TYPE_VARDICT);
+
+              bz_serializable_serialize (BZ_SERIALIZABLE (category), category_builder);
+              g_variant_builder_add (sub_builder, "v", g_variant_builder_end (category_builder));
+            }
+
+          g_variant_builder_add (builder, "{sv}", "categories", g_variant_builder_end (sub_builder));
+        }
+    }
+}
+
+static gboolean
+bz_flathub_state_real_deserialize (BzSerializable *serializable,
+                                   GVariant       *import,
+                                   GError        **error)
+{
+  BzFlathubState *self          = BZ_FLATHUB_STATE (serializable);
+  gboolean        result        = FALSE;
+  g_autoptr (GVariantIter) iter = NULL;
+
+  if (self->initializing != NULL &&
+      !dex_future_is_pending (self->initializing))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_BUSY,
+                   "Cannot perform serialization operations while initializing!");
+      return FALSE;
+    }
+
+  clear (self);
+
+  iter = g_variant_iter_new (import);
+  for (;;)
+    {
+      g_autofree char *key       = NULL;
+      g_autoptr (GVariant) value = NULL;
+
+      /* TODO automate this, this is awful */
+      if (!g_variant_iter_next (iter, "{sv}", &key, &value))
+        break;
+
+      if (g_strcmp0 (key, "for-day") == 0)
+        self->for_day = g_variant_dup_string (value, NULL);
+      else if (g_strcmp0 (key, "app-of-the-day") == 0)
+        self->app_of_the_day = g_variant_dup_string (value, NULL);
+      else if (g_strcmp0 (key, "apps-of-the-week") == 0)
+        {
+          g_autoptr (GtkStringList) list     = NULL;
+          g_autoptr (GVariantIter) list_iter = NULL;
+
+          list = gtk_string_list_new (NULL);
+
+          list_iter = g_variant_iter_new (value);
+          for (;;)
+            {
+              g_autofree char *id = NULL;
+
+              if (!g_variant_iter_next (list_iter, "s", &id))
+                break;
+              gtk_string_list_append (list, id);
+            }
+
+          self->apps_of_the_week = g_steal_pointer (&list);
+        }
+      else if (g_strcmp0 (key, "categories") == 0)
+        {
+          g_autoptr (GListStore) categories        = NULL;
+          g_autoptr (GVariantIter) categories_iter = NULL;
+
+          categories = g_list_store_new (BZ_TYPE_FLATHUB_CATEGORY);
+
+          categories_iter = g_variant_iter_new (value);
+          for (;;)
+            {
+              g_autoptr (GVariant) category_import   = NULL;
+              g_autoptr (BzFlathubCategory) category = NULL;
+
+              if (!g_variant_iter_next (categories_iter, "v", &category_import))
+                break;
+
+              category = bz_flathub_category_new ();
+              result   = bz_serializable_deserialize (
+                  BZ_SERIALIZABLE (category), category_import, error);
+              if (!result)
+                return FALSE;
+
+              g_object_bind_property (self, "map-factory", category, "map-factory", G_BINDING_SYNC_CREATE);
+              g_list_store_append (categories, category);
+            }
+
+          self->categories = g_steal_pointer (&categories);
+        }
+    }
+
+  notify_all (self);
+  return TRUE;
+}
+
+static void
+serializable_iface_init (BzSerializableInterface *iface)
+{
+  iface->serialize   = bz_flathub_state_real_serialize;
+  iface->deserialize = bz_flathub_state_real_deserialize;
+}
+
 BzFlathubState *
 bz_flathub_state_new (void)
 {
@@ -253,7 +416,8 @@ const char *
 bz_flathub_state_get_app_of_the_day (BzFlathubState *self)
 {
   g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
-  if (self->initializing != NULL)
+  if (self->initializing != NULL &&
+      dex_future_is_pending (self->initializing))
     return NULL;
   return self->app_of_the_day;
 }
@@ -264,7 +428,8 @@ bz_flathub_state_dup_app_of_the_day_group (BzFlathubState *self)
   g_autoptr (GtkStringObject) string = NULL;
 
   g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
-  if (self->initializing != NULL)
+  if (self->initializing != NULL &&
+      dex_future_is_pending (self->initializing))
     return NULL;
   g_return_val_if_fail (self->map_factory != NULL, NULL);
 
@@ -276,7 +441,8 @@ GListModel *
 bz_flathub_state_dup_apps_of_the_week (BzFlathubState *self)
 {
   g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
-  if (self->initializing != NULL)
+  if (self->initializing != NULL &&
+      dex_future_is_pending (self->initializing))
     return NULL;
 
   if (self->apps_of_the_week != NULL)
@@ -297,7 +463,8 @@ bz_flathub_state_dup_apps_of_the_day_week (BzFlathubState *self)
   g_autoptr (GtkStringList) combined_list = NULL;
 
   g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
-  if (self->initializing != NULL)
+  if (self->initializing != NULL &&
+      dex_future_is_pending (self->initializing))
     return NULL;
 
   combined_list = gtk_string_list_new (NULL);
@@ -325,12 +492,13 @@ GListModel *
 bz_flathub_state_get_categories (BzFlathubState *self)
 {
   g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
-  if (self->initializing != NULL)
+  if (self->initializing != NULL &&
+      dex_future_is_pending (self->initializing))
     return NULL;
   return G_LIST_MODEL (self->categories);
 }
 
-static gboolean
+gboolean
 bz_flathub_state_get_has_connection_error (BzFlathubState *self)
 {
   g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), FALSE);
@@ -344,13 +512,7 @@ bz_flathub_state_set_for_day (BzFlathubState *self,
   dex_return_error_if_fail (BZ_IS_FLATHUB_STATE (self));
 
   dex_clear (&self->initializing);
-
-  g_clear_pointer (&self->for_day, g_free);
-  g_clear_pointer (&self->app_of_the_day, g_free);
-  g_clear_pointer (&self->apps_of_the_week, g_object_unref);
-  g_clear_pointer (&self->categories, g_object_unref);
-  self->has_connection_error = FALSE;
-
+  clear (self);
   if (for_day != NULL)
     {
       g_autoptr (DexFuture) future = NULL;
@@ -369,23 +531,13 @@ bz_flathub_state_set_for_day (BzFlathubState *self,
           (DexFutureCallback) initialize_finally,
           bz_track_weak (self), bz_weak_release);
       self->initializing = g_steal_pointer (&future);
+      return dex_ref (self->initializing);
     }
   else
     {
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_OF_THE_DAY]);
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_OF_THE_DAY_GROUP]);
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APPS_OF_THE_WEEK]);
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APPS_OF_THE_DAY_WEEK]);
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CATEGORIES]);
+      notify_all (self);
+      return dex_future_new_false ();
     }
-
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_FOR_DAY]);
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_CONNECTION_ERROR]);
-
-  if (self->initializing != NULL)
-    return dex_ref (self->initializing);
-  else
-    return dex_future_new_true ();
 }
 
 DexFuture *
@@ -454,9 +606,7 @@ add_collection_category (BzFlathubState *self,
       gtk_string_list_append (store, app_id);
 
       if (g_hash_table_contains (quality_set, app_id))
-        {
-          gtk_string_list_append (quality_store, app_id);
-        }
+        gtk_string_list_append (quality_store, app_id);
     }
 
   bz_flathub_category_set_quality_applications (category, G_LIST_MODEL (quality_store));
@@ -467,224 +617,196 @@ static DexFuture *
 initialize_fiber (GWeakRef *wr)
 {
   g_autoptr (BzFlathubState) self    = NULL;
-  const char *for_day                = NULL;
   g_autoptr (GError) local_error     = NULL;
-  g_autoptr (GHashTable) futures     = NULL;
-  g_autoptr (GHashTable) nodes       = NULL;
+  gboolean result                    = FALSE;
+  g_autoptr (GPtrArray) futures      = NULL;
   g_autoptr (GHashTable) quality_set = NULL;
-  guint successful_requests          = 0;
+
+  g_autoptr (DexFuture) aotd_f       = NULL;
+  g_autoptr (DexFuture) aotw_f       = NULL;
+  g_autoptr (DexFuture) categories_f = NULL;
+  g_autoptr (DexFuture) updated_f    = NULL;
+  g_autoptr (DexFuture) added_f      = NULL;
+  g_autoptr (DexFuture) popular_f    = NULL;
+  g_autoptr (DexFuture) trending_f   = NULL;
+  g_autoptr (DexFuture) mobile_f     = NULL;
+  g_autoptr (DexFuture) passing_f    = NULL;
 
   bz_weak_get_or_return_reject (self, wr);
-  for_day = self->for_day;
 
-  futures     = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, dex_unref);
-  nodes       = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, (GDestroyNotify) json_node_unref);
+  futures     = g_ptr_array_new_with_free_func (dex_unref);
   quality_set = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 
-#define ADD_REQUEST(key, ...)                  \
-  G_STMT_START                                 \
-  {                                            \
-    g_autofree char *_request     = NULL;      \
-    g_autoptr (DexFuture) _future = NULL;      \
-                                               \
-    _request = g_strdup_printf (__VA_ARGS__);  \
-    _future  = bz_query_flathub_v2_json_take ( \
-        g_steal_pointer (&_request));         \
-    g_hash_table_replace (                     \
-        futures,                               \
-        g_strdup (key),                        \
-        g_steal_pointer (&_future));           \
-  }                                            \
+#define ADD_REQUEST(_var, ...)                   \
+  G_STMT_START                                   \
+  {                                              \
+    g_autofree char *_request = NULL;            \
+                                                 \
+    _request = g_strdup_printf (__VA_ARGS__);    \
+    (_var)   = bz_query_flathub_v2_json_take (   \
+        g_steal_pointer (&_request));          \
+    g_ptr_array_add (futures, dex_ref ((_var))); \
+  }                                              \
   G_STMT_END
 
-  ADD_REQUEST ("/app-picks/app-of-the-day", "/app-picks/app-of-the-day/%s", for_day);
-  ADD_REQUEST ("/app-picks/apps-of-the-week", "/app-picks/apps-of-the-week/%s", for_day);
-  ADD_REQUEST ("/collection/category", "/collection/category");
-  ADD_REQUEST ("/collection/recently-updated", "/collection/recently-updated?page=0&per_page=%d", COLLECTION_FETCH_SIZE);
-  ADD_REQUEST ("/collection/recently-added", "/collection/recently-added?page=0&per_page=%d", COLLECTION_FETCH_SIZE);
-  ADD_REQUEST ("/collection/popular", "/collection/popular?page=0&per_page=%d", COLLECTION_FETCH_SIZE);
-  ADD_REQUEST ("/collection/trending", "/collection/trending?page=0&per_page=%d", COLLECTION_FETCH_SIZE);
-  ADD_REQUEST ("/collection/mobile", "/collection/mobile?page=0&per_page=%d", COLLECTION_FETCH_SIZE);
-  ADD_REQUEST ("/quality-moderation/passing-apps", "/quality-moderation/passing-apps?page=1&page_size=%d", QUALITY_MODERATION_PAGE_SIZE);
+  ADD_REQUEST (passing_f, "/quality-moderation/passing-apps?page=1&page_size=%d", QUALITY_MODERATION_PAGE_SIZE);
+  ADD_REQUEST (aotd_f, "/app-picks/app-of-the-day/%s", self->for_day);
+  ADD_REQUEST (aotw_f, "/app-picks/apps-of-the-week/%s", self->for_day);
+  ADD_REQUEST (categories_f, "/collection/category");
+  ADD_REQUEST (updated_f, "/collection/recently-updated?page=0&per_page=%d", COLLECTION_FETCH_SIZE);
+  ADD_REQUEST (added_f, "/collection/recently-added?page=0&per_page=%d", COLLECTION_FETCH_SIZE);
+  ADD_REQUEST (popular_f, "/collection/popular?page=0&per_page=%d", COLLECTION_FETCH_SIZE);
+  ADD_REQUEST (trending_f, "/collection/trending?page=0&per_page=%d", COLLECTION_FETCH_SIZE);
+  ADD_REQUEST (mobile_f, "/collection/mobile?page=0&per_page=%d", COLLECTION_FETCH_SIZE);
 
-  while (g_hash_table_size (futures) > 0)
+#undef ADD_REQUEST
+
+  result = dex_await (
+      dex_future_all_racev (
+          (DexFuture *const *) futures->pdata,
+          futures->len),
+      &local_error);
+  if (!result)
     {
-      GHashTableIter   iter        = { 0 };
-      g_autofree char *request     = NULL;
-      g_autoptr (DexFuture) future = NULL;
-      g_autoptr (JsonNode) node    = NULL;
-
-      g_hash_table_iter_init (&iter, futures);
-      g_hash_table_iter_next (&iter, (gpointer *) &request, (gpointer *) &future);
-      g_hash_table_iter_steal (&iter);
-
-      node = dex_await_boxed (g_steal_pointer (&future), &local_error);
-      if (node == NULL)
-        {
-          g_warning ("Failed to complete request '%s' from flathub: %s", request, local_error->message);
-          g_clear_error (&local_error);
-          continue;
-        }
-      g_hash_table_replace (nodes, g_steal_pointer (&request), g_steal_pointer (&node));
-      successful_requests++;
+      g_warning ("Failed to complete request to flathub: %s", local_error->message);
+      return dex_future_new_for_error (g_steal_pointer (&local_error));
     }
 
-  if (g_hash_table_contains (nodes, "/quality-moderation/passing-apps"))
-    {
-      JsonObject *object = NULL;
-      JsonArray  *array  = NULL;
-      guint       length = 0;
+#define GET_BOXED(_future) g_value_get_boxed (dex_future_get_value ((_future), NULL))
 
-      object = json_node_get_object (g_hash_table_lookup (nodes, "/quality-moderation/passing-apps"));
-      array  = json_object_get_array_member (object, "apps");
-      length = json_array_get_length (array);
+  {
+    JsonObject *object = NULL;
+    JsonArray  *array  = NULL;
+    guint       length = 0;
 
-      for (guint i = 0; i < length; i++)
-        {
-          const char *app_id = NULL;
+    object = json_node_get_object (GET_BOXED (passing_f));
+    array  = json_object_get_array_member (object, "apps");
+    length = json_array_get_length (array);
 
-          app_id = json_array_get_string_element (array, i);
-          g_hash_table_add (quality_set, g_strdup (app_id));
-        }
-    }
+    for (guint i = 0; i < length; i++)
+      {
+        const char *app_id = NULL;
 
-  if (g_hash_table_contains (nodes, "/app-picks/app-of-the-day"))
-    {
-      JsonObject *object = NULL;
+        app_id = json_array_get_string_element (array, i);
+        g_hash_table_replace (quality_set, g_strdup (app_id), NULL);
+      }
+  }
+  {
+    JsonObject *object = NULL;
 
-      object               = json_node_get_object (g_hash_table_lookup (nodes, "/app-picks/app-of-the-day"));
-      self->app_of_the_day = g_strdup (json_object_get_string_member (object, "app_id"));
-    }
-  if (g_hash_table_contains (nodes, "/app-picks/apps-of-the-week"))
-    {
-      JsonObject *object = NULL;
-      JsonArray  *array  = NULL;
-      guint       length = 0;
+    object               = json_node_get_object (GET_BOXED (aotd_f));
+    self->app_of_the_day = g_strdup (json_object_get_string_member (object, "app_id"));
+  }
+  {
+    JsonObject *object = NULL;
+    JsonArray  *array  = NULL;
+    guint       length = 0;
 
-      object = json_node_get_object (g_hash_table_lookup (nodes, "/app-picks/apps-of-the-week"));
-      array  = json_object_get_array_member (object, "apps");
-      length = json_array_get_length (array);
+    object = json_node_get_object (GET_BOXED (aotw_f));
+    array  = json_object_get_array_member (object, "apps");
+    length = json_array_get_length (array);
 
-      for (guint i = 0; i < length; i++)
-        {
-          JsonObject *element = NULL;
+    for (guint i = 0; i < length; i++)
+      {
+        JsonObject *element = NULL;
 
-          element = json_array_get_object_element (array, i);
-          gtk_string_list_append (
-              self->apps_of_the_week,
-              json_object_get_string_member (element, "app_id"));
-        }
-    }
+        element = json_array_get_object_element (array, i);
+        gtk_string_list_append (
+            self->apps_of_the_week,
+            json_object_get_string_member (element, "app_id"));
+      }
+  }
 
-  if (g_hash_table_contains (nodes, "/collection/trending"))
-    add_collection_category (self, "trending",
-                             g_hash_table_lookup (nodes, "/collection/trending"),
-                             quality_set);
-
-  if (g_hash_table_contains (nodes, "/collection/popular"))
-    add_collection_category (self, "popular",
-                             g_hash_table_lookup (nodes, "/collection/popular"),
-                             quality_set);
-
-  if (g_hash_table_contains (nodes, "/collection/recently-added"))
-    add_collection_category (self, "recently-added",
-                             g_hash_table_lookup (nodes, "/collection/recently-added"),
-                             quality_set);
-
-  if (g_hash_table_contains (nodes, "/collection/recently-updated"))
-    add_collection_category (self, "recently-updated",
-                             g_hash_table_lookup (nodes, "/collection/recently-updated"),
-                             quality_set);
-
-  if (g_hash_table_contains (nodes, "/collection/mobile"))
-    add_collection_category (self, "mobile",
-                             g_hash_table_lookup (nodes, "/collection/mobile"),
-                             quality_set);
+  add_collection_category (self, "trending", GET_BOXED (trending_f), quality_set);
+  add_collection_category (self, "popular", GET_BOXED (popular_f), quality_set);
+  add_collection_category (self, "recently-added", GET_BOXED (added_f), quality_set);
+  add_collection_category (self, "recently-updated", GET_BOXED (updated_f), quality_set);
+  add_collection_category (self, "mobile", GET_BOXED (mobile_f), quality_set);
 
   /* Add regular categories */
-  if (g_hash_table_contains (nodes, "/collection/category"))
-    {
-      JsonArray *array  = NULL;
-      guint      length = 0;
+  {
+    JsonArray *array                       = NULL;
+    guint      length                      = 0;
+    g_autoptr (GPtrArray) category_futures = NULL;
 
-      array  = json_node_get_array (g_hash_table_lookup (nodes, "/collection/category"));
-      length = json_array_get_length (array);
+    array  = json_node_get_array (GET_BOXED (categories_f));
+    length = json_array_get_length (array);
 
-      for (guint i = 0; i < length; i++)
-        {
-          const char *category = NULL;
+    category_futures = g_ptr_array_new_with_free_func (dex_unref);
 
-          category = json_array_get_string_element (array, i);
-          ADD_REQUEST (category, "/collection/category/%s?page=0&per_page=%d", category, CATEGORY_FETCH_SIZE);
-        }
+    for (guint i = 0; i < length; i++)
+      {
+        const char      *category = NULL;
+        g_autofree char *request  = NULL;
 
-      while (g_hash_table_size (futures) > 0)
-        {
-          GHashTableIter   iter                   = { 0 };
-          g_autofree char *name                   = NULL;
-          g_autoptr (DexFuture) future            = NULL;
-          g_autoptr (JsonNode) node               = NULL;
-          g_autoptr (BzFlathubCategory) category  = NULL;
-          g_autoptr (GtkStringList) store         = NULL;
-          g_autoptr (GtkStringList) quality_store = NULL;
-          JsonObject *response_object             = NULL;
-          JsonArray  *category_array              = NULL;
-          guint       category_length             = 0;
-          int         total_hits                  = 0;
+        category = json_array_get_string_element (array, i);
+        request  = g_strdup_printf (
+            "/collection/category/%s?page=0&per_page=%d",
+            category, CATEGORY_FETCH_SIZE);
+        g_ptr_array_add (
+            category_futures,
+            bz_query_flathub_v2_json_take (
+                g_steal_pointer (&request)));
+      }
 
-          g_hash_table_iter_init (&iter, futures);
-          g_hash_table_iter_next (&iter, (gpointer *) &name, (gpointer *) &future);
-          g_hash_table_iter_steal (&iter);
+    if (category_futures->len > 0)
+      {
+        result = dex_await (
+            dex_future_all_racev (
+                (DexFuture *const *) category_futures->pdata,
+                category_futures->len),
+            &local_error);
+        if (!result)
+          {
+            g_warning ("Failed to complete request to flathub: %s", local_error->message);
+            return dex_future_new_for_error (g_steal_pointer (&local_error));
+          }
+      }
 
-          node = dex_await_boxed (g_steal_pointer (&future), &local_error);
-          if (node == NULL)
-            {
-              g_warning ("Failed to retrieve category '%s' from flathub: %s", name, local_error->message);
-              g_clear_error (&local_error);
-              continue;
-            }
+    for (guint i = 0; i < length; i++)
+      {
+        DexFuture  *future                      = NULL;
+        JsonNode   *node                        = NULL;
+        const char *name                        = NULL;
+        g_autoptr (BzFlathubCategory) category  = NULL;
+        g_autoptr (GtkStringList) store         = NULL;
+        g_autoptr (GtkStringList) quality_store = NULL;
+        JsonObject *response_object             = NULL;
+        JsonArray  *category_array              = NULL;
+        guint       category_length             = 0;
+        int         total_hits                  = 0;
 
-          successful_requests++;
+        future        = g_ptr_array_index (category_futures, i);
+        node          = GET_BOXED (future);
+        name          = json_array_get_string_element (array, i);
+        category      = bz_flathub_category_new ();
+        store         = gtk_string_list_new (NULL);
+        quality_store = gtk_string_list_new (NULL);
+        bz_flathub_category_set_name (category, name);
+        bz_flathub_category_set_applications (category, G_LIST_MODEL (store));
+        response_object = json_node_get_object (node);
+        category_array  = json_object_get_array_member (response_object, "hits");
+        category_length = json_array_get_length (category_array);
+        total_hits      = json_object_get_int_member (response_object, "totalHits");
+        bz_flathub_category_set_total_entries (category, total_hits);
 
-          category      = bz_flathub_category_new ();
-          store         = gtk_string_list_new (NULL);
-          quality_store = gtk_string_list_new (NULL);
-          bz_flathub_category_set_name (category, name);
-          bz_flathub_category_set_applications (category, G_LIST_MODEL (store));
-          response_object = json_node_get_object (node);
-          category_array  = json_object_get_array_member (response_object, "hits");
-          category_length = json_array_get_length (category_array);
-          total_hits      = json_object_get_int_member (response_object, "totalHits");
-          bz_flathub_category_set_total_entries (category, total_hits);
+        for (guint j = 0; j < category_length; j++)
+          {
+            JsonObject *element = NULL;
+            const char *app_id  = NULL;
 
-          for (guint i = 0; i < category_length; i++)
-            {
-              JsonObject *element = NULL;
-              const char *app_id  = NULL;
+            element = json_array_get_object_element (category_array, j);
+            app_id  = json_object_get_string_member (element, "app_id");
+            gtk_string_list_append (store, app_id);
 
-              element = json_array_get_object_element (category_array, i);
-              app_id  = json_object_get_string_member (element, "app_id");
-              gtk_string_list_append (store, app_id);
+            if (g_hash_table_contains (quality_set, app_id))
+              gtk_string_list_append (quality_store, app_id);
+          }
 
-              if (g_hash_table_contains (quality_set, app_id))
-                {
-                  gtk_string_list_append (quality_store, app_id);
-                }
-            }
-
-          bz_flathub_category_set_quality_applications (category, G_LIST_MODEL (quality_store));
-
-          g_list_store_append (self->categories, category);
-        }
-    }
-
-  if (successful_requests == 0)
-    {
-      self->has_connection_error = TRUE;
-      return dex_future_new_for_error (
-          g_error_new (G_IO_ERROR, G_IO_ERROR_FAILED,
-                       "All Flathub API requests failed"));
-    }
+        bz_flathub_category_set_quality_applications (category, G_LIST_MODEL (quality_store));
+        g_list_store_append (self->categories, category);
+      }
+  }
 
   return dex_future_new_true ();
 }
@@ -694,38 +816,37 @@ initialize_finally (DexFuture *future,
                     GWeakRef  *wr)
 {
   g_autoptr (BzFlathubState) self = NULL;
-  guint n_categories              = 0;
 
   bz_weak_get_or_return_reject (self, wr);
 
-  n_categories = g_list_model_get_n_items (G_LIST_MODEL (self->categories));
-  for (guint i = 0; i < n_categories; i++)
+  if (dex_future_is_resolved (future))
     {
-      g_autoptr (BzFlathubCategory) category = NULL;
+      guint n_categories = 0;
 
-      category = g_list_model_get_item (G_LIST_MODEL (self->categories), i);
-      g_object_bind_property (self, "map-factory", category, "map-factory", G_BINDING_SYNC_CREATE);
+      n_categories = g_list_model_get_n_items (G_LIST_MODEL (self->categories));
+      for (guint i = 0; i < n_categories; i++)
+        {
+          g_autoptr (BzFlathubCategory) category = NULL;
+
+          category = g_list_model_get_item (G_LIST_MODEL (self->categories), i);
+          g_object_bind_property (self, "map-factory", category, "map-factory", G_BINDING_SYNC_CREATE);
+        }
+
+      g_debug ("Done syncing flathub state; notifying property listeners...");
+      notify_all (self);
     }
+  else
+    clear (self);
 
-  dex_clear (&self->initializing);
-  g_debug ("Done syncing flathub state; notifying property listeners...");
-
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_OF_THE_DAY]);
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_OF_THE_DAY_GROUP]);
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APPS_OF_THE_WEEK]);
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APPS_OF_THE_DAY_WEEK]);
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CATEGORIES]);
-
-  return NULL;
+  return dex_ref (future);
 }
 
 static DexFuture *
-search_keyword_fiber (gpointer user_data)
+search_keyword_fiber (char *keyword)
 {
+  g_autoptr (GError) local_error    = NULL;
   g_autoptr (GtkStringList) results = NULL;
   g_autoptr (JsonNode) node         = NULL;
-  g_autoptr (GError) error          = NULL;
-  char            *keyword          = user_data;
   g_autofree char *request          = NULL;
   JsonObject      *object           = NULL;
   JsonArray       *array            = NULL;
@@ -734,12 +855,12 @@ search_keyword_fiber (gpointer user_data)
   request = g_strdup_printf ("/collection/keyword?keyword=%s&page=1&per_page=%d&locale=en",
                              keyword, KEYWORD_SEARCH_PAGE_SIZE);
 
-  node = dex_await_boxed (bz_query_flathub_v2_json_take (g_steal_pointer (&request)), &error);
-
+  node = dex_await_boxed (
+      bz_query_flathub_v2_json_take (
+          g_steal_pointer (&request)),
+      &local_error);
   if (node == NULL)
-    {
-      return dex_future_new_for_error (g_steal_pointer (&error));
-    }
+    return dex_future_new_for_error (g_steal_pointer (&local_error));
 
   results = gtk_string_list_new (NULL);
 
@@ -782,18 +903,19 @@ search_keyword_finally (DexFuture *future,
   return dex_ref (future);
 }
 
-BzResult *
+DexFuture *
 bz_flathub_state_search_keyword (BzFlathubState *self,
                                  const char     *keyword)
 {
   g_autoptr (DexFuture) future = NULL;
-  g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self), NULL);
-  g_return_val_if_fail (keyword != NULL, NULL);
+
+  dex_return_error_if_fail (BZ_IS_FLATHUB_STATE (self));
+  dex_return_error_if_fail (keyword != NULL);
 
   future = dex_scheduler_spawn (
       bz_get_io_scheduler (),
       bz_get_dex_stack_size (),
-      search_keyword_fiber,
+      (DexFiberFunc) search_keyword_fiber,
       g_strdup (keyword),
       g_free);
   future = dex_future_finally (
@@ -801,8 +923,29 @@ bz_flathub_state_search_keyword (BzFlathubState *self,
       (DexFutureCallback) search_keyword_finally,
       bz_track_weak (self),
       bz_weak_release);
+  return g_steal_pointer (&future);
+}
 
-  return bz_result_new (g_steal_pointer (&future));
+static void
+notify_all (BzFlathubState *self)
+{
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_FOR_DAY]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_CONNECTION_ERROR]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_OF_THE_DAY]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_OF_THE_DAY_GROUP]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APPS_OF_THE_WEEK]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APPS_OF_THE_DAY_WEEK]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CATEGORIES]);
+}
+
+static void
+clear (BzFlathubState *self)
+{
+  g_clear_pointer (&self->for_day, g_free);
+  g_clear_pointer (&self->app_of_the_day, g_free);
+  g_clear_pointer (&self->apps_of_the_week, g_object_unref);
+  g_clear_pointer (&self->categories, g_object_unref);
+  self->has_connection_error = FALSE;
 }
 
 /* End of bz-flathub-state.c */

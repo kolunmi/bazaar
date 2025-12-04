@@ -22,6 +22,8 @@
 
 #include <adwaita.h>
 
+#include "bz-flathub-category.h"
+
 G_BEGIN_DECLS
 
 #define BZ_TYPE_APPS_PAGE (bz_apps_page_get_type ())
@@ -36,6 +38,9 @@ AdwNavigationPage *
 bz_apps_page_new_with_carousel (const char *title,
                                 GListModel *applications,
                                 GListModel *carousel_applications);
+
+AdwNavigationPage *
+bz_apps_page_new_from_category (BzFlathubCategory *category);
 
 void
 bz_apps_page_set_subtitle (BzAppsPage *self,

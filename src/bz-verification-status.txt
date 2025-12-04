@@ -1,0 +1,13 @@
+prefix=bz
+name=verification_status
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+property=verified gboolean G_TYPE_BOOLEAN boolean
+property=method char G_TYPE_STRING string
+property=website char G_TYPE_STRING string
+property=login_name char G_TYPE_STRING string
+property=login_provider char G_TYPE_STRING string
+property=timestamp char G_TYPE_STRING string
+property=login_is_organization gboolean G_TYPE_BOOLEAN boolean

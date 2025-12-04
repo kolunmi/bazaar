@@ -2,8 +2,10 @@ using Gtk 4.0;
 using Adw 1;
 
 template $BzStatsDialog: Adw.Dialog {
-  width-request: 300;
-  height-request: 300;
+  width-request: 360;
+  height-request: 450;
+  content-width: 2000;
+  content-height: 1500;
   child: Adw.ToolbarView {
     bottom-bar-style: raised_border;
 
@@ -68,11 +70,12 @@ template $BzStatsDialog: Adw.Dialog {
   };
 
   Adw.Breakpoint {
-    condition ("max-width: 550sp")
+    condition ("max-width: 450sp")
 
     setters {
       switcher_title.stack: null;
       switcher_bar.reveal: true;
+      template.content-height: 300;
     }
   }
 }

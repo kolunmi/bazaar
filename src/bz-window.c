@@ -67,7 +67,6 @@ struct _BzWindow
   AdwViewStack        *main_view_stack;
   GtkStack            *main_stack;
   GtkLabel            *debug_id_label;
-  // GtkButton           *refresh;
 };
 
 G_DEFINE_FINAL_TYPE (BzWindow, bz_window, ADW_TYPE_APPLICATION_WINDOW)
@@ -202,6 +201,22 @@ is_null (gpointer object,
          GObject *value)
 {
   return value == NULL;
+}
+
+static gboolean
+logical_and (gpointer object,
+             gboolean value1,
+             gboolean value2)
+{
+  return value1 && value2;
+}
+
+static gboolean
+logical_or (gpointer object,
+            gboolean value1,
+            gboolean value2)
+{
+  return value1 || value2;
 }
 
 static void
@@ -404,6 +419,15 @@ stop_transactions_cb (BzWindow  *self,
 }
 
 static void
+sync_cb (BzWindow  *self,
+         GtkButton *button)
+{
+  g_action_group_activate_action (
+      G_ACTION_GROUP (g_application_get_default ()),
+      "sync-remotes", NULL);
+}
+
+static void
 update_cb (BzWindow  *self,
            GtkButton *button)
 {
@@ -511,7 +535,6 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzWindow, toasts);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, toggle_transactions);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, toggle_transactions_sidebar);
-  // gtk_widget_class_bind_template_child (widget_class, BzWindow, refresh);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, search_widget);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, update_button);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, transactions_pause);
@@ -523,6 +546,8 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_double_zero);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
+  gtk_widget_class_bind_template_callback (widget_class, logical_and);
+  gtk_widget_class_bind_template_callback (widget_class, logical_or);
   gtk_widget_class_bind_template_callback (widget_class, browser_group_selected_cb);
   gtk_widget_class_bind_template_callback (widget_class, search_widget_select_cb);
   gtk_widget_class_bind_template_callback (widget_class, full_view_install_cb);
@@ -536,7 +561,7 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, breakpoint_unapply_cb);
   gtk_widget_class_bind_template_callback (widget_class, pause_transactions_cb);
   gtk_widget_class_bind_template_callback (widget_class, stop_transactions_cb);
-  // gtk_widget_class_bind_template_callback (widget_class, refresh_cb);
+  gtk_widget_class_bind_template_callback (widget_class, sync_cb);
   gtk_widget_class_bind_template_callback (widget_class, update_cb);
   gtk_widget_class_bind_template_callback (widget_class, transactions_clear_cb);
   gtk_widget_class_bind_template_callback (widget_class, visible_page_changed_cb);
@@ -907,9 +932,7 @@ transact (BzWindow  *self,
           bz_comet_overlay_set_pulse_color (self->comet_overlay, &destructive_color);
         }
       else
-        {
-          bz_comet_overlay_set_pulse_color (self->comet_overlay, NULL);
-        }
+        bz_comet_overlay_set_pulse_color (self->comet_overlay, NULL);
 
       comet = g_object_new (
           BZ_TYPE_COMET,
@@ -949,10 +972,10 @@ try_transact (BzWindow     *self,
 
   data               = transact_data_new ();
   data->self         = self;
-  data->group        = group != NULL ? g_object_ref (group) : NULL;
+  data->group        = bz_object_maybe_ref (group);
   data->remove       = remove;
   data->auto_confirm = auto_confirm;
-  data->source       = source != NULL ? g_object_ref (source) : NULL;
+  data->source       = bz_object_maybe_ref (source);
 
   dex_clear (&self->transact_future);
   self->transact_future = dex_future_finally (

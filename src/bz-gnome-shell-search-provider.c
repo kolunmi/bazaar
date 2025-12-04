@@ -387,8 +387,11 @@ request_finally (DexFuture   *future,
 
           result = g_ptr_array_index (results, i);
           group  = bz_search_result_get_group (result);
-          id     = bz_entry_group_get_id (group);
+          if (bz_entry_group_get_removable (group) > 0)
+            /* Skip already installed groups */
+            continue;
 
+          id = bz_entry_group_get_id (group);
           g_variant_builder_add (builder, "s", id);
           g_hash_table_replace (
               self->last_results,

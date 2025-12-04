@@ -153,6 +153,9 @@ BZ_DEFINE_DATA (
 static DexFuture *
 read_task_fiber (ReadTaskData *data);
 
+static DexFuture *
+enumerate_disk_fiber (OngoingTaskData *data);
+
 static void
 bz_entry_cache_manager_dispose (GObject *object)
 {
@@ -326,6 +329,45 @@ bz_entry_cache_manager_get (BzEntryCacheManager *self,
       (DexFiberFunc) read_task_fiber,
       read_task_data_ref (data),
       read_task_data_unref);
+  return g_steal_pointer (&future);
+}
+
+DexFuture *
+bz_entry_cache_manager_get_by_checksum (BzEntryCacheManager *self,
+                                        const char          *unique_id_checksum)
+{
+  g_autoptr (ReadTaskData) data = NULL;
+  g_autoptr (DexFuture) future  = NULL;
+
+  dex_return_error_if_fail (BZ_IS_ENTRY_CACHE_MANAGER (self));
+  dex_return_error_if_fail (unique_id_checksum != NULL);
+
+  data                     = read_task_data_new ();
+  data->task_data          = ongoing_task_data_ref (self->task_data);
+  data->unique_id_checksum = g_strdup (unique_id_checksum);
+
+  future = dex_scheduler_spawn (
+      self->scheduler,
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) read_task_fiber,
+      read_task_data_ref (data),
+      read_task_data_unref);
+  return g_steal_pointer (&future);
+}
+
+DexFuture *
+bz_entry_cache_manager_enumerate_disk (BzEntryCacheManager *self)
+{
+  g_autoptr (DexFuture) future = NULL;
+
+  dex_return_error_if_fail (BZ_IS_ENTRY_CACHE_MANAGER (self));
+
+  future = dex_scheduler_spawn (
+      self->scheduler,
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) enumerate_disk_fiber,
+      ongoing_task_data_ref (self->task_data),
+      ongoing_task_data_unref);
   return g_steal_pointer (&future);
 }
 
@@ -679,9 +721,78 @@ done:
 }
 
 static DexFuture *
+enumerate_disk_fiber (OngoingTaskData *data)
+{
+  g_autoptr (GError) local_error         = NULL;
+  g_autoptr (BzGuard) guard              = NULL;
+  g_autoptr (GHashTable) set             = NULL;
+  g_autofree char *main_cache            = NULL;
+  g_autoptr (GFile) main_cache_file      = NULL;
+  g_autoptr (GFileEnumerator) enumerator = NULL;
+
+  set = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+
+  BZ_BEGIN_GUARD_WITH_CONTEXT (&guard, &data->alive_mutex, &data->alive_gate);
+  BZ_BEGIN_GUARD_WITH_CONTEXT (&guard, &data->reading_mutex, &data->reading_gate);
+  BZ_BEGIN_GUARD_WITH_CONTEXT (&guard, &data->writing_mutex, &data->writing_gate);
+
+  main_cache = bz_dup_module_dir ();
+  if (!g_file_test (main_cache, G_FILE_TEST_EXISTS))
+    goto done;
+
+  main_cache_file = g_file_new_for_path (main_cache);
+  enumerator      = g_file_enumerate_children (
+      main_cache_file,
+      G_FILE_ATTRIBUTE_STANDARD_IS_SYMLINK
+      "," G_FILE_ATTRIBUTE_STANDARD_NAME
+      "," G_FILE_ATTRIBUTE_STANDARD_TYPE,
+      G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+      NULL,
+      &local_error);
+  if (enumerator == NULL)
+    return dex_future_new_reject (
+        BZ_ENTRY_CACHE_ERROR,
+        BZ_ENTRY_CACHE_ERROR_ENUMERATE_FAILED,
+        "Could not initialize directory enumerator at %s: %s",
+        main_cache, local_error->message);
+
+  for (;;)
+    {
+      g_autoptr (GFileInfo) info = NULL;
+      g_autoptr (GFile) child    = NULL;
+      g_autofree char *basename  = NULL;
+
+      info = g_file_enumerator_next_file (enumerator, NULL, &local_error);
+      if (info == NULL)
+        {
+          if (local_error != NULL)
+            return dex_future_new_reject (
+                BZ_ENTRY_CACHE_ERROR,
+                BZ_ENTRY_CACHE_ERROR_ENUMERATE_FAILED,
+                "Could not enumerate children of cache directory at %s: %s",
+                main_cache, local_error->message);
+          else
+            break;
+        }
+      child = g_file_enumerator_get_child (enumerator, info);
+
+      if (g_file_info_get_is_symlink (info) ||
+          g_file_info_get_file_type (info) != G_FILE_TYPE_REGULAR)
+        continue;
+
+      basename = g_file_get_basename (child);
+      if (basename != NULL)
+        g_hash_table_replace (set, g_steal_pointer (&basename), NULL);
+    }
+
+done:
+  return dex_future_new_take_boxed (G_TYPE_HASH_TABLE, g_steal_pointer (&set));
+}
+
+static DexFuture *
 watch_init_fiber (OngoingTaskData *task_data)
 {
-  bz_discard_module_dir ();
+  // bz_discard_module_dir ();
   dex_promise_resolve_boolean (task_data->init, TRUE);
 
   return dex_future_finally_loop (

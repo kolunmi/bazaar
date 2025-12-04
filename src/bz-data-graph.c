@@ -844,7 +844,7 @@ refresh_path (BzDataGraph *self,
   rounded_axis_max       = ceil (max_dependent / tick_spacing) * tick_spacing;
   self->rounded_axis_max = rounded_axis_max;
 
-  independent_label_step = MAX (1, n_items / MAX (1, floor (width / MAX (font_height + 10.0, LABEL_MARGIN)))) * 1.5 ;
+  independent_label_step = MAX (1, n_items / MAX (1, floor (width / MAX (font_height + 10.0, LABEL_MARGIN)))) * 1.5;
 
   curve_builder = gsk_path_builder_new ();
   snapshot      = gtk_snapshot_new ();
@@ -875,7 +875,7 @@ refresh_path (BzDataGraph *self,
           const char *label              = NULL;
           char        buf[32]            = { 0 };
           g_autoptr (PangoLayout) layout = NULL;
-          PangoRectangle          extents;
+          PangoRectangle extents;
 
           label = bz_data_point_get_label (point);
           if (label == NULL)

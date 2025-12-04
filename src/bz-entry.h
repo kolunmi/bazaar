@@ -122,6 +122,8 @@ bz_entry_get_eol (BzEntry *self);
 const char *
 bz_entry_get_description (BzEntry *self);
 
+gboolean bz_entry_is_verified (BzEntry *self);
+
 const char *
 bz_entry_get_long_description (BzEntry *self);
 

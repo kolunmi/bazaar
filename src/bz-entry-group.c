@@ -42,6 +42,7 @@ struct _BzEntryGroup
   char          *light_accent_color;
   char          *dark_accent_color;
   gboolean       is_flathub;
+  gboolean       is_verified;
   char          *search_tokens;
   char          *remote_repos_string;
   char          *eol;
@@ -81,6 +82,7 @@ enum
   PROP_LIGHT_ACCENT_COLOR,
   PROP_DARK_ACCENT_COLOR,
   PROP_IS_FLATHUB,
+  PROP_IS_VERIFIED,
   PROP_SEARCH_TOKENS,
   PROP_UI_ENTRY,
   PROP_REMOTE_REPOS_STRING,
@@ -181,6 +183,9 @@ bz_entry_group_get_property (GObject    *object,
     case PROP_IS_FLATHUB:
       g_value_set_boolean (value, bz_entry_group_get_is_flathub (self));
       break;
+    case PROP_IS_VERIFIED:
+      g_value_set_boolean (value, bz_entry_group_get_is_verified (self));
+      break;
     case PROP_SEARCH_TOKENS:
       g_value_set_boxed (value, bz_entry_group_get_search_tokens (self));
       break;
@@ -246,6 +251,7 @@ bz_entry_group_set_property (GObject      *object,
     case PROP_LIGHT_ACCENT_COLOR:
     case PROP_DARK_ACCENT_COLOR:
     case PROP_IS_FLATHUB:
+    case PROP_IS_VERIFIED:
     case PROP_SEARCH_TOKENS:
     case PROP_EOL:
     case PROP_UI_ENTRY:
@@ -338,6 +344,12 @@ bz_entry_group_class_init (BzEntryGroupClass *klass)
           "is-flathub",
           NULL, NULL, FALSE,
           G_PARAM_READABLE);
+
+  props[PROP_IS_VERIFIED] =
+    g_param_spec_boolean (
+        "is-verified",
+        NULL, NULL, FALSE,
+        G_PARAM_READABLE);
 
   props[PROP_SEARCH_TOKENS] =
       g_param_spec_string (
@@ -535,6 +547,13 @@ bz_entry_group_get_is_flathub (BzEntryGroup *self)
   return self->is_flathub;
 }
 
+gboolean
+bz_entry_group_get_is_verified (BzEntryGroup *self)
+{
+  g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), FALSE);
+  return self->is_verified;
+}
+
 const char *
 bz_entry_group_get_search_tokens (BzEntryGroup *self)
 {
@@ -673,6 +692,7 @@ bz_entry_group_add (BzEntryGroup *self,
   const char   *light_accent_color = NULL;
   const char   *dark_accent_color  = NULL;
   gboolean      is_flathub         = FALSE;
+  gboolean      is_verified        = FALSE;
   guint64       size               = 0;
   GListModel   *addons             = NULL;
   int           n_addons           = 0;
@@ -719,6 +739,7 @@ bz_entry_group_add (BzEntryGroup *self,
   light_accent_color = bz_entry_get_light_accent_color (entry);
   dark_accent_color  = bz_entry_get_dark_accent_color (entry);
   is_flathub         = bz_entry_get_is_flathub (entry);
+  is_verified        = bz_entry_is_verified (entry);
   size               = bz_entry_get_size (entry);
   donation_url       = bz_entry_get_donation_url (entry);
 
@@ -798,6 +819,11 @@ bz_entry_group_add (BzEntryGroup *self,
         {
           self->is_flathub = is_flathub;
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_IS_FLATHUB]);
+        }
+      if (!!is_verified != !!self->is_verified)
+        {
+          self->is_verified = is_verified;
+          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_IS_VERIFIED]);
         }
       if (size != self->size)
         {

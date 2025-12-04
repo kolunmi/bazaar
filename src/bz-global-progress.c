@@ -268,7 +268,7 @@ bz_global_progress_snapshot (GtkWidget   *widget,
   height        = gtk_widget_get_height (widget);
   corner_radius = height * 0.5 * (0.3 * self->transition_progress + 0.2);
   gap           = height * 0.1;
-  inner_radius  = MAX(corner_radius - gap, 0.0);
+  inner_radius  = MAX (corner_radius - gap, 0.0);
 
   total_clip.bounds           = GRAPHENE_RECT_INIT (0.0, 0.0, width, height);
   total_clip.corner[0].width  = corner_radius;
@@ -331,7 +331,7 @@ bz_global_progress_snapshot (GtkWidget   *widget,
             {   0.0 / 255.0,  76.0 / 255.0, 255.0 / 255.0, 1.0 },
             { 115.0 / 255.0,  41.0 / 255.0, 130.0 / 255.0, 1.0 },
           };
-          const float offsets[] = {
+          const float offsets[G_N_ELEMENTS (colors)] = {
             0.0 / 6.0,
             1.0 / 6.0,
             2.0 / 6.0,
@@ -339,7 +339,7 @@ bz_global_progress_snapshot (GtkWidget   *widget,
             4.0 / 6.0,
             5.0 / 6.0,
           };
-          const float sizes[] = {
+          const float sizes[G_N_ELEMENTS (colors)] = {
             1.0 / 6.0,
             1.0 / 6.0,
             1.0 / 6.0,
@@ -360,7 +360,7 @@ bz_global_progress_snapshot (GtkWidget   *widget,
             { 181.0 / 255.0,  86.0 / 255.0, 144.0 / 255.0, 1.0 },
             { 163.0 / 255.0,   2.0 / 255.0,  98.0 / 255.0, 1.0 },
           };
-          const float offsets[] = {
+          const float offsets[G_N_ELEMENTS (colors)] = {
             0.0 / 7.0,
             1.0 / 7.0,
             2.0 / 7.0,
@@ -369,7 +369,8 @@ bz_global_progress_snapshot (GtkWidget   *widget,
             5.0 / 7.0,
             6.0 / 7.0,
           };
-          const float sizes[] = {
+          const float sizes[G_N_ELEMENTS (colors)] = {
+            1.0 / 7.0,
             1.0 / 7.0,
             1.0 / 7.0,
             1.0 / 7.0,
@@ -386,12 +387,12 @@ bz_global_progress_snapshot (GtkWidget   *widget,
             { 245.0 / 255.0, 169.0 / 255.0, 184.0 / 255.0, 1.0 },
             { 255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 1.0 },
           };
-          const float offsets[] = {
+          const float offsets[G_N_ELEMENTS (colors)] = {
             0.0 / 5.0,
             1.0 / 5.0,
             2.0 / 5.0,
           };
-          const float sizes[] = {
+          const float sizes[G_N_ELEMENTS (colors)] = {
             5.0 / 5.0,
             3.0 / 5.0,
             1.0 / 5.0,
@@ -406,13 +407,13 @@ bz_global_progress_snapshot (GtkWidget   *widget,
             { 156.0 / 255.0,  89.0 / 255.0, 209.0 / 255.0, 1.0 },
             {  44.0 / 255.0,  44.0 / 255.0,  44.0 / 255.0, 1.0 },
           };
-          const float offsets[] = {
+          const float offsets[G_N_ELEMENTS (colors)] = {
             0.0 / 4.0,
             1.0 / 4.0,
             2.0 / 4.0,
             3.0 / 4.0,
           };
-          const float sizes[] = {
+          const float sizes[G_N_ELEMENTS (colors)] = {
             1.0 / 4.0,
             1.0 / 4.0,
             1.0 / 4.0,
@@ -427,12 +428,12 @@ bz_global_progress_snapshot (GtkWidget   *widget,
             { 155.0 / 255.0, 79.0 / 255.0, 150.0 / 255.0, 1.0 },
             {   0.0 / 255.0, 56.0 / 255.0, 168.0 / 255.0, 1.0 },
           };
-          const float offsets[] = {
+          const float offsets[G_N_ELEMENTS (colors)] = {
             0.0 / 5.0,
             2.0 / 5.0,
             3.0 / 5.0,
           };
-          const float sizes[] = {
+          const float sizes[G_N_ELEMENTS (colors)] = {
             2.0 / 5.0,
             1.0 / 5.0,
             2.0 / 5.0,
@@ -447,13 +448,13 @@ bz_global_progress_snapshot (GtkWidget   *widget,
             { 255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 1.0 },
             { 128.0 / 255.0,   0.0 / 255.0, 128.0 / 255.0, 1.0 },
           };
-          const float offsets[] = {
+          const float offsets[G_N_ELEMENTS (colors)] = {
             0.0 / 4.0,
             1.0 / 4.0,
             2.0 / 4.0,
             3.0 / 4.0,
           };
-          const float sizes[] = {
+          const float sizes[G_N_ELEMENTS (colors)] = {
             1.0 / 4.0,
             1.0 / 4.0,
             1.0 / 4.0,
@@ -468,12 +469,12 @@ bz_global_progress_snapshot (GtkWidget   *widget,
             { 255.0 / 255.0, 216.0 / 255.0,   0.0 / 255.0, 1.0 },
             {  33.0 / 255.0, 177.0 / 255.0, 255.0 / 255.0, 1.0 },
           };
-          const float offsets[] = {
+          const float offsets[G_N_ELEMENTS (colors)] = {
             0.0 / 3.0,
             1.0 / 3.0,
             2.0 / 3.0,
           };
-          const float sizes[] = {
+          const float sizes[G_N_ELEMENTS (colors)] = {
             1.0 / 3.0,
             1.0 / 3.0,
             1.0 / 3.0,
@@ -489,14 +490,14 @@ bz_global_progress_snapshot (GtkWidget   *widget,
             { 169.0 / 255.0, 169.0 / 255.0, 169.0 / 255.0, 1.0 },
             {   0.0 / 255.0,   0.0 / 255.0,   0.0 / 255.0, 1.0 },
           };
-          const float offsets[] = {
+          const float offsets[G_N_ELEMENTS (colors)] = {
             0.0 / 5.0,
             1.0 / 5.0,
             2.0 / 5.0,
             3.0 / 5.0,
             4.0 / 5.0,
           };
-          const float sizes[] = {
+          const float sizes[G_N_ELEMENTS (colors)] = {
             1.0 / 5.0,
             1.0 / 5.0,
             1.0 / 5.0,
@@ -514,14 +515,14 @@ bz_global_progress_snapshot (GtkWidget   *widget,
             {   0.0 / 255.0,   0.0 / 255.0,   0.0 / 255.0, 1.0 },
             {  47.0 / 255.0,  60.0 / 255.0, 190.0 / 255.0, 1.0 },
           };
-          const float offsets[] = {
+          const float offsets[G_N_ELEMENTS (colors)] = {
             0.0 / 5.0,
             1.0 / 5.0,
             2.0 / 5.0,
             3.0 / 5.0,
             4.0 / 5.0,
           };
-          const float sizes[] = {
+          const float sizes[G_N_ELEMENTS (colors)] = {
             1.0 / 5.0,
             1.0 / 5.0,
             1.0 / 5.0,
@@ -537,12 +538,12 @@ bz_global_progress_snapshot (GtkWidget   *widget,
             {   1.0 / 255.0, 214.0 / 255.0, 106.0 / 255.0, 1.0 },
             {  21.0 / 255.0, 148.0 / 255.0, 246.0 / 255.0, 1.0 },
           };
-          const float offsets[] = {
+          const float offsets[G_N_ELEMENTS (colors)] = {
             0.0 / 3.0,
             1.0 / 3.0,
             2.0 / 3.0,
           };
-          const float sizes[] = {
+          const float sizes[G_N_ELEMENTS (colors)] = {
             1.0 / 3.0,
             1.0 / 3.0,
             1.0 / 3.0,
@@ -558,14 +559,164 @@ bz_global_progress_snapshot (GtkWidget   *widget,
             { 103.0 / 255.0,  96.0 / 255.0, 254.0 / 255.0, 1.0 },
             { 142.0 / 255.0, 166.0 / 255.0, 255.0 / 255.0, 1.0 },
           };
-          const float offsets[] = {
+          const float offsets[G_N_ELEMENTS (colors)] = {
             0.0 / 5.0,
             1.0 / 5.0,
             2.0 / 5.0,
             3.0 / 5.0,
             4.0 / 5.0,
           };
-          const float sizes[] = {
+          const float sizes[G_N_ELEMENTS (colors)] = {
+            1.0 / 5.0,
+            1.0 / 5.0,
+            1.0 / 5.0,
+            1.0 / 5.0,
+            1.0 / 5.0,
+          };
+          append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
+        }
+      else if (g_strcmp0 (theme, "aroace-flag") == 0)
+        {
+          const GdkRGBA colors[] = {
+            { 226.0 / 255.0, 140.0 / 255.0,   0.0 / 255.0, 1.0 },
+            { 236.0 / 255.0, 205.0 / 255.0,   0.0 / 255.0, 1.0 },
+            { 255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 1.0 },
+            {  98.0 / 255.0, 174.0 / 255.0, 220.0 / 255.0, 1.0 },
+            {  32.0 / 255.0,  56.0 / 255.0,  86.0 / 255.0, 1.0 },
+          };
+          const float offsets[G_N_ELEMENTS (colors)] = {
+            0.0 / 5.0,
+            1.0 / 5.0,
+            2.0 / 5.0,
+            3.0 / 5.0,
+            4.0 / 5.0,
+          };
+          const float sizes[G_N_ELEMENTS (colors)] = {
+            1.0 / 5.0,
+            1.0 / 5.0,
+            1.0 / 5.0,
+            1.0 / 5.0,
+            1.0 / 5.0,
+          };
+          append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
+        }
+      else if (g_strcmp0 (theme, "agender-flag") == 0)
+        {
+          const GdkRGBA colors[] = {
+            {   0.0 / 255.0,   0.0 / 255.0,   0.0 / 255.0, 1.0 },
+            { 188.0 / 255.0, 196.0 / 255.0, 199.0 / 255.0, 1.0 },
+            { 255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 1.0 },
+            { 183.0 / 255.0, 246.0 / 255.0, 132.0 / 255.0, 1.0 },
+            { 255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 1.0 },
+            { 188.0 / 255.0, 196.0 / 255.0, 199.0 / 255.0, 1.0 },
+            {   0.0 / 255.0,   0.0 / 255.0,   0.0 / 255.0, 1.0 },
+          };
+          const float offsets[G_N_ELEMENTS (colors)] = {
+            0.0 / 7.0,
+            1.0 / 7.0,
+            2.0 / 7.0,
+            3.0 / 7.0,
+            4.0 / 7.0,
+            5.0 / 7.0,
+            6.0 / 7.0,
+          };
+          const float sizes[G_N_ELEMENTS (colors)] = {
+            1.0 / 7.0,
+            1.0 / 7.0,
+            1.0 / 7.0,
+            1.0 / 7.0,
+            1.0 / 7.0,
+            1.0 / 7.0,
+            1.0 / 7.0,
+          };
+          append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
+        }
+      else if (g_strcmp0 (theme, "genderqueer-flag") == 0)
+        {
+          const GdkRGBA colors[] = {
+            { 181.0 / 255.0, 126.0 / 255.0, 220.0 / 255.0, 1.0 },
+            { 255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 1.0 },
+            {  74.0 / 255.0, 129.0 / 255.0,  35.0 / 255.0, 1.0 },
+          };
+          const float offsets[G_N_ELEMENTS (colors)] = {
+            0.0 / 3.0,
+            1.0 / 3.0,
+            2.0 / 3.0,
+          };
+          const float sizes[G_N_ELEMENTS (colors)] = {
+            1.0 / 3.0,
+            1.0 / 3.0,
+            1.0 / 3.0,
+          };
+          append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
+        }
+      else if (g_strcmp0 (theme, "intersex-flag") == 0)
+        {
+          const GdkRGBA colors[] = {
+            { 255.0 / 255.0, 216.0 / 255.0,   0.0 / 255.0, 1.0 },
+            { 121.0 / 255.0,   2.0 / 255.0, 170.0 / 255.0, 1.0 },
+            { 255.0 / 255.0, 216.0 / 255.0,   0.0 / 255.0, 1.0 },
+          };
+          const float offsets[G_N_ELEMENTS (colors)] = {
+            0.0 / 5.0,
+            2.0 / 5.0,
+            3.0 / 5.0,
+          };
+          const float sizes[G_N_ELEMENTS (colors)] = {
+            2.0 / 5.0,
+            1.0 / 5.0,
+            2.0 / 5.0,
+          };
+          append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
+        }
+      else if (g_strcmp0 (theme, "demigender-flag") == 0)
+        {
+          const GdkRGBA colors[] = {
+            { 127.0 / 255.0, 127.0 / 255.0, 127.0 / 255.0, 1.0 },
+            { 195.0 / 255.0, 195.0 / 255.0, 195.0 / 255.0, 1.0 },
+            { 251.0 / 255.0, 255.0 / 255.0, 116.0 / 255.0, 1.0 },
+            { 255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 1.0 },
+            { 251.0 / 255.0, 255.0 / 255.0, 116.0 / 255.0, 1.0 },
+            { 195.0 / 255.0, 195.0 / 255.0, 195.0 / 255.0, 1.0 },
+            { 127.0 / 255.0, 127.0 / 255.0, 127.0 / 255.0, 1.0 },
+          };
+          const float offsets[G_N_ELEMENTS (colors)] = {
+            0.0 / 7.0,
+            1.0 / 7.0,
+            2.0 / 7.0,
+            3.0 / 7.0,
+            4.0 / 7.0,
+            5.0 / 7.0,
+            6.0 / 7.0,
+          };
+          const float sizes[G_N_ELEMENTS (colors)] = {
+            1.0 / 7.0,
+            1.0 / 7.0,
+            1.0 / 7.0,
+            1.0 / 7.0,
+            1.0 / 7.0,
+            1.0 / 7.0,
+            1.0 / 7.0,
+          };
+          append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), &fraction_clip.bounds);
+        }
+      else if (g_strcmp0 (theme, "biromantic-flag") == 0)
+        {
+          const GdkRGBA colors[] = {
+            { 136.0 / 255.0, 105.0 / 255.0, 165.0 / 255.0, 1.0 },
+            { 216.0 / 255.0, 167.0 / 255.0, 216.0 / 255.0, 1.0 },
+            { 255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 1.0 },
+            { 253.0 / 255.0, 177.0 / 255.0, 141.0 / 255.0, 1.0 },
+            {  21.0 / 255.0,  22.0 / 255.0,  56.0 / 255.0, 1.0 },
+          };
+          const float offsets[G_N_ELEMENTS (colors)] = {
+            0.0 / 5.0,
+            1.0 / 5.0,
+            2.0 / 5.0,
+            3.0 / 5.0,
+            4.0 / 5.0,
+          };
+          const float sizes[G_N_ELEMENTS (colors)] = {
             1.0 / 5.0,
             1.0 / 5.0,
             1.0 / 5.0,

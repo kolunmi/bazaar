@@ -213,7 +213,7 @@ send (SoupMessage   *message,
 
   data               = http_request_data_new ();
   data->message      = g_object_ref (message);
-  data->splice_into  = splice_into != NULL ? g_object_ref (splice_into) : NULL;
+  data->splice_into  = bz_object_maybe_ref (splice_into);
   data->close_output = close_output;
 
   future = dex_scheduler_spawn (

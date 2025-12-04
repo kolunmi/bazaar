@@ -30,6 +30,7 @@
 #include "bz-apps-page.h"
 #include "bz-appstream-description-render.h"
 #include "bz-context-tile.h"
+#include "bz-developer-badge.h"
 #include "bz-dynamic-list-view.h"
 #include "bz-env.h"
 #include "bz-error.h"
@@ -293,15 +294,26 @@ static char *
 format_recent_downloads (gpointer object,
                          int      value)
 {
+  double result;
+  int    digits;
+
   if (value <= 0)
     return g_strdup (_ ("---"));
 
   if (value >= 1000000)
-    /* Translators: M is the suffix for millions */
-    return g_strdup_printf (_ ("%.2fM"), value / 1000000.0);
+    {
+      result = value / 1000000.0;
+      digits = (int) log10 (result) + 1;
+      /* Translators: M is the suffix for millions */
+      return g_strdup_printf (_ ("%.*fM"), 3 - digits, result);
+    }
   else if (value >= 1000)
-    /* Translators: K is the suffix for thousands*/
-    return g_strdup_printf (_ ("%.2fK"), value / 1000.0);
+    {
+      result = value / 1000.0;
+      digits = (int) log10 (result) + 1;
+      /* Translators: K is the suffix for thousands*/
+      return g_strdup_printf (_ ("%.*fK"), 3 - digits, result);
+    }
   else
     return g_strdup_printf ("%'d", value);
 }
@@ -318,10 +330,21 @@ format_size (gpointer object, guint64 value)
 {
   g_autofree char *size_str = g_format_size (value);
   char            *space    = g_strrstr (size_str, "\xC2\xA0");
+  char            *decimal  = NULL;
+  int              digits   = 0;
 
   if (space != NULL)
     {
       *space = '\0';
+      for (char *p = size_str; *p != '\0' && *p != '.'; p++)
+        if (g_ascii_isdigit (*p))
+          digits++;
+      if (digits >= 3)
+        {
+          decimal = g_strrstr (size_str, ".");
+          if (decimal != NULL)
+            *decimal = '\0';
+        }
       return format_with_small_suffix (size_str, space + 2);
     }
   return g_strdup (size_str);
@@ -607,7 +630,7 @@ more_apps_button_clicked_cb (BzFullView *self,
   else
     title = g_strdup (_ ("Other Apps"));
 
-  subtitle = g_strdup_printf (ngettext ("%d application", "%d applications", n_items), n_items);
+  subtitle = g_strdup_printf (ngettext ("%d Application", "%d Applications", n_items), n_items);
 
   apps_page = bz_apps_page_new (title, model);
   bz_apps_page_set_subtitle (BZ_APPS_PAGE (apps_page), subtitle);
@@ -742,8 +765,6 @@ dl_stats_cb (BzFullView *self,
   ui_entry = bz_result_get_object (self->ui_entry);
 
   dialog = bz_stats_dialog_new (NULL, NULL, 0);
-  adw_dialog_set_content_width (dialog, 2000);
-  adw_dialog_set_content_height (dialog, 1500);
 
   g_object_bind_property (ui_entry, "download-stats", dialog, "model", G_BINDING_SYNC_CREATE);
   g_object_bind_property (ui_entry, "download-stats-per-country", dialog, "country-model", G_BINDING_SYNC_CREATE);
@@ -1078,6 +1099,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
       g_cclosure_marshal_VOID__OBJECTv);
 
   g_type_ensure (BZ_TYPE_APPSTREAM_DESCRIPTION_RENDER);
+  g_type_ensure (BZ_TYPE_DEVELOPER_BADGE);
   g_type_ensure (BZ_TYPE_DYNAMIC_LIST_VIEW);
   g_type_ensure (BZ_TYPE_ENTRY);
   g_type_ensure (BZ_TYPE_ENTRY_GROUP);

@@ -31,7 +31,6 @@
 #include "bz-flathub-page.h"
 #include "bz-inhibited-scrollable.h"
 #include "bz-section-view.h"
-#include "bz-window.h"
 
 struct _BzFlathubPage
 {
@@ -69,9 +68,9 @@ get_category_by_name (GListModel *categories,
                       const char *name);
 
 static void
-online_changed (BzFlathubPage *self,
-                GParamSpec    *pspec,
-                BzStateInfo   *info);
+invalidating_state_changed (BzFlathubPage *self,
+                            GParamSpec    *pspec,
+                            BzStateInfo   *info);
 
 static void
 check_online (BzFlathubPage *self);
@@ -95,9 +94,9 @@ tile_clicked (BzEntryGroup *group,
               GtkButton    *button);
 
 static void
-show_more_clicked (const char *title,
-                   GListModel *model,
-                   GtkButton  *button);
+show_more_clicked (BzFlathubPage *self,
+                   GtkButton     *button,
+                   const char    *category_name);
 
 static void
 apps_page_select_cb (BzFlathubPage *self,
@@ -123,7 +122,7 @@ bz_flathub_page_dispose (GObject *object)
   BzFlathubPage *self = BZ_FLATHUB_PAGE (object);
 
   if (self->state != NULL)
-    g_signal_handlers_disconnect_by_func (self->state, online_changed, self);
+    g_signal_handlers_disconnect_by_func (self->state, invalidating_state_changed, self);
   g_clear_object (&self->state);
 
   G_OBJECT_CLASS (bz_flathub_page_parent_class)->dispose (object);
@@ -184,24 +183,17 @@ unbind_widget_cb (BzFlathubPage     *self,
 }
 
 static void
-show_more_mobile_clicked_cb (BzFlathubPage *self,
-                             GtkButton     *button)
+show_more_mobile_cb (BzFlathubPage *self,
+                     GtkButton     *button)
 {
-  g_autoptr (GListModel) model           = NULL;
-  g_autoptr (BzFlathubCategory) category = NULL;
+  show_more_clicked (self, button, "mobile");
+}
 
-  category = get_category_by_name (
-      bz_flathub_state_get_categories (
-          bz_state_info_get_flathub (self->state)),
-      "mobile");
-  if (category == NULL)
-    return;
-
-  model = bz_flathub_category_dup_applications (category);
-  if (model == NULL)
-    return;
-
-  show_more_clicked (_ ("Mobile Apps"), model, button);
+static void
+show_more_gaming_cb (BzFlathubPage *self,
+                     GtkButton     *button)
+{
+  show_more_clicked (self, button, "game");
 }
 
 static BzFlathubCategory *
@@ -306,7 +298,8 @@ bz_flathub_page_class_init (BzFlathubPageClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, unbind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, category_section_group_selected_cb);
   gtk_widget_class_bind_template_callback (widget_class, get_category_by_name_cb);
-  gtk_widget_class_bind_template_callback (widget_class, show_more_mobile_clicked_cb);
+  gtk_widget_class_bind_template_callback (widget_class, show_more_mobile_cb);
+  gtk_widget_class_bind_template_callback (widget_class, show_more_gaming_cb);
   gtk_widget_class_bind_template_callback (widget_class, featured_carousel_group_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, open_search_cb);
 }
@@ -331,7 +324,7 @@ bz_flathub_page_set_state (BzFlathubPage *self,
   g_return_if_fail (state == NULL || BZ_IS_STATE_INFO (state));
 
   if (self->state != NULL)
-    g_signal_handlers_disconnect_by_func (self->state, online_changed, self);
+    g_signal_handlers_disconnect_by_func (self->state, invalidating_state_changed, self);
 
   g_clear_object (&self->state);
   if (state != NULL)
@@ -339,8 +332,13 @@ bz_flathub_page_set_state (BzFlathubPage *self,
       self->state = g_object_ref (state);
       g_signal_connect_swapped (
           state,
+          "notify::flathub",
+          G_CALLBACK (invalidating_state_changed),
+          self);
+      g_signal_connect_swapped (
+          state,
           "notify::online",
-          G_CALLBACK (online_changed),
+          G_CALLBACK (invalidating_state_changed),
           self);
     }
 
@@ -367,21 +365,25 @@ tile_clicked (BzEntryGroup *group,
 }
 
 static void
-show_more_clicked (const char *title,
-                   GListModel *model,
-                   GtkButton  *button)
+show_more_clicked (BzFlathubPage *self,
+                   GtkButton     *button,
+                   const char    *category_name)
 {
-  GtkWidget         *self      = NULL;
-  GtkWidget         *nav_view  = NULL;
-  AdwNavigationPage *apps_page = NULL;
+  g_autoptr (BzFlathubCategory) category = NULL;
+  GtkWidget         *nav_view            = NULL;
+  AdwNavigationPage *apps_page           = NULL;
 
-  self = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_FLATHUB_PAGE);
-  g_assert (self != NULL);
+  category = get_category_by_name (
+      bz_flathub_state_get_categories (
+          bz_state_info_get_flathub (self->state)),
+      category_name);
+  if (category == NULL)
+    return;
+
+  apps_page = bz_apps_page_new_from_category (category);
 
   nav_view = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
   g_assert (nav_view != NULL);
-
-  apps_page = bz_apps_page_new (title, model);
 
   g_signal_connect_swapped (
       apps_page, "select",
@@ -407,9 +409,9 @@ category_section_group_selected_cb (BzFlathubPage            *self,
 }
 
 static void
-online_changed (BzFlathubPage *self,
-                GParamSpec    *pspec,
-                BzStateInfo   *info)
+invalidating_state_changed (BzFlathubPage *self,
+                            GParamSpec    *pspec,
+                            BzStateInfo   *info)
 {
   check_online (self);
 }
@@ -417,10 +419,12 @@ online_changed (BzFlathubPage *self,
 static void
 check_online (BzFlathubPage *self)
 {
-  const char *page = NULL;
+  BzFlathubState *flathub = NULL;
+  const char     *page    = NULL;
 
-  if (self->state != NULL &&
-      bz_state_info_get_online (self->state))
+  if (self->state != NULL)
+    flathub = bz_state_info_get_flathub (self->state);
+  if (flathub != NULL)
     page = "content";
   else
     page = "offline";

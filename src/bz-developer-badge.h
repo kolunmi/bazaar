@@ -1,4 +1,4 @@
-/* bz-screenshots-carousel.h
+/* bz-developer-badge.h
  *
  * Copyright 2025 Alexander Vanhee
  *
@@ -20,28 +20,19 @@
 
 #pragma once
 
-#include <gtk/gtk.h>
+#include "bz-entry.h"
+#include <adwaita.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_SCREENSHOTS_CAROUSEL (bz_screenshots_carousel_get_type ())
+#define BZ_TYPE_DEVELOPER_BADGE (bz_developer_badge_get_type ())
 
-G_DECLARE_FINAL_TYPE (BzScreenshotsCarousel, bz_screenshots_carousel, BZ, SCREENSHOTS_CAROUSEL, GtkWidget)
+G_DECLARE_FINAL_TYPE (BzDeveloperBadge, bz_developer_badge, BZ, DEVELOPER_BADGE, GtkButton)
 
-GtkWidget *
-bz_screenshots_carousel_new (void);
+GtkWidget *bz_developer_badge_new (void);
 
-void
-bz_screenshots_carousel_set_model (BzScreenshotsCarousel *self,
-                                   GListModel            *model);
-
-GListModel *
-bz_screenshots_carousel_get_model (BzScreenshotsCarousel *self);
-
-void
-bz_screenshots_carousel_set_compact (BzScreenshotsCarousel *self,
-                                     gboolean               compact);
-gboolean
-bz_screenshots_carousel_get_compact (BzScreenshotsCarousel *self);
+BzEntry *bz_developer_badge_get_entry (BzDeveloperBadge *self);
+void     bz_developer_badge_set_entry (BzDeveloperBadge *self,
+                                       BzEntry          *entry);
 
 G_END_DECLS
