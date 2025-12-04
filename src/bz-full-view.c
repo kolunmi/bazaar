@@ -431,28 +431,61 @@ get_age_rating_style (gpointer         object,
 }
 
 static char *
-format_license_tooltip (gpointer    object,
-                        const char *license)
+format_license_tooltip (gpointer object,
+                        BzEntry *entry)
 {
-  g_autofree char *name = NULL;
+  const char      *license;
+  gboolean         is_floss = FALSE;
+  g_autofree char *name     = NULL;
+
+  if (entry == NULL)
+    return g_strdup (_ ("Unknown"));
+
+  g_object_get (entry, "is-floss", &is_floss, "project-license", &license, NULL);
 
   if (license == NULL || *license == '\0')
     return g_strdup (_ ("Unknown"));
+
+  if (is_floss && bz_spdx_is_valid (license))
+    {
+      name = bz_spdx_get_name (license);
+      return g_strdup_printf (_ ("Free software licensed under %s"),
+                              (name != NULL && *name != '\0') ? name : license);
+    }
+
+  if (is_floss)
+    return g_strdup (_ ("Free software"));
 
   if (g_strcmp0 (license, "LicenseRef-proprietary") == 0)
     return g_strdup (_ ("Proprietary Software"));
 
   name = bz_spdx_get_name (license);
-
-  return g_strdup_printf (_ ("Free software licensed under %s"),
+  return g_strdup_printf (_ ("Special License: %s"),
                           (name != NULL && *name != '\0') ? name : license);
 }
 
 static char *
 get_license_label (gpointer object,
-                   gboolean is_floss)
+                   BzEntry *entry)
 {
-  return g_strdup (is_floss ? _ ("Free") : _ ("Proprietary"));
+  const char *license;
+  gboolean    is_floss = FALSE;
+
+  if (entry == NULL)
+    return g_strdup (_ ("Unknown"));
+
+  g_object_get (entry, "is-floss", &is_floss, "project-license", &license, NULL);
+
+  if (is_floss)
+    return g_strdup (_ ("Free"));
+
+  if (g_strcmp0 (license, "LicenseRef-proprietary") == 0)
+    return g_strdup (_ ("Proprietary"));
+
+  if (license == NULL || *license == '\0')
+    return g_strdup (_ ("Unknown"));
+
+  return g_strdup (_ ("Special License"));
 }
 
 static char *
