@@ -44,8 +44,6 @@ static void on_zoom_level_changed (BzZoom           *zoom,
                                    GParamSpec       *pspec,
                                    BzScreenshotPage *self);
 
-const char *bz_screenshot_page_get_current_caption (BzScreenshotPage *self);
-
 enum
 {
   PROP_0,

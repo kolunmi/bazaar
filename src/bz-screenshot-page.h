@@ -33,4 +33,11 @@ AdwNavigationPage *bz_screenshot_page_new (GListModel *screenshots,
                                            GListModel *captions,
                                            guint       initial_index);
 
+void
+bz_screenshot_page_set_captions (BzScreenshotPage *self,
+                                 GListModel       *captions);
+
+const char *
+bz_screenshot_page_get_current_caption (BzScreenshotPage *self);
+
 G_END_DECLS
