@@ -30,6 +30,7 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (BzScreenshotPage, bz_screenshot_page, BZ, SCREENSHOT_PAGE, AdwNavigationPage)
 
 AdwNavigationPage *bz_screenshot_page_new (GListModel *screenshots,
+                                           GListModel *captions,
                                            guint       initial_index);
 
 G_END_DECLS
