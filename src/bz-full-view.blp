@@ -584,6 +584,8 @@ template $BzFullView: Adw.Bin {
                       hexpand: true;
                       visible: bind template.debounced-ui-entry as <$BzResult>.resolved as <bool>;
                       clicked => $screenshot_clicked_cb() swapped;
+                      light-accent-color: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.light-accent-color;
+                      dark-accent-color: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.dark-accent-color;
 
                       model: $BzLazyAsyncTextureModel {
                         model: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.screenshot-paintables;
