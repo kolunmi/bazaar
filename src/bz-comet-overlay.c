@@ -402,6 +402,7 @@ bz_comet_overlay_spawn (BzCometOverlay *self,
 
   g_signal_connect (animation, "done", G_CALLBACK (animation_done), self);
 
+  g_object_notify (G_OBJECT (comet), "progress");
   adw_animation_play (animation);
 }
 

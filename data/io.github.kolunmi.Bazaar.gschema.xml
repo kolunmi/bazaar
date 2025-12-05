@@ -40,6 +40,12 @@
         <choice value="genderfluid-flag"/>
         <choice value="polysexual-flag"/>
         <choice value="omnisexual-flag"/>
+        <choice value="aroace-flag"/>
+        <choice value="agender-flag"/>
+        <choice value="genderqueer-flag"/>
+        <choice value="intersex-flag"/>
+        <choice value="demigender-flag"/>
+        <choice value="biromantic-flag"/>
       </choices>
       <default>'accent-color'</default>
       <summary>Global Progress Bar Theme</summary>

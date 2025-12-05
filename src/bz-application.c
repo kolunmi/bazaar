@@ -32,7 +32,6 @@
 #include "bz-application.h"
 #include "bz-backend-notification.h"
 #include "bz-content-provider.h"
-#include "bz-download-worker.h"
 #include "bz-entry-cache-manager.h"
 #include "bz-entry-group.h"
 #include "bz-env.h"
@@ -61,64 +60,51 @@ struct _BzApplication
 {
   AdwApplication parent_instance;
 
-  GSettings    *settings;
-  BzMainConfig *config;
-
-  BzYamlParser      *blocklist_parser;
-  BzContentProvider *blocklists_provider;
-
-  BzNewlineParser   *txt_blocklist_parser;
-  BzContentProvider *txt_blocklists_provider;
-
-  GtkStringList   *blocklists;
-  GtkMapListModel *blocklists_to_files;
-  GPtrArray       *blocklist_regexes;
-
-  GtkStringList   *txt_blocklists;
-  GtkMapListModel *txt_blocklists_to_files;
-  GPtrArray       *txt_blocked_id_sets;
-
-  GtkStringList   *curated_configs;
-  GtkMapListModel *curated_configs_to_files;
-
-  gboolean    running;
-  GWeakRef    main_window;
-  GTimer     *init_timer;
-  DexChannel *flatpak_notifs;
-  DexFuture  *notif_watch;
-  int         n_incoming;
-  GHashTable *eol_runtimes;
-  GHashTable *sys_name_to_addons;
-  GHashTable *usr_name_to_addons;
-
-  DexFuture *periodic_sync;
-  guint      periodic_timeout;
-
+  BzApplicationMapFactory    *application_factory;
+  BzApplicationMapFactory    *entry_factory;
+  BzContentProvider          *blocklists_provider;
+  BzContentProvider          *curated_provider;
+  BzContentProvider          *txt_blocklists_provider;
   BzEntryCacheManager        *cache;
-  BzTransactionManager       *transactions;
-  BzSearchEngine             *search_engine;
+  BzFlathubState             *flathub;
+  BzFlathubState             *tmp_flathub;
+  BzFlatpakInstance          *flatpak;
   BzGnomeShellSearchProvider *gs_search;
-
-  BzFlatpakInstance *flatpak;
-  BzFlathubState    *flathub;
-  BzFlathubState    *tmp_flathub;
-
-  BzYamlParser      *curated_parser;
-  BzContentProvider *curated_provider;
-
-  GHashTable *installed_set;
-  GListStore *groups;
-  GHashTable *ids_to_groups;
-  GListStore *installed_apps;
-
-  BzApplicationMapFactory *entry_factory;
-  GtkCustomFilter         *appid_filter;
-  BzApplicationMapFactory *application_factory;
-
-  GtkCustomFilter    *group_filter;
-  GtkFilterListModel *group_filter_model;
-
-  BzStateInfo *state;
+  BzMainConfig               *config;
+  BzNewlineParser            *txt_blocklist_parser;
+  BzSearchEngine             *search_engine;
+  BzStateInfo                *state;
+  BzTransactionManager       *transactions;
+  BzYamlParser               *blocklist_parser;
+  BzYamlParser               *curated_parser;
+  DexChannel                 *flatpak_notifs;
+  DexFuture                  *notif_watch;
+  DexFuture                  *sync;
+  GHashTable                 *eol_runtimes;
+  GHashTable                 *ids_to_groups;
+  GHashTable                 *installed_set;
+  GHashTable                 *sys_name_to_addons;
+  GHashTable                 *usr_name_to_addons;
+  GListStore                 *groups;
+  GListStore                 *installed_apps;
+  GNetworkMonitor            *network;
+  GPtrArray                  *blocklist_regexes;
+  GPtrArray                  *txt_blocked_id_sets;
+  GSettings                  *settings;
+  GTimer                     *init_timer;
+  GWeakRef                    main_window;
+  GtkCustomFilter            *appid_filter;
+  GtkCustomFilter            *group_filter;
+  GtkFilterListModel         *group_filter_model;
+  GtkMapListModel            *blocklists_to_files;
+  GtkMapListModel            *curated_configs_to_files;
+  GtkMapListModel            *txt_blocklists_to_files;
+  GtkStringList              *blocklists;
+  GtkStringList              *curated_configs;
+  GtkStringList              *txt_blocklists;
+  gboolean                    running;
+  guint                       periodic_timeout_source;
+  int                         n_notifications_incoming;
 };
 
 G_DEFINE_FINAL_TYPE (BzApplication, bz_application, ADW_TYPE_APPLICATION)
@@ -199,6 +185,14 @@ fiber_dup_flathub_cache_file (char   **path_out,
 
 static gboolean
 periodic_timeout_cb (BzApplication *self);
+
+static gboolean
+scheduled_timeout_cb (GWeakRef *wr);
+
+static void
+network_status_changed (BzApplication   *self,
+                        GParamSpec      *pspec,
+                        GNetworkMonitor *network);
 
 static void
 show_hide_app_setting_changed (BzApplication *self,
@@ -291,46 +285,47 @@ bz_application_dispose (GObject *object)
 {
   BzApplication *self = BZ_APPLICATION (object);
 
-  dex_clear (&self->periodic_sync);
+  dex_clear (&self->sync);
   dex_clear (&self->notif_watch);
   dex_clear (&self->flatpak_notifs);
-  g_clear_handle_id (&self->periodic_timeout, g_source_remove);
-  g_clear_object (&self->blocklist_parser);
-  g_clear_object (&self->txt_blocklist_parser);
-  g_clear_object (&self->curated_parser);
-  g_clear_object (&self->settings);
-  g_clear_object (&self->blocklists);
-  g_clear_object (&self->txt_blocklists);
-  g_clear_object (&self->curated_configs);
-  g_clear_object (&self->transactions);
-  g_clear_object (&self->curated_provider);
-  g_clear_object (&self->blocklists_provider);
-  g_clear_object (&self->txt_blocklists_provider);
-  g_clear_object (&self->curated_configs_to_files);
-  g_clear_object (&self->blocklists_to_files);
-  g_clear_object (&self->txt_blocklists_to_files);
-  g_clear_object (&self->search_engine);
-  g_clear_object (&self->gs_search);
-  g_clear_object (&self->flatpak);
-  g_clear_object (&self->entry_factory);
+  g_clear_handle_id (&self->periodic_timeout_source, g_source_remove);
   g_clear_object (&self->appid_filter);
-  g_clear_object (&self->group_filter_model);
-  g_clear_object (&self->group_filter);
   g_clear_object (&self->application_factory);
-  g_clear_object (&self->flathub);
-  g_clear_object (&self->tmp_flathub);
+  g_clear_object (&self->blocklist_parser);
+  g_clear_object (&self->blocklists);
+  g_clear_object (&self->blocklists_provider);
+  g_clear_object (&self->blocklists_to_files);
   g_clear_object (&self->cache);
+  g_clear_object (&self->curated_configs);
+  g_clear_object (&self->curated_configs_to_files);
+  g_clear_object (&self->curated_parser);
+  g_clear_object (&self->curated_provider);
+  g_clear_object (&self->entry_factory);
+  g_clear_object (&self->flathub);
+  g_clear_object (&self->flatpak);
+  g_clear_object (&self->group_filter);
+  g_clear_object (&self->group_filter_model);
   g_clear_object (&self->groups);
+  g_clear_object (&self->gs_search);
   g_clear_object (&self->installed_apps);
+  g_clear_object (&self->network);
+  g_clear_object (&self->search_engine);
+  g_clear_object (&self->settings);
   g_clear_object (&self->state);
+  g_clear_object (&self->tmp_flathub);
+  g_clear_object (&self->transactions);
+  g_clear_object (&self->txt_blocklist_parser);
+  g_clear_object (&self->txt_blocklists);
+  g_clear_object (&self->txt_blocklists_provider);
+  g_clear_object (&self->txt_blocklists_to_files);
+  g_clear_pointer (&self->blocklist_regexes, g_ptr_array_unref);
+  g_clear_pointer (&self->eol_runtimes, g_hash_table_unref);
+  g_clear_pointer (&self->ids_to_groups, g_hash_table_unref);
   g_clear_pointer (&self->init_timer, g_timer_destroy);
   g_clear_pointer (&self->installed_set, g_hash_table_unref);
-  g_clear_pointer (&self->ids_to_groups, g_hash_table_unref);
-  g_clear_pointer (&self->eol_runtimes, g_hash_table_unref);
   g_clear_pointer (&self->sys_name_to_addons, g_hash_table_unref);
-  g_clear_pointer (&self->usr_name_to_addons, g_hash_table_unref);
-  g_clear_pointer (&self->blocklist_regexes, g_ptr_array_unref);
   g_clear_pointer (&self->txt_blocked_id_sets, g_ptr_array_unref);
+  g_clear_pointer (&self->usr_name_to_addons, g_hash_table_unref);
   g_weak_ref_clear (&self->main_window);
 
   G_OBJECT_CLASS (bz_application_parent_class)->dispose (object);
@@ -620,12 +615,12 @@ bz_application_sync_remotes_action (GSimpleAction *action,
 
   g_assert (BZ_IS_APPLICATION (self));
 
-  if (self->periodic_sync != NULL &&
-      dex_future_is_pending (self->periodic_sync))
+  if (self->sync != NULL &&
+      dex_future_is_pending (self->sync))
     return;
 
-  dex_clear (&self->periodic_sync);
-  self->periodic_sync = make_sync_future (self);
+  dex_clear (&self->sync);
+  self->sync = make_sync_future (self);
 }
 
 static void
@@ -1063,6 +1058,9 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
   window = gtk_application_get_active_window (GTK_APPLICATION (self));
   if (window != NULL)
     clock = gtk_widget_get_frame_clock (GTK_WIDGET (window));
+
+  /* `reread_timeout` defines how long we are allowed to spend adding to
+   `build-futures` on which we will await later */
   if (clock != NULL)
     {
       gint64 refresh_interval  = 0;
@@ -1086,8 +1084,6 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
 
   build_futures = g_ptr_array_new_with_free_func (dex_unref);
   read_future   = dex_future_new_for_object (notif);
-  /* this value defines how long we are allowed to spend adding to
-     `build-futures` to await later */
 
   timer = g_timer_new ();
   while (dex_future_is_resolved (read_future))
@@ -1118,7 +1114,7 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
             int n_incoming = 0;
 
             n_incoming = bz_backend_notification_get_n_incoming (notif);
-            self->n_incoming += n_incoming;
+            self->n_notifications_incoming += n_incoming;
 
             update_labels = TRUE;
           }
@@ -1134,7 +1130,7 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
             if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
               update_filter = TRUE;
 
-            self->n_incoming--;
+            self->n_notifications_incoming--;
             update_labels = TRUE;
           }
           break;
@@ -1361,11 +1357,11 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
 
   if (update_labels)
     {
-      if (self->n_incoming > 0)
+      if (self->n_notifications_incoming > 0)
         {
           g_autofree char *label = NULL;
 
-          label = g_strdup_printf (_ ("Receiving %d entries..."), self->n_incoming);
+          label = g_strdup_printf (_ ("Receiving %d entries..."), self->n_notifications_incoming);
           bz_state_info_set_background_task_label (self->state, label);
         }
       else
@@ -1473,9 +1469,9 @@ init_finally (DexFuture *future,
           (DexFutureCallback) init_sync_finally,
           bz_track_weak (self),
           bz_weak_release);
-      self->periodic_sync = g_steal_pointer (&sync_future);
+      self->sync = g_steal_pointer (&sync_future);
 
-      self->periodic_timeout = g_timeout_add_seconds (
+      self->periodic_timeout_source = g_timeout_add_seconds (
           /* Check every hour */
           60 * 60, (GSourceFunc) periodic_timeout_cb, self);
     }
@@ -1829,17 +1825,81 @@ fiber_dup_flathub_cache_file (char   **path_out,
 static gboolean
 periodic_timeout_cb (BzApplication *self)
 {
-  if (self->periodic_sync != NULL &&
-      dex_future_is_pending (self->periodic_sync))
+  gboolean have_connection    = FALSE;
+  gboolean metered_connection = FALSE;
+
+  if (self->sync != NULL &&
+      dex_future_is_pending (self->sync))
     /* If for some reason the last update check is still happening, let it
        finish */
     goto done;
 
-  dex_clear (&self->periodic_sync);
-  self->periodic_sync = make_sync_future (self);
+  dex_clear (&self->sync);
+
+  have_connection    = bz_state_info_get_have_connection (self->state);
+  metered_connection = bz_state_info_get_metered_connection (self->state);
+  if (have_connection && !metered_connection)
+    /* Do not do periodic sync on metered connections. The user will have to
+       manually refresh instead. */
+    self->sync = make_sync_future (self);
 
 done:
   return G_SOURCE_CONTINUE;
+}
+
+static gboolean
+scheduled_timeout_cb (GWeakRef *wr)
+{
+  g_autoptr (BzApplication) self = NULL;
+  gboolean have_connection       = FALSE;
+
+  /* Use weak ref here since the source tag of this callback won't be tracked by
+     the main application obj */
+  self = g_weak_ref_get (wr);
+  if (self == NULL)
+    goto done;
+
+  dex_clear (&self->sync);
+  have_connection = bz_state_info_get_have_connection (self->state);
+  if (have_connection)
+    self->sync = make_sync_future (self);
+
+done:
+  return G_SOURCE_REMOVE;
+}
+
+static void
+network_status_changed (BzApplication   *self,
+                        GParamSpec      *pspec,
+                        GNetworkMonitor *network)
+{
+  gboolean             was_connected   = FALSE;
+  gboolean             was_metered     = FALSE;
+  GNetworkConnectivity connectivity    = 0;
+  gboolean             have_connection = FALSE;
+  gboolean             is_metered      = FALSE;
+
+  was_connected = bz_state_info_get_have_connection (self->state);
+  was_metered   = bz_state_info_get_metered_connection (self->state);
+
+  connectivity    = g_network_monitor_get_connectivity (network);
+  have_connection = connectivity == G_NETWORK_CONNECTIVITY_FULL;
+  is_metered      = g_network_monitor_get_network_metered (network);
+
+  if (!bz_state_info_get_busy (self->state) &&
+      ((!was_connected &&
+        have_connection &&
+        !is_metered) ||
+       (was_metered &&
+        !is_metered)))
+    /* Wait a bit to prevent flakiness */
+    g_timeout_add_full (
+        G_PRIORITY_DEFAULT,
+        500, (GSourceFunc) scheduled_timeout_cb,
+        bz_track_weak (self), bz_weak_release);
+
+  bz_state_info_set_have_connection (self->state, have_connection);
+  bz_state_info_set_metered_connection (self->state, is_metered);
 }
 
 static void
@@ -2185,7 +2245,8 @@ init_service_struct (BzApplication *self,
   g_autoptr (GFile) config_file   = NULL;
   g_autoptr (GBytes) config_bytes = NULL;
 #endif
-  GtkCustomFilter *filter = NULL;
+  GtkCustomFilter *filter  = NULL;
+  GNetworkMonitor *network = NULL;
 
   g_type_ensure (BZ_TYPE_MAIN_CONFIG);
 #ifdef HARDCODED_MAIN_CONFIG
@@ -2215,8 +2276,6 @@ init_service_struct (BzApplication *self,
 #endif
 
   self->init_timer = g_timer_new ();
-
-  (void) bz_download_worker_get_default ();
 
   if (self->config != NULL &&
       bz_main_config_get_yaml_blocklist_paths (self->config) != NULL)
@@ -2303,8 +2362,26 @@ init_service_struct (BzApplication *self,
       "/io/github/kolunmi/Bazaar/curated-config-schema.xml");
 
   self->cache = bz_entry_cache_manager_new ();
+
   self->state = bz_state_info_new ();
   bz_state_info_set_busy (self->state, TRUE);
+
+  network = g_network_monitor_get_default ();
+  if (network != NULL)
+    {
+      GNetworkConnectivity connectivity = 0;
+      gboolean             metered      = FALSE;
+
+      connectivity = g_network_monitor_get_connectivity (network);
+      bz_state_info_set_have_connection (self->state, connectivity == G_NETWORK_CONNECTIVITY_FULL);
+
+      metered = g_network_monitor_get_network_metered (network);
+      bz_state_info_set_metered_connection (self->state, metered);
+
+      g_signal_connect_swapped (network, "notify", G_CALLBACK (network_status_changed), self);
+    }
+  else
+    g_warning ("Unable to detect networking device! Continuing anyway...");
 
   app_id = g_application_get_application_id (G_APPLICATION (self));
   g_assert (app_id != NULL);

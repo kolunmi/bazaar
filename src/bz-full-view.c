@@ -294,15 +294,26 @@ static char *
 format_recent_downloads (gpointer object,
                          int      value)
 {
+  double result;
+  int    digits;
+
   if (value <= 0)
     return g_strdup (_ ("---"));
 
   if (value >= 1000000)
-    /* Translators: M is the suffix for millions */
-    return g_strdup_printf (_ ("%.2fM"), value / 1000000.0);
+    {
+      result = value / 1000000.0;
+      digits = (int) log10 (result) + 1;
+      /* Translators: M is the suffix for millions */
+      return g_strdup_printf (_ ("%.*fM"), 3 - digits, result);
+    }
   else if (value >= 1000)
-    /* Translators: K is the suffix for thousands*/
-    return g_strdup_printf (_ ("%.2fK"), value / 1000.0);
+    {
+      result = value / 1000.0;
+      digits = (int) log10 (result) + 1;
+      /* Translators: K is the suffix for thousands*/
+      return g_strdup_printf (_ ("%.*fK"), 3 - digits, result);
+    }
   else
     return g_strdup_printf ("%'d", value);
 }
@@ -319,10 +330,21 @@ format_size (gpointer object, guint64 value)
 {
   g_autofree char *size_str = g_format_size (value);
   char            *space    = g_strrstr (size_str, "\xC2\xA0");
+  char            *decimal  = NULL;
+  int              digits   = 0;
 
   if (space != NULL)
     {
       *space = '\0';
+      for (char *p = size_str; *p != '\0' && *p != '.'; p++)
+        if (g_ascii_isdigit (*p))
+          digits++;
+      if (digits >= 3)
+        {
+          decimal = g_strrstr (size_str, ".");
+          if (decimal != NULL)
+            *decimal = '\0';
+        }
       return format_with_small_suffix (size_str, space + 2);
     }
   return g_strdup (size_str);
@@ -409,28 +431,61 @@ get_age_rating_style (gpointer         object,
 }
 
 static char *
-format_license_tooltip (gpointer    object,
-                        const char *license)
+format_license_tooltip (gpointer object,
+                        BzEntry *entry)
 {
-  g_autofree char *name = NULL;
+  const char      *license;
+  gboolean         is_floss = FALSE;
+  g_autofree char *name     = NULL;
+
+  if (entry == NULL)
+    return g_strdup (_ ("Unknown"));
+
+  g_object_get (entry, "is-floss", &is_floss, "project-license", &license, NULL);
 
   if (license == NULL || *license == '\0')
     return g_strdup (_ ("Unknown"));
+
+  if (is_floss && bz_spdx_is_valid (license))
+    {
+      name = bz_spdx_get_name (license);
+      return g_strdup_printf (_ ("Free software licensed under %s"),
+                              (name != NULL && *name != '\0') ? name : license);
+    }
+
+  if (is_floss)
+    return g_strdup (_ ("Free software"));
 
   if (g_strcmp0 (license, "LicenseRef-proprietary") == 0)
     return g_strdup (_ ("Proprietary Software"));
 
   name = bz_spdx_get_name (license);
-
-  return g_strdup_printf (_ ("Free software licensed under %s"),
+  return g_strdup_printf (_ ("Special License: %s"),
                           (name != NULL && *name != '\0') ? name : license);
 }
 
 static char *
 get_license_label (gpointer object,
-                   gboolean is_floss)
+                   BzEntry *entry)
 {
-  return g_strdup (is_floss ? _ ("Free") : _ ("Proprietary"));
+  const char *license;
+  gboolean    is_floss = FALSE;
+
+  if (entry == NULL)
+    return g_strdup (_ ("Unknown"));
+
+  g_object_get (entry, "is-floss", &is_floss, "project-license", &license, NULL);
+
+  if (is_floss)
+    return g_strdup (_ ("Free"));
+
+  if (g_strcmp0 (license, "LicenseRef-proprietary") == 0)
+    return g_strdup (_ ("Proprietary"));
+
+  if (license == NULL || *license == '\0')
+    return g_strdup (_ ("Unknown"));
+
+  return g_strdup (_ ("Special License"));
 }
 
 static char *
@@ -743,8 +798,6 @@ dl_stats_cb (BzFullView *self,
   ui_entry = bz_result_get_object (self->ui_entry);
 
   dialog = bz_stats_dialog_new (NULL, NULL, 0);
-  adw_dialog_set_content_width (dialog, 2000);
-  adw_dialog_set_content_height (dialog, 1500);
 
   g_object_bind_property (ui_entry, "download-stats", dialog, "model", G_BINDING_SYNC_CREATE);
   g_object_bind_property (ui_entry, "download-stats-per-country", dialog, "country-model", G_BINDING_SYNC_CREATE);
@@ -760,14 +813,25 @@ screenshot_clicked_cb (BzFullView            *self,
                        BzScreenshotsCarousel *carousel)
 {
   GListModel        *screenshots = NULL;
+  GListModel        *captions    = NULL;
   AdwNavigationPage *page        = NULL;
   GtkWidget         *nav_view    = NULL;
+  BzEntry           *entry       = NULL;
 
   screenshots = bz_screenshots_carousel_get_model (carousel);
   if (screenshots == NULL)
     return;
 
-  page = bz_screenshot_page_new (screenshots, index);
+  if (self->ui_entry != NULL)
+    {
+      entry = bz_result_get_object (self->ui_entry);
+      if (entry != NULL)
+        g_object_get (entry, "screenshot-captions", &captions, NULL);
+    }
+
+  page = bz_screenshot_page_new (screenshots, captions, index);
+
+  g_clear_object (&captions);
 
   nav_view = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
   if (nav_view != NULL)

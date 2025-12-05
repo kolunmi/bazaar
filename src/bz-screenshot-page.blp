@@ -4,108 +4,72 @@ using Adw 1;
 template $BzScreenshotPage: Adw.NavigationPage {
   title: _("Screenshots");
 
-  child: Adw.ToastOverlay toast_overlay {
-    child: Adw.ToolbarView {
-      top-bar-style: flat;
-      extend-content-to-top-edge: true;
+  child: Adw.BreakpointBin {
+    width-request: 360;
+    height-request: 450;
 
-      styles [
-        "view-dark",
-      ]
+    Adw.Breakpoint {
+      condition ("max-width: 700px")
 
-      [top]
-      Adw.HeaderBar {
+      setters {
+        mobile_caption_box.margin-bottom: 70;
+      }
+    }
+
+    child: Adw.ToastOverlay toast_overlay {
+      child: Adw.ToolbarView {
+        top-bar-style: flat;
+        extend-content-to-top-edge: true;
+
         styles [
-          "flat",
-          "header-osd",
+          "view-dark",
         ]
 
-        show-title: false;
-        show-end-title-buttons: false;
-        show-start-title-buttons: false;
-      }
+        [top]
+        Adw.HeaderBar header_bar {
+          styles [
+            "flat",
+            "header-osd",
+          ]
 
-      content: Overlay {
-        [overlay]
-        Box {
-          orientation: horizontal;
-          halign: start;
-          valign: end;
-          margin-bottom: 12;
-          margin-start: 12;
-          spacing: 6;
-
-          Box navigation_controls {
-            orientation: horizontal;
-            spacing: 6;
-            visible: bind $has_multiple_screenshots(template.screenshots) as <bool>;
-
-            styles [
-              "osd-box",
-            ]
-
-            Button previous_button {
-              icon-name: "go-previous-symbolic";
-              tooltip-text: _("Previous Screenshot");
-              clicked => $previous_clicked() swapped;
-
-              styles [
-                "flat",
-              ]
-            }
-
-            Button next_button {
-              icon-name: "go-next-symbolic";
-              tooltip-text: _("Next Screenshot");
-              clicked => $next_clicked() swapped;
-
-              styles [
-                "flat",
-              ]
-            }
-          }
-
-          Box {
-            styles [
-              "osd-box",
-            ]
-
-            Button copy_button {
-              icon-name: "edit-copy-symbolic";
-              tooltip-text: _("Copy Image");
-              clicked => $copy_clicked() swapped;
-
-              styles [
-                "flat",
-              ]
-            }
-          }
-
+          show-end-title-buttons: false;
+          show-start-title-buttons: false;
+          show-title: false;
         }
 
-        [overlay]
-        Box {
-          orientation: horizontal;
-          halign: end;
-          valign: end;
-          margin-bottom: 12;
-          margin-end: 12;
-
-          Box zoom_controls {
+        content: Overlay {
+          [overlay]
+          Box {
             orientation: horizontal;
+            halign: start;
+            valign: end;
+            margin-bottom: 12;
+            margin-start: 12;
+            spacing: 6;
 
-            styles [
-              "osd-box",
-            ]
+            Box navigation_controls {
+              orientation: horizontal;
+              spacing: 6;
+              visible: bind $has_multiple_screenshots(template.screenshots) as <bool>;
 
-            Revealer {
-              reveal-child: bind template.is-zoomed as <bool>;
-              transition-type: slide_right;
+              styles [
+                "osd-box",
+              ]
 
-              Button reset_zoom_button {
-                icon-name: "zoom-original-symbolic";
-                tooltip-text: _("Reset View");
-                clicked => $reset_zoom_clicked() swapped;
+              Button previous_button {
+                icon-name: "go-previous-symbolic";
+                tooltip-text: _("Previous Screenshot");
+                clicked => $previous_clicked() swapped;
+
+                styles [
+                  "flat",
+                ]
+              }
+
+              Button next_button {
+                icon-name: "go-next-symbolic";
+                tooltip-text: _("Next Screenshot");
+                clicked => $next_clicked() swapped;
 
                 styles [
                   "flat",
@@ -113,35 +77,112 @@ template $BzScreenshotPage: Adw.NavigationPage {
               }
             }
 
-            Button zoom_out_button {
-              icon-name: "zoom-minus-symbolic";
-              tooltip-text: _("Zoom Out");
-              clicked => $zoom_out_clicked() swapped;
-
+            Box {
               styles [
-                "flat",
+                "osd-box",
               ]
-            }
 
-            Button zoom_in_button {
-              icon-name: "zoom-plus-symbolic";
-              tooltip-text: _("Zoom In");
-              clicked => $zoom_in_clicked() swapped;
+              Button copy_button {
+                icon-name: "edit-copy-symbolic";
+                tooltip-text: _("Copy Image");
+                clicked => $copy_clicked() swapped;
 
-              styles [
-                "flat",
-              ]
+                styles [
+                  "flat",
+                ]
+              }
             }
           }
-        }
 
-        child: Adw.Carousel carousel {
-          can-focus: false;
-          interactive: bind $invert_boolean(template.is-zoomed) as <bool>;
-          allow-scroll-wheel: bind $invert_boolean(template.is-zoomed) as <bool>;
-          allow-mouse-drag: bind $invert_boolean(template.is-zoomed) as <bool>;
-          allow-long-swipes: false;
-          notify::position => $on_carousel_position_changed();
+          [overlay]
+          Revealer {
+            halign: center;
+            valign: end;
+            reveal-child: bind $is_valid_string(template.current-caption) as <bool>;
+            transition-type: crossfade;
+            can-target: false;
+
+            child: Box mobile_caption_box {
+              margin-bottom: 20;
+              styles [
+                "osd-box",
+              ]
+
+              Label {
+                halign: center;
+                hexpand: true;
+                label: bind template.current-caption;
+                justify: center;
+                max-width-chars: 30;
+                wrap: true;
+                wrap-mode: word_char;
+                styles [
+                  "heading"
+                ]
+              }
+            };
+          }
+
+          [overlay]
+          Box {
+            orientation: horizontal;
+            halign: end;
+            valign: end;
+            margin-bottom: 12;
+            margin-end: 12;
+
+            Box zoom_controls {
+              orientation: horizontal;
+
+              styles [
+                "osd-box",
+              ]
+
+              Revealer {
+                reveal-child: bind template.is-zoomed as <bool>;
+                transition-type: slide_right;
+
+                Button reset_zoom_button {
+                  icon-name: "zoom-original-symbolic";
+                  tooltip-text: _("Reset View");
+                  clicked => $reset_zoom_clicked() swapped;
+
+                  styles [
+                    "flat",
+                  ]
+                }
+              }
+
+              Button zoom_out_button {
+                icon-name: "zoom-minus-symbolic";
+                tooltip-text: _("Zoom Out");
+                clicked => $zoom_out_clicked() swapped;
+
+                styles [
+                  "flat",
+                ]
+              }
+
+              Button zoom_in_button {
+                icon-name: "zoom-plus-symbolic";
+                tooltip-text: _("Zoom In");
+                clicked => $zoom_in_clicked() swapped;
+
+                styles [
+                  "flat",
+                ]
+              }
+            }
+          }
+
+          child: Adw.Carousel carousel {
+            can-focus: false;
+            interactive: bind $invert_boolean(template.is-zoomed) as <bool>;
+            allow-scroll-wheel: bind $invert_boolean(template.is-zoomed) as <bool>;
+            allow-mouse-drag: bind $invert_boolean(template.is-zoomed) as <bool>;
+            allow-long-swipes: false;
+            notify::position => $on_carousel_position_changed();
+          };
         };
       };
     };

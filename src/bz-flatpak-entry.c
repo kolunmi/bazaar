@@ -384,6 +384,7 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
   g_autoptr (GdkPaintable) icon_paintable              = NULL;
   g_autoptr (GIcon) mini_icon                          = NULL;
   g_autoptr (GListStore) screenshot_paintables         = NULL;
+  g_autoptr (GListStore) screenshot_captions           = NULL;
   g_autoptr (GListStore) share_urls                    = NULL;
   g_autofree char *donation_url                        = NULL;
   g_autofree char *forge_url                           = NULL;
@@ -524,14 +525,17 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
       if (screenshots != NULL)
         {
           screenshot_paintables = g_list_store_new (BZ_TYPE_ASYNC_TEXTURE);
+          screenshot_captions   = g_list_store_new (GTK_TYPE_STRING_OBJECT);
 
           for (guint i = 0; i < screenshots->len; i++)
             {
               AsScreenshot *screenshot = NULL;
               GPtrArray    *images     = NULL;
+              const gchar  *caption    = NULL;
 
               screenshot = g_ptr_array_index (screenshots, i);
               images     = as_screenshot_get_images_all (screenshot);
+              caption    = as_screenshot_get_caption (screenshot);
 
               for (guint j = 0; j < images->len; j++)
                 {
@@ -543,10 +547,11 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
 
                   if (url != NULL)
                     {
-                      g_autoptr (GFile) screenshot_file  = NULL;
-                      g_autofree char *cache_basename    = NULL;
-                      g_autoptr (GFile) cache_file       = NULL;
-                      g_autoptr (BzAsyncTexture) texture = NULL;
+                      g_autoptr (GFile) screenshot_file       = NULL;
+                      g_autofree char *cache_basename         = NULL;
+                      g_autoptr (GFile) cache_file            = NULL;
+                      g_autoptr (BzAsyncTexture) texture      = NULL;
+                      g_autoptr (GtkStringObject) caption_obj = NULL;
 
                       screenshot_file = g_file_new_for_uri (url);
                       cache_basename  = g_strdup_printf ("screenshot_%d.png", i);
@@ -555,6 +560,10 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
 
                       texture = bz_async_texture_new_lazy (screenshot_file, cache_file);
                       g_list_store_append (screenshot_paintables, texture);
+
+                      caption_obj = gtk_string_object_new (caption ? caption : "");
+                      g_list_store_append (screenshot_captions, caption_obj);
+
                       break;
                     }
                 }
@@ -1022,6 +1031,7 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
       "icon-paintable", icon_paintable,
       "mini-icon", mini_icon,
       "screenshot-paintables", screenshot_paintables,
+      "screenshot-captions", screenshot_captions,
       "share-urls", share_urls,
       "donation-url", donation_url,
       "forge-url", forge_url,

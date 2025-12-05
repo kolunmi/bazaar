@@ -323,83 +323,99 @@ template $BzWindow: Adw.ApplicationWindow {
                   };
 
                   [top]
-                  Adw.HeaderBar top_header_bar {
-                    [start]
-                    Button {
-                      has-tooltip: true;
-                      tooltip-text: _("Sync");
-                      icon-name: "view-refresh-symbolic";
-                      visible: bind $invert_boolean(template.state as <$BzStateInfo>.online as <bool>) as <bool>;
-                      sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.syncing as <bool>) as <bool>;
-                      clicked => $sync_cb(template);
-                    }
+                  Box {
+                    orientation: vertical;
 
-                    [start]
-                    Button update_button {
-                      styles [
-                        "suggested-action",
-                      ]
+                    Adw.HeaderBar top_header_bar {
 
-                      has-tooltip: true;
-                      tooltip-text: _("Update");
-                      icon-name: "software-update-available-symbolic";
-                      visible: bind $invert_boolean($is_null(template.state as <$BzStateInfo>.available-updates) as <bool>) as <bool>;
-                      clicked => $update_cb(template);
-                    }
-
-                    [start]
-                    Box {
-                      orientation: horizontal;
-                      spacing: 10;
-                      margin-start: 4;
-                      visible: bind $invert_boolean($is_null(template.state as <$BzStateInfo>.background-task-label) as <bool>) as <bool>;
-
-                      Adw.Spinner {}
-                    }
-
-                    [title]
-                    Adw.ViewSwitcher {
-                      stack: main_view_stack;
-                      policy: wide;
-                      sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.busy) as <bool>;
-                    }
-
-                    [end]
-                    Revealer {
-                      transition-type: slide_right;
-                      reveal-child: bind $invert_boolean(split_view.show-sidebar as <bool>) as <bool>;
-
-                      child: ToggleButton toggle_transactions {
+                      [start]
+                      Button update_button {
                         styles [
-                          "flat",
+                          "suggested-action",
                         ]
 
                         has-tooltip: true;
-                        tooltip-text: _("Toggle transaction sidebar");
-                        active: bind split_view.show-sidebar bidirectional;
+                        tooltip-text: _("Update");
+                        icon-name: "software-update-available-symbolic";
+                        visible: bind $invert_boolean($is_null(template.state as <$BzStateInfo>.available-updates) as <bool>) as <bool>;
+                        clicked => $update_cb(template);
+                      }
 
-                        child: $BzGlobalProgress download_bar {
-                          expand-size: 125;
-                          active: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
-                          pending: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.pending;
-                          fraction: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.current-progress;
-                          settings: bind template.state as <$BzStateInfo>.settings;
+                      [start]
+                      Box {
+                        orientation: horizontal;
+                        spacing: 10;
+                        margin-start: 4;
+                        visible: bind $invert_boolean($is_null(template.state as <$BzStateInfo>.background-task-label) as <bool>) as <bool>;
 
-                          child: Image {
-                            halign: end;
-                            icon-name: "folder-download-symbolic";
+                        Adw.Spinner {}
+
+                        Label {
+                          label: bind template.state as <$BzStateInfo>.background-task-label;
+                          ellipsize: end;
+                        }
+                      }
+
+                      [title]
+                      Adw.ViewSwitcher {
+                        stack: main_view_stack;
+                        policy: wide;
+                        sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.busy) as <bool>;
+                      }
+
+                      [end]
+                      Revealer {
+                        transition-type: slide_right;
+                        reveal-child: bind $invert_boolean(split_view.show-sidebar as <bool>) as <bool>;
+
+                        child: ToggleButton toggle_transactions {
+                          styles [
+                            "flat",
+                          ]
+
+                          has-tooltip: true;
+                          tooltip-text: _("Toggle transaction sidebar");
+                          active: bind split_view.show-sidebar bidirectional;
+
+                          child: $BzGlobalProgress download_bar {
+                            expand-size: 125;
+                            active: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
+                            pending: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.pending;
+                            fraction: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.current-progress;
+                            settings: bind template.state as <$BzStateInfo>.settings;
+
+                            child: Image {
+                              halign: end;
+                              icon-name: "folder-download-symbolic";
+                            };
                           };
                         };
-                      };
-                    }
+                      }
 
-                    [end]
-                    MenuButton {
-                      primary: true;
-                      icon-name: "open-menu-symbolic";
-                      has-tooltip: true;
-                      tooltip-text: _("Main Menu");
-                      menu-model: primary_menu;
+                      [end]
+                      MenuButton {
+                        primary: true;
+                        icon-name: "open-menu-symbolic";
+                        has-tooltip: true;
+                        tooltip-text: _("Main Menu");
+                        menu-model: primary_menu;
+                      }
+                    }
+                    Adw.Banner {
+                      sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.syncing as <bool>) as <bool>;
+                      revealed: bind template.state as <$BzStateInfo>.metered_connection as <bool>;
+                      title: _("Network connection is metered — automatic store data sync is paused");
+                      button-label: _("Sync Manually");
+                      button-clicked => $sync_cb(template);
+                    }
+                    Adw.Banner {
+                      sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.syncing as <bool>) as <bool>;
+                      revealed: bind $logical_and($invert_boolean(template.state as <$BzStateInfo>.metered_connection as <bool>) as <bool>,
+                                                  $logical_and(template.state as <$BzStateInfo>.have_connection as <bool>,
+                                                  $invert_boolean(template.state as <$BzStateInfo>.online as <bool>) as <bool>) as <bool>) as <bool>;
+                      title: _("You have a network connection but are viewing a cached version of Flathub");
+                      button-label: _("Sync Manually");
+                      button-clicked => $sync_cb(template);
                     }
                   }
 
