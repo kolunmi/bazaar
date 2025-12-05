@@ -1365,7 +1365,7 @@ msgstr ""
 "Este aplicativo é desenvolvido em aberto por uma comunidade internacional e "
 "é distribuído sob a licença %s.\n"
 "\n"
-"Você pode participar e ajudar a o tornar ainda melhor."
+"Você pode participar e ajudar a tornar-lo ainda melhor."
 
 #: src/bz-license-dialog.c:156
 msgid ""
