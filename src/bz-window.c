@@ -219,6 +219,16 @@ logical_or (gpointer object,
   return value1 || value2;
 }
 
+static char *
+list_length (gpointer    object,
+             GListModel *model)
+{
+  if (model == NULL)
+    return g_strdup (0);
+
+  return g_strdup_printf ("%u", g_list_model_get_n_items (model));
+}
+
 static void
 browser_group_selected_cb (BzWindow     *self,
                            BzEntryGroup *group,
@@ -435,6 +445,23 @@ update_cb (BzWindow  *self,
   bz_window_push_update_dialog (self);
 }
 
+static char *
+update_amount_tooltip (gpointer    object,
+                       GListModel *model)
+{
+  guint count;
+
+  if (model == NULL)
+    count = 0;
+  else
+    count = g_list_model_get_n_items (model);
+
+  return g_strdup_printf (ngettext ("%d Update Available",
+                                    "%d Updates Available",
+                                    count),
+                          count);
+}
+
 static void
 transactions_clear_cb (BzWindow  *self,
                        GtkButton *button)
@@ -548,6 +575,7 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, logical_and);
   gtk_widget_class_bind_template_callback (widget_class, logical_or);
+  gtk_widget_class_bind_template_callback (widget_class, list_length);
   gtk_widget_class_bind_template_callback (widget_class, browser_group_selected_cb);
   gtk_widget_class_bind_template_callback (widget_class, search_widget_select_cb);
   gtk_widget_class_bind_template_callback (widget_class, full_view_install_cb);
@@ -563,6 +591,7 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, stop_transactions_cb);
   gtk_widget_class_bind_template_callback (widget_class, sync_cb);
   gtk_widget_class_bind_template_callback (widget_class, update_cb);
+  gtk_widget_class_bind_template_callback (widget_class, update_amount_tooltip);
   gtk_widget_class_bind_template_callback (widget_class, transactions_clear_cb);
   gtk_widget_class_bind_template_callback (widget_class, visible_page_changed_cb);
   gtk_widget_class_bind_template_callback (widget_class, main_view_stack_changed_cb);

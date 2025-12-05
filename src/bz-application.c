@@ -1366,7 +1366,7 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
         }
       else
         {
-          bz_state_info_set_background_task_label (self->state, _ ("Checking for updates..."));
+          bz_state_info_set_background_task_label (self->state, _ ("Checking for updates"));
           fiber_check_for_updates (self);
           bz_state_info_set_background_task_label (self->state, NULL);
         }
