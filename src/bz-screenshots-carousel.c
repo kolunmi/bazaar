@@ -33,7 +33,7 @@
 
 #define LIGHT_CLASS          "screenshot-carousel-light"
 #define DARK_CLASS           "screenshot-carousel-dark"
-#define LIGHT_MIX_PERCENTAGE 25
+#define LIGHT_MIX_PERCENTAGE 15
 #define DARK_MIX_PERCENTAGE  4
 
 struct _BzScreenshotsCarousel
