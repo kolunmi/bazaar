@@ -19,6 +19,12 @@
  */
 
 #include "bz-io.h"
+#include "bz-env.h"
+
+static DexFuture *
+reap_file_fiber (GFile *file);
+static DexFuture *
+reap_path_fiber (char *path);
 
 DexScheduler *
 bz_get_io_scheduler (void)
@@ -107,6 +113,28 @@ bz_reap_path (const char *path)
   bz_reap_file (file);
 }
 
+DexFuture *
+bz_reap_file_dex (GFile *file)
+{
+  dex_return_error_if_fail (G_IS_FILE (file));
+  return dex_scheduler_spawn (
+      bz_get_io_scheduler (),
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) reap_file_fiber,
+      g_object_ref (file), g_object_unref);
+}
+
+DexFuture *
+bz_reap_path_dex (const char *path)
+{
+  dex_return_error_if_fail (path != NULL);
+  return dex_scheduler_spawn (
+      bz_get_io_scheduler (),
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) reap_path_fiber,
+      g_strdup (path), g_free);
+}
+
 char *
 bz_dup_cache_dir (const char *submodule)
 {
@@ -122,4 +150,18 @@ bz_dup_cache_dir (const char *submodule)
     id = "Bazaar";
 
   return g_build_filename (user_cache, id, submodule, NULL);
+}
+
+static DexFuture *
+reap_file_fiber (GFile *file)
+{
+  bz_reap_file (file);
+  return dex_future_new_true ();
+}
+
+static DexFuture *
+reap_path_fiber (char *path)
+{
+  bz_reap_path (path);
+  return dex_future_new_true ();
 }
