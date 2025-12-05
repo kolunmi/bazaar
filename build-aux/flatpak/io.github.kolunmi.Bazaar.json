@@ -4,6 +4,9 @@
   "runtime-version": "49",
   "sdk": "org.gnome.Sdk",
   "command": "bazaar",
+  "sdk-extensions": [
+    "org.freedesktop.Sdk.Extension.llvm20"
+  ],
   "tags": [ "nightly" ],
   "desktop-file-name-suffix": " (Nightly)",
   "finish-args": [
@@ -34,6 +37,10 @@
     {
       "name": "bazaar",
       "buildsystem": "meson",
+      "build-options": {
+        "append-path": "/usr/lib/sdk/llvm20/bin",
+        "prepend-ld-library-path": "/usr/lib/sdk/llvm20/lib"
+      },
       "config-opts": [
         "-Dsandboxed_libflatpak=true",
         "-Dhardcoded_main_config_path=/run/host/etc/bazaar/bazaar.yaml",
