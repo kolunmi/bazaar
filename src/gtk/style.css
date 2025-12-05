@@ -3,6 +3,19 @@
     color: black;
 }
 
+.updates-amount {
+	background-color: white;
+	color: var(--accent-bg-color);
+	font-size: 0.60em;
+	border-radius: 9999px;
+	font-weight: 900;
+}
+
+.updates-amount-border {
+  background-color: var(--accent-bg-color);
+  	border-radius: 9999px;
+}
+
 .bz-monospace {
     font-family: monospace;
 }
