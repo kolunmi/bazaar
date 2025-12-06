@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-01 01:08+0100\n"
-"PO-Revision-Date: 2025-12-02 01:28+0100\n"
+"POT-Creation-Date: 2025-12-03 21:31+0100\n"
+"PO-Revision-Date: 2025-12-07 00:09+0100\n"
 "Last-Translator: Mimolet <theMimolet@proton.me>\n"
 "Language-Team: French\n"
 "Language: fr\n"
@@ -150,12 +150,12 @@ msgid "Manage Add-ons"
 msgstr "Gérer les extensions"
 
 #: src/bz-addons-dialog.c:90 src/bz-full-view.blp:505
-#: src/bz-transaction-view.blp:212 src/bz-window.c:1125
+#: src/bz-transaction-view.blp:212 src/bz-window.c:1123
 msgid "Remove"
 msgstr "Supprimer"
 
 #: src/bz-addons-dialog.c:95 src/bz-full-view.blp:277 src/bz-full-view.blp:492
-#: src/bz-transaction-view.blp:186 src/bz-window.c:1102
+#: src/bz-transaction-view.blp:186 src/bz-window.c:1100
 msgid "Install"
 msgstr "Installer"
 
@@ -399,15 +399,16 @@ msgstr "N'inclus pas de références à la drogue"
 #: src/bz-age-rating-dialog.c:309
 msgid ""
 "Does not include swearing, profanity, and other kinds of strong language"
-msgstr "N'inclus pas de jurons, de vulgarité et autres gros mots"
+msgstr ""
+"N'inclus pas de jurons, de blasphèmes ou d'autres types de langage grossier."
 
 #: src/bz-age-rating-dialog.c:311
 msgid "Does not include ads or monetary transactions"
-msgstr "N'inclus pas de publicité ou de transactions monétaires"
+msgstr "N'inclus pas de publicité, ni de transactions monétaires"
 
 #: src/bz-age-rating-dialog.c:313
 msgid "Does not include sex or nudity"
-msgstr "N'inclus pas de sexe ou de nudité"
+msgstr "N'inclus pas de sexe, ni de nudité"
 
 #: src/bz-age-rating-dialog.c:315
 msgid "Does not include uncontrolled chat functionality"
@@ -461,37 +462,37 @@ msgstr "%s a une limite d'âge inconnue"
 #: src/bz-age-rating-dialog.c:854
 #, c-format
 msgid "%s is suitable for everyone"
-msgstr "%s est approprié pour tout le monde"
+msgstr "%s convient à tout le monde"
 
 #: src/bz-age-rating-dialog.c:857
 #, c-format
 msgid "%s is suitable for toddlers"
-msgstr "%s est approprié pour les tout-petits"
+msgstr "%s convient aux tout-petits"
 
 #: src/bz-age-rating-dialog.c:860
 #, c-format
 msgid "%s is suitable for young children"
-msgstr "%s est approprié pour les jeunes enfants"
+msgstr "%s convient aux jeunes enfants"
 
 #: src/bz-age-rating-dialog.c:863
 #, c-format
 msgid "%s is suitable for children"
-msgstr "%s est approprié pour les enfants"
+msgstr "%s convient aux enfants"
 
 #: src/bz-age-rating-dialog.c:866
 #, c-format
 msgid "%s is suitable for teenagers"
-msgstr "%s est approprié pour les adolescents"
+msgstr "%s convient aux adolescents"
 
 #: src/bz-age-rating-dialog.c:869
 #, c-format
 msgid "%s is suitable for adults"
-msgstr "%s est approprié pour les adultes"
+msgstr "%s convient aux adultes"
 
 #: src/bz-age-rating-dialog.c:872
 #, c-format
 msgid "%s is suitable for %s"
-msgstr "%s est approprié pour %s"
+msgstr "%s convient à %s"
 
 #: src/bz-app-size-dialog.blp:43
 msgid "--- MB"
@@ -645,8 +646,8 @@ msgid ""
 "The ownership of the %s app ID has not been verified and it may be a "
 "community package."
 msgstr ""
-"La propriété de l'ID de %s n'a pas été vérifiée et ce pourrait être un "
-"paquet géré par la communauté."
+"La propriété de l'ID %s n'a pas été vérifiée et ce pourrait être un paquet "
+"géré par la communauté."
 
 #: src/bz-developer-badge.c:155
 #, c-format
@@ -654,24 +655,23 @@ msgid ""
 "The ownership of the %s app ID has been manually verified by the Flathub "
 "team."
 msgstr ""
-"La propriété de l'ID de %s a été vérifiée manuellement par l'équipe de "
-"Flathub."
+"La propriété de l'ID %s a été vérifiée manuellement par l'équipe de Flathub."
 
 #: src/bz-developer-badge.c:161
 #, c-format
 msgid ""
 "The ownership of the %s app ID has been verified by <b>%s</b> on <b>%s</b>."
-msgstr "La propriété de l'ID de %s a été vérifiée par <b>%s</b> sur <b>%s</b>."
+msgstr "La propriété de l'ID %s a été vérifiée par <b>%s</b> sur <b>%s</b>."
 
 #: src/bz-developer-badge.c:168
 #, c-format
 msgid "The ownership of the %s app ID has been verified using %s."
-msgstr "La propriété de l'ID de %s a été vérifiée en utilisant %s."
+msgstr "La propriété de l'ID %s a été vérifiée en utilisant %s."
 
 #: src/bz-developer-badge.c:172
 #, c-format
 msgid "The ownership of the %s app ID has been verified."
-msgstr "La propriété de l'ID de %s a été vérifiée."
+msgstr "La propriété de l'ID %s a été vérifiée."
 
 #: src/bz-entry-inspector.blp:5
 msgid "Entry Inspector"
@@ -910,7 +910,7 @@ msgstr "Nous + jeux = ♥"
 
 #: src/bz-flathub-page.blp:392
 msgid "Games and apps to run your favorite titles"
-msgstr "Des jeux et des apps pour faire tourner vos titres préférés"
+msgstr "Jeux et apps pour exécuter vos titres préférés"
 
 #: src/bz-flathub-page.blp:426
 msgid "More Games"
@@ -966,11 +966,11 @@ msgctxt "Project URL Type"
 msgid "Contribute"
 msgstr "Contribuer à l'app"
 
-#: src/bz-full-view.blp:21 src/bz-window.blp:126 src/bz-window.blp:380
+#: src/bz-full-view.blp:21 src/bz-window.blp:126 src/bz-window.blp:377
 msgid "Toggle transaction sidebar"
-msgstr "Afficher/Masquer la barre latérale des opérations"
+msgstr "Afficher/Masquer la barre des tâches"
 
-#: src/bz-full-view.blp:44 src/bz-window.blp:403
+#: src/bz-full-view.blp:44 src/bz-window.blp:400
 msgid "Main Menu"
 msgstr "Menu principal"
 
@@ -1317,7 +1317,7 @@ msgstr ""
 "Plusieurs versions de cette application sont installées. Avec quelle version "
 "voulez-vous continuer ? "
 
-#: src/bz-installed-page.c:402 src/bz-window.c:1101 src/bz-window.c:1124
+#: src/bz-installed-page.c:402 src/bz-window.c:1099 src/bz-window.c:1122
 msgid "Cancel"
 msgstr "Annuler"
 
@@ -1382,7 +1382,7 @@ msgstr "Logiciels libres seulement"
 
 #: src/bz-preferences-dialog.blp:27
 msgid "Hide proprietary applications when browsing and searching"
-msgstr "Masquer les applications propriétaires dans les résultats de recherche"
+msgstr "Masque les applications propriétaires dans les résultats de recherche"
 
 #: src/bz-preferences-dialog.blp:31
 msgid "Flathub Results Only"
@@ -1621,7 +1621,7 @@ msgstr "Environnement d'exécution"
 msgid "Install Size"
 msgstr "Taille après installation"
 
-#: src/bz-transaction-view.blp:199 src/bz-window.blp:346
+#: src/bz-transaction-view.blp:199 src/bz-window.blp:338
 msgid "Update"
 msgstr "Mettre à jour"
 
@@ -1687,11 +1687,11 @@ msgstr "Effacer l'historique"
 
 #: src/bz-window.blp:187
 msgid "No Tasks Yet"
-msgstr "Aucune tâche"
+msgstr "Aucune tâche en cours"
 
 #: src/bz-window.blp:258
 msgid "Refreshing Store Content"
-msgstr "Actualiser le contenu"
+msgstr "Actualisation..."
 
 #: src/bz-window.blp:273
 msgid "Curated"
@@ -1701,31 +1701,44 @@ msgstr "Recommandées"
 msgid "Flathub"
 msgstr ""
 
-#: src/bz-window.blp:330
-msgid "Sync"
-msgstr "Synchroniser"
+#: src/bz-window.blp:407
+msgid "Network connection is metered — automatic store data sync is paused"
+msgstr ""
+"La connexion réseau a un quota — la synchronisation automatique des données "
+"est suspendue."
 
-#: src/bz-window.blp:466
+#: src/bz-window.blp:408 src/bz-window.blp:417
+msgid "Sync Manually"
+msgstr "Synchroniser manuellement"
+
+#: src/bz-window.blp:416
+msgid ""
+"You have a network connection but are viewing a cached version of Flathub"
+msgstr ""
+"Vous disposez d'une connexion réseau, mais vous consultez une version mise "
+"en cache de Flathub."
+
+#: src/bz-window.blp:480
 msgid "_Donate to Bazaar ❤️"
 msgstr "_Faire un don à Bazaar ❤️"
 
-#: src/bz-window.blp:473
+#: src/bz-window.blp:487
 msgid "_Preferences"
 msgstr "_Préférences"
 
-#: src/bz-window.blp:478
+#: src/bz-window.blp:492
 msgid "_Keyboard Shortcuts"
 msgstr "_Raccourcis clavier"
 
-#: src/bz-window.blp:483
+#: src/bz-window.blp:497
 msgid "_About Bazaar"
 msgstr "_À propos de Bazaar"
 
-#: src/bz-window.blp:490
+#: src/bz-window.blp:504
 msgid "_Quit Bazaar"
 msgstr "_Quitter Bazaar"
 
-#: src/bz-window.blp:499
+#: src/bz-window.blp:513
 msgid "Open Bazaar Inspector"
 msgstr "Ouvrir l'inspecteur de Bazaar"
 
@@ -1745,25 +1758,25 @@ msgstr ""
 "\n"
 "en ligne de commande."
 
-#: src/bz-window.c:966
+#: src/bz-window.c:964
 msgid "Can't do that right now!"
 msgstr "Impossible de faire ceci pour le moment !"
 
-#: src/bz-window.c:1095
+#: src/bz-window.c:1093
 #, c-format
 msgid "Install %s?"
 msgstr "Installer %s ?"
 
-#: src/bz-window.c:1098
+#: src/bz-window.c:1096
 msgid "May install additional shared components"
 msgstr "Peut installer des composants partagés supplémentaires"
 
-#: src/bz-window.c:1117
+#: src/bz-window.c:1115
 #, c-format
 msgid "Remove %s?"
 msgstr "Supprimer %s ?"
 
-#: src/bz-window.c:1121
+#: src/bz-window.c:1119
 #, c-format
 msgid ""
 "It will not be possible to use %s after it is uninstalled.\n"
@@ -1774,11 +1787,11 @@ msgstr ""
 "\n"
 "Les paramètres et les données utilisateurs seront gardées."
 
-#: src/bz-window.c:1286
+#: src/bz-window.c:1284
 msgid "Resume Current Tasks"
 msgstr "Reprendre les tâches actuelles"
 
-#: src/bz-window.c:1292
+#: src/bz-window.c:1290
 msgid "Pause Current Tasks"
 msgstr "Mettre en pause les tâches actuelles"
 
