@@ -279,7 +279,7 @@ window.narrow .app-developer {
 }
 
 .context-tile {
-	border-radius: 10px;
+  box-shadow: none;
 	padding: 4px;
 }
 
@@ -735,6 +735,7 @@ window.narrow .category-tile {
 
 .disable-adw-flow-box-styling {
     background-color: transparent;
+    box-shadow: none;
 }
 
 curated-list-view,
