@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-01 07:08+0700\n"
-"PO-Revision-Date: 2025-12-01 15:36+0700\n"
+"POT-Creation-Date: 2025-12-06 23:16+0700\n"
+"PO-Revision-Date: 2025-12-07 00:23+0700\n"
 "Last-Translator: Jill Fiore <contact@lumaeris.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -143,17 +143,17 @@ msgstr "Страница поиска"
 msgid "Category page"
 msgstr "Страница категорий"
 
-#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:668
+#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:670
 msgid "Manage Add-ons"
 msgstr "Управление дополнениями"
 
 #: src/bz-addons-dialog.c:90 src/bz-full-view.blp:505
-#: src/bz-transaction-view.blp:212 src/bz-window.c:1125
+#: src/bz-transaction-view.blp:212 src/bz-window.c:1227
 msgid "Remove"
 msgstr "Удалить"
 
 #: src/bz-addons-dialog.c:95 src/bz-full-view.blp:277 src/bz-full-view.blp:492
-#: src/bz-transaction-view.blp:186 src/bz-window.c:1102
+#: src/bz-transaction-view.blp:186 src/bz-window.c:1204
 msgid "Install"
 msgstr "Установить"
 
@@ -598,8 +598,8 @@ msgid "Receiving %d entries..."
 msgstr "Получение %d элементов"
 
 #: src/bz-application.c:1369
-msgid "Checking for updates..."
-msgstr "Проверка на наличие обновлений..."
+msgid "Checking for updates"
+msgstr "Проверка на наличие обновлений"
 
 #: src/bz-curated-view.blp:11 src/bz-flathub-page.blp:19
 #: src/bz-full-view.blp:54 src/bz-installed-page.blp:15 src/bz-window.blp:183
@@ -913,61 +913,61 @@ msgstr "Игры и приложения для запуска ваших люб
 msgid "More Games"
 msgstr "Больше игр"
 
-#: src/bz-flatpak-entry.c:574
+#: src/bz-flatpak-entry.c:583
 msgctxt "Project URL Type"
 msgid "Flathub Page"
 msgstr "Страница Flathub"
 
-#: src/bz-flatpak-entry.c:595
+#: src/bz-flatpak-entry.c:604
 msgctxt "Project URL Type"
 msgid "Project Website"
 msgstr "Веб-сайт проекта"
 
-#: src/bz-flatpak-entry.c:599
+#: src/bz-flatpak-entry.c:608
 msgctxt "Project URL Type"
 msgid "Issue Tracker"
 msgstr "Отслеживание ошибок"
 
-#: src/bz-flatpak-entry.c:603
+#: src/bz-flatpak-entry.c:612
 msgctxt "Project URL Type"
 msgid "FAQ"
 msgstr "Часто задаваемые вопросы"
 
-#: src/bz-flatpak-entry.c:607
+#: src/bz-flatpak-entry.c:616
 msgctxt "Project URL Type"
 msgid "Help"
 msgstr "Помощь"
 
-#: src/bz-flatpak-entry.c:611
+#: src/bz-flatpak-entry.c:620
 msgctxt "Project URL Type"
 msgid "Donate"
 msgstr "Пожертвовать"
 
-#: src/bz-flatpak-entry.c:617
+#: src/bz-flatpak-entry.c:626
 msgctxt "Project URL Type"
 msgid "Translate"
 msgstr "Перевод"
 
-#: src/bz-flatpak-entry.c:621
+#: src/bz-flatpak-entry.c:630
 msgctxt "Project URL Type"
 msgid "Contact"
 msgstr "Связаться"
 
-#: src/bz-flatpak-entry.c:625
+#: src/bz-flatpak-entry.c:634
 msgctxt "Project URL Type"
 msgid "Source Code"
 msgstr "Исходный код"
 
-#: src/bz-flatpak-entry.c:631
+#: src/bz-flatpak-entry.c:640
 msgctxt "Project URL Type"
 msgid "Contribute"
 msgstr "Сделать вклад"
 
-#: src/bz-full-view.blp:21 src/bz-window.blp:126 src/bz-window.blp:380
+#: src/bz-full-view.blp:21 src/bz-window.blp:126 src/bz-window.blp:403
 msgid "Toggle transaction sidebar"
 msgstr "Переключить боковую панель транзакций"
 
-#: src/bz-full-view.blp:44 src/bz-window.blp:403
+#: src/bz-full-view.blp:44 src/bz-window.blp:426
 msgid "Main Menu"
 msgstr "Главное меню"
 
@@ -1028,7 +1028,7 @@ msgstr ""
 "обновления или исправления ошибок безопасности. Оно может стать небезопасным "
 "для использования."
 
-#: src/bz-full-view.blp:735
+#: src/bz-full-view.blp:737
 msgid "Tags:"
 msgstr "Метки:"
 
@@ -1075,48 +1075,62 @@ msgstr "Предназначено для всех возрастов"
 msgid "Suitable for ages %d and up"
 msgstr "Предназначено для лиц старше %d лет"
 
-#: src/bz-full-view.c:440
+#: src/bz-full-view.c:442 src/bz-full-view.c:447 src/bz-full-view.c:475
+#: src/bz-full-view.c:486
 msgid "Unknown"
 msgstr "Неизвестно"
 
-#: src/bz-full-view.c:443
-msgid "Proprietary Software"
-msgstr "Проприетарное программное обеспечение"
-
-#: src/bz-full-view.c:447
+#: src/bz-full-view.c:452
 #, c-format
 msgid "Free software licensed under %s"
 msgstr "Свободное программное обеспечение, лицензированное под %s"
 
-#: src/bz-full-view.c:455
+#: src/bz-full-view.c:457
+msgid "Free software"
+msgstr "Cвободное программное обеспечение"
+
+#: src/bz-full-view.c:460
+msgid "Proprietary Software"
+msgstr "Проприетарное программное обеспечение"
+
+#: src/bz-full-view.c:463
+#, c-format
+msgid "Special License: %s"
+msgstr "Специальная лицензия: %s"
+
+#: src/bz-full-view.c:480
 msgid "Free"
 msgstr "Свободное"
 
-#: src/bz-full-view.c:455 src/bz-license-dialog.blp:135
+#: src/bz-full-view.c:483 src/bz-license-dialog.c:118
 msgid "Proprietary"
 msgstr "Проприетарное"
 
-#: src/bz-full-view.c:475
+#: src/bz-full-view.c:488 src/bz-license-dialog.c:120
+msgid "Special License"
+msgstr "Специальная лицензия"
+
+#: src/bz-full-view.c:508
 msgid "Adaptive"
 msgstr "Адаптивное"
 
-#: src/bz-full-view.c:475
+#: src/bz-full-view.c:508
 msgid "Desktop Only"
 msgstr "Только для ПК"
 
-#: src/bz-full-view.c:481
+#: src/bz-full-view.c:514
 msgid "Works on desktop, tablets, and phones"
 msgstr "Работает на настольных компьютерах, планшетах и телефонах"
 
-#: src/bz-full-view.c:482
+#: src/bz-full-view.c:515
 msgid "May not work on mobile devices"
 msgstr "Может не работать на мобильных устройствах"
 
-#: src/bz-full-view.c:493
+#: src/bz-full-view.c:526
 msgid "No URL"
 msgstr "Нет URL"
 
-#: src/bz-full-view.c:511
+#: src/bz-full-view.c:544
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -1124,7 +1138,7 @@ msgstr ""
 "Это приложение имеет лицензию FLOSS, что значит исходный код может быть "
 "проверен на безопасность."
 
-#: src/bz-full-view.c:512
+#: src/bz-full-view.c:545
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
@@ -1133,29 +1147,29 @@ msgstr ""
 "разрабатывается в тайне и не может быть проверен независимой третьей "
 "стороной."
 
-#: src/bz-full-view.c:519
+#: src/bz-full-view.c:552
 msgid "More Apps"
 msgstr "Больше приложений"
 
-#: src/bz-full-view.c:520
+#: src/bz-full-view.c:553
 #, c-format
 msgid "More Apps by %s"
 msgstr "Больше приложений от %s"
 
-#: src/bz-full-view.c:527
+#: src/bz-full-view.c:560
 msgid "Other Apps by this Developer"
 msgstr "Другие приложения от этого разработчика"
 
-#: src/bz-full-view.c:529 src/bz-full-view.c:629
+#: src/bz-full-view.c:562 src/bz-full-view.c:662
 #, c-format
 msgid "Other Apps by %s"
 msgstr "Другие приложения от %s"
 
-#: src/bz-full-view.c:631
+#: src/bz-full-view.c:664
 msgid "Other Apps"
 msgstr "Другие приложения"
 
-#: src/bz-full-view.c:633
+#: src/bz-full-view.c:666
 #, c-format
 msgid "%d Application"
 msgid_plural "%d Applications"
@@ -1163,11 +1177,11 @@ msgstr[0] "%d приложение"
 msgstr[1] "%d приложения"
 msgstr[2] "%d приложений"
 
-#: src/bz-full-view.c:972
+#: src/bz-full-view.c:1016
 msgid "Show Less"
 msgstr "Показать меньше"
 
-#: src/bz-full-view.c:972
+#: src/bz-full-view.c:1016
 msgid "Show More"
 msgstr "Показать больше"
 
@@ -1317,33 +1331,36 @@ msgstr ""
 "Вы установили несколько версий данного приложения. Какое вы хотите выбрать "
 "для продолжения?"
 
-#: src/bz-installed-page.c:402 src/bz-window.c:1101 src/bz-window.c:1124
+#: src/bz-installed-page.c:402 src/bz-window.c:1203 src/bz-window.c:1226
 msgid "Cancel"
 msgstr "Отмена"
 
-#: src/bz-license-dialog.blp:77
-msgid "Community Built"
-msgstr "Создано сообществом"
-
-#: src/bz-license-dialog.blp:176
+#: src/bz-license-dialog.blp:160
 msgid "Get Involved"
 msgstr "Внести вклад"
 
-#: src/bz-license-dialog.c:115
-msgid ""
-"This app is not developed in the open, so only its developers know how it "
-"works. It may be insecure in ways that are hard to detect, and it may change "
-"without oversight.\n"
-"\n"
-"You may not be able to contribute to this app."
-msgstr ""
-"Это приложение не разрабатывается открыто, поэтому только его разработчики "
-"знают как оно работает. Оно может быть небезопасным в некоторых местах, "
-"которые сложно опознать, и оно может измениться без предупреждения.\n"
-"\n"
-"Вы возможно не сможете внести свой вклад в это приложение."
+#: src/bz-license-dialog.c:107 src/bz-license-dialog.c:112
+msgid "Unknown License"
+msgstr "Неизвестная лицензия"
 
-#: src/bz-license-dialog.c:124
+#: src/bz-license-dialog.c:115
+msgid "Community Built"
+msgstr "Сделано сообществом"
+
+#: src/bz-license-dialog.c:148
+#, c-format
+msgid ""
+"This app is developed in the open by an international community, and "
+"released under the %s license.\n"
+"\n"
+"You can participate and help make it even better."
+msgstr ""
+"Это приложение открыто разрабатывается международным сообществом и "
+"выпускается под лицензией %s.\n"
+"\n"
+"Вы можете внести свой вклад и сделать это приложение ещё лучше."
+
+#: src/bz-license-dialog.c:156
 msgid ""
 "This app is developed in the open by an international community.\n"
 "\n"
@@ -1353,18 +1370,34 @@ msgstr ""
 "\n"
 "Вы можете внести свой вклад и сделать это приложение ещё лучше."
 
-#: src/bz-license-dialog.c:135
+#: src/bz-license-dialog.c:161
+msgid "The license of this app is not known"
+msgstr "Лицензия этого приложения неизвестна"
+
+#: src/bz-license-dialog.c:165
+msgid ""
+"This app is not developed in the open, so only its developers know how it "
+"works. It may be insecure in ways that are hard to detect, and it may change "
+"without oversight.\n"
+"\n"
+"You may or may not be able to contribute to this app."
+msgstr ""
+"Это приложение не разрабатывается открыто, поэтому только его разработчики "
+"знают как оно работает. Оно может быть небезопасным в некоторых местах, "
+"которые сложно опознать, и оно может измениться без предупреждения.\n"
+"\n"
+"Вы можете не иметь возможности внести вклад в это приложение."
+
+#: src/bz-license-dialog.c:174
 #, c-format
 msgid ""
-"This app is developed in the open by an international community, and "
-"released under the <a href=\"%s\">%s</a> license.\n"
+"This app is developed under the special license %s.\n"
 "\n"
-"You can participate and help make it even better."
+"You may or may not be able to contribute to this app."
 msgstr ""
-"Это приложение разрабатывается открыто международным сообществом и "
-"выпускается под лицензией <a href=\"%s\">%s</a>.\n"
+"Это приложение разрабатывается под специальной лицензией %s.\n"
 "\n"
-"Вы можете внести свой вклад и сделать это приложение ещё лучше."
+"Вы можете не иметь возможности внести вклад в это приложение."
 
 #: src/bz-preferences-dialog.blp:19
 msgid "Preferences"
@@ -1600,7 +1633,7 @@ msgstr "%d приложений"
 msgid "Search failed"
 msgstr "Ошибка поиска"
 
-#: src/bz-transaction-manager.c:1132
+#: src/bz-transaction-manager.c:1137
 #, c-format
 msgid "Finished in %.02f seconds"
 msgstr "Закончено за %.02f секунд"
@@ -1617,7 +1650,7 @@ msgstr "Среда выполнения"
 msgid "Install Size"
 msgstr "Размер установки"
 
-#: src/bz-transaction-view.blp:199 src/bz-window.blp:346
+#: src/bz-transaction-view.blp:199
 msgid "Update"
 msgstr "Обновить"
 
@@ -1695,35 +1728,59 @@ msgstr "Курируемое"
 msgid "Flathub"
 msgstr "Flathub"
 
-#: src/bz-window.blp:330
-msgid "Sync"
-msgstr "Синхронизировать"
+#: src/bz-window.blp:433
+msgid "Network connection is metered — automatic store data sync is paused"
+msgstr ""
+"Сетевое соединение ограничено — автоматическая синхронизация данных магазина "
+"приостановлена"
 
-#: src/bz-window.blp:466
+#: src/bz-window.blp:434 src/bz-window.blp:443
+msgid "Sync Manually"
+msgstr "Синхронизировать вручную"
+
+#: src/bz-window.blp:442
+msgid ""
+"You have a network connection but are viewing a cached version of Flathub"
+msgstr ""
+"Вы имеете сетевое подключение, но просматриваете кэшируемую версию Flathub"
+
+#: src/bz-window.blp:506
 msgid "_Donate to Bazaar ❤️"
 msgstr "_Поддержать Bazaar ❤️"
 
-#: src/bz-window.blp:473
+#: src/bz-window.blp:513
 msgid "_Preferences"
 msgstr "П_араметры"
 
-#: src/bz-window.blp:478
+#: src/bz-window.blp:518
 msgid "_Keyboard Shortcuts"
 msgstr "_Сочетание клавиш"
 
-#: src/bz-window.blp:483
+#: src/bz-window.blp:523
 msgid "_About Bazaar"
 msgstr "О _Bazaar"
 
-#: src/bz-window.blp:490
+#: src/bz-window.blp:530
 msgid "_Quit Bazaar"
 msgstr "_Закрыть Bazaar"
 
-#: src/bz-window.blp:499
+#: src/bz-window.blp:539
 msgid "Open Bazaar Inspector"
 msgstr "Открыть Bazaar Инспектор"
 
-#: src/bz-window.c:844
+#: src/bz-window.c:474
+#, c-format
+msgid "%d Update Available"
+msgid_plural "%d Updates Available"
+msgstr[0] "Доступно %d обновление"
+msgstr[1] "Доступно %d обновления"
+msgstr[2] "Доступно %d обновлений"
+
+#: src/bz-window.c:776
+msgid "Delete local data as well"
+msgstr "Также удалить локальные данные"
+
+#: src/bz-window.c:960
 msgid ""
 "The ability to inspect and install local .flatpak bundle files is coming "
 "soon! In the meantime, try running\n"
@@ -1739,25 +1796,25 @@ msgstr ""
 "\n"
 "в командной строке."
 
-#: src/bz-window.c:966
+#: src/bz-window.c:1078
 msgid "Can't do that right now!"
 msgstr "Нельзя сделать это прямо сейчас!"
 
-#: src/bz-window.c:1095
+#: src/bz-window.c:1197
 #, c-format
 msgid "Install %s?"
 msgstr "Установить %s?"
 
-#: src/bz-window.c:1098
+#: src/bz-window.c:1200
 msgid "May install additional shared components"
 msgstr "Может установить дополнительные общие компоненты"
 
-#: src/bz-window.c:1117
+#: src/bz-window.c:1219
 #, c-format
 msgid "Remove %s?"
 msgstr "Удалить %s?"
 
-#: src/bz-window.c:1121
+#: src/bz-window.c:1223
 #, c-format
 msgid ""
 "It will not be possible to use %s after it is uninstalled.\n"
@@ -1815,6 +1872,9 @@ msgstr "Открыть сочетания клавиш"
 msgctxt "shortcut window"
 msgid "Quit"
 msgstr "Закрыть"
+
+#~ msgid "Sync"
+#~ msgstr "Синхронизировать"
 
 #~ msgid "We ♥ Games"
 #~ msgstr "Мы ♥ Игры"
