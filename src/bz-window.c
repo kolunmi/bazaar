@@ -719,24 +719,24 @@ checking_for_updates_changed (BzWindow    *self,
 static DexFuture *
 transact_fiber (TransactData *data)
 {
-  g_autoptr (BzWindow) self               = NULL;
-  BzEntry      *entry                     = data->entry;
-  BzEntryGroup *group                     = data->group;
-  gboolean      remove                    = data->remove;
-  gboolean      auto_confirm              = data->auto_confirm;
-  GtkWidget    *source                    = data->source;
-  g_autoptr (GError) local_error          = NULL;
-  g_autoptr (GListModel) model            = NULL;
-  const char      *title                  = NULL;
-  const char      *id                     = NULL;
-  g_autofree char *id_dup                 = NULL;
-  AdwDialog       *alert                  = NULL;
-  gboolean         delete_user_data       = FALSE;
-  g_autoptr (GPtrArray) radios            = NULL;
-  g_autofree char *dialog_response        = NULL;
-  gboolean         should_install         = FALSE;
-  gboolean         should_remove          = FALSE;
-  g_autoptr (DexFuture) transact_future   = NULL;
+  g_autoptr (BzWindow) self             = NULL;
+  BzEntry      *entry                   = data->entry;
+  BzEntryGroup *group                   = data->group;
+  gboolean      remove                  = data->remove;
+  gboolean      auto_confirm            = data->auto_confirm;
+  GtkWidget    *source                  = data->source;
+  g_autoptr (GError) local_error        = NULL;
+  g_autoptr (GListModel) model          = NULL;
+  const char      *title                = NULL;
+  const char      *id                   = NULL;
+  g_autofree char *id_dup               = NULL;
+  AdwDialog       *alert                = NULL;
+  gboolean         delete_user_data     = FALSE;
+  g_autoptr (GPtrArray) radios          = NULL;
+  g_autofree char *dialog_response      = NULL;
+  gboolean         should_install       = FALSE;
+  gboolean         should_remove        = FALSE;
+  g_autoptr (DexFuture) transact_future = NULL;
 
   bz_weak_get_or_return_reject (self, data->self);
 
@@ -787,7 +787,7 @@ transact_fiber (TransactData *data)
       if (remove && radios->len >= 2)
         {
           GtkCheckButton *delete_radio = g_ptr_array_index (radios, radios->len - 1);
-          delete_user_data = gtk_check_button_get_active (delete_radio);
+          delete_user_data             = gtk_check_button_get_active (delete_radio);
         }
     }
 
@@ -825,13 +825,7 @@ transact_fiber (TransactData *data)
     return dex_future_new_for_error (g_steal_pointer (&local_error));
 
   if (delete_user_data)
-    {
-      g_autofree char *user_data_path = NULL;
-
-      /* TODO: should probably be backend-dependent */
-      user_data_path = g_build_filename (g_get_home_dir (), ".var", "app", id_dup, NULL);
-      dex_await (bz_reap_path_dex (user_data_path), NULL);
-    }
+    dex_await (bz_reap_user_data_dex (id_dup), NULL);
 
   return dex_future_new_true ();
 }
@@ -1134,12 +1128,12 @@ create_entry_radio_buttons (AdwAlertDialog *alert,
   GtkCheckButton *first_valid_radio = NULL;
   guint           n_entries         = 0;
   guint           n_valid_entries   = 0;
-  GtkWidget *data_listbox           = NULL;
-  GtkWidget *keep_data_row          = NULL;
-  GtkWidget *delete_data_row        = NULL;
-  GtkWidget *keep_radio             = NULL;
-  GtkWidget *delete_radio           = NULL;
-  GtkWidget *container              = NULL;
+  GtkWidget      *data_listbox      = NULL;
+  GtkWidget      *keep_data_row     = NULL;
+  GtkWidget      *delete_data_row   = NULL;
+  GtkWidget      *keep_radio        = NULL;
+  GtkWidget      *delete_radio      = NULL;
+  GtkWidget      *container         = NULL;
 
   listbox = gtk_list_box_new ();
   gtk_list_box_set_selection_mode (GTK_LIST_BOX (listbox), GTK_SELECTION_NONE);
@@ -1186,8 +1180,8 @@ create_entry_radio_buttons (AdwAlertDialog *alert,
       gtk_widget_add_css_class (data_listbox, "boxed-list");
 
       keep_data_row = adw_action_row_new ();
-      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (keep_data_row), _("Keep Data"));
-      adw_action_row_set_subtitle (ADW_ACTION_ROW (keep_data_row), _("Allow restoring settings and content"));
+      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (keep_data_row), _ ("Keep Data"));
+      adw_action_row_set_subtitle (ADW_ACTION_ROW (keep_data_row), _ ("Allow restoring settings and content"));
       keep_radio = gtk_check_button_new ();
       gtk_check_button_set_active (GTK_CHECK_BUTTON (keep_radio), TRUE);
       adw_action_row_add_prefix (ADW_ACTION_ROW (keep_data_row), keep_radio);
@@ -1195,8 +1189,8 @@ create_entry_radio_buttons (AdwAlertDialog *alert,
       gtk_list_box_append (GTK_LIST_BOX (data_listbox), keep_data_row);
 
       delete_data_row = adw_action_row_new ();
-      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (delete_data_row), _("Delete Data"));
-      adw_action_row_set_subtitle (ADW_ACTION_ROW (delete_data_row), _("Permanently remove app data to save space"));
+      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (delete_data_row), _ ("Delete Data"));
+      adw_action_row_set_subtitle (ADW_ACTION_ROW (delete_data_row), _ ("Permanently remove app data to save space"));
       delete_radio = gtk_check_button_new ();
       gtk_check_button_set_group (GTK_CHECK_BUTTON (delete_radio), GTK_CHECK_BUTTON (keep_radio));
       adw_action_row_add_prefix (ADW_ACTION_ROW (delete_data_row), delete_radio);

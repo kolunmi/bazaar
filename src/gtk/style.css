@@ -231,7 +231,7 @@ button.context-tile:active .lozenge {
     color: var(--accent-color);
 }
 
-.card.eol {
+.card.colored {
     background-color: alpha(var(--accent-bg-color),0.15);
     color: var(--accent-color);
 }

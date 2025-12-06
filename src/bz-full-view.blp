@@ -6,7 +6,6 @@ template $BzFullView: Adw.Bin {
   child: Adw.ToolbarView {
     [top]
     Adw.HeaderBar header_bar {
-
       [end]
       Revealer {
         transition-type: slide_right;
@@ -542,7 +541,7 @@ template $BzFullView: Adw.Bin {
 
                         styles [
                           "card",
-                          "eol",
+                          "colored",
                           "warning",
                         ]
 
@@ -605,11 +604,52 @@ template $BzFullView: Adw.Bin {
                         margin-start: 25;
                         margin-end: 25;
                         margin-bottom: 20;
-                        margin-top: 20;
+                        margin-top: 10;
                         spacing: 20;
+
+                        Revealer {
+                          transition-type: slide_down;
+                          reveal-child: bind $logical_and(template.entry-group as <$BzEntryGroup>.has-user-data, $is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
+
+                          child: Box {
+                            height-request: 50;
+                            margin-bottom: 10;
+                            spacing: 12;
+
+                            styles [
+                              "card",
+                              "colored",
+                              "accent",
+                            ]
+
+                            Label {
+                              halign: start;
+                              valign: center;
+                              hexpand: true;
+                              margin-start: 12;
+                              label: bind $format_leftover_label(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.title) as <string>;
+                              wrap: true;
+                              wrap-mode: word_char;
+                              justify: left;
+                            }
+
+                            Button {
+                              valign: center;
+                              margin-end: 8;
+                              clicked => $delete_user_data_cb(template);
+
+                              child: Adw.ButtonContent {
+                                icon-name: "user-trash-symbolic";
+                                label: _("Delete Data");
+                              };
+                            }
+                          };
+                        }
+
                         Box {
                           spacing: 10;
                           orientation: vertical;
+
                           Label {
                             styles [
                               "title-2",

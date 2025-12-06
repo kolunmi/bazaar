@@ -40,6 +40,15 @@ bz_reap_file_dex (GFile *file);
 DexFuture *
 bz_reap_path_dex (const char *path);
 
+DexFuture *
+bz_reap_user_data_dex (const char *app_id);
+
+DexFuture *
+bz_path_exists_dex (const char *path);
+
+DexFuture *
+bz_user_data_exists_dex (const char *app_id);
+
 char *
 bz_dup_cache_dir (const char *submodule);
 
