@@ -62,12 +62,13 @@ struct _BzEntryGroup
   int updatable_available;
   int removable_available;
 
-  gboolean   has_user_data;
+  gboolean has_user_data;
+
   DexFuture *user_data_exists_future;
+  DexFuture *reap_user_data_future;
 
   GWeakRef ui_entry;
-
-  GMutex mutex;
+  GMutex   mutex;
 };
 
 G_DEFINE_FINAL_TYPE (BzEntryGroup, bz_entry_group, G_TYPE_OBJECT)
@@ -133,6 +134,7 @@ bz_entry_group_dispose (GObject *object)
   BzEntryGroup *self = BZ_ENTRY_GROUP (object);
 
   dex_clear (&self->user_data_exists_future);
+  dex_clear (&self->reap_user_data_future);
   g_clear_object (&self->factory);
   g_clear_object (&self->unique_ids);
   g_clear_pointer (&self->id, g_free);
@@ -1158,11 +1160,9 @@ reap_user_data_then (DexFuture *future,
 {
   g_autoptr (BzEntryGroup) self = NULL;
 
-  self = g_weak_ref_get (wr);
-  if (self == NULL)
-    return dex_future_new_false ();
+  bz_weak_get_or_return_reject (self, wr);
+  dex_clear (&self->reap_user_data_future);
 
-  dex_clear (&self->user_data_exists_future);
   self->has_user_data = FALSE;
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_USER_DATA]);
 
@@ -1175,11 +1175,14 @@ bz_entry_group_reap_user_data (BzEntryGroup *self)
   g_return_if_fail (BZ_IS_ENTRY_GROUP (self));
   g_return_if_fail (self->id != NULL);
 
-  dex_future_disown (dex_future_then (
+  if (self->reap_user_data_future != NULL)
+    return;
+
+  self->reap_user_data_future = dex_future_then (
       bz_reap_user_data_dex (self->id),
       (DexFutureCallback) reap_user_data_then,
       bz_track_weak (self),
-      bz_weak_release));
+      bz_weak_release);
 }
 
 static DexFuture *
@@ -1187,14 +1190,11 @@ user_data_exists_then (DexFuture *future,
                        GWeakRef  *wr)
 {
   g_autoptr (BzEntryGroup) self = NULL;
-  gboolean exists               = FALSE;
 
-  self = g_weak_ref_get (wr);
-  if (self == NULL)
-    return dex_future_new_false ();
+  bz_weak_get_or_return_reject (self, wr);
+  dex_clear (&self->user_data_exists_future);
 
-  exists              = dex_await_boolean (future, NULL);
-  self->has_user_data = exists;
+  self->has_user_data = g_value_get_boolean (dex_future_get_value (future, NULL));
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_USER_DATA]);
 
   return dex_future_new_true ();
@@ -1203,13 +1203,22 @@ user_data_exists_then (DexFuture *future,
 static void
 check_user_data_exists (BzEntryGroup *self)
 {
-  if (self->user_data_exists_future == NULL && self->id != NULL)
+  g_autoptr (DexFuture) future = NULL;
+
+  if (self->user_data_exists_future != NULL ||
+      self->id == NULL)
+    return;
+
+  if (self->reap_user_data_future != NULL)
     {
-      self->user_data_exists_future = dex_ref (bz_user_data_exists_dex (self->id));
-      dex_future_disown (dex_future_then (
-          dex_ref (self->user_data_exists_future),
-          (DexFutureCallback) user_data_exists_then,
-          bz_track_weak (self),
-          bz_weak_release));
+      self->has_user_data = FALSE;
+      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_USER_DATA]);
     }
+
+  future = bz_user_data_exists_dex (self->id);
+  future = dex_future_then (
+      future,
+      (DexFutureCallback) user_data_exists_then,
+      bz_track_weak (self), bz_weak_release);
+  self->user_data_exists_future = g_steal_pointer (&future);
 }

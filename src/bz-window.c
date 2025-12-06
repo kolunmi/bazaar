@@ -825,7 +825,12 @@ transact_fiber (TransactData *data)
     return dex_future_new_for_error (g_steal_pointer (&local_error));
 
   if (delete_user_data)
-    dex_await (bz_reap_user_data_dex (id_dup), NULL);
+    {
+      if (group != NULL)
+        bz_entry_group_reap_user_data (group);
+      else
+        dex_future_disown (bz_reap_user_data_dex (id_dup));
+    }
 
   return dex_future_new_true ();
 }
