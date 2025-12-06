@@ -1213,6 +1213,7 @@ check_user_data_exists (BzEntryGroup *self)
     {
       self->has_user_data = FALSE;
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_USER_DATA]);
+      return;
     }
 
   future = bz_user_data_exists_dex (self->id);
