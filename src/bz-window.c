@@ -117,8 +117,7 @@ configure_remove_dialog (AdwAlertDialog *alert,
 static GPtrArray *
 create_entry_radio_buttons (AdwAlertDialog *alert,
                             GListModel     *model,
-                            gboolean        remove,
-                            GtkCheckButton *delete_user_data);
+                            gboolean        remove);
 
 static GtkWidget *
 create_entry_radio_button (BzEntry    *entry,
@@ -720,25 +719,24 @@ checking_for_updates_changed (BzWindow    *self,
 static DexFuture *
 transact_fiber (TransactData *data)
 {
-  g_autoptr (BzWindow) self               = NULL;
-  BzEntry      *entry                     = data->entry;
-  BzEntryGroup *group                     = data->group;
-  gboolean      remove                    = data->remove;
-  gboolean      auto_confirm              = data->auto_confirm;
-  GtkWidget    *source                    = data->source;
-  g_autoptr (GError) local_error          = NULL;
-  g_autoptr (GListModel) model            = NULL;
-  const char      *title                  = NULL;
-  const char      *id                     = NULL;
-  g_autofree char *id_dup                 = NULL;
-  AdwDialog       *alert                  = NULL;
-  gboolean         delete_user_data       = FALSE;
-  g_autoptr (GtkWidget) delete_data_check = NULL;
-  g_autoptr (GPtrArray) radios            = NULL;
-  g_autofree char *dialog_response        = NULL;
-  gboolean         should_install         = FALSE;
-  gboolean         should_remove          = FALSE;
-  g_autoptr (DexFuture) transact_future   = NULL;
+  g_autoptr (BzWindow) self             = NULL;
+  BzEntry      *entry                   = data->entry;
+  BzEntryGroup *group                   = data->group;
+  gboolean      remove                  = data->remove;
+  gboolean      auto_confirm            = data->auto_confirm;
+  GtkWidget    *source                  = data->source;
+  g_autoptr (GError) local_error        = NULL;
+  g_autoptr (GListModel) model          = NULL;
+  const char      *title                = NULL;
+  const char      *id                   = NULL;
+  g_autofree char *id_dup               = NULL;
+  AdwDialog       *alert                = NULL;
+  gboolean         delete_user_data     = FALSE;
+  g_autoptr (GPtrArray) radios          = NULL;
+  g_autofree char *dialog_response      = NULL;
+  gboolean         should_install       = FALSE;
+  gboolean         should_remove        = FALSE;
+  g_autoptr (DexFuture) transact_future = NULL;
 
   bz_weak_get_or_return_reject (self, data->self);
 
@@ -769,17 +767,9 @@ transact_fiber (TransactData *data)
   id    = NULL;
   title = NULL;
 
-  if (remove)
-    {
-      delete_data_check = gtk_check_button_new ();
-      gtk_check_button_set_label (GTK_CHECK_BUTTON (delete_data_check),
-                                  _ ("Delete local data as well"));
-      /* delete user data by default */
-      gtk_check_button_set_active (GTK_CHECK_BUTTON (delete_data_check), TRUE);
-    }
   radios = create_entry_radio_buttons (
       ADW_ALERT_DIALOG (alert),
-      model, remove, (GtkCheckButton *) delete_data_check);
+      model, remove);
 
   if (!remove && auto_confirm && radios->len <= 1)
     {
@@ -794,8 +784,11 @@ transact_fiber (TransactData *data)
           &local_error);
       if (dialog_response == NULL)
         return dex_future_new_for_error (g_steal_pointer (&local_error));
-      if (delete_data_check != NULL)
-        delete_user_data = gtk_check_button_get_active (GTK_CHECK_BUTTON (delete_data_check));
+      if (remove && radios->len >= 2)
+        {
+          GtkCheckButton *delete_radio = g_ptr_array_index (radios, radios->len - 1);
+          delete_user_data             = gtk_check_button_get_active (delete_radio);
+        }
     }
 
   should_install = g_strcmp0 (dialog_response, "install") == 0;
@@ -833,11 +826,10 @@ transact_fiber (TransactData *data)
 
   if (delete_user_data)
     {
-      g_autofree char *user_data_path = NULL;
-
-      /* TODO: should probably be backend-dependent */
-      user_data_path = g_build_filename (g_get_home_dir (), ".var", "app", id_dup, NULL);
-      dex_await (bz_reap_path_dex (user_data_path), NULL);
+      if (group != NULL)
+        bz_entry_group_reap_user_data (group);
+      else
+        dex_future_disown (bz_reap_user_data_dex (id_dup));
     }
 
   return dex_future_new_true ();
@@ -1134,13 +1126,19 @@ create_entry_radio_button (BzEntry    *entry,
 static GPtrArray *
 create_entry_radio_buttons (AdwAlertDialog *alert,
                             GListModel     *model,
-                            gboolean        remove,
-                            GtkCheckButton *delete_user_data)
+                            gboolean        remove)
 {
   GtkWidget *listbox                = NULL;
   g_autoptr (GPtrArray) radios      = NULL;
   GtkCheckButton *first_valid_radio = NULL;
   guint           n_entries         = 0;
+  guint           n_valid_entries   = 0;
+  GtkWidget      *data_listbox      = NULL;
+  GtkWidget      *keep_data_row     = NULL;
+  GtkWidget      *delete_data_row   = NULL;
+  GtkWidget      *keep_radio        = NULL;
+  GtkWidget      *delete_radio      = NULL;
+  GtkWidget      *container         = NULL;
 
   listbox = gtk_list_box_new ();
   gtk_list_box_set_selection_mode (GTK_LIST_BOX (listbox), GTK_SELECTION_NONE);
@@ -1167,6 +1165,7 @@ create_entry_radio_buttons (AdwAlertDialog *alert,
 
       row = create_entry_radio_button (entry_variant, &radio);
       g_ptr_array_add (radios, radio);
+      n_valid_entries++;
 
       if (first_valid_radio != NULL)
         gtk_check_button_set_group (GTK_CHECK_BUTTON (radio), first_valid_radio);
@@ -1179,10 +1178,48 @@ create_entry_radio_buttons (AdwAlertDialog *alert,
       gtk_list_box_append (GTK_LIST_BOX (listbox), row);
     }
 
-  if (delete_user_data != NULL)
-    gtk_list_box_append (GTK_LIST_BOX (listbox), g_object_ref_sink (GTK_WIDGET (delete_user_data)));
-  if (radios->len > 1 || delete_user_data != NULL)
-    adw_alert_dialog_set_extra_child (alert, listbox);
+  if (remove)
+    {
+      data_listbox = gtk_list_box_new ();
+      gtk_list_box_set_selection_mode (GTK_LIST_BOX (data_listbox), GTK_SELECTION_NONE);
+      gtk_widget_add_css_class (data_listbox, "boxed-list");
+
+      keep_data_row = adw_action_row_new ();
+      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (keep_data_row), _ ("Keep Data"));
+      adw_action_row_set_subtitle (ADW_ACTION_ROW (keep_data_row), _ ("Allow restoring settings and content"));
+      keep_radio = gtk_check_button_new ();
+      gtk_check_button_set_active (GTK_CHECK_BUTTON (keep_radio), TRUE);
+      adw_action_row_add_prefix (ADW_ACTION_ROW (keep_data_row), keep_radio);
+      adw_action_row_set_activatable_widget (ADW_ACTION_ROW (keep_data_row), keep_radio);
+      gtk_list_box_append (GTK_LIST_BOX (data_listbox), keep_data_row);
+
+      delete_data_row = adw_action_row_new ();
+      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (delete_data_row), _ ("Delete Data"));
+      adw_action_row_set_subtitle (ADW_ACTION_ROW (delete_data_row), _ ("Permanently remove app data to save space"));
+      delete_radio = gtk_check_button_new ();
+      gtk_check_button_set_group (GTK_CHECK_BUTTON (delete_radio), GTK_CHECK_BUTTON (keep_radio));
+      adw_action_row_add_prefix (ADW_ACTION_ROW (delete_data_row), delete_radio);
+      adw_action_row_set_activatable_widget (ADW_ACTION_ROW (delete_data_row), delete_radio);
+      gtk_list_box_append (GTK_LIST_BOX (data_listbox), delete_data_row);
+
+      g_ptr_array_add (radios, keep_radio);
+      g_ptr_array_add (radios, delete_radio);
+    }
+
+  container = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+
+  if (remove)
+    {
+      if (n_valid_entries > 1)
+        gtk_box_append (GTK_BOX (container), listbox);
+      gtk_box_append (GTK_BOX (container), data_listbox);
+    }
+  else if (n_valid_entries > 1)
+    {
+      gtk_box_append (GTK_BOX (container), listbox);
+    }
+
+  adw_alert_dialog_set_extra_child (alert, container);
 
   return g_steal_pointer (&radios);
 }
@@ -1220,7 +1257,7 @@ configure_remove_dialog (AdwAlertDialog *alert,
 
   adw_alert_dialog_set_heading (alert, heading);
   adw_alert_dialog_set_body (
-      alert, g_strdup_printf (_ ("It will not be possible to use %s after it is uninstalled.\n\nSettings and user data will be kept."), title));
+      alert, g_strdup_printf (_ ("It will not be possible to use %s after it is uninstalled."), title));
 
   adw_alert_dialog_add_responses (alert,
                                   "cancel", _ ("Cancel"),
