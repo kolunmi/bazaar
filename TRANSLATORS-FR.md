@@ -94,7 +94,7 @@ killall bazaar
 Et ensuite redémarrez Bazaar pour voir vos traductions !
 
 >Si vous n'avez pas votre système en français, vous pouvez utiliser la commande suivante pour lancer Bazaar en français:
->```sh
+```sh
 LANGUAGE=fr flatpak run io.github.kolunmi.Bazaar
 ```
 
