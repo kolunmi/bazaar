@@ -26,11 +26,13 @@
 #include "bz-curated-view.h"
 #include "bz-entry-group.h"
 #include "bz-entry-inspector.h"
+#include "bz-env.h"
 #include "bz-error.h"
 #include "bz-flathub-page.h"
 #include "bz-full-view.h"
 #include "bz-global-progress.h"
 #include "bz-installed-page.h"
+#include "bz-io.h"
 #include "bz-progress-bar.h"
 #include "bz-search-widget.h"
 #include "bz-transaction-manager.h"
@@ -47,8 +49,6 @@ struct _BzWindow
   GtkEventController *key_controller;
 
   gboolean breakpoint_applied;
-
-  DexFuture *transact_future;
 
   /* Template widgets */
   BzCometOverlay      *comet_overlay;
@@ -85,19 +85,19 @@ BZ_DEFINE_DATA (
     transact,
     Transact,
     {
-      BzWindow     *self;
+      GWeakRef     *self;
+      BzEntry      *entry;
       BzEntryGroup *group;
       gboolean      remove;
       gboolean      auto_confirm;
       GtkWidget    *source;
     },
+    BZ_RELEASE_DATA (self, bz_weak_release);
+    BZ_RELEASE_DATA (entry, g_object_unref);
     BZ_RELEASE_DATA (group, g_object_unref);
     BZ_RELEASE_DATA (source, g_object_unref))
-
-static void
-install_confirmation_response (AdwAlertDialog *alert,
-                               gchar          *response,
-                               BzWindow       *self);
+static DexFuture *
+transact_fiber (TransactData *data);
 
 static void
 update_dialog_response (BzUpdateDialog *dialog,
@@ -105,6 +105,26 @@ update_dialog_response (BzUpdateDialog *dialog,
                         BzWindow       *self);
 
 static void
+configure_install_dialog (AdwAlertDialog *alert,
+                          const char     *title,
+                          const char     *id);
+
+static void
+configure_remove_dialog (AdwAlertDialog *alert,
+                         const char     *title,
+                         const char     *id);
+
+static GPtrArray *
+create_entry_radio_buttons (AdwAlertDialog *alert,
+                            GListModel     *model,
+                            gboolean        remove,
+                            GtkCheckButton *delete_user_data);
+
+static GtkWidget *
+create_entry_radio_button (BzEntry    *entry,
+                           GtkWidget **out_radio);
+
+static DexFuture *
 transact (BzWindow  *self,
           BzEntry   *entry,
           gboolean   remove,
@@ -117,10 +137,6 @@ try_transact (BzWindow     *self,
               gboolean      remove,
               gboolean      auto_confirm,
               GtkWidget    *source);
-
-static DexFuture *
-ready_to_transact (DexFuture    *future,
-                   TransactData *data);
 
 static void
 update (BzWindow *self,
@@ -142,7 +158,6 @@ bz_window_dispose (GObject *object)
 {
   BzWindow *self = BZ_WINDOW (object);
 
-  dex_clear (&self->transact_future);
   g_clear_object (&self->state);
 
   G_OBJECT_CLASS (bz_window_parent_class)->dispose (object);
@@ -702,58 +717,130 @@ checking_for_updates_changed (BzWindow    *self,
     }
 }
 
-static void
-install_confirmation_response (AdwAlertDialog *alert,
-                               gchar          *response,
-                               BzWindow       *self)
+static DexFuture *
+transact_fiber (TransactData *data)
 {
-  gboolean should_install               = FALSE;
-  gboolean should_remove                = FALSE;
-  g_autoptr (GtkWidget) cb_source       = NULL;
-  g_autoptr (BzEntry) cb_entry          = NULL;
-  g_autoptr (BzEntryGroup) cb_group     = NULL;
-  g_autoptr (GListModel) cb_group_model = NULL;
+  g_autoptr (BzWindow) self               = NULL;
+  BzEntry      *entry                     = data->entry;
+  BzEntryGroup *group                     = data->group;
+  gboolean      remove                    = data->remove;
+  gboolean      auto_confirm              = data->auto_confirm;
+  GtkWidget    *source                    = data->source;
+  g_autoptr (GError) local_error          = NULL;
+  g_autoptr (GListModel) model            = NULL;
+  const char      *title                  = NULL;
+  const char      *id                     = NULL;
+  g_autofree char *id_dup                 = NULL;
+  AdwDialog       *alert                  = NULL;
+  gboolean         delete_user_data       = FALSE;
+  g_autoptr (GtkWidget) delete_data_check = NULL;
+  g_autoptr (GPtrArray) radios            = NULL;
+  g_autofree char *dialog_response        = NULL;
+  gboolean         should_install         = FALSE;
+  gboolean         should_remove          = FALSE;
+  g_autoptr (DexFuture) transact_future   = NULL;
 
-  should_install = g_strcmp0 (response, "install") == 0;
-  should_remove  = g_strcmp0 (response, "remove") == 0;
+  bz_weak_get_or_return_reject (self, data->self);
 
-  cb_source      = g_object_steal_data (G_OBJECT (alert), "source");
-  cb_entry       = g_object_steal_data (G_OBJECT (alert), "entry");
-  cb_group       = g_object_steal_data (G_OBJECT (alert), "group");
-  cb_group_model = g_object_steal_data (G_OBJECT (alert), "model");
-
-  if (should_install || should_remove)
+  if (group != NULL)
     {
-      if (cb_group != NULL)
+      model = dex_await_object (bz_entry_group_dup_all_into_model (group), &local_error);
+      if (model == NULL)
         {
-          GPtrArray *checks = NULL;
+          bz_show_error_for_widget (GTK_WIDGET (self), local_error->message);
+          return dex_future_new_for_error (g_steal_pointer (&local_error));
+        }
+      title = bz_entry_group_get_title (group);
+      id    = bz_entry_group_get_id (group);
+    }
+  else
+    {
+      title = bz_entry_get_title (entry);
+      id    = bz_entry_get_id (entry);
+    }
+  /* id may become invalid after awaiting */
+  id_dup = g_strdup (id);
 
-          checks = g_object_get_data (G_OBJECT (alert), "checks");
-          if (checks != NULL)
+  alert = adw_alert_dialog_new (NULL, NULL);
+  if (remove)
+    configure_remove_dialog (ADW_ALERT_DIALOG (alert), title, id);
+  else
+    configure_install_dialog (ADW_ALERT_DIALOG (alert), title, id);
+  id    = NULL;
+  title = NULL;
+
+  if (remove)
+    {
+      delete_data_check = gtk_check_button_new ();
+      gtk_check_button_set_label (GTK_CHECK_BUTTON (delete_data_check),
+                                  _ ("Delete local data as well"));
+      /* delete user data by default */
+      gtk_check_button_set_active (GTK_CHECK_BUTTON (delete_data_check), TRUE);
+    }
+  radios = create_entry_radio_buttons (
+      ADW_ALERT_DIALOG (alert),
+      model, remove, (GtkCheckButton *) delete_data_check);
+
+  if (!remove && auto_confirm && radios->len <= 1)
+    {
+      dialog_response = g_strdup (remove ? "remove" : "install");
+      g_clear_object (&alert);
+    }
+  else
+    {
+      adw_dialog_present (alert, GTK_WIDGET (self));
+      dialog_response = dex_await_string (
+          bz_make_alert_dialog_future (ADW_ALERT_DIALOG (alert)),
+          &local_error);
+      if (dialog_response == NULL)
+        return dex_future_new_for_error (g_steal_pointer (&local_error));
+      if (delete_data_check != NULL)
+        delete_user_data = gtk_check_button_get_active (GTK_CHECK_BUTTON (delete_data_check));
+    }
+
+  should_install = g_strcmp0 (dialog_response, "install") == 0;
+  should_remove  = g_strcmp0 (dialog_response, "remove") == 0;
+  if (!should_install && !should_remove)
+    return dex_future_new_false ();
+
+  if (group != NULL)
+    {
+      guint n_entries                    = 0;
+      g_autoptr (BzEntry) selected_entry = NULL;
+
+      n_entries = g_list_model_get_n_items (model);
+      for (guint i = 0; i < n_entries; i++)
+        {
+          GtkCheckButton *check = NULL;
+
+          check = g_ptr_array_index (radios, i);
+          if (check != NULL && gtk_check_button_get_active (check))
             {
-              guint n_entries           = 0;
-              g_autoptr (BzEntry) entry = NULL;
-
-              n_entries = g_list_model_get_n_items (cb_group_model);
-              for (guint i = 0; i < n_entries; i++)
-                {
-                  GtkCheckButton *check = NULL;
-
-                  check = g_ptr_array_index (checks, i);
-                  if (check != NULL && gtk_check_button_get_active (check))
-                    {
-                      entry = g_list_model_get_item (cb_group_model, i);
-                      break;
-                    }
-                }
-
-              if (entry != NULL)
-                transact (self, entry, should_remove, cb_source);
+              selected_entry = g_list_model_get_item (model, i);
+              break;
             }
         }
-      else if (cb_entry != NULL)
-        transact (self, cb_entry, should_remove, cb_source);
+      if (selected_entry == NULL)
+        selected_entry = g_list_model_get_item (model, 0);
+
+      transact_future = transact (self, selected_entry, should_remove, source);
     }
+  else if (entry != NULL)
+    transact_future = transact (self, entry, should_remove, source);
+
+  if (!dex_await (g_steal_pointer (&transact_future), &local_error))
+    return dex_future_new_for_error (g_steal_pointer (&local_error));
+
+  if (delete_user_data)
+    {
+      g_autofree char *user_data_path = NULL;
+
+      /* TODO: should probably be backend-dependent */
+      user_data_path = g_build_filename (g_get_home_dir (), ".var", "app", id_dup, NULL);
+      dex_await (bz_reap_path_dex (user_data_path), NULL);
+    }
+
+  return dex_future_new_true ();
 }
 
 static void
@@ -909,7 +996,7 @@ bz_window_get_state_info (BzWindow *self)
   return self->state;
 }
 
-static void
+static DexFuture *
 transact (BzWindow  *self,
           BzEntry   *entry,
           gboolean   remove,
@@ -929,10 +1016,6 @@ transact (BzWindow  *self,
         &entry, 1,
         NULL, 0,
         NULL, 0);
-
-  bz_transaction_manager_add (
-      bz_state_info_get_transaction_manager (self->state),
-      transaction);
 
   if (source == NULL)
     source = GTK_WIDGET (self->navigation_view);
@@ -971,6 +1054,10 @@ transact (BzWindow  *self,
           NULL);
       bz_comet_overlay_spawn (self->comet_overlay, comet);
     }
+
+  return bz_transaction_manager_add (
+      bz_state_info_get_transaction_manager (self->state),
+      transaction);
 }
 
 static void
@@ -981,11 +1068,9 @@ try_transact (BzWindow     *self,
               gboolean      auto_confirm,
               GtkWidget    *source)
 {
-  g_autoptr (DexFuture) base_future = NULL;
-  g_autoptr (TransactData) data     = NULL;
+  g_autoptr (TransactData) data = NULL;
 
   g_return_if_fail (entry != NULL || group != NULL);
-
   if (bz_state_info_get_busy (self->state))
     {
       adw_toast_overlay_add_toast (
@@ -994,23 +1079,19 @@ try_transact (BzWindow     *self,
       return;
     }
 
-  if (group != NULL)
-    base_future = bz_entry_group_dup_all_into_model (group);
-  else if (entry != NULL)
-    base_future = dex_future_new_for_object (entry);
-
   data               = transact_data_new ();
-  data->self         = self;
+  data->self         = bz_track_weak (self);
+  data->entry        = bz_object_maybe_ref (entry);
   data->group        = bz_object_maybe_ref (group);
   data->remove       = remove;
   data->auto_confirm = auto_confirm;
   data->source       = bz_object_maybe_ref (source);
 
-  dex_clear (&self->transact_future);
-  self->transact_future = dex_future_finally (
-      g_steal_pointer (&base_future),
-      (DexFutureCallback) ready_to_transact,
-      transact_data_ref (data), transact_data_unref);
+  dex_future_disown (dex_scheduler_spawn (
+      dex_scheduler_get_default (),
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) transact_fiber,
+      transact_data_ref (data), transact_data_unref));
 }
 
 static gboolean
@@ -1050,16 +1131,16 @@ create_entry_radio_button (BzEntry    *entry,
   return row;
 }
 
-static int
+static GPtrArray *
 create_entry_radio_buttons (AdwAlertDialog *alert,
                             GListModel     *model,
-                            gboolean        remove)
+                            gboolean        remove,
+                            GtkCheckButton *delete_user_data)
 {
   GtkWidget *listbox                = NULL;
   g_autoptr (GPtrArray) radios      = NULL;
   GtkCheckButton *first_valid_radio = NULL;
   guint           n_entries         = 0;
-  int             n_valid_radios    = 0;
 
   listbox = gtk_list_box_new ();
   gtk_list_box_set_selection_mode (GTK_LIST_BOX (listbox), GTK_SELECTION_NONE);
@@ -1070,8 +1151,6 @@ create_entry_radio_buttons (AdwAlertDialog *alert,
 
   if (model != NULL)
     n_entries = g_list_model_get_n_items (model);
-  n_valid_radios = 0;
-
   for (guint i = 0; i < n_entries; i++)
     {
       g_autoptr (BzEntry) entry_variant = NULL;
@@ -1098,18 +1177,14 @@ create_entry_radio_buttons (AdwAlertDialog *alert,
         }
 
       gtk_list_box_append (GTK_LIST_BOX (listbox), row);
-      n_valid_radios++;
     }
 
-  g_object_set_data_full (
-      G_OBJECT (alert), "checks",
-      g_steal_pointer (&radios),
-      (GDestroyNotify) g_ptr_array_unref);
-
-  if (n_valid_radios > 1)
+  if (delete_user_data != NULL)
+    gtk_list_box_append (GTK_LIST_BOX (listbox), g_object_ref_sink (GTK_WIDGET (delete_user_data)));
+  if (radios->len > 1 || delete_user_data != NULL)
     adw_alert_dialog_set_extra_child (alert, listbox);
 
-  return n_valid_radios;
+  return g_steal_pointer (&radios);
 }
 
 static void
@@ -1157,108 +1232,6 @@ configure_remove_dialog (AdwAlertDialog *alert,
   adw_alert_dialog_set_close_response (alert, "cancel");
 }
 
-static AdwDialog *
-create_confirmation_dialog (BzWindow     *self,
-                            BzEntryGroup *group,
-                            GListModel   *model,
-                            BzEntry      *entry,
-                            GtkWidget    *source,
-                            gboolean      remove,
-                            int          *out_n_valid_radios)
-{
-  AdwDialog  *alert          = NULL;
-  const char *title          = NULL;
-  const char *id             = NULL;
-  int         n_valid_radios = 0;
-
-  alert          = adw_alert_dialog_new (NULL, NULL);
-  title          = NULL;
-  id             = NULL;
-  n_valid_radios = 0;
-
-  if (source != NULL)
-    g_object_set_data_full (G_OBJECT (alert), "source",
-                            g_object_ref (source), g_object_unref);
-
-  if (model != NULL)
-    {
-      g_object_set_data_full (G_OBJECT (alert), "group",
-                              g_object_ref (group), g_object_unref);
-      g_object_set_data_full (G_OBJECT (alert), "model",
-                              g_object_ref (model), g_object_unref);
-      title = bz_entry_group_get_title (group);
-      id    = bz_entry_group_get_id (group);
-    }
-  else
-    {
-      g_object_set_data_full (G_OBJECT (alert), "entry",
-                              g_object_ref (entry), g_object_unref);
-      title = bz_entry_get_title (entry);
-      id    = bz_entry_get_id (entry);
-    }
-
-  if (remove)
-    configure_remove_dialog (ADW_ALERT_DIALOG (alert), title, id);
-  else
-    configure_install_dialog (ADW_ALERT_DIALOG (alert), title, id);
-
-  n_valid_radios = create_entry_radio_buttons (ADW_ALERT_DIALOG (alert), model, remove);
-
-  if (out_n_valid_radios != NULL)
-    *out_n_valid_radios = n_valid_radios;
-
-  return alert;
-}
-
-static DexFuture *
-ready_to_transact (DexFuture    *future,
-                   TransactData *data)
-{
-  BzWindow     *self             = data->self;
-  BzEntryGroup *group            = data->group;
-  gboolean      remove           = data->remove;
-  gboolean      auto_confirm     = data->auto_confirm;
-  GtkWidget    *source           = data->source;
-  g_autoptr (GError) local_error = NULL;
-  const GValue *value            = NULL;
-  g_autoptr (GListModel) model   = NULL;
-  g_autoptr (BzEntry) entry      = NULL;
-  AdwDialog *alert               = NULL;
-  int        n_valid_radios      = 0;
-
-  value = dex_future_get_value (future, &local_error);
-  if (value != NULL)
-    {
-      if (G_VALUE_HOLDS (value, G_TYPE_LIST_MODEL))
-        model = g_value_dup_object (value);
-      else
-        entry = g_value_dup_object (value);
-
-      alert = create_confirmation_dialog (self, group, model, entry, source, remove, &n_valid_radios);
-
-      if (auto_confirm && n_valid_radios <= 1)
-        {
-          const char *response_id = remove ? "remove" : "install";
-          g_object_ref_sink (alert);
-          install_confirmation_response (ADW_ALERT_DIALOG (alert), (gchar *) response_id, self);
-          g_object_unref (alert);
-        }
-      else
-        {
-          g_signal_connect (alert, "response",
-                            G_CALLBACK (install_confirmation_response), self);
-          adw_dialog_present (alert, GTK_WIDGET (self));
-        }
-    }
-  else
-    {
-      bz_show_error_for_widget (GTK_WIDGET (self), local_error->message);
-    }
-
-  dex_clear (&self->transact_future);
-  return NULL;
-}
-
 static void
 update (BzWindow *self,
         BzEntry **updates,
@@ -1270,9 +1243,9 @@ update (BzWindow *self,
       NULL, 0,
       updates, n_updates,
       NULL, 0);
-  bz_transaction_manager_add (
+  dex_future_disown (bz_transaction_manager_add (
       bz_state_info_get_transaction_manager (self->state),
-      transaction);
+      transaction));
 }
 
 static void

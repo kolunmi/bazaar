@@ -47,7 +47,10 @@ bz_reap_file (GFile *file)
 
   g_return_if_fail (G_IS_FILE (file));
 
-  uri        = g_file_get_uri (file);
+  uri = g_file_get_uri (file);
+  if (uri == NULL)
+    uri = g_file_get_path (file);
+
   enumerator = g_file_enumerate_children (
       file,
       G_FILE_ATTRIBUTE_STANDARD_IS_SYMLINK
@@ -85,16 +88,25 @@ bz_reap_file (GFile *file)
 
       if (!g_file_info_get_is_symlink (info) && file_type == G_FILE_TYPE_DIRECTORY)
         bz_reap_file (child);
-
-      result = g_file_delete (child, NULL, &local_error);
-      if (!result)
+      else
         {
-          g_warning ("failed to reap cache directory '%s': %s", uri, local_error->message);
-          g_clear_pointer (&local_error, g_error_free);
+          result = g_file_delete (child, NULL, &local_error);
+          if (!result)
+            {
+              g_warning ("failed to reap cache directory '%s': %s", uri, local_error->message);
+              g_clear_pointer (&local_error, g_error_free);
+            }
         }
     }
 
   result = g_file_enumerator_close (enumerator, NULL, &local_error);
+  if (!result)
+    {
+      g_warning ("failed to reap cache directory '%s': %s", uri, local_error->message);
+      g_clear_pointer (&local_error, g_error_free);
+    }
+
+  result = g_file_delete (file, NULL, &local_error);
   if (!result)
     {
       g_warning ("failed to reap cache directory '%s': %s", uri, local_error->message);
