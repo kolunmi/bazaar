@@ -26,6 +26,11 @@ reap_file_fiber (GFile *file);
 static DexFuture *
 reap_path_fiber (char *path);
 
+static DexFuture *
+path_exists_fiber (char *path);
+static DexFuture *
+user_data_exists_fiber (char *app_id);
+
 DexScheduler *
 bz_get_io_scheduler (void)
 {
@@ -114,6 +119,17 @@ bz_reap_file (GFile *file)
     }
 }
 
+DexFuture *
+bz_reap_user_data_dex (const char *app_id)
+{
+  g_autofree char *user_data_path = NULL;
+
+  dex_return_error_if_fail (app_id != NULL);
+
+  user_data_path = g_build_filename (g_get_home_dir (), ".var", "app", app_id, NULL);
+  return bz_reap_path_dex (g_steal_pointer (&user_data_path));
+}
+
 void
 bz_reap_path (const char *path)
 {
@@ -145,6 +161,52 @@ bz_reap_path_dex (const char *path)
       bz_get_dex_stack_size (),
       (DexFiberFunc) reap_path_fiber,
       g_strdup (path), g_free);
+}
+
+DexFuture *
+bz_path_exists_dex (const char *path)
+{
+  dex_return_error_if_fail (path != NULL);
+  return dex_scheduler_spawn (
+      bz_get_io_scheduler (),
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) path_exists_fiber,
+      g_strdup (path), g_free);
+}
+
+DexFuture *
+bz_user_data_exists_dex (const char *app_id)
+{
+  dex_return_error_if_fail (app_id != NULL);
+  return dex_scheduler_spawn (
+      bz_get_io_scheduler (),
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) user_data_exists_fiber,
+      g_strdup (app_id), g_free);
+}
+
+static DexFuture *
+path_exists_fiber (char *path)
+{
+  g_autoptr (GFile) file = NULL;
+  gboolean exists        = FALSE;
+
+  file   = g_file_new_for_path (path);
+  exists = g_file_query_exists (file, NULL);
+  return dex_future_new_for_boolean (exists);
+}
+
+static DexFuture *
+user_data_exists_fiber (char *app_id)
+{
+  g_autofree char *user_data_path = NULL;
+  g_autoptr (GFile) file          = NULL;
+  gboolean exists                 = FALSE;
+
+  user_data_path = g_build_filename (g_get_home_dir (), ".var", "app", app_id, NULL);
+  file           = g_file_new_for_path (user_data_path);
+  exists         = g_file_query_exists (file, NULL);
+  return dex_future_new_for_boolean (exists);
 }
 
 char *

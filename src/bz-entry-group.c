@@ -24,6 +24,8 @@
 #include "bz-entry-group.h"
 #include "bz-async-texture.h"
 #include "bz-env.h"
+#include "bz-io.h"
+#include "bz-util.h"
 
 struct _BzEntryGroup
 {
@@ -59,6 +61,9 @@ struct _BzEntryGroup
   int installable_available;
   int updatable_available;
   int removable_available;
+
+  gboolean   has_user_data;
+  DexFuture *user_data_exists_future;
 
   GWeakRef ui_entry;
 
@@ -96,6 +101,7 @@ enum
   PROP_INSTALLABLE_AND_AVAILABLE,
   PROP_UPDATABLE_AND_AVAILABLE,
   PROP_REMOVABLE_AND_AVAILABLE,
+  PROP_HAS_USER_DATA,
 
   LAST_PROP
 };
@@ -114,11 +120,19 @@ holding_changed (BzEntryGroup *self,
 static DexFuture *
 dup_all_into_model_fiber (BzEntryGroup *self);
 
+static DexFuture *
+user_data_exists_then (DexFuture *future,
+                       GWeakRef  *wr);
+
+static void
+check_user_data_exists (BzEntryGroup *self);
+
 static void
 bz_entry_group_dispose (GObject *object)
 {
   BzEntryGroup *self = BZ_ENTRY_GROUP (object);
 
+  dex_clear (&self->user_data_exists_future);
   g_clear_object (&self->factory);
   g_clear_object (&self->unique_ids);
   g_clear_pointer (&self->id, g_free);
@@ -225,6 +239,9 @@ bz_entry_group_get_property (GObject    *object,
     case PROP_REMOVABLE_AND_AVAILABLE:
       g_value_set_int (value, bz_entry_group_get_removable_and_available (self));
       break;
+    case PROP_HAS_USER_DATA:
+      g_value_set_boolean (value, bz_entry_group_get_has_user_data (self));
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -262,6 +279,7 @@ bz_entry_group_set_property (GObject      *object,
     case PROP_INSTALLABLE_AND_AVAILABLE:
     case PROP_UPDATABLE_AND_AVAILABLE:
     case PROP_REMOVABLE_AND_AVAILABLE:
+    case PROP_HAS_USER_DATA:
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -346,10 +364,10 @@ bz_entry_group_class_init (BzEntryGroupClass *klass)
           G_PARAM_READABLE);
 
   props[PROP_IS_VERIFIED] =
-    g_param_spec_boolean (
-        "is-verified",
-        NULL, NULL, FALSE,
-        G_PARAM_READABLE);
+      g_param_spec_boolean (
+          "is-verified",
+          NULL, NULL, FALSE,
+          G_PARAM_READABLE);
 
   props[PROP_SEARCH_TOKENS] =
       g_param_spec_string (
@@ -436,6 +454,12 @@ bz_entry_group_class_init (BzEntryGroupClass *klass)
           "removable-and-available",
           NULL, NULL,
           0, G_MAXINT, 0,
+          G_PARAM_READABLE);
+
+  props[PROP_HAS_USER_DATA] =
+      g_param_spec_boolean (
+          "has-user-data",
+          NULL, NULL, FALSE,
           G_PARAM_READABLE);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
@@ -587,6 +611,14 @@ bz_entry_group_get_donation_url (BzEntryGroup *self)
 {
   g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), NULL);
   return self->donation_url;
+}
+
+gboolean
+bz_entry_group_get_has_user_data (BzEntryGroup *self)
+{
+  g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), FALSE);
+  check_user_data_exists (self);
+  return self->has_user_data;
 }
 
 BzResult *
@@ -1028,6 +1060,10 @@ installed_changed (BzEntryGroup *self,
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_REMOVABLE]);
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLABLE]);
     }
+
+  dex_clear (&self->user_data_exists_future);
+  self->has_user_data = FALSE;
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_USER_DATA]);
 }
 
 static void
@@ -1114,4 +1150,66 @@ dup_all_into_model_fiber (BzEntryGroup *self)
     g_warning ("Some entries for %s failed to resolve", self->id);
 
   return dex_future_new_for_object (store);
+}
+
+static DexFuture *
+reap_user_data_then (DexFuture *future,
+                     GWeakRef  *wr)
+{
+  g_autoptr (BzEntryGroup) self = NULL;
+
+  self = g_weak_ref_get (wr);
+  if (self == NULL)
+    return dex_future_new_false ();
+
+  dex_clear (&self->user_data_exists_future);
+  self->has_user_data = FALSE;
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_USER_DATA]);
+
+  return dex_future_new_true ();
+}
+
+void
+bz_entry_group_reap_user_data (BzEntryGroup *self)
+{
+  g_return_if_fail (BZ_IS_ENTRY_GROUP (self));
+  g_return_if_fail (self->id != NULL);
+
+  dex_future_disown (dex_future_then (
+      bz_reap_user_data_dex (self->id),
+      (DexFutureCallback) reap_user_data_then,
+      bz_track_weak (self),
+      bz_weak_release));
+}
+
+static DexFuture *
+user_data_exists_then (DexFuture *future,
+                       GWeakRef  *wr)
+{
+  g_autoptr (BzEntryGroup) self = NULL;
+  gboolean exists               = FALSE;
+
+  self = g_weak_ref_get (wr);
+  if (self == NULL)
+    return dex_future_new_false ();
+
+  exists              = dex_await_boolean (future, NULL);
+  self->has_user_data = exists;
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_USER_DATA]);
+
+  return dex_future_new_true ();
+}
+
+static void
+check_user_data_exists (BzEntryGroup *self)
+{
+  if (self->user_data_exists_future == NULL && self->id != NULL)
+    {
+      self->user_data_exists_future = dex_ref (bz_user_data_exists_dex (self->id));
+      dex_future_disown (dex_future_then (
+          dex_ref (self->user_data_exists_future),
+          (DexFutureCallback) user_data_exists_then,
+          bz_track_weak (self),
+          bz_weak_release));
+    }
 }
