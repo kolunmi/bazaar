@@ -548,27 +548,25 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
                   g_autoptr (GFile) cache_file            = NULL;
                   g_autoptr (BzAsyncTexture) texture      = NULL;
                   g_autoptr (GtkStringObject) caption_obj = NULL;
-                  gsize            url_len                = 0;
-                  g_autofree char *temp                   = NULL;
 
                   image_obj = g_ptr_array_index (images, j);
                   url       = as_image_get_url (image_obj);
 
                   if (url != NULL)
                     {
-                      extension = ".png";
-
                       // Flathub CDN serves WebP but appstream only provides PNG links.
                       if (g_str_has_prefix (url, "https://dl.flathub.org/") &&
                           g_str_has_suffix (url, ".png"))
                         {
-                          url_len      = strlen (url);
-                          temp         = g_strndup (url, url_len - 4);
+                          g_autofree char *temp = NULL;
+
+                          temp         = g_strndup (url, strlen (url) - 4);
                           modified_url = g_strdup_printf ("%s.webp", temp);
                           extension    = ".webp";
                         }
                       else
                         {
+                          extension    = ".png";
                           modified_url = g_strdup (url);
                         }
 
