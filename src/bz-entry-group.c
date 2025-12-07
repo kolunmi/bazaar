@@ -119,7 +119,7 @@ holding_changed (BzEntryGroup *self,
                  BzEntry      *entry);
 
 static DexFuture *
-dup_all_into_model_fiber (BzEntryGroup *self);
+dup_all_into_store_fiber (BzEntryGroup *self);
 
 static DexFuture *
 user_data_exists_then (DexFuture *future,
@@ -1010,7 +1010,7 @@ bz_entry_group_connect_living (BzEntryGroup *self,
 }
 
 DexFuture *
-bz_entry_group_dup_all_into_model (BzEntryGroup *self)
+bz_entry_group_dup_all_into_store (BzEntryGroup *self)
 {
   g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), NULL);
 
@@ -1020,7 +1020,7 @@ bz_entry_group_dup_all_into_model (BzEntryGroup *self)
   return dex_scheduler_spawn (
       dex_scheduler_get_default (),
       bz_get_dex_stack_size (),
-      (DexFiberFunc) dup_all_into_model_fiber,
+      (DexFiberFunc) dup_all_into_store_fiber,
       g_object_ref (self),
       g_object_unref);
 }
@@ -1097,7 +1097,7 @@ holding_changed (BzEntryGroup *self,
 }
 
 static DexFuture *
-dup_all_into_model_fiber (BzEntryGroup *self)
+dup_all_into_store_fiber (BzEntryGroup *self)
 {
   g_autoptr (GPtrArray) futures = NULL;
   guint n_items                 = 0;

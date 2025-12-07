@@ -1300,7 +1300,7 @@ bz_full_view_set_entry_group (BzFullView   *self,
       self->group    = g_object_ref (group);
       self->ui_entry = bz_entry_group_dup_ui_entry (group);
 
-      future            = bz_entry_group_dup_all_into_model (group);
+      future            = bz_entry_group_dup_all_into_store (group);
       self->group_model = bz_result_new (future);
 
       if (self->debounce)

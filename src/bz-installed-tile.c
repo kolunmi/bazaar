@@ -327,7 +327,7 @@ bz_installed_tile_class_init (BzInstalledTileClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, support_cb);
   gtk_widget_class_bind_template_callback (widget_class, install_addons_cb);
   gtk_widget_class_bind_template_callback (widget_class, remove_cb);
-  
+
   gtk_widget_class_set_accessible_role (widget_class, GTK_ACCESSIBLE_ROLE_BUTTON);
 }
 
@@ -374,7 +374,7 @@ find_entry_in_group (BzEntryGroup *group,
   guint n_items                    = 0;
   g_autoptr (GPtrArray) candidates = NULL;
 
-  model = dex_await_object (bz_entry_group_dup_all_into_model (group), error);
+  model = dex_await_object (bz_entry_group_dup_all_into_store (group), error);
   if (model == NULL)
     return NULL;
   n_items = g_list_model_get_n_items (model);

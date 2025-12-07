@@ -128,6 +128,6 @@ bz_entry_group_connect_living (BzEntryGroup *self,
                                BzEntry      *entry);
 
 DexFuture *
-bz_entry_group_dup_all_into_model (BzEntryGroup *self);
+bz_entry_group_dup_all_into_store (BzEntryGroup *self);
 
 G_END_DECLS
