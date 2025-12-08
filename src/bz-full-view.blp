@@ -609,7 +609,10 @@ template $BzFullView: Adw.Bin {
 
                         Revealer {
                           transition-type: slide_down;
-                          reveal-child: bind $logical_and(template.entry-group as <$BzEntryGroup>.has-user-data, $is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
+                          reveal-child: bind $logical_and(
+                            $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.user-data-size) as <bool>) as <bool>,
+                            $is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>
+                          ) as <bool>;
 
                           child: Box {
                             height-request: 50;
@@ -627,7 +630,9 @@ template $BzFullView: Adw.Bin {
                               valign: center;
                               hexpand: true;
                               margin-start: 12;
-                              label: bind $format_leftover_label(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.title) as <string>;
+                              margin-top: 8;
+                              margin-bottom: 8;
+                              label: bind $format_leftover_label(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.title, template.entry-group as <$BzEntryGroup>.user-data-size ) as <string>;
                               wrap: true;
                               wrap-mode: word_char;
                               justify: left;

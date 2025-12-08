@@ -728,6 +728,16 @@ window.narrow .category-tile {
     margin: 6px 0px;
 }
 
+.user-data-list-view > * {
+  transition: background-color 200ms;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.user-data-list-view row {
+	min-height: 0;
+}
+
 .transaction-sidebar-entry-list {
     margin: 0;
     padding: 0;
