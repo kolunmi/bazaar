@@ -773,19 +773,71 @@ bz_state_info_get_default (void)
 static DexFuture *
 init_fiber (GWeakRef *wr)
 {
-  g_autoptr (BzApplication) self       = NULL;
-  g_autoptr (GError) local_error       = NULL;
-  gboolean has_flathub                 = FALSE;
-  gboolean result                      = FALSE;
-  g_autoptr (GHashTable) cached_set    = NULL;
-  g_autofree char *flathub_cache       = NULL;
-  g_autoptr (GFile) flathub_cache_file = NULL;
+  g_autoptr (BzApplication) self        = NULL;
+  g_autoptr (GError) local_error        = NULL;
+  g_autofree char *root_cache_dir       = NULL;
+  g_autoptr (GFile) root_cache_dir_file = NULL;
+  gboolean has_flathub                  = FALSE;
+  gboolean result                       = FALSE;
+  g_autoptr (GHashTable) cached_set     = NULL;
+  g_autofree char *flathub_cache        = NULL;
+  g_autoptr (GFile) flathub_cache_file  = NULL;
 
   bz_weak_get_or_return_reject (self, wr);
 
   bz_state_info_set_online (self->state, TRUE);
   bz_state_info_set_busy (self->state, TRUE);
   bz_state_info_set_background_task_label (self->state, _ ("Performing setup..."));
+
+  root_cache_dir      = bz_dup_root_cache_dir ();
+  root_cache_dir_file = g_file_new_for_path (root_cache_dir);
+  if (dex_await (dex_file_query_exists (root_cache_dir_file), NULL))
+    {
+      g_autofree char *cache_version_path  = NULL;
+      g_autoptr (GFile) cache_version_file = NULL;
+      gboolean wipe_cache                  = TRUE;
+
+      cache_version_path = g_build_filename (root_cache_dir, "cache-version", NULL);
+      cache_version_file = g_file_new_for_path (cache_version_path);
+      if (dex_await (dex_file_query_exists (cache_version_file), NULL))
+        {
+          g_autoptr (GBytes) bytes = NULL;
+
+          bytes = dex_await_boxed (dex_file_load_contents_bytes (cache_version_file), NULL);
+          if (bytes != NULL)
+            {
+              g_autoptr (GVariant) variant = NULL;
+
+              variant = g_variant_new_from_bytes (G_VARIANT_TYPE_STRING, bytes, FALSE);
+              if (variant != NULL)
+                {
+                  const char *version = NULL;
+
+                  version    = g_variant_get_string (variant, NULL);
+                  wipe_cache = g_strcmp0 (version, PACKAGE_VERSION) != 0;
+                }
+            }
+        }
+
+      if (wipe_cache)
+        {
+          g_info ("Version incompatibility detected: clearing cache");
+          dex_await (bz_reap_file_dex (root_cache_dir_file), NULL);
+        }
+
+      if (dex_await (dex_file_make_directory_with_parents (root_cache_dir_file), NULL))
+        {
+          g_autoptr (GVariant) variant = NULL;
+          g_autoptr (GBytes) bytes     = NULL;
+
+          variant = g_variant_new_string (PACKAGE_VERSION);
+          bytes   = g_variant_get_data_as_bytes (variant);
+          dex_await (dex_file_replace_contents_bytes (
+                         cache_version_file, bytes, NULL, FALSE,
+                         G_FILE_CREATE_REPLACE_DESTINATION),
+                     NULL);
+        }
+    }
 
   g_clear_object (&self->flatpak);
   self->flatpak = dex_await_object (bz_flatpak_instance_new (), &local_error);
@@ -939,7 +991,7 @@ init_fiber (GWeakRef *wr)
   flathub_cache_file = fiber_dup_flathub_cache_file (&flathub_cache, &local_error);
   if (flathub_cache_file != NULL)
     {
-      if (dex_await_boolean (dex_file_query_exists (flathub_cache_file), NULL))
+      if (dex_await (dex_file_query_exists (flathub_cache_file), NULL))
         {
           g_autoptr (GBytes) bytes = NULL;
 
