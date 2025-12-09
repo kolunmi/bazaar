@@ -68,6 +68,17 @@
   </screenshots>
 
   <releases>
+    <release version="0.6.1" date="2025-12-09">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.6.1</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>Fix frequent disk writes; set refresh frequency to 1 day rather than 1 hour</li>
+          <li>Add "Delete User Data" option when uninstalling an application</li>
+          <li>Version cache to prevent incompatibility between Bazaar versions</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.6.0" date="2025-12-04">
       <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.6.0</url>
       <description translate="no">
