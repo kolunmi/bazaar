@@ -35,7 +35,7 @@ bz_user_data_tile_new (void);
 
 void
 bz_user_data_tile_set_group (BzUserDataTile *self,
-                             BzEntryGroup    *group);
+                             BzEntryGroup   *group);
 
 BzEntryGroup *
 bz_user_data_tile_get_group (BzUserDataTile *self);

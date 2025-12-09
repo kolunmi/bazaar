@@ -202,15 +202,13 @@ static DexFuture *
 get_directory_size_fiber (GFile *file)
 {
   g_autoptr (DexFuture) enumerator_future = NULL;
-  g_autoptr (GFileEnumerator) enumerator = NULL;
-  g_autoptr (GError) error = NULL;
-  guint64 total_size = 0;
+  g_autoptr (GFileEnumerator) enumerator  = NULL;
+  g_autoptr (GError) error                = NULL;
+  guint64 total_size                      = 0;
 
   enumerator_future = dex_file_enumerate_children (
       file,
-      G_FILE_ATTRIBUTE_STANDARD_NAME ","
-      G_FILE_ATTRIBUTE_STANDARD_TYPE ","
-      G_FILE_ATTRIBUTE_STANDARD_SIZE,
+      G_FILE_ATTRIBUTE_STANDARD_NAME "," G_FILE_ATTRIBUTE_STANDARD_TYPE "," G_FILE_ATTRIBUTE_STANDARD_SIZE,
       G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
       G_PRIORITY_DEFAULT);
 
@@ -225,11 +223,11 @@ get_directory_size_fiber (GFile *file)
   for (;;)
     {
       g_autoptr (DexFuture) next_future = NULL;
-      g_autoptr (GList) infos = NULL;
+      g_autoptr (GList) infos           = NULL;
       GList *l;
 
       next_future = dex_file_enumerator_next_files (enumerator, 10, G_PRIORITY_DEFAULT);
-      infos = dex_await_boxed (dex_ref (next_future), &error);
+      infos       = dex_await_boxed (dex_ref (next_future), &error);
 
       if (infos == NULL)
         {
@@ -240,14 +238,14 @@ get_directory_size_fiber (GFile *file)
 
       for (l = infos; l != NULL; l = l->next)
         {
-          GFileInfo *info = l->data;
-          GFileType file_type = g_file_info_get_file_type (info);
+          GFileInfo *info      = l->data;
+          GFileType  file_type = g_file_info_get_file_type (info);
 
           if (file_type == G_FILE_TYPE_DIRECTORY)
             {
-              g_autoptr (GFile) child = g_file_enumerator_get_child (enumerator, info);
+              g_autoptr (GFile) child           = g_file_enumerator_get_child (enumerator, info);
               g_autoptr (DexFuture) size_future = get_directory_size_fiber (child);
-              guint64 child_size = dex_await_uint64 (dex_ref (size_future), &error);
+              guint64 child_size                = dex_await_uint64 (dex_ref (size_future), &error);
 
               if (error != NULL)
                 return dex_future_new_for_error (g_steal_pointer (&error));
@@ -267,22 +265,21 @@ get_directory_size_fiber (GFile *file)
 static DexFuture *
 get_all_user_data_ids_fiber (void)
 {
-  g_autofree char *var_app_path = NULL;
-  g_autoptr (GFile) var_app_dir = NULL;
+  g_autofree char *var_app_path           = NULL;
+  g_autoptr (GFile) var_app_dir           = NULL;
   g_autoptr (DexFuture) enumerator_future = NULL;
-  g_autoptr (GFileEnumerator) enumerator = NULL;
-  g_autoptr (GError) error = NULL;
-  GHashTable *ids = NULL;
+  g_autoptr (GFileEnumerator) enumerator  = NULL;
+  g_autoptr (GError) error                = NULL;
+  GHashTable *ids                         = NULL;
 
   var_app_path = g_build_filename (g_get_home_dir (), ".var", "app", NULL);
-  var_app_dir = g_file_new_for_path (var_app_path);
+  var_app_dir  = g_file_new_for_path (var_app_path);
 
   ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 
   enumerator_future = dex_file_enumerate_children (
       var_app_dir,
-      G_FILE_ATTRIBUTE_STANDARD_NAME ","
-      G_FILE_ATTRIBUTE_STANDARD_TYPE,
+      G_FILE_ATTRIBUTE_STANDARD_NAME "," G_FILE_ATTRIBUTE_STANDARD_TYPE,
       G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
       G_PRIORITY_DEFAULT);
 
@@ -298,11 +295,11 @@ get_all_user_data_ids_fiber (void)
   for (;;)
     {
       g_autoptr (DexFuture) next_future = NULL;
-      g_autoptr (GList) infos = NULL;
+      g_autoptr (GList) infos           = NULL;
       GList *l;
 
       next_future = dex_file_enumerator_next_files (enumerator, 10, G_PRIORITY_DEFAULT);
-      infos = dex_await_boxed (dex_ref (next_future), &error);
+      infos       = dex_await_boxed (dex_ref (next_future), &error);
 
       if (infos == NULL)
         {
@@ -316,8 +313,8 @@ get_all_user_data_ids_fiber (void)
 
       for (l = infos; l != NULL; l = l->next)
         {
-          GFileInfo *info = l->data;
-          GFileType file_type = g_file_info_get_file_type (info);
+          GFileInfo *info      = l->data;
+          GFileType  file_type = g_file_info_get_file_type (info);
 
           if (file_type == G_FILE_TYPE_DIRECTORY)
             {

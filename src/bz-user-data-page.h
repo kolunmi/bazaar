@@ -19,8 +19,8 @@
  */
 #pragma once
 
-#include <adwaita.h>
 #include "bz-state-info.h"
+#include <adwaita.h>
 
 G_BEGIN_DECLS
 

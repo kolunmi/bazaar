@@ -20,11 +20,11 @@
 
 #include <glib/gi18n.h>
 
-#include "bz-user-data-page.h"
 #include "bz-application-map-factory.h"
 #include "bz-env.h"
-#include "bz-user-data-tile.h"
 #include "bz-io.h"
+#include "bz-user-data-page.h"
+#include "bz-user-data-tile.h"
 #include "bz-util.h"
 
 struct _BzUserDataPage
@@ -74,7 +74,7 @@ set_page (BzUserDataPage *self);
 
 static void
 tile_activated_cb (BzUserDataTile *tile,
-                   GtkWidget       *user_data);
+                   GtkWidget      *user_data);
 
 static void
 bz_user_data_page_dispose (GObject *object)
@@ -131,7 +131,7 @@ bz_user_data_page_set_property (GObject      *object,
 static void
 bz_user_data_page_constructed (GObject *object)
 {
-  BzUserDataPage *self = BZ_USER_DATA_PAGE (object);
+  BzUserDataPage *self         = BZ_USER_DATA_PAGE (object);
   g_autoptr (DexFuture) future = NULL;
 
   G_OBJECT_CLASS (bz_user_data_page_parent_class)->constructed (object);
@@ -238,10 +238,10 @@ set_page (BzUserDataPage *self)
 
 static void
 tile_activated_cb (BzUserDataTile *tile,
-                   GtkWidget       *user_data)
+                   GtkWidget      *user_data)
 {
-  BzUserDataPage *self = NULL;
-  BzEntryGroup *group = NULL;
+  BzUserDataPage *self  = NULL;
+  BzEntryGroup   *group = NULL;
 
   g_return_if_fail (BZ_IS_USER_DATA_TILE (tile));
 
@@ -264,7 +264,7 @@ tile_activated_cb (BzUserDataTile *tile,
 
 static int
 compare_entry_groups_by_title (BzEntryGroup *group_a,
-                                BzEntryGroup *group_b)
+                               BzEntryGroup *group_b)
 {
   const char *title_a = bz_entry_group_get_title (group_a);
   const char *title_b = bz_entry_group_get_title (group_b);
@@ -274,15 +274,15 @@ compare_entry_groups_by_title (BzEntryGroup *group_a,
 static DexFuture *
 fetch_user_data_fiber (GWeakRef *wr)
 {
-  g_autoptr (BzUserDataPage) self = NULL;
-  g_autoptr (GHashTable) ids_hash   = NULL;
-  g_autoptr (GError) local_error    = NULL;
-  GHashTableIter iter               = { 0 };
-  g_autoptr (GtkStringList) id_list = NULL;
-  BzApplicationMapFactory *factory  = NULL;
-  g_autoptr (GListModel) model      = NULL;
-  g_autoptr (GListStore) sorted_store = NULL;
-  GListModel *installed_groups      = NULL;
+  g_autoptr (BzUserDataPage) self      = NULL;
+  g_autoptr (GHashTable) ids_hash      = NULL;
+  g_autoptr (GError) local_error       = NULL;
+  GHashTableIter iter                  = { 0 };
+  g_autoptr (GtkStringList) id_list    = NULL;
+  BzApplicationMapFactory *factory     = NULL;
+  g_autoptr (GListModel) model         = NULL;
+  g_autoptr (GListStore) sorted_store  = NULL;
+  GListModel *installed_groups         = NULL;
   g_autoptr (GHashTable) installed_ids = NULL;
   guint n_items;
 
@@ -291,7 +291,7 @@ fetch_user_data_fiber (GWeakRef *wr)
     return dex_future_new_reject (G_IO_ERROR, G_IO_ERROR_CANCELLED, "Page destroyed");
 
   installed_groups = bz_state_info_get_all_installed_entry_groups (self->state);
-  installed_ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+  installed_ids    = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 
   if (installed_groups != NULL)
     {
@@ -299,10 +299,10 @@ fetch_user_data_fiber (GWeakRef *wr)
       for (guint i = 0; i < n_installed; i++)
         {
           g_autoptr (BzEntryGroup) group = NULL;
-          const char *id = NULL;
+          const char *id                 = NULL;
 
           group = g_list_model_get_item (installed_groups, i);
-          id = bz_entry_group_get_id (group);
+          id    = bz_entry_group_get_id (group);
           if (id != NULL)
             g_hash_table_add (installed_ids, g_strdup (id));
         }
@@ -333,10 +333,10 @@ fetch_user_data_fiber (GWeakRef *wr)
     }
 
   factory = bz_state_info_get_application_factory (self->state);
-  model = bz_application_map_factory_generate (factory, G_LIST_MODEL (id_list));
+  model   = bz_application_map_factory_generate (factory, G_LIST_MODEL (id_list));
 
   sorted_store = g_list_store_new (BZ_TYPE_ENTRY_GROUP);
-  n_items = g_list_model_get_n_items (model);
+  n_items      = g_list_model_get_n_items (model);
   for (guint i = 0; i < n_items; i++)
     {
       g_autoptr (BzEntryGroup) group = g_list_model_get_item (model, i);

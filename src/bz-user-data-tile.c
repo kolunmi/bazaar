@@ -23,9 +23,9 @@
 #include "bz-entry-group.h"
 #include "bz-env.h"
 #include "bz-error.h"
-#include "bz-user-data-tile.h"
 #include "bz-state-info.h"
 #include "bz-user-data-page.h"
+#include "bz-user-data-tile.h"
 #include "bz-window.h"
 
 struct _BzUserDataTile
@@ -126,11 +126,11 @@ format_size (gpointer object, guint64 value)
 
 static void
 remove_cb (BzUserDataTile *self,
-           GtkButton       *button)
+           GtkButton      *button)
 {
-  BzWindow *window;
-  AdwToast *toast;
-  const char *title;
+  BzWindow        *window;
+  AdwToast        *toast;
+  const char      *title;
   g_autofree char *message = NULL;
 
   if (self->group == NULL)
@@ -140,9 +140,9 @@ remove_cb (BzUserDataTile *self,
 
   bz_entry_group_reap_user_data (self->group);
 
-  window = BZ_WINDOW (gtk_widget_get_root (GTK_WIDGET (self)));
-  message = g_strdup_printf (_("Removed User Data for %s"), title);
-  toast = adw_toast_new (message);
+  window  = BZ_WINDOW (gtk_widget_get_root (GTK_WIDGET (self)));
+  message = g_strdup_printf (_ ("Removed User Data for %s"), title);
+  toast   = adw_toast_new (message);
   bz_window_add_toast (window, toast);
 }
 
@@ -196,7 +196,7 @@ bz_user_data_tile_new (void)
 
 void
 bz_user_data_tile_set_group (BzUserDataTile *self,
-                             BzEntryGroup    *group)
+                             BzEntryGroup   *group)
 {
   g_return_if_fail (BZ_IS_USER_DATA_TILE (self));
   g_return_if_fail (group == NULL || BZ_IS_ENTRY_GROUP (group));

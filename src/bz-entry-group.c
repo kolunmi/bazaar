@@ -1165,7 +1165,7 @@ reap_user_data_then (DexFuture *future,
   bz_weak_get_or_return_reject (self, wr);
   dex_clear (&self->reap_user_data_future);
 
-  old_size = self->user_data_size;
+  old_size             = self->user_data_size;
   self->user_data_size = 0;
 
   if (old_size != 0)
@@ -1206,7 +1206,7 @@ user_data_size_then (DexFuture *future,
   if (error != NULL)
     size = 0;
 
-  old_size = self->user_data_size;
+  old_size             = self->user_data_size;
   self->user_data_size = size;
 
   if (old_size != size)
