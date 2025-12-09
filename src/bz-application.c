@@ -2320,10 +2320,6 @@ init_service_struct (BzApplication *self,
         g_warning ("Could not load main config at %s: %s",
                    HARDCODED_MAIN_CONFIG, local_error->message);
     }
-  else
-    g_warning ("Could not load main config at %s: %s",
-               HARDCODED_MAIN_CONFIG, local_error->message);
-
   g_clear_error (&local_error);
 #endif
 
