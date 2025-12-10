@@ -19,6 +19,7 @@
  */
 
 // This file is an utter mess
+#include "config.h"
 
 #include <glib/gi18n.h>
 
@@ -644,6 +645,10 @@ static void
 bz_window_init (BzWindow *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
+
+#ifdef DEVELOPMENT_BUILD
+  gtk_widget_add_css_class (GTK_WIDGET (self), "devel");
+#endif
 
   adw_view_stack_set_visible_child_name (self->main_view_stack, "flathub");
 
