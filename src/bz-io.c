@@ -19,6 +19,17 @@
  */
 
 #include "bz-io.h"
+#include "bz-env.h"
+
+static DexFuture *
+reap_file_fiber (GFile *file);
+static DexFuture *
+reap_path_fiber (char *path);
+
+static DexFuture *
+path_exists_fiber (char *path);
+static DexFuture *
+user_data_exists_fiber (char *app_id);
 
 DexScheduler *
 bz_get_io_scheduler (void)
@@ -41,7 +52,10 @@ bz_reap_file (GFile *file)
 
   g_return_if_fail (G_IS_FILE (file));
 
-  uri        = g_file_get_uri (file);
+  uri = g_file_get_uri (file);
+  if (uri == NULL)
+    uri = g_file_get_path (file);
+
   enumerator = g_file_enumerate_children (
       file,
       G_FILE_ATTRIBUTE_STANDARD_IS_SYMLINK
@@ -79,12 +93,14 @@ bz_reap_file (GFile *file)
 
       if (!g_file_info_get_is_symlink (info) && file_type == G_FILE_TYPE_DIRECTORY)
         bz_reap_file (child);
-
-      result = g_file_delete (child, NULL, &local_error);
-      if (!result)
+      else
         {
-          g_warning ("failed to reap cache directory '%s': %s", uri, local_error->message);
-          g_clear_pointer (&local_error, g_error_free);
+          result = g_file_delete (child, NULL, &local_error);
+          if (!result)
+            {
+              g_warning ("failed to reap cache directory '%s': %s", uri, local_error->message);
+              g_clear_pointer (&local_error, g_error_free);
+            }
         }
     }
 
@@ -94,6 +110,24 @@ bz_reap_file (GFile *file)
       g_warning ("failed to reap cache directory '%s': %s", uri, local_error->message);
       g_clear_pointer (&local_error, g_error_free);
     }
+
+  result = g_file_delete (file, NULL, &local_error);
+  if (!result)
+    {
+      g_warning ("failed to reap cache directory '%s': %s", uri, local_error->message);
+      g_clear_pointer (&local_error, g_error_free);
+    }
+}
+
+DexFuture *
+bz_reap_user_data_dex (const char *app_id)
+{
+  g_autofree char *user_data_path = NULL;
+
+  dex_return_error_if_fail (app_id != NULL);
+
+  user_data_path = g_build_filename (g_get_home_dir (), ".var", "app", app_id, NULL);
+  return bz_reap_path_dex (g_steal_pointer (&user_data_path));
 }
 
 void
@@ -107,13 +141,79 @@ bz_reap_path (const char *path)
   bz_reap_file (file);
 }
 
+DexFuture *
+bz_reap_file_dex (GFile *file)
+{
+  dex_return_error_if_fail (G_IS_FILE (file));
+  return dex_scheduler_spawn (
+      bz_get_io_scheduler (),
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) reap_file_fiber,
+      g_object_ref (file), g_object_unref);
+}
+
+DexFuture *
+bz_reap_path_dex (const char *path)
+{
+  dex_return_error_if_fail (path != NULL);
+  return dex_scheduler_spawn (
+      bz_get_io_scheduler (),
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) reap_path_fiber,
+      g_strdup (path), g_free);
+}
+
+DexFuture *
+bz_path_exists_dex (const char *path)
+{
+  dex_return_error_if_fail (path != NULL);
+  return dex_scheduler_spawn (
+      bz_get_io_scheduler (),
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) path_exists_fiber,
+      g_strdup (path), g_free);
+}
+
+DexFuture *
+bz_user_data_exists_dex (const char *app_id)
+{
+  dex_return_error_if_fail (app_id != NULL);
+  return dex_scheduler_spawn (
+      bz_get_io_scheduler (),
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) user_data_exists_fiber,
+      g_strdup (app_id), g_free);
+}
+
+static DexFuture *
+path_exists_fiber (char *path)
+{
+  g_autoptr (GFile) file = NULL;
+  gboolean exists        = FALSE;
+
+  file   = g_file_new_for_path (path);
+  exists = g_file_query_exists (file, NULL);
+  return dex_future_new_for_boolean (exists);
+}
+
+static DexFuture *
+user_data_exists_fiber (char *app_id)
+{
+  g_autofree char *user_data_path = NULL;
+  g_autoptr (GFile) file          = NULL;
+  gboolean exists                 = FALSE;
+
+  user_data_path = g_build_filename (g_get_home_dir (), ".var", "app", app_id, NULL);
+  file           = g_file_new_for_path (user_data_path);
+  exists         = g_file_query_exists (file, NULL);
+  return dex_future_new_for_boolean (exists);
+}
+
 char *
-bz_dup_cache_dir (const char *submodule)
+bz_dup_root_cache_dir (void)
 {
   const char *user_cache = NULL;
   const char *id         = NULL;
-
-  g_return_val_if_fail (submodule != NULL, NULL);
 
   user_cache = g_get_user_cache_dir ();
 
@@ -121,5 +221,30 @@ bz_dup_cache_dir (const char *submodule)
   if (id == NULL)
     id = "Bazaar";
 
-  return g_build_filename (user_cache, id, submodule, NULL);
+  return g_build_filename (user_cache, id, NULL);
+}
+
+char *
+bz_dup_cache_dir (const char *submodule)
+{
+  g_autofree char *root_cache_dir = NULL;
+
+  g_return_val_if_fail (submodule != NULL, NULL);
+
+  root_cache_dir = bz_dup_root_cache_dir ();
+  return g_build_filename (root_cache_dir, submodule, NULL);
+}
+
+static DexFuture *
+reap_file_fiber (GFile *file)
+{
+  bz_reap_file (file);
+  return dex_future_new_true ();
+}
+
+static DexFuture *
+reap_path_fiber (char *path)
+{
+  bz_reap_path (path);
+  return dex_future_new_true ();
 }

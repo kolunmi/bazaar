@@ -8,6 +8,8 @@ template $BzTransactionView: Adw.Bin {
         "navigation-sidebar",
         "transaction-sidebar-entry-list",
       ]
+
+      overflow: visible;
                 
       model: NoSelection {
         model: bind template.transaction as <$BzTransaction>.trackers;
@@ -19,7 +21,6 @@ template $BzTransactionView: Adw.Bin {
 
           child: Button {
             styles [
-              "flat",
               "app-transaction-button",
               "card"
             ]

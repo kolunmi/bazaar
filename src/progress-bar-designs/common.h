@@ -1,6 +1,6 @@
-/* bz-detailed-app-tile.h
+/* progress-bar-designs/common.h
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2025 Eva M
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,23 +22,11 @@
 
 #include <gtk/gtk.h>
 
-#include "bz-entry-group.h"
-
 G_BEGIN_DECLS
 
-#define BZ_TYPE_DETAILED_APP_TILE (bz_detailed_app_tile_get_type ())
-G_DECLARE_FINAL_TYPE (BzDetailedAppTile, bz_detailed_app_tile, BZ, DETAILED_APP_TILE, GtkButton)
-
-BzDetailedAppTile *
-bz_detailed_app_tile_new (void);
-
-BzEntryGroup *
-bz_detailed_app_tile_get_group (BzDetailedAppTile *self);
-
 void
-bz_detailed_app_tile_set_group (BzDetailedAppTile *self,
-                                BzEntryGroup      *group);
+append_pride_flag (GtkSnapshot     *snapshot,
+                   graphene_rect_t *bounds,
+                   const char      *name);
 
 G_END_DECLS
-
-/* End of bz-detailed-app-tile.h */

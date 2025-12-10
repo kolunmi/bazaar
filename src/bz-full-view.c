@@ -431,28 +431,61 @@ get_age_rating_style (gpointer         object,
 }
 
 static char *
-format_license_tooltip (gpointer    object,
-                        const char *license)
+format_license_tooltip (gpointer object,
+                        BzEntry *entry)
 {
-  g_autofree char *name = NULL;
+  const char      *license;
+  gboolean         is_floss = FALSE;
+  g_autofree char *name     = NULL;
+
+  if (entry == NULL)
+    return g_strdup (_ ("Unknown"));
+
+  g_object_get (entry, "is-floss", &is_floss, "project-license", &license, NULL);
 
   if (license == NULL || *license == '\0')
     return g_strdup (_ ("Unknown"));
+
+  if (is_floss && bz_spdx_is_valid (license))
+    {
+      name = bz_spdx_get_name (license);
+      return g_strdup_printf (_ ("Free software licensed under %s"),
+                              (name != NULL && *name != '\0') ? name : license);
+    }
+
+  if (is_floss)
+    return g_strdup (_ ("Free software"));
 
   if (g_strcmp0 (license, "LicenseRef-proprietary") == 0)
     return g_strdup (_ ("Proprietary Software"));
 
   name = bz_spdx_get_name (license);
-
-  return g_strdup_printf (_ ("Free software licensed under %s"),
+  return g_strdup_printf (_ ("Special License: %s"),
                           (name != NULL && *name != '\0') ? name : license);
 }
 
 static char *
 get_license_label (gpointer object,
-                   gboolean is_floss)
+                   BzEntry *entry)
 {
-  return g_strdup (is_floss ? _ ("Free") : _ ("Proprietary"));
+  const char *license;
+  gboolean    is_floss = FALSE;
+
+  if (entry == NULL)
+    return g_strdup (_ ("Unknown"));
+
+  g_object_get (entry, "is-floss", &is_floss, "project-license", &license, NULL);
+
+  if (is_floss)
+    return g_strdup (_ ("Free"));
+
+  if (g_strcmp0 (license, "LicenseRef-proprietary") == 0)
+    return g_strdup (_ ("Proprietary"));
+
+  if (license == NULL || *license == '\0')
+    return g_strdup (_ ("Unknown"));
+
+  return g_strdup (_ ("Special License"));
 }
 
 static char *
@@ -527,6 +560,12 @@ format_more_other_apps_label (gpointer object, const char *developer)
     return g_strdup (_ ("Other Apps by this Developer"));
 
   return g_strdup_printf (_ ("Other Apps by %s"), developer);
+}
+
+static char *
+format_leftover_label (gpointer object, const char *name)
+{
+  return g_strdup_printf (_ ("%s is not installed, but it still has data present."), name);
 }
 
 static gpointer
@@ -780,14 +819,25 @@ screenshot_clicked_cb (BzFullView            *self,
                        BzScreenshotsCarousel *carousel)
 {
   GListModel        *screenshots = NULL;
+  GListModel        *captions    = NULL;
   AdwNavigationPage *page        = NULL;
   GtkWidget         *nav_view    = NULL;
+  BzEntry           *entry       = NULL;
 
   screenshots = bz_screenshots_carousel_get_model (carousel);
   if (screenshots == NULL)
     return;
 
-  page = bz_screenshot_page_new (screenshots, index);
+  if (self->ui_entry != NULL)
+    {
+      entry = bz_result_get_object (self->ui_entry);
+      if (entry != NULL)
+        g_object_get (entry, "screenshot-captions", &captions, NULL);
+    }
+
+  page = bz_screenshot_page_new (screenshots, captions, index);
+
+  g_clear_object (&captions);
 
   nav_view = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
   if (nav_view != NULL)
@@ -876,6 +926,18 @@ remove_cb (BzFullView *self,
            GtkButton  *button)
 {
   g_signal_emit (self, signals[SIGNAL_REMOVE], 0, button);
+}
+
+static void
+delete_user_data_cb (BzFullView *self,
+                     GtkButton  *button)
+{
+  g_return_if_fail (BZ_IS_FULL_VIEW (self));
+
+  if (self->group == NULL)
+    return;
+
+  bz_entry_group_reap_user_data (self->group);
 }
 
 static void
@@ -1146,6 +1208,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, get_formfactor_label);
   gtk_widget_class_bind_template_callback (widget_class, get_formfactor_tooltip);
   gtk_widget_class_bind_template_callback (widget_class, has_link);
+  gtk_widget_class_bind_template_callback (widget_class, format_leftover_label);
   gtk_widget_class_bind_template_callback (widget_class, format_other_apps_label);
   gtk_widget_class_bind_template_callback (widget_class, format_more_other_apps_label);
   gtk_widget_class_bind_template_callback (widget_class, get_developer_apps_entries);
@@ -1161,6 +1224,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, run_cb);
   gtk_widget_class_bind_template_callback (widget_class, install_cb);
   gtk_widget_class_bind_template_callback (widget_class, remove_cb);
+  gtk_widget_class_bind_template_callback (widget_class, delete_user_data_cb);
   gtk_widget_class_bind_template_callback (widget_class, support_cb);
   gtk_widget_class_bind_template_callback (widget_class, forge_cb);
   gtk_widget_class_bind_template_callback (widget_class, pick_license_warning);
@@ -1236,7 +1300,7 @@ bz_full_view_set_entry_group (BzFullView   *self,
       self->group    = g_object_ref (group);
       self->ui_entry = bz_entry_group_dup_ui_entry (group);
 
-      future            = bz_entry_group_dup_all_into_model (group);
+      future            = bz_entry_group_dup_all_into_store (group);
       self->group_model = bz_result_new (future);
 
       if (self->debounce)

@@ -51,7 +51,7 @@ gdbus_src = gnome.gdbus_codegen(
   namespace : 'Bz',
 )
 
-bz_sources = [
+bz_sources = files(
   'bz-addons-dialog.c',
   'bz-age-rating-dialog.c',
   'bz-app-size-dialog.c',
@@ -70,7 +70,6 @@ bz_sources = [
   'bz-curated-view.c',
   'bz-data-graph.c',
   'bz-decorated-screenshot.c',
-  'bz-detailed-app-tile.c',
   'bz-developer-badge.c',
   'bz-download-worker.c',
   'bz-dynamic-list-view.c',
@@ -137,7 +136,8 @@ bz_sources = [
   'bz-yaml-parser.c',
   'bz-zoom.c',
   'main.c',
-]
+)
+subdir('progress-bar-designs')
 
 bz_deps = [
   math,
@@ -225,7 +225,6 @@ blueprints = custom_target('blueprints',
     'bz-curated-app-tile.blp',
     'bz-curated-view.blp',
     'bz-decorated-screenshot.blp',
-    'bz-detailed-app-tile.blp',
     'bz-developer-badge.blp',
     'bz-entry-inspector.blp',
     'bz-featured-carousel.blp',
