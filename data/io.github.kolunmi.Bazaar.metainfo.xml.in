@@ -68,6 +68,12 @@
   </screenshots>
 
   <releases>
+    <release version="0.6.2" date="2025-12-09">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.6.2</url>
+      <description translate="no">
+        <p>Quick release to allow manual refresh if flathub is being flaky</p>
+      </description>
+    </release>
     <release version="0.6.1" date="2025-12-09">
       <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.6.1</url>
       <description translate="no">
