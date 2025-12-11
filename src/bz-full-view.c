@@ -566,9 +566,8 @@ static char *
 format_leftover_label (gpointer object, const char *name, guint64 size)
 {
   g_autofree char *formatted_size = NULL;
-
   formatted_size = g_format_size (size);
-  return g_strdup_printf (_ ("%s is not installed, but it still has %s of data present."), name, formatted_size);
+  return g_strdup_printf (_ ("%s is not installed, but it still has <b>%s</b> of data present."), name, formatted_size);
 }
 
 static gpointer

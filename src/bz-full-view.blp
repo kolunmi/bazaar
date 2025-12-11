@@ -633,6 +633,7 @@ template $BzFullView: Adw.Bin {
                               margin-top: 8;
                               margin-bottom: 8;
                               label: bind $format_leftover_label(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.title, template.entry-group as <$BzEntryGroup>.user-data-size ) as <string>;
+                              use-markup: true;
                               wrap: true;
                               wrap-mode: word_char;
                               justify: left;
