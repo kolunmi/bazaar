@@ -11,6 +11,7 @@ src/bz-app-size-dialog.blp
 src/bz-app-size-dialog.c
 src/bz-app-tile.blp
 src/bz-app-tile.c
+src/bz-apps-page.blp
 src/bz-application-map-factory.c
 src/bz-application.c
 src/bz-async-texture.c
@@ -33,6 +34,7 @@ src/bz-entry-inspector.c
 src/bz-entry.c
 src/bz-env.c
 src/bz-error.c
+src/bz-featured-carousel.blp
 src/bz-featured-tile.blp
 src/bz-flathub-category-section.c
 src/bz-flathub-category.c
@@ -53,6 +55,7 @@ src/bz-inspector.blp
 src/bz-inspector.c
 src/bz-installed-page.blp
 src/bz-installed-page.c
+src/bz-installed-tile.blp
 src/bz-io.c
 src/bz-lazy-async-texture-model.c
 src/bz-license-dialog.blp
@@ -69,6 +72,8 @@ src/bz-result.c
 src/bz-rich-app-tile.blp
 src/bz-rich-app-tile.c
 src/bz-screenshot.c
+src/bz-screenshot-page.blp
+src/bz-screenshots-carousel.blp
 src/bz-search-engine.c
 src/bz-search-widget.blp
 src/bz-search-widget.c
