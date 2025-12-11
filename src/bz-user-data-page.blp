@@ -80,7 +80,6 @@ template $BzUserDataPage: Adw.NavigationPage {
                     focusable: false;
                     child: $BzUserDataTile {
                       group: bind template.item as <$BzEntryGroup>;
-                      activated => $tile_activated_cb();
                     };
                   }
                 };
@@ -92,8 +91,8 @@ template $BzUserDataPage: Adw.NavigationPage {
       Adw.Breakpoint {
         condition ("max-width: 700px")
         setters {
-          list_view.margin-start: 2;
-          list_view.margin-end: 2;
+          list_view.margin-start: 0;
+          list_view.margin-end: 0;
         }
       }
     };

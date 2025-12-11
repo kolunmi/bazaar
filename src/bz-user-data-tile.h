@@ -28,7 +28,7 @@ G_BEGIN_DECLS
 
 #define BZ_TYPE_USER_DATA_TILE (bz_user_data_tile_get_type ())
 
-G_DECLARE_FINAL_TYPE (BzUserDataTile, bz_user_data_tile, BZ, USER_DATA_TILE, BzListTile)
+G_DECLARE_FINAL_TYPE (BzUserDataTile, bz_user_data_tile, BZ, USER_DATA_TILE, AdwBin)
 
 GtkWidget *
 bz_user_data_tile_new (void);

@@ -521,11 +521,6 @@ action_user_data (GtkWidget  *widget,
   AdwNavigationPage *user_data_page = NULL;
 
   user_data_page = ADW_NAVIGATION_PAGE (bz_user_data_page_new (self->state));
-
-  g_signal_connect_swapped (
-      user_data_page, "select",
-      G_CALLBACK (browser_group_selected_cb), self);
-
   adw_navigation_view_push (self->navigation_view, user_data_page);
 }
 

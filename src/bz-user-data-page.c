@@ -51,14 +51,6 @@ enum
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
 
-enum
-{
-  SIGNAL_SELECT,
-
-  LAST_SIGNAL,
-};
-static guint signals[LAST_SIGNAL];
-
 static DexFuture *
 fetch_user_data_fiber (GWeakRef *wr);
 
@@ -71,10 +63,6 @@ items_changed (BzUserDataPage *self,
 
 static void
 set_page (BzUserDataPage *self);
-
-static void
-tile_activated_cb (BzUserDataTile *tile,
-                   GtkWidget      *user_data);
 
 static void
 bz_user_data_page_dispose (GObject *object)
@@ -179,27 +167,11 @@ bz_user_data_page_class_init (BzUserDataPageClass *klass)
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
-  signals[SIGNAL_SELECT] =
-      g_signal_new (
-          "select",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
-          g_cclosure_marshal_VOID__OBJECT,
-          G_TYPE_NONE, 1,
-          BZ_TYPE_ENTRY_GROUP);
-  g_signal_set_va_marshaller (
-      signals[SIGNAL_SELECT],
-      G_TYPE_FROM_CLASS (klass),
-      g_cclosure_marshal_VOID__OBJECTv);
-
   g_type_ensure (BZ_TYPE_USER_DATA_TILE);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-user-data-page.ui");
   gtk_widget_class_bind_template_child (widget_class, BzUserDataPage, stack);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
-  gtk_widget_class_bind_template_callback (widget_class, tile_activated_cb);
 }
 
 static void
@@ -234,32 +206,6 @@ set_page (BzUserDataPage *self)
     adw_view_stack_set_visible_child_name (self->stack, "content");
   else
     adw_view_stack_set_visible_child_name (self->stack, "empty");
-}
-
-static void
-tile_activated_cb (BzUserDataTile *tile,
-                   GtkWidget      *user_data)
-{
-  BzUserDataPage *self  = NULL;
-  BzEntryGroup   *group = NULL;
-
-  g_return_if_fail (BZ_IS_USER_DATA_TILE (tile));
-
-  self = BZ_USER_DATA_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (tile), BZ_TYPE_USER_DATA_PAGE));
-  if (self == NULL)
-    {
-      g_warning ("Could not find BzUserDataPage ancestor");
-      return;
-    }
-
-  group = bz_user_data_tile_get_group (tile);
-  if (group == NULL)
-    {
-      g_warning ("Tile has no group");
-      return;
-    }
-
-  g_signal_emit (self, signals[SIGNAL_SELECT], 0, group);
 }
 
 static int

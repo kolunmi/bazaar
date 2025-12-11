@@ -730,8 +730,7 @@ window.narrow .category-tile {
 
 .user-data-list-view > * {
   transition: background-color 200ms;
-  margin-left: 0;
-  margin-right: 0;
+  margin-bottom: 0;
 }
 
 .user-data-list-view row {
@@ -752,3 +751,4 @@ curated-list-view,
 curated-list-view list {
   background: var(--bg-color);
 }
+

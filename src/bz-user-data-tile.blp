@@ -1,91 +1,81 @@
 using Gtk 4.0;
+using Adw 1;
 
-template $BzUserDataTile: $BzListTile {
-  accessibility {
-    labelled-by: title_label;
-    described-by: description_label;
-  }
-
-  margin-bottom: 8;
-  visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.user-data-size) as <bool>) as <bool>;
-  child: Box {
-    orientation: horizontal;
-    spacing: 10;
-
-    Picture icon_picture {
-      margin-start: 10;
-      margin-top: 10;
-      margin-bottom: 10;
-      height-request: 64;
-      width-request: 64;
-      paintable: bind template.group as <$BzEntryGroup>.icon-paintable;
-      visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.icon-paintable) as <bool>) as <bool>;
-      styles ["icon-dropshadow"]
-    }
-
-    Image fallback_icon {
-      margin-start: 10;
-      margin-top: 10;
-      margin-bottom: 10;
-      height-request: 64;
-      width-request: 64;
-      pixel-size: 64;
-      icon-name: "application-x-executable";
-      visible: bind $is_null(template.group as <$BzEntryGroup>.icon-paintable) as <bool>;
-      styles ["icon-dropshadow"]
-    }
-
-    Box {
-      orientation: vertical;
-      valign: center;
-      spacing: 4;
-
-      Label title_label {
-        xalign: 0.0;
-        ellipsize: end;
-        single-line-mode: true;
-        has-tooltip: true;
-        tooltip-text: bind template.group as <$BzEntryGroup>.id;
-        label: bind template.group as <$BzEntryGroup>.title;
+template $BzUserDataTile: Adw.Bin {
+  child: Revealer {
+    transition-type: slide_down;
+    reveal-child: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.user-data-size) as <bool>) as <bool>;
+    child: Adw.Bin {
+      accessibility {
+        labelled-by: title_label;
+        described-by: description_label;
       }
-
-      Label description_label {
-        halign: start;
-        label: bind $format_size(template.group as <$BzEntryGroup>.user-data-size) as <string>;
-        styles ["accent", "caption-heading"]
-      }
-    }
-
-    Box {
-      orientation: horizontal;
-      spacing: 8;
-      margin-end: 8;
-      hexpand: true;
-      halign: end;
-
-      Button remove_button {
-        styles [
-          "flat",
-          "destructive-action",
-        ]
-
-        has-tooltip: true;
-        tooltip-text: _("Remove User Data");
-
-        width-request: 32;
-        height-request: 32;
-        valign: center;
-        icon-name: "user-trash-symbolic";
-
-        clicked => $remove_cb() swapped;
-      }
-
-      Image {
-        pixel-size: 14;
-        icon-name: "go-next-symbolic";
-        margin-end: 4;
-        styles ["dimmed"]
-      }
-    }
+      margin-bottom: 4;
+      margin-start: 4;
+      margin-end: 4;
+      margin-top: 4;
+      styles [
+        "card",
+      ]
+      child: Box {
+        orientation: horizontal;
+        spacing: 10;
+        Picture icon_picture {
+          margin-start: 10;
+          margin-top: 10;
+          margin-bottom: 10;
+          height-request: 48;
+          width-request: 48;
+          paintable: bind template.group as <$BzEntryGroup>.icon-paintable;
+          visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.icon-paintable) as <bool>) as <bool>;
+          styles ["icon-dropshadow"]
+        }
+        Image fallback_icon {
+          margin-start: 10;
+          margin-top: 10;
+          margin-bottom: 10;
+          height-request: 48;
+          width-request: 48;
+          pixel-size: 64;
+          icon-name: "application-x-executable";
+          visible: bind $is_null(template.group as <$BzEntryGroup>.icon-paintable) as <bool>;
+          styles ["icon-dropshadow"]
+        }
+        Box {
+          orientation: vertical;
+          valign: center;
+          spacing: 4;
+          Label title_label {
+            xalign: 0.0;
+            ellipsize: end;
+            single-line-mode: true;
+            has-tooltip: true;
+            tooltip-text: bind template.group as <$BzEntryGroup>.id;
+            label: bind template.group as <$BzEntryGroup>.title;
+          }
+          Label description_label {
+            halign: start;
+            label: bind $format_size(template.group as <$BzEntryGroup>.user-data-size) as <string>;
+            styles ["accent", "caption-heading"]
+          }
+        }
+        Button remove_button {
+          styles [
+            "flat",
+            "destructive-action",
+          ]
+          hexpand: true;
+          halign: end;
+          width-request: 32;
+          height-request: 32;
+          valign: center;
+          margin-end: 8;
+          has-tooltip: true;
+          tooltip-text: _("Remove User Data");
+          icon-name: "user-trash-symbolic";
+          clicked => $remove_cb() swapped;
+        }
+      };
+    };
   };
 }

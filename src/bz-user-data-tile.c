@@ -40,7 +40,7 @@ struct _BzUserDataTile
   GtkButton  *remove_button;
 };
 
-G_DEFINE_FINAL_TYPE (BzUserDataTile, bz_user_data_tile, BZ_TYPE_LIST_TILE)
+G_DEFINE_FINAL_TYPE (BzUserDataTile, bz_user_data_tile, ADW_TYPE_BIN)
 
 enum
 {
