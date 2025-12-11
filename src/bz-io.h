@@ -50,6 +50,9 @@ DexFuture *
 bz_get_user_data_ids_dex (void);
 
 char *
+bz_dup_root_cache_dir (void);
+
+char *
 bz_dup_cache_dir (const char *submodule);
 
 #define bz_dup_module_dir() bz_dup_cache_dir (BAZAAR_MODULE)

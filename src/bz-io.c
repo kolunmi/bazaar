@@ -328,12 +328,10 @@ get_all_user_data_ids_fiber (void)
 }
 
 char *
-bz_dup_cache_dir (const char *submodule)
+bz_dup_root_cache_dir (void)
 {
   const char *user_cache = NULL;
   const char *id         = NULL;
-
-  g_return_val_if_fail (submodule != NULL, NULL);
 
   user_cache = g_get_user_cache_dir ();
 
@@ -341,7 +339,18 @@ bz_dup_cache_dir (const char *submodule)
   if (id == NULL)
     id = "Bazaar";
 
-  return g_build_filename (user_cache, id, submodule, NULL);
+  return g_build_filename (user_cache, id, NULL);
+}
+
+char *
+bz_dup_cache_dir (const char *submodule)
+{
+  g_autofree char *root_cache_dir = NULL;
+
+  g_return_val_if_fail (submodule != NULL, NULL);
+
+  root_cache_dir = bz_dup_root_cache_dir ();
+  return g_build_filename (root_cache_dir, submodule, NULL);
 }
 
 static DexFuture *

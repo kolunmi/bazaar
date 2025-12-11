@@ -619,7 +619,6 @@ initialize_fiber (GWeakRef *wr)
   g_autoptr (BzFlathubState) self    = NULL;
   g_autoptr (GError) local_error     = NULL;
   gboolean result                    = FALSE;
-  g_autoptr (GPtrArray) futures      = NULL;
   g_autoptr (GHashTable) quality_set = NULL;
 
   g_autoptr (DexFuture) aotd_f       = NULL;
@@ -634,19 +633,21 @@ initialize_fiber (GWeakRef *wr)
 
   bz_weak_get_or_return_reject (self, wr);
 
-  futures     = g_ptr_array_new_with_free_func (dex_unref);
   quality_set = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 
-#define ADD_REQUEST(_var, ...)                   \
-  G_STMT_START                                   \
-  {                                              \
-    g_autofree char *_request = NULL;            \
-                                                 \
-    _request = g_strdup_printf (__VA_ARGS__);    \
-    (_var)   = bz_query_flathub_v2_json_take (   \
-        g_steal_pointer (&_request));          \
-    g_ptr_array_add (futures, dex_ref ((_var))); \
-  }                                              \
+#define ADD_REQUEST(_var, ...)                                                         \
+  G_STMT_START                                                                         \
+  {                                                                                    \
+    g_autofree char *_request = NULL;                                                  \
+                                                                                       \
+    _request = g_strdup_printf (__VA_ARGS__);                                          \
+    (_var)   = bz_query_flathub_v2_json_take (g_steal_pointer (&_request));            \
+    if (!dex_await (dex_ref ((_var)), &local_error))                                   \
+      {                                                                                \
+        g_warning ("Failed to complete request to flathub: %s", local_error->message); \
+        return dex_future_new_for_error (g_steal_pointer (&local_error));              \
+      }                                                                                \
+  }                                                                                    \
   G_STMT_END
 
   ADD_REQUEST (passing_f, "/quality-moderation/passing-apps?page=1&page_size=%d", QUALITY_MODERATION_PAGE_SIZE);
@@ -660,17 +661,6 @@ initialize_fiber (GWeakRef *wr)
   ADD_REQUEST (mobile_f, "/collection/mobile?page=0&per_page=%d", COLLECTION_FETCH_SIZE);
 
 #undef ADD_REQUEST
-
-  result = dex_await (
-      dex_future_all_racev (
-          (DexFuture *const *) futures->pdata,
-          futures->len),
-      &local_error);
-  if (!result)
-    {
-      g_warning ("Failed to complete request to flathub: %s", local_error->message);
-      return dex_future_new_for_error (g_steal_pointer (&local_error));
-    }
 
 #define GET_BOXED(_future) g_value_get_boxed (dex_future_get_value ((_future), NULL))
 
@@ -736,31 +726,23 @@ initialize_fiber (GWeakRef *wr)
 
     for (guint i = 0; i < length; i++)
       {
-        const char      *category = NULL;
-        g_autofree char *request  = NULL;
+        const char      *category    = NULL;
+        g_autofree char *request     = NULL;
+        g_autoptr (DexFuture) future = NULL;
 
         category = json_array_get_string_element (array, i);
         request  = g_strdup_printf (
             "/collection/category/%s?page=0&per_page=%d",
             category, CATEGORY_FETCH_SIZE);
-        g_ptr_array_add (
-            category_futures,
-            bz_query_flathub_v2_json_take (
-                g_steal_pointer (&request)));
-      }
 
-    if (category_futures->len > 0)
-      {
-        result = dex_await (
-            dex_future_all_racev (
-                (DexFuture *const *) category_futures->pdata,
-                category_futures->len),
-            &local_error);
+        future = bz_query_flathub_v2_json_take (g_steal_pointer (&request));
+        result = dex_await (dex_ref (future), &local_error);
         if (!result)
           {
             g_warning ("Failed to complete request to flathub: %s", local_error->message);
             return dex_future_new_for_error (g_steal_pointer (&local_error));
           }
+        g_ptr_array_add (category_futures, dex_ref (future));
       }
 
     for (guint i = 0; i < length; i++)
