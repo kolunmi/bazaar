@@ -1524,8 +1524,8 @@ init_finally (DexFuture *future,
       self->sync = g_steal_pointer (&sync_future);
 
       self->periodic_timeout_source = g_timeout_add_seconds (
-          /* Check every hour */
-          60 * 60, (GSourceFunc) periodic_timeout_cb, self);
+          /* Check every day */
+          60 * 60 * 24, (GSourceFunc) periodic_timeout_cb, self);
     }
   else
     {
@@ -2320,10 +2320,6 @@ init_service_struct (BzApplication *self,
         g_warning ("Could not load main config at %s: %s",
                    HARDCODED_MAIN_CONFIG, local_error->message);
     }
-  else
-    g_warning ("Could not load main config at %s: %s",
-               HARDCODED_MAIN_CONFIG, local_error->message);
-
   g_clear_error (&local_error);
 #endif
 

@@ -43,6 +43,7 @@
         "prepend-ld-library-path": "/usr/lib/sdk/llvm20/lib"
       },
       "config-opts": [
+        "-Ddevelopment=true",
         "-Dsandboxed_libflatpak=true",
         "-Dhardcoded_main_config_path=/run/host/etc/bazaar/bazaar.yaml",
         "-Dhardcoded_content_config_path=/run/host/etc/bazaar/config.yaml",

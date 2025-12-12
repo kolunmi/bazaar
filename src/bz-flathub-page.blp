@@ -32,6 +32,15 @@ template $BzFlathubPage: Adw.Bin {
           child: Adw.StatusPage {
             icon-name: "connected-squares-x";
             title: _("Offline");
+            description: _("Flathub returned an error");
+
+            child: Button {
+              styles ["pill"]
+              halign: center;
+              sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.syncing as <bool>) as <bool>;
+              label: _("Retry Flathub Connection");
+              action-name: "app.sync-remotes";
+            };
           };
         }
 
