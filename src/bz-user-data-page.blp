@@ -38,7 +38,7 @@ template $BzUserDataPage: Adw.NavigationPage {
         transition-duration: 400;
         Adw.ViewStackPage {
           name: "loading";
-          title: _("Empty");
+          title: _("Loading");
           child:Adw.Spinner {
             halign: fill;
             valign: center;
@@ -52,7 +52,7 @@ template $BzUserDataPage: Adw.NavigationPage {
           title: _("Empty");
           child: Adw.StatusPage {
             icon-name: "folder-documents-symbolic";
-            title: _("No User Data");
+            title: _("No User Data found");
           };
         }
         Adw.ViewStackPage {
