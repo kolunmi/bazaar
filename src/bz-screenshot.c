@@ -243,7 +243,12 @@ bz_screenshot_snapshot (GtkWidget   *widget,
 
   if (self->top_half)
     {
-      scaled_w = TOP_HALF_FIXED_WIDTH;
+      int paintable_width = gdk_paintable_get_intrinsic_width (self->paintable);
+
+      if (paintable_width > TOP_HALF_FIXED_WIDTH)
+        scaled_w = TOP_HALF_FIXED_WIDTH;
+      else
+        scaled_w = paintable_width > 0 ? paintable_width : TOP_HALF_FIXED_WIDTH;
 
       if (paintable_aspect > 0.0)
         scaled_h = scaled_w / paintable_aspect;
