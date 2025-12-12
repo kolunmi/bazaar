@@ -51,6 +51,7 @@ struct _BzWorldMap
   gboolean cache_valid;
 
   GtkEventController *motion;
+  GtkGesture         *gesture;
   double              offset_x;
   double              offset_y;
   double              scale;
@@ -320,14 +321,15 @@ on_style_changed (AdwStyleManager *style_manager,
 }
 
 static void
-motion_event (BzWorldMap               *self,
-              gdouble                   x,
-              gdouble                   y,
-              GtkEventControllerMotion *controller)
+update_hovered_country (BzWorldMap *self,
+                        double      x,
+                        double      y)
 {
-  double map_x       = (x - self->offset_x) / self->scale;
-  double map_y       = (y - self->offset_y) / self->scale;
-  int    old_hovered = self->hovered_country;
+  double map_x;
+  double map_y;
+
+  map_x = (x - self->offset_x) / self->scale;
+  map_y = (y - self->offset_y) / self->scale;
 
   self->motion_x        = x;
   self->motion_y        = y;
@@ -343,6 +345,19 @@ motion_event (BzWorldMap               *self,
           break;
         }
     }
+}
+
+static void
+motion_event (BzWorldMap               *self,
+              gdouble                   x,
+              gdouble                   y,
+              GtkEventControllerMotion *controller)
+{
+  int old_hovered;
+
+  old_hovered = self->hovered_country;
+
+  update_hovered_country (self, x, y);
 
   if (old_hovered != self->hovered_country || self->hovered_country >= 0)
     gtk_widget_queue_draw (GTK_WIDGET (self));
@@ -359,6 +374,40 @@ motion_leave (BzWorldMap               *self,
       self->motion_y        = -1.0;
       gtk_widget_queue_draw (GTK_WIDGET (self));
     }
+}
+
+static void
+gesture_begin (BzWorldMap     *self,
+               double          start_x,
+               double          start_y,
+               GtkGestureDrag *gesture)
+{
+  update_hovered_country (self, start_x, start_y);
+  gtk_widget_queue_draw (GTK_WIDGET (self));
+}
+
+static void
+gesture_update (BzWorldMap     *self,
+                double          offset_x,
+                double          offset_y,
+                GtkGestureDrag *gesture)
+{
+  double start_x;
+  double start_y;
+
+  gtk_gesture_drag_get_start_point (gesture, &start_x, &start_y);
+
+  update_hovered_country (self, start_x + offset_x, start_y + offset_y);
+  gtk_widget_queue_draw (GTK_WIDGET (self));
+}
+
+static void
+gesture_end (BzWorldMap     *self,
+             double          offset_x,
+             double          offset_y,
+             GtkGestureDrag *gesture)
+{
+  gtk_widget_queue_draw (GTK_WIDGET (self));
 }
 
 static void
@@ -623,6 +672,13 @@ bz_world_map_init (BzWorldMap *self)
   g_signal_connect_swapped (self->motion, "motion", G_CALLBACK (motion_event), self);
   g_signal_connect_swapped (self->motion, "leave", G_CALLBACK (motion_leave), self);
   gtk_widget_add_controller (GTK_WIDGET (self), self->motion);
+
+  self->gesture = gtk_gesture_drag_new ();
+  gtk_gesture_single_set_touch_only (GTK_GESTURE_SINGLE (self->gesture), TRUE);
+  g_signal_connect_swapped (self->gesture, "drag-begin", G_CALLBACK (gesture_begin), self);
+  g_signal_connect_swapped (self->gesture, "drag-update", G_CALLBACK (gesture_update), self);
+  g_signal_connect_swapped (self->gesture, "drag-end", G_CALLBACK (gesture_end), self);
+  gtk_widget_add_controller (GTK_WIDGET (self), GTK_EVENT_CONTROLLER (self->gesture));
 
   g_signal_connect (style_manager, "notify::dark",
                     G_CALLBACK (on_style_changed), self);
