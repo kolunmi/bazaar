@@ -23,6 +23,12 @@
     "--system-talk-name=org.freedesktop.Accounts"
   ],
   "cleanup": [
+    "/libexec",
+    "/share/zsh",
+    "/share/gnome-shell",
+    "/share/gir-1.0",
+    "/share/gettext",
+    "/lib/girepository-1.0",
     "/include",
     "/lib/pkgconfig",
     "/lib/cmake",
