@@ -563,9 +563,11 @@ format_more_other_apps_label (gpointer object, const char *developer)
 }
 
 static char *
-format_leftover_label (gpointer object, const char *name)
+format_leftover_label (gpointer object, const char *name, guint64 size)
 {
-  return g_strdup_printf (_ ("%s is not installed, but it still has data present."), name);
+  g_autofree char *formatted_size = NULL;
+  formatted_size = g_format_size (size);
+  return g_strdup_printf (_ ("%s is not installed, but it still has <b>%s</b> of data present."), name, formatted_size);
 }
 
 static gpointer

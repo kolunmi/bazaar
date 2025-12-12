@@ -91,6 +91,10 @@ src/bz-transaction-view.c
 src/bz-transaction.c
 src/bz-update-dialog.blp
 src/bz-update-dialog.c
+src/bz-user-data-page.c
+src/bz-user-data-page.blp
+src/bz-user-data-tile.c
+src/bz-user-data-tile.blp
 src/bz-window.blp
 src/bz-window.c
 src/bz-world-map.c

@@ -38,6 +38,7 @@
 #include "bz-search-widget.h"
 #include "bz-transaction-manager.h"
 #include "bz-update-dialog.h"
+#include "bz-user-data-page.h"
 #include "bz-util.h"
 #include "bz-window.h"
 
@@ -513,6 +514,18 @@ format_progress (gpointer object,
 }
 
 static void
+action_user_data (GtkWidget  *widget,
+                  const char *action_name,
+                  GVariant   *parameter)
+{
+  BzWindow          *self           = BZ_WINDOW (widget);
+  AdwNavigationPage *user_data_page = NULL;
+
+  user_data_page = ADW_NAVIGATION_PAGE (bz_user_data_page_new (self->state));
+  adw_navigation_view_push (self->navigation_view, user_data_page);
+}
+
+static void
 debug_id_inspect_cb (BzWindow  *self,
                      GtkButton *button)
 {
@@ -616,6 +629,7 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, debug_id_inspect_cb);
 
   gtk_widget_class_install_action (widget_class, "escape", NULL, action_escape);
+  gtk_widget_class_install_action (widget_class, "window.user-data", NULL, action_user_data);
 }
 
 static gboolean
