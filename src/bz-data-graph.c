@@ -52,6 +52,7 @@ struct _BzDataGraph
   GtkEventController *motion;
   double              motion_x;
   double              motion_y;
+  GtkGesture         *gesture;
 };
 
 G_DEFINE_FINAL_TYPE (BzDataGraph, bz_data_graph, GTK_TYPE_WIDGET)
@@ -550,6 +551,39 @@ motion_leave (BzDataGraph              *self,
 }
 
 static void
+gesture_begin (BzDataGraph    *self,
+               double          start_x,
+               double          start_y,
+               GtkGestureDrag *gesture)
+{
+  self->motion_x = start_x;
+  self->motion_y = start_y;
+  gtk_widget_queue_draw (GTK_WIDGET (self));
+}
+
+static void
+gesture_update (BzDataGraph    *self,
+                double          offset_x,
+                double          offset_y,
+                GtkGestureDrag *gesture)
+{
+  double start_x, start_y;
+  gtk_gesture_drag_get_start_point (gesture, &start_x, &start_y);
+  self->motion_x = start_x + offset_x;
+  self->motion_y = start_y + offset_y;
+  gtk_widget_queue_draw (GTK_WIDGET (self));
+}
+
+static void
+gesture_end (BzDataGraph    *self,
+             double          offset_x,
+             double          offset_y,
+             GtkGestureDrag *gesture)
+{
+  gtk_widget_queue_draw (GTK_WIDGET (self));
+}
+
+static void
 bz_data_graph_init (BzDataGraph *self)
 {
   self->motion = gtk_event_controller_motion_new ();
@@ -557,6 +591,13 @@ bz_data_graph_init (BzDataGraph *self)
   g_signal_connect_swapped (self->motion, "motion", G_CALLBACK (motion_event), self);
   g_signal_connect_swapped (self->motion, "leave", G_CALLBACK (motion_leave), self);
   gtk_widget_add_controller (GTK_WIDGET (self), self->motion);
+
+  self->gesture = gtk_gesture_drag_new ();
+  gtk_gesture_single_set_touch_only (GTK_GESTURE_SINGLE (self->gesture), TRUE);
+  g_signal_connect_swapped (self->gesture, "drag-begin", G_CALLBACK (gesture_begin), self);
+  g_signal_connect_swapped (self->gesture, "drag-update", G_CALLBACK (gesture_update), self);
+  g_signal_connect_swapped (self->gesture, "drag-end", G_CALLBACK (gesture_end), self);
+  gtk_widget_add_controller (GTK_WIDGET (self), GTK_EVENT_CONTROLLER (self->gesture));
 
   self->motion_x         = -1.0;
   self->motion_y         = -1.0;
