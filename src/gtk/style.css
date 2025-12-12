@@ -725,12 +725,15 @@ window.narrow .category-tile {
 .installed-list-view > * {
     padding: 0;
     transition: background-color 200ms;
-    margin: 6px 0px;
+    margin: 5px 4.5px;
+}
+
+.narrow .installed-list-view > * {
+    margin: 4px 4.5px;
 }
 
 .user-data-list-view > * {
-  transition: background-color 200ms;
-  margin-bottom: 0;
+  margin: 0;
 }
 
 .user-data-list-view row {
