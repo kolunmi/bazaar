@@ -112,10 +112,10 @@
     --accent-color : #f06292;
 }
 
-.star {
-    --accent-fg-color: @warning_bg_color;
-    --accent-bg-color : alpha(@warning_bg_color, 0.25);
-    --accent-color: @warning_color;
+.favorite {
+    --accent-fg-color: @accent_bg_color;
+    --accent-bg-color : alpha(@accent_bg_color, 0.25);
+    --accent-color: @accent_color;
 }
 
 .green {
