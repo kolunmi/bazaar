@@ -212,37 +212,28 @@ template $BzFullView: Adw.Bin {
                                 };
                               }
 
-                              Revealer forge_stars {
-                                transition-type: slide_down;
-                                reveal-child: false;
-
-                                child: Button {
+                              Button {
                                   styles [
                                     "small-pill",
                                     "suggested-action",
-                                    "star",
+                                    "favorite",
                                   ]
-
                                   margin-top: 8;
                                   valign: start;
                                   halign: start;
                                   has-tooltip: true;
-                                  tooltip-text: _("Repository Star Count");
-                                  clicked => $forge_cb(template);
+                                  tooltip-text: _("Favorite Count");
+                                  can-target: false;
 
-                                  child: Box {
-                                    hexpand: false;
-                                    orientation: horizontal;
-                                    spacing: 10;
+                                  visible: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.is-flathub;
+                                  //clicked => $forge_cb(template);
 
-                                    Image {
-                                      icon-name: "starred-symbolic";
-                                    }
+                                  child: Adw.ButtonContent {
+                                    label: bind $format_favorites_count(template.ui-entry as <$BzResult>.object as <$BzEntry>.favorites-count) as <string>;
+                                    icon-name: "bookmark-outline-symbolic";
 
-                                    Label forge_stars_label {}
                                   };
-                                };
-                              }
+                                }
                             }
                           }
 

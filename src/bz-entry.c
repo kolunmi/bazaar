@@ -121,6 +121,7 @@ typedef struct
   GListModel           *download_stats_per_country;
   int                   recent_downloads;
   int                   total_downloads;
+  int                   favorites_count;
 
   GHashTable *flathub_prop_queries;
   DexFuture  *mini_icon_future;
@@ -172,6 +173,7 @@ enum
   PROP_DOWNLOAD_STATS,
   PROP_RECENT_DOWNLOADS,
   PROP_TOTAL_DOWNLOADS,
+  PROP_FAVORITES_COUNT,
   PROP_LIGHT_ACCENT_COLOR,
   PROP_DARK_ACCENT_COLOR,
   PROP_IS_MOBILE_FRIENDLY,
@@ -429,10 +431,13 @@ bz_entry_get_property (GObject    *object,
       query_flathub (self, PROP_DOWNLOAD_STATS);
       g_value_set_int (value, priv->recent_downloads);
       break;
-
     case PROP_TOTAL_DOWNLOADS:
       query_flathub (self, PROP_TOTAL_DOWNLOADS);
       g_value_set_int (value, priv->total_downloads);
+      break;
+    case PROP_FAVORITES_COUNT:
+      query_flathub (self, PROP_FAVORITES_COUNT);
+      g_value_set_int (value, priv->favorites_count);
       break;
 
     default:
@@ -663,6 +668,9 @@ bz_entry_set_property (GObject      *object,
       break;
     case PROP_TOTAL_DOWNLOADS:
       priv->total_downloads = g_value_get_int (value);
+      break;
+    case PROP_FAVORITES_COUNT:
+      priv->favorites_count = g_value_get_int (value);
       break;
     case PROP_HOLDING:
     default:
@@ -1008,6 +1016,13 @@ bz_entry_class_init (BzEntryClass *klass)
           "total-downloads",
           NULL, NULL,
           0, G_MAXINT, 0,
+          G_PARAM_READWRITE);
+
+  props[PROP_FAVORITES_COUNT] =
+      g_param_spec_int (
+          "favorites-count",
+          NULL, NULL,
+          -1, G_MAXINT, -1,
           G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
@@ -1361,6 +1376,8 @@ bz_entry_real_serialize (BzSerializable  *serializable,
             }
           if (g_hash_table_contains (priv->flathub_prop_queries, GINT_TO_POINTER (PROP_RECENT_DOWNLOADS)))
             g_variant_builder_add (builder, "{sv}", "recent-downloads", g_variant_new_int32 (priv->recent_downloads));
+          if (g_hash_table_contains (priv->flathub_prop_queries, GINT_TO_POINTER (PROP_FAVORITES_COUNT)))
+            g_variant_builder_add (builder, "{sv}", "favorites-count", g_variant_new_int32 (priv->favorites_count));
         }
     }
 }
@@ -2325,6 +2342,9 @@ query_flathub_fiber (QueryFlathubData *data)
     case PROP_DEVELOPER_APPS:
       request = g_strdup_printf ("/collection/developer/%s", developer);
       break;
+    case PROP_FAVORITES_COUNT:
+      request = g_strdup_printf ("/favorites/%s/count", id);
+      break;
     default:
       g_assert_not_reached ();
       return NULL;
@@ -2420,6 +2440,15 @@ query_flathub_fiber (QueryFlathubData *data)
           }
 
         return dex_future_new_for_object (app_ids);
+      }
+      break;
+    case PROP_FAVORITES_COUNT:
+      {
+        int favorites_count = 0;
+        if (json_object_has_member (json_node_get_object (node), "favorites_count"))
+          favorites_count = json_object_get_int_member (json_node_get_object (node), "favorites_count");
+
+        return dex_future_new_for_int (favorites_count);
       }
       break;
 
