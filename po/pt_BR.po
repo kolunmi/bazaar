@@ -556,7 +556,7 @@ msgstr "_Doar para o Bazaar ❤️"
 
 #: src/bz-apps-page.blp:18 src/bz-user-data-page.blp:19
 msgid "_Refresh Content"
-msgstr "Recarregando Conteúdo"
+msgstr "_Recarregar Conteúdo"
 
 #: src/bz-apps-page.blp:22 src/bz-user-data-page.blp:22 src/bz-window.blp:513
 msgid "_Preferences"
