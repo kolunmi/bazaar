@@ -358,7 +358,7 @@ find_entry_in_group (BzEntryGroup *group,
   guint n_items                    = 0;
   g_autoptr (GPtrArray) candidates = NULL;
 
-  model = dex_await_object (bz_entry_group_dup_all_into_model (group), error);
+  model = dex_await_object (bz_entry_group_dup_all_into_store (group), error);
   if (model == NULL)
     return NULL;
   n_items = g_list_model_get_n_items (model);

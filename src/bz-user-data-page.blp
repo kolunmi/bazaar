@@ -1,0 +1,100 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzUserDataPage: Adw.NavigationPage {
+  title: _("Manage Leftover User Data");
+
+  Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {
+      [end]
+      MenuButton {
+        primary: true;
+        icon-name: "open-menu-symbolic";
+        has-tooltip: true;
+        tooltip-text: _("Main Menu");
+        menu-model: menu {
+          section {
+            item (_("_Donate to Bazaar ❤️"), "app.donate")
+            item (_("_Refresh Content"), "app.refresh")
+          }
+          section {
+            item (_("_Preferences"), "app.preferences")
+            item (_("_Keyboard Shortcuts"), "app.shortcuts")
+            item (_("_About Bazaar"), "app.about")
+          }
+          section {
+            item (_("_Quit Bazaar"), "app.quit")
+          }
+        };
+      }
+    }
+
+    content: Adw.BreakpointBin {
+      width-request: 360;
+      height-request: 450;
+      child: Adw.ViewStack stack {
+        enable-transitions: true;
+        transition-duration: 400;
+        Adw.ViewStackPage {
+          name: "loading";
+          title: _("Empty");
+          child:Adw.Spinner {
+            halign: fill;
+            valign: center;
+            width-request: 64;
+            height-request: 64;
+            margin-bottom: 18;
+          };
+        }
+        Adw.ViewStackPage {
+          name: "empty";
+          title: _("Empty");
+          child: Adw.StatusPage {
+            icon-name: "folder-documents-symbolic";
+            title: _("No User Data");
+          };
+        }
+        Adw.ViewStackPage {
+          name: "content";
+          title: _("User Data");
+          child: ScrolledWindow {
+            hscrollbar-policy: never;
+            child: Adw.ClampScrollable {
+              maximum-size: 650;
+              child: ListView list_view {
+                styles [
+                  "navigation-sidebar",
+                  "user-data-list-view"
+                ]
+                margin-start: 25;
+                margin-end: 25;
+                overflow: visible;
+                model: NoSelection {
+                  model: bind template.model;
+                };
+                factory: BuilderListItemFactory {
+                  template ListItem {
+                    activatable: false;
+                    selectable: false;
+                    focusable: false;
+                    child: $BzUserDataTile {
+                      group: bind template.item as <$BzEntryGroup>;
+                    };
+                  }
+                };
+              };
+            };
+          };
+        }
+      };
+      Adw.Breakpoint {
+        condition ("max-width: 700px")
+        setters {
+          list_view.margin-start: 0;
+          list_view.margin-end: 0;
+        }
+      }
+    };
+  }
+}

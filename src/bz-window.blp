@@ -329,31 +329,57 @@ template $BzWindow: Adw.ApplicationWindow {
                     Adw.HeaderBar top_header_bar {
 
                       [start]
-                      Button update_button {
-                        styles [
-                          "suggested-action",
-                        ]
-
-                        has-tooltip: true;
-                        tooltip-text: _("Update");
-                        icon-name: "software-update-available-symbolic";
+                      Overlay {
                         visible: bind $invert_boolean($is_null(template.state as <$BzStateInfo>.available-updates) as <bool>) as <bool>;
-                        clicked => $update_cb(template);
+                        child: Button update_button {
+                          styles [
+                            "suggested-action",
+                          ]
+
+                          has-tooltip: true;
+                          tooltip-text: bind $update_amount_tooltip(template.state as <$BzStateInfo>.available-updates) as <string>;
+                          icon-name: "software-update-available-symbolic";
+
+                          clicked => $update_cb(template);
+                        };
+
+                        [overlay]
+                        Box {
+                          can-target: false;
+                          can-focus: false;
+                          margin-end: 2;
+                          margin-top: 3;
+                          halign: end;
+                          valign: start;
+
+                          styles [
+                            "updates-amount-border" ,
+                          ]
+
+                          Label {
+                            margin-top: 2;
+                            margin-bottom: 2;
+                            margin-start: 2;
+                            margin-end: 2;
+
+                            justify: center;
+                            width-request: 16;
+                            label: bind $list_length(template.state as <$BzStateInfo>.available-updates) as <string>;
+
+                            styles [
+                              "updates-amount",
+                            ]
+
+                          }
+                        }
                       }
 
                       [start]
-                      Box {
-                        orientation: horizontal;
-                        spacing: 10;
+                      Adw.Spinner {
                         margin-start: 4;
                         visible: bind $invert_boolean($is_null(template.state as <$BzStateInfo>.background-task-label) as <bool>) as <bool>;
-
-                        Adw.Spinner {}
-
-                        Label {
-                          label: bind template.state as <$BzStateInfo>.background-task-label;
-                          ellipsize: end;
-                        }
+                        has-tooltip: true;
+                        tooltip-text: bind template.state as <$BzStateInfo>.background-task-label;
                       }
 
                       [title]
@@ -486,6 +512,11 @@ menu primary_menu {
     item {
       label: _("_Preferences");
       action: "app.preferences";
+    }
+
+    item {
+      label: _("_Manage Leftover User Data");
+      action: "window.user-data";
     }
 
     item {

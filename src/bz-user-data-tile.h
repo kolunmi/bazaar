@@ -1,6 +1,6 @@
-/* bz-detailed-app-tile.h
+/* bz-user-data-tile.h
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2025 Adam Masciola, Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,25 +20,24 @@
 
 #pragma once
 
-#include <gtk/gtk.h>
-
 #include "bz-entry-group.h"
+#include "bz-list-tile.h"
+#include <adwaita.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_DETAILED_APP_TILE (bz_detailed_app_tile_get_type ())
-G_DECLARE_FINAL_TYPE (BzDetailedAppTile, bz_detailed_app_tile, BZ, DETAILED_APP_TILE, GtkButton)
+#define BZ_TYPE_USER_DATA_TILE (bz_user_data_tile_get_type ())
 
-BzDetailedAppTile *
-bz_detailed_app_tile_new (void);
+G_DECLARE_FINAL_TYPE (BzUserDataTile, bz_user_data_tile, BZ, USER_DATA_TILE, AdwBin)
 
-BzEntryGroup *
-bz_detailed_app_tile_get_group (BzDetailedAppTile *self);
+GtkWidget *
+bz_user_data_tile_new (void);
 
 void
-bz_detailed_app_tile_set_group (BzDetailedAppTile *self,
-                                BzEntryGroup      *group);
+bz_user_data_tile_set_group (BzUserDataTile *self,
+                             BzEntryGroup   *group);
+
+BzEntryGroup *
+bz_user_data_tile_get_group (BzUserDataTile *self);
 
 G_END_DECLS
-
-/* End of bz-detailed-app-tile.h */

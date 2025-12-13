@@ -351,7 +351,7 @@ bz_transaction_new_full (BzEntry **installs,
 
   g_return_val_if_fail ((installs != NULL && n_installs > 0) ||
                             (updates != NULL && n_updates > 0) ||
-                            (removals != NULL && n_removals),
+                            (removals != NULL && n_removals > 0),
                         NULL);
 
   for (guint i = 0; i < n_installs; i++)

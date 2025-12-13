@@ -368,7 +368,6 @@ query_sub_task_fiber (QuerySubTaskData *data)
       const char   *id                = NULL;
       const char   *title             = NULL;
       const char   *developer         = NULL;
-      const char   *description       = NULL;
       const char   *search_tokens     = NULL;
       double        score             = 0.0;
 
@@ -378,7 +377,6 @@ query_sub_task_fiber (QuerySubTaskData *data)
       id            = bz_entry_group_get_id (group);
       title         = bz_entry_group_get_title (group);
       developer     = bz_entry_group_get_developer (group);
-      description   = bz_entry_group_get_description (group);
       search_tokens = bz_entry_group_get_search_tokens (group);
 
       if (id != NULL && g_strcmp0 (query_utf8, id) == 0)
@@ -391,7 +389,6 @@ query_sub_task_fiber (QuerySubTaskData *data)
 
       score += EVALUATE_STRING (title, TRUE) * 1.0;
       score += EVALUATE_STRING (developer, FALSE) * 1.0;
-      score += EVALUATE_STRING (description, FALSE) * 1.0;
       score += EVALUATE_STRING (search_tokens, FALSE) * 1.0;
 
 #undef EVALUATE_STRING

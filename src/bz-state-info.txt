@@ -16,6 +16,7 @@ include="bz-transaction-manager.h"
 property=all_entries GListModel G_TYPE_LIST_MODEL object
 property=all_entry_groups GListModel G_TYPE_LIST_MODEL object
 property=all_installed_entry_groups GListModel G_TYPE_LIST_MODEL object
+property=all_user_data_entry_groups GListModel G_TYPE_LIST_MODEL object
 property=application_factory BzApplicationMapFactory BZ_TYPE_APPLICATION_MAP_FACTORY object
 property=available_updates GListModel G_TYPE_LIST_MODEL object
 property=backend BzBackend BZ_TYPE_BACKEND object

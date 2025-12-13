@@ -22,7 +22,6 @@
 
 #include "bz-app-tile.h"
 #include "bz-apps-page.h"
-#include "bz-detailed-app-tile.h"
 #include "bz-dynamic-list-view.h"
 #include "bz-entry-group.h"
 #include "bz-featured-carousel.h"
@@ -284,7 +283,6 @@ bz_flathub_page_class_init (BzFlathubPageClass *klass)
   g_type_ensure (BZ_TYPE_SECTION_VIEW);
   g_type_ensure (BZ_TYPE_FLATHUB_CATEGORY_SECTION);
   g_type_ensure (BZ_TYPE_FLATHUB_CATEGORY);
-  g_type_ensure (BZ_TYPE_DETAILED_APP_TILE);
   g_type_ensure (BZ_TYPE_INHIBITED_SCROLLABLE);
   g_type_ensure (BZ_TYPE_DYNAMIC_LIST_VIEW);
   g_type_ensure (BZ_TYPE_APP_TILE);

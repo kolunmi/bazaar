@@ -3,6 +3,19 @@
     color: black;
 }
 
+.updates-amount {
+	background-color: white;
+	color: var(--accent-bg-color);
+	font-size: 0.60em;
+	border-radius: 9999px;
+	font-weight: 900;
+}
+
+.updates-amount-border {
+  background-color: var(--accent-bg-color);
+  	border-radius: 9999px;
+}
+
 .bz-monospace {
     font-family: monospace;
 }
@@ -218,7 +231,7 @@ button.context-tile:active .lozenge {
     color: var(--accent-color);
 }
 
-.card.eol {
+.card.colored {
     background-color: alpha(var(--accent-bg-color),0.15);
     color: var(--accent-color);
 }
@@ -266,7 +279,7 @@ window.narrow .app-developer {
 }
 
 .context-tile {
-	border-radius: 10px;
+  box-shadow: none;
 	padding: 4px;
 }
 
@@ -715,6 +728,15 @@ window.narrow .category-tile {
     margin: 6px 0px;
 }
 
+.user-data-list-view > * {
+  transition: background-color 200ms;
+  margin-bottom: 0;
+}
+
+.user-data-list-view row {
+	min-height: 0;
+}
+
 .transaction-sidebar-entry-list {
     margin: 0;
     padding: 0;
@@ -722,9 +744,11 @@ window.narrow .category-tile {
 
 .disable-adw-flow-box-styling {
     background-color: transparent;
+    box-shadow: none;
 }
 
 curated-list-view,
 curated-list-view list {
   background: var(--bg-color);
 }
+

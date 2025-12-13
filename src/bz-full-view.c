@@ -562,6 +562,14 @@ format_more_other_apps_label (gpointer object, const char *developer)
   return g_strdup_printf (_ ("Other Apps by %s"), developer);
 }
 
+static char *
+format_leftover_label (gpointer object, const char *name, guint64 size)
+{
+  g_autofree char *formatted_size = NULL;
+  formatted_size = g_format_size (size);
+  return g_strdup_printf (_ ("%s is not installed, but it still has <b>%s</b> of data present."), name, formatted_size);
+}
+
 static gpointer
 filter_own_app_id (BzEntry *entry, GtkStringList *app_ids)
 {
@@ -923,6 +931,18 @@ remove_cb (BzFullView *self,
 }
 
 static void
+delete_user_data_cb (BzFullView *self,
+                     GtkButton  *button)
+{
+  g_return_if_fail (BZ_IS_FULL_VIEW (self));
+
+  if (self->group == NULL)
+    return;
+
+  bz_entry_group_reap_user_data (self->group);
+}
+
+static void
 support_cb (BzFullView *self,
             GtkButton  *button)
 {
@@ -1190,6 +1210,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, get_formfactor_label);
   gtk_widget_class_bind_template_callback (widget_class, get_formfactor_tooltip);
   gtk_widget_class_bind_template_callback (widget_class, has_link);
+  gtk_widget_class_bind_template_callback (widget_class, format_leftover_label);
   gtk_widget_class_bind_template_callback (widget_class, format_other_apps_label);
   gtk_widget_class_bind_template_callback (widget_class, format_more_other_apps_label);
   gtk_widget_class_bind_template_callback (widget_class, get_developer_apps_entries);
@@ -1205,6 +1226,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, run_cb);
   gtk_widget_class_bind_template_callback (widget_class, install_cb);
   gtk_widget_class_bind_template_callback (widget_class, remove_cb);
+  gtk_widget_class_bind_template_callback (widget_class, delete_user_data_cb);
   gtk_widget_class_bind_template_callback (widget_class, support_cb);
   gtk_widget_class_bind_template_callback (widget_class, forge_cb);
   gtk_widget_class_bind_template_callback (widget_class, pick_license_warning);
@@ -1280,7 +1302,7 @@ bz_full_view_set_entry_group (BzFullView   *self,
       self->group    = g_object_ref (group);
       self->ui_entry = bz_entry_group_dup_ui_entry (group);
 
-      future            = bz_entry_group_dup_all_into_model (group);
+      future            = bz_entry_group_dup_all_into_store (group);
       self->group_model = bz_result_new (future);
 
       if (self->debounce)

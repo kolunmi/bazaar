@@ -22,7 +22,6 @@
     <file preprocess="xml-stripblanks">bz-context-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-curated-app-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-decorated-screenshot.ui</file>
-    <file preprocess="xml-stripblanks">bz-detailed-app-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-developer-badge.ui</file>
     <file preprocess="xml-stripblanks">bz-entry-inspector.ui</file>
     <file preprocess="xml-stripblanks">bz-featured-carousel.ui</file>
@@ -49,6 +48,8 @@
     <file preprocess="xml-stripblanks">bz-stats-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-transaction-view.ui</file>
     <file preprocess="xml-stripblanks">bz-update-dialog.ui</file>
+    <file preprocess="xml-stripblanks">bz-user-data-page.ui</file>
+    <file preprocess="xml-stripblanks">bz-user-data-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-window.ui</file>
     <file alias="shortcuts-dialog.ui" preprocess="xml-stripblanks">gtk/shortcuts-dialog.ui</file>
 
