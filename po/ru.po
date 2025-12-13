@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-10 09:28+0700\n"
-"PO-Revision-Date: 2025-12-10 09:52+0700\n"
+"POT-Creation-Date: 2025-12-13 02:06+0700\n"
+"PO-Revision-Date: 2025-12-13 13:30+0700\n"
 "Last-Translator: Jill Fiore <contact@lumaeris.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -143,17 +143,19 @@ msgstr "Страница поиска"
 msgid "Category page"
 msgstr "Страница категорий"
 
-#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:710
+#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:716
+#: src/bz-installed-tile.blp:99
 msgid "Manage Add-ons"
 msgstr "Управление дополнениями"
 
 #: src/bz-addons-dialog.c:90 src/bz-full-view.blp:504
-#: src/bz-transaction-view.blp:213 src/bz-window.c:1263
+#: src/bz-installed-tile.blp:117 src/bz-transaction-view.blp:213
+#: src/bz-window.c:1282
 msgid "Remove"
 msgstr "Удалить"
 
 #: src/bz-addons-dialog.c:95 src/bz-full-view.blp:276 src/bz-full-view.blp:491
-#: src/bz-transaction-view.blp:187 src/bz-window.c:1240
+#: src/bz-transaction-view.blp:187 src/bz-window.c:1259
 msgid "Install"
 msgstr "Установить"
 
@@ -540,6 +542,35 @@ msgstr "От размера Википедии"
 msgid "Without any media"
 msgstr "Исключая медиафайлы"
 
+#: src/bz-apps-page.blp:14 src/bz-full-view.blp:43 src/bz-user-data-page.blp:15
+#: src/bz-window.blp:426
+msgid "Main Menu"
+msgstr "Главное меню"
+
+#: src/bz-apps-page.blp:17 src/bz-user-data-page.blp:18 src/bz-window.blp:506
+msgid "_Donate to Bazaar ❤️"
+msgstr "_Поддержать Bazaar ❤️"
+
+#: src/bz-apps-page.blp:18 src/bz-user-data-page.blp:19
+msgid "_Refresh Content"
+msgstr "_Обновить контент"
+
+#: src/bz-apps-page.blp:22 src/bz-user-data-page.blp:22 src/bz-window.blp:513
+msgid "_Preferences"
+msgstr "П_араметры"
+
+#: src/bz-apps-page.blp:23 src/bz-user-data-page.blp:23 src/bz-window.blp:523
+msgid "_Keyboard Shortcuts"
+msgstr "_Сочетание клавиш"
+
+#: src/bz-apps-page.blp:24 src/bz-user-data-page.blp:24 src/bz-window.blp:528
+msgid "_About Bazaar"
+msgstr "О _Bazaar"
+
+#: src/bz-apps-page.blp:28 src/bz-user-data-page.blp:27 src/bz-window.blp:535
+msgid "_Quit Bazaar"
+msgstr "_Закрыть Bazaar"
+
 #: src/bz-application.c:556
 msgid ""
 "This functionality is currently disabled. It is recommended you download and "
@@ -602,7 +633,9 @@ msgid "Checking for updates"
 msgstr "Проверка на наличие обновлений"
 
 #: src/bz-curated-view.blp:11 src/bz-flathub-page.blp:19
-#: src/bz-full-view.blp:53 src/bz-installed-page.blp:15 src/bz-window.blp:183
+#: src/bz-full-view.blp:53 src/bz-installed-page.blp:15
+#: src/bz-user-data-page.blp:41 src/bz-user-data-page.blp:52
+#: src/bz-window.blp:183
 msgid "Empty"
 msgstr "Пусто"
 
@@ -694,6 +727,14 @@ msgstr "Закрыть"
 #: src/bz-error.c:90
 msgid "Copy and Close"
 msgstr "Скопировать и закрыть"
+
+#: src/bz-featured-carousel.blp:31
+msgid "Previous"
+msgstr "Предыдущий"
+
+#: src/bz-featured-carousel.blp:53
+msgid "Next"
+msgstr "Следующий"
 
 #: src/bz-featured-tile.blp:88
 msgid "App of the Day"
@@ -975,10 +1016,6 @@ msgstr "Сделать вклад"
 msgid "Toggle transaction sidebar"
 msgstr "Переключить боковую панель транзакций"
 
-#: src/bz-full-view.blp:43 src/bz-window.blp:426
-msgid "Main Menu"
-msgstr "Главное меню"
-
 #: src/bz-full-view.blp:57
 msgid "No Results"
 msgstr "Нет результатов"
@@ -1036,11 +1073,11 @@ msgstr ""
 "обновления или исправления ошибок безопасности. Оно может стать небезопасным "
 "для использования."
 
-#: src/bz-full-view.blp:643 src/bz-window.c:1209
+#: src/bz-full-view.blp:649 src/bz-window.c:1228
 msgid "Delete Data"
 msgstr "Удалить данные"
 
-#: src/bz-full-view.blp:777
+#: src/bz-full-view.blp:783
 msgid "Tags:"
 msgstr "Метки:"
 
@@ -1172,21 +1209,23 @@ msgstr "Больше приложений от %s"
 msgid "Other Apps by this Developer"
 msgstr "Другие приложения от этого разработчика"
 
-#: src/bz-full-view.c:562 src/bz-full-view.c:668
+#: src/bz-full-view.c:562 src/bz-full-view.c:670
 #, c-format
 msgid "Other Apps by %s"
 msgstr "Другие приложения от %s"
 
-#: src/bz-full-view.c:568
+#: src/bz-full-view.c:570
 #, c-format
-msgid "%s is not installed, but it still has data present."
-msgstr "%s не установлено, но пользовательские данные ещё присутствуют."
+msgid "%s is not installed, but it still has <b>%s</b> of data present."
+msgstr ""
+"%s не установлено, но пользовательские данные в размере <b>%s</b> ещё "
+"присутствуют."
 
-#: src/bz-full-view.c:670
+#: src/bz-full-view.c:672
 msgid "Other Apps"
 msgstr "Другие приложения"
 
-#: src/bz-full-view.c:672
+#: src/bz-full-view.c:674
 #, c-format
 msgid "%d Application"
 msgid_plural "%d Applications"
@@ -1194,11 +1233,11 @@ msgstr[0] "%d приложение"
 msgstr[1] "%d приложения"
 msgstr[2] "%d приложений"
 
-#: src/bz-full-view.c:1034
+#: src/bz-full-view.c:1036
 msgid "Show Less"
 msgstr "Показать меньше"
 
-#: src/bz-full-view.c:1034
+#: src/bz-full-view.c:1036
 msgid "Show More"
 msgstr "Показать больше"
 
@@ -1348,9 +1387,17 @@ msgstr ""
 "Вы установили несколько версий данного приложения. Какое вы хотите выбрать "
 "для продолжения?"
 
-#: src/bz-installed-page.c:402 src/bz-window.c:1239 src/bz-window.c:1262
+#: src/bz-installed-page.c:402 src/bz-window.c:1258 src/bz-window.c:1281
 msgid "Cancel"
 msgstr "Отмена"
+
+#: src/bz-installed-tile.blp:61 src/bz-rich-app-tile.blp:137
+msgid "Stopped Receiving Updates"
+msgstr "Прекращено получение обновлений"
+
+#: src/bz-installed-tile.blp:75
+msgid "Support this application"
+msgstr "Поддержать это приложение"
 
 #: src/bz-license-dialog.blp:160
 msgid "Get Involved"
@@ -1579,13 +1626,45 @@ msgstr "Версия %s"
 msgid "No details for this release"
 msgstr "Нет подробностей"
 
-#: src/bz-rich-app-tile.blp:137
-msgid "Stopped Receiving Updates"
-msgstr "Прекращено получение обновлений"
-
 #: src/bz-rich-app-tile.blp:154
 msgid "Get"
 msgstr "Скачать"
+
+#: src/bz-screenshot-page.blp:5
+msgid "Screenshots"
+msgstr "Скриншоты"
+
+#: src/bz-screenshot-page.blp:61
+msgid "Previous Screenshot"
+msgstr "Предыдущий скриншот"
+
+#: src/bz-screenshot-page.blp:71
+msgid "Next Screenshot"
+msgstr "Следующий скриншот"
+
+#: src/bz-screenshot-page.blp:87
+msgid "Copy Image"
+msgstr "Скопировать изображение"
+
+#: src/bz-screenshot-page.blp:147
+msgid "Reset View"
+msgstr "Возобновить вид"
+
+#: src/bz-screenshot-page.blp:158
+msgid "Zoom Out"
+msgstr "Отдалить"
+
+#: src/bz-screenshot-page.blp:168
+msgid "Zoom In"
+msgstr "Приблизить"
+
+#: src/bz-screenshots-carousel.blp:6
+msgid "Screenshots Carousel"
+msgstr "Карусель скриншотов"
+
+#: src/bz-screenshots-carousel.blp:104
+msgid "Open Screenshot Viewer"
+msgstr "Открыть просмотрщик скриншотов"
 
 #: src/bz-search-widget.blp:105
 msgid "Search Apps, Games, Software"
@@ -1709,6 +1788,27 @@ msgstr ""
 msgid "Additionally, %d runtimes and/or addons will be updated."
 msgstr "Дополнительно, %d сред выполнения и/или расширений будут обновлены."
 
+#: src/bz-user-data-page.blp:5
+msgid "Manage Leftover User Data"
+msgstr "Управление оставшимися пользовательскими данными"
+
+#: src/bz-user-data-page.blp:55
+msgid "No User Data"
+msgstr "Нет пользовательских данных"
+
+#: src/bz-user-data-page.blp:60
+msgid "User Data"
+msgstr "Пользовательские данные"
+
+#: src/bz-user-data-tile.c:144
+#, c-format
+msgid "Removed User Data for %s"
+msgstr "Удалены пользовательские данные к %s"
+
+#: src/bz-user-data-tile.blp:74
+msgid "Remove User Data"
+msgstr "Удалить пользовательские данные"
+
 #: src/bz-window.blp:66
 msgid "Inspect UI Entry"
 msgstr "Исследовать элемент интерфейса"
@@ -1761,31 +1861,15 @@ msgid ""
 msgstr ""
 "Вы имеете сетевое подключение, но просматриваете кэшируемую версию Flathub"
 
-#: src/bz-window.blp:506
-msgid "_Donate to Bazaar ❤️"
-msgstr "_Поддержать Bazaar ❤️"
-
-#: src/bz-window.blp:513
-msgid "_Preferences"
-msgstr "П_араметры"
-
 #: src/bz-window.blp:518
-msgid "_Keyboard Shortcuts"
-msgstr "_Сочетание клавиш"
+msgid "_Manage Leftover User Data"
+msgstr "_Управлять оставшимися данными"
 
-#: src/bz-window.blp:523
-msgid "_About Bazaar"
-msgstr "О _Bazaar"
-
-#: src/bz-window.blp:530
-msgid "_Quit Bazaar"
-msgstr "_Закрыть Bazaar"
-
-#: src/bz-window.blp:539
+#: src/bz-window.blp:544
 msgid "Open Bazaar Inspector"
 msgstr "Открыть Bazaar Инспектор"
 
-#: src/bz-window.c:473
+#: src/bz-window.c:475
 #, c-format
 msgid "%d Update Available"
 msgid_plural "%d Updates Available"
@@ -1793,7 +1877,7 @@ msgstr[0] "Доступно %d обновление"
 msgstr[1] "Доступно %d обновления"
 msgstr[2] "Доступно %d обновлений"
 
-#: src/bz-window.c:951
+#: src/bz-window.c:970
 msgid ""
 "The ability to inspect and install local .flatpak bundle files is coming "
 "soon! In the meantime, try running\n"
@@ -1809,50 +1893,50 @@ msgstr ""
 "\n"
 "в командной строке."
 
-#: src/bz-window.c:1069
+#: src/bz-window.c:1088
 msgid "Can't do that right now!"
 msgstr "Нельзя сделать это прямо сейчас!"
 
-#: src/bz-window.c:1200
+#: src/bz-window.c:1219
 msgid "Keep Data"
 msgstr "Оставить данные"
 
-#: src/bz-window.c:1201
+#: src/bz-window.c:1220
 msgid "Allow restoring settings and content"
 msgstr "Возможно восстановление настроек и контента"
 
-#: src/bz-window.c:1210
+#: src/bz-window.c:1229
 msgid "Permanently remove app data to save space"
 msgstr "Навсегда удалить данные приложения для сохранения места"
 
-#: src/bz-window.c:1233
+#: src/bz-window.c:1252
 #, c-format
 msgid "Install %s?"
 msgstr "Установить %s?"
 
-#: src/bz-window.c:1236
+#: src/bz-window.c:1255
 msgid "May install additional shared components"
 msgstr "Может установить дополнительные общие компоненты"
 
-#: src/bz-window.c:1255
+#: src/bz-window.c:1274
 #, c-format
 msgid "Remove %s?"
 msgstr "Удалить %s?"
 
-#: src/bz-window.c:1259
+#: src/bz-window.c:1278
 #, c-format
 msgid "It will not be possible to use %s after it is uninstalled."
-msgstr "Будет невозможно использовать %s после его удаления."
+msgstr "Станет невозможным использовать %s после его удаления."
 
-#: src/bz-window.c:1322
+#: src/bz-window.c:1341
 msgid "Resume Current Tasks"
 msgstr "Продолжить текущие задачи"
 
-#: src/bz-window.c:1328
+#: src/bz-window.c:1347
 msgid "Pause Current Tasks"
 msgstr "Приостановить текущие задачи"
 
-#: src/bz-world-map.c:523
+#: src/bz-world-map.c:572
 #, c-format
 msgid "%s: %'u downloads"
 msgstr "%s: %'u загрузок"
@@ -1966,9 +2050,6 @@ msgstr "Закрыть"
 #~ "Beginning remote entry retrieval while referencing %d blocklist(s)..."
 #~ msgstr ""
 #~ "Получение элементов из репозиториев при обращении к %d чёрным спискам..."
-
-#~ msgid "Support this application"
-#~ msgstr "Поддержать это приложение"
 
 #~ msgid "More actions"
 #~ msgstr "Больше опций"
