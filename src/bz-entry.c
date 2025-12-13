@@ -1034,6 +1034,7 @@ bz_entry_init (BzEntry *self)
   BzEntryPrivate *priv = bz_entry_get_instance_private (self);
 
   priv->hold = 0;
+  priv->favorites_count = -1;
 }
 
 static void
