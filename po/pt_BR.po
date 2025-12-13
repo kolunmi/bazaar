@@ -599,7 +599,8 @@ msgstr "Adam Masciola"
 #. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
 #: src/bz-application.c:664
 msgid "translator-credits"
-msgstr "João Victor <victorsouzaleal@gmail.com>, 2025"
+msgstr "João Victor <victorsouzaleal@gmail.com>, 2025\n"
+"Rin Koito <mouichidouryuuseigun@gmail.com>, 2025"
 
 #: src/bz-application.c:790
 msgid "Performing setup..."
