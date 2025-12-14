@@ -1,110 +1,111 @@
-# Turkish translation for io.github.kolunmi.Bazaar.
-# Copyright (C) 2025 io.github.kolunmi.Bazaar's COPYRIGHT HOLDER
-# This file is distributed under the same license as the io.github.kolunmi.Bazaar package.
-#
-# Sabri Ünal <yakushabb@gmail.com>, 2025.
+# Vietnamese translations for bazaar package.
+# Copyright (C) 2025 THE bazaar'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the bazaar package.
+# Automatically generated, 2025.
+# Loc Huynh <https://github.com/hthienloc>, 2025.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: io.github.kolunmi.Bazaar master\n"
+"Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-12 00:00+0300\n"
-"PO-Revision-Date: 2025-12-12 00:02+0300\n"
-"Last-Translator: Sabri Ünal <yakushabb@gmail.com>\n"
-"Language-Team: Turkish <takim@gnome.org.tr>\n"
-"Language: tr\n"
+"POT-Creation-Date: 2025-12-02 18:34+0700\n"
+"PO-Revision-Date: 2025-12-10 18:23+0700\n"
+"Last-Translator: Loc Huynh <https://github.com/hthienloc>\n"
+"Language-Team: Vietnamese <https://github.com/linux-l10n-vi>\n"
+"Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 3.8\n"
+"X-Generator: Gtranslator 49.0\n"
 
-#: data/io.github.kolunmi.Bazaar.desktop.in:2
+#: data/io.github.kolunmi.Bazaar.desktop.in:3
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:5
 #: src/bz-window.blp:234
 msgid "Bazaar"
 msgstr "Bazaar"
 
-#: data/io.github.kolunmi.Bazaar.desktop.in:3
+#: data/io.github.kolunmi.Bazaar.desktop.in:4
 msgid "Add, remove or update flatpak software on this computer"
-msgstr "Bu bilgisayara flatpak yazılımı ekle, kaldır ya da güncelle"
+msgstr "Thêm, xóa hoặc cập nhật phần mềm Flatpak trên máy tính này"
 
-#: data/io.github.kolunmi.Bazaar.desktop.in:9
+#: data/io.github.kolunmi.Bazaar.desktop.in:10
 msgid "GTK;System;PackageManager;Discover;Flatpak;Software;Store;"
 msgstr ""
-"GTK;System;PackageManager;Discover;Flatpak;Software;Store;Sistem;Paket "
-"Yöneticisi;Keşfet;Yazılımlar;Mağaza;Çarşı;"
+"GTK;System;PackageManager;Discover;Flatpak;Software;Store;Trình quản lý gói; "
+"Khám phá; Phần mềm; Cửa hàng;"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:6
 msgid "Hide EOL Entries"
-msgstr "EOL Girişlerini Gizle"
+msgstr "Ẩn các mục EOL"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:7
 msgid "Hide EOL entries and entries depending on them"
-msgstr "EOL girişlerini ve bunlara bağlı girişleri gizle"
+msgstr "Ẩn các mục EOL và các mục phụ thuộc vào chúng"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:11
 msgid "Show Git Forge Star Counts"
-msgstr "Git Forge Yıldız Sayılarını Göster"
+msgstr "Hiển thị số sao trên Git Forge"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:12
 msgid ""
 "Whether to attempt to detect and show \"star counts\" for projects in the "
 "full view"
 msgstr ""
-"Tam görünümde projeler için \"yıldız sayılarını\" algılama ve gösterme durumu"
+"Có cố gắng phát hiện và hiển thị \"số sao\" cho các dự án trong chế độ xem "
+"chi tiết hay không"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:16
 msgid "Only Show Free Software"
-msgstr "Yalnızca Özgür Yazılımları Göster"
+msgstr "Chỉ hiển thị phần mềm miễn phí"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:17
 msgid "Hide proprietary software"
-msgstr "Sahipli yazılımları gizle"
+msgstr "Ẩn phần mềm độc quyền"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:21
 msgid "Show Only Flathub Content"
-msgstr "Yalnızca Flathub İçeriğini Göster"
+msgstr "Chỉ hiển thị nội dung Flathub"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:22
 msgid "Hide applications which do not originate from Flathub"
-msgstr "Flathub kökenli olmayan uygulamaları gizle"
+msgstr "Ẩn các ứng dụng không có nguồn gốc từ Flathub"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:26
 msgid "Debounce Search Inputs"
-msgstr "Debounce Arama Girdilerini Geciktir"
+msgstr "Trì hoãn tìm kiếm"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:27
 msgid "Add a delay before searching to prevent instant replies while typing"
-msgstr "Yazarken anlık yanıtları önlemek için aramadan önce gecikme ekle"
+msgstr "Thêm độ trễ trước khi tìm kiếm để tránh phản hồi tức thì khi đang gõ"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:51
 msgid "Global Progress Bar Theme"
-msgstr "Küresel İlerleme Çubuğu Teması"
+msgstr "Chủ đề thanh tiến trình toàn cục"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:52
 msgid "Describes the look of the global progress bar"
-msgstr "Küresel ilerleme çubuğunun görünümünü tanımlar"
+msgstr "Mô tả giao diện của thanh tiến trình toàn cục"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:56
 msgid "Saved Window Dimensions"
-msgstr "Kaydedilen Pencere Boyutları"
+msgstr "Kích thước cửa sổ đã lưu"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:57
 msgid "The window dimensions to be used by the next Bazaar window"
-msgstr "Bir sonraki Bazaar penceresince kullanılacak pencere boyutları"
+msgstr "Kích thước cửa sổ sẽ được sử dụng cho cửa sổ Bazaar tiếp theo"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:8
 msgid "Discover and install applications"
-msgstr "Uygulamaları keşfet ve kur"
+msgstr "Khám phá và cài đặt ứng dụng"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:10
 msgid ""
 "A new app store for GNOME with a focus on discovering and installing "
 "applications and addons from Flatpak remotes, particularly Flathub."
 msgstr ""
-"Flatpak uzaklarından, özellikle Flathubʼdan uygulama ve eklentileri "
-"keşfetmeye ve kurmaya odaklanan GNOME için yeni uygulama mağazası."
+"Một cửa hàng ứng dụng mới cho GNOME tập trung vào việc khám phá và cài đặt "
+"ứng dụng cùng tiện ích mở rộng từ các remote Flatpak, đặc biệt là Flathub."
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:14
 msgid ""
@@ -112,9 +113,9 @@ msgid ""
 "Bazaar features a \"curated\" tab that can be configured by distributors to "
 "allow for a more localized experience."
 msgstr ""
-"Linux masaüstünü mümkün kılan geliştiricileri desteklemeyi vurgular. Bazaar, "
-"daha yerelleştirilmiş deneyim sunmak için dağıtıcılarca yapılandırılabilen "
-"bir \"Özelleştirilmiş\" sekmeye sahiptir."
+"Nó nhấn mạnh việc hỗ trợ các nhà phát triển làm nên môi trường desktop "
+"Linux. Bazaar có tab \"chọn lọc\" có thể được nhà phân phối cấu hình để mang "
+"lại trải nghiệm địa phương hóa tốt hơn."
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29 src/bz-application.c:661
 msgid "Adam Masciola"
@@ -122,40 +123,38 @@ msgstr "Adam Masciola"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:54
 msgid "The home page displaying Flathub apps"
-msgstr "Flathub uygulamalarını görüntüleyen ana görünüm"
+msgstr "Trang chủ hiển thị các ứng dụng Flathub"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:58
 msgid "Nucleus app page"
-msgstr "Nucleus uygulama sayfası"
+msgstr "Trang ứng dụng Nucleus"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:62
 msgid "Search page"
-msgstr "Arama sayfası"
+msgstr "Trang tìm kiếm"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:66
 msgid "Category page"
-msgstr "Kategori sayfası"
+msgstr "Trang danh mục"
 
-#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:710
-#: src/bz-installed-tile.blp:99
+#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:668
 msgid "Manage Add-ons"
-msgstr "Eklentileri Yönet"
+msgstr "Quản lý tiện ích mở rộng"
 
-#: src/bz-addons-dialog.c:90 src/bz-full-view.blp:504
-#: src/bz-installed-tile.blp:117 src/bz-transaction-view.blp:213
-#: src/bz-window.c:1268
+#: src/bz-addons-dialog.c:90 src/bz-full-view.blp:505
+#: src/bz-transaction-view.blp:212 src/bz-window.c:1125
 msgid "Remove"
-msgstr "Kaldır"
+msgstr "Gỡ bỏ"
 
-#: src/bz-addons-dialog.c:95 src/bz-full-view.blp:276 src/bz-full-view.blp:491
-#: src/bz-transaction-view.blp:187 src/bz-window.c:1245
+#: src/bz-addons-dialog.c:95 src/bz-full-view.blp:277 src/bz-full-view.blp:492
+#: src/bz-transaction-view.blp:186 src/bz-window.c:1102
 msgid "Install"
-msgstr "Kur"
+msgstr "Cài đặt"
 
 #: src/bz-age-rating-dialog.blp:7 src/bz-age-rating-dialog.blp:50
 #: src/bz-full-view.c:385 src/bz-full-view.c:392
 msgid "Age Rating"
-msgstr "Yaş Derecelendirmesi"
+msgstr "Xếp hạng độ tuổi"
 
 #: src/bz-age-rating-dialog.blp:40 src/bz-age-rating-dialog.c:790
 msgid "?"
@@ -163,268 +162,268 @@ msgstr "?"
 
 #: src/bz-age-rating-dialog.c:139
 msgid "Cartoon Violence"
-msgstr "Çizgi Dizisi Şiddeti"
+msgstr "Bạo lực hoạt hình"
 
 #: src/bz-age-rating-dialog.c:140
 msgid "No information regarding cartoon violence"
-msgstr "Çizgi dizisi şiddetiyle ilgili bilgi yok"
+msgstr "Không có thông tin về bạo lực hoạt hình"
 
 #: src/bz-age-rating-dialog.c:143
 msgid "Fantasy Violence"
-msgstr "Fantezi Şiddeti"
+msgstr "Bạo lực giả tưởng"
 
 #: src/bz-age-rating-dialog.c:144
 msgid "No information regarding fantasy violence"
-msgstr "Fantezi şiddetiyle ilgili bilgi yok"
+msgstr "Không có thông tin về bạo lực giả tưởng"
 
 #: src/bz-age-rating-dialog.c:147
 msgid "Realistic Violence"
-msgstr "Gerçekçi Şiddet"
+msgstr "Bạo lực thực tế"
 
 #: src/bz-age-rating-dialog.c:148
 msgid "No information regarding realistic violence"
-msgstr "Gerçekçi şiddetle ilgili bilgi yok"
+msgstr "Không có thông tin về bạo lực thực tế"
 
 #: src/bz-age-rating-dialog.c:151
 msgid "Violence Depicting Bloodshed"
-msgstr "Kan Dökülmesini Betimleyen Şiddet"
+msgstr "Bạo lực có máu"
 
 #: src/bz-age-rating-dialog.c:152
 msgid "No information regarding bloodshed"
-msgstr "Kan dökülmesiyle ilgili bilgi yok"
+msgstr "Không có thông tin về cảnh đổ máu"
 
 #: src/bz-age-rating-dialog.c:155
 msgid "Sexual Violence"
-msgstr "Cinsel Şiddet"
+msgstr "Bạo lực tình dục"
 
 #: src/bz-age-rating-dialog.c:156
 msgid "No information regarding sexual violence"
-msgstr "Cinsel şiddetle ilgili bilgi yok"
+msgstr "Không có thông tin về bạo lực tình dục"
 
 #: src/bz-age-rating-dialog.c:159
 msgid "Alcohol"
-msgstr "Alkol"
+msgstr "Rượu bia"
 
 #: src/bz-age-rating-dialog.c:160
 msgid "No information regarding references to alcohol"
-msgstr "Alkole atıflarla ilgili bilgi yok"
+msgstr "Không có thông tin về đề cập đến rượu bia"
 
 #: src/bz-age-rating-dialog.c:163
 msgid "Narcotics"
-msgstr "Uyuşturucu"
+msgstr "Ma túy"
 
 #: src/bz-age-rating-dialog.c:164
 msgid "No information regarding references to illicit drugs"
-msgstr "Yasadışı ilaçlara atıflarla ilgili bilgi yok"
+msgstr "Không có thông tin về đề cập đến ma túy"
 
 #: src/bz-age-rating-dialog.c:167
 msgid "Tobacco"
-msgstr "Tütün"
+msgstr "Thuốc lá"
 
 #: src/bz-age-rating-dialog.c:168
 msgid "No information regarding references to tobacco products"
-msgstr "Tütün ürünlerine atıflarla ilgili bilgi yok"
+msgstr "Không có thông tin về đề cập đến sản phẩm thuốc lá"
 
 #: src/bz-age-rating-dialog.c:171 src/bz-age-rating-dialog.c:358
 msgid "Nudity"
-msgstr "Çıplaklık"
+msgstr "Khỏa thân"
 
 #: src/bz-age-rating-dialog.c:172
 msgid "No information regarding nudity of any sort"
-msgstr "Herhangi biçimde çıplaklıkla ilgili bilgi yok"
+msgstr "Không có thông tin về cảnh khỏa thân"
 
 #: src/bz-age-rating-dialog.c:175
 msgid "Sexual Themes"
-msgstr "Cinsel Temalar"
+msgstr "Chủ đề tình dục"
 
 #: src/bz-age-rating-dialog.c:176
 msgid "No information regarding references to or depictions of sexual nature"
-msgstr "Cinsel doğaya atıf ya da betimlemelerle ilgili bilgi yok"
+msgstr "Không có thông tin về đề cập hoặc mô tả tính chất tình dục"
 
 #: src/bz-age-rating-dialog.c:179
 msgid "Profanity"
-msgstr "Sövgü"
+msgstr "Ngôn từ thô tục"
 
 #: src/bz-age-rating-dialog.c:180
 msgid "No information regarding profanity of any kind"
-msgstr "Herhangi türde küfürlerle ilgili bilgi yok"
+msgstr "Không có thông tin về ngôn từ thô tục"
 
 #: src/bz-age-rating-dialog.c:183
 msgid "Inappropriate Humor"
-msgstr "Uygunsuz Mizah"
+msgstr "Hài không phù hợp"
 
 #: src/bz-age-rating-dialog.c:184
 msgid "No information regarding inappropriate humor"
-msgstr "Uygunsuz mizahla ilgili bilgi yok"
+msgstr "Không có thông tin về hài không phù hợp"
 
 #: src/bz-age-rating-dialog.c:187
 msgid "Discrimination"
-msgstr "Ayrımcılık"
+msgstr "Kỳ thị"
 
 #: src/bz-age-rating-dialog.c:188
 msgid "No information regarding discriminatory language of any kind"
-msgstr "Herhangi türde ayrımcı dille ilgili bilgi yok"
+msgstr "Không có thông tin về ngôn ngữ kỳ thị"
 
 #: src/bz-age-rating-dialog.c:191
 msgid "Advertising"
-msgstr "Reklam"
+msgstr "Quảng cáo"
 
 #: src/bz-age-rating-dialog.c:192
 msgid "No information regarding advertising of any kind"
-msgstr "Herhangi türde reklamla ilgili bilgi yok"
+msgstr "Không có thông tin về quảng cáo"
 
 #: src/bz-age-rating-dialog.c:195
 msgid "Gambling"
-msgstr "Kumar"
+msgstr "Cờ bạc"
 
 #: src/bz-age-rating-dialog.c:196
 msgid "No information regarding gambling of any kind"
-msgstr "Herhangi türde kumarla ilgili bilgi yok"
+msgstr "Không có thông tin về cờ bạc"
 
 #: src/bz-age-rating-dialog.c:199
 msgid "Purchasing"
-msgstr "Satın Alım"
+msgstr "Mua hàng"
 
 #: src/bz-age-rating-dialog.c:200
 msgid "No information regarding the ability to spend money"
-msgstr "Para harcama yeteneğiyle ilgili bilgi yok"
+msgstr "Không có thông tin về khả năng chi tiêu tiền"
 
 #: src/bz-age-rating-dialog.c:203
 msgid "Chat Between Users"
-msgstr "Kullanıcılar Arası Sohbet"
+msgstr "Trò chuyện giữa người dùng"
 
 #: src/bz-age-rating-dialog.c:204
 msgid "No information regarding ways to chat with other users"
-msgstr "Diğer kullanıcılarla sohbet etme yollarıyla ilgili bilgi yok"
+msgstr "Không có thông tin về cách trò chuyện với người dùng khác"
 
 #: src/bz-age-rating-dialog.c:207
 msgid "Audio Chat Between Users"
-msgstr "Kullanıcılar Arası Sesli Sohbet"
+msgstr "Trò chuyện âm thanh giữa người dùng"
 
 #: src/bz-age-rating-dialog.c:208
 msgid "No information regarding ways to talk with other users"
-msgstr "Diğer kullanıcılarla konuşma yollarıyla ilgili bilgi yok"
+msgstr "Không có thông tin về cách nói chuyện với người dùng khác"
 
 #: src/bz-age-rating-dialog.c:211
 msgid "Contact Details"
-msgstr "Kişi Ayrıntıları"
+msgstr "Thông tin liên hệ"
 
 #: src/bz-age-rating-dialog.c:212
 msgid ""
 "No information regarding sharing of social network usernames or email "
 "addresses"
 msgstr ""
-"Sosyal ağ kullanıcı adlarının ya da e-posta adreslerinin paylaşımıyla ilgili "
-"bilgi yok"
+"Không có thông tin về việc chia sẻ tên người dùng mạng xã hội hoặc địa chỉ "
+"email"
 
 #: src/bz-age-rating-dialog.c:215
 msgid "Identifying Information"
-msgstr "Tanımlayıcı Bilgiler"
+msgstr "Thông tin nhận dạng"
 
 #: src/bz-age-rating-dialog.c:216
 msgid "No information regarding sharing of user information with third parties"
-msgstr "Üçüncü şahıslarla kullanıcı bilgisi paylaşımıyla ilgili bilgi yok"
+msgstr "Không có thông tin về việc chia sẻ thông tin người dùng với bên thứ ba"
 
 #: src/bz-age-rating-dialog.c:219
 msgid "Location Sharing"
-msgstr "Konum Paylaşımı"
+msgstr "Chia sẻ vị trí"
 
 #: src/bz-age-rating-dialog.c:220
 msgid "No information regarding sharing of physical location with other users"
-msgstr "Diğer kullanıcılarla fiziksel konum paylaşımıyla ilgili bilgi yok"
+msgstr "Không có thông tin về việc chia sẻ vị trí thực với người dùng khác"
 
 #: src/bz-age-rating-dialog.c:223
 msgid "Prostitution"
-msgstr "Fuhuş"
+msgstr "Mại dâm"
 
 #: src/bz-age-rating-dialog.c:224
 msgid "No information regarding references to prostitution"
-msgstr "Fuhşa atıflarla ilgili bilgi yok"
+msgstr "Không có thông tin về đề cập đến mại dâm"
 
 #: src/bz-age-rating-dialog.c:227
 msgid "Adultery"
-msgstr "Zina"
+msgstr "Ngoại tình"
 
 #: src/bz-age-rating-dialog.c:228
 msgid "No information regarding references to adultery"
-msgstr "Eş aldatmaya atıflarla ilgili bilgi yok"
+msgstr "Không có thông tin về đề cập đến ngoại tình"
 
 #: src/bz-age-rating-dialog.c:231
 msgid "Sexualized Characters"
-msgstr "Cinselleştirilmiş Karakterler"
+msgstr "Nhân vật tình dục hóa"
 
 #: src/bz-age-rating-dialog.c:232
 msgid "No information regarding sexualized characters"
-msgstr "Cinselleştirilmiş karakterlerle ilgili bilgi yok"
+msgstr "Không có thông tin về nhân vật tình dục hóa"
 
 #: src/bz-age-rating-dialog.c:235
 msgid "Desecration"
-msgstr "Saygısızlık"
+msgstr "Báng bổ"
 
 #: src/bz-age-rating-dialog.c:236
 msgid "No information regarding references to desecration"
-msgstr "Kutsala saygısızlığa atıflarla ilgili bilgi yok"
+msgstr "Không có thông tin về đề cập đến báng bổ"
 
 #: src/bz-age-rating-dialog.c:239
 msgid "Human Remains"
-msgstr "İnsan Kalıntıları"
+msgstr "Xác người"
 
 #: src/bz-age-rating-dialog.c:240
 msgid "No information regarding visible dead human remains"
-msgstr "Görününür ölü insan kalıntılarıyla ilgili bilgi yok"
+msgstr "Không có thông tin về hiển thị xác người chết"
 
 #: src/bz-age-rating-dialog.c:243
 msgid "Slavery"
-msgstr "Kölelik"
+msgstr "Nô lệ"
 
 #: src/bz-age-rating-dialog.c:244
 msgid "No information regarding references to slavery"
-msgstr "Köleliğe atıflarla ilgili bilgi yok"
+msgstr "Không có thông tin về đề cập đến chế độ nô lệ"
 
 #: src/bz-age-rating-dialog.c:307
 msgid "Does not include references to drugs"
-msgstr "Yasadışı ilaçlara atıf içermez"
+msgstr "Không đề cập đến ma túy"
 
 #: src/bz-age-rating-dialog.c:309
 msgid ""
 "Does not include swearing, profanity, and other kinds of strong language"
-msgstr "Küfür, sövgü ve diğer türlerde sert dil içermez"
+msgstr "Không chứa chửi thề, ngôn từ thô tục và các loại ngôn ngữ mạnh khác"
 
 #: src/bz-age-rating-dialog.c:311
 msgid "Does not include ads or monetary transactions"
-msgstr "Reklam ya da parasal işlemler içermez"
+msgstr "Không chứa quảng cáo hoặc giao dịch tiền tệ"
 
 #: src/bz-age-rating-dialog.c:313
 msgid "Does not include sex or nudity"
-msgstr "Cinsellik ya da çıplaklık içermez"
+msgstr "Không chứa tình dục hoặc khỏa thân"
 
 #: src/bz-age-rating-dialog.c:315
 msgid "Does not include uncontrolled chat functionality"
-msgstr "Denetimsiz sohbet işlevi içermez"
+msgstr "Không có chức năng trò chuyện không kiểm soát"
 
 #: src/bz-age-rating-dialog.c:317
 msgid "Does not include violence"
-msgstr "Şiddet içermez"
+msgstr "Không chứa bạo lực"
 
 #: src/bz-age-rating-dialog.c:352
 msgid "Drugs"
-msgstr "Uyuşturucu"
+msgstr "Ma túy"
 
 #: src/bz-age-rating-dialog.c:354
 msgid "Strong Language"
-msgstr "Sert Dil"
+msgstr "Ngôn ngữ mạnh"
 
 #: src/bz-age-rating-dialog.c:356
 msgid "Money"
-msgstr "Para"
+msgstr "Tiền bạc"
 
 #: src/bz-age-rating-dialog.c:360
 msgid "Social"
-msgstr "Sosyal"
+msgstr "Xã hội"
 
 #: src/bz-age-rating-dialog.c:362
 msgid "Violence"
-msgstr "Şiddet"
+msgstr "Bạo lực"
 
 #: src/bz-age-rating-dialog.c:564
 #, c-format
@@ -440,47 +439,47 @@ msgstr "%d+"
 #: src/bz-age-rating-dialog.c:782
 msgctxt "Age rating"
 msgid "All"
-msgstr "Tümü"
+msgstr "Mọi lứa tuổi"
 
 #: src/bz-age-rating-dialog.c:846
 #, c-format
 msgid "%s has an unknown age rating"
-msgstr "%s yaş derecelendirmesi bilinmiyor"
+msgstr "%s có xếp hạng độ tuổi không xác định"
 
 #: src/bz-age-rating-dialog.c:854
 #, c-format
 msgid "%s is suitable for everyone"
-msgstr "%s, herkese uygundur"
+msgstr "%s phù hợp với mọi người"
 
 #: src/bz-age-rating-dialog.c:857
 #, c-format
 msgid "%s is suitable for toddlers"
-msgstr "%s, bebeklere uygundur"
+msgstr "%s phù hợp với trẻ mẫu giáo"
 
 #: src/bz-age-rating-dialog.c:860
 #, c-format
 msgid "%s is suitable for young children"
-msgstr "%s, küçük çocuklara uygundur"
+msgstr "%s phù hợp với trẻ nhỏ"
 
 #: src/bz-age-rating-dialog.c:863
 #, c-format
 msgid "%s is suitable for children"
-msgstr "%s, çocuklara uygundur"
+msgstr "%s phù hợp với trẻ em"
 
 #: src/bz-age-rating-dialog.c:866
 #, c-format
 msgid "%s is suitable for teenagers"
-msgstr "%s, ergenlere uygundur"
+msgstr "%s phù hợp với thiếu niên"
 
 #: src/bz-age-rating-dialog.c:869
 #, c-format
 msgid "%s is suitable for adults"
-msgstr "%s, yetişkinlere uygundur"
+msgstr "%s phù hợp với người lớn"
 
 #: src/bz-age-rating-dialog.c:872
 #, c-format
 msgid "%s is suitable for %s"
-msgstr "%s, %s için uygundur"
+msgstr "%s phù hợp với %s"
 
 #: src/bz-app-size-dialog.blp:43
 msgid "--- MB"
@@ -488,19 +487,19 @@ msgstr "--- MB"
 
 #: src/bz-app-size-dialog.blp:53
 msgid "Download Size"
-msgstr "İndirme Boyutu"
+msgstr "Kích thước tải về"
 
 #: src/bz-app-size-dialog.c:55
 msgid "Of the size of human DNA"
-msgstr "İnsan DNAʼsına kıyasla"
+msgstr "Kích thước của DNA người"
 
 #: src/bz-app-size-dialog.c:55
 msgid "3 billion base pairs"
-msgstr "3 milyar baz çifti"
+msgstr "3 tỷ cặp base"
 
 #: src/bz-app-size-dialog.c:56
 msgid "Of the Linux Kernel"
-msgstr "Linux çekirdeğine kıyasla"
+msgstr "Kích thước của Linux Kernel"
 
 #: src/bz-app-size-dialog.c:56
 msgid "linux-6.17.tar.xz"
@@ -508,63 +507,35 @@ msgstr "linux-6.17.tar.xz"
 
 #: src/bz-app-size-dialog.c:57
 msgid "Of the Apollo 11 guidance computer"
-msgstr "Apollo 11ʼin yönlendirme bilgisayarına kıyasla"
+msgstr "Kích thước của máy tính dẫn đường Apollo 11"
 
 #: src/bz-app-size-dialog.c:57
 msgid "Total ROM and RAM"
-msgstr "Toplam ROM ve RAM"
+msgstr "Tổng ROM và RAM"
 
 #: src/bz-app-size-dialog.c:58
 msgid "Of the original Super Mario Bros"
-msgstr "Özgün Super Mario Brosʼa kıyasla"
+msgstr "Kích thước của Super Mario Bros gốc"
 
 #: src/bz-app-size-dialog.c:58
 msgid "On the NES"
-msgstr "NES üzerinde"
+msgstr "Trên NES"
 
 #: src/bz-app-size-dialog.c:59
 msgid "Of the size of Wikipedia"
-msgstr "Wikipedia büyüklüğüne kıyasla"
+msgstr "Kích thước của Wikipedia"
 
 #: src/bz-app-size-dialog.c:59
 msgid "Without any media"
-msgstr "Ortam olmadan"
-
-#: src/bz-apps-page.blp:14 src/bz-full-view.blp:43 src/bz-window.blp:426
-msgid "Main Menu"
-msgstr "Ana Menü"
-
-#: src/bz-apps-page.blp:17 src/bz-window.blp:506
-msgid "_Donate to Bazaar ❤️"
-msgstr "Bazaar ❤️ uygulamasına _bağış yap"
-
-#: src/bz-apps-page.blp:18
-msgid "_Refresh Content"
-msgstr "İçeriği _Yenile"
-
-#: src/bz-apps-page.blp:22 src/bz-window.blp:513
-msgid "_Preferences"
-msgstr "_Tercihler"
-
-#: src/bz-apps-page.blp:23 src/bz-window.blp:518
-msgid "_Keyboard Shortcuts"
-msgstr "_Klavye Kısayolları"
-
-#: src/bz-apps-page.blp:24 src/bz-window.blp:523
-msgid "_About Bazaar"
-msgstr "_Bazaar _Hakkında"
-
-#: src/bz-apps-page.blp:28 src/bz-window.blp:530
-msgid "_Quit Bazaar"
-msgstr "Bazaarʼdan Çı_k"
+msgstr "Không có media"
 
 #: src/bz-application.c:556
 msgid ""
 "This functionality is currently disabled. It is recommended you download and "
 "install Flatseal to manage app permissions."
 msgstr ""
-"Bu işlev şu an devre dışıdır. Uygulama izinlerini yönetmek için Flatseal "
-"kurmanız önerilir."
+"Chức năng này hiện bị tắt. Khuyến nghị bạn tải và cài Flatseal để quản lý "
+"quyền ứng dụng."
 
 #: src/bz-application.c:638
 msgctxt "About Dialog Developer Credit"
@@ -579,79 +550,78 @@ msgstr "Alexander Vanhee"
 #. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
 #: src/bz-application.c:664
 msgid "translator-credits"
-msgstr "Sabri Ünal <yakushabb@gmail.com>, 2025"
+msgstr "Loc Huynh <huynhloc.contact@gmail.com>, 2025"
 
-#: src/bz-application.c:790
+#: src/bz-application.c:788
 msgid "Performing setup..."
-msgstr "Kurulum gerçekleştiriliyor..."
+msgstr "Đang thực hiện thiết lập..."
 
-#: src/bz-application.c:869 src/bz-application.c:878
+#: src/bz-application.c:817 src/bz-application.c:826
 msgid "Set Up Flathub"
-msgstr "Flathubʼı Ayarla"
+msgstr "Thiết lập Flathub"
 
-#: src/bz-application.c:872
+#: src/bz-application.c:820
 msgid ""
 "Flathub is not set up on this system. You will not be able to browse and "
 "install applications in Bazaar if its unavailable.\n"
 "\n"
 "You can still use Bazaar to browse and remove already installed apps."
 msgstr ""
-"Flathub bu sistemde kurulmamıştır. Bu sebeple Bazaar uygulamalara göz atamaz "
-"ve kuramaz.\n"
+"Flathub chưa được thiết lập trên hệ thống này. Bạn sẽ không thể duyệt và cài "
+"đặt ứng dụng trong Bazaar nếu nó không khả dụng.\n"
 "\n"
-"Yine de Bazaarʼı kullanarak zaten kurulmuş uygulamalara göz atabilir ve "
-"kaldırabilirsiniz."
+"Bạn vẫn có thể dùng Bazaar để duyệt và gỡ bỏ các ứng dụng đã cài."
 
-#: src/bz-application.c:877 src/bz-update-dialog.blp:6
+#: src/bz-application.c:825 src/bz-update-dialog.blp:6
 msgid "Later"
-msgstr "Sonra"
+msgstr "Để sau"
 
-#: src/bz-application.c:1277
+#: src/bz-application.c:1225
 msgid "Synchronizing..."
-msgstr "Eşzamanlanıyor..."
+msgstr "Đang đồng bộ hóa..."
 
-#: src/bz-application.c:1416
+#: src/bz-application.c:1364
 #, c-format
 msgid "Receiving %d entries..."
-msgstr "%d giriş alınıyor..."
+msgstr "Đang nhận %d mục..."
 
-#: src/bz-application.c:1421
-msgid "Checking for updates"
-msgstr "Güncellemeler denetleniyor"
+#: src/bz-application.c:1369
+msgid "Checking for updates..."
+msgstr "Đang kiểm tra cập nhật..."
 
 #: src/bz-curated-view.blp:11 src/bz-flathub-page.blp:19
-#: src/bz-full-view.blp:53 src/bz-installed-page.blp:15 src/bz-window.blp:183
+#: src/bz-full-view.blp:54 src/bz-installed-page.blp:15 src/bz-window.blp:183
 msgid "Empty"
-msgstr "Boş"
+msgstr "Trống"
 
 #: src/bz-curated-view.blp:15
 msgid "No Curation"
-msgstr "Uygulama Seçkisi Yok"
+msgstr "Không có lựa chọn"
 
 #: src/bz-curated-view.blp:16
 msgid ""
 "There is no curation information provided on this system. You can still "
 "browse applications on Flathub"
 msgstr ""
-"Bu sistemde uygulama seçkisi bilgisi sağlanmamaktadır. Flathubʼda "
-"uygulamalara yine de göz atabilirsiniz"
+"Không có thông tin chọn lọc trên hệ thống này. Bạn vẫn có thể duyệt ứng dụng "
+"trên Flathub"
 
 #: src/bz-curated-view.blp:18
 msgid "Browse Flathub"
-msgstr "Flathubʼa Göz At"
+msgstr "Duyệt Flathub"
 
 #: src/bz-curated-view.blp:29 src/bz-curated-view.blp:33
 #: src/bz-flathub-page.blp:30 src/bz-flathub-page.blp:34
 msgid "Offline"
-msgstr "Çevrim Dışı"
+msgstr "Ngoại tuyến"
 
-#: src/bz-curated-view.blp:39 src/bz-flathub-page.blp:49
+#: src/bz-curated-view.blp:39 src/bz-flathub-page.blp:40
 msgid "Browser"
-msgstr "Tarayıcı"
+msgstr "Trình duyệt"
 
 #: src/bz-developer-badge.c:131
 msgid "Developer information not available."
-msgstr "Geliştirici bilgisi yok."
+msgstr "Thông tin nhà phát triển không khả dụng."
 
 #: src/bz-developer-badge.c:137 src/bz-developer-badge.c:151
 #, c-format
@@ -659,409 +629,389 @@ msgid ""
 "The ownership of the %s app ID has not been verified and it may be a "
 "community package."
 msgstr ""
-"%s uygulama kimliğinin sahipliği doğrulanmadı ve topluluk paketlemesi "
-"olabilir."
+"Quyền sở hữu ID ứng dụng %s chưa được xác minh và có thể là gói cộng đồng."
 
 #: src/bz-developer-badge.c:155
 #, c-format
 msgid ""
 "The ownership of the %s app ID has been manually verified by the Flathub "
 "team."
-msgstr ""
-"%s uygulama kimliğinin sahipliği Flathub ekibi tarafından elle doğrulandı."
+msgstr "Quyền sở hữu ID ứng dụng %s đã được đội ngũ Flathub xác minh thủ công."
 
 #: src/bz-developer-badge.c:161
 #, c-format
 msgid ""
 "The ownership of the %s app ID has been verified by <b>%s</b> on <b>%s</b>."
-msgstr ""
-"%s uygulama kimliğinin sahipliği <b>%s</b> tarafından <b>%s</b> sitesinden "
-"doğrulandı."
+msgstr "Quyền sở hữu ID ứng dụng %s đã được <b>%s</b> xác minh trên <b>%s</b>."
 
 #: src/bz-developer-badge.c:168
 #, c-format
 msgid "The ownership of the %s app ID has been verified using %s."
-msgstr "%s uygulama kimliğinin sahipliği %s kullanılarak doğrulandı."
+msgstr "Quyền sở hữu ID ứng dụng %s đã được xác minh bằng %s."
 
 #: src/bz-developer-badge.c:172
 #, c-format
 msgid "The ownership of the %s app ID has been verified."
-msgstr "%s uygulama kimliğinin sahipliği doğrulandı."
+msgstr "Quyền sở hữu ID ứng dụng %s đã được xác minh."
 
 #: src/bz-entry-inspector.blp:5
 msgid "Entry Inspector"
-msgstr "Giriş İnceleyici"
+msgstr "Trình kiểm tra mục"
 
 #: src/bz-entry-inspector.blp:76
 msgid "Serialize"
-msgstr "Serileştir"
+msgstr "Chuyển thành chuỗi"
 
 #: src/bz-entry-inspector.blp:80
 msgid "Convert to JSON"
-msgstr "JSONʼa dönüştür"
+msgstr "Chuyển sang JSON"
 
 #: src/bz-error.c:68
 msgid "An Error Occurred"
-msgstr "Hata Oluştu"
+msgstr "Đã xảy ra lỗi"
 
 #: src/bz-error.c:89
 msgid "Close"
-msgstr "Kapat"
+msgstr "Đóng"
 
 #: src/bz-error.c:90
 msgid "Copy and Close"
-msgstr "Kopyala ve Kapat"
-
-#: src/bz-featured-carousel.blp:31
-msgid "Previous"
-msgstr "Önceki"
-
-#: src/bz-featured-carousel.blp:53
-msgid "Next"
-msgstr "Sonraki"
+msgstr "Sao chép và đóng"
 
 #: src/bz-featured-tile.blp:88
 msgid "App of the Day"
-msgstr "Günün Uygulaması"
+msgstr "Ứng dụng của ngày"
 
 #: src/bz-flathub-category.c:78
 msgid "Audio & Video"
-msgstr "Ses ve Video"
+msgstr "Âm thanh & Video"
 
 #: src/bz-flathub-category.c:78
 msgid "Media"
-msgstr "Ortam"
+msgstr "Đa phương tiện"
 
 #: src/bz-flathub-category.c:78
 msgid "More Audio & Video"
-msgstr "Ses ve Video"
+msgstr "Thêm Âm thanh & Video"
 
 #: src/bz-flathub-category.c:79
 msgid "Developer Tools"
-msgstr "Geliştirici Araçları"
+msgstr "Công cụ phát triển"
 
 #: src/bz-flathub-category.c:79
 msgid "Develop"
-msgstr "Geliştir"
+msgstr "Phát triển"
 
 #: src/bz-flathub-category.c:79
 msgid "More Developer Tools"
-msgstr "Daha Çok Geliştirici Araçları"
+msgstr "Thêm Công cụ phát triển"
 
 #: src/bz-flathub-category.c:80
 msgid "Education"
-msgstr "Eğitim"
+msgstr "Giáo dục"
 
 #: src/bz-flathub-category.c:80
 msgid "Learn"
-msgstr "Öğren"
+msgstr "Học tập"
 
 #: src/bz-flathub-category.c:80
 msgid "More Education"
-msgstr "Eğitim"
+msgstr "Thêm Giáo dục"
 
 #: src/bz-flathub-category.c:81
 msgid "Gaming"
-msgstr "Oyun"
+msgstr "Trò chơi"
 
 #: src/bz-flathub-category.c:81
 msgid "Play"
-msgstr "Oynat"
+msgstr "Chơi"
 
 #: src/bz-flathub-category.c:81
 msgid "More Gaming"
-msgstr "Daha Çok Oyun"
+msgstr "Thêm Trò chơi"
 
 #: src/bz-flathub-category.c:82
 msgid "Graphics & Photography"
-msgstr "Grafikler ve Fotoğrafçılık"
+msgstr "Đồ họa & Nhiếp ảnh"
 
 #: src/bz-flathub-category.c:82
 msgid "Create"
-msgstr "Oluştur"
+msgstr "Sáng tạo"
 
 #: src/bz-flathub-category.c:82
 msgid "More Graphics & Photography"
-msgstr "Daha Çok Grafikler ve Fotoğrafçılık"
+msgstr "Thêm Đồ họa & Nhiếp ảnh"
 
 #: src/bz-flathub-category.c:83
 msgid "Networking"
-msgstr "Ağ"
+msgstr "Mạng"
 
 #: src/bz-flathub-category.c:83
 msgid "Internet"
-msgstr "İnternet"
+msgstr "Internet"
 
 #: src/bz-flathub-category.c:83
 msgid "More Networking"
-msgstr "Ağ"
+msgstr "Thêm Mạng"
 
 #: src/bz-flathub-category.c:84
 msgid "Productivity"
-msgstr "Verimlilik"
+msgstr "Năng suất"
 
 #: src/bz-flathub-category.c:84
 msgid "Work"
-msgstr "İş"
+msgstr "Công việc"
 
 #: src/bz-flathub-category.c:84
 msgid "More Productivity"
-msgstr "Daha Çok Verimlilik"
+msgstr "Thêm Năng suất"
 
 #: src/bz-flathub-category.c:85
 msgid "Science"
-msgstr "Bilim"
+msgstr "Khoa học"
 
 #: src/bz-flathub-category.c:85
 msgid "More Science"
-msgstr "Bilim"
+msgstr "Thêm Khoa học"
 
 #: src/bz-flathub-category.c:86
 msgid "System"
-msgstr "Sistem"
+msgstr "Hệ thống"
 
 #: src/bz-flathub-category.c:86
 msgid "More System"
-msgstr "Sistem"
+msgstr "Thêm Hệ thống"
 
 #: src/bz-flathub-category.c:87
 msgid "Utilities"
-msgstr "Araçlar"
+msgstr "Tiện ích"
 
 #: src/bz-flathub-category.c:87
 msgid "Tools"
-msgstr "Araçlar"
+msgstr "Công cụ"
 
 #: src/bz-flathub-category.c:87
 msgid "More Utilities"
-msgstr "Daha Çok Araçlar"
+msgstr "Thêm Tiện ích"
 
-#: src/bz-flathub-category.c:88 src/bz-flathub-page.blp:119
-#: src/bz-flathub-page.blp:152
+#: src/bz-flathub-category.c:88 src/bz-flathub-page.blp:110
+#: src/bz-flathub-page.blp:143
 msgid "Trending"
-msgstr "Trend"
+msgstr "Thịnh hành"
 
 #: src/bz-flathub-category.c:88
 msgid "More Trending"
-msgstr "Daha Çok Trend"
+msgstr "Thêm Thịnh hành"
 
-#: src/bz-flathub-category.c:89 src/bz-flathub-page.blp:125
-#: src/bz-flathub-page.blp:185
+#: src/bz-flathub-category.c:89 src/bz-flathub-page.blp:116
+#: src/bz-flathub-page.blp:176
 msgid "Popular"
-msgstr "Popüler"
+msgstr "Phổ biến"
 
 #: src/bz-flathub-category.c:89
 msgid "More Popular"
-msgstr "Daha Çok Popüler"
+msgstr "Thêm Phổ biến"
 
-#: src/bz-flathub-category.c:90 src/bz-flathub-page.blp:174
+#: src/bz-flathub-category.c:90 src/bz-flathub-page.blp:165
 msgid "Recently Added"
-msgstr "Son Eklenenler"
+msgstr "Mới thêm gần đây"
 
-#: src/bz-flathub-category.c:90 src/bz-flathub-page.blp:131
+#: src/bz-flathub-category.c:90 src/bz-flathub-page.blp:122
 msgid "New"
-msgstr "Yeni"
+msgstr "Mới"
 
 #: src/bz-flathub-category.c:90
 msgid "More New"
-msgstr "Daha Çok Yeni"
+msgstr "Thêm Mới"
 
-#: src/bz-flathub-category.c:91 src/bz-flathub-page.blp:163
+#: src/bz-flathub-category.c:91 src/bz-flathub-page.blp:154
 msgid "Recently Updated"
-msgstr "Son Güncellenenler"
+msgstr "Mới cập nhật gần đây"
 
-#: src/bz-flathub-category.c:91 src/bz-flathub-page.blp:137
+#: src/bz-flathub-category.c:91 src/bz-flathub-page.blp:128
 msgid "Updated"
-msgstr "Güncellendi"
+msgstr "Đã cập nhật"
 
 #: src/bz-flathub-category.c:91
 msgid "More Updated"
-msgstr "Daha Çok Güncellenenler"
+msgstr "Thêm Đã cập nhật"
 
 #: src/bz-flathub-category.c:92
 msgid "Mobile"
-msgstr "Mobil"
+msgstr "Di động"
 
 #: src/bz-flathub-category.c:92
 msgid "More Mobile"
-msgstr "Daha Çok Mobil"
+msgstr "Thêm Di động"
 
 #: src/bz-flathub-page.blp:23
 msgid "Flathub Not Added"
-msgstr "Flathub Eklenmedi"
+msgstr "Flathub chưa được thêm"
 
 #: src/bz-flathub-page.blp:24
 msgid "The Flathub remote was not found on any of your Flatpak installations"
-msgstr "Flatpak kurulumlarınızda Flathub uzağı bulunamadı"
+msgstr "Remote Flathub không được tìm thấy trong bất kỳ cài đặt Flatpak nào"
 
-#: src/bz-flathub-page.blp:35
-msgid "Flathub returned an error"
-msgstr "Flathub hata döndürdü"
-
-#: src/bz-flathub-page.blp:41
-msgid "Retry Flathub Connection"
-msgstr "Flathub Bağlantısını Yeniden Dene"
-
-#: src/bz-flathub-page.blp:57
+#: src/bz-flathub-page.blp:48
 msgid "Flathub Unavailable"
-msgstr "Flathub Kullanılamıyor"
+msgstr "Flathub không khả dụng"
 
-#: src/bz-flathub-page.blp:58
+#: src/bz-flathub-page.blp:49
 msgid ""
 "We could not connect to Flathub. You can still manage and search for "
 "applications."
 msgstr ""
-"Flathubʼa bağlanamadık. Yine de uygulamaları yönetebilir ve arayabilirsiniz."
+"Không thể kết nối đến Flathub. Bạn vẫn có thể quản lý và tìm kiếm ứng dụng."
 
-#: src/bz-flathub-page.blp:61
+#: src/bz-flathub-page.blp:52
 msgid "Search Apps"
-msgstr "Uygulamaları Ara"
+msgstr "Tìm kiếm ứng dụng"
 
-#: src/bz-flathub-page.blp:270
+#: src/bz-flathub-page.blp:261
 msgid "On the Go"
-msgstr "Hareket Halindeyken"
+msgstr "Di động"
 
-#: src/bz-flathub-page.blp:282
+#: src/bz-flathub-page.blp:273
 msgid "Apps for your Linux phones and tablets"
-msgstr "Linux telefonlarınız ve tabletleriniz için uygulamalar"
+msgstr "Ứng dụng cho điện thoại và máy tính bảng Linux"
 
-#: src/bz-flathub-page.blp:293
+#: src/bz-flathub-page.blp:284
 msgid "More Mobile Apps"
-msgstr "Daha Çok Mobil Uygulama"
+msgstr "Thêm Ứng dụng di động"
 
-#: src/bz-flathub-page.blp:328
+#: src/bz-flathub-page.blp:319
 msgid "More Mobile apps"
-msgstr "Daha Çok Mobil"
+msgstr "Thêm ứng dụng di động"
 
-#: src/bz-flathub-page.blp:388
-msgid "We​ ♥​ Games"
-msgstr "Oyunları Severiz ♥​"
+#: src/bz-flathub-page.blp:379
+msgid "We ♥ Games"
+msgstr "We ♥ Games"
 
-#: src/bz-flathub-page.blp:401
+#: src/bz-flathub-page.blp:392
 msgid "Games and apps to run your favorite titles"
-msgstr "Sevdiğiniz oyunları çalıştırabileceğiniz oyunlar ve uygulamalar"
+msgstr "Trò chơi và ứng dụng để chạy các tựa game yêu thích"
 
-#: src/bz-flathub-page.blp:435
+#: src/bz-flathub-page.blp:426
 msgid "More Games"
-msgstr "Daha Çok Oyun"
+msgstr "Thêm Trò chơi"
 
-#: src/bz-flatpak-entry.c:600
+#: src/bz-flatpak-entry.c:574
 msgctxt "Project URL Type"
 msgid "Flathub Page"
-msgstr "Flathub Sayfası"
+msgstr "Trang Flathub"
+
+#: src/bz-flatpak-entry.c:595
+msgctxt "Project URL Type"
+msgid "Project Website"
+msgstr "Trang web dự án"
+
+#: src/bz-flatpak-entry.c:599
+msgctxt "Project URL Type"
+msgid "Issue Tracker"
+msgstr "Theo dõi lỗi"
+
+#: src/bz-flatpak-entry.c:603
+msgctxt "Project URL Type"
+msgid "FAQ"
+msgstr "Câu hỏi thường gặp"
+
+#: src/bz-flatpak-entry.c:607
+msgctxt "Project URL Type"
+msgid "Help"
+msgstr "Trợ giúp"
+
+#: src/bz-flatpak-entry.c:611
+msgctxt "Project URL Type"
+msgid "Donate"
+msgstr "Quyên góp"
+
+#: src/bz-flatpak-entry.c:617
+msgctxt "Project URL Type"
+msgid "Translate"
+msgstr "Dịch thuật"
 
 #: src/bz-flatpak-entry.c:621
 msgctxt "Project URL Type"
-msgid "Project Website"
-msgstr "Proje Web Sitesi"
+msgid "Contact"
+msgstr "Liên hệ"
 
 #: src/bz-flatpak-entry.c:625
 msgctxt "Project URL Type"
-msgid "Issue Tracker"
-msgstr "Sorun İzleyici"
-
-#: src/bz-flatpak-entry.c:629
-msgctxt "Project URL Type"
-msgid "FAQ"
-msgstr "SSS"
-
-#: src/bz-flatpak-entry.c:633
-msgctxt "Project URL Type"
-msgid "Help"
-msgstr "Yardım"
-
-#: src/bz-flatpak-entry.c:637
-msgctxt "Project URL Type"
-msgid "Donate"
-msgstr "Bağış"
-
-#: src/bz-flatpak-entry.c:643
-msgctxt "Project URL Type"
-msgid "Translate"
-msgstr "Çevir"
-
-#: src/bz-flatpak-entry.c:647
-msgctxt "Project URL Type"
-msgid "Contact"
-msgstr "Kişi"
-
-#: src/bz-flatpak-entry.c:651
-msgctxt "Project URL Type"
 msgid "Source Code"
-msgstr "Kaynak Kodu"
+msgstr "Mã nguồn"
 
-#: src/bz-flatpak-entry.c:657
+#: src/bz-flatpak-entry.c:631
 msgctxt "Project URL Type"
 msgid "Contribute"
-msgstr "Katkı Ver"
+msgstr "Đóng góp"
 
-#: src/bz-full-view.blp:20 src/bz-window.blp:126 src/bz-window.blp:403
+#: src/bz-full-view.blp:21 src/bz-window.blp:126 src/bz-window.blp:380
 msgid "Toggle transaction sidebar"
-msgstr "Ödeme işlemleri kenar çubuğunu aç/kapat"
+msgstr "Bật/tắt thanh bên giao dịch"
 
-#: src/bz-full-view.blp:57
-msgid "No Results"
-msgstr "Sonuç Yok"
+#: src/bz-full-view.blp:44 src/bz-window.blp:403
+msgid "Main Menu"
+msgstr "Menu chính"
 
 #: src/bz-full-view.blp:58
+msgid "No Results"
+msgstr "Không có kết quả"
+
+#: src/bz-full-view.blp:59
 msgid "Try a different search query"
-msgstr "Başka arama deneyin"
+msgstr "Thử truy vấn tìm kiếm khác"
 
-#: src/bz-full-view.blp:64 src/bz-window.blp:193
+#: src/bz-full-view.blp:65 src/bz-window.blp:193
 msgid "Content"
-msgstr "İçerik"
+msgstr "Nội dung"
 
-#: src/bz-full-view.blp:210
+#: src/bz-full-view.blp:211
 msgid "Support"
-msgstr "Destek"
+msgstr "Hỗ trợ"
 
-#: src/bz-full-view.blp:230
+#: src/bz-full-view.blp:231
 msgid "Repository Star Count"
-msgstr "Depo Yıldız Sayısı"
+msgstr "Số sao kho lưu trữ"
 
-#: src/bz-full-view.blp:260 src/bz-full-view.blp:515
+#: src/bz-full-view.blp:261 src/bz-full-view.blp:516
 msgid "Open"
-msgstr "Aç"
+msgstr "Mở"
 
-#: src/bz-full-view.blp:273 src/bz-full-view.blp:488
+#: src/bz-full-view.blp:274 src/bz-full-view.blp:489
 msgid "Download & Install Application"
-msgstr "Uygulama İndir ve Kur"
+msgstr "Tải xuống & cài đặt ứng dụng"
 
-#: src/bz-full-view.blp:288
+#: src/bz-full-view.blp:289
 msgid "Uninstall Application"
-msgstr "Uygulamayı Kaldır"
+msgstr "Gỡ cài đặt ứng dụng"
 
-#: src/bz-full-view.blp:303 src/bz-full-view.blp:530
+#: src/bz-full-view.blp:304 src/bz-full-view.blp:531
 msgid "Install Other Version"
-msgstr "Diğer Sürümü Kur"
+msgstr "Cài đặt phiên bản khác"
 
-#: src/bz-full-view.blp:327
+#: src/bz-full-view.blp:328
 msgid "Size"
-msgstr "Boyut"
+msgstr "Kích thước"
 
-#: src/bz-full-view.blp:432
+#: src/bz-full-view.blp:433
 msgid "Downloads /mo"
-msgstr "İndirme /ay"
+msgstr "Lượt tải/tháng"
 
-#: src/bz-full-view.blp:549
+#: src/bz-full-view.blp:550
 msgid "Stopped Receiving Core Updates"
-msgstr "Çekirdek Güncellemelerinin Alınması Durduruldu"
+msgstr "Ngừng nhận cập nhật lõi"
 
-#: src/bz-full-view.blp:563
+#: src/bz-full-view.blp:564
 msgid ""
 "This app uses a runtime that no longer receives updates or security fixes. "
 "It may become unsafe to use."
 msgstr ""
-"Bu uygulama, artık güncelleme ya da güvenlik düzeltmesi almayan bir çalışma "
-"zamanı kullanıyor. Kullanımı güvenli olmayabilir."
+"Ứng dụng này dùng runtime không còn nhận cập nhật hoặc vá bảo mật. Có thể "
+"trở nên không an toàn khi sử dụng."
 
-#: src/bz-full-view.blp:643 src/bz-window.c:1214
-msgid "Delete Data"
-msgstr "Verileri Sil"
-
-#: src/bz-full-view.blp:777
+#: src/bz-full-view.blp:735
 msgid "Tags:"
-msgstr "Etiketler:"
+msgstr "Thẻ:"
 
 #: src/bz-full-view.c:301
 msgid "---"
@@ -1082,430 +1032,382 @@ msgstr "%.*fK"
 #: src/bz-full-view.c:325
 #, c-format
 msgid "%d downloads in the last 30 days"
-msgstr "Son 30 günde %d indirme"
+msgstr "%d lượt tải trong 30 ngày qua"
 
 #: src/bz-full-view.c:357
 #, c-format
 msgid "Download size of %s"
-msgstr "%s İndirme Boyutu"
+msgstr "Kích thước tải về %s"
 
 #: src/bz-full-view.c:390
 msgid "All Ages"
-msgstr "Tüm Yaşlar"
+msgstr "Mọi lứa tuổi"
 
 #: src/bz-full-view.c:402
 msgid "Age rating information unavailable"
-msgstr "Yaş derecelendirme bilgisi yok"
+msgstr "Thông tin xếp hạng độ tuổi không khả dụng"
 
 #: src/bz-full-view.c:407
 msgid "Suitable for all ages"
-msgstr "Tüm yaşlar için uygun"
+msgstr "Phù hợp với mọi lứa tuổi"
 
 #: src/bz-full-view.c:409
 #, c-format
 msgid "Suitable for ages %d and up"
-msgstr "%d ve üstü yaşlar için uygun"
+msgstr "Phù hợp từ %d tuổi trở lên"
 
-#: src/bz-full-view.c:442 src/bz-full-view.c:447 src/bz-full-view.c:475
-#: src/bz-full-view.c:486
+#: src/bz-full-view.c:440
 msgid "Unknown"
-msgstr "Bilinmiyor"
+msgstr "Không xác định"
 
-#: src/bz-full-view.c:452
+#: src/bz-full-view.c:443
+msgid "Proprietary Software"
+msgstr "Phần mềm độc quyền"
+
+#: src/bz-full-view.c:447
 #, c-format
 msgid "Free software licensed under %s"
-msgstr "%s altında lisanslanmış özgür yazılım"
+msgstr "Phần mềm miễn phí theo giấy phép %s"
 
-#: src/bz-full-view.c:457
-msgid "Free software"
-msgstr "Özgür yazılım"
-
-#: src/bz-full-view.c:460
-msgid "Proprietary Software"
-msgstr "Sahipli Yazılım"
-
-#: src/bz-full-view.c:463
-#, c-format
-msgid "Special License: %s"
-msgstr "Özel Lisans: %s"
-
-#: src/bz-full-view.c:480
+#: src/bz-full-view.c:455
 msgid "Free"
-msgstr "Özgür"
+msgstr "Miễn phí"
 
-#: src/bz-full-view.c:483 src/bz-license-dialog.c:118
+#: src/bz-full-view.c:455 src/bz-license-dialog.blp:135
 msgid "Proprietary"
-msgstr "Sahipli"
+msgstr "Độc quyền"
 
-#: src/bz-full-view.c:488 src/bz-license-dialog.c:120
-msgid "Special License"
-msgstr "Özel Lisans"
-
-#: src/bz-full-view.c:508
+#: src/bz-full-view.c:475
 msgid "Adaptive"
-msgstr "Uyarlanır"
+msgstr "Thích ứng"
 
-#: src/bz-full-view.c:508
+#: src/bz-full-view.c:475
 msgid "Desktop Only"
-msgstr "Yalnızca Masaüstü"
+msgstr "Chỉ máy tính để bàn"
 
-#: src/bz-full-view.c:514
+#: src/bz-full-view.c:481
 msgid "Works on desktop, tablets, and phones"
-msgstr "Telefonlarda, tabletlerde ve masaüstülerde çalışır"
+msgstr "Hoạt động trên máy tính để bàn, máy tính bảng và điện thoại"
 
-#: src/bz-full-view.c:515
+#: src/bz-full-view.c:482
 msgid "May not work on mobile devices"
-msgstr "Mobil aygıtlarda çalışmayabilir"
+msgstr "Có thể không hoạt động tốt trên thiết bị di động"
 
-#: src/bz-full-view.c:526
+#: src/bz-full-view.c:493
 msgid "No URL"
-msgstr "URL Yok"
+msgstr "Không có URL"
 
-#: src/bz-full-view.c:544
+#: src/bz-full-view.c:511
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
 msgstr ""
-"Bu uygulama FLOSS (Özgür ya da Açık Kaynak Yazılım) lisansına sahip, yani "
-"kaynak kodu güvenlik açısından denetlenebilir."
+"Ứng dụng này có giấy phép FLOSS, nghĩa là mã nguồn có thể được kiểm tra để "
+"đảm bảo an toàn."
 
-#: src/bz-full-view.c:545
+#: src/bz-full-view.c:512
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
 msgstr ""
-"Bu uygulama sahipli lisansa sahip, yani kaynak kodu özel olarak "
-"geliştirilmiştir ve bağımsız üçüncü tarafca denetlenemez."
+"Ứng dụng này có giấy phép độc quyền, nghĩa là mã nguồn được phát triển riêng "
+"tư và không thể được kiểm tra bởi bên thứ ba độc lập."
 
-#: src/bz-full-view.c:552
+#: src/bz-full-view.c:519
 msgid "More Apps"
-msgstr "Daha Çok Uygulama"
+msgstr "Thêm Ứng dụng"
 
-#: src/bz-full-view.c:553
+#: src/bz-full-view.c:520
 #, c-format
 msgid "More Apps by %s"
-msgstr "Daha Çok %s Uygulamaları"
+msgstr "Thêm Ứng dụng từ %s"
 
-#: src/bz-full-view.c:560
+#: src/bz-full-view.c:527
 msgid "Other Apps by this Developer"
-msgstr "Bu Geliştiricinin Diğer Uygulamaları"
+msgstr "Ứng dụng khác từ nhà phát triển này"
 
-#: src/bz-full-view.c:562 src/bz-full-view.c:668
+#: src/bz-full-view.c:529 src/bz-full-view.c:629
 #, c-format
 msgid "Other Apps by %s"
-msgstr "Diğer %s Uygulamaları"
+msgstr "Ứng dụng khác từ %s"
 
-#: src/bz-full-view.c:568
-#, c-format
-msgid "%s is not installed, but it still has data present."
-msgstr "%s kurulmamış, ancak yine de verisi var."
-
-#: src/bz-full-view.c:670
+#: src/bz-full-view.c:631
 msgid "Other Apps"
-msgstr "Diğer Uygulamalar"
+msgstr "Ứng dụng khác"
 
-#: src/bz-full-view.c:672
+#: src/bz-full-view.c:633
 #, c-format
 msgid "%d Application"
 msgid_plural "%d Applications"
-msgstr[0] "%d Uygulama"
+msgstr[0] "%d ứng dụng"
 
-#: src/bz-full-view.c:1034
+#: src/bz-full-view.c:972
 msgid "Show Less"
-msgstr "Daha Azını Göster"
+msgstr "Thu gọn"
 
-#: src/bz-full-view.c:1034
+#: src/bz-full-view.c:972
 msgid "Show More"
-msgstr "Daha Çok Göster"
+msgstr "Hiện thêm"
 
 #: src/bz-hardware-support-dialog.blp:6 src/bz-hardware-support-dialog.blp:47
 msgid "Hardware Support"
-msgstr "Donanım Desteği"
+msgstr "Hỗ trợ phần cứng"
 
 #: src/bz-hardware-support-dialog.c:69
 msgid "Keyboard support"
-msgstr "Klavye desteği"
+msgstr "Hỗ trợ bàn phím"
 
 #: src/bz-hardware-support-dialog.c:71
 msgid "Requires keyboards"
-msgstr "Klavye gerektirir"
+msgstr "Yêu cầu bàn phím"
 
 #: src/bz-hardware-support-dialog.c:72
 msgid "Recommends keyboards"
-msgstr "Klavye kullanımı önerilir"
+msgstr "Khuyến nghị bàn phím"
 
 #: src/bz-hardware-support-dialog.c:73
 msgid "Supports keyboards"
-msgstr "Klavyeleri destekler"
+msgstr "Hỗ trợ bàn phím"
 
 #: src/bz-hardware-support-dialog.c:74
 msgid "Unknown support for keyboards"
-msgstr "Klavye desteği bilinmiyor"
+msgstr "Hỗ trợ bàn phím không xác định"
 
 #: src/bz-hardware-support-dialog.c:76
 msgid "Mouse support"
-msgstr "Fare desteği"
+msgstr "Hỗ trợ chuột"
 
 #: src/bz-hardware-support-dialog.c:78
 msgid "Requires mice or pointing devices"
-msgstr "Fare ya da işaretleme aygıtları gerektirir"
+msgstr "Yêu cầu chuột hoặc thiết bị trỏ"
 
 #: src/bz-hardware-support-dialog.c:79
 msgid "Recommends mice or pointing devices"
-msgstr "Fare ya da işaretleme aygıtları önerilir"
+msgstr "Khuyến nghị chuột hoặc thiết bị trỏ"
 
 #: src/bz-hardware-support-dialog.c:80
 msgid "Supports mice or pointing devices"
-msgstr "Fare ve işaretleme aygıtlarını destekler"
+msgstr "Hỗ trợ chuột hoặc thiết bị trỏ"
 
 #: src/bz-hardware-support-dialog.c:81
 msgid "Unknown support for mice or pointing devices"
-msgstr "Fare ya da işaretleme aygıtları desteği bilinmiyor"
+msgstr "Hỗ trợ chuột hoặc thiết bị trỏ không xác định"
 
 #: src/bz-hardware-support-dialog.c:83
 msgid "Touchscreen support"
-msgstr "Dokunmatik ekran desteği"
+msgstr "Hỗ trợ màn hình cảm ứng"
 
 #: src/bz-hardware-support-dialog.c:85
 msgid "Requires touchscreens"
-msgstr "Dokunmatik ekran gerektirir"
+msgstr "Yêu cầu màn hình cảm ứng"
 
 #: src/bz-hardware-support-dialog.c:86
 msgid "Recommends touchscreens"
-msgstr "Dokunmatik ekran önerilir"
+msgstr "Khuyến nghị màn hình cảm ứng"
 
 #: src/bz-hardware-support-dialog.c:87
 msgid "Supports touchscreens"
-msgstr "Dokunmatik ekranı destekler"
+msgstr "Hỗ trợ màn hình cảm ứng"
 
 #: src/bz-hardware-support-dialog.c:88
 msgid "Unknown support for touchscreens"
-msgstr "Dokunmatik ekran desteği bilinmiyor"
+msgstr "Hỗ trợ màn hình cảm ứng không xác định"
 
 #: src/bz-hardware-support-dialog.c:192
 msgid "Mobile support"
-msgstr "Mobil desteği"
+msgstr "Hỗ trợ di động"
 
 #: src/bz-hardware-support-dialog.c:193
 msgid "Works on mobile devices"
-msgstr "Mobil aygıtlarda çalışır"
+msgstr "Hoạt động trên thiết bị di động"
 
 #: src/bz-hardware-support-dialog.c:193
 msgid "May not work well on mobile devices"
-msgstr "Mobil aygıtlarda iyi çalışmayabilir"
+msgstr "Có thể không hoạt động tốt trên thiết bị di động"
 
 #: src/bz-hardware-support-dialog.c:198
 msgid "Desktop support"
-msgstr "Masaüstü desteği"
+msgstr "Hỗ trợ máy tính để bàn"
 
 #: src/bz-hardware-support-dialog.c:199
 msgid "Works well on large screens"
-msgstr "Büyük ekranlarda iyi çalışır"
+msgstr "Hoạt động tốt trên màn hình lớn"
 
 #: src/bz-hardware-support-dialog.c:233
 #, c-format
 msgid "%s works best on specific hardware"
-msgstr "%s belirli donanımlarda daha iyi çalışır"
+msgstr "%s hoạt động tốt nhất trên phần cứng cụ thể"
 
 #: src/bz-hardware-support-dialog.c:240
 #, c-format
 msgid "%s works on most devices"
-msgstr "%s çoğu aygıtta çalışır"
+msgstr "%s hoạt động trên hầu hết thiết bị"
 
 #: src/bz-inspector.blp:5
 msgid "Bazaar Inspector"
-msgstr "Bazaar İnceleyici"
+msgstr "Trình kiểm tra Bazaar"
 
 #: src/bz-inspector.blp:33
 msgid "Background Task Info:"
-msgstr "Arka Plan Görev Bilgisi:"
+msgstr "Thông tin tác vụ nền:"
 
 #: src/bz-inspector.blp:43
 msgid "Enable Global Debug Mode"
-msgstr "Genel Hata Ayıklama Kipini Etkinleştir"
+msgstr "Bật chế độ gỡ lỗi toàn cục"
 
 #: src/bz-inspector.blp:50
 msgid "Active Blocklists"
-msgstr "Etkin Engelleme Listeleri"
+msgstr "Danh sách chặn hoạt động"
 
 #: src/bz-inspector.blp:67
 msgid "Active Curated-Configs"
-msgstr "Etkin Özelleştirme Ayarları"
+msgstr "Cấu hình chọn lọc hoạt động"
 
 #: src/bz-inspector.blp:85
 msgid "All Entry Groups"
-msgstr "Tüm Giriş Grupları"
+msgstr "Tất cả nhóm mục"
 
 #: src/bz-inspector.blp:93
 msgid "Filter..."
-msgstr "Süz..."
+msgstr "Lọc..."
 
 #: src/bz-inspector.blp:134
 msgid "Decache and Inspect"
-msgstr "Ayır ve İncele"
+msgstr "Xóa bộ đệm và kiểm tra"
 
 #: src/bz-installed-page.blp:19
 msgid "No Flatpaks Installed"
-msgstr "Kurulu Flatpak Yok"
+msgstr "Chưa cài Flatpak nào"
 
 #: src/bz-installed-page.blp:25 src/bz-window.blp:298
 msgid "Installed"
-msgstr "Kurulu"
+msgstr "Đã cài đặt"
 
 #: src/bz-installed-page.c:395
 msgid "Choose an Installation"
-msgstr "Kurulum seç"
+msgstr "Chọn cài đặt"
 
 #: src/bz-installed-page.c:398
 msgid ""
 "You have multiple versions of this app installed. Which one would you like "
 "to proceed with? "
 msgstr ""
-"Bu uygulamanın birden çok sürümü kurulu. Hangisiyle devam etmek istersiniz? "
+"Bạn đã cài nhiều phiên bản của ứng dụng này. Bạn muốn tiếp tục với phiên bản "
+"nào? "
 
-#: src/bz-installed-page.c:402 src/bz-window.c:1244 src/bz-window.c:1267
+#: src/bz-installed-page.c:402 src/bz-window.c:1101 src/bz-window.c:1124
 msgid "Cancel"
-msgstr "İptal"
+msgstr "Hủy"
 
-#: src/bz-installed-tile.blp:61 src/bz-rich-app-tile.blp:137
-msgid "Stopped Receiving Updates"
-msgstr "Güncellemelerin Alınması Durduruldu"
+#: src/bz-license-dialog.blp:77
+msgid "Community Built"
+msgstr "Do cộng đồng xây dựng"
 
-#: src/bz-installed-tile.blp:75
-msgid "Support this application"
-msgstr "Bu uygulamayı destekle"
-
-#: src/bz-license-dialog.blp:160
+#: src/bz-license-dialog.blp:176
 msgid "Get Involved"
-msgstr "Katılım Sağlayın"
-
-#: src/bz-license-dialog.c:107 src/bz-license-dialog.c:112
-msgid "Unknown License"
-msgstr "Bilinmeyen Lisans"
+msgstr "Tham gia"
 
 #: src/bz-license-dialog.c:115
-msgid "Community Built"
-msgstr "Topluluk İnşası"
-
-#: src/bz-license-dialog.c:148
-#, c-format
-msgid ""
-"This app is developed in the open by an international community, and "
-"released under the %s license.\n"
-"\n"
-"You can participate and help make it even better."
-msgstr ""
-"Bu uygulama, uluslararası bir topluluk tarafından açık şekilde geliştirilmiş "
-"ve %s lisansıyla dağıtılmıştır.\n"
-"\n"
-"Katılarak daha iyi olmasını sağlayabilirsiniz."
-
-#: src/bz-license-dialog.c:156
-msgid ""
-"This app is developed in the open by an international community.\n"
-"\n"
-"You can participate and help make it even better."
-msgstr ""
-"Bu uygulama, uluslararası bir topluluk tarafından açık şekilde "
-"geliştirilmiştir. \n"
-"\n"
-"Katılarak daha iyi olmasını sağlayabilirsiniz."
-
-#: src/bz-license-dialog.c:161
-msgid "The license of this app is not known"
-msgstr "Uygulamanın lisansı bilinmiyor"
-
-#: src/bz-license-dialog.c:165
 msgid ""
 "This app is not developed in the open, so only its developers know how it "
 "works. It may be insecure in ways that are hard to detect, and it may change "
 "without oversight.\n"
 "\n"
-"You may or may not be able to contribute to this app."
+"You may not be able to contribute to this app."
 msgstr ""
-"Bu uygulama açık olarak geliştirilmemiştir, nasıl çalıştığını yalnızca kendi "
-"geliştiricileri bilir. Saptanması zor biçimde güvensiz olabilir ve "
-"gözetimsizce değişebilir.\n"
+"Ứng dụng này không được phát triển công khai, chỉ nhà phát triển biết cách "
+"nó hoạt động. Có thể không an toàn theo cách khó phát hiện và có thể thay "
+"đổi mà không được giám sát.\n"
 "\n"
-"Bu uygulamaya katkıda bulunabilir ya da bulunamayabilirsiniz."
+"Bạn có thể không đóng góp được cho ứng dụng này."
 
-#: src/bz-license-dialog.c:174
+#: src/bz-license-dialog.c:124
+msgid ""
+"This app is developed in the open by an international community.\n"
+"\n"
+"You can participate and help make it even better."
+msgstr ""
+"Ứng dụng này được cộng đồng quốc tế phát triển công khai.\n"
+"\n"
+"Bạn có thể tham gia và giúp nó tốt hơn."
+
+#: src/bz-license-dialog.c:135
 #, c-format
 msgid ""
-"This app is developed under the special license %s.\n"
+"This app is developed in the open by an international community, and "
+"released under the <a href=\"%s\">%s</a> license.\n"
 "\n"
-"You may or may not be able to contribute to this app."
+"You can participate and help make it even better."
 msgstr ""
-"Bu uygulama özel “%s” lisansı altında geliştirilmiştir.\n"
+"Ứng dụng này được cộng đồng quốc tế phát triển công khai và phát hành theo "
+"giấy phép <a href=\"%s\">%s</a>.\n"
 "\n"
-"Bu uygulamaya katkıda bulunabilir ya da bulunamayabilirsiniz."
+"Bạn có thể tham gia và giúp nó tốt hơn."
 
 #: src/bz-preferences-dialog.blp:19
 msgid "Preferences"
-msgstr "Tercihler"
+msgstr "Tùy chỉnh"
 
 #: src/bz-preferences-dialog.blp:23
 msgid "Content Filters"
-msgstr "İçerik Süzgeçleri"
+msgstr "Bộ lọc nội dung"
 
 #: src/bz-preferences-dialog.blp:26
 msgid "Free Software Only"
-msgstr "Yalnızca Özgür Yazılımlar"
+msgstr "Chỉ phần mềm miễn phí"
 
 #: src/bz-preferences-dialog.blp:27
 msgid "Hide proprietary applications when browsing and searching"
-msgstr "Göz atarken ve arama yaparken sahipli uygulamaları gizle"
+msgstr "Ẩn ứng dụng độc quyền khi duyệt và tìm kiếm"
 
 #: src/bz-preferences-dialog.blp:31
 msgid "Flathub Results Only"
-msgstr "Yalnızca Flathub Sonuçları"
+msgstr "Chỉ kết quả Flathub"
 
 #: src/bz-preferences-dialog.blp:32
 msgid ""
 "Limit search and browse results to applications only available on Flathub"
-msgstr ""
-"Arama ve gözatma sonuçlarını yalnızca Flathubʼda bulunan uygulamalarla "
-"sınırla"
+msgstr "Giới hạn kết quả tìm kiếm và duyệt chỉ ở ứng dụng có trên Flathub"
 
 #: src/bz-preferences-dialog.blp:36
 msgid "Hide EOL Apps"
-msgstr "Ömrünün Sonuna Gelmiş Uygulamaları Gizle"
+msgstr "Ẩn ứng dụng EOL"
 
 #: src/bz-preferences-dialog.blp:37
 msgid "Hide apps which are no longer supported by their developers"
-msgstr "Geliştiricilerince artık desteklenmeyen uygulamaları gizle"
+msgstr "Ẩn ứng dụng không còn được nhà phát triển hỗ trợ"
 
 #: src/bz-preferences-dialog.blp:42 src/bz-window.blp:313
 msgid "Search"
-msgstr "Ara"
+msgstr "Tìm kiếm"
 
 #: src/bz-preferences-dialog.blp:45
 msgid "Delay Search Results"
-msgstr "Arama Sonuçlarını Geciktir"
+msgstr "Trì hoãn kết quả tìm kiếm"
 
 #: src/bz-preferences-dialog.blp:46
 msgid "Improve results performance by debouncing search terms"
-msgstr "Arama terimlerini geciktirerek sonuç başarımını iyileştir"
+msgstr "Cải thiện hiệu suất kết quả bằng cách trì hoãn từ khóa tìm kiếm"
 
 #: src/bz-preferences-dialog.blp:51
 msgid "Application Details"
-msgstr "Uygulama Ayrıntıları"
+msgstr "Chi tiết ứng dụng"
 
 #: src/bz-preferences-dialog.blp:54
 msgid "Display Star Count"
-msgstr "Yıldız Sayısını Göster"
+msgstr "Hiển thị số sao"
 
 #: src/bz-preferences-dialog.blp:55
 msgid "Show the star count of an application's source code repository"
-msgstr "Uygulamanın kaynak kodu deposunun yıldız sayısını göster"
+msgstr "Hiển thị số sao của kho mã nguồn ứng dụng"
 
 #: src/bz-preferences-dialog.blp:80
 msgid "Progress Bar"
-msgstr "İlerleme Çubuğu"
+msgstr "Thanh tiến trình"
 
 #: src/bz-preferences-dialog.blp:81
 msgid "Choose a theme for the progress bar!"
-msgstr "İlerleme çubuğu için tema seç!"
+msgstr "Chọn chủ đề cho thanh tiến trình!"
 
 #: src/bz-preferences-dialog.blp:116
 msgid ""
@@ -1513,243 +1415,211 @@ msgid ""
 "code repository on a remote Git forge. \n"
 " For projects on GitHub, rate limits may cause them not to appear."
 msgstr ""
-"Bazaar, uzak Git forge kaynak kodu deposundan yıldız sayısını alıp "
-"görüntüleyebilir. \n"
-"GitHubʼdaki projeler için, sorgu sınırlamaları nedeniyle bunlar "
-"görünmeyebilir."
+"Bazaar có thể lấy và hiển thị số sao từ kho mã nguồn ứng dụng trên git forge "
+"từ xa.\n"
+"Đối với dự án trên GitHub, giới hạn tốc độ có thể khiến chúng không xuất "
+"hiện."
 
 #: src/bz-preferences-dialog.c:32
 msgid "Accent Color"
-msgstr "Vurgu Rengi"
+msgstr "Màu nổi bật"
 
 #: src/bz-preferences-dialog.c:33
 msgid "Pride Colors"
-msgstr "Pride Colors"
+msgstr "Màu cờ LGBT+"
 
 #: src/bz-preferences-dialog.c:34
 msgid "Lesbian Pride Colors"
-msgstr "Lesbian Pride Colors"
+msgstr "Màu cờ Lesbian"
 
 #: src/bz-preferences-dialog.c:35
 msgid "Transgender Pride Colors"
-msgstr "Transgender Pride Colors"
+msgstr "Màu cờ Transgender"
 
 #: src/bz-preferences-dialog.c:36
 msgid "Nonbinary Pride Colors"
-msgstr "Nonbinary Pride Colors"
+msgstr "Màu cờ Nonbinary"
 
 #: src/bz-preferences-dialog.c:37
 msgid "Bisexual Pride Colors"
-msgstr "Bisexual Pride Colors"
+msgstr "Màu cờ Bisexual"
 
 #: src/bz-preferences-dialog.c:38
 msgid "Asexual Pride Colors"
-msgstr "Asexual Pride Colors"
+msgstr "Màu cờ Asexual"
 
 #: src/bz-preferences-dialog.c:39
 msgid "Pansexual Pride Colors"
-msgstr "Pansexual Pride Colors"
+msgstr "Màu cờ Pansexual"
 
 #: src/bz-preferences-dialog.c:40
 msgid "Aromantic Pride Colors"
-msgstr "Aromantic Pride Colors"
+msgstr "Màu cờ Aromantic"
 
 #: src/bz-preferences-dialog.c:41
 msgid "Genderfluid Pride Colors"
-msgstr "Genderfluid Pride Colors"
+msgstr "Màu cờ Genderfluid"
 
 #: src/bz-preferences-dialog.c:42
 msgid "Polysexual Pride Colors"
-msgstr "Polysexual Pride Colors"
+msgstr "Màu cờ Polysexual"
 
 #: src/bz-preferences-dialog.c:43
 msgid "Omnisexual Pride Colors"
-msgstr "Omnisexual Pride Colors"
+msgstr "Màu cờ Omnisexual"
 
 #: src/bz-preferences-dialog.c:44
 msgid "Aroace Pride Colors"
-msgstr "Aroace Pride Colors"
+msgstr "Màu cờ Aroace"
 
 #: src/bz-preferences-dialog.c:45
 msgid "Agender Pride Colors"
-msgstr "Agender Pride Colors"
+msgstr "Màu cờ Agender"
 
 #: src/bz-preferences-dialog.c:46
 msgid "Genderqueer Pride Colors"
-msgstr "Genderqueer Pride Colors"
+msgstr "Màu cờ Genderqueer"
 
 #: src/bz-preferences-dialog.c:47
 msgid "Intersex Pride Colors"
-msgstr "Intersex Pride Colors"
+msgstr "Màu cờ Intersex"
 
 #: src/bz-preferences-dialog.c:48
 msgid "Demigender Pride Colors"
-msgstr "Demigender Pride Colors"
+msgstr "Màu cờ Demigender"
 
 #: src/bz-preferences-dialog.c:49
 msgid "Biromantic Pride Colors"
-msgstr "Biromantic Pride Colors"
+msgstr "Màu cờ Biromantic"
 
 #: src/bz-releases-dialog.blp:5 src/bz-releases-list.blp:26
 msgid "Version History"
-msgstr "Sürüm Geçmişi"
+msgstr "Lịch sử phiên bản"
 
 #: src/bz-releases-list.c:128
 #, c-format
 msgid "Version %s"
-msgstr "Sürüm %s"
+msgstr "Phiên bản %s"
 
 #: src/bz-releases-list.c:153
 msgid "No details for this release"
-msgstr "Bu sürüm için ayrıntı yok"
+msgstr "Không có chi tiết cho bản phát hành này"
+
+#: src/bz-rich-app-tile.blp:137
+msgid "Stopped Receiving Updates"
+msgstr "Ngừng nhận cập nhật"
 
 #: src/bz-rich-app-tile.blp:154
 msgid "Get"
-msgstr "Al"
-
-#: src/bz-screenshot-page.blp:5
-msgid "Screenshots"
-msgstr "Ekran Görüntüleri"
-
-#: src/bz-screenshot-page.blp:61
-msgid "Previous Screenshot"
-msgstr "Önceki Ekran Görüntüsü"
-
-#: src/bz-screenshot-page.blp:71
-msgid "Next Screenshot"
-msgstr "Sonraki Ekran Görüntüsü"
-
-#: src/bz-screenshot-page.blp:87
-msgid "Copy Image"
-msgstr "Resmi Kopyala"
-
-#: src/bz-screenshot-page.blp:147
-msgid "Reset View"
-msgstr "Görünümü Sıfırla"
-
-#: src/bz-screenshot-page.blp:158
-msgid "Zoom Out"
-msgstr "Uzaklaştır"
-
-#: src/bz-screenshot-page.blp:168
-msgid "Zoom In"
-msgstr "Yakınlaştır"
-
-#: src/bz-screenshots-carousel.blp:6
-msgid "Screenshots Carousel"
-msgstr "Ekran Görüntüsü Sergisi"
-
-#: src/bz-screenshots-carousel.blp:104
-msgid "Open Screenshot Viewer"
-msgstr "Ekran Görüntüsü Görüntüleyiciyi Aç"
+msgstr "Tải"
 
 #: src/bz-search-widget.blp:105
 msgid "Search Apps, Games, Software"
-msgstr "Uygulamaları, Oyunları, Yazılımları Ara"
+msgstr "Tìm kiếm ứng dụng, trò chơi, phần mềm"
 
 #: src/bz-search-widget.blp:149
 msgid "Categories Unavailable"
-msgstr "Kategoriler Kullanılamıyor"
+msgstr "Danh mục không khả dụng"
 
 #: src/bz-search-widget.blp:150
 msgid "Search for apps using the search bar above."
-msgstr "Yukarıdaki arama çubuğunu kullanarak uygulamaları ara."
+msgstr "Tìm kiếm ứng dụng bằng thanh tìm kiếm phía trên."
 
 #: src/bz-search-widget.blp:234
 msgid "No Applications Found"
-msgstr "Uygulama Bulunamadı."
+msgstr "Không tìm thấy ứng dụng"
 
 #: src/bz-search-widget.c:241
 #, c-format
 msgid "No results found for \"%s\" in Flathub"
-msgstr "Flathubʼda \"%s\" için sonuç bulunamadı"
+msgstr "Không tìm thấy kết quả cho \"%s\" trên Flathub"
 
 #: src/bz-share-list.c:64
 msgid "Copied!"
-msgstr "Kopyalandı!"
+msgstr "Đã sao chép!"
 
 #: src/bz-share-list.c:116
 msgid "Copy Link"
-msgstr "Bağlantıyı Kopyala"
+msgstr "Sao chép liên kết"
 
 #: src/bz-share-list.c:127
 msgid "Open Link"
-msgstr "Bağlantıyı Aç"
+msgstr "Mở liên kết"
 
 #: src/bz-stats-dialog.blp:28
 msgid "Timeline"
-msgstr "Zaman çizgisi"
+msgstr "Dòng thời gian"
 
 #: src/bz-stats-dialog.blp:46
 msgid "Installs:"
-msgstr "Kurulumlar:"
+msgstr "Cài đặt:"
 
 #: src/bz-stats-dialog.blp:55
 msgid "World"
-msgstr "Dünya"
+msgstr "Thế giới"
 
 #: src/bz-tag-list.c:96
 msgid "No Results Found"
-msgstr "Hiçbir Sonuç Bulunamadı"
+msgstr "Không tìm thấy kết quả"
 
 #: src/bz-tag-list.c:108
 #, c-format
 msgid "Apps Tagged \"%s\""
-msgstr "\"%s\" Etiketli Uygulamalar"
+msgstr "Ứng dụng có thẻ \"%s\""
 
 #: src/bz-tag-list.c:109
 #, c-format
 msgid "%d Applications"
-msgstr "%d Uygulama"
+msgstr "%d ứng dụng"
 
 #: src/bz-tag-list.c:124
 msgid "Search failed"
-msgstr "Arama başarısız"
+msgstr "Tìm kiếm thất bại"
 
-#: src/bz-transaction-manager.c:1137
+#: src/bz-transaction-manager.c:1132
 #, c-format
 msgid "Finished in %.02f seconds"
-msgstr "%.02f saniyede bitti"
+msgstr "Hoàn thành trong %.02f giây"
 
-#: src/bz-transaction-view.blp:95
+#: src/bz-transaction-view.blp:94
 msgid "App Add-on"
-msgstr "Uygulama Eklentisi"
+msgstr "Tiện ích mở rộng ứng dụng"
 
-#: src/bz-transaction-view.blp:120
+#: src/bz-transaction-view.blp:119
 msgid "Runtime"
-msgstr "Çalışma Zamanı"
+msgstr "Runtime"
 
-#: src/bz-transaction-view.blp:146 src/bz-transaction-view.blp:172
+#: src/bz-transaction-view.blp:145 src/bz-transaction-view.blp:171
 msgid "Install Size"
-msgstr "Kurulum Boyutu"
+msgstr "Kích thước cài đặt"
 
-#: src/bz-transaction-view.blp:200
+#: src/bz-transaction-view.blp:199 src/bz-window.blp:346
 msgid "Update"
-msgstr "Güncelle"
+msgstr "Cập nhật"
 
 #: src/bz-transaction-view.c:139
 #, c-format
 msgid "Transferred %s so far"
-msgstr "%s kısmı aktarıldı"
+msgstr "Đã truyền %s"
 
 #: src/bz-transaction.c:336
 msgid "Pending"
-msgstr "Beklemede"
+msgstr "Đang chờ"
 
 #: src/bz-update-dialog.blp:7
 msgid "Install Now"
-msgstr "Şimdi Kur"
+msgstr "Cài đặt ngay"
 
 #: src/bz-update-dialog.blp:10
 msgid "Updates Are Available"
-msgstr "Güncelleme Var"
+msgstr "Có bản cập nhật"
 
 #: src/bz-update-dialog.blp:11
 msgid ""
 "The following applications are eligible for updates. Would you like to "
 "install them?"
 msgstr ""
-"Aşağıdaki uygulamalar güncelleme için uygun. Güncellemeler kurulsun mu?"
+"Các ứng dụng sau đủ điều kiện cập nhật. Bạn có muốn cài đặt chúng không?"
 
 #: src/bz-update-dialog.c:134
 #, c-format
@@ -1757,78 +1627,79 @@ msgid ""
 "%d runtimes and/or addons are eligible for updates. Would you like to "
 "install them?"
 msgstr ""
-"%d çalışma zamanı ve/ya da uzantı güncelleme için uygun. Güncellemeler "
-"kurulsun mu??"
+"%d runtime và/hoặc tiện ích mở rộng đủ điều kiện cập nhật. Bạn có muốn cài "
+"đặt chúng không?"
 
 #: src/bz-update-dialog.c:142
 #, c-format
 msgid "Additionally, %d runtimes and/or addons will be updated."
-msgstr "Ayrıca, %d çalışma zamanı ve/ya da uzantı güncellenecek.."
+msgstr "Ngoài ra, %d runtime và/hoặc tiện ích mở rộng sẽ được cập nhật."
 
 #: src/bz-window.blp:66
 msgid "Inspect UI Entry"
-msgstr "Arayüz Girişini Denetle"
+msgstr "Kiểm tra mục giao diện"
 
 #: src/bz-window.blp:73
 msgid "All Debug Actions"
-msgstr "Tüm Hata Ayıklama İşlemleri"
+msgstr "Tất cả hành động gỡ lỗi"
 
 #: src/bz-window.blp:107
 msgid "Tasks"
-msgstr "Görevler"
+msgstr "Tác vụ"
 
 #: src/bz-window.blp:163
 msgid "Stop Active Tasks"
-msgstr "Etkin Görevleri Durdur"
+msgstr "Dừng tác vụ đang chạy"
 
 #: src/bz-window.blp:171
 msgid "Clear History"
-msgstr "Geçmişi Temizle"
+msgstr "Xóa lịch sử"
 
 #: src/bz-window.blp:187
 msgid "No Tasks Yet"
-msgstr "Henüz Görev Yok"
+msgstr "Chưa có tác vụ"
 
 #: src/bz-window.blp:258
 msgid "Refreshing Store Content"
-msgstr "Mağaza İçeriği Yenileniyor"
+msgstr "Đang làm mới nội dung cửa hàng"
 
 #: src/bz-window.blp:273
 msgid "Curated"
-msgstr "Özelleştirilmiş"
+msgstr "Chọn lọc"
 
 #: src/bz-window.blp:286
 msgid "Flathub"
 msgstr "Flathub"
 
-#: src/bz-window.blp:433
-msgid "Network connection is metered — automatic store data sync is paused"
-msgstr ""
-"Ağ bağlantısı ölçülü — kendiliğinden mağaza verilerinin eşzamanlanması "
-"duraklatıldı"
+#: src/bz-window.blp:330
+msgid "Sync"
+msgstr "Đồng bộ"
 
-#: src/bz-window.blp:434 src/bz-window.blp:443
-msgid "Sync Manually"
-msgstr "Elle Eşzamanla"
+#: src/bz-window.blp:466
+msgid "_Donate to Bazaar ❤️"
+msgstr "_Quyên góp cho Bazaar ❤️"
 
-#: src/bz-window.blp:442
-msgid ""
-"You have a network connection but are viewing a cached version of Flathub"
-msgstr ""
-"Ağ bağlantınız var ancak Flathubʼın önbelleklenmiş sürümünü "
-"görüntülüyorsunuz."
+#: src/bz-window.blp:473
+msgid "_Preferences"
+msgstr "_Tùy chỉnh"
 
-#: src/bz-window.blp:539
+#: src/bz-window.blp:478
+msgid "_Keyboard Shortcuts"
+msgstr "_Phím tắt"
+
+#: src/bz-window.blp:483
+msgid "_About Bazaar"
+msgstr "_Giới thiệu Bazaar"
+
+#: src/bz-window.blp:490
+msgid "_Quit Bazaar"
+msgstr "Thoát _Bazaar"
+
+#: src/bz-window.blp:499
 msgid "Open Bazaar Inspector"
-msgstr "Bazaar İnceleyiciyi Aç"
+msgstr "Mở Trình kiểm tra Bazaar"
 
-#: src/bz-window.c:474
-#, c-format
-msgid "%d Update Available"
-msgid_plural "%d Updates Available"
-msgstr[0] "%d Güncelleme Var"
-
-#: src/bz-window.c:956
+#: src/bz-window.c:844
 msgid ""
 "The ability to inspect and install local .flatpak bundle files is coming "
 "soon! In the meantime, try running\n"
@@ -1837,91 +1708,86 @@ msgid ""
 "\n"
 "on the command line."
 msgstr ""
-"Yerel .flatpak paket dosyalarını inceleme ve kurma özelliği yakında "
-"kullanıma sunulacak! Bu özellik kullanıma sunulana kadar, komut satırında şu "
-"komutu çalıştırmayı deneyin:\n"
+"Khả năng kiểm tra và cài đặt tập tin .flatpak bundle cục bộ sẽ sớm có! Trong "
+"lúc chờ đợi, hãy thử chạy\n"
 "\n"
-"flatpak install --bundle your-bundle.flatpak"
+"flatpak install --bundle your-bundle.flatpak\n"
+"\n"
+"trên dòng lệnh."
 
-#: src/bz-window.c:1074
+#: src/bz-window.c:966
 msgid "Can't do that right now!"
-msgstr "Şimdi yapma!"
+msgstr "Hiện không thể thực hiện!"
 
-#: src/bz-window.c:1205
-msgid "Keep Data"
-msgstr "Verileri Tut"
-
-#: src/bz-window.c:1206
-msgid "Allow restoring settings and content"
-msgstr "Ayarların ve içeriğin geri yüklenmesine izin ver"
-
-#: src/bz-window.c:1215
-msgid "Permanently remove app data to save space"
-msgstr "Disk alanını korumak için uygulama verilerini kalıcı olarak sil"
-
-#: src/bz-window.c:1238
+#: src/bz-window.c:1095
 #, c-format
 msgid "Install %s?"
-msgstr "%s Kurulsun Mu?"
+msgstr "Cài đặt %s?"
 
-#: src/bz-window.c:1241
+#: src/bz-window.c:1098
 msgid "May install additional shared components"
-msgstr "Ek paylaşımlı bileşenler kurabilir"
+msgstr "Có thể cài đặt thêm thành phần chia sẻ"
 
-#: src/bz-window.c:1260
+#: src/bz-window.c:1117
 #, c-format
 msgid "Remove %s?"
-msgstr "%s Kaldırılsın Mı?"
+msgstr "Gỡ bỏ %s?"
 
-#: src/bz-window.c:1264
+#: src/bz-window.c:1121
 #, c-format
-msgid "It will not be possible to use %s after it is uninstalled."
-msgstr "Kaldırıldıktan sonra %s artık kullanılamayacak."
+msgid ""
+"It will not be possible to use %s after it is uninstalled.\n"
+"\n"
+"Settings and user data will be kept."
+msgstr ""
+"Sẽ không thể sử dụng %s sau khi gỡ bỏ.\n"
+"\n"
+"Cài đặt và dữ liệu người dùng sẽ được giữ lại."
 
-#: src/bz-window.c:1327
+#: src/bz-window.c:1286
 msgid "Resume Current Tasks"
-msgstr "Geçerli Görevleri Sürdür"
+msgstr "Tiếp tục tác vụ hiện tại"
 
-#: src/bz-window.c:1333
+#: src/bz-window.c:1292
 msgid "Pause Current Tasks"
-msgstr "Geçerli Görevleri Duraklat"
+msgstr "Tạm dừng tác vụ hiện tại"
 
 #: src/bz-world-map.c:523
 #, c-format
 msgid "%s: %'u downloads"
-msgstr "%s: %'u indirme"
+msgstr "%s: %'u lượt tải"
 
 #: src/gtk/shortcuts-dialog.blp:6
 msgctxt "shortcut window"
 msgid "General"
-msgstr "Genel"
+msgstr "Chung"
 
 #: src/gtk/shortcuts-dialog.blp:9
 msgctxt "shortcut window"
 msgid "Open Search Dialog"
-msgstr "Arama İletişim Kutusunu Aç"
+msgstr "Mở hộp thoại tìm kiếm"
 
 #: src/gtk/shortcuts-dialog.blp:14
 msgctxt "shortcut window"
 msgid "Open Preferences"
-msgstr "Tercihleri Aç"
+msgstr "Mở tùy chỉnh"
 
 #: src/gtk/shortcuts-dialog.blp:19
 msgctxt "shortcut window"
 msgid "Refresh"
-msgstr "Yenile"
+msgstr "Làm mới"
 
 #: src/gtk/shortcuts-dialog.blp:24
 msgctxt "shortcut window"
 msgid "Toggle Transaction Manager"
-msgstr "Ödeme İşlemleri Yöneticisini Aç/Kapat"
+msgstr "Bật/tắt quản lý giao dịch"
 
 #: src/gtk/shortcuts-dialog.blp:29
 msgctxt "shortcut window"
 msgid "Show Shortcuts"
-msgstr "Kısayolları Göster"
+msgstr "Hiển thị phím tắt"
 
 #: src/gtk/shortcuts-dialog.blp:34
 msgctxt "shortcut window"
 msgid "Quit"
-msgstr "Çık"
+msgstr "Thoát"

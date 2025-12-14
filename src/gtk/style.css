@@ -3,6 +3,19 @@
     color: black;
 }
 
+.updates-amount {
+	background-color: white;
+	color: var(--accent-bg-color);
+	font-size: 0.60em;
+	border-radius: 9999px;
+	font-weight: 900;
+}
+
+.updates-amount-border {
+  background-color: var(--accent-bg-color);
+  	border-radius: 9999px;
+}
+
 .bz-monospace {
     font-family: monospace;
 }
@@ -99,10 +112,10 @@
     --accent-color : #f06292;
 }
 
-.star {
-    --accent-fg-color: @warning_bg_color;
-    --accent-bg-color : alpha(@warning_bg_color, 0.25);
-    --accent-color: @warning_color;
+.favorite {
+    --accent-fg-color: @accent_bg_color;
+    --accent-bg-color : alpha(@accent_bg_color, 0.25);
+    --accent-color: @accent_color;
 }
 
 .green {
@@ -218,7 +231,7 @@ button.context-tile:active .lozenge {
     color: var(--accent-color);
 }
 
-.card.eol {
+.card.colored {
     background-color: alpha(var(--accent-bg-color),0.15);
     color: var(--accent-color);
 }
@@ -266,7 +279,7 @@ window.narrow .app-developer {
 }
 
 .context-tile {
-	border-radius: 10px;
+  box-shadow: none;
 	padding: 4px;
 }
 
@@ -387,6 +400,10 @@ window.flathub {
 
 .flathub .sidebar-pane {
   background-color: oklch(from var(--sidebar-bg-color) l calc(c * 4) var(--flathub-bg-hue));
+}
+
+.flathub banner  > * > * {
+  background-color: oklch(from var(--card-bg-color) l calc(c * 4) var(--flathub-bg-hue));
 }
 
 .flathub-lotion {
@@ -708,7 +725,19 @@ window.narrow .category-tile {
 .installed-list-view > * {
     padding: 0;
     transition: background-color 200ms;
-    margin: 6px 0px;
+    margin: 5px 4.5px;
+}
+
+.narrow .installed-list-view > * {
+    margin: 4px 4.5px;
+}
+
+.user-data-list-view > * {
+  margin: 0;
+}
+
+.user-data-list-view row {
+	min-height: 0;
 }
 
 .transaction-sidebar-entry-list {
@@ -718,9 +747,11 @@ window.narrow .category-tile {
 
 .disable-adw-flow-box-styling {
     background-color: transparent;
+    box-shadow: none;
 }
 
 curated-list-view,
 curated-list-view list {
   background: var(--bg-color);
 }
+

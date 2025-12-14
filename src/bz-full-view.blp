@@ -6,7 +6,6 @@ template $BzFullView: Adw.Bin {
   child: Adw.ToolbarView {
     [top]
     Adw.HeaderBar header_bar {
-
       [end]
       Revealer {
         transition-type: slide_right;
@@ -213,35 +212,33 @@ template $BzFullView: Adw.Bin {
                                 };
                               }
 
-                              Revealer forge_stars {
-                                transition-type: slide_down;
-                                reveal-child: false;
+                              Button {
+                                styles [
+                                  "small-pill",
+                                  "suggested-action",
+                                  "favorite",
+                                ]
 
-                                child: Button {
-                                  styles [
-                                    "small-pill",
-                                    "suggested-action",
-                                    "star",
-                                  ]
+                                margin-top: 8;
+                                valign: start;
+                                halign: start;
+                                has-tooltip: true;
+                                tooltip-text: _("Favorite Count");
+                                can-target: false;
+                                visible: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.is-flathub;
 
-                                  margin-top: 8;
-                                  valign: start;
-                                  halign: start;
-                                  has-tooltip: true;
-                                  tooltip-text: _("Repository Star Count");
-                                  clicked => $forge_cb(template);
-
-                                  child: Box {
-                                    hexpand: false;
-                                    orientation: horizontal;
-                                    spacing: 10;
-
-                                    Image {
-                                      icon-name: "starred-symbolic";
-                                    }
-
-                                    Label forge_stars_label {}
-                                  };
+                                child: Box {
+                                  Image {
+                                    icon-name: "bookmark-outline-symbolic";
+                                  }
+                                  Revealer {
+                                    reveal-child: bind $is_positive(template.ui-entry as <$BzResult>.object as <$BzEntry>.favorites-count) as <bool>;
+                                    transition-type: slide_left;
+                                    child: Label {
+                                      margin-start: 4;
+                                      label: bind $format_favorites_count(template.ui-entry as <$BzResult>.object as <$BzEntry>.favorites-count) as <string>;
+                                    };
+                                  }
                                 };
                               }
                             }
@@ -344,11 +341,11 @@ template $BzFullView: Adw.Bin {
                           }
 
                           $BzContextTile license_tile {
-                            label: bind $get_license_label(template.ui-entry as <$BzResult>.object as <$BzEntry>.is-floss) as <string>;
+                            label: bind $get_license_label(template.ui-entry as <$BzResult>.object as <$BzEntry>) as <string>;
                             lozenge-style: bind $bool_to_string(template.ui-entry as <$BzResult>.object as <$BzEntry>.is-floss, "grey", "warning") as <string>;
                             clicked => $license_cb(template);
                             has-tooltip: true;
-                            tooltip-text: bind $format_license_tooltip(template.ui-entry as <$BzResult>.object as <$BzEntry>.project-license) as <string>;
+                            tooltip-text: bind $format_license_tooltip(template.ui-entry as <$BzResult>.object as <$BzEntry>) as <string>;
 
                             lozenge-child: Box {
                               spacing: 6;
@@ -427,17 +424,17 @@ template $BzFullView: Adw.Bin {
                           }
 
                           $BzContextTile {
-                            can-target: bind $invert_boolean($is_null(template.debounced-ui-entry) as <bool>) as <bool>;
-                            sensitive: bind $invert_boolean($is_null(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <bool>) as <bool>;
+                            can-target: bind $invert_boolean($is_null(template.ui-entry) as <bool>) as <bool>;
+                            sensitive: bind $invert_boolean($is_null(template.ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <bool>) as <bool>;
                             clicked => $dl_stats_cb(template);
                             label: _("Downloads /mo");
-                            has-tooltip: bind $invert_boolean($is_null(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <bool>) as <bool>;
-                            tooltip-text: bind $format_recent_downloads_tooltip(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <string>;
+                            has-tooltip: bind $invert_boolean($is_null(template.ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <bool>) as <bool>;
+                            tooltip-text: bind $format_recent_downloads_tooltip(template.ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <string>;
                             lozenge-style: "grey";
 
                             lozenge-child: Label {
                               justify: center;
-                              label: bind $format_recent_downloads(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <string>;
+                              label: bind $format_recent_downloads(template.ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <string>;
                               halign: center;
                               use-markup: true;
                             };
@@ -542,7 +539,7 @@ template $BzFullView: Adw.Bin {
 
                         styles [
                           "card",
-                          "eol",
+                          "colored",
                           "warning",
                         ]
 
@@ -576,17 +573,19 @@ template $BzFullView: Adw.Bin {
                   Box screenshot_box {
                     Adw.Spinner {
                       vexpand: true;
-                      visible: bind $invert_boolean(template.debounced-ui-entry as <$BzResult>.resolved as <bool>) as <bool>;
+                      visible: bind $invert_boolean(template.ui-entry as <$BzResult>.resolved as <bool>) as <bool>;
                     }
 
                     $BzScreenshotsCarousel screenshots {
                       vexpand: true;
                       hexpand: true;
-                      visible: bind template.debounced-ui-entry as <$BzResult>.resolved as <bool>;
+                      visible: bind template.ui-entry as <$BzResult>.resolved as <bool>;
                       clicked => $screenshot_clicked_cb() swapped;
+                      light-accent-color: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.light-accent-color;
+                      dark-accent-color: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.dark-accent-color;
 
                       model: $BzLazyAsyncTextureModel {
-                        model: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.screenshot-paintables;
+                        model: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.screenshot-paintables;
                       };
                     }
                   }
@@ -603,11 +602,55 @@ template $BzFullView: Adw.Bin {
                         margin-start: 25;
                         margin-end: 25;
                         margin-bottom: 20;
-                        margin-top: 20;
+                        margin-top: 10;
                         spacing: 20;
+
+                        Revealer {
+                          transition-type: slide_down;
+                          reveal-child: bind $logical_and($invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.user-data-size) as <bool>) as <bool>, $is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
+
+                          child: Box {
+                            height-request: 50;
+                            margin-bottom: 10;
+                            spacing: 12;
+
+                            styles [
+                              "card",
+                              "colored",
+                              "accent",
+                            ]
+
+                            Label {
+                              halign: start;
+                              valign: center;
+                              hexpand: true;
+                              margin-start: 12;
+                              margin-top: 8;
+                              margin-bottom: 8;
+                              label: bind $format_leftover_label(template.ui-entry as <$BzResult>.object as <$BzEntry>.title, template.entry-group as <$BzEntryGroup>.user-data-size) as <string>;
+                              use-markup: true;
+                              wrap: true;
+                              wrap-mode: word_char;
+                              justify: left;
+                            }
+
+                            Button {
+                              valign: center;
+                              margin-end: 8;
+                              clicked => $delete_user_data_cb(template);
+
+                              child: Adw.ButtonContent {
+                                icon-name: "user-trash-symbolic";
+                                label: _("Delete Data");
+                              };
+                            }
+                          };
+                        }
+
                         Box {
                           spacing: 10;
                           orientation: vertical;
+
                           Label {
                             styles [
                               "title-2",
@@ -672,11 +715,11 @@ template $BzFullView: Adw.Bin {
                         }
 
                         $BzShareList {
-                          urls: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.share-urls;
+                          urls: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.share-urls;
                         }
 
                         $BzReleasesList releases_list {
-                          version-history: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.version-history;
+                          version-history: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.version-history;
                         }
 
                         Box {

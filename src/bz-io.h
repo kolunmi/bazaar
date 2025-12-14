@@ -34,6 +34,24 @@ bz_reap_file (GFile *file);
 void
 bz_reap_path (const char *path);
 
+DexFuture *
+bz_reap_file_dex (GFile *file);
+
+DexFuture *
+bz_reap_path_dex (const char *path);
+
+DexFuture *
+bz_reap_user_data_dex (const char *app_id);
+
+DexFuture *
+bz_get_user_data_size_dex (const char *app_id);
+
+DexFuture *
+bz_get_user_data_ids_dex (void);
+
+char *
+bz_dup_root_cache_dir (void);
+
 char *
 bz_dup_cache_dir (const char *submodule);
 

@@ -11,6 +11,7 @@ src/bz-app-size-dialog.blp
 src/bz-app-size-dialog.c
 src/bz-app-tile.blp
 src/bz-app-tile.c
+src/bz-apps-page.blp
 src/bz-application-map-factory.c
 src/bz-application.c
 src/bz-async-texture.c
@@ -22,8 +23,6 @@ src/bz-curated-view.c
 src/bz-data-graph.c
 src/bz-decorated-screenshot.blp
 src/bz-decorated-screenshot.c
-src/bz-detailed-app-tile.blp
-src/bz-detailed-app-tile.c
 src/bz-developer-badge.blp
 src/bz-developer-badge.c
 src/bz-download-worker.c
@@ -35,6 +34,7 @@ src/bz-entry-inspector.c
 src/bz-entry.c
 src/bz-env.c
 src/bz-error.c
+src/bz-featured-carousel.blp
 src/bz-featured-tile.blp
 src/bz-flathub-category-section.c
 src/bz-flathub-category.c
@@ -55,6 +55,7 @@ src/bz-inspector.blp
 src/bz-inspector.c
 src/bz-installed-page.blp
 src/bz-installed-page.c
+src/bz-installed-tile.blp
 src/bz-io.c
 src/bz-lazy-async-texture-model.c
 src/bz-license-dialog.blp
@@ -71,6 +72,8 @@ src/bz-result.c
 src/bz-rich-app-tile.blp
 src/bz-rich-app-tile.c
 src/bz-screenshot.c
+src/bz-screenshot-page.blp
+src/bz-screenshots-carousel.blp
 src/bz-search-engine.c
 src/bz-search-widget.blp
 src/bz-search-widget.c
@@ -88,6 +91,10 @@ src/bz-transaction-view.c
 src/bz-transaction.c
 src/bz-update-dialog.blp
 src/bz-update-dialog.c
+src/bz-user-data-page.c
+src/bz-user-data-page.blp
+src/bz-user-data-tile.c
+src/bz-user-data-tile.blp
 src/bz-window.blp
 src/bz-window.c
 src/bz-world-map.c

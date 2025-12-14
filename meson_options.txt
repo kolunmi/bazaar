@@ -22,3 +22,8 @@ option('sandboxed_libflatpak',
        type: 'boolean',
        value: false,
        description: 'Whether to treat libflatpak as being sandboxed or not')
+
+option('development',
+        type: 'boolean',
+        value: false,
+        description: 'If this is a development build')

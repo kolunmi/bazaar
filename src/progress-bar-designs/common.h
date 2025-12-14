@@ -1,6 +1,6 @@
-/* bz-screenshot-page.h
+/* progress-bar-designs/common.h
  *
- * Copyright 2025 Alexander Vanhee
+ * Copyright 2025 Eva M
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,24 +20,13 @@
 
 #pragma once
 
-#include "bz-async-texture.h"
-#include <adwaita.h>
+#include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_SCREENSHOT_PAGE (bz_screenshot_page_get_type ())
-
-G_DECLARE_FINAL_TYPE (BzScreenshotPage, bz_screenshot_page, BZ, SCREENSHOT_PAGE, AdwNavigationPage)
-
-AdwNavigationPage *bz_screenshot_page_new (GListModel *screenshots,
-                                           GListModel *captions,
-                                           guint       initial_index);
-
 void
-bz_screenshot_page_set_captions (BzScreenshotPage *self,
-                                 GListModel       *captions);
-
-const char *
-bz_screenshot_page_get_current_caption (BzScreenshotPage *self);
+append_pride_flag (GtkSnapshot     *snapshot,
+                   graphene_rect_t *bounds,
+                   const char      *name);
 
 G_END_DECLS

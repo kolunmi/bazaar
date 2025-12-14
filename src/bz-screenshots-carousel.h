@@ -44,4 +44,16 @@ bz_screenshots_carousel_set_compact (BzScreenshotsCarousel *self,
 gboolean
 bz_screenshots_carousel_get_compact (BzScreenshotsCarousel *self);
 
+void
+bz_screenshots_carousel_set_light_accent_color (BzScreenshotsCarousel *self,
+                                                const char            *color);
+const char *
+bz_screenshots_carousel_get_light_accent_color (BzScreenshotsCarousel *self);
+
+void
+bz_screenshots_carousel_set_dark_accent_color (BzScreenshotsCarousel *self,
+                                               const char            *color);
+const char *
+bz_screenshots_carousel_get_dark_accent_color (BzScreenshotsCarousel *self);
+
 G_END_DECLS

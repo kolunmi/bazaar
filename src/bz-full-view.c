@@ -60,21 +60,15 @@ struct _BzFullView
   BzTransactionManager *transactions;
   BzEntryGroup         *group;
   BzResult             *ui_entry;
-  gboolean              debounce;
-  BzResult             *debounced_ui_entry;
   BzResult             *group_model;
   gboolean              show_sidebar;
 
-  guint       debounce_timeout;
-  DexFuture  *loading_forge_stars;
   GMenuModel *main_menu;
 
   /* Template widgets */
   GtkScrolledWindow *main_scroll;
   AdwViewStack      *stack;
   GtkWidget         *shadow_overlay;
-  GtkWidget         *forge_stars;
-  GtkLabel          *forge_stars_label;
   GtkToggleButton   *description_toggle;
 
   GtkWidget *wide_open_button;
@@ -93,8 +87,6 @@ enum
   PROP_TRANSACTION_MANAGER,
   PROP_ENTRY_GROUP,
   PROP_UI_ENTRY,
-  PROP_DEBOUNCE,
-  PROP_DEBOUNCED_UI_ENTRY,
   PROP_MAIN_MENU,
   PROP_SHOW_SIDEBAR,
 
@@ -114,12 +106,6 @@ enum
 static guint signals[LAST_SIGNAL];
 
 static void
-debounce_timeout (BzFullView *self);
-
-static DexFuture *
-retrieve_star_string_fiber (GWeakRef *wr);
-
-static void
 addon_transact_cb (BzFullView     *self,
                    BzEntry        *entry,
                    BzAddonsDialog *dialog);
@@ -136,12 +122,8 @@ bz_full_view_dispose (GObject *object)
   g_clear_object (&self->transactions);
   g_clear_object (&self->group);
   g_clear_object (&self->ui_entry);
-  g_clear_object (&self->debounced_ui_entry);
   g_clear_object (&self->group_model);
   g_clear_object (&self->main_menu);
-
-  dex_clear (&self->loading_forge_stars);
-  g_clear_handle_id (&self->debounce_timeout, g_source_remove);
 
   G_OBJECT_CLASS (bz_full_view_parent_class)->dispose (object);
 }
@@ -167,12 +149,6 @@ bz_full_view_get_property (GObject    *object,
       break;
     case PROP_UI_ENTRY:
       g_value_set_object (value, self->ui_entry);
-      break;
-    case PROP_DEBOUNCE:
-      g_value_set_boolean (value, self->debounce);
-      break;
-    case PROP_DEBOUNCED_UI_ENTRY:
-      g_value_set_object (value, self->debounced_ui_entry);
       break;
     case PROP_MAIN_MENU:
       g_value_set_object (value, self->main_menu);
@@ -205,11 +181,7 @@ bz_full_view_set_property (GObject      *object,
     case PROP_ENTRY_GROUP:
       bz_full_view_set_entry_group (self, g_value_get_object (value));
       break;
-    case PROP_DEBOUNCE:
-      bz_full_view_set_debounce (self, g_value_get_boolean (value));
-      break;
     case PROP_UI_ENTRY:
-    case PROP_DEBOUNCED_UI_ENTRY:
     case PROP_MAIN_MENU:
       if (self->main_menu)
         g_object_unref (self->main_menu);
@@ -236,6 +208,13 @@ is_zero (gpointer object,
          int      value)
 {
   return value == 0;
+}
+
+static gboolean
+is_positive (gpointer object,
+         int      value)
+{
+  return value > -1;
 }
 
 static gboolean
@@ -288,6 +267,15 @@ format_with_small_suffix (char *number, const char *suffix)
 
   return g_strdup_printf ("%s\xC2\xA0<span font_size='x-small'>%s</span>",
                           number, suffix);
+}
+
+static char *
+format_favorites_count (gpointer object,
+                        int      favorites_count)
+{
+  if (favorites_count < 0)
+    return g_strdup ("  ");
+  return g_strdup_printf ("%d", favorites_count);
 }
 
 static char *
@@ -431,28 +419,61 @@ get_age_rating_style (gpointer         object,
 }
 
 static char *
-format_license_tooltip (gpointer    object,
-                        const char *license)
+format_license_tooltip (gpointer object,
+                        BzEntry *entry)
 {
-  g_autofree char *name = NULL;
+  const char      *license;
+  gboolean         is_floss = FALSE;
+  g_autofree char *name     = NULL;
+
+  if (entry == NULL)
+    return g_strdup (_ ("Unknown"));
+
+  g_object_get (entry, "is-floss", &is_floss, "project-license", &license, NULL);
 
   if (license == NULL || *license == '\0')
     return g_strdup (_ ("Unknown"));
+
+  if (is_floss && bz_spdx_is_valid (license))
+    {
+      name = bz_spdx_get_name (license);
+      return g_strdup_printf (_ ("Free software licensed under %s"),
+                              (name != NULL && *name != '\0') ? name : license);
+    }
+
+  if (is_floss)
+    return g_strdup (_ ("Free software"));
 
   if (g_strcmp0 (license, "LicenseRef-proprietary") == 0)
     return g_strdup (_ ("Proprietary Software"));
 
   name = bz_spdx_get_name (license);
-
-  return g_strdup_printf (_ ("Free software licensed under %s"),
+  return g_strdup_printf (_ ("Special License: %s"),
                           (name != NULL && *name != '\0') ? name : license);
 }
 
 static char *
 get_license_label (gpointer object,
-                   gboolean is_floss)
+                   BzEntry *entry)
 {
-  return g_strdup (is_floss ? _ ("Free") : _ ("Proprietary"));
+  const char *license;
+  gboolean    is_floss = FALSE;
+
+  if (entry == NULL)
+    return g_strdup (_ ("Unknown"));
+
+  g_object_get (entry, "is-floss", &is_floss, "project-license", &license, NULL);
+
+  if (is_floss)
+    return g_strdup (_ ("Free"));
+
+  if (g_strcmp0 (license, "LicenseRef-proprietary") == 0)
+    return g_strdup (_ ("Proprietary"));
+
+  if (license == NULL || *license == '\0')
+    return g_strdup (_ ("Unknown"));
+
+  return g_strdup (_ ("Special License"));
 }
 
 static char *
@@ -527,6 +548,14 @@ format_more_other_apps_label (gpointer object, const char *developer)
     return g_strdup (_ ("Other Apps by this Developer"));
 
   return g_strdup_printf (_ ("Other Apps by %s"), developer);
+}
+
+static char *
+format_leftover_label (gpointer object, const char *name, guint64 size)
+{
+  g_autofree char *formatted_size = NULL;
+  formatted_size = g_format_size (size);
+  return g_strdup_printf (_ ("%s is not installed, but it still has <b>%s</b> of data present."), name, formatted_size);
 }
 
 static gpointer
@@ -780,14 +809,25 @@ screenshot_clicked_cb (BzFullView            *self,
                        BzScreenshotsCarousel *carousel)
 {
   GListModel        *screenshots = NULL;
+  GListModel        *captions    = NULL;
   AdwNavigationPage *page        = NULL;
   GtkWidget         *nav_view    = NULL;
+  BzEntry           *entry       = NULL;
 
   screenshots = bz_screenshots_carousel_get_model (carousel);
   if (screenshots == NULL)
     return;
 
-  page = bz_screenshot_page_new (screenshots, index);
+  if (self->ui_entry != NULL)
+    {
+      entry = bz_result_get_object (self->ui_entry);
+      if (entry != NULL)
+        g_object_get (entry, "screenshot-captions", &captions, NULL);
+    }
+
+  page = bz_screenshot_page_new (screenshots, captions, index);
+
+  g_clear_object (&captions);
 
   nav_view = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
   if (nav_view != NULL)
@@ -879,6 +919,18 @@ remove_cb (BzFullView *self,
 }
 
 static void
+delete_user_data_cb (BzFullView *self,
+                     GtkButton  *button)
+{
+  g_return_if_fail (BZ_IS_FULL_VIEW (self));
+
+  if (self->group == NULL)
+    return;
+
+  bz_entry_group_reap_user_data (self->group);
+}
+
+static void
 support_cb (BzFullView *self,
             GtkButton  *button)
 {
@@ -894,21 +946,7 @@ support_cb (BzFullView *self,
     }
 }
 
-static void
-forge_cb (BzFullView *self,
-          GtkButton  *button)
-{
-  BzEntry *entry = NULL;
 
-  entry = bz_result_get_object (self->ui_entry);
-  if (entry != NULL)
-    {
-      const char *url = NULL;
-
-      url = bz_entry_get_forge_url (entry);
-      g_app_info_launch_default_for_uri (url, NULL, NULL);
-    }
-}
 
 static void
 install_addons_cb (BzFullView *self,
@@ -1010,20 +1048,6 @@ bz_full_view_class_init (BzFullViewClass *klass)
           BZ_TYPE_RESULT,
           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
-  props[PROP_DEBOUNCE] =
-      g_param_spec_boolean (
-          "debounce",
-          NULL, NULL,
-          FALSE,
-          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
-
-  props[PROP_DEBOUNCED_UI_ENTRY] =
-      g_param_spec_object (
-          "debounced-ui-entry",
-          NULL, NULL,
-          BZ_TYPE_RESULT,
-          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
-
   props[PROP_MAIN_MENU] =
       g_param_spec_object (
           "main-menu",
@@ -1117,8 +1141,6 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzFullView, stack);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, main_scroll);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, shadow_overlay);
-  gtk_widget_class_bind_template_child (widget_class, BzFullView, forge_stars);
-  gtk_widget_class_bind_template_child (widget_class, BzFullView, forge_stars_label);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, description_toggle);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, wide_open_button);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, wide_install_button);
@@ -1126,10 +1148,12 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzFullView, narrow_open_button);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
+  gtk_widget_class_bind_template_callback (widget_class, is_positive);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, logical_and);
   gtk_widget_class_bind_template_callback (widget_class, is_longer);
   gtk_widget_class_bind_template_callback (widget_class, bool_to_string);
+  gtk_widget_class_bind_template_callback (widget_class, format_favorites_count);
   gtk_widget_class_bind_template_callback (widget_class, format_recent_downloads);
   gtk_widget_class_bind_template_callback (widget_class, format_recent_downloads_tooltip);
   gtk_widget_class_bind_template_callback (widget_class, format_size);
@@ -1146,6 +1170,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, get_formfactor_label);
   gtk_widget_class_bind_template_callback (widget_class, get_formfactor_tooltip);
   gtk_widget_class_bind_template_callback (widget_class, has_link);
+  gtk_widget_class_bind_template_callback (widget_class, format_leftover_label);
   gtk_widget_class_bind_template_callback (widget_class, format_other_apps_label);
   gtk_widget_class_bind_template_callback (widget_class, format_more_other_apps_label);
   gtk_widget_class_bind_template_callback (widget_class, get_developer_apps_entries);
@@ -1161,8 +1186,8 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, run_cb);
   gtk_widget_class_bind_template_callback (widget_class, install_cb);
   gtk_widget_class_bind_template_callback (widget_class, remove_cb);
+  gtk_widget_class_bind_template_callback (widget_class, delete_user_data_cb);
   gtk_widget_class_bind_template_callback (widget_class, support_cb);
-  gtk_widget_class_bind_template_callback (widget_class, forge_cb);
   gtk_widget_class_bind_template_callback (widget_class, pick_license_warning);
   gtk_widget_class_bind_template_callback (widget_class, install_addons_cb);
   gtk_widget_class_bind_template_callback (widget_class, addon_transact_cb);
@@ -1218,15 +1243,9 @@ bz_full_view_set_entry_group (BzFullView   *self,
   if (group == self->group)
     return;
 
-  g_clear_handle_id (&self->debounce_timeout, g_source_remove);
   g_clear_object (&self->group);
   g_clear_object (&self->ui_entry);
-  g_clear_object (&self->debounced_ui_entry);
   g_clear_object (&self->group_model);
-
-  gtk_widget_set_visible (self->forge_stars, FALSE);
-  gtk_revealer_set_reveal_child (GTK_REVEALER (self->forge_stars), FALSE);
-  gtk_label_set_label (self->forge_stars_label, "...");
   gtk_toggle_button_set_active (self->description_toggle, FALSE);
 
   if (group != NULL)
@@ -1236,14 +1255,8 @@ bz_full_view_set_entry_group (BzFullView   *self,
       self->group    = g_object_ref (group);
       self->ui_entry = bz_entry_group_dup_ui_entry (group);
 
-      future            = bz_entry_group_dup_all_into_model (group);
+      future            = bz_entry_group_dup_all_into_store (group);
       self->group_model = bz_result_new (future);
-
-      if (self->debounce)
-        self->debounce_timeout = g_timeout_add_once (
-            300, (GSourceOnceFunc) debounce_timeout, self);
-      else
-        debounce_timeout (self);
 
       adw_view_stack_set_visible_child_name (self->stack, "content");
     }
@@ -1256,7 +1269,6 @@ bz_full_view_set_entry_group (BzFullView   *self,
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ENTRY_GROUP]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_UI_ENTRY]);
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DEBOUNCED_UI_ENTRY]);
 }
 
 BzEntryGroup *
@@ -1264,122 +1276,6 @@ bz_full_view_get_entry_group (BzFullView *self)
 {
   g_return_val_if_fail (BZ_IS_FULL_VIEW (self), NULL);
   return self->group;
-}
-
-void
-bz_full_view_set_debounce (BzFullView *self,
-                           gboolean    debounce)
-{
-  g_return_if_fail (BZ_IS_FULL_VIEW (self));
-
-  if (!!debounce == !!self->debounce)
-    return;
-
-  self->debounce = debounce;
-  if (!debounce &&
-      self->debounce_timeout > 0)
-    {
-      g_clear_handle_id (&self->debounce_timeout, g_source_remove);
-      debounce_timeout (self);
-    }
-
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DEBOUNCE]);
-}
-
-gboolean
-bz_full_view_get_debounce (BzFullView *self)
-{
-  g_return_val_if_fail (BZ_IS_FULL_VIEW (self), FALSE);
-  return self->debounce;
-}
-
-static void
-debounce_timeout (BzFullView *self)
-{
-  self->debounce_timeout = 0;
-  if (self->group == NULL)
-    return;
-
-  g_clear_object (&self->debounced_ui_entry);
-  self->debounced_ui_entry = g_object_ref (self->ui_entry);
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DEBOUNCED_UI_ENTRY]);
-
-  /* Disabled by default in gsettings schema since we don't want to
-   users to be rate limited by github */
-  if (self->state != NULL &&
-      g_settings_get_boolean (
-          bz_state_info_get_settings (self->state),
-          "show-git-forge-star-counts"))
-    {
-      dex_clear (&self->loading_forge_stars);
-      self->loading_forge_stars = dex_scheduler_spawn (
-          dex_scheduler_get_default (),
-          bz_get_dex_stack_size (),
-          (DexFiberFunc) retrieve_star_string_fiber,
-          bz_track_weak (self), bz_weak_release);
-    }
-}
-
-static DexFuture *
-retrieve_star_string_fiber (GWeakRef *wr)
-{
-  g_autoptr (BzFullView) self         = NULL;
-  g_autoptr (GError) local_error      = NULL;
-  g_autoptr (BzEntry) entry           = NULL;
-  const char      *forge_link         = NULL;
-  g_autofree char *forge_link_trimmed = NULL;
-  g_autofree char *star_url           = NULL;
-  g_autoptr (JsonNode) node           = NULL;
-  JsonObject      *object             = NULL;
-  gint64           star_count         = 0;
-  g_autofree char *fmt                = NULL;
-
-  bz_weak_get_or_return_reject (self, wr);
-
-  entry = dex_await_object (bz_result_dup_future (self->ui_entry), NULL);
-  if (entry == NULL)
-    goto done;
-
-  forge_link = bz_entry_get_forge_url (entry);
-  if (forge_link == NULL)
-    goto done;
-
-  // Remove trailing `/` from forge URLs if it exists
-  if (g_str_has_suffix (forge_link, "/"))
-    {
-      forge_link_trimmed = g_strndup (forge_link, strlen (forge_link) - 1);
-      forge_link         = forge_link_trimmed;
-    }
-
-  if (g_regex_match_simple (
-          "https://github.com/.*/.*",
-          forge_link,
-          G_REGEX_DEFAULT,
-          G_REGEX_MATCH_DEFAULT))
-    star_url = g_strdup_printf (
-        "https://api.github.com/repos/%s",
-        forge_link + strlen ("https://github.com/"));
-  else
-    goto done;
-
-  node = dex_await_boxed (bz_https_query_json (star_url), &local_error);
-  if (node == NULL)
-    {
-      g_warning ("Could not retrieve vcs star count at %s: %s",
-                 forge_link, local_error->message);
-      goto done;
-    }
-
-  object     = json_node_get_object (node);
-  star_count = json_object_get_int_member_with_default (object, "stargazers_count", 0);
-  fmt        = g_strdup_printf ("%'zu", star_count);
-
-  gtk_widget_set_visible (self->forge_stars, TRUE);
-  gtk_revealer_set_reveal_child (GTK_REVEALER (self->forge_stars), TRUE);
-
-done:
-  gtk_label_set_label (self->forge_stars_label, fmt != NULL ? fmt : "?");
-  return NULL;
 }
 
 static void

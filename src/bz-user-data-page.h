@@ -1,6 +1,6 @@
-/* bz-screenshot-page.h
+/* bz-user-data-page.h
  *
- * Copyright 2025 Alexander Vanhee
+ * Copyright 2025 Adam Masciola, Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,27 +17,18 @@
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
-
 #pragma once
 
-#include "bz-async-texture.h"
+#include "bz-state-info.h"
 #include <adwaita.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_SCREENSHOT_PAGE (bz_screenshot_page_get_type ())
+#define BZ_TYPE_USER_DATA_PAGE (bz_user_data_page_get_type ())
 
-G_DECLARE_FINAL_TYPE (BzScreenshotPage, bz_screenshot_page, BZ, SCREENSHOT_PAGE, AdwNavigationPage)
+G_DECLARE_FINAL_TYPE (BzUserDataPage, bz_user_data_page, BZ, USER_DATA_PAGE, AdwNavigationPage)
 
-AdwNavigationPage *bz_screenshot_page_new (GListModel *screenshots,
-                                           GListModel *captions,
-                                           guint       initial_index);
-
-void
-bz_screenshot_page_set_captions (BzScreenshotPage *self,
-                                 GListModel       *captions);
-
-const char *
-bz_screenshot_page_get_current_caption (BzScreenshotPage *self);
+GtkWidget *
+bz_user_data_page_new (BzStateInfo *state);
 
 G_END_DECLS

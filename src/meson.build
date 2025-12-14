@@ -52,7 +52,7 @@ gdbus_src = gnome.gdbus_codegen(
   namespace : 'Bz',
 )
 
-bz_sources = [
+bz_sources = files(
   'bz-addons-dialog.c',
   'bz-age-rating-dialog.c',
   'bz-app-size-dialog.c',
@@ -71,7 +71,6 @@ bz_sources = [
   'bz-curated-view.c',
   'bz-data-graph.c',
   'bz-decorated-screenshot.c',
-  'bz-detailed-app-tile.c',
   'bz-developer-badge.c',
   'bz-download-worker.c',
   'bz-dynamic-list-view.c',
@@ -133,13 +132,16 @@ bz_sources = [
   'bz-transaction-view.c',
   'bz-transaction.c',
   'bz-update-dialog.c',
+  'bz-user-data-page.c',
+  'bz-user-data-tile.c',
   'bz-window.c',
   'bz-world-map-parser.c',
   'bz-world-map.c',
   'bz-yaml-parser.c',
   'bz-zoom.c',
   'main.c',
-]
+)
+subdir('progress-bar-designs')
 
 bz_deps = [
   math,
@@ -229,7 +231,6 @@ blueprints = custom_target('blueprints',
     'bz-curated-app-tile.blp',
     'bz-curated-view.blp',
     'bz-decorated-screenshot.blp',
-    'bz-detailed-app-tile.blp',
     'bz-developer-badge.blp',
     'bz-entry-inspector.blp',
     'bz-featured-carousel.blp',
@@ -257,6 +258,8 @@ blueprints = custom_target('blueprints',
     'bz-stats-dialog.blp',
     'bz-transaction-view.blp',
     'bz-update-dialog.blp',
+    'bz-user-data-page.blp',
+    'bz-user-data-tile.blp',
     'bz-window.blp',
     'gtk/shortcuts-dialog.blp',
   ),
