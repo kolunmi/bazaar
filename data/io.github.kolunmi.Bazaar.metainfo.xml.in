@@ -68,6 +68,12 @@
   </screenshots>
 
   <releases>
+    <release version="0.6.3" date="2025-12-14">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.6.3</url>
+      <description translate="no">
+        <p>Another quick release to restore alphabetical sorting on the installed page</p>
+      </description>
+    </release>
     <release version="0.6.2" date="2025-12-09">
       <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.6.2</url>
       <description translate="no">
