@@ -203,6 +203,7 @@
                     },
                     "config-opts": [
                       "--disable-man",
+                      "--enable-introspection=no",
                       "--with-curl",
                       "--without-libsystemd"
                     ]
