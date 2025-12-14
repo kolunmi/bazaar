@@ -36,7 +36,7 @@ template $BzUserDataTile: Adw.Bin {
           margin-bottom: 10;
           height-request: 48;
           width-request: 48;
-          pixel-size: 64;
+          pixel-size: 48;
           icon-name: "application-x-executable";
           visible: bind $is_null(template.group as <$BzEntryGroup>.icon-paintable) as <bool>;
           styles ["icon-dropshadow"]
@@ -69,7 +69,7 @@ template $BzUserDataTile: Adw.Bin {
           width-request: 32;
           height-request: 32;
           valign: center;
-          margin-end: 8;
+          margin-end: 16;
           has-tooltip: true;
           tooltip-text: _("Remove User Data");
           icon-name: "user-trash-symbolic";
