@@ -32,9 +32,11 @@ struct _BzAuthState
   char           *name;
   char           *token;
   char           *profile_icon_url;
+  GDateTime      *token_expires;
   BzAsyncTexture *paintable;
 
   gboolean loading;
+  guint    expiration_timeout_id;
 };
 
 G_DEFINE_FINAL_TYPE (BzAuthState, bz_auth_state, G_TYPE_OBJECT)
@@ -67,6 +69,45 @@ get_secret_schema (void)
   return &schema;
 }
 
+static gboolean
+on_token_expired (gpointer user_data)
+{
+  BzAuthState *self           = BZ_AUTH_STATE (user_data);
+  self->expiration_timeout_id = 0;
+  bz_auth_state_clear (self);
+  return G_SOURCE_REMOVE;
+}
+
+static void
+schedule_token_expiration (BzAuthState *self)
+{
+  GDateTime *now;
+  gint64     seconds_until_expiration;
+
+  if (self->expiration_timeout_id != 0)
+    g_source_remove (self->expiration_timeout_id);
+
+  self->expiration_timeout_id = 0;
+
+  if (self->token_expires == NULL)
+    return;
+
+  now                      = g_date_time_new_now_utc ();
+  seconds_until_expiration = g_date_time_difference (self->token_expires, now) / G_TIME_SPAN_SECOND;
+  g_date_time_unref (now);
+
+  if (seconds_until_expiration <= 0)
+    {
+      bz_auth_state_clear (self);
+      return;
+    }
+
+  if (seconds_until_expiration > G_MAXUINT / 1000)
+    self->expiration_timeout_id = g_timeout_add_seconds (G_MAXUINT / 1000, on_token_expired, self);
+  else
+    self->expiration_timeout_id = g_timeout_add_seconds (seconds_until_expiration, on_token_expired, self);
+}
+
 static void
 save_to_secrets (BzAuthState *self)
 {
@@ -88,6 +129,11 @@ save_to_secrets (BzAuthState *self)
     g_variant_builder_add (builder, "{sv}", "name", g_variant_new_string (self->name));
   if (self->token != NULL)
     g_variant_builder_add (builder, "{sv}", "token", g_variant_new_string (self->token));
+  if (self->token_expires != NULL)
+    {
+      g_autofree char *expires = g_date_time_format_iso8601 (self->token_expires);
+      g_variant_builder_add (builder, "{sv}", "token-expires", g_variant_new_string (expires));
+    }
   if (self->profile_icon_url != NULL)
     g_variant_builder_add (builder, "{sv}", "profile-icon-url", g_variant_new_string (self->profile_icon_url));
 
@@ -173,6 +219,15 @@ load_from_secrets (BzAuthState *self)
                   g_free (self->token);
                   self->token = g_variant_dup_string (value, NULL);
                 }
+              else if (g_strcmp0 (key, "token-expires") == 0)
+                {
+                  g_autoptr (GDateTime) dt = g_date_time_new_from_iso8601 (g_variant_get_string (value, NULL), NULL);
+                  if (dt != NULL)
+                    {
+                      g_clear_pointer (&self->token_expires, g_date_time_unref);
+                      self->token_expires = g_steal_pointer (&dt);
+                    }
+                }
               else if (g_strcmp0 (key, "profile-icon-url") == 0)
                 {
                   g_free (self->profile_icon_url);
@@ -187,6 +242,19 @@ load_from_secrets (BzAuthState *self)
                 }
             }
         }
+    }
+
+  if (self->token_expires != NULL)
+    {
+      GDateTime *now = g_date_time_new_now_utc ();
+      if (g_date_time_compare (now, self->token_expires) >= 0)
+        {
+          g_date_time_unref (now);
+          bz_auth_state_clear (self);
+          return;
+        }
+      g_date_time_unref (now);
+      schedule_token_expiration (self);
     }
 }
 
@@ -215,6 +283,22 @@ clear_secrets (BzAuthState *self)
 }
 
 static void
+bz_auth_state_dispose (GObject *object)
+{
+  BzAuthState *self = BZ_AUTH_STATE (object);
+
+  if (self->expiration_timeout_id != 0)
+    {
+      g_source_remove (self->expiration_timeout_id);
+      self->expiration_timeout_id = 0;
+    }
+
+  g_clear_object (&self->paintable);
+
+  G_OBJECT_CLASS (bz_auth_state_parent_class)->dispose (object);
+}
+
+static void
 bz_auth_state_finalize (GObject *object)
 {
   BzAuthState *self = BZ_AUTH_STATE (object);
@@ -222,7 +306,7 @@ bz_auth_state_finalize (GObject *object)
   g_clear_pointer (&self->name, g_free);
   g_clear_pointer (&self->token, g_free);
   g_clear_pointer (&self->profile_icon_url, g_free);
-  g_clear_object (&self->paintable);
+  g_clear_pointer (&self->token_expires, g_date_time_unref);
 
   G_OBJECT_CLASS (bz_auth_state_parent_class)->finalize (object);
 }
@@ -262,6 +346,7 @@ bz_auth_state_class_init (BzAuthStateClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
+  object_class->dispose      = bz_auth_state_dispose;
   object_class->finalize     = bz_auth_state_finalize;
   object_class->get_property = bz_auth_state_get_property;
 
@@ -351,6 +436,7 @@ void
 bz_auth_state_set_authenticated (BzAuthState *self,
                                  const char  *name,
                                  const char  *token,
+                                 GDateTime   *token_expires,
                                  const char  *profile_icon_url)
 {
   gboolean was_authenticated;
@@ -375,6 +461,10 @@ bz_auth_state_set_authenticated (BzAuthState *self,
       self->token   = g_strdup (token);
       token_changed = TRUE;
     }
+
+  g_clear_pointer (&self->token_expires, g_date_time_unref);
+  if (token_expires != NULL)
+    self->token_expires = g_date_time_ref (token_expires);
 
   if (g_strcmp0 (self->profile_icon_url, profile_icon_url) != 0)
     {
@@ -401,6 +491,7 @@ bz_auth_state_set_authenticated (BzAuthState *self,
   if (was_authenticated != bz_auth_state_is_authenticated (self))
     g_object_notify_by_pspec (G_OBJECT (self), properties[PROP_AUTHENTICATED]);
 
+  schedule_token_expiration (self);
   save_to_secrets (self);
 }
 
@@ -409,6 +500,12 @@ bz_auth_state_clear (BzAuthState *self)
 {
   g_return_if_fail (BZ_IS_AUTH_STATE (self));
 
+  if (self->expiration_timeout_id != 0)
+    {
+      g_source_remove (self->expiration_timeout_id);
+      self->expiration_timeout_id = 0;
+    }
+
   clear_secrets (self);
-  bz_auth_state_set_authenticated (self, NULL, NULL, NULL);
+  bz_auth_state_set_authenticated (self, NULL, NULL, NULL, NULL);
 }

@@ -505,11 +505,11 @@ bz_screenshot_page_class_init (BzScreenshotPageClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, zoom_out_clicked);
   gtk_widget_class_bind_template_callback (widget_class, on_carousel_position_changed);
   gtk_widget_class_bind_template_callback (widget_class, reset_zoom_clicked);
+  gtk_widget_class_bind_template_callback (widget_class, copy_clicked);
   gtk_widget_class_bind_template_callback (widget_class, previous_clicked);
   gtk_widget_class_bind_template_callback (widget_class, next_clicked);
   gtk_widget_class_bind_template_callback (widget_class, has_multiple_screenshots);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
-  gtk_widget_class_bind_template_callback (widget_class, copy_clicked);
   gtk_widget_class_bind_template_callback (widget_class, is_valid_string);
 }
 

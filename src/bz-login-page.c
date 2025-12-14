@@ -44,6 +44,7 @@ struct _BzLoginPage
   BzFlathubAuthProvider *current_provider;
   char                  *auth_redirect_url;
   char                  *session_cookie;
+  GDateTime             *session_cookie_expires;
   gboolean               oauth_completed;
 
   GtkStack            *main_stack;
@@ -62,6 +63,29 @@ enum
 };
 
 static GParamSpec *properties[N_PROPS];
+
+static WebKitNetworkSession *
+get_shared_network_session (void)
+{
+  static WebKitNetworkSession *shared_session = NULL;
+
+  if (g_once_init_enter (&shared_session))
+    {
+      WebKitNetworkSession *session = NULL;
+      g_autofree char *data_dir = NULL;
+
+      data_dir = g_build_filename (g_get_user_data_dir (),
+                                   "io.github.kolunmi.Bazaar",
+                                   "webkit-data",
+                                   NULL);
+
+      session = webkit_network_session_new (data_dir, NULL);
+
+      g_once_init_leave (&shared_session, session);
+    }
+
+  return shared_session;
+}
 
 static void
 show_error (BzLoginPage *self, const char *message)
@@ -100,10 +124,17 @@ create_flathub_request (const char *method, const char *route)
 static void
 load_webkit_library (BzLoginPage *self)
 {
+  WebKitNetworkSession *network_session = NULL;
+
   if (self->webkit_loaded)
     return;
 
-  self->webview = WEBKIT_WEB_VIEW (webkit_web_view_new ());
+  network_session = get_shared_network_session ();
+
+  self->webview = WEBKIT_WEB_VIEW (g_object_new (WEBKIT_TYPE_WEB_VIEW,
+                                                  "network-session", network_session,
+                                                  NULL));
+
   gtk_scrolled_window_set_child (self->browser_scroll, GTK_WIDGET (self->webview));
 
   self->webkit_loaded = TRUE;
@@ -268,6 +299,7 @@ on_oauth_complete (GObject      *source_object,
         {
           g_free (self->session_cookie);
           self->session_cookie = g_strdup (soup_cookie_get_value (cookie));
+          self->session_cookie_expires = soup_cookie_get_expires (cookie);
         }
     }
   g_slist_free_full (cookies, (GDestroyNotify) soup_cookie_free);
@@ -325,6 +357,7 @@ on_user_info_loaded (GObject      *source_object,
     bz_auth_state_set_authenticated (self->auth_state,
                                      displayname,
                                      self->session_cookie,
+                                     self->session_cookie_expires,
                                      avatar_url);
 
   gtk_stack_set_visible_child_name (self->main_stack, "finish");
@@ -501,6 +534,7 @@ bz_login_page_dispose (GObject *object)
   g_clear_object (&self->auth_state);
   g_clear_object (&self->session);
   g_clear_object (&self->cookie_jar);
+  g_clear_object (&self->session_cookie_expires);
   g_clear_pointer (&self->auth_redirect_url, g_free);
   g_clear_pointer (&self->session_cookie, g_free);
 
@@ -555,7 +589,7 @@ format_greeting (gpointer    object,
 {
   if (name == NULL || name[0] == '\0')
     return g_strdup ("  ");
-  return g_strdup_printf ("Welcome, %s", name);
+  return g_strdup_printf (_ ("Hello, %s!"), name);
 }
 
 static void

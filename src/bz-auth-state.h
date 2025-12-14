@@ -50,6 +50,7 @@ void
 bz_auth_state_set_authenticated (BzAuthState *self,
                                  const char  *name,
                                  const char  *token,
+                                 GDateTime   *token_expires,
                                  const char  *profile_icon_url);
 
 void
