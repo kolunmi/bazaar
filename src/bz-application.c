@@ -1704,7 +1704,9 @@ fiber_replace_entry (BzApplication *self,
         {
           bz_entry_group_add (group, entry, eol_runtime);
           if (installed && !g_list_store_find (self->installed_apps, group, NULL))
-            g_list_store_append (self->installed_apps, group);
+            g_list_store_insert_sorted (
+                self->installed_apps, group,
+                (GCompareDataFunc) cmp_group, NULL);
         }
       else
         {
@@ -1718,7 +1720,9 @@ fiber_replace_entry (BzApplication *self,
           g_hash_table_replace (self->ids_to_groups, g_strdup (id), g_object_ref (new_group));
 
           if (installed)
-            g_list_store_append (self->installed_apps, new_group);
+            g_list_store_insert_sorted (
+                self->installed_apps, new_group,
+                (GCompareDataFunc) cmp_group, NULL);
         }
 
       if (eol_runtime != NULL)
