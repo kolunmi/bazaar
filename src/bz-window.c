@@ -33,7 +33,6 @@
 #include "bz-full-view.h"
 #include "bz-global-progress.h"
 #include "bz-installed-page.h"
-#include "bz-login-page.h"
 #include "bz-io.h"
 #include "bz-progress-bar.h"
 #include "bz-search-widget.h"
@@ -515,33 +514,6 @@ format_progress (gpointer object,
 }
 
 static void
-on_login_complete (BzLoginPage *login_page,
-                   const char  *jwt,
-                   gpointer     user_data)
-{
-  BzWindow *self = BZ_WINDOW (user_data);
-
-  gtk_widget_action_set_enabled (GTK_WIDGET (self), "window.flathub-login", FALSE);
-  g_print ("Login complete, JWT: %s\n", jwt);
-}
-
-static void
-action_flathub_login (GtkWidget  *widget,
-                      const char *action_name,
-                      GVariant   *parameter)
-{
-  BzWindow          *self       = BZ_WINDOW (widget);
-  AdwNavigationPage *login_page = NULL;
-
-  login_page = bz_login_page_new ();
-
-  g_signal_connect (login_page, "login-complete",
-                    G_CALLBACK (on_login_complete), self);
-
-  adw_navigation_view_push (self->navigation_view, login_page);
-}
-
-static void
 action_user_data (GtkWidget  *widget,
                   const char *action_name,
                   GVariant   *parameter)
@@ -657,7 +629,6 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, debug_id_inspect_cb);
 
   gtk_widget_class_install_action (widget_class, "escape", NULL, action_escape);
-  gtk_widget_class_install_action (widget_class, "window.flathub-login", NULL, action_flathub_login);
   gtk_widget_class_install_action (widget_class, "window.user-data", NULL, action_user_data);
 }
 
@@ -696,7 +667,10 @@ bz_window_init (BzWindow *self)
   adw_view_stack_set_visible_child_name (self->main_view_stack, "flathub");
 
   self->key_controller = gtk_event_controller_key_new ();
-  g_signal_connect_swapped (self->key_controller, "key-pressed", G_CALLBACK (key_pressed), self);
+  g_signal_connect_swapped (self->key_controller,
+                            "key-pressed",
+                            G_CALLBACK (key_pressed),
+                            self);
   gtk_widget_add_controller (GTK_WIDGET (self), self->key_controller);
 }
 
@@ -1026,6 +1000,15 @@ bz_window_add_toast (BzWindow *self,
   g_return_if_fail (ADW_IS_TOAST (toast));
 
   adw_toast_overlay_add_toast (self->toasts, toast);
+}
+
+void
+bz_window_push_page(BzWindow *self, AdwNavigationPage *page)
+{
+    g_return_if_fail(BZ_IS_WINDOW(self));
+    g_return_if_fail(ADW_IS_NAVIGATION_PAGE(page));
+
+    adw_navigation_view_push(self->navigation_view, page);
 }
 
 BzStateInfo *

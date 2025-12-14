@@ -24,12 +24,15 @@
 #include <webkit/webkit.h>
 
 #include "bz-async-texture.h"
+#include "bz-auth-state.h"
 #include "bz-flathub-auth-provider.h"
 #include "bz-login-page.h"
 
 struct _BzLoginPage
 {
   AdwNavigationPage parent_instance;
+
+  BzAuthState *auth_state;
 
   WebKitWebView *webview;
   gboolean       webkit_loaded;
@@ -43,24 +46,22 @@ struct _BzLoginPage
   char                  *session_cookie;
   gboolean               oauth_completed;
 
-  /* Template widgets */
-  GtkStack          *main_stack;
-  AdwStatusPage     *error_status_page;
+  GtkStack            *main_stack;
+  AdwStatusPage       *error_status_page;
   AdwPreferencesGroup *provider_preferences_group;
-  GtkScrolledWindow *browser_scroll;
-  AdwAvatar         *finish_avatar;
-  GtkLabel          *welcome_label;
+  GtkScrolledWindow   *browser_scroll;
 };
 
 G_DEFINE_FINAL_TYPE (BzLoginPage, bz_login_page, ADW_TYPE_NAVIGATION_PAGE)
 
 enum
 {
-  SIGNAL_LOGIN_COMPLETE,
-  LAST_SIGNAL
+  PROP_0,
+  PROP_AUTH_STATE,
+  N_PROPS
 };
 
-static guint signals[LAST_SIGNAL];
+static GParamSpec *properties[N_PROPS];
 
 static void
 show_error (BzLoginPage *self, const char *message)
@@ -86,12 +87,11 @@ parse_json_response (GBytes *bytes, GError **error)
   return json_node_dup_object (root);
 }
 
-
 static SoupMessage *
 create_flathub_request (const char *method, const char *route)
 {
   g_autofree char *url = g_strdup_printf ("https://flathub.org/api/v2%s", route);
-  SoupMessage *msg = soup_message_new (method, url);
+  SoupMessage     *msg = soup_message_new (method, url);
   soup_message_headers_append (soup_message_get_request_headers (msg),
                                "accept", "application/json");
   return msg;
@@ -181,7 +181,7 @@ on_decide_policy (WebKitWebView           *webview,
   WebKitNavigationAction *nav_action;
   WebKitURIRequest       *request;
   const char             *uri;
-  g_autoptr (GUri) parsed_uri = NULL;
+  g_autoptr (GUri) parsed_uri   = NULL;
   g_autoptr (GHashTable) params = NULL;
   const char *code, *state, *error;
 
@@ -235,12 +235,12 @@ on_oauth_complete (GObject      *source_object,
                    GAsyncResult *res,
                    gpointer      user_data)
 {
-  BzLoginPage *self = BZ_LOGIN_PAGE (user_data);
-  g_autoptr (GBytes) bytes = NULL;
-  g_autoptr (GError) error = NULL;
+  BzLoginPage *self          = BZ_LOGIN_PAGE (user_data);
+  g_autoptr (GBytes) bytes   = NULL;
+  g_autoptr (GError) error   = NULL;
   g_autoptr (JsonObject) obj = NULL;
   const char *status;
-  GSList *cookies, *l;
+  GSList     *cookies, *l;
 
   bytes = soup_session_send_and_read_finish (SOUP_SESSION (source_object), res, &error);
   if (error != NULL)
@@ -283,12 +283,10 @@ on_user_info_loaded (GObject      *source_object,
                      GAsyncResult *res,
                      gpointer      user_data)
 {
-  BzLoginPage *self = BZ_LOGIN_PAGE (user_data);
-  g_autoptr (GBytes) bytes = NULL;
-  g_autoptr (GError) error = NULL;
-  g_autoptr (JsonObject) obj = NULL;
-  g_autoptr (GFile) avatar_file = NULL;
-  g_autoptr (BzAsyncTexture) async_texture = NULL;
+  BzLoginPage *self           = BZ_LOGIN_PAGE (user_data);
+  g_autoptr (GBytes) bytes    = NULL;
+  g_autoptr (GError) error    = NULL;
+  g_autoptr (JsonObject) obj  = NULL;
   JsonObject *default_account = NULL;
   const char *displayname;
   const char *avatar_url = NULL;
@@ -319,19 +317,17 @@ on_user_info_loaded (GObject      *source_object,
   if (json_object_has_member (obj, "default_account"))
     {
       default_account = json_object_get_object_member (obj, "default_account");
-      avatar_url = json_object_get_string_member (default_account, "avatar");
+      if (json_object_has_member (default_account, "avatar"))
+        avatar_url = json_object_get_string_member (default_account, "avatar");
     }
 
-  gtk_label_set_text (self->welcome_label, g_strdup_printf ("Hello, %s!", displayname));
-  adw_avatar_set_text (self->finish_avatar, displayname);
+  if (self->auth_state != NULL)
+    bz_auth_state_set_authenticated (self->auth_state,
+                                     displayname,
+                                     self->session_cookie,
+                                     avatar_url);
+
   gtk_stack_set_visible_child_name (self->main_stack, "finish");
-
-  if (avatar_url == NULL || avatar_url[0] == '\0')
-    return;
-
-  avatar_file = g_file_new_for_uri (avatar_url);
-  async_texture = bz_async_texture_new (avatar_file, NULL);
-  adw_avatar_set_custom_image (self->finish_avatar, GDK_PAINTABLE (async_texture));
 }
 
 static void
@@ -339,9 +335,9 @@ on_login_response (GObject      *source_object,
                    GAsyncResult *res,
                    gpointer      user_data)
 {
-  BzLoginPage *self = BZ_LOGIN_PAGE (user_data);
-  g_autoptr (GBytes) bytes = NULL;
-  g_autoptr (GError) error = NULL;
+  BzLoginPage *self          = BZ_LOGIN_PAGE (user_data);
+  g_autoptr (GBytes) bytes   = NULL;
+  g_autoptr (GError) error   = NULL;
   g_autoptr (JsonObject) obj = NULL;
   const char *redirect;
 
@@ -380,7 +376,7 @@ on_login_response (GObject      *source_object,
 
 static void
 on_provider_row_activated (GtkButton   *button,
-                            BzLoginPage *self)
+                           BzLoginPage *self)
 {
   BzFlathubAuthProvider *provider;
   SoupMessage           *msg;
@@ -409,9 +405,9 @@ on_providers_loaded (GObject      *source_object,
                      GAsyncResult *res,
                      gpointer      user_data)
 {
-  BzLoginPage *self = BZ_LOGIN_PAGE (user_data);
-  g_autoptr (GBytes) bytes = NULL;
-  g_autoptr (GError) error = NULL;
+  BzLoginPage *self             = BZ_LOGIN_PAGE (user_data);
+  g_autoptr (GBytes) bytes      = NULL;
+  g_autoptr (GError) error      = NULL;
   g_autoptr (JsonParser) parser = NULL;
   JsonNode  *root;
   JsonArray *array;
@@ -445,7 +441,7 @@ on_providers_loaded (GObject      *source_object,
       const char            *name         = json_object_get_string_member (provider_obj, "name");
       GtkWidget             *row          = adw_action_row_new ();
       GtkWidget             *prefix_icon, *suffix_icon;
-      g_autofree char       *icon_name    = g_strdup_printf ("io.github.kolunmi.Bazaar.%s", method);
+      g_autofree char       *icon_name = g_strdup_printf ("io.github.kolunmi.Bazaar.%s", method);
 
       bz_flathub_auth_provider_set_name (provider, name);
       bz_flathub_auth_provider_set_method (provider, method);
@@ -455,15 +451,15 @@ on_providers_loaded (GObject      *source_object,
       adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), name);
 
       prefix_icon = gtk_image_new_from_icon_name (icon_name);
-      gtk_image_set_icon_size(GTK_IMAGE (prefix_icon), GTK_ICON_SIZE_LARGE);
-      gtk_widget_add_css_class(prefix_icon, "lowres-icon");
+      gtk_image_set_icon_size (GTK_IMAGE (prefix_icon), GTK_ICON_SIZE_LARGE);
+      gtk_widget_add_css_class (prefix_icon, "lowres-icon");
       adw_action_row_add_prefix (ADW_ACTION_ROW (row), prefix_icon);
 
       suffix_icon = gtk_image_new_from_icon_name ("go-next-symbolic");
       adw_action_row_add_suffix (ADW_ACTION_ROW (row), suffix_icon);
 
       g_object_set_data (G_OBJECT (row), "provider", provider);
-      gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW(row), true);
+      gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), true);
       g_signal_connect (row, "activated", G_CALLBACK (on_provider_row_activated), self);
 
       adw_preferences_group_add (self->provider_preferences_group, row);
@@ -491,12 +487,10 @@ on_close_clicked (GtkButton   *button,
 {
   AdwNavigationView *navigation_view;
   navigation_view = ADW_NAVIGATION_VIEW (gtk_widget_get_ancestor (GTK_WIDGET (self),
-                                                                   ADW_TYPE_NAVIGATION_VIEW));
+                                                                  ADW_TYPE_NAVIGATION_VIEW));
 
   if (navigation_view != NULL)
     adw_navigation_view_pop (navigation_view);
-
-  g_signal_emit (self, signals[SIGNAL_LOGIN_COMPLETE], 0, self->session_cookie);
 }
 
 static void
@@ -504,6 +498,7 @@ bz_login_page_dispose (GObject *object)
 {
   BzLoginPage *self = BZ_LOGIN_PAGE (object);
 
+  g_clear_object (&self->auth_state);
   g_clear_object (&self->session);
   g_clear_object (&self->cookie_jar);
   g_clear_pointer (&self->auth_redirect_url, g_free);
@@ -519,23 +514,67 @@ bz_login_page_dispose (GObject *object)
 }
 
 static void
+bz_login_page_get_property (GObject    *object,
+                            guint       prop_id,
+                            GValue     *value,
+                            GParamSpec *pspec)
+{
+  BzLoginPage *self = BZ_LOGIN_PAGE (object);
+
+  switch (prop_id)
+    {
+    case PROP_AUTH_STATE:
+      g_value_set_object (value, self->auth_state);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+    }
+}
+
+static void
+bz_login_page_set_property (GObject      *object,
+                            guint         prop_id,
+                            const GValue *value,
+                            GParamSpec   *pspec)
+{
+  BzLoginPage *self = BZ_LOGIN_PAGE (object);
+
+  switch (prop_id)
+    {
+    case PROP_AUTH_STATE:
+      g_set_object (&self->auth_state, g_value_get_object (value));
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+    }
+}
+
+static char *
+format_greeting (gpointer    object,
+                 const char *name)
+{
+  if (name == NULL || name[0] == '\0')
+    return g_strdup ("  ");
+  return g_strdup_printf ("Welcome, %s", name);
+}
+
+static void
 bz_login_page_class_init (BzLoginPageClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
-  object_class->dispose = bz_login_page_dispose;
+  object_class->dispose      = bz_login_page_dispose;
+  object_class->get_property = bz_login_page_get_property;
+  object_class->set_property = bz_login_page_set_property;
 
-  signals[SIGNAL_LOGIN_COMPLETE] =
-      g_signal_new ("login-complete",
-                    G_TYPE_FROM_CLASS (klass),
-                    G_SIGNAL_RUN_LAST,
-                    0,
-                    NULL, NULL,
-                    NULL,
-                    G_TYPE_NONE,
-                    1,
-                    G_TYPE_STRING);
+  properties[PROP_AUTH_STATE] =
+      g_param_spec_object ("auth-state",
+                           NULL, NULL,
+                           BZ_TYPE_AUTH_STATE,
+                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
+
+  g_object_class_install_properties (object_class, N_PROPS, properties);
 
   gtk_widget_class_set_template_from_resource (widget_class,
                                                "/io/github/kolunmi/Bazaar/bz-login-page.ui");
@@ -544,10 +583,9 @@ bz_login_page_class_init (BzLoginPageClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzLoginPage, error_status_page);
   gtk_widget_class_bind_template_child (widget_class, BzLoginPage, provider_preferences_group);
   gtk_widget_class_bind_template_child (widget_class, BzLoginPage, browser_scroll);
-  gtk_widget_class_bind_template_child (widget_class, BzLoginPage, finish_avatar);
-  gtk_widget_class_bind_template_child (widget_class, BzLoginPage, welcome_label);
 
   gtk_widget_class_bind_template_callback (widget_class, on_close_clicked);
+  gtk_widget_class_bind_template_callback (widget_class, format_greeting);
 }
 
 static void
@@ -567,7 +605,9 @@ bz_login_page_init (BzLoginPage *self)
 }
 
 AdwNavigationPage *
-bz_login_page_new (void)
+bz_login_page_new (BzAuthState *auth_state)
 {
-  return g_object_new (BZ_TYPE_LOGIN_PAGE, NULL);
+  return g_object_new (BZ_TYPE_LOGIN_PAGE,
+                       "auth-state", auth_state,
+                       NULL);
 }

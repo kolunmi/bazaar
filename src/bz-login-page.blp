@@ -81,13 +81,16 @@ template $BzLoginPage: Adw.NavigationPage {
                 halign: center;
                 valign: center;
 
-                Adw.Avatar finish_avatar {
+                Adw.Avatar {
                   size: 96;
                   show-initials: true;
+                  text: bind template.auth-state as <$BzAuthState>.name;
+                  custom-image: bind template.auth-state as <$BzAuthState>.paintable;
                 }
 
-                Label welcome_label {
+                Label {
                   halign: center;
+                  label: bind $format_greeting(template.auth-state as <$BzAuthState>.name as <string>) as <string>;
 
                   styles [
                     "title-1",

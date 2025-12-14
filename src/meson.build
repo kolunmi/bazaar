@@ -18,6 +18,7 @@ glycin_dep           = dependency('glycin-2', version: '>= 2.0')
 glycin_gtk4_dep      = dependency('glycin-gtk4-2', version: '>= 2.0')
 md4c_dep             = dependency('md4c', version: '>= 0.5.1')
 webkit_dep           = dependency('webkitgtk-6.0', version: '>= 2.50.2')
+libsecret_dep        = dependency('libsecret-1', version: '>= 0.20')
 
 
 dl_worker_sources = [
@@ -62,6 +63,7 @@ bz_sources = files(
   'bz-apps-page.c',
   'bz-appstream-description-render.c',
   'bz-async-texture.c',
+  'bz-auth-state.c',
   'bz-backend.c',
   'bz-category-tile.c',
   'bz-comet-overlay.c',
@@ -158,6 +160,7 @@ bz_deps = [
   glycin_gtk4_dep,
   md4c_dep,
   webkit_dep,
+  libsecret_dep,
 ]
 
 gen_gobject = find_program('./gen_gobject.sh')

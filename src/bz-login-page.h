@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include "bz-auth-state.h"
 #include <adwaita.h>
 
 G_BEGIN_DECLS
@@ -28,6 +29,6 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE (BzLoginPage, bz_login_page, BZ, LOGIN_PAGE, AdwNavigationPage)
 
-AdwNavigationPage *bz_login_page_new (void);
+AdwNavigationPage *bz_login_page_new (BzAuthState *auth_state);
 
 G_END_DECLS

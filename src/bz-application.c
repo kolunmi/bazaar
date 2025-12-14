@@ -30,6 +30,7 @@
 
 #include "bz-application-map-factory.h"
 #include "bz-application.h"
+#include "bz-auth-state.h"
 #include "bz-backend-notification.h"
 #include "bz-content-provider.h"
 #include "bz-entry-cache-manager.h"
@@ -43,6 +44,7 @@
 #include "bz-hash-table-object.h"
 #include "bz-inspector.h"
 #include "bz-io.h"
+#include "bz-login-page.h"
 #include "bz-newline-parser.h"
 #include "bz-parser.h"
 #include "bz-preferences-dialog.h"
@@ -691,6 +693,45 @@ bz_application_preferences_action (GSimpleAction *action,
 }
 
 static void
+bz_application_flathub_login_action (GSimpleAction *action,
+                                     GVariant      *parameter,
+                                     gpointer       user_data)
+{
+  BzApplication     *self       = user_data;
+  GtkWindow         *window     = NULL;
+  BzAuthState       *auth_state = NULL;
+  AdwNavigationPage *login_page = NULL;
+
+  g_assert (BZ_IS_APPLICATION (self));
+
+  window      = gtk_application_get_active_window (GTK_APPLICATION (self));
+
+  auth_state = bz_state_info_get_auth_state (self->state);
+  login_page = bz_login_page_new (auth_state);
+
+  bz_window_push_page(BZ_WINDOW(window), login_page);
+}
+
+static void
+bz_application_flathub_logout_action (GSimpleAction *action,
+                                      GVariant      *parameter,
+                                      gpointer       user_data)
+{
+    BzApplication *self       = BZ_APPLICATION(user_data);
+    GtkWindow     *window     = gtk_application_get_active_window(GTK_APPLICATION(self));
+    BzAuthState   *auth_state = bz_state_info_get_auth_state(self->state);
+
+    g_assert(BZ_IS_WINDOW(window));
+
+    bz_auth_state_clear(auth_state);
+
+    bz_window_add_toast(
+        BZ_WINDOW(window),
+        adw_toast_new(_("Logged Out Successfully!"))
+    );
+}
+
+static void
 bz_application_quit_action (GSimpleAction *action,
                             GVariant      *parameter,
                             gpointer       user_data)
@@ -703,6 +744,8 @@ bz_application_quit_action (GSimpleAction *action,
 }
 
 static const GActionEntry app_actions[] = {
+  {       "flathub-login",       bz_application_flathub_login_action, NULL },
+  {      "flathub-logout",      bz_application_flathub_logout_action, NULL },
   {                "quit",                bz_application_quit_action, NULL },
   {         "preferences",         bz_application_preferences_action, NULL },
   {               "about",               bz_application_about_action, NULL },
@@ -2292,6 +2335,9 @@ init_service_struct (BzApplication *self,
                      GtkStringList *curated_configs)
 {
   const char *app_id = NULL;
+  BzAuthState *auth_state = bz_auth_state_new ();
+  GSimpleAction *login_action = G_SIMPLE_ACTION(
+    g_action_map_lookup_action(G_ACTION_MAP(self), "flathub-login"));
 #ifdef HARDCODED_MAIN_CONFIG
   g_autoptr (GError) local_error  = NULL;
   g_autoptr (GFile) config_file   = NULL;
@@ -2413,6 +2459,17 @@ init_service_struct (BzApplication *self,
 
   self->state = bz_state_info_new ();
   bz_state_info_set_busy (self->state, TRUE);
+
+  bz_state_info_set_auth_state (self->state, auth_state);
+  g_object_unref (auth_state);
+
+  if (G_IS_SIMPLE_ACTION(login_action) && BZ_IS_AUTH_STATE(auth_state)) {
+      g_simple_action_set_enabled(login_action, !bz_auth_state_is_authenticated(auth_state));
+      g_object_bind_property(auth_state, "authenticated",
+                             login_action, "enabled",
+                             G_BINDING_INVERT_BOOLEAN);
+  }
+
 
   network = g_network_monitor_get_default ();
   if (network != NULL)
