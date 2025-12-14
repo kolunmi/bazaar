@@ -23,6 +23,8 @@
     "--system-talk-name=org.freedesktop.Accounts"
   ],
   "cleanup": [
+    "/share/zsh",
+    "/share/gettext",
     "/include",
     "/lib/pkgconfig",
     "/lib/cmake",
