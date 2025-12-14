@@ -94,6 +94,7 @@
             "-Dsystem_install_dir=/var/lib/flatpak",
             "-Dsystem_bubblewrap=bwrap",
             "-Dsystem_dbus_proxy=xdg-dbus-proxy",
+            "-Dgir=disabled",
             "--sysconfdir=/var/run/host/etc"
           ],
           "cleanup": [
