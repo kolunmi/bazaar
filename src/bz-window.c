@@ -541,6 +541,7 @@ action_flathub_login (GtkWidget  *widget,
   adw_navigation_view_push (self->navigation_view, login_page);
 }
 
+static void
 action_user_data (GtkWidget  *widget,
                   const char *action_name,
                   GVariant   *parameter)
