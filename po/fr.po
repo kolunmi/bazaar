@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-10 08:21+0100\n"
-"PO-Revision-Date: 2025-12-10 10:15+0100\n"
+"POT-Creation-Date: 2025-12-12 20:06+0100\n"
+"PO-Revision-Date: 2025-12-13 12:11+0100\n"
 "Last-Translator: Mimolet <theMimolet@proton.me>\n"
 "Language-Team: French\n"
 "Language: fr\n"
@@ -145,17 +145,19 @@ msgstr "Page de recherche"
 msgid "Category page"
 msgstr "Catégories"
 
-#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:710
+#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:716
+#: src/bz-installed-tile.blp:99
 msgid "Manage Add-ons"
 msgstr "Gérer les extensions"
 
 #: src/bz-addons-dialog.c:90 src/bz-full-view.blp:504
-#: src/bz-transaction-view.blp:213 src/bz-window.c:1268
+#: src/bz-installed-tile.blp:117 src/bz-transaction-view.blp:213
+#: src/bz-window.c:1282
 msgid "Remove"
 msgstr "Supprimer"
 
 #: src/bz-addons-dialog.c:95 src/bz-full-view.blp:276 src/bz-full-view.blp:491
-#: src/bz-transaction-view.blp:187 src/bz-window.c:1245
+#: src/bz-transaction-view.blp:187 src/bz-window.c:1259
 msgid "Install"
 msgstr "Installer"
 
@@ -542,6 +544,35 @@ msgstr "De la taille de Wikipédia"
 msgid "Without any media"
 msgstr "Sans le contenu multimédia"
 
+#: src/bz-apps-page.blp:14 src/bz-full-view.blp:43 src/bz-user-data-page.blp:15
+#: src/bz-window.blp:426
+msgid "Main Menu"
+msgstr "Menu principal"
+
+#: src/bz-apps-page.blp:17 src/bz-user-data-page.blp:18 src/bz-window.blp:506
+msgid "_Donate to Bazaar ❤️"
+msgstr "_Faire un don à Bazaar ❤️"
+
+#: src/bz-apps-page.blp:18 src/bz-user-data-page.blp:19
+msgid "_Refresh Content"
+msgstr "_Actualiser le contenu"
+
+#: src/bz-apps-page.blp:22 src/bz-user-data-page.blp:22 src/bz-window.blp:513
+msgid "_Preferences"
+msgstr "_Préférences"
+
+#: src/bz-apps-page.blp:23 src/bz-user-data-page.blp:23 src/bz-window.blp:523
+msgid "_Keyboard Shortcuts"
+msgstr "_Raccourcis clavier"
+
+#: src/bz-apps-page.blp:24 src/bz-user-data-page.blp:24 src/bz-window.blp:528
+msgid "_About Bazaar"
+msgstr "_À propos de Bazaar"
+
+#: src/bz-apps-page.blp:28 src/bz-user-data-page.blp:27 src/bz-window.blp:535
+msgid "_Quit Bazaar"
+msgstr "_Quitter Bazaar"
+
 #: src/bz-application.c:556
 msgid ""
 "This functionality is currently disabled. It is recommended you download and "
@@ -607,7 +638,9 @@ msgid "Checking for updates"
 msgstr "Recherche de mises à jour..."
 
 #: src/bz-curated-view.blp:11 src/bz-flathub-page.blp:19
-#: src/bz-full-view.blp:53 src/bz-installed-page.blp:15 src/bz-window.blp:183
+#: src/bz-full-view.blp:53 src/bz-installed-page.blp:15
+#: src/bz-user-data-page.blp:41 src/bz-user-data-page.blp:52
+#: src/bz-window.blp:183
 msgid "Empty"
 msgstr "Vide"
 
@@ -696,6 +729,14 @@ msgstr "Fermer"
 #: src/bz-error.c:90
 msgid "Copy and Close"
 msgstr "Copier et fermer"
+
+#: src/bz-featured-carousel.blp:31
+msgid "Previous"
+msgstr "Précédent"
+
+#: src/bz-featured-carousel.blp:53
+msgid "Next"
+msgstr "Suivant"
 
 #: src/bz-featured-tile.blp:88
 msgid "App of the Day"
@@ -978,10 +1019,6 @@ msgstr "Contribuer à l'app"
 msgid "Toggle transaction sidebar"
 msgstr "Afficher/Masquer la barre des tâches"
 
-#: src/bz-full-view.blp:43 src/bz-window.blp:426
-msgid "Main Menu"
-msgstr "Menu principal"
-
 #: src/bz-full-view.blp:57
 msgid "No Results"
 msgstr "Aucun résultat"
@@ -1038,11 +1075,11 @@ msgstr ""
 "L'environnement d'exécution utilisé par cette app ne reçoit plus de mises à "
 "jour de sécurité. Son utilisation pourrait devenir risquée."
 
-#: src/bz-full-view.blp:643 src/bz-window.c:1214
+#: src/bz-full-view.blp:649 src/bz-window.c:1228
 msgid "Delete Data"
 msgstr "Supprimer les données"
 
-#: src/bz-full-view.blp:777
+#: src/bz-full-view.blp:783
 msgid "Tags:"
 msgstr "Étiquettes:"
 
@@ -1173,32 +1210,32 @@ msgstr "Plus d'apps par %s"
 msgid "Other Apps by this Developer"
 msgstr "D'autres apps par ce développeur"
 
-#: src/bz-full-view.c:562 src/bz-full-view.c:668
+#: src/bz-full-view.c:562 src/bz-full-view.c:670
 #, c-format
 msgid "Other Apps by %s"
 msgstr "D'autres apps par %s"
 
-#: src/bz-full-view.c:568
+#: src/bz-full-view.c:570
 #, c-format
-msgid "%s is not installed, but it still has data present."
-msgstr "%s n'est pas installé, mais a toujours des données présentes."
+msgid "%s is not installed, but it still has <b>%s</b> of data present."
+msgstr "%s n'est pas installé, mais a toujours <b>%s</b> de données présentes."
 
-#: src/bz-full-view.c:670
+#: src/bz-full-view.c:672
 msgid "Other Apps"
 msgstr "D'autres apps"
 
-#: src/bz-full-view.c:672
+#: src/bz-full-view.c:674
 #, c-format
 msgid "%d Application"
 msgid_plural "%d Applications"
 msgstr[0] "%d application"
 msgstr[1] "%d applications"
 
-#: src/bz-full-view.c:1034
+#: src/bz-full-view.c:1036
 msgid "Show Less"
 msgstr "Moins"
 
-#: src/bz-full-view.c:1034
+#: src/bz-full-view.c:1036
 msgid "Show More"
 msgstr "Plus"
 
@@ -1348,9 +1385,17 @@ msgstr ""
 "Plusieurs versions de cette application sont installées. Avec quelle version "
 "voulez-vous continuer ? "
 
-#: src/bz-installed-page.c:402 src/bz-window.c:1244 src/bz-window.c:1267
+#: src/bz-installed-page.c:402 src/bz-window.c:1258 src/bz-window.c:1281
 msgid "Cancel"
 msgstr "Annuler"
+
+#: src/bz-installed-tile.blp:61 src/bz-rich-app-tile.blp:137
+msgid "Stopped Receiving Updates"
+msgstr "Ne reçoit plus de mises à jour"
+
+#: src/bz-installed-tile.blp:75
+msgid "Support this application"
+msgstr "Soutenez cette application"
 
 #: src/bz-license-dialog.blp:160
 msgid "Get Involved"
@@ -1504,51 +1549,51 @@ msgstr "Couleur d'accentuation"
 
 #: src/bz-preferences-dialog.c:33
 msgid "Pride Colors"
-msgstr "Couleurs du drapeau des fiertés "
+msgstr "Couleurs de la fierté"
 
 #: src/bz-preferences-dialog.c:34
 msgid "Lesbian Pride Colors"
-msgstr "Couleurs du drapeau lesbienne"
+msgstr "Couleurs de la fierté lesbienne"
 
 #: src/bz-preferences-dialog.c:35
 msgid "Transgender Pride Colors"
-msgstr "Couleurs du drapeau transgenre"
+msgstr "Couleurs de la fierté transgenre"
 
 #: src/bz-preferences-dialog.c:36
 msgid "Nonbinary Pride Colors"
-msgstr "Couleurs du drapeau  non binaire"
+msgstr "Couleurs de la fierté non binaire"
 
 #: src/bz-preferences-dialog.c:37
 msgid "Bisexual Pride Colors"
-msgstr "Couleurs du drapeau bisexuel"
+msgstr "Couleurs de la fierté bisexuel"
 
 #: src/bz-preferences-dialog.c:38
 msgid "Asexual Pride Colors"
-msgstr "Couleurs du drapeau asexuel"
+msgstr "Couleurs de la fierté asexuel"
 
 #: src/bz-preferences-dialog.c:39
 msgid "Pansexual Pride Colors"
-msgstr "Couleurs du drapeau pansexuel"
+msgstr "Couleurs de la fierté pansexuel"
 
 #: src/bz-preferences-dialog.c:40
 msgid "Aromantic Pride Colors"
-msgstr "Couleurs du drapeau aromantique"
+msgstr "Couleurs de la fierté aromantique"
 
 #: src/bz-preferences-dialog.c:41
 msgid "Genderfluid Pride Colors"
-msgstr "Couleurs du drapeau fluide"
+msgstr "Couleurs de la fierté fluide"
 
 #: src/bz-preferences-dialog.c:42
 msgid "Polysexual Pride Colors"
-msgstr "Couleurs du drapeau polysexuel"
+msgstr "Couleurs de la fierté polysexuel"
 
 #: src/bz-preferences-dialog.c:43
 msgid "Omnisexual Pride Colors"
-msgstr "Couleurs du drapeau omnisexuel"
+msgstr "Couleurs de la fierté omnisexuel"
 
 #: src/bz-preferences-dialog.c:44
 msgid "Aroace Pride Colors"
-msgstr "Couleurs du drapeau aroace"
+msgstr "Couleurs de la fierté aroace"
 
 #: src/bz-preferences-dialog.c:45
 msgid "Agender Pride Colors"
@@ -1583,13 +1628,45 @@ msgstr "Version %s"
 msgid "No details for this release"
 msgstr "Aucune information à propos de cette version"
 
-#: src/bz-rich-app-tile.blp:137
-msgid "Stopped Receiving Updates"
-msgstr "Ne reçoit plus de mises à jour"
-
 #: src/bz-rich-app-tile.blp:154
 msgid "Get"
 msgstr "Installer"
+
+#: src/bz-screenshot-page.blp:5
+msgid "Screenshots"
+msgstr "Captures d'écran"
+
+#: src/bz-screenshot-page.blp:61
+msgid "Previous Screenshot"
+msgstr "Capture d'écran précédente"
+
+#: src/bz-screenshot-page.blp:71
+msgid "Next Screenshot"
+msgstr "Capture d'écran suivante"
+
+#: src/bz-screenshot-page.blp:87
+msgid "Copy Image"
+msgstr "Copier l'image"
+
+#: src/bz-screenshot-page.blp:147
+msgid "Reset View"
+msgstr "Réinitialiser l'affichage"
+
+#: src/bz-screenshot-page.blp:158
+msgid "Zoom Out"
+msgstr "Zoom arrière"
+
+#: src/bz-screenshot-page.blp:168
+msgid "Zoom In"
+msgstr "Zoom avant"
+
+#: src/bz-screenshots-carousel.blp:6
+msgid "Screenshots Carousel"
+msgstr "Carrousel de captures d'écran"
+
+#: src/bz-screenshots-carousel.blp:104
+msgid "Open Screenshot Viewer"
+msgstr "Ouvrir la visionneuse de captures d'écran"
 
 #: src/bz-search-widget.blp:105
 msgid "Search Apps, Games, Software"
@@ -1715,6 +1792,27 @@ msgid "Additionally, %d runtimes and/or addons will be updated."
 msgstr ""
 "De plus, %d environnements d'exécution et/ou extensions seront mis à jour."
 
+#: src/bz-user-data-page.blp:5
+msgid "Manage Leftover User Data"
+msgstr "Gérer les données utilisateur restantes"
+
+#: src/bz-user-data-page.blp:55
+msgid "No User Data"
+msgstr "Aucune donnée utilisateur"
+
+#: src/bz-user-data-page.blp:60
+msgid "User Data"
+msgstr "Données utilisateur"
+
+#: src/bz-user-data-tile.c:144
+#, c-format
+msgid "Removed User Data for %s"
+msgstr "Données utilisateur supprimées pour %s"
+
+#: src/bz-user-data-tile.blp:74
+msgid "Remove User Data"
+msgstr "Supprimer les données utilisateur"
+
 #: src/bz-window.blp:66
 msgid "Inspect UI Entry"
 msgstr "Inspecter une entrée d'interface"
@@ -1768,38 +1866,22 @@ msgstr ""
 "Vous disposez d'une connexion réseau, mais vous consultez une version mise "
 "en cache de Flathub."
 
-#: src/bz-window.blp:506
-msgid "_Donate to Bazaar ❤️"
-msgstr "_Faire un don à Bazaar ❤️"
-
-#: src/bz-window.blp:513
-msgid "_Preferences"
-msgstr "_Préférences"
-
 #: src/bz-window.blp:518
-msgid "_Keyboard Shortcuts"
-msgstr "_Raccourcis clavier"
+msgid "_Manage Leftover User Data"
+msgstr "_Gérer les données utilisateur restantes"
 
-#: src/bz-window.blp:523
-msgid "_About Bazaar"
-msgstr "_À propos de Bazaar"
-
-#: src/bz-window.blp:530
-msgid "_Quit Bazaar"
-msgstr "_Quitter Bazaar"
-
-#: src/bz-window.blp:539
+#: src/bz-window.blp:544
 msgid "Open Bazaar Inspector"
 msgstr "Ouvrir l'inspecteur de Bazaar"
 
-#: src/bz-window.c:474
+#: src/bz-window.c:475
 #, c-format
 msgid "%d Update Available"
 msgid_plural "%d Updates Available"
 msgstr[0] "%d mise à jour disponible"
 msgstr[1] "%d mises à jour disponibles"
 
-#: src/bz-window.c:956
+#: src/bz-window.c:970
 msgid ""
 "The ability to inspect and install local .flatpak bundle files is coming "
 "soon! In the meantime, try running\n"
@@ -1815,50 +1897,50 @@ msgstr ""
 "\n"
 "en ligne de commande."
 
-#: src/bz-window.c:1074
+#: src/bz-window.c:1088
 msgid "Can't do that right now!"
 msgstr "Impossible de faire ceci pour le moment !"
 
-#: src/bz-window.c:1205
+#: src/bz-window.c:1219
 msgid "Keep Data"
 msgstr "Garder les données"
 
-#: src/bz-window.c:1206
+#: src/bz-window.c:1220
 msgid "Allow restoring settings and content"
 msgstr "Permet la restauration des paramètres et du contenu"
 
-#: src/bz-window.c:1215
+#: src/bz-window.c:1229
 msgid "Permanently remove app data to save space"
 msgstr "Supprimer définitivement les données et gagner de l'espace de stockage"
 
-#: src/bz-window.c:1238
+#: src/bz-window.c:1252
 #, c-format
 msgid "Install %s?"
 msgstr "Installer %s ?"
 
-#: src/bz-window.c:1241
+#: src/bz-window.c:1255
 msgid "May install additional shared components"
 msgstr "Peut installer des composants partagés supplémentaires"
 
-#: src/bz-window.c:1260
+#: src/bz-window.c:1274
 #, c-format
 msgid "Remove %s?"
 msgstr "Supprimer %s ?"
 
-#: src/bz-window.c:1264
+#: src/bz-window.c:1278
 #, c-format
 msgid "It will not be possible to use %s after it is uninstalled."
 msgstr "Il ne sera plus possible d'utiliser %s après sa désinstallation."
 
-#: src/bz-window.c:1327
+#: src/bz-window.c:1341
 msgid "Resume Current Tasks"
 msgstr "Reprendre les tâches actuelles"
 
-#: src/bz-window.c:1333
+#: src/bz-window.c:1347
 msgid "Pause Current Tasks"
 msgstr "Mettre en pause les tâches actuelles"
 
-#: src/bz-world-map.c:523
+#: src/bz-world-map.c:572
 #, c-format
 msgid "%s: %'u downloads"
 msgstr "%s : %'u téléchargements"
