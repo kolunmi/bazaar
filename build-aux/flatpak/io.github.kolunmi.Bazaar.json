@@ -28,6 +28,7 @@
     "/lib/cmake",
     "/share/applications/mimeinfo.cache",
     "/share/bash-completion",
+    "/share/zsh/site-functions",
     "/share/icons/hicolor/icon-theme.cache",
     "/share/man",
     "/share/pkgconfig",
@@ -116,11 +117,12 @@
             {
               "type": "git",
               "url": "https://github.com/flatpak/flatpak",
-              "commit": "b676905d91aa3c4e524ca663784d4cf085c465d7",
-              "tag": "1.16.1",
+              "commit": "0835c0272f3a0389f97b02cad4b208f80fec99ed",
+              "tag": "1.17.0",
               "x-checker-data": {
                 "type": "git",
-                "url-template": "$version"
+                "url-template": "$version",
+                "is-important": true
               }
             }
           ],
@@ -137,8 +139,8 @@
               "sources": [
                 {
                   "type": "file",
-                  "url": "https://files.pythonhosted.org/packages/bb/22/f1129e69d94ffff626bdb5c835506b3a5b4f3d070f17ea295e12c2c6f60f/pyparsing-3.2.3.tar.gz",
-                  "sha256": "b9c13f1ab8b3b542f72e28f634bad4de758ab3ce4546e4301970ad6fa77c38be",
+                  "url": "https://files.pythonhosted.org/packages/f2/a5/181488fc2b9d093e3972d2a472855aae8a03f000592dbfce716a512b3359/pyparsing-3.2.5.tar.gz",
+                  "sha256": "2df8d5b7b2802ef88e8d016a2eb9c7aeaa923529cd251ed0fe4608275d4105b6",
                   "x-checker-data": {
                     "type": "pypi",
                     "name": "pyparsing"
@@ -157,50 +159,41 @@
             },
             {
               "name": "polkit",
+              "buildsystem": "meson",
               "config-opts": [
-                "--disable-polkitd",
-                "--disable-man-pages",
-                "--disable-introspection",
-                "--disable-examples",
-                "--disable-gtk-doc",
-                "--disable-libelogind",
-                "--disable-libsystemd-login",
-                "--with-systemdsystemunitdir=no",
-                "--with-authdb=dummy",
-                "--with-authfw=none"
+                "-Dlibs-only=true",
+                "-Dintrospection=false",
+                "-Dauthfw=shadow"
               ],
               "rm-configure": true,
               "build-options": {
-                "cflags": "-Wno-implicit-function-declaration"
+                "env": {
+                  "CFLAGS": "-Wno-implicit-function-declaration"
+                }
               },
               "cleanup": [
                 "/bin/*",
-                "/etc/pam.d",
                 "/etc/dbus-1",
+                "/etc/pam.d",
+                "/include",
+                "/lib/pkgconfig",
+                "/lib/polkit-1",
                 "/share/dbus-1/system-services/*",
-                "/share/polkit-1",
-                "/lib/polkit-1"
+                "/share/polkit-1"
               ],
               "sources": [
                 {
-                  "type": "archive",
-                  "url": "https://www.freedesktop.org/software/polkit/releases/polkit-0.116.tar.gz",
-                  "sha256": "88170c9e711e8db305a12fdb8234fac5706c61969b94e084d0f117d8ec5d34b1"
-                },
-                {
-                  "type": "patch",
-                  "path": "polkit-build-Add-option-to-build-without-polkitd.patch"
-                },
-                {
-                  "type": "script",
-                  "dest-filename": "autogen.sh",
-                  "commands": [
-                    "gtkdocize --flavour no-tmpl\nautoreconf -if\n"
-                  ]
+                  "type": "git",
+                  "url": "https://github.com/polkit-org/polkit",
+                  "commit": "d627b0d1e1108563658dabe3fb8d2a065e64df10",
+                  "tag": "126",
+                  "x-checker-data": {
+                    "type": "git",
+                    "tag-pattern": "^([\\d.]+)$"
+                  }
                 }
               ],
               "modules": [
-                "shared-modules/intltool/intltool-0.51.json",
                 {
                   "name": "ostree",
                   "build-options": {
@@ -224,12 +217,13 @@
                     {
                       "type": "git",
                       "url": "https://github.com/ostreedev/ostree",
-                      "tag": "v2025.6",
-                      "commit": "82185d9aaf0a79b100378f13a54c3d5d3763a971",
+                      "tag": "v2025.7",
+                      "commit": "134d144cb52ff018cfedfb936b661189bccc76e6",
                       "x-checker-data": {
                         "type": "anitya",
                         "project-id": 10899,
-                        "tag-template": "v$version"
+                        "tag-template": "v$version",
+                        "is-important": true
                       }
                     }
                   ],
@@ -246,7 +240,8 @@
                         "INIT_D_PATH=/app/etc/init.d"
                       ],
                       "cleanup": [
-                        "/bin/ulockmgr_server"
+                        "/bin/ulockmgr_server",
+                        "/etc"
                       ],
                       "post-install": [
                         "install -Dpm0755 ./fusermount-wrapper.sh /app/bin/fusermount"
