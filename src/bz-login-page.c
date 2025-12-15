@@ -299,7 +299,8 @@ on_oauth_complete (GObject      *source_object,
         {
           g_free (self->session_cookie);
           self->session_cookie = g_strdup (soup_cookie_get_value (cookie));
-          self->session_cookie_expires = soup_cookie_get_expires (cookie);
+          g_clear_pointer (&self->session_cookie_expires, g_date_time_unref);
+          self->session_cookie_expires = g_date_time_ref (soup_cookie_get_expires (cookie));
         }
     }
   g_slist_free_full (cookies, (GDestroyNotify) soup_cookie_free);
@@ -534,7 +535,7 @@ bz_login_page_dispose (GObject *object)
   g_clear_object (&self->auth_state);
   g_clear_object (&self->session);
   g_clear_object (&self->cookie_jar);
-  g_clear_object (&self->session_cookie_expires);
+  g_clear_pointer (&self->session_cookie_expires, g_date_time_unref);
   g_clear_pointer (&self->auth_redirect_url, g_free);
   g_clear_pointer (&self->session_cookie, g_free);
 
