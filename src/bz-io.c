@@ -223,8 +223,7 @@ get_directory_size_fiber (GFile *file)
   for (;;)
     {
       g_autoptr (DexFuture) next_future = NULL;
-      g_autoptr (GList) infos           = NULL;
-      GList *l;
+      g_autolist (GFileInfo) infos      = NULL;
 
       next_future = dex_file_enumerator_next_files (enumerator, 10, G_PRIORITY_DEFAULT);
       infos       = dex_await_boxed (dex_ref (next_future), &error);
@@ -236,7 +235,7 @@ get_directory_size_fiber (GFile *file)
           break;
         }
 
-      for (l = infos; l != NULL; l = l->next)
+      for (GList *l = infos; l != NULL; l = l->next)
         {
           GFileInfo *info      = l->data;
           GFileType  file_type = g_file_info_get_file_type (info);
@@ -295,8 +294,7 @@ get_all_user_data_ids_fiber (void)
   for (;;)
     {
       g_autoptr (DexFuture) next_future = NULL;
-      g_autoptr (GList) infos           = NULL;
-      GList *l;
+      g_autolist (GFileInfo) infos      = NULL;
 
       next_future = dex_file_enumerator_next_files (enumerator, 10, G_PRIORITY_DEFAULT);
       infos       = dex_await_boxed (dex_ref (next_future), &error);
@@ -311,7 +309,7 @@ get_all_user_data_ids_fiber (void)
           break;
         }
 
-      for (l = infos; l != NULL; l = l->next)
+      for (GList *l = infos; l != NULL; l = l->next)
         {
           GFileInfo *info      = l->data;
           GFileType  file_type = g_file_info_get_file_type (info);
