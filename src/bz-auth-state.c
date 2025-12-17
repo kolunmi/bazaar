@@ -18,9 +18,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "bz-auth-state.h"
-#include "bz-async-texture.h"
 #include <libsecret/secret.h>
+
+#include "bz-async-texture.h"
+#include "bz-auth-state.h"
 
 #define SECRET_SCHEMA_NAME "io.github.kolunmi.Bazaar.FlathubAuth"
 #define SECRET_LABEL       "Flathub Authentication"
