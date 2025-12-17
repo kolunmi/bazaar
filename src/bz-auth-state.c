@@ -261,25 +261,20 @@ load_from_secrets (BzAuthState *self)
 static void
 clear_secrets (BzAuthState *self)
 {
-  GHashTable *attributes = NULL;
-  GError     *error      = NULL;
+  gboolean result                   = FALSE;
+  g_autoptr (GError) local_error    = NULL;
+  g_autoptr (GHashTable) attributes = NULL;
 
   attributes = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
-  g_hash_table_insert (attributes, g_strdup ("service"), g_strdup ("flathub"));
+  g_hash_table_replace (attributes, g_strdup ("service"), g_strdup ("flathub"));
 
-  secret_password_clearv_sync (
+  result = secret_password_clearv_sync (
       get_secret_schema (),
       attributes,
       NULL,
-      &error);
-
-  g_hash_table_unref (attributes);
-
-  if (error != NULL)
-    {
-      g_warning ("Failed to clear auth values from secrets: %s", error->message);
-      g_error_free (error);
-    }
+      &local_error);
+  if (!result)
+    g_warning ("Failed to clear auth values from secrets: %s", local_error->message);
 }
 
 static void
@@ -504,12 +499,7 @@ bz_auth_state_clear (BzAuthState *self)
 {
   g_return_if_fail (BZ_IS_AUTH_STATE (self));
 
-  if (self->expiration_timeout_id != 0)
-    {
-      g_source_remove (self->expiration_timeout_id);
-      self->expiration_timeout_id = 0;
-    }
-
+  g_clear_handle_id (&self->expiration_timeout_id, g_source_remove);
   clear_secrets (self);
   bz_auth_state_set_authenticated (self, NULL, NULL, NULL, NULL);
 }
