@@ -159,8 +159,8 @@ backend_sync_finally (DexFuture *future,
                       GWeakRef  *wr);
 
 static DexFuture *
-init_finally (DexFuture *future,
-              GWeakRef  *wr);
+init_fiber_finally (DexFuture *future,
+                    GWeakRef  *wr);
 
 static DexFuture *
 init_sync_finally (DexFuture *future,
@@ -169,6 +169,10 @@ init_sync_finally (DexFuture *future,
 static DexFuture *
 flathub_update_finally (DexFuture *future,
                         GWeakRef  *wr);
+
+static DexFuture *
+sync_finally (DexFuture *future,
+              GWeakRef  *wr);
 
 static DexFuture *
 watch_backend_notifs_then_loop_cb (DexFuture *future,
@@ -453,7 +457,7 @@ bz_application_command_line (GApplication            *app,
           bz_weak_release);
       init = dex_future_finally (
           init,
-          (DexFutureCallback) init_finally,
+          (DexFutureCallback) init_fiber_finally,
           bz_track_weak (self),
           bz_weak_release);
       dex_future_disown (g_steal_pointer (&init));
@@ -778,6 +782,10 @@ bz_application_init (BzApplication *self)
       GTK_APPLICATION (self),
       "app.preferences",
       (const char *[]) { "<primary>comma", NULL });
+  gtk_application_set_accels_for_action (
+      GTK_APPLICATION (self),
+      "app.sync-remotes",
+      (const char *[]) { "<primary>r", NULL });
   gtk_application_set_accels_for_action (
       GTK_APPLICATION (self),
       "app.search('')",
@@ -1464,6 +1472,11 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
           fiber_check_for_updates (self);
           bz_state_info_set_background_task_label (self->state, NULL);
         }
+
+      bz_state_info_set_allow_manual_sync (
+          self->state,
+          self->n_notifications_incoming == 0 &&
+              (self->sync == NULL || !dex_future_is_pending (self->sync)));
     }
 
   if (read_future == NULL)
@@ -1535,8 +1548,8 @@ open_flatpakref_fiber (OpenFlatpakrefData *data)
 }
 
 static DexFuture *
-init_finally (DexFuture *future,
-              GWeakRef  *wr)
+init_fiber_finally (DexFuture *future,
+                    GWeakRef  *wr)
 {
   g_autoptr (BzApplication) self = NULL;
   g_autoptr (GError) local_error = NULL;
@@ -1646,6 +1659,20 @@ flathub_update_finally (DexFuture *future,
       g_clear_object (&self->tmp_flathub);
       return dex_ref (future);
     }
+}
+
+static DexFuture *
+sync_finally (DexFuture *future,
+              GWeakRef  *wr)
+{
+  g_autoptr (BzApplication) self = NULL;
+
+  bz_weak_get_or_return_reject (self, wr);
+  bz_state_info_set_allow_manual_sync (
+      self->state,
+      self->n_notifications_incoming == 0);
+
+  return dex_future_new_true ();
 }
 
 static DexFuture *
@@ -2346,7 +2373,6 @@ init_service_struct (BzApplication *self,
   GtkCustomFilter *filter            = NULL;
   GNetworkMonitor *network           = NULL;
   g_autoptr (BzAuthState) auth_state = NULL;
-  GAction *login_action              = NULL;
 
   g_type_ensure (BZ_TYPE_MAIN_CONFIG);
 #ifdef HARDCODED_MAIN_CONFIG
@@ -2465,10 +2491,10 @@ init_service_struct (BzApplication *self,
   auth_state = bz_auth_state_new ();
   bz_state_info_set_auth_state (self->state, auth_state);
 
-  login_action = g_action_map_lookup_action (G_ACTION_MAP (self), "flathub-login");
-  g_object_bind_property (auth_state, "authenticated",
-                          login_action, "enabled",
-                          G_BINDING_SYNC_CREATE | G_BINDING_INVERT_BOOLEAN);
+  g_object_bind_property (
+      auth_state, "authenticated",
+      g_action_map_lookup_action (G_ACTION_MAP (self), "flathub-login"), "enabled",
+      G_BINDING_SYNC_CREATE | G_BINDING_INVERT_BOOLEAN);
 
   network = g_network_monitor_get_default ();
   if (network != NULL)
@@ -2590,6 +2616,11 @@ init_service_struct (BzApplication *self,
   bz_state_info_set_transaction_manager (self->state, self->transactions);
   bz_state_info_set_txt_blocklists (self->state, G_LIST_MODEL (self->txt_blocklists));
   bz_state_info_set_txt_blocklists_provider (self->state, self->txt_blocklists_provider);
+
+  g_object_bind_property (
+      self->state, "allow-manual-sync",
+      g_action_map_lookup_action (G_ACTION_MAP (self), "sync-remotes"), "enabled",
+      G_BINDING_SYNC_CREATE);
 }
 
 static GtkWindow *
@@ -2908,5 +2939,9 @@ make_sync_future (BzApplication *self)
       dex_ref (backend_future),
       dex_ref (flathub_future),
       NULL);
+  ret_future = dex_future_finally (
+      ret_future,
+      (DexFutureCallback) sync_finally,
+      bz_track_weak (self), bz_weak_release);
   return g_steal_pointer (&ret_future);
 }

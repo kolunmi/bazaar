@@ -535,10 +535,15 @@ menu primary_menu {
       action: "app.flathub-login";
       hidden-when: "action-disabled";
     }
-    
+
     item {
       label: _("_Manage Leftover User Data");
       action: "window.user-data";
+    }
+
+    item {
+      label: _("_Synchronize Remotes");
+      action: "app.sync-remotes";
     }
 
     item {
@@ -577,4 +582,3 @@ menu account_menu {
     }
   }
 }
-

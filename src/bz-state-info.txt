@@ -18,6 +18,7 @@ property=all_entries GListModel G_TYPE_LIST_MODEL object
 property=all_entry_groups GListModel G_TYPE_LIST_MODEL object
 property=all_installed_entry_groups GListModel G_TYPE_LIST_MODEL object
 property=all_user_data_entry_groups GListModel G_TYPE_LIST_MODEL object
+property=allow_manual_sync gboolean G_TYPE_BOOLEAN boolean
 property=application_factory BzApplicationMapFactory BZ_TYPE_APPLICATION_MAP_FACTORY object
 property=auth_state BzAuthState BZ_TYPE_AUTH_STATE object
 property=available_updates GListModel G_TYPE_LIST_MODEL object
