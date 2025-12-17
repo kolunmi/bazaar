@@ -7,19 +7,6 @@ template $BzAppTile: Button {
   ]
 
   child: Overlay {
-    [overlay]
-    Image {
-      css-name: "app-tile-installed-indicator";
-
-      halign: end;
-      valign: start;
-      icon-name: "app-installed-symbolic";
-      icon-size: normal;
-      visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
-      margin-top: 10;
-      margin-end: 10;
-    }
-
     Box {
       margin-start: 12;
       margin-end: 12;
@@ -40,12 +27,11 @@ template $BzAppTile: Button {
         valign: center;
         hexpand: true;
         orientation: vertical;
-        spacing: 5;
+        spacing: 4;
 
         Box {
           orientation: horizontal;
           spacing: 6;
-          margin-end: 12;
 
           Label {
             css-name: "app-tile-title";
@@ -77,10 +63,27 @@ template $BzAppTile: Button {
           wrap: true;
           ellipsize: end;
           vexpand: true;
-          lines: 2;
+          lines: bind $description_line_amount($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <int>;
           max-width-chars: 15;
           single-line-mode: true;
           label: bind template.group as <$BzEntryGroup>.description;
+        }
+
+        Box {
+          halign: start;
+          spacing: 4;
+          visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
+          styles ["small-pill", "installed-pill", "success"]
+
+          Image {
+            icon-name: "app-installed-symbolic";
+            pixel-size: 12;
+          }
+
+          Label {
+            label: _("Installed");
+
+          }
         }
       }
     }

@@ -244,6 +244,13 @@ button.context-tile:active .lozenge {
     background-color: alpha(@error_bg_color, 0.15);
 }
 
+.installed-pill {
+	background-color: alpha(@success_bg_color, 0.15);
+	font-weight: 500;
+	font-size: 0.9em;
+ 	padding: 2px 7px 2px 4.5px;
+}
+
 .download-size-pill{
   padding: 2px 8px;
 }
