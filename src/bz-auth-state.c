@@ -487,7 +487,7 @@ bz_auth_state_set_authenticated (BzAuthState *self,
   if (icon_changed)
     g_object_notify_by_pspec (G_OBJECT (self), properties[PROP_PROFILE_ICON_URL]);
 
-  if (was_authenticated != bz_auth_state_is_authenticated (self))
+  if (!!was_authenticated != !!bz_auth_state_is_authenticated (self))
     g_object_notify_by_pspec (G_OBJECT (self), properties[PROP_AUTHENTICATED]);
 
   schedule_token_expiration (self);
