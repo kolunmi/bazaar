@@ -34,6 +34,7 @@
     <file preprocess="xml-stripblanks">bz-installed-page.ui</file>
     <file preprocess="xml-stripblanks">bz-installed-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-license-dialog.ui</file>
+    <file preprocess="xml-stripblanks">bz-login-page.ui</file>
     <file preprocess="xml-stripblanks">bz-markdown-render.ui</file>
     <file preprocess="xml-stripblanks">bz-preferences-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-progress-bar.ui</file>
@@ -158,6 +159,12 @@
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Popular.svg</file>
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.New.svg</file>
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Updated.svg</file>
+
+    <file preprocess="xml-stripblanks">icons/io.github.kolunmi.Bazaar.github.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolunmi.Bazaar.gitlab.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolunmi.Bazaar.gnome.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolunmi.Bazaar.kde.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolunmi.Bazaar.google.svg</file>
 
   </gresource>
 </gresources>

@@ -327,6 +327,23 @@ template $BzWindow: Adw.ApplicationWindow {
                     orientation: vertical;
 
                     Adw.HeaderBar top_header_bar {
+                      [start]
+                      Revealer {
+                        reveal-child: bind template.state as <$BzStateInfo>.auth-state as <$BzAuthState>.authenticated;
+                        transition-type: slide_left;
+                        child: MenuButton {
+                          menu-model: account_menu;
+                          styles [
+                            "circular",
+                            "flat",
+                          ]
+
+                          child: Adw.Avatar {
+                            size: 24;
+                            custom-image: bind template.state as <$BzStateInfo>.auth-state as <$BzAuthState>.paintable;
+                          };
+                        };
+                      }
 
                       [start]
                       Overlay {
@@ -514,6 +531,12 @@ menu primary_menu {
     }
 
     item {
+      label: _("_Login with Flathub");
+      action: "app.flathub-login";
+      hidden-when: "action-disabled";
+    }
+    
+    item {
       label: _("_Manage Leftover User Data");
       action: "window.user-data";
     }
@@ -545,3 +568,13 @@ menu debug_menu {
     }
   }
 }
+
+menu account_menu {
+  section {
+    item {
+      label: _("Log Out");
+      action: "app.flathub-logout";
+    }
+  }
+}
+

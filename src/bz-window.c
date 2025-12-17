@@ -667,7 +667,10 @@ bz_window_init (BzWindow *self)
   adw_view_stack_set_visible_child_name (self->main_view_stack, "flathub");
 
   self->key_controller = gtk_event_controller_key_new ();
-  g_signal_connect_swapped (self->key_controller, "key-pressed", G_CALLBACK (key_pressed), self);
+  g_signal_connect_swapped (self->key_controller,
+                            "key-pressed",
+                            G_CALLBACK (key_pressed),
+                            self);
   gtk_widget_add_controller (GTK_WIDGET (self), self->key_controller);
 }
 
@@ -997,6 +1000,15 @@ bz_window_add_toast (BzWindow *self,
   g_return_if_fail (ADW_IS_TOAST (toast));
 
   adw_toast_overlay_add_toast (self->toasts, toast);
+}
+
+void
+bz_window_push_page(BzWindow *self, AdwNavigationPage *page)
+{
+    g_return_if_fail(BZ_IS_WINDOW(self));
+    g_return_if_fail(ADW_IS_NAVIGATION_PAGE(page));
+
+    adw_navigation_view_push(self->navigation_view, page);
 }
 
 BzStateInfo *
