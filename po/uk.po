@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-14 00:44+0200\n"
-"PO-Revision-Date: 2025-12-14 05:22+0200\n"
+"POT-Creation-Date: 2025-12-16 11:35+0200\n"
+"PO-Revision-Date: 2025-12-16 11:56+0200\n"
 "Last-Translator: faoquad <faoquad@noreply.codeberg.org>\n"
 "Language-Team: Ukrainian <>\n"
 "Language: uk\n"
@@ -45,54 +45,42 @@ msgid "Hide EOL entries and entries depending on them"
 msgstr "Сховати осиротілі надходження та надходження, котрі залежать від них"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:11
-msgid "Show Git Forge Star Counts"
-msgstr "Показувати вподобання зі сторінки розробки"
-
-#: data/io.github.kolunmi.Bazaar.gschema.xml:12
-msgid ""
-"Whether to attempt to detect and show \"star counts\" for projects in the "
-"full view"
-msgstr ""
-"Намагатися віднаходити та показувати кількість уподобань на сторінках "
-"застосунків"
-
-#: data/io.github.kolunmi.Bazaar.gschema.xml:16
 msgid "Only Show Free Software"
 msgstr "Показувати лише вільні застосунки"
 
-#: data/io.github.kolunmi.Bazaar.gschema.xml:17
+#: data/io.github.kolunmi.Bazaar.gschema.xml:12
 msgid "Hide proprietary software"
 msgstr "Ховати власницькі застосунки"
 
-#: data/io.github.kolunmi.Bazaar.gschema.xml:21
+#: data/io.github.kolunmi.Bazaar.gschema.xml:16
 msgid "Show Only Flathub Content"
 msgstr "Показувати лише вміст з Flathub"
 
-#: data/io.github.kolunmi.Bazaar.gschema.xml:22
+#: data/io.github.kolunmi.Bazaar.gschema.xml:17
 msgid "Hide applications which do not originate from Flathub"
 msgstr "Ховати застосунки, що не походять із Flathub"
 
-#: data/io.github.kolunmi.Bazaar.gschema.xml:26
+#: data/io.github.kolunmi.Bazaar.gschema.xml:21
 msgid "Debounce Search Inputs"
 msgstr "Чекати вводу"
 
-#: data/io.github.kolunmi.Bazaar.gschema.xml:27
+#: data/io.github.kolunmi.Bazaar.gschema.xml:22
 msgid "Add a delay before searching to prevent instant replies while typing"
 msgstr "Чекати на закінчення вводу, аби попередити миттєві надходження."
 
-#: data/io.github.kolunmi.Bazaar.gschema.xml:51
+#: data/io.github.kolunmi.Bazaar.gschema.xml:46
 msgid "Global Progress Bar Theme"
 msgstr "Загальний вигляд смужки поступу"
 
-#: data/io.github.kolunmi.Bazaar.gschema.xml:52
+#: data/io.github.kolunmi.Bazaar.gschema.xml:47
 msgid "Describes the look of the global progress bar"
 msgstr "Описує вигляд загальної смужки поступу"
 
-#: data/io.github.kolunmi.Bazaar.gschema.xml:56
+#: data/io.github.kolunmi.Bazaar.gschema.xml:51
 msgid "Saved Window Dimensions"
 msgstr "Збережені розміри вікна"
 
-#: data/io.github.kolunmi.Bazaar.gschema.xml:57
+#: data/io.github.kolunmi.Bazaar.gschema.xml:52
 msgid "The window dimensions to be used by the next Bazaar window"
 msgstr "Розміри, що їх користуватиме наступне вікно Базару"
 
@@ -135,24 +123,24 @@ msgstr "Сторінка пошуку"
 msgid "Category page"
 msgstr "Сторінка пошуку з категоріями"
 
-#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:716
+#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:711
 #: src/bz-installed-tile.blp:99
 msgid "Manage Add-ons"
 msgstr "Керувати розширеннями"
 
-#: src/bz-addons-dialog.c:90 src/bz-full-view.blp:504
+#: src/bz-addons-dialog.c:90 src/bz-full-view.blp:502
 #: src/bz-installed-tile.blp:117 src/bz-transaction-view.blp:213
 #: src/bz-window.c:1282
 msgid "Remove"
 msgstr "Видалити"
 
-#: src/bz-addons-dialog.c:95 src/bz-full-view.blp:276 src/bz-full-view.blp:491
+#: src/bz-addons-dialog.c:95 src/bz-full-view.blp:274 src/bz-full-view.blp:489
 #: src/bz-transaction-view.blp:187 src/bz-window.c:1259
 msgid "Install"
 msgstr "Встановити"
 
 #: src/bz-age-rating-dialog.blp:7 src/bz-age-rating-dialog.blp:50
-#: src/bz-full-view.c:385 src/bz-full-view.c:392
+#: src/bz-full-view.c:373 src/bz-full-view.c:380
 msgid "Age Rating"
 msgstr "Вікове обмеження"
 
@@ -438,7 +426,7 @@ msgid "%s • %s"
 msgstr "%s • %s"
 
 #. Translators: Age rating format, e.g. "12+" for ages 12 and up
-#: src/bz-age-rating-dialog.c:752 src/bz-full-view.c:375
+#: src/bz-age-rating-dialog.c:752 src/bz-full-view.c:363
 #, c-format
 msgid "%d+"
 msgstr "%d+"
@@ -542,7 +530,7 @@ msgstr "без медіявмісту"
 msgid "Main Menu"
 msgstr "Головне меню"
 
-#: src/bz-apps-page.blp:17 src/bz-user-data-page.blp:18 src/bz-window.blp:506
+#: src/bz-apps-page.blp:17 src/bz-user-data-page.blp:18 src/bz-window.blp:505
 msgid "_Donate to Bazaar ❤️"
 msgstr "_Пожертувати Базару ❤️"
 
@@ -550,19 +538,19 @@ msgstr "_Пожертувати Базару ❤️"
 msgid "_Refresh Content"
 msgstr "_Освіжити вміст"
 
-#: src/bz-apps-page.blp:22 src/bz-user-data-page.blp:22 src/bz-window.blp:513
+#: src/bz-apps-page.blp:22 src/bz-user-data-page.blp:22 src/bz-window.blp:512
 msgid "_Preferences"
 msgstr "_Налаштування"
 
-#: src/bz-apps-page.blp:23 src/bz-user-data-page.blp:23 src/bz-window.blp:523
+#: src/bz-apps-page.blp:23 src/bz-user-data-page.blp:23 src/bz-window.blp:522
 msgid "_Keyboard Shortcuts"
 msgstr "_Клавіатурні скорочення"
 
-#: src/bz-apps-page.blp:24 src/bz-user-data-page.blp:24 src/bz-window.blp:528
+#: src/bz-apps-page.blp:24 src/bz-user-data-page.blp:24 src/bz-window.blp:527
 msgid "_About Bazaar"
 msgstr "_Про Базар"
 
-#: src/bz-apps-page.blp:28 src/bz-user-data-page.blp:27 src/bz-window.blp:535
+#: src/bz-apps-page.blp:28 src/bz-user-data-page.blp:27 src/bz-window.blp:534
 msgid "_Quit Bazaar"
 msgstr "_Вийти"
 
@@ -631,8 +619,7 @@ msgstr "Шукаємо оновлення"
 
 #: src/bz-curated-view.blp:11 src/bz-flathub-page.blp:19
 #: src/bz-full-view.blp:53 src/bz-installed-page.blp:15
-#: src/bz-user-data-page.blp:41 src/bz-user-data-page.blp:52
-#: src/bz-window.blp:183
+#: src/bz-user-data-page.blp:52 src/bz-window.blp:183
 msgid "Empty"
 msgstr "Порожньо"
 
@@ -1026,39 +1013,39 @@ msgstr "Вміст"
 msgid "Support"
 msgstr "Підтримати"
 
-#: src/bz-full-view.blp:230
-msgid "Repository Star Count"
-msgstr "Вподобань на сторінці розробки"
+#: src/bz-full-view.blp:226
+msgid "Favorite Count"
+msgstr "Кількість уподобань"
 
-#: src/bz-full-view.blp:260 src/bz-full-view.blp:515
+#: src/bz-full-view.blp:258 src/bz-full-view.blp:513
 msgid "Open"
 msgstr "Запустити"
 
-#: src/bz-full-view.blp:273 src/bz-full-view.blp:488
+#: src/bz-full-view.blp:271 src/bz-full-view.blp:486
 msgid "Download & Install Application"
 msgstr "Завантажити й встановити цей застосунок"
 
-#: src/bz-full-view.blp:288
+#: src/bz-full-view.blp:286
 msgid "Uninstall Application"
 msgstr "Видалити цей застосунок"
 
-#: src/bz-full-view.blp:303 src/bz-full-view.blp:530
+#: src/bz-full-view.blp:301 src/bz-full-view.blp:528
 msgid "Install Other Version"
 msgstr "Встановити іншу версію"
 
-#: src/bz-full-view.blp:327
+#: src/bz-full-view.blp:325
 msgid "Size"
 msgstr "Розмір"
 
-#: src/bz-full-view.blp:432
+#: src/bz-full-view.blp:430
 msgid "Downloads /mo"
 msgstr "зав/міс"
 
-#: src/bz-full-view.blp:549
+#: src/bz-full-view.blp:547
 msgid "Stopped Receiving Core Updates"
 msgstr "Більше не отримує оновлень середовища виконання"
 
-#: src/bz-full-view.blp:563
+#: src/bz-full-view.blp:561
 msgid ""
 "This app uses a runtime that no longer receives updates or security fixes. "
 "It may become unsafe to use."
@@ -1067,113 +1054,113 @@ msgstr ""
 "оновлень або безпекових виправлень. Він може стати небезпечним до "
 "використання."
 
-#: src/bz-full-view.blp:649 src/bz-window.c:1228
+#: src/bz-full-view.blp:644 src/bz-window.c:1228
 msgid "Delete Data"
 msgstr "Видалити дані"
 
-#: src/bz-full-view.blp:783
+#: src/bz-full-view.blp:778
 msgid "Tags:"
 msgstr "Мітки:"
 
-#: src/bz-full-view.c:301
+#: src/bz-full-view.c:289
 msgid "---"
 msgstr "---"
 
 #. Translators: M is the suffix for millions
-#: src/bz-full-view.c:308
+#: src/bz-full-view.c:296
 #, c-format
 msgid "%.*fM"
 msgstr "%.*f млн"
 
 #. Translators: K is the suffix for thousands
-#: src/bz-full-view.c:315
+#: src/bz-full-view.c:303
 #, c-format
 msgid "%.*fK"
 msgstr "%.*f тис."
 
-#: src/bz-full-view.c:325
+#: src/bz-full-view.c:313
 #, c-format
 msgid "%d downloads in the last 30 days"
 msgstr "%d завантажень протягом останніх 30 днів"
 
-#: src/bz-full-view.c:357
+#: src/bz-full-view.c:345
 #, c-format
 msgid "Download size of %s"
 msgstr "Розмір завантаження"
 
-#: src/bz-full-view.c:390
+#: src/bz-full-view.c:378
 msgid "All Ages"
 msgstr "Без обмежень"
 
-#: src/bz-full-view.c:402
+#: src/bz-full-view.c:390
 msgid "Age rating information unavailable"
 msgstr "Дані щодо вікового обмеження недоступні"
 
-#: src/bz-full-view.c:407
+#: src/bz-full-view.c:395
 msgid "Suitable for all ages"
 msgstr "Без обмежень за віком"
 
-#: src/bz-full-view.c:409
+#: src/bz-full-view.c:397
 #, c-format
 msgid "Suitable for ages %d and up"
 msgstr "%d та старше"
 
-#: src/bz-full-view.c:442 src/bz-full-view.c:447 src/bz-full-view.c:475
-#: src/bz-full-view.c:486
+#: src/bz-full-view.c:430 src/bz-full-view.c:435 src/bz-full-view.c:463
+#: src/bz-full-view.c:474
 msgid "Unknown"
 msgstr "Невідомо"
 
-#: src/bz-full-view.c:452
+#: src/bz-full-view.c:440
 #, c-format
 msgid "Free software licensed under %s"
 msgstr "Вільне ПЗ за ліцензією %s"
 
-#: src/bz-full-view.c:457
+#: src/bz-full-view.c:445
 msgid "Free software"
 msgstr "Вільне ПЗ"
 
-#: src/bz-full-view.c:460
+#: src/bz-full-view.c:448
 msgid "Proprietary Software"
 msgstr "Власницька ліцензія"
 
-#: src/bz-full-view.c:463
+#: src/bz-full-view.c:451
 #, c-format
 msgid "Special License: %s"
 msgstr "Власна ліцензія: %s"
 
-#: src/bz-full-view.c:480
+#: src/bz-full-view.c:468
 msgid "Free"
 msgstr "Вільна ліцензія"
 
-#: src/bz-full-view.c:483 src/bz-license-dialog.c:118
+#: src/bz-full-view.c:471 src/bz-license-dialog.c:118
 msgid "Proprietary"
 msgstr "Власницька ліцензія"
 
-#: src/bz-full-view.c:488 src/bz-license-dialog.c:120
+#: src/bz-full-view.c:476 src/bz-license-dialog.c:120
 msgid "Special License"
 msgstr "Власна ліцензія"
 
-#: src/bz-full-view.c:508
+#: src/bz-full-view.c:496
 msgid "Adaptive"
 msgstr "Адаптивний"
 
-#: src/bz-full-view.c:508
+#: src/bz-full-view.c:496
 msgid "Desktop Only"
 msgstr "Лише для стільниць"
 
-#: src/bz-full-view.c:514
+#: src/bz-full-view.c:502
 msgid "Works on desktop, tablets, and phones"
 msgstr "Працює на стільницях, планшетах і смартфонах"
 
-#: src/bz-full-view.c:515
+#: src/bz-full-view.c:503
 msgid "May not work on mobile devices"
 msgstr "Може не працювати на мобільних пристроях"
 
-#: src/bz-full-view.c:526
+#: src/bz-full-view.c:514
 msgid "No URL"
 msgstr "Без URL"
 
-#: src/bz-full-view.c:544
+#: src/bz-full-view.c:532
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -1181,7 +1168,7 @@ msgstr ""
 "Цей застосунок має вільну ліцензію. Це означає, що початковий код може бути "
 "перевірено на безпечність."
 
-#: src/bz-full-view.c:545
+#: src/bz-full-view.c:533
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
@@ -1189,36 +1176,36 @@ msgstr ""
 "Цей застосунок має невільну (власницьку) ліцензію. Це означає, що початковий "
 "код не є публічно доступним і не може бути перевіреним на безпечність."
 
-#: src/bz-full-view.c:552
+#: src/bz-full-view.c:540
 msgid "More Apps"
 msgstr "Більше застосунків"
 
-#: src/bz-full-view.c:553
+#: src/bz-full-view.c:541
 #, c-format
 msgid "More Apps by %s"
 msgstr "Більше від %s"
 
-#: src/bz-full-view.c:560
+#: src/bz-full-view.c:548
 msgid "Other Apps by this Developer"
 msgstr "Більше від розробників"
 
-#: src/bz-full-view.c:562 src/bz-full-view.c:670
+#: src/bz-full-view.c:550 src/bz-full-view.c:658
 #, c-format
 msgid "Other Apps by %s"
 msgstr "Більше від %s"
 
 # Трохи довший переклад, аби зберегти статеву нейтральність назви самого застосунку.
-#: src/bz-full-view.c:570
+#: src/bz-full-view.c:558
 #, c-format
 msgid "%s is not installed, but it still has <b>%s</b> of data present."
 msgstr ""
 "Застосунок %s не встановлено, проте він має <b>%s</b> залишкових даних."
 
-#: src/bz-full-view.c:672
+#: src/bz-full-view.c:660
 msgid "Other Apps"
 msgstr "Інші застосунки"
 
-#: src/bz-full-view.c:674
+#: src/bz-full-view.c:662
 #, c-format
 msgid "%d Application"
 msgid_plural "%d Applications"
@@ -1226,11 +1213,11 @@ msgstr[0] "%d застосунок"
 msgstr[1] "%d застосунки"
 msgstr[2] "%d застосунків"
 
-#: src/bz-full-view.c:1036
+#: src/bz-full-view.c:1010
 msgid "Show Less"
 msgstr "Згорнути"
 
-#: src/bz-full-view.c:1036
+#: src/bz-full-view.c:1010
 msgid "Show More"
 msgstr "Розгорнути"
 
@@ -1507,35 +1494,12 @@ msgid "Improve results performance by debouncing search terms"
 msgstr "Поліпшити швидкодію пошуку, затримуючи відправлення пошукових запитів"
 
 #: src/bz-preferences-dialog.blp:51
-msgid "Application Details"
-msgstr "Докладнощі застосунку"
-
-#: src/bz-preferences-dialog.blp:54
-msgid "Display Star Count"
-msgstr "Вподобань на сторінці розробки"
-
-#: src/bz-preferences-dialog.blp:55
-msgid "Show the star count of an application's source code repository"
-msgstr "Показувати кількість уподобань на сторінках розробки застосунків"
-
-#: src/bz-preferences-dialog.blp:80
 msgid "Progress Bar"
 msgstr "Смужка поступу"
 
-#: src/bz-preferences-dialog.blp:81
+#: src/bz-preferences-dialog.blp:52
 msgid "Choose a theme for the progress bar!"
 msgstr "Оберіть цікавий зовнішній вигляд для смужки поступу!"
-
-#: src/bz-preferences-dialog.blp:116
-msgid ""
-"Bazaar can fetch and display the star count from an application's source "
-"code repository on a remote Git forge. \n"
-" For projects on GitHub, rate limits may cause them not to appear."
-msgstr ""
-"Базар може виявляти та показувати кількість уподобань зі сторінок розробки "
-"початкового коду у віддаленому сховищі Git.\n"
-"Для проєктів на GitHub, обмеження запитів (rate limit) може призвести до "
-"їхнього незʼявлення."
 
 #: src/bz-preferences-dialog.c:32
 msgid "Accent Color"
@@ -1663,19 +1627,19 @@ msgstr "Карусель знімків"
 msgid "Open Screenshot Viewer"
 msgstr "Відкрити переглядач знімків"
 
-#: src/bz-search-widget.blp:105
+#: src/bz-search-widget.blp:106
 msgid "Search Apps, Games, Software"
 msgstr "Шукайте застосунки, ігри та програми"
 
-#: src/bz-search-widget.blp:149
+#: src/bz-search-widget.blp:150
 msgid "Categories Unavailable"
 msgstr "Категорії недоступні"
 
-#: src/bz-search-widget.blp:150
+#: src/bz-search-widget.blp:151
 msgid "Search for apps using the search bar above."
 msgstr "Шукайте застосунки за допомогою рядка згори."
 
-#: src/bz-search-widget.blp:234
+#: src/bz-search-widget.blp:235
 msgid "No Applications Found"
 msgstr "Жодного підібраного застосунку"
 
@@ -1790,9 +1754,13 @@ msgstr "Крім того, буде оновлено %d середовищ ви�
 msgid "Manage Leftover User Data"
 msgstr "Керувати залишковими даними"
 
+#: src/bz-user-data-page.blp:41
+msgid "Loading"
+msgstr "Шукаємо"
+
 #: src/bz-user-data-page.blp:55
-msgid "No User Data"
-msgstr "Користувацькі дані відсутні"
+msgid "No User Data found"
+msgstr "Користувацьких даних не знайдено"
 
 #: src/bz-user-data-page.blp:60
 msgid "User Data"
@@ -1856,11 +1824,11 @@ msgid ""
 "You have a network connection but are viewing a cached version of Flathub"
 msgstr "Ви маєте зʼєднання з мережею, але переглядаєте кешовану версію Flathub"
 
-#: src/bz-window.blp:518
+#: src/bz-window.blp:517
 msgid "_Manage Leftover User Data"
 msgstr "_Керувати залишковими даними"
 
-#: src/bz-window.blp:544
+#: src/bz-window.blp:543
 msgid "Open Bazaar Inspector"
 msgstr "Відкрити зневаджувач"
 
