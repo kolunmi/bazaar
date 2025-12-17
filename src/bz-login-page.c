@@ -495,7 +495,6 @@ on_providers_loaded (GObject      *source_object,
   g_autoptr (JsonParser) parser  = NULL;
   JsonNode  *root;
   JsonArray *array;
-  guint      i;
 
   self = g_weak_ref_get (wr);
   if (self == NULL)
@@ -521,7 +520,7 @@ on_providers_loaded (GObject      *source_object,
   root  = json_parser_get_root (parser);
   array = json_node_get_array (root);
 
-  for (i = 0; i < json_array_get_length (array); i++)
+  for (guint i = 0; i < json_array_get_length (array); i++)
     {
       JsonObject *provider_obj                   = NULL;
       g_autoptr (BzFlathubAuthProvider) provider = NULL;

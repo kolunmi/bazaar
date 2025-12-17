@@ -211,12 +211,12 @@ load_from_secrets (BzAuthState *self)
 
               if (g_strcmp0 (key, "name") == 0)
                 {
-                  g_free (self->name);
+                  g_clear_pointer (&self->name, g_free);
                   self->name = g_variant_dup_string (value, NULL);
                 }
               else if (g_strcmp0 (key, "token") == 0)
                 {
-                  g_free (self->token);
+                  g_clear_pointer (&self->token, g_free);
                   self->token = g_variant_dup_string (value, NULL);
                 }
               else if (g_strcmp0 (key, "token-expires") == 0)
@@ -230,7 +230,7 @@ load_from_secrets (BzAuthState *self)
                 }
               else if (g_strcmp0 (key, "profile-icon-url") == 0)
                 {
-                  g_free (self->profile_icon_url);
+                  g_clear_pointer (&self->profile_icon_url, g_free);
                   self->profile_icon_url = g_variant_dup_string (value, NULL);
 
                   g_clear_object (&self->paintable);
@@ -261,8 +261,8 @@ load_from_secrets (BzAuthState *self)
 static void
 clear_secrets (BzAuthState *self)
 {
-  GHashTable *attributes;
-  GError     *error = NULL;
+  GHashTable *attributes = NULL;
+  GError     *error      = NULL;
 
   attributes = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
   g_hash_table_insert (attributes, g_strdup ("service"), g_strdup ("flathub"));
@@ -351,34 +351,39 @@ bz_auth_state_class_init (BzAuthStateClass *klass)
   object_class->get_property = bz_auth_state_get_property;
 
   properties[PROP_NAME] =
-      g_param_spec_string ("name",
-                           NULL, NULL,
-                           NULL,
-                           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+      g_param_spec_string (
+          "name",
+          NULL, NULL,
+          NULL,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   properties[PROP_TOKEN] =
-      g_param_spec_string ("token",
-                           NULL, NULL,
-                           NULL,
-                           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+      g_param_spec_string (
+          "token",
+          NULL, NULL,
+          NULL,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   properties[PROP_PROFILE_ICON_URL] =
-      g_param_spec_string ("profile-icon-url",
-                           NULL, NULL,
-                           NULL,
-                           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+      g_param_spec_string (
+          "profile-icon-url",
+          NULL, NULL,
+          NULL,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   properties[PROP_AUTHENTICATED] =
-      g_param_spec_boolean ("authenticated",
-                            NULL, NULL,
-                            FALSE,
-                            G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+      g_param_spec_boolean (
+          "authenticated",
+          NULL, NULL,
+          FALSE,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   properties[PROP_PAINTABLE] =
-      g_param_spec_object ("paintable",
-                           NULL, NULL,
-                           GDK_TYPE_PAINTABLE,
-                           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+      g_param_spec_object (
+          "paintable",
+          NULL, NULL,
+          GDK_TYPE_PAINTABLE,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, N_PROPS, properties);
 }
@@ -439,10 +444,10 @@ bz_auth_state_set_authenticated (BzAuthState *self,
                                  GDateTime   *token_expires,
                                  const char  *profile_icon_url)
 {
-  gboolean was_authenticated;
-  gboolean name_changed  = FALSE;
-  gboolean token_changed = FALSE;
-  gboolean icon_changed  = FALSE;
+  gboolean was_authenticated = FALSE;
+  gboolean name_changed      = FALSE;
+  gboolean token_changed     = FALSE;
+  gboolean icon_changed      = FALSE;
 
   g_return_if_fail (BZ_IS_AUTH_STATE (self));
 
@@ -450,14 +455,14 @@ bz_auth_state_set_authenticated (BzAuthState *self,
 
   if (g_strcmp0 (self->name, name) != 0)
     {
-      g_free (self->name);
+      g_clear_pointer (&self->name, g_free);
       self->name   = g_strdup (name);
       name_changed = TRUE;
     }
 
   if (g_strcmp0 (self->token, token) != 0)
     {
-      g_free (self->token);
+      g_clear_pointer (&self->token, g_free);
       self->token   = g_strdup (token);
       token_changed = TRUE;
     }
@@ -468,7 +473,7 @@ bz_auth_state_set_authenticated (BzAuthState *self,
 
   if (g_strcmp0 (self->profile_icon_url, profile_icon_url) != 0)
     {
-      g_free (self->profile_icon_url);
+      g_clear_pointer (&self->profile_icon_url, g_free);
       self->profile_icon_url = g_strdup (profile_icon_url);
       icon_changed           = TRUE;
 
