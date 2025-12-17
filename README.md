@@ -13,10 +13,12 @@ Bazaar
     </picture>
 </div>
 
-> [!NOTE] If you are interested in contributing code to Bazaar (Thank you!),
+> [!NOTE]
+> If you are interested in contributing code to Bazaar (Thank you!),
 > please see the [style rules](/CODESTYLE.md).
 
-> [!NOTE] If you are interested in contributing translations to Bazaar (Thank
+> [!NOTE]
+> If you are interested in contributing translations to Bazaar (Thank
 > you!), please see the [translators introduction](/TRANSLATORS.md).
 
 Bazaar is a new app store for GNOME with a focus on discovering and installing
