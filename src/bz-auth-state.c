@@ -287,12 +287,11 @@ bz_auth_state_dispose (GObject *object)
 {
   BzAuthState *self = BZ_AUTH_STATE (object);
 
-  if (self->expiration_timeout_id != 0)
-    {
-      g_source_remove (self->expiration_timeout_id);
-      self->expiration_timeout_id = 0;
-    }
-
+  g_clear_handle_id (&self->expiration_timeout_id, g_source_remove);
+  g_clear_pointer (&self->name, g_free);
+  g_clear_pointer (&self->token, g_free);
+  g_clear_pointer (&self->profile_icon_url, g_free);
+  g_clear_pointer (&self->token_expires, g_date_time_unref);
   g_clear_object (&self->paintable);
 
   G_OBJECT_CLASS (bz_auth_state_parent_class)->dispose (object);
