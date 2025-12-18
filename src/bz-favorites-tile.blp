@@ -1,0 +1,135 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzFavoritesTile: $BzListTile {
+  accessibility {
+    labelled-by: title_label;
+    described-by: description_label;
+  }
+
+  child: Box {
+    orientation: horizontal;
+    spacing: 10;
+
+    Picture icon_picture {
+      margin-start: 10;
+      margin-top: 10;
+      margin-bottom: 10;
+      height-request: 48;
+      width-request: 48;
+      paintable: bind template.group as <$BzEntryGroup>.icon-paintable;
+      visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.icon-paintable) as <bool>) as <bool>;
+      styles ["icon-dropshadow"]
+    }
+
+    Image fallback_icon {
+      margin-start: 10;
+      margin-top: 10;
+      margin-bottom: 10;
+      height-request: 48;
+      width-request: 48;
+      pixel-size: 48;
+      icon-name: "application-x-executable";
+      visible: bind $is_null(template.group as <$BzEntryGroup>.icon-paintable) as <bool>;
+      styles ["icon-dropshadow"]
+    }
+
+    Box {
+      orientation: vertical;
+      valign: center;
+      spacing: 4;
+
+      Label title_label {
+        xalign: 0.0;
+        ellipsize: end;
+        single-line-mode: true;
+        has-tooltip: true;
+        tooltip-text: bind template.group as <$BzEntryGroup>.id;
+        label: bind template.group as <$BzEntryGroup>.title;
+      }
+
+      Label description_label {
+        halign: start;
+        label: bind template.group as <$BzEntryGroup>.description;
+        xalign: 0.0;
+        ellipsize: end;
+        single-line-mode: true;
+        styles ["dim-label", "caption"]
+      }
+    }
+
+    Button support_button {
+      styles [
+        "circular",
+        "flat",
+        "suggested-action",
+        "support"
+      ]
+
+      has-tooltip: true;
+      tooltip-text: _("Support this application");
+
+      width-request: 32;
+      height-request: 32;
+      valign: center;
+      icon-name: "heart-filled-symbolic";
+      visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.donation-url) as <bool>) as <bool>;
+
+      clicked => $support_cb() swapped;
+    }
+
+    Box {
+      orientation: horizontal;
+      spacing: 8;
+      margin-end: 8;
+      hexpand: true;
+      halign: end;
+
+      Button install_remove_button {
+        styles [
+          "flat",
+        ]
+        width-request: 32;
+        height-request: 32;
+        valign: center;
+        has-tooltip: true;
+        tooltip-text: bind $get_install_remove_tooltip(template.group as <$BzEntryGroup>.removable) as <string>;
+        icon-name: bind $get_install_remove_icon(template.group as <$BzEntryGroup>.removable) as <string>;
+        clicked => $install_remove_cb() swapped;
+      }
+
+      Stack unfavorite_stack {
+        transition-type: crossfade;
+        StackPage {
+          name: "button";
+          child: Button unfavorite_button {
+            styles [
+              "flat",
+            ]
+            width-request: 32;
+            height-request: 32;
+            valign: center;
+            has-tooltip: true;
+            tooltip-text: _("Remove from Favorites");
+            icon-name: "bookmark-filled-symbolic";
+            clicked => $unfavorite_cb() swapped;
+          };
+        }
+        StackPage {
+          name: "spinner";
+          child: Adw.Spinner {
+            halign: center;
+            width-request: 16;
+          };
+        }
+      }
+
+      Image {
+        pixel-size: 14;
+        icon-name: "go-next-symbolic";
+        margin-end: 4;
+        styles ["dimmed"]
+      }
+    }
+  };
+}

@@ -29,6 +29,7 @@
 #include "bz-entry-inspector.h"
 #include "bz-env.h"
 #include "bz-error.h"
+#include "bz-favorites-page.h"
 #include "bz-flathub-page.h"
 #include "bz-full-view.h"
 #include "bz-global-progress.h"
@@ -310,6 +311,14 @@ remove_addon_cb (BzWindow   *self,
                  BzFullView *view)
 {
   try_transact (self, entry, NULL, TRUE, TRUE, NULL);
+}
+
+static void
+install_entry_cb (BzWindow   *self,
+                  BzEntry    *entry,
+                  BzFullView *view)
+{
+  try_transact (self, entry, NULL, FALSE, FALSE, NULL);
 }
 
 static void
@@ -1003,12 +1012,23 @@ bz_window_add_toast (BzWindow *self,
 }
 
 void
-bz_window_push_page(BzWindow *self, AdwNavigationPage *page)
+bz_window_push_page (BzWindow *self, AdwNavigationPage *page)
 {
-    g_return_if_fail(BZ_IS_WINDOW(self));
-    g_return_if_fail(ADW_IS_NAVIGATION_PAGE(page));
+  g_return_if_fail (BZ_IS_WINDOW (self));
+  g_return_if_fail (ADW_IS_NAVIGATION_PAGE (page));
 
-    adw_navigation_view_push(self->navigation_view, page);
+  if (BZ_IS_FAVORITES_PAGE (page))
+    {
+      g_signal_connect_swapped (page, "install", G_CALLBACK (install_entry_cb), self);
+      g_signal_connect_swapped (page, "remove", G_CALLBACK (remove_installed_cb), self);
+      g_signal_connect_swapped (page, "show-entry", G_CALLBACK (installed_page_show_cb), self);
+
+      g_object_bind_property (self->split_view, "show-sidebar",
+                              page, "show-sidebar",
+                              G_BINDING_BIDIRECTIONAL | G_BINDING_SYNC_CREATE);
+    }
+
+  adw_navigation_view_push (self->navigation_view, page);
 }
 
 BzStateInfo *

@@ -24,6 +24,8 @@
     <file preprocess="xml-stripblanks">bz-decorated-screenshot.ui</file>
     <file preprocess="xml-stripblanks">bz-developer-badge.ui</file>
     <file preprocess="xml-stripblanks">bz-entry-inspector.ui</file>
+    <file preprocess="xml-stripblanks">bz-favorites-page.ui</file>
+    <file preprocess="xml-stripblanks">bz-favorites-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-featured-carousel.ui</file>
     <file preprocess="xml-stripblanks">bz-featured-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-flathub-category-section.ui</file>
@@ -55,6 +57,7 @@
     <file alias="shortcuts-dialog.ui" preprocess="xml-stripblanks">gtk/shortcuts-dialog.ui</file>
 
     <file preprocess="xml-stripblanks">icons/scalable/actions/app-installed-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/bookmark-filled-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/bookmark-outline-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/check-plain-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/circle-filled-symbolic.svg</file>
