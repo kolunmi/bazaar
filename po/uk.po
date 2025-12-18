@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-16 11:35+0200\n"
-"PO-Revision-Date: 2025-12-16 11:56+0200\n"
+"POT-Creation-Date: 2025-12-18 12:49+0200\n"
+"PO-Revision-Date: 2025-12-19 08:24+0200\n"
 "Last-Translator: faoquad <faoquad@noreply.codeberg.org>\n"
 "Language-Team: Ukrainian <>\n"
 "Language: uk\n"
@@ -130,12 +130,12 @@ msgstr "Керувати розширеннями"
 
 #: src/bz-addons-dialog.c:90 src/bz-full-view.blp:502
 #: src/bz-installed-tile.blp:117 src/bz-transaction-view.blp:213
-#: src/bz-window.c:1282
+#: src/bz-window.c:1294
 msgid "Remove"
 msgstr "Видалити"
 
 #: src/bz-addons-dialog.c:95 src/bz-full-view.blp:274 src/bz-full-view.blp:489
-#: src/bz-transaction-view.blp:187 src/bz-window.c:1259
+#: src/bz-transaction-view.blp:187 src/bz-window.c:1271
 msgid "Install"
 msgstr "Встановити"
 
@@ -201,10 +201,10 @@ msgstr "Без даних щодо згадок або зображення ал
 msgid "Narcotics"
 msgstr "Заборонені речовини"
 
-# «Drugs» включає, але не обмежується «наркотиками».
+# Тут поняття включає як заборонені, так і незаборонені речовини (алкоголь, тютюн тощо)
 #: src/bz-age-rating-dialog.c:164
 msgid "No information regarding references to illicit drugs"
-msgstr "Без даних щодо згадок або зображення заборонених речовин"
+msgstr "Без даних щодо згадок або зображення пʼянких речовин"
 
 #: src/bz-age-rating-dialog.c:167
 msgid "Tobacco"
@@ -236,7 +236,7 @@ msgstr "Лайка"
 
 #: src/bz-age-rating-dialog.c:180
 msgid "No information regarding profanity of any kind"
-msgstr "Без даних щодо використання лайливої мови"
+msgstr "Без даних щодо грубощів або недоречного гумору"
 
 #: src/bz-age-rating-dialog.c:183
 msgid "Inappropriate Humor"
@@ -372,15 +372,15 @@ msgstr "Рабство"
 msgid "No information regarding references to slavery"
 msgstr "Без даних щодо згадок або зображення рабства"
 
-# «Drugs» включає, але не обмежується «наркотиками».
+# Тут поняття включає як заборонені, так і незаборонені речовини (алкоголь, тютюн тощо)
 #: src/bz-age-rating-dialog.c:307
 msgid "Does not include references to drugs"
-msgstr "Не містить згадок або зображення заборонених речовин"
+msgstr "Не містить згадок або зображення пʼянких речовин"
 
 #: src/bz-age-rating-dialog.c:309
 msgid ""
 "Does not include swearing, profanity, and other kinds of strong language"
-msgstr "Не містить лайливої мови"
+msgstr "Не містить грубощів або недоречного гумору"
 
 #: src/bz-age-rating-dialog.c:311
 msgid "Does not include ads or monetary transactions"
@@ -392,20 +392,21 @@ msgstr "Не містить оголености або сексу"
 
 #: src/bz-age-rating-dialog.c:315
 msgid "Does not include uncontrolled chat functionality"
-msgstr "Не містить можливості спілкуватися з іншими користувачами"
+msgstr "Не має можливості спілкуватися з іншими користувачами"
 
 #: src/bz-age-rating-dialog.c:317
 msgid "Does not include violence"
 msgstr "Не містить жорстокости"
 
+# Тут поняття включає як заборонені, так і незаборонені речовини (алкоголь, тютюн тощо)
 #: src/bz-age-rating-dialog.c:352
 msgid "Drugs"
-msgstr "Заборонені речовини"
+msgstr "Речовини"
 
 # Як розумію, це включає лайливу мову та інші форми міцної мови.
 #: src/bz-age-rating-dialog.c:354
 msgid "Strong Language"
-msgstr "Лайлива мова"
+msgstr "Грубощі"
 
 #: src/bz-age-rating-dialog.c:356
 msgid "Money"
@@ -525,12 +526,16 @@ msgstr "від усієї Вікіпедії"
 msgid "Without any media"
 msgstr "без медіявмісту"
 
+#: src/bz-app-tile.blp:84 src/bz-installed-page.blp:25 src/bz-window.blp:298
+msgid "Installed"
+msgstr "Встановлені"
+
 #: src/bz-apps-page.blp:14 src/bz-full-view.blp:43 src/bz-user-data-page.blp:15
-#: src/bz-window.blp:426
+#: src/bz-window.blp:443
 msgid "Main Menu"
 msgstr "Головне меню"
 
-#: src/bz-apps-page.blp:17 src/bz-user-data-page.blp:18 src/bz-window.blp:505
+#: src/bz-apps-page.blp:17 src/bz-user-data-page.blp:18 src/bz-window.blp:522
 msgid "_Donate to Bazaar ❤️"
 msgstr "_Пожертувати Базару ❤️"
 
@@ -538,23 +543,23 @@ msgstr "_Пожертувати Базару ❤️"
 msgid "_Refresh Content"
 msgstr "_Освіжити вміст"
 
-#: src/bz-apps-page.blp:22 src/bz-user-data-page.blp:22 src/bz-window.blp:512
+#: src/bz-apps-page.blp:22 src/bz-user-data-page.blp:22 src/bz-window.blp:529
 msgid "_Preferences"
 msgstr "_Налаштування"
 
-#: src/bz-apps-page.blp:23 src/bz-user-data-page.blp:23 src/bz-window.blp:522
+#: src/bz-apps-page.blp:23 src/bz-user-data-page.blp:23 src/bz-window.blp:550
 msgid "_Keyboard Shortcuts"
 msgstr "_Клавіатурні скорочення"
 
-#: src/bz-apps-page.blp:24 src/bz-user-data-page.blp:24 src/bz-window.blp:527
+#: src/bz-apps-page.blp:24 src/bz-user-data-page.blp:24 src/bz-window.blp:555
 msgid "_About Bazaar"
 msgstr "_Про Базар"
 
-#: src/bz-apps-page.blp:28 src/bz-user-data-page.blp:27 src/bz-window.blp:534
+#: src/bz-apps-page.blp:28 src/bz-user-data-page.blp:27 src/bz-window.blp:562
 msgid "_Quit Bazaar"
 msgstr "_Вийти"
 
-#: src/bz-application.c:556
+#: src/bz-application.c:577
 msgid ""
 "This functionality is currently disabled. It is recommended you download and "
 "install Flatseal to manage app permissions."
@@ -562,34 +567,38 @@ msgstr ""
 "Цю можливість наразі вимкнено. Для керування дозволами застосунків радимо "
 "встановити Flatseal."
 
-#: src/bz-application.c:638
+#: src/bz-application.c:659
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr ""
 
-#: src/bz-application.c:639
+#: src/bz-application.c:660
 msgctxt "About Dialog Developer Credit"
 msgid "Alexander Vanhee"
 msgstr ""
 
-#: src/bz-application.c:661
+#: src/bz-application.c:682
 msgid "Adam Masciola"
 msgstr ""
 
 #. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
-#: src/bz-application.c:664
+#: src/bz-application.c:685
 msgid "translator-credits"
 msgstr "faoquad <faoquad@noreply.codeberg.org>, 2025"
 
-#: src/bz-application.c:790
+#: src/bz-application.c:749
+msgid "Logged Out Successfully!"
+msgstr "Ви вийшли з Flathub"
+
+#: src/bz-application.c:855
 msgid "Performing setup..."
 msgstr "Налаштовуємо…"
 
-#: src/bz-application.c:869 src/bz-application.c:878
+#: src/bz-application.c:934 src/bz-application.c:943
 msgid "Set Up Flathub"
 msgstr "Налаштувати Flathub"
 
-#: src/bz-application.c:872
+#: src/bz-application.c:937
 msgid ""
 "Flathub is not set up on this system. You will not be able to browse and "
 "install applications in Bazaar if its unavailable.\n"
@@ -600,20 +609,20 @@ msgstr ""
 "застосунки в Базарі. Проте, Ви зможете користати Базар для огляду та "
 "керування вже встановленими застосунками."
 
-#: src/bz-application.c:877 src/bz-update-dialog.blp:6
+#: src/bz-application.c:942 src/bz-update-dialog.blp:6
 msgid "Later"
 msgstr "Пізніше"
 
-#: src/bz-application.c:1277
+#: src/bz-application.c:1344
 msgid "Synchronizing..."
 msgstr "Синхронізуємо…"
 
-#: src/bz-application.c:1416
+#: src/bz-application.c:1483
 #, c-format
 msgid "Receiving %d entries..."
 msgstr "Отримуємо %d надходжень…"
 
-#: src/bz-application.c:1421
+#: src/bz-application.c:1488
 msgid "Checking for updates"
 msgstr "Шукаємо оновлення"
 
@@ -993,7 +1002,7 @@ msgctxt "Project URL Type"
 msgid "Contribute"
 msgstr "Долучитися"
 
-#: src/bz-full-view.blp:20 src/bz-window.blp:126 src/bz-window.blp:403
+#: src/bz-full-view.blp:20 src/bz-window.blp:126 src/bz-window.blp:420
 msgid "Toggle transaction sidebar"
 msgstr "Перемкнути віконце дій над застосунками"
 
@@ -1054,7 +1063,7 @@ msgstr ""
 "оновлень або безпекових виправлень. Він може стати небезпечним до "
 "використання."
 
-#: src/bz-full-view.blp:644 src/bz-window.c:1228
+#: src/bz-full-view.blp:644 src/bz-window.c:1240
 msgid "Delete Data"
 msgstr "Видалити дані"
 
@@ -1233,6 +1242,8 @@ msgstr "Підтримка клавіатури"
 msgid "Requires keyboards"
 msgstr "Вимагає клавіатуру"
 
+# Позначає, що застосунок ліпше працює з такими пристроями
+# Стан підтримки загалом описується іншим рядком
 #: src/bz-hardware-support-dialog.c:72
 msgid "Recommends keyboards"
 msgstr "Бажана клавіатура"
@@ -1243,7 +1254,7 @@ msgstr "Підтримує клавіатуру"
 
 #: src/bz-hardware-support-dialog.c:74
 msgid "Unknown support for keyboards"
-msgstr "Невідома підтримка клавіатури"
+msgstr "Сумісність із клавіатурами на вказана"
 
 #: src/bz-hardware-support-dialog.c:76
 msgid "Mouse support"
@@ -1253,6 +1264,8 @@ msgstr "Підтримка миші"
 msgid "Requires mice or pointing devices"
 msgstr "Вимагає мишу або вказівний пристрій"
 
+# Позначає, що застосунок ліпше працює з такими пристроями
+# Стан підтримки загалом описується іншим рядком
 #: src/bz-hardware-support-dialog.c:79
 msgid "Recommends mice or pointing devices"
 msgstr "Бажані миша або вказівний пристрій"
@@ -1263,7 +1276,7 @@ msgstr "Підтримує мишу або вказівний пристрій"
 
 #: src/bz-hardware-support-dialog.c:81
 msgid "Unknown support for mice or pointing devices"
-msgstr "Невідома підтримка миші або вказівних пристроїв"
+msgstr "Сумісність із мишами або вказівними пристроями не вказана"
 
 #: src/bz-hardware-support-dialog.c:83
 msgid "Touchscreen support"
@@ -1273,6 +1286,8 @@ msgstr "Підтримка сенсорних екранів"
 msgid "Requires touchscreens"
 msgstr "Вимагає сенсорний екран"
 
+# Позначає, що застосунок ліпше працює з такими пристроями
+# Стан підтримки загалом описується іншим рядком
 #: src/bz-hardware-support-dialog.c:86
 msgid "Recommends touchscreens"
 msgstr "Бажаний сенсорний екран"
@@ -1283,7 +1298,7 @@ msgstr "Підтримує сенсорний екран"
 
 #: src/bz-hardware-support-dialog.c:88
 msgid "Unknown support for touchscreens"
-msgstr "Невідома підтримка сенсорного екрану"
+msgstr "Сумісність із сенсорними екранами на вказана"
 
 #: src/bz-hardware-support-dialog.c:192
 msgid "Mobile support"
@@ -1351,10 +1366,6 @@ msgstr "Відкинути кеш та дослідити"
 msgid "No Flatpaks Installed"
 msgstr "Не встановлено жодного пакунку Flatpak"
 
-#: src/bz-installed-page.blp:25 src/bz-window.blp:298
-msgid "Installed"
-msgstr "Встановлені"
-
 #: src/bz-installed-page.c:395
 msgid "Choose an Installation"
 msgstr "Оберіть встановлення"
@@ -1367,7 +1378,7 @@ msgstr ""
 "Ви маєте декілька встановлених версій цього застосунку. З котрою з них Ви "
 "бажаєте продовжити?"
 
-#: src/bz-installed-page.c:402 src/bz-window.c:1258 src/bz-window.c:1281
+#: src/bz-installed-page.c:402 src/bz-window.c:1270 src/bz-window.c:1293
 msgid "Cancel"
 msgstr "Скасувати"
 
@@ -1692,7 +1703,7 @@ msgstr "%d застосунків"
 msgid "Search failed"
 msgstr "Пошук завершився невдало"
 
-#: src/bz-transaction-manager.c:1137
+#: src/bz-transaction-manager.c:1135
 #, c-format
 msgid "Finished in %.02f seconds"
 msgstr "Завершено за %.02f сек"
@@ -1811,26 +1822,38 @@ msgstr "Підібрані"
 msgid "Flathub"
 msgstr "Flathub"
 
-#: src/bz-window.blp:433
+#: src/bz-window.blp:450
 msgid "Network connection is metered — automatic store data sync is paused"
 msgstr "Платне зʼєднання — автоматичне освіження вмісту крамниці призупинено"
 
-#: src/bz-window.blp:434 src/bz-window.blp:443
+#: src/bz-window.blp:451 src/bz-window.blp:460
 msgid "Sync Manually"
 msgstr "Освіжити власноруч"
 
-#: src/bz-window.blp:442
+#: src/bz-window.blp:459
 msgid ""
 "You have a network connection but are viewing a cached version of Flathub"
 msgstr "Ви маєте зʼєднання з мережею, але переглядаєте кешовану версію Flathub"
 
-#: src/bz-window.blp:517
+#: src/bz-window.blp:534
+msgid "_Login with Flathub"
+msgstr "_Увійти з допомогою Flathub"
+
+#: src/bz-window.blp:540
 msgid "_Manage Leftover User Data"
 msgstr "_Керувати залишковими даними"
 
-#: src/bz-window.blp:543
+#: src/bz-window.blp:545
+msgid "_Synchronize Remotes"
+msgstr "_Освіжити віддалені сховища"
+
+#: src/bz-window.blp:571
 msgid "Open Bazaar Inspector"
 msgstr "Відкрити зневаджувач"
+
+#: src/bz-window.blp:580
+msgid "Log Out"
+msgstr "Вийти"
 
 #: src/bz-window.c:475
 #, c-format
@@ -1840,7 +1863,7 @@ msgstr[0] "Доступне %s оновлення"
 msgstr[1] "Доступні %s оновлення"
 msgstr[2] "Доступні %s оновлень"
 
-#: src/bz-window.c:970
+#: src/bz-window.c:973
 msgid ""
 "The ability to inspect and install local .flatpak bundle files is coming "
 "soon! In the meantime, try running\n"
@@ -1856,47 +1879,47 @@ msgstr ""
 "\n"
 "у терміналі."
 
-#: src/bz-window.c:1088
+#: src/bz-window.c:1100
 msgid "Can't do that right now!"
 msgstr "Наразі цього не можна зробити!"
 
 # Виглядає як заголовок «пташечки» у діалозі при видаленні застосунку.
-#: src/bz-window.c:1219
+#: src/bz-window.c:1231
 msgid "Keep Data"
 msgstr "Залишити дані"
 
-#: src/bz-window.c:1220
+#: src/bz-window.c:1232
 msgid "Allow restoring settings and content"
 msgstr "Залишити можливість відновити налаштування та вміст у майбутньому"
 
-#: src/bz-window.c:1229
+#: src/bz-window.c:1241
 msgid "Permanently remove app data to save space"
 msgstr "Назавжди видалити дані застосунку"
 
-#: src/bz-window.c:1252
+#: src/bz-window.c:1264
 #, c-format
 msgid "Install %s?"
 msgstr "Встановити %s?"
 
-#: src/bz-window.c:1255
+#: src/bz-window.c:1267
 msgid "May install additional shared components"
 msgstr "Можуть бути встановлені додаткові компоненти"
 
-#: src/bz-window.c:1274
+#: src/bz-window.c:1286
 #, c-format
 msgid "Remove %s?"
 msgstr "Видалити %s?"
 
-#: src/bz-window.c:1278
+#: src/bz-window.c:1290
 #, c-format
 msgid "It will not be possible to use %s after it is uninstalled."
 msgstr "%s не можна буде користати після видалення."
 
-#: src/bz-window.c:1341
+#: src/bz-window.c:1353
 msgid "Resume Current Tasks"
 msgstr "Відновити активні дії"
 
-#: src/bz-window.c:1347
+#: src/bz-window.c:1359
 msgid "Pause Current Tasks"
 msgstr "Призупинити активні дії"
 
