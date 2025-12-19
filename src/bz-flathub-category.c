@@ -90,6 +90,8 @@ static const CategoryInfo category_info[] = {
   {   "recently-added",         N_ ("Recently Added"),      N_ ("New"),                    N_ ("More New"),        "io.github.kolumni.Bazaar.New" },
   { "recently-updated",       N_ ("Recently Updated"),  N_ ("Updated"),                N_ ("More Updated"),    "io.github.kolumni.Bazaar.Updated" },
   {           "mobile",                 N_ ("Mobile"),   N_ ("Mobile"),                 N_ ("More Mobile"),     "io.github.kolumni.Bazaar.Mobile" },
+  {          "adwaita",                N_ ("Adwaita"),  N_ ("Adwaita"),                N_ ("More Adwaita"),    "io.github.kolumni.Bazaar.Adwaita" },
+  {          "kde",                N_ ("KDE Apps"),  N_ ("KDE Apps"),                N_ ("More KDE Apps"),    "io.github.kolumni.Bazaar.Kde" },
   {               NULL,                          NULL,            NULL,                               NULL,                                  NULL }
 };
 

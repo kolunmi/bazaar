@@ -729,6 +729,33 @@ window.narrow .category-tile {
   background: linear-gradient(135deg, shade(#f6f5f4, .95) 0%, shade(#deddda, .95) 100%);
 }
 
+.category-tile.category-adwaita {
+  text-shadow: 0 1px rgba(255, 255, 255, 0.35);
+  background: linear-gradient(45deg, #1c71d8 0%, #57e289 100%);
+}
+.category-tile.category-adwaita:hover {
+  background: linear-gradient(45deg, shade(#1c71d8, 1.08) 0%, shade(#57e289, 1.08) 100%);
+}
+.category-tile.category-adwaita:active {
+  background: linear-gradient(45deg, shade(#1c71d8, .95) 0%, shade(#57e289, .95) 100%);
+}
+
+.category-tile.category-kde {
+  text-shadow: 0 1px rgba(255, 255, 255, 0.35);
+  background: linear-gradient(135deg, #3584e4 0%, #704dac 100%);
+}
+.category-tile.category-kde:hover {
+  background: linear-gradient(135deg, shade(#3584e4, 1.08) 0%, shade(#704dac, 1.08) 100%);
+}
+.category-tile.category-kde:active {
+  background: linear-gradient(135deg, shade(#3584e4, .95) 0%, shade(#704dac, .95) 100%);
+}
+
+.category-tile.category-adwaita image,
+.category-tile.category-kde image {
+	-gtk-icon-shadow: none;
+}
+
 .installed-list-view > * {
     padding: 0;
     transition: background-color 200ms;
