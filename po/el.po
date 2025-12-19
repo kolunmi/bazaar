@@ -1,26 +1,22 @@
-# Russian translations for bazaar package.
+# Greek translations for bazaar package.
 # Copyright (C) 2025 THE bazaar'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the bazaar package.
 # Automatically generated, 2025.
-#
-# SPDX-FileCopyrightText: 2025 Jill Fiore <contact@lumaeris.com>
-# Jill Fiore <contact@lumaeris.com>, 2025.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-18 07:22+0700\n"
-"PO-Revision-Date: 2025-12-19 13:25+0700\n"
-"Last-Translator: Jill Fiore <contact@lumaeris.com>\n"
-"Language-Team: Russian\n"
-"Language: ru\n"
+"POT-Creation-Date: 2025-12-18 02:22+0200\n"
+"PO-Revision-Date: 2025-12-18 04:30+0200\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: el\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Gtranslator 49.0\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.8\n"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:2
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:5
@@ -31,75 +27,77 @@ msgstr "Bazaar"
 #: data/io.github.kolunmi.Bazaar.desktop.in:3
 msgid "Add, remove or update flatpak software on this computer"
 msgstr ""
-"Установка, удаление или обновление Flatpak приложений на этом компьютере"
+"Προσθήκη, αφαίρεση ή ενημέρωση λογισμικού flatpak σε αυτόν τον υπολογιστή"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:9
 msgid "GTK;System;PackageManager;Discover;Flatpak;Software;Store;"
-msgstr "GTK;Система;УправлениеПакетами;Discover;Flatpak;Приложения;Магазин;"
+msgstr ""
+"GTK;Σύστημα;Διαχειριστής πακέτων;Ανακάλυψη;Flatpak;Λογισμικό;Κατάστημα;"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:6
 msgid "Hide EOL Entries"
-msgstr "Скрыть неподдерживаемое ПО"
+msgstr "Απόκρυψη καταχωρήσεων EOL"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:7
 msgid "Hide EOL entries and entries depending on them"
-msgstr ""
-"Скрыть неподдерживаемые среды выполнения, а так же зависящие от них "
-"приложения"
+msgstr "Απόκρυψη καταχωρήσεων EOL και καταχωρήσεων που εξαρτώνται από αυτές"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:11
 msgid "Only Show Free Software"
-msgstr "Показывать только свободные приложения"
+msgstr "Εμφάνιση μόνο δωρεάν λογισμικού"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:12
 msgid "Hide proprietary software"
-msgstr "Скрыть проприетарные приложения"
+msgstr "Απόκρυψη ιδιόκτητου λογισμικού"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:16
 msgid "Show Only Flathub Content"
-msgstr "Показывать только приложения из Flathub"
+msgstr "Εμφάνιση μόνο περιεχομένου Flathub"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:17
 msgid "Hide applications which do not originate from Flathub"
-msgstr "Скрыть приложения, которые не распространяются Flathub"
+msgstr "Απόκρυψη εφαρμογών που δεν προέρχονται από το Flathub"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:21
 msgid "Debounce Search Inputs"
-msgstr "Увеличить время отклика ввода при поиске"
+msgstr "Αναζήτηση εισόδων χωρίς αναπήδηση"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:22
 msgid "Add a delay before searching to prevent instant replies while typing"
 msgstr ""
-"Добавить время отклика перед выполнением фильтрации быстрых ответов при вводе"
+"Προσθέστε μια καθυστέρηση πριν από την αναζήτηση για να αποτρέψετε τις "
+"άμεσες απαντήσεις κατά την πληκτρολόγηση"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:46
 msgid "Global Progress Bar Theme"
-msgstr "Тема оформления глобальной полосы прогресса"
+msgstr "Καθολικό θέμα μπάρας προόδου"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:47
 msgid "Describes the look of the global progress bar"
-msgstr "Описывает внешний вид глобальной полосы прогресса"
+msgstr "Περιγράφει την εμφάνιση της καθολικής μπάρας προόδου"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:51
 msgid "Saved Window Dimensions"
-msgstr "Сохранить размер окна"
+msgstr "Αποθηκευμένες διαστάσεις παραθύρου"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:52
 msgid "The window dimensions to be used by the next Bazaar window"
 msgstr ""
-"Сохранённый размер окна будет использован при повторном открытии Bazaar"
+"Οι διαστάσεις του παραθύρου που θα χρησιμοποιηθούν από το επόμενο παράθυρο "
+"Bazaar"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:8
 msgid "Discover and install applications"
-msgstr "Поиск и установка приложений"
+msgstr "Ανακαλύψτε και εγκαταστήστε εφαρμογές"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:10
 msgid ""
 "A new app store for GNOME with a focus on discovering and installing "
 "applications and addons from Flatpak remotes, particularly Flathub."
 msgstr ""
-"Новый магазин приложений для GNOME с фокусом на поиске, установке приложений "
-"и дополнений из Flatpak репозиторий, в частности с Flathub."
+"Ένα νέο κατάστημα εφαρμογών για το GNOME με έμφαση στην αναζήτηση και "
+"εγκατάσταση εφαρμογών και πρόσθετων από απομακρυσμένους διακομιστές Flatpak, "
+"ιδίως το Flathub."
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:14
 msgid ""
@@ -107,50 +105,47 @@ msgid ""
 "Bazaar features a \"curated\" tab that can be configured by distributors to "
 "allow for a more localized experience."
 msgstr ""
-"Оно подчёркивает поддержку разработчиков, которые делают настольный Linux "
-"возможным. Bazaar внедряет вкладку \"Курируемое\", которая настраивается "
-"дистрибьюторами для обеспечения более ориентированного опыта."
-
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29 src/bz-application.c:682
-msgid "Adam Masciola"
-msgstr "Адам Масциола"
+"Δίνει έμφαση στην υποστήριξη των προγραμματιστών που καθιστούν δυνατή τη "
+"λειτουργία του Linux desktop. Το Bazaar διαθέτει μια καρτέλα \"curated\" που "
+"μπορεί να διαμορφωθεί από τους διανομείς ώστε να προσφέρει μια πιο τοπική "
+"εμπειρία."
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:54
 msgid "The home page displaying Flathub apps"
-msgstr "Главная страница, отображающая приложения Flathub"
+msgstr "Η αρχική σελίδα που εμφανίζει τις εφαρμογές Flathub"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:58
 msgid "Nucleus app page"
-msgstr "Страница приложения Nucleus"
+msgstr "Σελίδα εφαρμογής Nucleus"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:62
 msgid "Search page"
-msgstr "Страница поиска"
+msgstr "Σελίδα αναζήτησης"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:66
 msgid "Category page"
-msgstr "Страница категорий"
+msgstr "Σελίδα κατηγορίας"
 
 #: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:711
 #: src/bz-installed-tile.blp:99
 msgid "Manage Add-ons"
-msgstr "Управление дополнениями"
+msgstr "Διαχείριση πρόσθετων"
 
 #: src/bz-addons-dialog.c:90 src/bz-full-view.blp:502
 #: src/bz-installed-tile.blp:117 src/bz-transaction-view.blp:213
 #: src/bz-window.c:1294
 msgid "Remove"
-msgstr "Удалить"
+msgstr "Κατάργηση"
 
 #: src/bz-addons-dialog.c:95 src/bz-full-view.blp:274 src/bz-full-view.blp:489
 #: src/bz-transaction-view.blp:187 src/bz-window.c:1271
 msgid "Install"
-msgstr "Установить"
+msgstr "Εγκατάσταση"
 
 #: src/bz-age-rating-dialog.blp:7 src/bz-age-rating-dialog.blp:50
 #: src/bz-full-view.c:373 src/bz-full-view.c:380
 msgid "Age Rating"
-msgstr "Возраст"
+msgstr "Βαθμολογία ηλικίας"
 
 #: src/bz-age-rating-dialog.blp:40 src/bz-age-rating-dialog.c:790
 msgid "?"
@@ -158,273 +153,280 @@ msgstr "?"
 
 #: src/bz-age-rating-dialog.c:139
 msgid "Cartoon Violence"
-msgstr "Мультипликационное насилие"
+msgstr "Βία στα κινούμενα σχέδια"
 
 #: src/bz-age-rating-dialog.c:140
 msgid "No information regarding cartoon violence"
-msgstr "Нет информации о мультипликационном насилии"
+msgstr "Δεν υπάρχουν πληροφορίες σχετικά με τη βία στα κινούμενα σχέδια"
 
 #: src/bz-age-rating-dialog.c:143
 msgid "Fantasy Violence"
-msgstr "Фэнтезийное насилие"
+msgstr "Φανταστική βία"
 
 #: src/bz-age-rating-dialog.c:144
 msgid "No information regarding fantasy violence"
-msgstr "Нет информации о фэнтезийном насилии"
+msgstr "Δεν υπάρχουν πληροφορίες σχετικά με τη φανταστική βία"
 
 #: src/bz-age-rating-dialog.c:147
 msgid "Realistic Violence"
-msgstr "Реалистичное насилие"
+msgstr "Ρεαλιστική βία"
 
 #: src/bz-age-rating-dialog.c:148
 msgid "No information regarding realistic violence"
-msgstr "Нет информации о реалистичном насилии"
+msgstr "Δεν υπάρχουν πληροφορίες σχετικά με ρεαλιστική βία"
 
 #: src/bz-age-rating-dialog.c:151
 msgid "Violence Depicting Bloodshed"
-msgstr "Кровопролитие"
+msgstr "Βία που απεικονίζει αιματοχυσία"
 
 #: src/bz-age-rating-dialog.c:152
 msgid "No information regarding bloodshed"
-msgstr "Нет информации о кровопролитии"
+msgstr "Δεν υπάρχουν πληροφορίες σχετικά με βία που απεικονίζει αιματοχυσία"
 
 #: src/bz-age-rating-dialog.c:155
 msgid "Sexual Violence"
-msgstr "Сексуальное насилие"
+msgstr "Σεξουαλική βία"
 
 #: src/bz-age-rating-dialog.c:156
 msgid "No information regarding sexual violence"
-msgstr "Нет информации о сексуальном насилии"
+msgstr "Δεν υπάρχουν πληροφορίες σχετικά με σεξουαλική βία"
 
 #: src/bz-age-rating-dialog.c:159
 msgid "Alcohol"
-msgstr "Алкоголь"
+msgstr "Αλκοόλ"
 
 #: src/bz-age-rating-dialog.c:160
 msgid "No information regarding references to alcohol"
-msgstr "Нет информации о упоминании алкоголя"
+msgstr "Δεν υπάρχουν πληροφορίες σχετικά με αναφορές στο αλκοόλ"
 
 #: src/bz-age-rating-dialog.c:163
 msgid "Narcotics"
-msgstr "Наркотики"
+msgstr "Ναρκωτικά"
 
 #: src/bz-age-rating-dialog.c:164
 msgid "No information regarding references to illicit drugs"
-msgstr "Нет информации о упоминании наркотических средств"
+msgstr ""
+"Δεν υπάρχουν πληροφορίες σχετικά με αναφορές σε παράνομες ναρκωτικές ουσίες"
 
 #: src/bz-age-rating-dialog.c:167
 msgid "Tobacco"
-msgstr "Табак"
+msgstr "Καπνός"
 
 #: src/bz-age-rating-dialog.c:168
 msgid "No information regarding references to tobacco products"
-msgstr "Нет информации о упоминании табачных изделий"
+msgstr "Δεν υπάρχουν πληροφορίες σχετικά με αναφορές σε προϊόντα καπνού"
 
 #: src/bz-age-rating-dialog.c:171 src/bz-age-rating-dialog.c:358
 msgid "Nudity"
-msgstr "Нагота"
+msgstr "Γυμνότητα"
 
 #: src/bz-age-rating-dialog.c:172
 msgid "No information regarding nudity of any sort"
-msgstr "Нет информации о наготе любого рода"
+msgstr "Καμία πληροφορία σχετικά με γυμνότητα οποιουδήποτε είδους"
 
 #: src/bz-age-rating-dialog.c:175
 msgid "Sexual Themes"
-msgstr "Сексуальные темы"
+msgstr "Σεξουαλικά θέματα"
 
 #: src/bz-age-rating-dialog.c:176
 msgid "No information regarding references to or depictions of sexual nature"
 msgstr ""
-"Нет информации о упоминании или показе изображений сексуального характера"
+"Δεν υπάρχουν πληροφορίες σχετικά με αναφορές ή απεικονίσεις σεξουαλικού "
+"χαρακτήρα"
 
 #: src/bz-age-rating-dialog.c:179
 msgid "Profanity"
-msgstr "Ненормативная лексика"
+msgstr "Βωμολοχίες"
 
 #: src/bz-age-rating-dialog.c:180
 msgid "No information regarding profanity of any kind"
-msgstr "Нет информации о ненормативной лексике в любом виде"
+msgstr "Δεν υπάρχουν πληροφορίες σχετικά με οποιαδήποτε μορφή βωμολοχίας"
 
 #: src/bz-age-rating-dialog.c:183
 msgid "Inappropriate Humor"
-msgstr "Неприемлемый юмор"
+msgstr "Ακατάλληλο χιούμορ"
 
 #: src/bz-age-rating-dialog.c:184
 msgid "No information regarding inappropriate humor"
-msgstr "Нет информации о неприемоемом юморе"
+msgstr "Δεν υπάρχουν πληροφορίες σχετικά με ακατάλληλο χιούμορ"
 
 #: src/bz-age-rating-dialog.c:187
 msgid "Discrimination"
-msgstr "Дискриминация"
+msgstr "Διακρίσεις"
 
 #: src/bz-age-rating-dialog.c:188
 msgid "No information regarding discriminatory language of any kind"
-msgstr "Нет информации о дискриминации в любом виде"
+msgstr "Καμία πληροφορία σχετικά με διακριτική γλώσσα οποιουδήποτε είδους"
 
 #: src/bz-age-rating-dialog.c:191
 msgid "Advertising"
-msgstr "Реклама"
+msgstr "Διαφήμιση"
 
 #: src/bz-age-rating-dialog.c:192
 msgid "No information regarding advertising of any kind"
-msgstr "Нет информации о рекламе в любом виде"
+msgstr "Καμία πληροφορία σχετικά με διαφημίσεις οποιουδήποτε είδους"
 
 #: src/bz-age-rating-dialog.c:195
 msgid "Gambling"
-msgstr "Азартные игры"
+msgstr "Τυχερά παιχνίδια"
 
 #: src/bz-age-rating-dialog.c:196
 msgid "No information regarding gambling of any kind"
-msgstr "Нет информации о азартных играх в любом виде"
+msgstr "Καμία πληροφορία σχετικά με τυχερά παιχνίδια οποιουδήποτε είδους"
 
 #: src/bz-age-rating-dialog.c:199
 msgid "Purchasing"
-msgstr "Покупка"
+msgstr "Αγορές"
 
 #: src/bz-age-rating-dialog.c:200
 msgid "No information regarding the ability to spend money"
-msgstr "Нет информации о возможности тратить деньги"
+msgstr "Δεν υπάρχουν πληροφορίες σχετικά με τη δυνατότητα δαπάνης χρημάτων"
 
 #: src/bz-age-rating-dialog.c:203
 msgid "Chat Between Users"
-msgstr "Общение между пользователями"
+msgstr "Συνομιλία μεταξύ χρηστών"
 
 #: src/bz-age-rating-dialog.c:204
 msgid "No information regarding ways to chat with other users"
-msgstr "Нет инфорамции о возможностях общаться с другими пользователями"
+msgstr ""
+"Δεν υπάρχουν πληροφορίες σχετικά με τους τρόπους επικοινωνίας με άλλους "
+"χρήστες"
 
 #: src/bz-age-rating-dialog.c:207
 msgid "Audio Chat Between Users"
-msgstr "Аудиочат между пользователями"
+msgstr "Ηχητική συνομιλία μεταξύ χρηστών"
 
 #: src/bz-age-rating-dialog.c:208
 msgid "No information regarding ways to talk with other users"
-msgstr "Нет информации о возможности разговаривать с другими пользователями"
+msgstr ""
+"Δεν υπάρχουν πληροφορίες σχετικά με τους τρόπους επικοινωνίας με άλλους "
+"χρήστες"
 
 #: src/bz-age-rating-dialog.c:211
 msgid "Contact Details"
-msgstr "Контактная информация"
+msgstr "Στοιχεία επικοινωνίας"
 
 #: src/bz-age-rating-dialog.c:212
 msgid ""
 "No information regarding sharing of social network usernames or email "
 "addresses"
 msgstr ""
-"Нет информации о распространении имён пользователей или адресов электронной "
-"почты"
+"Δεν υπάρχουν πληροφορίες σχετικά με την κοινοποίηση ονομάτων χρήστη "
+"κοινωνικών δικτύων ή διευθύνσεων ηλεκτρονικού ταχυδρομείου"
 
 #: src/bz-age-rating-dialog.c:215
 msgid "Identifying Information"
-msgstr "Идентифицирующая информация"
+msgstr "Πληροφορίες ταυτοποίησης"
 
 #: src/bz-age-rating-dialog.c:216
 msgid "No information regarding sharing of user information with third parties"
 msgstr ""
-"Нет информации о распространении пользовательских данных с другими лицами"
+"Δεν υπάρχουν πληροφορίες σχετικά με την κοινοποίηση πληροφοριών χρηστών σε "
+"τρίτους"
 
 #: src/bz-age-rating-dialog.c:219
 msgid "Location Sharing"
-msgstr "Распространение местоположения"
+msgstr "Κοινή χρήση τοποθεσίας"
 
 #: src/bz-age-rating-dialog.c:220
 msgid "No information regarding sharing of physical location with other users"
 msgstr ""
-"Нет информации о распространении физического местоположения с другими "
-"пользователями"
+"Δεν υπάρχουν πληροφορίες σχετικά με την κοινοποίηση της φυσικής τοποθεσίας "
+"σε άλλους χρήστες"
 
 #: src/bz-age-rating-dialog.c:223
 msgid "Prostitution"
-msgstr "Проституция"
+msgstr "Πορνεία"
 
 #: src/bz-age-rating-dialog.c:224
 msgid "No information regarding references to prostitution"
-msgstr "Нет информации о упоминании проституции"
+msgstr "Δεν υπάρχουν πληροφορίες σχετικά με αναφορές σε πορνεία"
 
 #: src/bz-age-rating-dialog.c:227
 msgid "Adultery"
-msgstr "Прелюбодеяние"
+msgstr "Μοιχεία"
 
 #: src/bz-age-rating-dialog.c:228
 msgid "No information regarding references to adultery"
-msgstr "Нет информации о упоминании прелюбодеяния"
+msgstr "Δεν υπάρχουν πληροφορίες σχετικά με αναφορές σε μοιχεία"
 
 #: src/bz-age-rating-dialog.c:231
 msgid "Sexualized Characters"
-msgstr "Сексуализированные персонажи"
+msgstr "Σεξουαλικοποιημένοι χαρακτήρες"
 
 #: src/bz-age-rating-dialog.c:232
 msgid "No information regarding sexualized characters"
-msgstr "Нет информации о сексуализированных персонажей"
+msgstr "Δεν υπάρχουν πληροφορίες σχετικά με Σεξουαλικοποιημένους χαρακτήρες"
 
 #: src/bz-age-rating-dialog.c:235
 msgid "Desecration"
-msgstr "Осквернение"
+msgstr "Βεβήλωση"
 
 #: src/bz-age-rating-dialog.c:236
 msgid "No information regarding references to desecration"
-msgstr "Нет информации о осквернении"
+msgstr "Δεν υπάρχουν πληροφορίες σχετικά με αναφορές σε βεβήλωση"
 
 #: src/bz-age-rating-dialog.c:239
 msgid "Human Remains"
-msgstr "Останки человека"
+msgstr "Ανθρώπινα λείψανα"
 
 #: src/bz-age-rating-dialog.c:240
 msgid "No information regarding visible dead human remains"
-msgstr "Нет информации о видимости останков человека"
+msgstr "Δεν υπάρχουν πληροφορίες σχετικά με ορατά ανθρώπινα λείψανα"
 
 #: src/bz-age-rating-dialog.c:243
 msgid "Slavery"
-msgstr "Рабство"
+msgstr "Δουλεία"
 
 #: src/bz-age-rating-dialog.c:244
 msgid "No information regarding references to slavery"
-msgstr "Нет информации о упоминании рабства"
+msgstr "Δεν υπάρχουν πληροφορίες σχετικά με αναφορές στη δουλεία"
 
 #: src/bz-age-rating-dialog.c:307
 msgid "Does not include references to drugs"
-msgstr "Не содержит упоминания наркотических средств"
+msgstr "Δεν περιλαμβάνει αναφορές σε φάρμακα"
 
 #: src/bz-age-rating-dialog.c:309
 msgid ""
 "Does not include swearing, profanity, and other kinds of strong language"
 msgstr ""
-"Не содержит ругательство, ненормативную лексику, и любых видов грубой речи"
+"Δεν περιλαμβάνει βρισιές, χυδαίες εκφράσεις και άλλα είδη σκληρής γλώσσας"
 
 #: src/bz-age-rating-dialog.c:311
 msgid "Does not include ads or monetary transactions"
-msgstr "Не содержит рекламу или денежные транзакции"
+msgstr "Δεν περιλαμβάνει διαφημίσεις ή χρηματικές συναλλαγές"
 
 #: src/bz-age-rating-dialog.c:313
 msgid "Does not include sex or nudity"
-msgstr "Не содержит секс или наготу"
+msgstr "Δεν περιλαμβάνει σεξ ή γυμνότητα"
 
 #: src/bz-age-rating-dialog.c:315
 msgid "Does not include uncontrolled chat functionality"
-msgstr "Не содержит функциональность немодерируемого чата"
+msgstr "Δεν περιλαμβάνει λειτουργία ανεξέλεγκτης συνομιλίας"
 
 #: src/bz-age-rating-dialog.c:317
 msgid "Does not include violence"
-msgstr "Не содержит насилие"
+msgstr "Δεν περιλαμβάνει βία"
 
 #: src/bz-age-rating-dialog.c:352
 msgid "Drugs"
-msgstr "Наркотики"
+msgstr "Ναρκωτικά"
 
 #: src/bz-age-rating-dialog.c:354
 msgid "Strong Language"
-msgstr "Грубая речь"
+msgstr "Σκληρή γλώσσα"
 
 #: src/bz-age-rating-dialog.c:356
 msgid "Money"
-msgstr "Деньги"
+msgstr "Χρήματα"
 
 #: src/bz-age-rating-dialog.c:360
 msgid "Social"
-msgstr "Общение"
+msgstr "Κοινωνικά"
 
 #: src/bz-age-rating-dialog.c:362
 msgid "Violence"
-msgstr "Насилие"
+msgstr "Βία"
 
 #: src/bz-age-rating-dialog.c:564
 #, c-format
@@ -440,67 +442,67 @@ msgstr "%d+"
 #: src/bz-age-rating-dialog.c:782
 msgctxt "Age rating"
 msgid "All"
-msgstr "Все"
+msgstr "Όλα"
 
 #: src/bz-age-rating-dialog.c:846
 #, c-format
 msgid "%s has an unknown age rating"
-msgstr "%s имеет неизвестное возрастное ограничение"
+msgstr "Το %s έχει άγνωστη ηλικιακή βαθμολογία"
 
 #: src/bz-age-rating-dialog.c:854
 #, c-format
 msgid "%s is suitable for everyone"
-msgstr "%s предназначено для всех возрастов"
+msgstr "Το %s είναι κατάλληλο για όλους"
 
 #: src/bz-age-rating-dialog.c:857
 #, c-format
 msgid "%s is suitable for toddlers"
-msgstr "%s предназначено для детей младшего возраста"
+msgstr "Το %s είναι κατάλληλο για νήπια"
 
 #: src/bz-age-rating-dialog.c:860
 #, c-format
 msgid "%s is suitable for young children"
-msgstr "%s предназначено для маленьких детей"
+msgstr "Το %s είναι κατάλληλο για μικρά παιδιά"
 
 #: src/bz-age-rating-dialog.c:863
 #, c-format
 msgid "%s is suitable for children"
-msgstr "%s предназначено для детей"
+msgstr "Το %s είναι κατάλληλο για παιδιά"
 
 #: src/bz-age-rating-dialog.c:866
 #, c-format
 msgid "%s is suitable for teenagers"
-msgstr "%s предназначено для подростков"
+msgstr "Το %s είναι κατάλληλο για εφήβους"
 
 #: src/bz-age-rating-dialog.c:869
 #, c-format
 msgid "%s is suitable for adults"
-msgstr "%s предназначено для взрослых"
+msgstr "Το %s είναι κατάλληλο για ενήλικες"
 
 #: src/bz-age-rating-dialog.c:872
 #, c-format
 msgid "%s is suitable for %s"
-msgstr "%s предназначено для %s"
+msgstr "Το %s είναι κατάλληλο για %s"
 
 #: src/bz-app-size-dialog.blp:43
 msgid "--- MB"
-msgstr "--- МБ"
+msgstr "--- MB"
 
 #: src/bz-app-size-dialog.blp:53
 msgid "Download Size"
-msgstr "Размер скачивания"
+msgstr "Μέγεθος λήψης"
 
 #: src/bz-app-size-dialog.c:55
 msgid "Of the size of human DNA"
-msgstr "От размера человеческого ДНК"
+msgstr "Του μεγέθους του ανθρώπινου DNA"
 
 #: src/bz-app-size-dialog.c:55
 msgid "3 billion base pairs"
-msgstr "3 миллиарда пар оснований"
+msgstr "3 δισεκατομμύρια ζεύγη βάσεων"
 
 #: src/bz-app-size-dialog.c:56
 msgid "Of the Linux Kernel"
-msgstr "От ядра Linux"
+msgstr "Του πυρήνα Linux"
 
 #: src/bz-app-size-dialog.c:56
 msgid "linux-6.17.tar.xz"
@@ -508,95 +510,100 @@ msgstr "linux-6.17.tar.xz"
 
 #: src/bz-app-size-dialog.c:57
 msgid "Of the Apollo 11 guidance computer"
-msgstr "От вычислителя Аполлон-11"
+msgstr "Του υπολογιστή πλοήγησης του Apollo 11"
 
 #: src/bz-app-size-dialog.c:57
 msgid "Total ROM and RAM"
-msgstr "ПЗУ и ОЗУ"
+msgstr "Συνολική ROM και RAM"
 
 #: src/bz-app-size-dialog.c:58
 msgid "Of the original Super Mario Bros"
-msgstr "От оригинальной Super Mario Bros"
+msgstr "Από το αρχικό Super Mario Bros"
 
 #: src/bz-app-size-dialog.c:58
 msgid "On the NES"
-msgstr "На NES"
+msgstr "Στο NES"
 
 #: src/bz-app-size-dialog.c:59
 msgid "Of the size of Wikipedia"
-msgstr "От размера Википедии"
+msgstr "Του μεγέθους της Wikipedia"
 
 #: src/bz-app-size-dialog.c:59
 msgid "Without any media"
-msgstr "Исключая медиафайлы"
+msgstr "Χωρίς κανένα πολυμέσο"
 
 #: src/bz-app-tile.blp:84 src/bz-installed-page.blp:25 src/bz-window.blp:298
 msgid "Installed"
-msgstr "Установлено"
+msgstr "Εγκατεστημένο"
 
 #: src/bz-apps-page.blp:14 src/bz-full-view.blp:43 src/bz-user-data-page.blp:15
 #: src/bz-window.blp:443
 msgid "Main Menu"
-msgstr "Главное меню"
+msgstr "Κύριο μενού"
 
 #: src/bz-apps-page.blp:17 src/bz-user-data-page.blp:18 src/bz-window.blp:522
 msgid "_Donate to Bazaar ❤️"
-msgstr "_Поддержать Bazaar ❤️"
+msgstr "_Δωρίστε στο Bazaar ❤️"
 
 #: src/bz-apps-page.blp:18 src/bz-user-data-page.blp:19
 msgid "_Refresh Content"
-msgstr "_Обновить контент"
+msgstr "_Ανανέωση περιεχομένου"
 
 #: src/bz-apps-page.blp:22 src/bz-user-data-page.blp:22 src/bz-window.blp:529
 msgid "_Preferences"
-msgstr "П_араметры"
+msgstr "_Προτιμήσεις"
 
 #: src/bz-apps-page.blp:23 src/bz-user-data-page.blp:23 src/bz-window.blp:550
 msgid "_Keyboard Shortcuts"
-msgstr "_Сочетание клавиш"
+msgstr "_Συντομεύσεις πληκτρολογίου"
 
 #: src/bz-apps-page.blp:24 src/bz-user-data-page.blp:24 src/bz-window.blp:555
 msgid "_About Bazaar"
-msgstr "О _Bazaar"
+msgstr "_Σχετικά με το Bazaar"
 
 #: src/bz-apps-page.blp:28 src/bz-user-data-page.blp:27 src/bz-window.blp:562
 msgid "_Quit Bazaar"
-msgstr "_Закрыть Bazaar"
+msgstr "_Κλείστε το Bazaar"
 
 #: src/bz-application.c:577
 msgid ""
 "This functionality is currently disabled. It is recommended you download and "
 "install Flatseal to manage app permissions."
 msgstr ""
-"Данный функционал сейчас отключён. Рекомендуется скачать и установить "
-"Flatseal для редактирования разрешений приложения."
+"Αυτή η λειτουργία είναι προς το παρόν απενεργοποιημένη. Συνιστάται να "
+"κατεβάσετε και να εγκαταστήσετε το Flatseal για να διαχειριστείτε τις άδειες "
+"της εφαρμογής."
 
 #: src/bz-application.c:659
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
-msgstr "Адам Масциола <kolunmi@posteo.net>"
+msgstr "Adam Masciola <kolunmi@posteo.net>"
 
 #: src/bz-application.c:660
 msgctxt "About Dialog Developer Credit"
 msgid "Alexander Vanhee"
-msgstr "Александр Фанхе"
+msgstr "Alexander Vanhee"
+
+#: src/bz-application.c:682
+msgid "Adam Masciola"
+msgstr "Adam Masciola"
 
 #. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
 #: src/bz-application.c:685
 msgid "translator-credits"
-msgstr "Jill Fiore <contact@lumaeris.com>, 2025"
+msgstr "μεταφραστής-συντελεστές"
 
 #: src/bz-application.c:749
 msgid "Logged Out Successfully!"
-msgstr "Выход из аккаунта выполнен успешно!"
+msgstr "Αποσύνδεση με επιτυχία!"
 
 #: src/bz-application.c:855
 msgid "Performing setup..."
-msgstr "Выполняется настройка..."
+msgstr "Εκτέλεση εγκατάστασης..."
 
 #: src/bz-application.c:934 src/bz-application.c:943
 msgid "Set Up Flathub"
-msgstr "Добавить Flathub"
+msgstr "Ρύθμιση του Flathub"
 
 #: src/bz-application.c:937
 msgid ""
@@ -605,63 +612,64 @@ msgid ""
 "\n"
 "You can still use Bazaar to browse and remove already installed apps."
 msgstr ""
-"Flathub не был добавлен в данную систему. Вы не сможете искать и "
-"устанавливать приложения в Bazaar пока он недоступен.\n"
+"Το Flathub δεν είναι εγκατεστημένο σε αυτό το σύστημα. Δεν θα μπορείτε να "
+"περιηγηθείτε και να εγκαταστήσετε εφαρμογές στο Bazaar εάν δεν είναι "
+"διαθέσιμο.\n"
 "\n"
-"Вы по-прежнему можете использовать Bazaar для обзора и удаления уже "
-"установленных приложений."
+"Μπορείτε ακόμα να χρησιμοποιήσετε το Bazaar για να περιηγηθείτε και να "
+"καταργήσετε ήδη εγκατεστημένες εφαρμογές."
 
 #: src/bz-application.c:942 src/bz-update-dialog.blp:6
 msgid "Later"
-msgstr "Позже"
+msgstr "Αργότερα"
 
 #: src/bz-application.c:1344
 msgid "Synchronizing..."
-msgstr "Синхронизация..."
+msgstr "Συγχρονισμός..."
 
 #: src/bz-application.c:1483
 #, c-format
 msgid "Receiving %d entries..."
-msgstr "Получение %d элементов"
+msgstr "Λήψη %d καταχωρήσεων..."
 
 #: src/bz-application.c:1488
 msgid "Checking for updates"
-msgstr "Проверка на наличие обновлений"
+msgstr "Έλεγχος για ενημερώσεις"
 
 #: src/bz-curated-view.blp:11 src/bz-flathub-page.blp:19
 #: src/bz-full-view.blp:53 src/bz-installed-page.blp:15
 #: src/bz-user-data-page.blp:52 src/bz-window.blp:183
 msgid "Empty"
-msgstr "Пусто"
+msgstr "Άδειο"
 
 #: src/bz-curated-view.blp:15
 msgid "No Curation"
-msgstr "Нет курации"
+msgstr "Χωρίς επιμέλεια"
 
 #: src/bz-curated-view.blp:16
 msgid ""
 "There is no curation information provided on this system. You can still "
 "browse applications on Flathub"
 msgstr ""
-"Отсутствует информация о курируемых приложениях в данной системе. Вы всё ещё "
-"можете поискать приложения во вкладке Flathub"
+"Δεν παρέχονται πληροφορίες σχετικά με την επιμέλεια σε αυτό το σύστημα. "
+"Μπορείτε να συνεχίσετε να περιηγείστε στις εφαρμογές στο Flathub"
 
 #: src/bz-curated-view.blp:18
 msgid "Browse Flathub"
-msgstr "Открыть Flathub"
+msgstr "Περιήγηση στο Flathub"
 
 #: src/bz-curated-view.blp:29 src/bz-curated-view.blp:33
 #: src/bz-flathub-page.blp:30 src/bz-flathub-page.blp:34
 msgid "Offline"
-msgstr "Нет интернета"
+msgstr "Εκτός σύνδεσης"
 
 #: src/bz-curated-view.blp:39 src/bz-flathub-page.blp:49
 msgid "Browser"
-msgstr "Обзор"
+msgstr "Πρόγραμμα περιήγησης"
 
 #: src/bz-developer-badge.c:131
 msgid "Developer information not available."
-msgstr "Информация о разработчике недоступна."
+msgstr "Οι πληροφορίες για τον προγραμματιστή δεν είναι διαθέσιμες."
 
 #: src/bz-developer-badge.c:137 src/bz-developer-badge.c:151
 #, c-format
@@ -669,8 +677,8 @@ msgid ""
 "The ownership of the %s app ID has not been verified and it may be a "
 "community package."
 msgstr ""
-"Право собственности на ID приложения %s не было подтверждено, это приложение "
-"может быть неофициальным."
+"Η ιδιοκτησία του αναγνωριστικού εφαρμογής %s δεν έχει επαληθευτεί και "
+"ενδέχεται να πρόκειται για πακέτο κοινότητας."
 
 #: src/bz-developer-badge.c:155
 #, c-format
@@ -678,403 +686,407 @@ msgid ""
 "The ownership of the %s app ID has been manually verified by the Flathub "
 "team."
 msgstr ""
-"Право собственности на ID приложения %s было подтверждено командой Flathub."
+"Η ιδιοκτησία του αναγνωριστικού εφαρμογής %s έχει επαληθευτεί χειροκίνητα "
+"από την ομάδα του Flathub."
 
 #: src/bz-developer-badge.c:161
 #, c-format
 msgid ""
 "The ownership of the %s app ID has been verified by <b>%s</b> on <b>%s</b>."
 msgstr ""
-"Право собственности на ID приложения %s было подтверждено <b>%s</b> на "
-"<b>%s</b>."
+"Η ιδιοκτησία του αναγνωριστικού εφαρμογής %s έχει επαληθευτεί από τον <b>%s</"
+"b> στις <b>%s</b>."
 
 #: src/bz-developer-badge.c:168
 #, c-format
 msgid "The ownership of the %s app ID has been verified using %s."
 msgstr ""
-"Право собственности на ID приложения %s было подтверждено используя %s."
+"Η ιδιοκτησία του αναγνωριστικού εφαρμογής %s έχει επαληθευτεί "
+"χρησιμοποιώντας το %s."
 
 #: src/bz-developer-badge.c:172
 #, c-format
 msgid "The ownership of the %s app ID has been verified."
-msgstr "Право собственности на ID приложения %s было подтверждено."
+msgstr "Η ιδιοκτησία του αναγνωριστικού εφαρμογής %s έχει επαληθευτεί."
 
 #: src/bz-entry-inspector.blp:5
 msgid "Entry Inspector"
-msgstr "Инспектор элементов"
+msgstr "Επιθεωρητής εισόδου"
 
 #: src/bz-entry-inspector.blp:76
 msgid "Serialize"
-msgstr "Сериализировать"
+msgstr "Σειριοποίηση"
 
 #: src/bz-entry-inspector.blp:80
 msgid "Convert to JSON"
-msgstr "Конвертировать в JSON"
+msgstr "Μετατροπή σε JSON"
 
 #: src/bz-error.c:68
 msgid "An Error Occurred"
-msgstr "Произошла ошибка"
+msgstr "Παρουσιάστηκε σφάλμα"
 
 #: src/bz-error.c:89
 msgid "Close"
-msgstr "Закрыть"
+msgstr "Κλείσιμο"
 
 #: src/bz-error.c:90
 msgid "Copy and Close"
-msgstr "Скопировать и закрыть"
+msgstr "Αντιγραφή και κλείσιμο"
 
 #: src/bz-featured-carousel.blp:31
 msgid "Previous"
-msgstr "Предыдущий"
+msgstr "Προηγούμενο"
 
 #: src/bz-featured-carousel.blp:53
 msgid "Next"
-msgstr "Следующий"
+msgstr "Επόμενο"
 
 #: src/bz-featured-tile.blp:88
 msgid "App of the Day"
-msgstr "Приложение дня"
+msgstr "Εφαρμογή της ημέρας"
 
 #: src/bz-flathub-category.c:78
 msgid "Audio & Video"
-msgstr "Аудио и видео"
+msgstr "Ήχος & Βίντεο"
 
 #: src/bz-flathub-category.c:78
 msgid "Media"
-msgstr "Медиа"
+msgstr "Πολυμέσα"
 
 #: src/bz-flathub-category.c:78
 msgid "More Audio & Video"
-msgstr "Больше приложений для аудио и видео"
+msgstr "Περισσότερα Ήχος & Βίντεο"
 
 #: src/bz-flathub-category.c:79
 msgid "Developer Tools"
-msgstr "Инструменты разработчика"
+msgstr "Εργαλεία προγραμματιστή"
 
 #: src/bz-flathub-category.c:79
 msgid "Develop"
-msgstr "Разработчикам"
+msgstr "Προγραμματισμός"
 
 #: src/bz-flathub-category.c:79
 msgid "More Developer Tools"
-msgstr "Больше приложений для разработки"
+msgstr "Περισσότερα εργαλεία προγραμματιστή"
 
 #: src/bz-flathub-category.c:80
 msgid "Education"
-msgstr "Образование"
+msgstr "Εκπαίδευση"
 
 #: src/bz-flathub-category.c:80
 msgid "Learn"
-msgstr "Обучение"
+msgstr "Μάθηση"
 
 #: src/bz-flathub-category.c:80
 msgid "More Education"
-msgstr "Больше образовательных приложений"
+msgstr "Περισσότερη Μάθηση"
 
 #: src/bz-flathub-category.c:81
 msgid "Gaming"
-msgstr "Игры"
+msgstr "Παιχνίδια"
 
 #: src/bz-flathub-category.c:81
 msgid "Play"
-msgstr "Игры"
+msgstr "Παίξτε"
 
 #: src/bz-flathub-category.c:81
 msgid "More Gaming"
-msgstr "Больше игр"
+msgstr "Περισσότερα παιχνίδια"
 
 #: src/bz-flathub-category.c:82
 msgid "Graphics & Photography"
-msgstr "Графика и фотография"
+msgstr "Γραφικά & Φωτογραφία"
 
 #: src/bz-flathub-category.c:82
 msgid "Create"
-msgstr "Творите"
+msgstr "Δημιουργία"
 
 #: src/bz-flathub-category.c:82
 msgid "More Graphics & Photography"
-msgstr "Больше приложений для графики"
+msgstr "Περισσότερα Γραφικά & Φωτογραφία"
 
 #: src/bz-flathub-category.c:83
 msgid "Networking"
-msgstr "Сеть"
+msgstr "Δικτύωση"
 
 #: src/bz-flathub-category.c:83
 msgid "Internet"
-msgstr "Сеть"
+msgstr "Διαδίκτυο"
 
 #: src/bz-flathub-category.c:83
 msgid "More Networking"
-msgstr "Больше сетевых приложений"
+msgstr "Περισσότερη Δικτύωση"
 
 #: src/bz-flathub-category.c:84
 msgid "Productivity"
-msgstr "Продуктивность"
+msgstr "Παραγωγικότητα"
 
 #: src/bz-flathub-category.c:84
 msgid "Work"
-msgstr "Работа"
+msgstr "Εργασία"
 
 #: src/bz-flathub-category.c:84
 msgid "More Productivity"
-msgstr "Больше приложений для продуктивности"
+msgstr "Περισσότερη Παραγωγικότητα"
 
 #: src/bz-flathub-category.c:85
 msgid "Science"
-msgstr "Наука"
+msgstr "Επιστήμη"
 
 #: src/bz-flathub-category.c:85
 msgid "More Science"
-msgstr "Больше научных приложений"
+msgstr "Περισσότερη Επιστήμη"
 
 #: src/bz-flathub-category.c:86
 msgid "System"
-msgstr "Система"
+msgstr "Σύστημα"
 
 #: src/bz-flathub-category.c:86
 msgid "More System"
-msgstr "Больше системных приложений"
+msgstr "Περισσότερο Σύστημα"
 
 #: src/bz-flathub-category.c:87
 msgid "Utilities"
-msgstr "Утилиты"
+msgstr "Βοηθητικά προγράμματα"
 
 #: src/bz-flathub-category.c:87
 msgid "Tools"
-msgstr "Утилиты"
+msgstr "Εργαλεία"
 
 #: src/bz-flathub-category.c:87
 msgid "More Utilities"
-msgstr "Больше утилит"
+msgstr "Περισσότερα βοηθητικά προγράμματα"
 
 #: src/bz-flathub-category.c:88 src/bz-flathub-page.blp:119
 #: src/bz-flathub-page.blp:152
 msgid "Trending"
-msgstr "В тренде"
+msgstr "Τάσεις"
 
 #: src/bz-flathub-category.c:88
 msgid "More Trending"
-msgstr "Больше трендовых"
+msgstr "Περισσότερες Τάσεις"
 
 #: src/bz-flathub-category.c:89 src/bz-flathub-page.blp:125
 #: src/bz-flathub-page.blp:185
 msgid "Popular"
-msgstr "Популярное"
+msgstr "Δημοφιλείς"
 
 #: src/bz-flathub-category.c:89
 msgid "More Popular"
-msgstr "Больше популярных"
+msgstr "Περισσότερα Δημοφιλή"
 
 #: src/bz-flathub-category.c:90 src/bz-flathub-page.blp:174
 msgid "Recently Added"
-msgstr "Недавно добавленные"
+msgstr "Πρόσφατα Προστέθηκαν"
 
 #: src/bz-flathub-category.c:90 src/bz-flathub-page.blp:131
 msgid "New"
-msgstr "Новое"
+msgstr "Νέα"
 
 #: src/bz-flathub-category.c:90
 msgid "More New"
-msgstr "Больше новинок"
+msgstr "Περισσότερα Νέα"
 
 #: src/bz-flathub-category.c:91 src/bz-flathub-page.blp:163
 msgid "Recently Updated"
-msgstr "Недавно обновленные"
+msgstr "Πρόσφατα Ενημερωμένο"
 
 #: src/bz-flathub-category.c:91 src/bz-flathub-page.blp:137
 msgid "Updated"
-msgstr "Обновлённое"
+msgstr "Ενημερωμένο"
 
 #: src/bz-flathub-category.c:91
 msgid "More Updated"
-msgstr "Больше обновленных"
+msgstr "Περισσότερα Ενημερωμένα"
 
 #: src/bz-flathub-category.c:92
 msgid "Mobile"
-msgstr "Мобильные"
+msgstr "Κινητό"
 
 #: src/bz-flathub-category.c:92
 msgid "More Mobile"
-msgstr "Больше мобильных приложений"
+msgstr "Περισσότερα για κινητό"
 
 #: src/bz-flathub-page.blp:23
 msgid "Flathub Not Added"
-msgstr "Flathub не добавлен"
+msgstr "Το Flathub δεν έχει προστεθεί"
 
 #: src/bz-flathub-page.blp:24
 msgid "The Flathub remote was not found on any of your Flatpak installations"
-msgstr "Репозиторий Flathub не был найден среди ваших flatpak установок"
+msgstr ""
+"O απομακρυσμένος διακομιστής Flathub δεν βρέθηκε σε καμία από τις "
+"εγκαταστάσεις Flatpak σας"
 
 #: src/bz-flathub-page.blp:35
 msgid "Flathub returned an error"
-msgstr "Flathub вернул ошибку"
+msgstr "Το Flathub επέστρεψε ένα σφάλμα"
 
 #: src/bz-flathub-page.blp:41
 msgid "Retry Flathub Connection"
-msgstr "Повторить подключение к Flathub"
+msgstr "Επανάληψη σύνδεσης με το Flathub"
 
 #: src/bz-flathub-page.blp:57
 msgid "Flathub Unavailable"
-msgstr "Flathub недоступен"
+msgstr "Το Flathub δεν είναι διαθέσιμο"
 
 #: src/bz-flathub-page.blp:58
 msgid ""
 "We could not connect to Flathub. You can still manage and search for "
 "applications."
 msgstr ""
-"Мы не можем подключиться к Flathub. Вы всё ещё можете управлять приложениями "
-"и искать их."
+"Δεν μπορέσαμε να συνδεθούμε στο Flathub. Μπορείτε ακόμα να διαχειριστείτε "
+"και να αναζητήσετε εφαρμογές."
 
 #: src/bz-flathub-page.blp:61
 msgid "Search Apps"
-msgstr "Поиск приложений"
+msgstr "Αναζήτηση εφαρμογών"
 
 #: src/bz-flathub-page.blp:270
 msgid "On the Go"
-msgstr "Всегда под рукой"
+msgstr "Εν κινήσει"
 
 #: src/bz-flathub-page.blp:282
 msgid "Apps for your Linux phones and tablets"
-msgstr "Приложения для ваших телефонов и планшетов на Linux"
+msgstr "Εφαρμογές για τα τηλέφωνα και τα tablet σας με Linux"
 
 #: src/bz-flathub-page.blp:293
 msgid "More Mobile Apps"
-msgstr "Больше мобильных приложений"
+msgstr "Περισσότερες εφαρμογές για κινητά"
 
 #: src/bz-flathub-page.blp:328
 msgid "More Mobile apps"
-msgstr "Больше мобильных приложений"
+msgstr "Περισσότερες εφαρμογές για κινητά"
 
 #: src/bz-flathub-page.blp:388
 msgid "We​ ♥​ Games"
-msgstr "Мы ♥ Игры"
+msgstr "♥ τα παιχνίδια"
 
 #: src/bz-flathub-page.blp:401
 msgid "Games and apps to run your favorite titles"
-msgstr "Игры и приложения для запуска ваших любимых тайтлов"
+msgstr "Παιχνίδια και εφαρμογές για να τρέξετε τους αγαπημένους σας τίτλους"
 
 #: src/bz-flathub-page.blp:435
 msgid "More Games"
-msgstr "Больше игр"
+msgstr "Περισσότερα παιχνίδια"
 
 #: src/bz-flatpak-entry.c:600
 msgctxt "Project URL Type"
 msgid "Flathub Page"
-msgstr "Страница Flathub"
+msgstr "Σελίδα Flathub"
 
 #: src/bz-flatpak-entry.c:621
 msgctxt "Project URL Type"
 msgid "Project Website"
-msgstr "Веб-сайт проекта"
+msgstr "Ιστοσελίδα του έργου"
 
 #: src/bz-flatpak-entry.c:625
 msgctxt "Project URL Type"
 msgid "Issue Tracker"
-msgstr "Отслеживание ошибок"
+msgstr "Παρακολούθηση ζητημάτων"
 
 #: src/bz-flatpak-entry.c:629
 msgctxt "Project URL Type"
 msgid "FAQ"
-msgstr "Часто задаваемые вопросы"
+msgstr "FAQ"
 
 #: src/bz-flatpak-entry.c:633
 msgctxt "Project URL Type"
 msgid "Help"
-msgstr "Помощь"
+msgstr "Βοήθεια"
 
 #: src/bz-flatpak-entry.c:637
 msgctxt "Project URL Type"
 msgid "Donate"
-msgstr "Пожертвовать"
+msgstr "Δωρεά"
 
 #: src/bz-flatpak-entry.c:643
 msgctxt "Project URL Type"
 msgid "Translate"
-msgstr "Перевод"
+msgstr "Μετάφραση"
 
 #: src/bz-flatpak-entry.c:647
 msgctxt "Project URL Type"
 msgid "Contact"
-msgstr "Связаться"
+msgstr "Επικοινωνία"
 
 #: src/bz-flatpak-entry.c:651
 msgctxt "Project URL Type"
 msgid "Source Code"
-msgstr "Исходный код"
+msgstr "Πηγαίος κώδικας"
 
 #: src/bz-flatpak-entry.c:657
 msgctxt "Project URL Type"
 msgid "Contribute"
-msgstr "Сделать вклад"
+msgstr "Συνεισφέρετε"
 
 #: src/bz-full-view.blp:20 src/bz-window.blp:126 src/bz-window.blp:420
 msgid "Toggle transaction sidebar"
-msgstr "Переключить боковую панель транзакций"
+msgstr "Εναλλαγή πλευρικής γραμμής συναλλαγών"
 
 #: src/bz-full-view.blp:57
 msgid "No Results"
-msgstr "Нет результатов"
+msgstr "Κανένα αποτέλεσμα"
 
 #: src/bz-full-view.blp:58
 msgid "Try a different search query"
-msgstr "Попробуйте выполнить другой поисковый запрос"
+msgstr "Δοκιμάστε μια διαφορετική αναζήτηση"
 
 #: src/bz-full-view.blp:64 src/bz-window.blp:193
 msgid "Content"
-msgstr "Контент"
+msgstr "Περιεχόμενο"
 
 #: src/bz-full-view.blp:210
 msgid "Support"
-msgstr "Поддержать"
+msgstr "Υποστήριξη"
 
 #: src/bz-full-view.blp:226
 msgid "Favorite Count"
-msgstr "Число избранных"
+msgstr "Αριθμός αγαπημένων"
 
 #: src/bz-full-view.blp:258 src/bz-full-view.blp:513
 msgid "Open"
-msgstr "Открыть"
+msgstr "Ανοιχτό"
 
 #: src/bz-full-view.blp:271 src/bz-full-view.blp:486
 msgid "Download & Install Application"
-msgstr "Скачать и установить приложение"
+msgstr "Λήψη και εγκατάσταση εφαρμογής"
 
 #: src/bz-full-view.blp:286
 msgid "Uninstall Application"
-msgstr "Удалить приложение"
+msgstr "Απεγκατάσταση εφαρμογής"
 
 #: src/bz-full-view.blp:301 src/bz-full-view.blp:528
 msgid "Install Other Version"
-msgstr "Установить другую версию"
+msgstr "Εγκατάσταση άλλης έκδοσης"
 
 #: src/bz-full-view.blp:325
 msgid "Size"
-msgstr "Размер"
+msgstr "Μέγεθος"
 
 #: src/bz-full-view.blp:430
 msgid "Downloads /mo"
-msgstr "Загрузок /мес"
+msgstr "Λήψεις /mo"
 
 #: src/bz-full-view.blp:547
 msgid "Stopped Receiving Core Updates"
-msgstr "Прекращено получение основных обновлений"
+msgstr "Δεν λαμβάνετε πλέον βασικές ενημερώσεις"
 
 #: src/bz-full-view.blp:561
 msgid ""
 "This app uses a runtime that no longer receives updates or security fixes. "
 "It may become unsafe to use."
 msgstr ""
-"Это приложение использует среду выполнения, которая больше не получает "
-"обновления или исправления ошибок безопасности. Оно может стать небезопасным "
-"для использования."
+"Αυτή η εφαρμογή χρησιμοποιεί ένα περιβάλλον εκτέλεσης που δεν λαμβάνει πλέον "
+"ενημερώσεις ή διορθώσεις ασφαλείας. Η χρήση της ενδέχεται να μην είναι "
+"ασφαλής."
 
 #: src/bz-full-view.blp:644 src/bz-window.c:1240
 msgid "Delete Data"
-msgstr "Удалить данные"
+msgstr "Διαγραφή δεδομένων"
 
 #: src/bz-full-view.blp:778
 msgid "Tags:"
-msgstr "Метки:"
+msgstr "Ετικέτες:"
 
 #: src/bz-full-view.c:289
 msgid "---"
@@ -1084,323 +1096,322 @@ msgstr "---"
 #: src/bz-full-view.c:296
 #, c-format
 msgid "%.*fM"
-msgstr "%.*f мил."
+msgstr "%.*fM"
 
 #. Translators: K is the suffix for thousands
 #: src/bz-full-view.c:303
 #, c-format
 msgid "%.*fK"
-msgstr "%.*f тыс."
+msgstr "%.*fK"
 
 #: src/bz-full-view.c:313
 #, c-format
 msgid "%d downloads in the last 30 days"
-msgstr "%d загрузок за последние 30 дней"
+msgstr "%d λήψεις τις τελευταίες 30 ημέρες"
 
 #: src/bz-full-view.c:345
 #, c-format
 msgid "Download size of %s"
-msgstr "Размер скачивания %s"
+msgstr "Μέγεθος λήψης του %s"
 
 #: src/bz-full-view.c:378
 msgid "All Ages"
-msgstr "Для всех"
+msgstr "Όλες οι ηλικίες"
 
 #: src/bz-full-view.c:390
 msgid "Age rating information unavailable"
-msgstr "Информация о возрастном ограничении недоступна"
+msgstr "Πληροφορίες σχετικά με την ηλικιακή βαθμολογία δεν είναι διαθέσιμες"
 
 #: src/bz-full-view.c:395
 msgid "Suitable for all ages"
-msgstr "Предназначено для всех возрастов"
+msgstr "Κατάλληλο για όλες τις ηλικίες"
 
 #: src/bz-full-view.c:397
 #, c-format
 msgid "Suitable for ages %d and up"
-msgstr "Предназначено для лиц старше %d лет"
+msgstr "Κατάλληλο για ηλικίες %d και άνω"
 
 #: src/bz-full-view.c:430 src/bz-full-view.c:435 src/bz-full-view.c:463
 #: src/bz-full-view.c:474
 msgid "Unknown"
-msgstr "Неизвестно"
+msgstr "Άγνωστο"
 
 #: src/bz-full-view.c:440
 #, c-format
 msgid "Free software licensed under %s"
-msgstr "Свободное программное обеспечение, лицензированное под %s"
+msgstr "Ελεύθερο λογισμικό με άδεια χρήσης %s"
 
 #: src/bz-full-view.c:445
 msgid "Free software"
-msgstr "Cвободное программное обеспечение"
+msgstr "Ελεύθερο λογισμικό"
 
 #: src/bz-full-view.c:448
 msgid "Proprietary Software"
-msgstr "Проприетарное программное обеспечение"
+msgstr "Ιδιόκτητο λογισμικό"
 
 #: src/bz-full-view.c:451
 #, c-format
 msgid "Special License: %s"
-msgstr "Специальная лицензия: %s"
+msgstr "Ειδική άδεια: %s"
 
 #: src/bz-full-view.c:468
 msgid "Free"
-msgstr "Свободное"
+msgstr "Ελεύθερο"
 
 #: src/bz-full-view.c:471 src/bz-license-dialog.c:118
 msgid "Proprietary"
-msgstr "Проприетарное"
+msgstr "Ιδιόκτητο"
 
 #: src/bz-full-view.c:476 src/bz-license-dialog.c:120
 msgid "Special License"
-msgstr "Специальная лицензия"
+msgstr "Ειδική άδεια"
 
 #: src/bz-full-view.c:496
 msgid "Adaptive"
-msgstr "Адаптивное"
+msgstr "Προσαρμοστικό"
 
 #: src/bz-full-view.c:496
 msgid "Desktop Only"
-msgstr "Только для ПК"
+msgstr "Μόνο για επιτραπέζιους υπολογιστές"
 
 #: src/bz-full-view.c:502
 msgid "Works on desktop, tablets, and phones"
-msgstr "Работает на настольных компьютерах, планшетах и телефонах"
+msgstr "Λειτουργεί σε επιτραπέζιους υπολογιστές, tablet και κινητά τηλέφωνα"
 
 #: src/bz-full-view.c:503
 msgid "May not work on mobile devices"
-msgstr "Может не работать на мобильных устройствах"
+msgstr "Ενδέχεται να μην λειτουργεί σε κινητές συσκευές"
 
 #: src/bz-full-view.c:514
 msgid "No URL"
-msgstr "Нет URL"
+msgstr "Χωρίς διεύθυνση URL"
 
 #: src/bz-full-view.c:532
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
 msgstr ""
-"Это приложение имеет лицензию FLOSS, что значит исходный код может быть "
-"проверен на безопасность."
+"Αυτή η εφαρμογή διαθέτει άδεια FLOSS, που σημαίνει ότι ο πηγαίος κώδικας "
+"μπορεί να ελεγχθεί για λόγους ασφαλείας."
 
 #: src/bz-full-view.c:533
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
 msgstr ""
-"Это приложение имеет проприетарную лицензию, что значит исходный код "
-"разрабатывается в тайне и не может быть проверен независимой третьей "
-"стороной."
+"Αυτή η εφαρμογή διαθέτει ιδιόκτητη άδεια χρήσης, που σημαίνει ότι ο πηγαίος "
+"κώδικας έχει αναπτυχθεί ιδιωτικά και δεν μπορεί να ελεγχθεί από ανεξάρτητο "
+"τρίτο μέρος."
 
 #: src/bz-full-view.c:540
 msgid "More Apps"
-msgstr "Больше приложений"
+msgstr "Περισσότερες εφαρμογές"
 
 #: src/bz-full-view.c:541
 #, c-format
 msgid "More Apps by %s"
-msgstr "Больше приложений от %s"
+msgstr "Περισσότερες εφαρμογές από %s"
 
 #: src/bz-full-view.c:548
 msgid "Other Apps by this Developer"
-msgstr "Другие приложения от этого разработчика"
+msgstr "Άλλες εφαρμογές από αυτόν τον προγραμματιστή"
 
 #: src/bz-full-view.c:550 src/bz-full-view.c:658
 #, c-format
 msgid "Other Apps by %s"
-msgstr "Другие приложения от %s"
+msgstr "Άλλες εφαρμογές από %s"
 
 #: src/bz-full-view.c:558
 #, c-format
 msgid "%s is not installed, but it still has <b>%s</b> of data present."
 msgstr ""
-"%s не установлено, но пользовательские данные в размере <b>%s</b> ещё "
-"присутствуют."
+"Το %s δεν είναι εγκατεστημένο, αλλά εξακολουθεί να περιέχει <b>%s</b> "
+"δεδομένων."
 
 #: src/bz-full-view.c:660
 msgid "Other Apps"
-msgstr "Другие приложения"
+msgstr "Άλλες εφαρμογές"
 
 #: src/bz-full-view.c:662
 #, c-format
 msgid "%d Application"
 msgid_plural "%d Applications"
-msgstr[0] "%d приложение"
-msgstr[1] "%d приложения"
-msgstr[2] "%d приложений"
+msgstr[0] "%d Εφαρμογή"
+msgstr[1] "%d Εφαρμογές"
 
 #: src/bz-full-view.c:1010
 msgid "Show Less"
-msgstr "Показать меньше"
+msgstr "Εμφάνιση λιγότερων"
 
 #: src/bz-full-view.c:1010
 msgid "Show More"
-msgstr "Показать больше"
+msgstr "Εμφάνιση περισσότερων"
 
 #: src/bz-hardware-support-dialog.blp:6 src/bz-hardware-support-dialog.blp:47
 msgid "Hardware Support"
-msgstr "Поддержка оборудования"
+msgstr "Υποστήριξη υλικού"
 
 #: src/bz-hardware-support-dialog.c:69
 msgid "Keyboard support"
-msgstr "Поддержка клавиатуры"
+msgstr "Υποστήριξη πληκτρολογίου"
 
 #: src/bz-hardware-support-dialog.c:71
 msgid "Requires keyboards"
-msgstr "Требуется использовать клавиатуру"
+msgstr "Απαιτεί πληκτρολόγια"
 
 #: src/bz-hardware-support-dialog.c:72
 msgid "Recommends keyboards"
-msgstr "Рекомендуется использовать клавиатуру"
+msgstr "Συνιστά πληκτρολόγια"
 
 #: src/bz-hardware-support-dialog.c:73
 msgid "Supports keyboards"
-msgstr "Поддерживает клавиатуру"
+msgstr "Υποστηρίζει πληκτρολόγια"
 
 #: src/bz-hardware-support-dialog.c:74
 msgid "Unknown support for keyboards"
-msgstr "Неизвестная поддержка клавиатуры"
+msgstr "Άγνωστη υποστήριξη για πληκτρολόγια"
 
 #: src/bz-hardware-support-dialog.c:76
 msgid "Mouse support"
-msgstr "Поддержка мыши"
+msgstr "Υποστήριξη ποντικιού"
 
 #: src/bz-hardware-support-dialog.c:78
 msgid "Requires mice or pointing devices"
-msgstr "Требуется использовать мышь или указательные устройства"
+msgstr "Απαιτεί ποντίκια ή συσκευές κατάδειξης"
 
 #: src/bz-hardware-support-dialog.c:79
 msgid "Recommends mice or pointing devices"
-msgstr "Рекомендуется использовать мышь или указательные устройства"
+msgstr "Συνιστά ποντίκια ή συσκευές κατάδειξης"
 
 #: src/bz-hardware-support-dialog.c:80
 msgid "Supports mice or pointing devices"
-msgstr "Поддерживает мышь или указательные устройства"
+msgstr "Υποστηρίζει ποντίκια ή συσκευές κατάδειξης"
 
 #: src/bz-hardware-support-dialog.c:81
 msgid "Unknown support for mice or pointing devices"
-msgstr "Неизвестная поддержка мыши и указательных устройств"
+msgstr "Άγνωστη υποστήριξη για ποντίκια ή συσκευές κατάδειξης"
 
 #: src/bz-hardware-support-dialog.c:83
 msgid "Touchscreen support"
-msgstr "Поддержка сенсорного экрана"
+msgstr "Υποστήριξη οθόνης αφής"
 
 #: src/bz-hardware-support-dialog.c:85
 msgid "Requires touchscreens"
-msgstr "Требуется использовать сенсорный экран"
+msgstr "Απαιτεί οθόνες αφής"
 
 #: src/bz-hardware-support-dialog.c:86
 msgid "Recommends touchscreens"
-msgstr "Рекомендуется использовать сенсорный экран"
+msgstr "Συνιστά οθόνες αφής"
 
 #: src/bz-hardware-support-dialog.c:87
 msgid "Supports touchscreens"
-msgstr "Поддерживает сенсорные экраны"
+msgstr "Υποστηρίζει οθόνες αφής"
 
 #: src/bz-hardware-support-dialog.c:88
 msgid "Unknown support for touchscreens"
-msgstr "Неизвестная поддержка сенсорных экран"
+msgstr "Άγνωστη υποστήριξη για οθόνες αφής"
 
 #: src/bz-hardware-support-dialog.c:192
 msgid "Mobile support"
-msgstr "Поддержка мобильных устройств"
+msgstr "Υποστήριξη για κινητά"
 
 #: src/bz-hardware-support-dialog.c:193
 msgid "Works on mobile devices"
-msgstr "Работает на мобильных устройствах"
+msgstr "Λειτουργεί σε κινητές συσκευές"
 
 #: src/bz-hardware-support-dialog.c:193
 msgid "May not work well on mobile devices"
-msgstr "Может не работать хорошо на мобильных устройствах"
+msgstr "Μπορεί να μην λειτουργεί καλά σε κινητές συσκευές"
 
 #: src/bz-hardware-support-dialog.c:198
 msgid "Desktop support"
-msgstr "Поддержка настольных компьютеров"
+msgstr "Υποστήριξη επιτραπέζιων υπολογιστών"
 
 #: src/bz-hardware-support-dialog.c:199
 msgid "Works well on large screens"
-msgstr "Работает хорошо на больших экранах"
+msgstr "Λειτουργεί καλά σε μεγάλες οθόνες"
 
 #: src/bz-hardware-support-dialog.c:233
 #, c-format
 msgid "%s works best on specific hardware"
-msgstr "%s работает лучше на определённых устройствах"
+msgstr "Το %s λειτουργεί καλύτερα σε συγκεκριμένο υλικό"
 
 #: src/bz-hardware-support-dialog.c:240
 #, c-format
 msgid "%s works on most devices"
-msgstr "%s работает на большинстве устройств"
+msgstr "Το %s λειτουργεί στις περισσότερες συσκευές"
 
 #: src/bz-inspector.blp:5
 msgid "Bazaar Inspector"
-msgstr "Bazaar Инспектор"
+msgstr "Επιθεωρητής Bazaar"
 
 #: src/bz-inspector.blp:33
 msgid "Background Task Info:"
-msgstr "Информация о фоновом процессе:"
+msgstr "Πληροφορίες για την εργασία παρασκηνίου:"
 
 #: src/bz-inspector.blp:43
 msgid "Enable Global Debug Mode"
-msgstr "Включить глобальный режим отладки"
+msgstr "Ενεργοποίηση καθολικής λειτουργίας αποσφαλμάτωσης"
 
 #: src/bz-inspector.blp:50
 msgid "Active Blocklists"
-msgstr "Активные чёрные списки"
+msgstr "Ενεργές λίστες αποκλεισμένων"
 
 #: src/bz-inspector.blp:67
 msgid "Active Curated-Configs"
-msgstr "Активные конфигурации курируемых приложений"
+msgstr "Ενεργές Επιμελημένες-Ρυθμίσεις"
 
 #: src/bz-inspector.blp:85
 msgid "All Entry Groups"
-msgstr "Все группы элементов"
+msgstr "Όλες οι ομάδες εισόδου"
 
 #: src/bz-inspector.blp:93
 msgid "Filter..."
-msgstr "Фильтрация..."
+msgstr "Φίλτρο..."
 
 #: src/bz-inspector.blp:134
 msgid "Decache and Inspect"
-msgstr "Декешировать и проверить"
+msgstr "Καθαρισμός cache και Έλεγχος"
 
 #: src/bz-installed-page.blp:19
 msgid "No Flatpaks Installed"
-msgstr "Нет установленных Flatpak"
+msgstr "Δεν έχουν εγκατασταθεί Flatpaks"
 
 #: src/bz-installed-page.c:395
 msgid "Choose an Installation"
-msgstr "Выбор установки"
+msgstr "Επιλέξτε μια εγκατάσταση"
 
 #: src/bz-installed-page.c:398
 msgid ""
 "You have multiple versions of this app installed. Which one would you like "
 "to proceed with? "
 msgstr ""
-"Вы установили несколько версий данного приложения. Какое вы хотите выбрать "
-"для продолжения?"
+"Έχετε εγκαταστήσει πολλές εκδόσεις αυτής της εφαρμογής. Με ποια από αυτές "
+"θέλετε να συνεχίσετε; "
 
 #: src/bz-installed-page.c:402 src/bz-window.c:1270 src/bz-window.c:1293
 msgid "Cancel"
-msgstr "Отмена"
+msgstr "Ακύρωση"
 
 #: src/bz-installed-tile.blp:61 src/bz-rich-app-tile.blp:137
 msgid "Stopped Receiving Updates"
-msgstr "Прекращено получение обновлений"
+msgstr "Δεν λαμβάνετε πλέον ενημερώσεις"
 
 #: src/bz-installed-tile.blp:75
 msgid "Support this application"
-msgstr "Поддержать это приложение"
+msgstr "Υποστηρίξτε αυτήν την εφαρμογή"
 
 #: src/bz-license-dialog.blp:160
 msgid "Get Involved"
-msgstr "Внести вклад"
+msgstr "Συμμετέχε"
 
 #: src/bz-license-dialog.c:107 src/bz-license-dialog.c:112
 msgid "Unknown License"
-msgstr "Неизвестная лицензия"
+msgstr "Άγνωστη άδεια χρήσης"
 
 #: src/bz-license-dialog.c:115
 msgid "Community Built"
-msgstr "Сделано сообществом"
+msgstr "Δημιουργήθηκε από την Κοινότητα"
 
 #: src/bz-license-dialog.c:148
 #, c-format
@@ -1410,10 +1421,10 @@ msgid ""
 "\n"
 "You can participate and help make it even better."
 msgstr ""
-"Это приложение открыто разрабатывается международным сообществом и "
-"выпускается под лицензией %s.\n"
+"Αυτή η εφαρμογή έχει αναπτυχθεί ανοιχτά από μια διεθνή κοινότητα και "
+"διατίθεται με άδεια χρήσης %s.\n"
 "\n"
-"Вы можете внести свой вклад и сделать это приложение ещё лучше."
+"Μπορείτε να συμμετάσχετε και να βοηθήσετε να γίνει ακόμα καλύτερη."
 
 #: src/bz-license-dialog.c:156
 msgid ""
@@ -1421,13 +1432,13 @@ msgid ""
 "\n"
 "You can participate and help make it even better."
 msgstr ""
-"Это приложение разрабатывается открыто международным сообществом.\n"
+"Αυτή η εφαρμογή έχει αναπτυχθεί ανοιχτά από μια διεθνή κοινότητα.\n"
 "\n"
-"Вы можете внести свой вклад и сделать это приложение ещё лучше."
+"Μπορείτε να συμμετάσχετε και να βοηθήσετε να γίνει ακόμα καλύτερη."
 
 #: src/bz-license-dialog.c:161
 msgid "The license of this app is not known"
-msgstr "Лицензия этого приложения неизвестна"
+msgstr "Η άδεια χρήσης αυτής της εφαρμογής δεν είναι γνωστή"
 
 #: src/bz-license-dialog.c:165
 msgid ""
@@ -1437,11 +1448,13 @@ msgid ""
 "\n"
 "You may or may not be able to contribute to this app."
 msgstr ""
-"Это приложение не разрабатывается открыто, поэтому только его разработчики "
-"знают как оно работает. Оно может быть небезопасным в некоторых местах, "
-"которые сложно опознать, и оно может измениться без предупреждения.\n"
+"Αυτή η εφαρμογή δεν έχει αναπτυχθεί ανοιχτά, επομένως μόνο οι "
+"προγραμματιστές της γνωρίζουν πώς λειτουργεί. Μπορεί να είναι ανασφαλής με "
+"τρόπους που είναι δύσκολο να εντοπιστούν και μπορεί να αλλάξει χωρίς "
+"εποπτεία.\n"
 "\n"
-"Вы можете не иметь возможности внести вклад в это приложение."
+"Μπορεί να έχετε ή να μην έχετε τη δυνατότητα να συνεισφέρετε σε αυτήν την "
+"εφαρμογή."
 
 #: src/bz-license-dialog.c:174
 #, c-format
@@ -1450,297 +1463,302 @@ msgid ""
 "\n"
 "You may or may not be able to contribute to this app."
 msgstr ""
-"Это приложение разрабатывается под специальной лицензией %s.\n"
+"Αυτή η εφαρμογή έχει αναπτυχθεί με την ειδική άδεια %s.\n"
 "\n"
-"Вы можете не иметь возможности внести вклад в это приложение."
+"Μπορεί να έχετε ή να μην έχετε τη δυνατότητα να συνεισφέρετε σε αυτήν την "
+"εφαρμογή."
 
 #: src/bz-preferences-dialog.blp:19
 msgid "Preferences"
-msgstr "Параметры"
+msgstr "Προτιμήσεις"
 
 #: src/bz-preferences-dialog.blp:23
 msgid "Content Filters"
-msgstr "Фильтры контента"
+msgstr "Φίλτρα περιεχομένου"
 
 #: src/bz-preferences-dialog.blp:26
 msgid "Free Software Only"
-msgstr "Только свободные приложения"
+msgstr "Μόνο ελεύθερο λογισμικό"
 
 #: src/bz-preferences-dialog.blp:27
 msgid "Hide proprietary applications when browsing and searching"
-msgstr "Скрыть проприетарные приложения при обзоре и поиске"
+msgstr "Απόκρυψη ιδιόκτητων εφαρμογών κατά την περιήγηση και την αναζήτηση"
 
 #: src/bz-preferences-dialog.blp:31
 msgid "Flathub Results Only"
-msgstr "Только результаты из Flathub"
+msgstr "Αποτελέσματα μόνο από το Flathub"
 
 #: src/bz-preferences-dialog.blp:32
 msgid ""
 "Limit search and browse results to applications only available on Flathub"
-msgstr "Ограничить обзор и результаты поиска только приложениями из Flathub"
+msgstr ""
+"Περιορίστε τα αποτελέσματα αναζήτησης και περιήγησης σε εφαρμογές που είναι "
+"διαθέσιμες μόνο στο Flathub"
 
 #: src/bz-preferences-dialog.blp:36
 msgid "Hide EOL Apps"
-msgstr "Скрыть неподдерживаемые приложения"
+msgstr "Απόκρυψη εφαρμογών EOL"
 
 #: src/bz-preferences-dialog.blp:37
 msgid "Hide apps which are no longer supported by their developers"
-msgstr "Скрыть приложения, которые больше не поддерживаются разработчиками"
+msgstr ""
+"Απόκρυψη εφαρμογών που δεν υποστηρίζονται πλέον από τους προγραμματιστές τους"
 
 #: src/bz-preferences-dialog.blp:42 src/bz-window.blp:313
 msgid "Search"
-msgstr "Поиск"
+msgstr "Αναζήτηση"
 
 #: src/bz-preferences-dialog.blp:45
 msgid "Delay Search Results"
-msgstr "Увеличить задержку результатов поиска"
+msgstr "Αναβολή αποτελεσμάτων αναζήτησης"
 
 #: src/bz-preferences-dialog.blp:46
 msgid "Improve results performance by debouncing search terms"
 msgstr ""
-"Улучшить производительность показа результатов благодаря увеличению задержки "
-"ввода запроса"
+"Βελτιώστε την απόδοση των αποτελεσμάτων με την απομάκρυνση των όρων "
+"αναζήτησης"
 
 #: src/bz-preferences-dialog.blp:51
 msgid "Progress Bar"
-msgstr "Полоса прогресса"
+msgstr "Μπάρα προόδου"
 
 #: src/bz-preferences-dialog.blp:52
 msgid "Choose a theme for the progress bar!"
-msgstr "Выберите тему для полосы прогресса!"
+msgstr "Επιλέξτε ένα θέμα για τη μπάρα προόδου!"
 
 #: src/bz-preferences-dialog.c:32
 msgid "Accent Color"
-msgstr "Цвет акцента"
+msgstr "Χρώμα έμφασης"
 
 #: src/bz-preferences-dialog.c:33
 msgid "Pride Colors"
-msgstr "Цвета гордости"
+msgstr "Χρώματα υπερηφάνειας"
 
 #: src/bz-preferences-dialog.c:34
 msgid "Lesbian Pride Colors"
-msgstr "Цвета гордости лесбиянок"
+msgstr "Χρώματα Υπερηφάνειας Λεσβιών"
 
 #: src/bz-preferences-dialog.c:35
 msgid "Transgender Pride Colors"
-msgstr "Цвета гордости трансгендеров"
+msgstr "Χρώματα Υπερηφάνειας Τρανς"
 
 #: src/bz-preferences-dialog.c:36
 msgid "Nonbinary Pride Colors"
-msgstr "Цвета гордости небинарных"
+msgstr "Χρώματα Υπερηφάνειας Nonbinary"
 
 #: src/bz-preferences-dialog.c:37
 msgid "Bisexual Pride Colors"
-msgstr "Цвета гордости бисексуалов"
+msgstr "Χρώματα Υπερηφάνειας Bisexual"
 
 #: src/bz-preferences-dialog.c:38
 msgid "Asexual Pride Colors"
-msgstr "Цвета гордости асексуалов"
+msgstr "Χρώματα Υπερηφάνειας Asexual"
 
 #: src/bz-preferences-dialog.c:39
 msgid "Pansexual Pride Colors"
-msgstr "Цвета гордости пансексуалов"
+msgstr "Χρώματα Υπερηφάνειας Pansexual"
 
 #: src/bz-preferences-dialog.c:40
 msgid "Aromantic Pride Colors"
-msgstr "Цвета гордости аромантиков"
+msgstr "Χρώματα Υπερηφάνειας Aromantic"
 
 #: src/bz-preferences-dialog.c:41
 msgid "Genderfluid Pride Colors"
-msgstr "Цвета гордости гендерфлюид"
+msgstr "Χρώματα Υπερηφάνειας Genderfluid"
 
 #: src/bz-preferences-dialog.c:42
 msgid "Polysexual Pride Colors"
-msgstr "Цвета гордости полисексуалов"
+msgstr "Χρώματα Υπερηφάνειας Polysexual"
 
 #: src/bz-preferences-dialog.c:43
 msgid "Omnisexual Pride Colors"
-msgstr "Цвета гордости омнисексуалов"
+msgstr "Χρώματα Υπερηφάνειας Omnisexual"
 
 #: src/bz-preferences-dialog.c:44
 msgid "Aroace Pride Colors"
-msgstr "Цвета гордости ароэйс"
+msgstr "Χρώματα Υπερηφάνειας Aroace"
 
 #: src/bz-preferences-dialog.c:45
 msgid "Agender Pride Colors"
-msgstr "Цвета гордости агендеров"
+msgstr "Χρώματα Υπερηφάνειας Agender"
 
 #: src/bz-preferences-dialog.c:46
 msgid "Genderqueer Pride Colors"
-msgstr "Цвета гордости гендерквиров"
+msgstr "Χρώματα Υπερηφάνειας Genderqueer"
 
 #: src/bz-preferences-dialog.c:47
 msgid "Intersex Pride Colors"
-msgstr "Цвета гордости интерсекс"
+msgstr "Χρώματα Υπερηφάνειας Intersex"
 
 #: src/bz-preferences-dialog.c:48
 msgid "Demigender Pride Colors"
-msgstr "Цвета гордости демигендеров"
+msgstr "Χρώματα Υπερηφάνειας Demigender"
 
 #: src/bz-preferences-dialog.c:49
 msgid "Biromantic Pride Colors"
-msgstr "Цвета гордости биромантиков"
+msgstr "Χρώματα Υπερηφάνειας Biromantic"
 
 #: src/bz-releases-dialog.blp:5 src/bz-releases-list.blp:26
 msgid "Version History"
-msgstr "История версий"
+msgstr "Ιστορικό εκδόσεων"
 
 #: src/bz-releases-list.c:128
 #, c-format
 msgid "Version %s"
-msgstr "Версия %s"
+msgstr "Έκδοση %s"
 
 #: src/bz-releases-list.c:153
 msgid "No details for this release"
-msgstr "Нет подробностей"
+msgstr "Δεν υπάρχουν λεπτομέρειες για αυτήν την έκδοση"
 
 #: src/bz-rich-app-tile.blp:154
 msgid "Get"
-msgstr "Скачать"
+msgstr "Λήψη"
 
 #: src/bz-screenshot-page.blp:5
 msgid "Screenshots"
-msgstr "Скриншоты"
+msgstr "Στιγμιότυπα οθόνης"
 
 #: src/bz-screenshot-page.blp:61
 msgid "Previous Screenshot"
-msgstr "Предыдущий скриншот"
+msgstr "Προηγούμενο στιγμιότυπο οθόνης"
 
 #: src/bz-screenshot-page.blp:71
 msgid "Next Screenshot"
-msgstr "Следующий скриншот"
+msgstr "Επόμενο στιγμιότυπο οθόνης"
 
 #: src/bz-screenshot-page.blp:87
 msgid "Copy Image"
-msgstr "Скопировать изображение"
+msgstr "Αντιγραφή εικόνας"
 
 #: src/bz-screenshot-page.blp:147
 msgid "Reset View"
-msgstr "Возобновить вид"
+msgstr "Επαναφορά προβολής"
 
 #: src/bz-screenshot-page.blp:158
 msgid "Zoom Out"
-msgstr "Отдалить"
+msgstr "Σμίκρυνση"
 
 #: src/bz-screenshot-page.blp:168
 msgid "Zoom In"
-msgstr "Приблизить"
+msgstr "Μεγέθυνση"
 
 #: src/bz-screenshots-carousel.blp:6
 msgid "Screenshots Carousel"
-msgstr "Карусель скриншотов"
+msgstr "Καρουζέλ Στιγμιότυπων Οθόνης"
 
 #: src/bz-screenshots-carousel.blp:104
 msgid "Open Screenshot Viewer"
-msgstr "Открыть просмотрщик скриншотов"
+msgstr "Άνοιγμα προγράμματος προβολής στιγμιότυπων οθόνης"
 
 #: src/bz-search-widget.blp:106
 msgid "Search Apps, Games, Software"
-msgstr "Поиск приложений, игр, ПО"
+msgstr "Αναζήτηση εφαρμογών, παιχνιδιών, λογισμικού"
 
 #: src/bz-search-widget.blp:150
 msgid "Categories Unavailable"
-msgstr "Категории недоступны"
+msgstr "Κατηγορίες Μη διαθέσιμες"
 
 #: src/bz-search-widget.blp:151
 msgid "Search for apps using the search bar above."
-msgstr "Попробуйте поискать приложения используя поле ввода запроса выше."
+msgstr "Αναζητήστε εφαρμογές χρησιμοποιώντας τη γραμμή αναζήτησης παραπάνω."
 
 #: src/bz-search-widget.blp:235
 msgid "No Applications Found"
-msgstr "Приложение не найдено"
+msgstr "Δεν βρέθηκαν εφαρμογές"
 
 #: src/bz-search-widget.c:241
 #, c-format
 msgid "No results found for \"%s\" in Flathub"
-msgstr "Нет результатов по запросу \"%s\" в Flathub"
+msgstr "Δεν βρέθηκαν αποτελέσματα για το \"%s\" στο Flathub"
 
 #: src/bz-share-list.c:64
 msgid "Copied!"
-msgstr "Скопировано!"
+msgstr "Αντιγράφηκε!"
 
 #: src/bz-share-list.c:116
 msgid "Copy Link"
-msgstr "Скопировать ссылку"
+msgstr "Αντιγραφή συνδέσμου"
 
 #: src/bz-share-list.c:127
 msgid "Open Link"
-msgstr "Открыть ссылку"
+msgstr "Άνοιγμα συνδέσμου"
 
 #: src/bz-stats-dialog.blp:28
 msgid "Timeline"
-msgstr "Временная шкала"
+msgstr "Χρονοδιάγραμμα"
 
 #: src/bz-stats-dialog.blp:46
 msgid "Installs:"
-msgstr "Установок:"
+msgstr "Εγκαταστάσεις:"
 
 #: src/bz-stats-dialog.blp:55
 msgid "World"
-msgstr "Карта мира"
+msgstr "Κόσμος"
 
 #: src/bz-tag-list.c:96
 msgid "No Results Found"
-msgstr "Нет результатов"
+msgstr "Δεν βρέθηκαν αποτελέσματα"
 
 #: src/bz-tag-list.c:108
 #, c-format
 msgid "Apps Tagged \"%s\""
-msgstr "Приложения с меткой \"%s\""
+msgstr "Εφαρμογές με ετικέτα \"%s\""
 
 #: src/bz-tag-list.c:109
 #, c-format
 msgid "%d Applications"
-msgstr "%d приложений"
+msgstr "%d Εφαρμογές"
 
 #: src/bz-tag-list.c:124
 msgid "Search failed"
-msgstr "Ошибка поиска"
+msgstr "Η αναζήτηση απέτυχε"
 
 #: src/bz-transaction-manager.c:1135
 #, c-format
 msgid "Finished in %.02f seconds"
-msgstr "Закончено за %.02f секунд"
+msgstr "Ολοκληρώθηκε σε %.02f δευτερόλεπτα"
 
 #: src/bz-transaction-view.blp:95
 msgid "App Add-on"
-msgstr "Дополнение приложения"
+msgstr "Πρόσθετο εφαρμογής"
 
 #: src/bz-transaction-view.blp:120
 msgid "Runtime"
-msgstr "Среда выполнения"
+msgstr "Περιβάλλον εκτέλεσης"
 
 #: src/bz-transaction-view.blp:146 src/bz-transaction-view.blp:172
 msgid "Install Size"
-msgstr "Размер установки"
+msgstr "Μέγεθος εγκατάστασης"
 
 #: src/bz-transaction-view.blp:200
 msgid "Update"
-msgstr "Обновить"
+msgstr "Ενημέρωση"
 
 #: src/bz-transaction-view.c:139
 #, c-format
 msgid "Transferred %s so far"
-msgstr "Всего было загружено %s"
+msgstr "Μεταφέρθηκαν %s μέχρι τώρα"
 
 #: src/bz-transaction.c:336
 msgid "Pending"
-msgstr "В ожидании"
+msgstr "Σε εκκρεμότητα"
 
 #: src/bz-update-dialog.blp:7
 msgid "Install Now"
-msgstr "Установить сейчас"
+msgstr "Εγκατάσταση τώρα"
 
 #: src/bz-update-dialog.blp:10
 msgid "Updates Are Available"
-msgstr "Доступны обновления"
+msgstr "Διατίθενται ενημερώσεις"
 
 #: src/bz-update-dialog.blp:11
 msgid ""
 "The following applications are eligible for updates. Would you like to "
 "install them?"
 msgstr ""
-"Перечисленные приложения могут быть обновлены. Вы хотите установить их?"
+"Οι ακόλουθες εφαρμογές είναι επιλέξιμες για ενημερώσεις. Θέλετε να τις "
+"εγκαταστήσετε;"
 
 #: src/bz-update-dialog.c:134
 #, c-format
@@ -1748,70 +1766,70 @@ msgid ""
 "%d runtimes and/or addons are eligible for updates. Would you like to "
 "install them?"
 msgstr ""
-"%d сред выполнения и/или дополнений могут быть обновлены. Вы хотите "
-"установить их?"
+"%d περιβάλλοντα εκτέλεσης και/ή πρόσθετα είναι επιλέξιμα για ενημερώσεις. "
+"Θέλετε να τα εγκαταστήσετε;"
 
 #: src/bz-update-dialog.c:142
 #, c-format
 msgid "Additionally, %d runtimes and/or addons will be updated."
-msgstr "Дополнительно, %d сред выполнения и/или расширений будут обновлены."
+msgstr "Επιπλέον, θα ενημερωθούν %d περιβάλλοντα εκτέλεσης και/ή πρόσθετα."
 
 #: src/bz-user-data-page.blp:5
 msgid "Manage Leftover User Data"
-msgstr "Управление оставшимися пользовательскими данными"
+msgstr "Διαχείριση υπολειπόμενων δεδομένων χρήστη"
 
 #: src/bz-user-data-page.blp:41
 msgid "Loading"
-msgstr "Загрузка"
+msgstr "Φόρτωση"
 
 #: src/bz-user-data-page.blp:55
 msgid "No User Data found"
-msgstr "Пользовательские данные не найдены"
+msgstr "Δεν βρέθηκαν δεδομένα χρήστη"
 
 #: src/bz-user-data-page.blp:60
 msgid "User Data"
-msgstr "Пользовательские данные"
+msgstr "Δεδομένα χρήστη"
 
 #: src/bz-user-data-tile.c:144
 #, c-format
 msgid "Removed User Data for %s"
-msgstr "Удалены пользовательские данные к %s"
+msgstr "Διαγράφηκαν τα δεδομένα χρήστη για %s"
 
 #: src/bz-user-data-tile.blp:74
 msgid "Remove User Data"
-msgstr "Удалить пользовательские данные"
+msgstr "Κατάργηση δεδομένων χρήστη"
 
 #: src/bz-window.blp:66
 msgid "Inspect UI Entry"
-msgstr "Исследовать элемент интерфейса"
+msgstr "Επιθεώρηση εισόδου UI"
 
 #: src/bz-window.blp:73
 msgid "All Debug Actions"
-msgstr "Все действия отладки"
+msgstr "Όλες οι ενέργειες εντοπισμού σφαλμάτων"
 
 #: src/bz-window.blp:107
 msgid "Tasks"
-msgstr "Задачи"
+msgstr "Εργασίες"
 
 #: src/bz-window.blp:163
 msgid "Stop Active Tasks"
-msgstr "Остановить активные задачи"
+msgstr "Διακοπή ενεργών εργασιών"
 
 #: src/bz-window.blp:171
 msgid "Clear History"
-msgstr "Очистить историю"
+msgstr "Εκκαθάριση ιστορικού"
 
 #: src/bz-window.blp:187
 msgid "No Tasks Yet"
-msgstr "Нет задач"
+msgstr "Δεν υπάρχουν ακόμη εργασίες"
 
 #: src/bz-window.blp:258
 msgid "Refreshing Store Content"
-msgstr "Обновление контента магазина"
+msgstr "Ανανέωση περιεχομένου καταστήματος"
 
 #: src/bz-window.blp:273
 msgid "Curated"
-msgstr "Курируемое"
+msgstr "Επιμελημένο"
 
 #: src/bz-window.blp:286
 msgid "Flathub"
@@ -1820,46 +1838,46 @@ msgstr "Flathub"
 #: src/bz-window.blp:450
 msgid "Network connection is metered — automatic store data sync is paused"
 msgstr ""
-"Сетевое соединение ограничено — автоматическая синхронизация данных магазина "
-"приостановлена"
+"Η σύνδεση δικτύου μετράται — η αυτόματη συγχρονισμός δεδομένων του "
+"καταστήματος έχει παυθεί"
 
 #: src/bz-window.blp:451 src/bz-window.blp:460
 msgid "Sync Manually"
-msgstr "Синхронизировать вручную"
+msgstr "Χειροκίνητος συγχρονισμός"
 
 #: src/bz-window.blp:459
 msgid ""
 "You have a network connection but are viewing a cached version of Flathub"
 msgstr ""
-"Вы имеете сетевое подключение, но просматриваете кэшируемую версию Flathub"
+"Έχετε σύνδεση στο δίκτυο, αλλά βλέπετε μια προσωρινά αποθηκευμένη έκδοση του "
+"Flathub"
 
 #: src/bz-window.blp:534
 msgid "_Login with Flathub"
-msgstr "_Войти в Flathub"
+msgstr "_Σύνδεση με το Flathub"
 
 #: src/bz-window.blp:540
 msgid "_Manage Leftover User Data"
-msgstr "_Управлять оставшимися данными"
+msgstr "_Διαχείριση υπολειπόμενων δεδομένων χρήστη"
 
 #: src/bz-window.blp:545
 msgid "_Synchronize Remotes"
-msgstr "С_инхронизировать репозитории"
+msgstr "_Συγχρονισμός απομακρυσμένου διακομιστής"
 
 #: src/bz-window.blp:571
 msgid "Open Bazaar Inspector"
-msgstr "Открыть Bazaar Инспектор"
+msgstr "Άνοιγμα Επιθεωρητή Bazaar"
 
 #: src/bz-window.blp:580
 msgid "Log Out"
-msgstr "Выйти"
+msgstr "Αποσύνδεση"
 
 #: src/bz-window.c:475
 #, c-format
 msgid "%d Update Available"
 msgid_plural "%d Updates Available"
-msgstr[0] "Доступно %d обновление"
-msgstr[1] "Доступно %d обновления"
-msgstr[2] "Доступно %d обновлений"
+msgstr[0] "%d Διαθέσιμη ενημέρωση"
+msgstr[1] "%d Διαθέσιμες ενημερώσεις"
 
 #: src/bz-window.c:973
 msgid ""
@@ -1870,214 +1888,92 @@ msgid ""
 "\n"
 "on the command line."
 msgstr ""
-"Возможность просмотра и установки локального пакета .flatpak появится совсем "
-"скоро! Тем временем, попробуйте выполнить\n"
+"Η δυνατότητα ελέγχου και εγκατάστασης τοπικών αρχείων πακέτων .flatpak θα "
+"είναι διαθέσιμη σύντομα! Εν τω μεταξύ, δοκιμάστε να εκτελέσετε την εντολή\n"
 "\n"
 "flatpak install --bundle your-bundle.flatpak\n"
 "\n"
-"в командной строке."
+"στη γραμμή εντολών."
 
 #: src/bz-window.c:1100
 msgid "Can't do that right now!"
-msgstr "Нельзя сделать это прямо сейчас!"
+msgstr "Δεν μπορεί να γίνει αυτή τη στιγμή!"
 
 #: src/bz-window.c:1231
 msgid "Keep Data"
-msgstr "Оставить данные"
+msgstr "Διατήρηση δεδομένων"
 
 #: src/bz-window.c:1232
 msgid "Allow restoring settings and content"
-msgstr "Возможно восстановление настроек и контента"
+msgstr "Επιτρέψτε την επαναφορά ρυθμίσεων και περιεχομένου"
 
 #: src/bz-window.c:1241
 msgid "Permanently remove app data to save space"
-msgstr "Навсегда удалить данные приложения для сохранения места"
+msgstr "Διαγράψτε μόνιμα τα δεδομένα των εφαρμογών για να εξοικονομήσετε χώρο"
 
 #: src/bz-window.c:1264
 #, c-format
 msgid "Install %s?"
-msgstr "Установить %s?"
+msgstr "Εγκατάσταση %s?"
 
 #: src/bz-window.c:1267
 msgid "May install additional shared components"
-msgstr "Может установить дополнительные общие компоненты"
+msgstr "Μπορεί να εγκαταστήσει επιπλέον κοινόχρηστα στοιχεία"
 
 #: src/bz-window.c:1286
 #, c-format
 msgid "Remove %s?"
-msgstr "Удалить %s?"
+msgstr "Αφαίρεση %s?"
 
 #: src/bz-window.c:1290
 #, c-format
 msgid "It will not be possible to use %s after it is uninstalled."
-msgstr "Станет невозможным использовать %s после его удаления."
+msgstr "Δεν θα είναι δυνατή η χρήση του %s μετά την απεγκατάστασή του."
 
 #: src/bz-window.c:1353
 msgid "Resume Current Tasks"
-msgstr "Продолжить текущие задачи"
+msgstr "Συνέχιση τρεχουσών εργασιών"
 
 #: src/bz-window.c:1359
 msgid "Pause Current Tasks"
-msgstr "Приостановить текущие задачи"
+msgstr "Παύση τρέχουσων εργασιών"
 
 #: src/bz-world-map.c:572
 #, c-format
 msgid "%s: %'u downloads"
-msgstr "%s: %'u загрузок"
+msgstr "%s: %'u λήψεις"
 
 #: src/gtk/shortcuts-dialog.blp:6
 msgctxt "shortcut window"
 msgid "General"
-msgstr "Общее"
+msgstr "Γενικά"
 
 #: src/gtk/shortcuts-dialog.blp:9
 msgctxt "shortcut window"
 msgid "Open Search Dialog"
-msgstr "Открыть диалог поиска"
+msgstr "Άνοιγμα Διαλόγου Αναζήτησης"
 
 #: src/gtk/shortcuts-dialog.blp:14
 msgctxt "shortcut window"
 msgid "Open Preferences"
-msgstr "Открыть параметры"
+msgstr "Άνοιγμα Προτιμήσεων"
 
 #: src/gtk/shortcuts-dialog.blp:19
 msgctxt "shortcut window"
 msgid "Refresh"
-msgstr "Обновить"
+msgstr "Ανανέωση"
 
 #: src/gtk/shortcuts-dialog.blp:24
 msgctxt "shortcut window"
 msgid "Toggle Transaction Manager"
-msgstr "Переключить боковую панель транзакций"
+msgstr "Εναλλαγή Διαχειριστή Συναλλαγών"
 
 #: src/gtk/shortcuts-dialog.blp:29
 msgctxt "shortcut window"
 msgid "Show Shortcuts"
-msgstr "Открыть сочетания клавиш"
+msgstr "Εμφάνιση συντομεύσεων"
 
 #: src/gtk/shortcuts-dialog.blp:34
 msgctxt "shortcut window"
 msgid "Quit"
-msgstr "Закрыть"
-
-#~ msgid "Show Git Forge Star Counts"
-#~ msgstr "Показать количество звёзд на странице репозитория"
-
-#~ msgid ""
-#~ "Whether to attempt to detect and show \"star counts\" for projects in the "
-#~ "full view"
-#~ msgstr ""
-#~ "Пытаться ли получить количество звёзд на странице репозитория проектов в "
-#~ "экране обзора приложения"
-
-#~ msgid "Repository Star Count"
-#~ msgstr "Количество звёзд репозитория"
-
-#~ msgid "Application Details"
-#~ msgstr "Информация приложения"
-
-#~ msgid "Display Star Count"
-#~ msgstr "Показать количество звёзд"
-
-#~ msgid "Show the star count of an application's source code repository"
-#~ msgstr "Показать количество звёзд в репозитории приложения"
-
-#~ msgid ""
-#~ "Bazaar can fetch and display the star count from an application's source "
-#~ "code repository on a remote Git forge. \n"
-#~ " For projects on GitHub, rate limits may cause them not to appear."
-#~ msgstr ""
-#~ "Bazaar может получить и отобразить количество звёзд из репозитория "
-#~ "приложения на удалённом Git-сервере. \n"
-#~ " Для проектов на GitHub временные ограничения в получении запроса могут "
-#~ "противостоять их отображению."
-
-#~ msgid "Delete local data as well"
-#~ msgstr "Также удалить локальные данные"
-
-#~ msgid "Sync"
-#~ msgstr "Синхронизировать"
-
-#~ msgid "We ♥ Games"
-#~ msgstr "Мы ♥ Игры"
-
-#, c-format
-#~ msgid "%.2fM"
-#~ msgstr "%.2fM"
-
-#, c-format
-#~ msgid "%.2fK"
-#~ msgstr "%.2fK"
-
-#~ msgid "Mobile Apps"
-#~ msgstr "Мобильные приложения"
-
-#~ msgid "Hide proprietary software when searching"
-#~ msgstr "Скрыть проприетарные приложения в поиске"
-
-#~ msgid "Filter search results to only show applications available on Flathub"
-#~ msgstr "Фильтровать приложения из Flathub в результатах поиска "
-
-#~ msgid "Constructing Flatpak instance..."
-#~ msgstr "Настраивается обращение к Flatpak..."
-
-#~ msgid "Reusing last Flatpak instance..."
-#~ msgstr "Используем ранее настроенное обращение к Flatpak..."
-
-#~ msgid "Flathub is not registered on this system"
-#~ msgstr "Flathub не зарегистрирован в данной системе"
-
-#~ msgid ""
-#~ "Would you like to add Flathub as a remote? If you decline, the Flathub "
-#~ "page will not be available. You can change this later."
-#~ msgstr ""
-#~ "Вы хотите добавить Flathub как сторонний репозиторий? Если вы откажитесь, "
-#~ "страница Flathub не будет доступна. Вы можете изменить это позже."
-
-#~ msgid "Add Flathub"
-#~ msgstr "Добавить Flathub"
-
-#~ msgid "Identifying installed entries..."
-#~ msgstr "Определение установленных приложений..."
-
-#, c-format
-#~ msgid "%'d of %'d"
-#~ msgstr "%'d из %'d"
-
-#, c-format
-#~ msgid "Waiting for background indexing tasks to catch up..."
-#~ msgstr "Ожидание завершения фоновых задач индексирования..."
-
-#, c-format
-#~ msgid "Completed initialization in %0.2f seconds"
-#~ msgstr "Инициализация завершена за %0.2f секунд"
-
-#~ msgid "Verified by the original developers"
-#~ msgstr "Верифицировано подлинными разработчиками"
-
-#~ msgid "End of Life Apps"
-#~ msgstr "Неподдерживаемые приложения"
-
-#~ msgid "Searching for Blender"
-#~ msgstr "Поиск Blender"
-
-#, c-format
-#~ msgid ""
-#~ "Beginning remote entry retrieval while referencing %d blocklist(s)..."
-#~ msgstr ""
-#~ "Получение элементов из репозиториев при обращении к %d чёрным спискам..."
-
-#~ msgid "More actions"
-#~ msgstr "Больше опций"
-
-#~ msgid "Run this application"
-#~ msgstr "Запустить это приложение"
-
-#~ msgid "Run"
-#~ msgstr "Запустить"
-
-#~ msgid "View Store Page"
-#~ msgstr "Открыть страницу магазина"
-
-#~ msgid "Settings & user data will be kept"
-#~ msgstr "Настройки и пользовательские данные будут сохранены"
+msgstr "Έξοδος"
