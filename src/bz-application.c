@@ -37,6 +37,7 @@
 #include "bz-entry-group.h"
 #include "bz-env.h"
 #include "bz-error.h"
+#include "bz-favorites-page.h"
 #include "bz-flathub-state.h"
 #include "bz-flatpak-entry.h"
 #include "bz-flatpak-instance.h"
@@ -750,6 +751,26 @@ bz_application_flathub_logout_action (GSimpleAction *action,
 }
 
 static void
+bz_application_flathub_favorites_action (GSimpleAction *action,
+                                         GVariant      *parameter,
+                                         gpointer       user_data)
+{
+  BzApplication     *self          = user_data;
+  GtkWindow         *window        = NULL;
+  AdwNavigationPage *favorites_page = NULL;
+
+  g_assert (BZ_IS_APPLICATION (self));
+
+  window = gtk_application_get_active_window (GTK_APPLICATION (self));
+  if (window == NULL)
+    window = new_window (self);
+
+  favorites_page = ADW_NAVIGATION_PAGE (bz_favorites_page_new (self->state));
+
+  bz_window_push_page (BZ_WINDOW (window), favorites_page);
+}
+
+static void
 bz_application_quit_action (GSimpleAction *action,
                             GVariant      *parameter,
                             gpointer       user_data)
@@ -764,6 +785,7 @@ bz_application_quit_action (GSimpleAction *action,
 static const GActionEntry app_actions[] = {
   {       "flathub-login",       bz_application_flathub_login_action, NULL },
   {      "flathub-logout",      bz_application_flathub_logout_action, NULL },
+  {   "flathub-favorites",   bz_application_flathub_favorites_action, NULL },
   {                "quit",                bz_application_quit_action, NULL },
   {         "preferences",         bz_application_preferences_action, NULL },
   {               "about",               bz_application_about_action, NULL },

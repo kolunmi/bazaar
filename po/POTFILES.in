@@ -29,11 +29,16 @@ src/bz-download-worker.c
 src/bz-dynamic-list-view.c
 src/bz-entry-cache-manager.c
 src/bz-entry-group.c
+src/bz-entry-group-util.c
 src/bz-entry-inspector.blp
 src/bz-entry-inspector.c
 src/bz-entry.c
 src/bz-env.c
 src/bz-error.c
+src/bz-favorites-tile.c
+src/bz-favorites-tile.blp
+src/bz-favorites-page.c
+src/bz-favorites-page.blp
 src/bz-featured-carousel.blp
 src/bz-featured-tile.blp
 src/bz-flathub-category-section.c

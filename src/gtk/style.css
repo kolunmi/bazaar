@@ -732,11 +732,21 @@ window.narrow .category-tile {
 .installed-list-view > * {
     padding: 0;
     transition: background-color 200ms;
+    	min-height: 0;
     margin: 5px 4.5px;
 }
 
 .narrow .installed-list-view > * {
     margin: 4px 4.5px;
+}
+
+.no-vertical-margin > row.hidden {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.no-vertical-margin > row:not(.hidden) {
+  margin-bottom: 6px;
 }
 
 .user-data-list-view > * {
