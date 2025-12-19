@@ -176,6 +176,15 @@ get_install_remove_icon (gpointer object,
     return g_strdup ("document-save-symbolic");
 }
 
+static gboolean
+switch_bool (gpointer  object,
+             gboolean  condition,
+             gboolean  true_value,
+             gboolean  false_value)
+{
+  return condition ? true_value : false_value;
+}
+
 static void
 bz_favorites_tile_class_init (BzFavoritesTileClass *klass)
 {
@@ -210,6 +219,7 @@ bz_favorites_tile_class_init (BzFavoritesTileClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
+  gtk_widget_class_bind_template_callback (widget_class, switch_bool);
   gtk_widget_class_bind_template_callback (widget_class, get_install_remove_tooltip);
   gtk_widget_class_bind_template_callback (widget_class, get_install_remove_icon);
   gtk_widget_class_bind_template_callback (widget_class, install_remove_cb);

@@ -94,6 +94,11 @@ template $BzFavoritesTile: $BzListTile {
         valign: center;
         has-tooltip: true;
         tooltip-text: bind $get_install_remove_tooltip(template.group as <$BzEntryGroup>.removable) as <string>;
+        sensitive: bind $switch_bool(
+                          template.group as <$BzEntryGroup>.removable,
+                          $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>,
+                          $invert_boolean($is_zero(template.group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>,
+                        ) as <bool>;
         icon-name: bind $get_install_remove_icon(template.group as <$BzEntryGroup>.removable) as <string>;
         clicked => $install_remove_cb() swapped;
       }
