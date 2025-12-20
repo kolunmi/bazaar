@@ -23,6 +23,7 @@
 #define CATEGORY_FETCH_SIZE          96
 #define QUALITY_MODERATION_PAGE_SIZE 300
 #define KEYWORD_SEARCH_PAGE_SIZE     48
+#define ADWAITA_URL                  "https://arewelibadwaitayet.com"
 
 #include <json-glib/json-glib.h>
 #include <libdex.h>
@@ -733,11 +734,12 @@ initialize_fiber (GWeakRef *wr)
     }
   else
     {
-      adwaita_f = bz_https_query_json ("https://arewelibadwaitayet.com/api/apps");
+      adwaita_f = bz_https_query_json (ADWAITA_URL "/api/apps");
       if (!dex_await (dex_ref (adwaita_f), &local_error))
         {
           g_warning ("Failed to complete request to arewelibadwaitayet: %s", local_error->message);
-          return dex_future_new_for_error (g_steal_pointer (&local_error));
+          g_clear_error (&local_error);
+          adwaita_f = NULL;
         }
     }
 
@@ -851,7 +853,7 @@ initialize_fiber (GWeakRef *wr)
 
   if (is_kde)
     add_category (self, "kde", GET_BOXED (toolkit_f), quality_set, FALSE, QUALITY_MODE_RANDOM, FALSE);
-  else
+  else if (adwaita_f != NULL)
     add_category (self, "adwaita", GET_BOXED (adwaita_f), quality_set, TRUE, QUALITY_MODE_RANDOM, FALSE);
 
   return dex_future_new_true ();
