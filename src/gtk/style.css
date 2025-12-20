@@ -118,6 +118,12 @@
     --accent-color: @accent_color;
 }
 
+.favorite * {
+    --accent-fg-color: @accent_fg_color;
+    --accent-bg-color:  @accent_bg_color;
+    --accent-color: @accent_color;
+}
+
 .green {
     --accent-fg-color : #8ff0a4;
     --accent-bg-color : alpha(#2ec27e, 0.25);

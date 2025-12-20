@@ -1,0 +1,48 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzFavoriteButton: Button {
+  styles [
+    "small-pill",
+    "suggested-action",
+    "favorite",
+  ]
+  margin-top: 8;
+  valign: start;
+  halign: start;
+  has-tooltip: true;
+  tooltip-text: _("Favorite Count");
+  visible: bind template.entry as <$BzEntry>.is-flathub;
+  clicked => $button_clicked_cb() swapped;
+
+  child: Stack stack {
+    transition-type: crossfade;
+
+    StackPage {
+      name: "content";
+      child: Box box {
+        Image icon {
+          icon-name: "bookmark-outline-symbolic";
+        }
+
+        Revealer count_revealer {
+          reveal-child: bind $is_positive(template.entry as <$BzEntry>.favorites-count) as <bool>;
+          transition-type: slide_left;
+
+          child: Label count_label {
+            margin-start: 4;
+            label: bind $format_favorites_count(template.entry as <$BzEntry>.favorites-count) as <string>;
+          };
+        }
+      };
+    }
+
+    StackPage {
+      name: "spinner";
+      child: Adw.Spinner {
+        halign: center;
+        width-request: 16;
+      };
+    }
+  };
+}
