@@ -11,15 +11,15 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-10-30 01:38+0100\n"
-"PO-Revision-Date: 2025-10-30 12:15+0100\n"
-"Last-Translator: robotta <>\n"
+"PO-Revision-Date: 2025-12-20 17:57+0100\n"
+"Last-Translator: Zeglius <33781398+Zeglius@users.noreply.github.com>\n"
 "Language-Team: Spanish\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Gtranslator 49.0\n"
+"X-Generator: Poedit 3.8\n"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:2
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:5
@@ -112,7 +112,7 @@ msgid ""
 msgstr ""
 "Enfatiza el apoyar a los desarrolladores que hacen que Linux en el "
 "escritorio sea posible. Bazaar contiene una lista de aplicaciones "
-"\"Elegidas\" que puede ser configurada por distribuidores para ofrecer una "
+"\"destacadas\" que puede ser configurada por distribuidores para ofrecer una "
 "experiencia más centrada a sus usuarios."
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29 src/bz-application.c:505
@@ -391,16 +391,16 @@ msgstr "Vacío"
 
 #: src/bz-browse-widget.blp:15
 msgid "No Curated Applications"
-msgstr "Aplicaciones no seleccionadas "
+msgstr "Aplicaciones no destacadas"
 
 #: src/bz-browse-widget.blp:16
 msgid ""
 "Bazaar was not provided a curated content configuration. Contact your "
 "operating system's support channels for assistance."
 msgstr ""
-"Bazaar no ha recibido una configuración dedicada para contenido "
-"seleccionado. Contacta con los canales de soporte de tu sistema operativo "
-"para soliticar asistencia."
+"Bazaar no ha recibido una configuración dedicada para contenido destacado. "
+"Contacta con los canales de soporte de tu sistema operativo para soliticar "
+"asistencia."
 
 #: src/bz-browse-widget.blp:22 src/bz-flathub-page.blp:26
 msgid "Browser"
@@ -1193,11 +1193,11 @@ msgstr "Ir atrás"
 
 #: src/bz-window.blp:381
 msgid "View curated applications"
-msgstr "Ver las aplicaciones seleccionadas"
+msgstr "Ver las aplicaciones destacadas"
 
 #: src/bz-window.blp:385
 msgid "Curated"
-msgstr "Seleccionado"
+msgstr "Destacado"
 
 #: src/bz-window.blp:389
 msgid "View the latest on Flathub"
