@@ -35,6 +35,8 @@ src/bz-entry-inspector.c
 src/bz-entry.c
 src/bz-env.c
 src/bz-error.c
+src/bz-favorite-button.c
+src/bz-favorite-button.blp
 src/bz-favorites-tile.c
 src/bz-favorites-tile.blp
 src/bz-favorites-page.c
