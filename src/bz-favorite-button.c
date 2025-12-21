@@ -370,17 +370,13 @@ toggle_favorite_fiber (BzFavoriteButton *button)
     request = g_strdup_printf ("/favorites/%s/add", app_id);
 
   if (button->is_favorited)
-    {
-      dex_await (
-          bz_query_flathub_v2_json_authenticated_delete (request, token),
-          &local_error);
-    }
+    dex_await (
+        bz_query_flathub_v2_json_authenticated_delete (request, token),
+        &local_error);
   else
-    {
-      dex_await (
-          bz_query_flathub_v2_json_authenticated_post (request, token),
-          &local_error);
-    }
+    dex_await (
+        bz_query_flathub_v2_json_authenticated_post (request, token),
+        &local_error);
 
   if (local_error != NULL)
     {
