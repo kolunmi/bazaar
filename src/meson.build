@@ -1,13 +1,8 @@
 math = cc.find_library('m', required: false)
 
-
-libdex_opts = [
-  'introspection=disabled',
-]
-
 gtk_dep              = dependency('gtk4')
 libadwaita_dep       = dependency('libadwaita-1', version: '>= 1.8')
-libdex_dep           = dependency('libdex-1', version: '>= 1.0.0', default_options: libdex_opts)
+libdex_dep           = dependency('libdex-1', version: '>= 1.0.0')
 flatpak_dep          = dependency('flatpak', version: '>= 1.9')
 appstream_dep        = dependency('appstream', version: '>= 1.0')
 xmlb_dep             = dependency('xmlb', version: '>= 0.3.4')
@@ -17,6 +12,8 @@ json_glib_dep        = dependency('json-glib-1.0', version: '>= 1.10.0')
 glycin_dep           = dependency('glycin-2', version: '>= 2.0')
 glycin_gtk4_dep      = dependency('glycin-gtk4-2', version: '>= 2.0')
 md4c_dep             = dependency('md4c', version: '>= 0.5.1')
+webkit_dep           = dependency('webkitgtk-6.0', version: '>= 2.50.2')
+libsecret_dep        = dependency('libsecret-1', version: '>= 0.20')
 
 
 dl_worker_sources = [
@@ -51,7 +48,7 @@ gdbus_src = gnome.gdbus_codegen(
   namespace : 'Bz',
 )
 
-bz_sources = [
+bz_sources = files(
   'bz-addons-dialog.c',
   'bz-age-rating-dialog.c',
   'bz-app-size-dialog.c',
@@ -61,6 +58,7 @@ bz_sources = [
   'bz-apps-page.c',
   'bz-appstream-description-render.c',
   'bz-async-texture.c',
+  'bz-auth-state.c',
   'bz-backend.c',
   'bz-category-tile.c',
   'bz-comet-overlay.c',
@@ -70,17 +68,20 @@ bz_sources = [
   'bz-curated-view.c',
   'bz-data-graph.c',
   'bz-decorated-screenshot.c',
-  'bz-detailed-app-tile.c',
   'bz-developer-badge.c',
   'bz-download-worker.c',
   'bz-dynamic-list-view.c',
   'bz-entry-cache-manager.c',
   'bz-entry-group.c',
+  'bz-entry-group-util.c',
   'bz-entry-inspector.c',
   'bz-entry.c',
   'bz-env.c',
   'bz-error.c',
   'bz-fading-clamp.c',
+  'bz-favorite-button.c',
+  'bz-favorites-page.c',
+  'bz-favorites-tile.c',
   'bz-featured-carousel.c',
   'bz-featured-tile.c',
   'bz-flathub-category-section.c',
@@ -104,6 +105,7 @@ bz_sources = [
   'bz-lazy-async-texture-model.c',
   'bz-license-dialog.c',
   'bz-list-tile.c',
+  'bz-login-page.c',
   'bz-markdown-render.c',
   'bz-newline-parser.c',
   'bz-parser.c',
@@ -131,13 +133,16 @@ bz_sources = [
   'bz-transaction-view.c',
   'bz-transaction.c',
   'bz-update-dialog.c',
+  'bz-user-data-page.c',
+  'bz-user-data-tile.c',
   'bz-window.c',
   'bz-world-map-parser.c',
   'bz-world-map.c',
   'bz-yaml-parser.c',
   'bz-zoom.c',
   'main.c',
-]
+)
+subdir('progress-bar-designs')
 
 bz_deps = [
   math,
@@ -153,6 +158,8 @@ bz_deps = [
   glycin_dep,
   glycin_gtk4_dep,
   md4c_dep,
+  webkit_dep,
+  libsecret_dep,
 ]
 
 gen_gobject = find_program('./gen_gobject.sh')
@@ -184,6 +191,7 @@ gobject_specs = files(
   'bz-curated-row.txt',
   'bz-curated-section.txt',
   'bz-data-point.txt',
+  'bz-flathub-auth-provider.txt',
   'bz-hash-table-object.txt',
   'bz-hook-dialog-option.txt',
   'bz-hook-dialog.txt',
@@ -225,9 +233,11 @@ blueprints = custom_target('blueprints',
     'bz-curated-app-tile.blp',
     'bz-curated-view.blp',
     'bz-decorated-screenshot.blp',
-    'bz-detailed-app-tile.blp',
     'bz-developer-badge.blp',
     'bz-entry-inspector.blp',
+    'bz-favorite-button.blp',
+    'bz-favorites-page.blp',
+    'bz-favorites-tile.blp',
     'bz-featured-carousel.blp',
     'bz-featured-tile.blp',
     'bz-flathub-category-section.blp',
@@ -238,6 +248,7 @@ blueprints = custom_target('blueprints',
     'bz-installed-page.blp',
     'bz-installed-tile.blp',
     'bz-license-dialog.blp',
+    'bz-login-page.blp',
     'bz-markdown-render.blp',
     'bz-preferences-dialog.blp',
     'bz-progress-bar.blp',
@@ -252,6 +263,8 @@ blueprints = custom_target('blueprints',
     'bz-stats-dialog.blp',
     'bz-transaction-view.blp',
     'bz-update-dialog.blp',
+    'bz-user-data-page.blp',
+    'bz-user-data-tile.blp',
     'bz-window.blp',
     'gtk/shortcuts-dialog.blp',
   ),

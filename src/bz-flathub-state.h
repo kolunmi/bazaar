@@ -59,10 +59,13 @@ bz_flathub_state_dup_apps_of_the_week (BzFlathubState *self);
 GListModel *
 bz_flathub_state_get_categories (BzFlathubState *self);
 
+gboolean
+bz_flathub_state_get_has_connection_error (BzFlathubState *self);
+
 DexFuture *
 bz_flathub_state_update_to_today (BzFlathubState *self);
 
-BzResult *
+DexFuture *
 bz_flathub_state_search_keyword (BzFlathubState *self,
                                  const char     *keyword);
 

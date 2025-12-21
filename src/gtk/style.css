@@ -3,6 +3,19 @@
     color: black;
 }
 
+.updates-amount {
+	background-color: white;
+	color: var(--accent-bg-color);
+	font-size: 0.60em;
+	border-radius: 9999px;
+	font-weight: 900;
+}
+
+.updates-amount-border {
+  background-color: var(--accent-bg-color);
+  	border-radius: 9999px;
+}
+
 .bz-monospace {
     font-family: monospace;
 }
@@ -89,16 +102,26 @@
 	font-weight: 500;
 }
 
+.verified {
+  color: @blue_2;
+}
+
 .support {
     --accent-fg-color : #f06292;
     --accent-bg-color : alpha(#f06292, 0.25);
     --accent-color : #f06292;
 }
 
-.star {
-    --accent-fg-color: @warning_bg_color;
-    --accent-bg-color : alpha(@warning_bg_color, 0.25);
-    --accent-color: @warning_color;
+.favorite {
+    --accent-fg-color: @accent_bg_color;
+    --accent-bg-color : alpha(@accent_bg_color, 0.25);
+    --accent-color: @accent_color;
+}
+
+.favorite * {
+    --accent-fg-color: @accent_fg_color;
+    --accent-bg-color:  @accent_bg_color;
+    --accent-color: @accent_color;
 }
 
 .green {
@@ -155,13 +178,6 @@ global-progress {
 
 global-progress image {
   color: var(--window-fg-color);
-}
-
-@media (prefers-color-scheme: light) {
-  .flathub {
-    --accent-color: #251f32;
-    --accent-bg-color: #251f32;
-  }
 }
 
 .lozenge {
@@ -221,7 +237,7 @@ button.context-tile:active .lozenge {
     color: var(--accent-color);
 }
 
-.card.eol {
+.card.colored {
     background-color: alpha(var(--accent-bg-color),0.15);
     color: var(--accent-color);
 }
@@ -232,6 +248,13 @@ button.context-tile:active .lozenge {
 
 .small-pill.error {
     background-color: alpha(@error_bg_color, 0.15);
+}
+
+.installed-pill {
+	background-color: alpha(@success_bg_color, 0.15);
+	font-weight: 500;
+	font-size: 0.9em;
+ 	padding: 2px 7px 2px 4.5px;
 }
 
 .download-size-pill{
@@ -269,7 +292,7 @@ window.narrow .app-developer {
 }
 
 .context-tile {
-	border-radius: 10px;
+  box-shadow: none;
 	padding: 4px;
 }
 
@@ -312,11 +335,15 @@ toggle-group.huge * {
   background: linear-gradient(to right, #2f3d9f, #682889);
 }
 
-.otg .card:not(:hover):not(:active) {
+.wlg {
+  background: linear-gradient(to right, #821756, #136673);
+}
+
+.sp-section .card:not(:hover):not(:active) {
   background: transparent;
 }
 
-.otg .card {
+.sp-section .card {
   box-shadow: none;
 }
 
@@ -325,21 +352,25 @@ toggle-group.huge * {
     background: linear-gradient(to right, #c6eaf8, #c4f3c9);
   }
 
-  .otg .card:hover {
+  .wlg {
+    background: linear-gradient(to right, #fdcde0, #b0e5f0);
+  }
+
+  .sp-section .card:hover {
     background: rgba(255, 255, 255, 0.50);
   }
 
-  .otg .card:active {
+  .sp-section .card:active {
     background: rgba(255, 255, 255, 0.75);
   }
 }
 
-.otg-image {
+.sp-section-image {
 	margin-top: -95px;
 	margin-bottom: -95px;
 }
 
-.otg-title {
+.sp-section-title {
 	font-size: 3.5em;
 }
 
@@ -382,6 +413,10 @@ window.flathub {
 
 .flathub .sidebar-pane {
   background-color: oklch(from var(--sidebar-bg-color) l calc(c * 4) var(--flathub-bg-hue));
+}
+
+.flathub banner  > * > * {
+  background-color: oklch(from var(--card-bg-color) l calc(c * 4) var(--flathub-bg-hue));
 }
 
 .flathub-lotion {
@@ -485,6 +520,30 @@ window.flathub {
 
 .accent-button.omnisexual-theme {
   --flag-gradient: linear-gradient(to bottom, #FF9CCE 0%, #FF9CCE 20%, #FF52BF 20%, #FF52BF 40%, #200044 40%, #200044 60%, #675FFF 60%, #675FFF 80%, #8DA7FF 80%, #8DA7FF 100%);
+}
+
+.accent-button.aroace-theme {
+  --flag-gradient: linear-gradient(to bottom, #E28C00 0%, #E28C00 20%, #ECCD00 20%, #ECCD00 40%, #FFFFFF 40%, #FFFFFF 60%, #62AEDC 60%, #62AEDC 80%, #203856 80%, #203856 100%);
+}
+
+.accent-button.agender-theme {
+  --flag-gradient: linear-gradient(to bottom, #000000 0%, #000000 14.285714286%, #BCC4C7 14.285714286%, #BCC4C7 28.571428571%, #FFFFFF 28.571428571%, #FFFFFF 42.857142857%, #B7F684 42.857142857%, #B7F684 57.142857143%, #FFFFFF 57.142857143%, #FFFFFF 71.428571429%, #BCC4C7 71.428571429%, #BCC4C7 85.714285714%, #000000 85.714285714%, #000000 100%);
+}
+
+.accent-button.genderqueer-theme {
+  --flag-gradient: linear-gradient(to bottom, #B57EDC 0%, #B57EDC 33.333%, #FFFFFF 33.333%, #FFFFFF 66.666%, #4A8123 66.666%, #4A8123 100%);
+}
+
+.accent-button.intersex-theme {
+  --flag-gradient: linear-gradient(to bottom, #FFD800 0%, #FFD800 40%, #7902AA 40%, #7902AA 60%, #FFD800 60%, #FFD800 100%);
+}
+
+.accent-button.demigender-theme {
+  --flag-gradient: linear-gradient(to bottom, #7F7F7F 0%, #7F7F7F 14.285714286%, #C3C3C3 14.285714286%, #C3C3C3 28.571428571%, #FBFF74 28.571428571%, #FBFF74 42.857142857%, #FFFFFF 42.857142857%, #FFFFFF 57.142857143%, #FBFF74 57.142857143%, #FBFF74 57.142857143%, #C3C3C3 71.428571429%, #C3C3C3 85.714285714%, #7F7F7F 85.714285714%, #7F7F7F 100%);
+}
+
+.accent-button.biromantic-theme {
+  --flag-gradient: linear-gradient(to bottom, #8869A5 0%, #8869A5 20%, #D8A7D8 20%, #D8A7D8 40%, #FFFFFF 40%, #FFFFFF 60%, #FDB18D 60%, #FDB18D 80%, #151638 80%, #151638 100%);
 }
 
 /* Category buttons styling modified from GNOME Software*/
@@ -679,7 +738,29 @@ window.narrow .category-tile {
 .installed-list-view > * {
     padding: 0;
     transition: background-color 200ms;
-    margin: 6px 0px;
+    	min-height: 0;
+    margin: 5px 4.5px;
+}
+
+.narrow .installed-list-view > * {
+    margin: 4px 4.5px;
+}
+
+.no-vertical-margin > row.hidden {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.no-vertical-margin > row:not(.hidden) {
+  margin-bottom: 6px;
+}
+
+.user-data-list-view > * {
+  margin: 0;
+}
+
+.user-data-list-view row {
+	min-height: 0;
 }
 
 .transaction-sidebar-entry-list {
@@ -689,4 +770,11 @@ window.narrow .category-tile {
 
 .disable-adw-flow-box-styling {
     background-color: transparent;
+    box-shadow: none;
 }
+
+curated-list-view,
+curated-list-view list {
+  background: var(--bg-color);
+}
+

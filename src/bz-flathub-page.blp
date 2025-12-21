@@ -32,6 +32,15 @@ template $BzFlathubPage: Adw.Bin {
           child: Adw.StatusPage {
             icon-name: "connected-squares-x";
             title: _("Offline");
+            description: _("Flathub returned an error");
+
+            child: Button {
+              styles ["pill"]
+              halign: center;
+              sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.syncing as <bool>) as <bool>;
+              label: _("Retry Flathub Connection");
+              action-name: "app.sync-remotes";
+            };
           };
         }
 
@@ -219,11 +228,6 @@ template $BzFlathubPage: Adw.Bin {
                       group-selected => $category_section_group_selected_cb() swapped;
                     }
 
-                    $BzFlathubCategorySection section_education {
-                      category: bind $get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "education") as <$BzFlathubCategory>;
-                      group-selected => $category_section_group_selected_cb() swapped;
-                    }
-
                     Box otg_box {
                       visible: bind $invert_boolean($is_null($get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "mobile") as <$BzFlathubCategory>) as <bool>) as <bool>;
                       margin-start: 3;
@@ -232,6 +236,7 @@ template $BzFlathubPage: Adw.Bin {
                       margin-bottom: 8;
 
                       styles [
+                        "sp-section",
                         "otg",
                         "card",
                       ]
@@ -251,12 +256,13 @@ template $BzFlathubPage: Adw.Bin {
 
                           Image otg_image {
                             icon-name: "on-the-go-symbolic";
+                            can-target: false;
                             pixel-size: 256;
                             margin-bottom: 10;
                             halign: start;
 
                             styles [
-                              "otg-image",
+                              "sp-section-image",
                             ]
                           }
 
@@ -267,7 +273,7 @@ template $BzFlathubPage: Adw.Bin {
                             wrap-mode: word_char;
 
                             styles [
-                              "otg-title",
+                              "sp-section-title",
                               "title-1",
                             ]
                           }
@@ -287,7 +293,7 @@ template $BzFlathubPage: Adw.Bin {
                             label: _("More Mobile Apps");
                             halign: start;
                             valign: center;
-                            clicked => $show_more_mobile_clicked_cb(template);
+                            clicked => $show_more_mobile_cb(template);
                           }
                         }
 
@@ -323,19 +329,117 @@ template $BzFlathubPage: Adw.Bin {
                           halign: center;
                           valign: center;
                           margin-bottom: 12;
-                          clicked => $show_more_mobile_clicked_cb(template);
+                          clicked => $show_more_mobile_cb(template);
                         }
                       }
                     }
+
+                    $BzFlathubCategorySection section_education {
+                      category: bind $get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "education") as <$BzFlathubCategory>;
+                      group-selected => $category_section_group_selected_cb() swapped;
+                    }
+
 
                     $BzFlathubCategorySection section_network {
                       category: bind $get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "network") as <$BzFlathubCategory>;
                       group-selected => $category_section_group_selected_cb() swapped;
                     }
 
-                    $BzFlathubCategorySection section_game {
-                      category: bind $get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "game") as <$BzFlathubCategory>;
-                      group-selected => $category_section_group_selected_cb() swapped;
+                    Box {
+                      visible: bind $invert_boolean($is_null($get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "game") as <$BzFlathubCategory>) as <bool>) as <bool>;
+                      margin-start: 3;
+                      margin-end: 3;
+                      margin-top: 8;
+                      margin-bottom: 8;
+
+                      styles [
+                        "sp-section",
+                        "wlg",
+                        "card",
+                      ]
+
+                      Box gaming_padding_box {
+                        orientation: vertical;
+                        margin-start: 24;
+                        margin-end: 24;
+                        margin-top: 24;
+                        margin-bottom: 24;
+
+                        Box {
+                          orientation: vertical;
+                          spacing: 12;
+                          width-request: 285;
+                          margin-bottom: 12;
+                          valign: center;
+
+                          Image {
+                            icon-name: "we-love-games-symbolic";
+                            can-target: false;
+                            pixel-size: 256;
+                            margin-bottom: 10;
+                            halign: center;
+
+                            styles [
+                              "sp-section-image",
+                            ]
+                          }
+
+                          Label {
+                            label: _("We​ ♥​ Games");
+                            halign: center;
+                            justify: center;
+                            wrap: true;
+                            wrap-mode: word_char;
+
+                            styles [
+                              "sp-section-title",
+                              "title-1",
+                            ]
+                          }
+
+                          Label {
+                            label: _("Games and apps to run your favorite titles");
+                            halign: center;
+                            justify: center;
+                            wrap: true;
+                            wrap-mode: word_char;
+                          }
+                        }
+
+                        $BzDynamicListView game_list {
+                          styles [
+                            "flathub-page-section",
+                          ]
+
+                          hexpand: true;
+                          scroll: false;
+                          noscroll-kind: flow-box;
+                          child-type: "BzAppTile";
+                          child-prop: "group";
+                          max-children-per-line: 4;
+
+                          model: SliceListModel game_slice {
+                            offset: 0;
+                            size: 12;
+                            model: bind $get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "game") as <$BzFlathubCategory>.applications;
+                          };
+
+                          bind-widget => $bind_widget_cb(template);
+                          unbind-widget => $unbind_widget_cb(template);
+                        }
+
+                        Button {
+                          styles [
+                            "pill",
+                          ]
+                          label: _("More Games");
+                          halign: center;
+                          valign: center;
+                          margin-top: 12;
+                          margin-bottom: 12;
+                          clicked => $show_more_gaming_cb(template);
+                        }
+                      }
                     }
 
                     $BzFlathubCategorySection section_development {
@@ -383,6 +487,9 @@ template $BzFlathubPage: Adw.Bin {
           otg_padding_box.margin-start: 6;
           otg_padding_box.margin-end: 6;
           otg_padding_box.margin-bottom: 6;
+          gaming_padding_box.margin-start: 6;
+          gaming_padding_box.margin-end: 6;
+          gaming_padding_box.margin-bottom: 6;
           section_toggles.homogeneous: false;
           section_trending.compact: true;
           section_popular.compact: true;
@@ -393,12 +500,12 @@ template $BzFlathubPage: Adw.Bin {
           section_audiovideo.compact: true;
           section_education.compact: true;
           section_network.compact: true;
-          section_game.compact: true;
           section_development.compact: true;
           section_science.compact: true;
           section_system.compact: true;
           section_utility.compact: true;
           otg_slice.size: 6;
+          game_slice.size: 6;
         }
       }
     };

@@ -13,6 +13,14 @@ Bazaar
     </picture>
 </div>
 
+> [!NOTE]
+> If you are interested in contributing code to Bazaar (Thank you!),
+> please see the [style rules](/CODESTYLE.md).
+
+> [!NOTE]
+> If you are interested in contributing translations to Bazaar (Thank
+> you!), please see the [translators introduction](/TRANSLATORS.md).
+
 Bazaar is a new app store for GNOME with a focus on discovering and installing
 applications and add-ons from Flatpak remotes, particularly
 [Flathub](https://flathub.org/). It emphasizes supporting the developers who
@@ -20,8 +28,8 @@ make the Linux desktop possible. Bazaar features a "curated" tab that can be
 configured by distributors to allow for a more localized experience.
 
 Bazaar is fast and highly multi-threaded, guaranteeing a smooth
-experience in the user interface. You can queue as many downloads as 
-you wish and run them while perusing Flathub's latest releases. 
+experience in the user interface. You can queue as many downloads as
+you wish and run them while perusing Flathub's latest releases.
 This is due to the UI being completely decoupled from all backend operations.
 
 It runs as a service, meaning state will be maintained even if you
@@ -44,7 +52,7 @@ Pre-built binaries are distributed via Flathub and GitHub actions:
 ### Supporting
 
 If you would like to support me and the development of this
-application (Thank you!), I have a ko-fi here! <https://ko-fi.com/kolunmi> 
+application (Thank you!), I have a ko-fi here! <https://ko-fi.com/kolunmi>
 
 [![Ko-Fi](https://img.shields.io/badge/Ko--fi-F16061?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/kolunmi)
 
@@ -82,7 +90,8 @@ You will need the following dependencies installed, along with a C compiler, mes
 | [libsoup](https://gitlab.gnome.org/GNOME/libsoup)       | `libsoup-3.0`     | `3.6.0`                | HTTP operations                                     |
 | [json-glib](https://gitlab.gnome.org/GNOME/json-glib)   | `json-glib-1.0`   | `1.10.0`               | Parse HTTP replies from Flathub                     |
 | [md4c](https://github.com/mity/md4c)                    | `md4c`            | `0.5.1`                | Parse markdown (.md)                                |
-
+| [webkitgtk](https://webkitgtk.org/)                     | `webkitgtk-6.0`   | `2.50.2`               | Render web views                                    |
+| [libsecret](https://gitlab.gnome.org/GNOME/libsecret)   | `libsecret-1`     | `0.20`                 | Store Flathub account information                   |
 
 #### Code of Conduct
 

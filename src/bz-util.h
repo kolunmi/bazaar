@@ -22,7 +22,9 @@
 
 #include <libdex.h>
 
-#define bz_maybe_ref(_ptr, _ref)  ((_ptr) != NULL ? (_ref) ((_ptr)) : NULL)
+#define bz_maybe(_ptr, _func)     ((_ptr) != NULL ? (_func) ((_ptr)) : NULL)
+#define bz_maybe_strdup(_ptr)     bz_maybe (_ptr, g_strdup)
+#define bz_maybe_ref(_ptr, _ref)  ((typeof (_ptr)) bz_maybe (_ptr, _ref))
 #define bz_object_maybe_ref(_obj) bz_maybe_ref ((_obj), g_object_ref)
 #define bz_dex_maybe_ref(_obj)    bz_maybe_ref ((_obj), dex_ref)
 

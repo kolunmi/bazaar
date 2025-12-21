@@ -50,11 +50,11 @@
 
   <screenshots>
     <screenshot type="default">
-      <image>https://github.com/user-attachments/assets/24983333-e049-4ec7-a68d-786833edb90c</image>
+      <image>https://github.com/user-attachments/assets/4bf0cf77-f4c6-4ea6-afbd-f74acfc992ef</image>
       <caption>The home page displaying Flathub apps</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/user-attachments/assets/670bcd04-1e54-4f4c-b199-e5bd1400c6b8</image>
+      <image>https://github.com/user-attachments/assets/635b19fb-5130-4797-91ce-f358339f260a</image>
       <caption>Nucleus app page</caption>
     </screenshot>
     <screenshot>
@@ -68,6 +68,47 @@
   </screenshots>
 
   <releases>
+    <release version="0.6.3" date="2025-12-14">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.6.3</url>
+      <description translate="no">
+        <p>Another quick release to restore alphabetical sorting on the installed page</p>
+      </description>
+    </release>
+    <release version="0.6.2" date="2025-12-09">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.6.2</url>
+      <description translate="no">
+        <p>Quick release to allow manual refresh if flathub is being flaky</p>
+      </description>
+    </release>
+    <release version="0.6.1" date="2025-12-09">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.6.1</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>Fix frequent disk writes; set refresh frequency to 1 day rather than 1 hour</li>
+          <li>Add "Delete User Data" option when uninstalling an application</li>
+          <li>Version cache to prevent incompatibility between Bazaar versions</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.6.0" date="2025-12-04">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.6.0</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>Reworked loading to be substantially faster after first start via async loading</li>
+          <li>A gaming section on the Flathub page</li>
+          <li>Improved UI on mobile, especially on app pages</li>
+          <li>Verified badges next to most places where apps are shown</li>
+          <li>A popover that explains what verification and non-verification mean</li>
+          <li>An "other apps by" page for when a developer has more than 6 apps</li>
+          <li>Tags that show other apps with the same tag when pressed</li>
+          <li>An age rating dialog</li>
+          <li>Changed search filters into global content filters</li>
+          <li>5 new pride flags</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.5.10" date="2025-11-12">
       <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.5.10</url>
       <description translate="no">

@@ -21,9 +21,8 @@
 #define G_LOG_DOMAIN  "BAZAAR::ENTRY-CACHE"
 #define BAZAAR_MODULE "entry-cache"
 
-#define MAX_CONCURRENT_WRITES             4
-#define WATCH_CLEANUP_INTERVAL_MSEC       5000
-#define WATCH_RECACHE_INTERVAL_SEC_DOUBLE 4.0
+#define MAX_CONCURRENT_WRITES       4
+#define WATCH_CLEANUP_INTERVAL_MSEC 5000
 
 #include <malloc.h>
 
@@ -817,17 +816,15 @@ watch_cb (DexFuture       *future,
 static DexFuture *
 watch_work_fiber (OngoingTaskData *task_data)
 {
-  g_autoptr (BzGuard) guard0        = NULL;
-  GHashTableIter iter               = { 0 };
-  g_autoptr (GTimer) timer          = NULL;
-  g_autoptr (GPtrArray) write_backs = NULL;
-  guint total                       = 0;
-  guint skipped                     = 0;
-  guint written                     = 0;
-  guint pruned                      = 0;
+  g_autoptr (BzGuard) guard0 = NULL;
+  GHashTableIter iter        = { 0 };
+  g_autoptr (GTimer) timer   = NULL;
+  guint total                = 0;
+  guint active               = 0;
+  guint alive                = 0;
+  guint pruned               = 0;
 
-  timer       = g_timer_new ();
-  write_backs = g_ptr_array_new_with_free_func (dex_unref);
+  timer = g_timer_new ();
 
   BZ_BEGIN_GUARD_WITH_CONTEXT (&guard0, &task_data->alive_mutex, &task_data->alive_gate);
   BZ_BEGIN_GUARD_WITH_CONTEXT (&guard0, &task_data->reading_mutex, &task_data->reading_gate);
@@ -848,7 +845,7 @@ watch_work_fiber (OngoingTaskData *task_data)
       if (g_hash_table_contains (task_data->reading_hash, unique_id_checksum) ||
           g_hash_table_contains (task_data->writing_hash, unique_id_checksum))
         {
-          skipped++;
+          active++;
           continue;
         }
 
@@ -856,28 +853,7 @@ watch_work_fiber (OngoingTaskData *task_data)
 
       entry = g_weak_ref_get (&living->wr);
       if (entry != NULL)
-        {
-          if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION) &&
-              g_timer_elapsed (living->cached, NULL) > WATCH_RECACHE_INTERVAL_SEC_DOUBLE)
-            {
-              g_autoptr (WriteTaskData) data = NULL;
-              g_autoptr (DexFuture) future   = NULL;
-
-              data                     = write_task_data_new ();
-              data->task_data          = ongoing_task_data_ref (task_data);
-              data->unique_id_checksum = g_strdup (unique_id_checksum);
-              data->entry              = g_object_ref (entry);
-
-              future = dex_scheduler_spawn (
-                  task_data->scheduler,
-                  bz_get_dex_stack_size (),
-                  (DexFiberFunc) write_task_fiber,
-                  write_task_data_ref (data),
-                  write_task_data_unref);
-              g_ptr_array_add (write_backs, g_steal_pointer (&future));
-              written++;
-            }
-        }
+        alive++;
       else
         {
           bz_clear_guard (&guard1);
@@ -885,13 +861,7 @@ watch_work_fiber (OngoingTaskData *task_data)
           pruned++;
         }
     }
-
   bz_clear_guard (&guard0);
-  if (write_backs->len > 0)
-    dex_await (dex_future_allv (
-                   (DexFuture *const *) write_backs->pdata,
-                   write_backs->len),
-               NULL);
 
 #ifdef __GLIBC__
   malloc_trim (0);
@@ -900,11 +870,11 @@ watch_work_fiber (OngoingTaskData *task_data)
   g_debug ("Sweep report: finished in %.4f seconds, including time to acquire guards\n"
            "  Out of a total of %d entries considered:\n"
            "    %d were skipped due to active tasks being associated with them\n"
-           "    %d application entries were kept alive but written to back to disk\n"
+           "    %d application entries were otherwise kept alive\n"
            "    %d entries were forgotten by the application and were pruned\n"
            "  Another sweep will take place in %d msec",
            g_timer_elapsed (timer, NULL),
-           total, skipped, written, pruned, WATCH_CLEANUP_INTERVAL_MSEC);
+           total, active, alive, pruned, WATCH_CLEANUP_INTERVAL_MSEC);
 
   return dex_timeout_new_msec (WATCH_CLEANUP_INTERVAL_MSEC);
 }

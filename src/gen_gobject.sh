@@ -178,7 +178,7 @@ print_enums () {
 
     [ -z "$ENUMS" ] && return
 
-    if [ "$HEADER" == header ]; then
+    if [ "$HEADER" = header ]; then
         while IFS= read -r line; do
             set -- $line
 
@@ -384,7 +384,7 @@ print_functions () {
     HEADER="$1"
 
     printf '%s *\n%s_new (void)' "$PASCAL" "$SNAKE"
-    if [ "$HEADER" == header ]; then
+    if [ "$HEADER" = header ]; then
         printf ';\n\n'
     else
         printf '{\n  return g_object_new (%s, NULL);\n}\n\n' "$TYPE"
@@ -413,7 +413,7 @@ print_get_property_methods () {
         esac
         printf '\n%s_get_%s (%s *self)' "$SNAKE" "$LOC_NAME" "$PASCAL"
 
-        if [ "$HEADER" == header ]; then
+        if [ "$HEADER" = header ]; then
             printf ';\n\n'
         else
             printf '{\n  g_return_val_if_fail (%s_IS_%s (self), ' "$MACRO_PREF" "$MACRO_NAME"
@@ -466,7 +466,7 @@ print_set_property_methods () {
         esac
         printf '%s)' "$LOC_NAME"
 
-        if [ "$HEADER" == header ]; then
+        if [ "$HEADER" = header ]; then
             printf ';\n\n'
         else
             printf '{\n  g_return_if_fail (%s_IS_%s (self));\n\n' "$MACRO_PREF" "$MACRO_NAME"

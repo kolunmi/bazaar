@@ -31,6 +31,7 @@ struct _BzScreenshotPage
   AdwToastOverlay *toast_overlay;
 
   GListModel *screenshots;
+  GListModel *captions;
   guint       current_index;
   guint       initial_index;
 
@@ -49,6 +50,7 @@ enum
 
   PROP_SCREENSHOTS,
   PROP_CURRENT_INDEX,
+  PROP_CURRENT_CAPTION,
   PROP_IS_ZOOMED,
 
   LAST_PROP
@@ -61,6 +63,7 @@ bz_screenshot_page_dispose (GObject *object)
   BzScreenshotPage *self = BZ_SCREENSHOT_PAGE (object);
 
   g_clear_object (&self->screenshots);
+  g_clear_object (&self->captions);
 
   G_OBJECT_CLASS (bz_screenshot_page_parent_class)->dispose (object);
 }
@@ -80,6 +83,12 @@ bz_screenshot_page_get_property (GObject    *object,
       break;
     case PROP_CURRENT_INDEX:
       g_value_set_uint (value, self->current_index);
+      break;
+    case PROP_CURRENT_CAPTION:
+      {
+        const char *caption = bz_screenshot_page_get_current_caption (self);
+        g_value_set_string (value, caption);
+      }
       break;
     case PROP_IS_ZOOMED:
       g_value_set_boolean (value, self->is_zoomed);
@@ -206,6 +215,7 @@ bz_screenshot_page_constructed (GObject *object)
     connect_zoom_signal (self, page);
 
   update_is_zoomed (self);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CURRENT_CAPTION]);
 }
 
 static void
@@ -224,6 +234,7 @@ bz_screenshot_page_set_property (GObject      *object,
     case PROP_CURRENT_INDEX:
       self->initial_index = g_value_get_uint (value);
       break;
+    case PROP_CURRENT_CAPTION:
     case PROP_IS_ZOOMED:
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -361,6 +372,7 @@ on_carousel_position_changed (AdwCarousel      *carousel,
 
   update_is_zoomed (self);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CURRENT_INDEX]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CURRENT_CAPTION]);
 }
 
 static void
@@ -436,6 +448,13 @@ invert_boolean (gpointer object,
   return !value;
 }
 
+static gboolean
+is_valid_string (gpointer    object,
+                 const char *value)
+{
+  return value != NULL && *value != '\0';
+}
+
 static void
 bz_screenshot_page_class_init (BzScreenshotPageClass *klass)
 {
@@ -461,6 +480,13 @@ bz_screenshot_page_class_init (BzScreenshotPageClass *klass)
           0, G_MAXUINT, 0,
           G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
 
+  props[PROP_CURRENT_CAPTION] =
+      g_param_spec_string (
+          "current-caption",
+          NULL, NULL,
+          NULL,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
   props[PROP_IS_ZOOMED] =
       g_param_spec_boolean (
           "is-zoomed",
@@ -484,6 +510,7 @@ bz_screenshot_page_class_init (BzScreenshotPageClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, next_clicked);
   gtk_widget_class_bind_template_callback (widget_class, has_multiple_screenshots);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
+  gtk_widget_class_bind_template_callback (widget_class, is_valid_string);
 }
 
 static void
@@ -499,13 +526,54 @@ bz_screenshot_page_init (BzScreenshotPage *self)
   gtk_widget_add_controller (GTK_WIDGET (self), key_controller);
 }
 
+const char *
+bz_screenshot_page_get_current_caption (BzScreenshotPage *self)
+{
+  g_autoptr (GtkStringObject) caption_obj = NULL;
+  guint n_items                           = 0;
+  guint actual_index                      = 0;
+
+  g_return_val_if_fail (BZ_IS_SCREENSHOT_PAGE (self), NULL);
+
+  if (self->captions == NULL)
+    return "";
+
+  n_items = g_list_model_get_n_items (self->captions);
+  if (n_items == 0)
+    return "";
+
+  actual_index = (self->initial_index + self->current_index) % n_items;
+
+  caption_obj = g_list_model_get_item (self->captions, actual_index);
+  if (caption_obj == NULL)
+    return "";
+
+  return gtk_string_object_get_string (caption_obj);
+}
+
+void
+bz_screenshot_page_set_captions (BzScreenshotPage *self,
+                                 GListModel       *captions)
+{
+  g_return_if_fail (BZ_IS_SCREENSHOT_PAGE (self));
+
+  g_set_object (&self->captions, captions);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CURRENT_CAPTION]);
+}
+
 AdwNavigationPage *
 bz_screenshot_page_new (GListModel *screenshots,
+                        GListModel *captions,
                         guint       initial_index)
 {
-  return g_object_new (
+  BzScreenshotPage *page = g_object_new (
       BZ_TYPE_SCREENSHOT_PAGE,
       "screenshots", screenshots,
       "current-index", initial_index,
       NULL);
+
+  if (captions != NULL)
+    bz_screenshot_page_set_captions (page, captions);
+
+  return ADW_NAVIGATION_PAGE (page);
 }

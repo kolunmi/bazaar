@@ -35,7 +35,6 @@ struct _BzTagList
   GtkWidget      *prefix;
   BzFlathubState *flathub_state;
 
-  gulong     items_changed_id;
   DexFuture *task;
 };
 
@@ -86,8 +85,8 @@ search_finally (DexFuture *future,
   value = dex_future_get_value (future, &local_error);
   if (value != NULL)
     {
-      g_autoptr (GListModel) model = NULL;
-      guint n_items                = 0;
+      GListModel *model   = NULL;
+      guint       n_items = 0;
 
       model   = g_value_get_object (value);
       n_items = g_list_model_get_n_items (model);
@@ -107,7 +106,7 @@ search_finally (DexFuture *future,
 
           tag      = g_object_get_data (G_OBJECT (self), "current-tag");
           title    = g_strdup_printf (_ ("Apps Tagged \"%s\""), tag);
-          subtitle = g_strdup_printf (_ ("%d applications"), n_items);
+          subtitle = g_strdup_printf (_ ("%d Applications"), n_items);
 
           apps_page = bz_apps_page_new (title, model);
           bz_apps_page_set_subtitle (BZ_APPS_PAGE (apps_page), subtitle);
@@ -153,11 +152,7 @@ tag_button_clicked_cb (BzTagList *self,
 
   g_object_set_data_full (G_OBJECT (self), "current-tag", g_strdup (tag), g_free);
 
-  result = bz_flathub_state_search_keyword (self->flathub_state, tag);
-  if (result == NULL)
-    return;
-
-  future = bz_result_dup_future (result);
+  future = bz_flathub_state_search_keyword (self->flathub_state, tag);
   future = dex_future_finally (
       future,
       (DexFutureCallback) search_finally,
@@ -171,6 +166,8 @@ rebuild_tags (BzTagList *self)
 {
   GtkWidget *child;
   guint      n_items;
+
+  dex_clear (&self->task);
 
   while ((child = gtk_widget_get_first_child (GTK_WIDGET (self))) != NULL)
     {
@@ -222,11 +219,11 @@ rebuild_tags (BzTagList *self)
 }
 
 static void
-on_items_changed (GListModel *model,
+on_items_changed (BzTagList  *self,
                   guint       position,
                   guint       removed,
                   guint       added,
-                  BzTagList  *self)
+                  GListModel *model)
 {
   rebuild_tags (self);
 }
@@ -237,12 +234,8 @@ bz_tag_list_dispose (GObject *object)
   BzTagList *self = BZ_TAG_LIST (object);
 
   dex_clear (&self->task);
-
-  if (self->model != NULL && self->items_changed_id != 0)
-    {
-      g_signal_handler_disconnect (self->model, self->items_changed_id);
-      self->items_changed_id = 0;
-    }
+  if (self->model != NULL)
+    g_signal_handlers_disconnect_by_func (self->model, on_items_changed, self);
 
   g_clear_object (&self->model);
   g_clear_object (&self->flathub_state);
@@ -373,21 +366,18 @@ bz_tag_list_set_model (BzTagList  *self,
   g_return_if_fail (BZ_IS_TAG_LIST (self));
   g_return_if_fail (model == NULL || G_IS_LIST_MODEL (model));
 
-  if (self->model != NULL && self->items_changed_id != 0)
-    {
-      g_signal_handler_disconnect (self->model, self->items_changed_id);
-      self->items_changed_id = 0;
-    }
-
+  if (self->model != NULL)
+    g_signal_handlers_disconnect_by_func (self->model, on_items_changed, self);
   g_clear_object (&self->model);
 
   if (model != NULL)
     {
-      self->model            = g_object_ref (model);
-      self->items_changed_id = g_signal_connect (self->model,
-                                                 "items-changed",
-                                                 G_CALLBACK (on_items_changed),
-                                                 self);
+      self->model = g_object_ref (model);
+      g_signal_connect_swapped (
+          self->model,
+          "items-changed",
+          G_CALLBACK (on_items_changed),
+          self);
     }
 
   rebuild_tags (self);

@@ -1370,38 +1370,48 @@ retrieve_updates_fiber (GatherRefsData *data)
   GCancellable *cancellable          = data->cancellable;
   g_autoptr (GError) local_error     = NULL;
   g_autoptr (GPtrArray) system_refs  = NULL;
+  guint n_sys_refs                   = 0;
   g_autoptr (GPtrArray) user_refs    = NULL;
+  guint n_user_refs                  = 0;
   g_autoptr (GPtrArray) ids          = NULL;
 
   bz_weak_get_or_return_reject (self, data->self);
 
-  system_refs = flatpak_installation_list_installed_refs_for_update (
-      self->system, cancellable, &local_error);
-  if (system_refs == NULL)
-    SEND_AND_RETURN_ERROR (
-        self, TRUE,
-        BZ_FLATPAK_ERROR_REMOTE_SYNCHRONIZATION_FAILURE,
-        "Failed to discover update-elligible refs for system installation: %s",
-        local_error->message);
+  if (self->system != NULL)
+    {
+      system_refs = flatpak_installation_list_installed_refs_for_update (
+          self->system, cancellable, &local_error);
+      if (system_refs == NULL)
+        SEND_AND_RETURN_ERROR (
+            self, TRUE,
+            BZ_FLATPAK_ERROR_REMOTE_SYNCHRONIZATION_FAILURE,
+            "Failed to discover update-elligible refs for system installation: %s",
+            local_error->message);
+      n_sys_refs = system_refs->len;
+    }
 
-  user_refs = flatpak_installation_list_installed_refs_for_update (
-      self->user, cancellable, &local_error);
-  if (user_refs == NULL)
-    SEND_AND_RETURN_ERROR (
-        self, TRUE,
-        BZ_FLATPAK_ERROR_REMOTE_SYNCHRONIZATION_FAILURE,
-        "Failed to discover update-elligible refs for user installation: %s",
-        local_error->message);
+  if (self->user != NULL)
+    {
+      user_refs = flatpak_installation_list_installed_refs_for_update (
+          self->user, cancellable, &local_error);
+      if (user_refs == NULL)
+        SEND_AND_RETURN_ERROR (
+            self, TRUE,
+            BZ_FLATPAK_ERROR_REMOTE_SYNCHRONIZATION_FAILURE,
+            "Failed to discover update-elligible refs for user installation: %s",
+            local_error->message);
+      n_user_refs = user_refs->len;
+    }
 
   ids = g_ptr_array_new_with_free_func (g_free);
-  g_ptr_array_set_size (ids, system_refs->len + user_refs->len);
+  g_ptr_array_set_size (ids, n_sys_refs + n_user_refs);
 
-  for (guint i = 0; i < system_refs->len + user_refs->len; i++)
+  for (guint i = 0; i < n_sys_refs + n_user_refs; i++)
     {
       gboolean             user = FALSE;
       FlatpakInstalledRef *iref = NULL;
 
-      if (i < system_refs->len)
+      if (i < n_sys_refs)
         {
           user = FALSE;
           iref = g_ptr_array_index (system_refs, i);
@@ -1409,7 +1419,7 @@ retrieve_updates_fiber (GatherRefsData *data)
       else
         {
           user = TRUE;
-          iref = g_ptr_array_index (user_refs, i - system_refs->len);
+          iref = g_ptr_array_index (user_refs, i - n_sys_refs);
         }
 
       g_ptr_array_index (ids, i) =
@@ -1479,7 +1489,7 @@ transaction_fiber (TransactionData *data)
               return dex_future_new_reject (
                   BZ_FLATPAK_ERROR,
                   BZ_FLATPAK_ERROR_TRANSACTION_FAILURE,
-                  "Failed to initialize potential transaction for system installation: %s",
+                  "Failed to initialize potential transaction for installation: %s",
                   local_error->message);
             }
 
@@ -1797,7 +1807,7 @@ transaction_new_operation (FlatpakTransaction          *transaction,
 
   operation_data         = transaction_operation_data_new ();
   operation_data->parent = transaction_data_ref (data);
-  operation_data->entry  = entry != NULL ? g_object_ref (entry) : NULL;
+  operation_data->entry  = bz_object_maybe_ref (entry);
   operation_data->op     = g_object_ref (payload);
 
   g_signal_connect_data (

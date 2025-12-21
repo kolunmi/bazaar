@@ -384,6 +384,7 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
   g_autoptr (GdkPaintable) icon_paintable              = NULL;
   g_autoptr (GIcon) mini_icon                          = NULL;
   g_autoptr (GListStore) screenshot_paintables         = NULL;
+  g_autoptr (GListStore) screenshot_captions           = NULL;
   g_autoptr (GListStore) share_urls                    = NULL;
   g_autofree char *donation_url                        = NULL;
   g_autofree char *forge_url                           = NULL;
@@ -524,37 +525,62 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
       if (screenshots != NULL)
         {
           screenshot_paintables = g_list_store_new (BZ_TYPE_ASYNC_TEXTURE);
+          screenshot_captions   = g_list_store_new (GTK_TYPE_STRING_OBJECT);
 
           for (guint i = 0; i < screenshots->len; i++)
             {
               AsScreenshot *screenshot = NULL;
               GPtrArray    *images     = NULL;
+              const gchar  *caption    = NULL;
 
               screenshot = g_ptr_array_index (screenshots, i);
               images     = as_screenshot_get_images_all (screenshot);
+              caption    = as_screenshot_get_caption (screenshot);
 
               for (guint j = 0; j < images->len; j++)
                 {
-                  AsImage    *image_obj = NULL;
-                  const char *url       = NULL;
+                  AsImage         *image_obj              = NULL;
+                  const char      *url                    = NULL;
+                  g_autofree char *modified_url           = NULL;
+                  const char      *extension              = NULL;
+                  g_autoptr (GFile) screenshot_file       = NULL;
+                  g_autofree char *cache_basename         = NULL;
+                  g_autoptr (GFile) cache_file            = NULL;
+                  g_autoptr (BzAsyncTexture) texture      = NULL;
+                  g_autoptr (GtkStringObject) caption_obj = NULL;
 
                   image_obj = g_ptr_array_index (images, j);
                   url       = as_image_get_url (image_obj);
 
                   if (url != NULL)
                     {
-                      g_autoptr (GFile) screenshot_file  = NULL;
-                      g_autofree char *cache_basename    = NULL;
-                      g_autoptr (GFile) cache_file       = NULL;
-                      g_autoptr (BzAsyncTexture) texture = NULL;
+                      // Flathub CDN serves WebP but appstream only provides PNG links.
+                      if (g_str_has_prefix (url, "https://dl.flathub.org/") &&
+                          g_str_has_suffix (url, ".png"))
+                        {
+                          g_autofree char *temp = NULL;
 
-                      screenshot_file = g_file_new_for_uri (url);
-                      cache_basename  = g_strdup_printf ("screenshot_%d.png", i);
+                          temp         = g_strndup (url, strlen (url) - 4);
+                          modified_url = g_strdup_printf ("%s.webp", temp);
+                          extension    = ".webp";
+                        }
+                      else
+                        {
+                          extension    = ".png";
+                          modified_url = g_strdup (url);
+                        }
+
+                      screenshot_file = g_file_new_for_uri (modified_url);
+                      cache_basename  = g_strdup_printf ("screenshot_%d%s", i, extension);
                       cache_file      = g_file_new_build_filename (
                           module_dir, unique_id_checksum, cache_basename, NULL);
 
                       texture = bz_async_texture_new_lazy (screenshot_file, cache_file);
                       g_list_store_append (screenshot_paintables, texture);
+
+                      caption_obj = gtk_string_object_new (caption ? caption : "");
+                      g_list_store_append (screenshot_captions, caption_obj);
+
                       break;
                     }
                 }
@@ -1022,6 +1048,7 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
       "icon-paintable", icon_paintable,
       "mini-icon", mini_icon,
       "screenshot-paintables", screenshot_paintables,
+      "screenshot-captions", screenshot_captions,
       "share-urls", share_urls,
       "donation-url", donation_url,
       "forge-url", forge_url,

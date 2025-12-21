@@ -586,7 +586,7 @@ input_load_finally (DexFuture         *future,
   value = dex_future_get_value (future, &local_error);
   if (value != NULL)
     g_list_store_append (data->output, g_value_get_object (value));
-  else
+  else if (local_error->domain != G_IO_ERROR)
     g_warning ("Could not load object at path %s: %s",
                data->path, local_error->message);
 

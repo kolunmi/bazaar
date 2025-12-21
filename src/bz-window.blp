@@ -323,73 +323,142 @@ template $BzWindow: Adw.ApplicationWindow {
                   };
 
                   [top]
-                  Adw.HeaderBar top_header_bar {
-                    [start]
-                    Button update_button {
-                      styles [
-                        "suggested-action",
-                      ]
+                  Box {
+                    orientation: vertical;
 
-                      has-tooltip: true;
-                      tooltip-text: _("Update");
-                      icon-name: "software-update-available-symbolic";
-                      visible: bind $invert_boolean($is_null(template.state as <$BzStateInfo>.available-updates) as <bool>) as <bool>;
-                      clicked => $update_cb(template);
-                    }
+                    Adw.HeaderBar top_header_bar {
+                      [start]
+                      Revealer {
+                        reveal-child: bind template.state as <$BzStateInfo>.auth-state as <$BzAuthState>.authenticated;
+                        transition-type: slide_left;
+                        child: MenuButton {
+                          menu-model: account_menu;
+                          styles [
+                            "circular",
+                            "flat",
+                          ]
 
-                    [start]
-                    Box {
-                      orientation: horizontal;
-                      spacing: 10;
-                      margin-start: 4;
-                      visible: bind $invert_boolean($is_null(template.state as <$BzStateInfo>.background-task-label) as <bool>) as <bool>;
-
-                      Adw.Spinner {}
-                    }
-
-                    [title]
-                    Adw.ViewSwitcher {
-                      stack: main_view_stack;
-                      policy: wide;
-                      sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.busy) as <bool>;
-                    }
-
-                    [end]
-                    Revealer {
-                      transition-type: slide_right;
-                      reveal-child: bind $invert_boolean(split_view.show-sidebar as <bool>) as <bool>;
-
-                      child: ToggleButton toggle_transactions {
-                        styles [
-                          "flat",
-                        ]
-
-                        has-tooltip: true;
-                        tooltip-text: _("Toggle transaction sidebar");
-                        active: bind split_view.show-sidebar bidirectional;
-
-                        child: $BzGlobalProgress download_bar {
-                          expand-size: 125;
-                          active: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
-                          pending: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.pending;
-                          fraction: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.current-progress;
-                          settings: bind template.state as <$BzStateInfo>.settings;
-
-                          child: Image {
-                            halign: end;
-                            icon-name: "folder-download-symbolic";
+                          child: Adw.Avatar {
+                            size: 24;
+                            custom-image: bind template.state as <$BzStateInfo>.auth-state as <$BzAuthState>.paintable;
                           };
                         };
-                      };
-                    }
+                      }
 
-                    [end]
-                    MenuButton {
-                      primary: true;
-                      icon-name: "open-menu-symbolic";
-                      has-tooltip: true;
-                      tooltip-text: _("Main Menu");
-                      menu-model: primary_menu;
+                      [start]
+                      Overlay {
+                        visible: bind $invert_boolean($is_null(template.state as <$BzStateInfo>.available-updates) as <bool>) as <bool>;
+                        child: Button update_button {
+                          styles [
+                            "suggested-action",
+                          ]
+
+                          has-tooltip: true;
+                          tooltip-text: bind $update_amount_tooltip(template.state as <$BzStateInfo>.available-updates) as <string>;
+                          icon-name: "software-update-available-symbolic";
+
+                          clicked => $update_cb(template);
+                        };
+
+                        [overlay]
+                        Box {
+                          can-target: false;
+                          can-focus: false;
+                          margin-end: 2;
+                          margin-top: 3;
+                          halign: end;
+                          valign: start;
+
+                          styles [
+                            "updates-amount-border" ,
+                          ]
+
+                          Label {
+                            margin-top: 2;
+                            margin-bottom: 2;
+                            margin-start: 2;
+                            margin-end: 2;
+
+                            justify: center;
+                            width-request: 16;
+                            label: bind $list_length(template.state as <$BzStateInfo>.available-updates) as <string>;
+
+                            styles [
+                              "updates-amount",
+                            ]
+
+                          }
+                        }
+                      }
+
+                      [start]
+                      Adw.Spinner {
+                        margin-start: 4;
+                        visible: bind $invert_boolean($is_null(template.state as <$BzStateInfo>.background-task-label) as <bool>) as <bool>;
+                        has-tooltip: true;
+                        tooltip-text: bind template.state as <$BzStateInfo>.background-task-label;
+                      }
+
+                      [title]
+                      Adw.ViewSwitcher {
+                        stack: main_view_stack;
+                        policy: wide;
+                        sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.busy) as <bool>;
+                      }
+
+                      [end]
+                      Revealer {
+                        transition-type: slide_right;
+                        reveal-child: bind $invert_boolean(split_view.show-sidebar as <bool>) as <bool>;
+
+                        child: ToggleButton toggle_transactions {
+                          styles [
+                            "flat",
+                          ]
+
+                          has-tooltip: true;
+                          tooltip-text: _("Toggle transaction sidebar");
+                          active: bind split_view.show-sidebar bidirectional;
+
+                          child: $BzGlobalProgress download_bar {
+                            expand-size: 125;
+                            active: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
+                            pending: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.pending;
+                            fraction: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.current-progress;
+                            settings: bind template.state as <$BzStateInfo>.settings;
+
+                            child: Image {
+                              halign: end;
+                              icon-name: "folder-download-symbolic";
+                            };
+                          };
+                        };
+                      }
+
+                      [end]
+                      MenuButton {
+                        primary: true;
+                        icon-name: "open-menu-symbolic";
+                        has-tooltip: true;
+                        tooltip-text: _("Main Menu");
+                        menu-model: primary_menu;
+                      }
+                    }
+                    Adw.Banner {
+                      sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.syncing as <bool>) as <bool>;
+                      revealed: bind template.state as <$BzStateInfo>.metered_connection as <bool>;
+                      title: _("Network connection is metered — automatic store data sync is paused");
+                      button-label: _("Sync Manually");
+                      button-clicked => $sync_cb(template);
+                    }
+                    Adw.Banner {
+                      sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.syncing as <bool>) as <bool>;
+                      revealed: bind $logical_and($invert_boolean(template.state as <$BzStateInfo>.metered_connection as <bool>) as <bool>,
+                                                  $logical_and(template.state as <$BzStateInfo>.have_connection as <bool>,
+                                                  $invert_boolean(template.state as <$BzStateInfo>.online as <bool>) as <bool>) as <bool>) as <bool>;
+                      title: _("You have a network connection but are viewing a cached version of Flathub");
+                      button-label: _("Sync Manually");
+                      button-clicked => $sync_cb(template);
                     }
                   }
 
@@ -410,7 +479,6 @@ template $BzWindow: Adw.ApplicationWindow {
                   state: bind template.state;
                   transaction-manager: bind template.state as <$BzStateInfo>.transaction-manager;
                   show-sidebar: bind split_view.show-sidebar bidirectional;
-                  debounce: false;
                   main-menu: primary_menu;
                   install => $full_view_install_cb(template);
                   remove => $full_view_remove_cb(template);
@@ -463,6 +531,22 @@ menu primary_menu {
     }
 
     item {
+      label: _("_Login with Flathub");
+      action: "app.flathub-login";
+      hidden-when: "action-disabled";
+    }
+
+    item {
+      label: _("_Manage Leftover User Data");
+      action: "window.user-data";
+    }
+
+    item {
+      label: _("_Synchronize Remotes");
+      action: "app.sync-remotes";
+    }
+
+    item {
       label: _("_Keyboard Shortcuts");
       action: "app.shortcuts";
     }
@@ -486,6 +570,21 @@ menu debug_menu {
     item {
       label: _("Open Bazaar Inspector");
       action: "app.bazaar-inspector";
+    }
+  }
+}
+
+menu account_menu {
+  section {
+    item {
+      label: _("Favorites");
+      action: "app.flathub-favorites";
+    }
+  }
+  section {
+    item {
+      label: _("Log Out");
+      action: "app.flathub-logout";
     }
   }
 }

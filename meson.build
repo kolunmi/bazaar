@@ -38,6 +38,10 @@ else
     config_h.set_quoted('SANDBOXED_LIBFLATPAK', '1')
   endif
 
+  if get_option('development')
+    config_h.set10('DEVELOPMENT_BUILD', get_option('development'))
+  endif
+
   configure_file(output: 'config.h', configuration: config_h)
   add_project_arguments(['-I' + meson.project_build_root()], language: 'c')
 

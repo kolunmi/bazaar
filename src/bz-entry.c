@@ -96,6 +96,7 @@ typedef struct
   char            *developer_id;
   GListModel      *developer_apps;
   GListModel      *screenshot_paintables;
+  GListModel      *screenshot_captions;
   GListModel      *share_urls;
   char            *donation_url;
   char            *forge_url;
@@ -120,6 +121,7 @@ typedef struct
   GListModel           *download_stats_per_country;
   int                   recent_downloads;
   int                   total_downloads;
+  int                   favorites_count;
 
   GHashTable *flathub_prop_queries;
   DexFuture  *mini_icon_future;
@@ -158,6 +160,7 @@ enum
   PROP_DEVELOPER_ID,
   PROP_DEVELOPER_APPS,
   PROP_SCREENSHOT_PAINTABLES,
+  PROP_SCREENSHOT_CAPTIONS,
   PROP_SHARE_URLS,
   PROP_DONATION_URL,
   PROP_FORGE_URL,
@@ -170,6 +173,7 @@ enum
   PROP_DOWNLOAD_STATS,
   PROP_RECENT_DOWNLOADS,
   PROP_TOTAL_DOWNLOADS,
+  PROP_FAVORITES_COUNT,
   PROP_LIGHT_ACCENT_COLOR,
   PROP_DARK_ACCENT_COLOR,
   PROP_IS_MOBILE_FRIENDLY,
@@ -355,6 +359,9 @@ bz_entry_get_property (GObject    *object,
     case PROP_SCREENSHOT_PAINTABLES:
       g_value_set_object (value, priv->screenshot_paintables);
       break;
+    case PROP_SCREENSHOT_CAPTIONS:
+      g_value_set_object (value, priv->screenshot_captions);
+      break;
     case PROP_SHARE_URLS:
       g_value_set_object (value, priv->share_urls);
       break;
@@ -424,10 +431,13 @@ bz_entry_get_property (GObject    *object,
       query_flathub (self, PROP_DOWNLOAD_STATS);
       g_value_set_int (value, priv->recent_downloads);
       break;
-
     case PROP_TOTAL_DOWNLOADS:
       query_flathub (self, PROP_TOTAL_DOWNLOADS);
       g_value_set_int (value, priv->total_downloads);
+      break;
+    case PROP_FAVORITES_COUNT:
+      query_flathub (self, PROP_FAVORITES_COUNT);
+      g_value_set_int (value, priv->favorites_count);
       break;
 
     default:
@@ -544,6 +554,10 @@ bz_entry_set_property (GObject      *object,
       g_clear_object (&priv->screenshot_paintables);
       priv->screenshot_paintables = g_value_dup_object (value);
       break;
+    case PROP_SCREENSHOT_CAPTIONS:
+      g_clear_object (&priv->screenshot_captions);
+      priv->screenshot_captions = g_value_dup_object (value);
+      break;
     case PROP_SHARE_URLS:
       g_clear_object (&priv->share_urls);
       priv->share_urls = g_value_dup_object (value);
@@ -654,6 +668,9 @@ bz_entry_set_property (GObject      *object,
       break;
     case PROP_TOTAL_DOWNLOADS:
       priv->total_downloads = g_value_get_int (value);
+      break;
+    case PROP_FAVORITES_COUNT:
+      priv->favorites_count = g_value_get_int (value);
       break;
     case PROP_HOLDING:
     default:
@@ -834,6 +851,13 @@ bz_entry_class_init (BzEntryClass *klass)
           G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE);
 
+  props[PROP_SCREENSHOT_CAPTIONS] =
+      g_param_spec_object (
+          "screenshot-captions",
+          NULL, NULL,
+          G_TYPE_LIST_MODEL,
+          G_PARAM_READWRITE);
+
   props[PROP_SHARE_URLS] =
       g_param_spec_object (
           "share-urls",
@@ -994,6 +1018,13 @@ bz_entry_class_init (BzEntryClass *klass)
           0, G_MAXINT, 0,
           G_PARAM_READWRITE);
 
+  props[PROP_FAVORITES_COUNT] =
+      g_param_spec_int (
+          "favorites-count",
+          NULL, NULL,
+          -1, G_MAXINT, -1,
+          G_PARAM_READWRITE);
+
   g_object_class_install_properties (object_class, LAST_PROP, props);
 }
 
@@ -1003,6 +1034,7 @@ bz_entry_init (BzEntry *self)
   BzEntryPrivate *priv = bz_entry_get_instance_private (self);
 
   priv->hold = 0;
+  priv->favorites_count = -1;
 }
 
 static void
@@ -1101,6 +1133,27 @@ bz_entry_real_serialize (BzSerializable  *serializable,
             }
 
           g_variant_builder_add (builder, "{sv}", "screenshot-paintables", g_variant_builder_end (sub_builder));
+        }
+    }
+  if (priv->screenshot_captions != NULL)
+    {
+      guint n_items = 0;
+
+      n_items = g_list_model_get_n_items (priv->screenshot_captions);
+      if (n_items > 0)
+        {
+          g_autoptr (GVariantBuilder) sub_builder = NULL;
+
+          sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("as"));
+          for (guint i = 0; i < n_items; i++)
+            {
+              g_autoptr (GtkStringObject) string = NULL;
+
+              string = g_list_model_get_item (priv->screenshot_captions, i);
+              g_variant_builder_add (sub_builder, "s", gtk_string_object_get_string (string));
+            }
+
+          g_variant_builder_add (builder, "{sv}", "screenshot-captions", g_variant_builder_end (sub_builder));
         }
     }
   if (priv->share_urls != NULL)
@@ -1256,38 +1309,38 @@ bz_entry_real_serialize (BzSerializable  *serializable,
     }
 
   if (priv->verification_status != NULL)
-  {
-    gboolean verified                 = FALSE;
-    g_autofree char *method           = NULL;
-    g_autofree char *website          = NULL;
-    g_autofree char *login_name       = NULL;
-    g_autofree char *login_provider   = NULL;
-    g_autofree char *timestamp        = NULL;
-    gboolean login_is_organization    = FALSE;
+    {
+      gboolean         verified              = FALSE;
+      g_autofree char *method                = NULL;
+      g_autofree char *website               = NULL;
+      g_autofree char *login_name            = NULL;
+      g_autofree char *login_provider        = NULL;
+      g_autofree char *timestamp             = NULL;
+      gboolean         login_is_organization = FALSE;
 
-    g_object_get (priv->verification_status,
-                  "verified", &verified,
-                  "method", &method,
-                  "website", &website,
-                  "login-name", &login_name,
-                  "login-provider", &login_provider,
-                  "timestamp", &timestamp,
-                  "login-is-organization", &login_is_organization,
-                  NULL);
+      g_object_get (priv->verification_status,
+                    "verified", &verified,
+                    "method", &method,
+                    "website", &website,
+                    "login-name", &login_name,
+                    "login-provider", &login_provider,
+                    "timestamp", &timestamp,
+                    "login-is-organization", &login_is_organization,
+                    NULL);
 
-    g_variant_builder_add (builder, "{sv}", "verification-verified", g_variant_new_boolean (verified));
-    if (method != NULL)
-      g_variant_builder_add (builder, "{sv}", "verification-method", g_variant_new_string (method));
-    if (website != NULL)
-      g_variant_builder_add (builder, "{sv}", "verification-website", g_variant_new_string (website));
-    if (login_name != NULL)
-      g_variant_builder_add (builder, "{sv}", "verification-login-name", g_variant_new_string (login_name));
-    if (login_provider != NULL)
-      g_variant_builder_add (builder, "{sv}", "verification-login-provider", g_variant_new_string (login_provider));
-    if (timestamp != NULL)
-      g_variant_builder_add (builder, "{sv}", "verification-timestamp", g_variant_new_string (timestamp));
-    g_variant_builder_add (builder, "{sv}", "verification-login-is-organization", g_variant_new_boolean (login_is_organization));
-  }
+      g_variant_builder_add (builder, "{sv}", "verification-verified", g_variant_new_boolean (verified));
+      if (method != NULL)
+        g_variant_builder_add (builder, "{sv}", "verification-method", g_variant_new_string (method));
+      if (website != NULL)
+        g_variant_builder_add (builder, "{sv}", "verification-website", g_variant_new_string (website));
+      if (login_name != NULL)
+        g_variant_builder_add (builder, "{sv}", "verification-login-name", g_variant_new_string (login_name));
+      if (login_provider != NULL)
+        g_variant_builder_add (builder, "{sv}", "verification-login-provider", g_variant_new_string (login_provider));
+      if (timestamp != NULL)
+        g_variant_builder_add (builder, "{sv}", "verification-timestamp", g_variant_new_string (timestamp));
+      g_variant_builder_add (builder, "{sv}", "verification-login-is-organization", g_variant_new_boolean (login_is_organization));
+    }
 
   g_variant_builder_add (builder, "{sv}", "is-flathub", g_variant_new_boolean (priv->is_flathub));
   if (priv->is_flathub)
@@ -1324,6 +1377,8 @@ bz_entry_real_serialize (BzSerializable  *serializable,
             }
           if (g_hash_table_contains (priv->flathub_prop_queries, GINT_TO_POINTER (PROP_RECENT_DOWNLOADS)))
             g_variant_builder_add (builder, "{sv}", "recent-downloads", g_variant_new_int32 (priv->recent_downloads));
+          if (g_hash_table_contains (priv->flathub_prop_queries, GINT_TO_POINTER (PROP_FAVORITES_COUNT)))
+            g_variant_builder_add (builder, "{sv}", "favorites-count", g_variant_new_int32 (priv->favorites_count));
         }
     }
 }
@@ -1432,6 +1487,27 @@ bz_entry_real_deserialize (BzSerializable *serializable,
             }
 
           priv->screenshot_paintables = G_LIST_MODEL (g_steal_pointer (&store));
+        }
+      else if (g_strcmp0 (key, "screenshot-captions") == 0)
+        {
+          g_autoptr (GListStore) store          = NULL;
+          g_autoptr (GVariantIter) caption_iter = NULL;
+
+          store = g_list_store_new (GTK_TYPE_STRING_OBJECT);
+
+          caption_iter = g_variant_iter_new (value);
+          for (;;)
+            {
+              g_autofree char *caption           = NULL;
+              g_autoptr (GtkStringObject) string = NULL;
+
+              if (!g_variant_iter_next (caption_iter, "s", &caption))
+                break;
+              string = gtk_string_object_new (caption);
+              g_list_store_append (store, string);
+            }
+
+          priv->screenshot_captions = G_LIST_MODEL (g_steal_pointer (&store));
         }
       else if (g_strcmp0 (key, "share-urls") == 0)
         {
@@ -1795,6 +1871,21 @@ bz_entry_get_developer (BzEntry *self)
   priv = bz_entry_get_instance_private (self);
 
   return priv->developer;
+}
+
+gboolean
+bz_entry_is_verified (BzEntry *self)
+{
+  BzEntryPrivate *priv     = NULL;
+  gboolean        verified = FALSE;
+
+  g_return_val_if_fail (BZ_IS_ENTRY (self), FALSE);
+  priv = bz_entry_get_instance_private (self);
+
+  if (priv->verification_status != NULL)
+    g_object_get (priv->verification_status, "verified", &verified, NULL);
+
+  return verified;
 }
 
 const char *
@@ -2222,6 +2313,16 @@ query_flathub (BzEntry *self,
       g_steal_pointer (&future));
 }
 
+static gint
+compare_dates (BzDataPoint *a,
+               BzDataPoint *b)
+{
+  double date_a = bz_data_point_get_independent (a);
+  double date_b = bz_data_point_get_independent (b);
+
+  return (date_a > date_b) - (date_a < date_b);
+}
+
 static DexFuture *
 query_flathub_fiber (QueryFlathubData *data)
 {
@@ -2241,6 +2342,9 @@ query_flathub_fiber (QueryFlathubData *data)
       break;
     case PROP_DEVELOPER_APPS:
       request = g_strdup_printf ("/collection/developer/%s", developer);
+      break;
+    case PROP_FAVORITES_COUNT:
+      request = g_strdup_printf ("/favorites/%s/count", id);
       break;
     default:
       g_assert_not_reached ();
@@ -2282,6 +2386,7 @@ query_flathub_fiber (QueryFlathubData *data)
             (JsonObjectForeach) download_stats_per_day_foreach,
             store);
 
+        g_list_store_sort (store, (GCompareDataFunc) compare_dates, NULL);
         return dex_future_new_for_object (store);
       }
       break;
@@ -2338,6 +2443,15 @@ query_flathub_fiber (QueryFlathubData *data)
         return dex_future_new_for_object (app_ids);
       }
       break;
+    case PROP_FAVORITES_COUNT:
+      {
+        int favorites_count = 0;
+        if (json_object_has_member (json_node_get_object (node), "favorites_count"))
+          favorites_count = json_object_get_int_member (json_node_get_object (node), "favorites_count");
+
+        return dex_future_new_for_int (favorites_count);
+      }
+      break;
 
     default:
       g_assert_not_reached ();
@@ -2375,16 +2489,13 @@ download_stats_per_day_foreach (JsonObject  *object,
   g_autofree char *formatted_label = NULL;
   g_autofree char *iso_with_tz     = NULL;
 
-  independent = g_list_model_get_n_items (G_LIST_MODEL (store));
-  dependent   = json_node_get_int (member_node);
+  dependent = json_node_get_int (member_node);
 
   iso_with_tz = g_strdup_printf ("%sT00:00:00Z", member_name);
   date        = g_date_time_new_from_iso8601 (iso_with_tz, NULL);
 
-  if (date != NULL)
-    formatted_label = g_date_time_format (date, "%-d %b");
-  else
-    formatted_label = g_strdup (member_name);
+  formatted_label = g_date_time_format (date, "%-d %b");
+  independent     = (double) g_date_time_to_unix (date);
 
   point = g_object_new (
       BZ_TYPE_DATA_POINT,
@@ -2670,6 +2781,7 @@ clear_entry (BzEntry *self)
   g_clear_pointer (&priv->developer_id, g_free);
   g_clear_object (&priv->developer_apps);
   g_clear_object (&priv->screenshot_paintables);
+  g_clear_object (&priv->screenshot_captions);
   g_clear_object (&priv->share_urls);
   g_clear_pointer (&priv->donation_url, g_free);
   g_clear_pointer (&priv->forge_url, g_free);

@@ -22,9 +22,11 @@
     <file preprocess="xml-stripblanks">bz-context-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-curated-app-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-decorated-screenshot.ui</file>
-    <file preprocess="xml-stripblanks">bz-detailed-app-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-developer-badge.ui</file>
     <file preprocess="xml-stripblanks">bz-entry-inspector.ui</file>
+    <file preprocess="xml-stripblanks">bz-favorite-button.ui</file>
+    <file preprocess="xml-stripblanks">bz-favorites-page.ui</file>
+    <file preprocess="xml-stripblanks">bz-favorites-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-featured-carousel.ui</file>
     <file preprocess="xml-stripblanks">bz-featured-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-flathub-category-section.ui</file>
@@ -35,6 +37,7 @@
     <file preprocess="xml-stripblanks">bz-installed-page.ui</file>
     <file preprocess="xml-stripblanks">bz-installed-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-license-dialog.ui</file>
+    <file preprocess="xml-stripblanks">bz-login-page.ui</file>
     <file preprocess="xml-stripblanks">bz-markdown-render.ui</file>
     <file preprocess="xml-stripblanks">bz-preferences-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-progress-bar.ui</file>
@@ -49,10 +52,14 @@
     <file preprocess="xml-stripblanks">bz-stats-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-transaction-view.ui</file>
     <file preprocess="xml-stripblanks">bz-update-dialog.ui</file>
+    <file preprocess="xml-stripblanks">bz-user-data-page.ui</file>
+    <file preprocess="xml-stripblanks">bz-user-data-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-window.ui</file>
     <file alias="shortcuts-dialog.ui" preprocess="xml-stripblanks">gtk/shortcuts-dialog.ui</file>
 
     <file preprocess="xml-stripblanks">icons/scalable/actions/app-installed-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/bookmark-filled-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/bookmark-outline-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/check-plain-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/circle-filled-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/code-symbolic.svg</file>
@@ -100,8 +107,8 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/share-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/sidebar-show-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/sliders-horizontal-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/smartphone2-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/software-update-available-symbolic.svg</file>
-    <file preprocess="xml-stripblanks">icons/scalable/actions/starred-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/thumbs-up-outline-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/timer-sand-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/translations-symbolic.svg</file>
@@ -139,6 +146,7 @@
     <file alias="icons/scalable/actions/violence-none-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/violence-none-symbolic.svg</file>
 
     <file preprocess="xml-stripblanks">icons/scalable/actions/on-the-go-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/we-love-games-symbolic.svg</file>
 
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Create.svg</file>
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Develop.svg</file>
@@ -155,6 +163,12 @@
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Popular.svg</file>
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.New.svg</file>
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Updated.svg</file>
+
+    <file preprocess="xml-stripblanks">icons/io.github.kolunmi.Bazaar.github.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolunmi.Bazaar.gitlab.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolunmi.Bazaar.gnome.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolunmi.Bazaar.kde.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolunmi.Bazaar.google.svg</file>
 
   </gresource>
 </gresources>

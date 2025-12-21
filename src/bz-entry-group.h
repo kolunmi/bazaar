@@ -70,6 +70,9 @@ bz_entry_group_get_dark_accent_color (BzEntryGroup *self);
 gboolean
 bz_entry_group_get_is_flathub (BzEntryGroup *self);
 
+gboolean
+bz_entry_group_get_is_verified (BzEntryGroup *self);
+
 const char *
 bz_entry_group_get_search_tokens (BzEntryGroup *self);
 
@@ -109,6 +112,12 @@ bz_entry_group_get_updatable_and_available (BzEntryGroup *self);
 int
 bz_entry_group_get_removable_and_available (BzEntryGroup *self);
 
+guint64
+bz_entry_group_get_user_data_size (BzEntryGroup *self);
+
+void
+bz_entry_group_reap_user_data (BzEntryGroup *self);
+
 void
 bz_entry_group_add (BzEntryGroup *self,
                     BzEntry      *entry,
@@ -119,6 +128,6 @@ bz_entry_group_connect_living (BzEntryGroup *self,
                                BzEntry      *entry);
 
 DexFuture *
-bz_entry_group_dup_all_into_model (BzEntryGroup *self);
+bz_entry_group_dup_all_into_store (BzEntryGroup *self);
 
 G_END_DECLS

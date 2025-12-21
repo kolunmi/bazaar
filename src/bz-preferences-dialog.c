@@ -41,6 +41,12 @@ static const BarTheme bar_themes[] = {
   {   "genderfluid-flag",   "genderfluid-theme", N_ ("Genderfluid Pride Colors") },
   {    "polysexual-flag",    "polysexual-theme",  N_ ("Polysexual Pride Colors") },
   {    "omnisexual-flag",    "omnisexual-theme",  N_ ("Omnisexual Pride Colors") },
+  {        "aroace-flag",        "aroace-theme",      N_ ("Aroace Pride Colors") },
+  {       "agender-flag",       "agender-theme",     N_ ("Agender Pride Colors") },
+  {   "genderqueer-flag",   "genderqueer-theme", N_ ("Genderqueer Pride Colors") },
+  {      "intersex-flag",      "intersex-theme",    N_ ("Intersex Pride Colors") },
+  {    "demigender-flag",    "demigender-theme",  N_ ("Demigender Pride Colors") },
+  {    "biromantic-flag",    "biromantic-theme",  N_ ("Biromantic Pride Colors") },
 };
 
 struct _BzPreferencesDialog
@@ -50,7 +56,6 @@ struct _BzPreferencesDialog
   GSettings *settings;
 
   /* Template widgets */
-  AdwSwitchRow *git_forge_star_counts_switch;
   AdwSwitchRow *only_foss_switch;
   AdwSwitchRow *only_flathub_switch;
   AdwSwitchRow *search_debounce_switch;
@@ -154,10 +159,6 @@ bind_settings (BzPreferencesDialog *self)
     return;
 
   /* Bind all boolean settings to their respective switches */
-  g_settings_bind (self->settings, "show-git-forge-star-counts",
-                   self->git_forge_star_counts_switch, "active",
-                   G_SETTINGS_BIND_DEFAULT);
-
   g_settings_bind (self->settings, "show-only-foss",
                    self->only_foss_switch, "active",
                    G_SETTINGS_BIND_DEFAULT);
@@ -192,7 +193,6 @@ bz_preferences_dialog_class_init (BzPreferencesDialogClass *klass)
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-preferences-dialog.ui");
 
-  gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, git_forge_star_counts_switch);
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, only_foss_switch);
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, only_flathub_switch);
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, search_debounce_switch);

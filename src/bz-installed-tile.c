@@ -21,6 +21,7 @@
 #include <glib/gi18n.h>
 
 #include "bz-addons-dialog.h"
+#include "bz-entry-group-util.h"
 #include "bz-entry-group.h"
 #include "bz-env.h"
 #include "bz-error.h"
@@ -52,12 +53,6 @@ enum
 };
 
 static GParamSpec *props[LAST_PROP] = { 0 };
-
-static BzEntry *
-find_entry_in_group (BzEntryGroup *group,
-                     gboolean (*test) (BzEntry *entry),
-                     GtkWidget *window,
-                     GError   **error);
 
 static gboolean
 test_is_support (BzEntry *entry);
@@ -168,7 +163,7 @@ support_fiber (BzInstalledTile *tile)
   window = gtk_widget_get_ancestor (GTK_WIDGET (tile), GTK_TYPE_WINDOW);
   g_assert (window != NULL);
 
-  entry = find_entry_in_group (tile->group, test_is_support, window, &local_error);
+  entry = bz_entry_group_find_entry (tile->group, test_is_support, window, &local_error);
   if (entry == NULL)
     goto err;
 
@@ -215,7 +210,7 @@ install_addons_fiber (BzInstalledTile *tile)
   g_object_get (page, "state", &state, NULL);
   g_assert (state != NULL);
 
-  entry = find_entry_in_group (tile->group, test_has_addons, window, &local_error);
+  entry = bz_entry_group_find_entry (tile->group, test_has_addons, window, &local_error);
   if (entry == NULL)
     goto err;
 
@@ -265,7 +260,7 @@ remove_fiber (BzInstalledTile *tile)
   window = gtk_widget_get_ancestor (GTK_WIDGET (tile), GTK_TYPE_WINDOW);
   g_assert (window != NULL);
 
-  entry = find_entry_in_group (tile->group, NULL, window, &local_error);
+  entry = bz_entry_group_find_entry (tile->group, NULL, window, &local_error);
   if (entry == NULL)
     goto err;
 
@@ -327,7 +322,7 @@ bz_installed_tile_class_init (BzInstalledTileClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, support_cb);
   gtk_widget_class_bind_template_callback (widget_class, install_addons_cb);
   gtk_widget_class_bind_template_callback (widget_class, remove_cb);
-  
+
   gtk_widget_class_set_accessible_role (widget_class, GTK_ACCESSIBLE_ROLE_BUTTON);
 }
 
@@ -362,103 +357,6 @@ bz_installed_tile_get_group (BzInstalledTile *self)
 {
   g_return_val_if_fail (BZ_IS_INSTALLED_TILE (self), NULL);
   return self->group;
-}
-
-static BzEntry *
-find_entry_in_group (BzEntryGroup *group,
-                     gboolean (*test) (BzEntry *entry),
-                     GtkWidget *window,
-                     GError   **error)
-{
-  g_autoptr (GListModel) model     = NULL;
-  guint n_items                    = 0;
-  g_autoptr (GPtrArray) candidates = NULL;
-
-  model = dex_await_object (bz_entry_group_dup_all_into_model (group), error);
-  if (model == NULL)
-    return NULL;
-  n_items = g_list_model_get_n_items (model);
-
-  candidates = g_ptr_array_new_with_free_func (g_object_unref);
-  for (guint i = 0; i < n_items; i++)
-    {
-      g_autoptr (BzEntry) entry = NULL;
-
-      entry = g_list_model_get_item (model, i);
-
-      if (bz_entry_is_installed (entry) &&
-          (test == NULL || test (entry)))
-        g_ptr_array_add (candidates, g_steal_pointer (&entry));
-    }
-
-  if (candidates->len == 0)
-    {
-      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
-                   "BUG: No entry candidates satisfied this test condition");
-      return NULL;
-    }
-  else if (candidates->len == 1)
-    return g_ptr_array_steal_index_fast (candidates, 0);
-  else if (window != NULL)
-    {
-      AdwDialog       *alert    = NULL;
-      g_autofree char *response = NULL;
-
-      alert = adw_alert_dialog_new (NULL, NULL);
-      adw_alert_dialog_set_prefer_wide_layout (ADW_ALERT_DIALOG (alert), TRUE);
-      adw_alert_dialog_format_heading (
-          ADW_ALERT_DIALOG (alert),
-          _ ("Choose an Installation"));
-      adw_alert_dialog_format_body (
-          ADW_ALERT_DIALOG (alert),
-          _ ("You have multiple versions of this app installed. Which "
-             "one would you like to proceed with? "));
-      adw_alert_dialog_add_responses (
-          ADW_ALERT_DIALOG (alert),
-          "cancel", _ ("Cancel"),
-          NULL);
-      adw_alert_dialog_set_close_response (ADW_ALERT_DIALOG (alert), "cancel");
-      adw_alert_dialog_set_response_appearance (
-          ADW_ALERT_DIALOG (alert), "cancel", ADW_RESPONSE_DESTRUCTIVE);
-
-      for (guint i = 0; i < candidates->len; i++)
-        {
-          BzEntry    *entry     = NULL;
-          const char *unique_id = NULL;
-
-          entry     = g_ptr_array_index (candidates, i);
-          unique_id = bz_entry_get_unique_id (entry);
-
-          adw_alert_dialog_add_responses (
-              ADW_ALERT_DIALOG (alert),
-              unique_id, unique_id,
-              NULL);
-          if (i == 0)
-            adw_alert_dialog_set_default_response (ADW_ALERT_DIALOG (alert), unique_id);
-        }
-
-      adw_dialog_present (alert, GTK_WIDGET (window));
-      response = dex_await_string (
-          bz_make_alert_dialog_future (ADW_ALERT_DIALOG (alert)),
-          NULL);
-
-      if (response != NULL)
-        {
-          for (guint i = 0; i < candidates->len; i++)
-            {
-              BzEntry    *entry     = NULL;
-              const char *unique_id = NULL;
-
-              entry     = g_ptr_array_index (candidates, i);
-              unique_id = bz_entry_get_unique_id (entry);
-
-              if (g_strcmp0 (unique_id, response) == 0)
-                return g_object_ref (entry);
-            }
-        }
-    }
-
-  return NULL;
 }
 
 static gboolean

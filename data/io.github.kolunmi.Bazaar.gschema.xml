@@ -6,11 +6,6 @@
       <summary>Hide EOL Entries</summary>
       <description>Hide EOL entries and entries depending on them</description>
     </key>
-    <key name="show-git-forge-star-counts" type="b">
-      <default>false</default>
-      <summary>Show Git Forge Star Counts</summary>
-      <description>Whether to attempt to detect and show "star counts" for projects in the full view</description>
-    </key>
     <key name="show-only-foss" type="b">
       <default>false</default>
       <summary>Only Show Free Software</summary>
@@ -40,6 +35,12 @@
         <choice value="genderfluid-flag"/>
         <choice value="polysexual-flag"/>
         <choice value="omnisexual-flag"/>
+        <choice value="aroace-flag"/>
+        <choice value="agender-flag"/>
+        <choice value="genderqueer-flag"/>
+        <choice value="intersex-flag"/>
+        <choice value="demigender-flag"/>
+        <choice value="biromantic-flag"/>
       </choices>
       <default>'accent-color'</default>
       <summary>Global Progress Bar Theme</summary>
