@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-18 01:22+0100\n"
-"PO-Revision-Date: 2025-12-19 11:04+0100\n"
+"POT-Creation-Date: 2025-12-19 20:46+0100\n"
+"PO-Revision-Date: 2025-12-19 23:06+0100\n"
 "Last-Translator: Mimolet <theMimolet@proton.me>\n"
 "Language-Team: French <kde-francophone@kde.org>\n"
 "Language: fr\n"
@@ -112,7 +112,7 @@ msgstr ""
 "onglet \"Recommandées\" qui peut être configuré par les distributeurs, "
 "améliorant la personnalisation de l'expérience."
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29 src/bz-application.c:682
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29 src/bz-application.c:683
 msgid "Adam Masciola"
 msgstr ""
 
@@ -139,12 +139,13 @@ msgstr "Gérer les extensions"
 
 #: src/bz-addons-dialog.c:90 src/bz-full-view.blp:502
 #: src/bz-installed-tile.blp:117 src/bz-transaction-view.blp:213
-#: src/bz-window.c:1294
+#: src/bz-window.c:1314
 msgid "Remove"
 msgstr "Supprimer"
 
-#: src/bz-addons-dialog.c:95 src/bz-full-view.blp:274 src/bz-full-view.blp:489
-#: src/bz-transaction-view.blp:187 src/bz-window.c:1271
+#: src/bz-addons-dialog.c:95 src/bz-favorites-tile.c:166
+#: src/bz-full-view.blp:274 src/bz-full-view.blp:489
+#: src/bz-transaction-view.blp:187 src/bz-window.c:1291
 msgid "Install"
 msgstr "Installer"
 
@@ -564,7 +565,7 @@ msgstr "_À propos de Bazaar"
 msgid "_Quit Bazaar"
 msgstr "_Quitter Bazaar"
 
-#: src/bz-application.c:577
+#: src/bz-application.c:578
 msgid ""
 "This functionality is currently disabled. It is recommended you download and "
 "install Flatseal to manage app permissions."
@@ -572,37 +573,37 @@ msgstr ""
 "Cette fonctionnalité est actuellement désactivée. Téléchargez et installez "
 "Flatseal pour gérer les autorisations des apps."
 
-#: src/bz-application.c:659
+#: src/bz-application.c:660
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr ""
 
-#: src/bz-application.c:660
+#: src/bz-application.c:661
 msgctxt "About Dialog Developer Credit"
 msgid "Alexander Vanhee"
 msgstr ""
 
 #. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
-#: src/bz-application.c:685
+#: src/bz-application.c:686
 msgid "translator-credits"
 msgstr ""
 "Atom <29772841+AtomHare@users.noreply.github.com>, 2025\n"
 "Léane GRASSER <leane.grasser@proton.me>, 2025\n"
 "Mimolet <theMimolet@proton.me>, 2025"
 
-#: src/bz-application.c:749
+#: src/bz-application.c:750
 msgid "Logged Out Successfully!"
 msgstr "Déconnexion réussie !"
 
-#: src/bz-application.c:855
+#: src/bz-application.c:877
 msgid "Performing setup..."
 msgstr "Configuration en cours..."
 
-#: src/bz-application.c:934 src/bz-application.c:943
+#: src/bz-application.c:956 src/bz-application.c:965
 msgid "Set Up Flathub"
 msgstr "Configurer Flathub"
 
-#: src/bz-application.c:937
+#: src/bz-application.c:959
 msgid ""
 "Flathub is not set up on this system. You will not be able to browse and "
 "install applications in Bazaar if its unavailable.\n"
@@ -615,26 +616,27 @@ msgstr ""
 "Vous pouvez toujours utiliser Bazaar pour naviguer et désinstaller des apps "
 "déjà installées."
 
-#: src/bz-application.c:942 src/bz-update-dialog.blp:6
+#: src/bz-application.c:964 src/bz-update-dialog.blp:6
 msgid "Later"
 msgstr "Plus tard"
 
-#: src/bz-application.c:1344
+#: src/bz-application.c:1366
 msgid "Synchronizing..."
 msgstr "Synchronisation..."
 
-#: src/bz-application.c:1483
+#: src/bz-application.c:1505
 #, c-format
 msgid "Receiving %d entries..."
 msgstr "Chargement de %d apps..."
 
-#: src/bz-application.c:1488
+#: src/bz-application.c:1510
 msgid "Checking for updates"
 msgstr "Recherche de mises à jour..."
 
-#: src/bz-curated-view.blp:11 src/bz-flathub-page.blp:19
-#: src/bz-full-view.blp:53 src/bz-installed-page.blp:15
-#: src/bz-user-data-page.blp:52 src/bz-window.blp:183
+#: src/bz-curated-view.blp:11 src/bz-favorites-page.blp:65
+#: src/bz-flathub-page.blp:19 src/bz-full-view.blp:53
+#: src/bz-installed-page.blp:15 src/bz-user-data-page.blp:52
+#: src/bz-window.blp:183
 msgid "Empty"
 msgstr "Vide"
 
@@ -700,6 +702,22 @@ msgstr "La propriété de l'ID %s a été vérifiée en utilisant %s."
 msgid "The ownership of the %s app ID has been verified."
 msgstr "La propriété de l'ID %s a été vérifiée."
 
+#: src/bz-entry-group-util.c:73
+msgid "Choose an Installation"
+msgstr "Choisissez une installation"
+
+#: src/bz-entry-group-util.c:76
+msgid ""
+"You have multiple versions of this app installed. Which one would you like "
+"to proceed with?"
+msgstr ""
+"Plusieurs versions de cette application sont installées. Avec quelle version v"
+"oulez-vous continuer ?"
+
+#: src/bz-entry-group-util.c:80 src/bz-window.c:1290 src/bz-window.c:1313
+msgid "Cancel"
+msgstr "Annuler"
+
 #: src/bz-entry-inspector.blp:5
 msgid "Entry Inspector"
 msgstr "Inspecteur d'entrée"
@@ -723,6 +741,41 @@ msgstr "Fermer"
 #: src/bz-error.c:90
 msgid "Copy and Close"
 msgstr "Copier et fermer"
+
+#: src/bz-favorites-tile.c:164
+msgid "Uninstall"
+msgstr "Désinstaller"
+
+#: src/bz-favorites-tile.blp:70 src/bz-installed-tile.blp:75
+msgid "Support this application"
+msgstr "Soutenez cette application"
+
+#: src/bz-favorites-tile.blp:118
+msgid "Remove from Favorites"
+msgstr "Enlever des favoris"
+
+#: src/bz-favorites-page.blp:5 src/bz-favorites-page.blp:75
+#: src/bz-window.blp:580
+msgid "Favorites"
+msgstr "Favoris"
+
+#: src/bz-favorites-page.blp:22 src/bz-full-view.blp:20 src/bz-window.blp:126
+#: src/bz-window.blp:420
+msgid "Toggle transaction sidebar"
+msgstr "Afficher/Masquer la barre des tâches"
+
+#: src/bz-favorites-page.blp:53 src/bz-user-data-page.blp:41
+msgid "Loading"
+msgstr "Chargement"
+
+#: src/bz-favorites-page.blp:68
+msgid "No Favorites"
+msgstr "Aucun favoris"
+
+#: src/bz-favorites-page.blp:69
+msgid "Applications you mark as favorite will appear here"
+msgstr ""
+"Les applications que vous marquerez comme favorites vont apparaître ici"
 
 #: src/bz-featured-carousel.blp:31
 msgid "Previous"
@@ -1009,10 +1062,6 @@ msgctxt "Project URL Type"
 msgid "Contribute"
 msgstr "Contribuer à l'app"
 
-#: src/bz-full-view.blp:20 src/bz-window.blp:126 src/bz-window.blp:420
-msgid "Toggle transaction sidebar"
-msgstr "Afficher/Masquer la barre des tâches"
-
 #: src/bz-full-view.blp:57
 msgid "No Results"
 msgstr "Aucun résultat"
@@ -1069,7 +1118,7 @@ msgstr ""
 "L'environnement d'exécution utilisé par cette app ne reçoit plus de mises à "
 "jour de sécurité. Son utilisation pourrait devenir risquée."
 
-#: src/bz-full-view.blp:644 src/bz-window.c:1240
+#: src/bz-full-view.blp:644 src/bz-window.c:1260
 msgid "Delete Data"
 msgstr "Supprimer les données"
 
@@ -1363,29 +1412,9 @@ msgstr "Sortir du cache et inspecter"
 msgid "No Flatpaks Installed"
 msgstr "Aucun Flatpak installé"
 
-#: src/bz-installed-page.c:395
-msgid "Choose an Installation"
-msgstr "Choisissez une installation"
-
-#: src/bz-installed-page.c:398
-msgid ""
-"You have multiple versions of this app installed. Which one would you like "
-"to proceed with? "
-msgstr ""
-"Plusieurs versions de cette application sont installées. Avec quelle version "
-"voulez-vous continuer ? "
-
-#: src/bz-installed-page.c:402 src/bz-window.c:1270 src/bz-window.c:1293
-msgid "Cancel"
-msgstr "Annuler"
-
 #: src/bz-installed-tile.blp:61 src/bz-rich-app-tile.blp:137
 msgid "Stopped Receiving Updates"
 msgstr "Ne reçoit plus de mises à jour"
-
-#: src/bz-installed-tile.blp:75
-msgid "Support this application"
-msgstr "Soutenez cette application"
 
 #: src/bz-license-dialog.blp:160
 msgid "Get Involved"
@@ -1761,10 +1790,6 @@ msgstr ""
 msgid "Manage Leftover User Data"
 msgstr "Nettoyer les données orphelines"
 
-#: src/bz-user-data-page.blp:41
-msgid "Loading"
-msgstr "Chargement"
-
 #: src/bz-user-data-page.blp:55
 msgid "No User Data found"
 msgstr "Aucunes données orphelines trouvées"
@@ -1821,8 +1846,8 @@ msgstr ""
 #: src/bz-window.blp:450
 msgid "Network connection is metered — automatic store data sync is paused"
 msgstr ""
-"La connexion réseau est limitée — l'actualisation automatique de Bazaar est su"
-"spendue."
+"La connexion réseau est limitée — l'actualisation automatique de Bazaar est"
+"suspendue."
 
 #: src/bz-window.blp:451 src/bz-window.blp:460
 msgid "Sync Manually"
@@ -1832,8 +1857,8 @@ msgstr "Actualiser"
 msgid ""
 "You have a network connection but are viewing a cached version of Flathub"
 msgstr ""
-"Vous disposez d'une connexion réseau, mais vous consultez une version mise en "
-"cache de Flathub."
+"Vous disposez d'une connexion réseau, mais vous consultez une version mise "
+"en cache de Flathub."
 
 #: src/bz-window.blp:534
 msgid "_Login with Flathub"
@@ -1851,18 +1876,18 @@ msgstr "_Actualiser"
 msgid "Open Bazaar Inspector"
 msgstr "Ouvrir l'inspecteur de Bazaar"
 
-#: src/bz-window.blp:580
+#: src/bz-window.blp:586
 msgid "Log Out"
 msgstr "Se déconnecter"
 
-#: src/bz-window.c:475
+#: src/bz-window.c:484
 #, c-format
 msgid "%d Update Available"
 msgid_plural "%d Updates Available"
 msgstr[0] "%d mise à jour disponible"
 msgstr[1] "%d mises à jour disponibles"
 
-#: src/bz-window.c:973
+#: src/bz-window.c:982
 msgid ""
 "The ability to inspect and install local .flatpak bundle files is coming "
 "soon! In the meantime, try running\n"
@@ -1878,46 +1903,46 @@ msgstr ""
 "\n"
 "en ligne de commande."
 
-#: src/bz-window.c:1100
+#: src/bz-window.c:1120
 msgid "Can't do that right now!"
 msgstr "Impossible de faire ceci pour le moment !"
 
-#: src/bz-window.c:1231
+#: src/bz-window.c:1251
 msgid "Keep Data"
 msgstr "Garder les données"
 
-#: src/bz-window.c:1232
+#: src/bz-window.c:1252
 msgid "Allow restoring settings and content"
 msgstr "Permet la restauration des paramètres et du contenu"
 
-#: src/bz-window.c:1241
+#: src/bz-window.c:1261
 msgid "Permanently remove app data to save space"
 msgstr "Supprimer définitivement les données et gagner de l'espace de stockage"
 
-#: src/bz-window.c:1264
+#: src/bz-window.c:1284
 #, c-format
 msgid "Install %s?"
 msgstr "Installer %s ?"
 
-#: src/bz-window.c:1267
+#: src/bz-window.c:1287
 msgid "May install additional shared components"
 msgstr "Peut installer des composants partagés supplémentaires"
 
-#: src/bz-window.c:1286
+#: src/bz-window.c:1306
 #, c-format
 msgid "Remove %s?"
 msgstr "Supprimer %s ?"
 
-#: src/bz-window.c:1290
+#: src/bz-window.c:1310
 #, c-format
 msgid "It will not be possible to use %s after it is uninstalled."
 msgstr "Il ne sera plus possible d'utiliser %s après sa désinstallation."
 
-#: src/bz-window.c:1353
+#: src/bz-window.c:1373
 msgid "Resume Current Tasks"
 msgstr "Reprendre les tâches actuelles"
 
-#: src/bz-window.c:1359
+#: src/bz-window.c:1379
 msgid "Pause Current Tasks"
 msgstr "Mettre en pause les tâches actuelles"
 
