@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-19 20:46+0100\n"
-"PO-Revision-Date: 2025-12-19 23:06+0100\n"
+"POT-Creation-Date: 2025-12-21 07:27+0100\n"
+"PO-Revision-Date: 2025-12-21 19:01+0100\n"
 "Last-Translator: Mimolet <theMimolet@proton.me>\n"
 "Language-Team: French <kde-francophone@kde.org>\n"
 "Language: fr\n"
@@ -132,25 +132,25 @@ msgstr "Page de recherche"
 msgid "Category page"
 msgstr "Catégories"
 
-#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:711
+#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:686
 #: src/bz-installed-tile.blp:99
 msgid "Manage Add-ons"
 msgstr "Gérer les extensions"
 
-#: src/bz-addons-dialog.c:90 src/bz-full-view.blp:502
+#: src/bz-addons-dialog.c:90 src/bz-full-view.blp:477
 #: src/bz-installed-tile.blp:117 src/bz-transaction-view.blp:213
 #: src/bz-window.c:1314
 msgid "Remove"
 msgstr "Supprimer"
 
 #: src/bz-addons-dialog.c:95 src/bz-favorites-tile.c:166
-#: src/bz-full-view.blp:274 src/bz-full-view.blp:489
+#: src/bz-full-view.blp:249 src/bz-full-view.blp:464
 #: src/bz-transaction-view.blp:187 src/bz-window.c:1291
 msgid "Install"
 msgstr "Installer"
 
 #: src/bz-age-rating-dialog.blp:7 src/bz-age-rating-dialog.blp:50
-#: src/bz-full-view.c:373 src/bz-full-view.c:380
+#: src/bz-full-view.c:374 src/bz-full-view.c:381
 msgid "Age Rating"
 msgstr "Limite d'âge"
 
@@ -434,7 +434,7 @@ msgid "%s • %s"
 msgstr ""
 
 #. Translators: Age rating format, e.g. "12+" for ages 12 and up
-#: src/bz-age-rating-dialog.c:752 src/bz-full-view.c:363
+#: src/bz-age-rating-dialog.c:752 src/bz-full-view.c:364
 #, c-format
 msgid "%d+"
 msgstr ""
@@ -711,8 +711,8 @@ msgid ""
 "You have multiple versions of this app installed. Which one would you like "
 "to proceed with?"
 msgstr ""
-"Plusieurs versions de cette application sont installées. Avec quelle version v"
-"oulez-vous continuer ?"
+"Plusieurs versions de cette application sont installées. Avec quelle version "
+"voulez-vous continuer ?"
 
 #: src/bz-entry-group-util.c:80 src/bz-window.c:1290 src/bz-window.c:1313
 msgid "Cancel"
@@ -741,6 +741,18 @@ msgstr "Fermer"
 #: src/bz-error.c:90
 msgid "Copy and Close"
 msgstr "Copier et fermer"
+
+#: src/bz-favorite-button.c:434
+msgid "Log in with Flathub to manage favorites"
+msgstr "Connectez-vous avec Flathub pour gérer vos favoris"
+
+#: src/bz-favorite-button.c:440
+msgid "Log In"
+msgstr "Se connecter"
+
+#: src/bz-favorite-button.blp:14
+msgid "Favorite Count"
+msgstr "Nombre de favoris"
 
 #: src/bz-favorites-tile.c:164
 msgid "Uninstall"
@@ -1078,39 +1090,35 @@ msgstr "Contenu"
 msgid "Support"
 msgstr "Soutenir"
 
-#: src/bz-full-view.blp:226
-msgid "Favorite Count"
-msgstr "Nombre de favoris"
-
-#: src/bz-full-view.blp:258 src/bz-full-view.blp:513
+#: src/bz-full-view.blp:233 src/bz-full-view.blp:488
 msgid "Open"
 msgstr "Ouvrir"
 
-#: src/bz-full-view.blp:271 src/bz-full-view.blp:486
+#: src/bz-full-view.blp:246 src/bz-full-view.blp:461
 msgid "Download & Install Application"
 msgstr "Télécharger et installer l'application"
 
-#: src/bz-full-view.blp:286
+#: src/bz-full-view.blp:261
 msgid "Uninstall Application"
 msgstr "Désinstaller l'application"
 
-#: src/bz-full-view.blp:301 src/bz-full-view.blp:528
+#: src/bz-full-view.blp:276 src/bz-full-view.blp:503
 msgid "Install Other Version"
 msgstr "Installer une autre version"
 
-#: src/bz-full-view.blp:325
+#: src/bz-full-view.blp:300
 msgid "Size"
 msgstr "Taille"
 
-#: src/bz-full-view.blp:430
+#: src/bz-full-view.blp:405
 msgid "Downloads /mo"
 msgstr "Téléchargements / mois"
 
-#: src/bz-full-view.blp:547
+#: src/bz-full-view.blp:522
 msgid "Stopped Receiving Core Updates"
 msgstr "Ne reçoit plus de mises à jour"
 
-#: src/bz-full-view.blp:561
+#: src/bz-full-view.blp:536
 msgid ""
 "This app uses a runtime that no longer receives updates or security fixes. "
 "It may become unsafe to use."
@@ -1118,113 +1126,113 @@ msgstr ""
 "L'environnement d'exécution utilisé par cette app ne reçoit plus de mises à "
 "jour de sécurité. Son utilisation pourrait devenir risquée."
 
-#: src/bz-full-view.blp:644 src/bz-window.c:1260
+#: src/bz-full-view.blp:619 src/bz-window.c:1260
 msgid "Delete Data"
 msgstr "Supprimer les données"
 
-#: src/bz-full-view.blp:778
+#: src/bz-full-view.blp:753
 msgid "Tags:"
 msgstr "Étiquettes:"
 
-#: src/bz-full-view.c:289
+#: src/bz-full-view.c:290
 msgid "---"
 msgstr "---"
 
 #. Translators: M is the suffix for millions
-#: src/bz-full-view.c:296
+#: src/bz-full-view.c:297
 #, c-format
 msgid "%.*fM"
 msgstr ""
 
 #. Translators: K is the suffix for thousands
-#: src/bz-full-view.c:303
+#: src/bz-full-view.c:304
 #, c-format
 msgid "%.*fK"
 msgstr ""
 
-#: src/bz-full-view.c:313
+#: src/bz-full-view.c:314
 #, c-format
 msgid "%d downloads in the last 30 days"
 msgstr "%d téléchargements ces 30 derniers jours"
 
-#: src/bz-full-view.c:345
+#: src/bz-full-view.c:346
 #, c-format
 msgid "Download size of %s"
 msgstr "Taille du téléchargement de %s"
 
-#: src/bz-full-view.c:378
+#: src/bz-full-view.c:379
 msgid "All Ages"
 msgstr "Tout public"
 
-#: src/bz-full-view.c:390
+#: src/bz-full-view.c:391
 msgid "Age rating information unavailable"
 msgstr "Informations sur la limite d'âge non-disponibles"
 
-#: src/bz-full-view.c:395
+#: src/bz-full-view.c:396
 msgid "Suitable for all ages"
 msgstr "Approprié pour tous"
 
-#: src/bz-full-view.c:397
+#: src/bz-full-view.c:398
 #, c-format
 msgid "Suitable for ages %d and up"
 msgstr "Approprié dès %d ans et plus"
 
-#: src/bz-full-view.c:430 src/bz-full-view.c:435 src/bz-full-view.c:463
-#: src/bz-full-view.c:474
+#: src/bz-full-view.c:431 src/bz-full-view.c:436 src/bz-full-view.c:464
+#: src/bz-full-view.c:475
 msgid "Unknown"
 msgstr "Inconnue"
 
-#: src/bz-full-view.c:440
+#: src/bz-full-view.c:441
 #, c-format
 msgid "Free software licensed under %s"
 msgstr "Logiciel libre sous la licence %s"
 
-#: src/bz-full-view.c:445
+#: src/bz-full-view.c:446
 msgid "Free software"
 msgstr "Logiciels libres"
 
-#: src/bz-full-view.c:448
+#: src/bz-full-view.c:449
 msgid "Proprietary Software"
 msgstr "Propriétaire"
 
-#: src/bz-full-view.c:451
+#: src/bz-full-view.c:452
 #, c-format
 msgid "Special License: %s"
 msgstr "License spéciale: %s"
 
-#: src/bz-full-view.c:468
+#: src/bz-full-view.c:469
 msgid "Free"
 msgstr "Libre"
 
-#: src/bz-full-view.c:471 src/bz-license-dialog.c:118
+#: src/bz-full-view.c:472 src/bz-license-dialog.c:118
 msgid "Proprietary"
 msgstr "Propriétaire"
 
-#: src/bz-full-view.c:476 src/bz-license-dialog.c:120
+#: src/bz-full-view.c:477 src/bz-license-dialog.c:120
 msgid "Special License"
 msgstr "License spéciale"
 
-#: src/bz-full-view.c:496
+#: src/bz-full-view.c:497
 msgid "Adaptive"
 msgstr "Adaptatif"
 
-#: src/bz-full-view.c:496
+#: src/bz-full-view.c:497
 msgid "Desktop Only"
 msgstr "Ordinateur"
 
-#: src/bz-full-view.c:502
+#: src/bz-full-view.c:503
 msgid "Works on desktop, tablets, and phones"
 msgstr "Fonctionne sur ordinateur, tablettes et téléphones"
 
-#: src/bz-full-view.c:503
+#: src/bz-full-view.c:504
 msgid "May not work on mobile devices"
 msgstr "Appareils mobiles non pris en charge"
 
-#: src/bz-full-view.c:514
+#: src/bz-full-view.c:515
 msgid "No URL"
 msgstr "Aucune URL"
 
-#: src/bz-full-view.c:532
+#: src/bz-full-view.c:533
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -1232,7 +1240,7 @@ msgstr ""
 "Cette application est soumise à une licence FLOSS, la fiabilité de son code "
 "source peut donc être auditée."
 
-#: src/bz-full-view.c:533
+#: src/bz-full-view.c:534
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
@@ -1240,45 +1248,45 @@ msgstr ""
 "Cette application est soumise à une licence propriétaire, son code source "
 "est donc privé et ne peut pas être audité par un tiers indépendant."
 
-#: src/bz-full-view.c:540
+#: src/bz-full-view.c:541
 msgid "More Apps"
 msgstr "Plus d'apps"
 
-#: src/bz-full-view.c:541
+#: src/bz-full-view.c:542
 #, c-format
 msgid "More Apps by %s"
 msgstr "Plus d'apps par %s"
 
-#: src/bz-full-view.c:548
+#: src/bz-full-view.c:549
 msgid "Other Apps by this Developer"
 msgstr "D'autres apps par ce développeur"
 
-#: src/bz-full-view.c:550 src/bz-full-view.c:658
+#: src/bz-full-view.c:551 src/bz-full-view.c:659
 #, c-format
 msgid "Other Apps by %s"
 msgstr "D'autres apps par %s"
 
-#: src/bz-full-view.c:558
+#: src/bz-full-view.c:559
 #, c-format
 msgid "%s is not installed, but it still has <b>%s</b> of data present."
 msgstr "%s n'est pas installé, mais a toujours <b>%s</b> de données présentes."
 
-#: src/bz-full-view.c:660
+#: src/bz-full-view.c:661
 msgid "Other Apps"
 msgstr "D'autres apps"
 
-#: src/bz-full-view.c:662
+#: src/bz-full-view.c:663
 #, c-format
 msgid "%d Application"
 msgid_plural "%d Applications"
 msgstr[0] "%d application"
 msgstr[1] "%d applications"
 
-#: src/bz-full-view.c:1010
+#: src/bz-full-view.c:1011
 msgid "Show Less"
 msgstr "Moins"
 
-#: src/bz-full-view.c:1010
+#: src/bz-full-view.c:1011
 msgid "Show More"
 msgstr "Plus"
 
@@ -1756,8 +1764,8 @@ msgid "Pending"
 msgstr "En attente"
 
 #: src/bz-update-dialog.blp:7
-msgid "Install Now"
-msgstr "Installer maintenant"
+msgid "Update Now"
+msgstr "Mettre à jour"
 
 #: src/bz-update-dialog.blp:10
 msgid "Updates Are Available"
@@ -1846,8 +1854,8 @@ msgstr ""
 #: src/bz-window.blp:450
 msgid "Network connection is metered — automatic store data sync is paused"
 msgstr ""
-"La connexion réseau est limitée — l'actualisation automatique de Bazaar est"
-"suspendue."
+"La connexion réseau est limitée — l'actualisation automatique de Bazaar "
+"est suspendue."
 
 #: src/bz-window.blp:451 src/bz-window.blp:460
 msgid "Sync Manually"
@@ -1985,3 +1993,6 @@ msgstr "Afficher les raccourcis"
 msgctxt "shortcut window"
 msgid "Quit"
 msgstr "Quitter"
+
+#~ msgid "Install Now"
+#~ msgstr "Installer maintenant"
