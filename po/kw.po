@@ -951,7 +951,7 @@ msgid ""
 "applications."
 msgstr ""
 "Yma difygya dhe junya Flathub. Hwi gallos hwath dyghtya ha hwilas rag "
-"appys".
+"appys."
 
 #: src/bz-flathub-page.blp:61
 msgid "Search Apps"
@@ -1408,7 +1408,7 @@ msgid ""
 "You can participate and help make it even better."
 msgstr ""
 "An app ma usi gwrys yn poblek gans unn kemeneth keswlasek, ha"
-"dyllo a-woles dhe an %s kummyas.\n"
+"dyllo a-woles dhe an %s kummyas."
 
 #: src/bz-license-dialog.c:156
 msgid ""
