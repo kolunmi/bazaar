@@ -212,36 +212,9 @@ template $BzFullView: Adw.Bin {
                                 };
                               }
 
-                              Revealer forge_stars {
-                                transition-type: slide_down;
-                                reveal-child: false;
-
-                                child: Button {
-                                  styles [
-                                    "small-pill",
-                                    "suggested-action",
-                                    "star",
-                                  ]
-
-                                  margin-top: 8;
-                                  valign: start;
-                                  halign: start;
-                                  has-tooltip: true;
-                                  tooltip-text: _("Repository Star Count");
-                                  clicked => $forge_cb(template);
-
-                                  child: Box {
-                                    hexpand: false;
-                                    orientation: horizontal;
-                                    spacing: 10;
-
-                                    Image {
-                                      icon-name: "starred-symbolic";
-                                    }
-
-                                    Label forge_stars_label {}
-                                  };
-                                };
+                              $BzFavoriteButton {
+                                state: bind template.state as <$BzStateInfo>;
+                                entry: bind template.ui-entry as <$BzResult>.object as <$BzEntry>;
                               }
                             }
                           }
@@ -426,17 +399,17 @@ template $BzFullView: Adw.Bin {
                           }
 
                           $BzContextTile {
-                            can-target: bind $invert_boolean($is_null(template.debounced-ui-entry) as <bool>) as <bool>;
-                            sensitive: bind $invert_boolean($is_null(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <bool>) as <bool>;
+                            can-target: bind $invert_boolean($is_null(template.ui-entry) as <bool>) as <bool>;
+                            sensitive: bind $invert_boolean($is_null(template.ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <bool>) as <bool>;
                             clicked => $dl_stats_cb(template);
                             label: _("Downloads /mo");
-                            has-tooltip: bind $invert_boolean($is_null(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <bool>) as <bool>;
-                            tooltip-text: bind $format_recent_downloads_tooltip(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <string>;
+                            has-tooltip: bind $invert_boolean($is_null(template.ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <bool>) as <bool>;
+                            tooltip-text: bind $format_recent_downloads_tooltip(template.ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <string>;
                             lozenge-style: "grey";
 
                             lozenge-child: Label {
                               justify: center;
-                              label: bind $format_recent_downloads(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <string>;
+                              label: bind $format_recent_downloads(template.ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <string>;
                               halign: center;
                               use-markup: true;
                             };
@@ -575,19 +548,19 @@ template $BzFullView: Adw.Bin {
                   Box screenshot_box {
                     Adw.Spinner {
                       vexpand: true;
-                      visible: bind $invert_boolean(template.debounced-ui-entry as <$BzResult>.resolved as <bool>) as <bool>;
+                      visible: bind $invert_boolean(template.ui-entry as <$BzResult>.resolved as <bool>) as <bool>;
                     }
 
                     $BzScreenshotsCarousel screenshots {
                       vexpand: true;
                       hexpand: true;
-                      visible: bind template.debounced-ui-entry as <$BzResult>.resolved as <bool>;
+                      visible: bind template.ui-entry as <$BzResult>.resolved as <bool>;
                       clicked => $screenshot_clicked_cb() swapped;
-                      light-accent-color: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.light-accent-color;
-                      dark-accent-color: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.dark-accent-color;
+                      light-accent-color: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.light-accent-color;
+                      dark-accent-color: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.dark-accent-color;
 
                       model: $BzLazyAsyncTextureModel {
-                        model: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.screenshot-paintables;
+                        model: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.screenshot-paintables;
                       };
                     }
                   }
@@ -609,7 +582,7 @@ template $BzFullView: Adw.Bin {
 
                         Revealer {
                           transition-type: slide_down;
-                          reveal-child: bind $logical_and(template.entry-group as <$BzEntryGroup>.has-user-data, $is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
+                          reveal-child: bind $logical_and($invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.user-data-size) as <bool>) as <bool>, $is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
 
                           child: Box {
                             height-request: 50;
@@ -627,7 +600,10 @@ template $BzFullView: Adw.Bin {
                               valign: center;
                               hexpand: true;
                               margin-start: 12;
-                              label: bind $format_leftover_label(template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.title) as <string>;
+                              margin-top: 8;
+                              margin-bottom: 8;
+                              label: bind $format_leftover_label(template.ui-entry as <$BzResult>.object as <$BzEntry>.title, template.entry-group as <$BzEntryGroup>.user-data-size) as <string>;
+                              use-markup: true;
                               wrap: true;
                               wrap-mode: word_char;
                               justify: left;
@@ -714,11 +690,11 @@ template $BzFullView: Adw.Bin {
                         }
 
                         $BzShareList {
-                          urls: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.share-urls;
+                          urls: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.share-urls;
                         }
 
                         $BzReleasesList releases_list {
-                          version-history: bind template.debounced-ui-entry as <$BzResult>.object as <$BzEntry>.version-history;
+                          version-history: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.version-history;
                         }
 
                         Box {

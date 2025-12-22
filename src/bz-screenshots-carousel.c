@@ -98,19 +98,19 @@ update_button_visibility (BzScreenshotsCarousel *self)
 }
 
 static void
-carousel_navigate (AdwCarousel *carousel, AdwNavigationDirection direction)
+carousel_navigate (AdwCarousel           *carousel,
+                   AdwNavigationDirection direction)
 {
-  g_autoptr (GList) children = NULL;
-  GtkWidget *child;
-  gdouble    position;
-  guint      n_children;
+  g_autolist (GtkWidget) children = NULL;
+  gdouble    position             = 0.0;
+  guint      n_children           = 0;
+  GtkWidget *nth_child            = NULL;
 
-  n_children = 0;
-  for (child = gtk_widget_get_first_child (GTK_WIDGET (carousel));
+  for (GtkWidget *child = gtk_widget_get_first_child (GTK_WIDGET (carousel));
        child != NULL;
        child = gtk_widget_get_next_sibling (child))
     {
-      children = g_list_prepend (children, child);
+      children = g_list_prepend (children, g_object_ref (child));
       n_children++;
     }
   children = g_list_reverse (children);
@@ -121,9 +121,9 @@ carousel_navigate (AdwCarousel *carousel, AdwNavigationDirection direction)
   position = MIN (position, n_children - 1);
   position = MAX (0, position);
 
-  child = g_list_nth_data (children, position);
-  if (child)
-    adw_carousel_scroll_to (carousel, child, TRUE);
+  nth_child = g_list_nth_data (children, position);
+  if (nth_child != NULL)
+    adw_carousel_scroll_to (carousel, nth_child, TRUE);
 }
 
 static void

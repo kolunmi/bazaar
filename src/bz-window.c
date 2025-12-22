@@ -29,6 +29,7 @@
 #include "bz-entry-inspector.h"
 #include "bz-env.h"
 #include "bz-error.h"
+#include "bz-favorites-page.h"
 #include "bz-flathub-page.h"
 #include "bz-full-view.h"
 #include "bz-global-progress.h"
@@ -38,6 +39,7 @@
 #include "bz-search-widget.h"
 #include "bz-transaction-manager.h"
 #include "bz-update-dialog.h"
+#include "bz-user-data-page.h"
 #include "bz-util.h"
 #include "bz-window.h"
 
@@ -312,6 +314,14 @@ remove_addon_cb (BzWindow   *self,
 }
 
 static void
+install_entry_cb (BzWindow   *self,
+                  BzEntry    *entry,
+                  BzFullView *view)
+{
+  try_transact (self, entry, NULL, FALSE, FALSE, NULL);
+}
+
+static void
 remove_installed_cb (BzWindow   *self,
                      BzEntry    *entry,
                      BzFullView *view)
@@ -513,6 +523,18 @@ format_progress (gpointer object,
 }
 
 static void
+action_user_data (GtkWidget  *widget,
+                  const char *action_name,
+                  GVariant   *parameter)
+{
+  BzWindow          *self           = BZ_WINDOW (widget);
+  AdwNavigationPage *user_data_page = NULL;
+
+  user_data_page = ADW_NAVIGATION_PAGE (bz_user_data_page_new (self->state));
+  adw_navigation_view_push (self->navigation_view, user_data_page);
+}
+
+static void
 debug_id_inspect_cb (BzWindow  *self,
                      GtkButton *button)
 {
@@ -616,6 +638,7 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, debug_id_inspect_cb);
 
   gtk_widget_class_install_action (widget_class, "escape", NULL, action_escape);
+  gtk_widget_class_install_action (widget_class, "window.user-data", NULL, action_user_data);
 }
 
 static gboolean
@@ -653,7 +676,10 @@ bz_window_init (BzWindow *self)
   adw_view_stack_set_visible_child_name (self->main_view_stack, "flathub");
 
   self->key_controller = gtk_event_controller_key_new ();
-  g_signal_connect_swapped (self->key_controller, "key-pressed", G_CALLBACK (key_pressed), self);
+  g_signal_connect_swapped (self->key_controller,
+                            "key-pressed",
+                            G_CALLBACK (key_pressed),
+                            self);
   gtk_widget_add_controller (GTK_WIDGET (self), self->key_controller);
 }
 
@@ -983,6 +1009,26 @@ bz_window_add_toast (BzWindow *self,
   g_return_if_fail (ADW_IS_TOAST (toast));
 
   adw_toast_overlay_add_toast (self->toasts, toast);
+}
+
+void
+bz_window_push_page (BzWindow *self, AdwNavigationPage *page)
+{
+  g_return_if_fail (BZ_IS_WINDOW (self));
+  g_return_if_fail (ADW_IS_NAVIGATION_PAGE (page));
+
+  if (BZ_IS_FAVORITES_PAGE (page))
+    {
+      g_signal_connect_swapped (page, "install", G_CALLBACK (install_entry_cb), self);
+      g_signal_connect_swapped (page, "remove", G_CALLBACK (remove_installed_cb), self);
+      g_signal_connect_swapped (page, "show-entry", G_CALLBACK (installed_page_show_cb), self);
+
+      g_object_bind_property (self->split_view, "show-sidebar",
+                              page, "show-sidebar",
+                              G_BINDING_BIDIRECTIONAL | G_BINDING_SYNC_CREATE);
+    }
+
+  adw_navigation_view_push (self->navigation_view, page);
 }
 
 BzStateInfo *

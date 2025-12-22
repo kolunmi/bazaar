@@ -39,6 +39,17 @@ DexFuture *
 bz_query_flathub_v2_json (const char *request);
 
 DexFuture *
+bz_query_flathub_v2_json_authenticated (const char *request,
+                                        const char *token);
+
+DexFuture *
+bz_query_flathub_v2_json_authenticated_post (const char *request,
+                                             const char *token);
+DexFuture *
+bz_query_flathub_v2_json_authenticated_delete (const char *request,
+                                               const char *token);
+
+DexFuture *
 bz_query_flathub_v2_json_take (char *request);
 
 G_END_DECLS

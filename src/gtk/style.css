@@ -112,10 +112,16 @@
     --accent-color : #f06292;
 }
 
-.star {
-    --accent-fg-color: @warning_bg_color;
-    --accent-bg-color : alpha(@warning_bg_color, 0.25);
-    --accent-color: @warning_color;
+.favorite {
+    --accent-fg-color: @accent_bg_color;
+    --accent-bg-color : alpha(@accent_bg_color, 0.25);
+    --accent-color: @accent_color;
+}
+
+.favorite * {
+    --accent-fg-color: @accent_fg_color;
+    --accent-bg-color:  @accent_bg_color;
+    --accent-color: @accent_color;
 }
 
 .green {
@@ -242,6 +248,13 @@ button.context-tile:active .lozenge {
 
 .small-pill.error {
     background-color: alpha(@error_bg_color, 0.15);
+}
+
+.installed-pill {
+	background-color: alpha(@success_bg_color, 0.15);
+	font-weight: 500;
+	font-size: 0.9em;
+ 	padding: 2px 7px 2px 4.5px;
 }
 
 .download-size-pill{
@@ -725,7 +738,29 @@ window.narrow .category-tile {
 .installed-list-view > * {
     padding: 0;
     transition: background-color 200ms;
-    margin: 6px 0px;
+    	min-height: 0;
+    margin: 5px 4.5px;
+}
+
+.narrow .installed-list-view > * {
+    margin: 4px 4.5px;
+}
+
+.no-vertical-margin > row.hidden {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.no-vertical-margin > row:not(.hidden) {
+  margin-bottom: 6px;
+}
+
+.user-data-list-view > * {
+  margin: 0;
+}
+
+.user-data-list-view row {
+	min-height: 0;
 }
 
 .transaction-sidebar-entry-list {
@@ -742,3 +777,4 @@ curated-list-view,
 curated-list-view list {
   background: var(--bg-color);
 }
+

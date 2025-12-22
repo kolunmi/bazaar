@@ -27,9 +27,11 @@ static DexFuture *
 reap_path_fiber (char *path);
 
 static DexFuture *
-path_exists_fiber (char *path);
+get_directory_size_fiber (GFile *file);
 static DexFuture *
-user_data_exists_fiber (char *app_id);
+get_user_data_size_fiber (char *app_id);
+static DexFuture *
+get_all_user_data_ids_fiber (void);
 
 DexScheduler *
 bz_get_io_scheduler (void)
@@ -164,49 +166,163 @@ bz_reap_path_dex (const char *path)
 }
 
 DexFuture *
-bz_path_exists_dex (const char *path)
-{
-  dex_return_error_if_fail (path != NULL);
-  return dex_scheduler_spawn (
-      bz_get_io_scheduler (),
-      bz_get_dex_stack_size (),
-      (DexFiberFunc) path_exists_fiber,
-      g_strdup (path), g_free);
-}
-
-DexFuture *
-bz_user_data_exists_dex (const char *app_id)
+bz_get_user_data_size_dex (const char *app_id)
 {
   dex_return_error_if_fail (app_id != NULL);
   return dex_scheduler_spawn (
       bz_get_io_scheduler (),
       bz_get_dex_stack_size (),
-      (DexFiberFunc) user_data_exists_fiber,
+      (DexFiberFunc) get_user_data_size_fiber,
       g_strdup (app_id), g_free);
 }
 
-static DexFuture *
-path_exists_fiber (char *path)
+DexFuture *
+bz_get_user_data_ids_dex (void)
 {
-  g_autoptr (GFile) file = NULL;
-  gboolean exists        = FALSE;
-
-  file   = g_file_new_for_path (path);
-  exists = g_file_query_exists (file, NULL);
-  return dex_future_new_for_boolean (exists);
+  return dex_scheduler_spawn (
+      bz_get_io_scheduler (),
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) get_all_user_data_ids_fiber,
+      NULL, NULL);
 }
 
 static DexFuture *
-user_data_exists_fiber (char *app_id)
+get_user_data_size_fiber (char *app_id)
 {
   g_autofree char *user_data_path = NULL;
   g_autoptr (GFile) file          = NULL;
-  gboolean exists                 = FALSE;
 
   user_data_path = g_build_filename (g_get_home_dir (), ".var", "app", app_id, NULL);
   file           = g_file_new_for_path (user_data_path);
-  exists         = g_file_query_exists (file, NULL);
-  return dex_future_new_for_boolean (exists);
+
+  return get_directory_size_fiber (file);
+}
+
+static DexFuture *
+get_directory_size_fiber (GFile *file)
+{
+  g_autoptr (DexFuture) enumerator_future = NULL;
+  g_autoptr (GFileEnumerator) enumerator  = NULL;
+  g_autoptr (GError) error                = NULL;
+  guint64 total_size                      = 0;
+
+  enumerator_future = dex_file_enumerate_children (
+      file,
+      G_FILE_ATTRIBUTE_STANDARD_NAME "," G_FILE_ATTRIBUTE_STANDARD_TYPE "," G_FILE_ATTRIBUTE_STANDARD_SIZE,
+      G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+      G_PRIORITY_DEFAULT);
+
+  enumerator = dex_await_object (dex_ref (enumerator_future), &error);
+  if (enumerator == NULL)
+    {
+      if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
+        return dex_future_new_for_uint64 (0);
+      return dex_future_new_for_error (g_steal_pointer (&error));
+    }
+
+  for (;;)
+    {
+      g_autoptr (DexFuture) next_future = NULL;
+      g_autolist (GFileInfo) infos      = NULL;
+
+      next_future = dex_file_enumerator_next_files (enumerator, 10, G_PRIORITY_DEFAULT);
+      infos       = dex_await_boxed (dex_ref (next_future), &error);
+
+      if (infos == NULL)
+        {
+          if (error != NULL)
+            return dex_future_new_for_error (g_steal_pointer (&error));
+          break;
+        }
+
+      for (GList *l = infos; l != NULL; l = l->next)
+        {
+          GFileInfo *info      = l->data;
+          GFileType  file_type = g_file_info_get_file_type (info);
+
+          if (file_type == G_FILE_TYPE_DIRECTORY)
+            {
+              g_autoptr (GFile) child           = g_file_enumerator_get_child (enumerator, info);
+              g_autoptr (DexFuture) size_future = get_directory_size_fiber (child);
+              guint64 child_size                = dex_await_uint64 (dex_ref (size_future), &error);
+
+              if (error != NULL)
+                return dex_future_new_for_error (g_steal_pointer (&error));
+
+              total_size += child_size;
+            }
+          else
+            {
+              total_size += g_file_info_get_size (info);
+            }
+        }
+    }
+
+  return dex_future_new_for_uint64 (total_size);
+}
+
+static DexFuture *
+get_all_user_data_ids_fiber (void)
+{
+  g_autofree char *var_app_path           = NULL;
+  g_autoptr (GFile) var_app_dir           = NULL;
+  g_autoptr (DexFuture) enumerator_future = NULL;
+  g_autoptr (GFileEnumerator) enumerator  = NULL;
+  g_autoptr (GError) error                = NULL;
+  GHashTable *ids                         = NULL;
+
+  var_app_path = g_build_filename (g_get_home_dir (), ".var", "app", NULL);
+  var_app_dir  = g_file_new_for_path (var_app_path);
+
+  ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+
+  enumerator_future = dex_file_enumerate_children (
+      var_app_dir,
+      G_FILE_ATTRIBUTE_STANDARD_NAME "," G_FILE_ATTRIBUTE_STANDARD_TYPE,
+      G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+      G_PRIORITY_DEFAULT);
+
+  enumerator = dex_await_object (dex_ref (enumerator_future), &error);
+  if (enumerator == NULL)
+    {
+      if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
+        return dex_future_new_take_boxed (G_TYPE_HASH_TABLE, ids);
+      g_hash_table_unref (ids);
+      return dex_future_new_for_error (g_steal_pointer (&error));
+    }
+
+  for (;;)
+    {
+      g_autoptr (DexFuture) next_future = NULL;
+      g_autolist (GFileInfo) infos      = NULL;
+
+      next_future = dex_file_enumerator_next_files (enumerator, 10, G_PRIORITY_DEFAULT);
+      infos       = dex_await_boxed (dex_ref (next_future), &error);
+
+      if (infos == NULL)
+        {
+          if (error != NULL)
+            {
+              g_hash_table_unref (ids);
+              return dex_future_new_for_error (g_steal_pointer (&error));
+            }
+          break;
+        }
+
+      for (GList *l = infos; l != NULL; l = l->next)
+        {
+          GFileInfo *info      = l->data;
+          GFileType  file_type = g_file_info_get_file_type (info);
+
+          if (file_type == G_FILE_TYPE_DIRECTORY)
+            {
+              const char *app_id = g_file_info_get_name (info);
+              g_hash_table_insert (ids, g_strdup (app_id), NULL);
+            }
+        }
+    }
+
+  return dex_future_new_take_boxed (G_TYPE_HASH_TABLE, ids);
 }
 
 char *

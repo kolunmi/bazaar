@@ -62,9 +62,9 @@ struct _BzEntryGroup
   int updatable_available;
   int removable_available;
 
-  gboolean has_user_data;
+  guint64 user_data_size;
 
-  DexFuture *user_data_exists_future;
+  DexFuture *user_data_size_future;
   DexFuture *reap_user_data_future;
 
   GWeakRef ui_entry;
@@ -102,7 +102,7 @@ enum
   PROP_INSTALLABLE_AND_AVAILABLE,
   PROP_UPDATABLE_AND_AVAILABLE,
   PROP_REMOVABLE_AND_AVAILABLE,
-  PROP_HAS_USER_DATA,
+  PROP_USER_DATA_SIZE,
 
   LAST_PROP
 };
@@ -122,18 +122,18 @@ static DexFuture *
 dup_all_into_store_fiber (BzEntryGroup *self);
 
 static DexFuture *
-user_data_exists_then (DexFuture *future,
-                       GWeakRef  *wr);
+user_data_size_then (DexFuture *future,
+                     GWeakRef  *wr);
 
 static void
-check_user_data_exists (BzEntryGroup *self);
+check_user_data_size (BzEntryGroup *self);
 
 static void
 bz_entry_group_dispose (GObject *object)
 {
   BzEntryGroup *self = BZ_ENTRY_GROUP (object);
 
-  dex_clear (&self->user_data_exists_future);
+  dex_clear (&self->user_data_size_future);
   dex_clear (&self->reap_user_data_future);
   g_clear_object (&self->factory);
   g_clear_object (&self->unique_ids);
@@ -241,8 +241,8 @@ bz_entry_group_get_property (GObject    *object,
     case PROP_REMOVABLE_AND_AVAILABLE:
       g_value_set_int (value, bz_entry_group_get_removable_and_available (self));
       break;
-    case PROP_HAS_USER_DATA:
-      g_value_set_boolean (value, bz_entry_group_get_has_user_data (self));
+    case PROP_USER_DATA_SIZE:
+      g_value_set_uint64 (value, bz_entry_group_get_user_data_size (self));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -281,7 +281,7 @@ bz_entry_group_set_property (GObject      *object,
     case PROP_INSTALLABLE_AND_AVAILABLE:
     case PROP_UPDATABLE_AND_AVAILABLE:
     case PROP_REMOVABLE_AND_AVAILABLE:
-    case PROP_HAS_USER_DATA:
+    case PROP_USER_DATA_SIZE:
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -458,10 +458,11 @@ bz_entry_group_class_init (BzEntryGroupClass *klass)
           0, G_MAXINT, 0,
           G_PARAM_READABLE);
 
-  props[PROP_HAS_USER_DATA] =
-      g_param_spec_boolean (
-          "has-user-data",
-          NULL, NULL, FALSE,
+  props[PROP_USER_DATA_SIZE] =
+      g_param_spec_uint64 (
+          "user-data-size",
+          NULL, NULL,
+          0, G_MAXUINT64, 0,
           G_PARAM_READABLE);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
@@ -615,12 +616,12 @@ bz_entry_group_get_donation_url (BzEntryGroup *self)
   return self->donation_url;
 }
 
-gboolean
-bz_entry_group_get_has_user_data (BzEntryGroup *self)
+guint64
+bz_entry_group_get_user_data_size (BzEntryGroup *self)
 {
-  g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), FALSE);
-  check_user_data_exists (self);
-  return self->has_user_data;
+  g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), 0);
+  check_user_data_size (self);
+  return self->user_data_size;
 }
 
 BzResult *
@@ -1063,9 +1064,9 @@ installed_changed (BzEntryGroup *self,
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLABLE]);
     }
 
-  dex_clear (&self->user_data_exists_future);
-  self->has_user_data = FALSE;
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_USER_DATA]);
+  dex_clear (&self->user_data_size_future);
+  self->user_data_size = 0;
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_USER_DATA_SIZE]);
 }
 
 static void
@@ -1159,12 +1160,16 @@ reap_user_data_then (DexFuture *future,
                      GWeakRef  *wr)
 {
   g_autoptr (BzEntryGroup) self = NULL;
+  guint64 old_size              = 0;
 
   bz_weak_get_or_return_reject (self, wr);
   dex_clear (&self->reap_user_data_future);
 
-  self->has_user_data = FALSE;
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_USER_DATA]);
+  old_size             = self->user_data_size;
+  self->user_data_size = 0;
+
+  if (old_size != 0)
+    g_object_notify_by_pspec (G_OBJECT (self), props[PROP_USER_DATA_SIZE]);
 
   return dex_future_new_true ();
 }
@@ -1186,40 +1191,46 @@ bz_entry_group_reap_user_data (BzEntryGroup *self)
 }
 
 static DexFuture *
-user_data_exists_then (DexFuture *future,
-                       GWeakRef  *wr)
+user_data_size_then (DexFuture *future,
+                     GWeakRef  *wr)
 {
   g_autoptr (BzEntryGroup) self = NULL;
+  g_autoptr (GError) error      = NULL;
+  guint64 size                  = 0;
+  guint64 old_size              = 0;
 
   bz_weak_get_or_return_reject (self, wr);
-  dex_clear (&self->user_data_exists_future);
+  dex_clear (&self->user_data_size_future);
 
-  self->has_user_data = g_value_get_boolean (dex_future_get_value (future, NULL));
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_USER_DATA]);
+  size = dex_await_uint64 (dex_ref (future), &error);
+  if (error != NULL)
+    size = 0;
+
+  old_size             = self->user_data_size;
+  self->user_data_size = size;
+
+  if (old_size != size)
+    g_object_notify_by_pspec (G_OBJECT (self), props[PROP_USER_DATA_SIZE]);
 
   return dex_future_new_true ();
 }
 
 static void
-check_user_data_exists (BzEntryGroup *self)
+check_user_data_size (BzEntryGroup *self)
 {
   g_autoptr (DexFuture) future = NULL;
 
-  if (self->user_data_exists_future != NULL ||
+  if (self->user_data_size_future != NULL ||
       self->id == NULL)
     return;
 
   if (self->reap_user_data_future != NULL)
-    {
-      self->has_user_data = FALSE;
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_USER_DATA]);
-      return;
-    }
+    return;
 
-  future = bz_user_data_exists_dex (self->id);
+  future = bz_get_user_data_size_dex (self->id);
   future = dex_future_then (
       future,
-      (DexFutureCallback) user_data_exists_then,
+      (DexFutureCallback) user_data_size_then,
       bz_track_weak (self), bz_weak_release);
-  self->user_data_exists_future = g_steal_pointer (&future);
+  self->user_data_size_future = g_steal_pointer (&future);
 }
