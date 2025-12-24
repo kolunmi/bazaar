@@ -35,6 +35,7 @@
 #include "bz-env.h"
 #include "bz-error.h"
 #include "bz-fading-clamp.h"
+#include "bz-favorite-button.h"
 #include "bz-flatpak-entry.h"
 #include "bz-full-view.h"
 #include "bz-global-net.h"
@@ -1128,6 +1129,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   g_type_ensure (BZ_TYPE_ENTRY);
   g_type_ensure (BZ_TYPE_ENTRY_GROUP);
   g_type_ensure (BZ_TYPE_FADING_CLAMP);
+  g_type_ensure (BZ_TYPE_FAVORITE_BUTTON);
   g_type_ensure (BZ_TYPE_HARDWARE_SUPPORT_DIALOG);
   g_type_ensure (BZ_TYPE_LAZY_ASYNC_TEXTURE_MODEL);
   g_type_ensure (BZ_TYPE_SECTION_VIEW);

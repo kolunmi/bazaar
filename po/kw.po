@@ -1,4 +1,4 @@
-# Czech translations for bazaar package.
+# Cornish translations for bazaar package.
 # Copyright (C) 2025 THE bazaar'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the bazaar package.
 # Automatically generated, 2025.
@@ -7,150 +7,141 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-06 13:08+0200\n"
-"PO-Revision-Date: 2025-12-21 07:27+0100\n"
-"Last-Translator: Vlastimil Dědek <dedek.vlastimil2@proton.me>\n"
-"Language-Team: Czech\n"
-"Language: cs\n"
+"POT-Creation-Date: 2025-12-19 19:46+0000\n"
+"PO-Revision-Date: 2025-12-19 19:46+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: kw\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:2
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:5
 #: src/bz-window.blp:234
 msgid "Bazaar"
-msgstr "Bazaar"
+msgstr "Basar"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:3
 msgid "Add, remove or update flatpak software on this computer"
-msgstr "Přidejte, odstraňte nebo aktualizujte flatpaky na tomto počítači."
+msgstr "Addya, remova, po nowedhi medhelweyth flatpak yn an amontyell ma"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:9
 msgid "GTK;System;PackageManager;Discover;Flatpak;Software;Store;"
-msgstr "GTK;Systém;SprávceBalíčků;Discover;Flatpak;Software;Obchod;"
+msgstr ""
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:6
 msgid "Hide EOL Entries"
-msgstr "Skrýt Zastaralé Položky"
+msgstr "Keles appys marow"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:7
 msgid "Hide EOL entries and entries depending on them"
-msgstr "Skrýt zastaralé položky a aplikace na nich závislé"
+msgstr "Keles appys marow hag appys serghek"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:11
 msgid "Only Show Free Software"
-msgstr "Zobrazit pouze svobodný software"
+msgstr "Diskwedhes appys dhe wari hepken"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:12
-#, fuzzy
 msgid "Hide proprietary software"
-msgstr "Skrýt propertiární software"
+msgstr "Keles appys perghenogel"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:16
 msgid "Show Only Flathub Content"
-msgstr "Zobrazit pouze obsah z Flathubu"
+msgstr "Diskwedhes synsas Flathub hepken"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:17
-#, fuzzy
 msgid "Hide applications which do not originate from Flathub"
-msgstr "Skrýt aplikace mimo Flathub"
+msgstr ""
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:21
 msgid "Debounce Search Inputs"
-msgstr "Debouncing Vstupů Vyhledávání"
+msgstr ""
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:22
-#, fuzzy
 msgid "Add a delay before searching to prevent instant replies while typing"
-msgstr "Omezit frekvenci reakce"
+msgstr ""
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:46
 msgid "Global Progress Bar Theme"
-msgstr "Téma Globálního Ukazatele Postupu"
+msgstr "Thema Barr Spedya Olldalghus"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:47
 msgid "Describes the look of the global progress bar"
-msgstr "Popisuje vzhled globáního ukazatele postupu"
+msgstr "Deskrifa an mir a an Barr Spedya Olldalghus"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:51
 msgid "Saved Window Dimensions"
-msgstr "Uložené rozměry okna"
+msgstr ""
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:52
 msgid "The window dimensions to be used by the next Bazaar window"
-msgstr "Rozměry okna použitá dalšími okny Bazaaru"
+msgstr ""
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:8
 msgid "Discover and install applications"
-msgstr "Objevit a nainstalovat aplikace"
+msgstr "Diskudha ha lea appys"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:10
-#, fuzzy
 msgid ""
 "A new app store for GNOME with a focus on discovering and installing "
 "applications and addons from Flatpak remotes, particularly Flathub."
 msgstr ""
-"Nový obchod s aplikacemi pro GNOME se zaměřením na objevování a instalování "
-"aplikací a doplňků z Flatpak remotů, hlavně Flathubu"
+"Unn gwerthji appys nowydh rag GNOME gans unn fog war diskudha ha lea"
+"appys ha ystynansow a-dhia gwerthjiow Flatpak, dres oll Flathub."
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:14
-#, fuzzy
 msgid ""
 "It emphasizes supporting the developers who make the Linux desktop possible. "
 "Bazaar features a \"curated\" tab that can be configured by distributors to "
 "allow for a more localized experience."
 msgstr ""
-"Zdůrazňuje podporu vývojářů, kteří umožňují existenci Linuxu na počítačích. "
-"Bazaar má kartu \"vybrané\" která může být nastavena distribucemi pro více "
-"přizpůsobený zážitek"
+"Y posleva an skoodhyans rag an awtours neb a gul an ekokevreyth Linux. "
+"Basar omdhiskwedhes an \"dyghtys\" tabb dre konfigurys gans lesrenyadesow dhe "
+"alowa unn eksperyans leel."
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29 src/bz-application.c:683
 msgid "Adam Masciola"
 msgstr "Adam Masciola"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:54
-#, fuzzy
 msgid "The home page displaying Flathub apps"
-msgstr "Domovské zobrazení ukazující Flathub aplikace a kategorie"
+msgstr "An folen chi displetya appys Flathub"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:58
 msgid "Nucleus app page"
-msgstr "Stránka aplikace Nucleus"
+msgstr "Folen app Nuklesen"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:62
-#, fuzzy
 msgid "Search page"
-msgstr "Vyhledat Aplikace"
+msgstr "Folen hwithrans"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:66
-#, fuzzy
 msgid "Category page"
-msgstr "Kategorie"
+msgstr "Folen klassys"
 
-#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:686
+#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:711
 #: src/bz-installed-tile.blp:99
-#, fuzzy
 msgid "Manage Add-ons"
-msgstr "Správce doplňků"
+msgstr "Dyghtya Ystynansow"
 
-#: src/bz-addons-dialog.c:90 src/bz-full-view.blp:477
+#: src/bz-addons-dialog.c:90 src/bz-full-view.blp:502
 #: src/bz-installed-tile.blp:117 src/bz-transaction-view.blp:213
 #: src/bz-window.c:1314
 msgid "Remove"
-msgstr "Odstranit"
+msgstr "Remova"
 
 #: src/bz-addons-dialog.c:95 src/bz-favorites-tile.c:166
-#: src/bz-full-view.blp:249 src/bz-full-view.blp:464
+#: src/bz-full-view.blp:274 src/bz-full-view.blp:489
 #: src/bz-transaction-view.blp:187 src/bz-window.c:1291
 msgid "Install"
-msgstr "Instalovat"
+msgstr "Lea"
 
 #: src/bz-age-rating-dialog.blp:7 src/bz-age-rating-dialog.blp:50
-#: src/bz-full-view.c:374 src/bz-full-view.c:381
+#: src/bz-full-view.c:373 src/bz-full-view.c:380
 msgid "Age Rating"
-msgstr "Věkové hodnocení"
+msgstr "Talvos Oos"
 
 #: src/bz-age-rating-dialog.blp:40 src/bz-age-rating-dialog.c:790
 msgid "?"
@@ -158,271 +149,267 @@ msgstr "?"
 
 #: src/bz-age-rating-dialog.c:139
 msgid "Cartoon Violence"
-msgstr "Cartoon Violence"
+msgstr "Garowder Komik"
 
 #: src/bz-age-rating-dialog.c:140
 msgid "No information regarding cartoon violence"
-msgstr "Žádná informace o cartoon violence"
+msgstr "Vyth kedhlow yn-kever garowder komik"
 
 #: src/bz-age-rating-dialog.c:143
 msgid "Fantasy Violence"
-msgstr "Fantasy Violence"
+msgstr "Garowder Fantasi"
 
 #: src/bz-age-rating-dialog.c:144
 msgid "No information regarding fantasy violence"
-msgstr "Žádná informace o fantasy violence"
+msgstr "Vyth kedhlow yn-kever garowder fantasi"
 
 #: src/bz-age-rating-dialog.c:147
 msgid "Realistic Violence"
-msgstr "Realistické násilí"
+msgstr "Garowder Gwirvosek"
 
 #: src/bz-age-rating-dialog.c:148
 msgid "No information regarding realistic violence"
-msgstr "Žádná informace o realistickém násilí"
+msgstr "Vyth kedhlow yn-kever garowder gwirvosek"
 
 #: src/bz-age-rating-dialog.c:151
 msgid "Violence Depicting Bloodshed"
-msgstr "Násilí zobrazující zabíjení"
+msgstr "Garowder rag Krow"
 
 #: src/bz-age-rating-dialog.c:152
 msgid "No information regarding bloodshed"
-msgstr "Žádná informace o zabíjení"
+msgstr "Vyth kedhlow yn-kever krow"
 
 #: src/bz-age-rating-dialog.c:155
 msgid "Sexual Violence"
-msgstr "Sexuální násilí"
+msgstr "Garowder Reydhel"
 
 #: src/bz-age-rating-dialog.c:156
 msgid "No information regarding sexual violence"
-msgstr "Žádná informace o sexuálním násilí"
+msgstr "Vyth kedhlow yn-kever garowder reydhel"
 
 #: src/bz-age-rating-dialog.c:159
 msgid "Alcohol"
-msgstr "Alkohol"
+msgstr "Las"
 
 #: src/bz-age-rating-dialog.c:160
 msgid "No information regarding references to alcohol"
-msgstr "Žádná informace o odkazech na alkohol"
+msgstr "Vyth kedhlow yn-kever kampollans dhe las"
 
 #: src/bz-age-rating-dialog.c:163
 msgid "Narcotics"
-msgstr "Narkotika"
+msgstr "Droggya Anlaghel"
 
 #: src/bz-age-rating-dialog.c:164
 msgid "No information regarding references to illicit drugs"
-msgstr "Žádná informace o odkazech na nelegální drogy"
+msgstr "Vyth kedhlow yn-kever kampollans dhe droggya anlaghel"
 
 #: src/bz-age-rating-dialog.c:167
 msgid "Tobacco"
-msgstr "Tabák"
+msgstr "Tobacko"
 
 #: src/bz-age-rating-dialog.c:168
 msgid "No information regarding references to tobacco products"
-msgstr "Žádná informace o odkazech na tabák"
+msgstr "Vyth kedhlow yn-kever kampollans dhe gwaren tobacko"
 
 #: src/bz-age-rating-dialog.c:171 src/bz-age-rating-dialog.c:358
 msgid "Nudity"
-msgstr "Nahota"
+msgstr "Nothedh"
 
 #: src/bz-age-rating-dialog.c:172
 msgid "No information regarding nudity of any sort"
-msgstr "Žádná informace o nahotě jakéhokoli druhu"
+msgstr "Vyth kedhlow yn-kever kampollans dhe nothedh"
 
 #: src/bz-age-rating-dialog.c:175
 msgid "Sexual Themes"
-msgstr "Sexuální Téma"
+msgstr "Themow Reydhel"
 
 #: src/bz-age-rating-dialog.c:176
 msgid "No information regarding references to or depictions of sexual nature"
-msgstr "Žádná informace o odkazech na obsah sexuálního charakteru"
+msgstr "Vyth kedhlow yn-kever kampollans dhe po portrayansow a gnas reydhel"
 
 #: src/bz-age-rating-dialog.c:179
 msgid "Profanity"
-msgstr "Profanity"
+msgstr "Koss"
 
 #: src/bz-age-rating-dialog.c:180
 msgid "No information regarding profanity of any kind"
-msgstr "Žádná informace o profanity jakéhokoli druhu"
+msgstr "Vyth kedhlow yn-kever kossya"
 
 #: src/bz-age-rating-dialog.c:183
 msgid "Inappropriate Humor"
-msgstr "Nepřípustný Humor"
+msgstr "Hwarthuster na Gwiw"
 
 #: src/bz-age-rating-dialog.c:184
 msgid "No information regarding inappropriate humor"
-msgstr "Žádné informace o nepřípustném humoru"
+msgstr "Vyth kedhlow yn-kever hwarthuster na gwiw"
 
 #: src/bz-age-rating-dialog.c:187
 msgid "Discrimination"
-msgstr "Diskriminace"
+msgstr "Disfaveryans"
 
 #: src/bz-age-rating-dialog.c:188
 msgid "No information regarding discriminatory language of any kind"
-msgstr "Žádná informace o diskriminačním jazyku jakéhokoli druhu"
+msgstr "Vyth kedhlow yn-kever keskows disfaveryans"
 
 #: src/bz-age-rating-dialog.c:191
 msgid "Advertising"
-msgstr "Reklama"
+msgstr "Argemynnow"
 
 #: src/bz-age-rating-dialog.c:192
 msgid "No information regarding advertising of any kind"
-msgstr "Žádná informace o reklamě jakéhokoli druhu"
+msgstr "Vyth kedhlow yn-kever argemynnow"
 
 #: src/bz-age-rating-dialog.c:195
 msgid "Gambling"
-msgstr "Gambling"
+msgstr "Hapwaryans"
 
 #: src/bz-age-rating-dialog.c:196
 msgid "No information regarding gambling of any kind"
-msgstr "Žádné informace o gamblingu jakéhokoli druhu"
+msgstr "Vyth kedhlow yn-kever hapwaryans"
 
 #: src/bz-age-rating-dialog.c:199
 msgid "Purchasing"
-msgstr "Nákupy v aplikaci"
+msgstr "Prenyans"
 
 #: src/bz-age-rating-dialog.c:200
 msgid "No information regarding the ability to spend money"
-msgstr "Žádná informace o možnosti nákupu v aplikaci"
+msgstr "Vyth kedhlow yn-kever prenyans"
 
 #: src/bz-age-rating-dialog.c:203
 msgid "Chat Between Users"
-msgstr "Sociální interakce (textová)"
+msgstr "Keskows ynter Devnydhyoryon"
 
 #: src/bz-age-rating-dialog.c:204
 msgid "No information regarding ways to chat with other users"
-msgstr "Žádná informace o možnosti chatování s ostatními uživateli"
+msgstr "Vyth kedhlow yn-kever keskows ynter devnydhyoryon"
 
 #: src/bz-age-rating-dialog.c:207
 msgid "Audio Chat Between Users"
-msgstr "Sociální interakce (voice chat)"
+msgstr "Galow Pellgows ynter Devnydhyoryon"
 
 #: src/bz-age-rating-dialog.c:208
 msgid "No information regarding ways to talk with other users"
-msgstr "Žádná informace o možnosti hovoru s ostatními uživateli"
+msgstr "Vyth kedhlow yn-kever keskows ynter devnydhyoryon"
 
 #: src/bz-age-rating-dialog.c:211
-#, fuzzy
 msgid "Contact Details"
-msgstr "Podrobnosti chyby"
+msgstr "Kedhlow Kestav"
 
 #: src/bz-age-rating-dialog.c:212
 msgid ""
 "No information regarding sharing of social network usernames or email "
 "addresses"
 msgstr ""
-"Žádná informace o sdílení uživatelských jména nebo "
-"e-mailových adres"
+"Vyth kedhlow yn-kever kevrans a hanwyn usyer po ebost"
 
 #: src/bz-age-rating-dialog.c:215
 msgid "Identifying Information"
-msgstr "Indentifikační Informace"
+msgstr "Kedhlow Privedh"
 
 #: src/bz-age-rating-dialog.c:216
 msgid "No information regarding sharing of user information with third parties"
-msgstr "Žádné informace o sdílení uživatelských informací s třetími stranami"
+msgstr "Vyth kedhlow yn-kever kevrans a kedhlow privedh gans tressa partiow"
 
 #: src/bz-age-rating-dialog.c:219
 msgid "Location Sharing"
-msgstr "Sdílení Lokace"
+msgstr "Kevrans Tyller"
 
 #: src/bz-age-rating-dialog.c:220
 msgid "No information regarding sharing of physical location with other users"
-msgstr "Žádná informace o sdílení lokace s ostatními uživateli"
+msgstr "Vyth kedhlow yn-kever kevrans tyller gans devnydhyoryon erel"
 
 #: src/bz-age-rating-dialog.c:223
 msgid "Prostitution"
-msgstr "Prostituce"
+msgstr "Horyans"
 
 #: src/bz-age-rating-dialog.c:224
 msgid "No information regarding references to prostitution"
-msgstr "Žádné informace o odkazech na prostituci"
+msgstr "Vyth kedhlow yn-kever kampollans dhe horyans"
 
 #: src/bz-age-rating-dialog.c:227
 msgid "Adultery"
-msgstr "Adultery"
+msgstr "Avoutri"
 
 #: src/bz-age-rating-dialog.c:228
 msgid "No information regarding references to adultery"
-msgstr "No information regarding references to adultery"
+msgstr "Vyth kedhlow yn-kever kampollans dhe avoutri"
 
 #: src/bz-age-rating-dialog.c:231
 msgid "Sexualized Characters"
-msgstr "Sexualized Characters"
+msgstr "Warioryon Reydhel"
 
 #: src/bz-age-rating-dialog.c:232
 msgid "No information regarding sexualized characters"
-msgstr "No information regarding sexualized characters"
+msgstr "Vyth kedhlow yn-kever warioryon reydhel"
 
 #: src/bz-age-rating-dialog.c:235
-#, fuzzy
 msgid "Desecration"
-msgstr "Desecration"
+msgstr "Defolyans"
 
 #: src/bz-age-rating-dialog.c:236
 msgid "No information regarding references to desecration"
-msgstr "No information regarding references to desecration"
+msgstr "Vyth kedhlow yn-kever kampollans dhe defolyans"
 
 #: src/bz-age-rating-dialog.c:239
 msgid "Human Remains"
-msgstr "Human Remains"
+msgstr "Korf Marow"
 
 #: src/bz-age-rating-dialog.c:240
 msgid "No information regarding visible dead human remains"
-msgstr "No information regarding visible dead human remains"
+msgstr "Vyth kedhlow yn-kever korf marow a wel"
 
 #: src/bz-age-rating-dialog.c:243
 msgid "Slavery"
-msgstr "Slavery"
+msgstr "Kethneth"
 
 #: src/bz-age-rating-dialog.c:244
 msgid "No information regarding references to slavery"
-msgstr "No information regarding references to slavery"
+msgstr "Vyth kedhlow yn-kever kampollans dhe kethneth"
 
 #: src/bz-age-rating-dialog.c:307
 msgid "Does not include references to drugs"
-msgstr "Neobsahuje odkazy na drogy"
+msgstr "Vyth komprehendya kampollans dhe droggys"
 
 #: src/bz-age-rating-dialog.c:309
 msgid ""
 "Does not include swearing, profanity, and other kinds of strong language"
-msgstr "Does not include swearing, profanity, and other kinds of strong language"
+msgstr "Vyth komprehendya kossya"
 
 #: src/bz-age-rating-dialog.c:311
 msgid "Does not include ads or monetary transactions"
-msgstr "Neobsahuje reklamy nebo jiné finanční transakce"
+msgstr "Vyth komprehendya argemynnow po treuswriansow monesek"
 
 #: src/bz-age-rating-dialog.c:313
 msgid "Does not include sex or nudity"
-msgstr "Neobsahuje sexuální obsah nebo nahotu"
+msgstr "Vyth komprehendya kyjyans po nothedh"
 
 #: src/bz-age-rating-dialog.c:315
 msgid "Does not include uncontrolled chat functionality"
-msgstr "Does not include uncontrolled chat functionality"
+msgstr "Vyth komprehendya keskows heb musur"
 
 #: src/bz-age-rating-dialog.c:317
 msgid "Does not include violence"
-msgstr "Neobsahuje násilí"
+msgstr "Vyth komprehendya garowder"
 
 #: src/bz-age-rating-dialog.c:352
 msgid "Drugs"
-msgstr "Drogy"
+msgstr "Droggys"
 
 #: src/bz-age-rating-dialog.c:354
 msgid "Strong Language"
-msgstr "Strong Language"
+msgstr "Koss"
 
 #: src/bz-age-rating-dialog.c:356
 msgid "Money"
-msgstr "Peníze"
+msgstr "Mona"
 
 #: src/bz-age-rating-dialog.c:360
 msgid "Social"
-msgstr "Sociální"
+msgstr "Kowethasek"
 
 #: src/bz-age-rating-dialog.c:362
-#, fuzzy
 msgid "Violence"
-msgstr "Násilí"
+msgstr "Garowder"
 
 #: src/bz-age-rating-dialog.c:564
 #, c-format
@@ -430,7 +417,7 @@ msgid "%s • %s"
 msgstr "%s • %s"
 
 #. Translators: Age rating format, e.g. "12+" for ages 12 and up
-#: src/bz-age-rating-dialog.c:752 src/bz-full-view.c:364
+#: src/bz-age-rating-dialog.c:752 src/bz-full-view.c:363
 #, c-format
 msgid "%d+"
 msgstr "%d+"
@@ -438,47 +425,47 @@ msgstr "%d+"
 #: src/bz-age-rating-dialog.c:782
 msgctxt "Age rating"
 msgid "All"
-msgstr "Všichni"
+msgstr "Oll"
 
 #: src/bz-age-rating-dialog.c:846
 #, c-format
 msgid "%s has an unknown age rating"
-msgstr "%s má neznámé věkové hodnocení"
+msgstr "%s re unn talvos oos ankoth"
 
 #: src/bz-age-rating-dialog.c:854
 #, c-format
 msgid "%s is suitable for everyone"
-msgstr "%s je vhodné pro každého"
+msgstr "%s usi fytti rag oll"
 
 #: src/bz-age-rating-dialog.c:857
 #, c-format
 msgid "%s is suitable for toddlers"
-msgstr "%s je vhodné pro mládež"
+msgstr "%s usi fytti rag fleghes vyghan"
 
 #: src/bz-age-rating-dialog.c:860
 #, c-format
 msgid "%s is suitable for young children"
-msgstr "%s je vhodné pro malé děti"
+msgstr "%s usi fytti rag fleghes yowynk"
 
 #: src/bz-age-rating-dialog.c:863
 #, c-format
 msgid "%s is suitable for children"
-msgstr "%s je vhodné pro děti"
+msgstr "%s usi fytti rag fleghes"
 
 #: src/bz-age-rating-dialog.c:866
 #, c-format
 msgid "%s is suitable for teenagers"
-msgstr "%s je vhodné pro teenagery"
+msgstr "%s usi fytti rag degowogyon"
 
 #: src/bz-age-rating-dialog.c:869
 #, c-format
 msgid "%s is suitable for adults"
-msgstr "%s je vhodné pro dospělé"
+msgstr "%s usi fytti rag tevesigesow"
 
 #: src/bz-age-rating-dialog.c:872
 #, c-format
 msgid "%s is suitable for %s"
-msgstr "%s je vhodné pro %s"
+msgstr "%s usi fytti rag %s"
 
 #: src/bz-app-size-dialog.blp:43
 msgid "--- MB"
@@ -486,19 +473,19 @@ msgstr "--- MB"
 
 #: src/bz-app-size-dialog.blp:53
 msgid "Download Size"
-msgstr "Velikost ke stažení"
+msgstr "Braster Iskarg"
 
 #: src/bz-app-size-dialog.c:55
 msgid "Of the size of human DNA"
-msgstr "Velikosti lidské DNA"
+msgstr "a an braster a DNA den"
 
 #: src/bz-app-size-dialog.c:55
 msgid "3 billion base pairs"
-msgstr "3 miliardy bazických párů"
+msgstr "3 bilvil koplow ben"
 
 #: src/bz-app-size-dialog.c:56
 msgid "Of the Linux Kernel"
-msgstr "Linuxového jádra"
+msgstr "a an Bewyn Linux"
 
 #: src/bz-app-size-dialog.c:56
 msgid "linux-6.17.tar.xz"
@@ -506,70 +493,68 @@ msgstr "linux-6.17.tar.xz"
 
 #: src/bz-app-size-dialog.c:57
 msgid "Of the Apollo 11 guidance computer"
-msgstr "Naváděcího počítače Apolla 11"
+msgstr "a an amontyell Apollo 11"
 
 #: src/bz-app-size-dialog.c:57
 msgid "Total ROM and RAM"
-msgstr "Kompletní ROM a RAM"
+msgstr "Somm rag ROM ha RAM"
 
 #: src/bz-app-size-dialog.c:58
 msgid "Of the original Super Mario Bros"
-msgstr "Originálního Super Mario Bros"
+msgstr "a Super Mario Bros"
 
 #: src/bz-app-size-dialog.c:58
 msgid "On the NES"
-msgstr "Na NES"
+msgstr "yn an NES"
 
 #: src/bz-app-size-dialog.c:59
 msgid "Of the size of Wikipedia"
-msgstr "Velikosti Wikipedie"
+msgstr "a an braster rag Wikipedya"
 
 #: src/bz-app-size-dialog.c:59
 msgid "Without any media"
-msgstr "Bez žádných medií"
+msgstr "Heb neb media"
 
 #: src/bz-app-tile.blp:84 src/bz-installed-page.blp:25 src/bz-window.blp:298
 msgid "Installed"
-msgstr "Nainstalované"
+msgstr ""
 
 #: src/bz-apps-page.blp:14 src/bz-full-view.blp:43 src/bz-user-data-page.blp:15
 #: src/bz-window.blp:443
 msgid "Main Menu"
-msgstr "Hlavní Menu"
+msgstr "Rol Chif"
 
 #: src/bz-apps-page.blp:17 src/bz-user-data-page.blp:18 src/bz-window.blp:522
 msgid "_Donate to Bazaar ❤️"
-msgstr "_Podpořte Vývoj ❤️"
+msgstr "_Argevri dhe Basar ❤️"
 
 #: src/bz-apps-page.blp:18 src/bz-user-data-page.blp:19
-#, fuzzy
 msgid "_Refresh Content"
-msgstr "Obnovit"
+msgstr "_Dishegha Synsas"
 
 #: src/bz-apps-page.blp:22 src/bz-user-data-page.blp:22 src/bz-window.blp:529
 msgid "_Preferences"
-msgstr "Předvolby"
+msgstr "_Settyansow"
 
 #: src/bz-apps-page.blp:23 src/bz-user-data-page.blp:23 src/bz-window.blp:550
 msgid "_Keyboard Shortcuts"
-msgstr "_Klávesové Zkratky"
+msgstr "_Kesunyansow Bysowek"
 
 #: src/bz-apps-page.blp:24 src/bz-user-data-page.blp:24 src/bz-window.blp:555
 msgid "_About Bazaar"
-msgstr "_O Bazaaru"
+msgstr "_A-dro Basar"
 
 #: src/bz-apps-page.blp:28 src/bz-user-data-page.blp:27 src/bz-window.blp:562
-#, fuzzy
 msgid "_Quit Bazaar"
-msgstr "_O Bazaaru"
+msgstr "_Kwytya Basar"
 
 #: src/bz-application.c:578
 msgid ""
 "This functionality is currently disabled. It is recommended you download and "
 "install Flatseal to manage app permissions."
 msgstr ""
-"Tato funkce je aktuálně vypnutá. Doporučujeme stáhnout a nainstalovat "
-"Flatseal pro správu oprávnění aplikací."
+"An nas ma usi evredhek y'n eur ma. Y usi komendya dhe iskarga ha "
+"lea Flatseal dhe dyghtya grontow appys."
 
 #: src/bz-application.c:660
 msgctxt "About Dialog Developer Credit"
@@ -584,20 +569,19 @@ msgstr "Alexander Vanhee"
 #. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
 #: src/bz-application.c:686
 msgid "translator-credits"
-msgstr "Vlastimil Dědek"
+msgstr "Flynn Peck <cirilla@tuta.io>"
 
 #: src/bz-application.c:750
 msgid "Logged Out Successfully!"
-msgstr "Uživatel Úspěšně Odhlášen!"
+msgstr ""
 
 #: src/bz-application.c:877
 msgid "Performing setup..."
-msgstr "Provádím nastavení..."
+msgstr "Gwruthyl selyans..."
 
 #: src/bz-application.c:956 src/bz-application.c:965
-#, fuzzy
 msgid "Set Up Flathub"
-msgstr "Nastavuji Flathub"
+msgstr "Selya Flathub"
 
 #: src/bz-application.c:959
 msgid ""
@@ -606,66 +590,57 @@ msgid ""
 "\n"
 "You can still use Bazaar to browse and remove already installed apps."
 msgstr ""
-"Flathub není nastaven na tomto systému.Nebudete moct procházet a instalovat "
-"aplikace v Bazaaru.\n"
-"\n"
-"Stále můžete používat Bazaar ke správě nainstalovaných aplikací."
 
 #: src/bz-application.c:964 src/bz-update-dialog.blp:6
 msgid "Later"
-msgstr "Později"
+msgstr "Diwettha"
 
 #: src/bz-application.c:1366
 msgid "Synchronizing..."
-msgstr "Synchronizuji..."
+msgstr "Kettermynyegi..."
 
 #: src/bz-application.c:1505
-#, fuzzy, c-format
+#, c-format
 msgid "Receiving %d entries..."
-msgstr "Získávání položek"
+msgstr "Receva %d enworrans manylyon..."
 
 #: src/bz-application.c:1510
-#, fuzzy
 msgid "Checking for updates"
-msgstr "Kontroluji aktualizace"
+msgstr ""
 
 #: src/bz-curated-view.blp:11 src/bz-favorites-page.blp:65
 #: src/bz-flathub-page.blp:19 src/bz-full-view.blp:53
 #: src/bz-installed-page.blp:15 src/bz-user-data-page.blp:52
 #: src/bz-window.blp:183
 msgid "Empty"
-msgstr "Prázdné"
+msgstr "Gwag"
 
 #: src/bz-curated-view.blp:15
-#, fuzzy
 msgid "No Curation"
-msgstr "Žádné vybrané aplikace"
+msgstr ""
 
 #: src/bz-curated-view.blp:16
 msgid ""
 "There is no curation information provided on this system. You can still "
 "browse applications on Flathub"
 msgstr ""
-"Na vašem systému nejsou dostupné žádné informace o vybraných aplikacích. "
-"Stále můžete procházet aplikace na Flathubu."
 
 #: src/bz-curated-view.blp:18
-#, fuzzy
 msgid "Browse Flathub"
-msgstr "Prohlížet Flathub"
+msgstr "Peuri Flathub"
 
 #: src/bz-curated-view.blp:29 src/bz-curated-view.blp:33
 #: src/bz-flathub-page.blp:30 src/bz-flathub-page.blp:34
 msgid "Offline"
-msgstr "Offline"
+msgstr "Dhywarlinen"
 
 #: src/bz-curated-view.blp:39 src/bz-flathub-page.blp:49
 msgid "Browser"
-msgstr "Prohlížeč"
+msgstr "Peurell"
 
 #: src/bz-developer-badge.c:131
 msgid "Developer information not available."
-msgstr "Developer information not available."
+msgstr "Kedhlow awtour ankavadow."
 
 #: src/bz-developer-badge.c:137 src/bz-developer-badge.c:151
 #, c-format
@@ -673,8 +648,8 @@ msgid ""
 "The ownership of the %s app ID has not been verified and it may be a "
 "community package."
 msgstr ""
-"Vlastnictví ID aplikace %s není ověřeno a může se jednat o "
-"komunitní balíček."
+"An perghenogeth a an %s ID app usi heb gwir hag y res bones unn "
+"fardel ansodhogel."
 
 #: src/bz-developer-badge.c:155
 #, c-format
@@ -682,804 +657,747 @@ msgid ""
 "The ownership of the %s app ID has been manually verified by the Flathub "
 "team."
 msgstr ""
-"Vlastnictví ID aplikace %s bylo manuálně ověřeno týmem Flathubu."
+"An perghenogeth a an %s ID app usi gwirya dre dhorn gans an bagas "
+"Flathub."
 
 #: src/bz-developer-badge.c:161
 #, c-format
 msgid ""
 "The ownership of the %s app ID has been verified by <b>%s</b> on <b>%s</b>."
 msgstr ""
-"Vlastnictví ID aplikace %s bylo ověřeno <b>%s</b> na <b>%s</b>."
+"An perghenogeth a an %s ID app usi gwirya gans <b>%S</b> war <b>%s</b>."
 
 #: src/bz-developer-badge.c:168
 #, c-format
 msgid "The ownership of the %s app ID has been verified using %s."
-msgstr "Vlastnictví ID aplikace %s bylo ověřeno pomocí %s."
+msgstr ""
+"An perghenogeth a an %s ID app usi gwirya war %s."
 
 #: src/bz-developer-badge.c:172
 #, c-format
 msgid "The ownership of the %s app ID has been verified."
-msgstr "Vlastnictví ID aplikace %s bylo ověřeno."
+msgstr ""
+"An perghenogeth a an %s ID app usi gwirya."
 
 #: src/bz-entry-group-util.c:73
-#, fuzzy
 msgid "Choose an Installation"
-msgstr "Vyberte Instalaci"
+msgstr "Dewis unn Ynstallyans"
 
 #: src/bz-entry-group-util.c:76
-#, fuzzy
 msgid ""
 "You have multiple versions of this app installed. Which one would you like "
 "to proceed with?"
 msgstr ""
-"Máte více verzí této aplikace nainstalované. "
-"Se kterou chcete pokračovat?"
 
 #: src/bz-entry-group-util.c:80 src/bz-window.c:1290 src/bz-window.c:1313
 msgid "Cancel"
-msgstr "Zrušit"
+msgstr "Hedhi"
 
 #: src/bz-entry-inspector.blp:5
 msgid "Entry Inspector"
-msgstr "Otevřít Inspector"
+msgstr "Hwithrer Enworrans Manylyon"
 
 #: src/bz-entry-inspector.blp:76
 msgid "Serialize"
-msgstr "Serialize"
+msgstr ""
 
 #: src/bz-entry-inspector.blp:80
 msgid "Convert to JSON"
-msgstr "Převést do JSON"
+msgstr "Kedreylya dhe JSON"
 
 #: src/bz-error.c:68
 msgid "An Error Occurred"
-msgstr "Chyba"
+msgstr "Unn Error Hwarvos"
 
 #: src/bz-error.c:89
 msgid "Close"
-msgstr "Zavřít"
+msgstr "Kwytya"
 
 #: src/bz-error.c:90
 msgid "Copy and Close"
-msgstr "Zkopírovat a zavřít"
-
-#: src/bz-favorite-button.c:434
-msgid "Log in with Flathub to manage favorites"
-msgstr "Přihlašte se pomocí Flathubu pro správu oblíbených aplikací"
-
-#: src/bz-favorite-button.c:440
-msgid "Log In"
-msgstr "Přihlásit Se"
-
-#: src/bz-favorite-button.blp:14
-msgid "Favorite Count"
-msgstr "Počet Oblíbených"
+msgstr "Dasskrifa ha Kwytya"
 
 #: src/bz-favorites-tile.c:164
-#, fuzzy
 msgid "Uninstall"
-msgstr "Instalovat"
+msgstr "Dislea"
 
 #: src/bz-favorites-tile.blp:70 src/bz-installed-tile.blp:75
 msgid "Support this application"
-msgstr "Sdílet tuto aplikaci"
+msgstr "Skoodhya an app ma"
 
 #: src/bz-favorites-tile.blp:118
 msgid "Remove from Favorites"
-msgstr "Odebrat z Oblíbených"
+msgstr "Dilea a Drudhyow"
 
 #: src/bz-favorites-page.blp:5 src/bz-favorites-page.blp:75
 #: src/bz-window.blp:580
 msgid "Favorites"
-msgstr "Oblíbené"
+msgstr "Drudhyow"
 
 #: src/bz-favorites-page.blp:22 src/bz-full-view.blp:20 src/bz-window.blp:126
 #: src/bz-window.blp:420
 msgid "Toggle transaction sidebar"
-msgstr "Zobrazit/skrýt přehled translakcí"
+msgstr ""
 
 #: src/bz-favorites-page.blp:53 src/bz-user-data-page.blp:41
 msgid "Loading"
-msgstr "Načítání"
+msgstr "Karga"
 
 #: src/bz-favorites-page.blp:68
 msgid "No Favorites"
-msgstr "Žádné Oblíbené Aplikace"
+msgstr "Vyth Drudhyow"
 
 #: src/bz-favorites-page.blp:69
 msgid "Applications you mark as favorite will appear here"
-msgstr "Aplikace, které označíte jako oblíbené se zobrazí zde"
+msgstr ""
 
 #: src/bz-featured-carousel.blp:31
 msgid "Previous"
-msgstr "Předchozí"
+msgstr "Kyns"
 
 #: src/bz-featured-carousel.blp:53
 msgid "Next"
-msgstr "Další"
+msgstr "Nessa"
 
 #: src/bz-featured-tile.blp:88
 msgid "App of the Day"
-msgstr "Aplikace Dne"
+msgstr "App rag an Dydh"
 
 #: src/bz-flathub-category.c:78
 msgid "Audio & Video"
-msgstr "Audio & Video"
+msgstr "Son & Gwydhyow"
 
 #: src/bz-flathub-category.c:78
 msgid "Media"
-msgstr "Multimédia"
+msgstr "Media"
 
 #: src/bz-flathub-category.c:78
-#, fuzzy
 msgid "More Audio & Video"
-msgstr "Zobrazit Více"
+msgstr "Moy Son & Gwydhyow"
 
 #: src/bz-flathub-category.c:79
-#, fuzzy
 msgid "Developer Tools"
-msgstr "Vývojářské Nástroje"
+msgstr "Toulys Amontydh"
 
 #: src/bz-flathub-category.c:79
-#, fuzzy
 msgid "Develop"
-msgstr "Vývoj"
+msgstr "Displegya"
 
 #: src/bz-flathub-category.c:79
 msgid "More Developer Tools"
-msgstr "Zobrazit Více"
+msgstr "Moy Toulys Amontydh"
 
 #: src/bz-flathub-category.c:80
 msgid "Education"
-msgstr "Vzdělávání"
+msgstr "Adhyskans"
 
 #: src/bz-flathub-category.c:80
 msgid "Learn"
-msgstr "Učení"
+msgstr "Dyski"
 
 #: src/bz-flathub-category.c:80
-#, fuzzy
 msgid "More Education"
-msgstr "Zobrazit Více"
+msgstr "Moy Adhyskans"
 
 #: src/bz-flathub-category.c:81
 msgid "Gaming"
-msgstr "Gaming"
+msgstr "Gwariow"
 
 #: src/bz-flathub-category.c:81
 msgid "Play"
-msgstr "Hrát"
+msgstr "Gwari"
 
 #: src/bz-flathub-category.c:81
-#, fuzzy
 msgid "More Gaming"
-msgstr "Zobrazit Více"
+msgstr "Moy Gwariow"
 
 #: src/bz-flathub-category.c:82
 msgid "Graphics & Photography"
-msgstr "Grafika & Fotografie"
+msgstr "Grafek & Skeusenieth"
 
 #: src/bz-flathub-category.c:82
 msgid "Create"
-msgstr "Vytvořit"
+msgstr "Gul"
 
 #: src/bz-flathub-category.c:82
 msgid "More Graphics & Photography"
-msgstr "Zobrazit Více"
+msgstr "Moy Grafek & Skeusenieth"
 
 #: src/bz-flathub-category.c:83
 msgid "Networking"
-msgstr "Internet"
+msgstr "Rosweythyans"
 
 #: src/bz-flathub-category.c:83
 msgid "Internet"
-msgstr "Internet"
+msgstr "Kesrosweyth"
 
 #: src/bz-flathub-category.c:83
-#, fuzzy
 msgid "More Networking"
-msgstr "Zobrazit Více"
+msgstr "Moy Rosweythyans"
 
 #: src/bz-flathub-category.c:84
 msgid "Productivity"
-msgstr "Prodiktivita"
+msgstr "Askorruster"
 
 #: src/bz-flathub-category.c:84
 msgid "Work"
-msgstr "Práce"
+msgstr "Gonis"
 
 #: src/bz-flathub-category.c:84
 msgid "More Productivity"
-msgstr "Zobrazit Více"
+msgstr "Moy Askorruster"
 
 #: src/bz-flathub-category.c:85
 msgid "Science"
-msgstr "Věda"
+msgstr "Godhonieth"
 
 #: src/bz-flathub-category.c:85
-#, fuzzy
 msgid "More Science"
-msgstr "Zobrazit Více"
+msgstr "Moy Godhonieth"
 
 #: src/bz-flathub-category.c:86
 msgid "System"
-msgstr "Systém"
+msgstr "Kevreyth"
 
 #: src/bz-flathub-category.c:86
-#, fuzzy
 msgid "More System"
-msgstr "Systém"
+msgstr "Moy Kevreyth"
 
 #: src/bz-flathub-category.c:87
 msgid "Utilities"
-msgstr "Nástroje"
+msgstr "Lesow"
 
 #: src/bz-flathub-category.c:87
 msgid "Tools"
-msgstr "Nástroje"
+msgstr "Toulys"
 
 #: src/bz-flathub-category.c:87
-#, fuzzy
 msgid "More Utilities"
-msgstr "Zobrazit Více"
+msgstr "Moy Lesow"
 
 #: src/bz-flathub-category.c:88 src/bz-flathub-page.blp:119
 #: src/bz-flathub-page.blp:152
 msgid "Trending"
-msgstr "Trendy"
+msgstr ""
 
 #: src/bz-flathub-category.c:88
-#, fuzzy
 msgid "More Trending"
-msgstr "Více Trendy"
+msgstr ""
 
 #: src/bz-flathub-category.c:89 src/bz-flathub-page.blp:125
 #: src/bz-flathub-page.blp:185
 msgid "Popular"
-msgstr "Populární"
+msgstr "Gerys-da"
 
 #: src/bz-flathub-category.c:89
-#, fuzzy
 msgid "More Popular"
-msgstr "Více Populárních"
+msgstr "Moy Gerys-da"
 
 #: src/bz-flathub-category.c:90 src/bz-flathub-page.blp:174
 msgid "Recently Added"
-msgstr "Nedávno přidané"
+msgstr "Addya A-lergh"
 
 #: src/bz-flathub-category.c:90 src/bz-flathub-page.blp:131
 msgid "New"
-msgstr "Nové"
+msgstr "Nowydh"
 
 #: src/bz-flathub-category.c:90
-#, fuzzy
 msgid "More New"
-msgstr "Více Nedávno Přidaných"
+msgstr "Moy Nowydh"
 
 #: src/bz-flathub-category.c:91 src/bz-flathub-page.blp:163
 msgid "Recently Updated"
-msgstr "Nedávno aktualizované"
+msgstr "Nowedhi A-lergh"
 
 #: src/bz-flathub-category.c:91 src/bz-flathub-page.blp:137
-#, fuzzy
 msgid "Updated"
-msgstr "Aktualizavané"
+msgstr "Nowedhi"
 
 #: src/bz-flathub-category.c:91
-#, fuzzy
 msgid "More Updated"
-msgstr "Více Aktualizovaných"
+msgstr "Moy Nowedhi"
 
 #: src/bz-flathub-category.c:92
 msgid "Mobile"
-msgstr "Mobile"
+msgstr "Gwayadow"
 
 #: src/bz-flathub-category.c:92
-#, fuzzy
 msgid "More Mobile"
-msgstr "Zobrazit Více"
+msgstr "Moy Gwayadow"
 
 #: src/bz-flathub-page.blp:23
 msgid "Flathub Not Added"
-msgstr "Flathub Nebyl Přidán"
+msgstr "Flathub heb Addya"
 
 #: src/bz-flathub-page.blp:24
-#, fuzzy
 msgid "The Flathub remote was not found on any of your Flatpak installations"
-msgstr "Flathub remote nebyl nalezen na žádné z instalacích flatpaku"
+msgstr "An gwerthji Flathub na fonya war neb agas ynstalyansow Flatpak"
 
 #: src/bz-flathub-page.blp:35
 msgid "Flathub returned an error"
-msgstr "Flathub vrátil chybu"
+msgstr "Flathub ri tre unn error"
 
 #: src/bz-flathub-page.blp:41
-#, fuzzy
 msgid "Retry Flathub Connection"
-msgstr "Zobrazit pouze obsah z Flathubu"
+msgstr "Hwilewgh arta Junyans Flathub"
 
 #: src/bz-flathub-page.blp:57
-#, fuzzy
 msgid "Flathub Unavailable"
-msgstr "Stránka na Flathubu"
+msgstr "Flathub Ankavadow"
 
 #: src/bz-flathub-page.blp:58
 msgid ""
 "We could not connect to Flathub. You can still manage and search for "
 "applications."
 msgstr ""
-"Nemůžeme se připojit k Flathubu. Ovšem můžeze stále spravovat a hledat aplikace."
+"Yma difygya dhe junya Flathub. Hwi gallos hwath dyghtya ha hwilas rag "
+"appys."
 
 #: src/bz-flathub-page.blp:61
-#, fuzzy
 msgid "Search Apps"
-msgstr "Vyhledat Aplikace"
+msgstr "Hwilas Appys"
 
 #: src/bz-flathub-page.blp:270
-#, fuzzy
 msgid "On the Go"
-msgstr "Na Cesty"
+msgstr "Gwayadow"
 
 #: src/bz-flathub-page.blp:282
 msgid "Apps for your Linux phones and tablets"
-msgstr "Aplikace pro vaše Linuxové telefony a tablety"
+msgstr "Appys rag agas kellgowsoryon ha leghennow Linux"
 
 #: src/bz-flathub-page.blp:293
 msgid "More Mobile Apps"
-msgstr "Více Mobilních Aplikací"
+msgstr "Moy Appys Gwayadow"
 
 #: src/bz-flathub-page.blp:328
 msgid "More Mobile apps"
-msgstr "Více Mobilních Aplikací"
+msgstr "Moy Appys Gwayadow"
 
 #: src/bz-flathub-page.blp:388
 msgid "We​ ♥​ Games"
-msgstr "We​ ♥​ Games"
+msgstr "Yma ♥ Gwariow​"
 
 #: src/bz-flathub-page.blp:401
 msgid "Games and apps to run your favorite titles"
-msgstr "Hry a aplikace pro vaše oblíbené tituly"
+msgstr "Gwariow hag appys rag eksekutya agas titlys drudh"
 
 #: src/bz-flathub-page.blp:435
-#, fuzzy
 msgid "More Games"
-msgstr "Více Her"
+msgstr "Moy Gwariow"
 
 #: src/bz-flatpak-entry.c:600
-#, fuzzy
 msgctxt "Project URL Type"
 msgid "Flathub Page"
-msgstr "Stránka na Flathubu"
+msgstr "Folen Flathub"
 
 #: src/bz-flatpak-entry.c:621
-#, fuzzy
 msgctxt "Project URL Type"
 msgid "Project Website"
-msgstr "Stránka projektu"
+msgstr "Gwiasva Ragdres"
 
 #: src/bz-flatpak-entry.c:625
-#, fuzzy
 msgctxt "Project URL Type"
 msgid "Issue Tracker"
-msgstr "Sledovač chyb"
+msgstr "Rol a Kudynnow"
 
 #: src/bz-flatpak-entry.c:629
 msgctxt "Project URL Type"
 msgid "FAQ"
-msgstr "FAQ"
+msgstr "Govynnow Kemmyn"
 
 #: src/bz-flatpak-entry.c:633
 msgctxt "Project URL Type"
 msgid "Help"
-msgstr "Nápověda"
+msgstr "Gweres"
 
 #: src/bz-flatpak-entry.c:637
-#, fuzzy
 msgctxt "Project URL Type"
 msgid "Donate"
-msgstr "Podpořit"
+msgstr "Argevri"
 
 #: src/bz-flatpak-entry.c:643
 msgctxt "Project URL Type"
 msgid "Translate"
-msgstr "Překlad"
+msgstr "Treylya"
 
 #: src/bz-flatpak-entry.c:647
-#, fuzzy
 msgctxt "Project URL Type"
 msgid "Contact"
-msgstr "Kontakt"
+msgstr "Kestava"
 
 #: src/bz-flatpak-entry.c:651
 msgctxt "Project URL Type"
 msgid "Source Code"
-msgstr "Zdrojový kód"
+msgstr "Kod"
 
 #: src/bz-flatpak-entry.c:657
 msgctxt "Project URL Type"
 msgid "Contribute"
-msgstr "Přispět"
+msgstr "Kevri"
 
 #: src/bz-full-view.blp:57
 msgid "No Results"
-msgstr "Žádné výsledky"
+msgstr "Vyth Sewyansow"
 
 #: src/bz-full-view.blp:58
 msgid "Try a different search query"
-msgstr "Zkuste jiný dotaz"
+msgstr "Assaya hwithrans erel"
 
 #: src/bz-full-view.blp:64 src/bz-window.blp:193
 msgid "Content"
-msgstr "Obsah"
+msgstr "Synsas"
 
 #: src/bz-full-view.blp:210
 msgid "Support"
-msgstr "Podpořit"
+msgstr "Skoodhyans"
 
-#: src/bz-full-view.blp:233 src/bz-full-view.blp:488
-#, fuzzy
+#: src/bz-full-view.blp:226
+msgid "Favorite Count"
+msgstr "Somm Drughyow"
+
+#: src/bz-full-view.blp:258 src/bz-full-view.blp:513
 msgid "Open"
-msgstr "Otevřít odkaz"
+msgstr "Ygeri"
 
-#: src/bz-full-view.blp:246 src/bz-full-view.blp:461
-#, fuzzy
+#: src/bz-full-view.blp:271 src/bz-full-view.blp:486
 msgid "Download & Install Application"
-msgstr "Stáhnout a nainstalovat tuto aplikaci"
+msgstr "Iskarga & Lea App"
 
-#: src/bz-full-view.blp:261
-#, fuzzy
+#: src/bz-full-view.blp:286
 msgid "Uninstall Application"
-msgstr "Odinstalovat tuto aplikaci"
+msgstr "Dislea App"
 
-#: src/bz-full-view.blp:276 src/bz-full-view.blp:503
+#: src/bz-full-view.blp:301 src/bz-full-view.blp:528
 msgid "Install Other Version"
-msgstr "Nainstalovat další verzi"
+msgstr "Lea Versyon Erel"
 
-#: src/bz-full-view.blp:300
+#: src/bz-full-view.blp:325
 msgid "Size"
-msgstr "Velikost"
+msgstr "Braster"
 
-#: src/bz-full-view.blp:405
-#, fuzzy
+#: src/bz-full-view.blp:430
 msgid "Downloads /mo"
-msgstr "Stažení /měsíc"
+msgstr "Iskargow dre mis"
 
-#: src/bz-full-view.blp:522
+#: src/bz-full-view.blp:547
 msgid "Stopped Receiving Core Updates"
-msgstr "Stopped Receiving Core Updates"
+msgstr ""
 
-#: src/bz-full-view.blp:536
+#: src/bz-full-view.blp:561
 msgid ""
 "This app uses a runtime that no longer receives updates or security fixes. "
 "It may become unsafe to use."
 msgstr ""
-"Tato aplikace používá runtime, který již nedostává aktualizace nebo bezpečnostní opravy. "
-"Může se stát, že bude nebezpečné ji používat."
 
-#: src/bz-full-view.blp:619 src/bz-window.c:1260
+#: src/bz-full-view.blp:644 src/bz-window.c:1260
 msgid "Delete Data"
-msgstr "Smazat Data"
+msgstr "Dilea Data"
 
-#: src/bz-full-view.blp:753
+#: src/bz-full-view.blp:778
 msgid "Tags:"
-msgstr "Tagy:"
+msgstr "Taggys:"
 
-#: src/bz-full-view.c:290
-#, fuzzy
+#: src/bz-full-view.c:289
 msgid "---"
 msgstr "---"
 
 #. Translators: M is the suffix for millions
-#: src/bz-full-view.c:297
+#: src/bz-full-view.c:296
 #, c-format
 msgid "%.*fM"
 msgstr "%.*fM"
 
 #. Translators: K is the suffix for thousands
-#: src/bz-full-view.c:304
+#: src/bz-full-view.c:303
 #, c-format
 msgid "%.*fK"
 msgstr "%.*fK"
 
-#: src/bz-full-view.c:314
-#, fuzzy, c-format
+#: src/bz-full-view.c:313
+#, c-format
 msgid "%d downloads in the last 30 days"
-msgstr "%'d stažení za poslední měsíc"
+msgstr "%d iskargow yn an mis diwettha"
 
-#: src/bz-full-view.c:346
-#, fuzzy, c-format
+#: src/bz-full-view.c:345
+#, c-format
 msgid "Download size of %s"
-msgstr "Velikost ke stažení"
+msgstr "Braster iskarg a %s"
 
-#: src/bz-full-view.c:379
+#: src/bz-full-view.c:378
 msgid "All Ages"
-msgstr "Všechny Věkové Skupiny"
+msgstr "Oll Osow"
 
-#: src/bz-full-view.c:391
+#: src/bz-full-view.c:390
 msgid "Age rating information unavailable"
-msgstr "Hondocení věku není k dispozici"
+msgstr "Kedhlow Talvos oos ankavadow"
 
-#: src/bz-full-view.c:396
+#: src/bz-full-view.c:395
 msgid "Suitable for all ages"
-msgstr "Vhodné pro všechny věkové skupiny"
+msgstr "Fytti rag oll osow"
 
-#: src/bz-full-view.c:398
+#: src/bz-full-view.c:397
 #, c-format
 msgid "Suitable for ages %d and up"
-msgstr "Vhodné pro věkové skupiny od %d a více"
+msgstr "Fytti rag osow %d ha war-vann"
 
-#: src/bz-full-view.c:431 src/bz-full-view.c:436 src/bz-full-view.c:464
-#: src/bz-full-view.c:475
+#: src/bz-full-view.c:430 src/bz-full-view.c:435 src/bz-full-view.c:463
+#: src/bz-full-view.c:474
 msgid "Unknown"
-msgstr "Neznámé"
+msgstr "Ankoth"
 
-#: src/bz-full-view.c:441
+#: src/bz-full-view.c:440
 #, c-format
 msgid "Free software licensed under %s"
-msgstr "Svobodný software licencovaný pod licencí %s"
+msgstr "Medhelweyth dhe wari kummya a-woles dhe %s"
 
-#: src/bz-full-view.c:446
-#, fuzzy
+#: src/bz-full-view.c:445
 msgid "Free software"
-msgstr "Svobodný software"
+msgstr "Medhelweyth dhe wari"
 
-#: src/bz-full-view.c:449
-#, fuzzy
+#: src/bz-full-view.c:448
 msgid "Proprietary Software"
-msgstr "Propriétární Software"
+msgstr "Medhelweyth Perghenogel"
 
-#: src/bz-full-view.c:452
+#: src/bz-full-view.c:451
 #, c-format
 msgid "Special License: %s"
-msgstr "Speciální Licencie: %s"
+msgstr "Kummyas Arbennik: %s"
 
-#: src/bz-full-view.c:469
+#: src/bz-full-view.c:468
 msgid "Free"
-msgstr "Free"
+msgstr "Dhe wari"
 
-#: src/bz-full-view.c:472 src/bz-license-dialog.c:118
+#: src/bz-full-view.c:471 src/bz-license-dialog.c:118
 msgid "Proprietary"
-msgstr "Propriétární"
+msgstr "Perghenogel"
 
-#: src/bz-full-view.c:477 src/bz-license-dialog.c:120
-#, fuzzy
+#: src/bz-full-view.c:476 src/bz-license-dialog.c:120
 msgid "Special License"
-msgstr "Speciální Licence"
+msgstr "Kummyas Arbennik"
 
-#: src/bz-full-view.c:497
+#: src/bz-full-view.c:496
 msgid "Adaptive"
-msgstr "Adaptivní"
+msgstr "Desedhadow"
 
-#: src/bz-full-view.c:497
+#: src/bz-full-view.c:496
 msgid "Desktop Only"
-msgstr "Pouze pro Desktop"
+msgstr "Amontyell Unnik"
+
+#: src/bz-full-view.c:502
+msgid "Works on desktop, tablets, and phones"
+msgstr "Gweythresek war amontyellow, leghennow, ha kellgowsoryon"
 
 #: src/bz-full-view.c:503
-msgid "Works on desktop, tablets, and phones"
-msgstr "Funkční na desktopu, tabletu a telefonu"
-
-#: src/bz-full-view.c:504
 msgid "May not work on mobile devices"
-msgstr "Možná nefunguje na mobilních zařízeních"
+msgstr "Res angweythresek war kellgowsoryon"
 
-#: src/bz-full-view.c:515
+#: src/bz-full-view.c:514
 msgid "No URL"
-msgstr "Žádná URL"
+msgstr "URL Vyth"
 
-#: src/bz-full-view.c:533
+#: src/bz-full-view.c:532
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
 msgstr ""
-"Tato aplikace má FLOSS licenci. To znamená že kód může být ověřen pro "
-"bezpečnost."
+"An app ma re unn kummyas dhe wari, ytho an kod gallos arhwilas "
+"rag salowder."
 
-#: src/bz-full-view.c:534
+#: src/bz-full-view.c:533
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
 msgstr ""
-"Tato aplikace má proprietární licenci. To znamená že kód je vyvíjen v "
-"soukromý a nemůže být ověřen třetí stranou."
+"An app ma re unn kummyas perghenogel, ytho an kod usi "
+"displegya privedh ha na gallos arhwilas gans unn parti tressa."
+
+#: src/bz-full-view.c:540
+msgid "More Apps"
+msgstr "Moy Appys"
 
 #: src/bz-full-view.c:541
-#, fuzzy
-msgid "More Apps"
-msgstr "Více přidaných"
-
-#: src/bz-full-view.c:542
 #, c-format
 msgid "More Apps by %s"
-msgstr "Více Aplikací od %s"
+msgstr "Moy Appys gans %s"
 
-#: src/bz-full-view.c:549
-#, fuzzy
+#: src/bz-full-view.c:548
 msgid "Other Apps by this Developer"
-msgstr "Více Aplikací od tohoto Vývojáře"
+msgstr "Appys Aral gans an Awtour ma"
 
-#: src/bz-full-view.c:551 src/bz-full-view.c:659
+#: src/bz-full-view.c:550 src/bz-full-view.c:658
 #, c-format
 msgid "Other Apps by %s"
-msgstr "Ostatní Aplikace od %s"
+msgstr "Appys Aral gans %s"
 
-#: src/bz-full-view.c:559
+#: src/bz-full-view.c:558
 #, c-format
 msgid "%s is not installed, but it still has <b>%s</b> of data present."
-msgstr "%s is not installed, but it still has <b>%s</b> of data present."
+msgstr "%s usi na ynstallys, saw y hwath re <b>%s</b> a data remenant."
 
-#: src/bz-full-view.c:661
-#, fuzzy
+#: src/bz-full-view.c:660
 msgid "Other Apps"
-msgstr "Ostatní Aplikace"
+msgstr "Appys Aral"
 
-#: src/bz-full-view.c:663
-#, fuzzy, c-format
+#: src/bz-full-view.c:662
+#, c-format
 msgid "%d Application"
 msgid_plural "%d Applications"
-msgstr[0] "%d Aplikace"
-msgstr[1] "%d Aplikace"
-msgstr[2] "%d Aplikace"
+msgstr[0] "%d App"
+msgstr[1] "%d Appys"
 
-#: src/bz-full-view.c:1011
-#, fuzzy
+#: src/bz-full-view.c:1010
 msgid "Show Less"
-msgstr "Zobrazit Méně"
+msgstr "Diskwedhes Le"
 
-#: src/bz-full-view.c:1011
+#: src/bz-full-view.c:1010
 msgid "Show More"
-msgstr "Zobrazit Více"
+msgstr "Diskwedhes Moy"
 
 #: src/bz-hardware-support-dialog.blp:6 src/bz-hardware-support-dialog.blp:47
-#, fuzzy
 msgid "Hardware Support"
-msgstr "Podpořit"
+msgstr "Skoodhyans kalesweyth"
 
 #: src/bz-hardware-support-dialog.c:69
-#, fuzzy
 msgid "Keyboard support"
-msgstr "Podpora klávesnice"
+msgstr "Skoodhyans bysowek"
 
 #: src/bz-hardware-support-dialog.c:71
 msgid "Requires keyboards"
-msgstr "Vyřaduje klávesnici"
+msgstr "Rekwirya bysowegi"
 
 #: src/bz-hardware-support-dialog.c:72
 msgid "Recommends keyboards"
-msgstr "Doporučuje klávesnici"
+msgstr "Komendya bysowegi"
 
 #: src/bz-hardware-support-dialog.c:73
-#, fuzzy
 msgid "Supports keyboards"
-msgstr "Podporuje klávesnici"
+msgstr "Skoodhya bysowegi"
 
 #: src/bz-hardware-support-dialog.c:74
 msgid "Unknown support for keyboards"
-msgstr "Neznámá podpora klávesnice"
+msgstr "Skoodhyans ankoth rag bysowegi"
 
 #: src/bz-hardware-support-dialog.c:76
-#, fuzzy
 msgid "Mouse support"
-msgstr "Podpora myši"
+msgstr "Skoodhyans logosen"
 
 #: src/bz-hardware-support-dialog.c:78
 msgid "Requires mice or pointing devices"
-msgstr "Požaduje myš"
+msgstr "Rekwirya logosen po devisyow poyntya"
 
 #: src/bz-hardware-support-dialog.c:79
 msgid "Recommends mice or pointing devices"
-msgstr "Doporučuje myš"
+msgstr "Komendya logosen po devisyow poyntya"
 
 #: src/bz-hardware-support-dialog.c:80
 msgid "Supports mice or pointing devices"
-msgstr "Podporuje myš"
+msgstr "Skoodhya logosen po devisyow poyntya"
 
 #: src/bz-hardware-support-dialog.c:81
 msgid "Unknown support for mice or pointing devices"
-msgstr "Neznámá podpora pro myš"
+msgstr "Skoodhyans ankoth rag logosen po devisyow poyntya"
 
 #: src/bz-hardware-support-dialog.c:83
 msgid "Touchscreen support"
-msgstr "Podpora dotykových obrazovek"
+msgstr "Skoodhyans tochskrin"
 
 #: src/bz-hardware-support-dialog.c:85
 msgid "Requires touchscreens"
-msgstr "Požaduje dotykové obrazovky"
+msgstr "Rekwirya tochskrinyow"
 
 #: src/bz-hardware-support-dialog.c:86
 msgid "Recommends touchscreens"
-msgstr "Doporučuje dotykové obrazovky"
+msgstr "Komendya tochskrinyow"
 
 #: src/bz-hardware-support-dialog.c:87
-#, fuzzy
 msgid "Supports touchscreens"
-msgstr "Podporuje dotykové obrazovky"
+msgstr "Skoodhya tochskrinyow"
 
 #: src/bz-hardware-support-dialog.c:88
 msgid "Unknown support for touchscreens"
-msgstr "Neznámá podpora pro dotykové obrazovky"
+msgstr "Skoodhyans ankoth rag tochskrinyow"
 
 #: src/bz-hardware-support-dialog.c:192
 msgid "Mobile support"
-msgstr "Mobile support"
+msgstr "Skoodhyans kellgowser"
 
 #: src/bz-hardware-support-dialog.c:193
 msgid "Works on mobile devices"
-msgstr "Funguje na mobilních zařízeních"
+msgstr "Gweythresek war kellgowsoryon"
 
 #: src/bz-hardware-support-dialog.c:193
 msgid "May not work well on mobile devices"
-msgstr "Nemusí fungovat dobře na mobilních zařízeních"
+msgstr "Res angweythresek war kellgowsoryon"
 
 #: src/bz-hardware-support-dialog.c:198
 msgid "Desktop support"
-msgstr "Desktop support"
+msgstr "Skoodhyans amontyell"
 
 #: src/bz-hardware-support-dialog.c:199
 msgid "Works well on large screens"
-msgstr "Funguje dobře na velkých obrazovkách"
+msgstr "Gweythresek war skrinyow bras"
 
 #: src/bz-hardware-support-dialog.c:233
 #, c-format
 msgid "%s works best on specific hardware"
-msgstr "%s funguje nejlépe na konkrétním hardware"
+msgstr "%s gweythresek gwella war kalesweyth komparek"
 
 #: src/bz-hardware-support-dialog.c:240
 #, c-format
 msgid "%s works on most devices"
-msgstr "%s funguje na většině zařízení"
+msgstr "%s gweythresek war rann vrassa a devisyow"
 
 #: src/bz-inspector.blp:5
 msgid "Bazaar Inspector"
-msgstr "Bazaar Inspertor"
+msgstr "Hwithrer Basar"
 
 #: src/bz-inspector.blp:33
 msgid "Background Task Info:"
-msgstr "Informace Služby na Pozadí:"
+msgstr "Kedhlow Oberennow Kilva:"
 
 #: src/bz-inspector.blp:43
 msgid "Enable Global Debug Mode"
-msgstr "Povolit Globální Režim Ladění"
+msgstr "Gallosegi Prevessa Olldalghus"
 
 #: src/bz-inspector.blp:50
 msgid "Active Blocklists"
-msgstr "Aktivní Blokovací Seznamy"
+msgstr "Rol a Lettys Byw"
 
 #: src/bz-inspector.blp:67
 msgid "Active Curated-Configs"
-msgstr "Aktivní Nastavení Vybraného Obsahu"
+msgstr ""
 
 #: src/bz-inspector.blp:85
 msgid "All Entry Groups"
-msgstr "Všechny Skupiny Vstupů"
+msgstr "Oll Bagasow Enworrans Manylyon"
 
 #: src/bz-inspector.blp:93
 msgid "Filter..."
-msgstr "Filtrovat..."
+msgstr "Sidhla..."
 
 #: src/bz-inspector.blp:134
 msgid "Decache and Inspect"
-msgstr "Decache and Inspect"
+msgstr "Dissorn ha Hwithra"
 
 #: src/bz-installed-page.blp:19
 msgid "No Flatpaks Installed"
-msgstr "Žádné Flatpaky Nejsou Nainstalované."
+msgstr "Vyth Flatpakow Ynstallys"
 
 #: src/bz-installed-tile.blp:61 src/bz-rich-app-tile.blp:137
-#, fuzzy
 msgid "Stopped Receiving Updates"
-msgstr "Stopped Receiving Updates"
+msgstr "Nowedhi Namoy"
 
 #: src/bz-license-dialog.blp:160
 msgid "Get Involved"
-msgstr "Get Involved"
+msgstr "Bos Omvyskys"
 
 #: src/bz-license-dialog.c:107 src/bz-license-dialog.c:112
-#, fuzzy
 msgid "Unknown License"
-msgstr "Neznámá Licence"
+msgstr "Kummyas Ankoth"
 
 #: src/bz-license-dialog.c:115
 msgid "Community Built"
-msgstr "Postavené Komunitou"
+msgstr "Byldya gans an Kemeneth"
 
 #: src/bz-license-dialog.c:148
 #, c-format
@@ -1489,6 +1407,8 @@ msgid ""
 "\n"
 "You can participate and help make it even better."
 msgstr ""
+"An app ma usi gwrys yn poblek gans unn kemeneth keswlasek, ha"
+"dyllo a-woles dhe an %s kummyas."
 
 #: src/bz-license-dialog.c:156
 msgid ""
@@ -1496,10 +1416,13 @@ msgid ""
 "\n"
 "You can participate and help make it even better."
 msgstr ""
+"An app ma usi gwrys yn poblek gans unn kemeneth keswlasek.\n"
+"\n"
+"Hwi gallos kemeres rann ha gweres gwellhe y."
 
 #: src/bz-license-dialog.c:161
 msgid "The license of this app is not known"
-msgstr ""
+msgstr "An kummyas rag an app ma usi ankoth"
 
 #: src/bz-license-dialog.c:165
 msgid ""
@@ -1509,6 +1432,11 @@ msgid ""
 "\n"
 "You may or may not be able to contribute to this app."
 msgstr ""
+"An app ma usi gwyrs na yn poblek, ytho an awtours unnik aswon fatel y "
+"oberi. Y res usi andhiogel yn agwedhow dre kales dhe helergi, hag y res chanja "
+"heb ankov.\n"
+"\n"
+"Hwi res po na res kevri dhe an app ma."
 
 #: src/bz-license-dialog.c:174
 #, c-format
@@ -1517,384 +1445,364 @@ msgid ""
 "\n"
 "You may or may not be able to contribute to this app."
 msgstr ""
+"An app ma usi gwyrs a-woles dhe an kummyas arbennik %s.\n"
+"\n"
+"Hwi res po na res kevri dhe an app ma."
 
 #: src/bz-preferences-dialog.blp:19
 msgid "Preferences"
-msgstr "Předvolby"
+msgstr "Settyansow"
 
 #: src/bz-preferences-dialog.blp:23
-#, fuzzy
 msgid "Content Filters"
-msgstr "Filtry Obsahu"
+msgstr "Sidhlow Synsas"
 
 #: src/bz-preferences-dialog.blp:26
-#, fuzzy
 msgid "Free Software Only"
-msgstr "Pouze Svobodný Software"
+msgstr "Medhelweyth dre wari Unnik"
 
 #: src/bz-preferences-dialog.blp:27
-#, fuzzy
 msgid "Hide proprietary applications when browsing and searching"
-msgstr "Skrýt propertiární aplikace z výsledků vyhledávání"
+msgstr "Kudha appys perghenogel dres peuryans ha hwithrans"
 
 #: src/bz-preferences-dialog.blp:31
 msgid "Flathub Results Only"
-msgstr "Pouze Výsledky z Flathubu"
+msgstr "Sewyasow a Flathub Unnik"
 
 #: src/bz-preferences-dialog.blp:32
-#, fuzzy
 msgid ""
 "Limit search and browse results to applications only available on Flathub"
-msgstr "Limitovat výsledky vyhledávání na aplikace dostupné na Flathubu"
+msgstr ""
+"Finwetha sewyasow hwithrans ha peuryans dhe appys kavadow unnik war Flathub"
 
 #: src/bz-preferences-dialog.blp:36
 msgid "Hide EOL Apps"
-msgstr "Skrýt EOL Aplikace"
+msgstr "Kudha Appys Marow"
 
 #: src/bz-preferences-dialog.blp:37
 msgid "Hide apps which are no longer supported by their developers"
-msgstr "Skrýt aplikace, které nejsou podporované jejich vývojáři"
+msgstr "Kudha appys may na skoodhya gans y'ga awtours"
 
 #: src/bz-preferences-dialog.blp:42 src/bz-window.blp:313
 msgid "Search"
-msgstr "Vyhledávání"
+msgstr "Hwithrans"
 
 #: src/bz-preferences-dialog.blp:45
-#, fuzzy
 msgid "Delay Search Results"
-msgstr "Debouncing Výsledků Vyhledávání"
+msgstr "Delatya Sewyasow Hwithrans"
 
 #: src/bz-preferences-dialog.blp:46
 msgid "Improve results performance by debouncing search terms"
-msgstr "Vylepšit výkon výsledků vyhledávání debouncingem vyhledávacích termínů"
+msgstr "Gwellhe skavder sewyasow gans kesunya geryow hwithrans"
 
 #: src/bz-preferences-dialog.blp:51
-#, fuzzy
 msgid "Progress Bar"
-msgstr "Globální Ukazatel Postupu"
+msgstr "Barr Spedya"
 
 #: src/bz-preferences-dialog.blp:52
-#, fuzzy
 msgid "Choose a theme for the progress bar!"
-msgstr "Vyberte vtipné téma pro globální ukazatel postupu!"
+msgstr "Dewis unn thema rag an barr spedya!"
 
 #: src/bz-preferences-dialog.c:32
 msgid "Accent Color"
-msgstr "Barva akcentu"
+msgstr "Kolor Usyer"
 
 #: src/bz-preferences-dialog.c:33
 msgid "Pride Colors"
-msgstr "Pride Colors"
+msgstr "Kolors Gooth"
 
 #: src/bz-preferences-dialog.c:34
-#, fuzzy
 msgid "Lesbian Pride Colors"
-msgstr "Lesbian Pride Colors"
+msgstr "Kolors Gooth Lesbian"
 
 #: src/bz-preferences-dialog.c:35
-#, fuzzy
 msgid "Transgender Pride Colors"
-msgstr "Transgender Pride Colors"
+msgstr "Kolors Gooth Treusreydhek"
 
 #: src/bz-preferences-dialog.c:36
-#, fuzzy
 msgid "Nonbinary Pride Colors"
-msgstr "Nonbinary Pride Colors"
+msgstr "Kolors Gooth na Den na Ben"
 
 #: src/bz-preferences-dialog.c:37
 msgid "Bisexual Pride Colors"
-msgstr "Bisexual Pride Colors"
+msgstr "Kolors Gooth Dewreydhel"
 
 #: src/bz-preferences-dialog.c:38
 msgid "Asexual Pride Colors"
-msgstr "Asexual Pride Colors"
+msgstr "Kolors Gooth Anreydhel"
 
 #: src/bz-preferences-dialog.c:39
-#, fuzzy
 msgid "Pansexual Pride Colors"
-msgstr "Pansexual Pride Colors"
+msgstr "Kolors Gooth Pubreydhek"
 
 #: src/bz-preferences-dialog.c:40
-#, fuzzy
 msgid "Aromantic Pride Colors"
-msgstr "Aromantic Pride Colors"
+msgstr "Kolors Gooth Anromansek"
 
 #: src/bz-preferences-dialog.c:41
-#, fuzzy
 msgid "Genderfluid Pride Colors"
-msgstr "Genderfluid Pride Colors"
+msgstr "Kolors Gooth Reydh Chanjus"
 
 #: src/bz-preferences-dialog.c:42
-#, fuzzy
 msgid "Polysexual Pride Colors"
-msgstr "Polysexual Pride Colors"
+msgstr ""
 
 #: src/bz-preferences-dialog.c:43
-#, fuzzy
 msgid "Omnisexual Pride Colors"
-msgstr "Omnisexual Pride Colors"
+msgstr ""
 
 #: src/bz-preferences-dialog.c:44
 msgid "Aroace Pride Colors"
-msgstr "Aroace Pride Colors"
+msgstr "Kolors Gooth Anromansek hag Anreydhel"
 
 #: src/bz-preferences-dialog.c:45
 msgid "Agender Pride Colors"
-msgstr "Agender Pride Colors"
+msgstr "Kolors Gooth Anreydh"
 
 #: src/bz-preferences-dialog.c:46
 msgid "Genderqueer Pride Colors"
-msgstr "Genderqueer Pride Colors"
+msgstr "Kolors Gooth na Den na Ben"
 
 #: src/bz-preferences-dialog.c:47
 msgid "Intersex Pride Colors"
-msgstr "Intersex Pride Colors"
+msgstr "Kolors Gooth Hermaphroditek"
 
 #: src/bz-preferences-dialog.c:48
 msgid "Demigender Pride Colors"
-msgstr "Demigender Pride Colors"
+msgstr "Kolors Gooth Hanterreydh"
 
 #: src/bz-preferences-dialog.c:49
 msgid "Biromantic Pride Colors"
-msgstr "Biromantic Pride Colors"
+msgstr "Kolors Gooth Dewromansek"
 
 #: src/bz-releases-dialog.blp:5 src/bz-releases-list.blp:26
-#, fuzzy
 msgid "Version History"
-msgstr "Verze %s"
+msgstr "Istori a Versyons"
 
 #: src/bz-releases-list.c:128
 #, c-format
 msgid "Version %s"
-msgstr "Verze %s"
+msgstr "Versyon %s"
 
 #: src/bz-releases-list.c:153
 msgid "No details for this release"
-msgstr "Žádné informace o této verzi"
+msgstr "Manylyon vyth rag an veryson ma"
 
 #: src/bz-rich-app-tile.blp:154
 msgid "Get"
-msgstr "Získat"
+msgstr "Kavos"
 
 #: src/bz-screenshot-page.blp:5
 msgid "Screenshots"
-msgstr "Snímky Obrazovky"
+msgstr "Imajys"
 
 #: src/bz-screenshot-page.blp:61
 msgid "Previous Screenshot"
-msgstr "Předchozí Snímek Obrazovky"
+msgstr "Imach Kyns"
 
 #: src/bz-screenshot-page.blp:71
 msgid "Next Screenshot"
-msgstr "Další Snímek Obrazovky"
+msgstr "Imach Nessa"
 
 #: src/bz-screenshot-page.blp:87
 msgid "Copy Image"
-msgstr "Kopírovat Obrázek"
+msgstr "Dasskrifa Imach"
 
 #: src/bz-screenshot-page.blp:147
 msgid "Reset View"
-msgstr "Resetovat Pohled"
+msgstr "Dasgorra Gwel"
 
 #: src/bz-screenshot-page.blp:158
 msgid "Zoom Out"
-msgstr "Zoom Out"
+msgstr "Lehe"
 
 #: src/bz-screenshot-page.blp:168
 msgid "Zoom In"
-msgstr "Zoom In"
+msgstr "Moghhe"
 
 #: src/bz-screenshots-carousel.blp:6
 msgid "Screenshots Carousel"
-msgstr "Screenshots Carousel"
+msgstr "Res A-dro Imajys"
 
 #: src/bz-screenshots-carousel.blp:104
-#, fuzzy
 msgid "Open Screenshot Viewer"
-msgstr "Otevřít v prohlížeči obrázků"
+msgstr "Ygeri Goloker Imajys"
 
 #: src/bz-search-widget.blp:106
 msgid "Search Apps, Games, Software"
-msgstr "Vyhledat Aplikace, Hry, Software"
+msgstr "Hwials Appys, Gwariow, Medhelweyth"
 
 #: src/bz-search-widget.blp:150
-#, fuzzy
 msgid "Categories Unavailable"
-msgstr "Aktualizace k dispozici"
+msgstr "Kassys Ankavadow"
 
 #: src/bz-search-widget.blp:151
 msgid "Search for apps using the search bar above."
-msgstr "Vyhledejte aplikace pomocí vyhledávacího pole nahoře."
+msgstr "Hwilas rag appys gans an barr hwithrans a-ugh."
 
 #: src/bz-search-widget.blp:235
-#, fuzzy
 msgid "No Applications Found"
-msgstr "Žádné vybrané aplikace"
+msgstr "Appys Kavos Vyth"
 
 #: src/bz-search-widget.c:241
 #, c-format
 msgid "No results found for \"%s\" in Flathub"
-msgstr "Žádné výsledky pro \"%s\" v Flathubu"
+msgstr "Sewyansow kavos vyth rag \"%s\" yn Flathub"
 
 #: src/bz-share-list.c:64
 msgid "Copied!"
-msgstr "Zkopírováno!"
+msgstr "Dasskrifys"
 
 #: src/bz-share-list.c:116
-#, fuzzy
 msgid "Copy Link"
-msgstr "Kopírovat odkaz"
+msgstr "Dasskrifa Gorgevren"
 
 #: src/bz-share-list.c:127
 msgid "Open Link"
-msgstr "Otevřít odkaz"
+msgstr "Ygeri Gorgevren"
 
 #: src/bz-stats-dialog.blp:28
 msgid "Timeline"
-msgstr "Časová osa"
+msgstr "Linen Dermyn"
 
 #: src/bz-stats-dialog.blp:46
-#, fuzzy
 msgid "Installs:"
-msgstr "Instalace:"
+msgstr "Leyansow:"
 
 #: src/bz-stats-dialog.blp:55
 msgid "World"
-msgstr "Svět"
+msgstr "Nor"
 
 #: src/bz-tag-list.c:96
-#, fuzzy
 msgid "No Results Found"
-msgstr "Žádné výsledky"
+msgstr "Sewyansow Kavos Vyth"
 
 #: src/bz-tag-list.c:108
 #, c-format
 msgid "Apps Tagged \"%s\""
-msgstr "Aplikace Označené \"%s\""
+msgstr "Appys Taggya avel \"%s\""
 
 #: src/bz-tag-list.c:109
-#, fuzzy, c-format
+#, c-format
 msgid "%d Applications"
-msgstr "%d Aplikací"
+msgstr "%s Appys"
 
 #: src/bz-tag-list.c:124
-#, fuzzy
 msgid "Search failed"
-msgstr "Vyhledávání bylo neúspěšné"
+msgstr "Hwithrans fyllis"
 
 #: src/bz-transaction-manager.c:1135
 #, c-format
 msgid "Finished in %.02f seconds"
-msgstr "Dokončeno v %.02f sekundách"
+msgstr "Deu yn %.02f eylennow"
 
 #: src/bz-transaction-view.blp:95
 msgid "App Add-on"
-msgstr "Doplňky aplikace"
+msgstr "Ystynnans rag App"
 
 #: src/bz-transaction-view.blp:120
 msgid "Runtime"
-msgstr "Runtime"
+msgstr "Kerghynnedh rag App"
 
 #: src/bz-transaction-view.blp:146 src/bz-transaction-view.blp:172
-#, fuzzy
 msgid "Install Size"
-msgstr "Velikost na disku"
+msgstr "Braster Lea"
 
 #: src/bz-transaction-view.blp:200
 msgid "Update"
-msgstr "Aktualizace"
+msgstr "Nowedhi"
 
 #: src/bz-transaction-view.c:139
 #, c-format
 msgid "Transferred %s so far"
-msgstr "Přeneseno %s"
+msgstr "Treusperthi %s bys lemmyn"
 
 #: src/bz-transaction.c:336
 msgid "Pending"
-msgstr "Čeká"
+msgstr "Gortos"
 
 #: src/bz-update-dialog.blp:7
-#, fuzzy
-msgid "Update Now"
-msgstr "Aktualizace"
+msgid "Install Now"
+msgstr "Lea Lemmyn"
 
 #: src/bz-update-dialog.blp:10
 msgid "Updates Are Available"
-msgstr "Aktualizace k dispozici"
+msgstr "Nowedhow Kavadow"
 
 #: src/bz-update-dialog.blp:11
 msgid ""
 "The following applications are eligible for updates. Would you like to "
 "install them?"
-msgstr "Následující aplikace mají aktualizace. Přejete si je nainstalovat?"
+msgstr ""
+"An appys a sew yw dewisadow rag nowedhow. A vynnsowgh "
+"lea y's?"
 
 #: src/bz-update-dialog.c:134
 #, c-format
 msgid ""
 "%d runtimes and/or addons are eligible for updates. Would you like to "
 "install them?"
-msgstr "%d runtime a/nebo doplňky mají aktualizace. Přejete si je nainstalovat?"
+msgstr ""
+"%d kerghynnedhow ha/po ystynnans yw dewisadow rag nowedhow. A vynnsowgh "
+"lea y's?"
 
 #: src/bz-update-dialog.c:142
 #, c-format
 msgid "Additionally, %d runtimes and/or addons will be updated."
-msgstr "Také následující %d runtime a/nebo dopňky budou aktualizované"
+msgstr "Dres hemma, %s kerghynnedhow ha/po ystyannans yw nowedhi."
 
 #: src/bz-user-data-page.blp:5
 msgid "Manage Leftover User Data"
-msgstr "Spravovat Zbylá Uživatelské Data"
+msgstr "Dyghtya Data Usyer Remenant"
 
 #: src/bz-user-data-page.blp:55
 msgid "No User Data found"
-msgstr "Žádná uživatelská data nebyla nalezena"
+msgstr "Data Usyer kavos vyth"
 
 #: src/bz-user-data-page.blp:60
 msgid "User Data"
-msgstr "Uživatelská Data"
+msgstr "Data Usyer"
 
 #: src/bz-user-data-tile.c:144
 #, c-format
 msgid "Removed User Data for %s"
-msgstr "Uživatelská Data pro %s byla odstraněna"
+msgstr "Removys Data User rag %s"
 
 #: src/bz-user-data-tile.blp:74
-#, fuzzy
 msgid "Remove User Data"
-msgstr "Odstranit Uživatelská Data"
+msgstr "Remova Data Usyer"
 
 #: src/bz-window.blp:66
 msgid "Inspect UI Entry"
-msgstr "Inspect UI Entry"
+msgstr "Hwithra Elven Ynterfas"
 
 #: src/bz-window.blp:73
 msgid "All Debug Actions"
-msgstr "All Debug Actions"
+msgstr "Oll Gwriansow Prevessa"
 
 #: src/bz-window.blp:107
 msgid "Tasks"
-msgstr "Úlohy"
+msgstr "Oberennow"
 
 #: src/bz-window.blp:163
 msgid "Stop Active Tasks"
-msgstr "Zastavit Aktivní Úlohy"
+msgstr "Hedhi Oberennow Byw"
 
 #: src/bz-window.blp:171
-#, fuzzy
 msgid "Clear History"
-msgstr "Historie verzí"
+msgstr "Dilea Istori"
 
 #: src/bz-window.blp:187
 msgid "No Tasks Yet"
-msgstr "Žádné úlohy"
+msgstr "Oberennow Vyth Hwath"
 
 #: src/bz-window.blp:258
-#, fuzzy
 msgid "Refreshing Store Content"
-msgstr "Obnovit"
+msgstr "Diseghow Synsas Gwerthji"
 
 #: src/bz-window.blp:273
 msgid "Curated"
-msgstr "Vybrané"
+msgstr "Dyghtys"
 
 #: src/bz-window.blp:286
 msgid "Flathub"
@@ -1902,46 +1810,44 @@ msgstr "Flathub"
 
 #: src/bz-window.blp:450
 msgid "Network connection is metered — automatic store data sync is paused"
-msgstr "Připojení k síti je měřené - automatická synchronizace dat je pozastavena"
+msgstr "Junyans kesrosweyth yw strothys — kerghow awtomatek synsas gwerthji yw powesys"
 
 #: src/bz-window.blp:451 src/bz-window.blp:460
 msgid "Sync Manually"
-msgstr "Synchronizovat ručně"
+msgstr "Kerghes dre Dhorn"
 
 #: src/bz-window.blp:459
 msgid ""
 "You have a network connection but are viewing a cached version of Flathub"
 msgstr ""
-"Máte připojení k síti, ale prohlížíte si cached verzi Flathubu"
+"Hwi re unn junyans kewrosweyth lemen yw gwelow unn versyon koth a Flathub"
 
 #: src/bz-window.blp:534
 msgid "_Login with Flathub"
-msgstr "_Přihlásit se pomocí Flathubu"
+msgstr "_Omgelmi gans Flathub"
 
 #: src/bz-window.blp:540
 msgid "_Manage Leftover User Data"
-msgstr "_Spravovat Zbylá Uživatelská Data"
+msgstr "_Dyghtya Data Usyer Remenant"
 
 #: src/bz-window.blp:545
 msgid "_Synchronize Remotes"
-msgstr "_Synchronizovat Remoty"
+msgstr "_Kerghes Gwerthjiow"
 
 #: src/bz-window.blp:571
-#, fuzzy
 msgid "Open Bazaar Inspector"
-msgstr "Bazaar Inspertor"
+msgstr "Ygeri Hwithrer Basar"
 
 #: src/bz-window.blp:586
 msgid "Log Out"
-msgstr "Odhlásit se"
+msgstr "Omdenna"
 
 #: src/bz-window.c:484
-#, fuzzy, c-format
+#, c-format
 msgid "%d Update Available"
 msgid_plural "%d Updates Available"
-msgstr[0] "Aktualizace k dispozici"
-msgstr[1] "Aktualizace k dispozici"
-msgstr[2] "Aktualizace k dispozici"
+msgstr[0] "%d Nowedh Kavadow"
+msgstr[1] "%d Nowedhow Kavadow"
 
 #: src/bz-window.c:982
 msgid ""
@@ -1952,562 +1858,92 @@ msgid ""
 "\n"
 "on the command line."
 msgstr ""
-"Možnost prohlížet a instalovat loální .flatpak soubory bude brzy hotová. "
-"Mezitím zkuste spustit\n"
+"An Gallos dhe hwithra ha lea restrennow .flatpak leel ow tos "
+"yn skon! Yn kettermyn, tria eksekutya\n"
 "\n"
-"flatpak install --bundle tvuj-bundle.flatpak\n"
+"flatpak install --bundle agas-gronn.flatpak\n"
 "\n"
-"v terminálu."
+"yn an linen arghadow."
 
 #: src/bz-window.c:1120
 msgid "Can't do that right now!"
-msgstr "Toto teď nelze provést!"
+msgstr "Ny allav gul na y'n eur ma"
 
 #: src/bz-window.c:1251
 msgid "Keep Data"
-msgstr "Ponechat Data"
+msgstr "Synsi Data"
 
 #: src/bz-window.c:1252
 msgid "Allow restoring settings and content"
-msgstr "Povolit obnovení nastavení a obsahu"
+msgstr "Alowa dasserghyans a settyansow ha synsas"
 
 #: src/bz-window.c:1261
 msgid "Permanently remove app data to save space"
-msgstr "Navždy odstranit data aplikace pro šetření místa"
+msgstr "Dilea yn fast data app dhe erbysi dalghuster"
 
 #: src/bz-window.c:1284
-#, fuzzy, c-format
+#, c-format
 msgid "Install %s?"
-msgstr "Instalovat %s?"
+msgstr "Lea %s?"
 
 #: src/bz-window.c:1287
 msgid "May install additional shared components"
-msgstr "Může nainstalovat dodatečné sdílené komponenty"
+msgstr "Res lea darnow keworransel poblek"
 
 #: src/bz-window.c:1306
-#, fuzzy, c-format
+#, c-format
 msgid "Remove %s?"
-msgstr "Odstranit %s?"
+msgstr "Dilea %s?"
 
 #: src/bz-window.c:1310
 #, c-format
 msgid "It will not be possible to use %s after it is uninstalled."
-msgstr "Po odinstalování nebude %s možné použít."
+msgstr "Y yw angalladow dhe devnydhya %s wosa y yw dislea."
 
 #: src/bz-window.c:1373
 msgid "Resume Current Tasks"
-msgstr "Obnovit Aktivní Úlohy"
+msgstr ""
 
 #: src/bz-window.c:1379
 msgid "Pause Current Tasks"
-msgstr "Pozastavit Aktivní Úlohy"
+msgstr "Powes Oberennow a'n Jydh"
 
 #: src/bz-world-map.c:572
 #, c-format
 msgid "%s: %'u downloads"
-msgstr "%s: %'u stažení"
+msgstr "%s: %'u iskargow"
 
 #: src/gtk/shortcuts-dialog.blp:6
 msgctxt "shortcut window"
 msgid "General"
-msgstr "Obecné"
+msgstr "Ollgemmyn"
 
 #: src/gtk/shortcuts-dialog.blp:9
 msgctxt "shortcut window"
 msgid "Open Search Dialog"
-msgstr "Otevřít Vyhledávání"
+msgstr "Ygeri Fenester Hwithrans"
 
 #: src/gtk/shortcuts-dialog.blp:14
-#, fuzzy
 msgctxt "shortcut window"
 msgid "Open Preferences"
-msgstr "Otevřít Předvolby"
+msgstr "Ygeri Settyansow"
 
 #: src/gtk/shortcuts-dialog.blp:19
 msgctxt "shortcut window"
 msgid "Refresh"
-msgstr "Obnovit"
+msgstr "Disegha"
 
 #: src/gtk/shortcuts-dialog.blp:24
 msgctxt "shortcut window"
 msgid "Toggle Transaction Manager"
-msgstr "Otevřít/zavřít Přehled translakcí"
+msgstr ""
 
 #: src/gtk/shortcuts-dialog.blp:29
 msgctxt "shortcut window"
 msgid "Show Shortcuts"
-msgstr "Zobrazit Zkratky"
+msgstr "Diskwedhes Kesunyansow Bysowek"
 
 #: src/gtk/shortcuts-dialog.blp:34
 msgctxt "shortcut window"
 msgid "Quit"
-msgstr "Ukončit"
-
-#~ msgid "Show Git Forge Star Counts"
-#~ msgstr "Počet Hvězd Git Forge"
-
-#~ msgid ""
-#~ "Whether to attempt to detect and show \"star counts\" for projects in the "
-#~ "full view"
-#~ msgstr ""
-#~ "Pokusit se detekovat a zobrazit  \"počet hvězd\" pro projekt v plném "
-#~ "zobrazení"
-
-#~ msgid "Filter search results to only show applications available on Flathub"
-#~ msgstr ""
-#~ "Filtrovat výsledky vyhledávání pro zobrazení pouze aplikacích dostupných "
-#~ "na Flathubu"
-
-#~ msgid "Manage Addons"
-#~ msgstr "Správce doplňků"
-
-#~ msgctxt "About Dialog Translator Credit"
-#~ msgid "Ahmed Najmawi"
-#~ msgstr "Ahmed Najmawi"
-
-#~ msgctxt "About Dialog Translator Credit"
-#~ msgid "AtomHare"
-#~ msgstr "AtomHare"
-
-#~ msgctxt "About Dialog Translator Credit"
-#~ msgid "Azenyr"
-#~ msgstr "Azenyr"
-
-#~ msgctxt "About Dialog Translator Credit"
-#~ msgid "Goudarz Jafari"
-#~ msgstr "Goudarz Jafari"
-
-#~ msgctxt "About Dialog Translator Credit"
-#~ msgid "Jill Fiore (Lumaeris)"
-#~ msgstr "Jill Fiore (Lumaeris)"
-
-#~ msgctxt "About Dialog Translator Credit"
-#~ msgid "João Victor (Leal)"
-#~ msgstr "João Victor (Leal)"
-
-#~ msgctxt "About Dialog Translator Credit"
-#~ msgid "KiKaraage"
-#~ msgstr "KiKaraage"
-
-#~ msgctxt "About Dialog Translator Credit"
-#~ msgid "Lucosec"
-#~ msgstr "Lucosec"
-
-#~ msgctxt "About Dialog Translator Credit"
-#~ msgid "Léane GRASSER"
-#~ msgstr "Léane GRASSER"
-
-#~ msgctxt "About Dialog Translator Credit"
-#~ msgid "Marcel Mrówka (Microwave)"
-#~ msgstr "Marcel Mrówka (Microwave)"
-
-#~ msgctxt "About Dialog Translator Credit"
-#~ msgid "Peter Dave Hello"
-#~ msgstr "Peter Dave Hello"
-
-#~ msgctxt "About Dialog Translator Credit"
-#~ msgid "Pietro F."
-#~ msgstr "Pietro F."
-
-#~ msgctxt "About Dialog Translator Credit"
-#~ msgid "Sabri Ünal"
-#~ msgstr "Sabri Ünal"
-
-#~ msgctxt "About Dialog Translator Credit"
-#~ msgid "Shihfu Juan"
-#~ msgstr "Shihfu Juan"
-
-#~ msgctxt "About Dialog Translator Credit"
-#~ msgid "Shinsei"
-#~ msgstr "Shinsei"
-
-#~ msgctxt "About Dialog Translator Credit"
-#~ msgid "Vlastimil Dědek"
-#~ msgstr "Vlastimil Dědek"
-
-#~ msgctxt "About Dialog Translator Credit"
-#~ msgid "asen23"
-#~ msgstr "asen23"
-
-#~ msgctxt "About Dialog Translator Credit"
-#~ msgid "camegone"
-#~ msgstr "camegone"
-
-#~ msgctxt "About Dialog Translator Credit"
-#~ msgid "renner"
-#~ msgstr "renner"
-
-#~ msgctxt "About Dialog Translator Credit"
-#~ msgid "robotta"
-#~ msgstr "robotta"
-
-#~ msgid "Constructing Flatpak instance..."
-#~ msgstr "Sestavuji Flatpak instanci..."
-
-#~ msgid "Reusing last Flatpak instance..."
-#~ msgstr "Používám poslední Flatpak instanci..."
-
-#~ msgid "Flathub is not registered on this system"
-#~ msgstr "Flathub není registrovaný na tomto systému"
-
-#~ msgid ""
-#~ "Would you like to add Flathub as a remote? If you decline, the Flathub "
-#~ "page will not be available. You can change this later."
-#~ msgstr ""
-#~ "Přejete si přidat Flathub jako remote? Pokud ne, Flathub karta nebude "
-#~ "dostupná. Toto můžete změnit později."
-
-#~ msgid "Add Flathub"
-#~ msgstr "Přidat Flathub"
-
-#, c-format
-#~ msgid "Identifying installed entries..."
-#~ msgstr "Identifikuji instalované položky..."
-
-#, c-format
-#~ msgid ""
-#~ "Beginning remote entry retrieval while referencing %d blocklist(s)..."
-#~ msgstr ""
-#~ "Probíhá stahování vzdálených položek s odkazem na %d blokovací "
-#~ "seznam(y)..."
-
-#, c-format
-#~ msgid "%'d of %'d"
-#~ msgstr "%'d z %'d"
-
-#, c-format
-#~ msgid "Waiting for background indexing tasks to catch up..."
-#~ msgstr "Čekám na procesy na pozadí..."
-
-#, c-format
-#~ msgid "Completed initialization in %0.2f seconds"
-#~ msgstr "Dokončeno během %0.2f sekund."
-
-#~ msgid ""
-#~ "Bazaar was not provided a curated content configuration. Contact your "
-#~ "operating system's support channels for assistance."
-#~ msgstr ""
-#~ "Bazaar nezískal konfiguraci vybraného obsahu. Kontaktujte podporu své "
-#~ "distribuce."
-
-#~ msgid "Graphics"
-#~ msgstr "Grafika"
-
-#~ msgid "Office"
-#~ msgstr "Kancelář"
-
-#~ msgctxt "Project URL Type"
-#~ msgid "Homepage"
-#~ msgstr "Domovská stránka"
-
-#~ msgid "This flatpak is verified by the original developers of the software."
-#~ msgstr "Tento Flatpak je ověřený jeho původním vývojářem"
-
-#, fuzzy
-#~ msgid "Repository Star Count"
-#~ msgstr "Počet Hvězd Repozitáře"
-
-#~ msgid "Share this application"
-#~ msgstr "Sdílet tuto aplikaci"
-
-#~ msgid "Excludes shared components"
-#~ msgstr "Vynechané sdílené komponenty"
-
-#~ msgid "Source code may not be available"
-#~ msgstr "Zdrojový kód nemusí být k dispozici"
-
-#, fuzzy
-#~ msgid "Click for details"
-#~ msgstr "Klikněte pro podrobnosti"
-
-#~ msgid "Repositories"
-#~ msgstr "Repozitáře"
-
-#~ msgid "Open in browser"
-#~ msgstr "Otevřít v prohlížeči"
-
-#, c-format
-#~ msgid "%'d Monthly Downloads"
-#~ msgstr "%'d Měsíční stažení"
-
-#~ msgid "%B %-d, %Y"
-#~ msgstr "%e. %B %Y"
-
-#~ msgid "%B %-d"
-#~ msgstr "%e. %B"
-
-#~ msgid "Run this application"
-#~ msgstr "Sdílej tuto aplikaci"
-
-#~ msgid "Run"
-#~ msgstr "Spustit"
-
-#~ msgid "View Store Page"
-#~ msgstr "Otevřít Stránku Obchodu"
-
-#, fuzzy
-#~ msgid "Application Details"
-#~ msgstr "Podrobnosti"
-
-#~ msgid "Git Forge Star Counts"
-#~ msgstr "Počet Hvězd Git Forge"
-
-#~ msgid "Not having a GitHub access token may trigger rate limits"
-#~ msgstr "Pokud nemáte Github acess token, můžte narazit na limity"
-
-#~ msgid "Show Only Flathub Apps"
-#~ msgstr "Zobrazit Pouze Flathub Aplikace"
-
-#~ msgid "Wait for a brief pause to reduce system load"
-#~ msgstr "Krátce vyčkejte ke snížení systémové zátěže"
-
-#~ msgid "Theme"
-#~ msgstr "Téma"
-
-#~ msgid "Pride Rainbow Flag"
-#~ msgstr "Pride Vlajka"
-
-#~ msgid "Bisexual Flag"
-#~ msgstr "Bisexual Vlajka"
-
-#~ msgid "Asexual Flag"
-#~ msgstr "Asexual Vlajka"
-
-#~ msgid "Share"
-#~ msgstr "Sdílet"
-
-#~ msgid "Install Now"
-#~ msgstr "Nainstalovat nyní"
-
-#~ msgid "Browse"
-#~ msgstr "Prohlížet"
-
-#~ msgid "App View"
-#~ msgstr "Aplikace"
-
-#~ msgid "Go Back"
-#~ msgstr "Zpět"
-
-#~ msgid "View curated applications"
-#~ msgstr "Zobraz vybrané aplikace"
-
-#~ msgid "View the latest on Flathub"
-#~ msgstr "Zobrazit to nejnovější z Flathubu"
-
-#~ msgid "View installed applications"
-#~ msgstr "Zobrazit nainstalované aplikace"
-
-#~ msgid "_Quit Service"
-#~ msgstr "_Ukončit Službu"
-
-#~ msgid "Settings & user data will be kept"
-#~ msgstr "Nastavení a uživatelská data budou zachována"
-
-#~ msgid "Calligraphy application page"
-#~ msgstr "Stránka aplikace Calligraphy"
-
-#~ msgid "Download graph for Blender"
-#~ msgstr "Graf stažení Blenderu"
-
-#~ msgid "Open this image in the default image viewer"
-#~ msgstr "Otevřít obrázek ve výchozím prohlížeči obrázků"
-
-#, fuzzy
-#~ msgid "Copy this image to the clipboard"
-#~ msgstr "Zkopírovat obrázek"
-
-#, fuzzy
-#~ msgid "App Details"
-#~ msgstr "Podrobnosti"
-
-#~ msgid "Download Statistics"
-#~ msgstr "Statistiky Stažení"
-
-#~ msgid "Show Downloads Over Time"
-#~ msgstr "Stažení za čas"
-
-#~ msgid "Remote repo name"
-#~ msgstr "Jméno remotu"
-
-#, fuzzy
-#~ msgid "Updated Size"
-#~ msgstr "Velikost aktualizace"
-
-#~ msgid "Freed Space"
-#~ msgstr "Uvolněné místo"
-
-#~ msgid "Transactions Will Appear Here"
-#~ msgstr "Translakce Se Zobrazí Zde"
-
-#~ msgid "Halt the execution of transactions"
-#~ msgstr "Zastavit přůběh translakcí"
-
-#~ msgid "Clear all finished transactions"
-#~ msgstr "Vymazat všechny dokončené translakce"
-
-#~ msgid "Up to date!"
-#~ msgstr "Vše je aktualizované"
-
-#~ msgid "Confirm Action"
-#~ msgstr "Potvrď akci"
-
-#, c-format
-#~ msgid ""
-#~ "You are about to remove the following Flatpak:\n"
-#~ "\n"
-#~ "<b>%s</b>\n"
-#~ "<tt>%s</tt>\n"
-#~ "\n"
-#~ "Are you sure?"
-#~ msgstr ""
-#~ "Budou se odstraňovat následující Flatpaky:\n"
-#~ "\n"
-#~ "<b>%s</b>\n"
-#~ "<tt>%s</tt>\n"
-#~ "\n"
-#~ "Jste si jistý?"
-
-#, c-format
-#~ msgid ""
-#~ "You are about to install the following Flatpak:\n"
-#~ "\n"
-#~ "<b>%s</b>\n"
-#~ "<tt>%s</tt>\n"
-#~ "\n"
-#~ "Are you sure?"
-#~ msgstr ""
-#~ "Budou se instalovat následující Flatpaky:\n"
-#~ "\n"
-#~ "<b>%s</b>\n"
-#~ "<tt>%s</tt>\n"
-#~ "\n"
-#~ "Jste si jistý?"
-
-#~ msgid "Resume the execution of transactions"
-#~ msgstr "Obnov prováděné translakce"
-
-#~ msgid "Pause the execution of transactions"
-#~ msgstr "Pozastav prováděné translakce"
-
-#~ msgid "Downloads Over Time"
-#~ msgstr "Stažení za čas"
-
-#~ msgid "Apps Of The Week"
-#~ msgstr "Aplikace týdne"
-
-#, fuzzy
-#~ msgctxt "Project URL Type"
-#~ msgid "VCS Browser"
-#~ msgstr "VCS Prohlížeč"
-
-#, c-format
-#~ msgid "Released %x"
-#~ msgstr "Vydáno %x"
-
-#~ msgid "Full Application View"
-#~ msgstr "Plné zobrazení aplikace"
-
-#~ msgid "Change what content is shown when viewing applications"
-#~ msgstr "Změnit jaký obsah je zobrazen při prohlížení aplikací"
-
-#~ msgid ""
-#~ "If you do not have an access token, turning this setting on may cause "
-#~ "GitHub to eventually rate limit you."
-#~ msgstr ""
-#~ "Pokud nemáte přístupový token, zapínání tohoto nastavení může způsobit že "
-#~ "dosáhnete přístupového limitu (omezení) Githubu"
-
-#~ msgid "Type to filter"
-#~ msgstr "Pište pro filtrování"
-
-#~ msgid "Exclude results with proprietary licenses"
-#~ msgstr "Skrýt výsledky s proprietárními licencemi"
-
-#~ msgid "Advanced"
-#~ msgstr "Pokročilé"
-
-#~ msgid "Open this link externally"
-#~ msgstr "Otevřít externě"
-
-#~ msgid "Minimize Lower Bound"
-#~ msgstr "Minimalizuj dolní hranici"
-
-#~ msgid "Maximize Upper Bound"
-#~ msgstr "Maximalizuj horní hranici"
-
-#, c-format
-#~ msgid "Received %'d entries out of %'d (%0.1f seconds elapsed)"
-#~ msgstr "Získáno %'d položek z celkových %'d (%0.1f sekund uplynulo)"
-
-#~ msgid "VCS Forge Star Count"
-#~ msgstr "Počet Hvězd VCS Forge"
-
-#~ msgid "This application does not provide a donation link"
-#~ msgstr "Tato aplikace nemá odkaz na stránku s dary"
-
-#~ msgid "Edit Permissions"
-#~ msgstr "Správce oprávnění"
-
-#, c-format
-#~ msgid ""
-#~ "\"%s\" does not provide a donations link. This does not mean you cannot "
-#~ "support them! Try looking at their <a href=\"%s\">project page</a> for "
-#~ "more information."
-#~ msgstr ""
-#~ "\"%s\" nemá odkaz na stránku s dary. To znamená že je nemůžete podpořit! "
-#~ "Zkuste se podívat na jejich <a href=\"%s\">webové stránky</a> pro více "
-#~ "informací."
-
-#, c-format
-#~ msgid ""
-#~ "\"%s\" does not provide a donations link. This does not mean you cannot "
-#~ "support them! Try finding their project page for more information."
-#~ msgstr ""
-#~ "\"%s\" nemá odkaz na stránku s dary. To znamená že je nemůžete podpořit! "
-#~ "Zkuste najít jejich webovou stránku pro více infomací."
-
-#~ msgid "Installing"
-#~ msgstr "Instalace"
-
-#~ msgid "Updating"
-#~ msgstr "Aktualizace"
-
-#~ msgid "Removing"
-#~ msgstr "Odinstalace"
-
-#~ msgid "Show Animated Background"
-#~ msgstr "Ukázat animované pozadí"
-
-#~ msgid "Whether to show the animated icon background on the home page"
-#~ msgstr "Zda se mají na domovské stránce zobrazovat animované pozadí ikony"
-
-#~ msgid ""
-#~ "The number of downloads in the last 30 days. Click to view this "
-#~ "application's download statistics."
-#~ msgstr ""
-#~ "Počet staženích v posledních 30 dnech. Klikni pro zobrazení statistiky "
-#~ "stažení aplikace."
-
-#~ msgid "How the application looks"
-#~ msgstr "Jak aplikace vypadá"
-
-#~ msgid "Appearance"
-#~ msgstr "Vzhled"
-
-#~ msgid "Show animated background"
-#~ msgstr "Zobrazit animované pozadí"
-
-#~ msgid "Keep the summary shorter, between 10 and 35 characters"
-#~ msgstr "Nechej schnutí krátké, mezi 10 až 35 znaky"
-
-#~ msgid "Main Bazaar window showing Blender"
-#~ msgstr "Hlavní okno Bazaaru ukazující Blender"
-
-#~ msgid "BzInstalledPage"
-#~ msgstr "BzInstalledPage"
-
-#~ msgid "Match using regular expressions"
-#~ msgstr "Použít regulérní výrazy"
-
-#~ msgid "Hide filtering and sorting behind a crossfade effect"
-#~ msgstr "Skrýt filtrování a řazení za efekt prolínání"
+msgstr "Kwytya"

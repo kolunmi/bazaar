@@ -212,34 +212,9 @@ template $BzFullView: Adw.Bin {
                                 };
                               }
 
-                              Button {
-                                styles [
-                                  "small-pill",
-                                  "suggested-action",
-                                  "favorite",
-                                ]
-
-                                margin-top: 8;
-                                valign: start;
-                                halign: start;
-                                has-tooltip: true;
-                                tooltip-text: _("Favorite Count");
-                                can-target: false;
-                                visible: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.is-flathub;
-
-                                child: Box {
-                                  Image {
-                                    icon-name: "bookmark-outline-symbolic";
-                                  }
-                                  Revealer {
-                                    reveal-child: bind $is_positive(template.ui-entry as <$BzResult>.object as <$BzEntry>.favorites-count) as <bool>;
-                                    transition-type: slide_left;
-                                    child: Label {
-                                      margin-start: 4;
-                                      label: bind $format_favorites_count(template.ui-entry as <$BzResult>.object as <$BzEntry>.favorites-count) as <string>;
-                                    };
-                                  }
-                                };
+                              $BzFavoriteButton {
+                                state: bind template.state as <$BzStateInfo>;
+                                entry: bind template.ui-entry as <$BzResult>.object as <$BzEntry>;
                               }
                             }
                           }
