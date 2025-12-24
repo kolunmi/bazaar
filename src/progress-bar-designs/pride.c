@@ -94,6 +94,37 @@ append_pride_flag (GtkSnapshot     *snapshot,
       };
       append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), bounds);
     }
+    else if (g_strcmp0 (name, "gay-pride-flag") == 0)
+    {
+      const GdkRGBA colors[] = {
+        { 1.0 / 255.0,  142.0 / 255.0,  113.0 / 255.0, 1.0 },
+        { 33.0 / 255.0, 207.0 / 172.0,  199.0 / 255.0, 1.0 },
+        { 154.0 / 255.0, 233.0 / 255.0, 195.0 / 255.0, 1.0 },
+        { 255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 1.0 },
+        { 124.0 / 255.0, 175.0 / 255.0, 228.0 / 255.0, 1.0 },
+        { 79.0 / 255.0, 71.0 / 255.0,   204.0 / 255.0, 1.0 },
+        {  60.0 / 255.0,  19.0 / 255.0, 121.0 / 255.0, 1.0 },
+      };
+      const float offsets[G_N_ELEMENTS (colors)] = {
+        0.0 / 7.0,
+        1.0 / 7.0,
+        2.0 / 7.0,
+        3.0 / 7.0,
+        4.0 / 7.0,
+        5.0 / 7.0,
+        6.0 / 7.0,
+      };
+      const float sizes[G_N_ELEMENTS (colors)] = {
+        1.0 / 7.0,
+        1.0 / 7.0,
+        1.0 / 7.0,
+        1.0 / 7.0,
+        1.0 / 7.0,
+        1.0 / 7.0,
+        1.0 / 7.0,
+      };
+      append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), bounds);
+    }
   else if (g_strcmp0 (name, "transgender-flag") == 0)
     {
       const GdkRGBA colors[] = {

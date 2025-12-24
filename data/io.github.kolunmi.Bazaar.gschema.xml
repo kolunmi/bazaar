@@ -26,6 +26,7 @@
         <choice value="accent-color"/>
         <choice value="pride-rainbow-flag"/>
         <choice value="lesbian-pride-flag"/>
+        <choice value="gay-pride-flag"/>
         <choice value="transgender-flag"/>
         <choice value="nonbinary-flag"/>
         <choice value="bisexual-flag"/>
