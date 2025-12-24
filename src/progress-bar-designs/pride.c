@@ -439,6 +439,37 @@ append_pride_flag (GtkSnapshot     *snapshot,
       };
       append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), bounds);
     }
+  else if (g_strcmp0 (name, "disability-flag") == 0)
+    {
+      const GdkRGBA colors[] = {
+        {  89.0 / 255.0,  89.0 / 255.0,  89.0 / 255.0, 1.0 },
+        { 207.0 / 255.0, 114.0 / 255.0, 128.0 / 255.0, 1.0 },
+        { 238.0 / 255.0, 222.0 / 255.0, 119.0 / 255.0, 1.0 },
+        { 232.0 / 255.0, 232.0 / 255.0, 232.0 / 255.0, 1.0 },
+        { 123.0 / 255.0, 194.0 / 255.0, 224.0 / 255.0, 1.0 },
+        {  59.0 / 255.0, 176.0 / 255.0, 125.0 / 255.0, 1.0 },
+        {  89.0 / 255.0,  89.0 / 255.0,  89.0 / 255.0, 1.0 },
+      };
+      const float offsets[G_N_ELEMENTS (colors)] = {
+        0.0 / 7.0,
+        1.0 / 7.0,
+        2.0 / 7.0,
+        3.0 / 7.0,
+        4.0 / 7.0,
+        5.0 / 7.0,
+        6.0 / 7.0,
+      };
+      const float sizes[G_N_ELEMENTS (colors)] = {
+        1.0 / 7.0,
+        1.0 / 7.0,
+        1.0 / 7.0,
+        1.0 / 7.0,
+        1.0 / 7.0,
+        1.0 / 7.0,
+        1.0 / 7.0,
+      };
+      append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), bounds);
+    }
   else
     g_warning ("Invalid pride flag id \"%s\"", name);
 }
