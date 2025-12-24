@@ -1192,7 +1192,7 @@ msgstr "Velikost ke stažení"
 
 #: src/bz-full-view.c:379
 msgid "All Ages"
-msgstr "Všechny Věkové Skupiny"
+msgstr "Pro Všechny"
 
 #: src/bz-full-view.c:391
 msgid "Age rating information unavailable"
@@ -1770,7 +1770,7 @@ msgstr "Žádné výsledky"
 #: src/bz-tag-list.c:108
 #, c-format
 msgid "Apps Tagged \"%s\""
-msgstr "Aplikace Označené \"%s\""
+msgstr "Aplikace s Tagem \"%s\""
 
 #: src/bz-tag-list.c:109
 #, fuzzy, c-format
