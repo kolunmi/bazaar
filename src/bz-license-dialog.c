@@ -114,7 +114,7 @@ get_label_cb (gpointer object,
   if (is_floss)
     return g_strdup (_ ("Community Built"));
 
-  if (g_strcmp0 (license, "LicenseRef-proprietary") == 0)
+  if (bz_spdx_is_proprietary (license))
     return g_strdup (_ ("Proprietary"));
 
   return g_strdup (_ ("Special License"));
@@ -160,7 +160,7 @@ get_license_info (gpointer object,
   if (license == NULL || *license == '\0')
     return g_strdup (_ ("The license of this app is not known"));
 
-  if ((g_strcmp0 (license, "LicenseRef-proprietary") == 0))
+  if (bz_spdx_is_proprietary (license))
     {
       return g_strdup (_ ("This app is not developed in the open, so only its developers know how it works. "
                           "It may be insecure in ways that are hard to detect, and it may change without oversight.\n\n"
