@@ -32,6 +32,11 @@ template $BzPreferencesDialog: Adw.PreferencesDialog {
         subtitle: _("Limit search and browse results to applications only available on Flathub");
       }
 
+      Adw.SwitchRow only_verified_switch {
+        title: _("Verified Results Only");
+        subtitle: _("Hide results that are not verified on Flathub");
+      }
+
       Adw.SwitchRow hide_eol_switch {
         title: _("Hide EOL Apps");
         subtitle: _("Hide apps which are no longer supported by their developers");
