@@ -41,6 +41,7 @@
         <choice value="intersex-flag"/>
         <choice value="demigender-flag"/>
         <choice value="biromantic-flag"/>
+        <choice value="disability-flag"/>
       </choices>
       <default>'accent-color'</default>
       <summary>Global Progress Bar Theme</summary>

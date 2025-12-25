@@ -546,6 +546,10 @@ window.flathub {
   --flag-gradient: linear-gradient(to bottom, #8869A5 0%, #8869A5 20%, #D8A7D8 20%, #D8A7D8 40%, #FFFFFF 40%, #FFFFFF 60%, #FDB18D 60%, #FDB18D 80%, #151638 80%, #151638 100%);
 }
 
+.accent-button.disability-theme {
+  --flag-gradient: linear-gradient(to bottom, #595959 0%, #595959 14.285714286%, #CF7280 14.285714286%, #CF7280 28.571428571%, #EEDE77 28.571428571%, #EEDE77 42.857142857%, #E8E8E8 42.857142857%, #E8E8E8 57.142857143%, #7BC2E0 57.142857143%, #7BC2E0 57.142857143%, #3BB07D 71.428571429%, #3BB07D 85.714285714%, #595959 85.714285714%, #595959 100%);
+}
+
 /* Category buttons styling modified from GNOME Software*/
 .category-tile {
   font-weight: 700;
