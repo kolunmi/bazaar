@@ -629,6 +629,28 @@ bz_application_search_action (GSimpleAction *action,
 }
 
 static void
+bz_application_show_app_id_action (GSimpleAction *action,
+                                   GVariant      *parameter,
+                                   gpointer       user_data)
+{
+  BzApplication *self = user_data;
+  GtkWindow     *window = NULL;
+  const char    *app_id = NULL;
+
+  g_assert (BZ_IS_APPLICATION (self));
+
+  window = gtk_application_get_active_window (GTK_APPLICATION (self));
+  if (window == NULL)
+    window = new_window (self);
+
+  if (parameter != NULL)
+    {
+      app_id = g_variant_get_string (parameter, NULL);
+      bz_window_show_app_id (BZ_WINDOW (window), app_id);
+    }
+}
+
+static void
 bz_application_sync_remotes_action (GSimpleAction *action,
                                     GVariant      *parameter,
                                     gpointer       user_data)
@@ -791,6 +813,7 @@ static const GActionEntry app_actions[] = {
   {               "about",               bz_application_about_action, NULL },
   {        "sync-remotes",        bz_application_sync_remotes_action, NULL },
   {              "search",              bz_application_search_action,  "s" },
+  {         "show-app-id",         bz_application_show_app_id_action,  "s" },
   { "toggle-transactions", bz_application_toggle_transactions_action, NULL },
   {              "donate",              bz_application_donate_action, NULL },
   {            "flatseal",            bz_application_flatseal_action, NULL },
