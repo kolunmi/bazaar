@@ -32,7 +32,7 @@ static const BarTheme bar_themes[] = {
   {       "accent-color",  "accent-color-theme",             N_ ("Accent Color") },
   { "pride-rainbow-flag", "pride-rainbow-theme",             N_ ("Pride Colors") },
   { "lesbian-pride-flag", "lesbian-pride-theme",     N_ ("Lesbian Pride Colors") },
-  { "gay-pride-flag", "gay-pride-theme", N_ ("Male Homosexual Pride Colors") },
+  { "gay-pride-flag", "gay-pride-theme",     N_ ("Male Homosexual Pride Colors") },
   {   "transgender-flag",   "transgender-theme", N_ ("Transgender Pride Colors") },
   {     "nonbinary-flag",     "nonbinary-theme",   N_ ("Nonbinary Pride Colors") },
   {      "bisexual-flag",      "bisexual-theme",    N_ ("Bisexual Pride Colors") },
