@@ -633,7 +633,7 @@ bz_application_show_app_id_action (GSimpleAction *action,
                                    GVariant      *parameter,
                                    gpointer       user_data)
 {
-  BzApplication *self = user_data;
+  BzApplication *self   = user_data;
   GtkWindow     *window = NULL;
   const char    *app_id = NULL;
 
@@ -777,8 +777,8 @@ bz_application_flathub_favorites_action (GSimpleAction *action,
                                          GVariant      *parameter,
                                          gpointer       user_data)
 {
-  BzApplication     *self          = user_data;
-  GtkWindow         *window        = NULL;
+  BzApplication     *self           = user_data;
+  GtkWindow         *window         = NULL;
   AdwNavigationPage *favorites_page = NULL;
 
   g_assert (BZ_IS_APPLICATION (self));
@@ -2620,8 +2620,8 @@ init_service_struct (BzApplication *self,
       self);
 
   bz_state_info_set_show_only_verified (
-    self->state,
-    g_settings_get_boolean (self->settings, "show-only-verified"));
+      self->state,
+      g_settings_get_boolean (self->settings, "show-only-verified"));
   g_signal_connect_swapped (
       self->settings,
       "changed::show-only-verified",
