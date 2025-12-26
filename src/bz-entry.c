@@ -30,6 +30,7 @@
 #include "bz-data-point.h"
 #include "bz-entry.h"
 #include "bz-env.h"
+#include "bz-flathub-category.h"
 #include "bz-global-net.h"
 #include "bz-io.h"
 #include "bz-issue.h"
@@ -114,6 +115,7 @@ typedef struct
   gint             max_display_length;
   AsContentRating *content_rating;
   GListModel      *keywords;
+  GListModel      *categories;
 
   gboolean              is_flathub;
   BzVerificationStatus *verification_status;
@@ -184,6 +186,7 @@ enum
   PROP_MAX_DISPLAY_LENGTH,
   PROP_CONTENT_RATING,
   PROP_KEYWORDS,
+  PROP_CATEGORIES,
 
   LAST_PROP
 };
@@ -413,6 +416,9 @@ bz_entry_get_property (GObject    *object,
     case PROP_KEYWORDS:
       g_value_set_object (value, priv->keywords);
       break;
+    case PROP_CATEGORIES:
+      g_value_set_object (value, priv->categories);
+      break;
     case PROP_IS_FLATHUB:
       g_value_set_boolean (value, priv->is_flathub);
       break;
@@ -618,6 +624,10 @@ bz_entry_set_property (GObject      *object,
     case PROP_KEYWORDS:
       g_clear_object (&priv->keywords);
       priv->keywords = g_value_dup_object (value);
+      break;
+    case PROP_CATEGORIES:
+      g_clear_object (&priv->categories);
+      priv->categories = g_value_dup_object (value);
       break;
     case PROP_IS_FLATHUB:
       priv->is_flathub = g_value_get_boolean (value);
@@ -977,6 +987,13 @@ bz_entry_class_init (BzEntryClass *klass)
           G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE);
 
+  props[PROP_CATEGORIES] =
+      g_param_spec_object (
+          "categories",
+          NULL, NULL,
+          G_TYPE_LIST_MODEL,
+          G_PARAM_READWRITE);
+
   props[PROP_IS_FLATHUB] =
       g_param_spec_boolean (
           "is-flathub",
@@ -1033,7 +1050,7 @@ bz_entry_init (BzEntry *self)
 {
   BzEntryPrivate *priv = bz_entry_get_instance_private (self);
 
-  priv->hold = 0;
+  priv->hold            = 0;
   priv->favorites_count = -1;
 }
 
@@ -1305,6 +1322,31 @@ bz_entry_real_serialize (BzSerializable  *serializable,
             }
 
           g_variant_builder_add (builder, "{sv}", "keywords", g_variant_builder_end (sub_builder));
+        }
+    }
+
+  if (priv->categories != NULL)
+    {
+      guint n_items = 0;
+
+      n_items = g_list_model_get_n_items (priv->categories);
+      if (n_items > 0)
+        {
+          g_autoptr (GVariantBuilder) sub_builder = NULL;
+
+          sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("as"));
+          for (guint i = 0; i < n_items; i++)
+            {
+              g_autoptr (BzFlathubCategory) category = NULL;
+              const char *category_name              = NULL;
+
+              category      = g_list_model_get_item (priv->categories, i);
+              category_name = bz_flathub_category_get_name (category);
+              if (category_name != NULL)
+                g_variant_builder_add (sub_builder, "s", category_name);
+            }
+
+          g_variant_builder_add (builder, "{sv}", "categories", g_variant_builder_end (sub_builder));
         }
     }
 
@@ -1664,6 +1706,29 @@ bz_entry_real_deserialize (BzSerializable *serializable,
             }
 
           priv->keywords = G_LIST_MODEL (g_steal_pointer (&store));
+        }
+      else if (g_strcmp0 (key, "categories") == 0)
+        {
+          g_autoptr (GListStore) store             = NULL;
+          g_autoptr (GVariantIter) categories_iter = NULL;
+
+          store = g_list_store_new (BZ_TYPE_FLATHUB_CATEGORY);
+
+          categories_iter = g_variant_iter_new (value);
+          for (;;)
+            {
+              g_autofree char *category_name         = NULL;
+              g_autoptr (BzFlathubCategory) category = NULL;
+
+              if (!g_variant_iter_next (categories_iter, "s", &category_name))
+                break;
+
+              category = bz_flathub_category_new ();
+              bz_flathub_category_set_name (category, category_name);
+              g_list_store_append (store, category);
+            }
+
+          priv->categories = G_LIST_MODEL (g_steal_pointer (&store));
         }
       else if (g_strcmp0 (key, "verification-verified") == 0)
         {
@@ -2178,6 +2243,17 @@ bz_entry_get_content_rating (BzEntry *self)
   g_return_val_if_fail (BZ_IS_ENTRY (self), NULL);
 
   return priv->content_rating;
+}
+
+GListModel *
+bz_entry_get_categories (BzEntry *self)
+{
+  BzEntryPrivate *priv = NULL;
+
+  g_return_val_if_fail (BZ_IS_ENTRY (self), NULL);
+
+  priv = bz_entry_get_instance_private (self);
+  return priv->categories;
 }
 
 gboolean
@@ -2795,4 +2871,5 @@ clear_entry (BzEntry *self)
   g_clear_object (&priv->download_stats_per_country);
   g_clear_object (&priv->content_rating);
   g_clear_object (&priv->keywords);
+  g_clear_object (&priv->categories);
 }

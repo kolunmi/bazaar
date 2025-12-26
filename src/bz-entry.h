@@ -203,6 +203,9 @@ bz_entry_get_age_rating (BzEntry *self);
 AsContentRating *
 bz_entry_get_content_rating (BzEntry *self);
 
+GListModel *
+bz_entry_get_categories (BzEntry *self);
+
 DexFuture *
 bz_entry_load_mini_icon (BzEntry *self);
 
