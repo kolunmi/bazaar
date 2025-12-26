@@ -59,6 +59,7 @@ struct _BzPreferencesDialog
   /* Template widgets */
   AdwSwitchRow *only_foss_switch;
   AdwSwitchRow *only_flathub_switch;
+  AdwSwitchRow *only_verified_switch;
   AdwSwitchRow *search_debounce_switch;
   GtkFlowBox   *flag_buttons_box;
   AdwSwitchRow *hide_eol_switch;
@@ -168,6 +169,10 @@ bind_settings (BzPreferencesDialog *self)
                    self->only_flathub_switch, "active",
                    G_SETTINGS_BIND_DEFAULT);
 
+  g_settings_bind (self->settings, "show-only-verified",
+                   self->only_verified_switch, "active",
+                   G_SETTINGS_BIND_DEFAULT);
+
   g_settings_bind (self->settings, "search-debounce",
                    self->search_debounce_switch, "active",
                    G_SETTINGS_BIND_DEFAULT);
@@ -196,6 +201,7 @@ bz_preferences_dialog_class_init (BzPreferencesDialogClass *klass)
 
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, only_foss_switch);
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, only_flathub_switch);
+  gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, only_verified_switch);
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, search_debounce_switch);
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, flag_buttons_box);
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, hide_eol_switch);

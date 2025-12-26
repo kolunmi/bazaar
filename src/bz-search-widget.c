@@ -518,6 +518,11 @@ bz_search_widget_set_state (BzSearchWidget *self,
           "notify::show-only-flathub",
           G_CALLBACK (invalidating_state_prop_changed),
           self);
+      g_signal_connect_swapped (
+          state,
+          "notify::show-only-verified",
+          G_CALLBACK (invalidating_state_prop_changed),
+          self);
 
       g_object_get (
           state,

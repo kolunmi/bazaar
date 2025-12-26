@@ -16,6 +16,11 @@
       <summary>Show Only Flathub Content</summary>
       <description>Hide applications which do not originate from Flathub</description>
     </key>
+    <key name="show-only-verified" type="b">
+      <default>false</default>
+      <summary>Show Only Verified Content</summary>
+      <description>Hide applications which are not verified on Flathub</description>
+    </key>
     <key name="search-debounce" type="b">
       <default>true</default>
       <summary>Debounce Search Inputs</summary>
