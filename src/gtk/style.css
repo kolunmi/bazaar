@@ -252,9 +252,17 @@ button.context-tile:active .lozenge {
 
 .installed-pill {
 	background-color: alpha(@success_bg_color, 0.15);
+	color: @success_color;
 	font-weight: 500;
 	font-size: 0.9em;
  	padding: 2px 7px 2px 4.5px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .flathub .installed-pill {
+    background-color: alpha(@window_fg_color, 0.10);
+    color: alpha(@window_fg_color, 0.75);
+  }
 }
 
 .download-size-pill{
@@ -550,6 +558,10 @@ window.flathub {
   --flag-gradient: linear-gradient(to bottom, #8869A5 0%, #8869A5 20%, #D8A7D8 20%, #D8A7D8 40%, #FFFFFF 40%, #FFFFFF 60%, #FDB18D 60%, #FDB18D 80%, #151638 80%, #151638 100%);
 }
 
+.accent-button.disability-theme {
+  --flag-gradient: linear-gradient(to bottom, #595959 0%, #595959 14.285714286%, #CF7280 14.285714286%, #CF7280 28.571428571%, #EEDE77 28.571428571%, #EEDE77 42.857142857%, #E8E8E8 42.857142857%, #E8E8E8 57.142857143%, #7BC2E0 57.142857143%, #7BC2E0 57.142857143%, #3BB07D 71.428571429%, #3BB07D 85.714285714%, #595959 85.714285714%, #595959 100%);
+}
+
 /* Category buttons styling modified from GNOME Software*/
 .category-tile {
   font-weight: 700;
@@ -737,6 +749,33 @@ window.narrow .category-tile {
 }
 .category-tile.category-utility:active {
   background: linear-gradient(135deg, shade(#f6f5f4, .95) 0%, shade(#deddda, .95) 100%);
+}
+
+.category-tile.category-adwaita {
+  text-shadow: 0 1px rgba(255, 255, 255, 0.35);
+  background: linear-gradient(45deg, #1c71d8 0%, #57e289 100%);
+}
+.category-tile.category-adwaita:hover {
+  background: linear-gradient(45deg, shade(#1c71d8, 1.08) 0%, shade(#57e289, 1.08) 100%);
+}
+.category-tile.category-adwaita:active {
+  background: linear-gradient(45deg, shade(#1c71d8, .95) 0%, shade(#57e289, .95) 100%);
+}
+
+.category-tile.category-kde {
+  text-shadow: 0 1px rgba(255, 255, 255, 0.35);
+  background: linear-gradient(135deg, #3584e4 0%, #704dac 100%);
+}
+.category-tile.category-kde:hover {
+  background: linear-gradient(135deg, shade(#3584e4, 1.08) 0%, shade(#704dac, 1.08) 100%);
+}
+.category-tile.category-kde:active {
+  background: linear-gradient(135deg, shade(#3584e4, .95) 0%, shade(#704dac, .95) 100%);
+}
+
+.category-tile.category-adwaita image,
+.category-tile.category-kde image {
+	-gtk-icon-shadow: none;
 }
 
 .installed-list-view > * {

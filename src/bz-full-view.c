@@ -445,7 +445,7 @@ format_license_tooltip (gpointer object,
   if (is_floss)
     return g_strdup (_ ("Free software"));
 
-  if (g_strcmp0 (license, "LicenseRef-proprietary") == 0)
+  if (bz_spdx_is_proprietary (license))
     return g_strdup (_ ("Proprietary Software"));
 
   name = bz_spdx_get_name (license);
@@ -468,7 +468,7 @@ get_license_label (gpointer object,
   if (is_floss)
     return g_strdup (_ ("Free"));
 
-  if (g_strcmp0 (license, "LicenseRef-proprietary") == 0)
+  if (bz_spdx_is_proprietary (license))
     return g_strdup (_ ("Proprietary"));
 
   if (license == NULL || *license == '\0')

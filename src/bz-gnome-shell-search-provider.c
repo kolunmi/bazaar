@@ -241,7 +241,7 @@ activate_result (BzShellSearchProvider2     *skeleton,
 {
   g_action_group_activate_action (
       G_ACTION_GROUP (g_application_get_default ()),
-      "search",
+      "show-app-id",
       g_variant_new ("s", result));
 
   bz_shell_search_provider2_complete_activate_result (skeleton, invocation);
@@ -260,7 +260,7 @@ launch_search (BzShellSearchProvider2     *skeleton,
   string = g_strjoinv (" ", terms);
   g_action_group_activate_action (
       G_ACTION_GROUP (g_application_get_default ()),
-      "search",
+      "show-app-id",
       g_variant_new ("s", string));
 
   bz_shell_search_provider2_complete_launch_search (skeleton, invocation);

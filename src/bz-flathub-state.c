@@ -23,6 +23,7 @@
 #define CATEGORY_FETCH_SIZE          96
 #define QUALITY_MODERATION_PAGE_SIZE 300
 #define KEYWORD_SEARCH_PAGE_SIZE     48
+#define ADWAITA_URL                  "https://arewelibadwaitayet.com"
 
 #include <json-glib/json-glib.h>
 #include <libdex.h>
@@ -48,6 +49,13 @@ struct _BzFlathubState
 
   DexFuture *initializing;
 };
+
+typedef enum
+{
+  QUALITY_MODE_NONE,
+  QUALITY_MODE_FIRST,
+  QUALITY_MODE_RANDOM
+} QualityMode;
 
 static void
 serializable_iface_init (BzSerializableInterface *iface);
@@ -569,46 +577,113 @@ bz_flathub_state_set_map_factory (BzFlathubState          *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MAP_FACTORY]);
 }
 
-static void
-add_collection_category (BzFlathubState *self,
-                         const char     *name,
-                         JsonNode       *node,
-                         GHashTable     *quality_set)
+static gboolean
+is_kde_plasma (void)
 {
+  const char *desktop = g_getenv ("XDG_CURRENT_DESKTOP");
+
+  if (desktop == NULL)
+    return FALSE;
+
+  return g_str_equal (desktop, "KDE") || g_strstr_len (desktop, -1, "KDE") != NULL;
+}
+
+static void
+add_category (BzFlathubState *self,
+              const char     *name,
+              JsonNode       *node,
+              GHashTable     *quality_set,
+              gboolean        is_json_object,
+              QualityMode     quality_mode,
+              gboolean        is_spotlight)
+{
+  JsonObject    *object = NULL;
+  JsonObjectIter iter;
+  JsonArray     *hits_array               = NULL;
+  const char    *key                      = NULL;
+  const char    *app                      = NULL;
   g_autoptr (BzFlathubCategory) category  = NULL;
   g_autoptr (GtkStringList) store         = NULL;
   g_autoptr (GtkStringList) quality_store = NULL;
-  JsonObject *response_object             = NULL;
-  JsonArray  *hits_array                  = NULL;
-  guint       hits_length                 = 0;
-  int         total_hits                  = 0;
+  g_autoptr (GPtrArray) quality_apps      = NULL;
+  guint app_count                         = 0;
+  guint quality_count                     = 0;
+  guint random_index                      = 0;
+  guint i                                 = 0;
+  int   total_entries                     = 0;
 
   category      = bz_flathub_category_new ();
   store         = gtk_string_list_new (NULL);
   quality_store = gtk_string_list_new (NULL);
+
   bz_flathub_category_set_name (category, name);
-  bz_flathub_category_set_is_spotlight (category, TRUE);
+  bz_flathub_category_set_is_spotlight (category, is_spotlight);
   bz_flathub_category_set_applications (category, G_LIST_MODEL (store));
 
-  response_object = json_node_get_object (node);
-  hits_array      = json_object_get_array_member (response_object, "hits");
-  hits_length     = json_array_get_length (hits_array);
-  total_hits      = json_object_get_int_member (response_object, "totalHits");
-  bz_flathub_category_set_total_entries (category, total_hits);
+  object = json_node_get_object (node);
 
-  for (guint i = 0; i < hits_length; i++)
+  if (is_json_object)
     {
-      JsonObject *element = NULL;
-      const char *app_id  = NULL;
+      if (quality_mode == QUALITY_MODE_RANDOM)
+        quality_apps = g_ptr_array_new_with_free_func (g_free);
 
-      element = json_array_get_object_element (hits_array, i);
-      app_id  = json_object_get_string_member (element, "app_id");
-      gtk_string_list_append (store, app_id);
+      json_object_iter_init (&iter, object);
+      while (json_object_iter_next (&iter, &key, NULL) && app_count < COLLECTION_FETCH_SIZE)
+        {
+          gtk_string_list_append (store, key);
 
-      if (g_hash_table_contains (quality_set, app_id))
-        gtk_string_list_append (quality_store, app_id);
+          if (g_hash_table_contains (quality_set, key))
+            {
+              if (quality_mode == QUALITY_MODE_RANDOM)
+                g_ptr_array_add (quality_apps, g_strdup (key));
+              else if (quality_mode == QUALITY_MODE_FIRST)
+                gtk_string_list_append (quality_store, key);
+            }
+          app_count++;
+        }
+      total_entries = json_object_get_size (object);
+    }
+  else
+    {
+      if (quality_mode == QUALITY_MODE_RANDOM)
+        quality_apps = g_ptr_array_new_with_free_func (g_free);
+
+      hits_array = json_object_get_array_member (object, "hits");
+      app_count  = json_array_get_length (hits_array);
+
+      for (i = 0; i < app_count; i++)
+        {
+          JsonObject *element = NULL;
+          const char *app_id  = NULL;
+
+          element = json_array_get_object_element (hits_array, i);
+          app_id  = json_object_get_string_member (element, "app_id");
+          gtk_string_list_append (store, app_id);
+
+          if (g_hash_table_contains (quality_set, app_id))
+            {
+              if (quality_mode == QUALITY_MODE_RANDOM)
+                g_ptr_array_add (quality_apps, g_strdup (app_id));
+              else if (quality_mode == QUALITY_MODE_FIRST)
+                gtk_string_list_append (quality_store, app_id);
+            }
+        }
+      total_entries = json_object_get_int_member (object, "totalHits");
     }
 
+  if (quality_mode == QUALITY_MODE_RANDOM && quality_apps != NULL)
+    {
+      quality_count = MIN (7, quality_apps->len);
+      for (i = 0; i < quality_count; i++)
+        {
+          random_index = g_random_int_range (0, quality_apps->len);
+          app          = g_ptr_array_index (quality_apps, random_index);
+          gtk_string_list_append (quality_store, app);
+          g_ptr_array_remove_index_fast (quality_apps, random_index);
+        }
+    }
+
+  bz_flathub_category_set_total_entries (category, total_entries);
   bz_flathub_category_set_quality_applications (category, G_LIST_MODEL (quality_store));
   g_list_store_append (self->categories, category);
 }
@@ -619,6 +694,7 @@ initialize_fiber (GWeakRef *wr)
   g_autoptr (BzFlathubState) self    = NULL;
   g_autoptr (GError) local_error     = NULL;
   gboolean result                    = FALSE;
+  gboolean is_kde                    = is_kde_plasma ();
   g_autoptr (GHashTable) quality_set = NULL;
 
   g_autoptr (DexFuture) aotd_f       = NULL;
@@ -630,6 +706,8 @@ initialize_fiber (GWeakRef *wr)
   g_autoptr (DexFuture) trending_f   = NULL;
   g_autoptr (DexFuture) mobile_f     = NULL;
   g_autoptr (DexFuture) passing_f    = NULL;
+  g_autoptr (DexFuture) adwaita_f    = NULL;
+  g_autoptr (DexFuture) toolkit_f    = NULL;
 
   bz_weak_get_or_return_reject (self, wr);
 
@@ -649,6 +727,19 @@ initialize_fiber (GWeakRef *wr)
       }                                                                                \
   }                                                                                    \
   G_STMT_END
+
+  if (is_kde)
+    ADD_REQUEST (toolkit_f, "/collection/developer/kde?locale=en");
+  else
+    {
+      adwaita_f = bz_https_query_json (ADWAITA_URL "/api/apps");
+      if (!dex_await (dex_ref (adwaita_f), &local_error))
+        {
+          g_warning ("Failed to complete request to arewelibadwaitayet: %s", local_error->message);
+          g_clear_error (&local_error);
+          adwaita_f = NULL;
+        }
+    }
 
   ADD_REQUEST (passing_f, "/quality-moderation/passing-apps?page=1&page_size=%d", QUALITY_MODERATION_PAGE_SIZE);
   ADD_REQUEST (aotd_f, "/app-picks/app-of-the-day/%s", self->for_day);
@@ -707,13 +798,12 @@ initialize_fiber (GWeakRef *wr)
       }
   }
 
-  add_collection_category (self, "trending", GET_BOXED (trending_f), quality_set);
-  add_collection_category (self, "popular", GET_BOXED (popular_f), quality_set);
-  add_collection_category (self, "recently-added", GET_BOXED (added_f), quality_set);
-  add_collection_category (self, "recently-updated", GET_BOXED (updated_f), quality_set);
-  add_collection_category (self, "mobile", GET_BOXED (mobile_f), quality_set);
+  add_category (self, "trending", GET_BOXED (trending_f), quality_set, FALSE, QUALITY_MODE_NONE, TRUE);
+  add_category (self, "popular", GET_BOXED (popular_f), quality_set, FALSE, QUALITY_MODE_NONE, TRUE);
+  add_category (self, "recently-added", GET_BOXED (added_f), quality_set, FALSE, QUALITY_MODE_NONE, TRUE);
+  add_category (self, "recently-updated", GET_BOXED (updated_f), quality_set, FALSE, QUALITY_MODE_NONE, TRUE);
+  add_category (self, "mobile", GET_BOXED (mobile_f), quality_set, FALSE, QUALITY_MODE_NONE, TRUE);
 
-  /* Add regular categories */
   {
     JsonArray *array                       = NULL;
     guint      length                      = 0;
@@ -747,48 +837,22 @@ initialize_fiber (GWeakRef *wr)
 
     for (guint i = 0; i < length; i++)
       {
-        DexFuture  *future                      = NULL;
-        JsonNode   *node                        = NULL;
-        const char *name                        = NULL;
-        g_autoptr (BzFlathubCategory) category  = NULL;
-        g_autoptr (GtkStringList) store         = NULL;
-        g_autoptr (GtkStringList) quality_store = NULL;
-        JsonObject *response_object             = NULL;
-        JsonArray  *category_array              = NULL;
-        guint       category_length             = 0;
-        int         total_hits                  = 0;
+        DexFuture  *future = NULL;
+        JsonNode   *node   = NULL;
+        const char *name   = NULL;
 
-        future        = g_ptr_array_index (category_futures, i);
-        node          = GET_BOXED (future);
-        name          = json_array_get_string_element (array, i);
-        category      = bz_flathub_category_new ();
-        store         = gtk_string_list_new (NULL);
-        quality_store = gtk_string_list_new (NULL);
-        bz_flathub_category_set_name (category, name);
-        bz_flathub_category_set_applications (category, G_LIST_MODEL (store));
-        response_object = json_node_get_object (node);
-        category_array  = json_object_get_array_member (response_object, "hits");
-        category_length = json_array_get_length (category_array);
-        total_hits      = json_object_get_int_member (response_object, "totalHits");
-        bz_flathub_category_set_total_entries (category, total_hits);
+        future = g_ptr_array_index (category_futures, i);
+        node   = GET_BOXED (future);
+        name   = json_array_get_string_element (array, i);
 
-        for (guint j = 0; j < category_length; j++)
-          {
-            JsonObject *element = NULL;
-            const char *app_id  = NULL;
-
-            element = json_array_get_object_element (category_array, j);
-            app_id  = json_object_get_string_member (element, "app_id");
-            gtk_string_list_append (store, app_id);
-
-            if (g_hash_table_contains (quality_set, app_id))
-              gtk_string_list_append (quality_store, app_id);
-          }
-
-        bz_flathub_category_set_quality_applications (category, G_LIST_MODEL (quality_store));
-        g_list_store_append (self->categories, category);
+        add_category (self, name, node, quality_set, FALSE, QUALITY_MODE_FIRST, FALSE);
       }
   }
+
+  if (is_kde)
+    add_category (self, "kde", GET_BOXED (toolkit_f), quality_set, FALSE, QUALITY_MODE_RANDOM, FALSE);
+  else if (adwaita_f != NULL)
+    add_category (self, "adwaita", GET_BOXED (adwaita_f), quality_set, TRUE, QUALITY_MODE_RANDOM, FALSE);
 
   return dex_future_new_true ();
 }

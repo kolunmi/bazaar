@@ -46,7 +46,8 @@ static GParamSpec *props[LAST_PROP] = { 0 };
 static double
 test_strings (const char *query,
               const char *against,
-              gboolean    fuzzy);
+              gboolean    fuzzy,
+              gssize      accept_min_size);
 
 typedef struct
 {
@@ -367,31 +368,40 @@ query_sub_task_fiber (QuerySubTaskData *data)
       BzEntryGroup *group             = NULL;
       const char   *id                = NULL;
       const char   *title             = NULL;
-      const char   *developer         = NULL;
-      const char   *search_tokens     = NULL;
       double        score             = 0.0;
 
       group  = g_ptr_array_index (shallow_mirror, work_offset + i);
       locker = bz_entry_group_lock (group);
 
-      id            = bz_entry_group_get_id (group);
-      title         = bz_entry_group_get_title (group);
-      developer     = bz_entry_group_get_developer (group);
-      search_tokens = bz_entry_group_get_search_tokens (group);
+      id    = bz_entry_group_get_id (group);
+      title = bz_entry_group_get_title (group);
+      if ((id != NULL && g_strcmp0 (query_utf8, id) == 0) ||
+          (title != NULL && strcasecmp (query_utf8, title) == 0))
+        score = G_MAXDOUBLE;
+      else
+        {
+          const char *developer     = NULL;
+          const char *description   = NULL;
+          const char *search_tokens = NULL;
 
-      if (id != NULL && g_strcmp0 (query_utf8, id) == 0)
-        score += 1000.0;
+          developer     = bz_entry_group_get_developer (group);
+          description   = bz_entry_group_get_description (group);
+          search_tokens = bz_entry_group_get_search_tokens (group);
 
-#define EVALUATE_STRING(_s, _fuzzy)                  \
-  ((_s) != NULL                                      \
-       ? (test_strings (query_utf8, (_s), (_fuzzy))) \
+#define EVALUATE_STRING(_s, _fuzzy, _accept_min_size)                    \
+  ((_s) != NULL                                                          \
+       ? (test_strings (query_utf8, (_s), (_fuzzy), (_accept_min_size))) \
        : 0.0)
 
-      score += EVALUATE_STRING (title, TRUE) * 1.0;
-      score += EVALUATE_STRING (developer, FALSE) * 1.0;
-      score += EVALUATE_STRING (search_tokens, FALSE) * 1.0;
+          score += EVALUATE_STRING (title, TRUE, -1);
+          score += EVALUATE_STRING (developer, FALSE, -1);
+          /* reject tokens less than 4 bytes in length in description to prevent
+             false positives */
+          score += EVALUATE_STRING (description, TRUE, 4);
+          score += EVALUATE_STRING (search_tokens, FALSE, -1);
 
 #undef EVALUATE_STRING
+        }
 
       if (score > threshold)
         {
@@ -429,7 +439,8 @@ query_sub_task_fiber (QuerySubTaskData *data)
 static double
 test_strings (const char *query,
               const char *against,
-              gboolean    fuzzy)
+              gboolean    fuzzy,
+              gssize      accept_min_size)
 {
   double score = 0.0;
 
@@ -439,7 +450,17 @@ test_strings (const char *query,
 
     UTF8_FOREACH_TOKEN_FORWARDS (a_s, a_e, against)
     {
-      if (fuzzy)
+      gssize q_len = q_e - q_s;
+      gssize a_len = a_e - a_s;
+
+      if (accept_min_size > 0 &&
+          a_len < accept_min_size)
+        continue;
+
+      if (q_len <= a_len &&
+          memmem (a_s, a_len, q_s, q_len) != NULL)
+        query_token_score += (double) (q_len * q_len) / (double) a_len;
+      else if (fuzzy)
         {
           double      against_token_score = 0.0;
           const char *last_best_char      = NULL;
@@ -493,15 +514,6 @@ test_strings (const char *query,
 
           if (against_token_score > 0.0)
             query_token_score += against_token_score;
-        }
-      else
-        {
-          gssize q_len = q_e - q_s;
-          gssize a_len = a_e - a_s;
-
-          if (q_len <= a_len &&
-              memmem (a_s, a_len, q_s, q_len) != NULL)
-            query_token_score += (double) g_utf8_strlen (q_s, q_len);
         }
     }
 
