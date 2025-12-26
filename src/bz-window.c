@@ -344,6 +344,23 @@ installed_page_show_cb (BzWindow   *self,
     bz_window_show_group (self, group);
 }
 
+void
+bz_window_show_app_id (BzWindow   *self,
+                       const char *app_id)
+{
+  g_autoptr (BzEntryGroup) group = NULL;
+
+  g_return_if_fail (BZ_IS_WINDOW (self));
+  g_return_if_fail (app_id != NULL);
+
+  group = bz_application_map_factory_convert_one (
+      bz_state_info_get_application_factory (self->state),
+      gtk_string_object_new (app_id));
+
+  if (group != NULL)
+    bz_window_show_group (self, group);
+}
+
 static void
 page_toggled_cb (BzWindow       *self,
                  GParamSpec     *pspec,
