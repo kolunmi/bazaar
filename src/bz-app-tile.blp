@@ -73,7 +73,7 @@ template $BzAppTile: Button {
           halign: start;
           spacing: 4;
           visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
-          styles ["small-pill", "installed-pill", "success"]
+          styles ["small-pill", "installed-pill"]
 
           Image {
             icon-name: "app-installed-symbolic";
