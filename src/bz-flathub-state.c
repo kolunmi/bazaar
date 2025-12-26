@@ -729,9 +729,7 @@ initialize_fiber (GWeakRef *wr)
   G_STMT_END
 
   if (is_kde)
-    {
-      ADD_REQUEST (toolkit_f, "/collection/developer/kde?locale=en");
-    }
+    ADD_REQUEST (toolkit_f, "/collection/developer/kde?locale=en");
   else
     {
       adwaita_f = bz_https_query_json (ADWAITA_URL "/api/apps");
