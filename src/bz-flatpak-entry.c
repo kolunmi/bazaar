@@ -27,6 +27,7 @@
 #include <xmlb.h>
 
 #include "bz-async-texture.h"
+#include "bz-flathub-category.h"
 #include "bz-flatpak-private.h"
 #include "bz-io.h"
 #include "bz-issue.h"
@@ -403,6 +404,8 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
   g_autoptr (AsContentRating) content_rating           = NULL;
   GPtrArray *as_keywords                               = NULL;
   g_autoptr (GListStore) keywords                      = NULL;
+  GPtrArray *as_categories                             = NULL;
+  g_autoptr (GListModel) categories                    = NULL;
   g_autoptr (BzVerificationStatus) verification_status = NULL;
 
   g_return_val_if_fail (FLATPAK_IS_REF (ref), NULL);
@@ -982,6 +985,12 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
               g_list_store_append (keywords, keyword_obj);
             }
         }
+
+      as_categories = as_component_get_categories (component);
+      if (as_categories != NULL && as_categories->len > 0)
+        {
+          categories = bz_flathub_category_list_from_appstream (as_categories);
+        }
     }
 
   if (component != NULL && g_strcmp0 (remote_name, "flathub") == 0)
@@ -1066,6 +1075,7 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
       "is-mobile-friendly", is_mobile_friendly,
       "content-rating", content_rating,
       "keywords", keywords,
+      "categories", categories,
       "verification-status", verification_status,
       NULL);
 

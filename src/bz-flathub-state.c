@@ -20,7 +20,7 @@
 
 #define G_LOG_DOMAIN                 "BAZAAR::FLATHUB"
 #define COLLECTION_FETCH_SIZE        192
-#define CATEGORY_FETCH_SIZE          96
+#define CATEGORY_FETCH_SIZE          48
 #define QUALITY_MODERATION_PAGE_SIZE 300
 #define KEYWORD_SEARCH_PAGE_SIZE     48
 #define ADWAITA_URL                  "https://arewelibadwaitayet.com"
@@ -628,7 +628,7 @@ add_category (BzFlathubState *self,
         quality_apps = g_ptr_array_new_with_free_func (g_free);
 
       json_object_iter_init (&iter, object);
-      while (json_object_iter_next (&iter, &key, NULL) && app_count < COLLECTION_FETCH_SIZE)
+      while (json_object_iter_next (&iter, &key, NULL))
         {
           gtk_string_list_append (store, key);
 

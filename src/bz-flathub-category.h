@@ -86,6 +86,9 @@ void
 bz_flathub_category_set_is_spotlight (BzFlathubCategory *self,
                                       gboolean           is_spotlight);
 
+GListModel *
+bz_flathub_category_list_from_appstream (GPtrArray *as_categories);
+
 G_END_DECLS
 
 /* End of bz-flathub-category.h */
