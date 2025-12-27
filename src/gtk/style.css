@@ -494,6 +494,10 @@ window.flathub {
   --flag-gradient: linear-gradient(to bottom, #D62800 0%, #D62800 20%, #FF9B56 20%, #FF9B56 40%, #FFFFFF 40%, #FFFFFF 60%, #D462A6 60%, #D462A6 80%, #A40062 80%, #A40062 100%);
 }
 
+.accent-button.gay-pride-theme {
+  --flag-gradient: linear-gradient(to bottom, #018E71 0%, #018E71 14.285714286%, #21CFAC 14.285714286%, #21CFAC 28.571428571%, #9AE9C3 28.571428571%, #9AE9C3 42.857142857%, #FFFFFF 42.857142857%, #FFFFFF 57.142857143%, #7CAFE4 57.142857143%, #7CAFE4 71.428571429%, #4F47CC 71.428571429%, #4F47CC 85.714285714%, #3C1379 85.714285714%, #3C1379 100%);
+}
+
 .accent-button.transgender-theme {
   --flag-gradient: linear-gradient(to bottom, #5BCEFA 0%, #5BCEFA 20%, #F5A9B8 20%, #F5A9B8 40%, #FFFFFF 40%, #FFFFFF 60%, #F5A9B8 60%, #F5A9B8 80%, #5BCEFA 80%, #5BCEFA 100%);
 }

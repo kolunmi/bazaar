@@ -316,6 +316,7 @@ bz_global_progress_snapshot (GtkWidget   *widget,
         gtk_snapshot_append_color (snapshot, accent_color, &fraction_clip.bounds);
       else if (g_strcmp0 (theme, "pride-rainbow-flag") == 0 ||
                g_strcmp0 (theme, "lesbian-pride-flag") == 0 ||
+               g_strcmp0 (theme, "gay-pride-flag") == 0 ||
                g_strcmp0 (theme, "transgender-flag") == 0 ||
                g_strcmp0 (theme, "nonbinary-flag") == 0 ||
                g_strcmp0 (theme, "bisexual-flag") == 0 ||
