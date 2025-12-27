@@ -8,7 +8,7 @@
   <summary>Discover and install applications</summary>
   <description>
     <p>
-      A new app store for GNOME with a focus on discovering and installing
+      A new app store for Linux with a focus on discovering and installing
       applications and addons from Flatpak remotes, particularly Flathub.
     </p>
     <p>
@@ -50,24 +50,43 @@
 
   <screenshots>
     <screenshot type="default">
-      <image>https://github.com/user-attachments/assets/4bf0cf77-f4c6-4ea6-afbd-f74acfc992ef</image>
+      <image>https://github.com/user-attachments/assets/ebe32d33-136c-4d90-a6e4-9d468f664be7</image>
       <caption>The home page displaying Flathub apps</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/user-attachments/assets/635b19fb-5130-4797-91ce-f358339f260a</image>
+      <image>https://github.com/user-attachments/assets/8904e33b-37c5-41ae-ade6-3fa778bdc4c2</image>
       <caption>Nucleus app page</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/user-attachments/assets/15276907-8c63-46b3-84b4-2ec07f5c85b4</image>
+      <image>https://github.com/user-attachments/assets/230ef503-cf4f-4eae-907a-b48bf42f8dd1</image>
       <caption>Search page</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/user-attachments/assets/24db66aa-eb6b-4fbf-9a37-db2bd4d063c5</image>
+      <image>https://github.com/user-attachments/assets/74f838e9-af47-4e06-a0db-42a9176b69c0</image>
       <caption>Category page</caption>
     </screenshot>
   </screenshots>
 
   <releases>
+    <release version="0.6.4" date="2025-12-14">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.6.4</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>Flathub account support with the ability to manage bookmarks</li>
+          <li>Flathub bookmarks replace star count; you can add or remove bookmarks from app pages</li>
+          <li>An "Only Show Verified" option</li>
+          <li>Exhaustive category pages for most categories</li>
+          <li>An "Adwaita" or "KDE" category shown based on desktop environment</li>
+          <li>Updated installed indicator for app tiles</li>
+          <li>3 new flag options</li>
+          <li>Fixed GNOME search provider to show the app page instead of search</li>
+          <li>Fixed issue where flatpakref URIs did not open when the app wasnt running in the background</li>
+          <li>Fixed issue where some proprietary apps were marked as "Special License"</li>
+          <li>Fixed issue where graphs did not work with touch</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.6.3" date="2025-12-14">
       <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.6.3</url>
       <description translate="no">
