@@ -368,6 +368,7 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
   g_autofree char *unique_id                           = NULL;
   g_autofree char *unique_id_checksum                  = NULL;
   guint64          download_size                       = 0;
+  guint64          installed_size                      = 0;
   const char      *title                               = NULL;
   const char      *eol                                 = NULL;
   const char      *description                         = NULL;
@@ -488,8 +489,11 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
 
   if (FLATPAK_IS_REMOTE_REF (ref))
     download_size = flatpak_remote_ref_get_download_size (FLATPAK_REMOTE_REF (ref));
+
+  if (FLATPAK_IS_REMOTE_REF (ref))
+    installed_size = flatpak_remote_ref_get_installed_size (FLATPAK_REMOTE_REF (ref));
   else if (FLATPAK_IS_BUNDLE_REF (ref))
-    download_size = flatpak_bundle_ref_get_installed_size (FLATPAK_BUNDLE_REF (ref));
+    installed_size = flatpak_bundle_ref_get_installed_size (FLATPAK_BUNDLE_REF (ref));
 
   if (component != NULL)
     {
@@ -1047,6 +1051,7 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
       "remote-repo-name", remote_name,
       "url", project_url,
       "size", download_size,
+      "installed-size", installed_size,
       "search-tokens", search_tokens,
       "metadata-license", metadata_license,
       "project-license", project_license,

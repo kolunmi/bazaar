@@ -85,6 +85,7 @@ typedef struct
   char            *remote_repo_name;
   char            *url;
   guint64          size;
+  guint64          installed_size;
   GdkPaintable    *icon_paintable;
   GIcon           *mini_icon;
   GdkPaintable    *remote_repo_icon;
@@ -150,6 +151,7 @@ enum
   PROP_REMOTE_REPO_NAME,
   PROP_URL,
   PROP_SIZE,
+  PROP_INSTALLED_SIZE,
   PROP_ICON_PAINTABLE,
   PROP_MINI_ICON,
   PROP_SEARCH_TOKENS,
@@ -323,6 +325,10 @@ bz_entry_get_property (GObject    *object,
       break;
     case PROP_SIZE:
       g_value_set_uint64 (value, priv->size);
+      break;
+      g_value_set_uint64 (value, priv->size);
+    case PROP_INSTALLED_SIZE:
+      g_value_set_uint64 (value, priv->installed_size);
       break;
     case PROP_ICON_PAINTABLE:
       g_value_set_object (value, priv->icon_paintable);
@@ -512,6 +518,9 @@ bz_entry_set_property (GObject      *object,
       break;
     case PROP_SIZE:
       priv->size = g_value_get_uint64 (value);
+      break;
+    case PROP_INSTALLED_SIZE:
+      priv->installed_size = g_value_get_uint64 (value);
       break;
     case PROP_ICON_PAINTABLE:
       g_clear_object (&priv->icon_paintable);
@@ -780,6 +789,13 @@ bz_entry_class_init (BzEntryClass *klass)
   props[PROP_SIZE] =
       g_param_spec_uint64 (
           "size",
+          NULL, NULL,
+          0, G_MAXUINT64, 0,
+          G_PARAM_READWRITE);
+
+    props[PROP_INSTALLED_SIZE] =
+      g_param_spec_uint64 (
+          "installed-size",
           NULL, NULL,
           0, G_MAXUINT64, 0,
           G_PARAM_READWRITE);
@@ -1104,6 +1120,8 @@ bz_entry_real_serialize (BzSerializable  *serializable,
     g_variant_builder_add (builder, "{sv}", "url", g_variant_new_string (priv->url));
   if (priv->size > 0)
     g_variant_builder_add (builder, "{sv}", "size", g_variant_new_uint64 (priv->size));
+  if (priv->installed_size > 0)
+    g_variant_builder_add (builder, "{sv}", "installed-size", g_variant_new_uint64 (priv->installed_size));
   if (priv->icon_paintable != NULL)
     maybe_save_paintable (priv, "icon-paintable", priv->icon_paintable, builder);
   if (priv->mini_icon != NULL)
@@ -1490,6 +1508,8 @@ bz_entry_real_deserialize (BzSerializable *serializable,
         priv->url = g_variant_dup_string (value, NULL);
       else if (g_strcmp0 (key, "size") == 0)
         priv->size = g_variant_get_uint64 (value);
+      else if (g_strcmp0 (key, "installed-size") == 0)
+        priv->installed_size = g_variant_get_uint64 (value);
       else if (g_strcmp0 (key, "icon-paintable") == 0)
         priv->icon_paintable = make_async_texture (value);
       else if (g_strcmp0 (key, "mini-icon") == 0)
@@ -2006,6 +2026,17 @@ bz_entry_get_size (BzEntry *self)
   priv = bz_entry_get_instance_private (self);
 
   return priv->size;
+}
+
+guint64
+bz_entry_get_installed_size (BzEntry *self)
+{
+  BzEntryPrivate *priv = NULL;
+
+  g_return_val_if_fail (BZ_IS_ENTRY (self), 0);
+  priv = bz_entry_get_instance_private (self);
+
+  return priv->installed_size;
 }
 
 GdkPaintable *

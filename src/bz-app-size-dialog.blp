@@ -31,16 +31,16 @@ template $BzAppSizeDialog: Adw.Dialog {
 
             styles [
               "title-1",
-              "lozenge",
+              "circular-lozenge",
               "grey",
             ]
 
             Label size_label {
               margin-end: 8;
               margin-start: 8;
-              margin-top: 6;
-              margin-bottom: 6;
-              label: _("--- MB");
+              margin-top: 2;
+              margin-bottom: 2;
+              label: bind $format_size(template.entry as <$BzEntry>.size) as <string>;
               use-markup: true;
             }
           }
@@ -54,7 +54,85 @@ template $BzAppSizeDialog: Adw.Dialog {
           }
         }
 
-        Adw.PreferencesGroup comparisons_group {
+        Adw.PreferencesGroup {
+          margin-bottom: 15;
+
+          Adw.ActionRow {
+            [prefix]
+            Label {
+              label: bind $format_size(template.entry as <$BzEntry>.size) as <string>;
+              use-markup: true;
+              valign: center;
+              width-request: 90;
+              margin-top: 8;
+              margin-bottom: 8;
+
+              styles [
+                "circular-lozenge",
+                "title-4",
+                "grey",
+              ]
+            }
+
+            title: _("Download Size");
+            subtitle: _("Amount to download from the internet");
+          }
+
+          Adw.ActionRow {
+            [prefix]
+            Label {
+              label: bind $format_size(template.entry as <$BzEntry>.installed-size) as <string>;
+              use-markup: true;
+              valign: center;
+              width-request: 90;
+
+              margin-top: 8;
+              margin-bottom: 8;
+
+              styles [
+                "circular-lozenge",
+                "title-4",
+                "grey",
+              ]
+            }
+
+            title: _("Installed Size");
+            subtitle: _("Size on Disk");
+          }
+        }
+
+        Adw.PreferencesGroup {
+          margin-top: 10;
+          title: _("Details");
+          Adw.ActionRow {
+            title: _("License");
+            subtitle:  bind template.entry as <$BzEntry>.project-license;
+            styles ["property"]
+          }
+          Adw.ActionRow {
+            title: _("App ID");
+            subtitle:  bind template.entry as <$BzEntry>.id;
+            styles ["property"]
+          }
+          Adw.ActionRow {
+            title: _("SDK");
+            subtitle:  bind template.entry as <$BzFlatpakEntry>.application-runtime;
+            styles ["property"]
+
+            [suffix]
+            MenuButton {
+              visible: bind $invert_boolean($is_null(template.entry as <$BzEntry>.eol) as <bool>) as <bool>;
+              styles ["error", "flat"]
+              valign: center;
+              icon-name: "dialog-warning-symbolic";
+              popover: Popover {
+                child: Label {
+                  label: _("This app uses an outdated version of the software platform (SDK) and might contain bugs or security vulnerabilities which will not be fixed.");
+                };
+              };
+            }
+
+          }
         }
       };
     };
