@@ -844,7 +844,7 @@ size_cb (BzFullView *self,
   if (self->group == NULL)
     return;
 
-  size_dialog = bz_app_size_dialog_new (bz_result_get_object (self->ui_entry));
+  size_dialog = bz_app_size_dialog_new (self->group);
   adw_dialog_present (size_dialog, GTK_WIDGET (self));
 }
 

@@ -19,14 +19,14 @@
  */
 
 #include "bz-app-size-dialog.h"
-#include "bz-entry.h"
+#include "bz-entry-group.h"
 #include <glib/gi18n.h>
 
 struct _BzAppSizeDialog
 {
   AdwDialog parent_instance;
 
-  BzEntry *entry;
+  BzEntryGroup *group;
 };
 
 G_DEFINE_FINAL_TYPE (BzAppSizeDialog, bz_app_size_dialog, ADW_TYPE_DIALOG)
@@ -35,7 +35,7 @@ enum
 {
   PROP_0,
 
-  PROP_ENTRY,
+  PROP_GROUP,
 
   LAST_PROP
 };
@@ -46,7 +46,7 @@ bz_app_size_dialog_dispose (GObject *object)
 {
   BzAppSizeDialog *self = BZ_APP_SIZE_DIALOG (object);
 
-  g_clear_object (&self->entry);
+  g_clear_object (&self->group);
 
   G_OBJECT_CLASS (bz_app_size_dialog_parent_class)->dispose (object);
 }
@@ -61,8 +61,8 @@ bz_app_size_dialog_get_property (GObject    *object,
 
   switch (prop_id)
     {
-    case PROP_ENTRY:
-      g_value_set_object (value, self->entry);
+    case PROP_GROUP:
+      g_value_set_object (value, self->group);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -79,9 +79,9 @@ bz_app_size_dialog_set_property (GObject      *object,
 
   switch (prop_id)
     {
-    case PROP_ENTRY:
-      g_clear_object (&self->entry);
-      self->entry = g_value_dup_object (value);
+    case PROP_GROUP:
+      g_clear_object (&self->group);
+      self->group = g_value_dup_object (value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -128,11 +128,11 @@ bz_app_size_dialog_class_init (BzAppSizeDialogClass *klass)
   object_class->get_property = bz_app_size_dialog_get_property;
   object_class->set_property = bz_app_size_dialog_set_property;
 
-  props[PROP_ENTRY] =
+  props[PROP_GROUP] =
       g_param_spec_object (
-          "entry",
+          "group",
           NULL, NULL,
-          BZ_TYPE_ENTRY,
+          BZ_TYPE_ENTRY_GROUP,
           G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
@@ -150,13 +150,13 @@ bz_app_size_dialog_init (BzAppSizeDialog *self)
 }
 
 AdwDialog *
-bz_app_size_dialog_new (BzEntry *entry)
+bz_app_size_dialog_new (BzEntryGroup *group)
 {
   BzAppSizeDialog *app_size_dialog = NULL;
 
   app_size_dialog = g_object_new (
       BZ_TYPE_APP_SIZE_DIALOG,
-      "entry", entry,
+      "group", group,
       NULL);
 
   return ADW_DIALOG (app_size_dialog);
