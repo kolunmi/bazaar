@@ -685,6 +685,12 @@ bz_application_about_action (GSimpleAction *action,
     NULL
   };
 
+  const char *special_thanks[] = {
+    "arewelibadwaitayet https://arewelibadwaitayet.com/",
+    /* This array MUST be NULL terminated */
+    NULL
+  };
+
   g_assert (BZ_IS_APPLICATION (self));
 
   window = gtk_application_get_active_window (GTK_APPLICATION (self));
@@ -713,6 +719,10 @@ bz_application_about_action (GSimpleAction *action,
       "issue-url", "https://github.com/kolunmi/bazaar/issues",
       "release-notes", release_notes_text,
       NULL);
+
+  adw_about_dialog_add_acknowledgement_section (ADW_ABOUT_DIALOG (dialog),
+                                              _ ("Special Thanks"),
+                                              special_thanks);
 
   adw_dialog_present (dialog, GTK_WIDGET (window));
 }
