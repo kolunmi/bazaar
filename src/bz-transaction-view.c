@@ -227,6 +227,52 @@ list_has_items (gpointer    object,
 }
 
 static gboolean
+is_queued (gpointer    object,
+           GListModel *current_ops,
+           GListModel *finished_ops)
+{
+
+  gboolean has_current_ops  = 0;
+  gboolean has_finished_ops = 0;
+
+  if (current_ops == NULL || finished_ops == NULL)
+    return FALSE;
+
+  has_current_ops  = list_has_items (object, current_ops);
+  has_finished_ops = list_has_items (object, finished_ops);
+
+  return !has_current_ops && !has_finished_ops;
+}
+
+static gboolean
+is_ongoing (gpointer    object,
+           GListModel *current_ops)
+{
+  if (current_ops == NULL)
+    return FALSE;
+
+  return list_has_items (object, current_ops);
+}
+
+static gboolean
+is_completed (gpointer    object,
+           GListModel *current_ops,
+           GListModel *finished_ops)
+{
+
+  gboolean has_current_ops  = 0;
+  gboolean has_finished_ops = 0;
+
+  if (current_ops == NULL || finished_ops == NULL)
+    return FALSE;
+
+  has_current_ops  = list_has_items (object, current_ops);
+  has_finished_ops = list_has_items (object, finished_ops);
+
+  return !has_current_ops && has_finished_ops;
+}
+
+static gboolean
 is_both (gpointer object,
          gboolean first,
          gboolean second)
@@ -352,6 +398,9 @@ bz_transaction_view_class_init (BzTransactionViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, create_app_id_filter);
   gtk_widget_class_bind_template_callback (widget_class, is_transaction_type);
   gtk_widget_class_bind_template_callback (widget_class, list_has_items);
+  gtk_widget_class_bind_template_callback (widget_class, is_queued);
+  gtk_widget_class_bind_template_callback (widget_class, is_ongoing);
+  gtk_widget_class_bind_template_callback (widget_class, is_completed);
   gtk_widget_class_bind_template_callback (widget_class, is_both);
 }
 
