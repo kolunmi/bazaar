@@ -98,6 +98,16 @@ template $BzAppsPage: Adw.NavigationPage {
               bind-widget => $bind_widget_cb(template);
               unbind-widget => $unbind_widget_cb(template);
             }
+
+            Button {
+              label: _("Show All");
+              visible: bind $is_not_empty_list(template.all-applications) as <bool>;
+              halign: center;
+              margin-top: 8;
+
+              clicked => $show_all_cb(template);
+              styles ["pill"]
+            }
           }
         }
       };

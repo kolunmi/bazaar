@@ -80,13 +80,16 @@ const char *
 bz_entry_group_get_eol (BzEntryGroup *self);
 
 guint64
-bz_entry_group_get_size (BzEntryGroup *self);
+bz_entry_group_get_installed_size (BzEntryGroup *self);
 
 int
 bz_entry_group_get_n_addons (BzEntryGroup *self);
 
 const char *
 bz_entry_group_get_donation_url (BzEntryGroup *self);
+
+GListModel *
+bz_entry_group_get_categories (BzEntryGroup *self);
 
 BzResult *
 bz_entry_group_dup_ui_entry (BzEntryGroup *self);

@@ -629,6 +629,28 @@ bz_application_search_action (GSimpleAction *action,
 }
 
 static void
+bz_application_show_app_id_action (GSimpleAction *action,
+                                   GVariant      *parameter,
+                                   gpointer       user_data)
+{
+  BzApplication *self   = user_data;
+  GtkWindow     *window = NULL;
+  const char    *app_id = NULL;
+
+  g_assert (BZ_IS_APPLICATION (self));
+
+  window = gtk_application_get_active_window (GTK_APPLICATION (self));
+  if (window == NULL)
+    window = new_window (self);
+
+  if (parameter != NULL)
+    {
+      app_id = g_variant_get_string (parameter, NULL);
+      bz_window_show_app_id (BZ_WINDOW (window), app_id);
+    }
+}
+
+static void
 bz_application_sync_remotes_action (GSimpleAction *action,
                                     GVariant      *parameter,
                                     gpointer       user_data)
@@ -663,6 +685,12 @@ bz_application_about_action (GSimpleAction *action,
     NULL
   };
 
+  const char *special_thanks[] = {
+    "arewelibadwaitayet https://arewelibadwaitayet.com/",
+    /* This array MUST be NULL terminated */
+    NULL
+  };
+
   g_assert (BZ_IS_APPLICATION (self));
 
   window = gtk_application_get_active_window (GTK_APPLICATION (self));
@@ -691,6 +719,10 @@ bz_application_about_action (GSimpleAction *action,
       "issue-url", "https://github.com/kolunmi/bazaar/issues",
       "release-notes", release_notes_text,
       NULL);
+
+  adw_about_dialog_add_acknowledgement_section (ADW_ABOUT_DIALOG (dialog),
+                                              _ ("Special Thanks"),
+                                              special_thanks);
 
   adw_dialog_present (dialog, GTK_WIDGET (window));
 }
@@ -755,8 +787,8 @@ bz_application_flathub_favorites_action (GSimpleAction *action,
                                          GVariant      *parameter,
                                          gpointer       user_data)
 {
-  BzApplication     *self          = user_data;
-  GtkWindow         *window        = NULL;
+  BzApplication     *self           = user_data;
+  GtkWindow         *window         = NULL;
   AdwNavigationPage *favorites_page = NULL;
 
   g_assert (BZ_IS_APPLICATION (self));
@@ -791,6 +823,7 @@ static const GActionEntry app_actions[] = {
   {               "about",               bz_application_about_action, NULL },
   {        "sync-remotes",        bz_application_sync_remotes_action, NULL },
   {              "search",              bz_application_search_action,  "s" },
+  {         "show-app-id",         bz_application_show_app_id_action,  "s" },
   { "toggle-transactions", bz_application_toggle_transactions_action, NULL },
   {              "donate",              bz_application_donate_action, NULL },
   {            "flatseal",            bz_application_flatseal_action, NULL },
@@ -2086,6 +2119,7 @@ show_hide_app_setting_changed (BzApplication *self,
   bz_state_info_set_hide_eol (self->state, g_settings_get_boolean (self->settings, "hide-eol"));
   bz_state_info_set_show_only_foss (self->state, g_settings_get_boolean (self->settings, "show-only-foss"));
   bz_state_info_set_show_only_flathub (self->state, g_settings_get_boolean (self->settings, "show-only-flathub"));
+  bz_state_info_set_show_only_verified (self->state, g_settings_get_boolean (self->settings, "show-only-verified"));
 
   gtk_filter_changed (GTK_FILTER (self->group_filter), GTK_FILTER_CHANGE_DIFFERENT);
   gtk_filter_changed (GTK_FILTER (self->appid_filter), GTK_FILTER_CHANGE_DIFFERENT);
@@ -2595,6 +2629,15 @@ init_service_struct (BzApplication *self,
       G_CALLBACK (show_hide_app_setting_changed),
       self);
 
+  bz_state_info_set_show_only_verified (
+      self->state,
+      g_settings_get_boolean (self->settings, "show-only-verified"));
+  g_signal_connect_swapped (
+      self->settings,
+      "changed::show-only-verified",
+      G_CALLBACK (show_hide_app_setting_changed),
+      self);
+
   self->blocklist_regexes = g_ptr_array_new_with_free_func (
       (GDestroyNotify) g_ptr_array_unref);
   self->blocklists_provider = bz_content_provider_new ();
@@ -2937,6 +2980,9 @@ validate_group_for_ui (BzApplication *self,
     return FALSE;
   if (bz_state_info_get_show_only_flathub (self->state) &&
       !bz_entry_group_get_is_flathub (group))
+    return FALSE;
+  if (bz_state_info_get_show_only_verified (self->state) &&
+      !bz_entry_group_get_is_verified (group))
     return FALSE;
 
   id = bz_entry_group_get_id (group);

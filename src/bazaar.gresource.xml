@@ -15,6 +15,7 @@
     <file preprocess="xml-stripblanks">bz-age-rating-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-app-size-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-app-tile.ui</file>
+    <file preprocess="xml-stripblanks">bz-all-apps-page.ui</file>
     <file preprocess="xml-stripblanks">bz-apps-page.ui</file>
     <file preprocess="xml-stripblanks">bz-appstream-description-render.ui</file>
     <file preprocess="xml-stripblanks">bz-curated-view.ui</file>
@@ -163,6 +164,8 @@
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Popular.svg</file>
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.New.svg</file>
     <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Updated.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Adwaita.svg</file>
+    <file preprocess="xml-stripblanks">icons/io.github.kolumni.Bazaar.Kde.svg</file>
 
     <file preprocess="xml-stripblanks">icons/io.github.kolunmi.Bazaar.github.svg</file>
     <file preprocess="xml-stripblanks">icons/io.github.kolunmi.Bazaar.gitlab.svg</file>
