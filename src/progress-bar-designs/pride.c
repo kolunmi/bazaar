@@ -502,36 +502,36 @@ append_pride_flag (GtkSnapshot     *snapshot,
       append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), bounds);
     }
   else if (g_strcmp0 (name, "femboy-flag") == 0)
-  {
-    const GdkRGBA colors[] = {
-      { 212.0 / 255.0,  96.0 / 255.0, 167.0 / 255.0, 1.0 },
-      { 228.0 / 255.0, 173.0 / 255.0, 205.0 / 255.0, 1.0 },
-      { 255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 1.0 },
-      {  87.0 / 255.0, 206.0 / 255.0, 248.0 / 255.0, 1.0 },
-      { 255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 1.0 },
-      { 228.0 / 255.0, 173.0 / 255.0, 205.0 / 255.0, 1.0 },
-      { 212.0 / 255.0,  96.0 / 255.0, 167.0 / 255.0, 1.0 },
-    };
-    const float offsets[G_N_ELEMENTS (colors)] = {
-      0.0 / 7.0,
-      1.0 / 7.0,
-      2.0 / 7.0,
-      3.0 / 7.0,
-      4.0 / 7.0,
-      5.0 / 7.0,
-      6.0 / 7.0,
-    };
-    const float sizes[G_N_ELEMENTS (colors)] = {
-      1.0 / 7.0,
-      1.0 / 7.0,
-      1.0 / 7.0,
-      1.0 / 7.0,
-      1.0 / 7.0,
-      1.0 / 7.0,
-      1.0 / 7.0,
-    };
-    append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), bounds);
-  }
+    {
+      const GdkRGBA colors[] = {
+        { 212.0 / 255.0,  96.0 / 255.0, 167.0 / 255.0, 1.0 },
+        { 228.0 / 255.0, 173.0 / 255.0, 205.0 / 255.0, 1.0 },
+        { 255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 1.0 },
+        {  87.0 / 255.0, 206.0 / 255.0, 248.0 / 255.0, 1.0 },
+        { 255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 1.0 },
+        { 228.0 / 255.0, 173.0 / 255.0, 205.0 / 255.0, 1.0 },
+        { 212.0 / 255.0,  96.0 / 255.0, 167.0 / 255.0, 1.0 },
+      };
+      const float offsets[G_N_ELEMENTS (colors)] = {
+        0.0 / 7.0,
+        1.0 / 7.0,
+        2.0 / 7.0,
+        3.0 / 7.0,
+        4.0 / 7.0,
+        5.0 / 7.0,
+        6.0 / 7.0,
+      };
+      const float sizes[G_N_ELEMENTS (colors)] = {
+        1.0 / 7.0,
+        1.0 / 7.0,
+        1.0 / 7.0,
+        1.0 / 7.0,
+        1.0 / 7.0,
+        1.0 / 7.0,
+        1.0 / 7.0,
+      };
+      append_striped_flag (snapshot, colors, offsets, sizes, G_N_ELEMENTS (colors), bounds);
+    }
   else
     g_warning ("Invalid pride flag id \"%s\"", name);
 }
