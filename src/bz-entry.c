@@ -326,7 +326,6 @@ bz_entry_get_property (GObject    *object,
     case PROP_SIZE:
       g_value_set_uint64 (value, priv->size);
       break;
-      g_value_set_uint64 (value, priv->size);
     case PROP_INSTALLED_SIZE:
       g_value_set_uint64 (value, priv->installed_size);
       break;
