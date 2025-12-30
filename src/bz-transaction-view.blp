@@ -10,7 +10,7 @@ template $BzTransactionView: Adw.Bin {
       ]
 
       overflow: visible;
-                
+
       model: NoSelection {
         model: bind template.transaction as <$BzTransaction>.trackers;
       };
@@ -198,7 +198,7 @@ template $BzTransactionView: Adw.Bin {
                   icon-name: "process-working-symbolic";
                   has-tooltip: true;
                   tooltip-text: _("Ongoing");
-                  visible: bind $is_both($is_ongoing(template.item as <$BzTransactionEntryTracker>.current_ops) as <bool>, $is_transaction_type(template.item, 0) as <bool>) as <bool>;
+                  visible: bind $is_ongoing(template.item as <$BzTransactionEntryTracker>.current_ops) as <bool>;
                 }
 
                 Image {
@@ -210,8 +210,8 @@ template $BzTransactionView: Adw.Bin {
                   margin-end: 10;
                   icon-name: "check-plain-symbolic";
                   has-tooltip: true;
-                  tooltip-text: _("Installed");
-                  visible: bind $is_both($is_completed(template.item as <$BzTransactionEntryTracker>.current_ops, template.item as <$BzTransactionEntryTracker>.finished_ops) as <bool>, $is_transaction_type(template.item, 0) as <bool>) as <bool>;
+                  tooltip-text: _("Finished");
+                  visible: bind $is_completed(template.item as <$BzTransactionEntryTracker>.current_ops, template.item as <$BzTransactionEntryTracker>.finished_ops) as <bool>;
                 }
 
                 Image {
@@ -242,32 +242,6 @@ template $BzTransactionView: Adw.Bin {
 
                 Image {
                   styles [
-                    "accent",
-                  ]
-
-                  valign: start;
-                  margin-end: 10;
-                  icon-name: "process-working-symbolic";
-                  has-tooltip: true;
-                  tooltip-text: _("Ongoing");
-                  visible: bind $is_both($is_ongoing(template.item as <$BzTransactionEntryTracker>.current_ops) as <bool>, $is_transaction_type(template.item, 1) as <bool>) as <bool>;
-                }
-
-                Image {
-                  styles [
-                    "success",
-                  ]
-
-                  valign: start;
-                  margin-end: 10;
-                  icon-name: "check-plain-symbolic";
-                  has-tooltip: true;
-                  tooltip-text: _("Updated");
-                  visible: bind $is_both($is_completed(template.item as <$BzTransactionEntryTracker>.current_ops, template.item as <$BzTransactionEntryTracker>.finished_ops) as <bool>, $is_transaction_type(template.item, 1) as <bool>) as <bool>;
-                }
-
-                Image {
-                  styles [
                     "dimmed",
                   ]
 
@@ -290,32 +264,6 @@ template $BzTransactionView: Adw.Bin {
                   has-tooltip: true;
                   tooltip-text: _("Pending");
                   visible: bind $is_both($is_queued(template.item as <$BzTransactionEntryTracker>.current_ops, template.item as <$BzTransactionEntryTracker>.finished_ops) as <bool>, $is_transaction_type(template.item, 2) as <bool>) as <bool>;
-                }
-
-                Image {
-                  styles [
-                    "accent",
-                  ]
-
-                  valign: start;
-                  margin-end: 10;
-                  icon-name: "process-working-symbolic";
-                  has-tooltip: true;
-                  tooltip-text: _("Ongoing");
-                  visible: bind $is_both($is_ongoing(template.item as <$BzTransactionEntryTracker>.current_ops) as <bool>, $is_transaction_type(template.item, 2) as <bool>) as <bool>;
-                }
-
-                Image {
-                  styles [
-                    "success",
-                  ]
-
-                  valign: start;
-                  margin-end: 10;
-                  icon-name: "check-plain-symbolic";
-                  has-tooltip: true;
-                  tooltip-text: _("Removed");
-                  visible: bind $is_both($is_completed(template.item as <$BzTransactionEntryTracker>.current_ops, template.item as <$BzTransactionEntryTracker>.finished_ops) as <bool>, $is_transaction_type(template.item, 2) as <bool>) as <bool>;
                 }
 
                 Image {
