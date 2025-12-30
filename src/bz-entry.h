@@ -133,6 +133,9 @@ bz_entry_get_remote_repo_name (BzEntry *self);
 guint64
 bz_entry_get_size (BzEntry *self);
 
+guint64
+bz_entry_get_installed_size (BzEntry *self);
+
 GdkPaintable *
 bz_entry_get_icon_paintable (BzEntry *self);
 
