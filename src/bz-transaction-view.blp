@@ -71,7 +71,7 @@ template $BzTransactionView: Adw.Bin {
                     orientation: horizontal;
                     spacing: 4;
                     Box {
-                      visible: bind $is_entry_kind(template.item, 4) as <bool>;
+                      visible: bind $is_entry_addon(template.item) as <bool>;
                       halign: start;
                       spacing: 4;
                       styles [
@@ -96,7 +96,7 @@ template $BzTransactionView: Adw.Bin {
                       }
                     }
                     Box {
-                      visible: bind $is_entry_kind(template.item, 2) as <bool>;
+                      visible: bind $is_entry_runtime(template.item) as <bool>;
                       halign: start;
                       spacing: 4;
                       styles [

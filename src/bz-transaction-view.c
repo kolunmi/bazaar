@@ -343,6 +343,28 @@ is_entry_kind (gpointer                   object,
   return bz_entry_is_of_kinds (entry, kind);
 }
 
+/* Sucks but we can't rely on magic numbers in the blueprint */
+static gboolean
+is_entry_application (gpointer                   object,
+                      BzTransactionEntryTracker *tracker)
+{
+  return is_entry_kind (object, tracker, BZ_ENTRY_KIND_APPLICATION);
+}
+
+static gboolean
+is_entry_runtime (gpointer                   object,
+                  BzTransactionEntryTracker *tracker)
+{
+  return is_entry_kind (object, tracker, BZ_ENTRY_KIND_RUNTIME);
+}
+
+static gboolean
+is_entry_addon (gpointer                   object,
+                BzTransactionEntryTracker *tracker)
+{
+  return is_entry_kind (object, tracker, BZ_ENTRY_KIND_ADDON);
+}
+
 static void
 entry_clicked (GtkListItem *list_item,
                GtkButton   *button)
@@ -393,7 +415,9 @@ bz_transaction_view_class_init (BzTransactionViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, format_bytes_transferred);
   gtk_widget_class_bind_template_callback (widget_class, format_download_progress);
   gtk_widget_class_bind_template_callback (widget_class, get_main_icon);
-  gtk_widget_class_bind_template_callback (widget_class, is_entry_kind);
+  gtk_widget_class_bind_template_callback (widget_class, is_entry_application);
+  gtk_widget_class_bind_template_callback (widget_class, is_entry_runtime);
+  gtk_widget_class_bind_template_callback (widget_class, is_entry_addon);
   gtk_widget_class_bind_template_callback (widget_class, entry_clicked);
   gtk_widget_class_bind_template_callback (widget_class, create_app_id_filter);
   gtk_widget_class_bind_template_callback (widget_class, is_transaction_type);
