@@ -246,7 +246,7 @@ is_queued (gpointer    object,
 
 static gboolean
 is_ongoing (gpointer    object,
-           GListModel *current_ops)
+            GListModel *current_ops)
 {
   if (current_ops == NULL)
     return FALSE;
@@ -256,8 +256,8 @@ is_ongoing (gpointer    object,
 
 static gboolean
 is_completed (gpointer    object,
-           GListModel *current_ops,
-           GListModel *finished_ops)
+              GListModel *current_ops,
+              GListModel *finished_ops)
 {
 
   gboolean has_current_ops  = 0;
