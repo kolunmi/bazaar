@@ -1,13 +1,14 @@
 <p>This release comes with the following improvements:</p>
 <ul>
-  <li>Reworked loading to be substantially faster after first start via async loading</li>
-  <li>A gaming section on the Flathub page</li>
-  <li>Improved UI on mobile, especially on app pages</li>
-  <li>Verified badges next to most places where apps are shown</li>
-  <li>A popover that explains what verification and non-verification mean</li>
-  <li>An "other apps by" page for when a developer has more than 6 apps</li>
-  <li>Tags that show other apps with the same tag when pressed</li>
-  <li>An age rating dialog</li>
-  <li>Changed search filters into global content filters</li>
-  <li>5 new pride flags</li>
+  <li>Flathub account support with the ability to manage bookmarks</li>
+  <li>Flathub bookmarks replace star count; you can add or remove bookmarks from app pages</li>
+  <li>An "Only Show Verified" option</li>
+  <li>Exhaustive category pages for most categories</li>
+  <li>An "Adwaita" or "KDE" category shown based on desktop environment</li>
+  <li>Updated installed indicator for app tiles</li>
+  <li>3 new flag options</li>
+  <li>Fixed GNOME search provider to show the app page instead of search</li>
+  <li>Fixed issue where flatpakref URIs did not open when the app wasnt running in the background</li>
+  <li>Fixed issue where some proprietary apps were marked as "Special License"</li>
+  <li>Fixed issue where graphs did not work with touch</li>
 </ul>
