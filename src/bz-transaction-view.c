@@ -217,6 +217,27 @@ is_transaction_type (gpointer                   object,
 }
 
 static gboolean
+is_transaction_tracker_install (gpointer                   object,
+                                BzTransactionEntryTracker *tracker)
+{
+  return is_transaction_type (object, tracker, BZ_TRANSACTION_ENTRY_TYPE_INSTALL);
+}
+
+static gboolean
+is_transaction_tracker_update (gpointer                   object,
+                               BzTransactionEntryTracker *tracker)
+{
+  return is_transaction_type (object, tracker, BZ_TRANSACTION_ENTRY_TYPE_UPDATE);
+}
+
+static gboolean
+is_transaction_tracker_removal (gpointer                   object,
+                                BzTransactionEntryTracker *tracker)
+{
+  return is_transaction_type (object, tracker, BZ_TRANSACTION_ENTRY_TYPE_REMOVAL);
+}
+
+static gboolean
 list_has_items (gpointer    object,
                 GListModel *model)
 {
@@ -420,7 +441,9 @@ bz_transaction_view_class_init (BzTransactionViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, is_entry_addon);
   gtk_widget_class_bind_template_callback (widget_class, entry_clicked);
   gtk_widget_class_bind_template_callback (widget_class, create_app_id_filter);
-  gtk_widget_class_bind_template_callback (widget_class, is_transaction_type);
+  gtk_widget_class_bind_template_callback (widget_class, is_transaction_tracker_install);
+  gtk_widget_class_bind_template_callback (widget_class, is_transaction_tracker_update);
+  gtk_widget_class_bind_template_callback (widget_class, is_transaction_tracker_removal);
   gtk_widget_class_bind_template_callback (widget_class, list_has_items);
   gtk_widget_class_bind_template_callback (widget_class, is_queued);
   gtk_widget_class_bind_template_callback (widget_class, is_ongoing);
