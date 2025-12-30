@@ -332,7 +332,8 @@ bz_global_progress_snapshot (GtkWidget   *widget,
                g_strcmp0 (theme, "intersex-flag") == 0 ||
                g_strcmp0 (theme, "demigender-flag") == 0 ||
                g_strcmp0 (theme, "biromantic-flag") == 0 ||
-               g_strcmp0 (theme, "disability-flag") == 0)
+               g_strcmp0 (theme, "disability-flag") == 0 ||
+               g_strcmp0 (theme, "femboy-flag") == 0)
         append_pride_flag (snapshot, &fraction_clip.bounds, theme);
       else
         gtk_snapshot_append_color (snapshot, accent_color, &fraction_clip.bounds);
