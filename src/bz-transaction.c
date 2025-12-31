@@ -380,18 +380,18 @@ bz_transaction_new_full (BzEntry **installs,
     bz_transaction_entry_tracker_set_entry (tracker, (entry));                            \
     bz_transaction_entry_tracker_set_current_ops (tracker, G_LIST_MODEL (current_ops));   \
     bz_transaction_entry_tracker_set_finished_ops (tracker, G_LIST_MODEL (finished_ops)); \
-    bz_transaction_entry_tracker_set_type_enum (tracker, transaction_type);               \
+    bz_transaction_entry_tracker_set_kind (tracker, transaction_type);                    \
                                                                                           \
     g_list_store_append (priv->trackers, tracker);                                        \
   }                                                                                       \
   G_STMT_END
 
   for (guint i = 0; i < n_installs; i++)
-    ADD_ENTRY (installs, installs[i], BZ_TRANSACTION_ENTRY_TYPE_INSTALL);
+    ADD_ENTRY (installs, installs[i], BZ_TRANSACTION_ENTRY_KIND_INSTALL);
   for (guint i = 0; i < n_updates; i++)
-    ADD_ENTRY (updates, updates[i], BZ_TRANSACTION_ENTRY_TYPE_UPDATE);
+    ADD_ENTRY (updates, updates[i], BZ_TRANSACTION_ENTRY_KIND_UPDATE);
   for (guint i = 0; i < n_removals; i++)
-    ADD_ENTRY (removals, removals[i], BZ_TRANSACTION_ENTRY_TYPE_REMOVAL);
+    ADD_ENTRY (removals, removals[i], BZ_TRANSACTION_ENTRY_KIND_REMOVAL);
 
 #undef ADD_ENTRY
 

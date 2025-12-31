@@ -209,28 +209,28 @@ is_transaction_type (gpointer                   object,
   if (tracker == NULL)
     return FALSE;
 
-  return bz_transaction_entry_tracker_get_type_enum (tracker) == type;
+  return bz_transaction_entry_tracker_get_kind (tracker) == type;
 }
 
 static gboolean
 is_transaction_tracker_install (gpointer                   object,
                                 BzTransactionEntryTracker *tracker)
 {
-  return is_transaction_type (object, tracker, BZ_TRANSACTION_ENTRY_TYPE_INSTALL);
+  return is_transaction_type (object, tracker, BZ_TRANSACTION_ENTRY_KIND_INSTALL);
 }
 
 static gboolean
 is_transaction_tracker_update (gpointer                   object,
                                BzTransactionEntryTracker *tracker)
 {
-  return is_transaction_type (object, tracker, BZ_TRANSACTION_ENTRY_TYPE_UPDATE);
+  return is_transaction_type (object, tracker, BZ_TRANSACTION_ENTRY_KIND_UPDATE);
 }
 
 static gboolean
 is_transaction_tracker_removal (gpointer                   object,
                                 BzTransactionEntryTracker *tracker)
 {
-  return is_transaction_type (object, tracker, BZ_TRANSACTION_ENTRY_TYPE_REMOVAL);
+  return is_transaction_type (object, tracker, BZ_TRANSACTION_ENTRY_KIND_REMOVAL);
 }
 
 static gboolean

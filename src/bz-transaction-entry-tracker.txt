@@ -1,0 +1,15 @@
+prefix=bz
+name=transaction_entry_tracker
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+enum=bz transaction_entry_kind install update removal
+
+include=<gtk/gtk.h>
+include="bz-entry.h"
+
+property=entry BzEntry BZ_TYPE_ENTRY object
+property=current_ops GListModel G_TYPE_LIST_MODEL object
+property=finished_ops GListModel G_TYPE_LIST_MODEL object
+property=kind BzTransactionEntryKind BZ_TYPE_TRANSACTION_ENTRY_KIND enum
