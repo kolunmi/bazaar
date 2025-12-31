@@ -227,7 +227,6 @@ template $BzWindow: Adw.ApplicationWindow {
           content: Adw.ToastOverlay toasts {
             child: Adw.NavigationView navigation_view {
               pop-on-escape: false;
-              notify::visible-page => $visible_page_changed_cb(template);
 
               Adw.NavigationPage {
                 tag: "main";
@@ -266,7 +265,6 @@ template $BzWindow: Adw.ApplicationWindow {
                       name: "main";
 
                       child: Adw.ViewStack main_view_stack {
-                        notify::visible-child-name => $main_view_stack_changed_cb(template);
 
                         Adw.ViewStackPage {
                           name: "browse";
