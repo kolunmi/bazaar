@@ -720,9 +720,10 @@ bz_application_about_action (GSimpleAction *action,
       "release-notes", release_notes_text,
       NULL);
 
-  adw_about_dialog_add_acknowledgement_section (ADW_ABOUT_DIALOG (dialog),
-                                              _ ("Special Thanks"),
-                                              special_thanks);
+  adw_about_dialog_add_acknowledgement_section (
+      ADW_ABOUT_DIALOG (dialog),
+      _ ("Special Thanks"),
+      special_thanks);
 
   adw_dialog_present (dialog, GTK_WIDGET (window));
 }
