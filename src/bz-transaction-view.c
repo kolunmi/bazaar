@@ -244,49 +244,24 @@ list_has_items (gpointer    object,
 }
 
 static gboolean
-is_queued (gpointer    object,
-           GListModel *current_ops,
-           GListModel *finished_ops)
+is_queued (gpointer                 object,
+           BzTransactionEntryStatus status)
 {
-
-  gboolean has_current_ops  = 0;
-  gboolean has_finished_ops = 0;
-
-  if (current_ops == NULL || finished_ops == NULL)
-    return FALSE;
-
-  has_current_ops  = list_has_items (object, current_ops);
-  has_finished_ops = list_has_items (object, finished_ops);
-
-  return !has_current_ops && !has_finished_ops;
+  return status == BZ_TRANSACTION_ENTRY_STATUS_QUEUED;
 }
 
 static gboolean
-is_ongoing (gpointer    object,
-            GListModel *current_ops)
+is_ongoing (gpointer                 object,
+            BzTransactionEntryStatus status)
 {
-  if (current_ops == NULL)
-    return FALSE;
-
-  return list_has_items (object, current_ops);
+  return status == BZ_TRANSACTION_ENTRY_STATUS_ONGOING;
 }
 
 static gboolean
-is_completed (gpointer    object,
-              GListModel *current_ops,
-              GListModel *finished_ops)
+is_completed (gpointer                 object,
+              BzTransactionEntryStatus status)
 {
-
-  gboolean has_current_ops  = 0;
-  gboolean has_finished_ops = 0;
-
-  if (current_ops == NULL || finished_ops == NULL)
-    return FALSE;
-
-  has_current_ops  = list_has_items (object, current_ops);
-  has_finished_ops = list_has_items (object, finished_ops);
-
-  return !has_current_ops && has_finished_ops;
+  return status == BZ_TRANSACTION_ENTRY_STATUS_DONE;
 }
 
 static gboolean
