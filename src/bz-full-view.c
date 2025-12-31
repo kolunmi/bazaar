@@ -236,6 +236,15 @@ is_null (gpointer object,
 }
 
 static gboolean
+is_empty (gpointer    object,
+          GListModel *model)
+{
+  if (model == NULL)
+    return TRUE;
+  return g_list_model_get_n_items (model) == 0;
+}
+
+static gboolean
 logical_and (gpointer object,
              gboolean value1,
              gboolean value2)
@@ -1152,6 +1161,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, is_positive);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
+  gtk_widget_class_bind_template_callback (widget_class, is_empty);
   gtk_widget_class_bind_template_callback (widget_class, logical_and);
   gtk_widget_class_bind_template_callback (widget_class, is_longer);
   gtk_widget_class_bind_template_callback (widget_class, bool_to_string);
