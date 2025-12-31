@@ -370,55 +370,6 @@ page_toggled_cb (BzWindow       *self,
 }
 
 static void
-update_flathub_style (BzWindow *self)
-{
-  AdwNavigationPage *visible_page = NULL;
-  const char        *page_tag     = NULL;
-  const char        *stack_page   = NULL;
-
-  visible_page = adw_navigation_view_get_visible_page (self->navigation_view);
-
-  if (visible_page != NULL)
-    {
-      page_tag = adw_navigation_page_get_tag (visible_page);
-
-      if (page_tag != NULL && strstr (page_tag, "flathub") != NULL)
-        {
-          gtk_widget_add_css_class (GTK_WIDGET (self), "flathub");
-          return;
-        }
-
-      if (g_strcmp0 (page_tag, "main") == 0)
-        {
-          stack_page = adw_view_stack_get_visible_child_name (self->main_view_stack);
-          if (g_strcmp0 (stack_page, "flathub") == 0)
-            {
-              gtk_widget_add_css_class (GTK_WIDGET (self), "flathub");
-              return;
-            }
-        }
-    }
-
-  gtk_widget_remove_css_class (GTK_WIDGET (self), "flathub");
-}
-
-static void
-visible_page_changed_cb (BzWindow          *self,
-                         GParamSpec        *pspec,
-                         AdwNavigationView *navigation_view)
-{
-  update_flathub_style (self);
-}
-
-static void
-main_view_stack_changed_cb (BzWindow     *self,
-                            GParamSpec   *pspec,
-                            AdwViewStack *stack)
-{
-  update_flathub_style (self);
-}
-
-static void
 browse_flathub_cb (BzWindow      *self,
                    BzCuratedView *widget)
 {
@@ -647,8 +598,6 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, update_cb);
   gtk_widget_class_bind_template_callback (widget_class, update_amount_tooltip);
   gtk_widget_class_bind_template_callback (widget_class, transactions_clear_cb);
-  gtk_widget_class_bind_template_callback (widget_class, visible_page_changed_cb);
-  gtk_widget_class_bind_template_callback (widget_class, main_view_stack_changed_cb);
   gtk_widget_class_bind_template_callback (widget_class, browse_flathub_cb);
   gtk_widget_class_bind_template_callback (widget_class, open_search_cb);
   gtk_widget_class_bind_template_callback (widget_class, format_progress);

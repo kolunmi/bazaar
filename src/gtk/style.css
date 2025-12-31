@@ -165,6 +165,11 @@
 	--accent-bg-color: @window_fg_color;
 }
 
+.flathub {
+	--accent-color: alpha(@window_fg_color,0.75);
+	--accent-bg-color: @window_fg_color;
+}
+
 @media (prefers-color-scheme: dark) {
   .flathub {
     --accent-color: alpha(#fafafa,0.75);
@@ -258,11 +263,9 @@ button.context-tile:active .lozenge {
  	padding: 2px 7px 2px 4.5px;
 }
 
-@media (prefers-color-scheme: dark) {
-  .flathub .installed-pill {
-    background-color: alpha(@window_fg_color, 0.10);
-    color: alpha(@window_fg_color, 0.75);
-  }
+.sp-section .installed-pill {
+  background-color: alpha(@window_fg_color, 0.10);
+  color: alpha(@window_fg_color, 0.75);
 }
 
 .download-size-pill{
@@ -404,35 +407,6 @@ window,
 headerbar,
 .global-search {
   transition: background-color 0.2s ease;
-}
-
-.flathub {
-  --flathub-bg-hue: 301.44;
-}
-
-.flathub .global-search,
-window.flathub {
-  background-color: oklch(from var(--window-bg-color) l calc(c * 4) var(--flathub-bg-hue));
-}
-
-.flathub .toplevel-headerbar {
-  background-color: oklch(from var(--window-bg-color) l calc(c * 4) var(--flathub-bg-hue));
-}
-
-.flathub .sidebar-pane {
-  background-color: oklch(from var(--sidebar-bg-color) l calc(c * 4) var(--flathub-bg-hue));
-}
-
-.flathub banner  > * > * {
-  background-color: oklch(from var(--card-bg-color) l calc(c * 4) var(--flathub-bg-hue));
-}
-
-.flathub-lotion {
-  color: #fafafa;
-}
-
-.flathub-gunmetal {
-  color:#251f32;
 }
 
 .header-osd windowcontrols button image {
