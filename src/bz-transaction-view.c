@@ -115,8 +115,6 @@ static char *
 format_download_size (gpointer object,
                       guint64  value)
 {
-  g_autofree char *size = NULL;
-
   return g_format_size (value);
 }
 
@@ -124,8 +122,6 @@ static char *
 format_installed_size (gpointer object,
                        guint64  value)
 {
-  g_autofree char *size = NULL;
-
   return g_format_size (value);
 }
 
