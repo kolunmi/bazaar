@@ -34,8 +34,8 @@ typedef struct
 
   char       *name;
   gboolean    pending;
-  GListStore *current_ops;
-  GListStore *finished_ops;
+  GListStore *current_tasks;
+  GListStore *finished_tasks;
   GListStore *trackers;
   char       *status;
   double      progress;
@@ -103,8 +103,8 @@ bz_transaction_dispose (GObject *object)
   g_clear_object (&priv->installs);
   g_clear_object (&priv->updates);
   g_clear_object (&priv->removals);
-  g_clear_object (&priv->current_ops);
-  g_clear_object (&priv->finished_ops);
+  g_clear_object (&priv->current_tasks);
+  g_clear_object (&priv->finished_tasks);
   g_clear_object (&priv->trackers);
   g_clear_pointer (&priv->status, g_free);
   g_clear_pointer (&priv->error, g_free);
@@ -139,10 +139,10 @@ bz_transaction_get_property (GObject    *object,
       g_value_set_boolean (value, priv->pending);
       break;
     case PROP_CURRENT_OPS:
-      g_value_set_object (value, priv->current_ops);
+      g_value_set_object (value, priv->current_tasks);
       break;
     case PROP_FINISHED_OPS:
-      g_value_set_object (value, priv->finished_ops);
+      g_value_set_object (value, priv->finished_tasks);
       break;
     case PROP_TRACKERS:
       g_value_set_object (value, priv->trackers);
@@ -332,15 +332,15 @@ bz_transaction_init (BzTransaction *self)
   now        = g_date_time_new_now_local ();
   priv->name = g_date_time_format (now, "%X");
 
-  priv->installs     = g_list_store_new (BZ_TYPE_ENTRY);
-  priv->updates      = g_list_store_new (BZ_TYPE_ENTRY);
-  priv->removals     = g_list_store_new (BZ_TYPE_ENTRY);
-  priv->pending      = TRUE;
-  priv->current_ops  = g_list_store_new (BZ_TYPE_TRANSACTION_TASK);
-  priv->finished_ops = g_list_store_new (BZ_TYPE_TRANSACTION_TASK);
-  priv->trackers     = g_list_store_new (BZ_TYPE_TRANSACTION_ENTRY_TRACKER);
-  priv->status       = g_strdup (_ ("Pending"));
-  priv->success      = TRUE;
+  priv->installs       = g_list_store_new (BZ_TYPE_ENTRY);
+  priv->updates        = g_list_store_new (BZ_TYPE_ENTRY);
+  priv->removals       = g_list_store_new (BZ_TYPE_ENTRY);
+  priv->pending        = TRUE;
+  priv->current_tasks  = g_list_store_new (BZ_TYPE_TRANSACTION_TASK);
+  priv->finished_tasks = g_list_store_new (BZ_TYPE_TRANSACTION_TASK);
+  priv->trackers       = g_list_store_new (BZ_TYPE_TRANSACTION_ENTRY_TRACKER);
+  priv->status         = g_strdup (_ ("Pending"));
+  priv->success        = TRUE;
 }
 
 BzTransaction *
@@ -570,7 +570,7 @@ bz_transaction_add_task (BzTransaction                 *self,
   task = bz_transaction_task_new ();
   bz_transaction_task_set_op (task, payload);
 
-  g_list_store_append (priv->current_ops, task);
+  g_list_store_append (priv->current_tasks, task);
 
   entry  = bz_backend_transaction_op_payload_get_entry (payload);
   result = find_and_maybe_transfer (
@@ -605,7 +605,7 @@ bz_transaction_update_task (BzTransaction                         *self,
   op   = bz_backend_transaction_op_progress_payload_get_op (payload);
 
   result = find_and_maybe_transfer (
-      priv->current_ops,
+      priv->current_tasks,
       NULL,
       op,
       (GEqualFuncFull) find_payload_eq_func,
@@ -628,8 +628,8 @@ bz_transaction_finish_task (BzTransaction                 *self,
   priv = bz_transaction_get_instance_private (self);
 
   find_and_maybe_transfer (
-      priv->current_ops,
-      priv->finished_ops,
+      priv->current_tasks,
+      priv->finished_tasks,
       payload,
       (GEqualFuncFull) find_payload_eq_func,
       NULL);
@@ -653,8 +653,8 @@ bz_transaction_error_out_task (BzTransaction                 *self,
   priv = bz_transaction_get_instance_private (self);
 
   result = find_and_maybe_transfer (
-      priv->current_ops,
-      priv->finished_ops,
+      priv->current_tasks,
+      priv->finished_tasks,
       payload,
       (GEqualFuncFull) find_payload_eq_func,
       (gpointer *) &task);
