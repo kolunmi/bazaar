@@ -7,6 +7,8 @@ src/bz-addons-dialog.blp
 src/bz-addons-dialog.c
 src/bz-age-rating-dialog.blp
 src/bz-age-rating-dialog.c
+src/bz-all-apps-page.blp
+src/bz-all-apps-page.c
 src/bz-app-size-dialog.blp
 src/bz-app-size-dialog.c
 src/bz-app-tile.blp

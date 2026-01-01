@@ -1,4 +1,4 @@
-/* progress-bar-designs/common.h
+/* progress-bar-designs/pride/pride.h
  *
  * Copyright 2025 Eva M
  *
@@ -20,4 +20,14 @@
 
 #pragma once
 
-#include "pride/pride.h"
+#include <gtk/gtk.h>
+
+G_BEGIN_DECLS
+
+GtkStyleProvider *
+bz_get_pride_style_provider (void);
+
+char *
+bz_dup_css_class_for_pride_id (const char *id);
+
+G_END_DECLS

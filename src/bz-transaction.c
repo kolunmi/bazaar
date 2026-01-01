@@ -34,8 +34,8 @@ typedef struct
 
   char       *name;
   gboolean    pending;
-  GListStore *current_ops;
-  GListStore *finished_ops;
+  GListStore *current_tasks;
+  GListStore *finished_tasks;
   GListStore *trackers;
   char       *status;
   double      progress;
@@ -68,6 +68,9 @@ enum
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
 
+static void
+finish (BzTransactionPrivate *priv);
+
 static gboolean
 find_payload_eq_func (BzTransactionTask             *task,
                       gpointer                       none,
@@ -86,8 +89,9 @@ find_and_maybe_transfer (GListStore    *from,
                          gpointer      *out);
 
 static void
-tracker_transfer (BzTransactionPrivate          *priv,
-                  BzBackendTransactionOpPayload *payload);
+tracker_update (BzTransactionPrivate          *priv,
+                BzBackendTransactionOpPayload *payload,
+                gboolean                       transfer);
 
 static void
 bz_transaction_dispose (GObject *object)
@@ -99,8 +103,8 @@ bz_transaction_dispose (GObject *object)
   g_clear_object (&priv->installs);
   g_clear_object (&priv->updates);
   g_clear_object (&priv->removals);
-  g_clear_object (&priv->current_ops);
-  g_clear_object (&priv->finished_ops);
+  g_clear_object (&priv->current_tasks);
+  g_clear_object (&priv->finished_tasks);
   g_clear_object (&priv->trackers);
   g_clear_pointer (&priv->status, g_free);
   g_clear_pointer (&priv->error, g_free);
@@ -135,10 +139,10 @@ bz_transaction_get_property (GObject    *object,
       g_value_set_boolean (value, priv->pending);
       break;
     case PROP_CURRENT_OPS:
-      g_value_set_object (value, priv->current_ops);
+      g_value_set_object (value, priv->current_tasks);
       break;
     case PROP_FINISHED_OPS:
-      g_value_set_object (value, priv->finished_ops);
+      g_value_set_object (value, priv->finished_tasks);
       break;
     case PROP_TRACKERS:
       g_value_set_object (value, priv->trackers);
@@ -202,6 +206,8 @@ bz_transaction_set_property (GObject      *object,
       break;
     case PROP_FINISHED:
       priv->finished = g_value_get_boolean (value);
+      if (priv->finished)
+        finish (priv);
       break;
     case PROP_SUCCESS:
       priv->success = g_value_get_boolean (value);
@@ -326,15 +332,15 @@ bz_transaction_init (BzTransaction *self)
   now        = g_date_time_new_now_local ();
   priv->name = g_date_time_format (now, "%X");
 
-  priv->installs     = g_list_store_new (BZ_TYPE_ENTRY);
-  priv->updates      = g_list_store_new (BZ_TYPE_ENTRY);
-  priv->removals     = g_list_store_new (BZ_TYPE_ENTRY);
-  priv->pending      = TRUE;
-  priv->current_ops  = g_list_store_new (BZ_TYPE_TRANSACTION_TASK);
-  priv->finished_ops = g_list_store_new (BZ_TYPE_TRANSACTION_TASK);
-  priv->trackers     = g_list_store_new (BZ_TYPE_TRANSACTION_ENTRY_TRACKER);
-  priv->status       = g_strdup (_ ("Pending"));
-  priv->success      = TRUE;
+  priv->installs       = g_list_store_new (BZ_TYPE_ENTRY);
+  priv->updates        = g_list_store_new (BZ_TYPE_ENTRY);
+  priv->removals       = g_list_store_new (BZ_TYPE_ENTRY);
+  priv->pending        = TRUE;
+  priv->current_tasks  = g_list_store_new (BZ_TYPE_TRANSACTION_TASK);
+  priv->finished_tasks = g_list_store_new (BZ_TYPE_TRANSACTION_TASK);
+  priv->trackers       = g_list_store_new (BZ_TYPE_TRANSACTION_ENTRY_TRACKER);
+  priv->status         = g_strdup (_ ("Pending"));
+  priv->success        = TRUE;
 }
 
 BzTransaction *
@@ -364,34 +370,35 @@ bz_transaction_new_full (BzEntry **installs,
   self = g_object_new (BZ_TYPE_TRANSACTION, NULL);
   priv = bz_transaction_get_instance_private (self);
 
-#define ADD_ENTRY(type, entry, transaction_type)                                          \
-  G_STMT_START                                                                            \
-  {                                                                                       \
-    g_autoptr (BzTransactionEntryTracker) tracker = NULL;                                 \
-    g_autoptr (GListStore) current_ops            = NULL;                                 \
-    g_autoptr (GListStore) finished_ops           = NULL;                                 \
-                                                                                          \
-    g_list_store_append (priv->type, (entry));                                            \
-                                                                                          \
-    tracker      = bz_transaction_entry_tracker_new ();                                   \
-    current_ops  = g_list_store_new (BZ_TYPE_TRANSACTION_TASK);                           \
-    finished_ops = g_list_store_new (BZ_TYPE_TRANSACTION_TASK);                           \
-                                                                                          \
-    bz_transaction_entry_tracker_set_entry (tracker, (entry));                            \
-    bz_transaction_entry_tracker_set_current_ops (tracker, G_LIST_MODEL (current_ops));   \
-    bz_transaction_entry_tracker_set_finished_ops (tracker, G_LIST_MODEL (finished_ops)); \
-    bz_transaction_entry_tracker_set_type_enum (tracker, transaction_type);               \
-                                                                                          \
-    g_list_store_append (priv->trackers, tracker);                                        \
-  }                                                                                       \
+#define ADD_ENTRY(type, entry, transaction_type)                                           \
+  G_STMT_START                                                                             \
+  {                                                                                        \
+    g_autoptr (BzTransactionEntryTracker) tracker = NULL;                                  \
+    g_autoptr (GListStore) current_ops            = NULL;                                  \
+    g_autoptr (GListStore) finished_ops           = NULL;                                  \
+                                                                                           \
+    g_list_store_append (priv->type, (entry));                                             \
+                                                                                           \
+    tracker      = bz_transaction_entry_tracker_new ();                                    \
+    current_ops  = g_list_store_new (BZ_TYPE_TRANSACTION_TASK);                            \
+    finished_ops = g_list_store_new (BZ_TYPE_TRANSACTION_TASK);                            \
+                                                                                           \
+    bz_transaction_entry_tracker_set_entry (tracker, (entry));                             \
+    bz_transaction_entry_tracker_set_current_ops (tracker, G_LIST_MODEL (current_ops));    \
+    bz_transaction_entry_tracker_set_finished_ops (tracker, G_LIST_MODEL (finished_ops));  \
+    bz_transaction_entry_tracker_set_kind (tracker, transaction_type);                     \
+    bz_transaction_entry_tracker_set_status (tracker, BZ_TRANSACTION_ENTRY_STATUS_QUEUED); \
+                                                                                           \
+    g_list_store_append (priv->trackers, tracker);                                         \
+  }                                                                                        \
   G_STMT_END
 
   for (guint i = 0; i < n_installs; i++)
-    ADD_ENTRY (installs, installs[i], BZ_TRANSACTION_ENTRY_TYPE_INSTALL);
+    ADD_ENTRY (installs, installs[i], BZ_TRANSACTION_ENTRY_KIND_INSTALL);
   for (guint i = 0; i < n_updates; i++)
-    ADD_ENTRY (updates, updates[i], BZ_TRANSACTION_ENTRY_TYPE_UPDATE);
+    ADD_ENTRY (updates, updates[i], BZ_TRANSACTION_ENTRY_KIND_UPDATE);
   for (guint i = 0; i < n_removals; i++)
-    ADD_ENTRY (removals, removals[i], BZ_TRANSACTION_ENTRY_TYPE_REMOVAL);
+    ADD_ENTRY (removals, removals[i], BZ_TRANSACTION_ENTRY_KIND_REMOVAL);
 
 #undef ADD_ENTRY
 
@@ -563,7 +570,7 @@ bz_transaction_add_task (BzTransaction                 *self,
   task = bz_transaction_task_new ();
   bz_transaction_task_set_op (task, payload);
 
-  g_list_store_append (priv->current_ops, task);
+  g_list_store_append (priv->current_tasks, task);
 
   entry  = bz_backend_transaction_op_payload_get_entry (payload);
   result = find_and_maybe_transfer (
@@ -598,13 +605,15 @@ bz_transaction_update_task (BzTransaction                         *self,
   op   = bz_backend_transaction_op_progress_payload_get_op (payload);
 
   result = find_and_maybe_transfer (
-      priv->current_ops,
+      priv->current_tasks,
       NULL,
       op,
       (GEqualFuncFull) find_payload_eq_func,
       (gpointer *) &task);
   if (result)
     bz_transaction_task_set_last_progress (task, payload);
+
+  tracker_update (priv, op, FALSE);
 }
 
 void
@@ -619,13 +628,13 @@ bz_transaction_finish_task (BzTransaction                 *self,
   priv = bz_transaction_get_instance_private (self);
 
   find_and_maybe_transfer (
-      priv->current_ops,
-      priv->finished_ops,
+      priv->current_tasks,
+      priv->finished_tasks,
       payload,
       (GEqualFuncFull) find_payload_eq_func,
       NULL);
 
-  tracker_transfer (priv, payload);
+  tracker_update (priv, payload, TRUE);
 }
 
 void
@@ -644,15 +653,30 @@ bz_transaction_error_out_task (BzTransaction                 *self,
   priv = bz_transaction_get_instance_private (self);
 
   result = find_and_maybe_transfer (
-      priv->current_ops,
-      priv->finished_ops,
+      priv->current_tasks,
+      priv->finished_tasks,
       payload,
       (GEqualFuncFull) find_payload_eq_func,
       (gpointer *) &task);
   if (result)
     bz_transaction_task_set_error (task, message);
 
-  tracker_transfer (priv, payload);
+  tracker_update (priv, payload, TRUE);
+}
+
+static void
+finish (BzTransactionPrivate *priv)
+{
+  guint n_trackers = 0;
+
+  n_trackers = g_list_model_get_n_items (G_LIST_MODEL (priv->trackers));
+  for (guint i = 0; i < n_trackers; i++)
+    {
+      g_autoptr (BzTransactionEntryTracker) tracker = NULL;
+
+      tracker = g_list_model_get_item (G_LIST_MODEL (priv->trackers), i);
+      bz_transaction_entry_tracker_set_status (tracker, BZ_TRANSACTION_ENTRY_STATUS_DONE);
+    }
 }
 
 static gboolean
@@ -704,8 +728,9 @@ find_and_maybe_transfer (GListStore    *from,
 }
 
 static void
-tracker_transfer (BzTransactionPrivate          *priv,
-                  BzBackendTransactionOpPayload *payload)
+tracker_update (BzTransactionPrivate          *priv,
+                BzBackendTransactionOpPayload *payload,
+                gboolean                       transfer)
 {
   BzEntry *entry                                = NULL;
   g_autoptr (BzTransactionEntryTracker) tracker = NULL;
@@ -721,19 +746,26 @@ tracker_transfer (BzTransactionPrivate          *priv,
       (gpointer *) &tracker);
   if (result)
     {
-      GListModel *from = NULL;
-      GListModel *to   = NULL;
+      if (transfer)
+        {
+          GListModel *from = NULL;
+          GListModel *to   = NULL;
 
-      from   = bz_transaction_entry_tracker_get_current_ops (tracker);
-      to     = bz_transaction_entry_tracker_get_finished_ops (tracker);
-      result = find_and_maybe_transfer (
-          G_LIST_STORE (from),
-          G_LIST_STORE (to),
-          payload,
-          (GEqualFuncFull) find_payload_eq_func,
-          NULL);
+          bz_transaction_entry_tracker_set_status (tracker, BZ_TRANSACTION_ENTRY_STATUS_DONE);
 
-      g_object_notify (G_OBJECT (tracker), "current-ops");
-      g_object_notify (G_OBJECT (tracker), "finished-ops");
+          from   = bz_transaction_entry_tracker_get_current_ops (tracker);
+          to     = bz_transaction_entry_tracker_get_finished_ops (tracker);
+          result = find_and_maybe_transfer (
+              G_LIST_STORE (from),
+              G_LIST_STORE (to),
+              payload,
+              (GEqualFuncFull) find_payload_eq_func,
+              NULL);
+
+          g_object_notify (G_OBJECT (tracker), "current-ops");
+          g_object_notify (G_OBJECT (tracker), "finished-ops");
+        }
+      else
+        bz_transaction_entry_tracker_set_status (tracker, BZ_TRANSACTION_ENTRY_STATUS_ONGOING);
     }
 }

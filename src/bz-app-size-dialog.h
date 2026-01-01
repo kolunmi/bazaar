@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "bz-entry.h"
+#include "bz-entry-group.h"
 #include <adwaita.h>
 
 G_BEGIN_DECLS
@@ -30,6 +30,6 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (BzAppSizeDialog, bz_app_size_dialog, BZ, APP_SIZE_DIALOG, AdwDialog)
 
 AdwDialog *
-bz_app_size_dialog_new (BzEntry *entry);
+bz_app_size_dialog_new (BzEntryGroup *group);
 
 G_END_DECLS

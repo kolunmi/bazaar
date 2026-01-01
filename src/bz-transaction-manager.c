@@ -55,7 +55,8 @@ struct _BzTransactionManager
   double      current_progress;
   gboolean    pending;
 
-  DexPromise *current;
+  DexPromise    *cur_promise;
+  BzTransaction *cur_transaction;
 
   GQueue queue;
 };
@@ -142,7 +143,8 @@ bz_transaction_manager_dispose (GObject *object)
   g_clear_object (&self->backend);
   g_clear_object (&self->transactions);
   g_queue_clear_full (&self->queue, queued_schedule_data_unref);
-  dex_clear (&self->current);
+  dex_clear (&self->cur_promise);
+  g_clear_object (&self->cur_transaction);
 
   G_OBJECT_CLASS (bz_transaction_manager_parent_class)->dispose (object);
 }
@@ -391,14 +393,14 @@ gboolean
 bz_transaction_manager_get_active (BzTransactionManager *self)
 {
   g_return_val_if_fail (BZ_IS_TRANSACTION_MANAGER (self), FALSE);
-  return self->current != NULL;
+  return self->cur_promise != NULL;
 }
 
 gboolean
 bz_transaction_manager_get_pending (BzTransactionManager *self)
 {
   g_return_val_if_fail (BZ_IS_TRANSACTION_MANAGER (self), FALSE);
-  return self->current != NULL && self->pending;
+  return self->cur_promise != NULL && self->pending;
 }
 
 gboolean
@@ -448,7 +450,7 @@ bz_transaction_manager_add (BzTransactionManager *self,
     }
 
   g_queue_push_head (&self->queue, queued_schedule_data_ref (data));
-  if (self->current == NULL && !self->paused)
+  if (self->cur_promise == NULL && !self->paused)
     dex_future_disown (dispatch_next (self));
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_TRANSACTIONS]);
@@ -460,13 +462,24 @@ bz_transaction_manager_cancel_current (BzTransactionManager *self)
 {
   g_return_if_fail (BZ_IS_TRANSACTION_MANAGER (self));
 
-  if (self->current == NULL)
+  if (self->cur_promise == NULL ||
+      self->cur_transaction == NULL)
     return;
 
   dex_promise_reject (
-      self->current,
+      self->cur_promise,
       g_error_new (G_IO_ERROR, G_IO_ERROR_CANCELLED, "Cancelled by API"));
-  dex_clear (&self->current);
+  dex_clear (&self->cur_promise);
+
+  g_object_set (
+      self->cur_transaction,
+      "status", "Cancelled",
+      "progress", 1.0,
+      "finished", TRUE,
+      "success", FALSE,
+      "error", "Cancelled by API",
+      NULL);
+  g_clear_object (&self->cur_transaction);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ACTIVE]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PENDING]);
@@ -1171,7 +1184,8 @@ then_loop_cb (DexFuture *future,
 
   bz_weak_get_or_return_reject (self, wr);
 
-  dex_clear (&self->current);
+  dex_clear (&self->cur_promise);
+  g_clear_object (&self->cur_transaction);
   if (self->paused)
     {
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ACTIVE]);
@@ -1220,8 +1234,11 @@ dispatch_next (BzTransactionManager *self)
       bz_weak_release);
   dex_future_disown (g_steal_pointer (&future));
 
-  dex_clear (&self->current);
-  self->current = dex_ref (data->promise);
+  dex_clear (&self->cur_promise);
+  self->cur_promise = dex_ref (data->promise);
+
+  g_clear_object (&self->cur_transaction);
+  self->cur_transaction = g_object_ref (data->transaction);
 
   return dex_ref (data->promise);
 }

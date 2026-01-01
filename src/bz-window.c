@@ -344,61 +344,29 @@ installed_page_show_cb (BzWindow   *self,
     bz_window_show_group (self, group);
 }
 
+void
+bz_window_show_app_id (BzWindow   *self,
+                       const char *app_id)
+{
+  g_autoptr (BzEntryGroup) group = NULL;
+
+  g_return_if_fail (BZ_IS_WINDOW (self));
+  g_return_if_fail (app_id != NULL);
+
+  group = bz_application_map_factory_convert_one (
+      bz_state_info_get_application_factory (self->state),
+      gtk_string_object_new (app_id));
+
+  if (group != NULL)
+    bz_window_show_group (self, group);
+}
+
 static void
 page_toggled_cb (BzWindow       *self,
                  GParamSpec     *pspec,
                  AdwToggleGroup *toggles)
 {
   set_page (self);
-}
-
-static void
-update_flathub_style (BzWindow *self)
-{
-  AdwNavigationPage *visible_page = NULL;
-  const char        *page_tag     = NULL;
-  const char        *stack_page   = NULL;
-
-  visible_page = adw_navigation_view_get_visible_page (self->navigation_view);
-
-  if (visible_page != NULL)
-    {
-      page_tag = adw_navigation_page_get_tag (visible_page);
-
-      if (page_tag != NULL && strstr (page_tag, "flathub") != NULL)
-        {
-          gtk_widget_add_css_class (GTK_WIDGET (self), "flathub");
-          return;
-        }
-
-      if (g_strcmp0 (page_tag, "main") == 0)
-        {
-          stack_page = adw_view_stack_get_visible_child_name (self->main_view_stack);
-          if (g_strcmp0 (stack_page, "flathub") == 0)
-            {
-              gtk_widget_add_css_class (GTK_WIDGET (self), "flathub");
-              return;
-            }
-        }
-    }
-
-  gtk_widget_remove_css_class (GTK_WIDGET (self), "flathub");
-}
-
-static void
-visible_page_changed_cb (BzWindow          *self,
-                         GParamSpec        *pspec,
-                         AdwNavigationView *navigation_view)
-{
-  update_flathub_style (self);
-}
-
-static void
-main_view_stack_changed_cb (BzWindow     *self,
-                            GParamSpec   *pspec,
-                            AdwViewStack *stack)
-{
-  update_flathub_style (self);
 }
 
 static void
@@ -630,8 +598,6 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, update_cb);
   gtk_widget_class_bind_template_callback (widget_class, update_amount_tooltip);
   gtk_widget_class_bind_template_callback (widget_class, transactions_clear_cb);
-  gtk_widget_class_bind_template_callback (widget_class, visible_page_changed_cb);
-  gtk_widget_class_bind_template_callback (widget_class, main_view_stack_changed_cb);
   gtk_widget_class_bind_template_callback (widget_class, browse_flathub_cb);
   gtk_widget_class_bind_template_callback (widget_class, open_search_cb);
   gtk_widget_class_bind_template_callback (widget_class, format_progress);
@@ -1164,6 +1130,7 @@ create_entry_radio_button (BzEntry    *entry,
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), label);
 
   radio = gtk_check_button_new ();
+  gtk_widget_set_valign(radio, GTK_ALIGN_CENTER);
   adw_action_row_add_prefix (ADW_ACTION_ROW (row), radio);
   adw_action_row_set_activatable_widget (ADW_ACTION_ROW (row), radio);
 
@@ -1251,6 +1218,7 @@ create_entry_radio_buttons (AdwAlertDialog *alert,
       adw_preferences_row_set_title (ADW_PREFERENCES_ROW (keep_data_row), _ ("Keep Data"));
       adw_action_row_set_subtitle (ADW_ACTION_ROW (keep_data_row), _ ("Allow restoring settings and content"));
       keep_radio = gtk_check_button_new ();
+      gtk_widget_set_valign(keep_radio, GTK_ALIGN_CENTER);
       gtk_check_button_set_active (GTK_CHECK_BUTTON (keep_radio), TRUE);
       adw_action_row_add_prefix (ADW_ACTION_ROW (keep_data_row), keep_radio);
       adw_action_row_set_activatable_widget (ADW_ACTION_ROW (keep_data_row), keep_radio);
@@ -1260,6 +1228,7 @@ create_entry_radio_buttons (AdwAlertDialog *alert,
       adw_preferences_row_set_title (ADW_PREFERENCES_ROW (delete_data_row), _ ("Delete Data"));
       adw_action_row_set_subtitle (ADW_ACTION_ROW (delete_data_row), _ ("Permanently remove app data to save space"));
       delete_radio = gtk_check_button_new ();
+      gtk_widget_set_valign(delete_radio, GTK_ALIGN_CENTER);
       gtk_check_button_set_group (GTK_CHECK_BUTTON (delete_radio), GTK_CHECK_BUTTON (keep_radio));
       adw_action_row_add_prefix (ADW_ACTION_ROW (delete_data_row), delete_radio);
       adw_action_row_set_activatable_widget (ADW_ACTION_ROW (delete_data_row), delete_radio);

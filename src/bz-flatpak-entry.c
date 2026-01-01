@@ -27,6 +27,7 @@
 #include <xmlb.h>
 
 #include "bz-async-texture.h"
+#include "bz-flathub-category.h"
 #include "bz-flatpak-private.h"
 #include "bz-io.h"
 #include "bz-issue.h"
@@ -367,6 +368,7 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
   g_autofree char *unique_id                           = NULL;
   g_autofree char *unique_id_checksum                  = NULL;
   guint64          download_size                       = 0;
+  guint64          installed_size                      = 0;
   const char      *title                               = NULL;
   const char      *eol                                 = NULL;
   const char      *description                         = NULL;
@@ -403,6 +405,8 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
   g_autoptr (AsContentRating) content_rating           = NULL;
   GPtrArray *as_keywords                               = NULL;
   g_autoptr (GListStore) keywords                      = NULL;
+  GPtrArray *as_categories                             = NULL;
+  g_autoptr (GListModel) categories                    = NULL;
   g_autoptr (BzVerificationStatus) verification_status = NULL;
 
   g_return_val_if_fail (FLATPAK_IS_REF (ref), NULL);
@@ -485,8 +489,11 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
 
   if (FLATPAK_IS_REMOTE_REF (ref))
     download_size = flatpak_remote_ref_get_download_size (FLATPAK_REMOTE_REF (ref));
+
+  if (FLATPAK_IS_REMOTE_REF (ref))
+    installed_size = flatpak_remote_ref_get_installed_size (FLATPAK_REMOTE_REF (ref));
   else if (FLATPAK_IS_BUNDLE_REF (ref))
-    download_size = flatpak_bundle_ref_get_installed_size (FLATPAK_BUNDLE_REF (ref));
+    installed_size = flatpak_bundle_ref_get_installed_size (FLATPAK_BUNDLE_REF (ref));
 
   if (component != NULL)
     {
@@ -982,6 +989,12 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
               g_list_store_append (keywords, keyword_obj);
             }
         }
+
+      as_categories = as_component_get_categories (component);
+      if (as_categories != NULL && as_categories->len > 0)
+        {
+          categories = bz_flathub_category_list_from_appstream (as_categories);
+        }
     }
 
   if (component != NULL && g_strcmp0 (remote_name, "flathub") == 0)
@@ -1038,6 +1051,7 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
       "remote-repo-name", remote_name,
       "url", project_url,
       "size", download_size,
+      "installed-size", installed_size,
       "search-tokens", search_tokens,
       "metadata-license", metadata_license,
       "project-license", project_license,
@@ -1066,6 +1080,7 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
       "is-mobile-friendly", is_mobile_friendly,
       "content-rating", content_rating,
       "keywords", keywords,
+      "categories", categories,
       "verification-status", verification_status,
       NULL);
 

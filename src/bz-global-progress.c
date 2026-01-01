@@ -29,6 +29,9 @@ struct _BzGlobalProgress
 {
   GtkWidget parent_instance;
 
+  GtkWidget *draw_widget;
+  char      *draw_widget_class;
+
   GtkWidget *child;
   gboolean   active;
   gboolean   pending;
@@ -78,6 +81,9 @@ global_progress_bar_theme_changed (BzGlobalProgress *self,
                                    GSettings        *settings);
 
 static void
+ensure_draw_css (BzGlobalProgress *self);
+
+static void
 bz_global_progress_dispose (GObject *object)
 {
   BzGlobalProgress *self = BZ_GLOBAL_PROGRESS (object);
@@ -90,6 +96,9 @@ bz_global_progress_dispose (GObject *object)
         self->settings,
         global_progress_bar_theme_changed,
         self);
+
+  g_clear_pointer (&self->draw_widget, gtk_widget_unparent);
+  g_clear_pointer (&self->draw_widget_class, g_free);
 
   g_clear_pointer (&self->child, gtk_widget_unparent);
   g_clear_object (&self->settings);
@@ -227,6 +236,8 @@ bz_global_progress_size_allocate (GtkWidget *widget,
 {
   BzGlobalProgress *self = BZ_GLOBAL_PROGRESS (widget);
 
+  gtk_widget_allocate (self->draw_widget, width, height, baseline, NULL);
+
   if (self->child != NULL)
     gtk_widget_allocate (self->child, width, height, baseline, NULL);
 }
@@ -306,37 +317,7 @@ bz_global_progress_snapshot (GtkWidget   *widget,
   accent_color->alpha = 1.0;
 
   gtk_snapshot_push_rounded_clip (snapshot, &fraction_clip);
-  if (self->settings != NULL)
-    {
-      const char *theme = NULL;
-
-      theme = g_settings_get_string (self->settings, "global-progress-bar-theme");
-
-      if (theme == NULL || g_strcmp0 (theme, "accent-color") == 0)
-        gtk_snapshot_append_color (snapshot, accent_color, &fraction_clip.bounds);
-      else if (g_strcmp0 (theme, "pride-rainbow-flag") == 0 ||
-               g_strcmp0 (theme, "lesbian-pride-flag") == 0 ||
-               g_strcmp0 (theme, "transgender-flag") == 0 ||
-               g_strcmp0 (theme, "nonbinary-flag") == 0 ||
-               g_strcmp0 (theme, "bisexual-flag") == 0 ||
-               g_strcmp0 (theme, "asexual-flag") == 0 ||
-               g_strcmp0 (theme, "pansexual-flag") == 0 ||
-               g_strcmp0 (theme, "aromantic-flag") == 0 ||
-               g_strcmp0 (theme, "genderfluid-flag") == 0 ||
-               g_strcmp0 (theme, "polysexual-flag") == 0 ||
-               g_strcmp0 (theme, "omnisexual-flag") == 0 ||
-               g_strcmp0 (theme, "aroace-flag") == 0 ||
-               g_strcmp0 (theme, "agender-flag") == 0 ||
-               g_strcmp0 (theme, "genderqueer-flag") == 0 ||
-               g_strcmp0 (theme, "intersex-flag") == 0 ||
-               g_strcmp0 (theme, "demigender-flag") == 0 ||
-               g_strcmp0 (theme, "biromantic-flag") == 0)
-        append_pride_flag (snapshot, &fraction_clip.bounds, theme);
-      else
-        gtk_snapshot_append_color (snapshot, accent_color, &fraction_clip.bounds);
-    }
-  else
-    gtk_snapshot_append_color (snapshot, accent_color, &fraction_clip.bounds);
+  gtk_widget_snapshot_child (widget, self->draw_widget, snapshot);
   gtk_snapshot_pop (snapshot);
 
   gtk_snapshot_pop (snapshot);
@@ -454,6 +435,11 @@ bz_global_progress_init (BzGlobalProgress *self)
   AdwSpringParams    *pending_spring    = NULL;
   AdwAnimationTarget *fraction_target   = NULL;
   AdwSpringParams    *fraction_spring   = NULL;
+
+  self->draw_widget = gtk_fixed_new ();
+  gtk_widget_set_halign (self->draw_widget, GTK_ALIGN_FILL);
+  gtk_widget_set_valign (self->draw_widget, GTK_ALIGN_FILL);
+  gtk_widget_set_parent (self->draw_widget, GTK_WIDGET (self));
 
   self->expand_size = 100;
 
@@ -743,6 +729,7 @@ bz_global_progress_set_settings (BzGlobalProgress *self,
           G_CALLBACK (global_progress_bar_theme_changed),
           self);
     }
+  ensure_draw_css (self);
 
   gtk_widget_queue_draw (GTK_WIDGET (self));
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SETTINGS]);
@@ -760,5 +747,35 @@ global_progress_bar_theme_changed (BzGlobalProgress *self,
                                    const char       *key,
                                    GSettings        *settings)
 {
+  ensure_draw_css (self);
   gtk_widget_queue_draw (GTK_WIDGET (self));
+}
+
+static void
+ensure_draw_css (BzGlobalProgress *self)
+{
+  if (self->settings != NULL)
+    {
+      g_autofree char *id    = NULL;
+      g_autofree char *class = NULL;
+
+      id    = g_settings_get_string (self->settings, "global-progress-bar-theme");
+      class = bz_dup_css_class_for_pride_id (id);
+
+      if (self->draw_widget_class != NULL &&
+          g_strcmp0 (self->draw_widget_class, class) == 0)
+        return;
+
+      if (self->draw_widget_class != NULL)
+        gtk_widget_remove_css_class (self->draw_widget, self->draw_widget_class);
+      g_clear_pointer (&self->draw_widget_class, g_free);
+      gtk_widget_add_css_class (self->draw_widget, class);
+      self->draw_widget_class = g_steal_pointer (&class);
+    }
+  else
+    {
+      if (self->draw_widget_class != NULL)
+        gtk_widget_remove_css_class (self->draw_widget, self->draw_widget_class);
+      g_clear_pointer (&self->draw_widget_class, g_free);
+    }
 }

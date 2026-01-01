@@ -16,6 +16,11 @@
       <summary>Show Only Flathub Content</summary>
       <description>Hide applications which do not originate from Flathub</description>
     </key>
+    <key name="show-only-verified" type="b">
+      <default>false</default>
+      <summary>Show Only Verified Content</summary>
+      <description>Hide applications which are not verified on Flathub</description>
+    </key>
     <key name="search-debounce" type="b">
       <default>true</default>
       <summary>Debounce Search Inputs</summary>
@@ -26,6 +31,7 @@
         <choice value="accent-color"/>
         <choice value="pride-rainbow-flag"/>
         <choice value="lesbian-pride-flag"/>
+        <choice value="gay-pride-flag"/>
         <choice value="transgender-flag"/>
         <choice value="nonbinary-flag"/>
         <choice value="bisexual-flag"/>
@@ -41,6 +47,8 @@
         <choice value="intersex-flag"/>
         <choice value="demigender-flag"/>
         <choice value="biromantic-flag"/>
+        <choice value="disability-flag"/>
+        <choice value="femboy-flag"/>
       </choices>
       <default>'accent-color'</default>
       <summary>Global Progress Bar Theme</summary>

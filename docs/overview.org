@@ -117,6 +117,8 @@ Here is a basic curated config:
   # - app-tile-title
   # - app-tile-verified-check
   # - app-tile-description
+  # - app-tile-installed-indicator
+  # - app-tile-installed-pill
   css: |
     .main-section {
       margin: 15px;

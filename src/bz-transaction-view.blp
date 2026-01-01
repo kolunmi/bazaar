@@ -10,7 +10,7 @@ template $BzTransactionView: Adw.Bin {
       ]
 
       overflow: visible;
-                
+
       model: NoSelection {
         model: bind template.transaction as <$BzTransaction>.trackers;
       };
@@ -71,7 +71,7 @@ template $BzTransactionView: Adw.Bin {
                     orientation: horizontal;
                     spacing: 4;
                     Box {
-                      visible: bind $is_entry_kind(template.item, 4) as <bool>;
+                      visible: bind $is_entry_addon(template.item) as <bool>;
                       halign: start;
                       spacing: 4;
                       styles [
@@ -96,7 +96,7 @@ template $BzTransactionView: Adw.Bin {
                       }
                     }
                     Box {
-                      visible: bind $is_entry_kind(template.item, 2) as <bool>;
+                      visible: bind $is_entry_runtime(template.item) as <bool>;
                       halign: start;
                       spacing: 4;
                       styles [
@@ -128,7 +128,7 @@ template $BzTransactionView: Adw.Bin {
                         "small-pill",
                         "download-size-pill"
                       ]
-                      visible: bind $invert_boolean($is_transaction_type(template.item, 2) as <bool>) as <bool>;
+                      visible: bind $invert_boolean($is_transaction_tracker_removal(template.item) as <bool>) as <bool>;
 
                       Image {
                         icon-name: "drive-harddisk-symbolic";
@@ -154,7 +154,7 @@ template $BzTransactionView: Adw.Bin {
                         "small-pill",
                         "download-size-pill"
                       ]
-                      visible: bind $is_transaction_type(template.item, 2) as <bool>;
+                      visible: bind $is_transaction_tracker_removal(template.item) as <bool>;
 
                       Image {
                         icon-name: "drive-harddisk-symbolic";
@@ -177,7 +177,45 @@ template $BzTransactionView: Adw.Bin {
 
                 Image {
                   styles [
+                    "accent",
+                  ]
+
+                  valign: start;
+                  margin-end: 10;
+                  icon-name: "timer-sand-symbolic";
+                  has-tooltip: true;
+                  tooltip-text: _("Pending");
+                  visible: bind $is_both($is_queued(template.item as <$BzTransactionEntryTracker>.status as <$BzTransactionEntryStatus>) as <bool>, $is_transaction_tracker_install(template.item) as <bool>) as <bool>;
+                }
+
+                Adw.Spinner {
+                  styles [
+                    "accent",
+                  ]
+
+                  valign: start;
+                  margin-end: 10;
+                  has-tooltip: true;
+                  tooltip-text: _("Ongoing");
+                  visible: bind $is_ongoing(template.item as <$BzTransactionEntryTracker>.status as <$BzTransactionEntryStatus>) as <bool>;
+                }
+
+                Image {
+                  styles [
                     "success",
+                  ]
+
+                  valign: start;
+                  margin-end: 10;
+                  icon-name: "check-plain-symbolic";
+                  has-tooltip: true;
+                  tooltip-text: _("Finished");
+                  visible: bind $is_completed(template.item as <$BzTransactionEntryTracker>.status as <$BzTransactionEntryStatus>) as <bool>;
+                }
+
+                Image {
+                  styles [
+                    "dimmed",
                   ]
 
                   valign: start;
@@ -185,7 +223,7 @@ template $BzTransactionView: Adw.Bin {
                   icon-name: "folder-download-symbolic";
                   has-tooltip: true;
                   tooltip-text: _("Install");
-                  visible: bind $is_transaction_type(template.item, 0) as <bool>;
+                  visible: bind $is_transaction_tracker_install(template.item) as <bool>;
                 }
 
                 Image {
@@ -195,15 +233,41 @@ template $BzTransactionView: Adw.Bin {
 
                   valign: start;
                   margin-end: 10;
-                  icon-name: "software-update-available-symbolic";
+                  icon-name: "timer-sand-symbolic";
                   has-tooltip: true;
-                  tooltip-text: _("Update");
-                  visible: bind $is_transaction_type(template.item, 1) as <bool>;
+                  tooltip-text: _("Pending");
+                  visible: bind $is_both($is_queued(template.item as <$BzTransactionEntryTracker>.status as <$BzTransactionEntryStatus>) as <bool>, $is_transaction_tracker_update(template.item) as <bool>) as <bool>;
                 }
 
                 Image {
                   styles [
-                    "error",
+                    "dimmed",
+                  ]
+
+                  valign: start;
+                  margin-end: 10;
+                  icon-name: "software-update-available-symbolic";
+                  has-tooltip: true;
+                  tooltip-text: _("Update");
+                  visible: bind $is_transaction_tracker_update(template.item) as <bool>;
+                }
+
+                Image {
+                  styles [
+                    "accent",
+                  ]
+
+                  valign: start;
+                  margin-end: 10;
+                  icon-name: "timer-sand-symbolic";
+                  has-tooltip: true;
+                  tooltip-text: _("Pending");
+                  visible: bind $is_both($is_queued(template.item as <$BzTransactionEntryTracker>.status as <$BzTransactionEntryStatus>) as <bool>, $is_transaction_tracker_removal(template.item) as <bool>) as <bool>;
+                }
+
+                Image {
+                  styles [
+                    "dimmed",
                   ]
 
                   valign: start;
@@ -211,7 +275,7 @@ template $BzTransactionView: Adw.Bin {
                   icon-name: "user-trash-symbolic";
                   has-tooltip: true;
                   tooltip-text: _("Remove");
-                  visible: bind $is_transaction_type(template.item, 2) as <bool>;
+                  visible: bind $is_transaction_tracker_removal(template.item) as <bool>;
                 }
               }
 
@@ -225,7 +289,7 @@ template $BzTransactionView: Adw.Bin {
                     "transaction-sidebar-entry-list",
                   ]
 
-                  visible: bind $invert_boolean($is_transaction_type(template.item, 2) as <bool>) as <bool>;
+                  visible: bind $invert_boolean($is_transaction_tracker_removal(template.item) as <bool>) as <bool>;
 
                   model: NoSelection {
                     model: bind template.item as <$BzTransactionEntryTracker>.current-ops;

@@ -20,6 +20,7 @@
 
 #include <glib/gi18n.h>
 
+#include "appstream.h"
 #include "bz-flathub-category.h"
 #include "bz-serializable.h"
 
@@ -90,6 +91,8 @@ static const CategoryInfo category_info[] = {
   {   "recently-added",         N_ ("Recently Added"),      N_ ("New"),                    N_ ("More New"),        "io.github.kolumni.Bazaar.New" },
   { "recently-updated",       N_ ("Recently Updated"),  N_ ("Updated"),                N_ ("More Updated"),    "io.github.kolumni.Bazaar.Updated" },
   {           "mobile",                 N_ ("Mobile"),   N_ ("Mobile"),                 N_ ("More Mobile"),     "io.github.kolumni.Bazaar.Mobile" },
+  {          "adwaita",                N_ ("Adwaita"),  N_ ("Adwaita"),                N_ ("More Adwaita"),    "io.github.kolumni.Bazaar.Adwaita" },
+  {              "kde",               N_ ("KDE Apps"), N_ ("KDE Apps"),               N_ ("More KDE Apps"),        "io.github.kolumni.Bazaar.Kde" },
   {               NULL,                          NULL,            NULL,                               NULL,                                  NULL }
 };
 
@@ -590,6 +593,60 @@ clear (BzFlathubCategory *self)
   g_clear_pointer (&self->name, g_free);
   g_clear_pointer (&self->applications, g_object_unref);
   g_clear_pointer (&self->quality_applications, g_object_unref);
+}
+
+static const char *
+bz_flathub_category_map_appstream_id (const char *as_category_id)
+{
+  g_autofree char    *lowercase = NULL;
+  const CategoryInfo *info      = NULL;
+
+  g_return_val_if_fail (as_category_id != NULL, NULL);
+
+  lowercase = g_ascii_strdown (as_category_id, -1);
+  info      = get_category_info (lowercase);
+
+  return info ? info->id : NULL;
+}
+
+GListModel *
+bz_flathub_category_list_from_appstream (GPtrArray *as_categories)
+{
+  g_autoptr (GListStore) categories = NULL;
+
+  g_return_val_if_fail (as_categories != NULL, NULL);
+
+  if (as_categories->len == 0)
+    return NULL;
+
+  categories = g_list_store_new (BZ_TYPE_FLATHUB_CATEGORY);
+
+  for (guint i = 0; i < as_categories->len; i++)
+    {
+      const char *category_id = NULL;
+      const char *mapped_id   = NULL;
+
+      category_id = (const char *) g_ptr_array_index (as_categories, i);
+
+      if (category_id == NULL)
+        continue;
+
+      mapped_id = bz_flathub_category_map_appstream_id (category_id);
+
+      if (mapped_id != NULL)
+        {
+          g_autoptr (BzFlathubCategory) category = NULL;
+
+          category = bz_flathub_category_new ();
+          bz_flathub_category_set_name (category, mapped_id);
+          g_list_store_append (categories, category);
+        }
+    }
+
+  if (g_list_model_get_n_items (G_LIST_MODEL (categories)) == 0)
+    return NULL;
+
+  return G_LIST_MODEL (g_steal_pointer (&categories));
 }
 
 /* End of bz-flathub-category.c */

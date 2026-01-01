@@ -45,16 +45,22 @@ char *
 bz_spdx_get_name (const char *license_id)
 {
   char *result = NULL;
-
   g_return_val_if_fail (license_id != NULL, NULL);
 
-  if (g_str_has_prefix (license_id, "LicenseRef-proprietary"))
+  if (bz_spdx_is_proprietary (license_id))
     return g_strdup ("Proprietary");
 
   result = as_license_to_spdx_id (license_id);
-
   if (result == NULL)
     return g_strdup (license_id);
 
   return result;
+}
+
+gboolean
+bz_spdx_is_proprietary (const char *license_id)
+{
+  g_return_val_if_fail (license_id != NULL, FALSE);
+
+  return g_str_has_prefix (license_id, "LicenseRef-proprietary");
 }

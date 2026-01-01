@@ -46,7 +46,7 @@ static GParamSpec *props[LAST_PROP] = { 0 };
 static double
 test_strings (const char *query,
               const char *against,
-              gboolean    fuzzy);
+              gssize      accept_min_size);
 
 typedef struct
 {
@@ -265,16 +265,13 @@ query_task_fiber (QueryTaskData *data)
   g_autoptr (GError) local_error    = NULL;
   gboolean         result           = FALSE;
   g_autofree char *query_utf8       = NULL;
-  double           threshold        = 0.0;
   guint            n_sub_tasks      = 0;
   guint            scores_per_task  = 0;
   g_autoptr (GPtrArray) sub_futures = NULL;
   g_autoptr (GArray) scores         = NULL;
   g_autoptr (GPtrArray) results     = NULL;
 
-  query_utf8 = g_strjoinv (" ", terms);
-  threshold  = (double) g_utf8_strlen (query_utf8, -1);
-
+  query_utf8      = g_strjoinv (" ", terms);
   n_sub_tasks     = MAX (1, MIN (shallow_mirror->len / 512, g_get_num_processors ()));
   scores_per_task = shallow_mirror->len / n_sub_tasks;
 
@@ -287,7 +284,7 @@ query_task_fiber (QueryTaskData *data)
       sub_data                 = query_sub_task_data_new ();
       sub_data->query_utf8     = g_strdup (query_utf8);
       sub_data->shallow_mirror = g_ptr_array_ref (shallow_mirror);
-      sub_data->threshold      = threshold;
+      sub_data->threshold      = 1.0;
       sub_data->work_offset    = i * scores_per_task;
       sub_data->work_length    = scores_per_task;
 
@@ -367,31 +364,38 @@ query_sub_task_fiber (QuerySubTaskData *data)
       BzEntryGroup *group             = NULL;
       const char   *id                = NULL;
       const char   *title             = NULL;
-      const char   *developer         = NULL;
-      const char   *search_tokens     = NULL;
       double        score             = 0.0;
 
       group  = g_ptr_array_index (shallow_mirror, work_offset + i);
       locker = bz_entry_group_lock (group);
 
-      id            = bz_entry_group_get_id (group);
-      title         = bz_entry_group_get_title (group);
-      developer     = bz_entry_group_get_developer (group);
-      search_tokens = bz_entry_group_get_search_tokens (group);
+      id    = bz_entry_group_get_id (group);
+      title = bz_entry_group_get_title (group);
+      if ((id != NULL && g_strcmp0 (query_utf8, id) == 0) ||
+          (title != NULL && strcasecmp (query_utf8, title) == 0))
+        score = G_MAXDOUBLE;
+      else
+        {
+          const char *developer     = NULL;
+          const char *description   = NULL;
+          const char *search_tokens = NULL;
 
-      if (id != NULL && g_strcmp0 (query_utf8, id) == 0)
-        score += 1000.0;
+          developer     = bz_entry_group_get_developer (group);
+          description   = bz_entry_group_get_description (group);
+          search_tokens = bz_entry_group_get_search_tokens (group);
 
-#define EVALUATE_STRING(_s, _fuzzy)                  \
-  ((_s) != NULL                                      \
-       ? (test_strings (query_utf8, (_s), (_fuzzy))) \
+#define EVALUATE_STRING(_s, _accept_min_size)                  \
+  ((_s) != NULL                                                \
+       ? (test_strings (query_utf8, (_s), (_accept_min_size))) \
        : 0.0)
 
-      score += EVALUATE_STRING (title, TRUE) * 1.0;
-      score += EVALUATE_STRING (developer, FALSE) * 1.0;
-      score += EVALUATE_STRING (search_tokens, FALSE) * 1.0;
+          score += EVALUATE_STRING (title, 2) * 2.0;
+          score += EVALUATE_STRING (developer, 2) * 1.0;
+          score += EVALUATE_STRING (description, 3) * 1.0;
+          score += EVALUATE_STRING (search_tokens, -1) * 1.5;
 
 #undef EVALUATE_STRING
+        }
 
       if (score > threshold)
         {
@@ -429,83 +433,63 @@ query_sub_task_fiber (QuerySubTaskData *data)
 static double
 test_strings (const char *query,
               const char *against,
-              gboolean    fuzzy)
+              gssize      accept_min_size)
 {
-  double score = 0.0;
+  gsize  query_length   = 0;
+  gsize  against_length = 0;
+  double score          = 0.0;
+
+  query_length   = strlen (query);
+  against_length = strlen (against);
+  if (accept_min_size > 0 &&
+      against_length < accept_min_size)
+    return 0.0;
+
+  if (query_length <= against_length &&
+      strcasestr (against, query) != NULL)
+    return (double) query_length;
 
   UTF8_FOREACH_TOKEN_FORWARDS (q_s, q_e, query)
   {
-    double query_token_score = 0.0;
-
     UTF8_FOREACH_TOKEN_FORWARDS (a_s, a_e, against)
     {
-      if (fuzzy)
+      gssize   q_len = q_e - q_s;
+      gssize   a_len = a_e - a_s;
+      gboolean match = FALSE;
+
+      if (q_len <= a_len)
+        continue;
+
+      if (accept_min_size > 0 &&
+          a_len < accept_min_size)
+        continue;
+
+      UTF8_FOREACH_FORWARD_WITH_END (a, a_s, a_e)
+      {
+        gunichar a_ch = 0;
+
+        match = TRUE;
+
+        a_ch = g_unichar_tolower (g_utf8_get_char (a));
+        UTF8_FOREACH_FORWARD_WITH_END (q, q_s, q_e)
         {
-          double      against_token_score = 0.0;
-          const char *last_best_char      = NULL;
+          gunichar q_ch = 0;
 
-          UTF8_FOREACH_FORWARD_WITH_END (q, q_s, q_e)
-          {
-            gunichar    query_ch   = 0;
-            const char *best_char  = NULL;
-            double      best_score = 0.0;
-
-            query_ch = g_unichar_tolower (g_utf8_get_char (q));
-
-            UTF8_FOREACH_BACKWARD (a, a_e, a_s)
+          q_ch = g_unichar_tolower (g_utf8_get_char (q));
+          if (a_ch != q_ch)
             {
-              gunichar against_ch = 0;
-              double   tmp_score  = 0;
-
-              against_ch = g_unichar_tolower (g_utf8_get_char (a));
-
-              tmp_score = against_ch == query_ch ? PERFECT : NO_MATCH;
-              if (tmp_score > NO_MATCH &&
-                  (tmp_score > best_score ||
-                   ((last_best_char == NULL ||
-                     last_best_char < best_char) &&
-                    tmp_score >= best_score)))
-                {
-                  best_char  = a;
-                  best_score = tmp_score;
-                }
+              match = FALSE;
+              break;
             }
-
-            if (best_char != NULL)
-              {
-                if (last_best_char != NULL)
-                  {
-                    gssize diff = 0;
-
-                    diff = (gssize) best_char - (gssize) last_best_char;
-                    if (diff > 1)
-                      best_score /= (double) diff * 1.0;
-                    else if (diff < 0)
-                      best_score /= (double) ABS (diff) * 2.0;
-                  }
-
-                against_token_score += best_score;
-                last_best_char = best_char;
-              }
-            else
-              against_token_score -= 1.0;
-          }
-
-          if (against_token_score > 0.0)
-            query_token_score += against_token_score;
         }
-      else
-        {
-          gssize q_len = q_e - q_s;
-          gssize a_len = a_e - a_s;
 
-          if (q_len <= a_len &&
-              memmem (a_s, a_len, q_s, q_len) != NULL)
-            query_token_score += (double) g_utf8_strlen (q_s, q_len);
-        }
+        if (match)
+          break;
+      }
+
+      if (match)
+        score += (double) (q_len * q_len) / (double) a_len;
     }
-
-    score += query_token_score;
   }
 
   return score;

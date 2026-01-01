@@ -236,6 +236,15 @@ is_null (gpointer object,
 }
 
 static gboolean
+is_empty (gpointer    object,
+          GListModel *model)
+{
+  if (model == NULL)
+    return TRUE;
+  return g_list_model_get_n_items (model) == 0;
+}
+
+static gboolean
 logical_and (gpointer object,
              gboolean value1,
              gboolean value2)
@@ -445,7 +454,7 @@ format_license_tooltip (gpointer object,
   if (is_floss)
     return g_strdup (_ ("Free software"));
 
-  if (g_strcmp0 (license, "LicenseRef-proprietary") == 0)
+  if (bz_spdx_is_proprietary (license))
     return g_strdup (_ ("Proprietary Software"));
 
   name = bz_spdx_get_name (license);
@@ -468,7 +477,7 @@ get_license_label (gpointer object,
   if (is_floss)
     return g_strdup (_ ("Free"));
 
-  if (g_strcmp0 (license, "LicenseRef-proprietary") == 0)
+  if (bz_spdx_is_proprietary (license))
     return g_strdup (_ ("Proprietary"));
 
   if (license == NULL || *license == '\0')
@@ -844,7 +853,7 @@ size_cb (BzFullView *self,
   if (self->group == NULL)
     return;
 
-  size_dialog = bz_app_size_dialog_new (bz_result_get_object (self->ui_entry));
+  size_dialog = bz_app_size_dialog_new (self->group);
   adw_dialog_present (size_dialog, GTK_WIDGET (self));
 }
 
@@ -1152,6 +1161,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, is_positive);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
+  gtk_widget_class_bind_template_callback (widget_class, is_empty);
   gtk_widget_class_bind_template_callback (widget_class, logical_and);
   gtk_widget_class_bind_template_callback (widget_class, is_longer);
   gtk_widget_class_bind_template_callback (widget_class, bool_to_string);

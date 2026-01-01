@@ -1,0 +1,10 @@
+prefix=bz
+name=pride_flag_stripe_spec
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+include=<gtk/gtk.h>
+
+property=rgba char G_TYPE_STRING string
+property=size double G_TYPE_DOUBLE double

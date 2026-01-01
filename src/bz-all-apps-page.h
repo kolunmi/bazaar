@@ -1,6 +1,6 @@
-/* progress-bar-designs/common.h
+/* bz-all-apps-page.h
  *
- * Copyright 2025 Eva M
+ * Copyright 2025 Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,4 +20,16 @@
 
 #pragma once
 
-#include "pride/pride.h"
+#include <adwaita.h>
+
+G_BEGIN_DECLS
+
+#define BZ_TYPE_ALL_APPS_PAGE (bz_all_apps_page_get_type ())
+
+G_DECLARE_FINAL_TYPE (BzAllAppsPage, bz_all_apps_page, BZ, ALL_APPS_PAGE, AdwNavigationPage)
+
+AdwNavigationPage *
+bz_all_apps_page_new (const char *title,
+                      GListModel *applications);
+
+G_END_DECLS
