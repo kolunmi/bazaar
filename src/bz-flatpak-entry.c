@@ -26,6 +26,7 @@
 #include <glib/gi18n.h>
 #include <xmlb.h>
 
+#include "bz-app-permissions.h"
 #include "bz-async-texture.h"
 #include "bz-flathub-category.h"
 #include "bz-flatpak-private.h"
@@ -408,6 +409,7 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
   GPtrArray *as_categories                             = NULL;
   g_autoptr (GListModel) categories                    = NULL;
   g_autoptr (BzVerificationStatus) verification_status = NULL;
+  g_autoptr (BzAppPermissions) permissions             = NULL;
 
   g_return_val_if_fail (FLATPAK_IS_REF (ref), NULL);
   g_return_val_if_fail (FLATPAK_IS_REMOTE_REF (ref) || FLATPAK_IS_BUNDLE_REF (ref), NULL);
@@ -1038,6 +1040,10 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
                     NULL);
     }
 
+  permissions = bz_app_permissions_new_from_metadata (key_file, error);
+  if (permissions == NULL)
+    return NULL;
+
   g_object_set (
       self,
       "kinds", kinds,
@@ -1082,6 +1088,7 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
       "keywords", keywords,
       "categories", categories,
       "verification-status", verification_status,
+      "permissions", permissions,
       NULL);
 
   return g_steal_pointer (&self);

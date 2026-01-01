@@ -106,7 +106,7 @@ create_support_row (const gchar *icon_name,
   icon = gtk_image_new_from_icon_name (icon_name);
   gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
   gtk_widget_add_css_class (icon, "circular-lozenge");
-  gtk_widget_add_css_class (icon, is_supported ? "success" : "grey");
+  gtk_widget_add_css_class (icon, is_supported ? "green" : "grey");
 
   adw_action_row_add_prefix (row, icon);
 
@@ -239,13 +239,13 @@ update_header (BzHardwareSupportDialog *self)
       icon_name  = "device-supported-symbolic";
       title_text = g_strdup_printf (_ ("%s works on most devices"),
                                     bz_entry_get_title (self->entry));
-      css_class  = "success";
+      css_class  = "green";
     }
 
   gtk_image_set_from_icon_name (GTK_IMAGE (self->lozenge), icon_name);
   gtk_label_set_text (self->title, title_text);
 
-  gtk_widget_remove_css_class (self->lozenge, "success");
+  gtk_widget_remove_css_class (self->lozenge, "green");
   gtk_widget_remove_css_class (self->lozenge, "grey");
   gtk_widget_add_css_class (self->lozenge, css_class);
 }

@@ -99,63 +99,6 @@ template $BzAppSizeDialog: Adw.Dialog {
             subtitle: _("Size on Disk");
           }
         }
-
-        Adw.PreferencesGroup {
-          margin-top: 10;
-          title: _("Details");
-
-          Adw.ActionRow {
-            title: _("License");
-            subtitle: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.project-license;
-
-            styles [
-              "property",
-            ]
-          }
-
-          Adw.ActionRow {
-            title: _("App ID");
-            subtitle: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.id;
-
-            styles [
-              "property",
-            ]
-          }
-
-          Adw.ActionRow {
-            title: _("SDK");
-            subtitle: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzFlatpakEntry>.application-runtime;
-
-            styles [
-              "property",
-            ]
-
-            [suffix]
-            MenuButton {
-              visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.eol) as <bool>) as <bool>;
-
-              styles [
-                "error",
-                "flat",
-              ]
-
-              valign: center;
-              icon-name: "dialog-warning-symbolic";
-
-              popover: Popover {
-                child: Label {
-                  margin-top: 8;
-                  margin-bottom: 8;
-                  margin-start: 8;
-                  margin-end: 8;
-                  max-width-chars: 35;
-                  wrap: true;
-                  label: _("This app uses an outdated version of the software platform (SDK) and might contain bugs or security vulnerabilities which will not be fixed.");
-                };
-              };
-            }
-          }
-        }
       };
     };
   };

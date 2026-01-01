@@ -335,6 +335,21 @@ template $BzFullView: Adw.Bin {
                             };
                           }
 
+                          $BzContextTile {
+                            can-target: bind template.entry-group as <$BzEntryGroup>.is_flathub as <bool>;
+                            clicked => $safety_cb(template);
+                            label: bind $get_safety_rating_label(template.ui-entry as <$BzResult>.object as <$BzEntry>) as <string>;
+                            lozenge-style: bind $get_safety_rating_style(template.ui-entry as <$BzResult>.object as <$BzEntry>) as <string>;
+
+                            lozenge-child: Image {
+                              icon-name: bind $get_safety_rating_icon(template.ui-entry as <$BzResult>.object as <$BzEntry>) as <string>;
+                            };
+                          }
+                        }
+
+                        Box {
+                          homogeneous: true;
+
                           $BzContextTile formfactor_support_tile_wide {
                             label: bind $get_formfactor_label(template.ui-entry as <$BzResult>.object as <$BzEntry>.is-mobile-friendly) as <string>;
                             has-tooltip: true;
@@ -380,10 +395,6 @@ template $BzFullView: Adw.Bin {
                               }
                             };
                           }
-                        }
-
-                        Box {
-                          homogeneous: true;
 
                           $BzContextTile {
                             clicked => $age_rating_cb(template);
@@ -412,26 +423,6 @@ template $BzFullView: Adw.Bin {
                               label: bind $format_recent_downloads(template.ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <string>;
                               halign: center;
                               use-markup: true;
-                            };
-                          }
-
-                          $BzContextTile {
-                            can-target: bind template.entry-group as <$BzEntryGroup>.is_flathub as <bool>;
-                            clicked => $open_flathub_url_cb(template);
-                            label: bind template.entry-group as <$BzEntryGroup>.remote-repos-string;
-                            lozenge-style: bind $bool_to_string(template.entry-group as <$BzEntryGroup>.is_flathub, "flathub", "grey") as <string>;
-
-                            lozenge-child: Box {
-                              spacing: 6;
-
-                              Image {
-                                icon-name: "network-server-symbolic";
-                              }
-
-                              Image {
-                                visible: bind template.entry-group as <$BzEntryGroup>.is_flathub as <bool>;
-                                icon-name: "flathub-symbolic";
-                              }
                             };
                           }
                         }
