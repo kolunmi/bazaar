@@ -58,6 +58,7 @@
 #include "bz-util.h"
 #include "bz-window.h"
 #include "bz-yaml-parser.h"
+#include "progress-bar-designs/common.h"
 
 struct _BzApplication
 {
@@ -2715,6 +2716,11 @@ init_service_struct (BzApplication *self,
       self->state, "allow-manual-sync",
       g_action_map_lookup_action (G_ACTION_MAP (self), "sync-remotes"), "enabled",
       G_BINDING_SYNC_CREATE);
+
+  gtk_style_context_add_provider_for_display (
+      gdk_display_get_default (),
+      bz_get_pride_style_provider (),
+      GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 }
 
 static GtkWindow *

@@ -1,3 +1,1 @@
-bz_sources += files(
-  'pride.c',
-)
+subdir('pride')
