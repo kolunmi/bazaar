@@ -39,15 +39,10 @@ struct _BzAppstreamDescriptionRender
 {
   AdwBin parent_instance;
 
-  char    *appstream_description;
-  gboolean selectable;
-
-  GPtrArray *box_children;
-
-  GRegex *split_regex;
+  char *appstream_description;
 
   /* Template widgets */
-  GtkBox *box;
+  GtkTextView *text_view;
 };
 
 G_DEFINE_FINAL_TYPE (BzAppstreamDescriptionRender, bz_appstream_description_render, ADW_TYPE_BIN);
@@ -57,10 +52,10 @@ enum
   PROP_0,
 
   PROP_APPSTREAM_DESCRIPTION,
-  PROP_SELECTABLE,
 
   LAST_PROP
 };
+
 static GParamSpec *props[LAST_PROP] = { 0 };
 
 static void
@@ -69,19 +64,14 @@ regenerate (BzAppstreamDescriptionRender *self);
 static void
 compile (BzAppstreamDescriptionRender *self,
          XbNode                       *node,
-         GString                      *markup,
+         GtkTextBuffer                *buffer,
+         GtkTextIter                  *iter,
          int                           parent_kind,
          int                           idx,
-         int                           depth);
+         gboolean                      is_last_sibling);
 
-static void
-append_text (BzAppstreamDescriptionRender *self,
-             GString                      *markup,
-             const char                   *text,
-             int                           kind,
-             int                           parent_kind,
-             int                           idx,
-             int                           depth);
+static char *
+normalize_whitespace (const char *text);
 
 static void
 bz_appstream_description_render_dispose (GObject *object)
@@ -89,10 +79,6 @@ bz_appstream_description_render_dispose (GObject *object)
   BzAppstreamDescriptionRender *self = BZ_APPSTREAM_DESCRIPTION_RENDER (object);
 
   g_clear_pointer (&self->appstream_description, g_free);
-
-  g_clear_pointer (&self->box_children, g_ptr_array_unref);
-
-  g_clear_pointer (&self->split_regex, g_regex_unref);
 
   G_OBJECT_CLASS (bz_appstream_description_render_parent_class)->dispose (object);
 }
@@ -109,9 +95,6 @@ bz_appstream_description_render_get_property (GObject    *object,
     {
     case PROP_APPSTREAM_DESCRIPTION:
       g_value_set_string (value, bz_appstream_description_render_get_appstream_description (self));
-      break;
-    case PROP_SELECTABLE:
-      g_value_set_boolean (value, bz_appstream_description_render_get_selectable (self));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -130,9 +113,6 @@ bz_appstream_description_render_set_property (GObject      *object,
     {
     case PROP_APPSTREAM_DESCRIPTION:
       bz_appstream_description_render_set_appstream_description (self, g_value_get_string (value));
-      break;
-    case PROP_SELECTABLE:
-      bz_appstream_description_render_set_selectable (self, g_value_get_boolean (value));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -155,27 +135,55 @@ bz_appstream_description_render_class_init (BzAppstreamDescriptionRenderClass *k
           NULL, NULL, NULL,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
-  props[PROP_SELECTABLE] =
-      g_param_spec_boolean (
-          "selectable",
-          NULL, NULL, FALSE,
-          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
-
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-appstream-description-render.ui");
-  gtk_widget_class_bind_template_child (widget_class, BzAppstreamDescriptionRender, box);
+  gtk_widget_class_bind_template_child (widget_class, BzAppstreamDescriptionRender, text_view);
+}
+
+static void
+setup_text_tags (GtkTextBuffer *buffer)
+{
+  gtk_text_buffer_create_tag (buffer, "code",
+                              "family", "monospace",
+                              NULL);
+
+  gtk_text_buffer_create_tag (buffer, "emphasis",
+                              "weight", PANGO_WEIGHT_BOLD,
+                              NULL);
+
+  gtk_text_buffer_create_tag (buffer, "paragraph",
+                              "pixels-below-lines", 6,
+                              NULL);
+
+  gtk_text_buffer_create_tag (buffer, "list-item-ul",
+                              "left-margin", 10,
+                              "pixels-below-lines", 4,
+                              "indent", -12,
+                              NULL);
+
+  gtk_text_buffer_create_tag (buffer, "list-item-ol",
+                              "left-margin", 10,
+                              "pixels-below-lines", 4,
+                              "indent", -18,
+                              NULL);
+
+  gtk_text_buffer_create_tag (buffer, "list-number",
+                              "family", "monospace",
+                              "foreground", "gray",
+                              NULL);
 }
 
 static void
 bz_appstream_description_render_init (BzAppstreamDescriptionRender *self)
 {
+  GtkTextBuffer *buffer = NULL;
+
   gtk_widget_init_template (GTK_WIDGET (self));
 
-  self->box_children = g_ptr_array_new ();
-
-  self->split_regex = g_regex_new ("\\s+", G_REGEX_DEFAULT, G_REGEX_MATCH_DEFAULT, NULL);
-  g_assert (self->split_regex);
+  buffer = gtk_text_view_get_buffer (self->text_view);
+  setup_text_tags (buffer);
+  gtk_widget_remove_css_class (GTK_WIDGET (self->text_view), "view");
 }
 
 BzAppstreamDescriptionRender *
@@ -189,13 +197,6 @@ bz_appstream_description_render_get_appstream_description (BzAppstreamDescriptio
 {
   g_return_val_if_fail (BZ_IS_APPSTREAM_DESCRIPTION_RENDER (self), NULL);
   return self->appstream_description;
-}
-
-gboolean
-bz_appstream_description_render_get_selectable (BzAppstreamDescriptionRender *self)
-{
-  g_return_val_if_fail (BZ_IS_APPSTREAM_DESCRIPTION_RENDER (self), FALSE);
-  return self->selectable;
 }
 
 void
@@ -213,32 +214,18 @@ bz_appstream_description_render_set_appstream_description (BzAppstreamDescriptio
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APPSTREAM_DESCRIPTION]);
 }
 
-void
-bz_appstream_description_render_set_selectable (BzAppstreamDescriptionRender *self,
-                                                gboolean                      selectable)
-{
-  g_return_if_fail (BZ_IS_APPSTREAM_DESCRIPTION_RENDER (self));
-
-  self->selectable = selectable;
-
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SELECTABLE]);
-}
-
 static void
 regenerate (BzAppstreamDescriptionRender *self)
 {
   g_autoptr (GError) local_error = NULL;
   g_autoptr (XbSilo) silo        = NULL;
   g_autoptr (XbNode) root        = NULL;
+  GtkTextBuffer *buffer          = NULL;
+  GtkTextIter    iter            = { 0 };
+  int            node_count      = 0;
 
-  for (guint i = 0; i < self->box_children->len; i++)
-    {
-      GtkWidget *child = NULL;
-
-      child = g_ptr_array_index (self->box_children, i);
-      gtk_box_remove (self->box, child);
-    }
-  g_ptr_array_set_size (self->box_children, 0);
+  buffer = gtk_text_view_get_buffer (self->text_view);
+  gtk_text_buffer_set_text (buffer, "", 0);
 
   if (self->appstream_description == NULL)
     return;
@@ -250,17 +237,18 @@ regenerate (BzAppstreamDescriptionRender *self)
       return;
     }
 
+  gtk_text_buffer_get_end_iter (buffer, &iter);
   root = xb_silo_get_root (silo);
+
+  for (XbNode *n = root; n != NULL; n = xb_node_get_next (n))
+    node_count++;
+
   for (int i = 0; root != NULL; i++)
     {
-      const char *tail        = NULL;
       g_autoptr (XbNode) next = NULL;
+      gboolean is_last        = (i == node_count - 1);
 
-      compile (self, root, NULL, NO_ELEMENT, i, 0);
-
-      tail = xb_node_get_tail (root);
-      if (tail != NULL)
-        append_text (self, NULL, tail, NO_ELEMENT, NO_ELEMENT, 0, 0);
+      compile (self, root, buffer, &iter, NO_ELEMENT, i, is_last);
 
       next = xb_node_get_next (root);
       g_object_unref (root);
@@ -271,28 +259,30 @@ regenerate (BzAppstreamDescriptionRender *self)
 static void
 compile (BzAppstreamDescriptionRender *self,
          XbNode                       *node,
-         GString                      *markup,
+         GtkTextBuffer                *buffer,
+         GtkTextIter                  *iter,
          int                           parent_kind,
          int                           idx,
-         int                           depth)
+         gboolean                      is_last_sibling)
 {
-  XbNode     *child              = NULL;
-  const char *element            = NULL;
-  const char *text               = NULL;
-  int         kind               = NO_ELEMENT;
-  g_autoptr (GString) new_markup = NULL;
-  GString *cur_markup            = markup;
+  const char  *element    = NULL;
+  const char  *text       = NULL;
+  XbNode      *child      = NULL;
+  int          kind       = NO_ELEMENT;
+  GtkTextMark *start_mark = NULL;
 
-  child   = xb_node_get_child (node);
-  element = xb_node_get_element (node);
-  text    = xb_node_get_text (node);
+  element    = xb_node_get_element (node);
+  text       = xb_node_get_text (node);
+  child      = xb_node_get_child (node);
+  kind       = NO_ELEMENT;
+  start_mark = NULL;
 
   if (element != NULL)
     {
       if (g_strcmp0 (element, "p") == 0)
         {
           kind       = PARAGRAPH;
-          cur_markup = new_markup = g_string_new (NULL);
+          start_mark = gtk_text_buffer_create_mark (buffer, NULL, iter, TRUE);
         }
       else if (g_strcmp0 (element, "ol") == 0)
         kind = ORDERED_LIST;
@@ -301,130 +291,137 @@ compile (BzAppstreamDescriptionRender *self,
       else if (g_strcmp0 (element, "li") == 0)
         {
           kind       = LIST_ITEM;
-          cur_markup = new_markup = g_string_new (NULL);
+          start_mark = gtk_text_buffer_create_mark (buffer, NULL, iter, TRUE);
+
+          if (parent_kind == ORDERED_LIST)
+            {
+              g_autofree char *prefix = NULL;
+              GtkTextMark     *prefix_start_mark;
+              GtkTextIter      prefix_start_iter;
+
+              prefix_start_mark = gtk_text_buffer_create_mark (buffer, NULL, iter, TRUE);
+              prefix            = g_strdup_printf ("%d.", idx + 1);
+              gtk_text_buffer_insert (buffer, iter, prefix, -1);
+
+              gtk_text_buffer_get_iter_at_mark (buffer, &prefix_start_iter, prefix_start_mark);
+              gtk_text_buffer_apply_tag_by_name (buffer, "list-number", &prefix_start_iter, iter);
+              gtk_text_buffer_delete_mark (buffer, prefix_start_mark);
+            }
+          else if (parent_kind == UNORDERED_LIST)
+            gtk_text_buffer_insert (buffer, iter, "• ", -1);
         }
       else if (g_strcmp0 (element, "code") == 0)
         {
-          kind = CODE;
-          if (cur_markup != NULL)
-            g_string_append (cur_markup, "<tt>");
+          kind       = CODE;
+          start_mark = gtk_text_buffer_create_mark (buffer, NULL, iter, TRUE);
         }
       else if (g_strcmp0 (element, "em") == 0)
         {
-          kind = EMPHASIS;
-          if (cur_markup != NULL)
-            g_string_append (cur_markup, "<b>");
+          kind       = EMPHASIS;
+          start_mark = gtk_text_buffer_create_mark (buffer, NULL, iter, TRUE);
         }
     }
 
   if (text != NULL)
-    append_text (self, cur_markup, text, kind, parent_kind, idx, depth);
+    {
+      g_autofree char *normalized = NULL;
+
+      normalized = normalize_whitespace (text);
+      if (normalized != NULL && *normalized != '\0')
+        gtk_text_buffer_insert (buffer, iter, normalized, -1);
+    }
 
   for (int i = 0; child != NULL; i++)
     {
       const char *tail = NULL;
       XbNode     *next = NULL;
 
-      compile (self, child, cur_markup, kind, i, depth + 1);
+      next = xb_node_get_next (child);
+      compile (self, child, buffer, iter, kind, i, next == NULL);
 
       tail = xb_node_get_tail (child);
       if (tail != NULL)
-        append_text (self, cur_markup, tail, kind, parent_kind, idx, depth);
+        {
+          g_autofree char *normalized = NULL;
 
-      next = xb_node_get_next (child);
+          normalized = normalize_whitespace (tail);
+          if (normalized != NULL && *normalized != '\0')
+            gtk_text_buffer_insert (buffer, iter, normalized, -1);
+        }
+
       g_object_unref (child);
       child = next;
     }
 
-  if (cur_markup != NULL)
+  if (start_mark != NULL)
     {
-      if (kind == EMPHASIS)
-        g_string_append (cur_markup, "</b>");
-      else if (kind == CODE)
-        g_string_append (cur_markup, "</tt>");
+      GtkTextIter start_iter = { 0 };
+
+      gtk_text_buffer_get_iter_at_mark (buffer, &start_iter, start_mark);
+
+      if (kind == CODE)
+        gtk_text_buffer_apply_tag_by_name (buffer, "code", &start_iter, iter);
+      else if (kind == EMPHASIS)
+        gtk_text_buffer_apply_tag_by_name (buffer, "emphasis", &start_iter, iter);
+      else if (kind == PARAGRAPH)
+        gtk_text_buffer_apply_tag_by_name (buffer, "paragraph", &start_iter, iter);
+      else if (kind == LIST_ITEM)
+        {
+          const char *tag_name = NULL;
+
+          tag_name = (parent_kind == ORDERED_LIST) ? "list-item-ol" : "list-item-ul";
+          gtk_text_buffer_apply_tag_by_name (buffer, tag_name, &start_iter, iter);
+          gtk_text_buffer_insert (buffer, iter, "\n", 1);
+        }
+
+      gtk_text_buffer_delete_mark (buffer, start_mark);
     }
 
-  if (new_markup != NULL)
-    append_text (self, NULL, new_markup->str, kind, parent_kind, idx, depth);
+  if (kind == PARAGRAPH && !is_last_sibling)
+    gtk_text_buffer_insert (buffer, iter, "\n", 1);
+  else if ((kind == ORDERED_LIST || kind == UNORDERED_LIST) && !is_last_sibling)
+    gtk_text_buffer_insert (buffer, iter, "\n", 1);
 }
 
-static void
-append_text (BzAppstreamDescriptionRender *self,
-             GString                      *markup,
-             const char                   *text,
-             int                           kind,
-             int                           parent_kind,
-             int                           idx,
-             int                           depth)
+static char *
+normalize_whitespace (const char *text)
 {
-  if (markup != NULL)
+  GString *result   = NULL;
+  gboolean in_space = FALSE;
+  gboolean at_start = TRUE;
+
+  if (text == NULL)
+    return NULL;
+
+  result = g_string_new (NULL);
+
+  for (const char *p = text;
+       p != NULL && *p != '\0';
+       p = g_utf8_next_char (p))
     {
-      g_autofree char *escaped = NULL;
+      gunichar ch = 0;
 
-      escaped = g_markup_escape_text (text, -1);
-      g_string_append (markup, escaped);
-    }
-  else
-    {
-      g_auto (GStrv) tokens     = NULL;
-      g_autoptr (GString) fixed = NULL;
-      GtkWidget *child          = NULL;
-
-      tokens = g_regex_split (self->split_regex, text, G_REGEX_MATCH_DEFAULT);
-      fixed  = g_string_new (NULL);
-      for (guint i = 0; tokens[i] != NULL; i++)
+      ch = g_utf8_get_char (p);
+      if (g_unichar_isspace (ch))
         {
-          if (*tokens[i] == '\0')
-            /* Avoid extra whitespace */
-            continue;
-
-          if (fixed->len > 0)
-            g_string_append_printf (fixed, " %s", tokens[i]);
-          else
-            g_string_append (fixed, tokens[i]);
+          if (!at_start && !in_space)
+            {
+              g_string_append_c (result, ' ');
+              in_space = TRUE;
+            }
         }
-
-      child = gtk_label_new (fixed->str);
-      gtk_label_set_use_markup (GTK_LABEL (child), TRUE);
-      gtk_label_set_wrap (GTK_LABEL (child), TRUE);
-      gtk_label_set_wrap_mode (GTK_LABEL (child), PANGO_WRAP_WORD_CHAR);
-      gtk_label_set_xalign (GTK_LABEL (child), 0.0);
-      gtk_label_set_selectable (GTK_LABEL (child), TRUE);
-
-      if (kind == LIST_ITEM)
+      else
         {
-          GtkWidget *box    = NULL;
-          GtkWidget *prefix = NULL;
-
-          box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-          if (parent_kind == ORDERED_LIST)
-            {
-              g_autofree char *prefix_text = NULL;
-
-              prefix_text = g_strdup_printf ("%d)", idx + 1);
-              prefix      = gtk_label_new (prefix_text);
-              gtk_widget_add_css_class (prefix, "caption");
-            }
-          else
-            {
-              prefix = gtk_image_new_from_icon_name ("circle-filled-symbolic");
-              gtk_image_set_pixel_size (GTK_IMAGE (prefix), 6);
-              gtk_widget_set_margin_top (prefix, 6);
-            }
-          gtk_widget_add_css_class (prefix, "dimmed");
-          gtk_widget_set_valign (prefix, GTK_ALIGN_START);
-
-          gtk_box_append (GTK_BOX (box), prefix);
-          gtk_box_append (GTK_BOX (box), child);
-
-          child = box;
+          g_string_append_unichar (result, ch);
+          in_space = FALSE;
+          at_start = FALSE;
         }
-
-      gtk_widget_set_margin_start (child, 10 * depth);
-
-      gtk_box_append (self->box, child);
-      g_ptr_array_add (self->box_children, child);
     }
+
+  if (result->len > 0 && result->str[result->len - 1] == ' ')
+    g_string_truncate (result, result->len - 1);
+
+  return g_string_free (result, FALSE);
 }
 
 /* End of bz-appstream-description-render.c */

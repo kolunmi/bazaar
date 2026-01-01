@@ -33,16 +33,9 @@ bz_appstream_description_render_new (void);
 const char *
 bz_appstream_description_render_get_appstream_description (BzAppstreamDescriptionRender *self);
 
-gboolean
-bz_appstream_description_render_get_selectable (BzAppstreamDescriptionRender *self);
-
 void
 bz_appstream_description_render_set_appstream_description (BzAppstreamDescriptionRender *self,
                                                            const char                   *appstream_description);
-
-void
-bz_appstream_description_render_set_selectable (BzAppstreamDescriptionRender *self,
-                                                gboolean                      selectable);
 
 G_END_DECLS
 
