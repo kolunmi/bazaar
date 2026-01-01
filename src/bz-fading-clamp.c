@@ -215,12 +215,16 @@ bz_fading_clamp_snapshot (GtkWidget *widget, GtkSnapshot *snapshot)
   GskColorStop     stops[2];
   graphene_point_t start_point, end_point;
   int              effective_fade_height;
+  float            stop_offset;
 
   if (!self->child || !gtk_widget_get_visible (self->child))
     return;
 
   width  = gtk_widget_get_width (widget);
   height = gtk_widget_get_height (widget);
+
+  if (height <= 0)
+    return;
 
   gtk_widget_measure (self->child, GTK_ORIENTATION_VERTICAL, width, NULL, &natural_height, NULL, NULL);
 
@@ -237,8 +241,10 @@ bz_fading_clamp_snapshot (GtkWidget *widget, GtkSnapshot *snapshot)
   gradient_start = height - effective_fade_height;
   graphene_rect_init (&gradient_rect, 0, 0, width, height);
 
+  stop_offset = CLAMP ((float) gradient_start / height, 0.0f, 1.0f);
+
   stops[0] = (GskColorStop) {
-    (float) gradient_start / height, { 1, 1, 1, 1 }
+    stop_offset, { 1, 1, 1, 1 }
   };
   stops[1] = (GskColorStop) {
     1.0, { 1, 1, 1, 0 }
