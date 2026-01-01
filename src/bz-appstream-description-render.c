@@ -395,9 +395,14 @@ normalize_whitespace (const char *text)
 
   result = g_string_new (NULL);
 
-  for (const char *p = text; *p != '\0'; p++)
+  for (const char *p = text;
+       p != NULL && *p != '\0';
+       p = g_utf8_next_char (p))
     {
-      if (g_ascii_isspace (*p))
+      gunichar ch = 0;
+
+      ch = g_utf8_get_char (p);
+      if (g_unichar_isspace (ch))
         {
           if (!at_start && !in_space)
             {
@@ -407,7 +412,7 @@ normalize_whitespace (const char *text)
         }
       else
         {
-          g_string_append_c (result, *p);
+          g_string_append_unichar (result, ch);
           in_space = FALSE;
           at_start = FALSE;
         }
