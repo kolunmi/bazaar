@@ -58,15 +58,20 @@ enum
 
 static GParamSpec *props[LAST_PROP] = { 0 };
 
-static void regenerate (BzAppstreamDescriptionRender *self);
+static void
+regenerate (BzAppstreamDescriptionRender *self);
 
-static void compile (BzAppstreamDescriptionRender *self,
-                     XbNode                       *node,
-                     GtkTextBuffer                *buffer,
-                     GtkTextIter                  *iter,
-                     int                           parent_kind,
-                     int                           idx,
-                     gboolean                      is_last_sibling);
+static void
+compile (BzAppstreamDescriptionRender *self,
+         XbNode                       *node,
+         GtkTextBuffer                *buffer,
+         GtkTextIter                  *iter,
+         int                           parent_kind,
+         int                           idx,
+         gboolean                      is_last_sibling);
+
+static char *
+normalize_whitespace (const char *text);
 
 static void
 bz_appstream_description_render_dispose (GObject *object)
@@ -172,7 +177,7 @@ setup_text_tags (GtkTextBuffer *buffer)
 static void
 bz_appstream_description_render_init (BzAppstreamDescriptionRender *self)
 {
-  GtkTextBuffer *buffer;
+  GtkTextBuffer *buffer = NULL;
 
   gtk_widget_init_template (GTK_WIDGET (self));
 
@@ -215,9 +220,9 @@ regenerate (BzAppstreamDescriptionRender *self)
   g_autoptr (GError) local_error = NULL;
   g_autoptr (XbSilo) silo        = NULL;
   g_autoptr (XbNode) root        = NULL;
-  GtkTextBuffer *buffer;
-  GtkTextIter    iter;
-  int            node_count = 0;
+  GtkTextBuffer *buffer          = NULL;
+  GtkTextIter    iter            = { 0 };
+  int            node_count      = 0;
 
   buffer = gtk_text_view_get_buffer (self->text_view);
   gtk_text_buffer_set_text (buffer, "", 0);
@@ -251,10 +256,137 @@ regenerate (BzAppstreamDescriptionRender *self)
     }
 }
 
+static void
+compile (BzAppstreamDescriptionRender *self,
+         XbNode                       *node,
+         GtkTextBuffer                *buffer,
+         GtkTextIter                  *iter,
+         int                           parent_kind,
+         int                           idx,
+         gboolean                      is_last_sibling)
+{
+  const char  *element    = NULL;
+  const char  *text       = NULL;
+  XbNode      *child      = NULL;
+  int          kind       = NO_ELEMENT;
+  GtkTextMark *start_mark = NULL;
+
+  element    = xb_node_get_element (node);
+  text       = xb_node_get_text (node);
+  child      = xb_node_get_child (node);
+  kind       = NO_ELEMENT;
+  start_mark = NULL;
+
+  if (element != NULL)
+    {
+      if (g_strcmp0 (element, "p") == 0)
+        {
+          kind       = PARAGRAPH;
+          start_mark = gtk_text_buffer_create_mark (buffer, NULL, iter, TRUE);
+        }
+      else if (g_strcmp0 (element, "ol") == 0)
+        kind = ORDERED_LIST;
+      else if (g_strcmp0 (element, "ul") == 0)
+        kind = UNORDERED_LIST;
+      else if (g_strcmp0 (element, "li") == 0)
+        {
+          kind       = LIST_ITEM;
+          start_mark = gtk_text_buffer_create_mark (buffer, NULL, iter, TRUE);
+
+          if (parent_kind == ORDERED_LIST)
+            {
+              g_autofree char *prefix = NULL;
+              GtkTextMark     *prefix_start_mark;
+              GtkTextIter      prefix_start_iter;
+
+              prefix_start_mark = gtk_text_buffer_create_mark (buffer, NULL, iter, TRUE);
+              prefix            = g_strdup_printf ("%d.", idx + 1);
+              gtk_text_buffer_insert (buffer, iter, prefix, -1);
+
+              gtk_text_buffer_get_iter_at_mark (buffer, &prefix_start_iter, prefix_start_mark);
+              gtk_text_buffer_apply_tag_by_name (buffer, "list-number", &prefix_start_iter, iter);
+              gtk_text_buffer_delete_mark (buffer, prefix_start_mark);
+            }
+          else if (parent_kind == UNORDERED_LIST)
+            gtk_text_buffer_insert (buffer, iter, "• ", -1);
+        }
+      else if (g_strcmp0 (element, "code") == 0)
+        {
+          kind       = CODE;
+          start_mark = gtk_text_buffer_create_mark (buffer, NULL, iter, TRUE);
+        }
+      else if (g_strcmp0 (element, "em") == 0)
+        {
+          kind       = EMPHASIS;
+          start_mark = gtk_text_buffer_create_mark (buffer, NULL, iter, TRUE);
+        }
+    }
+
+  if (text != NULL)
+    {
+      g_autofree char *normalized = NULL;
+
+      normalized = normalize_whitespace (text);
+      if (normalized != NULL && *normalized != '\0')
+        gtk_text_buffer_insert (buffer, iter, normalized, -1);
+    }
+
+  for (int i = 0; child != NULL; i++)
+    {
+      const char *tail = NULL;
+      XbNode     *next = NULL;
+
+      next = xb_node_get_next (child);
+      compile (self, child, buffer, iter, kind, i, next == NULL);
+
+      tail = xb_node_get_tail (child);
+      if (tail != NULL)
+        {
+          g_autofree char *normalized = NULL;
+
+          normalized = normalize_whitespace (tail);
+          if (normalized != NULL && *normalized != '\0')
+            gtk_text_buffer_insert (buffer, iter, normalized, -1);
+        }
+
+      g_object_unref (child);
+      child = next;
+    }
+
+  if (start_mark != NULL)
+    {
+      GtkTextIter start_iter = { 0 };
+
+      gtk_text_buffer_get_iter_at_mark (buffer, &start_iter, start_mark);
+
+      if (kind == CODE)
+        gtk_text_buffer_apply_tag_by_name (buffer, "code", &start_iter, iter);
+      else if (kind == EMPHASIS)
+        gtk_text_buffer_apply_tag_by_name (buffer, "emphasis", &start_iter, iter);
+      else if (kind == PARAGRAPH)
+        gtk_text_buffer_apply_tag_by_name (buffer, "paragraph", &start_iter, iter);
+      else if (kind == LIST_ITEM)
+        {
+          const char *tag_name = NULL;
+
+          tag_name = (parent_kind == ORDERED_LIST) ? "list-item-ol" : "list-item-ul";
+          gtk_text_buffer_apply_tag_by_name (buffer, tag_name, &start_iter, iter);
+          gtk_text_buffer_insert (buffer, iter, "\n", 1);
+        }
+
+      gtk_text_buffer_delete_mark (buffer, start_mark);
+    }
+
+  if (kind == PARAGRAPH && !is_last_sibling)
+    gtk_text_buffer_insert (buffer, iter, "\n", 1);
+  else if ((kind == ORDERED_LIST || kind == UNORDERED_LIST) && !is_last_sibling)
+    gtk_text_buffer_insert (buffer, iter, "\n", 1);
+}
+
 static char *
 normalize_whitespace (const char *text)
 {
-  GString *result;
+  GString *result   = NULL;
   gboolean in_space = FALSE;
   gboolean at_start = TRUE;
 
@@ -285,136 +417,6 @@ normalize_whitespace (const char *text)
     g_string_truncate (result, result->len - 1);
 
   return g_string_free (result, FALSE);
-}
-
-static void
-compile (BzAppstreamDescriptionRender *self,
-         XbNode                       *node,
-         GtkTextBuffer                *buffer,
-         GtkTextIter                  *iter,
-         int                           parent_kind,
-         int                           idx,
-         gboolean                      is_last_sibling)
-{
-  const char  *element;
-  const char  *text;
-  XbNode      *child;
-  int          kind;
-  GtkTextMark *start_mark;
-
-  element    = xb_node_get_element (node);
-  text       = xb_node_get_text (node);
-  child      = xb_node_get_child (node);
-  kind       = NO_ELEMENT;
-  start_mark = NULL;
-
-  if (element != NULL)
-    {
-      if (g_strcmp0 (element, "p") == 0)
-        {
-          kind       = PARAGRAPH;
-          start_mark = gtk_text_buffer_create_mark (buffer, NULL, iter, TRUE);
-        }
-      else if (g_strcmp0 (element, "ol") == 0)
-        kind = ORDERED_LIST;
-      else if (g_strcmp0 (element, "ul") == 0)
-        kind = UNORDERED_LIST;
-      else if (g_strcmp0 (element, "li") == 0)
-        {
-          g_autofree char *prefix = NULL;
-
-          kind       = LIST_ITEM;
-          start_mark = gtk_text_buffer_create_mark (buffer, NULL, iter, TRUE);
-
-          if (parent_kind == ORDERED_LIST)
-            {
-              GtkTextMark *prefix_start_mark;
-              GtkTextIter  prefix_start_iter;
-
-              prefix_start_mark = gtk_text_buffer_create_mark (buffer, NULL, iter, TRUE);
-              prefix            = g_strdup_printf ("%d.", idx + 1);
-              gtk_text_buffer_insert (buffer, iter, prefix, -1);
-
-              gtk_text_buffer_get_iter_at_mark (buffer, &prefix_start_iter, prefix_start_mark);
-              gtk_text_buffer_apply_tag_by_name (buffer, "list-number", &prefix_start_iter, iter);
-              gtk_text_buffer_delete_mark (buffer, prefix_start_mark);
-            }
-          else if (parent_kind == UNORDERED_LIST)
-            {
-              gtk_text_buffer_insert (buffer, iter, "• ", -1);
-            }
-        }
-      else if (g_strcmp0 (element, "code") == 0)
-        {
-          kind       = CODE;
-          start_mark = gtk_text_buffer_create_mark (buffer, NULL, iter, TRUE);
-        }
-      else if (g_strcmp0 (element, "em") == 0)
-        {
-          kind       = EMPHASIS;
-          start_mark = gtk_text_buffer_create_mark (buffer, NULL, iter, TRUE);
-        }
-    }
-
-  if (text != NULL)
-    {
-      g_autofree char *normalized = normalize_whitespace (text);
-      if (normalized != NULL && *normalized != '\0')
-        gtk_text_buffer_insert (buffer, iter, normalized, -1);
-    }
-
-  for (int i = 0; child != NULL; i++)
-    {
-      const char *tail;
-      XbNode     *next;
-
-      next = xb_node_get_next (child);
-      compile (self, child, buffer, iter, kind, i, next == NULL);
-
-      tail = xb_node_get_tail (child);
-      if (tail != NULL)
-        {
-          g_autofree char *normalized = normalize_whitespace (tail);
-          if (normalized != NULL && *normalized != '\0')
-            gtk_text_buffer_insert (buffer, iter, normalized, -1);
-        }
-
-      g_object_unref (child);
-      child = next;
-    }
-
-  if (start_mark != NULL)
-    {
-      GtkTextIter start_iter;
-
-      gtk_text_buffer_get_iter_at_mark (buffer, &start_iter, start_mark);
-
-      if (kind == CODE)
-        gtk_text_buffer_apply_tag_by_name (buffer, "code", &start_iter, iter);
-      else if (kind == EMPHASIS)
-        gtk_text_buffer_apply_tag_by_name (buffer, "emphasis", &start_iter, iter);
-      else if (kind == PARAGRAPH)
-        gtk_text_buffer_apply_tag_by_name (buffer, "paragraph", &start_iter, iter);
-      else if (kind == LIST_ITEM)
-        {
-          const char *tag_name;
-
-          tag_name = (parent_kind == ORDERED_LIST) ? "list-item-ol" : "list-item-ul";
-          gtk_text_buffer_apply_tag_by_name (buffer, tag_name, &start_iter, iter);
-          gtk_text_buffer_insert (buffer, iter, "\n", 1);
-        }
-
-      gtk_text_buffer_delete_mark (buffer, start_mark);
-    }
-
-  if (kind == PARAGRAPH && !is_last_sibling)
-    {
-      gtk_text_buffer_insert (buffer, iter, "\n", 1);
-    }
-  else if ((kind == ORDERED_LIST || kind == UNORDERED_LIST) && !is_last_sibling)
-    {
-      gtk_text_buffer_insert (buffer, iter, "\n", 1);
-    }
 }
 
 /* End of bz-appstream-description-render.c */
