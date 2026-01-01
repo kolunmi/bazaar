@@ -591,7 +591,7 @@ msgstr "Adam Masciola"
 #. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
 #: src/bz-application.c:685
 msgid "translator-credits"
-msgstr "μεταφραστής-συντελεστές"
+msgstr "Xarishark-Zacharias Xenakis"
 
 #: src/bz-application.c:749
 msgid "Logged Out Successfully!"
