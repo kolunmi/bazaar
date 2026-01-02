@@ -30,25 +30,45 @@
       <choices>
         <choice value="accent-color"/>
         <choice value="pride-rainbow-flag"/>
+        <choice value="pride-rainbow-flag-horizontal"/>
         <choice value="lesbian-pride-flag"/>
+        <choice value="lesbian-pride-flag-horizontal"/>
         <choice value="gay-pride-flag"/>
+        <choice value="gay-pride-flag-horizontal"/>
         <choice value="transgender-flag"/>
+        <choice value="transgender-flag-horizontal"/>
         <choice value="nonbinary-flag"/>
+        <choice value="nonbinary-flag-horizontal"/>
         <choice value="bisexual-flag"/>
+        <choice value="bisexual-flag-horizontal"/>
         <choice value="asexual-flag"/>
+        <choice value="asexual-flag-horizontal"/>
         <choice value="pansexual-flag"/>
+        <choice value="pansexual-flag-horizontal"/>
         <choice value="aromantic-flag"/>
+        <choice value="aromantic-flag-horizontal"/>
         <choice value="genderfluid-flag"/>
+        <choice value="genderfluid-flag-horizontal"/>
         <choice value="polysexual-flag"/>
+        <choice value="polysexual-flag-horizontal"/>
         <choice value="omnisexual-flag"/>
+        <choice value="omnisexual-flag-horizontal"/>
         <choice value="aroace-flag"/>
+        <choice value="aroace-flag-horizontal"/>
         <choice value="agender-flag"/>
+        <choice value="agender-flag-horizontal"/>
         <choice value="genderqueer-flag"/>
+        <choice value="genderqueer-flag-horizontal"/>
         <choice value="intersex-flag"/>
+        <choice value="intersex-flag-horizontal"/>
         <choice value="demigender-flag"/>
+        <choice value="demigender-flag-horizontal"/>
         <choice value="biromantic-flag"/>
+        <choice value="biromantic-flag-horizontal"/>
         <choice value="disability-flag"/>
+        <choice value="disability-flag-horizontal"/>
         <choice value="femboy-flag"/>
+        <choice value="femboy-flag-horizontal"/>
       </choices>
       <default>'accent-color'</default>
       <summary>Global Progress Bar Theme</summary>

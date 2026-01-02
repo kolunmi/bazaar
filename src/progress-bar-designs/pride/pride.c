@@ -79,6 +79,7 @@ bz_get_pride_style_provider (void)
                   const char *name                      = NULL;
                   gboolean    homogeneous               = FALSE;
                   GListModel *stripes                   = NULL;
+                  const char *direction                 = NULL;
                   g_autoptr (GString) stripe_css        = NULL;
                   guint    n_stripes                    = 0;
                   double   cur_offset                   = 0.0;
@@ -90,6 +91,7 @@ bz_get_pride_style_provider (void)
                   name        = bz_pride_flag_spec_get_name (flag_spec);
                   homogeneous = bz_pride_flag_spec_get_homogeneous (flag_spec);
                   stripes     = bz_pride_flag_spec_get_stripes (flag_spec);
+                  direction   = bz_pride_flag_spec_get_direction (flag_spec);
 
                   if (id == NULL)
                     {
@@ -107,10 +109,13 @@ bz_get_pride_style_provider (void)
                       continue;
                     }
 
+                  if (direction == NULL)
+                    direction = "to bottom";
+
                   stripe_css = g_string_new (NULL);
                   g_string_append_printf (stripe_css, ".%s-theme { ", id);
 
-                  g_string_append (stripe_css, "--flag-gradient: linear-gradient(to bottom");
+                  g_string_append_printf (stripe_css, "--flag-gradient: linear-gradient(%s", direction);
                   n_stripes = g_list_model_get_n_items (stripes);
                   for (guint j = 0; j < n_stripes; j++)
                     {

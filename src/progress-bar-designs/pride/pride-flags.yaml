@@ -7,8 +7,10 @@ flag-specs:
     # (optional) set to true if the flag is homogeneous, or put more
     # shrimply(🦐) each stripe has the same vertical size
     homogeneous: true
+    # the direction in which the stripes are drawn (css format)
+    direction: to bottom
     # list of stripe specs
-    stripes:
+    stripes: &pride-rainbow-flag-stripes
       - # all stripes must provide the `rgba` field, which will is the color of
         # the stripe. Many formats are supported for this; here is a snippet
         # from the GDK source, listing the formats:
@@ -40,10 +42,18 @@ flag-specs:
       - rgba: "#24408E"
       - rgba: "#732982"
 
+  - id: "pride-rainbow-flag-horizontal"
+    name: "Pride Rainbow Flag (Horizontal)"
+    homogeneous: true
+    direction: to right
+    stripes: *pride-rainbow-flag-stripes
+
+
   - id: "lesbian-pride-flag"
     name: "Lesbian Pride Flag"
     homogeneous: true
-    stripes:
+    direction: to bottom
+    stripes: &lesbian-flag-stripes
       - rgba: "#D62800"
       - rgba: "#EF7627"
       - rgba: "#FF9B56"
@@ -52,10 +62,18 @@ flag-specs:
       - rgba: "#B55690"
       - rgba: "#A30262"
 
+  - id: "lesbian-pride-flag-horizontal"
+    name: "Lesbian Pride Flag (Horizontal)"
+    homogeneous: true
+    direction: to right
+    stripes: *lesbian-flag-stripes
+
+
   - id: "gay-pride-flag"
     name: "Gay Pride Flag"
     homogeneous: true
-    stripes:
+    direction: to bottom
+    stripes: &gay-pride-flag-stripes
       - rgba: "#018E71"
       - rgba: "#21CFAC"
       - rgba: "#9AE9C3"
@@ -64,28 +82,52 @@ flag-specs:
       - rgba: "#4F47CC"
       - rgba: "#3C1379"
 
+  - id: "gay-pride-flag-horizontal"
+    name: "Gay Pride Flag (Horizontal)"
+    homogeneous: true
+    direction: to right
+    stripes: *gay-pride-flag-stripes
+
+
   - id: "transgender-flag"
     name: "Transgender Flag"
     homogeneous: true
-    stripes:
+    direction: to bottom
+    stripes: &transgender-flag-stripes
       - rgba: "#5BCEFA"
       - rgba: "#F5A9B8"
       - rgba: "#FFFFFF"
       - rgba: "#F5A9B8"
       - rgba: "#5BCEFA"
 
+  - id: "transgender-flag-horizontal"
+    name: "Transgender Flag (Horizontal)"
+    homogeneous: true
+    direction: to right
+    stripes: *transgender-flag-stripes
+
+
   - id: "nonbinary-flag"
     name: "Nonbinary Flag"
     homogeneous: true
-    stripes:
+    direction: to bottom
+    stripes: &nonbinary-flag-stripes
       - rgba: "#FCF434"
       - rgba: "#FFFFFF"
       - rgba: "#9C59D1"
       - rgba: "#2C2C2C"
 
+  - id: "nonbinary-flag-horizontal"
+    name: "Nonbinary Flag (Horizontal)"
+    homogeneous: true
+    direction: to right
+    stripes: *nonbinary-flag-stripes
+
+
   - id: "bisexual-flag"
     name: "Bisexual Flag"
-    stripes:
+    direction: to bottom
+    stripes: &bisexual-flag-stripes
       - rgba: "#D60270"
         size: 0.4
       - rgba: "#9B4F96"
@@ -93,75 +135,138 @@ flag-specs:
       - rgba: "#0038A8"
         size: 0.4
 
+  - id: "bisexual-flag-horizontal"
+    name: "Bisexual Flag (Horizontal)"
+    direction: to right
+    stripes: *bisexual-flag-stripes
+
+
   - id: "asexual-flag"
     name: "Asexual Flag"
     homogeneous: true
-    stripes:
+    direction: to bottom
+    stripes: &asexual-flag-stripes
       - rgba: "#000000"
       - rgba: "#A3A3A3"
       - rgba: "#FFFFFF"
       - rgba: "#810081"
 
+  - id: "asexual-flag-horizontal"
+    name: "Asexual Flag (Horizontal)"
+    homogeneous: true
+    direction: to right
+    stripes: *asexual-flag-stripes
+
+
   - id: "pansexual-flag"
     name: "Pansexual Flag"
     homogeneous: true
-    stripes:
+    direction: to bottom
+    stripes: &pansexual-flag-stripes
       - rgba: "#FF218C"
       - rgba: "#FFD800"
       - rgba: "#21B1FF"
 
+  - id: "pansexual-flag-horizontal"
+    name: "Pansexual Flag (Horizontal)"
+    homogeneous: true
+    direction: to right
+    stripes: *pansexual-flag-stripes
+
+
   - id: "aromantic-flag"
     name: "Aromantic Flag"
     homogeneous: true
-    stripes:
+    direction: to bottom
+    stripes: &aromantic-flag-stripes
       - rgba: "#3DA542"
       - rgba: "#A7D379"
       - rgba: "#FFFFFF"
       - rgba: "#A9A9A9"
       - rgba: "#000000"
 
+  - id: "aromantic-flag-horizontal"
+    name: "Aromantic Flag (Horizontal)"
+    homogeneous: true
+    direction: to right
+    stripes: *aromantic-flag-stripes
+
+
   - id: "genderfluid-flag"
     name: "Genderfluid Flag"
     homogeneous: true
-    stripes:
+    direction: to bottom
+    stripes: &genderfluid-flag-stripes
       - rgba: "#FF76A4"
       - rgba: "#FFFFFF"
       - rgba: "#C011D7"
       - rgba: "#000000"
       - rgba: "#2F3CBE"
 
+  - id: "genderfluid-flag-horizontal"
+    name: "Genderfluid Flag (Horizontal)"
+    homogeneous: true
+    direction: to right
+    stripes: *genderfluid-flag-stripes
+
+
   - id: "polysexual-flag"
     name: "Polysexual Flag"
     homogeneous: true
-    stripes:
+    direction: to bottom
+    stripes: &polysexual-flag-stripes
       - rgba: "#F61CB9"
       - rgba: "#07D569"
       - rgba: "#1C92F6"
 
+  - id: "polysexual-flag-horizontal"
+    name: "Polysexual Flag (Horizontal)"
+    homogeneous: true
+    direction: to right
+    stripes: *polysexual-flag-stripes
+
+
   - id: "omnisexual-flag"
     name: "Omnisexual Flag"
     homogeneous: true
-    stripes:
+    direction: to bottom
+    stripes: &omnisexual-flag-stripes
       - rgba: "#FF9CCE"
       - rgba: "#FF52BF"
       - rgba: "#200044"
       - rgba: "#675FFF"
       - rgba: "#8DA7FF"
 
+  - id: "omnisexual-flag-horizontal"
+    name: "Omnisexual Flag (Horizontal)"
+    homogeneous: true
+    direction: to right
+    stripes: *omnisexual-flag-stripes
+
+
   - id: "aroace-flag"
     name: "Aroace Flag"
     homogeneous: true
-    stripes:
+    direction: to bottom
+    stripes: &aroace-flag-stripes
       - rgba: "#E28C00"
       - rgba: "#ECCD00"
       - rgba: "#FFFFFF"
       - rgba: "#62AEDC"
       - rgba: "#203856"
 
+  - id: "aroace-flag-horizontal"
+    name: "Aroace Flag (Horizontal)"
+    homogeneous: true
+    direction: to right
+    stripes: *aroace-flag-stripes
+
+
   - id: "agender-flag"
     name: "Agender Flag"
     homogeneous: true
-    stripes:
+    direction: to bottom
+    stripes: &agender-flag-stripes
       - rgba: "#000000"
       - rgba: "#BCC4C7"
       - rgba: "#FFFFFF"
@@ -170,17 +275,33 @@ flag-specs:
       - rgba: "#BCC4C7"
       - rgba: "#000000"
 
+  - id: "agender-flag-horizontal"
+    name: "Agender Flag (Horizontal)"
+    homogeneous: true
+    direction: to right
+    stripes: *agender-flag-stripes
+
+
   - id: "genderqueer-flag"
     name: "Genderqueer Flag"
     homogeneous: true
-    stripes:
+    direction: to bottom
+    stripes: &genderqueer-flag-stripes
       - rgba: "#B57EDC"
       - rgba: "#FFFFFF"
       - rgba: "#4A8123"
 
+  - id: "genderqueer-flag-horizontal"
+    name: "Genderqueer Flag (Horizontal)"
+    homogeneous: true
+    direction: to right
+    stripes: *genderqueer-flag-stripes
+
+
   - id: "intersex-flag"
     name: "Intersex Flag"
-    stripes:
+    direction: to bottom
+    stripes: &intersex-flag-stripes
       - rgba: "#FFD800"
         size: 0.4
       - rgba: "#7902AA"
@@ -188,10 +309,17 @@ flag-specs:
       - rgba: "#FFD800"
         size: 0.4
 
+  - id: "intersex-flag-horizontal"
+    name: "Intersex Flag (Horizontal)"
+    direction: to right
+    stripes: *intersex-flag-stripes
+
+
   - id: "demigender-flag"
     name: "Demigender Flag"
     homogeneous: true
-    stripes:
+    direction: to bottom
+    stripes: &demigender-flag-stripes
       - rgba: "#7F7F7F"
       - rgba: "#C3C3C3"
       - rgba: "#FBFF74"
@@ -200,20 +328,36 @@ flag-specs:
       - rgba: "#C3C3C3"
       - rgba: "#7F7F7F"
 
+  - id: "demigender-flag-horizontal"
+    name: "Demigender Flag (Horizontal)"
+    homogeneous: true
+    direction: to right
+    stripes: *demigender-flag-stripes
+
+
   - id: "biromantic-flag"
     name: "Biromantic Flag"
     homogeneous: true
-    stripes:
+    direction: to bottom
+    stripes: &biromantic-flag-stripes
       - rgba: "#8869A5"
       - rgba: "#D8A7D8"
       - rgba: "#FFFFFF"
       - rgba: "#FDB18D"
       - rgba: "#151638"
 
+  - id: "biromantic-flag-horizontal"
+    name: "Biromantic Flag (Horizontal)"
+    homogeneous: true
+    direction: to right
+    stripes: *biromantic-flag-stripes
+
+
   - id: "disability-flag"
     name: "Disability Flag"
     homogeneous: true
-    stripes:
+    direction: to bottom
+    stripes: &disability-flag-stripes
       - rgba: "#595959"
       - rgba: "#CF7280"
       - rgba: "#EEDE77"
@@ -222,10 +366,18 @@ flag-specs:
       - rgba: "#3BB07D"
       - rgba: "#595959"
 
+  - id: "disability-flag-horizontal"
+    name: "Disability Flag (Horizontal)"
+    homogeneous: true
+    direction: to right
+    stripes: *disability-flag-stripes
+
+
   - id: "femboy-flag"
     name: "Femboy Flag"
     homogeneous: true
-    stripes:
+    direction: to bottom
+    stripes: &femboy-flag-stripes
       - rgba: "#D460A7"
       - rgba: "#E4ADCD"
       - rgba: "#FFFFFF"
@@ -233,3 +385,9 @@ flag-specs:
       - rgba: "#FFFFFF"
       - rgba: "#E4ADCD"
       - rgba: "#D460A7"
+
+  - id: "femboy-flag-horizontal"
+    name: "Femboy Flag (Horizontal)"
+    homogeneous: true
+    direction: to right
+    stripes: *femboy-flag-stripes

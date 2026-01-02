@@ -12,4 +12,5 @@ ensure=BZ_TYPE_PRIDE_FLAG_STRIPE_SPEC
 property=id char G_TYPE_STRING string
 property=name char G_TYPE_STRING string
 property=homogeneous gboolean G_TYPE_BOOLEAN boolean
+property=direction char G_TYPE_STRING string
 property=stripes GListModel G_TYPE_LIST_MODEL object
