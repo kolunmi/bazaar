@@ -30,7 +30,6 @@
 #include "bz-flathub-category.h"
 #include "bz-flatpak-private.h"
 #include "bz-io.h"
-#include "bz-issue.h"
 #include "bz-release.h"
 #include "bz-serializable.h"
 #include "bz-url.h"
@@ -691,40 +690,16 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
           for (guint i = 0; i < releases_arr->len; i++)
             {
               AsRelease  *as_release          = NULL;
-              GPtrArray  *as_issues           = NULL;
               const char *release_description = NULL;
-              g_autoptr (GListStore) issues   = NULL;
               g_autoptr (BzRelease) release   = NULL;
 
               as_release = g_ptr_array_index (releases_arr, i);
-              as_issues  = as_release_get_issues (as_release);
 
               release_description = as_release_get_description (as_release);
-
-              if (as_issues != NULL && as_issues->len > 0)
-                {
-                  issues = g_list_store_new (BZ_TYPE_ISSUE);
-
-                  for (guint j = 0; j < as_issues->len; j++)
-                    {
-                      AsIssue *as_issue         = NULL;
-                      g_autoptr (BzIssue) issue = NULL;
-
-                      as_issue = g_ptr_array_index (as_issues, j);
-
-                      issue = g_object_new (
-                          BZ_TYPE_ISSUE,
-                          "id", as_issue_get_id (as_issue),
-                          "url", as_issue_get_url (as_issue),
-                          NULL);
-                      g_list_store_append (issues, issue);
-                    }
-                }
 
               release = g_object_new (
                   BZ_TYPE_RELEASE,
                   "description", release_description,
-                  "issues", issues,
                   "timestamp", as_release_get_timestamp (as_release),
                   "url", as_release_get_url (as_release, AS_RELEASE_URL_KIND_DETAILS),
                   "version", as_release_get_version (as_release),

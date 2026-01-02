@@ -1,7 +1,0 @@
-prefix=bz
-name=issue
-parent-prefix=g
-parent-name=object
-author=AUTOGEN
-property=id char G_TYPE_STRING string
-property=url char G_TYPE_STRING string

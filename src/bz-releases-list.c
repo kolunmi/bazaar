@@ -103,6 +103,7 @@ static GtkWidget *
 create_release_row (const char *version,
                     const char *description,
                     guint64     timestamp,
+                    const char *url,
                     gboolean    use_clamp)
 {
   AdwActionRow                 *row                = NULL;
@@ -112,8 +113,12 @@ create_release_row (const char *version,
   GtkLabel                     *date_label         = NULL;
   BzAppstreamDescriptionRender *description_widget = NULL;
   BzFadingClamp                *fading_clamp       = NULL;
+  GtkBox                       *more_info_box      = NULL;
+  GtkLabel                     *more_info_label    = NULL;
+  GtkImage                     *more_info_icon     = NULL;
   g_autofree char              *date_str           = NULL;
   g_autofree char              *version_text       = NULL;
+  g_autofree char              *markup             = NULL;
 
   date_str = format_timestamp (NULL, timestamp);
 
@@ -173,6 +178,23 @@ create_release_row (const char *version,
       gtk_box_append (content_box, GTK_WIDGET (fallback_label));
     }
 
+  if (!use_clamp && url && *url)
+    {
+      more_info_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4));
+
+      markup          = g_markup_printf_escaped ("<a href=\"%s\">%s</a>", url, _ ("Get More Information"));
+      more_info_label = GTK_LABEL (gtk_label_new (NULL));
+      gtk_label_set_markup (more_info_label, markup);
+      gtk_box_append (more_info_box, GTK_WIDGET (more_info_label));
+
+      more_info_icon = GTK_IMAGE (gtk_image_new_from_icon_name ("external-link-symbolic"));
+      gtk_image_set_pixel_size (more_info_icon, 12);
+      gtk_widget_add_css_class (GTK_WIDGET (more_info_icon), "accent");
+      gtk_box_append (more_info_box, GTK_WIDGET (more_info_icon));
+
+      gtk_box_append (content_box, GTK_WIDGET (more_info_box));
+    }
+
   gtk_list_box_row_set_child (GTK_LIST_BOX_ROW (row), GTK_WIDGET (content_box));
 
   return GTK_WIDGET (row);
@@ -221,6 +243,7 @@ bz_releases_dialog_set_version_history (BzReleasesDialog *self,
       g_autoptr (BzRelease) release = NULL;
       const char *version           = NULL;
       const char *description       = NULL;
+      const char *url               = NULL;
       guint64     timestamp         = 0;
       GtkWidget  *row               = NULL;
 
@@ -230,9 +253,10 @@ bz_releases_dialog_set_version_history (BzReleasesDialog *self,
 
       version     = bz_release_get_version (release);
       description = bz_release_get_description (release);
+      url         = bz_release_get_url (release);
       timestamp   = bz_release_get_timestamp (release);
 
-      row = create_release_row (version, description, timestamp, FALSE);
+      row = create_release_row (version, description, timestamp, url, FALSE);
       gtk_list_box_append (self->releases_box, row);
     }
 }
@@ -290,7 +314,7 @@ populate_preview_box (BzReleasesList *self)
           description = bz_release_get_description (release);
           timestamp   = bz_release_get_timestamp (release);
 
-          row = create_release_row (version, description, timestamp, TRUE);
+          row = create_release_row (version, description, timestamp, NULL, TRUE);
           gtk_list_box_insert (self->preview_box, row, 0);
         }
     }
