@@ -396,6 +396,10 @@ template $BzWindow: Adw.ApplicationWindow {
                                                        status_popover.visible) as <bool>;
 
                         child: MenuButton {
+                          styles [
+                            "flat",
+                          ]
+
                           child: Box {
                             Adw.Spinner {
                               visible: bind status_popover_label.visible;
