@@ -341,8 +341,22 @@ template $BzFullView: Adw.Bin {
                             label: bind $get_safety_rating_label(template.ui-entry as <$BzResult>.object as <$BzEntry>) as <string>;
                             lozenge-style: bind $get_safety_rating_style(template.ui-entry as <$BzResult>.object as <$BzEntry>) as <string>;
 
-                            lozenge-child: Image {
-                              icon-name: bind $get_safety_rating_icon(template.ui-entry as <$BzResult>.object as <$BzEntry>) as <string>;
+                            lozenge-child: Box {
+                              spacing: 4;
+
+                              Image {
+                                icon-name: bind $get_safety_rating_icon(template.ui-entry as <$BzResult>.object as <$BzEntry>,0) as <string>;
+                                visible: bind $invert_boolean($is_empty_string($get_safety_rating_icon(template.ui-entry as <$BzResult>.object as <$BzEntry>,0) as <string>) as <bool>) as <bool>;
+                              }
+                              Image {
+                                icon-name: bind $get_safety_rating_icon(template.ui-entry as <$BzResult>.object as <$BzEntry>,1) as <string>;
+                                visible: bind $invert_boolean($is_empty_string($get_safety_rating_icon(template.ui-entry as <$BzResult>.object as <$BzEntry>,1) as <string>) as <bool>) as <bool>;
+                              }
+                              Image {
+                                icon-name: bind $get_safety_rating_icon(template.ui-entry as <$BzResult>.object as <$BzEntry>,2) as <string>;
+                                visible: bind $invert_boolean($is_empty_string($get_safety_rating_icon(template.ui-entry as <$BzResult>.object as <$BzEntry>,2) as <string>) as <bool>) as <bool>;
+                              }
+
                             };
                           }
                         }

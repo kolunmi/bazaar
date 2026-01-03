@@ -248,6 +248,15 @@ is_empty (gpointer    object,
 }
 
 static gboolean
+is_empty_string (gpointer    object,
+                 const char *str)
+{
+  if (str == NULL)
+    return TRUE;
+  return *str == '\0';
+}
+
+static gboolean
 logical_and (gpointer object,
              gboolean value1,
              gboolean value2)
@@ -573,28 +582,38 @@ format_leftover_label (gpointer object, const char *name, guint64 size)
 
 static char *
 get_safety_rating_icon (gpointer object,
-                        BzEntry *entry)
+                        BzEntry *entry,
+                        int      index)
 {
+  char *icon = NULL;
   BzImportance importance;
 
   if (entry == NULL)
     return g_strdup ("app-safety-unknown-symbolic");
 
-  importance = bz_safety_calculator_calculate_rating (entry);
+  if (index < 0 || index > 2)
+    return NULL;
 
-  switch (importance)
+  if (index == 0)
     {
-    case BZ_IMPORTANCE_UNIMPORTANT:
-    case BZ_IMPORTANCE_NEUTRAL:
-    case BZ_IMPORTANCE_INFORMATION:
-      return g_strdup ("app-safety-ok-symbolic");
-    case BZ_IMPORTANCE_WARNING:
-      return g_strdup ("app-safety-unknown-symbolic");
-    case BZ_IMPORTANCE_IMPORTANT:
-      return g_strdup ("app-safety-unsafe-symbolic");
-    default:
-      return g_strdup ("app-safety-unknown-symbolic");
+      importance = bz_safety_calculator_calculate_rating (entry);
+      switch (importance)
+        {
+        case BZ_IMPORTANCE_UNIMPORTANT:
+        case BZ_IMPORTANCE_NEUTRAL:
+          return g_strdup ("app-safety-ok-symbolic");
+        case BZ_IMPORTANCE_INFORMATION:
+        case BZ_IMPORTANCE_WARNING:
+          return NULL;
+        case BZ_IMPORTANCE_IMPORTANT:
+          return g_strdup ("dialog-warning-symbolic");
+        default:
+          return NULL;
+        }
     }
+
+  icon = bz_safety_calculator_get_top_icon (entry, index - 1);
+  return icon;
 }
 
 static char *
@@ -1239,6 +1258,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, is_positive);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, is_empty);
+  gtk_widget_class_bind_template_callback (widget_class, is_empty_string);
   gtk_widget_class_bind_template_callback (widget_class, logical_and);
   gtk_widget_class_bind_template_callback (widget_class, is_longer);
   gtk_widget_class_bind_template_callback (widget_class, bool_to_string);

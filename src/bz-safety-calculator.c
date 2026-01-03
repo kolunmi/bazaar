@@ -139,14 +139,14 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
                              NULL, NULL, NULL);
       add_row_if_permission (store,
                              (perm_flags & BZ_APP_PERMISSIONS_FLAGS_X11) != 0,
-                             BZ_IMPORTANCE_WARNING,
+                             BZ_IMPORTANCE_IMPORTANT,
                              "permissions-legacy-windowing-system-symbolic",
                              _ ("Legacy Windowing System"),
                              _ ("Uses a legacy windowing system"),
                              NULL, NULL, NULL);
       add_row_if_permission (store,
                              (perm_flags & BZ_APP_PERMISSIONS_FLAGS_ESCAPE_SANDBOX) != 0,
-                             BZ_IMPORTANCE_WARNING,
+                             BZ_IMPORTANCE_IMPORTANT,
                              "permissions-warning-symbolic",
                              _ ("Arbitrary Permissions"),
                              _ ("Can acquire arbitrary permissions"),
@@ -160,7 +160,7 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
                              NULL, NULL, NULL);
       add_row_if_permission (store,
                              (perm_flags & BZ_APP_PERMISSIONS_FLAGS_FILESYSTEM_FULL) != 0,
-                             BZ_IMPORTANCE_WARNING,
+                             BZ_IMPORTANCE_IMPORTANT,
                              "folder-symbolic",
                              _ ("Full File System Read/Write Access"),
                              _ ("Can read and write all data on the file system"),
@@ -168,7 +168,7 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
       add_row_if_permission (store,
                              ((perm_flags & BZ_APP_PERMISSIONS_FLAGS_HOME_FULL) != 0 &&
                               !(perm_flags & BZ_APP_PERMISSIONS_FLAGS_FILESYSTEM_FULL)),
-                             BZ_IMPORTANCE_WARNING,
+                             BZ_IMPORTANCE_IMPORTANT,
                              "user-home-symbolic",
                              _ ("Home Folder Read/Write Access"),
                              _ ("Can read and write all data in your home directory"),
@@ -176,7 +176,7 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
       add_row_if_permission (store,
                              ((perm_flags & BZ_APP_PERMISSIONS_FLAGS_FILESYSTEM_READ) != 0 &&
                               !(perm_flags & BZ_APP_PERMISSIONS_FLAGS_FILESYSTEM_FULL)),
-                             BZ_IMPORTANCE_WARNING,
+                             BZ_IMPORTANCE_IMPORTANT,
                              "folder-symbolic",
                              _ ("Full File System Read Access"),
                              _ ("Can read all data on the file system"),
@@ -185,7 +185,7 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
                              ((perm_flags & BZ_APP_PERMISSIONS_FLAGS_HOME_READ) != 0 &&
                               !(perm_flags & (BZ_APP_PERMISSIONS_FLAGS_FILESYSTEM_FULL |
                                               BZ_APP_PERMISSIONS_FLAGS_FILESYSTEM_READ))),
-                             BZ_IMPORTANCE_WARNING,
+                             BZ_IMPORTANCE_IMPORTANT,
                              "user-home-symbolic",
                              _ ("Home Folder Read Access"),
                              _ ("Can read all data in your home directory"),
@@ -215,10 +215,11 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
         {
           const BzFilesystemPath *path     = g_ptr_array_index (filesystem_full, i);
           g_autofree char        *fs_title = bz_filesystem_path_to_display_string (path);
+          const char             *fs_icon  = bz_filesystem_path_to_icon_name (path);
           add_row_if_permission (store,
                                  TRUE,
                                  BZ_IMPORTANCE_WARNING,
-                                 "folder-symbolic",
+                                 fs_icon,
                                  fs_title,
                                  _ ("Can read and write all data in the directory"),
                                  NULL, NULL, NULL);
@@ -228,10 +229,11 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
         {
           const BzFilesystemPath *path     = g_ptr_array_index (filesystem_read, i);
           g_autofree char        *fs_title = bz_filesystem_path_to_display_string (path);
+          const char             *fs_icon  = bz_filesystem_path_to_icon_name (path);
           add_row_if_permission (store,
                                  TRUE,
                                  BZ_IMPORTANCE_WARNING,
-                                 "folder-symbolic",
+                                 fs_icon,
                                  fs_title,
                                  _ ("Can read all data in the directory"),
                                  NULL, NULL, NULL);
@@ -298,7 +300,7 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
                          is_verified,
                          BZ_IMPORTANCE_UNIMPORTANT,
                          "verified-checkmark-symbolic",
-                         _ ("App developer is verified"),
+                         _ ("Verified App Developer"),
                          _ ("The developer of this app has been verified to be who they say they are"),
                          NULL, NULL, NULL);
 
@@ -328,6 +330,66 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
   return G_LIST_MODEL (store);
 }
 
+char *
+bz_safety_calculator_get_top_icon (BzEntry *entry,
+                                   int      index)
+{
+  g_autoptr (GListModel) model = NULL;
+  const char            *icons[2] = {NULL, NULL};
+  guint                  icon_count = 0;
+  guint                  n_items = 0;
+  BzImportance priorities[] = {BZ_IMPORTANCE_IMPORTANT, BZ_IMPORTANCE_WARNING, BZ_IMPORTANCE_INFORMATION};
+
+  g_return_val_if_fail (BZ_IS_ENTRY (entry), NULL);
+
+  if (index < 0 || index > 1)
+    return NULL;
+
+  model = bz_safety_calculator_analyze_entry (entry);
+  n_items = g_list_model_get_n_items (model);
+
+  for (guint priority_idx = 0; priority_idx < 3 && icon_count < 2; priority_idx++)
+    {
+      BzImportance current_priority = priorities[priority_idx];
+
+      for (guint i = 0; i < n_items && icon_count < 2; i++)
+        {
+          g_autoptr (BzSafetyRow) row = g_list_model_get_item (model, i);
+          BzImportance importance = BZ_IMPORTANCE_UNIMPORTANT;
+          const char *icon_name = NULL;
+          gboolean duplicate = FALSE;
+
+          g_object_get (row, "importance", &importance, "icon-name", &icon_name, NULL);
+
+          if (importance != current_priority)
+            continue;
+
+          if (icon_name == NULL || *icon_name == '\0')
+            continue;
+
+          for (guint j = 0; j < icon_count; j++)
+            {
+              if (g_strcmp0 (icons[j], icon_name) == 0)
+                {
+                  duplicate = TRUE;
+                  break;
+                }
+            }
+
+          if (!duplicate)
+            {
+              icons[icon_count] = icon_name;
+              icon_count++;
+            }
+        }
+    }
+
+  if (icon_count == 0 || icons[index] == NULL)
+    return NULL;
+
+  return g_strdup (icons[index]);
+}
+
 BzImportance
 bz_safety_calculator_calculate_rating (BzEntry *entry)
 {
@@ -335,11 +397,13 @@ bz_safety_calculator_calculate_rating (BzEntry *entry)
   BzImportance max_rating      = BZ_IMPORTANCE_UNIMPORTANT;
   guint        n_items         = 0;
   guint        i               = 0;
+  gboolean     is_foss         = FALSE;
 
   g_return_val_if_fail (BZ_IS_ENTRY (entry), BZ_IMPORTANCE_UNIMPORTANT);
 
   model   = bz_safety_calculator_analyze_entry (entry);
   n_items = g_list_model_get_n_items (model);
+  is_foss = bz_entry_get_is_foss (entry);
 
   for (i = 0; i < n_items; i++)
     {
@@ -348,6 +412,11 @@ bz_safety_calculator_calculate_rating (BzEntry *entry)
 
       g_object_get (row, "importance", &rating, NULL);
       max_rating = MAX (max_rating, rating);
+    }
+
+  if (is_foss && max_rating == BZ_IMPORTANCE_IMPORTANT) // We don't want any "high risk" FOSS apps.
+    {
+      max_rating = BZ_IMPORTANCE_WARNING;
     }
 
   return max_rating;
