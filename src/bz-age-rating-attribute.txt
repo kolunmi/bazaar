@@ -1,5 +1,5 @@
 prefix=bz
-name=safety_row
+name=age_rating_attribute
 parent-prefix=g
 parent-name=object
 author=AUTOGEN
@@ -7,6 +7,7 @@ author=AUTOGEN
 include="bz-context-row.h"
 
 property=importance BzImportance BZ_TYPE_IMPORTANCE enum
+property=id char G_TYPE_STRING string
 property=title char G_TYPE_STRING string
-property=subtitle char G_TYPE_STRING string
+property=description char G_TYPE_STRING string
 property=icon_name char G_TYPE_STRING string

@@ -424,9 +424,9 @@ get_age_rating_style (gpointer         object,
   if (age >= 18)
     return g_strdup ("error");
   else if (age >= 15)
-    return g_strdup ("warning");
+    return g_strdup ("orange");
   else if (age >= 12)
-    return g_strdup ("dark-blue");
+    return g_strdup ("warning");
   else
     return g_strdup ("grey");
 }
@@ -575,22 +575,22 @@ static char *
 get_safety_rating_icon (gpointer object,
                         BzEntry *entry)
 {
-  BzSafetyRating rating;
+  BzImportance importance;
 
   if (entry == NULL)
     return g_strdup ("app-safety-unknown-symbolic");
 
-  rating = bz_safety_calculator_calculate_rating (entry);
+  importance = bz_safety_calculator_calculate_rating (entry);
 
-  switch (rating)
+  switch (importance)
     {
-    case BZ_SAFETY_RATING_SAFE:
-    case BZ_SAFETY_RATING_NEUTRAL:
-    case BZ_SAFETY_RATING_PROBABLY_SAFE:
+    case BZ_IMPORTANCE_UNIMPORTANT:
+    case BZ_IMPORTANCE_NEUTRAL:
+    case BZ_IMPORTANCE_INFORMATION:
       return g_strdup ("app-safety-ok-symbolic");
-    case BZ_SAFETY_RATING_POTENTIALLY_UNSAFE:
+    case BZ_IMPORTANCE_WARNING:
       return g_strdup ("app-safety-unknown-symbolic");
-    case BZ_SAFETY_RATING_UNSAFE:
+    case BZ_IMPORTANCE_IMPORTANT:
       return g_strdup ("app-safety-unsafe-symbolic");
     default:
       return g_strdup ("app-safety-unknown-symbolic");
@@ -601,24 +601,23 @@ static char *
 get_safety_rating_style (gpointer object,
                          BzEntry *entry)
 {
-  BzSafetyRating rating;
+  BzImportance importance;
 
   if (entry == NULL)
     return g_strdup ("grey");
 
-  rating = bz_safety_calculator_calculate_rating (entry);
+  importance = bz_safety_calculator_calculate_rating (entry);
 
-  switch (rating)
+  switch (importance)
     {
-    case BZ_SAFETY_RATING_SAFE:
+    case BZ_IMPORTANCE_UNIMPORTANT:
+    case BZ_IMPORTANCE_NEUTRAL:
       return g_strdup ("grey");
-    case BZ_SAFETY_RATING_NEUTRAL:
-      return g_strdup ("grey");
-    case BZ_SAFETY_RATING_PROBABLY_SAFE:
+    case BZ_IMPORTANCE_INFORMATION:
       return g_strdup ("warning");
-    case BZ_SAFETY_RATING_POTENTIALLY_UNSAFE:
+    case BZ_IMPORTANCE_WARNING:
       return g_strdup ("orange");
-    case BZ_SAFETY_RATING_UNSAFE:
+    case BZ_IMPORTANCE_IMPORTANT:
       return g_strdup ("error");
     default:
       return g_strdup ("grey");
@@ -627,26 +626,26 @@ get_safety_rating_style (gpointer object,
 
 static char *
 get_safety_rating_label (gpointer object,
-                           BzEntry *entry)
+                         BzEntry *entry)
 {
-  BzSafetyRating rating;
+  BzImportance importance;
 
   if (entry == NULL)
     return g_strdup (_ ("N/A"));
 
-  rating = bz_safety_calculator_calculate_rating (entry);
+  importance = bz_safety_calculator_calculate_rating (entry);
 
-  switch (rating)
+  switch (importance)
     {
-    case BZ_SAFETY_RATING_SAFE:
+    case BZ_IMPORTANCE_UNIMPORTANT:
       return g_strdup (_ ("Low Risk"));
-    case BZ_SAFETY_RATING_NEUTRAL:
+    case BZ_IMPORTANCE_NEUTRAL:
       return g_strdup (_ ("Low Risk"));
-    case BZ_SAFETY_RATING_PROBABLY_SAFE:
+    case BZ_IMPORTANCE_INFORMATION:
       return g_strdup (_ ("Medium Risk"));
-    case BZ_SAFETY_RATING_POTENTIALLY_UNSAFE:
+    case BZ_IMPORTANCE_WARNING:
       return g_strdup (_ ("Medium Risk"));
-    case BZ_SAFETY_RATING_UNSAFE:
+    case BZ_IMPORTANCE_IMPORTANT:
       return g_strdup (_ ("High Risk"));
     default:
       return g_strdup (_ ("N/A"));

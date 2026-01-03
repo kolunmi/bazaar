@@ -22,21 +22,23 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "bz-age-rating-dialog.h"
+#include "config.h"
+
 #include <appstream.h>
 #include <glib/gi18n.h>
 #include <locale.h>
+
+#include "bz-age-rating-attribute.h"
+#include "bz-age-rating-dialog.h"
+#include "bz-context-row.h"
+#include "bz-lozenge.h"
 
 struct _BzAgeRatingDialog
 {
   AdwDialog parent_instance;
 
-  BzEntry *entry;
-  gulong   entry_notify_handler_content_rating;
-  gulong   entry_notify_handler_title;
-
-  GtkWidget  *lozenge;
-  GtkLabel   *title_label;
+  BzEntry    *entry;
+  BzLozenge  *lozenge;
   GtkListBox *list;
 };
 
@@ -63,68 +65,14 @@ typedef enum
 
 #define BZ_AGE_RATING_GROUP_TYPE_COUNT (BZ_AGE_RATING_GROUP_TYPE_VIOLENCE + 1)
 
-typedef enum
-{
-  BZ_IMPORTANCE_UNIMPORTANT,
-  BZ_IMPORTANCE_NEUTRAL,
-  BZ_IMPORTANCE_INFORMATION,
-  BZ_IMPORTANCE_WARNING,
-  BZ_IMPORTANCE_IMPORTANT,
-} BzImportance;
-
 typedef struct
 {
-  gchar       *id;
-  gchar       *icon_name;
-  BzImportance importance;
-  gchar       *title;
-  gchar       *description;
-} BzAgeRatingAttribute;
-
-typedef struct
-{
-  BzAgeRatingDialog   *dialog;
-  BzAgeRatingGroupType group_type;
-  AdwActionRow        *row;
-  GList               *attributes;
+  GList *attributes;
 } BzAgeRatingGroup;
 
 typedef void (*AttributeCallback) (const gchar         *attribute,
                                    AsContentRatingValue value,
                                    gpointer             user_data);
-
-static BzAgeRatingAttribute *
-bz_age_rating_attribute_new (const gchar *id,
-                             const gchar *icon_name,
-                             BzImportance importance,
-                             const gchar *title,
-                             const gchar *description)
-{
-  BzAgeRatingAttribute *attribute;
-
-  g_assert (icon_name != NULL);
-  g_assert (title != NULL);
-  g_assert (description != NULL);
-
-  attribute              = g_new0 (BzAgeRatingAttribute, 1);
-  attribute->id          = g_strdup (id);
-  attribute->icon_name   = g_strdup (icon_name);
-  attribute->importance  = importance;
-  attribute->title       = g_strdup (title);
-  attribute->description = g_strdup (description);
-
-  return attribute;
-}
-
-static void
-bz_age_rating_attribute_free (BzAgeRatingAttribute *attribute)
-{
-  g_free (attribute->id);
-  g_free (attribute->icon_name);
-  g_free (attribute->title);
-  g_free (attribute->description);
-  g_free (attribute);
-}
 
 static const struct
 {
@@ -244,6 +192,121 @@ static const struct
    N_ ("No information regarding references to slavery"),
    "violence-symbolic",              "violence-none-symbolic"                },
 };
+
+static const gchar         *content_rating_attribute_get_icon_name (const gchar *attribute,
+                                                                    gboolean     negative_version);
+static const gchar         *content_rating_attribute_get_title (const gchar *attribute);
+static const gchar         *content_rating_attribute_get_unknown_description (const gchar *attribute);
+static BzAgeRatingGroupType content_rating_attribute_get_group_type (const gchar *attribute);
+static const gchar         *content_rating_group_get_description (BzAgeRatingGroupType group_type);
+static const gchar         *content_rating_group_get_icon_name (BzAgeRatingGroupType group_type,
+                                                                gboolean             negative_version);
+static const gchar         *content_rating_group_get_title (BzAgeRatingGroupType group_type);
+static BzImportance         content_rating_value_get_importance (AsContentRatingValue value);
+static gint                 attributes_compare (BzAgeRatingAttribute *attr1,
+                                                BzAgeRatingAttribute *attr2);
+static void                 collect_attribute (const gchar         *attribute,
+                                               AsContentRatingValue value,
+                                               gpointer             user_data);
+static void                 process_attributes (AsContentRating  *content_rating,
+                                                gboolean          show_worst_only,
+                                                AttributeCallback callback,
+                                                gpointer          user_data);
+static gchar               *format_age_short (AsContentRatingSystem system,
+                                              guint                 age);
+static void                 update_lozenge (BzAgeRatingDialog *self,
+                                            AsContentRating   *content_rating);
+static void                 update_list (BzAgeRatingDialog *self);
+
+static void
+bz_age_rating_dialog_set_property (GObject      *object,
+                                   guint         prop_id,
+                                   const GValue *value,
+                                   GParamSpec   *pspec)
+{
+  BzAgeRatingDialog *self = NULL;
+
+  self = BZ_AGE_RATING_DIALOG (object);
+
+  switch (prop_id)
+    {
+    case PROP_ENTRY:
+      self->entry = g_value_dup_object (value);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+    }
+}
+
+static void
+bz_age_rating_dialog_constructed (GObject *object)
+{
+  BzAgeRatingDialog *self = NULL;
+
+  self = BZ_AGE_RATING_DIALOG (object);
+
+  G_OBJECT_CLASS (bz_age_rating_dialog_parent_class)->constructed (object);
+
+  if (self->entry != NULL)
+    update_list (self);
+}
+
+static void
+bz_age_rating_dialog_dispose (GObject *object)
+{
+  BzAgeRatingDialog *self = NULL;
+
+  self = BZ_AGE_RATING_DIALOG (object);
+
+  g_clear_object (&self->entry);
+
+  gtk_widget_dispose_template (GTK_WIDGET (self), BZ_TYPE_AGE_RATING_DIALOG);
+  G_OBJECT_CLASS (bz_age_rating_dialog_parent_class)->dispose (object);
+}
+
+static void
+bz_age_rating_dialog_class_init (BzAgeRatingDialogClass *klass)
+{
+  GObjectClass   *object_class = NULL;
+  GtkWidgetClass *widget_class = NULL;
+
+  object_class = G_OBJECT_CLASS (klass);
+  widget_class = GTK_WIDGET_CLASS (klass);
+
+  object_class->set_property = bz_age_rating_dialog_set_property;
+  object_class->constructed  = bz_age_rating_dialog_constructed;
+  object_class->dispose      = bz_age_rating_dialog_dispose;
+
+  props[PROP_ENTRY] =
+      g_param_spec_object (
+          "entry",
+          NULL, NULL,
+          BZ_TYPE_ENTRY,
+          G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
+
+  g_object_class_install_properties (object_class, LAST_PROP, props);
+
+  g_type_ensure (BZ_TYPE_LOZENGE);
+
+  gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-age-rating-dialog.ui");
+
+  gtk_widget_class_bind_template_child (widget_class, BzAgeRatingDialog, lozenge);
+  gtk_widget_class_bind_template_child (widget_class, BzAgeRatingDialog, list);
+}
+
+static void
+bz_age_rating_dialog_init (BzAgeRatingDialog *self)
+{
+  gtk_widget_init_template (GTK_WIDGET (self));
+}
+
+BzAgeRatingDialog *
+bz_age_rating_dialog_new (BzEntry *entry)
+{
+  return g_object_new (BZ_TYPE_AGE_RATING_DIALOG,
+                       "entry", entry,
+                       NULL);
+}
 
 static const gchar *
 content_rating_attribute_get_icon_name (const gchar *attribute,
@@ -390,208 +453,47 @@ static gint
 attributes_compare (BzAgeRatingAttribute *attr1,
                     BzAgeRatingAttribute *attr2)
 {
-  if (attr1->importance != attr2->importance)
+  BzImportance importance1 = 0;
+  BzImportance importance2 = 0;
+  const gchar *id1         = NULL;
+  const gchar *id2         = NULL;
+
+  importance1 = bz_age_rating_attribute_get_importance (attr1);
+  importance2 = bz_age_rating_attribute_get_importance (attr2);
+
+  if (importance1 != importance2)
     {
-      if (attr1->importance == BZ_IMPORTANCE_NEUTRAL &&
-          attr2->importance == BZ_IMPORTANCE_UNIMPORTANT)
+      if (importance1 == BZ_IMPORTANCE_NEUTRAL &&
+          importance2 == BZ_IMPORTANCE_UNIMPORTANT)
         return -1;
-      if (attr1->importance == BZ_IMPORTANCE_UNIMPORTANT &&
-          attr2->importance == BZ_IMPORTANCE_NEUTRAL)
+      if (importance1 == BZ_IMPORTANCE_UNIMPORTANT &&
+          importance2 == BZ_IMPORTANCE_NEUTRAL)
         return 1;
 
-      return attr2->importance - attr1->importance;
+      return importance2 - importance1;
     }
   else
     {
-      return g_strcmp0 (attr1->id, attr2->id);
+      id1 = bz_age_rating_attribute_get_id (attr1);
+      id2 = bz_age_rating_attribute_get_id (attr2);
+      return g_strcmp0 (id1, id2);
     }
-}
-
-static AdwActionRow *
-create_attribute_row (const gchar *icon_name,
-                      BzImportance importance,
-                      const gchar *title,
-                      const gchar *subtitle)
-{
-  AdwActionRow *row;
-  GtkWidget    *icon;
-  const gchar  *css_class;
-
-  row = ADW_ACTION_ROW (adw_action_row_new ());
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), title);
-
-  if (subtitle != NULL)
-    adw_action_row_set_subtitle (row, subtitle);
-
-  icon = gtk_image_new_from_icon_name (icon_name);
-  gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
-  gtk_widget_add_css_class (icon, "circular-lozenge");
-
-  switch (importance)
-    {
-    case BZ_IMPORTANCE_UNIMPORTANT:
-      css_class = "green";
-      break;
-    case BZ_IMPORTANCE_NEUTRAL:
-      css_class = "grey";
-      break;
-    case BZ_IMPORTANCE_INFORMATION:
-      css_class = "grey";
-      break;
-    case BZ_IMPORTANCE_WARNING:
-      css_class = "yellow";
-      break;
-    case BZ_IMPORTANCE_IMPORTANT:
-      css_class = "red";
-      break;
-    default:
-      css_class = "grey";
-      break;
-    }
-
-  gtk_widget_add_css_class (icon, css_class);
-  adw_action_row_add_prefix (row, icon);
-
-  return row;
 }
 
 static void
-update_attribute_row (BzAgeRatingDialog   *self,
-                      BzAgeRatingGroupType group_type,
-                      AdwActionRow        *row,
-                      GList               *attributes)
+collect_attribute (const gchar         *attribute,
+                   AsContentRatingValue value,
+                   gpointer             user_data)
 {
-  const BzAgeRatingAttribute *first;
-  const gchar                *group_icon_name;
-  const gchar                *group_title;
-  const gchar                *group_description;
-  g_autofree gchar           *new_description = NULL;
-  GtkWidget                  *icon;
+  BzAgeRatingGroup     *groups      = NULL;
+  BzAgeRatingGroupType  group_type  = 0;
+  BzImportance          rating      = 0;
+  const gchar          *icon_name   = NULL;
+  const gchar          *title       = NULL;
+  const gchar          *description = NULL;
+  BzAgeRatingAttribute *attr        = NULL;
 
-  first = (BzAgeRatingAttribute *) attributes->data;
-
-  if (g_list_length (attributes) == 1)
-    {
-      const gchar *css_classes[] = { "success", "grey", "warning", "error" };
-
-      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), first->title);
-      adw_action_row_set_subtitle (row, first->description);
-
-      icon = gtk_widget_get_first_child (GTK_WIDGET (row));
-      while (icon != NULL && !GTK_IS_IMAGE (icon))
-        icon = gtk_widget_get_next_sibling (icon);
-
-      if (icon != NULL)
-        {
-          gtk_image_set_from_icon_name (GTK_IMAGE (icon), first->icon_name);
-
-          for (gsize i = 0; i < G_N_ELEMENTS (css_classes); i++)
-            gtk_widget_remove_css_class (icon, css_classes[i]);
-
-          switch (first->importance)
-            {
-            case BZ_IMPORTANCE_UNIMPORTANT:
-              gtk_widget_add_css_class (icon, "success");
-              break;
-            case BZ_IMPORTANCE_NEUTRAL:
-              gtk_widget_add_css_class (icon, "grey");
-              break;
-            case BZ_IMPORTANCE_INFORMATION:
-              gtk_widget_add_css_class (icon, "grey");
-              break;
-            case BZ_IMPORTANCE_WARNING:
-              gtk_widget_add_css_class (icon, "warning");
-              break;
-            case BZ_IMPORTANCE_IMPORTANT:
-              gtk_widget_add_css_class (icon, "error");
-              break;
-            default:
-              gtk_widget_add_css_class (icon, "grey");
-              break;
-            }
-        }
-
-      return;
-    }
-
-  if (first->importance == BZ_IMPORTANCE_UNIMPORTANT)
-    {
-      gboolean only_unimportant = TRUE;
-
-      for (GList *l = attributes->next; l; l = l->next)
-        {
-          BzAgeRatingAttribute *attribute = (BzAgeRatingAttribute *) l->data;
-
-          if (attribute->importance != BZ_IMPORTANCE_UNIMPORTANT)
-            {
-              only_unimportant = FALSE;
-              break;
-            }
-        }
-
-      if (only_unimportant)
-        {
-          group_icon_name   = content_rating_group_get_icon_name (group_type, TRUE);
-          group_title       = content_rating_group_get_title (group_type);
-          group_description = content_rating_group_get_description (group_type);
-
-          adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), group_title);
-          adw_action_row_set_subtitle (row, group_description);
-
-          icon = gtk_widget_get_first_child (GTK_WIDGET (row));
-          while (icon != NULL && !GTK_IS_IMAGE (icon))
-            icon = gtk_widget_get_next_sibling (icon);
-
-          if (icon != NULL)
-            gtk_image_set_from_icon_name (GTK_IMAGE (icon), group_icon_name);
-
-          return;
-        }
-    }
-
-  group_icon_name = content_rating_group_get_icon_name (group_type, FALSE);
-  group_title     = content_rating_group_get_title (group_type);
-  new_description = g_strdup (first->description);
-
-  for (GList *l = attributes->next; l; l = l->next)
-    {
-      BzAgeRatingAttribute *attribute = (BzAgeRatingAttribute *) l->data;
-      gchar                *s;
-
-      if (attribute->importance == BZ_IMPORTANCE_UNIMPORTANT)
-        break;
-
-      s = g_strdup_printf (_ ("%s • %s"),
-                           new_description,
-                           attribute->description);
-      g_free (new_description);
-      new_description = s;
-    }
-
-  icon = gtk_widget_get_first_child (GTK_WIDGET (row));
-  while (icon != NULL && !GTK_IS_IMAGE (icon))
-    icon = gtk_widget_get_next_sibling (icon);
-
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), group_title);
-  adw_action_row_set_subtitle (row, new_description);
-
-  if (icon != NULL)
-    gtk_image_set_from_icon_name (GTK_IMAGE (icon), group_icon_name);
-}
-
-static void
-add_attribute_row (BzAgeRatingDialog   *self,
-                   BzAgeRatingGroup    *groups,
-                   const gchar         *attribute,
-                   AsContentRatingValue value)
-{
-  BzAgeRatingGroupType  group_type;
-  BzImportance          rating;
-  const gchar          *icon_name;
-  const gchar          *title;
-  const gchar          *description;
-  BzAgeRatingAttribute *attr;
-
+  groups     = user_data;
   group_type = content_rating_attribute_get_group_type (attribute);
   rating     = content_rating_value_get_importance (value);
   icon_name  = content_rating_attribute_get_icon_name (attribute, value == AS_CONTENT_RATING_VALUE_NONE);
@@ -602,38 +504,16 @@ add_attribute_row (BzAgeRatingDialog   *self,
   else
     description = as_content_rating_attribute_get_description (attribute, value);
 
-  attr = bz_age_rating_attribute_new (attribute, icon_name, rating, title, description);
-
-  if (groups[group_type].attributes != NULL)
-    {
-      groups[group_type].attributes = g_list_insert_sorted (groups[group_type].attributes,
-                                                            attr,
-                                                            (GCompareFunc) attributes_compare);
-
-      update_attribute_row (self, group_type, groups[group_type].row, groups[group_type].attributes);
-    }
-  else
-    {
-      groups[group_type].attributes = g_list_prepend (groups[group_type].attributes, attr);
-      groups[group_type].row        = create_attribute_row (icon_name, rating, title, description);
-      gtk_list_box_append (self->list, GTK_WIDGET (groups[group_type].row));
-    }
-}
-
-typedef struct
-{
-  BzAgeRatingDialog *dialog;
-  BzAgeRatingGroup  *groups;
-} AddAttributeData;
-
-static void
-add_attribute_rows_cb (const gchar         *attribute,
-                       AsContentRatingValue value,
-                       gpointer             user_data)
-{
-  AddAttributeData *data = user_data;
-
-  add_attribute_row (data->dialog, data->groups, attribute, value);
+  attr                          = g_object_new (BZ_TYPE_AGE_RATING_ATTRIBUTE,
+                                                "id", attribute,
+                                                "icon-name", icon_name,
+                                                "importance", rating,
+                                                "title", title,
+                                                "description", description,
+                                                NULL);
+  groups[group_type].attributes = g_list_insert_sorted (groups[group_type].attributes,
+                                                        attr,
+                                                        (GCompareFunc) attributes_compare);
 }
 
 static void
@@ -642,9 +522,11 @@ process_attributes (AsContentRating  *content_rating,
                     AttributeCallback callback,
                     gpointer          user_data)
 {
-  g_autofree const gchar **rating_ids = NULL;
-  AsContentRatingValue     value_bad  = AS_CONTENT_RATING_VALUE_NONE;
-  guint                    age_bad    = 0;
+  g_autofree const gchar **rating_ids   = NULL;
+  AsContentRatingValue     value_bad    = AS_CONTENT_RATING_VALUE_NONE;
+  guint                    age_bad      = 0;
+  guint                    rating_age   = 0;
+  AsContentRatingValue     rating_value = 0;
 
   const gchar *const violence_group[] = {
     "violence-bloodshed",
@@ -670,9 +552,6 @@ process_attributes (AsContentRating  *content_rating,
 
   for (gsize i = 0; rating_ids[i] != NULL; i++)
     {
-      guint                rating_age;
-      AsContentRatingValue rating_value;
-
       rating_value = as_content_rating_get_value (content_rating, rating_ids[i]);
       rating_age   = as_content_rating_attribute_to_csm_age (rating_ids[i], rating_value);
 
@@ -690,9 +569,6 @@ process_attributes (AsContentRating  *content_rating,
 
   for (gsize i = 0; rating_ids[i] != NULL; i++)
     {
-      guint                rating_age;
-      AsContentRatingValue rating_value;
-
       if (g_strv_contains (violence_group, rating_ids[i]) ||
           g_strv_contains (social_group, rating_ids[i]))
         continue;
@@ -714,9 +590,6 @@ process_attributes (AsContentRating  *content_rating,
 
   for (gsize i = 0; violence_group[i] != NULL; i++)
     {
-      guint                rating_age;
-      AsContentRatingValue rating_value;
-
       rating_value = as_content_rating_get_value (content_rating, violence_group[i]);
       rating_age   = as_content_rating_attribute_to_csm_age (violence_group[i], rating_value);
 
@@ -728,9 +601,6 @@ process_attributes (AsContentRating  *content_rating,
 
   for (gsize i = 0; social_group[i] != NULL; i++)
     {
-      guint                rating_age;
-      AsContentRatingValue rating_value;
-
       rating_value = as_content_rating_get_value (content_rating, social_group[i]);
       rating_age   = as_content_rating_attribute_to_csm_age (social_group[i], rating_value);
 
@@ -756,18 +626,13 @@ static void
 update_lozenge (BzAgeRatingDialog *self,
                 AsContentRating   *content_rating)
 {
-  const gchar          *css_class;
-  const gchar          *locale;
-  AsContentRatingSystem system;
-  guint                 age      = G_MAXUINT;
-  g_autofree gchar     *age_text = NULL;
-
-  const gchar *css_age_classes[] = {
-    "error",
-    "warning",
-    "dark-blue",
-    "grey"
-  };
+  const gchar          *locale     = NULL;
+  AsContentRatingSystem system     = 0;
+  guint                 age        = G_MAXUINT;
+  g_autofree gchar     *age_text   = NULL;
+  g_autofree gchar     *title_text = NULL;
+  BzImportance          importance = BZ_IMPORTANCE_NEUTRAL;
+  gboolean              is_unknown = FALSE;
 
   locale = setlocale (LC_MESSAGES, NULL);
   system = as_content_rating_system_from_locale (locale);
@@ -786,225 +651,158 @@ update_lozenge (BzAgeRatingDialog *self,
        g_strcmp0 (as_content_rating_get_kind (content_rating), "oars-1.0") != 0 &&
        g_strcmp0 (as_content_rating_get_kind (content_rating), "oars-1.1") != 0))
     {
-      g_free (age_text);
-      age_text  = g_strdup (_ ("?"));
-      css_class = "grey";
+      g_clear_pointer (&age_text, g_free);
+      age_text   = g_strdup (_ ("?"));
+      importance = BZ_IMPORTANCE_NEUTRAL;
     }
   else
     {
       if (age >= 18)
-        css_class = "error";
+        importance = BZ_IMPORTANCE_IMPORTANT;
       else if (age >= 15)
-        css_class = "warning";
+        importance = BZ_IMPORTANCE_WARNING;
       else if (age >= 12)
-        css_class = "dark-blue";
+        importance = BZ_IMPORTANCE_INFORMATION;
       else
-        css_class = "grey";
+        importance = BZ_IMPORTANCE_NEUTRAL;
     }
 
-  gtk_label_set_text (GTK_LABEL (self->lozenge), age_text);
+  if (self->entry == NULL)
+    {
+      title_text = g_strdup (_ ("Age Rating"));
+    }
+  else
+    {
+      is_unknown = (content_rating == NULL ||
+                    (g_strcmp0 (as_content_rating_get_kind (content_rating), "oars-1.0") != 0 &&
+                     g_strcmp0 (as_content_rating_get_kind (content_rating), "oars-1.1") != 0) ||
+                    age == G_MAXUINT);
 
-  for (gsize i = 0; i < G_N_ELEMENTS (css_age_classes); i++)
-    gtk_widget_remove_css_class (self->lozenge, css_age_classes[i]);
+      if (is_unknown)
+        {
+          title_text = g_strdup_printf (_ ("%s has an unknown age rating"),
+                                        bz_entry_get_title (self->entry));
+        }
+      else
+        {
+          if (age <= 3)
+            title_text = g_strdup_printf (_ ("%s is suitable for everyone"),
+                                          bz_entry_get_title (self->entry));
+          else if (age <= 5)
+            title_text = g_strdup_printf (_ ("%s is suitable for young children"),
+                                          bz_entry_get_title (self->entry));
+          else if (age <= 12)
+            title_text = g_strdup_printf (_ ("%s is suitable for children"),
+                                          bz_entry_get_title (self->entry));
+          else if (age <= 18)
+            title_text = g_strdup_printf (_ ("%s is suitable for teenagers"),
+                                          bz_entry_get_title (self->entry));
+          else if (age < G_MAXUINT)
+            title_text = g_strdup_printf (_ ("%s is suitable for adults"),
+                                          bz_entry_get_title (self->entry));
+          else
+            title_text = g_strdup_printf (_ ("%s is suitable for %s"),
+                                          bz_entry_get_title (self->entry),
+                                          age_text);
+        }
+    }
 
-  gtk_widget_add_css_class (self->lozenge, css_class);
+  bz_lozenge_set_label (self->lozenge, age_text);
+  bz_lozenge_set_title (self->lozenge, title_text);
+  bz_lozenge_set_importance (self->lozenge, importance);
 }
 
 static void
 update_list (BzAgeRatingDialog *self)
 {
-  GtkWidget        *child;
-  AsContentRating  *content_rating = NULL;
-  gboolean          is_unknown;
-  g_autofree gchar *title_text                             = NULL;
-  BzAgeRatingGroup  groups[BZ_AGE_RATING_GROUP_TYPE_COUNT] = { 0 };
-  AddAttributeData  data;
-
-  while ((child = gtk_widget_get_first_child (GTK_WIDGET (self->list))) != NULL)
-    gtk_list_box_remove (self->list, child);
-
-  if (self->entry == NULL)
-    return;
+  AsContentRating      *content_rating                         = NULL;
+  BzAgeRatingGroup      groups[BZ_AGE_RATING_GROUP_TYPE_COUNT] = { 0 };
+  guint                 attr_count                             = 0;
+  BzAgeRatingAttribute *attr                                   = NULL;
+  AdwActionRow         *row                                    = NULL;
+  BzImportance          max_importance                         = 0;
+  BzImportance          attr_importance                        = 0;
+  const gchar          *group_icon                             = NULL;
+  const gchar          *group_title                            = NULL;
+  const gchar          *group_description                      = NULL;
+  const gchar          *attr_description                       = NULL;
+  g_autofree gchar     *description                            = NULL;
+  g_autoptr (GList) l                                          = NULL;
+  g_autofree gchar *tmp                                        = NULL;
 
   content_rating = bz_entry_get_content_rating (self->entry);
   update_lozenge (self, content_rating);
 
-  if (content_rating == NULL ||
-      (g_strcmp0 (as_content_rating_get_kind (content_rating), "oars-1.0") != 0 &&
-       g_strcmp0 (as_content_rating_get_kind (content_rating), "oars-1.1") != 0))
-    {
-      is_unknown = TRUE;
-    }
-  else
-    {
-      guint age  = as_content_rating_get_minimum_age (content_rating);
-      is_unknown = (age == G_MAXUINT);
-    }
+  process_attributes (content_rating, FALSE, collect_attribute, groups);
 
-  if (is_unknown)
+  for (gsize i = 0; i < BZ_AGE_RATING_GROUP_TYPE_COUNT; i++)
     {
-      title_text = g_strdup_printf (_ ("%s has an unknown age rating"),
-                                    bz_entry_get_title (self->entry));
-    }
-  else
-    {
-      guint age = as_content_rating_get_minimum_age (content_rating);
+      if (groups[i].attributes == NULL)
+        continue;
 
-      if (age == 0)
-        title_text = g_strdup_printf (_ ("%s is suitable for everyone"),
-                                      bz_entry_get_title (self->entry));
-      else if (age <= 3)
-        title_text = g_strdup_printf (_ ("%s is suitable for toddlers"),
-                                      bz_entry_get_title (self->entry));
-      else if (age <= 5)
-        title_text = g_strdup_printf (_ ("%s is suitable for young children"),
-                                      bz_entry_get_title (self->entry));
-      else if (age <= 12)
-        title_text = g_strdup_printf (_ ("%s is suitable for children"),
-                                      bz_entry_get_title (self->entry));
-      else if (age <= 18)
-        title_text = g_strdup_printf (_ ("%s is suitable for teenagers"),
-                                      bz_entry_get_title (self->entry));
-      else if (age < G_MAXUINT)
-        title_text = g_strdup_printf (_ ("%s is suitable for adults"),
-                                      bz_entry_get_title (self->entry));
+      attr_count = g_list_length (groups[i].attributes);
+      row        = NULL;
+
+      if (attr_count == 1)
+        {
+          attr = (BzAgeRatingAttribute *) groups[i].attributes->data;
+          row  = bz_context_row_new (bz_age_rating_attribute_get_icon_name (attr),
+                                     bz_age_rating_attribute_get_importance (attr),
+                                     bz_age_rating_attribute_get_title (attr),
+                                     bz_age_rating_attribute_get_description (attr));
+        }
       else
-        title_text = g_strdup_printf (_ ("%s is suitable for %s"),
-                                      bz_entry_get_title (self->entry),
-                                      gtk_label_get_text (GTK_LABEL (self->lozenge)));
+        {
+          max_importance = BZ_IMPORTANCE_UNIMPORTANT;
+
+          for (l = groups[i].attributes; l != NULL; l = l->next)
+            {
+              attr            = (BzAgeRatingAttribute *) l->data;
+              attr_importance = bz_age_rating_attribute_get_importance (attr);
+              if (attr_importance > max_importance)
+                max_importance = attr_importance;
+            }
+
+          if (max_importance == BZ_IMPORTANCE_UNIMPORTANT)
+            {
+              group_icon        = content_rating_group_get_icon_name (i, TRUE);
+              group_title       = content_rating_group_get_title (i);
+              group_description = content_rating_group_get_description (i);
+              row               = bz_context_row_new (group_icon, BZ_IMPORTANCE_UNIMPORTANT, group_title, group_description);
+            }
+          else
+            {
+              group_icon  = content_rating_group_get_icon_name (i, FALSE);
+              group_title = content_rating_group_get_title (i);
+              g_clear_pointer (&description, g_free);
+
+              for (l = groups[i].attributes; l != NULL; l = l->next)
+                {
+                  attr            = (BzAgeRatingAttribute *) l->data;
+                  attr_importance = bz_age_rating_attribute_get_importance (attr);
+
+                  if (attr_importance == BZ_IMPORTANCE_UNIMPORTANT)
+                    continue;
+
+                  attr_description = bz_age_rating_attribute_get_description (attr);
+
+                  if (description == NULL)
+                    {
+                      description = g_strdup (attr_description);
+                    }
+                  else
+                    {
+                      tmp = g_strdup_printf (_ ("%s • %s"), description, attr_description);
+                      g_clear_pointer (&description, g_free);
+                      description = g_steal_pointer (&tmp);
+                    }
+                }
+
+              row = bz_context_row_new (group_icon, max_importance, group_title, description);
+            }
+        }
+
+      gtk_list_box_append (self->list, GTK_WIDGET (row));
+      g_list_free_full (g_steal_pointer (&groups[i].attributes), g_object_unref);
     }
-
-  gtk_label_set_text (self->title_label, title_text);
-
-  for (gsize i = 0; i < BZ_AGE_RATING_GROUP_TYPE_COUNT; i++)
-    {
-      groups[i].dialog     = self;
-      groups[i].group_type = i;
-      groups[i].row        = NULL;
-      groups[i].attributes = NULL;
-    }
-
-  data.dialog = self;
-  data.groups = groups;
-
-  process_attributes (content_rating, FALSE, add_attribute_rows_cb, &data);
-
-  for (gsize i = 0; i < BZ_AGE_RATING_GROUP_TYPE_COUNT; i++)
-    {
-      if (groups[i].attributes != NULL)
-        g_list_free_full (groups[i].attributes, (GDestroyNotify) bz_age_rating_attribute_free);
-    }
-}
-
-static void
-entry_notify_cb (GObject    *obj,
-                 GParamSpec *pspec,
-                 gpointer    user_data)
-{
-  BzAgeRatingDialog *self = BZ_AGE_RATING_DIALOG (user_data);
-  update_list (self);
-}
-
-static gint
-sort_cb (GtkListBoxRow *row1,
-         GtkListBoxRow *row2,
-         gpointer       user_data)
-{
-  const gchar *title1, *title2;
-
-  title1 = adw_preferences_row_get_title (ADW_PREFERENCES_ROW (row1));
-  title2 = adw_preferences_row_get_title (ADW_PREFERENCES_ROW (row2));
-
-  return g_strcmp0 (title1, title2);
-}
-
-static void
-bz_age_rating_dialog_set_property (GObject      *object,
-                                   guint         prop_id,
-                                   const GValue *value,
-                                   GParamSpec   *pspec)
-{
-  BzAgeRatingDialog *self = BZ_AGE_RATING_DIALOG (object);
-
-  switch (prop_id)
-    {
-    case PROP_ENTRY:
-      self->entry = g_value_dup_object (value);
-      break;
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-    }
-}
-
-static void
-bz_age_rating_dialog_constructed (GObject *object)
-{
-  BzAgeRatingDialog *self = BZ_AGE_RATING_DIALOG (object);
-
-  G_OBJECT_CLASS (bz_age_rating_dialog_parent_class)->constructed (object);
-
-  if (self->entry != NULL)
-    {
-      self->entry_notify_handler_content_rating = g_signal_connect (self->entry, "notify::content-rating",
-                                                                    G_CALLBACK (entry_notify_cb), self);
-      self->entry_notify_handler_title          = g_signal_connect (self->entry, "notify::title",
-                                                                    G_CALLBACK (entry_notify_cb), self);
-      update_list (self);
-    }
-}
-
-static void
-bz_age_rating_dialog_dispose (GObject *object)
-{
-  BzAgeRatingDialog *self = BZ_AGE_RATING_DIALOG (object);
-
-  g_clear_signal_handler (&self->entry_notify_handler_content_rating, self->entry);
-  g_clear_signal_handler (&self->entry_notify_handler_title, self->entry);
-  g_clear_object (&self->entry);
-
-  gtk_widget_dispose_template (GTK_WIDGET (self), BZ_TYPE_AGE_RATING_DIALOG);
-
-  G_OBJECT_CLASS (bz_age_rating_dialog_parent_class)->dispose (object);
-}
-
-static void
-bz_age_rating_dialog_class_init (BzAgeRatingDialogClass *klass)
-{
-  GObjectClass   *object_class = G_OBJECT_CLASS (klass);
-  GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
-
-  object_class->set_property = bz_age_rating_dialog_set_property;
-  object_class->constructed  = bz_age_rating_dialog_constructed;
-  object_class->dispose      = bz_age_rating_dialog_dispose;
-
-  props[PROP_ENTRY] =
-      g_param_spec_object (
-          "entry",
-          NULL, NULL,
-          BZ_TYPE_ENTRY,
-          G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
-
-  g_object_class_install_properties (object_class, LAST_PROP, props);
-
-  gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-age-rating-dialog.ui");
-
-  gtk_widget_class_bind_template_child (widget_class, BzAgeRatingDialog, lozenge);
-  gtk_widget_class_bind_template_child (widget_class, BzAgeRatingDialog, title_label);
-  gtk_widget_class_bind_template_child (widget_class, BzAgeRatingDialog, list);
-}
-
-static void
-bz_age_rating_dialog_init (BzAgeRatingDialog *self)
-{
-  gtk_widget_init_template (GTK_WIDGET (self));
-
-  gtk_list_box_set_sort_func (self->list, sort_cb, NULL, NULL);
-}
-
-BzAgeRatingDialog *
-bz_age_rating_dialog_new (BzEntry *entry)
-{
-  return g_object_new (BZ_TYPE_AGE_RATING_DIALOG,
-                       "entry", entry,
-                       NULL);
 }

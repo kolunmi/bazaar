@@ -24,6 +24,7 @@
 #include <glib/gi18n.h>
 
 #include "bz-app-permissions.h"
+#include "bz-context-row.h"
 #include "bz-safety-calculator.h"
 #include "bz-safety-row.h"
 
@@ -32,15 +33,15 @@ format_bus_policy_title (const BzBusPolicy *bus_policy);
 static const char *
 format_bus_policy_subtitle (const BzBusPolicy *bus_policy);
 static void
-add_row_if_permission (GListStore    *store,
-                       gboolean       has_permission,
-                       BzSafetyRating item_rating,
-                       const char    *icon_name_with_permission,
-                       const char    *title_with_permission,
-                       const char    *description_with_permission,
-                       const char    *icon_name_without_permission,
-                       const char    *title_without_permission,
-                       const char    *description_without_permission);
+add_row_if_permission (GListStore  *store,
+                       gboolean     has_permission,
+                       BzImportance item_rating,
+                       const char  *icon_name_with_permission,
+                       const char  *title_with_permission,
+                       const char  *description_with_permission,
+                       const char  *icon_name_without_permission,
+                       const char  *title_without_permission,
+                       const char  *description_without_permission);
 
 GListModel *
 bz_safety_calculator_analyze_entry (BzEntry *entry)
@@ -48,7 +49,7 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
   GListStore               *store           = NULL;
   BzAppPermissions         *permissions     = NULL;
   BzAppPermissionsFlags     perm_flags      = BZ_APP_PERMISSIONS_FLAGS_NONE;
-  BzSafetyRating            license_rating  = BZ_SAFETY_RATING_PROBABLY_SAFE;
+  BzImportance              license_rating  = BZ_IMPORTANCE_NEUTRAL;
   gboolean                  is_verified     = FALSE;
   gboolean                  is_foss         = FALSE;
   const GPtrArray          *filesystem_read = NULL;
@@ -71,7 +72,7 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
     {
       add_row_if_permission (store,
                              TRUE,
-                             BZ_SAFETY_RATING_POTENTIALLY_UNSAFE,
+                             BZ_IMPORTANCE_WARNING,
                              "channel-insecure-symbolic",
                              _ ("Unknown Permissions"),
                              _ ("Permissions are missing for this app."),
@@ -85,14 +86,14 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
 
       add_row_if_permission (store,
                              bz_app_permissions_is_empty (permissions),
-                             BZ_SAFETY_RATING_SAFE,
+                             BZ_IMPORTANCE_UNIMPORTANT,
                              "permissions-sandboxed-symbolic",
                              _ ("No Permissions"),
                              _ ("App is fully sandboxed"),
                              NULL, NULL, NULL);
       add_row_if_permission (store,
                              (perm_flags & BZ_APP_PERMISSIONS_FLAGS_NETWORK) != 0,
-                             BZ_SAFETY_RATING_NEUTRAL,
+                             BZ_IMPORTANCE_INFORMATION,
                              "network-wireless-symbolic",
                              _ ("Network Access"),
                              _ ("Can access the internet"),
@@ -101,7 +102,7 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
                              _ ("Cannot access the internet"));
       add_row_if_permission (store,
                              (perm_flags & BZ_APP_PERMISSIONS_FLAGS_DEVICES) != 0,
-                             BZ_SAFETY_RATING_POTENTIALLY_UNSAFE,
+                             BZ_IMPORTANCE_WARNING,
                              "camera-photo-symbolic",
                              _ ("User Device Access"),
                              _ ("Can access devices such as webcams or gaming controllers"),
@@ -110,56 +111,56 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
                              _ ("Cannot access devices such as webcams or gaming controllers"));
       add_row_if_permission (store,
                              (perm_flags & BZ_APP_PERMISSIONS_FLAGS_INPUT_DEVICES) != 0,
-                             BZ_SAFETY_RATING_PROBABLY_SAFE,
+                             BZ_IMPORTANCE_INFORMATION,
                              "input-keyboard-symbolic",
                              _ ("Input Device Access"),
                              _ ("Can access input devices"),
                              NULL, NULL, NULL);
       add_row_if_permission (store,
                              (perm_flags & BZ_APP_PERMISSIONS_FLAGS_AUDIO_DEVICES) != 0,
-                             BZ_SAFETY_RATING_PROBABLY_SAFE,
+                             BZ_IMPORTANCE_INFORMATION,
                              "permissions-microphone-symbolic",
                              _ ("Microphone Access and Audio Playback"),
                              _ ("Can listen using microphones and play audio without asking permission"),
                              NULL, NULL, NULL);
       add_row_if_permission (store,
                              (perm_flags & BZ_APP_PERMISSIONS_FLAGS_SYSTEM_DEVICES) != 0,
-                             BZ_SAFETY_RATING_POTENTIALLY_UNSAFE,
+                             BZ_IMPORTANCE_WARNING,
                              "permissions-system-devices-symbolic",
                              _ ("System Device Access"),
                              _ ("Can access system devices which require elevated permissions"),
                              NULL, NULL, NULL);
       add_row_if_permission (store,
                              (perm_flags & BZ_APP_PERMISSIONS_FLAGS_SCREEN) != 0,
-                             BZ_SAFETY_RATING_POTENTIALLY_UNSAFE,
+                             BZ_IMPORTANCE_WARNING,
                              "permissions-screen-contents-symbolic",
                              _ ("Screen Contents Access"),
                              _ ("Can access the contents of the screen or other windows"),
                              NULL, NULL, NULL);
       add_row_if_permission (store,
                              (perm_flags & BZ_APP_PERMISSIONS_FLAGS_X11) != 0,
-                             BZ_SAFETY_RATING_POTENTIALLY_UNSAFE,
+                             BZ_IMPORTANCE_WARNING,
                              "permissions-legacy-windowing-system-symbolic",
                              _ ("Legacy Windowing System"),
                              _ ("Uses a legacy windowing system"),
                              NULL, NULL, NULL);
       add_row_if_permission (store,
                              (perm_flags & BZ_APP_PERMISSIONS_FLAGS_ESCAPE_SANDBOX) != 0,
-                             BZ_SAFETY_RATING_POTENTIALLY_UNSAFE,
+                             BZ_IMPORTANCE_WARNING,
                              "permissions-warning-symbolic",
                              _ ("Arbitrary Permissions"),
                              _ ("Can acquire arbitrary permissions"),
                              NULL, NULL, NULL);
       add_row_if_permission (store,
                              (perm_flags & BZ_APP_PERMISSIONS_FLAGS_SETTINGS) != 0,
-                             BZ_SAFETY_RATING_POTENTIALLY_UNSAFE,
+                             BZ_IMPORTANCE_WARNING,
                              "emblem-system-symbolic",
                              _ ("User Settings"),
                              _ ("Can access and change user settings"),
                              NULL, NULL, NULL);
       add_row_if_permission (store,
                              (perm_flags & BZ_APP_PERMISSIONS_FLAGS_FILESYSTEM_FULL) != 0,
-                             BZ_SAFETY_RATING_POTENTIALLY_UNSAFE,
+                             BZ_IMPORTANCE_WARNING,
                              "folder-symbolic",
                              _ ("Full File System Read/Write Access"),
                              _ ("Can read and write all data on the file system"),
@@ -167,7 +168,7 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
       add_row_if_permission (store,
                              ((perm_flags & BZ_APP_PERMISSIONS_FLAGS_HOME_FULL) != 0 &&
                               !(perm_flags & BZ_APP_PERMISSIONS_FLAGS_FILESYSTEM_FULL)),
-                             BZ_SAFETY_RATING_POTENTIALLY_UNSAFE,
+                             BZ_IMPORTANCE_WARNING,
                              "user-home-symbolic",
                              _ ("Home Folder Read/Write Access"),
                              _ ("Can read and write all data in your home directory"),
@@ -175,7 +176,7 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
       add_row_if_permission (store,
                              ((perm_flags & BZ_APP_PERMISSIONS_FLAGS_FILESYSTEM_READ) != 0 &&
                               !(perm_flags & BZ_APP_PERMISSIONS_FLAGS_FILESYSTEM_FULL)),
-                             BZ_SAFETY_RATING_POTENTIALLY_UNSAFE,
+                             BZ_IMPORTANCE_WARNING,
                              "folder-symbolic",
                              _ ("Full File System Read Access"),
                              _ ("Can read all data on the file system"),
@@ -184,7 +185,7 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
                              ((perm_flags & BZ_APP_PERMISSIONS_FLAGS_HOME_READ) != 0 &&
                               !(perm_flags & (BZ_APP_PERMISSIONS_FLAGS_FILESYSTEM_FULL |
                                               BZ_APP_PERMISSIONS_FLAGS_FILESYSTEM_READ))),
-                             BZ_SAFETY_RATING_POTENTIALLY_UNSAFE,
+                             BZ_IMPORTANCE_WARNING,
                              "user-home-symbolic",
                              _ ("Home Folder Read Access"),
                              _ ("Can read all data in your home directory"),
@@ -193,7 +194,7 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
                              ((perm_flags & BZ_APP_PERMISSIONS_FLAGS_DOWNLOADS_FULL) != 0 &&
                               !(perm_flags & (BZ_APP_PERMISSIONS_FLAGS_FILESYSTEM_FULL |
                                               BZ_APP_PERMISSIONS_FLAGS_HOME_FULL))),
-                             BZ_SAFETY_RATING_POTENTIALLY_UNSAFE,
+                             BZ_IMPORTANCE_WARNING,
                              "folder-download-symbolic",
                              _ ("Download Folder Read/Write Access"),
                              _ ("Can read and write all data in your downloads directory"),
@@ -204,7 +205,7 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
                                               BZ_APP_PERMISSIONS_FLAGS_FILESYSTEM_READ |
                                               BZ_APP_PERMISSIONS_FLAGS_HOME_FULL |
                                               BZ_APP_PERMISSIONS_FLAGS_HOME_READ))),
-                             BZ_SAFETY_RATING_POTENTIALLY_UNSAFE,
+                             BZ_IMPORTANCE_WARNING,
                              "folder-download-symbolic",
                              _ ("Download Folder Read Access"),
                              _ ("Can read all data in your downloads directory"),
@@ -216,7 +217,7 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
           g_autofree char        *fs_title = bz_filesystem_path_to_display_string (path);
           add_row_if_permission (store,
                                  TRUE,
-                                 BZ_SAFETY_RATING_POTENTIALLY_UNSAFE,
+                                 BZ_IMPORTANCE_WARNING,
                                  "folder-symbolic",
                                  fs_title,
                                  _ ("Can read and write all data in the directory"),
@@ -229,7 +230,7 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
           g_autofree char        *fs_title = bz_filesystem_path_to_display_string (path);
           add_row_if_permission (store,
                                  TRUE,
-                                 BZ_SAFETY_RATING_POTENTIALLY_UNSAFE,
+                                 BZ_IMPORTANCE_WARNING,
                                  "folder-symbolic",
                                  fs_title,
                                  _ ("Can read all data in the directory"),
@@ -245,7 +246,7 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
                                              BZ_APP_PERMISSIONS_FLAGS_DOWNLOADS_FULL |
                                              BZ_APP_PERMISSIONS_FLAGS_DOWNLOADS_READ)) &&
                                  filesystem_read == NULL && filesystem_full == NULL,
-                             BZ_SAFETY_RATING_SAFE,
+                             BZ_IMPORTANCE_UNIMPORTANT,
                              "folder-symbolic",
                              _ ("No File System Access"),
                              _ ("Cannot access the file system at all"),
@@ -253,14 +254,14 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
 
       add_row_if_permission (store,
                              (perm_flags & BZ_APP_PERMISSIONS_FLAGS_SYSTEM_BUS) != 0,
-                             BZ_SAFETY_RATING_POTENTIALLY_UNSAFE,
+                             BZ_IMPORTANCE_WARNING,
                              "emblem-system-symbolic",
                              _ ("Uses System Services"),
                              _ ("Can request data from non-portal system services"),
                              NULL, NULL, NULL);
       add_row_if_permission (store,
                              (perm_flags & BZ_APP_PERMISSIONS_FLAGS_SESSION_BUS) != 0,
-                             BZ_SAFETY_RATING_POTENTIALLY_UNSAFE,
+                             BZ_IMPORTANCE_WARNING,
                              "emblem-system-symbolic",
                              _ ("Uses Session Services"),
                              _ ("Can request data from non-portal session services"),
@@ -274,7 +275,7 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
 
           add_row_if_permission (store,
                                  TRUE,
-                                 BZ_SAFETY_RATING_POTENTIALLY_UNSAFE,
+                                 BZ_IMPORTANCE_WARNING,
                                  "emblem-system-symbolic",
                                  bus_title,
                                  bus_description,
@@ -286,7 +287,7 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
                                              BZ_APP_PERMISSIONS_FLAGS_SESSION_BUS |
                                              BZ_APP_PERMISSIONS_FLAGS_BUS_POLICY_OTHER)) &&
                                  n_bus_policies == 0,
-                             BZ_SAFETY_RATING_SAFE,
+                             BZ_IMPORTANCE_UNIMPORTANT,
                              "emblem-system-symbolic",
                              _ ("No Service Access"),
                              _ ("Cannot access non-portal session or system services at all"),
@@ -295,7 +296,7 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
 
   add_row_if_permission (store,
                          is_verified,
-                         BZ_SAFETY_RATING_SAFE,
+                         BZ_IMPORTANCE_UNIMPORTANT,
                          "verified-checkmark-symbolic",
                          _ ("App developer is verified"),
                          _ ("The developer of this app has been verified to be who they say they are"),
@@ -327,15 +328,15 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
   return G_LIST_MODEL (store);
 }
 
-BzSafetyRating
+BzImportance
 bz_safety_calculator_calculate_rating (BzEntry *entry)
 {
   g_autoptr (GListModel) model = NULL;
-  BzSafetyRating max_rating    = BZ_SAFETY_RATING_SAFE;
-  guint          n_items       = 0;
-  guint          i             = 0;
+  BzImportance max_rating      = BZ_IMPORTANCE_UNIMPORTANT;
+  guint        n_items         = 0;
+  guint        i               = 0;
 
-  g_return_val_if_fail (BZ_IS_ENTRY (entry), BZ_SAFETY_RATING_SAFE);
+  g_return_val_if_fail (BZ_IS_ENTRY (entry), BZ_IMPORTANCE_UNIMPORTANT);
 
   model   = bz_safety_calculator_analyze_entry (entry);
   n_items = g_list_model_get_n_items (model);
@@ -343,9 +344,9 @@ bz_safety_calculator_calculate_rating (BzEntry *entry)
   for (i = 0; i < n_items; i++)
     {
       g_autoptr (BzSafetyRow) row = g_list_model_get_item (model, i);
-      BzSafetyRating rating       = BZ_SAFETY_RATING_SAFE;
+      BzImportance rating         = BZ_IMPORTANCE_UNIMPORTANT;
 
-      g_object_get (row, "rating", &rating, NULL);
+      g_object_get (row, "importance", &rating, NULL);
       max_rating = MAX (max_rating, rating);
     }
 
@@ -388,15 +389,15 @@ format_bus_policy_subtitle (const BzBusPolicy *bus_policy)
 }
 
 static void
-add_row_if_permission (GListStore    *store,
-                       gboolean       has_permission,
-                       BzSafetyRating item_rating,
-                       const char    *icon_name_with_permission,
-                       const char    *title_with_permission,
-                       const char    *description_with_permission,
-                       const char    *icon_name_without_permission,
-                       const char    *title_without_permission,
-                       const char    *description_without_permission)
+add_row_if_permission (GListStore  *store,
+                       gboolean     has_permission,
+                       BzImportance item_rating,
+                       const char  *icon_name_with_permission,
+                       const char  *title_with_permission,
+                       const char  *description_with_permission,
+                       const char  *icon_name_without_permission,
+                       const char  *title_without_permission,
+                       const char  *description_without_permission)
 {
   BzSafetyRow *row = NULL;
 
@@ -405,7 +406,7 @@ add_row_if_permission (GListStore    *store,
 
   row = bz_safety_row_new ();
   g_object_set (row,
-                "rating", has_permission ? item_rating : BZ_SAFETY_RATING_SAFE,
+                "importance", has_permission ? item_rating : BZ_IMPORTANCE_UNIMPORTANT,
                 "icon-name", has_permission ? icon_name_with_permission : icon_name_without_permission,
                 "title", has_permission ? title_with_permission : title_without_permission,
                 "subtitle", has_permission ? description_with_permission : description_without_permission,

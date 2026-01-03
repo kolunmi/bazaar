@@ -1,4 +1,4 @@
-/* bz-safety-calculator.h
+/* bz-lozenge.h
  *
  * Copyright 2026 Alexander Vanhee
  *
@@ -21,13 +21,38 @@
 #pragma once
 
 #include "bz-context-row.h"
-#include "bz-entry.h"
-#include "bz-safety-row.h"
-#include <gio/gio.h>
+#include <adwaita.h>
 
 G_BEGIN_DECLS
 
-GListModel  *bz_safety_calculator_analyze_entry (BzEntry *entry);
-BzImportance bz_safety_calculator_calculate_rating (BzEntry *entry);
+#define BZ_TYPE_LOZENGE (bz_lozenge_get_type ())
+
+G_DECLARE_FINAL_TYPE (BzLozenge, bz_lozenge, BZ, LOZENGE, GtkBox)
+
+GtkWidget *bz_lozenge_new (void);
+
+void
+bz_lozenge_set_title (BzLozenge   *self,
+                      const gchar *title);
+const gchar *
+bz_lozenge_get_title (BzLozenge *self);
+
+void
+bz_lozenge_set_label (BzLozenge   *self,
+                      const gchar *label);
+const gchar *
+bz_lozenge_get_label (BzLozenge *self);
+
+void
+bz_lozenge_set_icon_names (BzLozenge          *self,
+                           const gchar *const *icon_names);
+gchar **
+bz_lozenge_get_icon_names (BzLozenge *self);
+
+void
+bz_lozenge_set_importance (BzLozenge   *self,
+                           BzImportance importance);
+BzImportance
+bz_lozenge_get_importance (BzLozenge *self);
 
 G_END_DECLS

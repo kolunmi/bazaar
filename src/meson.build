@@ -66,6 +66,7 @@ bz_sources = files(
   'bz-comet-overlay.c',
   'bz-content-provider.c',
   'bz-context-tile.c',
+  'bz-context-row.c',
   'bz-curated-app-tile.c',
   'bz-curated-view.c',
   'bz-data-graph.c',
@@ -108,6 +109,7 @@ bz_sources = files(
   'bz-license-dialog.c',
   'bz-list-tile.c',
   'bz-login-page.c',
+  'bz-lozenge.c',
   'bz-markdown-render.c',
   'bz-newline-parser.c',
   'bz-parser.c',
@@ -178,6 +180,7 @@ gen_gobject_code = generator(
 )
 
 gobject_specs = files(
+  'bz-age-rating-attribute.txt',
   'bz-backend-notification.txt',
   'bz-backend-transaction-op-payload.txt',
   'bz-backend-transaction-op-progress-payload.txt',

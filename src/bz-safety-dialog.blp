@@ -27,39 +27,14 @@ template $BzSafetyDialog: Adw.Dialog {
           margin-top: 24;
           margin-bottom: 24;
 
-          Box {
-            orientation: vertical;
-            spacing: 12;
+          $BzLozenge lozenge {
+            title: _("Safe");
 
-            Box {
-              orientation: vertical;
-              spacing: 12;
-              halign: center;
+            icon-names: [
+              "app-safety-ok-symbolic",
+            ];
 
-              Image lozenge {
-                icon-name: "app-safety-ok-symbolic";
-                pixel-size: 24;
-                halign: center;
-
-                styles [
-                  "circular-lozenge",
-                  "large",
-                  "success",
-                ]
-              }
-
-              Label title {
-                label: _("Safe");
-                justify: center;
-                wrap: true;
-                wrap-mode: word_char;
-                xalign: 0.5;
-
-                styles [
-                  "title-2",
-                ]
-              }
-            }
+            importance: unimportant;
           }
 
           ListBox permissions_list {
