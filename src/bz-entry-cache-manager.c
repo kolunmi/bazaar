@@ -21,7 +21,7 @@
 #define G_LOG_DOMAIN  "BAZAAR::ENTRY-CACHE"
 #define BAZAAR_MODULE "entry-cache"
 
-#define MAX_CONCURRENT_WRITES       4
+#define MAX_CONCURRENT_WRITES       16
 #define WATCH_CLEANUP_INTERVAL_MSEC 5000
 
 #include <malloc.h>
