@@ -68,6 +68,12 @@
   </screenshots>
 
   <releases>
+    <release version="0.7.2" date="2026-01-03">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.2</url>
+      <description translate="no">
+        <p>This small release ensures the new icon is rendered correctly on KDE Plasma.</p>
+      </description>
+    </release>
     <release version="0.7.1" date="2026-01-03">
       <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.1</url>
       <description translate="no">
