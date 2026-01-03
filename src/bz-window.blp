@@ -392,6 +392,7 @@ template $BzWindow: Adw.ApplicationWindow {
                       [start]
                       Revealer {
                         transition-type: crossfade;
+                        transition-duration: 750;
                         reveal-child: bind $logical_or($invert_boolean($is_null(template.state as <$BzStateInfo>.background-task-label) as <bool>) as <bool>,
                                                        status_popover.visible) as <bool>;
 
