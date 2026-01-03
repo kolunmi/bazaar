@@ -150,7 +150,7 @@ create_flag_buttons (BzPreferencesDialog *self)
 
       button = GTK_TOGGLE_BUTTON (gtk_toggle_button_new ());
 
-      gtk_widget_set_tooltip_text (GTK_WIDGET (button), bar_themes[i].tooltip);
+      gtk_widget_set_tooltip_text (GTK_WIDGET (button), _ (bar_themes[i].tooltip));
       gtk_widget_add_css_class (GTK_WIDGET (button), "accent-button");
       gtk_widget_add_css_class (GTK_WIDGET (button), bar_themes[i].style_class);
 

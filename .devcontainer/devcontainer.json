@@ -1,10 +1,8 @@
 {
 	"name": "Bazaar devcontainer",
-
 	"build": {
 		"dockerfile": "Dockerfile"
 	},
-
 	"features": {
 		"ghcr.io/devcontainers/features/common-utils:2": {
 			"installZsh": "false",
@@ -12,27 +10,23 @@
 			"userUid": "1000",
 			"userGid": "1000",
 			"upgradePackages": "true"
-		},
-		"ghcr.io/devcontainers/features/github-cli:1": {}
+		}
 	},
-
 	"remoteUser": "vscode",
-
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"ms-vscode.cpptools-extension-pack"
+				"ms-vscode.cpptools-extension-pack",
+				"bodil.blueprint-gtk"
 			]
 		}
 	},
-
 	// Wayland support
 	"containerEnv": {
 		"WAYLAND_DISPLAY": "${localEnv:WAYLAND_DISPLAY}",
 		"XDG_RUNTIME_DIR": "${localEnv:XDG_RUNTIME_DIR}",
 		"XDG_SESSION_TYPE": "${localEnv:XDG_SESSION_TYPE}"
 	},
-
 	"mounts": [
 		"source=${localEnv:XDG_RUNTIME_DIR},target=${localEnv:XDG_RUNTIME_DIR},type=bind,consistency=cached"
 	]
