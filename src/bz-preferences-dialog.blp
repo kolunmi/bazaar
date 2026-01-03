@@ -2,6 +2,7 @@ using Gtk 4.0;
 using Adw 1;
 
 template $BzPreferencesDialog: Adw.PreferencesDialog {
+  follows-content-size: true;
   content-height: 500;
   search-enabled: true;
   width-request: 350;
@@ -18,6 +19,14 @@ template $BzPreferencesDialog: Adw.PreferencesDialog {
   Adw.PreferencesPage {
     title: _("Preferences");
     use-underline: true;
+
+    banner: Adw.Banner {
+      sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.syncing as <bool>) as <bool>;
+      revealed: bind template.state as <$BzStateInfo>.metered_connection as <bool>;
+      title: _("Network connection is metered — automatic store data sync is paused");
+      button-label: _("Sync Manually");
+      action-name: "app.sync-remotes";
+    };
 
     Adw.PreferencesGroup {
       title: _("Content Filters");
@@ -80,4 +89,3 @@ template $BzPreferencesDialog: Adw.PreferencesDialog {
     }
   }
 }
-

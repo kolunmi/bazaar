@@ -484,13 +484,7 @@ template $BzWindow: Adw.ApplicationWindow {
                         menu-model: primary_menu;
                       }
                     }
-                    Adw.Banner {
-                      sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.syncing as <bool>) as <bool>;
-                      revealed: bind template.state as <$BzStateInfo>.metered_connection as <bool>;
-                      title: _("Network connection is metered — automatic store data sync is paused");
-                      button-label: _("Sync Manually");
-                      button-clicked => $sync_cb(template);
-                    }
+
                     Adw.Banner {
                       sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.syncing as <bool>) as <bool>;
                       revealed: bind $logical_and($invert_boolean(template.state as <$BzStateInfo>.metered_connection as <bool>) as <bool>,

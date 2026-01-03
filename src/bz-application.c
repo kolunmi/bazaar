@@ -744,7 +744,7 @@ bz_application_preferences_action (GSimpleAction *action,
   g_assert (BZ_IS_APPLICATION (self));
 
   window      = gtk_application_get_active_window (GTK_APPLICATION (self));
-  preferences = bz_preferences_dialog_new (self->settings);
+  preferences = bz_preferences_dialog_new (self->state);
 
   adw_dialog_present (preferences, GTK_WIDGET (window));
 }
