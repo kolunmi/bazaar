@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: io.github.kolunmi.Bazaar master\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-01 09:20+0300\n"
-"PO-Revision-Date: 2026-01-01 22:48+0300\n"
+"POT-Creation-Date: 2026-01-03 21:18+0300\n"
+"PO-Revision-Date: 2026-01-03 23:09+0300\n"
 "Last-Translator: Sabri Ünal <yakushabb@gmail.com>\n"
 "Language-Team: Turkish <takim@gnome.org.tr>\n"
 "Language: tr\n"
@@ -75,19 +75,19 @@ msgstr "Debounce Arama Girdilerini Geciktir"
 msgid "Add a delay before searching to prevent instant replies while typing"
 msgstr "Yazarken anlık yanıtları önlemek için aramadan önce gecikme ekle"
 
-#: data/io.github.kolunmi.Bazaar.gschema.xml:54
+#: data/io.github.kolunmi.Bazaar.gschema.xml:74
 msgid "Global Progress Bar Theme"
 msgstr "Küresel İlerleme Çubuğu Teması"
 
-#: data/io.github.kolunmi.Bazaar.gschema.xml:55
+#: data/io.github.kolunmi.Bazaar.gschema.xml:75
 msgid "Describes the look of the global progress bar"
 msgstr "Küresel ilerleme çubuğunun görünümünü tanımlar"
 
-#: data/io.github.kolunmi.Bazaar.gschema.xml:59
+#: data/io.github.kolunmi.Bazaar.gschema.xml:79
 msgid "Saved Window Dimensions"
 msgstr "Kaydedilen Pencere Boyutları"
 
-#: data/io.github.kolunmi.Bazaar.gschema.xml:60
+#: data/io.github.kolunmi.Bazaar.gschema.xml:80
 msgid "The window dimensions to be used by the next Bazaar window"
 msgstr "Bir sonraki Bazaar penceresince kullanılacak pencere boyutları"
 
@@ -113,7 +113,7 @@ msgstr ""
 "daha yerelleştirilmiş deneyim sunmak için dağıtıcılarca yapılandırılabilen "
 "bir \"Özelleştirilmiş\" sekmeye sahiptir."
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29 src/bz-application.c:712
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29 src/bz-application.c:715
 msgid "Adam Masciola"
 msgstr "Adam Masciola"
 
@@ -133,182 +133,184 @@ msgstr "Arama sayfası"
 msgid "Category page"
 msgstr "Kategori sayfası"
 
-#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:689
+#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:680
 #: src/bz-installed-tile.blp:99
 msgid "Manage Add-ons"
 msgstr "Eklentileri Yönet"
 
-#: src/bz-addons-dialog.c:90 src/bz-full-view.blp:477
+#: src/bz-addons-dialog.c:90 src/bz-full-view.blp:468
 #: src/bz-installed-tile.blp:117 src/bz-transaction-view.blp:277
 #: src/bz-window.c:1283
 msgid "Remove"
 msgstr "Kaldır"
 
 #: src/bz-addons-dialog.c:95 src/bz-favorites-tile.c:166
-#: src/bz-full-view.blp:249 src/bz-full-view.blp:464
+#: src/bz-full-view.blp:249 src/bz-full-view.blp:455
 #: src/bz-transaction-view.blp:225 src/bz-window.c:1260
 msgid "Install"
 msgstr "Kur"
 
-#: src/bz-age-rating-dialog.blp:7 src/bz-age-rating-dialog.blp:50
-#: src/bz-full-view.c:383 src/bz-full-view.c:390
 # Arayüzde sığmadığı için new line eklendi
+#: src/bz-age-rating-dialog.blp:7 src/bz-age-rating-dialog.blp:31
+#: src/bz-age-rating-dialog.c:672 src/bz-full-view.c:386 src/bz-full-view.c:393
 msgid "Age Rating"
-msgstr "Yaş\nDerecelendirmesi"
+msgstr ""
+"Yaş\n"
+"Derecelendirmesi"
 
-#: src/bz-age-rating-dialog.blp:40 src/bz-age-rating-dialog.c:790
+#: src/bz-age-rating-dialog.blp:32 src/bz-age-rating-dialog.c:655
 msgid "?"
 msgstr "?"
 
-#: src/bz-age-rating-dialog.c:139
+#: src/bz-age-rating-dialog.c:87
 msgid "Cartoon Violence"
 msgstr "Çizgi Dizisi Şiddeti"
 
-#: src/bz-age-rating-dialog.c:140
+#: src/bz-age-rating-dialog.c:88
 msgid "No information regarding cartoon violence"
 msgstr "Çizgi dizisi şiddetiyle ilgili bilgi yok"
 
-#: src/bz-age-rating-dialog.c:143
+#: src/bz-age-rating-dialog.c:91
 msgid "Fantasy Violence"
 msgstr "Fantezi Şiddeti"
 
-#: src/bz-age-rating-dialog.c:144
+#: src/bz-age-rating-dialog.c:92
 msgid "No information regarding fantasy violence"
 msgstr "Fantezi şiddetiyle ilgili bilgi yok"
 
-#: src/bz-age-rating-dialog.c:147
+#: src/bz-age-rating-dialog.c:95
 msgid "Realistic Violence"
 msgstr "Gerçekçi Şiddet"
 
-#: src/bz-age-rating-dialog.c:148
+#: src/bz-age-rating-dialog.c:96
 msgid "No information regarding realistic violence"
 msgstr "Gerçekçi şiddetle ilgili bilgi yok"
 
-#: src/bz-age-rating-dialog.c:151
+#: src/bz-age-rating-dialog.c:99
 msgid "Violence Depicting Bloodshed"
 msgstr "Kan Dökülmesini Betimleyen Şiddet"
 
-#: src/bz-age-rating-dialog.c:152
+#: src/bz-age-rating-dialog.c:100
 msgid "No information regarding bloodshed"
 msgstr "Kan dökülmesiyle ilgili bilgi yok"
 
-#: src/bz-age-rating-dialog.c:155
+#: src/bz-age-rating-dialog.c:103
 msgid "Sexual Violence"
 msgstr "Cinsel Şiddet"
 
-#: src/bz-age-rating-dialog.c:156
+#: src/bz-age-rating-dialog.c:104
 msgid "No information regarding sexual violence"
 msgstr "Cinsel şiddetle ilgili bilgi yok"
 
-#: src/bz-age-rating-dialog.c:159
+#: src/bz-age-rating-dialog.c:107
 msgid "Alcohol"
 msgstr "Alkol"
 
-#: src/bz-age-rating-dialog.c:160
+#: src/bz-age-rating-dialog.c:108
 msgid "No information regarding references to alcohol"
 msgstr "Alkole atıflarla ilgili bilgi yok"
 
-#: src/bz-age-rating-dialog.c:163
+#: src/bz-age-rating-dialog.c:111
 msgid "Narcotics"
 msgstr "Uyuşturucu"
 
-#: src/bz-age-rating-dialog.c:164
+#: src/bz-age-rating-dialog.c:112
 msgid "No information regarding references to illicit drugs"
 msgstr "Yasadışı ilaçlara atıflarla ilgili bilgi yok"
 
-#: src/bz-age-rating-dialog.c:167
+#: src/bz-age-rating-dialog.c:115
 msgid "Tobacco"
 msgstr "Tütün"
 
-#: src/bz-age-rating-dialog.c:168
+#: src/bz-age-rating-dialog.c:116
 msgid "No information regarding references to tobacco products"
 msgstr "Tütün ürünlerine atıflarla ilgili bilgi yok"
 
-#: src/bz-age-rating-dialog.c:171 src/bz-age-rating-dialog.c:358
+#: src/bz-age-rating-dialog.c:119 src/bz-age-rating-dialog.c:421
 msgid "Nudity"
 msgstr "Çıplaklık"
 
-#: src/bz-age-rating-dialog.c:172
+#: src/bz-age-rating-dialog.c:120
 msgid "No information regarding nudity of any sort"
 msgstr "Herhangi biçimde çıplaklıkla ilgili bilgi yok"
 
-#: src/bz-age-rating-dialog.c:175
+#: src/bz-age-rating-dialog.c:123
 msgid "Sexual Themes"
 msgstr "Cinsel Temalar"
 
-#: src/bz-age-rating-dialog.c:176
+#: src/bz-age-rating-dialog.c:124
 msgid "No information regarding references to or depictions of sexual nature"
 msgstr "Cinsel doğaya atıf ya da betimlemelerle ilgili bilgi yok"
 
-#: src/bz-age-rating-dialog.c:179
+#: src/bz-age-rating-dialog.c:127
 msgid "Profanity"
 msgstr "Sövgü"
 
-#: src/bz-age-rating-dialog.c:180
+#: src/bz-age-rating-dialog.c:128
 msgid "No information regarding profanity of any kind"
 msgstr "Herhangi türde küfürlerle ilgili bilgi yok"
 
-#: src/bz-age-rating-dialog.c:183
+#: src/bz-age-rating-dialog.c:131
 msgid "Inappropriate Humor"
 msgstr "Uygunsuz Mizah"
 
-#: src/bz-age-rating-dialog.c:184
+#: src/bz-age-rating-dialog.c:132
 msgid "No information regarding inappropriate humor"
 msgstr "Uygunsuz mizahla ilgili bilgi yok"
 
-#: src/bz-age-rating-dialog.c:187
+#: src/bz-age-rating-dialog.c:135
 msgid "Discrimination"
 msgstr "Ayrımcılık"
 
-#: src/bz-age-rating-dialog.c:188
+#: src/bz-age-rating-dialog.c:136
 msgid "No information regarding discriminatory language of any kind"
 msgstr "Herhangi türde ayrımcı dille ilgili bilgi yok"
 
-#: src/bz-age-rating-dialog.c:191
+#: src/bz-age-rating-dialog.c:139
 msgid "Advertising"
 msgstr "Reklam"
 
-#: src/bz-age-rating-dialog.c:192
+#: src/bz-age-rating-dialog.c:140
 msgid "No information regarding advertising of any kind"
 msgstr "Herhangi türde reklamla ilgili bilgi yok"
 
-#: src/bz-age-rating-dialog.c:195
+#: src/bz-age-rating-dialog.c:143
 msgid "Gambling"
 msgstr "Kumar"
 
-#: src/bz-age-rating-dialog.c:196
+#: src/bz-age-rating-dialog.c:144
 msgid "No information regarding gambling of any kind"
 msgstr "Herhangi türde kumarla ilgili bilgi yok"
 
-#: src/bz-age-rating-dialog.c:199
+#: src/bz-age-rating-dialog.c:147
 msgid "Purchasing"
 msgstr "Satın Alım"
 
-#: src/bz-age-rating-dialog.c:200
+#: src/bz-age-rating-dialog.c:148
 msgid "No information regarding the ability to spend money"
 msgstr "Para harcama yeteneğiyle ilgili bilgi yok"
 
-#: src/bz-age-rating-dialog.c:203
+#: src/bz-age-rating-dialog.c:151
 msgid "Chat Between Users"
 msgstr "Kullanıcılar Arası Sohbet"
 
-#: src/bz-age-rating-dialog.c:204
+#: src/bz-age-rating-dialog.c:152
 msgid "No information regarding ways to chat with other users"
 msgstr "Diğer kullanıcılarla sohbet etme yollarıyla ilgili bilgi yok"
 
-#: src/bz-age-rating-dialog.c:207
+#: src/bz-age-rating-dialog.c:155
 msgid "Audio Chat Between Users"
 msgstr "Kullanıcılar Arası Sesli Sohbet"
 
-#: src/bz-age-rating-dialog.c:208
+#: src/bz-age-rating-dialog.c:156
 msgid "No information regarding ways to talk with other users"
 msgstr "Diğer kullanıcılarla konuşma yollarıyla ilgili bilgi yok"
 
-#: src/bz-age-rating-dialog.c:211
+#: src/bz-age-rating-dialog.c:159
 msgid "Contact Details"
 msgstr "Kişi Ayrıntıları"
 
-#: src/bz-age-rating-dialog.c:212
+#: src/bz-age-rating-dialog.c:160
 msgid ""
 "No information regarding sharing of social network usernames or email "
 "addresses"
@@ -316,178 +318,173 @@ msgstr ""
 "Sosyal ağ kullanıcı adlarının ya da e-posta adreslerinin paylaşımıyla ilgili "
 "bilgi yok"
 
-#: src/bz-age-rating-dialog.c:215
+#: src/bz-age-rating-dialog.c:163
 msgid "Identifying Information"
 msgstr "Tanımlayıcı Bilgiler"
 
-#: src/bz-age-rating-dialog.c:216
+#: src/bz-age-rating-dialog.c:164
 msgid "No information regarding sharing of user information with third parties"
 msgstr "Üçüncü şahıslarla kullanıcı bilgisi paylaşımıyla ilgili bilgi yok"
 
-#: src/bz-age-rating-dialog.c:219
+#: src/bz-age-rating-dialog.c:167
 msgid "Location Sharing"
 msgstr "Konum Paylaşımı"
 
-#: src/bz-age-rating-dialog.c:220
+#: src/bz-age-rating-dialog.c:168
 msgid "No information regarding sharing of physical location with other users"
 msgstr "Diğer kullanıcılarla fiziksel konum paylaşımıyla ilgili bilgi yok"
 
-#: src/bz-age-rating-dialog.c:223
+#: src/bz-age-rating-dialog.c:171
 msgid "Prostitution"
 msgstr "Fuhuş"
 
-#: src/bz-age-rating-dialog.c:224
+#: src/bz-age-rating-dialog.c:172
 msgid "No information regarding references to prostitution"
 msgstr "Fuhşa atıflarla ilgili bilgi yok"
 
-#: src/bz-age-rating-dialog.c:227
+#: src/bz-age-rating-dialog.c:175
 msgid "Adultery"
 msgstr "Zina"
 
-#: src/bz-age-rating-dialog.c:228
+#: src/bz-age-rating-dialog.c:176
 msgid "No information regarding references to adultery"
 msgstr "Eş aldatmaya atıflarla ilgili bilgi yok"
 
-#: src/bz-age-rating-dialog.c:231
+#: src/bz-age-rating-dialog.c:179
 msgid "Sexualized Characters"
 msgstr "Cinselleştirilmiş Karakterler"
 
-#: src/bz-age-rating-dialog.c:232
+#: src/bz-age-rating-dialog.c:180
 msgid "No information regarding sexualized characters"
 msgstr "Cinselleştirilmiş karakterlerle ilgili bilgi yok"
 
-#: src/bz-age-rating-dialog.c:235
+#: src/bz-age-rating-dialog.c:183
 msgid "Desecration"
 msgstr "Saygısızlık"
 
-#: src/bz-age-rating-dialog.c:236
+#: src/bz-age-rating-dialog.c:184
 msgid "No information regarding references to desecration"
 msgstr "Kutsala saygısızlığa atıflarla ilgili bilgi yok"
 
-#: src/bz-age-rating-dialog.c:239
+#: src/bz-age-rating-dialog.c:187
 msgid "Human Remains"
 msgstr "İnsan Kalıntıları"
 
-#: src/bz-age-rating-dialog.c:240
+#: src/bz-age-rating-dialog.c:188
 msgid "No information regarding visible dead human remains"
 msgstr "Görününür ölü insan kalıntılarıyla ilgili bilgi yok"
 
-#: src/bz-age-rating-dialog.c:243
+#: src/bz-age-rating-dialog.c:191
 msgid "Slavery"
 msgstr "Kölelik"
 
-#: src/bz-age-rating-dialog.c:244
+#: src/bz-age-rating-dialog.c:192
 msgid "No information regarding references to slavery"
 msgstr "Köleliğe atıflarla ilgili bilgi yok"
 
-#: src/bz-age-rating-dialog.c:307
+#: src/bz-age-rating-dialog.c:370
 msgid "Does not include references to drugs"
 msgstr "Yasadışı ilaçlara atıf içermez"
 
-#: src/bz-age-rating-dialog.c:309
+#: src/bz-age-rating-dialog.c:372
 msgid ""
 "Does not include swearing, profanity, and other kinds of strong language"
 msgstr "Küfür, sövgü ve diğer türlerde sert dil içermez"
 
-#: src/bz-age-rating-dialog.c:311
+#: src/bz-age-rating-dialog.c:374
 msgid "Does not include ads or monetary transactions"
 msgstr "Reklam ya da parasal işlemler içermez"
 
-#: src/bz-age-rating-dialog.c:313
+#: src/bz-age-rating-dialog.c:376
 msgid "Does not include sex or nudity"
 msgstr "Cinsellik ya da çıplaklık içermez"
 
-#: src/bz-age-rating-dialog.c:315
+#: src/bz-age-rating-dialog.c:378
 msgid "Does not include uncontrolled chat functionality"
 msgstr "Denetimsiz sohbet işlevi içermez"
 
-#: src/bz-age-rating-dialog.c:317
+#: src/bz-age-rating-dialog.c:380
 msgid "Does not include violence"
 msgstr "Şiddet içermez"
 
-#: src/bz-age-rating-dialog.c:352
+#: src/bz-age-rating-dialog.c:415
 msgid "Drugs"
 msgstr "Uyuşturucu"
 
-#: src/bz-age-rating-dialog.c:354
+#: src/bz-age-rating-dialog.c:417
 msgid "Strong Language"
 msgstr "Sert Dil"
 
-#: src/bz-age-rating-dialog.c:356
+#: src/bz-age-rating-dialog.c:419
 msgid "Money"
 msgstr "Para"
 
-#: src/bz-age-rating-dialog.c:360
+#: src/bz-age-rating-dialog.c:423
 msgid "Social"
 msgstr "Sosyal"
 
-#: src/bz-age-rating-dialog.c:362
+#: src/bz-age-rating-dialog.c:425
 msgid "Violence"
 msgstr "Şiddet"
 
-#: src/bz-age-rating-dialog.c:564
-#, c-format
-msgid "%s • %s"
-msgstr "%s • %s"
-
 #. Translators: Age rating format, e.g. "12+" for ages 12 and up
-#: src/bz-age-rating-dialog.c:752 src/bz-full-view.c:373
+#: src/bz-age-rating-dialog.c:622 src/bz-full-view.c:376
 #, c-format
 msgid "%d+"
 msgstr "%d+"
 
-#: src/bz-age-rating-dialog.c:782
+#: src/bz-age-rating-dialog.c:647
 msgctxt "Age rating"
 msgid "All"
 msgstr "Tümü"
 
-#: src/bz-age-rating-dialog.c:846
+#: src/bz-age-rating-dialog.c:683
 #, c-format
 msgid "%s has an unknown age rating"
 msgstr "%s yaş derecelendirmesi bilinmiyor"
 
-#: src/bz-age-rating-dialog.c:854
+#: src/bz-age-rating-dialog.c:689
 #, c-format
 msgid "%s is suitable for everyone"
 msgstr "%s, herkese uygundur"
 
-#: src/bz-age-rating-dialog.c:857
-#, c-format
-msgid "%s is suitable for toddlers"
-msgstr "%s, bebeklere uygundur"
-
-#: src/bz-age-rating-dialog.c:860
+#: src/bz-age-rating-dialog.c:692
 #, c-format
 msgid "%s is suitable for young children"
 msgstr "%s, küçük çocuklara uygundur"
 
-#: src/bz-age-rating-dialog.c:863
+#: src/bz-age-rating-dialog.c:695
 #, c-format
 msgid "%s is suitable for children"
 msgstr "%s, çocuklara uygundur"
 
-#: src/bz-age-rating-dialog.c:866
+#: src/bz-age-rating-dialog.c:698
 #, c-format
 msgid "%s is suitable for teenagers"
 msgstr "%s, ergenlere uygundur"
 
-#: src/bz-age-rating-dialog.c:869
+#: src/bz-age-rating-dialog.c:701
 #, c-format
 msgid "%s is suitable for adults"
 msgstr "%s, yetişkinlere uygundur"
 
-#: src/bz-age-rating-dialog.c:872
+#: src/bz-age-rating-dialog.c:704
 #, c-format
 msgid "%s is suitable for %s"
 msgstr "%s, %s için uygundur"
 
+#: src/bz-age-rating-dialog.c:795
+#, c-format
+msgid "%s • %s"
+msgstr "%s • %s"
+
 #: src/bz-all-apps-page.blp:13 src/bz-apps-page.blp:14 src/bz-full-view.blp:43
-#: src/bz-user-data-page.blp:15 src/bz-window.blp:441
+#: src/bz-user-data-page.blp:15 src/bz-window.blp:483
 msgid "Main Menu"
 msgstr "Ana Menü"
 
 #: src/bz-all-apps-page.blp:17 src/bz-apps-page.blp:17
-#: src/bz-user-data-page.blp:18 src/bz-window.blp:520
+#: src/bz-user-data-page.blp:18 src/bz-window.blp:556
 msgid "_Donate to Bazaar ❤️"
 msgstr "Bazaarʼa _Bağış Yap ❤️"
 
@@ -497,65 +494,166 @@ msgid "_Refresh Content"
 msgstr "İçeriği _Yenile"
 
 #: src/bz-all-apps-page.blp:22 src/bz-apps-page.blp:22
-#: src/bz-user-data-page.blp:22 src/bz-window.blp:527
+#: src/bz-user-data-page.blp:22 src/bz-window.blp:563
 msgid "_Preferences"
 msgstr "_Tercihler"
 
 #: src/bz-all-apps-page.blp:23 src/bz-apps-page.blp:23
-#: src/bz-user-data-page.blp:23 src/bz-window.blp:548
+#: src/bz-user-data-page.blp:23 src/bz-window.blp:584
 msgid "_Keyboard Shortcuts"
 msgstr "_Klavye Kısayolları"
 
 #: src/bz-all-apps-page.blp:24 src/bz-apps-page.blp:24
-#: src/bz-user-data-page.blp:24 src/bz-window.blp:553
+#: src/bz-user-data-page.blp:24 src/bz-window.blp:589
 msgid "_About Bazaar"
-msgstr "_Bazaar _Hakkında"
+msgstr "Bazaar _Hakkında"
 
 #: src/bz-all-apps-page.blp:28 src/bz-apps-page.blp:28
-#: src/bz-user-data-page.blp:27 src/bz-window.blp:560
+#: src/bz-user-data-page.blp:27 src/bz-window.blp:596
 msgid "_Quit Bazaar"
 msgstr "Bazaarʼdan Çı_k"
 
-#: src/bz-app-size-dialog.blp:53 src/bz-app-size-dialog.blp:77
+#: src/bz-app-permissions.c:160
+#, c-format
+msgid "System folder %s"
+msgstr "Sistem klasörü %s"
+
+#: src/bz-app-permissions.c:162
+#, c-format
+msgid "Home subfolder %s"
+msgstr "Ev alt klasörü %s"
+
+#: src/bz-app-permissions.c:164
+msgid "Host system folders"
+msgstr "Ana makine sistem klasörleri"
+
+#: src/bz-app-permissions.c:166
+msgid "Host system configuration from /etc"
+msgstr "/etc dizininden ana makine sistem yapılandırması"
+
+#: src/bz-app-permissions.c:169
+#, c-format
+msgid "Desktop subfolder %s"
+msgstr "Masaüstü alt klasörü %s"
+
+#: src/bz-app-permissions.c:170
+msgid "Desktop folder"
+msgstr "Masaüstü klasörü"
+
+#: src/bz-app-permissions.c:173
+#, c-format
+msgid "Documents subfolder %s"
+msgstr "Belgeler alt klasörü %s"
+
+#: src/bz-app-permissions.c:174
+msgid "Documents folder"
+msgstr "Belgeler klasörü"
+
+#: src/bz-app-permissions.c:177
+#, c-format
+msgid "Music subfolder %s"
+msgstr "Müzik alt klasörü %s"
+
+#: src/bz-app-permissions.c:178
+msgid "Music folder"
+msgstr "Müzik klasörü"
+
+#: src/bz-app-permissions.c:181
+#, c-format
+msgid "Pictures subfolder %s"
+msgstr "Resimler alt klasörü %s"
+
+#: src/bz-app-permissions.c:182
+msgid "Pictures folder"
+msgstr "Resimler klasörü"
+
+#: src/bz-app-permissions.c:185
+#, c-format
+msgid "Public Share subfolder %s"
+msgstr "Paylaşılanlar alt klasörü %s"
+
+#: src/bz-app-permissions.c:186
+msgid "Public Share folder"
+msgstr "Paylaşılanlar klasörü"
+
+#: src/bz-app-permissions.c:189
+#, c-format
+msgid "Videos subfolder %s"
+msgstr "Videolar alt klasörü %s"
+
+#: src/bz-app-permissions.c:190
+msgid "Videos folder"
+msgstr "Videolar klasörü"
+
+#: src/bz-app-permissions.c:193
+#, c-format
+msgid "Templates subfolder %s"
+msgstr "Şablonlar alt klasörü %s"
+
+#: src/bz-app-permissions.c:194
+msgid "Templates folder"
+msgstr "Şablonlar klasörü"
+
+#: src/bz-app-permissions.c:197
+#, c-format
+msgid "User cache subfolder %s"
+msgstr "Kullanıcı ön bellek alt klasörü %s"
+
+#: src/bz-app-permissions.c:198
+msgid "User cache folder"
+msgstr "Kullanıcı ön bellek klasörü"
+
+#: src/bz-app-permissions.c:201
+#, c-format
+msgid "User configuration subfolder %s"
+msgstr "Kullanıcı yapılandırma alt klasörü %s"
+
+#: src/bz-app-permissions.c:202
+msgid "User configuration folder"
+msgstr "Kullanıcı yapılandırma klasörü"
+
+#: src/bz-app-permissions.c:205
+#, c-format
+msgid "User data subfolder %s"
+msgstr "Kullanıcı verisi alt klasörü %s"
+
+#: src/bz-app-permissions.c:206
+msgid "User data folder"
+msgstr "Kullanıcı veri klasörü"
+
+#: src/bz-app-permissions.c:209
+#, c-format
+msgid "User runtime subfolder %s"
+msgstr "Kullanıcı çalışma zamanı alt klasörü %s"
+
+#: src/bz-app-permissions.c:210
+msgid "User runtime folder"
+msgstr "Kullanıcı çalışma zamanı klasörü"
+
+#: src/bz-app-permissions.c:212
+#, c-format
+msgid "Filesystem access to %s"
+msgstr "Dosya sistemi erişimi %s"
+
+#: src/bz-app-permissions.c:214
+msgid "Unknown filesystem path"
+msgstr "Bilinmeyen dosya sistemi yolu"
+
+#: src/bz-app-size-dialog.blp:29 src/bz-app-size-dialog.blp:55
 msgid "Download Size"
 msgstr "İndirme Boyutu"
 
-#: src/bz-app-size-dialog.blp:78
+#: src/bz-app-size-dialog.blp:56
 msgid "Amount to download from the internet"
 msgstr "İnternetten indirilecek miktar"
 
-#: src/bz-app-size-dialog.blp:98
+#: src/bz-app-size-dialog.blp:76
 msgid "Installed Size"
 msgstr "Kurulu Boyut"
 
-#: src/bz-app-size-dialog.blp:99
+#: src/bz-app-size-dialog.blp:77
 msgid "Size on Disk"
 msgstr "Diskteki Boyut"
-
-#: src/bz-app-size-dialog.blp:105
-msgid "Details"
-msgstr "Ayrıntılar"
-
-#: src/bz-app-size-dialog.blp:108
-msgid "License"
-msgstr "Lisans"
-
-#: src/bz-app-size-dialog.blp:117
-msgid "App ID"
-msgstr "Uygulama Kimliği"
-
-#: src/bz-app-size-dialog.blp:126
-msgid "SDK"
-msgstr "SDK"
-
-# SDK vurgusu hatalı. Yazılımları genelde Platform ile paketleniyor, SDK ise derlenirken kullanılıyor.
-#: src/bz-app-size-dialog.blp:153
-msgid ""
-"This app uses an outdated version of the software platform (SDK) and might "
-"contain bugs or security vulnerabilities which will not be fixed."
-msgstr ""
-"Bu uygulama, çalışma ortamının eski sürümünü kullanıyor ve düzeltilmeyecek "
-"hatalar ya da güvenlik açıkları içerebilir."
 
 #: src/bz-app-tile.blp:85 src/bz-installed-page.blp:25 src/bz-window.blp:296
 msgid "Installed"
@@ -565,7 +663,17 @@ msgstr "Kurulu"
 msgid "Show All"
 msgstr "Tümünü Göster"
 
-#: src/bz-application.c:579
+#: src/bz-apps-page.c:232
+#, c-format
+msgid "All \"%s\""
+msgstr "Tüm \"%s\""
+
+#: src/bz-apps-page.c:506 src/bz-tag-list.c:109
+#, c-format
+msgid "%d Applications"
+msgstr "%d Uygulama"
+
+#: src/bz-application.c:582
 msgid ""
 "This functionality is currently disabled. It is recommended you download and "
 "install Flatseal to manage app permissions."
@@ -573,38 +681,38 @@ msgstr ""
 "Bu işlev şu an devre dışıdır. Uygulama izinlerini yönetmek için Flatseal "
 "kurmanız önerilir."
 
-#: src/bz-application.c:683
+#: src/bz-application.c:686
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr "Adam Masciola <kolunmi@posteo.net>"
 
-#: src/bz-application.c:684
+#: src/bz-application.c:687
 msgctxt "About Dialog Developer Credit"
 msgid "Alexander Vanhee"
 msgstr "Alexander Vanhee"
 
 #. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
-#: src/bz-application.c:715
+#: src/bz-application.c:718
 msgid "translator-credits"
 msgstr "Sabri Ünal <yakushabb@gmail.com>, 2025"
 
-#: src/bz-application.c:726
+#: src/bz-application.c:729
 msgid "Special Thanks"
 msgstr "Özel Teşekkürler"
 
-#: src/bz-application.c:784
+#: src/bz-application.c:787
 msgid "Logged Out Successfully!"
-msgstr "Otukum Kapatıldı!"
+msgstr "Oturum Kapatıldı!"
 
-#: src/bz-application.c:912
+#: src/bz-application.c:915
 msgid "Performing setup..."
 msgstr "Kurulum gerçekleştiriliyor..."
 
-#: src/bz-application.c:991 src/bz-application.c:1000
+#: src/bz-application.c:994 src/bz-application.c:1003
 msgid "Set Up Flathub"
 msgstr "Flathubʼı Ayarla"
 
-#: src/bz-application.c:994
+#: src/bz-application.c:997
 msgid ""
 "Flathub is not set up on this system. You will not be able to browse and "
 "install applications in Bazaar if its unavailable.\n"
@@ -617,22 +725,26 @@ msgstr ""
 "Yine de Bazaarʼı kullanarak zaten kurulmuş uygulamalara göz atabilir ve "
 "kaldırabilirsiniz."
 
-#: src/bz-application.c:999 src/bz-update-dialog.blp:6
+#: src/bz-application.c:1002 src/bz-update-dialog.blp:6
 msgid "Later"
 msgstr "Sonra"
 
-#: src/bz-application.c:1401
+#: src/bz-application.c:1404 src/bz-application.c:3078
 msgid "Synchronizing..."
 msgstr "Eşzamanlanıyor..."
 
-#: src/bz-application.c:1540
+#: src/bz-application.c:1543 src/bz-application.c:3074
 #, c-format
 msgid "Receiving %d entries..."
 msgstr "%d giriş alınıyor..."
 
-#: src/bz-application.c:1545
+#: src/bz-application.c:1548
 msgid "Checking for updates"
 msgstr "Güncellemeler denetleniyor"
+
+#: src/bz-application.c:3080
+msgid "Indexing Data..."
+msgstr "Veriler İnkeksleniyor..."
 
 #: src/bz-curated-view.blp:11 src/bz-favorites-page.blp:65
 #: src/bz-flathub-page.blp:19 src/bz-full-view.blp:53
@@ -769,13 +881,13 @@ msgid "Remove from Favorites"
 msgstr "Gözdelerden Kaldır"
 
 #: src/bz-favorites-page.blp:5 src/bz-favorites-page.blp:75
-#: src/bz-window.blp:578
+#: src/bz-window.blp:614
 msgid "Favorites"
 msgstr "Gözdeler"
 
 # Transaction dese de para ile ilgisi yok. O sebeple sadece İşlemler diye çevirdim.
 #: src/bz-favorites-page.blp:22 src/bz-full-view.blp:20 src/bz-window.blp:126
-#: src/bz-window.blp:418
+#: src/bz-window.blp:460
 msgid "Toggle transaction sidebar"
 msgstr "İşlemler kenar çubuğunu aç/kapat"
 
@@ -843,9 +955,10 @@ msgstr "Eğitim"
 msgid "Gaming"
 msgstr "Oyun"
 
+# Oyun Oyna anlamında Oyna, Oynat değil!
 #: src/bz-flathub-category.c:82
 msgid "Play"
-msgstr "Oynat"
+msgstr "Oyna"
 
 #: src/bz-flathub-category.c:82
 msgid "More Gaming"
@@ -1040,52 +1153,52 @@ msgstr "Sevdiğiniz oyunları çalıştırabileceğiniz oyunlar ve uygulamalar"
 msgid "More Games"
 msgstr "Daha Çok Oyun"
 
-#: src/bz-flatpak-entry.c:607
+#: src/bz-flatpak-entry.c:608
 msgctxt "Project URL Type"
 msgid "Flathub Page"
 msgstr "Flathub Sayfası"
 
-#: src/bz-flatpak-entry.c:628
+#: src/bz-flatpak-entry.c:629
 msgctxt "Project URL Type"
 msgid "Project Website"
 msgstr "Proje Web Sitesi"
 
-#: src/bz-flatpak-entry.c:632
+#: src/bz-flatpak-entry.c:633
 msgctxt "Project URL Type"
 msgid "Issue Tracker"
 msgstr "Sorun İzleyici"
 
-#: src/bz-flatpak-entry.c:636
+#: src/bz-flatpak-entry.c:637
 msgctxt "Project URL Type"
 msgid "FAQ"
 msgstr "SSS"
 
-#: src/bz-flatpak-entry.c:640
+#: src/bz-flatpak-entry.c:641
 msgctxt "Project URL Type"
 msgid "Help"
 msgstr "Yardım"
 
-#: src/bz-flatpak-entry.c:644
+#: src/bz-flatpak-entry.c:645
 msgctxt "Project URL Type"
 msgid "Donate"
 msgstr "Bağış"
 
-#: src/bz-flatpak-entry.c:650
+#: src/bz-flatpak-entry.c:651
 msgctxt "Project URL Type"
 msgid "Translate"
 msgstr "Çevir"
 
-#: src/bz-flatpak-entry.c:654
+#: src/bz-flatpak-entry.c:655
 msgctxt "Project URL Type"
 msgid "Contact"
 msgstr "Kişi"
 
-#: src/bz-flatpak-entry.c:658
+#: src/bz-flatpak-entry.c:659
 msgctxt "Project URL Type"
 msgid "Source Code"
 msgstr "Kaynak Kodu"
 
-#: src/bz-flatpak-entry.c:664
+#: src/bz-flatpak-entry.c:665
 msgctxt "Project URL Type"
 msgid "Contribute"
 msgstr "Katkı Ver"
@@ -1106,11 +1219,11 @@ msgstr "İçerik"
 msgid "Support"
 msgstr "Destek"
 
-#: src/bz-full-view.blp:233 src/bz-full-view.blp:488
+#: src/bz-full-view.blp:233 src/bz-full-view.blp:479
 msgid "Open"
 msgstr "Aç"
 
-#: src/bz-full-view.blp:246 src/bz-full-view.blp:461
+#: src/bz-full-view.blp:246 src/bz-full-view.blp:452
 msgid "Download & Install Application"
 msgstr "Uygulama İndir ve Kur"
 
@@ -1118,7 +1231,7 @@ msgstr "Uygulama İndir ve Kur"
 msgid "Uninstall Application"
 msgstr "Uygulamayı Kaldır"
 
-#: src/bz-full-view.blp:276 src/bz-full-view.blp:503
+#: src/bz-full-view.blp:276 src/bz-full-view.blp:494
 msgid "Install Other Version"
 msgstr "Diğer Sürümü Kur"
 
@@ -1126,15 +1239,15 @@ msgstr "Diğer Sürümü Kur"
 msgid "Size"
 msgstr "Boyut"
 
-#: src/bz-full-view.blp:405
+#: src/bz-full-view.blp:416
 msgid "Downloads /mo"
 msgstr "İndirme/ay"
 
-#: src/bz-full-view.blp:522
+#: src/bz-full-view.blp:513
 msgid "Stopped Receiving Core Updates"
 msgstr "Çekirdek Güncellemelerinin Alınması Durduruldu"
 
-#: src/bz-full-view.blp:536
+#: src/bz-full-view.blp:527
 msgid ""
 "This app uses a runtime that no longer receives updates or security fixes. "
 "It may become unsafe to use."
@@ -1142,114 +1255,116 @@ msgstr ""
 "Bu uygulama, artık güncelleme ya da güvenlik düzeltmesi almayan bir çalışma "
 "zamanı kullanıyor. Kullanımı güvenli olmayabilir."
 
-#: src/bz-full-view.blp:622 src/bz-window.c:1228
+#: src/bz-full-view.blp:613 src/bz-window.c:1228
 msgid "Delete Data"
 msgstr "Verileri Sil"
 
-#: src/bz-full-view.blp:756
+#: src/bz-full-view.blp:747
 msgid "Tags:"
 msgstr "Etiketler:"
 
-#: src/bz-full-view.c:299
+#: src/bz-full-view.c:302
 msgid "---"
 msgstr "---"
 
 #. Translators: M is the suffix for millions
-#: src/bz-full-view.c:306
+#: src/bz-full-view.c:309
 #, c-format
 msgid "%.*fM"
 msgstr "%.*fM"
 
 #. Translators: K is the suffix for thousands
-#: src/bz-full-view.c:313
+#: src/bz-full-view.c:316
 #, c-format
 msgid "%.*fK"
 msgstr "%.*fK"
 
-#: src/bz-full-view.c:323
+#: src/bz-full-view.c:326
 #, c-format
 msgid "%d downloads in the last 30 days"
 msgstr "Son 30 günde %d indirme"
 
-#: src/bz-full-view.c:355
+#: src/bz-full-view.c:358
 #, c-format
 msgid "Download size of %s"
 msgstr "%s İndirme Boyutu"
 
-#: src/bz-full-view.c:388
+#: src/bz-full-view.c:391
 msgid "All Ages"
 msgstr "Tüm Yaşlar"
 
-#: src/bz-full-view.c:400
+#: src/bz-full-view.c:403
 msgid "Age rating information unavailable"
 msgstr "Yaş derecelendirme bilgisi yok"
 
-#: src/bz-full-view.c:405
+#: src/bz-full-view.c:408
 msgid "Suitable for all ages"
 msgstr "Tüm yaşlar için uygun"
 
-#: src/bz-full-view.c:407
+#: src/bz-full-view.c:410
 #, c-format
 msgid "Suitable for ages %d and up"
 msgstr "%d ve üstü yaşlar için uygun"
 
-#: src/bz-full-view.c:440 src/bz-full-view.c:445 src/bz-full-view.c:473
-#: src/bz-full-view.c:484
+#: src/bz-full-view.c:443 src/bz-full-view.c:448 src/bz-full-view.c:476
+#: src/bz-full-view.c:487
 msgid "Unknown"
 msgstr "Bilinmiyor"
 
-#: src/bz-full-view.c:450
+#: src/bz-full-view.c:453
 #, c-format
 msgid "Free software licensed under %s"
 msgstr "%s altında lisanslanmış özgür yazılım"
 
-#: src/bz-full-view.c:455
+#: src/bz-full-view.c:458
 msgid "Free software"
 msgstr "Özgür yazılım"
 
-#: src/bz-full-view.c:458
+#: src/bz-full-view.c:461
 msgid "Proprietary Software"
 msgstr "Sahipli Yazılım"
 
-#: src/bz-full-view.c:461
+#: src/bz-full-view.c:464
 #, c-format
 msgid "Special License: %s"
 msgstr "Özel Lisans: %s"
 
-#: src/bz-full-view.c:478
+#: src/bz-full-view.c:481
 msgid "Free"
 msgstr "Özgür"
 
-#: src/bz-full-view.c:481 src/bz-license-dialog.c:118
+#: src/bz-full-view.c:484 src/bz-license-dialog.c:186
 msgid "Proprietary"
 msgstr "Sahipli"
 
-#: src/bz-full-view.c:486 src/bz-license-dialog.c:120
+#: src/bz-full-view.c:489 src/bz-license-dialog.c:188
 msgid "Special License"
 msgstr "Özel Lisans"
 
-#: src/bz-full-view.c:506
+#: src/bz-full-view.c:509
 msgid "Adaptive"
 msgstr "Uyarlanır"
 
-#: src/bz-full-view.c:506
 # Arayüzde sığmadığı için new line eklendi
+#: src/bz-full-view.c:509
 msgid "Desktop Only"
-msgstr "Yalnızca\nMasaüstü"
+msgstr ""
+"Yalnızca\n"
+"Masaüstü"
 
-#: src/bz-full-view.c:512
+#: src/bz-full-view.c:515
 msgid "Works on desktop, tablets, and phones"
 msgstr "Telefonlarda, tabletlerde ve masaüstülerde çalışır"
 
-#: src/bz-full-view.c:513
+#: src/bz-full-view.c:516
 msgid "May not work on mobile devices"
 msgstr "Mobil aygıtlarda çalışmayabilir"
 
-#: src/bz-full-view.c:524
+#: src/bz-full-view.c:527
 msgid "No URL"
 msgstr "URL Yok"
 
-#: src/bz-full-view.c:542
+#: src/bz-full-view.c:545
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -1257,7 +1372,7 @@ msgstr ""
 "Bu uygulama FLOSS (Özgür ya da Açık Kaynak Yazılım) lisansına sahip, yani "
 "kaynak kodu güvenlik açısından denetlenebilir."
 
-#: src/bz-full-view.c:543
+#: src/bz-full-view.c:546
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
@@ -1265,137 +1380,153 @@ msgstr ""
 "Bu uygulama sahipli lisansa sahip, yani kaynak kodu özel olarak "
 "geliştirilmiştir ve bağımsız üçüncü tarafca denetlenemez."
 
-#: src/bz-full-view.c:550
+#: src/bz-full-view.c:553
 msgid "More Apps"
 msgstr "Daha Çok Uygulama"
 
-#: src/bz-full-view.c:551
+#: src/bz-full-view.c:554
 #, c-format
 msgid "More Apps by %s"
 msgstr "Daha Çok %s Uygulamaları"
 
-#: src/bz-full-view.c:558
+#: src/bz-full-view.c:561
 msgid "Other Apps by this Developer"
 msgstr "Bu Geliştiricinin Diğer Uygulamaları"
 
-#: src/bz-full-view.c:560 src/bz-full-view.c:668
+#: src/bz-full-view.c:563 src/bz-full-view.c:752
 #, c-format
 msgid "Other Apps by %s"
 msgstr "Diğer %s Uygulamaları"
 
-#: src/bz-full-view.c:568
+#: src/bz-full-view.c:571
 #, c-format
 msgid "%s is not installed, but it still has <b>%s</b> of data present."
 msgstr "%s kurulmamış, ancak yine de <b>%s</b> verisi var."
 
-#: src/bz-full-view.c:670
+#: src/bz-full-view.c:634 src/bz-full-view.c:651
+msgid "N/A"
+msgstr "Yok"
+
+#: src/bz-full-view.c:641 src/bz-full-view.c:643
+msgid "Low Risk"
+msgstr "Düşük Risk"
+
+#: src/bz-full-view.c:645 src/bz-full-view.c:647
+msgid "Medium Risk"
+msgstr "Ortak Risk"
+
+#: src/bz-full-view.c:649
+msgid "High Risk"
+msgstr "Yüksek Risk"
+
+#: src/bz-full-view.c:754
 msgid "Other Apps"
 msgstr "Diğer Uygulamalar"
 
-#: src/bz-full-view.c:672
+#: src/bz-full-view.c:756
 #, c-format
 msgid "%d Application"
 msgid_plural "%d Applications"
 msgstr[0] "%d Uygulama"
 
-#: src/bz-full-view.c:1020
+#: src/bz-full-view.c:1097
 msgid "Show Less"
 msgstr "Daha Azını Göster"
 
-#: src/bz-full-view.c:1020
+#: src/bz-full-view.c:1097
 msgid "Show More"
 msgstr "Daha Çok Göster"
 
-#: src/bz-hardware-support-dialog.blp:6 src/bz-hardware-support-dialog.blp:47
+#: src/bz-hardware-support-dialog.blp:7 src/bz-hardware-support-dialog.blp:31
 msgid "Hardware Support"
 msgstr "Donanım Desteği"
 
-#: src/bz-hardware-support-dialog.c:69
+#: src/bz-hardware-support-dialog.c:62
 msgid "Keyboard support"
 msgstr "Klavye desteği"
 
-#: src/bz-hardware-support-dialog.c:71
+#: src/bz-hardware-support-dialog.c:64
 msgid "Requires keyboards"
 msgstr "Klavye gerektirir"
 
-#: src/bz-hardware-support-dialog.c:72
+#: src/bz-hardware-support-dialog.c:65
 msgid "Recommends keyboards"
 msgstr "Klavye kullanımı önerilir"
 
-#: src/bz-hardware-support-dialog.c:73
+#: src/bz-hardware-support-dialog.c:66
 msgid "Supports keyboards"
 msgstr "Klavyeleri destekler"
 
-#: src/bz-hardware-support-dialog.c:74
+#: src/bz-hardware-support-dialog.c:67
 msgid "Unknown support for keyboards"
 msgstr "Klavye desteği bilinmiyor"
 
-#: src/bz-hardware-support-dialog.c:76
+#: src/bz-hardware-support-dialog.c:69
 msgid "Mouse support"
 msgstr "Fare desteği"
 
-#: src/bz-hardware-support-dialog.c:78
+#: src/bz-hardware-support-dialog.c:71
 msgid "Requires mice or pointing devices"
 msgstr "Fare ya da işaretleme aygıtları gerektirir"
 
-#: src/bz-hardware-support-dialog.c:79
+#: src/bz-hardware-support-dialog.c:72
 msgid "Recommends mice or pointing devices"
 msgstr "Fare ya da işaretleme aygıtları önerilir"
 
-#: src/bz-hardware-support-dialog.c:80
+#: src/bz-hardware-support-dialog.c:73
 msgid "Supports mice or pointing devices"
 msgstr "Fare ve işaretleme aygıtlarını destekler"
 
-#: src/bz-hardware-support-dialog.c:81
+#: src/bz-hardware-support-dialog.c:74
 msgid "Unknown support for mice or pointing devices"
 msgstr "Fare ya da işaretleme aygıtları desteği bilinmiyor"
 
-#: src/bz-hardware-support-dialog.c:83
+#: src/bz-hardware-support-dialog.c:76
 msgid "Touchscreen support"
 msgstr "Dokunmatik ekran desteği"
 
-#: src/bz-hardware-support-dialog.c:85
+#: src/bz-hardware-support-dialog.c:78
 msgid "Requires touchscreens"
 msgstr "Dokunmatik ekran gerektirir"
 
-#: src/bz-hardware-support-dialog.c:86
+#: src/bz-hardware-support-dialog.c:79
 msgid "Recommends touchscreens"
 msgstr "Dokunmatik ekran önerilir"
 
-#: src/bz-hardware-support-dialog.c:87
+#: src/bz-hardware-support-dialog.c:80
 msgid "Supports touchscreens"
 msgstr "Dokunmatik ekranı destekler"
 
-#: src/bz-hardware-support-dialog.c:88
+#: src/bz-hardware-support-dialog.c:81
 msgid "Unknown support for touchscreens"
 msgstr "Dokunmatik ekran desteği bilinmiyor"
 
-#: src/bz-hardware-support-dialog.c:192
+#: src/bz-hardware-support-dialog.c:160
 msgid "Mobile support"
 msgstr "Mobil desteği"
 
-#: src/bz-hardware-support-dialog.c:193
+#: src/bz-hardware-support-dialog.c:161
 msgid "Works on mobile devices"
 msgstr "Mobil aygıtlarda çalışır"
 
-#: src/bz-hardware-support-dialog.c:193
+#: src/bz-hardware-support-dialog.c:161
 msgid "May not work well on mobile devices"
 msgstr "Mobil aygıtlarda iyi çalışmayabilir"
 
-#: src/bz-hardware-support-dialog.c:198
+#: src/bz-hardware-support-dialog.c:166
 msgid "Desktop support"
 msgstr "Masaüstü desteği"
 
-#: src/bz-hardware-support-dialog.c:199
+#: src/bz-hardware-support-dialog.c:167
 msgid "Works well on large screens"
 msgstr "Büyük ekranlarda iyi çalışır"
 
-#: src/bz-hardware-support-dialog.c:233
+#: src/bz-hardware-support-dialog.c:201
 #, c-format
 msgid "%s works best on specific hardware"
 msgstr "%s belirli donanımlarda daha iyi çalışır"
 
-#: src/bz-hardware-support-dialog.c:240
+#: src/bz-hardware-support-dialog.c:209
 #, c-format
 msgid "%s works on most devices"
 msgstr "%s çoğu aygıtta çalışır"
@@ -1440,19 +1571,19 @@ msgstr "Kurulu Flatpak Yok"
 msgid "Stopped Receiving Updates"
 msgstr "Güncellemelerin Alınması Durduruldu"
 
-#: src/bz-license-dialog.blp:160
+#: src/bz-license-dialog.blp:93
 msgid "Get Involved"
 msgstr "Katılım Sağlayın"
 
-#: src/bz-license-dialog.c:107 src/bz-license-dialog.c:112
+#: src/bz-license-dialog.c:180
 msgid "Unknown License"
 msgstr "Bilinmeyen Lisans"
 
-#: src/bz-license-dialog.c:115
+#: src/bz-license-dialog.c:183
 msgid "Community Built"
 msgstr "Topluluk İnşası"
 
-#: src/bz-license-dialog.c:148
+#: src/bz-license-dialog.c:218
 #, c-format
 msgid ""
 "This app is developed in the open by an international community, and "
@@ -1465,7 +1596,7 @@ msgstr ""
 "\n"
 "Katılarak daha iyi olmasını sağlayabilirsiniz."
 
-#: src/bz-license-dialog.c:156
+#: src/bz-license-dialog.c:226
 msgid ""
 "This app is developed in the open by an international community.\n"
 "\n"
@@ -1476,11 +1607,11 @@ msgstr ""
 "\n"
 "Katılarak daha iyi olmasını sağlayabilirsiniz."
 
-#: src/bz-license-dialog.c:161
+#: src/bz-license-dialog.c:231
 msgid "The license of this app is not known"
 msgstr "Uygulamanın lisansı bilinmiyor"
 
-#: src/bz-license-dialog.c:165
+#: src/bz-license-dialog.c:235
 msgid ""
 "This app is not developed in the open, so only its developers know how it "
 "works. It may be insecure in ways that are hard to detect, and it may change "
@@ -1494,7 +1625,7 @@ msgstr ""
 "\n"
 "Bu uygulamaya katkıda bulunabilir ya da bulunamayabilirsiniz."
 
-#: src/bz-license-dialog.c:174
+#: src/bz-license-dialog.c:247
 #, c-format
 msgid ""
 "This app is developed under the special license %s.\n"
@@ -1505,66 +1636,101 @@ msgstr ""
 "\n"
 "Bu uygulamaya katkıda bulunabilir ya da bulunamayabilirsiniz."
 
-#: src/bz-preferences-dialog.blp:19
+#: src/bz-login-page.blp:5
+msgid "Connect to Flathub"
+msgstr "Flathubʼa bağlan"
+
+#: src/bz-login-page.blp:32
+msgid "Something Went Wrong"
+msgstr "Bir Şeyler Yanlış Gitti"
+
+#: src/bz-login-page.blp:42
+msgid "Connect with Flathub"
+msgstr "Flathub ile Bağlan"
+
+#: src/bz-login-page.blp:43
+msgid "Connect your Flathub account to Bazaar to manage your favorited apps."
+msgstr "Flathub hesabınızı Bazaar'a bağlayarak gözde uygulamalarınızı yönetin."
+
+#: src/bz-login-page.blp:108
+msgid "Finish"
+msgstr "Bitti"
+
+#: src/bz-login-page.c:658
+#, c-format
+msgid "Hello, %s!"
+msgstr "Merhaba, %s!"
+
+#: src/bz-preferences-dialog.blp:20
 msgid "Preferences"
 msgstr "Tercihler"
 
-#: src/bz-preferences-dialog.blp:23
+#: src/bz-preferences-dialog.blp:26
+msgid "Network connection is metered — automatic store data sync is paused"
+msgstr ""
+"Ağ bağlantısı ölçülü — kendiliğinden mağaza verilerinin eşzamanlanması "
+"duraklatıldı"
+
+#: src/bz-preferences-dialog.blp:27 src/bz-window.blp:494
+msgid "Sync Manually"
+msgstr "Elle Eşzamanla"
+
+#: src/bz-preferences-dialog.blp:32
 msgid "Content Filters"
 msgstr "İçerik Süzgeçleri"
 
-#: src/bz-preferences-dialog.blp:26
+#: src/bz-preferences-dialog.blp:35
 msgid "Free Software Only"
 msgstr "Yalnızca Özgür Yazılımlar"
 
-#: src/bz-preferences-dialog.blp:27
+#: src/bz-preferences-dialog.blp:36
 msgid "Hide proprietary applications when browsing and searching"
 msgstr "Göz atarken ve arama yaparken sahipli uygulamaları gizle"
 
-#: src/bz-preferences-dialog.blp:31
+#: src/bz-preferences-dialog.blp:40
 msgid "Flathub Results Only"
 msgstr "Yalnızca Flathub Sonuçları"
 
-#: src/bz-preferences-dialog.blp:32
+#: src/bz-preferences-dialog.blp:41
 msgid ""
 "Limit search and browse results to applications only available on Flathub"
 msgstr ""
 "Arama ve gözatma sonuçlarını yalnızca Flathubʼda bulunan uygulamalarla "
 "sınırla"
 
-#: src/bz-preferences-dialog.blp:36
+#: src/bz-preferences-dialog.blp:45
 msgid "Verified Results Only"
 msgstr "Yalnızca Doğrulanmış Sonuçlar"
 
-#: src/bz-preferences-dialog.blp:37
+#: src/bz-preferences-dialog.blp:46
 msgid "Hide results that are not verified on Flathub"
 msgstr "Flathubʼda doğrulanmamış sonuçları gizle"
 
-#: src/bz-preferences-dialog.blp:41
+#: src/bz-preferences-dialog.blp:50
 msgid "Hide EOL Apps"
 msgstr "Ömrünün Sonuna Gelmiş Uygulamaları Gizle"
 
-#: src/bz-preferences-dialog.blp:42
+#: src/bz-preferences-dialog.blp:51
 msgid "Hide apps which are no longer supported by their developers"
 msgstr "Geliştiricilerince artık desteklenmeyen uygulamaları gizle"
 
-#: src/bz-preferences-dialog.blp:47 src/bz-window.blp:311
+#: src/bz-preferences-dialog.blp:56 src/bz-window.blp:311
 msgid "Search"
 msgstr "Ara"
 
-#: src/bz-preferences-dialog.blp:50
+#: src/bz-preferences-dialog.blp:59
 msgid "Delay Search Results"
 msgstr "Arama Sonuçlarını Geciktir"
 
-#: src/bz-preferences-dialog.blp:51
+#: src/bz-preferences-dialog.blp:60
 msgid "Improve results performance by debouncing search terms"
 msgstr "Arama terimlerini geciktirerek sonuç başarımını iyileştir"
 
-#: src/bz-preferences-dialog.blp:56
+#: src/bz-preferences-dialog.blp:65
 msgid "Progress Bar"
 msgstr "İlerleme Çubuğu"
 
-#: src/bz-preferences-dialog.blp:57
+#: src/bz-preferences-dialog.blp:66
 msgid "Choose a theme for the progress bar!"
 msgstr "İlerleme çubuğu için tema seç!"
 
@@ -1577,100 +1743,510 @@ msgid "Pride Colors"
 msgstr "Pride Colors"
 
 #: src/bz-preferences-dialog.c:34
+#| msgid "Pride Colors"
+msgid "Pride Colors (Horizontal)"
+msgstr "Pride Colors (Horizontal)"
+
+#: src/bz-preferences-dialog.c:35
 msgid "Lesbian Pride Colors"
 msgstr "Lesbian Pride Colors"
 
-#: src/bz-preferences-dialog.c:35
-#| msgid "Pansexual Pride Colors"
+#: src/bz-preferences-dialog.c:36
+#| msgid "Lesbian Pride Colors"
+msgid "Lesbian Pride Colors (Horizontal)"
+msgstr "Lesbian Pride Colors (Horizontal)"
+
+#: src/bz-preferences-dialog.c:37
 msgid "Male Homosexual Pride Colors"
 msgstr "Male Homosexual Pride Colors"
 
-#: src/bz-preferences-dialog.c:36
+#: src/bz-preferences-dialog.c:38
+#| msgid "Male Homosexual Pride Colors"
+msgid "Male Homosexual Pride Colors (Horizontal)"
+msgstr "Male Homosexual Pride Colors (Horizontal)"
+
+#: src/bz-preferences-dialog.c:39
 msgid "Transgender Pride Colors"
 msgstr "Transgender Pride Colors"
 
-#: src/bz-preferences-dialog.c:37
+#: src/bz-preferences-dialog.c:40
+#| msgid "Transgender Pride Colors"
+msgid "Transgender Pride Colors (Horizontal)"
+msgstr "Transgender Pride Colors (Horizontal)"
+
+#: src/bz-preferences-dialog.c:41
 msgid "Nonbinary Pride Colors"
 msgstr "Nonbinary Pride Colors"
 
-#: src/bz-preferences-dialog.c:38
+#: src/bz-preferences-dialog.c:42
+#| msgid "Nonbinary Pride Colors"
+msgid "Nonbinary Pride Colors (Horizontal)"
+msgstr "Nonbinary Pride Colors (Horizontal)"
+
+#: src/bz-preferences-dialog.c:43
 msgid "Bisexual Pride Colors"
 msgstr "Bisexual Pride Colors"
 
-#: src/bz-preferences-dialog.c:39
+#: src/bz-preferences-dialog.c:44
+#| msgid "Bisexual Pride Colors"
+msgid "Bisexual Pride Colors (Horizontal)"
+msgstr "Bisexual Pride Colors (Horizontal)"
+
+#: src/bz-preferences-dialog.c:45
 msgid "Asexual Pride Colors"
 msgstr "Asexual Pride Colors"
 
-#: src/bz-preferences-dialog.c:40
+#: src/bz-preferences-dialog.c:46
+#| msgid "Asexual Pride Colors"
+msgid "Asexual Pride Colors (Horizontal)"
+msgstr "Asexual Pride Colors (Horizontal)"
+
+#: src/bz-preferences-dialog.c:47
 msgid "Pansexual Pride Colors"
 msgstr "Pansexual Pride Colors"
 
-#: src/bz-preferences-dialog.c:41
+#: src/bz-preferences-dialog.c:48
+#| msgid "Pansexual Pride Colors"
+msgid "Pansexual Pride Colors (Horizontal)"
+msgstr "Pansexual Pride Colors (Horizontal)"
+
+#: src/bz-preferences-dialog.c:49
 msgid "Aromantic Pride Colors"
 msgstr "Aromantic Pride Colors"
 
-#: src/bz-preferences-dialog.c:42
+#: src/bz-preferences-dialog.c:50
+#| msgid "Aromantic Pride Colors"
+msgid "Aromantic Pride Colors (Horizontal)"
+msgstr "Aromantic Pride Colors (Horizontal)"
+
+#: src/bz-preferences-dialog.c:51
 msgid "Genderfluid Pride Colors"
 msgstr "Genderfluid Pride Colors"
 
-#: src/bz-preferences-dialog.c:43
+#: src/bz-preferences-dialog.c:52
+#| msgid "Genderfluid Pride Colors"
+msgid "Genderfluid Pride Colors (Horizontal)"
+msgstr "Genderfluid Pride Colors (Horizontal)"
+
+#: src/bz-preferences-dialog.c:53
 msgid "Polysexual Pride Colors"
 msgstr "Polysexual Pride Colors"
 
-#: src/bz-preferences-dialog.c:44
+#: src/bz-preferences-dialog.c:54
+#| msgid "Polysexual Pride Colors"
+msgid "Polysexual Pride Colors (Horizontal)"
+msgstr "Polysexual Pride Colors (Horizontal)"
+
+#: src/bz-preferences-dialog.c:55
 msgid "Omnisexual Pride Colors"
 msgstr "Omnisexual Pride Colors"
 
-#: src/bz-preferences-dialog.c:45
+#: src/bz-preferences-dialog.c:56
+#| msgid "Omnisexual Pride Colors"
+msgid "Omnisexual Pride Colors (Horizontal)"
+msgstr "Omnisexual Pride Colors (Horizontal)"
+
+#: src/bz-preferences-dialog.c:57
 msgid "Aroace Pride Colors"
 msgstr "Aroace Pride Colors"
 
-#: src/bz-preferences-dialog.c:46
+#: src/bz-preferences-dialog.c:58
+#| msgid "Aroace Pride Colors"
+msgid "Aroace Pride Colors (Horizontal)"
+msgstr "Aroace Pride Colors (Horizontal)"
+
+#: src/bz-preferences-dialog.c:59
 msgid "Agender Pride Colors"
 msgstr "Agender Pride Colors"
 
-#: src/bz-preferences-dialog.c:47
+#: src/bz-preferences-dialog.c:60
+#| msgid "Agender Pride Colors"
+msgid "Agender Pride Colors (Horizontal)"
+msgstr "Agender Pride Colors (Horizontal)"
+
+#: src/bz-preferences-dialog.c:61
 msgid "Genderqueer Pride Colors"
 msgstr "Genderqueer Pride Colors"
 
-#: src/bz-preferences-dialog.c:48
+#: src/bz-preferences-dialog.c:62
+#| msgid "Genderqueer Pride Colors"
+msgid "Genderqueer Pride Colors (Horizontal)"
+msgstr "Genderqueer Pride Colors (Horizontal)"
+
+#: src/bz-preferences-dialog.c:63
 msgid "Intersex Pride Colors"
 msgstr "Intersex Pride Colors"
 
-#: src/bz-preferences-dialog.c:49
+#: src/bz-preferences-dialog.c:64
+#| msgid "Intersex Pride Colors"
+msgid "Intersex Pride Colors (Horizontal)"
+msgstr "Intersex Pride Colors (Horizontal)"
+
+#: src/bz-preferences-dialog.c:65
 msgid "Demigender Pride Colors"
 msgstr "Demigender Pride Colors"
 
-#: src/bz-preferences-dialog.c:50
+#: src/bz-preferences-dialog.c:66
+#| msgid "Demigender Pride Colors"
+msgid "Demigender Pride Colors (Horizontal)"
+msgstr "Demigender Pride Colors (Horizontal)"
+
+#: src/bz-preferences-dialog.c:67
 msgid "Biromantic Pride Colors"
 msgstr "Biromantic Pride Colors"
 
-#: src/bz-preferences-dialog.c:51
-#| msgid "Bisexual Pride Colors"
+#: src/bz-preferences-dialog.c:68
+#| msgid "Biromantic Pride Colors"
+msgid "Biromantic Pride Colors (Horizontal)"
+msgstr "Biromantic Pride Colors (Horizontal)"
+
+#: src/bz-preferences-dialog.c:69
 msgid "Disability Pride Colors"
 msgstr "Disability Pride Colors"
 
-#: src/bz-preferences-dialog.c:52
-#| msgid "Pride Colors"
+#: src/bz-preferences-dialog.c:70
+#| msgid "Disability Pride Colors"
+msgid "Disability Pride Colors (Horizontal)"
+msgstr "Disability Pride Colors (Horizontal)"
+
+#: src/bz-preferences-dialog.c:71
 msgid "Femboy Pride Colors"
 msgstr "Femboy Pride Colors"
+
+#: src/bz-preferences-dialog.c:72
+#| msgid "Femboy Pride Colors"
+msgid "Femboy Pride Colors (Horizontal)"
+msgstr "Femboy Pride Colors (Horizontal)"
 
 #: src/bz-releases-dialog.blp:5 src/bz-releases-list.blp:26
 msgid "Version History"
 msgstr "Sürüm Geçmişi"
 
-#: src/bz-releases-list.c:131
+#: src/bz-releases-list.c:136
 #, c-format
 msgid "Version %s"
 msgstr "Sürüm %s"
 
-#: src/bz-releases-list.c:170
+#: src/bz-releases-list.c:174
 msgid "No details for this release"
 msgstr "Bu sürüm için ayrıntı yok"
+
+#: src/bz-releases-list.c:185
+msgid "Get More Information"
+msgstr "Daha Çok Bilgi"
 
 #: src/bz-rich-app-tile.blp:154
 msgid "Get"
 msgstr "Al"
+
+#: src/bz-safety-calculator.c:77
+msgid "Unknown Permissions"
+msgstr "Bilinmeyen İzinler"
+
+#: src/bz-safety-calculator.c:78
+msgid "Permissions are missing for this app."
+msgstr "Bu uygulama için izinler eksik."
+
+#: src/bz-safety-calculator.c:91
+msgid "No Permissions"
+msgstr "İzin Yok"
+
+#: src/bz-safety-calculator.c:92
+msgid "App is fully sandboxed"
+msgstr "Uygulama tümüyle yalıtılmış alandadır"
+
+#: src/bz-safety-calculator.c:98
+msgid "Network Access"
+msgstr "Ağ Erişimi"
+
+#: src/bz-safety-calculator.c:99
+msgid "Can access the internet"
+msgstr "İnternete erişebilir"
+
+#: src/bz-safety-calculator.c:101
+msgid "No Network Access"
+msgstr "Ağ Erişimi Yok"
+
+#: src/bz-safety-calculator.c:102
+msgid "Cannot access the internet"
+msgstr "İnternete erişemez"
+
+#: src/bz-safety-calculator.c:107
+msgid "User Device Access"
+msgstr "Kullanıcı Aygıtı Erişimi"
+
+#: src/bz-safety-calculator.c:108
+msgid "Can access devices such as webcams or gaming controllers"
+msgstr "Web kameraları veya oyun denetçileri gibi aygıtlara erişebilir"
+
+#: src/bz-safety-calculator.c:110
+msgid "No User Device Access"
+msgstr "Kullanıcı Aygıtı Erişimi Yok"
+
+#: src/bz-safety-calculator.c:111
+msgid "Cannot access devices such as webcams or gaming controllers"
+msgstr "Web kameraları veya oyun denetçileri gibi aygıtlara erişemez"
+
+#: src/bz-safety-calculator.c:116
+msgid "Input Device Access"
+msgstr "Girdi Aygıtı Erişimi"
+
+#: src/bz-safety-calculator.c:117
+msgid "Can access input devices"
+msgstr "Girdi aygıtlarına erişebilir"
+
+#: src/bz-safety-calculator.c:123
+msgid "Microphone Access and Audio Playback"
+msgstr "Mikrofon Erişimi ve Ses Oynatımı"
+
+#: src/bz-safety-calculator.c:124
+msgid "Can listen using microphones and play audio without asking permission"
+msgstr "İzin istemeden mikrofonlarla dinleyebilir ve sesleri oynatabilir"
+
+#: src/bz-safety-calculator.c:130
+msgid "System Device Access"
+msgstr "Sistem Aygıtı Erişimi"
+
+#: src/bz-safety-calculator.c:131
+msgid "Can access system devices which require elevated permissions"
+msgstr "Yükseltilmiş izinler gerektiren sistem aygıtlarına erişebilir"
+
+#: src/bz-safety-calculator.c:137
+msgid "Screen Contents Access"
+msgstr "Ekran İçerikleri Erişimi"
+
+#: src/bz-safety-calculator.c:138
+msgid "Can access the contents of the screen or other windows"
+msgstr "Ekranın ya da diğer pencerelerin içeriklerine erişebilir"
+
+#: src/bz-safety-calculator.c:144
+msgid "Legacy Windowing System"
+msgstr "Eski Pencereleme Sistemi"
+
+#: src/bz-safety-calculator.c:145
+msgid "Uses a legacy windowing system"
+msgstr "Eski pencereleme sistemi kullanır"
+
+#: src/bz-safety-calculator.c:151
+msgid "Arbitrary Permissions"
+msgstr "İsteğe Bağlı İzinler"
+
+#: src/bz-safety-calculator.c:152
+msgid "Can acquire arbitrary permissions"
+msgstr "İsteğe bağlı izinler edinir"
+
+#: src/bz-safety-calculator.c:158
+msgid "User Settings"
+msgstr "Kullanıcı Ayarları"
+
+#: src/bz-safety-calculator.c:159
+msgid "Can access and change user settings"
+msgstr "Kullanıcı ayarlarına erişebilir ve değiştirebilir"
+
+#: src/bz-safety-calculator.c:165
+msgid "Full File System Read/Write Access"
+msgstr "Tüm Dosya Sistemini Okuma/Yazma Erişimi"
+
+#: src/bz-safety-calculator.c:166
+msgid "Can read and write all data on the file system"
+msgstr "Dosya sistemindeki tüm veriyi okuyabilir ve yazabilir"
+
+#: src/bz-safety-calculator.c:173
+msgid "Home Folder Read/Write Access"
+msgstr "Ev Klasörü Okuma/Yazma Erişimi"
+
+#: src/bz-safety-calculator.c:174
+msgid "Can read and write all data in your home directory"
+msgstr "Ev dizininizdeki tüm veriyi okuyabilir ve yazabilir"
+
+#: src/bz-safety-calculator.c:181
+msgid "Full File System Read Access"
+msgstr "Tüm Dosya Sistemini Okuma Erişimi"
+
+#: src/bz-safety-calculator.c:182
+msgid "Can read all data on the file system"
+msgstr "Dosya sistemindeki tüm veriyi okuyabilir"
+
+#: src/bz-safety-calculator.c:190
+msgid "Home Folder Read Access"
+msgstr "Ev Klasörü Okuma Erişimi"
+
+#: src/bz-safety-calculator.c:191
+msgid "Can read all data in your home directory"
+msgstr "Ev dizininizdeki tüm verinizi okuyabilir"
+
+#: src/bz-safety-calculator.c:199
+msgid "Download Folder Read/Write Access"
+msgstr "İndirilenler Klasörü Okuma/Yazma Erişimi"
+
+#: src/bz-safety-calculator.c:200
+msgid "Can read and write all data in your downloads directory"
+msgstr "İndirilenler dizininizdeki tüm veriyi okuyabilir ve yazabilir"
+
+#: src/bz-safety-calculator.c:210
+msgid "Download Folder Read Access"
+msgstr "İndirilenler Klasörü Okuma Erişimi"
+
+#: src/bz-safety-calculator.c:211
+msgid "Can read all data in your downloads directory"
+msgstr "İndirilenler dizininizdeki tüm veriyi okuyabilir"
+
+#: src/bz-safety-calculator.c:223
+msgid "Can read and write all data in the directory"
+msgstr "Dizindeki tüm veriyi okuyabilir ve yazabilir"
+
+#: src/bz-safety-calculator.c:236
+msgid "Can read all data in the directory"
+msgstr "Dizindeki tüm veriyi okuyabilir"
+
+#: src/bz-safety-calculator.c:251
+msgid "No File System Access"
+msgstr "Dosya Sistemi Erişimi Yok"
+
+#: src/bz-safety-calculator.c:252
+msgid "Cannot access the file system at all"
+msgstr "Dosya sistemine asla erişemez"
+
+#: src/bz-safety-calculator.c:259
+msgid "Uses System Services"
+msgstr "Sistem Hizmetlerini Kullanır"
+
+#: src/bz-safety-calculator.c:260
+msgid "Can request data from non-portal system services"
+msgstr "Kapı dışı sistem hizmetlerinden veri isteyebilir"
+
+#: src/bz-safety-calculator.c:266
+msgid "Uses Session Services"
+msgstr "Oturum Hizmetlerini Kullanır"
+
+#: src/bz-safety-calculator.c:267
+msgid "Can request data from non-portal session services"
+msgstr "Kapı dışı oturum hizmetlerinden veri isteyebilir"
+
+#: src/bz-safety-calculator.c:292
+msgid "No Service Access"
+msgstr "Hizmet Erişimi Yok"
+
+#: src/bz-safety-calculator.c:293
+msgid "Cannot access non-portal session or system services at all"
+msgstr "Kapı dışı oturum ya da sistem hizmetlerine asla erişemez"
+
+#: src/bz-safety-calculator.c:301
+msgid "App developer is verified"
+msgstr "Uygulama geliştirici doğrulandı"
+
+#: src/bz-safety-calculator.c:302
+msgid "The developer of this app has been verified to be who they say they are"
+msgstr "Bu uygulamanın geliştiricisinin söylediği kişi olduğu doğrulandı"
+
+#: src/bz-safety-calculator.c:311
+msgid "Proprietary Code"
+msgstr "Sahipli Kod"
+
+#: src/bz-safety-calculator.c:312
+msgid ""
+"The source code is not public, so it cannot be independently audited and "
+"might be unsafe"
+msgstr ""
+"Kaynak kod halka açık değildir, bu nedenle bağımsızca denetlenemez ve "
+"güvenilir olmayabilir"
+
+#: src/bz-safety-calculator.c:322
+msgid "Auditable Code"
+msgstr "Denetlenebilir Kod"
+
+#: src/bz-safety-calculator.c:323
+msgid ""
+"The source code is public and can be independently audited, which makes the "
+"app more likely to be safe"
+msgstr ""
+"Kaynak kod halka açıktır ve bağımsızca denetlenebilir, bu uygulamayı daha "
+"güvenilir kılar"
+
+#: src/bz-safety-calculator.c:361
+#, c-format
+msgid "Use the %s System Service"
+msgstr "%s Sistem Hizmetini Kullan"
+
+#: src/bz-safety-calculator.c:365
+#, c-format
+msgid "Use the %s Session Service"
+msgstr "%s Oturum Hizmetini Kullan"
+
+#: src/bz-safety-calculator.c:369
+#, c-format
+msgid "Use the %s Service"
+msgstr "%s Hizmetini Kullan"
+
+#: src/bz-safety-calculator.c:379
+msgid "Can see the non-portal service"
+msgstr "Kapı dışı hizmetleri görebilir"
+
+#: src/bz-safety-calculator.c:381
+msgid "Can talk to the non-portal service"
+msgstr "Kapı dışı hizmetlere konuşabilir"
+
+#: src/bz-safety-calculator.c:383
+msgid "Can own the non-portal service"
+msgstr "Kapı dışı hizmet edinebilir"
+
+#: src/bz-safety-dialog.blp:7
+msgid "Safety"
+msgstr "Güvenlik"
+
+#: src/bz-safety-dialog.blp:31
+msgid "Safe"
+msgstr "Güvenli"
+
+#: src/bz-safety-dialog.blp:50
+msgid "Details"
+msgstr "Ayrıntılar"
+
+#: src/bz-safety-dialog.blp:53
+msgid "License"
+msgstr "Lisans"
+
+#: src/bz-safety-dialog.blp:62
+msgid "App ID"
+msgstr "Uygulama Kimliği"
+
+#: src/bz-safety-dialog.blp:71
+msgid "SDK"
+msgstr "SDK"
+
+# SDK vurgusu hatalı. Yazılımları genelde Platform ile paketleniyor, SDK ise derlenirken kullanılıyor.
+#: src/bz-safety-dialog.blp:98
+msgid ""
+"This app uses an outdated version of the software platform (SDK) and might "
+"contain bugs or security vulnerabilities which will not be fixed."
+msgstr ""
+"Bu uygulama, çalışma ortamının eski sürümünü kullanıyor ve düzeltilmeyecek "
+"hatalar ya da güvenlik açıkları içerebilir."
+
+#: src/bz-safety-dialog.c:222
+#, c-format
+msgid "%s is Safe"
+msgstr "%s Güvenilir"
+
+#: src/bz-safety-dialog.c:227
+#, c-format
+msgid "%s has no Unsafe Permissions"
+msgstr "%s Güvenli Olmayan İzinleri Yok"
+
+#: src/bz-safety-dialog.c:232
+#, c-format
+msgid "%s is Probably Safe"
+msgstr "%s Muhtemelen Güvenli"
+
+#: src/bz-safety-dialog.c:237
+#, c-format
+msgid "%s is Possibly Unsafe"
+msgstr "%s Güvenilir Olmayabilir"
+
+#: src/bz-safety-dialog.c:242
+#, c-format
+msgid "%s is Unsafe"
+msgstr "%s Güvenilir Değil"
 
 #: src/bz-screenshot-page.blp:5
 msgid "Screenshots"
@@ -1762,11 +2338,6 @@ msgstr "Hiçbir Sonuç Bulunamadı"
 msgid "Apps Tagged \"%s\""
 msgstr "\"%s\" Etiketli Uygulamalar"
 
-#: src/bz-tag-list.c:109
-#, c-format
-msgid "%d Applications"
-msgstr "%d Uygulama"
-
 #: src/bz-tag-list.c:124
 msgid "Search failed"
 msgstr "Arama başarısız"
@@ -1825,7 +2396,7 @@ msgid ""
 msgstr ""
 "Aşağıdaki uygulamalar güncelleme için uygun. Güncellemeler kurulsun mu?"
 
-#: src/bz-update-dialog.c:134
+#: src/bz-update-dialog.c:135
 #, c-format
 msgid ""
 "%d runtimes and/or addons are eligible for updates. Would you like to "
@@ -1834,7 +2405,7 @@ msgstr ""
 "%d çalışma zamanı ve/ya da uzantı güncelleme için uygun. Güncellemeler "
 "kurulsun mu??"
 
-#: src/bz-update-dialog.c:142
+#: src/bz-update-dialog.c:143
 #, c-format
 msgid "Additionally, %d runtimes and/or addons will be updated."
 msgstr "Ayrıca, %d çalışma zamanı ve/ya da uzantı güncellenecek.."
@@ -1896,39 +2467,33 @@ msgstr "Özelleştirilmiş"
 msgid "Flathub"
 msgstr "Flathub"
 
-#: src/bz-window.blp:448
-msgid "Network connection is metered — automatic store data sync is paused"
-msgstr ""
-"Ağ bağlantısı ölçülü — kendiliğinden mağaza verilerinin eşzamanlanması "
-"duraklatıldı"
+#: src/bz-window.blp:435
+msgid "No background tasks!"
+msgstr "Arka plan görevi yok!"
 
-#: src/bz-window.blp:449 src/bz-window.blp:458
-msgid "Sync Manually"
-msgstr "Elle Eşzamanla"
-
-#: src/bz-window.blp:457
+#: src/bz-window.blp:493
 msgid ""
 "You have a network connection but are viewing a cached version of Flathub"
 msgstr ""
 "Ağ bağlantınız var ancak Flathubʼın önbelleklenmiş sürümünü görüntülüyorsunuz"
 
-#: src/bz-window.blp:532
+#: src/bz-window.blp:568
 msgid "_Login with Flathub"
-msgstr "Flathub İle Oturum Aç"
+msgstr "Flathub İle _Oturum Aç"
 
-#: src/bz-window.blp:538
+#: src/bz-window.blp:574
 msgid "_Manage Leftover User Data"
 msgstr "Artık Kullanıcı Verisini _Yönet"
 
-#: src/bz-window.blp:543
+#: src/bz-window.blp:579
 msgid "_Synchronize Remotes"
 msgstr "Uzakları _Eşzamanla"
 
-#: src/bz-window.blp:569
+#: src/bz-window.blp:605
 msgid "Open Bazaar Inspector"
 msgstr "Bazaar İnceleyiciyi Aç"
 
-#: src/bz-window.blp:584
+#: src/bz-window.blp:620
 msgid "Log Out"
 msgstr "Oturumu Kapat"
 
@@ -2018,8 +2583,8 @@ msgstr "Tercihleri Aç"
 
 #: src/gtk/shortcuts-dialog.blp:19
 msgctxt "shortcut window"
-msgid "Refresh"
-msgstr "Yenile"
+msgid "Synchronize Remotes"
+msgstr "Uzakları Eşzamanla"
 
 # Transaction dese de para ile ilgisi yok. O sebeple sadece İşlemler diye çevirdim.
 #: src/gtk/shortcuts-dialog.blp:24
@@ -2036,3 +2601,11 @@ msgstr "Kısayolları Göster"
 msgctxt "shortcut window"
 msgid "Quit"
 msgstr "Çık"
+
+#, c-format
+#~ msgid "%s is suitable for toddlers"
+#~ msgstr "%s, bebeklere uygundur"
+
+#~ msgctxt "shortcut window"
+#~ msgid "Refresh"
+#~ msgstr "Yenile"
