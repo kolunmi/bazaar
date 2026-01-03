@@ -15,6 +15,7 @@ src/bz-app-size-dialog.c
 src/bz-app-tile.blp
 src/bz-app-tile.c
 src/bz-apps-page.blp
+src/bz-apps-page.c
 src/bz-application-map-factory.c
 src/bz-application.c
 src/bz-async-texture.c
