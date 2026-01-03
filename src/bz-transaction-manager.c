@@ -675,7 +675,7 @@ transaction_fiber (QueuedScheduleData *data)
             {
               bz_transaction_add_task (
                   transaction, BZ_BACKEND_TRANSACTION_OP_PAYLOAD (object));
-              g_hash_table_add (op_set, g_object_ref (object));
+              g_hash_table_replace (op_set, g_object_ref (object), NULL);
             }
         }
       else if (BZ_IS_BACKEND_TRANSACTION_OP_PROGRESS_PAYLOAD (object))
@@ -706,7 +706,7 @@ transaction_fiber (QueuedScheduleData *data)
 
           if (is_estimating && !g_hash_table_contains (pending_set, object))
             {
-              g_hash_table_add (pending_set, g_object_ref (object));
+              g_hash_table_replace (pending_set, g_object_ref (object), NULL);
               self->pending = g_hash_table_size (pending_set) ==
                               g_hash_table_size (op_set);
               g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PENDING]);

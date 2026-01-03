@@ -1356,7 +1356,7 @@ retrieve_installs_fiber (GatherRefsData *data)
           iref = g_ptr_array_index (user_refs, i - n_system_refs);
         }
 
-      g_hash_table_add (ids, bz_flatpak_ref_format_unique (FLATPAK_REF (iref), user));
+      g_hash_table_replace (ids, bz_flatpak_ref_format_unique (FLATPAK_REF (iref), user), NULL);
     }
 
   return dex_future_new_take_boxed (
