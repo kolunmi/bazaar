@@ -19,6 +19,8 @@
  */
 
 #include "bz-hardware-support-dialog.h"
+#include "bz-context-row.h"
+#include "bz-lozenge.h"
 #include <glib/gi18n.h>
 
 struct _BzHardwareSupportDialog
@@ -29,8 +31,7 @@ struct _BzHardwareSupportDialog
   gulong   entry_notify_handler;
 
   /* Template widgets */
-  GtkWidget  *lozenge;
-  GtkLabel   *title;
+  BzLozenge  *lozenge;
   GtkListBox *list;
 };
 
@@ -44,14 +45,6 @@ enum
 };
 
 static GParamSpec *props[LAST_PROP] = { 0 };
-
-typedef enum
-{
-  RELATION_NONE = 0,
-  RELATION_SUPPORTS,
-  RELATION_RECOMMENDS,
-  RELATION_REQUIRES
-} RelationType;
 
 typedef struct
 {
@@ -88,82 +81,56 @@ static const ControlInfo control_infos[] = {
    N_ ("Unknown support for touchscreens")            }
 };
 
-static AdwActionRow *
-create_support_row (const gchar *icon_name,
-                    const gchar *title_text,
-                    const gchar *subtitle,
-                    gboolean     is_supported)
-{
-  AdwActionRow *row;
-  GtkWidget    *icon;
-
-  row = ADW_ACTION_ROW (adw_action_row_new ());
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), title_text);
-
-  if (subtitle != NULL)
-    adw_action_row_set_subtitle (row, subtitle);
-
-  icon = gtk_image_new_from_icon_name (icon_name);
-  gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
-  gtk_widget_add_css_class (icon, "circular-lozenge");
-  gtk_widget_add_css_class (icon, is_supported ? "green" : "grey");
-
-  adw_action_row_add_prefix (row, icon);
-
-  return row;
-}
-
-static RelationType
-get_control_relation (guint         required_controls,
-                      guint         recommended_controls,
-                      guint         supported_controls,
-                      BzControlType control_flag)
+static BzImportance
+get_control_importance (guint         required_controls,
+                        guint         recommended_controls,
+                        guint         supported_controls,
+                        BzControlType control_flag)
 {
   if (required_controls & control_flag)
-    return RELATION_REQUIRES;
+    return BZ_IMPORTANCE_IMPORTANT;
   else if (recommended_controls & control_flag)
-    return RELATION_RECOMMENDS;
+    return BZ_IMPORTANCE_INFORMATION;
   else if (supported_controls & control_flag)
-    return RELATION_SUPPORTS;
+    return BZ_IMPORTANCE_UNIMPORTANT;
   else
-    return RELATION_NONE;
+    return BZ_IMPORTANCE_NEUTRAL;
 }
 
 static const gchar *
-get_subtitle_for_relation (const ControlInfo *info,
-                           RelationType       relation)
+get_subtitle_for_importance (const ControlInfo *info,
+                             BzImportance       importance)
 {
-  switch (relation)
+  switch (importance)
     {
-    case RELATION_REQUIRES:
+    case BZ_IMPORTANCE_IMPORTANT:
       return _ (info->required_subtitle);
-    case RELATION_RECOMMENDS:
+    case BZ_IMPORTANCE_INFORMATION:
       return _ (info->recommended_subtitle);
-    case RELATION_SUPPORTS:
+    case BZ_IMPORTANCE_UNIMPORTANT:
       return _ (info->supported_subtitle);
-    case RELATION_NONE:
+    case BZ_IMPORTANCE_NEUTRAL:
       return _ (info->unsupported_subtitle);
+    case BZ_IMPORTANCE_WARNING:
     default:
-      return _ (info->unsupported_subtitle);
+      g_assert_not_reached ();
     }
 }
 
 static void
 add_control_row (BzHardwareSupportDialog *self,
                  const ControlInfo       *info,
-                 RelationType             relation)
+                 BzImportance             importance)
 {
   AdwActionRow *row;
-  gboolean      is_supported;
   const gchar  *subtitle;
 
-  is_supported = (relation != RELATION_NONE);
-  subtitle     = get_subtitle_for_relation (info, relation);
+  subtitle = get_subtitle_for_importance (info, importance);
 
-  row = create_support_row (info->icon_name,
+  row = bz_context_row_new (info->icon_name,
+                            importance,
                             _ (info->title),
-                            subtitle,
-                            is_supported);
+                            subtitle);
   gtk_list_box_append (self->list, GTK_WIDGET (row));
 }
 
@@ -188,36 +155,36 @@ update_list (BzHardwareSupportDialog *self)
   supported_controls   = bz_entry_get_supported_controls (self->entry);
   is_mobile_friendly   = bz_entry_get_is_mobile_friendly (self->entry);
 
-  row = create_support_row ("phone-symbolic",
+  row = bz_context_row_new ("phone-symbolic",
+                            is_mobile_friendly ? BZ_IMPORTANCE_UNIMPORTANT : BZ_IMPORTANCE_NEUTRAL,
                             _ ("Mobile support"),
-                            is_mobile_friendly ? _ ("Works on mobile devices") : _ ("May not work well on mobile devices"),
-                            is_mobile_friendly);
+                            is_mobile_friendly ? _ ("Works on mobile devices") : _ ("May not work well on mobile devices"));
   gtk_list_box_append (self->list, GTK_WIDGET (row));
 
-  row = create_support_row ("device-support-desktop-symbolic",
+  row = bz_context_row_new ("device-support-desktop-symbolic",
+                            BZ_IMPORTANCE_UNIMPORTANT,
                             _ ("Desktop support"),
-                            _ ("Works well on large screens"),
-                            TRUE);
+                            _ ("Works well on large screens"));
   gtk_list_box_append (self->list, GTK_WIDGET (row));
 
   for (gsize i = 0; i < G_N_ELEMENTS (control_infos); i++)
     {
-      RelationType relation;
+      BzImportance importance;
 
-      relation = get_control_relation (required_controls,
-                                       recommended_controls,
-                                       supported_controls,
-                                       control_infos[i].control_flag);
-      add_control_row (self, &control_infos[i], relation);
+      importance = get_control_importance (required_controls,
+                                           recommended_controls,
+                                           supported_controls,
+                                           control_infos[i].control_flag);
+      add_control_row (self, &control_infos[i], importance);
     }
 }
 
 static void
 update_header (BzHardwareSupportDialog *self)
 {
-  const gchar      *icon_name;
+  const gchar      *icon_names[2];
   g_autofree gchar *title_text = NULL;
-  const gchar      *css_class;
+  BzImportance      importance;
   guint             required_controls;
   gboolean          is_mobile_friendly;
 
@@ -229,25 +196,24 @@ update_header (BzHardwareSupportDialog *self)
 
   if (required_controls != BZ_CONTROL_NONE || !is_mobile_friendly)
     {
-      icon_name  = "dialog-warning-symbolic";
-      title_text = g_strdup_printf (_ ("%s works best on specific hardware"),
-                                    bz_entry_get_title (self->entry));
-      css_class  = "grey";
+      icon_names[0] = "dialog-warning-symbolic";
+      icon_names[1] = NULL;
+      title_text    = g_strdup_printf (_ ("%s works best on specific hardware"),
+                                       bz_entry_get_title (self->entry));
+      importance    = BZ_IMPORTANCE_NEUTRAL;
     }
   else
     {
-      icon_name  = "device-supported-symbolic";
-      title_text = g_strdup_printf (_ ("%s works on most devices"),
-                                    bz_entry_get_title (self->entry));
-      css_class  = "green";
+      icon_names[0] = "device-supported-symbolic";
+      icon_names[1] = NULL;
+      title_text    = g_strdup_printf (_ ("%s works on most devices"),
+                                       bz_entry_get_title (self->entry));
+      importance    = BZ_IMPORTANCE_UNIMPORTANT;
     }
 
-  gtk_image_set_from_icon_name (GTK_IMAGE (self->lozenge), icon_name);
-  gtk_label_set_text (self->title, title_text);
-
-  gtk_widget_remove_css_class (self->lozenge, "green");
-  gtk_widget_remove_css_class (self->lozenge, "grey");
-  gtk_widget_add_css_class (self->lozenge, css_class);
+  bz_lozenge_set_icon_names (self->lozenge, icon_names);
+  bz_lozenge_set_title (self->lozenge, title_text);
+  bz_lozenge_set_importance (self->lozenge, importance);
 }
 
 static void
@@ -331,10 +297,11 @@ bz_hardware_support_dialog_class_init (BzHardwareSupportDialogClass *klass)
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
+  g_type_ensure (BZ_TYPE_LOZENGE);
+
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-hardware-support-dialog.ui");
 
   gtk_widget_class_bind_template_child (widget_class, BzHardwareSupportDialog, lozenge);
-  gtk_widget_class_bind_template_child (widget_class, BzHardwareSupportDialog, title);
   gtk_widget_class_bind_template_child (widget_class, BzHardwareSupportDialog, list);
 }
 

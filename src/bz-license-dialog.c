@@ -18,11 +18,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "bz-license-dialog.h"
+#include "config.h"
+
+#include <glib/gi18n.h>
+
 #include "bz-entry.h"
+#include "bz-license-dialog.h"
+#include "bz-lozenge.h"
 #include "bz-spdx.h"
 #include "bz-url.h"
-#include <glib/gi18n.h>
 
 struct _BzLicenseDialog
 {
@@ -40,12 +44,25 @@ enum
   LAST_PROP
 };
 
-static GParamSpec *props[LAST_PROP] = { 0 };
+static GParamSpec *props[LAST_PROP] = { NULL };
+
+static gboolean invert_boolean (gpointer object,
+                                gboolean value);
+
+static char    *get_label_cb (gpointer object,
+                              BzEntry *entry);
+
+static char    *get_license_info (gpointer object,
+                                  BzEntry *entry);
+
+static void     contribute_cb (BzLicenseDialog *self);
 
 static void
 bz_license_dialog_dispose (GObject *object)
 {
-  BzLicenseDialog *self = BZ_LICENSE_DIALOG (object);
+  BzLicenseDialog *self = NULL;
+
+  self = BZ_LICENSE_DIALOG (object);
 
   g_clear_object (&self->entry);
 
@@ -58,7 +75,9 @@ bz_license_dialog_get_property (GObject    *object,
                                 GValue     *value,
                                 GParamSpec *pspec)
 {
-  BzLicenseDialog *self = BZ_LICENSE_DIALOG (object);
+  BzLicenseDialog *self = NULL;
+
+  self = BZ_LICENSE_DIALOG (object);
 
   switch (prop_id)
     {
@@ -76,7 +95,9 @@ bz_license_dialog_set_property (GObject      *object,
                                 const GValue *value,
                                 GParamSpec   *pspec)
 {
-  BzLicenseDialog *self = BZ_LICENSE_DIALOG (object);
+  BzLicenseDialog *self = NULL;
+
+  self = BZ_LICENSE_DIALOG (object);
 
   switch (prop_id)
     {
@@ -87,6 +108,53 @@ bz_license_dialog_set_property (GObject      *object,
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
+}
+
+static void
+bz_license_dialog_class_init (BzLicenseDialogClass *klass)
+{
+  GObjectClass   *object_class = NULL;
+  GtkWidgetClass *widget_class = NULL;
+
+  object_class = G_OBJECT_CLASS (klass);
+  widget_class = GTK_WIDGET_CLASS (klass);
+
+  object_class->dispose      = bz_license_dialog_dispose;
+  object_class->get_property = bz_license_dialog_get_property;
+  object_class->set_property = bz_license_dialog_set_property;
+
+  props[PROP_ENTRY] =
+      g_param_spec_object (
+          "entry",
+          NULL, NULL,
+          BZ_TYPE_ENTRY,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  g_object_class_install_properties (object_class, LAST_PROP, props);
+
+  g_type_ensure (BZ_TYPE_LOZENGE);
+  gtk_widget_class_set_template_from_resource (
+      widget_class,
+      "/io/github/kolunmi/Bazaar/bz-license-dialog.ui");
+
+  gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
+  gtk_widget_class_bind_template_callback (widget_class, get_label_cb);
+  gtk_widget_class_bind_template_callback (widget_class, get_license_info);
+  gtk_widget_class_bind_template_callback (widget_class, contribute_cb);
+}
+
+static void
+bz_license_dialog_init (BzLicenseDialog *self)
+{
+  gtk_widget_init_template (GTK_WIDGET (self));
+}
+
+AdwDialog *
+bz_license_dialog_new (BzEntry *entry)
+{
+  return g_object_new (BZ_TYPE_LICENSE_DIALOG,
+                       "entry", entry,
+                       NULL);
 }
 
 static gboolean
@@ -100,11 +168,11 @@ static char *
 get_label_cb (gpointer object,
               BzEntry *entry)
 {
-  const char *license;
+  const char *license  = NULL;
   gboolean    is_floss = FALSE;
 
   if (entry == NULL)
-    return g_strdup (_ ("Unknown License"));
+    return g_strdup ("");
 
   g_object_get (entry, "is-floss", &is_floss, "project-license", &license, NULL);
 
@@ -128,6 +196,7 @@ get_license_info (gpointer object,
   gboolean         is_floss     = FALSE;
   g_autofree char *license_name = NULL;
   g_autofree char *license_url  = NULL;
+  g_autofree char *link         = NULL;
 
   if (entry == NULL)
     return g_strdup ("");
@@ -136,11 +205,12 @@ get_license_info (gpointer object,
 
   if (is_floss && bz_spdx_is_valid (license))
     {
-      g_autofree char *link = NULL;
-
       license_name = bz_spdx_get_name (license);
       if (license_name == NULL || *license_name == '\0')
-        license_name = g_strdup (license);
+        {
+          g_clear_pointer (&license_name, g_free);
+          license_name = g_strdup (license);
+        }
 
       license_url = bz_spdx_get_url (license);
       link        = g_strdup_printf ("<a href=\"%s\">%s</a>", license_url, license_name);
@@ -169,7 +239,10 @@ get_license_info (gpointer object,
 
   license_name = bz_spdx_get_name (license);
   if (license_name == NULL || *license_name == '\0')
-    license_name = g_strdup (license);
+    {
+      g_clear_pointer (&license_name, g_free);
+      license_name = g_strdup (license);
+    }
 
   return g_strdup_printf (_ ("This app is developed under the special license %s.\n\n"
                              "You may or may not be able to contribute to this app."),
@@ -179,75 +252,18 @@ get_license_info (gpointer object,
 static void
 contribute_cb (BzLicenseDialog *self)
 {
-  GListModel *share_urls = NULL;
-  BzUrl      *first_url  = NULL;
-  const char *url        = NULL;
-
-  if (self->entry == NULL || !BZ_IS_ENTRY (self->entry))
-    return;
+  g_autoptr (GListModel) share_urls = NULL;
+  g_autoptr (BzUrl) first_url       = NULL;
+  const char *url                   = NULL;
 
   g_object_get (self->entry, "share-urls", &share_urls, NULL);
 
   if (share_urls == NULL || g_list_model_get_n_items (share_urls) < 1)
-    {
-      g_clear_object (&share_urls);
-      return;
-    }
+    return;
 
   first_url = g_list_model_get_item (share_urls, 1);
+  url = bz_url_get_url (first_url);
 
-  if (first_url != NULL)
-    {
-      url = bz_url_get_url (first_url);
-
-      if (url != NULL && *url != '\0')
-        g_app_info_launch_default_for_uri (url, NULL, NULL);
-
-      g_object_unref (first_url);
-    }
-
-  g_clear_object (&share_urls);
-}
-
-static void
-bz_license_dialog_class_init (BzLicenseDialogClass *klass)
-{
-  GObjectClass   *object_class = G_OBJECT_CLASS (klass);
-  GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
-
-  object_class->dispose      = bz_license_dialog_dispose;
-  object_class->get_property = bz_license_dialog_get_property;
-  object_class->set_property = bz_license_dialog_set_property;
-
-  props[PROP_ENTRY] =
-      g_param_spec_object (
-          "entry",
-          NULL, NULL,
-          BZ_TYPE_ENTRY,
-          G_PARAM_READWRITE);
-
-  g_object_class_install_properties (object_class, LAST_PROP, props);
-
-  gtk_widget_class_set_template_from_resource (
-      widget_class,
-      "/io/github/kolunmi/Bazaar/bz-license-dialog.ui");
-
-  gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
-  gtk_widget_class_bind_template_callback (widget_class, get_label_cb);
-  gtk_widget_class_bind_template_callback (widget_class, get_license_info);
-  gtk_widget_class_bind_template_callback (widget_class, contribute_cb);
-}
-
-static void
-bz_license_dialog_init (BzLicenseDialog *self)
-{
-  gtk_widget_init_template (GTK_WIDGET (self));
-}
-
-AdwDialog *
-bz_license_dialog_new (BzEntry *entry)
-{
-  return g_object_new (BZ_TYPE_LICENSE_DIALOG,
-                       "entry", entry,
-                       NULL);
+  if (url != NULL && *url != '\0')
+    g_app_info_launch_default_for_uri (url, NULL, NULL);
 }

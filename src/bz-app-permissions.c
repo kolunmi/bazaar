@@ -215,28 +215,6 @@ bz_filesystem_path_to_display_string (const BzFilesystemPath *path)
     }
 }
 
-GType
-bz_safety_rating_get_type (void)
-{
-  static gsize g_define_type_id__volatile = 0;
-
-  if (g_once_init_enter (&g_define_type_id__volatile))
-    {
-      static const GEnumValue values[] = {
-        {               BZ_SAFETY_RATING_SAFE,               "BZ_SAFETY_RATING_SAFE",               "safe" },
-        {            BZ_SAFETY_RATING_NEUTRAL,            "BZ_SAFETY_RATING_NEUTRAL",            "neutral" },
-        {      BZ_SAFETY_RATING_PROBABLY_SAFE,      "BZ_SAFETY_RATING_PROBABLY_SAFE",      "probably-safe" },
-        { BZ_SAFETY_RATING_POTENTIALLY_UNSAFE, "BZ_SAFETY_RATING_POTENTIALLY_UNSAFE", "potentially-unsafe" },
-        {             BZ_SAFETY_RATING_UNSAFE,             "BZ_SAFETY_RATING_UNSAFE",             "unsafe" },
-        {                                   0,                                  NULL,                 NULL }
-      };
-      GType g_define_type_id = g_enum_register_static ("BzSafetyRating", values);
-      g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
-    }
-
-  return g_define_type_id__volatile;
-}
-
 BzBusPolicy *
 bz_bus_policy_new (GBusType              bus_type,
                    const char           *bus_name,

@@ -23,8 +23,10 @@
 #include <glib/gi18n.h>
 
 #include "bz-app-permissions.h"
+#include "bz-context-row.h"
 #include "bz-entry-group.h"
 #include "bz-entry.h"
+#include "bz-lozenge.h"
 #include "bz-result.h"
 #include "bz-safety-calculator.h"
 #include "bz-safety-dialog.h"
@@ -35,10 +37,8 @@ struct _BzSafetyDialog
   AdwDialog parent_instance;
 
   BzEntryGroup *group;
-  gulong        permissions_handler;
 
-  GtkImage   *lozenge;
-  GtkLabel   *title;
+  BzLozenge  *lozenge;
   GtkListBox *permissions_list;
 };
 
@@ -53,13 +53,10 @@ enum
 
 static GParamSpec *props[LAST_PROP] = { 0 };
 
-static const char *get_css_class_for_rating (BzSafetyRating rating);
 static AdwActionRow *create_permission_row (BzSafetyRow *row_data);
-static void update_lozenge_css_class (GtkWidget *widget, const char *new_class);
-static void update_permissions_list (BzSafetyDialog *self);
-static void on_permissions_changed (BzSafetyDialog *self);
-static gboolean invert_boolean (gpointer object, gboolean value);
-static gboolean is_null (gpointer object, GObject *value);
+static void          update_permissions_list (BzSafetyDialog *self);
+static gboolean      invert_boolean (gpointer object, gboolean value);
+static gboolean      is_null (gpointer object, GObject *value);
 
 static void
 bz_safety_dialog_dispose (GObject *object)
@@ -67,12 +64,6 @@ bz_safety_dialog_dispose (GObject *object)
   BzSafetyDialog *self;
 
   self = BZ_SAFETY_DIALOG (object);
-
-  if (self->group != NULL && self->permissions_handler != 0)
-    {
-      g_signal_handler_disconnect (self->group, self->permissions_handler);
-      self->permissions_handler = 0;
-    }
 
   g_clear_object (&self->group);
 
@@ -112,21 +103,8 @@ bz_safety_dialog_set_property (GObject      *object,
   switch (prop_id)
     {
     case PROP_GROUP:
-      if (self->group != NULL && self->permissions_handler != 0)
-        {
-          g_signal_handler_disconnect (self->group, self->permissions_handler);
-          self->permissions_handler = 0;
-        }
-
       g_clear_object (&self->group);
       self->group = g_value_dup_object (value);
-
-      if (self->group != NULL)
-        {
-          self->permissions_handler = g_signal_connect_swapped (self->group, "notify::ui-entry",
-                                                                G_CALLBACK (on_permissions_changed), self);
-        }
-
       update_permissions_list (self);
       break;
     default:
@@ -155,11 +133,12 @@ bz_safety_dialog_class_init (BzSafetyDialogClass *klass)
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
+  g_type_ensure (BZ_TYPE_LOZENGE);
+
   gtk_widget_class_set_template_from_resource (widget_class,
                                                "/io/github/kolunmi/Bazaar/bz-safety-dialog.ui");
 
   gtk_widget_class_bind_template_child (widget_class, BzSafetyDialog, lozenge);
-  gtk_widget_class_bind_template_child (widget_class, BzSafetyDialog, title);
   gtk_widget_class_bind_template_child (widget_class, BzSafetyDialog, permissions_list);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
@@ -179,80 +158,28 @@ bz_safety_dialog_new (BzEntryGroup *group)
                        NULL);
 }
 
-static const char *
-get_css_class_for_rating (BzSafetyRating rating)
-{
-  switch (rating)
-    {
-    case BZ_SAFETY_RATING_SAFE:
-      return "green";
-    case BZ_SAFETY_RATING_NEUTRAL:
-      return "grey";
-    case BZ_SAFETY_RATING_PROBABLY_SAFE:
-      return "yellow";
-    case BZ_SAFETY_RATING_POTENTIALLY_UNSAFE:
-      return "orange";
-    case BZ_SAFETY_RATING_UNSAFE:
-      return "red";
-    default:
-      return "grey";
-    }
-}
-
 static AdwActionRow *
 create_permission_row (BzSafetyRow *row_data)
 {
-  AdwActionRow  *row;
-  GtkWidget     *icon;
-  const char    *icon_name;
-  const char    *title;
-  const char    *subtitle;
-  BzSafetyRating rating;
-
-  icon_name = bz_safety_row_get_icon_name (row_data);
-  title     = bz_safety_row_get_title (row_data);
-  subtitle  = bz_safety_row_get_subtitle (row_data);
-  rating    = bz_safety_row_get_rating (row_data);
-
-  row = ADW_ACTION_ROW (adw_action_row_new ());
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), title);
-  if (subtitle != NULL)
-    adw_action_row_set_subtitle (row, subtitle);
-
-  icon = gtk_image_new_from_icon_name (icon_name);
-  gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
-  gtk_widget_add_css_class (icon, "circular-lozenge");
-  gtk_widget_add_css_class (icon, get_css_class_for_rating (rating));
-  adw_action_row_add_prefix (row, icon);
-
-  return row;
-}
-
-static void
-update_lozenge_css_class (GtkWidget *widget, const char *new_class)
-{
-  static const char *css_classes[] = { "green", "yellow", "orange", "red", "grey" };
-
-  for (size_t i = 0; i < G_N_ELEMENTS (css_classes); i++)
-    gtk_widget_remove_css_class (widget, css_classes[i]);
-
-  gtk_widget_add_css_class (widget, new_class);
+  return bz_context_row_new (bz_safety_row_get_icon_name (row_data),
+                             bz_safety_row_get_importance (row_data),
+                             bz_safety_row_get_title (row_data),
+                             bz_safety_row_get_subtitle (row_data));
 }
 
 static void
 update_permissions_list (BzSafetyDialog *self)
 {
-  const char             *icon_name = NULL;
-  const char             *css_class = NULL;
-  const char             *app_name = NULL;
-  g_autofree char        *title_text = NULL;
-  BzSafetyRating          rating = BZ_SAFETY_RATING_SAFE;
-  BzEntry                *entry = NULL;
-  BzResult               *result = NULL;
-  GtkWidget              *child;
-  g_autoptr (GListModel)  model = NULL;
-  guint                   n_items = 0;
-  guint                   i = 0;
+  const char      *icon_names[2];
+  const char      *app_name   = NULL;
+  g_autofree char *title_text = NULL;
+  BzImportance     importance = BZ_IMPORTANCE_UNIMPORTANT;
+  BzEntry         *entry      = NULL;
+  BzResult        *result     = NULL;
+  GtkWidget       *child;
+  g_autoptr (GListModel) model = NULL;
+  guint n_items                = 0;
+  guint i                      = 0;
 
   while ((child = gtk_widget_get_first_child (GTK_WIDGET (self->permissions_list))) != NULL)
     gtk_list_box_remove (self->permissions_list, child);
@@ -273,62 +200,56 @@ update_permissions_list (BzSafetyDialog *self)
 
   app_name = bz_entry_get_title (entry);
 
-  model  = bz_safety_calculator_analyze_entry (entry);
-  rating = bz_safety_calculator_calculate_rating (entry);
+  model      = bz_safety_calculator_analyze_entry (entry);
+  importance = bz_safety_calculator_calculate_rating (entry);
 
   n_items = g_list_model_get_n_items (model);
   for (i = 0; i < n_items; i++)
     {
       g_autoptr (BzSafetyRow) row_data;
-      AdwActionRow           *row;
+      AdwActionRow *row;
 
       row_data = g_list_model_get_item (model, i);
       row      = create_permission_row (row_data);
       gtk_list_box_append (self->permissions_list, GTK_WIDGET (row));
     }
 
-  switch (rating)
+  switch (importance)
     {
-    case BZ_SAFETY_RATING_NEUTRAL:
-      icon_name  = "app-safety-ok-symbolic";
-      title_text = g_strdup_printf (_ ("%s has no Unsafe Permissions"), app_name);
-      css_class  = "grey";
+    case BZ_IMPORTANCE_UNIMPORTANT:
+      icon_names[0] = "app-safety-ok-symbolic";
+      icon_names[1] = NULL;
+      title_text    = g_strdup_printf (_ ("%s is Safe"), app_name);
       break;
-    case BZ_SAFETY_RATING_SAFE:
-      icon_name  = "app-safety-ok-symbolic";
-      title_text = g_strdup_printf (_ ("%s is Safe"), app_name);
-      css_class  = "green";
+    case BZ_IMPORTANCE_NEUTRAL:
+      icon_names[0] = "app-safety-ok-symbolic";
+      icon_names[1] = NULL;
+      title_text    = g_strdup_printf (_ ("%s has no Unsafe Permissions"), app_name);
       break;
-    case BZ_SAFETY_RATING_PROBABLY_SAFE:
-      icon_name  = "app-safety-ok-symbolic";
-      title_text = g_strdup_printf (_ ("%s is Probably Safe"), app_name);
-      css_class  = "yellow";
+    case BZ_IMPORTANCE_INFORMATION:
+      icon_names[0] = "app-safety-ok-symbolic";
+      icon_names[1] = NULL;
+      title_text    = g_strdup_printf (_ ("%s is Probably Safe"), app_name);
       break;
-    case BZ_SAFETY_RATING_POTENTIALLY_UNSAFE:
-      icon_name  = "app-safety-unknown-symbolic";
-      title_text = g_strdup_printf (_ ("%s is Possibly Unsafe"), app_name);
-      css_class  = "orange";
+    case BZ_IMPORTANCE_WARNING:
+      icon_names[0] = "app-safety-unknown-symbolic";
+      icon_names[1] = NULL;
+      title_text    = g_strdup_printf (_ ("%s is Possibly Unsafe"), app_name);
       break;
-    case BZ_SAFETY_RATING_UNSAFE:
-      icon_name  = "app-safety-unsafe-symbolic";
-      title_text = g_strdup_printf (_ ("%s is Unsafe"), app_name);
-      css_class  = "red";
+    case BZ_IMPORTANCE_IMPORTANT:
+      icon_names[0] = "app-safety-unsafe-symbolic";
+      icon_names[1] = NULL;
+      title_text    = g_strdup_printf (_ ("%s is Unsafe"), app_name);
       break;
     default:
       g_assert_not_reached ();
     }
 
-  gtk_image_set_from_icon_name (self->lozenge, icon_name);
-  gtk_label_set_text (self->title, title_text);
-  update_lozenge_css_class (GTK_WIDGET (self->lozenge), css_class);
+  bz_lozenge_set_icon_names (self->lozenge, icon_names);
+  bz_lozenge_set_title (self->lozenge, title_text);
+  bz_lozenge_set_importance (self->lozenge, importance);
 
   g_clear_object (&result);
-}
-
-static void
-on_permissions_changed (BzSafetyDialog *self)
-{
-  update_permissions_list (self);
 }
 
 static gboolean
