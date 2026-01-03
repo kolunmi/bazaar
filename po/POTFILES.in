@@ -81,7 +81,6 @@ src/bz-releases-list.c
 src/bz-result.c
 src/bz-rich-app-tile.blp
 src/bz-rich-app-tile.c
-src/bz-safety-calculator.blp
 src/bz-safety-calculator.c
 src/bz-safety-dialog.blp
 src/bz-safety-dialog.c
