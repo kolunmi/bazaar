@@ -1,6 +1,6 @@
 /* bz-context-row.h
  *
- * Copyright 2025 Alexander Vanhee
+ * Copyright 2026 Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,11 +36,13 @@ typedef enum
 #define BZ_TYPE_IMPORTANCE (bz_importance_get_type ())
 GType bz_importance_get_type (void) G_GNUC_CONST;
 
-AdwActionRow *bz_context_row_new (const gchar *icon_name,
-                                  BzImportance importance,
-                                  const gchar *title,
-                                  const gchar *subtitle);
+AdwActionRow *
+bz_context_row_new (const gchar *icon_name,
+                    BzImportance importance,
+                    const gchar *title,
+                    const gchar *subtitle);
 
-const gchar *bz_context_row_importance_to_css_class (BzImportance importance);
+const gchar *
+bz_context_row_importance_to_css_class (BzImportance importance);
 
 G_END_DECLS
