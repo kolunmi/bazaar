@@ -71,6 +71,9 @@ src/bz-lazy-async-texture-model.c
 src/bz-license-dialog.blp
 src/bz-license-dialog.c
 src/bz-license-dialog.h
+src/bz-login-page.blp
+src/bz-login-page.c
+src/bz-login-page.h
 src/bz-preferences-dialog.blp
 src/bz-preferences-dialog.c
 src/bz-progress-bar.blp
