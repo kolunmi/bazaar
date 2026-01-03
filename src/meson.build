@@ -199,7 +199,6 @@ gobject_specs = files(
   'bz-hook-dialog-option.txt',
   'bz-hook-dialog.txt',
   'bz-hook.txt',
-  'bz-issue.txt',
   'bz-main-config.txt',
   'bz-pride-flag-config.txt',
   'bz-pride-flag-spec.txt',

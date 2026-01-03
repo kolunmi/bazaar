@@ -34,7 +34,6 @@
 #include "bz-flathub-category.h"
 #include "bz-global-net.h"
 #include "bz-io.h"
-#include "bz-issue.h"
 #include "bz-release.h"
 #include "bz-serializable.h"
 #include "bz-url.h"
@@ -1246,53 +1245,25 @@ bz_entry_real_serialize (BzSerializable  *serializable,
         {
           g_autoptr (GVariantBuilder) sub_builder = NULL;
 
-          sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("a(msmvtmsms)"));
+          sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("a(mstmsms)"));
           for (guint i = 0; i < n_items; i++)
             {
               g_autoptr (BzRelease) release              = NULL;
-              GListModel *issues                         = NULL;
-              g_autoptr (GVariantBuilder) issues_builder = NULL;
-              guint       n_issues                       = 0;
               guint64     timestamp                      = 0;
               const char *url                            = NULL;
               const char *version                        = NULL;
               const char *description                    = NULL;
 
               release     = g_list_model_get_item (priv->version_history, i);
-              issues      = bz_release_get_issues (release);
               timestamp   = bz_release_get_timestamp (release);
               url         = bz_release_get_url (release);
               version     = bz_release_get_version (release);
               description = bz_release_get_description (release);
 
-              if (issues != NULL)
-                {
-                  n_issues = g_list_model_get_n_items (issues);
-                  if (n_issues > 0)
-                    {
-                      issues_builder = g_variant_builder_new (G_VARIANT_TYPE ("a(msms)"));
-                      for (guint j = 0; j < n_issues; j++)
-                        {
-                          g_autoptr (BzIssue) issue = NULL;
-                          const char *issue_id      = NULL;
-                          const char *issue_url     = NULL;
-
-                          issue     = g_list_model_get_item (issues, j);
-                          issue_id  = bz_issue_get_id (issue);
-                          issue_url = bz_issue_get_url (issue);
-
-                          g_variant_builder_add (issues_builder, "(msms)", issue_id, issue_url);
-                        }
-                    }
-                }
-
               g_variant_builder_add (
                   sub_builder,
-                  "(msmvtmsms)",
+                  "(mstmsms)",
                   description,
-                  issues_builder != NULL
-                      ? g_variant_builder_end (issues_builder)
-                      : NULL,
                   timestamp,
                   url,
                   version);
@@ -1632,43 +1603,16 @@ bz_entry_real_deserialize (BzSerializable *serializable,
           version_iter = g_variant_iter_new (value);
           for (;;)
             {
-              g_autoptr (GVariant) issues         = NULL;
-              g_autoptr (GListStore) issues_store = NULL;
               guint64          timestamp          = 0;
               g_autofree char *url                = NULL;
               g_autofree char *description        = NULL;
               g_autofree char *version            = NULL;
               g_autoptr (BzRelease) release       = NULL;
 
-              if (!g_variant_iter_next (version_iter, "(msmvtmsms)", &description, &issues, &timestamp, &url, &version))
+              if (!g_variant_iter_next (version_iter, "(mstmsms)", &description, &timestamp, &url, &version))
                 break;
 
-              if (issues != NULL)
-                {
-                  g_autoptr (GVariantIter) issues_iter = NULL;
-
-                  issues_store = g_list_store_new (BZ_TYPE_ISSUE);
-
-                  issues_iter = g_variant_iter_new (issues);
-                  for (;;)
-                    {
-                      g_autofree char *issue_id  = NULL;
-                      g_autofree char *issue_url = NULL;
-                      g_autoptr (BzIssue) issue  = NULL;
-
-                      if (!g_variant_iter_next (issues_iter, "(msms)", &issue_id, &issue_url))
-                        break;
-
-                      issue = bz_issue_new ();
-                      bz_issue_set_id (issue, issue_id);
-                      bz_issue_set_url (issue, issue_url);
-                      g_list_store_append (issues_store, issue);
-                    }
-                }
-
               release = bz_release_new ();
-              if (issues_store != NULL)
-                bz_release_set_issues (release, G_LIST_MODEL (issues_store));
               bz_release_set_timestamp (release, timestamp);
               bz_release_set_url (release, url);
               bz_release_set_version (release, version);
