@@ -49,6 +49,7 @@
     <file preprocess="xml-stripblanks">bz-releases-list.ui</file>
     <file preprocess="xml-stripblanks">bz-rich-app-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-row-view.ui</file>
+    <file preprocess="xml-stripblanks">bz-safety-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-screenshot-page.ui</file>
     <file preprocess="xml-stripblanks">bz-screenshots-carousel.ui</file>
     <file preprocess="xml-stripblanks">bz-search-widget.ui</file>
@@ -122,6 +123,17 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/view-more-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/zoom-minus-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/zoom-plus-symbolic.svg</file>
+
+    <file preprocess="xml-stripblanks">icons/scalable/actions/permissions-legacy-windowing-system-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/permissions-microphone-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/permissions-sandboxed-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/permissions-screen-contents-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/permissions-system-devices-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/permissions-warning-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/app-safety-ok-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/app-safety-unknown-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/app-safety-unsafe-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/auditable-code-symbolic.svg</file>
 
     <file alias="icons/scalable/actions/advertising-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/advertising-symbolic.svg</file>
     <file alias="icons/scalable/actions/advertising-none-symbolic.svg" preprocess="xml-stripblanks">icons/scalable/actions/ratings/advertising-none-symbolic.svg</file>

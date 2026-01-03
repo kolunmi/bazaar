@@ -1,0 +1,12 @@
+prefix=bz
+name=safety_row
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+include="bz-app-permissions.h"
+
+property=rating BzSafetyRating BZ_TYPE_SAFETY_RATING enum
+property=title char G_TYPE_STRING string
+property=subtitle char G_TYPE_STRING string
+property=icon_name char G_TYPE_STRING string

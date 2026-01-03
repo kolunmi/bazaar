@@ -25,6 +25,7 @@
 
 #include <json-glib/json-glib.h>
 
+#include "bz-app-permissions.h"
 #include "bz-async-texture.h"
 #include "bz-country-data-point.h"
 #include "bz-data-point.h"
@@ -117,6 +118,7 @@ typedef struct
   AsContentRating *content_rating;
   GListModel      *keywords;
   GListModel      *categories;
+  BzAppPermissions *permissions;
 
   gboolean              is_flathub;
   BzVerificationStatus *verification_status;
@@ -189,6 +191,7 @@ enum
   PROP_CONTENT_RATING,
   PROP_KEYWORDS,
   PROP_CATEGORIES,
+  PROP_PERMISSIONS,
 
   LAST_PROP
 };
@@ -424,6 +427,9 @@ bz_entry_get_property (GObject    *object,
     case PROP_CATEGORIES:
       g_value_set_object (value, priv->categories);
       break;
+    case PROP_PERMISSIONS:
+      g_value_set_object (value, priv->permissions);
+      break;
     case PROP_IS_FLATHUB:
       g_value_set_boolean (value, priv->is_flathub);
       break;
@@ -636,6 +642,10 @@ bz_entry_set_property (GObject      *object,
     case PROP_CATEGORIES:
       g_clear_object (&priv->categories);
       priv->categories = g_value_dup_object (value);
+      break;
+    case PROP_PERMISSIONS:
+      g_clear_object (&priv->permissions);
+      priv->permissions = g_value_dup_object (value);
       break;
     case PROP_IS_FLATHUB:
       priv->is_flathub = g_value_get_boolean (value);
@@ -1007,6 +1017,13 @@ bz_entry_class_init (BzEntryClass *klass)
           "categories",
           NULL, NULL,
           G_TYPE_LIST_MODEL,
+          G_PARAM_READWRITE);
+
+  props[PROP_PERMISSIONS] =
+      g_param_spec_object (
+          "permissions",
+          NULL, NULL,
+          BZ_TYPE_APP_PERMISSIONS,
           G_PARAM_READWRITE);
 
   props[PROP_IS_FLATHUB] =
@@ -1401,6 +1418,11 @@ bz_entry_real_serialize (BzSerializable  *serializable,
       g_variant_builder_add (builder, "{sv}", "verification-login-is-organization", g_variant_new_boolean (login_is_organization));
     }
 
+  if (priv->permissions != NULL)
+    {
+      bz_app_permissions_serialize (priv->permissions, builder);
+    }
+
   g_variant_builder_add (builder, "{sv}", "is-flathub", g_variant_new_boolean (priv->is_flathub));
   if (priv->is_flathub)
     {
@@ -1793,6 +1815,18 @@ bz_entry_real_deserialize (BzSerializable *serializable,
         }
       else if (g_strcmp0 (key, "is-flathub") == 0)
         priv->is_flathub = g_variant_get_boolean (value);
+      else if (g_str_has_prefix (key, "permissions-"))
+        {
+          continue;
+        }
+    }
+
+  if (priv->permissions == NULL)
+    priv->permissions = bz_app_permissions_new ();
+
+  if (!bz_app_permissions_deserialize (priv->permissions, import, error))
+    {
+      g_warning ("Failed to deserialize app permissions");
     }
 
   return TRUE;
@@ -2902,4 +2936,5 @@ clear_entry (BzEntry *self)
   g_clear_object (&priv->content_rating);
   g_clear_object (&priv->keywords);
   g_clear_object (&priv->categories);
+  g_clear_object (&priv->permissions);
 }
