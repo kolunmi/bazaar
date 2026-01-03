@@ -1,6 +1,6 @@
 /* bz-lozenge.h
  *
- * Copyright 2025 Alexander Vanhee
+ * Copyright 2026 Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,20 +31,28 @@ G_DECLARE_FINAL_TYPE (BzLozenge, bz_lozenge, BZ, LOZENGE, GtkBox)
 
 GtkWidget *bz_lozenge_new (void);
 
-void         bz_lozenge_set_title (BzLozenge   *self,
-                                   const gchar *title);
-const gchar *bz_lozenge_get_title (BzLozenge *self);
+void
+bz_lozenge_set_title (BzLozenge   *self,
+                      const gchar *title);
+const gchar *
+bz_lozenge_get_title (BzLozenge *self);
 
-void         bz_lozenge_set_label (BzLozenge   *self,
-                                   const gchar *label);
-const gchar *bz_lozenge_get_label (BzLozenge *self);
+void
+bz_lozenge_set_label (BzLozenge   *self,
+                      const gchar *label);
+const gchar *
+bz_lozenge_get_label (BzLozenge *self);
 
-void    bz_lozenge_set_icon_names (BzLozenge          *self,
-                                   const gchar *const *icon_names);
-gchar **bz_lozenge_get_icon_names (BzLozenge *self);
+void
+bz_lozenge_set_icon_names (BzLozenge          *self,
+                           const gchar *const *icon_names);
+gchar **
+bz_lozenge_get_icon_names (BzLozenge *self);
 
-void         bz_lozenge_set_importance (BzLozenge   *self,
-                                        BzImportance importance);
-BzImportance bz_lozenge_get_importance (BzLozenge *self);
+void
+bz_lozenge_set_importance (BzLozenge   *self,
+                           BzImportance importance);
+BzImportance
+bz_lozenge_get_importance (BzLozenge *self);
 
 G_END_DECLS
