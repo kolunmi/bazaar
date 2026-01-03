@@ -1,6 +1,6 @@
-/* bz-preferences-dialog.h
+/* bz-safety-calculator.h
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2026 Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,16 +20,13 @@
 
 #pragma once
 
-#include <adwaita.h>
-
-#include "bz-state-info.h"
+#include "bz-entry.h"
+#include "bz-safety-row.h"
+#include <gio/gio.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_PREFERENCES_DIALOG (bz_preferences_dialog_get_type ())
-G_DECLARE_FINAL_TYPE (BzPreferencesDialog, bz_preferences_dialog, BZ, PREFERENCES_DIALOG, AdwPreferencesDialog)
-
-AdwDialog *
-bz_preferences_dialog_new (BzStateInfo *state);
+GListModel    *bz_safety_calculator_analyze_entry (BzEntry *entry);
+BzSafetyRating bz_safety_calculator_calculate_rating (BzEntry *entry);
 
 G_END_DECLS

@@ -124,6 +124,12 @@
     --accent-color: @accent_color;
 }
 
+.orange {
+  --accent-fg-color: @orange_5;
+  --accent-color: alpha(@orange_5, 0.25);
+  --accent-bg-color: @orange_5;
+}
+
 .green {
     --accent-fg-color : #8ff0a4;
     --accent-bg-color : alpha(#2ec27e, 0.25);
@@ -163,6 +169,66 @@
 .grey {
 	--accent-color: alpha(@window_fg_color,0.75);
 	--accent-bg-color: @window_fg_color;
+}
+
+.circular-lozenge.green,
+.lozenge.green {
+	color: @green_5;
+	background-color: alpha(@green_3, .25);
+}
+
+.circular-lozenge.yellow,
+.lozenge.yellow {
+	color: #ae7b03;
+	background: alpha(@yellow_5, .25);
+}
+
+.circular-lozenge.orange,
+.lozenge.orange {
+	color: @orange_5;
+	background-color: alpha(@orange_4, .25);
+}
+
+.circular-lozenge.red,
+.lozenge.red {
+	color: @red_4;
+	background-color: alpha(@red_2, .25);
+}
+
+.circular-lozenge.grey,
+.lozenge.grey {
+	color: @dark_5;
+	background-color: alpha(@dark_3, .25);
+}
+
+@media (prefers-color-scheme: dark) {
+  .circular-lozenge.green,
+  .lozenge.green {
+	  color: @green_1;
+	  background-color: alpha(@green_4, .25);
+  }
+
+  .circular-lozenge.yellow,
+  .lozenge.yellow {
+	  color: @yellow_2;
+	  background: alpha(#cd9309, .25);
+  }
+
+  .circular-lozenge.orange,
+  .lozenge.orange {
+	  color: @orange_1;
+  }
+
+  .circular-lozenge.red,
+  .lozenge.red {
+	  color: #ff7b63;
+  }
+
+  .circular-lozenge.grey,
+  .lozenge.grey {
+	  color: @light_3;
+	  background-color: alpha(@light_5, .25);
+  }
 }
 
 .flathub {

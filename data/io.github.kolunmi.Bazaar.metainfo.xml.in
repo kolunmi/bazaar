@@ -68,6 +68,25 @@
   </screenshots>
 
   <releases>
+    <release version="0.7.1" date="2026-01-03">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.1</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>New market stall icon</li>
+          <li>Remove Flathub styling</li>
+          <li>Add horizontal versions of pride flags</li>
+          <li>Text selection in app descriptions can be made across paragraph breaks</li>
+          <li>Support YAML anchors and aliases in config parsing</li>
+          <li>Drastically reduce disk cache writes over time by skipping unchanged entries</li>
+          <li>Show background status in popover</li>
+          <li>Add app permission system</li>
+          <li>Add back release URLs</li>
+          <li>Fix sync-remotes action in shortcut dialog</li>
+          <li>Fix visual hiccups in comet animations</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.7.0" date="2025-12-31">
       <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.0</url>
       <description translate="no">

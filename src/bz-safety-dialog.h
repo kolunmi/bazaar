@@ -1,6 +1,6 @@
-/* bz-preferences-dialog.h
+/* bz-safety-dialog.h
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2026 Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,16 +20,15 @@
 
 #pragma once
 
+#include "bz-entry-group.h"
 #include <adwaita.h>
-
-#include "bz-state-info.h"
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_PREFERENCES_DIALOG (bz_preferences_dialog_get_type ())
-G_DECLARE_FINAL_TYPE (BzPreferencesDialog, bz_preferences_dialog, BZ, PREFERENCES_DIALOG, AdwPreferencesDialog)
+#define BZ_TYPE_SAFETY_DIALOG (bz_safety_dialog_get_type ())
 
-AdwDialog *
-bz_preferences_dialog_new (BzStateInfo *state);
+G_DECLARE_FINAL_TYPE (BzSafetyDialog, bz_safety_dialog, BZ, SAFETY_DIALOG, AdwDialog)
+
+AdwDialog *bz_safety_dialog_new (BzEntryGroup *group);
 
 G_END_DECLS

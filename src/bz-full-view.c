@@ -25,6 +25,7 @@
 
 #include "bz-addons-dialog.h"
 #include "bz-age-rating-dialog.h"
+#include "bz-app-permissions.h"
 #include "bz-app-size-dialog.h"
 #include "bz-app-tile.h"
 #include "bz-apps-page.h"
@@ -43,6 +44,8 @@
 #include "bz-lazy-async-texture-model.h"
 #include "bz-license-dialog.h"
 #include "bz-releases-list.h"
+#include "bz-safety-dialog.h"
+#include "bz-safety-calculator.h"
 #include "bz-screenshot-page.h"
 #include "bz-screenshots-carousel.h"
 #include "bz-section-view.h"
@@ -568,6 +571,88 @@ format_leftover_label (gpointer object, const char *name, guint64 size)
   return g_strdup_printf (_ ("%s is not installed, but it still has <b>%s</b> of data present."), name, formatted_size);
 }
 
+static char *
+get_safety_rating_icon (gpointer object,
+                        BzEntry *entry)
+{
+  BzSafetyRating rating;
+
+  if (entry == NULL)
+    return g_strdup ("app-safety-unknown-symbolic");
+
+  rating = bz_safety_calculator_calculate_rating (entry);
+
+  switch (rating)
+    {
+    case BZ_SAFETY_RATING_SAFE:
+    case BZ_SAFETY_RATING_NEUTRAL:
+    case BZ_SAFETY_RATING_PROBABLY_SAFE:
+      return g_strdup ("app-safety-ok-symbolic");
+    case BZ_SAFETY_RATING_POTENTIALLY_UNSAFE:
+      return g_strdup ("app-safety-unknown-symbolic");
+    case BZ_SAFETY_RATING_UNSAFE:
+      return g_strdup ("app-safety-unsafe-symbolic");
+    default:
+      return g_strdup ("app-safety-unknown-symbolic");
+    }
+}
+
+static char *
+get_safety_rating_style (gpointer object,
+                         BzEntry *entry)
+{
+  BzSafetyRating rating;
+
+  if (entry == NULL)
+    return g_strdup ("grey");
+
+  rating = bz_safety_calculator_calculate_rating (entry);
+
+  switch (rating)
+    {
+    case BZ_SAFETY_RATING_SAFE:
+      return g_strdup ("grey");
+    case BZ_SAFETY_RATING_NEUTRAL:
+      return g_strdup ("grey");
+    case BZ_SAFETY_RATING_PROBABLY_SAFE:
+      return g_strdup ("warning");
+    case BZ_SAFETY_RATING_POTENTIALLY_UNSAFE:
+      return g_strdup ("orange");
+    case BZ_SAFETY_RATING_UNSAFE:
+      return g_strdup ("error");
+    default:
+      return g_strdup ("grey");
+    }
+}
+
+static char *
+get_safety_rating_label (gpointer object,
+                           BzEntry *entry)
+{
+  BzSafetyRating rating;
+
+  if (entry == NULL)
+    return g_strdup (_ ("N/A"));
+
+  rating = bz_safety_calculator_calculate_rating (entry);
+
+  switch (rating)
+    {
+    case BZ_SAFETY_RATING_SAFE:
+      return g_strdup (_ ("Low Risk"));
+    case BZ_SAFETY_RATING_NEUTRAL:
+      return g_strdup (_ ("Low Risk"));
+    case BZ_SAFETY_RATING_PROBABLY_SAFE:
+      return g_strdup (_ ("Medium Risk"));
+    case BZ_SAFETY_RATING_POTENTIALLY_UNSAFE:
+      return g_strdup (_ ("Medium Risk"));
+    case BZ_SAFETY_RATING_UNSAFE:
+      return g_strdup (_ ("High Risk"));
+    default:
+      return g_strdup (_ ("N/A"));
+    }
+}
+
 static gpointer
 filter_own_app_id (BzEntry *entry, GtkStringList *app_ids)
 {
@@ -735,27 +820,6 @@ open_url_cb (BzFullView   *self,
 }
 
 static void
-open_flathub_url_cb (BzFullView *self,
-                     GtkButton  *button)
-{
-  BzEntry    *entry = NULL;
-  const char *id    = NULL;
-  char       *url   = NULL;
-
-  entry = BZ_ENTRY (bz_result_get_object (self->ui_entry));
-  id    = bz_entry_get_id (entry);
-
-  if (id != NULL && *id != '\0')
-    {
-      url = g_strdup_printf ("https://flathub.org/apps/%s", id);
-      g_app_info_launch_default_for_uri (url, NULL, NULL);
-      g_free (url);
-    }
-  else
-    g_warning ("Invalid or empty ID provided");
-}
-
-static void
 license_cb (BzFullView *self,
             GtkButton  *button)
 {
@@ -869,6 +933,20 @@ formfactor_cb (BzFullView *self,
 
   ui_entry = bz_result_get_object (self->ui_entry);
   dialog   = ADW_DIALOG (bz_hardware_support_dialog_new (ui_entry));
+
+  adw_dialog_present (dialog, GTK_WIDGET (self));
+}
+
+static void
+safety_cb (BzFullView *self,
+           GtkButton  *button)
+{
+  AdwDialog *dialog   = NULL;
+
+  if (self->group == NULL)
+    return;
+
+  dialog  = ADW_DIALOG (bz_safety_dialog_new (self->group));
 
   adw_dialog_present (dialog, GTK_WIDGET (self));
 }
@@ -1181,6 +1259,9 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, get_license_icon);
   gtk_widget_class_bind_template_callback (widget_class, get_formfactor_label);
   gtk_widget_class_bind_template_callback (widget_class, get_formfactor_tooltip);
+  gtk_widget_class_bind_template_callback (widget_class, get_safety_rating_icon);
+  gtk_widget_class_bind_template_callback (widget_class, get_safety_rating_style);
+  gtk_widget_class_bind_template_callback (widget_class, get_safety_rating_label);
   gtk_widget_class_bind_template_callback (widget_class, has_link);
   gtk_widget_class_bind_template_callback (widget_class, format_leftover_label);
   gtk_widget_class_bind_template_callback (widget_class, format_other_apps_label);
@@ -1189,12 +1270,12 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, more_apps_button_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, has_other_apps);
   gtk_widget_class_bind_template_callback (widget_class, open_url_cb);
-  gtk_widget_class_bind_template_callback (widget_class, open_flathub_url_cb);
   gtk_widget_class_bind_template_callback (widget_class, license_cb);
   gtk_widget_class_bind_template_callback (widget_class, dl_stats_cb);
   gtk_widget_class_bind_template_callback (widget_class, screenshot_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, size_cb);
   gtk_widget_class_bind_template_callback (widget_class, formfactor_cb);
+  gtk_widget_class_bind_template_callback (widget_class, safety_cb);
   gtk_widget_class_bind_template_callback (widget_class, run_cb);
   gtk_widget_class_bind_template_callback (widget_class, install_cb);
   gtk_widget_class_bind_template_callback (widget_class, remove_cb);

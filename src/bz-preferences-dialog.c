@@ -76,7 +76,8 @@ struct _BzPreferencesDialog
 {
   AdwPreferencesDialog parent_instance;
 
-  GSettings *settings;
+  BzStateInfo *state;
+  GSettings   *settings;
 
   /* Template widgets */
   AdwSwitchRow *only_foss_switch;
@@ -91,6 +92,16 @@ struct _BzPreferencesDialog
 
 G_DEFINE_FINAL_TYPE (BzPreferencesDialog, bz_preferences_dialog, ADW_TYPE_PREFERENCES_DIALOG)
 
+enum
+{
+  PROP_0,
+
+  PROP_STATE,
+
+  LAST_PROP
+};
+static GParamSpec *props[LAST_PROP] = { 0 };
+
 static void bind_settings (BzPreferencesDialog *self);
 static void create_flag_buttons (BzPreferencesDialog *self);
 
@@ -99,6 +110,7 @@ bz_preferences_dialog_dispose (GObject *object)
 {
   BzPreferencesDialog *self = BZ_PREFERENCES_DIALOG (object);
 
+  g_clear_object (&self->state);
   g_clear_object (&self->settings);
 
   G_OBJECT_CLASS (bz_preferences_dialog_parent_class)->dispose (object);
@@ -212,12 +224,62 @@ bind_settings (BzPreferencesDialog *self)
 }
 
 static void
+bz_preferences_dialog_get_property (GObject    *object,
+                                    guint       prop_id,
+                                    GValue     *value,
+                                    GParamSpec *pspec)
+{
+  BzPreferencesDialog *self = BZ_PREFERENCES_DIALOG (object);
+
+  switch (prop_id)
+    {
+    case PROP_STATE:
+      g_value_set_object (value, self->state);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+    }
+}
+
+static void
+bz_preferences_dialog_set_property (GObject      *object,
+                                    guint         prop_id,
+                                    const GValue *value,
+                                    GParamSpec   *pspec)
+{
+  switch (prop_id)
+    {
+    case PROP_STATE:
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+    }
+}
+
+static gboolean
+invert_boolean (gpointer object,
+                gboolean value)
+{
+  return !value;
+}
+
+static void
 bz_preferences_dialog_class_init (BzPreferencesDialogClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
-  object_class->dispose = bz_preferences_dialog_dispose;
+  object_class->set_property = bz_preferences_dialog_set_property;
+  object_class->get_property = bz_preferences_dialog_get_property;
+  object_class->dispose      = bz_preferences_dialog_dispose;
+
+  props[PROP_STATE] =
+      g_param_spec_object (
+          "state",
+          NULL, NULL,
+          BZ_TYPE_STATE_INFO,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
+  g_object_class_install_properties (object_class, LAST_PROP, props);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-preferences-dialog.ui");
 
@@ -227,6 +289,7 @@ bz_preferences_dialog_class_init (BzPreferencesDialogClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, search_debounce_switch);
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, flag_buttons_box);
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, hide_eol_switch);
+  gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
 }
 
 static void
@@ -237,14 +300,15 @@ bz_preferences_dialog_init (BzPreferencesDialog *self)
 }
 
 AdwDialog *
-bz_preferences_dialog_new (GSettings *settings)
+bz_preferences_dialog_new (BzStateInfo *state)
 {
   BzPreferencesDialog *dialog = NULL;
 
-  g_return_val_if_fail (G_IS_SETTINGS (settings), NULL);
+  g_return_val_if_fail (BZ_IS_STATE_INFO (state), NULL);
 
-  dialog           = g_object_new (BZ_TYPE_PREFERENCES_DIALOG, NULL);
-  dialog->settings = g_object_ref (settings);
+  dialog        = g_object_new (BZ_TYPE_PREFERENCES_DIALOG, NULL);
+  dialog->state = g_object_ref (state);
+  g_object_get (state, "settings", &dialog->settings, NULL);
   bind_settings (dialog);
 
   return ADW_DIALOG (dialog);

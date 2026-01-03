@@ -430,7 +430,7 @@ create_attribute_row (const gchar *icon_name,
   switch (importance)
     {
     case BZ_IMPORTANCE_UNIMPORTANT:
-      css_class = "success";
+      css_class = "green";
       break;
     case BZ_IMPORTANCE_NEUTRAL:
       css_class = "grey";
@@ -439,10 +439,10 @@ create_attribute_row (const gchar *icon_name,
       css_class = "grey";
       break;
     case BZ_IMPORTANCE_WARNING:
-      css_class = "warning";
+      css_class = "yellow";
       break;
     case BZ_IMPORTANCE_IMPORTANT:
-      css_class = "error";
+      css_class = "red";
       break;
     default:
       css_class = "grey";
