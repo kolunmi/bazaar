@@ -4,26 +4,26 @@
 # Automatically generated, 2025.
 # Atom <29772841+AtomHare@users.noreply.github.com>, 2025.
 # Léane GRASSER <leane.grasser@proton.me>, 2025.
-# SPDX-FileCopyrightText: 2025 Mimolet <theMimolet@proton.me>
+# SPDX-FileCopyrightText: 2025, 2026 Mimolet <theMimolet@proton.me>
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-30 15:59+0100\n"
-"PO-Revision-Date: 2025-12-30 16:05+0100\n"
-"Last-Translator: Mimolet <themimolet@proton.me>\n"
+"POT-Creation-Date: 2026-01-02 21:33+0100\n"
+"PO-Revision-Date: 2026-01-02 21:59+0100\n"
+"Last-Translator: Mimolet <theMimolet@proton.me>\n"
 "Language-Team: French <kde-francophone@kde.org>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Lokalize 25.04.0\n"
+"X-Generator: Lokalize 25.12.0\n"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:2
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:5
-#: src/bz-window.blp:234
+#: src/bz-window.blp:233
 msgid "Bazaar"
 msgstr "Bazaar"
 
@@ -80,19 +80,19 @@ msgstr ""
 "Ajouter un délai avant le lancement des recherches pour éviter d'obtenir "
 "instantanément des résultats pendant la saisie"
 
-#: data/io.github.kolunmi.Bazaar.gschema.xml:54
+#: data/io.github.kolunmi.Bazaar.gschema.xml:74
 msgid "Global Progress Bar Theme"
 msgstr "Thème de la barre de progression globale"
 
-#: data/io.github.kolunmi.Bazaar.gschema.xml:55
+#: data/io.github.kolunmi.Bazaar.gschema.xml:75
 msgid "Describes the look of the global progress bar"
 msgstr "Décrit l'apparence de la barre de progression globale"
 
-#: data/io.github.kolunmi.Bazaar.gschema.xml:59
+#: data/io.github.kolunmi.Bazaar.gschema.xml:79
 msgid "Saved Window Dimensions"
 msgstr "Dimensions de fenêtre sauvegardées"
 
-#: data/io.github.kolunmi.Bazaar.gschema.xml:60
+#: data/io.github.kolunmi.Bazaar.gschema.xml:80
 msgid "The window dimensions to be used by the next Bazaar window"
 msgstr "Les dimensions de fenêtre à utiliser pour la prochaine fenêtre Bazaar"
 
@@ -120,6 +120,10 @@ msgstr ""
 "onglet \"Recommandées\" qui peut être configuré par les distributeurs, "
 "améliorant la personnalisation de l'expérience."
 
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29 src/bz-application.c:712
+msgid "Adam Masciola"
+msgstr ""
+
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:54
 msgid "The home page displaying Flathub apps"
 msgstr "Page d'accueil affichant les apps de Flathub"
@@ -136,25 +140,25 @@ msgstr "Page de recherche"
 msgid "Category page"
 msgstr "Page des catégories"
 
-#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:686
+#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:689
 #: src/bz-installed-tile.blp:99
 msgid "Manage Add-ons"
 msgstr "Gérer les extensions"
 
 #: src/bz-addons-dialog.c:90 src/bz-full-view.blp:477
 #: src/bz-installed-tile.blp:117 src/bz-transaction-view.blp:277
-#: src/bz-window.c:1331
+#: src/bz-window.c:1283
 msgid "Remove"
 msgstr "Supprimer"
 
 #: src/bz-addons-dialog.c:95 src/bz-favorites-tile.c:166
 #: src/bz-full-view.blp:249 src/bz-full-view.blp:464
-#: src/bz-transaction-view.blp:225 src/bz-window.c:1308
+#: src/bz-transaction-view.blp:225 src/bz-window.c:1260
 msgid "Install"
 msgstr "Installer"
 
 #: src/bz-age-rating-dialog.blp:7 src/bz-age-rating-dialog.blp:50
-#: src/bz-full-view.c:374 src/bz-full-view.c:381
+#: src/bz-full-view.c:383 src/bz-full-view.c:390
 msgid "Age Rating"
 msgstr "Limite d'âge"
 
@@ -438,7 +442,7 @@ msgid "%s • %s"
 msgstr ""
 
 #. Translators: Age rating format, e.g. "12+" for ages 12 and up
-#: src/bz-age-rating-dialog.c:752 src/bz-full-view.c:364
+#: src/bz-age-rating-dialog.c:752 src/bz-full-view.c:373
 #, c-format
 msgid "%d+"
 msgstr ""
@@ -489,12 +493,12 @@ msgid "%s is suitable for %s"
 msgstr "%s convient à %s"
 
 #: src/bz-all-apps-page.blp:13 src/bz-apps-page.blp:14 src/bz-full-view.blp:43
-#: src/bz-user-data-page.blp:15 src/bz-window.blp:443
+#: src/bz-user-data-page.blp:15 src/bz-window.blp:441
 msgid "Main Menu"
 msgstr "Menu principal"
 
 #: src/bz-all-apps-page.blp:17 src/bz-apps-page.blp:17
-#: src/bz-user-data-page.blp:18 src/bz-window.blp:522
+#: src/bz-user-data-page.blp:18 src/bz-window.blp:520
 msgid "_Donate to Bazaar ❤️"
 msgstr "_Faire un don à Bazaar ❤️"
 
@@ -504,22 +508,22 @@ msgid "_Refresh Content"
 msgstr "_Actualiser le contenu"
 
 #: src/bz-all-apps-page.blp:22 src/bz-apps-page.blp:22
-#: src/bz-user-data-page.blp:22 src/bz-window.blp:529
+#: src/bz-user-data-page.blp:22 src/bz-window.blp:527
 msgid "_Preferences"
 msgstr "_Préférences"
 
 #: src/bz-all-apps-page.blp:23 src/bz-apps-page.blp:23
-#: src/bz-user-data-page.blp:23 src/bz-window.blp:550
+#: src/bz-user-data-page.blp:23 src/bz-window.blp:548
 msgid "_Keyboard Shortcuts"
 msgstr "_Raccourcis clavier"
 
 #: src/bz-all-apps-page.blp:24 src/bz-apps-page.blp:24
-#: src/bz-user-data-page.blp:24 src/bz-window.blp:555
+#: src/bz-user-data-page.blp:24 src/bz-window.blp:553
 msgid "_About Bazaar"
 msgstr "_À propos de Bazaar"
 
 #: src/bz-all-apps-page.blp:28 src/bz-apps-page.blp:28
-#: src/bz-user-data-page.blp:27 src/bz-window.blp:562
+#: src/bz-user-data-page.blp:27 src/bz-window.blp:560
 msgid "_Quit Bazaar"
 msgstr "_Quitter Bazaar"
 
@@ -560,11 +564,11 @@ msgid ""
 "This app uses an outdated version of the software platform (SDK) and might "
 "contain bugs or security vulnerabilities which will not be fixed."
 msgstr ""
-"Cette application utilise une version obsolète de la plateforme logicielle (SD"
-"K) et peut "
-"contenir des bogues ou des failles de sécurité qui ne seront pas corrigés."
+"Cette application utilise une version obsolète de la plateforme logicielle "
+"(SDK) et peut contenir des bogues ou des failles de sécurité qui ne seront "
+"pas corrigés."
 
-#: src/bz-app-tile.blp:84 src/bz-installed-page.blp:25 src/bz-window.blp:298
+#: src/bz-app-tile.blp:85 src/bz-installed-page.blp:25 src/bz-window.blp:296
 msgid "Installed"
 msgstr "Installées"
 
@@ -572,7 +576,17 @@ msgstr "Installées"
 msgid "Show All"
 msgstr "Tout afficher"
 
-#: src/bz-application.c:578
+#: src/bz-apps-page.c:232
+#, c-format
+msgid "All \"%s\""
+msgstr "Toutes les apps \"%s\""
+
+#: src/bz-apps-page.c:506 src/bz-tag-list.c:109
+#, c-format
+msgid "%d Applications"
+msgstr "%d applications"
+
+#: src/bz-application.c:579
 msgid ""
 "This functionality is currently disabled. It is recommended you download and "
 "install Flatseal to manage app permissions."
@@ -580,45 +594,41 @@ msgstr ""
 "Cette fonctionnalité est actuellement désactivée. Téléchargez et installez "
 "Flatseal pour gérer les autorisations des apps."
 
-#: src/bz-application.c:682
+#: src/bz-application.c:683
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr ""
 
-#: src/bz-application.c:683
+#: src/bz-application.c:684
 msgctxt "About Dialog Developer Credit"
 msgid "Alexander Vanhee"
 msgstr ""
 
-#: src/bz-application.c:711
-msgid "Adam Masciola"
-msgstr ""
-
 #. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
-#: src/bz-application.c:714
+#: src/bz-application.c:715
 msgid "translator-credits"
 msgstr ""
 "Atom <29772841+AtomHare@users.noreply.github.com>, 2025\n"
 "Léane GRASSER <leane.grasser@proton.me>, 2025\n"
 "Mimolet <theMimolet@proton.me>, 2025"
 
-#: src/bz-application.c:724
+#: src/bz-application.c:726
 msgid "Special Thanks"
 msgstr "Remerciements particuliers"
 
-#: src/bz-application.c:782
+#: src/bz-application.c:784
 msgid "Logged Out Successfully!"
 msgstr "Déconnexion réussie !"
 
-#: src/bz-application.c:910
+#: src/bz-application.c:912
 msgid "Performing setup..."
 msgstr "Configuration en cours..."
 
-#: src/bz-application.c:989 src/bz-application.c:998
+#: src/bz-application.c:991 src/bz-application.c:1000
 msgid "Set Up Flathub"
 msgstr "Configurer Flathub"
 
-#: src/bz-application.c:992
+#: src/bz-application.c:994
 msgid ""
 "Flathub is not set up on this system. You will not be able to browse and "
 "install applications in Bazaar if its unavailable.\n"
@@ -631,20 +641,20 @@ msgstr ""
 "Vous pouvez toujours utiliser Bazaar pour naviguer et désinstaller des apps "
 "déjà installées."
 
-#: src/bz-application.c:997 src/bz-update-dialog.blp:6
+#: src/bz-application.c:999 src/bz-update-dialog.blp:6
 msgid "Later"
 msgstr "Plus tard"
 
-#: src/bz-application.c:1399
+#: src/bz-application.c:1401
 msgid "Synchronizing..."
 msgstr "Synchronisation..."
 
-#: src/bz-application.c:1538
+#: src/bz-application.c:1540
 #, c-format
 msgid "Receiving %d entries..."
 msgstr "Chargement de %d apps..."
 
-#: src/bz-application.c:1543
+#: src/bz-application.c:1545
 msgid "Checking for updates"
 msgstr "Recherche de mises à jour..."
 
@@ -729,7 +739,7 @@ msgstr ""
 "Plusieurs versions de cette application sont installées. Avec quelle version "
 "souhaitez-vous continuer ?"
 
-#: src/bz-entry-group-util.c:80 src/bz-window.c:1307 src/bz-window.c:1330
+#: src/bz-entry-group-util.c:80 src/bz-window.c:1259 src/bz-window.c:1282
 msgid "Cancel"
 msgstr "Annuler"
 
@@ -782,12 +792,12 @@ msgid "Remove from Favorites"
 msgstr "Enlever des favoris"
 
 #: src/bz-favorites-page.blp:5 src/bz-favorites-page.blp:75
-#: src/bz-window.blp:580
+#: src/bz-window.blp:578
 msgid "Favorites"
 msgstr "Favoris"
 
 #: src/bz-favorites-page.blp:22 src/bz-full-view.blp:20 src/bz-window.blp:126
-#: src/bz-window.blp:420
+#: src/bz-window.blp:418
 msgid "Toggle transaction sidebar"
 msgstr "Afficher/Masquer la barre des tâches"
 
@@ -988,7 +998,7 @@ msgstr "Plus d'apps Adwaita"
 
 #: src/bz-flathub-category.c:95
 msgid "KDE Apps"
-msgstr "Apps KDE"
+msgstr "KDE"
 
 #: src/bz-flathub-category.c:95
 msgid "More KDE Apps"
@@ -1157,113 +1167,113 @@ msgstr ""
 "L'environnement d'exécution utilisé par cette app ne reçoit plus de mises à "
 "jour de sécurité. Son utilisation pourrait devenir risquée."
 
-#: src/bz-full-view.blp:619 src/bz-window.c:1277
+#: src/bz-full-view.blp:622 src/bz-window.c:1228
 msgid "Delete Data"
 msgstr "Supprimer les données"
 
-#: src/bz-full-view.blp:753
+#: src/bz-full-view.blp:756
 msgid "Tags:"
 msgstr "Étiquettes:"
 
-#: src/bz-full-view.c:290
+#: src/bz-full-view.c:299
 msgid "---"
 msgstr "---"
 
 #. Translators: M is the suffix for millions
-#: src/bz-full-view.c:297
+#: src/bz-full-view.c:306
 #, c-format
 msgid "%.*fM"
 msgstr ""
 
 #. Translators: K is the suffix for thousands
-#: src/bz-full-view.c:304
+#: src/bz-full-view.c:313
 #, c-format
 msgid "%.*fK"
 msgstr ""
 
-#: src/bz-full-view.c:314
+#: src/bz-full-view.c:323
 #, c-format
 msgid "%d downloads in the last 30 days"
 msgstr "%d téléchargements ces 30 derniers jours"
 
-#: src/bz-full-view.c:346
+#: src/bz-full-view.c:355
 #, c-format
 msgid "Download size of %s"
 msgstr "Taille du téléchargement de %s"
 
-#: src/bz-full-view.c:379
+#: src/bz-full-view.c:388
 msgid "All Ages"
 msgstr "Tout public"
 
-#: src/bz-full-view.c:391
+#: src/bz-full-view.c:400
 msgid "Age rating information unavailable"
 msgstr "Informations sur la limite d'âge non-disponibles"
 
-#: src/bz-full-view.c:396
+#: src/bz-full-view.c:405
 msgid "Suitable for all ages"
 msgstr "Approprié pour tous"
 
-#: src/bz-full-view.c:398
+#: src/bz-full-view.c:407
 #, c-format
 msgid "Suitable for ages %d and up"
 msgstr "Approprié dès %d ans et plus"
 
-#: src/bz-full-view.c:431 src/bz-full-view.c:436 src/bz-full-view.c:464
-#: src/bz-full-view.c:475
+#: src/bz-full-view.c:440 src/bz-full-view.c:445 src/bz-full-view.c:473
+#: src/bz-full-view.c:484
 msgid "Unknown"
 msgstr "Inconnue"
 
-#: src/bz-full-view.c:441
+#: src/bz-full-view.c:450
 #, c-format
 msgid "Free software licensed under %s"
 msgstr "Logiciel libre sous la licence %s"
 
-#: src/bz-full-view.c:446
+#: src/bz-full-view.c:455
 msgid "Free software"
 msgstr "Logiciels libres"
 
-#: src/bz-full-view.c:449
+#: src/bz-full-view.c:458
 msgid "Proprietary Software"
 msgstr "Propriétaire"
 
-#: src/bz-full-view.c:452
+#: src/bz-full-view.c:461
 #, c-format
 msgid "Special License: %s"
 msgstr "License spéciale: %s"
 
-#: src/bz-full-view.c:469
+#: src/bz-full-view.c:478
 msgid "Free"
 msgstr "Libre"
 
-#: src/bz-full-view.c:472 src/bz-license-dialog.c:118
+#: src/bz-full-view.c:481 src/bz-license-dialog.c:118
 msgid "Proprietary"
 msgstr "Propriétaire"
 
-#: src/bz-full-view.c:477 src/bz-license-dialog.c:120
+#: src/bz-full-view.c:486 src/bz-license-dialog.c:120
 msgid "Special License"
 msgstr "License spéciale"
 
-#: src/bz-full-view.c:497
+#: src/bz-full-view.c:506
 msgid "Adaptive"
 msgstr "Adaptatif"
 
-#: src/bz-full-view.c:497
+#: src/bz-full-view.c:506
 msgid "Desktop Only"
 msgstr "Ordinateur"
 
-#: src/bz-full-view.c:503
+#: src/bz-full-view.c:512
 msgid "Works on desktop, tablets, and phones"
 msgstr "Fonctionne sur ordinateur, tablettes et téléphones"
 
-#: src/bz-full-view.c:504
+#: src/bz-full-view.c:513
 msgid "May not work on mobile devices"
 msgstr "Appareils mobiles non pris en charge"
 
-#: src/bz-full-view.c:515
+#: src/bz-full-view.c:524
 msgid "No URL"
 msgstr "Aucune URL"
 
-#: src/bz-full-view.c:533
+#: src/bz-full-view.c:542
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -1271,7 +1281,7 @@ msgstr ""
 "Cette application est soumise à une licence FLOSS, la fiabilité de son code "
 "source peut donc être auditée."
 
-#: src/bz-full-view.c:534
+#: src/bz-full-view.c:543
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
@@ -1279,45 +1289,45 @@ msgstr ""
 "Cette application est soumise à une licence propriétaire, son code source "
 "est donc privé et ne peut pas être audité par un tiers indépendant."
 
-#: src/bz-full-view.c:541
+#: src/bz-full-view.c:550
 msgid "More Apps"
 msgstr "Plus d'apps"
 
-#: src/bz-full-view.c:542
+#: src/bz-full-view.c:551
 #, c-format
 msgid "More Apps by %s"
 msgstr "Plus d'apps par %s"
 
-#: src/bz-full-view.c:549
+#: src/bz-full-view.c:558
 msgid "Other Apps by this Developer"
 msgstr "D'autres apps par ce développeur"
 
-#: src/bz-full-view.c:551 src/bz-full-view.c:659
+#: src/bz-full-view.c:560 src/bz-full-view.c:668
 #, c-format
 msgid "Other Apps by %s"
 msgstr "D'autres apps par %s"
 
-#: src/bz-full-view.c:559
+#: src/bz-full-view.c:568
 #, c-format
 msgid "%s is not installed, but it still has <b>%s</b> of data present."
 msgstr "%s n'est pas installé, mais a toujours <b>%s</b> de données présentes."
 
-#: src/bz-full-view.c:661
+#: src/bz-full-view.c:670
 msgid "Other Apps"
 msgstr "D'autres apps"
 
-#: src/bz-full-view.c:663
+#: src/bz-full-view.c:672
 #, c-format
 msgid "%d Application"
 msgid_plural "%d Applications"
 msgstr[0] "%d application"
 msgstr[1] "%d applications"
 
-#: src/bz-full-view.c:1011
+#: src/bz-full-view.c:1020
 msgid "Show Less"
 msgstr "Moins"
 
-#: src/bz-full-view.c:1011
+#: src/bz-full-view.c:1020
 msgid "Show More"
 msgstr "Plus"
 
@@ -1521,6 +1531,33 @@ msgstr ""
 "\n"
 "Vous ne pourrez peut-être pas contribuer à cette application."
 
+#: src/bz-login-page.blp:5
+msgid "Connect to Flathub"
+msgstr "Se connecter à Flathub"
+
+#: src/bz-login-page.blp:32
+msgid "Something Went Wrong"
+msgstr "Une erreur s'est produite"
+
+#: src/bz-login-page.blp:42
+msgid "Connect with Flathub"
+msgstr "Se connecter avec Flathub"
+
+#: src/bz-login-page.blp:43
+msgid "Connect your Flathub account to Bazaar to manage your favorited apps."
+msgstr ""
+"Connectez votre compte Flathub à Bazaar pour gérer vos applications "
+"favorites."
+
+#: src/bz-login-page.blp:108
+msgid "Finish"
+msgstr "Terminer"
+
+#: src/bz-login-page.c:658
+#, c-format
+msgid "Hello, %s!"
+msgstr "Bonjour, %s!"
+
 #: src/bz-preferences-dialog.blp:19
 msgid "Preferences"
 msgstr "Préférences"
@@ -1564,7 +1601,7 @@ msgid "Hide apps which are no longer supported by their developers"
 msgstr ""
 "Masque les apps qui ne sont plus prises en charge par leurs développeurs"
 
-#: src/bz-preferences-dialog.blp:47 src/bz-window.blp:313
+#: src/bz-preferences-dialog.blp:47 src/bz-window.blp:311
 msgid "Search"
 msgstr "Recherche"
 
@@ -1593,80 +1630,161 @@ msgid "Pride Colors"
 msgstr "Couleurs de la fierté"
 
 #: src/bz-preferences-dialog.c:34
+msgid "Pride Colors (Horizontal)"
+msgstr "Couleurs de la fierté (horizontal)"
+
+#: src/bz-preferences-dialog.c:35
 msgid "Lesbian Pride Colors"
 msgstr "Couleurs de la fierté lesbienne"
 
-#: src/bz-preferences-dialog.c:35
+#: src/bz-preferences-dialog.c:36
+msgid "Lesbian Pride Colors (Horizontal)"
+msgstr "Couleurs de la fierté lesbienne (horizontal)"
+
+#: src/bz-preferences-dialog.c:37
 msgid "Male Homosexual Pride Colors"
 msgstr "Couleurs de la fierté homosexuelle"
 
-#: src/bz-preferences-dialog.c:36
+#: src/bz-preferences-dialog.c:38
+msgid "Male Homosexual Pride Colors (Horizontal)"
+msgstr "Couleurs de la fierté homosexuelle (horizontal)"
+
+#: src/bz-preferences-dialog.c:39
 msgid "Transgender Pride Colors"
 msgstr "Couleurs de la fierté transgenre"
 
-#: src/bz-preferences-dialog.c:37
+#: src/bz-preferences-dialog.c:40
+msgid "Transgender Pride Colors (Horizontal)"
+msgstr "Couleurs de la fierté transgenre (horizontal)"
+
+#: src/bz-preferences-dialog.c:41
 msgid "Nonbinary Pride Colors"
 msgstr "Couleurs de la fierté non binaire"
 
-#: src/bz-preferences-dialog.c:38
+#: src/bz-preferences-dialog.c:42
+msgid "Nonbinary Pride Colors (Horizontal)"
+msgstr "Couleurs de la fierté non binaire (horizontal)"
+
+#: src/bz-preferences-dialog.c:43
 msgid "Bisexual Pride Colors"
 msgstr "Couleurs de la fierté bisexuel"
 
-#: src/bz-preferences-dialog.c:39
+#: src/bz-preferences-dialog.c:44
+msgid "Bisexual Pride Colors (Horizontal)"
+msgstr "Couleurs de la fierté bisexuel (horizontal)"
+
+#: src/bz-preferences-dialog.c:45
 msgid "Asexual Pride Colors"
 msgstr "Couleurs de la fierté asexuel"
 
-#: src/bz-preferences-dialog.c:40
+#: src/bz-preferences-dialog.c:46
+msgid "Asexual Pride Colors (Horizontal)"
+msgstr "Couleurs de la fierté asexuel (horizontal)"
+
+#: src/bz-preferences-dialog.c:47
 msgid "Pansexual Pride Colors"
 msgstr "Couleurs de la fierté pansexuel"
 
-#: src/bz-preferences-dialog.c:41
+#: src/bz-preferences-dialog.c:48
+msgid "Pansexual Pride Colors (Horizontal)"
+msgstr "Couleurs de la fierté pansexuel (horizontal)"
+
+#: src/bz-preferences-dialog.c:49
 msgid "Aromantic Pride Colors"
 msgstr "Couleurs de la fierté aromantique"
 
-#: src/bz-preferences-dialog.c:42
+#: src/bz-preferences-dialog.c:50
+msgid "Aromantic Pride Colors (Horizontal)"
+msgstr "Couleurs de la fierté aromantique (horizontal)"
+
+#: src/bz-preferences-dialog.c:51
 msgid "Genderfluid Pride Colors"
 msgstr "Couleurs de la fierté fluide"
 
-#: src/bz-preferences-dialog.c:43
+#: src/bz-preferences-dialog.c:52
+msgid "Genderfluid Pride Colors (Horizontal)"
+msgstr "Couleurs de la fierté fluide (horizontal)"
+
+#: src/bz-preferences-dialog.c:53
 msgid "Polysexual Pride Colors"
 msgstr "Couleurs de la fierté polysexuel"
 
-#: src/bz-preferences-dialog.c:44
+#: src/bz-preferences-dialog.c:54
+msgid "Polysexual Pride Colors (Horizontal)"
+msgstr "Couleurs de la fierté polysexuel (horizontal)"
+
+#: src/bz-preferences-dialog.c:55
 msgid "Omnisexual Pride Colors"
 msgstr "Couleurs de la fierté omnisexuel"
 
-#: src/bz-preferences-dialog.c:45
+#: src/bz-preferences-dialog.c:56
+msgid "Omnisexual Pride Colors (Horizontal)"
+msgstr "Couleurs de la fierté omnisexuel (horizontal)"
+
+#: src/bz-preferences-dialog.c:57
 msgid "Aroace Pride Colors"
 msgstr "Couleurs de la fierté aroace"
 
-#: src/bz-preferences-dialog.c:46
+#: src/bz-preferences-dialog.c:58
+msgid "Aroace Pride Colors (Horizontal)"
+msgstr "Couleurs de la fierté aroace (horizontal)"
+
+#: src/bz-preferences-dialog.c:59
 msgid "Agender Pride Colors"
 msgstr "Couleurs du drapeau agenre"
 
-#: src/bz-preferences-dialog.c:47
+#: src/bz-preferences-dialog.c:60
+msgid "Agender Pride Colors (Horizontal)"
+msgstr "Couleurs du drapeau agenre (horizontal)"
+
+#: src/bz-preferences-dialog.c:61
 msgid "Genderqueer Pride Colors"
 msgstr "Couleurs du drapeau genderqueer"
 
-#: src/bz-preferences-dialog.c:48
+#: src/bz-preferences-dialog.c:62
+msgid "Genderqueer Pride Colors (Horizontal)"
+msgstr "Couleurs du drapeau genderqueer (horizontal)"
+
+#: src/bz-preferences-dialog.c:63
 msgid "Intersex Pride Colors"
 msgstr "Couleurs du drapeau intersexe"
 
-#: src/bz-preferences-dialog.c:49
+#: src/bz-preferences-dialog.c:64
+msgid "Intersex Pride Colors (Horizontal)"
+msgstr "Couleurs du drapeau intersexe (horizontal)"
+
+#: src/bz-preferences-dialog.c:65
 msgid "Demigender Pride Colors"
 msgstr "Couleurs du drapeau demi-genre"
 
-#: src/bz-preferences-dialog.c:50
+#: src/bz-preferences-dialog.c:66
+msgid "Demigender Pride Colors (Horizontal)"
+msgstr "Couleurs du drapeau demi-genre (horizontal)"
+
+#: src/bz-preferences-dialog.c:67
 msgid "Biromantic Pride Colors"
 msgstr "Couleurs du drapeau biromantique"
 
-#: src/bz-preferences-dialog.c:51
+#: src/bz-preferences-dialog.c:68
+msgid "Biromantic Pride Colors (Horizontal)"
+msgstr "Couleurs du drapeau biromantique (horizontal)"
+
+#: src/bz-preferences-dialog.c:69
 msgid "Disability Pride Colors"
 msgstr "Couleurs de la fierté des personnes en situation de handicap"
 
-#: src/bz-preferences-dialog.c:52
+#: src/bz-preferences-dialog.c:70
+msgid "Disability Pride Colors (Horizontal)"
+msgstr ""
+"Couleurs de la fierté des personnes en situation de handicap (horizontal)"
+
+#: src/bz-preferences-dialog.c:71
 msgid "Femboy Pride Colors"
 msgstr "Couleurs de la fierté femboy"
+
+#: src/bz-preferences-dialog.c:72
+msgid "Femboy Pride Colors (Horizontal)"
+msgstr "Couleurs de la fierté femboy (horizontal)"
 
 #: src/bz-releases-dialog.blp:5 src/bz-releases-list.blp:26
 msgid "Version History"
@@ -1677,7 +1795,7 @@ msgstr "Historique des versions"
 msgid "Version %s"
 msgstr "Version %s"
 
-#: src/bz-releases-list.c:170
+#: src/bz-releases-list.c:169
 msgid "No details for this release"
 msgstr "Aucune information à propos de cette version"
 
@@ -1775,16 +1893,11 @@ msgstr "Aucun résultat trouvé"
 msgid "Apps Tagged \"%s\""
 msgstr "Applications taggées \"%s\""
 
-#: src/bz-tag-list.c:109
-#, c-format
-msgid "%d Applications"
-msgstr "%d applications"
-
 #: src/bz-tag-list.c:124
 msgid "Search failed"
 msgstr "La recherche a échoué"
 
-#: src/bz-transaction-manager.c:1135
+#: src/bz-transaction-manager.c:1148
 #, c-format
 msgid "Finished in %.02f seconds"
 msgstr "Terminé en %.02f secondes"
@@ -1802,7 +1915,7 @@ msgid "Install Size"
 msgstr "Taille après installation"
 
 #: src/bz-transaction-view.blp:187 src/bz-transaction-view.blp:238
-#: src/bz-transaction-view.blp:264 src/bz-transaction.c:336
+#: src/bz-transaction-view.blp:264 src/bz-transaction.c:342
 msgid "Pending"
 msgstr "En attente"
 
@@ -1818,7 +1931,7 @@ msgstr "Terminé"
 msgid "Update"
 msgstr "Mettre à jour"
 
-#: src/bz-transaction-view.c:139
+#: src/bz-transaction-view.c:135
 #, c-format
 msgid "Transferred %s so far"
 msgstr "%s transférés"
@@ -1899,63 +2012,63 @@ msgstr "Effacer l'historique"
 msgid "No Tasks Yet"
 msgstr "Aucune tâche en cours"
 
-#: src/bz-window.blp:258
+#: src/bz-window.blp:257
 msgid "Refreshing Store Content"
 msgstr "Actualisation..."
 
-#: src/bz-window.blp:273
+#: src/bz-window.blp:271
 msgid "Curated"
 msgstr "Sélection"
 
-#: src/bz-window.blp:286
+#: src/bz-window.blp:284
 msgid "Flathub"
 msgstr ""
 
-#: src/bz-window.blp:450
+#: src/bz-window.blp:448
 msgid "Network connection is metered — automatic store data sync is paused"
 msgstr ""
 "La connexion réseau est limitée — l'actualisation automatique de Bazaar est "
 "suspendue."
 
-#: src/bz-window.blp:451 src/bz-window.blp:460
+#: src/bz-window.blp:449 src/bz-window.blp:458
 msgid "Sync Manually"
 msgstr "Actualiser"
 
-#: src/bz-window.blp:459
+#: src/bz-window.blp:457
 msgid ""
 "You have a network connection but are viewing a cached version of Flathub"
 msgstr ""
 "Vous disposez d'une connexion réseau, mais vous consultez une version mise "
 "en cache de Flathub."
 
-#: src/bz-window.blp:534
+#: src/bz-window.blp:532
 msgid "_Login with Flathub"
 msgstr "_Se connecter avec Flathub"
 
-#: src/bz-window.blp:540
+#: src/bz-window.blp:538
 msgid "_Manage Leftover User Data"
 msgstr "_Nettoyer les données orphelines"
 
-#: src/bz-window.blp:545
+#: src/bz-window.blp:543
 msgid "_Synchronize Remotes"
 msgstr "_Actualiser"
 
-#: src/bz-window.blp:571
+#: src/bz-window.blp:569
 msgid "Open Bazaar Inspector"
 msgstr "Ouvrir l'inspecteur de Bazaar"
 
-#: src/bz-window.blp:586
+#: src/bz-window.blp:584
 msgid "Log Out"
 msgstr "Se déconnecter"
 
-#: src/bz-window.c:501
+#: src/bz-window.c:452
 #, c-format
 msgid "%d Update Available"
 msgid_plural "%d Updates Available"
 msgstr[0] "%d mise à jour disponible"
 msgstr[1] "%d mises à jour disponibles"
 
-#: src/bz-window.c:999
+#: src/bz-window.c:948
 msgid ""
 "The ability to inspect and install local .flatpak bundle files is coming "
 "soon! In the meantime, try running\n"
@@ -1971,46 +2084,46 @@ msgstr ""
 "\n"
 "en ligne de commande."
 
-#: src/bz-window.c:1137
+#: src/bz-window.c:1086
 msgid "Can't do that right now!"
 msgstr "Impossible de faire ceci pour le moment !"
 
-#: src/bz-window.c:1268
+#: src/bz-window.c:1218
 msgid "Keep Data"
 msgstr "Garder les données"
 
-#: src/bz-window.c:1269
+#: src/bz-window.c:1219
 msgid "Allow restoring settings and content"
 msgstr "Permet la restauration des paramètres et du contenu"
 
-#: src/bz-window.c:1278
+#: src/bz-window.c:1229
 msgid "Permanently remove app data to save space"
 msgstr "Supprimer définitivement les données et gagner de l'espace de stockage"
 
-#: src/bz-window.c:1301
+#: src/bz-window.c:1253
 #, c-format
 msgid "Install %s?"
 msgstr "Installer %s ?"
 
-#: src/bz-window.c:1304
+#: src/bz-window.c:1256
 msgid "May install additional shared components"
 msgstr "Peut installer des composants partagés supplémentaires"
 
-#: src/bz-window.c:1323
+#: src/bz-window.c:1275
 #, c-format
 msgid "Remove %s?"
 msgstr "Supprimer %s ?"
 
-#: src/bz-window.c:1327
+#: src/bz-window.c:1279
 #, c-format
 msgid "It will not be possible to use %s after it is uninstalled."
 msgstr "Il ne sera plus possible d'utiliser %s après sa désinstallation."
 
-#: src/bz-window.c:1390
+#: src/bz-window.c:1342
 msgid "Resume Current Tasks"
 msgstr "Reprendre les tâches actuelles"
 
-#: src/bz-window.c:1396
+#: src/bz-window.c:1348
 msgid "Pause Current Tasks"
 msgstr "Mettre en pause les tâches actuelles"
 
