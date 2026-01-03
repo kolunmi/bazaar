@@ -451,13 +451,14 @@ test_strings (const char *query,
 
   UTF8_FOREACH_TOKEN_FORWARDS (q_s, q_e, query)
   {
+    gssize q_len = q_e - q_s;
+
     UTF8_FOREACH_TOKEN_FORWARDS (a_s, a_e, against)
     {
-      gssize   q_len = q_e - q_s;
       gssize   a_len = a_e - a_s;
       gboolean match = FALSE;
 
-      if (q_len <= a_len)
+      if (q_len > a_len)
         continue;
 
       if (accept_min_size > 0 &&
