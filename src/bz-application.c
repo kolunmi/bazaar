@@ -142,7 +142,7 @@ BZ_DEFINE_DATA (
       GWeakRef *self;
       GFile    *file;
     },
-    BZ_RELEASE_DATA (self, g_object_unref);
+    BZ_RELEASE_DATA (self, bz_weak_release);
     BZ_RELEASE_DATA (file, g_object_unref))
 
 BZ_DEFINE_DATA (
