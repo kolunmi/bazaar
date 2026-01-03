@@ -303,6 +303,9 @@ static DexFuture *
 make_sync_future (BzApplication *self);
 
 static void
+finish_with_background_task_label (BzApplication *self);
+
+static void
 bz_application_dispose (GObject *object)
 {
   BzApplication *self = BZ_APPLICATION (object);
@@ -1407,7 +1410,7 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
             if (installed_set == NULL)
               {
                 g_warning ("Failed to enumerate installed entries: %s", local_error->message);
-                bz_state_info_set_background_task_label (self->state, NULL);
+                finish_with_background_task_label (self);
                 break;
               }
 
@@ -1504,7 +1507,7 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
             self->installed_set = g_steal_pointer (&installed_set);
 
             fiber_check_for_updates (self);
-            bz_state_info_set_background_task_label (self->state, NULL);
+            finish_with_background_task_label (self);
           }
           break;
         default:
@@ -1544,7 +1547,7 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
         {
           bz_state_info_set_background_task_label (self->state, _ ("Checking for updates"));
           fiber_check_for_updates (self);
-          bz_state_info_set_background_task_label (self->state, NULL);
+          finish_with_background_task_label (self);
         }
     }
 
@@ -1697,8 +1700,8 @@ init_sync_finally (DexFuture *future,
 
   bz_weak_get_or_return_reject (self, wr);
 
-  bz_state_info_set_background_task_label (self->state, NULL);
   bz_state_info_set_busy (self->state, FALSE);
+  finish_with_background_task_label (self);
 
   return dex_future_new_true ();
 }
@@ -3059,4 +3062,22 @@ make_sync_future (BzApplication *self)
       (DexFutureCallback) sync_then,
       bz_track_weak (self), bz_weak_release);
   return g_steal_pointer (&ret_future);
+}
+
+static void
+finish_with_background_task_label (BzApplication *self)
+{
+  if (self->n_notifications_incoming > 0)
+    {
+      g_autofree char *label = NULL;
+
+      label = g_strdup_printf (_ ("Receiving %d entries..."), self->n_notifications_incoming);
+      bz_state_info_set_background_task_label (self->state, label);
+    }
+  else if (bz_state_info_get_syncing (self->state))
+    bz_state_info_set_background_task_label (self->state, _ ("Synchronizing..."));
+  else if (bz_state_info_get_busy (self->state))
+    bz_state_info_set_background_task_label (self->state, _ ("Indexing Data..."));
+  else
+    bz_state_info_set_background_task_label (self->state, NULL);
 }
