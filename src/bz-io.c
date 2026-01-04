@@ -125,11 +125,23 @@ DexFuture *
 bz_reap_user_data_dex (const char *app_id)
 {
   g_autofree char *user_data_path = NULL;
+  g_autoptr (GFile) file          = NULL;
+  g_autoptr (GError) local_error  = NULL;
+  gboolean result                 = FALSE;
 
   dex_return_error_if_fail (app_id != NULL);
 
   user_data_path = g_build_filename (g_get_home_dir (), ".var", "app", app_id, NULL);
-  return bz_reap_path_dex (g_steal_pointer (&user_data_path));
+  file           = g_file_new_for_path (user_data_path);
+
+  result = g_file_trash (file, NULL, &local_error);
+  if (!result)
+    {
+      if (!g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
+        g_warning ("failed to trash user data '%s': %s", user_data_path, local_error->message);
+    }
+
+  return dex_future_new_true ();
 }
 
 void
