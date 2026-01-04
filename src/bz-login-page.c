@@ -381,15 +381,20 @@ on_user_info_loaded (GObject      *source_object,
     }
 
   displayname = json_object_get_string_member (obj, "displayname");
-  if (displayname == NULL)
-    displayname = "N/A";
 
   if (json_object_has_member (obj, "default_account"))
     {
       default_account = json_object_get_object_member (obj, "default_account");
+
+      if (displayname == NULL && json_object_has_member (default_account, "login"))
+        displayname = json_object_get_string_member (default_account, "login");
+
       if (json_object_has_member (default_account, "avatar"))
         avatar_url = json_object_get_string_member (default_account, "avatar");
     }
+
+  if (displayname == NULL)
+    displayname = "N/A";
 
   if (self->auth_state != NULL)
     bz_auth_state_set_authenticated (self->auth_state,
