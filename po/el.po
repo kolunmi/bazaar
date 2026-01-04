@@ -889,15 +889,15 @@ msgstr "Περισσότερα Νέα"
 
 #: src/bz-flathub-category.c:91 src/bz-flathub-page.blp:163
 msgid "Recently Updated"
-msgstr "Πρόσφατα Ενημερωμένο"
+msgstr "Πρόσφατα Ενημερωμένες"
 
 #: src/bz-flathub-category.c:91 src/bz-flathub-page.blp:137
 msgid "Updated"
-msgstr "Ενημερωμένο"
+msgstr "Ενημερωμένες"
 
 #: src/bz-flathub-category.c:91
 msgid "More Updated"
-msgstr "Περισσότερα Ενημερωμένα"
+msgstr "Περισσότερα Ενημερωμένες"
 
 #: src/bz-flathub-category.c:92
 msgid "Mobile"
@@ -1829,7 +1829,7 @@ msgstr "Ανανέωση περιεχομένου καταστήματος"
 
 #: src/bz-window.blp:273
 msgid "Curated"
-msgstr "Επιμελημένο"
+msgstr "Επιμελημένες"
 
 #: src/bz-window.blp:286
 msgid "Flathub"
