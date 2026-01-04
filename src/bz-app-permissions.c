@@ -220,8 +220,6 @@ bz_filesystem_path_to_icon_name (const BzFilesystemPath *path)
 {
   switch (path->type)
     {
-    case BZ_FILESYSTEM_PATH_SYSTEM_ROOT:
-      return "drive-harddisk-symbolic";
     case BZ_FILESYSTEM_PATH_HOST_OS:
       return "computer-symbolic";
     case BZ_FILESYSTEM_PATH_HOST_ETC:
@@ -240,6 +238,7 @@ bz_filesystem_path_to_icon_name (const BzFilesystemPath *path)
       return "folder-videos-symbolic";
     case BZ_FILESYSTEM_PATH_XDG_CONFIG:
       return "emblem-system-symbolic";
+    case BZ_FILESYSTEM_PATH_SYSTEM_ROOT:
     case BZ_FILESYSTEM_PATH_HOME_SUBDIR:
     case BZ_FILESYSTEM_PATH_XDG_TEMPLATES:
     case BZ_FILESYSTEM_PATH_XDG_CACHE:
