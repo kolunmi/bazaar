@@ -1829,7 +1829,7 @@ msgstr "Ανανέωση περιεχομένου καταστήματος"
 
 #: src/bz-window.blp:273
 msgid "Curated"
-msgstr "Επιμελημένο"
+msgstr "Επιμελημένες"
 
 #: src/bz-window.blp:286
 msgid "Flathub"
