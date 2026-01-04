@@ -147,7 +147,7 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
       add_row_if_permission (store,
                              (perm_flags & BZ_APP_PERMISSIONS_FLAGS_ESCAPE_SANDBOX) != 0,
                              BZ_IMPORTANCE_IMPORTANT,
-                             "permissions-warning-symbolic",
+                             "earth-symbolic",
                              _ ("Arbitrary Permissions"),
                              _ ("Can acquire arbitrary permissions"),
                              NULL, NULL, NULL);
@@ -161,7 +161,7 @@ bz_safety_calculator_analyze_entry (BzEntry *entry)
       add_row_if_permission (store,
                              (perm_flags & BZ_APP_PERMISSIONS_FLAGS_FILESYSTEM_FULL) != 0,
                              BZ_IMPORTANCE_IMPORTANT,
-                             "folder-symbolic",
+                             "drive-harddisk-symbolic",
                              _ ("Full File System Read/Write Access"),
                              _ ("Can read and write all data on the file system"),
                              NULL, NULL, NULL);
@@ -414,7 +414,12 @@ bz_safety_calculator_calculate_rating (BzEntry *entry)
       max_rating = MAX (max_rating, rating);
     }
 
-  if (is_foss && max_rating == BZ_IMPORTANCE_IMPORTANT) // We don't want any "high risk" FOSS apps.
+  if (is_foss && max_rating == BZ_IMPORTANCE_WARNING)
+    {
+      max_rating = BZ_IMPORTANCE_INFORMATION;
+    }
+
+  if (is_foss && max_rating == BZ_IMPORTANCE_IMPORTANT)
     {
       max_rating = BZ_IMPORTANCE_WARNING;
     }
