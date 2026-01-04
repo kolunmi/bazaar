@@ -592,7 +592,7 @@ msgstr "Subpasta vídeos %s"
 
 #: src/bz-app-permissions.c:190
 msgid "Videos folder"
-msgstr Pasta vídeos""
+msgstr "Pasta vídeos"
 
 #: src/bz-app-permissions.c:193
 #, c-format
@@ -677,7 +677,7 @@ msgstr "Mostrar tudo"
 #: src/bz-apps-page.c:232
 #, fuzzy, c-format
 msgid "All \"%s\""
-msgstr "Todas de \"%s\"
+msgstr "Todas de \"%s\""
 
 #: src/bz-apps-page.c:506 src/bz-tag-list.c:109
 #, fuzzy, c-format
