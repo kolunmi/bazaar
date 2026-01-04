@@ -121,15 +121,67 @@ bz_reap_file (GFile *file)
     }
 }
 
+static void
+trash_file_callback (GObject      *object,
+                     GAsyncResult *result,
+                     gpointer      user_data)
+{
+  g_autoptr (DexPromise) promise = user_data;
+  g_autoptr (GError) error = NULL;
+
+  if (g_file_trash_finish (G_FILE (object), result, &error))
+    dex_promise_resolve_boolean (promise, TRUE);
+  else
+    dex_promise_reject (promise, g_steal_pointer (&error));
+}
+
+static DexFuture *
+trash_file_dex (GFile *file)
+{
+  DexPromise *promise = dex_promise_new_cancellable ();
+
+  g_file_trash_async (file,
+                      G_PRIORITY_DEFAULT,
+                      dex_promise_get_cancellable (promise),
+                      trash_file_callback,
+                      dex_ref (promise));
+
+  return DEX_FUTURE (promise);
+}
+
+static DexFuture *
+reap_user_data_fiber (char *app_id)
+{
+  g_autofree char *user_data_path = NULL;
+  g_autoptr (GFile) file          = NULL;
+  g_autoptr (DexFuture) trash_future = NULL;
+  g_autoptr (GError) error        = NULL;
+  gboolean result                 = FALSE;
+
+  user_data_path = g_build_filename (g_get_home_dir (), ".var", "app", app_id, NULL);
+  file           = g_file_new_for_path (user_data_path);
+
+  trash_future = trash_file_dex (file);
+  result = dex_await_boolean (dex_ref (trash_future), &error);
+
+  if (!result)
+    {
+      if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
+        g_warning ("failed to trash user data '%s': %s", user_data_path, error->message);
+    }
+
+  return dex_future_new_true ();
+}
+
 DexFuture *
 bz_reap_user_data_dex (const char *app_id)
 {
-  g_autofree char *user_data_path = NULL;
-
   dex_return_error_if_fail (app_id != NULL);
-
-  user_data_path = g_build_filename (g_get_home_dir (), ".var", "app", app_id, NULL);
-  return bz_reap_path_dex (g_steal_pointer (&user_data_path));
+  return dex_scheduler_spawn (
+      bz_get_io_scheduler (),
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) reap_user_data_fiber,
+      g_strdup (app_id), g_free);
 }
 
 void

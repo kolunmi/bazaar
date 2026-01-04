@@ -141,7 +141,7 @@ remove_cb (BzUserDataTile *self,
   bz_entry_group_reap_user_data (self->group);
 
   window  = BZ_WINDOW (gtk_widget_get_root (GTK_WIDGET (self)));
-  message = g_strdup_printf (_ ("Removed User Data for %s"), title);
+  message = g_strdup_printf (_ ("Trashed User Data for %s"), title);
   toast   = adw_toast_new (message);
   bz_window_add_toast (window, toast);
 }
