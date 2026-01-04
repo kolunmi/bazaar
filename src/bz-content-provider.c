@@ -18,34 +18,24 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#define G_LOG_DOMAIN  "BAZAAR::CURATED-PROVIDER"
-#define BAZAAR_MODULE "curated-provider"
+#define G_LOG_DOMAIN "BAZAAR::CONTENT-PROVIDER"
 
 #include "config.h"
 
+#include <gtk/gtk.h>
 #include <libdex.h>
-#include <yaml.h>
 
 #include "bz-content-provider.h"
-#include "bz-content-section.h"
-#include "bz-curated-row.h"
 #include "bz-env.h"
 #include "bz-io.h"
 #include "bz-util.h"
-#include "bz-yaml-parser.h"
-
-/* clang-format off */
-G_DEFINE_QUARK (bz-content-yaml-error-quark, bz_content_yaml_error);
-/* clang-format on */
 
 struct _BzContentProvider
 {
   GObject parent_instance;
 
-  BzYamlParser *yaml_parser;
-
-  GListModel              *input_files;
-  BzApplicationMapFactory *factory;
+  GListModel *input_files;
+  BzParser   *parser;
 
   GListStore *input_mirror;
   GHashTable *input_tracking;
@@ -67,7 +57,7 @@ enum
   PROP_0,
 
   PROP_INPUT_FILES,
-  PROP_FACTORY,
+  PROP_PARSER,
   PROP_HAS_INPUTS,
 
   LAST_PROP
@@ -86,36 +76,31 @@ BZ_DEFINE_DATA (
     input_load,
     InputLoad,
     {
-      GFile        *file;
-      BzYamlParser *parser;
+      GFile    *file;
+      BzParser *parser;
     },
     BZ_RELEASE_DATA (file, g_object_unref);
     BZ_RELEASE_DATA (parser, g_object_unref))
 static DexFuture *
 input_load_fiber (InputLoadData *data);
 
-static void
-destroy_css (GtkCssProvider *css);
-
 BZ_DEFINE_DATA (
     input_tracking,
     InputTracking,
     {
-      GMutex          mutex;
-      GWeakRef        self;
-      char           *path;
-      GFileMonitor   *monitor;
-      GListStore     *output;
-      GtkCssProvider *css;
-      DexFuture      *init;
-      DexFuture      *task;
+      GMutex        mutex;
+      GWeakRef      self;
+      char         *path;
+      GFileMonitor *monitor;
+      GListStore   *output;
+      DexFuture    *init;
+      DexFuture    *task;
     },
     g_mutex_clear (&self->mutex);
     g_weak_ref_clear (&self->self);
     BZ_RELEASE_DATA (path, g_free);
     BZ_RELEASE_DATA (monitor, g_object_unref);
     BZ_RELEASE_DATA (output, g_object_unref);
-    BZ_RELEASE_DATA (css, destroy_css);
     BZ_RELEASE_DATA (init, dex_unref);
     BZ_RELEASE_DATA (task, dex_unref))
 static DexFuture *
@@ -154,9 +139,8 @@ bz_content_provider_dispose (GObject *object)
 {
   BzContentProvider *self = BZ_CONTENT_PROVIDER (object);
 
-  g_clear_object (&self->yaml_parser);
   g_clear_object (&self->input_files);
-  g_clear_object (&self->factory);
+  g_clear_object (&self->parser);
   g_clear_object (&self->input_mirror);
   g_clear_pointer (&self->input_tracking, g_hash_table_unref);
   g_clear_object (&self->outputs);
@@ -178,8 +162,8 @@ bz_content_provider_get_property (GObject    *object,
     case PROP_INPUT_FILES:
       g_value_set_object (value, bz_content_provider_get_input_files (self));
       break;
-    case PROP_FACTORY:
-      g_value_set_object (value, bz_content_provider_get_factory (self));
+    case PROP_PARSER:
+      g_value_set_object (value, bz_content_provider_get_parser (self));
       break;
     case PROP_HAS_INPUTS:
       g_value_set_boolean (value, bz_content_provider_get_has_inputs (self));
@@ -202,8 +186,8 @@ bz_content_provider_set_property (GObject      *object,
     case PROP_INPUT_FILES:
       bz_content_provider_set_input_files (self, g_value_get_object (value));
       break;
-    case PROP_FACTORY:
-      bz_content_provider_set_factory (self, g_value_get_object (value));
+    case PROP_PARSER:
+      bz_content_provider_set_parser (self, g_value_get_object (value));
       break;
     case PROP_HAS_INPUTS:
     default:
@@ -227,11 +211,11 @@ bz_content_provider_class_init (BzContentProviderClass *klass)
           G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
-  props[PROP_FACTORY] =
+  props[PROP_PARSER] =
       g_param_spec_object (
-          "factory",
+          "parser",
           NULL, NULL,
-          BZ_TYPE_APPLICATION_MAP_FACTORY,
+          BZ_TYPE_PARSER,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   props[PROP_HAS_INPUTS] =
@@ -246,11 +230,6 @@ bz_content_provider_class_init (BzContentProviderClass *klass)
 static void
 bz_content_provider_init (BzContentProvider *self)
 {
-  g_type_ensure (BZ_TYPE_CURATED_ROW);
-  g_type_ensure (BZ_TYPE_CONTENT_SECTION);
-  self->yaml_parser = bz_yaml_parser_new_for_resource_schema (
-      "/io/github/kolunmi/Bazaar/bz-content-provider-config-schema.xml");
-
   self->input_mirror   = g_list_store_new (G_TYPE_FILE);
   self->input_tracking = g_hash_table_new_full (
       g_direct_hash, g_direct_equal,
@@ -269,7 +248,7 @@ bz_content_provider_init (BzContentProvider *self)
 static GType
 list_model_get_item_type (GListModel *list)
 {
-  return BZ_TYPE_CURATED_ROW;
+  return G_TYPE_OBJECT;
 }
 
 static guint
@@ -348,24 +327,39 @@ bz_content_provider_get_input_files (BzContentProvider *self)
 }
 
 void
-bz_content_provider_set_factory (BzContentProvider       *self,
-                                 BzApplicationMapFactory *factory)
+bz_content_provider_set_parser (BzContentProvider *self,
+                                BzParser          *parser)
 {
+  GHashTableIter iter = { 0 };
+
   g_return_if_fail (BZ_IS_CONTENT_PROVIDER (self));
-  g_return_if_fail (factory == NULL || BZ_IS_APPLICATION_MAP_FACTORY (factory));
+  g_return_if_fail (parser == NULL || BZ_IS_PARSER (parser));
 
-  g_clear_object (&self->factory);
-  if (factory != NULL)
-    self->factory = g_object_ref (factory);
+  g_clear_object (&self->parser);
+  if (parser != NULL)
+    self->parser = g_object_ref (parser);
 
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INPUT_FILES]);
+  g_hash_table_iter_init (&iter, self->input_tracking);
+  for (;;)
+    {
+      GFile             *file = NULL;
+      InputTrackingData *data = NULL;
+
+      if (!g_hash_table_iter_next (
+              &iter, (gpointer *) &file, (gpointer *) &data))
+        break;
+
+      commence_reload (data);
+    }
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PARSER]);
 }
 
-BzApplicationMapFactory *
-bz_content_provider_get_factory (BzContentProvider *self)
+BzParser *
+bz_content_provider_get_parser (BzContentProvider *self)
 {
   g_return_val_if_fail (BZ_IS_CONTENT_PROVIDER (self), NULL);
-  return self->factory;
+  return self->parser;
 }
 
 gboolean
@@ -431,7 +425,7 @@ input_files_changed (BzContentProvider *self,
 
       new_outputs = g_malloc0_n (added, sizeof (*new_outputs));
       for (guint i = 0; i < added; i++)
-        new_outputs[i] = g_list_store_new (BZ_TYPE_CURATED_ROW);
+        new_outputs[i] = g_list_store_new (G_TYPE_OBJECT);
     }
 
   g_list_store_splice (self->input_mirror, position, removed,
@@ -542,18 +536,8 @@ input_init_finally (DexFuture         *future,
       commence_reload (data);
     }
   else
-    {
-      // g_autoptr (BzContentSection) error_section = NULL;
-
-      g_warning ("Could not init curated config watch at path %s: %s",
-                 data->path, local_error->message);
-
-      // error_section = g_object_new (
-      //     BZ_TYPE_CONTENT_SECTION,
-      //     "error", local_error->message,
-      //     NULL);
-      // g_list_store_append (data->output, error_section);
-    }
+    g_warning ("Could not init object watch at path %s: %s",
+               data->path, local_error->message);
 
   return NULL;
 }
@@ -561,70 +545,28 @@ input_init_finally (DexFuture         *future,
 static DexFuture *
 input_load_fiber (InputLoadData *data)
 {
-  GFile        *file                   = data->file;
-  BzYamlParser *parser                 = data->parser;
-  g_autoptr (GPtrArray) css            = NULL;
-  g_autoptr (GPtrArray) rows           = NULL;
+  GFile    *file                       = data->file;
+  BzParser *parser                     = data->parser;
   g_autoptr (GError) local_error       = NULL;
   g_autoptr (GBytes) bytes             = NULL;
   g_autoptr (GHashTable) parse_results = NULL;
-  g_autoptr (GHashTable) dict          = NULL;
-
-  css  = g_ptr_array_new_with_free_func (g_free);
-  rows = g_ptr_array_new_with_free_func (g_object_unref);
+  GObject *object                      = NULL;
 
   bytes = dex_await_boxed (dex_file_load_contents_bytes (file), &local_error);
   if (bytes == NULL)
     return dex_future_new_for_error (g_steal_pointer (&local_error));
 
-  parse_results = bz_yaml_parser_process_bytes (parser, bytes, &local_error);
+  parse_results = bz_parser_process_bytes (parser, bytes, &local_error);
   if (parse_results == NULL)
     return dex_future_new_for_error (g_steal_pointer (&local_error));
 
-  if (g_hash_table_contains (parse_results, "/css"))
-    {
-      const char *css_string = NULL;
+  object = g_value_get_object (g_hash_table_lookup (parse_results, "/"));
+  if (object == NULL)
+    return dex_future_new_reject (G_IO_ERROR,
+                                  G_IO_ERROR_UNKNOWN,
+                                  "Parser returned invalid results");
 
-      css_string = g_variant_get_string (
-          g_value_get_variant (
-              g_hash_table_lookup (
-                  parse_results, "/css")),
-          NULL);
-      g_ptr_array_add (css, g_strdup (css_string));
-    }
-
-  if (g_hash_table_contains (parse_results, "/rows"))
-    {
-      GPtrArray *list = NULL;
-
-      list = g_value_get_boxed (g_hash_table_lookup (parse_results, "/rows"));
-
-      for (guint i = 0; i < list->len; i++)
-        {
-          BzCuratedRow *row = NULL;
-
-          row = g_value_get_object (
-              g_hash_table_lookup (
-                  g_value_get_boxed (
-                      g_ptr_array_index (list, i)),
-                  "/"));
-          g_ptr_array_add (rows, g_object_ref (row));
-        }
-    }
-
-  dict = g_hash_table_new_full (
-      g_str_hash, g_str_equal,
-      g_free, (GDestroyNotify) g_ptr_array_unref);
-  g_hash_table_replace (
-      dict, g_strdup ("css"),
-      g_steal_pointer (&css));
-  g_hash_table_replace (
-      dict, g_strdup ("rows"),
-      g_steal_pointer (&rows));
-
-  return dex_future_new_take_boxed (
-      G_TYPE_HASH_TABLE,
-      g_steal_pointer (&dict));
+  return dex_future_new_for_object (object);
 }
 
 static DexFuture *
@@ -637,97 +579,16 @@ input_load_finally (DexFuture         *future,
   const GValue *value                = NULL;
 
   locker = g_mutex_locker_new (&data->mutex);
-
   g_list_store_remove_all (data->output);
-  g_clear_pointer (&data->css, destroy_css);
 
   bz_weak_get_or_return_reject (self, &data->self);
 
   value = dex_future_get_value (future, &local_error);
   if (value != NULL)
-    {
-      GHashTable *dict = NULL;
-      GPtrArray  *css  = NULL;
-      GPtrArray  *rows = NULL;
-
-      dict = g_value_get_boxed (value);
-      css  = g_hash_table_lookup (dict, "css");
-      rows = g_hash_table_lookup (dict, "rows");
-
-      g_assert (css != NULL);
-      g_assert (rows != NULL);
-
-      if (css->pdata != NULL && css->len > 0)
-        {
-          const char *css_string = NULL;
-
-          css_string = g_ptr_array_index (css, 0);
-
-          data->css = gtk_css_provider_new ();
-          gtk_css_provider_load_from_string (
-              data->css, css_string);
-          gtk_style_context_add_provider_for_display (
-              gdk_display_get_default (),
-              GTK_STYLE_PROVIDER (data->css),
-              GTK_STYLE_PROVIDER_PRIORITY_USER);
-        }
-
-      if (rows->pdata != NULL && rows->len > 0)
-        {
-          for (guint i = 0; i < rows->len; i++)
-            {
-              /* TODO: move this functionality to blueprint */
-
-              BzCuratedRow *row        = NULL;
-              GListModel   *sections   = NULL;
-              guint         n_sections = 0;
-
-              row        = g_ptr_array_index (rows, i);
-              sections   = bz_curated_row_get_sections (row);
-              n_sections = g_list_model_get_n_items (sections);
-
-              for (guint j = 0; j < n_sections; j++)
-                {
-                  g_autoptr (BzContentSection) section = NULL;
-
-                  section = g_list_model_get_item (sections, j);
-
-                  bz_content_section_set_banner_height (
-                      section,
-                      CLAMP (bz_content_section_get_banner_height (section), 100, 1000));
-
-                  if (self->factory != NULL)
-                    {
-                      GListModel *appids = NULL;
-
-                      appids = bz_content_section_get_appids (section);
-                      if (appids != NULL)
-                        {
-                          g_autoptr (GListModel) converted = NULL;
-
-                          converted = bz_application_map_factory_generate (self->factory, appids);
-                          bz_content_section_set_appids (section, converted);
-                        }
-                    }
-                }
-            }
-
-          g_list_store_splice (data->output, 0, 0, rows->pdata, rows->len);
-        }
-    }
-  else
-    {
-      // g_autoptr (BzContentSection) error_section = NULL;
-
-      g_warning ("Could not load curated config at path %s: %s",
-                 data->path, local_error->message);
-
-      // error_section = g_object_new (
-      //     BZ_TYPE_CONTENT_SECTION,
-      //     "error", local_error->message,
-      //     NULL);
-      // g_list_store_append (data->output, error_section);
-    }
+    g_list_store_append (data->output, g_value_get_object (value));
+  else if (local_error->domain != G_IO_ERROR)
+    g_warning ("Could not load object at path %s: %s",
+               data->path, local_error->message);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_INPUTS]);
   return NULL;
@@ -748,9 +609,12 @@ commence_reload (InputTrackingData *data)
   if (self == NULL)
     goto done;
 
+  if (self->parser == NULL)
+    goto done;
+
   load_data         = input_load_data_new ();
   load_data->file   = g_file_new_for_path (data->path);
-  load_data->parser = g_object_ref (self->yaml_parser);
+  load_data->parser = g_object_ref (self->parser);
 
   future = dex_scheduler_spawn (
       bz_get_io_scheduler (),
@@ -767,13 +631,4 @@ commence_reload (InputTrackingData *data)
 
 done:
   return G_SOURCE_REMOVE;
-}
-
-static void
-destroy_css (GtkCssProvider *css)
-{
-  gtk_style_context_remove_provider_for_display (
-      gdk_display_get_default (),
-      GTK_STYLE_PROVIDER (css));
-  g_object_unref (css);
 }

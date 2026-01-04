@@ -1,6 +1,0 @@
-#+title: Bazaar TODOs
-
-* TODO Allow installed entry management when not connected to the internet
-* DONE Hide curated page if no configs were readable/valid
-* TODO Reduce memory usage
-* TODO Fix erroneous search results

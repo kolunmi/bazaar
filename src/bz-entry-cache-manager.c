@@ -21,9 +21,8 @@
 #define G_LOG_DOMAIN  "BAZAAR::ENTRY-CACHE"
 #define BAZAAR_MODULE "entry-cache"
 
-#define MAX_CONCURRENT_WRITES             4
-#define WATCH_CLEANUP_INTERVAL_MSEC       5000
-#define WATCH_RECACHE_INTERVAL_SEC_DOUBLE 4.0
+#define MAX_CONCURRENT_WRITES       16
+#define WATCH_CLEANUP_INTERVAL_MSEC 5000
 
 #include <malloc.h>
 
@@ -152,6 +151,9 @@ BZ_DEFINE_DATA (
     BZ_RELEASE_DATA (unique_id_checksum, g_free))
 static DexFuture *
 read_task_fiber (ReadTaskData *data);
+
+static DexFuture *
+enumerate_disk_fiber (OngoingTaskData *data);
 
 static void
 bz_entry_cache_manager_dispose (GObject *object)
@@ -329,31 +331,75 @@ bz_entry_cache_manager_get (BzEntryCacheManager *self,
   return g_steal_pointer (&future);
 }
 
+DexFuture *
+bz_entry_cache_manager_get_by_checksum (BzEntryCacheManager *self,
+                                        const char          *unique_id_checksum)
+{
+  g_autoptr (ReadTaskData) data = NULL;
+  g_autoptr (DexFuture) future  = NULL;
+
+  dex_return_error_if_fail (BZ_IS_ENTRY_CACHE_MANAGER (self));
+  dex_return_error_if_fail (unique_id_checksum != NULL);
+
+  data                     = read_task_data_new ();
+  data->task_data          = ongoing_task_data_ref (self->task_data);
+  data->unique_id_checksum = g_strdup (unique_id_checksum);
+
+  future = dex_scheduler_spawn (
+      self->scheduler,
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) read_task_fiber,
+      read_task_data_ref (data),
+      read_task_data_unref);
+  return g_steal_pointer (&future);
+}
+
+DexFuture *
+bz_entry_cache_manager_enumerate_disk (BzEntryCacheManager *self)
+{
+  g_autoptr (DexFuture) future = NULL;
+
+  dex_return_error_if_fail (BZ_IS_ENTRY_CACHE_MANAGER (self));
+
+  future = dex_scheduler_spawn (
+      self->scheduler,
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) enumerate_disk_fiber,
+      ongoing_task_data_ref (self->task_data),
+      ongoing_task_data_unref);
+  return g_steal_pointer (&future);
+}
+
 static DexFuture *
 write_task_fiber (WriteTaskData *data)
 {
-  OngoingTaskData *task_data           = data->task_data;
-  char            *unique_id_checksum  = data->unique_id_checksum;
-  BzEntry         *entry               = data->entry;
-  g_autoptr (GError) local_error       = NULL;
-  g_autoptr (BzGuard) slot_guard       = NULL;
-  g_autoptr (BzGuard) other_guard      = NULL;
-  g_autoptr (GMutexLocker) locker      = NULL;
-  guint      slot_queued               = G_MAXUINT;
-  guint      slot_index                = 0;
-  DexFuture *writing_future            = NULL;
-  g_autoptr (LivingEntryData) living   = NULL;
-  g_autoptr (DexPromise) promise       = NULL;
-  g_autoptr (GVariantBuilder) builder  = NULL;
-  g_autoptr (GVariant) variant         = NULL;
-  g_autoptr (GBytes) bytes             = NULL;
-  g_autofree char *main_cache          = NULL;
-  g_autoptr (GFile) parent_file        = NULL;
-  g_autoptr (GFile) save_file          = NULL;
-  g_autoptr (GFileOutputStream) output = NULL;
-  gssize   bytes_written               = 0;
-  gboolean result                      = FALSE;
-  g_autoptr (GError) ret_error         = NULL;
+  OngoingTaskData *task_data              = data->task_data;
+  char            *unique_id_checksum     = data->unique_id_checksum;
+  BzEntry         *entry                  = data->entry;
+  g_autoptr (GError) local_error          = NULL;
+  g_autoptr (BzGuard) slot_guard          = NULL;
+  g_autoptr (BzGuard) other_guard         = NULL;
+  g_autoptr (GMutexLocker) locker         = NULL;
+  guint      slot_queued                  = G_MAXUINT;
+  guint      slot_index                   = 0;
+  DexFuture *writing_future               = NULL;
+  g_autoptr (LivingEntryData) living      = NULL;
+  g_autoptr (DexPromise) promise          = NULL;
+  g_autoptr (GVariantBuilder) builder     = NULL;
+  g_autoptr (GVariant) variant            = NULL;
+  g_autoptr (GBytes) bytes                = NULL;
+  gsize            bytes_size             = 0;
+  gconstpointer    bytes_data             = 0;
+  g_autofree char *main_cache             = NULL;
+  g_autoptr (GFile) parent_file           = NULL;
+  g_autofree char *save_file_path         = NULL;
+  g_autoptr (GFile) save_file             = NULL;
+  gsize            existing_contents_size = 0;
+  g_autofree char *existing_contents      = NULL;
+  g_autoptr (GFileOutputStream) output    = NULL;
+  gssize   bytes_written                  = 0;
+  gboolean result                         = FALSE;
+  g_autoptr (GError) ret_error            = NULL;
 
   if (!BZ_IS_FLATPAK_ENTRY (entry))
     return dex_future_new_reject (
@@ -436,8 +482,9 @@ write_task_fiber (WriteTaskData *data)
   {
     builder = g_variant_builder_new (G_VARIANT_TYPE_VARDICT);
     bz_serializable_serialize (BZ_SERIALIZABLE (entry), builder);
-    variant = g_variant_builder_end (builder);
-    bytes   = g_variant_get_data_as_bytes (variant);
+    variant    = g_variant_builder_end (builder);
+    bytes      = g_variant_get_data_as_bytes (variant);
+    bytes_data = g_bytes_get_data (bytes, &bytes_size);
 
     main_cache  = bz_dup_module_dir ();
     parent_file = g_file_new_for_path (main_cache);
@@ -456,45 +503,55 @@ write_task_fiber (WriteTaskData *data)
             goto done;
           }
       }
-    save_file = g_file_new_build_filename (main_cache, unique_id_checksum, NULL);
+    save_file_path = g_build_filename (main_cache, unique_id_checksum, NULL);
+    save_file      = g_file_new_for_path (save_file_path);
 
-    output = g_file_replace (
-        save_file,
-        NULL,
-        FALSE,
-        G_FILE_CREATE_REPLACE_DESTINATION,
-        NULL,
-        &local_error);
-    if (output == NULL)
+    result = g_file_get_contents (
+        save_file_path, &existing_contents,
+        &existing_contents_size, NULL);
+    /* Only write if the file has definitely changed */
+    if (!result ||
+        existing_contents_size != bytes_size ||
+        memcmp (existing_contents, bytes_data, bytes_size) != 0)
       {
-        ret_error = g_error_new (
-            BZ_ENTRY_CACHE_ERROR,
-            BZ_ENTRY_CACHE_ERROR_CACHE_FAILED,
-            "Failed to open write stream when caching '%s': %s",
-            unique_id_checksum, local_error->message);
-        goto done;
-      }
+        output = g_file_replace (
+            save_file,
+            NULL,
+            FALSE,
+            G_FILE_CREATE_REPLACE_DESTINATION,
+            NULL,
+            &local_error);
+        if (output == NULL)
+          {
+            ret_error = g_error_new (
+                BZ_ENTRY_CACHE_ERROR,
+                BZ_ENTRY_CACHE_ERROR_CACHE_FAILED,
+                "Failed to open write stream when caching '%s': %s",
+                unique_id_checksum, local_error->message);
+            goto done;
+          }
 
-    bytes_written = g_output_stream_write_bytes (G_OUTPUT_STREAM (output), bytes, NULL, &local_error);
-    if (bytes_written < 0)
-      {
-        ret_error = g_error_new (
-            BZ_ENTRY_CACHE_ERROR,
-            BZ_ENTRY_CACHE_ERROR_CACHE_FAILED,
-            "Failed to write data to stream when caching '%s': %s",
-            unique_id_checksum, local_error->message);
-        goto done;
-      }
+        bytes_written = g_output_stream_write_bytes (G_OUTPUT_STREAM (output), bytes, NULL, &local_error);
+        if (bytes_written < 0)
+          {
+            ret_error = g_error_new (
+                BZ_ENTRY_CACHE_ERROR,
+                BZ_ENTRY_CACHE_ERROR_CACHE_FAILED,
+                "Failed to write data to stream when caching '%s': %s",
+                unique_id_checksum, local_error->message);
+            goto done;
+          }
 
-    result = g_output_stream_close (G_OUTPUT_STREAM (output), NULL, &local_error);
-    if (!result)
-      {
-        ret_error = g_error_new (
-            BZ_ENTRY_CACHE_ERROR,
-            BZ_ENTRY_CACHE_ERROR_CACHE_FAILED,
-            "Failed to close stream when caching '%s': %s",
-            unique_id_checksum, local_error->message);
-        goto done;
+        result = g_output_stream_close (G_OUTPUT_STREAM (output), NULL, &local_error);
+        if (!result)
+          {
+            ret_error = g_error_new (
+                BZ_ENTRY_CACHE_ERROR,
+                BZ_ENTRY_CACHE_ERROR_CACHE_FAILED,
+                "Failed to close stream when caching '%s': %s",
+                unique_id_checksum, local_error->message);
+            goto done;
+          }
       }
 
     g_timer_start (living->cached);
@@ -679,9 +736,78 @@ done:
 }
 
 static DexFuture *
+enumerate_disk_fiber (OngoingTaskData *data)
+{
+  g_autoptr (GError) local_error         = NULL;
+  g_autoptr (BzGuard) guard              = NULL;
+  g_autoptr (GHashTable) set             = NULL;
+  g_autofree char *main_cache            = NULL;
+  g_autoptr (GFile) main_cache_file      = NULL;
+  g_autoptr (GFileEnumerator) enumerator = NULL;
+
+  set = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+
+  BZ_BEGIN_GUARD_WITH_CONTEXT (&guard, &data->alive_mutex, &data->alive_gate);
+  BZ_BEGIN_GUARD_WITH_CONTEXT (&guard, &data->reading_mutex, &data->reading_gate);
+  BZ_BEGIN_GUARD_WITH_CONTEXT (&guard, &data->writing_mutex, &data->writing_gate);
+
+  main_cache = bz_dup_module_dir ();
+  if (!g_file_test (main_cache, G_FILE_TEST_EXISTS))
+    goto done;
+
+  main_cache_file = g_file_new_for_path (main_cache);
+  enumerator      = g_file_enumerate_children (
+      main_cache_file,
+      G_FILE_ATTRIBUTE_STANDARD_IS_SYMLINK
+      "," G_FILE_ATTRIBUTE_STANDARD_NAME
+      "," G_FILE_ATTRIBUTE_STANDARD_TYPE,
+      G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+      NULL,
+      &local_error);
+  if (enumerator == NULL)
+    return dex_future_new_reject (
+        BZ_ENTRY_CACHE_ERROR,
+        BZ_ENTRY_CACHE_ERROR_ENUMERATE_FAILED,
+        "Could not initialize directory enumerator at %s: %s",
+        main_cache, local_error->message);
+
+  for (;;)
+    {
+      g_autoptr (GFileInfo) info = NULL;
+      g_autoptr (GFile) child    = NULL;
+      g_autofree char *basename  = NULL;
+
+      info = g_file_enumerator_next_file (enumerator, NULL, &local_error);
+      if (info == NULL)
+        {
+          if (local_error != NULL)
+            return dex_future_new_reject (
+                BZ_ENTRY_CACHE_ERROR,
+                BZ_ENTRY_CACHE_ERROR_ENUMERATE_FAILED,
+                "Could not enumerate children of cache directory at %s: %s",
+                main_cache, local_error->message);
+          else
+            break;
+        }
+      child = g_file_enumerator_get_child (enumerator, info);
+
+      if (g_file_info_get_is_symlink (info) ||
+          g_file_info_get_file_type (info) != G_FILE_TYPE_REGULAR)
+        continue;
+
+      basename = g_file_get_basename (child);
+      if (basename != NULL)
+        g_hash_table_replace (set, g_steal_pointer (&basename), NULL);
+    }
+
+done:
+  return dex_future_new_take_boxed (G_TYPE_HASH_TABLE, g_steal_pointer (&set));
+}
+
+static DexFuture *
 watch_init_fiber (OngoingTaskData *task_data)
 {
-  bz_discard_module_dir ();
+  // bz_discard_module_dir ();
   dex_promise_resolve_boolean (task_data->init, TRUE);
 
   return dex_future_finally_loop (
@@ -706,17 +832,15 @@ watch_cb (DexFuture       *future,
 static DexFuture *
 watch_work_fiber (OngoingTaskData *task_data)
 {
-  g_autoptr (BzGuard) guard0        = NULL;
-  GHashTableIter iter               = { 0 };
-  g_autoptr (GTimer) timer          = NULL;
-  g_autoptr (GPtrArray) write_backs = NULL;
-  guint total                       = 0;
-  guint skipped                     = 0;
-  guint written                     = 0;
-  guint pruned                      = 0;
+  g_autoptr (BzGuard) guard0 = NULL;
+  GHashTableIter iter        = { 0 };
+  g_autoptr (GTimer) timer   = NULL;
+  guint total                = 0;
+  guint active               = 0;
+  guint alive                = 0;
+  guint pruned               = 0;
 
-  timer       = g_timer_new ();
-  write_backs = g_ptr_array_new_with_free_func (dex_unref);
+  timer = g_timer_new ();
 
   BZ_BEGIN_GUARD_WITH_CONTEXT (&guard0, &task_data->alive_mutex, &task_data->alive_gate);
   BZ_BEGIN_GUARD_WITH_CONTEXT (&guard0, &task_data->reading_mutex, &task_data->reading_gate);
@@ -737,7 +861,7 @@ watch_work_fiber (OngoingTaskData *task_data)
       if (g_hash_table_contains (task_data->reading_hash, unique_id_checksum) ||
           g_hash_table_contains (task_data->writing_hash, unique_id_checksum))
         {
-          skipped++;
+          active++;
           continue;
         }
 
@@ -745,28 +869,7 @@ watch_work_fiber (OngoingTaskData *task_data)
 
       entry = g_weak_ref_get (&living->wr);
       if (entry != NULL)
-        {
-          if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION) &&
-              g_timer_elapsed (living->cached, NULL) > WATCH_RECACHE_INTERVAL_SEC_DOUBLE)
-            {
-              g_autoptr (WriteTaskData) data = NULL;
-              g_autoptr (DexFuture) future   = NULL;
-
-              data                     = write_task_data_new ();
-              data->task_data          = ongoing_task_data_ref (task_data);
-              data->unique_id_checksum = g_strdup (unique_id_checksum);
-              data->entry              = g_object_ref (entry);
-
-              future = dex_scheduler_spawn (
-                  task_data->scheduler,
-                  bz_get_dex_stack_size (),
-                  (DexFiberFunc) write_task_fiber,
-                  write_task_data_ref (data),
-                  write_task_data_unref);
-              g_ptr_array_add (write_backs, g_steal_pointer (&future));
-              written++;
-            }
-        }
+        alive++;
       else
         {
           bz_clear_guard (&guard1);
@@ -774,13 +877,7 @@ watch_work_fiber (OngoingTaskData *task_data)
           pruned++;
         }
     }
-
   bz_clear_guard (&guard0);
-  if (write_backs->len > 0)
-    dex_await (dex_future_allv (
-                   (DexFuture *const *) write_backs->pdata,
-                   write_backs->len),
-               NULL);
 
 #ifdef __GLIBC__
   malloc_trim (0);
@@ -789,11 +886,11 @@ watch_work_fiber (OngoingTaskData *task_data)
   g_debug ("Sweep report: finished in %.4f seconds, including time to acquire guards\n"
            "  Out of a total of %d entries considered:\n"
            "    %d were skipped due to active tasks being associated with them\n"
-           "    %d application entries were kept alive but written to back to disk\n"
+           "    %d application entries were otherwise kept alive\n"
            "    %d entries were forgotten by the application and were pruned\n"
            "  Another sweep will take place in %d msec",
            g_timer_elapsed (timer, NULL),
-           total, skipped, written, pruned, WATCH_CLEANUP_INTERVAL_MSEC);
+           total, active, alive, pruned, WATCH_CLEANUP_INTERVAL_MSEC);
 
   return dex_timeout_new_msec (WATCH_CLEANUP_INTERVAL_MSEC);
 }

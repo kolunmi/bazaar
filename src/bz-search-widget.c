@@ -40,6 +40,8 @@ struct _BzSearchWidget
   gboolean      remove;
   gboolean      search_in_progress;
 
+  BzContentProvider *blocklists_provider;
+  BzContentProvider *txt_blocklists_provider;
   GListStore        *search_model;
   GtkSelectionModel *selection_model;
   guint              search_update_timeout;
@@ -88,9 +90,16 @@ grid_activate (GtkGridView    *grid_view,
                BzSearchWidget *self);
 
 static void
-hide_eol_changed (BzSearchWidget *self,
-                  GParamSpec     *pspec,
-                  BzStateInfo    *info);
+invalidating_state_prop_changed (BzSearchWidget *self,
+                                 GParamSpec     *pspec,
+                                 BzStateInfo    *info);
+
+static void
+blocklists_items_changed (BzSearchWidget *self,
+                          guint           position,
+                          guint           removed,
+                          guint           added,
+                          GListModel     *model);
 
 static DexFuture *
 search_query_then (DexFuture *future,
@@ -110,13 +119,20 @@ bz_search_widget_dispose (GObject *object)
   BzSearchWidget *self = BZ_SEARCH_WIDGET (object);
 
   if (self->state != NULL)
-    g_signal_handlers_disconnect_by_func (self->state, hide_eol_changed, self);
+    g_signal_handlers_disconnect_by_func (self->state, invalidating_state_prop_changed, self);
+  if (self->blocklists_provider != NULL)
+    g_signal_handlers_disconnect_by_func (self->blocklists_provider, blocklists_items_changed, self);
+  if (self->txt_blocklists_provider != NULL)
+    g_signal_handlers_disconnect_by_func (self->txt_blocklists_provider, blocklists_items_changed, self);
 
   g_clear_handle_id (&self->search_update_timeout, g_source_remove);
   dex_clear (&self->search_query);
 
   g_clear_object (&self->state);
   g_clear_object (&self->selected);
+  g_clear_object (&self->blocklists_provider);
+  g_clear_object (&self->txt_blocklists_provider);
+  g_clear_object (&self->search_model);
   g_clear_object (&self->selection_model);
 
   G_OBJECT_CLASS (bz_search_widget_parent_class)->dispose (object);
@@ -271,15 +287,9 @@ static void
 category_clicked (BzFlathubCategory *category,
                   GtkButton         *button)
 {
-  GtkWidget         *self               = NULL;
-  GtkWidget         *nav_view           = NULL;
-  AdwNavigationPage *apps_page          = NULL;
-  g_autoptr (GListModel) model          = NULL;
-  g_autoptr (GListModel) carousel_model = NULL;
-  const char      *title                = NULL;
-  g_autofree char *subtitle             = NULL;
-  int              total_entries        = 0;
-  gboolean         is_spotlight         = FALSE;
+  GtkWidget         *self      = NULL;
+  GtkWidget         *nav_view  = NULL;
+  AdwNavigationPage *apps_page = NULL;
 
   self = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_SEARCH_WIDGET);
   g_assert (self != NULL);
@@ -287,34 +297,7 @@ category_clicked (BzFlathubCategory *category,
   nav_view = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
   g_assert (nav_view != NULL);
 
-  title        = bz_flathub_category_get_display_name (category);
-  model        = bz_flathub_category_dup_applications (category);
-  is_spotlight = bz_flathub_category_get_is_spotlight (category);
-
-  if (is_spotlight)
-    {
-      apps_page = bz_apps_page_new (title, model);
-    }
-  else
-    {
-      carousel_model = bz_flathub_category_dup_quality_applications (category);
-      total_entries  = bz_flathub_category_get_total_entries (category);
-
-      if (carousel_model != NULL && g_list_model_get_n_items (carousel_model) > 0)
-        {
-          apps_page = bz_apps_page_new_with_carousel (title, model, carousel_model);
-        }
-      else
-        {
-          apps_page = bz_apps_page_new (title, model);
-        }
-
-      if (total_entries > 0)
-        {
-          subtitle = g_strdup_printf (_ ("%d applications"), total_entries);
-          bz_apps_page_set_subtitle (BZ_APPS_PAGE (apps_page), subtitle);
-        }
-    }
+  apps_page = bz_apps_page_new_from_category (category);
 
   g_signal_connect_swapped (
       apps_page, "select",
@@ -339,6 +322,26 @@ unbind_category_tile_cb (BzSearchWidget    *self,
                          BzDynamicListView *view)
 {
   g_signal_handlers_disconnect_by_func (tile, category_clicked, category);
+}
+
+static void
+tile_activated_cb (GtkListItem   *list_item,
+                   BzRichAppTile *tile)
+{
+  BzSearchWidget *self   = NULL;
+  BzSearchResult *result = NULL;
+  BzEntryGroup   *group  = NULL;
+
+  g_assert (GTK_IS_LIST_ITEM (list_item));
+  g_assert (BZ_IS_RICH_APP_TILE (tile));
+
+  self = BZ_SEARCH_WIDGET (gtk_widget_get_ancestor (GTK_WIDGET (tile),
+                                                    BZ_TYPE_SEARCH_WIDGET));
+
+  result = gtk_list_item_get_item (list_item);
+  group  = bz_search_result_get_group (result);
+
+  g_signal_emit (self, signals[SIGNAL_SELECT], 0, group, FALSE);
 }
 
 static void
@@ -428,6 +431,7 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, score_to_string);
   gtk_widget_class_bind_template_callback (widget_class, reset_search_cb);
   gtk_widget_class_bind_template_callback (widget_class, no_results_found_subtitle);
+  gtk_widget_class_bind_template_callback (widget_class, tile_activated_cb);
 
   gtk_widget_class_install_action (widget_class, "move", "i", action_move);
 }
@@ -442,6 +446,7 @@ bz_search_widget_init (BzSearchWidget *self)
   /* TODO: move all this to blueprint */
 
   self->selection_model = GTK_SELECTION_MODEL (gtk_no_selection_new (NULL));
+  gtk_no_selection_set_model (GTK_NO_SELECTION (self->selection_model), G_LIST_MODEL (self->search_model));
   gtk_grid_view_set_model (self->grid_view, self->selection_model);
 
   g_signal_connect (self->search_bar, "changed", G_CALLBACK (search_changed), self);
@@ -484,8 +489,16 @@ bz_search_widget_set_state (BzSearchWidget *self,
   g_return_if_fail (BZ_IS_SEARCH_WIDGET (self));
 
   if (self->state != NULL)
-    g_signal_handlers_disconnect_by_func (self->state, hide_eol_changed, self);
+    g_signal_handlers_disconnect_by_func (self->state, invalidating_state_prop_changed, self);
   g_clear_object (&self->state);
+
+  if (self->blocklists_provider != NULL)
+    g_signal_handlers_disconnect_by_func (self->blocklists_provider, blocklists_items_changed, self);
+  g_clear_object (&self->blocklists_provider);
+
+  if (self->txt_blocklists_provider != NULL)
+    g_signal_handlers_disconnect_by_func (self->txt_blocklists_provider, blocklists_items_changed, self);
+  g_clear_object (&self->txt_blocklists_provider);
 
   if (state != NULL)
     {
@@ -493,8 +506,43 @@ bz_search_widget_set_state (BzSearchWidget *self,
       g_signal_connect_swapped (
           state,
           "notify::hide-eol",
-          G_CALLBACK (hide_eol_changed),
+          G_CALLBACK (invalidating_state_prop_changed),
           self);
+      g_signal_connect_swapped (
+          state,
+          "notify::show-only-foss",
+          G_CALLBACK (invalidating_state_prop_changed),
+          self);
+      g_signal_connect_swapped (
+          state,
+          "notify::show-only-flathub",
+          G_CALLBACK (invalidating_state_prop_changed),
+          self);
+      g_signal_connect_swapped (
+          state,
+          "notify::show-only-verified",
+          G_CALLBACK (invalidating_state_prop_changed),
+          self);
+
+      g_object_get (
+          state,
+          "blocklists-provider", &self->blocklists_provider,
+          "txt-blocklists-provider", &self->txt_blocklists_provider,
+          NULL);
+      if (self->blocklists_provider != NULL)
+        g_signal_connect_data (
+            self->blocklists_provider,
+            "items-changed",
+            G_CALLBACK (blocklists_items_changed),
+            self, NULL,
+            G_CONNECT_SWAPPED | G_CONNECT_AFTER);
+      if (self->txt_blocklists_provider != NULL)
+        g_signal_connect_data (
+            self->txt_blocklists_provider,
+            "items-changed",
+            G_CALLBACK (blocklists_items_changed),
+            self, NULL,
+            G_CONNECT_SWAPPED | G_CONNECT_AFTER);
     }
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_STATE]);
@@ -566,7 +614,7 @@ search_changed (GtkEditable    *editable,
       g_settings_get_boolean (settings, "search-debounce"))
     {
       self->search_update_timeout = g_timeout_add_once (
-          200, (GSourceOnceFunc) update_filter, self);
+          150, (GSourceOnceFunc) update_filter, self);
       gtk_widget_set_visible (GTK_WIDGET (self->search_busy), TRUE);
     }
   else
@@ -612,9 +660,19 @@ grid_activate (GtkGridView    *grid_view,
 }
 
 static void
-hide_eol_changed (BzSearchWidget *self,
-                  GParamSpec     *pspec,
-                  BzStateInfo    *info)
+invalidating_state_prop_changed (BzSearchWidget *self,
+                                 GParamSpec     *pspec,
+                                 BzStateInfo    *info)
+{
+  update_filter (self);
+}
+
+static void
+blocklists_items_changed (BzSearchWidget *self,
+                          guint           position,
+                          guint           removed,
+                          guint           added,
+                          GListModel     *model)
 {
   update_filter (self);
 }
@@ -626,63 +684,17 @@ search_query_then (DexFuture *future,
   g_autoptr (BzSearchWidget) self = NULL;
   GPtrArray  *results             = NULL;
   guint       old_length          = 0;
-  GSettings  *settings            = NULL;
   const char *page_name           = NULL;
 
   bz_weak_get_or_return_reject (self, wr);
 
   results    = g_value_get_boxed (dex_future_get_value (future, NULL));
   old_length = g_list_model_get_n_items (G_LIST_MODEL (self->search_model));
-  settings   = bz_state_info_get_settings (self->state);
-
-  if (settings != NULL &&
-      g_settings_get_boolean (settings, "search-only-foss"))
-    {
-      for (guint i = 0; i < results->len;)
-        {
-          BzSearchResult *result  = NULL;
-          BzEntryGroup   *group   = NULL;
-          gboolean        is_foss = FALSE;
-
-          result  = g_ptr_array_index (results, i);
-          group   = bz_search_result_get_group (result);
-          is_foss = bz_entry_group_get_is_floss (group);
-
-          if (is_foss)
-            i++;
-          else
-            g_ptr_array_remove_index (results, i);
-        }
-    }
-
-  if (settings != NULL &&
-      g_settings_get_boolean (settings, "search-only-flathub"))
-    {
-      for (guint i = 0; i < results->len;)
-        {
-          BzSearchResult *result     = NULL;
-          BzEntryGroup   *group      = NULL;
-          gboolean        is_flathub = FALSE;
-
-          result     = g_ptr_array_index (results, i);
-          group      = bz_search_result_get_group (result);
-          is_flathub = bz_entry_group_get_is_flathub (group);
-
-          if (is_flathub)
-            i++;
-          else
-            g_ptr_array_remove_index (results, i);
-        }
-    }
 
   g_list_store_splice (
       self->search_model,
       0, old_length,
-      (gpointer *) results->pdata,
-      results->len);
-  gtk_no_selection_set_model (
-      GTK_NO_SELECTION (self->selection_model), G_LIST_MODEL (self->search_model));
-
+      (gpointer *) results->pdata, results->len);
   gtk_widget_set_visible (GTK_WIDGET (self->search_busy), FALSE);
 
   if (results->len > 0)
@@ -729,8 +741,6 @@ update_filter (BzSearchWidget *self)
   if (search_text == NULL || *search_text == '\0')
     {
       g_list_store_remove_all (self->search_model);
-      gtk_no_selection_set_model (
-          GTK_NO_SELECTION (self->selection_model), G_LIST_MODEL (self->search_model));
       gtk_stack_set_visible_child_name (self->search_stack, "empty");
       return;
     }
@@ -752,8 +762,6 @@ update_filter (BzSearchWidget *self)
   if (n_terms == 0)
     {
       g_list_store_remove_all (self->search_model);
-      gtk_no_selection_set_model (
-          GTK_NO_SELECTION (self->selection_model), G_LIST_MODEL (self->search_model));
       gtk_stack_set_visible_child_name (self->search_stack, "empty");
       return;
     }

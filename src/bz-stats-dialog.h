@@ -29,7 +29,8 @@ G_DECLARE_FINAL_TYPE (BzStatsDialog, bz_stats_dialog, BZ, STATS_DIALOG, AdwDialo
 
 AdwDialog *
 bz_stats_dialog_new (GListModel *model,
-                     GListModel *country_model);
+                     GListModel *country_model,
+                     int         total_downloads);
 
 void
 bz_stats_dialog_animate_open (BzStatsDialog *self);

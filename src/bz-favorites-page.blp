@@ -1,0 +1,122 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzFavoritesPage: Adw.NavigationPage {
+  title: _("Favorites");
+
+  Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {
+
+      [end]
+      Revealer {
+        transition-type: slide_right;
+        reveal-child: bind $invert_boolean(template.show-sidebar as <bool>) as <bool>;
+
+        child: ToggleButton {
+          styles [
+            "flat",
+          ]
+
+          has-tooltip: true;
+          tooltip-text: _("Toggle transaction sidebar");
+          active: bind template.show-sidebar bidirectional;
+
+          child: $BzGlobalProgress download_bar {
+            expand-size: 125;
+            active: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
+            pending: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.pending;
+            fraction: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.current-progress;
+            settings: bind template.state as <$BzStateInfo>.settings;
+
+            child: Image {
+              halign: end;
+              icon-name: "folder-download-symbolic";
+            };
+          };
+        };
+      }
+
+
+    }
+
+    content: Adw.BreakpointBin {
+      width-request: 360;
+      height-request: 450;
+
+      child: Adw.ViewStack stack {
+        enable-transitions: true;
+        transition-duration: 400;
+
+        Adw.ViewStackPage {
+          name: "loading";
+          title: _("Loading");
+          child: Adw.Spinner {
+            halign: fill;
+            valign: center;
+            width-request: 64;
+            height-request: 64;
+            margin-bottom: 18;
+          };
+        }
+
+        Adw.ViewStackPage {
+          name: "empty";
+          title: _("Empty");
+          child: Adw.StatusPage {
+            icon-name: "starred-symbolic";
+            title: _("No Favorites");
+            description: _("Applications you mark as favorite will appear here");
+          };
+        }
+
+        Adw.ViewStackPage {
+          name: "content";
+          title: _("Favorites");
+          child: ScrolledWindow {
+            hscrollbar-policy: never;
+            child: Adw.ClampScrollable {
+              maximum-size: 650;
+              child: ListView list_view {
+                styles [
+                  "navigation-sidebar",
+                  "installed-list-view",
+                  "no-vertical-margin"
+                ]
+                margin-start: 25;
+                margin-end: 25;
+                overflow: visible;
+                model: NoSelection {
+                  model: bind template.model;
+                };
+                factory: BuilderListItemFactory {
+                  template ListItem {
+                    activatable: true;
+                    selectable: false;
+                    focusable: true;
+                    child: Revealer {
+                      reveal-child: true;
+                      overflow: visible;
+                      child: $BzFavoritesTile {
+                        group: bind template.item as <$BzEntryGroup>;
+                        activated => $tile_activated_cb();
+                      };
+                    };
+                  }
+                };
+              };
+            };
+          };
+        }
+      };
+
+      Adw.Breakpoint {
+        condition ("max-width: 700px")
+        setters {
+          list_view.margin-start: 8;
+          list_view.margin-end: 8;
+        }
+      }
+    };
+  }
+}

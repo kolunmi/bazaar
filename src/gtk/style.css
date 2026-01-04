@@ -3,14 +3,37 @@
     color: black;
 }
 
+.updates-amount {
+	background-color: white;
+	color: var(--accent-bg-color);
+	font-size: 0.60em;
+	border-radius: 9999px;
+	font-weight: 900;
+}
+
+.updates-amount-border {
+  background-color: var(--accent-bg-color);
+  	border-radius: 9999px;
+}
+
 .bz-monospace {
     font-family: monospace;
 }
 
 .search-box {
+  outline: 0 solid transparent;
+  outline-offset: 6px;
+  transition-property: outline, outline-offset;
+  transition-duration: 200ms;
   padding: 8px 12px;
   border-radius: 9999px;
   background-color: var(--card-bg-color);
+}
+
+.search-box:focus-within {
+  outline-color: color-mix(in srgb, var(--accent-color), transparent);
+  outline-offset: 0;
+  outline-width: 2px;
 }
 
 .rich-screenshot-box {
@@ -79,16 +102,32 @@
 	font-weight: 500;
 }
 
+.verified {
+  color: @blue_2;
+}
+
 .support {
     --accent-fg-color : #f06292;
     --accent-bg-color : alpha(#f06292, 0.25);
     --accent-color : #f06292;
 }
 
-.star {
-    --accent-fg-color: @warning_bg_color;
-    --accent-bg-color : alpha(@warning_bg_color, 0.25);
-    --accent-color: @warning_color;
+.favorite {
+    --accent-fg-color: @accent_bg_color;
+    --accent-bg-color : alpha(@accent_bg_color, 0.25);
+    --accent-color: @accent_color;
+}
+
+.favorite * {
+    --accent-fg-color: @accent_fg_color;
+    --accent-bg-color:  @accent_bg_color;
+    --accent-color: @accent_color;
+}
+
+.orange {
+  --accent-fg-color: @orange_5;
+  --accent-color: alpha(@orange_5, 0.25);
+  --accent-bg-color: @orange_5;
 }
 
 .green {
@@ -132,6 +171,71 @@
 	--accent-bg-color: @window_fg_color;
 }
 
+.circular-lozenge.green,
+.lozenge.green {
+	color: @green_5;
+	background-color: alpha(@green_3, .25);
+}
+
+.circular-lozenge.yellow,
+.lozenge.yellow {
+	color: #ae7b03;
+	background: alpha(@yellow_5, .25);
+}
+
+.circular-lozenge.orange,
+.lozenge.orange {
+	color: @orange_5;
+	background-color: alpha(@orange_4, .25);
+}
+
+.circular-lozenge.red,
+.lozenge.red {
+	color: @red_4;
+	background-color: alpha(@red_2, .25);
+}
+
+.circular-lozenge.grey,
+.lozenge.grey {
+	color: @dark_5;
+	background-color: alpha(@dark_3, .25);
+}
+
+@media (prefers-color-scheme: dark) {
+  .circular-lozenge.green,
+  .lozenge.green {
+	  color: @green_1;
+	  background-color: alpha(@green_4, .25);
+  }
+
+  .circular-lozenge.yellow,
+  .lozenge.yellow {
+	  color: @yellow_2;
+	  background: alpha(#cd9309, .25);
+  }
+
+  .circular-lozenge.orange,
+  .lozenge.orange {
+	  color: @orange_1;
+  }
+
+  .circular-lozenge.red,
+  .lozenge.red {
+	  color: #ff7b63;
+  }
+
+  .circular-lozenge.grey,
+  .lozenge.grey {
+	  color: @light_3;
+	  background-color: alpha(@light_5, .25);
+  }
+}
+
+.flathub {
+	--accent-color: alpha(@window_fg_color,0.75);
+	--accent-bg-color: @window_fg_color;
+}
+
 @media (prefers-color-scheme: dark) {
   .flathub {
     --accent-color: alpha(#fafafa,0.75);
@@ -143,15 +247,12 @@ global-progress {
   color: var(--accent-bg-color);
 }
 
-global-progress image {
-  color: var(--window-fg-color);
+global-progress > *:first-child {
+  background: var(--flag-gradient, var(--accent-bg-color));
 }
 
-@media (prefers-color-scheme: light) {
-  .flathub {
-    --accent-color: #251f32;
-    --accent-bg-color: #251f32;
-  }
+global-progress image {
+  color: var(--window-fg-color);
 }
 
 .lozenge {
@@ -166,6 +267,12 @@ global-progress image {
 	  transition: background-color 150ms ease;
 }
 
+.lozenge-ring-button {
+	padding: 0;
+	border-radius: 999999px;
+	background: transparent;
+}
+
 .circular-lozenge {
 	font-weight: bold;
 	border-radius: 99999px;
@@ -177,6 +284,7 @@ global-progress image {
 }
 
 .circular-lozenge.large {
+	font-size: 24px;
 	padding: 15px 18px;
 	min-width: 24px;
 	min-height: 30px;
@@ -204,7 +312,7 @@ button.context-tile:active .lozenge {
     color: var(--accent-color);
 }
 
-.card.eol {
+.card.colored {
     background-color: alpha(var(--accent-bg-color),0.15);
     color: var(--accent-color);
 }
@@ -215,6 +323,19 @@ button.context-tile:active .lozenge {
 
 .small-pill.error {
     background-color: alpha(@error_bg_color, 0.15);
+}
+
+.installed-pill {
+	background-color: alpha(@success_bg_color, 0.15);
+	color: @success_color;
+	font-weight: 500;
+	font-size: 0.9em;
+ 	padding: 2px 7px 2px 4.5px;
+}
+
+.sp-section .installed-pill {
+  background-color: alpha(@window_fg_color, 0.10);
+  color: alpha(@window_fg_color, 0.75);
 }
 
 .download-size-pill{
@@ -238,12 +359,21 @@ window.narrow .app-title {
   font-size: 16pt;
 }
 
+.developer-badge > button {
+	padding: 0;
+  	background-color: transparent;
+}
+
+.developer-badge:focus > button {
+	border-radius: 5px;
+}
+
 window.narrow .app-developer {
 	font-size: small;
 }
 
 .context-tile {
-	border-radius: 10px;
+  box-shadow: none;
 	padding: 4px;
 }
 
@@ -273,30 +403,55 @@ button.context-tile {
   background-color: var(--view-bg-color);
 }
 
+toggle-group.huge,
+toggle-group.huge * {
+  border-radius: 9999px;
+}
+
+.huge > toggle {
+  padding: 3px 12px;
+}
+
 .otg {
   background: linear-gradient(to right, #2f3d9f, #682889);
+}
+
+.wlg {
+  background: linear-gradient(to right, #821756, #136673);
+}
+
+.sp-section .card:not(:hover):not(:active) {
+  background: transparent;
+}
+
+.sp-section .card {
+  box-shadow: none;
 }
 
 @media (prefers-color-scheme: light) {
   .otg {
     background: linear-gradient(to right, #c6eaf8, #c4f3c9);
   }
+
+  .wlg {
+    background: linear-gradient(to right, #fdcde0, #b0e5f0);
+  }
+
+  .sp-section .card:hover {
+    background: rgba(255, 255, 255, 0.50);
+  }
+
+  .sp-section .card:active {
+    background: rgba(255, 255, 255, 0.75);
+  }
 }
 
-.otg .card:not(:hover):not(:active) {
-  background: transparent;
+.sp-section-image {
+	margin-top: -95px;
+	margin-bottom: -95px;
 }
 
-.otg .card {
-  box-shadow: none;
-}
-
-.otg-image {
-	margin-top: -75px;
-	margin-bottom: -75px;
-}
-
-.otg-title {
+.sp-section-title {
 	font-size: 3.5em;
 }
 
@@ -322,31 +477,6 @@ window,
 headerbar,
 .global-search {
   transition: background-color 0.2s ease;
-}
-
-.flathub {
-  --flathub-bg-hue: 301.44;
-}
-
-.flathub .global-search,
-window.flathub {
-  background-color: oklch(from var(--window-bg-color) l calc(c * 4) var(--flathub-bg-hue));
-}
-
-.flathub .toplevel-headerbar {
-  background-color: oklch(from var(--window-bg-color) l calc(c * 4) var(--flathub-bg-hue));
-}
-
-.flathub .sidebar-pane {
-  background-color: oklch(from var(--sidebar-bg-color) l calc(c * 4) var(--flathub-bg-hue));
-}
-
-.flathub-lotion {
-  color: #fafafa;
-}
-
-.flathub-gunmetal {
-  color:#251f32;
 }
 
 .header-osd windowcontrols button image {
@@ -400,54 +530,11 @@ window.flathub {
               0 0 0 6px color-mix(in srgb, var(--accent-color) 30%, transparent);
 }
 
-.accent-button.pride-rainbow-theme {
-  --flag-gradient: linear-gradient(to bottom, #E40303 0%, #E40303 16.666%, #FF8C00 16.666%, #FF8C00 33.333%, #FFED00 33.333%, #FFED00 50%, #008026 50%, #008026 66.666%, #24408E 66.666%, #24408E 83.333%, #732982 83.333%, #732982 100%);
-}
-
-.accent-button.lesbian-pride-theme {
-  --flag-gradient: linear-gradient(to bottom, #D62800 0%, #D62800 20%, #FF9B56 20%, #FF9B56 40%, #FFFFFF 40%, #FFFFFF 60%, #D462A6 60%, #D462A6 80%, #A40062 80%, #A40062 100%);
-}
-
-.accent-button.transgender-theme {
-  --flag-gradient: linear-gradient(to bottom, #5BCEFA 0%, #5BCEFA 20%, #F5A9B8 20%, #F5A9B8 40%, #FFFFFF 40%, #FFFFFF 60%, #F5A9B8 60%, #F5A9B8 80%, #5BCEFA 80%, #5BCEFA 100%);
-}
-
-.accent-button.nonbinary-theme {
-  --flag-gradient: linear-gradient(to bottom, #FCF434 0%, #FCF434 25%, #FFFFFF 25%, #FFFFFF 50%, #9C59D1 50%, #9C59D1 75%, #2C2C2C 75%, #2C2C2C 100%);
-}
-
-.accent-button.bisexual-theme {
-  --flag-gradient: linear-gradient(to bottom, #D60270 0%, #D60270 40%, #9B4F96 40%, #9B4F96 60%, #0038A8 60%, #0038A8 100%);
-}
-
-.accent-button.asexual-theme {
-  --flag-gradient: linear-gradient(to bottom, #000000 0%, #000000 25%, #A3A3A3 25%, #A3A3A3 50%, #FFFFFF 50%, #FFFFFF 75%, #810081 75%, #810081 100%);
-}
-
-.accent-button.pansexual-theme {
-  --flag-gradient: linear-gradient(to bottom, #FF218C 0%, #FF218C 33.333%, #FFD800 33.333%, #FFD800 66.666%, #21B1FF 66.666%, #21B1FF 100%);
-}
-
-.accent-button.aromantic-theme {
-  --flag-gradient: linear-gradient(to bottom, #3DA542 0%, #3DA542 20%, #A7D379 20%, #A7D379 40%, #FFFFFF 40%, #FFFFFF 60%, #A9A9A9 60%, #A9A9A9 80%, #000000 80%, #000000 100%);
-}
-
-.accent-button.genderfluid-theme {
-  --flag-gradient: linear-gradient(to bottom, #FF76A4 0%, #FF76A4 20%, #FFFFFF 20%, #FFFFFF 40%, #C011D7 40%, #C011D7 60%, #000000 60%, #000000 80%, #2F3CBE 80%, #2F3CBE 100%);
-}
-
-.accent-button.polysexual-theme {
-  --flag-gradient: linear-gradient(to bottom, #F61CB9 0%, #F61CB9 33.333%, #07D569 33.333%, #07D569 66.666%, #1C92F6 66.666%, #1C92F6 100%);
-}
-
-.accent-button.omnisexual-theme {
-  --flag-gradient: linear-gradient(to bottom, #FF9CCE 0%, #FF9CCE 20%, #FF52BF 20%, #FF52BF 40%, #200044 40%, #200044 60%, #675FFF 60%, #675FFF 80%, #8DA7FF 80%, #8DA7FF 100%);
-}
 
 /* Category buttons styling modified from GNOME Software*/
 .category-tile {
   font-weight: 700;
-  font-size: 14pt;
+  font-size: 13pt;
   color: white;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
   padding-left: 32px;
@@ -633,10 +720,59 @@ window.narrow .category-tile {
   background: linear-gradient(135deg, shade(#f6f5f4, .95) 0%, shade(#deddda, .95) 100%);
 }
 
+.category-tile.category-adwaita {
+  text-shadow: 0 1px rgba(255, 255, 255, 0.35);
+  background: linear-gradient(45deg, #1c71d8 0%, #57e289 100%);
+}
+.category-tile.category-adwaita:hover {
+  background: linear-gradient(45deg, shade(#1c71d8, 1.08) 0%, shade(#57e289, 1.08) 100%);
+}
+.category-tile.category-adwaita:active {
+  background: linear-gradient(45deg, shade(#1c71d8, .95) 0%, shade(#57e289, .95) 100%);
+}
+
+.category-tile.category-kde {
+  text-shadow: 0 1px rgba(255, 255, 255, 0.35);
+  background: linear-gradient(135deg, #3584e4 0%, #704dac 100%);
+}
+.category-tile.category-kde:hover {
+  background: linear-gradient(135deg, shade(#3584e4, 1.08) 0%, shade(#704dac, 1.08) 100%);
+}
+.category-tile.category-kde:active {
+  background: linear-gradient(135deg, shade(#3584e4, .95) 0%, shade(#704dac, .95) 100%);
+}
+
+.category-tile.category-adwaita image,
+.category-tile.category-kde image {
+	-gtk-icon-shadow: none;
+}
+
 .installed-list-view > * {
     padding: 0;
     transition: background-color 200ms;
-    margin: 6px 0px;
+    	min-height: 0;
+    margin: 5px 4.5px;
+}
+
+.narrow .installed-list-view > * {
+    margin: 4px 4.5px;
+}
+
+.no-vertical-margin > row.hidden {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.no-vertical-margin > row:not(.hidden) {
+  margin-bottom: 6px;
+}
+
+.user-data-list-view > * {
+  margin: 0;
+}
+
+.user-data-list-view row {
+	min-height: 0;
 }
 
 .transaction-sidebar-entry-list {
@@ -644,9 +780,12 @@ window.narrow .category-tile {
     padding: 0;
 }
 
-.disable-adw-flow-box-styling:hover {
+.disable-adw-flow-box-styling {
     background-color: transparent;
+    box-shadow: none;
 }
-.disable-adw-flow-box-styling:focus {
-    background-color: transparent;
+
+curated-list-view,
+curated-list-view list {
+  background: var(--bg-color);
 }

@@ -50,7 +50,7 @@ msgstr ""
 #: data/io.github.kolunmi.Bazaar.gschema.xml:11
 #: src/bz-preferences-dialog.blp:35
 msgid "Only Show Free Software"
-msgstr "Solo mostrar software gratuito"
+msgstr "Solo mostrar Software Libre"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:12
 msgid "Hide proprietary software when searching"
@@ -698,7 +698,7 @@ msgstr "Software libre licendiado bajo %s"
 
 #: src/bz-full-view.c:361
 msgid "Free"
-msgstr "Gratis"
+msgstr "Libre"
 
 #: src/bz-full-view.c:361
 msgid "Proprietary"
@@ -1359,7 +1359,7 @@ msgstr "Salir"
 #~ msgstr "Excluye componentes compartidos"
 
 #~ msgid "Free Software"
-#~ msgstr "Software gratuito"
+#~ msgstr "Software Libre"
 
 #~ msgid "in the last month"
 #~ msgstr "En el último mes"

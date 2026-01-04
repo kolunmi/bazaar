@@ -4,6 +4,6 @@ parent-prefix=g
 parent-name=object
 author=AUTOGEN
 
-include="bz-content-section.h"
+include="bz-curated-section.h"
 
 property=sections GListModel G_TYPE_LIST_MODEL object

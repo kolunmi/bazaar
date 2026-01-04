@@ -51,6 +51,14 @@ bz_window_show_group (BzWindow     *self,
                       BzEntryGroup *group);
 
 void
+bz_window_show_app_id (BzWindow     *self,
+                       const char *app_id);
+
+void
+bz_window_push_page(BzWindow *self,
+                    AdwNavigationPage *page);
+
+void
 bz_window_add_toast (BzWindow *self,
                      AdwToast *toast);
 

@@ -21,6 +21,7 @@
 #pragma once
 
 #include "bz-backend.h"
+#include "bz-main-config.h"
 #include "bz-transaction.h"
 
 G_BEGIN_DECLS
@@ -41,9 +42,9 @@ bz_transaction_manager_new (void);
 
 void
 bz_transaction_manager_set_config (BzTransactionManager *self,
-                                   GHashTable           *config);
+                                   BzMainConfig         *config);
 
-GHashTable *
+BzMainConfig *
 bz_transaction_manager_get_config (BzTransactionManager *self);
 
 void
@@ -69,11 +70,12 @@ bz_transaction_manager_get_pending (BzTransactionManager *self);
 gboolean
 bz_transaction_manager_get_has_transactions (BzTransactionManager *self);
 
-void
+G_GNUC_WARN_UNUSED_RESULT
+DexFuture *
 bz_transaction_manager_add (BzTransactionManager *self,
                             BzTransaction        *transaction);
 
-DexFuture *
+void
 bz_transaction_manager_cancel_current (BzTransactionManager *self);
 
 void

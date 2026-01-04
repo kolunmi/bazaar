@@ -241,7 +241,7 @@ activate_result (BzShellSearchProvider2     *skeleton,
 {
   g_action_group_activate_action (
       G_ACTION_GROUP (g_application_get_default ()),
-      "search",
+      "show-app-id",
       g_variant_new ("s", result));
 
   bz_shell_search_provider2_complete_activate_result (skeleton, invocation);
@@ -260,7 +260,7 @@ launch_search (BzShellSearchProvider2     *skeleton,
   string = g_strjoinv (" ", terms);
   g_action_group_activate_action (
       G_ACTION_GROUP (g_application_get_default ()),
-      "search",
+      "show-app-id",
       g_variant_new ("s", string));
 
   bz_shell_search_provider2_complete_launch_search (skeleton, invocation);
@@ -387,8 +387,11 @@ request_finally (DexFuture   *future,
 
           result = g_ptr_array_index (results, i);
           group  = bz_search_result_get_group (result);
-          id     = bz_entry_group_get_id (group);
+          if (bz_entry_group_get_removable (group) > 0)
+            /* Skip already installed groups */
+            continue;
 
+          id = bz_entry_group_get_id (group);
           g_variant_builder_add (builder, "s", id);
           g_hash_table_replace (
               self->last_results,

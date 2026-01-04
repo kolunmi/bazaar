@@ -20,18 +20,11 @@
 
 #pragma once
 
-#include "bz-application-map-factory.h"
+#include <gtk/gtk.h>
+
+#include "bz-parser.h"
 
 G_BEGIN_DECLS
-
-#define BZ_CONTENT_YAML_ERROR (bz_content_yaml_error_quark ())
-GQuark bz_content_yaml_error_quark (void);
-
-typedef enum
-{
-  BZ_CONTENT_YAML_ERROR_INVALID_YAML = 0,
-  BZ_CONTENT_YAML_ERROR_INVALID_STRUCTURE,
-} BzContentYamlError;
 
 #define BZ_TYPE_CONTENT_PROVIDER (bz_content_provider_get_type ())
 G_DECLARE_FINAL_TYPE (BzContentProvider, bz_content_provider, BZ, CONTENT_PROVIDER, GObject)
@@ -47,11 +40,11 @@ GListModel *
 bz_content_provider_get_input_files (BzContentProvider *self);
 
 void
-bz_content_provider_set_factory (BzContentProvider       *self,
-                                 BzApplicationMapFactory *factory);
+bz_content_provider_set_parser (BzContentProvider *self,
+                                BzParser          *parser);
 
-BzApplicationMapFactory *
-bz_content_provider_get_factory (BzContentProvider *self);
+BzParser *
+bz_content_provider_get_parser (BzContentProvider *self);
 
 gboolean
 bz_content_provider_get_has_inputs (BzContentProvider *self);

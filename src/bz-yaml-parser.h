@@ -40,9 +40,4 @@ G_DECLARE_FINAL_TYPE (BzYamlParser, bz_yaml_parser, BZ, YAML_PARSER, GObject)
 BzYamlParser *
 bz_yaml_parser_new_for_resource_schema (const char *path);
 
-GHashTable *
-bz_yaml_parser_process_bytes (BzYamlParser *self,
-                              GBytes       *bytes,
-                              GError      **error);
-
 G_END_DECLS

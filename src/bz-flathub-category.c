@@ -18,8 +18,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "bz-flathub-category.h"
 #include <glib/gi18n.h>
+
+#include "appstream.h"
+#include "bz-flathub-category.h"
+#include "bz-serializable.h"
 
 struct _BzFlathubCategory
 {
@@ -33,7 +36,14 @@ struct _BzFlathubCategory
   gboolean                 is_spotlight;
 };
 
-G_DEFINE_FINAL_TYPE (BzFlathubCategory, bz_flathub_category, G_TYPE_OBJECT);
+static void
+serializable_iface_init (BzSerializableInterface *iface);
+
+G_DEFINE_FINAL_TYPE_WITH_CODE (
+    BzFlathubCategory,
+    bz_flathub_category,
+    G_TYPE_OBJECT,
+    G_IMPLEMENT_INTERFACE (BZ_TYPE_SERIALIZABLE, serializable_iface_init));
 
 enum
 {
@@ -52,6 +62,9 @@ enum
   LAST_PROP
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
+
+static void
+clear (BzFlathubCategory *self);
 
 typedef struct
 {
@@ -78,7 +91,9 @@ static const CategoryInfo category_info[] = {
   {   "recently-added",         N_ ("Recently Added"),      N_ ("New"),                    N_ ("More New"),        "io.github.kolumni.Bazaar.New" },
   { "recently-updated",       N_ ("Recently Updated"),  N_ ("Updated"),                N_ ("More Updated"),    "io.github.kolumni.Bazaar.Updated" },
   {           "mobile",                 N_ ("Mobile"),   N_ ("Mobile"),                 N_ ("More Mobile"),     "io.github.kolumni.Bazaar.Mobile" },
-  {               NULL,                          NULL,            NULL,                              NULL,                                  NULL }
+  {          "adwaita",                N_ ("Adwaita"),  N_ ("Adwaita"),                N_ ("More Adwaita"),    "io.github.kolumni.Bazaar.Adwaita" },
+  {              "kde",               N_ ("KDE Apps"), N_ ("KDE Apps"),               N_ ("More KDE Apps"),        "io.github.kolumni.Bazaar.Kde" },
+  {               NULL,                          NULL,            NULL,                               NULL,                                  NULL }
 };
 
 static const CategoryInfo *
@@ -97,10 +112,7 @@ bz_flathub_category_dispose (GObject *object)
 {
   BzFlathubCategory *self = BZ_FLATHUB_CATEGORY (object);
 
-  g_clear_pointer (&self->map_factory, g_object_unref);
-  g_clear_pointer (&self->name, g_free);
-  g_clear_pointer (&self->applications, g_object_unref);
-  g_clear_pointer (&self->quality_applications, g_object_unref);
+  clear (self);
 
   G_OBJECT_CLASS (bz_flathub_category_parent_class)->dispose (object);
 }
@@ -201,6 +213,7 @@ bz_flathub_category_class_init (BzFlathubCategoryClass *klass)
           "name",
           NULL, NULL, NULL,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
   props[PROP_DISPLAY_NAME] =
       g_param_spec_string (
           "display-name",
@@ -253,6 +266,131 @@ bz_flathub_category_class_init (BzFlathubCategoryClass *klass)
 static void
 bz_flathub_category_init (BzFlathubCategory *self)
 {
+}
+
+static void
+bz_flathub_category_real_serialize (BzSerializable  *serializable,
+                                    GVariantBuilder *builder)
+{
+  BzFlathubCategory *self = BZ_FLATHUB_CATEGORY (serializable);
+
+  if (self->name != NULL)
+    g_variant_builder_add (builder, "{sv}", "name", g_variant_new_string (self->name));
+  if (self->applications != NULL)
+    {
+      guint n_items = 0;
+
+      n_items = g_list_model_get_n_items (self->applications);
+      if (n_items > 0)
+        {
+          g_autoptr (GVariantBuilder) sub_builder = NULL;
+
+          sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("as"));
+          for (guint i = 0; i < n_items; i++)
+            {
+              g_autoptr (GtkStringObject) string = NULL;
+
+              string = g_list_model_get_item (self->applications, i);
+              g_variant_builder_add (sub_builder, "s", gtk_string_object_get_string (string));
+            }
+
+          g_variant_builder_add (builder, "{sv}", "applications", g_variant_builder_end (sub_builder));
+        }
+    }
+  if (self->quality_applications != NULL)
+    {
+      guint n_items = 0;
+
+      n_items = g_list_model_get_n_items (self->quality_applications);
+      if (n_items > 0)
+        {
+          g_autoptr (GVariantBuilder) sub_builder = NULL;
+
+          sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("as"));
+          for (guint i = 0; i < n_items; i++)
+            {
+              g_autoptr (GtkStringObject) string = NULL;
+
+              string = g_list_model_get_item (self->quality_applications, i);
+              g_variant_builder_add (sub_builder, "s", gtk_string_object_get_string (string));
+            }
+
+          g_variant_builder_add (builder, "{sv}", "quality-applications", g_variant_builder_end (sub_builder));
+        }
+    }
+  g_variant_builder_add (builder, "{sv}", "total-entries", g_variant_new_int32 (self->total_entries));
+}
+
+static gboolean
+bz_flathub_category_real_deserialize (BzSerializable *serializable,
+                                      GVariant       *import,
+                                      GError        **error)
+{
+  BzFlathubCategory *self       = BZ_FLATHUB_CATEGORY (serializable);
+  g_autoptr (GVariantIter) iter = NULL;
+
+  clear (self);
+
+  iter = g_variant_iter_new (import);
+  for (;;)
+    {
+      g_autofree char *key       = NULL;
+      g_autoptr (GVariant) value = NULL;
+
+      /* TODO automate this, this is awful */
+      if (!g_variant_iter_next (iter, "{sv}", &key, &value))
+        break;
+
+      if (g_strcmp0 (key, "name") == 0)
+        self->name = g_variant_dup_string (value, NULL);
+      else if (g_strcmp0 (key, "applications") == 0)
+        {
+          g_autoptr (GtkStringList) list     = NULL;
+          g_autoptr (GVariantIter) list_iter = NULL;
+
+          list = gtk_string_list_new (NULL);
+
+          list_iter = g_variant_iter_new (value);
+          for (;;)
+            {
+              g_autofree char *id = NULL;
+
+              if (!g_variant_iter_next (list_iter, "s", &id))
+                break;
+              gtk_string_list_append (list, id);
+            }
+
+          self->applications = (GListModel *) g_steal_pointer (&list);
+        }
+      else if (g_strcmp0 (key, "quality-applications") == 0)
+        {
+          g_autoptr (GtkStringList) list     = NULL;
+          g_autoptr (GVariantIter) list_iter = NULL;
+
+          list = gtk_string_list_new (NULL);
+
+          list_iter = g_variant_iter_new (value);
+          for (;;)
+            {
+              g_autofree char *id = NULL;
+
+              if (!g_variant_iter_next (list_iter, "s", &id))
+                break;
+              gtk_string_list_append (list, id);
+            }
+
+          self->quality_applications = (GListModel *) g_steal_pointer (&list);
+        }
+    }
+
+  return TRUE;
+}
+
+static void
+serializable_iface_init (BzSerializableInterface *iface)
+{
+  iface->serialize   = bz_flathub_category_real_serialize;
+  iface->deserialize = bz_flathub_category_real_deserialize;
 }
 
 BzFlathubCategory *
@@ -447,4 +585,68 @@ bz_flathub_category_get_icon_name (BzFlathubCategory *self)
   info = get_category_info (self->name);
   return info ? info->icon_name : NULL;
 }
+
+static void
+clear (BzFlathubCategory *self)
+{
+  g_clear_pointer (&self->map_factory, g_object_unref);
+  g_clear_pointer (&self->name, g_free);
+  g_clear_pointer (&self->applications, g_object_unref);
+  g_clear_pointer (&self->quality_applications, g_object_unref);
+}
+
+static const char *
+bz_flathub_category_map_appstream_id (const char *as_category_id)
+{
+  g_autofree char    *lowercase = NULL;
+  const CategoryInfo *info      = NULL;
+
+  g_return_val_if_fail (as_category_id != NULL, NULL);
+
+  lowercase = g_ascii_strdown (as_category_id, -1);
+  info      = get_category_info (lowercase);
+
+  return info ? info->id : NULL;
+}
+
+GListModel *
+bz_flathub_category_list_from_appstream (GPtrArray *as_categories)
+{
+  g_autoptr (GListStore) categories = NULL;
+
+  g_return_val_if_fail (as_categories != NULL, NULL);
+
+  if (as_categories->len == 0)
+    return NULL;
+
+  categories = g_list_store_new (BZ_TYPE_FLATHUB_CATEGORY);
+
+  for (guint i = 0; i < as_categories->len; i++)
+    {
+      const char *category_id = NULL;
+      const char *mapped_id   = NULL;
+
+      category_id = (const char *) g_ptr_array_index (as_categories, i);
+
+      if (category_id == NULL)
+        continue;
+
+      mapped_id = bz_flathub_category_map_appstream_id (category_id);
+
+      if (mapped_id != NULL)
+        {
+          g_autoptr (BzFlathubCategory) category = NULL;
+
+          category = bz_flathub_category_new ();
+          bz_flathub_category_set_name (category, mapped_id);
+          g_list_store_append (categories, category);
+        }
+    }
+
+  if (g_list_model_get_n_items (G_LIST_MODEL (categories)) == 0)
+    return NULL;
+
+  return G_LIST_MODEL (g_steal_pointer (&categories));
+}
+
 /* End of bz-flathub-category.c */

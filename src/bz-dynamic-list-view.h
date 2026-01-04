@@ -94,6 +94,20 @@ void
 bz_dynamic_list_view_set_max_children_per_line (BzDynamicListView *self,
                                                 guint              max_children);
 
+guint
+bz_dynamic_list_view_get_row_spacing (BzDynamicListView *self);
+
+void
+bz_dynamic_list_view_set_row_spacing (BzDynamicListView *self,
+                                      guint              row_spacing);
+
+guint
+bz_dynamic_list_view_get_column_spacing (BzDynamicListView *self);
+
+void
+bz_dynamic_list_view_set_column_spacing (BzDynamicListView *self,
+                                         guint              column_spacing);
+
 GtkAdjustment *bz_dynamic_list_view_get_vadjustment (BzDynamicListView *self);
 
 G_END_DECLS

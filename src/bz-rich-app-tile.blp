@@ -1,13 +1,17 @@
 using Gtk 4.0;
-using Adw 1;
 
-template $BzRichAppTile: Adw.Bin {
+template $BzRichAppTile: $BzListTile {
+  overflow: hidden;
+
+  accessibility {
+    labelled-by: title;
+    described-by: description;
+  }
+
   child: Box {
     orientation: vertical;
-    overflow: hidden;
 
     styles [
-      "card",
       "rich-tile-card",
     ]
 
@@ -26,12 +30,25 @@ template $BzRichAppTile: Adw.Bin {
         margin-top: 12;
         margin-bottom: 12;
 
+        Image {
+          icon-name: "image-missing-symbolic";
+          pixel-size: 96;
+          halign: center;
+          valign: center;
+          hexpand: true;
+
+          visible: bind $is_null(template.first-screenshot) as <bool>;
+
+        }
+
         $BzRoundedPicture {
           halign: center;
           hexpand: true;
           valign: center;
           paintable: bind template.first-screenshot;
           radius: 6;
+
+          visible: bind $invert_boolean($is_null(template.first-screenshot) as <bool>) as <bool>;
         }
       };
     }
@@ -43,11 +60,12 @@ template $BzRichAppTile: Adw.Bin {
       margin-bottom: 12;
       orientation: horizontal;
       spacing: 15;
-      can-focus: false;
 
       Image {
         pixel-size: 64;
         paintable: bind template.group as <$BzEntryGroup>.icon-paintable;
+
+        visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.icon-paintable) as <bool>) as <bool>;
 
         styles [
           "icon-dropshadow",
@@ -60,20 +78,32 @@ template $BzRichAppTile: Adw.Bin {
         orientation: vertical;
         spacing: 5;
 
-        Label {
-          css-name: "app-tile-title";
+        Box {
+          spacing: 6;
+          Label title {
+            css-name: "app-tile-title";
 
-          styles [
-            "heading",
-          ]
+            styles [
+              "heading",
+            ]
 
-          xalign: 0.0;
-          ellipsize: end;
-          label: bind template.group as <$BzEntryGroup>.title;
-          max-width-chars: 18;
+            xalign: 0.0;
+            ellipsize: end;
+            label: bind template.group as <$BzEntryGroup>.title;
+            max-width-chars: 18;
+          }
+
+          Image {
+             styles [
+               "verified",
+             ]
+            visible: bind template.group as <$BzEntryGroup>.is-verified;
+            icon-name: "verified-checkmark-symbolic";
+            pixel-size: 14;
+          }
         }
 
-        Label {
+        Label description {
           visible: bind $is_null(template.group as <$BzEntryGroup>.eol) as <bool>;
           css-name: "app-tile-description";
           xalign: 0.0;
@@ -115,6 +145,7 @@ template $BzRichAppTile: Adw.Bin {
       Box {
         Button {
           visible: bind $is_zero(template.group as <$BzEntryGroup>.removable) as <bool>;
+          sensitive: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
 
           styles [
             "medium-pill",
@@ -127,6 +158,7 @@ template $BzRichAppTile: Adw.Bin {
 
         Button {
           visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
+          sensitive: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
 
           styles [
             "circular"

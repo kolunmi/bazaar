@@ -22,7 +22,7 @@
 
 #include <adwaita.h>
 
-#include "bz-content-section.h"
+#include "bz-curated-section.h"
 
 G_BEGIN_DECLS
 
@@ -30,13 +30,13 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (BzSectionView, bz_section_view, BZ, SECTION_VIEW, AdwBin)
 
 GtkWidget *
-bz_section_view_new (BzContentSection *section);
+bz_section_view_new (BzCuratedSection *section);
 
 void
 bz_section_view_set_section (BzSectionView    *self,
-                             BzContentSection *section);
+                             BzCuratedSection *section);
 
-BzContentSection *
+BzCuratedSection *
 bz_section_view_get_section (BzSectionView *self);
 
 G_END_DECLS

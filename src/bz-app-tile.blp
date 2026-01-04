@@ -6,27 +6,7 @@ template $BzAppTile: Button {
     "app-tile",
   ]
 
-  margin-start: 5;
-  margin-end: 5;
-  margin-top: 5;
-  margin-bottom: 5;
   child: Overlay {
-    [overlay]
-    Image {
-      css-name: "app-tile-installed-indicator";
-      styles [
-        "success",
-      ]
-
-      halign: end;
-      valign: start;
-      icon-name: "app-installed-symbolic";
-      icon-size: normal;
-      visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
-      margin-top: 10;
-      margin-end: 10;
-    }
-
     Box {
       margin-start: 12;
       margin-end: 12;
@@ -47,11 +27,11 @@ template $BzAppTile: Button {
         valign: center;
         hexpand: true;
         orientation: vertical;
-        spacing: 5;
+        spacing: 4;
 
         Box {
           orientation: horizontal;
-          spacing: 10;
+          spacing: 6;
 
           Label {
             css-name: "app-tile-title";
@@ -65,23 +45,15 @@ template $BzAppTile: Button {
             max-width-chars: 18;
           }
 
-          // Revealer {
-          //   transition-type: crossfade;
-          //   reveal-child: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
-          //   visible: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.verified;
-
-          //   child: Image {
-          //     css-name: "app-tile-verified-check";
-          //     styles [
-          //       "accent",
-          //     ]
-
-          //     has-tooltip: true;
-          //     tooltip-text: _("This flatpak is verified by the original developers of the software.");
-          //     icon-name: "verified-checkmark-symbolic";
-          //     icon-size: normal;
-          //   };
-          // }
+          Image {
+            css-name: "app-tile-verified-check";
+            styles [
+              "verified",
+            ]
+            visible: bind template.group as <$BzEntryGroup>.is-verified;
+            icon-name: "verified-checkmark-symbolic";
+            pixel-size: 14;
+          }
         }
 
         Label {
@@ -91,10 +63,27 @@ template $BzAppTile: Button {
           wrap: true;
           ellipsize: end;
           vexpand: true;
-          lines: 2;
+          lines: bind $description_line_amount($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <int>;
           max-width-chars: 15;
           single-line-mode: true;
           label: bind template.group as <$BzEntryGroup>.description;
+        }
+
+        Box {
+          css-name: "app-tile-installed-pill";
+          halign: start;
+          spacing: 4;
+          visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
+          styles ["small-pill", "installed-pill"]
+
+          Image {
+            icon-name: "app-installed-symbolic";
+            pixel-size: 12;
+          }
+
+          Label {
+            label: _("Installed");
+          }
         }
       }
     }

@@ -8,8 +8,8 @@ template $BzScreenshotsCarousel: Gtk.Widget {
 
   styles [
     "screenshot-carousel",
-    "view",
     "frame",
+    "carousel-box",
   ]
 
   layout-manager: Gtk.BinLayout {};
@@ -23,15 +23,11 @@ template $BzScreenshotsCarousel: Gtk.Widget {
       halign: fill;
       valign: fill;
 
-      styles [
-        "carousel-box",
-      ]
-
       Adw.Carousel carousel {
         vexpand: true;
         hexpand: true;
         valign: center;
-        height-request: 450;
+        height-request: bind $get_carousel_height(template.compact) as <int>;
         allow-mouse-drag: true;
         allow-scroll-wheel: false;
         allow-long-swipes: true;

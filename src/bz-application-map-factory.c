@@ -19,6 +19,7 @@
  */
 
 #include "bz-application-map-factory.h"
+#include "bz-util.h"
 
 struct _BzApplicationMapFactory
 {
@@ -76,7 +77,7 @@ bz_application_map_factory_new (GtkMapListModelMapFunc func,
   self->user_data       = user_data;
   self->ref_user_data   = ref_user_data;
   self->unref_user_data = unref_user_data;
-  self->filter          = filter != NULL ? g_object_ref_sink (filter) : NULL;
+  self->filter          = bz_maybe_ref (filter, g_object_ref_sink);
 
   return self;
 }

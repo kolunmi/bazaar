@@ -4,11 +4,11 @@
   "runtime-version": "49",
   "sdk": "org.gnome.Sdk",
   "command": "bazaar",
-  "tags": [ "nightly" ],
-  "desktop-file-name-suffix": " (Nightly)",
   "sdk-extensions": [
     "org.freedesktop.Sdk.Extension.llvm20"
   ],
+  "tags": [ "nightly" ],
+  "desktop-file-name-suffix": " (Nightly)",
   "finish-args": [
     "--share=network",
     "--share=ipc",
@@ -16,31 +16,39 @@
     "--socket=wayland",
     "--device=dri",
     "--filesystem=/var/lib/flatpak",
+    "--filesystem=~/.var/app",
     "--talk-name=org.freedesktop.Flatpak",
     "--system-talk-name=org.freedesktop.Flatpak.SystemHelper",
     "--filesystem=/var/tmp",
     "--system-talk-name=org.freedesktop.Accounts"
   ],
   "cleanup": [
+    "/share/zsh",
+    "/share/gettext",
     "/include",
     "/lib/pkgconfig",
+    "/lib/cmake",
     "/share/applications/mimeinfo.cache",
     "/share/bash-completion",
+    "/share/zsh/site-functions",
     "/share/icons/hicolor/icon-theme.cache",
     "/share/man",
     "/share/pkgconfig",
     "*.la",
     "*.a"
   ],
-  "build-options": {
-    "append-path": "/usr/lib/sdk/rust-stable/bin:/usr/lib/sdk/llvm20/bin"
-  },
   "modules": [
     {
       "name": "bazaar",
       "buildsystem": "meson",
+      "build-options": {
+        "append-path": "/usr/lib/sdk/llvm20/bin",
+        "prepend-ld-library-path": "/usr/lib/sdk/llvm20/lib"
+      },
       "config-opts": [
+        "-Ddevelopment=true",
         "-Dsandboxed_libflatpak=true",
+        "-Dhardcoded_main_config_path=/run/host/etc/bazaar/bazaar.yaml",
         "-Dhardcoded_content_config_path=/run/host/etc/bazaar/config.yaml",
         "-Dhardcoded_blocklist_path=/run/host/etc/bazaar/blocklist.txt"
       ],
@@ -48,16 +56,28 @@
         {
           "type": "dir",
           "path": "../.."
-        },
-        "bazaar-cargo-sources.json",
-        {
-          "type": "shell",
-          "commands": [
-            "install -Dpm0644 cargo/config .cargo/config.toml"
-          ]
         }
       ],
       "modules": [
+        {
+          "name": "md4c",
+          "buildsystem": "cmake",
+          "config-opts": [
+            "-DBUILD_MD2HTML_EXECUTABLE=Off"
+          ],
+          "sources": [
+            {
+              "type": "git",
+              "url": "https://github.com/mity/md4c.git",
+              "commit": "729e6b8b320caa96328968ab27d7db2235e4fb47",
+              "tag": "release-0.5.2",
+              "x-checker-data": {
+                "type": "git",
+                "tag-pattern": "^release-([\\d.]+)$"
+              }
+            }
+          ]
+        },
         {
           "name": "flatpak",
           "buildsystem": "meson",
@@ -76,6 +96,7 @@
             "-Dsystem_install_dir=/var/lib/flatpak",
             "-Dsystem_bubblewrap=bwrap",
             "-Dsystem_dbus_proxy=xdg-dbus-proxy",
+            "-Dgir=disabled",
             "--sysconfdir=/var/run/host/etc"
           ],
           "cleanup": [
@@ -87,20 +108,24 @@
             "/share/dbus-1/services/org.freedesktop.*",
             "/share/flatpak/triggers",
             "/share/gdm",
-            "/share/zsh"
+            "/share/zsh",
+            "/share/fish",
+            "/lib/sysusers.d",
+            "/lib/tmpfiles.d"
           ],
           "post-install": [
             "install -Dpm0755 -t /app/bin /usr/bin/update-{mime,desktop}-database"
           ],
           "sources": [
             {
-              "type": "archive",
-              "url": "https://github.com/flatpak/flatpak/archive/refs/tags/1.16.1.tar.gz",
-              "sha256": "281aa7e35efa0899fefaf7eba923e8ff117f7c03726c7f73b2ac296dae2daf37",
+              "type": "git",
+              "url": "https://github.com/flatpak/flatpak",
+              "commit": "0835c0272f3a0389f97b02cad4b208f80fec99ed",
+              "tag": "1.17.0",
               "x-checker-data": {
-                "type": "anitya",
-                "project-id": 6377,
-                "url-template": "https://github.com/flatpak/flatpak/archive/refs/tags/$version.tar.gz"
+                "type": "git",
+                "url-template": "$version",
+                "is-important": true
               }
             }
           ],
@@ -117,8 +142,8 @@
               "sources": [
                 {
                   "type": "file",
-                  "url": "https://files.pythonhosted.org/packages/bb/22/f1129e69d94ffff626bdb5c835506b3a5b4f3d070f17ea295e12c2c6f60f/pyparsing-3.2.3.tar.gz",
-                  "sha256": "b9c13f1ab8b3b542f72e28f634bad4de758ab3ce4546e4301970ad6fa77c38be",
+                  "url": "https://files.pythonhosted.org/packages/f2/a5/181488fc2b9d093e3972d2a472855aae8a03f000592dbfce716a512b3359/pyparsing-3.2.5.tar.gz",
+                  "sha256": "2df8d5b7b2802ef88e8d016a2eb9c7aeaa923529cd251ed0fe4608275d4105b6",
                   "x-checker-data": {
                     "type": "pypi",
                     "name": "pyparsing"
@@ -137,50 +162,41 @@
             },
             {
               "name": "polkit",
+              "buildsystem": "meson",
               "config-opts": [
-                "--disable-polkitd",
-                "--disable-man-pages",
-                "--disable-introspection",
-                "--disable-examples",
-                "--disable-gtk-doc",
-                "--disable-libelogind",
-                "--disable-libsystemd-login",
-                "--with-systemdsystemunitdir=no",
-                "--with-authdb=dummy",
-                "--with-authfw=none"
+                "-Dlibs-only=true",
+                "-Dintrospection=false",
+                "-Dauthfw=shadow"
               ],
               "rm-configure": true,
               "build-options": {
-                "cflags": "-Wno-implicit-function-declaration"
+                "env": {
+                  "CFLAGS": "-Wno-implicit-function-declaration"
+                }
               },
               "cleanup": [
                 "/bin/*",
-                "/etc/pam.d",
                 "/etc/dbus-1",
+                "/etc/pam.d",
+                "/include",
+                "/lib/pkgconfig",
+                "/lib/polkit-1",
                 "/share/dbus-1/system-services/*",
-                "/share/polkit-1",
-                "/lib/polkit-1"
+                "/share/polkit-1"
               ],
               "sources": [
                 {
-                  "type": "archive",
-                  "url": "https://www.freedesktop.org/software/polkit/releases/polkit-0.116.tar.gz",
-                  "sha256": "88170c9e711e8db305a12fdb8234fac5706c61969b94e084d0f117d8ec5d34b1"
-                },
-                {
-                  "type": "patch",
-                  "path": "polkit-build-Add-option-to-build-without-polkitd.patch"
-                },
-                {
-                  "type": "script",
-                  "dest-filename": "autogen.sh",
-                  "commands": [
-                    "gtkdocize --flavour no-tmpl\nautoreconf -if\n"
-                  ]
+                  "type": "git",
+                  "url": "https://github.com/polkit-org/polkit",
+                  "commit": "d627b0d1e1108563658dabe3fb8d2a065e64df10",
+                  "tag": "126",
+                  "x-checker-data": {
+                    "type": "git",
+                    "tag-pattern": "^([\\d.]+)$"
+                  }
                 }
               ],
               "modules": [
-                "shared-modules/intltool/intltool-0.51.json",
                 {
                   "name": "ostree",
                   "build-options": {
@@ -189,6 +205,7 @@
                     },
                     "config-opts": [
                       "--disable-man",
+                      "--enable-introspection=no",
                       "--with-curl",
                       "--without-libsystemd"
                     ]
@@ -204,12 +221,13 @@
                     {
                       "type": "git",
                       "url": "https://github.com/ostreedev/ostree",
-                      "tag": "v2025.4",
-                      "commit": "1a9350c94395cf743fc43e715931998fd67c520b",
+                      "tag": "v2025.7",
+                      "commit": "134d144cb52ff018cfedfb936b661189bccc76e6",
                       "x-checker-data": {
                         "type": "anitya",
                         "project-id": 10899,
-                        "tag-template": "v$version"
+                        "tag-template": "v$version",
+                        "is-important": true
                       }
                     }
                   ],
@@ -226,7 +244,8 @@
                         "INIT_D_PATH=/app/etc/init.d"
                       ],
                       "cleanup": [
-                        "/bin/ulockmgr_server"
+                        "/bin/ulockmgr_server",
+                        "/etc"
                       ],
                       "post-install": [
                         "install -Dpm0755 ./fusermount-wrapper.sh /app/bin/fusermount"
@@ -266,13 +285,13 @@
                   ],
                   "sources": [
                     {
-                      "type": "archive",
-                      "url": "https://github.com/flatpak/xdg-dbus-proxy/archive/refs/tags/0.1.6.tar.gz",
-                      "sha256": "ee9c1d665f4e3b025a83d522d478ff7930070f2817fc2cb446db0dca93c990b1",
+                      "type": "git",
+                      "url": "https://github.com/flatpak/xdg-dbus-proxy",
+                      "commit": "1c1989e56f94b9eb3b7567f8a6e8a0aa16cba496",
+                      "tag": "0.1.6",
                       "x-checker-data": {
-                        "type": "anitya",
-                        "project-id": 58434,
-                        "url-template": "https://github.com/flatpak/xdg-dbus-proxy/archive/refs/tags/$version.tar.gz"
+                        "type": "git",
+                        "url-template": "$version"
                       }
                     }
                   ]
@@ -280,18 +299,7 @@
               ]
             }
           ]
-        },
-          {
-              "name": "md4c",
-              "buildsystem": "cmake",
-              "sources": [
-                  {
-                      "type": "git",
-                      "url": "https://github.com/mity/md4c.git",
-                      "tag": "release-0.5.2"
-                  }
-              ]
-          }
+        }
       ]
     },
     {
@@ -304,13 +312,13 @@
       ],
       "sources": [
         {
-          "type": "archive",
-          "url": "https://github.com/containers/bubblewrap/archive/refs/tags/v0.11.0.tar.gz",
-          "sha256": "cfeeb15fcc47d177d195f06fdf0847e93ee3aa6bf46f6ac0a141fa142759e2c3",
+          "type": "git",
+          "url": "https://github.com/containers/bubblewrap",
+          "commit": "9ca3b05ec787acfb4b17bed37db5719fa777834f",
+          "tag": "v0.11.0",
           "x-checker-data": {
-            "type": "anitya",
-            "project-id": 10937,
-            "url-template": "https://github.com/containers/bubblewrap/archive/refs/tags/v$version.tar.gz"
+            "type": "git",
+            "url-template": "$version"
           }
         }
       ]

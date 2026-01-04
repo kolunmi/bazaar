@@ -1,0 +1,18 @@
+prefix=bz
+name=hook
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+include=<gtk/gtk.h>
+include="bz-hook-dialog.h"
+
+ensure=BZ_TYPE_HOOK_DIALOG
+ensure=BZ_TYPE_HOOK_DIALOG_OPTION
+
+enum=bz hook_signal before_transaction after_transaction
+
+property=id char G_TYPE_STRING string
+property=when BzHookSignal BZ_TYPE_HOOK_SIGNAL enum
+property=dialogs GListModel G_TYPE_LIST_MODEL object
+property=shell char G_TYPE_STRING string

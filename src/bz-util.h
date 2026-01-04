@@ -22,6 +22,12 @@
 
 #include <libdex.h>
 
+#define bz_maybe(_ptr, _func)     ((_ptr) != NULL ? (_func) ((_ptr)) : NULL)
+#define bz_maybe_strdup(_ptr)     bz_maybe (_ptr, g_strdup)
+#define bz_maybe_ref(_ptr, _ref)  ((typeof (_ptr)) bz_maybe (_ptr, _ref))
+#define bz_object_maybe_ref(_obj) bz_maybe_ref ((_obj), g_object_ref)
+#define bz_dex_maybe_ref(_obj)    bz_maybe_ref ((_obj), dex_ref)
+
 #define BZ_RELEASE_DATA(name, unref) \
   if ((unref) != NULL)               \
     g_clear_pointer (&self->name, (unref));
@@ -151,6 +157,15 @@ bz_weak_release (gpointer ptr)
   g_weak_ref_clear (wr);
   g_free (wr);
 }
+
+#define bz_weak_get_or_return(self, wr) \
+  G_STMT_START                          \
+  {                                     \
+    (self) = g_weak_ref_get (wr);       \
+    if ((self) == NULL)                 \
+      return;                           \
+  }                                     \
+  G_STMT_END
 
 #define bz_weak_get_or_return_reject(self, wr) \
   G_STMT_START                                 \

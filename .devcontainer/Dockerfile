@@ -1,24 +1,25 @@
-FROM ubuntu:25.04
+FROM fedora:rawhide
 
-RUN userdel -f -r ubuntu
-
-RUN apt-get update && apt-get install -y \
-    appstream \
-    bash-completion \
-    build-essential \
-    cmake \
-    gettext \
-    git \
-    libadwaita-1-dev \
-    libdex-dev \
-    libflatpak-dev \
-    libglycin-1-dev \
-    libglycin-gtk4-1-dev \
-    libgtk-4-dev \
-    liblcms2-dev \
-    libxmlb-dev \
-    libyaml-dev \
-    libsoup-3.0-dev \
-    libjson-glib-dev \
+RUN dnf update -y && dnf install -y \
     meson \
-    ninja-build
+    ninja \
+    cmake \
+    just \
+    git \
+    blueprint-compiler \
+    desktop-file-utils \
+    gtk4-devel \
+    libadwaita-devel \
+    libdex-devel \
+    flatpak-devel \
+    libxmlb-devel \
+    appstream-devel \
+    glycin-devel \
+    glycin-gtk4-devel \
+    libyaml-devel \
+    libsoup3-devel \
+    json-glib-devel \
+    md4c-devel \
+    webkitgtk6.0-devel \
+    libsecret-devel \
+    clangd

@@ -2,6 +2,7 @@ using Gtk 4.0;
 using Adw 1;
 
 template $BzPreferencesDialog: Adw.PreferencesDialog {
+  follows-content-size: true;
   content-height: 500;
   search-enabled: true;
   width-request: 350;
@@ -19,51 +20,44 @@ template $BzPreferencesDialog: Adw.PreferencesDialog {
     title: _("Preferences");
     use-underline: true;
 
+    banner: Adw.Banner {
+      sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.syncing as <bool>) as <bool>;
+      revealed: bind template.state as <$BzStateInfo>.metered_connection as <bool>;
+      title: _("Network connection is metered — automatic store data sync is paused");
+      button-label: _("Sync Manually");
+      action-name: "app.sync-remotes";
+    };
+
     Adw.PreferencesGroup {
-      title: _("Search");
+      title: _("Content Filters");
 
-      Adw.SwitchRow search_only_foss_switch {
+      Adw.SwitchRow only_foss_switch {
         title: _("Free Software Only");
-        subtitle: _("Hide proprietary applications from search results");
+        subtitle: _("Hide proprietary applications when browsing and searching");
       }
 
-      Adw.SwitchRow search_only_flathub_switch {
+      Adw.SwitchRow only_flathub_switch {
         title: _("Flathub Results Only");
-        subtitle: _("Limit search results to applications only available on Flathub");
+        subtitle: _("Limit search and browse results to applications only available on Flathub");
       }
 
-      Adw.SwitchRow search_debounce_switch {
-        title: _("Delay Search Results");
-        subtitle: _("Improve results performance by debouncing search terms");
+      Adw.SwitchRow only_verified_switch {
+        title: _("Verified Results Only");
+        subtitle: _("Hide results that are not verified on Flathub");
+      }
+
+      Adw.SwitchRow hide_eol_switch {
+        title: _("Hide EOL Apps");
+        subtitle: _("Hide apps which are no longer supported by their developers");
       }
     }
 
     Adw.PreferencesGroup {
-      title: _("Application Details");
+      title: _("Search");
 
-      Adw.ActionRow {
-        title: _("Display Star Count");
-        subtitle: _("Show the star count of an application's source code repository");
-        activatable-widget: git_forge_star_counts_switch;
-
-        [suffix]
-        Box {
-          valign: center;
-          spacing: 8;
-
-          MenuButton {
-            icon-name: "info-outline-symbolic";
-            popover: forge_popover;
-
-            styles [
-              "flat",
-            ]
-          }
-
-          Switch git_forge_star_counts_switch {
-            valign: center;
-          }
-        }
+      Adw.SwitchRow search_debounce_switch {
+        title: _("Delay Search Results");
+        subtitle: _("Improve results performance by debouncing search terms");
       }
     }
 
@@ -93,35 +87,5 @@ template $BzPreferencesDialog: Adw.PreferencesDialog {
         };
       }
     }
-
-    Adw.PreferencesGroup {
-      title: _("End of Life Apps");
-
-      Adw.SwitchRow hide_eol_switch {
-        title: _("Hide EOL Apps");
-        subtitle: _("Hide apps which are no longer supported by their developers");
-      }
-    }
   }
-}
-
-Popover forge_popover {
-  has-arrow: true;
-  name: "plain_popover";
-
-  child: Box plain-popover-box {
-    name: "plain-popover-box";
-
-    Label {
-      label: _("Bazaar can fetch and display the star count from an application's source code repository on a remote Git forge. \n For projects on GitHub, rate limits may cause them not to appear.");
-      wrap: true;
-      wrap-mode: word_char;
-      max-width-chars: 30;
-      halign: center;
-      margin-start: 6;
-      margin-end: 6;
-      margin-top: 6;
-      margin-bottom: 6;
-    }
-  };
 }

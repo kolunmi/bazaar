@@ -115,8 +115,6 @@ static char *
 format_download_size (gpointer object,
                       guint64  value)
 {
-  g_autofree char *size = NULL;
-
   return g_format_size (value);
 }
 
@@ -124,8 +122,6 @@ static char *
 format_installed_size (gpointer object,
                        guint64  value)
 {
-  g_autofree char *size = NULL;
-
   return g_format_size (value);
 }
 
@@ -213,7 +209,28 @@ is_transaction_type (gpointer                   object,
   if (tracker == NULL)
     return FALSE;
 
-  return bz_transaction_entry_tracker_get_type_enum (tracker) == type;
+  return bz_transaction_entry_tracker_get_kind (tracker) == type;
+}
+
+static gboolean
+is_transaction_tracker_install (gpointer                   object,
+                                BzTransactionEntryTracker *tracker)
+{
+  return is_transaction_type (object, tracker, BZ_TRANSACTION_ENTRY_KIND_INSTALL);
+}
+
+static gboolean
+is_transaction_tracker_update (gpointer                   object,
+                               BzTransactionEntryTracker *tracker)
+{
+  return is_transaction_type (object, tracker, BZ_TRANSACTION_ENTRY_KIND_UPDATE);
+}
+
+static gboolean
+is_transaction_tracker_removal (gpointer                   object,
+                                BzTransactionEntryTracker *tracker)
+{
+  return is_transaction_type (object, tracker, BZ_TRANSACTION_ENTRY_KIND_REMOVAL);
 }
 
 static gboolean
@@ -224,6 +241,27 @@ list_has_items (gpointer    object,
     return FALSE;
 
   return g_list_model_get_n_items (model) > 0;
+}
+
+static gboolean
+is_queued (gpointer                 object,
+           BzTransactionEntryStatus status)
+{
+  return status == BZ_TRANSACTION_ENTRY_STATUS_QUEUED;
+}
+
+static gboolean
+is_ongoing (gpointer                 object,
+            BzTransactionEntryStatus status)
+{
+  return status == BZ_TRANSACTION_ENTRY_STATUS_ONGOING;
+}
+
+static gboolean
+is_completed (gpointer                 object,
+              BzTransactionEntryStatus status)
+{
+  return status == BZ_TRANSACTION_ENTRY_STATUS_DONE;
 }
 
 static gboolean
@@ -297,6 +335,28 @@ is_entry_kind (gpointer                   object,
   return bz_entry_is_of_kinds (entry, kind);
 }
 
+/* Sucks but we can't rely on magic numbers in the blueprint */
+static gboolean
+is_entry_application (gpointer                   object,
+                      BzTransactionEntryTracker *tracker)
+{
+  return is_entry_kind (object, tracker, BZ_ENTRY_KIND_APPLICATION);
+}
+
+static gboolean
+is_entry_runtime (gpointer                   object,
+                  BzTransactionEntryTracker *tracker)
+{
+  return is_entry_kind (object, tracker, BZ_ENTRY_KIND_RUNTIME);
+}
+
+static gboolean
+is_entry_addon (gpointer                   object,
+                BzTransactionEntryTracker *tracker)
+{
+  return is_entry_kind (object, tracker, BZ_ENTRY_KIND_ADDON);
+}
+
 static void
 entry_clicked (GtkListItem *list_item,
                GtkButton   *button)
@@ -347,11 +407,18 @@ bz_transaction_view_class_init (BzTransactionViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, format_bytes_transferred);
   gtk_widget_class_bind_template_callback (widget_class, format_download_progress);
   gtk_widget_class_bind_template_callback (widget_class, get_main_icon);
-  gtk_widget_class_bind_template_callback (widget_class, is_entry_kind);
+  gtk_widget_class_bind_template_callback (widget_class, is_entry_application);
+  gtk_widget_class_bind_template_callback (widget_class, is_entry_runtime);
+  gtk_widget_class_bind_template_callback (widget_class, is_entry_addon);
   gtk_widget_class_bind_template_callback (widget_class, entry_clicked);
   gtk_widget_class_bind_template_callback (widget_class, create_app_id_filter);
-  gtk_widget_class_bind_template_callback (widget_class, is_transaction_type);
+  gtk_widget_class_bind_template_callback (widget_class, is_transaction_tracker_install);
+  gtk_widget_class_bind_template_callback (widget_class, is_transaction_tracker_update);
+  gtk_widget_class_bind_template_callback (widget_class, is_transaction_tracker_removal);
   gtk_widget_class_bind_template_callback (widget_class, list_has_items);
+  gtk_widget_class_bind_template_callback (widget_class, is_queued);
+  gtk_widget_class_bind_template_callback (widget_class, is_ongoing);
+  gtk_widget_class_bind_template_callback (widget_class, is_completed);
   gtk_widget_class_bind_template_callback (widget_class, is_both);
 }
 

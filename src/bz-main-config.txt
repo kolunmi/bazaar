@@ -1,0 +1,21 @@
+prefix=bz
+name=main_config
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+include=<gtk/gtk.h>
+include="bz-hook.h"
+
+ensure=BZ_TYPE_HOOK
+ensure=BZ_TYPE_HOOK_DIALOG
+ensure=BZ_TYPE_HOOK_DIALOG_OPTION
+
+property=txt_blocklist_paths GListModel G_TYPE_LIST_MODEL object
+property=blocklist_version int G_TYPE_INT int
+property=yaml_blocklist_paths GListModel G_TYPE_LIST_MODEL object
+
+property=curated_config_version int G_TYPE_INT int
+property=curated_config_paths GListModel G_TYPE_LIST_MODEL object
+
+property=hooks GListModel G_TYPE_LIST_MODEL object

@@ -1,0 +1,20 @@
+prefix=bz
+name=blocklist
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+include=<gtk/gtk.h>
+
+include="bz-blocklist-condition.h"
+ensure=BZ_TYPE_BLOCKLIST_CONDITION
+
+property=priority int G_TYPE_INT int
+
+property=conditions GListModel G_TYPE_LIST_MODEL object
+
+property=allow GListModel G_TYPE_LIST_MODEL object
+property=allow_regex GListModel G_TYPE_LIST_MODEL object
+
+property=block GListModel G_TYPE_LIST_MODEL object
+property=block_regex GListModel G_TYPE_LIST_MODEL object

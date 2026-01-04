@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <appstream.h>
 #include <gtk/gtk.h>
 #include <libdex.h>
 
@@ -121,6 +122,8 @@ bz_entry_get_eol (BzEntry *self);
 const char *
 bz_entry_get_description (BzEntry *self);
 
+gboolean bz_entry_is_verified (BzEntry *self);
+
 const char *
 bz_entry_get_long_description (BzEntry *self);
 
@@ -129,6 +132,9 @@ bz_entry_get_remote_repo_name (BzEntry *self);
 
 guint64
 bz_entry_get_size (BzEntry *self);
+
+guint64
+bz_entry_get_installed_size (BzEntry *self);
 
 GdkPaintable *
 bz_entry_get_icon_paintable (BzEntry *self);
@@ -139,7 +145,7 @@ bz_entry_get_screenshot_paintables (BzEntry *self);
 GIcon *
 bz_entry_get_mini_icon (BzEntry *self);
 
-GPtrArray *
+const char *
 bz_entry_get_search_tokens (BzEntry *self);
 
 GListModel *
@@ -196,6 +202,12 @@ bz_entry_supports_form_factor (BzEntry *self,
 
 gint
 bz_entry_get_age_rating (BzEntry *self);
+
+AsContentRating *
+bz_entry_get_content_rating (BzEntry *self);
+
+GListModel *
+bz_entry_get_categories (BzEntry *self);
 
 DexFuture *
 bz_entry_load_mini_icon (BzEntry *self);

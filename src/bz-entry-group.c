@@ -24,6 +24,8 @@
 #include "bz-entry-group.h"
 #include "bz-async-texture.h"
 #include "bz-env.h"
+#include "bz-io.h"
+#include "bz-util.h"
 
 struct _BzEntryGroup
 {
@@ -31,20 +33,25 @@ struct _BzEntryGroup
 
   BzApplicationMapFactory *factory;
 
-  GListStore   *store;
-  char         *id;
-  char         *title;
-  char         *developer;
-  char         *description;
-  GdkPaintable *icon_paintable;
-  GIcon        *mini_icon;
-  gboolean      is_floss;
-  char         *light_accent_color;
-  char         *dark_accent_color;
-  gboolean      is_flathub;
-  GPtrArray    *search_tokens;
-  char         *remote_repos_string;
-  char         *eol;
+  GtkStringList *unique_ids;
+  char          *id;
+  char          *title;
+  char          *developer;
+  char          *description;
+  GdkPaintable  *icon_paintable;
+  GIcon         *mini_icon;
+  gboolean       is_floss;
+  char          *light_accent_color;
+  char          *dark_accent_color;
+  gboolean       is_flathub;
+  gboolean       is_verified;
+  char          *search_tokens;
+  char          *remote_repos_string;
+  char          *eol;
+  guint64        installed_size;
+  int            n_addons;
+  char          *donation_url;
+  GListModel    *categories;
 
   int      max_usefulness;
   gboolean has_non_eol;
@@ -56,7 +63,13 @@ struct _BzEntryGroup
   int updatable_available;
   int removable_available;
 
+  guint64 user_data_size;
+
+  DexFuture *user_data_size_future;
+  DexFuture *reap_user_data_future;
+
   GWeakRef ui_entry;
+  GMutex   mutex;
 };
 
 G_DEFINE_FINAL_TYPE (BzEntryGroup, bz_entry_group, G_TYPE_OBJECT)
@@ -76,16 +89,22 @@ enum
   PROP_LIGHT_ACCENT_COLOR,
   PROP_DARK_ACCENT_COLOR,
   PROP_IS_FLATHUB,
+  PROP_IS_VERIFIED,
   PROP_SEARCH_TOKENS,
   PROP_UI_ENTRY,
   PROP_REMOTE_REPOS_STRING,
   PROP_EOL,
+  PROP_INSTALLED_SIZE,
+  PROP_N_ADDONS,
+  PROP_DONATION_URL,
+  PROP_CATEGORIES,
   PROP_INSTALLABLE,
   PROP_UPDATABLE,
   PROP_REMOVABLE,
   PROP_INSTALLABLE_AND_AVAILABLE,
   PROP_UPDATABLE_AND_AVAILABLE,
   PROP_REMOVABLE_AND_AVAILABLE,
+  PROP_USER_DATA_SIZE,
 
   LAST_PROP
 };
@@ -102,15 +121,24 @@ holding_changed (BzEntryGroup *self,
                  BzEntry      *entry);
 
 static DexFuture *
-dup_all_into_model_fiber (BzEntryGroup *self);
+dup_all_into_store_fiber (BzEntryGroup *self);
+
+static DexFuture *
+user_data_size_then (DexFuture *future,
+                     GWeakRef  *wr);
+
+static void
+check_user_data_size (BzEntryGroup *self);
 
 static void
 bz_entry_group_dispose (GObject *object)
 {
   BzEntryGroup *self = BZ_ENTRY_GROUP (object);
 
+  dex_clear (&self->user_data_size_future);
+  dex_clear (&self->reap_user_data_future);
   g_clear_object (&self->factory);
-  g_clear_object (&self->store);
+  g_clear_object (&self->unique_ids);
   g_clear_pointer (&self->id, g_free);
   g_clear_pointer (&self->title, g_free);
   g_clear_pointer (&self->developer, g_free);
@@ -119,10 +147,14 @@ bz_entry_group_dispose (GObject *object)
   g_clear_pointer (&self->dark_accent_color, g_free);
   g_clear_object (&self->icon_paintable);
   g_clear_object (&self->mini_icon);
-  g_clear_pointer (&self->search_tokens, g_ptr_array_unref);
+  g_clear_pointer (&self->search_tokens, g_free);
   g_clear_pointer (&self->remote_repos_string, g_free);
   g_clear_pointer (&self->eol, g_free);
+  g_clear_pointer (&self->donation_url, g_free);
+  g_clear_object (&self->categories);
+
   g_weak_ref_clear (&self->ui_entry);
+  g_mutex_clear (&self->mutex);
 
   G_OBJECT_CLASS (bz_entry_group_parent_class)->dispose (object);
 }
@@ -170,11 +202,26 @@ bz_entry_group_get_property (GObject    *object,
     case PROP_IS_FLATHUB:
       g_value_set_boolean (value, bz_entry_group_get_is_flathub (self));
       break;
+    case PROP_IS_VERIFIED:
+      g_value_set_boolean (value, bz_entry_group_get_is_verified (self));
+      break;
     case PROP_SEARCH_TOKENS:
       g_value_set_boxed (value, bz_entry_group_get_search_tokens (self));
       break;
     case PROP_EOL:
       g_value_set_string (value, bz_entry_group_get_eol (self));
+      break;
+    case PROP_INSTALLED_SIZE:
+      g_value_set_uint64 (value, bz_entry_group_get_installed_size (self));
+      break;
+    case PROP_N_ADDONS:
+      g_value_set_int (value, bz_entry_group_get_n_addons (self));
+      break;
+    case PROP_DONATION_URL:
+      g_value_set_string (value, bz_entry_group_get_donation_url (self));
+      break;
+    case PROP_CATEGORIES:
+      g_value_set_object (value, bz_entry_group_get_categories (self));
       break;
     case PROP_UI_ENTRY:
       g_value_take_object (value, bz_entry_group_dup_ui_entry (self));
@@ -199,6 +246,9 @@ bz_entry_group_get_property (GObject    *object,
       break;
     case PROP_REMOVABLE_AND_AVAILABLE:
       g_value_set_int (value, bz_entry_group_get_removable_and_available (self));
+      break;
+    case PROP_USER_DATA_SIZE:
+      g_value_set_uint64 (value, bz_entry_group_get_user_data_size (self));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -226,6 +276,7 @@ bz_entry_group_set_property (GObject      *object,
     case PROP_LIGHT_ACCENT_COLOR:
     case PROP_DARK_ACCENT_COLOR:
     case PROP_IS_FLATHUB:
+    case PROP_IS_VERIFIED:
     case PROP_SEARCH_TOKENS:
     case PROP_EOL:
     case PROP_UI_ENTRY:
@@ -236,6 +287,8 @@ bz_entry_group_set_property (GObject      *object,
     case PROP_INSTALLABLE_AND_AVAILABLE:
     case PROP_UPDATABLE_AND_AVAILABLE:
     case PROP_REMOVABLE_AND_AVAILABLE:
+    case PROP_USER_DATA_SIZE:
+
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -319,17 +372,49 @@ bz_entry_group_class_init (BzEntryGroupClass *klass)
           NULL, NULL, FALSE,
           G_PARAM_READABLE);
 
+  props[PROP_IS_VERIFIED] =
+      g_param_spec_boolean (
+          "is-verified",
+          NULL, NULL, FALSE,
+          G_PARAM_READABLE);
+
   props[PROP_SEARCH_TOKENS] =
-      g_param_spec_boxed (
+      g_param_spec_string (
           "search-tokens",
-          NULL, NULL,
-          G_TYPE_PTR_ARRAY,
+          NULL, NULL, NULL,
           G_PARAM_READABLE);
 
   props[PROP_EOL] =
       g_param_spec_string (
           "eol",
           NULL, NULL, NULL,
+          G_PARAM_READABLE);
+
+  props[PROP_INSTALLED_SIZE] =
+      g_param_spec_uint64 (
+          "installed-size",
+          NULL, NULL,
+          0, G_MAXUINT64, 0,
+          G_PARAM_READABLE);
+
+  props[PROP_N_ADDONS] =
+      g_param_spec_int (
+          "n-addons",
+          NULL, NULL,
+          0, G_MAXINT, 0,
+          G_PARAM_READABLE);
+
+  props[PROP_DONATION_URL] =
+      g_param_spec_string (
+          "donation-url",
+          NULL, NULL, NULL,
+          G_PARAM_READABLE);
+
+  props[PROP_CATEGORIES] =
+      g_param_spec_object (
+          "categories",
+          NULL, NULL,
+          G_TYPE_LIST_MODEL,
           G_PARAM_READABLE);
 
   props[PROP_UI_ENTRY] =
@@ -387,15 +472,23 @@ bz_entry_group_class_init (BzEntryGroupClass *klass)
           0, G_MAXINT, 0,
           G_PARAM_READABLE);
 
+  props[PROP_USER_DATA_SIZE] =
+      g_param_spec_uint64 (
+          "user-data-size",
+          NULL, NULL,
+          0, G_MAXUINT64, 0,
+          G_PARAM_READABLE);
+
   g_object_class_install_properties (object_class, LAST_PROP, props);
 }
 
 static void
 bz_entry_group_init (BzEntryGroup *self)
 {
-  self->store          = g_list_store_new (GTK_TYPE_STRING_OBJECT);
+  self->unique_ids     = gtk_string_list_new (NULL);
   self->max_usefulness = -1;
   g_weak_ref_init (&self->ui_entry, NULL);
+  g_mutex_init (&self->mutex);
 }
 
 BzEntryGroup *
@@ -411,11 +504,18 @@ bz_entry_group_new (BzApplicationMapFactory *factory)
   return group;
 }
 
+GMutexLocker *
+bz_entry_group_lock (BzEntryGroup *self)
+{
+  g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), NULL);
+  return g_mutex_locker_new (&self->mutex);
+}
+
 GListModel *
 bz_entry_group_get_model (BzEntryGroup *self)
 {
   g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), NULL);
-  return G_LIST_MODEL (self->store);
+  return G_LIST_MODEL (self->unique_ids);
 }
 
 const char *
@@ -488,7 +588,14 @@ bz_entry_group_get_is_flathub (BzEntryGroup *self)
   return self->is_flathub;
 }
 
-GPtrArray *
+gboolean
+bz_entry_group_get_is_verified (BzEntryGroup *self)
+{
+  g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), FALSE);
+  return self->is_verified;
+}
+
+const char *
 bz_entry_group_get_search_tokens (BzEntryGroup *self)
 {
   g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), NULL);
@@ -502,12 +609,48 @@ bz_entry_group_get_eol (BzEntryGroup *self)
   return self->eol;
 }
 
+guint64
+bz_entry_group_get_installed_size (BzEntryGroup *self)
+{
+  g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), 0);
+  return self->installed_size;
+}
+
+int
+bz_entry_group_get_n_addons (BzEntryGroup *self)
+{
+  g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), 0);
+  return self->n_addons;
+}
+
+const char *
+bz_entry_group_get_donation_url (BzEntryGroup *self)
+{
+  g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), NULL);
+  return self->donation_url;
+}
+
+GListModel *
+bz_entry_group_get_categories (BzEntryGroup *self)
+{
+  g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), NULL);
+  return self->categories;
+}
+
+guint64
+bz_entry_group_get_user_data_size (BzEntryGroup *self)
+{
+  g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), 0);
+  check_user_data_size (self);
+  return self->user_data_size;
+}
+
 BzResult *
 bz_entry_group_dup_ui_entry (BzEntryGroup *self)
 {
   g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), NULL);
 
-  if (g_list_model_get_n_items (G_LIST_MODEL (self->store)) > 0)
+  if (g_list_model_get_n_items (G_LIST_MODEL (self->unique_ids)) > 0)
     {
       g_autoptr (BzResult) result = NULL;
 
@@ -516,7 +659,7 @@ bz_entry_group_dup_ui_entry (BzEntryGroup *self)
         {
           g_autoptr (GtkStringObject) id = NULL;
 
-          id     = g_list_model_get_item (G_LIST_MODEL (self->store), 0);
+          id     = g_list_model_get_item (G_LIST_MODEL (self->unique_ids), 0);
           result = bz_application_map_factory_convert_one (self->factory, g_steal_pointer (&id));
           if (result == NULL)
             return NULL;
@@ -534,11 +677,11 @@ bz_entry_group_dup_ui_entry_id (BzEntryGroup *self)
 {
   g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), NULL);
 
-  if (g_list_model_get_n_items (G_LIST_MODEL (self->store)) > 0)
+  if (g_list_model_get_n_items (G_LIST_MODEL (self->unique_ids)) > 0)
     {
       g_autoptr (GtkStringObject) id = NULL;
 
-      id = g_list_model_get_item (G_LIST_MODEL (self->store), 0);
+      id = g_list_model_get_item (G_LIST_MODEL (self->unique_ids), 0);
       return g_strdup (gtk_string_object_get_string (id));
     }
   else
@@ -592,23 +735,39 @@ bz_entry_group_add (BzEntryGroup *self,
                     BzEntry      *entry,
                     BzEntry      *runtime)
 {
-  const char *unique_id                        = NULL;
-  g_autoptr (GtkStringObject) unique_id_string = NULL;
-  const char *remote_repo                      = NULL;
-  gint        usefulness                       = 0;
+  g_autoptr (GMutexLocker) locker  = NULL;
+  const char   *unique_id          = NULL;
+  gint          usefulness         = 0;
+  const char   *title              = NULL;
+  const char   *developer          = NULL;
+  const char   *description        = NULL;
+  GdkPaintable *icon_paintable     = NULL;
+  GIcon        *mini_icon          = NULL;
+  const char   *search_tokens      = NULL;
+  gboolean      is_floss           = FALSE;
+  const char   *light_accent_color = NULL;
+  const char   *dark_accent_color  = NULL;
+  gboolean      is_flathub         = FALSE;
+  gboolean      is_verified        = FALSE;
+  guint64       installed_size     = 0;
+  GListModel   *addons             = NULL;
+  int           n_addons           = 0;
+  const char   *donation_url       = NULL;
+  GListModel   *entry_categories   = NULL;
+  guint         existing           = 0;
 
   g_return_if_fail (BZ_IS_ENTRY_GROUP (self));
   g_return_if_fail (BZ_IS_ENTRY (entry));
   g_return_if_fail (runtime == NULL || BZ_IS_ENTRY (runtime));
+
+  locker = g_mutex_locker_new (&self->mutex);
 
   if (self->id == NULL)
     {
       self->id = g_strdup (bz_entry_get_id (entry));
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ID]);
     }
-
-  unique_id        = bz_entry_get_unique_id (entry);
-  unique_id_string = gtk_string_object_new (unique_id);
+  unique_id = bz_entry_get_unique_id (entry);
 
   if (!self->has_non_eol)
     {
@@ -627,32 +786,33 @@ bz_entry_group_add (BzEntryGroup *self,
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_EOL]);
     }
 
+  title              = bz_entry_get_title (entry);
+  developer          = bz_entry_get_developer (entry);
+  description        = bz_entry_get_description (entry);
+  icon_paintable     = bz_entry_get_icon_paintable (entry);
+  mini_icon          = bz_entry_get_mini_icon (entry);
+  search_tokens      = bz_entry_get_search_tokens (entry);
+  is_floss           = bz_entry_get_is_foss (entry);
+  light_accent_color = bz_entry_get_light_accent_color (entry);
+  dark_accent_color  = bz_entry_get_dark_accent_color (entry);
+  is_flathub         = bz_entry_get_is_flathub (entry);
+  is_verified        = bz_entry_is_verified (entry);
+  installed_size     = bz_entry_get_installed_size (entry);
+  donation_url       = bz_entry_get_donation_url (entry);
+  entry_categories   = bz_entry_get_categories (entry);
+
+  addons = bz_entry_get_addons (entry);
+  if (addons != NULL)
+    n_addons = g_list_model_get_n_items (addons);
+
   usefulness = bz_entry_calc_usefulness (entry);
-  if (usefulness > self->max_usefulness)
+  existing   = gtk_string_list_find (self->unique_ids, unique_id);
+
+  if (usefulness >= self->max_usefulness)
     {
-      const char   *title              = NULL;
-      const char   *developer          = NULL;
-      const char   *description        = NULL;
-      GdkPaintable *icon_paintable     = NULL;
-      GIcon        *mini_icon          = NULL;
-      GPtrArray    *search_tokens      = NULL;
-      gboolean      is_floss           = FALSE;
-      const char   *light_accent_color = NULL;
-      const char   *dark_accent_color  = NULL;
-      gboolean      is_flathub         = FALSE;
-
-      g_list_store_insert (self->store, 0, unique_id_string);
-
-      title              = bz_entry_get_title (entry);
-      developer          = bz_entry_get_developer (entry);
-      description        = bz_entry_get_description (entry);
-      icon_paintable     = bz_entry_get_icon_paintable (entry);
-      mini_icon          = bz_entry_get_mini_icon (entry);
-      search_tokens      = bz_entry_get_search_tokens (entry);
-      is_floss           = bz_entry_get_is_foss (entry);
-      light_accent_color = bz_entry_get_light_accent_color (entry);
-      dark_accent_color  = bz_entry_get_dark_accent_color (entry);
-      is_flathub         = bz_entry_get_is_flathub (entry);
+      if (existing != G_MAXUINT)
+        gtk_string_list_remove (self->unique_ids, existing);
+      gtk_string_list_splice (self->unique_ids, 0, 0, (const char *const[]) { unique_id, NULL });
 
       if (title != NULL)
         {
@@ -692,11 +852,11 @@ bz_entry_group_add (BzEntryGroup *self,
         }
       if (search_tokens != NULL)
         {
-          g_clear_pointer (&self->search_tokens, g_ptr_array_unref);
-          self->search_tokens = g_ptr_array_ref (search_tokens);
+          g_clear_pointer (&self->search_tokens, g_free);
+          self->search_tokens = g_strdup (search_tokens);
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SEARCH_TOKENS]);
         }
-      if (is_floss != self->is_floss)
+      if (!!is_floss != !!self->is_floss)
         {
           self->is_floss = is_floss;
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_IS_FLOSS]);
@@ -713,35 +873,46 @@ bz_entry_group_add (BzEntryGroup *self,
           self->dark_accent_color = g_strdup (dark_accent_color);
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DARK_ACCENT_COLOR]);
         }
-      if (is_flathub != self->is_flathub)
+      if (!!is_flathub != !!self->is_flathub)
         {
           self->is_flathub = is_flathub;
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_IS_FLATHUB]);
+        }
+      if (!!is_verified != !!self->is_verified)
+        {
+          self->is_verified = is_verified;
+          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_IS_VERIFIED]);
+        }
+      if (installed_size != self->installed_size)
+        {
+          self->installed_size = installed_size;
+          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLED_SIZE]);
+        }
+      if (n_addons != self->n_addons)
+        {
+          self->n_addons = n_addons;
+          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_N_ADDONS]);
+        }
+      if (donation_url != NULL)
+        {
+          g_clear_pointer (&self->donation_url, g_free);
+          self->donation_url = g_strdup (donation_url);
+          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DONATION_URL]);
+        }
+
+      if (entry_categories != NULL && g_list_model_get_n_items (entry_categories) > 0)
+        {
+          g_clear_object (&self->categories);
+          self->categories = g_object_ref (entry_categories);
+          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CATEGORIES]);
         }
 
       self->max_usefulness = usefulness;
     }
   else
     {
-      const char   *title              = NULL;
-      const char   *developer          = NULL;
-      const char   *description        = NULL;
-      GdkPaintable *icon_paintable     = NULL;
-      GIcon        *mini_icon          = NULL;
-      GPtrArray    *search_tokens      = NULL;
-      const char   *light_accent_color = NULL;
-      const char   *dark_accent_color  = NULL;
-
-      g_list_store_append (self->store, unique_id_string);
-
-      title              = bz_entry_get_title (entry);
-      developer          = bz_entry_get_developer (entry);
-      description        = bz_entry_get_description (entry);
-      icon_paintable     = bz_entry_get_icon_paintable (entry);
-      mini_icon          = bz_entry_get_mini_icon (entry);
-      search_tokens      = bz_entry_get_search_tokens (entry);
-      light_accent_color = bz_entry_get_light_accent_color (entry);
-      dark_accent_color  = bz_entry_get_dark_accent_color (entry);
+      if (existing == G_MAXUINT)
+        gtk_string_list_append (self->unique_ids, unique_id);
 
       if (title != NULL && self->title == NULL)
         {
@@ -770,7 +941,7 @@ bz_entry_group_add (BzEntryGroup *self,
         }
       if (search_tokens != NULL && self->search_tokens == NULL)
         {
-          self->search_tokens = g_ptr_array_ref (search_tokens);
+          self->search_tokens = g_strdup (search_tokens);
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SEARCH_TOKENS]);
         }
       if (light_accent_color != NULL && self->light_accent_color == NULL)
@@ -783,57 +954,72 @@ bz_entry_group_add (BzEntryGroup *self,
           self->dark_accent_color = g_strdup (dark_accent_color);
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DARK_ACCENT_COLOR]);
         }
+      if (installed_size > 0 && self->installed_size == 0)
+        {
+          self->installed_size = installed_size;
+          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLED_SIZE]);
+        }
+      if (donation_url != NULL && self->donation_url == NULL)
+        {
+          self->donation_url = g_strdup (donation_url);
+          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DONATION_URL]);
+        }
     }
 
-  remote_repo = bz_entry_get_remote_repo_name (entry);
-  if (remote_repo != NULL)
+  if (existing == G_MAXUINT)
     {
-      g_autofree char *capitalized_repo = NULL;
+      const char *remote_repo = NULL;
 
-      if (remote_repo[0] != '\0')
+      remote_repo = bz_entry_get_remote_repo_name (entry);
+      if (remote_repo != NULL)
         {
-          capitalized_repo    = g_strdup (remote_repo);
-          capitalized_repo[0] = g_ascii_toupper (capitalized_repo[0]);
-        }
-      else
-        {
-          capitalized_repo = g_strdup (remote_repo);
-        }
+          g_autofree char *capitalized_repo = NULL;
 
-      if (self->remote_repos_string != NULL)
-        {
-          g_autofree char *old_string = NULL;
-          if (strstr (self->remote_repos_string, capitalized_repo) == NULL)
+          if (remote_repo[0] != '\0')
             {
-              old_string                = g_steal_pointer (&self->remote_repos_string);
-              self->remote_repos_string = g_strdup_printf ("%s • %s", old_string, capitalized_repo);
+              capitalized_repo    = g_strdup (remote_repo);
+              capitalized_repo[0] = g_ascii_toupper (capitalized_repo[0]);
+            }
+          else
+            {
+              capitalized_repo = g_strdup (remote_repo);
+            }
+
+          if (self->remote_repos_string != NULL)
+            {
+              g_autofree char *old_string = NULL;
+              if (strstr (self->remote_repos_string, capitalized_repo) == NULL)
+                {
+                  old_string                = g_steal_pointer (&self->remote_repos_string);
+                  self->remote_repos_string = g_strdup_printf ("%s • %s", old_string, capitalized_repo);
+                }
+            }
+          else
+            {
+              self->remote_repos_string = g_strdup (capitalized_repo);
             }
         }
+
+      if (bz_entry_is_installed (entry))
+        {
+          self->removable++;
+          if (!bz_entry_is_holding (entry))
+            {
+              self->removable_available++;
+              g_object_notify_by_pspec (G_OBJECT (self), props[PROP_REMOVABLE_AND_AVAILABLE]);
+            }
+          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_REMOVABLE]);
+        }
       else
         {
-          self->remote_repos_string = g_strdup (capitalized_repo);
+          self->installable++;
+          if (!bz_entry_is_holding (entry))
+            {
+              self->installable_available++;
+              g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLABLE_AND_AVAILABLE]);
+            }
+          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLABLE]);
         }
-    }
-
-  if (bz_entry_is_installed (entry))
-    {
-      self->removable++;
-      if (!bz_entry_is_holding (entry))
-        {
-          self->removable_available++;
-          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_REMOVABLE_AND_AVAILABLE]);
-        }
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_REMOVABLE]);
-    }
-  else
-    {
-      self->installable++;
-      if (!bz_entry_is_holding (entry))
-        {
-          self->installable_available++;
-          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLABLE_AND_AVAILABLE]);
-        }
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLABLE]);
     }
 }
 
@@ -841,8 +1027,12 @@ void
 bz_entry_group_connect_living (BzEntryGroup *self,
                                BzEntry      *entry)
 {
+  g_autoptr (GMutexLocker) locker = NULL;
+
   g_return_if_fail (BZ_IS_ENTRY_GROUP (self));
   g_return_if_fail (BZ_IS_ENTRY (entry));
+
+  locker = g_mutex_locker_new (&self->mutex);
 
   g_signal_handlers_disconnect_by_func (entry, installed_changed, self);
   g_signal_handlers_disconnect_by_func (entry, holding_changed, self);
@@ -851,7 +1041,7 @@ bz_entry_group_connect_living (BzEntryGroup *self,
 }
 
 DexFuture *
-bz_entry_group_dup_all_into_model (BzEntryGroup *self)
+bz_entry_group_dup_all_into_store (BzEntryGroup *self)
 {
   g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), NULL);
 
@@ -861,7 +1051,7 @@ bz_entry_group_dup_all_into_model (BzEntryGroup *self)
   return dex_scheduler_spawn (
       dex_scheduler_get_default (),
       bz_get_dex_stack_size (),
-      (DexFiberFunc) dup_all_into_model_fiber,
+      (DexFiberFunc) dup_all_into_store_fiber,
       g_object_ref (self),
       g_object_unref);
 }
@@ -871,6 +1061,10 @@ installed_changed (BzEntryGroup *self,
                    GParamSpec   *pspec,
                    BzEntry      *entry)
 {
+  g_autoptr (GMutexLocker) locker = NULL;
+
+  locker = g_mutex_locker_new (&self->mutex);
+
   if (bz_entry_is_installed (entry))
     {
       self->installable--;
@@ -899,6 +1093,10 @@ installed_changed (BzEntryGroup *self,
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_REMOVABLE]);
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLABLE]);
     }
+
+  dex_clear (&self->user_data_size_future);
+  self->user_data_size = 0;
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_USER_DATA_SIZE]);
 }
 
 static void
@@ -906,6 +1104,10 @@ holding_changed (BzEntryGroup *self,
                  GParamSpec   *pspec,
                  BzEntry      *entry)
 {
+  g_autoptr (GMutexLocker) locker = NULL;
+
+  locker = g_mutex_locker_new (&self->mutex);
+
   if (bz_entry_is_holding (entry))
     {
       if (bz_entry_is_installed (entry))
@@ -926,7 +1128,7 @@ holding_changed (BzEntryGroup *self,
 }
 
 static DexFuture *
-dup_all_into_model_fiber (BzEntryGroup *self)
+dup_all_into_store_fiber (BzEntryGroup *self)
 {
   g_autoptr (GPtrArray) futures = NULL;
   guint n_items                 = 0;
@@ -935,13 +1137,13 @@ dup_all_into_model_fiber (BzEntryGroup *self)
 
   futures = g_ptr_array_new_with_free_func (dex_unref);
 
-  n_items = g_list_model_get_n_items (G_LIST_MODEL (self->store));
+  n_items = g_list_model_get_n_items (G_LIST_MODEL (self->unique_ids));
   for (guint i = 0; i < n_items; i++)
     {
       g_autoptr (GtkStringObject) string = NULL;
       g_autoptr (BzResult) result        = NULL;
 
-      string = g_list_model_get_item (G_LIST_MODEL (self->store), i);
+      string = g_list_model_get_item (G_LIST_MODEL (self->unique_ids), i);
       result = bz_application_map_factory_convert_one (self->factory, g_steal_pointer (&string));
 
       g_ptr_array_add (futures, bz_result_dup_future (result));
@@ -981,4 +1183,84 @@ dup_all_into_model_fiber (BzEntryGroup *self)
     g_warning ("Some entries for %s failed to resolve", self->id);
 
   return dex_future_new_for_object (store);
+}
+
+static DexFuture *
+reap_user_data_then (DexFuture *future,
+                     GWeakRef  *wr)
+{
+  g_autoptr (BzEntryGroup) self = NULL;
+  guint64 old_size              = 0;
+
+  bz_weak_get_or_return_reject (self, wr);
+  dex_clear (&self->reap_user_data_future);
+
+  old_size             = self->user_data_size;
+  self->user_data_size = 0;
+
+  if (old_size != 0)
+    g_object_notify_by_pspec (G_OBJECT (self), props[PROP_USER_DATA_SIZE]);
+
+  return dex_future_new_true ();
+}
+
+void
+bz_entry_group_reap_user_data (BzEntryGroup *self)
+{
+  g_return_if_fail (BZ_IS_ENTRY_GROUP (self));
+  g_return_if_fail (self->id != NULL);
+
+  if (self->reap_user_data_future != NULL)
+    return;
+
+  self->reap_user_data_future = dex_future_then (
+      bz_reap_user_data_dex (self->id),
+      (DexFutureCallback) reap_user_data_then,
+      bz_track_weak (self),
+      bz_weak_release);
+}
+
+static DexFuture *
+user_data_size_then (DexFuture *future,
+                     GWeakRef  *wr)
+{
+  g_autoptr (BzEntryGroup) self = NULL;
+  g_autoptr (GError) error      = NULL;
+  guint64 size                  = 0;
+  guint64 old_size              = 0;
+
+  bz_weak_get_or_return_reject (self, wr);
+  dex_clear (&self->user_data_size_future);
+
+  size = dex_await_uint64 (dex_ref (future), &error);
+  if (error != NULL)
+    size = 0;
+
+  old_size             = self->user_data_size;
+  self->user_data_size = size;
+
+  if (old_size != size)
+    g_object_notify_by_pspec (G_OBJECT (self), props[PROP_USER_DATA_SIZE]);
+
+  return dex_future_new_true ();
+}
+
+static void
+check_user_data_size (BzEntryGroup *self)
+{
+  g_autoptr (DexFuture) future = NULL;
+
+  if (self->user_data_size_future != NULL ||
+      self->id == NULL)
+    return;
+
+  if (self->reap_user_data_future != NULL)
+    return;
+
+  future = bz_get_user_data_size_dex (self->id);
+  future = dex_future_then (
+      future,
+      (DexFutureCallback) user_data_size_then,
+      bz_track_weak (self), bz_weak_release);
+  self->user_data_size_future = g_steal_pointer (&future);
 }

@@ -1,0 +1,17 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzRowView: Adw.Bin {
+  child: $BzDynamicListView {
+    hexpand: true;
+    scroll: false;
+    noscroll-kind: h-box;
+    child-type: "BzSectionView";
+    child-prop: "section";
+
+    bind-widget => $bind_section_view_cb(template);
+    unbind-widget => $unbind_section_view_cb(template);
+
+    model: bind template.row as <$BzCuratedRow>.sections;
+  };
+}

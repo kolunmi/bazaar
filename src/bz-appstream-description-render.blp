@@ -2,8 +2,14 @@ using Gtk 4.0;
 using Adw 1;
 
 template $BzAppstreamDescriptionRender: Adw.Bin {
-  child: Box box {
+  child: Box {
     orientation: vertical;
-    spacing: 10;
+
+    TextView text_view {
+      editable: false;
+      cursor-visible: false;
+      wrap-mode: word_char;
+      height-request: 25;
+    }
   };
 }

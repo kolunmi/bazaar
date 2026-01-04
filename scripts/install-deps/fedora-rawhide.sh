@@ -19,6 +19,8 @@ DEPS=(
     libsoup3-devel
     json-glib-devel
     md4c-devel
+    webkitgtk6.0-devel
+    libsecret-devel
 
     # lsp
     clangd
