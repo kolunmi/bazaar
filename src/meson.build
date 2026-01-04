@@ -137,6 +137,7 @@ bz_sources = files(
   'bz-transaction-manager.c',
   'bz-transaction-view.c',
   'bz-transaction.c',
+  'bz-transaction-dialog.c',
   'bz-update-dialog.c',
   'bz-user-data-page.c',
   'bz-user-data-tile.c',

@@ -27,7 +27,14 @@
 
 G_BEGIN_DECLS
 
-GListModel  *bz_safety_calculator_analyze_entry (BzEntry *entry);
-BzImportance bz_safety_calculator_calculate_rating (BzEntry *entry);
+GListModel  *
+bz_safety_calculator_analyze_entry (BzEntry *entry);
+
+BzImportance
+bz_safety_calculator_calculate_rating (BzEntry *entry);
+
+char *
+bz_safety_calculator_get_top_icon (BzEntry *entry,
+                                   int      index);
 
 G_END_DECLS

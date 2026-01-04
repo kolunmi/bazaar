@@ -107,66 +107,93 @@ GType bz_safety_rating_get_type (void) G_GNUC_CONST;
 GType bz_filesystem_path_type_get_type (void) G_GNUC_CONST;
 GType bz_bus_policy_permission_get_type (void) G_GNUC_CONST;
 
-BzFilesystemPath *bz_filesystem_path_new (BzFilesystemPathType type,
-                                          const char          *subpath);
-void              bz_filesystem_path_free (BzFilesystemPath *self);
-char             *bz_filesystem_path_to_display_string (const BzFilesystemPath *path);
+BzFilesystemPath *
+bz_filesystem_path_new (BzFilesystemPathType type,
+                        const char          *subpath);
+void
+bz_filesystem_path_free (BzFilesystemPath *self);
 
-BzBusPolicy *bz_bus_policy_new (GBusType              bus_type,
-                                const char           *bus_name,
-                                BzBusPolicyPermission permission);
-void         bz_bus_policy_free (BzBusPolicy *self);
+char *
+bz_filesystem_path_to_display_string (const BzFilesystemPath *path);
+
+const char *
+bz_filesystem_path_to_icon_name (const BzFilesystemPath *path);
+
+BzBusPolicy *
+bz_bus_policy_new (GBusType              bus_type,
+                   const char           *bus_name,
+                   BzBusPolicyPermission permission);
+
+void
+bz_bus_policy_free (BzBusPolicy *self);
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (BzFilesystemPath, bz_filesystem_path_free)
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (BzBusPolicy, bz_bus_policy_free)
 
-BzAppPermissions *bz_app_permissions_new (void);
+BzAppPermissions *
+bz_app_permissions_new (void);
 
-BzAppPermissions *bz_app_permissions_new_from_metadata (GKeyFile *keyfile,
-                                                        GError  **error);
+BzAppPermissions *
+bz_app_permissions_new_from_metadata (GKeyFile *keyfile,
+                                      GError  **error);
 
-void bz_app_permissions_seal (BzAppPermissions *self);
+void
+bz_app_permissions_seal (BzAppPermissions *self);
 
-gboolean bz_app_permissions_is_sealed (BzAppPermissions *self);
+gboolean
+bz_app_permissions_is_sealed (BzAppPermissions *self);
 
-gboolean bz_app_permissions_is_empty (BzAppPermissions *self);
+gboolean
+bz_app_permissions_is_empty (BzAppPermissions *self);
 
-void bz_app_permissions_set_flags (BzAppPermissions     *self,
-                                   BzAppPermissionsFlags flags);
+void
+bz_app_permissions_set_flags (BzAppPermissions     *self,
+                              BzAppPermissionsFlags flags);
 
-BzAppPermissionsFlags bz_app_permissions_get_flags (BzAppPermissions *self);
+BzAppPermissionsFlags
+bz_app_permissions_get_flags (BzAppPermissions *self);
 
-void bz_app_permissions_add_flag (BzAppPermissions     *self,
-                                  BzAppPermissionsFlags flags);
+void
+bz_app_permissions_add_flag (BzAppPermissions     *self,
+                             BzAppPermissionsFlags flags);
 
-void bz_app_permissions_remove_flag (BzAppPermissions     *self,
-                                     BzAppPermissionsFlags flags);
+void
+bz_app_permissions_remove_flag (BzAppPermissions     *self,
+                                BzAppPermissionsFlags flags);
 
-void bz_app_permissions_add_filesystem_read (BzAppPermissions    *self,
-                                             BzFilesystemPathType type,
-                                             const char          *subpath);
+void
+bz_app_permissions_add_filesystem_read (BzAppPermissions    *self,
+                                        BzFilesystemPathType type,
+                                        const char          *subpath);
 
-const GPtrArray *bz_app_permissions_get_filesystem_read (BzAppPermissions *self);
+const GPtrArray *
+bz_app_permissions_get_filesystem_read (BzAppPermissions *self);
 
-void bz_app_permissions_add_filesystem_full (BzAppPermissions    *self,
-                                             BzFilesystemPathType type,
-                                             const char          *subpath);
+void
+bz_app_permissions_add_filesystem_full (BzAppPermissions    *self,
+                                        BzFilesystemPathType type,
+                                        const char          *subpath);
 
-const GPtrArray *bz_app_permissions_get_filesystem_full (BzAppPermissions *self);
+const GPtrArray *
+bz_app_permissions_get_filesystem_full (BzAppPermissions *self);
 
-void bz_app_permissions_add_bus_policy (BzAppPermissions     *self,
-                                        GBusType              bus_type,
-                                        const char           *bus_name,
-                                        BzBusPolicyPermission permission);
+void
+bz_app_permissions_add_bus_policy (BzAppPermissions     *self,
+                                   GBusType              bus_type,
+                                   const char           *bus_name,
+                                   BzBusPolicyPermission permission);
 
-const BzBusPolicy *const *bz_app_permissions_get_bus_policies (BzAppPermissions *self,
-                                                               size_t           *out_n_bus_policies);
+const BzBusPolicy *const *
+bz_app_permissions_get_bus_policies (BzAppPermissions *self,
+                                     size_t           *out_n_bus_policies);
 
-void bz_app_permissions_serialize (BzAppPermissions *self,
-                                   GVariantBuilder  *builder);
+void
+bz_app_permissions_serialize (BzAppPermissions *self,
+                              GVariantBuilder  *builder);
 
-gboolean bz_app_permissions_deserialize (BzAppPermissions *self,
-                                         GVariant         *import,
-                                         GError          **error);
+gboolean
+bz_app_permissions_deserialize (BzAppPermissions *self,
+                                GVariant         *import,
+                                GError          **error);
 
 G_END_DECLS
