@@ -53,8 +53,7 @@ struct _BzEntryGroup
   char          *donation_url;
   GListModel    *categories;
 
-  int      max_usefulness;
-  gboolean has_non_eol;
+  int max_usefulness;
 
   int installable;
   int updatable;
@@ -738,6 +737,7 @@ bz_entry_group_add (BzEntryGroup *self,
   g_autoptr (GMutexLocker) locker  = NULL;
   const char   *unique_id          = NULL;
   gint          usefulness         = 0;
+  const char   *eol                = NULL;
   const char   *title              = NULL;
   const char   *developer          = NULL;
   const char   *description        = NULL;
@@ -769,20 +769,13 @@ bz_entry_group_add (BzEntryGroup *self,
     }
   unique_id = bz_entry_get_unique_id (entry);
 
-  if (!self->has_non_eol)
+  eol = bz_entry_get_eol (entry);
+  if (eol == NULL && runtime != NULL)
+    eol = bz_entry_get_eol (runtime);
+  if (eol != NULL)
     {
-      const char *eol = NULL;
-
-      eol = bz_entry_get_eol (entry);
-      if (eol == NULL && runtime != NULL)
-        eol = bz_entry_get_eol (runtime);
-
       g_clear_pointer (&self->eol, g_free);
-      if (eol != NULL)
-        self->eol = g_strdup (eol);
-      else
-        self->has_non_eol = TRUE;
-
+      self->eol = g_strdup (eol);
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_EOL]);
     }
 
