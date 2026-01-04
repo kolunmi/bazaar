@@ -25,7 +25,6 @@
 
 #include "bz-addons-dialog.h"
 #include "bz-age-rating-dialog.h"
-#include "bz-app-permissions.h"
 #include "bz-app-size-dialog.h"
 #include "bz-app-tile.h"
 #include "bz-apps-page.h"
@@ -33,19 +32,17 @@
 #include "bz-context-tile.h"
 #include "bz-developer-badge.h"
 #include "bz-dynamic-list-view.h"
-#include "bz-env.h"
 #include "bz-error.h"
 #include "bz-fading-clamp.h"
 #include "bz-favorite-button.h"
 #include "bz-flatpak-entry.h"
 #include "bz-full-view.h"
-#include "bz-global-net.h"
 #include "bz-hardware-support-dialog.h"
 #include "bz-lazy-async-texture-model.h"
 #include "bz-license-dialog.h"
 #include "bz-releases-list.h"
-#include "bz-safety-dialog.h"
 #include "bz-safety-calculator.h"
+#include "bz-safety-dialog.h"
 #include "bz-screenshot-page.h"
 #include "bz-screenshots-carousel.h"
 #include "bz-section-view.h"
@@ -54,7 +51,6 @@
 #include "bz-state-info.h"
 #include "bz-stats-dialog.h"
 #include "bz-tag-list.h"
-#include "bz-util.h"
 
 struct _BzFullView
 {
@@ -216,7 +212,7 @@ is_zero (gpointer object,
 
 static gboolean
 is_positive (gpointer object,
-         int      value)
+             int      value)
 {
   return value > -1;
 }
@@ -576,6 +572,7 @@ static char *
 format_leftover_label (gpointer object, const char *name, guint64 size)
 {
   g_autofree char *formatted_size = NULL;
+
   formatted_size = g_format_size (size);
   return g_strdup_printf (_ ("%s is not installed, but it still has <b>%s</b> of data present."), name, formatted_size);
 }
@@ -585,8 +582,8 @@ get_safety_rating_icon (gpointer object,
                         BzEntry *entry,
                         int      index)
 {
-  char *icon = NULL;
-  BzImportance importance;
+  char        *icon       = NULL;
+  BzImportance importance = 0;
 
   if (entry == NULL)
     return g_strdup ("app-safety-unknown-symbolic");
@@ -959,12 +956,12 @@ static void
 safety_cb (BzFullView *self,
            GtkButton  *button)
 {
-  AdwDialog *dialog   = NULL;
+  AdwDialog *dialog = NULL;
 
   if (self->group == NULL)
     return;
 
-  dialog  = ADW_DIALOG (bz_safety_dialog_new (self->group));
+  dialog = ADW_DIALOG (bz_safety_dialog_new (self->group));
 
   adw_dialog_present (dialog, GTK_WIDGET (self));
 }
@@ -1051,8 +1048,6 @@ support_cb (BzFullView *self,
       g_app_info_launch_default_for_uri (url, NULL, NULL);
     }
 }
-
-
 
 static void
 install_addons_cb (BzFullView *self,
