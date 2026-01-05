@@ -25,22 +25,13 @@
 #include <adwaita.h>
 #include <math.h>
 
-#define SCROLL_TIMEOUT_DURATION 150
-
 typedef struct
 {
   GtkWidget *widget;
   int        position;
   gboolean   visible;
-  double     size;
   double     snap_point;
-  gboolean   adding;
-  gboolean   removing;
-
-  gboolean      shift_position;
-  AdwAnimation *resize_animation;
-
-  int actual_size;
+  int        actual_size;
 } ChildInfo;
 
 struct _BzCarousel
@@ -52,15 +43,12 @@ struct _BzCarousel
   double         position;
   guint          spacing;
   GtkOrientation orientation;
-  guint          reveal_duration;
 
   double        animation_source_position;
   AdwAnimation *animation;
   ChildInfo    *animation_target_child;
 
   AdwSwipeTracker *tracker;
-
-  double position_shift;
 
   guint    scroll_timeout_id;
   gboolean is_being_allocated;
@@ -110,8 +98,7 @@ find_child_info (BzCarousel *self,
 
 static int
 find_child_index (BzCarousel *self,
-                  GtkWidget  *widget,
-                  gboolean    count_removing)
+                  GtkWidget  *widget)
 {
   GList *l;
   int    i;
@@ -120,9 +107,6 @@ find_child_index (BzCarousel *self,
   for (l = self->children; l; l = l->next)
     {
       ChildInfo *info = l->data;
-
-      if (info->removing && !count_removing)
-        continue;
 
       if (widget == info->widget)
         return i;
@@ -143,11 +127,6 @@ get_nth_link (BzCarousel *self,
   i = n;
   for (l = self->children; l; l = l->next)
     {
-      ChildInfo *info = l->data;
-
-      if (info->removing)
-        continue;
-
       if (i-- == 0)
         return l;
     }
@@ -157,9 +136,7 @@ get_nth_link (BzCarousel *self,
 
 static ChildInfo *
 get_closest_child_at (BzCarousel *self,
-                      double      position,
-                      gboolean    count_adding,
-                      gboolean    count_removing)
+                      double      position)
 {
   GList     *l;
   ChildInfo *closest_child = NULL;
@@ -167,12 +144,6 @@ get_closest_child_at (BzCarousel *self,
   for (l = self->children; l; l = l->next)
     {
       ChildInfo *child = l->data;
-
-      if (child->adding && !count_adding)
-        continue;
-
-      if (child->removing && !count_removing)
-        continue;
 
       if (!closest_child ||
           ABS (closest_child->snap_point - position) >
@@ -195,7 +166,7 @@ get_range (BzCarousel *self,
     *lower = 0;
 
   if (upper)
-    *upper = MAX (0, self->position_shift + (child ? child->snap_point : 0));
+    *upper = MAX (0, child ? child->snap_point : 0);
 }
 
 static GtkWidget *
@@ -209,7 +180,7 @@ get_page_at_position (BzCarousel *self,
 
   position = CLAMP (position, lower, upper);
 
-  child = get_closest_child_at (self, position, TRUE, FALSE);
+  child = get_closest_child_at (self, position);
 
   if (!child)
     return NULL;
@@ -218,28 +189,9 @@ get_page_at_position (BzCarousel *self,
 }
 
 static void
-update_shift_position_flag (BzCarousel *self,
-                            ChildInfo  *child)
-{
-  ChildInfo *closest_child;
-  int        animating_index, closest_index;
-
-  closest_child = get_closest_child_at (self, self->position, FALSE, TRUE);
-
-  if (!closest_child)
-    return;
-
-  animating_index = g_list_index (self->children, child);
-  closest_index   = g_list_index (self->children, closest_child);
-
-  child->shift_position = (closest_index >= animating_index);
-}
-
-static void
 set_position (BzCarousel *self,
               double      position)
 {
-  GList *l;
   double lower = 0, upper = 0;
 
   get_range (self, &lower, &upper);
@@ -249,83 +201,7 @@ set_position (BzCarousel *self,
   self->position = position;
   gtk_widget_queue_allocate (GTK_WIDGET (self));
 
-  for (l = self->children; l; l = l->next)
-    {
-      ChildInfo *child = l->data;
-
-      if (child->adding || child->removing)
-        update_shift_position_flag (self, child);
-    }
-
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_POSITION]);
-}
-
-static void
-resize_animation_value_cb (double     value,
-                           ChildInfo *child)
-{
-  BzCarousel *self  = BZ_CAROUSEL (adw_animation_get_widget (child->resize_animation));
-  double      delta = value - child->size;
-
-  child->size = value;
-
-  if (child->shift_position)
-    self->position_shift += delta;
-
-  gtk_widget_queue_allocate (GTK_WIDGET (self));
-}
-
-static void
-resize_animation_done_cb (ChildInfo *child)
-{
-  BzCarousel *self = BZ_CAROUSEL (adw_animation_get_widget (child->resize_animation));
-
-  g_clear_object (&child->resize_animation);
-
-  if (child->adding)
-    child->adding = FALSE;
-
-  if (child->removing)
-    {
-      self->children = g_list_remove (self->children, child);
-      g_free (child);
-    }
-
-  gtk_widget_queue_allocate (GTK_WIDGET (self));
-}
-
-static void
-animate_child_resize (BzCarousel *self,
-                      ChildInfo  *child,
-                      double      value,
-                      guint       duration)
-{
-  AdwAnimationTarget *target;
-  double              old_size = child->size;
-
-  update_shift_position_flag (self, child);
-
-  if (child->resize_animation)
-    {
-      gboolean been_removing = child->removing;
-      adw_animation_skip (child->resize_animation);
-      if (been_removing)
-        return;
-    }
-
-  target = adw_callback_animation_target_new ((AdwAnimationTargetFunc)
-                                                  resize_animation_value_cb,
-                                              child, NULL);
-  child->resize_animation =
-      adw_timed_animation_new (GTK_WIDGET (self), old_size,
-                               value, duration, target);
-
-  adw_timed_animation_set_easing (ADW_TIMED_ANIMATION (child->resize_animation), ADW_EASE);
-
-  g_signal_connect_swapped (child->resize_animation, "done",
-                            G_CALLBACK (resize_animation_done_cb), child);
-
-  adw_animation_play (child->resize_animation);
 }
 
 static void
@@ -346,7 +222,7 @@ scroll_animation_done_cb (BzCarousel *self)
   self->animation_target_child    = NULL;
 
   child = get_page_at_position (self, self->position);
-  index = find_child_index (self, child, FALSE);
+  index = find_child_index (self, child);
 
   g_signal_emit (self, signals[SIGNAL_PAGE_CHANGED], 0, index);
 }
@@ -375,8 +251,7 @@ scroll_to (BzCarousel *self,
 static inline double
 get_closest_snap_point (BzCarousel *self)
 {
-  ChildInfo *closest_child =
-      get_closest_child_at (self, self->position, TRUE, TRUE);
+  ChildInfo *closest_child = get_closest_child_at (self, self->position);
 
   if (!closest_child)
     return 0;
@@ -469,9 +344,6 @@ bz_carousel_measure (GtkWidget     *widget,
       GtkWidget *child      = child_info->widget;
       int        child_min, child_nat;
 
-      if (child_info->removing)
-        continue;
-
       if (!gtk_widget_get_visible (child))
         continue;
 
@@ -506,13 +378,6 @@ bz_carousel_size_allocate (GtkWidget *widget,
 
   self = BZ_CAROUSEL (widget);
 
-  if (!G_APPROX_VALUE (self->position_shift, 0, DBL_EPSILON))
-    {
-      set_position (self, self->position + self->position_shift);
-      adw_swipe_tracker_shift_position (self->tracker, self->position_shift);
-      self->position_shift = 0;
-    }
-
   total_size = 0;
   for (children = self->children; children; children = children->next)
     {
@@ -523,12 +388,6 @@ bz_carousel_size_allocate (GtkWidget *widget,
 
       child_info = children->data;
       child      = child_info->widget;
-
-      if (child_info->removing)
-        {
-          child_info->actual_size = 0;
-          continue;
-        }
 
       if (self->orientation == GTK_ORIENTATION_HORIZONTAL)
         {
@@ -550,7 +409,7 @@ bz_carousel_size_allocate (GtkWidget *widget,
         }
 
       child_info->actual_size = child_size;
-      total_size += child_size * child_info->size;
+      total_size += child_size;
     }
 
   n_pages = bz_carousel_get_n_pages (self);
@@ -567,7 +426,7 @@ bz_carousel_size_allocate (GtkWidget *widget,
       child_info = children->data;
 
       child_info->snap_point = snap_point;
-      snap_point += child_info->size;
+      snap_point += 1.0;
 
       if (child_info == self->animation_target_child)
         adw_spring_animation_set_value_to (ADW_SPRING_ANIMATION (self->animation),
@@ -588,36 +447,23 @@ bz_carousel_size_allocate (GtkWidget *widget,
   for (children = self->children; children; children = children->next)
     {
       ChildInfo *child_info;
-      double     child_contribution;
 
-      child_info         = children->data;
-      child_contribution = child_info->size;
+      child_info = children->data;
 
-      if (child_contribution <= 0)
-        continue;
-
-      if (remaining_position < child_contribution)
+      if (remaining_position < 1.0)
         {
           GList *next;
           double fraction;
 
           current_child = child_info;
           next          = children->next;
-          while (next)
+          if (next)
             {
-              ChildInfo *ni;
-
-              ni = next->data;
-              if (ni->size > 0 && !ni->removing)
-                {
-                  next_child = ni;
-                  break;
-                }
-              next = next->next;
+              next_child = next->data;
             }
 
           current_offset += child_info->actual_size * remaining_position;
-          fraction = remaining_position / child_contribution;
+          fraction = remaining_position;
           if (next_child)
             {
               center_offset_size = child_info->actual_size * (1.0 - fraction) +
@@ -631,23 +477,14 @@ bz_carousel_size_allocate (GtkWidget *widget,
           break;
         }
 
-      current_offset += child_info->actual_size * child_contribution;
-      remaining_position -= child_contribution;
+      current_offset += child_info->actual_size;
+      remaining_position -= 1.0;
     }
 
-  if (!current_child)
+  if (!current_child && self->children)
     {
-      for (children = self->children; children; children = children->next)
-        {
-          ChildInfo *child_info;
-
-          child_info = children->data;
-          if (!child_info->removing && child_info->size > 0)
-            {
-              center_offset_size = child_info->actual_size;
-              break;
-            }
-        }
+      ChildInfo *child_info = self->children->data;
+      center_offset_size    = child_info->actual_size;
     }
 
   if (self->orientation == GTK_ORIENTATION_VERTICAL)
@@ -672,9 +509,6 @@ bz_carousel_size_allocate (GtkWidget *widget,
       child_info = children->data;
       transform  = gsk_transform_new ();
 
-      if (child_info->removing)
-        continue;
-
       if (!gtk_widget_get_visible (child_info->widget))
         continue;
 
@@ -697,7 +531,7 @@ bz_carousel_size_allocate (GtkWidget *widget,
 
           transform = gsk_transform_translate (transform, &GRAPHENE_POINT_INIT (0, child_info->position));
 
-          y += child_info->actual_size * child_info->size;
+          y += child_info->actual_size;
         }
       else
         {
@@ -708,9 +542,9 @@ bz_carousel_size_allocate (GtkWidget *widget,
           transform = gsk_transform_translate (transform, &GRAPHENE_POINT_INIT (child_info->position, 0));
 
           if (is_rtl)
-            x -= child_info->actual_size * child_info->size;
+            x -= child_info->actual_size;
           else
-            x += child_info->actual_size * child_info->size;
+            x += child_info->actual_size;
         }
 
       gtk_widget_allocate (child_info->widget, child_width, child_height, baseline, transform);
@@ -743,7 +577,9 @@ bz_carousel_dispose (GObject *object)
   while (self->children)
     {
       ChildInfo *info = self->children->data;
-      bz_carousel_remove (self, info->widget);
+      gtk_widget_unparent (info->widget);
+      self->children = g_list_remove (self->children, info);
+      g_free (info);
     }
 
   g_clear_object (&self->tracker);
@@ -861,9 +697,8 @@ bz_carousel_init (BzCarousel *self)
   GtkEventController *controller;
   AdwAnimationTarget *target;
 
-  self->spacing         = 0;
-  self->reveal_duration = 0;
-  self->orientation     = GTK_ORIENTATION_HORIZONTAL;
+  self->spacing     = 0;
+  self->orientation = GTK_ORIENTATION_HORIZONTAL;
 
   gtk_widget_set_overflow (GTK_WIDGET (self), GTK_OVERFLOW_HIDDEN);
 
@@ -898,10 +733,7 @@ bz_carousel_buildable_add_child (GtkBuildable *buildable,
                                  GObject      *child,
                                  const char   *type)
 {
-  if (GTK_IS_WIDGET (child))
-    bz_carousel_append (BZ_CAROUSEL (buildable), GTK_WIDGET (child));
-  else
-    parent_buildable_iface->add_child (buildable, builder, child, type);
+  parent_buildable_iface->add_child (buildable, builder, child, type);
 }
 
 static void
@@ -973,56 +805,41 @@ bz_carousel_new (void)
 }
 
 void
-bz_carousel_append (BzCarousel *self,
-                    GtkWidget  *widget)
+bz_carousel_set_widgets (BzCarousel *self,
+                         GList      *widgets)
 {
-  ChildInfo *info;
+  GList *l;
 
   g_return_if_fail (BZ_IS_CAROUSEL (self));
-  g_return_if_fail (GTK_IS_WIDGET (widget));
-  g_return_if_fail (gtk_widget_get_parent (widget) == NULL);
 
-  info              = g_new0 (ChildInfo, 1);
-  info->widget      = widget;
-  info->size        = 0;
-  info->adding      = TRUE;
-  info->actual_size = 0;
+  while (self->children)
+    {
+      ChildInfo *info = self->children->data;
+      gtk_widget_unparent (info->widget);
+      self->children = g_list_remove (self->children, info);
+      g_free (info);
+    }
 
-  self->children = g_list_append (self->children, info);
-  gtk_widget_set_parent (widget, GTK_WIDGET (self));
+  for (l = widgets; l; l = l->next)
+    {
+      GtkWidget *widget = GTK_WIDGET (l->data);
+      ChildInfo *info;
 
-  self->is_being_allocated = TRUE;
+      g_return_if_fail (GTK_IS_WIDGET (widget));
+      g_return_if_fail (gtk_widget_get_parent (widget) == NULL);
+
+      info         = g_new0 (ChildInfo, 1);
+      info->widget = widget;
+
+      self->children = g_list_append (self->children, info);
+      gtk_widget_set_parent (widget, GTK_WIDGET (self));
+    }
+
+  self->position = 0;
+
   gtk_widget_queue_allocate (GTK_WIDGET (self));
-
-  animate_child_resize (self, info, 1, self->reveal_duration);
-
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_N_PAGES]);
-}
-
-void
-bz_carousel_remove (BzCarousel *self,
-                    GtkWidget  *child)
-{
-  ChildInfo *info;
-
-  g_return_if_fail (BZ_IS_CAROUSEL (self));
-  g_return_if_fail (GTK_IS_WIDGET (child));
-  g_return_if_fail (gtk_widget_get_parent (child) == GTK_WIDGET (self));
-
-  info = find_child_info (self, child);
-
-  g_assert_nonnull (info);
-
-  info->removing = TRUE;
-
-  gtk_widget_unparent (child);
-
-  info->widget = NULL;
-
-  if (!gtk_widget_in_destruction (GTK_WIDGET (self)))
-    animate_child_resize (self, info, 0, self->reveal_duration);
-
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_N_PAGES]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_POSITION]);
 }
 
 static void
@@ -1058,24 +875,17 @@ bz_carousel_scroll_to (BzCarousel *self,
                        GtkWidget  *widget,
                        gboolean    animate)
 {
+  ScrollData *data;
   g_return_if_fail (BZ_IS_CAROUSEL (self));
   g_return_if_fail (GTK_IS_WIDGET (widget));
   g_return_if_fail (gtk_widget_get_parent (widget) == GTK_WIDGET (self));
 
-  if (self->is_being_allocated)
-    {
-      ScrollData *data;
+  data           = g_new (ScrollData, 1);
+  data->carousel = g_object_ref (self);
+  data->widget   = g_object_ref (widget);
+  data->animate  = animate;
 
-      data           = g_new (ScrollData, 1);
-      data->carousel = g_object_ref (self);
-      data->widget   = g_object_ref (widget);
-      data->animate  = animate;
-
-      g_idle_add_once ((GSourceOnceFunc) scroll_to_idle_cb, data);
-      return;
-    }
-
-  do_scroll_to (self, widget, animate);
+  g_idle_add_once ((GSourceOnceFunc) scroll_to_idle_cb, data);
 }
 
 GtkWidget *
@@ -1083,33 +893,17 @@ bz_carousel_get_nth_page (BzCarousel *self,
                           guint       n)
 {
   ChildInfo *info;
-
   g_return_val_if_fail (BZ_IS_CAROUSEL (self), NULL);
   g_return_val_if_fail (n < bz_carousel_get_n_pages (self), NULL);
-
   info = get_nth_link (self, n)->data;
-
   return info->widget;
 }
 
 guint
 bz_carousel_get_n_pages (BzCarousel *self)
 {
-  GList *l;
-  guint  n_pages;
-
   g_return_val_if_fail (BZ_IS_CAROUSEL (self), 0);
-
-  n_pages = 0;
-  for (l = self->children; l; l = l->next)
-    {
-      ChildInfo *child = l->data;
-
-      if (!child->removing)
-        n_pages++;
-    }
-
-  return n_pages;
+  return g_list_length (self->children);
 }
 
 double

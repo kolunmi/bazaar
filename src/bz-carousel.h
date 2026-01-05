@@ -31,11 +31,8 @@ G_DECLARE_FINAL_TYPE (BzCarousel, bz_carousel, BZ, CAROUSEL, GtkWidget)
 
 GtkWidget *bz_carousel_new (void) G_GNUC_WARN_UNUSED_RESULT;
 
-void bz_carousel_append (BzCarousel *self,
-                         GtkWidget  *child);
-
-void bz_carousel_remove (BzCarousel *self,
-                         GtkWidget  *child);
+void bz_carousel_set_widgets (BzCarousel *self,
+                              GList      *widgets);
 
 void bz_carousel_scroll_to (BzCarousel *self,
                             GtkWidget  *widget,

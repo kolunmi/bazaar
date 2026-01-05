@@ -245,25 +245,12 @@ get_carousel_height (BzScreenshotsCarousel *self)
 }
 
 static void
-clear_carousel (BzScreenshotsCarousel *self)
-{
-  GtkWidget *child;
-
-  if (!self->carousel)
-    return;
-
-  while ((child = gtk_widget_get_first_child (GTK_WIDGET (self->carousel))) != NULL)
-    bz_carousel_remove (self->carousel, child);
-}
-
-static void
 populate_carousel (BzScreenshotsCarousel *self)
 {
   guint    i;
   guint    n_items = 0;
   gboolean wide    = FALSE;
-
-  clear_carousel (self);
+  GList   *widgets = NULL;
 
   if (!self->carousel || self->model == NULL)
     return;
@@ -293,9 +280,12 @@ populate_carousel (BzScreenshotsCarousel *self)
       g_signal_connect (screenshot, "clicked",
                         G_CALLBACK (on_screenshot_clicked), self);
 
-      bz_carousel_append (self->carousel, screenshot);
+      widgets = g_list_append (widgets, screenshot);
       gtk_widget_set_visible (screenshot, TRUE);
     }
+
+  bz_carousel_set_widgets (self->carousel, widgets);
+  g_list_free (widgets);
 
   update_button_visibility (self);
 }
@@ -308,20 +298,21 @@ on_model_items_changed (GListModel            *model,
                         BzScreenshotsCarousel *self)
 {
   GtkWidget *child;
+  guint      n_pages;
+  guint      target_page;
 
   populate_carousel (self);
 
-  if (is_window_wide (self) && model != NULL && g_list_model_get_n_items (model) >= 3)
-    {
-      child = gtk_widget_get_next_sibling (gtk_widget_get_first_child (GTK_WIDGET (self->carousel)));
-    }
-  else
-    {
-      child = gtk_widget_get_first_child (GTK_WIDGET (self->carousel));
-    }
+  n_pages = bz_carousel_get_n_pages (self->carousel);
+
+  if (n_pages == 0)
+    return;
+
+  target_page = (is_window_wide (self) && model != NULL && g_list_model_get_n_items (model) >= 3) ? 1 : 0;
+  child = bz_carousel_get_nth_page (self->carousel, target_page);
 
   if (child != NULL)
-    bz_carousel_scroll_to (self->carousel, child, FALSE);
+      bz_carousel_scroll_to (self->carousel, child, FALSE);
 }
 
 static void
