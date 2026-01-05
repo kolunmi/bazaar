@@ -1,6 +1,7 @@
 using Gtk 4.0;
 
 template $BzDecoratedScreenshot: Button {
+  halign: center;
   styles [
     "flat", "decorated-screenshot"
   ]
@@ -8,5 +9,6 @@ template $BzDecoratedScreenshot: Button {
   child: Gtk.Picture {
     paintable: bind template.async-texture;
     content-fit: contain;
+    halign: center;
   };
 }
