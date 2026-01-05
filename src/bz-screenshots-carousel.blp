@@ -1,5 +1,4 @@
 using Gtk 4.0;
-using Adw 1;
 
 template $BzScreenshotsCarousel: Gtk.Widget {
   accessibility {
@@ -23,19 +22,16 @@ template $BzScreenshotsCarousel: Gtk.Widget {
       halign: fill;
       valign: fill;
 
-      Adw.Carousel carousel {
+      $BzCarousel carousel {
         vexpand: true;
         hexpand: true;
         valign: center;
         height-request: bind $get_carousel_height(template.compact) as <int>;
-        allow-mouse-drag: true;
-        allow-scroll-wheel: false;
-        allow-long-swipes: true;
         notify::position => $on_notify_position() swapped;
         notify::n-pages => $on_notify_n_pages() swapped;
       }
 
-      Adw.CarouselIndicatorDots carousel_indicator {
+      $BzCarouselIndicatorDots carousel_indicator {
         carousel: carousel;
         opacity: 0;
         hexpand: true;

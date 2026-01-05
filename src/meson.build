@@ -63,6 +63,8 @@ bz_sources = files(
   'bz-auth-state.c',
   'bz-backend.c',
   'bz-category-tile.c',
+  'bz-carousel.c',
+  'bz-carousel-indicator-dots.c',
   'bz-comet-overlay.c',
   'bz-content-provider.c',
   'bz-context-tile.c',
