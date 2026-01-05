@@ -245,6 +245,18 @@ get_carousel_height (BzScreenshotsCarousel *self)
 }
 
 static void
+on_screenshot_focus_changed (BzDecoratedScreenshot *screenshot,
+                            GParamSpec            *pspec,
+                            BzScreenshotsCarousel *self)
+{
+  if (!self->carousel)
+    return;
+
+  if (gtk_widget_has_focus (GTK_WIDGET (screenshot)))
+    bz_carousel_scroll_to (self->carousel, GTK_WIDGET (screenshot), TRUE);
+}
+
+static void
 populate_carousel (BzScreenshotsCarousel *self)
 {
   guint    i;
@@ -279,6 +291,9 @@ populate_carousel (BzScreenshotsCarousel *self)
 
       g_signal_connect (screenshot, "clicked",
                         G_CALLBACK (on_screenshot_clicked), self);
+
+      g_signal_connect (screenshot, "notify::has-focus",
+                  G_CALLBACK (on_screenshot_focus_changed), self);
 
       widgets = g_list_append (widgets, screenshot);
       gtk_widget_set_visible (screenshot, TRUE);
