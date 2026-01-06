@@ -175,6 +175,7 @@ create_release_row (const char *version,
       gtk_widget_set_margin_top (GTK_WIDGET (fallback_label), 5);
       gtk_widget_add_css_class (GTK_WIDGET (fallback_label), "dim-label");
       gtk_label_set_xalign (fallback_label, 0.0);
+      gtk_label_set_wrap (fallback_label, TRUE);
       gtk_box_append (content_box, GTK_WIDGET (fallback_label));
     }
 
