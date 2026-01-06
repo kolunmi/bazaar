@@ -326,20 +326,17 @@ template $BzWindow: Adw.ApplicationWindow {
 
                     Adw.HeaderBar top_header_bar {
                       [start]
-                      Revealer {
-                        reveal-child: bind template.state as <$BzStateInfo>.auth-state as <$BzAuthState>.authenticated;
-                        transition-type: slide_left;
-                        child: MenuButton {
-                          menu-model: account_menu;
-                          styles [
-                            "circular",
-                            "flat",
-                          ]
+                      MenuButton {
+                        visible: bind template.state as <$BzStateInfo>.auth-state as <$BzAuthState>.authenticated;
+                        menu-model: account_menu;
+                        styles [
+                          "circular",
+                          "flat",
+                        ]
 
-                          child: Adw.Avatar {
-                            size: 24;
-                            custom-image: bind template.state as <$BzStateInfo>.auth-state as <$BzAuthState>.paintable;
-                          };
+                        child: Adw.Avatar {
+                          size: 24;
+                          custom-image: bind template.state as <$BzStateInfo>.auth-state as <$BzAuthState>.paintable;
                         };
                       }
 
