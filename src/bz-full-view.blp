@@ -297,7 +297,7 @@ template $BzFullView: Adw.Bin {
                           homogeneous: true;
 
                           $BzContextTile download_size_tile {
-                            label: _("Size");
+                            label: bind $get_size_label($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <string>;
                             has-tooltip: true;
                             tooltip-text: bind $format_size_tooltip(template.ui-entry as <$BzResult>.object as <$BzEntry>.size) as <string>;
                             lozenge-style: "grey";
@@ -305,7 +305,7 @@ template $BzFullView: Adw.Bin {
 
                             lozenge-child: Label {
                               justify: center;
-                              label: bind $format_size(template.ui-entry as <$BzResult>.object as <$BzEntry>.size) as <string>;
+                              label: bind $format_size($get_size_type(template.ui-entry as <$BzResult>.object as <$BzEntry>, $is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <int>) as <string>;
                               lines: 3;
                               ellipsize: end;
                               halign: center;
