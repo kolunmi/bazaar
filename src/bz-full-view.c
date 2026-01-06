@@ -356,6 +356,24 @@ format_size (gpointer object, guint64 value)
   return g_strdup (size_str);
 }
 
+static  char *
+get_size_label (gpointer object,
+                gboolean is_installable)
+{
+   return g_strdup (is_installable ? _("Download") : _("Installed"));
+}
+
+static guint64
+get_size_type (gpointer object,
+               BzEntry *entry,
+               gboolean is_installable)
+{
+  if (entry == NULL)
+    return 0;
+
+  return is_installable ? bz_entry_get_size (entry) : bz_entry_get_installed_size (entry);
+}
+
 static char *
 format_size_tooltip (gpointer object, guint64 value)
 {
@@ -1261,6 +1279,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, format_recent_downloads);
   gtk_widget_class_bind_template_callback (widget_class, format_recent_downloads_tooltip);
   gtk_widget_class_bind_template_callback (widget_class, format_size);
+  gtk_widget_class_bind_template_callback (widget_class, get_size_label);
   gtk_widget_class_bind_template_callback (widget_class, format_size_tooltip);
   gtk_widget_class_bind_template_callback (widget_class, age_rating_cb);
   gtk_widget_class_bind_template_callback (widget_class, format_age_rating);
@@ -1288,6 +1307,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, dl_stats_cb);
   gtk_widget_class_bind_template_callback (widget_class, screenshot_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, size_cb);
+  gtk_widget_class_bind_template_callback (widget_class, get_size_type);
   gtk_widget_class_bind_template_callback (widget_class, formfactor_cb);
   gtk_widget_class_bind_template_callback (widget_class, safety_cb);
   gtk_widget_class_bind_template_callback (widget_class, run_cb);
