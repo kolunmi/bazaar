@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-01-05 21:39+0100\n"
-"PO-Revision-Date: 2026-01-06 02:33+0100\n"
+"PO-Revision-Date: 2026-01-06 02:45+0100\n"
 "Last-Translator: Mimolet <theMimolet@proton.me>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -1273,7 +1273,7 @@ msgstr ""
 
 #: src/bz-full-view.blp:627
 msgid "Trash Data"
-msgstr "Données inutiles"
+msgstr "Supprimer les données"
 
 #: src/bz-full-view.blp:761
 msgid "Tags:"
@@ -2497,11 +2497,11 @@ msgstr "Données utilisateur"
 #: src/bz-user-data-tile.c:144
 #, c-format
 msgid "Trashed User Data for %s"
-msgstr "Données utilisateur supprimées pour %s"
+msgstr "Les données de %s ont été supprimées"
 
 #: src/bz-user-data-tile.blp:74
 msgid "Trash User Data"
-msgstr "Supprimer les données utilisateur inutiles"
+msgstr "Supprimer les données utilisateurs"
 
 #: src/bz-window.blp:66
 msgid "Inspect UI Entry"
