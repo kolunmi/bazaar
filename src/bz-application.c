@@ -2944,7 +2944,7 @@ cmp_group (BzEntryGroup *a,
   if (title_b == NULL)
     return -1;
 
-  return g_strcmp0 (title_a, title_b);
+  return strcasecmp (title_a, title_b);
 }
 
 static gint

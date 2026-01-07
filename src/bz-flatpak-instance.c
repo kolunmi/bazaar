@@ -252,23 +252,24 @@ send_notif_all (BzFlatpakInstance     *self,
                 BzBackendNotification *notif,
                 gboolean               lock);
 
-#define SEND_AND_RETURN_ERROR(_self, _lock, _error, ...)       \
-  G_STMT_START                                                 \
-  {                                                            \
-    g_autofree char *_error_string           = NULL;           \
-    g_autoptr (BzBackendNotification) _notif = NULL;           \
-                                                               \
-    _error_string = g_strdup_printf (__VA_ARGS__);             \
-                                                               \
-    _notif = bz_backend_notification_new ();                   \
-    bz_backend_notification_set_error (_notif, _error_string); \
-    send_notif_all ((_self), _notif, (_lock));                 \
-                                                               \
-    return dex_future_new_for_error (                          \
-        g_error_new_literal (BZ_FLATPAK_ERROR,                 \
-                             (_error),                         \
-                             _error_string));                  \
-  }                                                            \
+#define SEND_AND_RETURN_ERROR(_self, _lock, _error, ...)                           \
+  G_STMT_START                                                                     \
+  {                                                                                \
+    g_autofree char *_error_string           = NULL;                               \
+    g_autoptr (BzBackendNotification) _notif = NULL;                               \
+                                                                                   \
+    _error_string = g_strdup_printf (__VA_ARGS__);                                 \
+                                                                                   \
+    _notif = bz_backend_notification_new ();                                       \
+    bz_backend_notification_set_kind (_notif, BZ_BACKEND_NOTIFICATION_KIND_ERROR); \
+    bz_backend_notification_set_error (_notif, _error_string);                     \
+    send_notif_all ((_self), _notif, (_lock));                                     \
+                                                                                   \
+    return dex_future_new_for_error (                                              \
+        g_error_new_literal (BZ_FLATPAK_ERROR,                                     \
+                             (_error),                                             \
+                             _error_string));                                      \
+  }                                                                                \
   G_STMT_END
 
 BZ_DEFINE_DATA (

@@ -51,8 +51,9 @@ struct _BzGlobalProgress
   AdwSpringParams *pending_spring;
   AdwSpringParams *fraction_spring;
 
-  guint  tick;
-  double pending_time_mod;
+  guint           tick;
+  double          pending_time_mod;
+  graphene_rect_t filled_rect;
 };
 
 G_DEFINE_FINAL_TYPE (BzGlobalProgress, bz_global_progress, GTK_TYPE_WIDGET)
@@ -234,9 +235,36 @@ bz_global_progress_size_allocate (GtkWidget *widget,
                                   int        height,
                                   int        baseline)
 {
-  BzGlobalProgress *self = BZ_GLOBAL_PROGRESS (widget);
+  BzGlobalProgress *self          = BZ_GLOBAL_PROGRESS (widget);
+  graphene_rect_t   pending_rect  = { 0 };
+  graphene_rect_t   fraction_rect = { 0 };
 
-  gtk_widget_allocate (self->draw_widget, width, height, baseline, NULL);
+  pending_rect = GRAPHENE_RECT_INIT (
+      ((double) height * 0.2) + MAX (((double) width - (double) height * 0.4) * 0.35, 0.0) * self->pending_time_mod,
+      (double) height * 0.2,
+      MAX (((double) width - (double) height * 0.4) * 0.65, 0.0),
+      (double) height * 0.6);
+  fraction_rect = GRAPHENE_RECT_INIT (
+      0.0,
+      0.0,
+      width * self->actual_fraction,
+      height);
+  graphene_rect_interpolate (
+      &fraction_rect,
+      &pending_rect,
+      self->pending_progress,
+      &self->filled_rect);
+
+  gtk_widget_allocate (
+      self->draw_widget,
+      ceil (self->filled_rect.size.width),
+      ceil (self->filled_rect.size.height),
+      baseline,
+      gsk_transform_translate (
+          NULL,
+          &GRAPHENE_POINT_INIT (
+              floor (self->filled_rect.origin.x),
+              floor (self->filled_rect.origin.y))));
 
   if (self->child != NULL)
     gtk_widget_allocate (self->child, width, height, baseline, NULL);
@@ -253,8 +281,6 @@ bz_global_progress_snapshot (GtkWidget   *widget,
   double            inner_radius   = 0.0;
   double            gap            = 0.0;
   GskRoundedRect    total_clip     = { 0 };
-  graphene_rect_t   fraction_rect  = { 0 };
-  graphene_rect_t   pending_rect   = { 0 };
   GskRoundedRect    fraction_clip  = { 0 };
   g_autoptr (GdkRGBA) accent_color = NULL;
 
@@ -284,22 +310,7 @@ bz_global_progress_snapshot (GtkWidget   *widget,
   total_clip.corner[3].width  = corner_radius;
   total_clip.corner[3].height = corner_radius;
 
-  fraction_rect = GRAPHENE_RECT_INIT (
-      0.0,
-      0.0,
-      width * self->actual_fraction,
-      height);
-  pending_rect = GRAPHENE_RECT_INIT (
-      (height * 0.2) + MAX ((width - height * 0.4) * 0.35, 0.0) * self->pending_time_mod,
-      height * 0.2,
-      MAX ((width - height * 0.4) * 0.65, 0.0),
-      height * 0.6);
-
-  graphene_rect_interpolate (
-      &fraction_rect,
-      &pending_rect,
-      self->pending_progress,
-      &fraction_clip.bounds);
+  fraction_clip.bounds           = self->filled_rect;
   fraction_clip.corner[0].width  = inner_radius;
   fraction_clip.corner[0].height = inner_radius;
   fraction_clip.corner[1].width  = inner_radius;
@@ -421,7 +432,7 @@ tick_cb (BzGlobalProgress *self,
 
   if (self->pending_progress > 0.0 &&
       self->transition_progress > 0.0)
-    gtk_widget_queue_draw (GTK_WIDGET (self));
+    gtk_widget_queue_allocate (GTK_WIDGET (self));
 
   return G_SOURCE_CONTINUE;
 }
@@ -638,7 +649,7 @@ bz_global_progress_set_actual_fraction (BzGlobalProgress *self,
   g_return_if_fail (BZ_IS_GLOBAL_PROGRESS (self));
 
   self->actual_fraction = CLAMP (fraction, 0.0, 1.0);
-  gtk_widget_queue_draw (GTK_WIDGET (self));
+  gtk_widget_queue_allocate (GTK_WIDGET (self));
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_FRACTION]);
 }
@@ -676,7 +687,7 @@ bz_global_progress_set_pending_progress (BzGlobalProgress *self,
   g_return_if_fail (BZ_IS_GLOBAL_PROGRESS (self));
 
   self->pending_progress = MAX (progress, 0.0);
-  gtk_widget_queue_draw (GTK_WIDGET (self));
+  gtk_widget_queue_allocate (GTK_WIDGET (self));
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PENDING_PROGRESS]);
 }

@@ -76,6 +76,29 @@ template $BzAppSizeDialog: Adw.Dialog {
             title: _("Installed Size");
             subtitle: _("Size on Disk");
           }
+
+          Adw.ActionRow {
+            visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.user-data-size ) as <bool>) as <bool>;
+
+            [prefix]
+            Label {
+              label: bind $format_size(template.group as <$BzEntryGroup>.user-data-size) as <string>;
+              use-markup: true;
+              valign: center;
+              width-request: 90;
+              margin-top: 8;
+              margin-bottom: 8;
+
+              styles [
+                "circular-lozenge",
+                "title-4",
+                "grey",
+              ]
+            }
+
+            title: _("User Data Size");
+            subtitle: _("Caches, settings, and other app data");
+          }
         }
       };
     };

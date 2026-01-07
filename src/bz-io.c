@@ -127,7 +127,7 @@ trash_file_callback (GObject      *object,
                      gpointer      user_data)
 {
   g_autoptr (DexPromise) promise = user_data;
-  g_autoptr (GError) error = NULL;
+  g_autoptr (GError) error       = NULL;
 
   if (g_file_trash_finish (G_FILE (object), result, &error))
     dex_promise_resolve_boolean (promise, TRUE);
@@ -152,17 +152,17 @@ trash_file_dex (GFile *file)
 static DexFuture *
 reap_user_data_fiber (char *app_id)
 {
-  g_autofree char *user_data_path = NULL;
-  g_autoptr (GFile) file          = NULL;
+  g_autofree char *user_data_path    = NULL;
+  g_autoptr (GFile) file             = NULL;
   g_autoptr (DexFuture) trash_future = NULL;
-  g_autoptr (GError) error        = NULL;
-  gboolean result                 = FALSE;
+  g_autoptr (GError) error           = NULL;
+  gboolean result                    = FALSE;
 
   user_data_path = g_build_filename (g_get_home_dir (), ".var", "app", app_id, NULL);
   file           = g_file_new_for_path (user_data_path);
 
   trash_future = trash_file_dex (file);
-  result = dex_await_boolean (dex_ref (trash_future), &error);
+  result       = dex_await_boolean (dex_ref (trash_future), &error);
 
   if (!result)
     {

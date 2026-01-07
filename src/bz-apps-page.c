@@ -501,7 +501,7 @@ bz_apps_page_new_from_category (BzFlathubCategory *category)
   else
     apps_page = create_standard_page (title, model, carousel_model);
 
-  if (total_entries > 0)
+  if (total_entries > 0 && !bz_flathub_category_get_is_spotlight (category))
     {
       subtitle = g_strdup_printf (_ ("%d Applications"), total_entries);
       bz_apps_page_set_subtitle (BZ_APPS_PAGE (apps_page), subtitle);

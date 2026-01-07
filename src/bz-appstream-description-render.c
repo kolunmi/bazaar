@@ -240,8 +240,16 @@ regenerate (BzAppstreamDescriptionRender *self)
   gtk_text_buffer_get_end_iter (buffer, &iter);
   root = xb_silo_get_root (silo);
 
-  for (XbNode *n = root; n != NULL; n = xb_node_get_next (n))
-    node_count++;
+  for (XbNode *n = g_object_ref (root); n != NULL;)
+    {
+      XbNode *last = NULL;
+
+      node_count++;
+
+      last = n;
+      n    = xb_node_get_next (n);
+      g_object_unref (last);
+    }
 
   for (int i = 0; root != NULL; i++)
     {
