@@ -27,16 +27,46 @@ template $BzInstalledPage: Adw.Bin {
         child: Box {
           orientation: vertical;
 
-          Adw.Clamp {
-            maximum-size: 300;
+          Adw.Clamp search_box_clamp {
+            margin-start: 12;
+            margin-end: 12;
+            maximum-size: 375;
 
-            child: SearchEntry search {
-              margin-start: 10;
-              margin-end: 10;
+            child: Adw.Bin {
+              halign: fill;
               margin-top: 10;
               margin-bottom: 10;
-              placeholder-text: _("Search Installed Applications");
-              notify::text => $search_text_changed(template);
+
+              child: Box {
+                spacing: 8;
+                height-request: 40;
+
+                Image {
+                  icon-name: "system-search-symbolic";
+                }
+
+                Text search_bar{
+                  hexpand: true;
+                  placeholder-text: _("Search Installed Apps");
+                  notify::text => $search_text_changed(template);
+                }
+
+                Button clear_button {
+                  icon-name: "edit-clear-symbolic";
+                  visible: bind $is_valid_string(search_bar.text) as <bool>;
+                  styles [
+                    "flat",
+                    "circular",
+                    "clear-button",
+                  ]
+
+                  clicked => $reset_search_cb(template);
+                }
+
+                styles [
+                  "search-box",
+                ]
+              };
             };
           }
 
