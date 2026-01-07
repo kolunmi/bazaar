@@ -37,7 +37,9 @@ struct _BzInstalledPage
   BzStateInfo *state;
 
   /* Template widgets */
-  AdwViewStack *stack;
+  AdwViewStack    *stack;
+  GtkSearchEntry  *search;
+  GtkCustomFilter *filter;
 };
 
 G_DEFINE_FINAL_TYPE (BzInstalledPage, bz_installed_page, ADW_TYPE_BIN)
@@ -73,6 +75,10 @@ items_changed (BzInstalledPage *self,
 
 static void
 set_page (BzInstalledPage *self);
+
+static gboolean
+filter (BzEntryGroup    *group,
+        BzInstalledPage *self);
 
 static void
 bz_installed_page_dispose (GObject *object)
@@ -189,6 +195,15 @@ tile_activated_cb (BzInstalledTile *tile)
 }
 
 static void
+search_text_changed (BzInstalledPage *self,
+                     GParamSpec      *pspec,
+                     GtkEntry        *entry)
+{
+  gtk_filter_changed (GTK_FILTER (self->filter),
+                      GTK_FILTER_CHANGE_DIFFERENT);
+}
+
+static void
 bz_installed_page_class_init (BzInstalledPageClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
@@ -280,14 +295,20 @@ bz_installed_page_class_init (BzInstalledPageClass *klass)
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-installed-page.ui");
   gtk_widget_class_bind_template_child (widget_class, BzInstalledPage, stack);
+  gtk_widget_class_bind_template_child (widget_class, BzInstalledPage, search);
+  gtk_widget_class_bind_template_child (widget_class, BzInstalledPage, filter);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, tile_activated_cb);
+  gtk_widget_class_bind_template_callback (widget_class, search_text_changed);
 }
 
 static void
 bz_installed_page_init (BzInstalledPage *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
+  gtk_custom_filter_set_filter_func (
+      self->filter, (GtkCustomFilterFunc) filter,
+      self, NULL);
 }
 
 GtkWidget *
@@ -341,4 +362,24 @@ set_page (BzInstalledPage *self)
     adw_view_stack_set_visible_child_name (self->stack, "content");
   else
     adw_view_stack_set_visible_child_name (self->stack, "empty");
+}
+
+static gboolean
+filter (BzEntryGroup    *group,
+        BzInstalledPage *self)
+{
+  const char *id    = NULL;
+  const char *title = NULL;
+  const char *text  = NULL;
+
+  id    = bz_entry_group_get_id (group);
+  title = bz_entry_group_get_id (group);
+
+  text = gtk_editable_get_text (GTK_EDITABLE (self->search));
+
+  if (text != NULL && *text != '\0')
+    return strcasestr (id, text) != NULL ||
+           strcasestr (title, text) != NULL;
+  else
+    return TRUE;
 }

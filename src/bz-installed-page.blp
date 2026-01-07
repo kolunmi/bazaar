@@ -24,40 +24,60 @@ template $BzInstalledPage: Adw.Bin {
         name: "content";
         title: _("Installed");
 
-        child: ScrolledWindow {
-          hscrollbar-policy: never;
+        child: Box {
+          orientation: vertical;
 
-          child: Adw.ClampScrollable {
-            maximum-size: 650;
+          Adw.Clamp {
+            maximum-size: 300;
 
-            child: ListView list_view {
-              styles [
-                "navigation-sidebar",
-                "installed-list-view"
-              ]
-              margin-top: 11;
-              margin-start: 25;
-              margin-end: 25;
-              overflow: visible;
+            child: SearchEntry search {
+              margin-start: 10;
+              margin-end: 10;
+              margin-top: 10;
+              margin-bottom: 10;
+              placeholder-text: _("Search Installed Applications");
+              notify::text => $search_text_changed(template);
+            };
+          }
 
-              model: NoSelection {
-                model: bind template.model;
-              };
+          ScrolledWindow {
+            hscrollbar-policy: never;
+            vexpand: true;
 
-              factory: BuilderListItemFactory {
-                template ListItem {
-                  activatable: false;
-                  selectable: false;
-                  focusable: false;
+            child: Adw.ClampScrollable {
+              maximum-size: 650;
 
-                  child: $BzInstalledTile {
-                    group: bind template.item as <$BzEntryGroup>;
-                    activated => $tile_activated_cb();
+              child: ListView list_view {
+                styles [
+                  "navigation-sidebar",
+                  "installed-list-view"
+                ]
+                margin-start: 25;
+                margin-end: 25;
+
+                model: NoSelection {
+                  model: FilterListModel {
+                    filter: CustomFilter filter {
+                    };
+                    model: bind template.model;
                   };
-                }
+                };
+
+                factory: BuilderListItemFactory {
+                  template ListItem {
+                    activatable: false;
+                    selectable: false;
+                    focusable: false;
+
+                    child: $BzInstalledTile {
+                      group: bind template.item as <$BzEntryGroup>;
+                      activated => $tile_activated_cb();
+                    };
+                  }
+                };
               };
             };
-          };
+          }
         };
       }
     };
