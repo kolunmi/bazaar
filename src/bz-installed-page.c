@@ -389,7 +389,7 @@ filter (BzEntryGroup    *group,
   const char *text  = NULL;
 
   id    = bz_entry_group_get_id (group);
-  title = bz_entry_group_get_id (group);
+  title = bz_entry_group_get_title (group);
 
   text = gtk_editable_get_text (GTK_EDITABLE (self->search_bar));
 
