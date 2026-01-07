@@ -596,11 +596,17 @@ key_pressed (BzWindow              *self,
              GdkModifierType        state,
              GtkEventControllerKey *controller)
 {
-  gunichar unichar = 0;
-  char     buf[32] = { 0 };
+  gunichar    unichar = 0;
+  char        buf[32] = { 0 };
+  const char *visible_child_name = NULL;
 
   /* Ignore if this is a modifier-shortcut of some sort */
   if (state & ~(GDK_NO_MODIFIER_MASK | GDK_SHIFT_MASK))
+    return FALSE;
+
+  /* Don't trigger search on installed page as it has its own search */
+  visible_child_name = adw_view_stack_get_visible_child_name (self->main_view_stack);
+  if (g_strcmp0 (visible_child_name, "installed") == 0)
     return FALSE;
 
   unichar = gdk_keyval_to_unicode (keyval);
