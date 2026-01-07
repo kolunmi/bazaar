@@ -49,13 +49,13 @@ static GParamSpec *props[LAST_PROP] = { NULL };
 static gboolean invert_boolean (gpointer object,
                                 gboolean value);
 
-static char    *get_label_cb (gpointer object,
-                              BzEntry *entry);
+static char *get_label_cb (gpointer object,
+                           BzEntry *entry);
 
-static char    *get_license_info (gpointer object,
-                                  BzEntry *entry);
+static char *get_license_info (gpointer object,
+                               BzEntry *entry);
 
-static void     contribute_cb (BzLicenseDialog *self);
+static void contribute_cb (BzLicenseDialog *self);
 
 static void
 bz_license_dialog_dispose (GObject *object)
@@ -168,13 +168,17 @@ static char *
 get_label_cb (gpointer object,
               BzEntry *entry)
 {
-  const char *license  = NULL;
-  gboolean    is_floss = FALSE;
+  g_autofree char *license  = NULL;
+  gboolean         is_floss = FALSE;
 
   if (entry == NULL)
     return g_strdup ("");
 
-  g_object_get (entry, "is-floss", &is_floss, "project-license", &license, NULL);
+  g_object_get (
+      entry,
+      "is-floss", &is_floss,
+      "project-license", &license,
+      NULL);
 
   if (license == NULL || *license == '\0')
     return g_strdup (_ ("Unknown License"));
@@ -212,14 +216,18 @@ static char *
 get_license_info (gpointer object,
                   BzEntry *entry)
 {
-  const char      *license      = NULL;
-  gboolean         is_floss     = FALSE;
-  g_autofree char *link         = NULL;
+  g_autofree char *license  = NULL;
+  gboolean         is_floss = FALSE;
+  g_autofree char *link     = NULL;
 
   if (entry == NULL)
     return g_strdup ("");
 
-  g_object_get (entry, "is-floss", &is_floss, "project-license", &license, NULL);
+  g_object_get (
+      entry,
+      "is-floss", &is_floss,
+      "project-license", &license,
+      NULL);
 
   if (license == NULL || *license == '\0')
     {
@@ -265,7 +273,7 @@ contribute_cb (BzLicenseDialog *self)
     return;
 
   first_url = g_list_model_get_item (share_urls, 1);
-  url = bz_url_get_url (first_url);
+  url       = bz_url_get_url (first_url);
 
   if (url != NULL && *url != '\0')
     g_app_info_launch_default_for_uri (url, NULL, NULL);
