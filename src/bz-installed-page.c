@@ -38,7 +38,7 @@ struct _BzInstalledPage
 
   /* Template widgets */
   AdwViewStack    *stack;
-  GtkSearchEntry  *search;
+  GtkText         *search_bar;
   GtkCustomFilter *filter;
 };
 
@@ -194,6 +194,13 @@ tile_activated_cb (BzInstalledTile *tile)
       bz_track_weak (tile), bz_weak_release));
 }
 
+static gboolean
+is_valid_string (gpointer    object,
+                 const char *value)
+{
+  return value != NULL && *value != '\0';
+}
+
 static void
 search_text_changed (BzInstalledPage *self,
                      GParamSpec      *pspec,
@@ -201,6 +208,13 @@ search_text_changed (BzInstalledPage *self,
 {
   gtk_filter_changed (GTK_FILTER (self->filter),
                       GTK_FILTER_CHANGE_DIFFERENT);
+}
+
+static void
+reset_search_cb (BzInstalledPage *self,
+                 GtkButton      *button)
+{
+  gtk_text_set_buffer (self->search_bar, NULL);
 }
 
 static void
@@ -295,10 +309,12 @@ bz_installed_page_class_init (BzInstalledPageClass *klass)
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-installed-page.ui");
   gtk_widget_class_bind_template_child (widget_class, BzInstalledPage, stack);
-  gtk_widget_class_bind_template_child (widget_class, BzInstalledPage, search);
+  gtk_widget_class_bind_template_child (widget_class, BzInstalledPage, search_bar);
   gtk_widget_class_bind_template_child (widget_class, BzInstalledPage, filter);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
+  gtk_widget_class_bind_template_callback (widget_class, is_valid_string);
   gtk_widget_class_bind_template_callback (widget_class, tile_activated_cb);
+  gtk_widget_class_bind_template_callback (widget_class, reset_search_cb);
   gtk_widget_class_bind_template_callback (widget_class, search_text_changed);
 }
 
@@ -375,7 +391,7 @@ filter (BzEntryGroup    *group,
   id    = bz_entry_group_get_id (group);
   title = bz_entry_group_get_id (group);
 
-  text = gtk_editable_get_text (GTK_EDITABLE (self->search));
+  text = gtk_editable_get_text (GTK_EDITABLE (self->search_bar));
 
   if (text != NULL && *text != '\0')
     return strcasestr (id, text) != NULL ||

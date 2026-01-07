@@ -96,6 +96,7 @@ template $BzSearchWidget: Adw.Bin {
 
           child: Box {
             spacing: 8;
+            height-request: 40;
 
             Image {
               icon-name: "system-search-symbolic";
@@ -112,21 +113,16 @@ template $BzSearchWidget: Adw.Bin {
               height-request: 16;
             }
 
-            Revealer {
-              reveal-child: bind $is_valid_string(search_bar.text) as <bool>;
-              transition-type: slide_right;
+            Button clear_button {
+              visible: bind $is_valid_string(search_bar.text) as <bool>;
+              icon-name: "edit-clear-symbolic";
 
-              child: Button clear_button {
-                icon-name: "edit-clear-symbolic";
-
-                styles [
-                  "flat",
-                  "circular",
-                  "clear-button",
-                ]
-
-                clicked => $reset_search_cb(template);
-              };
+              styles [
+                "flat",
+                "circular",
+                "clear-button",
+              ]
+              clicked => $reset_search_cb(template);
             }
 
             styles [
