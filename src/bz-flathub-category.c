@@ -319,6 +319,7 @@ bz_flathub_category_real_serialize (BzSerializable  *serializable,
         }
     }
   g_variant_builder_add (builder, "{sv}", "total-entries", g_variant_new_int32 (self->total_entries));
+  g_variant_builder_add (builder, "{sv}", "is-spotlight", g_variant_new_boolean (self->is_spotlight));
 }
 
 static gboolean
@@ -381,6 +382,10 @@ bz_flathub_category_real_deserialize (BzSerializable *serializable,
 
           self->quality_applications = (GListModel *) g_steal_pointer (&list);
         }
+      else if (g_strcmp0 (key, "total-entries") == 0)
+        self->total_entries = g_variant_get_int32 (value);
+      else if (g_strcmp0 (key, "is-spotlight") == 0)
+        self->is_spotlight = g_variant_get_boolean (value);
     }
 
   return TRUE;
