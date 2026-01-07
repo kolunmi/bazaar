@@ -214,6 +214,7 @@ get_license_info (gpointer object,
 {
   const char      *license      = NULL;
   gboolean         is_floss     = FALSE;
+  g_autofree char *link         = NULL;
 
   if (entry == NULL)
     return g_strdup ("");
@@ -231,10 +232,11 @@ get_license_info (gpointer object,
 
   if (is_floss)
     {
+      link = format_license_link (license);
       return g_strdup_printf (_ ("This app is developed in the open by an international community, "
                                  "and released under the %s license.\n\n"
                                  "You can participate and help make it even better."),
-                              format_license_link (license));
+                              link);
     }
 
   if (bz_spdx_is_proprietary (license))
@@ -244,9 +246,10 @@ get_license_info (gpointer object,
                           "You may or may not be able to contribute to this app."));
     }
 
+  link = format_license_link (license);
   return g_strdup_printf (_ ("This app is developed under the special license %s.\n\n"
                              "You may or may not be able to contribute to this app."),
-                          format_license_link (license));
+                          link);
 }
 
 static void
