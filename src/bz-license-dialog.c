@@ -189,53 +189,13 @@ get_label_cb (gpointer object,
 }
 
 static char *
-get_license_info (gpointer object,
-                  BzEntry *entry)
+format_license_link (const char *license)
 {
-  const char      *license      = NULL;
-  gboolean         is_floss     = FALSE;
   g_autofree char *license_name = NULL;
   g_autofree char *license_url  = NULL;
-  g_autofree char *link         = NULL;
 
-  if (entry == NULL)
-    return g_strdup ("");
-
-  g_object_get (entry, "is-floss", &is_floss, "project-license", &license, NULL);
-
-  if (is_floss && bz_spdx_is_valid (license))
-    {
-      license_name = bz_spdx_get_name (license);
-      if (license_name == NULL || *license_name == '\0')
-        {
-          g_clear_pointer (&license_name, g_free);
-          license_name = g_strdup (license);
-        }
-
-      license_url = bz_spdx_get_url (license);
-      link        = g_strdup_printf ("<a href=\"%s\">%s</a>", license_url, license_name);
-
-      return g_strdup_printf (_ ("This app is developed in the open by an international community, "
-                                 "and released under the %s license.\n\n"
-                                 "You can participate and help make it even better."),
-                              link);
-    }
-
-  if (is_floss)
-    {
-      return g_strdup (_ ("This app is developed in the open by an international community.\n\n"
-                          "You can participate and help make it even better."));
-    }
-
-  if (license == NULL || *license == '\0')
-    return g_strdup (_ ("The license of this app is not known"));
-
-  if (bz_spdx_is_proprietary (license))
-    {
-      return g_strdup (_ ("This app is not developed in the open, so only its developers know how it works. "
-                          "It may be insecure in ways that are hard to detect, and it may change without oversight.\n\n"
-                          "You may or may not be able to contribute to this app."));
-    }
+  if (!bz_spdx_is_valid (license))
+    return g_strdup (license);
 
   license_name = bz_spdx_get_name (license);
   if (license_name == NULL || *license_name == '\0')
@@ -244,9 +204,49 @@ get_license_info (gpointer object,
       license_name = g_strdup (license);
     }
 
+  license_url = bz_spdx_get_url (license);
+  return g_strdup_printf ("<a href=\"%s\">%s</a>", license_url, license_name);
+}
+
+static char *
+get_license_info (gpointer object,
+                  BzEntry *entry)
+{
+  const char      *license      = NULL;
+  gboolean         is_floss     = FALSE;
+
+  if (entry == NULL)
+    return g_strdup ("");
+
+  g_object_get (entry, "is-floss", &is_floss, "project-license", &license, NULL);
+
+  if (license == NULL || *license == '\0')
+    {
+      if (is_floss)
+        return g_strdup (_ ("This app is developed in the open by an international community.\n\n"
+                            "You can participate and help make it even better."));
+      else
+        return g_strdup (_ ("The license of this app is not known"));
+    }
+
+  if (is_floss)
+    {
+      return g_strdup_printf (_ ("This app is developed in the open by an international community, "
+                                 "and released under the %s license.\n\n"
+                                 "You can participate and help make it even better."),
+                              format_license_link (license));
+    }
+
+  if (bz_spdx_is_proprietary (license))
+    {
+      return g_strdup (_ ("This app is not developed in the open, so only its developers know how it works. "
+                          "It may be insecure in ways that are hard to detect, and it may change without oversight.\n\n"
+                          "You may or may not be able to contribute to this app."));
+    }
+
   return g_strdup_printf (_ ("This app is developed under the special license %s.\n\n"
                              "You may or may not be able to contribute to this app."),
-                          license_name);
+                          format_license_link (license));
 }
 
 static void
