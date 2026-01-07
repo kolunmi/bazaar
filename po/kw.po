@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-01-07 18:58+0000\n"
-"PO-Revision-Date: 2026-01-07 22:56+0000\n"
+"PO-Revision-Date: 2026-01-07 23:11+0000\n"
 "Last-Translator: Flynn Peck <cirilla@tuta.io>\n"
 "Language-Team: kw\n"
 "Language: kw\n"
@@ -1060,15 +1060,15 @@ msgstr "Moy Nowydh"
 
 #: src/bz-flathub-category.c:92 src/bz-flathub-page.blp:163
 msgid "Recently Updated"
-msgstr "Nowedhi A-lergh"
+msgstr "Nowedhys A-lergh"
 
 #: src/bz-flathub-category.c:92 src/bz-flathub-page.blp:137
 msgid "Updated"
-msgstr "Nowedhi"
+msgstr "Nowedhys"
 
 #: src/bz-flathub-category.c:92
 msgid "More Updated"
-msgstr "Moy Nowedhi"
+msgstr "Moy Nowedhys"
 
 #: src/bz-flathub-category.c:93
 msgid "Mobile"
@@ -1570,7 +1570,7 @@ msgstr "Hwilas appys leys"
 
 #: src/bz-installed-tile.blp:61 src/bz-rich-app-tile.blp:137
 msgid "Stopped Receiving Updates"
-msgstr "Nowedhi Namoy"
+msgstr "Nowedhys Namoy"
 
 #: src/bz-license-dialog.blp:95
 msgid "Get Involved"
@@ -2441,7 +2441,7 @@ msgstr ""
 #: src/bz-update-dialog.c:143
 #, c-format
 msgid "Additionally, %d runtimes and/or addons will be updated."
-msgstr "Dres hemma, %d kerghynnedhow ha/po ystyannans yw nowedhi."
+msgstr "Dres hemma, %d kerghynnedhow ha/po ystyannans yw nowedhys."
 
 #: src/bz-user-data-page.blp:5
 msgid "Manage Leftover User Data"
