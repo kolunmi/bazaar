@@ -66,6 +66,7 @@ template $BzLicenseDialog: Adw.Dialog {
 
             ListBoxRow {
               vexpand: true;
+              activatable: false;
 
               Label {
                 label: bind $get_license_info(template.entry as <$BzEntry>) as <string>;
@@ -75,6 +76,7 @@ template $BzLicenseDialog: Adw.Dialog {
                 margin-start: 12;
                 margin-end: 12;
                 use-markup: true;
+                xalign: 0;
                 wrap: true;
                 wrap-mode: word_char;
               }
