@@ -9,3 +9,8 @@ Categories=Utility;
 Keywords=GTK;System;PackageManager;Discover;Flatpak;Software;Store;
 StartupNotify=true
 MimeType=x-scheme-handler/appstream;x-scheme-handler/flatpak;x-scheme-handler/flatpak+https;
+Actions=new-window;
+
+[Desktop Action new-window]
+Name=New Window
+Exec=bazaar %U
