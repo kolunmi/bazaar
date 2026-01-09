@@ -151,7 +151,7 @@ no_results_found_subtitle (gpointer    object,
   if (search_text == NULL || *search_text == '\0')
     return g_strdup ("");
 
-  return g_strdup_printf (_ ("No results found for \"%s\" in the list of installed apps"), search_text);
+  return g_strdup_printf (_ ("No matches found for \"%s\" in the list of installed apps"), search_text);
 }
 
 static DexFuture *
