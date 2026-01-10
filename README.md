@@ -8,8 +8,8 @@ Bazaar
 
 <div align="center">
     <picture>
-        <source srcset="https://github.com/user-attachments/assets/cc545658-31fc-4cc5-b512-a4c17a2af454" media="(prefers-color-scheme: dark)">
-        <img width="512" alt="Screenshot showing Bazaar's Flathub page" src="https://github.com/user-attachments/assets/b712f5de-ea5f-4f06-b834-d41b9265a192" style="max-width: 100%; height: auto;">
+        <source srcset="https://github.com/user-attachments/assets/da47d39c-2984-4521-87b2-c7207808624e" media="(prefers-color-scheme: dark)">
+        <img width="512" alt="Screenshot showing Bazaar's Flathub page" src="https://github.com/user-attachments/assets/6e012fd4-da26-452e-88ee-278077417193" style="max-width: 100%; height: auto;">
     </picture>
 </div>
 
