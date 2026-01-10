@@ -40,6 +40,7 @@ struct _BzInstalledPage
   AdwViewStack    *stack;
   GtkText         *search_bar;
   GtkCustomFilter *filter;
+  GtkListView     *list_view;
 };
 
 G_DEFINE_FINAL_TYPE (BzInstalledPage, bz_installed_page, ADW_TYPE_BIN)
@@ -143,6 +144,16 @@ is_zero (gpointer object,
   return value == 0;
 }
 
+static char *
+no_results_found_subtitle (gpointer    object,
+                           const char *search_text)
+{
+  if (search_text == NULL || *search_text == '\0')
+    return g_strdup ("");
+
+  return g_strdup_printf (_ ("No matches found for \"%s\" in the list of installed apps"), search_text);
+}
+
 static DexFuture *
 row_activated_fiber (GWeakRef *wr)
 {
@@ -208,6 +219,7 @@ search_text_changed (BzInstalledPage *self,
 {
   gtk_filter_changed (GTK_FILTER (self->filter),
                       GTK_FILTER_CHANGE_DIFFERENT);
+  set_page (self);
 }
 
 static void
@@ -311,7 +323,9 @@ bz_installed_page_class_init (BzInstalledPageClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzInstalledPage, stack);
   gtk_widget_class_bind_template_child (widget_class, BzInstalledPage, search_bar);
   gtk_widget_class_bind_template_child (widget_class, BzInstalledPage, filter);
+  gtk_widget_class_bind_template_child (widget_class, BzInstalledPage, list_view);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
+  gtk_widget_class_bind_template_callback (widget_class, no_results_found_subtitle );
   gtk_widget_class_bind_template_callback (widget_class, is_valid_string);
   gtk_widget_class_bind_template_callback (widget_class, tile_activated_cb);
   gtk_widget_class_bind_template_callback (widget_class, reset_search_cb);
@@ -373,11 +387,22 @@ items_changed (BzInstalledPage *self,
 static void
 set_page (BzInstalledPage *self)
 {
-  if (self->model != NULL &&
-      g_list_model_get_n_items (G_LIST_MODEL (self->model)) > 0)
-    adw_view_stack_set_visible_child_name (self->stack, "content");
+  GtkSelectionModel *selection_model;
+  GListModel *filter_model;
+
+  if (self->model == NULL || g_list_model_get_n_items (self->model) == 0)
+    {
+      adw_view_stack_set_visible_child_name (self->stack, "empty");
+      return;
+    }
+
+  selection_model = gtk_list_view_get_model (self->list_view);
+  filter_model = gtk_no_selection_get_model (GTK_NO_SELECTION (selection_model));
+
+  if (g_list_model_get_n_items (filter_model) == 0)
+    adw_view_stack_set_visible_child_name (self->stack, "no-results");
   else
-    adw_view_stack_set_visible_child_name (self->stack, "empty");
+    adw_view_stack_set_visible_child_name (self->stack, "content");
 }
 
 static gboolean
