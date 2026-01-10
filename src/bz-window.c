@@ -37,8 +37,8 @@
 #include "bz-io.h"
 #include "bz-progress-bar.h"
 #include "bz-search-widget.h"
-#include "bz-transaction-manager.h"
 #include "bz-transaction-dialog.h"
+#include "bz-transaction-manager.h"
 #include "bz-update-dialog.h"
 #include "bz-user-data-page.h"
 #include "bz-util.h"
@@ -596,8 +596,8 @@ key_pressed (BzWindow              *self,
              GdkModifierType        state,
              GtkEventControllerKey *controller)
 {
-  gunichar    unichar = 0;
-  char        buf[32] = { 0 };
+  gunichar    unichar            = 0;
+  char        buf[32]            = { 0 };
   const char *visible_child_name = NULL;
 
   /* Ignore if this is a modifier-shortcut of some sort */
@@ -704,11 +704,11 @@ checking_for_updates_changed (BzWindow    *self,
 static DexFuture *
 transact_fiber (TransactData *data)
 {
-  g_autoptr (BzWindow) self = NULL;
-  g_autoptr (GError) local_error = NULL;
+  g_autoptr (BzWindow) self                           = NULL;
+  g_autoptr (GError) local_error                      = NULL;
   g_autoptr (BzTransactionDialogResult) dialog_result = NULL;
-  g_autoptr (DexFuture) transact_future = NULL;
-  g_autofree char *id_dup = NULL;
+  g_autoptr (DexFuture) transact_future               = NULL;
+  g_autofree char *id_dup                             = NULL;
 
   bz_weak_get_or_return_reject (self, data->self);
 

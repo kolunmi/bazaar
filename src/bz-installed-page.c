@@ -224,7 +224,7 @@ search_text_changed (BzInstalledPage *self,
 
 static void
 reset_search_cb (BzInstalledPage *self,
-                 GtkButton      *button)
+                 GtkButton       *button)
 {
   gtk_text_set_buffer (self->search_bar, NULL);
 }
@@ -325,7 +325,7 @@ bz_installed_page_class_init (BzInstalledPageClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzInstalledPage, filter);
   gtk_widget_class_bind_template_child (widget_class, BzInstalledPage, list_view);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
-  gtk_widget_class_bind_template_callback (widget_class, no_results_found_subtitle );
+  gtk_widget_class_bind_template_callback (widget_class, no_results_found_subtitle);
   gtk_widget_class_bind_template_callback (widget_class, is_valid_string);
   gtk_widget_class_bind_template_callback (widget_class, tile_activated_cb);
   gtk_widget_class_bind_template_callback (widget_class, reset_search_cb);
@@ -388,7 +388,7 @@ static void
 set_page (BzInstalledPage *self)
 {
   GtkSelectionModel *selection_model;
-  GListModel *filter_model;
+  GListModel        *filter_model;
 
   if (self->model == NULL || g_list_model_get_n_items (self->model) == 0)
     {
@@ -397,7 +397,7 @@ set_page (BzInstalledPage *self)
     }
 
   selection_model = gtk_list_view_get_model (self->list_view);
-  filter_model = gtk_no_selection_get_model (GTK_NO_SELECTION (selection_model));
+  filter_model    = gtk_no_selection_get_model (GTK_NO_SELECTION (selection_model));
 
   if (g_list_model_get_n_items (filter_model) == 0)
     adw_view_stack_set_visible_child_name (self->stack, "no-results");
