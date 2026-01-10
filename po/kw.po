@@ -2408,7 +2408,7 @@ msgstr "Deu"
 
 #: src/bz-transaction-view.blp:251
 msgid "Update"
-msgstr "Nowedhi"
+msgstr "Nowedhyans"
 
 #: src/bz-transaction-view.c:135
 #, c-format
