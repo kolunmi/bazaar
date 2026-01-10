@@ -566,24 +566,6 @@ bz_application_bazaar_inspector_action (GSimpleAction *action,
 }
 
 static void
-bz_application_flatseal_action (GSimpleAction *action,
-                                GVariant      *parameter,
-                                gpointer       user_data)
-{
-  BzApplication *self   = user_data;
-  GtkWindow     *window = NULL;
-
-  g_assert (BZ_IS_APPLICATION (self));
-
-  window = gtk_application_get_active_window (GTK_APPLICATION (self));
-  if (window != NULL)
-    bz_show_error_for_widget (
-        GTK_WIDGET (window),
-        _ ("This functionality is currently disabled. It is recommended "
-           "you download and install Flatseal to manage app permissions."));
-}
-
-static void
 bz_application_donate_action (GSimpleAction *action,
                               GVariant      *parameter,
                               gpointer       user_data)
@@ -831,7 +813,6 @@ static const GActionEntry app_actions[] = {
   {         "show-app-id",         bz_application_show_app_id_action,  "s" },
   { "toggle-transactions", bz_application_toggle_transactions_action, NULL },
   {              "donate",              bz_application_donate_action, NULL },
-  {            "flatseal",            bz_application_flatseal_action, NULL },
   {    "bazaar-inspector",    bz_application_bazaar_inspector_action, NULL },
   {   "toggle-debug-mode",   bz_application_toggle_debug_mode_action, NULL },
 };

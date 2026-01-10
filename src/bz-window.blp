@@ -63,14 +63,14 @@ template $BzWindow: Adw.ApplicationWindow {
           ellipsize: end;
         }
         Button {
-          label: _("Inspect UI Entry");
+          label: "Inspect UI Entry";
           clicked => $debug_id_inspect_cb(template);
         }
       }
 
       [end]
       MenuButton {
-        label: _("All Debug Actions");
+        label: "All Debug Actions";
         menu-model: debug_menu;
       }
 
@@ -599,7 +599,7 @@ menu primary_menu {
 menu debug_menu {
   section {
     item {
-      label: _("Open Bazaar Inspector");
+      label: "Open Bazaar Inspector";
       action: "app.bazaar-inspector";
     }
   }
