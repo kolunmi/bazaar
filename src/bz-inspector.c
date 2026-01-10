@@ -20,6 +20,7 @@
 
 #include "bz-inspector.h"
 #include "bz-entry-inspector.h"
+#include "bz-window.h"
 
 struct _BzInspector
 {
@@ -27,11 +28,13 @@ struct _BzInspector
 
   BzStateInfo *state;
 
-  GBinding *debug_mode_binding;
+  GBinding  *debug_mode_binding;
+  GtkWindow *preview_window;
 
   GtkCheckButton     *debug_mode_check;
   GtkEditable        *search_entry;
   GtkFilterListModel *filter_model;
+  GtkSingleSelection *groups_selection;
 };
 
 G_DEFINE_FINAL_TYPE (BzInspector, bz_inspector, ADW_TYPE_WINDOW);
@@ -58,6 +61,9 @@ bz_inspector_dispose (GObject *object)
   g_clear_pointer (&self->state, g_object_unref);
 
   g_clear_object (&self->debug_mode_binding);
+  if (self->preview_window != NULL)
+    gtk_window_close (self->preview_window);
+  g_clear_object (&self->preview_window);
 
   G_OBJECT_CLASS (bz_inspector_parent_class)->dispose (object);
 }
@@ -96,6 +102,52 @@ bz_inspector_set_property (GObject      *object,
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
+}
+
+static void
+preview_changed (BzInspector    *self,
+                 GParamSpec     *pspec,
+                 GtkCheckButton *button)
+{
+  if (gtk_check_button_get_active (button))
+    {
+      BzWindow     *window   = NULL;
+      BzEntryGroup *selected = NULL;
+
+      g_assert (self->preview_window == NULL);
+
+      window = bz_window_new (self->state);
+      gtk_window_set_default_size (GTK_WINDOW (window), 750, 750);
+      gtk_window_present (GTK_WINDOW (window));
+
+      selected = gtk_single_selection_get_selected_item (self->groups_selection);
+      if (selected != NULL)
+        bz_window_show_group (window, selected);
+
+      self->preview_window = (GtkWindow *) g_object_ref_sink (window);
+    }
+  else
+    {
+      if (self->preview_window != NULL)
+        gtk_window_close (self->preview_window);
+      g_clear_object (&self->preview_window);
+    }
+}
+
+static void
+selected_group_changed (BzInspector        *self,
+                        GParamSpec         *pspec,
+                        GtkSingleSelection *selection)
+{
+  BzEntryGroup *group = NULL;
+
+  if (self->preview_window == NULL ||
+      !gtk_widget_get_mapped (GTK_WIDGET (self->preview_window)))
+    return;
+
+  group = gtk_single_selection_get_selected_item (self->groups_selection);
+  if (group != NULL)
+    bz_window_show_group (BZ_WINDOW (self->preview_window), group);
 }
 
 static void
@@ -165,6 +217,9 @@ bz_inspector_class_init (BzInspectorClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzInspector, debug_mode_check);
   gtk_widget_class_bind_template_child (widget_class, BzInspector, search_entry);
   gtk_widget_class_bind_template_child (widget_class, BzInspector, filter_model);
+  gtk_widget_class_bind_template_child (widget_class, BzInspector, groups_selection);
+  gtk_widget_class_bind_template_callback (widget_class, preview_changed);
+  gtk_widget_class_bind_template_callback (widget_class, selected_group_changed);
   gtk_widget_class_bind_template_callback (widget_class, decache_and_inspect_cb);
   gtk_widget_class_bind_template_callback (widget_class, entry_changed);
   gtk_widget_class_bind_template_callback (widget_class, format_uint);

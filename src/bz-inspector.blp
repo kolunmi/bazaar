@@ -85,22 +85,34 @@ template $BzInspector: Adw.Window {
         label: _("All Entry Groups");
         xalign: 0.0;
       }
-      Entry search_entry {
-        margin-start: 10;
-        margin-end: 10;
-        margin-top: 8;
-        margin-bottom: 8;
-        placeholder-text: _("Filter...");
-        changed => $entry_changed(template);
+      Box {
+        orientation: horizontal;
+        spacing: 5;
+
+        CheckButton {
+          label: _("Preview");
+          notify::active => $preview_changed(template);
+        }
+
+        Entry search_entry {
+          hexpand: true;
+          margin-start: 5;
+          margin-end: 5;
+          margin-top: 5;
+          margin-bottom: 5;
+          placeholder-text: _("Filter...");
+          changed => $entry_changed(template);
+        }
       }
       ScrolledWindow {
         vscrollbar-policy: always;
         propagate-natural-height: true;
         child: ListView {
-          model: NoSelection {
+          model: SingleSelection groups_selection {
             model: FilterListModel filter_model {
               model: bind template.state as <$BzStateInfo>.all-entry-groups;
             };
+            notify::selected-item => $selected_group_changed(template);
           };
           factory: BuilderListItemFactory {
             template ListItem {
