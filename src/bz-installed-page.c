@@ -374,6 +374,27 @@ bz_installed_page_get_model (BzInstalledPage *self)
   return self->model;
 }
 
+gboolean
+bz_installed_page_ensure_active (BzInstalledPage *self,
+                                 const char      *initial)
+{
+  const char *text = NULL;
+
+  g_return_val_if_fail (BZ_IS_INSTALLED_PAGE (self), FALSE);
+
+  text = gtk_editable_get_text (GTK_EDITABLE (self->search_bar));
+  if (text != NULL && *text != '\0' &&
+      gtk_widget_has_focus (GTK_WIDGET (self->search_bar)))
+    return FALSE;
+
+  gtk_widget_grab_focus (GTK_WIDGET (self->search_bar));
+  gtk_editable_set_text (GTK_EDITABLE (self->search_bar), initial);
+  if (initial != NULL)
+    gtk_editable_set_position (GTK_EDITABLE (self->search_bar), g_utf8_strlen (initial, -1));
+
+  return TRUE;
+}
+
 static void
 items_changed (BzInstalledPage *self,
                guint            position,

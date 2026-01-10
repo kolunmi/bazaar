@@ -63,6 +63,7 @@ struct _BzWindow
   GtkToggleButton     *toggle_transactions;
   GtkToggleButton     *toggle_transactions_sidebar;
   BzSearchWidget      *search_widget;
+  BzInstalledPage     *installed_page;
   GtkButton           *update_button;
   GtkToggleButton     *transactions_pause;
   GtkButton           *transactions_stop;
@@ -550,6 +551,7 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzWindow, toggle_transactions);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, toggle_transactions_sidebar);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, search_widget);
+  gtk_widget_class_bind_template_child (widget_class, BzWindow, installed_page);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, update_button);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, transactions_pause);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, transactions_stop);
@@ -604,18 +606,19 @@ key_pressed (BzWindow              *self,
   if (state & ~(GDK_NO_MODIFIER_MASK | GDK_SHIFT_MASK))
     return FALSE;
 
-  /* Don't trigger search on installed page as it has its own search */
-  visible_child_name = adw_view_stack_get_visible_child_name (self->main_view_stack);
-  if (g_strcmp0 (visible_child_name, "installed") == 0)
-    return FALSE;
-
   unichar = gdk_keyval_to_unicode (keyval);
   if (unichar == 0 || !g_unichar_isgraph (unichar))
     return FALSE;
   g_unichar_to_utf8 (unichar, buf);
 
-  adw_view_stack_set_visible_child_name (self->main_view_stack, "search");
-  return bz_search_widget_ensure_active (self->search_widget, buf);
+  visible_child_name = adw_view_stack_get_visible_child_name (self->main_view_stack);
+  if (g_strcmp0 (visible_child_name, "installed") == 0)
+    return bz_installed_page_ensure_active (self->installed_page, buf);
+  else
+    {
+      adw_view_stack_set_visible_child_name (self->main_view_stack, "search");
+      return bz_search_widget_ensure_active (self->search_widget, buf);
+    }
 }
 
 static void

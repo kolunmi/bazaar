@@ -296,7 +296,7 @@ template $BzWindow: Adw.ApplicationWindow {
                           title: _("Installed");
                           icon-name: "library-symbolic";
 
-                          child: $BzInstalledPage {
+                          child: $BzInstalledPage installed_page {
                             state: bind template.state;
                             model: bind template.state as <$BzStateInfo>.all-installed-entry-groups;
                             remove => $remove_installed_cb(template);
