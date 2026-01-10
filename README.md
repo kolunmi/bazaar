@@ -38,7 +38,8 @@ interface. A krunner
 [plugin](https://github.com/ublue-os/krunner-bazaar) is available for
 use on the KDE Plasma desktop.
 
-Thanks to [Jakub Steiner](http://jimmac.eu) for designing Bazaar's
+Thanks to [Tobias Bernard](https://tobiasbernard.com/) for designing Bazaar's
+market stall icon, and [Jakub Steiner](http://jimmac.eu) for the shopping tag
 icon.
 
 ### Installing
