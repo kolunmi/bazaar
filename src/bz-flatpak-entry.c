@@ -549,8 +549,6 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
                 {
                   AsImage         *image_obj              = NULL;
                   const char      *url                    = NULL;
-                  g_autofree char *modified_url           = NULL;
-                  const char      *extension              = NULL;
                   g_autoptr (GFile) screenshot_file       = NULL;
                   g_autofree char *cache_basename         = NULL;
                   g_autoptr (GFile) cache_file            = NULL;
@@ -562,24 +560,8 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
 
                   if (url != NULL)
                     {
-                      // Flathub CDN serves WebP but appstream only provides PNG links.
-                      if (g_str_has_prefix (url, "https://dl.flathub.org/") &&
-                          g_str_has_suffix (url, ".png"))
-                        {
-                          g_autofree char *temp = NULL;
-
-                          temp         = g_strndup (url, strlen (url) - 4);
-                          modified_url = g_strdup_printf ("%s.webp", temp);
-                          extension    = ".webp";
-                        }
-                      else
-                        {
-                          extension    = ".png";
-                          modified_url = g_strdup (url);
-                        }
-
-                      screenshot_file = g_file_new_for_uri (modified_url);
-                      cache_basename  = g_strdup_printf ("screenshot_%d%s", i, extension);
+                      screenshot_file = g_file_new_for_uri (url);
+                      cache_basename  = g_strdup_printf ("screenshot_%u.png", i);
                       cache_file      = g_file_new_build_filename (
                           module_dir, unique_id_checksum, cache_basename, NULL);
 
