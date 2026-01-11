@@ -21,6 +21,7 @@
 #include "bz-fading-clamp.h"
 
 #define FADE_HEIGHT 75
+#define CLAMP_LEEWAY 100
 
 struct _BzFadingClamp
 {
@@ -77,7 +78,7 @@ bz_fading_clamp_update_will_change (BzFadingClamp *self)
         gtk_widget_measure (self->child, GTK_ORIENTATION_HORIZONTAL, -1, NULL, &width, NULL, NULL);
 
       gtk_widget_measure (self->child, GTK_ORIENTATION_VERTICAL, width, NULL, &natural_height, NULL, NULL);
-      new_value = natural_height > self->min_max_height;
+      new_value = natural_height > self->min_max_height + CLAMP_LEEWAY;
     }
 
   if (self->will_change != new_value)
@@ -169,7 +170,10 @@ bz_fading_clamp_measure (GtkWidget *widget, GtkOrientation orientation, int for_
     {
       gtk_widget_measure (self->child, GTK_ORIENTATION_VERTICAL, for_size, minimum, natural, minimum_baseline, natural_baseline);
 
-      target_height = MIN (*natural, self->max_height);
+      if (*natural <= self->max_height + CLAMP_LEEWAY)
+        target_height = *natural;
+      else
+        target_height = self->max_height;
 
       bz_fading_clamp_update_will_change (self);
 
@@ -365,7 +369,11 @@ bz_fading_clamp_set_max_height (BzFadingClamp *self, int max_height)
         gtk_widget_measure (self->child, GTK_ORIENTATION_HORIZONTAL, -1, NULL, &width, NULL, NULL);
 
       gtk_widget_measure (self->child, GTK_ORIENTATION_VERTICAL, width, NULL, &natural_height, NULL, NULL);
-      target_height = MIN (natural_height, max_height);
+
+      if (natural_height <= max_height + CLAMP_LEEWAY)
+        target_height = natural_height;
+      else
+        target_height = max_height;
     }
   else
     {
