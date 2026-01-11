@@ -427,6 +427,36 @@ bz_safety_calculator_calculate_rating (BzEntry *entry)
   return max_rating;
 }
 
+BzHighRiskGroup
+bz_safety_calculator_get_high_risk_groups (BzEntry *entry)
+{
+  BzAppPermissions     *permissions = NULL;
+  BzAppPermissionsFlags perm_flags  = BZ_APP_PERMISSIONS_FLAGS_NONE;
+  BzHighRiskGroup       result      = BZ_HIGH_RISK_GROUP_NONE;
+
+  g_return_val_if_fail (BZ_IS_ENTRY (entry), BZ_HIGH_RISK_GROUP_NONE);
+
+  g_object_get (entry, "permissions", &permissions, NULL);
+  if (permissions == NULL)
+    return BZ_HIGH_RISK_GROUP_NONE;
+
+  perm_flags = bz_app_permissions_get_flags (permissions);
+
+  if (perm_flags & BZ_APP_PERMISSIONS_FLAGS_X11)
+    result |= BZ_HIGH_RISK_GROUP_X11;
+
+  if (perm_flags & (BZ_APP_PERMISSIONS_FLAGS_FILESYSTEM_FULL |
+                    BZ_APP_PERMISSIONS_FLAGS_FILESYSTEM_READ |
+                    BZ_APP_PERMISSIONS_FLAGS_HOME_FULL |
+                    BZ_APP_PERMISSIONS_FLAGS_HOME_READ |
+                    BZ_APP_PERMISSIONS_FLAGS_ESCAPE_SANDBOX))
+    result |= BZ_HIGH_RISK_GROUP_DISK;
+
+  g_clear_object (&permissions);
+
+  return result;
+}
+
 static char *
 format_bus_policy_title (const BzBusPolicy *bus_policy)
 {

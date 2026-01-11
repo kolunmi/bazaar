@@ -230,19 +230,34 @@ configure_remove_dialog (AdwAlertDialog *alert,
 }
 
 static void
-configure_high_risk_warning_dialog (AdwAlertDialog *alert,
-                                    const char     *title)
+configure_high_risk_warning_dialog (AdwAlertDialog  *alert,
+                                    const char      *title,
+                                    BzHighRiskGroup  risk_groups)
 {
   g_autofree char *heading = NULL;
   g_autofree char *body    = NULL;
 
   heading = g_strdup_printf (_ ("“%s” is High Risk"), title);
-  body    = g_strdup (_ ("This app has full access to your system, including all "
-                            "<b>your files, browser history, saved passwords</b>, and "
-                            "more. It also has access to the internet, meaning it "
-                            "could send your data to outside parties.\n\n"
-                            "Because the app is proprietary, it can not be audited "
-                            "for what it does with these permissions."));
+
+  if (risk_groups & BZ_HIGH_RISK_GROUP_DISK)
+    {
+      body = g_strdup (_ ("This app has full access to your system, including all "
+                          "<b>your files, browser history, saved passwords</b>, and "
+                          "more. It also has access to the internet, meaning it "
+                          "could send your data to outside parties.\n\n"
+                          "Because the app is proprietary, it can not be audited "
+                          "for what it does with these permissions."));
+    }
+  else if (risk_groups & BZ_HIGH_RISK_GROUP_X11)
+    {
+      body = g_strdup (_ ("This app uses the legacy X11 windowing system, which "
+                          "allows it to <b>record all keystrokes, capture screenshots, "
+                          "and monitor other applications</b>. It also has access "
+                          "to the internet, meaning it could send your data to "
+                          "outside parties.\n\n"
+                          "Because the app is proprietary, it can not be audited "
+                          "for what it does with these permissions."));
+    }
 
   adw_alert_dialog_set_heading (alert, heading);
   adw_alert_dialog_set_body (alert, body);
@@ -259,15 +274,13 @@ configure_high_risk_warning_dialog (AdwAlertDialog *alert,
   adw_alert_dialog_set_close_response (alert, "cancel");
 }
 
-static gboolean
-is_entry_high_risk (BzEntry *entry)
+static BzHighRiskGroup
+get_entry_high_risk_groups (BzEntry *entry)
 {
-  BzImportance rating;
+  if (bz_entry_get_is_foss (entry))
+      return BZ_HIGH_RISK_GROUP_NONE;
 
-  g_return_val_if_fail (BZ_IS_ENTRY (entry), FALSE);
-
-  rating = bz_safety_calculator_calculate_rating (entry);
-  return rating == BZ_IMPORTANCE_IMPORTANT;
+  return bz_safety_calculator_get_high_risk_groups (entry);
 }
 
 typedef struct
@@ -301,7 +314,7 @@ show_dialog_fiber (ShowDialogData *data)
   g_autofree char *risk_response               = NULL;
   g_autoptr (BzTransactionDialogResult) result = NULL;
   g_autoptr (BzEntry) check_entry              = NULL;
-  gboolean is_high_risk                        = FALSE;
+  BzHighRiskGroup risk_groups                  = BZ_HIGH_RISK_GROUP_NONE;
 
   result = bz_transaction_dialog_result_new ();
 
@@ -328,13 +341,13 @@ show_dialog_fiber (ShowDialogData *data)
 
   if (!data->remove && check_entry != NULL)
     {
-      is_high_risk = is_entry_high_risk (check_entry);
+      risk_groups = get_entry_high_risk_groups (check_entry);
     }
 
-  if (is_high_risk)
+  if (risk_groups != BZ_HIGH_RISK_GROUP_NONE)
     {
       risk_alert = g_object_ref_sink (adw_alert_dialog_new (NULL, NULL));
-      configure_high_risk_warning_dialog (ADW_ALERT_DIALOG (risk_alert), title);
+      configure_high_risk_warning_dialog (ADW_ALERT_DIALOG (risk_alert), title, risk_groups);
 
       adw_dialog_present (risk_alert, data->parent);
       risk_response = dex_await_string (
@@ -359,7 +372,7 @@ show_dialog_fiber (ShowDialogData *data)
 
   radios = create_entry_radio_buttons (ADW_ALERT_DIALOG (alert), store, data->remove);
 
-  if (!data->remove && data->auto_confirm && radios->len <= 1 && !is_high_risk)
+  if (!data->remove && data->auto_confirm && radios->len <= 1 && risk_groups == BZ_HIGH_RISK_GROUP_NONE)
     {
       dialog_response = g_strdup ("install");
       g_ptr_array_set_size (radios, 0);
