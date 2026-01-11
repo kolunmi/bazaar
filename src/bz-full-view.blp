@@ -717,6 +717,8 @@ template $BzFullView: Adw.Bin {
 
                             label: bind $format_other_apps_label(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer) as <string>;
                             xalign: 0;
+                            wrap: true;
+                            wrap-mode: word_char;
                             margin-bottom: 6;
                             margin-start: 3;
                           }
@@ -740,11 +742,17 @@ template $BzFullView: Adw.Bin {
 
                           Button {
                             visible: bind $is_longer(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer-apps, 6) as <bool>;
-                            label: bind $format_more_other_apps_label(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer) as <string>;
                             clicked => $more_apps_button_clicked_cb(template);
                             halign: center;
                             margin-top: 11;
                             margin-bottom: 8;
+
+                            child: Label {
+                              label: bind $format_more_other_apps_label(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer) as <string>;
+                              justify: center;
+                              wrap: true;
+                              wrap-mode: word_char;
+                            };
 
                             styles [
                               "pill",
