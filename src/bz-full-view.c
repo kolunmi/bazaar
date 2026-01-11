@@ -572,7 +572,7 @@ pick_license_warning (gpointer object,
 static char *
 format_other_apps_label (gpointer object, const char *developer)
 {
-  if (!developer || *developer == '\0' || strlen (developer) > 12)
+  if (!developer || *developer == '\0')
     return g_strdup (_ ("More Apps"));
   return g_strdup_printf (_ ("More Apps by %s"), developer);
 }
