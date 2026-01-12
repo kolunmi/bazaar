@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-01-07 18:58+0000\n"
-"PO-Revision-Date: 2026-01-07 23:11+0000\n"
+"PO-Revision-Date: 2026-01-12 11:18+0000\n"
 "Last-Translator: Flynn Peck <cirilla@tuta.io>\n"
 "Language-Team: kw\n"
 "Language: kw\n"
@@ -72,7 +72,7 @@ msgstr "Kesunya Ynworransow Hwithrans"
 #: data/io.github.kolunmi.Bazaar.gschema.xml:27
 msgid "Add a delay before searching to prevent instant replies while typing"
 msgstr ""
-"Addya unn ardak dherag hwilas rag preventya gorthebow desempis dres "
+"Addya unn ardak dherag ow hwilas rag preventya gorthebow desempis dres ow "
 "jynnskrifa"
 
 #: data/io.github.kolunmi.Bazaar.gschema.xml:74
@@ -100,8 +100,8 @@ msgid ""
 "A new app store for Linux with a focus on discovering and installing "
 "applications and addons from Flatpak remotes, particularly Flathub."
 msgstr ""
-"Unn gwerthji appys nowydh rag Linux gans unn fog war diskudha ha lea appys "
-"hag ystynansow dhyworth gwerthjiow Flatpak, dres oll Flathub."
+"Unn gwerthji appys nowydh rag Linux gans unn fog war ow diskudha hag ow lea "
+"appys hag ystynansow dhyworth gwerthjiow Flatpak, dres oll Flathub."
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:14
 msgid ""
@@ -119,7 +119,7 @@ msgstr "Adam Masciola"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:54
 msgid "The home page displaying Flathub apps"
-msgstr "An folen chi displetya appys Flathub"
+msgstr "An folen chi ow displetya appys Flathub"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:58
 msgid "Nucleus app page"
@@ -165,7 +165,7 @@ msgstr "Garowder Komik"
 
 #: src/bz-age-rating-dialog.c:88
 msgid "No information regarding cartoon violence"
-msgstr "Vyth kedhlow yn-kever garowder komik"
+msgstr "Kedhlow vyth yn-kever garowder komik"
 
 #: src/bz-age-rating-dialog.c:91
 msgid "Fantasy Violence"
@@ -173,7 +173,7 @@ msgstr "Garowder Fantasi"
 
 #: src/bz-age-rating-dialog.c:92
 msgid "No information regarding fantasy violence"
-msgstr "Vyth kedhlow yn-kever garowder fantasi"
+msgstr "Kedhlow vyth yn-kever garowder fantasi"
 
 #: src/bz-age-rating-dialog.c:95
 msgid "Realistic Violence"
@@ -181,7 +181,7 @@ msgstr "Garowder Gwirvosek"
 
 #: src/bz-age-rating-dialog.c:96
 msgid "No information regarding realistic violence"
-msgstr "Vyth kedhlow yn-kever garowder gwirvosek"
+msgstr "Kedhlow vyth yn-kever garowder gwirvosek"
 
 #: src/bz-age-rating-dialog.c:99
 msgid "Violence Depicting Bloodshed"
@@ -189,7 +189,7 @@ msgstr "Garowder rag Krow"
 
 #: src/bz-age-rating-dialog.c:100
 msgid "No information regarding bloodshed"
-msgstr "Vyth kedhlow yn-kever krow"
+msgstr "Kedhlow vyth yn-kever krow"
 
 #: src/bz-age-rating-dialog.c:103
 msgid "Sexual Violence"
@@ -197,7 +197,7 @@ msgstr "Garowder Reydhel"
 
 #: src/bz-age-rating-dialog.c:104
 msgid "No information regarding sexual violence"
-msgstr "Vyth kedhlow yn-kever garowder reydhel"
+msgstr "Kedhlow vyth yn-kever garowder reydhel"
 
 #: src/bz-age-rating-dialog.c:107
 msgid "Alcohol"
@@ -205,7 +205,7 @@ msgstr "Las"
 
 #: src/bz-age-rating-dialog.c:108
 msgid "No information regarding references to alcohol"
-msgstr "Vyth kedhlow yn-kever kampollans dhe las"
+msgstr "Kedhlow vyth yn-kever kampollans dhe las"
 
 #: src/bz-age-rating-dialog.c:111
 msgid "Narcotics"
@@ -213,7 +213,7 @@ msgstr "Droggya Anlaghel"
 
 #: src/bz-age-rating-dialog.c:112
 msgid "No information regarding references to illicit drugs"
-msgstr "Vyth kedhlow yn-kever kampollans dhe droggya anlaghel"
+msgstr "Kedhlow vyth yn-kever kampollans dhe droggya anlaghel"
 
 #: src/bz-age-rating-dialog.c:115
 msgid "Tobacco"
@@ -221,7 +221,7 @@ msgstr "Tobacko"
 
 #: src/bz-age-rating-dialog.c:116
 msgid "No information regarding references to tobacco products"
-msgstr "Vyth kedhlow yn-kever kampollans dhe gwaren tobacko"
+msgstr "Kedhlow vyth yn-kever kampollans dhe gwaren tobacko"
 
 #: src/bz-age-rating-dialog.c:119 src/bz-age-rating-dialog.c:421
 msgid "Nudity"
@@ -229,7 +229,7 @@ msgstr "Nothedh"
 
 #: src/bz-age-rating-dialog.c:120
 msgid "No information regarding nudity of any sort"
-msgstr "Vyth kedhlow yn-kever kampollans dhe nothedh"
+msgstr "Kedhlow vyth yn-kever kampollans dhe nothedh"
 
 #: src/bz-age-rating-dialog.c:123
 msgid "Sexual Themes"
@@ -237,7 +237,7 @@ msgstr "Themow Reydhel"
 
 #: src/bz-age-rating-dialog.c:124
 msgid "No information regarding references to or depictions of sexual nature"
-msgstr "Vyth kedhlow yn-kever kampollans dhe po portrayansow a gnas reydhel"
+msgstr "Kedhlow vyth yn-kever kampollans dhe po portrayansow a gnas reydhel"
 
 #: src/bz-age-rating-dialog.c:127
 msgid "Profanity"
@@ -245,7 +245,7 @@ msgstr "Koss"
 
 #: src/bz-age-rating-dialog.c:128
 msgid "No information regarding profanity of any kind"
-msgstr "Vyth kedhlow yn-kever kossya"
+msgstr "Kedhlow vyth yn-kever kossya"
 
 #: src/bz-age-rating-dialog.c:131
 msgid "Inappropriate Humor"
@@ -253,7 +253,7 @@ msgstr "Hwarthuster na Gwiw"
 
 #: src/bz-age-rating-dialog.c:132
 msgid "No information regarding inappropriate humor"
-msgstr "Vyth kedhlow yn-kever hwarthuster na gwiw"
+msgstr "Kedhlow vyth yn-kever hwarthuster na gwiw"
 
 #: src/bz-age-rating-dialog.c:135
 msgid "Discrimination"
@@ -261,7 +261,7 @@ msgstr "Disfaveryans"
 
 #: src/bz-age-rating-dialog.c:136
 msgid "No information regarding discriminatory language of any kind"
-msgstr "Vyth kedhlow yn-kever keskows disfaveryans"
+msgstr "Kedhlow vyth yn-kever keskows disfaveryans"
 
 #: src/bz-age-rating-dialog.c:139
 msgid "Advertising"
@@ -269,7 +269,7 @@ msgstr "Argemynnow"
 
 #: src/bz-age-rating-dialog.c:140
 msgid "No information regarding advertising of any kind"
-msgstr "Vyth kedhlow yn-kever argemynnow"
+msgstr "Kedhlow vyth yn-kever argemynnow"
 
 #: src/bz-age-rating-dialog.c:143
 msgid "Gambling"
@@ -277,7 +277,7 @@ msgstr "Hapwaryans"
 
 #: src/bz-age-rating-dialog.c:144
 msgid "No information regarding gambling of any kind"
-msgstr "Vyth kedhlow yn-kever hapwaryans"
+msgstr "Kedhlow vyth yn-kever hapwaryans"
 
 #: src/bz-age-rating-dialog.c:147
 msgid "Purchasing"
@@ -285,7 +285,7 @@ msgstr "Prenyans"
 
 #: src/bz-age-rating-dialog.c:148
 msgid "No information regarding the ability to spend money"
-msgstr "Vyth kedhlow yn-kever prenyans"
+msgstr "Kedhlow vyth yn-kever prenyans"
 
 #: src/bz-age-rating-dialog.c:151
 msgid "Chat Between Users"
@@ -293,7 +293,7 @@ msgstr "Keskows ynter Devnydhyoryon"
 
 #: src/bz-age-rating-dialog.c:152
 msgid "No information regarding ways to chat with other users"
-msgstr "Vyth kedhlow yn-kever keskows ynter devnydhyoryon"
+msgstr "Kedhlow vyth yn-kever keskows ynter devnydhyoryon"
 
 #: src/bz-age-rating-dialog.c:155
 msgid "Audio Chat Between Users"
@@ -301,7 +301,7 @@ msgstr "Galow Pellgows ynter Devnydhyoryon"
 
 #: src/bz-age-rating-dialog.c:156
 msgid "No information regarding ways to talk with other users"
-msgstr "Vyth kedhlow yn-kever keskows ynter devnydhyoryon"
+msgstr "Kedhlow vyth yn-kever keskows ynter devnydhyoryon"
 
 #: src/bz-age-rating-dialog.c:159
 msgid "Contact Details"
@@ -311,7 +311,7 @@ msgstr "Kedhlow Kestav"
 msgid ""
 "No information regarding sharing of social network usernames or email "
 "addresses"
-msgstr "Vyth kedhlow yn-kever kevrans a hanwyn usyer po ebost"
+msgstr "Kedhlow vyth yn-kever kevrans a hanwyn usyer po ebost"
 
 #: src/bz-age-rating-dialog.c:163
 msgid "Identifying Information"
@@ -319,7 +319,7 @@ msgstr "Kedhlow Privedh"
 
 #: src/bz-age-rating-dialog.c:164
 msgid "No information regarding sharing of user information with third parties"
-msgstr "Vyth kedhlow yn-kever kevrans a kedhlow privedh gans tressa partiow"
+msgstr "Kedhlow vyth yn-kever kevrans a kedhlow privedh gans tressa partiow"
 
 #: src/bz-age-rating-dialog.c:167
 msgid "Location Sharing"
@@ -327,7 +327,7 @@ msgstr "Kevrans Tyller"
 
 #: src/bz-age-rating-dialog.c:168
 msgid "No information regarding sharing of physical location with other users"
-msgstr "Vyth kedhlow yn-kever kevrans tyller gans devnydhyoryon erel"
+msgstr "Kedhlow vyth yn-kever kevrans tyller gans devnydhyoryon erel"
 
 #: src/bz-age-rating-dialog.c:171
 msgid "Prostitution"
@@ -335,7 +335,7 @@ msgstr "Horyans"
 
 #: src/bz-age-rating-dialog.c:172
 msgid "No information regarding references to prostitution"
-msgstr "Vyth kedhlow yn-kever kampollans dhe horyans"
+msgstr "Kedhlow vyth yn-kever kampollans dhe horyans"
 
 #: src/bz-age-rating-dialog.c:175
 msgid "Adultery"
@@ -343,7 +343,7 @@ msgstr "Avoutri"
 
 #: src/bz-age-rating-dialog.c:176
 msgid "No information regarding references to adultery"
-msgstr "Vyth kedhlow yn-kever kampollans dhe avoutri"
+msgstr "Kedhlow vyth yn-kever kampollans dhe avoutri"
 
 #: src/bz-age-rating-dialog.c:179
 msgid "Sexualized Characters"
@@ -351,7 +351,7 @@ msgstr "Warioryon Reydhel"
 
 #: src/bz-age-rating-dialog.c:180
 msgid "No information regarding sexualized characters"
-msgstr "Vyth kedhlow yn-kever warioryon reydhel"
+msgstr "Kedhlow vyth yn-kever warioryon reydhel"
 
 #: src/bz-age-rating-dialog.c:183
 msgid "Desecration"
@@ -359,7 +359,7 @@ msgstr "Defolyans"
 
 #: src/bz-age-rating-dialog.c:184
 msgid "No information regarding references to desecration"
-msgstr "Vyth kedhlow yn-kever kampollans dhe defolyans"
+msgstr "Kedhlow vyth yn-kever kampollans dhe defolyans"
 
 #: src/bz-age-rating-dialog.c:187
 msgid "Human Remains"
@@ -367,7 +367,7 @@ msgstr "Korf Marow"
 
 #: src/bz-age-rating-dialog.c:188
 msgid "No information regarding visible dead human remains"
-msgstr "Vyth kedhlow yn-kever korf marow a wel"
+msgstr "Kedhlow vyth yn-kever korf marow a wel"
 
 #: src/bz-age-rating-dialog.c:191
 msgid "Slavery"
@@ -375,7 +375,7 @@ msgstr "Kethneth"
 
 #: src/bz-age-rating-dialog.c:192
 msgid "No information regarding references to slavery"
-msgstr "Vyth kedhlow yn-kever kampollans dhe kethneth"
+msgstr "Kedhlow vyth yn-kever kampollans dhe kethneth"
 
 #: src/bz-age-rating-dialog.c:370
 msgid "Does not include references to drugs"
@@ -384,7 +384,7 @@ msgstr "Vyth komprehendya kampollans dhe droggys"
 #: src/bz-age-rating-dialog.c:372
 msgid ""
 "Does not include swearing, profanity, and other kinds of strong language"
-msgstr "Vyth komprehendya kossya"
+msgstr "Na komprehendya kossya"
 
 #: src/bz-age-rating-dialog.c:374
 msgid "Does not include ads or monetary transactions"
@@ -710,7 +710,7 @@ msgstr "Omdennys yn Sewen!"
 
 #: src/bz-application.c:915
 msgid "Performing setup..."
-msgstr "Gwruthyl selyans..."
+msgstr "Ow gwruthyl selyans..."
 
 #: src/bz-application.c:994 src/bz-application.c:1003
 msgid "Set Up Flathub"
@@ -732,20 +732,20 @@ msgstr "Diwettha"
 
 #: src/bz-application.c:1404 src/bz-application.c:3078
 msgid "Synchronizing..."
-msgstr "Kettermynyegi..."
+msgstr "Ow Kettermynyegi..."
 
 #: src/bz-application.c:1543 src/bz-application.c:3074
 #, c-format
 msgid "Receiving %d entries..."
-msgstr "Receva %d enworrans manylyon..."
+msgstr "Ow receva %d enworrans manylyon..."
 
 #: src/bz-application.c:1548
 msgid "Checking for updates"
-msgstr "Checkya rag nowedhyansow"
+msgstr "Ow checkya rag nowedhyansow"
 
 #: src/bz-application.c:3080
 msgid "Indexing Data..."
-msgstr "Kevernya Data..."
+msgstr "Ow Kevernya Data..."
 
 #: src/bz-curated-view.blp:11 src/bz-favorites-page.blp:65
 #: src/bz-flathub-page.blp:19 src/bz-full-view.blp:53
@@ -894,11 +894,11 @@ msgstr "Dewis bord lestri treuswrians"
 
 #: src/bz-favorites-page.blp:53 src/bz-user-data-page.blp:41
 msgid "Loading"
-msgstr "Karga"
+msgstr "Ow Karga"
 
 #: src/bz-favorites-page.blp:68
 msgid "No Favorites"
-msgstr "Vyth Drudhyow"
+msgstr "Drudhyow Vyth"
 
 #: src/bz-favorites-page.blp:69
 msgid "Applications you mark as favorite will appear here"
@@ -1096,7 +1096,7 @@ msgstr "Moy Appys KDE"
 
 #: src/bz-flathub-page.blp:23
 msgid "Flathub Not Added"
-msgstr "Flathub heb Addya"
+msgstr "Flathub Na Addys"
 
 #: src/bz-flathub-page.blp:24
 msgid "The Flathub remote was not found on any of your Flatpak installations"
@@ -1205,7 +1205,7 @@ msgstr "Kevri"
 
 #: src/bz-full-view.blp:57
 msgid "No Results"
-msgstr "Vyth Sewyansow"
+msgstr "Sewyansow Vyth"
 
 #: src/bz-full-view.blp:58
 msgid "Try a different search query"
@@ -1241,7 +1241,7 @@ msgstr "Iskargow dre mis"
 
 #: src/bz-full-view.blp:527
 msgid "Stopped Receiving Core Updates"
-msgstr "Na Fella Receva Nowedhyansow Kolonnen"
+msgstr "Ow Receva Nowedhyansow Kolonnen Na Fella"
 
 #: src/bz-full-view.blp:541
 msgid ""
@@ -1347,7 +1347,7 @@ msgstr "Desedhadow"
 
 #: src/bz-full-view.c:532
 msgid "Desktop Only"
-msgstr "Amontyell Unnik"
+msgstr "Amontyell Hepken"
 
 #: src/bz-full-view.c:538
 msgid "Works on desktop, tablets, and phones"
@@ -1436,7 +1436,7 @@ msgstr "Diskwedhes Moy"
 
 #: src/bz-hardware-support-dialog.blp:7 src/bz-hardware-support-dialog.blp:31
 msgid "Hardware Support"
-msgstr "Skoodhyans kalesweyth"
+msgstr "Skoodhyans Kalesweyth"
 
 #: src/bz-hardware-support-dialog.c:62
 msgid "Keyboard support"
@@ -1562,7 +1562,7 @@ msgstr "Dissorn ha Hwithra"
 
 #: src/bz-installed-page.blp:19
 msgid "No Flatpaks Installed"
-msgstr "Vyth Flatpakow Ynstallys"
+msgstr "Flatpakys Leys Vyth"
 
 #: src/bz-installed-page.blp:50
 msgid "Search installed apps"
@@ -1687,7 +1687,7 @@ msgstr "Kudha appys perghenogel dres peuryans ha hwithrans"
 
 #: src/bz-preferences-dialog.blp:40
 msgid "Flathub Results Only"
-msgstr "Sewyasow a Flathub Unnik"
+msgstr "Sewyasow Flathub Hepken"
 
 #: src/bz-preferences-dialog.blp:41
 msgid ""
@@ -1922,7 +1922,7 @@ msgstr "Grontys Ankoth"
 
 #: src/bz-safety-calculator.c:78
 msgid "Permissions are missing for this app."
-msgstr "Grontys fyllel rag an app ma."
+msgstr "Grontys ow fyllel rag an app ma."
 
 #: src/bz-safety-calculator.c:91
 msgid "No Permissions"
@@ -2267,7 +2267,7 @@ msgstr "Hwials Appys, Gwariow, Medhelweyth"
 
 #: src/bz-search-widget.blp:146
 msgid "Categories Unavailable"
-msgstr "Kassys Ankavadow"
+msgstr "Klassys Ankavadow"
 
 #: src/bz-search-widget.blp:147
 msgid "Search for apps using the search bar above."
@@ -2284,11 +2284,11 @@ msgstr "Sewyansow kavos vyth rag \"%s\" yn Flathub"
 
 #: src/bz-share-list.c:64
 msgid "Copied!"
-msgstr "Dasskrifys"
+msgstr "Kopys!"
 
 #: src/bz-share-list.c:116
 msgid "Copy Link"
-msgstr "Dasskrifa Gorgevren"
+msgstr "Kopia Gorgevren"
 
 #: src/bz-share-list.c:127
 msgid "Open Link"
@@ -2321,7 +2321,7 @@ msgstr "Hwithrans fyllis"
 
 #: src/bz-transaction-dialog.c:159
 msgid "Keep Data"
-msgstr "Synsi Data"
+msgstr "Gwitha Data"
 
 #: src/bz-transaction-dialog.c:160
 msgid "Allow restoring settings and content"
@@ -2352,7 +2352,7 @@ msgstr "Dilea %s?"
 #: src/bz-transaction-dialog.c:220
 #, c-format
 msgid "It will not be possible to use %s after it is uninstalled."
-msgstr "Y yw angalladow dhe devnydhya %s wosa y yw dislea."
+msgstr "Y yw angalladow dhe devnydhya %s wosa y yw disleys."
 
 #: src/bz-transaction-dialog.c:239
 #, c-format
@@ -2391,7 +2391,7 @@ msgstr "Kerghynnedh rag App"
 
 #: src/bz-transaction-view.blp:146 src/bz-transaction-view.blp:172
 msgid "Install Size"
-msgstr "Braster Lea"
+msgstr "Braster Leyans"
 
 #: src/bz-transaction-view.blp:187 src/bz-transaction-view.blp:238
 #: src/bz-transaction-view.blp:264 src/bz-transaction.c:342
@@ -2490,7 +2490,7 @@ msgstr "Oberennow Vyth Hwath"
 
 #: src/bz-window.blp:257
 msgid "Refreshing Store Content"
-msgstr "Diseghow Synsas Gwerthji"
+msgstr "Ow Disegha Synsas Gwerthji"
 
 #: src/bz-window.blp:271
 msgid "Curated"
@@ -2502,13 +2502,13 @@ msgstr "Flathub"
 
 #: src/bz-window.blp:432
 msgid "No background tasks!"
-msgstr "Oberennow vyth yn kilva!"
+msgstr "Oberennow yn kilva vyth!"
 
 #: src/bz-window.blp:490
 msgid ""
 "You have a network connection but are viewing a cached version of Flathub"
 msgstr ""
-"Ty re unn junyans kewrosweyth lemen yw gwelow unn versyon koth a Flathub"
+"Ty re unn junyans kewrosweyth lemen yw ow gwel unn versyon koth a Flathub"
 
 #: src/bz-window.blp:565
 msgid "_Login with Flathub"
