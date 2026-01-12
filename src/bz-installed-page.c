@@ -78,6 +78,9 @@ static void
 set_page (BzInstalledPage *self);
 
 static gboolean
+set_page_idle_cb (BzInstalledPage *self);
+
+static gboolean
 filter (BzEntryGroup    *group,
         BzInstalledPage *self);
 
@@ -362,7 +365,11 @@ bz_installed_page_set_model (BzInstalledPage *self,
       self->model = g_object_ref (model);
       g_signal_connect_swapped (model, "items-changed", G_CALLBACK (items_changed), self);
     }
-  g_idle_add_once ((GSourceOnceFunc) set_page, self);
+  g_idle_add_full (
+      G_PRIORITY_DEFAULT,
+      (GSourceFunc) set_page_idle_cb,
+      g_object_ref (self),
+      g_object_unref);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MODEL]);
 }
@@ -424,6 +431,13 @@ set_page (BzInstalledPage *self)
     adw_view_stack_set_visible_child_name (self->stack, "no-results");
   else
     adw_view_stack_set_visible_child_name (self->stack, "content");
+}
+
+static gboolean
+set_page_idle_cb (BzInstalledPage *self)
+{
+  set_page (self);
+  return G_SOURCE_REMOVE;
 }
 
 static gboolean
