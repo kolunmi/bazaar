@@ -1,0 +1,23 @@
+prefix=bz
+name=curated_section
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+include=<gtk/gtk.h>
+
+include="bz-entry-group.h"
+include="bz-curated-category-info.h"
+include="bz-curated-markdown-info.h"
+include="bz-curated-image-info.h"
+
+property=expand_horizontally gboolean G_TYPE_BOOLEAN boolean
+property=expand_vertically gboolean G_TYPE_BOOLEAN boolean
+
+property=classes GListModel G_TYPE_LIST_MODEL object
+property=light_classes GListModel G_TYPE_LIST_MODEL object
+property=dark_classes GListModel G_TYPE_LIST_MODEL object
+
+property=category BzCuratedCategoryInfo BZ_TYPE_CURATED_CATEGORY_INFO object
+property=markdown BzCuratedMarkdownInfo BZ_TYPE_CURATED_MARKDOWN_INFO object
+property=image BzCuratedImageInfo BZ_TYPE_CURATED_IMAGE_INFO object

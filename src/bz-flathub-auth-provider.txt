@@ -1,0 +1,7 @@
+prefix=bz
+name=flathub_auth_provider
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+property=method char G_TYPE_STRING string
+property=name char G_TYPE_STRING string

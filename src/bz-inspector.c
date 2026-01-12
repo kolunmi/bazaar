@@ -20,6 +20,7 @@
 
 #include "bz-inspector.h"
 #include "bz-entry-inspector.h"
+#include "bz-window.h"
 
 struct _BzInspector
 {
@@ -27,8 +28,13 @@ struct _BzInspector
 
   BzStateInfo *state;
 
+  GBinding  *debug_mode_binding;
+  GtkWindow *preview_window;
+
+  GtkCheckButton     *debug_mode_check;
   GtkEditable        *search_entry;
   GtkFilterListModel *filter_model;
+  GtkSingleSelection *groups_selection;
 };
 
 G_DEFINE_FINAL_TYPE (BzInspector, bz_inspector, ADW_TYPE_WINDOW);
@@ -53,6 +59,11 @@ bz_inspector_dispose (GObject *object)
   BzInspector *self = BZ_INSPECTOR (object);
 
   g_clear_pointer (&self->state, g_object_unref);
+
+  g_clear_object (&self->debug_mode_binding);
+  if (self->preview_window != NULL)
+    gtk_window_close (self->preview_window);
+  g_clear_object (&self->preview_window);
 
   G_OBJECT_CLASS (bz_inspector_parent_class)->dispose (object);
 }
@@ -94,6 +105,52 @@ bz_inspector_set_property (GObject      *object,
 }
 
 static void
+preview_changed (BzInspector    *self,
+                 GParamSpec     *pspec,
+                 GtkCheckButton *button)
+{
+  if (gtk_check_button_get_active (button))
+    {
+      BzWindow     *window   = NULL;
+      BzEntryGroup *selected = NULL;
+
+      g_assert (self->preview_window == NULL);
+
+      window = bz_window_new (self->state);
+      gtk_window_set_default_size (GTK_WINDOW (window), 750, 750);
+      gtk_window_present (GTK_WINDOW (window));
+
+      selected = gtk_single_selection_get_selected_item (self->groups_selection);
+      if (selected != NULL)
+        bz_window_show_group (window, selected);
+
+      self->preview_window = (GtkWindow *) g_object_ref_sink (window);
+    }
+  else
+    {
+      if (self->preview_window != NULL)
+        gtk_window_close (self->preview_window);
+      g_clear_object (&self->preview_window);
+    }
+}
+
+static void
+selected_group_changed (BzInspector        *self,
+                        GParamSpec         *pspec,
+                        GtkSingleSelection *selection)
+{
+  BzEntryGroup *group = NULL;
+
+  if (self->preview_window == NULL ||
+      !gtk_widget_get_mapped (GTK_WIDGET (self->preview_window)))
+    return;
+
+  group = gtk_single_selection_get_selected_item (self->groups_selection);
+  if (group != NULL)
+    bz_window_show_group (BZ_WINDOW (self->preview_window), group);
+}
+
+static void
 entry_changed (BzInspector *self,
                GtkEditable *editable)
 {
@@ -130,6 +187,13 @@ decache_and_inspect_cb (GtkListItem *list_item,
     }
 }
 
+static char *
+format_uint (gpointer object,
+             guint    value)
+{
+  return g_strdup_printf ("%d", value);
+}
+
 static void
 bz_inspector_class_init (BzInspectorClass *klass)
 {
@@ -150,10 +214,15 @@ bz_inspector_class_init (BzInspectorClass *klass)
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-inspector.ui");
+  gtk_widget_class_bind_template_child (widget_class, BzInspector, debug_mode_check);
   gtk_widget_class_bind_template_child (widget_class, BzInspector, search_entry);
   gtk_widget_class_bind_template_child (widget_class, BzInspector, filter_model);
+  gtk_widget_class_bind_template_child (widget_class, BzInspector, groups_selection);
+  gtk_widget_class_bind_template_callback (widget_class, preview_changed);
+  gtk_widget_class_bind_template_callback (widget_class, selected_group_changed);
   gtk_widget_class_bind_template_callback (widget_class, decache_and_inspect_cb);
   gtk_widget_class_bind_template_callback (widget_class, entry_changed);
+  gtk_widget_class_bind_template_callback (widget_class, format_uint);
 }
 
 static void
@@ -187,8 +256,16 @@ bz_inspector_set_state (BzInspector *self,
   g_return_if_fail (BZ_IS_INSPECTOR (self));
 
   g_clear_pointer (&self->state, g_object_unref);
+  g_clear_pointer (&self->debug_mode_binding, g_object_unref);
+
   if (state != NULL)
-    self->state = g_object_ref (state);
+    {
+      self->state              = g_object_ref (state);
+      self->debug_mode_binding = g_object_bind_property (
+          state, "debug-mode",
+          self->debug_mode_check, "active",
+          G_BINDING_BIDIRECTIONAL | G_BINDING_SYNC_CREATE);
+    }
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_STATE]);
 }

@@ -1,0 +1,7 @@
+<!--
+  SPDX-License-Identifier: CC0-1.0
+  SPDX-FileCopyrightText: 2024 GNOME Foundation, Inc.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+    <path d="m1.531.469-1.06 1.06 14 14 1.06-1.06-1.035-1.035a1.5 1.5 0 0 0-1.426-1.426L12.062 11H14V2h-2v8.938l-1-1V9h-.938L9 7.937V7h2V5H9V2H7v3h-.938L5 3.937V2H3.062L1.532.469zM1 5v2h2v2H1v2h2v3h2v-3h2v3h2v-1.879L5.879 9H5v-.879L1.879 5z" style="fill:#222"/>
+</svg>

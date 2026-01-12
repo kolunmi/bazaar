@@ -4,36 +4,86 @@ using Adw 1;
 template $BzPreferencesDialog: Adw.PreferencesDialog {
   content-height: 500;
   search-enabled: true;
+  width-request: 350;
+  height-request: 500;
+
+  Adw.Breakpoint {
+    condition ("max-width: 625sp")
+
+    setters {
+      flag_buttons_box.max-children-per-line: 6;
+    }
+  }
 
   Adw.PreferencesPage {
     title: _("Preferences");
     use-underline: true;
 
-    Adw.PreferencesGroup {
-      title: _("Application Details");
+    banner: Adw.Banner {
+      sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.syncing as <bool>) as <bool>;
+      revealed: bind template.state as <$BzStateInfo>.metered_connection as <bool>;
+      title: _("Network connection is metered — automatic store data sync is paused");
+      button-label: _("Sync Manually");
+      action-name: "app.sync-remotes";
+    };
 
-      Adw.SwitchRow git_forge_star_counts_switch{
-        title: _("Git Forge Star Counts");
-        subtitle: _("Not having a GitHub access token may trigger rate limits");
+    Adw.PreferencesGroup {
+      title: _("Content Filters");
+
+      Adw.SwitchRow only_foss_switch {
+        title: _("Free Software Only");
+        subtitle: _("Hide proprietary applications when browsing and searching");
+      }
+
+      Adw.SwitchRow only_flathub_switch {
+        title: _("Flathub Results Only");
+        subtitle: _("Limit search and browse results to applications only available on Flathub");
+      }
+
+      Adw.SwitchRow only_verified_switch {
+        title: _("Verified Results Only");
+        subtitle: _("Hide results that are not verified on Flathub");
+      }
+
+      Adw.SwitchRow hide_eol_switch {
+        title: _("Hide EOL Apps");
+        subtitle: _("Hide apps which are no longer supported by their developers");
       }
     }
 
     Adw.PreferencesGroup {
       title: _("Search");
 
-      Adw.SwitchRow search_only_foss_switch{
-        title: _("Only Show Free Software");
-        subtitle: _("Hide proprietary applications from search results");
+      Adw.SwitchRow search_debounce_switch {
+        title: _("Delay Search Results");
+        subtitle: _("Improve results performance by debouncing search terms");
       }
+    }
 
-      Adw.SwitchRow search_only_flathub_switch{
-        title: _("Show Only Flathub Apps");
-        subtitle: _("Limit search results to applications available on Flathub");
-      }
+    Adw.PreferencesGroup {
+      title: _("Progress Bar");
+      description: _("Choose a theme for the progress bar!");
 
-      Adw.SwitchRow search_debounce_switch{
-        title: _("Debounce Search Results");
-        subtitle: _("Wait for a brief pause to reduce system load");
+      Adw.ActionRow {
+        child: Box {
+          margin-top: 6;
+          margin-bottom: 6;
+          halign: center;
+
+          FlowBox flag_buttons_box {
+            styles [
+              "accent-button-box",
+            ]
+
+            orientation: horizontal;
+            column-spacing: 4;
+            row-spacing: 4;
+            halign: center;
+            homogeneous: true;
+            max-children-per-line: 12;
+            selection-mode: none;
+          }
+        };
       }
     }
   }

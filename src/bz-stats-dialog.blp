@@ -2,23 +2,80 @@ using Gtk 4.0;
 using Adw 1;
 
 template $BzStatsDialog: Adw.Dialog {
+  width-request: 360;
+  height-request: 450;
+  content-width: 2000;
+  content-height: 1500;
   child: Adw.ToolbarView {
     bottom-bar-style: raised_border;
 
     [top]
     Adw.HeaderBar {
-      title-widget: Label {
-        styles [
-          "heading",
-        ]
-
-        label: _("Downloads Over Time");
+      title-widget: Adw.ViewSwitcher switcher_title {
+        stack: stack;
+        policy: wide;
       };
     }
 
-    content: $BzDataGraph graph {
-      model: bind template.model;
-      tooltip-prefix:_("Installs:");
+    content: Box {
+      orientation: vertical;
+
+      Adw.ViewStack stack {
+        vexpand: true;
+
+        Adw.ViewStackPage {
+          name: "graph";
+          title: _("Timeline");
+          icon-name: "graph2-symbolic";
+
+          child: Box {
+            orientation: vertical;
+
+              Label {
+                label: bind $format_total_downloads(template.total-downloads) as <string>;
+                halign: end;
+                hexpand: true;
+                margin-end: 34;
+                margin-bottom: 2;
+
+                styles ["dimmed"]
+              }
+
+            $BzDataGraph graph {
+              model: bind template.model;
+              tooltip-prefix: _("Installs:");
+              vexpand: true;
+              hexpand: true;
+            }
+          };
+        }
+
+        Adw.ViewStackPage {
+          name: "map";
+          title: _("World");
+          icon-name: "globe-symbolic";
+
+          child: $BzWorldMap world_map {
+              model: bind template.country-model;
+              margin-top:10;
+              margin-bottom: 10;
+          };
+        }
+      }
+
+      Adw.ViewSwitcherBar switcher_bar {
+        stack: stack;
+      }
     };
   };
+
+  Adw.Breakpoint {
+    condition ("max-width: 450sp")
+
+    setters {
+      switcher_title.stack: null;
+      switcher_bar.reveal: true;
+      template.content-height: 300;
+    }
+  }
 }

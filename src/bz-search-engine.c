@@ -29,7 +29,6 @@ struct _BzSearchEngine
   GObject parent_instance;
 
   GListModel *model;
-  GPtrArray  *mirror;
 };
 
 G_DEFINE_FINAL_TYPE (BzSearchEngine, bz_search_engine, G_TYPE_OBJECT);
@@ -44,61 +43,10 @@ enum
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
 
-static void
-items_changed (BzSearchEngine *self,
-               guint           position,
-               guint           removed,
-               guint           added,
-               GListModel     *model);
-
-BZ_DEFINE_DATA (
-    query_task,
-    QueryTask,
-    {
-      char     **terms;
-      GPtrArray *shallow_mirror;
-    },
-    BZ_RELEASE_DATA (terms, g_strfreev);
-    BZ_RELEASE_DATA (shallow_mirror, g_ptr_array_unref))
-static DexFuture *
-query_task_fiber (QueryTaskData *data);
-
-typedef struct
-{
-  gunichar     ch;
-  GUnicodeType type;
-} IndexedChar;
-
-BZ_DEFINE_DATA (
-    indexed_string,
-    IndexedString,
-    {
-      char        *ptr;
-      glong        utf8_len;
-      IndexedChar *chars;
-    },
-    BZ_RELEASE_DATA (ptr, g_free);
-    BZ_RELEASE_DATA (chars, g_free))
-
-static inline void
-index_string (const char        *s,
-              IndexedStringData *out);
-
-static inline double
-test_strings (IndexedStringData *query,
-              IndexedStringData *against);
-
-BZ_DEFINE_DATA (
-    group,
-    Group,
-    {
-      BzEntryGroup   *group;
-      GArray         *istrings;
-      BzSearchResult *default_result;
-    },
-    BZ_RELEASE_DATA (group, g_object_unref);
-    BZ_RELEASE_DATA (istrings, g_array_unref);
-    BZ_RELEASE_DATA (default_result, g_object_unref))
+static double
+test_strings (const char *query,
+              const char *against,
+              gssize      accept_min_size);
 
 typedef struct
 {
@@ -116,16 +64,48 @@ cmp_scores (Score *a,
 #define SAME_CLUSTER   0.1
 #define NO_MATCH       0.0
 
+BZ_DEFINE_DATA (
+    query_task,
+    QueryTask,
+    {
+      char     **terms;
+      GPtrArray *snapshot;
+    },
+    BZ_RELEASE_DATA (terms, g_strfreev);
+    BZ_RELEASE_DATA (snapshot, g_ptr_array_unref))
+static DexFuture *
+query_task_fiber (QueryTaskData *data);
+
+BZ_DEFINE_DATA (
+    query_sub_task,
+    QuerySubTask,
+    {
+      char      *query_utf8;
+      GPtrArray *shallow_mirror;
+      double     threshold;
+      guint      work_offset;
+      guint      work_length;
+    },
+    BZ_RELEASE_DATA (query_utf8, g_free);
+    BZ_RELEASE_DATA (shallow_mirror, g_ptr_array_unref));
+static DexFuture *
+query_sub_task_fiber (QuerySubTaskData *data);
+
+static inline GUnicodeType
+utf8_char_class (const char *s,
+                 gunichar   *ch_out);
+
+static inline const char *
+utf8_skip_to_next_of_class (const char **s,
+                            GUnicodeType class,
+                            gsize       *read_utf8);
+
 static void
 bz_search_engine_dispose (GObject *object)
 {
   BzSearchEngine *self = BZ_SEARCH_ENGINE (object);
 
-  if (self->model != NULL)
-    g_signal_handlers_disconnect_by_func (self->model, items_changed, self);
   g_clear_object (&self->model);
-
-  g_clear_pointer (&self->mirror, g_ptr_array_unref);
 
   G_OBJECT_CLASS (bz_search_engine_parent_class)->dispose (object);
 }
@@ -188,7 +168,6 @@ bz_search_engine_class_init (BzSearchEngineClass *klass)
 static void
 bz_search_engine_init (BzSearchEngine *self)
 {
-  self->mirror = g_ptr_array_new_with_free_func (group_data_unref);
 }
 
 BzSearchEngine *
@@ -211,19 +190,9 @@ bz_search_engine_set_model (BzSearchEngine *self,
   g_return_if_fail (BZ_IS_SEARCH_ENGINE (self));
   g_return_if_fail (model == NULL || G_IS_LIST_MODEL (model));
 
-  if (self->model != NULL)
-    g_signal_handlers_disconnect_by_func (self->model, items_changed, self);
   g_clear_object (&self->model);
-
-  if (self->mirror->len > 0)
-    g_ptr_array_remove_range (self->mirror, 0, self->mirror->len);
-
   if (model != NULL)
-    {
-      self->model = g_object_ref (model);
-      items_changed (self, 0, 0, g_list_model_get_n_items (model), model);
-      g_signal_connect_swapped (model, "items-changed", G_CALLBACK (items_changed), self);
-    }
+    self->model = g_object_ref (model);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MODEL]);
 }
@@ -232,25 +201,34 @@ DexFuture *
 bz_search_engine_query (BzSearchEngine    *self,
                         const char *const *terms)
 {
+  guint n_groups = 0;
 
-  g_return_val_if_fail (BZ_IS_SEARCH_ENGINE (self), NULL);
-  g_return_val_if_fail (terms != NULL && *terms != NULL, NULL);
+  dex_return_error_if_fail (BZ_IS_SEARCH_ENGINE (self));
+  dex_return_error_if_fail (terms != NULL && *terms != NULL);
 
-  if (self->mirror->len == 0 || **terms == '\0')
+  if (self->model != NULL)
+    n_groups = g_list_model_get_n_items (self->model);
+
+  if (self->model == NULL ||
+      n_groups == 0 ||
+      **terms == '\0')
     {
       g_autoptr (GPtrArray) ret = NULL;
 
       ret = g_ptr_array_new_with_free_func (g_object_unref);
-      g_ptr_array_set_size (ret, self->mirror->len);
+      g_ptr_array_set_size (ret, n_groups);
 
       for (guint i = 0; i < ret->len; i++)
         {
-          GroupData *data = NULL;
+          g_autoptr (BzEntryGroup) group    = NULL;
+          g_autoptr (BzSearchResult) result = NULL;
 
-          data = g_ptr_array_index (self->mirror, i);
-          /* Set original index here to ensure it is always up to date */
-          bz_search_result_set_original_index (data->default_result, i);
-          g_ptr_array_index (ret, i) = g_object_ref (data->default_result);
+          group = g_list_model_get_item (self->model, i);
+
+          result = bz_search_result_new ();
+          bz_search_result_set_group (result, group);
+          bz_search_result_set_original_index (result, i);
+          g_ptr_array_index (ret, i) = g_steal_pointer (&result);
         }
 
       return dex_future_new_take_boxed (
@@ -259,19 +237,18 @@ bz_search_engine_query (BzSearchEngine    *self,
     }
   else
     {
-      g_autoptr (GPtrArray) shallow_mirror = NULL;
-      g_autoptr (QueryTaskData) data       = NULL;
+      g_autoptr (GPtrArray) snapshot = NULL;
+      g_autoptr (QueryTaskData) data = NULL;
 
-      shallow_mirror = g_ptr_array_new_with_free_func (group_data_unref);
-      g_ptr_array_set_size (shallow_mirror, self->mirror->len);
+      snapshot = g_ptr_array_new_with_free_func (g_object_unref);
+      g_ptr_array_set_size (snapshot, n_groups);
 
-      for (guint i = 0; i < shallow_mirror->len; i++)
-        g_ptr_array_index (shallow_mirror, i) =
-            group_data_ref (g_ptr_array_index (self->mirror, i));
+      for (guint i = 0; i < snapshot->len; i++)
+        g_ptr_array_index (snapshot, i) = g_list_model_get_item (self->model, i);
 
-      data                 = query_task_data_new ();
-      data->terms          = g_strdupv ((gchar **) terms);
-      data->shallow_mirror = g_steal_pointer (&shallow_mirror);
+      data           = query_task_data_new ();
+      data->terms    = g_strdupv ((gchar **) terms);
+      data->snapshot = g_steal_pointer (&snapshot);
 
       return dex_scheduler_spawn (
           dex_thread_pool_scheduler_get_default (),
@@ -281,144 +258,68 @@ bz_search_engine_query (BzSearchEngine    *self,
     }
 }
 
-static void
-items_changed (BzSearchEngine *self,
-               guint           position,
-               guint           removed,
-               guint           added,
-               GListModel     *model)
-{
-  if (removed > 0)
-    g_ptr_array_remove_range (self->mirror, position, removed);
-
-  for (guint i = 0; i < added; i++)
-    {
-      g_autoptr (BzEntryGroup) group = NULL;
-      const char *id                 = NULL;
-      const char *title              = NULL;
-      const char *developer          = NULL;
-      const char *description        = NULL;
-      GPtrArray  *search_tokens      = NULL;
-      g_autoptr (GroupData) data     = NULL;
-
-      group         = g_list_model_get_item (model, position + i);
-      id            = bz_entry_group_get_id (group);
-      title         = bz_entry_group_get_title (group);
-      developer     = bz_entry_group_get_developer (group);
-      description   = bz_entry_group_get_description (group);
-      search_tokens = bz_entry_group_get_search_tokens (group);
-
-      data        = group_data_new ();
-      data->group = g_object_ref (group);
-
-      data->istrings = g_array_new (FALSE, TRUE, sizeof (IndexedStringData));
-      g_array_set_clear_func (data->istrings, indexed_string_data_deinit);
-
-#define ADD_INDEXED_STRING(_s)                     \
-  if ((_s) != NULL)                                \
-    {                                              \
-      IndexedStringData append = { 0 };            \
-                                                   \
-      index_string ((_s), &append);                \
-      g_array_append_val (data->istrings, append); \
-    }
-
-      ADD_INDEXED_STRING (id);
-      ADD_INDEXED_STRING (title);
-      ADD_INDEXED_STRING (developer);
-      ADD_INDEXED_STRING (description);
-
-#undef ADD_INDEXED_STRING
-
-      if (search_tokens != NULL)
-        {
-          guint old_len = 0;
-
-          old_len = data->istrings->len;
-          g_array_set_size (data->istrings, old_len + search_tokens->len);
-
-          for (guint j = 0; j < search_tokens->len; j++)
-            {
-              const char        *token   = NULL;
-              IndexedStringData *istring = NULL;
-
-              token   = g_ptr_array_index (search_tokens, j);
-              istring = &g_array_index (data->istrings, IndexedStringData, old_len + j);
-
-              index_string (token, istring);
-            }
-        }
-
-      data->default_result = bz_search_result_new ();
-      bz_search_result_set_group (data->default_result, group);
-
-      g_ptr_array_insert (self->mirror, position + i, g_steal_pointer (&data));
-    }
-}
-
 static DexFuture *
 query_task_fiber (QueryTaskData *data)
 {
-  char     **terms                 = data->terms;
-  GPtrArray *shallow_mirror        = data->shallow_mirror;
-  g_autoptr (GArray) term_istrings = NULL;
-  g_autoptr (GArray) scores        = NULL;
-  g_autoptr (GPtrArray) results    = NULL;
+  char     **terms                  = data->terms;
+  GPtrArray *shallow_mirror         = data->snapshot;
+  g_autoptr (GError) local_error    = NULL;
+  gboolean         result           = FALSE;
+  g_autofree char *query_utf8       = NULL;
+  guint            n_sub_tasks      = 0;
+  guint            scores_per_task  = 0;
+  g_autoptr (GPtrArray) sub_futures = NULL;
+  g_autoptr (GArray) scores         = NULL;
+  g_autoptr (GPtrArray) results     = NULL;
 
-  term_istrings = g_array_new (FALSE, TRUE, sizeof (IndexedStringData));
-  g_array_set_clear_func (term_istrings, indexed_string_data_deinit);
-  g_array_set_size (term_istrings, g_strv_length (terms));
-  for (guint i = 0; terms[i] != NULL; i++)
+  query_utf8      = g_strjoinv (" ", terms);
+  n_sub_tasks     = MAX (1, MIN (shallow_mirror->len / 512, g_get_num_processors ()));
+  scores_per_task = shallow_mirror->len / n_sub_tasks;
+
+  sub_futures = g_ptr_array_new_with_free_func (dex_unref);
+  for (guint i = 0; i < n_sub_tasks; i++)
     {
-      IndexedStringData *istring = NULL;
+      g_autoptr (QuerySubTaskData) sub_data = NULL;
+      g_autoptr (DexFuture) future          = NULL;
 
-      istring = &g_array_index (term_istrings, IndexedStringData, i);
-      index_string (terms[i], istring);
+      sub_data                 = query_sub_task_data_new ();
+      sub_data->query_utf8     = g_strdup (query_utf8);
+      sub_data->shallow_mirror = g_ptr_array_ref (shallow_mirror);
+      sub_data->threshold      = 1.0;
+      sub_data->work_offset    = i * scores_per_task;
+      sub_data->work_length    = scores_per_task;
+
+      if (i >= n_sub_tasks - 1)
+        sub_data->work_length += shallow_mirror->len % n_sub_tasks;
+
+      future = dex_scheduler_spawn (
+          dex_thread_pool_scheduler_get_default (),
+          bz_get_dex_stack_size (),
+          (DexFiberFunc) query_sub_task_fiber,
+          query_sub_task_data_ref (sub_data),
+          query_sub_task_data_unref);
+
+      g_ptr_array_add (sub_futures, g_steal_pointer (&future));
     }
+
+  result = dex_await (dex_future_allv (
+                          (DexFuture *const *) sub_futures->pdata, sub_futures->len),
+                      &local_error);
+  if (!result)
+    return dex_future_new_for_error (g_steal_pointer (&local_error));
 
   scores = g_array_new (FALSE, FALSE, sizeof (Score));
-
-  for (guint i = 0; i < shallow_mirror->len; i++)
+  for (guint i = 0; i < sub_futures->len; i++)
     {
-      GroupData *group_data = NULL;
-      double     score      = 0.0;
+      DexFuture *future     = NULL;
+      GArray    *scores_out = NULL;
 
-      group_data = g_ptr_array_index (shallow_mirror, i);
-      for (guint j = 0; j < group_data->istrings->len; j++)
-        {
-          IndexedStringData *token_istring = NULL;
-          double             token_score   = 1.0;
+      future     = g_ptr_array_index (sub_futures, i);
+      scores_out = g_value_get_boxed (dex_future_get_value (future, NULL));
 
-          token_istring = &g_array_index (group_data->istrings, IndexedStringData, j);
-          for (guint k = 0; k < term_istrings->len; k++)
-            {
-              IndexedStringData *term_istring = NULL;
-              double             mult         = 0.0;
-
-              term_istring = &g_array_index (term_istrings, IndexedStringData, k);
-
-              mult = test_strings (term_istring, token_istring);
-              /* highly reward multiple terms hitting the same token */
-              token_score *= mult;
-            }
-
-          /* correct for the decay of multiple terms */
-          token_score *= (double) term_istrings->len;
-          /* earliest tokens are the most important */
-          token_score *= 16.0 / (double) (j + 1);
-          score += token_score;
-        }
-
-      if (score > (double) term_istrings->len)
-        {
-          Score append = { 0 };
-
-          append.idx = i;
-          append.val = score;
-          g_array_append_val (scores, append);
-        }
+      if (scores_out->len > 0)
+        g_array_append_vals (scores, scores_out->data, scores_out->len);
     }
-
   if (scores->len > 0)
     g_array_sort (scores, (GCompareFunc) cmp_scores);
 
@@ -426,19 +327,19 @@ query_task_fiber (QueryTaskData *data)
   g_ptr_array_set_size (results, scores->len);
   for (guint i = 0; i < scores->len; i++)
     {
-      Score     *score                  = NULL;
-      GroupData *group_data             = NULL;
-      g_autoptr (BzSearchResult) result = NULL;
+      Score        *score                      = NULL;
+      BzEntryGroup *group                      = NULL;
+      g_autoptr (BzSearchResult) search_result = NULL;
 
-      score      = &g_array_index (scores, Score, i);
-      group_data = g_ptr_array_index (shallow_mirror, score->idx);
+      score = &g_array_index (scores, Score, i);
+      group = g_ptr_array_index (shallow_mirror, score->idx);
 
-      result = bz_search_result_new ();
-      bz_search_result_set_group (result, group_data->group);
-      bz_search_result_set_original_index (result, score->idx);
-      bz_search_result_set_score (result, score->val);
+      search_result = bz_search_result_new ();
+      bz_search_result_set_group (search_result, group);
+      bz_search_result_set_original_index (search_result, score->idx);
+      bz_search_result_set_score (search_result, score->val);
 
-      g_ptr_array_index (results, i) = g_steal_pointer (&result);
+      g_ptr_array_index (results, i) = g_steal_pointer (&search_result);
     }
 
   return dex_future_new_take_boxed (
@@ -446,143 +347,202 @@ query_task_fiber (QueryTaskData *data)
       g_steal_pointer (&results));
 }
 
-static inline void
-index_string (const char        *s,
-              IndexedStringData *out)
+static DexFuture *
+query_sub_task_fiber (QuerySubTaskData *data)
 {
-  g_autofree char *normalized = NULL;
-  g_autofree char *casefolded = NULL;
-  guint            i          = 0;
+  GPtrArray *shallow_mirror     = data->shallow_mirror;
+  char      *query_utf8         = data->query_utf8;
+  double     threshold          = data->threshold;
+  guint      work_offset        = data->work_offset;
+  guint      work_length        = data->work_length;
+  g_autoptr (GArray) scores_out = NULL;
 
-  normalized = g_utf8_normalize (s, -1, G_NORMALIZE_ALL);
-  casefolded = g_utf8_casefold (normalized, -1);
+  scores_out = g_array_new (FALSE, FALSE, sizeof (Score));
 
-  out->ptr      = g_steal_pointer (&casefolded);
-  out->utf8_len = g_utf8_strlen (out->ptr, -1);
-  out->chars    = g_malloc0_n (out->utf8_len, sizeof (*out->chars));
-
-  for (char *ch = out->ptr; *ch != '\0'; ch = g_utf8_next_char (ch), i++)
+  for (guint i = 0; i < work_length; i++)
     {
-      out->chars[i].ch   = g_utf8_get_char (ch);
-      out->chars[i].type = g_unichar_type (out->chars[i].ch);
-    }
-}
+      g_autoptr (GMutexLocker) locker = NULL;
+      BzEntryGroup *group             = NULL;
+      const char   *id                = NULL;
+      const char   *title             = NULL;
+      double        score             = 0.0;
 
-static inline double
-test_chars (IndexedChar *a,
-            IndexedChar *b)
-{
-  if (a->ch == b->ch)
-    return PERFECT;
+      group  = g_ptr_array_index (shallow_mirror, work_offset + i);
+      locker = bz_entry_group_lock (group);
 
-  // if ((a->type == G_UNICODE_LOWERCASE_LETTER ||
-  //      a->type == G_UNICODE_MODIFIER_LETTER ||
-  //      a->type == G_UNICODE_OTHER_LETTER ||
-  //      a->type == G_UNICODE_TITLECASE_LETTER ||
-  //      a->type == G_UNICODE_LOWERCASE_LETTER) &&
-
-  //     (b->type == G_UNICODE_LOWERCASE_LETTER ||
-  //      b->type == G_UNICODE_MODIFIER_LETTER ||
-  //      b->type == G_UNICODE_OTHER_LETTER ||
-  //      b->type == G_UNICODE_TITLECASE_LETTER ||
-  //      b->type == G_UNICODE_LOWERCASE_LETTER))
-  //   return SAME_CLUSTER;
-
-  // if ((a->type == G_UNICODE_DECIMAL_NUMBER ||
-  //      a->type == G_UNICODE_LETTER_NUMBER ||
-  //      a->type == G_UNICODE_OTHER_NUMBER) &&
-
-  //     (b->type == G_UNICODE_DECIMAL_NUMBER ||
-  //      b->type == G_UNICODE_LETTER_NUMBER ||
-  //      b->type == G_UNICODE_OTHER_NUMBER))
-  //   return SAME_CLUSTER;
-
-  // if ((a->type == G_UNICODE_CONNECT_PUNCTUATION ||
-  //      a->type == G_UNICODE_DASH_PUNCTUATION ||
-  //      a->type == G_UNICODE_CLOSE_PUNCTUATION ||
-  //      a->type == G_UNICODE_FINAL_PUNCTUATION ||
-  //      a->type == G_UNICODE_INITIAL_PUNCTUATION ||
-  //      a->type == G_UNICODE_OTHER_PUNCTUATION ||
-  //      a->type == G_UNICODE_OPEN_PUNCTUATION) &&
-
-  //     (b->type == G_UNICODE_CONNECT_PUNCTUATION ||
-  //      b->type == G_UNICODE_DASH_PUNCTUATION ||
-  //      b->type == G_UNICODE_CLOSE_PUNCTUATION ||
-  //      b->type == G_UNICODE_FINAL_PUNCTUATION ||
-  //      b->type == G_UNICODE_INITIAL_PUNCTUATION ||
-  //      b->type == G_UNICODE_OTHER_PUNCTUATION ||
-  //      b->type == G_UNICODE_OPEN_PUNCTUATION))
-  //   return SAME_CLUSTER;
-
-  return NO_MATCH;
-}
-
-static inline double
-test_strings (IndexedStringData *query,
-              IndexedStringData *against)
-{
-  guint  last_best_idx = G_MAXUINT;
-  guint  misses        = 0;
-  double score         = 0.0;
-  int    length_diff   = 0;
-
-  /* Quick check of exact match before doing complex stuff */
-  if (g_strstr_len (against->ptr, -1, query->ptr))
-    return ((double) query->utf8_len / (double) against->utf8_len) * (double) query->utf8_len;
-
-  for (guint i = 0; i < query->utf8_len; i++)
-    {
-      guint  best_idx   = G_MAXUINT;
-      double best_score = 0.0;
-
-      for (guint j = against->utf8_len; j > 1; j--)
-        {
-          double tmp_score = 0;
-
-          tmp_score = test_chars (&query->chars[i], &against->chars[j - 1]);
-          if (tmp_score > NO_MATCH &&
-              (tmp_score > best_score ||
-               ((last_best_idx == G_MAXUINT ||
-                 j - 1 > last_best_idx) &&
-                tmp_score >= best_score)))
-            {
-              best_idx   = j - 1;
-              best_score = tmp_score;
-            }
-        }
-
-      if (best_idx != G_MAXUINT)
-        {
-          if (last_best_idx != G_MAXUINT)
-            {
-              int diff = 0;
-
-              diff = (int) best_idx - (int) last_best_idx;
-              if (diff > 1)
-                /* Penalize the query for fragmentation */
-                best_score /= (double) diff;
-              else if (diff < 0)
-                /* Penalize the query more harshly for
-                 * transposing and fragmentation
-                 */
-                best_score /= 1.5 * (double) ABS (diff);
-            }
-
-          score += best_score;
-          last_best_idx = best_idx;
-        }
+      id    = bz_entry_group_get_id (group);
+      title = bz_entry_group_get_title (group);
+      if ((id != NULL && g_strcmp0 (query_utf8, id) == 0) ||
+          (title != NULL && strcasecmp (query_utf8, title) == 0))
+        score = G_MAXDOUBLE;
       else
-        misses++;
+        {
+          const char *developer     = NULL;
+          const char *description   = NULL;
+          const char *search_tokens = NULL;
+
+          developer     = bz_entry_group_get_developer (group);
+          description   = bz_entry_group_get_description (group);
+          search_tokens = bz_entry_group_get_search_tokens (group);
+
+#define EVALUATE_STRING(_s, _accept_min_size)                  \
+  ((_s) != NULL                                                \
+       ? (test_strings (query_utf8, (_s), (_accept_min_size))) \
+       : 0.0)
+
+          score += EVALUATE_STRING (title, 2) * 2.0;
+          score += EVALUATE_STRING (developer, 2) * 1.0;
+          score += EVALUATE_STRING (description, 3) * 1.0;
+          score += EVALUATE_STRING (search_tokens, -1) * 1.5;
+
+#undef EVALUATE_STRING
+        }
+
+      if (score > threshold)
+        {
+          Score append = { 0 };
+
+          append.idx = work_offset + i;
+          append.val = score;
+          g_array_append_val (scores_out, append);
+        }
     }
 
-  /* Penalize the query for including chars that didn't match at all */
-  score /= (double) (misses + 1);
+  return dex_future_new_take_boxed (G_TYPE_ARRAY, g_steal_pointer (&scores_out));
+}
 
-  length_diff = ABS ((int) against->utf8_len - (int) query->utf8_len);
-  /* Penalize the query for being a different length */
-  score /= (double) (length_diff + 1);
+#define UTF8_FOREACH_FORWARD(_var, _s) \
+  for (const char *_var = (_s);        \
+       _var != NULL && *_var != '\0';  \
+       _var = g_utf8_next_char (_var))
+
+#define UTF8_FOREACH_FORWARD_WITH_END(_var, _s, _end)  \
+  for (const char *_var = (_s);                        \
+       _var != NULL && *_var != '\0' && _var < (_end); \
+       _var = g_utf8_next_char (_var))
+
+#define UTF8_FOREACH_BACKWARD(_var, _s, _start) \
+  for (const char *_var = (_s);                 \
+       _var != NULL && _var >= (_start);        \
+       _var = g_utf8_prev_char (_var))
+
+#define UTF8_FOREACH_TOKEN_FORWARDS(_start_var, _end_var, _s, _token_len)                                                            \
+  for (const char *_start_var = (_s), *_end_var = utf8_skip_to_next_of_class (&_start_var, G_UNICODE_SPACE_SEPARATOR, (_token_len)); \
+       _start_var != NULL && *_start_var != '\0';                                                                                    \
+       _start_var = _end_var, _end_var = utf8_skip_to_next_of_class (&_start_var, G_UNICODE_SPACE_SEPARATOR, (_token_len)))
+
+static double
+test_strings (const char *query,
+              const char *against,
+              gssize      accept_min_size)
+{
+  double score                    = 0.0;
+  gsize  full_query_utf8_length   = 0;
+  gsize  full_against_utf8_length = 0;
+  gsize  query_tok_utf8_len       = 0;
+  gsize  against_tok_utf8_len     = 0;
+
+  full_query_utf8_length   = g_utf8_strlen (query, -1);
+  full_against_utf8_length = g_utf8_strlen (against, -1);
+  if (accept_min_size > 0 &&
+      full_against_utf8_length < accept_min_size)
+    return 0.0;
+
+  if (full_query_utf8_length <= full_against_utf8_length &&
+      strcasestr (against, query) != NULL)
+    return (double) full_query_utf8_length;
+
+  UTF8_FOREACH_TOKEN_FORWARDS (query_tok_start, query_tok_end, query, &query_tok_utf8_len)
+  {
+    UTF8_FOREACH_TOKEN_FORWARDS (against_tok_start, against_tok_end, against, &against_tok_utf8_len)
+    {
+      gboolean match    = FALSE;
+      gsize    consumed = 0;
+
+      if (accept_min_size > 0 &&
+          against_tok_utf8_len < accept_min_size)
+        continue;
+
+      UTF8_FOREACH_FORWARD_WITH_END (against_ptr, against_tok_start, against_tok_end)
+      {
+        gunichar against_ch = 0;
+
+        if (query_tok_utf8_len > against_tok_utf8_len - consumed)
+          break;
+
+        match = TRUE;
+
+        against_ch = g_unichar_tolower (g_utf8_get_char (against_ptr));
+        UTF8_FOREACH_FORWARD_WITH_END (query_ptr, query_tok_start, query_tok_end)
+        {
+          gunichar query_ch = 0;
+
+          query_ch = g_unichar_tolower (g_utf8_get_char (query_ptr));
+          if (against_ch != query_ch)
+            {
+              match = FALSE;
+              break;
+            }
+        }
+
+        consumed++;
+        if (match)
+          break;
+      }
+
+      if (match)
+        score += (double) (query_tok_utf8_len * query_tok_utf8_len) / (double) against_tok_utf8_len;
+    }
+  }
 
   return score;
+}
+
+static inline GUnicodeType
+utf8_char_class (const char *s,
+                 gunichar   *ch_out)
+{
+  gunichar     ch = 0;
+  GUnicodeType cl = 0;
+
+  ch = g_utf8_get_char (s);
+  cl = g_unichar_type (ch);
+
+  if (ch_out != NULL)
+    *ch_out = ch;
+  return cl;
+}
+
+static inline const char *
+utf8_skip_to_next_of_class (const char **s,
+                            GUnicodeType class,
+                            gsize       *read_utf8)
+{
+  gboolean skipped = FALSE;
+
+  if (read_utf8 != NULL)
+    *read_utf8 = 0;
+
+  UTF8_FOREACH_FORWARD (p, *s)
+  {
+    if (utf8_char_class (p, NULL) == class)
+      {
+        if (skipped)
+          return p;
+      }
+    else
+      {
+        if (!skipped)
+          {
+            *s      = p;
+            skipped = TRUE;
+          }
+        if (read_utf8 != NULL)
+          (*read_utf8)++;
+      }
+  }
+  /* return the end of the string if nothing was found */
+  return *s + strlen (*s);
 }
 
 static gint

@@ -1,0 +1,101 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzAllAppsPage: Adw.NavigationPage {
+  Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {
+      [end]
+      MenuButton {
+        primary: true;
+        icon-name: "open-menu-symbolic";
+        has-tooltip: true;
+        tooltip-text: _("Main Menu");
+
+        menu-model: menu {
+          section {
+            item (_("_Donate to Bazaar ❤️"), "app.donate")
+            item (_("_Refresh Content"), "app.refresh")
+          }
+
+          section {
+            item (_("_Preferences"), "app.preferences")
+            item (_("_Keyboard Shortcuts"), "app.shortcuts")
+            item (_("_About Bazaar"), "app.about")
+          }
+
+          section {
+            item (_("_Quit Bazaar"), "app.quit")
+          }
+        };
+      }
+    }
+
+    content: Adw.BreakpointBin {
+      width-request: 360;
+      height-request: 450;
+
+      child: ScrolledWindow {
+        hexpand: true;
+        vexpand: true;
+        hscrollbar-policy: never;
+
+        child: Adw.ClampScrollable clamp_scrollable {
+          maximum-size: 1500;
+          tightening-threshold: 1400;
+
+          child: GridView grid_view {
+            styles [
+              "search-grid",
+            ]
+
+            min-columns: 4;
+            max-columns: 4;
+            margin-start: 30;
+            margin-end: 30;
+            enable-rubberband: false;
+            single-click-activate: true;
+
+            factory: BuilderListItemFactory {
+              template ListItem {
+                child: $BzAppTile {
+                  group: bind template.item as <$BzEntryGroup>;
+                  clicked => $tile_clicked_cb(template);
+                };
+              }
+            };
+          };
+        };
+      };
+
+      Adw.Breakpoint {
+        condition ("max-width: 1300px")
+
+        setters {
+          grid_view.min-columns: 3;
+          grid_view.max-columns: 3;
+        }
+      }
+
+      Adw.Breakpoint {
+        condition ("max-width: 900px")
+
+        setters {
+          grid_view.min-columns: 2;
+          grid_view.max-columns: 2;
+        }
+      }
+
+      Adw.Breakpoint {
+        condition ("max-width: 700px")
+
+        setters {
+          grid_view.margin-start: 3;
+          grid_view.margin-end: 3;
+          grid_view.min-columns: 1;
+          grid_view.max-columns: 1;
+        }
+      }
+    };
+  }
+}

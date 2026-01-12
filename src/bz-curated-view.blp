@@ -1,0 +1,75 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzCuratedView: Adw.Bin {
+  child: Adw.ViewStack stack {
+    enable-transitions: true;
+    transition-duration: 400;
+
+    Adw.ViewStackPage {
+      name: "empty";
+      title: _("Empty");
+
+      child: Adw.StatusPage {
+        icon-name: "starred-symbolic";
+        title: _("No Curation");
+        description: _("There is no curation information provided on this system. You can still browse applications on Flathub");
+        child: Button {
+          label: _("Browse Flathub");
+          halign: center;
+          clicked => $browse_flathub_cb(template);
+
+          styles ["pill"]
+        };
+      };
+    }
+
+    Adw.ViewStackPage {
+      name: "offline";
+      title: _("Offline");
+
+      child: Adw.StatusPage {
+        icon-name: "connected-squares-x";
+        title: _("Offline");
+      };
+    }
+
+    Adw.ViewStackPage {
+      name: "content";
+      title: _("Browser");
+
+      child: ScrolledWindow {
+        hscrollbar-policy: never;
+
+        child: Adw.ClampScrollable {
+          maximum-size: 1800;
+          tightening-threshold: 1500;
+
+          child: ListView {
+            css-name: "curated-list-view";
+            model: NoSelection {
+              model: bind template.state as <$BzStateInfo>.curated-provider;
+            };
+
+            factory: BuilderListItemFactory {
+              template ListItem {
+                activatable: false;
+                selectable: false;
+                focusable: false;
+
+                child: $BzDynamicListView {
+                  hexpand: true;
+                  scroll: false;
+                  noscroll-kind: list-box;
+                  child-type: "BzRowView";
+                  child-prop: "row";
+                  model: bind template.item as <$BzRootCuratedConfig>.rows;
+                };
+              }
+            };
+          };
+        };
+      };
+    }
+  };
+}

@@ -8,17 +8,22 @@
   <summary>Discover and install applications</summary>
   <description>
     <p>
-      A new app store for GNOME with a focus on discovering and installing
-      applications and add-ons from Flatpak remotes, particularly
-      Flathub
+      A new app store for Linux with a focus on discovering and installing
+      applications and addons from Flatpak remotes, particularly Flathub.
     </p>
     <p>
-      It emphasizes supporting the
-      developers who make the Linux desktop possible. Bazaar features a
-      "curated" tab that can be configured by distributors to allow for a
-      more locallized experience.
+      It emphasizes supporting the developers who make the Linux desktop
+      possible. Bazaar features a "curated" tab that can be configured by
+      distributors to allow for a more localized experience.
     </p>
   </description>
+
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+    <control>touch</control>
+    <display_length compare="ge">360</display_length>
+  </supports>
 
   <developer id="io.github.kolunmi">
     <name>Adam Masciola</name>
@@ -39,30 +44,216 @@
   <content_rating type="oars-1.1" />
 
   <branding>
-    <color type="primary" scheme_preference="light">#993d3d</color>
-    <color type="primary" scheme_preference="dark">#4f1305</color>
+    <color type="primary" scheme_preference="light">#ffbe6f</color>
+    <color type="primary" scheme_preference="dark">#c11c2b</color>
   </branding>
 
   <screenshots>
     <screenshot type="default">
-      <image>https://github.com/user-attachments/assets/3f8b6a63-54df-4978-9cbb-feb461aca9c2</image>
-      <caption>The home view displaying flathub apps and categories</caption>
+      <image>https://github.com/user-attachments/assets/ebe32d33-136c-4d90-a6e4-9d468f664be7</image>
+      <caption>The home page displaying Flathub apps</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/user-attachments/assets/af7e6462-2e59-4368-a10f-03ee96e2074b</image>
-      <caption>Calligraphy application page</caption>
+      <image>https://github.com/user-attachments/assets/8904e33b-37c5-41ae-ade6-3fa778bdc4c2</image>
+      <caption>Nucleus app page</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/user-attachments/assets/a322ad5b-d88c-492a-b0c2-8c36cb161b19</image>
-      <caption>Searching for Blender</caption>
+      <image>https://github.com/user-attachments/assets/230ef503-cf4f-4eae-907a-b48bf42f8dd1</image>
+      <caption>Search page</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/user-attachments/assets/a32dff95-5453-499f-b510-6bd2f722cae0"</image>
-      <caption>Download graph for Blender</caption>
+      <image>https://github.com/user-attachments/assets/74f838e9-af47-4e06-a0db-42a9176b69c0</image>
+      <caption>Category page</caption>
     </screenshot>
   </screenshots>
 
   <releases>
+    <release version="0.7.3" date="2026-01-11">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.3</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>Trash user data instead of deleting</li>
+          <li>Tweaks to permissions dialog</li>
+          <li>Fix broken EOL filtering</li>
+          <li>Add text filter to installed page</li>
+          <li>Add optional translations mappings for string properties in YAML configs</li>
+          <li>Hide EOL apps by default</li>
+          <li>Many other minor bug fixes and improvements</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.7.2" date="2026-01-03">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.2</url>
+      <description translate="no">
+        <p>This small release ensures the new icon is rendered correctly on KDE Plasma.</p>
+      </description>
+    </release>
+    <release version="0.7.1" date="2026-01-03">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.1</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>New market stall icon</li>
+          <li>Remove Flathub styling</li>
+          <li>Add horizontal versions of pride flags</li>
+          <li>Text selection in app descriptions can be made across paragraph breaks</li>
+          <li>Support YAML anchors and aliases in config parsing</li>
+          <li>Drastically reduce disk cache writes over time by skipping unchanged entries</li>
+          <li>Show background status in popover</li>
+          <li>Add app permission system</li>
+          <li>Add back release URLs</li>
+          <li>Fix sync-remotes action in shortcut dialog</li>
+          <li>Fix visual hiccups in comet animations</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.7.0" date="2025-12-31">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.0</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>Flathub account support with the ability to manage bookmarks</li>
+          <li>Flathub bookmarks replace star count; you can add or remove bookmarks from app pages</li>
+          <li>An "Only Show Verified" option</li>
+          <li>Exhaustive category pages for most categories</li>
+          <li>An "Adwaita" or "KDE" category shown based on desktop environment</li>
+          <li>Updated installed indicator for app tiles</li>
+          <li>3 new flag options</li>
+          <li>Fixed GNOME search provider to show the app page instead of search</li>
+          <li>Fixed issue where flatpakref URIs did not open when the app wasn't running in the background</li>
+          <li>Fixed issue where some proprietary apps were marked as "Special License"</li>
+          <li>Fixed issue where graphs did not work with touch</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.6.3" date="2025-12-14">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.6.3</url>
+      <description translate="no">
+        <p>Another quick release to restore alphabetical sorting on the installed page</p>
+      </description>
+    </release>
+    <release version="0.6.2" date="2025-12-09">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.6.2</url>
+      <description translate="no">
+        <p>Quick release to allow manual refresh if flathub is being flaky</p>
+      </description>
+    </release>
+    <release version="0.6.1" date="2025-12-09">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.6.1</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>Fix frequent disk writes; set refresh frequency to 1 day rather than 1 hour</li>
+          <li>Add "Delete User Data" option when uninstalling an application</li>
+          <li>Version cache to prevent incompatibility between Bazaar versions</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.6.0" date="2025-12-04">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.6.0</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>Reworked loading to be substantially faster after first start via async loading</li>
+          <li>A gaming section on the Flathub page</li>
+          <li>Improved UI on mobile, especially on app pages</li>
+          <li>Verified badges next to most places where apps are shown</li>
+          <li>A popover that explains what verification and non-verification mean</li>
+          <li>An "other apps by" page for when a developer has more than 6 apps</li>
+          <li>Tags that show other apps with the same tag when pressed</li>
+          <li>An age rating dialog</li>
+          <li>Changed search filters into global content filters</li>
+          <li>5 new pride flags</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.5.10" date="2025-11-12">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.5.10</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>Add "hide-eol" preferences option to prevent Bazaar from showing end-of-life applications or applications which depend on end-of-life runtimes</li>
+          <li>Fix global progress bar theme sometimes not syncing with preferences</li>
+          <li>Show version next to addon name in the addons dialog</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.5.9" date="2025-11-08">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.5.9</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>Add "On the go" section and mobile cateogry</li>
+          <li>Greatly decrease reported memory usage</li>
+          <li>Rework search UI</li>
+          <li>Rework page stack navigation</li>
+          <li>Change screenshot dialog to page</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.5.8" date="2025-10-29">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.5.8</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>Fix slow/inconsistent image loading</li>
+          <li>Fix context row in full view</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.5.7" date="2025-10-27">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.5.7</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>Rework full view layout</li>
+          <li>Improve progress bar theme selection</li>
+          <li>Reduce quantity and improve quality of search results</li>
+          <li>Allow the application window to fit on mobile screen sizes</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.5.6" date="2025-10-15">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.5.6</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>Add interactive screenshot dialog</li>
+          <li>Fix empty update dialogs</li>
+          <li>Greatly improve look of app description rendering</li>
+          <li>Add pending state to the global progress bar</li>
+          <li>Add featured apps carousel</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.5.5" date="2025-10-09">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.5.5</url>
+      <description translate="no">
+        <p>More improvements:</p>
+        <ul>
+          <li>Improve design of transaction dialog</li>
+          <li>Update remove button pulse effect and comet size curve</li>
+          <li>Reap and reload cached textures after a day</li>
+          <li>Eliminate some crashes caused by race conditions</li>
+          <li>Change preferences group to context bar in full view</li>
+          <li>Switch side panels to sidebars and use flat header bar designs</li>
+          <li>Add really useful app size dialog :)</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.5.4" date="2025-10-04">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.5.4</url>
+      <description translate="no">
+        <p>Some improvements:</p>
+        <ul>
+          <li>Make the global progress bar customizable with pride flags! Check preferences</li>
+          <li>Add a new world map page to the download statistics dialog</li>
+          <li>Allow clicking on entries on transaction sidebar to navigate to the original store page</li>
+          <li>Add Alexander Vanhee to the developer credits</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.5.3" date="2025-10-02">
       <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.5.3</url>
       <description translate="no">

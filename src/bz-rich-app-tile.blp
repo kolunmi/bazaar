@@ -1,0 +1,174 @@
+using Gtk 4.0;
+
+template $BzRichAppTile: $BzListTile {
+  overflow: hidden;
+
+  accessibility {
+    labelled-by: title;
+    described-by: description;
+  }
+
+  child: Box {
+    orientation: vertical;
+
+    styles [
+      "rich-tile-card",
+    ]
+
+    $BzThemedEntryGroupRect picture_box {
+      height-request: 200;
+
+      styles [
+        "rich-screenshot-box",
+      ]
+
+      group: bind template.group as <$BzEntryGroup>;
+
+      child: Box {
+        margin-start: 12;
+        margin-end: 12;
+        margin-top: 12;
+        margin-bottom: 12;
+
+        Image {
+          icon-name: "image-missing-symbolic";
+          pixel-size: 96;
+          halign: center;
+          valign: center;
+          hexpand: true;
+
+          visible: bind $is_null(template.first-screenshot) as <bool>;
+
+        }
+
+        $BzRoundedPicture {
+          halign: center;
+          hexpand: true;
+          valign: center;
+          paintable: bind template.first-screenshot;
+          radius: 6;
+
+          visible: bind $invert_boolean($is_null(template.first-screenshot) as <bool>) as <bool>;
+        }
+      };
+    }
+
+    Box {
+      margin-start: 12;
+      margin-end: 12;
+      margin-top: 12;
+      margin-bottom: 12;
+      orientation: horizontal;
+      spacing: 15;
+
+      Image {
+        pixel-size: 64;
+        paintable: bind template.group as <$BzEntryGroup>.icon-paintable;
+
+        visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.icon-paintable) as <bool>) as <bool>;
+
+        styles [
+          "icon-dropshadow",
+        ]
+      }
+
+      Box {
+        valign: center;
+        hexpand: true;
+        orientation: vertical;
+        spacing: 5;
+
+        Box {
+          spacing: 6;
+          Label title {
+            css-name: "app-tile-title";
+
+            styles [
+              "heading",
+            ]
+
+            xalign: 0.0;
+            ellipsize: end;
+            label: bind template.group as <$BzEntryGroup>.title;
+            max-width-chars: 18;
+          }
+
+          Image {
+             styles [
+               "verified",
+             ]
+            visible: bind template.group as <$BzEntryGroup>.is-verified;
+            icon-name: "verified-checkmark-symbolic";
+            pixel-size: 14;
+          }
+        }
+
+        Label description {
+          visible: bind $is_null(template.group as <$BzEntryGroup>.eol) as <bool>;
+          css-name: "app-tile-description";
+          xalign: 0.0;
+          yalign: 0.0;
+          wrap: true;
+          wrap-mode: word_char;
+          ellipsize: end;
+          vexpand: true;
+          lines: 2;
+          max-width-chars: 15;
+          single-line-mode: true;
+          label: bind template.group as <$BzEntryGroup>.description;
+
+          styles [
+            "dimmed",
+          ]
+        }
+
+        Label {
+          visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.eol) as <bool>) as <bool>;
+          css-name: "app-tile-description";
+          xalign: 0.0;
+          yalign: 0.0;
+          wrap: true;
+          wrap-mode: word_char;
+          ellipsize: end;
+          vexpand: true;
+          lines: 2;
+          max-width-chars: 15;
+          single-line-mode: true;
+          label: _("Stopped Receiving Updates");
+
+          styles [
+            "warning",
+          ]
+        }
+      }
+
+      Box {
+        Button {
+          visible: bind $is_zero(template.group as <$BzEntryGroup>.removable) as <bool>;
+          sensitive: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
+
+          styles [
+            "medium-pill",
+          ]
+
+          label: _("Get");
+          valign: center;
+          clicked => $install_button_clicked_cb(template);
+        }
+
+        Button {
+          visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
+          sensitive: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
+
+          styles [
+            "circular"
+          ]
+
+          icon-name: "user-trash-symbolic";
+          valign: center;
+          clicked => $install_button_clicked_cb(template);
+        }
+      }
+    }
+  };
+}

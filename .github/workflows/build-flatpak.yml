@@ -1,16 +1,31 @@
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
+    paths-ignore:
+      - "**.md"
+      - "docs/*"
+      - "screenshots/*"
+      - "translators.sh"
+      - ".github/ISSUE_TEMPLATE/**"
+
 name: CI Build Flatpak
 jobs:
 
   flatpak:
     name: "Flatpak"
-    runs-on: ubuntu-latest
     container:
-      image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-48
+      image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-49
       options: --privileged
+    strategy:
+      matrix:
+        variant:
+          - arch: x86_64
+            runner: ubuntu-latest
+          # no latest for ARM :(
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.variant.runner }}
     steps:
     - uses: actions/checkout@v4
       with:
@@ -20,3 +35,5 @@ jobs:
         bundle: Bazaar.flatpak
         manifest-path: build-aux/flatpak/io.github.kolunmi.Bazaar.json
         cache-key: flatpak-builder-${{ github.sha }}
+        arch: ${{ matrix.variant.arch }}
+        verbose: true

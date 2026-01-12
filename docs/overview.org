@@ -45,15 +45,15 @@ basics of managing software through the GUI:
   the command line
 
 ** CLI Usage
-You can start the bazaar daemon in two ways:
+You can start the bazaar daemon like this:
 #+begin_example
-  bazaar service [ARGS] [PACKAGE PATH/URI]
-  bazaar window --auto-service [ARGS] [PACKAGE PATH/URI]
+  bazaar [ARGS] [PACKAGE PATH/URI]
 #+end_example
 
-The latter will start the service if it hasn't been started already,
-then open a window. =bazaar window= by itself will fail if the service
-is not currently running.
+To avoid spawning a window, use:
+#+begin_example
+  bazaar --no-window [ARGS] [PACKAGE PATH/URI]
+#+end_example
 
 =[PACKAGE PATH/URI]= could be a =.flatpakref= file. flatpak+https and
 regular https is supported.
@@ -61,11 +61,15 @@ regular https is supported.
 ** Comptime Vars
 Bazaar provides a few compile time meson options:
 
-- =hardcoded_main_config_path=: Embeds a path to a main configuration
-  file into Bazaar. If this is not defined at compile time, Bazaar
-  will never attempt to read a main config
+- =hardcoded_main_config_path=: Embeds a path to a main configuration file into
+  Bazaar. If this is not defined at compile time, Bazaar will never attempt to
+  read a main config. See the "Hooks" section of this document to see an example
+  config file.
+
+THESE NEXT TWO OPTIONS ARE DEPRECATED. GOING FORWARD, PLEASE USE THE MAIN CONFIG
+TO SPECIFY BLOCKLIST PATHS AND CURATED CONFIG PATHS.
 - =hardcoded_blocklist_path=: Embeds a path to a blocklist into Bazaar
-  which, if possible, will always be read with highest priority
+  which, if possible, will always be read with highest priority.
 - =hardcoded_content_config_path=: Embeds a path to a curated YAML
   configuration file into Bazaar which, if possible, will always be
   read with highest priority
@@ -113,6 +117,8 @@ Here is a basic curated config:
   # - app-tile-title
   # - app-tile-verified-check
   # - app-tile-description
+  # - app-tile-installed-indicator
+  # - app-tile-installed-pill
   css: |
     .main-section {
       margin: 15px;
@@ -144,73 +150,116 @@ Here is a basic curated config:
       color: orange;
     }
 
-  sections:
-    - title: "My Favorite Apps"
-      subtitle: "These are really good and you should download them!"
-      
-      # can be https as well
-      banner: file:///home/kolunmi/banner-1.jxl
-      
-      # can be "fill", "contain", "cover", or "scale-down"
-      # see https://docs.gtk.org/gtk4/enum.ContentFit.html
-      banner-fit: contain
-      
-      # can be "fill", "start", "end", or "center"
-      # see https://docs.gtk.org/gtk4/enum.Align.html
-      # halign -> "horizontal alignment"
-      banner-text-halign: start
-      # valign -> "vertical alignment"
-      banner-text-valign: center
+  rows:
+    - sections:
+      - expand-horizontally: true
 
-      # "The horizontal alignment of the label text inside its size
-      # allocation."
-      # see https://docs.gtk.org/gtk4/property.Label.xalign.html
-      banner-text-label-xalign: 0.0
+        category:
+          title: "My Favorite Apps"
+          subtitle: "These are really good and you should download them!"
 
-      # reference the classes we defined earlier
-      classes:
-        - main-section
-        - background-1
+          # can be https as well
+          banner: file:///home/kolunmi/banner-1.jxl
 
-      # The `classes` key (above) is for styling which we want to apply
-      # all the time. If you want a style class to only be active in
-      # light or dark mode, use `light-classes` or `dark-classes`:
-      light-classes:
-        - light-section
-      dark-classes:
-        - dark-section
+          # can be "fill", "contain", "cover", or "scale-down"
+          # see https://docs.gtk.org/gtk4/enum.ContentFit.html
+          banner-fit: contain
 
-      # appid list
-      appids:
-        - com.usebottles.bottles
-        - io.mgba.mGBA
-        - net.pcsx2.PCSX2
-        - org.blender.Blender
-        - org.desmume.DeSmuME
-        - org.duckstation.DuckStation
-        - org.freecad.FreeCAD
-        
-    - title: "Some more awesome apps!"
-      subtitle: "These are also pretty cool"
-      banner: file:///home/kolunmi/banner-2.png
-      banner-fit: contain
-      banner-text-halign: end
-      banner-text-valign: center
-      banner-text-label-xalign: 1.0
-      classes:
-        - main-section
-        - background-2
-      appids:
-        - org.gimp.GIMP
-        - org.gnome.Builder
-        - org.gnome.Loupe
-        - org.inkscape.Inkscape
+          # can be "fill", "start", "end", or "center"
+          # see https://docs.gtk.org/gtk4/enum.Align.html
+          # halign -> "horizontal alignment"
+          banner-text-halign: start
+          # valign -> "vertical alignment"
+          banner-text-valign: center
+
+          # "The horizontal alignment of the label text inside its size
+          # allocation."
+          # see https://docs.gtk.org/gtk4/property.Label.xalign.html
+          banner-text-label-xalign: 0.0
+
+          # appid list
+          appids:
+            - com.usebottles.bottles
+            - io.mgba.mGBA
+            - net.pcsx2.PCSX2
+            - org.blender.Blender
+            - org.desmume.DeSmuME
+            - org.duckstation.DuckStation
+            - org.freecad.FreeCAD
+
+        # reference the classes we defined earlier
+        classes:
+          - main-section
+          - background-1
+
+        # The `classes` key (above) is for styling which we want to apply
+        # all the time. If you want a style class to only be active in
+        # light or dark mode, use `light-classes` or `dark-classes`:
+        light-classes:
+          - light-section
+        dark-classes:
+          - dark-section
+
+
+    - sections:
+      - category:
+          title: "Some more awesome apps!"
+          subtitle: "These are also pretty cool"
+          banner: file:///home/kolunmi/banner-2.png
+          banner-fit: contain
+          banner-text-halign: end
+          banner-text-valign: center
+          banner-text-label-xalign: 1.0
+          appids:
+            - org.gimp.GIMP
+            - org.gnome.Builder
+            - org.gnome.Loupe
+            - org.inkscape.Inkscape
+        classes:
+          - main-section
+          - background-2
 #+end_src
 
 ** Blocklists
-Blocklists are a way to ensure that users will never interact with a
-certain application inside Bazaar. They are plain text files with
-newline-separated appids:
+Blocklists are a way to ensure that users will never interact with a certain
+application inside Bazaar. There are two kinds of blocklists supported by
+Bazaar:
+
+YAML files, containing special rules, priorities, and regex:
+#+begin_src yaml
+  blocklists:
+    - priority: 0
+      block-regex:
+        # block all ids matching this regex unconditionally
+        - com\.place\..*
+    - priority: -1 # lower number = higher priority
+      conditions:
+        - match-locale:
+            # only apply this rule if we have the Arabic locale
+            regex: ar
+      allow:
+        - com.place.App3
+        - com.place.App5
+      allow-regex:
+        - com\.place\..*\.ar
+    - priority: -1
+      conditions:
+        - match-locale:
+            regex: en.*
+          # invert the result of this condition; so all locales which don't match
+          # the regex
+          post-process: invert
+        - match-envvar:
+            var: PATH
+            regex: .*/usr/local/bin.*
+      block:
+        - com.other.App1
+      allow:
+        - com.place.App1
+        - com.place.App2
+#+end_src
+
+Simple plain text files with newline-separated appids:
 #+begin_example
 com.jetbrains.CLion
 com.valvesoftware.Steam
@@ -330,6 +379,16 @@ Hooks are defined in the main yaml config as indicated by the
 =hardcoded_main_config_path= comptime var. Here is a basic example
 demonstrating how to define a hook:
 #+begin_src yaml
+  yaml-blocklist-paths:
+    - /path/to/yaml/blocklist.yaml
+    - /path/to/another/yaml/blocklist.yaml
+  txt-blocklist-paths:
+    - /path/to/txt/blocklist.txt
+    - /path/to/another/txt/blocklist.txt
+  curated-config-paths:
+    - /path/to/yaml/file.yaml
+    - /path/to/another/yaml/file.yaml
+
   hooks:
     - id: my-hook
       when: before-transaction
@@ -457,7 +516,7 @@ the transaction.
       else
           echo 'pass'
       fi
-      
+
   }
 
 
@@ -466,7 +525,7 @@ the transaction.
       # we don't need to do anything here right now, just let Bazaar
       # know we should continue setting up the dialog
       echo 'ok'
-      
+
   }
 
 
@@ -483,7 +542,7 @@ the transaction.
               echo 'abort'
               ;;
       esac
-      
+
   }
 
 
@@ -493,7 +552,7 @@ the transaction.
       # we could echo "recover" at this point to still go to the
       # `action` stage, but we have no reason to do that right now
       echo 'abort'
-      
+
   }
 
 
@@ -502,7 +561,7 @@ the transaction.
       # this is where we do the thing! it is important to use `nohup`
       # here so bazaar doesn't hang
       nohup xdg-open 'https://www.jetbrains.com/toolbox-app/'
-      
+
   }
 
 
@@ -510,7 +569,7 @@ the transaction.
 
       # Let's always prevent the user from installing Jetbrains stuff
       echo 'deny'
-      
+
   }
 
 
@@ -528,4 +587,3 @@ the transaction.
   # exit successfully
   exit 0
 #+end_src
-

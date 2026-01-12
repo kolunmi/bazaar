@@ -1,0 +1,9 @@
+prefix=bz
+name=curated_row
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+include="bz-curated-section.h"
+
+property=sections GListModel G_TYPE_LIST_MODEL object

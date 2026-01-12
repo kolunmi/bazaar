@@ -21,6 +21,7 @@
 #pragma once
 
 #include "bz-entry.h"
+#include "bz-transaction-entry-tracker.h"
 #include "bz-transaction-task.h"
 
 G_BEGIN_DECLS
@@ -59,13 +60,6 @@ bz_transaction_hold (BzTransaction *self);
 
 void
 bz_transaction_release (BzTransaction *self);
-
-static inline void
-bz_transaction_dismiss (BzTransaction *self)
-{
-  bz_transaction_release (self);
-  g_object_unref (self);
-}
 
 void
 bz_transaction_add_task (BzTransaction                 *self,

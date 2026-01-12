@@ -47,15 +47,16 @@ struct _BzTransactionManager
 {
   GObject parent_instance;
 
-  GHashTable *config;
-  BzBackend  *backend;
+  BzMainConfig *config;
+  BzBackend    *backend;
 
   gboolean    paused;
   GListStore *transactions;
   double      current_progress;
+  gboolean    pending;
 
-  DexFuture    *current_task;
-  GCancellable *cancellable;
+  DexPromise    *cur_promise;
+  BzTransaction *cur_transaction;
 
   GQueue queue;
 };
@@ -72,6 +73,7 @@ enum
   PROP_TRANSACTIONS,
   PROP_HAS_TRANSACTIONS,
   PROP_ACTIVE,
+  PROP_PENDING,
   PROP_CURRENT_PROGRESS,
 
   LAST_PROP
@@ -87,22 +89,19 @@ enum
 };
 static guint signals[LAST_SIGNAL];
 
+static inline void
+finish_queued_schedule_data (gpointer ptr);
+
 BZ_DEFINE_DATA (
     queued_schedule,
     QueuedSchedule,
     {
-      BzTransactionManager *self;
-      BzBackend            *backend;
-      BzTransaction        *transaction;
-      DexChannel           *channel;
-      GTimer               *timer;
-      GCancellable         *cancellable;
+      GWeakRef      *self;
+      BzTransaction *transaction;
+      DexPromise    *promise;
+      GTimer        *timer;
     },
-    BZ_RELEASE_DATA (backend, g_object_unref);
-    BZ_RELEASE_DATA (transaction, bz_transaction_dismiss);
-    BZ_RELEASE_DATA (channel, dex_unref);
-    BZ_RELEASE_DATA (timer, g_timer_destroy);
-    BZ_RELEASE_DATA (cancellable, g_object_unref));
+    finish_queued_schedule_data (self);)
 
 BZ_DEFINE_DATA (
     dialog,
@@ -119,15 +118,20 @@ transaction_fiber (QueuedScheduleData *data);
 
 static int
 execute_hook (BzTransactionManager *self,
-              GHashTable           *hook,
-              const char           *ts_kind,
+              BzHook               *hook,
+              const char           *hook_type,
+              const char           *ts_type,
               const char           *ts_appid);
 
 static DexFuture *
 transaction_finally (DexFuture          *future,
                      QueuedScheduleData *data);
 
-static void
+static DexFuture *
+then_loop_cb (DexFuture *future,
+              GWeakRef  *wr);
+
+static DexFuture *
 dispatch_next (BzTransactionManager *self);
 
 static void
@@ -135,12 +139,12 @@ bz_transaction_manager_dispose (GObject *object)
 {
   BzTransactionManager *self = BZ_TRANSACTION_MANAGER (object);
 
-  g_clear_pointer (&self->config, g_hash_table_unref);
+  g_clear_object (&self->config);
   g_clear_object (&self->backend);
   g_clear_object (&self->transactions);
   g_queue_clear_full (&self->queue, queued_schedule_data_unref);
-  dex_clear (&self->current_task);
-  g_clear_object (&self->cancellable);
+  dex_clear (&self->cur_promise);
+  g_clear_object (&self->cur_transaction);
 
   G_OBJECT_CLASS (bz_transaction_manager_parent_class)->dispose (object);
 }
@@ -173,6 +177,9 @@ bz_transaction_manager_get_property (GObject    *object,
     case PROP_ACTIVE:
       g_value_set_boolean (value, bz_transaction_manager_get_active (self));
       break;
+    case PROP_PENDING:
+      g_value_set_boolean (value, bz_transaction_manager_get_pending (self));
+      break;
     case PROP_CURRENT_PROGRESS:
       g_value_set_double (value, self->current_progress);
       break;
@@ -203,6 +210,7 @@ bz_transaction_manager_set_property (GObject      *object,
     case PROP_TRANSACTIONS:
     case PROP_HAS_TRANSACTIONS:
     case PROP_ACTIVE:
+    case PROP_PENDING:
     case PROP_CURRENT_PROGRESS:
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -219,10 +227,10 @@ bz_transaction_manager_class_init (BzTransactionManagerClass *klass)
   object_class->set_property = bz_transaction_manager_set_property;
 
   props[PROP_CONFIG] =
-      g_param_spec_boxed (
+      g_param_spec_object (
           "config",
           NULL, NULL,
-          G_TYPE_HASH_TABLE,
+          BZ_TYPE_MAIN_CONFIG,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   props[PROP_BACKEND] =
@@ -257,6 +265,12 @@ bz_transaction_manager_class_init (BzTransactionManagerClass *klass)
           NULL, NULL, FALSE,
           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
+  props[PROP_PENDING] =
+      g_param_spec_boolean (
+          "pending",
+          NULL, NULL, FALSE,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
   props[PROP_CURRENT_PROGRESS] =
       g_param_spec_double (
           "current-progress",
@@ -274,9 +288,9 @@ bz_transaction_manager_class_init (BzTransactionManagerClass *klass)
           G_SIGNAL_RUN_FIRST,
           0,
           NULL, NULL,
-          bz_marshal_VOID__OBJECT_BOXED,
+          g_cclosure_marshal_VOID__OBJECT,
           G_TYPE_NONE,
-          2, BZ_TYPE_TRANSACTION, G_TYPE_HASH_TABLE, 0);
+          1, BZ_TYPE_TRANSACTION, 0);
   g_signal_set_va_marshaller (
       signals[SIGNAL_SUCCESS],
       G_TYPE_FROM_CLASS (klass),
@@ -313,18 +327,18 @@ bz_transaction_manager_new (void)
 
 void
 bz_transaction_manager_set_config (BzTransactionManager *self,
-                                   GHashTable           *config)
+                                   BzMainConfig         *config)
 {
   g_return_if_fail (BZ_IS_TRANSACTION_MANAGER (self));
 
-  g_clear_pointer (&self->config, g_hash_table_unref);
+  g_clear_object (&self->config);
   if (config != NULL)
-    self->config = g_hash_table_ref (config);
+    self->config = g_object_ref (config);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CONFIG]);
 }
 
-GHashTable *
+BzMainConfig *
 bz_transaction_manager_get_config (BzTransactionManager *self)
 {
   g_return_val_if_fail (BZ_IS_TRANSACTION_MANAGER (self), NULL);
@@ -358,13 +372,12 @@ bz_transaction_manager_set_paused (BzTransactionManager *self,
 {
   g_return_if_fail (BZ_IS_TRANSACTION_MANAGER (self));
 
-  if ((self->paused && paused) ||
-      (!self->paused && !paused))
+  if (!!self->paused == !!paused)
     return;
 
   self->paused = paused;
   if (!paused)
-    dispatch_next (self);
+    dex_future_disown (dispatch_next (self));
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PAUSED]);
 }
@@ -380,7 +393,14 @@ gboolean
 bz_transaction_manager_get_active (BzTransactionManager *self)
 {
   g_return_val_if_fail (BZ_IS_TRANSACTION_MANAGER (self), FALSE);
-  return self->current_task != NULL;
+  return self->cur_promise != NULL;
+}
+
+gboolean
+bz_transaction_manager_get_pending (BzTransactionManager *self)
+{
+  g_return_val_if_fail (BZ_IS_TRANSACTION_MANAGER (self), FALSE);
+  return self->cur_promise != NULL && self->pending;
 }
 
 gboolean
@@ -390,15 +410,15 @@ bz_transaction_manager_get_has_transactions (BzTransactionManager *self)
   return g_list_model_get_n_items (G_LIST_MODEL (self->transactions)) > 0;
 }
 
-void
+DexFuture *
 bz_transaction_manager_add (BzTransactionManager *self,
                             BzTransaction        *transaction)
 {
   g_autoptr (QueuedScheduleData) data = NULL;
 
-  g_return_if_fail (BZ_IS_TRANSACTION_MANAGER (self));
-  g_return_if_fail (self->backend != NULL);
-  g_return_if_fail (BZ_IS_TRANSACTION (transaction));
+  dex_return_error_if_fail (BZ_IS_TRANSACTION_MANAGER (self));
+  dex_return_error_if_fail (self->backend != NULL);
+  dex_return_error_if_fail (BZ_IS_TRANSACTION (transaction));
 
   bz_transaction_hold (transaction);
 
@@ -422,36 +442,47 @@ bz_transaction_manager_add (BzTransactionManager *self,
   else
     {
       data              = queued_schedule_data_new ();
-      data->self        = self;
-      data->backend     = g_object_ref (self->backend);
+      data->self        = bz_track_weak (self);
       data->transaction = g_object_ref (transaction);
+      data->promise     = dex_promise_new_cancellable ();
 
       g_list_store_insert (self->transactions, 0, transaction);
     }
 
   g_queue_push_head (&self->queue, queued_schedule_data_ref (data));
-  if (self->current_task == NULL)
-    dispatch_next (self);
+  if (self->cur_promise == NULL && !self->paused)
+    dex_future_disown (dispatch_next (self));
+
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_TRANSACTIONS]);
+  return dex_ref (data->promise);
 }
 
-DexFuture *
+void
 bz_transaction_manager_cancel_current (BzTransactionManager *self)
 {
-  dex_return_error_if_fail (BZ_IS_TRANSACTION_MANAGER (self));
+  g_return_if_fail (BZ_IS_TRANSACTION_MANAGER (self));
 
-  if (self->current_task != NULL)
-    {
-      DexFuture *task = NULL;
+  if (self->cur_promise == NULL ||
+      self->cur_transaction == NULL)
+    return;
 
-      g_cancellable_cancel (self->cancellable);
-      task = g_steal_pointer (&self->current_task);
+  dex_promise_reject (
+      self->cur_promise,
+      g_error_new (G_IO_ERROR, G_IO_ERROR_CANCELLED, "Cancelled by API"));
+  dex_clear (&self->cur_promise);
 
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ACTIVE]);
-      return task;
-    }
-  else
-    return NULL;
+  g_object_set (
+      self->cur_transaction,
+      "status", "Cancelled",
+      "progress", 1.0,
+      "finished", TRUE,
+      "success", FALSE,
+      "error", "Cancelled by API",
+      NULL);
+  g_clear_object (&self->cur_transaction);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ACTIVE]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PENDING]);
 }
 
 void
@@ -489,26 +520,33 @@ bz_transaction_manager_clear_finished (BzTransactionManager *self)
 static DexFuture *
 transaction_fiber (QueuedScheduleData *data)
 {
-  BzTransactionManager *self        = data->self;
-  BzBackend            *backend     = data->backend;
-  BzTransaction        *transaction = data->transaction;
-  DexChannel           *channel     = data->channel;
-  // GTimer               *timer       = data->timer;
-  GCancellable *cancellable      = data->cancellable;
-  g_autoptr (GError) local_error = NULL;
-  gboolean result                = FALSE;
-  guint    n_installs            = 0;
-  guint    n_updates             = 0;
-  guint    n_removals            = 0;
-  g_autoptr (GListStore) store   = NULL;
-  g_autoptr (DexFuture) future   = NULL;
-  g_autoptr (GHashTable) op_set  = NULL;
+  g_autoptr (BzTransactionManager) self = NULL;
+  BzTransaction *transaction            = data->transaction;
+  DexPromise    *promise                = data->promise;
+  g_autoptr (GError) local_error        = NULL;
+  gboolean result                       = FALSE;
+  guint    n_installs                   = 0;
+  guint    n_updates                    = 0;
+  guint    n_removals                   = 0;
+  g_autoptr (GListStore) store          = NULL;
+  g_autoptr (DexChannel) channel        = NULL;
+  g_autoptr (DexFuture) future          = NULL;
+  g_autoptr (GHashTable) op_set         = NULL;
+  g_autoptr (GHashTable) pending_set    = NULL;
+
+  bz_weak_get_or_return_reject (self, data->self);
 
   g_object_set (
       transaction,
       "status", "Starting up...",
       "progress", 0.0,
       NULL);
+
+  self->current_progress = 0.0;
+  self->pending          = TRUE;
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ACTIVE]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PENDING]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CURRENT_PROGRESS]);
 
 #define COUNT(type)                                  \
   G_STMT_START                                       \
@@ -529,11 +567,14 @@ transaction_fiber (QueuedScheduleData *data)
 
   /* TODO: make reading config less bad */
   if (self->config != NULL &&
-      g_hash_table_contains (self->config, "/hooks"))
+      bz_main_config_get_hooks (self->config) != NULL)
     {
-      GPtrArray *hooks = NULL;
+      GListModel *hooks   = NULL;
+      guint       n_hooks = 0;
 
-      hooks = g_value_get_boxed (g_hash_table_lookup (self->config, "/hooks"));
+      hooks   = bz_main_config_get_hooks (self->config);
+      n_hooks = g_list_model_get_n_items (hooks);
+
       for (guint i = 0; i < n_installs + n_updates + n_removals; i++)
         {
           const char *ts_kind       = NULL;
@@ -563,18 +604,17 @@ transaction_fiber (QueuedScheduleData *data)
             }
           ts_appid = bz_entry_get_id (entry);
 
-          for (guint k = 0; k < hooks->len; k++)
+          for (guint j = 0; j < n_hooks; j++)
             {
-              GHashTable *hook        = NULL;
-              GValue     *when        = NULL;
-              int         hook_result = HOOK_CONTINUE;
+              g_autoptr (BzHook) hook  = NULL;
+              BzHookSignal when        = 0;
+              int          hook_result = HOOK_CONTINUE;
 
-              hook = g_value_get_boxed (g_ptr_array_index (hooks, k));
-              when = g_hash_table_lookup (hook, "/when");
-              if (when != NULL &&
-                  g_strcmp0 (g_variant_get_string (g_value_get_variant (when), NULL),
-                             "before-transaction") == 0)
-                hook_result = execute_hook (self, hook, ts_kind, ts_appid);
+              hook = g_list_model_get_item (hooks, j);
+              when = bz_hook_get_when (hook);
+
+              if (when == BZ_HOOK_SIGNAL_BEFORE_TRANSACTION)
+                hook_result = execute_hook (self, hook, "before-transaction", ts_kind, ts_appid);
 
               if (hook_result == HOOK_CONFIRM ||
                   hook_result == HOOK_STOP)
@@ -591,13 +631,15 @@ transaction_fiber (QueuedScheduleData *data)
   store = g_list_store_new (BZ_TYPE_TRANSACTION);
   g_list_store_append (store, transaction);
 
-  future = bz_backend_merge_and_schedule_transactions (
-      backend,
+  channel = dex_channel_new (0);
+  future  = bz_backend_merge_and_schedule_transactions (
+      self->backend,
       G_LIST_MODEL (store),
       channel,
-      cancellable);
+      dex_promise_get_cancellable (promise));
 
-  op_set = g_hash_table_new_full (g_direct_hash, g_direct_equal, g_object_unref, NULL);
+  op_set      = g_hash_table_new_full (g_direct_hash, g_direct_equal, g_object_unref, NULL);
+  pending_set = g_hash_table_new_full (g_direct_hash, g_direct_equal, g_object_unref, NULL);
   for (;;)
     {
       g_autoptr (GObject) object = NULL;
@@ -620,12 +662,20 @@ transaction_fiber (QueuedScheduleData *data)
                 bz_transaction_finish_task (
                     transaction, BZ_BACKEND_TRANSACTION_OP_PAYLOAD (object));
               g_hash_table_remove (op_set, object);
+
+              if (g_hash_table_contains (pending_set, object))
+                {
+                  g_hash_table_remove (pending_set, object);
+                  self->pending = g_hash_table_size (pending_set) ==
+                                  g_hash_table_size (op_set);
+                  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PENDING]);
+                }
             }
           else
             {
               bz_transaction_add_task (
                   transaction, BZ_BACKEND_TRANSACTION_OP_PAYLOAD (object));
-              g_hash_table_add (op_set, g_object_ref (object));
+              g_hash_table_replace (op_set, g_object_ref (object), NULL);
             }
         }
       else if (BZ_IS_BACKEND_TRANSACTION_OP_PROGRESS_PAYLOAD (object))
@@ -653,20 +703,38 @@ transaction_fiber (QueuedScheduleData *data)
 
           self->current_progress = total_progress;
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CURRENT_PROGRESS]);
+
+          if (is_estimating && !g_hash_table_contains (pending_set, object))
+            {
+              g_hash_table_replace (pending_set, g_object_ref (object), NULL);
+              self->pending = g_hash_table_size (pending_set) ==
+                              g_hash_table_size (op_set);
+              g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PENDING]);
+            }
+          else if (!is_estimating && g_hash_table_contains (pending_set, object))
+            {
+              g_hash_table_remove (pending_set, object);
+              self->pending = g_hash_table_size (pending_set) ==
+                              g_hash_table_size (op_set);
+              g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PENDING]);
+            }
         }
     }
 
-  result = dex_await (dex_ref (future), &local_error);
+  result = dex_await (g_steal_pointer (&future), &local_error);
   if (!result)
     return dex_future_new_for_error (g_steal_pointer (&local_error));
 
   /* FIXME: duplicate code */
   if (self->config != NULL &&
-      g_hash_table_contains (self->config, "/hooks"))
+      bz_main_config_get_hooks (self->config) != NULL)
     {
-      GPtrArray *hooks = NULL;
+      GListModel *hooks   = NULL;
+      guint       n_hooks = 0;
 
-      hooks = g_value_get_boxed (g_hash_table_lookup (self->config, "/hooks"));
+      hooks   = bz_main_config_get_hooks (self->config);
+      n_hooks = g_list_model_get_n_items (hooks);
+
       for (guint i = 0; i < n_installs + n_updates + n_removals; i++)
         {
           const char *ts_kind       = NULL;
@@ -696,18 +764,17 @@ transaction_fiber (QueuedScheduleData *data)
             }
           ts_appid = bz_entry_get_id (entry);
 
-          for (guint k = 0; k < hooks->len; k++)
+          for (guint j = 0; j < n_hooks; j++)
             {
-              GHashTable *hook        = NULL;
-              GValue     *when        = NULL;
-              int         hook_result = HOOK_CONTINUE;
+              g_autoptr (BzHook) hook  = NULL;
+              BzHookSignal when        = 0;
+              int          hook_result = HOOK_CONTINUE;
 
-              hook = g_value_get_boxed (g_ptr_array_index (hooks, k));
-              when = g_hash_table_lookup (hook, "/when");
-              if (when != NULL &&
-                  g_strcmp0 (g_variant_get_string (g_value_get_variant (when), NULL),
-                             "after-transaction") == 0)
-                hook_result = execute_hook (self, hook, ts_kind, ts_appid);
+              hook = g_list_model_get_item (hooks, j);
+              when = bz_hook_get_when (hook);
+
+              if (when == BZ_HOOK_SIGNAL_AFTER_TRANSACTION)
+                hook_result = execute_hook (self, hook, "after-transaction", ts_kind, ts_appid);
 
               if (hook_result == HOOK_STOP)
                 break;
@@ -715,12 +782,13 @@ transaction_fiber (QueuedScheduleData *data)
         }
     }
 
-  return g_steal_pointer (&future);
+  return dex_future_new_true ();
 }
 
 static int
 execute_hook (BzTransactionManager *self,
-              GHashTable           *hook,
+              BzHook               *hook,
+              const char           *hook_type,
               const char           *ts_type,
               const char           *ts_appid)
 {
@@ -728,7 +796,6 @@ execute_hook (BzTransactionManager *self,
   g_autofree char *timestamp_sec        = NULL;
   g_autofree char *timestamp_usec       = NULL;
   const char      *id                   = NULL;
-  const char      *type                 = NULL;
   const char      *shell                = NULL;
   g_autoptr (GPtrArray) dialogs         = NULL;
   g_autoptr (DialogData) current_dialog = NULL;
@@ -739,94 +806,87 @@ execute_hook (BzTransactionManager *self,
   timestamp_sec  = g_strdup_printf ("%zu", g_date_time_to_unix (date));
   timestamp_usec = g_strdup_printf ("%zu", g_date_time_to_unix_usec (date));
 
-#define GRAB_STRING(hash, key, into)              \
-  if (g_hash_table_contains ((hash), (key)))      \
-    (into) = g_variant_get_string (               \
-        g_value_get_variant (                     \
-            g_hash_table_lookup ((hash), (key))), \
-        NULL);
-#define GRAB_BOOL(hash, key, into)           \
-  if (g_hash_table_contains ((hash), (key))) \
-    (into) = g_variant_get_boolean (         \
-        g_value_get_variant (                \
-            g_hash_table_lookup ((hash), (key))));
-
-  GRAB_STRING (hook, "/id", id);
-  GRAB_STRING (hook, "/when", type);
-  GRAB_STRING (hook, "/shell", shell);
+  id    = bz_hook_get_id (hook);
+  shell = bz_hook_get_shell (hook);
   if (shell == NULL)
     {
-      g_critical ("Main Config: hook definition must have shell code, skipping this hook");
+      g_warning ("Main Config: hook definition must have shell code, skipping this hook");
       return HOOK_CONTINUE;
     }
 
   dialogs = g_ptr_array_new_with_free_func (dialog_data_unref);
-  if (g_hash_table_contains (hook, "/dialogs"))
+  if (bz_hook_get_dialogs (hook) != NULL)
     {
-      GPtrArray *config_dialogs = NULL;
+      GListModel *config_dialogs = NULL;
+      guint       n_dialogs      = 0;
 
-      config_dialogs = g_value_get_boxed (g_hash_table_lookup (hook, "/dialogs"));
-      for (guint i = 0; i < config_dialogs->len; i++)
+      config_dialogs = bz_hook_get_dialogs (hook);
+      n_dialogs      = g_list_model_get_n_items (config_dialogs);
+
+      for (guint i = 0; i < n_dialogs; i++)
         {
-          GHashTable *config_dialog           = NULL;
-          const char *dialog_id               = NULL;
-          const char *dialog_title            = NULL;
-          const char *dialog_body             = NULL;
-          gboolean    dialog_body_use_markup  = FALSE;
-          const char *dialog_default_response = NULL;
-          g_autoptr (AdwDialog) dialog        = NULL;
-          guint n_opts                        = 0;
-          g_autoptr (DialogData) data         = NULL;
+          g_autoptr (BzHookDialog) config_dialog = NULL;
+          const char *dialog_id                  = NULL;
+          const char *dialog_title               = NULL;
+          const char *dialog_body                = NULL;
+          gboolean    dialog_body_use_markup     = FALSE;
+          const char *dialog_default_response    = NULL;
+          g_autoptr (AdwDialog) dialog           = NULL;
+          guint n_opts                           = 0;
+          g_autoptr (DialogData) data            = NULL;
 
-          config_dialog = g_value_get_boxed (g_ptr_array_index (config_dialogs, i));
+          config_dialog           = g_list_model_get_item (config_dialogs, i);
+          dialog_id               = bz_hook_dialog_get_id (config_dialog);
+          dialog_title            = bz_hook_dialog_get_title (config_dialog);
+          dialog_body             = bz_hook_dialog_get_body (config_dialog);
+          dialog_body_use_markup  = bz_hook_dialog_get_body_use_markup (config_dialog);
+          dialog_default_response = bz_hook_dialog_get_default_response_id (config_dialog);
 
-          GRAB_STRING (config_dialog, "/id", dialog_id);
-          GRAB_STRING (config_dialog, "/title", dialog_title);
-          GRAB_STRING (config_dialog, "/body", dialog_body);
-          GRAB_BOOL (config_dialog, "/body-use-markup", dialog_body_use_markup);
-          GRAB_STRING (config_dialog, "/default-response-id", dialog_default_response);
           if (dialog_title == NULL ||
               dialog_body == NULL)
             {
-              g_critical ("Main Config: dialog definition must have a title and body, skipping this hook");
+              g_warning ("Main Config: dialog definition must have a title and body, skipping this hook");
               return HOOK_CONTINUE;
             }
           if (dialog_default_response == NULL)
             {
-              g_critical ("Main Config: dialog definition must have a default response, skipping this hook");
+              g_warning ("Main Config: dialog definition must have a default response, skipping this hook");
               return HOOK_CONTINUE;
             }
           dialog = g_object_ref_sink (adw_alert_dialog_new (dialog_title, dialog_body));
 
-          if (g_hash_table_contains (config_dialog, "/options"))
+          if (bz_hook_dialog_get_options (config_dialog) != NULL)
             {
-              GPtrArray *config_opts = NULL;
+              GListModel *config_opts = NULL;
+              guint       n_options   = 0;
 
-              config_opts = g_value_get_boxed (g_hash_table_lookup (config_dialog, "/options"));
-              for (guint k = 0; k < config_opts->len; k++)
+              config_opts = bz_hook_dialog_get_options (config_dialog);
+              n_options   = g_list_model_get_n_items (config_opts);
+
+              for (guint j = 0; j < n_options; j++)
                 {
-                  GHashTable *config_opt = NULL;
-                  const char *opt_id     = NULL;
-                  const char *opt_string = NULL;
-                  const char *opt_style  = NULL;
+                  g_autoptr (BzHookDialogOption) config_opt = NULL;
+                  const char *opt_id                        = NULL;
+                  const char *opt_string                    = NULL;
+                  const char *opt_style                     = NULL;
 
-                  config_opt = g_value_get_boxed (g_ptr_array_index (config_opts, k));
+                  config_opt = g_list_model_get_item (config_opts, j);
 
-                  GRAB_STRING (config_opt, "/id", opt_id);
+                  opt_id = bz_hook_dialog_option_get_id (config_opt);
                   if (opt_id == NULL)
                     {
-                      g_critical ("Main Config: dialog option definition must have an id, skipping this hook");
+                      g_warning ("Main Config: dialog option definition must have an id, skipping this hook");
                       return HOOK_CONTINUE;
                     }
 
-                  GRAB_STRING (config_opt, "/string", opt_string);
+                  opt_string = bz_hook_dialog_option_get_string (config_opt);
                   if (opt_string == NULL)
                     {
-                      g_critical ("Main Config: dialog option definition must have a string, skipping this hook");
+                      g_warning ("Main Config: dialog option definition must have a string, skipping this hook");
                       return HOOK_CONTINUE;
                     }
 
-                  GRAB_STRING (config_opt, "/style", opt_style);
+                  opt_style = bz_hook_dialog_option_get_style (config_opt);
 
                   adw_alert_dialog_add_response (ADW_ALERT_DIALOG (dialog), opt_id, opt_string);
                   if (opt_style != NULL)
@@ -853,7 +913,7 @@ execute_hook (BzTransactionManager *self,
             }
           if (n_opts == 0)
             {
-              g_critical ("Main Config: dialog definition must have options, skipping this hook");
+              g_warning ("Main Config: dialog definition must have options, skipping this hook");
               return HOOK_CONTINUE;
             }
 
@@ -870,9 +930,6 @@ execute_hook (BzTransactionManager *self,
           g_ptr_array_add (dialogs, g_steal_pointer (&data));
         }
     }
-
-#undef GRAB_BOOL
-#undef GRAB_STRING
 
   for (guint stage = 0;; stage++)
     {
@@ -899,7 +956,7 @@ execute_hook (BzTransactionManager *self,
       g_subprocess_launcher_setenv (launcher, "BAZAAR_HOOK_STAGE_IDX", stage_str, TRUE);
 
       g_subprocess_launcher_setenv (launcher, "BAZAAR_HOOK_ID", id, TRUE);
-      g_subprocess_launcher_setenv (launcher, "BAZAAR_HOOK_TYPE", type, TRUE);
+      g_subprocess_launcher_setenv (launcher, "BAZAAR_HOOK_TYPE", hook_type, TRUE);
 
       g_subprocess_launcher_setenv (launcher, "BAZAAR_HOOK_WAS_ABORTED", hook_aborted ? "true" : "false", TRUE);
 
@@ -930,20 +987,20 @@ execute_hook (BzTransactionManager *self,
                   bz_make_alert_dialog_future (ADW_ALERT_DIALOG (current_dialog->dialog)),
                   &local_error);
               if (response == NULL)
-                g_critical ("Failed to resolve response from dialog "
-                            "\"%s\", assuming default response \"%s\": %s",
-                            current_dialog->id,
-                            adw_alert_dialog_get_default_response (
-                                ADW_ALERT_DIALOG (current_dialog->dialog)),
-                            local_error->message);
+                g_warning ("Failed to resolve response from dialog "
+                           "\"%s\", assuming default response \"%s\": %s",
+                           current_dialog->id,
+                           adw_alert_dialog_get_default_response (
+                               ADW_ALERT_DIALOG (current_dialog->dialog)),
+                           local_error->message);
               g_clear_pointer (&local_error, g_error_free);
             }
           else
-            g_critical ("A window was not available to present dialog "
-                        "\"%s\" on, assuming default response \"%s\"",
-                        current_dialog->id,
-                        adw_alert_dialog_get_default_response (
-                            ADW_ALERT_DIALOG (current_dialog->dialog)));
+            g_warning ("A window was not available to present dialog "
+                       "\"%s\" on, assuming default response \"%s\"",
+                       current_dialog->id,
+                       adw_alert_dialog_get_default_response (
+                           ADW_ALERT_DIALOG (current_dialog->dialog)));
 
           g_subprocess_launcher_setenv (launcher, "BAZAAR_HOOK_DIALOG_ID", current_dialog->id, TRUE);
           g_subprocess_launcher_setenv (
@@ -976,7 +1033,7 @@ execute_hook (BzTransactionManager *self,
           NULL);
       if (subprocess == NULL)
         {
-          g_critical ("Hook failed to spawn, abandoning it now: %s", local_error->message);
+          g_warning ("Hook failed to spawn, abandoning it now: %s", local_error->message);
           return HOOK_CONTINUE;
         }
 
@@ -985,7 +1042,7 @@ execute_hook (BzTransactionManager *self,
           &local_error);
       if (!result)
         {
-          g_critical ("Hook failed to exit cleanly, abandoning it now: %s", local_error->message);
+          g_warning ("Hook failed to exit cleanly, abandoning it now: %s", local_error->message);
           return HOOK_CONTINUE;
         }
 
@@ -993,7 +1050,7 @@ execute_hook (BzTransactionManager *self,
       stdout_bytes = g_input_stream_read_bytes (stdout_pipe, 1024, NULL, &local_error);
       if (!stdout_bytes)
         {
-          g_critical ("Failed to read stdout pipe of hook, abandoning it now: %s", local_error->message);
+          g_warning ("Failed to read stdout pipe of hook, abandoning it now: %s", local_error->message);
           return HOOK_CONTINUE;
         }
 
@@ -1066,8 +1123,8 @@ execute_hook (BzTransactionManager *self,
       else
         g_assert_not_reached ();
 
-      g_critical ("Received invalid response from hook for stage \"%s\", abandoning it now",
-                  hook_stage);
+      g_warning ("Received invalid response from hook for stage \"%s\", abandoning it now",
+                 hook_stage);
       return HOOK_CONTINUE;
     }
 }
@@ -1076,19 +1133,22 @@ static DexFuture *
 transaction_finally (DexFuture          *future,
                      QueuedScheduleData *data)
 {
-  g_autoptr (GError) local_error    = NULL;
-  BzTransactionManager *self        = data->self;
-  BzTransaction        *transaction = data->transaction;
-  GTimer               *timer       = data->timer;
-  const GValue         *value       = NULL;
-  g_autofree char      *status      = NULL;
+  g_autoptr (BzTransactionManager) self = NULL;
+  g_autoptr (GError) local_error        = NULL;
+  BzTransaction   *transaction          = data->transaction;
+  DexPromise      *promise              = data->promise;
+  GTimer          *timer                = data->timer;
+  const GValue    *value                = NULL;
+  g_autofree char *status               = NULL;
 
-  value = dex_future_get_value (future, &local_error);
+  bz_weak_get_or_return_reject (self, data->self);
 
   g_timer_stop (timer);
   status = g_strdup_printf (
       _ ("Finished in %.02f seconds"),
       g_timer_elapsed (data->timer, NULL));
+
+  value = dex_future_get_value (future, &local_error);
   g_object_set (
       transaction,
       "status", status,
@@ -1103,36 +1163,55 @@ transaction_finally (DexFuture          *future,
 
   if (value != NULL)
     {
-      GHashTable *errored = NULL;
-
-      errored = g_value_get_boxed (value);
-      g_signal_emit (self, signals[SIGNAL_SUCCESS], 0, transaction, errored);
+      g_signal_emit (self, signals[SIGNAL_SUCCESS], 0, transaction);
+      dex_promise_resolve_boolean (promise, TRUE);
     }
   else
-    g_signal_emit (self, signals[SIGNAL_FAILURE], 0, transaction);
+    {
+      g_warning ("Transaction failed to complete: %s", local_error->message);
+      g_signal_emit (self, signals[SIGNAL_FAILURE], 0, transaction);
+      dex_promise_resolve_boolean (promise, FALSE);
+    }
 
-  g_clear_object (&self->cancellable);
-  self->current_task = NULL;
-  dispatch_next (self);
-
-  return NULL;
+  return dex_future_new_true ();
 }
 
-static void
+static DexFuture *
+then_loop_cb (DexFuture *future,
+              GWeakRef  *wr)
+{
+  g_autoptr (BzTransactionManager) self = NULL;
+
+  bz_weak_get_or_return_reject (self, wr);
+
+  dex_clear (&self->cur_promise);
+  g_clear_object (&self->cur_transaction);
+  if (self->paused)
+    {
+      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ACTIVE]);
+      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PENDING]);
+      return dex_future_new_reject (G_IO_ERROR, G_IO_ERROR_PENDING, "Paused");
+    }
+  return dispatch_next (self);
+}
+
+static DexFuture *
 dispatch_next (BzTransactionManager *self)
 {
   g_autoptr (QueuedScheduleData) data = NULL;
   g_autoptr (DexFuture) future        = NULL;
 
-  if (self->paused ||
-      self->cancellable != NULL ||
-      self->queue.length == 0)
-    goto done;
+  if (self->queue.length == 0)
+    {
+      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ACTIVE]);
+      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PENDING]);
+      return dex_future_new_reject (G_IO_ERROR, G_IO_ERROR_UNKNOWN, "No more futures in queue");
+    }
 
-  data              = g_queue_pop_tail (&self->queue);
-  data->channel     = dex_channel_new (0);
-  data->timer       = g_timer_new ();
-  data->cancellable = g_cancellable_new ();
+  data = g_queue_pop_tail (&self->queue);
+
+  g_clear_pointer (&data->timer, g_timer_destroy);
+  data->timer = g_timer_new ();
 
   future = dex_scheduler_spawn (
       dex_scheduler_get_default (),
@@ -1144,9 +1223,45 @@ dispatch_next (BzTransactionManager *self)
       future, (DexFutureCallback) transaction_finally,
       queued_schedule_data_ref (data),
       queued_schedule_data_unref);
-  self->cancellable  = g_object_ref (data->cancellable);
-  self->current_task = g_steal_pointer (&future);
+  future = dex_future_first (
+      future,
+      dex_ref (data->promise),
+      NULL);
+  future = dex_future_then_loop (
+      future,
+      (DexFutureCallback) then_loop_cb,
+      bz_track_weak (self),
+      bz_weak_release);
+  dex_future_disown (g_steal_pointer (&future));
 
-done:
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ACTIVE]);
+  dex_clear (&self->cur_promise);
+  self->cur_promise = dex_ref (data->promise);
+
+  g_clear_object (&self->cur_transaction);
+  self->cur_transaction = g_object_ref (data->transaction);
+
+  return dex_ref (data->promise);
+}
+
+static inline void
+finish_queued_schedule_data (gpointer ptr)
+{
+  QueuedScheduleData *data = ptr;
+
+  g_clear_pointer (&data->self, bz_weak_release);
+
+  if (data->transaction != NULL)
+    bz_transaction_release (data->transaction);
+  g_clear_object (&data->transaction);
+
+  if (data->promise != NULL &&
+      dex_future_is_pending (DEX_FUTURE (data->promise)))
+    dex_promise_reject (
+        data->promise,
+        g_error_new (G_IO_ERROR,
+                     G_IO_ERROR_CANCELLED,
+                     "User data was destroyed"));
+  dex_clear (&data->promise);
+
+  g_clear_pointer (&data->timer, g_timer_destroy);
 }

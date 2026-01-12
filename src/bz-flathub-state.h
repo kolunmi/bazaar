@@ -33,7 +33,7 @@ G_DECLARE_FINAL_TYPE (BzFlathubState, bz_flathub_state, BZ, FLATHUB_STATE, GObje
 BzFlathubState *
 bz_flathub_state_new (void);
 
-void
+DexFuture *
 bz_flathub_state_set_for_day (BzFlathubState *self,
                               const char     *for_day);
 
@@ -59,20 +59,15 @@ bz_flathub_state_dup_apps_of_the_week (BzFlathubState *self);
 GListModel *
 bz_flathub_state_get_categories (BzFlathubState *self);
 
-GListModel *
-bz_flathub_state_dup_recently_updated (BzFlathubState *self);
+gboolean
+bz_flathub_state_get_has_connection_error (BzFlathubState *self);
 
-GListModel *
-bz_flathub_state_dup_recently_added (BzFlathubState *self);
-
-GListModel *
-bz_flathub_state_dup_popular (BzFlathubState *self);
-
-GListModel *
-bz_flathub_state_dup_trending (BzFlathubState *self);
-
-void
+DexFuture *
 bz_flathub_state_update_to_today (BzFlathubState *self);
+
+DexFuture *
+bz_flathub_state_search_keyword (BzFlathubState *self,
+                                 const char     *keyword);
 
 G_END_DECLS
 

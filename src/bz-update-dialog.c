@@ -55,6 +55,7 @@ bz_update_dialog_dispose (GObject *object)
   BzUpdateDialog *self = BZ_UPDATE_DIALOG (object);
 
   g_clear_object (&self->updates);
+  g_clear_object (&self->app_filter);
 
   G_OBJECT_CLASS (bz_update_dialog_parent_class)->dispose (object);
 }

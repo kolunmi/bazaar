@@ -47,6 +47,10 @@ enum
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
 
+static BzEntryGroup *
+resolve_group_from_entry (BzEntry  *entry,
+                          BzWindow *window);
+
 static void
 bz_transaction_view_dispose (GObject *object)
 {
@@ -111,8 +115,6 @@ static char *
 format_download_size (gpointer object,
                       guint64  value)
 {
-  g_autofree char *size = NULL;
-
   return g_format_size (value);
 }
 
@@ -120,8 +122,6 @@ static char *
 format_installed_size (gpointer object,
                        guint64  value)
 {
-  g_autofree char *size = NULL;
-
   return g_format_size (value);
 }
 
@@ -135,12 +135,154 @@ format_bytes_transferred (gpointer object,
   return g_strdup_printf (_ ("Transferred %s so far"), size);
 }
 
-static GdkPaintable *
-get_main_icon (GtkListItem *list_item,
-               BzEntry     *entry)
+static char *
+format_download_progress (gpointer object,
+                          double   progress,
+                          guint64  total_size)
 {
+  guint64          downloaded     = (guint64) (progress * total_size);
+  g_autofree char *downloaded_str = g_format_size (downloaded);
+  g_autofree char *total_str      = g_format_size (total_size);
+
+  return g_strdup_printf ("%s / %s", downloaded_str, total_str);
+}
+
+static gboolean
+filter_finished_ops_by_app_id (gpointer item,
+                               gpointer user_data)
+{
+  BzTransactionTask             *task     = BZ_TRANSACTION_TASK (item);
+  BzTransactionEntryTracker     *tracker  = BZ_TRANSACTION_ENTRY_TRACKER (user_data);
+  BzEntry                       *entry    = NULL;
+  const char                    *entry_id = NULL;
+  BzBackendTransactionOpPayload *op       = NULL;
+  const char                    *op_name  = NULL;
+  const char                    *error    = NULL;
+
+  if (task == NULL || tracker == NULL)
+    return TRUE;
+
+  error = bz_transaction_task_get_error (task);
+  if (error != NULL)
+    return TRUE;
+
+  entry = bz_transaction_entry_tracker_get_entry (tracker);
+  if (entry == NULL)
+    return TRUE;
+
+  entry_id = bz_entry_get_id (entry);
+  if (entry_id == NULL)
+    return TRUE;
+
+  op = bz_transaction_task_get_op (task);
+  if (op == NULL)
+    return TRUE;
+
+  op_name = bz_backend_transaction_op_payload_get_name (op);
+  if (op_name == NULL)
+    return TRUE;
+
+  return strstr (op_name, entry_id) == NULL;
+}
+
+static GtkFilter *
+create_app_id_filter (gpointer                   object,
+                      BzTransactionEntryTracker *tracker)
+{
+  GtkCustomFilter *filter = NULL;
+
+  if (tracker == NULL)
+    return NULL;
+
+  filter = gtk_custom_filter_new (filter_finished_ops_by_app_id,
+                                  g_object_ref (tracker),
+                                  g_object_unref);
+
+  return GTK_FILTER (filter);
+}
+
+static gboolean
+is_transaction_type (gpointer                   object,
+                     BzTransactionEntryTracker *tracker,
+                     int                        type)
+{
+  if (tracker == NULL)
+    return FALSE;
+
+  return bz_transaction_entry_tracker_get_kind (tracker) == type;
+}
+
+static gboolean
+is_transaction_tracker_install (gpointer                   object,
+                                BzTransactionEntryTracker *tracker)
+{
+  return is_transaction_type (object, tracker, BZ_TRANSACTION_ENTRY_KIND_INSTALL);
+}
+
+static gboolean
+is_transaction_tracker_update (gpointer                   object,
+                               BzTransactionEntryTracker *tracker)
+{
+  return is_transaction_type (object, tracker, BZ_TRANSACTION_ENTRY_KIND_UPDATE);
+}
+
+static gboolean
+is_transaction_tracker_removal (gpointer                   object,
+                                BzTransactionEntryTracker *tracker)
+{
+  return is_transaction_type (object, tracker, BZ_TRANSACTION_ENTRY_KIND_REMOVAL);
+}
+
+static gboolean
+list_has_items (gpointer    object,
+                GListModel *model)
+{
+  if (model == NULL)
+    return FALSE;
+
+  return g_list_model_get_n_items (model) > 0;
+}
+
+static gboolean
+is_queued (gpointer                 object,
+           BzTransactionEntryStatus status)
+{
+  return status == BZ_TRANSACTION_ENTRY_STATUS_QUEUED;
+}
+
+static gboolean
+is_ongoing (gpointer                 object,
+            BzTransactionEntryStatus status)
+{
+  return status == BZ_TRANSACTION_ENTRY_STATUS_ONGOING;
+}
+
+static gboolean
+is_completed (gpointer                 object,
+              BzTransactionEntryStatus status)
+{
+  return status == BZ_TRANSACTION_ENTRY_STATUS_DONE;
+}
+
+static gboolean
+is_both (gpointer object,
+         gboolean first,
+         gboolean second)
+{
+  return first && second;
+}
+
+static GdkPaintable *
+get_main_icon (GtkListItem               *list_item,
+               BzTransactionEntryTracker *tracker)
+{
+  BzEntry      *entry          = NULL;
   GdkPaintable *icon_paintable = NULL;
 
+  if (tracker == NULL)
+    goto return_generic;
+
+  entry = bz_transaction_entry_tracker_get_entry (tracker);
   if (entry == NULL)
     goto return_generic;
 
@@ -149,39 +291,14 @@ get_main_icon (GtkListItem *list_item,
     return g_object_ref (icon_paintable);
   else if (BZ_IS_FLATPAK_ENTRY (entry))
     {
-      BzWindow        *window               = NULL;
-      BzStateInfo     *info                 = NULL;
-      const char      *extension_of_ref     = NULL;
-      g_autofree char *extension_of_ref_dup = NULL;
-      char            *generic_id           = NULL;
-      char            *generic_id_term      = NULL;
-      g_autoptr (BzEntryGroup) group        = NULL;
+      BzWindow *window               = NULL;
+      g_autoptr (BzEntryGroup) group = NULL;
 
       window = (BzWindow *) gtk_widget_get_ancestor (gtk_list_item_get_child (list_item), BZ_TYPE_WINDOW);
       if (window == NULL)
         goto return_generic;
 
-      info = bz_window_get_state_info (window);
-      if (info == NULL)
-        goto return_generic;
-
-      extension_of_ref = bz_flatpak_entry_get_addon_extension_of_ref (BZ_FLATPAK_ENTRY (entry));
-      if (extension_of_ref == NULL)
-        goto return_generic;
-
-      extension_of_ref_dup = g_strdup (extension_of_ref);
-      generic_id           = strchr (extension_of_ref_dup, '/');
-      if (generic_id == NULL)
-        goto return_generic;
-
-      generic_id++;
-      generic_id_term = strchr (generic_id, '/');
-      if (generic_id_term != NULL)
-        *generic_id_term = '\0';
-
-      group = bz_application_map_factory_convert_one (
-          bz_state_info_get_application_factory (info),
-          gtk_string_object_new (generic_id));
+      group = resolve_group_from_entry (entry, window);
       if (group == NULL)
         goto return_generic;
 
@@ -194,24 +311,73 @@ return_generic:
   return (GdkPaintable *) gtk_icon_theme_lookup_icon (
       gtk_icon_theme_get_for_display (gdk_display_get_default ()),
       "application-x-executable",
-      NULL, 64, 1,
+      NULL,
+      64,
+      1,
       gtk_widget_get_default_direction (),
       GTK_ICON_LOOKUP_NONE);
 }
 
-static char *
-get_sub_icon_name (gpointer object,
-                   BzEntry *entry)
+static gboolean
+is_entry_kind (gpointer                   object,
+               BzTransactionEntryTracker *tracker,
+               int                        kind)
 {
-  if (entry == NULL)
-    return NULL;
+  BzEntry *entry = NULL;
 
-  if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
-    return NULL;
-  else if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_RUNTIME))
-    return g_strdup ("application-x-sharedlib");
-  else
-    return g_strdup ("application-x-addon");
+  if (tracker == NULL)
+    return FALSE;
+
+  entry = bz_transaction_entry_tracker_get_entry (tracker);
+  if (entry == NULL)
+    return FALSE;
+
+  return bz_entry_is_of_kinds (entry, kind);
+}
+
+/* Sucks but we can't rely on magic numbers in the blueprint */
+static gboolean
+is_entry_application (gpointer                   object,
+                      BzTransactionEntryTracker *tracker)
+{
+  return is_entry_kind (object, tracker, BZ_ENTRY_KIND_APPLICATION);
+}
+
+static gboolean
+is_entry_runtime (gpointer                   object,
+                  BzTransactionEntryTracker *tracker)
+{
+  return is_entry_kind (object, tracker, BZ_ENTRY_KIND_RUNTIME);
+}
+
+static gboolean
+is_entry_addon (gpointer                   object,
+                BzTransactionEntryTracker *tracker)
+{
+  return is_entry_kind (object, tracker, BZ_ENTRY_KIND_ADDON);
+}
+
+static void
+entry_clicked (GtkListItem *list_item,
+               GtkButton   *button)
+{
+  BzTransactionEntryTracker *tracker = NULL;
+  BzEntry                   *entry   = NULL;
+  BzWindow                  *window  = NULL;
+  g_autoptr (BzEntryGroup) group     = NULL;
+
+  tracker = gtk_list_item_get_item (list_item);
+  entry   = bz_transaction_entry_tracker_get_entry (tracker);
+
+  window = (BzWindow *) gtk_widget_get_ancestor (gtk_list_item_get_child (list_item), BZ_TYPE_WINDOW);
+  if (window == NULL)
+    return;
+
+  group = resolve_group_from_entry (entry, window);
+  if (group == NULL)
+    return;
+
+  bz_window_show_group (window, group);
 }
 
 static void
@@ -239,8 +405,21 @@ bz_transaction_view_class_init (BzTransactionViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, format_download_size);
   gtk_widget_class_bind_template_callback (widget_class, format_installed_size);
   gtk_widget_class_bind_template_callback (widget_class, format_bytes_transferred);
+  gtk_widget_class_bind_template_callback (widget_class, format_download_progress);
   gtk_widget_class_bind_template_callback (widget_class, get_main_icon);
-  gtk_widget_class_bind_template_callback (widget_class, get_sub_icon_name);
+  gtk_widget_class_bind_template_callback (widget_class, is_entry_application);
+  gtk_widget_class_bind_template_callback (widget_class, is_entry_runtime);
+  gtk_widget_class_bind_template_callback (widget_class, is_entry_addon);
+  gtk_widget_class_bind_template_callback (widget_class, entry_clicked);
+  gtk_widget_class_bind_template_callback (widget_class, create_app_id_filter);
+  gtk_widget_class_bind_template_callback (widget_class, is_transaction_tracker_install);
+  gtk_widget_class_bind_template_callback (widget_class, is_transaction_tracker_update);
+  gtk_widget_class_bind_template_callback (widget_class, is_transaction_tracker_removal);
+  gtk_widget_class_bind_template_callback (widget_class, list_has_items);
+  gtk_widget_class_bind_template_callback (widget_class, is_queued);
+  gtk_widget_class_bind_template_callback (widget_class, is_ongoing);
+  gtk_widget_class_bind_template_callback (widget_class, is_completed);
+  gtk_widget_class_bind_template_callback (widget_class, is_both);
 }
 
 static void
@@ -273,6 +452,56 @@ bz_transaction_view_set_transaction (BzTransactionView *self,
     self->transaction = g_object_ref (transaction);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TRANSACTION]);
+}
+
+static BzEntryGroup *
+resolve_group_from_entry (BzEntry  *entry,
+                          BzWindow *window)
+{
+  BzStateInfo     *info                 = NULL;
+  const char      *extension_of_ref     = NULL;
+  g_autofree char *extension_of_ref_dup = NULL;
+  char            *generic_id           = NULL;
+  char            *generic_id_term      = NULL;
+  g_autoptr (BzEntryGroup) group        = NULL;
+
+  info = bz_window_get_state_info (window);
+  if (info == NULL)
+    return NULL;
+
+  if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
+    {
+      const char *id = NULL;
+
+      id    = bz_entry_get_id (entry);
+      group = bz_application_map_factory_convert_one (
+          bz_state_info_get_application_factory (info),
+          gtk_string_object_new (id));
+      if (group != NULL)
+        return g_steal_pointer (&group);
+    }
+
+  extension_of_ref = bz_flatpak_entry_get_addon_extension_of_ref (BZ_FLATPAK_ENTRY (entry));
+  if (extension_of_ref == NULL)
+    return NULL;
+
+  extension_of_ref_dup = g_strdup (extension_of_ref);
+  generic_id           = strchr (extension_of_ref_dup, '/');
+  if (generic_id == NULL)
+    return NULL;
+
+  generic_id++;
+  generic_id_term = strchr (generic_id, '/');
+  if (generic_id_term != NULL)
+    *generic_id_term = '\0';
+
+  group = bz_application_map_factory_convert_one (
+      bz_state_info_get_application_factory (info),
+      gtk_string_object_new (generic_id));
+  if (group == NULL)
+    return NULL;
+
+  return g_steal_pointer (&group);
 }
 
 /* End of bz-transaction-view.c */

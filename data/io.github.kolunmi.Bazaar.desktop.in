@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=Bazaar
 Comment=Add, remove or update flatpak software on this computer
-Exec=bazaar window --auto-service %U
+Exec=bazaar %U
 Icon=io.github.kolunmi.Bazaar
 Terminal=false
 Type=Application
@@ -9,3 +9,8 @@ Categories=Utility;
 Keywords=GTK;System;PackageManager;Discover;Flatpak;Software;Store;
 StartupNotify=true
 MimeType=x-scheme-handler/appstream;x-scheme-handler/flatpak;x-scheme-handler/flatpak+https;
+Actions=new-window;
+
+[Desktop Action new-window]
+Name=New Window
+Exec=bazaar %U

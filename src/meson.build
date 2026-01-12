@@ -1,12 +1,8 @@
 math = cc.find_library('m', required: false)
 
-
-libdex_opts = [
-  'introspection=disabled',
-]
-
-libadwaita_dep       = dependency('libadwaita-1', version: '>= 1.7')
-libdex_dep           = dependency('libdex-1', version: '>= 0.11.1', default_options: libdex_opts)
+gtk_dep              = dependency('gtk4')
+libadwaita_dep       = dependency('libadwaita-1', version: '>= 1.8')
+libdex_dep           = dependency('libdex-1', version: '>= 1.0.0')
 flatpak_dep          = dependency('flatpak', version: '>= 1.9')
 appstream_dep        = dependency('appstream', version: '>= 1.0')
 xmlb_dep             = dependency('xmlb', version: '>= 0.3.4')
@@ -15,11 +11,14 @@ libsoup_dep          = dependency('libsoup-3.0', version: '>= 3.6.0')
 json_glib_dep        = dependency('json-glib-1.0', version: '>= 1.10.0')
 glycin_dep           = dependency('glycin-2', version: '>= 2.0')
 glycin_gtk4_dep      = dependency('glycin-gtk4-2', version: '>= 2.0')
+md4c_dep             = dependency('md4c', version: '>= 0.5.1')
+webkit_dep           = dependency('webkitgtk-6.0', version: '>= 2.50.2')
+libsecret_dep        = dependency('libsecret-1', version: '>= 0.20')
 
 
 dl_worker_sources = [
   'bz-env.c',
-  'bz-global-state.c',
+  'bz-global-net.c',
   'dl-worker.c',
 ]
 
@@ -49,80 +48,111 @@ gdbus_src = gnome.gdbus_codegen(
   namespace : 'Bz',
 )
 
-bz_sources = [
+bz_sources = files(
   'bz-addons-dialog.c',
+  'bz-app-permissions.c',
+  'bz-age-rating-dialog.c',
+  'bz-app-size-dialog.c',
   'bz-app-tile.c',
-  'bz-apps-page.c',
   'bz-application-map-factory.c',
   'bz-application.c',
+  'bz-apps-page.c',
+  'bz-all-apps-page.c',
+  'bz-appstream-description-render.c',
   'bz-async-texture.c',
-  'bz-backend-notification.c',
-  'bz-backend-transaction-op-payload.c',
-  'bz-backend-transaction-op-progress-payload.c',
+  'bz-auth-state.c',
   'bz-backend.c',
-  'bz-browse-widget.c',
   'bz-category-tile.c',
+  'bz-carousel.c',
+  'bz-carousel-indicator-dots.c',
   'bz-comet-overlay.c',
-  'bz-comet.c',
   'bz-content-provider.c',
-  'bz-content-section.c',
+  'bz-context-tile.c',
+  'bz-context-row.c',
   'bz-curated-app-tile.c',
+  'bz-curated-view.c',
   'bz-data-graph.c',
-  'bz-data-point.c',
   'bz-decorated-screenshot.c',
-  'bz-detailed-app-tile.c',
+  'bz-developer-badge.c',
   'bz-download-worker.c',
   'bz-dynamic-list-view.c',
   'bz-entry-cache-manager.c',
   'bz-entry-group.c',
+  'bz-entry-group-util.c',
   'bz-entry-inspector.c',
   'bz-entry.c',
   'bz-env.c',
   'bz-error.c',
+  'bz-fading-clamp.c',
+  'bz-favorite-button.c',
+  'bz-favorites-page.c',
+  'bz-favorites-tile.c',
+  'bz-featured-carousel.c',
+  'bz-featured-tile.c',
+  'bz-flathub-category-section.c',
+  'bz-flathub-category.c',
   'bz-flathub-category.c',
   'bz-flathub-page.c',
   'bz-flathub-state.c',
   'bz-flatpak-entry.c',
   'bz-flatpak-instance.c',
   'bz-full-view.c',
+  'bz-global-net.c',
   'bz-global-progress.c',
-  'bz-global-state.c',
   'bz-gnome-shell-search-provider.c',
   'bz-group-tile-css-watcher.c',
+  'bz-hardware-support-dialog.c',
   'bz-inhibited-scrollable.c',
   'bz-inspector.c',
   'bz-installed-page.c',
+  'bz-installed-tile.c',
   'bz-io.c',
-  'bz-issue.c',
   'bz-lazy-async-texture-model.c',
-  'bz-patterned-background.c',
+  'bz-license-dialog.c',
+  'bz-list-tile.c',
+  'bz-login-page.c',
+  'bz-lozenge.c',
+  'bz-markdown-render.c',
+  'bz-newline-parser.c',
+  'bz-parser.c',
   'bz-preferences-dialog.c',
   'bz-progress-bar.c',
-  'bz-release.c',
+  'bz-releases-list.c',
   'bz-result.c',
-  'bz-review.c',
+  'bz-rich-app-tile.c',
+  'bz-rounded-picture.c',
+  'bz-row-view.c',
+  'bz-safety-dialog.c',
+  'bz-safety-calculator.c',
+  'bz-screenshot-page.c',
   'bz-screenshot.c',
+  'bz-screenshots-carousel.c',
   'bz-search-engine.c',
-  'bz-search-result.c',
   'bz-search-widget.c',
   'bz-section-view.c',
   'bz-serializable.c',
-  'bz-share-dialog.c',
-  'bz-state-info.c',
+  'bz-share-list.c',
+  'bz-spdx.c',
   'bz-stats-dialog.c',
+  'bz-tag-list.c',
+  'bz-themed-entry-group-rect.c',
   'bz-transaction-manager.c',
-  'bz-transaction-task.c',
   'bz-transaction-view.c',
   'bz-transaction.c',
+  'bz-transaction-dialog.c',
   'bz-update-dialog.c',
-  'bz-url.c',
+  'bz-user-data-page.c',
+  'bz-user-data-tile.c',
   'bz-window.c',
+  'bz-world-map-parser.c',
+  'bz-world-map.c',
   'bz-yaml-parser.c',
+  'bz-zoom.c',
   'main.c',
-]
+)
+subdir('progress-bar-designs')
 
 bz_deps = [
-  # bazaar_ui_dep,
   math,
   gtk_dep,
   libadwaita_dep,
@@ -135,31 +165,121 @@ bz_deps = [
   libdex_dep,
   glycin_dep,
   glycin_gtk4_dep,
+  md4c_dep,
+  webkit_dep,
+  libsecret_dep,
 ]
+
+gen_gobject = find_program('./gen_gobject.sh')
+gen_gobject_header = generator(
+  gen_gobject,
+  output: '@BASENAME@.h',
+  arguments: ['--header', '@INPUT@', '@OUTPUT@'],
+)
+gen_gobject_code = generator(
+  gen_gobject,
+  output: '@BASENAME@.c',
+  arguments: ['--code', '@INPUT@', '@OUTPUT@'],
+)
+
+gobject_specs = files(
+  'bz-age-rating-attribute.txt',
+  'bz-backend-notification.txt',
+  'bz-backend-transaction-op-payload.txt',
+  'bz-backend-transaction-op-progress-payload.txt',
+  'bz-blocklist-condition-match-envvar.txt',
+  'bz-blocklist-condition-match-locale.txt',
+  'bz-blocklist-condition.txt',
+  'bz-blocklist.txt',
+  'bz-comet.txt',
+  'bz-country-data-point.txt',
+  'bz-country.txt',
+  'bz-curated-category-info.txt',
+  'bz-curated-image-info.txt',
+  'bz-curated-markdown-info.txt',
+  'bz-curated-row.txt',
+  'bz-curated-section.txt',
+  'bz-data-point.txt',
+  'bz-flathub-auth-provider.txt',
+  'bz-hash-table-object.txt',
+  'bz-hook-dialog-option.txt',
+  'bz-hook-dialog.txt',
+  'bz-hook.txt',
+  'bz-main-config.txt',
+  'bz-pride-flag-config.txt',
+  'bz-pride-flag-spec.txt',
+  'bz-pride-flag-stripe-spec.txt',
+  'bz-release.txt',
+  'bz-root-blocklist.txt',
+  'bz-root-curated-config.txt',
+  'bz-safety-row.txt',
+  'bz-search-result.txt',
+  'bz-state-info.txt',
+  'bz-transaction-entry-tracker.txt',
+  'bz-transaction-task.txt',
+  'bz-url.txt',
+  'bz-verification-status.txt',
+)
+
+gen_gobject_srcs = []
+foreach f : gobject_specs
+  header = gen_gobject_header.process(f)
+  code = gen_gobject_code.process(f)
+  gen_gobject_srcs += [header, code]
+endforeach
+
+generated_gobjects = declare_dependency(
+  sources: gen_gobject_srcs,
+)
+bz_deps += [ generated_gobjects ]
 
 blueprints = custom_target('blueprints',
   input: files(
     'bz-addons-dialog.blp',
+    'bz-age-rating-dialog.blp',
+    'bz-app-size-dialog.blp',
     'bz-app-tile.blp',
+    'bz-all-apps-page.blp',
     'bz-apps-page.blp',
-    'bz-browse-widget.blp',
+    'bz-appstream-description-render.blp',
     'bz-category-tile.blp',
+    'bz-context-tile.blp',
     'bz-curated-app-tile.blp',
+    'bz-curated-view.blp',
     'bz-decorated-screenshot.blp',
-    'bz-detailed-app-tile.blp',
+    'bz-developer-badge.blp',
     'bz-entry-inspector.blp',
+    'bz-favorite-button.blp',
+    'bz-favorites-page.blp',
+    'bz-favorites-tile.blp',
+    'bz-featured-carousel.blp',
+    'bz-featured-tile.blp',
+    'bz-flathub-category-section.blp',
     'bz-flathub-page.blp',
     'bz-full-view.blp',
+    'bz-hardware-support-dialog.blp',
     'bz-inspector.blp',
     'bz-installed-page.blp',
+    'bz-installed-tile.blp',
+    'bz-license-dialog.blp',
+    'bz-login-page.blp',
+    'bz-markdown-render.blp',
     'bz-preferences-dialog.blp',
     'bz-progress-bar.blp',
+    'bz-releases-dialog.blp',
+    'bz-releases-list.blp',
+    'bz-rich-app-tile.blp',
+    'bz-row-view.blp',
+    'bz-safety-dialog.blp',
+    'bz-screenshot-page.blp',
+    'bz-screenshots-carousel.blp',
     'bz-search-widget.blp',
     'bz-section-view.blp',
-    'bz-share-dialog.blp',
     'bz-stats-dialog.blp',
     'bz-transaction-view.blp',
     'bz-update-dialog.blp',
+    'bz-user-data-page.blp',
+    'bz-user-data-tile.blp',
     'bz-window.blp',
     'gtk/shortcuts-dialog.blp',
   ),

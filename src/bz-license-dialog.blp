@@ -1,0 +1,104 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzLicenseDialog: Adw.Dialog {
+  content-width: 400;
+
+  child: Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {
+      show-title: false;
+    }
+
+    content: Adw.Clamp {
+      maximum-size: 600;
+
+      child: Box {
+        orientation: vertical;
+        margin-top: 6;
+        margin-bottom: 18;
+        margin-start: 18;
+        margin-end: 18;
+
+        Box {
+          orientation: vertical;
+          margin-bottom: 24;
+          valign: center;
+          vexpand: true;
+
+          $BzLozenge {
+            visible: bind template.entry as <$BzEntry>.is-floss as <bool>;
+            title: bind $get_label_cb(template.entry as <$BzEntry>) as <string>;
+
+            icon-names: [
+              "heart-outline-thick-symbolic",
+              "community-symbolic",
+              "thumbs-up-outline-symbolic",
+            ];
+
+            importance: unimportant;
+          }
+
+          $BzLozenge {
+            visible: bind $invert_boolean(template.entry as <$BzEntry>.is-floss as <bool>) as <bool>;
+            title: bind $get_label_cb(template.entry as <$BzEntry>) as <string>;
+
+            icon-names: [
+              "hand-openyay-symbolic",
+              "proprietary-code-symbolic",
+              "license-symbolic",
+            ];
+
+            importance: information;
+          }
+        }
+
+        Box {
+          orientation: vertical;
+          spacing: 12;
+
+          ListBox {
+            selection-mode: none;
+
+            styles [
+              "boxed-list",
+            ]
+
+            ListBoxRow {
+              vexpand: true;
+              activatable: false;
+
+              Label {
+                label: bind $get_license_info(template.entry as <$BzEntry>) as <string>;
+                valign: start;
+                margin-top: 12;
+                margin-bottom: 12;
+                margin-start: 12;
+                margin-end: 12;
+                use-markup: true;
+                xalign: 0;
+                wrap: true;
+                wrap-mode: word_char;
+              }
+            }
+          }
+
+          ListBox {
+            visible: bind template.entry as <$BzEntry>.is-floss as <bool>;
+            selection-mode: none;
+
+            styles [
+              "boxed-list",
+            ]
+
+            Adw.ButtonRow show_all_button {
+              title: _("Get Involved");
+              end-icon-name: "external-link-symbolic";
+              activated => $contribute_cb(template);
+            }
+          }
+        }
+      };
+    };
+  };
+}

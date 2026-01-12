@@ -19,24 +19,18 @@
  */
 
 #include "bz-decorated-screenshot.h"
-#include "bz-error.h"
 #include "bz-screenshot.h"
-#include "bz-window.h"
 #include <glib/gi18n.h>
 
 struct _BzDecoratedScreenshot
 {
-  GtkWidget parent_instance;
+  GtkButton parent_instance;
 
   BzAsyncTexture *async_texture;
-
-  GtkEventController *motion;
-
   /* Template widgets */
-  GtkWidget *buttons;
 };
 
-G_DEFINE_FINAL_TYPE (BzDecoratedScreenshot, bz_decorated_screenshot, ADW_TYPE_BIN)
+G_DEFINE_FINAL_TYPE (BzDecoratedScreenshot, bz_decorated_screenshot, GTK_TYPE_BUTTON)
 
 enum
 {
@@ -54,6 +48,8 @@ bz_decorated_screenshot_dispose (GObject *object)
   BzDecoratedScreenshot *self = BZ_DECORATED_SCREENSHOT (object);
 
   g_clear_pointer (&self->async_texture, g_object_unref);
+
+  gtk_widget_dispose_template (GTK_WIDGET (self), BZ_TYPE_DECORATED_SCREENSHOT);
 
   G_OBJECT_CLASS (bz_decorated_screenshot_parent_class)->dispose (object);
 }
@@ -95,54 +91,6 @@ bz_decorated_screenshot_set_property (GObject      *object,
 }
 
 static void
-open_externally_clicked (BzDecoratedScreenshot *self,
-                         GtkButton             *button)
-{
-  g_autoptr (GError) local_error = NULL;
-  const char      *cache_path    = NULL;
-  g_autofree char *uri           = NULL;
-  gboolean         result        = FALSE;
-
-  cache_path = bz_async_texture_get_cache_into_path (self->async_texture);
-  if (cache_path == NULL)
-    return;
-
-  uri    = g_strdup_printf ("file://%s", cache_path);
-  result = g_app_info_launch_default_for_uri (uri, NULL, &local_error);
-
-  if (!result)
-    {
-      GtkWidget *window = NULL;
-
-      window = gtk_widget_get_ancestor (GTK_WIDGET (button), GTK_TYPE_WINDOW);
-      if (window != NULL)
-        bz_show_error_for_widget (window, local_error->message);
-    }
-}
-
-static void
-copy_clicked (BzDecoratedScreenshot *self,
-              GtkButton             *button)
-{
-  g_autoptr (GdkTexture) texture = NULL;
-  GdkClipboard *clipboard;
-  BzWindow     *window = NULL;
-  AdwToast     *toast  = NULL;
-
-  texture = bz_async_texture_dup_texture (self->async_texture);
-  /* button shouldn't be clickable if not loaded */
-  g_assert (texture != NULL);
-
-  clipboard = gdk_display_get_clipboard (gdk_display_get_default ());
-  gdk_clipboard_set_texture (clipboard, texture);
-
-  window = BZ_WINDOW (gtk_widget_get_root (GTK_WIDGET (self)));
-  toast  = adw_toast_new (_ ("Copied!"));
-  adw_toast_set_timeout (toast, 1);
-  bz_window_add_toast (window, toast);
-}
-
-static void
 bz_decorated_screenshot_class_init (BzDecoratedScreenshotClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
@@ -161,54 +109,33 @@ bz_decorated_screenshot_class_init (BzDecoratedScreenshotClass *klass)
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
-  g_type_ensure (BZ_TYPE_SCREENSHOT);
-
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-decorated-screenshot.ui");
-  gtk_widget_class_bind_template_child (widget_class, BzDecoratedScreenshot, buttons);
-  gtk_widget_class_bind_template_callback (widget_class, open_externally_clicked);
-  gtk_widget_class_bind_template_callback (widget_class, copy_clicked);
 }
 
 static void
-motion_enter (BzDecoratedScreenshot    *self,
-              gdouble                   x,
-              gdouble                   y,
-              GtkEventControllerMotion *controller)
+on_enter_notify (GtkEventController *controller, gpointer user_data)
 {
-  // gtk_widget_set_opacity (self->buttons, 0.25);
-  // bz_screenshot_set_focus_x (self->screenshot_widget, x);
-  // bz_screenshot_set_focus_y (self->screenshot_widget, y);
+  g_autoptr (GdkCursor) cursor = gdk_cursor_new_from_name ("pointer", NULL);
+  gtk_widget_set_cursor (GTK_WIDGET (user_data), cursor);
 }
 
 static void
-motion_event (BzDecoratedScreenshot    *self,
-              gdouble                   x,
-              gdouble                   y,
-              GtkEventControllerMotion *controller)
+on_leave_notify (GtkEventController *controller, gpointer user_data)
 {
-  // bz_screenshot_set_focus_x (self->screenshot_widget, x);
-  // bz_screenshot_set_focus_y (self->screenshot_widget, y);
-}
-
-static void
-motion_leave (BzDecoratedScreenshot    *self,
-              GtkEventControllerMotion *controller)
-{
-  // gtk_widget_set_opacity (self->buttons, 1.0);
-  // bz_screenshot_set_focus_x (self->screenshot_widget, -1.0);
-  // bz_screenshot_set_focus_y (self->screenshot_widget, -1.0);
+  gtk_widget_set_cursor (GTK_WIDGET (user_data), NULL);
 }
 
 static void
 bz_decorated_screenshot_init (BzDecoratedScreenshot *self)
 {
+  GtkEventController *enter_leave = gtk_event_controller_motion_new ();
+
   gtk_widget_init_template (GTK_WIDGET (self));
 
-  self->motion = gtk_event_controller_motion_new ();
-  g_signal_connect_swapped (self->motion, "enter", G_CALLBACK (motion_enter), self);
-  g_signal_connect_swapped (self->motion, "motion", G_CALLBACK (motion_event), self);
-  g_signal_connect_swapped (self->motion, "leave", G_CALLBACK (motion_leave), self);
-  gtk_widget_add_controller (GTK_WIDGET (self), self->motion);
+  g_signal_connect (enter_leave, "enter", G_CALLBACK (on_enter_notify), GTK_WIDGET (self));
+  g_signal_connect (enter_leave, "leave", G_CALLBACK (on_leave_notify), GTK_WIDGET (self));
+
+  gtk_widget_add_controller (GTK_WIDGET (self), enter_leave);
 }
 
 BzDecoratedScreenshot *

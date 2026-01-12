@@ -194,7 +194,7 @@ get_result_metas (BzShellSearchProvider2     *skeleton,
       group = g_hash_table_lookup (self->last_results, *result);
       if (group == NULL)
         {
-          g_critical ("failed to find '%s' in gnome-shell search result cache", *result);
+          g_warning ("failed to find '%s' in gnome-shell search result cache", *result);
           continue;
         }
 
@@ -241,7 +241,7 @@ activate_result (BzShellSearchProvider2     *skeleton,
 {
   g_action_group_activate_action (
       G_ACTION_GROUP (g_application_get_default ()),
-      "search",
+      "show-app-id",
       g_variant_new ("s", result));
 
   bz_shell_search_provider2_complete_activate_result (skeleton, invocation);
@@ -260,7 +260,7 @@ launch_search (BzShellSearchProvider2     *skeleton,
   string = g_strjoinv (" ", terms);
   g_action_group_activate_action (
       G_ACTION_GROUP (g_application_get_default ()),
-      "search",
+      "show-app-id",
       g_variant_new ("s", string));
 
   bz_shell_search_provider2_complete_launch_search (skeleton, invocation);
@@ -354,7 +354,7 @@ bz_gnome_shell_search_provider_set_connection (BzGnomeShellSearchProvider *self,
           if (error != NULL)
             g_propagate_error (error, g_steal_pointer (&local_error));
           else
-            g_critical ("Could not register gnome shell search provider: %s", local_error->message);
+            g_warning ("Could not register gnome shell search provider: %s", local_error->message);
         }
     }
 
@@ -387,8 +387,11 @@ request_finally (DexFuture   *future,
 
           result = g_ptr_array_index (results, i);
           group  = bz_search_result_get_group (result);
-          id     = bz_entry_group_get_id (group);
+          if (bz_entry_group_get_removable (group) > 0)
+            /* Skip already installed groups */
+            continue;
 
+          id = bz_entry_group_get_id (group);
           g_variant_builder_add (builder, "s", id);
           g_hash_table_replace (
               self->last_results,
@@ -402,9 +405,9 @@ request_finally (DexFuture   *future,
     }
   else
     {
-      g_critical ("search engine reported an error to the search provider, "
-                  "returning an empty response to invocation: %s",
-                  local_error->message);
+      g_warning ("search engine reported an error to the search provider, "
+                 "returning an empty response to invocation: %s",
+                 local_error->message);
       g_dbus_method_invocation_return_value (invocation, g_variant_new ("(as)", NULL));
     }
 
@@ -433,8 +436,8 @@ start_request (BzGnomeShellSearchProvider *self,
 
   if (self->engine == NULL)
     {
-      g_critical ("search provider does not have an engine, "
-                  "returning empty response to invocation");
+      g_warning ("search provider does not have an engine, "
+                 "returning empty response to invocation");
       g_dbus_method_invocation_return_value (
           invocation,
           g_variant_new ("(as)", NULL));

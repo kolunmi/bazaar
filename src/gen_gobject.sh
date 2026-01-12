@@ -4,61 +4,142 @@
 # author: kolunmi
 
 die() {
-    echo "Usage: $0 [prefix] [name] [parent-prefix] [parent-name] [author] [properties] [header] [code]" 1>&2
-    echo "  [prefix]        lower case prefix,      EX: my" 1>&2
-    echo "  [name]          lower case class name,  EX: class" 1>&2
-    echo "  [parent-prefix] prefix of parent class, EX: g" 1>&2
-    echo "  [parent-name]   name of parent class,   EX: object" 1>&2
-    echo "  [author]        author name,            EX: <your name>" 1>&2
-    echo "  [properties]    properties input file,  EX: properties.txt" 1>&2
-    echo "  [header]        .h output file,         EX: my-class.h" 1>&2
-    echo "  [code]          .c output file,         EX: my-class.c" 1>&2
+    echo "Usage: $0 [--header|--code] [spec] [output]" 1>&2
+    echo "  [--header|--code] whether to output the header (.h) or code (.c)" 1>&2
+    echo "  [spec]            spec keyfile" 1>&2
+    echo "  [output]          output file" 1>&2
     echo "" 1>&2
-    echo "  The properties input file must contain newline" 1>&2
-    echo "  separated properties with the form:" 1>&2
-    echo "    [name] [ctype] [gtype] [spec-type] [free (optional)] [ref (optional)]" 1>&2
-    echo "    EX: my_widget GtkWidget GTK_TYPE_WIDGET object" 1>&2
-    echo "    EX: my_string char G_TYPE_STRING string" 1>&2
-    echo "    EX: my_int int G_TYPE_INT int" 1>&2
-    echo "    EX: my_ptr_array GPtrArray G_TYPE_PTR_ARRAY boxed g_ptr_array_unref g_ptr_array_ref" 1>&2
+    echo "  The spec file should contain these keys:" 1>&2
+    echo "    [prefix]        lower case prefix,             EX: my" 1>&2
+    echo "    [name]          lower case class name,         EX: class" 1>&2
+    echo "    [parent-prefix] prefix of parent class,        EX: g" 1>&2
+    echo "    [parent-name]   name of parent class,          EX: object" 1>&2
+    echo "    [author]        author name,                   EX: <your name>" 1>&2
+    echo "    [include]       #include for the header file (can have multiple)" 1>&2
+    echo "                       EX: <gtk/gtk.h>" 1>&2
+    echo "                       EX: \"my-other-class.h\"" 1>&2
+    echo "    [enum]          declare an enum type (can have multiple)" 1>&2
+    echo "                       EX: my fruit_type apple orange pear" 1>&2
+    echo "    [ensure]        ensure another type (can have multiple),  EX: GTK_TYPE_WIDGET" 1>&2
+    echo "    [property]      property spec (can have multiple),     EX: (see below)" 1>&2
+    echo "" 1>&2
+    echo "      The properties are parsed with the form:" 1>&2
+    echo "        [name] [ctype] [gtype] [spec-type] [free (optional)] [ref (optional)]" 1>&2
+    echo "        EX: my_widget GtkWidget GTK_TYPE_WIDGET object" 1>&2
+    echo "        EX: my_string char G_TYPE_STRING string" 1>&2
+    echo "        EX: my_int int G_TYPE_INT int" 1>&2
+    echo "        EX: my_ptr_array GPtrArray G_TYPE_PTR_ARRAY boxed g_ptr_array_unref g_ptr_array_ref" 1>&2
     echo "" 1>&2
     echo "$@, aborting!" 1>&2
     exit 1
 }
 
-if [ "$#" -ne 8 ]; then
+
+if [ "$#" -ne 3 ]; then
     die wrong number of args
 fi
 
-PREF="$1"
-NAME="$2"
-PAR_PREF="$3"
-PAR_NAME="$4"
-AUTHOR="$5"
-PROPS="$6"
-H_FILE="$7"
-C_FILE="$8"
+OUTPUT_TYPE="$1"
+SPEC_FILE="$2"
+OUTPUT_FILE="$3"
+
+if [ -z "$OUTPUT_TYPE" ] ||
+       [ -z "$SPEC_FILE" ] ||
+       [ -z "$OUTPUT_FILE" ]; then
+    die one or more args are empty
+fi
+
+case "$OUTPUT_TYPE" in
+    --header|--code) ;;
+    *) die arg 1 must be '--header' or '--code' ;;
+esac
+
+if ! [ -f "$SPEC_FILE" ]; then
+    die "$SPEC_FILE isn't a file"
+fi
+# if [ -e "$OUTPUT_FILE" ]; then
+#     die "$OUTPUT_FILE already exists"
+# fi
+
+unset PREF
+unset NAME
+unset PAR_PREF
+unset PAR_NAME
+unset AUTHOR
+unset INCLUDES
+unset ENSURES
+unset ENUMS
+unset PROPS
+
+while IFS= read -r line; do
+
+    [ -z "$line" ] && continue
+
+    KEY="${line%%=*}"
+    VAL="${line#*=}"
+
+    case "$KEY" in
+        prefix)          PREF="$VAL" ;;
+        name)            NAME="$VAL" ;;
+        parent-prefix)   PAR_PREF="$VAL" ;;
+        parent-name)     PAR_NAME="$VAL" ;;
+        author)          AUTHOR="$VAL" ;;
+        include)
+            if [ -n "$INCLUDES" ]; then
+                INCLUDES="${INCLUDES}
+#include ${VAL}"
+            else
+                INCLUDES="#include ${VAL}"
+            fi
+            ;;
+        enum)
+            if [ -n "$ENUMS" ]; then
+                ENUMS="${ENUMS}
+${VAL}"
+            else
+                ENUMS="$VAL"
+            fi
+            ;;
+        ensure)
+            if [ -n "$ENSURES" ]; then
+                ENSURES="${ENSURES}
+  g_type_ensure (${VAL});"
+            else
+                ENSURES="  g_type_ensure (${VAL});"
+            fi
+            ;;
+        property)
+            if [ -n "$PROPS" ]; then
+                PROPS="${PROPS}
+${VAL}"
+            else
+                PROPS="$VAL"
+            fi
+            ;;
+        *)  die "unknown key '${KEY}' in ${SPEC_FILE}" ;;
+    esac
+
+done < "$SPEC_FILE"
 
 if [ -z "$PREF" ] ||
        [ -z "$NAME" ] ||
        [ -z "$PAR_PREF" ] ||
        [ -z "$PAR_NAME" ] ||
        [ -z "$AUTHOR" ] ||
-       [ -z "$PROPS" ] ||
-       [ -z "$H_FILE" ] ||
-       [ -z "$C_FILE" ]; then
-    die one or more args are empty
+       [ -z "$PROPS" ]; then
+    die "one or more params in $SPEC_FILE are empty"
 fi
 
-if ! [ -f "$PROPS" ]; then
-    die "$PROPS isn't a file"
-fi
-
-for f in "$C_FILE" "$H_FILE"; do
-    if [ -e "$f" ]; then
-        die "$f" already exists
-    fi
-done
+case "$OUTPUT_TYPE" in
+    --header)
+        H_FILE="$OUTPUT_FILE"
+        C_FILE="${OUTPUT_FILE%\.h}.c"
+        ;;
+    --code)
+        H_FILE="${OUTPUT_FILE%\.c}.h"
+        C_FILE="$OUTPUT_FILE"
+        ;;
+esac
 
 to_upper() {
     echo "$1" | tr '[a-z]' '[A-Z]'
@@ -92,55 +173,118 @@ PAR_HYPHEN="$(to_hyphened "${PAR_PREF}")-${PAR_HYPHEN_NAME}"
 
 YEAR="$(date +'%Y')"
 
+print_enums () {
+    HEADER="$1"
+
+    [ -z "$ENUMS" ] && return
+
+    if [ "$HEADER" = header ]; then
+        while IFS= read -r line; do
+            set -- $line
+
+            LOC_PREF="$1"
+            LOC_NAME="$2"
+
+            LOC_SNAKE="${LOC_PREF}_${LOC_NAME}"
+            LOC_SNAKE_UPPER="$(to_upper "$LOC_SNAKE")"
+            LOC_TYPE="$(to_upper "$LOC_PREF")_TYPE_$(to_upper "$LOC_NAME")"
+            LOC_PASCAL="$(to_pascal "${LOC_SNAKE}")"
+            shift 2
+
+            printf 'typedef enum\n{\n'
+            for enum in "$@"; do
+                LOC_ENUM_SYMBOL="${LOC_SNAKE_UPPER}_$(to_upper "$enum")"
+                printf '  %s,\n' "$LOC_ENUM_SYMBOL"
+            done
+            printf '} %s;\n' "$LOC_PASCAL"
+
+            printf 'GType %s_get_type (void);\n' "$LOC_SNAKE"
+            printf '#define %s (%s_get_type ())\n\n' "$LOC_TYPE" "$LOC_SNAKE"
+
+        done <<EOF
+$ENUMS
+EOF
+    else
+        while IFS= read -r line; do
+            set -- $line
+
+            LOC_PREF="$1"
+            LOC_NAME="$2"
+
+            LOC_SNAKE="${LOC_PREF}_${LOC_NAME}"
+            LOC_SNAKE_UPPER="$(to_upper "$LOC_SNAKE")"
+            LOC_TYPE="$(to_upper "$LOC_PREF")_TYPE_$(to_upper "$LOC_NAME")"
+            LOC_PASCAL="$(to_pascal "${LOC_SNAKE}")"
+            shift 2
+
+            printf 'G_DEFINE_ENUM_TYPE (\n'
+            printf '    %s,\n' "$LOC_PASCAL"
+            printf '    %s' "$LOC_SNAKE"
+            for enum in "$@"; do
+                LOC_ENUM_SYMBOL="${LOC_SNAKE_UPPER}_$(to_upper "$enum")"
+                LOC_ENUM_NICK="$(to_hyphened "$enum")"
+                printf ',\n    G_DEFINE_ENUM_VALUE (%s, "%s")' "$LOC_ENUM_SYMBOL" "$LOC_ENUM_NICK"
+            done
+            printf ');\n\n'
+
+        done <<EOF
+$ENUMS
+EOF
+    fi
+}
 
 print_struct () {
-    while read -r line; do
+    while IFS= read -r line; do
         set -- $line
-        
+
         LOC_NAME="$1"
         LOC_CTYPE="$2"
         LOC_GTYPE="$3"
         LOC_PTYPE="$4"
-        
+
         printf '  %s ' "$LOC_CTYPE"
         case "$LOC_PTYPE" in
             char|uchar|boolean|int|uint|long|ulong|int64|uint64|unichar|enum|flags|float|double) ;;
             *) printf '*'
         esac
         printf "%s;\n" "$LOC_NAME"
-    done < "$PROPS"
+    done <<EOF
+$PROPS
+EOF
 }
 
-print_enums () {
+print_prop_enums () {
     printf '  PROP_0,\n\n'
-    while read -r line; do
+    while IFS= read -r line; do
         set -- $line
-        
+
         LOC_NAME="$1"
         LOC_CTYPE="$2"
         LOC_GTYPE="$3"
         LOC_PTYPE="$4"
-        
+
         printf '  PROP_%s,\n' "$(to_upper $LOC_NAME)"
-    done < "$PROPS"
+    done <<EOF
+$PROPS
+EOF
     printf '\n  LAST_PROP\n'
 }
 
 print_dispose () {
-    while read -r line; do
+    while IFS= read -r line; do
         set -- $line
-        
+
         LOC_NAME="$1"
         LOC_CTYPE="$2"
         LOC_GTYPE="$3"
         LOC_PTYPE="$4"
         LOC_FREE="$5"
-        
+
         case "$LOC_PTYPE" in
             char|uchar|boolean|int|uint|long|ulong|int64|uint64|unichar|enum|flags|float|double) ;;
             *)
                 printf '  g_clear_pointer (&self->%s, ' "${LOC_NAME}"
-                
+
                 if [ -n "$LOC_FREE" ]; then
                     printf "$LOC_FREE"
                 else
@@ -153,14 +297,16 @@ print_dispose () {
                 printf ');\n'
                 ;;
         esac
-    done < "$PROPS"
+    done <<EOF
+$PROPS
+EOF
 }
 
 
 print_get_property () {
-    while read -r line; do
+    while IFS= read -r line; do
         set -- $line
-        
+
         LOC_NAME="$1"
         LOC_CTYPE="$2"
         LOC_GTYPE="$3"
@@ -169,43 +315,50 @@ print_get_property () {
         printf '    case PROP_%s:\n' "$(to_upper $LOC_NAME)"
         printf '      g_value_set_%s (value, %s_get_%s (self));\n' "$LOC_PTYPE" "$SNAKE" "$LOC_NAME"
         printf '      break;\n'
-    done < "$PROPS"
+    done <<EOF
+$PROPS
+EOF
 }
 
 print_set_property () {
-    while read -r line; do
+    while IFS= read -r line; do
         set -- $line
-        
+
         LOC_NAME="$1"
         LOC_CTYPE="$2"
         LOC_GTYPE="$3"
         LOC_PTYPE="$4"
-        
+
         printf '    case PROP_%s:\n' "$(to_upper $LOC_NAME)"
-        printf '      %s_set_%s (self, g_value_get_%s (value));\n' "$SNAKE" "$LOC_NAME" "$LOC_PTYPE" 
+        printf '      %s_set_%s (self, g_value_get_%s (value));\n' "$SNAKE" "$LOC_NAME" "$LOC_PTYPE"
         printf '      break;\n'
-    done < "$PROPS"
+    done <<EOF
+$PROPS
+EOF
 }
 
 print_init_properties () {
-    while read -r line; do
+    while IFS= read -r line; do
         set -- $line
-        
+
         LOC_NAME="$1"
         LOC_CTYPE="$2"
         LOC_GTYPE="$3"
         LOC_PTYPE="$4"
-        
+
         printf '  props[PROP_%s] =\n' "$(to_upper $LOC_NAME)"
         printf '      g_param_spec_%s (\n' "$LOC_PTYPE"
         printf '          "%s",\n' "$(to_hyphened "$LOC_NAME")"
         printf '          NULL, NULL,'
         case "$LOC_PTYPE" in
             uchar|uint|ulong|uint64|unichar)
-                printf '\n          0, G_MAX%s, (%s) 0,\n' "$(to_upper "$LOC_PTYPE")" "$LOC_CTYPE"
+                printf '\n          0, G_MAX%s, 0,\n' "$(to_upper "$LOC_PTYPE")"
                 ;;
-            char|int|long|int64|float|double)
-                printf '\n          G_MIN%s, G_MAX%s, (%s) 0,\n' "$(to_upper "$LOC_PTYPE")" "$(to_upper "$LOC_PTYPE")" "$LOC_CTYPE"
+            char|int|long|int64)
+                printf '\n          G_MIN%s, G_MAX%s, 0,\n' "$(to_upper "$LOC_PTYPE")" "$(to_upper "$LOC_PTYPE")"
+                ;;
+            float|double)
+                printf '\n          0.0, G_MAX%s, 0.0,\n' "$(to_upper "$LOC_PTYPE")"
                 ;;
             boolean)
                 printf ' FALSE,\n'
@@ -213,12 +366,17 @@ print_init_properties () {
             string)
                 printf ' NULL,\n'
                 ;;
+            enum)
+                printf '\n          %s, 0,\n' "$LOC_GTYPE"
+                ;;
             *)
                 printf '\n          %s,\n' "$LOC_GTYPE"
                 ;;
         esac
         printf '          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);\n\n'
-    done < "$PROPS"
+    done <<EOF
+$PROPS
+EOF
 }
 
 
@@ -226,7 +384,7 @@ print_functions () {
     HEADER="$1"
 
     printf '%s *\n%s_new (void)' "$PASCAL" "$SNAKE"
-    if [ "$HEADER" == header ]; then
+    if [ "$HEADER" = header ]; then
         printf ';\n\n'
     else
         printf '{\n  return g_object_new (%s, NULL);\n}\n\n' "$TYPE"
@@ -236,10 +394,10 @@ print_functions () {
 
 print_get_property_methods () {
     HEADER="$1"
-    
-    while read -r line; do
+
+    while IFS= read -r line; do
         set -- $line
-        
+
         LOC_NAME="$1"
         LOC_CTYPE="$2"
         LOC_GTYPE="$3"
@@ -254,13 +412,13 @@ print_get_property_methods () {
             *) printf ' *'
         esac
         printf '\n%s_get_%s (%s *self)' "$SNAKE" "$LOC_NAME" "$PASCAL"
-        
-        if [ "$HEADER" == header ]; then
+
+        if [ "$HEADER" = header ]; then
             printf ';\n\n'
         else
             printf '{\n  g_return_val_if_fail (%s_IS_%s (self), ' "$MACRO_PREF" "$MACRO_NAME"
             case "$LOC_PTYPE" in
-                uchar|uint|ulong|uint64|unichar|char|int|long|int64)
+                uchar|uint|ulong|uint64|unichar|char|int|long|int64|enum)
                     printf '0'
                     ;;
                 float|double)
@@ -277,17 +435,19 @@ print_get_property_methods () {
             printf '  return self->%s;\n' "$LOC_NAME"
             printf '}\n\n'
         fi
-        
-    done < "$PROPS"
+
+    done <<EOF
+$PROPS
+EOF
 }
 
 
 print_set_property_methods () {
     HEADER="$1"
-    
-    while read -r line; do
+
+    while IFS= read -r line; do
         set -- $line
-        
+
         LOC_NAME="$1"
         LOC_CTYPE="$2"
         LOC_GTYPE="$3"
@@ -305,17 +465,25 @@ print_set_property_methods () {
             *) printf '*'
         esac
         printf '%s)' "$LOC_NAME"
-        
-        if [ "$HEADER" == header ]; then
+
+        if [ "$HEADER" = header ]; then
             printf ';\n\n'
         else
             printf '{\n  g_return_if_fail (%s_IS_%s (self));\n\n' "$MACRO_PREF" "$MACRO_NAME"
+
+            printf '  if ('
+            case "$LOC_PTYPE" in
+                boolean) printf '!!%s == !!self->%s' "$LOC_NAME" "$LOC_NAME" ;;
+                string) printf '%s == self->%s || (%s != NULL && self->%s != NULL && g_strcmp0(%s, self->%s) == 0)' "$LOC_NAME" "$LOC_NAME" "$LOC_NAME" "$LOC_NAME" "$LOC_NAME" "$LOC_NAME";;
+                *) printf '%s == self->%s' "$LOC_NAME" "$LOC_NAME" ;;
+            esac
+            printf ')\n    return;\n\n'
 
             case "$LOC_PTYPE" in
                 char|uchar|boolean|int|uint|long|ulong|int64|uint64|unichar|enum|flags|float|double) ;;
                 *)
                     printf '  g_clear_pointer (&self->%s, ' "$LOC_NAME"
-                    
+
                     if [ -n "$LOC_FREE" ]; then
                         printf "$LOC_FREE"
                     else
@@ -347,16 +515,18 @@ print_set_property_methods () {
                 esac
             fi
             printf ';\n\n'
-            
+
             printf '  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_%s]);\n' "$(to_upper $LOC_NAME)"
             printf '}\n\n'
         fi
-        
-    done < "$PROPS"
+
+    done <<EOF
+$PROPS
+EOF
 }
 
 
-cat > "$H_FILE" <<EOF
+[ "$OUTPUT_TYPE" = --header ] && cat > "$H_FILE" <<EOF
 /* $H_FILE
  *
  * Copyright $YEAR $AUTHOR
@@ -379,9 +549,12 @@ cat > "$H_FILE" <<EOF
 
 #pragma once
 
-#include <gtk/gtk.h>
+#include <glib-object.h>
+$INCLUDES
 
 G_BEGIN_DECLS
+
+$(print_enums header)
 
 #define $TYPE (${SNAKE}_get_type ())
 G_DECLARE_FINAL_TYPE ($PASCAL, $SNAKE, $MACRO_PREF, $MACRO_NAME, $PAR_PASCAL)
@@ -399,7 +572,7 @@ EOF
 
 
 
-cat > "$C_FILE" <<EOF
+[ "$OUTPUT_TYPE" = --code ] && cat > "$C_FILE" <<EOF
 /* $C_FILE
  *
  * Copyright $YEAR $AUTHOR
@@ -422,6 +595,8 @@ cat > "$C_FILE" <<EOF
 
 #include "$H_FILE"
 
+$(print_enums)
+
 struct _${PASCAL}
 {
   $PAR_PASCAL parent_instance;
@@ -433,7 +608,7 @@ G_DEFINE_FINAL_TYPE ($PASCAL, $SNAKE, $PAR_TYPE);
 
 enum
 {
-$(print_enums)
+$(print_prop_enums)
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
 
@@ -484,6 +659,8 @@ ${SNAKE}_class_init (${PASCAL}Class *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
+$ENSURES
+
   object_class->set_property = ${SNAKE}_set_property;
   object_class->get_property = ${SNAKE}_get_property;
   object_class->dispose      = ${SNAKE}_dispose;
@@ -506,3 +683,6 @@ $(print_set_property_methods)
 
 /* End of $C_FILE */
 EOF
+
+
+exit 0

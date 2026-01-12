@@ -1,8 +1,0 @@
-[wrap-git]
-directory = libdex
-url = https://gitlab.gnome.org/GNOME/libdex.git
-revision = 0.11.1
-depth = 1
-
-[provide]
-dependency_names = libdex-1

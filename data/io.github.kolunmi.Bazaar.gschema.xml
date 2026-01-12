@@ -1,25 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="bazaar">
   <schema id="io.github.kolunmi.Bazaar" path="/io/github/kolunmi/Bazaar/">
-    <key name="show-git-forge-star-counts" type="b">
-      <default>false</default>
-      <summary>Show Git Forge Star Counts</summary>
-      <description>Whether to attempt to detect and show "star counts" for projects in the full view</description>
+    <key name="hide-eol" type="b">
+      <default>true</default>
+      <summary>Hide EOL Entries</summary>
+      <description>Hide EOL entries and entries depending on them</description>
     </key>
-    <key name="search-only-foss" type="b">
+    <key name="show-only-foss" type="b">
       <default>false</default>
       <summary>Only Show Free Software</summary>
-      <description>Hide proprietary software when searching</description>
+      <description>Hide proprietary software</description>
     </key>
-    <key name="search-only-flathub" type="b">
+    <key name="show-only-flathub" type="b">
       <default>false</default>
       <summary>Show Only Flathub Content</summary>
-      <description>Filter search results to only show applications available on Flathub</description>
+      <description>Hide applications which do not originate from Flathub</description>
+    </key>
+    <key name="show-only-verified" type="b">
+      <default>false</default>
+      <summary>Show Only Verified Content</summary>
+      <description>Hide applications which are not verified on Flathub</description>
     </key>
     <key name="search-debounce" type="b">
       <default>true</default>
       <summary>Debounce Search Inputs</summary>
       <description>Add a delay before searching to prevent instant replies while typing</description>
+    </key>
+    <key name="global-progress-bar-theme" type="s">
+      <choices>
+        <choice value="accent-color"/>
+        <choice value="pride-rainbow-flag"/>
+        <choice value="pride-rainbow-flag-horizontal"/>
+        <choice value="lesbian-pride-flag"/>
+        <choice value="lesbian-pride-flag-horizontal"/>
+        <choice value="gay-pride-flag"/>
+        <choice value="gay-pride-flag-horizontal"/>
+        <choice value="transgender-flag"/>
+        <choice value="transgender-flag-horizontal"/>
+        <choice value="nonbinary-flag"/>
+        <choice value="nonbinary-flag-horizontal"/>
+        <choice value="bisexual-flag"/>
+        <choice value="bisexual-flag-horizontal"/>
+        <choice value="asexual-flag"/>
+        <choice value="asexual-flag-horizontal"/>
+        <choice value="pansexual-flag"/>
+        <choice value="pansexual-flag-horizontal"/>
+        <choice value="aromantic-flag"/>
+        <choice value="aromantic-flag-horizontal"/>
+        <choice value="genderfluid-flag"/>
+        <choice value="genderfluid-flag-horizontal"/>
+        <choice value="polysexual-flag"/>
+        <choice value="polysexual-flag-horizontal"/>
+        <choice value="omnisexual-flag"/>
+        <choice value="omnisexual-flag-horizontal"/>
+        <choice value="aroace-flag"/>
+        <choice value="aroace-flag-horizontal"/>
+        <choice value="agender-flag"/>
+        <choice value="agender-flag-horizontal"/>
+        <choice value="genderqueer-flag"/>
+        <choice value="genderqueer-flag-horizontal"/>
+        <choice value="intersex-flag"/>
+        <choice value="intersex-flag-horizontal"/>
+        <choice value="demigender-flag"/>
+        <choice value="demigender-flag-horizontal"/>
+        <choice value="biromantic-flag"/>
+        <choice value="biromantic-flag-horizontal"/>
+        <choice value="disability-flag"/>
+        <choice value="disability-flag-horizontal"/>
+        <choice value="femboy-flag"/>
+        <choice value="femboy-flag-horizontal"/>
+      </choices>
+      <default>'accent-color'</default>
+      <summary>Global Progress Bar Theme</summary>
+      <description>Describes the look of the global progress bar</description>
     </key>
     <key name="window-dimensions" type="(ii)">
       <default>(1220, 900)</default>

@@ -2,7 +2,7 @@ using Gtk 4.0;
 using Adw 1;
 
 template $BzInspector: Adw.Window {
-  title: _("Bazaar Inspector");
+  title: "Bazaar Inspector";
   default-width: 800;
   default-height: 1000;
   width-request: 300;
@@ -16,10 +16,39 @@ template $BzInspector: Adw.Window {
     content: Box {
       orientation: vertical;
       width-request: 100;
+      spacing: 10;
+
+      Box {
+        styles [
+          "bz-debug"
+        ]
+
+        orientation: horizontal;
+        spacing: 10;
+
+        Label {
+          styles [
+            "heading"
+          ]
+          label: "Background Task Info:";
+          xalign: 0.0;
+        }
+        Label {
+          label: bind template.state as <$BzStateInfo>.background-task-label as <string>;
+          xalign: 0.0;
+        }
+      }
+
+      CheckButton debug_mode_check {
+        label: "Enable Global Debug Mode";
+      }
 
       Label {
-        margin-top: 10;
-        label: _("Active Blocklists");
+        styles [
+          "heading"
+        ]
+        label: "Active Blocklists";
+        xalign: 0.0;
       }
       ScrolledWindow {
         propagate-natural-height: true;
@@ -27,21 +56,16 @@ template $BzInspector: Adw.Window {
           model: NoSelection {
             model: bind template.state as <$BzStateInfo>.blocklists;
           };
-          factory: BuilderListItemFactory {
-            template ListItem {
-              child: Label {
-                label: bind template.item as <$GtkStringObject>.string as <string>;
-              };
-            }
-          };
+          factory: string_list_factory;
         };
       }
 
-      Separator {}
-        
       Label {
-        margin-top: 10;
-        label: _("Active Curated-Configs");
+        styles [
+          "heading"
+        ]
+        label: "Active Curated-Configs";
+        xalign: 0.0;
       }
       ScrolledWindow {
         propagate-natural-height: true;
@@ -49,34 +73,46 @@ template $BzInspector: Adw.Window {
           model: NoSelection {
             model: bind template.state as <$BzStateInfo>.curated-configs;
           };
-          factory: BuilderListItemFactory {
-            template ListItem {
-              child: Label {
-                label: bind template.item as <$GtkStringObject>.string as <string>;
-              };
-            }
-          };
+          factory: string_list_factory;
         };
       }
 
-      Separator {}
-      
       Label {
+        styles [
+          "heading"
+        ]
         margin-top: 10;
-        label: _("All Entry Groups");
+        label: "All Entry Groups";
+        xalign: 0.0;
       }
-      Entry search_entry {
-        placeholder-text: _("Filter...");
-        changed => $entry_changed(template);
+      Box {
+        orientation: horizontal;
+        spacing: 5;
+
+        CheckButton {
+          label: "Preview";
+          notify::active => $preview_changed(template);
+        }
+
+        Entry search_entry {
+          hexpand: true;
+          margin-start: 5;
+          margin-end: 5;
+          margin-top: 5;
+          margin-bottom: 5;
+          placeholder-text: "Filter...";
+          changed => $entry_changed(template);
+        }
       }
       ScrolledWindow {
         vscrollbar-policy: always;
         propagate-natural-height: true;
         child: ListView {
-          model: NoSelection {
+          model: SingleSelection groups_selection {
             model: FilterListModel filter_model {
               model: bind template.state as <$BzStateInfo>.all-entry-groups;
-            };      
+            };
+            notify::selected-item => $selected_group_changed(template);
           };
           factory: BuilderListItemFactory {
             template ListItem {
@@ -86,7 +122,7 @@ template $BzInspector: Adw.Window {
 
                 child: Box {
                   orientation: vertical;
-                  
+
                   Separator {}
                   ScrolledWindow {
                     propagate-natural-height: true;
@@ -99,7 +135,7 @@ template $BzInspector: Adw.Window {
                           activatable: false;
                           child: Box {
                             orientation: horizontal;
-                          
+
                             Label {
                               hexpand: true;
                               ellipsize: end;
@@ -107,7 +143,7 @@ template $BzInspector: Adw.Window {
                               label: bind template.item as <$GtkStringObject>.string as <string>;
                             }
                             Button {
-                              label: _("Decache and Inspect");
+                              label: "Decache and Inspect";
                               clicked => $decache_and_inspect_cb(template);
                             }
                           };
@@ -126,5 +162,37 @@ template $BzInspector: Adw.Window {
 
     [top]
     Adw.HeaderBar top_header_bar {}
+  }
+}
+
+BuilderListItemFactory string_list_factory {
+  template ListItem {
+    selectable: false;
+    activatable: false;
+    child: Box {
+      orientation: horizontal;
+      spacing: 10;
+
+      Label {
+        styles [
+          "dimmed",
+          "bz-monospace",
+        ]
+        width-request: 30;
+        label: bind $format_uint(template.position) as <string>;
+        xalign: 1.0;
+      }
+      Label {
+        styles [
+          "bz-monospace",
+        ]
+
+        margin-top: 2;
+        margin-bottom: 2;
+        xalign: 0.0;
+        selectable: true;
+        label: bind template.item as <$GtkStringObject>.string as <string>;
+      }
+    };
   }
 }

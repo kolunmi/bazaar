@@ -1,0 +1,45 @@
+using Gtk 4.0;
+
+template $BzContextTile: Button {
+  styles [
+    "context-tile",
+    "flat",
+  ]
+
+  focusable: false;
+
+  Box {
+    orientation: vertical;
+    spacing: 4;
+    hexpand: true;
+
+    Button ring_button {
+      styles [
+        "lozenge-ring-button",
+      ]
+
+      halign: center;
+      valign: center;
+      margin-bottom: 4;
+
+      child: Box lozenge {
+        styles [
+          "lozenge",
+        ]
+
+        halign: center;
+      };
+    }
+
+    Label label {
+      styles [
+        "context-tile-text",
+      ]
+
+      justify: center;
+      wrap: true;
+      wrap-mode: char;
+      xalign: 0.5;
+    }
+  }
+}

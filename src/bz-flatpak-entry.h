@@ -28,23 +28,33 @@ G_BEGIN_DECLS
 #define BZ_TYPE_FLATPAK_ENTRY (bz_flatpak_entry_get_type ())
 G_DECLARE_FINAL_TYPE (BzFlatpakEntry, bz_flatpak_entry, BZ, FLATPAK_ENTRY, BzEntry)
 
+char *
+bz_flatpak_id_format_unique (const char *flatpak_id,
+                             gboolean    user);
+
 gboolean
 bz_flatpak_entry_is_user (BzFlatpakEntry *self);
+
+const char *
+bz_flatpak_entry_get_flatpak_name (BzFlatpakEntry *self);
 
 const char *
 bz_flatpak_entry_get_flatpak_id (BzFlatpakEntry *self);
 
 const char *
+bz_flatpak_entry_get_flatpak_version (BzFlatpakEntry *self);
+
+const char *
 bz_flatpak_entry_get_application_name (BzFlatpakEntry *self);
+
+const char *
+bz_flatpak_entry_get_application_runtime (BzFlatpakEntry *self);
 
 const char *
 bz_flatpak_entry_get_runtime_name (BzFlatpakEntry *self);
 
 const char *
 bz_flatpak_entry_get_addon_extension_of_ref (BzFlatpakEntry *self);
-
-char *
-bz_flatpak_entry_extract_id_from_unique_id (const char *unique_id);
 
 gboolean
 bz_flatpak_entry_launch (BzFlatpakEntry    *self,

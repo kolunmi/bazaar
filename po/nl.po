@@ -3,11 +3,12 @@
 # This file is distributed under the same license as the bazaar package.
 # Automatically generated, 2025.
 #
+#: src/bz-installed-page.blp:68
 msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-15 07:56+0200\n"
+"POT-Creation-Date: 2026-01-10 20:06+0100\n"
 "PO-Revision-Date: 2025-07-15 07:56+0200\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -19,464 +20,2494 @@ msgstr ""
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:2
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:5
+#: src/bz-window.blp:233
 msgid "Bazaar"
 msgstr "Bazaar"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:3
 msgid "Add, remove or update flatpak software on this computer"
-msgstr "Voeg flatpak software toe, verwijder deze of update deze op deze computer"
+msgstr ""
+"Voeg flatpak software toe, verwijder deze of update deze op deze computer"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:9
 msgid "GTK;System;PackageManager;Discover;Flatpak;Software;Store;"
+msgstr "GTK;Systeem;Pakketbeheer;Ontdekken;Flatpak;Software;Winkel;"
+
+#: data/io.github.kolunmi.Bazaar.desktop.in:15
+msgid "New Window"
+msgstr "Nieuw Venster"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:8
+msgid "Discover and install applications"
+msgstr "Ontdek en installeer applicaties"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:10
+msgid ""
+"A new app store for Linux with a focus on discovering and installing "
+"applications and addons from Flatpak remotes, particularly Flathub."
 msgstr ""
+"Een nieuwe appstore voor GNOME, gericht op het ontdekken en installeren van "
+"applicaties en add-ons van Flatpak bronnen, vooral Flathub."
 
-#: data/io.github.kolunmi.Bazaar.gschema.xml:6
-msgid "Show Animated Background"
-msgstr "Toon Geanimeerde Achtergrond"
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:14
+msgid ""
+"It emphasizes supporting the developers who make the Linux desktop possible. "
+"Bazaar features a \"curated\" tab that can be configured by distributors to "
+"allow for a more localized experience."
+msgstr ""
+"Het legt de nadruk op het ondersteunen van de ontwikkelaars die de Linux "
+"desktop mogelijk maken. Bazaar heeft een \"gecureerde\" tab die door "
+"distributeurs kan worden aangepast voor een meer gelokaliseerde ervaring."
 
-#: data/io.github.kolunmi.Bazaar.gschema.xml:7
-msgid "Whether to show the animated icon background on the home page"
-msgstr "Of je de geanimeerde icoon achtergrond wilt zien op de startpagina"
-
-#. FIXME: add descriptions and summary
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:9
-msgid "Keep the summary shorter, between 10 and 35 characters"
-msgstr "Houd de samenvatting korter, tussen 10 en 35 karakters"
-
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:11
-msgid "No description"
-msgstr "Geen beschrijving"
-
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:15 src/bz-application.c:1215
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29 src/bz-application.c:697
 msgid "Adam Masciola"
 msgstr "Adam Masciola"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:41
-msgid "Main Bazaar window showing Blender"
-msgstr "Hoofdvenster van Bazaar met Blender"
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:54
+msgid "The home page displaying Flathub apps"
+msgstr "Het startscherm dat Flathub apps weergeeft"
 
-#: src/bz-addons-dialog.blp:13 src/bz-installed-page.blp:162
-#: src/bz-installed-page.blp:174
-msgid "Manage Addons"
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:58
+msgid "Nucleus app page"
+msgstr "Nucleus apppagina"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:62
+msgid "Search page"
+msgstr "Zoekpagina"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:66
+msgid "Category page"
+msgstr "Categoriepagina"
+
+#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:694
+#: src/bz-installed-tile.blp:99
+msgid "Manage Add-ons"
 msgstr "Beheer Addons"
 
-#: src/bz-app-tile.blp:65 src/bz-full-view.blp:139
-msgid "This flatpak is verified by the original developers of the software."
-msgstr "Deze flatpak is geverifieerd door de originele ontwikkelaars van de software"
+#: src/bz-addons-dialog.c:90 src/bz-full-view.blp:482
+#: src/bz-installed-tile.blp:117 src/bz-transaction-dialog.c:224
+#: src/bz-transaction-view.blp:277
+msgid "Remove"
+msgstr "Verwijder"
 
-#: src/bz-application.c:1186
+#: src/bz-addons-dialog.c:95 src/bz-favorites-tile.c:166
+#: src/bz-full-view.blp:249 src/bz-full-view.blp:469
+#: src/bz-transaction-dialog.c:201 src/bz-transaction-view.blp:225
+msgid "Install"
+msgstr "Installeren"
+
+#: src/bz-age-rating-dialog.blp:7 src/bz-age-rating-dialog.blp:31
+#: src/bz-age-rating-dialog.c:726 src/bz-full-view.c:409 src/bz-full-view.c:416
+msgid "Age Rating"
+msgstr "Leeftijdsadvies"
+
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:88
+msgid "Cartoon Violence"
+msgstr "Stripgeweld"
+
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:90
+msgid "No information regarding cartoon violence"
+msgstr "Geen informatie over stripgeweld"
+
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:94
+msgid "Fantasy Violence"
+msgstr "Fantasiegeweld"
+
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:96
+msgid "No information regarding fantasy violence"
+msgstr "Geen informatie over fantasiegeweld"
+
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:100
+msgid "Realistic Violence"
+msgstr "Realistisch geweld"
+
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:102
+msgid "No information regarding realistic violence"
+msgstr "Geen informatie over realistisch geweld"
+
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:106
+msgid "Violence Depicting Bloodshed"
+msgstr "Geweld met bloedvergieten"
+
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:108
+msgid "No information regarding bloodshed"
+msgstr "Geen informatie over geweld met bloedvergieten"
+
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:112
+msgid "Sexual Violence"
+msgstr "Seksueel geweld"
+
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:114
+msgid "No information regarding sexual violence"
+msgstr "Geen informatie over seksueel geweld"
+
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:118
+msgid "Alcohol"
+msgstr "Alcohol"
+
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:120
+msgid "No information regarding references to alcohol"
+msgstr "Geen informatie over verwijzingen naar alcohol"
+
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:124
+msgid "Narcotics"
+msgstr "Drugs"
+
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:126
+msgid "No information regarding references to illicit drugs"
+msgstr "Geen informatie over verwijzingen naar illegale drugs"
+
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:130
+msgid "Tobacco"
+msgstr "Tabak"
+
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:132
+msgid "No information regarding references to tobacco products"
+msgstr "Geen informatie over verwijzingen naar tabaksproducten"
+
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:136 src/bz-age-rating-dialog.c:475
+msgid "Nudity"
+msgstr "Naaktheid"
+
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:138
+msgid "No information regarding nudity of any sort"
+msgstr "Geen informatie over enige naaktheid"
+
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:142
+msgid "Sexual Themes"
+msgstr "Seksuele thema’s"
+
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:144
+msgid "No information regarding references to or depictions of sexual nature"
+msgstr "Geen informatie over seksueel verwijzingen of afbeeldingen"
+
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:148
+msgid "Profanity"
+msgstr "Grof Taalgebruik"
+
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:150
+msgid "No information regarding profanity of any kind"
+msgstr "Geen informatie over grof taalgebruik"
+
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:154
+msgid "Inappropriate Humor"
+msgstr "Ongepaste humor"
+
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:156
+msgid "No information regarding inappropriate humor"
+msgstr "Geen informatie over ongepaste humor"
+
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:160
+msgid "Discrimination"
+msgstr "Discriminatie"
+
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:162
+msgid "No information regarding discriminatory language of any kind"
+msgstr "Geen informatie over discriminerend taalgebruik"
+
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:166
+msgid "Advertising"
+msgstr "Reclame"
+
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:168
+msgid "No information regarding advertising of any kind"
+msgstr "Geen informatie over enige reclame"
+
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:172
+msgid "Gambling"
+msgstr "Gokken"
+
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:174
+msgid "No information regarding gambling of any kind"
+msgstr "Geen informatie over gokken"
+
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:178
+msgid "Purchasing"
+msgstr "Aankopen"
+
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:180
+msgid "No information regarding the ability to spend money"
+msgstr "Geen informatie over de mogelijkheid om echt geld uit te geven"
+
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:184
+msgid "Chat Between Users"
+msgstr "Gesprekken tussen gebruikers"
+
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:186
+msgid "No information regarding ways to chat with other users"
+msgstr "Geen informatie over mogelijkheden om met andere gebruikers te chatten"
+
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:190
+msgid "Audio Chat Between Users"
+msgstr "Audiogesprekken tussen gebruikers"
+
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:192
+msgid "No information regarding ways to talk with other users"
+msgstr "Geen informatie over mogelijkheden om met andere gebruikers te praten"
+
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:196
+msgid "Contact Details"
+msgstr "Contactgegevens"
+
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:198
+msgid ""
+"No information regarding sharing of social network usernames or email "
+"addresses"
+msgstr ""
+"Geen informatie over het delen van gebruikersnamen van sociale netwerken of "
+"e-mailadressen"
+
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:202
+msgid "Identifying Information"
+msgstr "Identificerende informatie"
+
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:204
+msgid "No information regarding sharing of user information with third parties"
+msgstr "Geen informatie over het delen van gebruikersinformatie met derden"
+
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:208
+msgid "Location Sharing"
+msgstr "Locatie delen"
+
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:210
+msgid "No information regarding sharing of physical location with other users"
+msgstr ""
+"Geen informatie over het delen van de fysieke locatie met andere gebruikers"
+
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:214
+msgid "Prostitution"
+msgstr "Prostitutie"
+
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:216
+msgid "No information regarding references to prostitution"
+msgstr "Geen informatie over verwijzingen naar prostitutie"
+
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:220
+msgid "Adultery"
+msgstr "Overspel"
+
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:222
+msgid "No information regarding references to adultery"
+msgstr "Geen informatie over verwijzingen naar overspel"
+
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:226
+msgid "Sexualized Characters"
+msgstr "Geseksualiseerde personages"
+
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:228
+msgid "No information regarding sexualized characters"
+msgstr "Geen informatie over geseksualiseerde personages"
+
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:232
+msgid "Desecration"
+msgstr "Heiligschennis"
+
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:234
+msgid "No information regarding references to desecration"
+msgstr "Geen informatie over verwijzingen naar heiligschennis"
+
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:238
+msgid "Human Remains"
+msgstr "Menselijke overblijfselen"
+
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:240
+msgid "No information regarding visible dead human remains"
+msgstr "Geen informatie over zichtbare overblijfselen van dode mensen"
+
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:244
+msgid "Slavery"
+msgstr "Slavernij"
+
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:246
+msgid "No information regarding references to slavery"
+msgstr "Geen informatie over verwijzingen naar slavernij"
+
+#: src/bz-age-rating-dialog.c:424
+msgid "Does not include references to drugs"
+msgstr "Bevat geen verwijzingen naar drugs"
+
+#: src/bz-age-rating-dialog.c:426
+msgid ""
+"Does not include swearing, profanity, and other kinds of strong language"
+msgstr "Bevat geen scheldwoorden of ander grof taalgebruik"
+
+#: src/bz-age-rating-dialog.c:428
+msgid "Does not include ads or monetary transactions"
+msgstr "Bevat geen reclame of monetaire transacties"
+
+#: src/bz-age-rating-dialog.c:430
+msgid "Does not include sex or nudity"
+msgstr "Bevat geen seks of naaktheid"
+
+#: src/bz-age-rating-dialog.c:432
+msgid "Does not include uncontrolled chat functionality"
+msgstr ""
+"Bevat geen niet-gecontroleerde gespreksfunctionaliteit tussen gebruikers"
+
+#: src/bz-age-rating-dialog.c:434
+msgid "Does not include violence"
+msgstr "Bevat geen geweld"
+
+#: src/bz-age-rating-dialog.c:469
+msgid "Drugs"
+msgstr "Drugs"
+
+#: src/bz-age-rating-dialog.c:471
+msgid "Strong Language"
+msgstr "Grof taalgebruik"
+
+#: src/bz-age-rating-dialog.c:473
+msgid "Money"
+msgstr "Geld"
+
+#: src/bz-age-rating-dialog.c:477
+msgid "Social"
+msgstr "Sociaal"
+
+#: src/bz-age-rating-dialog.c:479
+msgid "Violence"
+msgstr "Geweld"
+
+#. Translators: Age rating format, e.g. "12+" for ages 12 and up
+#: src/bz-age-rating-dialog.c:676 src/bz-full-view.c:399
+#, c-format
+msgid "%d+"
+msgstr "%d+"
+
+#: src/bz-age-rating-dialog.c:701
+msgctxt "Age rating"
+msgid "All"
+msgstr "Alle"
+
+#: src/bz-age-rating-dialog.c:737
+#, c-format
+msgid "%s has an unknown age rating"
+msgstr "%s heeft een onbekende leeftijdsclassificatie"
+
+#: src/bz-age-rating-dialog.c:743
+#, c-format
+msgid "%s is suitable for everyone"
+msgstr "%s is geschikt voor iedereen"
+
+#: src/bz-age-rating-dialog.c:746
+#, c-format
+msgid "%s is suitable for young children"
+msgstr "%s is geschikt voor jonge kinderen"
+
+#: src/bz-age-rating-dialog.c:749
+#, c-format
+msgid "%s is suitable for children"
+msgstr "%s is geschikt voor kinderen"
+
+#: src/bz-age-rating-dialog.c:752
+#, c-format
+msgid "%s is suitable for teenagers"
+msgstr "%s is geschikt voor tieners"
+
+#: src/bz-age-rating-dialog.c:755
+#, c-format
+msgid "%s is suitable for adults"
+msgstr "%s is geschikt voor volwassenen"
+
+#: src/bz-age-rating-dialog.c:758
+#, c-format
+msgid "%s is suitable for %s"
+msgstr "%s is geschikt voor %s"
+
+#: src/bz-age-rating-dialog.c:849
+#, c-format
+msgid "%s • %s"
+msgstr "%s • %s"
+
+#: src/bz-all-apps-page.blp:13 src/bz-apps-page.blp:14 src/bz-full-view.blp:43
+#: src/bz-user-data-page.blp:15 src/bz-window.blp:480
+msgid "Main Menu"
+msgstr "Hoofdmenu"
+
+#: src/bz-all-apps-page.blp:17 src/bz-apps-page.blp:17
+#: src/bz-user-data-page.blp:18 src/bz-window.blp:553
+msgid "_Donate to Bazaar ❤️"
+msgstr "_Doneer aan Bazaar ❤️"
+
+#: src/bz-all-apps-page.blp:18 src/bz-apps-page.blp:18
+#: src/bz-user-data-page.blp:19
+msgid "_Refresh Content"
+msgstr "_Inhoud verversen"
+
+#: src/bz-all-apps-page.blp:22 src/bz-apps-page.blp:22
+#: src/bz-user-data-page.blp:22 src/bz-window.blp:560
+msgid "_Preferences"
+msgstr "_Voorkeuren"
+
+#: src/bz-all-apps-page.blp:23 src/bz-apps-page.blp:23
+#: src/bz-user-data-page.blp:23 src/bz-window.blp:581
+msgid "_Keyboard Shortcuts"
+msgstr "_Snelkoppelingen Toetsenbord"
+
+#: src/bz-all-apps-page.blp:24 src/bz-apps-page.blp:24
+#: src/bz-user-data-page.blp:24 src/bz-window.blp:586
+msgid "_About Bazaar"
+msgstr "_Over Bazaar"
+
+#: src/bz-all-apps-page.blp:28 src/bz-apps-page.blp:28
+#: src/bz-user-data-page.blp:27 src/bz-window.blp:593
+msgid "_Quit Bazaar"
+msgstr "_Sluit Bazaar"
+
+#: src/bz-app-permissions.c:160
+#, c-format
+msgid "System folder %s"
+msgstr "Systeemmap %s"
+
+#: src/bz-app-permissions.c:162
+#, c-format
+msgid "Home subfolder %s"
+msgstr "Home submap %s"
+
+#: src/bz-app-permissions.c:164
+msgid "Host system folders"
+msgstr "Systeemmappen van host"
+
+#: src/bz-app-permissions.c:166
+msgid "Host system configuration from /etc"
+msgstr "Systeemconfiguratie van host in /etc"
+
+#: src/bz-app-permissions.c:169
+#, c-format
+msgid "Desktop subfolder %s"
+msgstr "Bureaublad-submap %s"
+
+#: src/bz-app-permissions.c:170
+msgid "Desktop folder"
+msgstr "Bureaublad-map"
+
+#: src/bz-app-permissions.c:173
+#, c-format
+msgid "Documents subfolder %s"
+msgstr "Bureaublad-submap %s"
+
+#: src/bz-app-permissions.c:174
+msgid "Documents folder"
+msgstr "Documenten-map"
+
+#: src/bz-app-permissions.c:177
+#, c-format
+msgid "Music subfolder %s"
+msgstr "Muziek-submap %s"
+
+#: src/bz-app-permissions.c:178
+msgid "Music folder"
+msgstr "Muziek-map"
+
+#: src/bz-app-permissions.c:181
+#, c-format
+msgid "Pictures subfolder %s"
+msgstr "Afbeeldingen-submap %s"
+
+#: src/bz-app-permissions.c:182
+msgid "Pictures folder"
+msgstr "Afbeeldingen-map"
+
+#: src/bz-app-permissions.c:185
+#, c-format
+msgid "Public Share subfolder %s"
+msgstr "Openbaar-submap %s"
+
+#: src/bz-app-permissions.c:186
+msgid "Public Share folder"
+msgstr "Openbaar-map"
+
+#: src/bz-app-permissions.c:189
+#, c-format
+msgid "Videos subfolder %s"
+msgstr "Video’s-submap %s"
+
+#: src/bz-app-permissions.c:190
+msgid "Videos folder"
+msgstr "Video’s-map"
+
+#: src/bz-app-permissions.c:193
+#, c-format
+msgid "Templates subfolder %s"
+msgstr "Sjablonen-submap %s"
+
+#: src/bz-app-permissions.c:194
+msgid "Templates folder"
+msgstr "Sjablonen-map"
+
+#: src/bz-app-permissions.c:197
+#, c-format
+msgid "User cache subfolder %s"
+msgstr "Cache-submap %s van gebruiker"
+
+#: src/bz-app-permissions.c:198
+msgid "User cache folder"
+msgstr "Cachemap van gebruiker"
+
+#: src/bz-app-permissions.c:201
+#, c-format
+msgid "User configuration subfolder %s"
+msgstr "Configuratie-submap %s van gebruiker"
+
+#: src/bz-app-permissions.c:202
+msgid "User configuration folder"
+msgstr "Configuratiemap van gebruiker"
+
+#: src/bz-app-permissions.c:205
+#, c-format
+msgid "User data subfolder %s"
+msgstr "Gegevens-submap %s van gebruiker"
+
+#: src/bz-app-permissions.c:206
+msgid "User data folder"
+msgstr "Gegevensmap van gebruiker"
+
+#: src/bz-app-permissions.c:209
+#, c-format
+msgid "User runtime subfolder %s"
+msgstr "Runtime-submap %s van gebruiker"
+
+#: src/bz-app-permissions.c:210
+msgid "User runtime folder"
+msgstr "Runtime-map van gebruiker"
+
+#: src/bz-app-permissions.c:212
+#, c-format
+msgid "Filesystem access to %s"
+msgstr "Toegang tot %s in bestandssysteem"
+
+#: src/bz-app-permissions.c:214
+msgid "Unknown filesystem path"
+msgstr "Onbekend bestandspad"
+
+#: src/bz-app-size-dialog.blp:29 src/bz-app-size-dialog.blp:55
+msgid "Download Size"
+msgstr "Download Grootte"
+
+#: src/bz-app-size-dialog.blp:56
+msgid "Amount to download from the internet"
+msgstr "Te downloaden hoeveelheid van internet"
+
+#: src/bz-app-size-dialog.blp:76
+msgid "Installed Size"
+msgstr "Geïnstalleerde Grootte"
+
+#: src/bz-app-size-dialog.blp:77
+msgid "Size on Disk"
+msgstr "Grootte op schijf"
+
+#: src/bz-app-size-dialog.blp:99
+msgid "User Data Size"
+msgstr "Grootte Gebruikersgegevens"
+
+#: src/bz-app-size-dialog.blp:100
+msgid "Caches, settings, and other app data"
+msgstr "Caches, instellingen en andere app-data"
+
+#: src/bz-app-tile.blp:85 src/bz-full-view.c:363 src/bz-installed-page.blp:85
+#: src/bz-window.blp:296
+msgid "Installed"
+msgstr "Geïnstalleerd"
+
+#: src/bz-apps-page.blp:103
+msgid "Show All"
+msgstr "Toon Alle"
+
+#: src/bz-apps-page.c:232
+#, c-format
+msgid "All \"%s\""
+msgstr "Alle \"%s\""
+
+#: src/bz-apps-page.c:506 src/bz-tag-list.c:109
+#, c-format
+msgid "%d Applications"
+msgstr "%d Applicaties"
+
+#: src/bz-application.c:668
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr "Adam Masciola <kolunmi@posteo.net>"
 
-#: src/bz-application.c:1191
-msgctxt "About Dialog Translator Credit"
-msgid "Ahmed Najmawi"
-msgstr "Admed Najmawi"
+#: src/bz-application.c:669
+msgctxt "About Dialog Developer Credit"
+msgid "Alexander Vanhee"
+msgstr "Alexander Vanhee"
 
-#: src/bz-application.c:1192
-msgctxt "About Dialog Translator Credit"
-msgid "AtomHare"
-msgstr "AtomHare"
+#. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
+#: src/bz-application.c:700
+msgid "translator-credits"
+msgstr "Alexander Vanhee, 2025"
 
-#: src/bz-application.c:1193
-msgctxt "About Dialog Translator Credit"
-msgid "Jill Fiore"
-msgstr "Jill Fiore"
+#: src/bz-application.c:711
+msgid "Special Thanks"
+msgstr "Speciale Dank"
 
-#: src/bz-application.c:1194
-msgctxt "About Dialog Translator Credit"
-msgid "Lucosec"
-msgstr "Lucosec"
+#: src/bz-application.c:769
+msgid "Logged Out Successfully!"
+msgstr "Succesvol Uitgelogd!"
 
-#: src/bz-application.c:1195
-msgctxt "About Dialog Translator Credit"
-msgid "Shihfu Juan"
-msgstr "Shihfu Juan"
+#: src/bz-application.c:896
+msgid "Performing setup..."
+msgstr "Setup aan het uitvoeren..."
 
-#: src/bz-application.c:1196
-msgctxt "About Dialog Translator Credit"
-msgid "Vlastimil Dědek"
-msgstr "Vlastimil Dědek"
+#: src/bz-application.c:975 src/bz-application.c:984
+msgid "Set Up Flathub"
+msgstr "Flathub instellen"
 
-#: src/bz-application.c:1197
-msgctxt "About Dialog Translator Credit"
-msgid "asen23"
-msgstr "asen23"
+#: src/bz-application.c:978
+msgid ""
+"Flathub is not set up on this system. You will not be able to browse and "
+"install applications in Bazaar if its unavailable.\n"
+"\n"
+"You can still use Bazaar to browse and remove already installed apps."
+msgstr ""
+"Flathub is niet ingesteld op dit systeem. Je kunt geen applicaties in Bazaar "
+"browsen en installeren als het niet beschikbaar is.\n"
+"\n"
+"Je kunt Bazaar nog steeds gebruiken om reeds geïnstalleerde apps te bekijken "
+"en verwijderen."
 
-#: src/bz-application.c:1198
-msgctxt "About Dialog Translator Credit"
-msgid "renner"
-msgstr "renner"
+#: src/bz-application.c:983 src/bz-update-dialog.blp:6
+msgid "Later"
+msgstr "Later"
 
-#: src/bz-application.c:1199
-msgctxt "About Dialog Translator Credit"
-msgid "robotta"
-msgstr "robotta"
+#: src/bz-application.c:1385 src/bz-application.c:3059
+msgid "Synchronizing..."
+msgstr "Synchroniseren..."
 
-#: src/bz-browse-widget.blp:11 src/bz-full-view.blp:11
-#: src/bz-installed-page.blp:11 src/bz-window.blp:32
+#: src/bz-application.c:1524 src/bz-application.c:3055
+#, c-format
+msgid "Receiving %d entries..."
+msgstr "%d items ontvangen..."
+
+#: src/bz-application.c:1529
+msgid "Checking for updates"
+msgstr "Controleren op updates"
+
+#: src/bz-application.c:3061
+msgid "Indexing Data..."
+msgstr "Gegevens aan het Indexeren..."
+
+#: src/bz-curated-view.blp:11 src/bz-favorites-page.blp:65
+#: src/bz-flathub-page.blp:19 src/bz-full-view.blp:53
+#: src/bz-installed-page.blp:63 src/bz-user-data-page.blp:52
+#: src/bz-window.blp:183
 msgid "Empty"
 msgstr "Leeg"
 
-#: src/bz-browse-widget.blp:15
-msgid "No Curated Applications"
-msgstr "Geen Gecureerde Applicaties"
+#: src/bz-curated-view.blp:15
+msgid "No Curation"
+msgstr "Geen Gecureerde Apps"
 
-#: src/bz-browse-widget.blp:16
+#: src/bz-curated-view.blp:16
 msgid ""
-"Bazaar was not provided a curated content configuration. Contact your "
-"operating system's support channels for assistance."
-msgstr "Bazaar heeft geen gecureerde content configuratie gekregen. Neem contact op met uw bestuuringssysteem hun supportkanalen voor ondersteuning"
+"There is no curation information provided on this system. You can still "
+"browse applications on Flathub"
+msgstr ""
+"Er is geen curatie-info beschikbaar op dit systeem. Je kan nog steeds apps "
+"op Flathub bekijken"
 
-#: src/bz-browse-widget.blp:22 src/bz-flathub-page.blp:11
+#: src/bz-curated-view.blp:18
+msgid "Browse Flathub"
+msgstr "Naar Flathub"
+
+#: src/bz-curated-view.blp:29 src/bz-curated-view.blp:33
+#: src/bz-flathub-page.blp:30 src/bz-flathub-page.blp:34
+msgid "Offline"
+msgstr "Offline"
+
+#: src/bz-curated-view.blp:39 src/bz-flathub-page.blp:49
 msgid "Browser"
 msgstr "Browser"
 
-#: src/bz-error.c:45
+#: src/bz-developer-badge.c:131
+msgid "Developer information not available."
+msgstr "Ontwikkelaarsinformatie niet beschikbaar."
+
+#: src/bz-developer-badge.c:137 src/bz-developer-badge.c:151
+#, c-format
+msgid ""
+"The ownership of the %s app ID has not been verified and it may be a "
+"community package."
+msgstr ""
+"Het eigendom van de %s app-ID is niet geverifieerd en het kan een "
+"communitypakket zijn."
+
+#: src/bz-developer-badge.c:155
+#, c-format
+msgid ""
+"The ownership of the %s app ID has been manually verified by the Flathub "
+"team."
+msgstr ""
+"Het eigendom van de %s app-ID is handmatig geverifieerd door het Flathub-"
+"team."
+
+#: src/bz-developer-badge.c:161
+#, c-format
+msgid ""
+"The ownership of the %1$s app ID has been verified by <b>%2$s</b> on "
+"<b>%3$s</b>."
+msgstr ""
+"Het eigendom van de %1$s app-ID is geverifieerd door <b>%2$s</b> op <b>%3$s</"
+"b>."
+
+#: src/bz-developer-badge.c:168
+#, c-format
+msgid "The ownership of the %1$s app ID has been verified using %2$s."
+msgstr "Het eigendom van de %1$s app-ID is geverifieerd met %2$s."
+
+#: src/bz-developer-badge.c:172
+#, c-format
+msgid "The ownership of the %s app ID has been verified."
+msgstr "Het eigendom van de %s app-ID is geverifieerd."
+
+#: src/bz-entry-group-util.c:73
+msgid "Choose an Installation"
+msgstr "Kies een Installatie"
+
+#: src/bz-entry-group-util.c:76
+msgid ""
+"You have multiple versions of this app installed. Which one would you like "
+"to proceed with?"
+msgstr ""
+"Je hebt meerdere versies van deze app geïnstalleerd. Welke wil je gebruiken?"
+
+#: src/bz-entry-group-util.c:80 src/bz-transaction-dialog.c:200
+#: src/bz-transaction-dialog.c:223 src/bz-transaction-dialog.c:253
+msgid "Cancel"
+msgstr "Annuleer"
+
+#: src/bz-error.c:68
 msgid "An Error Occurred"
 msgstr "Er is een fout opgetreden"
 
-#: src/bz-error.c:51
+#: src/bz-error.c:89
 msgid "Close"
 msgstr "Sluiten"
 
-#: src/bz-error.c:52
+#: src/bz-error.c:90
 msgid "Copy and Close"
 msgstr "Kopieren en Sluiten"
 
-#: src/bz-flathub-page.blp:41
-msgid "Apps Of The Week"
-msgstr "Apps Van De Week"
+#: src/bz-favorite-button.c:434
+msgid "Log in with Flathub to manage favorites"
+msgstr "Log in met Flathub om favorieten te beheren"
 
-#: src/bz-flathub-page.blp:85
+#: src/bz-favorite-button.c:440
+msgid "Log In"
+msgstr "Log In"
+
+#: src/bz-favorite-button.blp:14
+msgid "Favorite Count"
+msgstr "Aantal favorieten"
+
+#: src/bz-favorites-tile.c:164
+msgid "Uninstall"
+msgstr "Verwijderen"
+
+#: src/bz-favorites-tile.blp:70 src/bz-installed-tile.blp:75
+msgid "Support this application"
+msgstr "Ondersteun deze applicatie"
+
+#: src/bz-favorites-tile.blp:118
+msgid "Remove from Favorites"
+msgstr "Verwijder van Favorieten"
+
+#: src/bz-favorites-page.blp:5 src/bz-favorites-page.blp:75
+#: src/bz-window.blp:611
+msgid "Favorites"
+msgstr "Favorieten"
+
+#: src/bz-favorites-page.blp:22 src/bz-full-view.blp:20 src/bz-window.blp:126
+#: src/bz-window.blp:457
+msgid "Toggle transaction sidebar"
+msgstr "Schakel Transactie-zijbalk"
+
+#: src/bz-favorites-page.blp:53 src/bz-user-data-page.blp:41
+msgid "Loading"
+msgstr "Laden"
+
+#: src/bz-favorites-page.blp:68
+msgid "No Favorites"
+msgstr "Geen Favorieten"
+
+#: src/bz-favorites-page.blp:69
+msgid "Applications you mark as favorite will appear here"
+msgstr "Applicaties die je als favoriet markeert verschijnen hier"
+
+#: src/bz-featured-carousel.blp:31
+msgid "Previous"
+msgstr "Vorige"
+
+#: src/bz-featured-carousel.blp:53
+msgid "Next"
+msgstr "Volgende"
+
+#: src/bz-featured-tile.blp:88
+msgid "App of the Day"
+msgstr "App van de Dag"
+
+#: src/bz-flathub-category.c:79
+msgid "Audio & Video"
+msgstr "Audio & Video"
+
+#: src/bz-flathub-category.c:79
+msgid "Media"
+msgstr "Media"
+
+#: src/bz-flathub-category.c:79
+msgid "More Audio & Video"
+msgstr "Meer Audio & Video"
+
+#: src/bz-flathub-category.c:80
+msgid "Developer Tools"
+msgstr "Ontwikkeltools"
+
+#: src/bz-flathub-category.c:80
+msgid "Develop"
+msgstr "Ontwikkel"
+
+#: src/bz-flathub-category.c:80
+msgid "More Developer Tools"
+msgstr "Meer Ontwikkeltools"
+
+#: src/bz-flathub-category.c:81
+msgid "Education"
+msgstr "Educatie"
+
+#: src/bz-flathub-category.c:81
+msgid "Learn"
+msgstr "Leren"
+
+#: src/bz-flathub-category.c:81
+msgid "More Education"
+msgstr "Meer Educatie"
+
+#: src/bz-flathub-category.c:82
+msgid "Gaming"
+msgstr "Gaming"
+
+#: src/bz-flathub-category.c:82
+msgid "Play"
+msgstr "Spelen"
+
+#: src/bz-flathub-category.c:82
+msgid "More Gaming"
+msgstr "Meer Gaming"
+
+#: src/bz-flathub-category.c:83
+msgid "Graphics & Photography"
+msgstr "Grafisch & Fotografie"
+
+#: src/bz-flathub-category.c:83
+msgid "Create"
+msgstr "Creëren"
+
+#: src/bz-flathub-category.c:83
+msgid "More Graphics & Photography"
+msgstr "Meer Grafisch & Fotografie"
+
+#: src/bz-flathub-category.c:84
+msgid "Networking"
+msgstr "Netwerken"
+
+#: src/bz-flathub-category.c:84
+msgid "Internet"
+msgstr "Internet"
+
+#: src/bz-flathub-category.c:84
+msgid "More Networking"
+msgstr "Meer Netwerken"
+
+#: src/bz-flathub-category.c:85
+msgid "Productivity"
+msgstr "Productiviteit"
+
+#: src/bz-flathub-category.c:85
+msgid "Work"
+msgstr "Werk"
+
+#: src/bz-flathub-category.c:85
+msgid "More Productivity"
+msgstr "Meer Productiviteit"
+
+#: src/bz-flathub-category.c:86
+msgid "Science"
+msgstr "Wetenschap"
+
+#: src/bz-flathub-category.c:86
+msgid "More Science"
+msgstr "Meer Wetenschap"
+
+#: src/bz-flathub-category.c:87
+msgid "System"
+msgstr "Systeem"
+
+#: src/bz-flathub-category.c:87
+msgid "More System"
+msgstr "Meer Systeem"
+
+#: src/bz-flathub-category.c:88
+msgid "Utilities"
+msgstr "Tools"
+
+#: src/bz-flathub-category.c:88
+msgid "Tools"
+msgstr "Tools"
+
+#: src/bz-flathub-category.c:88
+msgid "More Utilities"
+msgstr "Meer Tools"
+
+#: src/bz-flathub-category.c:89 src/bz-flathub-page.blp:119
+#: src/bz-flathub-page.blp:152
 msgid "Trending"
 msgstr "Trending"
 
-#: src/bz-flathub-page.blp:117
-msgid "Recently Updated"
-msgstr "Onlangs bijgewerkt"
+#: src/bz-flathub-category.c:89
+msgid "More Trending"
+msgstr "Meer Trending"
 
-#: src/bz-flathub-page.blp:149
-msgid "Recently Added"
-msgstr "Recent Toegevoegd"
-
-#: src/bz-flathub-page.blp:181
+#: src/bz-flathub-category.c:90 src/bz-flathub-page.blp:125
+#: src/bz-flathub-page.blp:185
 msgid "Popular"
 msgstr "Populair"
 
-#: src/bz-full-view.blp:15
+#: src/bz-flathub-category.c:90
+msgid "More Popular"
+msgstr "Meer Populair"
+
+#: src/bz-flathub-category.c:91 src/bz-flathub-page.blp:174
+msgid "Recently Added"
+msgstr "Recent Toegevoegd"
+
+#: src/bz-flathub-category.c:91 src/bz-flathub-page.blp:131
+msgid "New"
+msgstr "Nieuw"
+
+#: src/bz-flathub-category.c:91
+msgid "More New"
+msgstr "Meer Niewe"
+
+#: src/bz-flathub-category.c:92 src/bz-flathub-page.blp:163
+msgid "Recently Updated"
+msgstr "Onlangs Bijgewerkt"
+
+#: src/bz-flathub-category.c:92 src/bz-flathub-page.blp:137
+msgid "Updated"
+msgstr "Bijgewerkt"
+
+#: src/bz-flathub-category.c:92
+msgid "More Updated"
+msgstr "Meer Bijgewerkt"
+
+#: src/bz-flathub-category.c:93
+msgid "Mobile"
+msgstr "Onderweg"
+
+#: src/bz-flathub-category.c:93
+msgid "More Mobile"
+msgstr "Meer Onderweg"
+
+#: src/bz-flathub-category.c:94
+msgid "Adwaita"
+msgstr "Adwaita"
+
+#: src/bz-flathub-category.c:94
+msgid "More Adwaita"
+msgstr "Meer Adwaita"
+
+#: src/bz-flathub-category.c:95
+msgid "KDE Apps"
+msgstr "KDE Apps"
+
+#: src/bz-flathub-category.c:95
+msgid "More KDE Apps"
+msgstr "Meer KDE Apps"
+
+#: src/bz-flathub-page.blp:23
+msgid "Flathub Not Added"
+msgstr "Flathub Niet Toegevoegd"
+
+#: src/bz-flathub-page.blp:24
+msgid "The Flathub remote was not found on any of your Flatpak installations"
+msgstr "De Flathub remote is op geen van je Flatpak installaties teruggevonden"
+
+#: src/bz-flathub-page.blp:35
+msgid "Flathub returned an error"
+msgstr "Flathub gaf een foutmelding"
+
+#: src/bz-flathub-page.blp:41
+msgid "Retry Flathub Connection"
+msgstr "Flathub-verbinding opnieuw proberen"
+
+#: src/bz-flathub-page.blp:57
+msgid "Flathub Unavailable"
+msgstr "Flathub Onbeschikbaar"
+
+#: src/bz-flathub-page.blp:58
+msgid ""
+"We could not connect to Flathub. You can still manage and search for "
+"applications."
+msgstr ""
+"We konden geen verbinding maken met Flathub. Je kunt nog steeds applicaties "
+"beheren en zoeken."
+
+#: src/bz-flathub-page.blp:61
+msgid "Search Apps"
+msgstr "Apps Zoeken"
+
+#: src/bz-flathub-page.blp:270
+msgid "On the Go"
+msgstr "Onderweg"
+
+#: src/bz-flathub-page.blp:282
+msgid "Apps for your Linux phones and tablets"
+msgstr "Apps voor je Linux telefoons en tablets"
+
+#: src/bz-flathub-page.blp:293 src/bz-flathub-page.blp:328
+msgid "More Mobile Apps"
+msgstr "Meer Mobiele Apps"
+
+#: src/bz-flathub-page.blp:388
+msgid "We​ ♥​ Games"
+msgstr "We​ ♥​ Games"
+
+#: src/bz-flathub-page.blp:401
+msgid "Games and apps to run your favorite titles"
+msgstr "Games en apps om je favoriete titels te spelen"
+
+#: src/bz-flathub-page.blp:435
+msgid "More Games"
+msgstr "Meer Gaming"
+
+#: src/bz-flatpak-entry.c:608
+msgctxt "Project URL Type"
+msgid "Flathub Page"
+msgstr "Flathub Pagina"
+
+#: src/bz-flatpak-entry.c:629
+msgctxt "Project URL Type"
+msgid "Project Website"
+msgstr "Projectwebsite"
+
+#: src/bz-flatpak-entry.c:633
+msgctxt "Project URL Type"
+msgid "Issue Tracker"
+msgstr "Probleemtracker"
+
+#: src/bz-flatpak-entry.c:637
+msgctxt "Project URL Type"
+msgid "FAQ"
+msgstr "Veelgestelde Vragen"
+
+#: src/bz-flatpak-entry.c:641
+msgctxt "Project URL Type"
+msgid "Help"
+msgstr "Hulp"
+
+#: src/bz-flatpak-entry.c:645
+msgctxt "Project URL Type"
+msgid "Donate"
+msgstr "Doneer"
+
+#: src/bz-flatpak-entry.c:651
+msgctxt "Project URL Type"
+msgid "Translate"
+msgstr "Vertalen"
+
+#: src/bz-flatpak-entry.c:655
+msgctxt "Project URL Type"
+msgid "Contact"
+msgstr "Contact"
+
+#: src/bz-flatpak-entry.c:659
+msgctxt "Project URL Type"
+msgid "Source Code"
+msgstr "Broncode"
+
+#: src/bz-flatpak-entry.c:665
+msgctxt "Project URL Type"
+msgid "Contribute"
+msgstr "Brijdragen"
+
+#: src/bz-full-view.blp:57 src/bz-installed-page.blp:74
+#: src/bz-installed-page.blp:78
 msgid "No Results"
 msgstr "Geen Resultaten"
 
-#: src/bz-full-view.blp:16
+#: src/bz-full-view.blp:58
 msgid "Try a different search query"
 msgstr "Probeer een andere zoekterm"
 
-#: src/bz-full-view.blp:22 src/bz-window.blp:42
+#: src/bz-full-view.blp:64 src/bz-window.blp:193
 msgid "Content"
 msgstr "Content"
 
-#: src/bz-full-view.blp:180
-msgid "Run this application"
-msgstr "Applicatie uitvoeren"
-
-#: src/bz-full-view.blp:204
-msgid "Download and install this application"
-msgstr "Download deze applicatie en voer deze uit"
-
-#: src/bz-full-view.blp:222 src/bz-window.c:987
-msgid "Install"
-msgstr "Installeren"
-
-#: src/bz-full-view.blp:236
-msgid "Uninstall this application"
-msgstr "Verwijder deze applicatie"
-
-#: src/bz-full-view.blp:262
-msgid "Share this application"
-msgstr "Deel deze applicatie"
-
-#: src/bz-full-view.blp:274
-msgid ""
-"The number of downloads in the last 30 days. Click to view this "
-"application's download statistics."
-msgstr "Het aantal downloads in de laatste 30 dagen. Click om de statistieken van deze applicatie te tonen"
-
-#: src/bz-full-view.blp:316
-msgid "Support this developer"
-msgstr "Steun deze ontwikkelaar"
-
-#: src/bz-full-view.blp:329
+#: src/bz-full-view.blp:210
 msgid "Support"
 msgstr "Steunen"
 
-#: src/bz-full-view.blp:387
-msgid "Remote repo name"
-msgstr "Remote repo naam"
+#: src/bz-full-view.blp:233 src/bz-full-view.blp:493
+msgid "Open"
+msgstr "Openen"
 
-#: src/bz-full-view.blp:400
-msgid "Project URL"
-msgstr "Project URL"
+#: src/bz-full-view.blp:246 src/bz-full-view.blp:466
+msgid "Download & Install Application"
+msgstr "App Downloaden & Uitvoeren"
 
-#: src/bz-full-view.blp:412
-msgid "Download size"
-msgstr "Download grootte"
+#: src/bz-full-view.blp:261
+msgid "Uninstall Application"
+msgstr "Verwijder deze Applicatie"
 
-#: src/bz-full-view.c:214
+#: src/bz-full-view.blp:276 src/bz-full-view.blp:508
+msgid "Install Other Version"
+msgstr "Installeer Andere Versie"
+
+#: src/bz-full-view.blp:430
+msgid "Downloads /mo"
+msgstr "Downloads p/m"
+
+#: src/bz-full-view.blp:527
+msgid "Stopped Receiving Core Updates"
+msgstr "Core-updates Gestopt"
+
+#: src/bz-full-view.blp:541
+msgid ""
+"This app uses a runtime that no longer receives updates or security fixes. "
+"It may become unsafe to use."
+msgstr ""
+"Deze app gebruikt een runtime die geen updates of beveiligingsfixes meer "
+"ontvangt. Het kan onveilig worden om te gebruiken."
+
+#: src/bz-full-view.blp:627
+msgid "Trash Data"
+msgstr "Naar Prullenbak"
+
+#: src/bz-full-view.blp:761
+msgid "Tags:"
+msgstr "Tags:"
+
+#: src/bz-full-view.c:307
+msgid "---"
+msgstr "---"
+
+#. Translators: M is the suffix for millions
+#: src/bz-full-view.c:314
 #, c-format
-msgid "Released %x"
-msgstr "Gereleased %x"
+msgid "%.*fM"
+msgstr "%.*fM"
 
-#: src/bz-full-view.c:225
+#. Translators: K is the suffix for thousands
+#: src/bz-full-view.c:321
+#, c-format
+msgid "%.*fK"
+msgstr "%.*fK"
+
+#: src/bz-full-view.c:331
+#, c-format
+msgid "%d downloads in the last 30 days"
+msgstr "%d downloads in de afgelopen 30 dagen"
+
+#: src/bz-full-view.c:363
+msgid "Download"
+msgstr "Download"
+
+#: src/bz-full-view.c:381
+#, c-format
+msgid "Download size of %s"
+msgstr "Downloadgrootte van %s"
+
+#: src/bz-full-view.c:414
+msgid "All Ages"
+msgstr "Iedereen"
+
+#: src/bz-full-view.c:426
+msgid "Age rating information unavailable"
+msgstr "Leeftijdsclassificatie niet beschikbaar"
+
+#: src/bz-full-view.c:431
+msgid "Suitable for all ages"
+msgstr "Geschikt voor alle leeftijden"
+
+#: src/bz-full-view.c:433
+#, c-format
+msgid "Suitable for ages %d and up"
+msgstr "Geschikt voor %d jarigen en ouder"
+
+#: src/bz-full-view.c:466 src/bz-full-view.c:471 src/bz-full-view.c:499
+#: src/bz-full-view.c:510
+msgid "Unknown"
+msgstr "Onbekend"
+
+#: src/bz-full-view.c:476
+#, c-format
+msgid "Free software licensed under %s"
+msgstr "Vrije software gelicentieerd onder %s"
+
+#: src/bz-full-view.c:481
+msgid "Free software"
+msgstr "Alleen Vrije Software"
+
+#: src/bz-full-view.c:484
+msgid "Proprietary Software"
+msgstr "Propriëtaire Software"
+
+#: src/bz-full-view.c:487
+#, c-format
+msgid "Special License: %s"
+msgstr "Speciale licentie: %s"
+
+#: src/bz-full-view.c:504
+msgid "Free"
+msgstr "Vrij"
+
+#: src/bz-full-view.c:507 src/bz-license-dialog.c:190
+msgid "Proprietary"
+msgstr "Propriëtair"
+
+#: src/bz-full-view.c:512 src/bz-license-dialog.c:192
+msgid "Special License"
+msgstr "Speciale licentie"
+
+#: src/bz-full-view.c:532
+msgid "Adaptive"
+msgstr "Adaptief"
+
+#: src/bz-full-view.c:532
+msgid "Desktop Only"
+msgstr "Alleen Desktop"
+
+#: src/bz-full-view.c:538
+msgid "Works on desktop, tablets, and phones"
+msgstr "Werkt op desktop, tablets en telefoons"
+
+#: src/bz-full-view.c:539
+msgid "May not work on mobile devices"
+msgstr "Werkt mogelijk niet op mobiele apparaten"
+
+#: src/bz-full-view.c:550
 msgid "No URL"
 msgstr "Geen URL"
 
-#: src/bz-full-view.c:233
+#: src/bz-full-view.c:568
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
-msgstr "Deze applicatie heeft een FLOSS licentie, wat betekent dat de broncode gecontroleerd kan worden op veiligheid"
+msgstr ""
+"Deze applicatie heeft een FLOSS licentie, wat betekent dat de broncode "
+"gecontroleerd kan worden op veiligheid"
 
-#: src/bz-full-view.c:234
+#: src/bz-full-view.c:569
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
-msgstr "Deze applicatie heeft een proprietary-licentie, wat betekent dat de broncode privé wordt ontwikkeld en niet gecontroleerd kan worden door een derde partij."
+msgstr ""
+"Deze applicatie heeft een proprietary-licentie, wat betekent dat de broncode "
+"privé wordt ontwikkeld en niet gecontroleerd kan worden door een derde "
+"partij."
 
-#: src/bz-installed-page.blp:15
-msgid "No Flatpaks Installed"
-msgstr "Geen Flatpaks geïnstalleerd"
+#: src/bz-full-view.c:576
+msgid "More Apps"
+msgstr "Meer Apps"
 
-#: src/bz-installed-page.blp:21 src/bz-window.blp:201 src/bz-window.blp:336
-msgid "Installed"
-msgstr "Geïnstalleerd"
+#: src/bz-full-view.c:577
+#, c-format
+msgid "More Apps by %s"
+msgstr "Andere Apps van %s"
 
-#: src/bz-installed-page.blp:143
-msgid "More actions"
-msgstr "Meer Acties"
+#: src/bz-full-view.c:584
+msgid "Other Apps by this Developer"
+msgstr "Andere Apps van deze Ontwikkelaar"
 
-#: src/bz-installed-page.blp:187 src/bz-installed-page.blp:198
-msgid "Edit Permissions"
-msgstr "Bewerk bevoegdheden"
+#: src/bz-full-view.c:586 src/bz-full-view.c:786
+#, c-format
+msgid "Other Apps by %s"
+msgstr "Andere Apps van %s"
 
-#: src/bz-preferences-dialog.blp:9
+#: src/bz-full-view.c:595
+#, c-format
+msgid "%s is not installed, but it still has <b>%s</b> of data present."
+msgstr "%s is niet geïnstalleerd, maar heeft nog <b>%s</b> aan gegevens."
+
+#: src/bz-full-view.c:668 src/bz-full-view.c:685
+msgid "N/A"
+msgstr "N.b."
+
+#: src/bz-full-view.c:675 src/bz-full-view.c:677 src/bz-full-view.c:679
+msgid "Low Risk"
+msgstr "Laag risico"
+
+#: src/bz-full-view.c:681
+msgid "Medium Risk"
+msgstr "Gemiddeld risico"
+
+#: src/bz-full-view.c:683
+msgid "High Risk"
+msgstr "Hoog risico"
+
+#: src/bz-full-view.c:788
+msgid "Other Apps"
+msgstr "Andere Apps"
+
+#: src/bz-full-view.c:790
+#, c-format
+msgid "%d Application"
+msgid_plural "%d Applications"
+msgstr[0] "%d Applicatie"
+msgstr[1] "%d Applicaties"
+
+#: src/bz-full-view.c:1129
+msgid "Show Less"
+msgstr "Minder Weergeven"
+
+#: src/bz-full-view.c:1129
+msgid "Show More"
+msgstr "Meer Weergeven"
+
+#: src/bz-hardware-support-dialog.blp:7 src/bz-hardware-support-dialog.blp:31
+msgid "Hardware Support"
+msgstr "Hardwareondersteuning"
+
+#: src/bz-hardware-support-dialog.c:62
+msgid "Keyboard support"
+msgstr "Toetsenbordondersteuning"
+
+#: src/bz-hardware-support-dialog.c:64
+msgid "Requires keyboards"
+msgstr "Vereist toetsenbord"
+
+#: src/bz-hardware-support-dialog.c:65
+msgid "Recommends keyboards"
+msgstr "Toetsenbord aanbevolen"
+
+#: src/bz-hardware-support-dialog.c:66
+msgid "Supports keyboards"
+msgstr "Ondersteunt toetsenborden"
+
+#: src/bz-hardware-support-dialog.c:67
+msgid "Unknown support for keyboards"
+msgstr "Onbekende ondersteuning voor toetsenborden"
+
+#: src/bz-hardware-support-dialog.c:69
+msgid "Mouse support"
+msgstr "Muisondersteuning"
+
+#: src/bz-hardware-support-dialog.c:71
+msgid "Requires mice or pointing devices"
+msgstr "Vereist muis of aanwijzingsapparaat"
+
+#: src/bz-hardware-support-dialog.c:72
+msgid "Recommends mice or pointing devices"
+msgstr "Muis of aanwijzingsapparaat aanbevolen"
+
+#: src/bz-hardware-support-dialog.c:73
+msgid "Supports mice or pointing devices"
+msgstr "Ondersteunt muis of aanwijzingsapparaten"
+
+#: src/bz-hardware-support-dialog.c:74
+msgid "Unknown support for mice or pointing devices"
+msgstr "Onbekende ondersteuning voor muis of aanwijzingsapparaten"
+
+#: src/bz-hardware-support-dialog.c:76
+msgid "Touchscreen support"
+msgstr "Touchscreen-ondersteuning"
+
+#: src/bz-hardware-support-dialog.c:78
+msgid "Requires touchscreens"
+msgstr "Vereist touchscreen"
+
+#: src/bz-hardware-support-dialog.c:79
+msgid "Recommends touchscreens"
+msgstr "Touchscreens aanbevolen"
+
+#: src/bz-hardware-support-dialog.c:80
+msgid "Supports touchscreens"
+msgstr "Ondersteunt touchscreens"
+
+#: src/bz-hardware-support-dialog.c:81
+msgid "Unknown support for touchscreens"
+msgstr "Onbekende ondersteuning voor touchscreens"
+
+#: src/bz-hardware-support-dialog.c:160
+msgid "Mobile support"
+msgstr "Mobiele ondersteuning"
+
+#: src/bz-hardware-support-dialog.c:161
+msgid "Works on mobile devices"
+msgstr "Werkt op mobiele apparaten"
+
+#: src/bz-hardware-support-dialog.c:161
+msgid "May not work well on mobile devices"
+msgstr "Werkt mogelijk niet goed op mobiele apparaten"
+
+#: src/bz-hardware-support-dialog.c:166
+msgid "Desktop support"
+msgstr "Desktopondersteuning"
+
+#: src/bz-hardware-support-dialog.c:167
+msgid "Works well on large screens"
+msgstr "Werkt goed op grote schermen"
+
+#: src/bz-hardware-support-dialog.c:201
+#, c-format
+msgid "%s works best on specific hardware"
+msgstr "%s werkt het beste op specifieke hardware"
+
+#: src/bz-hardware-support-dialog.c:209
+#, c-format
+msgid "%s works on most devices"
+msgstr "%s werkt op de meeste apparaten"
+
+#: src/bz-installed-page.blp:28
+msgid "Search installed apps"
+msgstr "Doorzoek geïnstalleerde apps"
+
+#: src/bz-installed-page.blp:67
+msgid "No Apps Found"
+msgstr "Geen Applicaties Gevonden"
+
+#: src/bz-installed-page.c:154
+#, c-format
+msgid "No matches found for \"%s\" in the list of installed apps"
+msgstr ""
+"Geen resultaten gevonden voor \"%s\" in de lijst met geïnstalleerde apps"
+
+#: src/bz-installed-tile.blp:61 src/bz-rich-app-tile.blp:137
+msgid "Stopped Receiving Updates"
+msgstr "Gestopt met ontvangen van updates"
+
+#: src/bz-license-dialog.blp:95
+msgid "Get Involved"
+msgstr "Doe mee"
+
+#: src/bz-license-dialog.c:184
+msgid "Unknown License"
+msgstr "Onbekende licentie"
+
+#: src/bz-license-dialog.c:187
+msgid "Community Built"
+msgstr "Door Community Gebouwd"
+
+#: src/bz-license-dialog.c:235
+msgid ""
+"This app is developed in the open by an international community.\n"
+"\n"
+"You can participate and help make it even better."
+msgstr ""
+"Deze app wordt openbaar ontwikkeld door een internationale gemeenschap.\n"
+"\n"
+"Je kunt dus deelnemen en helpen om de app nog beter te maken."
+
+#: src/bz-license-dialog.c:238
+msgid "The license of this app is not known"
+msgstr "De licentie van deze app is niet bekend"
+
+#: src/bz-license-dialog.c:244
+#, c-format
+msgid ""
+"This app is developed in the open by an international community, and "
+"released under the %s license.\n"
+"\n"
+"You can participate and help make it even better."
+msgstr ""
+"Deze app wordt openbaar ontwikkeld door een internationale community en "
+"uitgebracht onder de %s licentie.\n"
+"\n"
+"Je kunt deelnemen en helpen om de app nog beter te maken."
+
+#: src/bz-license-dialog.c:252
+msgid ""
+"This app is not developed in the open, so only its developers know how it "
+"works. It may be insecure in ways that are hard to detect, and it may change "
+"without oversight.\n"
+"\n"
+"You may or may not be able to contribute to this app."
+msgstr ""
+"Deze app wordt niet openbaar ontwikkeld, dus alleen de ontwikkelaars weten "
+"hoe het werkt. De app kan op moeilijk te detecteren manieren onveilig zijn "
+"en kan zonder toezicht veranderen.\n"
+"\n"
+"Je kunt mogelijk niet bijdragen aan deze app."
+
+#: src/bz-license-dialog.c:258
+#, c-format
+msgid ""
+"This app is developed under the special license %s.\n"
+"\n"
+"You may or may not be able to contribute to this app."
+msgstr ""
+"Deze app is ontwikkeld onder de speciale licentie %s.\n"
+"\n"
+"Je kunt mogelijk niet bijdragen aan deze app."
+
+#: src/bz-login-page.blp:5 src/bz-login-page.blp:42
+msgid "Connect to Flathub"
+msgstr "Verbind met Flathub"
+
+#: src/bz-login-page.blp:32
+msgid "Something Went Wrong"
+msgstr "Er Ging Iets Mis"
+
+#: src/bz-login-page.blp:43
+msgid "Connect your Flathub account to Bazaar to manage your favorited apps."
+msgstr "Verbind je Flathub-account met Bazaar om je favoriete apps te beheren."
+
+#: src/bz-login-page.blp:108
+msgid "Finish"
+msgstr "Voltooi"
+
+#: src/bz-login-page.c:663
+#, c-format
+msgid "Hello, %s!"
+msgstr "Hallo, %s!"
+
+#: src/bz-preferences-dialog.blp:20
 msgid "Preferences"
 msgstr "Voorkeuren"
 
-#: src/bz-preferences-dialog.blp:13
-msgid "How the application looks"
-msgstr "Hoe de applicatie eruit ziet"
+#: src/bz-preferences-dialog.blp:26
+msgid "Network connection is metered — automatic store data sync is paused"
+msgstr ""
+"Netwerkverbinding is gemeten — automatische synchronisatie van "
+"winkelgegevens is gepauzeerd"
 
-#: src/bz-preferences-dialog.blp:14
-msgid "Appearance"
-msgstr "Uiterlijk"
+#: src/bz-preferences-dialog.blp:27 src/bz-window.blp:491
+msgid "Sync Manually"
+msgstr "Handmatig synchroniseren"
 
-#: src/bz-preferences-dialog.blp:17
-msgid "Show animated background"
-msgstr "Toon geanimeerde achtergrond"
+#: src/bz-preferences-dialog.blp:32
+msgid "Content Filters"
+msgstr "Content Filters"
 
-#: src/bz-search-widget.blp:69
-msgid "Type to filter"
-msgstr "Typ om te filteren"
+#: src/bz-preferences-dialog.blp:35
+msgid "Free Software Only"
+msgstr "Alleen Vrije Software"
 
-#: src/bz-search-widget.blp:98 src/bz-search-widget.blp:115
-msgid "Search Options"
-msgstr "Zoek Opties"
+#: src/bz-preferences-dialog.blp:36
+msgid "Hide proprietary applications when browsing and searching"
+msgstr "Verberg propriëtaire applicaties bij browsen en zoeken"
 
-#: src/bz-search-widget.blp:119
-msgid "Exclude results with proprietary licenses"
-msgstr "Sluit resultaten met proprietary-licenties uit"
+#: src/bz-preferences-dialog.blp:40
+msgid "Flathub Results Only"
+msgstr "Alleen Flathub Resultaten"
 
-#: src/bz-search-widget.blp:124
-msgid "Exclude results not originating from Flathub"
-msgstr "Sluit resultaten die niet van Flathub komen uit"
+#: src/bz-preferences-dialog.blp:41
+msgid ""
+"Limit search and browse results to applications only available on Flathub"
+msgstr ""
+"Beperk zoek- en browseresultaten tot applicaties die alleen op Flathub "
+"beschikbaar zijn"
 
-#: src/bz-search-widget.blp:139
-msgid "Advanced"
-msgstr "Geavanceerd"
+#: src/bz-preferences-dialog.blp:45
+msgid "Verified Results Only"
+msgstr "Alleen Geverifieerde Resultaten"
 
-#: src/bz-search-widget.blp:143
-msgid "Match using regular expressions"
-msgstr "Match met behulp van reguliere expressies"
+#: src/bz-preferences-dialog.blp:46
+msgid "Hide results that are not verified on Flathub"
+msgstr "Verberg resultaten die niet geverifieerd zijn op Flathub"
 
-#: src/bz-search-widget.blp:148
-msgid "Hide filtering and sorting behind a crossfade effect"
-msgstr "Verberg filteren en sorteren achter een crossfade effect"
+#: src/bz-preferences-dialog.blp:50
+msgid "Hide EOL Apps"
+msgstr "Verberg EOL-apps"
 
-#: src/bz-search-widget.blp:153
-msgid "Debounce input to prevent instant replies"
-msgstr "Ontwijk input om onmiddelijke antwoorden te vermijden"
+#: src/bz-preferences-dialog.blp:51
+msgid "Hide apps which are no longer supported by their developers"
+msgstr "Verberg apps die niet langer ondersteund worden door hun ontwikkelaars"
 
-#: src/bz-share-dialog.blp:13
-msgid "Share"
-msgstr "Delen"
+#: src/bz-preferences-dialog.blp:56 src/bz-window.blp:311
+msgid "Search"
+msgstr "Zoeken"
 
-#: src/bz-share-dialog.blp:64
-msgid "Copy this link"
-msgstr "Kopieer deze link"
+#: src/bz-preferences-dialog.blp:59
+msgid "Delay Search Results"
+msgstr "Vertraag Zoekresultaten"
 
-#: src/bz-share-dialog.blp:71
-msgid "Open this link externally"
-msgstr "Open deze link extern"
+#: src/bz-preferences-dialog.blp:60
+msgid "Improve results performance by debouncing search terms"
+msgstr "Verbeter zoekprestaties door zoektermen te debouncen"
 
-#: src/bz-stats-dialog.blp:15
-msgid "Downloads Over Time"
-msgstr "Downloads door de tijd heen"
+#: src/bz-preferences-dialog.blp:65
+msgid "Progress Bar"
+msgstr "Voortgangsbalk"
 
-#: src/bz-stats-dialog.blp:31
-msgid "Minimize Lower Bound"
-msgstr "Verlaag ondergrens"
+#: src/bz-preferences-dialog.blp:66
+msgid "Choose a theme for the progress bar!"
+msgstr "Kies een thema voor de voortgangsbalk!"
 
-#: src/bz-stats-dialog.blp:36
-msgid "Maximize Upper Bound"
-msgstr "Verhoog bovengrens"
+#: src/bz-preferences-dialog.c:32
+msgid "Accent Color"
+msgstr "Accentkleur"
 
-#: src/bz-transaction-manager.c:451
+#: src/bz-preferences-dialog.c:33
+msgid "Pride Colors"
+msgstr "Pride kleuren"
+
+#: src/bz-preferences-dialog.c:34
+msgid "Pride Colors (Horizontal)"
+msgstr "Pride Kleuren (Horizontaal)"
+
+#: src/bz-preferences-dialog.c:35
+msgid "Lesbian Pride Colors"
+msgstr "Lesbische Pride kleuren"
+
+#: src/bz-preferences-dialog.c:36
+msgid "Lesbian Pride Colors (Horizontal)"
+msgstr "Lesbische Pride kleuren (Horizontaal)"
+
+#: src/bz-preferences-dialog.c:37
+msgid "Male Homosexual Pride Colors"
+msgstr "Mannelijke Homoseksuele Pride Kleuren"
+
+#: src/bz-preferences-dialog.c:38
+msgid "Male Homosexual Pride Colors (Horizontal)"
+msgstr "Mannelijke Homoseksuele Pride Kleuren (Horizontaal)"
+
+#: src/bz-preferences-dialog.c:39
+msgid "Transgender Pride Colors"
+msgstr "Transgender Pride Kleuren"
+
+#: src/bz-preferences-dialog.c:40
+msgid "Transgender Pride Colors (Horizontal)"
+msgstr "Transgender Pride Kleuren (Horizontaal)"
+
+#: src/bz-preferences-dialog.c:41
+msgid "Nonbinary Pride Colors"
+msgstr "Nonbinaire Pride Kleuren"
+
+#: src/bz-preferences-dialog.c:42
+msgid "Nonbinary Pride Colors (Horizontal)"
+msgstr "Nonbinaire Pride Kleuren (Horizontaal)"
+
+#: src/bz-preferences-dialog.c:43
+msgid "Bisexual Pride Colors"
+msgstr "Biseksuele Pride Kleuren"
+
+#: src/bz-preferences-dialog.c:44
+msgid "Bisexual Pride Colors (Horizontal)"
+msgstr "Biseksuele Pride Kleuren (Horizontaal)"
+
+#: src/bz-preferences-dialog.c:45
+msgid "Asexual Pride Colors"
+msgstr "Aseksuele Pride Kleuren"
+
+#: src/bz-preferences-dialog.c:46
+msgid "Asexual Pride Colors (Horizontal)"
+msgstr "Aseksuele Pride Kleuren (Horizontal)"
+
+#: src/bz-preferences-dialog.c:47
+msgid "Pansexual Pride Colors"
+msgstr "Panseksuele Pride Kleuren"
+
+#: src/bz-preferences-dialog.c:48
+msgid "Pansexual Pride Colors (Horizontal)"
+msgstr "Panseksuele Pride Kleuren (Horizontal)"
+
+#: src/bz-preferences-dialog.c:49
+msgid "Aromantic Pride Colors"
+msgstr "Aromantische Pride Kleuren"
+
+#: src/bz-preferences-dialog.c:50
+msgid "Aromantic Pride Colors (Horizontal)"
+msgstr "Aromantische Pride Kleuren (Horizontaal)"
+
+#: src/bz-preferences-dialog.c:51
+msgid "Genderfluid Pride Colors"
+msgstr "Genderfluïde Pride Kleuren"
+
+#: src/bz-preferences-dialog.c:52
+msgid "Genderfluid Pride Colors (Horizontal)"
+msgstr "Genderfluïde Pride Kleuren (Horizontaal)"
+
+#: src/bz-preferences-dialog.c:53
+msgid "Polysexual Pride Colors"
+msgstr "Polyseksuele Pride Kleuren"
+
+#: src/bz-preferences-dialog.c:54
+msgid "Polysexual Pride Colors (Horizontal)"
+msgstr "Polyseksuele Pride Kleuren (Horizontaal)"
+
+#: src/bz-preferences-dialog.c:55
+msgid "Omnisexual Pride Colors"
+msgstr "Omniseksuele Pride Kleuren"
+
+#: src/bz-preferences-dialog.c:56
+msgid "Omnisexual Pride Colors (Horizontal)"
+msgstr "Omniseksuele Pride Kleuren (Horizontaal)"
+
+#: src/bz-preferences-dialog.c:57
+msgid "Aroace Pride Colors"
+msgstr "Aroace Pride Kleuren"
+
+#: src/bz-preferences-dialog.c:58
+msgid "Aroace Pride Colors (Horizontal)"
+msgstr "Aroace Pride Kleuren (Horizontaal)"
+
+#: src/bz-preferences-dialog.c:59
+msgid "Agender Pride Colors"
+msgstr "Agender Pride Kleuren"
+
+#: src/bz-preferences-dialog.c:60
+msgid "Agender Pride Colors (Horizontal)"
+msgstr "Agender Pride Kleuren (Horizontaal)"
+
+#: src/bz-preferences-dialog.c:61
+msgid "Genderqueer Pride Colors"
+msgstr "Genderqueer Pride Kleuren"
+
+#: src/bz-preferences-dialog.c:62
+msgid "Genderqueer Pride Colors (Horizontal)"
+msgstr "Genderqueer Pride Kleuren (Horizontaal)"
+
+#: src/bz-preferences-dialog.c:63
+msgid "Intersex Pride Colors"
+msgstr "Intersekse Pride Kleuren"
+
+#: src/bz-preferences-dialog.c:64
+msgid "Intersex Pride Colors (Horizontal)"
+msgstr "Intersekse Pride Kleuren (Horizontaal)"
+
+#: src/bz-preferences-dialog.c:65
+msgid "Demigender Pride Colors"
+msgstr "Demigender Pride Kleuren"
+
+#: src/bz-preferences-dialog.c:66
+msgid "Demigender Pride Colors (Horizontal)"
+msgstr "Demigender Pride Kleuren (Horizontaal)"
+
+#: src/bz-preferences-dialog.c:67
+msgid "Biromantic Pride Colors"
+msgstr "Biromantische Pride Kleuren"
+
+#: src/bz-preferences-dialog.c:68
+msgid "Biromantic Pride Colors (Horizontal)"
+msgstr "Biromantische Pride Kleuren (Horizontaal)"
+
+#: src/bz-preferences-dialog.c:69
+msgid "Disability Pride Colors"
+msgstr "Disability Pride Kleuren"
+
+#: src/bz-preferences-dialog.c:70
+msgid "Disability Pride Colors (Horizontal)"
+msgstr "Disability Pride Kleuren (Horizontaal)"
+
+#: src/bz-preferences-dialog.c:71
+msgid "Femboy Pride Colors"
+msgstr "Femboy Pride Kleuren"
+
+#: src/bz-preferences-dialog.c:72
+msgid "Femboy Pride Colors (Horizontal)"
+msgstr "Femboy Pride Kleuren (Horizontaal)"
+
+#: src/bz-releases-dialog.blp:5 src/bz-releases-list.blp:27
+msgid "Version History"
+msgstr "Versie Geschiedenis"
+
+#: src/bz-releases-list.c:136
+#, c-format
+msgid "Version %s"
+msgstr "Versie %s"
+
+#: src/bz-releases-list.c:174
+msgid "No details for this release"
+msgstr "Geen details voor deze versie"
+
+#: src/bz-releases-list.c:186
+msgid "Get More Information"
+msgstr "Meer Informatie"
+
+#: src/bz-rich-app-tile.blp:154
+msgid "Get"
+msgstr "Haal"
+
+#: src/bz-safety-calculator.c:77
+msgid "Unknown Permissions"
+msgstr "Onbekende Machtigingen"
+
+#: src/bz-safety-calculator.c:78
+msgid "Permissions are missing for this app."
+msgstr "Machtigingen ontbreken voor deze app."
+
+#: src/bz-safety-calculator.c:91
+msgid "No Permissions"
+msgstr "Geen machtigingen"
+
+#: src/bz-safety-calculator.c:92
+msgid "App is fully sandboxed"
+msgstr "Toepassing bevindt zich volledig in een zandbak"
+
+#: src/bz-safety-calculator.c:98
+msgid "Network Access"
+msgstr "Netwerktoegang"
+
+#: src/bz-safety-calculator.c:99
+msgid "Can access the internet"
+msgstr "Heeft toegang tot het internet"
+
+#: src/bz-safety-calculator.c:101
+msgid "No Network Access"
+msgstr "Geen netwerktoegang"
+
+#: src/bz-safety-calculator.c:102
+msgid "Cannot access the internet"
+msgstr "Heeft geen toegang tot het internet"
+
+#: src/bz-safety-calculator.c:107
+msgid "User Device Access"
+msgstr "Gebruikerstoegang tot apparaat"
+
+#: src/bz-safety-calculator.c:108
+msgid "Can access devices such as webcams or gaming controllers"
+msgstr "Kan toegang verkrijgen tot apparaten zoals webcams of spelcontrollers"
+
+#: src/bz-safety-calculator.c:110
+msgid "No User Device Access"
+msgstr "Geen gebruikerstoegang tot apparaat"
+
+#: src/bz-safety-calculator.c:111
+msgid "Cannot access devices such as webcams or gaming controllers"
+msgstr ""
+"Kan geen toegang verkrijgen tot apparaten zoals webcams of spelcontrollers"
+
+#: src/bz-safety-calculator.c:116
+msgid "Input Device Access"
+msgstr "Toegang tot invoerapparaten"
+
+#: src/bz-safety-calculator.c:117
+msgid "Can access input devices"
+msgstr "Heeft toegang tot invoerapparaten"
+
+#: src/bz-safety-calculator.c:123
+msgid "Microphone Access and Audio Playback"
+msgstr "Toegang tot microfoon en audio afspelen"
+
+#: src/bz-safety-calculator.c:124
+msgid "Can listen using microphones and play audio without asking permission"
+msgstr ""
+"Kan naar microfoons luisteren en audio afspelen zonder toestemming te vragen"
+
+#: src/bz-safety-calculator.c:130
+msgid "System Device Access"
+msgstr "Systeemtoegang tot apparaat"
+
+#: src/bz-safety-calculator.c:131
+msgid "Can access system devices which require elevated permissions"
+msgstr ""
+"Kan naar microfoons luisteren en audio afspelen zonder toestemming te vragen"
+
+#: src/bz-safety-calculator.c:137
+msgid "Screen Contents Access"
+msgstr "Toegang tot scherminhoud"
+
+#: src/bz-safety-calculator.c:138
+msgid "Can access the contents of the screen or other windows"
+msgstr "Kan de inhoud van het scherm of andere vensters benaderen"
+
+#: src/bz-safety-calculator.c:144
+msgid "Legacy Windowing System"
+msgstr "Verouderd venstersysteem"
+
+#: src/bz-safety-calculator.c:145
+msgid "Uses a legacy windowing system"
+msgstr "Gebruikt een verouderd venstersysteem"
+
+#: src/bz-safety-calculator.c:151
+msgid "Arbitrary Permissions"
+msgstr "Willekeurige toegangsrechten"
+
+#: src/bz-safety-calculator.c:152
+msgid "Can acquire arbitrary permissions"
+msgstr "Kan willekeurige toegangsrechten verkrijgen"
+
+#: src/bz-safety-calculator.c:158
+msgid "User Settings"
+msgstr "Gebruikersinstellingen"
+
+#: src/bz-safety-calculator.c:159
+msgid "Can access and change user settings"
+msgstr "Heeft toegang tot gebruikersinstellingen en kan die wijzigen"
+
+#: src/bz-safety-calculator.c:165
+msgid "Full File System Read/Write Access"
+msgstr "Lees- en schrijftoegang tot volledig bestandssysteem"
+
+#: src/bz-safety-calculator.c:166
+msgid "Can read and write all data on the file system"
+msgstr "Kan alle gegevens op het bestandssysteem lezen en schrijven"
+
+#: src/bz-safety-calculator.c:173
+msgid "Home Folder Read/Write Access"
+msgstr "Lees- en schrijftoegang tot home map"
+
+#: src/bz-safety-calculator.c:174
+msgid "Can read and write all data in your home directory"
+msgstr "Kan alle gegevens in uw persoonlijke map lezen en schrijven"
+
+#: src/bz-safety-calculator.c:181
+msgid "Full File System Read Access"
+msgstr "Leestoegang tot volledig bestandssysteem"
+
+#: src/bz-safety-calculator.c:182
+msgid "Can read all data on the file system"
+msgstr "Kan alle gegevens op het bestandssysteem lezen"
+
+#: src/bz-safety-calculator.c:190
+msgid "Home Folder Read Access"
+msgstr "Leestoegang tot home map"
+
+#: src/bz-safety-calculator.c:191
+msgid "Can read all data in your home directory"
+msgstr "Kan alle gegevens in uw home map lezen"
+
+#: src/bz-safety-calculator.c:199
+msgid "Download Folder Read/Write Access"
+msgstr "Lees- en schrijftoegang tot downloadmap"
+
+#: src/bz-safety-calculator.c:200
+msgid "Can read and write all data in your downloads directory"
+msgstr "Kan alle gegevens in uw downloadmap lezen en schrijven"
+
+#: src/bz-safety-calculator.c:210
+msgid "Download Folder Read Access"
+msgstr "Leestoegang tot downloadmap"
+
+#: src/bz-safety-calculator.c:211
+msgid "Can read all data in your downloads directory"
+msgstr "Kan alle gegevens in uw downloadmap lezen"
+
+#: src/bz-safety-calculator.c:224
+msgid "Can read and write all data in the directory"
+msgstr "Kan alle gegevens in de map lezen en schrijven"
+
+#: src/bz-safety-calculator.c:238
+msgid "Can read all data in the directory"
+msgstr "Kan alle gegevens in de map lezen"
+
+#: src/bz-safety-calculator.c:253
+msgid "No File System Access"
+msgstr "Geen toegang tot bestandssysteem"
+
+#: src/bz-safety-calculator.c:254
+msgid "Cannot access the file system at all"
+msgstr "Heeft geen enkele toegang tot het bestandssysteem"
+
+#: src/bz-safety-calculator.c:261
+msgid "Uses System Services"
+msgstr "Gebruikt systeemdiensten"
+
+#: src/bz-safety-calculator.c:262
+msgid "Can request data from non-portal system services"
+msgstr "Kan gegevens opvragen van niet-portal-sessiediensten"
+
+#: src/bz-safety-calculator.c:268
+msgid "Uses Session Services"
+msgstr "Gebruikt sessiediensten"
+
+#: src/bz-safety-calculator.c:269
+msgid "Can request data from non-portal session services"
+msgstr "Kan gegevens opvragen van niet-portal-sessiediensten"
+
+#: src/bz-safety-calculator.c:294
+msgid "No Service Access"
+msgstr "Geen diensttoegang"
+
+#: src/bz-safety-calculator.c:295
+msgid "Cannot access non-portal session or system services at all"
+msgstr "Heeft geen enkele toegang tot niet-portal-sessie- of systeemdiensten"
+
+#: src/bz-safety-calculator.c:303
+msgid "Verified App Developer"
+msgstr "Geverifieerde App-ontwikkelaar"
+
+#: src/bz-safety-calculator.c:304
+msgid "The developer of this app has been verified to be who they say they are"
+msgstr ""
+"De ontwikkelaar van deze app is geverifieerd en is wie ze zeggen te zijn"
+
+#: src/bz-safety-calculator.c:313
+msgid "Proprietary Code"
+msgstr "Propriëtaire Code"
+
+#: src/bz-safety-calculator.c:314
+msgid ""
+"The source code is not public, so it cannot be independently audited and "
+"might be unsafe"
+msgstr ""
+"De broncode is niet publiek, dus kan niet onafhankelijk gecontroleerd worden "
+"en kan onveilig zijn"
+
+#: src/bz-safety-calculator.c:324
+msgid "Auditable Code"
+msgstr "Controleerbare Code"
+
+#: src/bz-safety-calculator.c:325
+msgid ""
+"The source code is public and can be independently audited, which makes the "
+"app more likely to be safe"
+msgstr ""
+"De broncode is publiek en kan onafhankelijk gecontroleerd worden, wat de app "
+"waarschijnlijk veiliger maakt"
+
+#: src/bz-safety-calculator.c:435
+#, c-format
+msgid "Use the %s System Service"
+msgstr "Gebruikt de %s-systeemdienst"
+
+#: src/bz-safety-calculator.c:439
+#, c-format
+msgid "Use the %s Session Service"
+msgstr "Gebruikt de %s-sessiedienst"
+
+#: src/bz-safety-calculator.c:443
+#, c-format
+msgid "Use the %s Service"
+msgstr "Gebruikt de %s-dienst"
+
+#: src/bz-safety-calculator.c:453
+msgid "Can see the non-portal service"
+msgstr "Kan de niet-portal-dienst zien"
+
+#: src/bz-safety-calculator.c:455
+msgid "Can talk to the non-portal service"
+msgstr "Kan praten met de niet-portal-dienst"
+
+#: src/bz-safety-calculator.c:457
+msgid "Can own the non-portal service"
+msgstr "Kan eigenaar zijn van de niet-portal-dienst"
+
+#: src/bz-safety-dialog.blp:7
+msgid "Safety"
+msgstr "Veiligheid"
+
+#: src/bz-safety-dialog.blp:31
+msgid "Safe"
+msgstr "Veilig"
+
+#: src/bz-safety-dialog.blp:50
+msgid "Details"
+msgstr "Gegevens"
+
+#: src/bz-safety-dialog.blp:53
+msgid "License"
+msgstr "Licentie"
+
+#: src/bz-safety-dialog.blp:62
+msgid "App ID"
+msgstr "App ID"
+
+#: src/bz-safety-dialog.blp:71
+msgid "SDK"
+msgstr "SDK"
+
+#: src/bz-safety-dialog.blp:98
+msgid ""
+"This app uses an outdated version of the software platform (SDK) and might "
+"contain bugs or security vulnerabilities which will not be fixed."
+msgstr ""
+"Deze app gebruikt een verouderde versie van het softwareplatform (SDK) en "
+"kan bugs of beveiligingskwetsbaarheden bevatten die niet zullen worden "
+"opgelost."
+
+#: src/bz-safety-dialog.c:222
+#, c-format
+msgid "%s is Safe"
+msgstr "%s is veilig"
+
+#: src/bz-safety-dialog.c:227
+#, c-format
+msgid "%s has no Unsafe Permissions"
+msgstr "%s geeft geen onveilige permissies"
+
+#: src/bz-safety-dialog.c:232
+#, c-format
+msgid "%s is Probably Safe"
+msgstr "%s is waarschijnlijk veilig"
+
+#: src/bz-safety-dialog.c:237
+#, c-format
+msgid "%s is Possibly Unsafe"
+msgstr "%s is mogelijk onveilig"
+
+#: src/bz-safety-dialog.c:242
+#, c-format
+msgid "%s is Unsafe"
+msgstr "%s is onveilig"
+
+#: src/bz-screenshot-page.blp:5
+msgid "Screenshots"
+msgstr "Schermafbeeldingen"
+
+#: src/bz-screenshot-page.blp:61
+msgid "Previous Screenshot"
+msgstr "Vorige schermafbeelding"
+
+#: src/bz-screenshot-page.blp:71
+msgid "Next Screenshot"
+msgstr "Volgende schermafbeelding"
+
+#: src/bz-screenshot-page.blp:87
+msgid "Copy Image"
+msgstr "Afbeelding kopiëren"
+
+#: src/bz-screenshot-page.blp:147
+msgid "Reset View"
+msgstr "Weergave resetten"
+
+#: src/bz-screenshot-page.blp:158
+msgid "Zoom Out"
+msgstr "Uitzoomen"
+
+#: src/bz-screenshot-page.blp:168
+msgid "Zoom In"
+msgstr "Inzoomen"
+
+#: src/bz-screenshots-carousel.blp:5
+msgid "Screenshots Carousel"
+msgstr "Schermafbeeldingen carrousel"
+
+#: src/bz-screenshots-carousel.blp:103
+msgid "Open Screenshot Viewer"
+msgstr "Schermafbeeldingsviewer openen"
+
+#: src/bz-search-widget.blp:107
+msgid "Search Apps, Games, Software"
+msgstr "Zoek Apps, Games, Software"
+
+#: src/bz-search-widget.blp:146
+msgid "Categories Unavailable"
+msgstr "Categorieën niet beschikbaar"
+
+#: src/bz-search-widget.blp:147
+msgid "Search for apps using the search bar above."
+msgstr "Zoek naar apps met de zoekbalk hierboven."
+
+#: src/bz-search-widget.blp:231
+msgid "No Applications Found"
+msgstr "Geen Applicaties Gevonden"
+
+#: src/bz-search-widget.c:241
+#, c-format
+msgid "No results found for \"%s\" in Flathub"
+msgstr "Geen resultaten voor \"%s\" op Flathub"
+
+#: src/bz-share-list.c:64
+msgid "Copied!"
+msgstr "Gekopieerd!"
+
+#: src/bz-share-list.c:116
+msgid "Copy Link"
+msgstr "Kopieer Link"
+
+#: src/bz-share-list.c:127
+msgid "Open Link"
+msgstr "Open Link"
+
+#: src/bz-stats-dialog.blp:28
+msgid "Timeline"
+msgstr "Tijdlijn"
+
+#: src/bz-stats-dialog.blp:46
+msgid "Installs:"
+msgstr "Installaties:"
+
+#: src/bz-stats-dialog.blp:55
+msgid "World"
+msgstr "Kaart"
+
+#. Translators: M is the suffix for millions
+#: src/bz-stats-dialog.c:124
+#, c-format
+msgid "%.2fM Total Installs"
+msgstr "%.2fM Totale Installaties"
+
+#. Translators: K is the suffix for thousands
+#: src/bz-stats-dialog.c:127
+#, c-format
+msgid "%.2fK Total Installs"
+msgstr "%.2fK Totale Installaties"
+
+#: src/bz-stats-dialog.c:129
+#, c-format
+msgid "%'d Total Installs"
+msgstr "%'d Totale Installaties"
+
+#: src/bz-tag-list.c:96
+msgid "No Results Found"
+msgstr "Geen Resultaten Gevonden"
+
+#: src/bz-tag-list.c:108
+#, c-format
+msgid "Apps Tagged \"%s\""
+msgstr "Apps getagd met \"%s\""
+
+#: src/bz-tag-list.c:124
+msgid "Search failed"
+msgstr "Zoeken mislukt"
+
+#: src/bz-transaction-dialog.c:159
+msgid "Keep Data"
+msgstr "Gegevens behouden"
+
+#: src/bz-transaction-dialog.c:160
+msgid "Allow restoring settings and content"
+msgstr "Herstel van instellingen en inhoud toestaan"
+
+#: src/bz-transaction-dialog.c:169
+msgid "Delete Data"
+msgstr "Data Verwijderen"
+
+#: src/bz-transaction-dialog.c:170
+msgid "Permanently remove app data to save space"
+msgstr "App-gegevens permanent verwijderen om ruimte te besparen"
+
+#: src/bz-transaction-dialog.c:194
+#, c-format
+msgid "Install %s?"
+msgstr "%s Installeren?"
+
+#: src/bz-transaction-dialog.c:197
+msgid "May install additional shared components"
+msgstr "Kan extra gedeelde componenten installeren"
+
+#: src/bz-transaction-dialog.c:216
+#, c-format
+msgid "Remove %s?"
+msgstr "%s Verwijderen?"
+
+#: src/bz-transaction-dialog.c:220
+#, c-format
+msgid "It will not be possible to use %s after it is uninstalled."
+msgstr "Het zal niet mogelijk zijn om %s te gebruiken na deïnstallatie."
+
+#: src/bz-transaction-dialog.c:239
+#, c-format
+msgid "“%s” is High Risk"
+msgstr "“%s” is Hoog Risico"
+
+#: src/bz-transaction-dialog.c:240
+msgid ""
+"This app has full access to your system, including all <b>your files, "
+"browser history, saved passwords</b>, and more. It also has access to the "
+"internet, meaning it could send your data to outside parties.\n"
+"\n"
+"Because the app is proprietary, it can not be audited for what it does with "
+"these permissions."
+msgstr ""
+"Deze app heeft volledige toegang tot je systeem, inclusief al <b>je "
+"bestanden, browsergeschiedenis, opgeslagen wachtwoorden</b> en meer. Het "
+"heeft ook toegang tot internet, wat betekent dat het je gegevens naar "
+"externe partijen kan versturen.\n"
+"\n"
+"Omdat de app propriëtair is, kan het ook niet gecontroleerd worden wat het "
+"doet met deze machtigingen."
+
+#: src/bz-transaction-dialog.c:254
+msgid "Install Anyway"
+msgstr "Installeer Toch"
+
+#: src/bz-transaction-manager.c:1148
 #, c-format
 msgid "Finished in %.02f seconds"
 msgstr "Geslaagd in %.02f seconden"
 
-#: src/bz-transaction-view.blp:34
-msgid "Installing"
-msgstr "Installeren"
+#: src/bz-transaction-view.blp:95
+msgid "App Add-on"
+msgstr "App Add-on"
 
-#: src/bz-transaction-view.blp:63
-msgid "Updating"
-msgstr "Bijwerken"
+#: src/bz-transaction-view.blp:120
+msgid "Runtime"
+msgstr "Runtime"
 
-#: src/bz-transaction-view.blp:92
-msgid "Removing"
-msgstr "Verwijderen"
+#: src/bz-transaction-view.blp:146 src/bz-transaction-view.blp:172
+msgid "Install Size"
+msgstr "Geïnstalleerde Grootte"
 
-#: src/bz-transaction.c:268
+#: src/bz-transaction-view.blp:187 src/bz-transaction-view.blp:238
+#: src/bz-transaction-view.blp:264 src/bz-transaction.c:342
 msgid "Pending"
-msgstr "Wachten"
+msgstr "In Afwachting"
 
-#: src/bz-update-dialog.blp:6
-msgid "Later"
-msgstr "Later"
+#: src/bz-transaction-view.blp:199
+msgid "Ongoing"
+msgstr "Bezig"
+
+#: src/bz-transaction-view.blp:212
+msgid "Finished"
+msgstr "Voltooid"
+
+#: src/bz-transaction-view.blp:251
+msgid "Update"
+msgstr "Update"
+
+#: src/bz-transaction-view.c:135
+#, c-format
+msgid "Transferred %s so far"
+msgstr "Tot nu toe %s overgedragen"
 
 #: src/bz-update-dialog.blp:7
-msgid "Install Now"
-msgstr "Installeer nu"
+msgid "Update Now"
+msgstr "Update Nu"
 
 #: src/bz-update-dialog.blp:10
 msgid "Updates Are Available"
-msgstr "Updates zijn beschikbaar"
+msgstr "Er zijn Updates Beschikbaar"
 
 #: src/bz-update-dialog.blp:11
 msgid ""
 "The following applications are eligible for updates. Would you like to "
 "install them?"
 msgstr ""
-"De volgende applicaties hebben updates. Wil je deze Installeren?"
+"De volgende applicaties hebben updates beschikbaar. Wil je deze Installeren?"
 
 #: src/bz-update-dialog.c:135
 #, c-format
 msgid ""
 "%d runtimes and/or addons are eligible for updates. Would you like to "
 "install them?"
-msgstr "%d runtimes en/of addons hebben updates. Wil je deze nu installeren?"
+msgstr "%d runtimes en/of add-ons hebben updates. Wil je deze nu installeren?"
 
 #: src/bz-update-dialog.c:143
 #, c-format
-msgid "Daarnaast worden %d runtimes en/of addons ook bijgewerkt."
-msgstr "Daarnaast worden %d runtimes en/of addons ook bijgewerkt."
+msgid "Additionally, %d runtimes and/or addons will be updated."
+msgstr "Daarnaast zullen %d runtimes en/of add-ons worden bijgewerkt."
 
-#: src/bz-window.blp:36
-msgid "Transactions Will Appear Here"
-msgstr "Transacties Zullen Hier Verschijnen"
+#: src/bz-user-data-page.blp:5
+msgid "Manage Leftover User Data"
+msgstr "Restgebruikersgegevens Beheren"
 
-#: src/bz-window.blp:97
-msgid "Halt the execution of transactions"
-msgstr "Pauzeer de uitvoer van transacties"
+#: src/bz-user-data-page.blp:55
+msgid "No User Data found"
+msgstr "Geen gebruikersgegevens gevonden"
 
-#: src/bz-window.blp:105
-msgid "Clear all finished transactions"
-msgstr "Wis alle voltooide transacties"
+#: src/bz-user-data-page.blp:60
+msgid "User Data"
+msgstr "Gebruikersgegevens"
 
-#: src/bz-window.blp:136 src/bz-window.blp:140
-msgid "Offline"
-msgstr "Offline"
+#: src/bz-user-data-tile.c:144
+#, c-format
+msgid "Trashed User Data for %s"
+msgstr "Gebruikersgegevens verwijderd voor %s"
 
-#: src/bz-window.blp:146
-msgid "Loading"
-msgstr "Laden"
+#: src/bz-user-data-tile.blp:74
+msgid "Trash User Data"
+msgstr "Gebruikersgegevens verwijderen"
 
-#: src/bz-window.blp:170
-msgid "Browse"
-msgstr "Blader"
+#: src/bz-window.blp:107
+msgid "Tasks"
+msgstr "Taken"
 
-#: src/bz-window.blp:180
-msgid "App View"
-msgstr "App-Weergave"
+#: src/bz-window.blp:163
+msgid "Stop Active Tasks"
+msgstr "Stop Bezige Taken"
 
-#: src/bz-window.blp:191 src/bz-window.blp:315
-msgid "Flathub"
-msgstr "Flathub"
+#: src/bz-window.blp:171
+msgid "Clear History"
+msgstr "Geschiedenis Wissen"
 
-#: src/bz-window.blp:220
-msgid "Go Back"
-msgstr "Ga Terug"
+#: src/bz-window.blp:187
+msgid "No Tasks Yet"
+msgstr "Nog Geen Taken"
 
-#: src/bz-window.blp:228
-msgid "Refresh"
-msgstr "Ververs"
+#: src/bz-window.blp:257
+msgid "Refreshing Store Content"
+msgstr "Winkelinhoud aan het verversen"
 
-#: src/bz-window.blp:237
-msgid "Search"
-msgstr "Zoek"
-
-#: src/bz-window.blp:249
-msgid "Update"
-msgstr "Update"
-
-#: src/bz-window.blp:263
-msgid "Checking for updates"
-msgstr "Zoeken naar updates"
-
-#: src/bz-window.blp:279
-msgid "View curated applications"
-msgstr "Bekijk gecureerde applicaties"
-
-#: src/bz-window.blp:294
+#: src/bz-window.blp:271
 msgid "Curated"
 msgstr "Gecureerd"
 
-#: src/bz-window.blp:300
-msgid "View the latest on Flathub"
-msgstr "Bekijk het nieuwste op Flathub"
+#: src/bz-window.blp:284
+msgid "Flathub"
+msgstr "Flathub"
 
-#: src/bz-window.blp:321
-msgid "View installed applications"
-msgstr "Bekijk geïnstalleerde applicaties"
+#: src/bz-window.blp:432
+msgid "No background tasks!"
+msgstr "Geen achtergrondtaken!"
 
-#: src/bz-window.blp:350
-msgid "Main Menu"
-msgstr "Hoofdmenu"
+#: src/bz-window.blp:490
+msgid ""
+"You have a network connection but are viewing a cached version of Flathub"
+msgstr ""
+"Je hebt een netwerkverbinding maar bekijkt een gecachte versie van Flathub"
 
-#: src/bz-window.blp:361
-msgid "Toggle transaction sidebar"
-msgstr "Schakel Transactie-zijbalk"
+#: src/bz-window.blp:565
+msgid "_Login with Flathub"
+msgstr "_Inloggen met Flathub"
 
-#: src/bz-window.blp:400
-msgid "Up to date!"
-msgstr "Up to date!"
+#: src/bz-window.blp:571
+msgid "_Manage Leftover User Data"
+msgstr "Restgegevens _Beheren"
 
-#: src/bz-window.blp:425
-msgid "_Keyboard Shortcuts"
-msgstr "Snelkoppelingen Toetsenbord"
+#: src/bz-window.blp:576
+msgid "_Synchronize Remotes"
+msgstr "Remotes _synchroniseren"
 
-#: src/bz-window.blp:430
-msgid "_About Bazaar"
-msgstr "Over Bazaar"
+#: src/bz-window.blp:617
+msgid "Log Out"
+msgstr "Uitloggen"
 
-#: src/bz-window.blp:435
-msgid "_Donate to Bazaar ❤️"
-msgstr "_Doneer aan Bazaar ❤️"
+#: src/bz-window.c:435
+#, c-format
+msgid "%d Update Available"
+msgid_plural "%d Updates Available"
+msgstr[0] "%d update beschikbaar"
+msgstr[1] "%d updates beschikbaar"
 
-#: src/bz-window.c:856
+#: src/bz-window.c:872
 msgid ""
 "The ability to inspect and install local .flatpak bundle files is coming "
 "soon! In the meantime, try running\n"
@@ -485,101 +2516,60 @@ msgid ""
 "\n"
 "on the command line."
 msgstr ""
-"De mogelijkheid om lokale .flatpak bestanden te inspecteren en te installeren komt er binnenkort aan"
-"\n"
+"De mogelijkheid om lokale .flatpak bestanden te inspecteren en te "
+"installeren komt er binnenkort aan\n"
 "Flatpak install -bundle jouw-bundle.flatpak\n"
 "\n"
 "in de command line"
 
-#: src/bz-window.c:927
+#: src/bz-window.c:1010
 msgid "Can't do that right now!"
 msgstr "Dit is nu niet mogelijk!"
 
-#: src/bz-window.c:940
-msgid "Confirm Action"
-msgstr "Bevestig Actie"
+#: src/bz-window.c:1080
+msgid "Resume Current Tasks"
+msgstr "Huidige Taken Hervatten"
 
-#: src/bz-window.c:958
+#: src/bz-window.c:1086
+msgid "Pause Current Tasks"
+msgstr "Huidige Taken Pauzeren"
+
+#: src/bz-world-map.c:572
 #, c-format
-msgid ""
-"You are about to remove the following Flatpak:\n"
-"\n"
-"<b>%s</b>\n"
-"<tt>%s</tt>\n"
-"\n"
-"Are you sure?"
-msgstr ""
-"Je staat op het punt om de volgende Flatpak te verwijderen: \n"
-"\n"
-"<b>%s</b>\n"
-"<tt>%s</tt>\n"
-"\n"
-"Weet je het zeker?"
+msgid "%s: %'u downloads"
+msgstr "%s: %'u downloads"
 
-
-#: src/bz-window.c:966 src/bz-window.c:986
-msgid "Cancel"
-msgstr "Annuleer"
-
-#: src/bz-window.c:967
-msgid "Remove"
-msgstr "Verwijder"
-
-#: src/bz-window.c:978
-#, c-format
-msgid ""
-"You are about to install the following Flatpak:\n"
-"\n"
-"<b>%s</b>\n"
-"<tt>%s</tt>\n"
-"\n"
-"Are you sure?"
-msgstr ""
-"Je staat op het punt om de volgende Flatpak te installeren: \n"
-"\n"
-"<b>%s</b>\n"
-"<tt>%s</tt>\n"
-"\n"
-"Weet je het zeker?"
-
-#: src/bz-window.c:1012
-msgid "More details"
-msgstr "Meer details"
-
-#: src/bz-window.c:1138
-msgid "Resume the execution of transactions"
-msgstr "Hervat de uitvoer van transacties"
-
-#: src/bz-window.c:1144
-msgid "Pause the execution of transactions"
-msgstr "Pauzeer de uitvoer van transacties"
-
-#: src/gtk/help-overlay.blp:11
+#: src/gtk/shortcuts-dialog.blp:6
 msgctxt "shortcut window"
 msgid "General"
 msgstr "Algemeen"
 
-#: src/gtk/help-overlay.blp:14
+#: src/gtk/shortcuts-dialog.blp:9
 msgctxt "shortcut window"
 msgid "Open Search Dialog"
 msgstr "Open zoekdialoog"
 
-#: src/gtk/help-overlay.blp:19
+#: src/gtk/shortcuts-dialog.blp:14
 msgctxt "shortcut window"
-msgid "Refresh"
-msgstr "Ververs"
+msgid "Open Preferences"
+msgstr "Voorkeuren"
 
-#: src/gtk/help-overlay.blp:24
+#: src/gtk/shortcuts-dialog.blp:19
+msgctxt "shortcut window"
+msgid "Synchronize Remotes"
+msgstr "Remotes Synchroniseren"
+
+#: src/gtk/shortcuts-dialog.blp:24
 msgctxt "shortcut window"
 msgid "Toggle Transaction Manager"
-msgstr "Schakel transactiebeheerder"
+msgstr "Schakel Transactiebeheerder"
 
-#: src/gtk/help-overlay.blp:29
+#: src/gtk/shortcuts-dialog.blp:29
 msgctxt "shortcut window"
 msgid "Show Shortcuts"
 msgstr "Toon Snelkoppelingen"
 
-#: src/gtk/help-overlay.blp:34
+#: src/gtk/shortcuts-dialog.blp:34
 msgctxt "shortcut window"
 msgid "Quit"
-msgstr "Sluit af"
+msgstr "Sluit Af"

@@ -27,7 +27,8 @@
 #include <math.h>
 
 #define LABEL_MARGIN        75.0
-#define CARD_EDGE_THRESHOLD 160
+#define LABEL_MARGIN_RIGHT  35.0
+#define CARD_EDGE_THRESHOLD 120
 
 struct _BzDataGraph
 {
@@ -51,6 +52,7 @@ struct _BzDataGraph
   GtkEventController *motion;
   double              motion_x;
   double              motion_y;
+  GtkGesture         *gesture;
 };
 
 G_DEFINE_FINAL_TYPE (BzDataGraph, bz_data_graph, GTK_TYPE_WIDGET)
@@ -186,7 +188,7 @@ bz_data_graph_size_allocate (GtkWidget *widget,
 {
   BzDataGraph *self = BZ_DATA_GRAPH (widget);
 
-  refresh_path (self, (double) width - LABEL_MARGIN * 2.0, (double) height - LABEL_MARGIN);
+  refresh_path (self, (double) width - LABEL_MARGIN - LABEL_MARGIN_RIGHT, (double) height - LABEL_MARGIN);
   gtk_widget_queue_draw (widget);
 }
 
@@ -260,7 +262,7 @@ bz_data_graph_snapshot (GtkWidget   *widget,
 
   if (self->motion_x >= LABEL_MARGIN &&
       self->motion_y >= 0.0 &&
-      self->motion_x < widget_width - LABEL_MARGIN &&
+      self->motion_x < widget_width - LABEL_MARGIN_RIGHT &&
       self->motion_y < widget_height - LABEL_MARGIN)
     {
       guint n_items                          = 0;
@@ -291,7 +293,7 @@ bz_data_graph_snapshot (GtkWidget   *widget,
       const char      *prefix                = NULL;
 
       n_items     = g_list_model_get_n_items (self->model);
-      graph_width = widget_width - LABEL_MARGIN * 2.0;
+      graph_width = widget_width - LABEL_MARGIN - LABEL_MARGIN_RIGHT;
       fraction    = (self->motion_x - LABEL_MARGIN) / graph_width;
       hovered_idx = floor ((double) n_items * fraction);
       if (hovered_idx >= n_items)
@@ -360,7 +362,7 @@ bz_data_graph_snapshot (GtkWidget   *widget,
 
       prefix     = self->tooltip_prefix != NULL ? self->tooltip_prefix : ("");
       layout2    = pango_layout_new (gtk_widget_get_pango_context (widget));
-      line2_text = g_strdup_printf ("%s %.0f", prefix, bz_data_point_get_dependent (point));
+      line2_text = g_strdup_printf ("%s %'.0f", prefix, bz_data_point_get_dependent (point));
       pango_layout_set_text (layout2, line2_text, -1);
       pango_layout_get_pixel_extents (layout2, NULL, &text2_extents);
 
@@ -508,7 +510,7 @@ update_cursor (BzDataGraph *self,
   if (x >= LABEL_MARGIN &&
       y >= 0.0 &&
       x < widget_width - LABEL_MARGIN &&
-      y < widget_height - LABEL_MARGIN)
+      y < widget_height - LABEL_MARGIN_RIGHT)
     gtk_widget_set_cursor_from_name (GTK_WIDGET (self), "crosshair");
   else
     gtk_widget_set_cursor (GTK_WIDGET (self), NULL);
@@ -549,6 +551,39 @@ motion_leave (BzDataGraph              *self,
 }
 
 static void
+gesture_begin (BzDataGraph    *self,
+               double          start_x,
+               double          start_y,
+               GtkGestureDrag *gesture)
+{
+  self->motion_x = start_x;
+  self->motion_y = start_y;
+  gtk_widget_queue_draw (GTK_WIDGET (self));
+}
+
+static void
+gesture_update (BzDataGraph    *self,
+                double          offset_x,
+                double          offset_y,
+                GtkGestureDrag *gesture)
+{
+  double start_x, start_y;
+  gtk_gesture_drag_get_start_point (gesture, &start_x, &start_y);
+  self->motion_x = start_x + offset_x;
+  self->motion_y = start_y + offset_y;
+  gtk_widget_queue_draw (GTK_WIDGET (self));
+}
+
+static void
+gesture_end (BzDataGraph    *self,
+             double          offset_x,
+             double          offset_y,
+             GtkGestureDrag *gesture)
+{
+  gtk_widget_queue_draw (GTK_WIDGET (self));
+}
+
+static void
 bz_data_graph_init (BzDataGraph *self)
 {
   self->motion = gtk_event_controller_motion_new ();
@@ -556,6 +591,13 @@ bz_data_graph_init (BzDataGraph *self)
   g_signal_connect_swapped (self->motion, "motion", G_CALLBACK (motion_event), self);
   g_signal_connect_swapped (self->motion, "leave", G_CALLBACK (motion_leave), self);
   gtk_widget_add_controller (GTK_WIDGET (self), self->motion);
+
+  self->gesture = gtk_gesture_drag_new ();
+  gtk_gesture_single_set_touch_only (GTK_GESTURE_SINGLE (self->gesture), TRUE);
+  g_signal_connect_swapped (self->gesture, "drag-begin", G_CALLBACK (gesture_begin), self);
+  g_signal_connect_swapped (self->gesture, "drag-update", G_CALLBACK (gesture_update), self);
+  g_signal_connect_swapped (self->gesture, "drag-end", G_CALLBACK (gesture_end), self);
+  gtk_widget_add_controller (GTK_WIDGET (self), GTK_EVENT_CONTROLLER (self->gesture));
 
   self->motion_x         = -1.0;
   self->motion_y         = -1.0;
@@ -832,7 +874,7 @@ refresh_path (BzDataGraph *self,
   font_height = (double) (int) PANGO_PIXELS_CEIL (pango_font_metrics_get_height (metrics));
   g_clear_pointer (&metrics, pango_font_metrics_unref);
 
-  num_ticks = floor (height / (font_height + 10.0));
+  num_ticks = floor (height / (font_height + 25.0));
   if (num_ticks < 2)
     num_ticks = 2;
 
@@ -843,7 +885,7 @@ refresh_path (BzDataGraph *self,
   rounded_axis_max       = ceil (max_dependent / tick_spacing) * tick_spacing;
   self->rounded_axis_max = rounded_axis_max;
 
-  independent_label_step = MAX (1, n_items / MAX (1, floor (width / MAX (font_height + 10.0, LABEL_MARGIN))));
+  independent_label_step = MAX (1, n_items / MAX (1, floor (width / MAX (font_height + 10.0, LABEL_MARGIN)))) * 1.5;
 
   curve_builder = gsk_path_builder_new ();
   snapshot      = gtk_snapshot_new ();
@@ -874,6 +916,7 @@ refresh_path (BzDataGraph *self,
           const char *label              = NULL;
           char        buf[32]            = { 0 };
           g_autoptr (PangoLayout) layout = NULL;
+          PangoRectangle extents;
 
           label = bz_data_point_get_label (point);
           if (label == NULL)
@@ -902,9 +945,12 @@ refresh_path (BzDataGraph *self,
           layout = pango_layout_new (pango);
           pango_layout_set_text (layout, label, -1);
 
+          pango_layout_get_pixel_extents (layout, NULL, &extents);
+
           gtk_snapshot_save (snapshot);
           gtk_snapshot_translate (snapshot, &GRAPHENE_POINT_INIT (x, height + LABEL_MARGIN / 10.0));
-          gtk_snapshot_rotate (snapshot, 25.0);
+          gtk_snapshot_rotate (snapshot, -LABEL_MARGIN_RIGHT);
+          gtk_snapshot_translate (snapshot, &GRAPHENE_POINT_INIT (-extents.width, 0));
           gtk_snapshot_append_layout (snapshot, layout, &(GdkRGBA) { 1.0, 1.0, 1.0, 1.0 });
           gtk_snapshot_restore (snapshot);
 

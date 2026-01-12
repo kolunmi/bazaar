@@ -22,12 +22,14 @@
 
 #include <adwaita.h>
 
+#include "bz-state-info.h"
+
 G_BEGIN_DECLS
 
 #define BZ_TYPE_PREFERENCES_DIALOG (bz_preferences_dialog_get_type ())
 G_DECLARE_FINAL_TYPE (BzPreferencesDialog, bz_preferences_dialog, BZ, PREFERENCES_DIALOG, AdwPreferencesDialog)
 
 AdwDialog *
-bz_preferences_dialog_new (GSettings *settings);
+bz_preferences_dialog_new (BzStateInfo *state);
 
 G_END_DECLS

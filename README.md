@@ -7,23 +7,29 @@ Bazaar
 <p align="center">Discover and install applications</p>
 
 <div align="center">
-<img height="512" alt="Image" src="https://github.com/user-attachments/assets/6e2a3f5b-1a92-47ce-89b4-61864a452fd5" />
+    <picture>
+        <source srcset="https://github.com/user-attachments/assets/da47d39c-2984-4521-87b2-c7207808624e" media="(prefers-color-scheme: dark)">
+        <img width="512" alt="Screenshot showing Bazaar's Flathub page" src="https://github.com/user-attachments/assets/6e012fd4-da26-452e-88ee-278077417193" style="max-width: 100%; height: auto;">
+    </picture>
 </div>
 
-<div align="center">
-<img height="512" alt="Image" src="https://github.com/user-attachments/assets/0a149911-7edb-48c4-84e7-d4e64be80c0d" />
-</div>
+> [!NOTE]
+> If you are interested in contributing code to Bazaar (Thank you!),
+> please see the [style rules](/CODESTYLE.md).
 
-Bazaar is a new app store for GNOME with a focus on discovering and
-installing applications and add-ons from Flatpak remotes, particularly
-[Flathub](https://flathub.org/). It emphasizes supporting the
-developers who make the Linux desktop possible. Bazaar features a
-"curated" tab that can be configured by distributors to allow for a
-more locallized experience.
+> [!NOTE]
+> If you are interested in contributing translations to Bazaar (Thank
+> you!), please see the [translators introduction](/TRANSLATORS.md).
+
+Bazaar is a new app store for GNOME with a focus on discovering and installing
+applications and add-ons from Flatpak remotes, particularly
+[Flathub](https://flathub.org/). It emphasizes supporting the developers who
+make the Linux desktop possible. Bazaar features a "curated" tab that can be
+configured by distributors to allow for a more localized experience.
 
 Bazaar is fast and highly multi-threaded, guaranteeing a smooth
-experience in the user interface. You can queue as many downloads as 
-you wish and run them while perusing Flathub's latest releases. 
+experience in the user interface. You can queue as many downloads as
+you wish and run them while perusing Flathub's latest releases.
 This is due to the UI being completely decoupled from all backend operations.
 
 It runs as a service, meaning state will be maintained even if you
@@ -32,12 +38,9 @@ interface. A krunner
 [plugin](https://github.com/ublue-os/krunner-bazaar) is available for
 use on the KDE Plasma desktop.
 
-Thanks to [Jakub Steiner](http://jimmac.eu) for designing Bazaar's
-icon.
-
-The screenshot above showing the curated tab features
-[Aurora](https://getaurora.dev/en)'s
-[config](https://github.com/ublue-os/aurora/blob/9e66ef4f4624afa96fd6050f096c835ef0f81ad9/system_files/shared/usr/share/ublue-os/bazaar/config.yaml).
+Thanks to [Tobias Bernard](https://tobiasbernard.com/), [Jakub
+Steiner](http://jimmac.eu), and [Sam Hewitt](https://snwh.org) for designing
+Bazaar's market stall icon.
 
 ### Installing
 
@@ -50,7 +53,7 @@ Pre-built binaries are distributed via Flathub and GitHub actions:
 ### Supporting
 
 If you would like to support me and the development of this
-application (Thank you!), I have a ko-fi here! <https://ko-fi.com/kolunmi> 
+application (Thank you!), I have a ko-fi here! <https://ko-fi.com/kolunmi>
 
 [![Ko-Fi](https://img.shields.io/badge/Ko--fi-F16061?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/kolunmi)
 
@@ -70,15 +73,15 @@ on the cli and type these commands inside the project root:
 meson setup build --prefix=/usr/local
 ninja -C build
 sudo ninja -C build install
-bazaar window --auto-service
+bazaar
 ```
 
 You will need the following dependencies installed, along with a C compiler, meson, and ninja:
 | Dep Name                                                | `pkg-config` Name | Min Version            | Justification                                       |
 |---------------------------------------------------------|-------------------|------------------------|-----------------------------------------------------|
 | [gtk4](https://gitlab.gnome.org/GNOME/gtk/)             | `gtk4`            | enforced by libadwaita | GUI                                                 |
-| [libadwaita](https://gitlab.gnome.org/GNOME/libadwaita) | `libadwaita-1`    | `1.7`                  | GNOME styling                                       |
-| [libdex](https://gitlab.gnome.org/GNOME/libdex)         | `libdex-1`        | `0.11.1`               | Async helpers                                       |
+| [libadwaita](https://gitlab.gnome.org/GNOME/libadwaita) | `libadwaita-1`    | `1.8`                  | GNOME styling                                       |
+| [libdex](https://gitlab.gnome.org/GNOME/libdex)         | `libdex-1`        | `1.0`                  | Async helpers                                       |
 | [flatpak](https://github.com/flatpak/flatpak)           | `flatpak`         | `1.9`                  | Flatpak installation management                     |
 | [appstream](https://github.com/ximion/appstream)        | `appstream`       | `1.0`                  | Download application metadata                       |
 | [xmlb](https://github.com/hughsie/libxmlb)              | `xmlb`            | `0.3.4`                | Handle binary xml appstream bundles/Parse plain xml |
@@ -87,7 +90,9 @@ You will need the following dependencies installed, along with a C compiler, mes
 | [libyaml](https://github.com/yaml/libyaml)              | `yaml-0.1`        | `0.2.5`                | Parse YAML configs                                  |
 | [libsoup](https://gitlab.gnome.org/GNOME/libsoup)       | `libsoup-3.0`     | `3.6.0`                | HTTP operations                                     |
 | [json-glib](https://gitlab.gnome.org/GNOME/json-glib)   | `json-glib-1.0`   | `1.10.0`               | Parse HTTP replies from Flathub                     |
-
+| [md4c](https://github.com/mity/md4c)                    | `md4c`            | `0.5.1`                | Parse markdown (.md)                                |
+| [webkitgtk](https://webkitgtk.org/)                     | `webkitgtk-6.0`   | `2.50.2`               | Render web views                                    |
+| [libsecret](https://gitlab.gnome.org/GNOME/libsecret)   | `libsecret-1`     | `0.20`                 | Store Flathub account information                   |
 
 #### Code of Conduct
 

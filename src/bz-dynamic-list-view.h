@@ -26,6 +26,8 @@ G_BEGIN_DECLS
 
 typedef enum
 {
+  BZ_DYNAMIC_LIST_VIEW_KIND_HBOX,
+  BZ_DYNAMIC_LIST_VIEW_KIND_VBOX,
   BZ_DYNAMIC_LIST_VIEW_KIND_LIST_BOX,
   BZ_DYNAMIC_LIST_VIEW_KIND_FLOW_BOX,
   BZ_DYNAMIC_LIST_VIEW_KIND_CAROUSEL,
@@ -91,6 +93,22 @@ bz_dynamic_list_view_get_max_children_per_line (BzDynamicListView *self);
 void
 bz_dynamic_list_view_set_max_children_per_line (BzDynamicListView *self,
                                                 guint              max_children);
+
+guint
+bz_dynamic_list_view_get_row_spacing (BzDynamicListView *self);
+
+void
+bz_dynamic_list_view_set_row_spacing (BzDynamicListView *self,
+                                      guint              row_spacing);
+
+guint
+bz_dynamic_list_view_get_column_spacing (BzDynamicListView *self);
+
+void
+bz_dynamic_list_view_set_column_spacing (BzDynamicListView *self,
+                                         guint              column_spacing);
+
+GtkAdjustment *bz_dynamic_list_view_get_vadjustment (BzDynamicListView *self);
 
 G_END_DECLS
 

@@ -39,18 +39,21 @@ bz_flatpak_instance_get_user_installation (BzFlatpakInstance *self);
 /* BzFlatpakEntry */
 
 char *
+bz_flatpak_ref_parts_format_unique (const char *origin,
+                                    const char *fmt,
+                                    gboolean    user);
+
+char *
 bz_flatpak_ref_format_unique (FlatpakRef *ref,
                               gboolean    user);
 
 BzFlatpakEntry *
-bz_flatpak_entry_new_for_ref (BzFlatpakInstance *instance,
-                              gboolean           user,
-                              FlatpakRemote     *remote,
-                              FlatpakRef        *ref,
-                              AsComponent       *component,
-                              const char        *appstream_dir,
-                              GdkPaintable      *remote_icon,
-                              GError           **error);
+bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
+                              FlatpakRemote *remote,
+                              gboolean       user,
+                              AsComponent   *component,
+                              const char    *appstream_dir,
+                              GError       **error);
 
 FlatpakRef *
 bz_flatpak_entry_get_ref (BzFlatpakEntry *self);

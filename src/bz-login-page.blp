@@ -1,0 +1,122 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzLoginPage: Adw.NavigationPage {
+  title: _("Connect to Flathub");
+
+  child: Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {}
+
+    content: Stack main_stack {
+      transition-type: crossfade;
+
+      StackPage {
+        name: "loading";
+
+        child: Adw.Spinner {
+          hexpand: true;
+          vexpand: true;
+          halign: center;
+          valign: center;
+          width-request: 64;
+          height-request: 64;
+        };
+      }
+
+      StackPage {
+        name: "error";
+
+        child: Adw.StatusPage error_status_page {
+          icon-name: "computer-fail-symbolic";
+          title: _("Something Went Wrong");
+        };
+      }
+
+      StackPage {
+        name: "start";
+
+        child: Adw.Clamp {
+          child: Adw.StatusPage {
+            icon-name: "flathub-symbolic";
+            title: _("Connect to Flathub");
+            description: _("Connect your Flathub account to Bazaar to manage your favorited apps.");
+
+            child: Adw.PreferencesGroup provider_preferences_group {
+              margin-start: 10;
+              margin-end: 10;
+              hexpand: true;
+              halign: fill;
+            };
+          };
+        };
+      }
+
+      StackPage {
+        name: "browser";
+
+        child: ScrolledWindow browser_scroll {
+          vexpand: true;
+        };
+      }
+
+      StackPage {
+        name: "finish";
+
+        child: ScrolledWindow {
+          hscrollbar-policy: never;
+
+          child: Adw.Clamp {
+            maximum-size: 600;
+
+            child: Box {
+              orientation: vertical;
+              vexpand: true;
+              halign: center;
+              valign: center;
+
+              Box {
+                orientation: vertical;
+                spacing: 15;
+                halign: center;
+                valign: center;
+
+                Adw.Avatar {
+                  size: 96;
+                  show-initials: true;
+                  text: bind template.auth-state as <$BzAuthState>.name;
+                  custom-image: bind template.auth-state as <$BzAuthState>.paintable;
+                }
+
+                Label {
+                  halign: center;
+                  label: bind $format_greeting(template.auth-state as <$BzAuthState>.name as <string>) as <string>;
+
+                  styles [
+                    "title-1",
+                  ]
+                }
+              }
+
+              Box {
+                orientation: horizontal;
+                spacing: 10;
+                halign: center;
+                margin-top: 20;
+
+                Button {
+                  label: _("Finish");
+                  clicked => $on_close_clicked();
+
+                  styles [
+                    "pill",
+                  ]
+                }
+              }
+            };
+          };
+        };
+      }
+    };
+  };
+}

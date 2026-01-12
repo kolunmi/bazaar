@@ -1,0 +1,397 @@
+/* bz-flathub-category-section.c
+ *
+ * Copyright 2025 Alexander Vanhee
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+#include <glib/gi18n.h>
+
+#include "bz-apps-page.h"
+#include "bz-entry-group.h"
+#include "bz-flathub-category-section.h"
+#include "bz-flathub-category.h"
+#include "bz-flathub-page.h"
+
+struct _BzFlathubCategorySection
+{
+  GtkBox parent_instance;
+
+  GtkLabel  *section_title;
+  GtkWidget *section_list;
+  GtkButton *more_button;
+
+  BzFlathubCategory *category;
+  gboolean           compact;
+  guint              min_items;
+  GtkSliceListModel *slice_model;
+};
+
+G_DEFINE_FINAL_TYPE (BzFlathubCategorySection, bz_flathub_category_section, GTK_TYPE_BOX)
+
+enum
+{
+  PROP_0,
+  PROP_CATEGORY,
+  PROP_COMPACT,
+  PROP_MIN_ITEMS,
+  LAST_PROP
+};
+
+static GParamSpec *props[LAST_PROP] = { 0 };
+
+enum
+{
+  SIGNAL_GROUP_SELECTED,
+  LAST_SIGNAL,
+};
+
+static guint signals[LAST_SIGNAL];
+
+static void
+apps_page_select_cb_forwarding (BzFlathubPage *flathub_page,
+                                BzEntryGroup  *group,
+                                BzAppsPage    *page)
+{
+  g_signal_emit_by_name (flathub_page, "group-selected", group);
+}
+
+static void
+tile_clicked (BzEntryGroup *group,
+              GtkButton    *button)
+{
+  BzFlathubCategorySection *self = NULL;
+
+  self = BZ_FLATHUB_CATEGORY_SECTION (gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_FLATHUB_CATEGORY_SECTION));
+
+  if (self != NULL)
+    g_signal_emit (self, signals[SIGNAL_GROUP_SELECTED], 0, group);
+}
+
+static void
+on_more_button_clicked (GtkButton                *button,
+                        BzFlathubCategorySection *self)
+{
+  GtkWidget         *flathub_page = NULL;
+  GtkWidget         *nav_view     = NULL;
+  AdwNavigationPage *apps_page    = NULL;
+
+  if (self->category == NULL)
+    return;
+
+  flathub_page = gtk_widget_get_ancestor (GTK_WIDGET (self), BZ_TYPE_FLATHUB_PAGE);
+  if (flathub_page == NULL)
+    return;
+
+  nav_view = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
+  if (nav_view == NULL)
+    return;
+
+  apps_page = bz_apps_page_new_from_category (self->category);
+  if (apps_page == NULL)
+    return;
+
+  g_signal_connect_swapped (
+      apps_page, "select",
+      G_CALLBACK (apps_page_select_cb_forwarding), flathub_page);
+
+  adw_navigation_view_push (ADW_NAVIGATION_VIEW (nav_view), apps_page);
+}
+
+static void
+bind_widget_cb (BzFlathubCategorySection *self,
+                GtkWidget                *tile,
+                BzEntryGroup             *group,
+                GtkWidget                *view)
+{
+  g_signal_connect_swapped (tile, "clicked", G_CALLBACK (tile_clicked), group);
+}
+
+static void
+unbind_widget_cb (BzFlathubCategorySection *self,
+                  GtkWidget                *tile,
+                  BzEntryGroup             *group,
+                  GtkWidget                *view)
+{
+  g_signal_handlers_disconnect_by_func (tile, G_CALLBACK (tile_clicked), group);
+}
+
+static int
+get_spacing (gpointer object,
+             gboolean compact)
+{
+  return compact ? 3 : 5;
+}
+
+static void
+update_model (BzFlathubCategorySection *self)
+{
+  GtkExpression *expression;
+  guint          max_items;
+
+  if (self->category == NULL)
+    return;
+
+  max_items = self->compact ? 6 : 12;
+  max_items = MAX (max_items, self->min_items);
+
+  if (self->slice_model != NULL)
+    {
+      gtk_slice_list_model_set_size (self->slice_model, max_items);
+      return;
+    }
+
+  expression        = gtk_property_expression_new (BZ_TYPE_FLATHUB_CATEGORY, NULL, "applications");
+  self->slice_model = gtk_slice_list_model_new (NULL, 0, max_items);
+
+  gtk_expression_bind (expression, self->slice_model, "model", self->category);
+
+  g_object_set (self->section_list, "model", self->slice_model, NULL);
+}
+
+static void
+bz_flathub_category_section_dispose (GObject *object)
+{
+  BzFlathubCategorySection *self = BZ_FLATHUB_CATEGORY_SECTION (object);
+
+  g_clear_object (&self->category);
+  g_clear_object (&self->slice_model);
+
+  G_OBJECT_CLASS (bz_flathub_category_section_parent_class)->dispose (object);
+}
+
+static void
+bz_flathub_category_section_get_property (GObject    *object,
+                                          guint       prop_id,
+                                          GValue     *value,
+                                          GParamSpec *pspec)
+{
+  BzFlathubCategorySection *self = BZ_FLATHUB_CATEGORY_SECTION (object);
+
+  switch (prop_id)
+    {
+    case PROP_CATEGORY:
+      g_value_set_object (value, bz_flathub_category_section_get_category (self));
+      break;
+    case PROP_COMPACT:
+      g_value_set_boolean (value, bz_flathub_category_section_get_compact (self));
+      break;
+    case PROP_MIN_ITEMS:
+      g_value_set_uint (value, bz_flathub_category_section_get_min_items (self));
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+    }
+}
+
+static void
+bz_flathub_category_section_set_property (GObject      *object,
+                                          guint         prop_id,
+                                          const GValue *value,
+                                          GParamSpec   *pspec)
+{
+  BzFlathubCategorySection *self = BZ_FLATHUB_CATEGORY_SECTION (object);
+
+  switch (prop_id)
+    {
+    case PROP_CATEGORY:
+      bz_flathub_category_section_set_category (self, g_value_get_object (value));
+      break;
+    case PROP_COMPACT:
+      bz_flathub_category_section_set_compact (self, g_value_get_boolean (value));
+      break;
+    case PROP_MIN_ITEMS:
+      bz_flathub_category_section_set_min_items (self, g_value_get_uint (value));
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+    }
+}
+
+static gboolean
+invert_boolean (gpointer object,
+                gboolean value)
+{
+  return !value;
+}
+
+static gboolean
+is_null (gpointer object,
+         GObject *value)
+{
+  return value == NULL;
+}
+
+static void
+bz_flathub_category_section_class_init (BzFlathubCategorySectionClass *klass)
+{
+  GObjectClass   *object_class = G_OBJECT_CLASS (klass);
+  GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
+
+  object_class->dispose      = bz_flathub_category_section_dispose;
+  object_class->get_property = bz_flathub_category_section_get_property;
+  object_class->set_property = bz_flathub_category_section_set_property;
+
+  props[PROP_CATEGORY] =
+      g_param_spec_object (
+          "category",
+          NULL, NULL,
+          BZ_TYPE_FLATHUB_CATEGORY,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_COMPACT] =
+      g_param_spec_boolean (
+          "compact",
+          NULL, NULL, FALSE,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_MIN_ITEMS] =
+      g_param_spec_uint (
+          "min-items",
+          NULL, NULL,
+          0, G_MAXUINT, 0,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  g_object_class_install_properties (object_class, LAST_PROP, props);
+
+  signals[SIGNAL_GROUP_SELECTED] =
+      g_signal_new (
+          "group-selected",
+          G_OBJECT_CLASS_TYPE (klass),
+          G_SIGNAL_RUN_FIRST,
+          0,
+          NULL, NULL,
+          g_cclosure_marshal_VOID__OBJECT,
+          G_TYPE_NONE, 1,
+          BZ_TYPE_ENTRY_GROUP);
+  g_signal_set_va_marshaller (
+      signals[SIGNAL_GROUP_SELECTED],
+      G_TYPE_FROM_CLASS (klass),
+      g_cclosure_marshal_VOID__OBJECTv);
+
+  gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-flathub-category-section.ui");
+
+  gtk_widget_class_bind_template_child (widget_class, BzFlathubCategorySection, section_title);
+  gtk_widget_class_bind_template_child (widget_class, BzFlathubCategorySection, section_list);
+  gtk_widget_class_bind_template_child (widget_class, BzFlathubCategorySection, more_button);
+
+  gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
+  gtk_widget_class_bind_template_callback (widget_class, is_null);
+  gtk_widget_class_bind_template_callback (widget_class, on_more_button_clicked);
+  gtk_widget_class_bind_template_callback (widget_class, bind_widget_cb);
+  gtk_widget_class_bind_template_callback (widget_class, unbind_widget_cb);
+  gtk_widget_class_bind_template_callback (widget_class, get_spacing);
+}
+
+static void
+bz_flathub_category_section_init (BzFlathubCategorySection *self)
+{
+  self->compact   = FALSE;
+  self->min_items = 0;
+
+  gtk_widget_init_template (GTK_WIDGET (self));
+}
+
+GtkWidget *
+bz_flathub_category_section_new (void)
+{
+  return g_object_new (BZ_TYPE_FLATHUB_CATEGORY_SECTION, NULL);
+}
+
+void
+bz_flathub_category_section_set_category (BzFlathubCategorySection *self,
+                                          BzFlathubCategory        *category)
+{
+  const char      *display_name;
+  g_autofree char *more_label = NULL;
+
+  g_return_if_fail (BZ_IS_FLATHUB_CATEGORY_SECTION (self));
+  g_return_if_fail (category == NULL || BZ_IS_FLATHUB_CATEGORY (category));
+
+  if (self->category == category)
+    return;
+
+  g_clear_object (&self->category);
+  g_clear_object (&self->slice_model);
+
+  if (category != NULL)
+    {
+      self->category = g_object_ref (category);
+
+      display_name = bz_flathub_category_get_display_name (category);
+      gtk_label_set_text (self->section_title, display_name);
+
+      more_label = g_strdup (bz_flathub_category_get_more_of_name (category));
+      gtk_button_set_label (self->more_button, more_label);
+
+      update_model (self);
+    }
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CATEGORY]);
+}
+
+BzFlathubCategory *
+bz_flathub_category_section_get_category (BzFlathubCategorySection *self)
+{
+  g_return_val_if_fail (BZ_IS_FLATHUB_CATEGORY_SECTION (self), NULL);
+  return self->category;
+}
+
+void
+bz_flathub_category_section_set_compact (BzFlathubCategorySection *self,
+                                         gboolean                  compact)
+{
+  g_return_if_fail (BZ_IS_FLATHUB_CATEGORY_SECTION (self));
+
+  if (self->compact == compact)
+    return;
+
+  self->compact = compact;
+
+  update_model (self);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_COMPACT]);
+}
+
+gboolean
+bz_flathub_category_section_get_compact (BzFlathubCategorySection *self)
+{
+  g_return_val_if_fail (BZ_IS_FLATHUB_CATEGORY_SECTION (self), FALSE);
+  return self->compact;
+}
+
+void
+bz_flathub_category_section_set_min_items (BzFlathubCategorySection *self,
+                                           guint                     min_items)
+{
+  g_return_if_fail (BZ_IS_FLATHUB_CATEGORY_SECTION (self));
+
+  if (self->min_items == min_items)
+    return;
+
+  self->min_items = min_items;
+
+  update_model (self);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MIN_ITEMS]);
+}
+
+guint
+bz_flathub_category_section_get_min_items (BzFlathubCategorySection *self)
+{
+  g_return_val_if_fail (BZ_IS_FLATHUB_CATEGORY_SECTION (self), 0);
+  return self->min_items;
+}

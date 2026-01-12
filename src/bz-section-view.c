@@ -19,17 +19,19 @@
  */
 
 #include "bz-section-view.h"
+#include "bz-application.h"
 #include "bz-async-texture.h"
-#include "bz-content-section.h"
 #include "bz-curated-app-tile.h"
+#include "bz-curated-section.h"
 #include "bz-dynamic-list-view.h"
 #include "bz-entry-group.h"
+#include "bz-markdown-render.h"
 
 struct _BzSectionView
 {
   AdwBin parent_instance;
 
-  BzContentSection *section;
+  BzCuratedSection *section;
   GListModel       *classes;
 
   AdwStyleManager *style_manager;
@@ -73,6 +75,11 @@ dark_changed (BzSectionView   *self,
 static void
 refresh_dark_light_classes (BzSectionView   *self,
                             AdwStyleManager *mgr);
+
+static BzAsyncTexture *
+choose_image (const char *default_variant_uri,
+              const char *light_variant_uri,
+              const char *dark_variant_uri);
 
 static void
 bz_section_view_dispose (GObject *object)
@@ -140,23 +147,71 @@ is_null (gpointer object,
   return value == NULL;
 }
 
-static GdkPaintable *
-get_banner (BzSectionView *self,
-            GdkPaintable  *value)
+static BzAsyncTexture *
+get_banner (gpointer               object,
+            BzCuratedCategoryInfo *info)
 {
-  g_autoptr (GdkPaintable) paintable = NULL;
+  const char *banner       = NULL;
+  const char *light_banner = NULL;
+  const char *dark_banner  = NULL;
 
-  if (self->section == NULL)
+  if (!BZ_IS_CURATED_CATEGORY_INFO (info))
     return NULL;
 
-  g_object_get (
-      self->section,
-      adw_style_manager_get_dark (self->style_manager)
-          ? "dark-banner"
-          : "light-banner",
-      &paintable,
-      NULL);
-  return g_steal_pointer (&paintable);
+  banner       = bz_curated_category_info_get_banner (info);
+  light_banner = bz_curated_category_info_get_light_banner (info);
+  dark_banner  = bz_curated_category_info_get_dark_banner (info);
+
+  return choose_image (banner, light_banner, dark_banner);
+}
+
+static BzAsyncTexture *
+get_image (gpointer            object,
+           BzCuratedImageInfo *info)
+{
+  const char *image       = NULL;
+  const char *light_image = NULL;
+  const char *dark_image  = NULL;
+
+  if (!BZ_IS_CURATED_IMAGE_INFO (info))
+    return NULL;
+
+  image       = bz_curated_image_info_get_uri (info);
+  light_image = bz_curated_image_info_get_light_uri (info);
+  dark_image  = bz_curated_image_info_get_dark_uri (info);
+
+  return choose_image (image, light_image, dark_image);
+}
+
+static int
+clamp_banner_height (gpointer object,
+                     int      value)
+{
+  if (value == 0)
+    return 300;
+  return CLAMP (value, 100, 1000);
+}
+
+static int
+clamp_image_dimension (gpointer object,
+                       int      value)
+{
+  if (value == 0)
+    return 200;
+  return CLAMP (value, 100, 1000);
+}
+
+static GListModel *
+convert_to_groups (gpointer    object,
+                   GListModel *value)
+{
+  BzStateInfo             *info    = NULL;
+  BzApplicationMapFactory *factory = NULL;
+
+  info    = bz_state_info_get_default ();
+  factory = bz_state_info_get_application_factory (info);
+
+  return bz_application_map_factory_generate (factory, value);
 }
 
 static void
@@ -191,8 +246,8 @@ bz_section_view_class_init (BzSectionViewClass *klass)
       g_param_spec_object (
           "section",
           NULL, NULL,
-          BZ_TYPE_CONTENT_SECTION,
-          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
+          BZ_TYPE_CURATED_SECTION,
+          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
@@ -211,9 +266,10 @@ bz_section_view_class_init (BzSectionViewClass *klass)
       G_TYPE_FROM_CLASS (klass),
       g_cclosure_marshal_VOID__OBJECTv);
 
-  g_type_ensure (BZ_TYPE_ASYNC_TEXTURE);
   g_type_ensure (BZ_TYPE_CURATED_APP_TILE);
   g_type_ensure (BZ_TYPE_DYNAMIC_LIST_VIEW);
+  g_type_ensure (BZ_TYPE_MARKDOWN_RENDER);
+  g_type_ensure (BZ_TYPE_ASYNC_TEXTURE);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-section-view.ui");
   gtk_widget_class_bind_template_child (widget_class, BzSectionView, banner_text_overlay);
@@ -222,6 +278,10 @@ bz_section_view_class_init (BzSectionViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, get_banner);
+  gtk_widget_class_bind_template_callback (widget_class, get_image);
+  gtk_widget_class_bind_template_callback (widget_class, clamp_banner_height);
+  gtk_widget_class_bind_template_callback (widget_class, clamp_image_dimension);
+  gtk_widget_class_bind_template_callback (widget_class, convert_to_groups);
   gtk_widget_class_bind_template_callback (widget_class, bind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, unbind_widget_cb);
 }
@@ -234,7 +294,11 @@ dark_changed (BzSectionView   *self,
   refresh_dark_light_classes (self, mgr);
 
   if (self->section != NULL)
-    bz_content_section_notify_dark_light (self->section);
+    {
+      g_object_notify (G_OBJECT (self->section), "category");
+      g_object_notify (G_OBJECT (self->section), "markdown");
+      g_object_notify (G_OBJECT (self->section), "image");
+    }
 }
 
 static void
@@ -261,7 +325,7 @@ bz_section_view_init (BzSectionView *self)
 }
 
 GtkWidget *
-bz_section_view_new (BzContentSection *section)
+bz_section_view_new (BzCuratedSection *section)
 {
   return g_object_new (
       BZ_TYPE_SECTION_VIEW,
@@ -271,10 +335,10 @@ bz_section_view_new (BzContentSection *section)
 
 void
 bz_section_view_set_section (BzSectionView    *self,
-                             BzContentSection *section)
+                             BzCuratedSection *section)
 {
   g_return_if_fail (BZ_IS_SECTION_VIEW (self));
-  g_return_if_fail (section == NULL || BZ_IS_CONTENT_SECTION (section));
+  g_return_if_fail (section == NULL || BZ_IS_CURATED_SECTION (section));
 
   g_clear_object (&self->section);
 
@@ -324,7 +388,7 @@ bz_section_view_set_section (BzSectionView    *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SECTION]);
 }
 
-BzContentSection *
+BzCuratedSection *
 bz_section_view_get_section (BzSectionView *self)
 {
   g_return_val_if_fail (BZ_IS_SECTION_VIEW (self), NULL);
@@ -390,4 +454,28 @@ refresh_dark_light_classes (BzSectionView   *self,
           gtk_widget_add_css_class (GTK_WIDGET (self), class);
         }
     }
+}
+
+static BzAsyncTexture *
+choose_image (const char *default_variant_uri,
+              const char *light_variant_uri,
+              const char *dark_variant_uri)
+{
+  gboolean    is_dark                = FALSE;
+  const char *uri                    = NULL;
+  g_autoptr (GFile) source           = NULL;
+  g_autoptr (GdkPaintable) paintable = NULL;
+
+  is_dark = adw_style_manager_get_dark (adw_style_manager_get_default ());
+  if (is_dark)
+    uri = dark_variant_uri;
+  else
+    uri = light_variant_uri;
+  if (uri == NULL)
+    uri = default_variant_uri;
+  if (uri == NULL)
+    return NULL;
+
+  source = g_file_new_for_uri (uri);
+  return bz_async_texture_new_lazy (source, NULL);
 }
