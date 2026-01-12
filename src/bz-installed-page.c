@@ -362,7 +362,7 @@ bz_installed_page_set_model (BzInstalledPage *self,
       self->model = g_object_ref (model);
       g_signal_connect_swapped (model, "items-changed", G_CALLBACK (items_changed), self);
     }
-  set_page (self);
+  g_idle_add_once ((GSourceOnceFunc) set_page, self);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MODEL]);
 }
