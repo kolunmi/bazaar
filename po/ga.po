@@ -10,9 +10,9 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-01-11 20:42+0000\n"
-"PO-Revision-Date: 2026-01-12 15:47+0000\n"
+"PO-Revision-Date: 2026-01-12 18:32+0000\n"
 "Last-Translator: Aindriú Mac Giolla Eoin <aindriu80@yahoo.com>\n"
-"Language-Team: Irish <>\n"
+"Language-Team: Irish <http://weblate.amgelocalnet.duckdns.org/projects/"
 "bazaar-translations/bazaar/ga/>\n"
 "Language: ga\n"
 "MIME-Version: 1.0\n"
@@ -695,7 +695,7 @@ msgstr "Alexander Vanhee"
 #. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
 #: src/bz-application.c:700
 msgid "translator-credits"
-msgstr "creidmheasanna-aistritheora"
+msgstr "Aindriú Mac Giolla Eoin"
 
 #: src/bz-application.c:711
 msgid "Special Thanks"
