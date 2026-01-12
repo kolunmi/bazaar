@@ -698,7 +698,7 @@ msgstr "Александр Фанхе"
 #. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
 #: src/bz-application.c:700
 msgid "translator-credits"
-msgstr "Jill Fiore <contact@lumaeris.com>, 2025"
+msgstr "Джилл Фиори <contact@lumaeris.com>, 2025, 2026"
 
 #: src/bz-application.c:711
 msgid "Special Thanks"
