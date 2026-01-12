@@ -20,7 +20,6 @@
 
 #include "bz-rich-app-tile.h"
 #include "bz-entry.h"
-#include "bz-group-tile-css-watcher.h"
 #include "bz-rounded-picture.h"
 #include "bz-themed-entry-group-rect.h"
 #include "bz-util.h"
@@ -97,9 +96,7 @@ ui_entry_resolved_finally (DexFuture *future,
         }
     }
 
-  dex_clear (&self->ui_entry_resolve);
   notify_properties (self, has_screenshot);
-
   return NULL;
 }
 
