@@ -73,50 +73,51 @@ typedef struct
   gint     hold;
   gboolean installed;
 
-  guint            kinds;
-  GListModel      *addons;
-  char            *id;
-  char            *unique_id;
-  char            *unique_id_checksum;
-  char            *title;
-  char            *eol;
-  char            *description;
-  char            *long_description;
-  char            *remote_repo_name;
-  char            *url;
-  guint64          size;
-  guint64          installed_size;
-  GdkPaintable    *icon_paintable;
-  GIcon           *mini_icon;
-  GdkPaintable    *remote_repo_icon;
-  char            *search_tokens;
-  char            *metadata_license;
-  char            *project_license;
-  gboolean         is_floss;
-  char            *project_group;
-  char            *developer;
-  char            *developer_id;
-  GListModel      *developer_apps;
-  GListModel      *screenshot_paintables;
-  GListModel      *screenshot_captions;
-  GListModel      *share_urls;
-  char            *donation_url;
-  char            *forge_url;
-  GListModel      *reviews;
-  double           average_rating;
-  char            *ratings_summary;
-  GListModel      *version_history;
-  char            *light_accent_color;
-  char            *dark_accent_color;
-  gboolean         is_mobile_friendly;
-  guint            required_controls;
-  guint            recommended_controls;
-  guint            supported_controls;
-  gint             min_display_length;
-  gint             max_display_length;
-  AsContentRating *content_rating;
-  GListModel      *keywords;
-  GListModel      *categories;
+  guint             kinds;
+  GListModel       *addons;
+  char             *id;
+  char             *unique_id;
+  char             *unique_id_checksum;
+  char             *title;
+  char             *eol;
+  char             *description;
+  char             *long_description;
+  char             *remote_repo_name;
+  char             *url;
+  guint64           size;
+  guint64           installed_size;
+  GdkPaintable     *icon_paintable;
+  GIcon            *mini_icon;
+  GdkPaintable     *remote_repo_icon;
+  char             *search_tokens;
+  char             *metadata_license;
+  char             *project_license;
+  gboolean          is_floss;
+  char             *project_group;
+  char             *developer;
+  char             *developer_id;
+  GListModel       *developer_apps;
+  GListModel       *screenshot_paintables;
+  GListModel       *screenshot_captions;
+  GdkPaintable     *thumbnail_paintable;
+  GListModel       *share_urls;
+  char             *donation_url;
+  char             *forge_url;
+  GListModel       *reviews;
+  double            average_rating;
+  char             *ratings_summary;
+  GListModel       *version_history;
+  char             *light_accent_color;
+  char             *dark_accent_color;
+  gboolean          is_mobile_friendly;
+  guint             required_controls;
+  guint             recommended_controls;
+  guint             supported_controls;
+  gint              min_display_length;
+  gint              max_display_length;
+  AsContentRating  *content_rating;
+  GListModel       *keywords;
+  GListModel       *categories;
   BzAppPermissions *permissions;
 
   gboolean              is_flathub;
@@ -166,6 +167,7 @@ enum
   PROP_DEVELOPER_APPS,
   PROP_SCREENSHOT_PAINTABLES,
   PROP_SCREENSHOT_CAPTIONS,
+  PROP_THUMBNAIL_PAINTABLE,
   PROP_SHARE_URLS,
   PROP_DONATION_URL,
   PROP_FORGE_URL,
@@ -372,6 +374,9 @@ bz_entry_get_property (GObject    *object,
     case PROP_SCREENSHOT_CAPTIONS:
       g_value_set_object (value, priv->screenshot_captions);
       break;
+    case PROP_THUMBNAIL_PAINTABLE:
+      g_value_set_object (value, priv->thumbnail_paintable);
+      break;
     case PROP_SHARE_URLS:
       g_value_set_object (value, priv->share_urls);
       break;
@@ -576,6 +581,10 @@ bz_entry_set_property (GObject      *object,
     case PROP_SCREENSHOT_CAPTIONS:
       g_clear_object (&priv->screenshot_captions);
       priv->screenshot_captions = g_value_dup_object (value);
+      break;
+    case PROP_THUMBNAIL_PAINTABLE:
+      g_clear_object (&priv->thumbnail_paintable);
+      priv->thumbnail_paintable = g_value_dup_object (value);
       break;
     case PROP_SHARE_URLS:
       g_clear_object (&priv->share_urls);
@@ -801,7 +810,7 @@ bz_entry_class_init (BzEntryClass *klass)
           0, G_MAXUINT64, 0,
           G_PARAM_READWRITE);
 
-    props[PROP_INSTALLED_SIZE] =
+  props[PROP_INSTALLED_SIZE] =
       g_param_spec_uint64 (
           "installed-size",
           NULL, NULL,
@@ -890,6 +899,13 @@ bz_entry_class_init (BzEntryClass *klass)
           "screenshot-captions",
           NULL, NULL,
           G_TYPE_LIST_MODEL,
+          G_PARAM_READWRITE);
+
+  props[PROP_THUMBNAIL_PAINTABLE] =
+      g_param_spec_object (
+          "thumbnail-paintable",
+          NULL, NULL,
+          GDK_TYPE_PAINTABLE,
           G_PARAM_READWRITE);
 
   props[PROP_SHARE_URLS] =
@@ -1206,6 +1222,8 @@ bz_entry_real_serialize (BzSerializable  *serializable,
           g_variant_builder_add (builder, "{sv}", "screenshot-captions", g_variant_builder_end (sub_builder));
         }
     }
+  if (priv->thumbnail_paintable != NULL)
+    maybe_save_paintable (priv, "thumbnail-paintable", priv->thumbnail_paintable, builder);
   if (priv->share_urls != NULL)
     {
       guint n_items = 0;
@@ -1248,11 +1266,11 @@ bz_entry_real_serialize (BzSerializable  *serializable,
           sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("a(mstmsms)"));
           for (guint i = 0; i < n_items; i++)
             {
-              g_autoptr (BzRelease) release              = NULL;
-              guint64     timestamp                      = 0;
-              const char *url                            = NULL;
-              const char *version                        = NULL;
-              const char *description                    = NULL;
+              g_autoptr (BzRelease) release = NULL;
+              guint64     timestamp         = 0;
+              const char *url               = NULL;
+              const char *version           = NULL;
+              const char *description       = NULL;
 
               release     = g_list_model_get_item (priv->version_history, i);
               timestamp   = bz_release_get_timestamp (release);
@@ -1563,6 +1581,8 @@ bz_entry_real_deserialize (BzSerializable *serializable,
 
           priv->screenshot_captions = G_LIST_MODEL (g_steal_pointer (&store));
         }
+      else if (g_strcmp0 (key, "thumbnail-paintable") == 0)
+        priv->thumbnail_paintable = make_async_texture (value);
       else if (g_strcmp0 (key, "share-urls") == 0)
         {
           g_autoptr (GListStore) store      = NULL;
@@ -1603,11 +1623,11 @@ bz_entry_real_deserialize (BzSerializable *serializable,
           version_iter = g_variant_iter_new (value);
           for (;;)
             {
-              guint64          timestamp          = 0;
-              g_autofree char *url                = NULL;
-              g_autofree char *description        = NULL;
-              g_autofree char *version            = NULL;
-              g_autoptr (BzRelease) release       = NULL;
+              guint64          timestamp    = 0;
+              g_autofree char *url          = NULL;
+              g_autofree char *description  = NULL;
+              g_autofree char *version      = NULL;
+              g_autoptr (BzRelease) release = NULL;
 
               if (!g_variant_iter_next (version_iter, "(mstmsms)", &description, &timestamp, &url, &version))
                 break;
@@ -2866,6 +2886,7 @@ clear_entry (BzEntry *self)
   g_clear_object (&priv->developer_apps);
   g_clear_object (&priv->screenshot_paintables);
   g_clear_object (&priv->screenshot_captions);
+  g_clear_object (&priv->thumbnail_paintable);
   g_clear_object (&priv->share_urls);
   g_clear_pointer (&priv->donation_url, g_free);
   g_clear_pointer (&priv->forge_url, g_free);
