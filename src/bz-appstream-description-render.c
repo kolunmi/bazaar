@@ -265,6 +265,30 @@ regenerate (BzAppstreamDescriptionRender *self)
 }
 
 static void
+insert (GtkTextBuffer *buffer,
+        GtkTextIter   *iter,
+        const char    *text)
+{
+  g_auto (GStrv) parts = g_strsplit (text, "**", -1);
+  for (int j = 0; parts[j] != NULL; j++)
+    {
+      if (j % 2 == 0)
+        {
+          gtk_text_buffer_insert (buffer, iter, parts[j], -1);
+        }
+      else
+        {
+          GtkTextMark *m = gtk_text_buffer_create_mark (buffer, NULL, iter, TRUE);
+          GtkTextIter  si;
+          gtk_text_buffer_insert (buffer, iter, parts[j], -1);
+          gtk_text_buffer_get_iter_at_mark (buffer, &si, m);
+          gtk_text_buffer_apply_tag_by_name (buffer, "emphasis", &si, iter);
+          gtk_text_buffer_delete_mark (buffer, m);
+        }
+    }
+}
+
+static void
 compile (BzAppstreamDescriptionRender *self,
          XbNode                       *node,
          GtkTextBuffer                *buffer,
@@ -336,7 +360,7 @@ compile (BzAppstreamDescriptionRender *self,
 
       normalized = normalize_whitespace (text);
       if (normalized != NULL && *normalized != '\0')
-        gtk_text_buffer_insert (buffer, iter, normalized, -1);
+        insert (buffer, iter, normalized);
     }
 
   for (int i = 0; child != NULL; i++)
@@ -354,7 +378,7 @@ compile (BzAppstreamDescriptionRender *self,
 
           normalized = normalize_whitespace (tail);
           if (normalized != NULL && *normalized != '\0')
-            gtk_text_buffer_insert (buffer, iter, normalized, -1);
+            insert (buffer, iter, normalized);
         }
 
       g_object_unref (child);
