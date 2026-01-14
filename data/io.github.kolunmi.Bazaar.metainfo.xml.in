@@ -68,8 +68,48 @@
   </screenshots>
 
   <releases>
-    <release version="0.6.4" date="2025-12-14">
-      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.6.4</url>
+    <release version="0.7.3" date="2026-01-11">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.3</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>Trash user data instead of deleting</li>
+          <li>Tweaks to permissions dialog</li>
+          <li>Fix broken EOL filtering</li>
+          <li>Add text filter to installed page</li>
+          <li>Add optional translations mappings for string properties in YAML configs</li>
+          <li>Hide EOL apps by default</li>
+          <li>Many other minor bug fixes and improvements</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.7.2" date="2026-01-03">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.2</url>
+      <description translate="no">
+        <p>This small release ensures the new icon is rendered correctly on KDE Plasma.</p>
+      </description>
+    </release>
+    <release version="0.7.1" date="2026-01-03">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.1</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>New market stall icon</li>
+          <li>Remove Flathub styling</li>
+          <li>Add horizontal versions of pride flags</li>
+          <li>Text selection in app descriptions can be made across paragraph breaks</li>
+          <li>Support YAML anchors and aliases in config parsing</li>
+          <li>Drastically reduce disk cache writes over time by skipping unchanged entries</li>
+          <li>Show background status in popover</li>
+          <li>Add app permission system</li>
+          <li>Add back release URLs</li>
+          <li>Fix sync-remotes action in shortcut dialog</li>
+          <li>Fix visual hiccups in comet animations</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.7.0" date="2025-12-31">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.0</url>
       <description translate="no">
         <p>This release comes with the following improvements:</p>
         <ul>
@@ -81,7 +121,7 @@
           <li>Updated installed indicator for app tiles</li>
           <li>3 new flag options</li>
           <li>Fixed GNOME search provider to show the app page instead of search</li>
-          <li>Fixed issue where flatpakref URIs did not open when the app wasnt running in the background</li>
+          <li>Fixed issue where flatpakref URIs did not open when the app wasn't running in the background</li>
           <li>Fixed issue where some proprietary apps were marked as "Special License"</li>
           <li>Fixed issue where graphs did not work with touch</li>
         </ul>
@@ -317,4 +357,12 @@
       <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.1.0</url>
     </release>
   </releases>
+  <recommends>
+    <control>keyboard</control>
+    <control>pointing</control>
+    <control>touch</control>
+  </recommends>
+  <requires>
+    <display_length compare="ge">360</display_length>
+  </requires>
 </component>

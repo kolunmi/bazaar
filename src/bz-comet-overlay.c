@@ -140,23 +140,24 @@ bz_comet_overlay_size_allocate (GtkWidget *widget,
                                 int        baseline)
 {
   BzCometOverlay *self = BZ_COMET_OVERLAY (widget);
-  GHashTableIter  iter = { 0 };
+  // GHashTableIter  iter = { 0 };
 
   if (self->child != NULL && gtk_widget_should_layout (self->child))
     gtk_widget_allocate (self->child, width, height, baseline, NULL);
 
-  g_hash_table_iter_init (&iter, self->nodes);
-  for (;;)
-    {
-      BzComet       *comet = NULL;
-      GskRenderNode *node  = NULL;
-
-      if (!g_hash_table_iter_next (
-              &iter, (gpointer *) &comet, (gpointer *) &node))
-        break;
-
-      update_params (self, comet, width, height);
-    }
+  /* This causes visual hiccups, keeping for reference */
+  // g_hash_table_iter_init (&iter, self->nodes);
+  // for (;;)
+  //   {
+  //     BzComet       *comet = NULL;
+  //     GskRenderNode *node  = NULL;
+  //
+  //     if (!g_hash_table_iter_next (
+  //             &iter, (gpointer *) &comet, (gpointer *) &node))
+  //       break;
+  //
+  //     update_params (self, comet, width, height);
+  //   }
 }
 
 static void

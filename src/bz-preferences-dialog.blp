@@ -19,6 +19,14 @@ template $BzPreferencesDialog: Adw.PreferencesDialog {
     title: _("Preferences");
     use-underline: true;
 
+    banner: Adw.Banner {
+      sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.syncing as <bool>) as <bool>;
+      revealed: bind template.state as <$BzStateInfo>.metered_connection as <bool>;
+      title: _("Network connection is metered — automatic store data sync is paused");
+      button-label: _("Sync Manually");
+      action-name: "app.sync-remotes";
+    };
+
     Adw.PreferencesGroup {
       title: _("Content Filters");
 
@@ -80,4 +88,3 @@ template $BzPreferencesDialog: Adw.PreferencesDialog {
     }
   }
 }
-

@@ -1,7 +1,6 @@
 # List of source files containing translatable strings.
 # Please keep this file sorted alphabetically.
 data/io.github.kolunmi.Bazaar.desktop.in
-data/io.github.kolunmi.Bazaar.gschema.xml
 data/io.github.kolunmi.Bazaar.metainfo.xml.in
 src/bz-addons-dialog.blp
 src/bz-addons-dialog.c
@@ -9,11 +8,13 @@ src/bz-age-rating-dialog.blp
 src/bz-age-rating-dialog.c
 src/bz-all-apps-page.blp
 src/bz-all-apps-page.c
+src/bz-app-permissions.c
 src/bz-app-size-dialog.blp
 src/bz-app-size-dialog.c
 src/bz-app-tile.blp
 src/bz-app-tile.c
 src/bz-apps-page.blp
+src/bz-apps-page.c
 src/bz-application-map-factory.c
 src/bz-application.c
 src/bz-async-texture.c
@@ -70,6 +71,9 @@ src/bz-lazy-async-texture-model.c
 src/bz-license-dialog.blp
 src/bz-license-dialog.c
 src/bz-license-dialog.h
+src/bz-login-page.blp
+src/bz-login-page.c
+src/bz-login-page.h
 src/bz-preferences-dialog.blp
 src/bz-preferences-dialog.c
 src/bz-progress-bar.blp
@@ -80,6 +84,9 @@ src/bz-releases-list.c
 src/bz-result.c
 src/bz-rich-app-tile.blp
 src/bz-rich-app-tile.c
+src/bz-safety-calculator.c
+src/bz-safety-dialog.blp
+src/bz-safety-dialog.c
 src/bz-screenshot.c
 src/bz-screenshot-page.blp
 src/bz-screenshots-carousel.blp
@@ -94,6 +101,7 @@ src/bz-share-list.c
 src/bz-stats-dialog.blp
 src/bz-stats-dialog.c
 src/bz-tag-list.c
+src/bz-transaction-dialog.c
 src/bz-transaction-manager.c
 src/bz-transaction-view.blp
 src/bz-transaction-view.c

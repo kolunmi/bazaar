@@ -158,14 +158,14 @@ get_popover_text (gpointer object,
   if (g_strcmp0 (method, "login_provider") == 0 && login_name != NULL && login_provider != NULL)
     {
       provider_name = format_provider_name (login_provider);
-      return g_strdup_printf (_ ("The ownership of the %s app ID has been verified by <b>%s</b> on <b>%s</b>."),
+      return g_strdup_printf (_ ("The ownership of the %1$s app ID has been verified by <b>%2$s</b> on <b>%3$s</b>."),
                               formatted_app_id, login_name, provider_name);
     }
 
   if (website != NULL && *website != '\0')
     {
       formatted_website = format_website_url (website);
-      return g_strdup_printf (_ ("The ownership of the %s app ID has been verified using %s."),
+      return g_strdup_printf (_ ("The ownership of the %1$s app ID has been verified using %2$s."),
                               formatted_app_id, formatted_website);
     }
 

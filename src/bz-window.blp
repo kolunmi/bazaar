@@ -63,14 +63,14 @@ template $BzWindow: Adw.ApplicationWindow {
           ellipsize: end;
         }
         Button {
-          label: _("Inspect UI Entry");
+          label: "Inspect UI Entry";
           clicked => $debug_id_inspect_cb(template);
         }
       }
 
       [end]
       MenuButton {
-        label: _("All Debug Actions");
+        label: "All Debug Actions";
         menu-model: debug_menu;
       }
 
@@ -227,7 +227,6 @@ template $BzWindow: Adw.ApplicationWindow {
           content: Adw.ToastOverlay toasts {
             child: Adw.NavigationView navigation_view {
               pop-on-escape: false;
-              notify::visible-page => $visible_page_changed_cb(template);
 
               Adw.NavigationPage {
                 tag: "main";
@@ -266,7 +265,6 @@ template $BzWindow: Adw.ApplicationWindow {
                       name: "main";
 
                       child: Adw.ViewStack main_view_stack {
-                        notify::visible-child-name => $main_view_stack_changed_cb(template);
 
                         Adw.ViewStackPage {
                           name: "browse";
@@ -298,7 +296,7 @@ template $BzWindow: Adw.ApplicationWindow {
                           title: _("Installed");
                           icon-name: "library-symbolic";
 
-                          child: $BzInstalledPage {
+                          child: $BzInstalledPage installed_page {
                             state: bind template.state;
                             model: bind template.state as <$BzStateInfo>.all-installed-entry-groups;
                             remove => $remove_installed_cb(template);
@@ -328,20 +326,17 @@ template $BzWindow: Adw.ApplicationWindow {
 
                     Adw.HeaderBar top_header_bar {
                       [start]
-                      Revealer {
-                        reveal-child: bind template.state as <$BzStateInfo>.auth-state as <$BzAuthState>.authenticated;
-                        transition-type: slide_left;
-                        child: MenuButton {
-                          menu-model: account_menu;
-                          styles [
-                            "circular",
-                            "flat",
-                          ]
+                      MenuButton {
+                        visible: bind template.state as <$BzStateInfo>.auth-state as <$BzAuthState>.authenticated;
+                        menu-model: account_menu;
+                        styles [
+                          "circular",
+                          "flat",
+                        ]
 
-                          child: Adw.Avatar {
-                            size: 24;
-                            custom-image: bind template.state as <$BzStateInfo>.auth-state as <$BzAuthState>.paintable;
-                          };
+                        child: Adw.Avatar {
+                          size: 24;
+                          custom-image: bind template.state as <$BzStateInfo>.auth-state as <$BzAuthState>.paintable;
                         };
                       }
 
@@ -392,11 +387,53 @@ template $BzWindow: Adw.ApplicationWindow {
                       }
 
                       [start]
-                      Adw.Spinner {
-                        margin-start: 4;
-                        visible: bind $invert_boolean($is_null(template.state as <$BzStateInfo>.background-task-label) as <bool>) as <bool>;
-                        has-tooltip: true;
-                        tooltip-text: bind template.state as <$BzStateInfo>.background-task-label;
+                      Revealer {
+                        transition-type: crossfade;
+                        transition-duration: 750;
+                        reveal-child: bind $logical_or($invert_boolean($is_null(template.state as <$BzStateInfo>.background-task-label) as <bool>) as <bool>,
+                                                       status_popover.visible) as <bool>;
+
+                        child: MenuButton {
+                          styles [
+                            "flat",
+                          ]
+
+                          child: Box {
+                            Adw.Spinner {
+                              visible: bind status_popover_label.visible;
+                            }
+                            Image {
+                              visible: bind $invert_boolean(status_popover_label.visible) as <bool>;
+                              icon-name: "check-plain-symbolic";
+                            }
+                          };
+
+                          popover: Popover status_popover {
+                            has-arrow: true;
+                            position: right;
+
+                            child: Box {
+                              orientation: vertical;
+                              margin-top: 12;
+                              margin-bottom: 12;
+                              margin-start: 12;
+                              margin-end: 12;
+                              width-request: 300;
+
+                              Label status_popover_label {
+                                hexpand: true;
+                                visible: bind $invert_boolean($is_null(template.state as <$BzStateInfo>.background-task-label) as <bool>) as <bool>;
+                                label: bind template.state as <$BzStateInfo>.background-task-label;
+                              }
+
+                              Label {
+                                hexpand: true;
+                                visible: bind $invert_boolean(status_popover_label.visible) as <bool>;
+                                label: _("No background tasks!");
+                              }
+                            };
+                          };
+                        };
                       }
 
                       [title]
@@ -444,13 +481,7 @@ template $BzWindow: Adw.ApplicationWindow {
                         menu-model: primary_menu;
                       }
                     }
-                    Adw.Banner {
-                      sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.syncing as <bool>) as <bool>;
-                      revealed: bind template.state as <$BzStateInfo>.metered_connection as <bool>;
-                      title: _("Network connection is metered — automatic store data sync is paused");
-                      button-label: _("Sync Manually");
-                      button-clicked => $sync_cb(template);
-                    }
+
                     Adw.Banner {
                       sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.syncing as <bool>) as <bool>;
                       revealed: bind $logical_and($invert_boolean(template.state as <$BzStateInfo>.metered_connection as <bool>) as <bool>,
@@ -568,7 +599,7 @@ menu primary_menu {
 menu debug_menu {
   section {
     item {
-      label: _("Open Bazaar Inspector");
+      label: "Open Bazaar Inspector";
       action: "app.bazaar-inspector";
     }
   }

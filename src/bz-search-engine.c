@@ -97,7 +97,8 @@ utf8_char_class (const char *s,
 
 static inline const char *
 utf8_skip_to_next_of_class (const char **s,
-                            GUnicodeType class);
+                            GUnicodeType class,
+                            gsize       *read_utf8);
 
 static void
 bz_search_engine_dispose (GObject *object)
@@ -425,70 +426,72 @@ query_sub_task_fiber (QuerySubTaskData *data)
        _var != NULL && _var >= (_start);        \
        _var = g_utf8_prev_char (_var))
 
-#define UTF8_FOREACH_TOKEN_FORWARDS(_start_var, _end_var, _s)                                                          \
-  for (const char *_start_var = (_s), *_end_var = utf8_skip_to_next_of_class (&_start_var, G_UNICODE_SPACE_SEPARATOR); \
-       _start_var != NULL && *_start_var != '\0';                                                                      \
-       _start_var = _end_var, _end_var = utf8_skip_to_next_of_class (&_start_var, G_UNICODE_SPACE_SEPARATOR))
+#define UTF8_FOREACH_TOKEN_FORWARDS(_start_var, _end_var, _s, _token_len)                                                            \
+  for (const char *_start_var = (_s), *_end_var = utf8_skip_to_next_of_class (&_start_var, G_UNICODE_SPACE_SEPARATOR, (_token_len)); \
+       _start_var != NULL && *_start_var != '\0';                                                                                    \
+       _start_var = _end_var, _end_var = utf8_skip_to_next_of_class (&_start_var, G_UNICODE_SPACE_SEPARATOR, (_token_len)))
 
 static double
 test_strings (const char *query,
               const char *against,
               gssize      accept_min_size)
 {
-  gsize  query_length   = 0;
-  gsize  against_length = 0;
-  double score          = 0.0;
+  double score                    = 0.0;
+  gsize  full_query_utf8_length   = 0;
+  gsize  full_against_utf8_length = 0;
+  gsize  query_tok_utf8_len       = 0;
+  gsize  against_tok_utf8_len     = 0;
 
-  query_length   = strlen (query);
-  against_length = strlen (against);
+  full_query_utf8_length   = g_utf8_strlen (query, -1);
+  full_against_utf8_length = g_utf8_strlen (against, -1);
   if (accept_min_size > 0 &&
-      against_length < accept_min_size)
+      full_against_utf8_length < accept_min_size)
     return 0.0;
 
-  if (query_length <= against_length &&
+  if (full_query_utf8_length <= full_against_utf8_length &&
       strcasestr (against, query) != NULL)
-    return (double) query_length;
+    return (double) full_query_utf8_length;
 
-  UTF8_FOREACH_TOKEN_FORWARDS (q_s, q_e, query)
+  UTF8_FOREACH_TOKEN_FORWARDS (query_tok_start, query_tok_end, query, &query_tok_utf8_len)
   {
-    UTF8_FOREACH_TOKEN_FORWARDS (a_s, a_e, against)
+    UTF8_FOREACH_TOKEN_FORWARDS (against_tok_start, against_tok_end, against, &against_tok_utf8_len)
     {
-      gssize   q_len = q_e - q_s;
-      gssize   a_len = a_e - a_s;
-      gboolean match = FALSE;
-
-      if (q_len <= a_len)
-        continue;
+      gboolean match    = FALSE;
+      gsize    consumed = 0;
 
       if (accept_min_size > 0 &&
-          a_len < accept_min_size)
+          against_tok_utf8_len < accept_min_size)
         continue;
 
-      UTF8_FOREACH_FORWARD_WITH_END (a, a_s, a_e)
+      UTF8_FOREACH_FORWARD_WITH_END (against_ptr, against_tok_start, against_tok_end)
       {
-        gunichar a_ch = 0;
+        gunichar against_ch = 0;
+
+        if (query_tok_utf8_len > against_tok_utf8_len - consumed)
+          break;
 
         match = TRUE;
 
-        a_ch = g_unichar_tolower (g_utf8_get_char (a));
-        UTF8_FOREACH_FORWARD_WITH_END (q, q_s, q_e)
+        against_ch = g_unichar_tolower (g_utf8_get_char (against_ptr));
+        UTF8_FOREACH_FORWARD_WITH_END (query_ptr, query_tok_start, query_tok_end)
         {
-          gunichar q_ch = 0;
+          gunichar query_ch = 0;
 
-          q_ch = g_unichar_tolower (g_utf8_get_char (q));
-          if (a_ch != q_ch)
+          query_ch = g_unichar_tolower (g_utf8_get_char (query_ptr));
+          if (against_ch != query_ch)
             {
               match = FALSE;
               break;
             }
         }
 
+        consumed++;
         if (match)
           break;
       }
 
       if (match)
-        score += (double) (q_len * q_len) / (double) a_len;
+        score += (double) (query_tok_utf8_len * query_tok_utf8_len) / (double) against_tok_utf8_len;
     }
   }
 
@@ -512,9 +515,13 @@ utf8_char_class (const char *s,
 
 static inline const char *
 utf8_skip_to_next_of_class (const char **s,
-                            GUnicodeType class)
+                            GUnicodeType class,
+                            gsize       *read_utf8)
 {
   gboolean skipped = FALSE;
+
+  if (read_utf8 != NULL)
+    *read_utf8 = 0;
 
   UTF8_FOREACH_FORWARD (p, *s)
   {
@@ -523,10 +530,15 @@ utf8_skip_to_next_of_class (const char **s,
         if (skipped)
           return p;
       }
-    else if (!skipped)
+    else
       {
-        *s      = p;
-        skipped = TRUE;
+        if (!skipped)
+          {
+            *s      = p;
+            skipped = TRUE;
+          }
+        if (read_utf8 != NULL)
+          (*read_utf8)++;
       }
   }
   /* return the end of the string if nothing was found */

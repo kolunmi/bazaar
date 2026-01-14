@@ -26,11 +26,11 @@
 #include <glib/gi18n.h>
 #include <xmlb.h>
 
+#include "bz-app-permissions.h"
 #include "bz-async-texture.h"
 #include "bz-flathub-category.h"
 #include "bz-flatpak-private.h"
 #include "bz-io.h"
-#include "bz-issue.h"
 #include "bz-release.h"
 #include "bz-serializable.h"
 #include "bz-url.h"
@@ -408,6 +408,7 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
   GPtrArray *as_categories                             = NULL;
   g_autoptr (GListModel) categories                    = NULL;
   g_autoptr (BzVerificationStatus) verification_status = NULL;
+  g_autoptr (BzAppPermissions) permissions             = NULL;
 
   g_return_val_if_fail (FLATPAK_IS_REF (ref), NULL);
   g_return_val_if_fail (FLATPAK_IS_REMOTE_REF (ref) || FLATPAK_IS_BUNDLE_REF (ref), NULL);
@@ -548,8 +549,6 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
                 {
                   AsImage         *image_obj              = NULL;
                   const char      *url                    = NULL;
-                  g_autofree char *modified_url           = NULL;
-                  const char      *extension              = NULL;
                   g_autoptr (GFile) screenshot_file       = NULL;
                   g_autofree char *cache_basename         = NULL;
                   g_autoptr (GFile) cache_file            = NULL;
@@ -561,24 +560,8 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
 
                   if (url != NULL)
                     {
-                      // Flathub CDN serves WebP but appstream only provides PNG links.
-                      if (g_str_has_prefix (url, "https://dl.flathub.org/") &&
-                          g_str_has_suffix (url, ".png"))
-                        {
-                          g_autofree char *temp = NULL;
-
-                          temp         = g_strndup (url, strlen (url) - 4);
-                          modified_url = g_strdup_printf ("%s.webp", temp);
-                          extension    = ".webp";
-                        }
-                      else
-                        {
-                          extension    = ".png";
-                          modified_url = g_strdup (url);
-                        }
-
-                      screenshot_file = g_file_new_for_uri (modified_url);
-                      cache_basename  = g_strdup_printf ("screenshot_%d%s", i, extension);
+                      screenshot_file = g_file_new_for_uri (url);
+                      cache_basename  = g_strdup_printf ("screenshot_%u.png", i);
                       cache_file      = g_file_new_build_filename (
                           module_dir, unique_id_checksum, cache_basename, NULL);
 
@@ -691,40 +674,16 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
           for (guint i = 0; i < releases_arr->len; i++)
             {
               AsRelease  *as_release          = NULL;
-              GPtrArray  *as_issues           = NULL;
               const char *release_description = NULL;
-              g_autoptr (GListStore) issues   = NULL;
               g_autoptr (BzRelease) release   = NULL;
 
               as_release = g_ptr_array_index (releases_arr, i);
-              as_issues  = as_release_get_issues (as_release);
 
               release_description = as_release_get_description (as_release);
-
-              if (as_issues != NULL && as_issues->len > 0)
-                {
-                  issues = g_list_store_new (BZ_TYPE_ISSUE);
-
-                  for (guint j = 0; j < as_issues->len; j++)
-                    {
-                      AsIssue *as_issue         = NULL;
-                      g_autoptr (BzIssue) issue = NULL;
-
-                      as_issue = g_ptr_array_index (as_issues, j);
-
-                      issue = g_object_new (
-                          BZ_TYPE_ISSUE,
-                          "id", as_issue_get_id (as_issue),
-                          "url", as_issue_get_url (as_issue),
-                          NULL);
-                      g_list_store_append (issues, issue);
-                    }
-                }
 
               release = g_object_new (
                   BZ_TYPE_RELEASE,
                   "description", release_description,
-                  "issues", issues,
                   "timestamp", as_release_get_timestamp (as_release),
                   "url", as_release_get_url (as_release, AS_RELEASE_URL_KIND_DETAILS),
                   "version", as_release_get_version (as_release),
@@ -1038,6 +997,10 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
                     NULL);
     }
 
+  permissions = bz_app_permissions_new_from_metadata (key_file, error);
+  if (permissions == NULL)
+    return NULL;
+
   g_object_set (
       self,
       "kinds", kinds,
@@ -1082,6 +1045,7 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
       "keywords", keywords,
       "categories", categories,
       "verification-status", verification_status,
+      "permissions", permissions,
       NULL);
 
   return g_steal_pointer (&self);

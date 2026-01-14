@@ -37,7 +37,10 @@ struct _BzInstalledPage
   BzStateInfo *state;
 
   /* Template widgets */
-  AdwViewStack *stack;
+  AdwViewStack    *stack;
+  GtkText         *search_bar;
+  GtkCustomFilter *filter;
+  GtkListView     *list_view;
 };
 
 G_DEFINE_FINAL_TYPE (BzInstalledPage, bz_installed_page, ADW_TYPE_BIN)
@@ -73,6 +76,13 @@ items_changed (BzInstalledPage *self,
 
 static void
 set_page (BzInstalledPage *self);
+
+static gboolean
+set_page_idle_cb (BzInstalledPage *self);
+
+static gboolean
+filter (BzEntryGroup    *group,
+        BzInstalledPage *self);
 
 static void
 bz_installed_page_dispose (GObject *object)
@@ -137,6 +147,16 @@ is_zero (gpointer object,
   return value == 0;
 }
 
+static char *
+no_results_found_subtitle (gpointer    object,
+                           const char *search_text)
+{
+  if (search_text == NULL || *search_text == '\0')
+    return g_strdup ("");
+
+  return g_strdup_printf (_ ("No matches found for \"%s\" in the list of installed apps"), search_text);
+}
+
 static DexFuture *
 row_activated_fiber (GWeakRef *wr)
 {
@@ -186,6 +206,30 @@ tile_activated_cb (BzInstalledTile *tile)
       bz_get_dex_stack_size (),
       (DexFiberFunc) row_activated_fiber,
       bz_track_weak (tile), bz_weak_release));
+}
+
+static gboolean
+is_valid_string (gpointer    object,
+                 const char *value)
+{
+  return value != NULL && *value != '\0';
+}
+
+static void
+search_text_changed (BzInstalledPage *self,
+                     GParamSpec      *pspec,
+                     GtkEntry        *entry)
+{
+  gtk_filter_changed (GTK_FILTER (self->filter),
+                      GTK_FILTER_CHANGE_DIFFERENT);
+  set_page (self);
+}
+
+static void
+reset_search_cb (BzInstalledPage *self,
+                 GtkButton       *button)
+{
+  gtk_text_set_buffer (self->search_bar, NULL);
 }
 
 static void
@@ -280,14 +324,24 @@ bz_installed_page_class_init (BzInstalledPageClass *klass)
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-installed-page.ui");
   gtk_widget_class_bind_template_child (widget_class, BzInstalledPage, stack);
+  gtk_widget_class_bind_template_child (widget_class, BzInstalledPage, search_bar);
+  gtk_widget_class_bind_template_child (widget_class, BzInstalledPage, filter);
+  gtk_widget_class_bind_template_child (widget_class, BzInstalledPage, list_view);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
+  gtk_widget_class_bind_template_callback (widget_class, no_results_found_subtitle);
+  gtk_widget_class_bind_template_callback (widget_class, is_valid_string);
   gtk_widget_class_bind_template_callback (widget_class, tile_activated_cb);
+  gtk_widget_class_bind_template_callback (widget_class, reset_search_cb);
+  gtk_widget_class_bind_template_callback (widget_class, search_text_changed);
 }
 
 static void
 bz_installed_page_init (BzInstalledPage *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
+  gtk_custom_filter_set_filter_func (
+      self->filter, (GtkCustomFilterFunc) filter,
+      self, NULL);
 }
 
 GtkWidget *
@@ -311,7 +365,11 @@ bz_installed_page_set_model (BzInstalledPage *self,
       self->model = g_object_ref (model);
       g_signal_connect_swapped (model, "items-changed", G_CALLBACK (items_changed), self);
     }
-  set_page (self);
+  g_idle_add_full (
+      G_PRIORITY_DEFAULT,
+      (GSourceFunc) set_page_idle_cb,
+      g_object_ref (self),
+      g_object_unref);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MODEL]);
 }
@@ -321,6 +379,27 @@ bz_installed_page_get_model (BzInstalledPage *self)
 {
   g_return_val_if_fail (BZ_IS_INSTALLED_PAGE (self), NULL);
   return self->model;
+}
+
+gboolean
+bz_installed_page_ensure_active (BzInstalledPage *self,
+                                 const char      *initial)
+{
+  const char *text = NULL;
+
+  g_return_val_if_fail (BZ_IS_INSTALLED_PAGE (self), FALSE);
+
+  text = gtk_editable_get_text (GTK_EDITABLE (self->search_bar));
+  if (text != NULL && *text != '\0' &&
+      gtk_widget_has_focus (GTK_WIDGET (self->search_bar)))
+    return FALSE;
+
+  gtk_widget_grab_focus (GTK_WIDGET (self->search_bar));
+  gtk_editable_set_text (GTK_EDITABLE (self->search_bar), initial);
+  if (initial != NULL)
+    gtk_editable_set_position (GTK_EDITABLE (self->search_bar), g_utf8_strlen (initial, -1));
+
+  return TRUE;
 }
 
 static void
@@ -336,9 +415,47 @@ items_changed (BzInstalledPage *self,
 static void
 set_page (BzInstalledPage *self)
 {
-  if (self->model != NULL &&
-      g_list_model_get_n_items (G_LIST_MODEL (self->model)) > 0)
-    adw_view_stack_set_visible_child_name (self->stack, "content");
+  GtkSelectionModel *selection_model;
+  GListModel        *filter_model;
+
+  if (self->model == NULL || g_list_model_get_n_items (self->model) == 0)
+    {
+      adw_view_stack_set_visible_child_name (self->stack, "empty");
+      return;
+    }
+
+  selection_model = gtk_list_view_get_model (self->list_view);
+  filter_model    = gtk_no_selection_get_model (GTK_NO_SELECTION (selection_model));
+
+  if (g_list_model_get_n_items (filter_model) == 0)
+    adw_view_stack_set_visible_child_name (self->stack, "no-results");
   else
-    adw_view_stack_set_visible_child_name (self->stack, "empty");
+    adw_view_stack_set_visible_child_name (self->stack, "content");
+}
+
+static gboolean
+set_page_idle_cb (BzInstalledPage *self)
+{
+  set_page (self);
+  return G_SOURCE_REMOVE;
+}
+
+static gboolean
+filter (BzEntryGroup    *group,
+        BzInstalledPage *self)
+{
+  const char *id    = NULL;
+  const char *title = NULL;
+  const char *text  = NULL;
+
+  id    = bz_entry_group_get_id (group);
+  title = bz_entry_group_get_title (group);
+
+  text = gtk_editable_get_text (GTK_EDITABLE (self->search_bar));
+
+  if (text != NULL && *text != '\0')
+    return strcasestr (id, text) != NULL ||
+           strcasestr (title, text) != NULL;
+  else
+    return TRUE;
 }

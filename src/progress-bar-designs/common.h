@@ -20,13 +20,4 @@
 
 #pragma once
 
-#include <gtk/gtk.h>
-
-G_BEGIN_DECLS
-
-void
-append_pride_flag (GtkSnapshot     *snapshot,
-                   graphene_rect_t *bounds,
-                   const char      *name);
-
-G_END_DECLS
+#include "pride/pride.h"

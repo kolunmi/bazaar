@@ -21,7 +21,7 @@
 #define G_LOG_DOMAIN  "BAZAAR::ENTRY-CACHE"
 #define BAZAAR_MODULE "entry-cache"
 
-#define MAX_CONCURRENT_WRITES       4
+#define MAX_CONCURRENT_WRITES       16
 #define WATCH_CLEANUP_INTERVAL_MSEC 5000
 
 #include <malloc.h>
@@ -373,28 +373,33 @@ bz_entry_cache_manager_enumerate_disk (BzEntryCacheManager *self)
 static DexFuture *
 write_task_fiber (WriteTaskData *data)
 {
-  OngoingTaskData *task_data           = data->task_data;
-  char            *unique_id_checksum  = data->unique_id_checksum;
-  BzEntry         *entry               = data->entry;
-  g_autoptr (GError) local_error       = NULL;
-  g_autoptr (BzGuard) slot_guard       = NULL;
-  g_autoptr (BzGuard) other_guard      = NULL;
-  g_autoptr (GMutexLocker) locker      = NULL;
-  guint      slot_queued               = G_MAXUINT;
-  guint      slot_index                = 0;
-  DexFuture *writing_future            = NULL;
-  g_autoptr (LivingEntryData) living   = NULL;
-  g_autoptr (DexPromise) promise       = NULL;
-  g_autoptr (GVariantBuilder) builder  = NULL;
-  g_autoptr (GVariant) variant         = NULL;
-  g_autoptr (GBytes) bytes             = NULL;
-  g_autofree char *main_cache          = NULL;
-  g_autoptr (GFile) parent_file        = NULL;
-  g_autoptr (GFile) save_file          = NULL;
-  g_autoptr (GFileOutputStream) output = NULL;
-  gssize   bytes_written               = 0;
-  gboolean result                      = FALSE;
-  g_autoptr (GError) ret_error         = NULL;
+  OngoingTaskData *task_data              = data->task_data;
+  char            *unique_id_checksum     = data->unique_id_checksum;
+  BzEntry         *entry                  = data->entry;
+  g_autoptr (GError) local_error          = NULL;
+  g_autoptr (BzGuard) slot_guard          = NULL;
+  g_autoptr (BzGuard) other_guard         = NULL;
+  g_autoptr (GMutexLocker) locker         = NULL;
+  guint      slot_queued                  = G_MAXUINT;
+  guint      slot_index                   = 0;
+  DexFuture *writing_future               = NULL;
+  g_autoptr (LivingEntryData) living      = NULL;
+  g_autoptr (DexPromise) promise          = NULL;
+  g_autoptr (GVariantBuilder) builder     = NULL;
+  g_autoptr (GVariant) variant            = NULL;
+  g_autoptr (GBytes) bytes                = NULL;
+  gsize            bytes_size             = 0;
+  gconstpointer    bytes_data             = 0;
+  g_autofree char *main_cache             = NULL;
+  g_autoptr (GFile) parent_file           = NULL;
+  g_autofree char *save_file_path         = NULL;
+  g_autoptr (GFile) save_file             = NULL;
+  gsize            existing_contents_size = 0;
+  g_autofree char *existing_contents      = NULL;
+  g_autoptr (GFileOutputStream) output    = NULL;
+  gssize   bytes_written                  = 0;
+  gboolean result                         = FALSE;
+  g_autoptr (GError) ret_error            = NULL;
 
   if (!BZ_IS_FLATPAK_ENTRY (entry))
     return dex_future_new_reject (
@@ -477,8 +482,9 @@ write_task_fiber (WriteTaskData *data)
   {
     builder = g_variant_builder_new (G_VARIANT_TYPE_VARDICT);
     bz_serializable_serialize (BZ_SERIALIZABLE (entry), builder);
-    variant = g_variant_builder_end (builder);
-    bytes   = g_variant_get_data_as_bytes (variant);
+    variant    = g_variant_builder_end (builder);
+    bytes      = g_variant_get_data_as_bytes (variant);
+    bytes_data = g_bytes_get_data (bytes, &bytes_size);
 
     main_cache  = bz_dup_module_dir ();
     parent_file = g_file_new_for_path (main_cache);
@@ -497,45 +503,55 @@ write_task_fiber (WriteTaskData *data)
             goto done;
           }
       }
-    save_file = g_file_new_build_filename (main_cache, unique_id_checksum, NULL);
+    save_file_path = g_build_filename (main_cache, unique_id_checksum, NULL);
+    save_file      = g_file_new_for_path (save_file_path);
 
-    output = g_file_replace (
-        save_file,
-        NULL,
-        FALSE,
-        G_FILE_CREATE_REPLACE_DESTINATION,
-        NULL,
-        &local_error);
-    if (output == NULL)
+    result = g_file_get_contents (
+        save_file_path, &existing_contents,
+        &existing_contents_size, NULL);
+    /* Only write if the file has definitely changed */
+    if (!result ||
+        existing_contents_size != bytes_size ||
+        memcmp (existing_contents, bytes_data, bytes_size) != 0)
       {
-        ret_error = g_error_new (
-            BZ_ENTRY_CACHE_ERROR,
-            BZ_ENTRY_CACHE_ERROR_CACHE_FAILED,
-            "Failed to open write stream when caching '%s': %s",
-            unique_id_checksum, local_error->message);
-        goto done;
-      }
+        output = g_file_replace (
+            save_file,
+            NULL,
+            FALSE,
+            G_FILE_CREATE_REPLACE_DESTINATION,
+            NULL,
+            &local_error);
+        if (output == NULL)
+          {
+            ret_error = g_error_new (
+                BZ_ENTRY_CACHE_ERROR,
+                BZ_ENTRY_CACHE_ERROR_CACHE_FAILED,
+                "Failed to open write stream when caching '%s': %s",
+                unique_id_checksum, local_error->message);
+            goto done;
+          }
 
-    bytes_written = g_output_stream_write_bytes (G_OUTPUT_STREAM (output), bytes, NULL, &local_error);
-    if (bytes_written < 0)
-      {
-        ret_error = g_error_new (
-            BZ_ENTRY_CACHE_ERROR,
-            BZ_ENTRY_CACHE_ERROR_CACHE_FAILED,
-            "Failed to write data to stream when caching '%s': %s",
-            unique_id_checksum, local_error->message);
-        goto done;
-      }
+        bytes_written = g_output_stream_write_bytes (G_OUTPUT_STREAM (output), bytes, NULL, &local_error);
+        if (bytes_written < 0)
+          {
+            ret_error = g_error_new (
+                BZ_ENTRY_CACHE_ERROR,
+                BZ_ENTRY_CACHE_ERROR_CACHE_FAILED,
+                "Failed to write data to stream when caching '%s': %s",
+                unique_id_checksum, local_error->message);
+            goto done;
+          }
 
-    result = g_output_stream_close (G_OUTPUT_STREAM (output), NULL, &local_error);
-    if (!result)
-      {
-        ret_error = g_error_new (
-            BZ_ENTRY_CACHE_ERROR,
-            BZ_ENTRY_CACHE_ERROR_CACHE_FAILED,
-            "Failed to close stream when caching '%s': %s",
-            unique_id_checksum, local_error->message);
-        goto done;
+        result = g_output_stream_close (G_OUTPUT_STREAM (output), NULL, &local_error);
+        if (!result)
+          {
+            ret_error = g_error_new (
+                BZ_ENTRY_CACHE_ERROR,
+                BZ_ENTRY_CACHE_ERROR_CACHE_FAILED,
+                "Failed to close stream when caching '%s': %s",
+                unique_id_checksum, local_error->message);
+            goto done;
+          }
       }
 
     g_timer_start (living->cached);

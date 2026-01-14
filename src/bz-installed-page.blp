@@ -2,71 +2,136 @@ using Gtk 4.0;
 using Adw 1;
 
 template $BzInstalledPage: Adw.Bin {
-  child: Adw.BreakpointBin {
-    width-request: 360;
-    height-request: 450;
+  child: Box {
+    orientation: vertical;
 
-    child: Adw.ViewStack stack {
-      enable-transitions: true;
-      transition-duration: 400;
+    Adw.Clamp search_box_clamp {
+      margin-start: 12;
+      margin-end: 12;
+      maximum-size: 375;
 
-      Adw.ViewStackPage {
-        name: "empty";
-        title: _("Empty");
+      child: Adw.Bin {
+        halign: fill;
+        margin-top: 10;
+        margin-bottom: 10;
 
-        child: Adw.StatusPage {
-          icon-name: "library-symbolic";
-          title: _("No Flatpaks Installed");
+        child: Box {
+          spacing: 8;
+          height-request: 40;
+
+          Image {
+            icon-name: "system-search-symbolic";
+          }
+
+          Text search_bar {
+            hexpand: true;
+            placeholder-text: _("Search installed apps");
+            notify::text => $search_text_changed(template);
+          }
+
+          Button clear_button {
+            icon-name: "edit-clear-symbolic";
+            visible: bind $is_valid_string(search_bar.text) as <bool>;
+
+            styles [
+              "flat",
+              "circular",
+              "clear-button",
+            ]
+
+            clicked => $reset_search_cb(template);
+          }
+
+          styles [
+            "search-box",
+          ]
         };
-      }
+      };
+    }
 
-      Adw.ViewStackPage {
-        name: "content";
-        title: _("Installed");
+    Adw.BreakpointBin {
+      width-request: 360;
+      height-request: 450;
+      vexpand: true;
 
-        child: ScrolledWindow {
-          hscrollbar-policy: never;
+      child: Adw.ViewStack stack {
+        enable-transitions: true;
+        transition-duration: 400;
 
-          child: Adw.ClampScrollable {
-            maximum-size: 650;
+        Adw.ViewStackPage {
+          name: "empty";
+          title: _("Empty");
 
-            child: ListView list_view {
-              styles [
-                "navigation-sidebar",
-                "installed-list-view"
-              ]
-              margin-top: 11;
-              margin-start: 25;
-              margin-end: 25;
-              overflow: visible;
+          child: Adw.StatusPage {
+            icon-name: "library-symbolic";
+            title: _("No Apps Found");
+            description: "";
+          };
+        }
 
-              model: NoSelection {
-                model: bind template.model;
-              };
+        Adw.ViewStackPage {
+          name: "no-results";
+          title: _("No Results");
 
-              factory: BuilderListItemFactory {
-                template ListItem {
-                  activatable: false;
-                  selectable: false;
-                  focusable: false;
+          child: Adw.StatusPage {
+            icon-name: "library-symbolic";
+            title: _("No Results");
+            description: bind $no_results_found_subtitle(search_bar.text) as <string>;
+          };
+        }
 
-                  child: $BzInstalledTile {
-                    group: bind template.item as <$BzEntryGroup>;
-                    activated => $tile_activated_cb();
+        Adw.ViewStackPage {
+          name: "content";
+          title: _("Installed");
+
+          child: ScrolledWindow {
+            hscrollbar-policy: never;
+
+            child: Adw.ClampScrollable {
+              maximum-size: 650;
+
+              child: ListView list_view {
+                styles [
+                  "navigation-sidebar",
+                  "installed-list-view",
+                ]
+
+                margin-start: 25;
+                margin-end: 25;
+
+                model: NoSelection {
+                  model: FilterListModel {
+                    filter: CustomFilter filter {};
+
+                    model: bind template.model;
                   };
-                }
+                };
+
+                factory: BuilderListItemFactory {
+                  template ListItem {
+                    activatable: false;
+                    selectable: false;
+                    focusable: false;
+
+                    child: $BzInstalledTile {
+                      group: bind template.item as <$BzEntryGroup>;
+                      activated => $tile_activated_cb();
+                    };
+                  }
+                };
               };
             };
           };
-        };
-      }
-    };
+        }
+      };
 
-    Adw.Breakpoint {
-      condition ("max-width: 700px")
-      setters {
-        list_view.margin-start: 8;
-        list_view.margin-end: 8;
+      Adw.Breakpoint {
+        condition ("max-width: 700px")
+
+        setters {
+          list_view.margin-start: 8;
+          list_view.margin-end: 8;
+        }
       }
     }
   };

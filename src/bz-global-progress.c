@@ -29,6 +29,9 @@ struct _BzGlobalProgress
 {
   GtkWidget parent_instance;
 
+  GtkWidget *draw_widget;
+  char      *draw_widget_class;
+
   GtkWidget *child;
   gboolean   active;
   gboolean   pending;
@@ -48,8 +51,9 @@ struct _BzGlobalProgress
   AdwSpringParams *pending_spring;
   AdwSpringParams *fraction_spring;
 
-  guint  tick;
-  double pending_time_mod;
+  guint           tick;
+  double          pending_time_mod;
+  graphene_rect_t filled_rect;
 };
 
 G_DEFINE_FINAL_TYPE (BzGlobalProgress, bz_global_progress, GTK_TYPE_WIDGET)
@@ -78,6 +82,9 @@ global_progress_bar_theme_changed (BzGlobalProgress *self,
                                    GSettings        *settings);
 
 static void
+ensure_draw_css (BzGlobalProgress *self);
+
+static void
 bz_global_progress_dispose (GObject *object)
 {
   BzGlobalProgress *self = BZ_GLOBAL_PROGRESS (object);
@@ -90,6 +97,9 @@ bz_global_progress_dispose (GObject *object)
         self->settings,
         global_progress_bar_theme_changed,
         self);
+
+  g_clear_pointer (&self->draw_widget, gtk_widget_unparent);
+  g_clear_pointer (&self->draw_widget_class, g_free);
 
   g_clear_pointer (&self->child, gtk_widget_unparent);
   g_clear_object (&self->settings);
@@ -225,7 +235,36 @@ bz_global_progress_size_allocate (GtkWidget *widget,
                                   int        height,
                                   int        baseline)
 {
-  BzGlobalProgress *self = BZ_GLOBAL_PROGRESS (widget);
+  BzGlobalProgress *self          = BZ_GLOBAL_PROGRESS (widget);
+  graphene_rect_t   pending_rect  = { 0 };
+  graphene_rect_t   fraction_rect = { 0 };
+
+  pending_rect = GRAPHENE_RECT_INIT (
+      ((double) height * 0.2) + MAX (((double) width - (double) height * 0.4) * 0.35, 0.0) * self->pending_time_mod,
+      (double) height * 0.2,
+      MAX (((double) width - (double) height * 0.4) * 0.65, 0.0),
+      (double) height * 0.6);
+  fraction_rect = GRAPHENE_RECT_INIT (
+      0.0,
+      0.0,
+      width * self->actual_fraction,
+      height);
+  graphene_rect_interpolate (
+      &fraction_rect,
+      &pending_rect,
+      self->pending_progress,
+      &self->filled_rect);
+
+  gtk_widget_allocate (
+      self->draw_widget,
+      ceil (self->filled_rect.size.width),
+      ceil (self->filled_rect.size.height),
+      baseline,
+      gsk_transform_translate (
+          NULL,
+          &GRAPHENE_POINT_INIT (
+              floor (self->filled_rect.origin.x),
+              floor (self->filled_rect.origin.y))));
 
   if (self->child != NULL)
     gtk_widget_allocate (self->child, width, height, baseline, NULL);
@@ -242,8 +281,6 @@ bz_global_progress_snapshot (GtkWidget   *widget,
   double            inner_radius   = 0.0;
   double            gap            = 0.0;
   GskRoundedRect    total_clip     = { 0 };
-  graphene_rect_t   fraction_rect  = { 0 };
-  graphene_rect_t   pending_rect   = { 0 };
   GskRoundedRect    fraction_clip  = { 0 };
   g_autoptr (GdkRGBA) accent_color = NULL;
 
@@ -273,22 +310,7 @@ bz_global_progress_snapshot (GtkWidget   *widget,
   total_clip.corner[3].width  = corner_radius;
   total_clip.corner[3].height = corner_radius;
 
-  fraction_rect = GRAPHENE_RECT_INIT (
-      0.0,
-      0.0,
-      width * self->actual_fraction,
-      height);
-  pending_rect = GRAPHENE_RECT_INIT (
-      (height * 0.2) + MAX ((width - height * 0.4) * 0.35, 0.0) * self->pending_time_mod,
-      height * 0.2,
-      MAX ((width - height * 0.4) * 0.65, 0.0),
-      height * 0.6);
-
-  graphene_rect_interpolate (
-      &fraction_rect,
-      &pending_rect,
-      self->pending_progress,
-      &fraction_clip.bounds);
+  fraction_clip.bounds           = self->filled_rect;
   fraction_clip.corner[0].width  = inner_radius;
   fraction_clip.corner[0].height = inner_radius;
   fraction_clip.corner[1].width  = inner_radius;
@@ -306,40 +328,7 @@ bz_global_progress_snapshot (GtkWidget   *widget,
   accent_color->alpha = 1.0;
 
   gtk_snapshot_push_rounded_clip (snapshot, &fraction_clip);
-  if (self->settings != NULL)
-    {
-      const char *theme = NULL;
-
-      theme = g_settings_get_string (self->settings, "global-progress-bar-theme");
-
-      if (theme == NULL || g_strcmp0 (theme, "accent-color") == 0)
-        gtk_snapshot_append_color (snapshot, accent_color, &fraction_clip.bounds);
-      else if (g_strcmp0 (theme, "pride-rainbow-flag") == 0 ||
-               g_strcmp0 (theme, "lesbian-pride-flag") == 0 ||
-               g_strcmp0 (theme, "gay-pride-flag") == 0 ||
-               g_strcmp0 (theme, "transgender-flag") == 0 ||
-               g_strcmp0 (theme, "nonbinary-flag") == 0 ||
-               g_strcmp0 (theme, "bisexual-flag") == 0 ||
-               g_strcmp0 (theme, "asexual-flag") == 0 ||
-               g_strcmp0 (theme, "pansexual-flag") == 0 ||
-               g_strcmp0 (theme, "aromantic-flag") == 0 ||
-               g_strcmp0 (theme, "genderfluid-flag") == 0 ||
-               g_strcmp0 (theme, "polysexual-flag") == 0 ||
-               g_strcmp0 (theme, "omnisexual-flag") == 0 ||
-               g_strcmp0 (theme, "aroace-flag") == 0 ||
-               g_strcmp0 (theme, "agender-flag") == 0 ||
-               g_strcmp0 (theme, "genderqueer-flag") == 0 ||
-               g_strcmp0 (theme, "intersex-flag") == 0 ||
-               g_strcmp0 (theme, "demigender-flag") == 0 ||
-               g_strcmp0 (theme, "biromantic-flag") == 0 ||
-               g_strcmp0 (theme, "disability-flag") == 0 ||
-               g_strcmp0 (theme, "femboy-flag") == 0)
-        append_pride_flag (snapshot, &fraction_clip.bounds, theme);
-      else
-        gtk_snapshot_append_color (snapshot, accent_color, &fraction_clip.bounds);
-    }
-  else
-    gtk_snapshot_append_color (snapshot, accent_color, &fraction_clip.bounds);
+  gtk_widget_snapshot_child (widget, self->draw_widget, snapshot);
   gtk_snapshot_pop (snapshot);
 
   gtk_snapshot_pop (snapshot);
@@ -443,7 +432,7 @@ tick_cb (BzGlobalProgress *self,
 
   if (self->pending_progress > 0.0 &&
       self->transition_progress > 0.0)
-    gtk_widget_queue_draw (GTK_WIDGET (self));
+    gtk_widget_queue_allocate (GTK_WIDGET (self));
 
   return G_SOURCE_CONTINUE;
 }
@@ -457,6 +446,11 @@ bz_global_progress_init (BzGlobalProgress *self)
   AdwSpringParams    *pending_spring    = NULL;
   AdwAnimationTarget *fraction_target   = NULL;
   AdwSpringParams    *fraction_spring   = NULL;
+
+  self->draw_widget = gtk_fixed_new ();
+  gtk_widget_set_halign (self->draw_widget, GTK_ALIGN_FILL);
+  gtk_widget_set_valign (self->draw_widget, GTK_ALIGN_FILL);
+  gtk_widget_set_parent (self->draw_widget, GTK_WIDGET (self));
 
   self->expand_size = 100;
 
@@ -655,7 +649,7 @@ bz_global_progress_set_actual_fraction (BzGlobalProgress *self,
   g_return_if_fail (BZ_IS_GLOBAL_PROGRESS (self));
 
   self->actual_fraction = CLAMP (fraction, 0.0, 1.0);
-  gtk_widget_queue_draw (GTK_WIDGET (self));
+  gtk_widget_queue_allocate (GTK_WIDGET (self));
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_FRACTION]);
 }
@@ -693,7 +687,7 @@ bz_global_progress_set_pending_progress (BzGlobalProgress *self,
   g_return_if_fail (BZ_IS_GLOBAL_PROGRESS (self));
 
   self->pending_progress = MAX (progress, 0.0);
-  gtk_widget_queue_draw (GTK_WIDGET (self));
+  gtk_widget_queue_allocate (GTK_WIDGET (self));
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PENDING_PROGRESS]);
 }
@@ -746,6 +740,7 @@ bz_global_progress_set_settings (BzGlobalProgress *self,
           G_CALLBACK (global_progress_bar_theme_changed),
           self);
     }
+  ensure_draw_css (self);
 
   gtk_widget_queue_draw (GTK_WIDGET (self));
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SETTINGS]);
@@ -763,5 +758,35 @@ global_progress_bar_theme_changed (BzGlobalProgress *self,
                                    const char       *key,
                                    GSettings        *settings)
 {
+  ensure_draw_css (self);
   gtk_widget_queue_draw (GTK_WIDGET (self));
+}
+
+static void
+ensure_draw_css (BzGlobalProgress *self)
+{
+  if (self->settings != NULL)
+    {
+      g_autofree char *id    = NULL;
+      g_autofree char *class = NULL;
+
+      id    = g_settings_get_string (self->settings, "global-progress-bar-theme");
+      class = bz_dup_css_class_for_pride_id (id);
+
+      if (self->draw_widget_class != NULL &&
+          g_strcmp0 (self->draw_widget_class, class) == 0)
+        return;
+
+      if (self->draw_widget_class != NULL)
+        gtk_widget_remove_css_class (self->draw_widget, self->draw_widget_class);
+      g_clear_pointer (&self->draw_widget_class, g_free);
+      gtk_widget_add_css_class (self->draw_widget, class);
+      self->draw_widget_class = g_steal_pointer (&class);
+    }
+  else
+    {
+      if (self->draw_widget_class != NULL)
+        gtk_widget_remove_css_class (self->draw_widget, self->draw_widget_class);
+      g_clear_pointer (&self->draw_widget_class, g_free);
+    }
 }

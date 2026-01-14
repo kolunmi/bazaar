@@ -25,6 +25,7 @@
 
 #include <json-glib/json-glib.h>
 
+#include "bz-app-permissions.h"
 #include "bz-async-texture.h"
 #include "bz-country-data-point.h"
 #include "bz-data-point.h"
@@ -33,7 +34,6 @@
 #include "bz-flathub-category.h"
 #include "bz-global-net.h"
 #include "bz-io.h"
-#include "bz-issue.h"
 #include "bz-release.h"
 #include "bz-serializable.h"
 #include "bz-url.h"
@@ -117,6 +117,7 @@ typedef struct
   AsContentRating *content_rating;
   GListModel      *keywords;
   GListModel      *categories;
+  BzAppPermissions *permissions;
 
   gboolean              is_flathub;
   BzVerificationStatus *verification_status;
@@ -189,6 +190,7 @@ enum
   PROP_CONTENT_RATING,
   PROP_KEYWORDS,
   PROP_CATEGORIES,
+  PROP_PERMISSIONS,
 
   LAST_PROP
 };
@@ -424,6 +426,9 @@ bz_entry_get_property (GObject    *object,
     case PROP_CATEGORIES:
       g_value_set_object (value, priv->categories);
       break;
+    case PROP_PERMISSIONS:
+      g_value_set_object (value, priv->permissions);
+      break;
     case PROP_IS_FLATHUB:
       g_value_set_boolean (value, priv->is_flathub);
       break;
@@ -636,6 +641,10 @@ bz_entry_set_property (GObject      *object,
     case PROP_CATEGORIES:
       g_clear_object (&priv->categories);
       priv->categories = g_value_dup_object (value);
+      break;
+    case PROP_PERMISSIONS:
+      g_clear_object (&priv->permissions);
+      priv->permissions = g_value_dup_object (value);
       break;
     case PROP_IS_FLATHUB:
       priv->is_flathub = g_value_get_boolean (value);
@@ -1009,6 +1018,13 @@ bz_entry_class_init (BzEntryClass *klass)
           G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE);
 
+  props[PROP_PERMISSIONS] =
+      g_param_spec_object (
+          "permissions",
+          NULL, NULL,
+          BZ_TYPE_APP_PERMISSIONS,
+          G_PARAM_READWRITE);
+
   props[PROP_IS_FLATHUB] =
       g_param_spec_boolean (
           "is-flathub",
@@ -1229,53 +1245,25 @@ bz_entry_real_serialize (BzSerializable  *serializable,
         {
           g_autoptr (GVariantBuilder) sub_builder = NULL;
 
-          sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("a(msmvtmsms)"));
+          sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("a(mstmsms)"));
           for (guint i = 0; i < n_items; i++)
             {
               g_autoptr (BzRelease) release              = NULL;
-              GListModel *issues                         = NULL;
-              g_autoptr (GVariantBuilder) issues_builder = NULL;
-              guint       n_issues                       = 0;
               guint64     timestamp                      = 0;
               const char *url                            = NULL;
               const char *version                        = NULL;
               const char *description                    = NULL;
 
               release     = g_list_model_get_item (priv->version_history, i);
-              issues      = bz_release_get_issues (release);
               timestamp   = bz_release_get_timestamp (release);
               url         = bz_release_get_url (release);
               version     = bz_release_get_version (release);
               description = bz_release_get_description (release);
 
-              if (issues != NULL)
-                {
-                  n_issues = g_list_model_get_n_items (issues);
-                  if (n_issues > 0)
-                    {
-                      issues_builder = g_variant_builder_new (G_VARIANT_TYPE ("a(msms)"));
-                      for (guint j = 0; j < n_issues; j++)
-                        {
-                          g_autoptr (BzIssue) issue = NULL;
-                          const char *issue_id      = NULL;
-                          const char *issue_url     = NULL;
-
-                          issue     = g_list_model_get_item (issues, j);
-                          issue_id  = bz_issue_get_id (issue);
-                          issue_url = bz_issue_get_url (issue);
-
-                          g_variant_builder_add (issues_builder, "(msms)", issue_id, issue_url);
-                        }
-                    }
-                }
-
               g_variant_builder_add (
                   sub_builder,
-                  "(msmvtmsms)",
+                  "(mstmsms)",
                   description,
-                  issues_builder != NULL
-                      ? g_variant_builder_end (issues_builder)
-                      : NULL,
                   timestamp,
                   url,
                   version);
@@ -1399,6 +1387,11 @@ bz_entry_real_serialize (BzSerializable  *serializable,
       if (timestamp != NULL)
         g_variant_builder_add (builder, "{sv}", "verification-timestamp", g_variant_new_string (timestamp));
       g_variant_builder_add (builder, "{sv}", "verification-login-is-organization", g_variant_new_boolean (login_is_organization));
+    }
+
+  if (priv->permissions != NULL)
+    {
+      bz_app_permissions_serialize (priv->permissions, builder);
     }
 
   g_variant_builder_add (builder, "{sv}", "is-flathub", g_variant_new_boolean (priv->is_flathub));
@@ -1610,43 +1603,16 @@ bz_entry_real_deserialize (BzSerializable *serializable,
           version_iter = g_variant_iter_new (value);
           for (;;)
             {
-              g_autoptr (GVariant) issues         = NULL;
-              g_autoptr (GListStore) issues_store = NULL;
               guint64          timestamp          = 0;
               g_autofree char *url                = NULL;
               g_autofree char *description        = NULL;
               g_autofree char *version            = NULL;
               g_autoptr (BzRelease) release       = NULL;
 
-              if (!g_variant_iter_next (version_iter, "(msmvtmsms)", &description, &issues, &timestamp, &url, &version))
+              if (!g_variant_iter_next (version_iter, "(mstmsms)", &description, &timestamp, &url, &version))
                 break;
 
-              if (issues != NULL)
-                {
-                  g_autoptr (GVariantIter) issues_iter = NULL;
-
-                  issues_store = g_list_store_new (BZ_TYPE_ISSUE);
-
-                  issues_iter = g_variant_iter_new (issues);
-                  for (;;)
-                    {
-                      g_autofree char *issue_id  = NULL;
-                      g_autofree char *issue_url = NULL;
-                      g_autoptr (BzIssue) issue  = NULL;
-
-                      if (!g_variant_iter_next (issues_iter, "(msms)", &issue_id, &issue_url))
-                        break;
-
-                      issue = bz_issue_new ();
-                      bz_issue_set_id (issue, issue_id);
-                      bz_issue_set_url (issue, issue_url);
-                      g_list_store_append (issues_store, issue);
-                    }
-                }
-
               release = bz_release_new ();
-              if (issues_store != NULL)
-                bz_release_set_issues (release, G_LIST_MODEL (issues_store));
               bz_release_set_timestamp (release, timestamp);
               bz_release_set_url (release, url);
               bz_release_set_version (release, version);
@@ -1793,6 +1759,18 @@ bz_entry_real_deserialize (BzSerializable *serializable,
         }
       else if (g_strcmp0 (key, "is-flathub") == 0)
         priv->is_flathub = g_variant_get_boolean (value);
+      else if (g_str_has_prefix (key, "permissions-"))
+        {
+          continue;
+        }
+    }
+
+  if (priv->permissions == NULL)
+    priv->permissions = bz_app_permissions_new ();
+
+  if (!bz_app_permissions_deserialize (priv->permissions, import, error))
+    {
+      g_warning ("Failed to deserialize app permissions");
     }
 
   return TRUE;
@@ -2902,4 +2880,5 @@ clear_entry (BzEntry *self)
   g_clear_object (&priv->content_rating);
   g_clear_object (&priv->keywords);
   g_clear_object (&priv->categories);
+  g_clear_object (&priv->permissions);
 }

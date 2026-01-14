@@ -1,13 +1,13 @@
 using Gtk 4.0;
 using Adw 1;
-template $BzHardwareSupportDialog : Adw.Dialog {
+
+template $BzHardwareSupportDialog: Adw.Dialog {
   content-height: 530;
   content-width: 640;
   title: _("Hardware Support");
 
   Adw.ToolbarView {
     [top]
-
     Adw.HeaderBar {
       show-title: false;
     }
@@ -27,37 +27,22 @@ template $BzHardwareSupportDialog : Adw.Dialog {
           margin-top: 24;
           margin-bottom: 24;
 
-          Box {
-            orientation: vertical;
-            spacing: 12;
+          $BzLozenge lozenge {
+            title: _("Hardware Support");
 
-            Box {
-              orientation: vertical;
-              spacing: 12;
-              halign: center;
+            icon-names: [
+              "device-supported-symbolic",
+            ];
 
-              Image lozenge {
-                icon-name: "device-supported-symbolic";
-                pixel-size: 24;
-                halign: center;
-                styles ["circular-lozenge", "large"]
-              }
-
-              Label title {
-                label: _("Hardware Support");
-                justify: center;
-                wrap: true;
-                wrap-mode: word_char;
-                xalign: 0.5;
-                styles ["title-2"]
-              }
-
-            }
+            importance: unimportant;
           }
 
           ListBox list {
             selection-mode: none;
-            styles ["boxed-list"]
+
+            styles [
+              "boxed-list",
+            ]
           }
         }
       }

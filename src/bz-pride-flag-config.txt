@@ -1,0 +1,12 @@
+prefix=bz
+name=pride_flag_config
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+include=<gtk/gtk.h>
+include="bz-pride-flag-spec.h"
+
+ensure=BZ_TYPE_PRIDE_FLAG_SPEC
+
+property=flag_specs GListModel G_TYPE_LIST_MODEL object

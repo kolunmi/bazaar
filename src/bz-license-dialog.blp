@@ -23,100 +23,33 @@ template $BzLicenseDialog: Adw.Dialog {
         Box {
           orientation: vertical;
           margin-bottom: 24;
-          spacing: 12;
           valign: center;
           vexpand: true;
 
-          Box {
+          $BzLozenge {
             visible: bind template.entry as <$BzEntry>.is-floss as <bool>;
-            halign: center;
-            spacing: 12;
+            title: bind $get_label_cb(template.entry as <$BzEntry>) as <string>;
 
-            Image {
-              icon-name: "heart-outline-thick-symbolic";
-              pixel-size: 24;
-              halign: center;
+            icon-names: [
+              "heart-outline-thick-symbolic",
+              "community-symbolic",
+              "thumbs-up-outline-symbolic",
+            ];
 
-              styles [
-                "circular-lozenge",
-                "success",
-                "large",
-              ]
-            }
-
-            Image {
-              icon-name: "community-symbolic";
-              pixel-size: 24;
-              halign: center;
-
-              styles [
-                "circular-lozenge",
-                "success",
-                "large",
-              ]
-            }
-
-            Image {
-              icon-name: "thumbs-up-outline-symbolic";
-              pixel-size: 24;
-              halign: center;
-
-              styles [
-                "circular-lozenge",
-                "success",
-                "large",
-              ]
-            }
+            importance: unimportant;
           }
 
-          Box {
+          $BzLozenge {
             visible: bind $invert_boolean(template.entry as <$BzEntry>.is-floss as <bool>) as <bool>;
-            halign: center;
-            spacing: 12;
+            title: bind $get_label_cb(template.entry as <$BzEntry>) as <string>;
 
-            Image {
-              icon-name: "hand-openyay-symbolic";
-              pixel-size: 24;
-              halign: center;
+            icon-names: [
+              "hand-openyay-symbolic",
+              "proprietary-code-symbolic",
+              "license-symbolic",
+            ];
 
-              styles [
-                "circular-lozenge",
-                "warning",
-                "large",
-              ]
-            }
-
-            Image {
-              icon-name: "proprietary-code-symbolic";
-              pixel-size: 24;
-              halign: center;
-
-              styles [
-                "circular-lozenge",
-                "warning",
-                "large",
-              ]
-            }
-
-            Image {
-              icon-name: "license-symbolic";
-              pixel-size: 24;
-              halign: center;
-
-              styles [
-                "circular-lozenge",
-                "warning",
-                "large",
-              ]
-            }
-          }
-
-          Label {
-            styles [
-              "title-2",
-            ]
-
-            label: bind $get_label_cb(template.entry as <$BzEntry>) as <string>;
+            importance: information;
           }
         }
 
@@ -133,6 +66,7 @@ template $BzLicenseDialog: Adw.Dialog {
 
             ListBoxRow {
               vexpand: true;
+              activatable: false;
 
               Label {
                 label: bind $get_license_info(template.entry as <$BzEntry>) as <string>;
@@ -142,6 +76,7 @@ template $BzLicenseDialog: Adw.Dialog {
                 margin-start: 12;
                 margin-end: 12;
                 use-markup: true;
+                xalign: 0;
                 wrap: true;
                 wrap-mode: word_char;
               }

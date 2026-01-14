@@ -534,7 +534,7 @@ msgstr "Χωρίς κανένα πολυμέσο"
 
 #: src/bz-app-tile.blp:84 src/bz-installed-page.blp:25 src/bz-window.blp:298
 msgid "Installed"
-msgstr "Εγκατεστημένο"
+msgstr "Εγκατεστημένες"
 
 #: src/bz-apps-page.blp:14 src/bz-full-view.blp:43 src/bz-user-data-page.blp:15
 #: src/bz-window.blp:443
@@ -591,7 +591,7 @@ msgstr "Adam Masciola"
 #. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
 #: src/bz-application.c:685
 msgid "translator-credits"
-msgstr "μεταφραστής-συντελεστές"
+msgstr "Xarishark-Zacharias Xenakis"
 
 #: src/bz-application.c:749
 msgid "Logged Out Successfully!"
@@ -787,7 +787,7 @@ msgstr "Παιχνίδια"
 
 #: src/bz-flathub-category.c:81
 msgid "Play"
-msgstr "Παίξτε"
+msgstr "Παιχνίδι"
 
 #: src/bz-flathub-category.c:81
 msgid "More Gaming"
@@ -881,23 +881,23 @@ msgstr "Πρόσφατα Προστέθηκαν"
 
 #: src/bz-flathub-category.c:90 src/bz-flathub-page.blp:131
 msgid "New"
-msgstr "Νέα"
+msgstr "Νέες"
 
 #: src/bz-flathub-category.c:90
 msgid "More New"
-msgstr "Περισσότερα Νέα"
+msgstr "Περισσότερες Νέες"
 
 #: src/bz-flathub-category.c:91 src/bz-flathub-page.blp:163
 msgid "Recently Updated"
-msgstr "Πρόσφατα Ενημερωμένο"
+msgstr "Πρόσφατα Ενημερωμένες"
 
 #: src/bz-flathub-category.c:91 src/bz-flathub-page.blp:137
 msgid "Updated"
-msgstr "Ενημερωμένο"
+msgstr "Ενημερωμένες"
 
 #: src/bz-flathub-category.c:91
 msgid "More Updated"
-msgstr "Περισσότερα Ενημερωμένα"
+msgstr "Περισσότερες Ενημερωμένες"
 
 #: src/bz-flathub-category.c:92
 msgid "Mobile"
@@ -1829,7 +1829,7 @@ msgstr "Ανανέωση περιεχομένου καταστήματος"
 
 #: src/bz-window.blp:273
 msgid "Curated"
-msgstr "Επιμελημένο"
+msgstr "Επιμελημένες"
 
 #: src/bz-window.blp:286
 msgid "Flathub"

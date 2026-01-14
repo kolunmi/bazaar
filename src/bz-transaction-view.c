@@ -115,8 +115,6 @@ static char *
 format_download_size (gpointer object,
                       guint64  value)
 {
-  g_autofree char *size = NULL;
-
   return g_format_size (value);
 }
 
@@ -124,8 +122,6 @@ static char *
 format_installed_size (gpointer object,
                        guint64  value)
 {
-  g_autofree char *size = NULL;
-
   return g_format_size (value);
 }
 
@@ -213,28 +209,28 @@ is_transaction_type (gpointer                   object,
   if (tracker == NULL)
     return FALSE;
 
-  return bz_transaction_entry_tracker_get_type_enum (tracker) == type;
+  return bz_transaction_entry_tracker_get_kind (tracker) == type;
 }
 
 static gboolean
 is_transaction_tracker_install (gpointer                   object,
                                 BzTransactionEntryTracker *tracker)
 {
-  return is_transaction_type (object, tracker, BZ_TRANSACTION_ENTRY_TYPE_INSTALL);
+  return is_transaction_type (object, tracker, BZ_TRANSACTION_ENTRY_KIND_INSTALL);
 }
 
 static gboolean
 is_transaction_tracker_update (gpointer                   object,
                                BzTransactionEntryTracker *tracker)
 {
-  return is_transaction_type (object, tracker, BZ_TRANSACTION_ENTRY_TYPE_UPDATE);
+  return is_transaction_type (object, tracker, BZ_TRANSACTION_ENTRY_KIND_UPDATE);
 }
 
 static gboolean
 is_transaction_tracker_removal (gpointer                   object,
                                 BzTransactionEntryTracker *tracker)
 {
-  return is_transaction_type (object, tracker, BZ_TRANSACTION_ENTRY_TYPE_REMOVAL);
+  return is_transaction_type (object, tracker, BZ_TRANSACTION_ENTRY_KIND_REMOVAL);
 }
 
 static gboolean
@@ -248,49 +244,24 @@ list_has_items (gpointer    object,
 }
 
 static gboolean
-is_queued (gpointer    object,
-           GListModel *current_ops,
-           GListModel *finished_ops)
+is_queued (gpointer                 object,
+           BzTransactionEntryStatus status)
 {
-
-  gboolean has_current_ops  = 0;
-  gboolean has_finished_ops = 0;
-
-  if (current_ops == NULL || finished_ops == NULL)
-    return FALSE;
-
-  has_current_ops  = list_has_items (object, current_ops);
-  has_finished_ops = list_has_items (object, finished_ops);
-
-  return !has_current_ops && !has_finished_ops;
+  return status == BZ_TRANSACTION_ENTRY_STATUS_QUEUED;
 }
 
 static gboolean
-is_ongoing (gpointer    object,
-            GListModel *current_ops)
+is_ongoing (gpointer                 object,
+            BzTransactionEntryStatus status)
 {
-  if (current_ops == NULL)
-    return FALSE;
-
-  return list_has_items (object, current_ops);
+  return status == BZ_TRANSACTION_ENTRY_STATUS_ONGOING;
 }
 
 static gboolean
-is_completed (gpointer    object,
-              GListModel *current_ops,
-              GListModel *finished_ops)
+is_completed (gpointer                 object,
+              BzTransactionEntryStatus status)
 {
-
-  gboolean has_current_ops  = 0;
-  gboolean has_finished_ops = 0;
-
-  if (current_ops == NULL || finished_ops == NULL)
-    return FALSE;
-
-  has_current_ops  = list_has_items (object, current_ops);
-  has_finished_ops = list_has_items (object, finished_ops);
-
-  return !has_current_ops && has_finished_ops;
+  return status == BZ_TRANSACTION_ENTRY_STATUS_DONE;
 }
 
 static gboolean

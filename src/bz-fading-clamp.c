@@ -21,6 +21,7 @@
 #include "bz-fading-clamp.h"
 
 #define FADE_HEIGHT 75
+#define CLAMP_LEEWAY 100
 
 struct _BzFadingClamp
 {
@@ -77,7 +78,7 @@ bz_fading_clamp_update_will_change (BzFadingClamp *self)
         gtk_widget_measure (self->child, GTK_ORIENTATION_HORIZONTAL, -1, NULL, &width, NULL, NULL);
 
       gtk_widget_measure (self->child, GTK_ORIENTATION_VERTICAL, width, NULL, &natural_height, NULL, NULL);
-      new_value = natural_height > self->min_max_height;
+      new_value = natural_height > self->min_max_height + CLAMP_LEEWAY;
     }
 
   if (self->will_change != new_value)
@@ -169,7 +170,10 @@ bz_fading_clamp_measure (GtkWidget *widget, GtkOrientation orientation, int for_
     {
       gtk_widget_measure (self->child, GTK_ORIENTATION_VERTICAL, for_size, minimum, natural, minimum_baseline, natural_baseline);
 
-      target_height = MIN (*natural, self->max_height);
+      if (*natural <= self->max_height + CLAMP_LEEWAY)
+        target_height = *natural;
+      else
+        target_height = self->max_height;
 
       bz_fading_clamp_update_will_change (self);
 
@@ -215,12 +219,16 @@ bz_fading_clamp_snapshot (GtkWidget *widget, GtkSnapshot *snapshot)
   GskColorStop     stops[2];
   graphene_point_t start_point, end_point;
   int              effective_fade_height;
+  float            stop_offset;
 
   if (!self->child || !gtk_widget_get_visible (self->child))
     return;
 
   width  = gtk_widget_get_width (widget);
   height = gtk_widget_get_height (widget);
+
+  if (height <= 0)
+    return;
 
   gtk_widget_measure (self->child, GTK_ORIENTATION_VERTICAL, width, NULL, &natural_height, NULL, NULL);
 
@@ -237,8 +245,10 @@ bz_fading_clamp_snapshot (GtkWidget *widget, GtkSnapshot *snapshot)
   gradient_start = height - effective_fade_height;
   graphene_rect_init (&gradient_rect, 0, 0, width, height);
 
+  stop_offset = CLAMP ((float) gradient_start / height, 0.0f, 1.0f);
+
   stops[0] = (GskColorStop) {
-    (float) gradient_start / height, { 1, 1, 1, 1 }
+    stop_offset, { 1, 1, 1, 1 }
   };
   stops[1] = (GskColorStop) {
     1.0, { 1, 1, 1, 0 }
@@ -359,7 +369,11 @@ bz_fading_clamp_set_max_height (BzFadingClamp *self, int max_height)
         gtk_widget_measure (self->child, GTK_ORIENTATION_HORIZONTAL, -1, NULL, &width, NULL, NULL);
 
       gtk_widget_measure (self->child, GTK_ORIENTATION_VERTICAL, width, NULL, &natural_height, NULL, NULL);
-      target_height = MIN (natural_height, max_height);
+
+      if (natural_height <= max_height + CLAMP_LEEWAY)
+        target_height = natural_height;
+      else
+        target_height = max_height;
     }
   else
     {

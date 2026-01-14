@@ -4,14 +4,15 @@
 # Automatically generated, 2025.
 #
 # SPDX-FileCopyrightText: 2025 Jill Fiore <contact@lumaeris.com>
-# Jill Fiore <contact@lumaeris.com>, 2025.
+# Jill Fiore <contact@lumaeris.com>, 2025-2026.
 #
+#: src/bz-installed-page.blp:68
 msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-27 09:11+0700\n"
-"PO-Revision-Date: 2025-12-27 12:26+0700\n"
+"POT-Creation-Date: 2026-01-12 03:42+0700\n"
+"PO-Revision-Date: 2026-01-12 08:38+0700\n"
 "Last-Translator: Jill Fiore <contact@lumaeris.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -24,7 +25,7 @@ msgstr ""
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:2
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:5
-#: src/bz-window.blp:234
+#: src/bz-window.blp:233
 msgid "Bazaar"
 msgstr "Bazaar"
 
@@ -37,65 +38,9 @@ msgstr ""
 msgid "GTK;System;PackageManager;Discover;Flatpak;Software;Store;"
 msgstr "GTK;Система;УправлениеПакетами;Discover;Flatpak;Приложения;Магазин;"
 
-#: data/io.github.kolunmi.Bazaar.gschema.xml:6
-msgid "Hide EOL Entries"
-msgstr "Скрыть неподдерживаемое ПО"
-
-#: data/io.github.kolunmi.Bazaar.gschema.xml:7
-msgid "Hide EOL entries and entries depending on them"
-msgstr ""
-"Скрыть неподдерживаемые среды выполнения, а так же зависящие от них "
-"приложения"
-
-#: data/io.github.kolunmi.Bazaar.gschema.xml:11
-msgid "Only Show Free Software"
-msgstr "Показывать только свободные приложения"
-
-#: data/io.github.kolunmi.Bazaar.gschema.xml:12
-msgid "Hide proprietary software"
-msgstr "Скрыть проприетарные приложения"
-
-#: data/io.github.kolunmi.Bazaar.gschema.xml:16
-msgid "Show Only Flathub Content"
-msgstr "Показывать только приложения из Flathub"
-
-#: data/io.github.kolunmi.Bazaar.gschema.xml:17
-msgid "Hide applications which do not originate from Flathub"
-msgstr "Скрыть приложения, которые не распространяются Flathub"
-
-#: data/io.github.kolunmi.Bazaar.gschema.xml:21
-msgid "Show Only Verified Content"
-msgstr "Показывать только верифицированные приложения"
-
-#: data/io.github.kolunmi.Bazaar.gschema.xml:22
-msgid "Hide applications which are not verified on Flathub"
-msgstr "Скрыть приложения, которые не были верифицированы на Flathub"
-
-#: data/io.github.kolunmi.Bazaar.gschema.xml:26
-msgid "Debounce Search Inputs"
-msgstr "Увеличить время отклика ввода при поиске"
-
-#: data/io.github.kolunmi.Bazaar.gschema.xml:27
-msgid "Add a delay before searching to prevent instant replies while typing"
-msgstr ""
-"Добавить время отклика перед выполнением фильтрации быстрых ответов при вводе"
-
-#: data/io.github.kolunmi.Bazaar.gschema.xml:53
-msgid "Global Progress Bar Theme"
-msgstr "Тема оформления глобальной полосы прогресса"
-
-#: data/io.github.kolunmi.Bazaar.gschema.xml:54
-msgid "Describes the look of the global progress bar"
-msgstr "Описывает внешний вид глобальной полосы прогресса"
-
-#: data/io.github.kolunmi.Bazaar.gschema.xml:58
-msgid "Saved Window Dimensions"
-msgstr "Сохранить размер окна"
-
-#: data/io.github.kolunmi.Bazaar.gschema.xml:59
-msgid "The window dimensions to be used by the next Bazaar window"
-msgstr ""
-"Сохранённый размер окна будет использован при повторном открытии Bazaar"
+#: data/io.github.kolunmi.Bazaar.desktop.in:15
+msgid "New Window"
+msgstr "Новое окно"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:8
 msgid "Discover and install applications"
@@ -103,10 +48,10 @@ msgstr "Поиск и установка приложений"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:10
 msgid ""
-"A new app store for GNOME with a focus on discovering and installing "
+"A new app store for Linux with a focus on discovering and installing "
 "applications and addons from Flatpak remotes, particularly Flathub."
 msgstr ""
-"Новый магазин приложений для GNOME с фокусом на поиске, установке приложений "
+"Новый магазин приложений для Linux с фокусом на поиске, установке приложений "
 "и дополнений из Flatpak репозиторий, в частности с Flathub."
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:14
@@ -119,7 +64,7 @@ msgstr ""
 "возможным. Bazaar внедряет вкладку \"Курируемое\", которая настраивается "
 "дистрибьюторами для обеспечения более ориентированного опыта."
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29 src/bz-application.c:705
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29 src/bz-application.c:697
 msgid "Adam Masciola"
 msgstr "Адам Масциола"
 
@@ -139,182 +84,216 @@ msgstr "Страница поиска"
 msgid "Category page"
 msgstr "Страница категорий"
 
-#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:686
+#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:694
 #: src/bz-installed-tile.blp:99
 msgid "Manage Add-ons"
 msgstr "Управление дополнениями"
 
-#: src/bz-addons-dialog.c:90 src/bz-full-view.blp:477
-#: src/bz-installed-tile.blp:117 src/bz-transaction-view.blp:213
-#: src/bz-window.c:1331
+#: src/bz-addons-dialog.c:90 src/bz-full-view.blp:482
+#: src/bz-installed-tile.blp:117 src/bz-transaction-dialog.c:224
+#: src/bz-transaction-view.blp:277
 msgid "Remove"
 msgstr "Удалить"
 
 #: src/bz-addons-dialog.c:95 src/bz-favorites-tile.c:166
-#: src/bz-full-view.blp:249 src/bz-full-view.blp:464
-#: src/bz-transaction-view.blp:187 src/bz-window.c:1308
+#: src/bz-full-view.blp:249 src/bz-full-view.blp:469
+#: src/bz-transaction-dialog.c:201 src/bz-transaction-view.blp:225
 msgid "Install"
 msgstr "Установить"
 
-#: src/bz-age-rating-dialog.blp:7 src/bz-age-rating-dialog.blp:50
-#: src/bz-full-view.c:374 src/bz-full-view.c:381
+#: src/bz-age-rating-dialog.blp:7 src/bz-age-rating-dialog.blp:31
+#: src/bz-age-rating-dialog.c:726 src/bz-full-view.c:409 src/bz-full-view.c:416
 msgid "Age Rating"
 msgstr "Возраст"
 
-#: src/bz-age-rating-dialog.blp:40 src/bz-age-rating-dialog.c:790
-msgid "?"
-msgstr "?"
-
-#: src/bz-age-rating-dialog.c:139
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:88
 msgid "Cartoon Violence"
 msgstr "Мультипликационное насилие"
 
-#: src/bz-age-rating-dialog.c:140
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:90
 msgid "No information regarding cartoon violence"
 msgstr "Нет информации о мультипликационном насилии"
 
-#: src/bz-age-rating-dialog.c:143
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:94
 msgid "Fantasy Violence"
 msgstr "Фэнтезийное насилие"
 
-#: src/bz-age-rating-dialog.c:144
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:96
 msgid "No information regarding fantasy violence"
 msgstr "Нет информации о фэнтезийном насилии"
 
-#: src/bz-age-rating-dialog.c:147
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:100
 msgid "Realistic Violence"
 msgstr "Реалистичное насилие"
 
-#: src/bz-age-rating-dialog.c:148
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:102
 msgid "No information regarding realistic violence"
 msgstr "Нет информации о реалистичном насилии"
 
-#: src/bz-age-rating-dialog.c:151
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:106
 msgid "Violence Depicting Bloodshed"
 msgstr "Кровопролитие"
 
-#: src/bz-age-rating-dialog.c:152
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:108
 msgid "No information regarding bloodshed"
 msgstr "Нет информации о кровопролитии"
 
-#: src/bz-age-rating-dialog.c:155
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:112
 msgid "Sexual Violence"
 msgstr "Сексуальное насилие"
 
-#: src/bz-age-rating-dialog.c:156
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:114
 msgid "No information regarding sexual violence"
 msgstr "Нет информации о сексуальном насилии"
 
-#: src/bz-age-rating-dialog.c:159
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:118
 msgid "Alcohol"
 msgstr "Алкоголь"
 
-#: src/bz-age-rating-dialog.c:160
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:120
 msgid "No information regarding references to alcohol"
 msgstr "Нет информации о упоминании алкоголя"
 
-#: src/bz-age-rating-dialog.c:163
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:124
 msgid "Narcotics"
 msgstr "Наркотики"
 
-#: src/bz-age-rating-dialog.c:164
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:126
 msgid "No information regarding references to illicit drugs"
 msgstr "Нет информации о упоминании наркотических средств"
 
-#: src/bz-age-rating-dialog.c:167
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:130
 msgid "Tobacco"
 msgstr "Табак"
 
-#: src/bz-age-rating-dialog.c:168
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:132
 msgid "No information regarding references to tobacco products"
 msgstr "Нет информации о упоминании табачных изделий"
 
-#: src/bz-age-rating-dialog.c:171 src/bz-age-rating-dialog.c:358
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:136 src/bz-age-rating-dialog.c:475
 msgid "Nudity"
 msgstr "Нагота"
 
-#: src/bz-age-rating-dialog.c:172
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:138
 msgid "No information regarding nudity of any sort"
 msgstr "Нет информации о наготе любого рода"
 
-#: src/bz-age-rating-dialog.c:175
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:142
 msgid "Sexual Themes"
 msgstr "Сексуальные темы"
 
-#: src/bz-age-rating-dialog.c:176
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:144
 msgid "No information regarding references to or depictions of sexual nature"
 msgstr ""
 "Нет информации о упоминании или показе изображений сексуального характера"
 
-#: src/bz-age-rating-dialog.c:179
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:148
 msgid "Profanity"
 msgstr "Ненормативная лексика"
 
-#: src/bz-age-rating-dialog.c:180
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:150
 msgid "No information regarding profanity of any kind"
 msgstr "Нет информации о ненормативной лексике в любом виде"
 
-#: src/bz-age-rating-dialog.c:183
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:154
 msgid "Inappropriate Humor"
 msgstr "Неприемлемый юмор"
 
-#: src/bz-age-rating-dialog.c:184
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:156
 msgid "No information regarding inappropriate humor"
 msgstr "Нет информации о неприемоемом юморе"
 
-#: src/bz-age-rating-dialog.c:187
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:160
 msgid "Discrimination"
 msgstr "Дискриминация"
 
-#: src/bz-age-rating-dialog.c:188
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:162
 msgid "No information regarding discriminatory language of any kind"
 msgstr "Нет информации о дискриминации в любом виде"
 
-#: src/bz-age-rating-dialog.c:191
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:166
 msgid "Advertising"
 msgstr "Реклама"
 
-#: src/bz-age-rating-dialog.c:192
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:168
 msgid "No information regarding advertising of any kind"
 msgstr "Нет информации о рекламе в любом виде"
 
-#: src/bz-age-rating-dialog.c:195
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:172
 msgid "Gambling"
 msgstr "Азартные игры"
 
-#: src/bz-age-rating-dialog.c:196
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:174
 msgid "No information regarding gambling of any kind"
 msgstr "Нет информации о азартных играх в любом виде"
 
-#: src/bz-age-rating-dialog.c:199
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:178
 msgid "Purchasing"
 msgstr "Покупка"
 
-#: src/bz-age-rating-dialog.c:200
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:180
 msgid "No information regarding the ability to spend money"
 msgstr "Нет информации о возможности тратить деньги"
 
-#: src/bz-age-rating-dialog.c:203
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:184
 msgid "Chat Between Users"
 msgstr "Общение между пользователями"
 
-#: src/bz-age-rating-dialog.c:204
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:186
 msgid "No information regarding ways to chat with other users"
 msgstr "Нет инфорамции о возможностях общаться с другими пользователями"
 
-#: src/bz-age-rating-dialog.c:207
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:190
 msgid "Audio Chat Between Users"
 msgstr "Аудиочат между пользователями"
 
-#: src/bz-age-rating-dialog.c:208
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:192
 msgid "No information regarding ways to talk with other users"
 msgstr "Нет информации о возможности разговаривать с другими пользователями"
 
-#: src/bz-age-rating-dialog.c:211
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:196
 msgid "Contact Details"
 msgstr "Контактная информация"
 
-#: src/bz-age-rating-dialog.c:212
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:198
 msgid ""
 "No information regarding sharing of social network usernames or email "
 "addresses"
@@ -322,259 +301,373 @@ msgstr ""
 "Нет информации о распространении имён пользователей или адресов электронной "
 "почты"
 
-#: src/bz-age-rating-dialog.c:215
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:202
 msgid "Identifying Information"
 msgstr "Идентифицирующая информация"
 
-#: src/bz-age-rating-dialog.c:216
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:204
 msgid "No information regarding sharing of user information with third parties"
 msgstr ""
 "Нет информации о распространении пользовательских данных с другими лицами"
 
-#: src/bz-age-rating-dialog.c:219
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:208
 msgid "Location Sharing"
 msgstr "Распространение местоположения"
 
-#: src/bz-age-rating-dialog.c:220
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:210
 msgid "No information regarding sharing of physical location with other users"
 msgstr ""
 "Нет информации о распространении физического местоположения с другими "
 "пользователями"
 
-#: src/bz-age-rating-dialog.c:223
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:214
 msgid "Prostitution"
 msgstr "Проституция"
 
-#: src/bz-age-rating-dialog.c:224
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:216
 msgid "No information regarding references to prostitution"
 msgstr "Нет информации о упоминании проституции"
 
-#: src/bz-age-rating-dialog.c:227
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:220
 msgid "Adultery"
 msgstr "Прелюбодеяние"
 
-#: src/bz-age-rating-dialog.c:228
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:222
 msgid "No information regarding references to adultery"
 msgstr "Нет информации о упоминании прелюбодеяния"
 
-#: src/bz-age-rating-dialog.c:231
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:226
 msgid "Sexualized Characters"
 msgstr "Сексуализированные персонажи"
 
-#: src/bz-age-rating-dialog.c:232
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:228
 msgid "No information regarding sexualized characters"
 msgstr "Нет информации о сексуализированных персонажей"
 
-#: src/bz-age-rating-dialog.c:235
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:232
 msgid "Desecration"
 msgstr "Осквернение"
 
-#: src/bz-age-rating-dialog.c:236
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:234
 msgid "No information regarding references to desecration"
 msgstr "Нет информации о осквернении"
 
-#: src/bz-age-rating-dialog.c:239
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:238
 msgid "Human Remains"
 msgstr "Останки человека"
 
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:240
 msgid "No information regarding visible dead human remains"
 msgstr "Нет информации о видимости останков человека"
 
-#: src/bz-age-rating-dialog.c:243
+#. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:244
 msgid "Slavery"
 msgstr "Рабство"
 
-#: src/bz-age-rating-dialog.c:244
+#. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
+#: src/bz-age-rating-dialog.c:246
 msgid "No information regarding references to slavery"
 msgstr "Нет информации о упоминании рабства"
 
-#: src/bz-age-rating-dialog.c:307
+#: src/bz-age-rating-dialog.c:424
 msgid "Does not include references to drugs"
 msgstr "Не содержит упоминания наркотических средств"
 
-#: src/bz-age-rating-dialog.c:309
+#: src/bz-age-rating-dialog.c:426
 msgid ""
 "Does not include swearing, profanity, and other kinds of strong language"
 msgstr ""
 "Не содержит ругательство, ненормативную лексику, и любых видов грубой речи"
 
-#: src/bz-age-rating-dialog.c:311
+#: src/bz-age-rating-dialog.c:428
 msgid "Does not include ads or monetary transactions"
 msgstr "Не содержит рекламу или денежные транзакции"
 
-#: src/bz-age-rating-dialog.c:313
+#: src/bz-age-rating-dialog.c:430
 msgid "Does not include sex or nudity"
 msgstr "Не содержит секс или наготу"
 
-#: src/bz-age-rating-dialog.c:315
+#: src/bz-age-rating-dialog.c:432
 msgid "Does not include uncontrolled chat functionality"
 msgstr "Не содержит функциональность немодерируемого чата"
 
-#: src/bz-age-rating-dialog.c:317
+#: src/bz-age-rating-dialog.c:434
 msgid "Does not include violence"
 msgstr "Не содержит насилие"
 
-#: src/bz-age-rating-dialog.c:352
+#: src/bz-age-rating-dialog.c:469
 msgid "Drugs"
 msgstr "Наркотики"
 
-#: src/bz-age-rating-dialog.c:354
+#: src/bz-age-rating-dialog.c:471
 msgid "Strong Language"
 msgstr "Грубая речь"
 
-#: src/bz-age-rating-dialog.c:356
+#: src/bz-age-rating-dialog.c:473
 msgid "Money"
 msgstr "Деньги"
 
-#: src/bz-age-rating-dialog.c:360
+#: src/bz-age-rating-dialog.c:477
 msgid "Social"
 msgstr "Общение"
 
-#: src/bz-age-rating-dialog.c:362
+#: src/bz-age-rating-dialog.c:479
 msgid "Violence"
 msgstr "Насилие"
 
-#: src/bz-age-rating-dialog.c:564
-#, c-format
-msgid "%s • %s"
-msgstr "%s • %s"
-
 #. Translators: Age rating format, e.g. "12+" for ages 12 and up
-#: src/bz-age-rating-dialog.c:752 src/bz-full-view.c:364
+#: src/bz-age-rating-dialog.c:676 src/bz-full-view.c:399
 #, c-format
 msgid "%d+"
 msgstr "%d+"
 
-#: src/bz-age-rating-dialog.c:782
+#: src/bz-age-rating-dialog.c:701
 msgctxt "Age rating"
 msgid "All"
 msgstr "Все"
 
-#: src/bz-age-rating-dialog.c:846
+#: src/bz-age-rating-dialog.c:737
 #, c-format
 msgid "%s has an unknown age rating"
 msgstr "%s имеет неизвестное возрастное ограничение"
 
-#: src/bz-age-rating-dialog.c:854
+#: src/bz-age-rating-dialog.c:743
 #, c-format
 msgid "%s is suitable for everyone"
 msgstr "%s предназначено для всех возрастов"
 
-#: src/bz-age-rating-dialog.c:857
-#, c-format
-msgid "%s is suitable for toddlers"
-msgstr "%s предназначено для детей младшего возраста"
-
-#: src/bz-age-rating-dialog.c:860
+#: src/bz-age-rating-dialog.c:746
 #, c-format
 msgid "%s is suitable for young children"
 msgstr "%s предназначено для маленьких детей"
 
-#: src/bz-age-rating-dialog.c:863
+#: src/bz-age-rating-dialog.c:749
 #, c-format
 msgid "%s is suitable for children"
 msgstr "%s предназначено для детей"
 
-#: src/bz-age-rating-dialog.c:866
+#: src/bz-age-rating-dialog.c:752
 #, c-format
 msgid "%s is suitable for teenagers"
 msgstr "%s предназначено для подростков"
 
-#: src/bz-age-rating-dialog.c:869
+#: src/bz-age-rating-dialog.c:755
 #, c-format
 msgid "%s is suitable for adults"
 msgstr "%s предназначено для взрослых"
 
-#: src/bz-age-rating-dialog.c:872
+#: src/bz-age-rating-dialog.c:758
 #, c-format
 msgid "%s is suitable for %s"
 msgstr "%s предназначено для %s"
 
+#: src/bz-age-rating-dialog.c:849
+#, c-format
+msgid "%s • %s"
+msgstr "%s • %s"
+
 #: src/bz-all-apps-page.blp:13 src/bz-apps-page.blp:14 src/bz-full-view.blp:43
-#: src/bz-user-data-page.blp:15 src/bz-window.blp:443
+#: src/bz-user-data-page.blp:15 src/bz-window.blp:480
 msgid "Main Menu"
 msgstr "Главное меню"
 
 #: src/bz-all-apps-page.blp:17 src/bz-apps-page.blp:17
-#: src/bz-user-data-page.blp:18 src/bz-window.blp:522
+#: src/bz-user-data-page.blp:18 src/bz-window.blp:553
 msgid "_Donate to Bazaar ❤️"
 msgstr "_Поддержать Bazaar ❤️"
 
 #: src/bz-all-apps-page.blp:18 src/bz-apps-page.blp:18
 #: src/bz-user-data-page.blp:19
 msgid "_Refresh Content"
-msgstr "_Обновить контент"
+msgstr "_Обновить содержимое"
 
 #: src/bz-all-apps-page.blp:22 src/bz-apps-page.blp:22
-#: src/bz-user-data-page.blp:22 src/bz-window.blp:529
+#: src/bz-user-data-page.blp:22 src/bz-window.blp:560
 msgid "_Preferences"
 msgstr "П_араметры"
 
 #: src/bz-all-apps-page.blp:23 src/bz-apps-page.blp:23
-#: src/bz-user-data-page.blp:23 src/bz-window.blp:550
+#: src/bz-user-data-page.blp:23 src/bz-window.blp:581
 msgid "_Keyboard Shortcuts"
 msgstr "_Сочетание клавиш"
 
 #: src/bz-all-apps-page.blp:24 src/bz-apps-page.blp:24
-#: src/bz-user-data-page.blp:24 src/bz-window.blp:555
+#: src/bz-user-data-page.blp:24 src/bz-window.blp:586
 msgid "_About Bazaar"
 msgstr "О _Bazaar"
 
 #: src/bz-all-apps-page.blp:28 src/bz-apps-page.blp:28
-#: src/bz-user-data-page.blp:27 src/bz-window.blp:562
+#: src/bz-user-data-page.blp:27 src/bz-window.blp:593
 msgid "_Quit Bazaar"
 msgstr "_Закрыть Bazaar"
 
-#: src/bz-app-size-dialog.blp:43
-msgid "--- MB"
-msgstr "--- МБ"
+#: src/bz-app-permissions.c:160
+#, c-format
+msgid "System folder %s"
+msgstr "Системная папка %s"
 
-#: src/bz-app-size-dialog.blp:53
+#: src/bz-app-permissions.c:162
+#, c-format
+msgid "Home subfolder %s"
+msgstr "Домашняя подпапка %s"
+
+#: src/bz-app-permissions.c:164
+msgid "Host system folders"
+msgstr "Системные папки хоста"
+
+#: src/bz-app-permissions.c:166
+msgid "Host system configuration from /etc"
+msgstr "Системная конфигурация хоста из /etc"
+
+#: src/bz-app-permissions.c:169
+#, c-format
+msgid "Desktop subfolder %s"
+msgstr "Подпапка рабочего стола %s"
+
+#: src/bz-app-permissions.c:170
+msgid "Desktop folder"
+msgstr "Папка рабочего стола"
+
+#: src/bz-app-permissions.c:173
+#, c-format
+msgid "Documents subfolder %s"
+msgstr "Подпапка документов %s"
+
+#: src/bz-app-permissions.c:174
+msgid "Documents folder"
+msgstr "Папка документов"
+
+#: src/bz-app-permissions.c:177
+#, c-format
+msgid "Music subfolder %s"
+msgstr "Подпапка музыки %s"
+
+#: src/bz-app-permissions.c:178
+msgid "Music folder"
+msgstr "Папка музыки"
+
+#: src/bz-app-permissions.c:181
+#, c-format
+msgid "Pictures subfolder %s"
+msgstr "Подпапка изображений %s"
+
+#: src/bz-app-permissions.c:182
+msgid "Pictures folder"
+msgstr "Папка изображений"
+
+#: src/bz-app-permissions.c:185
+#, c-format
+msgid "Public Share subfolder %s"
+msgstr "Подпапка общего доступа %s"
+
+#: src/bz-app-permissions.c:186
+msgid "Public Share folder"
+msgstr "Папка общего доступа"
+
+#: src/bz-app-permissions.c:189
+#, c-format
+msgid "Videos subfolder %s"
+msgstr "Подпапка с видео %s"
+
+#: src/bz-app-permissions.c:190
+msgid "Videos folder"
+msgstr "Папка с видео"
+
+#: src/bz-app-permissions.c:193
+#, c-format
+msgid "Templates subfolder %s"
+msgstr "Подпапка шаблонов %s"
+
+#: src/bz-app-permissions.c:194
+msgid "Templates folder"
+msgstr "Папка шаблонов"
+
+#: src/bz-app-permissions.c:197
+#, c-format
+msgid "User cache subfolder %s"
+msgstr "Подпапка пользовательского кэша %s"
+
+#: src/bz-app-permissions.c:198
+msgid "User cache folder"
+msgstr "Папка пользовательского кэша"
+
+#: src/bz-app-permissions.c:201
+#, c-format
+msgid "User configuration subfolder %s"
+msgstr "Подпапка пользовательской конфигурации %s"
+
+#: src/bz-app-permissions.c:202
+msgid "User configuration folder"
+msgstr "Папка пользовательской конфигурации"
+
+#: src/bz-app-permissions.c:205
+#, c-format
+msgid "User data subfolder %s"
+msgstr "Подпапка пользовательских данных %s"
+
+#: src/bz-app-permissions.c:206
+msgid "User data folder"
+msgstr "Папка пользовательских данных"
+
+#: src/bz-app-permissions.c:209
+#, c-format
+msgid "User runtime subfolder %s"
+msgstr "Подпапка пользовательской среды выполнения %s"
+
+#: src/bz-app-permissions.c:210
+msgid "User runtime folder"
+msgstr "Папка пользовательской среды выполнения"
+
+#: src/bz-app-permissions.c:212
+#, c-format
+msgid "Filesystem access to %s"
+msgstr "Доступ к файловой системе в %s"
+
+#: src/bz-app-permissions.c:214
+msgid "Unknown filesystem path"
+msgstr "Неизвестный путь файловой системы"
+
+#: src/bz-app-size-dialog.blp:29 src/bz-app-size-dialog.blp:55
 msgid "Download Size"
 msgstr "Размер скачивания"
 
-#: src/bz-app-size-dialog.c:55
-msgid "Of the size of human DNA"
-msgstr "От размера человеческого ДНК"
+#: src/bz-app-size-dialog.blp:56
+msgid "Amount to download from the internet"
+msgstr "Размер скачивания из интернета"
 
-#: src/bz-app-size-dialog.c:55
-msgid "3 billion base pairs"
-msgstr "3 миллиарда пар оснований"
+#: src/bz-app-size-dialog.blp:76
+msgid "Installed Size"
+msgstr "Размер установки"
 
-#: src/bz-app-size-dialog.c:56
-msgid "Of the Linux Kernel"
-msgstr "От ядра Linux"
+#: src/bz-app-size-dialog.blp:77
+msgid "Size on Disk"
+msgstr "Размер на диске"
 
-#: src/bz-app-size-dialog.c:56
-msgid "linux-6.17.tar.xz"
-msgstr "linux-6.17.tar.xz"
+#: src/bz-app-size-dialog.blp:99
+msgid "User Data Size"
+msgstr "Размер пользовательских данных"
 
-#: src/bz-app-size-dialog.c:57
-msgid "Of the Apollo 11 guidance computer"
-msgstr "От вычислителя Аполлон-11"
+#: src/bz-app-size-dialog.blp:100
+msgid "Caches, settings, and other app data"
+msgstr "Кэши, настройки и другие пользовательские данные"
 
-#: src/bz-app-size-dialog.c:57
-msgid "Total ROM and RAM"
-msgstr "ПЗУ и ОЗУ"
-
-#: src/bz-app-size-dialog.c:58
-msgid "Of the original Super Mario Bros"
-msgstr "От оригинальной Super Mario Bros"
-
-#: src/bz-app-size-dialog.c:58
-msgid "On the NES"
-msgstr "На NES"
-
-#: src/bz-app-size-dialog.c:59
-msgid "Of the size of Wikipedia"
-msgstr "От размера Википедии"
-
-#: src/bz-app-size-dialog.c:59
-msgid "Without any media"
-msgstr "Исключая медиафайлы"
-
-#: src/bz-app-tile.blp:84 src/bz-installed-page.blp:25 src/bz-window.blp:298
+#: src/bz-app-tile.blp:85 src/bz-full-view.c:363 src/bz-installed-page.blp:85
+#: src/bz-window.blp:296
 msgid "Installed"
 msgstr "Установлено"
 
@@ -582,42 +675,48 @@ msgstr "Установлено"
 msgid "Show All"
 msgstr "Показать все"
 
-#: src/bz-application.c:578
-msgid ""
-"This functionality is currently disabled. It is recommended you download and "
-"install Flatseal to manage app permissions."
-msgstr ""
-"Данный функционал сейчас отключён. Рекомендуется скачать и установить "
-"Flatseal для редактирования разрешений приложения."
+#: src/bz-apps-page.c:232
+#, c-format
+msgid "All \"%s\""
+msgstr "Все \"%s\""
 
-#: src/bz-application.c:682
+#: src/bz-apps-page.c:506 src/bz-tag-list.c:109
+#, c-format
+msgid "%d Applications"
+msgstr "%d приложений"
+
+#: src/bz-application.c:668
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr "Адам Масциола <kolunmi@posteo.net>"
 
-#: src/bz-application.c:683
+#: src/bz-application.c:669
 msgctxt "About Dialog Developer Credit"
 msgid "Alexander Vanhee"
 msgstr "Александр Фанхе"
 
 #. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
-#: src/bz-application.c:708
+#: src/bz-application.c:700
 msgid "translator-credits"
-msgstr "Jill Fiore <contact@lumaeris.com>, 2025"
+msgstr "Джилл Фиори <contact@lumaeris.com>, 2025, 2026"
 
-#: src/bz-application.c:772
+#: src/bz-application.c:711
+msgid "Special Thanks"
+msgstr "Особая благодарность"
+
+#: src/bz-application.c:769
 msgid "Logged Out Successfully!"
 msgstr "Выход из аккаунта выполнен успешно!"
 
-#: src/bz-application.c:900
+#: src/bz-application.c:896
 msgid "Performing setup..."
 msgstr "Выполняется настройка..."
 
-#: src/bz-application.c:979 src/bz-application.c:988
+#: src/bz-application.c:975 src/bz-application.c:984
 msgid "Set Up Flathub"
 msgstr "Добавить Flathub"
 
-#: src/bz-application.c:982
+#: src/bz-application.c:978
 msgid ""
 "Flathub is not set up on this system. You will not be able to browse and "
 "install applications in Bazaar if its unavailable.\n"
@@ -630,26 +729,30 @@ msgstr ""
 "Вы по-прежнему можете использовать Bazaar для обзора и удаления уже "
 "установленных приложений."
 
-#: src/bz-application.c:987 src/bz-update-dialog.blp:6
+#: src/bz-application.c:983 src/bz-update-dialog.blp:6
 msgid "Later"
 msgstr "Позже"
 
-#: src/bz-application.c:1389
+#: src/bz-application.c:1385 src/bz-application.c:3059
 msgid "Synchronizing..."
 msgstr "Синхронизация..."
 
-#: src/bz-application.c:1528
+#: src/bz-application.c:1524 src/bz-application.c:3055
 #, c-format
 msgid "Receiving %d entries..."
 msgstr "Получение %d элементов"
 
-#: src/bz-application.c:1533
+#: src/bz-application.c:1529
 msgid "Checking for updates"
 msgstr "Проверка на наличие обновлений"
 
+#: src/bz-application.c:3061
+msgid "Indexing Data..."
+msgstr "Индексация данных..."
+
 #: src/bz-curated-view.blp:11 src/bz-favorites-page.blp:65
 #: src/bz-flathub-page.blp:19 src/bz-full-view.blp:53
-#: src/bz-installed-page.blp:15 src/bz-user-data-page.blp:52
+#: src/bz-installed-page.blp:63 src/bz-user-data-page.blp:52
 #: src/bz-window.blp:183
 msgid "Empty"
 msgstr "Пусто"
@@ -703,16 +806,17 @@ msgstr ""
 #: src/bz-developer-badge.c:161
 #, c-format
 msgid ""
-"The ownership of the %s app ID has been verified by <b>%s</b> on <b>%s</b>."
+"The ownership of the %1$s app ID has been verified by <b>%2$s</b> on "
+"<b>%3$s</b>."
 msgstr ""
-"Право собственности на ID приложения %s было подтверждено <b>%s</b> на "
-"<b>%s</b>."
+"Право собственности на ID приложения %1$s было подтверждено <b>%2$s</b> на "
+"<b>%3$s</b>."
 
 #: src/bz-developer-badge.c:168
 #, c-format
-msgid "The ownership of the %s app ID has been verified using %s."
+msgid "The ownership of the %1$s app ID has been verified using %2$s."
 msgstr ""
-"Право собственности на ID приложения %s было подтверждено используя %s."
+"Право собственности на ID приложения %1$s было подтверждено используя %2$s."
 
 #: src/bz-developer-badge.c:172
 #, c-format
@@ -731,21 +835,10 @@ msgstr ""
 "Вы установили несколько версий данного приложения. Какое вы хотите выбрать "
 "для продолжения?"
 
-#: src/bz-entry-group-util.c:80 src/bz-window.c:1307 src/bz-window.c:1330
+#: src/bz-entry-group-util.c:80 src/bz-transaction-dialog.c:200
+#: src/bz-transaction-dialog.c:223 src/bz-transaction-dialog.c:268
 msgid "Cancel"
 msgstr "Отмена"
-
-#: src/bz-entry-inspector.blp:5
-msgid "Entry Inspector"
-msgstr "Инспектор элементов"
-
-#: src/bz-entry-inspector.blp:76
-msgid "Serialize"
-msgstr "Сериализировать"
-
-#: src/bz-entry-inspector.blp:80
-msgid "Convert to JSON"
-msgstr "Конвертировать в JSON"
 
 #: src/bz-error.c:68
 msgid "An Error Occurred"
@@ -784,12 +877,12 @@ msgid "Remove from Favorites"
 msgstr "Удалить из избранных"
 
 #: src/bz-favorites-page.blp:5 src/bz-favorites-page.blp:75
-#: src/bz-window.blp:580
+#: src/bz-window.blp:611
 msgid "Favorites"
 msgstr "Избранные"
 
 #: src/bz-favorites-page.blp:22 src/bz-full-view.blp:20 src/bz-window.blp:126
-#: src/bz-window.blp:420
+#: src/bz-window.blp:457
 msgid "Toggle transaction sidebar"
 msgstr "Переключить боковую панель транзакций"
 
@@ -965,7 +1058,7 @@ msgstr "Недавно обновленные"
 
 #: src/bz-flathub-category.c:92 src/bz-flathub-page.blp:137
 msgid "Updated"
-msgstr "Обновлённое"
+msgstr "Обновлённые"
 
 #: src/bz-flathub-category.c:92
 msgid "More Updated"
@@ -1035,12 +1128,8 @@ msgstr "Всегда под рукой"
 msgid "Apps for your Linux phones and tablets"
 msgstr "Приложения для ваших телефонов и планшетов на Linux"
 
-#: src/bz-flathub-page.blp:293
+#: src/bz-flathub-page.blp:293 src/bz-flathub-page.blp:328
 msgid "More Mobile Apps"
-msgstr "Больше мобильных приложений"
-
-#: src/bz-flathub-page.blp:328
-msgid "More Mobile apps"
 msgstr "Больше мобильных приложений"
 
 #: src/bz-flathub-page.blp:388
@@ -1055,57 +1144,58 @@ msgstr "Игры и приложения для запуска ваших люб
 msgid "More Games"
 msgstr "Больше игр"
 
-#: src/bz-flatpak-entry.c:603
+#: src/bz-flatpak-entry.c:590
 msgctxt "Project URL Type"
 msgid "Flathub Page"
 msgstr "Страница Flathub"
 
-#: src/bz-flatpak-entry.c:624
+#: src/bz-flatpak-entry.c:611
 msgctxt "Project URL Type"
 msgid "Project Website"
 msgstr "Веб-сайт проекта"
 
-#: src/bz-flatpak-entry.c:628
+#: src/bz-flatpak-entry.c:615
 msgctxt "Project URL Type"
 msgid "Issue Tracker"
 msgstr "Отслеживание ошибок"
 
-#: src/bz-flatpak-entry.c:632
+#: src/bz-flatpak-entry.c:619
 msgctxt "Project URL Type"
 msgid "FAQ"
 msgstr "Часто задаваемые вопросы"
 
-#: src/bz-flatpak-entry.c:636
+#: src/bz-flatpak-entry.c:623
 msgctxt "Project URL Type"
 msgid "Help"
 msgstr "Помощь"
 
-#: src/bz-flatpak-entry.c:640
+#: src/bz-flatpak-entry.c:627
 msgctxt "Project URL Type"
 msgid "Donate"
 msgstr "Пожертвовать"
 
-#: src/bz-flatpak-entry.c:646
+#: src/bz-flatpak-entry.c:633
 msgctxt "Project URL Type"
 msgid "Translate"
 msgstr "Перевод"
 
-#: src/bz-flatpak-entry.c:650
+#: src/bz-flatpak-entry.c:637
 msgctxt "Project URL Type"
 msgid "Contact"
 msgstr "Связаться"
 
-#: src/bz-flatpak-entry.c:654
+#: src/bz-flatpak-entry.c:641
 msgctxt "Project URL Type"
 msgid "Source Code"
 msgstr "Исходный код"
 
-#: src/bz-flatpak-entry.c:660
+#: src/bz-flatpak-entry.c:647
 msgctxt "Project URL Type"
 msgid "Contribute"
 msgstr "Сделать вклад"
 
-#: src/bz-full-view.blp:57
+#: src/bz-full-view.blp:57 src/bz-installed-page.blp:74
+#: src/bz-installed-page.blp:78
 msgid "No Results"
 msgstr "Нет результатов"
 
@@ -1115,17 +1205,17 @@ msgstr "Попробуйте выполнить другой поисковый 
 
 #: src/bz-full-view.blp:64 src/bz-window.blp:193
 msgid "Content"
-msgstr "Контент"
+msgstr "Содержимое"
 
 #: src/bz-full-view.blp:210
 msgid "Support"
 msgstr "Поддержать"
 
-#: src/bz-full-view.blp:233 src/bz-full-view.blp:488
+#: src/bz-full-view.blp:233 src/bz-full-view.blp:493
 msgid "Open"
 msgstr "Открыть"
 
-#: src/bz-full-view.blp:246 src/bz-full-view.blp:461
+#: src/bz-full-view.blp:246 src/bz-full-view.blp:466
 msgid "Download & Install Application"
 msgstr "Скачать и установить приложение"
 
@@ -1133,23 +1223,19 @@ msgstr "Скачать и установить приложение"
 msgid "Uninstall Application"
 msgstr "Удалить приложение"
 
-#: src/bz-full-view.blp:276 src/bz-full-view.blp:503
+#: src/bz-full-view.blp:276 src/bz-full-view.blp:508
 msgid "Install Other Version"
 msgstr "Установить другую версию"
 
-#: src/bz-full-view.blp:300
-msgid "Size"
-msgstr "Размер"
-
-#: src/bz-full-view.blp:405
+#: src/bz-full-view.blp:430
 msgid "Downloads /mo"
 msgstr "Загрузок /мес"
 
-#: src/bz-full-view.blp:522
+#: src/bz-full-view.blp:527
 msgid "Stopped Receiving Core Updates"
 msgstr "Прекращено получение основных обновлений"
 
-#: src/bz-full-view.blp:536
+#: src/bz-full-view.blp:541
 msgid ""
 "This app uses a runtime that no longer receives updates or security fixes. "
 "It may become unsafe to use."
@@ -1158,113 +1244,117 @@ msgstr ""
 "обновления или исправления ошибок безопасности. Оно может стать небезопасным "
 "для использования."
 
-#: src/bz-full-view.blp:619 src/bz-window.c:1277
-msgid "Delete Data"
-msgstr "Удалить данные"
+#: src/bz-full-view.blp:627
+msgid "Trash Data"
+msgstr "Отправить в корзину"
 
-#: src/bz-full-view.blp:753
+#: src/bz-full-view.blp:769
 msgid "Tags:"
 msgstr "Метки:"
 
-#: src/bz-full-view.c:290
+#: src/bz-full-view.c:307
 msgid "---"
 msgstr "---"
 
 #. Translators: M is the suffix for millions
-#: src/bz-full-view.c:297
+#: src/bz-full-view.c:314
 #, c-format
 msgid "%.*fM"
 msgstr "%.*f мил."
 
 #. Translators: K is the suffix for thousands
-#: src/bz-full-view.c:304
+#: src/bz-full-view.c:321
 #, c-format
 msgid "%.*fK"
 msgstr "%.*f тыс."
 
-#: src/bz-full-view.c:314
+#: src/bz-full-view.c:331
 #, c-format
 msgid "%d downloads in the last 30 days"
 msgstr "%d загрузок за последние 30 дней"
 
-#: src/bz-full-view.c:346
+#: src/bz-full-view.c:363
+msgid "Download"
+msgstr "Скачивание"
+
+#: src/bz-full-view.c:381
 #, c-format
 msgid "Download size of %s"
 msgstr "Размер скачивания %s"
 
-#: src/bz-full-view.c:379
+#: src/bz-full-view.c:414
 msgid "All Ages"
 msgstr "Для всех"
 
-#: src/bz-full-view.c:391
+#: src/bz-full-view.c:426
 msgid "Age rating information unavailable"
 msgstr "Информация о возрастном ограничении недоступна"
 
-#: src/bz-full-view.c:396
+#: src/bz-full-view.c:431
 msgid "Suitable for all ages"
 msgstr "Предназначено для всех возрастов"
 
-#: src/bz-full-view.c:398
+#: src/bz-full-view.c:433
 #, c-format
 msgid "Suitable for ages %d and up"
 msgstr "Предназначено для лиц старше %d лет"
 
-#: src/bz-full-view.c:431 src/bz-full-view.c:436 src/bz-full-view.c:464
-#: src/bz-full-view.c:475
+#: src/bz-full-view.c:466 src/bz-full-view.c:471 src/bz-full-view.c:499
+#: src/bz-full-view.c:510
 msgid "Unknown"
 msgstr "Неизвестно"
 
-#: src/bz-full-view.c:441
+#: src/bz-full-view.c:476
 #, c-format
 msgid "Free software licensed under %s"
 msgstr "Свободное программное обеспечение, лицензированное под %s"
 
-#: src/bz-full-view.c:446
+#: src/bz-full-view.c:481
 msgid "Free software"
 msgstr "Cвободное программное обеспечение"
 
-#: src/bz-full-view.c:449
+#: src/bz-full-view.c:484
 msgid "Proprietary Software"
 msgstr "Проприетарное программное обеспечение"
 
-#: src/bz-full-view.c:452
+#: src/bz-full-view.c:487
 #, c-format
 msgid "Special License: %s"
 msgstr "Специальная лицензия: %s"
 
-#: src/bz-full-view.c:469
+#: src/bz-full-view.c:504
 msgid "Free"
 msgstr "Свободное"
 
-#: src/bz-full-view.c:472 src/bz-license-dialog.c:118
+#: src/bz-full-view.c:507 src/bz-license-dialog.c:190
 msgid "Proprietary"
 msgstr "Проприетарное"
 
-#: src/bz-full-view.c:477 src/bz-license-dialog.c:120
+#: src/bz-full-view.c:512 src/bz-license-dialog.c:192
 msgid "Special License"
 msgstr "Специальная лицензия"
 
-#: src/bz-full-view.c:497
+#: src/bz-full-view.c:532
 msgid "Adaptive"
 msgstr "Адаптивное"
 
-#: src/bz-full-view.c:497
+#: src/bz-full-view.c:532
 msgid "Desktop Only"
 msgstr "Только для ПК"
 
-#: src/bz-full-view.c:503
+#: src/bz-full-view.c:538
 msgid "Works on desktop, tablets, and phones"
 msgstr "Работает на настольных компьютерах, планшетах и телефонах"
 
-#: src/bz-full-view.c:504
+#: src/bz-full-view.c:539
 msgid "May not work on mobile devices"
 msgstr "Может не работать на мобильных устройствах"
 
-#: src/bz-full-view.c:515
+#: src/bz-full-view.c:550
 msgid "No URL"
 msgstr "Нет URL"
 
-#: src/bz-full-view.c:533
+#: src/bz-full-view.c:568
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -1272,7 +1362,7 @@ msgstr ""
 "Это приложение имеет лицензию FLOSS, что значит исходный код может быть "
 "проверен на безопасность."
 
-#: src/bz-full-view.c:534
+#: src/bz-full-view.c:569
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
@@ -1281,36 +1371,52 @@ msgstr ""
 "разрабатывается в тайне и не может быть проверен независимой третьей "
 "стороной."
 
-#: src/bz-full-view.c:541
+#: src/bz-full-view.c:576
 msgid "More Apps"
 msgstr "Больше приложений"
 
-#: src/bz-full-view.c:542
+#: src/bz-full-view.c:577
 #, c-format
 msgid "More Apps by %s"
 msgstr "Больше приложений от %s"
 
-#: src/bz-full-view.c:549
+#: src/bz-full-view.c:584
 msgid "Other Apps by this Developer"
 msgstr "Другие приложения от этого разработчика"
 
-#: src/bz-full-view.c:551 src/bz-full-view.c:659
+#: src/bz-full-view.c:586 src/bz-full-view.c:786
 #, c-format
 msgid "Other Apps by %s"
 msgstr "Другие приложения от %s"
 
-#: src/bz-full-view.c:559
+#: src/bz-full-view.c:595
 #, c-format
 msgid "%s is not installed, but it still has <b>%s</b> of data present."
 msgstr ""
 "%s не установлено, но пользовательские данные в размере <b>%s</b> ещё "
 "присутствуют."
 
-#: src/bz-full-view.c:661
+#: src/bz-full-view.c:668 src/bz-full-view.c:685
+msgid "N/A"
+msgstr "Н/Д"
+
+#: src/bz-full-view.c:675 src/bz-full-view.c:677 src/bz-full-view.c:679
+msgid "Low Risk"
+msgstr "Низкий риск"
+
+#: src/bz-full-view.c:681
+msgid "Medium Risk"
+msgstr "Средний риск"
+
+#: src/bz-full-view.c:683
+msgid "High Risk"
+msgstr "Высокий риск"
+
+#: src/bz-full-view.c:788
 msgid "Other Apps"
 msgstr "Другие приложения"
 
-#: src/bz-full-view.c:663
+#: src/bz-full-view.c:790
 #, c-format
 msgid "%d Application"
 msgid_plural "%d Applications"
@@ -1318,161 +1424,152 @@ msgstr[0] "%d приложение"
 msgstr[1] "%d приложения"
 msgstr[2] "%d приложений"
 
-#: src/bz-full-view.c:1011
+#: src/bz-full-view.c:1129
 msgid "Show Less"
 msgstr "Показать меньше"
 
-#: src/bz-full-view.c:1011
+#: src/bz-full-view.c:1129
 msgid "Show More"
 msgstr "Показать больше"
 
-#: src/bz-hardware-support-dialog.blp:6 src/bz-hardware-support-dialog.blp:47
+#: src/bz-hardware-support-dialog.blp:7 src/bz-hardware-support-dialog.blp:31
 msgid "Hardware Support"
 msgstr "Поддержка оборудования"
 
-#: src/bz-hardware-support-dialog.c:69
+#: src/bz-hardware-support-dialog.c:62
 msgid "Keyboard support"
 msgstr "Поддержка клавиатуры"
 
-#: src/bz-hardware-support-dialog.c:71
+#: src/bz-hardware-support-dialog.c:64
 msgid "Requires keyboards"
 msgstr "Требуется использовать клавиатуру"
 
-#: src/bz-hardware-support-dialog.c:72
+#: src/bz-hardware-support-dialog.c:65
 msgid "Recommends keyboards"
 msgstr "Рекомендуется использовать клавиатуру"
 
-#: src/bz-hardware-support-dialog.c:73
+#: src/bz-hardware-support-dialog.c:66
 msgid "Supports keyboards"
 msgstr "Поддерживает клавиатуру"
 
-#: src/bz-hardware-support-dialog.c:74
+#: src/bz-hardware-support-dialog.c:67
 msgid "Unknown support for keyboards"
 msgstr "Неизвестная поддержка клавиатуры"
 
-#: src/bz-hardware-support-dialog.c:76
+#: src/bz-hardware-support-dialog.c:69
 msgid "Mouse support"
 msgstr "Поддержка мыши"
 
-#: src/bz-hardware-support-dialog.c:78
+#: src/bz-hardware-support-dialog.c:71
 msgid "Requires mice or pointing devices"
 msgstr "Требуется использовать мышь или указательные устройства"
 
-#: src/bz-hardware-support-dialog.c:79
+#: src/bz-hardware-support-dialog.c:72
 msgid "Recommends mice or pointing devices"
 msgstr "Рекомендуется использовать мышь или указательные устройства"
 
-#: src/bz-hardware-support-dialog.c:80
+#: src/bz-hardware-support-dialog.c:73
 msgid "Supports mice or pointing devices"
 msgstr "Поддерживает мышь или указательные устройства"
 
-#: src/bz-hardware-support-dialog.c:81
+#: src/bz-hardware-support-dialog.c:74
 msgid "Unknown support for mice or pointing devices"
 msgstr "Неизвестная поддержка мыши и указательных устройств"
 
-#: src/bz-hardware-support-dialog.c:83
+#: src/bz-hardware-support-dialog.c:76
 msgid "Touchscreen support"
 msgstr "Поддержка сенсорного экрана"
 
-#: src/bz-hardware-support-dialog.c:85
+#: src/bz-hardware-support-dialog.c:78
 msgid "Requires touchscreens"
 msgstr "Требуется использовать сенсорный экран"
 
-#: src/bz-hardware-support-dialog.c:86
+#: src/bz-hardware-support-dialog.c:79
 msgid "Recommends touchscreens"
 msgstr "Рекомендуется использовать сенсорный экран"
 
-#: src/bz-hardware-support-dialog.c:87
+#: src/bz-hardware-support-dialog.c:80
 msgid "Supports touchscreens"
 msgstr "Поддерживает сенсорные экраны"
 
-#: src/bz-hardware-support-dialog.c:88
+#: src/bz-hardware-support-dialog.c:81
 msgid "Unknown support for touchscreens"
 msgstr "Неизвестная поддержка сенсорных экран"
 
-#: src/bz-hardware-support-dialog.c:192
+#: src/bz-hardware-support-dialog.c:160
 msgid "Mobile support"
 msgstr "Поддержка мобильных устройств"
 
-#: src/bz-hardware-support-dialog.c:193
+#: src/bz-hardware-support-dialog.c:161
 msgid "Works on mobile devices"
 msgstr "Работает на мобильных устройствах"
 
-#: src/bz-hardware-support-dialog.c:193
+#: src/bz-hardware-support-dialog.c:161
 msgid "May not work well on mobile devices"
 msgstr "Может не работать хорошо на мобильных устройствах"
 
-#: src/bz-hardware-support-dialog.c:198
+#: src/bz-hardware-support-dialog.c:166
 msgid "Desktop support"
 msgstr "Поддержка настольных компьютеров"
 
-#: src/bz-hardware-support-dialog.c:199
+#: src/bz-hardware-support-dialog.c:167
 msgid "Works well on large screens"
 msgstr "Работает хорошо на больших экранах"
 
-#: src/bz-hardware-support-dialog.c:233
+#: src/bz-hardware-support-dialog.c:201
 #, c-format
 msgid "%s works best on specific hardware"
 msgstr "%s работает лучше на определённых устройствах"
 
-#: src/bz-hardware-support-dialog.c:240
+#: src/bz-hardware-support-dialog.c:209
 #, c-format
 msgid "%s works on most devices"
 msgstr "%s работает на большинстве устройств"
 
-#: src/bz-inspector.blp:5
-msgid "Bazaar Inspector"
-msgstr "Bazaar Инспектор"
+#: src/bz-installed-page.blp:28
+msgid "Search installed apps"
+msgstr "Поиск установленных приложений"
 
-#: src/bz-inspector.blp:33
-msgid "Background Task Info:"
-msgstr "Информация о фоновом процессе:"
+#: src/bz-installed-page.blp:67
+msgid "No Apps Found"
+msgstr "Приложение не найдено"
 
-#: src/bz-inspector.blp:43
-msgid "Enable Global Debug Mode"
-msgstr "Включить глобальный режим отладки"
-
-#: src/bz-inspector.blp:50
-msgid "Active Blocklists"
-msgstr "Активные чёрные списки"
-
-#: src/bz-inspector.blp:67
-msgid "Active Curated-Configs"
-msgstr "Активные конфигурации курируемых приложений"
-
-#: src/bz-inspector.blp:85
-msgid "All Entry Groups"
-msgstr "Все группы элементов"
-
-#: src/bz-inspector.blp:93
-msgid "Filter..."
-msgstr "Фильтрация..."
-
-#: src/bz-inspector.blp:134
-msgid "Decache and Inspect"
-msgstr "Декешировать и проверить"
-
-#: src/bz-installed-page.blp:19
-msgid "No Flatpaks Installed"
-msgstr "Нет установленных Flatpak"
+#: src/bz-installed-page.c:154
+#, c-format
+msgid "No matches found for \"%s\" in the list of installed apps"
+msgstr "Нет результатов по запросу \"%s\" в списке установленных приложений"
 
 #: src/bz-installed-tile.blp:61 src/bz-rich-app-tile.blp:137
 msgid "Stopped Receiving Updates"
 msgstr "Прекращено получение обновлений"
 
-#: src/bz-license-dialog.blp:160
+#: src/bz-license-dialog.blp:95
 msgid "Get Involved"
 msgstr "Внести вклад"
 
-#: src/bz-license-dialog.c:107 src/bz-license-dialog.c:112
+#: src/bz-license-dialog.c:184
 msgid "Unknown License"
 msgstr "Неизвестная лицензия"
 
-#: src/bz-license-dialog.c:115
+#: src/bz-license-dialog.c:187
 msgid "Community Built"
 msgstr "Сделано сообществом"
 
-#: src/bz-license-dialog.c:148
+#: src/bz-license-dialog.c:235
+msgid ""
+"This app is developed in the open by an international community.\n"
+"\n"
+"You can participate and help make it even better."
+msgstr ""
+"Это приложение разрабатывается открыто международным сообществом.\n"
+"\n"
+"Вы можете внести свой вклад и сделать это приложение ещё лучше."
+
+#: src/bz-license-dialog.c:238
+msgid "The license of this app is not known"
+msgstr "Лицензия этого приложения неизвестна"
+
+#: src/bz-license-dialog.c:244
 #, c-format
 msgid ""
 "This app is developed in the open by an international community, and "
@@ -1485,21 +1582,7 @@ msgstr ""
 "\n"
 "Вы можете внести свой вклад и сделать это приложение ещё лучше."
 
-#: src/bz-license-dialog.c:156
-msgid ""
-"This app is developed in the open by an international community.\n"
-"\n"
-"You can participate and help make it even better."
-msgstr ""
-"Это приложение разрабатывается открыто международным сообществом.\n"
-"\n"
-"Вы можете внести свой вклад и сделать это приложение ещё лучше."
-
-#: src/bz-license-dialog.c:161
-msgid "The license of this app is not known"
-msgstr "Лицензия этого приложения неизвестна"
-
-#: src/bz-license-dialog.c:165
+#: src/bz-license-dialog.c:252
 msgid ""
 "This app is not developed in the open, so only its developers know how it "
 "works. It may be insecure in ways that are hard to detect, and it may change "
@@ -1513,7 +1596,7 @@ msgstr ""
 "\n"
 "Вы можете не иметь возможности внести вклад в это приложение."
 
-#: src/bz-license-dialog.c:174
+#: src/bz-license-dialog.c:258
 #, c-format
 msgid ""
 "This app is developed under the special license %s.\n"
@@ -1524,66 +1607,99 @@ msgstr ""
 "\n"
 "Вы можете не иметь возможности внести вклад в это приложение."
 
+#: src/bz-login-page.blp:5 src/bz-login-page.blp:42
+msgid "Connect to Flathub"
+msgstr "Подключение к Flathub"
+
+#: src/bz-login-page.blp:32
+msgid "Something Went Wrong"
+msgstr "Что-то пошло не так"
+
+#: src/bz-login-page.blp:43
+msgid "Connect your Flathub account to Bazaar to manage your favorited apps."
+msgstr ""
+"Подключитесь к своему аккаунту Flathub в Bazaar для управления вашими "
+"избранными приложениями."
+
+#: src/bz-login-page.blp:108
+msgid "Finish"
+msgstr "Завершить"
+
+#: src/bz-login-page.c:663
+#, c-format
+msgid "Hello, %s!"
+msgstr "Приветствуем, %s!"
+
 #: src/bz-preferences-dialog.blp:19
 msgid "Preferences"
 msgstr "Параметры"
 
-#: src/bz-preferences-dialog.blp:23
-msgid "Content Filters"
-msgstr "Фильтры контента"
+#: src/bz-preferences-dialog.blp:25
+msgid "Network connection is metered — automatic store data sync is paused"
+msgstr ""
+"Сетевое соединение ограничено — автоматическая синхронизация данных магазина "
+"приостановлена"
 
-#: src/bz-preferences-dialog.blp:26
+#: src/bz-preferences-dialog.blp:26 src/bz-window.blp:491
+msgid "Sync Manually"
+msgstr "Синхронизировать вручную"
+
+#: src/bz-preferences-dialog.blp:31
+msgid "Content Filters"
+msgstr "Фильтры содержимого"
+
+#: src/bz-preferences-dialog.blp:34
 msgid "Free Software Only"
 msgstr "Только свободные приложения"
 
-#: src/bz-preferences-dialog.blp:27
+#: src/bz-preferences-dialog.blp:35
 msgid "Hide proprietary applications when browsing and searching"
 msgstr "Скрыть проприетарные приложения при обзоре и поиске"
 
-#: src/bz-preferences-dialog.blp:31
+#: src/bz-preferences-dialog.blp:39
 msgid "Flathub Results Only"
 msgstr "Только результаты из Flathub"
 
-#: src/bz-preferences-dialog.blp:32
+#: src/bz-preferences-dialog.blp:40
 msgid ""
 "Limit search and browse results to applications only available on Flathub"
 msgstr "Ограничить обзор и результаты поиска только приложениями из Flathub"
 
-#: src/bz-preferences-dialog.blp:36
+#: src/bz-preferences-dialog.blp:44
 msgid "Verified Results Only"
-msgstr "Только верифицированные результаты"
+msgstr "Только подтверждённые результаты"
 
-#: src/bz-preferences-dialog.blp:37
+#: src/bz-preferences-dialog.blp:45
 msgid "Hide results that are not verified on Flathub"
-msgstr "Скрыть приложения, которые не были верифицированы на Flathub"
+msgstr "Скрыть приложения, которые не являются подтверждёнными на Flathub"
 
-#: src/bz-preferences-dialog.blp:41
+#: src/bz-preferences-dialog.blp:49
 msgid "Hide EOL Apps"
 msgstr "Скрыть неподдерживаемые приложения"
 
-#: src/bz-preferences-dialog.blp:42
+#: src/bz-preferences-dialog.blp:50
 msgid "Hide apps which are no longer supported by their developers"
 msgstr "Скрыть приложения, которые больше не поддерживаются разработчиками"
 
-#: src/bz-preferences-dialog.blp:47 src/bz-window.blp:313
+#: src/bz-preferences-dialog.blp:55 src/bz-window.blp:311
 msgid "Search"
 msgstr "Поиск"
 
-#: src/bz-preferences-dialog.blp:50
+#: src/bz-preferences-dialog.blp:58
 msgid "Delay Search Results"
 msgstr "Увеличить задержку результатов поиска"
 
-#: src/bz-preferences-dialog.blp:51
+#: src/bz-preferences-dialog.blp:59
 msgid "Improve results performance by debouncing search terms"
 msgstr ""
 "Улучшить производительность показа результатов благодаря увеличению задержки "
 "ввода запроса"
 
-#: src/bz-preferences-dialog.blp:56
+#: src/bz-preferences-dialog.blp:64
 msgid "Progress Bar"
 msgstr "Полоса прогресса"
 
-#: src/bz-preferences-dialog.blp:57
+#: src/bz-preferences-dialog.blp:65
 msgid "Choose a theme for the progress bar!"
 msgstr "Выберите тему для полосы прогресса!"
 
@@ -1596,93 +1712,499 @@ msgid "Pride Colors"
 msgstr "Цвета гордости"
 
 #: src/bz-preferences-dialog.c:34
+msgid "Pride Colors (Horizontal)"
+msgstr "Цвета гордости (горизонтально)"
+
+#: src/bz-preferences-dialog.c:35
 msgid "Lesbian Pride Colors"
 msgstr "Цвета гордости лесбиянок"
 
-#: src/bz-preferences-dialog.c:35
+#: src/bz-preferences-dialog.c:36
+msgid "Lesbian Pride Colors (Horizontal)"
+msgstr "Цвета гордости лесбиянок (горизонтально)"
+
+#: src/bz-preferences-dialog.c:37
 msgid "Male Homosexual Pride Colors"
 msgstr "Цвета гордости мужчин гомосексуалов"
 
-#: src/bz-preferences-dialog.c:36
+#: src/bz-preferences-dialog.c:38
+msgid "Male Homosexual Pride Colors (Horizontal)"
+msgstr "Цвета гордости мужчин гомосексуалов (горизонтально)"
+
+#: src/bz-preferences-dialog.c:39
 msgid "Transgender Pride Colors"
 msgstr "Цвета гордости трансгендеров"
 
-#: src/bz-preferences-dialog.c:37
+#: src/bz-preferences-dialog.c:40
+msgid "Transgender Pride Colors (Horizontal)"
+msgstr "Цвета гордости трансгендеров (горизонтально)"
+
+#: src/bz-preferences-dialog.c:41
 msgid "Nonbinary Pride Colors"
 msgstr "Цвета гордости небинарных"
 
-#: src/bz-preferences-dialog.c:38
+#: src/bz-preferences-dialog.c:42
+msgid "Nonbinary Pride Colors (Horizontal)"
+msgstr "Цвета гордости небинарных (горизонтально)"
+
+#: src/bz-preferences-dialog.c:43
 msgid "Bisexual Pride Colors"
 msgstr "Цвета гордости бисексуалов"
 
-#: src/bz-preferences-dialog.c:39
+#: src/bz-preferences-dialog.c:44
+msgid "Bisexual Pride Colors (Horizontal)"
+msgstr "Цвета гордости бисексуалов (горизонтально)"
+
+#: src/bz-preferences-dialog.c:45
 msgid "Asexual Pride Colors"
 msgstr "Цвета гордости асексуалов"
 
-#: src/bz-preferences-dialog.c:40
+#: src/bz-preferences-dialog.c:46
+msgid "Asexual Pride Colors (Horizontal)"
+msgstr "Цвета гордости асексуалов (горизонтально)"
+
+#: src/bz-preferences-dialog.c:47
 msgid "Pansexual Pride Colors"
 msgstr "Цвета гордости пансексуалов"
 
-#: src/bz-preferences-dialog.c:41
+#: src/bz-preferences-dialog.c:48
+msgid "Pansexual Pride Colors (Horizontal)"
+msgstr "Цвета гордости пансексуалов (горизонтально)"
+
+#: src/bz-preferences-dialog.c:49
 msgid "Aromantic Pride Colors"
 msgstr "Цвета гордости аромантиков"
 
-#: src/bz-preferences-dialog.c:42
+#: src/bz-preferences-dialog.c:50
+msgid "Aromantic Pride Colors (Horizontal)"
+msgstr "Цвета гордости аромантиков (горизонтально)"
+
+#: src/bz-preferences-dialog.c:51
 msgid "Genderfluid Pride Colors"
 msgstr "Цвета гордости гендерфлюид"
 
-#: src/bz-preferences-dialog.c:43
+#: src/bz-preferences-dialog.c:52
+msgid "Genderfluid Pride Colors (Horizontal)"
+msgstr "Цвета гордости гендерфлюид (горизонтально)"
+
+#: src/bz-preferences-dialog.c:53
 msgid "Polysexual Pride Colors"
 msgstr "Цвета гордости полисексуалов"
 
-#: src/bz-preferences-dialog.c:44
+#: src/bz-preferences-dialog.c:54
+msgid "Polysexual Pride Colors (Horizontal)"
+msgstr "Цвета гордости полисексуалов (горизонтально)"
+
+#: src/bz-preferences-dialog.c:55
 msgid "Omnisexual Pride Colors"
 msgstr "Цвета гордости омнисексуалов"
 
-#: src/bz-preferences-dialog.c:45
+#: src/bz-preferences-dialog.c:56
+msgid "Omnisexual Pride Colors (Horizontal)"
+msgstr "Цвета гордости омнисексуалов (горизонтально)"
+
+#: src/bz-preferences-dialog.c:57
 msgid "Aroace Pride Colors"
 msgstr "Цвета гордости ароэйс"
 
-#: src/bz-preferences-dialog.c:46
+#: src/bz-preferences-dialog.c:58
+msgid "Aroace Pride Colors (Horizontal)"
+msgstr "Цвета гордости ароэйс (горизонтально)"
+
+#: src/bz-preferences-dialog.c:59
 msgid "Agender Pride Colors"
 msgstr "Цвета гордости агендеров"
 
-#: src/bz-preferences-dialog.c:47
+#: src/bz-preferences-dialog.c:60
+msgid "Agender Pride Colors (Horizontal)"
+msgstr "Цвета гордости агендеров (горизонтально)"
+
+#: src/bz-preferences-dialog.c:61
 msgid "Genderqueer Pride Colors"
 msgstr "Цвета гордости гендерквиров"
 
-#: src/bz-preferences-dialog.c:48
+#: src/bz-preferences-dialog.c:62
+msgid "Genderqueer Pride Colors (Horizontal)"
+msgstr "Цвета гордости гендерквиров (горизонтально)"
+
+#: src/bz-preferences-dialog.c:63
 msgid "Intersex Pride Colors"
 msgstr "Цвета гордости интерсекс"
 
-#: src/bz-preferences-dialog.c:49
+#: src/bz-preferences-dialog.c:64
+msgid "Intersex Pride Colors (Horizontal)"
+msgstr "Цвета гордости интерсекс (горизонтально)"
+
+#: src/bz-preferences-dialog.c:65
 msgid "Demigender Pride Colors"
 msgstr "Цвета гордости демигендеров"
 
-#: src/bz-preferences-dialog.c:50
+#: src/bz-preferences-dialog.c:66
+msgid "Demigender Pride Colors (Horizontal)"
+msgstr "Цвета гордости демигендеров (горизонтально)"
+
+#: src/bz-preferences-dialog.c:67
 msgid "Biromantic Pride Colors"
 msgstr "Цвета гордости биромантиков"
 
-#: src/bz-preferences-dialog.c:51
+#: src/bz-preferences-dialog.c:68
+msgid "Biromantic Pride Colors (Horizontal)"
+msgstr "Цвета гордости биромантиков (горизонтально)"
+
+#: src/bz-preferences-dialog.c:69
 msgid "Disability Pride Colors"
 msgstr "Цвета гордости недееспособных"
 
-#: src/bz-releases-dialog.blp:5 src/bz-releases-list.blp:26
+#: src/bz-preferences-dialog.c:70
+msgid "Disability Pride Colors (Horizontal)"
+msgstr "Цвета гордости недееспособных (горизонтально)"
+
+#: src/bz-preferences-dialog.c:71
+msgid "Femboy Pride Colors"
+msgstr "Цвета гордости фембоев"
+
+#: src/bz-preferences-dialog.c:72
+msgid "Femboy Pride Colors (Horizontal)"
+msgstr "Цвета гордости фембоев (горизонтально)"
+
+#: src/bz-releases-dialog.blp:5 src/bz-releases-list.blp:27
 msgid "Version History"
 msgstr "История версий"
 
-#: src/bz-releases-list.c:128
+#: src/bz-releases-list.c:136
 #, c-format
 msgid "Version %s"
 msgstr "Версия %s"
 
-#: src/bz-releases-list.c:153
+#: src/bz-releases-list.c:174
 msgid "No details for this release"
 msgstr "Нет подробностей"
+
+#: src/bz-releases-list.c:186
+msgid "Get More Information"
+msgstr "Получить дополнительную информацию"
 
 #: src/bz-rich-app-tile.blp:154
 msgid "Get"
 msgstr "Скачать"
+
+#: src/bz-safety-calculator.c:77
+msgid "Unknown Permissions"
+msgstr "Неизвестные разрешения"
+
+#: src/bz-safety-calculator.c:78
+msgid "Permissions are missing for this app."
+msgstr "Разрешения для этого приложения отсутствуют."
+
+#: src/bz-safety-calculator.c:91
+msgid "No Permissions"
+msgstr "Нет разрешений"
+
+#: src/bz-safety-calculator.c:92
+msgid "App is fully sandboxed"
+msgstr "Приложение полностью изолировано"
+
+#: src/bz-safety-calculator.c:98
+msgid "Network Access"
+msgstr "Доступ к сети"
+
+#: src/bz-safety-calculator.c:99
+msgid "Can access the internet"
+msgstr "Может получить доступ к интернету"
+
+#: src/bz-safety-calculator.c:101
+msgid "No Network Access"
+msgstr "Нет доступа к сети"
+
+#: src/bz-safety-calculator.c:102
+msgid "Cannot access the internet"
+msgstr "Не может получить доступ к интернету"
+
+#: src/bz-safety-calculator.c:107
+msgid "User Device Access"
+msgstr "Доступ к устройствам пользователя"
+
+#: src/bz-safety-calculator.c:108
+msgid "Can access devices such as webcams or gaming controllers"
+msgstr ""
+"Может получить доступ к таким устройствам, как веб-камеры или игровые "
+"контроллеры"
+
+#: src/bz-safety-calculator.c:110
+msgid "No User Device Access"
+msgstr "Нет доступа к устройствам пользователя"
+
+#: src/bz-safety-calculator.c:111
+msgid "Cannot access devices such as webcams or gaming controllers"
+msgstr ""
+"Не может получить доступ к таким устройствам, как веб-камеры или игровые "
+"контроллеры"
+
+#: src/bz-safety-calculator.c:116
+msgid "Input Device Access"
+msgstr "Доступ к устройствам ввода"
+
+#: src/bz-safety-calculator.c:117
+msgid "Can access input devices"
+msgstr "Может получить доступ к устройствам ввода"
+
+#: src/bz-safety-calculator.c:123
+msgid "Microphone Access and Audio Playback"
+msgstr "Доступ к микрофону и воспроизведение звука"
+
+#: src/bz-safety-calculator.c:124
+msgid "Can listen using microphones and play audio without asking permission"
+msgstr "Может слышать с помощью микрофона и воспроизводить звук без разрешения"
+
+#: src/bz-safety-calculator.c:130
+msgid "System Device Access"
+msgstr "Доступ к системным устройствам"
+
+#: src/bz-safety-calculator.c:131
+msgid "Can access system devices which require elevated permissions"
+msgstr ""
+"Может получить доступ к системным устройствам, требующие повышенные "
+"разрешения"
+
+#: src/bz-safety-calculator.c:137
+msgid "Screen Contents Access"
+msgstr "Доступ к содержимому экрана"
+
+#: src/bz-safety-calculator.c:138
+msgid "Can access the contents of the screen or other windows"
+msgstr "Может получить доступ к содержимому экрана или других окон"
+
+#: src/bz-safety-calculator.c:144
+msgid "Legacy Windowing System"
+msgstr "Устаревшая оконная система"
+
+#: src/bz-safety-calculator.c:145
+msgid "Uses a legacy windowing system"
+msgstr "Использует устаревшую оконную систему"
+
+#: src/bz-safety-calculator.c:151
+msgid "Arbitrary Permissions"
+msgstr "Произвольные разрешения"
+
+#: src/bz-safety-calculator.c:152
+msgid "Can acquire arbitrary permissions"
+msgstr "Может получить произвольные разрешения"
+
+#: src/bz-safety-calculator.c:158
+msgid "User Settings"
+msgstr "Пользовательские настройки"
+
+#: src/bz-safety-calculator.c:159
+msgid "Can access and change user settings"
+msgstr "Может получить и изменить пользовательские настройки"
+
+#: src/bz-safety-calculator.c:165
+msgid "Full File System Read/Write Access"
+msgstr "Полный доступ к файловой системе на чтение/запись"
+
+#: src/bz-safety-calculator.c:166
+msgid "Can read and write all data on the file system"
+msgstr "Может читать и записывать все данные в файловой системе"
+
+#: src/bz-safety-calculator.c:173
+msgid "Home Folder Read/Write Access"
+msgstr "Доступ к домашней папке для чтения/записи"
+
+#: src/bz-safety-calculator.c:174
+msgid "Can read and write all data in your home directory"
+msgstr "Может читать и записывать все данные в вашей домашней папке"
+
+#: src/bz-safety-calculator.c:181
+msgid "Full File System Read Access"
+msgstr "Полный доступ к файловой системе на чтение"
+
+#: src/bz-safety-calculator.c:182
+msgid "Can read all data on the file system"
+msgstr "Может читать все данные в файловой системе"
+
+#: src/bz-safety-calculator.c:190
+msgid "Home Folder Read Access"
+msgstr "Доступ на чтение домашней папки"
+
+#: src/bz-safety-calculator.c:191
+msgid "Can read all data in your home directory"
+msgstr "Может читать все данные в вашей домашней папке"
+
+#: src/bz-safety-calculator.c:199
+msgid "Download Folder Read/Write Access"
+msgstr "Доступ для чтения/записи в папку загрузки"
+
+#: src/bz-safety-calculator.c:200
+msgid "Can read and write all data in your downloads directory"
+msgstr "Может читать и записывать все данные в вашей папке загрузки"
+
+#: src/bz-safety-calculator.c:210
+msgid "Download Folder Read Access"
+msgstr "Доступ на чтение папки загрузки"
+
+#: src/bz-safety-calculator.c:211
+msgid "Can read all data in your downloads directory"
+msgstr "Может читать все данные в вашей папке загрузки"
+
+#: src/bz-safety-calculator.c:224
+msgid "Can read and write all data in the directory"
+msgstr "Может читать и записывать все данные в папке"
+
+#: src/bz-safety-calculator.c:238
+msgid "Can read all data in the directory"
+msgstr "Может читать все данные в папке"
+
+#: src/bz-safety-calculator.c:253
+msgid "No File System Access"
+msgstr "Нет доступа к файловой системе"
+
+#: src/bz-safety-calculator.c:254
+msgid "Cannot access the file system at all"
+msgstr "Не может получить доступ к файловой системе"
+
+#: src/bz-safety-calculator.c:261
+msgid "Uses System Services"
+msgstr "Использует системные службы"
+
+#: src/bz-safety-calculator.c:262
+msgid "Can request data from non-portal system services"
+msgstr "Может запрашивать данные у системных служб, не относящихся к порталу"
+
+#: src/bz-safety-calculator.c:268
+msgid "Uses Session Services"
+msgstr "Использует службы сеанса"
+
+#: src/bz-safety-calculator.c:269
+msgid "Can request data from non-portal session services"
+msgstr "Может запрашивать данные у служб сеанса, не относящихся к порталу"
+
+#: src/bz-safety-calculator.c:294
+msgid "No Service Access"
+msgstr "Нет доступа к службе"
+
+#: src/bz-safety-calculator.c:295
+msgid "Cannot access non-portal session or system services at all"
+msgstr ""
+"Не может получить доступ к службам сеанса или системным, не относящимся к "
+"порталу"
+
+#: src/bz-safety-calculator.c:303
+msgid "Verified App Developer"
+msgstr "Подтверждённый разработчик приложения"
+
+#: src/bz-safety-calculator.c:304
+msgid "The developer of this app has been verified to be who they say they are"
+msgstr ""
+"Разработчик этого приложения подтвердил, что является тем, за кого себя "
+"выдает"
+
+#: src/bz-safety-calculator.c:313
+msgid "Proprietary Code"
+msgstr "Проприетарный код"
+
+#: src/bz-safety-calculator.c:314
+msgid ""
+"The source code is not public, so it cannot be independently audited and "
+"might be unsafe"
+msgstr ""
+"Исходный код не является открытым, поэтому не может быть подвергнут "
+"независимому аудиту и может быть небезопасным"
+
+#: src/bz-safety-calculator.c:324
+msgid "Auditable Code"
+msgstr "Проверяемый код"
+
+#: src/bz-safety-calculator.c:325
+msgid ""
+"The source code is public and can be independently audited, which makes the "
+"app more likely to be safe"
+msgstr ""
+"Исходный код является открытым и может быть подвергнут независимому аудиту, "
+"что повышает вероятность того, что приложение безопасно"
+
+#: src/bz-safety-calculator.c:465
+#, c-format
+msgid "Use the %s System Service"
+msgstr "Использует системную службу %s"
+
+#: src/bz-safety-calculator.c:469
+#, c-format
+msgid "Use the %s Session Service"
+msgstr "Использует службу сеанса %s"
+
+#: src/bz-safety-calculator.c:473
+#, c-format
+msgid "Use the %s Service"
+msgstr "Использует службу %s"
+
+#: src/bz-safety-calculator.c:483
+msgid "Can see the non-portal service"
+msgstr "Может просматривать службу, не относящуюся к порталу"
+
+#: src/bz-safety-calculator.c:485
+msgid "Can talk to the non-portal service"
+msgstr "Может связаться со службой, не относящейся к порталу"
+
+#: src/bz-safety-calculator.c:487
+msgid "Can own the non-portal service"
+msgstr "Может быть владельцем службы, не относящейся к порталу"
+
+#: src/bz-safety-dialog.blp:7
+msgid "Safety"
+msgstr "Безопасность"
+
+#: src/bz-safety-dialog.blp:31
+msgid "Safe"
+msgstr "Безопасно"
+
+#: src/bz-safety-dialog.blp:50
+msgid "Details"
+msgstr "Детали"
+
+#: src/bz-safety-dialog.blp:53
+msgid "License"
+msgstr "Лицензия"
+
+#: src/bz-safety-dialog.blp:62
+msgid "App ID"
+msgstr "ID приложения"
+
+#: src/bz-safety-dialog.blp:71
+msgid "SDK"
+msgstr "SDK"
+
+#: src/bz-safety-dialog.blp:98
+msgid ""
+"This app uses an outdated version of the software platform (SDK) and might "
+"contain bugs or security vulnerabilities which will not be fixed."
+msgstr ""
+"Это приложение использует устаревшую версию платформа для разработки (SDK) и "
+"может иметь баги или уязвимости безопасности которые не были исправлены."
+
+#: src/bz-safety-dialog.c:222
+#, c-format
+msgid "%s is Safe"
+msgstr "%s безопасное"
+
+#: src/bz-safety-dialog.c:227
+#, c-format
+msgid "%s has no Unsafe Permissions"
+msgstr "%s имеет небезопасные разрешения"
+
+#: src/bz-safety-dialog.c:232
+#, c-format
+msgid "%s is Probably Safe"
+msgstr "%s возможно безопасное"
+
+#: src/bz-safety-dialog.c:237
+#, c-format
+msgid "%s is Possibly Unsafe"
+msgstr "%s возможно небезопасное"
+
+#: src/bz-safety-dialog.c:242
+#, c-format
+msgid "%s is Unsafe"
+msgstr "%s небезопасное"
 
 #: src/bz-screenshot-page.blp:5
 msgid "Screenshots"
@@ -1712,27 +2234,27 @@ msgstr "Отдалить"
 msgid "Zoom In"
 msgstr "Приблизить"
 
-#: src/bz-screenshots-carousel.blp:6
+#: src/bz-screenshots-carousel.blp:5
 msgid "Screenshots Carousel"
 msgstr "Карусель скриншотов"
 
-#: src/bz-screenshots-carousel.blp:104
+#: src/bz-screenshots-carousel.blp:103
 msgid "Open Screenshot Viewer"
 msgstr "Открыть просмотрщик скриншотов"
 
-#: src/bz-search-widget.blp:106
+#: src/bz-search-widget.blp:107
 msgid "Search Apps, Games, Software"
 msgstr "Поиск приложений, игр, ПО"
 
-#: src/bz-search-widget.blp:150
+#: src/bz-search-widget.blp:146
 msgid "Categories Unavailable"
 msgstr "Категории недоступны"
 
-#: src/bz-search-widget.blp:151
+#: src/bz-search-widget.blp:147
 msgid "Search for apps using the search bar above."
 msgstr "Попробуйте поискать приложения используя поле ввода запроса выше."
 
-#: src/bz-search-widget.blp:235
+#: src/bz-search-widget.blp:231
 msgid "No Applications Found"
 msgstr "Приложение не найдено"
 
@@ -1765,6 +2287,23 @@ msgstr "Установок:"
 msgid "World"
 msgstr "Карта мира"
 
+#. Translators: M is the suffix for millions
+#: src/bz-stats-dialog.c:124
+#, c-format
+msgid "%.2fM Total Installs"
+msgstr "%.2f миллионов общих установок"
+
+#. Translators: K is the suffix for thousands
+#: src/bz-stats-dialog.c:127
+#, c-format
+msgid "%.2fK Total Installs"
+msgstr "%.2f тысяч общих установок"
+
+#: src/bz-stats-dialog.c:129
+#, c-format
+msgid "%'d Total Installs"
+msgstr "%'d общих установок"
+
 #: src/bz-tag-list.c:96
 msgid "No Results Found"
 msgstr "Нет результатов"
@@ -1774,16 +2313,90 @@ msgstr "Нет результатов"
 msgid "Apps Tagged \"%s\""
 msgstr "Приложения с меткой \"%s\""
 
-#: src/bz-tag-list.c:109
-#, c-format
-msgid "%d Applications"
-msgstr "%d приложений"
-
 #: src/bz-tag-list.c:124
 msgid "Search failed"
 msgstr "Ошибка поиска"
 
-#: src/bz-transaction-manager.c:1135
+#: src/bz-transaction-dialog.c:159
+msgid "Keep Data"
+msgstr "Оставить данные"
+
+#: src/bz-transaction-dialog.c:160
+msgid "Allow restoring settings and content"
+msgstr "Возможно восстановление настроек и содержимого"
+
+#: src/bz-transaction-dialog.c:169
+msgid "Delete Data"
+msgstr "Удалить данные"
+
+#: src/bz-transaction-dialog.c:170
+msgid "Permanently remove app data to save space"
+msgstr "Навсегда удалить данные приложения для сохранения места"
+
+#: src/bz-transaction-dialog.c:194
+#, c-format
+msgid "Install %s?"
+msgstr "Установить %s?"
+
+#: src/bz-transaction-dialog.c:197
+msgid "May install additional shared components"
+msgstr "Может установить дополнительные общие компоненты"
+
+#: src/bz-transaction-dialog.c:216
+#, c-format
+msgid "Remove %s?"
+msgstr "Удалить %s?"
+
+#: src/bz-transaction-dialog.c:220
+#, c-format
+msgid "It will not be possible to use %s after it is uninstalled."
+msgstr "Станет невозможным использовать %s после его удаления."
+
+#: src/bz-transaction-dialog.c:240
+#, c-format
+msgid "“%s” is High Risk"
+msgstr "\"%s\" под высоким риском"
+
+#: src/bz-transaction-dialog.c:244
+msgid ""
+"This app has full access to your system, including all <b>your files, "
+"browser history, saved passwords</b>, and more. It also has access to the "
+"internet, meaning it could send your data to outside parties.\n"
+"\n"
+"Because the app is proprietary, it can not be audited for what it does with "
+"these permissions."
+msgstr ""
+"Это приложение имеет полный доступ к вашей системе, включая все <b>ваши "
+"файлы, историю браузера, сохранённые пароли</b>, и так далее. Оно также "
+"имеет доступ к интернету, что может означать отправку ваших данных третьим "
+"лицам.\n"
+"\n"
+"Так как это приложение является проприетарным, проверка на действия с такими "
+"разрешениями является невозможной."
+
+#: src/bz-transaction-dialog.c:253
+msgid ""
+"This app uses the legacy X11 windowing system, which allows it to <b>record "
+"all keystrokes, capture screenshots, and monitor other applications</b>. It "
+"also has access to the internet, meaning it could send your data to outside "
+"parties.\n"
+"\n"
+"Because the app is proprietary, it can not be audited for what it does with "
+"these permissions."
+msgstr ""
+"Это приложение использует устаревшую оконную систему X11, которая получает "
+"доступ к <b>записи всех нажатий клавиш, получению скриншотов и наблюдению "
+"над другими приложениями</b>. Оно также имеет доступ к интернету, что может "
+"означать отправку ваших данных третьим лицам.\n"
+"\n"
+"Так как это приложение является проприетарным, проверка на действия с такими "
+"разрешениями является невозможной."
+
+#: src/bz-transaction-dialog.c:269
+msgid "Install Anyway"
+msgstr "Всё равно установить"
+
+#: src/bz-transaction-manager.c:1148
 #, c-format
 msgid "Finished in %.02f seconds"
 msgstr "Закончено за %.02f секунд"
@@ -1800,18 +2413,27 @@ msgstr "Среда выполнения"
 msgid "Install Size"
 msgstr "Размер установки"
 
-#: src/bz-transaction-view.blp:200
+#: src/bz-transaction-view.blp:187 src/bz-transaction-view.blp:238
+#: src/bz-transaction-view.blp:264 src/bz-transaction.c:342
+msgid "Pending"
+msgstr "В ожидании"
+
+#: src/bz-transaction-view.blp:199
+msgid "Ongoing"
+msgstr "Выполняется"
+
+#: src/bz-transaction-view.blp:212
+msgid "Finished"
+msgstr "Завершено"
+
+#: src/bz-transaction-view.blp:251
 msgid "Update"
 msgstr "Обновить"
 
-#: src/bz-transaction-view.c:139
+#: src/bz-transaction-view.c:135
 #, c-format
 msgid "Transferred %s so far"
 msgstr "Всего было загружено %s"
-
-#: src/bz-transaction.c:336
-msgid "Pending"
-msgstr "В ожидании"
 
 #: src/bz-update-dialog.blp:7
 msgid "Update Now"
@@ -1828,7 +2450,7 @@ msgid ""
 msgstr ""
 "Перечисленные приложения могут быть обновлены. Вы хотите установить их?"
 
-#: src/bz-update-dialog.c:134
+#: src/bz-update-dialog.c:135
 #, c-format
 msgid ""
 "%d runtimes and/or addons are eligible for updates. Would you like to "
@@ -1837,7 +2459,7 @@ msgstr ""
 "%d сред выполнения и/или дополнений могут быть обновлены. Вы хотите "
 "установить их?"
 
-#: src/bz-update-dialog.c:142
+#: src/bz-update-dialog.c:143
 #, c-format
 msgid "Additionally, %d runtimes and/or addons will be updated."
 msgstr "Дополнительно, %d сред выполнения и/или расширений будут обновлены."
@@ -1856,20 +2478,12 @@ msgstr "Пользовательские данные"
 
 #: src/bz-user-data-tile.c:144
 #, c-format
-msgid "Removed User Data for %s"
-msgstr "Удалены пользовательские данные к %s"
+msgid "Trashed User Data for %s"
+msgstr "Пользовательские данные к %s отправлены в корзину"
 
 #: src/bz-user-data-tile.blp:74
-msgid "Remove User Data"
-msgstr "Удалить пользовательские данные"
-
-#: src/bz-window.blp:66
-msgid "Inspect UI Entry"
-msgstr "Исследовать элемент интерфейса"
-
-#: src/bz-window.blp:73
-msgid "All Debug Actions"
-msgstr "Все действия отладки"
+msgid "Trash User Data"
+msgstr "Отправить в корзину"
 
 #: src/bz-window.blp:107
 msgid "Tasks"
@@ -1887,55 +2501,45 @@ msgstr "Очистить историю"
 msgid "No Tasks Yet"
 msgstr "Нет задач"
 
-#: src/bz-window.blp:258
+#: src/bz-window.blp:257
 msgid "Refreshing Store Content"
-msgstr "Обновление контента магазина"
+msgstr "Обновление содержимого магазина"
 
-#: src/bz-window.blp:273
+#: src/bz-window.blp:271
 msgid "Curated"
 msgstr "Курируемое"
 
-#: src/bz-window.blp:286
+#: src/bz-window.blp:284
 msgid "Flathub"
 msgstr "Flathub"
 
-#: src/bz-window.blp:450
-msgid "Network connection is metered — automatic store data sync is paused"
-msgstr ""
-"Сетевое соединение ограничено — автоматическая синхронизация данных магазина "
-"приостановлена"
+#: src/bz-window.blp:432
+msgid "No background tasks!"
+msgstr "Нет фоновых задач!"
 
-#: src/bz-window.blp:451 src/bz-window.blp:460
-msgid "Sync Manually"
-msgstr "Синхронизировать вручную"
-
-#: src/bz-window.blp:459
+#: src/bz-window.blp:490
 msgid ""
 "You have a network connection but are viewing a cached version of Flathub"
 msgstr ""
 "Вы имеете сетевое подключение, но просматриваете кэшируемую версию Flathub"
 
-#: src/bz-window.blp:534
+#: src/bz-window.blp:565
 msgid "_Login with Flathub"
 msgstr "_Войти в Flathub"
 
-#: src/bz-window.blp:540
+#: src/bz-window.blp:571
 msgid "_Manage Leftover User Data"
 msgstr "_Управлять оставшимися данными"
 
-#: src/bz-window.blp:545
+#: src/bz-window.blp:576
 msgid "_Synchronize Remotes"
 msgstr "С_инхронизировать репозитории"
 
-#: src/bz-window.blp:571
-msgid "Open Bazaar Inspector"
-msgstr "Открыть Bazaar Инспектор"
-
-#: src/bz-window.blp:586
+#: src/bz-window.blp:617
 msgid "Log Out"
 msgstr "Выйти"
 
-#: src/bz-window.c:501
+#: src/bz-window.c:435
 #, c-format
 msgid "%d Update Available"
 msgid_plural "%d Updates Available"
@@ -1943,7 +2547,7 @@ msgstr[0] "Доступно %d обновление"
 msgstr[1] "Доступно %d обновления"
 msgstr[2] "Доступно %d обновлений"
 
-#: src/bz-window.c:999
+#: src/bz-window.c:872
 msgid ""
 "The ability to inspect and install local .flatpak bundle files is coming "
 "soon! In the meantime, try running\n"
@@ -1959,46 +2563,15 @@ msgstr ""
 "\n"
 "в командной строке."
 
-#: src/bz-window.c:1137
+#: src/bz-window.c:1010
 msgid "Can't do that right now!"
 msgstr "Нельзя сделать это прямо сейчас!"
 
-#: src/bz-window.c:1268
-msgid "Keep Data"
-msgstr "Оставить данные"
-
-#: src/bz-window.c:1269
-msgid "Allow restoring settings and content"
-msgstr "Возможно восстановление настроек и контента"
-
-#: src/bz-window.c:1278
-msgid "Permanently remove app data to save space"
-msgstr "Навсегда удалить данные приложения для сохранения места"
-
-#: src/bz-window.c:1301
-#, c-format
-msgid "Install %s?"
-msgstr "Установить %s?"
-
-#: src/bz-window.c:1304
-msgid "May install additional shared components"
-msgstr "Может установить дополнительные общие компоненты"
-
-#: src/bz-window.c:1323
-#, c-format
-msgid "Remove %s?"
-msgstr "Удалить %s?"
-
-#: src/bz-window.c:1327
-#, c-format
-msgid "It will not be possible to use %s after it is uninstalled."
-msgstr "Станет невозможным использовать %s после его удаления."
-
-#: src/bz-window.c:1390
+#: src/bz-window.c:1080
 msgid "Resume Current Tasks"
 msgstr "Продолжить текущие задачи"
 
-#: src/bz-window.c:1396
+#: src/bz-window.c:1086
 msgid "Pause Current Tasks"
 msgstr "Приостановить текущие задачи"
 
@@ -2024,8 +2597,8 @@ msgstr "Открыть параметры"
 
 #: src/gtk/shortcuts-dialog.blp:19
 msgctxt "shortcut window"
-msgid "Refresh"
-msgstr "Обновить"
+msgid "Synchronize Remotes"
+msgstr "Синхронизировать репозитории"
 
 #: src/gtk/shortcuts-dialog.blp:24
 msgctxt "shortcut window"
@@ -2041,128 +2614,3 @@ msgstr "Открыть сочетания клавиш"
 msgctxt "shortcut window"
 msgid "Quit"
 msgstr "Закрыть"
-
-#~ msgid "Install Now"
-#~ msgstr "Установить сейчас"
-
-#~ msgid "Show Git Forge Star Counts"
-#~ msgstr "Показать количество звёзд на странице репозитория"
-
-#~ msgid ""
-#~ "Whether to attempt to detect and show \"star counts\" for projects in the "
-#~ "full view"
-#~ msgstr ""
-#~ "Пытаться ли получить количество звёзд на странице репозитория проектов в "
-#~ "экране обзора приложения"
-
-#~ msgid "Repository Star Count"
-#~ msgstr "Количество звёзд репозитория"
-
-#~ msgid "Application Details"
-#~ msgstr "Информация приложения"
-
-#~ msgid "Display Star Count"
-#~ msgstr "Показать количество звёзд"
-
-#~ msgid "Show the star count of an application's source code repository"
-#~ msgstr "Показать количество звёзд в репозитории приложения"
-
-#~ msgid ""
-#~ "Bazaar can fetch and display the star count from an application's source "
-#~ "code repository on a remote Git forge. \n"
-#~ " For projects on GitHub, rate limits may cause them not to appear."
-#~ msgstr ""
-#~ "Bazaar может получить и отобразить количество звёзд из репозитория "
-#~ "приложения на удалённом Git-сервере. \n"
-#~ " Для проектов на GitHub временные ограничения в получении запроса могут "
-#~ "противостоять их отображению."
-
-#~ msgid "Delete local data as well"
-#~ msgstr "Также удалить локальные данные"
-
-#~ msgid "Sync"
-#~ msgstr "Синхронизировать"
-
-#~ msgid "We ♥ Games"
-#~ msgstr "Мы ♥ Игры"
-
-#, c-format
-#~ msgid "%.2fM"
-#~ msgstr "%.2fM"
-
-#, c-format
-#~ msgid "%.2fK"
-#~ msgstr "%.2fK"
-
-#~ msgid "Mobile Apps"
-#~ msgstr "Мобильные приложения"
-
-#~ msgid "Hide proprietary software when searching"
-#~ msgstr "Скрыть проприетарные приложения в поиске"
-
-#~ msgid "Filter search results to only show applications available on Flathub"
-#~ msgstr "Фильтровать приложения из Flathub в результатах поиска "
-
-#~ msgid "Constructing Flatpak instance..."
-#~ msgstr "Настраивается обращение к Flatpak..."
-
-#~ msgid "Reusing last Flatpak instance..."
-#~ msgstr "Используем ранее настроенное обращение к Flatpak..."
-
-#~ msgid "Flathub is not registered on this system"
-#~ msgstr "Flathub не зарегистрирован в данной системе"
-
-#~ msgid ""
-#~ "Would you like to add Flathub as a remote? If you decline, the Flathub "
-#~ "page will not be available. You can change this later."
-#~ msgstr ""
-#~ "Вы хотите добавить Flathub как сторонний репозиторий? Если вы откажитесь, "
-#~ "страница Flathub не будет доступна. Вы можете изменить это позже."
-
-#~ msgid "Add Flathub"
-#~ msgstr "Добавить Flathub"
-
-#~ msgid "Identifying installed entries..."
-#~ msgstr "Определение установленных приложений..."
-
-#, c-format
-#~ msgid "%'d of %'d"
-#~ msgstr "%'d из %'d"
-
-#, c-format
-#~ msgid "Waiting for background indexing tasks to catch up..."
-#~ msgstr "Ожидание завершения фоновых задач индексирования..."
-
-#, c-format
-#~ msgid "Completed initialization in %0.2f seconds"
-#~ msgstr "Инициализация завершена за %0.2f секунд"
-
-#~ msgid "Verified by the original developers"
-#~ msgstr "Верифицировано подлинными разработчиками"
-
-#~ msgid "End of Life Apps"
-#~ msgstr "Неподдерживаемые приложения"
-
-#~ msgid "Searching for Blender"
-#~ msgstr "Поиск Blender"
-
-#, c-format
-#~ msgid ""
-#~ "Beginning remote entry retrieval while referencing %d blocklist(s)..."
-#~ msgstr ""
-#~ "Получение элементов из репозиториев при обращении к %d чёрным спискам..."
-
-#~ msgid "More actions"
-#~ msgstr "Больше опций"
-
-#~ msgid "Run this application"
-#~ msgstr "Запустить это приложение"
-
-#~ msgid "Run"
-#~ msgstr "Запустить"
-
-#~ msgid "View Store Page"
-#~ msgstr "Открыть страницу магазина"
-
-#~ msgid "Settings & user data will be kept"
-#~ msgstr "Настройки и пользовательские данные будут сохранены"

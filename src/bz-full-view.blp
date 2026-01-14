@@ -297,7 +297,7 @@ template $BzFullView: Adw.Bin {
                           homogeneous: true;
 
                           $BzContextTile download_size_tile {
-                            label: _("Size");
+                            label: bind $get_size_label($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <string>;
                             has-tooltip: true;
                             tooltip-text: bind $format_size_tooltip(template.ui-entry as <$BzResult>.object as <$BzEntry>.size) as <string>;
                             lozenge-style: "grey";
@@ -305,7 +305,7 @@ template $BzFullView: Adw.Bin {
 
                             lozenge-child: Label {
                               justify: center;
-                              label: bind $format_size(template.ui-entry as <$BzResult>.object as <$BzEntry>.size) as <string>;
+                              label: bind $format_size($get_size_type(template.ui-entry as <$BzResult>.object as <$BzEntry>, $is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <int>) as <string>;
                               lines: 3;
                               ellipsize: end;
                               halign: center;
@@ -334,6 +334,35 @@ template $BzFullView: Adw.Bin {
                               }
                             };
                           }
+
+                          $BzContextTile {
+                            can-target: bind template.entry-group as <$BzEntryGroup>.is_flathub as <bool>;
+                            clicked => $safety_cb(template);
+                            label: bind $get_safety_rating_label(template.ui-entry as <$BzResult>.object as <$BzEntry>) as <string>;
+                            lozenge-style: bind $get_safety_rating_style(template.ui-entry as <$BzResult>.object as <$BzEntry>) as <string>;
+
+                            lozenge-child: Box {
+                              spacing: 4;
+
+                              Image {
+                                icon-name: bind $get_safety_rating_icon(template.ui-entry as <$BzResult>.object as <$BzEntry>,0) as <string>;
+                                visible: bind $invert_boolean($is_empty_string($get_safety_rating_icon(template.ui-entry as <$BzResult>.object as <$BzEntry>,0) as <string>) as <bool>) as <bool>;
+                              }
+                              Image {
+                                icon-name: bind $get_safety_rating_icon(template.ui-entry as <$BzResult>.object as <$BzEntry>,1) as <string>;
+                                visible: bind $invert_boolean($is_empty_string($get_safety_rating_icon(template.ui-entry as <$BzResult>.object as <$BzEntry>,1) as <string>) as <bool>) as <bool>;
+                              }
+                              Image {
+                                icon-name: bind $get_safety_rating_icon(template.ui-entry as <$BzResult>.object as <$BzEntry>,2) as <string>;
+                                visible: bind $invert_boolean($is_empty_string($get_safety_rating_icon(template.ui-entry as <$BzResult>.object as <$BzEntry>,2) as <string>) as <bool>) as <bool>;
+                              }
+
+                            };
+                          }
+                        }
+
+                        Box {
+                          homogeneous: true;
 
                           $BzContextTile formfactor_support_tile_wide {
                             label: bind $get_formfactor_label(template.ui-entry as <$BzResult>.object as <$BzEntry>.is-mobile-friendly) as <string>;
@@ -380,10 +409,6 @@ template $BzFullView: Adw.Bin {
                               }
                             };
                           }
-                        }
-
-                        Box {
-                          homogeneous: true;
 
                           $BzContextTile {
                             clicked => $age_rating_cb(template);
@@ -412,26 +437,6 @@ template $BzFullView: Adw.Bin {
                               label: bind $format_recent_downloads(template.ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <string>;
                               halign: center;
                               use-markup: true;
-                            };
-                          }
-
-                          $BzContextTile {
-                            can-target: bind template.entry-group as <$BzEntryGroup>.is_flathub as <bool>;
-                            clicked => $open_flathub_url_cb(template);
-                            label: bind template.entry-group as <$BzEntryGroup>.remote-repos-string;
-                            lozenge-style: bind $bool_to_string(template.entry-group as <$BzEntryGroup>.is_flathub, "flathub", "grey") as <string>;
-
-                            lozenge-child: Box {
-                              spacing: 6;
-
-                              Image {
-                                icon-name: "network-server-symbolic";
-                              }
-
-                              Image {
-                                visible: bind template.entry-group as <$BzEntryGroup>.is_flathub as <bool>;
-                                icon-name: "flathub-symbolic";
-                              }
                             };
                           }
                         }
@@ -554,7 +559,10 @@ template $BzFullView: Adw.Bin {
                     $BzScreenshotsCarousel screenshots {
                       vexpand: true;
                       hexpand: true;
-                      visible: bind template.ui-entry as <$BzResult>.resolved as <bool>;
+                      visible: bind $logical_and(
+                        template.ui-entry as <$BzResult>.resolved as <bool>,
+                        $invert_boolean($is_empty(template.ui-entry as <$BzResult>.object as <$BzEntry>.screenshot-paintables) as <bool>) as <bool>
+                      ) as <bool>;
                       clicked => $screenshot_clicked_cb() swapped;
                       light-accent-color: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.light-accent-color;
                       dark-accent-color: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.dark-accent-color;
@@ -616,7 +624,7 @@ template $BzFullView: Adw.Bin {
 
                               child: Adw.ButtonContent {
                                 icon-name: "user-trash-symbolic";
-                                label: _("Delete Data");
+                                label: _("Trash Data");
                               };
                             }
                           };
@@ -709,6 +717,8 @@ template $BzFullView: Adw.Bin {
 
                             label: bind $format_other_apps_label(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer) as <string>;
                             xalign: 0;
+                            wrap: true;
+                            wrap-mode: word_char;
                             margin-bottom: 6;
                             margin-start: 3;
                           }
@@ -732,11 +742,17 @@ template $BzFullView: Adw.Bin {
 
                           Button {
                             visible: bind $is_longer(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer-apps, 6) as <bool>;
-                            label: bind $format_more_other_apps_label(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer) as <string>;
                             clicked => $more_apps_button_clicked_cb(template);
                             halign: center;
                             margin-top: 11;
                             margin-bottom: 8;
+
+                            child: Label {
+                              label: bind $format_more_other_apps_label(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer) as <string>;
+                              justify: center;
+                              wrap: true;
+                              wrap-mode: word_char;
+                            };
 
                             styles [
                               "pill",

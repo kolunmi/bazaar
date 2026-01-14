@@ -1,0 +1,108 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzSafetyDialog: Adw.Dialog {
+  content-height: 576;
+  content-width: 640;
+  title: _("Safety");
+
+  child: Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {
+      show-title: false;
+    }
+
+    content: ScrolledWindow {
+      hscrollbar-policy: never;
+
+      Adw.Clamp {
+        maximum-size: 640;
+        tightening-threshold: 400;
+
+        Box {
+          orientation: vertical;
+          spacing: 24;
+          margin-start: 24;
+          margin-end: 24;
+          margin-top: 24;
+          margin-bottom: 24;
+
+          $BzLozenge lozenge {
+            title: _("Safe");
+
+            icon-names: [
+              "app-safety-ok-symbolic",
+            ];
+
+            importance: unimportant;
+          }
+
+          ListBox permissions_list {
+            selection-mode: none;
+
+            styles [
+              "boxed-list",
+            ]
+          }
+
+          Adw.PreferencesGroup {
+            margin-top: 10;
+            title: _("Details");
+
+            Adw.ActionRow {
+              title: _("License");
+              subtitle: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.project-license;
+
+              styles [
+                "property",
+              ]
+            }
+
+            Adw.ActionRow {
+              title: _("App ID");
+              subtitle: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.id;
+
+              styles [
+                "property",
+              ]
+            }
+
+            Adw.ActionRow {
+              title: _("SDK");
+              subtitle: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzFlatpakEntry>.application-runtime;
+
+              styles [
+                "property",
+              ]
+
+              [suffix]
+              MenuButton {
+                visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.eol) as <bool>) as <bool>;
+
+                styles [
+                  "error",
+                  "flat",
+                ]
+
+                valign: center;
+                icon-name: "dialog-warning-symbolic";
+
+                popover: Popover {
+                  child: Label {
+                    margin-top: 8;
+                    margin-bottom: 8;
+                    margin-start: 8;
+                    margin-end: 8;
+                    max-width-chars: 35;
+                    wrap: true;
+                    label: _("This app uses an outdated version of the software platform (SDK) and might contain bugs or security vulnerabilities which will not be fixed.");
+                  };
+                };
+              }
+            }
+          }
+        }
+      }
+    };
+  };
+}

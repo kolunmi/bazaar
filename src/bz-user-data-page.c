@@ -250,7 +250,7 @@ fetch_user_data_fiber (GWeakRef *wr)
           group = g_list_model_get_item (installed_groups, i);
           id    = bz_entry_group_get_id (group);
           if (id != NULL)
-            g_hash_table_add (installed_ids, g_strdup (id));
+            g_hash_table_replace (installed_ids, g_strdup (id), NULL);
         }
     }
 
