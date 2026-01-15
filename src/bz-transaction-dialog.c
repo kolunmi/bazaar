@@ -25,6 +25,7 @@
 #include "bz-error.h"
 #include "bz-safety-calculator.h"
 #include "bz-transaction-dialog.h"
+#include "bz-transaction-list-dialog.h"
 #include "bz-util.h"
 
 BzTransactionDialogResult *
@@ -230,9 +231,9 @@ configure_remove_dialog (AdwAlertDialog *alert,
 }
 
 static void
-configure_high_risk_warning_dialog (AdwAlertDialog  *alert,
-                                    const char      *title,
-                                    BzHighRiskGroup  risk_groups)
+configure_high_risk_warning_dialog (AdwAlertDialog *alert,
+                                    const char     *title,
+                                    BzHighRiskGroup risk_groups)
 {
   g_autofree char *heading = NULL;
   g_autofree char *body    = NULL;
@@ -278,7 +279,7 @@ static BzHighRiskGroup
 get_entry_high_risk_groups (BzEntry *entry)
 {
   if (bz_entry_get_is_foss (entry))
-      return BZ_HIGH_RISK_GROUP_NONE;
+    return BZ_HIGH_RISK_GROUP_NONE;
 
   return bz_safety_calculator_get_high_risk_groups (entry);
 }
@@ -457,4 +458,167 @@ bz_transaction_dialog_show (GtkWidget    *parent,
       (DexFiberFunc) show_dialog_fiber,
       data,
       (GDestroyNotify) show_dialog_data_free);
+}
+
+BzBulkInstallDialogResult *
+bz_bulk_install_dialog_result_new (void)
+{
+  BzBulkInstallDialogResult *result = g_new0 (BzBulkInstallDialogResult, 1);
+  result->entries                   = g_ptr_array_new_with_free_func (g_object_unref);
+  return result;
+}
+
+void
+bz_bulk_install_dialog_result_free (BzBulkInstallDialogResult *result)
+{
+  if (result == NULL)
+    return;
+
+  g_clear_pointer (&result->entries, g_ptr_array_unref);
+  g_free (result);
+}
+
+typedef struct
+{
+  GtkWidget  *parent;
+  GListModel *groups;
+} BulkInstallDialogData;
+
+static void
+bulk_install_dialog_data_free (BulkInstallDialogData *data)
+{
+  g_clear_object (&data->groups);
+  g_free (data);
+}
+
+static DexFuture *
+bulk_install_dialog_fiber (BulkInstallDialogData *data)
+{
+  g_autoptr (GError) local_error               = NULL;
+  g_autoptr (BzBulkInstallDialogResult) result = NULL;
+  g_autoptr (GPtrArray) resolved_entries       = NULL;
+  g_autoptr (GListStore) entries_store         = NULL;
+  AdwDialog       *dialog                      = NULL;
+  g_autofree char *dialog_response             = NULL;
+  g_autofree char *heading                     = NULL;
+  guint            n_groups                    = 0;
+
+  result           = bz_bulk_install_dialog_result_new ();
+  resolved_entries = g_ptr_array_new_with_free_func (g_object_unref);
+
+  if (data->groups == NULL)
+    {
+      result->confirmed = FALSE;
+      return dex_future_new_for_pointer (g_steal_pointer (&result));
+    }
+
+  n_groups = g_list_model_get_n_items (data->groups);
+
+  for (guint i = 0; i < n_groups; i++)
+    {
+      g_autoptr (BzEntryGroup) group = NULL;
+      g_autoptr (GListStore) store   = NULL;
+      g_autoptr (BzEntry) entry      = NULL;
+
+      group = g_list_model_get_item (data->groups, i);
+
+      if (bz_entry_group_get_removable (group) > 0)
+        continue;
+
+      store = dex_await_object (bz_entry_group_dup_all_into_store (group), &local_error);
+      if (store == NULL || g_list_model_get_n_items (G_LIST_MODEL (store)) == 0)
+        continue;
+
+      entry = g_list_model_get_item (G_LIST_MODEL (store), 0);
+      if (entry == NULL)
+        continue;
+
+      if (bz_entry_is_installed (entry) || bz_entry_is_holding (entry))
+        continue;
+
+      g_ptr_array_add (resolved_entries, g_object_ref (entry));
+    }
+
+  if (resolved_entries->len == 0)
+    {
+      g_autoptr (AdwDialog) info_alert = NULL;
+
+      info_alert = g_object_ref_sink (adw_alert_dialog_new (
+          _ ("All apps are already installed"), NULL));
+
+      adw_alert_dialog_add_response (ADW_ALERT_DIALOG (info_alert), "ok", _ ("OK"));
+      adw_alert_dialog_set_default_response (ADW_ALERT_DIALOG (info_alert), "ok");
+      adw_alert_dialog_set_close_response (ADW_ALERT_DIALOG (info_alert), "ok");
+
+      adw_dialog_present (info_alert, data->parent);
+
+      dex_await (bz_make_alert_dialog_future (ADW_ALERT_DIALOG (info_alert)), NULL);
+
+      result->confirmed = FALSE;
+      return dex_future_new_for_pointer (g_steal_pointer (&result));
+    }
+
+  entries_store = g_list_store_new (BZ_TYPE_ENTRY);
+  for (guint i = 0; i < resolved_entries->len; i++)
+    g_list_store_append (entries_store, g_ptr_array_index (resolved_entries, i));
+
+  heading = g_strdup_printf (ngettext ("Install %u App?",
+                                       "Install %u Apps?",
+                                       resolved_entries->len),
+                             resolved_entries->len);
+
+  dialog = bz_transaction_list_dialog_new (
+      G_LIST_MODEL (entries_store),
+      heading,
+      _ ("The following will be installed."),
+      _ ("%d runtimes and/or addons will be installed."),
+      _ ("Additionally, %d runtimes and/or addons will be installed."),
+      _ ("Cancel"),
+      _ ("Install All"));
+
+  adw_alert_dialog_set_default_response (ADW_ALERT_DIALOG (dialog), "confirm");
+  adw_alert_dialog_set_close_response (ADW_ALERT_DIALOG (dialog), "cancel");
+
+  adw_dialog_present (dialog, data->parent);
+
+  dialog_response = dex_await_string (
+      bz_make_alert_dialog_future (ADW_ALERT_DIALOG (dialog)),
+      &local_error);
+
+  if (dialog_response == NULL)
+    return dex_future_new_for_error (g_steal_pointer (&local_error));
+
+  result->confirmed = bz_transaction_list_dialog_was_confirmed (BZ_TRANSACTION_LIST_DIALOG (dialog));
+
+  if (result->confirmed)
+    {
+      for (guint i = 0; i < resolved_entries->len; i++)
+        {
+          BzEntry *entry = g_ptr_array_index (resolved_entries, i);
+          g_ptr_array_add (result->entries, g_object_ref (entry));
+        }
+    }
+
+  return dex_future_new_for_pointer (g_steal_pointer (&result));
+}
+
+DexFuture *
+bz_bulk_install_dialog_show (GtkWidget  *parent,
+                             GListModel *groups)
+{
+  BulkInstallDialogData *data;
+
+  g_return_val_if_fail (GTK_IS_WIDGET (parent), NULL);
+  g_return_val_if_fail (G_IS_LIST_MODEL (groups), NULL);
+
+  data         = g_new0 (BulkInstallDialogData, 1);
+  data->parent = parent;
+  data->groups = g_object_ref (groups);
+
+  return dex_scheduler_spawn (
+      dex_scheduler_get_default (),
+      0,
+      (DexFiberFunc) bulk_install_dialog_fiber,
+      data,
+      (GDestroyNotify) bulk_install_dialog_data_free);
 }

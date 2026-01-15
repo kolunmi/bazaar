@@ -46,4 +46,20 @@ DexFuture *bz_transaction_dialog_show (GtkWidget    *parent,
                                        gboolean      remove,
                                        gboolean      auto_confirm);
 
+typedef struct _BzBulkInstallDialogResult BzBulkInstallDialogResult;
+
+struct _BzBulkInstallDialogResult
+{
+  GPtrArray *entries;
+  gboolean   confirmed;
+};
+
+BzBulkInstallDialogResult *bz_bulk_install_dialog_result_new (void);
+void                       bz_bulk_install_dialog_result_free (BzBulkInstallDialogResult *result);
+
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (BzBulkInstallDialogResult, bz_bulk_install_dialog_result_free)
+
+DexFuture *bz_bulk_install_dialog_show (GtkWidget  *parent,
+                                        GListModel *groups);
+
 G_END_DECLS

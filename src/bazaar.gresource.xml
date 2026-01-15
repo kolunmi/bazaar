@@ -56,7 +56,7 @@
     <file preprocess="xml-stripblanks">bz-section-view.ui</file>
     <file preprocess="xml-stripblanks">bz-stats-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-transaction-view.ui</file>
-    <file preprocess="xml-stripblanks">bz-update-dialog.ui</file>
+    <file preprocess="xml-stripblanks">bz-transaction-list-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-user-data-page.ui</file>
     <file preprocess="xml-stripblanks">bz-user-data-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-window.ui</file>
