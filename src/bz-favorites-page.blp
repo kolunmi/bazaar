@@ -110,6 +110,7 @@ template $BzFavoritesPage: Adw.NavigationPage {
                       child: $BzFavoritesTile {
                         group: bind template.item as <$BzEntryGroup>;
                         activated => $tile_activated_cb();
+                        unfavorited => $unfavorite_cb();
                       };
                     };
                   }

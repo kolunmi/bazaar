@@ -298,13 +298,13 @@ install_all_cb (BzFavoritesPage *self,
     return;
 
   installable_groups = g_list_store_new (BZ_TYPE_ENTRY_GROUP);
-  n_items            = g_list_model_get_n_items (self->model);
+  n_items            = g_list_model_get_n_items (self->favorites);
 
   for (guint i = 0; i < n_items; i++)
     {
       g_autoptr (BzEntryGroup) group = NULL;
 
-      group = g_list_model_get_item (self->model, i);
+      group = g_list_model_get_item (self->favorites, i);
 
       if (!is_favorited (self->favorites, group))
         continue;
