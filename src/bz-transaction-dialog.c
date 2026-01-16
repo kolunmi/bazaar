@@ -570,9 +570,9 @@ bulk_install_dialog_fiber (BulkInstallDialogData *data)
   dialog = bz_transaction_list_dialog_new (
       G_LIST_MODEL (entries_store),
       heading,
-      _ ("The following will be installed."),
-      _ ("%d runtimes and/or addons will be installed."),
-      _ ("Additionally, %d runtimes and/or addons will be installed."),
+      _ ("The following will be installed. Additional shared components may also be installed"),
+      _ ("%d addons will be installed."),
+      _ ("Additionally, addons will be installed."),
       _ ("Cancel"),
       _ ("Install All"));
 
