@@ -149,7 +149,7 @@ bz_get_pride_style_provider (void)
                           break;
                         }
 
-                      g_string_append_printf (stripe_css, ", %s %f%%", rgba_spec, cur_offset * 100.0);
+                      g_string_append_printf (stripe_css, ", %s %d%%", rgba_spec, (int) round (cur_offset * 100.0));
                       cur_offset += homogeneous ? 1.0 / (double) n_stripes : size;
                       if (cur_offset > 1.0)
                         {
@@ -157,7 +157,7 @@ bz_get_pride_style_provider (void)
                           skip = TRUE;
                           break;
                         }
-                      g_string_append_printf (stripe_css, ", %s %f%%", rgba_spec, cur_offset * 100.0);
+                      g_string_append_printf (stripe_css, ", %s %d%%", rgba_spec, (int) round (cur_offset * 100.0));
                     }
                   if (skip)
                     continue;
