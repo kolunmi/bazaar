@@ -1,15 +1,7 @@
 using Gtk 4.0;
 using Adw 1;
 
-template $BzUpdateDialog: Adw.AlertDialog {
-  responses [
-    ignore: _("Later"),
-    install: _("Update Now") suggested,
-  ]
-
-  heading: _("Updates Are Available");
-  body: _("The following applications are eligible for updates. Would you like to install them?");
-
+template $BzTransactionListDialog: Adw.AlertDialog {
   extra-child: ScrolledWindow {
     width-request: 300;
     propagate-natural-height: true;
@@ -20,7 +12,7 @@ template $BzUpdateDialog: Adw.AlertDialog {
     child: Box {
       orientation: vertical;
       spacing: 5;
-                
+
       ListView list_view {
         styles [
           "navigation-sidebar",
@@ -31,7 +23,7 @@ template $BzUpdateDialog: Adw.AlertDialog {
         factory: BuilderListItemFactory {
           template ListItem {
             activatable: false;
-            
+
             child: Box {
               orientation: horizontal;
               margin-top: 5;
@@ -53,7 +45,7 @@ template $BzUpdateDialog: Adw.AlertDialog {
               Box {
                 orientation: vertical;
                 spacing: 3;
-                
+
                 Label {
                   styles [
                     "heading",
@@ -84,10 +76,11 @@ template $BzUpdateDialog: Adw.AlertDialog {
         };
       }
 
-      Label runtime_label {
+      Label secondary_label {
         styles [
           "dimmed",
         ]
+
         visible: false;
         wrap: true;
         justify: center;

@@ -36,10 +36,11 @@
 #include "bz-installed-page.h"
 #include "bz-io.h"
 #include "bz-progress-bar.h"
+#include "bz-result.h"
 #include "bz-search-widget.h"
 #include "bz-transaction-dialog.h"
+#include "bz-transaction-list-dialog.h"
 #include "bz-transaction-manager.h"
-#include "bz-update-dialog.h"
 #include "bz-user-data-page.h"
 #include "bz-util.h"
 #include "bz-window.h"
@@ -101,13 +102,27 @@ BZ_DEFINE_DATA (
     BZ_RELEASE_DATA (entry, g_object_unref);
     BZ_RELEASE_DATA (group, g_object_unref);
     BZ_RELEASE_DATA (source, g_object_unref))
+
 static DexFuture *
 transact_fiber (TransactData *data);
 
+BZ_DEFINE_DATA (
+    bulk_install,
+    BulkInstall,
+    {
+      GWeakRef   *self;
+      GListModel *groups;
+    },
+    BZ_RELEASE_DATA (self, bz_weak_release);
+    BZ_RELEASE_DATA (groups, g_object_unref))
+
+static DexFuture *
+bulk_install_fiber (BulkInstallData *data);
+
 static void
-update_dialog_response (BzUpdateDialog *dialog,
-                        const char     *response,
-                        BzWindow       *self);
+update_dialog_response (BzTransactionListDialog *dialog,
+                        const char              *response,
+                        BzWindow                *self);
 
 static DexFuture *
 transact (BzWindow  *self,
@@ -131,6 +146,11 @@ update (BzWindow *self,
 static void
 search (BzWindow   *self,
         const char *text);
+
+static void
+bulk_install (BzWindow *self,
+              BzEntry **installs,
+              guint     n_installs);
 
 static void
 check_transactions (BzWindow *self);
@@ -310,6 +330,28 @@ remove_installed_cb (BzWindow   *self,
                      BzFullView *view)
 {
   try_transact (self, entry, NULL, TRUE, FALSE, NULL);
+}
+
+static void
+bulk_install_cb (BzWindow   *self,
+                 GListModel *groups,
+                 gpointer    source)
+{
+  g_autoptr (BulkInstallData) data = NULL;
+
+  g_return_if_fail (BZ_IS_WINDOW (self));
+  g_return_if_fail (G_IS_LIST_MODEL (groups));
+
+  data         = bulk_install_data_new ();
+  data->self   = bz_track_weak (self);
+  data->groups = g_object_ref (groups);
+
+  dex_future_disown (dex_scheduler_spawn (
+      dex_scheduler_get_default (),
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) bulk_install_fiber,
+      bulk_install_data_ref (data),
+      bulk_install_data_unref));
 }
 
 static void
@@ -756,14 +798,11 @@ transact_fiber (TransactData *data)
 }
 
 static void
-update_dialog_response (BzUpdateDialog *dialog,
-                        const char     *response,
-                        BzWindow       *self)
+update_dialog_response (BzTransactionListDialog *dialog,
+                        const char              *response,
+                        BzWindow                *self)
 {
-  g_autoptr (GListModel) accepted_model = NULL;
-
-  accepted_model = bz_update_dialog_was_accepted (dialog);
-  if (accepted_model != NULL)
+  if (bz_transaction_list_dialog_was_confirmed (dialog))
     {
       GListModel          *updates     = NULL;
       guint                n_updates   = 0;
@@ -779,8 +818,7 @@ update_dialog_response (BzUpdateDialog *dialog,
 
       for (guint i = 0; i < n_updates; i++)
         g_object_unref (updates_buf[i]);
-      bz_state_info_set_available_updates (
-          self->state, NULL);
+      bz_state_info_set_available_updates (self->state, NULL);
     }
 }
 
@@ -855,7 +893,15 @@ bz_window_push_update_dialog (BzWindow *self)
   available_updates = bz_state_info_get_available_updates (self->state);
   g_return_if_fail (available_updates != NULL);
 
-  update_dialog = bz_update_dialog_new (available_updates);
+  update_dialog = bz_transaction_list_dialog_new (
+      available_updates,
+      _ ("Updates Are Available"),
+      _ ("The following applications are eligible for updates. Would you like to install them?"),
+      _ ("%d runtimes and/or addons are eligible for updates. Would you like to install them?"),
+      _ ("Additionally, %d runtimes and/or addons will be updated."),
+      _ ("Later"),
+      _ ("Update Now"));
+
   adw_dialog_set_content_width (update_dialog, 750);
   g_signal_connect (update_dialog, "response", G_CALLBACK (update_dialog_response), self);
 
@@ -912,6 +958,7 @@ bz_window_push_page (BzWindow *self, AdwNavigationPage *page)
       g_signal_connect_swapped (page, "install", G_CALLBACK (install_entry_cb), self);
       g_signal_connect_swapped (page, "remove", G_CALLBACK (remove_installed_cb), self);
       g_signal_connect_swapped (page, "show-entry", G_CALLBACK (installed_page_show_cb), self);
+      g_signal_connect_swapped (page, "bulk-install", G_CALLBACK (bulk_install_cb), self);
 
       g_object_bind_property (self->split_view, "show-sidebar",
                               page, "show-sidebar",
@@ -1040,6 +1087,61 @@ update (BzWindow *self,
   dex_future_disown (bz_transaction_manager_add (
       bz_state_info_get_transaction_manager (self->state),
       transaction));
+}
+
+static void
+bulk_install (BzWindow *self,
+              BzEntry **installs,
+              guint     n_installs)
+{
+  g_autoptr (BzTransaction) transaction = NULL;
+
+  g_return_if_fail (BZ_IS_WINDOW (self));
+  g_return_if_fail (installs != NULL);
+  g_return_if_fail (n_installs > 0);
+
+  if (bz_state_info_get_busy (self->state))
+    {
+      adw_toast_overlay_add_toast (
+          self->toasts,
+          adw_toast_new_format (_ ("Can't do that right now!")));
+      return;
+    }
+
+  transaction = bz_transaction_new_full (
+      installs, n_installs,
+      NULL, 0,
+      NULL, 0);
+
+  dex_future_disown (bz_transaction_manager_add (
+      bz_state_info_get_transaction_manager (self->state),
+      transaction));
+}
+
+static DexFuture *
+bulk_install_fiber (BulkInstallData *data)
+{
+  g_autoptr (BzWindow) self                    = NULL;
+  g_autoptr (GError) local_error               = NULL;
+  g_autoptr (BzBulkInstallDialogResult) result = NULL;
+
+  bz_weak_get_or_return_reject (self, data->self);
+
+  result = dex_await_pointer (
+      bz_bulk_install_dialog_show (GTK_WIDGET (self), data->groups),
+      &local_error);
+
+  if (result == NULL)
+    return dex_future_new_for_error (g_steal_pointer (&local_error));
+
+  if (!result->confirmed)
+    return dex_future_new_false ();
+
+  bulk_install (self,
+                (BzEntry **) result->entries->pdata,
+                result->entries->len);
+
+  return dex_future_new_true ();
 }
 
 static void

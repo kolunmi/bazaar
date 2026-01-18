@@ -1,4 +1,4 @@
-/* bz-update-dialog.h
+/* bz-transaction-list-dialog.h
  *
  * Copyright 2025 Adam Masciola
  *
@@ -24,13 +24,20 @@
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_UPDATE_DIALOG (bz_update_dialog_get_type ())
-G_DECLARE_FINAL_TYPE (BzUpdateDialog, bz_update_dialog, BZ, UPDATE_DIALOG, AdwAlertDialog)
+#define BZ_TYPE_TRANSACTION_LIST_DIALOG (bz_transaction_list_dialog_get_type ())
+
+G_DECLARE_FINAL_TYPE (BzTransactionListDialog, bz_transaction_list_dialog, BZ, TRANSACTION_LIST_DIALOG, AdwAlertDialog)
 
 AdwDialog *
-bz_update_dialog_new (GListModel *updates);
+bz_transaction_list_dialog_new (GListModel  *entries,
+                                const gchar *heading,
+                                const gchar *body,
+                                const gchar *body_no_apps,
+                                const gchar *secondary_label,
+                                const gchar *cancel_label,
+                                const gchar *confirm_label);
 
-GListModel *
-bz_update_dialog_was_accepted (BzUpdateDialog *self);
+gboolean
+bz_transaction_list_dialog_was_confirmed (BzTransactionListDialog *self);
 
 G_END_DECLS

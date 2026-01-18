@@ -59,6 +59,14 @@ enum
 
 static GParamSpec *props[LAST_PROP] = { 0 };
 
+enum
+{
+  SIGNAL_UNFAVORITED,
+  LAST_SIGNAL,
+};
+
+static guint signals[LAST_SIGNAL];
+
 static gboolean
 test_is_support (BzEntry *entry);
 
@@ -203,6 +211,17 @@ bz_favorites_tile_class_init (BzFavoritesTileClass *klass)
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
+
+  signals[SIGNAL_UNFAVORITED] =
+      g_signal_new (
+          "unfavorited",
+          G_OBJECT_CLASS_TYPE (klass),
+          G_SIGNAL_RUN_FIRST,
+          0,
+          NULL, NULL,
+          NULL,
+          G_TYPE_NONE, 1,
+          BZ_TYPE_ENTRY_GROUP);
 
   g_type_ensure (BZ_TYPE_LIST_TILE);
   g_type_ensure (BZ_TYPE_ENTRY_GROUP);
@@ -453,6 +472,7 @@ unfavorite_fiber (BzFavoritesTile *tile)
       gtk_widget_set_overflow (revealer, GTK_OVERFLOW_HIDDEN);
       gtk_revealer_set_reveal_child (GTK_REVEALER (revealer), FALSE);
       gtk_widget_add_css_class (row, "hidden");
+      g_signal_emit (tile, signals[SIGNAL_UNFAVORITED], 0, tile->group);
     }
 
   return NULL;
