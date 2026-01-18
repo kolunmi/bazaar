@@ -360,7 +360,8 @@ static  char *
 get_size_label (gpointer object,
                 gboolean is_installable)
 {
-   return g_strdup (is_installable ? _("Download") : _("Installed"));
+  // Translators: .
+  return g_strdup (is_installable ? _("Download") : _("Installed"));
 }
 
 static guint64
