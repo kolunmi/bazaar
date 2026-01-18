@@ -369,12 +369,4 @@
       <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.1.0</url>
     </release>
   </releases>
-  <recommends>
-    <control>keyboard</control>
-    <control>pointing</control>
-    <control>touch</control>
-  </recommends>
-  <requires>
-    <display_length compare="ge">360</display_length>
-  </requires>
 </component>
