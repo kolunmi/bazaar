@@ -78,8 +78,8 @@ static GParamSpec *props[LAST_PROP] = { 0 };
 
 static void
 global_progress_bar_flag_changed (BzGlobalProgress *self,
-                                   const char       *key,
-                                   GSettings        *settings);
+                                  const char       *key,
+                                  GSettings        *settings);
 
 static void
 ensure_draw_css (BzGlobalProgress *self);
@@ -93,16 +93,10 @@ bz_global_progress_dispose (GObject *object)
   self->tick = 0;
 
   if (self->settings != NULL)
-    {
-      g_signal_handlers_disconnect_by_func (
-          self->settings,
-          global_progress_bar_flag_changed,
-          self);
-      g_signal_handlers_disconnect_by_func (
-          self->settings,
-          global_progress_bar_flag_changed,
-          self);
-    }
+    g_signal_handlers_disconnect_by_func (
+        self->settings,
+        global_progress_bar_flag_changed,
+        self);
 
   g_clear_pointer (&self->draw_widget, gtk_widget_unparent);
   g_clear_pointer (&self->draw_widget_class, g_free);
@@ -731,16 +725,10 @@ bz_global_progress_set_settings (BzGlobalProgress *self,
   g_return_if_fail (BZ_IS_GLOBAL_PROGRESS (self));
 
   if (self->settings != NULL)
-    {
-      g_signal_handlers_disconnect_by_func (
-          self->settings,
-          global_progress_bar_flag_changed,
-          self);
-      g_signal_handlers_disconnect_by_func (
-          self->settings,
-          global_progress_bar_flag_changed,
-          self);
-    }
+    g_signal_handlers_disconnect_by_func (
+        self->settings,
+        global_progress_bar_flag_changed,
+        self);
   g_clear_object (&self->settings);
 
   if (settings != NULL)
@@ -772,8 +760,8 @@ bz_global_progress_get_settings (BzGlobalProgress *self)
 
 static void
 global_progress_bar_flag_changed (BzGlobalProgress *self,
-                                   const char       *key,
-                                   GSettings        *settings)
+                                  const char       *key,
+                                  GSettings        *settings)
 {
   ensure_draw_css (self);
   gtk_widget_queue_draw (GTK_WIDGET (self));
