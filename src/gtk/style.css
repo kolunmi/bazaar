@@ -512,6 +512,11 @@ headerbar,
   background-clip: content-box;
   background-origin: content-box;
   box-shadow: none;
+  transition: transform 0.3s ease;
+}
+
+.accent-button.horizontal {
+  transform: rotate(-90deg);
 }
 
 .accent-button-box > flowboxchild {
