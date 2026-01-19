@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-01-12 03:42+0700\n"
-"PO-Revision-Date: 2026-01-12 08:38+0700\n"
+"PO-Revision-Date: 2026-01-19 23:36+0300\n"
 "Last-Translator: Jill Fiore <contact@lumaeris.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -21,7 +21,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Gtranslator 49.0\n"
+"X-Generator: Poedit 3.8\n"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:2
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:5
@@ -1853,11 +1853,11 @@ msgstr "Цвета гордости биромантиков (горизонта
 
 #: src/bz-preferences-dialog.c:69
 msgid "Disability Pride Colors"
-msgstr "Цвета гордости недееспособных"
+msgstr "Цвета гордости людей с ограниченными возможностями"
 
 #: src/bz-preferences-dialog.c:70
 msgid "Disability Pride Colors (Horizontal)"
-msgstr "Цвета гордости недееспособных (горизонтально)"
+msgstr "Цвета гордости людей с ограниченными возможностями (горизонтально)"
 
 #: src/bz-preferences-dialog.c:71
 msgid "Femboy Pride Colors"
