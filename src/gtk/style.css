@@ -516,7 +516,7 @@ headerbar,
 }
 
 .accent-button.horizontal {
-  transform: rotate(90deg);
+  transform: rotate(-90deg);
 }
 
 .accent-button-box > flowboxchild {
