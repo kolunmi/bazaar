@@ -769,20 +769,22 @@ update_lozenge (BzAgeRatingDialog *self,
 static void
 update_list (BzAgeRatingDialog *self)
 {
-  AsContentRating      *content_rating                         = NULL;
-  BzAgeRatingGroup      groups[BZ_AGE_RATING_GROUP_TYPE_COUNT] = { 0 };
-  guint                 attr_count                             = 0;
-  BzAgeRatingAttribute *attr                                   = NULL;
-  AdwActionRow         *row                                    = NULL;
-  BzImportance          max_importance                         = 0;
-  BzImportance          attr_importance                        = 0;
-  const gchar          *group_icon                             = NULL;
-  const gchar          *group_title                            = NULL;
-  const gchar          *group_description                      = NULL;
-  const gchar          *attr_description                       = NULL;
-  g_autofree gchar     *description                            = NULL;
-  g_autoptr (GList) l                                          = NULL;
-  g_autofree gchar *tmp                                        = NULL;
+  AsContentRating      *content_rating                                  = NULL;
+  BzAgeRatingGroup      groups[BZ_AGE_RATING_GROUP_TYPE_COUNT]          = { 0 };
+  guint                 attr_count                                      = 0;
+  BzAgeRatingAttribute *attr                                            = NULL;
+  AdwActionRow         *row                                             = NULL;
+  BzImportance          max_importance                                  = 0;
+  BzImportance          attr_importance                                 = 0;
+  BzImportance          row_importances[BZ_AGE_RATING_GROUP_TYPE_COUNT] = { 0 };
+  GtkWidget            *rows[BZ_AGE_RATING_GROUP_TYPE_COUNT]            = { NULL };
+  const gchar          *group_icon                                      = NULL;
+  const gchar          *group_title                                     = NULL;
+  const gchar          *group_description                               = NULL;
+  const gchar          *attr_description                                = NULL;
+  g_autofree gchar     *description                                     = NULL;
+  g_autoptr (GList) l                                                   = NULL;
+  g_autofree gchar *tmp                                                 = NULL;
 
   content_rating = bz_entry_get_content_rating (self->entry);
   update_lozenge (self, content_rating);
@@ -799,11 +801,12 @@ update_list (BzAgeRatingDialog *self)
 
       if (attr_count == 1)
         {
-          attr = (BzAgeRatingAttribute *) groups[i].attributes->data;
-          row  = bz_context_row_new (bz_age_rating_attribute_get_icon_name (attr),
-                                     bz_age_rating_attribute_get_importance (attr),
-                                     bz_age_rating_attribute_get_title (attr),
-                                     bz_age_rating_attribute_get_description (attr));
+          attr               = (BzAgeRatingAttribute *) groups[i].attributes->data;
+          row                = bz_context_row_new (bz_age_rating_attribute_get_icon_name (attr),
+                                                   bz_age_rating_attribute_get_importance (attr),
+                                                   bz_age_rating_attribute_get_title (attr),
+                                                   bz_age_rating_attribute_get_description (attr));
+          row_importances[i] = bz_age_rating_attribute_get_importance (attr);
         }
       else
         {
@@ -854,9 +857,22 @@ update_list (BzAgeRatingDialog *self)
 
               row = bz_context_row_new (group_icon, max_importance, group_title, description);
             }
+
+          row_importances[i] = max_importance;
         }
 
-      gtk_list_box_append (self->list, GTK_WIDGET (row));
+      rows[i] = GTK_WIDGET (row);
       g_list_free_full (g_steal_pointer (&groups[i].attributes), g_object_unref);
+    }
+
+  for (gint level = BZ_IMPORTANCE_IMPORTANT; level >= BZ_IMPORTANCE_UNIMPORTANT; level--)
+    {
+      for (gsize i = 0; i < BZ_AGE_RATING_GROUP_TYPE_COUNT; i++)
+        {
+          if (rows[i] == NULL || row_importances[i] != level)
+            continue;
+
+          gtk_list_box_append (self->list, rows[i]);
+        }
     }
 }

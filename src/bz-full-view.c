@@ -673,7 +673,7 @@ get_safety_rating_label (gpointer object,
   switch (importance)
     {
     case BZ_IMPORTANCE_UNIMPORTANT:
-      return g_strdup (_ ("Low Risk"));
+      return g_strdup (_ ("Safe"));
     case BZ_IMPORTANCE_NEUTRAL:
       return g_strdup (_ ("Low Risk"));
     case BZ_IMPORTANCE_INFORMATION:
