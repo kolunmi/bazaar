@@ -1054,7 +1054,8 @@ parse_object (BzYamlParser  *self,
 
                       if (g_strv_contains (langs, code))
                         variant = g_variant_new_string ((const char *) event->data.scalar.value);
-                      else if (g_strcmp0 (code, "en") == 0)
+                      else if (english == NULL &&
+                               g_strcmp0 (code, "en") == 0)
                         english = g_strdup ((const char *) event->data.scalar.value);
                     }
 
