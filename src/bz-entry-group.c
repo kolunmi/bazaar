@@ -691,6 +691,8 @@ int
 bz_entry_group_get_installable (BzEntryGroup *self)
 {
   g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), 0);
+  if (g_strcmp0 (self->id, g_application_get_application_id (g_application_get_default ())) == 0)
+    return 0;
   return self->installable;
 }
 
@@ -705,6 +707,8 @@ int
 bz_entry_group_get_removable (BzEntryGroup *self)
 {
   g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), 0);
+  if (g_strcmp0 (self->id, g_application_get_application_id (g_application_get_default ())) == 0)
+    return 0;
   return self->removable;
 }
 

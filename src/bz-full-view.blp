@@ -594,6 +594,7 @@ template $BzFullView: Adw.Bin {
                               $logical_and($invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.user-data-size) as <bool>) as <bool>,$is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>,
                               $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>
                             ) as <bool>;
+                          visible: bind $invert_boolean($logical_and($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>, $is_zero(template.entry-group as <$BzEntryGroup>.installable) as <bool>) as <bool>) as <bool>;
                           child: Box {
                             height-request: 50;
                             margin-bottom: 10;
