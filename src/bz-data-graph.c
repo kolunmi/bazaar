@@ -509,8 +509,8 @@ update_cursor (BzDataGraph *self,
 
   if (x >= LABEL_MARGIN &&
       y >= 0.0 &&
-      x < widget_width - LABEL_MARGIN &&
-      y < widget_height - LABEL_MARGIN_RIGHT)
+      x < widget_width - LABEL_MARGIN_RIGHT &&
+      y < widget_height - LABEL_MARGIN)
     gtk_widget_set_cursor_from_name (GTK_WIDGET (self), "crosshair");
   else
     gtk_widget_set_cursor (GTK_WIDGET (self), NULL);
