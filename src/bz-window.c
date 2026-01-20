@@ -763,6 +763,19 @@ transact_fiber (TransactData *data)
   else
     id_dup = g_strdup (bz_entry_get_id (data->entry));
 
+  /* Prevent Bazaar from being removed by itself */
+  if (data->remove)
+    {
+      const char *bazaar_id = NULL;
+
+      bazaar_id = g_application_get_application_id (g_application_get_default ());
+      if (g_strcmp0 (id_dup, bazaar_id) == 0)
+        {
+          bz_show_error_for_widget (GTK_WIDGET (self), _ ("You can't remove Bazaar from Bazaar!"));
+          return dex_future_new_false ();
+        }
+    }
+
   // Show the dialog
   dialog_result = dex_await_pointer (
       bz_transaction_dialog_show (
