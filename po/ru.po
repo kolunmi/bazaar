@@ -2346,7 +2346,7 @@ msgstr "Станет невозможным использовать %s посл
 #: src/bz-transaction-dialog.c:241
 #, c-format
 msgid "“%s” is High Risk"
-msgstr "\"%s\" под высоким риском"
+msgstr "“%s” под высоким риском"
 
 #: src/bz-transaction-dialog.c:245
 msgid ""
@@ -2399,9 +2399,9 @@ msgstr "ОК"
 #, c-format
 msgid "Install %u App?"
 msgid_plural "Install %u Apps?"
-msgstr[0] "Установить %s приложение?"
-msgstr[1] "Установить %s приложения?"
-msgstr[2] "Установить %s приложений?"
+msgstr[0] "Установить %u приложение?"
+msgstr[1] "Установить %u приложения?"
+msgstr[2] "Установить %u приложений?"
 
 #: src/bz-transaction-dialog.c:573
 msgid ""
@@ -2414,7 +2414,7 @@ msgstr ""
 #: src/bz-transaction-dialog.c:574
 #, c-format
 msgid "%d addons will be installed."
-msgstr "%s дополнений будет установлено."
+msgstr "%d дополнений будет установлено."
 
 #: src/bz-transaction-dialog.c:575
 msgid "Additionally, addons will be installed."
