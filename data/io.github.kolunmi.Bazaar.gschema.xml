@@ -49,6 +49,7 @@
         <choice value="biromantic-flag"/>
         <choice value="disability-flag"/>
         <choice value="femboy-flag"/>
+	    <choice value="neutrois-flag"/>
       </choices>
       <default>'accent-color'</default>
       <summary>Global Progress Bar Theme</summary>

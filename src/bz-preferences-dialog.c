@@ -50,6 +50,7 @@ static const BarTheme bar_themes[] = {
   {               "biromantic-flag",               "biromantic-flag-theme",                   N_ ("Biromantic Pride Colors") },
   {               "disability-flag",               "disability-flag-theme",                   N_ ("Disability Pride Colors") },
   {                   "femboy-flag",                   "femboy-flag-theme",                       N_ ("Femboy Pride Colors") },
+  {                 "neutrois-flag",                 "neutrois-flag-theme",                     N_ ("Neutrois Pride Colors") },
 };
 
 struct _BzPreferencesDialog

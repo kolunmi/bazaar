@@ -273,3 +273,13 @@ flag-specs:
       - rgba: "#FFFFFF"
       - rgba: "#E4ADCD"
       - rgba: "#D460A7"
+
+
+  - id: "neutrois-flag"
+    name: "Neutrois Flag"
+    homogeneous: true
+    direction: to bottom
+    stripes: &neutrois-flag-stripes
+     - rgba: "rgb(255,255,255)"
+     - rgba: "rgb(31,159,0)"
+     - rgba: "rgb(0,0,0)"
