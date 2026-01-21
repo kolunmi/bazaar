@@ -115,6 +115,7 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/sliders-horizontal-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/smartphone2-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/software-update-available-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/square-filled-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/thumbs-up-outline-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/timer-sand-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/translations-symbolic.svg</file>
