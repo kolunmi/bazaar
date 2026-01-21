@@ -187,6 +187,10 @@ flathub_update_finally (DexFuture *future,
                         GWeakRef  *wr);
 
 static DexFuture *
+cache_write_back_finally (DexFuture *future,
+                          GWeakRef  *wr);
+
+static DexFuture *
 sync_then (DexFuture *future,
            GWeakRef  *wr);
 
@@ -1201,54 +1205,39 @@ cache_flathub_fiber (GWeakRef *wr)
 static DexFuture *
 respond_to_flatpak_fiber (RespondToFlatpakData *data)
 {
-  g_autoptr (BzApplication) self      = NULL;
-  BzBackendNotification *notif        = data->notif;
-  g_autoptr (GError) local_error      = NULL;
-  GtkWindow     *window               = NULL;
-  GdkFrameClock *clock                = NULL;
-  double         reread_timeout       = 0.0;
-  g_autoptr (GPtrArray) build_futures = NULL;
-  g_autoptr (DexFuture) read_future   = NULL;
-  g_autoptr (GTimer) timer            = NULL;
-  gboolean update_labels              = FALSE;
-  gboolean update_filter              = FALSE;
+  g_autoptr (BzApplication) self       = NULL;
+  BzBackendNotification *notif         = data->notif;
+  g_autoptr (GError) local_error       = NULL;
+  g_autoptr (GPtrArray) build_futures  = NULL;
+  g_autoptr (DexFuture) read_future    = NULL;
+  g_autoptr (DexFuture) reread_timeout = NULL;
+  gboolean update_labels               = FALSE;
+  gboolean update_filter               = FALSE;
 
   bz_weak_get_or_return_reject (self, data->self);
-
-  window = gtk_application_get_active_window (GTK_APPLICATION (self));
-  if (window != NULL)
-    clock = gtk_widget_get_frame_clock (GTK_WIDGET (window));
-
-  /* `reread_timeout` defines how long we are allowed to spend adding to
-   `build-futures` on which we will await later */
-  if (clock != NULL)
-    {
-      gint64 refresh_interval  = 0;
-      gint64 presentation_time = 0;
-
-      gdk_frame_clock_get_refresh_info (
-          clock,
-          g_get_monotonic_time (),
-          &refresh_interval,
-          &presentation_time);
-      reread_timeout = (double) refresh_interval / (double) G_USEC_PER_SEC;
-
-      /* take no longer than half a refresh interval */
-      reread_timeout /= 2.0;
-    }
-  else
-    reread_timeout = 1.0 / 60.0;
-
-  clock  = NULL;
-  window = NULL;
 
   build_futures = g_ptr_array_new_with_free_func (dex_unref);
   read_future   = dex_future_new_for_object (notif);
 
-  timer = g_timer_new ();
-  while (dex_future_is_resolved (read_future))
+  /* `reread_timeout` defines how long we are allowed to spend adding to
+     `build-futures` before we update the UI later */
+  reread_timeout = dex_timeout_new_msec (100);
+  for (;;)
     {
       BzBackendNotificationKind kind = 0;
+
+      if (!dex_future_is_resolved (read_future))
+        {
+          g_autoptr (DexFuture) future = NULL;
+
+          future = dex_future_all_race (
+              dex_ref (reread_timeout),
+              dex_ref (read_future),
+              NULL);
+          dex_await (g_steal_pointer (&future), NULL);
+          if (!dex_future_is_pending (reread_timeout))
+            break;
+        }
 
       notif = g_value_get_object (dex_future_get_value (read_future, NULL));
       kind  = bz_backend_notification_get_kind (notif);
@@ -1256,7 +1245,8 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
         {
         case BZ_BACKEND_NOTIFICATION_KIND_ERROR:
           {
-            const char *error = NULL;
+            const char *error  = NULL;
+            GtkWindow  *window = NULL;
 
             error = bz_backend_notification_get_error (notif);
             if (error == NULL)
@@ -1496,23 +1486,25 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
         }
 
       dex_clear (&read_future);
-      if (g_timer_elapsed (timer, NULL) > reread_timeout)
-        break;
-
       read_future = dex_channel_receive (self->flatpak_notifs);
+
+      if (!dex_future_is_pending (reread_timeout))
+        break;
     }
 
   if (build_futures->len > 0)
-    dex_await (
-        dex_future_allv (
-            (DexFuture *const *) build_futures->pdata,
-            build_futures->len),
-        NULL);
-
-  if (update_filter)
     {
-      gtk_filter_changed (GTK_FILTER (self->group_filter), GTK_FILTER_CHANGE_LESS_STRICT);
-      gtk_filter_changed (GTK_FILTER (self->appid_filter), GTK_FILTER_CHANGE_LESS_STRICT);
+      g_autoptr (DexFuture) future = NULL;
+
+      future = dex_future_allv (
+          (DexFuture *const *) build_futures->pdata,
+          build_futures->len);
+      if (update_filter)
+        future = dex_future_finally (
+            future,
+            (DexFutureCallback) cache_write_back_finally,
+            bz_track_weak (self), bz_weak_release);
+      dex_future_disown (g_steal_pointer (&future));
     }
 
   if (update_labels)
@@ -1532,8 +1524,6 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
         }
     }
 
-  if (read_future == NULL)
-    read_future = dex_channel_receive (self->flatpak_notifs);
   return g_steal_pointer (&read_future);
 }
 
@@ -1729,6 +1719,20 @@ flathub_update_finally (DexFuture *future,
       g_clear_object (&self->tmp_flathub);
       return dex_ref (future);
     }
+}
+
+static DexFuture *
+cache_write_back_finally (DexFuture *future,
+                          GWeakRef  *wr)
+{
+  g_autoptr (BzApplication) self = NULL;
+
+  bz_weak_get_or_return_reject (self, wr);
+
+  gtk_filter_changed (GTK_FILTER (self->group_filter), GTK_FILTER_CHANGE_LESS_STRICT);
+  gtk_filter_changed (GTK_FILTER (self->appid_filter), GTK_FILTER_CHANGE_LESS_STRICT);
+
+  return dex_future_new_true ();
 }
 
 static DexFuture *
