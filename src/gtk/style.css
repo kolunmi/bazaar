@@ -231,6 +231,14 @@
   }
 }
 
+.floating-tooltip {
+	background-color: var(--dialog-bg-color);
+}
+
+.floating-tooltip .monospace {
+	font-size: 1em;
+}
+
 .flathub {
 	--accent-color: alpha(@window_fg_color,0.75);
 	--accent-bg-color: @window_fg_color;

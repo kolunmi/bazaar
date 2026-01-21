@@ -60,6 +60,11 @@ struct _BzWorldMap
   double              motion_y;
 
   guint max_downloads;
+
+  GtkWidget *tooltip_box;
+  GtkWidget *tooltip_label1;
+  GtkWidget *tooltip_prefix_label;
+  GtkWidget *tooltip_label2;
 };
 
 G_DEFINE_FINAL_TYPE (BzWorldMap, bz_world_map, GTK_TYPE_WIDGET)
@@ -433,6 +438,9 @@ bz_world_map_dispose (GObject *object)
       self->path_to_country = NULL;
     }
 
+  if (self->tooltip_box != NULL)
+    gtk_widget_unparent (self->tooltip_box);
+
   g_clear_object (&self->countries);
   g_clear_object (&self->model);
 
@@ -569,66 +577,29 @@ bz_world_map_snapshot (GtkWidget   *widget,
       const char      *iso_code        = bz_country_get_iso_code (country);
       guint            download_number = get_downloads_for_country (self, iso_code);
       const char      *country_name    = bz_country_get_name (country);
-      g_autofree char *card_text       = g_strdup_printf (_ ("%s: %'u downloads"), country_name, download_number);
-      g_autoptr (PangoLayout) layout   = pango_layout_new (gtk_widget_get_pango_context (widget));
-      PangoRectangle text_extents      = { 0 };
-      double         card_width        = 0.0;
-      double         card_height       = 0.0;
-      double         card_x            = 0.0;
-      double         card_y            = 0.0;
-      GskRoundedRect text_bg_rect      = { { { 0 } } };
-      GdkRGBA        text_bg_color     = { 0 };
-      GdkRGBA        shadow_color      = { 0 };
-      GdkRGBA        text_color        = { 0 };
+      g_autofree char *label1_text     = g_strdup_printf ("<b>%s</b>", country_name);
+      g_autofree char *label2_text     = g_strdup_printf ("%'u", download_number);
+      GtkRequisition   natural_size;
+      double           card_x = 0.0;
+      double           card_y = 0.0;
 
-      pango_layout_set_text (layout, card_text, -1);
-      pango_layout_get_pixel_extents (layout, NULL, &text_extents);
+      gtk_label_set_markup (GTK_LABEL (self->tooltip_label1), label1_text);
+      gtk_label_set_text (GTK_LABEL (self->tooltip_prefix_label), _ ("Downloads"));
+      gtk_label_set_text (GTK_LABEL (self->tooltip_label2), label2_text);
 
-      card_width  = text_extents.width + 16.0;
-      card_height = text_extents.height + 16.0;
+      gtk_widget_get_preferred_size (self->tooltip_box, NULL, &natural_size);
+
+      gtk_widget_allocate (self->tooltip_box, natural_size.width, natural_size.height, -1, NULL);
 
       if (widget_width - self->motion_x < CARD_EDGE_THRESHOLD)
-        card_x = self->motion_x - card_width - 10.0;
+        card_x = self->motion_x - natural_size.width - 10.0;
       else
         card_x = self->motion_x + 10.0;
       card_y = self->motion_y + 10.0;
 
-      gtk_widget_get_color (widget, &text_color);
-
-      if (adw_style_manager_get_dark (style_manager))
-        {
-          text_bg_color = (GdkRGBA) { 0.18, 0.18, 0.2, 1.0 };
-          shadow_color  = (GdkRGBA) { 0.0, 0.0, 0.06, 0.20 };
-        }
-      else
-        {
-          text_bg_color = (GdkRGBA) { 1.0, 1.0, 1.0, 1.0 };
-          shadow_color  = (GdkRGBA) { 0.0, 0.0, 0.0, 0.20 };
-        }
-
-      gsk_rounded_rect_init_from_rect (
-          &text_bg_rect,
-          &GRAPHENE_RECT_INIT (card_x, card_y, card_width, card_height),
-          6.0);
-
-      gtk_snapshot_append_outset_shadow (
-          snapshot,
-          &text_bg_rect,
-          &shadow_color,
-          0.0,
-          0.0,
-          1.0,
-          3.0);
-
-      gtk_snapshot_push_rounded_clip (snapshot, &text_bg_rect);
-      gtk_snapshot_append_color (snapshot, &text_bg_color, &text_bg_rect.bounds);
-      gtk_snapshot_pop (snapshot);
-
       gtk_snapshot_save (snapshot);
-      gtk_snapshot_translate (
-          snapshot,
-          &GRAPHENE_POINT_INIT (card_x + 8.0, card_y + 8.0));
-      gtk_snapshot_append_layout (snapshot, layout, &text_color);
+      gtk_snapshot_translate (snapshot, &GRAPHENE_POINT_INIT (card_x, card_y));
+      gtk_widget_snapshot_child (widget, self->tooltip_box, snapshot);
       gtk_snapshot_restore (snapshot);
     }
 }
@@ -661,6 +632,8 @@ bz_world_map_init (BzWorldMap *self)
 {
   AdwStyleManager *style_manager = adw_style_manager_get_default ();
   g_autoptr (GError) error       = NULL;
+  GtkWidget *inner_box           = NULL;
+  GtkWidget *label2_box          = NULL;
 
   self->parser          = bz_world_map_parser_new ();
   self->hovered_country = -1;
@@ -679,6 +652,41 @@ bz_world_map_init (BzWorldMap *self)
   g_signal_connect_swapped (self->gesture, "drag-update", G_CALLBACK (gesture_update), self);
   g_signal_connect_swapped (self->gesture, "drag-end", G_CALLBACK (gesture_end), self);
   gtk_widget_add_controller (GTK_WIDGET (self), GTK_EVENT_CONTROLLER (self->gesture));
+
+  self->tooltip_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+  gtk_widget_add_css_class (self->tooltip_box, "floating-tooltip");
+  gtk_widget_add_css_class (self->tooltip_box, "card");
+
+  inner_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 4);
+  gtk_widget_set_margin_start (inner_box, 12);
+  gtk_widget_set_margin_end (inner_box, 12);
+  gtk_widget_set_margin_top (inner_box, 12);
+  gtk_widget_set_margin_bottom (inner_box, 12);
+
+  self->tooltip_label1 = gtk_label_new ("");
+  gtk_widget_add_css_class (self->tooltip_label1, "heading");
+  gtk_label_set_xalign (GTK_LABEL (self->tooltip_label1), 0.0);
+  gtk_label_set_use_markup (GTK_LABEL (self->tooltip_label1), TRUE);
+  gtk_box_append (GTK_BOX (inner_box), self->tooltip_label1);
+
+  label2_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+
+  self->tooltip_label2 = gtk_label_new ("");
+  gtk_widget_add_css_class (self->tooltip_label2, "monospace");
+  gtk_label_set_xalign (GTK_LABEL (self->tooltip_label2), 0.0);
+  gtk_box_append (GTK_BOX (label2_box), self->tooltip_label2);
+
+  self->tooltip_prefix_label = gtk_label_new ("");
+  gtk_widget_add_css_class (self->tooltip_prefix_label, "body");
+  gtk_widget_add_css_class (self->tooltip_prefix_label, "dim-label");
+  gtk_label_set_xalign (GTK_LABEL (self->tooltip_prefix_label), 0.0);
+  gtk_box_append (GTK_BOX (label2_box), self->tooltip_prefix_label);
+
+  gtk_box_append (GTK_BOX (inner_box), label2_box);
+
+  gtk_box_append (GTK_BOX (self->tooltip_box), inner_box);
+
+  gtk_widget_set_parent (self->tooltip_box, GTK_WIDGET (self));
 
   g_signal_connect (style_manager, "notify::dark",
                     G_CALLBACK (on_style_changed), self);
