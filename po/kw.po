@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-01-22 17:13+0000\n"
-"PO-Revision-Date: 2026-01-22 19:11+0000\n"
+"PO-Revision-Date: 2026-01-22 19:13+0000\n"
 "Last-Translator: Flynn Peck <cirilla@tuta.io>\n"
 "Language-Team: kw\n"
 "Language: kw\n"
@@ -109,7 +109,7 @@ msgstr "Garowder Komik"
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:90
 msgid "No information regarding cartoon violence"
-msgstr "Vyth kedhlow yn-kever garowder komik"
+msgstr "Kedhlow vyth yn-kever garowder komik"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:94
@@ -119,7 +119,7 @@ msgstr "Garowder Fantasi"
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:96
 msgid "No information regarding fantasy violence"
-msgstr "Vyth kedhlow yn-kever garowder fantasi"
+msgstr "Kedhlow vyth yn-kever garowder fantasi"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:100
@@ -129,7 +129,7 @@ msgstr "Garowder Gwirvosek"
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:102
 msgid "No information regarding realistic violence"
-msgstr "Vyth kedhlow yn-kever garowder gwirvosek"
+msgstr "Kedhlow vyth yn-kever garowder gwirvosek"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:106
@@ -139,7 +139,7 @@ msgstr "Garowder rag Krow"
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:108
 msgid "No information regarding bloodshed"
-msgstr "Vyth kedhlow yn-kever krow"
+msgstr "Kedhlow vyth yn-kever krow"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:112
@@ -149,7 +149,7 @@ msgstr "Garowder Reydhel"
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:114
 msgid "No information regarding sexual violence"
-msgstr "Vyth kedhlow yn-kever garowder reydhel"
+msgstr "Kedhlow vyth yn-kever garowder reydhel"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:118
@@ -159,7 +159,7 @@ msgstr "Las"
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:120
 msgid "No information regarding references to alcohol"
-msgstr "Vyth kedhlow yn-kever kampollans dhe las"
+msgstr "Kedhlow vyth yn-kever kampollans dhe las"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:124
@@ -169,7 +169,7 @@ msgstr "Droggya Anlaghel"
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:126
 msgid "No information regarding references to illicit drugs"
-msgstr "Vyth kedhlow yn-kever kampollans dhe droggya anlaghel"
+msgstr "Kedhlow vyth yn-kever kampollans dhe droggya anlaghel"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:130
@@ -179,7 +179,7 @@ msgstr "Tobacko"
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:132
 msgid "No information regarding references to tobacco products"
-msgstr "Vyth kedhlow yn-kever kampollans dhe gwaren tobacko"
+msgstr "Kedhlow vyth yn-kever kampollans dhe gwaren tobacko"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:136 src/bz-age-rating-dialog.c:475
@@ -189,7 +189,7 @@ msgstr "Nothedh"
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:138
 msgid "No information regarding nudity of any sort"
-msgstr "Vyth kedhlow yn-kever kampollans dhe nothedh"
+msgstr "Kedhlow vyth yn-kever kampollans dhe nothedh"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:142
@@ -199,7 +199,7 @@ msgstr "Themow Reydhel"
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:144
 msgid "No information regarding references to or depictions of sexual nature"
-msgstr "Vyth kedhlow yn-kever kampollans dhe po portrayansow a gnas reydhel"
+msgstr "Kedhlow vyth yn-kever kampollans dhe po portrayansow a gnas reydhel"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:148
@@ -209,7 +209,7 @@ msgstr "Koss"
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:150
 msgid "No information regarding profanity of any kind"
-msgstr "Vyth kedhlow yn-kever kossya"
+msgstr "Kedhlow vyth yn-kever kossya"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:154
@@ -219,7 +219,7 @@ msgstr "Hwarthuster na Gwiw"
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:156
 msgid "No information regarding inappropriate humor"
-msgstr "Vyth kedhlow yn-kever hwarthuster na gwiw"
+msgstr "Kedhlow vyth yn-kever hwarthuster na gwiw"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:160
@@ -229,7 +229,7 @@ msgstr "Disfaveryans"
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:162
 msgid "No information regarding discriminatory language of any kind"
-msgstr "Vyth kedhlow yn-kever keskows disfaveryans"
+msgstr "Kedhlow vyth yn-kever keskows disfaveryans"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:166
@@ -239,7 +239,7 @@ msgstr "Argemynnow"
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:168
 msgid "No information regarding advertising of any kind"
-msgstr "Vyth kedhlow yn-kever argemynnow"
+msgstr "Kedhlow vyth yn-kever argemynnow"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:172
@@ -249,7 +249,7 @@ msgstr "Hapwaryans"
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:174
 msgid "No information regarding gambling of any kind"
-msgstr "Vyth kedhlow yn-kever hapwaryans"
+msgstr "Kedhlow vyth yn-kever hapwaryans"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:178
@@ -259,7 +259,7 @@ msgstr "Prenyans"
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:180
 msgid "No information regarding the ability to spend money"
-msgstr "Vyth kedhlow yn-kever prenyans"
+msgstr "Kedhlow vyth yn-kever prenyans"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:184
@@ -269,7 +269,7 @@ msgstr "Keskows ynter Devnydhyoryon"
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:186
 msgid "No information regarding ways to chat with other users"
-msgstr "Vyth kedhlow yn-kever keskows ynter devnydhyoryon"
+msgstr "Kedhlow vyth yn-kever keskows ynter devnydhyoryon"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:190
@@ -279,7 +279,7 @@ msgstr "Galow Pellgows ynter Devnydhyoryon"
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:192
 msgid "No information regarding ways to talk with other users"
-msgstr "Vyth kedhlow yn-kever keskows ynter devnydhyoryon"
+msgstr "Kedhlow vyth yn-kever keskows ynter devnydhyoryon"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:196
@@ -291,7 +291,7 @@ msgstr "Kedhlow Kestav"
 msgid ""
 "No information regarding sharing of social network usernames or email "
 "addresses"
-msgstr "Vyth kedhlow yn-kever kevrans a hanwyn usyer po ebost"
+msgstr "Kedhlow vyth yn-kever kevrans a hanwyn usyer po ebost"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:202
@@ -301,7 +301,7 @@ msgstr "Kedhlow Privedh"
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:204
 msgid "No information regarding sharing of user information with third parties"
-msgstr "Vyth kedhlow yn-kever kevrans a kedhlow privedh gans tressa partiow"
+msgstr "Kedhlow vyth yn-kever kevrans a kedhlow privedh gans tressa partiow"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:208
@@ -311,7 +311,7 @@ msgstr "Kevrans Tyller"
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:210
 msgid "No information regarding sharing of physical location with other users"
-msgstr "Vyth kedhlow yn-kever kevrans tyller gans devnydhyoryon erel"
+msgstr "Kedhlow vyth yn-kever kevrans tyller gans devnydhyoryon erel"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:214
@@ -321,7 +321,7 @@ msgstr "Horyans"
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:216
 msgid "No information regarding references to prostitution"
-msgstr "Vyth kedhlow yn-kever kampollans dhe horyans"
+msgstr "Kedhlow vyth yn-kever kampollans dhe horyans"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:220
@@ -331,7 +331,7 @@ msgstr "Avoutri"
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:222
 msgid "No information regarding references to adultery"
-msgstr "Vyth kedhlow yn-kever kampollans dhe avoutri"
+msgstr "Kedhlow vyth yn-kever kampollans dhe avoutri"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:226
@@ -341,7 +341,7 @@ msgstr "Warioryon Reydhel"
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:228
 msgid "No information regarding sexualized characters"
-msgstr "Vyth kedhlow yn-kever warioryon reydhel"
+msgstr "Kedhlow vyth yn-kever warioryon reydhel"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:232
@@ -351,7 +351,7 @@ msgstr "Defolyans"
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:234
 msgid "No information regarding references to desecration"
-msgstr "Vyth kedhlow yn-kever kampollans dhe defolyans"
+msgstr "Kedhlow vyth yn-kever kampollans dhe defolyans"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:238
@@ -361,7 +361,7 @@ msgstr "Korf Marow"
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:240
 msgid "No information regarding visible dead human remains"
-msgstr "Vyth kedhlow yn-kever korf marow a wel"
+msgstr "Kedhlow vyth yn-kever korf marow a wel"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:244
@@ -371,7 +371,7 @@ msgstr "Kethneth"
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:246
 msgid "No information regarding references to slavery"
-msgstr "Vyth kedhlow yn-kever kampollans dhe kethneth"
+msgstr "Kedhlow vyth yn-kever kampollans dhe kethneth"
 
 #: src/bz-age-rating-dialog.c:424
 msgid "Does not include references to drugs"
