@@ -55,12 +55,13 @@ struct _BzEntryGroup
 
   int max_usefulness;
 
-  int installable;
-  int updatable;
-  int removable;
-  int installable_available;
-  int updatable_available;
-  int removable_available;
+  int      installable;
+  int      updatable;
+  int      removable;
+  int      installable_available;
+  int      updatable_available;
+  int      removable_available;
+  gboolean read_only;
 
   guint64 user_data_size;
 
@@ -691,6 +692,8 @@ int
 bz_entry_group_get_installable (BzEntryGroup *self)
 {
   g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), 0);
+  if (self->read_only)
+    return 0;
   return self->installable;
 }
 
@@ -705,6 +708,8 @@ int
 bz_entry_group_get_removable (BzEntryGroup *self)
 {
   g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), 0);
+  if (self->read_only)
+    return 0;
   return self->removable;
 }
 
@@ -764,7 +769,9 @@ bz_entry_group_add (BzEntryGroup *self,
 
   if (self->id == NULL)
     {
-      self->id = g_strdup (bz_entry_get_id (entry));
+      self->id        = g_strdup (bz_entry_get_id (entry));
+      self->read_only = g_strcmp0 (self->id,
+                                   g_application_get_application_id (g_application_get_default ())) == 0;
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ID]);
     }
   unique_id = bz_entry_get_unique_id (entry);

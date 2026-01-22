@@ -171,6 +171,14 @@ is_zero (gpointer object,
   return value == 0;
 }
 
+static gboolean
+logical_and (gpointer object,
+             gboolean value1,
+             gboolean value2)
+{
+  return value1 && value2;
+}
+
 static void
 install_button_clicked_cb (BzRichAppTile *self,
                            GtkButton     *button)
@@ -222,6 +230,7 @@ bz_rich_app_tile_class_init (BzRichAppTileClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
+  gtk_widget_class_bind_template_callback (widget_class, logical_and);
   gtk_widget_class_bind_template_callback (widget_class, install_button_clicked_cb);
   gtk_widget_class_bind_template_child (widget_class, BzRichAppTile, picture_box);
 

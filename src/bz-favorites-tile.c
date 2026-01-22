@@ -193,6 +193,14 @@ switch_bool (gpointer  object,
   return condition ? true_value : false_value;
 }
 
+static gboolean
+logical_and (gpointer object,
+             gboolean value1,
+             gboolean value2)
+{
+  return value1 && value2;
+}
+
 static void
 bz_favorites_tile_class_init (BzFavoritesTileClass *klass)
 {
@@ -239,6 +247,7 @@ bz_favorites_tile_class_init (BzFavoritesTileClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, switch_bool);
+  gtk_widget_class_bind_template_callback (widget_class, logical_and);
   gtk_widget_class_bind_template_callback (widget_class, get_install_remove_tooltip);
   gtk_widget_class_bind_template_callback (widget_class, get_install_remove_icon);
   gtk_widget_class_bind_template_callback (widget_class, install_remove_cb);

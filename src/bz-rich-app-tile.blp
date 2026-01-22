@@ -143,7 +143,7 @@ template $BzRichAppTile: $BzListTile {
 
       Box {
         Button {
-          visible: bind $is_zero(template.group as <$BzEntryGroup>.removable) as <bool>;
+          visible: bind $logical_and($invert_boolean($is_zero(template.group as <$BzEntryGroup>.installable) as <bool>) as <bool>, $is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
           sensitive: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
 
           styles [
