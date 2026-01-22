@@ -221,6 +221,11 @@ network_status_changed (BzApplication   *self,
                         GNetworkMonitor *network);
 
 static void
+disable_blocklists_changed (BzApplication *self,
+                            GParamSpec    *pspec,
+                            BzStateInfo   *state);
+
+static void
 show_hide_app_setting_changed (BzApplication *self,
                                const char    *key,
                                GSettings     *settings);
@@ -2100,6 +2105,15 @@ network_status_changed (BzApplication   *self,
 }
 
 static void
+disable_blocklists_changed (BzApplication *self,
+                            GParamSpec    *pspec,
+                            BzStateInfo   *state)
+{
+  gtk_filter_changed (GTK_FILTER (self->group_filter), GTK_FILTER_CHANGE_DIFFERENT);
+  gtk_filter_changed (GTK_FILTER (self->appid_filter), GTK_FILTER_CHANGE_DIFFERENT);
+}
+
+static void
 show_hide_app_setting_changed (BzApplication *self,
                                const char    *key,
                                GSettings     *settings)
@@ -2562,6 +2576,12 @@ init_service_struct (BzApplication *self,
   self->state = bz_state_info_new ();
   bz_state_info_set_busy (self->state, TRUE);
 
+  g_signal_connect_swapped (
+      self->state,
+      "notify::disable-blocklists",
+      G_CALLBACK (disable_blocklists_changed),
+      self);
+
   auth_state = bz_auth_state_new ();
   bz_state_info_set_auth_state (self->state, auth_state);
 
@@ -2979,6 +2999,9 @@ validate_group_for_ui (BzApplication *self,
   if (bz_state_info_get_show_only_verified (self->state) &&
       !bz_entry_group_get_is_verified (group))
     return FALSE;
+
+  if (bz_state_info_get_disable_blocklists (self->state))
+    return TRUE;
 
   id = bz_entry_group_get_id (group);
   for (guint i = 0; i < self->txt_blocked_id_sets->len; i++)

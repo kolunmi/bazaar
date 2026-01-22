@@ -505,6 +505,11 @@ bz_search_widget_set_state (BzSearchWidget *self,
       self->state = g_object_ref (state);
       g_signal_connect_swapped (
           state,
+          "notify::disable-blocklists",
+          G_CALLBACK (invalidating_state_prop_changed),
+          self);
+      g_signal_connect_swapped (
+          state,
           "notify::hide-eol",
           G_CALLBACK (invalidating_state_prop_changed),
           self);

@@ -39,8 +39,16 @@ template $BzInspector: Adw.Window {
         }
       }
 
-      CheckButton debug_mode_check {
-        label: "Enable Global Debug Mode";
+      Box {
+        orientation: vertical;
+        spacing: 3;
+
+        CheckButton debug_mode_check {
+          label: "Enable Global Debug Mode";
+        }
+        CheckButton disable_blocklists_check {
+          label: "Disable All Blocklists";
+        }
       }
 
       Label {

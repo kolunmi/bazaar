@@ -35,6 +35,7 @@ property=checking_for_updates gboolean G_TYPE_BOOLEAN boolean
 property=curated_configs GListModel G_TYPE_LIST_MODEL object
 property=curated_provider BzContentProvider BZ_TYPE_CONTENT_PROVIDER object
 property=debug_mode gboolean G_TYPE_BOOLEAN boolean
+property=disable_blocklists gboolean G_TYPE_BOOLEAN boolean
 property=entry_factory BzApplicationMapFactory BZ_TYPE_APPLICATION_MAP_FACTORY object
 property=flathub BzFlathubState BZ_TYPE_FLATHUB_STATE object
 property=have_connection gboolean G_TYPE_BOOLEAN boolean
