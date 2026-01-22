@@ -190,6 +190,21 @@ decache_and_inspect_cb (GtkListItem *list_item,
     }
 }
 
+static void
+open_file_externally_cb (GtkListItem *list_item,
+                         GtkButton   *button)
+{
+  GtkStringObject *string = NULL;
+  const char      *path   = NULL;
+  g_autofree char *uri    = NULL;
+
+  string = gtk_list_item_get_item (list_item);
+  path   = gtk_string_object_get_string (string);
+
+  uri = g_strdup_printf ("file://%s", path);
+  g_app_info_launch_default_for_uri (uri, NULL, NULL);
+}
+
 static char *
 format_uint (gpointer object,
              guint    value)
@@ -225,6 +240,7 @@ bz_inspector_class_init (BzInspectorClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, preview_changed);
   gtk_widget_class_bind_template_callback (widget_class, selected_group_changed);
   gtk_widget_class_bind_template_callback (widget_class, decache_and_inspect_cb);
+  gtk_widget_class_bind_template_callback (widget_class, open_file_externally_cb);
   gtk_widget_class_bind_template_callback (widget_class, entry_changed);
   gtk_widget_class_bind_template_callback (widget_class, format_uint);
 }

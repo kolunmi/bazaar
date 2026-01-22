@@ -227,11 +227,16 @@ BuilderListItemFactory string_list_factory {
           "bz-monospace",
         ]
 
+        hexpand: true;
         margin-top: 2;
         margin-bottom: 2;
         xalign: 0.0;
         selectable: true;
         label: bind template.item as <$GtkStringObject>.string as <string>;
+      }
+      Button {
+        label: "Open";
+        clicked => $open_file_externally_cb(template);
       }
     };
   }
