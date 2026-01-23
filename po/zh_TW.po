@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-23 03:03+0800\n"
+"POT-Creation-Date: 2026-01-24 01:17+0800\n"
 "PO-Revision-Date: 2026-01-24 05:43+0800\n"
 "Last-Translator: Shihfu Juan <xlion@xlion.tw>\n"
 "Language-Team: none\n"
@@ -98,7 +98,7 @@ msgid "Install"
 msgstr "安裝"
 
 #: src/bz-age-rating-dialog.blp:7 src/bz-age-rating-dialog.blp:31
-#: src/bz-age-rating-dialog.c:726 src/bz-full-view.c:410 src/bz-full-view.c:417
+#: src/bz-age-rating-dialog.c:726 src/bz-full-view.c:338 src/bz-full-view.c:345
 msgid "Age Rating"
 msgstr "年齡分級"
 
@@ -420,7 +420,7 @@ msgid "Violence"
 msgstr "暴力"
 
 #. Translators: Age rating format, e.g. "12+" for ages 12 and up
-#: src/bz-age-rating-dialog.c:676 src/bz-full-view.c:400
+#: src/bz-age-rating-dialog.c:676 src/bz-full-view.c:328
 #, c-format
 msgid "%d+"
 msgstr "%d+"
@@ -657,7 +657,7 @@ msgstr "快取、設定以及其他應用程式資料"
 
 #. Translators: As in 'The app is installed'.
 #. Translators: .
-#: src/bz-app-tile.blp:86 src/bz-full-view.c:364 src/bz-installed-page.blp:86
+#: src/bz-app-tile.blp:86 src/bz-full-view.c:292 src/bz-installed-page.blp:86
 #: src/bz-window.blp:299
 msgid "Installed"
 msgstr "已安裝"
@@ -721,7 +721,7 @@ msgstr ""
 "\n"
 "您仍可使用 Bazaar 來瀏覽並移除已安裝的應用程式。"
 
-#: src/bz-application.c:992 src/bz-window.c:915
+#: src/bz-application.c:992 src/bz-window.c:875
 msgid "Later"
 msgstr "稍後"
 
@@ -1235,179 +1235,179 @@ msgstr "清除資料"
 msgid "Tags:"
 msgstr "標籤："
 
-#: src/bz-full-view.c:307
+#: src/bz-full-view.c:235
 msgid "---"
 msgstr "---"
 
 #. Translators: M is the suffix for millions
-#: src/bz-full-view.c:314
+#: src/bz-full-view.c:242
 #, c-format
 msgid "%.*fM"
 msgstr "%.*fM"
 
 #. Translators: K is the suffix for thousands
-#: src/bz-full-view.c:321
+#: src/bz-full-view.c:249
 #, c-format
 msgid "%.*fK"
 msgstr "%.*fK"
 
-#: src/bz-full-view.c:331
+#: src/bz-full-view.c:259
 #, c-format
 msgid "%d downloads in the last 30 days"
 msgstr "在過去 30 天內有 %d 次下載"
 
 #. Translators: .
-#: src/bz-full-view.c:364
+#: src/bz-full-view.c:292
 msgid "Download"
 msgstr "下載"
 
-#: src/bz-full-view.c:382
+#: src/bz-full-view.c:310
 #, c-format
 msgid "Download size of %s"
 msgstr "下載 %s 的大小"
 
-#: src/bz-full-view.c:415
+#: src/bz-full-view.c:343
 msgid "All Ages"
 msgstr "所有年齡層"
 
-#: src/bz-full-view.c:427
+#: src/bz-full-view.c:355
 msgid "Age rating information unavailable"
 msgstr "年齡分級資訊未知"
 
-#: src/bz-full-view.c:432
+#: src/bz-full-view.c:360
 msgid "Suitable for all ages"
 msgstr "適合所有年齡層"
 
-#: src/bz-full-view.c:434
+#: src/bz-full-view.c:362
 #, c-format
 msgid "Suitable for ages %d and up"
 msgstr "適合 %d 歲以上"
 
-#: src/bz-full-view.c:467 src/bz-full-view.c:472 src/bz-full-view.c:500
-#: src/bz-full-view.c:511
+#: src/bz-full-view.c:395 src/bz-full-view.c:400 src/bz-full-view.c:428
+#: src/bz-full-view.c:439
 msgid "Unknown"
 msgstr "未知"
 
-#: src/bz-full-view.c:477
+#: src/bz-full-view.c:405
 #, c-format
 msgid "Free software licensed under %s"
 msgstr "依 %s 授權的自由軟體"
 
-#: src/bz-full-view.c:482
+#: src/bz-full-view.c:410
 msgid "Free software"
 msgstr "自由軟體"
 
-#: src/bz-full-view.c:485
+#: src/bz-full-view.c:413
 msgid "Proprietary Software"
 msgstr "專有軟體"
 
-#: src/bz-full-view.c:488
+#: src/bz-full-view.c:416
 #, c-format
 msgid "Special License: %s"
 msgstr "特殊授權：%s"
 
-#: src/bz-full-view.c:505
+#: src/bz-full-view.c:433
 msgid "Free"
 msgstr "自由"
 
-#: src/bz-full-view.c:508 src/bz-license-dialog.c:190
+#: src/bz-full-view.c:436 src/bz-license-dialog.c:190
 msgid "Proprietary"
 msgstr "專有"
 
-#: src/bz-full-view.c:513 src/bz-license-dialog.c:192
+#: src/bz-full-view.c:441 src/bz-license-dialog.c:192
 msgid "Special License"
 msgstr "特殊授權"
 
-#: src/bz-full-view.c:533
+#: src/bz-full-view.c:461
 msgid "Adaptive"
 msgstr "支援多裝置"
 
-#: src/bz-full-view.c:533
+#: src/bz-full-view.c:461
 msgid "Desktop Only"
 msgstr "僅限桌面"
 
-#: src/bz-full-view.c:539
+#: src/bz-full-view.c:467
 msgid "Works on desktop, tablets, and phones"
 msgstr "可在電腦、平板與手機上使用"
 
-#: src/bz-full-view.c:540
+#: src/bz-full-view.c:468
 msgid "May not work on mobile devices"
 msgstr "可能無法在行動裝置上使用"
 
-#: src/bz-full-view.c:551
+#: src/bz-full-view.c:479
 msgid "No URL"
 msgstr "沒有網址"
 
-#: src/bz-full-view.c:569
+#: src/bz-full-view.c:497
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
 msgstr "此應用程式具有 FLOSS 授權，這意味著其原始碼可供審查以確保安全性。"
 
-#: src/bz-full-view.c:570
+#: src/bz-full-view.c:498
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
 msgstr "此應用程式採用專有授權，表示其原始碼為私有，無法由第三方獨立審查。"
 
-#: src/bz-full-view.c:577
+#: src/bz-full-view.c:505
 msgid "More Apps"
 msgstr "更多應用程式"
 
-#: src/bz-full-view.c:578
+#: src/bz-full-view.c:506
 #, c-format
 msgid "More Apps by %s"
 msgstr "更多由 %s 製作的應用程式"
 
-#: src/bz-full-view.c:585
+#: src/bz-full-view.c:513
 msgid "Other Apps by this Developer"
 msgstr "其他由此開發者製作的應用程式"
 
-#: src/bz-full-view.c:587 src/bz-full-view.c:787
+#: src/bz-full-view.c:515 src/bz-full-view.c:715
 #, c-format
 msgid "Other Apps by %s"
 msgstr "其他由 %s 製作的應用程式"
 
-#: src/bz-full-view.c:596
+#: src/bz-full-view.c:524
 #, c-format
 msgid "%s is not installed, but it still has <b>%s</b> of data present."
 msgstr "%s 並未安裝，但仍保留 <b>%s</b> 的資料。"
 
-#: src/bz-full-view.c:669 src/bz-full-view.c:686
+#: src/bz-full-view.c:597 src/bz-full-view.c:614
 msgid "N/A"
 msgstr "N/A"
 
-#: src/bz-full-view.c:676 src/bz-safety-dialog.blp:31
+#: src/bz-full-view.c:604 src/bz-safety-dialog.blp:31
 msgid "Safe"
 msgstr "安全"
 
-#: src/bz-full-view.c:678 src/bz-full-view.c:680
+#: src/bz-full-view.c:606 src/bz-full-view.c:608
 msgid "Low Risk"
 msgstr "低風險"
 
-#: src/bz-full-view.c:682
+#: src/bz-full-view.c:610
 msgid "Medium Risk"
 msgstr "中度風險"
 
-#: src/bz-full-view.c:684
+#: src/bz-full-view.c:612
 msgid "High Risk"
 msgstr "高風險"
 
-#: src/bz-full-view.c:789
+#: src/bz-full-view.c:717
 msgid "Other Apps"
 msgstr "其他應用程式"
 
-#: src/bz-full-view.c:791
+#: src/bz-full-view.c:719
 #, c-format
 msgid "%d Application"
 msgid_plural "%d Applications"
 msgstr[0] "%d 個應用程式"
 
-#: src/bz-full-view.c:1130
+#: src/bz-full-view.c:1058
 msgid "Show Less"
 msgstr "顯示更少"
 
-#: src/bz-full-view.c:1130
+#: src/bz-full-view.c:1058
 msgid "Show More"
 msgstr "顯示更多"
 
@@ -1774,16 +1774,16 @@ msgstr "中性性別驕傲旗配色"
 msgid "Version History"
 msgstr "版本紀錄"
 
-#: src/bz-releases-list.c:136
+#: src/bz-releases-list.c:135
 #, c-format
 msgid "Version %s"
 msgstr "版本 %s"
 
-#: src/bz-releases-list.c:174
+#: src/bz-releases-list.c:173
 msgid "No details for this release"
 msgstr "此版本沒有詳細資訊"
 
-#: src/bz-releases-list.c:186
+#: src/bz-releases-list.c:185
 msgid "Get More Information"
 msgstr "取得更多資訊"
 
@@ -2473,43 +2473,43 @@ msgstr "同步遠端(_S)"
 msgid "Log Out"
 msgstr "登出"
 
-#: src/bz-window.c:477
+#: src/bz-window.c:440
 #, c-format
 msgid "%d Update Available"
 msgid_plural "%d Updates Available"
 msgstr[0] "有 %d 項更新可用"
 
-#: src/bz-window.c:774
+#: src/bz-window.c:734
 msgid "You can't remove Bazaar from Bazaar!"
 msgstr "您無法在 Bazaar 中移除 Bazaar 本身！"
 
-#: src/bz-window.c:911
+#: src/bz-window.c:871
 msgid "Updates Are Available"
 msgstr "有可用的更新"
 
-#: src/bz-window.c:912
+#: src/bz-window.c:872
 msgid ""
 "The following applications are eligible for updates. Would you like to "
 "install them?"
 msgstr "下列應用程式可更新。是否要安裝？"
 
-#: src/bz-window.c:913
+#: src/bz-window.c:873
 #, c-format
 msgid ""
 "%d runtimes and/or addons are eligible for updates. Would you like to "
 "install them?"
 msgstr "%d 個執行環境與／或附加元件可更新。是否要安裝？"
 
-#: src/bz-window.c:914
+#: src/bz-window.c:874
 #, c-format
 msgid "Additionally, %d runtimes and/or addons will be updated."
 msgstr "此外，還有 %d 個執行環境與／或附加元件將會更新。"
 
-#: src/bz-window.c:916
+#: src/bz-window.c:876
 msgid "Update Now"
 msgstr "現在更新"
 
-#: src/bz-window.c:931
+#: src/bz-window.c:891
 msgid ""
 "The ability to inspect and install local .flatpak bundle files is coming "
 "soon! In the meantime, try running\n"
@@ -2525,15 +2525,15 @@ msgstr ""
 "\n"
 "。"
 
-#: src/bz-window.c:1070 src/bz-window.c:1120
+#: src/bz-window.c:1030 src/bz-window.c:1080
 msgid "Can't do that right now!"
 msgstr "目前無法執行此動作！"
 
-#: src/bz-window.c:1195
+#: src/bz-window.c:1155
 msgid "Resume Current Tasks"
 msgstr "繼續目前的工作"
 
-#: src/bz-window.c:1201
+#: src/bz-window.c:1161
 msgid "Pause Current Tasks"
 msgstr "暫停目前的工作"
 
