@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-11-26 14:44+0100\n"
-"PO-Revision-Date: 2025-11-27 04:36+0100\n"
+"PO-Revision-Date: 2026-01-23 20:01+0100\n"
 "Last-Translator: renner <renner0@posteo.de>\n"
 "Language-Team: German\n"
 "Language: de\n"
@@ -1153,15 +1153,15 @@ msgstr "Hardwareunterstützung"
 
 #: src/bz-hardware-support-dialog.c:69
 msgid "Keyboard support"
-msgstr "Unterstützt Tastertur"
+msgstr "Tastaturunterstützung"
 
 #: src/bz-hardware-support-dialog.c:71
 msgid "Requires keyboards"
-msgstr ""
+msgstr "Benötigt Tastatur"
 
 #: src/bz-hardware-support-dialog.c:72
 msgid "Recommends keyboards"
-msgstr ""
+msgstr "Tastatur empfohlen"
 
 #: src/bz-hardware-support-dialog.c:73
 msgid "Supports keyboards"
@@ -1169,7 +1169,7 @@ msgstr "Unterstützt Tastaturen"
 
 #: src/bz-hardware-support-dialog.c:74
 msgid "Unknown support for keyboards"
-msgstr ""
+msgstr "Tastaturunterstützung unbekannt"
 
 #: src/bz-hardware-support-dialog.c:76
 msgid "Mouse support"
@@ -1177,43 +1177,43 @@ msgstr "Mausunterstützung"
 
 #: src/bz-hardware-support-dialog.c:78
 msgid "Requires mice or pointing devices"
-msgstr ""
+msgstr "Benötigt Maus oder anderes Zeigegerät"
 
 #: src/bz-hardware-support-dialog.c:79
 msgid "Recommends mice or pointing devices"
-msgstr ""
+msgstr "Maus oder anderes Zeigegerät empfohlen"
 
 #: src/bz-hardware-support-dialog.c:80
 msgid "Supports mice or pointing devices"
-msgstr ""
+msgstr "Unterstützt Mäuse und andere Zeigegeräte"
 
 #: src/bz-hardware-support-dialog.c:81
 msgid "Unknown support for mice or pointing devices"
-msgstr ""
+msgstr "Mausunterstützung unbekannt"
 
 #: src/bz-hardware-support-dialog.c:83
 msgid "Touchscreen support"
-msgstr "Unterstützt Tochscreens"
+msgstr "Touchscreen-Unterstützung"
 
 #: src/bz-hardware-support-dialog.c:85
 msgid "Requires touchscreens"
-msgstr "Benötigt Tochscreens"
+msgstr "Benötigt einen Touchscreen"
 
 #: src/bz-hardware-support-dialog.c:86
 msgid "Recommends touchscreens"
-msgstr "Empfiehlt Tochscreens"
+msgstr "Empfiehlt Touchscreen"
 
 #: src/bz-hardware-support-dialog.c:87
 msgid "Supports touchscreens"
-msgstr "Unterstützt Tochscreens"
+msgstr "Unterstützt Touchscreens"
 
 #: src/bz-hardware-support-dialog.c:88
 msgid "Unknown support for touchscreens"
-msgstr ""
+msgstr "Touchscreen-Unterstützung unbekannt"
 
 #: src/bz-hardware-support-dialog.c:192
 msgid "Mobile support"
-msgstr ""
+msgstr "Mobilgeräteunterstützung"
 
 #: src/bz-hardware-support-dialog.c:193
 msgid "Works on mobile devices"
@@ -1221,11 +1221,11 @@ msgstr "Funktioniert auf Mobilgeräten"
 
 #: src/bz-hardware-support-dialog.c:193
 msgid "May not work well on mobile devices"
-msgstr ""
+msgstr "Könnte auf Mobilgeräten nicht gut funktionieren"
 
 #: src/bz-hardware-support-dialog.c:198
 msgid "Desktop support"
-msgstr ""
+msgstr "Desktop-Unterstützung"
 
 #: src/bz-hardware-support-dialog.c:199
 msgid "Works well on large screens"
