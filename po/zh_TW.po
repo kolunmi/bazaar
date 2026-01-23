@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-01-23 03:03+0800\n"
-"PO-Revision-Date: 2026-01-24 04:30+0800\n"
+"PO-Revision-Date: 2026-01-24 04:45+0800\n"
 "Last-Translator: Shihfu Juan <xlion@xlion.tw>\n"
 "Language-Team: none\n"
 "Language: zh_TW\n"
@@ -539,7 +539,7 @@ msgstr "文件子目錄 %s"
 
 #: src/bz-app-permissions.c:174
 msgid "Documents folder"
-msgstr "桌面資料夾"
+msgstr "文件資料夾"
 
 #: src/bz-app-permissions.c:177
 #, c-format
@@ -641,7 +641,7 @@ msgstr "從網際網路下載的大小"
 
 #: src/bz-app-size-dialog.blp:76
 msgid "Installed Size"
-msgstr "已安裝大小"
+msgstr "安裝大小"
 
 #: src/bz-app-size-dialog.blp:77
 msgid "Size on Disk"
@@ -690,8 +690,8 @@ msgstr "Alexander Vanhee"
 #: src/bz-application.c:709
 msgid "translator-credits"
 msgstr ""
-"Peter Dave Hello <hsu@peterdavehello.org>, 2024, 2025\n"
-"Shihfu Juan <xlion@xlion.tw>, 2024"
+"Shihfu Juan <xlion@xlion.tw>, 2024, 2025\n"
+"Peter Dave Hello <hsu@peterdavehello.org>, 2025"
 
 #: src/bz-application.c:720
 msgid "Special Thanks"
