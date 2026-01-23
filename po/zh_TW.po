@@ -3,7 +3,8 @@
 # This file is distributed under the same license as the bazaar package.
 # Automatically generated, 2025.
 #
-# SPDX-FileCopyrightText: 2025 Shihfu Juan <xlion@xlion.tw>
+# SPDX-FileCopyrightText: 2025–2026 Shihfu Juan <xlion@xlion.tw>
+# SPDX-FileCopyrightText: 2025 Peter Dave Hello <hsu@peterdavehello.org>
 msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
@@ -690,7 +691,7 @@ msgstr "Alexander Vanhee"
 #: src/bz-application.c:709
 msgid "translator-credits"
 msgstr ""
-"Shihfu Juan <xlion@xlion.tw>, 2025\n"
+"Shihfu Juan <xlion@xlion.tw>, 2025,2026\n"
 "Peter Dave Hello <hsu@peterdavehello.org>, 2025"
 
 #: src/bz-application.c:720
