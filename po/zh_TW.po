@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-01-23 03:03+0800\n"
-"PO-Revision-Date: 2026-01-24 03:20+0800\n"
+"PO-Revision-Date: 2026-01-24 04:25+0800\n"
 "Last-Translator: Shihfu Juan <xlion@xlion.tw>\n"
 "Language-Team: none\n"
 "Language: zh_TW\n"
@@ -180,7 +180,7 @@ msgstr "菸草"
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:132
 msgid "No information regarding references to tobacco products"
-msgstr "No information regarding references to tobacco products"
+msgstr "未提供任何關於菸草製品的資訊"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:136 src/bz-age-rating-dialog.c:475
