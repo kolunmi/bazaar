@@ -690,7 +690,7 @@ msgstr "Alexander Vanhee"
 #: src/bz-application.c:709
 msgid "translator-credits"
 msgstr ""
-"Shihfu Juan <xlion@xlion.tw>, 2024, 2025\n"
+"Shihfu Juan <xlion@xlion.tw>, 2025\n"
 "Peter Dave Hello <hsu@peterdavehello.org>, 2025"
 
 #: src/bz-application.c:720
