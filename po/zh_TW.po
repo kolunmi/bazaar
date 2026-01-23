@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-01-23 03:03+0800\n"
-"PO-Revision-Date: 2026-01-24 04:50+0800\n"
+"PO-Revision-Date: 2026-01-24 05:40+0800\n"
 "Last-Translator: Shihfu Juan <xlion@xlion.tw>\n"
 "Language-Team: none\n"
 "Language: zh_TW\n"
@@ -1594,7 +1594,7 @@ msgstr "發生問題"
 
 #: src/bz-login-page.blp:43
 msgid "Connect your Flathub account to Bazaar to manage your favorited apps."
-msgstr "將您的 Flathub 帳號連結至 Bazaar，以管理您加入最愛的應用程式。"
+msgstr "將您的 Flathub 帳號連結至 Bazaar，以管理您加入收藏的應用程式。"
 
 #: src/bz-login-page.blp:108
 msgid "Finish"
