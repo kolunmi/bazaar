@@ -36,8 +36,8 @@
 #include "bz-installed-page.h"
 #include "bz-io.h"
 #include "bz-progress-bar.h"
-#include "bz-result.h"
 #include "bz-search-widget.h"
+#include "bz-template-callbacks.h"
 #include "bz-transaction-dialog.h"
 #include "bz-transaction-list-dialog.h"
 #include "bz-transaction-manager.h"
@@ -200,43 +200,6 @@ bz_window_set_property (GObject      *object,
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
-}
-
-static gboolean
-invert_boolean (gpointer object,
-                gboolean value)
-{
-  return !value;
-}
-
-static gboolean
-is_double_zero (gpointer object,
-                double   value)
-{
-  return value == 0.0;
-}
-
-static gboolean
-is_null (gpointer object,
-         GObject *value)
-{
-  return value == NULL;
-}
-
-static gboolean
-logical_and (gpointer object,
-             gboolean value1,
-             gboolean value2)
-{
-  return value1 && value2;
-}
-
-static gboolean
-logical_or (gpointer object,
-            gboolean value1,
-            gboolean value2)
-{
-  return value1 || value2;
 }
 
 static char *
@@ -584,6 +547,8 @@ bz_window_class_init (BzWindowClass *klass)
   g_type_ensure (BZ_TYPE_FLATHUB_PAGE);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-window.ui");
+  bz_widget_class_bind_all_util_callbacks (widget_class);
+
   gtk_widget_class_bind_template_child (widget_class, BzWindow, comet_overlay);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, split_view);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, transactions_stack);
@@ -601,11 +566,6 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzWindow, main_view_stack);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, main_stack);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, debug_id_label);
-  gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
-  gtk_widget_class_bind_template_callback (widget_class, is_double_zero);
-  gtk_widget_class_bind_template_callback (widget_class, is_null);
-  gtk_widget_class_bind_template_callback (widget_class, logical_and);
-  gtk_widget_class_bind_template_callback (widget_class, logical_or);
   gtk_widget_class_bind_template_callback (widget_class, list_length);
   gtk_widget_class_bind_template_callback (widget_class, browser_group_selected_cb);
   gtk_widget_class_bind_template_callback (widget_class, search_widget_select_cb);
