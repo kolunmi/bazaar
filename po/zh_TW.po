@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-01-23 03:03+0800\n"
-"PO-Revision-Date: 2026-01-24 04:45+0800\n"
+"PO-Revision-Date: 2026-01-24 04:50+0800\n"
 "Last-Translator: Shihfu Juan <xlion@xlion.tw>\n"
 "Language-Team: none\n"
 "Language: zh_TW\n"
@@ -781,31 +781,31 @@ msgstr "無法取得開發者資訊。"
 msgid ""
 "The ownership of the %s app ID has not been verified and it may be a "
 "community package."
-msgstr "%s 應用程式 ID 的所有權尚未經過驗證，可能為社群提供的套件。"
+msgstr "應用程式 ID %s 的所有權尚未經過驗證，可能為社群提供的套件。"
 
 #: src/bz-developer-badge.c:155
 #, c-format
 msgid ""
 "The ownership of the %s app ID has been manually verified by the Flathub "
 "team."
-msgstr "%s 應用程式 ID 的所有權已由 Flathub 團隊人工驗證。"
+msgstr "應用程式 ID %s 的所有權已由 Flathub 團隊人工驗證。"
 
 #: src/bz-developer-badge.c:161
 #, c-format
 msgid ""
 "The ownership of the %1$s app ID has been verified by <b>%2$s</b> on "
 "<b>%3$s</b>."
-msgstr "%1$s 應用程式 ID 的所有權已由 <b>%2$s</b> 於 <b>%3$s</b> 驗證。"
+msgstr "應用程式 ID %1$s 的所有權已由 <b>%2$s</b> 於 <b>%3$s</b> 驗證。"
 
 #: src/bz-developer-badge.c:168
 #, c-format
 msgid "The ownership of the %1$s app ID has been verified using %2$s."
-msgstr "%1$s 應用程式 ID 的所有權已透過 %2$s 驗證。"
+msgstr "應用程式 ID %1$s 的所有權已透過 %2$s 驗證。"
 
 #: src/bz-developer-badge.c:172
 #, c-format
 msgid "The ownership of the %s app ID has been verified."
-msgstr "%s 應用程式 ID 的所有權已完成驗證。"
+msgstr "應用程式 ID %s 的所有權已完成驗證。"
 
 #: src/bz-entry-group-util.c:73
 msgid "Choose an Installation"
