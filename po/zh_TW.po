@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-01-23 03:03+0800\n"
-"PO-Revision-Date: 2026-01-24 04:25+0800\n"
+"PO-Revision-Date: 2026-01-24 04:30+0800\n"
 "Last-Translator: Shihfu Juan <xlion@xlion.tw>\n"
 "Language-Team: none\n"
 "Language: zh_TW\n"
@@ -200,7 +200,7 @@ msgstr "性相關主題"
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:144
 msgid "No information regarding references to or depictions of sexual nature"
-msgstr "No information regarding references to or depictions of sexual nature"
+msgstr "未提供任何關於性相關描寫或暗示的資訊"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:148
