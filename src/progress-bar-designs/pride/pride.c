@@ -30,66 +30,7 @@ generate_flag_css (GString    *css,
                    const char *id,
                    const char *direction,
                    gboolean    homogeneous,
-                   GListModel *stripes)
-{
-  g_autoptr (GString) stripe_css = NULL;
-  guint    n_stripes             = 0;
-  double   cur_offset            = 0.0;
-  gboolean skip                  = FALSE;
-
-  stripe_css = g_string_new (NULL);
-  g_string_append_printf (stripe_css, ".%s-theme { ", id);
-
-  g_string_append_printf (stripe_css, "--flag-gradient: linear-gradient(%s", direction);
-  n_stripes = g_list_model_get_n_items (stripes);
-  for (guint j = 0; j < n_stripes; j++)
-    {
-      g_autoptr (BzPrideFlagStripeSpec) stripe_spec = NULL;
-      const char *rgba_spec                         = NULL;
-      double      size                              = 0.0;
-      GdkRGBA     rgba                              = { 0 };
-
-      stripe_spec = g_list_model_get_item (stripes, j);
-
-      rgba_spec = bz_pride_flag_stripe_spec_get_rgba (stripe_spec);
-      size      = bz_pride_flag_stripe_spec_get_size (stripe_spec);
-
-      if (rgba_spec == NULL)
-        {
-          g_critical ("Flag spec \"%s\" has a stripe spec which lacks an rgba spec, skipping it", id);
-          skip = TRUE;
-          break;
-        }
-      if (!gdk_rgba_parse (&rgba, rgba_spec))
-        {
-          g_critical ("Flag spec \"%s\" has a stripe spec which has an invalid rgba spec, skipping it", id);
-          skip = TRUE;
-          break;
-        }
-      if (!homogeneous &&
-          (size <= 0.0 || size > 1.0))
-        {
-          g_critical ("Flag spec \"%s\" has a stripe spec which has an out of bounds size, skipping it", id);
-          skip = TRUE;
-          break;
-        }
-
-      g_string_append_printf (stripe_css, ", %s %d%%", rgba_spec, (int) round (cur_offset * 100.0));
-      cur_offset += homogeneous ? 1.0 / (double) n_stripes : size;
-      if (cur_offset > 1.0)
-        {
-          g_critical ("Flag spec \"%s\" has a stripe spec which exceeds the height of the flag, skipping it", id);
-          skip = TRUE;
-          break;
-        }
-      g_string_append_printf (stripe_css, ", %s %d%%", rgba_spec, (int) round (cur_offset * 100.0));
-    }
-  if (skip)
-    return;
-  g_string_append (stripe_css, "); }\n");
-
-  g_string_append_len (css, stripe_css->str, stripe_css->len);
-}
+                   GListModel *stripes);
 
 GtkStyleProvider *
 bz_get_pride_style_provider (void)
@@ -213,4 +154,70 @@ bz_dup_css_class_for_pride_id (const char *id)
 {
   g_return_val_if_fail (id != NULL, NULL);
   return g_strdup_printf ("%s-theme", id);
+}
+
+static void
+generate_flag_css (GString    *css,
+                   const char *id,
+                   const char *direction,
+                   gboolean    homogeneous,
+                   GListModel *stripes)
+{
+  g_autoptr (GString) stripe_css = NULL;
+  guint    n_stripes             = 0;
+  double   cur_offset            = 0.0;
+  gboolean skip                  = FALSE;
+
+  stripe_css = g_string_new (NULL);
+  g_string_append_printf (stripe_css, ".%s-theme { ", id);
+
+  g_string_append_printf (stripe_css, "--flag-gradient: linear-gradient(%s", direction);
+  n_stripes = g_list_model_get_n_items (stripes);
+  for (guint j = 0; j < n_stripes; j++)
+    {
+      g_autoptr (BzPrideFlagStripeSpec) stripe_spec = NULL;
+      const char *rgba_spec                         = NULL;
+      double      size                              = 0.0;
+      GdkRGBA     rgba                              = { 0 };
+
+      stripe_spec = g_list_model_get_item (stripes, j);
+
+      rgba_spec = bz_pride_flag_stripe_spec_get_rgba (stripe_spec);
+      size      = bz_pride_flag_stripe_spec_get_size (stripe_spec);
+
+      if (rgba_spec == NULL)
+        {
+          g_critical ("Flag spec \"%s\" has a stripe spec which lacks an rgba spec, skipping it", id);
+          skip = TRUE;
+          break;
+        }
+      if (!gdk_rgba_parse (&rgba, rgba_spec))
+        {
+          g_critical ("Flag spec \"%s\" has a stripe spec which has an invalid rgba spec, skipping it", id);
+          skip = TRUE;
+          break;
+        }
+      if (!homogeneous &&
+          (size <= 0.0 || size > 1.0))
+        {
+          g_critical ("Flag spec \"%s\" has a stripe spec which has an out of bounds size, skipping it", id);
+          skip = TRUE;
+          break;
+        }
+
+      g_string_append_printf (stripe_css, ", %s %d%%", rgba_spec, (int) round (cur_offset * 100.0));
+      cur_offset += homogeneous ? 1.0 / (double) n_stripes : size;
+      if (cur_offset > 1.0)
+        {
+          g_critical ("Flag spec \"%s\" has a stripe spec which exceeds the height of the flag, skipping it", id);
+          skip = TRUE;
+          break;
+        }
+      g_string_append_printf (stripe_css, ", %s %d%%", rgba_spec, (int) round (cur_offset * 100.0));
+    }
+  if (skip)
+    return;
+  g_string_append (stripe_css, "); }\n");
+
+  g_string_append_len (css, stripe_css->str, stripe_css->len);
 }

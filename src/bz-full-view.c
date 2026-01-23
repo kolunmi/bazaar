@@ -51,6 +51,7 @@
 #include "bz-state-info.h"
 #include "bz-stats-dialog.h"
 #include "bz-tag-list.h"
+#include "bz-template-callbacks.h"
 
 struct _BzFullView
 {
@@ -196,79 +197,6 @@ bz_full_view_set_property (GObject      *object,
     }
 }
 
-static gboolean
-invert_boolean (gpointer object,
-                gboolean value)
-{
-  return !value;
-}
-
-static gboolean
-is_zero (gpointer object,
-         int      value)
-{
-  return value == 0;
-}
-
-static gboolean
-is_positive (gpointer object,
-             int      value)
-{
-  return value > -1;
-}
-
-static gboolean
-is_longer (gpointer    object,
-           GListModel *model,
-           int         value)
-{
-  if (model == NULL)
-    return FALSE;
-  return g_list_model_get_n_items (model) > value;
-}
-
-static gboolean
-is_null (gpointer object,
-         GObject *value)
-{
-  return value == NULL;
-}
-
-static gboolean
-is_empty (gpointer    object,
-          GListModel *model)
-{
-  if (model == NULL)
-    return TRUE;
-  return g_list_model_get_n_items (model) == 0;
-}
-
-static gboolean
-is_empty_string (gpointer    object,
-                 const char *str)
-{
-  if (str == NULL)
-    return TRUE;
-  return *str == '\0';
-}
-
-static gboolean
-logical_and (gpointer object,
-             gboolean value1,
-             gboolean value2)
-{
-  return value1 && value2;
-}
-
-static char *
-bool_to_string (gpointer object,
-                gboolean condition,
-                char    *if_true,
-                char    *if_false)
-{
-  return g_strdup (condition ? if_true : if_false);
-}
-
 static char *
 format_with_small_suffix (char *number, const char *suffix)
 {
@@ -356,12 +284,12 @@ format_size (gpointer object, guint64 value)
   return g_strdup (size_str);
 }
 
-static  char *
+static char *
 get_size_label (gpointer object,
                 gboolean is_installable)
 {
   // Translators: .
-  return g_strdup (is_installable ? _("Download") : _("Installed"));
+  return g_strdup (is_installable ? _ ("Download") : _ ("Installed"));
 }
 
 static guint64
@@ -1259,6 +1187,8 @@ bz_full_view_class_init (BzFullViewClass *klass)
   g_type_ensure (BZ_TYPE_CONTEXT_TILE);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-full-view.ui");
+  bz_widget_class_bind_all_util_callbacks (widget_class);
+
   gtk_widget_class_bind_template_child (widget_class, BzFullView, stack);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, main_scroll);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, shadow_overlay);
@@ -1267,15 +1197,6 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzFullView, wide_install_button);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, narrow_install_button);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, narrow_open_button);
-  gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
-  gtk_widget_class_bind_template_callback (widget_class, is_zero);
-  gtk_widget_class_bind_template_callback (widget_class, is_positive);
-  gtk_widget_class_bind_template_callback (widget_class, is_null);
-  gtk_widget_class_bind_template_callback (widget_class, is_empty);
-  gtk_widget_class_bind_template_callback (widget_class, is_empty_string);
-  gtk_widget_class_bind_template_callback (widget_class, logical_and);
-  gtk_widget_class_bind_template_callback (widget_class, is_longer);
-  gtk_widget_class_bind_template_callback (widget_class, bool_to_string);
   gtk_widget_class_bind_template_callback (widget_class, format_favorites_count);
   gtk_widget_class_bind_template_callback (widget_class, format_recent_downloads);
   gtk_widget_class_bind_template_callback (widget_class, format_recent_downloads_tooltip);

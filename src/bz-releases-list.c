@@ -21,7 +21,6 @@
 #include <glib/gi18n.h>
 
 #include "bz-appstream-description-render.h"
-#include "bz-entry.h"
 #include "bz-fading-clamp.h"
 #include "bz-release.h"
 #include "bz-releases-list.h"

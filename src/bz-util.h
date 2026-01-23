@@ -28,13 +28,17 @@
 #define bz_object_maybe_ref(_obj) bz_maybe_ref ((_obj), g_object_ref)
 #define bz_dex_maybe_ref(_obj)    bz_maybe_ref ((_obj), dex_ref)
 
-#define BZ_RELEASE_DATA(name, unref) \
-  if ((unref) != NULL)               \
-    g_clear_pointer (&self->name, (unref));
+#define BZ_RELEASE_DATA(name, unref)          \
+  if ((unref) != NULL)                        \
+    {                                         \
+      g_clear_pointer (&self->name, (unref)); \
+    }
 
-#define BZ_RELEASE_UTAG(name, remove) \
-  if ((remove) != NULL)               \
-    g_clear_handle_id (&self->name, (remove));
+#define BZ_RELEASE_UTAG(name, remove)            \
+  if ((remove) != NULL)                          \
+    {                                            \
+      g_clear_handle_id (&self->name, (remove)); \
+    }
 
 /* va args = releases */
 #define BZ_DEFINE_DATA(name, Name, layout, ...)    \
