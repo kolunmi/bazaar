@@ -11,14 +11,13 @@ managing software through the GUI:
   updates, and removals) during which you may close all windows or continue to
   append new transactions freely
 
-* Display a "Curated" page which you may extensively customize with YAML, as
-  will be discussed later. This is a way to highlight applications which you
-  believe might be of interest.
+* Display a "Curated" page which you may extensively customize with YAML.
+* This is a way to highlight applications which you believe might be of
+  interest.
   * Curated configuration files are constantly monitored for filesystem events,
-    meaning you can update them and see the changes immediate reflected in the
-    GUI
-  * You can have any number of curated configuration files; they will
-    concatenate in the GUI in the order they were provided
+    changes immediately reflected in the GUI
+  * Any number of curated configuration files; they will concatenate in the
+    GUI in the order they were provided
 
 * Access data from [Flathub](https://flathub.org/), such as the latest or most
   popular applications, and allow users to sign in to Flathub to manage
@@ -44,10 +43,13 @@ managing software through the GUI:
 
 Blocklists are a way to ensure that users will never interact with a certain
 application inside Bazaar by searching or browsing, either on the Flathub page
-or via search. Blocked applications which are already installed still appear in
-the library or when there are updates available for them. Under no circumstance
-does Bazaar touch the underlying flatpak configuration in order to block or
-allow apps.
+or via search. 
+
+Blocked applications which are already installed still appear in
+the library or when there are updates available for them and via the system's
+flatpak configuration. Under no circumstance does Bazaar touch the underlying 
+flatpak configuration in order to block or allow apps. The `flatpak` command
+line tool is unaffected.
 
 ### Blocklist Types
 
