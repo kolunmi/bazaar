@@ -152,7 +152,6 @@ create_release_row (const char *version,
     {
       description_widget = bz_appstream_description_render_new ();
       bz_appstream_description_render_set_appstream_description (description_widget, description);
-      gtk_widget_set_margin_start (GTK_WIDGET (description_widget), 5);
 
       if (use_clamp)
         {
