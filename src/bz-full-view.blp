@@ -586,7 +586,7 @@ template $BzFullView: Adw.Bin {
                         margin-end: 25;
                         margin-bottom: 20;
                         margin-top: 10;
-                        spacing: 20;
+                        spacing: 15;
 
                         Revealer {
                           transition-type: slide_down;
@@ -700,12 +700,12 @@ template $BzFullView: Adw.Bin {
                           }
                         }
 
-                        $BzShareList {
-                          urls: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.share-urls;
-                        }
-
                         $BzReleasesList releases_list {
                           version-history: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.version-history;
+                        }
+
+                        $BzShareList {
+                          urls: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.share-urls;
                         }
 
                         Box {
