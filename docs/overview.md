@@ -20,7 +20,7 @@ managing software through the GUI:
   * You can have any number of curated configuration files; they will
     concatenate in the GUI in the order they were provided
 
-* Access data from [[https://flathub.org/][Flathub]], such as the latest or most
+* Access data from [Flathub](https://flathub.org/), such as the latest or most
   popular applications, and allow users to sign in to Flathub to manage
   bookmarked applications
 
@@ -28,8 +28,8 @@ managing software through the GUI:
   info, using the same search routine as in-application
   - GNOME will work out of the box, as Bazaar implements the
     =org.gnome.Shell.SearchProvider2= dbus interface
-  - KDE Plasma will require a
-    [[https://github.com/ublue-os/krunner-bazaar][krunner plugin]]
+  - KDE Plasma will require a [krunner
+    plugin](https://github.com/ublue-os/krunner-bazaar)
 
 * Hide applications you do not want users to see with blocklists, which is
   useful for discouraging the use of certain packages which you deem to be
