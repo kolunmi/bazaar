@@ -586,7 +586,7 @@ template $BzFullView: Adw.Bin {
                         margin-end: 25;
                         margin-bottom: 20;
                         margin-top: 10;
-                        spacing: 20;
+                        spacing: 15;
 
                         Revealer {
                           transition-type: slide_down;
@@ -642,7 +642,6 @@ template $BzFullView: Adw.Bin {
                               "title-2",
                             ]
 
-                            margin-start: 5;
                             valign: start;
                             xalign: 0;
                             wrap: true;
@@ -656,7 +655,6 @@ template $BzFullView: Adw.Bin {
 
                             child: $BzAppstreamDescriptionRender {
                               appstream-description: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.long-description;
-                              margin-start: 5;
                             };
                           }
                         }
@@ -700,12 +698,12 @@ template $BzFullView: Adw.Bin {
                           }
                         }
 
-                        $BzShareList {
-                          urls: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.share-urls;
-                        }
-
                         $BzReleasesList releases_list {
                           version-history: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.version-history;
+                        }
+
+                        $BzShareList {
+                          urls: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.share-urls;
                         }
 
                         Box {

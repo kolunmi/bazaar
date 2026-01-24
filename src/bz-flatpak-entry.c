@@ -582,6 +582,7 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
       GPtrArray     *requires_relations   = NULL;
       GPtrArray     *recommends_relations = NULL;
       GPtrArray     *supports_relations   = NULL;
+      gboolean       has_bugtracker       = FALSE;
 
       title = as_component_get_name (component);
       if (title == NULL)
@@ -651,21 +652,6 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
         }
 
       share_urls = g_list_store_new (BZ_TYPE_URL);
-      if (kinds & BZ_ENTRY_KIND_APPLICATION &&
-          g_strcmp0 (remote_name, "flathub") == 0)
-        {
-          g_autofree char *flathub_url = NULL;
-          g_autoptr (BzUrl) url        = NULL;
-
-          flathub_url = g_strdup_printf ("https://flathub.org/apps/%s", id);
-
-          url = bz_url_new ();
-          bz_url_set_name (url, C_ ("Project URL Type", "Flathub Page"));
-          bz_url_set_url (url, flathub_url);
-          bz_url_set_icon_name (url, "flathub-symbolic");
-
-          g_list_store_append (share_urls, url);
-        }
 
       for (int e = AS_URL_KIND_UNKNOWN + 1; e < AS_URL_KIND_LAST; e++)
         {
@@ -685,8 +671,9 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
                   icon_name   = "globe-symbolic";
                   break;
                 case AS_URL_KIND_BUGTRACKER:
-                  enum_string = C_ ("Project URL Type", "Issue Tracker");
-                  icon_name   = "computer-fail-symbolic";
+                  enum_string    = C_ ("Project URL Type", "Issue Tracker");
+                  icon_name      = "computer-fail-symbolic";
+                  has_bugtracker = TRUE;
                   break;
                 case AS_URL_KIND_FAQ:
                   enum_string = C_ ("Project URL Type", "FAQ");
@@ -712,7 +699,7 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
                   break;
                 case AS_URL_KIND_VCS_BROWSER:
                   enum_string = C_ ("Project URL Type", "Source Code");
-                  icon_name   = "code-symbolic";
+                  icon_name   = "server-pick-symbolic";
                   g_clear_pointer (&forge_url, g_free);
                   forge_url = g_strdup (url);
                   break;
@@ -733,6 +720,45 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
               g_list_store_append (share_urls, share_url);
             }
         }
+
+      if (kinds & BZ_ENTRY_KIND_APPLICATION &&
+          g_strcmp0 (remote_name, "flathub") == 0)
+        {
+          g_autofree char *flathub_url       = NULL;
+          g_autoptr (BzUrl) url              = NULL;
+          g_autofree char *manifest_url      = NULL;
+          g_autoptr (BzUrl) manifest_url_obj = NULL;
+
+          flathub_url = g_strdup_printf ("https://flathub.org/apps/%s", id);
+          url         = bz_url_new ();
+          bz_url_set_name (url, C_ ("Project URL Type", "Flathub Page"));
+          bz_url_set_url (url, flathub_url);
+          bz_url_set_icon_name (url, "flathub-symbolic");
+          g_list_store_append (share_urls, url);
+
+          if (!has_bugtracker)
+            {
+              g_autofree char *bugtracker_url      = NULL;
+              g_autoptr (BzUrl) bugtracker_url_obj = NULL;
+
+              bugtracker_url = g_strdup_printf ("https://github.com/flathub/%s/issues", id);
+
+              bugtracker_url_obj = bz_url_new ();
+              bz_url_set_name (bugtracker_url_obj, C_ ("Project URL Type", "Issue Tracker"));
+              bz_url_set_url (bugtracker_url_obj, bugtracker_url);
+              bz_url_set_icon_name (bugtracker_url_obj, "computer-fail-symbolic");
+              g_list_store_append (share_urls, bugtracker_url_obj);
+            }
+
+          manifest_url = g_strdup_printf ("https://github.com/flathub/%s", id);
+
+          manifest_url_obj = bz_url_new ();
+          bz_url_set_name (manifest_url_obj, C_ ("Project URL Type", "Manifest"));
+          bz_url_set_url (manifest_url_obj, manifest_url);
+          bz_url_set_icon_name (manifest_url_obj, "code-symbolic");
+          g_list_store_append (share_urls, manifest_url_obj);
+        }
+
       if (g_list_model_get_n_items (G_LIST_MODEL (share_urls)) == 0)
         g_clear_object (&share_urls);
 
