@@ -73,6 +73,7 @@ template $BzFullView: Adw.Bin {
             setters {
               context_bar.orientation: vertical;
               context_bar.spacing: 4;
+              context_bar.homogeneous: false;
               header_box.spacing: 12;
               app_name_box.spacing: 0;
               download_bar.expand-size: 60;
@@ -427,7 +428,7 @@ template $BzFullView: Adw.Bin {
                             can-target: bind $invert_boolean($is_null(template.ui-entry) as <bool>) as <bool>;
                             sensitive: bind $invert_boolean($is_null(template.ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <bool>) as <bool>;
                             clicked => $dl_stats_cb(template);
-                            label: _("Downloads /mo");
+                            label: _("Downloads/Month");
                             has-tooltip: bind $invert_boolean($is_null(template.ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <bool>) as <bool>;
                             tooltip-text: bind $format_recent_downloads_tooltip(template.ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <string>;
                             lozenge-style: "grey";
