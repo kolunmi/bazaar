@@ -197,7 +197,7 @@
 
 .circular-lozenge.grey,
 .lozenge.grey {
-	color: @dark_5;
+  color: @window_fg_color;
 	background-color: alpha(@dark_3, .25);
 }
 
@@ -226,7 +226,6 @@
 
   .circular-lozenge.grey,
   .lozenge.grey {
-	  color: @light_3;
 	  background-color: alpha(@light_5, .25);
   }
 }
