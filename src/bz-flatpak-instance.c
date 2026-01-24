@@ -1494,13 +1494,17 @@ list_repositories_fiber (ListReposData *data)
 
       for (guint i = 0; i < system_repos->len; i++)
         {
-          FlatpakRemote *remote = g_ptr_array_index (system_repos, i);
-          g_autoptr (BzRepository) repo = g_object_new (BZ_TYPE_REPOSITORY,
-                                                        "name", flatpak_remote_get_name (remote),
-                                                        "title", flatpak_remote_get_title (remote),
-                                                        "url", flatpak_remote_get_url (remote),
-                                                        "is-user", FALSE,
-                                                        NULL);
+          FlatpakRemote *remote         = NULL;
+          g_autoptr (BzRepository) repo = NULL;
+
+          remote = g_ptr_array_index (system_repos, i);
+          repo   = g_object_new (BZ_TYPE_REPOSITORY,
+                                 "name", flatpak_remote_get_name (remote),
+                                 "title", flatpak_remote_get_title (remote),
+                                 "url", flatpak_remote_get_url (remote),
+                                 "is-user", FALSE,
+                                 NULL);
+
           g_list_store_append (repos, repo);
         }
     }
@@ -1518,13 +1522,17 @@ list_repositories_fiber (ListReposData *data)
 
       for (guint i = 0; i < user_repos->len; i++)
         {
-          FlatpakRemote *remote = g_ptr_array_index (user_repos, i);
-          g_autoptr (BzRepository) repo = g_object_new (BZ_TYPE_REPOSITORY,
-                                                        "name", flatpak_remote_get_name (remote),
-                                                        "title", flatpak_remote_get_title (remote),
-                                                        "url", flatpak_remote_get_url (remote),
-                                                        "is-user", TRUE,
-                                                        NULL);
+          FlatpakRemote *remote         = NULL;
+          g_autoptr (BzRepository) repo = NULL;
+
+          remote = g_ptr_array_index (user_repos, i);
+          repo   = g_object_new (BZ_TYPE_REPOSITORY,
+                                 "name", flatpak_remote_get_name (remote),
+                                 "title", flatpak_remote_get_title (remote),
+                                 "url", flatpak_remote_get_url (remote),
+                                 "is-user", TRUE,
+                                 NULL);
+
           g_list_store_append (repos, repo);
         }
     }
