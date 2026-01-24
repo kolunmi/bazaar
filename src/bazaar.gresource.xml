@@ -111,6 +111,7 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/sad-computer-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/share-alt-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/share-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/server-pick-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/sidebar-show-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/sliders-horizontal-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/smartphone2-symbolic.svg</file>
