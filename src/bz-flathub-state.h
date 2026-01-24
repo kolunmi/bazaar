@@ -66,8 +66,8 @@ DexFuture *
 bz_flathub_state_update_to_today (BzFlathubState *self);
 
 DexFuture *
-bz_flathub_state_search_keyword (BzFlathubState *self,
-                                 const char     *keyword);
+bz_flathub_state_search_collection (BzFlathubState *self,
+                                    const char     *route);
 
 G_END_DECLS
 

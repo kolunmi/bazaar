@@ -1,0 +1,7 @@
+prefix=bz
+name=flathub_sub_category
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+property=name char G_TYPE_STRING string
+property=id char G_TYPE_STRING string
