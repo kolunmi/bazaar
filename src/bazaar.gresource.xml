@@ -28,6 +28,7 @@
     <file preprocess="xml-stripblanks">bz-decorated-screenshot.ui</file>
     <file preprocess="xml-stripblanks">bz-developer-badge.ui</file>
     <file preprocess="xml-stripblanks">bz-entry-inspector.ui</file>
+    <file preprocess="xml-stripblanks">bz-entry-selection-row.ui</file>
     <file preprocess="xml-stripblanks">bz-favorite-button.ui</file>
     <file preprocess="xml-stripblanks">bz-favorites-page.ui</file>
     <file preprocess="xml-stripblanks">bz-favorites-tile.ui</file>
@@ -102,6 +103,7 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/newspaper-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/parent-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/people-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/person-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/pip-out-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/power-profile-performance-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/puzzle-piece-symbolic.svg</file>

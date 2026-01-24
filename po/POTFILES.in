@@ -35,6 +35,8 @@ src/bz-entry-group.c
 src/bz-entry-group-util.c
 src/bz-entry-inspector.blp
 src/bz-entry-inspector.c
+src/bz-entry-selection-row.blp
+src/bz-entry-selection-row.c
 src/bz-entry.c
 src/bz-env.c
 src/bz-error.c

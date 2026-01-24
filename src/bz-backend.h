@@ -54,7 +54,7 @@ struct _BzBackendInterface
 
   /* DexFuture* -> GListModel* (of BzRepository objects) */
   DexFuture *(*list_repositories) (BzBackend    *self,
-                                  GCancellable *cancellable);
+                                   GCancellable *cancellable);
 
   /* DexFuture* -> gboolean */
   DexFuture *(*schedule_transaction) (BzBackend    *self,
