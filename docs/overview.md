@@ -45,9 +45,9 @@ managing software through the GUI:
 Blocklists are a way to ensure that users will never interact with a certain
 application inside Bazaar by searching or browsing, either on the Flathub page
 or via search. Blocked applications which are already installed still appear in
-the library or when there are updates are available for them. Under no
-circumstance does Bazaar touch the underlying flatpak configuration in order to
-block or allow apps.
+the library or when there are updates available for them. Under no circumstance
+does Bazaar touch the underlying flatpak configuration in order to block or
+allow apps.
 
 ### Blocklist Types
 
@@ -93,7 +93,7 @@ For those who are learn more effectively by seeing an example:
 YAML blocklists files are comprised of a list of sub "blocklists," which to
 Bazaar means a **list of appids to block or allow**. These are optionally
 **applied based on a list of provided conditions** and **composed with other
-blocklists in based on a priority**.
+blocklists in the list based on a priority**.
 
 Each blocklist may contain these fields:
 
