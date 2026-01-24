@@ -1469,11 +1469,13 @@ static DexFuture *
 list_repositories_fiber (ListReposData *data)
 {
   g_autoptr (BzFlatpakInstance) self = NULL;
-  GCancellable *cancellable          = data->cancellable;
+  GCancellable *cancellable          = NULL;
   g_autoptr (GError) local_error     = NULL;
   g_autoptr (GPtrArray) system_repos = NULL;
   g_autoptr (GPtrArray) user_repos   = NULL;
   g_autoptr (GListStore) repos       = NULL;
+
+  cancellable = data->cancellable;
 
   bz_weak_get_or_return_reject (self, data->self);
 
@@ -1493,14 +1495,13 @@ list_repositories_fiber (ListReposData *data)
       for (guint i = 0; i < system_repos->len; i++)
         {
           FlatpakRemote *remote = g_ptr_array_index (system_repos, i);
-          BzRepository  *repo   = g_object_new (BZ_TYPE_REPOSITORY,
-                                                "name", flatpak_remote_get_name (remote),
-                                                "title", flatpak_remote_get_title (remote),
-                                                "url", flatpak_remote_get_url (remote),
-                                                "is-user", FALSE,
-                                                NULL);
+          g_autoptr (BzRepository) repo = g_object_new (BZ_TYPE_REPOSITORY,
+                                                        "name", flatpak_remote_get_name (remote),
+                                                        "title", flatpak_remote_get_title (remote),
+                                                        "url", flatpak_remote_get_url (remote),
+                                                        "is-user", FALSE,
+                                                        NULL);
           g_list_store_append (repos, repo);
-          g_object_unref (repo);
         }
     }
 
@@ -1518,18 +1519,17 @@ list_repositories_fiber (ListReposData *data)
       for (guint i = 0; i < user_repos->len; i++)
         {
           FlatpakRemote *remote = g_ptr_array_index (user_repos, i);
-          BzRepository  *repo   = g_object_new (BZ_TYPE_REPOSITORY,
-                                                "name", flatpak_remote_get_name (remote),
-                                                "title", flatpak_remote_get_title (remote),
-                                                "url", flatpak_remote_get_url (remote),
-                                                "is-user", TRUE,
-                                                NULL);
+          g_autoptr (BzRepository) repo = g_object_new (BZ_TYPE_REPOSITORY,
+                                                        "name", flatpak_remote_get_name (remote),
+                                                        "title", flatpak_remote_get_title (remote),
+                                                        "url", flatpak_remote_get_url (remote),
+                                                        "is-user", TRUE,
+                                                        NULL);
           g_list_store_append (repos, repo);
-          g_object_unref (repo);
         }
     }
 
-  return dex_future_new_for_object (repos);
+  return dex_future_new_for_object (g_steal_pointer (&repos));
 }
 
 static DexFuture *
