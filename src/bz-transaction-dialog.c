@@ -22,8 +22,12 @@
 
 #include <glib/gi18n.h>
 
+#include "bz-application.h"
+#include "bz-entry-selection-row.h"
 #include "bz-error.h"
+#include "bz-flatpak-entry.h"
 #include "bz-safety-calculator.h"
+#include "bz-state-info.h"
 #include "bz-transaction-dialog.h"
 #include "bz-transaction-list-dialog.h"
 #include "bz-util.h"
@@ -62,24 +66,25 @@ static GtkWidget *
 create_entry_radio_button (BzEntry    *entry,
                            GtkWidget **out_radio)
 {
-  GtkWidget       *row;
-  GtkWidget       *radio;
-  g_autofree char *label;
+  BzStateInfo *state_info       = NULL;
+  GListModel  *repositories     = NULL;
+  g_autoptr (BzRepository) repo = NULL;
+  BzEntrySelectionRow *row      = NULL;
+  GtkCheckButton      *radio    = NULL;
 
-  label = g_strdup (bz_entry_get_unique_id (entry));
+  state_info   = bz_state_info_get_default ();
+  repositories = bz_state_info_get_repositories (state_info);
 
-  row = adw_action_row_new ();
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), label);
+  if (repositories != NULL)
+    repo = bz_entry_get_repository (entry, repositories);
 
-  radio = gtk_check_button_new ();
-  gtk_widget_set_valign (radio, GTK_ALIGN_CENTER);
-  adw_action_row_add_prefix (ADW_ACTION_ROW (row), radio);
-  adw_action_row_set_activatable_widget (ADW_ACTION_ROW (row), radio);
+  row   = bz_entry_selection_row_new (BZ_FLATPAK_ENTRY (entry), repo);
+  radio = bz_entry_selection_row_get_radio (row);
 
   if (out_radio != NULL)
-    *out_radio = radio;
+    *out_radio = GTK_WIDGET (radio);
 
-  return row;
+  return GTK_WIDGET (row);
 }
 
 static GPtrArray *
@@ -95,46 +100,47 @@ create_entry_radio_buttons (AdwAlertDialog *alert,
   radios = g_ptr_array_new ();
   if (store != NULL)
     {
-      guint n_valid_entries = 0;
+      guint n_total_entries = g_list_model_get_n_items (G_LIST_MODEL (store));
 
-      for (guint i = 0; i < g_list_model_get_n_items (G_LIST_MODEL (store));)
-        {
-          g_autoptr (BzEntry) entry = NULL;
-
-          entry = g_list_model_get_item (G_LIST_MODEL (store), i);
-          if (should_skip_entry (entry, remove))
-            {
-              g_list_store_remove (store, i);
-              continue;
-            }
-          n_valid_entries++;
-          i++;
-        }
-      if (n_valid_entries > 1)
+      if (n_total_entries > 1)
         {
           GtkWidget      *listbox           = NULL;
           GtkCheckButton *first_valid_radio = NULL;
+          GtkCheckButton *dummy_radio       = NULL;
 
           listbox = gtk_list_box_new ();
           gtk_list_box_set_selection_mode (GTK_LIST_BOX (listbox), GTK_SELECTION_NONE);
           gtk_widget_add_css_class (listbox, "boxed-list");
 
-          for (guint i = 0; i < n_valid_entries; i++)
+          dummy_radio = GTK_CHECK_BUTTON (gtk_check_button_new ());
+
+          for (guint i = 0; i < n_total_entries; i++)
             {
               g_autoptr (BzEntry) entry = NULL;
               GtkWidget *row            = NULL;
               GtkWidget *radio          = NULL;
+              gboolean   should_skip    = FALSE;
 
-              entry = g_list_model_get_item (G_LIST_MODEL (store), i);
-              row   = create_entry_radio_button (entry, &radio);
+              entry       = g_list_model_get_item (G_LIST_MODEL (store), i);
+              should_skip = should_skip_entry (entry, remove);
+
+              row = create_entry_radio_button (entry, &radio);
               g_ptr_array_add (radios, radio);
 
-              if (first_valid_radio != NULL)
-                gtk_check_button_set_group (GTK_CHECK_BUTTON (radio), first_valid_radio);
+              gtk_check_button_set_group (GTK_CHECK_BUTTON (radio), dummy_radio);
+
+              if (should_skip)
+                {
+                  gtk_widget_set_sensitive (row, FALSE);
+                  gtk_widget_set_sensitive (radio, FALSE);
+                }
               else
                 {
-                  gtk_check_button_set_active (GTK_CHECK_BUTTON (radio), TRUE);
-                  first_valid_radio = (GtkCheckButton *) radio;
+                  if (first_valid_radio == NULL)
+                    {
+                      gtk_check_button_set_active (GTK_CHECK_BUTTON (radio), TRUE);
+                      first_valid_radio = (GtkCheckButton *) radio;
+                    }
                 }
 
               gtk_list_box_append (GTK_LIST_BOX (listbox), row);
@@ -188,14 +194,19 @@ create_entry_radio_buttons (AdwAlertDialog *alert,
 static void
 configure_install_dialog (AdwAlertDialog *alert,
                           const char     *title,
-                          const char     *id)
+                          const char     *id,
+                          gboolean        has_multiple_entries)
 {
   g_autofree char *heading = NULL;
 
   heading = g_strdup_printf (_ ("Install %s?"), title);
 
   adw_alert_dialog_set_heading (alert, heading);
-  adw_alert_dialog_set_body (alert, _ ("May install additional shared components"));
+
+  if (has_multiple_entries)
+    adw_alert_dialog_set_body (alert, _ ("Select which version to install. May install additional shared components"));
+  else
+    adw_alert_dialog_set_body (alert, _ ("May install additional shared components"));
 
   adw_alert_dialog_add_responses (alert,
                                   "cancel", _ ("Cancel"),
@@ -210,15 +221,21 @@ configure_install_dialog (AdwAlertDialog *alert,
 static void
 configure_remove_dialog (AdwAlertDialog *alert,
                          const char     *title,
-                         const char     *id)
+                         const char     *id,
+                         gboolean        has_multiple_entries)
 {
   g_autofree char *heading = NULL;
+  g_autofree char *body    = NULL;
 
   heading = g_strdup_printf (_ ("Remove %s?"), title);
 
+  if (has_multiple_entries)
+    body = g_strdup (_ ("Select which version to remove."));
+  else
+    body = g_strdup_printf (_ ("It will not be possible to use %s after it is uninstalled."), title);
+
   adw_alert_dialog_set_heading (alert, heading);
-  adw_alert_dialog_set_body (
-      alert, g_strdup_printf (_ ("It will not be possible to use %s after it is uninstalled."), title));
+  adw_alert_dialog_set_body (alert, body);
 
   adw_alert_dialog_add_responses (alert,
                                   "cancel", _ ("Cancel"),
@@ -316,6 +333,7 @@ show_dialog_fiber (ShowDialogData *data)
   g_autoptr (BzTransactionDialogResult) result = NULL;
   g_autoptr (BzEntry) check_entry              = NULL;
   BzHighRiskGroup risk_groups                  = BZ_HIGH_RISK_GROUP_NONE;
+  guint           n_total_entries              = 0;
 
   result = bz_transaction_dialog_result_new ();
 
@@ -330,7 +348,8 @@ show_dialog_fiber (ShowDialogData *data)
       title = bz_entry_group_get_title (data->group);
       id    = bz_entry_group_get_id (data->group);
 
-      if (g_list_model_get_n_items (G_LIST_MODEL (store)) > 0)
+      n_total_entries = g_list_model_get_n_items (G_LIST_MODEL (store));
+      if (n_total_entries > 0)
         check_entry = g_list_model_get_item (G_LIST_MODEL (store), 0);
     }
   else
@@ -367,9 +386,9 @@ show_dialog_fiber (ShowDialogData *data)
 
   alert = g_object_ref_sink (adw_alert_dialog_new (NULL, NULL));
   if (data->remove)
-    configure_remove_dialog (ADW_ALERT_DIALOG (alert), title, id);
+    configure_remove_dialog (ADW_ALERT_DIALOG (alert), title, id, n_total_entries > 1);
   else
-    configure_install_dialog (ADW_ALERT_DIALOG (alert), title, id);
+    configure_install_dialog (ADW_ALERT_DIALOG (alert), title, id, n_total_entries > 1);
 
   radios = create_entry_radio_buttons (ADW_ALERT_DIALOG (alert), store, data->remove);
 

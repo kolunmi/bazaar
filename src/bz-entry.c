@@ -35,6 +35,7 @@
 #include "bz-global-net.h"
 #include "bz-io.h"
 #include "bz-release.h"
+#include "bz-repository.h"
 #include "bz-serializable.h"
 #include "bz-url.h"
 #include "bz-util.h"
@@ -2122,6 +2123,46 @@ bz_entry_get_forge_url (BzEntry *self)
   priv = bz_entry_get_instance_private (self);
 
   return priv->forge_url;
+}
+
+BzRepository *
+bz_entry_get_repository (BzEntry    *self,
+                         GListModel *repos)
+{
+  BzEntryPrivate *priv = NULL;
+  guint n_repos = 0;
+  g_auto(GStrv) parts = NULL;
+  const char *scope = NULL;
+  const char *repo_name = NULL;
+  gboolean is_user = FALSE;
+
+  priv = bz_entry_get_instance_private (self);
+
+  if (priv->unique_id == NULL)
+    return NULL;
+
+  parts = g_strsplit (priv->unique_id, "::", -1);
+  if (g_strv_length (parts) < 3)
+    return NULL;
+
+  scope = parts[0];
+  repo_name = parts[1];
+
+  is_user = g_strcmp0 (scope, "FLATPAK-USER") == 0;
+
+  n_repos = g_list_model_get_n_items (repos);
+  for (guint i = 0; i < n_repos; i++)
+    {
+      g_autoptr (BzRepository) repo = g_list_model_get_item (repos, i);
+      const char *name = bz_repository_get_name (repo);
+      gboolean repo_is_user = bz_repository_get_is_user (repo);
+
+      if (repo_is_user == is_user &&
+          g_strcmp0 (name, repo_name) == 0)
+        return g_object_ref (repo);
+    }
+
+  return NULL;
 }
 
 gboolean

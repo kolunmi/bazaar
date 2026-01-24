@@ -892,6 +892,7 @@ init_fiber (GWeakRef *wr)
   g_autoptr (GError) local_error        = NULL;
   g_autofree char *root_cache_dir       = NULL;
   g_autoptr (GFile) root_cache_dir_file = NULL;
+  g_autoptr (GListModel) repos          = NULL;
   gboolean has_flathub                  = FALSE;
   gboolean result                       = FALSE;
   g_autoptr (GHashTable) cached_set     = NULL;
@@ -1031,6 +1032,18 @@ init_fiber (GWeakRef *wr)
 
       self->installed_set = g_hash_table_new_full (
           g_str_hash, g_str_equal, g_free, NULL);
+    }
+
+  repos = dex_await_object (
+      bz_backend_list_repositories (BZ_BACKEND (self->flatpak), NULL),
+      &local_error);
+
+  if (repos != NULL)
+    bz_state_info_set_repositories (self->state, repos);
+  else
+    {
+      g_warning ("Failed to enumerate repositories: %s", local_error->message);
+      g_clear_error (&local_error);
     }
 
   /* Revive old cache from previous Bazaar process */
