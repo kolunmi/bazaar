@@ -27,7 +27,7 @@ managing software through the GUI:
 * Run in the background and respond to desktop search queries with application
   info, using the same search routine as in-application
   - GNOME will work out of the box, as Bazaar implements the
-    =org.gnome.Shell.SearchProvider2= dbus interface
+    `org.gnome.Shell.SearchProvider2` dbus interface
   - KDE Plasma will require a [krunner
     plugin](https://github.com/ublue-os/krunner-bazaar)
 
