@@ -26,10 +26,9 @@
 #include "bz-data-point.h"
 #include <math.h>
 
-#define LABEL_MARGIN        75.0
-#define LABEL_MARGIN_RIGHT  35.0
-#define CARD_EDGE_THRESHOLD 150
-#define TICK_LENGTH         5.0
+#define LABEL_MARGIN       75.0
+#define LABEL_MARGIN_RIGHT 35.0
+#define TICK_LENGTH        5.0
 
 struct _BzDataGraph
 {
@@ -366,7 +365,7 @@ bz_data_graph_snapshot (GtkWidget   *widget,
 
       gtk_widget_allocate (self->tooltip_box, natural_size.width, natural_size.height, -1, NULL);
 
-      if (widget_width - self->motion_x < CARD_EDGE_THRESHOLD)
+      if (self->motion_x > widget_width / 2.0)
         card_x = self->motion_x - natural_size.width - 10.0;
       else
         card_x = self->motion_x + 10.0;
