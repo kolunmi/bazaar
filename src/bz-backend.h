@@ -52,6 +52,10 @@ struct _BzBackendInterface
   DexFuture *(*retrieve_update_ids) (BzBackend    *self,
                                      GCancellable *cancellable);
 
+  /* DexFuture* -> GListModel* (of BzRepository objects) */
+  DexFuture *(*list_repositories) (BzBackend    *self,
+                                  GCancellable *cancellable);
+
   /* DexFuture* -> gboolean */
   DexFuture *(*schedule_transaction) (BzBackend    *self,
                                       BzEntry     **installs,
@@ -83,6 +87,10 @@ bz_backend_retrieve_install_ids (BzBackend    *self,
 DexFuture *
 bz_backend_retrieve_update_ids (BzBackend    *self,
                                 GCancellable *cancellable);
+
+DexFuture *
+bz_backend_list_repositories (BzBackend    *self,
+                              GCancellable *cancellable);
 
 DexFuture *
 bz_backend_schedule_transaction (BzBackend    *self,

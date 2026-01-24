@@ -1,0 +1,13 @@
+prefix=bz
+name=repository
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+include=<gtk/gtk.h>
+include="bz-entry.h"
+
+property=is_user gboolean G_TYPE_BOOLEAN boolean
+property=title char G_TYPE_STRING string
+property=url char G_TYPE_STRING string
+property=name char G_TYPE_STRING string

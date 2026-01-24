@@ -61,6 +61,13 @@ bz_backend_real_retrieve_update_ids (BzBackend    *self,
 }
 
 static DexFuture *
+bz_backend_real_list_repositories (BzBackend    *self,
+                                   GCancellable *cancellable)
+{
+  return dex_future_new_reject (G_IO_ERROR, G_IO_ERROR_UNKNOWN, "Unimplemented");
+}
+
+static DexFuture *
 bz_backend_real_schedule_transaction (BzBackend    *self,
                                       BzEntry     **installs,
                                       guint         n_installs,
@@ -82,6 +89,7 @@ bz_backend_default_init (BzBackendInterface *iface)
   iface->retrieve_remote_entries     = bz_backend_real_retrieve_remote_entries;
   iface->retrieve_install_ids        = bz_backend_real_retrieve_install_ids;
   iface->retrieve_update_ids         = bz_backend_real_retrieve_update_ids;
+  iface->list_repositories           = bz_backend_real_list_repositories;
   iface->schedule_transaction        = bz_backend_real_schedule_transaction;
 }
 
@@ -129,6 +137,16 @@ bz_backend_retrieve_update_ids (BzBackend    *self,
 {
   dex_return_error_if_fail (BZ_IS_BACKEND (self));
   return BZ_BACKEND_GET_IFACE (self)->retrieve_update_ids (self, cancellable);
+}
+
+DexFuture *
+bz_backend_list_repositories (BzBackend    *self,
+                              GCancellable *cancellable)
+{
+  dex_return_error_if_fail (BZ_IS_BACKEND (self));
+  dex_return_error_if_fail (cancellable == NULL || G_IS_CANCELLABLE (cancellable));
+
+  return BZ_BACKEND_GET_IFACE (self)->list_repositories (self, cancellable);
 }
 
 DexFuture *

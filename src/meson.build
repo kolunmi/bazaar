@@ -211,6 +211,7 @@ gobject_specs = files(
   'bz-pride-flag-spec.txt',
   'bz-pride-flag-stripe-spec.txt',
   'bz-release.txt',
+  'bz-repository.txt',
   'bz-root-blocklist.txt',
   'bz-root-curated-config.txt',
   'bz-safety-row.txt',
