@@ -39,6 +39,51 @@ managing software through the GUI:
 * Communicate with, and invoke operations on, the main daemon through the
   command line
 
+## CLI Usage
+
+You can start the bazaar daemon like this:
+```
+bazaar [ARGS] [PACKAGE PATH/URI]
+```
+
+To avoid spawning an initial window, use:
+```
+bazaar --no-window [ARGS] [PACKAGE PATH/URI]
+```
+
+`[PACKAGE PATH/URI]` could be a `.flatpakref` file. flatpak+https and regular
+https is supported.
+
+## Comptime Configuration
+
+The only compile time meson option you should concern yourself with for
+production is `hardcoded_main_config_path`. This embeds a path to the main
+configuration file into Bazaar. If this is not defined at compile time, Bazaar
+will never attempt to read a main config. See the next section of this document
+to see an example config file.
+
+## Main Configuration
+
+This is the primary YAML configuration file for bazaar, as designated by the
+`hardcoded_main_config_path` meson option. Here, you will point bazaar to where
+your other configs are located. You can also define hooks in this file. See the
+"Hooks" section of this document for an overview of the hooks system and an
+example of integration into the main config.
+
+### Example
+
+```yaml
+yaml-blocklist-paths:
+  - /path/to/yaml/blocklist.yaml
+  - /path/to/another/yaml/blocklist.yaml
+txt-blocklist-paths:
+  - /path/to/txt/blocklist.txt
+  - /path/to/another/txt/blocklist.txt
+curated-config-paths:
+  - /path/to/yaml/file.yaml
+  - /path/to/another/yaml/file.yaml
+```
+
 ## Blocklists
 
 Blocklists are a way to ensure that users will never interact with a certain
