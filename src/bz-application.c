@@ -1583,37 +1583,10 @@ open_flatpakref_fiber (OpenFlatpakrefData *data)
     {
       if (G_VALUE_HOLDS_OBJECT (value))
         {
-          BzEntry    *entry         = NULL;
-          const char *unique_id     = NULL;
-          g_autoptr (BzEntry) equiv = NULL;
+          BzEntry *entry = NULL;
 
-          entry     = g_value_get_object (value);
-          unique_id = bz_entry_get_unique_id (entry);
-
-          equiv = dex_await_object (
-              bz_entry_cache_manager_get (self->cache, unique_id),
-              NULL);
-
-          if (equiv != NULL)
-            {
-              if (bz_entry_is_of_kinds (equiv, BZ_ENTRY_KIND_APPLICATION))
-                {
-                  const char   *generic_id = NULL;
-                  BzEntryGroup *group      = NULL;
-
-                  generic_id = bz_entry_get_id (entry);
-                  group      = g_hash_table_lookup (self->ids_to_groups, generic_id);
-
-                  if (group != NULL)
-                    bz_window_show_group (BZ_WINDOW (window), group);
-                  else
-                    bz_window_show_entry (BZ_WINDOW (window), equiv);
-                }
-              else
-                bz_window_show_entry (BZ_WINDOW (window), equiv);
-            }
-          else
-            bz_window_show_entry (BZ_WINDOW (window), entry);
+          entry = g_value_get_object (value);
+          bz_window_show_entry (BZ_WINDOW (window), entry);
         }
       else
         open_generic_id (self, g_value_get_string (value));

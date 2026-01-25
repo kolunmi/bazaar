@@ -267,6 +267,9 @@ format_size (gpointer object, guint64 value)
   char            *decimal  = NULL;
   int              digits   = 0;
 
+  if (value == 0)
+    return g_strdup (_ ("N/A"));
+
   if (space != NULL)
     {
       *space = '\0';
@@ -306,7 +309,12 @@ get_size_type (gpointer object,
 static char *
 format_size_tooltip (gpointer object, guint64 value)
 {
-  g_autofree char *size_str = g_format_size (value);
+  g_autofree char *size_str = NULL;
+
+  if (value == 0)
+    return g_strdup (_ ("Size information unavailable"));
+
+  size_str = g_format_size (value);
   return g_strdup_printf (_ ("Download size of %s"), size_str);
 }
 
@@ -1177,6 +1185,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   g_type_ensure (BZ_TYPE_ENTRY_GROUP);
   g_type_ensure (BZ_TYPE_FADING_CLAMP);
   g_type_ensure (BZ_TYPE_FAVORITE_BUTTON);
+  g_type_ensure (BZ_TYPE_FLATPAK_ENTRY);
   g_type_ensure (BZ_TYPE_HARDWARE_SUPPORT_DIALOG);
   g_type_ensure (BZ_TYPE_LAZY_ASYNC_TEXTURE_MODEL);
   g_type_ensure (BZ_TYPE_SECTION_VIEW);
@@ -1299,13 +1308,29 @@ bz_full_view_set_entry_group (BzFullView   *self,
 
   if (group != NULL)
     {
-      g_autoptr (DexFuture) future = NULL;
-
       self->group    = g_object_ref (group);
       self->ui_entry = bz_entry_group_dup_ui_entry (group);
 
-      future            = bz_entry_group_dup_all_into_store (group);
-      self->group_model = bz_result_new (future);
+      if (self->ui_entry != NULL && bz_result_get_resolved (self->ui_entry))
+        {
+          g_autoptr (GListStore) store = NULL;
+          g_autoptr (DexFuture) future = NULL;
+          BzEntry *entry               = NULL;
+
+          entry = bz_result_get_object (self->ui_entry);
+          store = g_list_store_new (BZ_TYPE_ENTRY);
+          g_list_store_append (store, entry);
+
+          future            = dex_future_new_for_object (store);
+          self->group_model = bz_result_new (future);
+        }
+      else
+        {
+          g_autoptr (DexFuture) future = NULL;
+
+          future            = bz_entry_group_dup_all_into_store (group);
+          self->group_model = bz_result_new (future);
+        }
 
       adw_view_stack_set_visible_child_name (self->stack, "content");
     }

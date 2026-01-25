@@ -59,6 +59,7 @@ bz_sources = files(
   'bz-application.c',
   'bz-apps-page.c',
   'bz-appstream-description-render.c',
+  'bz-appstream-parser.c',
   'bz-async-texture.c',
   'bz-auth-state.c',
   'bz-backend.c',

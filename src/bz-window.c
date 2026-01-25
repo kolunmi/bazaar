@@ -885,13 +885,19 @@ void
 bz_window_show_entry (BzWindow *self,
                       BzEntry  *entry)
 {
-  /* TODO: IMPLEMENT ME! */
-  bz_show_error_for_widget (
-      GTK_WIDGET (self),
-      _ ("The ability to inspect and install local .flatpak bundle files is coming soon! "
-         "In the meantime, try running\n\n"
-         "flatpak install --bundle your-bundle.flatpak\n\n"
-         "on the command line."));
+  g_autoptr (BzEntryGroup) group  = NULL;
+  AdwNavigationPage *visible_page = NULL;
+
+  g_return_if_fail (BZ_IS_WINDOW (self));
+  g_return_if_fail (BZ_IS_ENTRY (entry));
+
+  group = bz_entry_group_new_for_single_entry (entry);
+
+  bz_full_view_set_entry_group (self->full_view, group);
+
+  visible_page = adw_navigation_view_get_visible_page (self->navigation_view);
+  if (visible_page != adw_navigation_view_find_page (self->navigation_view, "view"))
+    adw_navigation_view_push_by_tag (self->navigation_view, "view");
 }
 
 void
