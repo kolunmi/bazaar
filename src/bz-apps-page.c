@@ -29,6 +29,7 @@
 #include "bz-entry-group.h"
 #include "bz-env.h"
 #include "bz-flathub-category.h"
+#include "bz-subcategory-list.h"
 #include "bz-state-info.h"
 
 struct _BzAppsPage
@@ -40,6 +41,7 @@ struct _BzAppsPage
   GListModel *all_applications;
   GListModel *carousel_applications;
   char       *subtitle;
+  BzFlathubCategory *category;
 
   /* Template widgets */
 };
@@ -55,6 +57,8 @@ enum
   PROP_ALL_APPLICATIONS,
   PROP_CAROUSEL_APPLICATIONS,
   PROP_PAGE_SUBTITLE,
+  PROP_CATEGORY,
+  PROP_FLATHUB_STATE,
 
   LAST_PROP
 };
@@ -82,6 +86,7 @@ bz_apps_page_dispose (GObject *object)
   g_clear_object (&self->all_applications);
   g_clear_object (&self->carousel_applications);
   g_clear_pointer (&self->subtitle, g_free);
+  g_clear_object (&self->category);
 
   G_OBJECT_CLASS (bz_apps_page_parent_class)->dispose (object);
 }
@@ -110,6 +115,12 @@ bz_apps_page_get_property (GObject    *object,
       break;
     case PROP_PAGE_SUBTITLE:
       g_value_set_string (value, self->subtitle);
+      break;
+    case PROP_CATEGORY:
+      g_value_set_object (value, self->category);
+      break;
+    case PROP_FLATHUB_STATE:
+      g_value_set_object (value, bz_state_info_get_flathub(bz_state_info_get_default ()));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -281,6 +292,18 @@ bz_apps_page_class_init (BzAppsPageClass *klass)
           "page-subtitle",
           NULL, NULL, NULL,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+  props[PROP_CATEGORY] =
+      g_param_spec_object (
+          "category",
+          NULL, NULL,
+          BZ_TYPE_FLATHUB_CATEGORY,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+  props[PROP_FLATHUB_STATE] =
+      g_param_spec_object (
+          "flathub-state",
+          NULL, NULL,
+          BZ_TYPE_FLATHUB_STATE,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
@@ -300,6 +323,7 @@ bz_apps_page_class_init (BzAppsPageClass *klass)
       g_cclosure_marshal_VOID__OBJECTv);
 
   g_type_ensure (BZ_TYPE_APP_TILE);
+  g_type_ensure (BZ_TYPE_SUBCATEGORY_LIST);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-apps-page.ui");
   gtk_widget_class_bind_template_callback (widget_class, is_not_null);
@@ -506,6 +530,9 @@ bz_apps_page_new_from_category (BzFlathubCategory *category)
       subtitle = g_strdup_printf (_ ("%d Applications"), total_entries);
       bz_apps_page_set_subtitle (BZ_APPS_PAGE (apps_page), subtitle);
     }
+
+  BZ_APPS_PAGE(apps_page)->category = g_object_ref (category);
+  g_object_notify_by_pspec (G_OBJECT (apps_page), props[PROP_CATEGORY]);
 
   if (n_items <= 48)
     setup_category_filter (apps_page, category_name);

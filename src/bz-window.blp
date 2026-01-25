@@ -255,6 +255,8 @@ template $BzWindow: Adw.ApplicationWindow {
 
                         Label {
                           label: _("Refreshing Store Content");
+                          wrap: true;
+                          justify: center;
                           margin-bottom: 24;
                           styles ["title-3"]
                         }
@@ -293,6 +295,7 @@ template $BzWindow: Adw.ApplicationWindow {
 
                         Adw.ViewStackPage {
                           name: "installed";
+                          // Translators: .
                           title: _("Installed");
                           icon-name: "library-symbolic";
 

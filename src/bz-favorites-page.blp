@@ -37,7 +37,17 @@ template $BzFavoritesPage: Adw.NavigationPage {
         };
       }
 
-
+      [end]
+      Button install_all_button {
+        styles [
+          "flat",
+        ]
+        has-tooltip: true;
+        tooltip-text: _("Install All");
+        icon-name: "list-add-symbolic";
+        sensitive: bind $invert_boolean($is_empty(template.favorites) as <bool>) as <bool>;
+        clicked => $install_all_cb() swapped;
+      }
     }
 
     content: Adw.BreakpointBin {
@@ -100,6 +110,7 @@ template $BzFavoritesPage: Adw.NavigationPage {
                       child: $BzFavoritesTile {
                         group: bind template.item as <$BzEntryGroup>;
                         activated => $tile_activated_cb();
+                        unfavorited => $unfavorite_cb();
                       };
                     };
                   }

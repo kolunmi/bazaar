@@ -32,6 +32,7 @@
 #include "bz-flatpak-private.h"
 #include "bz-global-net.h"
 #include "bz-io.h"
+#include "bz-repository.h"
 #include "bz-util.h"
 
 /* clang-format off */
@@ -132,6 +133,19 @@ static DexFuture *
 retrieve_installs_fiber (GatherRefsData *data);
 static DexFuture *
 retrieve_updates_fiber (GatherRefsData *data);
+
+BZ_DEFINE_DATA (
+    list_repos,
+    ListRepos,
+    {
+      GWeakRef     *self;
+      GCancellable *cancellable;
+    },
+    BZ_RELEASE_DATA (self, bz_weak_release);
+    BZ_RELEASE_DATA (cancellable, g_object_unref));
+
+static DexFuture *
+list_repositories_fiber (ListReposData *data);
 
 BZ_DEFINE_DATA (
     retrieve_refs_for_remote,
@@ -427,6 +441,25 @@ bz_flatpak_instance_retrieve_update_ids (BzBackend    *backend,
 }
 
 static DexFuture *
+bz_flatpak_instance_list_repositories (BzBackend    *backend,
+                                       GCancellable *cancellable)
+{
+  BzFlatpakInstance *self        = BZ_FLATPAK_INSTANCE (backend);
+  g_autoptr (ListReposData) data = NULL;
+
+  data              = list_repos_data_new ();
+  data->self        = bz_track_weak (self);
+  data->cancellable = bz_object_maybe_ref (cancellable);
+
+  return dex_scheduler_spawn (
+      self->scheduler,
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) list_repositories_fiber,
+      list_repos_data_ref (data),
+      list_repos_data_unref);
+}
+
+static DexFuture *
 bz_flatpak_instance_schedule_transaction (BzBackend    *backend,
                                           BzEntry     **installs,
                                           guint         n_installs,
@@ -497,6 +530,7 @@ backend_iface_init (BzBackendInterface *iface)
   iface->retrieve_remote_entries     = bz_flatpak_instance_retrieve_remote_refs;
   iface->retrieve_install_ids        = bz_flatpak_instance_retrieve_install_ids;
   iface->retrieve_update_ids         = bz_flatpak_instance_retrieve_update_ids;
+  iface->list_repositories           = bz_flatpak_instance_list_repositories;
   iface->schedule_transaction        = bz_flatpak_instance_schedule_transaction;
 }
 
@@ -1429,6 +1463,81 @@ retrieve_updates_fiber (GatherRefsData *data)
 
   return dex_future_new_take_boxed (
       G_TYPE_PTR_ARRAY, g_steal_pointer (&ids));
+}
+
+static DexFuture *
+list_repositories_fiber (ListReposData *data)
+{
+  g_autoptr (BzFlatpakInstance) self = NULL;
+  GCancellable *cancellable          = NULL;
+  g_autoptr (GError) local_error     = NULL;
+  g_autoptr (GPtrArray) system_repos = NULL;
+  g_autoptr (GPtrArray) user_repos   = NULL;
+  g_autoptr (GListStore) repos       = NULL;
+
+  cancellable = data->cancellable;
+
+  bz_weak_get_or_return_reject (self, data->self);
+
+  repos = g_list_store_new (BZ_TYPE_REPOSITORY);
+
+  if (self->system != NULL)
+    {
+      system_repos = flatpak_installation_list_remotes (
+          self->system, cancellable, &local_error);
+      if (system_repos == NULL)
+        SEND_AND_RETURN_ERROR (
+            self, TRUE,
+            BZ_FLATPAK_ERROR_CANNOT_INITIALIZE,
+            "Failed to enumerate remotes for system installation: %s",
+            local_error->message);
+
+      for (guint i = 0; i < system_repos->len; i++)
+        {
+          FlatpakRemote *remote         = NULL;
+          g_autoptr (BzRepository) repo = NULL;
+
+          remote = g_ptr_array_index (system_repos, i);
+          repo   = g_object_new (BZ_TYPE_REPOSITORY,
+                                 "name", flatpak_remote_get_name (remote),
+                                 "title", flatpak_remote_get_title (remote),
+                                 "url", flatpak_remote_get_url (remote),
+                                 "is-user", FALSE,
+                                 NULL);
+
+          g_list_store_append (repos, repo);
+        }
+    }
+
+  if (self->user != NULL)
+    {
+      user_repos = flatpak_installation_list_remotes (
+          self->user, cancellable, &local_error);
+      if (user_repos == NULL)
+        SEND_AND_RETURN_ERROR (
+            self, TRUE,
+            BZ_FLATPAK_ERROR_CANNOT_INITIALIZE,
+            "Failed to enumerate remotes for user installation: %s",
+            local_error->message);
+
+      for (guint i = 0; i < user_repos->len; i++)
+        {
+          FlatpakRemote *remote         = NULL;
+          g_autoptr (BzRepository) repo = NULL;
+
+          remote = g_ptr_array_index (user_repos, i);
+          repo   = g_object_new (BZ_TYPE_REPOSITORY,
+                                 "name", flatpak_remote_get_name (remote),
+                                 "title", flatpak_remote_get_title (remote),
+                                 "url", flatpak_remote_get_url (remote),
+                                 "is-user", TRUE,
+                                 NULL);
+
+          g_list_store_append (repos, repo);
+        }
+    }
+
+  return dex_future_new_for_object (g_steal_pointer (&repos));
 }
 
 static DexFuture *

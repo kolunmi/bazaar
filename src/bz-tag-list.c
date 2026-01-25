@@ -137,6 +137,7 @@ tag_button_clicked_cb (BzTagList *self,
   g_autoptr (BzResult) result  = NULL;
   g_autoptr (DexFuture) future = NULL;
   const char *tag              = NULL;
+  g_autofree char *route       = NULL;
 
   g_return_if_fail (BZ_IS_TAG_LIST (self));
   g_return_if_fail (GTK_IS_BUTTON (button));
@@ -152,7 +153,8 @@ tag_button_clicked_cb (BzTagList *self,
 
   g_object_set_data_full (G_OBJECT (self), "current-tag", g_strdup (tag), g_free);
 
-  future = bz_flathub_state_search_keyword (self->flathub_state, tag);
+  route  = g_strdup_printf ("/collection/keyword?keyword=%s", tag);
+  future = bz_flathub_state_search_collection (self->flathub_state, route);
   future = dex_future_finally (
       future,
       (DexFutureCallback) search_finally,

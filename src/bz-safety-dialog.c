@@ -179,7 +179,6 @@ update_permissions_list (BzSafetyDialog *self)
   GtkWidget       *child;
   g_autoptr (GListModel) model = NULL;
   guint n_items                = 0;
-  guint i                      = 0;
 
   while ((child = gtk_widget_get_first_child (GTK_WIDGET (self->permissions_list))) != NULL)
     gtk_list_box_remove (self->permissions_list, child);
@@ -204,14 +203,20 @@ update_permissions_list (BzSafetyDialog *self)
   importance = bz_safety_calculator_calculate_rating (entry);
 
   n_items = g_list_model_get_n_items (model);
-  for (i = 0; i < n_items; i++)
+  for (gint level = BZ_IMPORTANCE_IMPORTANT; level >= BZ_IMPORTANCE_UNIMPORTANT; level--)
     {
-      g_autoptr (BzSafetyRow) row_data;
-      AdwActionRow *row;
-
-      row_data = g_list_model_get_item (model, i);
-      row      = create_permission_row (row_data);
-      gtk_list_box_append (self->permissions_list, GTK_WIDGET (row));
+      for (gint j = 0; j < n_items; j++)
+        {
+          g_autoptr (BzSafetyRow) row_data;
+          AdwActionRow *row;
+          BzImportance row_importance;
+          row_data       = g_list_model_get_item (model, j);
+          row_importance = bz_safety_row_get_importance (row_data);
+          if (row_importance != level)
+            continue;
+          row = create_permission_row (row_data);
+          gtk_list_box_append (self->permissions_list, GTK_WIDGET (row));
+        }
     }
 
   switch (importance)

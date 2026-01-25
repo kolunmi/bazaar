@@ -3,25 +3,24 @@
 # This file is distributed under the same license as the bazaar package.
 # Automatically generated, 2025.
 #
-# SPDX-FileCopyrightText: 2025 Jill Fiore <contact@lumaeris.com>
+# SPDX-FileCopyrightText: 2025, 2026 Jill Fiore <contact@lumaeris.com>
 # Jill Fiore <contact@lumaeris.com>, 2025-2026.
 #
-#: src/bz-installed-page.blp:68
 msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-12 03:42+0700\n"
-"PO-Revision-Date: 2026-01-12 08:38+0700\n"
+"POT-Creation-Date: 2026-01-20 04:26+0700\n"
+"PO-Revision-Date: 2026-01-20 11:38+0700\n"
 "Last-Translator: Jill Fiore <contact@lumaeris.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Gtranslator 49.0\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<="
+"4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Lokalize 25.12.1\n"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:2
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:5
@@ -84,25 +83,25 @@ msgstr "Страница поиска"
 msgid "Category page"
 msgstr "Страница категорий"
 
-#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:694
+#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:696
 #: src/bz-installed-tile.blp:99
 msgid "Manage Add-ons"
 msgstr "Управление дополнениями"
 
 #: src/bz-addons-dialog.c:90 src/bz-full-view.blp:482
-#: src/bz-installed-tile.blp:117 src/bz-transaction-dialog.c:224
+#: src/bz-installed-tile.blp:117 src/bz-transaction-dialog.c:225
 #: src/bz-transaction-view.blp:277
 msgid "Remove"
 msgstr "Удалить"
 
-#: src/bz-addons-dialog.c:95 src/bz-favorites-tile.c:166
+#: src/bz-addons-dialog.c:95 src/bz-favorites-tile.c:174
 #: src/bz-full-view.blp:249 src/bz-full-view.blp:469
-#: src/bz-transaction-dialog.c:201 src/bz-transaction-view.blp:225
+#: src/bz-transaction-dialog.c:202 src/bz-transaction-view.blp:225
 msgid "Install"
 msgstr "Установить"
 
 #: src/bz-age-rating-dialog.blp:7 src/bz-age-rating-dialog.blp:31
-#: src/bz-age-rating-dialog.c:726 src/bz-full-view.c:409 src/bz-full-view.c:416
+#: src/bz-age-rating-dialog.c:726 src/bz-full-view.c:410 src/bz-full-view.c:417
 msgid "Age Rating"
 msgstr "Возраст"
 
@@ -431,7 +430,7 @@ msgid "Violence"
 msgstr "Насилие"
 
 #. Translators: Age rating format, e.g. "12+" for ages 12 and up
-#: src/bz-age-rating-dialog.c:676 src/bz-full-view.c:399
+#: src/bz-age-rating-dialog.c:676 src/bz-full-view.c:400
 #, c-format
 msgid "%d+"
 msgstr "%d+"
@@ -476,18 +475,18 @@ msgstr "%s предназначено для взрослых"
 msgid "%s is suitable for %s"
 msgstr "%s предназначено для %s"
 
-#: src/bz-age-rating-dialog.c:849
+#: src/bz-age-rating-dialog.c:852
 #, c-format
 msgid "%s • %s"
 msgstr "%s • %s"
 
 #: src/bz-all-apps-page.blp:13 src/bz-apps-page.blp:14 src/bz-full-view.blp:43
-#: src/bz-user-data-page.blp:15 src/bz-window.blp:480
+#: src/bz-user-data-page.blp:15 src/bz-window.blp:483
 msgid "Main Menu"
 msgstr "Главное меню"
 
 #: src/bz-all-apps-page.blp:17 src/bz-apps-page.blp:17
-#: src/bz-user-data-page.blp:18 src/bz-window.blp:553
+#: src/bz-user-data-page.blp:18 src/bz-window.blp:556
 msgid "_Donate to Bazaar ❤️"
 msgstr "_Поддержать Bazaar ❤️"
 
@@ -497,24 +496,24 @@ msgid "_Refresh Content"
 msgstr "_Обновить содержимое"
 
 #: src/bz-all-apps-page.blp:22 src/bz-apps-page.blp:22
-#: src/bz-user-data-page.blp:22 src/bz-window.blp:560
+#: src/bz-user-data-page.blp:22 src/bz-window.blp:563
 msgid "_Preferences"
 msgstr "П_араметры"
 
 #: src/bz-all-apps-page.blp:23 src/bz-apps-page.blp:23
-#: src/bz-user-data-page.blp:23 src/bz-window.blp:581
+#: src/bz-user-data-page.blp:23 src/bz-window.blp:584
 msgid "_Keyboard Shortcuts"
 msgstr "_Сочетание клавиш"
 
 #: src/bz-all-apps-page.blp:24 src/bz-apps-page.blp:24
-#: src/bz-user-data-page.blp:24 src/bz-window.blp:586
+#: src/bz-user-data-page.blp:24 src/bz-window.blp:589
 msgid "_About Bazaar"
 msgstr "О _Bazaar"
 
 #: src/bz-all-apps-page.blp:28 src/bz-apps-page.blp:28
-#: src/bz-user-data-page.blp:27 src/bz-window.blp:593
+#: src/bz-user-data-page.blp:27 src/bz-window.blp:596
 msgid "_Quit Bazaar"
-msgstr "_Закрыть Bazaar"
+msgstr "_Завершить Bazaar"
 
 #: src/bz-app-permissions.c:160
 #, c-format
@@ -666,8 +665,10 @@ msgstr "Размер пользовательских данных"
 msgid "Caches, settings, and other app data"
 msgstr "Кэши, настройки и другие пользовательские данные"
 
-#: src/bz-app-tile.blp:85 src/bz-full-view.c:363 src/bz-installed-page.blp:85
-#: src/bz-window.blp:296
+#. Translators: As in 'The app is installed'.
+#. Translators: .
+#: src/bz-app-tile.blp:86 src/bz-full-view.c:364 src/bz-installed-page.blp:86
+#: src/bz-window.blp:299
 msgid "Installed"
 msgstr "Установлено"
 
@@ -729,7 +730,7 @@ msgstr ""
 "Вы по-прежнему можете использовать Bazaar для обзора и удаления уже "
 "установленных приложений."
 
-#: src/bz-application.c:983 src/bz-update-dialog.blp:6
+#: src/bz-application.c:983 src/bz-window.c:902
 msgid "Later"
 msgstr "Позже"
 
@@ -750,7 +751,7 @@ msgstr "Проверка на наличие обновлений"
 msgid "Indexing Data..."
 msgstr "Индексация данных..."
 
-#: src/bz-curated-view.blp:11 src/bz-favorites-page.blp:65
+#: src/bz-curated-view.blp:11 src/bz-favorites-page.blp:75
 #: src/bz-flathub-page.blp:19 src/bz-full-view.blp:53
 #: src/bz-installed-page.blp:63 src/bz-user-data-page.blp:52
 #: src/bz-window.blp:183
@@ -835,8 +836,9 @@ msgstr ""
 "Вы установили несколько версий данного приложения. Какое вы хотите выбрать "
 "для продолжения?"
 
-#: src/bz-entry-group-util.c:80 src/bz-transaction-dialog.c:200
-#: src/bz-transaction-dialog.c:223 src/bz-transaction-dialog.c:268
+#: src/bz-entry-group-util.c:80 src/bz-transaction-dialog.c:201
+#: src/bz-transaction-dialog.c:224 src/bz-transaction-dialog.c:269
+#: src/bz-transaction-dialog.c:576
 msgid "Cancel"
 msgstr "Отмена"
 
@@ -864,7 +866,7 @@ msgstr "Войти"
 msgid "Favorite Count"
 msgstr "Число избранных"
 
-#: src/bz-favorites-tile.c:164
+#: src/bz-favorites-tile.c:172
 msgid "Uninstall"
 msgstr "Удалить"
 
@@ -876,25 +878,29 @@ msgstr "Поддержать это приложение"
 msgid "Remove from Favorites"
 msgstr "Удалить из избранных"
 
-#: src/bz-favorites-page.blp:5 src/bz-favorites-page.blp:75
-#: src/bz-window.blp:611
+#: src/bz-favorites-page.blp:5 src/bz-favorites-page.blp:85
+#: src/bz-window.blp:614
 msgid "Favorites"
 msgstr "Избранные"
 
 #: src/bz-favorites-page.blp:22 src/bz-full-view.blp:20 src/bz-window.blp:126
-#: src/bz-window.blp:457
+#: src/bz-window.blp:460
 msgid "Toggle transaction sidebar"
 msgstr "Переключить боковую панель транзакций"
 
-#: src/bz-favorites-page.blp:53 src/bz-user-data-page.blp:41
+#: src/bz-favorites-page.blp:46 src/bz-transaction-dialog.c:577
+msgid "Install All"
+msgstr "Установить все"
+
+#: src/bz-favorites-page.blp:63 src/bz-user-data-page.blp:41
 msgid "Loading"
 msgstr "Загрузка"
 
-#: src/bz-favorites-page.blp:68
+#: src/bz-favorites-page.blp:78
 msgid "No Favorites"
 msgstr "Нет избранных"
 
-#: src/bz-favorites-page.blp:69
+#: src/bz-favorites-page.blp:79
 msgid "Applications you mark as favorite will appear here"
 msgstr "Приложения помеченные как избранные будут показаны здесь"
 
@@ -1144,52 +1150,52 @@ msgstr "Игры и приложения для запуска ваших люб
 msgid "More Games"
 msgstr "Больше игр"
 
-#: src/bz-flatpak-entry.c:590
+#: src/bz-flatpak-entry.c:663
 msgctxt "Project URL Type"
 msgid "Flathub Page"
 msgstr "Страница Flathub"
 
-#: src/bz-flatpak-entry.c:611
+#: src/bz-flatpak-entry.c:684
 msgctxt "Project URL Type"
 msgid "Project Website"
 msgstr "Веб-сайт проекта"
 
-#: src/bz-flatpak-entry.c:615
+#: src/bz-flatpak-entry.c:688
 msgctxt "Project URL Type"
 msgid "Issue Tracker"
 msgstr "Отслеживание ошибок"
 
-#: src/bz-flatpak-entry.c:619
+#: src/bz-flatpak-entry.c:692
 msgctxt "Project URL Type"
 msgid "FAQ"
 msgstr "Часто задаваемые вопросы"
 
-#: src/bz-flatpak-entry.c:623
+#: src/bz-flatpak-entry.c:696
 msgctxt "Project URL Type"
 msgid "Help"
 msgstr "Помощь"
 
-#: src/bz-flatpak-entry.c:627
+#: src/bz-flatpak-entry.c:700
 msgctxt "Project URL Type"
 msgid "Donate"
 msgstr "Пожертвовать"
 
-#: src/bz-flatpak-entry.c:633
+#: src/bz-flatpak-entry.c:706
 msgctxt "Project URL Type"
 msgid "Translate"
 msgstr "Перевод"
 
-#: src/bz-flatpak-entry.c:637
+#: src/bz-flatpak-entry.c:710
 msgctxt "Project URL Type"
 msgid "Contact"
 msgstr "Связаться"
 
-#: src/bz-flatpak-entry.c:641
+#: src/bz-flatpak-entry.c:714
 msgctxt "Project URL Type"
 msgid "Source Code"
 msgstr "Исходный код"
 
-#: src/bz-flatpak-entry.c:647
+#: src/bz-flatpak-entry.c:720
 msgctxt "Project URL Type"
 msgid "Contribute"
 msgstr "Сделать вклад"
@@ -1244,11 +1250,11 @@ msgstr ""
 "обновления или исправления ошибок безопасности. Оно может стать небезопасным "
 "для использования."
 
-#: src/bz-full-view.blp:627
+#: src/bz-full-view.blp:629
 msgid "Trash Data"
 msgstr "Отправить в корзину"
 
-#: src/bz-full-view.blp:769
+#: src/bz-full-view.blp:771
 msgid "Tags:"
 msgstr "Метки:"
 
@@ -1273,88 +1279,89 @@ msgstr "%.*f тыс."
 msgid "%d downloads in the last 30 days"
 msgstr "%d загрузок за последние 30 дней"
 
-#: src/bz-full-view.c:363
+#. Translators: .
+#: src/bz-full-view.c:364
 msgid "Download"
 msgstr "Скачивание"
 
-#: src/bz-full-view.c:381
+#: src/bz-full-view.c:382
 #, c-format
 msgid "Download size of %s"
 msgstr "Размер скачивания %s"
 
-#: src/bz-full-view.c:414
+#: src/bz-full-view.c:415
 msgid "All Ages"
 msgstr "Для всех"
 
-#: src/bz-full-view.c:426
+#: src/bz-full-view.c:427
 msgid "Age rating information unavailable"
 msgstr "Информация о возрастном ограничении недоступна"
 
-#: src/bz-full-view.c:431
+#: src/bz-full-view.c:432
 msgid "Suitable for all ages"
 msgstr "Предназначено для всех возрастов"
 
-#: src/bz-full-view.c:433
+#: src/bz-full-view.c:434
 #, c-format
 msgid "Suitable for ages %d and up"
 msgstr "Предназначено для лиц старше %d лет"
 
-#: src/bz-full-view.c:466 src/bz-full-view.c:471 src/bz-full-view.c:499
-#: src/bz-full-view.c:510
+#: src/bz-full-view.c:467 src/bz-full-view.c:472 src/bz-full-view.c:500
+#: src/bz-full-view.c:511
 msgid "Unknown"
 msgstr "Неизвестно"
 
-#: src/bz-full-view.c:476
+#: src/bz-full-view.c:477
 #, c-format
 msgid "Free software licensed under %s"
 msgstr "Свободное программное обеспечение, лицензированное под %s"
 
-#: src/bz-full-view.c:481
+#: src/bz-full-view.c:482
 msgid "Free software"
 msgstr "Cвободное программное обеспечение"
 
-#: src/bz-full-view.c:484
+#: src/bz-full-view.c:485
 msgid "Proprietary Software"
 msgstr "Проприетарное программное обеспечение"
 
-#: src/bz-full-view.c:487
+#: src/bz-full-view.c:488
 #, c-format
 msgid "Special License: %s"
 msgstr "Специальная лицензия: %s"
 
-#: src/bz-full-view.c:504
+#: src/bz-full-view.c:505
 msgid "Free"
 msgstr "Свободное"
 
-#: src/bz-full-view.c:507 src/bz-license-dialog.c:190
+#: src/bz-full-view.c:508 src/bz-license-dialog.c:190
 msgid "Proprietary"
 msgstr "Проприетарное"
 
-#: src/bz-full-view.c:512 src/bz-license-dialog.c:192
+#: src/bz-full-view.c:513 src/bz-license-dialog.c:192
 msgid "Special License"
 msgstr "Специальная лицензия"
 
-#: src/bz-full-view.c:532
+#: src/bz-full-view.c:533
 msgid "Adaptive"
 msgstr "Адаптивное"
 
-#: src/bz-full-view.c:532
+#: src/bz-full-view.c:533
 msgid "Desktop Only"
 msgstr "Только для ПК"
 
-#: src/bz-full-view.c:538
+#: src/bz-full-view.c:539
 msgid "Works on desktop, tablets, and phones"
 msgstr "Работает на настольных компьютерах, планшетах и телефонах"
 
-#: src/bz-full-view.c:539
+#: src/bz-full-view.c:540
 msgid "May not work on mobile devices"
 msgstr "Может не работать на мобильных устройствах"
 
-#: src/bz-full-view.c:550
+#: src/bz-full-view.c:551
 msgid "No URL"
 msgstr "Нет URL"
 
-#: src/bz-full-view.c:568
+#: src/bz-full-view.c:569
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -1362,7 +1369,7 @@ msgstr ""
 "Это приложение имеет лицензию FLOSS, что значит исходный код может быть "
 "проверен на безопасность."
 
-#: src/bz-full-view.c:569
+#: src/bz-full-view.c:570
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
@@ -1371,52 +1378,56 @@ msgstr ""
 "разрабатывается в тайне и не может быть проверен независимой третьей "
 "стороной."
 
-#: src/bz-full-view.c:576
+#: src/bz-full-view.c:577
 msgid "More Apps"
 msgstr "Больше приложений"
 
-#: src/bz-full-view.c:577
+#: src/bz-full-view.c:578
 #, c-format
 msgid "More Apps by %s"
 msgstr "Больше приложений от %s"
 
-#: src/bz-full-view.c:584
+#: src/bz-full-view.c:585
 msgid "Other Apps by this Developer"
 msgstr "Другие приложения от этого разработчика"
 
-#: src/bz-full-view.c:586 src/bz-full-view.c:786
+#: src/bz-full-view.c:587 src/bz-full-view.c:787
 #, c-format
 msgid "Other Apps by %s"
 msgstr "Другие приложения от %s"
 
-#: src/bz-full-view.c:595
+#: src/bz-full-view.c:596
 #, c-format
 msgid "%s is not installed, but it still has <b>%s</b> of data present."
 msgstr ""
 "%s не установлено, но пользовательские данные в размере <b>%s</b> ещё "
 "присутствуют."
 
-#: src/bz-full-view.c:668 src/bz-full-view.c:685
+#: src/bz-full-view.c:669 src/bz-full-view.c:686
 msgid "N/A"
 msgstr "Н/Д"
 
-#: src/bz-full-view.c:675 src/bz-full-view.c:677 src/bz-full-view.c:679
+#: src/bz-full-view.c:676 src/bz-safety-dialog.blp:31
+msgid "Safe"
+msgstr "Безопасно"
+
+#: src/bz-full-view.c:678 src/bz-full-view.c:680
 msgid "Low Risk"
 msgstr "Низкий риск"
 
-#: src/bz-full-view.c:681
+#: src/bz-full-view.c:682
 msgid "Medium Risk"
 msgstr "Средний риск"
 
-#: src/bz-full-view.c:683
+#: src/bz-full-view.c:684
 msgid "High Risk"
 msgstr "Высокий риск"
 
-#: src/bz-full-view.c:788
+#: src/bz-full-view.c:789
 msgid "Other Apps"
 msgstr "Другие приложения"
 
-#: src/bz-full-view.c:790
+#: src/bz-full-view.c:791
 #, c-format
 msgid "%d Application"
 msgid_plural "%d Applications"
@@ -1424,11 +1435,11 @@ msgstr[0] "%d приложение"
 msgstr[1] "%d приложения"
 msgstr[2] "%d приложений"
 
-#: src/bz-full-view.c:1129
+#: src/bz-full-view.c:1130
 msgid "Show Less"
 msgstr "Показать меньше"
 
-#: src/bz-full-view.c:1129
+#: src/bz-full-view.c:1130
 msgid "Show More"
 msgstr "Показать больше"
 
@@ -1534,12 +1545,12 @@ msgstr "Поиск установленных приложений"
 msgid "No Apps Found"
 msgstr "Приложение не найдено"
 
-#: src/bz-installed-page.c:154
+#: src/bz-installed-page.c:157
 #, c-format
 msgid "No matches found for \"%s\" in the list of installed apps"
 msgstr "Нет результатов по запросу \"%s\" в списке установленных приложений"
 
-#: src/bz-installed-tile.blp:61 src/bz-rich-app-tile.blp:137
+#: src/bz-installed-tile.blp:61 src/bz-rich-app-tile.blp:136
 msgid "Stopped Receiving Updates"
 msgstr "Прекращено получение обновлений"
 
@@ -1640,7 +1651,7 @@ msgstr ""
 "Сетевое соединение ограничено — автоматическая синхронизация данных магазина "
 "приостановлена"
 
-#: src/bz-preferences-dialog.blp:26 src/bz-window.blp:491
+#: src/bz-preferences-dialog.blp:26 src/bz-window.blp:494
 msgid "Sync Manually"
 msgstr "Синхронизировать вручную"
 
@@ -1681,7 +1692,7 @@ msgstr "Скрыть неподдерживаемые приложения"
 msgid "Hide apps which are no longer supported by their developers"
 msgstr "Скрыть приложения, которые больше не поддерживаются разработчиками"
 
-#: src/bz-preferences-dialog.blp:55 src/bz-window.blp:311
+#: src/bz-preferences-dialog.blp:55 src/bz-window.blp:314
 msgid "Search"
 msgstr "Поиск"
 
@@ -1703,6 +1714,14 @@ msgstr "Полоса прогресса"
 msgid "Choose a theme for the progress bar!"
 msgstr "Выберите тему для полосы прогресса!"
 
+#: src/bz-preferences-dialog.blp:89
+msgid "Vertical Stripes"
+msgstr "Вертикальные полосы"
+
+#: src/bz-preferences-dialog.blp:90
+msgid "Display flag colors from top to bottom"
+msgstr "Отображать цвета флагов сверху вниз"
+
 #: src/bz-preferences-dialog.c:32
 msgid "Accent Color"
 msgstr "Цвет акцента"
@@ -1712,160 +1731,80 @@ msgid "Pride Colors"
 msgstr "Цвета гордости"
 
 #: src/bz-preferences-dialog.c:34
-msgid "Pride Colors (Horizontal)"
-msgstr "Цвета гордости (горизонтально)"
-
-#: src/bz-preferences-dialog.c:35
 msgid "Lesbian Pride Colors"
 msgstr "Цвета гордости лесбиянок"
 
-#: src/bz-preferences-dialog.c:36
-msgid "Lesbian Pride Colors (Horizontal)"
-msgstr "Цвета гордости лесбиянок (горизонтально)"
-
-#: src/bz-preferences-dialog.c:37
+#: src/bz-preferences-dialog.c:35
 msgid "Male Homosexual Pride Colors"
 msgstr "Цвета гордости мужчин гомосексуалов"
 
-#: src/bz-preferences-dialog.c:38
-msgid "Male Homosexual Pride Colors (Horizontal)"
-msgstr "Цвета гордости мужчин гомосексуалов (горизонтально)"
-
-#: src/bz-preferences-dialog.c:39
+#: src/bz-preferences-dialog.c:36
 msgid "Transgender Pride Colors"
 msgstr "Цвета гордости трансгендеров"
 
-#: src/bz-preferences-dialog.c:40
-msgid "Transgender Pride Colors (Horizontal)"
-msgstr "Цвета гордости трансгендеров (горизонтально)"
-
-#: src/bz-preferences-dialog.c:41
+#: src/bz-preferences-dialog.c:37
 msgid "Nonbinary Pride Colors"
 msgstr "Цвета гордости небинарных"
 
-#: src/bz-preferences-dialog.c:42
-msgid "Nonbinary Pride Colors (Horizontal)"
-msgstr "Цвета гордости небинарных (горизонтально)"
-
-#: src/bz-preferences-dialog.c:43
+#: src/bz-preferences-dialog.c:38
 msgid "Bisexual Pride Colors"
 msgstr "Цвета гордости бисексуалов"
 
-#: src/bz-preferences-dialog.c:44
-msgid "Bisexual Pride Colors (Horizontal)"
-msgstr "Цвета гордости бисексуалов (горизонтально)"
-
-#: src/bz-preferences-dialog.c:45
+#: src/bz-preferences-dialog.c:39
 msgid "Asexual Pride Colors"
 msgstr "Цвета гордости асексуалов"
 
-#: src/bz-preferences-dialog.c:46
-msgid "Asexual Pride Colors (Horizontal)"
-msgstr "Цвета гордости асексуалов (горизонтально)"
-
-#: src/bz-preferences-dialog.c:47
+#: src/bz-preferences-dialog.c:40
 msgid "Pansexual Pride Colors"
 msgstr "Цвета гордости пансексуалов"
 
-#: src/bz-preferences-dialog.c:48
-msgid "Pansexual Pride Colors (Horizontal)"
-msgstr "Цвета гордости пансексуалов (горизонтально)"
-
-#: src/bz-preferences-dialog.c:49
+#: src/bz-preferences-dialog.c:41
 msgid "Aromantic Pride Colors"
 msgstr "Цвета гордости аромантиков"
 
-#: src/bz-preferences-dialog.c:50
-msgid "Aromantic Pride Colors (Horizontal)"
-msgstr "Цвета гордости аромантиков (горизонтально)"
-
-#: src/bz-preferences-dialog.c:51
+#: src/bz-preferences-dialog.c:42
 msgid "Genderfluid Pride Colors"
 msgstr "Цвета гордости гендерфлюид"
 
-#: src/bz-preferences-dialog.c:52
-msgid "Genderfluid Pride Colors (Horizontal)"
-msgstr "Цвета гордости гендерфлюид (горизонтально)"
-
-#: src/bz-preferences-dialog.c:53
+#: src/bz-preferences-dialog.c:43
 msgid "Polysexual Pride Colors"
 msgstr "Цвета гордости полисексуалов"
 
-#: src/bz-preferences-dialog.c:54
-msgid "Polysexual Pride Colors (Horizontal)"
-msgstr "Цвета гордости полисексуалов (горизонтально)"
-
-#: src/bz-preferences-dialog.c:55
+#: src/bz-preferences-dialog.c:44
 msgid "Omnisexual Pride Colors"
 msgstr "Цвета гордости омнисексуалов"
 
-#: src/bz-preferences-dialog.c:56
-msgid "Omnisexual Pride Colors (Horizontal)"
-msgstr "Цвета гордости омнисексуалов (горизонтально)"
-
-#: src/bz-preferences-dialog.c:57
+#: src/bz-preferences-dialog.c:45
 msgid "Aroace Pride Colors"
 msgstr "Цвета гордости ароэйс"
 
-#: src/bz-preferences-dialog.c:58
-msgid "Aroace Pride Colors (Horizontal)"
-msgstr "Цвета гордости ароэйс (горизонтально)"
-
-#: src/bz-preferences-dialog.c:59
+#: src/bz-preferences-dialog.c:46
 msgid "Agender Pride Colors"
 msgstr "Цвета гордости агендеров"
 
-#: src/bz-preferences-dialog.c:60
-msgid "Agender Pride Colors (Horizontal)"
-msgstr "Цвета гордости агендеров (горизонтально)"
-
-#: src/bz-preferences-dialog.c:61
+#: src/bz-preferences-dialog.c:47
 msgid "Genderqueer Pride Colors"
 msgstr "Цвета гордости гендерквиров"
 
-#: src/bz-preferences-dialog.c:62
-msgid "Genderqueer Pride Colors (Horizontal)"
-msgstr "Цвета гордости гендерквиров (горизонтально)"
-
-#: src/bz-preferences-dialog.c:63
+#: src/bz-preferences-dialog.c:48
 msgid "Intersex Pride Colors"
 msgstr "Цвета гордости интерсекс"
 
-#: src/bz-preferences-dialog.c:64
-msgid "Intersex Pride Colors (Horizontal)"
-msgstr "Цвета гордости интерсекс (горизонтально)"
-
-#: src/bz-preferences-dialog.c:65
+#: src/bz-preferences-dialog.c:49
 msgid "Demigender Pride Colors"
 msgstr "Цвета гордости демигендеров"
 
-#: src/bz-preferences-dialog.c:66
-msgid "Demigender Pride Colors (Horizontal)"
-msgstr "Цвета гордости демигендеров (горизонтально)"
-
-#: src/bz-preferences-dialog.c:67
+#: src/bz-preferences-dialog.c:50
 msgid "Biromantic Pride Colors"
 msgstr "Цвета гордости биромантиков"
 
-#: src/bz-preferences-dialog.c:68
-msgid "Biromantic Pride Colors (Horizontal)"
-msgstr "Цвета гордости биромантиков (горизонтально)"
-
-#: src/bz-preferences-dialog.c:69
+#: src/bz-preferences-dialog.c:51
 msgid "Disability Pride Colors"
-msgstr "Цвета гордости недееспособных"
+msgstr "Цвета гордости людей с ограниченными возможностями"
 
-#: src/bz-preferences-dialog.c:70
-msgid "Disability Pride Colors (Horizontal)"
-msgstr "Цвета гордости недееспособных (горизонтально)"
-
-#: src/bz-preferences-dialog.c:71
+#: src/bz-preferences-dialog.c:52
 msgid "Femboy Pride Colors"
 msgstr "Цвета гордости фембоев"
-
-#: src/bz-preferences-dialog.c:72
-msgid "Femboy Pride Colors (Horizontal)"
-msgstr "Цвета гордости фембоев (горизонтально)"
 
 #: src/bz-releases-dialog.blp:5 src/bz-releases-list.blp:27
 msgid "Version History"
@@ -1884,225 +1823,225 @@ msgstr "Нет подробностей"
 msgid "Get More Information"
 msgstr "Получить дополнительную информацию"
 
-#: src/bz-rich-app-tile.blp:154
+#: src/bz-rich-app-tile.blp:153
 msgid "Get"
 msgstr "Скачать"
 
-#: src/bz-safety-calculator.c:77
+#: src/bz-safety-calculator.c:82
 msgid "Unknown Permissions"
 msgstr "Неизвестные разрешения"
 
-#: src/bz-safety-calculator.c:78
+#: src/bz-safety-calculator.c:83
 msgid "Permissions are missing for this app."
 msgstr "Разрешения для этого приложения отсутствуют."
 
-#: src/bz-safety-calculator.c:91
+#: src/bz-safety-calculator.c:96
 msgid "No Permissions"
 msgstr "Нет разрешений"
 
-#: src/bz-safety-calculator.c:92
+#: src/bz-safety-calculator.c:97
 msgid "App is fully sandboxed"
 msgstr "Приложение полностью изолировано"
 
-#: src/bz-safety-calculator.c:98
+#: src/bz-safety-calculator.c:103
 msgid "Network Access"
 msgstr "Доступ к сети"
 
-#: src/bz-safety-calculator.c:99
+#: src/bz-safety-calculator.c:104
 msgid "Can access the internet"
 msgstr "Может получить доступ к интернету"
 
-#: src/bz-safety-calculator.c:101
+#: src/bz-safety-calculator.c:106
 msgid "No Network Access"
 msgstr "Нет доступа к сети"
 
-#: src/bz-safety-calculator.c:102
+#: src/bz-safety-calculator.c:107
 msgid "Cannot access the internet"
 msgstr "Не может получить доступ к интернету"
 
-#: src/bz-safety-calculator.c:107
+#: src/bz-safety-calculator.c:112
 msgid "User Device Access"
 msgstr "Доступ к устройствам пользователя"
 
-#: src/bz-safety-calculator.c:108
+#: src/bz-safety-calculator.c:113
 msgid "Can access devices such as webcams or gaming controllers"
 msgstr ""
 "Может получить доступ к таким устройствам, как веб-камеры или игровые "
 "контроллеры"
 
-#: src/bz-safety-calculator.c:110
+#: src/bz-safety-calculator.c:115
 msgid "No User Device Access"
 msgstr "Нет доступа к устройствам пользователя"
 
-#: src/bz-safety-calculator.c:111
+#: src/bz-safety-calculator.c:116
 msgid "Cannot access devices such as webcams or gaming controllers"
 msgstr ""
 "Не может получить доступ к таким устройствам, как веб-камеры или игровые "
 "контроллеры"
 
-#: src/bz-safety-calculator.c:116
+#: src/bz-safety-calculator.c:121
 msgid "Input Device Access"
 msgstr "Доступ к устройствам ввода"
 
-#: src/bz-safety-calculator.c:117
+#: src/bz-safety-calculator.c:122
 msgid "Can access input devices"
 msgstr "Может получить доступ к устройствам ввода"
 
-#: src/bz-safety-calculator.c:123
+#: src/bz-safety-calculator.c:128
 msgid "Microphone Access and Audio Playback"
 msgstr "Доступ к микрофону и воспроизведение звука"
 
-#: src/bz-safety-calculator.c:124
+#: src/bz-safety-calculator.c:129
 msgid "Can listen using microphones and play audio without asking permission"
 msgstr "Может слышать с помощью микрофона и воспроизводить звук без разрешения"
 
-#: src/bz-safety-calculator.c:130
+#: src/bz-safety-calculator.c:135
 msgid "System Device Access"
 msgstr "Доступ к системным устройствам"
 
-#: src/bz-safety-calculator.c:131
+#: src/bz-safety-calculator.c:136
 msgid "Can access system devices which require elevated permissions"
 msgstr ""
 "Может получить доступ к системным устройствам, требующие повышенные "
 "разрешения"
 
-#: src/bz-safety-calculator.c:137
+#: src/bz-safety-calculator.c:142
 msgid "Screen Contents Access"
 msgstr "Доступ к содержимому экрана"
 
-#: src/bz-safety-calculator.c:138
+#: src/bz-safety-calculator.c:143
 msgid "Can access the contents of the screen or other windows"
 msgstr "Может получить доступ к содержимому экрана или других окон"
 
-#: src/bz-safety-calculator.c:144
+#: src/bz-safety-calculator.c:149
 msgid "Legacy Windowing System"
 msgstr "Устаревшая оконная система"
 
-#: src/bz-safety-calculator.c:145
-msgid "Uses a legacy windowing system"
-msgstr "Использует устаревшую оконную систему"
+#: src/bz-safety-calculator.c:150
+msgid "Always uses a legacy windowing system (X11)"
+msgstr "Использует устаревшую оконную систему постоянно (X11)"
 
-#: src/bz-safety-calculator.c:151
+#: src/bz-safety-calculator.c:156
 msgid "Arbitrary Permissions"
 msgstr "Произвольные разрешения"
 
-#: src/bz-safety-calculator.c:152
+#: src/bz-safety-calculator.c:157
 msgid "Can acquire arbitrary permissions"
 msgstr "Может получить произвольные разрешения"
 
-#: src/bz-safety-calculator.c:158
+#: src/bz-safety-calculator.c:163
 msgid "User Settings"
 msgstr "Пользовательские настройки"
 
-#: src/bz-safety-calculator.c:159
+#: src/bz-safety-calculator.c:164
 msgid "Can access and change user settings"
 msgstr "Может получить и изменить пользовательские настройки"
 
-#: src/bz-safety-calculator.c:165
+#: src/bz-safety-calculator.c:170
 msgid "Full File System Read/Write Access"
 msgstr "Полный доступ к файловой системе на чтение/запись"
 
-#: src/bz-safety-calculator.c:166
+#: src/bz-safety-calculator.c:171
 msgid "Can read and write all data on the file system"
 msgstr "Может читать и записывать все данные в файловой системе"
 
-#: src/bz-safety-calculator.c:173
+#: src/bz-safety-calculator.c:178
 msgid "Home Folder Read/Write Access"
 msgstr "Доступ к домашней папке для чтения/записи"
 
-#: src/bz-safety-calculator.c:174
+#: src/bz-safety-calculator.c:179
 msgid "Can read and write all data in your home directory"
 msgstr "Может читать и записывать все данные в вашей домашней папке"
 
-#: src/bz-safety-calculator.c:181
+#: src/bz-safety-calculator.c:186
 msgid "Full File System Read Access"
 msgstr "Полный доступ к файловой системе на чтение"
 
-#: src/bz-safety-calculator.c:182
+#: src/bz-safety-calculator.c:187
 msgid "Can read all data on the file system"
 msgstr "Может читать все данные в файловой системе"
 
-#: src/bz-safety-calculator.c:190
+#: src/bz-safety-calculator.c:195
 msgid "Home Folder Read Access"
 msgstr "Доступ на чтение домашней папки"
 
-#: src/bz-safety-calculator.c:191
+#: src/bz-safety-calculator.c:196
 msgid "Can read all data in your home directory"
 msgstr "Может читать все данные в вашей домашней папке"
 
-#: src/bz-safety-calculator.c:199
+#: src/bz-safety-calculator.c:204
 msgid "Download Folder Read/Write Access"
 msgstr "Доступ для чтения/записи в папку загрузки"
 
-#: src/bz-safety-calculator.c:200
+#: src/bz-safety-calculator.c:205
 msgid "Can read and write all data in your downloads directory"
 msgstr "Может читать и записывать все данные в вашей папке загрузки"
 
-#: src/bz-safety-calculator.c:210
+#: src/bz-safety-calculator.c:215
 msgid "Download Folder Read Access"
 msgstr "Доступ на чтение папки загрузки"
 
-#: src/bz-safety-calculator.c:211
+#: src/bz-safety-calculator.c:216
 msgid "Can read all data in your downloads directory"
 msgstr "Может читать все данные в вашей папке загрузки"
 
-#: src/bz-safety-calculator.c:224
+#: src/bz-safety-calculator.c:229
 msgid "Can read and write all data in the directory"
 msgstr "Может читать и записывать все данные в папке"
 
-#: src/bz-safety-calculator.c:238
+#: src/bz-safety-calculator.c:243
 msgid "Can read all data in the directory"
 msgstr "Может читать все данные в папке"
 
-#: src/bz-safety-calculator.c:253
+#: src/bz-safety-calculator.c:258
 msgid "No File System Access"
 msgstr "Нет доступа к файловой системе"
 
-#: src/bz-safety-calculator.c:254
+#: src/bz-safety-calculator.c:259
 msgid "Cannot access the file system at all"
 msgstr "Не может получить доступ к файловой системе"
 
-#: src/bz-safety-calculator.c:261
+#: src/bz-safety-calculator.c:266
 msgid "Uses System Services"
 msgstr "Использует системные службы"
 
-#: src/bz-safety-calculator.c:262
+#: src/bz-safety-calculator.c:267
 msgid "Can request data from non-portal system services"
 msgstr "Может запрашивать данные у системных служб, не относящихся к порталу"
 
-#: src/bz-safety-calculator.c:268
+#: src/bz-safety-calculator.c:273
 msgid "Uses Session Services"
 msgstr "Использует службы сеанса"
 
-#: src/bz-safety-calculator.c:269
+#: src/bz-safety-calculator.c:274
 msgid "Can request data from non-portal session services"
 msgstr "Может запрашивать данные у служб сеанса, не относящихся к порталу"
 
-#: src/bz-safety-calculator.c:294
+#: src/bz-safety-calculator.c:322
 msgid "No Service Access"
 msgstr "Нет доступа к службе"
 
-#: src/bz-safety-calculator.c:295
+#: src/bz-safety-calculator.c:323
 msgid "Cannot access non-portal session or system services at all"
 msgstr ""
 "Не может получить доступ к службам сеанса или системным, не относящимся к "
 "порталу"
 
-#: src/bz-safety-calculator.c:303
+#: src/bz-safety-calculator.c:331
 msgid "Verified App Developer"
 msgstr "Подтверждённый разработчик приложения"
 
-#: src/bz-safety-calculator.c:304
+#: src/bz-safety-calculator.c:332
 msgid "The developer of this app has been verified to be who they say they are"
 msgstr ""
 "Разработчик этого приложения подтвердил, что является тем, за кого себя "
 "выдает"
 
-#: src/bz-safety-calculator.c:313
+#: src/bz-safety-calculator.c:341
 msgid "Proprietary Code"
 msgstr "Проприетарный код"
 
-#: src/bz-safety-calculator.c:314
+#: src/bz-safety-calculator.c:342
 msgid ""
 "The source code is not public, so it cannot be independently audited and "
 "might be unsafe"
@@ -2110,11 +2049,11 @@ msgstr ""
 "Исходный код не является открытым, поэтому не может быть подвергнут "
 "независимому аудиту и может быть небезопасным"
 
-#: src/bz-safety-calculator.c:324
+#: src/bz-safety-calculator.c:352
 msgid "Auditable Code"
 msgstr "Проверяемый код"
 
-#: src/bz-safety-calculator.c:325
+#: src/bz-safety-calculator.c:353
 msgid ""
 "The source code is public and can be independently audited, which makes the "
 "app more likely to be safe"
@@ -2122,40 +2061,92 @@ msgstr ""
 "Исходный код является открытым и может быть подвергнут независимому аудиту, "
 "что повышает вероятность того, что приложение безопасно"
 
-#: src/bz-safety-calculator.c:465
+#: src/bz-safety-calculator.c:493
 #, c-format
 msgid "Use the %s System Service"
 msgstr "Использует системную службу %s"
 
-#: src/bz-safety-calculator.c:469
+#: src/bz-safety-calculator.c:497
 #, c-format
 msgid "Use the %s Session Service"
 msgstr "Использует службу сеанса %s"
 
-#: src/bz-safety-calculator.c:473
+#: src/bz-safety-calculator.c:501
 #, c-format
 msgid "Use the %s Service"
 msgstr "Использует службу %s"
 
-#: src/bz-safety-calculator.c:483
+#: src/bz-safety-calculator.c:511
 msgid "Can see the non-portal service"
 msgstr "Может просматривать службу, не относящуюся к порталу"
 
-#: src/bz-safety-calculator.c:485
+#: src/bz-safety-calculator.c:513
 msgid "Can talk to the non-portal service"
 msgstr "Может связаться со службой, не относящейся к порталу"
 
-#: src/bz-safety-calculator.c:487
+#: src/bz-safety-calculator.c:515
 msgid "Can own the non-portal service"
 msgstr "Может быть владельцем службы, не относящейся к порталу"
+
+#: src/bz-safety-calculator.c:530
+msgid "Global Menu Integration"
+msgstr "Интеграция с глобальным меню"
+
+#: src/bz-safety-calculator.c:531
+msgid "Can display its menus in a global menu bar"
+msgstr "Может показывать своё меню в глобальной полосе меню"
+
+#: src/bz-safety-calculator.c:536
+msgid "KDE Settings Integration"
+msgstr "Интеграция с настройками KDE"
+
+#: src/bz-safety-calculator.c:537
+msgid "Can detect when KDE desktop settings change"
+msgstr "Может определять изменение в настройках рабочего стола KDE"
+
+#: src/bz-safety-calculator.c:542
+msgid "KDE Global Settings"
+msgstr "Глобальные параметры KDE"
+
+#: src/bz-safety-calculator.c:543
+msgid "Can read KDE desktop preferences like fonts and colors"
+msgstr "Может читать параметры рабочего стола KDE как шрифты и цвета"
+
+#: src/bz-safety-calculator.c:548
+msgid "Secret Storage Service"
+msgstr "Служба хранения секретов"
+
+#: src/bz-safety-calculator.c:549
+msgid "Can store and retrieve its own passwords using the system keyring"
+msgstr "Может хранить и извлекать свои пароли используя системные ключи"
+
+#: src/bz-safety-calculator.c:554
+msgid "Desktop Notifications Service"
+msgstr "Служба уведомлений рабочего стола"
+
+#: src/bz-safety-calculator.c:555
+msgid "Can send desktop notifications"
+msgstr "Может отправлять уведомления на рабочий стол"
+
+#: src/bz-safety-calculator.c:561
+msgid "System Tray Integration"
+msgstr "Интеграция с системным треем"
+
+#: src/bz-safety-calculator.c:562
+msgid "Can display an icon in the system tray"
+msgstr "Может отображать иконку в системном треем"
+
+#: src/bz-safety-calculator.c:567
+msgid "KDE Connect Integration"
+msgstr "Интеграция с KDE Connect"
+
+#: src/bz-safety-calculator.c:568
+msgid "Can interact with devices paired via KDE Connect"
+msgstr "Может взаимодействовать с устройстами привязанным к KDE Connect"
 
 #: src/bz-safety-dialog.blp:7
 msgid "Safety"
 msgstr "Безопасность"
-
-#: src/bz-safety-dialog.blp:31
-msgid "Safe"
-msgstr "Безопасно"
 
 #: src/bz-safety-dialog.blp:50
 msgid "Details"
@@ -2181,27 +2172,27 @@ msgstr ""
 "Это приложение использует устаревшую версию платформа для разработки (SDK) и "
 "может иметь баги или уязвимости безопасности которые не были исправлены."
 
-#: src/bz-safety-dialog.c:222
+#: src/bz-safety-dialog.c:227
 #, c-format
 msgid "%s is Safe"
 msgstr "%s безопасное"
 
-#: src/bz-safety-dialog.c:227
+#: src/bz-safety-dialog.c:232
 #, c-format
 msgid "%s has no Unsafe Permissions"
 msgstr "%s имеет небезопасные разрешения"
 
-#: src/bz-safety-dialog.c:232
+#: src/bz-safety-dialog.c:237
 #, c-format
 msgid "%s is Probably Safe"
 msgstr "%s возможно безопасное"
 
-#: src/bz-safety-dialog.c:237
+#: src/bz-safety-dialog.c:242
 #, c-format
 msgid "%s is Possibly Unsafe"
 msgstr "%s возможно небезопасное"
 
-#: src/bz-safety-dialog.c:242
+#: src/bz-safety-dialog.c:247
 #, c-format
 msgid "%s is Unsafe"
 msgstr "%s небезопасное"
@@ -2317,47 +2308,47 @@ msgstr "Приложения с меткой \"%s\""
 msgid "Search failed"
 msgstr "Ошибка поиска"
 
-#: src/bz-transaction-dialog.c:159
+#: src/bz-transaction-dialog.c:160
 msgid "Keep Data"
 msgstr "Оставить данные"
 
-#: src/bz-transaction-dialog.c:160
+#: src/bz-transaction-dialog.c:161
 msgid "Allow restoring settings and content"
 msgstr "Возможно восстановление настроек и содержимого"
 
-#: src/bz-transaction-dialog.c:169
+#: src/bz-transaction-dialog.c:170
 msgid "Delete Data"
 msgstr "Удалить данные"
 
-#: src/bz-transaction-dialog.c:170
+#: src/bz-transaction-dialog.c:171
 msgid "Permanently remove app data to save space"
 msgstr "Навсегда удалить данные приложения для сохранения места"
 
-#: src/bz-transaction-dialog.c:194
+#: src/bz-transaction-dialog.c:195
 #, c-format
 msgid "Install %s?"
 msgstr "Установить %s?"
 
-#: src/bz-transaction-dialog.c:197
+#: src/bz-transaction-dialog.c:198
 msgid "May install additional shared components"
 msgstr "Может установить дополнительные общие компоненты"
 
-#: src/bz-transaction-dialog.c:216
+#: src/bz-transaction-dialog.c:217
 #, c-format
 msgid "Remove %s?"
 msgstr "Удалить %s?"
 
-#: src/bz-transaction-dialog.c:220
+#: src/bz-transaction-dialog.c:221
 #, c-format
 msgid "It will not be possible to use %s after it is uninstalled."
 msgstr "Станет невозможным использовать %s после его удаления."
 
-#: src/bz-transaction-dialog.c:240
+#: src/bz-transaction-dialog.c:241
 #, c-format
 msgid "“%s” is High Risk"
-msgstr "\"%s\" под высоким риском"
+msgstr "“%s” под высоким риском"
 
-#: src/bz-transaction-dialog.c:244
+#: src/bz-transaction-dialog.c:245
 msgid ""
 "This app has full access to your system, including all <b>your files, "
 "browser history, saved passwords</b>, and more. It also has access to the "
@@ -2374,7 +2365,7 @@ msgstr ""
 "Так как это приложение является проприетарным, проверка на действия с такими "
 "разрешениями является невозможной."
 
-#: src/bz-transaction-dialog.c:253
+#: src/bz-transaction-dialog.c:254
 msgid ""
 "This app uses the legacy X11 windowing system, which allows it to <b>record "
 "all keystrokes, capture screenshots, and monitor other applications</b>. It "
@@ -2392,9 +2383,42 @@ msgstr ""
 "Так как это приложение является проприетарным, проверка на действия с такими "
 "разрешениями является невозможной."
 
-#: src/bz-transaction-dialog.c:269
+#: src/bz-transaction-dialog.c:270
 msgid "Install Anyway"
 msgstr "Всё равно установить"
+
+#: src/bz-transaction-dialog.c:547
+msgid "All apps are already installed"
+msgstr "Все приложения уже были установлены"
+
+#: src/bz-transaction-dialog.c:549
+msgid "OK"
+msgstr "ОК"
+
+#: src/bz-transaction-dialog.c:565
+#, c-format
+msgid "Install %u App?"
+msgid_plural "Install %u Apps?"
+msgstr[0] "Установить %u приложение?"
+msgstr[1] "Установить %u приложения?"
+msgstr[2] "Установить %u приложений?"
+
+#: src/bz-transaction-dialog.c:573
+msgid ""
+"The following will be installed. Additional shared components may also be "
+"installed"
+msgstr ""
+"Перечисленное будет установлено. Дополнительные общие "
+"компоненты будут также установлены."
+
+#: src/bz-transaction-dialog.c:574
+#, c-format
+msgid "%d addons will be installed."
+msgstr "%d дополнений будет установлено."
+
+#: src/bz-transaction-dialog.c:575
+msgid "Additionally, addons will be installed."
+msgstr "Также будут установлены дополнения."
 
 #: src/bz-transaction-manager.c:1148
 #, c-format
@@ -2434,35 +2458,6 @@ msgstr "Обновить"
 #, c-format
 msgid "Transferred %s so far"
 msgstr "Всего было загружено %s"
-
-#: src/bz-update-dialog.blp:7
-msgid "Update Now"
-msgstr "Обновить сейчас"
-
-#: src/bz-update-dialog.blp:10
-msgid "Updates Are Available"
-msgstr "Доступны обновления"
-
-#: src/bz-update-dialog.blp:11
-msgid ""
-"The following applications are eligible for updates. Would you like to "
-"install them?"
-msgstr ""
-"Перечисленные приложения могут быть обновлены. Вы хотите установить их?"
-
-#: src/bz-update-dialog.c:135
-#, c-format
-msgid ""
-"%d runtimes and/or addons are eligible for updates. Would you like to "
-"install them?"
-msgstr ""
-"%d сред выполнения и/или дополнений могут быть обновлены. Вы хотите "
-"установить их?"
-
-#: src/bz-update-dialog.c:143
-#, c-format
-msgid "Additionally, %d runtimes and/or addons will be updated."
-msgstr "Дополнительно, %d сред выполнения и/или расширений будут обновлены."
 
 #: src/bz-user-data-page.blp:5
 msgid "Manage Leftover User Data"
@@ -2505,41 +2500,41 @@ msgstr "Нет задач"
 msgid "Refreshing Store Content"
 msgstr "Обновление содержимого магазина"
 
-#: src/bz-window.blp:271
+#: src/bz-window.blp:273
 msgid "Curated"
 msgstr "Курируемое"
 
-#: src/bz-window.blp:284
+#: src/bz-window.blp:286
 msgid "Flathub"
 msgstr "Flathub"
 
-#: src/bz-window.blp:432
+#: src/bz-window.blp:435
 msgid "No background tasks!"
 msgstr "Нет фоновых задач!"
 
-#: src/bz-window.blp:490
+#: src/bz-window.blp:493
 msgid ""
 "You have a network connection but are viewing a cached version of Flathub"
 msgstr ""
 "Вы имеете сетевое подключение, но просматриваете кэшируемую версию Flathub"
 
-#: src/bz-window.blp:565
+#: src/bz-window.blp:568
 msgid "_Login with Flathub"
 msgstr "_Войти в Flathub"
 
-#: src/bz-window.blp:571
+#: src/bz-window.blp:574
 msgid "_Manage Leftover User Data"
 msgstr "_Управлять оставшимися данными"
 
-#: src/bz-window.blp:576
+#: src/bz-window.blp:579
 msgid "_Synchronize Remotes"
 msgstr "С_инхронизировать репозитории"
 
-#: src/bz-window.blp:617
+#: src/bz-window.blp:620
 msgid "Log Out"
 msgstr "Выйти"
 
-#: src/bz-window.c:435
+#: src/bz-window.c:477
 #, c-format
 msgid "%d Update Available"
 msgid_plural "%d Updates Available"
@@ -2547,7 +2542,36 @@ msgstr[0] "Доступно %d обновление"
 msgstr[1] "Доступно %d обновления"
 msgstr[2] "Доступно %d обновлений"
 
-#: src/bz-window.c:872
+#: src/bz-window.c:898
+msgid "Updates Are Available"
+msgstr "Доступны обновления"
+
+#: src/bz-window.c:899
+msgid ""
+"The following applications are eligible for updates. Would you like to "
+"install them?"
+msgstr ""
+"Перечисленные приложения могут быть обновлены. Вы хотите установить их?"
+
+#: src/bz-window.c:900
+#, c-format
+msgid ""
+"%d runtimes and/or addons are eligible for updates. Would you like to "
+"install them?"
+msgstr ""
+"%d сред выполнения и/или дополнений могут быть обновлены. Вы хотите "
+"установить их?"
+
+#: src/bz-window.c:901
+#, c-format
+msgid "Additionally, %d runtimes and/or addons will be updated."
+msgstr "Дополнительно, %d сред выполнения и/или расширений будут обновлены."
+
+#: src/bz-window.c:903
+msgid "Update Now"
+msgstr "Обновить сейчас"
+
+#: src/bz-window.c:918
 msgid ""
 "The ability to inspect and install local .flatpak bundle files is coming "
 "soon! In the meantime, try running\n"
@@ -2563,15 +2587,15 @@ msgstr ""
 "\n"
 "в командной строке."
 
-#: src/bz-window.c:1010
+#: src/bz-window.c:1057 src/bz-window.c:1107
 msgid "Can't do that right now!"
 msgstr "Нельзя сделать это прямо сейчас!"
 
-#: src/bz-window.c:1080
+#: src/bz-window.c:1182
 msgid "Resume Current Tasks"
 msgstr "Продолжить текущие задачи"
 
-#: src/bz-window.c:1086
+#: src/bz-window.c:1188
 msgid "Pause Current Tasks"
 msgstr "Приостановить текущие задачи"
 
@@ -2614,3 +2638,63 @@ msgstr "Открыть сочетания клавиш"
 msgctxt "shortcut window"
 msgid "Quit"
 msgstr "Закрыть"
+
+#~ msgid "Pride Colors (Horizontal)"
+#~ msgstr "Цвета гордости (горизонтально)"
+
+#~ msgid "Lesbian Pride Colors (Horizontal)"
+#~ msgstr "Цвета гордости лесбиянок (горизонтально)"
+
+#~ msgid "Male Homosexual Pride Colors (Horizontal)"
+#~ msgstr "Цвета гордости мужчин гомосексуалов (горизонтально)"
+
+#~ msgid "Transgender Pride Colors (Horizontal)"
+#~ msgstr "Цвета гордости трансгендеров (горизонтально)"
+
+#~ msgid "Nonbinary Pride Colors (Horizontal)"
+#~ msgstr "Цвета гордости небинарных (горизонтально)"
+
+#~ msgid "Bisexual Pride Colors (Horizontal)"
+#~ msgstr "Цвета гордости бисексуалов (горизонтально)"
+
+#~ msgid "Asexual Pride Colors (Horizontal)"
+#~ msgstr "Цвета гордости асексуалов (горизонтально)"
+
+#~ msgid "Pansexual Pride Colors (Horizontal)"
+#~ msgstr "Цвета гордости пансексуалов (горизонтально)"
+
+#~ msgid "Aromantic Pride Colors (Horizontal)"
+#~ msgstr "Цвета гордости аромантиков (горизонтально)"
+
+#~ msgid "Genderfluid Pride Colors (Horizontal)"
+#~ msgstr "Цвета гордости гендерфлюид (горизонтально)"
+
+#~ msgid "Polysexual Pride Colors (Horizontal)"
+#~ msgstr "Цвета гордости полисексуалов (горизонтально)"
+
+#~ msgid "Omnisexual Pride Colors (Horizontal)"
+#~ msgstr "Цвета гордости омнисексуалов (горизонтально)"
+
+#~ msgid "Aroace Pride Colors (Horizontal)"
+#~ msgstr "Цвета гордости ароэйс (горизонтально)"
+
+#~ msgid "Agender Pride Colors (Horizontal)"
+#~ msgstr "Цвета гордости агендеров (горизонтально)"
+
+#~ msgid "Genderqueer Pride Colors (Horizontal)"
+#~ msgstr "Цвета гордости гендерквиров (горизонтально)"
+
+#~ msgid "Intersex Pride Colors (Horizontal)"
+#~ msgstr "Цвета гордости интерсекс (горизонтально)"
+
+#~ msgid "Demigender Pride Colors (Horizontal)"
+#~ msgstr "Цвета гордости демигендеров (горизонтально)"
+
+#~ msgid "Biromantic Pride Colors (Horizontal)"
+#~ msgstr "Цвета гордости биромантиков (горизонтально)"
+
+#~ msgid "Disability Pride Colors (Horizontal)"
+#~ msgstr "Цвета гордости людей с ограниченными возможностями (горизонтально)"
+
+#~ msgid "Femboy Pride Colors (Horizontal)"
+#~ msgstr "Цвета гордости фембоев (горизонтально)"

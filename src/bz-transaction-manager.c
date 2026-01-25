@@ -20,6 +20,8 @@
 
 #define G_LOG_DOMAIN "BAZAAR::TRANSACTIONS"
 
+#include "config.h"
+
 #include <glib/gi18n.h>
 
 #include "bz-backend-transaction-op-payload.h"

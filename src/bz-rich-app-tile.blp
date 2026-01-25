@@ -37,18 +37,17 @@ template $BzRichAppTile: $BzListTile {
           valign: center;
           hexpand: true;
 
-          visible: bind $is_null(template.first-screenshot) as <bool>;
-
+          visible: bind $is_null(template.ui-entry as <$BzEntry>.thumbnail-paintable) as <bool>;
         }
 
         $BzRoundedPicture {
           halign: center;
           hexpand: true;
           valign: center;
-          paintable: bind template.first-screenshot;
+          paintable: bind template.ui-entry as <$BzEntry>.thumbnail-paintable;
           radius: 6;
 
-          visible: bind $invert_boolean($is_null(template.first-screenshot) as <bool>) as <bool>;
+          visible: bind $invert_boolean($is_null(template.ui-entry as <$BzEntry>.thumbnail-paintable) as <bool>) as <bool>;
         }
       };
     }
@@ -144,7 +143,7 @@ template $BzRichAppTile: $BzListTile {
 
       Box {
         Button {
-          visible: bind $is_zero(template.group as <$BzEntryGroup>.removable) as <bool>;
+          visible: bind $logical_and($invert_boolean($is_zero(template.group as <$BzEntryGroup>.installable) as <bool>) as <bool>, $is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
           sensitive: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
 
           styles [

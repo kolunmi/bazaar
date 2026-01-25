@@ -77,9 +77,9 @@ enum
 static GParamSpec *props[LAST_PROP] = { 0 };
 
 static void
-global_progress_bar_theme_changed (BzGlobalProgress *self,
-                                   const char       *key,
-                                   GSettings        *settings);
+global_progress_bar_flag_changed (BzGlobalProgress *self,
+                                  const char       *key,
+                                  GSettings        *settings);
 
 static void
 ensure_draw_css (BzGlobalProgress *self);
@@ -95,7 +95,7 @@ bz_global_progress_dispose (GObject *object)
   if (self->settings != NULL)
     g_signal_handlers_disconnect_by_func (
         self->settings,
-        global_progress_bar_theme_changed,
+        global_progress_bar_flag_changed,
         self);
 
   g_clear_pointer (&self->draw_widget, gtk_widget_unparent);
@@ -727,7 +727,7 @@ bz_global_progress_set_settings (BzGlobalProgress *self,
   if (self->settings != NULL)
     g_signal_handlers_disconnect_by_func (
         self->settings,
-        global_progress_bar_theme_changed,
+        global_progress_bar_flag_changed,
         self);
   g_clear_object (&self->settings);
 
@@ -737,7 +737,12 @@ bz_global_progress_set_settings (BzGlobalProgress *self,
       g_signal_connect_swapped (
           self->settings,
           "changed::global-progress-bar-theme",
-          G_CALLBACK (global_progress_bar_theme_changed),
+          G_CALLBACK (global_progress_bar_flag_changed),
+          self);
+      g_signal_connect_swapped (
+          self->settings,
+          "changed::rotate-flag",
+          G_CALLBACK (global_progress_bar_flag_changed),
           self);
     }
   ensure_draw_css (self);
@@ -754,9 +759,9 @@ bz_global_progress_get_settings (BzGlobalProgress *self)
 }
 
 static void
-global_progress_bar_theme_changed (BzGlobalProgress *self,
-                                   const char       *key,
-                                   GSettings        *settings)
+global_progress_bar_flag_changed (BzGlobalProgress *self,
+                                  const char       *key,
+                                  GSettings        *settings)
 {
   ensure_draw_css (self);
   gtk_widget_queue_draw (GTK_WIDGET (self));
@@ -767,11 +772,20 @@ ensure_draw_css (BzGlobalProgress *self)
 {
   if (self->settings != NULL)
     {
-      g_autofree char *id    = NULL;
-      g_autofree char *class = NULL;
+      g_autofree char *id       = NULL;
+      g_autofree char *final_id = NULL;
+      g_autofree char *class    = NULL;
+      gboolean         rotate   = FALSE;
 
-      id    = g_settings_get_string (self->settings, "global-progress-bar-theme");
-      class = bz_dup_css_class_for_pride_id (id);
+      id     = g_settings_get_string (self->settings, "global-progress-bar-theme");
+      rotate = g_settings_get_boolean (self->settings, "rotate-flag");
+
+      if (rotate && g_strcmp0 (id, "accent-color") != 0)
+        final_id = g_strdup_printf ("%s-horizontal", id);
+      else
+        final_id = g_strdup (id);
+
+      class = bz_dup_css_class_for_pride_id (final_id);
 
       if (self->draw_widget_class != NULL &&
           g_strcmp0 (self->draw_widget_class, class) == 0)

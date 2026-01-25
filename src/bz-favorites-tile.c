@@ -59,6 +59,14 @@ enum
 
 static GParamSpec *props[LAST_PROP] = { 0 };
 
+enum
+{
+  SIGNAL_UNFAVORITED,
+  LAST_SIGNAL,
+};
+
+static guint signals[LAST_SIGNAL];
+
 static gboolean
 test_is_support (BzEntry *entry);
 
@@ -185,6 +193,14 @@ switch_bool (gpointer  object,
   return condition ? true_value : false_value;
 }
 
+static gboolean
+logical_and (gpointer object,
+             gboolean value1,
+             gboolean value2)
+{
+  return value1 && value2;
+}
+
 static void
 bz_favorites_tile_class_init (BzFavoritesTileClass *klass)
 {
@@ -204,6 +220,17 @@ bz_favorites_tile_class_init (BzFavoritesTileClass *klass)
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
+  signals[SIGNAL_UNFAVORITED] =
+      g_signal_new (
+          "unfavorited",
+          G_OBJECT_CLASS_TYPE (klass),
+          G_SIGNAL_RUN_FIRST,
+          0,
+          NULL, NULL,
+          NULL,
+          G_TYPE_NONE, 1,
+          BZ_TYPE_ENTRY_GROUP);
+
   g_type_ensure (BZ_TYPE_LIST_TILE);
   g_type_ensure (BZ_TYPE_ENTRY_GROUP);
 
@@ -220,6 +247,7 @@ bz_favorites_tile_class_init (BzFavoritesTileClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, switch_bool);
+  gtk_widget_class_bind_template_callback (widget_class, logical_and);
   gtk_widget_class_bind_template_callback (widget_class, get_install_remove_tooltip);
   gtk_widget_class_bind_template_callback (widget_class, get_install_remove_icon);
   gtk_widget_class_bind_template_callback (widget_class, install_remove_cb);
@@ -453,6 +481,7 @@ unfavorite_fiber (BzFavoritesTile *tile)
       gtk_widget_set_overflow (revealer, GTK_OVERFLOW_HIDDEN);
       gtk_revealer_set_reveal_child (GTK_REVEALER (revealer), FALSE);
       gtk_widget_add_css_class (row, "hidden");
+      g_signal_emit (tile, signals[SIGNAL_UNFAVORITED], 0, tile->group);
     }
 
   return NULL;

@@ -39,42 +39,82 @@ template $BzInspector: Adw.Window {
         }
       }
 
-      CheckButton debug_mode_check {
-        label: "Enable Global Debug Mode";
+      Box {
+        orientation: vertical;
+        spacing: 3;
+
+        CheckButton debug_mode_check {
+          label: "Enable Global Debug Mode";
+        }
+        CheckButton disable_blocklists_check {
+          label: "Disable All Blocklists";
+        }
       }
 
-      Label {
-        styles [
-          "heading"
-        ]
-        label: "Active Blocklists";
-        xalign: 0.0;
-      }
-      ScrolledWindow {
-        propagate-natural-height: true;
-        child: ListView {
-          model: NoSelection {
-            model: bind template.state as <$BzStateInfo>.blocklists;
+      Box {
+        orientation: vertical;
+        spacing: 3;
+
+        Label {
+          styles [
+            "heading"
+          ]
+          label: "Active Blocklists (YAML)";
+          xalign: 0.0;
+        }
+        ScrolledWindow {
+          propagate-natural-height: true;
+          child: ListView {
+            model: NoSelection {
+              model: bind template.state as <$BzStateInfo>.blocklists;
+            };
+            factory: string_list_factory;
           };
-          factory: string_list_factory;
-        };
+        }
       }
 
-      Label {
-        styles [
-          "heading"
-        ]
-        label: "Active Curated-Configs";
-        xalign: 0.0;
-      }
-      ScrolledWindow {
-        propagate-natural-height: true;
-        child: ListView {
-          model: NoSelection {
-            model: bind template.state as <$BzStateInfo>.curated-configs;
+      Box {
+        orientation: vertical;
+        spacing: 3;
+
+        Label {
+          styles [
+            "heading"
+          ]
+          label: "Active Blocklists (TXT)";
+          xalign: 0.0;
+        }
+        ScrolledWindow {
+          propagate-natural-height: true;
+          child: ListView {
+            model: NoSelection {
+              model: bind template.state as <$BzStateInfo>.txt-blocklists;
+            };
+            factory: string_list_factory;
           };
-          factory: string_list_factory;
-        };
+        }
+      }
+
+      Box {
+        orientation: vertical;
+        spacing: 3;
+
+        Label {
+          styles [
+            "heading"
+          ]
+          label: "Active Curated-Configs";
+          xalign: 0.0;
+        }
+        ScrolledWindow {
+          propagate-natural-height: true;
+          child: ListView {
+            model: NoSelection {
+              model: bind template.state as <$BzStateInfo>.curated-configs;
+            };
+            factory: string_list_factory;
+          };
+        }
       }
 
       Label {
@@ -187,11 +227,16 @@ BuilderListItemFactory string_list_factory {
           "bz-monospace",
         ]
 
+        hexpand: true;
         margin-top: 2;
         margin-bottom: 2;
         xalign: 0.0;
         selectable: true;
         label: bind template.item as <$GtkStringObject>.string as <string>;
+      }
+      Button {
+        label: "Open";
+        clicked => $open_file_externally_cb(template);
       }
     };
   }

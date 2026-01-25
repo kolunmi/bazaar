@@ -1,6 +1,6 @@
-/* bz-update-dialog.h
+/* bz-subcategory-list.h
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2025 Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,20 +17,28 @@
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
-
 #pragma once
+
+#include "bz-flathub-category.h"
+#include "bz-flathub-state.h"
 
 #include <adwaita.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_UPDATE_DIALOG (bz_update_dialog_get_type ())
-G_DECLARE_FINAL_TYPE (BzUpdateDialog, bz_update_dialog, BZ, UPDATE_DIALOG, AdwAlertDialog)
+#define BZ_TYPE_SUBCATEGORY_LIST (bz_subcategory_list_get_type ())
 
-AdwDialog *
-bz_update_dialog_new (GListModel *updates);
+G_DECLARE_FINAL_TYPE (BzSubcategoryList, bz_subcategory_list, BZ, SUBCATEGORY_LIST, GtkBox)
+GtkWidget *bz_subcategory_list_new (void);
 
-GListModel *
-bz_update_dialog_was_accepted (BzUpdateDialog *self);
+BzFlathubCategory *bz_subcategory_list_get_category (BzSubcategoryList *self);
+
+void bz_subcategory_list_set_category (BzSubcategoryList *self,
+                                       BzFlathubCategory *category);
+
+BzFlathubState *bz_subcategory_list_get_flathub_state (BzSubcategoryList *self);
+
+void bz_subcategory_list_set_flathub_state (BzSubcategoryList *self,
+                                            BzFlathubState    *flathub_state);
 
 G_END_DECLS
