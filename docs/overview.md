@@ -76,12 +76,18 @@ example of integration into the main config.
 yaml-blocklist-paths:
   - /path/to/yaml/blocklist.yaml
   - /path/to/another/yaml/blocklist.yaml
+  # Flatpak path with host-etc permission
+  - /run/host/etc/bazaar/blocklist.yaml
 txt-blocklist-paths:
   - /path/to/txt/blocklist.txt
   - /path/to/another/txt/blocklist.txt
+  # Flatpak path with host-etc permission
+  - /run/host/etc/bazaar/blocklist.txt
 curated-config-paths:
   - /path/to/yaml/file.yaml
   - /path/to/another/yaml/file.yaml
+  # Flatpak path with host-etc permission
+  - /run/host/etc/bazaar/curated.yaml
 ```
 
 ## Blocklists
@@ -187,9 +193,15 @@ com\.place\..*
 
 #### No Worky
 
-Check that the path the the blocklist exists and that Bazaar can access it.
-Also, sometimes host files accessed from a flatpak container require a special
-prefix.
+Check that the path of the blocklist exists and that Bazaar can access it. This command is useful for debugging this:
+
+```
+flatpak run --command=bash io.github.kolunmi.Bazaar
+```
+
+The `/etc` of the host system accessed from a Flatpak requires the `host-etc` permission.
+
+This means `/etc/bazaar/banner.png` turns into `/run/host/etc/bazaar/banner.png`.
 
 #### I want to to block a list of applications all the time, and also another list only on desktop environment X:
 
@@ -316,21 +328,31 @@ Right now, curated configs are essentially composed of a list of "sections"
 which appear stacked on top of each other inside of a scrollable viewport in the
 order they appear in the YAML. Each section has certain properties you can
 customize, like a title, an image banner URI, and of course a list of appids.
+
 Bazaar maps the appids you provide to the best matching "entry group" from the
 table of applications it was able to pull from remote sources (Simply put, an
 entry group in Bazaar is a collection of applications which share the same appid
 but come from different sources or installations). The entry group has a
 designated "ui entry" which was previously determined in the refresh process to
 have the most useful content associated with it as it pertains to presenting
-things like icons, descriptions, screenshots, etc to the user. When the user
-selects the app in the section, they are brought to a "full view" where they can
-see a bunch of information stored inside or referenced by the ui entry and
-choose to invoke transactions on the entry group, like installation or removal.
+things like icons, descriptions, screenshots, etc to the user.
 
-Additionally, curated configs allow you to define a css block from which you can
-reference classes inside sections and change the way gtk renders the content.
+When the user selects the app in the section, they are brought to a "full view"
+where they can see a bunch of information stored inside or referenced by the ui
+entry and choose to invoke transactions on the entry group, like installation
+or removal.
+
+Additionally, curated configs allow you to define a css block from which you
+can reference classes inside sections and change the way gtk renders the
+content.
 
 ### Example
+
+Here are practical examples:
+
+- [Aurora](https://github.com/get-aurora-dev/common/tree/0d86028dd0d737d1d0eee08205c33fc91997f155/system_files/shared/etc/bazaar) - https://getaurora.dev
+- [Bluefin](https://github.com/projectbluefin/common/tree/a868eba107b91c4eae60b6d1d6d2e2cdf05eb1c8/system_files/bluefin/etc/bazaar) - https://projectbluefin.io
+- [Bazzite](https://github.com/ublue-os/bazzite/blob/4cb928b7268d0cae38592ff112e061f972caed63/system_files/desktop/shared/usr/share/ublue-os/bazaar) - https://bazzite.gg
 
 Here is a basic curated config:
 ```yaml
@@ -387,6 +409,8 @@ rows:
         subtitle: "These are really good and you should download them!"
 
         # can be https as well
+        # If you want this to work with the Flatpak then use this path
+        # file:///run/host/etc/bazaar/banner-1.jxl
         banner: file:///home/kolunmi/banner-1.jxl
 
         # can be "fill", "contain", "cover", or "scale-down"
@@ -399,6 +423,9 @@ rows:
         banner-text-halign: start
         # valign -> "vertical alignment"
         banner-text-valign: center
+
+        # size in pixels
+        banner-height: 400
 
         # "The horizontal alignment of the label text inside its size
         # allocation."
@@ -447,6 +474,20 @@ rows:
         - main-section
         - background-2
 ```
+
+### Integrate the curated section + blocklist with the official Flatpak for Administrators/Vendors
+
+For more practical examples check out the configuration from [Bluefin](https://github.com/projectbluefin/common/tree/a868eba107b91c4eae60b6d1d6d2e2cdf05eb1c8/system_files/bluefin/etc/bazaar) and [Aurora](https://github.com/get-aurora-dev/common/tree/0d86028dd0d737d1d0eee08205c33fc91997f155/system_files/shared/etc/bazaar).
+
+Bazaar by default looks for a config file in `/etc/bazaar` or `/run/host/etc/bazaar` inside the sandbox, this is [configured on build time](https://github.com/flathub/io.github.kolunmi.Bazaar/blob/709faccd8c4198c5fdabf20eb4a98db98a5aa1c6/io.github.kolunmi.Bazaar.yaml#L43-L46) This needs permission to `/etc` which can be granted with the `filesystem=host-etc` permission, the build on Flathub doesn't have this permission by default.
+
+This is not super straightforward to setup currently as Flatpak doesn't support overriding permissions in `/etc` or `/usr` yet, so you have to resort to `systemd-tmpfiles` to create this permission override in `/var/lib/flatpak/overrides/io.github.kolunmi.Bazaar`.
+
+Here is how they did it:
+
+- [tmpfiles](https://github.com/get-aurora-dev/common/blob/0d86028dd0d737d1d0eee08205c33fc91997f155/system_files/shared/usr/lib/tmpfiles.d/bazaar-flatpak.conf)
+
+- [actual permission override](https://github.com/get-aurora-dev/common/blob/0d86028dd0d737d1d0eee08205c33fc91997f155/system_files/shared/usr/share/ublue-os/flatpak-overrides/io.github.kolunmi.Bazaar), the filepath for this doesn't really matter, just a way for you to ship the symlink with tmpfiles
 
 ## Hooks
 
