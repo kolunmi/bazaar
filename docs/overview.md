@@ -16,8 +16,8 @@ managing software through the GUI:
   interest.
   * Curated configuration files are constantly monitored for filesystem events,
     changes immediately reflected in the GUI
-  * Any number of curated configuration files; they will concatenate in the
-    GUI in the order they were provided
+  * Any number of curated configuration files; they will concatenate in the GUI
+    in the order they were provided
 
 * Access data from [Flathub](https://flathub.org/), such as the latest or most
   popular applications, and allow users to sign in to Flathub to manage
@@ -43,11 +43,11 @@ managing software through the GUI:
 
 Blocklists are a way to ensure that users will never interact with a certain
 application inside Bazaar by searching or browsing, either on the Flathub page
-or via search. 
+or via search.
 
 Blocked applications which are already installed still appear in
 the library or when there are updates available for them and via the system's
-flatpak configuration. Under no circumstance does Bazaar touch the underlying 
+flatpak configuration. Under no circumstance does Bazaar touch the underlying
 flatpak configuration in order to block or allow apps. The `flatpak` command
 line tool is unaffected.
 
