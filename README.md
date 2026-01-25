@@ -14,6 +14,10 @@ Bazaar
 </div>
 
 > [!NOTE]
+> If you are a distributor/packager who would like to learn how to
+> customize Bazaar, take a look at the [docs](/docs/overview.md).
+
+> [!NOTE]
 > If you are interested in contributing code to Bazaar (Thank you!),
 > please see the [style rules](/CODESTYLE.md).
 
@@ -61,10 +65,6 @@ Thanks to everyone in the GNOME development community for creating
 such an awesome desktop environment!
 
 ### Contributing
-
-> [!NOTE]
-> If you are a distributor/packager who would like to learn how to
-customize Bazaar, take a look at the [docs](/docs/overview.org).
 
 If you would like to try this project on your local machine, clone it
 on the cli and type these commands inside the project root:
