@@ -566,7 +566,7 @@ hooks:
                   # with the hook
                   echo 'ok'
                   ;;
-              ,*)
+              *)
                   # otherwise, skip this hook
                   echo 'pass'
                   ;;
@@ -595,7 +595,7 @@ hooks:
               # continue
               echo 'ok'
               ;;
-          ,*)
+          *)
               # otherwise, let's not do anything
               echo 'abort'
               ;;
