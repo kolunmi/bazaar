@@ -27,6 +27,10 @@ G_BEGIN_DECLS
 #define BZ_SERIALIZE_TYPEHINT (bz_serialize_typehint_quark ())
 GQuark bz_serialize_typehint_quark (void);
 
+void
+bz_pspec_set_list_typehint (GParamSpec *pspec,
+                            GType       type);
+
 GVariant *
 bz_serialize_object (GObject *object);
 

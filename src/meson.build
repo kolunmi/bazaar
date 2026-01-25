@@ -132,6 +132,7 @@ bz_sources = files(
   'bz-search-widget.c',
   'bz-section-view.c',
   'bz-serializable.c',
+  'bz-serialize.c',
   'bz-share-list.c',
   'bz-spdx.c',
   'bz-stats-dialog.c',
