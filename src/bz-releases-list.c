@@ -24,6 +24,7 @@
 #include "bz-fading-clamp.h"
 #include "bz-release.h"
 #include "bz-releases-list.h"
+#include "bz-template-callbacks.h"
 
 /* Dialog structure */
 typedef struct
@@ -387,20 +388,6 @@ bz_releases_list_set_property (GObject      *object,
     }
 }
 
-static gboolean
-invert_boolean (gpointer object,
-                gboolean value)
-{
-  return !value;
-}
-
-static gboolean
-is_null (gpointer object,
-         GObject *value)
-{
-  return value == NULL;
-}
-
 static void
 bz_releases_list_class_init (BzReleasesListClass *klass)
 {
@@ -425,11 +412,10 @@ bz_releases_list_class_init (BzReleasesListClass *klass)
 
   gtk_widget_class_set_template_from_resource (widget_class,
                                                "/io/github/kolunmi/Bazaar/bz-releases-list.ui");
+  bz_widget_class_bind_all_util_callbacks (widget_class);
   gtk_widget_class_bind_template_child (widget_class, BzReleasesList, preview_box);
   gtk_widget_class_bind_template_child (widget_class, BzReleasesList, show_all_box);
   gtk_widget_class_bind_template_callback (widget_class, show_all_releases_cb);
-  gtk_widget_class_bind_template_callback (widget_class, is_null);
-  gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
 }
 
 static void
