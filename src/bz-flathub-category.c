@@ -156,7 +156,7 @@ create_subcategories (const Subcategory *subcategories)
 
   for (gsize i = 0; subcategories[i].display_name != NULL; i++)
     g_list_store_append (store, g_object_new (BZ_TYPE_FLATHUB_SUB_CATEGORY,
-                                              "name", subcategories[i].display_name,
+                                              "name", _(subcategories[i].display_name),
                                               "id", subcategories[i].category_id,
                                               NULL));
 
