@@ -806,17 +806,49 @@ ensure_flathub_fiber (EnsureFlathubData *data)
   return dex_future_new_true ();
 }
 
+static AsComponent *
+parse_appstream_from_xmlb_node (XbNode  *node,
+                                GError **error)
+{
+  g_autofree char *component_xml  = NULL;
+  g_autoptr (AsMetadata) metadata = NULL;
+  AsComponent *component          = NULL;
+  gboolean     result             = FALSE;
+
+  component_xml = xb_node_export (node, XB_NODE_EXPORT_FLAG_NONE, error);
+  if (component_xml == NULL)
+    return NULL;
+
+  metadata = as_metadata_new ();
+  result   = as_metadata_parse_data (metadata,
+                                     component_xml,
+                                     -1,
+                                     AS_FORMAT_KIND_XML,
+                                     error);
+
+  if (!result)
+    return NULL;
+
+  component = as_metadata_get_component (metadata);
+  return component != NULL ? g_object_ref (component) : NULL;
+}
+
 static DexFuture *
 load_local_ref_fiber (LoadLocalRefData *data)
 {
-  // GCancellable      *cancellable    = data->cancellable;
-  // BzFlatpakInstance *instance       = data->instance;
-  GFile *file                       = data->file;
-  g_autoptr (GError) local_error    = NULL;
-  g_autofree char *uri              = NULL;
-  g_autofree char *path             = NULL;
-  g_autoptr (FlatpakBundleRef) bref = NULL;
-  g_autoptr (BzFlatpakEntry) entry  = NULL;
+  GFile *file                                = data->file;
+  g_autoptr (GError) local_error             = NULL;
+  g_autofree char *uri                       = NULL;
+  g_autofree char *path                      = NULL;
+  g_autoptr (FlatpakBundleRef) bref          = NULL;
+  g_autoptr (BzFlatpakEntry) entry           = NULL;
+  g_autoptr (GBytes) appstream_gz            = NULL;
+  gboolean     result                        = FALSE;
+  AsComponent *component                     = NULL;
+  g_autoptr (GBytes) appstream               = NULL;
+  g_autoptr (GInputStream) stream_gz         = NULL;
+  g_autoptr (GInputStream) stream_data       = NULL;
+  g_autoptr (GZlibDecompressor) decompressor = NULL;
 
   uri  = g_file_get_uri (file);
   path = g_file_get_path (file);
@@ -827,7 +859,6 @@ load_local_ref_fiber (LoadLocalRefData *data)
     {
       const char *resolved_uri      = NULL;
       g_autoptr (GKeyFile) key_file = g_key_file_new ();
-      gboolean         result       = FALSE;
       g_autofree char *name         = NULL;
 
       if (g_str_has_prefix (uri, "flatpak+https"))
@@ -893,11 +924,89 @@ load_local_ref_fiber (LoadLocalRefData *data)
         path,
         local_error->message);
 
+  appstream_gz = flatpak_bundle_ref_get_appstream (bref);
+
+  if (appstream_gz != NULL)
+    {
+      g_autoptr (XbBuilder) builder      = NULL;
+      g_autoptr (XbBuilderSource) source = NULL;
+      g_autoptr (XbSilo) silo            = NULL;
+      g_autoptr (XbNode) root            = NULL;
+      g_autoptr (GPtrArray) children     = NULL;
+      const gchar *const *locales        = NULL;
+
+      decompressor = g_zlib_decompressor_new (G_ZLIB_COMPRESSOR_FORMAT_GZIP);
+      stream_gz    = g_memory_input_stream_new_from_bytes (appstream_gz);
+
+      stream_data = g_converter_input_stream_new (stream_gz,
+                                                  G_CONVERTER (decompressor));
+
+      appstream = g_input_stream_read_bytes (stream_data,
+                                             0x100000, /* 1Mb */
+                                             NULL,
+                                             &local_error);
+      if (appstream == NULL)
+        {
+          g_warning ("Failed to decompress AppStream data: %s", local_error->message);
+          g_clear_error (&local_error);
+        }
+
+      source = xb_builder_source_new ();
+      result = xb_builder_source_load_bytes (source, appstream,
+                                             XB_BUILDER_SOURCE_FLAG_LITERAL_TEXT,
+                                             &local_error);
+      if (!result)
+        {
+          g_warning ("Failed to load AppStream bytes into xmlb: %s", local_error->message);
+          g_clear_error (&local_error);
+        }
+      else
+        {
+          builder = xb_builder_new ();
+
+          locales = g_get_language_names ();
+          for (guint i = 0; locales[i] != NULL; i++)
+            xb_builder_add_locale (builder, locales[i]);
+
+          xb_builder_import_source (builder, source);
+
+          silo = xb_builder_compile (builder,
+                                     XB_BUILDER_COMPILE_FLAG_NATIVE_LANGS,
+                                     NULL,
+                                     &local_error);
+
+          if (silo == NULL)
+            {
+              g_warning ("Failed to compile xmlb silo: %s", local_error->message);
+              g_clear_error (&local_error);
+            }
+          else
+            {
+              root     = xb_silo_get_root (silo);
+              children = xb_node_get_children (root);
+
+              if (children != NULL && children->len > 0)
+                {
+                  XbNode *component_node = NULL;
+
+                  component_node = g_ptr_array_index (children, 0);
+                  component      = parse_appstream_from_xmlb_node (component_node, &local_error);
+
+                  if (component == NULL)
+                    {
+                      g_warning ("Failed to parse component: %s", local_error->message);
+                      g_clear_error (&local_error);
+                    }
+                }
+            }
+        }
+    }
+
   entry = bz_flatpak_entry_new_for_ref (
       FLATPAK_REF (bref),
       NULL,
       FALSE,
-      NULL,
+      component,
       NULL,
       &local_error);
   if (entry == NULL)
@@ -1085,8 +1194,6 @@ retrieve_refs_for_remote_fiber (RetrieveRefsForRemoteData *data)
   g_autoptr (XbSilo) silo               = NULL;
   g_autoptr (XbNode) root               = NULL;
   g_autoptr (GPtrArray) children        = NULL;
-  g_autoptr (AsMetadata) metadata       = NULL;
-  AsComponentBox *components            = NULL;
   g_autoptr (GHashTable) component_hash = NULL;
   g_autoptr (GdkPaintable) remote_icon  = NULL;
   g_autoptr (GPtrArray) refs            = NULL;
@@ -1204,51 +1311,31 @@ retrieve_refs_for_remote_fiber (RetrieveRefsForRemoteData *data)
 
   root     = xb_silo_get_root (silo);
   children = xb_node_get_children (root);
-  metadata = as_metadata_new ();
+
+  component_hash = g_hash_table_new (g_str_hash, g_str_equal);
 
   for (guint i = 0; i < children->len; i++)
     {
-      XbNode          *component_node = NULL;
-      g_autofree char *component_xml  = NULL;
+      XbNode      *component_node = NULL;
+      AsComponent *component      = NULL;
+      const char  *id             = NULL;
 
       component_node = g_ptr_array_index (children, i);
+      component      = parse_appstream_from_xmlb_node (component_node, &local_error);
 
-      component_xml = xb_node_export (
-          component_node, XB_NODE_EXPORT_FLAG_NONE, &local_error);
-      if (component_xml == NULL)
-        SEND_AND_RETURN_ERROR (
-            self, TRUE,
-            BZ_FLATPAK_ERROR_IO_MISBEHAVIOR,
-            "Failed to export plain xml from appstream bundle silo "
-            "originating from download at path %s for remote '%s': %s",
-            appstream_xml_path,
-            remote_name,
-            local_error->message);
+      if (component == NULL)
+        {
+          SEND_AND_RETURN_ERROR (
+              self, TRUE,
+              BZ_FLATPAK_ERROR_APPSTREAM_FAILURE,
+              "Failed to parse appstream component from appstream bundle silo "
+              "originating from download at path %s for remote '%s': %s",
+              appstream_xml_path,
+              remote_name,
+              local_error->message);
+        }
 
-      result = as_metadata_parse_data (
-          metadata, component_xml, -1,
-          AS_FORMAT_KIND_XML, &local_error);
-      if (!result)
-        SEND_AND_RETURN_ERROR (
-            self, TRUE,
-            BZ_FLATPAK_ERROR_APPSTREAM_FAILURE,
-            "Failed to create appstream metadata from appstream bundle silo "
-            "originating from download at path %s for remote '%s': %s",
-            appstream_xml_path,
-            remote_name,
-            local_error->message);
-    }
-
-  components     = as_metadata_get_components (metadata);
-  component_hash = g_hash_table_new (g_str_hash, g_str_equal);
-  for (guint i = 0; i < as_component_box_len (components); i++)
-    {
-      AsComponent *component = NULL;
-      const char  *id        = NULL;
-
-      component = as_component_box_index (components, i);
-      id        = as_component_get_id (component);
-
+      id = as_component_get_id (component);
       g_hash_table_replace (component_hash, (gpointer) id, component);
     }
 

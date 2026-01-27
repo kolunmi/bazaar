@@ -116,13 +116,18 @@ template $BzFullView: Adw.Bin {
                 child: Box main_box {
                   orientation: vertical;
                   vexpand: false;
-                  margin-top: 15;
                   margin-bottom: 15;
                   spacing: 20;
+
+                  Adw.Banner {
+                    title: _("Installing .flatpak bundles is not yet supported");
+                    revealed: bind template.ui-entry as <$BzResult>.object as <$BzFlatpakEntry>.is-bundle as <bool>;
+                  }
 
                   Adw.Clamp {
                     maximum-size: 860;
                     tightening-threshold: 1000;
+                    margin-top: 15;
 
                     child: Box top_box {
                       orientation: vertical;
@@ -302,6 +307,7 @@ template $BzFullView: Adw.Bin {
                             has-tooltip: true;
                             tooltip-text: bind $format_size_tooltip(template.ui-entry as <$BzResult>.object as <$BzEntry>.size) as <string>;
                             lozenge-style: "grey";
+                            sensitive: bind $invert_boolean($is_zero($get_size_type(template.ui-entry as <$BzResult>.object as <$BzEntry>, $is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <int>) as <bool>) as <bool>;
                             clicked => $size_cb(template);
 
                             lozenge-child: Label {
@@ -337,7 +343,6 @@ template $BzFullView: Adw.Bin {
                           }
 
                           $BzContextTile {
-                            can-target: bind template.entry-group as <$BzEntryGroup>.is_flathub as <bool>;
                             clicked => $safety_cb(template);
                             label: bind $get_safety_rating_label(template.ui-entry as <$BzResult>.object as <$BzEntry>) as <string>;
                             lozenge-style: bind $get_safety_rating_style(template.ui-entry as <$BzResult>.object as <$BzEntry>) as <string>;

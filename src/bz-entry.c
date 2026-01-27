@@ -2425,10 +2425,15 @@ query_flathub (BzEntry *self,
   BzEntryPrivate *priv              = NULL;
   g_autoptr (QueryFlathubData) data = NULL;
   g_autoptr (DexFuture) future      = NULL;
+  gboolean is_download_stat         = FALSE;
 
   priv = bz_entry_get_instance_private (self);
 
-  if (!priv->is_flathub)
+  is_download_stat = (prop == PROP_DOWNLOAD_STATS ||
+                    prop == PROP_DOWNLOAD_STATS_PER_COUNTRY ||
+                    prop == PROP_TOTAL_DOWNLOADS);
+
+  if (!is_download_stat && !priv->is_flathub)
     return;
   if (priv->id == NULL)
     return;
