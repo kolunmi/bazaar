@@ -30,7 +30,7 @@
 #include "bz-env.h"
 #include "bz-flatpak-entry.h"
 #include "bz-io.h"
-#include "bz-serializable.h"
+#include "bz-serialize.h"
 #include "bz-util.h"
 
 /* clang-format off */
@@ -385,7 +385,6 @@ write_task_fiber (WriteTaskData *data)
   DexFuture *writing_future               = NULL;
   g_autoptr (LivingEntryData) living      = NULL;
   g_autoptr (DexPromise) promise          = NULL;
-  g_autoptr (GVariantBuilder) builder     = NULL;
   g_autoptr (GVariant) variant            = NULL;
   g_autoptr (GBytes) bytes                = NULL;
   gsize            bytes_size             = 0;
@@ -480,9 +479,7 @@ write_task_fiber (WriteTaskData *data)
                                &living->mutex,
                                &living->gate);
   {
-    builder = g_variant_builder_new (G_VARIANT_TYPE_VARDICT);
-    bz_serializable_serialize (BZ_SERIALIZABLE (entry), builder);
-    variant    = g_variant_builder_end (builder);
+    variant    = bz_serialize_object (G_OBJECT (entry));
     bytes      = g_variant_get_data_as_bytes (variant);
     bytes_data = g_bytes_get_data (bytes, &bytes_size);
 
@@ -702,9 +699,8 @@ read_task_fiber (ReadTaskData *data)
       goto done;
     }
 
-  entry  = g_object_new (BZ_TYPE_FLATPAK_ENTRY, NULL);
-  result = bz_serializable_deserialize (BZ_SERIALIZABLE (entry), variant, &local_error);
-  if (!result)
+  entry = bz_deserialize_object (BZ_TYPE_FLATPAK_ENTRY, variant, &local_error);
+  if (entry == NULL)
     {
       ret_error = g_error_new (
           BZ_ENTRY_CACHE_ERROR,

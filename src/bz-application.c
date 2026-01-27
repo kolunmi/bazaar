@@ -52,7 +52,7 @@
 #include "bz-result.h"
 #include "bz-root-blocklist.h"
 #include "bz-root-curated-config.h"
-#include "bz-serializable.h"
+#include "bz-serialize.h"
 #include "bz-state-info.h"
 #include "bz-transaction-manager.h"
 #include "bz-util.h"
@@ -1139,10 +1139,8 @@ init_fiber (GWeakRef *wr)
                   g_clear_error (&local_error);
                 }
 
-              flathub = bz_flathub_state_new ();
-              result  = bz_serializable_deserialize (
-                  BZ_SERIALIZABLE (flathub), variant, &local_error);
-              if (result)
+              flathub = bz_deserialize_object (BZ_TYPE_FLATHUB_STATE, variant, &local_error);
+              if (flathub != NULL)
                 {
                   self->flathub = g_steal_pointer (&flathub);
                   bz_flathub_state_set_map_factory (self->flathub, self->application_factory);
@@ -1189,13 +1187,10 @@ cache_flathub_fiber (GWeakRef *wr)
   flathub_cache_file = fiber_dup_flathub_cache_file (&flathub_cache, &local_error);
   if (flathub_cache_file != NULL)
     {
-      g_autoptr (GVariantBuilder) builder = NULL;
-      g_autoptr (GVariant) variant        = NULL;
-      g_autoptr (GBytes) bytes            = NULL;
+      g_autoptr (GVariant) variant = NULL;
+      g_autoptr (GBytes) bytes     = NULL;
 
-      builder = g_variant_builder_new (G_VARIANT_TYPE_VARDICT);
-      bz_serializable_serialize (BZ_SERIALIZABLE (self->flathub), builder);
-      variant = g_variant_builder_end (builder);
+      variant = bz_serialize_object (G_OBJECT (self->flathub));
       bytes   = g_variant_get_data_as_bytes (variant);
 
       result = dex_await (

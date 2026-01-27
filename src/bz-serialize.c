@@ -20,6 +20,7 @@
 
 #include <gtk/gtk.h>
 
+#include "bz-async-texture.h"
 #include "bz-serialize.h"
 
 /* clang-format off */
@@ -39,19 +40,24 @@ bz_pspec_set_list_typehint (GParamSpec *pspec,
 GVariant *
 bz_serialize_object (GObject *object)
 {
-  g_autoptr (GVariantBuilder) builder = NULL;
   GType type                          = G_TYPE_NONE;
+  g_autoptr (GVariantBuilder) builder = NULL;
   g_autoptr (GTypeClass) class        = NULL;
   guint                   n_pspecs    = 0;
   g_autofree GParamSpec **pspecs      = NULL;
 
   g_return_val_if_fail (G_IS_OBJECT (object), NULL);
 
-  builder = g_variant_builder_new (G_VARIANT_TYPE_VARDICT);
+  type = G_OBJECT_TYPE (object);
+  if (type == BZ_TYPE_ASYNC_TEXTURE)
+    return g_variant_new (
+        "(sms)",
+        bz_async_texture_get_source_uri (BZ_ASYNC_TEXTURE (object)),
+        bz_async_texture_get_cache_into_path (BZ_ASYNC_TEXTURE (object)));
 
-  type   = G_OBJECT_TYPE (object);
-  class  = g_type_class_ref (type);
-  pspecs = g_object_class_list_properties (G_OBJECT_CLASS (class), &n_pspecs);
+  builder = g_variant_builder_new (G_VARIANT_TYPE_VARDICT);
+  class   = g_type_class_ref (type);
+  pspecs  = g_object_class_list_properties (G_OBJECT_CLASS (class), &n_pspecs);
 
   for (guint i = 0; i < n_pspecs; i++)
     {
@@ -60,7 +66,10 @@ bz_serialize_object (GObject *object)
       g_autoptr (GVariant) variant = NULL;
 
       pspec = pspecs[i];
-      g_object_get_property (object, pspec->name, &value);
+      if (!(pspec->flags & G_PARAM_WRITABLE))
+        continue;
+
+      g_object_get_property (object, pspec->name, g_value_init (&value, pspec->value_type));
 
       if (g_type_is_a (pspec->value_type, G_TYPE_CHAR) ||
           g_type_is_a (pspec->value_type, G_TYPE_UCHAR))
@@ -144,15 +153,13 @@ bz_serialize_object (GObject *object)
           GObject *object_value = NULL;
 
           object_value = g_value_get_object (&value);
-          variant      = bz_serialize_object (object_value);
+          if (object_value != NULL)
+            variant = bz_serialize_object (object_value);
         }
 
       if (variant != NULL)
         g_variant_builder_add (builder, "{sv}", pspec->name,
                                g_steal_pointer (&variant));
-      else
-        g_critical ("Can't serialize property \"%s\" on object type %s!",
-                    pspec->name, g_type_name (type));
 
       g_value_unset (&value);
     }
@@ -173,6 +180,21 @@ bz_deserialize_object (GType     type,
 
   g_return_val_if_fail (g_type_is_a (type, G_TYPE_OBJECT), NULL);
   g_return_val_if_fail (import != NULL, NULL);
+
+  if (type == BZ_TYPE_ASYNC_TEXTURE)
+    {
+      g_autofree char *source_uri      = NULL;
+      g_autofree char *cache_into_path = NULL;
+      g_autoptr (GFile) source         = NULL;
+      g_autoptr (GFile) cache_into     = NULL;
+
+      g_variant_get (import, "(sms)", &source_uri, &cache_into_path);
+      source = g_file_new_for_uri (source_uri);
+      if (cache_into_path != NULL)
+        cache_into = g_file_new_for_path (cache_into_path);
+
+      return bz_async_texture_new_lazy (source, cache_into);
+    }
 
   object = g_object_new (type, NULL);
 
@@ -199,6 +221,9 @@ bz_deserialize_object (GType     type,
           GParamSpec *pspec = NULL;
 
           pspec = pspecs[i];
+          if (!(pspec->flags & G_PARAM_WRITABLE))
+            continue;
+
           if (g_strcmp0 (key, pspec->name) != 0)
             continue;
 

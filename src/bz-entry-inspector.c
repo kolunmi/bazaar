@@ -22,7 +22,7 @@
 
 #include "bz-entry-inspector.h"
 #include "bz-entry.h"
-#include "bz-serializable.h"
+#include "bz-serialize.h"
 
 struct _BzEntryInspector
 {
@@ -99,15 +99,12 @@ gen_serialized (BzEntryInspector *self,
 {
   if (bz_result_get_resolved (self->result))
     {
-      BzEntry *entry                      = NULL;
-      g_autoptr (GVariantBuilder) builder = NULL;
-      g_autoptr (GVariant) variant        = NULL;
-      g_autofree char *string             = NULL;
+      BzEntry *entry               = NULL;
+      g_autoptr (GVariant) variant = NULL;
+      g_autofree char *string      = NULL;
 
       entry   = bz_result_get_object (self->result);
-      builder = g_variant_builder_new (G_VARIANT_TYPE_VARDICT);
-      bz_serializable_serialize (BZ_SERIALIZABLE (entry), builder);
-      variant = g_variant_builder_end (builder);
+      variant = bz_serialize_object (G_OBJECT (entry));
 
       if (gtk_check_button_get_active (self->convert_to_json))
         {

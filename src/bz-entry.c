@@ -36,7 +36,7 @@
 #include "bz-io.h"
 #include "bz-release.h"
 #include "bz-repository.h"
-#include "bz-serializable.h"
+#include "bz-serialize.h"
 #include "bz-url.h"
 #include "bz-util.h"
 #include "bz-verification-status.h"
@@ -231,15 +231,6 @@ download_stats_per_country_foreach (JsonObject  *object,
                                     const gchar *member_name,
                                     JsonNode    *member_node,
                                     GListStore  *store);
-
-static gboolean
-maybe_save_paintable (BzEntryPrivate  *priv,
-                      const char      *key,
-                      GdkPaintable    *paintable,
-                      GVariantBuilder *builder);
-
-static GdkPaintable *
-make_async_texture (GVariant *parse);
 
 static DexFuture *
 icon_paintable_future_then (DexFuture *future,
@@ -742,6 +733,7 @@ bz_entry_class_init (BzEntryClass *klass)
           NULL, NULL,
           G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE);
+  bz_pspec_set_list_typehint (props[PROP_ADDONS], GTK_TYPE_STRING_OBJECT);
 
   props[PROP_KINDS] =
       g_param_spec_flags (
@@ -887,6 +879,7 @@ bz_entry_class_init (BzEntryClass *klass)
           NULL, NULL,
           G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE);
+  bz_pspec_set_list_typehint (props[PROP_DEVELOPER_APPS], GTK_TYPE_STRING_OBJECT);
 
   props[PROP_SCREENSHOT_PAINTABLES] =
       g_param_spec_object (
@@ -894,6 +887,7 @@ bz_entry_class_init (BzEntryClass *klass)
           NULL, NULL,
           G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE);
+  bz_pspec_set_list_typehint (props[PROP_SCREENSHOT_PAINTABLES], BZ_TYPE_ASYNC_TEXTURE);
 
   props[PROP_SCREENSHOT_CAPTIONS] =
       g_param_spec_object (
@@ -901,6 +895,7 @@ bz_entry_class_init (BzEntryClass *klass)
           NULL, NULL,
           G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE);
+  bz_pspec_set_list_typehint (props[PROP_SCREENSHOT_CAPTIONS], GTK_TYPE_STRING_OBJECT);
 
   props[PROP_THUMBNAIL_PAINTABLE] =
       g_param_spec_object (
@@ -915,6 +910,7 @@ bz_entry_class_init (BzEntryClass *klass)
           NULL, NULL,
           G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE);
+  bz_pspec_set_list_typehint (props[PROP_SHARE_URLS], BZ_TYPE_URL);
 
   props[PROP_DONATION_URL] =
       g_param_spec_string (
@@ -954,6 +950,7 @@ bz_entry_class_init (BzEntryClass *klass)
           NULL, NULL,
           G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE);
+  bz_pspec_set_list_typehint (props[PROP_VERSION_HISTORY], BZ_TYPE_RELEASE);
 
   props[PROP_LIGHT_ACCENT_COLOR] =
       g_param_spec_string (
@@ -1027,6 +1024,7 @@ bz_entry_class_init (BzEntryClass *klass)
           NULL, NULL,
           G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE);
+  bz_pspec_set_list_typehint (props[PROP_KEYWORDS], GTK_TYPE_STRING_OBJECT);
 
   props[PROP_CATEGORIES] =
       g_param_spec_object (
@@ -1034,6 +1032,7 @@ bz_entry_class_init (BzEntryClass *klass)
           NULL, NULL,
           G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE);
+  bz_pspec_set_list_typehint (props[PROP_CATEGORIES], GTK_TYPE_STRING_OBJECT);
 
   props[PROP_PERMISSIONS] =
       g_param_spec_object (
@@ -1061,6 +1060,7 @@ bz_entry_class_init (BzEntryClass *klass)
           NULL, NULL,
           G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE);
+  bz_pspec_set_list_typehint (props[PROP_DOWNLOAD_STATS], BZ_TYPE_DATA_POINT);
 
   props[PROP_DOWNLOAD_STATS_PER_COUNTRY] =
       g_param_spec_object (
@@ -1068,6 +1068,7 @@ bz_entry_class_init (BzEntryClass *klass)
           NULL, NULL,
           G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE);
+  bz_pspec_set_list_typehint (props[PROP_DOWNLOAD_STATS_PER_COUNTRY], BZ_TYPE_COUNTRY_DATA_POINT);
 
   props[PROP_RECENT_DOWNLOADS] =
       g_param_spec_int (
@@ -1100,701 +1101,6 @@ bz_entry_init (BzEntry *self)
 
   priv->hold            = 0;
   priv->favorites_count = -1;
-}
-
-static void
-bz_entry_real_serialize (BzSerializable  *serializable,
-                         GVariantBuilder *builder)
-{
-  BzEntry        *self = BZ_ENTRY (serializable);
-  BzEntryPrivate *priv = bz_entry_get_instance_private (self);
-
-  g_variant_builder_add (builder, "{sv}", "installed", g_variant_new_boolean (priv->installed));
-  g_variant_builder_add (builder, "{sv}", "kinds", g_variant_new_uint32 (priv->kinds));
-  if (priv->addons != NULL)
-    {
-      guint n_items = 0;
-
-      n_items = g_list_model_get_n_items (priv->addons);
-      if (n_items > 0)
-        {
-          g_autoptr (GVariantBuilder) sub_builder = NULL;
-
-          sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("as"));
-          for (guint i = 0; i < n_items; i++)
-            {
-              g_autoptr (GtkStringObject) string = NULL;
-
-              string = g_list_model_get_item (priv->addons, i);
-              g_variant_builder_add (sub_builder, "s", gtk_string_object_get_string (string));
-            }
-
-          g_variant_builder_add (builder, "{sv}", "addons", g_variant_builder_end (sub_builder));
-        }
-    }
-  if (priv->id != NULL)
-    g_variant_builder_add (builder, "{sv}", "id", g_variant_new_string (priv->id));
-  if (priv->unique_id != NULL)
-    g_variant_builder_add (builder, "{sv}", "unique-id", g_variant_new_string (priv->unique_id));
-  if (priv->unique_id_checksum != NULL)
-    g_variant_builder_add (builder, "{sv}", "unique-id-checksum", g_variant_new_string (priv->unique_id_checksum));
-  if (priv->title != NULL)
-    g_variant_builder_add (builder, "{sv}", "title", g_variant_new_string (priv->title));
-  if (priv->eol != NULL)
-    g_variant_builder_add (builder, "{sv}", "eol", g_variant_new_string (priv->eol));
-  if (priv->description != NULL)
-    g_variant_builder_add (builder, "{sv}", "description", g_variant_new_string (priv->description));
-  if (priv->long_description != NULL)
-    g_variant_builder_add (builder, "{sv}", "long-description", g_variant_new_string (priv->long_description));
-  if (priv->remote_repo_name != NULL)
-    g_variant_builder_add (builder, "{sv}", "remote-repo-name", g_variant_new_string (priv->remote_repo_name));
-  if (priv->url != NULL)
-    g_variant_builder_add (builder, "{sv}", "url", g_variant_new_string (priv->url));
-  if (priv->size > 0)
-    g_variant_builder_add (builder, "{sv}", "size", g_variant_new_uint64 (priv->size));
-  if (priv->installed_size > 0)
-    g_variant_builder_add (builder, "{sv}", "installed-size", g_variant_new_uint64 (priv->installed_size));
-  if (priv->icon_paintable != NULL)
-    maybe_save_paintable (priv, "icon-paintable", priv->icon_paintable, builder);
-  if (priv->mini_icon != NULL)
-    {
-      g_autoptr (GVariant) serialized = NULL;
-
-      serialized = g_icon_serialize (priv->mini_icon);
-      g_variant_builder_add (builder, "{sv}", "mini-icon", serialized);
-    }
-  if (priv->remote_repo_icon != NULL)
-    maybe_save_paintable (priv, "remote-repo-icon", priv->remote_repo_icon, builder);
-  if (priv->search_tokens != NULL)
-    g_variant_builder_add (builder, "{sv}", "search-tokens", g_variant_new_string (priv->search_tokens));
-  if (priv->metadata_license != NULL)
-    g_variant_builder_add (builder, "{sv}", "metadata-license", g_variant_new_string (priv->metadata_license));
-  if (priv->project_license != NULL)
-    g_variant_builder_add (builder, "{sv}", "project-license", g_variant_new_string (priv->project_license));
-  g_variant_builder_add (builder, "{sv}", "is-floss", g_variant_new_boolean (priv->is_floss));
-  if (priv->project_group != NULL)
-    g_variant_builder_add (builder, "{sv}", "project-group", g_variant_new_string (priv->project_group));
-  if (priv->developer != NULL)
-    g_variant_builder_add (builder, "{sv}", "developer", g_variant_new_string (priv->developer));
-  if (priv->developer_id != NULL)
-    g_variant_builder_add (builder, "{sv}", "developer-id", g_variant_new_string (priv->developer_id));
-  if (priv->screenshot_paintables != NULL)
-    {
-      guint n_items = 0;
-
-      n_items = g_list_model_get_n_items (priv->screenshot_paintables);
-      if (n_items > 0)
-        {
-          g_autoptr (GVariantBuilder) sub_builder = NULL;
-
-          sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("a{sv}"));
-          for (guint i = 0; i < n_items; i++)
-            {
-              g_autoptr (GdkPaintable) paintable = NULL;
-              g_autofree char *key               = NULL;
-
-              paintable = g_list_model_get_item (priv->screenshot_paintables, i);
-              key       = g_strdup_printf ("screenshot_%d.png", i);
-
-              maybe_save_paintable (priv, key, paintable, sub_builder);
-            }
-
-          g_variant_builder_add (builder, "{sv}", "screenshot-paintables", g_variant_builder_end (sub_builder));
-        }
-    }
-  if (priv->screenshot_captions != NULL)
-    {
-      guint n_items = 0;
-
-      n_items = g_list_model_get_n_items (priv->screenshot_captions);
-      if (n_items > 0)
-        {
-          g_autoptr (GVariantBuilder) sub_builder = NULL;
-
-          sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("as"));
-          for (guint i = 0; i < n_items; i++)
-            {
-              g_autoptr (GtkStringObject) string = NULL;
-
-              string = g_list_model_get_item (priv->screenshot_captions, i);
-              g_variant_builder_add (sub_builder, "s", gtk_string_object_get_string (string));
-            }
-
-          g_variant_builder_add (builder, "{sv}", "screenshot-captions", g_variant_builder_end (sub_builder));
-        }
-    }
-  if (priv->thumbnail_paintable != NULL)
-    maybe_save_paintable (priv, "thumbnail-paintable", priv->thumbnail_paintable, builder);
-  if (priv->share_urls != NULL)
-    {
-      guint n_items = 0;
-
-      n_items = g_list_model_get_n_items (priv->share_urls);
-      if (n_items > 0)
-        {
-          g_autoptr (GVariantBuilder) sub_builder = NULL;
-
-          sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("a(sss)"));
-          for (guint i = 0; i < n_items; i++)
-            {
-              g_autoptr (BzUrl) url = NULL;
-              const char *name      = NULL;
-              const char *url_str   = NULL;
-              const char *icon_name = NULL;
-
-              url       = g_list_model_get_item (priv->share_urls, i);
-              name      = bz_url_get_name (url);
-              url_str   = bz_url_get_url (url);
-              icon_name = bz_url_get_icon_name (url);
-              g_variant_builder_add (sub_builder, "(sss)", name, url_str, icon_name ? icon_name : "");
-            }
-          g_variant_builder_add (builder, "{sv}", "share-urls", g_variant_builder_end (sub_builder));
-        }
-    }
-  if (priv->donation_url != NULL)
-    g_variant_builder_add (builder, "{sv}", "donation-url", g_variant_new_string (priv->donation_url));
-  if (priv->forge_url != NULL)
-    g_variant_builder_add (builder, "{sv}", "forge-url", g_variant_new_string (priv->forge_url));
-  if (priv->version_history != NULL)
-    {
-      guint n_items = 0;
-
-      n_items = g_list_model_get_n_items (priv->version_history);
-      if (n_items > 0)
-        {
-          g_autoptr (GVariantBuilder) sub_builder = NULL;
-
-          sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("a(mstmsms)"));
-          for (guint i = 0; i < n_items; i++)
-            {
-              g_autoptr (BzRelease) release = NULL;
-              guint64     timestamp         = 0;
-              const char *url               = NULL;
-              const char *version           = NULL;
-              const char *description       = NULL;
-
-              release     = g_list_model_get_item (priv->version_history, i);
-              timestamp   = bz_release_get_timestamp (release);
-              url         = bz_release_get_url (release);
-              version     = bz_release_get_version (release);
-              description = bz_release_get_description (release);
-
-              g_variant_builder_add (
-                  sub_builder,
-                  "(mstmsms)",
-                  description,
-                  timestamp,
-                  url,
-                  version);
-            }
-
-          g_variant_builder_add (builder, "{sv}", "version-history", g_variant_builder_end (sub_builder));
-        }
-    }
-  if (priv->light_accent_color != NULL)
-    g_variant_builder_add (builder, "{sv}", "light-accent-color", g_variant_new_string (priv->light_accent_color));
-  if (priv->dark_accent_color != NULL)
-    g_variant_builder_add (builder, "{sv}", "dark-accent-color", g_variant_new_string (priv->dark_accent_color));
-  g_variant_builder_add (builder, "{sv}", "is-mobile-friendly", g_variant_new_boolean (priv->is_mobile_friendly));
-  if (priv->required_controls != BZ_CONTROL_NONE)
-    g_variant_builder_add (builder, "{sv}", "required-controls", g_variant_new_uint32 (priv->required_controls));
-  if (priv->recommended_controls != BZ_CONTROL_NONE)
-    g_variant_builder_add (builder, "{sv}", "recommended-controls", g_variant_new_uint32 (priv->recommended_controls));
-  if (priv->supported_controls != BZ_CONTROL_NONE)
-    g_variant_builder_add (builder, "{sv}", "supported-controls", g_variant_new_uint32 (priv->supported_controls));
-  if (priv->min_display_length > 0)
-    g_variant_builder_add (builder, "{sv}", "min-display-length", g_variant_new_int32 (priv->min_display_length));
-  if (priv->max_display_length > 0)
-    g_variant_builder_add (builder, "{sv}", "max-display-length", g_variant_new_int32 (priv->max_display_length));
-  if (priv->content_rating != NULL)
-    {
-      const gchar *kind                       = as_content_rating_get_kind (priv->content_rating);
-      g_autoptr (GVariantBuilder) sub_builder = NULL;
-      g_autofree const gchar **rating_ids     = NULL;
-
-      sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("a(ss)"));
-      rating_ids  = as_content_rating_get_all_rating_ids ();
-
-      for (gsize i = 0; rating_ids[i] != NULL; i++)
-        {
-          AsContentRatingValue value     = as_content_rating_get_value (priv->content_rating, rating_ids[i]);
-          const gchar         *value_str = as_content_rating_value_to_string (value);
-
-          if (value != AS_CONTENT_RATING_VALUE_UNKNOWN)
-            g_variant_builder_add (sub_builder, "(ss)", rating_ids[i], value_str);
-        }
-
-      g_variant_builder_add (builder, "{sv}", "content-rating-kind", g_variant_new_string (kind ? kind : "oars-1.1"));
-      g_variant_builder_add (builder, "{sv}", "content-rating-values", g_variant_builder_end (sub_builder));
-    }
-  if (priv->keywords != NULL)
-    {
-      guint n_items = 0;
-
-      n_items = g_list_model_get_n_items (priv->keywords);
-      if (n_items > 0)
-        {
-          g_autoptr (GVariantBuilder) sub_builder = NULL;
-
-          sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("as"));
-          for (guint i = 0; i < n_items; i++)
-            {
-              g_autoptr (GtkStringObject) string = NULL;
-
-              string = g_list_model_get_item (priv->keywords, i);
-              g_variant_builder_add (sub_builder, "s", gtk_string_object_get_string (string));
-            }
-
-          g_variant_builder_add (builder, "{sv}", "keywords", g_variant_builder_end (sub_builder));
-        }
-    }
-
-  if (priv->categories != NULL)
-    {
-      guint n_items = 0;
-
-      n_items = g_list_model_get_n_items (priv->categories);
-      if (n_items > 0)
-        {
-          g_autoptr (GVariantBuilder) sub_builder = NULL;
-
-          sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("as"));
-          for (guint i = 0; i < n_items; i++)
-            {
-              g_autoptr (BzFlathubCategory) category = NULL;
-              const char *category_name              = NULL;
-
-              category      = g_list_model_get_item (priv->categories, i);
-              category_name = bz_flathub_category_get_name (category);
-              if (category_name != NULL)
-                g_variant_builder_add (sub_builder, "s", category_name);
-            }
-
-          g_variant_builder_add (builder, "{sv}", "categories", g_variant_builder_end (sub_builder));
-        }
-    }
-
-  if (priv->verification_status != NULL)
-    {
-      gboolean         verified              = FALSE;
-      g_autofree char *method                = NULL;
-      g_autofree char *website               = NULL;
-      g_autofree char *login_name            = NULL;
-      g_autofree char *login_provider        = NULL;
-      g_autofree char *timestamp             = NULL;
-      gboolean         login_is_organization = FALSE;
-
-      g_object_get (priv->verification_status,
-                    "verified", &verified,
-                    "method", &method,
-                    "website", &website,
-                    "login-name", &login_name,
-                    "login-provider", &login_provider,
-                    "timestamp", &timestamp,
-                    "login-is-organization", &login_is_organization,
-                    NULL);
-
-      g_variant_builder_add (builder, "{sv}", "verification-verified", g_variant_new_boolean (verified));
-      if (method != NULL)
-        g_variant_builder_add (builder, "{sv}", "verification-method", g_variant_new_string (method));
-      if (website != NULL)
-        g_variant_builder_add (builder, "{sv}", "verification-website", g_variant_new_string (website));
-      if (login_name != NULL)
-        g_variant_builder_add (builder, "{sv}", "verification-login-name", g_variant_new_string (login_name));
-      if (login_provider != NULL)
-        g_variant_builder_add (builder, "{sv}", "verification-login-provider", g_variant_new_string (login_provider));
-      if (timestamp != NULL)
-        g_variant_builder_add (builder, "{sv}", "verification-timestamp", g_variant_new_string (timestamp));
-      g_variant_builder_add (builder, "{sv}", "verification-login-is-organization", g_variant_new_boolean (login_is_organization));
-    }
-
-  if (priv->permissions != NULL)
-    {
-      bz_app_permissions_serialize (priv->permissions, builder);
-    }
-
-  g_variant_builder_add (builder, "{sv}", "is-flathub", g_variant_new_boolean (priv->is_flathub));
-  if (priv->is_flathub)
-    {
-      if (priv->flathub_prop_queries != NULL)
-        {
-          if (g_hash_table_contains (priv->flathub_prop_queries, GINT_TO_POINTER (PROP_DOWNLOAD_STATS)) &&
-              priv->download_stats != NULL)
-            {
-              guint n_items = 0;
-
-              n_items = g_list_model_get_n_items (priv->download_stats);
-              if (n_items > 0)
-                {
-                  g_autoptr (GVariantBuilder) sub_builder = NULL;
-
-                  sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("a(ddms)"));
-                  for (guint i = 0; i < n_items; i++)
-                    {
-                      g_autoptr (BzDataPoint) point = NULL;
-                      double      independent       = 0.0;
-                      double      dependent         = 0.0;
-                      const char *label             = NULL;
-
-                      point       = g_list_model_get_item (priv->download_stats, i);
-                      independent = bz_data_point_get_independent (point);
-                      dependent   = bz_data_point_get_dependent (point);
-                      label       = bz_data_point_get_label (point);
-
-                      g_variant_builder_add (sub_builder, "(ddms)", independent, dependent, label);
-                    }
-                  g_variant_builder_add (builder, "{sv}", "download-stats", g_variant_builder_end (sub_builder));
-                }
-            }
-          if (g_hash_table_contains (priv->flathub_prop_queries, GINT_TO_POINTER (PROP_RECENT_DOWNLOADS)))
-            g_variant_builder_add (builder, "{sv}", "recent-downloads", g_variant_new_int32 (priv->recent_downloads));
-          if (g_hash_table_contains (priv->flathub_prop_queries, GINT_TO_POINTER (PROP_FAVORITES_COUNT)))
-            g_variant_builder_add (builder, "{sv}", "favorites-count", g_variant_new_int32 (priv->favorites_count));
-        }
-    }
-}
-
-static gboolean
-bz_entry_real_deserialize (BzSerializable *serializable,
-                           GVariant       *import,
-                           GError        **error)
-{
-  BzEntry        *self          = BZ_ENTRY (serializable);
-  BzEntryPrivate *priv          = bz_entry_get_instance_private (self);
-  g_autoptr (GVariantIter) iter = NULL;
-
-  clear_entry (self);
-
-  iter = g_variant_iter_new (import);
-  for (;;)
-    {
-      g_autofree char *key       = NULL;
-      g_autoptr (GVariant) value = NULL;
-
-      if (!g_variant_iter_next (iter, "{sv}", &key, &value))
-        break;
-
-      if (g_strcmp0 (key, "installed") == 0)
-        priv->installed = g_variant_get_boolean (value);
-      else if (g_strcmp0 (key, "kinds") == 0)
-        priv->kinds = g_variant_get_uint32 (value);
-      else if (g_strcmp0 (key, "addons") == 0)
-        {
-          g_autoptr (GListStore) store        = NULL;
-          g_autoptr (GVariantIter) addon_iter = NULL;
-
-          store = g_list_store_new (GTK_TYPE_STRING_OBJECT);
-
-          addon_iter = g_variant_iter_new (value);
-          for (;;)
-            {
-              g_autofree char *unique_id         = NULL;
-              g_autoptr (GtkStringObject) string = NULL;
-
-              if (!g_variant_iter_next (addon_iter, "s", &unique_id))
-                break;
-              string = gtk_string_object_new (unique_id);
-              g_list_store_append (store, string);
-            }
-
-          priv->addons = G_LIST_MODEL (g_steal_pointer (&store));
-        }
-      else if (g_strcmp0 (key, "id") == 0)
-        priv->id = g_variant_dup_string (value, NULL);
-      else if (g_strcmp0 (key, "unique-id") == 0)
-        priv->unique_id = g_variant_dup_string (value, NULL);
-      else if (g_strcmp0 (key, "unique-id-checksum") == 0)
-        priv->unique_id_checksum = g_variant_dup_string (value, NULL);
-      else if (g_strcmp0 (key, "title") == 0)
-        priv->title = g_variant_dup_string (value, NULL);
-      else if (g_strcmp0 (key, "eol") == 0)
-        priv->eol = g_variant_dup_string (value, NULL);
-      else if (g_strcmp0 (key, "description") == 0)
-        priv->description = g_variant_dup_string (value, NULL);
-      else if (g_strcmp0 (key, "long-description") == 0)
-        priv->long_description = g_variant_dup_string (value, NULL);
-      else if (g_strcmp0 (key, "remote-repo-name") == 0)
-        priv->remote_repo_name = g_variant_dup_string (value, NULL);
-      else if (g_strcmp0 (key, "url") == 0)
-        priv->url = g_variant_dup_string (value, NULL);
-      else if (g_strcmp0 (key, "size") == 0)
-        priv->size = g_variant_get_uint64 (value);
-      else if (g_strcmp0 (key, "installed-size") == 0)
-        priv->installed_size = g_variant_get_uint64 (value);
-      else if (g_strcmp0 (key, "icon-paintable") == 0)
-        priv->icon_paintable = make_async_texture (value);
-      else if (g_strcmp0 (key, "mini-icon") == 0)
-        priv->mini_icon = g_icon_deserialize (value);
-      else if (g_strcmp0 (key, "remote-repo-icon") == 0)
-        priv->remote_repo_icon = make_async_texture (value);
-      else if (g_strcmp0 (key, "search-tokens") == 0)
-        priv->search_tokens = g_variant_dup_string (value, NULL);
-      else if (g_strcmp0 (key, "metadata-license") == 0)
-        priv->metadata_license = g_variant_dup_string (value, NULL);
-      else if (g_strcmp0 (key, "project-license") == 0)
-        priv->project_license = g_variant_dup_string (value, NULL);
-      else if (g_strcmp0 (key, "is-floss") == 0)
-        priv->is_floss = g_variant_get_boolean (value);
-      else if (g_strcmp0 (key, "developer") == 0)
-        priv->developer = g_variant_dup_string (value, NULL);
-      else if (g_strcmp0 (key, "developer-id") == 0)
-        priv->developer_id = g_variant_dup_string (value, NULL);
-      else if (g_strcmp0 (key, "screenshot-paintables") == 0)
-        {
-          g_autoptr (GListStore) store             = NULL;
-          g_autoptr (GVariantIter) screenshot_iter = NULL;
-
-          store = g_list_store_new (BZ_TYPE_ASYNC_TEXTURE);
-
-          screenshot_iter = g_variant_iter_new (value);
-          for (;;)
-            {
-              g_autofree char *basename        = NULL;
-              g_autoptr (GVariant) screenshot  = NULL;
-              g_autoptr (GdkPaintable) texture = NULL;
-
-              if (!g_variant_iter_next (screenshot_iter, "{sv}", &basename, &screenshot))
-                break;
-              texture = make_async_texture (screenshot);
-              g_list_store_append (store, texture);
-            }
-
-          priv->screenshot_paintables = G_LIST_MODEL (g_steal_pointer (&store));
-        }
-      else if (g_strcmp0 (key, "screenshot-captions") == 0)
-        {
-          g_autoptr (GListStore) store          = NULL;
-          g_autoptr (GVariantIter) caption_iter = NULL;
-
-          store = g_list_store_new (GTK_TYPE_STRING_OBJECT);
-
-          caption_iter = g_variant_iter_new (value);
-          for (;;)
-            {
-              g_autofree char *caption           = NULL;
-              g_autoptr (GtkStringObject) string = NULL;
-
-              if (!g_variant_iter_next (caption_iter, "s", &caption))
-                break;
-              string = gtk_string_object_new (caption);
-              g_list_store_append (store, string);
-            }
-
-          priv->screenshot_captions = G_LIST_MODEL (g_steal_pointer (&store));
-        }
-      else if (g_strcmp0 (key, "thumbnail-paintable") == 0)
-        priv->thumbnail_paintable = make_async_texture (value);
-      else if (g_strcmp0 (key, "share-urls") == 0)
-        {
-          g_autoptr (GListStore) store      = NULL;
-          g_autoptr (GVariantIter) url_iter = NULL;
-
-          store = g_list_store_new (BZ_TYPE_URL);
-
-          url_iter = g_variant_iter_new (value);
-          for (;;)
-            {
-              g_autofree char *name      = NULL;
-              g_autofree char *url_str   = NULL;
-              g_autoptr (BzUrl) url      = NULL;
-              g_autofree char *icon_name = NULL;
-
-              if (!g_variant_iter_next (url_iter, "(sss)", &name, &url_str, &icon_name))
-                break;
-              url = bz_url_new ();
-              bz_url_set_name (url, name);
-              bz_url_set_url (url, url_str);
-              bz_url_set_icon_name (url, icon_name);
-              g_list_store_append (store, url);
-            }
-
-          priv->share_urls = G_LIST_MODEL (g_steal_pointer (&store));
-        }
-      else if (g_strcmp0 (key, "donation-url") == 0)
-        priv->donation_url = g_variant_dup_string (value, NULL);
-      else if (g_strcmp0 (key, "forge-url") == 0)
-        priv->forge_url = g_variant_dup_string (value, NULL);
-      else if (g_strcmp0 (key, "version-history") == 0)
-        {
-          g_autoptr (GListStore) store          = NULL;
-          g_autoptr (GVariantIter) version_iter = NULL;
-
-          store = g_list_store_new (BZ_TYPE_RELEASE);
-
-          version_iter = g_variant_iter_new (value);
-          for (;;)
-            {
-              guint64          timestamp    = 0;
-              g_autofree char *url          = NULL;
-              g_autofree char *description  = NULL;
-              g_autofree char *version      = NULL;
-              g_autoptr (BzRelease) release = NULL;
-
-              if (!g_variant_iter_next (version_iter, "(mstmsms)", &description, &timestamp, &url, &version))
-                break;
-
-              release = bz_release_new ();
-              bz_release_set_timestamp (release, timestamp);
-              bz_release_set_url (release, url);
-              bz_release_set_version (release, version);
-              bz_release_set_description (release, description);
-              g_list_store_append (store, release);
-            }
-
-          priv->version_history = G_LIST_MODEL (g_steal_pointer (&store));
-        }
-      else if (g_strcmp0 (key, "light-accent-color") == 0)
-        priv->light_accent_color = g_variant_dup_string (value, NULL);
-      else if (g_strcmp0 (key, "dark-accent-color") == 0)
-        priv->dark_accent_color = g_variant_dup_string (value, NULL);
-      else if (g_strcmp0 (key, "is-mobile-friendly") == 0)
-        priv->is_mobile_friendly = g_variant_get_boolean (value);
-      else if (g_strcmp0 (key, "required-controls") == 0 && g_variant_is_of_type (value, G_VARIANT_TYPE_UINT32))
-        priv->required_controls = g_variant_get_uint32 (value);
-      else if (g_strcmp0 (key, "recommended-controls") == 0 && g_variant_is_of_type (value, G_VARIANT_TYPE_UINT32))
-        priv->recommended_controls = g_variant_get_uint32 (value);
-      else if (g_strcmp0 (key, "supported-controls") == 0 && g_variant_is_of_type (value, G_VARIANT_TYPE_UINT32))
-        priv->supported_controls = g_variant_get_uint32 (value);
-      else if (g_strcmp0 (key, "min-display-length") == 0)
-        priv->min_display_length = g_variant_get_int32 (value);
-      else if (g_strcmp0 (key, "max-display-length") == 0)
-        priv->max_display_length = g_variant_get_int32 (value);
-      else if (g_strcmp0 (key, "content-rating-kind") == 0)
-        {
-          g_autofree gchar *kind = NULL;
-
-          kind = g_variant_dup_string (value, NULL);
-
-          if (priv->content_rating == NULL)
-            priv->content_rating = as_content_rating_new ();
-
-          as_content_rating_set_kind (priv->content_rating, kind);
-        }
-      else if (g_strcmp0 (key, "content-rating-values") == 0)
-        {
-          g_autoptr (GVariantIter) rating_iter = NULL;
-
-          if (priv->content_rating == NULL)
-            priv->content_rating = as_content_rating_new ();
-
-          rating_iter = g_variant_iter_new (value);
-          for (;;)
-            {
-              g_autofree gchar    *rating_id        = NULL;
-              g_autofree gchar    *rating_value_str = NULL;
-              AsContentRatingValue rating_value;
-
-              if (!g_variant_iter_next (rating_iter, "(ss)", &rating_id, &rating_value_str))
-                break;
-
-              rating_value = as_content_rating_value_from_string (rating_value_str);
-              if (rating_value != AS_CONTENT_RATING_VALUE_UNKNOWN)
-                as_content_rating_set_value (priv->content_rating, rating_id, rating_value);
-            }
-        }
-      else if (g_strcmp0 (key, "keywords") == 0)
-        {
-          g_autoptr (GListStore) store           = NULL;
-          g_autoptr (GVariantIter) keywords_iter = NULL;
-
-          store = g_list_store_new (GTK_TYPE_STRING_OBJECT);
-
-          keywords_iter = g_variant_iter_new (value);
-          for (;;)
-            {
-              g_autofree char *keyword           = NULL;
-              g_autoptr (GtkStringObject) string = NULL;
-
-              if (!g_variant_iter_next (keywords_iter, "s", &keyword))
-                break;
-              string = gtk_string_object_new (keyword);
-              g_list_store_append (store, string);
-            }
-
-          priv->keywords = G_LIST_MODEL (g_steal_pointer (&store));
-        }
-      else if (g_strcmp0 (key, "categories") == 0)
-        {
-          g_autoptr (GListStore) store             = NULL;
-          g_autoptr (GVariantIter) categories_iter = NULL;
-
-          store = g_list_store_new (BZ_TYPE_FLATHUB_CATEGORY);
-
-          categories_iter = g_variant_iter_new (value);
-          for (;;)
-            {
-              g_autofree char *category_name         = NULL;
-              g_autoptr (BzFlathubCategory) category = NULL;
-
-              if (!g_variant_iter_next (categories_iter, "s", &category_name))
-                break;
-
-              category = bz_flathub_category_new ();
-              bz_flathub_category_set_name (category, category_name);
-              g_list_store_append (store, category);
-            }
-
-          priv->categories = G_LIST_MODEL (g_steal_pointer (&store));
-        }
-      else if (g_strcmp0 (key, "verification-verified") == 0)
-        {
-          if (priv->verification_status == NULL)
-            priv->verification_status = bz_verification_status_new ();
-          g_object_set (priv->verification_status, "verified", g_variant_get_boolean (value), NULL);
-        }
-      else if (g_strcmp0 (key, "verification-method") == 0)
-        {
-          if (priv->verification_status == NULL)
-            priv->verification_status = bz_verification_status_new ();
-          g_object_set (priv->verification_status, "method", g_variant_get_string (value, NULL), NULL);
-        }
-      else if (g_strcmp0 (key, "verification-website") == 0)
-        {
-          if (priv->verification_status == NULL)
-            priv->verification_status = bz_verification_status_new ();
-          g_object_set (priv->verification_status, "website", g_variant_get_string (value, NULL), NULL);
-        }
-      else if (g_strcmp0 (key, "verification-login-name") == 0)
-        {
-          if (priv->verification_status == NULL)
-            priv->verification_status = bz_verification_status_new ();
-          g_object_set (priv->verification_status, "login-name", g_variant_get_string (value, NULL), NULL);
-        }
-      else if (g_strcmp0 (key, "verification-login-provider") == 0)
-        {
-          if (priv->verification_status == NULL)
-            priv->verification_status = bz_verification_status_new ();
-          g_object_set (priv->verification_status, "login-provider", g_variant_get_string (value, NULL), NULL);
-        }
-      else if (g_strcmp0 (key, "verification-timestamp") == 0)
-        {
-          if (priv->verification_status == NULL)
-            priv->verification_status = bz_verification_status_new ();
-          g_object_set (priv->verification_status, "timestamp", g_variant_get_string (value, NULL), NULL);
-        }
-      else if (g_strcmp0 (key, "verification-login-is-organization") == 0)
-        {
-          if (priv->verification_status == NULL)
-            priv->verification_status = bz_verification_status_new ();
-          g_object_set (priv->verification_status, "login-is-organization", g_variant_get_boolean (value), NULL);
-        }
-      else if (g_strcmp0 (key, "is-flathub") == 0)
-        priv->is_flathub = g_variant_get_boolean (value);
-      else if (g_str_has_prefix (key, "permissions-"))
-        {
-          continue;
-        }
-    }
-
-  if (priv->permissions == NULL)
-    priv->permissions = bz_app_permissions_new ();
-
-  if (!bz_app_permissions_deserialize (priv->permissions, import, error))
-    {
-      g_warning ("Failed to deserialize app permissions");
-    }
-
-  return TRUE;
 }
 
 void
@@ -2129,12 +1435,12 @@ BzRepository *
 bz_entry_get_repository (BzEntry    *self,
                          GListModel *repos)
 {
-  BzEntryPrivate *priv = NULL;
-  guint n_repos = 0;
-  g_auto(GStrv) parts = NULL;
-  const char *scope = NULL;
-  const char *repo_name = NULL;
-  gboolean is_user = FALSE;
+  BzEntryPrivate *priv    = NULL;
+  guint           n_repos = 0;
+  g_auto (GStrv) parts    = NULL;
+  const char *scope       = NULL;
+  const char *repo_name   = NULL;
+  gboolean    is_user     = FALSE;
 
   priv = bz_entry_get_instance_private (self);
 
@@ -2145,7 +1451,7 @@ bz_entry_get_repository (BzEntry    *self,
   if (g_strv_length (parts) < 3)
     return NULL;
 
-  scope = parts[0];
+  scope     = parts[0];
   repo_name = parts[1];
 
   is_user = g_strcmp0 (scope, "FLATPAK-USER") == 0;
@@ -2154,8 +1460,8 @@ bz_entry_get_repository (BzEntry    *self,
   for (guint i = 0; i < n_repos; i++)
     {
       g_autoptr (BzRepository) repo = g_list_model_get_item (repos, i);
-      const char *name = bz_repository_get_name (repo);
-      gboolean repo_is_user = bz_repository_get_is_user (repo);
+      const char *name              = bz_repository_get_name (repo);
+      gboolean    repo_is_user      = bz_repository_get_is_user (repo);
 
       if (repo_is_user == is_user &&
           g_strcmp0 (name, repo_name) == 0)
@@ -2395,27 +1701,6 @@ bz_entry_calc_usefulness (BzEntry *self)
   score -= priv->eol != NULL ? 500 : 0;
 
   return score;
-}
-
-void
-bz_entry_serialize (BzEntry         *self,
-                    GVariantBuilder *builder)
-{
-  g_return_if_fail (BZ_IS_ENTRY (self));
-  g_return_if_fail (builder != NULL);
-
-  return bz_entry_real_serialize (BZ_SERIALIZABLE (self), builder);
-}
-
-gboolean
-bz_entry_deserialize (BzEntry  *self,
-                      GVariant *import,
-                      GError  **error)
-{
-  g_return_val_if_fail (BZ_IS_ENTRY (self), FALSE);
-  g_return_val_if_fail (import != NULL, FALSE);
-
-  return bz_entry_real_deserialize (BZ_SERIALIZABLE (self), import, error);
 }
 
 static void
@@ -2669,117 +1954,6 @@ download_stats_per_country_foreach (JsonObject  *object,
       NULL);
 
   g_list_store_append (store, point);
-}
-
-static gboolean
-maybe_save_paintable (BzEntryPrivate  *priv,
-                      const char      *key,
-                      GdkPaintable    *paintable,
-                      GVariantBuilder *builder)
-{
-  g_autoptr (GError) local_error = NULL;
-  const char *source_uri         = NULL;
-  const char *cache_into_path    = NULL;
-  g_autoptr (GdkTexture) texture = NULL;
-  g_autoptr (GFile) save_file    = NULL;
-  gboolean result                = FALSE;
-
-  if (!BZ_IS_ASYNC_TEXTURE (paintable))
-    {
-      g_warning ("Paintable must be of type BzAsyncTexture to be serialized!");
-      return FALSE;
-    }
-
-  source_uri      = bz_async_texture_get_source_uri (BZ_ASYNC_TEXTURE (paintable));
-  cache_into_path = bz_async_texture_get_cache_into_path (BZ_ASYNC_TEXTURE (paintable));
-  if (cache_into_path == NULL)
-    goto done;
-
-  if (bz_async_texture_get_loaded (BZ_ASYNC_TEXTURE (paintable)))
-    texture = bz_async_texture_dup_texture (BZ_ASYNC_TEXTURE (paintable));
-  else
-    goto done;
-
-  save_file = g_file_new_for_path (cache_into_path);
-  if (!g_file_query_exists (save_file, NULL))
-    {
-      g_autoptr (GFile) parent_file        = NULL;
-      g_autoptr (GBytes) png_bytes         = NULL;
-      g_autoptr (GFileOutputStream) output = NULL;
-      gssize bytes_written                 = 0;
-
-      parent_file = g_file_get_parent (save_file);
-      result      = g_file_make_directory_with_parents (
-          parent_file, NULL, &local_error);
-      if (!result)
-        {
-          if (g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_EXISTS))
-            g_clear_pointer (&local_error, g_error_free);
-          else
-            {
-              g_warning ("Couldn't serialize texture to %s: %s\n",
-                         cache_into_path, local_error->message);
-              goto done;
-            }
-        }
-
-      png_bytes = gdk_texture_save_to_png_bytes (texture);
-      if (png_bytes == NULL)
-        goto done;
-
-      output = g_file_replace (
-          save_file,
-          NULL,
-          FALSE,
-          G_FILE_CREATE_REPLACE_DESTINATION,
-          NULL,
-          &local_error);
-      if (output == NULL)
-        {
-          g_warning ("Couldn't serialize texture to %s: %s\n",
-                     cache_into_path, local_error->message);
-          goto done;
-        }
-
-      bytes_written = g_output_stream_write_bytes (
-          G_OUTPUT_STREAM (output), png_bytes, NULL, &local_error);
-      if (bytes_written < 0)
-        {
-          g_warning ("Couldn't serialize texture to %s: %s\n",
-                     cache_into_path, local_error->message);
-          goto done;
-        }
-
-      result = g_output_stream_close (G_OUTPUT_STREAM (output), NULL, &local_error);
-      if (!result)
-        {
-          g_warning ("Couldn't serialize texture to %s: %s\n",
-                     cache_into_path, local_error->message);
-          goto done;
-        }
-    }
-
-done:
-  g_variant_builder_add (builder, "{sv}", key, g_variant_new ("(sms)", source_uri, cache_into_path));
-  return TRUE;
-}
-
-static GdkPaintable *
-make_async_texture (GVariant *parse)
-{
-  g_autofree char *source            = NULL;
-  g_autofree char *cache_into        = NULL;
-  g_autoptr (GFile) source_file      = NULL;
-  g_autoptr (GFile) cache_into_file  = NULL;
-  g_autoptr (BzAsyncTexture) texture = NULL;
-
-  g_variant_get (parse, "(sms)", &source, &cache_into);
-  source_file = g_file_new_for_uri (source);
-  if (cache_into != NULL)
-    cache_into_file = g_file_new_for_path (cache_into);
-
-  texture = bz_async_texture_new_lazy (source_file, cache_into_file);
-  return GDK_PAINTABLE (g_steal_pointer (&texture));
 }
 
 static DexFuture *

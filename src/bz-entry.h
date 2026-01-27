@@ -221,15 +221,6 @@ bz_entry_load_mini_icon (BzEntry *self);
 gint
 bz_entry_calc_usefulness (BzEntry *self);
 
-void
-bz_entry_serialize (BzEntry         *self,
-                    GVariantBuilder *builder);
-
-gboolean
-bz_entry_deserialize (BzEntry  *self,
-                      GVariant *import,
-                      GError  **error);
-
 GIcon *
 bz_load_mini_icon_sync (const char *unique_id_checksum,
                         const char *path);

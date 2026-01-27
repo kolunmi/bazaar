@@ -20,10 +20,8 @@
 
 #include <glib/gi18n.h>
 
-#include "appstream.h"
 #include "bz-flathub-category.h"
 #include "bz-flathub-sub-category.h"
-#include "bz-serializable.h"
 
 struct _BzFlathubCategory
 {
@@ -38,14 +36,7 @@ struct _BzFlathubCategory
   GListModel              *subcategories;
 };
 
-static void
-serializable_iface_init (BzSerializableInterface *iface);
-
-G_DEFINE_FINAL_TYPE_WITH_CODE (
-    BzFlathubCategory,
-    bz_flathub_category,
-    G_TYPE_OBJECT,
-    G_IMPLEMENT_INTERFACE (BZ_TYPE_SERIALIZABLE, serializable_iface_init));
+G_DEFINE_FINAL_TYPE (BzFlathubCategory, bz_flathub_category, G_TYPE_OBJECT)
 
 enum
 {
@@ -332,136 +323,6 @@ bz_flathub_category_class_init (BzFlathubCategoryClass *klass)
 static void
 bz_flathub_category_init (BzFlathubCategory *self)
 {
-}
-
-static void
-bz_flathub_category_real_serialize (BzSerializable  *serializable,
-                                    GVariantBuilder *builder)
-{
-  BzFlathubCategory *self = BZ_FLATHUB_CATEGORY (serializable);
-
-  if (self->name != NULL)
-    g_variant_builder_add (builder, "{sv}", "name", g_variant_new_string (self->name));
-  if (self->applications != NULL)
-    {
-      guint n_items = 0;
-
-      n_items = g_list_model_get_n_items (self->applications);
-      if (n_items > 0)
-        {
-          g_autoptr (GVariantBuilder) sub_builder = NULL;
-
-          sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("as"));
-          for (guint i = 0; i < n_items; i++)
-            {
-              g_autoptr (GtkStringObject) string = NULL;
-
-              string = g_list_model_get_item (self->applications, i);
-              g_variant_builder_add (sub_builder, "s", gtk_string_object_get_string (string));
-            }
-
-          g_variant_builder_add (builder, "{sv}", "applications", g_variant_builder_end (sub_builder));
-        }
-    }
-  if (self->quality_applications != NULL)
-    {
-      guint n_items = 0;
-
-      n_items = g_list_model_get_n_items (self->quality_applications);
-      if (n_items > 0)
-        {
-          g_autoptr (GVariantBuilder) sub_builder = NULL;
-
-          sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("as"));
-          for (guint i = 0; i < n_items; i++)
-            {
-              g_autoptr (GtkStringObject) string = NULL;
-
-              string = g_list_model_get_item (self->quality_applications, i);
-              g_variant_builder_add (sub_builder, "s", gtk_string_object_get_string (string));
-            }
-
-          g_variant_builder_add (builder, "{sv}", "quality-applications", g_variant_builder_end (sub_builder));
-        }
-    }
-  g_variant_builder_add (builder, "{sv}", "total-entries", g_variant_new_int32 (self->total_entries));
-  g_variant_builder_add (builder, "{sv}", "is-spotlight", g_variant_new_boolean (self->is_spotlight));
-}
-
-static gboolean
-bz_flathub_category_real_deserialize (BzSerializable *serializable,
-                                      GVariant       *import,
-                                      GError        **error)
-{
-  BzFlathubCategory *self       = BZ_FLATHUB_CATEGORY (serializable);
-  g_autoptr (GVariantIter) iter = NULL;
-
-  clear (self);
-
-  iter = g_variant_iter_new (import);
-  for (;;)
-    {
-      g_autofree char *key       = NULL;
-      g_autoptr (GVariant) value = NULL;
-
-      /* TODO automate this, this is awful */
-      if (!g_variant_iter_next (iter, "{sv}", &key, &value))
-        break;
-
-      if (g_strcmp0 (key, "name") == 0)
-        bz_flathub_category_set_name (self, g_variant_get_string (value, NULL));
-      else if (g_strcmp0 (key, "applications") == 0)
-        {
-          g_autoptr (GtkStringList) list     = NULL;
-          g_autoptr (GVariantIter) list_iter = NULL;
-
-          list = gtk_string_list_new (NULL);
-
-          list_iter = g_variant_iter_new (value);
-          for (;;)
-            {
-              g_autofree char *id = NULL;
-
-              if (!g_variant_iter_next (list_iter, "s", &id))
-                break;
-              gtk_string_list_append (list, id);
-            }
-
-          self->applications = (GListModel *) g_steal_pointer (&list);
-        }
-      else if (g_strcmp0 (key, "quality-applications") == 0)
-        {
-          g_autoptr (GtkStringList) list     = NULL;
-          g_autoptr (GVariantIter) list_iter = NULL;
-
-          list = gtk_string_list_new (NULL);
-
-          list_iter = g_variant_iter_new (value);
-          for (;;)
-            {
-              g_autofree char *id = NULL;
-
-              if (!g_variant_iter_next (list_iter, "s", &id))
-                break;
-              gtk_string_list_append (list, id);
-            }
-
-          self->quality_applications = (GListModel *) g_steal_pointer (&list);
-        }
-      else if (g_strcmp0 (key, "total-entries") == 0)
-        self->total_entries = g_variant_get_int32 (value);
-      else if (g_strcmp0 (key, "is-spotlight") == 0)
-        self->is_spotlight = g_variant_get_boolean (value);
-    }
-
-  return TRUE;
-}
-
-static void
-serializable_iface_init (BzSerializableInterface *iface)
-{
-  iface->serialize   = bz_flathub_category_real_serialize;
-  iface->deserialize = bz_flathub_category_real_deserialize;
 }
 
 BzFlathubCategory *

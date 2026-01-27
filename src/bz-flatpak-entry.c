@@ -32,7 +32,6 @@
 #include "bz-flatpak-private.h"
 #include "bz-io.h"
 #include "bz-release.h"
-#include "bz-serializable.h"
 #include "bz-url.h"
 #include "bz-verification-status.h"
 
@@ -64,14 +63,7 @@ struct _BzFlatpakEntry
   FlatpakRef *ref;
 };
 
-static void
-serializable_iface_init (BzSerializableInterface *iface);
-
-G_DEFINE_FINAL_TYPE_WITH_CODE (
-    BzFlatpakEntry,
-    bz_flatpak_entry,
-    BZ_TYPE_ENTRY,
-    G_IMPLEMENT_INTERFACE (BZ_TYPE_SERIALIZABLE, serializable_iface_init))
+G_DEFINE_FINAL_TYPE (BzFlatpakEntry, bz_flatpak_entry, BZ_TYPE_ENTRY)
 
 enum
 {
@@ -238,82 +230,6 @@ bz_flatpak_entry_class_init (BzFlatpakEntryClass *klass)
 static void
 bz_flatpak_entry_init (BzFlatpakEntry *self)
 {
-}
-
-static void
-bz_flatpak_entry_real_serialize (BzSerializable  *serializable,
-                                 GVariantBuilder *builder)
-{
-  BzFlatpakEntry *self = BZ_FLATPAK_ENTRY (serializable);
-
-  g_variant_builder_add (builder, "{sv}", "user", g_variant_new_boolean (self->user));
-  if (self->flatpak_name != NULL)
-    g_variant_builder_add (builder, "{sv}", "flatpak-name", g_variant_new_string (self->flatpak_name));
-  if (self->flatpak_id != NULL)
-    g_variant_builder_add (builder, "{sv}", "flatpak-id", g_variant_new_string (self->flatpak_id));
-  if (self->flatpak_version != NULL)
-    g_variant_builder_add (builder, "{sv}", "flatpak-version", g_variant_new_string (self->flatpak_version));
-  if (self->application_name != NULL)
-    g_variant_builder_add (builder, "{sv}", "application-name", g_variant_new_string (self->application_name));
-  if (self->application_runtime != NULL)
-    g_variant_builder_add (builder, "{sv}", "application-runtime", g_variant_new_string (self->application_runtime));
-  if (self->application_command != NULL)
-    g_variant_builder_add (builder, "{sv}", "application-command", g_variant_new_string (self->application_command));
-  if (self->runtime_name != NULL)
-    g_variant_builder_add (builder, "{sv}", "runtime-name", g_variant_new_string (self->runtime_name));
-  if (self->addon_extension_of_ref != NULL)
-    g_variant_builder_add (builder, "{sv}", "addon-extension-of-ref", g_variant_new_string (self->addon_extension_of_ref));
-
-  bz_entry_serialize (BZ_ENTRY (self), builder);
-}
-
-static gboolean
-bz_flatpak_entry_real_deserialize (BzSerializable *serializable,
-                                   GVariant       *import,
-                                   GError        **error)
-{
-  BzFlatpakEntry *self          = BZ_FLATPAK_ENTRY (serializable);
-  g_autoptr (GVariantIter) iter = NULL;
-
-  clear_entry (self);
-
-  iter = g_variant_iter_new (import);
-  for (;;)
-    {
-      g_autofree char *key       = NULL;
-      g_autoptr (GVariant) value = NULL;
-
-      if (!g_variant_iter_next (iter, "{sv}", &key, &value))
-        break;
-
-      if (g_strcmp0 (key, "user") == 0)
-        self->user = g_variant_get_boolean (value);
-      else if (g_strcmp0 (key, "flatpak-name") == 0)
-        self->flatpak_name = g_variant_dup_string (value, NULL);
-      else if (g_strcmp0 (key, "flatpak-id") == 0)
-        self->flatpak_id = g_variant_dup_string (value, NULL);
-      else if (g_strcmp0 (key, "flatpak-version") == 0)
-        self->flatpak_version = g_variant_dup_string (value, NULL);
-      else if (g_strcmp0 (key, "application-name") == 0)
-        self->application_name = g_variant_dup_string (value, NULL);
-      else if (g_strcmp0 (key, "application-runtime") == 0)
-        self->application_runtime = g_variant_dup_string (value, NULL);
-      else if (g_strcmp0 (key, "application-command") == 0)
-        self->application_command = g_variant_dup_string (value, NULL);
-      else if (g_strcmp0 (key, "runtime-name") == 0)
-        self->runtime_name = g_variant_dup_string (value, NULL);
-      else if (g_strcmp0 (key, "addon-extension-of-ref") == 0)
-        self->addon_extension_of_ref = g_variant_dup_string (value, NULL);
-    }
-
-  return bz_entry_deserialize (BZ_ENTRY (self), import, error);
-}
-
-static void
-serializable_iface_init (BzSerializableInterface *iface)
-{
-  iface->serialize   = bz_flatpak_entry_real_serialize;
-  iface->deserialize = bz_flatpak_entry_real_deserialize;
 }
 
 static guint
