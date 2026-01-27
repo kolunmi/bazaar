@@ -121,12 +121,12 @@ format_total_downloads (gpointer object,
     return g_strdup ("---");
   if (value >= 1000000)
     /* Translators: M is the suffix for millions */
-    return g_strdup_printf ("%.2fM Total Installs", value / 1000000.0);
+    return g_strdup_printf (_("%.2fM Total Installs"), value / 1000000.0);
   else if (value >= 1000)
     /* Translators: K is the suffix for thousands*/
-    return g_strdup_printf ("%.2fK Total Installs", value / 1000.0);
+    return g_strdup_printf (_("%.2fK Total Installs"), value / 1000.0);
   else
-    return g_strdup_printf ("%'d Total Installs", value);
+    return g_strdup_printf (_("%'d Total Installs"), value);
 }
 
 static void

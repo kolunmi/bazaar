@@ -242,40 +242,6 @@ no_results_found_subtitle (gpointer    object,
 }
 
 static void
-action_move (GtkWidget  *widget,
-             const char *action_name,
-             GVariant   *parameter)
-{
-  BzSearchWidget    *self     = BZ_SEARCH_WIDGET (widget);
-  GtkSelectionModel *model    = NULL;
-  guint              selected = 0;
-  guint              n_items  = 0;
-
-  model   = gtk_grid_view_get_model (self->grid_view);
-  n_items = g_list_model_get_n_items (G_LIST_MODEL (model));
-
-  if (n_items == 0)
-    return;
-
-  selected = gtk_single_selection_get_selected (GTK_SINGLE_SELECTION (model));
-
-  if (selected == GTK_INVALID_LIST_POSITION)
-    selected = 0;
-  else
-    {
-      int offset = 0;
-
-      offset = g_variant_get_int32 (parameter);
-      if (offset < 0 && ABS (offset) > selected)
-        selected = n_items + (offset % -(int) n_items);
-      else
-        selected = (selected + offset) % n_items;
-    }
-
-  gtk_widget_activate_action (GTK_WIDGET (self->grid_view), "list.scroll-to-item", "u", selected);
-}
-
-static void
 apps_page_select_cb (BzSearchWidget *self,
                      BzEntryGroup   *group,
                      BzAppsPage     *page)
@@ -432,8 +398,6 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, reset_search_cb);
   gtk_widget_class_bind_template_callback (widget_class, no_results_found_subtitle);
   gtk_widget_class_bind_template_callback (widget_class, tile_activated_cb);
-
-  gtk_widget_class_install_action (widget_class, "move", "i", action_move);
 }
 
 static void
@@ -503,6 +467,11 @@ bz_search_widget_set_state (BzSearchWidget *self,
   if (state != NULL)
     {
       self->state = g_object_ref (state);
+      g_signal_connect_swapped (
+          state,
+          "notify::disable-blocklists",
+          G_CALLBACK (invalidating_state_prop_changed),
+          self);
       g_signal_connect_swapped (
           state,
           "notify::hide-eol",

@@ -2,56 +2,6 @@ using Gtk 4.0;
 using Adw 1;
 
 template $BzSearchWidget: Adw.Bin {
-  ShortcutController {
-    Shortcut {
-      trigger: "<primary>p";
-      action: "action(move)";
-      arguments: "-1";
-    }
-
-    Shortcut {
-      trigger: "<primary>n";
-      action: "action(move)";
-      arguments: "1";
-    }
-
-    Shortcut {
-      trigger: "<primary>k";
-      action: "action(move)";
-      arguments: "-1";
-    }
-
-    Shortcut {
-      trigger: "<primary>j";
-      action: "action(move)";
-      arguments: "1";
-    }
-
-    Shortcut {
-      trigger: "<primary><alt>p";
-      action: "action(move)";
-      arguments: "-10";
-    }
-
-    Shortcut {
-      trigger: "<primary><alt>n";
-      action: "action(move)";
-      arguments: "10";
-    }
-
-    Shortcut {
-      trigger: "<primary><alt>k";
-      action: "action(move)";
-      arguments: "-10";
-    }
-
-    Shortcut {
-      trigger: "<primary><alt>j";
-      action: "action(move)";
-      arguments: "10";
-    }
-  }
-
   child: Adw.BreakpointBin {
     width-request: 360;
     height-request: 294;
@@ -96,6 +46,7 @@ template $BzSearchWidget: Adw.Bin {
 
           child: Box {
             spacing: 8;
+            height-request: 40;
 
             Image {
               icon-name: "system-search-symbolic";
@@ -112,21 +63,16 @@ template $BzSearchWidget: Adw.Bin {
               height-request: 16;
             }
 
-            Revealer {
-              reveal-child: bind $is_valid_string(search_bar.text) as <bool>;
-              transition-type: slide_right;
+            Button clear_button {
+              visible: bind $is_valid_string(search_bar.text) as <bool>;
+              icon-name: "edit-clear-symbolic";
 
-              child: Button clear_button {
-                icon-name: "edit-clear-symbolic";
-
-                styles [
-                  "flat",
-                  "circular",
-                  "clear-button",
-                ]
-
-                clicked => $reset_search_cb(template);
-              };
+              styles [
+                "flat",
+                "circular",
+                "clear-button",
+              ]
+              clicked => $reset_search_cb(template);
             }
 
             styles [

@@ -68,6 +68,39 @@
   </screenshots>
 
   <releases>
+    <release version="0.7.5" date="2026-01-18">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.5</url>
+      <description translate="no">
+        <p>Minor bugfix release</p>
+      </description>
+    </release>
+    <release version="0.7.4" date="2026-01-18">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.4</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>Fix issue where installed page is empty on opening second window</li>
+          <li>Fix screenshot flickering in search results</li>
+          <li>Fix pride flags sometimes not showing on certain locales</li>
+          <li>Add "Install all" to favorites page</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.7.3" date="2026-01-11">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.3</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>Trash user data instead of deleting</li>
+          <li>Tweaks to permissions dialog</li>
+          <li>Fix broken EOL filtering</li>
+          <li>Add text filter to installed page</li>
+          <li>Add optional translations mappings for string properties in YAML configs</li>
+          <li>Hide EOL apps by default</li>
+          <li>Many other minor bug fixes and improvements</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.7.2" date="2026-01-03">
       <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.2</url>
       <description translate="no">

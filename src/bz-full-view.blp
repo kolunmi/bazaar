@@ -73,6 +73,7 @@ template $BzFullView: Adw.Bin {
             setters {
               context_bar.orientation: vertical;
               context_bar.spacing: 4;
+              context_bar.homogeneous: false;
               header_box.spacing: 12;
               app_name_box.spacing: 0;
               download_bar.expand-size: 60;
@@ -115,13 +116,18 @@ template $BzFullView: Adw.Bin {
                 child: Box main_box {
                   orientation: vertical;
                   vexpand: false;
-                  margin-top: 15;
                   margin-bottom: 15;
                   spacing: 20;
+
+                  Adw.Banner {
+                    title: _("Installing .flatpak bundles is not yet supported");
+                    revealed: bind template.ui-entry as <$BzResult>.object as <$BzFlatpakEntry>.is-bundle as <bool>;
+                  }
 
                   Adw.Clamp {
                     maximum-size: 860;
                     tightening-threshold: 1000;
+                    margin-top: 15;
 
                     child: Box top_box {
                       orientation: vertical;
@@ -297,15 +303,16 @@ template $BzFullView: Adw.Bin {
                           homogeneous: true;
 
                           $BzContextTile download_size_tile {
-                            label: _("Size");
+                            label: bind $get_size_label($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <string>;
                             has-tooltip: true;
                             tooltip-text: bind $format_size_tooltip(template.ui-entry as <$BzResult>.object as <$BzEntry>.size) as <string>;
                             lozenge-style: "grey";
+                            sensitive: bind $invert_boolean($is_zero($get_size_type(template.ui-entry as <$BzResult>.object as <$BzEntry>, $is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <int>) as <bool>) as <bool>;
                             clicked => $size_cb(template);
 
                             lozenge-child: Label {
                               justify: center;
-                              label: bind $format_size(template.ui-entry as <$BzResult>.object as <$BzEntry>.size) as <string>;
+                              label: bind $format_size($get_size_type(template.ui-entry as <$BzResult>.object as <$BzEntry>, $is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <int>) as <string>;
                               lines: 3;
                               ellipsize: end;
                               halign: center;
@@ -336,7 +343,6 @@ template $BzFullView: Adw.Bin {
                           }
 
                           $BzContextTile {
-                            can-target: bind template.entry-group as <$BzEntryGroup>.is_flathub as <bool>;
                             clicked => $safety_cb(template);
                             label: bind $get_safety_rating_label(template.ui-entry as <$BzResult>.object as <$BzEntry>) as <string>;
                             lozenge-style: bind $get_safety_rating_style(template.ui-entry as <$BzResult>.object as <$BzEntry>) as <string>;
@@ -427,7 +433,7 @@ template $BzFullView: Adw.Bin {
                             can-target: bind $invert_boolean($is_null(template.ui-entry) as <bool>) as <bool>;
                             sensitive: bind $invert_boolean($is_null(template.ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <bool>) as <bool>;
                             clicked => $dl_stats_cb(template);
-                            label: _("Downloads /mo");
+                            label: _("Downloads/Month");
                             has-tooltip: bind $invert_boolean($is_null(template.ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <bool>) as <bool>;
                             tooltip-text: bind $format_recent_downloads_tooltip(template.ui-entry as <$BzResult>.object as <$BzEntry>.recent-downloads) as <string>;
                             lozenge-style: "grey";
@@ -586,12 +592,15 @@ template $BzFullView: Adw.Bin {
                         margin-end: 25;
                         margin-bottom: 20;
                         margin-top: 10;
-                        spacing: 20;
+                        spacing: 15;
 
                         Revealer {
                           transition-type: slide_down;
-                          reveal-child: bind $logical_and($invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.user-data-size) as <bool>) as <bool>, $is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
-
+                          reveal-child: bind $logical_and(
+                              $logical_and($invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.user-data-size) as <bool>) as <bool>,$is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>,
+                              $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>
+                            ) as <bool>;
+                          visible: bind $invert_boolean($logical_and($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>, $is_zero(template.entry-group as <$BzEntryGroup>.installable) as <bool>) as <bool>) as <bool>;
                           child: Box {
                             height-request: 50;
                             margin-bottom: 10;
@@ -639,7 +648,6 @@ template $BzFullView: Adw.Bin {
                               "title-2",
                             ]
 
-                            margin-start: 5;
                             valign: start;
                             xalign: 0;
                             wrap: true;
@@ -653,7 +661,6 @@ template $BzFullView: Adw.Bin {
 
                             child: $BzAppstreamDescriptionRender {
                               appstream-description: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.long-description;
-                              margin-start: 5;
                             };
                           }
                         }
@@ -697,12 +704,12 @@ template $BzFullView: Adw.Bin {
                           }
                         }
 
-                        $BzShareList {
-                          urls: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.share-urls;
-                        }
-
                         $BzReleasesList releases_list {
                           version-history: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.version-history;
+                        }
+
+                        $BzShareList {
+                          urls: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.share-urls;
                         }
 
                         Box {
@@ -717,6 +724,8 @@ template $BzFullView: Adw.Bin {
 
                             label: bind $format_other_apps_label(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer) as <string>;
                             xalign: 0;
+                            wrap: true;
+                            wrap-mode: word_char;
                             margin-bottom: 6;
                             margin-start: 3;
                           }
@@ -740,11 +749,17 @@ template $BzFullView: Adw.Bin {
 
                           Button {
                             visible: bind $is_longer(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer-apps, 6) as <bool>;
-                            label: bind $format_more_other_apps_label(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer) as <string>;
                             clicked => $more_apps_button_clicked_cb(template);
                             halign: center;
                             margin-top: 11;
                             margin-bottom: 8;
+
+                            child: Label {
+                              label: bind $format_more_other_apps_label(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer) as <string>;
+                              justify: center;
+                              wrap: true;
+                              wrap-mode: word_char;
+                            };
 
                             styles [
                               "pill",

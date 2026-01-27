@@ -104,9 +104,6 @@ parse (BzYamlParser   *self,
        GPtrArray      *path_stack,
        GError        **error);
 
-static char *
-join_path_stack (GPtrArray *path_stack);
-
 static GObject *
 parse_object (BzYamlParser  *self,
               yaml_parser_t *parser,
@@ -116,6 +113,9 @@ parse_object (BzYamlParser  *self,
               GHashTable    *anchors,
               const char    *prop_path,
               GError       **error);
+
+static char *
+join_path_stack (GPtrArray *path_stack);
 
 static void
 destroy_gvalue (GValue *value);
@@ -748,26 +748,6 @@ parse (BzYamlParser   *self,
   return TRUE;
 }
 
-static char *
-join_path_stack (GPtrArray *path_stack)
-{
-  GString *string = NULL;
-
-  if (path_stack->len == 0)
-    return g_strdup ("/");
-
-  string = g_string_new (NULL);
-  for (guint i = 0; i < path_stack->len; i++)
-    {
-      const char *component = NULL;
-
-      component = g_ptr_array_index (path_stack, i);
-      g_string_append_printf (string, "/%s", component);
-    }
-
-  return g_string_free_and_steal (string);
-}
-
 static GObject *
 parse_object (BzYamlParser  *self,
               yaml_parser_t *parser,
@@ -1026,58 +1006,97 @@ parse_object (BzYamlParser  *self,
             {
               g_autofree char *anchor = NULL;
 
-              EXPECT (YAML_SCALAR_EVENT, "scalar value");
-              anchor = bz_maybe_strdup ((const char *) event->data.scalar.anchor);
-
-              switch (spec->value_type)
+              if (spec->value_type == G_TYPE_STRING &&
+                  event->type == YAML_MAPPING_START_EVENT)
                 {
-                case G_TYPE_BOOLEAN:
-                  vtype = G_VARIANT_TYPE_BOOLEAN;
-                  break;
-                case G_TYPE_INT:
-                  vtype = G_VARIANT_TYPE_INT32;
-                  break;
-                case G_TYPE_INT64:
-                  vtype = G_VARIANT_TYPE_INT64;
-                  break;
-                case G_TYPE_UINT:
-                  vtype = G_VARIANT_TYPE_UINT32;
-                  break;
-                case G_TYPE_UINT64:
-                  vtype = G_VARIANT_TYPE_UINT64;
-                  break;
-                case G_TYPE_DOUBLE:
-                case G_TYPE_FLOAT:
-                  vtype = G_VARIANT_TYPE_DOUBLE;
-                  break;
-                case G_TYPE_STRING:
-                default:
-                  vtype = G_VARIANT_TYPE_STRING;
-                  break;
-                }
+                  /* Handle optional translated strings */
+                  const char *const *langs   = NULL;
+                  g_autofree char   *english = NULL;
 
-              if (g_variant_type_equal (vtype, G_VARIANT_TYPE_STRING))
-                variant = g_variant_new_string ((const char *) event->data.scalar.value);
+                  anchor = bz_maybe_strdup ((const char *) event->data.mapping_start.anchor);
+
+                  langs = g_get_language_names ();
+                  for (;;)
+                    {
+                      g_autofree char *code = NULL;
+
+                      NEXT_EVENT ();
+                      if (event->type == YAML_MAPPING_END_EVENT)
+                        break;
+                      EXPECT (YAML_SCALAR_EVENT, "scalar key language code");
+                      if (variant != NULL)
+                        continue;
+
+                      code = g_strdup ((const char *) event->data.scalar.value);
+
+                      NEXT_EVENT ();
+                      EXPECT (YAML_SCALAR_EVENT, "scalar translated string");
+
+                      if (g_strv_contains (langs, code))
+                        variant = g_variant_new_string ((const char *) event->data.scalar.value);
+                      else if (english == NULL &&
+                               g_strcmp0 (code, "en") == 0)
+                        english = g_strdup ((const char *) event->data.scalar.value);
+                    }
+
+                  if (variant == NULL)
+                    variant = g_variant_new_string (english != NULL ? english : "NULL");
+                }
               else
                 {
-                  variant = g_variant_parse (
-                      vtype,
-                      (const char *) event->data.scalar.value,
-                      NULL,
-                      NULL,
-                      &local_error);
-                  if (variant == NULL)
+                  EXPECT (YAML_SCALAR_EVENT, "scalar value");
+                  anchor = bz_maybe_strdup ((const char *) event->data.scalar.anchor);
+
+                  switch (spec->value_type)
                     {
-                      g_set_error (
-                          error,
-                          BZ_YAML_ERROR,
-                          BZ_YAML_ERROR_BAD_SCALAR,
-                          "Failed to parse scalar variant at line %zu, column %zu: %s",
-                          event->start_mark.line,
-                          event->start_mark.column,
-                          local_error->message);
-                      yaml_event_delete (event);
-                      return FALSE;
+                    case G_TYPE_BOOLEAN:
+                      vtype = G_VARIANT_TYPE_BOOLEAN;
+                      break;
+                    case G_TYPE_INT:
+                      vtype = G_VARIANT_TYPE_INT32;
+                      break;
+                    case G_TYPE_INT64:
+                      vtype = G_VARIANT_TYPE_INT64;
+                      break;
+                    case G_TYPE_UINT:
+                      vtype = G_VARIANT_TYPE_UINT32;
+                      break;
+                    case G_TYPE_UINT64:
+                      vtype = G_VARIANT_TYPE_UINT64;
+                      break;
+                    case G_TYPE_DOUBLE:
+                    case G_TYPE_FLOAT:
+                      vtype = G_VARIANT_TYPE_DOUBLE;
+                      break;
+                    case G_TYPE_STRING:
+                    default:
+                      vtype = G_VARIANT_TYPE_STRING;
+                      break;
+                    }
+
+                  if (g_variant_type_equal (vtype, G_VARIANT_TYPE_STRING))
+                    variant = g_variant_new_string ((const char *) event->data.scalar.value);
+                  else
+                    {
+                      variant = g_variant_parse (
+                          vtype,
+                          (const char *) event->data.scalar.value,
+                          NULL,
+                          NULL,
+                          &local_error);
+                      if (variant == NULL)
+                        {
+                          g_set_error (
+                              error,
+                              BZ_YAML_ERROR,
+                              BZ_YAML_ERROR_BAD_SCALAR,
+                              "Failed to parse scalar variant at line %zu, column %zu: %s",
+                              event->start_mark.line,
+                              event->start_mark.column,
+                              local_error->message);
+                          yaml_event_delete (event);
+                          return FALSE;
+                        }
                     }
                 }
 
@@ -1148,28 +1167,24 @@ parse_object (BzYamlParser  *self,
   return g_steal_pointer (&object);
 }
 
-static void
-deinit_schema_node (gpointer data)
+static char *
+join_path_stack (GPtrArray *path_stack)
 {
-  SchemaNodeData *self = data;
+  GString *string = NULL;
 
-  switch (self->kind)
+  if (path_stack->len == 0)
+    return g_strdup ("/");
+
+  string = g_string_new (NULL);
+  for (guint i = 0; i < path_stack->len; i++)
     {
-    case KIND_SCALAR:
-      g_clear_pointer (&self->scalar.vtype, g_free);
-      break;
-    case KIND_OBJECT:
-      g_clear_pointer (&self->object.type_hints, g_hash_table_unref);
-      break;
-    case KIND_LIST:
-      g_clear_pointer (&self->list.child, schema_node_data_unref);
-      break;
-    case KIND_MAPPINGS:
-      g_clear_pointer (&self->mappings.children, g_hash_table_unref);
-      break;
-    default:
-      g_assert_not_reached ();
+      const char *component = NULL;
+
+      component = g_ptr_array_index (path_stack, i);
+      g_string_append_printf (string, "/%s", component);
     }
+
+  return g_string_free_and_steal (string);
 }
 
 static void
@@ -1198,4 +1213,28 @@ copy_gvalue_alloc (GValue *value)
   g_value_init (ret, value->g_type);
   g_value_copy (value, ret);
   return ret;
+}
+
+static void
+deinit_schema_node (gpointer data)
+{
+  SchemaNodeData *self = data;
+
+  switch (self->kind)
+    {
+    case KIND_SCALAR:
+      g_clear_pointer (&self->scalar.vtype, g_free);
+      break;
+    case KIND_OBJECT:
+      g_clear_pointer (&self->object.type_hints, g_hash_table_unref);
+      break;
+    case KIND_LIST:
+      g_clear_pointer (&self->list.child, schema_node_data_unref);
+      break;
+    case KIND_MAPPINGS:
+      g_clear_pointer (&self->mappings.children, g_hash_table_unref);
+      break;
+    default:
+      g_assert_not_reached ();
+    }
 }

@@ -2,7 +2,6 @@ using Gtk 4.0;
 using Adw 1;
 
 template $BzPreferencesDialog: Adw.PreferencesDialog {
-  follows-content-size: true;
   content-height: 500;
   search-enabled: true;
   width-request: 350;
@@ -85,6 +84,11 @@ template $BzPreferencesDialog: Adw.PreferencesDialog {
             selection-mode: none;
           }
         };
+      }
+      Adw.SwitchRow rotate_switch {
+        title: _("Vertical Stripes");
+        subtitle: _("Display flag colors from left to right");
+        notify::active => $on_rotate_switch_changed();
       }
     }
   }

@@ -27,6 +27,15 @@
 
 G_BEGIN_DECLS
 
+typedef enum
+{
+  BZ_HIGH_RISK_GROUP_NONE = 0,
+  BZ_HIGH_RISK_GROUP_X11  = 1 << 0,
+  BZ_HIGH_RISK_GROUP_DISK = 1 << 1,
+} BzHighRiskGroup;
+
+#define BZ_TYPE_HIGH_RISK_GROUP (bz_high_risk_group_get_type ())
+
 GListModel  *
 bz_safety_calculator_analyze_entry (BzEntry *entry);
 
@@ -36,5 +45,8 @@ bz_safety_calculator_calculate_rating (BzEntry *entry);
 char *
 bz_safety_calculator_get_top_icon (BzEntry *entry,
                                    int      index);
+
+BzHighRiskGroup
+bz_safety_calculator_get_high_risk_groups (BzEntry *entry);
 
 G_END_DECLS

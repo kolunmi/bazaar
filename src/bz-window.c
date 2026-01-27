@@ -37,9 +37,10 @@
 #include "bz-io.h"
 #include "bz-progress-bar.h"
 #include "bz-search-widget.h"
-#include "bz-transaction-manager.h"
+#include "bz-template-callbacks.h"
 #include "bz-transaction-dialog.h"
-#include "bz-update-dialog.h"
+#include "bz-transaction-list-dialog.h"
+#include "bz-transaction-manager.h"
 #include "bz-user-data-page.h"
 #include "bz-util.h"
 #include "bz-window.h"
@@ -63,6 +64,7 @@ struct _BzWindow
   GtkToggleButton     *toggle_transactions;
   GtkToggleButton     *toggle_transactions_sidebar;
   BzSearchWidget      *search_widget;
+  BzInstalledPage     *installed_page;
   GtkButton           *update_button;
   GtkToggleButton     *transactions_pause;
   GtkButton           *transactions_stop;
@@ -100,13 +102,27 @@ BZ_DEFINE_DATA (
     BZ_RELEASE_DATA (entry, g_object_unref);
     BZ_RELEASE_DATA (group, g_object_unref);
     BZ_RELEASE_DATA (source, g_object_unref))
+
 static DexFuture *
 transact_fiber (TransactData *data);
 
+BZ_DEFINE_DATA (
+    bulk_install,
+    BulkInstall,
+    {
+      GWeakRef   *self;
+      GListModel *groups;
+    },
+    BZ_RELEASE_DATA (self, bz_weak_release);
+    BZ_RELEASE_DATA (groups, g_object_unref))
+
+static DexFuture *
+bulk_install_fiber (BulkInstallData *data);
+
 static void
-update_dialog_response (BzUpdateDialog *dialog,
-                        const char     *response,
-                        BzWindow       *self);
+update_dialog_response (BzTransactionListDialog *dialog,
+                        const char              *response,
+                        BzWindow                *self);
 
 static DexFuture *
 transact (BzWindow  *self,
@@ -130,6 +146,11 @@ update (BzWindow *self,
 static void
 search (BzWindow   *self,
         const char *text);
+
+static void
+bulk_install (BzWindow *self,
+              BzEntry **installs,
+              guint     n_installs);
 
 static void
 check_transactions (BzWindow *self);
@@ -179,43 +200,6 @@ bz_window_set_property (GObject      *object,
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
-}
-
-static gboolean
-invert_boolean (gpointer object,
-                gboolean value)
-{
-  return !value;
-}
-
-static gboolean
-is_double_zero (gpointer object,
-                double   value)
-{
-  return value == 0.0;
-}
-
-static gboolean
-is_null (gpointer object,
-         GObject *value)
-{
-  return value == NULL;
-}
-
-static gboolean
-logical_and (gpointer object,
-             gboolean value1,
-             gboolean value2)
-{
-  return value1 && value2;
-}
-
-static gboolean
-logical_or (gpointer object,
-            gboolean value1,
-            gboolean value2)
-{
-  return value1 || value2;
 }
 
 static char *
@@ -309,6 +293,28 @@ remove_installed_cb (BzWindow   *self,
                      BzFullView *view)
 {
   try_transact (self, entry, NULL, TRUE, FALSE, NULL);
+}
+
+static void
+bulk_install_cb (BzWindow   *self,
+                 GListModel *groups,
+                 gpointer    source)
+{
+  g_autoptr (BulkInstallData) data = NULL;
+
+  g_return_if_fail (BZ_IS_WINDOW (self));
+  g_return_if_fail (G_IS_LIST_MODEL (groups));
+
+  data         = bulk_install_data_new ();
+  data->self   = bz_track_weak (self);
+  data->groups = g_object_ref (groups);
+
+  dex_future_disown (dex_scheduler_spawn (
+      dex_scheduler_get_default (),
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) bulk_install_fiber,
+      bulk_install_data_ref (data),
+      bulk_install_data_unref));
 }
 
 static void
@@ -541,6 +547,8 @@ bz_window_class_init (BzWindowClass *klass)
   g_type_ensure (BZ_TYPE_FLATHUB_PAGE);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-window.ui");
+  bz_widget_class_bind_all_util_callbacks (widget_class);
+
   gtk_widget_class_bind_template_child (widget_class, BzWindow, comet_overlay);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, split_view);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, transactions_stack);
@@ -550,6 +558,7 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzWindow, toggle_transactions);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, toggle_transactions_sidebar);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, search_widget);
+  gtk_widget_class_bind_template_child (widget_class, BzWindow, installed_page);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, update_button);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, transactions_pause);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, transactions_stop);
@@ -557,11 +566,6 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzWindow, main_view_stack);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, main_stack);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, debug_id_label);
-  gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
-  gtk_widget_class_bind_template_callback (widget_class, is_double_zero);
-  gtk_widget_class_bind_template_callback (widget_class, is_null);
-  gtk_widget_class_bind_template_callback (widget_class, logical_and);
-  gtk_widget_class_bind_template_callback (widget_class, logical_or);
   gtk_widget_class_bind_template_callback (widget_class, list_length);
   gtk_widget_class_bind_template_callback (widget_class, browser_group_selected_cb);
   gtk_widget_class_bind_template_callback (widget_class, search_widget_select_cb);
@@ -596,8 +600,9 @@ key_pressed (BzWindow              *self,
              GdkModifierType        state,
              GtkEventControllerKey *controller)
 {
-  gunichar unichar = 0;
-  char     buf[32] = { 0 };
+  gunichar    unichar            = 0;
+  char        buf[32]            = { 0 };
+  const char *visible_child_name = NULL;
 
   /* Ignore if this is a modifier-shortcut of some sort */
   if (state & ~(GDK_NO_MODIFIER_MASK | GDK_SHIFT_MASK))
@@ -608,8 +613,14 @@ key_pressed (BzWindow              *self,
     return FALSE;
   g_unichar_to_utf8 (unichar, buf);
 
-  adw_view_stack_set_visible_child_name (self->main_view_stack, "search");
-  return bz_search_widget_ensure_active (self->search_widget, buf);
+  visible_child_name = adw_view_stack_get_visible_child_name (self->main_view_stack);
+  if (g_strcmp0 (visible_child_name, "installed") == 0)
+    return bz_installed_page_ensure_active (self->installed_page, buf);
+  else
+    {
+      adw_view_stack_set_visible_child_name (self->main_view_stack, "search");
+      return bz_search_widget_ensure_active (self->search_widget, buf);
+    }
 }
 
 static void
@@ -698,11 +709,11 @@ checking_for_updates_changed (BzWindow    *self,
 static DexFuture *
 transact_fiber (TransactData *data)
 {
-  g_autoptr (BzWindow) self = NULL;
-  g_autoptr (GError) local_error = NULL;
+  g_autoptr (BzWindow) self                           = NULL;
+  g_autoptr (GError) local_error                      = NULL;
   g_autoptr (BzTransactionDialogResult) dialog_result = NULL;
-  g_autoptr (DexFuture) transact_future = NULL;
-  g_autofree char *id_dup = NULL;
+  g_autoptr (DexFuture) transact_future               = NULL;
+  g_autofree char *id_dup                             = NULL;
 
   bz_weak_get_or_return_reject (self, data->self);
 
@@ -711,6 +722,19 @@ transact_fiber (TransactData *data)
     id_dup = g_strdup (bz_entry_group_get_id (data->group));
   else
     id_dup = g_strdup (bz_entry_get_id (data->entry));
+
+  /* Prevent Bazaar from being removed by itself */
+  if (data->remove)
+    {
+      const char *bazaar_id = NULL;
+
+      bazaar_id = g_application_get_application_id (g_application_get_default ());
+      if (g_strcmp0 (id_dup, bazaar_id) == 0)
+        {
+          bz_show_error_for_widget (GTK_WIDGET (self), _ ("You can't remove Bazaar from Bazaar!"));
+          return dex_future_new_false ();
+        }
+    }
 
   // Show the dialog
   dialog_result = dex_await_pointer (
@@ -747,14 +771,11 @@ transact_fiber (TransactData *data)
 }
 
 static void
-update_dialog_response (BzUpdateDialog *dialog,
-                        const char     *response,
-                        BzWindow       *self)
+update_dialog_response (BzTransactionListDialog *dialog,
+                        const char              *response,
+                        BzWindow                *self)
 {
-  g_autoptr (GListModel) accepted_model = NULL;
-
-  accepted_model = bz_update_dialog_was_accepted (dialog);
-  if (accepted_model != NULL)
+  if (bz_transaction_list_dialog_was_confirmed (dialog))
     {
       GListModel          *updates     = NULL;
       guint                n_updates   = 0;
@@ -770,8 +791,7 @@ update_dialog_response (BzUpdateDialog *dialog,
 
       for (guint i = 0; i < n_updates; i++)
         g_object_unref (updates_buf[i]);
-      bz_state_info_set_available_updates (
-          self->state, NULL);
+      bz_state_info_set_available_updates (self->state, NULL);
     }
 }
 
@@ -846,7 +866,15 @@ bz_window_push_update_dialog (BzWindow *self)
   available_updates = bz_state_info_get_available_updates (self->state);
   g_return_if_fail (available_updates != NULL);
 
-  update_dialog = bz_update_dialog_new (available_updates);
+  update_dialog = bz_transaction_list_dialog_new (
+      available_updates,
+      _ ("Updates Are Available"),
+      _ ("The following applications are eligible for updates. Would you like to install them?"),
+      _ ("%d runtimes and/or addons are eligible for updates. Would you like to install them?"),
+      _ ("Additionally, %d runtimes and/or addons will be updated."),
+      _ ("Later"),
+      _ ("Update Now"));
+
   adw_dialog_set_content_width (update_dialog, 750);
   g_signal_connect (update_dialog, "response", G_CALLBACK (update_dialog_response), self);
 
@@ -857,13 +885,19 @@ void
 bz_window_show_entry (BzWindow *self,
                       BzEntry  *entry)
 {
-  /* TODO: IMPLEMENT ME! */
-  bz_show_error_for_widget (
-      GTK_WIDGET (self),
-      _ ("The ability to inspect and install local .flatpak bundle files is coming soon! "
-         "In the meantime, try running\n\n"
-         "flatpak install --bundle your-bundle.flatpak\n\n"
-         "on the command line."));
+  g_autoptr (BzEntryGroup) group  = NULL;
+  AdwNavigationPage *visible_page = NULL;
+
+  g_return_if_fail (BZ_IS_WINDOW (self));
+  g_return_if_fail (BZ_IS_ENTRY (entry));
+
+  group = bz_entry_group_new_for_single_entry (entry);
+
+  bz_full_view_set_entry_group (self->full_view, group);
+
+  visible_page = adw_navigation_view_get_visible_page (self->navigation_view);
+  if (visible_page != adw_navigation_view_find_page (self->navigation_view, "view"))
+    adw_navigation_view_push_by_tag (self->navigation_view, "view");
 }
 
 void
@@ -903,6 +937,7 @@ bz_window_push_page (BzWindow *self, AdwNavigationPage *page)
       g_signal_connect_swapped (page, "install", G_CALLBACK (install_entry_cb), self);
       g_signal_connect_swapped (page, "remove", G_CALLBACK (remove_installed_cb), self);
       g_signal_connect_swapped (page, "show-entry", G_CALLBACK (installed_page_show_cb), self);
+      g_signal_connect_swapped (page, "bulk-install", G_CALLBACK (bulk_install_cb), self);
 
       g_object_bind_property (self->split_view, "show-sidebar",
                               page, "show-sidebar",
@@ -1031,6 +1066,61 @@ update (BzWindow *self,
   dex_future_disown (bz_transaction_manager_add (
       bz_state_info_get_transaction_manager (self->state),
       transaction));
+}
+
+static void
+bulk_install (BzWindow *self,
+              BzEntry **installs,
+              guint     n_installs)
+{
+  g_autoptr (BzTransaction) transaction = NULL;
+
+  g_return_if_fail (BZ_IS_WINDOW (self));
+  g_return_if_fail (installs != NULL);
+  g_return_if_fail (n_installs > 0);
+
+  if (bz_state_info_get_busy (self->state))
+    {
+      adw_toast_overlay_add_toast (
+          self->toasts,
+          adw_toast_new_format (_ ("Can't do that right now!")));
+      return;
+    }
+
+  transaction = bz_transaction_new_full (
+      installs, n_installs,
+      NULL, 0,
+      NULL, 0);
+
+  dex_future_disown (bz_transaction_manager_add (
+      bz_state_info_get_transaction_manager (self->state),
+      transaction));
+}
+
+static DexFuture *
+bulk_install_fiber (BulkInstallData *data)
+{
+  g_autoptr (BzWindow) self                    = NULL;
+  g_autoptr (GError) local_error               = NULL;
+  g_autoptr (BzBulkInstallDialogResult) result = NULL;
+
+  bz_weak_get_or_return_reject (self, data->self);
+
+  result = dex_await_pointer (
+      bz_bulk_install_dialog_show (GTK_WIDGET (self), data->groups),
+      &local_error);
+
+  if (result == NULL)
+    return dex_future_new_for_error (g_steal_pointer (&local_error));
+
+  if (!result->confirmed)
+    return dex_future_new_false ();
+
+  bulk_install (self,
+                (BzEntry **) result->entries->pdata,
+                result->entries->len);
+
+  return dex_future_new_true ();
 }
 
 static void

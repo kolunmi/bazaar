@@ -1,14 +1,10 @@
 <p>This release comes with the following improvements:</p>
 <ul>
-  <li>New market stall icon</li>
-  <li>Remove Flathub styling</li>
-  <li>Add horizontal versions of pride flags</li>
-  <li>Text selection in app descriptions can be made across paragraph breaks</li>
-  <li>Support YAML anchors and aliases in config parsing</li>
-  <li>Drastically reduce disk cache writes over time by skipping unchanged entries</li>
-  <li>Show background status in popover</li>
-  <li>Add app permission system</li>
-  <li>Add back release URLs</li>
-  <li>Fix sync-remotes action in shortcut dialog</li>
-  <li>Fix visual hiccups in comet animations</li>
+  <li>Trash user data instead of deleting</li>
+  <li>Tweaks to permissions dialog</li>
+  <li>Fix broken EOL filtering</li>
+  <li>Add text filter to installed page</li>
+  <li>Add optional translations mappings for string properties in YAML configs</li>
+  <li>Hide EOL apps by default</li>
+  <li>Many other minor bug fixes and improvements</li>
 </ul>

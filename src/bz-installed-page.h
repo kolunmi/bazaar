@@ -37,4 +37,8 @@ bz_installed_page_set_model (BzInstalledPage *self,
 GListModel *
 bz_installed_page_get_model (BzInstalledPage *self);
 
+gboolean
+bz_installed_page_ensure_active (BzInstalledPage *self,
+                                 const char      *initial);
+
 G_END_DECLS

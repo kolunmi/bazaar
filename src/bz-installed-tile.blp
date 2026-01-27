@@ -120,6 +120,7 @@ template $BzInstalledTile: $BzListTile {
         height-request: 32;
         valign: center;
         icon-name: "user-trash-symbolic";
+        visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
         sensitive: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
 
         clicked => $remove_cb() swapped;

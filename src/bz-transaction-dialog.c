@@ -22,9 +22,14 @@
 
 #include <glib/gi18n.h>
 
+#include "bz-application.h"
+#include "bz-entry-selection-row.h"
 #include "bz-error.h"
+#include "bz-flatpak-entry.h"
 #include "bz-safety-calculator.h"
+#include "bz-state-info.h"
 #include "bz-transaction-dialog.h"
+#include "bz-transaction-list-dialog.h"
 #include "bz-util.h"
 
 BzTransactionDialogResult *
@@ -61,24 +66,25 @@ static GtkWidget *
 create_entry_radio_button (BzEntry    *entry,
                            GtkWidget **out_radio)
 {
-  GtkWidget       *row;
-  GtkWidget       *radio;
-  g_autofree char *label;
+  BzStateInfo *state_info       = NULL;
+  GListModel  *repositories     = NULL;
+  g_autoptr (BzRepository) repo = NULL;
+  BzEntrySelectionRow *row      = NULL;
+  GtkCheckButton      *radio    = NULL;
 
-  label = g_strdup (bz_entry_get_unique_id (entry));
+  state_info   = bz_state_info_get_default ();
+  repositories = bz_state_info_get_repositories (state_info);
 
-  row = adw_action_row_new ();
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), label);
+  if (repositories != NULL)
+    repo = bz_entry_get_repository (entry, repositories);
 
-  radio = gtk_check_button_new ();
-  gtk_widget_set_valign (radio, GTK_ALIGN_CENTER);
-  adw_action_row_add_prefix (ADW_ACTION_ROW (row), radio);
-  adw_action_row_set_activatable_widget (ADW_ACTION_ROW (row), radio);
+  row   = bz_entry_selection_row_new (BZ_FLATPAK_ENTRY (entry), repo);
+  radio = bz_entry_selection_row_get_radio (row);
 
   if (out_radio != NULL)
-    *out_radio = radio;
+    *out_radio = GTK_WIDGET (radio);
 
-  return row;
+  return GTK_WIDGET (row);
 }
 
 static GPtrArray *
@@ -94,46 +100,47 @@ create_entry_radio_buttons (AdwAlertDialog *alert,
   radios = g_ptr_array_new ();
   if (store != NULL)
     {
-      guint n_valid_entries = 0;
+      guint n_total_entries = g_list_model_get_n_items (G_LIST_MODEL (store));
 
-      for (guint i = 0; i < g_list_model_get_n_items (G_LIST_MODEL (store));)
-        {
-          g_autoptr (BzEntry) entry = NULL;
-
-          entry = g_list_model_get_item (G_LIST_MODEL (store), i);
-          if (should_skip_entry (entry, remove))
-            {
-              g_list_store_remove (store, i);
-              continue;
-            }
-          n_valid_entries++;
-          i++;
-        }
-      if (n_valid_entries > 1)
+      if (n_total_entries > 1)
         {
           GtkWidget      *listbox           = NULL;
           GtkCheckButton *first_valid_radio = NULL;
+          GtkCheckButton *dummy_radio       = NULL;
 
           listbox = gtk_list_box_new ();
           gtk_list_box_set_selection_mode (GTK_LIST_BOX (listbox), GTK_SELECTION_NONE);
           gtk_widget_add_css_class (listbox, "boxed-list");
 
-          for (guint i = 0; i < n_valid_entries; i++)
+          dummy_radio = GTK_CHECK_BUTTON (gtk_check_button_new ());
+
+          for (guint i = 0; i < n_total_entries; i++)
             {
               g_autoptr (BzEntry) entry = NULL;
               GtkWidget *row            = NULL;
               GtkWidget *radio          = NULL;
+              gboolean   should_skip    = FALSE;
 
-              entry = g_list_model_get_item (G_LIST_MODEL (store), i);
-              row   = create_entry_radio_button (entry, &radio);
+              entry       = g_list_model_get_item (G_LIST_MODEL (store), i);
+              should_skip = should_skip_entry (entry, remove);
+
+              row = create_entry_radio_button (entry, &radio);
               g_ptr_array_add (radios, radio);
 
-              if (first_valid_radio != NULL)
-                gtk_check_button_set_group (GTK_CHECK_BUTTON (radio), first_valid_radio);
+              gtk_check_button_set_group (GTK_CHECK_BUTTON (radio), dummy_radio);
+
+              if (should_skip)
+                {
+                  gtk_widget_set_sensitive (row, FALSE);
+                  gtk_widget_set_sensitive (radio, FALSE);
+                }
               else
                 {
-                  gtk_check_button_set_active (GTK_CHECK_BUTTON (radio), TRUE);
-                  first_valid_radio = (GtkCheckButton *) radio;
+                  if (first_valid_radio == NULL)
+                    {
+                      gtk_check_button_set_active (GTK_CHECK_BUTTON (radio), TRUE);
+                      first_valid_radio = (GtkCheckButton *) radio;
+                    }
                 }
 
               gtk_list_box_append (GTK_LIST_BOX (listbox), row);
@@ -187,14 +194,19 @@ create_entry_radio_buttons (AdwAlertDialog *alert,
 static void
 configure_install_dialog (AdwAlertDialog *alert,
                           const char     *title,
-                          const char     *id)
+                          const char     *id,
+                          gboolean        has_multiple_entries)
 {
   g_autofree char *heading = NULL;
 
   heading = g_strdup_printf (_ ("Install %s?"), title);
 
   adw_alert_dialog_set_heading (alert, heading);
-  adw_alert_dialog_set_body (alert, _ ("May install additional shared components"));
+
+  if (has_multiple_entries)
+    adw_alert_dialog_set_body (alert, _ ("Select which version to install. May install additional shared components"));
+  else
+    adw_alert_dialog_set_body (alert, _ ("May install additional shared components"));
 
   adw_alert_dialog_add_responses (alert,
                                   "cancel", _ ("Cancel"),
@@ -209,15 +221,21 @@ configure_install_dialog (AdwAlertDialog *alert,
 static void
 configure_remove_dialog (AdwAlertDialog *alert,
                          const char     *title,
-                         const char     *id)
+                         const char     *id,
+                         gboolean        has_multiple_entries)
 {
   g_autofree char *heading = NULL;
+  g_autofree char *body    = NULL;
 
   heading = g_strdup_printf (_ ("Remove %s?"), title);
 
+  if (has_multiple_entries)
+    body = g_strdup (_ ("Select which version to remove."));
+  else
+    body = g_strdup_printf (_ ("It will not be possible to use %s after it is uninstalled."), title);
+
   adw_alert_dialog_set_heading (alert, heading);
-  adw_alert_dialog_set_body (
-      alert, g_strdup_printf (_ ("It will not be possible to use %s after it is uninstalled."), title));
+  adw_alert_dialog_set_body (alert, body);
 
   adw_alert_dialog_add_responses (alert,
                                   "cancel", _ ("Cancel"),
@@ -231,18 +249,33 @@ configure_remove_dialog (AdwAlertDialog *alert,
 
 static void
 configure_high_risk_warning_dialog (AdwAlertDialog *alert,
-                                    const char     *title)
+                                    const char     *title,
+                                    BzHighRiskGroup risk_groups)
 {
   g_autofree char *heading = NULL;
   g_autofree char *body    = NULL;
 
   heading = g_strdup_printf (_ ("“%s” is High Risk"), title);
-  body    = g_strdup (_ ("This app has full access to your system, including all "
-                            "<b>your files, browser history, saved passwords</b>, and "
-                            "more. It also has access to the internet, meaning it "
-                            "could send your data to outside parties.\n\n"
-                            "Because the app is proprietary, it can not be audited "
-                            "for what it does with these permissions."));
+
+  if (risk_groups & BZ_HIGH_RISK_GROUP_DISK)
+    {
+      body = g_strdup (_ ("This app has full access to your system, including all "
+                          "<b>your files, browser history, saved passwords</b>, and "
+                          "more. It also has access to the internet, meaning it "
+                          "could send your data to outside parties.\n\n"
+                          "Because the app is proprietary, it can not be audited "
+                          "for what it does with these permissions."));
+    }
+  else if (risk_groups & BZ_HIGH_RISK_GROUP_X11)
+    {
+      body = g_strdup (_ ("This app uses the legacy X11 windowing system, which "
+                          "allows it to <b>record all keystrokes, capture screenshots, "
+                          "and monitor other applications</b>. It also has access "
+                          "to the internet, meaning it could send your data to "
+                          "outside parties.\n\n"
+                          "Because the app is proprietary, it can not be audited "
+                          "for what it does with these permissions."));
+    }
 
   adw_alert_dialog_set_heading (alert, heading);
   adw_alert_dialog_set_body (alert, body);
@@ -259,15 +292,13 @@ configure_high_risk_warning_dialog (AdwAlertDialog *alert,
   adw_alert_dialog_set_close_response (alert, "cancel");
 }
 
-static gboolean
-is_entry_high_risk (BzEntry *entry)
+static BzHighRiskGroup
+get_entry_high_risk_groups (BzEntry *entry)
 {
-  BzImportance rating;
+  if (bz_entry_get_is_foss (entry))
+    return BZ_HIGH_RISK_GROUP_NONE;
 
-  g_return_val_if_fail (BZ_IS_ENTRY (entry), FALSE);
-
-  rating = bz_safety_calculator_calculate_rating (entry);
-  return rating == BZ_IMPORTANCE_IMPORTANT;
+  return bz_safety_calculator_get_high_risk_groups (entry);
 }
 
 typedef struct
@@ -301,7 +332,8 @@ show_dialog_fiber (ShowDialogData *data)
   g_autofree char *risk_response               = NULL;
   g_autoptr (BzTransactionDialogResult) result = NULL;
   g_autoptr (BzEntry) check_entry              = NULL;
-  gboolean is_high_risk                        = FALSE;
+  BzHighRiskGroup risk_groups                  = BZ_HIGH_RISK_GROUP_NONE;
+  guint           n_total_entries              = 0;
 
   result = bz_transaction_dialog_result_new ();
 
@@ -316,7 +348,8 @@ show_dialog_fiber (ShowDialogData *data)
       title = bz_entry_group_get_title (data->group);
       id    = bz_entry_group_get_id (data->group);
 
-      if (g_list_model_get_n_items (G_LIST_MODEL (store)) > 0)
+      n_total_entries = g_list_model_get_n_items (G_LIST_MODEL (store));
+      if (n_total_entries > 0)
         check_entry = g_list_model_get_item (G_LIST_MODEL (store), 0);
     }
   else
@@ -328,13 +361,13 @@ show_dialog_fiber (ShowDialogData *data)
 
   if (!data->remove && check_entry != NULL)
     {
-      is_high_risk = is_entry_high_risk (check_entry);
+      risk_groups = get_entry_high_risk_groups (check_entry);
     }
 
-  if (is_high_risk)
+  if (risk_groups != BZ_HIGH_RISK_GROUP_NONE)
     {
       risk_alert = g_object_ref_sink (adw_alert_dialog_new (NULL, NULL));
-      configure_high_risk_warning_dialog (ADW_ALERT_DIALOG (risk_alert), title);
+      configure_high_risk_warning_dialog (ADW_ALERT_DIALOG (risk_alert), title, risk_groups);
 
       adw_dialog_present (risk_alert, data->parent);
       risk_response = dex_await_string (
@@ -353,13 +386,13 @@ show_dialog_fiber (ShowDialogData *data)
 
   alert = g_object_ref_sink (adw_alert_dialog_new (NULL, NULL));
   if (data->remove)
-    configure_remove_dialog (ADW_ALERT_DIALOG (alert), title, id);
+    configure_remove_dialog (ADW_ALERT_DIALOG (alert), title, id, n_total_entries > 1);
   else
-    configure_install_dialog (ADW_ALERT_DIALOG (alert), title, id);
+    configure_install_dialog (ADW_ALERT_DIALOG (alert), title, id, n_total_entries > 1);
 
   radios = create_entry_radio_buttons (ADW_ALERT_DIALOG (alert), store, data->remove);
 
-  if (!data->remove && data->auto_confirm && radios->len <= 1 && !is_high_risk)
+  if (!data->remove && data->auto_confirm && radios->len <= 1 && risk_groups == BZ_HIGH_RISK_GROUP_NONE)
     {
       dialog_response = g_strdup ("install");
       g_ptr_array_set_size (radios, 0);
@@ -444,4 +477,167 @@ bz_transaction_dialog_show (GtkWidget    *parent,
       (DexFiberFunc) show_dialog_fiber,
       data,
       (GDestroyNotify) show_dialog_data_free);
+}
+
+BzBulkInstallDialogResult *
+bz_bulk_install_dialog_result_new (void)
+{
+  BzBulkInstallDialogResult *result = g_new0 (BzBulkInstallDialogResult, 1);
+  result->entries                   = g_ptr_array_new_with_free_func (g_object_unref);
+  return result;
+}
+
+void
+bz_bulk_install_dialog_result_free (BzBulkInstallDialogResult *result)
+{
+  if (result == NULL)
+    return;
+
+  g_clear_pointer (&result->entries, g_ptr_array_unref);
+  g_free (result);
+}
+
+typedef struct
+{
+  GtkWidget  *parent;
+  GListModel *groups;
+} BulkInstallDialogData;
+
+static void
+bulk_install_dialog_data_free (BulkInstallDialogData *data)
+{
+  g_clear_object (&data->groups);
+  g_free (data);
+}
+
+static DexFuture *
+bulk_install_dialog_fiber (BulkInstallDialogData *data)
+{
+  g_autoptr (GError) local_error               = NULL;
+  g_autoptr (BzBulkInstallDialogResult) result = NULL;
+  g_autoptr (GPtrArray) resolved_entries       = NULL;
+  g_autoptr (GListStore) entries_store         = NULL;
+  AdwDialog       *dialog                      = NULL;
+  g_autofree char *dialog_response             = NULL;
+  g_autofree char *heading                     = NULL;
+  guint            n_groups                    = 0;
+
+  result           = bz_bulk_install_dialog_result_new ();
+  resolved_entries = g_ptr_array_new_with_free_func (g_object_unref);
+
+  if (data->groups == NULL)
+    {
+      result->confirmed = FALSE;
+      return dex_future_new_for_pointer (g_steal_pointer (&result));
+    }
+
+  n_groups = g_list_model_get_n_items (data->groups);
+
+  for (guint i = 0; i < n_groups; i++)
+    {
+      g_autoptr (BzEntryGroup) group = NULL;
+      g_autoptr (GListStore) store   = NULL;
+      g_autoptr (BzEntry) entry      = NULL;
+
+      group = g_list_model_get_item (data->groups, i);
+
+      if (bz_entry_group_get_removable (group) > 0)
+        continue;
+
+      store = dex_await_object (bz_entry_group_dup_all_into_store (group), &local_error);
+      if (store == NULL || g_list_model_get_n_items (G_LIST_MODEL (store)) == 0)
+        continue;
+
+      entry = g_list_model_get_item (G_LIST_MODEL (store), 0);
+      if (entry == NULL)
+        continue;
+
+      if (bz_entry_is_installed (entry) || bz_entry_is_holding (entry))
+        continue;
+
+      g_ptr_array_add (resolved_entries, g_object_ref (entry));
+    }
+
+  if (resolved_entries->len == 0)
+    {
+      g_autoptr (AdwDialog) info_alert = NULL;
+
+      info_alert = g_object_ref_sink (adw_alert_dialog_new (
+          _ ("All apps are already installed"), NULL));
+
+      adw_alert_dialog_add_response (ADW_ALERT_DIALOG (info_alert), "ok", _ ("OK"));
+      adw_alert_dialog_set_default_response (ADW_ALERT_DIALOG (info_alert), "ok");
+      adw_alert_dialog_set_close_response (ADW_ALERT_DIALOG (info_alert), "ok");
+
+      adw_dialog_present (info_alert, data->parent);
+
+      dex_await (bz_make_alert_dialog_future (ADW_ALERT_DIALOG (info_alert)), NULL);
+
+      result->confirmed = FALSE;
+      return dex_future_new_for_pointer (g_steal_pointer (&result));
+    }
+
+  entries_store = g_list_store_new (BZ_TYPE_ENTRY);
+  for (guint i = 0; i < resolved_entries->len; i++)
+    g_list_store_append (entries_store, g_ptr_array_index (resolved_entries, i));
+
+  heading = g_strdup_printf (ngettext ("Install %u App?",
+                                       "Install %u Apps?",
+                                       resolved_entries->len),
+                             resolved_entries->len);
+
+  dialog = bz_transaction_list_dialog_new (
+      G_LIST_MODEL (entries_store),
+      heading,
+      _ ("The following will be installed. Additional shared components may also be installed"),
+      _ ("%d addons will be installed."),
+      _ ("Additionally, addons will be installed."),
+      _ ("Cancel"),
+      _ ("Install All"));
+
+  adw_alert_dialog_set_default_response (ADW_ALERT_DIALOG (dialog), "confirm");
+  adw_alert_dialog_set_close_response (ADW_ALERT_DIALOG (dialog), "cancel");
+
+  adw_dialog_present (dialog, data->parent);
+
+  dialog_response = dex_await_string (
+      bz_make_alert_dialog_future (ADW_ALERT_DIALOG (dialog)),
+      &local_error);
+
+  if (dialog_response == NULL)
+    return dex_future_new_for_error (g_steal_pointer (&local_error));
+
+  result->confirmed = bz_transaction_list_dialog_was_confirmed (BZ_TRANSACTION_LIST_DIALOG (dialog));
+
+  if (result->confirmed)
+    {
+      for (guint i = 0; i < resolved_entries->len; i++)
+        {
+          BzEntry *entry = g_ptr_array_index (resolved_entries, i);
+          g_ptr_array_add (result->entries, g_object_ref (entry));
+        }
+    }
+
+  return dex_future_new_for_pointer (g_steal_pointer (&result));
+}
+
+DexFuture *
+bz_bulk_install_dialog_show (GtkWidget  *parent,
+                             GListModel *groups)
+{
+  BulkInstallDialogData *data;
+
+  g_return_val_if_fail (GTK_IS_WIDGET (parent), NULL);
+  g_return_val_if_fail (G_IS_LIST_MODEL (groups), NULL);
+
+  data         = g_new0 (BulkInstallDialogData, 1);
+  data->parent = parent;
+  data->groups = g_object_ref (groups);
+
+  return dex_scheduler_spawn (
+      dex_scheduler_get_default (),
+      0,
+      (DexFiberFunc) bulk_install_dialog_fiber,
+      data,
+      (GDestroyNotify) bulk_install_dialog_data_free);
 }

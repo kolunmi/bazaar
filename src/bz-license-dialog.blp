@@ -66,6 +66,7 @@ template $BzLicenseDialog: Adw.Dialog {
 
             ListBoxRow {
               vexpand: true;
+              activatable: false;
 
               Label {
                 label: bind $get_license_info(template.entry as <$BzEntry>) as <string>;
@@ -75,6 +76,7 @@ template $BzLicenseDialog: Adw.Dialog {
                 margin-start: 12;
                 margin-end: 12;
                 use-markup: true;
+                xalign: 0;
                 wrap: true;
                 wrap-mode: word_char;
               }
@@ -93,6 +95,8 @@ template $BzLicenseDialog: Adw.Dialog {
               title: _("Get Involved");
               end-icon-name: "external-link-symbolic";
               activated => $contribute_cb(template);
+              has-tooltip: true;
+              tooltip-text: bind $get_involved_tooltip(template.entry) as <string>;
             }
           }
         }

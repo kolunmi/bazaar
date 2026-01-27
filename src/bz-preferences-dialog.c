@@ -31,45 +31,26 @@ typedef struct
 static const BarTheme bar_themes[] = {
   {                  "accent-color",                  "accent-color-theme",                              N_ ("Accent Color") },
   {            "pride-rainbow-flag",            "pride-rainbow-flag-theme",                              N_ ("Pride Colors") },
-  { "pride-rainbow-flag-horizontal", "pride-rainbow-flag-horizontal-theme",                 N_ ("Pride Colors (Horizontal)") },
   {            "lesbian-pride-flag",            "lesbian-pride-flag-theme",                      N_ ("Lesbian Pride Colors") },
-  { "lesbian-pride-flag-horizontal", "lesbian-pride-flag-horizontal-theme",         N_ ("Lesbian Pride Colors (Horizontal)") },
   {                "gay-pride-flag",                "gay-pride-flag-theme",              N_ ("Male Homosexual Pride Colors") },
-  {     "gay-pride-flag-horizontal",     "gay-pride-flag-horizontal-theme", N_ ("Male Homosexual Pride Colors (Horizontal)") },
   {              "transgender-flag",              "transgender-flag-theme",                  N_ ("Transgender Pride Colors") },
-  {   "transgender-flag-horizontal",   "transgender-flag-horizontal-theme",     N_ ("Transgender Pride Colors (Horizontal)") },
   {                "nonbinary-flag",                "nonbinary-flag-theme",                    N_ ("Nonbinary Pride Colors") },
-  {     "nonbinary-flag-horizontal",     "nonbinary-flag-horizontal-theme",       N_ ("Nonbinary Pride Colors (Horizontal)") },
   {                 "bisexual-flag",                 "bisexual-flag-theme",                     N_ ("Bisexual Pride Colors") },
-  {      "bisexual-flag-horizontal",      "bisexual-flag-horizontal-theme",        N_ ("Bisexual Pride Colors (Horizontal)") },
   {                  "asexual-flag",                  "asexual-flag-theme",                      N_ ("Asexual Pride Colors") },
-  {       "asexual-flag-horizontal",       "asexual-flag-horizontal-theme",         N_ ("Asexual Pride Colors (Horizontal)") },
   {                "pansexual-flag",                "pansexual-flag-theme",                    N_ ("Pansexual Pride Colors") },
-  {     "pansexual-flag-horizontal",     "pansexual-flag-horizontal-theme",       N_ ("Pansexual Pride Colors (Horizontal)") },
   {                "aromantic-flag",                "aromantic-flag-theme",                    N_ ("Aromantic Pride Colors") },
-  {     "aromantic-flag-horizontal",     "aromantic-flag-horizontal-theme",       N_ ("Aromantic Pride Colors (Horizontal)") },
   {              "genderfluid-flag",              "genderfluid-flag-theme",                  N_ ("Genderfluid Pride Colors") },
-  {   "genderfluid-flag-horizontal",   "genderfluid-flag-horizontal-theme",     N_ ("Genderfluid Pride Colors (Horizontal)") },
   {               "polysexual-flag",               "polysexual-flag-theme",                   N_ ("Polysexual Pride Colors") },
-  {    "polysexual-flag-horizontal",    "polysexual-flag-horizontal-theme",      N_ ("Polysexual Pride Colors (Horizontal)") },
   {               "omnisexual-flag",               "omnisexual-flag-theme",                   N_ ("Omnisexual Pride Colors") },
-  {    "omnisexual-flag-horizontal",    "omnisexual-flag-horizontal-theme",      N_ ("Omnisexual Pride Colors (Horizontal)") },
   {                   "aroace-flag",                   "aroace-flag-theme",                       N_ ("Aroace Pride Colors") },
-  {        "aroace-flag-horizontal",        "aroace-flag-horizontal-theme",          N_ ("Aroace Pride Colors (Horizontal)") },
   {                  "agender-flag",                  "agender-flag-theme",                      N_ ("Agender Pride Colors") },
-  {       "agender-flag-horizontal",       "agender-flag-horizontal-theme",         N_ ("Agender Pride Colors (Horizontal)") },
   {              "genderqueer-flag",              "genderqueer-flag-theme",                  N_ ("Genderqueer Pride Colors") },
-  {   "genderqueer-flag-horizontal",   "genderqueer-flag-horizontal-theme",     N_ ("Genderqueer Pride Colors (Horizontal)") },
   {                 "intersex-flag",                 "intersex-flag-theme",                     N_ ("Intersex Pride Colors") },
-  {      "intersex-flag-horizontal",      "intersex-flag-horizontal-theme",        N_ ("Intersex Pride Colors (Horizontal)") },
   {               "demigender-flag",               "demigender-flag-theme",                   N_ ("Demigender Pride Colors") },
-  {    "demigender-flag-horizontal",    "demigender-flag-horizontal-theme",      N_ ("Demigender Pride Colors (Horizontal)") },
   {               "biromantic-flag",               "biromantic-flag-theme",                   N_ ("Biromantic Pride Colors") },
-  {    "biromantic-flag-horizontal",    "biromantic-flag-horizontal-theme",      N_ ("Biromantic Pride Colors (Horizontal)") },
   {               "disability-flag",               "disability-flag-theme",                   N_ ("Disability Pride Colors") },
-  {    "disability-flag-horizontal",    "disability-flag-horizontal-theme",      N_ ("Disability Pride Colors (Horizontal)") },
   {                   "femboy-flag",                   "femboy-flag-theme",                       N_ ("Femboy Pride Colors") },
-  {        "femboy-flag-horizontal",        "femboy-flag-horizontal-theme",          N_ ("Femboy Pride Colors (Horizontal)") },
+  {                 "neutrois-flag",                 "neutrois-flag-theme",                     N_ ("Neutrois Pride Colors") },
 };
 
 struct _BzPreferencesDialog
@@ -86,6 +67,7 @@ struct _BzPreferencesDialog
   AdwSwitchRow *search_debounce_switch;
   GtkFlowBox   *flag_buttons_box;
   AdwSwitchRow *hide_eol_switch;
+  AdwSwitchRow *rotate_switch;
 
   GtkToggleButton *flag_buttons[G_N_ELEMENTS (bar_themes)];
 };
@@ -152,6 +134,22 @@ global_progress_theme_settings_changed (BzPreferencesDialog *self,
 }
 
 static void
+on_rotate_switch_changed (AdwSwitchRow        *row,
+                          GParamSpec          *pspec,
+                          BzPreferencesDialog *self)
+{
+  gboolean active = FALSE;
+  active = adw_switch_row_get_active (row);
+  for (guint i = 0; i < G_N_ELEMENTS (bar_themes); i++)
+    {
+      if (active)
+        gtk_widget_add_css_class (GTK_WIDGET (self->flag_buttons[i]), "horizontal");
+      else
+        gtk_widget_remove_css_class (GTK_WIDGET (self->flag_buttons[i]), "horizontal");
+    }
+}
+
+static void
 create_flag_buttons (BzPreferencesDialog *self)
 {
   GtkToggleButton *first_button = NULL;
@@ -214,6 +212,18 @@ bind_settings (BzPreferencesDialog *self)
   g_settings_bind (self->settings, "hide-eol",
                    self->hide_eol_switch, "active",
                    G_SETTINGS_BIND_DEFAULT);
+
+  g_settings_bind (self->settings, "rotate-flag",
+                 self->rotate_switch, "active",
+                 G_SETTINGS_BIND_DEFAULT);
+
+  if (adw_switch_row_get_active (self->rotate_switch))
+    {
+      for (guint i = 0; i < G_N_ELEMENTS (bar_themes); i++)
+        {
+          gtk_widget_add_css_class (GTK_WIDGET (self->flag_buttons[i]), "horizontal");
+        }
+    }
 
   g_signal_connect_object (
       self->settings,
@@ -289,7 +299,9 @@ bz_preferences_dialog_class_init (BzPreferencesDialogClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, search_debounce_switch);
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, flag_buttons_box);
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, hide_eol_switch);
+  gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, rotate_switch);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
+  gtk_widget_class_bind_template_callback (widget_class, on_rotate_switch_changed);
 }
 
 static void

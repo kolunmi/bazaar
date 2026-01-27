@@ -2,7 +2,7 @@ using Gtk 4.0;
 using Adw 1;
 
 template $BzEntryInspector: Adw.Window {
-  title: _("Entry Inspector");
+  title: "Entry Inspector";
   default-width: 600;
   default-height: 800;
   width-request: 300;
@@ -73,11 +73,11 @@ template $BzEntryInspector: Adw.Window {
         orientation: horizontal;
           
         Button {
-          label: _("Serialize");
+          label: "Serialize";
           clicked => $gen_serialized(template);
         }
         CheckButton convert_to_json {
-          label: _("Convert to JSON");
+          label: "Convert to JSON";
           active: true;
         }
       }

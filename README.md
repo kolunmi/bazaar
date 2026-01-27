@@ -8,10 +8,14 @@ Bazaar
 
 <div align="center">
     <picture>
-        <source srcset="https://github.com/user-attachments/assets/cc545658-31fc-4cc5-b512-a4c17a2af454" media="(prefers-color-scheme: dark)">
-        <img width="512" alt="Screenshot showing Bazaar's Flathub page" src="https://github.com/user-attachments/assets/b712f5de-ea5f-4f06-b834-d41b9265a192" style="max-width: 100%; height: auto;">
+        <source srcset="https://github.com/user-attachments/assets/da47d39c-2984-4521-87b2-c7207808624e" media="(prefers-color-scheme: dark)">
+        <img width="512" alt="Screenshot showing Bazaar's Flathub page" src="https://github.com/user-attachments/assets/6e012fd4-da26-452e-88ee-278077417193" style="max-width: 100%; height: auto;">
     </picture>
 </div>
+
+> [!NOTE]
+> If you are a distributor/packager who would like to learn how to
+> customize Bazaar, take a look at the [docs](/docs/overview.md).
 
 > [!NOTE]
 > If you are interested in contributing code to Bazaar (Thank you!),
@@ -38,8 +42,9 @@ interface. A krunner
 [plugin](https://github.com/ublue-os/krunner-bazaar) is available for
 use on the KDE Plasma desktop.
 
-Thanks to [Jakub Steiner](http://jimmac.eu) for designing Bazaar's
-icon.
+Thanks to [Tobias Bernard](https://tobiasbernard.com/), [Jakub
+Steiner](http://jimmac.eu), and [Sam Hewitt](https://snwh.org) for designing
+Bazaar's market stall icon.
 
 ### Installing
 
@@ -60,10 +65,6 @@ Thanks to everyone in the GNOME development community for creating
 such an awesome desktop environment!
 
 ### Contributing
-
-> [!NOTE]
-> If you are a distributor/packager who would like to learn how to
-customize Bazaar, take a look at the [docs](/docs/overview.org).
 
 If you would like to try this project on your local machine, clone it
 on the cli and type these commands inside the project root:

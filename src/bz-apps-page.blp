@@ -82,6 +82,13 @@ template $BzAppsPage: Adw.NavigationPage {
                 margin-top: 4;
                 xalign: 0.0;
               }
+
+              $BzSubcategoryList {
+                margin-top: 12;
+                margin-bottom: 8;
+                category: bind template.category;
+                flathub-state: bind template.flathub-state;
+              }
             }
 
             $BzDynamicListView list_view {
@@ -121,6 +128,7 @@ template $BzAppsPage: Adw.NavigationPage {
           list_view.row-spacing: 3;
 
           title.halign: center;
+          title.justify: center;
           subtitle.halign: center;
         }
       }

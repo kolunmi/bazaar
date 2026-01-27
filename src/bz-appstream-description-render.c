@@ -20,6 +20,8 @@
 
 #define G_LOG_DOMAIN "BAZAAR::APPSTREAM-DESCRIPTION-RENDER"
 
+#include "config.h"
+
 #include <xmlb.h>
 
 #include "bz-appstream-description-render.h"
@@ -59,7 +61,15 @@ enum
 static GParamSpec *props[LAST_PROP] = { 0 };
 
 static void
+setup_text_tags (GtkTextBuffer *buffer);
+
+static void
 regenerate (BzAppstreamDescriptionRender *self);
+
+static void
+insert (GtkTextBuffer *buffer,
+        GtkTextIter   *iter,
+        const char    *text);
 
 static void
 compile (BzAppstreamDescriptionRender *self,
@@ -240,8 +250,16 @@ regenerate (BzAppstreamDescriptionRender *self)
   gtk_text_buffer_get_end_iter (buffer, &iter);
   root = xb_silo_get_root (silo);
 
-  for (XbNode *n = root; n != NULL; n = xb_node_get_next (n))
-    node_count++;
+  for (XbNode *n = g_object_ref (root); n != NULL;)
+    {
+      XbNode *last = NULL;
+
+      node_count++;
+
+      last = n;
+      n    = xb_node_get_next (n);
+      g_object_unref (last);
+    }
 
   for (int i = 0; root != NULL; i++)
     {
@@ -253,6 +271,35 @@ regenerate (BzAppstreamDescriptionRender *self)
       next = xb_node_get_next (root);
       g_object_unref (root);
       root = g_steal_pointer (&next);
+    }
+}
+
+static void
+insert (GtkTextBuffer *buffer,
+        GtkTextIter   *iter,
+        const char    *text)
+{
+  g_auto (GStrv) parts = NULL;
+
+  parts = g_strsplit (text, "**", -1);
+
+  for (int j = 0; parts[j] != NULL; j++)
+    {
+      if (j % 2 == 0)
+        {
+          gtk_text_buffer_insert (buffer, iter, parts[j], -1);
+        }
+      else
+        {
+          GtkTextMark *m  = NULL;
+          GtkTextIter  si = { 0 };
+
+          m = gtk_text_buffer_create_mark (buffer, NULL, iter, TRUE);
+          gtk_text_buffer_insert (buffer, iter, parts[j], -1);
+          gtk_text_buffer_get_iter_at_mark (buffer, &si, m);
+          gtk_text_buffer_apply_tag_by_name (buffer, "emphasis", &si, iter);
+          gtk_text_buffer_delete_mark (buffer, m);
+        }
     }
 }
 
@@ -328,7 +375,7 @@ compile (BzAppstreamDescriptionRender *self,
 
       normalized = normalize_whitespace (text);
       if (normalized != NULL && *normalized != '\0')
-        gtk_text_buffer_insert (buffer, iter, normalized, -1);
+        insert (buffer, iter, normalized);
     }
 
   for (int i = 0; child != NULL; i++)
@@ -346,7 +393,7 @@ compile (BzAppstreamDescriptionRender *self,
 
           normalized = normalize_whitespace (tail);
           if (normalized != NULL && *normalized != '\0')
-            gtk_text_buffer_insert (buffer, iter, normalized, -1);
+            insert (buffer, iter, normalized);
         }
 
       g_object_unref (child);

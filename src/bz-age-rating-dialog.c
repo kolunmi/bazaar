@@ -84,111 +84,165 @@ static const struct
   const gchar         *icon_name_negative;
 } attribute_details[] = {
   {        "violence-cartoon", BZ_AGE_RATING_GROUP_TYPE_VIOLENCE,
+   /* TRANSLATORS: content rating title, see https://hughsie.github.io/oars/ */
    N_ ("Cartoon Violence"),
+   /* TRANSLATORS: content rating description, see https://hughsie.github.io/oars/ */
    N_ ("No information regarding cartoon violence"),
    "violence-symbolic",              "violence-none-symbolic"                },
   {        "violence-fantasy", BZ_AGE_RATING_GROUP_TYPE_VIOLENCE,
+   /* TRANSLATORS: content rating title, see https://hughsie.github.io/oars/ */
    N_ ("Fantasy Violence"),
+   /* TRANSLATORS: content rating description, see https://hughsie.github.io/oars/ */
    N_ ("No information regarding fantasy violence"),
    "violence-symbolic",              "violence-none-symbolic"                },
   {      "violence-realistic", BZ_AGE_RATING_GROUP_TYPE_VIOLENCE,
+   /* TRANSLATORS: content rating title, see https://hughsie.github.io/oars/ */
    N_ ("Realistic Violence"),
+   /* TRANSLATORS: content rating description, see https://hughsie.github.io/oars/ */
    N_ ("No information regarding realistic violence"),
    "violence-symbolic",              "violence-none-symbolic"                },
   {      "violence-bloodshed", BZ_AGE_RATING_GROUP_TYPE_VIOLENCE,
+   /* TRANSLATORS: content rating title, see https://hughsie.github.io/oars/ */
    N_ ("Violence Depicting Bloodshed"),
+   /* TRANSLATORS: content rating description, see https://hughsie.github.io/oars/ */
    N_ ("No information regarding bloodshed"),
    "violence-symbolic",              "violence-none-symbolic"                },
   {         "violence-sexual", BZ_AGE_RATING_GROUP_TYPE_VIOLENCE,
+   /* TRANSLATORS: content rating title, see https://hughsie.github.io/oars/ */
    N_ ("Sexual Violence"),
+   /* TRANSLATORS: content rating description, see https://hughsie.github.io/oars/ */
    N_ ("No information regarding sexual violence"),
    "violence-symbolic",              "violence-none-symbolic"                },
   {           "drugs-alcohol",    BZ_AGE_RATING_GROUP_TYPE_DRUGS,
+   /* TRANSLATORS: content rating title, see https://hughsie.github.io/oars/ */
    N_ ("Alcohol"),
+   /* TRANSLATORS: content rating description, see https://hughsie.github.io/oars/ */
    N_ ("No information regarding references to alcohol"),
    "alcohol-use-symbolic",           "alcohol-use-none-symbolic"             },
   {         "drugs-narcotics",    BZ_AGE_RATING_GROUP_TYPE_DRUGS,
+   /* TRANSLATORS: content rating title, see https://hughsie.github.io/oars/ */
    N_ ("Narcotics"),
+   /* TRANSLATORS: content rating description, see https://hughsie.github.io/oars/ */
    N_ ("No information regarding references to illicit drugs"),
    "drug-use-symbolic",              "drug-use-none-symbolic"                },
   {           "drugs-tobacco",    BZ_AGE_RATING_GROUP_TYPE_DRUGS,
+   /* TRANSLATORS: content rating title, see https://hughsie.github.io/oars/ */
    N_ ("Tobacco"),
+   /* TRANSLATORS: content rating description, see https://hughsie.github.io/oars/ */
    N_ ("No information regarding references to tobacco products"),
    "smoking-symbolic",               "smoking-none-symbolic"                 },
   {              "sex-nudity",      BZ_AGE_RATING_GROUP_TYPE_SEX,
+   /* TRANSLATORS: content rating title, see https://hughsie.github.io/oars/ */
    N_ ("Nudity"),
+   /* TRANSLATORS: content rating description, see https://hughsie.github.io/oars/ */
    N_ ("No information regarding nudity of any sort"),
    "nudity-symbolic",                "nudity-none-symbolic"                  },
   {              "sex-themes",      BZ_AGE_RATING_GROUP_TYPE_SEX,
+   /* TRANSLATORS: content rating title, see https://hughsie.github.io/oars/ */
    N_ ("Sexual Themes"),
+   /* TRANSLATORS: content rating description, see https://hughsie.github.io/oars/ */
    N_ ("No information regarding references to or depictions of sexual nature"),
    "nudity-symbolic",                "nudity-none-symbolic"                  },
   {      "language-profanity", BZ_AGE_RATING_GROUP_TYPE_LANGUAGE,
+   /* TRANSLATORS: content rating title, see https://hughsie.github.io/oars/ */
    N_ ("Profanity"),
+   /* TRANSLATORS: content rating description, see https://hughsie.github.io/oars/ */
    N_ ("No information regarding profanity of any kind"),
    "strong-language-symbolic",       "strong-language-none-symbolic"         },
   {          "language-humor", BZ_AGE_RATING_GROUP_TYPE_LANGUAGE,
+   /* TRANSLATORS: content rating title, see https://hughsie.github.io/oars/ */
    N_ ("Inappropriate Humor"),
+   /* TRANSLATORS: content rating description, see https://hughsie.github.io/oars/ */
    N_ ("No information regarding inappropriate humor"),
    "strong-language-symbolic",       "strong-language-none-symbolic"         },
   { "language-discrimination",   BZ_AGE_RATING_GROUP_TYPE_SOCIAL,
+   /* TRANSLATORS: content rating title, see https://hughsie.github.io/oars/ */
    N_ ("Discrimination"),
+   /* TRANSLATORS: content rating description, see https://hughsie.github.io/oars/ */
    N_ ("No information regarding discriminatory language of any kind"),
    "strong-language-symbolic",       "strong-language-none-symbolic"         },
   {       "money-advertising",    BZ_AGE_RATING_GROUP_TYPE_MONEY,
+   /* TRANSLATORS: content rating title, see https://hughsie.github.io/oars/ */
    N_ ("Advertising"),
+   /* TRANSLATORS: content rating description, see https://hughsie.github.io/oars/ */
    N_ ("No information regarding advertising of any kind"),
    "advertising-symbolic",           "advertising-none-symbolic"             },
   {          "money-gambling",    BZ_AGE_RATING_GROUP_TYPE_MONEY,
+   /* TRANSLATORS: content rating title, see https://hughsie.github.io/oars/ */
    N_ ("Gambling"),
+   /* TRANSLATORS: content rating description, see https://hughsie.github.io/oars/ */
    N_ ("No information regarding gambling of any kind"),
    "gambling-symbolic",              "gambling-none-symbolic"                },
   {        "money-purchasing",    BZ_AGE_RATING_GROUP_TYPE_MONEY,
+   /* TRANSLATORS: content rating title, see https://hughsie.github.io/oars/ */
    N_ ("Purchasing"),
+   /* TRANSLATORS: content rating description, see https://hughsie.github.io/oars/ */
    N_ ("No information regarding the ability to spend money"),
    "money-symbolic",                 "money-none-symbolic"                   },
   {             "social-chat",   BZ_AGE_RATING_GROUP_TYPE_SOCIAL,
+   /* TRANSLATORS: content rating title, see https://hughsie.github.io/oars/ */
    N_ ("Chat Between Users"),
+   /* TRANSLATORS: content rating description, see https://hughsie.github.io/oars/ */
    N_ ("No information regarding ways to chat with other users"),
    "messaging-symbolic",             "messaging-none-symbolic"               },
   {            "social-audio",   BZ_AGE_RATING_GROUP_TYPE_SOCIAL,
+   /* TRANSLATORS: content rating title, see https://hughsie.github.io/oars/ */
    N_ ("Audio Chat Between Users"),
+   /* TRANSLATORS: content rating description, see https://hughsie.github.io/oars/ */
    N_ ("No information regarding ways to talk with other users"),
    "audio-chat-symbolic",            "audio-chat-none-symbolic"              },
   {         "social-contacts",   BZ_AGE_RATING_GROUP_TYPE_SOCIAL,
+   /* TRANSLATORS: content rating title, see https://hughsie.github.io/oars/ */
    N_ ("Contact Details"),
+   /* TRANSLATORS: content rating description, see https://hughsie.github.io/oars/ */
    N_ ("No information regarding sharing of social network usernames or email addresses"),
    "contacts-symbolic",                                  NULL                },
   {             "social-info",   BZ_AGE_RATING_GROUP_TYPE_SOCIAL,
+   /* TRANSLATORS: content rating title, see https://hughsie.github.io/oars/ */
    N_ ("Identifying Information"),
+   /* TRANSLATORS: content rating description, see https://hughsie.github.io/oars/ */
    N_ ("No information regarding sharing of user information with third parties"),
    "social-info-symbolic",                                  NULL             },
   {         "social-location",   BZ_AGE_RATING_GROUP_TYPE_SOCIAL,
+   /* TRANSLATORS: content rating title, see https://hughsie.github.io/oars/ */
    N_ ("Location Sharing"),
+   /* TRANSLATORS: content rating description, see https://hughsie.github.io/oars/ */
    N_ ("No information regarding sharing of physical location with other users"),
    "location-services-active-symbolic", "location-services-disabled-symbolic" },
   {        "sex-prostitution",      BZ_AGE_RATING_GROUP_TYPE_SEX,
+   /* TRANSLATORS: content rating title, see https://hughsie.github.io/oars/ */
    N_ ("Prostitution"),
+   /* TRANSLATORS: content rating description, see https://hughsie.github.io/oars/ */
    N_ ("No information regarding references to prostitution"),
    "nudity-symbolic",                "nudity-none-symbolic"                  },
   {            "sex-adultery",      BZ_AGE_RATING_GROUP_TYPE_SEX,
+   /* TRANSLATORS: content rating title, see https://hughsie.github.io/oars/ */
    N_ ("Adultery"),
+   /* TRANSLATORS: content rating description, see https://hughsie.github.io/oars/ */
    N_ ("No information regarding references to adultery"),
    "nudity-symbolic",                "nudity-none-symbolic"                  },
   {          "sex-appearance",      BZ_AGE_RATING_GROUP_TYPE_SEX,
+   /* TRANSLATORS: content rating title, see https://hughsie.github.io/oars/ */
    N_ ("Sexualized Characters"),
+   /* TRANSLATORS: content rating description, see https://hughsie.github.io/oars/ */
    N_ ("No information regarding sexualized characters"),
    "nudity-symbolic",                "nudity-none-symbolic"                  },
   {        "violence-worship", BZ_AGE_RATING_GROUP_TYPE_VIOLENCE,
+   /* TRANSLATORS: content rating title, see https://hughsie.github.io/oars/ */
    N_ ("Desecration"),
+   /* TRANSLATORS: content rating description, see https://hughsie.github.io/oars/ */
    N_ ("No information regarding references to desecration"),
    "violence-symbolic",              "violence-none-symbolic"                },
   {    "violence-desecration", BZ_AGE_RATING_GROUP_TYPE_VIOLENCE,
+   /* TRANSLATORS: content rating title, see https://hughsie.github.io/oars/ */
    N_ ("Human Remains"),
+   /* TRANSLATORS: content rating description, see https://hughsie.github.io/oars/ */
    N_ ("No information regarding visible dead human remains"),
    "human-remains-symbolic",                                  NULL           },
   {        "violence-slavery", BZ_AGE_RATING_GROUP_TYPE_VIOLENCE,
+   /* TRANSLATORS: content rating title, see https://hughsie.github.io/oars/ */
    N_ ("Slavery"),
+   /* TRANSLATORS: content rating description, see https://hughsie.github.io/oars/ */
    N_ ("No information regarding references to slavery"),
    "violence-symbolic",              "violence-none-symbolic"                },
 };
@@ -652,7 +706,7 @@ update_lozenge (BzAgeRatingDialog *self,
        g_strcmp0 (as_content_rating_get_kind (content_rating), "oars-1.1") != 0))
     {
       g_clear_pointer (&age_text, g_free);
-      age_text   = g_strdup (_ ("?"));
+      age_text   = g_strdup ("?");
       importance = BZ_IMPORTANCE_NEUTRAL;
     }
   else
@@ -715,20 +769,22 @@ update_lozenge (BzAgeRatingDialog *self,
 static void
 update_list (BzAgeRatingDialog *self)
 {
-  AsContentRating      *content_rating                         = NULL;
-  BzAgeRatingGroup      groups[BZ_AGE_RATING_GROUP_TYPE_COUNT] = { 0 };
-  guint                 attr_count                             = 0;
-  BzAgeRatingAttribute *attr                                   = NULL;
-  AdwActionRow         *row                                    = NULL;
-  BzImportance          max_importance                         = 0;
-  BzImportance          attr_importance                        = 0;
-  const gchar          *group_icon                             = NULL;
-  const gchar          *group_title                            = NULL;
-  const gchar          *group_description                      = NULL;
-  const gchar          *attr_description                       = NULL;
-  g_autofree gchar     *description                            = NULL;
-  g_autoptr (GList) l                                          = NULL;
-  g_autofree gchar *tmp                                        = NULL;
+  AsContentRating      *content_rating                                  = NULL;
+  BzAgeRatingGroup      groups[BZ_AGE_RATING_GROUP_TYPE_COUNT]          = { 0 };
+  guint                 attr_count                                      = 0;
+  BzAgeRatingAttribute *attr                                            = NULL;
+  AdwActionRow         *row                                             = NULL;
+  BzImportance          max_importance                                  = 0;
+  BzImportance          attr_importance                                 = 0;
+  BzImportance          row_importances[BZ_AGE_RATING_GROUP_TYPE_COUNT] = { 0 };
+  GtkWidget            *rows[BZ_AGE_RATING_GROUP_TYPE_COUNT]            = { NULL };
+  const gchar          *group_icon                                      = NULL;
+  const gchar          *group_title                                     = NULL;
+  const gchar          *group_description                               = NULL;
+  const gchar          *attr_description                                = NULL;
+  g_autofree gchar     *description                                     = NULL;
+  g_autoptr (GList) l                                                   = NULL;
+  g_autofree gchar *tmp                                                 = NULL;
 
   content_rating = bz_entry_get_content_rating (self->entry);
   update_lozenge (self, content_rating);
@@ -745,11 +801,12 @@ update_list (BzAgeRatingDialog *self)
 
       if (attr_count == 1)
         {
-          attr = (BzAgeRatingAttribute *) groups[i].attributes->data;
-          row  = bz_context_row_new (bz_age_rating_attribute_get_icon_name (attr),
-                                     bz_age_rating_attribute_get_importance (attr),
-                                     bz_age_rating_attribute_get_title (attr),
-                                     bz_age_rating_attribute_get_description (attr));
+          attr               = (BzAgeRatingAttribute *) groups[i].attributes->data;
+          row                = bz_context_row_new (bz_age_rating_attribute_get_icon_name (attr),
+                                                   bz_age_rating_attribute_get_importance (attr),
+                                                   bz_age_rating_attribute_get_title (attr),
+                                                   bz_age_rating_attribute_get_description (attr));
+          row_importances[i] = bz_age_rating_attribute_get_importance (attr);
         }
       else
         {
@@ -800,9 +857,22 @@ update_list (BzAgeRatingDialog *self)
 
               row = bz_context_row_new (group_icon, max_importance, group_title, description);
             }
+
+          row_importances[i] = max_importance;
         }
 
-      gtk_list_box_append (self->list, GTK_WIDGET (row));
+      rows[i] = GTK_WIDGET (row);
       g_list_free_full (g_steal_pointer (&groups[i].attributes), g_object_unref);
+    }
+
+  for (gint level = BZ_IMPORTANCE_IMPORTANT; level >= BZ_IMPORTANCE_UNIMPORTANT; level--)
+    {
+      for (gsize i = 0; i < BZ_AGE_RATING_GROUP_TYPE_COUNT; i++)
+        {
+          if (rows[i] == NULL || row_importances[i] != level)
+            continue;
+
+          gtk_list_box_append (self->list, rows[i]);
+        }
     }
 }

@@ -63,14 +63,14 @@ template $BzWindow: Adw.ApplicationWindow {
           ellipsize: end;
         }
         Button {
-          label: _("Inspect UI Entry");
+          label: "Inspect UI Entry";
           clicked => $debug_id_inspect_cb(template);
         }
       }
 
       [end]
       MenuButton {
-        label: _("All Debug Actions");
+        label: "All Debug Actions";
         menu-model: debug_menu;
       }
 
@@ -255,6 +255,8 @@ template $BzWindow: Adw.ApplicationWindow {
 
                         Label {
                           label: _("Refreshing Store Content");
+                          wrap: true;
+                          justify: center;
                           margin-bottom: 24;
                           styles ["title-3"]
                         }
@@ -293,10 +295,11 @@ template $BzWindow: Adw.ApplicationWindow {
 
                         Adw.ViewStackPage {
                           name: "installed";
+                          // Translators: .
                           title: _("Installed");
                           icon-name: "library-symbolic";
 
-                          child: $BzInstalledPage {
+                          child: $BzInstalledPage installed_page {
                             state: bind template.state;
                             model: bind template.state as <$BzStateInfo>.all-installed-entry-groups;
                             remove => $remove_installed_cb(template);
@@ -326,20 +329,17 @@ template $BzWindow: Adw.ApplicationWindow {
 
                     Adw.HeaderBar top_header_bar {
                       [start]
-                      Revealer {
-                        reveal-child: bind template.state as <$BzStateInfo>.auth-state as <$BzAuthState>.authenticated;
-                        transition-type: slide_left;
-                        child: MenuButton {
-                          menu-model: account_menu;
-                          styles [
-                            "circular",
-                            "flat",
-                          ]
+                      MenuButton {
+                        visible: bind template.state as <$BzStateInfo>.auth-state as <$BzAuthState>.authenticated;
+                        menu-model: account_menu;
+                        styles [
+                          "circular",
+                          "flat",
+                        ]
 
-                          child: Adw.Avatar {
-                            size: 24;
-                            custom-image: bind template.state as <$BzStateInfo>.auth-state as <$BzAuthState>.paintable;
-                          };
+                        child: Adw.Avatar {
+                          size: 24;
+                          custom-image: bind template.state as <$BzStateInfo>.auth-state as <$BzAuthState>.paintable;
                         };
                       }
 
@@ -602,7 +602,7 @@ menu primary_menu {
 menu debug_menu {
   section {
     item {
-      label: _("Open Bazaar Inspector");
+      label: "Open Bazaar Inspector";
       action: "app.bazaar-inspector";
     }
   }

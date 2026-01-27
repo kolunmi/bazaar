@@ -20,6 +20,7 @@
 
 #include "bz-inspector.h"
 #include "bz-entry-inspector.h"
+#include "bz-window.h"
 
 struct _BzInspector
 {
@@ -27,11 +28,15 @@ struct _BzInspector
 
   BzStateInfo *state;
 
-  GBinding *debug_mode_binding;
+  GBinding  *debug_mode_binding;
+  GBinding  *disable_blocklists_binding;
+  GtkWindow *preview_window;
 
   GtkCheckButton     *debug_mode_check;
+  GtkCheckButton     *disable_blocklists_check;
   GtkEditable        *search_entry;
   GtkFilterListModel *filter_model;
+  GtkSingleSelection *groups_selection;
 };
 
 G_DEFINE_FINAL_TYPE (BzInspector, bz_inspector, ADW_TYPE_WINDOW);
@@ -58,6 +63,10 @@ bz_inspector_dispose (GObject *object)
   g_clear_pointer (&self->state, g_object_unref);
 
   g_clear_object (&self->debug_mode_binding);
+  g_clear_object (&self->disable_blocklists_binding);
+  if (self->preview_window != NULL)
+    gtk_window_close (self->preview_window);
+  g_clear_object (&self->preview_window);
 
   G_OBJECT_CLASS (bz_inspector_parent_class)->dispose (object);
 }
@@ -99,6 +108,52 @@ bz_inspector_set_property (GObject      *object,
 }
 
 static void
+preview_changed (BzInspector    *self,
+                 GParamSpec     *pspec,
+                 GtkCheckButton *button)
+{
+  if (gtk_check_button_get_active (button))
+    {
+      BzWindow     *window   = NULL;
+      BzEntryGroup *selected = NULL;
+
+      g_assert (self->preview_window == NULL);
+
+      window = bz_window_new (self->state);
+      gtk_window_set_default_size (GTK_WINDOW (window), 750, 750);
+      gtk_window_present (GTK_WINDOW (window));
+
+      selected = gtk_single_selection_get_selected_item (self->groups_selection);
+      if (selected != NULL)
+        bz_window_show_group (window, selected);
+
+      self->preview_window = (GtkWindow *) g_object_ref_sink (window);
+    }
+  else
+    {
+      if (self->preview_window != NULL)
+        gtk_window_close (self->preview_window);
+      g_clear_object (&self->preview_window);
+    }
+}
+
+static void
+selected_group_changed (BzInspector        *self,
+                        GParamSpec         *pspec,
+                        GtkSingleSelection *selection)
+{
+  BzEntryGroup *group = NULL;
+
+  if (self->preview_window == NULL ||
+      !gtk_widget_get_mapped (GTK_WIDGET (self->preview_window)))
+    return;
+
+  group = gtk_single_selection_get_selected_item (self->groups_selection);
+  if (group != NULL)
+    bz_window_show_group (BZ_WINDOW (self->preview_window), group);
+}
+
+static void
 entry_changed (BzInspector *self,
                GtkEditable *editable)
 {
@@ -135,6 +190,21 @@ decache_and_inspect_cb (GtkListItem *list_item,
     }
 }
 
+static void
+open_file_externally_cb (GtkListItem *list_item,
+                         GtkButton   *button)
+{
+  GtkStringObject *string = NULL;
+  const char      *path   = NULL;
+  g_autofree char *uri    = NULL;
+
+  string = gtk_list_item_get_item (list_item);
+  path   = gtk_string_object_get_string (string);
+
+  uri = g_strdup_printf ("file://%s", path);
+  g_app_info_launch_default_for_uri (uri, NULL, NULL);
+}
+
 static char *
 format_uint (gpointer object,
              guint    value)
@@ -163,9 +233,14 @@ bz_inspector_class_init (BzInspectorClass *klass)
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-inspector.ui");
   gtk_widget_class_bind_template_child (widget_class, BzInspector, debug_mode_check);
+  gtk_widget_class_bind_template_child (widget_class, BzInspector, disable_blocklists_check);
   gtk_widget_class_bind_template_child (widget_class, BzInspector, search_entry);
   gtk_widget_class_bind_template_child (widget_class, BzInspector, filter_model);
+  gtk_widget_class_bind_template_child (widget_class, BzInspector, groups_selection);
+  gtk_widget_class_bind_template_callback (widget_class, preview_changed);
+  gtk_widget_class_bind_template_callback (widget_class, selected_group_changed);
   gtk_widget_class_bind_template_callback (widget_class, decache_and_inspect_cb);
+  gtk_widget_class_bind_template_callback (widget_class, open_file_externally_cb);
   gtk_widget_class_bind_template_callback (widget_class, entry_changed);
   gtk_widget_class_bind_template_callback (widget_class, format_uint);
 }
@@ -202,6 +277,7 @@ bz_inspector_set_state (BzInspector *self,
 
   g_clear_pointer (&self->state, g_object_unref);
   g_clear_pointer (&self->debug_mode_binding, g_object_unref);
+  g_clear_pointer (&self->disable_blocklists_binding, g_object_unref);
 
   if (state != NULL)
     {
@@ -209,6 +285,10 @@ bz_inspector_set_state (BzInspector *self,
       self->debug_mode_binding = g_object_bind_property (
           state, "debug-mode",
           self->debug_mode_check, "active",
+          G_BINDING_BIDIRECTIONAL | G_BINDING_SYNC_CREATE);
+      self->disable_blocklists_binding = g_object_bind_property (
+          state, "disable-blocklists",
+          self->disable_blocklists_check, "active",
           G_BINDING_BIDIRECTIONAL | G_BINDING_SYNC_CREATE);
     }
 

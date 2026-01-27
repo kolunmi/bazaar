@@ -22,6 +22,7 @@
 
 #include "appstream.h"
 #include "bz-flathub-category.h"
+#include "bz-flathub-sub-category.h"
 #include "bz-serializable.h"
 
 struct _BzFlathubCategory
@@ -34,6 +35,7 @@ struct _BzFlathubCategory
   GListModel              *quality_applications;
   int                      total_entries;
   gboolean                 is_spotlight;
+  GListModel              *subcategories;
 };
 
 static void
@@ -58,6 +60,7 @@ enum
   PROP_QUALITY_APPLICATIONS,
   PROP_TOTAL_ENTRIES,
   PROP_IS_SPOTLIGHT,
+  PROP_SUBCATEGORIES,
 
   LAST_PROP
 };
@@ -73,27 +76,65 @@ typedef struct
   const char *short_name;
   const char *more_of_name;
   const char *icon_name;
+  const void *subcategories;
 } CategoryInfo;
 
+typedef struct
+{
+  const char *display_name;
+  const char *category_id;
+} Subcategory;
+
+static const Subcategory audiovideo_subcategories[] = {
+  {   N_ ("Editing"), "AudioVideoEditing" },
+  {      N_ ("Midi"),              "Midi" },
+  {     N_ ("Mixer"),             "Mixer" },
+  {     N_ ("Music"),             "Music" },
+  {    N_ ("Player"),            "Player" },
+  {  N_ ("Recorder"),          "Recorder" },
+  { N_ ("Sequencer"),         "Sequencer" },
+  {     N_ ("Tuner"),             "Tuner" },
+  {        N_ ("TV"),                "TV" },
+  {             NULL,                NULL }
+};
+
+static const Subcategory game_subcategories[] = {
+  {    N_ ("Emulation"),      "Emulator" },
+  {       N_ ("Action"),    "ActionGame" },
+  {    N_ ("Adventure"), "AdventureGame" },
+  {       N_ ("Arcade"),    "ArcadeGame" },
+  {       N_ ("Blocks"),    "BlocksGame" },
+  {        N_ ("Board"),     "BoardGame" },
+  {         N_ ("Card"),      "CardGame" },
+  {         N_ ("Kids"),      "KidsGame" },
+  {        N_ ("Logic"),     "LogicGame" },
+  { N_ ("Role Playing"),   "RolePlaying" },
+  {      N_ ("Shooter"),       "Shooter" },
+  {   N_ ("Simulation"),    "Simulation" },
+  {       N_ ("Sports"),    "SportsGame" },
+  {     N_ ("Strategy"),  "StrategyGame" },
+  {                NULL,            NULL }
+};
+
 static const CategoryInfo category_info[] = {
-  {       "audiovideo",          N_ ("Audio & Video"),    N_ ("Media"),          N_ ("More Audio & Video"), "io.github.kolumni.Bazaar.Audiovideo" },
-  {      "development",        N_ ("Developer Tools"),  N_ ("Develop"),        N_ ("More Developer Tools"),    "io.github.kolumni.Bazaar.Develop" },
-  {        "education",              N_ ("Education"),    N_ ("Learn"),              N_ ("More Education"),      "io.github.kolumni.Bazaar.Learn" },
-  {             "game",                 N_ ("Gaming"),     N_ ("Play"),                 N_ ("More Gaming"),       "io.github.kolumni.Bazaar.Play" },
-  {         "graphics", N_ ("Graphics & Photography"),   N_ ("Create"), N_ ("More Graphics & Photography"),     "io.github.kolumni.Bazaar.Create" },
-  {          "network",             N_ ("Networking"), N_ ("Internet"),             N_ ("More Networking"),    "io.github.kolumni.Bazaar.Network" },
-  {           "office",           N_ ("Productivity"),     N_ ("Work"),           N_ ("More Productivity"),       "io.github.kolumni.Bazaar.Work" },
-  {          "science",                N_ ("Science"),  N_ ("Science"),                N_ ("More Science"),    "io.github.kolumni.Bazaar.Science" },
-  {           "system",                 N_ ("System"),   N_ ("System"),                 N_ ("More System"),     "io.github.kolumni.Bazaar.System" },
-  {          "utility",              N_ ("Utilities"),    N_ ("Tools"),              N_ ("More Utilities"),  "io.github.kolumni.Bazaar.Utilities" },
-  {         "trending",               N_ ("Trending"), N_ ("Trending"),               N_ ("More Trending"),   "io.github.kolumni.Bazaar.Trending" },
-  {          "popular",                N_ ("Popular"),  N_ ("Popular"),                N_ ("More Popular"),    "io.github.kolumni.Bazaar.Popular" },
-  {   "recently-added",         N_ ("Recently Added"),      N_ ("New"),                    N_ ("More New"),        "io.github.kolumni.Bazaar.New" },
-  { "recently-updated",       N_ ("Recently Updated"),  N_ ("Updated"),                N_ ("More Updated"),    "io.github.kolumni.Bazaar.Updated" },
-  {           "mobile",                 N_ ("Mobile"),   N_ ("Mobile"),                 N_ ("More Mobile"),     "io.github.kolumni.Bazaar.Mobile" },
-  {          "adwaita",                N_ ("Adwaita"),  N_ ("Adwaita"),                N_ ("More Adwaita"),    "io.github.kolumni.Bazaar.Adwaita" },
-  {              "kde",               N_ ("KDE Apps"), N_ ("KDE Apps"),               N_ ("More KDE Apps"),        "io.github.kolumni.Bazaar.Kde" },
-  {               NULL,                          NULL,            NULL,                               NULL,                                  NULL }
+  {       "audiovideo",          N_ ("Audio & Video"),    N_ ("Media"),          N_ ("More Audio & Video"), "io.github.kolumni.Bazaar.Audiovideo", audiovideo_subcategories },
+  {      "development",        N_ ("Developer Tools"),  N_ ("Develop"),        N_ ("More Developer Tools"),    "io.github.kolumni.Bazaar.Develop",                     NULL },
+  {        "education",              N_ ("Education"),    N_ ("Learn"),              N_ ("More Education"),      "io.github.kolumni.Bazaar.Learn",                     NULL },
+  {             "game",                 N_ ("Gaming"),     N_ ("Play"),                 N_ ("More Gaming"),       "io.github.kolumni.Bazaar.Play",       game_subcategories },
+  {         "graphics", N_ ("Graphics & Photography"),   N_ ("Create"), N_ ("More Graphics & Photography"),     "io.github.kolumni.Bazaar.Create",                     NULL },
+  {          "network",             N_ ("Networking"), N_ ("Internet"),             N_ ("More Networking"),    "io.github.kolumni.Bazaar.Network",                     NULL },
+  {           "office",           N_ ("Productivity"),     N_ ("Work"),           N_ ("More Productivity"),       "io.github.kolumni.Bazaar.Work",                     NULL },
+  {          "science",                N_ ("Science"),  N_ ("Science"),                N_ ("More Science"),    "io.github.kolumni.Bazaar.Science",                     NULL },
+  {           "system",                 N_ ("System"),   N_ ("System"),                 N_ ("More System"),     "io.github.kolumni.Bazaar.System",                     NULL },
+  {          "utility",              N_ ("Utilities"),    N_ ("Tools"),              N_ ("More Utilities"),  "io.github.kolumni.Bazaar.Utilities",                     NULL },
+  {         "trending",               N_ ("Trending"), N_ ("Trending"),               N_ ("More Trending"),   "io.github.kolumni.Bazaar.Trending",                     NULL },
+  {          "popular",                N_ ("Popular"),  N_ ("Popular"),                N_ ("More Popular"),    "io.github.kolumni.Bazaar.Popular",                     NULL },
+  {   "recently-added",         N_ ("Recently Added"),      N_ ("New"),                    N_ ("More New"),        "io.github.kolumni.Bazaar.New",                     NULL },
+  { "recently-updated",       N_ ("Recently Updated"),  N_ ("Updated"),                N_ ("More Updated"),    "io.github.kolumni.Bazaar.Updated",                     NULL },
+  {           "mobile",                 N_ ("Mobile"),   N_ ("Mobile"),                 N_ ("More Mobile"),     "io.github.kolumni.Bazaar.Mobile",                     NULL },
+  {          "adwaita",                N_ ("Adwaita"),  N_ ("Adwaita"),                N_ ("More Adwaita"),    "io.github.kolumni.Bazaar.Adwaita",                     NULL },
+  {              "kde",               N_ ("KDE Apps"), N_ ("KDE Apps"),               N_ ("More KDE Apps"),        "io.github.kolumni.Bazaar.Kde",                     NULL },
+  {               NULL,                          NULL,            NULL,                               NULL,                                  NULL,                     NULL }
 };
 
 static const CategoryInfo *
@@ -105,6 +146,21 @@ get_category_info (const char *category_id)
         return &category_info[i];
     }
   return NULL;
+}
+
+static GListModel *
+create_subcategories (const Subcategory *subcategories)
+{
+  GListStore *store;
+  store = g_list_store_new (BZ_TYPE_FLATHUB_SUB_CATEGORY);
+
+  for (gsize i = 0; subcategories[i].display_name != NULL; i++)
+    g_list_store_append (store, g_object_new (BZ_TYPE_FLATHUB_SUB_CATEGORY,
+                                              "name", _(subcategories[i].display_name),
+                                              "id", subcategories[i].category_id,
+                                              NULL));
+
+  return G_LIST_MODEL (store);
 }
 
 static void
@@ -153,6 +209,9 @@ bz_flathub_category_get_property (GObject    *object,
       break;
     case PROP_IS_SPOTLIGHT:
       g_value_set_boolean (value, bz_flathub_category_get_is_spotlight (self));
+      break;
+    case PROP_SUBCATEGORIES:
+      g_value_set_object (value, bz_flathub_category_get_subcategories (self));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -260,6 +319,13 @@ bz_flathub_category_class_init (BzFlathubCategoryClass *klass)
           FALSE,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
+  props[PROP_SUBCATEGORIES] =
+      g_param_spec_object (
+          "subcategories",
+          NULL, NULL,
+          G_TYPE_LIST_MODEL,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
   g_object_class_install_properties (object_class, LAST_PROP, props);
 }
 
@@ -319,6 +385,7 @@ bz_flathub_category_real_serialize (BzSerializable  *serializable,
         }
     }
   g_variant_builder_add (builder, "{sv}", "total-entries", g_variant_new_int32 (self->total_entries));
+  g_variant_builder_add (builder, "{sv}", "is-spotlight", g_variant_new_boolean (self->is_spotlight));
 }
 
 static gboolean
@@ -342,7 +409,7 @@ bz_flathub_category_real_deserialize (BzSerializable *serializable,
         break;
 
       if (g_strcmp0 (key, "name") == 0)
-        self->name = g_variant_dup_string (value, NULL);
+        bz_flathub_category_set_name (self, g_variant_get_string (value, NULL));
       else if (g_strcmp0 (key, "applications") == 0)
         {
           g_autoptr (GtkStringList) list     = NULL;
@@ -381,6 +448,10 @@ bz_flathub_category_real_deserialize (BzSerializable *serializable,
 
           self->quality_applications = (GListModel *) g_steal_pointer (&list);
         }
+      else if (g_strcmp0 (key, "total-entries") == 0)
+        self->total_entries = g_variant_get_int32 (value);
+      else if (g_strcmp0 (key, "is-spotlight") == 0)
+        self->is_spotlight = g_variant_get_boolean (value);
     }
 
   return TRUE;
@@ -479,11 +550,21 @@ void
 bz_flathub_category_set_name (BzFlathubCategory *self,
                               const char        *name)
 {
+  const CategoryInfo *info;
+
   g_return_if_fail (BZ_IS_FLATHUB_CATEGORY (self));
 
   g_clear_pointer (&self->name, g_free);
-  if (name != NULL)
-    self->name = g_strdup (name);
+
+  self->name = g_strdup (name);
+  info       = get_category_info (name);
+
+  if (info != NULL && info->subcategories != NULL)
+    {
+      g_clear_object (&self->subcategories);
+      self->subcategories = create_subcategories ((const Subcategory *) info->subcategories);
+      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SUBCATEGORIES]);
+    }
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_NAME]);
 }
@@ -586,6 +667,13 @@ bz_flathub_category_get_icon_name (BzFlathubCategory *self)
   return info ? info->icon_name : NULL;
 }
 
+GListModel *
+bz_flathub_category_get_subcategories (BzFlathubCategory *self)
+{
+  g_return_val_if_fail (BZ_IS_FLATHUB_CATEGORY (self), NULL);
+  return self->subcategories;
+}
+
 static void
 clear (BzFlathubCategory *self)
 {
@@ -593,6 +681,7 @@ clear (BzFlathubCategory *self)
   g_clear_pointer (&self->name, g_free);
   g_clear_pointer (&self->applications, g_object_unref);
   g_clear_pointer (&self->quality_applications, g_object_unref);
+  g_clear_object (&self->subcategories);
 }
 
 static const char *

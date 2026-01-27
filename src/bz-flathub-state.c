@@ -888,7 +888,7 @@ initialize_finally (DexFuture *future,
 }
 
 static DexFuture *
-search_keyword_fiber (char *keyword)
+search_collection_fiber (char *route)
 {
   g_autoptr (GError) local_error    = NULL;
   g_autoptr (GtkStringList) results = NULL;
@@ -898,8 +898,8 @@ search_keyword_fiber (char *keyword)
   JsonArray       *array            = NULL;
   guint            length           = 0;
 
-  request = g_strdup_printf ("/collection/keyword?keyword=%s&page=1&per_page=%d&locale=en",
-                             keyword, KEYWORD_SEARCH_PAGE_SIZE);
+  request = g_strdup_printf ("%s&page=1&per_page=%d&locale=en",
+                             route, KEYWORD_SEARCH_PAGE_SIZE);
 
   node = dex_await_boxed (
       bz_query_flathub_v2_json_take (
@@ -927,8 +927,8 @@ search_keyword_fiber (char *keyword)
 }
 
 static DexFuture *
-search_keyword_finally (DexFuture *future,
-                        GWeakRef  *wr)
+search_collection_finally (DexFuture *future,
+                           GWeakRef  *wr)
 {
   g_autoptr (BzFlathubState) self = NULL;
   const GValue *value             = NULL;
@@ -950,23 +950,23 @@ search_keyword_finally (DexFuture *future,
 }
 
 DexFuture *
-bz_flathub_state_search_keyword (BzFlathubState *self,
-                                 const char     *keyword)
+bz_flathub_state_search_collection (BzFlathubState *self,
+                                    const char     *route)
 {
   g_autoptr (DexFuture) future = NULL;
 
   dex_return_error_if_fail (BZ_IS_FLATHUB_STATE (self));
-  dex_return_error_if_fail (keyword != NULL);
+  dex_return_error_if_fail (route != NULL);
 
   future = dex_scheduler_spawn (
       bz_get_io_scheduler (),
       bz_get_dex_stack_size (),
-      (DexFiberFunc) search_keyword_fiber,
-      g_strdup (keyword),
+      (DexFiberFunc) search_collection_fiber,
+      g_strdup (route),
       g_free);
   future = dex_future_finally (
       future,
-      (DexFutureCallback) search_keyword_finally,
+      (DexFutureCallback) search_collection_finally,
       bz_track_weak (self),
       bz_weak_release);
   return g_steal_pointer (&future);
