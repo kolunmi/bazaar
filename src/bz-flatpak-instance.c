@@ -1961,10 +1961,11 @@ transaction_fiber (TransactionData *data)
                  (DexFuture *const *) jobs->pdata,
                  jobs->len),
              NULL);
-  dex_await (dex_future_allv (
-                 (DexFuture *const *) data->send_futures->pdata,
-                 data->send_futures->len),
-             NULL);
+  if (data->send_futures->len > 0)
+    dex_await (dex_future_allv (
+                   (DexFuture *const *) data->send_futures->pdata,
+                   data->send_futures->len),
+               NULL);
 
   errored = g_hash_table_new_full (
       g_direct_hash, g_direct_equal,
