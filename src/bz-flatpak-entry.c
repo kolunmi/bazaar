@@ -28,14 +28,9 @@
 
 #include "bz-app-permissions.h"
 #include "bz-appstream-parser.h"
-#include "bz-async-texture.h"
-#include "bz-flathub-category.h"
 #include "bz-flatpak-private.h"
 #include "bz-io.h"
-#include "bz-release.h"
 #include "bz-serializable.h"
-#include "bz-url.h"
-#include "bz-verification-status.h"
 
 struct _BzFlatpakEntry
 {
@@ -347,6 +342,7 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
   const char      *remote_name             = NULL;
   g_autoptr (GdkPaintable) icon_paintable  = NULL;
   g_autoptr (BzAppPermissions) permissions = NULL;
+  gboolean searchable                      = FALSE;
 
   g_return_val_if_fail (FLATPAK_IS_REF (ref), NULL);
   g_return_val_if_fail (FLATPAK_IS_REMOTE_REF (ref) || FLATPAK_IS_BUNDLE_REF (ref) || FLATPAK_IS_INSTALLED_REF (ref), NULL);
@@ -472,54 +468,56 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
     }
 
   g_object_get (self, "icon-paintable", &icon_paintable, NULL);
-  if (icon_paintable == NULL && (FLATPAK_IS_BUNDLE_REF (ref)))
+  if (icon_paintable == NULL)
     {
-      for (int size = 128; size > 0; size -= 64)
+      if (FLATPAK_IS_BUNDLE_REF (ref))
         {
-          g_autoptr (GBytes) icon_bytes = NULL;
-          GdkTexture *texture           = NULL;
-
-          icon_bytes = flatpak_bundle_ref_get_icon (FLATPAK_BUNDLE_REF (ref), size);
-          if (icon_bytes == NULL)
-            continue;
-
-          texture = gdk_texture_new_from_bytes (icon_bytes, NULL);
-          /* don't error out even if loading fails */
-
-          if (texture != NULL)
+          for (int size = 128; size > 0; size -= 64)
             {
-              icon_paintable = GDK_PAINTABLE (texture);
-              g_object_set (self, "icon-paintable", icon_paintable, NULL);
-              break;
-            }
-        }
-    }
+              g_autoptr (GBytes) icon_bytes = NULL;
+              GdkTexture *texture           = NULL;
 
-  g_object_get (self, "icon-paintable", &icon_paintable, NULL);
-  if (icon_paintable == NULL && FLATPAK_IS_INSTALLED_REF (ref))
-    {
-      const char *icon_name = flatpak_ref_get_name (ref);
-      const int   sizes[]   = { 512, 256, 128, 64, 48 };
+              icon_bytes = flatpak_bundle_ref_get_icon (FLATPAK_BUNDLE_REF (ref), size);
+              if (icon_bytes == NULL)
+                continue;
 
-      for (int i = 0; i < G_N_ELEMENTS (sizes); i++)
-        {
-          g_autofree char *icon_path = NULL;
-
-          if (user)
-            icon_path = g_build_filename (g_get_home_dir (), ".local/share/flatpak/exports/share/icons/hicolor", g_strdup_printf ("%dx%d", sizes[i], sizes[i]), "apps", g_strdup_printf ("%s.png", icon_name), NULL);
-          else
-            icon_path = g_build_filename ("/var/lib/flatpak/exports/share/icons/hicolor", g_strdup_printf ("%dx%d", sizes[i], sizes[i]), "apps", g_strdup_printf ("%s.png", icon_name), NULL);
-
-          if (g_file_test (icon_path, G_FILE_TEST_EXISTS))
-            {
-              g_autoptr (GFile) icon_file = g_file_new_for_path (icon_path);
-              GdkTexture *texture         = gdk_texture_new_from_file (icon_file, NULL);
+              texture = gdk_texture_new_from_bytes (icon_bytes, NULL);
+              /* don't error out even if loading fails */
 
               if (texture != NULL)
                 {
-                  icon_paintable = GDK_PAINTABLE (texture);
-                  g_object_set (self, "icon-paintable", icon_paintable, NULL);
+                  icon_paintable = (GdkPaintable *) g_steal_pointer (&texture);
                   break;
+                }
+            }
+        }
+      else if (FLATPAK_IS_INSTALLED_REF (ref))
+        {
+          const char *icon_name = flatpak_ref_get_name (ref);
+          const int   sizes[]   = { 512, 256, 128, 64, 48 };
+
+          for (int i = 0; i < G_N_ELEMENTS (sizes); i++)
+            {
+              g_autofree char *icon_path = NULL;
+
+              if (user)
+                icon_path = g_build_filename (g_get_home_dir (), ".local/share/flatpak/exports/share/icons/hicolor", g_strdup_printf ("%dx%d", sizes[i], sizes[i]), "apps", g_strdup_printf ("%s.png", icon_name), NULL);
+              else
+                icon_path = g_build_filename ("/var/lib/flatpak/exports/share/icons/hicolor", g_strdup_printf ("%dx%d", sizes[i], sizes[i]), "apps", g_strdup_printf ("%s.png", icon_name), NULL);
+
+              if (g_file_test (icon_path, G_FILE_TEST_EXISTS))
+                {
+                  g_autoptr (GFile) icon_file = NULL;
+                  GdkTexture *texture         = NULL;
+
+                  icon_file = g_file_new_for_path (icon_path);
+                  texture   = gdk_texture_new_from_file (icon_file, NULL);
+
+                  if (texture != NULL)
+                    {
+                      icon_paintable = (GdkPaintable *) g_steal_pointer (&texture);
+                      break;
+                    }
                 }
             }
         }
@@ -545,8 +543,7 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
   if (permissions == NULL)
     return NULL;
 
-  if (FLATPAK_IS_INSTALLED_REF (ref))
-    g_object_set (self, "searchable", FALSE, NULL);
+  searchable = !FLATPAK_IS_INSTALLED_REF (ref);
 
   g_object_set (
       self,
@@ -561,6 +558,7 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
       "installed-size", installed_size,
       "icon-paintable", icon_paintable,
       "permissions", permissions,
+      "searchable", searchable,
       NULL);
 
   return g_steal_pointer (&self);
