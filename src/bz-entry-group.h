@@ -118,6 +118,9 @@ bz_entry_group_get_updatable_and_available (BzEntryGroup *self);
 int
 bz_entry_group_get_removable_and_available (BzEntryGroup *self);
 
+gboolean
+bz_entry_group_is_searchable (BzEntryGroup *self);
+
 guint64
 bz_entry_group_get_user_data_size (BzEntryGroup *self);
 

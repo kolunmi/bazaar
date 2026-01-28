@@ -90,6 +90,9 @@ bz_entry_set_installed (BzEntry *self,
                         gboolean installed);
 
 gboolean
+bz_entry_is_searchable (BzEntry *self);
+
+gboolean
 bz_entry_is_of_kinds (BzEntry *self,
                       guint    kinds);
 

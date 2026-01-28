@@ -370,6 +370,9 @@ query_sub_task_fiber (QuerySubTaskData *data)
       group  = g_ptr_array_index (shallow_mirror, work_offset + i);
       locker = bz_entry_group_lock (group);
 
+      if (!bz_entry_group_is_searchable (group))
+        continue;
+
       id    = bz_entry_group_get_id (group);
       title = bz_entry_group_get_title (group);
       if ((id != NULL && g_strcmp0 (query_utf8, id) == 0) ||
