@@ -63,7 +63,7 @@ msgid ""
 msgstr ""
 "Bazaar encourage activement à soutenir les développeurs qui rendent "
 "l’environnement de bureau Linux possible. Bazaar est doté d’un onglet "
-"« Recommandations » qui peut être configuré par les distributeurs, pour une "
+"« Sélection » qui peut être configuré par les distributeurs, pour une "
 "expérience personnalisée."
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29 src/bz-application.c:706
@@ -752,7 +752,7 @@ msgstr "Synchronisation…"
 #: src/bz-application.c:1534 src/bz-application.c:3068
 #, c-format
 msgid "Receiving %d entries..."
-msgstr "Réception de %d entrées…"
+msgstr "Réception de %d applis…"
 
 #: src/bz-application.c:1539
 msgid "Checking for updates"
@@ -771,15 +771,15 @@ msgstr "Vide"
 
 #: src/bz-curated-view.blp:15
 msgid "No Curation"
-msgstr "Aucune recommandation"
+msgstr "Aucune sélection"
 
 #: src/bz-curated-view.blp:16
 msgid ""
 "There is no curation information provided on this system. You can still "
 "browse applications on Flathub"
 msgstr ""
-"Votre système ne fourni pas de recommandations, mais vous pouvez toujours "
-"chercher des applications sur Flathub"
+"Votre système ne recommande pas d’applications en particulier, mais "
+"vous pouvez toujours en chercher sur Flathub"
 
 #: src/bz-curated-view.blp:18
 msgid "Browse Flathub"
@@ -1019,7 +1019,7 @@ msgstr "Jeux de rôles"
 
 #: src/bz-flathub-category.c:112
 msgid "Shooter"
-msgstr "Tireur"
+msgstr "Jeu de tir"
 
 #: src/bz-flathub-category.c:113
 msgid "Simulation"
@@ -1205,7 +1205,7 @@ msgstr "Plus d’applis Adwaita"
 
 #: src/bz-flathub-category.c:136
 msgid "KDE Apps"
-msgstr "Applis KDE"
+msgstr "KDE"
 
 #: src/bz-flathub-category.c:136
 msgid "More KDE Apps"
@@ -1262,7 +1262,7 @@ msgstr "Nous + jeux = ♥"
 
 #: src/bz-flathub-page.blp:401
 msgid "Games and apps to run your favorite titles"
-msgstr "Jeux et applis pour lire vos titres préférés"
+msgstr "Jeux et applis pour lancer vos titres préférés"
 
 #: src/bz-flathub-page.blp:435
 msgid "More Games"
@@ -1357,7 +1357,7 @@ msgstr "N"
 #. Translators: .
 #: src/bz-full-view.c:295
 msgid "Download"
-msgstr "Télécharger"
+msgstr "Installer"
 
 #: src/bz-full-view.c:315
 msgid "Size information unavailable"
@@ -1957,7 +1957,7 @@ msgstr ""
 
 #: src/bz-safety-calculator.c:121
 msgid "Input Device Access"
-msgstr "Accès au périphérique d’entrée"
+msgstr "Accès aux périphériques d’entrée"
 
 #: src/bz-safety-calculator.c:122
 msgid "Can access input devices"
@@ -2594,7 +2594,7 @@ msgstr "Actualisation du contenu de la logithèque"
 
 #: src/bz-window.blp:273
 msgid "Curated"
-msgstr "Recommandations"
+msgstr "Sélection"
 
 #: src/bz-window.blp:286
 msgid "Flathub"
