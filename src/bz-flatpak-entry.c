@@ -43,6 +43,7 @@ struct _BzFlatpakEntry
 
   gboolean user;
   gboolean is_bundle;
+  gboolean is_installed_ref;
   char    *flatpak_name;
   char    *flatpak_id;
   char    *flatpak_version;
@@ -205,11 +206,11 @@ bz_flatpak_entry_class_init (BzFlatpakEntryClass *klass)
           G_PARAM_READABLE);
 
   props[PROP_IS_BUNDLE] =
-    g_param_spec_boolean (
-        "is-bundle",
-        NULL, NULL,
-        FALSE,
-        G_PARAM_READABLE);
+      g_param_spec_boolean (
+          "is-bundle",
+          NULL, NULL,
+          FALSE,
+          G_PARAM_READABLE);
 
   props[PROP_APPLICATION_RUNTIME] =
       g_param_spec_string (
@@ -250,6 +251,7 @@ bz_flatpak_entry_real_serialize (BzSerializable  *serializable,
   BzFlatpakEntry *self = BZ_FLATPAK_ENTRY (serializable);
 
   g_variant_builder_add (builder, "{sv}", "user", g_variant_new_boolean (self->user));
+  g_variant_builder_add (builder, "{sv}", "is-installed-ref", g_variant_new_boolean (self->is_installed_ref));
   if (self->flatpak_name != NULL)
     g_variant_builder_add (builder, "{sv}", "flatpak-name", g_variant_new_string (self->flatpak_name));
   if (self->flatpak_id != NULL)
@@ -291,6 +293,8 @@ bz_flatpak_entry_real_deserialize (BzSerializable *serializable,
 
       if (g_strcmp0 (key, "user") == 0)
         self->user = g_variant_get_boolean (value);
+      else if (g_strcmp0 (key, "is-installed-ref") == 0)
+        self->is_installed_ref = g_variant_get_boolean (value);
       else if (g_strcmp0 (key, "flatpak-name") == 0)
         self->flatpak_name = g_variant_dup_string (value, NULL);
       else if (g_strcmp0 (key, "flatpak-id") == 0)
@@ -327,37 +331,40 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
                               const char    *appstream_dir,
                               GError       **error)
 {
-  g_autoptr (BzFlatpakEntry) self                      = NULL;
-  GBytes *bytes                                        = NULL;
-  g_autoptr (GKeyFile) key_file                        = NULL;
-  gboolean         result                              = FALSE;
-  guint            kinds                               = 0;
-  g_autofree char *module_dir                          = NULL;
-  const char      *id                                  = NULL;
-  g_autofree char *unique_id                           = NULL;
-  g_autofree char *unique_id_checksum                  = NULL;
-  guint64          download_size                       = 0;
-  guint64          installed_size                      = 0;
-  const char      *title                               = NULL;
-  const char      *eol                                 = NULL;
-  const char      *remote_name                         = NULL;
-  g_autoptr (GdkPaintable) icon_paintable              = NULL;
-  g_autoptr (BzAppPermissions) permissions             = NULL;
+  g_autoptr (BzFlatpakEntry) self          = NULL;
+  GBytes *bytes                            = NULL;
+  g_autoptr (GKeyFile) key_file            = NULL;
+  gboolean         result                  = FALSE;
+  guint            kinds                   = 0;
+  g_autofree char *module_dir              = NULL;
+  const char      *id                      = NULL;
+  g_autofree char *unique_id               = NULL;
+  g_autofree char *unique_id_checksum      = NULL;
+  guint64          download_size           = 0;
+  guint64          installed_size          = 0;
+  const char      *title                   = NULL;
+  const char      *eol                     = NULL;
+  const char      *remote_name             = NULL;
+  g_autoptr (GdkPaintable) icon_paintable  = NULL;
+  g_autoptr (BzAppPermissions) permissions = NULL;
 
   g_return_val_if_fail (FLATPAK_IS_REF (ref), NULL);
-  g_return_val_if_fail (FLATPAK_IS_REMOTE_REF (ref) || FLATPAK_IS_BUNDLE_REF (ref), NULL);
-  g_return_val_if_fail (component == NULL || appstream_dir != NULL || FLATPAK_IS_BUNDLE_REF (ref), NULL);
+  g_return_val_if_fail (FLATPAK_IS_REMOTE_REF (ref) || FLATPAK_IS_BUNDLE_REF (ref) || FLATPAK_IS_INSTALLED_REF (ref), NULL);
+  g_return_val_if_fail (component == NULL || appstream_dir != NULL || FLATPAK_IS_BUNDLE_REF (ref) || FLATPAK_IS_INSTALLED_REF (ref), NULL);
 
-  self       = g_object_new (BZ_TYPE_FLATPAK_ENTRY, NULL);
-  self->user = user;
-  self->is_bundle = FLATPAK_IS_BUNDLE_REF (ref);
-  self->ref  = g_object_ref (ref);
+  self                   = g_object_new (BZ_TYPE_FLATPAK_ENTRY, NULL);
+  self->user             = user;
+  self->is_bundle        = FLATPAK_IS_BUNDLE_REF (ref);
+  self->is_installed_ref = FLATPAK_IS_INSTALLED_REF (ref);
+  self->ref              = g_object_ref (ref);
 
   key_file = g_key_file_new ();
   if (FLATPAK_IS_REMOTE_REF (ref))
     bytes = flatpak_remote_ref_get_metadata (FLATPAK_REMOTE_REF (ref));
   else if (FLATPAK_IS_BUNDLE_REF (ref))
     bytes = flatpak_bundle_ref_get_metadata (FLATPAK_BUNDLE_REF (ref));
+  else if (FLATPAK_IS_INSTALLED_REF (ref))
+    bytes = flatpak_installed_ref_load_metadata (FLATPAK_INSTALLED_REF (ref), NULL, error);
 
   result = g_key_file_load_from_bytes (
       key_file, bytes, G_KEY_FILE_NONE, error);
@@ -422,12 +429,14 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
     remote_name = flatpak_remote_get_name (remote);
   else if (FLATPAK_IS_BUNDLE_REF (ref))
     remote_name = flatpak_bundle_ref_get_origin (FLATPAK_BUNDLE_REF (ref));
+  else if (FLATPAK_IS_INSTALLED_REF (ref))
+    remote_name = flatpak_installed_ref_get_origin (FLATPAK_INSTALLED_REF (ref));
 
   if (FLATPAK_IS_REMOTE_REF (ref))
     download_size = flatpak_remote_ref_get_download_size (FLATPAK_REMOTE_REF (ref));
   else if (FLATPAK_IS_BUNDLE_REF (ref))
     {
-      g_autoptr(GFileInfo) file_info = NULL;
+      g_autoptr (GFileInfo) file_info = NULL;
 
       GFile *bundle_file = flatpak_bundle_ref_get_file (FLATPAK_BUNDLE_REF (ref));
 
@@ -444,6 +453,8 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
     installed_size = flatpak_remote_ref_get_installed_size (FLATPAK_REMOTE_REF (ref));
   else if (FLATPAK_IS_BUNDLE_REF (ref))
     installed_size = flatpak_bundle_ref_get_installed_size (FLATPAK_BUNDLE_REF (ref));
+  else if (FLATPAK_IS_INSTALLED_REF (ref))
+    installed_size = flatpak_installed_ref_get_installed_size (FLATPAK_INSTALLED_REF (ref));
 
   if (component != NULL)
     {
@@ -461,7 +472,7 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
     }
 
   g_object_get (self, "icon-paintable", &icon_paintable, NULL);
-  if (icon_paintable == NULL && FLATPAK_IS_BUNDLE_REF (ref))
+  if (icon_paintable == NULL && (FLATPAK_IS_BUNDLE_REF (ref)))
     {
       for (int size = 128; size > 0; size -= 64)
         {
@@ -484,6 +495,36 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
         }
     }
 
+  g_object_get (self, "icon-paintable", &icon_paintable, NULL);
+  if (icon_paintable == NULL && FLATPAK_IS_INSTALLED_REF (ref))
+    {
+      const char *icon_name = flatpak_ref_get_name (ref);
+      const int   sizes[]   = { 512, 256, 128, 64, 48 };
+
+      for (int i = 0; i < G_N_ELEMENTS (sizes); i++)
+        {
+          g_autofree char *icon_path = NULL;
+
+          if (user)
+            icon_path = g_build_filename (g_get_home_dir (), ".local/share/flatpak/exports/share/icons/hicolor", g_strdup_printf ("%dx%d", sizes[i], sizes[i]), "apps", g_strdup_printf ("%s.png", icon_name), NULL);
+          else
+            icon_path = g_build_filename ("/var/lib/flatpak/exports/share/icons/hicolor", g_strdup_printf ("%dx%d", sizes[i], sizes[i]), "apps", g_strdup_printf ("%s.png", icon_name), NULL);
+
+          if (g_file_test (icon_path, G_FILE_TEST_EXISTS))
+            {
+              g_autoptr (GFile) icon_file = g_file_new_for_path (icon_path);
+              GdkTexture *texture         = gdk_texture_new_from_file (icon_file, NULL);
+
+              if (texture != NULL)
+                {
+                  icon_paintable = GDK_PAINTABLE (texture);
+                  g_object_set (self, "icon-paintable", icon_paintable, NULL);
+                  break;
+                }
+            }
+        }
+    }
+
   g_object_get (self, "title", &title, NULL);
   if (title == NULL)
     {
@@ -497,11 +538,15 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
 
   if (FLATPAK_IS_REMOTE_REF (ref))
     eol = flatpak_remote_ref_get_eol (FLATPAK_REMOTE_REF (ref));
-
+  else if (FLATPAK_IS_INSTALLED_REF (ref))
+    eol = flatpak_installed_ref_get_eol (FLATPAK_INSTALLED_REF (ref));
 
   permissions = bz_app_permissions_new_from_metadata (key_file, error);
   if (permissions == NULL)
     return NULL;
+
+  if (FLATPAK_IS_INSTALLED_REF (ref))
+    g_object_set (self, "searchable", FALSE, NULL);
 
   g_object_set (
       self,
@@ -629,6 +674,21 @@ bz_flatpak_entry_get_addon_extension_of_ref (BzFlatpakEntry *self)
 {
   g_return_val_if_fail (BZ_IS_FLATPAK_ENTRY (self), NULL);
   return self->addon_extension_of_ref;
+}
+
+gboolean
+bz_flatpak_entry_is_bundle (BzFlatpakEntry *self)
+{
+  g_return_val_if_fail (BZ_IS_FLATPAK_ENTRY (self), FALSE);
+  return self->is_bundle;
+}
+
+gboolean
+bz_flatpak_entry_is_installed_ref (BzFlatpakEntry *self)
+{
+  g_return_val_if_fail (BZ_IS_FLATPAK_ENTRY (self), FALSE);
+
+  return self->is_installed_ref;
 }
 
 gboolean

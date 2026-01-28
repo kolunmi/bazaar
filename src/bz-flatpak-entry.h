@@ -53,6 +53,12 @@ bz_flatpak_entry_get_application_runtime (BzFlatpakEntry *self);
 const char *
 bz_flatpak_entry_get_runtime_name (BzFlatpakEntry *self);
 
+gboolean
+bz_flatpak_entry_is_bundle (BzFlatpakEntry *self);
+
+gboolean
+bz_flatpak_entry_is_installed_ref (BzFlatpakEntry *self);
+
 const char *
 bz_flatpak_entry_get_addon_extension_of_ref (BzFlatpakEntry *self);
 

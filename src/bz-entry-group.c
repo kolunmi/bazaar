@@ -24,6 +24,7 @@
 #include "bz-entry-group.h"
 #include "bz-async-texture.h"
 #include "bz-env.h"
+#include "bz-flatpak-entry.h"
 #include "bz-io.h"
 #include "bz-util.h"
 
@@ -62,6 +63,7 @@ struct _BzEntryGroup
   int      updatable_available;
   int      removable_available;
   gboolean read_only;
+  gboolean searchable;
 
   guint64 user_data_size;
 
@@ -824,6 +826,14 @@ bz_entry_group_get_removable_and_available (BzEntryGroup *self)
   return self->removable_available;
 }
 
+gboolean
+bz_entry_group_is_searchable (BzEntryGroup *self)
+{
+  g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), TRUE);
+
+  return self->searchable;
+}
+
 void
 bz_entry_group_add (BzEntryGroup *self,
                     BzEntry      *entry,
@@ -850,6 +860,7 @@ bz_entry_group_add (BzEntryGroup *self,
   const char   *donation_url       = NULL;
   GListModel   *entry_categories   = NULL;
   guint         existing           = 0;
+  gboolean      is_searchable      = FALSE;
 
   g_return_if_fail (BZ_IS_ENTRY_GROUP (self));
   g_return_if_fail (BZ_IS_ENTRY (entry));
@@ -891,7 +902,8 @@ bz_entry_group_add (BzEntryGroup *self,
   donation_url       = bz_entry_get_donation_url (entry);
   entry_categories   = bz_entry_get_categories (entry);
 
-  addons = bz_entry_get_addons (entry);
+  addons        = bz_entry_get_addons (entry);
+  is_searchable = bz_entry_is_searchable (entry);
   if (addons != NULL)
     n_addons = g_list_model_get_n_items (addons);
 
@@ -1111,6 +1123,10 @@ bz_entry_group_add (BzEntryGroup *self,
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLABLE]);
         }
     }
+  if (is_searchable && !self->searchable)
+    {
+      self->searchable = TRUE;
+    }
 }
 
 void
@@ -1152,8 +1168,12 @@ installed_changed (BzEntryGroup *self,
                    BzEntry      *entry)
 {
   g_autoptr (GMutexLocker) locker = NULL;
+  gboolean is_installed_ref       = FALSE;
 
   locker = g_mutex_locker_new (&self->mutex);
+
+  if (BZ_IS_FLATPAK_ENTRY (entry))
+    is_installed_ref = bz_flatpak_entry_is_installed_ref (BZ_FLATPAK_ENTRY (entry));
 
   if (bz_entry_is_installed (entry))
     {
@@ -1172,16 +1192,23 @@ installed_changed (BzEntryGroup *self,
   else
     {
       self->removable--;
-      self->installable++;
+      if (!is_installed_ref)
+        self->installable++;
+
       if (!bz_entry_is_holding (entry))
         {
           self->removable_available--;
-          self->installable_available++;
+          if (!is_installed_ref)
+            self->installable_available++;
+
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_REMOVABLE_AND_AVAILABLE]);
-          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLABLE_AND_AVAILABLE]);
+          if (!is_installed_ref)
+            g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLABLE_AND_AVAILABLE]);
         }
+
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_REMOVABLE]);
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLABLE]);
+      if (!is_installed_ref)
+        g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLABLE]);
     }
 
   dex_clear (&self->user_data_size_future);
