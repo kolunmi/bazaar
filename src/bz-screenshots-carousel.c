@@ -53,6 +53,7 @@ struct _BzScreenshotsCarousel
   gboolean        compact;
   char           *light_accent_color;
   char           *dark_accent_color;
+  char           *widget_css_class;
   GtkCssProvider *css;
   gulong          items_changed_id;
 };
@@ -246,8 +247,8 @@ get_carousel_height (BzScreenshotsCarousel *self)
 
 static void
 on_screenshot_focus_changed (BzDecoratedScreenshot *screenshot,
-                            GParamSpec            *pspec,
-                            BzScreenshotsCarousel *self)
+                             GParamSpec            *pspec,
+                             BzScreenshotsCarousel *self)
 {
   if (!self->carousel)
     return;
@@ -293,7 +294,7 @@ populate_carousel (BzScreenshotsCarousel *self)
                         G_CALLBACK (on_screenshot_clicked), self);
 
       g_signal_connect (screenshot, "notify::has-focus",
-                  G_CALLBACK (on_screenshot_focus_changed), self);
+                        G_CALLBACK (on_screenshot_focus_changed), self);
 
       widgets = g_list_append (widgets, screenshot);
       gtk_widget_set_visible (screenshot, TRUE);
@@ -324,10 +325,10 @@ on_model_items_changed (GListModel            *model,
     return;
 
   target_page = (is_window_wide (self) && model != NULL && g_list_model_get_n_items (model) >= 3) ? 1 : 0;
-  child = bz_carousel_get_nth_page (self->carousel, target_page);
+  child       = bz_carousel_get_nth_page (self->carousel, target_page);
 
   if (child != NULL)
-      bz_carousel_scroll_to (self->carousel, child, FALSE);
+    bz_carousel_scroll_to (self->carousel, child, FALSE);
 }
 
 static void
@@ -366,6 +367,7 @@ bz_screenshots_carousel_dispose (GObject *object)
 
   g_clear_pointer (&self->light_accent_color, g_free);
   g_clear_pointer (&self->dark_accent_color, g_free);
+  g_clear_pointer (&self->widget_css_class, g_free);
 
   if (root_child != NULL)
     gtk_widget_unparent (root_child);
@@ -640,6 +642,9 @@ refresh_css (BzScreenshotsCarousel *self)
       self->dark_accent_color == NULL)
     return;
 
+  self->widget_css_class = g_strdup_printf ("screenshot-carousel-%p", (void *) self);
+  gtk_widget_add_css_class (GTK_WIDGET (self), self->widget_css_class);
+
   if (self->light_accent_color != NULL && self->dark_accent_color != NULL)
     light_bg = g_strdup_printf ("color-mix(in srgb, %s %d%%, rgb(255,255,255))",
                                 self->light_accent_color, LIGHT_MIX_PERCENTAGE);
@@ -659,10 +664,10 @@ refresh_css (BzScreenshotsCarousel *self)
                                self->light_accent_color, DARK_MIX_PERCENTAGE);
 
   css_string = g_strdup_printf (
-      ".%s{background-color:%s;}\n"
-      ".%s{background-color:%s;}",
-      LIGHT_CLASS, light_bg,
-      DARK_CLASS, dark_bg);
+      ".%s.%s{background-color:%s;}\n"
+      ".%s.%s{background-color:%s;}",
+      self->widget_css_class, LIGHT_CLASS, light_bg,
+      self->widget_css_class, DARK_CLASS, dark_bg);
 
   self->css = gtk_css_provider_new ();
   gtk_css_provider_load_from_string (self->css, css_string);
@@ -681,6 +686,12 @@ clear_css (BzScreenshotsCarousel *self)
 {
   gtk_widget_remove_css_class (GTK_WIDGET (self), LIGHT_CLASS);
   gtk_widget_remove_css_class (GTK_WIDGET (self), DARK_CLASS);
+
+  if (self->widget_css_class != NULL)
+    {
+      gtk_widget_remove_css_class (GTK_WIDGET (self), self->widget_css_class);
+      g_clear_pointer (&self->widget_css_class, g_free);
+    }
 
   if (self->css != NULL)
     gtk_style_context_remove_provider_for_display (
