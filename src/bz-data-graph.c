@@ -43,6 +43,8 @@ struct _BzDataGraph
   double      transition_progress;
   double      rounded_axis_max;
 
+  AdwStyleManager *style_manager;
+
   GskPath        *path;
   GskPathMeasure *path_measure;
   GskRenderNode  *fg;
@@ -94,6 +96,11 @@ static double
 calculate_axis_tick_value (double value, gboolean round_up);
 
 static void
+on_style_changed (AdwStyleManager *style_manager,
+                  GParamSpec      *pspec,
+                  BzDataGraph     *self);
+
+static void
 bz_data_graph_dispose (GObject *object)
 {
   BzDataGraph *self = BZ_DATA_GRAPH (object);
@@ -101,6 +108,10 @@ bz_data_graph_dispose (GObject *object)
   if (self->model != NULL)
     g_signal_handlers_disconnect_by_func (
         self->model, items_changed, self);
+
+  g_signal_handlers_disconnect_by_func (self->style_manager,
+                                        on_style_changed,
+                                        self);
 
   g_clear_object (&self->model);
   g_clear_pointer (&self->independent_axis_label, g_free);
@@ -198,6 +209,14 @@ bz_data_graph_size_allocate (GtkWidget *widget,
 
   refresh_path (self, (double) width - LABEL_MARGIN - LABEL_MARGIN_RIGHT, (double) height - LABEL_MARGIN);
   gtk_widget_queue_draw (widget);
+}
+
+static void
+on_style_changed (AdwStyleManager *style_manager,
+                  GParamSpec      *pspec,
+                  BzDataGraph     *self)
+{
+  gtk_widget_queue_draw (GTK_WIDGET (self));
 }
 
 static void
@@ -545,6 +564,13 @@ bz_data_graph_init (BzDataGraph *self)
   GtkWidget *inner_box  = NULL;
   GtkWidget *label2_box = NULL;
   GtkWidget *icon_image = NULL;
+
+  self->style_manager = adw_style_manager_get_default ();
+
+  g_signal_connect (self->style_manager, "notify::dark",
+                    G_CALLBACK (on_style_changed), self);
+  g_signal_connect (self->style_manager, "notify::accent-color",
+                    G_CALLBACK (on_style_changed), self);
 
   self->motion = gtk_event_controller_motion_new ();
   g_signal_connect_swapped (self->motion, "enter", G_CALLBACK (motion_enter), self);
