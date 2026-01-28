@@ -2009,7 +2009,7 @@ transaction_job_fiber (TransactionJobData *data)
     return dex_future_new_reject (
         BZ_FLATPAK_ERROR,
         BZ_FLATPAK_ERROR_TRANSACTION_FAILURE,
-        "Failed to run flatpak transaction on user installation: %s",
+        "Failed to run flatpak transaction on installation: %s",
         local_error->message);
 
   return dex_future_new_true ();
