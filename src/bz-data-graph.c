@@ -96,9 +96,9 @@ static double
 calculate_axis_tick_value (double value, gboolean round_up);
 
 static void
-on_style_changed (AdwStyleManager *style_manager,
+on_style_changed (BzDataGraph     *self,
                   GParamSpec      *pspec,
-                  BzDataGraph     *self);
+                  AdwStyleManager *style_manager);
 
 static void
 bz_data_graph_dispose (GObject *object)
@@ -212,9 +212,9 @@ bz_data_graph_size_allocate (GtkWidget *widget,
 }
 
 static void
-on_style_changed (AdwStyleManager *style_manager,
+on_style_changed (BzDataGraph     *self,
                   GParamSpec      *pspec,
-                  BzDataGraph     *self)
+                  AdwStyleManager *style_manager)
 {
   gtk_widget_queue_draw (GTK_WIDGET (self));
 }
@@ -567,10 +567,10 @@ bz_data_graph_init (BzDataGraph *self)
 
   self->style_manager = adw_style_manager_get_default ();
 
-  g_signal_connect (self->style_manager, "notify::dark",
-                    G_CALLBACK (on_style_changed), self);
-  g_signal_connect (self->style_manager, "notify::accent-color",
-                    G_CALLBACK (on_style_changed), self);
+  g_signal_connect_swapped (self->style_manager, "notify::dark",
+                            G_CALLBACK (on_style_changed), self);
+  g_signal_connect_swapped (self->style_manager, "notify::accent-color",
+                            G_CALLBACK (on_style_changed), self);
 
   self->motion = gtk_event_controller_motion_new ();
   g_signal_connect_swapped (self->motion, "enter", G_CALLBACK (motion_enter), self);
