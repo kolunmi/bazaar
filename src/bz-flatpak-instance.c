@@ -306,6 +306,24 @@ cmp_rref (FlatpakRemoteRef *a,
           FlatpakRemoteRef *b,
           GHashTable       *hash);
 
+static AsComponent *
+parse_component_for_node (XbNode  *node,
+                          GError **error);
+
+static GBytes *
+decompress_appstream_gz (GBytes       *appstream_gz,
+                         GCancellable *cancellable,
+                         GError      **error);
+
+static XbSilo *
+build_silo (XbBuilderSource *source,
+            GCancellable    *cancellable,
+            GError         **error);
+
+static AsComponent *
+extract_first_component_for_silo (XbSilo  *silo,
+                                  GError **error);
+
 static void
 bz_flatpak_instance_dispose (GObject *object)
 {
@@ -806,99 +824,6 @@ ensure_flathub_fiber (EnsureFlathubData *data)
   return dex_future_new_true ();
 }
 
-static AsComponent *
-parse_appstream_from_xmlb_node (XbNode  *node,
-                                GError **error)
-{
-  g_autofree char *component_xml  = NULL;
-  g_autoptr (AsMetadata) metadata = NULL;
-  AsComponent *component          = NULL;
-  gboolean     result             = FALSE;
-
-  component_xml = xb_node_export (node, XB_NODE_EXPORT_FLAG_NONE, error);
-  if (component_xml == NULL)
-    return NULL;
-
-  metadata = as_metadata_new ();
-  result   = as_metadata_parse_data (metadata,
-                                     component_xml,
-                                     -1,
-                                     AS_FORMAT_KIND_XML,
-                                     error);
-
-  if (!result)
-    return NULL;
-
-  component = as_metadata_get_component (metadata);
-  return component != NULL ? g_object_ref (component) : NULL;
-}
-
-static GBytes *
-decompress_appstream_gz (GBytes       *appstream_gz,
-                         GCancellable *cancellable,
-                         GError      **error)
-{
-  g_autoptr (GZlibDecompressor) decompressor = NULL;
-  g_autoptr (GInputStream) stream_gz         = NULL;
-  g_autoptr (GInputStream) stream_data       = NULL;
-  GBytes *appstream                          = NULL;
-
-  decompressor = g_zlib_decompressor_new (G_ZLIB_COMPRESSOR_FORMAT_GZIP);
-  stream_gz    = g_memory_input_stream_new_from_bytes (appstream_gz);
-  stream_data  = g_converter_input_stream_new (stream_gz, G_CONVERTER (decompressor));
-
-  appstream = g_input_stream_read_bytes (stream_data,
-                                         0x100000, /* 1MB */
-                                         cancellable,
-                                         error);
-
-  return appstream;
-}
-
-static XbSilo *
-build_silo_from_source (XbBuilderSource *source,
-                        GCancellable    *cancellable,
-                        GError         **error)
-{
-  g_autoptr (XbBuilder) builder = NULL;
-  const gchar *const *locales   = NULL;
-  XbSilo             *silo      = NULL;
-
-  builder = xb_builder_new ();
-
-  locales = g_get_language_names ();
-  for (guint i = 0; locales[i] != NULL; i++)
-    xb_builder_add_locale (builder, locales[i]);
-
-  xb_builder_import_source (builder, source);
-
-  silo = xb_builder_compile (builder,
-                             XB_BUILDER_COMPILE_FLAG_NATIVE_LANGS,
-                             cancellable,
-                             error);
-
-  return silo;
-}
-
-static AsComponent *
-extract_first_component_from_silo (XbSilo  *silo,
-                                   GError **error)
-{
-  g_autoptr (XbNode) root        = NULL;
-  g_autoptr (GPtrArray) children = NULL;
-  AsComponent *component         = NULL;
-
-  root     = xb_silo_get_root (silo);
-  children = xb_node_get_children (root);
-
-  if (children == NULL || children->len == 0)
-    return NULL;
-
-  component = parse_appstream_from_xmlb_node (g_ptr_array_index (children, 0), error);
-
-  return component;
-}
-
 static DexFuture *
 load_local_ref_fiber (LoadLocalRefData *data)
 {
@@ -909,8 +834,8 @@ load_local_ref_fiber (LoadLocalRefData *data)
   g_autoptr (FlatpakBundleRef) bref          = NULL;
   g_autoptr (BzFlatpakEntry) entry           = NULL;
   g_autoptr (GBytes) appstream_gz            = NULL;
-  gboolean     result                        = FALSE;
-  AsComponent *component                     = NULL;
+  gboolean result                            = FALSE;
+  g_autoptr (AsComponent) component          = NULL;
   g_autoptr (GBytes) appstream               = NULL;
   g_autoptr (GInputStream) stream_gz         = NULL;
   g_autoptr (GInputStream) stream_data       = NULL;
@@ -991,7 +916,6 @@ load_local_ref_fiber (LoadLocalRefData *data)
         local_error->message);
 
   appstream_gz = flatpak_bundle_ref_get_appstream (bref);
-
   if (appstream_gz != NULL)
     {
       g_autoptr (XbBuilderSource) source = NULL;
@@ -1015,7 +939,7 @@ load_local_ref_fiber (LoadLocalRefData *data)
             }
           else
             {
-              silo = build_silo_from_source (source, NULL, &local_error);
+              silo = build_silo (source, NULL, &local_error);
               if (silo == NULL)
                 {
                   g_warning ("Failed to compile xmlb silo: %s", local_error->message);
@@ -1023,7 +947,7 @@ load_local_ref_fiber (LoadLocalRefData *data)
                 }
               else
                 {
-                  component = extract_first_component_from_silo (silo, &local_error);
+                  component = extract_first_component_for_silo (silo, &local_error);
                   if (component == NULL && local_error != NULL)
                     {
                       g_warning ("Failed to parse component: %s", local_error->message);
@@ -1293,7 +1217,7 @@ retrieve_refs_for_enumerable_remote (RetrieveRefsForRemoteData *data,
         remote_name,
         local_error->message);
 
-  silo = build_silo_from_source (source, cancellable, &local_error);
+  silo = build_silo (source, cancellable, &local_error);
 
 #ifdef __GLIBC__
   /* From gnome-software/plugins/core/gs-plugin-appstream.c
@@ -1326,7 +1250,7 @@ retrieve_refs_for_enumerable_remote (RetrieveRefsForRemoteData *data,
       const char  *id             = NULL;
 
       component_node = g_ptr_array_index (children, i);
-      component      = parse_appstream_from_xmlb_node (component_node, &local_error);
+      component      = parse_component_for_node (component_node, &local_error);
 
       if (component == NULL)
         {
@@ -1454,11 +1378,11 @@ retrieve_refs_for_noenumerable_remote (RetrieveRefsForRemoteData *data,
 
   for (guint i = 0; i < installed_apps->len; i++)
     {
-      FlatpakInstalledRef *iref        = NULL;
-      const char          *ref_origin  = NULL;
-      AsComponent         *component   = NULL;
-      g_autoptr (BzFlatpakEntry) entry = NULL;
-      g_autoptr (GBytes) appstream_gz  = NULL;
+      FlatpakInstalledRef *iref         = NULL;
+      const char          *ref_origin   = NULL;
+      g_autoptr (AsComponent) component = NULL;
+      g_autoptr (BzFlatpakEntry) entry  = NULL;
+      g_autoptr (GBytes) appstream_gz   = NULL;
 
       iref       = g_ptr_array_index (installed_apps, i);
       ref_origin = flatpak_installed_ref_get_origin (iref);
@@ -1494,7 +1418,7 @@ retrieve_refs_for_noenumerable_remote (RetrieveRefsForRemoteData *data,
               goto create_entry;
             }
 
-          silo = build_silo_from_source (source, cancellable, &appstream_error);
+          silo = build_silo (source, cancellable, &appstream_error);
           if (silo == NULL)
             {
               g_info ("Could not build silo from appstream: %s",
@@ -1502,7 +1426,7 @@ retrieve_refs_for_noenumerable_remote (RetrieveRefsForRemoteData *data,
               goto create_entry;
             }
 
-          component = extract_first_component_from_silo (silo, &appstream_error);
+          component = extract_first_component_for_silo (silo, &appstream_error);
           if (component == NULL)
             {
               g_info ("Could not parse appstream component: %s",
@@ -2536,4 +2460,99 @@ cmp_rref (FlatpakRemoteRef *a,
     return -1;
 
   return 0;
+}
+
+static AsComponent *
+parse_component_for_node (XbNode  *node,
+                          GError **error)
+{
+  g_autofree char *component_xml  = NULL;
+  g_autoptr (AsMetadata) metadata = NULL;
+  AsComponent *component          = NULL;
+  gboolean     result             = FALSE;
+
+  component_xml = xb_node_export (node, XB_NODE_EXPORT_FLAG_NONE, error);
+  if (component_xml == NULL)
+    return NULL;
+
+  metadata = as_metadata_new ();
+  result   = as_metadata_parse_data (
+      metadata,
+      component_xml,
+      -1,
+      AS_FORMAT_KIND_XML,
+      error);
+  if (!result)
+    return NULL;
+
+  component = as_metadata_get_component (metadata);
+  return bz_object_maybe_ref (component);
+}
+
+static GBytes *
+decompress_appstream_gz (GBytes       *appstream_gz,
+                         GCancellable *cancellable,
+                         GError      **error)
+{
+  g_autoptr (GZlibDecompressor) decompressor = NULL;
+  g_autoptr (GInputStream) stream_gz         = NULL;
+  g_autoptr (GInputStream) stream_data       = NULL;
+  g_autoptr (GBytes) appstream               = NULL;
+
+  decompressor = g_zlib_decompressor_new (G_ZLIB_COMPRESSOR_FORMAT_GZIP);
+  stream_gz    = g_memory_input_stream_new_from_bytes (appstream_gz);
+  stream_data  = g_converter_input_stream_new (stream_gz, G_CONVERTER (decompressor));
+
+  appstream = g_input_stream_read_bytes (
+      stream_data,
+      0x100000, /* 1MB */
+      cancellable,
+      error);
+  if (appstream == NULL)
+    return NULL;
+
+  return g_steal_pointer (&appstream);
+}
+
+static XbSilo *
+build_silo (XbBuilderSource *source,
+            GCancellable    *cancellable,
+            GError         **error)
+{
+  g_autoptr (XbBuilder) builder = NULL;
+  const gchar *const *locales   = NULL;
+  g_autoptr (XbSilo) silo       = NULL;
+
+  builder = xb_builder_new ();
+
+  locales = g_get_language_names ();
+  for (guint i = 0; locales[i] != NULL; i++)
+    xb_builder_add_locale (builder, locales[i]);
+
+  xb_builder_import_source (builder, source);
+  silo = xb_builder_compile (
+      builder,
+      XB_BUILDER_COMPILE_FLAG_NATIVE_LANGS,
+      cancellable,
+      error);
+
+  return g_steal_pointer (&silo);
+}
+
+static AsComponent *
+extract_first_component_for_silo (XbSilo  *silo,
+                                  GError **error)
+{
+  g_autoptr (XbNode) root        = NULL;
+  g_autoptr (GPtrArray) children = NULL;
+
+  root     = xb_silo_get_root (silo);
+  children = xb_node_get_children (root);
+
+  if (children == NULL || children->len == 0)
+    return NULL;
+
+  return parse_component_for_node (
+      g_ptr_array_index (children, 0),
+      error);
 }

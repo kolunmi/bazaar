@@ -52,7 +52,4 @@ DexFuture *
 bz_flatpak_instance_ensure_has_flathub (BzFlatpakInstance *self,
                                         GCancellable      *cancellable);
 
-void
-bz_flatpak_instance_trigger_external_change (BzFlatpakInstance *self);
-
 G_END_DECLS
