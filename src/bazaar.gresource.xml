@@ -28,6 +28,7 @@
     <file preprocess="xml-stripblanks">bz-decorated-screenshot.ui</file>
     <file preprocess="xml-stripblanks">bz-developer-badge.ui</file>
     <file preprocess="xml-stripblanks">bz-entry-inspector.ui</file>
+    <file preprocess="xml-stripblanks">bz-entry-selection-row.ui</file>
     <file preprocess="xml-stripblanks">bz-favorite-button.ui</file>
     <file preprocess="xml-stripblanks">bz-favorites-page.ui</file>
     <file preprocess="xml-stripblanks">bz-favorites-tile.ui</file>
@@ -56,7 +57,7 @@
     <file preprocess="xml-stripblanks">bz-section-view.ui</file>
     <file preprocess="xml-stripblanks">bz-stats-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-transaction-view.ui</file>
-    <file preprocess="xml-stripblanks">bz-update-dialog.ui</file>
+    <file preprocess="xml-stripblanks">bz-transaction-list-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-user-data-page.ui</file>
     <file preprocess="xml-stripblanks">bz-user-data-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-window.ui</file>
@@ -102,6 +103,7 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/newspaper-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/parent-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/people-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/person-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/pip-out-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/power-profile-performance-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/puzzle-piece-symbolic.svg</file>
@@ -111,10 +113,12 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/sad-computer-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/share-alt-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/share-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/server-pick-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/sidebar-show-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/sliders-horizontal-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/smartphone2-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/software-update-available-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/square-filled-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/thumbs-up-outline-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/timer-sand-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/translations-symbolic.svg</file>

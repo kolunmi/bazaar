@@ -32,6 +32,9 @@ G_DECLARE_FINAL_TYPE (BzEntryGroup, bz_entry_group, BZ, ENTRY_GROUP, GObject)
 BzEntryGroup *
 bz_entry_group_new (BzApplicationMapFactory *factory);
 
+BzEntryGroup *
+bz_entry_group_new_for_single_entry (BzEntry *entry);
+
 /* Only necessary if reading props from another thread, writing is always
    prohibited */
 GMutexLocker *

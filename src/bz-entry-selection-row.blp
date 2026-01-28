@@ -1,0 +1,22 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzEntrySelectionRow: Adw.ActionRow {
+  activatable-widget: radio;
+
+  [prefix]
+  CheckButton radio {
+    valign: center;
+  }
+
+  [suffix]
+  Image {
+    visible: bind template.repository as <$BzRepository>.is-user;
+    icon-name: "person-symbolic";
+    has-tooltip: true;
+    tooltip-text: _("For this user only");
+  }
+
+  title: bind template.repository as <$BzRepository>.title;
+  subtitle: bind $get_subtitle(template.entry as <$BzFlatpakEntry>.flatpak-version, template.repository as <$BzRepository>.is-user) as <string>;
+}

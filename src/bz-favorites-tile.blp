@@ -93,6 +93,7 @@ template $BzFavoritesTile: $BzListTile {
         height-request: 32;
         valign: center;
         has-tooltip: true;
+        visible: bind $invert_boolean($logical_and($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>, $is_zero(template.group as <$BzEntryGroup>.installable) as <bool>) as <bool>) as <bool>;
         tooltip-text: bind $get_install_remove_tooltip(template.group as <$BzEntryGroup>.removable) as <string>;
         sensitive: bind $switch_bool(
                           template.group as <$BzEntryGroup>.removable,

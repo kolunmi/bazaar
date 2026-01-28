@@ -55,20 +55,22 @@ struct _BzEntryGroup
 
   int max_usefulness;
 
-  int installable;
-  int updatable;
-  int removable;
-  int installable_available;
-  int updatable_available;
-  int removable_available;
+  int      installable;
+  int      updatable;
+  int      removable;
+  int      installable_available;
+  int      updatable_available;
+  int      removable_available;
+  gboolean read_only;
 
   guint64 user_data_size;
 
   DexFuture *user_data_size_future;
   DexFuture *reap_user_data_future;
 
-  GWeakRef ui_entry;
-  GMutex   mutex;
+  GWeakRef  ui_entry;
+  BzResult *standalone_ui_entry;
+  GMutex    mutex;
 };
 
 G_DEFINE_FINAL_TYPE (BzEntryGroup, bz_entry_group, G_TYPE_OBJECT)
@@ -153,6 +155,7 @@ bz_entry_group_dispose (GObject *object)
   g_clear_object (&self->categories);
 
   g_weak_ref_clear (&self->ui_entry);
+  g_clear_object (&self->standalone_ui_entry);
   g_mutex_clear (&self->mutex);
 
   G_OBJECT_CLASS (bz_entry_group_parent_class)->dispose (object);
@@ -487,6 +490,7 @@ bz_entry_group_init (BzEntryGroup *self)
   self->unique_ids     = gtk_string_list_new (NULL);
   self->max_usefulness = -1;
   g_weak_ref_init (&self->ui_entry, NULL);
+  self->standalone_ui_entry = NULL;
   g_mutex_init (&self->mutex);
 }
 
@@ -499,6 +503,90 @@ bz_entry_group_new (BzApplicationMapFactory *factory)
 
   group          = g_object_new (BZ_TYPE_ENTRY_GROUP, NULL);
   group->factory = g_object_ref (factory);
+
+  return group;
+}
+
+BzEntryGroup *
+bz_entry_group_new_for_single_entry (BzEntry *entry)
+{
+  BzEntryGroup *group              = NULL;
+  const char   *id                 = NULL;
+  const char   *unique_id          = NULL;
+  const char   *title              = NULL;
+  const char   *developer          = NULL;
+  const char   *description        = NULL;
+  GdkPaintable *icon_paintable     = NULL;
+  GIcon        *mini_icon          = NULL;
+  const char   *search_tokens      = NULL;
+  gboolean      is_floss           = FALSE;
+  const char   *light_accent_color = NULL;
+  const char   *dark_accent_color  = NULL;
+  gboolean      is_flathub         = FALSE;
+  gboolean      is_verified        = FALSE;
+  const char   *eol                = NULL;
+  guint64       installed_size     = 0;
+  const char   *donation_url       = NULL;
+  GListModel   *entry_categories   = NULL;
+  DexFuture    *future             = NULL;
+
+  g_return_val_if_fail (BZ_IS_ENTRY (entry), NULL);
+
+  group = g_object_new (BZ_TYPE_ENTRY_GROUP, NULL);
+
+  id                 = bz_entry_get_id (entry);
+  unique_id          = bz_entry_get_unique_id (entry);
+  title              = bz_entry_get_title (entry);
+  developer          = bz_entry_get_developer (entry);
+  description        = bz_entry_get_description (entry);
+  icon_paintable     = bz_entry_get_icon_paintable (entry);
+  mini_icon          = bz_entry_get_mini_icon (entry);
+  search_tokens      = bz_entry_get_search_tokens (entry);
+  is_floss           = bz_entry_get_is_foss (entry);
+  light_accent_color = bz_entry_get_light_accent_color (entry);
+  dark_accent_color  = bz_entry_get_dark_accent_color (entry);
+  is_flathub         = bz_entry_get_is_flathub (entry);
+  is_verified        = bz_entry_is_verified (entry);
+  eol                = bz_entry_get_eol (entry);
+  installed_size     = bz_entry_get_installed_size (entry);
+  donation_url       = bz_entry_get_donation_url (entry);
+  entry_categories   = bz_entry_get_categories (entry);
+
+  if (id != NULL)
+    group->id = g_strdup (id);
+  if (title != NULL)
+    group->title = g_strdup (title);
+  if (developer != NULL)
+    group->developer = g_strdup (developer);
+  if (description != NULL)
+    group->description = g_strdup (description);
+  if (icon_paintable != NULL)
+    group->icon_paintable = g_object_ref (icon_paintable);
+  if (mini_icon != NULL)
+    group->mini_icon = g_object_ref (mini_icon);
+  if (search_tokens != NULL)
+    group->search_tokens = g_strdup (search_tokens);
+  group->is_floss = is_floss;
+  if (light_accent_color != NULL)
+    group->light_accent_color = g_strdup (light_accent_color);
+  if (dark_accent_color != NULL)
+    group->dark_accent_color = g_strdup (dark_accent_color);
+  group->is_flathub  = is_flathub;
+  group->is_verified = is_verified;
+  if (eol != NULL)
+    group->eol = g_strdup (eol);
+  group->installed_size = installed_size;
+  if (donation_url != NULL)
+    group->donation_url = g_strdup (donation_url);
+  if (entry_categories != NULL)
+    group->categories = g_object_ref (entry_categories);
+
+  if (unique_id != NULL)
+    gtk_string_list_append (group->unique_ids, unique_id);
+
+  future                     = dex_future_new_for_object (entry);
+  group->standalone_ui_entry = bz_result_new (future);
+  dex_unref (future);
 
   return group;
 }
@@ -649,6 +737,9 @@ bz_entry_group_dup_ui_entry (BzEntryGroup *self)
 {
   g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), NULL);
 
+  if (self->standalone_ui_entry != NULL)
+    return g_object_ref (self->standalone_ui_entry);
+
   if (g_list_model_get_n_items (G_LIST_MODEL (self->unique_ids)) > 0)
     {
       g_autoptr (BzResult) result = NULL;
@@ -691,6 +782,8 @@ int
 bz_entry_group_get_installable (BzEntryGroup *self)
 {
   g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), 0);
+  if (self->read_only)
+    return 0;
   return self->installable;
 }
 
@@ -705,6 +798,8 @@ int
 bz_entry_group_get_removable (BzEntryGroup *self)
 {
   g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), 0);
+  if (self->read_only)
+    return 0;
   return self->removable;
 }
 
@@ -764,7 +859,9 @@ bz_entry_group_add (BzEntryGroup *self,
 
   if (self->id == NULL)
     {
-      self->id = g_strdup (bz_entry_get_id (entry));
+      self->id        = g_strdup (bz_entry_get_id (entry));
+      self->read_only = g_strcmp0 (self->id,
+                                   g_application_get_application_id (g_application_get_default ())) == 0;
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ID]);
     }
   unique_id = bz_entry_get_unique_id (entry);
