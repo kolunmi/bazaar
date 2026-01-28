@@ -392,7 +392,7 @@ msgstr "Aucune information concernant des références à l’esclavage"
 
 #: src/bz-age-rating-dialog.c:424
 msgid "Does not include references to drugs"
-msgstr "N’inclut pas de références aux drogue"
+msgstr "N’inclut pas de références aux drogues"
 
 #: src/bz-age-rating-dialog.c:426
 msgid ""
@@ -2710,7 +2710,7 @@ msgstr "Actualiser"
 #: src/gtk/shortcuts-dialog.blp:24
 msgctxt "shortcut window"
 msgid "Toggle Transaction Manager"
-msgstr "Bascauler la barre des tâches"
+msgstr "Basculer la barre des tâches"
 
 #: src/gtk/shortcuts-dialog.blp:29
 msgctxt "shortcut window"
