@@ -1325,8 +1325,12 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
               {
               case BZ_BACKEND_NOTIFICATION_KIND_INSTALL_DONE:
                 {
+                  const char *version = NULL;
+
+                  version = bz_backend_notification_get_version (notif);
+
+                  g_hash_table_replace (self->installed_set, g_strdup (unique_id), g_strdup (version));
                   bz_entry_set_installed (entry, TRUE);
-                  g_hash_table_replace (self->installed_set, g_strdup (unique_id), NULL);
 
                   if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
                     {
@@ -1347,10 +1351,15 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
                 break;
               case BZ_BACKEND_NOTIFICATION_KIND_UPDATE_DONE:
                 {
+                  const char *version = NULL;
+
+                  version = bz_backend_notification_get_version (notif);
+                  g_hash_table_replace (self->installed_set, g_strdup (unique_id), g_strdup (version));
                 }
                 break;
               case BZ_BACKEND_NOTIFICATION_KIND_REMOVE_DONE:
                 {
+                  bz_entry_set_installed_version (entry, NULL);
                   bz_entry_set_installed (entry, FALSE);
                   g_hash_table_remove (self->installed_set, unique_id);
 
@@ -1455,6 +1464,7 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
                         const char   *unique_id = NULL;
                         BzEntryGroup *group     = NULL;
                         gboolean      installed = FALSE;
+                        const char   *version   = NULL;
 
                         entry = g_value_get_object (dex_future_get_value (future, NULL));
                         id    = bz_entry_get_id (entry);
@@ -1464,6 +1474,11 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
 
                         unique_id = bz_entry_get_unique_id (entry);
                         installed = g_hash_table_contains (installed_set, unique_id);
+
+                        version = g_hash_table_lookup (installed_set, unique_id);
+                        if (installed && version != NULL && *version != '\0')
+                          bz_entry_set_installed_version (entry, version);
+
                         bz_entry_set_installed (entry, installed);
 
                         if (group != NULL)
@@ -1778,6 +1793,7 @@ fiber_replace_entry (BzApplication *self,
   gboolean    user               = FALSE;
   gboolean    installed          = FALSE;
   const char *flatpak_id         = NULL;
+  const char *version            = NULL;
 
   id                 = bz_entry_get_id (entry);
   unique_id          = bz_entry_get_unique_id (entry);
@@ -1790,6 +1806,10 @@ fiber_replace_entry (BzApplication *self,
 
   installed = g_hash_table_contains (self->installed_set, unique_id);
   bz_entry_set_installed (entry, installed);
+
+  version = g_hash_table_lookup (self->installed_set, unique_id);
+  if (version != NULL && *version != '\0')
+    bz_entry_set_installed_version (entry, version);
 
   flatpak_id = bz_flatpak_entry_get_flatpak_id (BZ_FLATPAK_ENTRY (entry));
   if (flatpak_id != NULL)

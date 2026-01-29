@@ -1531,12 +1531,14 @@ retrieve_installs_fiber (GatherRefsData *data)
       n_user_refs = user_refs->len;
     }
 
-  ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+  ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
   for (guint i = 0; i < n_system_refs + n_user_refs; i++)
     {
-      gboolean             user = FALSE;
-      FlatpakInstalledRef *iref = NULL;
+      gboolean             user      = FALSE;
+      FlatpakInstalledRef *iref      = NULL;
+      const char          *version   = NULL;
+      g_autofree char     *unique_id = NULL;
 
       if (i < n_system_refs)
         {
@@ -1549,7 +1551,13 @@ retrieve_installs_fiber (GatherRefsData *data)
           iref = g_ptr_array_index (user_refs, i - n_system_refs);
         }
 
-      g_hash_table_replace (ids, bz_flatpak_ref_format_unique (FLATPAK_REF (iref), user), NULL);
+      version = flatpak_installed_ref_get_appdata_version (iref);
+
+      unique_id = bz_flatpak_ref_format_unique (FLATPAK_REF (iref), user);
+
+      g_hash_table_replace (ids,
+                            g_steal_pointer (&unique_id),
+                            g_strdup (version != NULL ? version : ""));
     }
 
   return dex_future_new_take_boxed (
@@ -2103,6 +2111,11 @@ transaction_operation_done (FlatpakTransaction          *transaction,
   gboolean                        is_user           = FALSE;
   g_autofree char                *unique_id         = NULL;
   g_autoptr (BzBackendNotification) notif           = NULL;
+  const char          *version                      = NULL;
+  FlatpakInstallation *installation                 = NULL;
+  g_autoptr (FlatpakInstalledRef) iref              = NULL;
+  g_autoptr (GError) local_error                    = NULL;
+  g_autoptr (FlatpakRef) parsed_ref                 = NULL;
 
   bz_weak_get_or_return (self, data->self);
 
@@ -2147,9 +2160,45 @@ transaction_operation_done (FlatpakTransaction          *transaction,
   is_user   = flatpak_transaction_get_installation (transaction) == self->user;
   unique_id = bz_flatpak_ref_parts_format_unique (origin, ref, is_user);
 
+  if (notif_kind == BZ_BACKEND_NOTIFICATION_KIND_INSTALL_DONE ||
+      notif_kind == BZ_BACKEND_NOTIFICATION_KIND_UPDATE_DONE)
+    {
+      installation = flatpak_transaction_get_installation (transaction);
+
+      parsed_ref = flatpak_ref_parse (ref, &local_error);
+      if (parsed_ref != NULL)
+        {
+          iref = flatpak_installation_get_installed_ref (
+              installation,
+              flatpak_ref_get_kind (parsed_ref),
+              flatpak_ref_get_name (parsed_ref),
+              flatpak_ref_get_arch (parsed_ref),
+              flatpak_ref_get_branch (parsed_ref),
+              NULL,
+              &local_error);
+
+          if (iref != NULL)
+            version = flatpak_installed_ref_get_appdata_version (iref);
+          else if (local_error != NULL)
+            {
+              g_warning ("Failed to get installed ref for version: %s", local_error->message);
+              g_clear_error (&local_error);
+            }
+        }
+      else if (local_error != NULL)
+        {
+          g_warning ("Failed to parse ref for version: %s", local_error->message);
+          g_clear_error (&local_error);
+        }
+    }
+
   notif = bz_backend_notification_new ();
   bz_backend_notification_set_kind (notif, notif_kind);
   bz_backend_notification_set_unique_id (notif, unique_id);
+
+  if (version != NULL && *version != '\0')
+    bz_backend_notification_set_version (notif, version);
+
   send_notif_all (self, notif, TRUE);
 }
 
