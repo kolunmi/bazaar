@@ -353,10 +353,6 @@ button.context-tile:active .lozenge {
     border-radius: 10px;
 }
 
-.app-transaction-button{
-    padding: 0;
-}
-
 .transaction-list-view row {
     margin: 0;
     padding: 0;
