@@ -43,6 +43,9 @@ bz_entry_group_lock (BzEntryGroup *self);
 GListModel *
 bz_entry_group_get_model (BzEntryGroup *self);
 
+GListModel *
+bz_entry_group_get_installed_versions (BzEntryGroup *self);
+
 const char *
 bz_entry_group_get_id (BzEntryGroup *self);
 
