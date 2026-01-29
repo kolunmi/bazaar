@@ -49,6 +49,8 @@ template $BzInstalledTile: $BzListTile {
 
       Label description_label {
         halign: start;
+        ellipsize: end;
+        single-line-mode: true;
         label: bind $format_description(template.group as <$BzEntryGroup>.installed-size, template.group as <$BzEntryGroup>.installed-versions) as <string>;
         styles ["dimmed", "caption", "installed-size"]
       }
