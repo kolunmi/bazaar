@@ -56,23 +56,16 @@ struct _BzWindow
   gboolean breakpoint_applied;
 
   /* Template widgets */
-  BzCometOverlay      *comet_overlay;
-  AdwOverlaySplitView *split_view;
-  AdwViewStack        *transactions_stack;
-  AdwNavigationView   *navigation_view;
-  BzFullView          *full_view;
-  GtkToggleButton     *toggle_transactions;
-  GtkToggleButton     *toggle_transactions_sidebar;
-  BzSearchWidget      *search_widget;
-  BzLibraryPage       *library_page;
-  GtkButton           *update_button;
-  GtkToggleButton     *transactions_pause;
-  GtkButton           *transactions_stop;
-  GtkButton           *transactions_clear;
-  AdwToastOverlay     *toasts;
-  AdwViewStack        *main_view_stack;
-  GtkStack            *main_stack;
-  GtkLabel            *debug_id_label;
+  BzCometOverlay    *comet_overlay;
+  AdwNavigationView *navigation_view;
+  BzFullView        *full_view;
+  BzSearchWidget    *search_widget;
+  BzLibraryPage     *library_page;
+  GtkButton         *update_button;
+  AdwToastOverlay   *toasts;
+  AdwViewStack      *main_view_stack;
+  GtkStack          *main_stack;
+  GtkLabel          *debug_id_label;
 };
 
 G_DEFINE_FINAL_TYPE (BzWindow, bz_window, ADW_TYPE_APPLICATION_WINDOW)
@@ -151,9 +144,6 @@ static void
 bulk_install (BzWindow *self,
               BzEntry **installs,
               guint     n_installs);
-
-static void
-check_transactions (BzWindow *self);
 
 static void
 set_page (BzWindow *self);
@@ -376,26 +366,6 @@ breakpoint_unapply_cb (BzWindow      *self,
 }
 
 static void
-pause_transactions_cb (BzWindow        *self,
-                       GtkToggleButton *toggle)
-{
-  gboolean paused = FALSE;
-
-  paused = gtk_toggle_button_get_active (toggle);
-  bz_transaction_manager_set_paused (
-      bz_state_info_get_transaction_manager (self->state), paused);
-  check_transactions (self);
-}
-
-static void
-stop_transactions_cb (BzWindow  *self,
-                      GtkButton *button)
-{
-  bz_transaction_manager_set_paused (bz_state_info_get_transaction_manager (self->state), TRUE);
-  bz_transaction_manager_cancel_current (bz_state_info_get_transaction_manager (self->state));
-}
-
-static void
 sync_cb (BzWindow  *self,
          GtkButton *button)
 {
@@ -451,10 +421,7 @@ action_escape (GtkWidget  *widget,
 
   adw_navigation_view_pop (self->navigation_view);
   if (n_pages <= 2)
-    {
-      gtk_toggle_button_set_active (self->toggle_transactions, FALSE);
-      set_page (self);
-    }
+    set_page (self);
 }
 
 static char *
@@ -536,19 +503,12 @@ bz_window_class_init (BzWindowClass *klass)
   bz_widget_class_bind_all_util_callbacks (widget_class);
 
   gtk_widget_class_bind_template_child (widget_class, BzWindow, comet_overlay);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, split_view);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, transactions_stack);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, navigation_view);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, full_view);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, toasts);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, toggle_transactions);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, toggle_transactions_sidebar);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, search_widget);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, library_page);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, update_button);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, transactions_pause);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, transactions_stop);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, transactions_clear);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, main_view_stack);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, main_stack);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, debug_id_label);
@@ -564,8 +524,6 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, page_toggled_cb);
   gtk_widget_class_bind_template_callback (widget_class, breakpoint_apply_cb);
   gtk_widget_class_bind_template_callback (widget_class, breakpoint_unapply_cb);
-  gtk_widget_class_bind_template_callback (widget_class, pause_transactions_cb);
-  gtk_widget_class_bind_template_callback (widget_class, stop_transactions_cb);
   gtk_widget_class_bind_template_callback (widget_class, sync_cb);
   gtk_widget_class_bind_template_callback (widget_class, update_cb);
   gtk_widget_class_bind_template_callback (widget_class, update_amount_tooltip);
@@ -635,22 +593,6 @@ app_busy_changed (BzWindow    *self,
 {
   bz_search_widget_refresh (self->search_widget);
   set_page (self);
-}
-
-static void
-transactions_active_changed (BzWindow             *self,
-                             GParamSpec           *pspec,
-                             BzTransactionManager *manager)
-{
-  check_transactions (self);
-}
-
-static void
-has_transactions_changed (BzWindow             *self,
-                          GParamSpec           *pspec,
-                          BzTransactionManager *manager)
-{
-  check_transactions (self);
 }
 
 static void
@@ -803,14 +745,6 @@ bz_window_new (BzStateInfo *state)
   /* these seem unsafe but BzApplication never
    * changes the objects we are connecting to
    */
-  g_signal_connect_object (bz_state_info_get_transaction_manager (state),
-                           "notify::active",
-                           G_CALLBACK (transactions_active_changed),
-                           window, G_CONNECT_SWAPPED);
-  g_signal_connect_object (bz_state_info_get_transaction_manager (state),
-                           "notify::has-transactions",
-                           G_CALLBACK (has_transactions_changed),
-                           window, G_CONNECT_SWAPPED);
   g_signal_connect_object (bz_state_info_get_curated_provider (state),
                            "notify::has-inputs",
                            G_CALLBACK (has_inputs_changed),
@@ -819,7 +753,6 @@ bz_window_new (BzStateInfo *state)
   g_object_notify_by_pspec (G_OBJECT (window), props[PROP_STATE]);
 
   set_page (window);
-  check_transactions (window);
   return window;
 }
 
@@ -829,16 +762,6 @@ bz_window_search (BzWindow   *self,
 {
   g_return_if_fail (BZ_IS_WINDOW (self));
   search (self, text);
-}
-
-void
-bz_window_toggle_transactions (BzWindow *self)
-{
-  g_return_if_fail (BZ_IS_WINDOW (self));
-  gtk_toggle_button_set_active (
-      self->toggle_transactions,
-      !gtk_toggle_button_get_active (
-          self->toggle_transactions));
 }
 
 void
@@ -924,10 +847,6 @@ bz_window_push_page (BzWindow *self, AdwNavigationPage *page)
       g_signal_connect_swapped (page, "remove", G_CALLBACK (remove_installed_cb), self);
       g_signal_connect_swapped (page, "show-entry", G_CALLBACK (library_page_show_cb), self);
       g_signal_connect_swapped (page, "bulk-install", G_CALLBACK (bulk_install_cb), self);
-
-      g_object_bind_property (self->split_view, "show-sidebar",
-                              page, "show-sidebar",
-                              G_BINDING_BIDIRECTIONAL | G_BINDING_SYNC_CREATE);
     }
 
   adw_navigation_view_push (self->navigation_view, page);
@@ -984,11 +903,6 @@ transact (BzWindow  *self,
 
   if (source == NULL)
     source = GTK_WIDGET (self->navigation_view);
-
-  if (adw_overlay_split_view_get_show_sidebar (self->split_view))
-    transaction_target = GTK_WIDGET (self->toggle_transactions_sidebar);
-  else
-    transaction_target = GTK_WIDGET (self->toggle_transactions);
 
   icon = bz_entry_get_icon_paintable (entry);
   if (icon != NULL)
@@ -1142,43 +1056,6 @@ search (BzWindow   *self,
   adw_view_stack_set_visible_child_name (self->main_view_stack, "search");
   adw_navigation_view_pop_to_tag (self->navigation_view, "main");
   gtk_widget_grab_focus (GTK_WIDGET (self->search_widget));
-}
-
-static void
-check_transactions (BzWindow *self)
-{
-  gboolean has_transactions = FALSE;
-  gboolean paused           = FALSE;
-  gboolean active           = FALSE;
-
-  has_transactions = bz_transaction_manager_get_has_transactions (
-      bz_state_info_get_transaction_manager (self->state));
-  adw_view_stack_set_visible_child_name (
-      self->transactions_stack,
-      has_transactions
-          ? "content"
-          : "empty");
-
-  paused = gtk_toggle_button_get_active (self->transactions_pause);
-  active = bz_transaction_manager_get_active (
-      bz_state_info_get_transaction_manager (self->state));
-  if (paused)
-    {
-      gtk_button_set_icon_name (GTK_BUTTON (self->transactions_pause), "media-playback-start-symbolic");
-      gtk_widget_set_tooltip_text (GTK_WIDGET (self->transactions_pause), _ ("Resume Current Tasks"));
-      gtk_widget_add_css_class (GTK_WIDGET (self->transactions_pause), "suggested-action");
-    }
-  else
-    {
-      gtk_button_set_icon_name (GTK_BUTTON (self->transactions_pause), "media-playback-pause-symbolic");
-      gtk_widget_set_tooltip_text (GTK_WIDGET (self->transactions_pause), _ ("Pause Current Tasks"));
-      gtk_widget_remove_css_class (GTK_WIDGET (self->transactions_pause), "suggested-action");
-    }
-
-  if (active)
-    gtk_widget_add_css_class (GTK_WIDGET (self->transactions_stop), "destructive-action");
-  else
-    gtk_widget_remove_css_class (GTK_WIDGET (self->transactions_stop), "destructive-action");
 }
 
 static void

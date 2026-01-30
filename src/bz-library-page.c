@@ -26,7 +26,7 @@
 #include "bz-installed-tile.h"
 #include "bz-library-page.h"
 #include "bz-section-view.h"
-#include "bz-state-info.h"
+#include "bz-template-callbacks.h"
 #include "bz-util.h"
 
 struct _BzLibraryPage
@@ -111,7 +111,7 @@ bz_library_page_get_property (GObject    *object,
       g_value_set_object (value, bz_library_page_get_model (self));
       break;
     case PROP_STATE:
-      g_value_set_object (value, self->state);
+      g_value_set_object (value, bz_library_page_get_state (self));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -132,8 +132,7 @@ bz_library_page_set_property (GObject      *object,
       bz_library_page_set_model (self, g_value_get_object (value));
       break;
     case PROP_STATE:
-      g_clear_object (&self->state);
-      self->state = g_value_dup_object (value);
+      bz_library_page_set_state (self, g_value_get_object (value));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -323,13 +322,13 @@ bz_library_page_class_init (BzLibraryPageClass *klass)
   g_type_ensure (BZ_TYPE_INSTALLED_TILE);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-library-page.ui");
+  bz_widget_class_bind_all_util_callbacks (widget_class);
+
   gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, stack);
   gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, search_bar);
   gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, filter);
   gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, list_view);
-  gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, no_results_found_subtitle);
-  gtk_widget_class_bind_template_callback (widget_class, is_valid_string);
   gtk_widget_class_bind_template_callback (widget_class, tile_activated_cb);
   gtk_widget_class_bind_template_callback (widget_class, reset_search_cb);
   gtk_widget_class_bind_template_callback (widget_class, search_text_changed);
@@ -379,6 +378,27 @@ bz_library_page_get_model (BzLibraryPage *self)
 {
   g_return_val_if_fail (BZ_IS_LIBRARY_PAGE (self), NULL);
   return self->model;
+}
+
+void
+bz_library_page_set_state (BzLibraryPage *self,
+                           BzStateInfo   *state)
+{
+  g_return_if_fail (BZ_IS_LIBRARY_PAGE (self));
+  g_return_if_fail (state == NULL || BZ_IS_STATE_INFO (state));
+
+  g_clear_object (&self->state);
+  if (state != NULL)
+    self->state = g_object_ref (state);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_STATE]);
+}
+
+BzStateInfo *
+bz_library_page_get_state (BzLibraryPage *self)
+{
+  g_return_val_if_fail (BZ_IS_LIBRARY_PAGE (self), NULL);
+  return self->state;
 }
 
 gboolean

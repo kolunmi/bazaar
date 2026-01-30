@@ -7,35 +7,6 @@ template $BzFullView: Adw.Bin {
     [top]
     Adw.HeaderBar header_bar {
       [end]
-      Revealer {
-        transition-type: slide_right;
-        reveal-child: bind $invert_boolean(template.show-sidebar as <bool>) as <bool>;
-
-        child: ToggleButton {
-          styles [
-            "flat",
-          ]
-
-          has-tooltip: true;
-          tooltip-text: _("Toggle transaction sidebar");
-          active: bind template.show-sidebar bidirectional;
-
-          child: $BzGlobalProgress download_bar {
-            expand-size: 125;
-            active: bind template.transaction-manager as <$BzTransactionManager>.active;
-            pending: bind template.transaction-manager as <$BzTransactionManager>.pending;
-            fraction: bind template.transaction-manager as <$BzTransactionManager>.current-progress;
-            settings: bind template.state as <$BzStateInfo>.settings;
-
-            child: Image {
-              halign: end;
-              icon-name: "folder-download-symbolic";
-            };
-          };
-        };
-      }
-
-      [end]
       MenuButton {
         primary: true;
         icon-name: "open-menu-symbolic";
@@ -76,7 +47,6 @@ template $BzFullView: Adw.Bin {
               context_bar.homogeneous: false;
               header_box.spacing: 12;
               app_name_box.spacing: 0;
-              download_bar.expand-size: 60;
               formfactor_support_tile_wide.visible: false;
               formfactor_support_tile_narrow.visible: true;
               screenshots.compact: true;

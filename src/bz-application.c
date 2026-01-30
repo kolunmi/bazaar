@@ -588,21 +588,6 @@ bz_application_donate_action (GSimpleAction *action,
 }
 
 static void
-bz_application_toggle_transactions_action (GSimpleAction *action,
-                                           GVariant      *parameter,
-                                           gpointer       user_data)
-{
-  BzApplication *self   = user_data;
-  GtkWindow     *window = NULL;
-
-  g_assert (BZ_IS_APPLICATION (self));
-
-  window = gtk_application_get_active_window (GTK_APPLICATION (self));
-
-  bz_window_toggle_transactions (BZ_WINDOW (window));
-}
-
-static void
 bz_application_search_action (GSimpleAction *action,
                               GVariant      *parameter,
                               gpointer       user_data)
@@ -811,19 +796,18 @@ bz_application_quit_action (GSimpleAction *action,
 }
 
 static const GActionEntry app_actions[] = {
-  {       "flathub-login",       bz_application_flathub_login_action, NULL },
-  {      "flathub-logout",      bz_application_flathub_logout_action, NULL },
-  {   "flathub-favorites",   bz_application_flathub_favorites_action, NULL },
-  {                "quit",                bz_application_quit_action, NULL },
-  {         "preferences",         bz_application_preferences_action, NULL },
-  {               "about",               bz_application_about_action, NULL },
-  {        "sync-remotes",        bz_application_sync_remotes_action, NULL },
-  {              "search",              bz_application_search_action,  "s" },
-  {         "show-app-id",         bz_application_show_app_id_action,  "s" },
-  { "toggle-transactions", bz_application_toggle_transactions_action, NULL },
-  {              "donate",              bz_application_donate_action, NULL },
-  {    "bazaar-inspector",    bz_application_bazaar_inspector_action, NULL },
-  {   "toggle-debug-mode",   bz_application_toggle_debug_mode_action, NULL },
+  {     "flathub-login",     bz_application_flathub_login_action, NULL },
+  {    "flathub-logout",    bz_application_flathub_logout_action, NULL },
+  { "flathub-favorites", bz_application_flathub_favorites_action, NULL },
+  {              "quit",              bz_application_quit_action, NULL },
+  {       "preferences",       bz_application_preferences_action, NULL },
+  {             "about",             bz_application_about_action, NULL },
+  {      "sync-remotes",      bz_application_sync_remotes_action, NULL },
+  {            "search",            bz_application_search_action,  "s" },
+  {       "show-app-id",       bz_application_show_app_id_action,  "s" },
+  {            "donate",            bz_application_donate_action, NULL },
+  {  "bazaar-inspector",  bz_application_bazaar_inspector_action, NULL },
+  { "toggle-debug-mode", bz_application_toggle_debug_mode_action, NULL },
 };
 
 static void
@@ -855,10 +839,6 @@ bz_application_init (BzApplication *self)
       GTK_APPLICATION (self),
       "app.search('')",
       (const char *[]) { "<primary>f", NULL });
-  gtk_application_set_accels_for_action (
-      GTK_APPLICATION (self),
-      "app.toggle-transactions",
-      (const char *[]) { "<primary>d", NULL });
   gtk_application_set_accels_for_action (
       GTK_APPLICATION (self),
       "app.bazaar-inspector",

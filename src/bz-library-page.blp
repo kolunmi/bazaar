@@ -16,6 +16,7 @@ template $BzLibraryPage: Adw.Bin {
         margin-bottom: 10;
 
         child: Box {
+          orientation: horizontal;
           spacing: 8;
           height-request: 40;
 
@@ -31,7 +32,7 @@ template $BzLibraryPage: Adw.Bin {
 
           Button clear_button {
             icon-name: "edit-clear-symbolic";
-            visible: bind $is_valid_string(search_bar.text) as <bool>;
+            visible: bind $not($is_empty_string(search_bar.text) as <bool>) as <bool>;
 
             styles [
               "flat",
@@ -83,43 +84,73 @@ template $BzLibraryPage: Adw.Bin {
         Adw.ViewStackPage {
           name: "content";
           // Translators: .
-          title: _("Installed");
+          title: _("Library");
 
           child: ScrolledWindow {
             hscrollbar-policy: never;
 
-            child: Adw.ClampScrollable {
+            child: Adw.Clamp {
               maximum-size: 650;
 
-              child: ListView list_view {
-                styles [
-                  "navigation-sidebar",
-                  "installed-list-view",
-                ]
+              child: Box {
+                orientation: vertical;
+                spacing: 10;
 
-                margin-start: 25;
-                margin-end: 25;
+                ListView {
+                  styles [
+                    "navigation-sidebar",
+                    "installed-list-view",
+                  ]
 
-                model: NoSelection {
-                  model: FilterListModel {
-                    filter: CustomFilter filter {};
+                  margin-start: 25;
+                  margin-end: 25;
+                  visible: bind $is_empty_string(search_bar.text) as <bool>;
 
-                    model: bind template.model;
+                  model: NoSelection no_selection {
+                    model: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.transactions;
                   };
-                };
 
-                factory: BuilderListItemFactory {
-                  template ListItem {
-                    activatable: false;
-                    selectable: false;
-                    focusable: false;
+                  factory: BuilderListItemFactory {
+                    template ListItem {
+                      activatable: false;
 
-                    child: $BzInstalledTile {
-                      group: bind template.item as <$BzEntryGroup>;
-                      activated => $tile_activated_cb();
+                      child: $BzTransactionView {
+                        transaction: bind template.item;
+                      };
+                    }
+                  };
+                }
+
+                ListView list_view {
+                  styles [
+                    "navigation-sidebar",
+                    "installed-list-view",
+                  ]
+
+                  margin-start: 25;
+                  margin-end: 25;
+
+                  model: NoSelection {
+                    model: FilterListModel {
+                      filter: CustomFilter filter {};
+
+                      model: bind template.model;
                     };
-                  }
-                };
+                  };
+
+                  factory: BuilderListItemFactory {
+                    template ListItem {
+                      activatable: false;
+                      selectable: false;
+                      focusable: false;
+
+                      child: $BzInstalledTile {
+                        group: bind template.item as <$BzEntryGroup>;
+                        activated => $tile_activated_cb();
+                      };
+                    }
+                  };
+                }
               };
             };
           };

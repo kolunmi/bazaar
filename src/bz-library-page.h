@@ -22,6 +22,8 @@
 
 #include <adwaita.h>
 
+#include "bz-state-info.h"
+
 G_BEGIN_DECLS
 
 #define BZ_TYPE_LIBRARY_PAGE (bz_library_page_get_type ())
@@ -36,6 +38,13 @@ bz_library_page_set_model (BzLibraryPage *self,
 
 GListModel *
 bz_library_page_get_model (BzLibraryPage *self);
+
+void
+bz_library_page_set_state (BzLibraryPage *self,
+                           BzStateInfo   *state);
+
+BzStateInfo *
+bz_library_page_get_state (BzLibraryPage *self);
 
 gboolean
 bz_library_page_ensure_active (BzLibraryPage *self,

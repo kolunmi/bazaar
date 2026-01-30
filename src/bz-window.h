@@ -37,9 +37,6 @@ bz_window_search (BzWindow   *self,
                   const char *text);
 
 void
-bz_window_toggle_transactions (BzWindow *self);
-
-void
 bz_window_push_update_dialog (BzWindow *self);
 
 void
