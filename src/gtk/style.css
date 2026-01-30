@@ -274,6 +274,12 @@ global-progress image {
 	  transition: background-color 150ms ease;
 }
 
+.lozenge.small {
+	padding: 1px 9px;
+	font-size: 12px;
+	font-weight: bold;
+}
+
 .lozenge-ring-button {
 	padding: 0;
 	border-radius: 999999px;

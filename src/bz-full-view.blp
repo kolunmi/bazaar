@@ -706,6 +706,7 @@ template $BzFullView: Adw.Bin {
 
                         $BzReleasesList releases_list {
                           version-history: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.version-history;
+                          installed-versions: bind template.entry-group as <$BzEntryGroup>.installed-versions;
                         }
 
                         $BzShareList {

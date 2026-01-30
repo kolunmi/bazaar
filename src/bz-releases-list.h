@@ -28,9 +28,14 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE (BzReleasesList, bz_releases_list, BZ, RELEASES_LIST, AdwBin)
 
-GtkWidget  *bz_releases_list_new (void);
-void        bz_releases_list_set_version_history (BzReleasesList *self,
-                                                  GListModel     *version_history);
-GListModel *bz_releases_list_get_version_history (BzReleasesList *self);
+GtkWidget *
+bz_releases_list_new (void);
+
+void
+bz_releases_list_set_version_history (BzReleasesList *self,
+                                      GListModel     *version_history);
+
+GListModel *
+bz_releases_list_get_version_history (BzReleasesList *self);
 
 G_END_DECLS
