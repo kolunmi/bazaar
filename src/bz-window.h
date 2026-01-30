@@ -51,16 +51,20 @@ bz_window_show_group (BzWindow     *self,
                       BzEntryGroup *group);
 
 void
-bz_window_show_app_id (BzWindow     *self,
+bz_window_show_app_id (BzWindow   *self,
                        const char *app_id);
 
 void
-bz_window_push_page(BzWindow *self,
-                    AdwNavigationPage *page);
+bz_window_push_page (BzWindow          *self,
+                     AdwNavigationPage *page);
 
 void
 bz_window_add_toast (BzWindow *self,
                      AdwToast *toast);
+
+void
+bz_window_bulk_install (BzWindow   *self,
+                        GListModel *groups);
 
 BzStateInfo *
 bz_window_get_state_info (BzWindow *self);

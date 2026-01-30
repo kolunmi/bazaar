@@ -300,21 +300,7 @@ bulk_install_cb (BzWindow   *self,
                  GListModel *groups,
                  gpointer    source)
 {
-  g_autoptr (BulkInstallData) data = NULL;
-
-  g_return_if_fail (BZ_IS_WINDOW (self));
-  g_return_if_fail (G_IS_LIST_MODEL (groups));
-
-  data         = bulk_install_data_new ();
-  data->self   = bz_track_weak (self);
-  data->groups = g_object_ref (groups);
-
-  dex_future_disown (dex_scheduler_spawn (
-      dex_scheduler_get_default (),
-      bz_get_dex_stack_size (),
-      (DexFiberFunc) bulk_install_fiber,
-      bulk_install_data_ref (data),
-      bulk_install_data_unref));
+  bz_window_bulk_install (self, groups);
 }
 
 static void
@@ -945,6 +931,27 @@ bz_window_push_page (BzWindow *self, AdwNavigationPage *page)
     }
 
   adw_navigation_view_push (self->navigation_view, page);
+}
+
+void
+bz_window_bulk_install (BzWindow   *self,
+                        GListModel *groups)
+{
+  g_autoptr (BulkInstallData) data = NULL;
+
+  g_return_if_fail (BZ_IS_WINDOW (self));
+  g_return_if_fail (G_IS_LIST_MODEL (groups));
+
+  data         = bulk_install_data_new ();
+  data->self   = bz_track_weak (self);
+  data->groups = g_object_ref (groups);
+
+  dex_future_disown (dex_scheduler_spawn (
+      dex_scheduler_get_default (),
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) bulk_install_fiber,
+      bulk_install_data_ref (data),
+      bulk_install_data_unref));
 }
 
 BzStateInfo *

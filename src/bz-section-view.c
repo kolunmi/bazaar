@@ -26,6 +26,7 @@
 #include "bz-dynamic-list-view.h"
 #include "bz-entry-group.h"
 #include "bz-markdown-render.h"
+#include "bz-window.h"
 
 struct _BzSectionView
 {
@@ -233,6 +234,41 @@ unbind_widget_cb (BzSectionView     *self,
 }
 
 static void
+install_all_clicked (BzSectionView *self,
+                     GtkButton     *button)
+{
+  GtkWidget               *window   = NULL;
+  BzCuratedCategoryInfo   *category = NULL;
+  GListModel              *appids   = NULL;
+  guint                    n_appids = 0;
+  BzStateInfo             *info     = NULL;
+  BzApplicationMapFactory *factory  = NULL;
+  g_autoptr (GListModel) groups     = NULL;
+
+  window = gtk_widget_get_ancestor (GTK_WIDGET (self), BZ_TYPE_WINDOW);
+  if (window == NULL)
+    return;
+
+  /* If the button is visible and the user clicked it, this must be non-null */
+  category = bz_curated_section_get_category (self->section);
+  appids   = bz_curated_category_info_get_appids (category);
+  if (appids == NULL)
+    return;
+  n_appids = g_list_model_get_n_items (appids);
+  if (n_appids == 0)
+    return;
+
+  /* TODO: bind state via object properties */
+  info    = bz_state_info_get_default ();
+  factory = bz_state_info_get_application_factory (info);
+
+  groups = bz_application_map_factory_generate (factory, appids);
+  /* TODO: use signals to chain up the blueprints; it is cleaner, but more
+     work... :( */
+  bz_window_bulk_install (BZ_WINDOW (window), groups);
+}
+
+static void
 bz_section_view_class_init (BzSectionViewClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
@@ -284,6 +320,7 @@ bz_section_view_class_init (BzSectionViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, convert_to_groups);
   gtk_widget_class_bind_template_callback (widget_class, bind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, unbind_widget_cb);
+  gtk_widget_class_bind_template_callback (widget_class, install_all_clicked);
 }
 
 static void
