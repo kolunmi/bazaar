@@ -1330,6 +1330,7 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
                   version = bz_backend_notification_get_version (notif);
 
                   g_hash_table_replace (self->installed_set, g_strdup (unique_id), g_strdup (version));
+                  bz_entry_set_installed_version (entry, version);
                   bz_entry_set_installed (entry, TRUE);
 
                   if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
