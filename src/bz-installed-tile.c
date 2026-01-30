@@ -25,8 +25,8 @@
 #include "bz-entry-group.h"
 #include "bz-env.h"
 #include "bz-error.h"
-#include "bz-installed-page.h"
 #include "bz-installed-tile.h"
+#include "bz-library-page.h"
 #include "bz-state-info.h"
 
 struct _BzInstalledTile
@@ -128,14 +128,14 @@ is_zero (gpointer object,
 }
 
 static char *
-format_description (gpointer     object,
-                   guint64      size,
-                   GListModel  *versions)
+format_description (gpointer    object,
+                    guint64     size,
+                    GListModel *versions)
 {
-  g_autoptr (GString) result = NULL;
+  g_autoptr (GString) result       = NULL;
   g_autoptr (GString) versions_str = NULL;
-  g_autofree char *size_str  = NULL;
-  guint n_versions           = 0;
+  g_autofree char *size_str        = NULL;
+  guint            n_versions      = 0;
 
   result = g_string_new (NULL);
 
@@ -180,10 +180,10 @@ addon_transact_cb (BzInstalledTile *self,
                    BzEntry         *entry,
                    BzAddonsDialog  *dialog)
 {
-  BzInstalledPage *page      = NULL;
-  gboolean         installed = FALSE;
+  BzLibraryPage *page      = NULL;
+  gboolean       installed = FALSE;
 
-  page = BZ_INSTALLED_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (self), BZ_TYPE_INSTALLED_PAGE));
+  page = BZ_LIBRARY_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (self), BZ_TYPE_LIBRARY_PAGE));
   g_assert (page != NULL);
 
   g_object_get (entry, "installed", &installed, NULL);
@@ -236,14 +236,14 @@ static DexFuture *
 install_addons_fiber (BzInstalledTile *tile)
 {
   g_autoptr (GError) local_error = NULL;
-  BzInstalledPage *page          = NULL;
-  BzStateInfo     *state         = NULL;
-  GtkWidget       *window        = NULL;
+  BzLibraryPage *page            = NULL;
+  BzStateInfo   *state           = NULL;
+  GtkWidget     *window          = NULL;
   g_autoptr (BzEntry) entry      = NULL;
   g_autoptr (GListModel) model   = NULL;
   AdwDialog *addons_dialog       = NULL;
 
-  page = BZ_INSTALLED_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (tile), BZ_TYPE_INSTALLED_PAGE));
+  page = BZ_LIBRARY_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (tile), BZ_TYPE_LIBRARY_PAGE));
   g_assert (page != NULL);
 
   window = gtk_widget_get_ancestor (GTK_WIDGET (tile), GTK_TYPE_WINDOW);
@@ -292,11 +292,11 @@ static DexFuture *
 remove_fiber (BzInstalledTile *tile)
 {
   g_autoptr (GError) local_error = NULL;
-  BzInstalledPage *page          = NULL;
-  GtkWidget       *window        = NULL;
+  BzLibraryPage *page            = NULL;
+  GtkWidget     *window          = NULL;
   g_autoptr (BzEntry) entry      = NULL;
 
-  page = BZ_INSTALLED_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (tile), BZ_TYPE_INSTALLED_PAGE));
+  page = BZ_LIBRARY_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (tile), BZ_TYPE_LIBRARY_PAGE));
   g_assert (page != NULL);
 
   window = gtk_widget_get_ancestor (GTK_WIDGET (tile), GTK_TYPE_WINDOW);

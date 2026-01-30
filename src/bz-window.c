@@ -33,8 +33,8 @@
 #include "bz-flathub-page.h"
 #include "bz-full-view.h"
 #include "bz-global-progress.h"
-#include "bz-installed-page.h"
 #include "bz-io.h"
+#include "bz-library-page.h"
 #include "bz-progress-bar.h"
 #include "bz-search-widget.h"
 #include "bz-template-callbacks.h"
@@ -64,7 +64,7 @@ struct _BzWindow
   GtkToggleButton     *toggle_transactions;
   GtkToggleButton     *toggle_transactions_sidebar;
   BzSearchWidget      *search_widget;
-  BzInstalledPage     *installed_page;
+  BzLibraryPage       *library_page;
   GtkButton           *update_button;
   GtkToggleButton     *transactions_pause;
   GtkButton           *transactions_stop;
@@ -304,9 +304,9 @@ bulk_install_cb (BzWindow   *self,
 }
 
 static void
-installed_page_show_cb (BzWindow   *self,
-                        BzEntry    *entry,
-                        BzFullView *view)
+library_page_show_cb (BzWindow   *self,
+                      BzEntry    *entry,
+                      BzFullView *view)
 {
   g_autoptr (BzEntryGroup) group = NULL;
 
@@ -529,7 +529,7 @@ bz_window_class_init (BzWindowClass *klass)
   g_type_ensure (BZ_TYPE_PROGRESS_BAR);
   g_type_ensure (BZ_TYPE_CURATED_VIEW);
   g_type_ensure (BZ_TYPE_FULL_VIEW);
-  g_type_ensure (BZ_TYPE_INSTALLED_PAGE);
+  g_type_ensure (BZ_TYPE_LIBRARY_PAGE);
   g_type_ensure (BZ_TYPE_FLATHUB_PAGE);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-window.ui");
@@ -544,7 +544,7 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzWindow, toggle_transactions);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, toggle_transactions_sidebar);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, search_widget);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, installed_page);
+  gtk_widget_class_bind_template_child (widget_class, BzWindow, library_page);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, update_button);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, transactions_pause);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, transactions_stop);
@@ -560,7 +560,7 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, install_addon_cb);
   gtk_widget_class_bind_template_callback (widget_class, remove_addon_cb);
   gtk_widget_class_bind_template_callback (widget_class, remove_installed_cb);
-  gtk_widget_class_bind_template_callback (widget_class, installed_page_show_cb);
+  gtk_widget_class_bind_template_callback (widget_class, library_page_show_cb);
   gtk_widget_class_bind_template_callback (widget_class, page_toggled_cb);
   gtk_widget_class_bind_template_callback (widget_class, breakpoint_apply_cb);
   gtk_widget_class_bind_template_callback (widget_class, breakpoint_unapply_cb);
@@ -601,7 +601,7 @@ key_pressed (BzWindow              *self,
 
   visible_child_name = adw_view_stack_get_visible_child_name (self->main_view_stack);
   if (g_strcmp0 (visible_child_name, "installed") == 0)
-    return bz_installed_page_ensure_active (self->installed_page, buf);
+    return bz_library_page_ensure_active (self->library_page, buf);
   else
     {
       adw_view_stack_set_visible_child_name (self->main_view_stack, "search");
@@ -922,7 +922,7 @@ bz_window_push_page (BzWindow *self, AdwNavigationPage *page)
     {
       g_signal_connect_swapped (page, "install", G_CALLBACK (install_entry_cb), self);
       g_signal_connect_swapped (page, "remove", G_CALLBACK (remove_installed_cb), self);
-      g_signal_connect_swapped (page, "show-entry", G_CALLBACK (installed_page_show_cb), self);
+      g_signal_connect_swapped (page, "show-entry", G_CALLBACK (library_page_show_cb), self);
       g_signal_connect_swapped (page, "bulk-install", G_CALLBACK (bulk_install_cb), self);
 
       g_object_bind_property (self->split_view, "show-sidebar",

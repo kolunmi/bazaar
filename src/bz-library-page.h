@@ -1,4 +1,4 @@
-/* bz-installed-page.h
+/* bz-library-page.h
  *
  * Copyright 2025 Adam Masciola
  *
@@ -24,21 +24,21 @@
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_INSTALLED_PAGE (bz_installed_page_get_type ())
-G_DECLARE_FINAL_TYPE (BzInstalledPage, bz_installed_page, BZ, INSTALLED_PAGE, AdwBin)
+#define BZ_TYPE_LIBRARY_PAGE (bz_library_page_get_type ())
+G_DECLARE_FINAL_TYPE (BzLibraryPage, bz_library_page, BZ, LIBRARY_PAGE, AdwBin)
 
 GtkWidget *
-bz_installed_page_new (void);
+bz_library_page_new (void);
 
 void
-bz_installed_page_set_model (BzInstalledPage *self,
-                             GListModel      *model);
+bz_library_page_set_model (BzLibraryPage *self,
+                           GListModel    *model);
 
 GListModel *
-bz_installed_page_get_model (BzInstalledPage *self);
+bz_library_page_get_model (BzLibraryPage *self);
 
 gboolean
-bz_installed_page_ensure_active (BzInstalledPage *self,
-                                 const char      *initial);
+bz_library_page_ensure_active (BzLibraryPage *self,
+                               const char    *initial);
 
 G_END_DECLS
