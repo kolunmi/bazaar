@@ -202,6 +202,7 @@ bz_view_switcher_set_stack (BzViewSwitcher *self,
                             AdwViewStack   *stack)
 {
   g_return_if_fail (BZ_IS_VIEW_SWITCHER (self));
+  g_return_if_fail (stack == NULL || ADW_IS_VIEW_STACK (stack));
 
   if (stack == self->stack)
     return;
@@ -252,8 +253,6 @@ bz_view_switcher_set_stack (BzViewSwitcher *self,
           G_CALLBACK (selection_changed),
           self);
     }
-  else
-    refresh_selection (self);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_STACK]);
 }
