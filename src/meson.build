@@ -52,6 +52,7 @@ bz_sources = files(
   'bz-addons-dialog.c',
   'bz-age-rating-dialog.c',
   'bz-all-apps-page.c',
+  'bz-animation.c',
   'bz-app-permissions.c',
   'bz-app-size-dialog.c',
   'bz-app-tile.c',
