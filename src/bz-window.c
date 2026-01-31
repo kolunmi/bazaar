@@ -43,6 +43,7 @@
 #include "bz-transaction-manager.h"
 #include "bz-user-data-page.h"
 #include "bz-util.h"
+#include "bz-view-switcher.h"
 #include "bz-window.h"
 
 struct _BzWindow
@@ -498,6 +499,7 @@ bz_window_class_init (BzWindowClass *klass)
   g_type_ensure (BZ_TYPE_FULL_VIEW);
   g_type_ensure (BZ_TYPE_LIBRARY_PAGE);
   g_type_ensure (BZ_TYPE_FLATHUB_PAGE);
+  g_type_ensure (BZ_TYPE_VIEW_SWITCHER);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-window.ui");
   bz_widget_class_bind_all_util_callbacks (widget_class);

@@ -311,9 +311,8 @@ template $BzWindow: Adw.ApplicationWindow {
                     }
 
                     [title]
-                    Adw.ViewSwitcher {
+                    $BzViewSwitcher {
                       stack: main_view_stack;
-                      policy: wide;
                       sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.busy) as <bool>;
                     }
 
