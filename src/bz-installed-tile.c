@@ -25,8 +25,8 @@
 #include "bz-entry-group.h"
 #include "bz-env.h"
 #include "bz-error.h"
-#include "bz-installed-page.h"
 #include "bz-installed-tile.h"
+#include "bz-library-page.h"
 #include "bz-state-info.h"
 
 struct _BzInstalledTile
@@ -128,9 +128,51 @@ is_zero (gpointer object,
 }
 
 static char *
-format_size (gpointer object, guint64 value)
+format_description (gpointer    object,
+                    guint64     size,
+                    GListModel *versions)
 {
-  return g_format_size (value);
+  g_autoptr (GString) result       = NULL;
+  g_autoptr (GString) versions_str = NULL;
+  g_autofree char *size_str        = NULL;
+  guint            n_versions      = 0;
+
+  result = g_string_new (NULL);
+
+  if (versions != NULL)
+    n_versions = g_list_model_get_n_items (versions);
+
+  if (n_versions > 0)
+    {
+      versions_str = g_string_new (NULL);
+
+      for (guint i = 0; i < n_versions; i++)
+        {
+          g_autoptr (GtkStringObject) string = NULL;
+          const char *version                = NULL;
+
+          string  = g_list_model_get_item (versions, i);
+          version = gtk_string_object_get_string (string);
+
+          if (version != NULL && *version != '\0')
+            {
+              if (versions_str->len > 0)
+                g_string_append_c (versions_str, ' ');
+              g_string_append (versions_str, version);
+            }
+        }
+
+      if (versions_str->len > 0)
+        {
+          g_string_append (result, versions_str->str);
+          g_string_append (result, " • ");
+        }
+    }
+
+  size_str = g_format_size (size);
+  g_string_append (result, size_str);
+
+  return g_string_free (g_steal_pointer (&result), FALSE);
 }
 
 static void
@@ -138,10 +180,10 @@ addon_transact_cb (BzInstalledTile *self,
                    BzEntry         *entry,
                    BzAddonsDialog  *dialog)
 {
-  BzInstalledPage *page      = NULL;
-  gboolean         installed = FALSE;
+  BzLibraryPage *page      = NULL;
+  gboolean       installed = FALSE;
 
-  page = BZ_INSTALLED_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (self), BZ_TYPE_INSTALLED_PAGE));
+  page = BZ_LIBRARY_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (self), BZ_TYPE_LIBRARY_PAGE));
   g_assert (page != NULL);
 
   g_object_get (entry, "installed", &installed, NULL);
@@ -194,14 +236,14 @@ static DexFuture *
 install_addons_fiber (BzInstalledTile *tile)
 {
   g_autoptr (GError) local_error = NULL;
-  BzInstalledPage *page          = NULL;
-  BzStateInfo     *state         = NULL;
-  GtkWidget       *window        = NULL;
+  BzLibraryPage *page            = NULL;
+  BzStateInfo   *state           = NULL;
+  GtkWidget     *window          = NULL;
   g_autoptr (BzEntry) entry      = NULL;
   g_autoptr (GListModel) model   = NULL;
   AdwDialog *addons_dialog       = NULL;
 
-  page = BZ_INSTALLED_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (tile), BZ_TYPE_INSTALLED_PAGE));
+  page = BZ_LIBRARY_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (tile), BZ_TYPE_LIBRARY_PAGE));
   g_assert (page != NULL);
 
   window = gtk_widget_get_ancestor (GTK_WIDGET (tile), GTK_TYPE_WINDOW);
@@ -250,11 +292,11 @@ static DexFuture *
 remove_fiber (BzInstalledTile *tile)
 {
   g_autoptr (GError) local_error = NULL;
-  BzInstalledPage *page          = NULL;
-  GtkWidget       *window        = NULL;
+  BzLibraryPage *page            = NULL;
+  GtkWidget     *window          = NULL;
   g_autoptr (BzEntry) entry      = NULL;
 
-  page = BZ_INSTALLED_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (tile), BZ_TYPE_INSTALLED_PAGE));
+  page = BZ_LIBRARY_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (tile), BZ_TYPE_LIBRARY_PAGE));
   g_assert (page != NULL);
 
   window = gtk_widget_get_ancestor (GTK_WIDGET (tile), GTK_TYPE_WINDOW);
@@ -318,7 +360,7 @@ bz_installed_tile_class_init (BzInstalledTileClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
-  gtk_widget_class_bind_template_callback (widget_class, format_size);
+  gtk_widget_class_bind_template_callback (widget_class, format_description);
   gtk_widget_class_bind_template_callback (widget_class, support_cb);
   gtk_widget_class_bind_template_callback (widget_class, install_addons_cb);
   gtk_widget_class_bind_template_callback (widget_class, remove_cb);

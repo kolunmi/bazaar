@@ -1,6 +1,6 @@
-/* bz-releases-list.h
+/* bz-view-switcher-button.h
  *
- * Copyright 2025 Alexander Vanhee, Adam Masciola
+ * Copyright 2026 Eva M
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,18 +24,22 @@
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_RELEASES_LIST (bz_releases_list_get_type ())
-
-G_DECLARE_FINAL_TYPE (BzReleasesList, bz_releases_list, BZ, RELEASES_LIST, AdwBin)
+#define BZ_TYPE_VIEW_SWITCHER_BUTTON (bz_view_switcher_button_get_type ())
+G_DECLARE_FINAL_TYPE (BzViewSwitcherButton, bz_view_switcher_button, BZ, VIEW_SWITCHER_BUTTON, AdwBin)
 
 GtkWidget *
-bz_releases_list_new (void);
+bz_view_switcher_button_new (void);
+
+GtkButton *
+bz_view_switcher_button_get_toggle (BzViewSwitcherButton *self);
+
+AdwViewStackPage *
+bz_view_switcher_button_get_page (BzViewSwitcherButton *self);
 
 void
-bz_releases_list_set_version_history (BzReleasesList *self,
-                                      GListModel     *version_history);
-
-GListModel *
-bz_releases_list_get_version_history (BzReleasesList *self);
+bz_view_switcher_button_set_page (BzViewSwitcherButton *self,
+                                  AdwViewStackPage     *page);
 
 G_END_DECLS
+
+/* End of bz-view-switcher-button.h */

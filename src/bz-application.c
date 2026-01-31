@@ -588,21 +588,6 @@ bz_application_donate_action (GSimpleAction *action,
 }
 
 static void
-bz_application_toggle_transactions_action (GSimpleAction *action,
-                                           GVariant      *parameter,
-                                           gpointer       user_data)
-{
-  BzApplication *self   = user_data;
-  GtkWindow     *window = NULL;
-
-  g_assert (BZ_IS_APPLICATION (self));
-
-  window = gtk_application_get_active_window (GTK_APPLICATION (self));
-
-  bz_window_toggle_transactions (BZ_WINDOW (window));
-}
-
-static void
 bz_application_search_action (GSimpleAction *action,
                               GVariant      *parameter,
                               gpointer       user_data)
@@ -811,19 +796,18 @@ bz_application_quit_action (GSimpleAction *action,
 }
 
 static const GActionEntry app_actions[] = {
-  {       "flathub-login",       bz_application_flathub_login_action, NULL },
-  {      "flathub-logout",      bz_application_flathub_logout_action, NULL },
-  {   "flathub-favorites",   bz_application_flathub_favorites_action, NULL },
-  {                "quit",                bz_application_quit_action, NULL },
-  {         "preferences",         bz_application_preferences_action, NULL },
-  {               "about",               bz_application_about_action, NULL },
-  {        "sync-remotes",        bz_application_sync_remotes_action, NULL },
-  {              "search",              bz_application_search_action,  "s" },
-  {         "show-app-id",         bz_application_show_app_id_action,  "s" },
-  { "toggle-transactions", bz_application_toggle_transactions_action, NULL },
-  {              "donate",              bz_application_donate_action, NULL },
-  {    "bazaar-inspector",    bz_application_bazaar_inspector_action, NULL },
-  {   "toggle-debug-mode",   bz_application_toggle_debug_mode_action, NULL },
+  {     "flathub-login",     bz_application_flathub_login_action, NULL },
+  {    "flathub-logout",    bz_application_flathub_logout_action, NULL },
+  { "flathub-favorites", bz_application_flathub_favorites_action, NULL },
+  {              "quit",              bz_application_quit_action, NULL },
+  {       "preferences",       bz_application_preferences_action, NULL },
+  {             "about",             bz_application_about_action, NULL },
+  {      "sync-remotes",      bz_application_sync_remotes_action, NULL },
+  {            "search",            bz_application_search_action,  "s" },
+  {       "show-app-id",       bz_application_show_app_id_action,  "s" },
+  {            "donate",            bz_application_donate_action, NULL },
+  {  "bazaar-inspector",  bz_application_bazaar_inspector_action, NULL },
+  { "toggle-debug-mode", bz_application_toggle_debug_mode_action, NULL },
 };
 
 static void
@@ -855,10 +839,6 @@ bz_application_init (BzApplication *self)
       GTK_APPLICATION (self),
       "app.search('')",
       (const char *[]) { "<primary>f", NULL });
-  gtk_application_set_accels_for_action (
-      GTK_APPLICATION (self),
-      "app.toggle-transactions",
-      (const char *[]) { "<primary>d", NULL });
   gtk_application_set_accels_for_action (
       GTK_APPLICATION (self),
       "app.bazaar-inspector",
@@ -1031,7 +1011,7 @@ init_fiber (GWeakRef *wr)
       g_clear_error (&local_error);
 
       self->installed_set = g_hash_table_new_full (
-          g_str_hash, g_str_equal, g_free, NULL);
+          g_str_hash, g_str_equal, g_free, g_free);
     }
 
   repos = dex_await_object (
@@ -1325,8 +1305,13 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
               {
               case BZ_BACKEND_NOTIFICATION_KIND_INSTALL_DONE:
                 {
+                  const char *version = NULL;
+
+                  version = bz_backend_notification_get_version (notif);
+
+                  g_hash_table_replace (self->installed_set, g_strdup (unique_id), g_strdup (version));
+                  bz_entry_set_installed_version (entry, version);
                   bz_entry_set_installed (entry, TRUE);
-                  g_hash_table_replace (self->installed_set, g_strdup (unique_id), NULL);
 
                   if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
                     {
@@ -1347,10 +1332,15 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
                 break;
               case BZ_BACKEND_NOTIFICATION_KIND_UPDATE_DONE:
                 {
+                  const char *version = NULL;
+
+                  version = bz_backend_notification_get_version (notif);
+                  g_hash_table_replace (self->installed_set, g_strdup (unique_id), g_strdup (version));
                 }
                 break;
               case BZ_BACKEND_NOTIFICATION_KIND_REMOVE_DONE:
                 {
+                  bz_entry_set_installed_version (entry, NULL);
                   bz_entry_set_installed (entry, FALSE);
                   g_hash_table_remove (self->installed_set, unique_id);
 
@@ -1455,6 +1445,7 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
                         const char   *unique_id = NULL;
                         BzEntryGroup *group     = NULL;
                         gboolean      installed = FALSE;
+                        const char   *version   = NULL;
 
                         entry = g_value_get_object (dex_future_get_value (future, NULL));
                         id    = bz_entry_get_id (entry);
@@ -1464,6 +1455,11 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
 
                         unique_id = bz_entry_get_unique_id (entry);
                         installed = g_hash_table_contains (installed_set, unique_id);
+
+                        version = g_hash_table_lookup (installed_set, unique_id);
+                        if (installed && version != NULL && *version != '\0')
+                          bz_entry_set_installed_version (entry, version);
+
                         bz_entry_set_installed (entry, installed);
 
                         if (group != NULL)
@@ -1778,6 +1774,7 @@ fiber_replace_entry (BzApplication *self,
   gboolean    user               = FALSE;
   gboolean    installed          = FALSE;
   const char *flatpak_id         = NULL;
+  const char *version            = NULL;
 
   id                 = bz_entry_get_id (entry);
   unique_id          = bz_entry_get_unique_id (entry);
@@ -1790,6 +1787,10 @@ fiber_replace_entry (BzApplication *self,
 
   installed = g_hash_table_contains (self->installed_set, unique_id);
   bz_entry_set_installed (entry, installed);
+
+  version = g_hash_table_lookup (self->installed_set, unique_id);
+  if (version != NULL && *version != '\0')
+    bz_entry_set_installed_version (entry, version);
 
   flatpak_id = bz_flatpak_entry_get_flatpak_id (BZ_FLATPAK_ENTRY (entry));
   if (flatpak_id != NULL)

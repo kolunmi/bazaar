@@ -1,6 +1,6 @@
-/* bz-releases-list.h
+/* bz-library-page.h
  *
- * Copyright 2025 Alexander Vanhee, Adam Masciola
+ * Copyright 2025 Adam Masciola
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,20 +22,32 @@
 
 #include <adwaita.h>
 
+#include "bz-state-info.h"
+
 G_BEGIN_DECLS
 
-#define BZ_TYPE_RELEASES_LIST (bz_releases_list_get_type ())
-
-G_DECLARE_FINAL_TYPE (BzReleasesList, bz_releases_list, BZ, RELEASES_LIST, AdwBin)
+#define BZ_TYPE_LIBRARY_PAGE (bz_library_page_get_type ())
+G_DECLARE_FINAL_TYPE (BzLibraryPage, bz_library_page, BZ, LIBRARY_PAGE, AdwBin)
 
 GtkWidget *
-bz_releases_list_new (void);
+bz_library_page_new (void);
 
 void
-bz_releases_list_set_version_history (BzReleasesList *self,
-                                      GListModel     *version_history);
+bz_library_page_set_model (BzLibraryPage *self,
+                           GListModel    *model);
 
 GListModel *
-bz_releases_list_get_version_history (BzReleasesList *self);
+bz_library_page_get_model (BzLibraryPage *self);
+
+void
+bz_library_page_set_state (BzLibraryPage *self,
+                           BzStateInfo   *state);
+
+BzStateInfo *
+bz_library_page_get_state (BzLibraryPage *self);
+
+gboolean
+bz_library_page_ensure_active (BzLibraryPage *self,
+                               const char    *initial);
 
 G_END_DECLS

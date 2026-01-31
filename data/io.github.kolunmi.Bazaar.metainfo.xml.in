@@ -68,6 +68,22 @@
   </screenshots>
 
   <releases>
+    <release version="0.7.6" date="2026-01-28">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.6</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>Improve context dialogs</li>
+          <li>Fix leftover data bar being shown prematurely</li>
+          <li>Have a rotation toggle for flags</li>
+          <li>Add hard check to prevent removing Bazaar flatpak</li>
+          <li>Improve download statistics tooltips</li>
+          <li>Add read support for flatpak bundles</li>
+          <li>Fix critical output sometimes during transactions</li>
+          <li>Fix error popover refusing to spawn in transaction sidebar</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.7.5" date="2026-01-18">
       <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.5</url>
       <description translate="no">

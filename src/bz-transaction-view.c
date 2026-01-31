@@ -358,18 +358,21 @@ is_entry_addon (gpointer                   object,
 }
 
 static void
-entry_clicked (GtkListItem *list_item,
-               GtkButton   *button)
+activate (BzTransactionView *self,
+          guint              position,
+          GtkListView       *list_view)
 {
-  BzTransactionEntryTracker *tracker = NULL;
-  BzEntry                   *entry   = NULL;
-  BzWindow                  *window  = NULL;
-  g_autoptr (BzEntryGroup) group     = NULL;
+  g_autoptr (GListModel) model                  = NULL;
+  g_autoptr (BzTransactionEntryTracker) tracker = NULL;
+  BzEntry  *entry                               = NULL;
+  BzWindow *window                              = NULL;
+  g_autoptr (BzEntryGroup) group                = NULL;
 
-  tracker = gtk_list_item_get_item (list_item);
+  g_object_get (self->transaction, "trackers", &model, NULL);
+  tracker = g_list_model_get_item (model, position);
   entry   = bz_transaction_entry_tracker_get_entry (tracker);
 
-  window = (BzWindow *) gtk_widget_get_ancestor (gtk_list_item_get_child (list_item), BZ_TYPE_WINDOW);
+  window = (BzWindow *) gtk_widget_get_ancestor (GTK_WIDGET (self), BZ_TYPE_WINDOW);
   if (window == NULL)
     return;
 
@@ -410,7 +413,7 @@ bz_transaction_view_class_init (BzTransactionViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, is_entry_application);
   gtk_widget_class_bind_template_callback (widget_class, is_entry_runtime);
   gtk_widget_class_bind_template_callback (widget_class, is_entry_addon);
-  gtk_widget_class_bind_template_callback (widget_class, entry_clicked);
+  gtk_widget_class_bind_template_callback (widget_class, activate);
   gtk_widget_class_bind_template_callback (widget_class, create_app_id_filter);
   gtk_widget_class_bind_template_callback (widget_class, is_transaction_tracker_install);
   gtk_widget_class_bind_template_callback (widget_class, is_transaction_tracker_update);

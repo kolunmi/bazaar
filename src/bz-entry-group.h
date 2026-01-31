@@ -43,6 +43,9 @@ bz_entry_group_lock (BzEntryGroup *self);
 GListModel *
 bz_entry_group_get_model (BzEntryGroup *self);
 
+GListModel *
+bz_entry_group_get_installed_versions (BzEntryGroup *self);
+
 const char *
 bz_entry_group_get_id (BzEntryGroup *self);
 
@@ -117,6 +120,9 @@ bz_entry_group_get_updatable_and_available (BzEntryGroup *self);
 
 int
 bz_entry_group_get_removable_and_available (BzEntryGroup *self);
+
+gboolean
+bz_entry_group_is_searchable (BzEntryGroup *self);
 
 guint64
 bz_entry_group_get_user_data_size (BzEntryGroup *self);

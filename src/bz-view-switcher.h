@@ -1,6 +1,6 @@
-/* bz-installed-page.h
+/* bz-view-switcher.h
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2026 Eva M
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,21 +24,19 @@
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_INSTALLED_PAGE (bz_installed_page_get_type ())
-G_DECLARE_FINAL_TYPE (BzInstalledPage, bz_installed_page, BZ, INSTALLED_PAGE, AdwBin)
+#define BZ_TYPE_VIEW_SWITCHER (bz_view_switcher_get_type ())
+G_DECLARE_FINAL_TYPE (BzViewSwitcher, bz_view_switcher, BZ, VIEW_SWITCHER, GtkWidget)
 
-GtkWidget *
-bz_installed_page_new (void);
+BzViewSwitcher *
+bz_view_switcher_new (void);
+
+AdwViewStack *
+bz_view_switcher_get_stack (BzViewSwitcher *self);
 
 void
-bz_installed_page_set_model (BzInstalledPage *self,
-                             GListModel      *model);
-
-GListModel *
-bz_installed_page_get_model (BzInstalledPage *self);
-
-gboolean
-bz_installed_page_ensure_active (BzInstalledPage *self,
-                                 const char      *initial);
+bz_view_switcher_set_stack (BzViewSwitcher *self,
+                            AdwViewStack   *stack);
 
 G_END_DECLS
+
+/* End of bz-view-switcher.h */

@@ -1,4 +1,4 @@
-/* bz-installed-page.c
+/* bz-library-page.c
  *
  * Copyright 2025 Adam Masciola
  *
@@ -23,13 +23,13 @@
 #include "bz-entry-group-util.h"
 #include "bz-env.h"
 #include "bz-error.h"
-#include "bz-installed-page.h"
 #include "bz-installed-tile.h"
+#include "bz-library-page.h"
 #include "bz-section-view.h"
-#include "bz-state-info.h"
+#include "bz-template-callbacks.h"
 #include "bz-util.h"
 
-struct _BzInstalledPage
+struct _BzLibraryPage
 {
   AdwBin parent_instance;
 
@@ -43,7 +43,7 @@ struct _BzInstalledPage
   GtkListView     *list_view;
 };
 
-G_DEFINE_FINAL_TYPE (BzInstalledPage, bz_installed_page, ADW_TYPE_BIN)
+G_DEFINE_FINAL_TYPE (BzLibraryPage, bz_library_page, ADW_TYPE_BIN)
 
 enum
 {
@@ -68,50 +68,50 @@ enum
 static guint signals[LAST_SIGNAL];
 
 static void
-items_changed (BzInstalledPage *self,
-               guint            position,
-               guint            removed,
-               guint            added,
-               GListModel      *model);
+items_changed (BzLibraryPage *self,
+               guint          position,
+               guint          removed,
+               guint          added,
+               GListModel    *model);
 
 static void
-set_page (BzInstalledPage *self);
+set_page (BzLibraryPage *self);
 
 static gboolean
-set_page_idle_cb (BzInstalledPage *self);
+set_page_idle_cb (BzLibraryPage *self);
 
 static gboolean
-filter (BzEntryGroup    *group,
-        BzInstalledPage *self);
+filter (BzEntryGroup  *group,
+        BzLibraryPage *self);
 
 static void
-bz_installed_page_dispose (GObject *object)
+bz_library_page_dispose (GObject *object)
 {
-  BzInstalledPage *self = BZ_INSTALLED_PAGE (object);
+  BzLibraryPage *self = BZ_LIBRARY_PAGE (object);
 
   if (self->model != NULL)
     g_signal_handlers_disconnect_by_func (self->model, items_changed, self);
   g_clear_object (&self->model);
   g_clear_object (&self->state);
 
-  G_OBJECT_CLASS (bz_installed_page_parent_class)->dispose (object);
+  G_OBJECT_CLASS (bz_library_page_parent_class)->dispose (object);
 }
 
 static void
-bz_installed_page_get_property (GObject    *object,
-                                guint       prop_id,
-                                GValue     *value,
-                                GParamSpec *pspec)
+bz_library_page_get_property (GObject    *object,
+                              guint       prop_id,
+                              GValue     *value,
+                              GParamSpec *pspec)
 {
-  BzInstalledPage *self = BZ_INSTALLED_PAGE (object);
+  BzLibraryPage *self = BZ_LIBRARY_PAGE (object);
 
   switch (prop_id)
     {
     case PROP_MODEL:
-      g_value_set_object (value, bz_installed_page_get_model (self));
+      g_value_set_object (value, bz_library_page_get_model (self));
       break;
     case PROP_STATE:
-      g_value_set_object (value, self->state);
+      g_value_set_object (value, bz_library_page_get_state (self));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -119,21 +119,20 @@ bz_installed_page_get_property (GObject    *object,
 }
 
 static void
-bz_installed_page_set_property (GObject      *object,
-                                guint         prop_id,
-                                const GValue *value,
-                                GParamSpec   *pspec)
+bz_library_page_set_property (GObject      *object,
+                              guint         prop_id,
+                              const GValue *value,
+                              GParamSpec   *pspec)
 {
-  BzInstalledPage *self = BZ_INSTALLED_PAGE (object);
+  BzLibraryPage *self = BZ_LIBRARY_PAGE (object);
 
   switch (prop_id)
     {
     case PROP_MODEL:
-      bz_installed_page_set_model (self, g_value_get_object (value));
+      bz_library_page_set_model (self, g_value_get_object (value));
       break;
     case PROP_STATE:
-      g_clear_object (&self->state);
-      self->state = g_value_dup_object (value);
+      bz_library_page_set_state (self, g_value_get_object (value));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -162,14 +161,14 @@ row_activated_fiber (GWeakRef *wr)
 {
   g_autoptr (GError) local_error   = NULL;
   g_autoptr (BzInstalledTile) tile = NULL;
-  BzInstalledPage *self            = NULL;
-  GtkWidget       *window          = NULL;
-  BzEntryGroup    *group           = NULL;
+  BzLibraryPage *self              = NULL;
+  GtkWidget     *window            = NULL;
+  BzEntryGroup  *group             = NULL;
   g_autoptr (BzEntry) entry        = NULL;
 
   bz_weak_get_or_return_reject (tile, wr);
 
-  self = (BzInstalledPage *) gtk_widget_get_ancestor (GTK_WIDGET (tile), BZ_TYPE_INSTALLED_PAGE);
+  self = (BzLibraryPage *) gtk_widget_get_ancestor (GTK_WIDGET (tile), BZ_TYPE_LIBRARY_PAGE);
   if (self == NULL)
     return NULL;
   if (self->model == NULL)
@@ -216,9 +215,9 @@ is_valid_string (gpointer    object,
 }
 
 static void
-search_text_changed (BzInstalledPage *self,
-                     GParamSpec      *pspec,
-                     GtkEntry        *entry)
+search_text_changed (BzLibraryPage *self,
+                     GParamSpec    *pspec,
+                     GtkEntry      *entry)
 {
   gtk_filter_changed (GTK_FILTER (self->filter),
                       GTK_FILTER_CHANGE_DIFFERENT);
@@ -226,21 +225,21 @@ search_text_changed (BzInstalledPage *self,
 }
 
 static void
-reset_search_cb (BzInstalledPage *self,
-                 GtkButton       *button)
+reset_search_cb (BzLibraryPage *self,
+                 GtkButton     *button)
 {
   gtk_text_set_buffer (self->search_bar, NULL);
 }
 
 static void
-bz_installed_page_class_init (BzInstalledPageClass *klass)
+bz_library_page_class_init (BzLibraryPageClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
-  object_class->dispose      = bz_installed_page_dispose;
-  object_class->get_property = bz_installed_page_get_property;
-  object_class->set_property = bz_installed_page_set_property;
+  object_class->dispose      = bz_library_page_dispose;
+  object_class->get_property = bz_library_page_get_property;
+  object_class->set_property = bz_library_page_set_property;
 
   props[PROP_MODEL] =
       g_param_spec_object (
@@ -322,21 +321,21 @@ bz_installed_page_class_init (BzInstalledPageClass *klass)
   g_type_ensure (BZ_TYPE_ENTRY_GROUP);
   g_type_ensure (BZ_TYPE_INSTALLED_TILE);
 
-  gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-installed-page.ui");
-  gtk_widget_class_bind_template_child (widget_class, BzInstalledPage, stack);
-  gtk_widget_class_bind_template_child (widget_class, BzInstalledPage, search_bar);
-  gtk_widget_class_bind_template_child (widget_class, BzInstalledPage, filter);
-  gtk_widget_class_bind_template_child (widget_class, BzInstalledPage, list_view);
-  gtk_widget_class_bind_template_callback (widget_class, is_zero);
+  gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-library-page.ui");
+  bz_widget_class_bind_all_util_callbacks (widget_class);
+
+  gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, stack);
+  gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, search_bar);
+  gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, filter);
+  gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, list_view);
   gtk_widget_class_bind_template_callback (widget_class, no_results_found_subtitle);
-  gtk_widget_class_bind_template_callback (widget_class, is_valid_string);
   gtk_widget_class_bind_template_callback (widget_class, tile_activated_cb);
   gtk_widget_class_bind_template_callback (widget_class, reset_search_cb);
   gtk_widget_class_bind_template_callback (widget_class, search_text_changed);
 }
 
 static void
-bz_installed_page_init (BzInstalledPage *self)
+bz_library_page_init (BzLibraryPage *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
   gtk_custom_filter_set_filter_func (
@@ -345,16 +344,16 @@ bz_installed_page_init (BzInstalledPage *self)
 }
 
 GtkWidget *
-bz_installed_page_new (void)
+bz_library_page_new (void)
 {
-  return g_object_new (BZ_TYPE_INSTALLED_PAGE, NULL);
+  return g_object_new (BZ_TYPE_LIBRARY_PAGE, NULL);
 }
 
 void
-bz_installed_page_set_model (BzInstalledPage *self,
-                             GListModel      *model)
+bz_library_page_set_model (BzLibraryPage *self,
+                           GListModel    *model)
 {
-  g_return_if_fail (BZ_IS_INSTALLED_PAGE (self));
+  g_return_if_fail (BZ_IS_LIBRARY_PAGE (self));
   g_return_if_fail (model == NULL || G_IS_LIST_MODEL (model));
 
   if (self->model != NULL)
@@ -375,19 +374,40 @@ bz_installed_page_set_model (BzInstalledPage *self,
 }
 
 GListModel *
-bz_installed_page_get_model (BzInstalledPage *self)
+bz_library_page_get_model (BzLibraryPage *self)
 {
-  g_return_val_if_fail (BZ_IS_INSTALLED_PAGE (self), NULL);
+  g_return_val_if_fail (BZ_IS_LIBRARY_PAGE (self), NULL);
   return self->model;
 }
 
+void
+bz_library_page_set_state (BzLibraryPage *self,
+                           BzStateInfo   *state)
+{
+  g_return_if_fail (BZ_IS_LIBRARY_PAGE (self));
+  g_return_if_fail (state == NULL || BZ_IS_STATE_INFO (state));
+
+  g_clear_object (&self->state);
+  if (state != NULL)
+    self->state = g_object_ref (state);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_STATE]);
+}
+
+BzStateInfo *
+bz_library_page_get_state (BzLibraryPage *self)
+{
+  g_return_val_if_fail (BZ_IS_LIBRARY_PAGE (self), NULL);
+  return self->state;
+}
+
 gboolean
-bz_installed_page_ensure_active (BzInstalledPage *self,
-                                 const char      *initial)
+bz_library_page_ensure_active (BzLibraryPage *self,
+                               const char    *initial)
 {
   const char *text = NULL;
 
-  g_return_val_if_fail (BZ_IS_INSTALLED_PAGE (self), FALSE);
+  g_return_val_if_fail (BZ_IS_LIBRARY_PAGE (self), FALSE);
 
   text = gtk_editable_get_text (GTK_EDITABLE (self->search_bar));
   if (text != NULL && *text != '\0' &&
@@ -403,17 +423,17 @@ bz_installed_page_ensure_active (BzInstalledPage *self,
 }
 
 static void
-items_changed (BzInstalledPage *self,
-               guint            position,
-               guint            removed,
-               guint            added,
-               GListModel      *model)
+items_changed (BzLibraryPage *self,
+               guint          position,
+               guint          removed,
+               guint          added,
+               GListModel    *model)
 {
   set_page (self);
 }
 
 static void
-set_page (BzInstalledPage *self)
+set_page (BzLibraryPage *self)
 {
   GtkSelectionModel *selection_model;
   GListModel        *filter_model;
@@ -434,15 +454,15 @@ set_page (BzInstalledPage *self)
 }
 
 static gboolean
-set_page_idle_cb (BzInstalledPage *self)
+set_page_idle_cb (BzLibraryPage *self)
 {
   set_page (self);
   return G_SOURCE_REMOVE;
 }
 
 static gboolean
-filter (BzEntryGroup    *group,
-        BzInstalledPage *self)
+filter (BzEntryGroup  *group,
+        BzLibraryPage *self)
 {
   const char *id    = NULL;
   const char *title = NULL;

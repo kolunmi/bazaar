@@ -442,6 +442,9 @@ rows:
           - org.duckstation.DuckStation
           - org.freecad.FreeCAD
 
+        # Show an "Install All" button
+        enable-bulk-install: true
+
       # reference the classes we defined earlier
       classes:
         - main-section

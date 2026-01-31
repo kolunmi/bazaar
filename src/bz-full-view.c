@@ -85,11 +85,9 @@ enum
   PROP_0,
 
   PROP_STATE,
-  PROP_TRANSACTION_MANAGER,
   PROP_ENTRY_GROUP,
   PROP_UI_ENTRY,
   PROP_MAIN_MENU,
-  PROP_SHOW_SIDEBAR,
 
   LAST_PROP
 };
@@ -142,9 +140,6 @@ bz_full_view_get_property (GObject    *object,
     case PROP_STATE:
       g_value_set_object (value, self->state);
       break;
-    case PROP_TRANSACTION_MANAGER:
-      g_value_set_object (value, bz_full_view_get_transaction_manager (self));
-      break;
     case PROP_ENTRY_GROUP:
       g_value_set_object (value, bz_full_view_get_entry_group (self));
       break;
@@ -153,9 +148,6 @@ bz_full_view_get_property (GObject    *object,
       break;
     case PROP_MAIN_MENU:
       g_value_set_object (value, self->main_menu);
-      break;
-    case PROP_SHOW_SIDEBAR:
-      g_value_set_boolean (value, self->show_sidebar);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -176,9 +168,6 @@ bz_full_view_set_property (GObject      *object,
       g_clear_object (&self->state);
       self->state = g_value_dup_object (value);
       break;
-    case PROP_TRANSACTION_MANAGER:
-      bz_full_view_set_transaction_manager (self, g_value_get_object (value));
-      break;
     case PROP_ENTRY_GROUP:
       bz_full_view_set_entry_group (self, g_value_get_object (value));
       break;
@@ -187,10 +176,6 @@ bz_full_view_set_property (GObject      *object,
       if (self->main_menu)
         g_object_unref (self->main_menu);
       self->main_menu = g_value_dup_object (value);
-      break;
-    case PROP_SHOW_SIDEBAR:
-      self->show_sidebar = g_value_get_boolean (value);
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SHOW_SIDEBAR]);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -1083,13 +1068,6 @@ bz_full_view_class_init (BzFullViewClass *klass)
           BZ_TYPE_STATE_INFO,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-  props[PROP_TRANSACTION_MANAGER] =
-      g_param_spec_object (
-          "transaction-manager",
-          NULL, NULL,
-          BZ_TYPE_TRANSACTION_MANAGER,
-          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
-
   props[PROP_ENTRY_GROUP] =
       g_param_spec_object (
           "entry-group",
@@ -1110,13 +1088,6 @@ bz_full_view_class_init (BzFullViewClass *klass)
           NULL, NULL,
           G_TYPE_MENU_MODEL,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-
-  props[PROP_SHOW_SIDEBAR] =
-      g_param_spec_boolean (
-          "show-sidebar",
-          NULL, NULL,
-          FALSE,
-          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
@@ -1266,28 +1237,6 @@ GtkWidget *
 bz_full_view_new (void)
 {
   return g_object_new (BZ_TYPE_FULL_VIEW, NULL);
-}
-
-void
-bz_full_view_set_transaction_manager (BzFullView           *self,
-                                      BzTransactionManager *transactions)
-{
-  g_return_if_fail (BZ_IS_FULL_VIEW (self));
-  g_return_if_fail (transactions == NULL ||
-                    BZ_IS_TRANSACTION_MANAGER (transactions));
-
-  g_clear_object (&self->transactions);
-  if (transactions != NULL)
-    self->transactions = g_object_ref (transactions);
-
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TRANSACTION_MANAGER]);
-}
-
-BzTransactionManager *
-bz_full_view_get_transaction_manager (BzFullView *self)
-{
-  g_return_val_if_fail (BZ_IS_FULL_VIEW (self), NULL);
-  return self->transactions;
 }
 
 void

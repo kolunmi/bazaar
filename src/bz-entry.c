@@ -73,6 +73,8 @@ typedef struct
 {
   gint     hold;
   gboolean installed;
+  char    *installed_version;
+  gboolean searchable;
 
   guint             kinds;
   GListModel       *addons;
@@ -141,6 +143,8 @@ enum
 
   PROP_HOLDING,
   PROP_INSTALLED,
+  PROP_INSTALLED_VERSION,
+  PROP_SEARCHABLE,
   PROP_KINDS,
   PROP_ADDONS,
   PROP_ID,
@@ -294,6 +298,12 @@ bz_entry_get_property (GObject    *object,
       break;
     case PROP_INSTALLED:
       g_value_set_boolean (value, priv->installed);
+      break;
+    case PROP_INSTALLED_VERSION:
+      g_value_set_string (value, priv->installed_version);
+      break;
+    case PROP_SEARCHABLE:
+      g_value_set_boolean (value, priv->searchable);
       break;
     case PROP_ADDONS:
       g_value_set_object (value, priv->addons);
@@ -480,6 +490,13 @@ bz_entry_set_property (GObject      *object,
     {
     case PROP_INSTALLED:
       priv->installed = g_value_get_boolean (value);
+      break;
+    case PROP_INSTALLED_VERSION:
+      g_clear_pointer (&priv->installed_version, g_free);
+      priv->installed_version = g_value_dup_string (value);
+      break;
+    case PROP_SEARCHABLE:
+      priv->searchable = g_value_get_boolean (value);
       break;
     case PROP_ADDONS:
       g_clear_object (&priv->addons);
@@ -734,6 +751,19 @@ bz_entry_class_init (BzEntryClass *klass)
       g_param_spec_boolean (
           "installed",
           NULL, NULL, FALSE,
+          G_PARAM_READWRITE);
+
+  props[PROP_INSTALLED_VERSION] =
+      g_param_spec_string (
+          "installed-version",
+          NULL, NULL, NULL,
+          G_PARAM_READWRITE);
+
+  props[PROP_SEARCHABLE] =
+      g_param_spec_boolean (
+          "searchable",
+          NULL, NULL,
+          TRUE,
           G_PARAM_READWRITE);
 
   props[PROP_ADDONS] =
@@ -1099,6 +1129,7 @@ bz_entry_init (BzEntry *self)
   BzEntryPrivate *priv = bz_entry_get_instance_private (self);
 
   priv->hold            = 0;
+  priv->searchable      = TRUE;
   priv->favorites_count = -1;
 }
 
@@ -1110,7 +1141,10 @@ bz_entry_real_serialize (BzSerializable  *serializable,
   BzEntryPrivate *priv = bz_entry_get_instance_private (self);
 
   g_variant_builder_add (builder, "{sv}", "installed", g_variant_new_boolean (priv->installed));
+  if (priv->installed_version != NULL)
+    g_variant_builder_add (builder, "{sv}", "installed-version", g_variant_new_string (priv->installed_version));
   g_variant_builder_add (builder, "{sv}", "kinds", g_variant_new_uint32 (priv->kinds));
+  g_variant_builder_add (builder, "{sv}", "searchable", g_variant_new_boolean (priv->searchable));
   if (priv->addons != NULL)
     {
       guint n_items = 0;
@@ -1476,8 +1510,12 @@ bz_entry_real_deserialize (BzSerializable *serializable,
 
       if (g_strcmp0 (key, "installed") == 0)
         priv->installed = g_variant_get_boolean (value);
+      else if (g_strcmp0 (key, "installed-version") == 0)
+        priv->installed_version = g_variant_dup_string (value, NULL);
       else if (g_strcmp0 (key, "kinds") == 0)
         priv->kinds = g_variant_get_uint32 (value);
+      else if (g_strcmp0 (key, "searchable") == 0)
+        priv->searchable = g_variant_get_boolean (value);
       else if (g_strcmp0 (key, "addons") == 0)
         {
           g_autoptr (GListStore) store        = NULL;
@@ -1856,6 +1894,31 @@ bz_entry_set_installed (BzEntry *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLED]);
 }
 
+const char *
+bz_entry_get_installed_version (BzEntry *self)
+{
+  BzEntryPrivate *priv = NULL;
+
+  g_return_val_if_fail (BZ_IS_ENTRY (self), NULL);
+  priv = bz_entry_get_instance_private (self);
+
+  return priv->installed_version;
+}
+
+void
+bz_entry_set_installed_version (BzEntry    *self,
+                                const char *version)
+{
+  BzEntryPrivate *priv = NULL;
+
+  g_return_if_fail (BZ_IS_ENTRY (self));
+  priv = bz_entry_get_instance_private (self);
+
+  g_clear_pointer (&priv->installed_version, g_free);
+  priv->installed_version = g_strdup (version);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLED_VERSION]);
+}
+
 gboolean
 bz_entry_is_of_kinds (BzEntry *self,
                       guint    kinds)
@@ -1866,6 +1929,17 @@ bz_entry_is_of_kinds (BzEntry *self,
   priv = bz_entry_get_instance_private (self);
 
   return (priv->kinds & kinds) == kinds;
+}
+
+gboolean
+bz_entry_is_searchable (BzEntry *self)
+{
+  BzEntryPrivate *priv = NULL;
+
+  g_return_val_if_fail (BZ_IS_ENTRY (self), TRUE);
+  priv = bz_entry_get_instance_private (self);
+
+  return priv->searchable;
 }
 
 void
@@ -2129,12 +2203,12 @@ BzRepository *
 bz_entry_get_repository (BzEntry    *self,
                          GListModel *repos)
 {
-  BzEntryPrivate *priv = NULL;
-  guint n_repos = 0;
-  g_auto(GStrv) parts = NULL;
-  const char *scope = NULL;
-  const char *repo_name = NULL;
-  gboolean is_user = FALSE;
+  BzEntryPrivate *priv    = NULL;
+  guint           n_repos = 0;
+  g_auto (GStrv) parts    = NULL;
+  const char *scope       = NULL;
+  const char *repo_name   = NULL;
+  gboolean    is_user     = FALSE;
 
   priv = bz_entry_get_instance_private (self);
 
@@ -2145,7 +2219,7 @@ bz_entry_get_repository (BzEntry    *self,
   if (g_strv_length (parts) < 3)
     return NULL;
 
-  scope = parts[0];
+  scope     = parts[0];
   repo_name = parts[1];
 
   is_user = g_strcmp0 (scope, "FLATPAK-USER") == 0;
@@ -2154,8 +2228,8 @@ bz_entry_get_repository (BzEntry    *self,
   for (guint i = 0; i < n_repos; i++)
     {
       g_autoptr (BzRepository) repo = g_list_model_get_item (repos, i);
-      const char *name = bz_repository_get_name (repo);
-      gboolean repo_is_user = bz_repository_get_is_user (repo);
+      const char *name              = bz_repository_get_name (repo);
+      gboolean    repo_is_user      = bz_repository_get_is_user (repo);
 
       if (repo_is_user == is_user &&
           g_strcmp0 (name, repo_name) == 0)
@@ -2430,8 +2504,8 @@ query_flathub (BzEntry *self,
   priv = bz_entry_get_instance_private (self);
 
   is_download_stat = (prop == PROP_DOWNLOAD_STATS ||
-                    prop == PROP_DOWNLOAD_STATS_PER_COUNTRY ||
-                    prop == PROP_TOTAL_DOWNLOADS);
+                      prop == PROP_DOWNLOAD_STATS_PER_COUNTRY ||
+                      prop == PROP_TOTAL_DOWNLOADS);
 
   if (!is_download_stat && !priv->is_flathub)
     return;
@@ -2914,6 +2988,7 @@ clear_entry (BzEntry *self)
   g_clear_pointer (&priv->id, g_free);
   g_clear_pointer (&priv->unique_id, g_free);
   g_clear_pointer (&priv->unique_id_checksum, g_free);
+  g_clear_pointer (&priv->installed_version, g_free);
   g_clear_pointer (&priv->title, g_free);
   g_clear_pointer (&priv->eol, g_free);
   g_clear_pointer (&priv->description, g_free);

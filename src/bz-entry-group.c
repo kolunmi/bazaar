@@ -24,6 +24,7 @@
 #include "bz-entry-group.h"
 #include "bz-async-texture.h"
 #include "bz-env.h"
+#include "bz-flatpak-entry.h"
 #include "bz-io.h"
 #include "bz-util.h"
 
@@ -34,6 +35,7 @@ struct _BzEntryGroup
   BzApplicationMapFactory *factory;
 
   GtkStringList *unique_ids;
+  GtkStringList *installed_versions;
   char          *id;
   char          *title;
   char          *developer;
@@ -62,6 +64,7 @@ struct _BzEntryGroup
   int      updatable_available;
   int      removable_available;
   gboolean read_only;
+  gboolean searchable;
 
   guint64 user_data_size;
 
@@ -80,6 +83,7 @@ enum
   PROP_0,
 
   PROP_MODEL,
+  PROP_INSTALLED_VERSIONS,
   PROP_ID,
   PROP_TITLE,
   PROP_DEVELOPER,
@@ -140,6 +144,7 @@ bz_entry_group_dispose (GObject *object)
   dex_clear (&self->reap_user_data_future);
   g_clear_object (&self->factory);
   g_clear_object (&self->unique_ids);
+  g_clear_object (&self->installed_versions);
   g_clear_pointer (&self->id, g_free);
   g_clear_pointer (&self->title, g_free);
   g_clear_pointer (&self->developer, g_free);
@@ -173,6 +178,9 @@ bz_entry_group_get_property (GObject    *object,
     {
     case PROP_MODEL:
       g_value_set_object (value, bz_entry_group_get_model (self));
+      break;
+    case PROP_INSTALLED_VERSIONS:
+      g_value_set_object (value, bz_entry_group_get_installed_versions (self));
       break;
     case PROP_ID:
       g_value_set_string (value, bz_entry_group_get_id (self));
@@ -308,6 +316,13 @@ bz_entry_group_class_init (BzEntryGroupClass *klass)
   props[PROP_MODEL] =
       g_param_spec_object (
           "model",
+          NULL, NULL,
+          G_TYPE_LIST_MODEL,
+          G_PARAM_READABLE);
+
+  props[PROP_INSTALLED_VERSIONS] =
+      g_param_spec_object (
+          "installed-versions",
           NULL, NULL,
           G_TYPE_LIST_MODEL,
           G_PARAM_READABLE);
@@ -487,8 +502,9 @@ bz_entry_group_class_init (BzEntryGroupClass *klass)
 static void
 bz_entry_group_init (BzEntryGroup *self)
 {
-  self->unique_ids     = gtk_string_list_new (NULL);
-  self->max_usefulness = -1;
+  self->unique_ids         = gtk_string_list_new (NULL);
+  self->installed_versions = gtk_string_list_new (NULL);
+  self->max_usefulness     = -1;
   g_weak_ref_init (&self->ui_entry, NULL);
   self->standalone_ui_entry = NULL;
   g_mutex_init (&self->mutex);
@@ -603,6 +619,13 @@ bz_entry_group_get_model (BzEntryGroup *self)
 {
   g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), NULL);
   return G_LIST_MODEL (self->unique_ids);
+}
+
+GListModel *
+bz_entry_group_get_installed_versions (BzEntryGroup *self)
+{
+  g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), NULL);
+  return G_LIST_MODEL (self->installed_versions);
 }
 
 const char *
@@ -824,6 +847,14 @@ bz_entry_group_get_removable_and_available (BzEntryGroup *self)
   return self->removable_available;
 }
 
+gboolean
+bz_entry_group_is_searchable (BzEntryGroup *self)
+{
+  g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), TRUE);
+
+  return self->searchable;
+}
+
 void
 bz_entry_group_add (BzEntryGroup *self,
                     BzEntry      *entry,
@@ -831,6 +862,7 @@ bz_entry_group_add (BzEntryGroup *self,
 {
   g_autoptr (GMutexLocker) locker  = NULL;
   const char   *unique_id          = NULL;
+  const char   *installed_version  = NULL;
   gint          usefulness         = 0;
   const char   *eol                = NULL;
   const char   *title              = NULL;
@@ -850,6 +882,7 @@ bz_entry_group_add (BzEntryGroup *self,
   const char   *donation_url       = NULL;
   GListModel   *entry_categories   = NULL;
   guint         existing           = 0;
+  gboolean      is_searchable      = FALSE;
 
   g_return_if_fail (BZ_IS_ENTRY_GROUP (self));
   g_return_if_fail (BZ_IS_ENTRY (entry));
@@ -864,7 +897,9 @@ bz_entry_group_add (BzEntryGroup *self,
                                    g_application_get_application_id (g_application_get_default ())) == 0;
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ID]);
     }
-  unique_id = bz_entry_get_unique_id (entry);
+  unique_id         = bz_entry_get_unique_id (entry);
+  installed_version = bz_entry_get_installed_version (entry);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLED_VERSIONS]);
 
   eol = bz_entry_get_eol (entry);
   if (eol == NULL && runtime != NULL)
@@ -891,7 +926,8 @@ bz_entry_group_add (BzEntryGroup *self,
   donation_url       = bz_entry_get_donation_url (entry);
   entry_categories   = bz_entry_get_categories (entry);
 
-  addons = bz_entry_get_addons (entry);
+  addons        = bz_entry_get_addons (entry);
+  is_searchable = bz_entry_is_searchable (entry);
   if (addons != NULL)
     n_addons = g_list_model_get_n_items (addons);
 
@@ -901,8 +937,12 @@ bz_entry_group_add (BzEntryGroup *self,
   if (usefulness >= self->max_usefulness)
     {
       if (existing != G_MAXUINT)
-        gtk_string_list_remove (self->unique_ids, existing);
+        {
+          gtk_string_list_remove (self->unique_ids, existing);
+          gtk_string_list_remove (self->installed_versions, existing);
+        }
       gtk_string_list_splice (self->unique_ids, 0, 0, (const char *const[]) { unique_id, NULL });
+      gtk_string_list_splice (self->installed_versions, 0, 0, (const char *const[]) { installed_version != NULL ? installed_version : "", NULL });
 
       if (title != NULL)
         {
@@ -1002,7 +1042,10 @@ bz_entry_group_add (BzEntryGroup *self,
   else
     {
       if (existing == G_MAXUINT)
-        gtk_string_list_append (self->unique_ids, unique_id);
+        {
+          gtk_string_list_append (self->unique_ids, unique_id);
+          gtk_string_list_append (self->installed_versions, installed_version != NULL ? installed_version : "");
+        }
 
       if (title != NULL && self->title == NULL)
         {
@@ -1111,6 +1154,10 @@ bz_entry_group_add (BzEntryGroup *self,
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLABLE]);
         }
     }
+  if (is_searchable && !self->searchable)
+    {
+      self->searchable = TRUE;
+    }
 }
 
 void
@@ -1152,8 +1199,29 @@ installed_changed (BzEntryGroup *self,
                    BzEntry      *entry)
 {
   g_autoptr (GMutexLocker) locker = NULL;
+  gboolean    is_installed_ref    = FALSE;
+  const char *unique_id           = NULL;
+  const char *version             = NULL;
+  guint       index               = 0;
 
   locker = g_mutex_locker_new (&self->mutex);
+
+  if (BZ_IS_FLATPAK_ENTRY (entry))
+    is_installed_ref = bz_flatpak_entry_is_installed_ref (BZ_FLATPAK_ENTRY (entry));
+
+  unique_id = bz_entry_get_unique_id (entry);
+  version   = bz_entry_get_installed_version (entry);
+  index     = gtk_string_list_find (self->unique_ids, unique_id);
+
+  if (index != G_MAXUINT)
+    {
+      gtk_string_list_splice (self->installed_versions, index, 1,
+                              (const char *const[]) {
+                                  version != NULL ? version : "",
+                                  NULL });
+    }
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLED_VERSIONS]);
 
   if (bz_entry_is_installed (entry))
     {
@@ -1172,16 +1240,23 @@ installed_changed (BzEntryGroup *self,
   else
     {
       self->removable--;
-      self->installable++;
+      if (!is_installed_ref)
+        self->installable++;
+
       if (!bz_entry_is_holding (entry))
         {
           self->removable_available--;
-          self->installable_available++;
+          if (!is_installed_ref)
+            self->installable_available++;
+
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_REMOVABLE_AND_AVAILABLE]);
-          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLABLE_AND_AVAILABLE]);
+          if (!is_installed_ref)
+            g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLABLE_AND_AVAILABLE]);
         }
+
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_REMOVABLE]);
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLABLE]);
+      if (!is_installed_ref)
+        g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLABLE]);
     }
 
   dex_clear (&self->user_data_size_future);

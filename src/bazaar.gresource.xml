@@ -39,7 +39,7 @@
     <file preprocess="xml-stripblanks">bz-full-view.ui</file>
     <file preprocess="xml-stripblanks">bz-hardware-support-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-inspector.ui</file>
-    <file preprocess="xml-stripblanks">bz-installed-page.ui</file>
+    <file preprocess="xml-stripblanks">bz-library-page.ui</file>
     <file preprocess="xml-stripblanks">bz-installed-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-license-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-login-page.ui</file>
@@ -61,6 +61,7 @@
     <file preprocess="xml-stripblanks">bz-user-data-page.ui</file>
     <file preprocess="xml-stripblanks">bz-user-data-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-window.ui</file>
+    <file preprocess="xml-stripblanks">bz-view-switcher-button.ui</file>
     <file alias="shortcuts-dialog.ui" preprocess="xml-stripblanks">gtk/shortcuts-dialog.ui</file>
 
     <file preprocess="xml-stripblanks">icons/scalable/actions/app-installed-symbolic.svg</file>

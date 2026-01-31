@@ -14,18 +14,50 @@ template $BzAllAppsPage: Adw.NavigationPage {
 
         menu-model: menu {
           section {
-            item (_("_Donate to Bazaar ❤️"), "app.donate")
-            item (_("_Refresh Content"), "app.refresh")
+            item {
+              label: _("_Donate to Bazaar ❤️");
+              action: "app.donate";
+            }
           }
 
           section {
-            item (_("_Preferences"), "app.preferences")
-            item (_("_Keyboard Shortcuts"), "app.shortcuts")
-            item (_("_About Bazaar"), "app.about")
+            item {
+              label: _("_Preferences");
+              action: "app.preferences";
+            }
+
+            item {
+              label: _("_Login with Flathub");
+              action: "app.flathub-login";
+              hidden-when: "action-disabled";
+            }
+
+            item {
+              label: _("_Manage Leftover User Data");
+              action: "window.user-data";
+            }
+
+            item {
+              label: _("_Synchronize Remotes");
+              action: "app.sync-remotes";
+            }
+
+            item {
+              label: _("_Keyboard Shortcuts");
+              action: "app.shortcuts";
+            }
+
+            item {
+              label: _("_About Bazaar");
+              action: "app.about";
+            }
           }
 
           section {
-            item (_("_Quit Bazaar"), "app.quit")
+            item {
+              label: _("_Quit Bazaar");
+              action: "app.quit";
+            }
           }
         };
       }

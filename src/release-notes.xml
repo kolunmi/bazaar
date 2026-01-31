@@ -1,10 +1,11 @@
 <p>This release comes with the following improvements:</p>
 <ul>
-  <li>Trash user data instead of deleting</li>
-  <li>Tweaks to permissions dialog</li>
-  <li>Fix broken EOL filtering</li>
-  <li>Add text filter to installed page</li>
-  <li>Add optional translations mappings for string properties in YAML configs</li>
-  <li>Hide EOL apps by default</li>
-  <li>Many other minor bug fixes and improvements</li>
+  <li>Improve context dialogs</li>
+  <li>Fix leftover data bar being shown prematurely</li>
+  <li>Have a rotation toggle for flags</li>
+  <li>Add hard check to prevent removing Bazaar flatpak</li>
+  <li>Improve download statistics tooltips</li>
+  <li>Add read support for flatpak bundles</li>
+  <li>Fix critical output sometimes during transactions</li>
+  <li>Fix error popover refusing to spawn in transaction sidebar</li>
 </ul>
