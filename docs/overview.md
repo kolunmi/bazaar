@@ -413,6 +413,10 @@ rows:
         # file:///run/host/etc/bazaar/banner-1.jxl
         banner: file:///home/kolunmi/banner-1.jxl
 
+        # Dynamically switching between light/dark variants of banners
+        light-banner: file:///home/kolunmi/banner-light.png
+        dark-banner: file:///home/kolunmi/banner-dark.png
+
         # can be "fill", "contain", "cover", or "scale-down"
         # see https://docs.gtk.org/gtk4/enum.ContentFit.html
         banner-fit: contain
