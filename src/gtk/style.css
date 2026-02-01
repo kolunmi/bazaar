@@ -803,3 +803,9 @@ curated-list-view,
 curated-list-view list {
   background: var(--bg-color);
 }
+
+.bz-popup {
+    border-radius: 15px;
+    background: var(--window-bg-color);
+    /* box-shadow: 0 0 20px 1px black; */
+}

@@ -42,6 +42,10 @@ bz_popup_overlay_push (BzPopupOverlay *self,
                        GtkWidget      *widget,
                        GtkWidget      *source);
 
+void
+bz_popup_present (GtkWidget *popup,
+                  GtkWidget *source);
+
 G_END_DECLS
 
 /* End of bz-popup-overlay.h */

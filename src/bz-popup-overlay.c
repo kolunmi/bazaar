@@ -46,8 +46,11 @@ BZ_DEFINE_DATA (
       GtkWidget      *child;
       GtkWidget      *source;
       graphene_rect_t allocation;
-      graphene_rect_t offset;
       gboolean        initialized;
+
+      graphene_point_t offset;
+      graphene_size_t  scale;
+      double           opacity;
     },
     BZ_RELEASE_DATA (child, gtk_widget_unparent);
     BZ_RELEASE_DATA (source, g_object_unref))
@@ -57,6 +60,10 @@ animate (BzPopupOverlay *self,
          const char     *key,
          double          value,
          PopupData      *data);
+
+static gboolean
+close_request_cb (BzPopupOverlay *self,
+                  GtkRoot        *root);
 
 enum
 {
@@ -152,11 +159,12 @@ bz_popup_overlay_size_allocate (GtkWidget *widget,
       PopupData       *data              = NULL;
       graphene_rect_t  source_bounds     = { 0 };
       graphene_point_t source_center     = { 0 };
-      graphene_rect_t  popup_bounds      = { 0 };
       int              minimum_width     = 0;
       int              natural_width     = 0;
       int              minimum_height    = 0;
       int              natural_height    = 0;
+      graphene_size_t  popup_size        = { 0 };
+      graphene_rect_t  popup_bounds      = { 0 };
       int              unused            = 0;
       g_autoptr (GskTransform) transform = NULL;
 
@@ -180,15 +188,20 @@ bz_popup_overlay_size_allocate (GtkWidget *widget,
           height, &minimum_height, &natural_height,
           &unused, &unused);
 
+      popup_size = GRAPHENE_SIZE_INIT (
+          CLAMP ((double) natural_width, (double) minimum_width, (double) width),
+          CLAMP ((double) natural_height, (double) minimum_height, (double) height));
+
       popup_bounds = GRAPHENE_RECT_INIT (
-          source_center.x / 2.0 < (double) width / 2.0
-              ? source_bounds.origin.x + source_bounds.size.width + 10.0
-              : source_bounds.origin.x - minimum_width - 10.0,
-          source_center.y / 2.0 < (double) height / 2.0
-              ? source_bounds.origin.y + source_bounds.size.height + 10.0
-              : source_bounds.origin.y - minimum_height - 10.0,
-          (double) minimum_width,
-          (double) minimum_height);
+          CLAMP (source_center.x / 2.0 < (double) width / 2.0
+                     ? source_bounds.origin.x + source_bounds.size.width
+                     : source_bounds.origin.x - popup_size.width,
+                 0.0, (double) width - popup_size.width),
+          CLAMP (source_center.y / 2.0 < (double) height / 2.0
+                     ? source_bounds.origin.y + source_bounds.size.height
+                     : source_bounds.origin.y - popup_size.height,
+                 0.0, (double) height - popup_size.height),
+          popup_size.width, popup_size.height);
 
       if (!data->initialized)
         {
@@ -213,7 +226,7 @@ bz_popup_overlay_size_allocate (GtkWidget *widget,
           buf[0] = 'w';
           bz_animation_add_spring (
               self->animation, buf,
-              1.0, 0.0,
+              0.0, 1.0,
               0.9, 1.0, 0.1,
               (BzAnimationCallback) animate,
               popup_data_ref (data), popup_data_unref);
@@ -221,18 +234,26 @@ bz_popup_overlay_size_allocate (GtkWidget *widget,
           buf[0] = 'h';
           bz_animation_add_spring (
               self->animation, buf,
-              1.0, 0.0,
+              0.0, 1.0,
               0.9, 1.0, 0.1,
+              (BzAnimationCallback) animate,
+              popup_data_ref (data), popup_data_unref);
+
+          buf[0] = 'o';
+          bz_animation_add_spring (
+              self->animation, buf,
+              0.0, 1.0,
+              1.0, 1.0, 0.2,
               (BzAnimationCallback) animate,
               popup_data_ref (data), popup_data_unref);
 
           data->initialized = TRUE;
         }
 
-      popup_bounds.origin.x -= data->offset.origin.x;
-      popup_bounds.origin.y -= data->offset.origin.y;
+      popup_bounds.origin.x -= data->offset.x;
+      popup_bounds.origin.y -= data->offset.y;
       transform = gsk_transform_translate (transform, &popup_bounds.origin);
-      transform = gsk_transform_scale (transform, 1.0 - data->offset.size.width, 1.0 - data->offset.size.height);
+      transform = gsk_transform_scale (transform, data->scale.width, data->scale.height);
 
       gtk_widget_allocate (
           data->child,
@@ -265,17 +286,47 @@ bz_popup_overlay_snapshot (GtkWidget   *widget,
 
       data = g_ptr_array_index (self->stack, i);
 
+      gtk_snapshot_push_opacity (snapshot, data->opacity);
       gtk_snapshot_append_color (
           snapshot,
           &(const GdkRGBA) {
               .red   = 0.0,
               .green = 0.0,
               .blue  = 0.0,
-              .alpha = 0.1,
+              .alpha = 0.25,
           },
           &GRAPHENE_RECT_INIT (0.0, 0.0, width, height));
       gtk_widget_snapshot_child (widget, data->child, snapshot);
+      gtk_snapshot_pop (snapshot);
     }
+}
+
+static void
+bz_popup_overlay_root (GtkWidget *widget)
+{
+  BzPopupOverlay *self = BZ_POPUP_OVERLAY (widget);
+  GtkRoot        *root = NULL;
+
+  GTK_WIDGET_CLASS (bz_popup_overlay_parent_class)->root (widget);
+
+  root = gtk_widget_get_root (GTK_WIDGET (self));
+  g_signal_connect_swapped (
+      root,
+      "close-request",
+      G_CALLBACK (close_request_cb),
+      self);
+}
+
+static void
+bz_popup_overlay_unroot (GtkWidget *widget)
+{
+  BzPopupOverlay *self = BZ_POPUP_OVERLAY (widget);
+  GtkRoot        *root = NULL;
+
+  root = gtk_widget_get_root (GTK_WIDGET (self));
+  g_signal_handlers_disconnect_by_func (root, close_request_cb, self);
+
+  GTK_WIDGET_CLASS (bz_popup_overlay_parent_class)->unroot (widget);
 }
 
 static void
@@ -300,6 +351,8 @@ bz_popup_overlay_class_init (BzPopupOverlayClass *klass)
   widget_class->measure       = bz_popup_overlay_measure;
   widget_class->size_allocate = bz_popup_overlay_size_allocate;
   widget_class->snapshot      = bz_popup_overlay_snapshot;
+  widget_class->root          = bz_popup_overlay_root;
+  widget_class->unroot        = bz_popup_overlay_unroot;
 }
 
 static void
@@ -351,7 +404,6 @@ bz_popup_overlay_push (BzPopupOverlay *self,
                        GtkWidget      *widget,
                        GtkWidget      *source)
 {
-  GtkWidget *frame           = NULL;
   g_autoptr (PopupData) data = NULL;
 
   g_return_if_fail (BZ_IS_POPUP_OVERLAY (self));
@@ -359,20 +411,38 @@ bz_popup_overlay_push (BzPopupOverlay *self,
   g_return_if_fail (GTK_IS_WIDGET (source));
   g_return_if_fail (gtk_widget_is_ancestor (source, GTK_WIDGET (self)));
 
-  frame = gtk_frame_new (NULL);
-  gtk_widget_add_css_class (frame, "card");
-  gtk_widget_set_parent (frame, GTK_WIDGET (self));
-  gtk_frame_set_child (GTK_FRAME (frame), widget);
-
   data              = popup_data_new ();
-  data->child       = frame;
+  data->child       = widget;
   data->source      = g_object_ref (source);
   data->allocation  = (graphene_rect_t) { 0 };
-  data->offset      = (graphene_rect_t) { 0 };
   data->initialized = FALSE;
+  data->offset      = (graphene_point_t) { 0 };
+  data->scale       = (graphene_size_t) { 0 };
+  data->opacity     = 0.0;
   g_ptr_array_add (self->stack, popup_data_ref (data));
 
+  gtk_widget_set_parent (widget, GTK_WIDGET (self));
   gtk_widget_queue_allocate (GTK_WIDGET (self));
+}
+
+void
+bz_popup_present (GtkWidget *popup,
+                  GtkWidget *source)
+{
+  GtkWidget *overlay = NULL;
+
+  g_return_if_fail (GTK_IS_WIDGET (popup));
+  g_return_if_fail (GTK_IS_WIDGET (source));
+
+  overlay = gtk_widget_get_ancestor (source, BZ_TYPE_POPUP_OVERLAY);
+  if (overlay == NULL)
+    {
+      g_critical ("source widget does not have an ancestor of type %s!",
+                  g_type_name (BZ_TYPE_POPUP_OVERLAY));
+      return;
+    }
+
+  bz_popup_overlay_push (BZ_POPUP_OVERLAY (overlay), popup, source);
 }
 
 static void
@@ -384,16 +454,19 @@ animate (BzPopupOverlay *self,
   switch (*key)
     {
     case 'x':
-      data->offset.origin.x = value;
+      data->offset.x = value;
       break;
     case 'y':
-      data->offset.origin.y = value;
+      data->offset.y = value;
       break;
     case 'w':
-      data->offset.size.width = value;
+      data->scale.width = value;
       break;
     case 'h':
-      data->offset.size.height = value;
+      data->scale.height = value;
+      break;
+    case 'o':
+      data->opacity = value;
       break;
     default:
       g_assert_not_reached ();
@@ -401,6 +474,18 @@ animate (BzPopupOverlay *self,
 
   gtk_widget_queue_allocate (GTK_WIDGET (self));
   gtk_widget_queue_draw (GTK_WIDGET (self));
+}
+
+static gboolean
+close_request_cb (BzPopupOverlay *self,
+                  GtkRoot        *root)
+{
+  if (self->stack->len > 0)
+    {
+      g_ptr_array_remove_index (self->stack, self->stack->len - 1);
+      return GDK_EVENT_STOP;
+    }
+  return GDK_EVENT_PROPAGATE;
 }
 
 /* End of bz-popup-overlay.c */
