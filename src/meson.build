@@ -118,6 +118,7 @@ bz_sources = files(
   'bz-markdown-render.c',
   'bz-newline-parser.c',
   'bz-parser.c',
+  'bz-popup-overlay.c',
   'bz-preferences-dialog.c',
   'bz-progress-bar.c',
   'bz-releases-list.c',

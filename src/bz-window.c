@@ -35,6 +35,7 @@
 #include "bz-global-progress.h"
 #include "bz-io.h"
 #include "bz-library-page.h"
+#include "bz-popup-overlay.h"
 #include "bz-progress-bar.h"
 #include "bz-search-widget.h"
 #include "bz-template-callbacks.h"
@@ -58,6 +59,7 @@ struct _BzWindow
 
   /* Template widgets */
   BzCometOverlay    *comet_overlay;
+  BzPopupOverlay    *popup_overlay;
   AdwNavigationView *navigation_view;
   BzFullView        *full_view;
   BzSearchWidget    *search_widget;
@@ -492,6 +494,7 @@ bz_window_class_init (BzWindowClass *klass)
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   g_type_ensure (BZ_TYPE_COMET_OVERLAY);
+  g_type_ensure (BZ_TYPE_POPUP_OVERLAY);
   g_type_ensure (BZ_TYPE_SEARCH_WIDGET);
   g_type_ensure (BZ_TYPE_GLOBAL_PROGRESS);
   g_type_ensure (BZ_TYPE_PROGRESS_BAR);
@@ -505,6 +508,7 @@ bz_window_class_init (BzWindowClass *klass)
   bz_widget_class_bind_all_util_callbacks (widget_class);
 
   gtk_widget_class_bind_template_child (widget_class, BzWindow, comet_overlay);
+  gtk_widget_class_bind_template_child (widget_class, BzWindow, popup_overlay);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, navigation_view);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, full_view);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, toasts);
