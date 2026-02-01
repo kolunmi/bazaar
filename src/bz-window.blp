@@ -1,4 +1,5 @@
 using Gtk 4.0;
+using Gio 2.0;
 using Adw 1;
 
 template $BzWindow: Adw.ApplicationWindow {
@@ -171,6 +172,9 @@ template $BzWindow: Adw.ApplicationWindow {
                           title: _("Library");
                           icon-name: "library-symbolic";
 
+                          badge-number: bind template.state as <$BzStateInfo>.available-updates as <Gio.ListStore>.n-items;
+                          needs-attention: bind template.state as <$BzStateInfo>.available-updates as <Gio.ListStore>.n-items;
+
                           child: $BzLibraryPage library_page {
                             state: bind template.state;
                             model: bind template.state as <$BzStateInfo>.all-installed-entry-groups;
@@ -178,6 +182,7 @@ template $BzWindow: Adw.ApplicationWindow {
                             remove-addon => $remove_addon_cb(template);
                             install-addon => $install_addon_cb(template);
                             show-entry => $library_page_show_cb(template);
+                            update => $update_cb(template);
                           };
                         }
 
@@ -213,52 +218,6 @@ template $BzWindow: Adw.ApplicationWindow {
                           size: 24;
                           custom-image: bind template.state as <$BzStateInfo>.auth-state as <$BzAuthState>.paintable;
                         };
-                      }
-
-                      [start]
-                      Overlay {
-                        visible: bind $invert_boolean($is_null(template.state as <$BzStateInfo>.available-updates) as <bool>) as <bool>;
-                        child: Button update_button {
-                          styles [
-                            "suggested-action",
-                          ]
-
-                          has-tooltip: true;
-                          tooltip-text: bind $update_amount_tooltip(template.state as <$BzStateInfo>.available-updates) as <string>;
-                          icon-name: "software-update-available-symbolic";
-
-                          clicked => $update_cb(template);
-                        };
-
-                        [overlay]
-                        Box {
-                          can-target: false;
-                          can-focus: false;
-                          margin-end: 2;
-                          margin-top: 3;
-                          halign: end;
-                          valign: start;
-
-                          styles [
-                            "updates-amount-border" ,
-                          ]
-
-                          Label {
-                            margin-top: 2;
-                            margin-bottom: 2;
-                            margin-start: 2;
-                            margin-end: 2;
-
-                            justify: center;
-                            width-request: 16;
-                            label: bind $list_length(template.state as <$BzStateInfo>.available-updates) as <string>;
-
-                            styles [
-                              "updates-amount",
-                            ]
-
-                          }
-                        }
                       }
 
                       [start]
@@ -312,8 +271,9 @@ template $BzWindow: Adw.ApplicationWindow {
                       }
 
                       [title]
-                      $BzViewSwitcher {
+                      Adw.ViewSwitcher {
                         stack: main_view_stack;
+                        policy: wide;
                         sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.busy) as <bool>;
                       }
 

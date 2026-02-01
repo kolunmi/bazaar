@@ -30,7 +30,6 @@
 #include "bz-error.h"
 #include "bz-marshalers.h"
 #include "bz-transaction-manager.h"
-#include "bz-transaction-view.h"
 #include "bz-util.h"
 
 /* clang-format off */
@@ -60,6 +59,10 @@ struct _BzTransactionManager
   DexPromise    *cur_promise;
   BzTransaction *cur_transaction;
 
+  GtkFlattenListModel *all_trackers;
+  GtkFilterListModel  *install_trackers;
+  GtkFilterListModel  *removal_trackers;
+
   GQueue queue;
 };
 
@@ -77,6 +80,8 @@ enum
   PROP_ACTIVE,
   PROP_PENDING,
   PROP_CURRENT_PROGRESS,
+  PROP_INSTALL_TRACKERS,
+  PROP_REMOVAL_TRACKERS,
 
   LAST_PROP
 };
@@ -185,6 +190,12 @@ bz_transaction_manager_get_property (GObject    *object,
     case PROP_CURRENT_PROGRESS:
       g_value_set_double (value, self->current_progress);
       break;
+    case PROP_INSTALL_TRACKERS:
+      g_value_set_object (value, self->install_trackers);
+      break;
+    case PROP_REMOVAL_TRACKERS:
+      g_value_set_object (value, self->removal_trackers);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -214,9 +225,54 @@ bz_transaction_manager_set_property (GObject      *object,
     case PROP_ACTIVE:
     case PROP_PENDING:
     case PROP_CURRENT_PROGRESS:
+    case PROP_INSTALL_TRACKERS:
+    case PROP_REMOVAL_TRACKERS:
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
+}
+
+static gboolean
+filter_install_trackers (gpointer item,
+                         gpointer user_data)
+{
+  BzTransactionEntryTracker *tracker = NULL;
+  BzTransactionEntryKind     kind    = 0;
+
+  tracker = BZ_TRANSACTION_ENTRY_TRACKER (item);
+  if (tracker == NULL)
+    return FALSE;
+
+  kind = bz_transaction_entry_tracker_get_kind (tracker);
+
+  return kind == BZ_TRANSACTION_ENTRY_KIND_INSTALL ||
+         kind == BZ_TRANSACTION_ENTRY_KIND_UPDATE;
+}
+
+static gboolean
+filter_removal_trackers (gpointer item,
+                         gpointer user_data)
+{
+  BzTransactionEntryTracker *tracker = NULL;
+
+  tracker = BZ_TRANSACTION_ENTRY_TRACKER (item);
+  if (tracker == NULL)
+    return FALSE;
+
+  return bz_transaction_entry_tracker_get_kind (tracker) == BZ_TRANSACTION_ENTRY_KIND_REMOVAL;
+}
+
+static gpointer
+get_trackers_model (gpointer item,
+                    gpointer user_data)
+{
+  BzTransaction *transaction = NULL;
+
+  transaction = BZ_TRANSACTION (item);
+  if (transaction == NULL)
+    return NULL;
+
+  return g_object_ref (bz_transaction_get_trackers (transaction));
 }
 
 static void
@@ -279,8 +335,20 @@ bz_transaction_manager_class_init (BzTransactionManagerClass *klass)
           NULL, NULL,
           0.0, 1.0, 0.0,
           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+  props[PROP_INSTALL_TRACKERS] =
+      g_param_spec_object (
+          "install-trackers",
+          NULL, NULL,
+          G_TYPE_LIST_MODEL,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
-  g_type_ensure (BZ_TYPE_TRANSACTION_VIEW);
+  props[PROP_REMOVAL_TRACKERS] =
+      g_param_spec_object (
+          "removal-trackers",
+          NULL, NULL,
+          G_TYPE_LIST_MODEL,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   signals[SIGNAL_SUCCESS] =
@@ -317,8 +385,35 @@ bz_transaction_manager_class_init (BzTransactionManagerClass *klass)
 static void
 bz_transaction_manager_init (BzTransactionManager *self)
 {
+  GtkCustomFilter *install_filter;
+  GtkCustomFilter *removal_filter;
+  GtkMapListModel *map_model;
+
   self->transactions = g_list_store_new (BZ_TYPE_TRANSACTION);
   g_queue_init (&self->queue);
+
+  map_model = gtk_map_list_model_new (
+      g_object_ref (G_LIST_MODEL (self->transactions)),
+      get_trackers_model,
+      NULL,
+      NULL);
+  self->all_trackers = gtk_flatten_list_model_new (G_LIST_MODEL (map_model));
+
+  install_filter = gtk_custom_filter_new (
+      filter_install_trackers,
+      NULL,
+      NULL);
+  self->install_trackers = gtk_filter_list_model_new (
+      g_object_ref (G_LIST_MODEL (self->all_trackers)),
+      GTK_FILTER (install_filter));
+
+  removal_filter = gtk_custom_filter_new (
+      filter_removal_trackers,
+      NULL,
+      NULL);
+  self->removal_trackers = gtk_filter_list_model_new (
+      g_object_ref (G_LIST_MODEL (self->all_trackers)),
+      GTK_FILTER (removal_filter));
 }
 
 BzTransactionManager *

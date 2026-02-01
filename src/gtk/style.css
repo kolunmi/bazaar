@@ -171,6 +171,12 @@
 	--accent-bg-color: @window_fg_color;
 }
 
+.grey.colored {
+    --accent-fg-color : @window_fg_color;
+    --accent-bg-color : alpha(@window_fg_color,0.05);
+    --accent-color : alpha(@window_fg_color,0.75);
+}
+
 .circular-lozenge.green,
 .lozenge.green {
 	color: @green_5;
@@ -789,9 +795,48 @@ window.narrow .category-tile {
 	min-height: 0;
 }
 
-.transaction-sidebar-entry-list {
-    margin: 0;
-    padding: 0;
+.no-min-height {
+  min-height: 0;
+}
+
+.transaction-tile-title {
+  font-size: 1.05em;
+  font-weight: 450;
+}
+
+.operations {
+	background-color: rgba(0, 0, 0, 0.10);
+	border-radius: 0px 0px 12px 12px;
+}
+
+@media (prefers-color-scheme: light) {
+	.operations {
+		background-color: rgba(0, 0, 0, 0.050);
+	}
+}
+
+.ops-toggle {
+	transition: transform 200ms ease;
+	transform: rotate(90deg);
+}
+
+.ops-toggle:checked,
+.ops-toggle.rotated {
+	transform: rotate(270deg);
+}
+
+.update-list {
+	background-color: alpha(@card_bg_color, 0.8);
+	border-radius: 0 0 12px 12px;
+}
+
+.update-toggle {
+	border-radius: 0;
+}
+
+.update-card {
+  border-radius: 12px;
+	box-shadow: 0 0 0 1px rgba(0,0,6,0.03), 0 1px 3px 1px rgba(0,0,6,0.07), 0 2px 6px 2px rgba(0,0,6,0.03);
 }
 
 .disable-adw-flow-box-styling {

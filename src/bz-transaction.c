@@ -490,6 +490,17 @@ bz_transaction_get_removals (BzTransaction *self)
   return G_LIST_MODEL (priv->removals);
 }
 
+GListModel *
+bz_transaction_get_trackers (BzTransaction *self)
+{
+  BzTransactionPrivate *priv = NULL;
+
+  g_return_val_if_fail (BZ_IS_TRANSACTION (self), NULL);
+
+  priv = bz_transaction_get_instance_private (self);
+  return G_LIST_MODEL (priv->trackers);
+}
+
 void
 bz_transaction_hold (BzTransaction *self)
 {

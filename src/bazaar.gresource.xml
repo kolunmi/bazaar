@@ -56,12 +56,12 @@
     <file preprocess="xml-stripblanks">bz-search-widget.ui</file>
     <file preprocess="xml-stripblanks">bz-section-view.ui</file>
     <file preprocess="xml-stripblanks">bz-stats-dialog.ui</file>
-    <file preprocess="xml-stripblanks">bz-transaction-view.ui</file>
+    <file preprocess="xml-stripblanks">bz-transaction-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-transaction-list-dialog.ui</file>
+    <file preprocess="xml-stripblanks">bz-updates-card.ui</file>
     <file preprocess="xml-stripblanks">bz-user-data-page.ui</file>
     <file preprocess="xml-stripblanks">bz-user-data-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-window.ui</file>
-    <file preprocess="xml-stripblanks">bz-view-switcher-button.ui</file>
     <file alias="shortcuts-dialog.ui" preprocess="xml-stripblanks">gtk/shortcuts-dialog.ui</file>
 
     <file preprocess="xml-stripblanks">icons/scalable/actions/app-installed-symbolic.svg</file>

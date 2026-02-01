@@ -1,4 +1,4 @@
-/* bz-transaction-view.h
+/* bz-transaction-tile.h
  *
  * Copyright 2025 Adam Masciola
  *
@@ -22,23 +22,24 @@
 
 #include <adwaita.h>
 
-#include "bz-transaction.h"
+#include "bz-transaction-entry-tracker.h"
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_TRANSACTION_VIEW (bz_transaction_view_get_type ())
-G_DECLARE_FINAL_TYPE (BzTransactionView, bz_transaction_view, BZ, TRANSACTION_VIEW, AdwBin)
+#define BZ_TYPE_TRANSACTION_TILE (bz_transaction_tile_get_type ())
 
-BzTransactionView *
-bz_transaction_view_new (void);
+G_DECLARE_FINAL_TYPE (BzTransactionTile, bz_transaction_tile, BZ, TRANSACTION_TILE, BzListTile)
 
-BzTransaction *
-bz_transaction_view_get_transaction (BzTransactionView *self);
+BzTransactionTile *
+bz_transaction_tile_new (void);
+
+BzTransactionEntryTracker *
+bz_transaction_tile_get_tracker (BzTransactionTile *self);
 
 void
-bz_transaction_view_set_transaction (BzTransactionView *self,
-                                     BzTransaction     *transaction);
+bz_transaction_tile_set_tracker (BzTransactionTile         *self,
+                                 BzTransactionEntryTracker *tracker);
 
 G_END_DECLS
 
-/* End of bz-transaction-view.h */
+/* End of bz-transaction-tile.h */
