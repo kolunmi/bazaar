@@ -65,11 +65,12 @@ src/bz-hardware-support-dialog.c
 src/bz-inhibited-scrollable.c
 src/bz-inspector.blp
 src/bz-inspector.c
-src/bz-installed-page.blp
-src/bz-installed-page.c
 src/bz-installed-tile.blp
+src/bz-installed-tile.c
 src/bz-io.c
 src/bz-lazy-async-texture-model.c
+src/bz-library-page.blp
+src/bz-library-page.c
 src/bz-license-dialog.blp
 src/bz-license-dialog.c
 src/bz-license-dialog.h
@@ -98,7 +99,6 @@ src/bz-search-widget.c
 src/bz-section-view.blp
 src/bz-section-view.c
 src/bz-serializable.c
-src/bz-share-list.blp
 src/bz-share-list.c
 src/bz-stats-dialog.blp
 src/bz-stats-dialog.c
