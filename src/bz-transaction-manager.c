@@ -335,6 +335,7 @@ bz_transaction_manager_class_init (BzTransactionManagerClass *klass)
           NULL, NULL,
           0.0, 1.0, 0.0,
           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
   props[PROP_INSTALL_TRACKERS] =
       g_param_spec_object (
           "install-trackers",

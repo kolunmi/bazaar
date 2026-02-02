@@ -156,13 +156,12 @@ static char *
 format_update_count (gpointer    object,
                      GListModel *updates)
 {
-  guint n_updates;
+  guint n_updates = 0;
 
   if (updates == NULL)
     return g_strdup ("");
 
   n_updates = g_list_model_get_n_items (updates);
-
   return g_strdup_printf (ngettext ("%u Available Update",
                                     "%u Available Updates",
                                     n_updates),
@@ -213,18 +212,18 @@ row_activated_fiber (GWeakRef *wr)
       if (entry == NULL)
         goto err;
 
-      g_object_ref (entry);
+      entry = g_object_ref (entry);
     }
   else
     goto err;
 
   g_signal_emit (self, signals[SIGNAL_SHOW], 0, entry);
-  return NULL;
+  return dex_future_new_true ();
 
 err:
   if (local_error != NULL)
     bz_show_error_for_widget (window, local_error->message);
-  return NULL;
+  return dex_future_new_for_error (g_steal_pointer (&local_error));
 }
 
 static void
