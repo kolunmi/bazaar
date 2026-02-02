@@ -1,4 +1,5 @@
 using Gtk 4.0;
+using Gio 2.0;
 using Adw 1;
 
 template $BzWindow: Adw.ApplicationWindow {
@@ -52,16 +53,20 @@ template $BzWindow: Adw.ApplicationWindow {
           styles [
             "caption-heading",
           ]
+
           label: "ID:";
         }
+
         Label debug_id_label {
           styles [
             "bz-monospace",
           ]
+
           label: bind full_view.entry_group as <$BzEntryGroup>.id as <string>;
           selectable: true;
           ellipsize: end;
         }
+
         Button {
           label: "Inspect UI Entry";
           clicked => $debug_id_inspect_cb(template);
@@ -79,6 +84,7 @@ template $BzWindow: Adw.ApplicationWindow {
         styles [
           "caption-heading",
         ]
+
         visible: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active as <bool>;
         label: bind $format_progress(template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.current-progress as <double>) as <string>;
       }
@@ -130,7 +136,10 @@ template $BzWindow: Adw.ApplicationWindow {
                           wrap: true;
                           justify: center;
                           margin-bottom: 24;
-                          styles ["title-3"]
+
+                          styles [
+                            "title-3",
+                          ]
                         }
                       };
                     }
@@ -139,7 +148,6 @@ template $BzWindow: Adw.ApplicationWindow {
                       name: "main";
 
                       child: Adw.ViewStack main_view_stack {
-
                         Adw.ViewStackPage {
                           name: "browse";
                           title: _("Curated");
@@ -170,6 +178,8 @@ template $BzWindow: Adw.ApplicationWindow {
                           // Translators: .
                           title: _("Library");
                           icon-name: "library-symbolic";
+                          badge-number: bind template.state as <$BzStateInfo>.available-updates as <Gio.ListStore>.n-items;
+                          needs-attention: bind template.state as <$BzStateInfo>.available-updates as <Gio.ListStore>.n-items;
 
                           child: $BzLibraryPage library_page {
                             state: bind template.state;
@@ -178,6 +188,7 @@ template $BzWindow: Adw.ApplicationWindow {
                             remove-addon => $remove_addon_cb(template);
                             install-addon => $install_addon_cb(template);
                             show-entry => $library_page_show_cb(template);
+                            update => $update_cb(template);
                           };
                         }
 
@@ -204,6 +215,7 @@ template $BzWindow: Adw.ApplicationWindow {
                       MenuButton {
                         visible: bind template.state as <$BzStateInfo>.auth-state as <$BzAuthState>.authenticated;
                         menu-model: account_menu;
+
                         styles [
                           "circular",
                           "flat",
@@ -216,57 +228,10 @@ template $BzWindow: Adw.ApplicationWindow {
                       }
 
                       [start]
-                      Overlay {
-                        visible: bind $invert_boolean($is_null(template.state as <$BzStateInfo>.available-updates) as <bool>) as <bool>;
-                        child: Button update_button {
-                          styles [
-                            "suggested-action",
-                          ]
-
-                          has-tooltip: true;
-                          tooltip-text: bind $update_amount_tooltip(template.state as <$BzStateInfo>.available-updates) as <string>;
-                          icon-name: "software-update-available-symbolic";
-
-                          clicked => $update_cb(template);
-                        };
-
-                        [overlay]
-                        Box {
-                          can-target: false;
-                          can-focus: false;
-                          margin-end: 2;
-                          margin-top: 3;
-                          halign: end;
-                          valign: start;
-
-                          styles [
-                            "updates-amount-border" ,
-                          ]
-
-                          Label {
-                            margin-top: 2;
-                            margin-bottom: 2;
-                            margin-start: 2;
-                            margin-end: 2;
-
-                            justify: center;
-                            width-request: 16;
-                            label: bind $list_length(template.state as <$BzStateInfo>.available-updates) as <string>;
-
-                            styles [
-                              "updates-amount",
-                            ]
-
-                          }
-                        }
-                      }
-
-                      [start]
                       Revealer {
                         transition-type: crossfade;
                         transition-duration: 750;
-                        reveal-child: bind $logical_or($invert_boolean($is_null(template.state as <$BzStateInfo>.background-task-label) as <bool>) as <bool>,
-                                                         status_popover.visible) as <bool>;
+                        reveal-child: bind $logical_or($invert_boolean($is_null(template.state as <$BzStateInfo>.background-task-label) as <bool>) as <bool>, status_popover.visible) as <bool>;
 
                         child: MenuButton {
                           styles [
@@ -277,6 +242,7 @@ template $BzWindow: Adw.ApplicationWindow {
                             Adw.Spinner {
                               visible: bind status_popover_label.visible;
                             }
+
                             Image {
                               visible: bind $invert_boolean(status_popover_label.visible) as <bool>;
                               icon-name: "check-plain-symbolic";
@@ -312,8 +278,9 @@ template $BzWindow: Adw.ApplicationWindow {
                       }
 
                       [title]
-                      $BzViewSwitcher {
+                      Adw.ViewSwitcher {
                         stack: main_view_stack;
+                        policy: wide;
                         sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.busy) as <bool>;
                       }
 
@@ -325,13 +292,35 @@ template $BzWindow: Adw.ApplicationWindow {
                         tooltip-text: _("Main Menu");
                         menu-model: primary_menu;
                       }
+
+                      [end]
+                      Revealer {
+                        transition-type: crossfade;
+                        reveal-child: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
+
+                        child: Button {
+                          styles [
+                            "flat",
+                          ]
+
+                          action-name: "window.open-library";
+                          has-tooltip: true;
+                          tooltip-text: _("Open App Library");
+
+                          child: $BzGlobalProgress {
+                            expand-size: 125;
+                            active: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
+                            pending: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.pending;
+                            fraction: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.current-progress;
+                            settings: bind template.state as <$BzStateInfo>.settings;
+                          };
+                        };
+                      }
                     }
 
                     Adw.Banner {
                       sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.syncing as <bool>) as <bool>;
-                      revealed: bind $logical_and($invert_boolean(template.state as <$BzStateInfo>.metered_connection as <bool>) as <bool>,
-                                                    $logical_and(template.state as <$BzStateInfo>.have_connection as <bool>,
-                                                    $invert_boolean(template.state as <$BzStateInfo>.online as <bool>) as <bool>) as <bool>) as <bool>;
+                      revealed: bind $logical_and($invert_boolean(template.state as <$BzStateInfo>.metered_connection as <bool>) as <bool>, $logical_and(template.state as <$BzStateInfo>.have_connection as <bool>, $invert_boolean(template.state as <$BzStateInfo>.online as <bool>) as <bool>) as <bool>) as <bool>;
                       title: _("You have a network connection but are viewing a cached version of Flathub");
                       button-label: _("Sync Manually");
                       button-clicked => $sync_cb(template);
@@ -366,17 +355,17 @@ template $BzWindow: Adw.ApplicationWindow {
           Adw.Breakpoint {
             condition ("max-width: 700px")
 
-        setters {
+            setters {
               top_header_bar.title-widget: null;
               toolbar_view.reveal-bottom-bars: true;
-        }
+            }
 
-        apply => $breakpoint_apply_cb(template);
-        unapply => $breakpoint_unapply_cb(template);
-      }
+            apply => $breakpoint_apply_cb(template);
+            unapply => $breakpoint_unapply_cb(template);
+          }
+        };
       };
     };
-  };
   };
 }
 
@@ -445,6 +434,7 @@ menu account_menu {
       action: "app.flathub-favorites";
     }
   }
+
   section {
     item {
       label: _("Log Out");

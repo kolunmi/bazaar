@@ -1,4 +1,4 @@
-/* bz-transaction-view.c
+/* bz-transaction-tile.c
  *
  * Copyright 2025 Adam Masciola
  *
@@ -24,24 +24,26 @@
 #include "bz-entry-group.h"
 #include "bz-entry.h"
 #include "bz-flatpak-entry.h"
+#include "bz-list-tile.h"
 #include "bz-state-info.h"
-#include "bz-transaction-view.h"
+#include "bz-template-callbacks.h"
+#include "bz-transaction-tile.h"
 #include "bz-window.h"
 
-struct _BzTransactionView
+struct _BzTransactionTile
 {
-  AdwBin parent_instance;
+  BzListTile parent_instance;
 
-  BzTransaction *transaction;
+  BzTransactionEntryTracker *tracker;
 };
 
-G_DEFINE_FINAL_TYPE (BzTransactionView, bz_transaction_view, ADW_TYPE_BIN);
+G_DEFINE_FINAL_TYPE (BzTransactionTile, bz_transaction_tile, BZ_TYPE_LIST_TILE);
 
 enum
 {
   PROP_0,
 
-  PROP_TRANSACTION,
+  PROP_TRACKER,
 
   LAST_PROP
 };
@@ -52,27 +54,27 @@ resolve_group_from_entry (BzEntry  *entry,
                           BzWindow *window);
 
 static void
-bz_transaction_view_dispose (GObject *object)
+bz_transaction_tile_dispose (GObject *object)
 {
-  BzTransactionView *self = BZ_TRANSACTION_VIEW (object);
+  BzTransactionTile *self = BZ_TRANSACTION_TILE (object);
 
-  g_clear_pointer (&self->transaction, g_object_unref);
+  g_clear_pointer (&self->tracker, g_object_unref);
 
-  G_OBJECT_CLASS (bz_transaction_view_parent_class)->dispose (object);
+  G_OBJECT_CLASS (bz_transaction_tile_parent_class)->dispose (object);
 }
 
 static void
-bz_transaction_view_get_property (GObject    *object,
+bz_transaction_tile_get_property (GObject    *object,
                                   guint       prop_id,
                                   GValue     *value,
                                   GParamSpec *pspec)
 {
-  BzTransactionView *self = BZ_TRANSACTION_VIEW (object);
+  BzTransactionTile *self = BZ_TRANSACTION_TILE (object);
 
   switch (prop_id)
     {
-    case PROP_TRANSACTION:
-      g_value_set_object (value, bz_transaction_view_get_transaction (self));
+    case PROP_TRACKER:
+      g_value_set_object (value, bz_transaction_tile_get_tracker (self));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -80,59 +82,31 @@ bz_transaction_view_get_property (GObject    *object,
 }
 
 static void
-bz_transaction_view_set_property (GObject      *object,
+bz_transaction_tile_set_property (GObject      *object,
                                   guint         prop_id,
                                   const GValue *value,
                                   GParamSpec   *pspec)
 {
-  BzTransactionView *self = BZ_TRANSACTION_VIEW (object);
+  BzTransactionTile *self = BZ_TRANSACTION_TILE (object);
 
   switch (prop_id)
     {
-    case PROP_TRANSACTION:
-      bz_transaction_view_set_transaction (self, g_value_get_object (value));
+    case PROP_TRACKER:
+      bz_transaction_tile_set_tracker (self, g_value_get_object (value));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
 }
 
-static gboolean
-invert_boolean (gpointer object,
-                gboolean value)
-{
-  return !value;
-}
-
-static gboolean
-is_null (gpointer object,
-         GObject *value)
-{
-  return value == NULL;
-}
-
 static char *
-format_download_size (gpointer object,
-                      guint64  value)
-{
-  return g_format_size (value);
-}
-
-static char *
-format_installed_size (gpointer object,
-                       guint64  value)
-{
-  return g_format_size (value);
-}
-
-static char *
-format_bytes_transferred (gpointer object,
-                          guint64  value)
+format_removal_size (gpointer object,
+                     guint64  value)
 {
   g_autofree char *size = NULL;
 
   size = g_format_size (value);
-  return g_strdup_printf (_ ("Transferred %s so far"), size);
+  return g_strdup_printf (_ ("%s Freed"), size);
 }
 
 static char *
@@ -273,7 +247,7 @@ is_both (gpointer object,
 }
 
 static GdkPaintable *
-get_main_icon (GtkListItem               *list_item,
+get_main_icon (gpointer                   object,
                BzTransactionEntryTracker *tracker)
 {
   BzEntry      *entry          = NULL;
@@ -294,7 +268,7 @@ get_main_icon (GtkListItem               *list_item,
       BzWindow *window               = NULL;
       g_autoptr (BzEntryGroup) group = NULL;
 
-      window = (BzWindow *) gtk_widget_get_ancestor (gtk_list_item_get_child (list_item), BZ_TYPE_WINDOW);
+      window = (BzWindow *) gtk_widget_get_ancestor (object, BZ_TYPE_WINDOW);
       if (window == NULL)
         goto return_generic;
 
@@ -335,14 +309,6 @@ is_entry_kind (gpointer                   object,
   return bz_entry_is_of_kinds (entry, kind);
 }
 
-/* Sucks but we can't rely on magic numbers in the blueprint */
-static gboolean
-is_entry_application (gpointer                   object,
-                      BzTransactionEntryTracker *tracker)
-{
-  return is_entry_kind (object, tracker, BZ_ENTRY_KIND_APPLICATION);
-}
-
 static gboolean
 is_entry_runtime (gpointer                   object,
                   BzTransactionEntryTracker *tracker)
@@ -358,62 +324,34 @@ is_entry_addon (gpointer                   object,
 }
 
 static void
-activate (BzTransactionView *self,
-          guint              position,
-          GtkListView       *list_view)
-{
-  g_autoptr (GListModel) model                  = NULL;
-  g_autoptr (BzTransactionEntryTracker) tracker = NULL;
-  BzEntry  *entry                               = NULL;
-  BzWindow *window                              = NULL;
-  g_autoptr (BzEntryGroup) group                = NULL;
-
-  g_object_get (self->transaction, "trackers", &model, NULL);
-  tracker = g_list_model_get_item (model, position);
-  entry   = bz_transaction_entry_tracker_get_entry (tracker);
-
-  window = (BzWindow *) gtk_widget_get_ancestor (GTK_WIDGET (self), BZ_TYPE_WINDOW);
-  if (window == NULL)
-    return;
-
-  group = resolve_group_from_entry (entry, window);
-  if (group == NULL)
-    return;
-
-  bz_window_show_group (window, group);
-}
-
-static void
-bz_transaction_view_class_init (BzTransactionViewClass *klass)
+bz_transaction_tile_class_init (BzTransactionTileClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
-  object_class->set_property = bz_transaction_view_set_property;
-  object_class->get_property = bz_transaction_view_get_property;
-  object_class->dispose      = bz_transaction_view_dispose;
+  object_class->set_property = bz_transaction_tile_set_property;
+  object_class->get_property = bz_transaction_tile_get_property;
+  object_class->dispose      = bz_transaction_tile_dispose;
 
-  props[PROP_TRANSACTION] =
+  props[PROP_TRACKER] =
       g_param_spec_object (
-          "transaction",
+          "tracker",
           NULL, NULL,
-          BZ_TYPE_TRANSACTION,
+          BZ_TYPE_TRANSACTION_ENTRY_TRACKER,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
-  gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-transaction-view.ui");
-  gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
-  gtk_widget_class_bind_template_callback (widget_class, is_null);
-  gtk_widget_class_bind_template_callback (widget_class, format_download_size);
-  gtk_widget_class_bind_template_callback (widget_class, format_installed_size);
-  gtk_widget_class_bind_template_callback (widget_class, format_bytes_transferred);
+  g_type_ensure (BZ_TYPE_LIST_TILE);
+
+  gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-transaction-tile.ui");
+  bz_widget_class_bind_all_util_callbacks (widget_class);
+
+  gtk_widget_class_bind_template_callback (widget_class, format_removal_size);
   gtk_widget_class_bind_template_callback (widget_class, format_download_progress);
   gtk_widget_class_bind_template_callback (widget_class, get_main_icon);
-  gtk_widget_class_bind_template_callback (widget_class, is_entry_application);
   gtk_widget_class_bind_template_callback (widget_class, is_entry_runtime);
   gtk_widget_class_bind_template_callback (widget_class, is_entry_addon);
-  gtk_widget_class_bind_template_callback (widget_class, activate);
   gtk_widget_class_bind_template_callback (widget_class, create_app_id_filter);
   gtk_widget_class_bind_template_callback (widget_class, is_transaction_tracker_install);
   gtk_widget_class_bind_template_callback (widget_class, is_transaction_tracker_update);
@@ -423,38 +361,40 @@ bz_transaction_view_class_init (BzTransactionViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, is_ongoing);
   gtk_widget_class_bind_template_callback (widget_class, is_completed);
   gtk_widget_class_bind_template_callback (widget_class, is_both);
+
+  gtk_widget_class_set_accessible_role (widget_class, GTK_ACCESSIBLE_ROLE_BUTTON);
 }
 
 static void
-bz_transaction_view_init (BzTransactionView *self)
+bz_transaction_tile_init (BzTransactionTile *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
 }
 
-BzTransactionView *
-bz_transaction_view_new (void)
+BzTransactionTile *
+bz_transaction_tile_new (void)
 {
-  return g_object_new (BZ_TYPE_TRANSACTION_VIEW, NULL);
+  return g_object_new (BZ_TYPE_TRANSACTION_TILE, NULL);
 }
 
-BzTransaction *
-bz_transaction_view_get_transaction (BzTransactionView *self)
+BzTransactionEntryTracker *
+bz_transaction_tile_get_tracker (BzTransactionTile *self)
 {
-  g_return_val_if_fail (BZ_IS_TRANSACTION_VIEW (self), NULL);
-  return self->transaction;
+  g_return_val_if_fail (BZ_IS_TRANSACTION_TILE (self), NULL);
+  return self->tracker;
 }
 
 void
-bz_transaction_view_set_transaction (BzTransactionView *self,
-                                     BzTransaction     *transaction)
+bz_transaction_tile_set_tracker (BzTransactionTile         *self,
+                                 BzTransactionEntryTracker *tracker)
 {
-  g_return_if_fail (BZ_IS_TRANSACTION_VIEW (self));
+  g_return_if_fail (BZ_IS_TRANSACTION_TILE (self));
 
-  g_clear_pointer (&self->transaction, g_object_unref);
-  if (transaction != NULL)
-    self->transaction = g_object_ref (transaction);
+  g_clear_pointer (&self->tracker, g_object_unref);
+  if (tracker != NULL)
+    self->tracker = g_object_ref (tracker);
 
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TRANSACTION]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TRACKER]);
 }
 
 static BzEntryGroup *
@@ -507,4 +447,4 @@ resolve_group_from_entry (BzEntry  *entry,
   return g_steal_pointer (&group);
 }
 
-/* End of bz-transaction-view.c */
+/* End of bz-transaction-tile.c */

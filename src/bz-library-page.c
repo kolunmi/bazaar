@@ -27,6 +27,8 @@
 #include "bz-library-page.h"
 #include "bz-section-view.h"
 #include "bz-template-callbacks.h"
+#include "bz-transaction-tile.h"
+#include "bz-updates-card.h"
 #include "bz-util.h"
 
 struct _BzLibraryPage
@@ -62,6 +64,7 @@ enum
   SIGNAL_REMOVE_ADDON,
   SIGNAL_INSTALL_ADDON,
   SIGNAL_SHOW,
+  SIGNAL_UPDATE,
 
   LAST_SIGNAL,
 };
@@ -139,13 +142,6 @@ bz_library_page_set_property (GObject      *object,
     }
 }
 
-static gboolean
-is_zero (gpointer object,
-         int      value)
-{
-  return value == 0;
-}
-
 static char *
 no_results_found_subtitle (gpointer    object,
                            const char *search_text)
@@ -156,15 +152,31 @@ no_results_found_subtitle (gpointer    object,
   return g_strdup_printf (_ ("No matches found for \"%s\" in the list of installed apps"), search_text);
 }
 
+static char *
+format_update_count (gpointer    object,
+                     GListModel *updates)
+{
+  guint n_updates = 0;
+
+  if (updates == NULL)
+    return g_strdup ("");
+
+  n_updates = g_list_model_get_n_items (updates);
+  return g_strdup_printf (ngettext ("%u Available Update",
+                                    "%u Available Updates",
+                                    n_updates),
+                          n_updates);
+}
+
 static DexFuture *
 row_activated_fiber (GWeakRef *wr)
 {
-  g_autoptr (GError) local_error   = NULL;
-  g_autoptr (BzInstalledTile) tile = NULL;
-  BzLibraryPage *self              = NULL;
-  GtkWidget     *window            = NULL;
-  BzEntryGroup  *group             = NULL;
-  g_autoptr (BzEntry) entry        = NULL;
+  g_autoptr (GError) local_error = NULL;
+  g_autoptr (BzListTile) tile    = NULL;
+  BzLibraryPage *self            = NULL;
+  GtkWidget     *window          = NULL;
+  BzEntryGroup  *group           = NULL;
+  g_autoptr (BzEntry) entry      = NULL;
 
   bz_weak_get_or_return_reject (tile, wr);
 
@@ -178,40 +190,52 @@ row_activated_fiber (GWeakRef *wr)
   if (window == NULL)
     goto err;
 
-  group = bz_installed_tile_get_group (tile);
-  if (group == NULL)
-    goto err;
+  if (BZ_IS_INSTALLED_TILE (tile))
+    {
+      group = bz_installed_tile_get_group (BZ_INSTALLED_TILE (tile));
+      if (group == NULL)
+        goto err;
 
-  entry = bz_entry_group_find_entry (group, NULL, window, &local_error);
-  if (entry == NULL)
+      entry = bz_entry_group_find_entry (group, NULL, window, &local_error);
+      if (entry == NULL)
+        goto err;
+    }
+  else if (BZ_IS_TRANSACTION_TILE (tile))
+    {
+      BzTransactionEntryTracker *tracker = NULL;
+
+      tracker = bz_transaction_tile_get_tracker (BZ_TRANSACTION_TILE (tile));
+      if (tracker == NULL)
+        goto err;
+
+      entry = bz_transaction_entry_tracker_get_entry (tracker);
+      if (entry == NULL)
+        goto err;
+
+      entry = g_object_ref (entry);
+    }
+  else
     goto err;
 
   g_signal_emit (self, signals[SIGNAL_SHOW], 0, entry);
-  return NULL;
+  return dex_future_new_true ();
 
 err:
   if (local_error != NULL)
     bz_show_error_for_widget (window, local_error->message);
-  return NULL;
+  return dex_future_new_for_error (g_steal_pointer (&local_error));
 }
 
 static void
-tile_activated_cb (BzInstalledTile *tile)
+tile_activated_cb (BzListTile *tile)
 {
-  g_assert (BZ_IS_INSTALLED_TILE (tile));
+  g_assert (BZ_IS_LIST_TILE (tile));
 
   dex_future_disown (dex_scheduler_spawn (
       dex_scheduler_get_default (),
       bz_get_dex_stack_size (),
       (DexFiberFunc) row_activated_fiber,
       bz_track_weak (tile), bz_weak_release));
-}
-
-static gboolean
-is_valid_string (gpointer    object,
-                 const char *value)
-{
-  return value != NULL && *value != '\0';
 }
 
 static void
@@ -229,6 +253,22 @@ reset_search_cb (BzLibraryPage *self,
                  GtkButton     *button)
 {
   gtk_text_set_buffer (self->search_bar, NULL);
+}
+
+static void
+clear_tasks_cb (BzLibraryPage *self)
+{
+  BzTransactionManager *manager = NULL;
+  manager                       = bz_state_info_get_transaction_manager (self->state);
+  bz_transaction_manager_clear_finished (manager);
+}
+
+static void
+updates_card_update_cb (BzLibraryPage *self,
+                        GListModel    *entries,
+                        BzUpdatesCard *card)
+{
+  g_signal_emit (self, signals[SIGNAL_UPDATE], 0, entries);
 }
 
 static void
@@ -317,9 +357,26 @@ bz_library_page_class_init (BzLibraryPageClass *klass)
       G_TYPE_FROM_CLASS (klass),
       g_cclosure_marshal_VOID__OBJECTv);
 
+  signals[SIGNAL_UPDATE] =
+      g_signal_new (
+          "update",
+          G_OBJECT_CLASS_TYPE (klass),
+          G_SIGNAL_RUN_FIRST,
+          0,
+          NULL, NULL,
+          g_cclosure_marshal_VOID__OBJECT,
+          G_TYPE_NONE, 1,
+          G_TYPE_LIST_MODEL);
+  g_signal_set_va_marshaller (
+      signals[SIGNAL_UPDATE],
+      G_TYPE_FROM_CLASS (klass),
+      g_cclosure_marshal_VOID__OBJECTv);
+
   g_type_ensure (BZ_TYPE_SECTION_VIEW);
   g_type_ensure (BZ_TYPE_ENTRY_GROUP);
   g_type_ensure (BZ_TYPE_INSTALLED_TILE);
+  g_type_ensure (BZ_TYPE_TRANSACTION_TILE);
+  g_type_ensure (BZ_TYPE_UPDATES_CARD);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-library-page.ui");
   bz_widget_class_bind_all_util_callbacks (widget_class);
@@ -329,9 +386,12 @@ bz_library_page_class_init (BzLibraryPageClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, filter);
   gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, list_view);
   gtk_widget_class_bind_template_callback (widget_class, no_results_found_subtitle);
+  gtk_widget_class_bind_template_callback (widget_class, format_update_count);
   gtk_widget_class_bind_template_callback (widget_class, tile_activated_cb);
   gtk_widget_class_bind_template_callback (widget_class, reset_search_cb);
   gtk_widget_class_bind_template_callback (widget_class, search_text_changed);
+  gtk_widget_class_bind_template_callback (widget_class, clear_tasks_cb);
+  gtk_widget_class_bind_template_callback (widget_class, updates_card_update_cb);
 }
 
 static void

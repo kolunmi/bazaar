@@ -270,10 +270,45 @@ bz_releases_dialog_init (BzReleasesDialog *self)
   gtk_widget_init_template (GTK_WIDGET (self));
 }
 
-static GtkWidget *
-bz_releases_dialog_new (void)
+GtkWidget *
+bz_releases_dialog_new (GListModel *version_history,
+                        GListModel *installed_versions)
 {
-  return g_object_new (bz_releases_dialog_get_type (), NULL);
+  BzReleasesDialog *dialog  = NULL;
+  guint             n_items = 0;
+
+  dialog = g_object_new (bz_releases_dialog_get_type (), NULL);
+
+  if (installed_versions)
+    dialog->installed_versions = g_object_ref (installed_versions);
+
+  if (version_history == NULL)
+    return GTK_WIDGET (dialog);
+
+  n_items = g_list_model_get_n_items (version_history);
+  for (guint i = 0; i < n_items; i++)
+    {
+      g_autoptr (BzRelease) release = NULL;
+      const char *version           = NULL;
+      const char *description       = NULL;
+      const char *url               = NULL;
+      guint64     timestamp         = 0;
+      GtkWidget  *row               = NULL;
+
+      release = g_list_model_get_item (version_history, i);
+      if (release == NULL)
+        continue;
+
+      version     = bz_release_get_version (release);
+      description = bz_release_get_description (release);
+      url         = bz_release_get_url (release);
+      timestamp   = bz_release_get_timestamp (release);
+
+      row = create_release_row (version, description, timestamp, url, FALSE, dialog->installed_versions);
+      gtk_list_box_append (dialog->releases_box, row);
+    }
+
+  return GTK_WIDGET (dialog);
 }
 
 static void
@@ -385,9 +420,8 @@ static void
 show_all_releases_cb (AdwButtonRow   *button,
                       BzReleasesList *self)
 {
-  GtkWidget        *dialog          = NULL;
-  GtkRoot          *root            = NULL;
-  BzReleasesDialog *releases_dialog = NULL;
+  GtkWidget *dialog = NULL;
+  GtkRoot   *root   = NULL;
 
   g_return_if_fail (BZ_IS_RELEASES_LIST (self));
 
@@ -395,9 +429,7 @@ show_all_releases_cb (AdwButtonRow   *button,
   if (root == NULL)
     return;
 
-  dialog          = bz_releases_dialog_new ();
-  releases_dialog = (BzReleasesDialog *) dialog;
-  bz_releases_dialog_set_version_history (releases_dialog, self->version_history, self->installed_versions);
+  dialog = bz_releases_dialog_new (self->version_history, self->installed_versions);
   adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (root));
 }
 
