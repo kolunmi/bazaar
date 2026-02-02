@@ -470,6 +470,17 @@ action_user_data (GtkWidget  *widget,
 }
 
 static void
+action_open_library (GtkWidget  *widget,
+                     const char *action_name,
+                     GVariant   *parameter)
+{
+  BzWindow *self = BZ_WINDOW (widget);
+
+  adw_navigation_view_pop_to_tag (self->navigation_view, "main");
+  adw_view_stack_set_visible_child_name (self->main_view_stack, "installed");
+}
+
+static void
 debug_id_inspect_cb (BzWindow  *self,
                      GtkButton *button)
 {
@@ -562,6 +573,7 @@ bz_window_class_init (BzWindowClass *klass)
 
   gtk_widget_class_install_action (widget_class, "escape", NULL, action_escape);
   gtk_widget_class_install_action (widget_class, "window.user-data", NULL, action_user_data);
+  gtk_widget_class_install_action (widget_class, "window.open-library", NULL, action_open_library);
 }
 
 static gboolean
