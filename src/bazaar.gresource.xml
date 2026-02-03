@@ -83,6 +83,7 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/drive-harddisk-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/earth-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/edit-clear-all-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/execute-to-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/external-link-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/eye-outline-filled-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/flathub-symbolic.svg</file>

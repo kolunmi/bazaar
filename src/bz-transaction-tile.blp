@@ -228,24 +228,44 @@ template $BzTransactionTile: $BzListTile {
           }
         }
 
-        ToggleButton toggle {
-          sensitive: bind $invert_boolean($is_empty(template.tracker as <$BzTransactionEntryTracker>.finished-ops) as <bool>) as <bool>;
-          child: Image {
-            pixel-size: 14;
-            icon-name: "go-next-symbolic";
+        Box {
+          Button {
+            visible: bind $is_both(
+                            $is_both($is_entry_application(template.tracker as <$BzTransactionEntryTracker>) as <bool>,$is_completed(template.tracker as <$BzTransactionEntryTracker>.status as <$BzTransactionEntryStatus>) as <bool>) as <bool>,
+                            $is_transaction_tracker_install(template.tracker as <$BzTransactionEntryTracker>) as <bool>
+                        ) as <bool>;
+
+            icon-name: "execute-to-symbolic";
+            has-tooltip: true;
+            valign: center;
+            tooltip-text: _("Open App");
+            clicked => $run_cb(template);
 
             styles [
-              "accent",
+              "flat",
             ]
-          };
+          }
 
-          valign: center;
+          ToggleButton toggle {
+            sensitive: bind $invert_boolean($is_empty(template.tracker as <$BzTransactionEntryTracker>.finished-ops) as <bool>) as <bool>;
 
-          styles [
-            "flat",
-            "circular",
-            "ops-toggle",
-          ]
+            child: Image {
+              pixel-size: 14;
+              icon-name: "go-next-symbolic";
+
+              styles [
+                "accent",
+              ]
+            };
+
+            valign: center;
+
+            styles [
+              "flat",
+              "circular",
+              "ops-toggle",
+            ]
+          }
         }
       }
 

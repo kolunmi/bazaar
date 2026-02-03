@@ -66,86 +66,92 @@ template $BzUpdatesCard: Adw.Bin {
         "update-list",
       ]
 
-      child: ListView {
-        styles [
-          "navigation-sidebar",
-          "operations",
-          "installed-list-view",
-        ]
+      child: Box {
+        orientation: vertical;
 
-        model: NoSelection {
-          model: bind template.state as <$BzStateInfo>.available-updates;
-        };
+        Separator {}
 
-        factory: BuilderListItemFactory {
-          template ListItem {
-            activatable: false;
+        ListView {
+          styles [
+            "navigation-sidebar",
+            "operations",
+            "installed-list-view",
+          ]
 
-            child: Box {
-              orientation: horizontal;
-              spacing: 10;
-              margin-end: 8;
-              margin-start: 4;
-              margin-top: 2;
-              margin-bottom: 2;
+          model: NoSelection {
+            model: bind template.state as <$BzStateInfo>.available-updates;
+          };
 
-              Image {
-                paintable: bind template.item as <$BzEntry>.icon-paintable;
-                pixel-size: 48;
-                valign: center;
+          factory: BuilderListItemFactory {
+            template ListItem {
+              activatable: false;
 
-                styles [
-                  "icon-dropshadow",
-                ]
-              }
+              child: Box {
+                orientation: horizontal;
+                spacing: 10;
+                margin-end: 8;
+                margin-start: 4;
+                margin-top: 2;
+                margin-bottom: 2;
 
-              Box {
-                spacing: 2;
-                hexpand: true;
-                valign: center;
-                orientation: vertical;
-
-                Label {
-                  label: bind template.item as <$BzEntry>.title;
-                  xalign: 0;
-                  ellipsize: end;
-                }
-
-                Label version_label {
-                  label: bind $format_version_change(template.item as <$BzEntry>.version-history, template.item as <$BzEntry>.installed-version) as <string>;
-                  visible: bind $invert_boolean($is_empty_string(version_label.label) as <bool>) as <bool>;
-                  xalign: 0;
-                  ellipsize: end;
+                Image {
+                  paintable: bind template.item as <$BzEntry>.icon-paintable;
+                  pixel-size: 48;
+                  valign: center;
 
                   styles [
-                    "dimmed",
-                    "caption",
-                    "installed-size",
+                    "icon-dropshadow",
                   ]
                 }
-              }
 
-              Button {
-                icon-name: "view-list-bullet-symbolic";
-                valign: center;
-                has-tooltip: true;
-                tooltip-text: _("Version History");
-                visible: bind $invert_boolean($is_null(template.item as <$BzEntry>.version-history) as <bool>) as <bool>;
-                clicked => $show_version_history_cb(template);
+                Box {
+                  spacing: 2;
+                  hexpand: true;
+                  valign: center;
+                  orientation: vertical;
 
-                styles [
-                  "flat",
-                ]
-              }
+                  Label {
+                    label: bind template.item as <$BzEntry>.title;
+                    xalign: 0;
+                    ellipsize: end;
+                  }
 
-              Button {
-                valign: center;
-                label: "Update";
-                clicked => $update_entry_cb(template);
-              }
-            };
-          }
-        };
+                  Label version_label {
+                    label: bind $format_version_change(template.item as <$BzEntry>.version-history, template.item as <$BzEntry>.installed-version) as <string>;
+                    visible: bind $invert_boolean($is_empty_string(version_label.label) as <bool>) as <bool>;
+                    xalign: 0;
+                    ellipsize: end;
+
+                    styles [
+                      "dimmed",
+                      "caption",
+                      "installed-size",
+                    ]
+                  }
+                }
+
+                Button {
+                  icon-name: "view-list-bullet-symbolic";
+                  valign: center;
+                  has-tooltip: true;
+                  tooltip-text: _("Version History");
+                  visible: bind $invert_boolean($is_null(template.item as <$BzEntry>.version-history) as <bool>) as <bool>;
+                  clicked => $show_version_history_cb(template);
+
+                  styles [
+                    "flat",
+                  ]
+                }
+
+                Button {
+                  valign: center;
+                  label: "Update";
+                  clicked => $update_entry_cb(template);
+                }
+              };
+            }
+          };
+        }
       };
     }
   };
