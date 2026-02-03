@@ -23,6 +23,7 @@
 #include "bz-application-map-factory.h"
 #include "bz-entry-group.h"
 #include "bz-entry.h"
+#include "bz-error.h"
 #include "bz-flatpak-entry.h"
 #include "bz-list-tile.h"
 #include "bz-state-info.h"
@@ -310,6 +311,13 @@ is_entry_kind (gpointer                   object,
 }
 
 static gboolean
+is_entry_application (gpointer                   object,
+                      BzTransactionEntryTracker *tracker)
+{
+  return is_entry_kind (object, tracker, BZ_ENTRY_KIND_APPLICATION);
+}
+
+static gboolean
 is_entry_runtime (gpointer                   object,
                   BzTransactionEntryTracker *tracker)
 {
@@ -321,6 +329,46 @@ is_entry_addon (gpointer                   object,
                 BzTransactionEntryTracker *tracker)
 {
   return is_entry_kind (object, tracker, BZ_ENTRY_KIND_ADDON);
+}
+
+static void
+run_cb (BzTransactionTile *self,
+        GtkButton         *button)
+{
+  BzTransactionEntryTracker *tracker = NULL;
+  BzEntry                   *entry   = NULL;
+
+  tracker = bz_transaction_tile_get_tracker (self);
+  if (tracker == NULL)
+    return;
+
+  entry = bz_transaction_entry_tracker_get_entry (tracker);
+  if (entry == NULL || !BZ_IS_FLATPAK_ENTRY (entry))
+    return;
+
+  if (bz_entry_is_installed (entry))
+    {
+      g_autoptr (GError) local_error = NULL;
+      gboolean     result            = FALSE;
+      BzWindow    *window            = NULL;
+      BzStateInfo *state             = NULL;
+
+      window = (BzWindow *) gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_WINDOW);
+      if (window == NULL)
+        return;
+
+      state = bz_window_get_state_info (window);
+      if (state == NULL)
+        return;
+
+      result = bz_flatpak_entry_launch (
+          BZ_FLATPAK_ENTRY (entry),
+          BZ_FLATPAK_INSTANCE (bz_state_info_get_backend (state)),
+          &local_error);
+
+      if (!result)
+        bz_show_error_for_widget (GTK_WIDGET (window), local_error->message);
+    }
 }
 
 static void
@@ -350,6 +398,7 @@ bz_transaction_tile_class_init (BzTransactionTileClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, format_removal_size);
   gtk_widget_class_bind_template_callback (widget_class, format_download_progress);
   gtk_widget_class_bind_template_callback (widget_class, get_main_icon);
+  gtk_widget_class_bind_template_callback (widget_class, is_entry_application);
   gtk_widget_class_bind_template_callback (widget_class, is_entry_runtime);
   gtk_widget_class_bind_template_callback (widget_class, is_entry_addon);
   gtk_widget_class_bind_template_callback (widget_class, create_app_id_filter);
@@ -361,6 +410,7 @@ bz_transaction_tile_class_init (BzTransactionTileClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, is_ongoing);
   gtk_widget_class_bind_template_callback (widget_class, is_completed);
   gtk_widget_class_bind_template_callback (widget_class, is_both);
+  gtk_widget_class_bind_template_callback (widget_class, run_cb);
 
   gtk_widget_class_set_accessible_role (widget_class, GTK_ACCESSIBLE_ROLE_BUTTON);
 }
