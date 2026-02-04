@@ -97,6 +97,22 @@ donate_clicked (BzDonationsDialog *self,
 }
 
 static void
+banner_disable_toggled (BzDonationsDialog *self,
+                        GtkCheckButton    *button)
+{
+  gboolean   disable  = FALSE;
+  GSettings *settings = NULL;
+
+  if (self->state == NULL)
+    return;
+
+  disable = gtk_check_button_get_active (button);
+
+  settings = bz_state_info_get_settings (self->state);
+  g_settings_set_boolean (settings, "disable-donations-banner", disable);
+}
+
+static void
 bz_donations_dialog_class_init (BzDonationsDialogClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
@@ -118,6 +134,7 @@ bz_donations_dialog_class_init (BzDonationsDialogClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-donations-dialog.ui");
   bz_widget_class_bind_all_util_callbacks (widget_class);
   gtk_widget_class_bind_template_callback (widget_class, donate_clicked);
+  gtk_widget_class_bind_template_callback (widget_class, banner_disable_toggled);
 }
 
 static void

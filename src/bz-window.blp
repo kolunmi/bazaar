@@ -210,6 +210,17 @@ template $BzWindow: Adw.ApplicationWindow {
                   Box {
                     orientation: vertical;
 
+                    Adw.Banner {
+                      styles [
+                        "bz-donations-banner",
+                      ]
+
+                      revealed: bind $invert_boolean(template.state as <$BzStateInfo>.donation-prompt-dismissed as <bool>) as <bool>;
+                      title: _("Support the Future of Linux App Distribution");
+                      button-label: _("See More");
+                      action-name: "app.donate";
+                    }
+
                     Adw.HeaderBar top_header_bar {
                       [start]
                       MenuButton {

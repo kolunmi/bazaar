@@ -591,7 +591,10 @@ bz_application_donate_action (GSimpleAction *action,
     window = new_window (self);
 
   dialog = bz_donations_dialog_new ();
+  bz_donations_dialog_set_state (BZ_DONATIONS_DIALOG (dialog), self->state);
   adw_dialog_present (dialog, GTK_WIDGET (window));
+
+  bz_state_info_set_donation_prompt_dismissed (self->state, TRUE);
 }
 
 static void
@@ -2605,6 +2608,10 @@ init_service_struct (BzApplication *self,
   g_assert (app_id != NULL);
   g_debug ("Constructing gsettings for %s ...", app_id);
   self->settings = g_settings_new (app_id);
+
+  bz_state_info_set_donation_prompt_dismissed (
+      self->state,
+      g_settings_get_boolean (self->settings, "disable-donations-banner"));
 
   bz_state_info_set_hide_eol (
       self->state,

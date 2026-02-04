@@ -12,6 +12,10 @@
     color: white;
 }
 
+.bz-donations-banner {
+    --banner-color: #159eff;
+}
+
 .updates-amount {
 	background-color: white;
 	color: var(--accent-bg-color);

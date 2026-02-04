@@ -64,5 +64,9 @@
       <summary>Saved Window Dimensions</summary>
       <description>The window dimensions to be used by the next Bazaar window</description>
     </key>
+    <key name="disable-donations-banner" type="b">
+      <default>false</default>
+      <summary>Disable the donations banner on startup</summary>
+    </key>
   </schema>
 </schemalist>
