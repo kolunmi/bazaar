@@ -123,60 +123,6 @@ format_download_progress (gpointer object,
 }
 
 static gboolean
-filter_finished_ops_by_app_id (gpointer item,
-                               gpointer user_data)
-{
-  BzTransactionTask             *task     = BZ_TRANSACTION_TASK (item);
-  BzTransactionEntryTracker     *tracker  = BZ_TRANSACTION_ENTRY_TRACKER (user_data);
-  BzEntry                       *entry    = NULL;
-  const char                    *entry_id = NULL;
-  BzBackendTransactionOpPayload *op       = NULL;
-  const char                    *op_name  = NULL;
-  const char                    *error    = NULL;
-
-  if (task == NULL || tracker == NULL)
-    return TRUE;
-
-  error = bz_transaction_task_get_error (task);
-  if (error != NULL)
-    return TRUE;
-
-  entry = bz_transaction_entry_tracker_get_entry (tracker);
-  if (entry == NULL)
-    return TRUE;
-
-  entry_id = bz_entry_get_id (entry);
-  if (entry_id == NULL)
-    return TRUE;
-
-  op = bz_transaction_task_get_op (task);
-  if (op == NULL)
-    return TRUE;
-
-  op_name = bz_backend_transaction_op_payload_get_name (op);
-  if (op_name == NULL)
-    return TRUE;
-
-  return strstr (op_name, entry_id) == NULL;
-}
-
-static GtkFilter *
-create_app_id_filter (gpointer                   object,
-                      BzTransactionEntryTracker *tracker)
-{
-  GtkCustomFilter *filter = NULL;
-
-  if (tracker == NULL)
-    return NULL;
-
-  filter = gtk_custom_filter_new (filter_finished_ops_by_app_id,
-                                  g_object_ref (tracker),
-                                  g_object_unref);
-
-  return GTK_FILTER (filter);
-}
-
-static gboolean
 is_transaction_type (gpointer                   object,
                      BzTransactionEntryTracker *tracker,
                      int                        type)
@@ -401,7 +347,6 @@ bz_transaction_tile_class_init (BzTransactionTileClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, is_entry_application);
   gtk_widget_class_bind_template_callback (widget_class, is_entry_runtime);
   gtk_widget_class_bind_template_callback (widget_class, is_entry_addon);
-  gtk_widget_class_bind_template_callback (widget_class, create_app_id_filter);
   gtk_widget_class_bind_template_callback (widget_class, is_transaction_tracker_install);
   gtk_widget_class_bind_template_callback (widget_class, is_transaction_tracker_update);
   gtk_widget_class_bind_template_callback (widget_class, is_transaction_tracker_removal);

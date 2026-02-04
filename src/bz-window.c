@@ -294,7 +294,6 @@ update_cb (BzWindow      *self,
     return;
 
   updates_buf = g_malloc_n (n_updates, sizeof (*updates_buf));
-
   for (guint i = 0; i < n_updates; i++)
     updates_buf[i] = g_list_model_get_item (entries, i);
 
@@ -302,13 +301,12 @@ update_cb (BzWindow      *self,
       NULL, 0,
       updates_buf, n_updates,
       NULL, 0);
+  for (guint i = 0; i < n_updates; i++)
+    g_object_unref (updates_buf[i]);
 
   dex_future_disown (bz_transaction_manager_add (
       bz_state_info_get_transaction_manager (self->state),
       transaction));
-
-  for (guint i = 0; i < n_updates; i++)
-    g_object_unref (updates_buf[i]);
 
   available_updates = bz_state_info_get_available_updates (self->state);
   if (available_updates != NULL && G_IS_LIST_STORE (available_updates))
@@ -316,9 +314,9 @@ update_cb (BzWindow      *self,
       GListStore *store       = G_LIST_STORE (available_updates);
       guint       n_available = g_list_model_get_n_items (available_updates);
 
-      for (gint i = n_available - 1; i >= 0; i--)
+      for (guint i = n_available; i > 0; i--)
         {
-          g_autoptr (BzEntry) available_entry = g_list_model_get_item (available_updates, i);
+          g_autoptr (BzEntry) available_entry = g_list_model_get_item (available_updates, i - 1);
           const char *available_id            = bz_entry_get_id (available_entry);
 
           for (guint j = 0; j < n_updates; j++)
