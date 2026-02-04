@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-04 12:06+0700\n"
-"PO-Revision-Date: 2026-02-04 11:48+0700\n"
+"POT-Creation-Date: 2026-02-04 12:56+0700\n"
+"PO-Revision-Date: 2026-02-04 13:07+0700\n"
 "Last-Translator: Jill Fiore <contact@lumaeris.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -63,7 +63,7 @@ msgstr ""
 "возможным. Bazaar внедряет вкладку \"Курируемое\", которая настраивается "
 "дистрибьюторами для обеспечения более ориентированного опыта."
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29 src/bz-application.c:691
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29 src/bz-application.c:698
 msgid "Adam Masciola"
 msgstr "Адам Масциола"
 
@@ -693,38 +693,38 @@ msgstr "Все \"%s\""
 msgid "%d Applications"
 msgstr "%d приложений"
 
-#: src/bz-application.c:662
+#: src/bz-application.c:669
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr "Адам Масциола <kolunmi@posteo.net>"
 
-#: src/bz-application.c:663
+#: src/bz-application.c:670
 msgctxt "About Dialog Developer Credit"
 msgid "Alexander Vanhee"
 msgstr "Александр Фанхе"
 
 #. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
-#: src/bz-application.c:694
+#: src/bz-application.c:701
 msgid "translator-credits"
 msgstr "Джилл Фиори <contact@lumaeris.com>, 2025, 2026"
 
-#: src/bz-application.c:705
+#: src/bz-application.c:712
 msgid "Special Thanks"
 msgstr "Особая благодарность"
 
-#: src/bz-application.c:763
+#: src/bz-application.c:770
 msgid "Logged Out Successfully!"
 msgstr "Выход из аккаунта выполнен успешно!"
 
-#: src/bz-application.c:886
+#: src/bz-application.c:893
 msgid "Performing setup..."
 msgstr "Выполняется настройка..."
 
-#: src/bz-application.c:965 src/bz-application.c:974
+#: src/bz-application.c:972 src/bz-application.c:981
 msgid "Set Up Flathub"
 msgstr "Добавить Flathub"
 
-#: src/bz-application.c:968
+#: src/bz-application.c:975
 msgid ""
 "Flathub is not set up on this system. You will not be able to browse and "
 "install applications in Bazaar if its unavailable.\n"
@@ -737,24 +737,24 @@ msgstr ""
 "Вы по-прежнему можете использовать Bazaar для обзора и удаления уже "
 "установленных приложений."
 
-#: src/bz-application.c:973
+#: src/bz-application.c:980
 msgid "Later"
 msgstr "Позже"
 
-#: src/bz-application.c:1383 src/bz-application.c:3073
+#: src/bz-application.c:1390 src/bz-application.c:3080
 msgid "Synchronizing..."
 msgstr "Синхронизация..."
 
-#: src/bz-application.c:1530 src/bz-application.c:3069
+#: src/bz-application.c:1537 src/bz-application.c:3076
 #, c-format
 msgid "Receiving %d entries..."
 msgstr "Получение %d элементов"
 
-#: src/bz-application.c:1535
+#: src/bz-application.c:1542
 msgid "Checking for updates"
 msgstr "Проверка на наличие обновлений"
 
-#: src/bz-application.c:3075
+#: src/bz-application.c:3082
 msgid "Indexing Data..."
 msgstr "Индексация данных..."
 
@@ -879,6 +879,28 @@ msgstr ""
 #, c-format
 msgid "The ownership of the %s app ID has been verified."
 msgstr "Право собственности на ID приложения %s было подтверждено."
+
+#: src/bz-donations-dialog.blp:22
+msgid "Bazaar is a Passion Project"
+msgstr "Bazaar - это проект, сделанный с любовью"
+
+#: src/bz-donations-dialog.blp:23
+msgid "Support the Future of Linux App Distribution"
+msgstr "Поддержите будущее распространения приложений Linux"
+
+#: src/bz-donations-dialog.blp:32
+msgid ""
+"I love making Bazaar, but I cannot do it alone. If you would like to help "
+"support further development, please consider donating to the project at my "
+"ko-fi:"
+msgstr ""
+"Мне нравится делать Bazaar, но я не могу это делать в одиночку. Если вы "
+"захотите поддержать дальнейшую разработку, пожалуйста пожертвуйте проекту в "
+"моём Ko-fi:"
+
+#: src/bz-donations-dialog.blp:42
+msgid "Donate to Bazaar"
+msgstr "Поддержать Bazaar"
 
 #: src/bz-entry-group-util.c:73
 msgid "Choose an Installation"
