@@ -24,6 +24,7 @@
 
 #include "bz-application.h"
 #include "bz-entry-selection-row.h"
+#include "bz-env.h"
 #include "bz-error.h"
 #include "bz-flatpak-entry.h"
 #include "bz-safety-calculator.h"
@@ -31,22 +32,6 @@
 #include "bz-transaction-dialog.h"
 #include "bz-transaction-list-dialog.h"
 #include "bz-util.h"
-
-BzTransactionDialogResult *
-bz_transaction_dialog_result_new (void)
-{
-  return g_new0 (BzTransactionDialogResult, 1);
-}
-
-void
-bz_transaction_dialog_result_free (BzTransactionDialogResult *result)
-{
-  if (result == NULL)
-    return;
-
-  g_clear_object (&result->selected_entry);
-  g_free (result);
-}
 
 static gboolean
 should_skip_entry (BzEntry *entry,
@@ -301,22 +286,18 @@ get_entry_high_risk_groups (BzEntry *entry)
   return bz_safety_calculator_get_high_risk_groups (entry);
 }
 
-typedef struct
-{
-  GtkWidget    *parent;
-  BzEntry      *entry;
-  BzEntryGroup *group;
-  gboolean      remove;
-  gboolean      auto_confirm;
-} ShowDialogData;
-
-static void
-show_dialog_data_free (ShowDialogData *data)
-{
-  g_clear_object (&data->entry);
-  g_clear_object (&data->group);
-  g_free (data);
-}
+BZ_DEFINE_DATA (
+    show_dialog,
+    ShowDialog,
+    {
+      GtkWidget    *parent;
+      BzEntry      *entry;
+      BzEntryGroup *group;
+      gboolean      remove;
+      gboolean      auto_confirm;
+    },
+    BZ_RELEASE_DATA (entry, g_object_unref);
+    BZ_RELEASE_DATA (group, g_object_unref))
 
 static DexFuture *
 show_dialog_fiber (ShowDialogData *data)
@@ -334,6 +315,7 @@ show_dialog_fiber (ShowDialogData *data)
   g_autoptr (BzEntry) check_entry              = NULL;
   BzHighRiskGroup risk_groups                  = BZ_HIGH_RISK_GROUP_NONE;
   guint           n_total_entries              = 0;
+  gboolean        confirmed                    = 0;
 
   result = bz_transaction_dialog_result_new ();
 
@@ -360,9 +342,7 @@ show_dialog_fiber (ShowDialogData *data)
     }
 
   if (!data->remove && check_entry != NULL)
-    {
-      risk_groups = get_entry_high_risk_groups (check_entry);
-    }
+    risk_groups = get_entry_high_risk_groups (check_entry);
 
   if (risk_groups != BZ_HIGH_RISK_GROUP_NONE)
     {
@@ -379,8 +359,8 @@ show_dialog_fiber (ShowDialogData *data)
 
       if (g_strcmp0 (risk_response, "install") != 0)
         {
-          result->confirmed = FALSE;
-          return dex_future_new_for_pointer (g_steal_pointer (&result));
+          bz_transaction_dialog_result_set_confirmed (result, FALSE);
+          return dex_future_new_for_object (result);
         }
     }
 
@@ -416,15 +396,15 @@ show_dialog_fiber (ShowDialogData *data)
       if (data->remove && radios->len >= 2)
         {
           GtkCheckButton *delete_radio = g_ptr_array_index (radios, radios->len - 1);
-          result->delete_user_data     = gtk_check_button_get_active (delete_radio);
+          bz_transaction_dialog_result_set_delete_user_data (result, gtk_check_button_get_active (delete_radio));
         }
     }
 
-  result->confirmed = (g_strcmp0 (dialog_response, "install") == 0) ||
-                      (g_strcmp0 (dialog_response, "remove") == 0);
-
-  if (!result->confirmed)
-    return dex_future_new_for_pointer (g_steal_pointer (&result));
+  confirmed = (g_strcmp0 (dialog_response, "install") == 0) ||
+              (g_strcmp0 (dialog_response, "remove") == 0);
+  bz_transaction_dialog_result_set_confirmed (result, confirmed);
+  if (!confirmed)
+    return dex_future_new_for_object (result);
 
   if (data->group != NULL)
     {
@@ -436,20 +416,27 @@ show_dialog_fiber (ShowDialogData *data)
 
           if (gtk_check_button_get_active (check))
             {
-              result->selected_entry = g_list_model_get_item (G_LIST_MODEL (store), i);
+              g_autoptr (BzEntry) entry = NULL;
+
+              entry = g_list_model_get_item (G_LIST_MODEL (store), i);
+              bz_transaction_dialog_result_set_selected_entry (result, entry);
               break;
             }
         }
 
-      if (result->selected_entry == NULL && n_entries > 0)
-        result->selected_entry = g_list_model_get_item (G_LIST_MODEL (store), 0);
+      if (bz_transaction_dialog_result_get_selected_entry (result) == NULL &&
+          n_entries > 0)
+        {
+          g_autoptr (BzEntry) entry = NULL;
+
+          entry = g_list_model_get_item (G_LIST_MODEL (store), 0);
+          bz_transaction_dialog_result_set_selected_entry (result, entry);
+        }
     }
   else
-    {
-      result->selected_entry = g_object_ref (data->entry);
-    }
+    bz_transaction_dialog_result_set_selected_entry (result, data->entry);
 
-  return dex_future_new_for_pointer (g_steal_pointer (&result));
+  return dex_future_new_for_object (result);
 }
 
 DexFuture *
@@ -459,56 +446,34 @@ bz_transaction_dialog_show (GtkWidget    *parent,
                             gboolean      remove,
                             gboolean      auto_confirm)
 {
-  ShowDialogData *data;
+  g_autoptr (ShowDialogData) data = NULL;
 
   g_return_val_if_fail (GTK_IS_WIDGET (parent), NULL);
   g_return_val_if_fail (entry != NULL || group != NULL, NULL);
 
-  data               = g_new0 (ShowDialogData, 1);
+  data               = show_dialog_data_new ();
   data->parent       = parent;
-  data->entry        = entry ? g_object_ref (entry) : NULL;
-  data->group        = group ? g_object_ref (group) : NULL;
+  data->entry        = bz_object_maybe_ref (entry);
+  data->group        = bz_object_maybe_ref (group);
   data->remove       = remove;
   data->auto_confirm = auto_confirm;
 
   return dex_scheduler_spawn (
       dex_scheduler_get_default (),
-      0,
+      bz_get_dex_stack_size (),
       (DexFiberFunc) show_dialog_fiber,
-      data,
-      (GDestroyNotify) show_dialog_data_free);
+      g_steal_pointer (&data),
+      show_dialog_data_unref);
 }
 
-BzBulkInstallDialogResult *
-bz_bulk_install_dialog_result_new (void)
-{
-  BzBulkInstallDialogResult *result = g_new0 (BzBulkInstallDialogResult, 1);
-  result->entries                   = g_ptr_array_new_with_free_func (g_object_unref);
-  return result;
-}
-
-void
-bz_bulk_install_dialog_result_free (BzBulkInstallDialogResult *result)
-{
-  if (result == NULL)
-    return;
-
-  g_clear_pointer (&result->entries, g_ptr_array_unref);
-  g_free (result);
-}
-
-typedef struct
-{
-  GtkWidget  *parent;
-  GListModel *groups;
-} BulkInstallDialogData;
-
-static void
-bulk_install_dialog_data_free (BulkInstallDialogData *data)
-{
-  g_clear_object (&data->groups);
-  g_free (data);
-}
+BZ_DEFINE_DATA (
+    bulk_install_dialog,
+    BulkInstallDialog,
+    {
+      GtkWidget  *parent;
+      GListModel *groups;
+    },
+    BZ_RELEASE_DATA (groups, g_object_unref));
 
 static DexFuture *
 bulk_install_dialog_fiber (BulkInstallDialogData *data)
@@ -521,14 +486,15 @@ bulk_install_dialog_fiber (BulkInstallDialogData *data)
   g_autofree char *dialog_response             = NULL;
   g_autofree char *heading                     = NULL;
   guint            n_groups                    = 0;
+  gboolean         confirmed                   = FALSE;
 
   result           = bz_bulk_install_dialog_result_new ();
   resolved_entries = g_ptr_array_new_with_free_func (g_object_unref);
 
   if (data->groups == NULL)
     {
-      result->confirmed = FALSE;
-      return dex_future_new_for_pointer (g_steal_pointer (&result));
+      bz_bulk_install_dialog_result_set_confirmed (result, FALSE);
+      return dex_future_new_for_object (result);
     }
 
   n_groups = g_list_model_get_n_items (data->groups);
@@ -573,8 +539,8 @@ bulk_install_dialog_fiber (BulkInstallDialogData *data)
 
       dex_await (bz_make_alert_dialog_future (ADW_ALERT_DIALOG (info_alert)), NULL);
 
-      result->confirmed = FALSE;
-      return dex_future_new_for_pointer (g_steal_pointer (&result));
+      bz_bulk_install_dialog_result_set_confirmed (result, FALSE);
+      return dex_future_new_for_object (result);
     }
 
   entries_store = g_list_store_new (BZ_TYPE_ENTRY);
@@ -607,37 +573,42 @@ bulk_install_dialog_fiber (BulkInstallDialogData *data)
   if (dialog_response == NULL)
     return dex_future_new_for_error (g_steal_pointer (&local_error));
 
-  result->confirmed = bz_transaction_list_dialog_was_confirmed (BZ_TRANSACTION_LIST_DIALOG (dialog));
-
-  if (result->confirmed)
+  confirmed = bz_transaction_list_dialog_was_confirmed (
+      BZ_TRANSACTION_LIST_DIALOG (dialog));
+  bz_bulk_install_dialog_result_set_confirmed (result, confirmed);
+  if (confirmed)
     {
+      g_autoptr (GListStore) store = NULL;
+
+      store = g_list_store_new (BZ_TYPE_ENTRY);
       for (guint i = 0; i < resolved_entries->len; i++)
         {
           BzEntry *entry = g_ptr_array_index (resolved_entries, i);
-          g_ptr_array_add (result->entries, g_object_ref (entry));
+          g_list_store_append (store, entry);
         }
-    }
 
-  return dex_future_new_for_pointer (g_steal_pointer (&result));
+      bz_bulk_install_dialog_result_set_entries (result, G_LIST_MODEL (store));
+    }
+  return dex_future_new_for_object (result);
 }
 
 DexFuture *
 bz_bulk_install_dialog_show (GtkWidget  *parent,
                              GListModel *groups)
 {
-  BulkInstallDialogData *data;
+  g_autoptr (BulkInstallDialogData) data;
 
   g_return_val_if_fail (GTK_IS_WIDGET (parent), NULL);
   g_return_val_if_fail (G_IS_LIST_MODEL (groups), NULL);
 
-  data         = g_new0 (BulkInstallDialogData, 1);
+  data         = bulk_install_dialog_data_new ();
   data->parent = parent;
   data->groups = g_object_ref (groups);
 
   return dex_scheduler_spawn (
       dex_scheduler_get_default (),
-      0,
+      bz_get_dex_stack_size (),
       (DexFiberFunc) bulk_install_dialog_fiber,
-      data,
-      (GDestroyNotify) bulk_install_dialog_data_free);
+      g_steal_pointer (&data),
+      bulk_install_dialog_data_unref);
 }

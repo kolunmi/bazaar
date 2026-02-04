@@ -40,11 +40,9 @@
 #include "bz-search-widget.h"
 #include "bz-template-callbacks.h"
 #include "bz-transaction-dialog.h"
-#include "bz-transaction-list-dialog.h"
 #include "bz-transaction-manager.h"
 #include "bz-user-data-page.h"
 #include "bz-util.h"
-#include "bz-view-switcher.h"
 #include "bz-window.h"
 
 struct _BzWindow
@@ -674,7 +672,7 @@ transact_fiber (TransactData *data)
     }
 
   // Show the dialog
-  dialog_result = dex_await_pointer (
+  dialog_result = dex_await_object (
       bz_transaction_dialog_show (
           GTK_WIDGET (self),
           data->entry,
@@ -685,18 +683,21 @@ transact_fiber (TransactData *data)
 
   if (dialog_result == NULL)
     return dex_future_new_for_error (g_steal_pointer (&local_error));
-
-  if (!dialog_result->confirmed)
+  if (!bz_transaction_dialog_result_get_confirmed (dialog_result))
     return dex_future_new_false ();
 
   // Perform the transaction
-  transact_future = transact (self, dialog_result->selected_entry, data->remove, data->source);
+  transact_future = transact (
+      self,
+      bz_transaction_dialog_result_get_selected_entry (dialog_result),
+      data->remove,
+      data->source);
 
   if (!dex_await (g_steal_pointer (&transact_future), &local_error))
     return dex_future_new_for_error (g_steal_pointer (&local_error));
 
   // Handle user data deletion
-  if (dialog_result->delete_user_data)
+  if (bz_transaction_dialog_result_get_delete_user_data (dialog_result))
     {
       if (data->group != NULL)
         bz_entry_group_reap_user_data (data->group);
@@ -962,22 +963,34 @@ bulk_install_fiber (BulkInstallData *data)
   g_autoptr (BzWindow) self                    = NULL;
   g_autoptr (GError) local_error               = NULL;
   g_autoptr (BzBulkInstallDialogResult) result = NULL;
+  GListModel          *entries                 = NULL;
+  guint                n_installs              = 0;
+  g_autofree BzEntry **installs_buf            = NULL;
 
   bz_weak_get_or_return_reject (self, data->self);
 
-  result = dex_await_pointer (
+  result = dex_await_object (
       bz_bulk_install_dialog_show (GTK_WIDGET (self), data->groups),
       &local_error);
 
   if (result == NULL)
     return dex_future_new_for_error (g_steal_pointer (&local_error));
 
-  if (!result->confirmed)
+  if (!bz_bulk_install_dialog_result_get_confirmed (result))
     return dex_future_new_false ();
 
-  bulk_install (self,
-                (BzEntry **) result->entries->pdata,
-                result->entries->len);
+  entries    = bz_bulk_install_dialog_result_get_entries (result);
+  n_installs = g_list_model_get_n_items (entries);
+  if (n_installs == 0)
+    return dex_future_new_false ();
+
+  installs_buf = g_malloc_n (n_installs, sizeof (*installs_buf));
+  for (guint i = 0; i < n_installs; i++)
+    installs_buf[i] = g_list_model_get_item (entries, i);
+
+  bulk_install (self, installs_buf, n_installs);
+  for (guint i = 0; i < n_installs; i++)
+    g_object_unref (installs_buf[i]);
 
   return dex_future_new_true ();
 }

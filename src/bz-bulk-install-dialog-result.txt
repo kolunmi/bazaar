@@ -1,0 +1,10 @@
+prefix=bz
+name=bulk_install_dialog_result
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+include="bz-entry.h"
+
+property=entries GListModel G_TYPE_LIST_MODEL object
+property=confirmed gboolean G_TYPE_BOOLEAN boolean
