@@ -107,8 +107,8 @@ src/bz-transaction-dialog.c
 src/bz-transaction-list-dialog.blp
 src/bz-transaction-list-dialog.c
 src/bz-transaction-manager.c
-src/bz-transaction-view.blp
-src/bz-transaction-view.c
+src/bz-transaction-tile.blp
+src/bz-transaction-tile.c
 src/bz-transaction.c
 src/bz-user-data-page.c
 src/bz-user-data-page.blp
