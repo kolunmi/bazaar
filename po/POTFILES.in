@@ -29,6 +29,8 @@ src/bz-decorated-screenshot.blp
 src/bz-decorated-screenshot.c
 src/bz-developer-badge.blp
 src/bz-developer-badge.c
+src/bz-donations-dialog.blp
+src/bz-donations-dialog.c
 src/bz-download-worker.c
 src/bz-dynamic-list-view.c
 src/bz-entry-cache-manager.c
