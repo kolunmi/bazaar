@@ -1,6 +1,15 @@
+.bz-monospace {
+    font-family: monospace;
+}
+
 .bz-debug {
     background-color: darkorange;
     color: black;
+}
+
+.bz-donations-dialog {
+    background: linear-gradient(to bottom left, #1f2d8f, #159eff);
+    color: white;
 }
 
 .updates-amount {
@@ -14,10 +23,6 @@
 .updates-amount-border {
   background-color: var(--accent-bg-color);
   	border-radius: 9999px;
-}
-
-.bz-monospace {
-    font-family: monospace;
 }
 
 .search-box {

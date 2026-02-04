@@ -33,6 +33,7 @@
 #include "bz-auth-state.h"
 #include "bz-backend-notification.h"
 #include "bz-content-provider.h"
+#include "bz-donations-dialog.h"
 #include "bz-entry-cache-manager.h"
 #include "bz-entry-group.h"
 #include "bz-env.h"
@@ -579,12 +580,18 @@ bz_application_donate_action (GSimpleAction *action,
                               GVariant      *parameter,
                               gpointer       user_data)
 {
-  BzApplication *self = user_data;
+  BzApplication *self   = user_data;
+  GtkWindow     *window = NULL;
+  AdwDialog     *dialog = NULL;
 
   g_assert (BZ_IS_APPLICATION (self));
 
-  g_app_info_launch_default_for_uri (
-      DONATE_LINK, NULL, NULL);
+  window = gtk_application_get_active_window (GTK_APPLICATION (self));
+  if (window == NULL)
+    window = new_window (self);
+
+  dialog = bz_donations_dialog_new ();
+  adw_dialog_present (dialog, GTK_WIDGET (window));
 }
 
 static void
