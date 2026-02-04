@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-04 12:56+0700\n"
-"PO-Revision-Date: 2026-02-04 13:07+0700\n"
+"POT-Creation-Date: 2026-02-04 13:46+0700\n"
+"PO-Revision-Date: 2026-02-04 13:48+0700\n"
 "Last-Translator: Jill Fiore <contact@lumaeris.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -63,7 +63,7 @@ msgstr ""
 "возможным. Bazaar внедряет вкладку \"Курируемое\", которая настраивается "
 "дистрибьюторами для обеспечения более ориентированного опыта."
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29 src/bz-application.c:698
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29 src/bz-application.c:701
 msgid "Adam Masciola"
 msgstr "Адам Масциола"
 
@@ -480,47 +480,47 @@ msgid "%s • %s"
 msgstr "%s • %s"
 
 #: src/bz-all-apps-page.blp:13 src/bz-apps-page.blp:14 src/bz-full-view.blp:16
-#: src/bz-user-data-page.blp:15 src/bz-window.blp:292
+#: src/bz-user-data-page.blp:15 src/bz-window.blp:303
 msgid "Main Menu"
 msgstr "Главное меню"
 
 #: src/bz-all-apps-page.blp:18 src/bz-apps-page.blp:18
-#: src/bz-user-data-page.blp:19 src/bz-window.blp:373
+#: src/bz-user-data-page.blp:19 src/bz-window.blp:384
 msgid "_Donate to Bazaar ❤️"
 msgstr "_Поддержать Bazaar ❤️"
 
 #: src/bz-all-apps-page.blp:25 src/bz-apps-page.blp:25
-#: src/bz-user-data-page.blp:26 src/bz-window.blp:380
+#: src/bz-user-data-page.blp:26 src/bz-window.blp:391
 msgid "_Preferences"
 msgstr "П_араметры"
 
 #: src/bz-all-apps-page.blp:30 src/bz-apps-page.blp:30
-#: src/bz-user-data-page.blp:31 src/bz-window.blp:385
+#: src/bz-user-data-page.blp:31 src/bz-window.blp:396
 msgid "_Login with Flathub"
 msgstr "_Войти в Flathub"
 
 #: src/bz-all-apps-page.blp:36 src/bz-apps-page.blp:36
-#: src/bz-user-data-page.blp:37 src/bz-window.blp:391
+#: src/bz-user-data-page.blp:37 src/bz-window.blp:402
 msgid "_Manage Leftover User Data"
 msgstr "_Управлять оставшимися данными"
 
 #: src/bz-all-apps-page.blp:41 src/bz-apps-page.blp:41
-#: src/bz-user-data-page.blp:42 src/bz-window.blp:396
+#: src/bz-user-data-page.blp:42 src/bz-window.blp:407
 msgid "_Synchronize Remotes"
 msgstr "С_инхронизировать репозитории"
 
 #: src/bz-all-apps-page.blp:46 src/bz-apps-page.blp:46
-#: src/bz-user-data-page.blp:47 src/bz-window.blp:401
+#: src/bz-user-data-page.blp:47 src/bz-window.blp:412
 msgid "_Keyboard Shortcuts"
 msgstr "_Сочетание клавиш"
 
 #: src/bz-all-apps-page.blp:51 src/bz-apps-page.blp:51
-#: src/bz-user-data-page.blp:52 src/bz-window.blp:406
+#: src/bz-user-data-page.blp:52 src/bz-window.blp:417
 msgid "_About Bazaar"
 msgstr "О _Bazaar"
 
 #: src/bz-all-apps-page.blp:58 src/bz-apps-page.blp:58
-#: src/bz-user-data-page.blp:59 src/bz-window.blp:413
+#: src/bz-user-data-page.blp:59 src/bz-window.blp:424
 msgid "_Quit Bazaar"
 msgstr "_Завершить Bazaar"
 
@@ -693,38 +693,38 @@ msgstr "Все \"%s\""
 msgid "%d Applications"
 msgstr "%d приложений"
 
-#: src/bz-application.c:669
+#: src/bz-application.c:672
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr "Адам Масциола <kolunmi@posteo.net>"
 
-#: src/bz-application.c:670
+#: src/bz-application.c:673
 msgctxt "About Dialog Developer Credit"
 msgid "Alexander Vanhee"
 msgstr "Александр Фанхе"
 
 #. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
-#: src/bz-application.c:701
+#: src/bz-application.c:704
 msgid "translator-credits"
 msgstr "Джилл Фиори <contact@lumaeris.com>, 2025, 2026"
 
-#: src/bz-application.c:712
+#: src/bz-application.c:715
 msgid "Special Thanks"
 msgstr "Особая благодарность"
 
-#: src/bz-application.c:770
+#: src/bz-application.c:773
 msgid "Logged Out Successfully!"
 msgstr "Выход из аккаунта выполнен успешно!"
 
-#: src/bz-application.c:893
+#: src/bz-application.c:896
 msgid "Performing setup..."
 msgstr "Выполняется настройка..."
 
-#: src/bz-application.c:972 src/bz-application.c:981
+#: src/bz-application.c:975 src/bz-application.c:984
 msgid "Set Up Flathub"
 msgstr "Добавить Flathub"
 
-#: src/bz-application.c:975
+#: src/bz-application.c:978
 msgid ""
 "Flathub is not set up on this system. You will not be able to browse and "
 "install applications in Bazaar if its unavailable.\n"
@@ -737,24 +737,24 @@ msgstr ""
 "Вы по-прежнему можете использовать Bazaar для обзора и удаления уже "
 "установленных приложений."
 
-#: src/bz-application.c:980
+#: src/bz-application.c:983
 msgid "Later"
 msgstr "Позже"
 
-#: src/bz-application.c:1390 src/bz-application.c:3080
+#: src/bz-application.c:1393 src/bz-application.c:3087
 msgid "Synchronizing..."
 msgstr "Синхронизация..."
 
-#: src/bz-application.c:1537 src/bz-application.c:3076
+#: src/bz-application.c:1540 src/bz-application.c:3083
 #, c-format
 msgid "Receiving %d entries..."
 msgstr "Получение %d элементов"
 
-#: src/bz-application.c:1542
+#: src/bz-application.c:1545
 msgid "Checking for updates"
 msgstr "Проверка на наличие обновлений"
 
-#: src/bz-application.c:3082
+#: src/bz-application.c:3089
 msgid "Indexing Data..."
 msgstr "Индексация данных..."
 
@@ -884,7 +884,7 @@ msgstr "Право собственности на ID приложения %s б
 msgid "Bazaar is a Passion Project"
 msgstr "Bazaar - это проект, сделанный с любовью"
 
-#: src/bz-donations-dialog.blp:23
+#: src/bz-donations-dialog.blp:23 src/bz-window.blp:219
 msgid "Support the Future of Linux App Distribution"
 msgstr "Поддержите будущее распространения приложений Linux"
 
@@ -901,6 +901,10 @@ msgstr ""
 #: src/bz-donations-dialog.blp:42
 msgid "Donate to Bazaar"
 msgstr "Поддержать Bazaar"
+
+#: src/bz-donations-dialog.blp:48
+msgid "Disable the donations banner on startup"
+msgstr "Отключить баннер пожертвования при запуске"
 
 #: src/bz-entry-group-util.c:73
 msgid "Choose an Installation"
@@ -969,11 +973,11 @@ msgid "Remove from Favorites"
 msgstr "Удалить из избранных"
 
 #: src/bz-favorites-page.blp:5 src/bz-favorites-page.blp:78
-#: src/bz-window.blp:431
+#: src/bz-window.blp:442
 msgid "Favorites"
 msgstr "Избранные"
 
-#: src/bz-favorites-page.blp:22 src/bz-full-view.blp:31 src/bz-window.blp:307
+#: src/bz-favorites-page.blp:22 src/bz-full-view.blp:31 src/bz-window.blp:318
 msgid "Open App Library"
 msgstr "Открыть библиотеку приложений"
 
@@ -1824,7 +1828,7 @@ msgstr ""
 "Сетевое соединение ограничено — автоматическая синхронизация данных магазина "
 "приостановлена"
 
-#: src/bz-preferences-dialog.blp:26 src/bz-window.blp:323
+#: src/bz-preferences-dialog.blp:26 src/bz-window.blp:334
 msgid "Sync Manually"
 msgstr "Синхронизировать вручную"
 
@@ -2684,17 +2688,21 @@ msgstr "Курируемое"
 msgid "Flathub"
 msgstr "Flathub"
 
-#: src/bz-window.blp:273
+#: src/bz-window.blp:220
+msgid "See More"
+msgstr "Узнать больше"
+
+#: src/bz-window.blp:284
 msgid "No background tasks!"
 msgstr "Нет фоновых задач!"
 
-#: src/bz-window.blp:322
+#: src/bz-window.blp:333
 msgid ""
 "You have a network connection but are viewing a cached version of Flathub"
 msgstr ""
 "Вы имеете сетевое подключение, но просматриваете кэшируемую версию Flathub"
 
-#: src/bz-window.blp:438
+#: src/bz-window.blp:449
 msgid "Log Out"
 msgstr "Выйти"
 
