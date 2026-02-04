@@ -44,7 +44,7 @@ template $BzDonationsDialog: Adw.Dialog {
           };
         }
 
-        CheckButton {
+        CheckButton disable_donations_banner_check {
           label: _("Disable the donations banner on startup");
           toggled => $banner_disable_toggled(template);
         }

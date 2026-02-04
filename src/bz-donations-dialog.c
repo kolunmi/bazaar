@@ -28,6 +28,9 @@ struct _BzDonationsDialog
   AdwDialog parent_instance;
 
   BzStateInfo *state;
+
+  /* Template widgets */
+  GtkCheckButton *disable_donations_banner_check;
 };
 
 G_DEFINE_FINAL_TYPE (BzDonationsDialog, bz_donations_dialog, ADW_TYPE_DIALOG);
@@ -133,6 +136,7 @@ bz_donations_dialog_class_init (BzDonationsDialogClass *klass)
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-donations-dialog.ui");
   bz_widget_class_bind_all_util_callbacks (widget_class);
+  gtk_widget_class_bind_template_child (widget_class, BzDonationsDialog, disable_donations_banner_check);
   gtk_widget_class_bind_template_callback (widget_class, donate_clicked);
   gtk_widget_class_bind_template_callback (widget_class, banner_disable_toggled);
 }
@@ -167,7 +171,16 @@ bz_donations_dialog_set_state (BzDonationsDialog *self,
 
   g_clear_pointer (&self->state, g_object_unref);
   if (state != NULL)
-    self->state = g_object_ref (state);
+    {
+      GSettings *settings = NULL;
+
+      self->state = g_object_ref (state);
+
+      settings = bz_state_info_get_settings (state);
+      gtk_check_button_set_active (
+          self->disable_donations_banner_check,
+          g_settings_get_boolean (settings, "disable-donations-banner"));
+    }
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_STATE]);
 }
