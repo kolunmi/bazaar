@@ -17,6 +17,7 @@ src/bz-apps-page.blp
 src/bz-apps-page.c
 src/bz-application-map-factory.c
 src/bz-application.c
+src/bz-appstream-parser.c
 src/bz-async-texture.c
 src/bz-backend.c
 src/bz-comet-overlay.c
@@ -110,6 +111,8 @@ src/bz-transaction-manager.c
 src/bz-transaction-tile.blp
 src/bz-transaction-tile.c
 src/bz-transaction.c
+src/bz-updates-card.blp
+src/bz-updates-card.c
 src/bz-user-data-page.c
 src/bz-user-data-page.blp
 src/bz-user-data-tile.c
