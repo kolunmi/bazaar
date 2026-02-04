@@ -301,15 +301,13 @@ update_cb (BzWindow      *self,
       NULL, 0,
       updates_buf, n_updates,
       NULL, 0);
-  for (guint i = 0; i < n_updates; i++)
-    g_object_unref (updates_buf[i]);
 
   dex_future_disown (bz_transaction_manager_add (
       bz_state_info_get_transaction_manager (self->state),
       transaction));
 
   available_updates = bz_state_info_get_available_updates (self->state);
-  if (available_updates != NULL && G_IS_LIST_STORE (available_updates))
+  if (G_IS_LIST_STORE (available_updates))
     {
       GListStore *store       = G_LIST_STORE (available_updates);
       guint       n_available = g_list_model_get_n_items (available_updates);
@@ -329,7 +327,11 @@ update_cb (BzWindow      *self,
             }
         }
     }
+
   g_object_notify (G_OBJECT (self->state), "available-updates");
+
+  for (guint i = 0; i < n_updates; i++)
+    g_object_unref (updates_buf[i]);
 }
 
 static void
