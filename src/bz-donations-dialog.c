@@ -165,6 +165,7 @@ bz_donations_dialog_set_state (BzDonationsDialog *self,
                                BzStateInfo       *state)
 {
   g_return_if_fail (BZ_IS_DONATIONS_DIALOG (self));
+  g_return_if_fail (state == NULL || BZ_IS_STATE_INFO (state));
 
   if (state == self->state)
     return;
