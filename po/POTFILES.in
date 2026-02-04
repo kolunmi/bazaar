@@ -17,6 +17,7 @@ src/bz-apps-page.blp
 src/bz-apps-page.c
 src/bz-application-map-factory.c
 src/bz-application.c
+src/bz-appstream-parser.c
 src/bz-async-texture.c
 src/bz-backend.c
 src/bz-comet-overlay.c
