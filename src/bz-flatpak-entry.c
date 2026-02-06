@@ -498,12 +498,27 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
 
           for (int i = 0; i < G_N_ELEMENTS (sizes); i++)
             {
+              g_autofree char *size      = NULL;
+              g_autofree char *basename  = NULL;
               g_autofree char *icon_path = NULL;
 
+              size     = g_strdup_printf ("%dx%d", sizes[i], sizes[i]);
+              basename = g_strdup_printf ("%s.png", icon_name);
               if (user)
-                icon_path = g_build_filename (g_get_home_dir (), ".local/share/flatpak/exports/share/icons/hicolor", g_strdup_printf ("%dx%d", sizes[i], sizes[i]), "apps", g_strdup_printf ("%s.png", icon_name), NULL);
+                icon_path = g_build_filename (
+                    g_get_home_dir (),
+                    ".local/share/flatpak/exports/share/icons/hicolor",
+                    size,
+                    "apps",
+                    basename,
+                    NULL);
               else
-                icon_path = g_build_filename ("/var/lib/flatpak/exports/share/icons/hicolor", g_strdup_printf ("%dx%d", sizes[i], sizes[i]), "apps", g_strdup_printf ("%s.png", icon_name), NULL);
+                icon_path = g_build_filename (
+                    "/var/lib/flatpak/exports/share/icons/hicolor",
+                    size,
+                    "apps",
+                    basename,
+                    NULL);
 
               if (g_file_test (icon_path, G_FILE_TEST_EXISTS))
                 {
