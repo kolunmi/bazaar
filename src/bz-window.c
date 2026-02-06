@@ -853,8 +853,6 @@ transact (BzWindow  *self,
           GtkWidget *source)
 {
   g_autoptr (BzTransaction) transaction = NULL;
-  GdkPaintable *icon                    = NULL;
-  GtkWidget    *transaction_target      = NULL;
 
   if (remove)
     transaction = bz_transaction_new_full (
@@ -866,39 +864,6 @@ transact (BzWindow  *self,
         &entry, 1,
         NULL, 0,
         NULL, 0);
-
-  if (source == NULL)
-    source = GTK_WIDGET (self->navigation_view);
-
-  icon = bz_entry_get_icon_paintable (entry);
-  if (icon != NULL)
-    {
-      g_autoptr (BzComet) comet = NULL;
-
-      if (remove)
-        {
-          AdwStyleManager *style_manager = adw_style_manager_get_default ();
-          gboolean         is_dark       = adw_style_manager_get_dark (style_manager);
-          GdkRGBA          destructive_color;
-
-          if (is_dark)
-            destructive_color = (GdkRGBA) { 0.3, 0.2, 0.21, 0.6 };
-          else
-            destructive_color = (GdkRGBA) { 0.95, 0.84, 0.84, 0.6 };
-
-          bz_comet_overlay_set_pulse_color (self->comet_overlay, &destructive_color);
-        }
-      else
-        bz_comet_overlay_set_pulse_color (self->comet_overlay, NULL);
-
-      comet = g_object_new (
-          BZ_TYPE_COMET,
-          "from", remove ? transaction_target : source,
-          "to", remove ? source : transaction_target,
-          "paintable", icon,
-          NULL);
-      bz_comet_overlay_spawn (self->comet_overlay, comet);
-    }
 
   return bz_transaction_manager_add (
       bz_state_info_get_transaction_manager (self->state),
