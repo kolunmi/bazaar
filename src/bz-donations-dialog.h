@@ -1,6 +1,6 @@
-/* bz-releases-list.h
+/* bz-donations-dialog.h
  *
- * Copyright 2025 Alexander Vanhee, Adam Masciola
+ * Copyright 2026 Eva M
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,24 +22,23 @@
 
 #include <adwaita.h>
 
+#include "bz-state-info.h"
+
 G_BEGIN_DECLS
 
-#define BZ_TYPE_RELEASES_LIST (bz_releases_list_get_type ())
+#define BZ_TYPE_DONATIONS_DIALOG (bz_donations_dialog_get_type ())
+G_DECLARE_FINAL_TYPE (BzDonationsDialog, bz_donations_dialog, BZ, DONATIONS_DIALOG, AdwDialog)
 
-G_DECLARE_FINAL_TYPE (BzReleasesList, bz_releases_list, BZ, RELEASES_LIST, AdwBin)
+AdwDialog *
+bz_donations_dialog_new (void);
 
-GtkWidget *
-bz_releases_list_new (void);
-
-GtkWidget *
-bz_releases_dialog_new (GListModel *version_history,
-                        GListModel *installed_versions);
+BzStateInfo *
+bz_donations_dialog_get_state (BzDonationsDialog *self);
 
 void
-bz_releases_list_set_version_history (BzReleasesList *self,
-                                      GListModel     *version_history);
-
-GListModel *
-bz_releases_list_get_version_history (BzReleasesList *self);
+bz_donations_dialog_set_state (BzDonationsDialog *self,
+                               BzStateInfo       *state);
 
 G_END_DECLS
+
+/* End of bz-donations-dialog.h */

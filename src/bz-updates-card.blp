@@ -1,0 +1,158 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzUpdatesCard: Adw.Bin {
+  child: Box {
+    orientation: vertical;
+    margin-start: 4;
+    margin-end: 4;
+    margin-bottom: 4;
+    overflow: hidden;
+
+    styles [
+      "update-card",
+    ]
+
+    $BzListTile {
+      activated => $tile_activated_cb();
+
+      styles [
+        "update-toggle",
+      ]
+
+      child: Box {
+        height-request: 65;
+        spacing: 8;
+        margin-start: 12;
+        margin-end: 8;
+
+        Label {
+          label: bind $format_update_count(template.state as <$BzStateInfo>.available-updates) as <string>;
+          hexpand: true;
+          halign: start;
+        }
+
+        Button {
+          label: _("Update All");
+          valign: center;
+          clicked => $update_all_cb();
+
+          styles [
+            "suggested-action",
+          ]
+        }
+
+        Image toggle_icon {
+          pixel-size: 14;
+          margin-start: 4;
+          margin-end: 4;
+          icon-name: "go-next-symbolic";
+          valign: center;
+
+          styles [
+            "dimmed",
+            "accent",
+            "ops-toggle",
+          ]
+        }
+      };
+    }
+
+    Revealer revealer {
+      reveal-child: false;
+      transition-type: slide_down;
+
+      styles [
+        "update-list",
+      ]
+
+      child: Box {
+        orientation: vertical;
+
+        Separator {}
+
+        ListView {
+          styles [
+            "navigation-sidebar",
+            "operations",
+            "installed-list-view",
+          ]
+
+          model: NoSelection {
+            model: bind template.state as <$BzStateInfo>.available-updates;
+          };
+
+          factory: BuilderListItemFactory {
+            template ListItem {
+              activatable: false;
+
+              child: Box {
+                orientation: horizontal;
+                spacing: 10;
+                margin-end: 8;
+                margin-start: 4;
+                margin-top: 2;
+                margin-bottom: 2;
+
+                Image {
+                  paintable: bind template.item as <$BzEntry>.icon-paintable;
+                  pixel-size: 48;
+                  valign: center;
+
+                  styles [
+                    "icon-dropshadow",
+                  ]
+                }
+
+                Box {
+                  spacing: 2;
+                  hexpand: true;
+                  valign: center;
+                  orientation: vertical;
+
+                  Label {
+                    label: bind template.item as <$BzEntry>.title;
+                    xalign: 0;
+                    ellipsize: end;
+                  }
+
+                  Label version_label {
+                    label: bind $format_version_change(template.item as <$BzEntry>.version-history, template.item as <$BzEntry>.installed-version) as <string>;
+                    visible: bind $invert_boolean($is_empty_string(version_label.label) as <bool>) as <bool>;
+                    xalign: 0;
+                    ellipsize: end;
+
+                    styles [
+                      "dimmed",
+                      "caption",
+                      "installed-size",
+                    ]
+                  }
+                }
+
+                Button {
+                  icon-name: "view-list-bullet-symbolic";
+                  valign: center;
+                  has-tooltip: true;
+                  tooltip-text: _("Version History");
+                  visible: bind $invert_boolean($is_null(template.item as <$BzEntry>.version-history) as <bool>) as <bool>;
+                  clicked => $show_version_history_cb(template);
+
+                  styles [
+                    "flat",
+                  ]
+                }
+
+                Button {
+                  valign: center;
+                  label: _("Update");
+                  clicked => $update_entry_cb(template);
+                }
+              };
+            }
+          };
+        }
+      };
+    }
+  };
+}

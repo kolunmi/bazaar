@@ -1,6 +1,6 @@
-/* bz-releases-list.h
+/* bz-popup-overlay.h
  *
- * Copyright 2025 Alexander Vanhee, Adam Masciola
+ * Copyright 2026 Eva M
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,26 +20,32 @@
 
 #pragma once
 
-#include <adwaita.h>
+#include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_RELEASES_LIST (bz_releases_list_get_type ())
+#define BZ_TYPE_POPUP_OVERLAY (bz_popup_overlay_get_type ())
+G_DECLARE_FINAL_TYPE (BzPopupOverlay, bz_popup_overlay, BZ, POPUP_OVERLAY, GtkWidget)
 
-G_DECLARE_FINAL_TYPE (BzReleasesList, bz_releases_list, BZ, RELEASES_LIST, AdwBin)
+BzPopupOverlay *
+bz_popup_overlay_new (void);
 
 GtkWidget *
-bz_releases_list_new (void);
-
-GtkWidget *
-bz_releases_dialog_new (GListModel *version_history,
-                        GListModel *installed_versions);
+bz_popup_overlay_get_child (BzPopupOverlay *self);
 
 void
-bz_releases_list_set_version_history (BzReleasesList *self,
-                                      GListModel     *version_history);
+bz_popup_overlay_set_child (BzPopupOverlay *self,
+                            GtkWidget      *child);
 
-GListModel *
-bz_releases_list_get_version_history (BzReleasesList *self);
+void
+bz_popup_overlay_push (BzPopupOverlay *self,
+                       GtkWidget      *widget,
+                       GtkWidget      *source);
+
+void
+bz_popup_present (GtkWidget *popup,
+                  GtkWidget *source);
 
 G_END_DECLS
+
+/* End of bz-popup-overlay.h */

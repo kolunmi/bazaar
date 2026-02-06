@@ -1,0 +1,54 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzDonationsDialog: Adw.Dialog {
+  width-request: 300;
+  height-request: 400;
+  content-width: 350;
+  content-height: 700;
+
+  child: Adw.ToolbarView {
+    styles [
+      "bz-donations-dialog",
+    ]
+
+    [top]
+    Adw.HeaderBar {
+      show-title: false;
+    }
+
+    content: Adw.StatusPage {
+      icon-name: "heart-filled-symbolic";
+      title: _("Bazaar is a Passion Project");
+      description: _("Support the Future of Linux App Distribution");
+
+      child: Box {
+        orientation: vertical;
+        spacing: 10;
+
+        Label {
+          wrap: true;
+          use-markup: true;
+          label: _("I love making Bazaar, but I cannot do it alone. If you would like to help support further development, please consider donating to the project at my ko-fi:");
+        }
+
+        Adw.Clamp {
+          maximum-size: 250;
+
+          child: Button {
+            styles [
+              "pill",
+            ]
+            label: _("Donate to Bazaar");
+            clicked => $donate_clicked(template);
+          };
+        }
+
+        CheckButton disable_donations_banner_check {
+          label: _("Disable the donations banner on startup");
+          toggled => $banner_disable_toggled(template);
+        }
+      };
+    };
+  };
+}

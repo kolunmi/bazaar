@@ -4,8 +4,10 @@ using Adw 1;
 
 template $BzFullView: Adw.Bin {
   child: Adw.ToolbarView {
+
     [top]
     Adw.HeaderBar header_bar {
+
       [end]
       MenuButton {
         primary: true;
@@ -13,6 +15,28 @@ template $BzFullView: Adw.Bin {
         has-tooltip: true;
         tooltip-text: _("Main Menu");
         menu-model: bind template.main-menu;
+      }
+
+      [end]
+      Button {
+        styles [
+          "flat",
+          "global-progress-button",
+        ]
+
+        can-target: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
+
+        action-name: "window.open-library";
+        has-tooltip: true;
+        tooltip-text: _("Open App Library");
+
+        child: $BzGlobalProgress {
+          expand-size: 125;
+          active: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
+          pending: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.pending;
+          fraction: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.current-progress;
+          settings: bind template.state as <$BzStateInfo>.settings;
+        };
       }
     }
 

@@ -1,6 +1,6 @@
-/* bz-releases-list.h
+/* bz-updates-card.h
  *
- * Copyright 2025 Alexander Vanhee, Adam Masciola
+ * Copyright 2026 Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,26 +20,23 @@
 
 #pragma once
 
+#include "bz-state-info.h"
 #include <adwaita.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_RELEASES_LIST (bz_releases_list_get_type ())
+#define BZ_TYPE_UPDATES_CARD (bz_updates_card_get_type ())
 
-G_DECLARE_FINAL_TYPE (BzReleasesList, bz_releases_list, BZ, RELEASES_LIST, AdwBin)
-
-GtkWidget *
-bz_releases_list_new (void);
+G_DECLARE_FINAL_TYPE (BzUpdatesCard, bz_updates_card, BZ, UPDATES_CARD, AdwBin)
 
 GtkWidget *
-bz_releases_dialog_new (GListModel *version_history,
-                        GListModel *installed_versions);
+bz_updates_card_new (void);
 
 void
-bz_releases_list_set_version_history (BzReleasesList *self,
-                                      GListModel     *version_history);
+bz_updates_card_set_state (BzUpdatesCard *self,
+                           BzStateInfo   *state);
 
-GListModel *
-bz_releases_list_get_version_history (BzReleasesList *self);
+BzStateInfo *
+bz_updates_card_get_state (BzUpdatesCard *self);
 
 G_END_DECLS

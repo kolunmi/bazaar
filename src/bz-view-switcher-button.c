@@ -26,8 +26,6 @@ struct _BzViewSwitcherButton
 
   AdwViewStackPage *page;
 
-  GBinding *active_binding;
-
   GtkButton *toggle;
 };
 
@@ -49,7 +47,6 @@ bz_view_switcher_button_dispose (GObject *object)
   BzViewSwitcherButton *self = BZ_VIEW_SWITCHER_BUTTON (object);
 
   g_clear_pointer (&self->page, g_object_unref);
-  g_clear_pointer (&self->active_binding, g_object_unref);
 
   G_OBJECT_CLASS (bz_view_switcher_button_parent_class)->dispose (object);
 }
@@ -149,7 +146,6 @@ bz_view_switcher_button_set_page (BzViewSwitcherButton *self,
     return;
 
   g_clear_pointer (&self->page, g_object_unref);
-  g_clear_pointer (&self->active_binding, g_object_unref);
   if (page != NULL)
     self->page = g_object_ref (page);
 

@@ -59,8 +59,8 @@ selection_changed (BzViewSwitcher    *self,
                    GtkSelectionModel *model);
 
 static void
-button_clicked (GtkButton *toggle,
-                gpointer   idx_p);
+button_clicked (GtkButton            *toggle,
+                BzViewSwitcherButton *button);
 
 static void
 refresh_selection (BzViewSwitcher *self);
@@ -291,7 +291,7 @@ pages_changed (BzViewSwitcher *self,
           toggle,
           "clicked",
           G_CALLBACK (button_clicked),
-          GUINT_TO_POINTER (position + i));
+          button);
 
       if (position + i > 0)
         sibling = g_ptr_array_index (self->buttons, position + i - 1);
@@ -311,20 +311,23 @@ selection_changed (BzViewSwitcher    *self,
 }
 
 static void
-button_clicked (GtkButton *toggle,
-                gpointer   idx_p)
+button_clicked (GtkButton            *toggle,
+                BzViewSwitcherButton *button)
 {
-  guint           idx  = GPOINTER_TO_UINT (idx_p);
-  BzViewSwitcher *self = NULL;
+  BzViewSwitcher *self   = NULL;
+  gboolean        result = FALSE;
+  guint           idx    = 0;
 
   if (!gtk_widget_has_css_class (GTK_WIDGET (toggle), "flat"))
     return;
 
   self = (BzViewSwitcher *) gtk_widget_get_ancestor (
-      GTK_WIDGET (toggle), BZ_TYPE_VIEW_SWITCHER);
+      GTK_WIDGET (button), BZ_TYPE_VIEW_SWITCHER);
   g_assert (self != NULL);
 
-  gtk_selection_model_select_item (self->pages, idx, TRUE);
+  result = g_ptr_array_find (self->buttons, button, &idx);
+  if (result)
+    gtk_selection_model_select_item (self->pages, idx, TRUE);
 }
 
 static void
