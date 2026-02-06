@@ -94,14 +94,21 @@ template $BzUpdatesCard: Adw.Bin {
                 margin-top: 2;
                 margin-bottom: 2;
 
-                Image {
+                Picture {
+                  height-request: 48;
+                  width-request: 48;
                   paintable: bind template.item as <$BzEntry>.icon-paintable;
-                  pixel-size: 48;
-                  valign: center;
+                  visible: bind $invert_boolean($is_null(template.item as <$BzEntry>.icon-paintable) as <bool>) as <bool>;
+                  styles ["icon-dropshadow"]
+                }
 
-                  styles [
-                    "icon-dropshadow",
-                  ]
+                Image {
+                  height-request: 48;
+                  width-request: 48;
+                  pixel-size: 48;
+                  icon-name: "application-x-executable";
+                  visible: bind $is_null(template.item as <$BzEntry>.icon-paintable) as <bool>;
+                  styles ["icon-dropshadow"]
                 }
 
                 Box {
