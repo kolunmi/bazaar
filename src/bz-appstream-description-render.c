@@ -163,7 +163,7 @@ setup_text_tags (GtkTextBuffer *buffer)
                               NULL);
 
   gtk_text_buffer_create_tag (buffer, "paragraph",
-                              "pixels-below-lines", 10,
+                              "pixels-below-lines", 12,
                               NULL);
 
   gtk_text_buffer_create_tag (buffer, "list-item-ul",
