@@ -69,17 +69,23 @@ template $BzUpdatesCard: Adw.Bin {
       child: Box {
         orientation: vertical;
 
+        styles ["operations"]
+
         Separator {}
 
-        ListView {
+        ListView app_list {
           styles [
             "navigation-sidebar",
-            "operations",
             "installed-list-view",
           ]
 
+          visible: bind $invert_boolean($is_zero(apps_filter_list as <FilterListModel>.n-items) as <bool>) as <bool>;
+
           model: NoSelection {
-            model: bind template.state as <$BzStateInfo>.available-updates;
+            model: FilterListModel apps_filter_list {
+              filter: CustomFilter apps_filter {};
+              model: bind template.state as <$BzStateInfo>.available-updates;
+            };
           };
 
           factory: BuilderListItemFactory {
@@ -159,7 +165,34 @@ template $BzUpdatesCard: Adw.Bin {
             }
           };
         }
+
+        Box runtimes_row {
+          orientation: horizontal;
+          spacing: 10;
+          margin-end: 12;
+          margin-start: 12;
+          margin-top: bind $choose(app_list.visible as <bool>, 8 , 12) as <int>;
+          margin-bottom: 12;
+          visible: bind $invert_boolean($is_zero(runtimes_filter_model as <FilterListModel>.n-items) as <bool>) as <bool>;
+
+          Label {
+            label: bind $format_runtime_count(runtimes_filter_model as <FilterListModel>.n-items) as <string>;
+            hexpand: true;
+            xalign: 0;
+          }
+
+          Button {
+            valign: center;
+            label: _("Update");
+            clicked => $update_runtimes_cb();
+          }
+        }
       };
     }
   };
+}
+
+FilterListModel runtimes_filter_model {
+  filter: CustomFilter runtimes_filter {};
+  model: bind template.state as <$BzStateInfo>.available-updates;
 }

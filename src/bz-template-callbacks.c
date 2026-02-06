@@ -113,6 +113,15 @@ bool_to_string (gpointer object,
   return g_strdup (condition ? if_true : if_false);
 }
 
+static gpointer
+choose (gpointer object,
+        gboolean condition,
+        gpointer if_true,
+        gpointer if_false)
+{
+  return condition ? if_true : if_false;
+}
+
 void
 bz_widget_class_bind_all_util_callbacks (GtkWidgetClass *widget_class)
 {
@@ -130,4 +139,5 @@ bz_widget_class_bind_all_util_callbacks (GtkWidgetClass *widget_class)
   gtk_widget_class_bind_template_callback (widget_class, is_empty_string);
   gtk_widget_class_bind_template_callback (widget_class, is_longer);
   gtk_widget_class_bind_template_callback (widget_class, bool_to_string);
+  gtk_widget_class_bind_template_callback (widget_class, choose);
 }

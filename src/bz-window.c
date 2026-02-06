@@ -314,14 +314,25 @@ update_cb (BzWindow      *self,
 
       for (guint i = n_available; i > 0; i--)
         {
-          g_autoptr (BzEntry) available_entry = g_list_model_get_item (available_updates, i - 1);
-          const char *available_id            = bz_entry_get_id (available_entry);
+          guint                current_size      = 0;
+          guint                idx               = 0;
+          g_autoptr (BzEntry) available_entry = NULL;
+          const char *available_id = NULL;
+
+          idx          = i - 1;
+          current_size = g_list_model_get_n_items (available_updates);
+
+          if (idx >= current_size)
+            continue;
+
+          available_entry = g_list_model_get_item (available_updates, idx);
+          available_id            = bz_entry_get_id (available_entry);
 
           for (guint j = 0; j < n_updates; j++)
             {
               if (g_strcmp0 (available_id, bz_entry_get_id (updates_buf[j])) == 0)
                 {
-                  g_list_store_remove (store, i);
+                  g_list_store_remove (store, idx);
                   break;
                 }
             }
