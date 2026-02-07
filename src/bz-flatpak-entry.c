@@ -377,6 +377,32 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
   }                                         \
   G_STMT_END
 
+  if (!g_log_writer_default_would_drop (G_LOG_LEVEL_DEBUG, G_LOG_DOMAIN))
+    {
+      gsize n_groups        = 0;
+      g_auto (GStrv) groups = NULL;
+
+      g_print ("Debug Key File Data for %s - groups:\n", flatpak_ref_get_name (ref));
+
+      groups = g_key_file_get_groups (key_file, &n_groups);
+      for (gsize i = 0; i < n_groups; i++)
+        {
+          gsize n_keys        = 0;
+          g_auto (GStrv) keys = NULL;
+
+          g_print ("   group %s\n", groups[i]);
+
+          keys = g_key_file_get_keys (key_file, groups[i], &n_keys, NULL);
+          for (gsize j = 0; j < n_keys; j++)
+            {
+              g_autofree char *value = NULL;
+
+              value = g_key_file_get_value (key_file, groups[i], keys[j], NULL);
+              g_print ("     %s=%s\n", keys[j], value);
+            }
+        }
+    }
+
   if (g_key_file_has_group (key_file, "Application"))
     {
       kinds |= BZ_ENTRY_KIND_APPLICATION;
@@ -387,20 +413,16 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
         GET_STRING (application_command, "Application", "command");
     }
 
-  if (g_key_file_has_group (key_file, "Runtime"))
-    {
-      if (!g_key_file_has_group (key_file, "Build"))
-        kinds |= BZ_ENTRY_KIND_RUNTIME;
-
-      GET_STRING (runtime_name, "Runtime", "name");
-    }
-
   if (g_key_file_has_group (key_file, "ExtensionOf"))
     {
-      if (!(kinds & BZ_ENTRY_KIND_RUNTIME))
-        kinds |= BZ_ENTRY_KIND_ADDON;
-
+      kinds |= BZ_ENTRY_KIND_ADDON;
       GET_STRING (addon_extension_of_ref, "ExtensionOf", "ref");
+    }
+
+  if (g_key_file_has_group (key_file, "Runtime"))
+    {
+      kinds |= BZ_ENTRY_KIND_RUNTIME;
+      GET_STRING (runtime_name, "Runtime", "name");
     }
 
 #undef GET_STRING

@@ -1867,9 +1867,6 @@ fiber_replace_entry (BzApplication *self,
                 self->installed_apps, new_group,
                 (GCompareDataFunc) cmp_group, NULL);
         }
-
-      if (eol_runtime != NULL)
-        g_hash_table_remove (self->eol_runtimes, runtime_name);
     }
 
   if (flatpak_id != NULL &&
@@ -1891,7 +1888,9 @@ fiber_replace_entry (BzApplication *self,
         }
     }
 
-  if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_ADDON))
+  if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_ADDON) &&
+      strstr (id, ".Debug") == NULL &&
+      strstr (id, ".Locale") == NULL)
     {
       const char *extension_of_what = NULL;
 

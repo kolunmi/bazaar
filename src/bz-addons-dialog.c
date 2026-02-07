@@ -22,8 +22,10 @@
 
 #include "bz-addons-dialog.h"
 #include "bz-entry.h"
+#include "bz-env.h"
 #include "bz-flatpak-entry.h"
 #include "bz-result.h"
+#include "bz-util.h"
 
 struct _BzAddonsDialog
 {
@@ -31,6 +33,8 @@ struct _BzAddonsDialog
 
   BzResult   *entry;
   GListModel *model;
+
+  DexFuture *task;
 
   /* Template widgets */
   AdwPreferencesGroup *addons_group;
@@ -105,9 +109,9 @@ entry_notify_cb (BzEntry      *entry,
                  GParamSpec   *pspec,
                  AdwActionRow *action_row)
 {
-  g_autofree char *title       = NULL;
-  g_autofree char *description = NULL;
-  GtkButton       *action_button;
+  g_autofree char *title         = NULL;
+  g_autofree char *description   = NULL;
+  GtkButton       *action_button = NULL;
 
   action_button = g_object_get_data (G_OBJECT (action_row), "button");
   if (action_button == NULL)
@@ -124,21 +128,19 @@ entry_notify_cb (BzEntry      *entry,
   update_button_for_entry (action_button, entry);
 }
 
-static void
-update_action_row_from_result (AdwActionRow   *action_row,
-                               BzResult       *result,
-                               BzAddonsDialog *self)
+static AdwActionRow *
+make_action_row (BzAddonsDialog *self,
+                 BzEntry        *entry)
 {
-  BzEntry         *entry           = NULL;
+  AdwActionRow    *action_row      = NULL;
   const char      *flatpak_version = NULL;
   const char      *title           = NULL;
   const char      *description     = NULL;
   g_autofree char *title_text      = NULL;
   GtkButton       *action_button   = NULL;
 
-  entry = bz_result_get_object (result);
-  if (entry == NULL)
-    return;
+  action_row = ADW_ACTION_ROW (adw_action_row_new ());
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (action_row), FALSE);
 
   flatpak_version = bz_flatpak_entry_get_flatpak_version (BZ_FLATPAK_ENTRY (entry));
   title           = bz_entry_get_title (entry);
@@ -165,83 +167,105 @@ update_action_row_from_result (AdwActionRow   *action_row,
 
   g_signal_connect_object (entry, "notify::installed",
                            G_CALLBACK (entry_notify_cb),
-                           action_row, 0);
+                           action_row, G_CONNECT_DEFAULT);
   g_signal_connect_object (entry, "notify::holding",
                            G_CALLBACK (entry_notify_cb),
-                           action_row, 0);
-}
-
-static void
-result_resolved_cb (BzResult   *result,
-                    GParamSpec *pspec,
-                    gpointer    user_data)
-{
-  AdwActionRow   *action_row;
-  BzAddonsDialog *self;
-
-  if (!bz_result_get_resolved (result))
-    return;
-
-  action_row = g_object_get_data (G_OBJECT (result), "action-row");
-  self       = g_object_get_data (G_OBJECT (result), "dialog");
-
-  if (action_row == NULL || self == NULL)
-    return;
-
-  update_action_row_from_result (action_row, result, self);
-}
-
-static AdwActionRow *
-create_addon_action_row (BzAddonsDialog *self,
-                         BzResult       *result)
-{
-  AdwActionRow *action_row;
-
-  action_row = ADW_ACTION_ROW (adw_action_row_new ());
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (action_row), FALSE);
-
-  if (bz_result_get_resolved (result))
-    {
-      update_action_row_from_result (action_row, result, self);
-    }
-  else
-    {
-      g_object_set_data (G_OBJECT (result), "action-row", action_row);
-      g_object_set_data (G_OBJECT (result), "dialog", self);
-      g_signal_connect (result, "notify::resolved",
-                        G_CALLBACK (result_resolved_cb),
-                        NULL);
-    }
+                           action_row, G_CONNECT_DEFAULT);
 
   return action_row;
+}
+
+static gint
+cmp_future (DexFuture *a,
+            DexFuture *b)
+{
+  const GValue *a_val   = NULL;
+  const GValue *b_val   = NULL;
+  BzEntry      *a_entry = NULL;
+  BzEntry      *b_entry = NULL;
+
+  a_val = dex_future_get_value (a, NULL);
+  b_val = dex_future_get_value (b, NULL);
+
+  if (a_val == NULL || b_val == NULL)
+    return 0;
+
+  a_entry = g_value_get_object (a_val);
+  b_entry = g_value_get_object (b_val);
+
+  return strcasecmp (bz_entry_get_title (a_entry),
+                     bz_entry_get_title (b_entry));
+}
+
+static DexFuture *
+populate_addons_fiber (GWeakRef *wr)
+{
+  g_autoptr (BzAddonsDialog) self = NULL;
+  guint n_results                 = 0;
+  g_autoptr (GPtrArray) futures   = NULL;
+
+  bz_weak_get_or_return_reject (self, wr);
+
+  n_results = g_list_model_get_n_items (self->model);
+  futures   = g_ptr_array_new_with_free_func (dex_unref);
+  for (guint i = 0; i < n_results; i++)
+    {
+      g_autoptr (BzResult) result  = NULL;
+      g_autoptr (DexFuture) future = NULL;
+
+      result = g_list_model_get_item (self->model, i);
+      future = bz_result_dup_future (result);
+      if (future != NULL)
+        g_ptr_array_add (futures, g_steal_pointer (&future));
+    }
+  dex_await (
+      dex_future_allv (
+          (DexFuture *const *) futures->pdata,
+          futures->len),
+      NULL);
+  g_ptr_array_sort_values (futures, (GCompareFunc) cmp_future);
+
+  for (guint i = 0; i < futures->len; i++)
+    {
+      DexFuture    *future     = NULL;
+      const GValue *value      = NULL;
+      BzEntry      *entry      = NULL;
+      const char   *id         = NULL;
+      AdwActionRow *action_row = NULL;
+
+      future = g_ptr_array_index (futures, i);
+      value  = dex_future_get_value (future, NULL);
+      if (value == NULL)
+        continue;
+      entry = g_value_get_object (value);
+
+      id = bz_entry_get_id (entry);
+      if (strstr (id, ".Debug") != NULL ||
+          strstr (id, ".Locale") != NULL)
+        continue;
+
+      action_row = make_action_row (self, entry);
+      if (action_row != NULL)
+        adw_preferences_group_add (self->addons_group, GTK_WIDGET (action_row));
+    }
+
+  return dex_future_new_true ();
 }
 
 static void
 populate_addons (BzAddonsDialog *self)
 {
-  guint n_items = 0;
-
-  if (!self->model)
+  if (self->model == NULL ||
+      self->addons_group == NULL)
     return;
 
-  if (!self->addons_group)
-    return;
-
-  n_items = g_list_model_get_n_items (self->model);
-
-  for (guint i = 0; i < n_items; i++)
-    {
-      g_autoptr (BzResult) result = NULL;
-      AdwActionRow *action_row;
-
-      result = g_list_model_get_item (self->model, i);
-      if (!result)
-        continue;
-
-      action_row = create_addon_action_row (self, result);
-      if (action_row)
-        adw_preferences_group_add (self->addons_group, GTK_WIDGET (action_row));
-    }
+  dex_clear (&self->task);
+  self->task = dex_scheduler_spawn (
+      dex_scheduler_get_default (),
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) populate_addons_fiber,
+      bz_track_weak (self),
+      bz_weak_release);
 }
 
 static void
@@ -251,6 +275,7 @@ bz_addons_dialog_dispose (GObject *object)
 
   g_clear_object (&self->entry);
   g_clear_object (&self->model);
+  dex_clear (&self->task);
 
   G_OBJECT_CLASS (bz_addons_dialog_parent_class)->dispose (object);
 }
