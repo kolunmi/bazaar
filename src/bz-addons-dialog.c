@@ -154,6 +154,7 @@ make_action_row (BzAddonsDialog *self,
 
   action_button = GTK_BUTTON (gtk_button_new ());
   gtk_widget_set_valign (GTK_WIDGET (action_button), GTK_ALIGN_CENTER);
+  gtk_widget_add_css_class (GTK_WIDGET (action_button), "flat");
   g_object_set_data_full (G_OBJECT (action_button), "entry", g_object_ref (entry), g_object_unref);
   g_signal_connect_swapped (action_button, "clicked",
                             G_CALLBACK (transact_cb), self);
