@@ -1145,13 +1145,21 @@ bz_entry_group_add (BzEntryGroup *self,
         }
       else
         {
-          self->installable++;
-          if (!bz_entry_is_holding (entry))
+          gboolean is_installed_ref = FALSE;
+
+          if (BZ_IS_FLATPAK_ENTRY (entry))
+            is_installed_ref = bz_flatpak_entry_is_installed_ref (BZ_FLATPAK_ENTRY (entry));
+
+          if (!is_installed_ref)
             {
-              self->installable_available++;
-              g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLABLE_AND_AVAILABLE]);
+              self->installable++;
+              if (!bz_entry_is_holding (entry))
+                {
+                  self->installable_available++;
+                  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLABLE_AND_AVAILABLE]);
+                }
+              g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLABLE]);
             }
-          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLABLE]);
         }
     }
   if (is_searchable && !self->searchable)

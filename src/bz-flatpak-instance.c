@@ -24,6 +24,8 @@
 #include <malloc.h>
 #include <xmlb.h>
 
+#include "config.h"
+
 #include "bz-backend-notification.h"
 #include "bz-backend-transaction-op-payload.h"
 #include "bz-backend-transaction-op-progress-payload.h"
@@ -653,7 +655,23 @@ init_fiber (InitData *data)
       g_clear_pointer (&local_error, g_error_free);
     }
 
-  self->user = flatpak_installation_new_user (NULL, &local_error);
+  #ifdef SANDBOXED_LIBFLATPAK
+    {
+      g_autoptr (GFile) user_installation_path = NULL;
+      const char *home = g_get_home_dir ();
+      g_autofree char *user_flatpak_path = g_build_filename (home, ".local", "share", "flatpak", NULL);
+
+      user_installation_path = g_file_new_for_path (user_flatpak_path);
+      self->user = flatpak_installation_new_for_path (
+          user_installation_path,
+          TRUE,
+          NULL,
+          &local_error);
+    }
+  #else
+    self->user = flatpak_installation_new_user (NULL, &local_error);
+  #endif
+
   if (self->user != NULL)
     {
       self->user_events = flatpak_installation_create_monitor (
@@ -1477,11 +1495,18 @@ retrieve_refs_for_remote_fiber (RetrieveRefsForRemoteData *data)
   FlatpakRemote       *remote         = data->remote;
   const char          *remote_name    = NULL;
   gboolean             is_noenumerate = FALSE;
+  g_autoptr (BzFlatpakInstance) self  = NULL;
+
+  bz_weak_get_or_return_reject (self, data->parent->self);
 
   remote_name    = flatpak_remote_get_name (remote);
   is_noenumerate = flatpak_remote_get_noenumerate (remote);
 
+#ifdef SANDBOXED_LIBFLATPAK
+  if (is_noenumerate || installation == self->user)
+#else
   if (is_noenumerate)
+#endif
     return retrieve_refs_for_noenumerable_remote (data, remote_name, installation, remote);
   else
     return retrieve_refs_for_enumerable_remote (data, remote_name, installation, remote);
