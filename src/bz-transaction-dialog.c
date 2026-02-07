@@ -362,6 +362,7 @@ show_dialog_fiber (ShowDialogData *data)
           bz_transaction_dialog_result_set_confirmed (result, FALSE);
           return dex_future_new_for_object (result);
         }
+      data->auto_confirm = TRUE;
     }
 
   alert = g_object_ref_sink (adw_alert_dialog_new (NULL, NULL));
@@ -372,7 +373,7 @@ show_dialog_fiber (ShowDialogData *data)
 
   radios = create_entry_radio_buttons (ADW_ALERT_DIALOG (alert), store, data->remove);
 
-  if (!data->remove && data->auto_confirm && radios->len <= 1 && risk_groups == BZ_HIGH_RISK_GROUP_NONE)
+  if (!data->remove && data->auto_confirm && radios->len <= 1)
     {
       dialog_response = g_strdup ("install");
       g_ptr_array_set_size (radios, 0);
