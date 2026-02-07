@@ -50,4 +50,7 @@ gboolean
 bz_library_page_ensure_active (BzLibraryPage *self,
                                const char    *initial);
 
+void
+bz_library_page_reset_search (BzLibraryPage *self);
+
 G_END_DECLS
