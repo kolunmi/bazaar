@@ -482,6 +482,14 @@ bz_library_page_ensure_active (BzLibraryPage *self,
   return TRUE;
 }
 
+void
+bz_library_page_reset_search (BzLibraryPage *self)
+{
+  g_return_if_fail (BZ_IS_LIBRARY_PAGE (self));
+
+  gtk_text_set_buffer (self->search_bar, NULL);
+}
+
 static void
 items_changed (BzLibraryPage *self,
                guint          position,
