@@ -71,22 +71,25 @@ static GParamSpec *props[LAST_PROP] = { 0 };
 static gboolean
 is_version_installed (GListModel *installed_versions, const char *version)
 {
-  guint n_items;
+  guint n_items = 0;
 
   if (!installed_versions || !version)
     return FALSE;
 
   n_items = g_list_model_get_n_items (installed_versions);
-
   for (guint i = 0; i < n_items; i++)
     {
-      g_autoptr (GObject) item      = g_list_model_get_item (installed_versions, i);
-      const char *installed_version = GTK_IS_STRING_OBJECT (item)
-                                          ? gtk_string_object_get_string (GTK_STRING_OBJECT (item))
-                                          : NULL;
+      g_autoptr (GObject) item = NULL;
 
-      if (installed_version && g_strcmp0 (installed_version, version) == 0)
-        return TRUE;
+      item = g_list_model_get_item (installed_versions, i);
+      if (GTK_IS_STRING_OBJECT (item))
+        {
+          const char *installed_version = NULL;
+
+          installed_version = gtk_string_object_get_string (GTK_STRING_OBJECT (item));
+          if (installed_version != NULL && g_strcmp0 (installed_version, version) == 0)
+            return TRUE;
+        }
     }
 
   return FALSE;
@@ -191,7 +194,7 @@ create_release_row (const char *version,
 
   gtk_box_append (content_box, GTK_WIDGET (header_box));
 
-  if (description && *description)
+  if (description != NULL && *description)
     {
       description_widget = bz_appstream_description_render_new ();
       bz_appstream_description_render_set_appstream_description (description_widget, description);
@@ -212,7 +215,9 @@ create_release_row (const char *version,
     }
   else
     {
-      GtkLabel *fallback_label = GTK_LABEL (gtk_label_new (_ ("No details for this release")));
+      GtkLabel *fallback_label = NULL;
+
+      fallback_label = GTK_LABEL (gtk_label_new (_ ("No details for this release")));
       gtk_widget_set_margin_top (GTK_WIDGET (fallback_label), 5);
       gtk_widget_add_css_class (GTK_WIDGET (fallback_label), "dim-label");
       gtk_label_set_xalign (fallback_label, 0.0);
