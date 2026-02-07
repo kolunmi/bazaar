@@ -1564,6 +1564,17 @@ retrieve_installs_fiber (GatherRefsData *data)
       G_TYPE_HASH_TABLE, g_steal_pointer (&ids));
 }
 
+static gboolean
+should_skip_extension_ref (FlatpakInstalledRef *iref)
+{
+  const gchar *ref_name = flatpak_ref_get_name (FLATPAK_REF (iref));
+
+  /* These get updated with their parents and look really bad in the UI */
+  return g_str_has_suffix (ref_name, ".Locale") ||
+         g_str_has_suffix (ref_name, ".Debug") ||
+         g_str_has_suffix (ref_name, ".Sources");
+}
+
 static DexFuture *
 retrieve_updates_fiber (GatherRefsData *data)
 {
@@ -1605,7 +1616,6 @@ retrieve_updates_fiber (GatherRefsData *data)
     }
 
   ids = g_ptr_array_new_with_free_func (g_free);
-  g_ptr_array_set_size (ids, n_sys_refs + n_user_refs);
 
   for (guint i = 0; i < n_sys_refs + n_user_refs; i++)
     {
@@ -1623,8 +1633,11 @@ retrieve_updates_fiber (GatherRefsData *data)
           iref = g_ptr_array_index (user_refs, i - n_sys_refs);
         }
 
-      g_ptr_array_index (ids, i) =
-          bz_flatpak_ref_format_unique (FLATPAK_REF (iref), user);
+      if (should_skip_extension_ref (iref))
+        continue;
+
+      g_ptr_array_add (ids,
+                       bz_flatpak_ref_format_unique (FLATPAK_REF (iref), user));
     }
 
   return dex_future_new_take_boxed (

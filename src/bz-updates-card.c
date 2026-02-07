@@ -35,8 +35,11 @@ struct _BzUpdatesCard
   BzStateInfo *state;
 
   /* Template widgets */
-  GtkRevealer *revealer;
-  GtkImage    *toggle_icon;
+  GtkRevealer        *revealer;
+  GtkImage           *toggle_icon;
+  GtkCustomFilter    *apps_filter;
+  GtkCustomFilter    *runtimes_filter;
+  GtkFilterListModel *runtimes_filter_model;
 };
 
 G_DEFINE_FINAL_TYPE (BzUpdatesCard, bz_updates_card, ADW_TYPE_BIN)
@@ -67,6 +70,10 @@ format_version_change (gpointer    object,
                        GListModel *version_history,
                        const char *installed_version);
 
+static char *
+format_runtime_count (gpointer object,
+                      guint    n_items);
+
 static void
 tile_activated_cb (BzListTile    *tile,
                    BzUpdatesCard *self);
@@ -82,6 +89,18 @@ update_entry_cb (GtkListItem *template,
 static void
 update_all_cb (GtkButton     *button,
                BzUpdatesCard *self);
+
+static void
+update_runtimes_cb (GtkButton     *button,
+                    BzUpdatesCard *self);
+
+static gboolean
+filter_apps (BzEntry       *entry,
+             BzUpdatesCard *self);
+
+static gboolean
+filter_runtimes (BzEntry       *entry,
+                 BzUpdatesCard *self);
 
 static void
 bz_updates_card_dispose (GObject *object)
@@ -170,18 +189,31 @@ bz_updates_card_class_init (BzUpdatesCardClass *klass)
 
   gtk_widget_class_bind_template_child (widget_class, BzUpdatesCard, revealer);
   gtk_widget_class_bind_template_child (widget_class, BzUpdatesCard, toggle_icon);
+  gtk_widget_class_bind_template_child (widget_class, BzUpdatesCard, apps_filter);
+  gtk_widget_class_bind_template_child (widget_class, BzUpdatesCard, runtimes_filter);
+  gtk_widget_class_bind_template_child (widget_class, BzUpdatesCard, runtimes_filter_model);
   gtk_widget_class_bind_template_callback (widget_class, format_update_count);
   gtk_widget_class_bind_template_callback (widget_class, format_version_change);
+  gtk_widget_class_bind_template_callback (widget_class, format_runtime_count);
   gtk_widget_class_bind_template_callback (widget_class, tile_activated_cb);
   gtk_widget_class_bind_template_callback (widget_class, show_version_history_cb);
   gtk_widget_class_bind_template_callback (widget_class, update_entry_cb);
   gtk_widget_class_bind_template_callback (widget_class, update_all_cb);
+  gtk_widget_class_bind_template_callback (widget_class, update_runtimes_cb);
 }
 
 static void
 bz_updates_card_init (BzUpdatesCard *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
+
+  gtk_custom_filter_set_filter_func (
+      self->apps_filter, (GtkCustomFilterFunc) filter_apps,
+      self, NULL);
+
+  gtk_custom_filter_set_filter_func (
+      self->runtimes_filter, (GtkCustomFilterFunc) filter_runtimes,
+      self, NULL);
 }
 
 GtkWidget *
@@ -252,6 +284,16 @@ format_version_change (gpointer    object,
     return g_strdup ("");
 
   return g_strdup_printf ("%s → %s", installed_version, new_version);
+}
+
+static char *
+format_runtime_count (gpointer object,
+                      guint    n_items)
+{
+  return g_strdup_printf (ngettext ("%u Runtime Update",
+                                    "%u Runtime Updates",
+                                    n_items),
+                          n_items);
 }
 
 static void
@@ -342,4 +384,49 @@ update_all_cb (GtkButton     *button,
     return;
 
   g_signal_emit (self, signals[SIGNAL_UPDATE], 0, updates);
+}
+
+static void
+update_runtimes_cb (GtkButton     *button,
+                    BzUpdatesCard *self)
+{
+  GListModel *runtimes         = NULL;
+  g_autoptr (GListStore) store = NULL;
+  guint n_items                = 0;
+
+  runtimes = G_LIST_MODEL (self->runtimes_filter_model);
+  n_items  = g_list_model_get_n_items (runtimes);
+
+  if (n_items == 0)
+    return;
+
+  store = g_list_store_new (BZ_TYPE_ENTRY);
+
+  for (guint i = 0; i < n_items; i++)
+    {
+      g_autoptr (BzEntry) entry = g_list_model_get_item (runtimes, i);
+      if (entry != NULL)
+        g_list_store_append (store, entry);
+    }
+
+  g_signal_emit (self, signals[SIGNAL_UPDATE], 0, store);
+}
+
+static gboolean
+filter_apps (BzEntry       *entry,
+             BzUpdatesCard *self)
+{
+  g_return_val_if_fail (BZ_IS_ENTRY (entry), FALSE);
+
+  return bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION);
+}
+
+static gboolean
+filter_runtimes (BzEntry       *entry,
+                 BzUpdatesCard *self)
+{
+  g_return_val_if_fail (BZ_IS_ENTRY (entry), FALSE);
+
+  return bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_RUNTIME) ||
+         bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_ADDON);
 }
