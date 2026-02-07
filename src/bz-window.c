@@ -314,10 +314,10 @@ update_cb (BzWindow      *self,
 
       for (guint i = n_available; i > 0; i--)
         {
-          guint                current_size      = 0;
-          guint                idx               = 0;
+          guint current_size                  = 0;
+          guint idx                           = 0;
           g_autoptr (BzEntry) available_entry = NULL;
-          const char *available_id = NULL;
+          const char *available_id            = NULL;
 
           idx          = i - 1;
           current_size = g_list_model_get_n_items (available_updates);
@@ -326,7 +326,7 @@ update_cb (BzWindow      *self,
             continue;
 
           available_entry = g_list_model_get_item (available_updates, idx);
-          available_id            = bz_entry_get_id (available_entry);
+          available_id    = bz_entry_get_id (available_entry);
 
           for (guint j = 0; j < n_updates; j++)
             {
