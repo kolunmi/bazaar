@@ -20,6 +20,9 @@
 
 #include "config.h"
 
+#include <glib/gi18n.h>
+
+#include "bz-appstream-description-render.h"
 #include "bz-donations-dialog.h"
 #include "bz-template-callbacks.h"
 
@@ -30,7 +33,8 @@ struct _BzDonationsDialog
   BzStateInfo *state;
 
   /* Template widgets */
-  GtkCheckButton *disable_donations_banner_check;
+  GtkLabel                     *title;
+  BzAppstreamDescriptionRender *changelog;
 };
 
 G_DEFINE_FINAL_TYPE (BzDonationsDialog, bz_donations_dialog, ADW_TYPE_DIALOG);
@@ -134,9 +138,12 @@ bz_donations_dialog_class_init (BzDonationsDialogClass *klass)
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
+  g_type_ensure (BZ_TYPE_APPSTREAM_DESCRIPTION_RENDER);
+
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-donations-dialog.ui");
   bz_widget_class_bind_all_util_callbacks (widget_class);
-  gtk_widget_class_bind_template_child (widget_class, BzDonationsDialog, disable_donations_banner_check);
+  gtk_widget_class_bind_template_child (widget_class, BzDonationsDialog, title);
+  gtk_widget_class_bind_template_child (widget_class, BzDonationsDialog, changelog);
   gtk_widget_class_bind_template_callback (widget_class, donate_clicked);
   gtk_widget_class_bind_template_callback (widget_class, banner_disable_toggled);
 }
@@ -144,7 +151,24 @@ bz_donations_dialog_class_init (BzDonationsDialogClass *klass)
 static void
 bz_donations_dialog_init (BzDonationsDialog *self)
 {
+  g_autofree char *title_str             = NULL;
+  g_autoptr (GBytes) release_notes_bytes = NULL;
+  const char *release_notes_text         = NULL;
+
   gtk_widget_init_template (GTK_WIDGET (self));
+
+  /* Translators: the %s format specifier will be something along the lines of "0.7.6" etc */
+  title_str = g_strdup_printf ("What's New in Version %s?", PACKAGE_VERSION);
+  gtk_label_set_label (self->title, title_str);
+
+  release_notes_bytes = g_resources_lookup_data (
+      "/io/github/kolunmi/Bazaar/release-notes.xml",
+      G_RESOURCE_LOOKUP_FLAGS_NONE,
+      NULL);
+  if (release_notes_bytes != NULL)
+    release_notes_text = g_bytes_get_data (release_notes_bytes, NULL);
+  bz_appstream_description_render_set_appstream_description (
+      self->changelog, release_notes_text);
 }
 
 AdwDialog *
@@ -172,16 +196,7 @@ bz_donations_dialog_set_state (BzDonationsDialog *self,
 
   g_clear_pointer (&self->state, g_object_unref);
   if (state != NULL)
-    {
-      GSettings *settings = NULL;
-
-      self->state = g_object_ref (state);
-
-      settings = bz_state_info_get_settings (state);
-      gtk_check_button_set_active (
-          self->disable_donations_banner_check,
-          g_settings_get_boolean (settings, "disable-donations-banner"));
-    }
+    self->state = g_object_ref (state);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_STATE]);
 }

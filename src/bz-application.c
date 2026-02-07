@@ -927,6 +927,8 @@ init_fiber (GWeakRef *wr)
 
       if (wipe_cache)
         {
+          bz_state_info_set_donation_prompt_dismissed (self->state, FALSE);
+
           g_info ("Version incompatibility detected: clearing cache");
           dex_await (bz_reap_file_dex (root_cache_dir_file), NULL);
         }
@@ -944,6 +946,8 @@ init_fiber (GWeakRef *wr)
                      NULL);
         }
     }
+  else
+    bz_state_info_set_donation_prompt_dismissed (self->state, FALSE);
 
   g_clear_object (&self->flatpak);
   self->flatpak = dex_await_object (bz_flatpak_instance_new (), &local_error);
@@ -2571,6 +2575,7 @@ init_service_struct (BzApplication *self,
 
   self->state = bz_state_info_new ();
   bz_state_info_set_busy (self->state, TRUE);
+  bz_state_info_set_donation_prompt_dismissed (self->state, TRUE);
 
   g_signal_connect_swapped (
       self->state,
@@ -2607,10 +2612,6 @@ init_service_struct (BzApplication *self,
   g_assert (app_id != NULL);
   g_debug ("Constructing gsettings for %s ...", app_id);
   self->settings = g_settings_new (app_id);
-
-  bz_state_info_set_donation_prompt_dismissed (
-      self->state,
-      g_settings_get_boolean (self->settings, "disable-donations-banner"));
 
   bz_state_info_set_hide_eol (
       self->state,
