@@ -88,6 +88,7 @@ struct _BzApplication
   DexPromise                 *ready_to_open_files;
   GHashTable                 *eol_runtimes;
   GHashTable                 *ids_to_groups;
+  GHashTable                 *ignore_eol_set;
   GHashTable                 *installed_set;
   GHashTable                 *sys_name_to_addons;
   GHashTable                 *usr_name_to_addons;
@@ -357,6 +358,7 @@ bz_application_dispose (GObject *object)
   g_clear_pointer (&self->blocklist_regexes, g_ptr_array_unref);
   g_clear_pointer (&self->eol_runtimes, g_hash_table_unref);
   g_clear_pointer (&self->ids_to_groups, g_hash_table_unref);
+  g_clear_pointer (&self->ignore_eol_set, g_hash_table_unref);
   g_clear_pointer (&self->init_timer, g_timer_destroy);
   g_clear_pointer (&self->installed_set, g_hash_table_unref);
   g_clear_pointer (&self->sys_name_to_addons, g_hash_table_unref);
@@ -1838,18 +1840,21 @@ fiber_replace_entry (BzApplication *self,
   if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
     {
       BzEntryGroup *group        = NULL;
+      gboolean      ignore_eol   = FALSE;
       const char   *runtime_name = NULL;
       BzEntry      *eol_runtime  = NULL;
 
       group = g_hash_table_lookup (self->ids_to_groups, id);
+      if (self->ignore_eol_set != NULL)
+        ignore_eol = g_hash_table_contains (self->ignore_eol_set, id);
 
       runtime_name = bz_flatpak_entry_get_application_runtime (BZ_FLATPAK_ENTRY (entry));
-      if (runtime_name != NULL)
+      if (!ignore_eol && runtime_name != NULL)
         eol_runtime = g_hash_table_lookup (self->eol_runtimes, runtime_name);
 
       if (group != NULL)
         {
-          bz_entry_group_add (group, entry, eol_runtime);
+          bz_entry_group_add (group, entry, eol_runtime, ignore_eol);
           if (installed && !g_list_store_find (self->installed_apps, group, NULL))
             g_list_store_insert_sorted (
                 self->installed_apps, group,
@@ -1861,7 +1866,7 @@ fiber_replace_entry (BzApplication *self,
 
           g_debug ("Creating new application group for id %s", id);
           new_group = bz_entry_group_new (self->entry_factory);
-          bz_entry_group_add (new_group, entry, eol_runtime);
+          bz_entry_group_add (new_group, entry, eol_runtime, ignore_eol);
 
           g_list_store_append (self->groups, new_group);
           g_hash_table_replace (self->ids_to_groups, g_strdup (id), g_object_ref (new_group));
@@ -2476,7 +2481,31 @@ init_service_struct (BzApplication *self,
       parse_results = bz_parser_process_bytes (
           BZ_PARSER (parser), config_bytes, &local_error);
       if (parse_results != NULL)
-        self->config = g_value_dup_object (g_hash_table_lookup (parse_results, "/"));
+        {
+          GListModel *override_eol_markings = NULL;
+
+          self->config = g_value_dup_object (g_hash_table_lookup (parse_results, "/"));
+
+          override_eol_markings = bz_main_config_get_override_eol_markings (self->config);
+          if (override_eol_markings != NULL)
+            {
+              guint n_appids = 0;
+
+              self->ignore_eol_set = g_hash_table_new_full (
+                  g_str_hash, g_str_equal, g_free, g_free);
+
+              n_appids = g_list_model_get_n_items (override_eol_markings);
+              for (guint i = 0; i < n_appids; i++)
+                {
+                  g_autoptr (GtkStringObject) string = NULL;
+                  const char *value                  = NULL;
+
+                  string = g_list_model_get_item (override_eol_markings, i);
+                  value  = gtk_string_object_get_string (string);
+                  g_hash_table_replace (self->ignore_eol_set, g_strdup (value), NULL);
+                }
+            }
+        }
       else
         g_warning ("Could not load main config at %s: %s",
                    HARDCODED_MAIN_CONFIG, local_error->message);

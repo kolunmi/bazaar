@@ -858,7 +858,8 @@ bz_entry_group_is_searchable (BzEntryGroup *self)
 void
 bz_entry_group_add (BzEntryGroup *self,
                     BzEntry      *entry,
-                    BzEntry      *runtime)
+                    BzEntry      *runtime,
+                    gboolean      ignore_eol)
 {
   g_autoptr (GMutexLocker) locker  = NULL;
   const char   *unique_id          = NULL;
@@ -901,14 +902,17 @@ bz_entry_group_add (BzEntryGroup *self,
   installed_version = bz_entry_get_installed_version (entry);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLED_VERSIONS]);
 
-  eol = bz_entry_get_eol (entry);
-  if (eol == NULL && runtime != NULL)
-    eol = bz_entry_get_eol (runtime);
-  if (eol != NULL)
+  if (!ignore_eol)
     {
-      g_clear_pointer (&self->eol, g_free);
-      self->eol = g_strdup (eol);
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_EOL]);
+      eol = bz_entry_get_eol (entry);
+      if (eol == NULL && runtime != NULL)
+        eol = bz_entry_get_eol (runtime);
+      if (eol != NULL)
+        {
+          g_clear_pointer (&self->eol, g_free);
+          self->eol = g_strdup (eol);
+          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_EOL]);
+        }
     }
 
   title              = bz_entry_get_title (entry);

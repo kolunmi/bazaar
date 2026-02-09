@@ -133,7 +133,8 @@ bz_entry_group_reap_user_data (BzEntryGroup *self);
 void
 bz_entry_group_add (BzEntryGroup *self,
                     BzEntry      *entry,
-                    BzEntry      *runtime);
+                    BzEntry      *runtime,
+                    gboolean      ignore_eol);
 
 void
 bz_entry_group_connect_living (BzEntryGroup *self,
