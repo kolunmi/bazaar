@@ -11,7 +11,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-02-09 15:07+0000\n"
 "PO-Revision-Date: 2026-02-10 01:09+0800\n"
-"Last-Translator: Mikosh <>\n"
+"Last-Translator: jiesou <i@loliis.top>\n"
 "Language-Team: Chinese (China)\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
@@ -680,7 +680,7 @@ msgstr "所有 \"%s\""
 #: src/bz-apps-page.c:530 src/bz-tag-list.c:109
 #, c-format
 msgid "%d Applications"
-msgstr "%d 应用程序"
+msgstr "%d 个应用"
 
 #: src/bz-application.c:672
 msgctxt "About Dialog Developer Credit"
@@ -848,7 +848,7 @@ msgstr "该 %s 应用 ID 的所有权已由 Flathub 团队手动验证。"
 msgid ""
 "The ownership of the %1$s app ID has been verified by <b>%2$s</b> on "
 "<b>%3$s</b>."
-msgstr "%1$s 应用 ID 的所有权已验证为 <b>%3$s</b> 上的 <b>%2$s</b>。"
+msgstr "%1$s 应用 ID 的所有权已验证为是 <b>%3$s</b> 上的 <b>%2$s</b>。"
 
 #: src/bz-developer-badge.c:168
 #, c-format
@@ -973,7 +973,7 @@ msgstr "您标记为收藏的应用程序将在此处显示"
 
 #: src/bz-featured-carousel.blp:31
 msgid "Previous"
-msgstr "前一页"
+msgstr "上一页"
 
 #: src/bz-featured-carousel.blp:53
 msgid "Next"
@@ -981,7 +981,7 @@ msgstr "下一页"
 
 #: src/bz-featured-tile.blp:88
 msgid "App of the Day"
-msgstr "今日 App"
+msgstr "每日应用"
 
 #: src/bz-flathub-category.c:89
 msgid "Editing"
@@ -1070,7 +1070,7 @@ msgstr "模拟"
 
 #: src/bz-flathub-category.c:114
 msgid "Sports"
-msgstr "运动"
+msgstr "体育"
 
 #: src/bz-flathub-category.c:115
 msgid "Strategy"
@@ -1078,7 +1078,7 @@ msgstr "战略"
 
 #: src/bz-flathub-category.c:120
 msgid "Audio & Video"
-msgstr "音频和视频应用"
+msgstr "音频与视频"
 
 #: src/bz-flathub-category.c:120
 msgid "Media"
@@ -1086,11 +1086,11 @@ msgstr "媒体"
 
 #: src/bz-flathub-category.c:120
 msgid "More Audio & Video"
-msgstr "更多音频视频应用"
+msgstr "更多音频与视频"
 
 #: src/bz-flathub-category.c:121
 msgid "Developer Tools"
-msgstr "开发工具"
+msgstr "开发者工具"
 
 #: src/bz-flathub-category.c:121
 msgid "Develop"
@@ -1098,7 +1098,7 @@ msgstr "开发"
 
 #: src/bz-flathub-category.c:121
 msgid "More Developer Tools"
-msgstr "更多开发工具"
+msgstr "更多开发者工具"
 
 #: src/bz-flathub-category.c:122
 msgid "Education"
@@ -1110,7 +1110,7 @@ msgstr "学习"
 
 #: src/bz-flathub-category.c:122
 msgid "More Education"
-msgstr "更多教育应用"
+msgstr "更多教育"
 
 #: src/bz-flathub-category.c:123
 msgid "Gaming"
@@ -1126,7 +1126,7 @@ msgstr "更多游戏"
 
 #: src/bz-flathub-category.c:124
 msgid "Graphics & Photography"
-msgstr "图像和摄影"
+msgstr "图形与摄影"
 
 #: src/bz-flathub-category.c:124
 msgid "Create"
@@ -1134,7 +1134,7 @@ msgstr "创造"
 
 #: src/bz-flathub-category.c:124
 msgid "More Graphics & Photography"
-msgstr "更多图像和摄影"
+msgstr "更多图形与摄影"
 
 #: src/bz-flathub-category.c:125
 msgid "Networking"
@@ -1158,7 +1158,7 @@ msgstr "工作"
 
 #: src/bz-flathub-category.c:126
 msgid "More Productivity"
-msgstr "更多生产力工具"
+msgstr "更多生产力"
 
 #: src/bz-flathub-category.c:127
 msgid "Science"
@@ -1166,7 +1166,7 @@ msgstr "科学"
 
 #: src/bz-flathub-category.c:127
 msgid "More Science"
-msgstr "更多科学工具"
+msgstr "更多科学"
 
 #: src/bz-flathub-category.c:128
 msgid "System"
@@ -1174,7 +1174,7 @@ msgstr "系统"
 
 #: src/bz-flathub-category.c:128
 msgid "More System"
-msgstr "更多系统工具"
+msgstr "更多系统"
 
 #: src/bz-flathub-category.c:129
 msgid "Utilities"
@@ -1182,25 +1182,25 @@ msgstr "实用工具"
 
 #: src/bz-flathub-category.c:129
 msgid "Tools"
-msgstr "系统工具"
+msgstr "工具"
 
 #: src/bz-flathub-category.c:129
 msgid "More Utilities"
-msgstr "更多系统工具"
+msgstr "更多实用工具"
 
 #: src/bz-flathub-category.c:130 src/bz-flathub-page.blp:119
 #: src/bz-flathub-page.blp:152
 msgid "Trending"
-msgstr "近期热门"
+msgstr "飙升"
 
 #: src/bz-flathub-category.c:130
 msgid "More Trending"
-msgstr "更多近期热门应用"
+msgstr "更多飙升应用"
 
 #: src/bz-flathub-category.c:131 src/bz-flathub-page.blp:125
 #: src/bz-flathub-page.blp:185
 msgid "Popular"
-msgstr "人气榜单"
+msgstr "人气"
 
 #: src/bz-flathub-category.c:131
 msgid "More Popular"
@@ -1224,19 +1224,19 @@ msgstr "最近更新"
 
 #: src/bz-flathub-category.c:133 src/bz-flathub-page.blp:137
 msgid "Updated"
-msgstr "近期更新"
+msgstr "最近更新"
 
 #: src/bz-flathub-category.c:133
 msgid "More Updated"
-msgstr "更新近期更新应用"
+msgstr "更多最近更新应用"
 
 #: src/bz-flathub-category.c:134
 msgid "Mobile"
-msgstr "移动端"
+msgstr "移动应用"
 
 #: src/bz-flathub-category.c:134
 msgid "More Mobile"
-msgstr "更多咨询更多移动应用"
+msgstr "更多移动应用"
 
 #: src/bz-flathub-category.c:135
 msgid "Adwaita"
@@ -1540,7 +1540,7 @@ msgstr "其他应用"
 #, c-format
 msgid "%d Application"
 msgid_plural "%d Applications"
-msgstr[0] "%d 应用程序"
+msgstr[0] "%d 个应用"
 
 #: src/bz-full-view.c:1051
 msgid "Show Less"
@@ -1580,19 +1580,19 @@ msgstr "鼠标支持情况"
 
 #: src/bz-hardware-support-dialog.c:71
 msgid "Requires mice or pointing devices"
-msgstr "需要鼠标或指示设备"
+msgstr "需要鼠标或指针设备"
 
 #: src/bz-hardware-support-dialog.c:72
 msgid "Recommends mice or pointing devices"
-msgstr "推荐鼠标或指示设备"
+msgstr "推荐鼠标或指针设备"
 
 #: src/bz-hardware-support-dialog.c:73
 msgid "Supports mice or pointing devices"
-msgstr "支持鼠标或指示设备"
+msgstr "支持鼠标或指针设备"
 
 #: src/bz-hardware-support-dialog.c:74
 msgid "Unknown support for mice or pointing devices"
-msgstr "鼠标或指示设备支持情况未知"
+msgstr "鼠标或指针设备支持情况未知"
 
 #: src/bz-hardware-support-dialog.c:76
 msgid "Touchscreen support"
@@ -1695,7 +1695,7 @@ msgstr[0] "%u 个可用更新"
 
 #: src/bz-license-dialog.blp:95
 msgid "Get Involved"
-msgstr "参与其中"
+msgstr "参与进来"
 
 #: src/bz-license-dialog.c:126
 msgid "Unknown License"
@@ -1703,7 +1703,7 @@ msgstr "未知许可证"
 
 #: src/bz-license-dialog.c:129
 msgid "Community Built"
-msgstr "社区构建"
+msgstr "社区共建"
 
 #: src/bz-license-dialog.c:202
 msgid ""
@@ -1711,13 +1711,13 @@ msgid ""
 "\n"
 "You can participate and help make it even better."
 msgstr ""
-"这款应用由一个国际社区在开放环境中开发而成。\n"
+"此应用由一个国际社区以开源方式开发而成。\n"
 "\n"
-"您可以参与其中，帮助它变得更好。"
+"您可以参与进来，帮助它变得更好。"
 
 #: src/bz-license-dialog.c:205
 msgid "The license of this app is not known"
-msgstr "此应用程序的许可证未知"
+msgstr "此应用的许可证未知"
 
 #: src/bz-license-dialog.c:211
 #, c-format
@@ -1727,9 +1727,9 @@ msgid ""
 "\n"
 "You can participate and help make it even better."
 msgstr ""
-"此应用由国际社区公开开发，并依据 %s 许可证发布。\n"
+"此应用由国际社区开放开发，并根据 %s 许可证发布。\n"
 "\n"
-"您可以参与其中，帮助它变得更好。"
+"您可以参与进来，帮助它变得更好。"
 
 #: src/bz-license-dialog.c:219
 msgid ""
@@ -1739,10 +1739,10 @@ msgid ""
 "\n"
 "You may or may not be able to contribute to this app."
 msgstr ""
-"此应用并非开源开发，因此只有其开发者了解其运作机制。它可能存在难以察觉的安全"
-"隐患，且可能在缺乏监督的情况下发生变更。\n"
+"此应用未采用开放开发，因此只有开发者知道其运作机制。它可能存在难以察觉的安全"
+"漏洞，且可能在缺乏监管的情况下进行更改。\n"
 "\n"
-"您可能无法或能够为本应用做出贡献。"
+"您可能无法为本应用做出贡献。"
 
 #: src/bz-license-dialog.c:225
 #, c-format
@@ -1753,7 +1753,7 @@ msgid ""
 msgstr ""
 "本应用基于特殊许可证 %s 开发。\n"
 "\n"
-"您可能可以或不能为本应用做出贡献。"
+"您可能无法为本应用做出贡献。"
 
 #: src/bz-login-page.blp:5 src/bz-login-page.blp:42
 msgid "Connect to Flathub"
@@ -1823,7 +1823,7 @@ msgstr "隐藏终止支持的应用"
 
 #: src/bz-preferences-dialog.blp:50
 msgid "Hide apps which are no longer supported by their developers"
-msgstr "隐藏开发者不再支持的应用程序"
+msgstr "隐藏开发者不再支持的应用"
 
 #: src/bz-preferences-dialog.blp:55 src/bz-window.blp:197
 msgid "Search"
@@ -1949,11 +1949,11 @@ msgstr "版本历史"
 #: src/bz-releases-list.c:168
 #, c-format
 msgid "Version %s"
-msgstr "版本号 %s"
+msgstr "版本 %s"
 
 #: src/bz-releases-list.c:220
 msgid "No details for this release"
-msgstr "该发行无具体信息"
+msgstr "未提供变更日志"
 
 #: src/bz-releases-list.c:232
 msgid "Get More Information"
@@ -1973,7 +1973,7 @@ msgstr "此应用缺少必要的权限。"
 
 #: src/bz-safety-calculator.c:96
 msgid "No Permissions"
-msgstr "无须权限"
+msgstr "没有权限"
 
 #: src/bz-safety-calculator.c:97
 msgid "App is fully sandboxed"
@@ -1985,15 +1985,15 @@ msgstr "网络访问"
 
 #: src/bz-safety-calculator.c:104
 msgid "Can access the internet"
-msgstr "可以访问互联网"
+msgstr "可访问网络"
 
 #: src/bz-safety-calculator.c:106
 msgid "No Network Access"
-msgstr "无须网络访问"
+msgstr "无网络访问"
 
 #: src/bz-safety-calculator.c:107
 msgid "Cannot access the internet"
-msgstr "无法访问互联网"
+msgstr "不能访问互联网"
 
 #: src/bz-safety-calculator.c:112
 msgid "User Device Access"
@@ -2001,15 +2001,15 @@ msgstr "用户设备访问"
 
 #: src/bz-safety-calculator.c:113
 msgid "Can access devices such as webcams or gaming controllers"
-msgstr "可以访问设备，如摄像头或游戏手柄"
+msgstr "可以访问网络摄像头或游戏控制器等硬件设备"
 
 #: src/bz-safety-calculator.c:115
 msgid "No User Device Access"
-msgstr "无须用户设备访问"
+msgstr "无用户设备访问"
 
 #: src/bz-safety-calculator.c:116
 msgid "Cannot access devices such as webcams or gaming controllers"
-msgstr "无法访问设备，如摄像头或游戏手柄"
+msgstr "应用不能访问网络摄像头或游戏控制器等任何用户设备"
 
 #: src/bz-safety-calculator.c:121
 msgid "Input Device Access"
@@ -2021,11 +2021,11 @@ msgstr "可以访问输入设备"
 
 #: src/bz-safety-calculator.c:128
 msgid "Microphone Access and Audio Playback"
-msgstr "麦克风访问与音频播放"
+msgstr "麦克风访问和音频播放"
 
 #: src/bz-safety-calculator.c:129
 msgid "Can listen using microphones and play audio without asking permission"
-msgstr "可以使用麦克风录制音频，无需请求许可即可播放音频"
+msgstr "无需请求权限即可使用麦克风收听和播放音频"
 
 #: src/bz-safety-calculator.c:135
 msgid "System Device Access"
@@ -2045,11 +2045,11 @@ msgstr "可以访问屏幕或其他窗口的内容"
 
 #: src/bz-safety-calculator.c:149
 msgid "Legacy Windowing System"
-msgstr "传统窗口系统"
+msgstr "过时窗口系统"
 
 #: src/bz-safety-calculator.c:150
 msgid "Always uses a legacy windowing system (X11)"
-msgstr "始终使用传统的窗口系统（X11）"
+msgstr "始终使用过时的窗口系统（X11）"
 
 #: src/bz-safety-calculator.c:156
 msgid "Arbitrary Permissions"
@@ -2065,11 +2065,11 @@ msgstr "用户设置"
 
 #: src/bz-safety-calculator.c:164
 msgid "Can access and change user settings"
-msgstr "可以更改用户设置"
+msgstr "可以访问和更改用户设置"
 
 #: src/bz-safety-calculator.c:170
 msgid "Full File System Read/Write Access"
-msgstr "完整文件系统读写权限"
+msgstr "完全的文件系统读写权限"
 
 #: src/bz-safety-calculator.c:171
 msgid "Can read and write all data on the file system"
@@ -2101,11 +2101,11 @@ msgstr "可以读取您主目录中的所有数据"
 
 #: src/bz-safety-calculator.c:204
 msgid "Download Folder Read/Write Access"
-msgstr "下载文件夹读写访问权限"
+msgstr "下载文件夹读写权限"
 
 #: src/bz-safety-calculator.c:205
 msgid "Can read and write all data in your downloads directory"
-msgstr "可以读取和写入您下载目录中的所有数据"
+msgstr "可以读写下载文件夹中的所有数据"
 
 #: src/bz-safety-calculator.c:215
 msgid "Download Folder Read Access"
@@ -2117,7 +2117,7 @@ msgstr "可以读取您下载目录中的所有数据"
 
 #: src/bz-safety-calculator.c:229
 msgid "Can read and write all data in the directory"
-msgstr "可以读取和写入目录中的所有数据"
+msgstr "可以读写目录中的所有数据"
 
 #: src/bz-safety-calculator.c:243
 msgid "Can read all data in the directory"
@@ -2157,11 +2157,11 @@ msgstr "完全无法访问非门户会话或系统服务"
 
 #: src/bz-safety-calculator.c:331
 msgid "Verified App Developer"
-msgstr "已验证应用开发者"
+msgstr "软件开发者已验证"
 
 #: src/bz-safety-calculator.c:332
 msgid "The developer of this app has been verified to be who they say they are"
-msgstr "此应用的开发者已通过验证，确认其身份属实"
+msgstr "软件开发者的身份已通过验证，使应用更安全"
 
 #: src/bz-safety-calculator.c:341
 msgid "Proprietary Code"
@@ -2181,7 +2181,7 @@ msgstr "可审计代码"
 msgid ""
 "The source code is public and can be independently audited, which makes the "
 "app more likely to be safe"
-msgstr "源代码公开且可独立审计，这使得应用程序更可能安全可靠"
+msgstr "源代码公开且可独立审计，这使得此应用更可能安全可靠"
 
 #: src/bz-safety-calculator.c:493
 #, c-format
@@ -2306,12 +2306,12 @@ msgstr "%s 没有不安全权限"
 #: src/bz-safety-dialog.c:237
 #, c-format
 msgid "%s is Probably Safe"
-msgstr "%s 可能是安全的"
+msgstr "%s 很可能安全"
 
 #: src/bz-safety-dialog.c:242
 #, c-format
 msgid "%s is Possibly Unsafe"
-msgstr "%s 可能是不安全的"
+msgstr "%s 可能不安全"
 
 #: src/bz-safety-dialog.c:247
 #, c-format
@@ -2476,7 +2476,7 @@ msgstr "卸载后将无法使用 %s"
 #: src/bz-transaction-dialog.c:243
 #, c-format
 msgid "“%s” is High Risk"
-msgstr "“%s” 高风险"
+msgstr "“%s” 是高风险的"
 
 #: src/bz-transaction-dialog.c:247
 msgid ""
@@ -2490,7 +2490,7 @@ msgstr ""
 "此应用拥有对您系统的完全访问权限，包括<b>您的所有文件、浏览历史、已保存密码</"
 "b>等。它还能访问互联网，这意味着它可能将您的数据发送给第三方。\n"
 "\n"
-"由于该应用是专有的，其如何利用权限也无法公开审查。\t"
+"由于该应用是专有的，其如何利用权限也无法审查。\t"
 
 #: src/bz-transaction-dialog.c:256
 msgid ""
@@ -2506,7 +2506,7 @@ msgstr ""
 "其他应用程序</b>。同时，该应用具备网络访问权限，这意味着它可能将您的数据发送"
 "给外部。\n"
 "\n"
-"由于该应用是专有的，其如何利用权限也无法公开审查。"
+"由于该应用是专有的，其如何利用权限也无法审查。"
 
 #: src/bz-transaction-dialog.c:272
 msgid "Install Anyway"
@@ -2654,7 +2654,7 @@ msgstr "现在还不能这么做！"
 #: src/bz-world-map.c:587
 msgctxt "As in, \"100 Downloads\""
 msgid "Downloads"
-msgstr "下载"
+msgstr "次下载"
 
 #: src/gtk/shortcuts-dialog.blp:6
 msgctxt "shortcut window"
