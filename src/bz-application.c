@@ -2988,8 +2988,13 @@ validate_group_for_ui (BzApplication *self,
   int         allowed_priority = G_MAXINT;
   int         blocked_priority = G_MAXINT;
 
+  id = bz_entry_group_get_id (group);
+
+  // People will scream at us if we dont give exceptions for these 2 :(
   if (bz_state_info_get_hide_eol (self->state) &&
-      bz_entry_group_get_eol (group) != NULL)
+      bz_entry_group_get_eol (group) != NULL &&
+      g_strcmp0 (id, "com.obsproject.Studio") != 0 &&
+      g_strcmp0 (id, "net.lutris.Lutris") != 0)
     return FALSE;
   if (bz_state_info_get_show_only_foss (self->state) &&
       !bz_entry_group_get_is_floss (group))
@@ -3004,7 +3009,6 @@ validate_group_for_ui (BzApplication *self,
   if (bz_state_info_get_disable_blocklists (self->state))
     return TRUE;
 
-  id = bz_entry_group_get_id (group);
   for (guint i = 0; i < self->txt_blocked_id_sets->len; i++)
     {
       GHashTable *set = NULL;
