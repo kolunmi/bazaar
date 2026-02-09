@@ -28,7 +28,7 @@ msgstr "Bazaar"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:3
 msgid "Add, remove or update flatpak software on this computer"
-msgstr "添加、删除和更新此电脑上的 Flatpak 软件"
+msgstr "添加、卸载和更新此电脑上的 Flatpak 软件"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:9
 msgid "GTK;System;PackageManager;Discover;Flatpak;Software;Store;"
@@ -87,7 +87,7 @@ msgstr "管理附加组件"
 #: src/bz-addons-dialog.c:94 src/bz-full-view.blp:482
 #: src/bz-installed-tile.blp:119 src/bz-transaction-dialog.c:227
 msgid "Remove"
-msgstr "删除"
+msgstr "卸载"
 
 #: src/bz-addons-dialog.c:99 src/bz-favorites-tile.c:174
 #: src/bz-full-view.blp:249 src/bz-full-view.blp:469
@@ -723,7 +723,7 @@ msgstr ""
 "此系统未设置 Flathub。如果 Flathub 不可用，您将无法在 Bazaar 中浏览和安装应用"
 "程序。\n"
 "\n"
-"您仍可使用 Bazaar 浏览和移除已安装的应用程序。"
+"您仍可使用 Bazaar 浏览和卸载已安装的应用程序。"
 
 #: src/bz-application.c:987
 msgid "Later"
@@ -2381,7 +2381,7 @@ msgstr "已复制！"
 
 #: src/bz-share-list.c:116
 msgid "Copy Link"
-msgstr "复制此链接"
+msgstr "复制链接"
 
 #: src/bz-share-list.c:127
 msgid "Open Link"
@@ -2462,11 +2462,11 @@ msgstr "可能还要安装额外的共享组件"
 #: src/bz-transaction-dialog.c:215
 #, c-format
 msgid "Remove %s?"
-msgstr "删除 %s ？"
+msgstr "卸载 %s ？"
 
 #: src/bz-transaction-dialog.c:218
 msgid "Select which version to remove."
-msgstr "选择你要删除的版本"
+msgstr "选择你要卸载的版本"
 
 #: src/bz-transaction-dialog.c:220
 #, c-format
@@ -2645,7 +2645,7 @@ msgstr "登出"
 
 #: src/bz-window.c:683
 msgid "You can't remove Bazaar from Bazaar!"
-msgstr "你无法从 Bazaar 移除 Bazaar！"
+msgstr "你无法用 Bazaar 卸载 Bazaar！"
 
 #: src/bz-window.c:891 src/bz-window.c:925
 msgid "Can't do that right now!"
@@ -2695,59 +2695,59 @@ msgstr "退出"
 #~ msgid "_Refresh Content"
 #~ msgstr "_刷新内容"
 
-#~ msgid "Toggle transaction sidebar"
-#~ msgstr "切换事务侧面板"
+msgid "Toggle transaction sidebar"
+msgstr "切换事务侧面板"
 
-#~ msgid "Install Size"
-#~ msgstr "安装大小"
+msgid "Install Size"
+msgstr "安装大小"
 
-#~ msgid "Ongoing"
-#~ msgstr "进行中"
+msgid "Ongoing"
+msgstr "进行中"
 
-#~ msgid "Finished"
-#~ msgstr "已完成"
+msgid "Finished"
+msgstr "已完成"
 
 #, c-format
 #~ msgid "Transferred %s so far"
 #~ msgstr "目前已传输 %s"
 
-#~ msgid "Tasks"
-#~ msgstr "任务"
+msgid "Tasks"
+msgstr "任务"
 
-#~ msgid "Stop Active Tasks"
-#~ msgstr "停止进行中的任务"
+msgid "Stop Active Tasks"
+msgstr "停止当前任务"
 
-#~ msgid "Clear History"
-#~ msgstr "清除历史"
+msgid "Clear History"
+msgstr "清除历史"
 
-#~ msgid "No Tasks Yet"
-#~ msgstr "当前无任务"
-
-#, c-format
-#~ msgid "%d Update Available"
-#~ msgid_plural "%d Updates Available"
-#~ msgstr[0] "%d 可更新"
-
-#~ msgid "Updates Are Available"
-#~ msgstr "有可用更新"
-
-#~ msgid ""
-#~ "The following applications are eligible for updates. Would you like to "
-#~ "install them?"
-#~ msgstr "以下应用程序可进行更新。您想要安装它们吗？"
+msgid "No Tasks Yet"
+msgstr "当前无任务"
 
 #, c-format
-#~ msgid ""
-#~ "%d runtimes and/or addons are eligible for updates. Would you like to "
-#~ "install them?"
-#~ msgstr "%d 个运行时和/或插件可进行更新。您要安装它们吗？"
+msgid "%d Update Available"
+msgid_plural "%d Updates Available"
+msgstr[0] "%d 个更新"
+
+msgid "Updates Are Available"
+msgstr "有可用更新"
+
+msgid ""
+"The following applications are eligible for updates. Would you like to "
+"install them?"
+msgstr "以下应用可进行更新。您想要安装它们吗？"
 
 #, c-format
-#~ msgid "Additionally, %d runtimes and/or addons will be updated."
-#~ msgstr "此外，%d 个运行时和/或插件也将被更新。"
+msgid ""
+"%d runtimes and/or addons are eligible for updates. Would you like to "
+"install them?"
+msgstr "%d 个运行时和/或插件可进行更新。您要安装它们吗？"
 
-#~ msgid "Update Now"
-#~ msgstr "立即更新"
+#, c-format
+msgid "Additionally, %d runtimes and/or addons will be updated."
+msgstr "此外，%d 个运行时和/或插件也将被更新"
+
+msgid "Update Now"
+msgstr "立即更新"
 
 #~ msgid ""
 #~ "The ability to inspect and install local .flatpak bundle files is coming "
@@ -2764,15 +2764,15 @@ msgstr "退出"
 #~ "\n"
 #~ "以上命令。"
 
-#~ msgid "Resume Current Tasks"
-#~ msgstr "恢复当前任务"
+msgid "Resume Current Tasks"
+msgstr "恢复当前任务"
 
-#~ msgid "Pause Current Tasks"
-#~ msgstr "暂停当前任务"
+msgid "Pause Current Tasks"
+msgstr "暂停当前任务"
 
-#~ msgctxt "shortcut window"
-#~ msgid "Toggle Transaction Manager"
-#~ msgstr "切换事务管理器"
+msgctxt "shortcut window"
+msgid "Toggle Transaction Manager"
+msgstr "切换事务管理器"
 
 #~ msgid "Show Animated Background"
 #~ msgstr "展示动画背景"
@@ -2893,11 +2893,11 @@ msgstr "退出"
 #~ msgid "Maximize Upper Bound"
 #~ msgstr "调低上限"
 
-#~ msgid "Installing"
-#~ msgstr "正在安装"
+msgid "Installing"
+msgstr "正在安装"
 
-#~ msgid "Removing"
-#~ msgstr "正在删除"
+msgid "Removing"
+msgstr "正在卸载"
 
 #~ msgid "Transactions Will Appear Here"
 #~ msgstr "事务会在此显示"
@@ -2938,7 +2938,7 @@ msgstr "退出"
 #~ "\n"
 #~ "Are you sure?"
 #~ msgstr ""
-#~ "您将要删除以下 Flatpak：\n"
+#~ "您将要卸载以下 Flatpak：\n"
 #~ "\n"
 #~ "<b>%s</b>\n"
 #~ "<tt>%s</tt>\n"
