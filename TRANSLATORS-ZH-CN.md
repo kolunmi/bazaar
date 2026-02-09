@@ -8,7 +8,10 @@
 * flathub.org 本身就有良好的中文支持，因此 Bazaar 里 Flathub 页面的翻译应当和 flathub.org 高度一致。
 即使 flathub.org 中个别翻译可能并不恰当，也请直接采用 flathub.org 的原文。
 例如 https://flathub.org/zh-Hans/apps/category/game/subcategories/ArcadeGame 里将 Arcade 翻译为“游乐中心”，虽然实际上是“街机”更合适，但我们依旧选择直接采用“游乐中心”作为翻译
-* 统一 Uninstall 翻译为“卸载”而非“删除”
+
+## 统一术语
+
+Uninstall 为“卸载”而非“删除”
 根据：
 ```bash
 ❯ flatpak uninstall --help
@@ -16,6 +19,9 @@
   flatpak uninstall [选项…] [引用…] - 卸载应用程序或运行时
 ...
 ```
+
+Donate 为“捐助”而非“捐赠”
+根据 flathub.org
 
 ## 基本流程
 
