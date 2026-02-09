@@ -82,7 +82,7 @@ msgmerge --update --verbose po/zh_CN.po po/bazaar.pot
 
 ## 测试你的翻译
 
-确保使用简体中文对应的[语言代码](https://en.wikipedia.org/wiki/List_of_ISO_639_language_cozh_CNs)"zh_CN"！
+确保使用简体中文对应的[语言代码](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes)"zh_CN"！
 
 ```sh
 msgfmt po/zh_CN.po -o bazaar.mo
