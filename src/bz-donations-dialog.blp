@@ -5,7 +5,7 @@ template $BzDonationsDialog: Adw.Dialog {
   width-request: 300;
   height-request: 400;
   content-width: 350;
-  content-height: 700;
+  content-height: 750;
 
   child: Adw.ToolbarView {
     styles [
@@ -18,7 +18,10 @@ template $BzDonationsDialog: Adw.Dialog {
     }
 
     content: ScrolledWindow {
+      hscrollbar-policy: never;
+
       child: Box {
+        valign: center;
         margin-start: 15;
         margin-end: 15;
         margin-top: 10;
@@ -34,7 +37,15 @@ template $BzDonationsDialog: Adw.Dialog {
           margin-bottom: 20;
         }
 
-        $BzAppstreamDescriptionRender changelog {
+        Button {
+          styles [
+            "pill",
+          ]
+          margin-start: 20;
+          margin-end: 20;
+          margin-bottom: 20;
+          label: _("View the Release Page");
+          clicked => $release_page_clicked(template);
         }
 
         Separator {

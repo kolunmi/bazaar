@@ -13,6 +13,10 @@ case "$INSTR" in
             echo "${VERSION}"
         fi
         ;;
+    get-gh-release)
+        TAG="v${VERSION}"
+        echo "https://github.com/kolunmi/bazaar/releases/tag/${TAG}"
+        ;;
     *)
         echo invalid arguments 1>&2
         exit 1
