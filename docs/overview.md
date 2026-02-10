@@ -90,6 +90,20 @@ curated-config-paths:
   - /run/host/etc/bazaar/curated.yaml
 ```
 
+### EOL Overrides
+
+In this file, you can also specify a list of apps for which to hide EOL warnings
+and therefore prevent users from being deterred from installing them:
+
+```yaml
+override-eol-markings:
+  - com.obsproject.Studio
+  - net.lutris.Lutris
+```
+
+(At the time of writing, the projects listed above rely on EOL runtimes but are
+otherwise widely used)
+
 ## Blocklists
 
 Blocklists are a way to ensure that users will never interact with a certain
