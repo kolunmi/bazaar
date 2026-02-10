@@ -16,7 +16,7 @@
     "--socket=wayland",
     "--device=dri",
     "--filesystem=/var/lib/flatpak",
-    "--filesystem=~/.local/share/flatpak",
+    "--filesystem=xdg-data/flatpak",
     "--filesystem=~/.var/app",
     "--talk-name=org.freedesktop.Flatpak",
     "--system-talk-name=org.freedesktop.Flatpak.SystemHelper",
