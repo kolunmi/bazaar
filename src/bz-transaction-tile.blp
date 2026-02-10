@@ -204,6 +204,30 @@ template $BzTransactionTile: $BzListTile {
               }
 
               Box {
+                visible: bind $is_transaction_tracker_errored(template.tracker as <$BzTransactionEntryTracker>.finished-ops) as <bool>;
+                halign: start;
+                spacing: 4;
+                margin-top: 8;
+
+                styles [
+                  "error",
+                  "colored",
+                  "small-pill",
+                  "download-size-pill",
+                ]
+
+                Label {
+                  styles [
+                    "caption-heading",
+                  ]
+
+                  valign: center;
+                  xalign: 0.0;
+                  label: _("Error");
+                }
+              }
+
+              Box {
                 halign: start;
                 spacing: 4;
                 margin-top: 8;
@@ -355,6 +379,8 @@ template $BzTransactionTile: $BzListTile {
                       single-line-mode: true;
                       label: bind template.item as <$BzTransactionTask>.op as <$BzBackendTransactionOpPayload>.name;
                       visible: bind $invert_boolean($is_null(template.item as <$BzTransactionTask>.error) as <bool>) as <bool>;
+                      has-tooltip: true;
+                      tooltip-text: bind template.item as <$BzTransactionTask>.error as <string>;
                     }
                   }
                 };
