@@ -69,17 +69,23 @@ template $BzUpdatesCard: Adw.Bin {
       child: Box {
         orientation: vertical;
 
+        styles ["operations"]
+
         Separator {}
 
-        ListView {
+        ListView app_list {
           styles [
             "navigation-sidebar",
-            "operations",
             "installed-list-view",
           ]
 
+          visible: bind $invert_boolean($is_zero(apps_filter_list as <FilterListModel>.n-items) as <bool>) as <bool>;
+
           model: NoSelection {
-            model: bind template.state as <$BzStateInfo>.available-updates;
+            model: FilterListModel apps_filter_list {
+              filter: CustomFilter apps_filter {};
+              model: bind template.state as <$BzStateInfo>.available-updates;
+            };
           };
 
           factory: BuilderListItemFactory {
@@ -94,14 +100,21 @@ template $BzUpdatesCard: Adw.Bin {
                 margin-top: 2;
                 margin-bottom: 2;
 
-                Image {
+                Picture {
+                  height-request: 48;
+                  width-request: 48;
                   paintable: bind template.item as <$BzEntry>.icon-paintable;
-                  pixel-size: 48;
-                  valign: center;
+                  visible: bind $invert_boolean($is_null(template.item as <$BzEntry>.icon-paintable) as <bool>) as <bool>;
+                  styles ["icon-dropshadow"]
+                }
 
-                  styles [
-                    "icon-dropshadow",
-                  ]
+                Image {
+                  height-request: 48;
+                  width-request: 48;
+                  pixel-size: 48;
+                  icon-name: "application-x-executable";
+                  visible: bind $is_null(template.item as <$BzEntry>.icon-paintable) as <bool>;
+                  styles ["icon-dropshadow"]
                 }
 
                 Box {
@@ -152,7 +165,34 @@ template $BzUpdatesCard: Adw.Bin {
             }
           };
         }
+
+        Box runtimes_row {
+          orientation: horizontal;
+          spacing: 10;
+          margin-end: 12;
+          margin-start: 12;
+          margin-top: bind $choose(app_list.visible as <bool>, 8 , 12) as <int>;
+          margin-bottom: 12;
+          visible: bind $invert_boolean($is_zero(runtimes_filter_model as <FilterListModel>.n-items) as <bool>) as <bool>;
+
+          Label {
+            label: bind $format_runtime_count(runtimes_filter_model as <FilterListModel>.n-items) as <string>;
+            hexpand: true;
+            xalign: 0;
+          }
+
+          Button {
+            valign: center;
+            label: _("Update");
+            clicked => $update_runtimes_cb();
+          }
+        }
       };
     }
   };
+}
+
+FilterListModel runtimes_filter_model {
+  filter: CustomFilter runtimes_filter {};
+  model: bind template.state as <$BzStateInfo>.available-updates;
 }

@@ -5,7 +5,7 @@ template $BzDonationsDialog: Adw.Dialog {
   width-request: 300;
   height-request: 400;
   content-width: 350;
-  content-height: 700;
+  content-height: 750;
 
   child: Adw.ToolbarView {
     styles [
@@ -17,36 +17,75 @@ template $BzDonationsDialog: Adw.Dialog {
       show-title: false;
     }
 
-    content: Adw.StatusPage {
-      icon-name: "heart-filled-symbolic";
-      title: _("Bazaar is a Passion Project");
-      description: _("Support the Future of Linux App Distribution");
+    content: ScrolledWindow {
+      hscrollbar-policy: never;
 
       child: Box {
+        valign: center;
+        margin-start: 15;
+        margin-end: 15;
+        margin-top: 10;
+        margin-bottom: 10;
         orientation: vertical;
-        spacing: 10;
+
+        Label title {
+          styles [
+            "title-1",
+          ]
+          wrap: true;
+          justify: center;
+          margin-bottom: 20;
+        }
+
+        Button {
+          styles [
+            "pill",
+          ]
+          margin-start: 20;
+          margin-end: 20;
+          margin-bottom: 20;
+          label: _("View the Release Page");
+          clicked => $release_page_clicked(template);
+        }
+
+        Separator {
+          margin-top: 20;
+          margin-bottom: 20;
+        }
+
+        Image {
+          icon-name: "heart-filled-symbolic";
+          pixel-size: 128;
+          margin-bottom: 10;
+        }
 
         Label {
+          styles [
+            "title-2",
+          ]
+          margin-bottom: 10;
           wrap: true;
+          justify: center;
+          label: _("This Bazaar Release Was Made Possible By Users Like You!");
+        }
+
+        Label {
+          margin-bottom: 20;
+          wrap: true;
+          justify: center;
           use-markup: true;
           label: _("I love making Bazaar, but I cannot do it alone. If you would like to help support further development, please consider donating to the project at my ko-fi:");
         }
 
-        Adw.Clamp {
-          maximum-size: 250;
-
-          child: Button {
-            styles [
-              "pill",
-            ]
-            label: _("Donate to Bazaar");
-            clicked => $donate_clicked(template);
-          };
-        }
-
-        CheckButton disable_donations_banner_check {
-          label: _("Disable the donations banner on startup");
-          toggled => $banner_disable_toggled(template);
+        Button {
+          styles [
+            "pill",
+          ]
+          margin-start: 20;
+          margin-end: 20;
+          margin-bottom: 20;
+          label: _("Donate to Bazaar");
+          clicked => $donate_clicked(template);
         }
       };
     };

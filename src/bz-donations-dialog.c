@@ -20,6 +20,9 @@
 
 #include "config.h"
 
+#include <glib/gi18n.h>
+
+#include "bz-appstream-description-render.h"
 #include "bz-donations-dialog.h"
 #include "bz-template-callbacks.h"
 
@@ -30,7 +33,7 @@ struct _BzDonationsDialog
   BzStateInfo *state;
 
   /* Template widgets */
-  GtkCheckButton *disable_donations_banner_check;
+  GtkLabel *title;
 };
 
 G_DEFINE_FINAL_TYPE (BzDonationsDialog, bz_donations_dialog, ADW_TYPE_DIALOG);
@@ -100,19 +103,11 @@ donate_clicked (BzDonationsDialog *self,
 }
 
 static void
-banner_disable_toggled (BzDonationsDialog *self,
-                        GtkCheckButton    *button)
+release_page_clicked (BzDonationsDialog *self,
+                      GtkButton         *button)
 {
-  gboolean   disable  = FALSE;
-  GSettings *settings = NULL;
-
-  if (self->state == NULL)
-    return;
-
-  disable = gtk_check_button_get_active (button);
-
-  settings = bz_state_info_get_settings (self->state);
-  g_settings_set_boolean (settings, "disable-donations-banner", disable);
+  g_app_info_launch_default_for_uri (
+      RELEASE_PAGE, NULL, NULL);
 }
 
 static void
@@ -134,17 +129,32 @@ bz_donations_dialog_class_init (BzDonationsDialogClass *klass)
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
+  g_type_ensure (BZ_TYPE_APPSTREAM_DESCRIPTION_RENDER);
+
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-donations-dialog.ui");
   bz_widget_class_bind_all_util_callbacks (widget_class);
-  gtk_widget_class_bind_template_child (widget_class, BzDonationsDialog, disable_donations_banner_check);
+  gtk_widget_class_bind_template_child (widget_class, BzDonationsDialog, title);
   gtk_widget_class_bind_template_callback (widget_class, donate_clicked);
-  gtk_widget_class_bind_template_callback (widget_class, banner_disable_toggled);
+  gtk_widget_class_bind_template_callback (widget_class, release_page_clicked);
 }
 
 static void
 bz_donations_dialog_init (BzDonationsDialog *self)
 {
+  g_autofree char *ui_version = NULL;
+  char            *space      = NULL;
+  g_autofree char *title_str  = NULL;
+
   gtk_widget_init_template (GTK_WIDGET (self));
+
+  ui_version = g_strdup (PACKAGE_VERSION);
+  space      = g_utf8_strchr (ui_version, strlen (PACKAGE_VERSION), ' ');
+  if (space != NULL)
+    *space = '\0';
+
+  /* Translators: the %s format specifier will be something along the lines of "0.7.6" etc */
+  title_str = g_strdup_printf (_("What's New in Version %s?"), ui_version);
+  gtk_label_set_label (self->title, title_str);
 }
 
 AdwDialog *
@@ -172,16 +182,7 @@ bz_donations_dialog_set_state (BzDonationsDialog *self,
 
   g_clear_pointer (&self->state, g_object_unref);
   if (state != NULL)
-    {
-      GSettings *settings = NULL;
-
-      self->state = g_object_ref (state);
-
-      settings = bz_state_info_get_settings (state);
-      gtk_check_button_set_active (
-          self->disable_donations_banner_check,
-          g_settings_get_boolean (settings, "disable-donations-banner"));
-    }
+    self->state = g_object_ref (state);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_STATE]);
 }

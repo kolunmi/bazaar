@@ -44,6 +44,20 @@ enum
   HOOK_DENY,
 };
 
+static inline void
+finish_queued_schedule_data (gpointer ptr);
+
+BZ_DEFINE_DATA (
+    queued_schedule,
+    QueuedSchedule,
+    {
+      GWeakRef      *self;
+      BzTransaction *transaction;
+      DexPromise    *promise;
+      GTimer        *timer;
+    },
+    finish_queued_schedule_data (self);)
+
 struct _BzTransactionManager
 {
   GObject parent_instance;
@@ -56,8 +70,8 @@ struct _BzTransactionManager
   double      current_progress;
   gboolean    pending;
 
-  DexPromise    *cur_promise;
-  BzTransaction *cur_transaction;
+  QueuedScheduleData *current;
+  DexFuture          *loop;
 
   GtkFlattenListModel *all_trackers;
   GtkFilterListModel  *install_trackers;
@@ -95,20 +109,6 @@ enum
   LAST_SIGNAL,
 };
 static guint signals[LAST_SIGNAL];
-
-static inline void
-finish_queued_schedule_data (gpointer ptr);
-
-BZ_DEFINE_DATA (
-    queued_schedule,
-    QueuedSchedule,
-    {
-      GWeakRef      *self;
-      BzTransaction *transaction;
-      DexPromise    *promise;
-      GTimer        *timer;
-    },
-    finish_queued_schedule_data (self);)
 
 BZ_DEFINE_DATA (
     dialog,
@@ -150,8 +150,8 @@ bz_transaction_manager_dispose (GObject *object)
   g_clear_object (&self->backend);
   g_clear_object (&self->transactions);
   g_queue_clear_full (&self->queue, queued_schedule_data_unref);
-  dex_clear (&self->cur_promise);
-  g_clear_object (&self->cur_transaction);
+  g_clear_pointer (&self->current, queued_schedule_data_unref);
+  dex_clear (&self->loop);
 
   G_OBJECT_CLASS (bz_transaction_manager_parent_class)->dispose (object);
 }
@@ -266,13 +266,16 @@ static gpointer
 get_trackers_model (gpointer item,
                     gpointer user_data)
 {
-  BzTransaction *transaction = NULL;
+  BzTransaction *transaction      = NULL;
+  g_autoptr (GListModel) trackers = NULL;
 
   transaction = BZ_TRANSACTION (item);
   if (transaction == NULL)
     return NULL;
 
-  return g_object_ref (bz_transaction_get_trackers (transaction));
+  trackers = g_object_ref (bz_transaction_get_trackers (transaction));
+  g_object_unref (item);
+  return g_steal_pointer (&trackers);
 }
 
 static void
@@ -491,14 +494,14 @@ gboolean
 bz_transaction_manager_get_active (BzTransactionManager *self)
 {
   g_return_val_if_fail (BZ_IS_TRANSACTION_MANAGER (self), FALSE);
-  return self->cur_promise != NULL;
+  return self->loop != NULL;
 }
 
 gboolean
 bz_transaction_manager_get_pending (BzTransactionManager *self)
 {
   g_return_val_if_fail (BZ_IS_TRANSACTION_MANAGER (self), FALSE);
-  return self->cur_promise != NULL && self->pending;
+  return self->loop != NULL && self->pending;
 }
 
 gboolean
@@ -522,20 +525,24 @@ bz_transaction_manager_add (BzTransactionManager *self,
 
   if (self->queue.length > 0)
     {
-      BzTransaction *to_merge[2] = { 0 };
-      guint          position    = 0;
+      BzTransaction *to_merge[2]                = { 0 };
+      g_autoptr (BzTransaction) new_transaction = NULL;
+      guint position                            = 0;
 
       data = g_queue_pop_head (&self->queue);
 
-      to_merge[0] = data->transaction;
-      to_merge[1] = g_steal_pointer (&transaction);
-      transaction = bz_transaction_new_merged (to_merge, G_N_ELEMENTS (to_merge));
-
       g_list_store_find (self->transactions, data->transaction, &position);
-      g_list_store_splice (self->transactions, position, 1, (gpointer *) &transaction, 1);
+      g_assert (position != G_MAXUINT);
 
-      g_clear_object (&data->transaction);
-      data->transaction = transaction;
+      to_merge[0]     = g_steal_pointer (&data->transaction);
+      to_merge[1]     = g_object_ref (transaction);
+      new_transaction = bz_transaction_new_merged (to_merge, G_N_ELEMENTS (to_merge));
+
+      g_list_store_splice (self->transactions, position, 1, (gpointer *) &new_transaction, 1);
+      for (guint i = 0; i < G_N_ELEMENTS (to_merge); i++)
+        g_object_unref (to_merge[i]);
+
+      data->transaction = g_steal_pointer (&new_transaction);
     }
   else
     {
@@ -548,7 +555,7 @@ bz_transaction_manager_add (BzTransactionManager *self,
     }
 
   g_queue_push_head (&self->queue, queued_schedule_data_ref (data));
-  if (self->cur_promise == NULL && !self->paused)
+  if (self->loop == NULL && !self->paused)
     dex_future_disown (dispatch_next (self));
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_TRANSACTIONS]);
@@ -560,24 +567,22 @@ bz_transaction_manager_cancel_current (BzTransactionManager *self)
 {
   g_return_if_fail (BZ_IS_TRANSACTION_MANAGER (self));
 
-  if (self->cur_promise == NULL ||
-      self->cur_transaction == NULL)
+  if (self->current == NULL)
     return;
 
   dex_promise_reject (
-      self->cur_promise,
+      self->current->promise,
       g_error_new (G_IO_ERROR, G_IO_ERROR_CANCELLED, "Cancelled by API"));
-  dex_clear (&self->cur_promise);
-
   g_object_set (
-      self->cur_transaction,
+      self->current->transaction,
       "status", "Cancelled",
       "progress", 1.0,
       "finished", TRUE,
       "success", FALSE,
       "error", "Cancelled by API",
       NULL);
-  g_clear_object (&self->cur_transaction);
+  g_clear_pointer (&self->current, queued_schedule_data_unref);
+  dex_clear (&self->loop);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ACTIVE]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PENDING]);
@@ -1281,15 +1286,7 @@ then_loop_cb (DexFuture *future,
   g_autoptr (BzTransactionManager) self = NULL;
 
   bz_weak_get_or_return_reject (self, wr);
-
-  dex_clear (&self->cur_promise);
-  g_clear_object (&self->cur_transaction);
-  if (self->paused)
-    {
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ACTIVE]);
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PENDING]);
-      return dex_future_new_reject (G_IO_ERROR, G_IO_ERROR_PENDING, "Paused");
-    }
+  g_clear_pointer (&self->current, queued_schedule_data_unref);
   return dispatch_next (self);
 }
 
@@ -1299,11 +1296,24 @@ dispatch_next (BzTransactionManager *self)
   g_autoptr (QueuedScheduleData) data = NULL;
   g_autoptr (DexFuture) future        = NULL;
 
-  if (self->queue.length == 0)
+  if (self->queue.length == 0 || self->paused)
     {
+      dex_clear (&self->loop);
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ACTIVE]);
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PENDING]);
-      return dex_future_new_reject (G_IO_ERROR, G_IO_ERROR_UNKNOWN, "No more futures in queue");
+
+      if (self->queue.length == 0)
+        return dex_future_new_reject (G_IO_ERROR, G_IO_ERROR_UNKNOWN, "No more futures in queue");
+      if (self->paused)
+        return dex_future_new_reject (G_IO_ERROR, G_IO_ERROR_UNKNOWN, "Paused");
+    }
+
+  if (self->current != NULL)
+    {
+      QueuedScheduleData *peek = NULL;
+
+      peek = g_queue_peek_head (&self->queue);
+      return dex_ref (peek->promise);
     }
 
   data = g_queue_pop_tail (&self->queue);
@@ -1325,20 +1335,17 @@ dispatch_next (BzTransactionManager *self)
       future,
       dex_ref (data->promise),
       NULL);
-  future = dex_future_then_loop (
-      future,
-      (DexFutureCallback) then_loop_cb,
-      bz_track_weak (self),
-      bz_weak_release);
-  dex_future_disown (g_steal_pointer (&future));
 
-  dex_clear (&self->cur_promise);
-  self->cur_promise = dex_ref (data->promise);
+  self->current = queued_schedule_data_ref (data);
 
-  g_clear_object (&self->cur_transaction);
-  self->cur_transaction = g_object_ref (data->transaction);
+  if (self->loop == NULL)
+    self->loop = dex_future_then_loop (
+        dex_ref (future),
+        (DexFutureCallback) then_loop_cb,
+        bz_track_weak (self),
+        bz_weak_release);
 
-  return dex_ref (data->promise);
+  return dex_ref (future);
 }
 
 static inline void

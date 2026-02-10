@@ -314,14 +314,25 @@ update_cb (BzWindow      *self,
 
       for (guint i = n_available; i > 0; i--)
         {
-          g_autoptr (BzEntry) available_entry = g_list_model_get_item (available_updates, i - 1);
-          const char *available_id            = bz_entry_get_id (available_entry);
+          guint current_size                  = 0;
+          guint idx                           = 0;
+          g_autoptr (BzEntry) available_entry = NULL;
+          const char *available_id            = NULL;
+
+          idx          = i - 1;
+          current_size = g_list_model_get_n_items (available_updates);
+
+          if (idx >= current_size)
+            continue;
+
+          available_entry = g_list_model_get_item (available_updates, idx);
+          available_id    = bz_entry_get_id (available_entry);
 
           for (guint j = 0; j < n_updates; j++)
             {
               if (g_strcmp0 (available_id, bz_entry_get_id (updates_buf[j])) == 0)
                 {
-                  g_list_store_remove (store, i);
+                  g_list_store_remove (store, idx);
                   break;
                 }
             }
@@ -476,6 +487,7 @@ action_open_library (GtkWidget  *widget,
 
   adw_navigation_view_pop_to_tag (self->navigation_view, "main");
   adw_view_stack_set_visible_child_name (self->main_view_stack, "installed");
+  bz_library_page_reset_search (self->library_page);
 }
 
 static void
@@ -572,6 +584,8 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_install_action (widget_class, "escape", NULL, action_escape);
   gtk_widget_class_install_action (widget_class, "window.user-data", NULL, action_user_data);
   gtk_widget_class_install_action (widget_class, "window.open-library", NULL, action_open_library);
+
+  gtk_widget_class_add_binding_action (widget_class, GDK_KEY_d, GDK_CONTROL_MASK, "window.open-library", NULL);
 }
 
 static gboolean
@@ -842,8 +856,6 @@ transact (BzWindow  *self,
           GtkWidget *source)
 {
   g_autoptr (BzTransaction) transaction = NULL;
-  GdkPaintable *icon                    = NULL;
-  GtkWidget    *transaction_target      = NULL;
 
   if (remove)
     transaction = bz_transaction_new_full (
@@ -855,39 +867,6 @@ transact (BzWindow  *self,
         &entry, 1,
         NULL, 0,
         NULL, 0);
-
-  if (source == NULL)
-    source = GTK_WIDGET (self->navigation_view);
-
-  icon = bz_entry_get_icon_paintable (entry);
-  if (icon != NULL)
-    {
-      g_autoptr (BzComet) comet = NULL;
-
-      if (remove)
-        {
-          AdwStyleManager *style_manager = adw_style_manager_get_default ();
-          gboolean         is_dark       = adw_style_manager_get_dark (style_manager);
-          GdkRGBA          destructive_color;
-
-          if (is_dark)
-            destructive_color = (GdkRGBA) { 0.3, 0.2, 0.21, 0.6 };
-          else
-            destructive_color = (GdkRGBA) { 0.95, 0.84, 0.84, 0.6 };
-
-          bz_comet_overlay_set_pulse_color (self->comet_overlay, &destructive_color);
-        }
-      else
-        bz_comet_overlay_set_pulse_color (self->comet_overlay, NULL);
-
-      comet = g_object_new (
-          BZ_TYPE_COMET,
-          "from", remove ? transaction_target : source,
-          "to", remove ? source : transaction_target,
-          "paintable", icon,
-          NULL);
-      bz_comet_overlay_spawn (self->comet_overlay, comet);
-    }
 
   return bz_transaction_manager_add (
       bz_state_info_get_transaction_manager (self->state),

@@ -34,14 +34,13 @@ template $BzTransactionTile: $BzListTile {
               "transaction-tile-title",
             ]
 
-            margin-start: 4;
             hexpand: true;
             ellipsize: end;
             xalign: 0.0;
             label: bind template.tracker as <$BzTransactionEntryTracker>.entry as <$BzEntry>.title as <string>;
           }
 
-          Revealer {
+          Revealer progress_bars_revealer {
             reveal-child: bind $list_has_items(template.tracker as <$BzTransactionEntryTracker>.current-ops) as <bool>;
             transition-type: slide_down;
 
@@ -53,6 +52,7 @@ template $BzTransactionTile: $BzListTile {
               styles [
                 "navigation-sidebar",
                 "installed-list-view",
+                "user-data-list-view"
               ]
 
               visible: bind $invert_boolean($is_transaction_tracker_removal(template.tracker) as <bool>) as <bool>;
@@ -91,140 +91,142 @@ template $BzTransactionTile: $BzListTile {
               };
             };
           }
-
-          Box {
-            orientation: horizontal;
-            spacing: 4;
-
-            Box {
-              visible: bind $is_entry_addon(template.tracker) as <bool>;
-              halign: start;
+          Revealer {
+            reveal-child: bind progress_bars_revealer.reveal-child inverted;
+            child: Box {
+              orientation: horizontal;
               spacing: 4;
-              margin-top: 8;
 
-              styles [
-                "green",
-                "colored",
-                "small-pill",
-                "download-size-pill",
-              ]
+              Box {
+                visible: bind $is_entry_addon(template.tracker) as <bool>;
+                halign: start;
+                spacing: 4;
+                margin-top: 8;
 
-              Image {
-                icon-name: "puzzle-piece-symbolic";
-                pixel-size: 12;
-              }
-
-              Label {
                 styles [
-                  "caption-heading",
+                  "green",
+                  "colored",
+                  "small-pill",
+                  "download-size-pill",
                 ]
 
-                valign: center;
-                xalign: 0.0;
-                label: _("App Add-on");
-              }
-            }
+                Image {
+                  icon-name: "puzzle-piece-symbolic";
+                  pixel-size: 12;
+                }
 
-            Box {
-              visible: bind $is_entry_runtime(template.tracker) as <bool>;
-              halign: start;
-              spacing: 4;
-              margin-top: 8;
+                Label {
+                  styles [
+                    "caption-heading",
+                  ]
 
-              styles [
-                "blue",
-                "colored",
-                "small-pill",
-                "download-size-pill",
-              ]
-
-              Image {
-                icon-name: "application-x-sharedlib-symbolic";
-                pixel-size: 12;
+                  valign: center;
+                  xalign: 0.0;
+                  label: _("App Add-on");
+                }
               }
 
-              Label {
+              Box {
+                visible: bind $is_entry_runtime(template.tracker) as <bool>;
+                halign: start;
+                spacing: 4;
+                margin-top: 8;
+
                 styles [
-                  "caption-heading",
+                  "blue",
+                  "colored",
+                  "small-pill",
+                  "download-size-pill",
                 ]
 
-                valign: center;
-                xalign: 0.0;
-                label: _("Runtime");
+                Image {
+                  icon-name: "application-x-sharedlib-symbolic";
+                  pixel-size: 12;
+                }
+
+                Label {
+                  styles [
+                    "caption-heading",
+                  ]
+
+                  valign: center;
+                  xalign: 0.0;
+                  label: _("Runtime");
+                }
               }
-            }
 
-            Box {
-              visible: bind $is_queued(template.tracker as <$BzTransactionEntryTracker>.status as <$BzTransactionEntryStatus>) as <bool>;
-              halign: start;
-              spacing: 4;
-              margin-top: 8;
+              Box {
+                visible: bind $is_queued(template.tracker as <$BzTransactionEntryTracker>.status as <$BzTransactionEntryStatus>) as <bool>;
+                halign: start;
+                spacing: 4;
+                margin-top: 8;
 
-              styles [
-                "grey",
-                "colored",
-                "small-pill",
-                "download-size-pill",
-              ]
-
-              Label {
                 styles [
-                  "caption-heading",
+                  "grey",
+                  "colored",
+                  "small-pill",
+                  "download-size-pill",
                 ]
 
-                valign: center;
-                xalign: 0.0;
-                label: _("In Queue");
+                Label {
+                  styles [
+                    "caption-heading",
+                  ]
+
+                  valign: center;
+                  xalign: 0.0;
+                  label: _("In Queue");
+                }
               }
-            }
 
-            Box {
-              visible: bind $is_completed(template.tracker as <$BzTransactionEntryTracker>.status as <$BzTransactionEntryStatus>) as <bool>;
-              halign: start;
-              spacing: 4;
-              margin-top: 8;
+              Box {
+                visible: bind $is_completed(template.tracker as <$BzTransactionEntryTracker>.status as <$BzTransactionEntryStatus>) as <bool>;
+                halign: start;
+                spacing: 4;
+                margin-top: 8;
 
-              styles [
-                "grey",
-                "colored",
-                "small-pill",
-                "download-size-pill",
-              ]
-
-              Label {
                 styles [
-                  "caption-heading",
+                  "grey",
+                  "colored",
+                  "small-pill",
+                  "download-size-pill",
                 ]
 
-                valign: center;
-                xalign: 0.0;
-                label: _("Done");
+                Label {
+                  styles [
+                    "caption-heading",
+                  ]
+
+                  valign: center;
+                  xalign: 0.0;
+                  label: _("Done");
+                }
               }
-            }
 
-            Box {
-              halign: start;
-              spacing: 4;
-              margin-top: 8;
+              Box {
+                halign: start;
+                spacing: 4;
+                margin-top: 8;
 
-              styles [
-                "installed-pill",
-                "small-pill",
-                "download-size-pill",
-              ]
-
-              visible: bind $is_transaction_tracker_removal(template.tracker) as <bool>;
-
-              Label {
                 styles [
-                  "caption-heading",
+                  "installed-pill",
+                  "small-pill",
+                  "download-size-pill",
                 ]
 
-                valign: center;
-                xalign: 0.0;
-                label: bind $format_removal_size(template.tracker as <$BzTransactionEntryTracker>.entry as <$BzEntry>.size) as <string>;
+                visible: bind $is_transaction_tracker_removal(template.tracker) as <bool>;
+
+                Label {
+                  styles [
+                    "caption-heading",
+                  ]
+
+                  valign: center;
+                  xalign: 0.0;
+                  label: bind $format_removal_size(template.tracker as <$BzTransactionEntryTracker>.entry as <$BzEntry>.size) as <string>;
+                }
               }
-            }
+            };
           }
         }
 

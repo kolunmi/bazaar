@@ -42,6 +42,10 @@ should_skip_entry (BzEntry *entry,
   if (bz_entry_is_holding (entry))
     return TRUE;
 
+  if (!remove && BZ_IS_FLATPAK_ENTRY (entry) &&
+      bz_flatpak_entry_is_installed_ref (BZ_FLATPAK_ENTRY (entry)))
+    return TRUE;
+
   is_installed = bz_entry_is_installed (entry);
 
   return (!remove && is_installed) || (remove && !is_installed);
@@ -327,6 +331,18 @@ show_dialog_fiber (ShowDialogData *data)
           bz_show_error_for_widget (data->parent, local_error->message);
           return dex_future_new_for_error (g_steal_pointer (&local_error));
         }
+
+      for (guint i = g_list_model_get_n_items (G_LIST_MODEL (store)); i > 0; i--)
+        {
+          g_autoptr (BzEntry) entry = NULL;
+
+          entry = g_list_model_get_item (G_LIST_MODEL (store), i - 1);
+          if (BZ_IS_FLATPAK_ENTRY (entry) &&
+              bz_flatpak_entry_is_installed_ref (BZ_FLATPAK_ENTRY (entry)) &&
+              (!data->remove || !bz_entry_is_installed (entry)))
+            g_list_store_remove (store, i - 1);
+        }
+
       title = bz_entry_group_get_title (data->group);
       id    = bz_entry_group_get_id (data->group);
 
@@ -362,6 +378,7 @@ show_dialog_fiber (ShowDialogData *data)
           bz_transaction_dialog_result_set_confirmed (result, FALSE);
           return dex_future_new_for_object (result);
         }
+      data->auto_confirm = TRUE;
     }
 
   alert = g_object_ref_sink (adw_alert_dialog_new (NULL, NULL));
@@ -372,7 +389,7 @@ show_dialog_fiber (ShowDialogData *data)
 
   radios = create_entry_radio_buttons (ADW_ALERT_DIALOG (alert), store, data->remove);
 
-  if (!data->remove && data->auto_confirm && radios->len <= 1 && risk_groups == BZ_HIGH_RISK_GROUP_NONE)
+  if (!data->remove && data->auto_confirm && radios->len <= 1)
     {
       dialog_response = g_strdup ("install");
       g_ptr_array_set_size (radios, 0);

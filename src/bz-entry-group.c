@@ -858,7 +858,8 @@ bz_entry_group_is_searchable (BzEntryGroup *self)
 void
 bz_entry_group_add (BzEntryGroup *self,
                     BzEntry      *entry,
-                    BzEntry      *runtime)
+                    BzEntry      *runtime,
+                    gboolean      ignore_eol)
 {
   g_autoptr (GMutexLocker) locker  = NULL;
   const char   *unique_id          = NULL;
@@ -901,14 +902,17 @@ bz_entry_group_add (BzEntryGroup *self,
   installed_version = bz_entry_get_installed_version (entry);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLED_VERSIONS]);
 
-  eol = bz_entry_get_eol (entry);
-  if (eol == NULL && runtime != NULL)
-    eol = bz_entry_get_eol (runtime);
-  if (eol != NULL)
+  if (!ignore_eol)
     {
-      g_clear_pointer (&self->eol, g_free);
-      self->eol = g_strdup (eol);
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_EOL]);
+      eol = bz_entry_get_eol (entry);
+      if (eol == NULL && runtime != NULL)
+        eol = bz_entry_get_eol (runtime);
+      if (eol != NULL)
+        {
+          g_clear_pointer (&self->eol, g_free);
+          self->eol = g_strdup (eol);
+          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_EOL]);
+        }
     }
 
   title              = bz_entry_get_title (entry);
@@ -1145,13 +1149,21 @@ bz_entry_group_add (BzEntryGroup *self,
         }
       else
         {
-          self->installable++;
-          if (!bz_entry_is_holding (entry))
+          gboolean is_installed_ref = FALSE;
+
+          if (BZ_IS_FLATPAK_ENTRY (entry))
+            is_installed_ref = bz_flatpak_entry_is_installed_ref (BZ_FLATPAK_ENTRY (entry));
+
+          if (!is_installed_ref)
             {
-              self->installable_available++;
-              g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLABLE_AND_AVAILABLE]);
+              self->installable++;
+              if (!bz_entry_is_holding (entry))
+                {
+                  self->installable_available++;
+                  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLABLE_AND_AVAILABLE]);
+                }
+              g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLABLE]);
             }
-          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLABLE]);
         }
     }
   if (is_searchable && !self->searchable)
