@@ -487,7 +487,7 @@ action_open_library (GtkWidget  *widget,
 
   adw_navigation_view_pop_to_tag (self->navigation_view, "main");
   adw_view_stack_set_visible_child_name (self->main_view_stack, "installed");
-  bz_library_page_reset_search(self->library_page);
+  bz_library_page_reset_search (self->library_page);
 }
 
 static void

@@ -655,22 +655,22 @@ init_fiber (InitData *data)
       g_clear_pointer (&local_error, g_error_free);
     }
 
-  #ifdef SANDBOXED_LIBFLATPAK
-    {
-      g_autoptr (GFile) user_installation_path = NULL;
-      const char *home = g_get_home_dir ();
-      g_autofree char *user_flatpak_path = g_build_filename (home, ".local", "share", "flatpak", NULL);
+#ifdef SANDBOXED_LIBFLATPAK
+  {
+    g_autoptr (GFile) user_installation_path = NULL;
+    const char      *home                    = g_get_home_dir ();
+    g_autofree char *user_flatpak_path       = g_build_filename (home, ".local", "share", "flatpak", NULL);
 
-      user_installation_path = g_file_new_for_path (user_flatpak_path);
-      self->user = flatpak_installation_new_for_path (
-          user_installation_path,
-          TRUE,
-          NULL,
-          &local_error);
-    }
-  #else
-    self->user = flatpak_installation_new_user (NULL, &local_error);
-  #endif
+    user_installation_path = g_file_new_for_path (user_flatpak_path);
+    self->user             = flatpak_installation_new_for_path (
+        user_installation_path,
+        TRUE,
+        NULL,
+        &local_error);
+  }
+#else
+  self->user = flatpak_installation_new_user (NULL, &local_error);
+#endif
 
   if (self->user != NULL)
     {
