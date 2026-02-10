@@ -155,6 +155,28 @@ is_transaction_tracker_removal (gpointer                   object,
 }
 
 static gboolean
+is_transaction_tracker_errored (gpointer    object,
+                                GListModel *finished_ops)
+{
+  guint n_items = 0;
+
+  if (finished_ops == NULL)
+    return FALSE;
+
+  n_items = g_list_model_get_n_items (finished_ops);
+  for (guint i = 0; i < n_items; i++)
+    {
+      g_autoptr (BzTransactionTask) task = NULL;
+
+      task = g_list_model_get_item (finished_ops, i);
+      if (bz_transaction_task_get_error (task) != NULL)
+        return TRUE;
+    }
+
+  return FALSE;
+}
+
+static gboolean
 list_has_items (gpointer    object,
                 GListModel *model)
 {
@@ -350,6 +372,7 @@ bz_transaction_tile_class_init (BzTransactionTileClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, is_transaction_tracker_install);
   gtk_widget_class_bind_template_callback (widget_class, is_transaction_tracker_update);
   gtk_widget_class_bind_template_callback (widget_class, is_transaction_tracker_removal);
+  gtk_widget_class_bind_template_callback (widget_class, is_transaction_tracker_errored);
   gtk_widget_class_bind_template_callback (widget_class, list_has_items);
   gtk_widget_class_bind_template_callback (widget_class, is_queued);
   gtk_widget_class_bind_template_callback (widget_class, is_ongoing);
