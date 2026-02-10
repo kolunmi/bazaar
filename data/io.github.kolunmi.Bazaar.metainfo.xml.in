@@ -68,6 +68,20 @@
   </screenshots>
 
   <releases>
+    <release version="0.7.7" date="2026-02-09">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.7</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>Better track installed versions of apps</li>
+          <li>Add `enable-bulk-install` key to curated sections</li>
+          <li>Introduce the app library page</li>
+          <li>Add donations dialog</li>
+          <li>Fix broken addon and runtime eol detection</li>
+          <li>Add `override-eol-markings` main config string list</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.7.6" date="2026-01-28">
       <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.6</url>
       <description translate="no">
