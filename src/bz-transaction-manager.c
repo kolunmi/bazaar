@@ -266,13 +266,16 @@ static gpointer
 get_trackers_model (gpointer item,
                     gpointer user_data)
 {
-  BzTransaction *transaction = NULL;
+  BzTransaction *transaction      = NULL;
+  g_autoptr (GListModel) trackers = NULL;
 
   transaction = BZ_TRANSACTION (item);
   if (transaction == NULL)
     return NULL;
 
-  return g_object_ref (bz_transaction_get_trackers (transaction));
+  trackers = g_object_ref (bz_transaction_get_trackers (transaction));
+  g_object_unref (item);
+  return g_steal_pointer (&trackers);
 }
 
 static void
