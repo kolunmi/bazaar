@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-04 13:46+0700\n"
-"PO-Revision-Date: 2026-02-04 13:48+0700\n"
+"POT-Creation-Date: 2026-02-10 22:35+0700\n"
+"PO-Revision-Date: 2026-02-10 22:36+0700\n"
 "Last-Translator: Jill Fiore <contact@lumaeris.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -63,7 +63,7 @@ msgstr ""
 "возможным. Bazaar внедряет вкладку \"Курируемое\", которая настраивается "
 "дистрибьюторами для обеспечения более ориентированного опыта."
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29 src/bz-application.c:701
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29 src/bz-application.c:703
 msgid "Adam Masciola"
 msgstr "Адам Масциола"
 
@@ -83,19 +83,19 @@ msgstr "Страница поиска"
 msgid "Category page"
 msgstr "Страница категорий"
 
-#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:695
+#: src/bz-addons-dialog.blp:16 src/bz-full-view.blp:695
 #: src/bz-installed-tile.blp:101
 msgid "Manage Add-ons"
 msgstr "Управление дополнениями"
 
-#: src/bz-addons-dialog.c:90 src/bz-full-view.blp:482
-#: src/bz-installed-tile.blp:119 src/bz-transaction-dialog.c:242
+#: src/bz-addons-dialog.c:94 src/bz-full-view.blp:482
+#: src/bz-installed-tile.blp:119 src/bz-transaction-dialog.c:231
 msgid "Remove"
 msgstr "Удалить"
 
-#: src/bz-addons-dialog.c:95 src/bz-favorites-tile.c:174
+#: src/bz-addons-dialog.c:99 src/bz-favorites-tile.c:174
 #: src/bz-full-view.blp:249 src/bz-full-view.blp:469
-#: src/bz-transaction-dialog.c:213
+#: src/bz-transaction-dialog.c:202
 msgid "Install"
 msgstr "Установить"
 
@@ -480,7 +480,7 @@ msgid "%s • %s"
 msgstr "%s • %s"
 
 #: src/bz-all-apps-page.blp:13 src/bz-apps-page.blp:14 src/bz-full-view.blp:16
-#: src/bz-user-data-page.blp:15 src/bz-window.blp:303
+#: src/bz-user-data-page.blp:15 src/bz-window.blp:292
 msgid "Main Menu"
 msgstr "Главное меню"
 
@@ -675,7 +675,7 @@ msgid "Caches, settings, and other app data"
 msgstr "Кэши, настройки и другие пользовательские данные"
 
 #. Translators: As in 'The app is installed'.
-#: src/bz-app-tile.blp:86 src/bz-full-view.c:280 src/bz-releases-list.c:175
+#: src/bz-app-tile.blp:86 src/bz-full-view.c:280 src/bz-releases-list.c:178
 msgid "Installed"
 msgstr "Установлено"
 
@@ -693,38 +693,38 @@ msgstr "Все \"%s\""
 msgid "%d Applications"
 msgstr "%d приложений"
 
-#: src/bz-application.c:672
+#: src/bz-application.c:674
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr "Адам Масциола <kolunmi@posteo.net>"
 
-#: src/bz-application.c:673
+#: src/bz-application.c:675
 msgctxt "About Dialog Developer Credit"
 msgid "Alexander Vanhee"
 msgstr "Александр Фанхе"
 
 #. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
-#: src/bz-application.c:704
+#: src/bz-application.c:706
 msgid "translator-credits"
 msgstr "Джилл Фиори <contact@lumaeris.com>, 2025, 2026"
 
-#: src/bz-application.c:715
+#: src/bz-application.c:717
 msgid "Special Thanks"
 msgstr "Особая благодарность"
 
-#: src/bz-application.c:773
+#: src/bz-application.c:775
 msgid "Logged Out Successfully!"
 msgstr "Выход из аккаунта выполнен успешно!"
 
-#: src/bz-application.c:896
+#: src/bz-application.c:898
 msgid "Performing setup..."
 msgstr "Выполняется настройка..."
 
-#: src/bz-application.c:975 src/bz-application.c:984
+#: src/bz-application.c:981 src/bz-application.c:990
 msgid "Set Up Flathub"
 msgstr "Добавить Flathub"
 
-#: src/bz-application.c:978
+#: src/bz-application.c:984
 msgid ""
 "Flathub is not set up on this system. You will not be able to browse and "
 "install applications in Bazaar if its unavailable.\n"
@@ -737,24 +737,24 @@ msgstr ""
 "Вы по-прежнему можете использовать Bazaar для обзора и удаления уже "
 "установленных приложений."
 
-#: src/bz-application.c:983
+#: src/bz-application.c:989
 msgid "Later"
 msgstr "Позже"
 
-#: src/bz-application.c:1393 src/bz-application.c:3087
+#: src/bz-application.c:1399 src/bz-application.c:3116
 msgid "Synchronizing..."
 msgstr "Синхронизация..."
 
-#: src/bz-application.c:1540 src/bz-application.c:3083
+#: src/bz-application.c:1546 src/bz-application.c:3112
 #, c-format
 msgid "Receiving %d entries..."
 msgstr "Получение %d элементов"
 
-#: src/bz-application.c:1545
+#: src/bz-application.c:1551
 msgid "Checking for updates"
 msgstr "Проверка на наличие обновлений"
 
-#: src/bz-application.c:3089
+#: src/bz-application.c:3118
 msgid "Indexing Data..."
 msgstr "Индексация данных..."
 
@@ -880,15 +880,15 @@ msgstr ""
 msgid "The ownership of the %s app ID has been verified."
 msgstr "Право собственности на ID приложения %s было подтверждено."
 
-#: src/bz-donations-dialog.blp:22
-msgid "Bazaar is a Passion Project"
-msgstr "Bazaar - это проект, сделанный с любовью"
+#: src/bz-donations-dialog.blp:47
+msgid "View the Release Page"
+msgstr "Открыть страницу выпуска"
 
-#: src/bz-donations-dialog.blp:23 src/bz-window.blp:219
-msgid "Support the Future of Linux App Distribution"
-msgstr "Поддержите будущее распространения приложений Linux"
+#: src/bz-donations-dialog.blp:69
+msgid "This Bazaar Release Was Made Possible By Users Like You!"
+msgstr "Этот выпуск Bazaar был сделан благодаря таким пользователям, как Вы!"
 
-#: src/bz-donations-dialog.blp:32
+#: src/bz-donations-dialog.blp:77
 msgid ""
 "I love making Bazaar, but I cannot do it alone. If you would like to help "
 "support further development, please consider donating to the project at my "
@@ -898,13 +898,15 @@ msgstr ""
 "захотите поддержать дальнейшую разработку, пожалуйста пожертвуйте проекту в "
 "моём Ko-fi:"
 
-#: src/bz-donations-dialog.blp:42
+#: src/bz-donations-dialog.blp:87
 msgid "Donate to Bazaar"
 msgstr "Поддержать Bazaar"
 
-#: src/bz-donations-dialog.blp:48
-msgid "Disable the donations banner on startup"
-msgstr "Отключить баннер пожертвования при запуске"
+#. Translators: the %s format specifier will be something along the lines of "0.7.6" etc
+#: src/bz-donations-dialog.c:156
+#, c-format
+msgid "What's New in Version %s?"
+msgstr "Что нового в версии %s?"
 
 #: src/bz-entry-group-util.c:73
 msgid "Choose an Installation"
@@ -918,9 +920,9 @@ msgstr ""
 "Вы установили несколько версий данного приложения. Какое вы хотите выбрать "
 "для продолжения?"
 
-#: src/bz-entry-group-util.c:80 src/bz-transaction-dialog.c:212
-#: src/bz-transaction-dialog.c:241 src/bz-transaction-dialog.c:286
-#: src/bz-transaction-dialog.c:595
+#: src/bz-entry-group-util.c:80 src/bz-transaction-dialog.c:201
+#: src/bz-transaction-dialog.c:230 src/bz-transaction-dialog.c:275
+#: src/bz-transaction-dialog.c:578
 msgid "Cancel"
 msgstr "Отмена"
 
@@ -977,12 +979,12 @@ msgstr "Удалить из избранных"
 msgid "Favorites"
 msgstr "Избранные"
 
-#: src/bz-favorites-page.blp:22 src/bz-full-view.blp:31 src/bz-window.blp:318
+#: src/bz-favorites-page.blp:22 src/bz-full-view.blp:31 src/bz-window.blp:307
 msgid "Open App Library"
 msgstr "Открыть библиотеку приложений"
 
 #: src/bz-favorites-page.blp:39 src/bz-section-view.blp:144
-#: src/bz-transaction-dialog.c:596
+#: src/bz-transaction-dialog.c:579
 msgid "Install All"
 msgstr "Установить все"
 
@@ -1723,7 +1725,7 @@ msgstr "Установленные приложения"
 msgid "No matches found for \"%s\" in the list of installed apps"
 msgstr "Нет результатов по запросу \"%s\" в списке установленных приложений"
 
-#: src/bz-library-page.c:165 src/bz-updates-card.c:225
+#: src/bz-library-page.c:165 src/bz-updates-card.c:257
 #, c-format
 msgid "%u Available Update"
 msgid_plural "%u Available Updates"
@@ -1988,20 +1990,20 @@ msgid "Neutrois Pride Colors"
 msgstr "Цвета гордости нейтроис"
 
 #: src/bz-releases-dialog.blp:5 src/bz-releases-list.blp:28
-#: src/bz-updates-card.blp:137
+#: src/bz-updates-card.blp:150
 msgid "Version History"
 msgstr "История версий"
 
-#: src/bz-releases-list.c:165
+#: src/bz-releases-list.c:168
 #, c-format
 msgid "Version %s"
 msgstr "Версия %s"
 
-#: src/bz-releases-list.c:215
+#: src/bz-releases-list.c:220
 msgid "No details for this release"
 msgstr "Нет подробностей"
 
-#: src/bz-releases-list.c:227
+#: src/bz-releases-list.c:232
 msgid "Get More Information"
 msgstr "Получить дополнительную информацию"
 
@@ -2490,58 +2492,58 @@ msgstr "Приложения с меткой \"%s\""
 msgid "Search failed"
 msgstr "Ошибка поиска"
 
-#: src/bz-transaction-dialog.c:166
+#: src/bz-transaction-dialog.c:155
 msgid "Keep Data"
 msgstr "Оставить данные"
 
-#: src/bz-transaction-dialog.c:167
+#: src/bz-transaction-dialog.c:156
 msgid "Allow restoring settings and content"
 msgstr "Возможно восстановление настроек и содержимого"
 
-#: src/bz-transaction-dialog.c:176
+#: src/bz-transaction-dialog.c:165
 msgid "Delete Data"
 msgstr "Удалить данные"
 
-#: src/bz-transaction-dialog.c:177
+#: src/bz-transaction-dialog.c:166
 msgid "Permanently remove app data to save space"
 msgstr "Навсегда удалить данные приложения для сохранения места"
 
-#: src/bz-transaction-dialog.c:202
+#: src/bz-transaction-dialog.c:191
 #, c-format
 msgid "Install %s?"
 msgstr "Установить %s?"
 
-#: src/bz-transaction-dialog.c:207
+#: src/bz-transaction-dialog.c:196
 msgid ""
 "Select which version to install. May install additional shared components"
 msgstr ""
 "Выберите какую версию установить. Может установить дополнительные общие "
 "компоненты"
 
-#: src/bz-transaction-dialog.c:209
+#: src/bz-transaction-dialog.c:198
 msgid "May install additional shared components"
 msgstr "Может установить дополнительные общие компоненты"
 
-#: src/bz-transaction-dialog.c:230
+#: src/bz-transaction-dialog.c:219
 #, c-format
 msgid "Remove %s?"
 msgstr "Удалить %s?"
 
-#: src/bz-transaction-dialog.c:233
+#: src/bz-transaction-dialog.c:222
 msgid "Select which version to remove."
 msgstr "Выберите какую версию удалить."
 
-#: src/bz-transaction-dialog.c:235
+#: src/bz-transaction-dialog.c:224
 #, c-format
 msgid "It will not be possible to use %s after it is uninstalled."
 msgstr "Станет невозможным использовать %s после его удаления."
 
-#: src/bz-transaction-dialog.c:258
+#: src/bz-transaction-dialog.c:247
 #, c-format
 msgid "“%s” is High Risk"
 msgstr "“%s” под высоким риском"
 
-#: src/bz-transaction-dialog.c:262
+#: src/bz-transaction-dialog.c:251
 msgid ""
 "This app has full access to your system, including all <b>your files, "
 "browser history, saved passwords</b>, and more. It also has access to the "
@@ -2558,7 +2560,7 @@ msgstr ""
 "Так как это приложение является проприетарным, проверка на действия с такими "
 "разрешениями является невозможной."
 
-#: src/bz-transaction-dialog.c:271
+#: src/bz-transaction-dialog.c:260
 msgid ""
 "This app uses the legacy X11 windowing system, which allows it to <b>record "
 "all keystrokes, capture screenshots, and monitor other applications</b>. It "
@@ -2576,19 +2578,19 @@ msgstr ""
 "Так как это приложение является проприетарным, проверка на действия с такими "
 "разрешениями является невозможной."
 
-#: src/bz-transaction-dialog.c:287
+#: src/bz-transaction-dialog.c:276
 msgid "Install Anyway"
 msgstr "Всё равно установить"
 
-#: src/bz-transaction-dialog.c:566
+#: src/bz-transaction-dialog.c:549
 msgid "All apps are already installed"
 msgstr "Все приложения уже были установлены"
 
-#: src/bz-transaction-dialog.c:568
+#: src/bz-transaction-dialog.c:551
 msgid "OK"
 msgstr "ОК"
 
-#: src/bz-transaction-dialog.c:584
+#: src/bz-transaction-dialog.c:567
 #, c-format
 msgid "Install %u App?"
 msgid_plural "Install %u Apps?"
@@ -2596,7 +2598,7 @@ msgstr[0] "Установить %u приложение?"
 msgstr[1] "Установить %u приложения?"
 msgstr[2] "Установить %u приложений?"
 
-#: src/bz-transaction-dialog.c:592
+#: src/bz-transaction-dialog.c:575
 msgid ""
 "The following will be installed. Additional shared components may also be "
 "installed"
@@ -2604,37 +2606,37 @@ msgstr ""
 "Перечисленное будет установлено. Дополнительные общие компоненты будут также "
 "установлены."
 
-#: src/bz-transaction-dialog.c:593
+#: src/bz-transaction-dialog.c:576
 #, c-format
 msgid "%d addons will be installed."
 msgstr "%d дополнений будет установлено."
 
-#: src/bz-transaction-dialog.c:594
+#: src/bz-transaction-dialog.c:577
 msgid "Additionally, addons will be installed."
 msgstr "Также будут установлены дополнения."
 
-#: src/bz-transaction-manager.c:1246
+#: src/bz-transaction-manager.c:1251
 #, c-format
 msgid "Finished in %.02f seconds"
 msgstr "Закончено за %.02f секунд"
 
-#: src/bz-transaction-tile.blp:124
+#: src/bz-transaction-tile.blp:125
 msgid "App Add-on"
 msgstr "Дополнение приложения"
 
-#: src/bz-transaction-tile.blp:153
+#: src/bz-transaction-tile.blp:154
 msgid "Runtime"
 msgstr "Среда выполнения"
 
-#: src/bz-transaction-tile.blp:177
+#: src/bz-transaction-tile.blp:178
 msgid "In Queue"
 msgstr "В очереди"
 
-#: src/bz-transaction-tile.blp:201
+#: src/bz-transaction-tile.blp:202
 msgid "Done"
 msgstr "Готово"
 
-#: src/bz-transaction-tile.blp:241
+#: src/bz-transaction-tile.blp:243
 msgid "Open App"
 msgstr "Открыть приложение"
 
@@ -2651,9 +2653,17 @@ msgstr "В ожидании"
 msgid "Update All"
 msgstr "Обновить все"
 
-#: src/bz-updates-card.blp:148
+#: src/bz-updates-card.blp:161 src/bz-updates-card.blp:186
 msgid "Update"
 msgstr "Обновить"
+
+#: src/bz-updates-card.c:293
+#, c-format
+msgid "%u Runtime Update"
+msgid_plural "%u Runtime Updates"
+msgstr[0] "Обновление %u среды выполнения"
+msgstr[1] "Обновление %u сред выполнения"
+msgstr[2] "Обновление %u сред выполнения"
 
 #: src/bz-user-data-page.blp:5
 msgid "Manage Leftover User Data"
@@ -2688,13 +2698,17 @@ msgstr "Курируемое"
 msgid "Flathub"
 msgstr "Flathub"
 
-#: src/bz-window.blp:220
-msgid "See More"
-msgstr "Узнать больше"
-
-#: src/bz-window.blp:284
+#: src/bz-window.blp:273
 msgid "No background tasks!"
 msgstr "Нет фоновых задач!"
+
+#: src/bz-window.blp:325
+msgid "You are running a new version of Bazaar!"
+msgstr "Вы используете новую версию Bazaar!"
+
+#: src/bz-window.blp:326
+msgid "See What's New"
+msgstr "Посмотреть что нового"
 
 #: src/bz-window.blp:333
 msgid ""
@@ -2706,11 +2720,11 @@ msgstr ""
 msgid "Log Out"
 msgstr "Выйти"
 
-#: src/bz-window.c:671
+#: src/bz-window.c:683
 msgid "You can't remove Bazaar from Bazaar!"
 msgstr "Вы не можете удалить Bazaar из Bazaar!"
 
-#: src/bz-window.c:911 src/bz-window.c:945
+#: src/bz-window.c:891 src/bz-window.c:925
 msgid "Can't do that right now!"
 msgstr "Нельзя сделать это прямо сейчас!"
 
@@ -2741,18 +2755,34 @@ msgstr "Синхронизировать репозитории"
 
 #: src/gtk/shortcuts-dialog.blp:24
 msgctxt "shortcut window"
-msgid "Toggle Transaction Manager"
-msgstr "Переключить боковую панель транзакций"
+msgid "Open Library"
+msgstr "Открыть библиотеку"
 
-#: src/gtk/shortcuts-dialog.blp:29
+#: src/gtk/shortcuts-dialog.blp:30
 msgctxt "shortcut window"
 msgid "Show Shortcuts"
 msgstr "Открыть сочетания клавиш"
 
-#: src/gtk/shortcuts-dialog.blp:34
+#: src/gtk/shortcuts-dialog.blp:35
 msgctxt "shortcut window"
 msgid "Quit"
 msgstr "Закрыть"
+
+#~ msgid "Bazaar is a Passion Project"
+#~ msgstr "Bazaar - это проект, сделанный с любовью"
+
+#~ msgid "Support the Future of Linux App Distribution"
+#~ msgstr "Поддержите будущее распространения приложений Linux"
+
+#~ msgid "Disable the donations banner on startup"
+#~ msgstr "Отключить баннер пожертвования при запуске"
+
+#~ msgid "See More"
+#~ msgstr "Узнать больше"
+
+#~ msgctxt "shortcut window"
+#~ msgid "Toggle Transaction Manager"
+#~ msgstr "Переключить боковую панель транзакций"
 
 #~ msgid "_Refresh Content"
 #~ msgstr "_Обновить содержимое"

@@ -153,7 +153,7 @@ bz_donations_dialog_init (BzDonationsDialog *self)
     *space = '\0';
 
   /* Translators: the %s format specifier will be something along the lines of "0.7.6" etc */
-  title_str = g_strdup_printf ("What's New in Version %s?", ui_version);
+  title_str = g_strdup_printf (_("What's New in Version %s?"), ui_version);
   gtk_label_set_label (self->title, title_str);
 }
 
