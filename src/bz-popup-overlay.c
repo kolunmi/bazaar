@@ -47,6 +47,7 @@ BZ_DEFINE_DATA (
       GtkWidget      *source;
       graphene_rect_t allocation;
       gboolean        initialized;
+      gboolean        closed;
 
       graphene_point_t offset;
       graphene_size_t  scale;
@@ -172,6 +173,12 @@ bz_popup_overlay_size_allocate (GtkWidget *widget,
 
       data = g_ptr_array_index (self->stack, i);
 
+      if (data->closed && G_APPROX_VALUE (data->opacity, 0.0, 0.001))
+        {
+          g_ptr_array_remove_index (self->stack, i);
+          continue;
+        }
+
       result = gtk_widget_compute_bounds (data->source, GTK_WIDGET (self), &source_bounds);
       if (!result)
         {
@@ -215,40 +222,65 @@ bz_popup_overlay_size_allocate (GtkWidget *widget,
           g_snprintf (buf, sizeof (buf), "x-%p", data);
           bz_animation_add_spring (
               self->animation, buf,
-              popup_bounds.origin.x - source_bounds.origin.x, 0.0,
-              0.9, 1.0, 0.1,
+              data->closed
+                  ? data->offset.x
+                  : popup_bounds.origin.x - source_bounds.origin.x,
+              data->closed
+                  ? popup_bounds.origin.x - source_bounds.origin.x
+                  : 0.0,
+              0.9, 1.0, 10.0,
               (BzAnimationCallback) animate,
               popup_data_ref (data), popup_data_unref);
 
           buf[0] = 'y';
           bz_animation_add_spring (
               self->animation, buf,
-              popup_bounds.origin.y - source_bounds.origin.y, 0.0,
-              0.9, 1.0, 0.1,
+              data->closed
+                  ? data->offset.y
+                  : popup_bounds.origin.y - source_bounds.origin.y,
+              data->closed
+                  ? popup_bounds.origin.y - source_bounds.origin.y
+                  : 0.0,
+              0.9, 1.0, 10.0,
               (BzAnimationCallback) animate,
               popup_data_ref (data), popup_data_unref);
 
           buf[0] = 'w';
           bz_animation_add_spring (
               self->animation, buf,
-              0.0, 1.0,
-              0.9, 1.0, 0.1,
+              data->closed
+                  ? data->scale.width
+                  : 0.0,
+              data->closed
+                  ? 0.0
+                  : 1.0,
+              0.9, 1.0, 10.0,
               (BzAnimationCallback) animate,
               popup_data_ref (data), popup_data_unref);
 
           buf[0] = 'h';
           bz_animation_add_spring (
               self->animation, buf,
-              0.0, 1.0,
-              0.9, 1.0, 0.1,
+              data->closed
+                  ? data->scale.height
+                  : 0.0,
+              data->closed
+                  ? 0.0
+                  : 1.0,
+              0.9, 1.0, 10.0,
               (BzAnimationCallback) animate,
               popup_data_ref (data), popup_data_unref);
 
           buf[0] = 'o';
           bz_animation_add_spring (
               self->animation, buf,
-              0.0, 1.0,
-              1.0, 1.0, 0.2,
+              data->closed
+                  ? data->opacity
+                  : 0.0,
+              data->closed
+                  ? 0.0
+                  : 1.0,
+              1.0, 1.0, 1.0,
               (BzAnimationCallback) animate,
               popup_data_ref (data), popup_data_unref);
 
@@ -487,10 +519,19 @@ close_request_cb (BzPopupOverlay *self,
 {
   if (self->stack->len > 0)
     {
-      g_ptr_array_remove_index (self->stack, self->stack->len - 1);
+      PopupData *data = NULL;
+
+      data = g_ptr_array_index (self->stack, self->stack->len - 1);
+      gtk_widget_set_sensitive (data->child, FALSE);
+      data->initialized = FALSE;
+      data->closed      = TRUE;
+
+      gtk_widget_queue_allocate (GTK_WIDGET (self));
+
       return GDK_EVENT_STOP;
     }
-  return GDK_EVENT_PROPAGATE;
+  else
+    return GDK_EVENT_PROPAGATE;
 }
 
 /* End of bz-popup-overlay.c */

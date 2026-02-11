@@ -418,7 +418,7 @@ oscillate (SpringData *data,
            double      time,
            double     *velocity)
 {
-  double t        = time * 100.0; // ?
+  double t        = time;
   double b        = data->damping_ratio;
   double m        = data->mass;
   double k        = data->stiffness;
@@ -504,20 +504,20 @@ get_first_zero (SpringData *data)
 {
   /* The first frame is not that important and we avoid finding the trivial 0
    * for in-place animations. */
-  double i = 0.0;
+  int    i = 0;
   double y = 0.0;
 
-  i = 0.001;
-  y = oscillate (data, i, NULL);
+  i = 1;
+  y = oscillate (data, (double) i * 0.001, NULL);
 
   while ((data->to - data->from > DBL_EPSILON && data->to - y > EPSILON) ||
          (data->from - data->to > DBL_EPSILON && y - data->to > EPSILON))
     {
-      if (i > 2.0)
+      if (i > 20000)
         return 0.0;
 
-      i += 0.001;
-      y = oscillate (data, i, NULL);
+      i++;
+      y = oscillate (data, (double) i * 0.001, NULL);
     }
 
   return i;
@@ -533,7 +533,7 @@ calculate_duration (SpringData *data)
   double x1     = 0.0;
   double y1     = 0.0;
   double m      = 0.0;
-  double i      = 0.0;
+  int    i      = 0;
 
   beta = data->damping_ratio / (2 * data->mass);
 
@@ -577,7 +577,7 @@ calculate_duration (SpringData *data)
 
   while (ABS (data->to - y1) > EPSILON)
     {
-      if (i > 1.0)
+      if (i > 10000)
         return 0.0;
 
       x0 = x1;
@@ -587,7 +587,7 @@ calculate_duration (SpringData *data)
 
       x1 = (data->to - y0 + m * x0) / m;
       y1 = oscillate (data, x1, NULL);
-      i += 0.001;
+      i++;
     }
 
   return x1;
