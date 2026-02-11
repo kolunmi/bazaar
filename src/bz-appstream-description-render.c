@@ -317,6 +317,7 @@ compile (BzAppstreamDescriptionRender *self,
   XbNode      *child      = NULL;
   int          kind       = NO_ELEMENT;
   GtkTextMark *start_mark = NULL;
+  int          child_count= 0;
 
   element    = xb_node_get_element (node);
   text       = xb_node_get_text (node);
@@ -354,7 +355,7 @@ compile (BzAppstreamDescriptionRender *self,
               gtk_text_buffer_apply_tag_by_name (buffer, "list-number", &prefix_start_iter, iter);
               gtk_text_buffer_delete_mark (buffer, prefix_start_mark);
             }
-          else if (parent_kind == UNORDERED_LIST)
+          else
             gtk_text_buffer_insert (buffer, iter, "• ", -1);
         }
       else if (g_strcmp0 (element, "code") == 0)
@@ -398,6 +399,7 @@ compile (BzAppstreamDescriptionRender *self,
 
       g_object_unref (child);
       child = next;
+      child_count++;
     }
 
   if (start_mark != NULL)
@@ -426,7 +428,7 @@ compile (BzAppstreamDescriptionRender *self,
 
   if (kind == PARAGRAPH && !is_last_sibling)
     gtk_text_buffer_insert (buffer, iter, "\n", 1);
-  else if ((kind == ORDERED_LIST || kind == UNORDERED_LIST) && !is_last_sibling)
+  else if ((kind == ORDERED_LIST || kind == UNORDERED_LIST) && !is_last_sibling && child_count > 0)
     gtk_text_buffer_insert (buffer, iter, "\n", 1);
 }
 
