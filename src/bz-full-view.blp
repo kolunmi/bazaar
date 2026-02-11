@@ -7,6 +7,19 @@ template $BzFullView: Adw.Bin {
 
     [top]
     Adw.HeaderBar header_bar {
+      overflow: hidden;
+
+      [title]
+      Revealer {
+        reveal-child: bind $is_scrolled_down(main_scroll.vadjustment as <Adjustment>.value) as <bool>;
+        transition-type: slide_up;
+        transition-duration: 500;
+        overflow: visible;
+        child: Label {
+          label: bind template.entry-group as <$BzEntryGroup>.title;
+          styles ["title"]
+        };
+      }
 
       [end]
       MenuButton {

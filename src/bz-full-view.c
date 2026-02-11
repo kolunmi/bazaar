@@ -200,6 +200,13 @@ format_with_small_suffix (char *number, const char *suffix)
                           number, suffix);
 }
 
+static gboolean
+is_scrolled_down (gpointer object,
+                  double   value)
+{
+  return value > 100.0;
+}
+
 static char *
 format_favorites_count (gpointer object,
                         int      favorites_count)
@@ -1177,6 +1184,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzFullView, wide_install_button);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, narrow_install_button);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, narrow_open_button);
+  gtk_widget_class_bind_template_callback (widget_class, is_scrolled_down);
   gtk_widget_class_bind_template_callback (widget_class, format_favorites_count);
   gtk_widget_class_bind_template_callback (widget_class, format_recent_downloads);
   gtk_widget_class_bind_template_callback (widget_class, format_recent_downloads_tooltip);
