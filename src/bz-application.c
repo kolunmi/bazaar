@@ -1882,19 +1882,19 @@ fiber_replace_entry (BzApplication *self,
       bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_RUNTIME) &&
       g_str_has_prefix (flatpak_id, "runtime/"))
     {
-      const char *eol = NULL;
+      const char *stripped = NULL;
+      const char *eol      = NULL;
+
+      stripped = flatpak_id + strlen ("runtime/");
 
       eol = bz_entry_get_eol (entry);
       if (eol != NULL)
-        {
-          g_autofree char *stripped = NULL;
-
-          stripped = g_strdup (flatpak_id + strlen ("runtime/"));
-          g_hash_table_replace (
-              self->eol_runtimes,
-              g_steal_pointer (&stripped),
-              g_object_ref (entry));
-        }
+        g_hash_table_replace (
+            self->eol_runtimes,
+            g_strdup (stripped),
+            g_object_ref (entry));
+      else
+        g_hash_table_remove (self->eol_runtimes, stripped);
     }
 
   if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_ADDON) &&
