@@ -1,10 +1,10 @@
 using Gtk 4.0;
 using Adw 1;
 
-template $BzSafetyDialog: Adw.Dialog {
+template $BzSafetyDialog: $BzPopup {
   content-height: 576;
   content-width: 640;
-  title: _("Safety");
+  // title: _("Safety");
 
   child: Adw.ToolbarView {
     [top]

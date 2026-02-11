@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <gtk/gtk.h>
+#include "bz-popup.h"
 
 G_BEGIN_DECLS
 
@@ -39,11 +39,11 @@ bz_popup_overlay_set_child (BzPopupOverlay *self,
 
 void
 bz_popup_overlay_push (BzPopupOverlay *self,
-                       GtkWidget      *widget,
+                       BzPopup        *popup,
                        GtkWidget      *source);
 
 void
-bz_popup_present (GtkWidget *popup,
+bz_popup_present (BzPopup   *popup,
                   GtkWidget *source);
 
 G_END_DECLS

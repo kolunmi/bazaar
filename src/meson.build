@@ -49,8 +49,9 @@ gdbus_src = gnome.gdbus_codegen(
 )
 
 bz_sources = files(
+  #'bz-view-switcher-button.c',
+  #'bz-view-switcher.c',
   'bz-addons-dialog.c',
-  'bz-donations-dialog.c',
   'bz-age-rating-dialog.c',
   'bz-all-apps-page.c',
   'bz-animation.c',
@@ -77,6 +78,7 @@ bz_sources = files(
   'bz-data-graph.c',
   'bz-decorated-screenshot.c',
   'bz-developer-badge.c',
+  'bz-donations-dialog.c',
   'bz-download-worker.c',
   'bz-dynamic-list-view.c',
   'bz-entry-cache-manager.c',
@@ -120,6 +122,7 @@ bz_sources = files(
   'bz-newline-parser.c',
   'bz-parser.c',
   'bz-popup-overlay.c',
+  'bz-popup.c',
   'bz-preferences-dialog.c',
   'bz-progress-bar.c',
   'bz-releases-list.c',
@@ -151,8 +154,6 @@ bz_sources = files(
   'bz-updates-card.c',
   'bz-user-data-page.c',
   'bz-user-data-tile.c',
-  #'bz-view-switcher-button.c',
-  #'bz-view-switcher.c',
   'bz-window.c',
   'bz-world-map-parser.c',
   'bz-world-map.c',

@@ -40,6 +40,7 @@
 #include "bz-hardware-support-dialog.h"
 #include "bz-lazy-async-texture-model.h"
 #include "bz-license-dialog.h"
+#include "bz-popup-overlay.h"
 #include "bz-releases-list.h"
 #include "bz-safety-calculator.h"
 #include "bz-safety-dialog.h"
@@ -903,14 +904,13 @@ static void
 safety_cb (BzFullView *self,
            GtkButton  *button)
 {
-  AdwDialog *dialog = NULL;
+  GtkWidget *dialog = NULL;
 
   if (self->group == NULL)
     return;
 
-  dialog = ADW_DIALOG (bz_safety_dialog_new (self->group));
-
-  adw_dialog_present (dialog, GTK_WIDGET (self));
+  dialog = bz_safety_dialog_new (self->group);
+  bz_popup_present (BZ_POPUP (dialog), GTK_WIDGET (button));
 }
 
 static void

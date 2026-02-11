@@ -27,6 +27,7 @@
 #include "bz-entry-group.h"
 #include "bz-entry.h"
 #include "bz-lozenge.h"
+#include "bz-popup.h"
 #include "bz-result.h"
 #include "bz-safety-calculator.h"
 #include "bz-safety-dialog.h"
@@ -34,7 +35,7 @@
 
 struct _BzSafetyDialog
 {
-  AdwDialog parent_instance;
+  BzPopup parent_instance;
 
   BzEntryGroup *group;
 
@@ -42,7 +43,7 @@ struct _BzSafetyDialog
   GtkListBox *permissions_list;
 };
 
-G_DEFINE_FINAL_TYPE (BzSafetyDialog, bz_safety_dialog, ADW_TYPE_DIALOG)
+G_DEFINE_FINAL_TYPE (BzSafetyDialog, bz_safety_dialog, BZ_TYPE_POPUP)
 
 enum
 {
@@ -61,9 +62,7 @@ static gboolean      is_null (gpointer object, GObject *value);
 static void
 bz_safety_dialog_dispose (GObject *object)
 {
-  BzSafetyDialog *self;
-
-  self = BZ_SAFETY_DIALOG (object);
+  BzSafetyDialog *self = BZ_SAFETY_DIALOG (object);
 
   g_clear_object (&self->group);
 
@@ -150,7 +149,7 @@ bz_safety_dialog_init (BzSafetyDialog *self)
   gtk_widget_init_template (GTK_WIDGET (self));
 }
 
-AdwDialog *
+GtkWidget *
 bz_safety_dialog_new (BzEntryGroup *group)
 {
   return g_object_new (BZ_TYPE_SAFETY_DIALOG,
@@ -209,7 +208,7 @@ update_permissions_list (BzSafetyDialog *self)
         {
           g_autoptr (BzSafetyRow) row_data;
           AdwActionRow *row;
-          BzImportance row_importance;
+          BzImportance  row_importance;
           row_data       = g_list_model_get_item (model, j);
           row_importance = bz_safety_row_get_importance (row_data);
           if (row_importance != level)

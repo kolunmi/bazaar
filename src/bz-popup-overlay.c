@@ -159,6 +159,8 @@ bz_popup_overlay_size_allocate (GtkWidget *widget,
       PopupData       *data              = NULL;
       graphene_rect_t  source_bounds     = { 0 };
       graphene_point_t source_center     = { 0 };
+      int              content_width     = 0;
+      int              content_height    = 0;
       int              minimum_width     = 0;
       int              natural_width     = 0;
       int              minimum_height    = 0;
@@ -179,6 +181,9 @@ bz_popup_overlay_size_allocate (GtkWidget *widget,
         }
       graphene_rect_get_center (&source_bounds, &source_center);
 
+      content_width  = bz_popup_get_content_width (BZ_POPUP (data->child));
+      content_height = bz_popup_get_content_height (BZ_POPUP (data->child));
+
       gtk_widget_measure (
           data->child, GTK_ORIENTATION_HORIZONTAL,
           width, &minimum_width, &natural_width,
@@ -189,8 +194,8 @@ bz_popup_overlay_size_allocate (GtkWidget *widget,
           &unused, &unused);
 
       popup_size = GRAPHENE_SIZE_INIT (
-          CLAMP ((double) natural_width, (double) minimum_width, (double) width),
-          CLAMP ((double) natural_height, (double) minimum_height, (double) height));
+          CLAMP ((double) MAX (content_width, natural_width), (double) minimum_width, (double) width),
+          CLAMP ((double) MAX (content_height, natural_height), (double) minimum_height, (double) height));
 
       popup_bounds = GRAPHENE_RECT_INIT (
           CLAMP (source_center.x / 2.0 < (double) width / 2.0
@@ -401,18 +406,18 @@ bz_popup_overlay_set_child (BzPopupOverlay *self,
 
 void
 bz_popup_overlay_push (BzPopupOverlay *self,
-                       GtkWidget      *widget,
+                       BzPopup        *popup,
                        GtkWidget      *source)
 {
   g_autoptr (PopupData) data = NULL;
 
   g_return_if_fail (BZ_IS_POPUP_OVERLAY (self));
-  g_return_if_fail (GTK_IS_WIDGET (widget));
+  g_return_if_fail (BZ_IS_POPUP (popup));
   g_return_if_fail (GTK_IS_WIDGET (source));
   g_return_if_fail (gtk_widget_is_ancestor (source, GTK_WIDGET (self)));
 
   data              = popup_data_new ();
-  data->child       = widget;
+  data->child       = GTK_WIDGET (popup);
   data->source      = g_object_ref (source);
   data->allocation  = (graphene_rect_t) { 0 };
   data->initialized = FALSE;
@@ -421,17 +426,17 @@ bz_popup_overlay_push (BzPopupOverlay *self,
   data->opacity     = 0.0;
   g_ptr_array_add (self->stack, popup_data_ref (data));
 
-  gtk_widget_set_parent (widget, GTK_WIDGET (self));
+  gtk_widget_set_parent (GTK_WIDGET (popup), GTK_WIDGET (self));
   gtk_widget_queue_allocate (GTK_WIDGET (self));
 }
 
 void
-bz_popup_present (GtkWidget *popup,
+bz_popup_present (BzPopup   *popup,
                   GtkWidget *source)
 {
   GtkWidget *overlay = NULL;
 
-  g_return_if_fail (GTK_IS_WIDGET (popup));
+  g_return_if_fail (BZ_IS_POPUP (popup));
   g_return_if_fail (GTK_IS_WIDGET (source));
 
   overlay = gtk_widget_get_ancestor (source, BZ_TYPE_POPUP_OVERLAY);

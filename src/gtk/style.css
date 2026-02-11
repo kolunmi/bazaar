@@ -868,8 +868,9 @@ curated-list-view list {
   background: var(--bg-color);
 }
 
-.bz-popup {
+bzpopup {
+    margin: 4px;
     border-radius: 15px;
     background: var(--window-bg-color);
-    /* box-shadow: 0 0 20px 1px black; */
+    box-shadow: 0 0 16px 2px alpha(black, 0.5);
 }
