@@ -100,6 +100,9 @@ destroy_spring_data (gpointer ptr);
 static void
 destroy_wr (gpointer ptr);
 
+static gboolean
+should_animate (GtkWidget *widget);
+
 static void
 dispose (GObject *object)
 {
@@ -282,42 +285,54 @@ bz_animation_add_spring (BzAnimation        *self,
   widget = g_weak_ref_get (&self->wr);
   if (widget != NULL)
     {
-      SpringData *data = NULL;
-
-      /* reuse old data if possible */
-      data = g_hash_table_lookup (self->data, key);
-      if (data != NULL)
+      if (should_animate (widget))
         {
-          if (data->user_data != NULL &&
-              data->destroy_data != NULL)
-            /* we are going to overwrite this */
-            data->destroy_data (data->user_data);
+          SpringData *data = NULL;
 
-          g_clear_pointer (&data->timer, g_timer_destroy);
+          /* reuse old data if possible */
+          data = g_hash_table_lookup (self->data, key);
+          if (data != NULL)
+            {
+              if (data->user_data != NULL &&
+                  data->destroy_data != NULL)
+                /* we are going to overwrite this */
+                data->destroy_data (data->user_data);
 
-          /* old velocity is retained */
+              g_clear_pointer (&data->timer, g_timer_destroy);
+
+              /* old velocity is retained */
+            }
+          else
+            {
+              data = g_new0 (typeof (*data), 1);
+              g_hash_table_replace (self->data, g_strdup (key), data);
+            }
+
+          data->from          = from;
+          data->to            = to;
+          data->damping_ratio = damping_ratio;
+          data->mass          = mass;
+          data->stiffness     = stiffness;
+          data->cb            = cb;
+          data->user_data     = user_data;
+          data->destroy_data  = destroy_data;
+
+          /* We'll fill this in on the first iteration */
+          data->timer = NULL;
+
+          data->est_duration = calculate_duration (data);
+
+          cb (widget, key, from, user_data);
         }
       else
+        /* If we shouldn't animate, just invoke the callback at the final
+           value */
         {
-          data = g_new0 (typeof (*data), 1);
-          g_hash_table_replace (self->data, g_strdup (key), data);
+          cb (widget, key, to, user_data);
+          if (user_data != NULL &&
+              destroy_data != NULL)
+            destroy_data (user_data);
         }
-
-      data->from          = from;
-      data->to            = to;
-      data->damping_ratio = damping_ratio;
-      data->mass          = mass;
-      data->stiffness     = stiffness;
-      data->cb            = cb;
-      data->user_data     = user_data;
-      data->destroy_data  = destroy_data;
-
-      /* We'll fill this in on the first iteration */
-      data->timer = NULL;
-
-      data->est_duration = calculate_duration (data);
-
-      cb (widget, key, from, user_data);
     }
   else if (user_data != NULL &&
            destroy_data != NULL)
@@ -330,18 +345,20 @@ tick_cb (GtkWidget     *widget,
          GWeakRef      *wr)
 {
   g_autoptr (BzAnimation) self = NULL;
+  gboolean       cancel        = FALSE;
   GHashTableIter iter          = { 0 };
 
   self = g_weak_ref_get (wr);
   if (self == NULL)
     return G_SOURCE_REMOVE;
 
+  cancel = !should_animate (widget);
+
   g_hash_table_iter_init (&iter, self->data);
   for (;;)
     {
       char       *key      = NULL;
       SpringData *data     = NULL;
-      double      elapsed  = 0.0;
       double      value    = 0.0;
       gboolean    finished = FALSE;
 
@@ -351,22 +368,29 @@ tick_cb (GtkWidget     *widget,
               (gpointer *) &data))
         break;
 
-      if (data->timer == NULL)
-        {
-          data->timer = g_timer_new ();
-          value       = data->from;
-        }
+      if (cancel)
+        finished = TRUE;
       else
         {
-          elapsed = g_timer_elapsed (data->timer, NULL);
-          value   = oscillate (data, elapsed, &data->velocity);
-        }
+          double elapsed = 0.0;
 
-      finished = elapsed > data->est_duration ||
-                 (data->damping_ratio >= 1.0 &&
-                  (G_APPROX_VALUE (value, data->to, EPSILON) ||
-                   (data->from > data->to && value < data->to) ||
-                   (data->from < data->to && value > data->to)));
+          if (data->timer == NULL)
+            {
+              data->timer = g_timer_new ();
+              value       = data->from;
+            }
+          else
+            {
+              elapsed = g_timer_elapsed (data->timer, NULL);
+              value   = oscillate (data, elapsed, &data->velocity);
+            }
+
+          finished = elapsed > data->est_duration ||
+                     (data->damping_ratio >= 1.0 &&
+                      (G_APPROX_VALUE (value, data->to, EPSILON) ||
+                       (data->from > data->to && value < data->to) ||
+                       (data->from < data->to && value > data->to)));
+        }
       if (finished)
         value = data->to;
 
@@ -590,4 +614,22 @@ destroy_wr (gpointer ptr)
 
   g_weak_ref_clear (wr);
   g_free (ptr);
+}
+
+static gboolean
+should_animate (GtkWidget *widget)
+{
+  GtkSettings *settings          = NULL;
+  gboolean     enable_animations = FALSE;
+
+  if (!gtk_widget_get_mapped (widget))
+    return FALSE;
+
+  settings = gtk_widget_get_settings (widget);
+  g_object_get (
+      settings,
+      "gtk-enable-animations", &enable_animations,
+      NULL);
+
+  return enable_animations;
 }
