@@ -39,10 +39,11 @@ struct _BzLibraryPage
   BzStateInfo *state;
 
   /* Template widgets */
-  AdwViewStack    *stack;
-  GtkText         *search_bar;
-  GtkCustomFilter *filter;
-  GtkListView     *list_view;
+  AdwViewStack      *stack;
+  GtkText           *search_bar;
+  GtkScrolledWindow *scroll;
+  GtkCustomFilter   *filter;
+  GtkListView       *list_view;
 };
 
 G_DEFINE_FINAL_TYPE (BzLibraryPage, bz_library_page, ADW_TYPE_BIN)
@@ -383,6 +384,7 @@ bz_library_page_class_init (BzLibraryPageClass *klass)
 
   gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, stack);
   gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, search_bar);
+  gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, scroll);
   gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, filter);
   gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, list_view);
   gtk_widget_class_bind_template_callback (widget_class, no_results_found_subtitle);
@@ -485,7 +487,11 @@ bz_library_page_ensure_active (BzLibraryPage *self,
 void
 bz_library_page_reset_search (BzLibraryPage *self)
 {
+  GtkAdjustment *vadjustment = NULL;
   g_return_if_fail (BZ_IS_LIBRARY_PAGE (self));
+
+  vadjustment = gtk_scrolled_window_get_vadjustment (self->scroll);
+  gtk_adjustment_set_value (vadjustment, 0.0);
 
   gtk_text_set_buffer (self->search_bar, NULL);
 }
