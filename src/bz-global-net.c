@@ -24,6 +24,7 @@
 
 #include "bz-env.h"
 #include "bz-global-net.h"
+#include "bz-proxy-resolver.h"
 #include "bz-util.h"
 
 BZ_DEFINE_DATA (
@@ -183,6 +184,7 @@ static DexFuture *
 http_send_fiber (HttpRequestData *data)
 {
   static SoupSession      *session      = NULL;
+  static BzProxyResolver  *resolver     = NULL;
   SoupMessage             *message      = data->message;
   GOutputStream           *splice_into  = data->splice_into;
   gboolean                 close_output = data->close_output;
@@ -190,7 +192,17 @@ http_send_fiber (HttpRequestData *data)
   g_autoptr (DexPromise) promise        = NULL;
 
   if (g_once_init_enter_pointer (&session))
-    g_once_init_leave_pointer (&session, soup_session_new ());
+    {
+      // Allocate session.
+      SoupSession *session_instance = soup_session_new ();
+
+      // Allocate and configure proxies on the session.
+      resolver = bz_proxy_resolver_new ();
+      soup_session_set_proxy_resolver (session_instance, (GProxyResolver *) resolver);
+
+      // Return session by leaving once init.
+      g_once_init_leave_pointer (&session, session_instance);
+    }
 
   splice_flags = G_OUTPUT_STREAM_SPLICE_CLOSE_SOURCE;
   if (close_output)
@@ -287,3 +299,4 @@ send (SoupMessage   *message,
       http_request_data_unref);
   return g_steal_pointer (&future);
 }
+

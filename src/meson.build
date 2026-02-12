@@ -14,11 +14,13 @@ glycin_gtk4_dep      = dependency('glycin-gtk4-2', version: '>= 2.0')
 md4c_dep             = dependency('md4c', version: '>= 0.5.1')
 webkit_dep           = dependency('webkitgtk-6.0', version: '>= 2.50.2')
 libsecret_dep        = dependency('libsecret-1', version: '>= 0.20')
+libproxy_dep         = dependency('libproxy-1.0', version: '>= 0.5')
 
 
 dl_worker_sources = [
   'bz-env.c',
   'bz-global-net.c',
+  'bz-proxy-resolver.c',
   'dl-worker.c',
 ]
 
@@ -27,6 +29,7 @@ dl_worker_deps = [
   libdex_dep,
   libsoup_dep,
   json_glib_dep,
+  libproxy_dep,
 ]
 
 dl_worker_exe = executable(dl_worker_bin_name, dl_worker_sources,
@@ -122,6 +125,7 @@ bz_sources = files(
   'bz-popup-overlay.c',
   'bz-preferences-dialog.c',
   'bz-progress-bar.c',
+  'bz-proxy-resolver.c',
   'bz-releases-list.c',
   'bz-result.c',
   'bz-rich-app-tile.c',
@@ -178,6 +182,7 @@ bz_deps = [
   md4c_dep,
   webkit_dep,
   libsecret_dep,
+  libproxy_dep,
 ]
 
 gen_gobject = find_program('./gen_gobject.sh')

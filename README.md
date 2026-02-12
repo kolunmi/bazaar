@@ -93,6 +93,7 @@ You will need the following dependencies installed, along with a C compiler, mes
 | [md4c](https://github.com/mity/md4c)                    | `md4c`            | `0.5.1`                | Parse markdown (.md)                                |
 | [webkitgtk](https://webkitgtk.org/)                     | `webkitgtk-6.0`   | `2.50.2`               | Render web views                                    |
 | [libsecret](https://gitlab.gnome.org/GNOME/libsecret)   | `libsecret-1`     | `0.20`                 | Store Flathub account information                   |
+| [libproxy](https://github.com/libproxy/libproxy)        | `libproxy-1.0`    | `0.5`                  | Parse proxies for networking operations             |
 
 #### Code of Conduct
 
