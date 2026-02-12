@@ -19,20 +19,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-// Include ourselves.
 #include "bz-proxy-resolver.h"
 
-// Include config.
 #include "config.h"
 
-// Include internal headers.
 #include "gio/gio.h"
 #include "glib-object.h"
 
-// Include external headers.
 #include <libproxy/proxy.h>
 
-// Class members.
 struct _BzProxyResolver
 {
   GSimpleProxyResolver parent_instance;
@@ -40,22 +35,18 @@ struct _BzProxyResolver
   char               **proxies;
 };
 
-// Let GObject do it's magic.
 G_DEFINE_TYPE (BzProxyResolver, bz_proxy_resolver, G_TYPE_SIMPLE_PROXY_RESOLVER)
 #define LOG_DOMAIN "BZ::PROXY-RESOLVER"
 
 static void
 bz_proxy_resolver_init (BzProxyResolver *self)
 {
-  // Log (*DEBUG*).
   g_log (LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "Initialising the proxy resolver instance.");
 
-  // Initialise members.
   self->proxy_factory = px_proxy_factory_new ();
 
-  // Configure ourselves, log.
-  self->proxies = px_proxy_factory_get_proxies (self->proxy_factory, DONATE_LINK);      // We need SOME URL to get a proxy, let's use this one. Needs to be manually cleaned later.
-  g_simple_proxy_resolver_set_default_proxy (&self->parent_instance, self->proxies[0]); // Safe on NULL.
+  self->proxies = px_proxy_factory_get_proxies (self->proxy_factory, DONATE_LINK);
+  g_simple_proxy_resolver_set_default_proxy (&self->parent_instance, self->proxies[0]);
   g_log (LOG_DOMAIN, G_LOG_LEVEL_INFO, "Resolved %li proxies, using the first one.",
          sizeof (*self->proxies) / sizeof (size_t));
 }
@@ -63,7 +54,6 @@ bz_proxy_resolver_init (BzProxyResolver *self)
 static void
 bz_proxy_resolver_dispose (GObject *object)
 {
-  // Get our instance, decrement reference counters, call super.
   BzProxyResolver *instance = bz_proxy_resolver_get_instance_private (BZ_PROXY_RESOLVER (object));
   g_clear_object (&instance->proxy_factory);
   G_OBJECT_CLASS (bz_proxy_resolver_parent_class)->dispose (object);
@@ -72,7 +62,6 @@ bz_proxy_resolver_dispose (GObject *object)
 static void
 bz_proxy_resolver_finalize (GObject *object)
 {
-  // Get our instance, deallocate, call super.
   BzProxyResolver *instance = bz_proxy_resolver_get_instance_private (BZ_PROXY_RESOLVER (object));
   px_proxy_factory_free_proxies (instance->proxies);
   g_free (instance->proxy_factory);
@@ -82,7 +71,6 @@ bz_proxy_resolver_finalize (GObject *object)
 static void
 bz_proxy_resolver_class_init (BzProxyResolverClass *klass)
 {
-  // Assign destructors.
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   object_class->dispose      = bz_proxy_resolver_dispose;
   object_class->finalize     = bz_proxy_resolver_finalize;

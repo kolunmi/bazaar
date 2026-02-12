@@ -19,16 +19,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-// Include guard.
 #pragma once
 
-// Import external headers.
 #include <gio/gio.h>
 #include <glib-object.h>
 
 G_BEGIN_DECLS
 
-// Declare our resolver type.
 #define BZ_TYPE_PROXY_RESOLVER (bz_proxy_resolver_get_type ())
 G_DECLARE_FINAL_TYPE (BzProxyResolver, bz_proxy_resolver, BZ, PROXY_RESOLVER, GSimpleProxyResolver)
 

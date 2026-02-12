@@ -193,14 +193,11 @@ http_send_fiber (HttpRequestData *data)
 
   if (g_once_init_enter_pointer (&session))
     {
-      // Allocate session.
       SoupSession *session_instance = soup_session_new ();
 
-      // Allocate and configure proxies on the session.
       resolver = bz_proxy_resolver_new ();
       soup_session_set_proxy_resolver (session_instance, (GProxyResolver *) resolver);
 
-      // Return session by leaving once init.
       g_once_init_leave_pointer (&session, session_instance);
     }
 
