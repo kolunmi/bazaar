@@ -20,7 +20,10 @@
 
 #define G_LOG_DOMAIN "BAZAAR::GLOBAL-NET"
 
+#include "config.h"
+
 #include <json-glib/json-glib.h>
+#include <libproxy/proxy.h>
 
 #include "bz-env.h"
 #include "bz-global-net.h"
@@ -58,6 +61,34 @@ static DexFuture *
 query_flathub_v2_json_with_method (const char *request,
                                    const char *method,
                                    const char *token);
+
+GProxyResolver *
+bz_get_default_proxy_resolver (void)
+{
+  static GProxyResolver *resolver = NULL;
+
+  if (g_once_init_enter_pointer (&resolver))
+    {
+      pxProxyFactory *factory                      = NULL;
+      g_auto (GStrv) proxies                       = NULL;
+      g_autoptr (GProxyResolver) resolver_instance = NULL;
+
+      factory = px_proxy_factory_new ();
+      /* blocking */
+      proxies = px_proxy_factory_get_proxies (factory, DONATE_LINK);
+      g_clear_pointer (&factory, px_proxy_factory_free);
+
+      resolver_instance = g_simple_proxy_resolver_new (
+          proxies != NULL && *proxies != NULL
+              ? proxies[0]
+              : NULL,
+          NULL);
+
+      g_once_init_leave_pointer (&resolver, g_steal_pointer (&resolver_instance));
+    }
+
+  return resolver;
+}
 
 DexFuture *
 bz_send_with_global_http_session (SoupMessage *message)
@@ -190,7 +221,14 @@ http_send_fiber (HttpRequestData *data)
   g_autoptr (DexPromise) promise        = NULL;
 
   if (g_once_init_enter_pointer (&session))
-    g_once_init_leave_pointer (&session, soup_session_new ());
+    {
+      g_autoptr (SoupSession) session_instance = NULL;
+
+      session_instance = soup_session_new ();
+      soup_session_set_proxy_resolver (session_instance, bz_get_default_proxy_resolver ());
+
+      g_once_init_leave_pointer (&session, g_steal_pointer (&session_instance));
+    }
 
   splice_flags = G_OUTPUT_STREAM_SPLICE_CLOSE_SOURCE;
   if (close_output)
