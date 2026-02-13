@@ -949,7 +949,7 @@ init_fiber (GWeakRef *wr)
         }
     }
   else
-    bz_state_info_set_donation_prompt_dismissed (self->state, FALSE);
+    bz_state_info_set_donation_prompt_dismissed (self->state, TRUE);
 
   g_clear_object (&self->flatpak);
   self->flatpak = dex_await_object (bz_flatpak_instance_new (), &local_error);
