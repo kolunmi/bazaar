@@ -20,7 +20,6 @@ libproxy_dep         = dependency('libproxy-1.0', version: '>= 0.5')
 dl_worker_sources = [
   'bz-env.c',
   'bz-global-net.c',
-  'bz-proxy-resolver.c',
   'dl-worker.c',
 ]
 
@@ -125,7 +124,6 @@ bz_sources = files(
   'bz-popup-overlay.c',
   'bz-preferences-dialog.c',
   'bz-progress-bar.c',
-  'bz-proxy-resolver.c',
   'bz-releases-list.c',
   'bz-result.c',
   'bz-rich-app-tile.c',

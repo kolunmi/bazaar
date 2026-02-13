@@ -25,6 +25,9 @@
 
 G_BEGIN_DECLS
 
+GProxyResolver *
+bz_get_default_proxy_resolver (void);
+
 DexFuture *
 bz_send_with_global_http_session (SoupMessage *message);
 

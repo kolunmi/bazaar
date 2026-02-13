@@ -25,8 +25,8 @@
 
 #include "bz-auth-state.h"
 #include "bz-flathub-auth-provider.h"
+#include "bz-global-net.h"
 #include "bz-login-page.h"
-#include "bz-proxy-resolver.h"
 #include "bz-util.h"
 
 struct _BzLoginPage
@@ -38,9 +38,8 @@ struct _BzLoginPage
   WebKitWebView *webview;
   gboolean       webkit_loaded;
 
-  SoupSession     *session;
-  SoupCookieJar   *cookie_jar;
-  BzProxyResolver *proxy_resolver;
+  SoupSession   *session;
+  SoupCookieJar *cookie_jar;
 
   GList                 *providers;
   BzFlathubAuthProvider *current_provider;
@@ -607,7 +606,6 @@ bz_login_page_dispose (GObject *object)
   g_clear_object (&self->auth_state);
   g_clear_object (&self->session);
   g_clear_object (&self->cookie_jar);
-  g_clear_object (&self->proxy_resolver);
   g_clear_pointer (&self->session_cookie_expires, g_date_time_unref);
   g_clear_pointer (&self->auth_redirect_url, g_free);
   g_clear_pointer (&self->session_cookie, g_free);
@@ -702,11 +700,11 @@ bz_login_page_init (BzLoginPage *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
 
-  self->session        = soup_session_new ();
-  self->cookie_jar     = soup_cookie_jar_new ();
-  self->proxy_resolver = bz_proxy_resolver_new ();
+  self->session = soup_session_new ();
+  soup_session_set_proxy_resolver (self->session, bz_get_default_proxy_resolver ());
+
+  self->cookie_jar = soup_cookie_jar_new ();
   soup_cookie_jar_set_accept_policy (self->cookie_jar, SOUP_COOKIE_JAR_ACCEPT_ALWAYS);
-  soup_session_set_proxy_resolver (self->session, (GProxyResolver *) self->proxy_resolver);
   soup_session_add_feature (self->session, SOUP_SESSION_FEATURE (self->cookie_jar));
 
   self->webkit_loaded   = FALSE;
@@ -722,4 +720,3 @@ bz_login_page_new (BzAuthState *auth_state)
                        "auth-state", auth_state,
                        NULL);
 }
-
