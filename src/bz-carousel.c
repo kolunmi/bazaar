@@ -41,8 +41,8 @@ struct _BzCarousel
   GPtrArray *mirror;
   GPtrArray *carousel_widgets;
 
-  /* x interpreted as progress between child widths, y/width/height interpreted
-    as percentages of the widget height/width/height */
+  /* x/y interpreted as pixel units, width/height interpreted as percentages of
+     the widget width/height */
   graphene_rect_t viewport;
 };
 
@@ -249,16 +249,19 @@ bz_carousel_size_allocate (GtkWidget *widget,
     self->viewport = GRAPHENE_RECT_INIT (
         0.0, 0.0, (double) width, (double) height);
 
-  for (guint i = 0; i < self->carousel_widgets->len;)
+  base_transform = gsk_transform_translate (
+      gsk_transform_new (),
+      &GRAPHENE_POINT_INIT (
+          -self->viewport.origin.x,
+          -self->viewport.origin.y));
+
+  for (guint i = 0; i < self->carousel_widgets->len; i++)
     {
       GtkWidget *child                   = NULL;
       int        hminimum                = 0;
       int        hnatural                = 0;
-      int        vminimum                = 0;
-      int        vnatural                = 0;
       int        unused                  = 0;
       int        child_width             = 0;
-      int        child_height            = 0;
       g_autoptr (GskTransform) transform = NULL;
 
       child = g_ptr_array_index (self->carousel_widgets, i);
@@ -271,51 +274,21 @@ bz_carousel_size_allocate (GtkWidget *widget,
           &hnatural,
           &unused,
           &unused);
-      gtk_widget_measure (
+
+      child_width = CLAMP (hnatural, hminimum, width);
+
+      transform = gsk_transform_translate (
+          gsk_transform_ref (base_transform),
+          &GRAPHENE_POINT_INIT (hoffset, 0.0));
+
+      gtk_widget_allocate (
           child,
-          GTK_ORIENTATION_VERTICAL,
-          width,
-          &vminimum,
-          &vnatural,
-          &unused,
-          &unused);
+          child_width,
+          height,
+          baseline,
+          g_steal_pointer (&transform));
 
-      child_width  = CLAMP (hnatural, hminimum, width);
-      child_height = CLAMP (vnatural, vminimum, height);
-
-      if (base_transform != NULL)
-        {
-          transform = gsk_transform_translate (
-              gsk_transform_ref (base_transform),
-              &GRAPHENE_POINT_INIT (hoffset, 0.0));
-
-          gtk_widget_allocate (
-              child,
-              child_width,
-              height,
-              baseline,
-              g_steal_pointer (&transform));
-
-          i++;
-          hoffset += child_width;
-        }
-      else if (self->viewport.origin.x <= 0.0 ||
-               ((double) i < self->viewport.origin.x &&
-                (double) i > self->viewport.origin.x - 1.0))
-        {
-          base_transform = gsk_transform_translate (
-              gsk_transform_new (),
-              &GRAPHENE_POINT_INIT (
-                  -hoffset - (double) child_width * (self->viewport.origin.x - (double) i),
-                  -self->viewport.origin.y * (double) height));
-          i       = 0;
-          hoffset = 0;
-        }
-      else
-        {
-          i++;
-          hoffset += child_width;
-        }
+      hoffset += child_width;
     }
 }
 
@@ -674,12 +647,47 @@ move_to_idx (BzCarousel *self,
              gboolean    raised,
              double      damping_ratio)
 {
+  int             width  = 0;
+  int             height = 0;
+  int             offset = 0;
   graphene_rect_t target = { 0 };
 
+  width  = gtk_widget_get_width (GTK_WIDGET (self));
+  height = gtk_widget_get_height (GTK_WIDGET (self));
+  offset = -width / 2;
+
+  for (guint i = 0; i <= idx; i++)
+    {
+      GtkWidget *child                   = NULL;
+      int        hminimum                = 0;
+      int        hnatural                = 0;
+      int        unused                  = 0;
+      int        child_width             = 0;
+      g_autoptr (GskTransform) transform = NULL;
+
+      child = g_ptr_array_index (self->carousel_widgets, i);
+
+      gtk_widget_measure (
+          child,
+          GTK_ORIENTATION_HORIZONTAL,
+          height,
+          &hminimum,
+          &hnatural,
+          &unused,
+          &unused);
+
+      child_width = CLAMP (hnatural, hminimum, width);
+
+      if (i == idx)
+        offset += child_width / 2;
+      else
+        offset += child_width;
+    }
+
   target = GRAPHENE_RECT_INIT (
-      (double) idx - 0.5, 0.0, 1.5, 1.0);
-  if (raised)
-    graphene_rect_inset (&target, -0.1, -0.1);
+      (double) offset, 0.0, 1.0, 1.0);
+  // if (raised)
+  //   graphene_rect_inset (&target, -0.1, -0.1);
 
 #define MASS      1.0
 #define STIFFNESS 0.08
