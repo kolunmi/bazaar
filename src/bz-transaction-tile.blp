@@ -247,7 +247,7 @@ template $BzTransactionTile: $BzListTile {
 
                   valign: center;
                   xalign: 0.0;
-                  label: bind $format_removal_size(template.tracker as <$BzTransactionEntryTracker>.entry as <$BzEntry>.size) as <string>;
+                  label: bind $format_removal_size(template.tracker as <$BzTransactionEntryTracker>.entry as <$BzEntry>.installed-size) as <string>;
                 }
               }
             };
