@@ -193,9 +193,8 @@ list_length (gpointer    object,
 }
 
 static void
-browser_group_selected_cb (BzWindow     *self,
-                           BzEntryGroup *group,
-                           gpointer      browser)
+select_cb (BzWindow     *self,
+           BzEntryGroup *group)
 {
   bz_window_show_group (self, group);
 }
@@ -260,19 +259,19 @@ remove_addon_cb (BzWindow   *self,
 }
 
 static void
-install_entry_cb (BzWindow   *self,
-                  BzEntry    *entry,
-                  BzFullView *view)
+install_entry_cb (BzWindow     *self,
+                  BzEntryGroup *group,
+                  BzFullView   *view)
 {
-  try_transact (self, entry, NULL, FALSE, FALSE, NULL);
+  try_transact (self, NULL, group, FALSE, FALSE, NULL);
 }
 
 static void
-remove_installed_cb (BzWindow   *self,
-                     BzEntry    *entry,
-                     BzFullView *view)
+remove_installed_cb (BzWindow     *self,
+                     BzEntryGroup *group,
+                     BzFullView   *view)
 {
-  try_transact (self, entry, NULL, TRUE, FALSE, NULL);
+  try_transact (self, NULL, group, TRUE, FALSE, NULL);
 }
 
 static void
@@ -351,21 +350,6 @@ bulk_install_cb (BzWindow   *self,
                  gpointer    source)
 {
   bz_window_bulk_install (self, groups);
-}
-
-static void
-library_page_show_cb (BzWindow   *self,
-                      BzEntry    *entry,
-                      BzFullView *view)
-{
-  g_autoptr (BzEntryGroup) group = NULL;
-
-  group = bz_application_map_factory_convert_one (
-      bz_state_info_get_application_factory (self->state),
-      gtk_string_object_new (bz_entry_get_id (entry)));
-
-  if (group != NULL)
-    bz_window_show_group (self, group);
 }
 
 void
@@ -562,7 +546,7 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzWindow, main_stack);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, debug_id_label);
   gtk_widget_class_bind_template_callback (widget_class, list_length);
-  gtk_widget_class_bind_template_callback (widget_class, browser_group_selected_cb);
+  gtk_widget_class_bind_template_callback (widget_class, select_cb);
   gtk_widget_class_bind_template_callback (widget_class, search_widget_select_cb);
   gtk_widget_class_bind_template_callback (widget_class, full_view_install_cb);
   gtk_widget_class_bind_template_callback (widget_class, full_view_remove_cb);
@@ -570,7 +554,6 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, remove_addon_cb);
   gtk_widget_class_bind_template_callback (widget_class, remove_installed_cb);
   gtk_widget_class_bind_template_callback (widget_class, update_cb);
-  gtk_widget_class_bind_template_callback (widget_class, library_page_show_cb);
   gtk_widget_class_bind_template_callback (widget_class, page_toggled_cb);
   gtk_widget_class_bind_template_callback (widget_class, breakpoint_apply_cb);
   gtk_widget_class_bind_template_callback (widget_class, breakpoint_unapply_cb);
@@ -814,7 +797,7 @@ bz_window_push_page (BzWindow *self, AdwNavigationPage *page)
     {
       g_signal_connect_swapped (page, "install", G_CALLBACK (install_entry_cb), self);
       g_signal_connect_swapped (page, "remove", G_CALLBACK (remove_installed_cb), self);
-      g_signal_connect_swapped (page, "show-entry", G_CALLBACK (library_page_show_cb), self);
+      g_signal_connect_swapped (page, "show-entry", G_CALLBACK (select_cb), self);
       g_signal_connect_swapped (page, "bulk-install", G_CALLBACK (bulk_install_cb), self);
     }
 

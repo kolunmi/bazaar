@@ -55,9 +55,6 @@ enum
 static GParamSpec *props[LAST_PROP] = { 0 };
 
 static gboolean
-test_is_support (BzEntry *entry);
-
-static gboolean
 test_has_addons (BzEntry *entry);
 
 static void
@@ -194,42 +191,20 @@ addon_transact_cb (BzInstalledTile *self,
     g_signal_emit_by_name (page, "install-addon", entry);
 }
 
-static DexFuture *
-support_fiber (BzInstalledTile *tile)
-{
-  g_autoptr (GError) local_error = NULL;
-  GtkWidget *window              = NULL;
-  g_autoptr (BzEntry) entry      = NULL;
-  const char *url                = NULL;
-
-  window = gtk_widget_get_ancestor (GTK_WIDGET (tile), GTK_TYPE_WINDOW);
-  g_assert (window != NULL);
-
-  entry = bz_entry_group_find_entry (tile->group, test_is_support, window, &local_error);
-  if (entry == NULL)
-    goto err;
-
-  url = bz_entry_get_donation_url (entry);
-  g_app_info_launch_default_for_uri (url, NULL, NULL);
-
-  return NULL;
-
-err:
-  if (local_error != NULL)
-    bz_show_error_for_widget (window, local_error->message);
-  return NULL;
-}
-
 static void
 support_cb (BzInstalledTile *self,
             GtkButton       *button)
 {
-  dex_future_disown (dex_scheduler_spawn (
-      dex_scheduler_get_default (),
-      bz_get_dex_stack_size (),
-      (DexFiberFunc) support_fiber,
-      g_object_ref (self),
-      g_object_unref));
+  const char *url = NULL;
+
+  if (self->group == NULL)
+    return;
+
+  url = bz_entry_group_get_donation_url (self->group);
+  if (url == NULL)
+    return;
+
+  g_app_info_launch_default_for_uri (url, NULL, NULL);
 }
 
 static DexFuture *
@@ -288,44 +263,20 @@ install_addons_cb (BzInstalledTile *self,
       g_object_unref));
 }
 
-static DexFuture *
-remove_fiber (BzInstalledTile *tile)
-{
-  g_autoptr (GError) local_error = NULL;
-  BzLibraryPage *page            = NULL;
-  GtkWidget     *window          = NULL;
-  g_autoptr (BzEntry) entry      = NULL;
-
-  page = BZ_LIBRARY_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (tile), BZ_TYPE_LIBRARY_PAGE));
-  g_assert (page != NULL);
-
-  window = gtk_widget_get_ancestor (GTK_WIDGET (tile), GTK_TYPE_WINDOW);
-  g_assert (window != NULL);
-
-  entry = bz_entry_group_find_entry (tile->group, NULL, window, &local_error);
-  if (entry == NULL)
-    goto err;
-
-  g_signal_emit_by_name (page, "remove", entry);
-
-  return NULL;
-
-err:
-  if (local_error != NULL)
-    bz_show_error_for_widget (window, local_error->message);
-  return NULL;
-}
-
 static void
 remove_cb (BzInstalledTile *self,
            GtkButton       *button)
 {
-  dex_future_disown (dex_scheduler_spawn (
-      dex_scheduler_get_default (),
-      bz_get_dex_stack_size (),
-      (DexFiberFunc) remove_fiber,
-      g_object_ref (self),
-      g_object_unref));
+  BzLibraryPage *page = NULL;
+
+  page = BZ_LIBRARY_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (self), BZ_TYPE_LIBRARY_PAGE));
+  if (page == NULL)
+    return;
+
+  if (self->group == NULL)
+    return;
+
+  g_signal_emit_by_name (page, "remove", self->group);
 }
 
 static void
@@ -399,12 +350,6 @@ bz_installed_tile_get_group (BzInstalledTile *self)
 {
   g_return_val_if_fail (BZ_IS_INSTALLED_TILE (self), NULL);
   return self->group;
-}
-
-static gboolean
-test_is_support (BzEntry *entry)
-{
-  return bz_entry_get_donation_url (entry) != NULL;
 }
 
 static gboolean
