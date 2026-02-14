@@ -24,7 +24,6 @@
 #include <json-glib/json-glib.h>
 
 #include "bz-application-map-factory.h"
-#include "bz-entry-group-util.h"
 #include "bz-env.h"
 #include "bz-error.h"
 #include "bz-favorites-page.h"
@@ -197,67 +196,23 @@ is_favorited (GListModel   *favorites,
   return g_list_store_find (G_LIST_STORE (favorites), group, NULL);
 }
 
-static DexFuture *
-tile_activated_fiber (GWeakRef *wr)
-{
-  g_autoptr (BzFavoritesTile) tile   = NULL;
-  g_autoptr (GError) local_error     = NULL;
-  g_autoptr (BzEntry) entry          = NULL;
-  g_autoptr (GListModel) all_entries = NULL;
-  BzFavoritesPage *self              = NULL;
-  GtkWidget       *window            = NULL;
-  BzEntryGroup    *group             = NULL;
-
-  bz_weak_get_or_return_reject (tile, wr);
-
-  self = (BzFavoritesPage *) gtk_widget_get_ancestor (GTK_WIDGET (tile), BZ_TYPE_FAVORITES_PAGE);
-  if (self == NULL)
-    return NULL;
-  if (self->model == NULL)
-    goto err;
-
-  window = gtk_widget_get_ancestor (GTK_WIDGET (self), GTK_TYPE_WINDOW);
-  if (window == NULL)
-    goto err;
-
-  group = bz_favorites_tile_get_group (tile);
-  if (group == NULL)
-    goto err;
-
-  entry = bz_entry_group_find_entry (group, NULL, window, &local_error);
-  if (entry == NULL)
-    {
-      if (local_error != NULL)
-        g_clear_error (&local_error);
-
-      all_entries = dex_await_object (
-          bz_entry_group_dup_all_into_store (group),
-          &local_error);
-      if (all_entries == NULL || g_list_model_get_n_items (all_entries) == 0)
-        goto err;
-
-      entry = g_list_model_get_item (all_entries, 0);
-    }
-
-  g_signal_emit (self, signals[SIGNAL_SHOW], 0, entry);
-  return NULL;
-
-err:
-  if (local_error != NULL)
-    bz_show_error_for_widget (window, local_error->message);
-  return NULL;
-}
-
 static void
 tile_activated_cb (BzFavoritesTile *tile)
 {
+  BzFavoritesPage *self  = NULL;
+  BzEntryGroup    *group = NULL;
+
   g_assert (BZ_IS_FAVORITES_TILE (tile));
 
-  dex_future_disown (dex_scheduler_spawn (
-      dex_scheduler_get_default (),
-      bz_get_dex_stack_size (),
-      (DexFiberFunc) tile_activated_fiber,
-      bz_track_weak (tile), bz_weak_release));
+  self = (BzFavoritesPage *) gtk_widget_get_ancestor (GTK_WIDGET (tile), BZ_TYPE_FAVORITES_PAGE);
+  if (self == NULL)
+    return;
+
+  group = bz_favorites_tile_get_group (tile);
+  if (group == NULL)
+    return;
+
+  g_signal_emit (self, signals[SIGNAL_SHOW], 0, group);
 }
 
 static void
@@ -365,7 +320,7 @@ bz_favorites_page_class_init (BzFavoritesPageClass *klass)
           NULL, NULL,
           NULL,
           G_TYPE_NONE, 1,
-          BZ_TYPE_ENTRY);
+          BZ_TYPE_ENTRY_GROUP);
 
   signals[SIGNAL_REMOVE] =
       g_signal_new (
@@ -376,7 +331,7 @@ bz_favorites_page_class_init (BzFavoritesPageClass *klass)
           NULL, NULL,
           NULL,
           G_TYPE_NONE, 1,
-          BZ_TYPE_ENTRY);
+          BZ_TYPE_ENTRY_GROUP);
 
   signals[SIGNAL_SHOW] =
       g_signal_new (
@@ -387,7 +342,7 @@ bz_favorites_page_class_init (BzFavoritesPageClass *klass)
           NULL, NULL,
           NULL,
           G_TYPE_NONE, 1,
-          BZ_TYPE_ENTRY);
+          BZ_TYPE_ENTRY_GROUP);
 
   signals[SIGNAL_BULK_INSTALL] =
       g_signal_new (

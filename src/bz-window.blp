@@ -156,7 +156,7 @@ template $BzWindow: Adw.ApplicationWindow {
 
                           child: $BzCuratedView browse {
                             state: bind template.state as <$BzStateInfo>;
-                            group-selected => $browser_group_selected_cb(template);
+                            group-selected => $select_cb(template);
                             browse-flathub => $browse_flathub_cb(template);
                           };
                         }
@@ -168,7 +168,7 @@ template $BzWindow: Adw.ApplicationWindow {
 
                           child: $BzFlathubPage {
                             state: bind template.state as <$BzStateInfo>;
-                            group-selected => $browser_group_selected_cb(template);
+                            group-selected => $select_cb(template);
                             open-search => $open_search_cb(template);
                           };
                         }
@@ -187,7 +187,7 @@ template $BzWindow: Adw.ApplicationWindow {
                             remove => $remove_installed_cb(template);
                             remove-addon => $remove_addon_cb(template);
                             install-addon => $install_addon_cb(template);
-                            show-entry => $library_page_show_cb(template);
+                            show-entry => $select_cb(template);
                             update => $update_cb(template);
                           };
                         }

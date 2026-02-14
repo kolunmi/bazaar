@@ -169,37 +169,22 @@ format_update_count (gpointer    object,
                           n_updates);
 }
 
-static DexFuture *
-row_activated_fiber (GWeakRef *wr)
+static void
+tile_activated_cb (BzListTile *tile)
 {
-  g_autoptr (GError) local_error = NULL;
-  g_autoptr (BzListTile) tile    = NULL;
   BzLibraryPage *self            = NULL;
-  GtkWidget     *window          = NULL;
   BzEntryGroup  *group           = NULL;
   g_autoptr (BzEntry) entry      = NULL;
 
-  bz_weak_get_or_return_reject (tile, wr);
+  g_assert (BZ_IS_LIST_TILE (tile));
 
   self = (BzLibraryPage *) gtk_widget_get_ancestor (GTK_WIDGET (tile), BZ_TYPE_LIBRARY_PAGE);
   if (self == NULL)
-    return NULL;
-  if (self->model == NULL)
-    goto err;
-
-  window = gtk_widget_get_ancestor (GTK_WIDGET (self), GTK_TYPE_WINDOW);
-  if (window == NULL)
-    goto err;
+    return;
 
   if (BZ_IS_INSTALLED_TILE (tile))
     {
       group = bz_installed_tile_get_group (BZ_INSTALLED_TILE (tile));
-      if (group == NULL)
-        goto err;
-
-      entry = bz_entry_group_find_entry (group, NULL, window, &local_error);
-      if (entry == NULL)
-        goto err;
     }
   else if (BZ_IS_TRANSACTION_TILE (tile))
     {
@@ -207,36 +192,18 @@ row_activated_fiber (GWeakRef *wr)
 
       tracker = bz_transaction_tile_get_tracker (BZ_TRANSACTION_TILE (tile));
       if (tracker == NULL)
-        goto err;
+        return;
 
       entry = bz_transaction_entry_tracker_get_entry (tracker);
-      if (entry == NULL)
-        goto err;
 
-      entry = g_object_ref (entry);
+      group = bz_application_map_factory_convert_one (
+        bz_state_info_get_application_factory (self->state),
+        gtk_string_object_new (bz_entry_get_id (entry)));
     }
   else
-    goto err;
+    return;
 
-  g_signal_emit (self, signals[SIGNAL_SHOW], 0, entry);
-  return dex_future_new_true ();
-
-err:
-  if (local_error != NULL)
-    bz_show_error_for_widget (window, local_error->message);
-  return dex_future_new_for_error (g_steal_pointer (&local_error));
-}
-
-static void
-tile_activated_cb (BzListTile *tile)
-{
-  g_assert (BZ_IS_LIST_TILE (tile));
-
-  dex_future_disown (dex_scheduler_spawn (
-      dex_scheduler_get_default (),
-      bz_get_dex_stack_size (),
-      (DexFiberFunc) row_activated_fiber,
-      bz_track_weak (tile), bz_weak_release));
+  g_signal_emit (self, signals[SIGNAL_SHOW], 0, group);
 }
 
 static void
@@ -307,7 +274,7 @@ bz_library_page_class_init (BzLibraryPageClass *klass)
           NULL, NULL,
           g_cclosure_marshal_VOID__OBJECT,
           G_TYPE_NONE, 1,
-          BZ_TYPE_ENTRY);
+          BZ_TYPE_ENTRY_GROUP);
   g_signal_set_va_marshaller (
       signals[SIGNAL_REMOVE],
       G_TYPE_FROM_CLASS (klass),
@@ -352,7 +319,7 @@ bz_library_page_class_init (BzLibraryPageClass *klass)
           NULL, NULL,
           g_cclosure_marshal_VOID__OBJECT,
           G_TYPE_NONE, 1,
-          BZ_TYPE_ENTRY);
+          BZ_TYPE_ENTRY_GROUP);
   g_signal_set_va_marshaller (
       signals[SIGNAL_SHOW],
       G_TYPE_FROM_CLASS (klass),
