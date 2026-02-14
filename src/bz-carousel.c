@@ -690,7 +690,7 @@ move_to_idx (BzCarousel *self,
   //   graphene_rect_inset (&target, -0.1, -0.1);
 
 #define MASS      1.0
-#define STIFFNESS 0.08
+#define STIFFNESS 0.16
 
   bz_animation_add_spring (
       self->animation, "x",
