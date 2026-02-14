@@ -54,6 +54,10 @@ Pre-built binaries are distributed via Flathub and GitHub actions:
 
 [![Build Flatpak and Upload Artifact](https://github.com/kolunmi/bazaar/actions/workflows/build-flatpak.yml/badge.svg)](https://github.com/kolunmi/bazaar/actions/workflows/build-flatpak.yml)
 
+There also exist packages for [Debian](https://tracker.debian.org/pkg/bazaar)
+and [Arch](https://archlinux.org/packages/extra/x86_64/bazaar/). These are not
+directly supported but should work fine.
+
 ### Supporting
 
 If you would like to support me and the development of this
