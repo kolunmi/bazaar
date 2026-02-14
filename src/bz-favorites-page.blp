@@ -9,6 +9,18 @@ template $BzFavoritesPage: Adw.NavigationPage {
     Adw.HeaderBar {
 
       [end]
+      Button install_all_button {
+        styles [
+          "flat",
+        ]
+        has-tooltip: true;
+        tooltip-text: _("Install All");
+        icon-name: "list-add-symbolic";
+        sensitive: bind $invert_boolean($is_empty(template.favorites) as <bool>) as <bool>;
+        clicked => $install_all_cb() swapped;
+      }
+
+      [end]
       Button {
         styles [
           "flat",
@@ -28,18 +40,6 @@ template $BzFavoritesPage: Adw.NavigationPage {
           fraction: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.current-progress;
           settings: bind template.state as <$BzStateInfo>.settings;
         };
-      }
-
-      [end]
-      Button install_all_button {
-        styles [
-          "flat",
-        ]
-        has-tooltip: true;
-        tooltip-text: _("Install All");
-        icon-name: "list-add-symbolic";
-        sensitive: bind $invert_boolean($is_empty(template.favorites) as <bool>) as <bool>;
-        clicked => $install_all_cb() swapped;
       }
     }
 
