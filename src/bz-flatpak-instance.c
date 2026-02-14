@@ -1066,13 +1066,6 @@ retrieve_remote_refs_fiber (GatherRefsData *data)
 
       name = flatpak_remote_get_name (remote);
 
-      if (strstr (name, "fedora") != NULL)
-        {
-          g_debug ("Skipping remote %s", name);
-          /* the fedora flatpak repos cause too many issues */
-          continue;
-        }
-
       job_data               = retrieve_refs_for_remote_data_new ();
       job_data->parent       = gather_refs_data_ref (data);
       job_data->installation = g_object_ref (installation);
@@ -1501,6 +1494,10 @@ retrieve_refs_for_remote_fiber (RetrieveRefsForRemoteData *data)
 
   remote_name    = flatpak_remote_get_name (remote);
   is_noenumerate = flatpak_remote_get_noenumerate (remote);
+
+  /* the fedora flatpak repos cause too many issues */
+  if (strstr (remote_name, "fedora") != NULL)
+    is_noenumerate = TRUE;
 
 #ifdef SANDBOXED_LIBFLATPAK
   if (is_noenumerate || installation == self->user)
