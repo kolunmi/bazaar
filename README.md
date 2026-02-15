@@ -56,7 +56,9 @@ Pre-built binaries are distributed via Flathub and GitHub actions:
 
 There also exist packages for [Debian](https://tracker.debian.org/pkg/bazaar)
 and [Arch](https://archlinux.org/packages/extra/x86_64/bazaar/). These are not
-directly supported but should work fine.
+directly supported but should work fine. If you encounter a bug on any package
+of Bazaar other than the flatpak, ensure the bug also exists on the flatpak
+before reporting it here.
 
 ### Supporting
 
