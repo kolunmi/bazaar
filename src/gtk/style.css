@@ -1,6 +1,19 @@
+.bz-monospace {
+    font-family: monospace;
+}
+
 .bz-debug {
     background-color: darkorange;
     color: black;
+}
+
+.bz-donations-dialog {
+    background: linear-gradient(to bottom left, #1f2d8f, #159eff);
+    color: white;
+}
+
+.bz-donations-banner {
+    --banner-color: #159eff;
 }
 
 .updates-amount {
@@ -14,10 +27,6 @@
 .updates-amount-border {
   background-color: var(--accent-bg-color);
   	border-radius: 9999px;
-}
-
-.bz-monospace {
-    font-family: monospace;
 }
 
 .search-box {
@@ -171,6 +180,12 @@
 	--accent-bg-color: @window_fg_color;
 }
 
+.grey.colored {
+    --accent-fg-color : @window_fg_color;
+    --accent-bg-color : alpha(@window_fg_color,0.05);
+    --accent-color : alpha(@window_fg_color,0.75);
+}
+
 .circular-lozenge.green,
 .lozenge.green {
 	color: @green_5;
@@ -262,6 +277,10 @@ global-progress image {
   color: var(--window-fg-color);
 }
 
+.global-progress-button {
+	padding: 5px;
+}
+
 .lozenge {
 	  font-size: 18px;
 	  font-weight: bold;
@@ -272,6 +291,12 @@ global-progress image {
 	  color: var(--accent-color);
 	  background-color: alpha(var(--accent-bg-color),0.15);
 	  transition: background-color 150ms ease;
+}
+
+.lozenge.small {
+	padding: 1px 9px;
+	font-size: 12px;
+	font-weight: bold;
 }
 
 .lozenge-ring-button {
@@ -351,10 +376,6 @@ button.context-tile:active .lozenge {
 
 .flathub-page-section {
     border-radius: 10px;
-}
-
-.app-transaction-button{
-    padding: 0;
 }
 
 .transaction-list-view row {
@@ -787,9 +808,54 @@ window.narrow .category-tile {
 	min-height: 0;
 }
 
-.transaction-sidebar-entry-list {
-    margin: 0;
-    padding: 0;
+.no-min-height {
+  min-height: 0;
+}
+
+.transaction-tile-title {
+  font-size: 1.05em;
+  font-weight: 450;
+}
+
+.operations {
+	background-color: rgba(0, 0, 0, 0.10);
+	border-radius: 0px 0px 12px 12px;
+}
+
+@media (prefers-color-scheme: light) {
+	.operations {
+		background-color: rgba(0, 0, 0, 0.050);
+	}
+}
+
+.ops-toggle {
+	transition: transform 200ms ease;
+	transform: rotate(90deg);
+}
+
+.ops-toggle:checked,
+.ops-toggle.rotated {
+	transform: rotate(270deg);
+}
+
+.update-list {
+	background-color: alpha(@card_bg_color, 0.8);
+	border-radius: 0 0 12px 12px;
+}
+
+.update-toggle {
+	border-radius: 0;
+}
+
+.update-card {
+  border-radius: 12px;
+	box-shadow: 0 0 0 1px rgba(0,0,6,0.03), 0 1px 3px 1px rgba(0,0,6,0.07), 0 2px 6px 2px rgba(0,0,6,0.03);
+}
+
+@media (prefers-color-scheme: dark) {
+  separator {
+	  opacity: 0.5;
+  }
 }
 
 .disable-adw-flow-box-styling {
@@ -800,4 +866,10 @@ window.narrow .category-tile {
 curated-list-view,
 curated-list-view list {
   background: var(--bg-color);
+}
+
+.bz-popup {
+    border-radius: 15px;
+    background: var(--window-bg-color);
+    /* box-shadow: 0 0 20px 1px black; */
 }

@@ -33,6 +33,7 @@
 #include "bz-auth-state.h"
 #include "bz-backend-notification.h"
 #include "bz-content-provider.h"
+#include "bz-donations-dialog.h"
 #include "bz-entry-cache-manager.h"
 #include "bz-entry-group.h"
 #include "bz-env.h"
@@ -87,6 +88,7 @@ struct _BzApplication
   DexPromise                 *ready_to_open_files;
   GHashTable                 *eol_runtimes;
   GHashTable                 *ids_to_groups;
+  GHashTable                 *ignore_eol_set;
   GHashTable                 *installed_set;
   GHashTable                 *sys_name_to_addons;
   GHashTable                 *usr_name_to_addons;
@@ -356,6 +358,7 @@ bz_application_dispose (GObject *object)
   g_clear_pointer (&self->blocklist_regexes, g_ptr_array_unref);
   g_clear_pointer (&self->eol_runtimes, g_hash_table_unref);
   g_clear_pointer (&self->ids_to_groups, g_hash_table_unref);
+  g_clear_pointer (&self->ignore_eol_set, g_hash_table_unref);
   g_clear_pointer (&self->init_timer, g_timer_destroy);
   g_clear_pointer (&self->installed_set, g_hash_table_unref);
   g_clear_pointer (&self->sys_name_to_addons, g_hash_table_unref);
@@ -579,27 +582,21 @@ bz_application_donate_action (GSimpleAction *action,
                               GVariant      *parameter,
                               gpointer       user_data)
 {
-  BzApplication *self = user_data;
-
-  g_assert (BZ_IS_APPLICATION (self));
-
-  g_app_info_launch_default_for_uri (
-      DONATE_LINK, NULL, NULL);
-}
-
-static void
-bz_application_toggle_transactions_action (GSimpleAction *action,
-                                           GVariant      *parameter,
-                                           gpointer       user_data)
-{
   BzApplication *self   = user_data;
   GtkWindow     *window = NULL;
+  AdwDialog     *dialog = NULL;
 
   g_assert (BZ_IS_APPLICATION (self));
 
   window = gtk_application_get_active_window (GTK_APPLICATION (self));
+  if (window == NULL)
+    window = new_window (self);
 
-  bz_window_toggle_transactions (BZ_WINDOW (window));
+  dialog = bz_donations_dialog_new ();
+  bz_donations_dialog_set_state (BZ_DONATIONS_DIALOG (dialog), self->state);
+  adw_dialog_present (dialog, GTK_WIDGET (window));
+
+  bz_state_info_set_donation_prompt_dismissed (self->state, TRUE);
 }
 
 static void
@@ -811,19 +808,18 @@ bz_application_quit_action (GSimpleAction *action,
 }
 
 static const GActionEntry app_actions[] = {
-  {       "flathub-login",       bz_application_flathub_login_action, NULL },
-  {      "flathub-logout",      bz_application_flathub_logout_action, NULL },
-  {   "flathub-favorites",   bz_application_flathub_favorites_action, NULL },
-  {                "quit",                bz_application_quit_action, NULL },
-  {         "preferences",         bz_application_preferences_action, NULL },
-  {               "about",               bz_application_about_action, NULL },
-  {        "sync-remotes",        bz_application_sync_remotes_action, NULL },
-  {              "search",              bz_application_search_action,  "s" },
-  {         "show-app-id",         bz_application_show_app_id_action,  "s" },
-  { "toggle-transactions", bz_application_toggle_transactions_action, NULL },
-  {              "donate",              bz_application_donate_action, NULL },
-  {    "bazaar-inspector",    bz_application_bazaar_inspector_action, NULL },
-  {   "toggle-debug-mode",   bz_application_toggle_debug_mode_action, NULL },
+  {     "flathub-login",     bz_application_flathub_login_action, NULL },
+  {    "flathub-logout",    bz_application_flathub_logout_action, NULL },
+  { "flathub-favorites", bz_application_flathub_favorites_action, NULL },
+  {              "quit",              bz_application_quit_action, NULL },
+  {       "preferences",       bz_application_preferences_action, NULL },
+  {             "about",             bz_application_about_action, NULL },
+  {      "sync-remotes",      bz_application_sync_remotes_action, NULL },
+  {            "search",            bz_application_search_action,  "s" },
+  {       "show-app-id",       bz_application_show_app_id_action,  "s" },
+  {            "donate",            bz_application_donate_action, NULL },
+  {  "bazaar-inspector",  bz_application_bazaar_inspector_action, NULL },
+  { "toggle-debug-mode", bz_application_toggle_debug_mode_action, NULL },
 };
 
 static void
@@ -855,10 +851,6 @@ bz_application_init (BzApplication *self)
       GTK_APPLICATION (self),
       "app.search('')",
       (const char *[]) { "<primary>f", NULL });
-  gtk_application_set_accels_for_action (
-      GTK_APPLICATION (self),
-      "app.toggle-transactions",
-      (const char *[]) { "<primary>d", NULL });
   gtk_application_set_accels_for_action (
       GTK_APPLICATION (self),
       "app.bazaar-inspector",
@@ -937,6 +929,8 @@ init_fiber (GWeakRef *wr)
 
       if (wipe_cache)
         {
+          bz_state_info_set_donation_prompt_dismissed (self->state, FALSE);
+
           g_info ("Version incompatibility detected: clearing cache");
           dex_await (bz_reap_file_dex (root_cache_dir_file), NULL);
         }
@@ -954,6 +948,8 @@ init_fiber (GWeakRef *wr)
                      NULL);
         }
     }
+  else
+    bz_state_info_set_donation_prompt_dismissed (self->state, TRUE);
 
   g_clear_object (&self->flatpak);
   self->flatpak = dex_await_object (bz_flatpak_instance_new (), &local_error);
@@ -1031,7 +1027,7 @@ init_fiber (GWeakRef *wr)
       g_clear_error (&local_error);
 
       self->installed_set = g_hash_table_new_full (
-          g_str_hash, g_str_equal, g_free, NULL);
+          g_str_hash, g_str_equal, g_free, g_free);
     }
 
   repos = dex_await_object (
@@ -1325,8 +1321,13 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
               {
               case BZ_BACKEND_NOTIFICATION_KIND_INSTALL_DONE:
                 {
+                  const char *version = NULL;
+
+                  version = bz_backend_notification_get_version (notif);
+
+                  g_hash_table_replace (self->installed_set, g_strdup (unique_id), g_strdup (version));
+                  bz_entry_set_installed_version (entry, version);
                   bz_entry_set_installed (entry, TRUE);
-                  g_hash_table_replace (self->installed_set, g_strdup (unique_id), NULL);
 
                   if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
                     {
@@ -1347,10 +1348,15 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
                 break;
               case BZ_BACKEND_NOTIFICATION_KIND_UPDATE_DONE:
                 {
+                  const char *version = NULL;
+
+                  version = bz_backend_notification_get_version (notif);
+                  g_hash_table_replace (self->installed_set, g_strdup (unique_id), g_strdup (version));
                 }
                 break;
               case BZ_BACKEND_NOTIFICATION_KIND_REMOVE_DONE:
                 {
+                  bz_entry_set_installed_version (entry, NULL);
                   bz_entry_set_installed (entry, FALSE);
                   g_hash_table_remove (self->installed_set, unique_id);
 
@@ -1455,6 +1461,7 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
                         const char   *unique_id = NULL;
                         BzEntryGroup *group     = NULL;
                         gboolean      installed = FALSE;
+                        const char   *version   = NULL;
 
                         entry = g_value_get_object (dex_future_get_value (future, NULL));
                         id    = bz_entry_get_id (entry);
@@ -1464,6 +1471,11 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
 
                         unique_id = bz_entry_get_unique_id (entry);
                         installed = g_hash_table_contains (installed_set, unique_id);
+
+                        version = g_hash_table_lookup (installed_set, unique_id);
+                        if (installed && version != NULL && *version != '\0')
+                          bz_entry_set_installed_version (entry, version);
+
                         bz_entry_set_installed (entry, installed);
 
                         if (group != NULL)
@@ -1583,37 +1595,10 @@ open_flatpakref_fiber (OpenFlatpakrefData *data)
     {
       if (G_VALUE_HOLDS_OBJECT (value))
         {
-          BzEntry    *entry         = NULL;
-          const char *unique_id     = NULL;
-          g_autoptr (BzEntry) equiv = NULL;
+          BzEntry *entry = NULL;
 
-          entry     = g_value_get_object (value);
-          unique_id = bz_entry_get_unique_id (entry);
-
-          equiv = dex_await_object (
-              bz_entry_cache_manager_get (self->cache, unique_id),
-              NULL);
-
-          if (equiv != NULL)
-            {
-              if (bz_entry_is_of_kinds (equiv, BZ_ENTRY_KIND_APPLICATION))
-                {
-                  const char   *generic_id = NULL;
-                  BzEntryGroup *group      = NULL;
-
-                  generic_id = bz_entry_get_id (entry);
-                  group      = g_hash_table_lookup (self->ids_to_groups, generic_id);
-
-                  if (group != NULL)
-                    bz_window_show_group (BZ_WINDOW (window), group);
-                  else
-                    bz_window_show_entry (BZ_WINDOW (window), equiv);
-                }
-              else
-                bz_window_show_entry (BZ_WINDOW (window), equiv);
-            }
-          else
-            bz_window_show_entry (BZ_WINDOW (window), entry);
+          entry = g_value_get_object (value);
+          bz_window_show_entry (BZ_WINDOW (window), entry);
         }
       else
         open_generic_id (self, g_value_get_string (value));
@@ -1805,6 +1790,7 @@ fiber_replace_entry (BzApplication *self,
   gboolean    user               = FALSE;
   gboolean    installed          = FALSE;
   const char *flatpak_id         = NULL;
+  const char *version            = NULL;
 
   id                 = bz_entry_get_id (entry);
   unique_id          = bz_entry_get_unique_id (entry);
@@ -1817,6 +1803,10 @@ fiber_replace_entry (BzApplication *self,
 
   installed = g_hash_table_contains (self->installed_set, unique_id);
   bz_entry_set_installed (entry, installed);
+
+  version = g_hash_table_lookup (self->installed_set, unique_id);
+  if (version != NULL && *version != '\0')
+    bz_entry_set_installed_version (entry, version);
 
   flatpak_id = bz_flatpak_entry_get_flatpak_id (BZ_FLATPAK_ENTRY (entry));
   if (flatpak_id != NULL)
@@ -1850,18 +1840,21 @@ fiber_replace_entry (BzApplication *self,
   if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
     {
       BzEntryGroup *group        = NULL;
+      gboolean      ignore_eol   = FALSE;
       const char   *runtime_name = NULL;
       BzEntry      *eol_runtime  = NULL;
 
       group = g_hash_table_lookup (self->ids_to_groups, id);
+      if (self->ignore_eol_set != NULL)
+        ignore_eol = g_hash_table_contains (self->ignore_eol_set, id);
 
       runtime_name = bz_flatpak_entry_get_application_runtime (BZ_FLATPAK_ENTRY (entry));
-      if (runtime_name != NULL)
+      if (!ignore_eol && runtime_name != NULL)
         eol_runtime = g_hash_table_lookup (self->eol_runtimes, runtime_name);
 
       if (group != NULL)
         {
-          bz_entry_group_add (group, entry, eol_runtime);
+          bz_entry_group_add (group, entry, eol_runtime, ignore_eol);
           if (installed && !g_list_store_find (self->installed_apps, group, NULL))
             g_list_store_insert_sorted (
                 self->installed_apps, group,
@@ -1873,7 +1866,7 @@ fiber_replace_entry (BzApplication *self,
 
           g_debug ("Creating new application group for id %s", id);
           new_group = bz_entry_group_new (self->entry_factory);
-          bz_entry_group_add (new_group, entry, eol_runtime);
+          bz_entry_group_add (new_group, entry, eol_runtime, ignore_eol);
 
           g_list_store_append (self->groups, new_group);
           g_hash_table_replace (self->ids_to_groups, g_strdup (id), g_object_ref (new_group));
@@ -1883,31 +1876,30 @@ fiber_replace_entry (BzApplication *self,
                 self->installed_apps, new_group,
                 (GCompareDataFunc) cmp_group, NULL);
         }
-
-      if (eol_runtime != NULL)
-        g_hash_table_remove (self->eol_runtimes, runtime_name);
     }
 
   if (flatpak_id != NULL &&
       bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_RUNTIME) &&
       g_str_has_prefix (flatpak_id, "runtime/"))
     {
-      const char *eol = NULL;
+      const char *stripped = NULL;
+      const char *eol      = NULL;
+
+      stripped = flatpak_id + strlen ("runtime/");
 
       eol = bz_entry_get_eol (entry);
       if (eol != NULL)
-        {
-          g_autofree char *stripped = NULL;
-
-          stripped = g_strdup (flatpak_id + strlen ("runtime/"));
-          g_hash_table_replace (
-              self->eol_runtimes,
-              g_steal_pointer (&stripped),
-              g_object_ref (entry));
-        }
+        g_hash_table_replace (
+            self->eol_runtimes,
+            g_strdup (stripped),
+            g_object_ref (entry));
+      else
+        g_hash_table_remove (self->eol_runtimes, stripped);
     }
 
-  if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_ADDON))
+  if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_ADDON) &&
+      strstr (id, ".Debug") == NULL &&
+      strstr (id, ".Locale") == NULL)
     {
       const char *extension_of_what = NULL;
 
@@ -2489,7 +2481,31 @@ init_service_struct (BzApplication *self,
       parse_results = bz_parser_process_bytes (
           BZ_PARSER (parser), config_bytes, &local_error);
       if (parse_results != NULL)
-        self->config = g_value_dup_object (g_hash_table_lookup (parse_results, "/"));
+        {
+          GListModel *override_eol_markings = NULL;
+
+          self->config = g_value_dup_object (g_hash_table_lookup (parse_results, "/"));
+
+          override_eol_markings = bz_main_config_get_override_eol_markings (self->config);
+          if (override_eol_markings != NULL)
+            {
+              guint n_appids = 0;
+
+              self->ignore_eol_set = g_hash_table_new_full (
+                  g_str_hash, g_str_equal, g_free, g_free);
+
+              n_appids = g_list_model_get_n_items (override_eol_markings);
+              for (guint i = 0; i < n_appids; i++)
+                {
+                  g_autoptr (GtkStringObject) string = NULL;
+                  const char *value                  = NULL;
+
+                  string = g_list_model_get_item (override_eol_markings, i);
+                  value  = gtk_string_object_get_string (string);
+                  g_hash_table_replace (self->ignore_eol_set, g_strdup (value), NULL);
+                }
+            }
+        }
       else
         g_warning ("Could not load main config at %s: %s",
                    HARDCODED_MAIN_CONFIG, local_error->message);
@@ -2588,6 +2604,7 @@ init_service_struct (BzApplication *self,
 
   self->state = bz_state_info_new ();
   bz_state_info_set_busy (self->state, TRUE);
+  bz_state_info_set_donation_prompt_dismissed (self->state, TRUE);
 
   g_signal_connect_swapped (
       self->state,

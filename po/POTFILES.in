@@ -17,6 +17,7 @@ src/bz-apps-page.blp
 src/bz-apps-page.c
 src/bz-application-map-factory.c
 src/bz-application.c
+src/bz-appstream-parser.c
 src/bz-async-texture.c
 src/bz-backend.c
 src/bz-comet-overlay.c
@@ -28,6 +29,8 @@ src/bz-decorated-screenshot.blp
 src/bz-decorated-screenshot.c
 src/bz-developer-badge.blp
 src/bz-developer-badge.c
+src/bz-donations-dialog.blp
+src/bz-donations-dialog.c
 src/bz-download-worker.c
 src/bz-dynamic-list-view.c
 src/bz-entry-cache-manager.c
@@ -65,11 +68,12 @@ src/bz-hardware-support-dialog.c
 src/bz-inhibited-scrollable.c
 src/bz-inspector.blp
 src/bz-inspector.c
-src/bz-installed-page.blp
-src/bz-installed-page.c
 src/bz-installed-tile.blp
+src/bz-installed-tile.c
 src/bz-io.c
 src/bz-lazy-async-texture-model.c
+src/bz-library-page.blp
+src/bz-library-page.c
 src/bz-license-dialog.blp
 src/bz-license-dialog.c
 src/bz-license-dialog.h
@@ -98,7 +102,6 @@ src/bz-search-widget.c
 src/bz-section-view.blp
 src/bz-section-view.c
 src/bz-serializable.c
-src/bz-share-list.blp
 src/bz-share-list.c
 src/bz-stats-dialog.blp
 src/bz-stats-dialog.c
@@ -107,9 +110,11 @@ src/bz-transaction-dialog.c
 src/bz-transaction-list-dialog.blp
 src/bz-transaction-list-dialog.c
 src/bz-transaction-manager.c
-src/bz-transaction-view.blp
-src/bz-transaction-view.c
+src/bz-transaction-tile.blp
+src/bz-transaction-tile.c
 src/bz-transaction.c
+src/bz-updates-card.blp
+src/bz-updates-card.c
 src/bz-user-data-page.c
 src/bz-user-data-page.blp
 src/bz-user-data-tile.c

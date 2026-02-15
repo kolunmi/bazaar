@@ -2,7 +2,7 @@
 
 INSTR="$1"
 
-VERSION=0.7.5
+VERSION=0.7.9
 
 case "$INSTR" in
     get-vcs)
@@ -12,6 +12,10 @@ case "$INSTR" in
         else
             echo "${VERSION}"
         fi
+        ;;
+    get-gh-release)
+        TAG="v${VERSION}"
+        echo "https://github.com/kolunmi/bazaar/releases/tag/${TAG}"
         ;;
     *)
         echo invalid arguments 1>&2

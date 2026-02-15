@@ -1,0 +1,287 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzLibraryPage: Adw.Bin {
+  child: Box {
+    orientation: vertical;
+
+    Adw.Clamp search_box_clamp {
+      margin-start: 12;
+      margin-end: 12;
+      maximum-size: 375;
+
+      child: Adw.Bin {
+        halign: fill;
+        margin-top: 10;
+        margin-bottom: 10;
+
+        child: Box {
+          orientation: horizontal;
+          spacing: 8;
+          height-request: 40;
+
+          Image {
+            icon-name: "system-search-symbolic";
+          }
+
+          Text search_bar {
+            hexpand: true;
+            placeholder-text: _("Search installed apps");
+            notify::text => $search_text_changed(template);
+          }
+
+          Button clear_button {
+            icon-name: "edit-clear-symbolic";
+            visible: bind $not($is_empty_string(search_bar.text) as <bool>) as <bool>;
+
+            styles [
+              "flat",
+              "circular",
+              "clear-button",
+            ]
+
+            clicked => $reset_search_cb(template);
+          }
+
+          styles [
+            "search-box",
+          ]
+        };
+      };
+    }
+
+    Adw.ViewStack stack {
+      enable-transitions: true;
+      transition-duration: 400;
+
+      Adw.ViewStackPage {
+        name: "empty";
+        title: _("Empty");
+
+        child: Adw.StatusPage {
+          icon-name: "library-symbolic";
+          title: _("No Apps Found");
+          description: "";
+        };
+      }
+
+      Adw.ViewStackPage {
+        name: "no-results";
+        title: _("No Results");
+
+        child: Adw.StatusPage {
+          icon-name: "library-symbolic";
+          title: _("No Results");
+          description: bind $no_results_found_subtitle(search_bar.text) as <string>;
+        };
+      }
+
+      Adw.ViewStackPage {
+        name: "content";
+        // Translators: .
+        title: _("Library");
+
+        child: ScrolledWindow scroll{
+          hscrollbar-policy: never;
+
+          child: Adw.Clamp {
+            vexpand: true;
+            maximum-size: 650;
+
+            child: Box margin_box {
+              orientation: vertical;
+              margin-start: 9;
+              margin-end: 9;
+
+              Box non_search_content {
+                orientation: vertical;
+                visible: bind $is_empty_string(search_bar.text) as <bool>;
+
+                Revealer {
+                  reveal-child: bind $invert_boolean($is_empty(template.state as <$BzStateInfo>.available-updates) as <bool>) as <bool>;
+                  transition-type: slide_down;
+
+                  child: Box {
+                    orientation: vertical;
+                    spacing: 8;
+                    margin-top: 15;
+
+                    Label {
+                      label: _("Pending Updates");
+                      xalign: 0;
+                      margin-start: 12;
+                      margin-top: 15;
+
+                      styles [
+                        "heading",
+                        "h4",
+                      ]
+                    }
+
+                    $BzUpdatesCard {
+                      state: bind template.state;
+                      update => $updates_card_update_cb(template);
+                    }
+                  };
+                }
+
+                Revealer {
+                  reveal-child: bind $invert_boolean($is_zero(template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.install-trackers as <FilterListModel>.n-items) as <bool>) as <bool>;
+                  transition-type: slide_down;
+
+                  child: Box {
+                    margin-top: 15;
+                    orientation: vertical;
+
+                    Label install_label {
+                      label: _("Downloads");
+                      xalign: 0;
+                      margin-start: 12;
+
+                      styles [
+                        "heading",
+                        "h4",
+                      ]
+                    }
+
+                    ListView install_list_view {
+                      styles [
+                        "navigation-sidebar",
+                        "installed-list-view",
+                      ]
+
+                      model: NoSelection {
+                        model: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.install-trackers;
+                      };
+
+                      factory: BuilderListItemFactory {
+                        template ListItem {
+                          activatable: false;
+
+                          child: $BzTransactionTile {
+                            tracker: bind template.item;
+                            activated => $tile_activated_cb();
+                          };
+                        }
+                      };
+                    }
+                  };
+                }
+
+                Revealer {
+                  reveal-child: bind $invert_boolean($is_zero(template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.removal-trackers as <FilterListModel>.n-items) as <bool>) as <bool>;
+                  transition-type: slide_down;
+
+                  child: Box {
+                    margin-top: 15;
+                    orientation: vertical;
+
+                    Label removal_label {
+                      label: _("Recently Uninstalled");
+                      xalign: 0;
+                      margin-start: 12;
+
+                      styles [
+                        "heading",
+                        "h4",
+                      ]
+                    }
+
+                    ListView removal_list_view {
+                      styles [
+                        "navigation-sidebar",
+                        "installed-list-view",
+                      ]
+
+                      model: NoSelection {
+                        model: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.removal-trackers;
+                      };
+
+                      factory: BuilderListItemFactory {
+                        template ListItem {
+                          activatable: false;
+
+                          child: $BzTransactionTile {
+                            tracker: bind template.item;
+                            activated => $tile_activated_cb();
+                          };
+                        }
+                      };
+                    }
+                  };
+                }
+
+                Revealer {
+                  reveal-child: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.has-transactions;
+                  margin-bottom: 15;
+                  transition-type: slide_down;
+
+                  child: ListBox {
+                    margin-bottom: 16;
+                    margin-top: 4;
+                    margin-start: 4;
+                    margin-end: 4;
+                    selection-mode: none;
+
+                    styles [
+                      "boxed-list",
+                    ]
+
+                    Adw.ButtonRow {
+                      title: _("Clear Finished Tasks");
+                      activated => $clear_tasks_cb(template);
+
+                      styles [
+                        "error",
+                      ]
+                    }
+                  };
+                }
+
+                Label {
+                  label: _("Installed Apps");
+                  xalign: 0;
+                  margin-start: 12;
+                  visible: bind $logical_or($logical_or($invert_boolean($is_zero(template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.removal-trackers as <FilterListModel>.n-items) as <bool>) as <bool>, $invert_boolean($is_zero(template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.install-trackers as <FilterListModel>.n-items) as <bool>) as <bool>) as <bool>, $invert_boolean($is_null(template.state as <$BzStateInfo>.available-updates) as <bool>) as <bool>) as <bool>;
+
+                  styles [
+                    "heading",
+                    "h4",
+                  ]
+                }
+              }
+
+              ListView list_view {
+                styles [
+                  "navigation-sidebar",
+                  "installed-list-view",
+                ]
+
+                model: NoSelection {
+                  model: FilterListModel {
+                    filter: CustomFilter filter {};
+
+                    model: bind template.model;
+                  };
+                };
+
+                factory: BuilderListItemFactory {
+                  template ListItem {
+                    activatable: false;
+                    selectable: false;
+                    focusable: false;
+
+                    child: $BzInstalledTile {
+                      group: bind template.item as <$BzEntryGroup>;
+                      activated => $tile_activated_cb();
+                    };
+                  }
+                };
+              }
+            };
+          };
+        };
+      }
+    }
+  };
+}

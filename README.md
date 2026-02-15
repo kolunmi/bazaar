@@ -14,6 +14,10 @@ Bazaar
 </div>
 
 > [!NOTE]
+> If you are a distributor/packager who would like to learn how to
+> customize Bazaar, take a look at the [docs](/docs/overview.md).
+
+> [!NOTE]
 > If you are interested in contributing code to Bazaar (Thank you!),
 > please see the [style rules](/CODESTYLE.md).
 
@@ -46,9 +50,13 @@ Bazaar's market stall icon.
 
 Pre-built binaries are distributed via Flathub and GitHub actions:
 
-<a href='https://flathub.org/apps/details/io.github.kolunmi.Bazaar'><img width='240' alt='Download on Flathub' src='https://flathub.org/assets/badges/flathub-badge-en.png'/></a>
+<a href='https://flathub.org/apps/details/io.github.kolunmi.Bazaar'><img width='240' alt='Get it on Flathub' src='https://flathub.org/api/badge?svg&locale=en'/></a>
 
 [![Build Flatpak and Upload Artifact](https://github.com/kolunmi/bazaar/actions/workflows/build-flatpak.yml/badge.svg)](https://github.com/kolunmi/bazaar/actions/workflows/build-flatpak.yml)
+
+There also exist packages for [Debian](https://tracker.debian.org/pkg/bazaar)
+and [Arch](https://archlinux.org/packages/extra/x86_64/bazaar/). These are not
+directly supported but should work fine.
 
 ### Supporting
 
@@ -61,10 +69,6 @@ Thanks to everyone in the GNOME development community for creating
 such an awesome desktop environment!
 
 ### Contributing
-
-> [!NOTE]
-> If you are a distributor/packager who would like to learn how to
-customize Bazaar, take a look at the [docs](/docs/overview.org).
 
 If you would like to try this project on your local machine, clone it
 on the cli and type these commands inside the project root:
@@ -93,6 +97,7 @@ You will need the following dependencies installed, along with a C compiler, mes
 | [md4c](https://github.com/mity/md4c)                    | `md4c`            | `0.5.1`                | Parse markdown (.md)                                |
 | [webkitgtk](https://webkitgtk.org/)                     | `webkitgtk-6.0`   | `2.50.2`               | Render web views                                    |
 | [libsecret](https://gitlab.gnome.org/GNOME/libsecret)   | `libsecret-1`     | `0.20`                 | Store Flathub account information                   |
+| [libproxy](https://github.com/libproxy/libproxy)        | `libproxy-1.0`    | `0.5`                  | Parse proxies for networking operations             |
 
 #### Code of Conduct
 

@@ -85,11 +85,9 @@ enum
   PROP_0,
 
   PROP_STATE,
-  PROP_TRANSACTION_MANAGER,
   PROP_ENTRY_GROUP,
   PROP_UI_ENTRY,
   PROP_MAIN_MENU,
-  PROP_SHOW_SIDEBAR,
 
   LAST_PROP
 };
@@ -142,9 +140,6 @@ bz_full_view_get_property (GObject    *object,
     case PROP_STATE:
       g_value_set_object (value, self->state);
       break;
-    case PROP_TRANSACTION_MANAGER:
-      g_value_set_object (value, bz_full_view_get_transaction_manager (self));
-      break;
     case PROP_ENTRY_GROUP:
       g_value_set_object (value, bz_full_view_get_entry_group (self));
       break;
@@ -153,9 +148,6 @@ bz_full_view_get_property (GObject    *object,
       break;
     case PROP_MAIN_MENU:
       g_value_set_object (value, self->main_menu);
-      break;
-    case PROP_SHOW_SIDEBAR:
-      g_value_set_boolean (value, self->show_sidebar);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -176,9 +168,6 @@ bz_full_view_set_property (GObject      *object,
       g_clear_object (&self->state);
       self->state = g_value_dup_object (value);
       break;
-    case PROP_TRANSACTION_MANAGER:
-      bz_full_view_set_transaction_manager (self, g_value_get_object (value));
-      break;
     case PROP_ENTRY_GROUP:
       bz_full_view_set_entry_group (self, g_value_get_object (value));
       break;
@@ -187,10 +176,6 @@ bz_full_view_set_property (GObject      *object,
       if (self->main_menu)
         g_object_unref (self->main_menu);
       self->main_menu = g_value_dup_object (value);
-      break;
-    case PROP_SHOW_SIDEBAR:
-      self->show_sidebar = g_value_get_boolean (value);
-      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SHOW_SIDEBAR]);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -213,6 +198,13 @@ format_with_small_suffix (char *number, const char *suffix)
 
   return g_strdup_printf ("%s\xC2\xA0<span font_size='x-small'>%s</span>",
                           number, suffix);
+}
+
+static gboolean
+is_scrolled_down (gpointer object,
+                  double   value)
+{
+  return value > 100.0;
 }
 
 static char *
@@ -267,6 +259,9 @@ format_size (gpointer object, guint64 value)
   char            *decimal  = NULL;
   int              digits   = 0;
 
+  if (value == 0)
+    return g_strdup (_ ("N/A"));
+
   if (space != NULL)
     {
       *space = '\0';
@@ -306,7 +301,12 @@ get_size_type (gpointer object,
 static char *
 format_size_tooltip (gpointer object, guint64 value)
 {
-  g_autofree char *size_str = g_format_size (value);
+  g_autofree char *size_str = NULL;
+
+  if (value == 0)
+    return g_strdup (_ ("Size information unavailable"));
+
+  size_str = g_format_size (value);
   return g_strdup_printf (_ ("Download size of %s"), size_str);
 }
 
@@ -1075,13 +1075,6 @@ bz_full_view_class_init (BzFullViewClass *klass)
           BZ_TYPE_STATE_INFO,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-  props[PROP_TRANSACTION_MANAGER] =
-      g_param_spec_object (
-          "transaction-manager",
-          NULL, NULL,
-          BZ_TYPE_TRANSACTION_MANAGER,
-          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
-
   props[PROP_ENTRY_GROUP] =
       g_param_spec_object (
           "entry-group",
@@ -1102,13 +1095,6 @@ bz_full_view_class_init (BzFullViewClass *klass)
           NULL, NULL,
           G_TYPE_MENU_MODEL,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-
-  props[PROP_SHOW_SIDEBAR] =
-      g_param_spec_boolean (
-          "show-sidebar",
-          NULL, NULL,
-          FALSE,
-          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
@@ -1177,6 +1163,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   g_type_ensure (BZ_TYPE_ENTRY_GROUP);
   g_type_ensure (BZ_TYPE_FADING_CLAMP);
   g_type_ensure (BZ_TYPE_FAVORITE_BUTTON);
+  g_type_ensure (BZ_TYPE_FLATPAK_ENTRY);
   g_type_ensure (BZ_TYPE_HARDWARE_SUPPORT_DIALOG);
   g_type_ensure (BZ_TYPE_LAZY_ASYNC_TEXTURE_MODEL);
   g_type_ensure (BZ_TYPE_SECTION_VIEW);
@@ -1197,6 +1184,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzFullView, wide_install_button);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, narrow_install_button);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, narrow_open_button);
+  gtk_widget_class_bind_template_callback (widget_class, is_scrolled_down);
   gtk_widget_class_bind_template_callback (widget_class, format_favorites_count);
   gtk_widget_class_bind_template_callback (widget_class, format_recent_downloads);
   gtk_widget_class_bind_template_callback (widget_class, format_recent_downloads_tooltip);
@@ -1260,28 +1248,6 @@ bz_full_view_new (void)
 }
 
 void
-bz_full_view_set_transaction_manager (BzFullView           *self,
-                                      BzTransactionManager *transactions)
-{
-  g_return_if_fail (BZ_IS_FULL_VIEW (self));
-  g_return_if_fail (transactions == NULL ||
-                    BZ_IS_TRANSACTION_MANAGER (transactions));
-
-  g_clear_object (&self->transactions);
-  if (transactions != NULL)
-    self->transactions = g_object_ref (transactions);
-
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TRANSACTION_MANAGER]);
-}
-
-BzTransactionManager *
-bz_full_view_get_transaction_manager (BzFullView *self)
-{
-  g_return_val_if_fail (BZ_IS_FULL_VIEW (self), NULL);
-  return self->transactions;
-}
-
-void
 bz_full_view_set_entry_group (BzFullView   *self,
                               BzEntryGroup *group)
 {
@@ -1299,13 +1265,29 @@ bz_full_view_set_entry_group (BzFullView   *self,
 
   if (group != NULL)
     {
-      g_autoptr (DexFuture) future = NULL;
-
       self->group    = g_object_ref (group);
       self->ui_entry = bz_entry_group_dup_ui_entry (group);
 
-      future            = bz_entry_group_dup_all_into_store (group);
-      self->group_model = bz_result_new (future);
+      if (self->ui_entry != NULL && bz_result_get_resolved (self->ui_entry))
+        {
+          g_autoptr (GListStore) store = NULL;
+          g_autoptr (DexFuture) future = NULL;
+          BzEntry *entry               = NULL;
+
+          entry = bz_result_get_object (self->ui_entry);
+          store = g_list_store_new (BZ_TYPE_ENTRY);
+          g_list_store_append (store, entry);
+
+          future            = dex_future_new_for_object (store);
+          self->group_model = bz_result_new (future);
+        }
+      else
+        {
+          g_autoptr (DexFuture) future = NULL;
+
+          future            = bz_entry_group_dup_all_into_store (group);
+          self->group_model = bz_result_new (future);
+        }
 
       adw_view_stack_set_visible_child_name (self->stack, "content");
     }

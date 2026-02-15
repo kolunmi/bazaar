@@ -33,13 +33,13 @@
 #include "bz-flathub-page.h"
 #include "bz-full-view.h"
 #include "bz-global-progress.h"
-#include "bz-installed-page.h"
 #include "bz-io.h"
+#include "bz-library-page.h"
+#include "bz-popup-overlay.h"
 #include "bz-progress-bar.h"
 #include "bz-search-widget.h"
 #include "bz-template-callbacks.h"
 #include "bz-transaction-dialog.h"
-#include "bz-transaction-list-dialog.h"
 #include "bz-transaction-manager.h"
 #include "bz-user-data-page.h"
 #include "bz-util.h"
@@ -56,23 +56,16 @@ struct _BzWindow
   gboolean breakpoint_applied;
 
   /* Template widgets */
-  BzCometOverlay      *comet_overlay;
-  AdwOverlaySplitView *split_view;
-  AdwViewStack        *transactions_stack;
-  AdwNavigationView   *navigation_view;
-  BzFullView          *full_view;
-  GtkToggleButton     *toggle_transactions;
-  GtkToggleButton     *toggle_transactions_sidebar;
-  BzSearchWidget      *search_widget;
-  BzInstalledPage     *installed_page;
-  GtkButton           *update_button;
-  GtkToggleButton     *transactions_pause;
-  GtkButton           *transactions_stop;
-  GtkButton           *transactions_clear;
-  AdwToastOverlay     *toasts;
-  AdwViewStack        *main_view_stack;
-  GtkStack            *main_stack;
-  GtkLabel            *debug_id_label;
+  BzCometOverlay    *comet_overlay;
+  BzPopupOverlay    *popup_overlay;
+  AdwNavigationView *navigation_view;
+  BzFullView        *full_view;
+  BzSearchWidget    *search_widget;
+  BzLibraryPage     *library_page;
+  AdwToastOverlay   *toasts;
+  AdwViewStack      *main_view_stack;
+  GtkStack          *main_stack;
+  GtkLabel          *debug_id_label;
 };
 
 G_DEFINE_FINAL_TYPE (BzWindow, bz_window, ADW_TYPE_APPLICATION_WINDOW)
@@ -119,11 +112,6 @@ BZ_DEFINE_DATA (
 static DexFuture *
 bulk_install_fiber (BulkInstallData *data);
 
-static void
-update_dialog_response (BzTransactionListDialog *dialog,
-                        const char              *response,
-                        BzWindow                *self);
-
 static DexFuture *
 transact (BzWindow  *self,
           BzEntry   *entry,
@@ -139,11 +127,6 @@ try_transact (BzWindow     *self,
               GtkWidget    *source);
 
 static void
-update (BzWindow *self,
-        BzEntry **updates,
-        guint     n_updates);
-
-static void
 search (BzWindow   *self,
         const char *text);
 
@@ -151,9 +134,6 @@ static void
 bulk_install (BzWindow *self,
               BzEntry **installs,
               guint     n_installs);
-
-static void
-check_transactions (BzWindow *self);
 
 static void
 set_page (BzWindow *self);
@@ -213,9 +193,8 @@ list_length (gpointer    object,
 }
 
 static void
-browser_group_selected_cb (BzWindow     *self,
-                           BzEntryGroup *group,
-                           gpointer      browser)
+select_cb (BzWindow     *self,
+           BzEntryGroup *group)
 {
   bz_window_show_group (self, group);
 }
@@ -280,19 +259,89 @@ remove_addon_cb (BzWindow   *self,
 }
 
 static void
-install_entry_cb (BzWindow   *self,
-                  BzEntry    *entry,
-                  BzFullView *view)
+install_entry_cb (BzWindow     *self,
+                  BzEntryGroup *group,
+                  BzFullView   *view)
 {
-  try_transact (self, entry, NULL, FALSE, FALSE, NULL);
+  try_transact (self, NULL, group, FALSE, FALSE, NULL);
 }
 
 static void
-remove_installed_cb (BzWindow   *self,
-                     BzEntry    *entry,
-                     BzFullView *view)
+remove_installed_cb (BzWindow     *self,
+                     BzEntryGroup *group,
+                     BzFullView   *view)
 {
-  try_transact (self, entry, NULL, TRUE, FALSE, NULL);
+  try_transact (self, NULL, group, TRUE, FALSE, NULL);
+}
+
+static void
+update_cb (BzWindow      *self,
+           GListModel    *entries,
+           BzLibraryPage *library_page)
+{
+  g_autoptr (BzTransaction) transaction  = NULL;
+  guint                n_updates         = 0;
+  g_autofree BzEntry **updates_buf       = NULL;
+  GListModel          *available_updates = NULL;
+
+  g_return_if_fail (BZ_IS_WINDOW (self));
+  g_return_if_fail (G_IS_LIST_MODEL (entries));
+  g_return_if_fail (BZ_IS_LIBRARY_PAGE (library_page));
+
+  n_updates = g_list_model_get_n_items (entries);
+  if (n_updates == 0)
+    return;
+
+  updates_buf = g_malloc_n (n_updates, sizeof (*updates_buf));
+  for (guint i = 0; i < n_updates; i++)
+    updates_buf[i] = g_list_model_get_item (entries, i);
+
+  transaction = bz_transaction_new_full (
+      NULL, 0,
+      updates_buf, n_updates,
+      NULL, 0);
+
+  dex_future_disown (bz_transaction_manager_add (
+      bz_state_info_get_transaction_manager (self->state),
+      transaction));
+
+  available_updates = bz_state_info_get_available_updates (self->state);
+  if (G_IS_LIST_STORE (available_updates))
+    {
+      GListStore *store       = G_LIST_STORE (available_updates);
+      guint       n_available = g_list_model_get_n_items (available_updates);
+
+      for (guint i = n_available; i > 0; i--)
+        {
+          guint current_size                  = 0;
+          guint idx                           = 0;
+          g_autoptr (BzEntry) available_entry = NULL;
+          const char *available_id            = NULL;
+
+          idx          = i - 1;
+          current_size = g_list_model_get_n_items (available_updates);
+
+          if (idx >= current_size)
+            continue;
+
+          available_entry = g_list_model_get_item (available_updates, idx);
+          available_id    = bz_entry_get_id (available_entry);
+
+          for (guint j = 0; j < n_updates; j++)
+            {
+              if (g_strcmp0 (available_id, bz_entry_get_id (updates_buf[j])) == 0)
+                {
+                  g_list_store_remove (store, idx);
+                  break;
+                }
+            }
+        }
+    }
+
+  g_object_notify (G_OBJECT (self->state), "available-updates");
+
+  for (guint i = 0; i < n_updates; i++)
+    g_object_unref (updates_buf[i]);
 }
 
 static void
@@ -300,36 +349,7 @@ bulk_install_cb (BzWindow   *self,
                  GListModel *groups,
                  gpointer    source)
 {
-  g_autoptr (BulkInstallData) data = NULL;
-
-  g_return_if_fail (BZ_IS_WINDOW (self));
-  g_return_if_fail (G_IS_LIST_MODEL (groups));
-
-  data         = bulk_install_data_new ();
-  data->self   = bz_track_weak (self);
-  data->groups = g_object_ref (groups);
-
-  dex_future_disown (dex_scheduler_spawn (
-      dex_scheduler_get_default (),
-      bz_get_dex_stack_size (),
-      (DexFiberFunc) bulk_install_fiber,
-      bulk_install_data_ref (data),
-      bulk_install_data_unref));
-}
-
-static void
-installed_page_show_cb (BzWindow   *self,
-                        BzEntry    *entry,
-                        BzFullView *view)
-{
-  g_autoptr (BzEntryGroup) group = NULL;
-
-  group = bz_application_map_factory_convert_one (
-      bz_state_info_get_application_factory (self->state),
-      gtk_string_object_new (bz_entry_get_id (entry)));
-
-  if (group != NULL)
-    bz_window_show_group (self, group);
+  bz_window_bulk_install (self, groups);
 }
 
 void
@@ -390,57 +410,12 @@ breakpoint_unapply_cb (BzWindow      *self,
 }
 
 static void
-pause_transactions_cb (BzWindow        *self,
-                       GtkToggleButton *toggle)
-{
-  gboolean paused = FALSE;
-
-  paused = gtk_toggle_button_get_active (toggle);
-  bz_transaction_manager_set_paused (
-      bz_state_info_get_transaction_manager (self->state), paused);
-  check_transactions (self);
-}
-
-static void
-stop_transactions_cb (BzWindow  *self,
-                      GtkButton *button)
-{
-  bz_transaction_manager_set_paused (bz_state_info_get_transaction_manager (self->state), TRUE);
-  bz_transaction_manager_cancel_current (bz_state_info_get_transaction_manager (self->state));
-}
-
-static void
 sync_cb (BzWindow  *self,
          GtkButton *button)
 {
   g_action_group_activate_action (
       G_ACTION_GROUP (g_application_get_default ()),
       "sync-remotes", NULL);
-}
-
-static void
-update_cb (BzWindow  *self,
-           GtkButton *button)
-{
-  /* if the button is clickable, there have to be updates */
-  bz_window_push_update_dialog (self);
-}
-
-static char *
-update_amount_tooltip (gpointer    object,
-                       GListModel *model)
-{
-  guint count;
-
-  if (model == NULL)
-    count = 0;
-  else
-    count = g_list_model_get_n_items (model);
-
-  return g_strdup_printf (ngettext ("%d Update Available",
-                                    "%d Updates Available",
-                                    count),
-                          count);
 }
 
 static void
@@ -465,10 +440,7 @@ action_escape (GtkWidget  *widget,
 
   adw_navigation_view_pop (self->navigation_view);
   if (n_pages <= 2)
-    {
-      gtk_toggle_button_set_active (self->toggle_transactions, FALSE);
-      set_page (self);
-    }
+    set_page (self);
 }
 
 static char *
@@ -488,6 +460,18 @@ action_user_data (GtkWidget  *widget,
 
   user_data_page = ADW_NAVIGATION_PAGE (bz_user_data_page_new (self->state));
   adw_navigation_view_push (self->navigation_view, user_data_page);
+}
+
+static void
+action_open_library (GtkWidget  *widget,
+                     const char *action_name,
+                     GVariant   *parameter)
+{
+  BzWindow *self = BZ_WINDOW (widget);
+
+  adw_navigation_view_pop_to_tag (self->navigation_view, "main");
+  adw_view_stack_set_visible_child_name (self->main_view_stack, "installed");
+  bz_library_page_reset_search (self->library_page);
 }
 
 static void
@@ -538,51 +522,42 @@ bz_window_class_init (BzWindowClass *klass)
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   g_type_ensure (BZ_TYPE_COMET_OVERLAY);
+  g_type_ensure (BZ_TYPE_POPUP_OVERLAY);
   g_type_ensure (BZ_TYPE_SEARCH_WIDGET);
   g_type_ensure (BZ_TYPE_GLOBAL_PROGRESS);
   g_type_ensure (BZ_TYPE_PROGRESS_BAR);
   g_type_ensure (BZ_TYPE_CURATED_VIEW);
   g_type_ensure (BZ_TYPE_FULL_VIEW);
-  g_type_ensure (BZ_TYPE_INSTALLED_PAGE);
+  g_type_ensure (BZ_TYPE_LIBRARY_PAGE);
   g_type_ensure (BZ_TYPE_FLATHUB_PAGE);
+  // g_type_ensure (BZ_TYPE_VIEW_SWITCHER);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-window.ui");
   bz_widget_class_bind_all_util_callbacks (widget_class);
 
   gtk_widget_class_bind_template_child (widget_class, BzWindow, comet_overlay);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, split_view);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, transactions_stack);
+  gtk_widget_class_bind_template_child (widget_class, BzWindow, popup_overlay);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, navigation_view);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, full_view);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, toasts);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, toggle_transactions);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, toggle_transactions_sidebar);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, search_widget);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, installed_page);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, update_button);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, transactions_pause);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, transactions_stop);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, transactions_clear);
+  gtk_widget_class_bind_template_child (widget_class, BzWindow, library_page);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, main_view_stack);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, main_stack);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, debug_id_label);
   gtk_widget_class_bind_template_callback (widget_class, list_length);
-  gtk_widget_class_bind_template_callback (widget_class, browser_group_selected_cb);
+  gtk_widget_class_bind_template_callback (widget_class, select_cb);
   gtk_widget_class_bind_template_callback (widget_class, search_widget_select_cb);
   gtk_widget_class_bind_template_callback (widget_class, full_view_install_cb);
   gtk_widget_class_bind_template_callback (widget_class, full_view_remove_cb);
   gtk_widget_class_bind_template_callback (widget_class, install_addon_cb);
   gtk_widget_class_bind_template_callback (widget_class, remove_addon_cb);
   gtk_widget_class_bind_template_callback (widget_class, remove_installed_cb);
-  gtk_widget_class_bind_template_callback (widget_class, installed_page_show_cb);
+  gtk_widget_class_bind_template_callback (widget_class, update_cb);
   gtk_widget_class_bind_template_callback (widget_class, page_toggled_cb);
   gtk_widget_class_bind_template_callback (widget_class, breakpoint_apply_cb);
   gtk_widget_class_bind_template_callback (widget_class, breakpoint_unapply_cb);
-  gtk_widget_class_bind_template_callback (widget_class, pause_transactions_cb);
-  gtk_widget_class_bind_template_callback (widget_class, stop_transactions_cb);
   gtk_widget_class_bind_template_callback (widget_class, sync_cb);
-  gtk_widget_class_bind_template_callback (widget_class, update_cb);
-  gtk_widget_class_bind_template_callback (widget_class, update_amount_tooltip);
   gtk_widget_class_bind_template_callback (widget_class, transactions_clear_cb);
   gtk_widget_class_bind_template_callback (widget_class, browse_flathub_cb);
   gtk_widget_class_bind_template_callback (widget_class, open_search_cb);
@@ -591,6 +566,9 @@ bz_window_class_init (BzWindowClass *klass)
 
   gtk_widget_class_install_action (widget_class, "escape", NULL, action_escape);
   gtk_widget_class_install_action (widget_class, "window.user-data", NULL, action_user_data);
+  gtk_widget_class_install_action (widget_class, "window.open-library", NULL, action_open_library);
+
+  gtk_widget_class_add_binding_action (widget_class, GDK_KEY_d, GDK_CONTROL_MASK, "window.open-library", NULL);
 }
 
 static gboolean
@@ -615,7 +593,7 @@ key_pressed (BzWindow              *self,
 
   visible_child_name = adw_view_stack_get_visible_child_name (self->main_view_stack);
   if (g_strcmp0 (visible_child_name, "installed") == 0)
-    return bz_installed_page_ensure_active (self->installed_page, buf);
+    return bz_library_page_ensure_active (self->library_page, buf);
   else
     {
       adw_view_stack_set_visible_child_name (self->main_view_stack, "search");
@@ -652,58 +630,12 @@ app_busy_changed (BzWindow    *self,
 }
 
 static void
-transactions_active_changed (BzWindow             *self,
-                             GParamSpec           *pspec,
-                             BzTransactionManager *manager)
-{
-  check_transactions (self);
-}
-
-static void
-has_transactions_changed (BzWindow             *self,
-                          GParamSpec           *pspec,
-                          BzTransactionManager *manager)
-{
-  check_transactions (self);
-}
-
-static void
 has_inputs_changed (BzWindow          *self,
                     GParamSpec        *pspec,
                     BzContentProvider *provider)
 {
   if (!bz_content_provider_get_has_inputs (provider))
     adw_view_stack_set_visible_child_name (self->main_view_stack, "flathub");
-}
-
-static void
-checking_for_updates_changed (BzWindow    *self,
-                              GParamSpec  *pspec,
-                              BzStateInfo *info)
-{
-  gboolean busy                 = FALSE;
-  gboolean checking_for_updates = FALSE;
-  gboolean has_updates          = FALSE;
-
-  busy                 = bz_state_info_get_busy (info);
-  checking_for_updates = bz_state_info_get_checking_for_updates (info);
-  has_updates          = bz_state_info_get_available_updates (info) != NULL;
-
-  if (!busy && !checking_for_updates)
-    {
-      if (has_updates)
-        {
-          bz_comet_overlay_set_pulse_color (self->comet_overlay, NULL);
-          bz_comet_overlay_pulse_child (
-              self->comet_overlay,
-              GTK_WIDGET (self->update_button));
-        }
-      /* TODO: this can be intrusive when idling checking for updates */
-      // else
-      //   adw_toast_overlay_add_toast (
-      //       self->toasts,
-      //       adw_toast_new_format (_ ("Up to date!")));
-    }
 }
 
 static DexFuture *
@@ -737,7 +669,7 @@ transact_fiber (TransactData *data)
     }
 
   // Show the dialog
-  dialog_result = dex_await_pointer (
+  dialog_result = dex_await_object (
       bz_transaction_dialog_show (
           GTK_WIDGET (self),
           data->entry,
@@ -748,18 +680,21 @@ transact_fiber (TransactData *data)
 
   if (dialog_result == NULL)
     return dex_future_new_for_error (g_steal_pointer (&local_error));
-
-  if (!dialog_result->confirmed)
+  if (!bz_transaction_dialog_result_get_confirmed (dialog_result))
     return dex_future_new_false ();
 
   // Perform the transaction
-  transact_future = transact (self, dialog_result->selected_entry, data->remove, data->source);
+  transact_future = transact (
+      self,
+      bz_transaction_dialog_result_get_selected_entry (dialog_result),
+      data->remove,
+      data->source);
 
   if (!dex_await (g_steal_pointer (&transact_future), &local_error))
     return dex_future_new_for_error (g_steal_pointer (&local_error));
 
   // Handle user data deletion
-  if (dialog_result->delete_user_data)
+  if (bz_transaction_dialog_result_get_delete_user_data (dialog_result))
     {
       if (data->group != NULL)
         bz_entry_group_reap_user_data (data->group);
@@ -768,31 +703,6 @@ transact_fiber (TransactData *data)
     }
 
   return dex_future_new_true ();
-}
-
-static void
-update_dialog_response (BzTransactionListDialog *dialog,
-                        const char              *response,
-                        BzWindow                *self)
-{
-  if (bz_transaction_list_dialog_was_confirmed (dialog))
-    {
-      GListModel          *updates     = NULL;
-      guint                n_updates   = 0;
-      g_autofree BzEntry **updates_buf = NULL;
-
-      updates     = bz_state_info_get_available_updates (self->state);
-      n_updates   = g_list_model_get_n_items (updates);
-      updates_buf = g_malloc_n (n_updates, sizeof (*updates_buf));
-
-      for (guint i = 0; i < n_updates; i++)
-        updates_buf[i] = g_list_model_get_item (updates, i);
-      update (self, updates_buf, n_updates);
-
-      for (guint i = 0; i < n_updates; i++)
-        g_object_unref (updates_buf[i]);
-      bz_state_info_set_available_updates (self->state, NULL);
-    }
 }
 
 BzWindow *
@@ -809,22 +719,10 @@ bz_window_new (BzStateInfo *state)
                            "notify::busy",
                            G_CALLBACK (app_busy_changed),
                            window, G_CONNECT_SWAPPED);
-  g_signal_connect_object (state,
-                           "notify::checking-for-updates",
-                           G_CALLBACK (checking_for_updates_changed),
-                           window, G_CONNECT_SWAPPED);
 
   /* these seem unsafe but BzApplication never
    * changes the objects we are connecting to
    */
-  g_signal_connect_object (bz_state_info_get_transaction_manager (state),
-                           "notify::active",
-                           G_CALLBACK (transactions_active_changed),
-                           window, G_CONNECT_SWAPPED);
-  g_signal_connect_object (bz_state_info_get_transaction_manager (state),
-                           "notify::has-transactions",
-                           G_CALLBACK (has_transactions_changed),
-                           window, G_CONNECT_SWAPPED);
   g_signal_connect_object (bz_state_info_get_curated_provider (state),
                            "notify::has-inputs",
                            G_CALLBACK (has_inputs_changed),
@@ -833,7 +731,6 @@ bz_window_new (BzStateInfo *state)
   g_object_notify_by_pspec (G_OBJECT (window), props[PROP_STATE]);
 
   set_page (window);
-  check_transactions (window);
   return window;
 }
 
@@ -846,52 +743,22 @@ bz_window_search (BzWindow   *self,
 }
 
 void
-bz_window_toggle_transactions (BzWindow *self)
-{
-  g_return_if_fail (BZ_IS_WINDOW (self));
-  gtk_toggle_button_set_active (
-      self->toggle_transactions,
-      !gtk_toggle_button_get_active (
-          self->toggle_transactions));
-}
-
-void
-bz_window_push_update_dialog (BzWindow *self)
-{
-  GListModel *available_updates = NULL;
-  AdwDialog  *update_dialog     = NULL;
-
-  g_return_if_fail (BZ_IS_WINDOW (self));
-
-  available_updates = bz_state_info_get_available_updates (self->state);
-  g_return_if_fail (available_updates != NULL);
-
-  update_dialog = bz_transaction_list_dialog_new (
-      available_updates,
-      _ ("Updates Are Available"),
-      _ ("The following applications are eligible for updates. Would you like to install them?"),
-      _ ("%d runtimes and/or addons are eligible for updates. Would you like to install them?"),
-      _ ("Additionally, %d runtimes and/or addons will be updated."),
-      _ ("Later"),
-      _ ("Update Now"));
-
-  adw_dialog_set_content_width (update_dialog, 750);
-  g_signal_connect (update_dialog, "response", G_CALLBACK (update_dialog_response), self);
-
-  adw_dialog_present (update_dialog, GTK_WIDGET (self));
-}
-
-void
 bz_window_show_entry (BzWindow *self,
                       BzEntry  *entry)
 {
-  /* TODO: IMPLEMENT ME! */
-  bz_show_error_for_widget (
-      GTK_WIDGET (self),
-      _ ("The ability to inspect and install local .flatpak bundle files is coming soon! "
-         "In the meantime, try running\n\n"
-         "flatpak install --bundle your-bundle.flatpak\n\n"
-         "on the command line."));
+  g_autoptr (BzEntryGroup) group  = NULL;
+  AdwNavigationPage *visible_page = NULL;
+
+  g_return_if_fail (BZ_IS_WINDOW (self));
+  g_return_if_fail (BZ_IS_ENTRY (entry));
+
+  group = bz_entry_group_new_for_single_entry (entry);
+
+  bz_full_view_set_entry_group (self->full_view, group);
+
+  visible_page = adw_navigation_view_get_visible_page (self->navigation_view);
+  if (visible_page != adw_navigation_view_find_page (self->navigation_view, "view"))
+    adw_navigation_view_push_by_tag (self->navigation_view, "view");
 }
 
 void
@@ -930,15 +797,32 @@ bz_window_push_page (BzWindow *self, AdwNavigationPage *page)
     {
       g_signal_connect_swapped (page, "install", G_CALLBACK (install_entry_cb), self);
       g_signal_connect_swapped (page, "remove", G_CALLBACK (remove_installed_cb), self);
-      g_signal_connect_swapped (page, "show-entry", G_CALLBACK (installed_page_show_cb), self);
+      g_signal_connect_swapped (page, "show-entry", G_CALLBACK (select_cb), self);
       g_signal_connect_swapped (page, "bulk-install", G_CALLBACK (bulk_install_cb), self);
-
-      g_object_bind_property (self->split_view, "show-sidebar",
-                              page, "show-sidebar",
-                              G_BINDING_BIDIRECTIONAL | G_BINDING_SYNC_CREATE);
     }
 
   adw_navigation_view_push (self->navigation_view, page);
+}
+
+void
+bz_window_bulk_install (BzWindow   *self,
+                        GListModel *groups)
+{
+  g_autoptr (BulkInstallData) data = NULL;
+
+  g_return_if_fail (BZ_IS_WINDOW (self));
+  g_return_if_fail (G_IS_LIST_MODEL (groups));
+
+  data         = bulk_install_data_new ();
+  data->self   = bz_track_weak (self);
+  data->groups = g_object_ref (groups);
+
+  dex_future_disown (dex_scheduler_spawn (
+      dex_scheduler_get_default (),
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) bulk_install_fiber,
+      bulk_install_data_ref (data),
+      bulk_install_data_unref));
 }
 
 BzStateInfo *
@@ -955,8 +839,6 @@ transact (BzWindow  *self,
           GtkWidget *source)
 {
   g_autoptr (BzTransaction) transaction = NULL;
-  GdkPaintable *icon                    = NULL;
-  GtkWidget    *transaction_target      = NULL;
 
   if (remove)
     transaction = bz_transaction_new_full (
@@ -968,44 +850,6 @@ transact (BzWindow  *self,
         &entry, 1,
         NULL, 0,
         NULL, 0);
-
-  if (source == NULL)
-    source = GTK_WIDGET (self->navigation_view);
-
-  if (adw_overlay_split_view_get_show_sidebar (self->split_view))
-    transaction_target = GTK_WIDGET (self->toggle_transactions_sidebar);
-  else
-    transaction_target = GTK_WIDGET (self->toggle_transactions);
-
-  icon = bz_entry_get_icon_paintable (entry);
-  if (icon != NULL)
-    {
-      g_autoptr (BzComet) comet = NULL;
-
-      if (remove)
-        {
-          AdwStyleManager *style_manager = adw_style_manager_get_default ();
-          gboolean         is_dark       = adw_style_manager_get_dark (style_manager);
-          GdkRGBA          destructive_color;
-
-          if (is_dark)
-            destructive_color = (GdkRGBA) { 0.3, 0.2, 0.21, 0.6 };
-          else
-            destructive_color = (GdkRGBA) { 0.95, 0.84, 0.84, 0.6 };
-
-          bz_comet_overlay_set_pulse_color (self->comet_overlay, &destructive_color);
-        }
-      else
-        bz_comet_overlay_set_pulse_color (self->comet_overlay, NULL);
-
-      comet = g_object_new (
-          BZ_TYPE_COMET,
-          "from", remove ? transaction_target : source,
-          "to", remove ? source : transaction_target,
-          "paintable", icon,
-          NULL);
-      bz_comet_overlay_spawn (self->comet_overlay, comet);
-    }
 
   return bz_transaction_manager_add (
       bz_state_info_get_transaction_manager (self->state),
@@ -1047,22 +891,6 @@ try_transact (BzWindow     *self,
 }
 
 static void
-update (BzWindow *self,
-        BzEntry **updates,
-        guint     n_updates)
-{
-  g_autoptr (BzTransaction) transaction = NULL;
-
-  transaction = bz_transaction_new_full (
-      NULL, 0,
-      updates, n_updates,
-      NULL, 0);
-  dex_future_disown (bz_transaction_manager_add (
-      bz_state_info_get_transaction_manager (self->state),
-      transaction));
-}
-
-static void
 bulk_install (BzWindow *self,
               BzEntry **installs,
               guint     n_installs)
@@ -1097,22 +925,34 @@ bulk_install_fiber (BulkInstallData *data)
   g_autoptr (BzWindow) self                    = NULL;
   g_autoptr (GError) local_error               = NULL;
   g_autoptr (BzBulkInstallDialogResult) result = NULL;
+  GListModel          *entries                 = NULL;
+  guint                n_installs              = 0;
+  g_autofree BzEntry **installs_buf            = NULL;
 
   bz_weak_get_or_return_reject (self, data->self);
 
-  result = dex_await_pointer (
+  result = dex_await_object (
       bz_bulk_install_dialog_show (GTK_WIDGET (self), data->groups),
       &local_error);
 
   if (result == NULL)
     return dex_future_new_for_error (g_steal_pointer (&local_error));
 
-  if (!result->confirmed)
+  if (!bz_bulk_install_dialog_result_get_confirmed (result))
     return dex_future_new_false ();
 
-  bulk_install (self,
-                (BzEntry **) result->entries->pdata,
-                result->entries->len);
+  entries    = bz_bulk_install_dialog_result_get_entries (result);
+  n_installs = g_list_model_get_n_items (entries);
+  if (n_installs == 0)
+    return dex_future_new_false ();
+
+  installs_buf = g_malloc_n (n_installs, sizeof (*installs_buf));
+  for (guint i = 0; i < n_installs; i++)
+    installs_buf[i] = g_list_model_get_item (entries, i);
+
+  bulk_install (self, installs_buf, n_installs);
+  for (guint i = 0; i < n_installs; i++)
+    g_object_unref (installs_buf[i]);
 
   return dex_future_new_true ();
 }
@@ -1129,43 +969,6 @@ search (BzWindow   *self,
   adw_view_stack_set_visible_child_name (self->main_view_stack, "search");
   adw_navigation_view_pop_to_tag (self->navigation_view, "main");
   gtk_widget_grab_focus (GTK_WIDGET (self->search_widget));
-}
-
-static void
-check_transactions (BzWindow *self)
-{
-  gboolean has_transactions = FALSE;
-  gboolean paused           = FALSE;
-  gboolean active           = FALSE;
-
-  has_transactions = bz_transaction_manager_get_has_transactions (
-      bz_state_info_get_transaction_manager (self->state));
-  adw_view_stack_set_visible_child_name (
-      self->transactions_stack,
-      has_transactions
-          ? "content"
-          : "empty");
-
-  paused = gtk_toggle_button_get_active (self->transactions_pause);
-  active = bz_transaction_manager_get_active (
-      bz_state_info_get_transaction_manager (self->state));
-  if (paused)
-    {
-      gtk_button_set_icon_name (GTK_BUTTON (self->transactions_pause), "media-playback-start-symbolic");
-      gtk_widget_set_tooltip_text (GTK_WIDGET (self->transactions_pause), _ ("Resume Current Tasks"));
-      gtk_widget_add_css_class (GTK_WIDGET (self->transactions_pause), "suggested-action");
-    }
-  else
-    {
-      gtk_button_set_icon_name (GTK_BUTTON (self->transactions_pause), "media-playback-pause-symbolic");
-      gtk_widget_set_tooltip_text (GTK_WIDGET (self->transactions_pause), _ ("Pause Current Tasks"));
-      gtk_widget_remove_css_class (GTK_WIDGET (self->transactions_pause), "suggested-action");
-    }
-
-  if (active)
-    gtk_widget_add_css_class (GTK_WIDGET (self->transactions_stop), "destructive-action");
-  else
-    gtk_widget_remove_css_class (GTK_WIDGET (self->transactions_stop), "destructive-action");
 }
 
 static void

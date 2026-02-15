@@ -50,24 +50,67 @@
 
   <screenshots>
     <screenshot type="default">
-      <image>https://github.com/user-attachments/assets/ebe32d33-136c-4d90-a6e4-9d468f664be7</image>
+      <image>https://github.com/user-attachments/assets/b7d749fb-ecc0-4f3e-a965-15b6771c54d3</image>
       <caption>The home page displaying Flathub apps</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/user-attachments/assets/8904e33b-37c5-41ae-ade6-3fa778bdc4c2</image>
-      <caption>Nucleus app page</caption>
+      <image>https://github.com/user-attachments/assets/7d306fbe-e1a7-4c74-91b2-f5061aba2c56</image>
+      <caption>Exhibit app page</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/user-attachments/assets/230ef503-cf4f-4eae-907a-b48bf42f8dd1</image>
+      <image>https://github.com/user-attachments/assets/cf0914b7-f256-436e-bbd5-6822cf3d0786</image>
+      <caption>Library page</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/user-attachments/assets/733bff33-a206-43b9-bbaf-08df9d1c65f3</image>
       <caption>Search page</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/user-attachments/assets/74f838e9-af47-4e06-a0db-42a9176b69c0</image>
+      <image>https://github.com/user-attachments/assets/fd721125-1842-4cf1-9ab3-a70ef6b9ce10</image>
       <caption>Category page</caption>
     </screenshot>
   </screenshots>
 
   <releases>
+    <release version="0.7.8" date="2026-02-11">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.8</url>
+      <description translate="no">
+        <p>
+          This release lets you view and remove user-scoped installed apps from the library page in the Flatpak version of the app.
+          Installing from user remotes is not supported yet.
+        </p>
+      </description>
+    </release>
+    <release version="0.7.7" date="2026-02-09">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.7</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>Merges the task sidebar and install page into the library page</li>
+          <li>Add installed version numbers of each app on the library and app pages</li>
+          <li>Add donations dialog</li>
+          <li>Fix broken addon and runtime eol detection</li>
+          <li>Add `enable-bulk-install` key to curated sections</li>
+          <li>Add `override-eol-markings` main config string list</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.7.6" date="2026-01-28">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.6</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>Improve context dialogs</li>
+          <li>Fix leftover data bar being shown prematurely</li>
+          <li>Have a rotation toggle for flags</li>
+          <li>Add hard check to prevent removing Bazaar flatpak</li>
+          <li>Improve download statistics tooltips</li>
+          <li>Add read support for flatpak bundles</li>
+          <li>Fix critical output sometimes during transactions</li>
+          <li>Fix error popover refusing to spawn in transaction sidebar</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.7.5" date="2026-01-18">
       <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.5</url>
       <description translate="no">

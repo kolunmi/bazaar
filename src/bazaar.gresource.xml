@@ -15,6 +15,7 @@
     <file>countries.json</file>
 
     <file preprocess="xml-stripblanks">bz-addons-dialog.ui</file>
+    <file preprocess="xml-stripblanks">bz-donations-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-age-rating-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-app-size-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-app-tile.ui</file>
@@ -39,7 +40,7 @@
     <file preprocess="xml-stripblanks">bz-full-view.ui</file>
     <file preprocess="xml-stripblanks">bz-hardware-support-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-inspector.ui</file>
-    <file preprocess="xml-stripblanks">bz-installed-page.ui</file>
+    <file preprocess="xml-stripblanks">bz-library-page.ui</file>
     <file preprocess="xml-stripblanks">bz-installed-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-license-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-login-page.ui</file>
@@ -56,8 +57,9 @@
     <file preprocess="xml-stripblanks">bz-search-widget.ui</file>
     <file preprocess="xml-stripblanks">bz-section-view.ui</file>
     <file preprocess="xml-stripblanks">bz-stats-dialog.ui</file>
-    <file preprocess="xml-stripblanks">bz-transaction-view.ui</file>
+    <file preprocess="xml-stripblanks">bz-transaction-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-transaction-list-dialog.ui</file>
+    <file preprocess="xml-stripblanks">bz-updates-card.ui</file>
     <file preprocess="xml-stripblanks">bz-user-data-page.ui</file>
     <file preprocess="xml-stripblanks">bz-user-data-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-window.ui</file>
@@ -82,6 +84,7 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/drive-harddisk-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/earth-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/edit-clear-all-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/execute-to-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/external-link-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/eye-outline-filled-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/flathub-symbolic.svg</file>

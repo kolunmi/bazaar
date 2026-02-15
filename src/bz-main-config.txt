@@ -18,4 +18,6 @@ property=yaml_blocklist_paths GListModel G_TYPE_LIST_MODEL object
 property=curated_config_version int G_TYPE_INT int
 property=curated_config_paths GListModel G_TYPE_LIST_MODEL object
 
+property=override_eol_markings GListModel G_TYPE_LIST_MODEL object
+
 property=hooks GListModel G_TYPE_LIST_MODEL object

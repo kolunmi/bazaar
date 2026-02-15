@@ -9,35 +9,6 @@ template $BzFavoritesPage: Adw.NavigationPage {
     Adw.HeaderBar {
 
       [end]
-      Revealer {
-        transition-type: slide_right;
-        reveal-child: bind $invert_boolean(template.show-sidebar as <bool>) as <bool>;
-
-        child: ToggleButton {
-          styles [
-            "flat",
-          ]
-
-          has-tooltip: true;
-          tooltip-text: _("Toggle transaction sidebar");
-          active: bind template.show-sidebar bidirectional;
-
-          child: $BzGlobalProgress download_bar {
-            expand-size: 125;
-            active: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
-            pending: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.pending;
-            fraction: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.current-progress;
-            settings: bind template.state as <$BzStateInfo>.settings;
-
-            child: Image {
-              halign: end;
-              icon-name: "folder-download-symbolic";
-            };
-          };
-        };
-      }
-
-      [end]
       Button install_all_button {
         styles [
           "flat",
@@ -47,6 +18,28 @@ template $BzFavoritesPage: Adw.NavigationPage {
         icon-name: "list-add-symbolic";
         sensitive: bind $invert_boolean($is_empty(template.favorites) as <bool>) as <bool>;
         clicked => $install_all_cb() swapped;
+      }
+
+      [end]
+      Button {
+        styles [
+          "flat",
+          "global-progress-button",
+        ]
+
+        can-target: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
+
+        action-name: "window.open-library";
+        has-tooltip: true;
+        tooltip-text: _("Open App Library");
+
+        child: $BzGlobalProgress {
+          expand-size: 125;
+          active: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
+          pending: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.pending;
+          fraction: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.current-progress;
+          settings: bind template.state as <$BzStateInfo>.settings;
+        };
       }
     }
 

@@ -4,34 +4,20 @@ using Adw 1;
 
 template $BzFullView: Adw.Bin {
   child: Adw.ToolbarView {
+
     [top]
     Adw.HeaderBar header_bar {
-      [end]
+      overflow: hidden;
+
+      [title]
       Revealer {
-        transition-type: slide_right;
-        reveal-child: bind $invert_boolean(template.show-sidebar as <bool>) as <bool>;
-
-        child: ToggleButton {
-          styles [
-            "flat",
-          ]
-
-          has-tooltip: true;
-          tooltip-text: _("Toggle transaction sidebar");
-          active: bind template.show-sidebar bidirectional;
-
-          child: $BzGlobalProgress download_bar {
-            expand-size: 125;
-            active: bind template.transaction-manager as <$BzTransactionManager>.active;
-            pending: bind template.transaction-manager as <$BzTransactionManager>.pending;
-            fraction: bind template.transaction-manager as <$BzTransactionManager>.current-progress;
-            settings: bind template.state as <$BzStateInfo>.settings;
-
-            child: Image {
-              halign: end;
-              icon-name: "folder-download-symbolic";
-            };
-          };
+        reveal-child: bind $is_scrolled_down(main_scroll.vadjustment as <Adjustment>.value) as <bool>;
+        transition-type: slide_up;
+        transition-duration: 500;
+        overflow: visible;
+        child: Label {
+          label: bind template.entry-group as <$BzEntryGroup>.title;
+          styles ["title"]
         };
       }
 
@@ -42,6 +28,28 @@ template $BzFullView: Adw.Bin {
         has-tooltip: true;
         tooltip-text: _("Main Menu");
         menu-model: bind template.main-menu;
+      }
+
+      [end]
+      Button {
+        styles [
+          "flat",
+          "global-progress-button",
+        ]
+
+        can-target: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
+
+        action-name: "window.open-library";
+        has-tooltip: true;
+        tooltip-text: _("Open App Library");
+
+        child: $BzGlobalProgress {
+          expand-size: 125;
+          active: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
+          pending: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.pending;
+          fraction: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.current-progress;
+          settings: bind template.state as <$BzStateInfo>.settings;
+        };
       }
     }
 
@@ -76,7 +84,6 @@ template $BzFullView: Adw.Bin {
               context_bar.homogeneous: false;
               header_box.spacing: 12;
               app_name_box.spacing: 0;
-              download_bar.expand-size: 60;
               formfactor_support_tile_wide.visible: false;
               formfactor_support_tile_narrow.visible: true;
               screenshots.compact: true;
@@ -116,13 +123,18 @@ template $BzFullView: Adw.Bin {
                 child: Box main_box {
                   orientation: vertical;
                   vexpand: false;
-                  margin-top: 15;
                   margin-bottom: 15;
                   spacing: 20;
+
+                  Adw.Banner {
+                    title: _("Installing .flatpak bundles is not yet supported");
+                    revealed: bind template.ui-entry as <$BzResult>.object as <$BzFlatpakEntry>.is-bundle as <bool>;
+                  }
 
                   Adw.Clamp {
                     maximum-size: 860;
                     tightening-threshold: 1000;
+                    margin-top: 15;
 
                     child: Box top_box {
                       orientation: vertical;
@@ -302,6 +314,7 @@ template $BzFullView: Adw.Bin {
                             has-tooltip: true;
                             tooltip-text: bind $format_size_tooltip(template.ui-entry as <$BzResult>.object as <$BzEntry>.size) as <string>;
                             lozenge-style: "grey";
+                            sensitive: bind $invert_boolean($is_zero($get_size_type(template.ui-entry as <$BzResult>.object as <$BzEntry>, $is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <int>) as <bool>) as <bool>;
                             clicked => $size_cb(template);
 
                             lozenge-child: Label {
@@ -337,7 +350,6 @@ template $BzFullView: Adw.Bin {
                           }
 
                           $BzContextTile {
-                            can-target: bind template.entry-group as <$BzEntryGroup>.is_flathub as <bool>;
                             clicked => $safety_cb(template);
                             label: bind $get_safety_rating_label(template.ui-entry as <$BzResult>.object as <$BzEntry>) as <string>;
                             lozenge-style: bind $get_safety_rating_style(template.ui-entry as <$BzResult>.object as <$BzEntry>) as <string>;
@@ -701,6 +713,7 @@ template $BzFullView: Adw.Bin {
 
                         $BzReleasesList releases_list {
                           version-history: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.version-history;
+                          installed-versions: bind template.entry-group as <$BzEntryGroup>.installed-versions;
                         }
 
                         $BzShareList {

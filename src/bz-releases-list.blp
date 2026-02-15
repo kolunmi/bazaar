@@ -1,8 +1,9 @@
 using Gtk 4.0;
 using Adw 1;
+using Gio 2.0;
 
 template $BzReleasesList: Adw.Bin {
-  visible: bind $invert_boolean($is_null(template.version-history) as <bool>) as <bool>;
+  visible: bind $invert_boolean($is_zero(template.version-history as <Gio.ListStore>.n-items) as <bool>) as <bool>;
   child: Box {
     orientation: vertical;
     spacing: 12;

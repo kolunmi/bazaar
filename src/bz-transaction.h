@@ -55,6 +55,9 @@ bz_transaction_get_updates (BzTransaction *self);
 GListModel *
 bz_transaction_get_removals (BzTransaction *self);
 
+GListModel *
+bz_transaction_get_trackers (BzTransaction *self);
+
 void
 bz_transaction_hold (BzTransaction *self);
 

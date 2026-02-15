@@ -71,6 +71,7 @@ template $BzSafetyDialog: Adw.Dialog {
 
             Adw.ActionRow {
               title: _("SDK");
+              visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzFlatpakEntry>.application-runtime) as <bool>) as <bool>;
               subtitle: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzFlatpakEntry>.application-runtime;
               subtitle-selectable: true;
               styles [

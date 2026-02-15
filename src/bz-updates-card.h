@@ -1,6 +1,6 @@
-/* bz-transaction-view.h
+/* bz-updates-card.h
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2026 Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,25 +20,23 @@
 
 #pragma once
 
+#include "bz-state-info.h"
 #include <adwaita.h>
-
-#include "bz-transaction.h"
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_TRANSACTION_VIEW (bz_transaction_view_get_type ())
-G_DECLARE_FINAL_TYPE (BzTransactionView, bz_transaction_view, BZ, TRANSACTION_VIEW, AdwBin)
+#define BZ_TYPE_UPDATES_CARD (bz_updates_card_get_type ())
 
-BzTransactionView *
-bz_transaction_view_new (void);
+G_DECLARE_FINAL_TYPE (BzUpdatesCard, bz_updates_card, BZ, UPDATES_CARD, AdwBin)
 
-BzTransaction *
-bz_transaction_view_get_transaction (BzTransactionView *self);
+GtkWidget *
+bz_updates_card_new (void);
 
 void
-bz_transaction_view_set_transaction (BzTransactionView *self,
-                                     BzTransaction     *transaction);
+bz_updates_card_set_state (BzUpdatesCard *self,
+                           BzStateInfo   *state);
+
+BzStateInfo *
+bz_updates_card_get_state (BzUpdatesCard *self);
 
 G_END_DECLS
-
-/* End of bz-transaction-view.h */

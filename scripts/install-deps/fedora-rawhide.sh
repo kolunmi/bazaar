@@ -21,6 +21,7 @@ DEPS=(
     md4c-devel
     webkitgtk6.0-devel
     libsecret-devel
+    libproxy-devel
 
     # lsp
     clangd

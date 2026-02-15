@@ -43,16 +43,18 @@ struct _BzScreenshotsCarousel
   GtkWidget parent_instance;
 
   BzCarousel *carousel;
-  GtkWidget  *carousel_indicator;
-  GtkButton  *prev_button;
-  GtkWidget  *prev_button_revealer;
-  GtkButton  *next_button;
-  GtkWidget  *next_button_revealer;
+  // GtkWidget          *carousel_indicator;
+  GtkButton          *prev_button;
+  GtkWidget          *prev_button_revealer;
+  GtkButton          *next_button;
+  GtkWidget          *next_button_revealer;
+  GtkSingleSelection *selection;
 
   GListModel     *model;
   gboolean        compact;
   char           *light_accent_color;
   char           *dark_accent_color;
+  char           *widget_css_class;
   GtkCssProvider *css;
   gulong          items_changed_id;
 };
@@ -105,41 +107,29 @@ update_button_visibility (BzScreenshotsCarousel *self)
   if (!self->carousel)
     return;
 
-  position = bz_carousel_get_position (self->carousel);
-  n_pages  = bz_carousel_get_n_pages (self->carousel);
+  position = gtk_single_selection_get_selected (self->selection);
+  n_pages  = g_list_model_get_n_items (G_LIST_MODEL (self->selection));
 
-  gtk_widget_set_opacity (self->carousel_indicator, n_pages > 1);
+  /* gtk_widget_set_opacity (self->carousel_indicator, n_pages > 1); */
   gtk_revealer_set_reveal_child (GTK_REVEALER (self->prev_button_revealer), position >= 0.5);
   gtk_revealer_set_reveal_child (GTK_REVEALER (self->next_button_revealer), position < n_pages - 1.5);
 }
 
 static void
-carousel_navigate (BzCarousel            *carousel,
+carousel_navigate (BzScreenshotsCarousel *self,
                    AdwNavigationDirection direction)
 {
-  g_autolist (GtkWidget) children = NULL;
-  gdouble    position             = 0.0;
-  guint      n_children           = 0;
-  GtkWidget *nth_child            = NULL;
+  guint   n_children = 0;
+  gdouble position   = 0.0;
 
-  for (GtkWidget *child = gtk_widget_get_first_child (GTK_WIDGET (carousel));
-       child != NULL;
-       child = gtk_widget_get_next_sibling (child))
-    {
-      children = g_list_prepend (children, g_object_ref (child));
-      n_children++;
-    }
-  children = g_list_reverse (children);
-
-  position = bz_carousel_get_position (carousel);
+  n_children = g_list_model_get_n_items (G_LIST_MODEL (self->selection));
+  position   = gtk_single_selection_get_selected (self->selection);
   position += (direction == ADW_NAVIGATION_DIRECTION_BACK) ? -1 : 1;
   position = round (position);
   position = MIN (position, n_children - 1);
   position = MAX (0, position);
 
-  nth_child = g_list_nth_data (children, position);
-  if (nth_child != NULL)
-    bz_carousel_scroll_to (carousel, nth_child, TRUE);
+  gtk_single_selection_set_selected (self->selection, position);
 }
 
 static void
@@ -148,7 +138,7 @@ on_prev_clicked (BzScreenshotsCarousel *self)
   if (!self->carousel)
     return;
 
-  carousel_navigate (self->carousel, ADW_NAVIGATION_DIRECTION_BACK);
+  carousel_navigate (self, ADW_NAVIGATION_DIRECTION_BACK);
 }
 
 static void
@@ -157,17 +147,17 @@ on_next_clicked (BzScreenshotsCarousel *self)
   if (!self->carousel)
     return;
 
-  carousel_navigate (self->carousel, ADW_NAVIGATION_DIRECTION_FORWARD);
+  carousel_navigate (self, ADW_NAVIGATION_DIRECTION_FORWARD);
 }
 
 static void
-on_notify_position (BzScreenshotsCarousel *self)
+on_notify_selected (BzScreenshotsCarousel *self)
 {
   update_button_visibility (self);
 }
 
 static void
-on_notify_n_pages (BzScreenshotsCarousel *self)
+on_notify_n_items (BzScreenshotsCarousel *self)
 {
   update_button_visibility (self);
 }
@@ -227,11 +217,11 @@ on_expand_clicked (BzScreenshotsCarousel *self)
   if (!self->carousel || !self->model)
     return;
 
-  n_pages = bz_carousel_get_n_pages (self->carousel);
+  n_pages = g_list_model_get_n_items (G_LIST_MODEL (self->selection));
   if (n_pages == 0)
     return;
 
-  position = bz_carousel_get_position (self->carousel);
+  position = gtk_single_selection_get_selected (self->selection);
   index    = (guint) round (position);
   index    = MIN (index, n_pages - 1);
 
@@ -246,88 +236,61 @@ get_carousel_height (BzScreenshotsCarousel *self)
 
 static void
 on_screenshot_focus_changed (BzDecoratedScreenshot *screenshot,
-                            GParamSpec            *pspec,
-                            BzScreenshotsCarousel *self)
+                             GParamSpec            *pspec,
+                             BzScreenshotsCarousel *self)
 {
   if (!self->carousel)
     return;
 
   if (gtk_widget_has_focus (GTK_WIDGET (screenshot)))
-    bz_carousel_scroll_to (self->carousel, GTK_WIDGET (screenshot), TRUE);
-}
-
-static void
-populate_carousel (BzScreenshotsCarousel *self)
-{
-  guint    i;
-  guint    n_items = 0;
-  gboolean wide    = FALSE;
-  GList   *widgets = NULL;
-
-  if (!self->carousel || self->model == NULL)
-    return;
-
-  n_items = g_list_model_get_n_items (self->model);
-  wide    = is_window_wide (self);
-
-  for (i = 0; i < n_items; i++)
     {
-      g_autoptr (GdkPaintable) paintable = NULL;
-      GtkWidget *screenshot;
-      guint      index;
+      BzAsyncTexture *texture = NULL;
+      guint           n_items = 0;
 
-      if (wide && i == 0 && n_items > 3)
-        index = 1;
-      else if (wide && i == 1 && n_items > 3)
-        index = 0;
-      else
-        index = i;
+      texture = bz_decorated_screenshot_get_async_texture (screenshot);
 
-      paintable = g_list_model_get_item (self->model, index);
+      n_items = g_list_model_get_n_items (self->model);
+      for (guint i = 0; i < n_items; i++)
+        {
+          g_autoptr (BzAsyncTexture) item = NULL;
 
-      screenshot = g_object_new (BZ_TYPE_DECORATED_SCREENSHOT,
-                                 "async-texture", paintable,
-                                 NULL);
-
-      g_signal_connect (screenshot, "clicked",
-                        G_CALLBACK (on_screenshot_clicked), self);
-
-      g_signal_connect (screenshot, "notify::has-focus",
-                  G_CALLBACK (on_screenshot_focus_changed), self);
-
-      widgets = g_list_append (widgets, screenshot);
-      gtk_widget_set_visible (screenshot, TRUE);
+          item = g_list_model_get_item (self->model, i);
+          if (item == texture)
+            {
+              gtk_single_selection_set_selected (self->selection, i);
+              break;
+            }
+        }
     }
-
-  bz_carousel_set_widgets (self->carousel, widgets);
-  g_list_free (widgets);
-
-  update_button_visibility (self);
 }
 
 static void
-on_model_items_changed (GListModel            *model,
-                        guint                  position,
-                        guint                  removed,
-                        guint                  added,
-                        BzScreenshotsCarousel *self)
+on_bind_widget (BzScreenshotsCarousel *self,
+                AdwBin                *widget,
+                BzAsyncTexture        *item,
+                BzCarousel            *carousel)
 {
-  GtkWidget *child;
-  guint      n_pages;
-  guint      target_page;
+  GtkWidget *screenshot = NULL;
 
-  populate_carousel (self);
+  screenshot = g_object_new (BZ_TYPE_DECORATED_SCREENSHOT,
+                             "async-texture", item,
+                             NULL);
 
-  n_pages = bz_carousel_get_n_pages (self->carousel);
+  g_signal_connect (screenshot, "clicked",
+                    G_CALLBACK (on_screenshot_clicked), self);
+  g_signal_connect (screenshot, "notify::has-focus",
+                    G_CALLBACK (on_screenshot_focus_changed), self);
 
-  if (n_pages == 0)
-    return;
+  adw_bin_set_child (widget, screenshot);
+}
 
-  target_page = (is_window_wide (self) && model != NULL && g_list_model_get_n_items (model) >= 3) ? 1 : 0;
-  child = bz_carousel_get_nth_page (self->carousel, target_page);
-
-  if (child != NULL)
-      bz_carousel_scroll_to (self->carousel, child, FALSE);
+static void
+on_unbind_widget (BzScreenshotsCarousel *self,
+                  AdwBin                *widget,
+                  BzAsyncTexture        *item,
+                  BzCarousel            *carousel)
+{
+  adw_bin_set_child (widget, NULL);
 }
 
 static void
@@ -366,6 +329,7 @@ bz_screenshots_carousel_dispose (GObject *object)
 
   g_clear_pointer (&self->light_accent_color, g_free);
   g_clear_pointer (&self->dark_accent_color, g_free);
+  g_clear_pointer (&self->widget_css_class, g_free);
 
   if (root_child != NULL)
     gtk_widget_unparent (root_child);
@@ -485,15 +449,18 @@ bz_screenshots_carousel_class_init (BzScreenshotsCarouselClass *klass)
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-screenshots-carousel.ui");
   gtk_widget_class_bind_template_child (widget_class, BzScreenshotsCarousel, carousel);
-  gtk_widget_class_bind_template_child (widget_class, BzScreenshotsCarousel, carousel_indicator);
+  // gtk_widget_class_bind_template_child (widget_class, BzScreenshotsCarousel, carousel_indicator);
   gtk_widget_class_bind_template_child (widget_class, BzScreenshotsCarousel, prev_button);
   gtk_widget_class_bind_template_child (widget_class, BzScreenshotsCarousel, prev_button_revealer);
   gtk_widget_class_bind_template_child (widget_class, BzScreenshotsCarousel, next_button);
   gtk_widget_class_bind_template_child (widget_class, BzScreenshotsCarousel, next_button_revealer);
+  gtk_widget_class_bind_template_child (widget_class, BzScreenshotsCarousel, selection);
   gtk_widget_class_bind_template_callback (widget_class, on_prev_clicked);
   gtk_widget_class_bind_template_callback (widget_class, on_next_clicked);
-  gtk_widget_class_bind_template_callback (widget_class, on_notify_position);
-  gtk_widget_class_bind_template_callback (widget_class, on_notify_n_pages);
+  gtk_widget_class_bind_template_callback (widget_class, on_notify_selected);
+  gtk_widget_class_bind_template_callback (widget_class, on_notify_n_items);
+  gtk_widget_class_bind_template_callback (widget_class, on_bind_widget);
+  gtk_widget_class_bind_template_callback (widget_class, on_unbind_widget);
   gtk_widget_class_bind_template_callback (widget_class, on_expand_clicked);
   gtk_widget_class_bind_template_callback (widget_class, get_carousel_height);
 
@@ -536,15 +503,9 @@ bz_screenshots_carousel_set_model (BzScreenshotsCarousel *self, GListModel *mode
     }
 
   g_clear_object (&self->model);
-
   if (model)
-    {
-      self->model            = g_object_ref (model);
-      self->items_changed_id = g_signal_connect (self->model, "items-changed",
-                                                 G_CALLBACK (on_model_items_changed), self);
-    }
+    self->model = g_object_ref (model);
 
-  populate_carousel (self);
   g_object_notify_by_pspec (G_OBJECT (self), properties[PROP_MODEL]);
 }
 
@@ -640,6 +601,9 @@ refresh_css (BzScreenshotsCarousel *self)
       self->dark_accent_color == NULL)
     return;
 
+  self->widget_css_class = g_strdup_printf ("screenshot-carousel-%p", (void *) self);
+  gtk_widget_add_css_class (GTK_WIDGET (self), self->widget_css_class);
+
   if (self->light_accent_color != NULL && self->dark_accent_color != NULL)
     light_bg = g_strdup_printf ("color-mix(in srgb, %s %d%%, rgb(255,255,255))",
                                 self->light_accent_color, LIGHT_MIX_PERCENTAGE);
@@ -659,10 +623,10 @@ refresh_css (BzScreenshotsCarousel *self)
                                self->light_accent_color, DARK_MIX_PERCENTAGE);
 
   css_string = g_strdup_printf (
-      ".%s{background-color:%s;}\n"
-      ".%s{background-color:%s;}",
-      LIGHT_CLASS, light_bg,
-      DARK_CLASS, dark_bg);
+      ".%s.%s{background-color:%s;}\n"
+      ".%s.%s{background-color:%s;}",
+      self->widget_css_class, LIGHT_CLASS, light_bg,
+      self->widget_css_class, DARK_CLASS, dark_bg);
 
   self->css = gtk_css_provider_new ();
   gtk_css_provider_load_from_string (self->css, css_string);
@@ -681,6 +645,12 @@ clear_css (BzScreenshotsCarousel *self)
 {
   gtk_widget_remove_css_class (GTK_WIDGET (self), LIGHT_CLASS);
   gtk_widget_remove_css_class (GTK_WIDGET (self), DARK_CLASS);
+
+  if (self->widget_css_class != NULL)
+    {
+      gtk_widget_remove_css_class (GTK_WIDGET (self), self->widget_css_class);
+      g_clear_pointer (&self->widget_css_class, g_free);
+    }
 
   if (self->css != NULL)
     gtk_style_context_remove_provider_for_display (

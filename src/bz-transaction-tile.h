@@ -1,4 +1,4 @@
-/* bz-installed-page.h
+/* bz-transaction-tile.h
  *
  * Copyright 2025 Adam Masciola
  *
@@ -22,23 +22,24 @@
 
 #include <adwaita.h>
 
+#include "bz-transaction-entry-tracker.h"
+
 G_BEGIN_DECLS
 
-#define BZ_TYPE_INSTALLED_PAGE (bz_installed_page_get_type ())
-G_DECLARE_FINAL_TYPE (BzInstalledPage, bz_installed_page, BZ, INSTALLED_PAGE, AdwBin)
+#define BZ_TYPE_TRANSACTION_TILE (bz_transaction_tile_get_type ())
 
-GtkWidget *
-bz_installed_page_new (void);
+G_DECLARE_FINAL_TYPE (BzTransactionTile, bz_transaction_tile, BZ, TRANSACTION_TILE, BzListTile)
+
+BzTransactionTile *
+bz_transaction_tile_new (void);
+
+BzTransactionEntryTracker *
+bz_transaction_tile_get_tracker (BzTransactionTile *self);
 
 void
-bz_installed_page_set_model (BzInstalledPage *self,
-                             GListModel      *model);
-
-GListModel *
-bz_installed_page_get_model (BzInstalledPage *self);
-
-gboolean
-bz_installed_page_ensure_active (BzInstalledPage *self,
-                                 const char      *initial);
+bz_transaction_tile_set_tracker (BzTransactionTile         *self,
+                                 BzTransactionEntryTracker *tracker);
 
 G_END_DECLS
+
+/* End of bz-transaction-tile.h */

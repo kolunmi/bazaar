@@ -32,6 +32,9 @@ G_DECLARE_FINAL_TYPE (BzEntryGroup, bz_entry_group, BZ, ENTRY_GROUP, GObject)
 BzEntryGroup *
 bz_entry_group_new (BzApplicationMapFactory *factory);
 
+BzEntryGroup *
+bz_entry_group_new_for_single_entry (BzEntry *entry);
+
 /* Only necessary if reading props from another thread, writing is always
    prohibited */
 GMutexLocker *
@@ -39,6 +42,9 @@ bz_entry_group_lock (BzEntryGroup *self);
 
 GListModel *
 bz_entry_group_get_model (BzEntryGroup *self);
+
+GListModel *
+bz_entry_group_get_installed_versions (BzEntryGroup *self);
 
 const char *
 bz_entry_group_get_id (BzEntryGroup *self);
@@ -115,6 +121,9 @@ bz_entry_group_get_updatable_and_available (BzEntryGroup *self);
 int
 bz_entry_group_get_removable_and_available (BzEntryGroup *self);
 
+gboolean
+bz_entry_group_is_searchable (BzEntryGroup *self);
+
 guint64
 bz_entry_group_get_user_data_size (BzEntryGroup *self);
 
@@ -124,7 +133,8 @@ bz_entry_group_reap_user_data (BzEntryGroup *self);
 void
 bz_entry_group_add (BzEntryGroup *self,
                     BzEntry      *entry,
-                    BzEntry      *runtime);
+                    BzEntry      *runtime,
+                    gboolean      ignore_eol);
 
 void
 bz_entry_group_connect_living (BzEntryGroup *self,

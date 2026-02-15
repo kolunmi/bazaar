@@ -25,23 +25,32 @@ template $BzScreenshotsCarousel: Gtk.Widget {
       $BzCarousel carousel {
         vexpand: true;
         hexpand: true;
-        valign: center;
+        valign: fill;
         height-request: bind $get_carousel_height(template.compact) as <int>;
-        notify::position => $on_notify_position() swapped;
-        notify::n-pages => $on_notify_n_pages() swapped;
+
+        bind-widget => $on_bind_widget(template);
+        unbind-widget => $on_bind_widget(template);
+
+        model: SingleSelection selection {
+          autoselect: true;
+          model: bind template.model;
+
+          notify::selected => $on_notify_selected(template);
+          notify::n-items => $on_notify_n_items(template);
+        };
       }
 
-      $BzCarouselIndicatorDots carousel_indicator {
-        carousel: carousel;
-        opacity: 0;
-        hexpand: true;
-        halign: center;
-
-        styles [
-          "boxed-indicator",
-          "indicator-box",
-        ]
-      }
+      // $BzCarouselIndicatorDots carousel_indicator {
+      //   carousel: carousel;
+      //   opacity: 0;
+      //   hexpand: true;
+      //   halign: center;
+      //
+      //   styles [
+      //     "boxed-indicator",
+      //     "indicator-box",
+      //   ]
+      // }
     };
 
     [overlay]

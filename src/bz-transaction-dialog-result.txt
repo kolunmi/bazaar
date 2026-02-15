@@ -1,0 +1,11 @@
+prefix=bz
+name=transaction_dialog_result
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+include="bz-entry.h"
+
+property=selected_entry BzEntry BZ_TYPE_ENTRY object
+property=delete_user_data gboolean G_TYPE_BOOLEAN boolean
+property=confirmed gboolean G_TYPE_BOOLEAN boolean

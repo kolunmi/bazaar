@@ -21,6 +21,7 @@ else
   config_h.set_quoted('GETTEXT_PACKAGE', 'bazaar')
   config_h.set_quoted('LOCALEDIR', get_option('prefix') / get_option('localedir'))
   config_h.set_quoted('DONATE_LINK', 'https://ko-fi.com/kolunmi')
+  config_h.set_quoted('RELEASE_PAGE', run_command('version.sh', 'get-gh-release').stdout().strip())
 
   dl_worker_bin_name = 'bazaar-dl-worker'
   config_h.set_quoted('DL_WORKER_BIN_NAME', dl_worker_bin_name)
