@@ -42,11 +42,13 @@ managing software through the GUI:
 ## CLI Usage
 
 You can start the bazaar daemon like this:
+
 ```
 bazaar [ARGS] [PACKAGE PATH/URI]
 ```
 
 To avoid spawning an initial window, use:
+
 ```
 bazaar --no-window [ARGS] [PACKAGE PATH/URI]
 ```
