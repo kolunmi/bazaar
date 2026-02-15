@@ -22,6 +22,7 @@
 
 #include "bz-entry.h"
 #include "bz-flatpak-instance.h"
+#include "bz-result.h"
 
 G_BEGIN_DECLS
 
@@ -52,6 +53,9 @@ bz_flatpak_entry_get_application_runtime (BzFlatpakEntry *self);
 
 const char *
 bz_flatpak_entry_get_runtime_name (BzFlatpakEntry *self);
+
+BzResult *
+bz_flatpak_entry_get_runtime (BzFlatpakEntry *self);
 
 gboolean
 bz_flatpak_entry_is_bundle (BzFlatpakEntry *self);
