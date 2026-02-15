@@ -40,10 +40,11 @@ static void
 on_copy_button_clicked (GtkButton     *button,
                         BzErrorDialog *self)
 {
-  GtkTextBuffer   *buffer;
-  GtkTextIter      start, end;
-  g_autofree char *text = NULL;
-  GdkClipboard    *clipboard;
+  GtkTextBuffer   *buffer    = NULL;
+  GtkTextIter      start     = { 0 };
+  GtkTextIter      end       = { 0 };
+  g_autofree char *text      = NULL;
+  GdkClipboard    *clipboard = NULL;
   g_autoptr (AdwToast) toast = NULL;
 
   buffer = gtk_text_view_get_buffer (self->text_view);

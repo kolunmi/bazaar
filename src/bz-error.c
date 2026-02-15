@@ -23,8 +23,8 @@
 #include <adwaita.h>
 #include <glib/gi18n.h>
 
-#include "bz-error.h"
 #include "bz-error-dialog.h"
+#include "bz-error.h"
 #include "bz-window.h"
 
 static void
@@ -58,15 +58,15 @@ on_toast_button_clicked (AdwToast  *toast,
 {
   BzErrorDialog *dialog;
   const char    *title = NULL;
-  const char    *text = NULL;
+  const char    *text  = NULL;
 
   if (!GTK_IS_WIDGET (widget))
     return;
 
   title = g_object_get_data (G_OBJECT (toast), "title");
-  text = g_object_get_data (G_OBJECT (toast), "text");
+  text  = g_object_get_data (G_OBJECT (toast), "text");
 
-  dialog = bz_error_dialog_new (title ? title : _("Details"), text ? text : "");
+  dialog = bz_error_dialog_new (title ? title : _ ("Details"), text ? text : "");
   adw_dialog_present (ADW_DIALOG (dialog), widget);
 }
 
@@ -75,15 +75,13 @@ show_alert (GtkWidget  *widget,
             const char *title,
             const char *text)
 {
-  BzWindow        *window = NULL;
-  AdwToast        *toast = NULL;
+  BzWindow        *window      = NULL;
+  AdwToast        *toast       = NULL;
   g_autofree char *toast_title = NULL;
 
   window = BZ_WINDOW (gtk_widget_get_ancestor (widget, BZ_TYPE_WINDOW));
   if (window == NULL)
-    {
-      return;
-    }
+    return;
 
   toast_title = g_strdup_printf ("%s", title);
   toast       = adw_toast_new (toast_title);
