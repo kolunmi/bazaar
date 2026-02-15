@@ -46,9 +46,6 @@ struct _BzCarousel
      the widget width/height */
   graphene_rect_t viewport;
   graphene_rect_t target;
-
-  int width;
-  int height;
 };
 
 G_DEFINE_FINAL_TYPE (BzCarousel, bz_carousel, GTK_TYPE_WIDGET);
