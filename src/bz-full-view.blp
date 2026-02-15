@@ -580,9 +580,7 @@ template $BzFullView: Adw.Bin {
                       light-accent-color: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.light-accent-color;
                       dark-accent-color: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.dark-accent-color;
 
-                      model: $BzLazyAsyncTextureModel {
-                        model: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.screenshot-paintables;
-                      };
+                      model: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.screenshot-paintables;
                     }
                   }
 

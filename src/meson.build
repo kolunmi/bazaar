@@ -113,7 +113,6 @@ bz_sources = files(
   'bz-inspector.c',
   'bz-installed-tile.c',
   'bz-io.c',
-  'bz-lazy-async-texture-model.c',
   'bz-library-page.c',
   'bz-license-dialog.c',
   'bz-list-tile.c',

@@ -38,7 +38,6 @@
 #include "bz-flatpak-entry.h"
 #include "bz-full-view.h"
 #include "bz-hardware-support-dialog.h"
-#include "bz-lazy-async-texture-model.h"
 #include "bz-license-dialog.h"
 #include "bz-releases-list.h"
 #include "bz-safety-calculator.h"
@@ -947,7 +946,7 @@ run_cb (BzFullView *self,
 
               window = gtk_widget_get_ancestor (GTK_WIDGET (button), GTK_TYPE_WINDOW);
               if (window != NULL)
-                bz_show_error_for_widget (window, _("Failed to launch application"), local_error->message);
+                bz_show_error_for_widget (window, _ ("Failed to launch application"), local_error->message);
             }
           break;
         }
@@ -1165,7 +1164,6 @@ bz_full_view_class_init (BzFullViewClass *klass)
   g_type_ensure (BZ_TYPE_FAVORITE_BUTTON);
   g_type_ensure (BZ_TYPE_FLATPAK_ENTRY);
   g_type_ensure (BZ_TYPE_HARDWARE_SUPPORT_DIALOG);
-  g_type_ensure (BZ_TYPE_LAZY_ASYNC_TEXTURE_MODEL);
   g_type_ensure (BZ_TYPE_SECTION_VIEW);
   g_type_ensure (BZ_TYPE_RELEASES_LIST);
   g_type_ensure (BZ_TYPE_SCREENSHOTS_CAROUSEL);
