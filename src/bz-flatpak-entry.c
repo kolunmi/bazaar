@@ -27,26 +27,31 @@
 #include <xmlb.h>
 
 #include "bz-app-permissions.h"
+#include "bz-application-map-factory.h"
+#include "bz-application.h"
 #include "bz-appstream-parser.h"
 #include "bz-flatpak-private.h"
 #include "bz-io.h"
+#include "bz-result.h"
 #include "bz-serializable.h"
+#include "bz-state-info.h"
 
 struct _BzFlatpakEntry
 {
   BzEntry parent_instance;
 
-  gboolean user;
-  gboolean is_bundle;
-  gboolean is_installed_ref;
-  char    *flatpak_name;
-  char    *flatpak_id;
-  char    *flatpak_version;
-  char    *application_name;
-  char    *application_runtime;
-  char    *application_command;
-  char    *runtime_name;
-  char    *addon_extension_of_ref;
+  gboolean  user;
+  gboolean  is_bundle;
+  gboolean  is_installed_ref;
+  char     *flatpak_name;
+  char     *flatpak_id;
+  char     *flatpak_version;
+  char     *application_name;
+  char     *application_runtime;
+  char     *application_command;
+  char     *runtime_name;
+  char     *addon_extension_of_ref;
+  BzResult *runtime_result;
 
   FlatpakRef *ref;
 };
@@ -73,6 +78,7 @@ enum
   PROP_APPLICATION_RUNTIME,
   PROP_APPLICATION_COMMAND,
   PROP_RUNTIME_NAME,
+  PROP_RUNTIME_RESULT,
   PROP_ADDON_OF_REF,
 
   LAST_PROP
@@ -109,6 +115,9 @@ bz_flatpak_entry_get_property (GObject    *object,
     case PROP_FLATPAK_ID:
       g_value_set_string (value, self->flatpak_id);
       break;
+    case PROP_FLATPAK_NAME:
+      g_value_set_string (value, self->flatpak_name);
+      break;
     case PROP_FLATPAK_VERSION:
       g_value_set_string (value, self->flatpak_version);
       break;
@@ -126,6 +135,9 @@ bz_flatpak_entry_get_property (GObject    *object,
       break;
     case PROP_RUNTIME_NAME:
       g_value_set_string (value, self->runtime_name);
+      break;
+    case PROP_RUNTIME_RESULT:
+      g_value_take_object (value, bz_flatpak_entry_get_runtime (self));
       break;
     case PROP_ADDON_OF_REF:
       g_value_set_string (value, self->addon_extension_of_ref);
@@ -225,6 +237,13 @@ bz_flatpak_entry_class_init (BzFlatpakEntryClass *klass)
           NULL, NULL, NULL,
           G_PARAM_READABLE);
 
+  props[PROP_RUNTIME_RESULT] =
+      g_param_spec_object (
+          "runtime",
+          NULL, NULL,
+          BZ_TYPE_RESULT,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
   props[PROP_ADDON_OF_REF] =
       g_param_spec_string (
           "addon-extension-of-ref",
@@ -316,6 +335,37 @@ serializable_iface_init (BzSerializableInterface *iface)
 {
   iface->serialize   = bz_flatpak_entry_real_serialize;
   iface->deserialize = bz_flatpak_entry_real_deserialize;
+}
+
+BzResult *
+bz_flatpak_entry_get_runtime (BzFlatpakEntry *self)
+{
+  BzStateInfo             *state             = NULL;
+  BzApplicationMapFactory *factory           = NULL;
+  g_autofree char         *runtime_unique_id = NULL;
+
+  g_return_val_if_fail (BZ_IS_FLATPAK_ENTRY (self), NULL);
+
+  state = bz_state_info_get_default ();
+
+  if (self->runtime_result != NULL)
+    return g_object_ref (self->runtime_result);
+
+  if (self->application_runtime == NULL)
+    return NULL;
+
+  factory = bz_state_info_get_entry_factory (state);
+  if (factory == NULL)
+    return NULL;
+
+  runtime_unique_id = g_strdup_printf ("FLATPAK-SYSTEM::flathub::runtime/%s",
+                                       self->application_runtime);
+
+  self->runtime_result = bz_application_map_factory_convert_one (
+      factory,
+      gtk_string_object_new (runtime_unique_id));
+
+  return self->runtime_result != NULL ? g_object_ref (self->runtime_result) : NULL;
 }
 
 BzFlatpakEntry *
@@ -571,6 +621,15 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
         title = self->flatpak_id;
     }
 
+  if ((kinds & BZ_ENTRY_KIND_RUNTIME) && !(kinds & BZ_ENTRY_KIND_ADDON) && self->flatpak_version != NULL)
+    {
+      if (!g_str_has_suffix (title, self->flatpak_version)) // GNOME runtimes have the flatpak version at the end whilst others don't.
+        {
+          g_autofree char *original_title = g_strdup (title);
+          title = g_strdup_printf ("%s %s", original_title, self->flatpak_version);
+        }
+    }
+
   if (FLATPAK_IS_REMOTE_REF (ref))
     eol = flatpak_remote_ref_get_eol (FLATPAK_REMOTE_REF (ref));
   else if (FLATPAK_IS_INSTALLED_REF (ref))
@@ -781,4 +840,5 @@ clear_entry (BzFlatpakEntry *self)
   g_clear_pointer (&self->application_command, g_free);
   g_clear_pointer (&self->runtime_name, g_free);
   g_clear_pointer (&self->addon_extension_of_ref, g_free);
+  g_clear_object (&self->runtime_result);
 }

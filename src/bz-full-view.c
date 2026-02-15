@@ -1247,6 +1247,34 @@ bz_full_view_new (void)
   return g_object_new (BZ_TYPE_FULL_VIEW, NULL);
 }
 
+static DexFuture *
+on_ui_entry_resolved (DexFuture *future,
+                      gpointer   user_data)
+{
+  BzEntry      *ui_entry       = NULL;
+  BzResult     *runtime_result = NULL;
+  const GValue *value          = NULL;
+
+  value = dex_future_get_value (future, NULL);
+  if (value != NULL && G_VALUE_HOLDS_OBJECT (value))
+    {
+      ui_entry = g_value_get_object (value);
+
+      if (BZ_IS_FLATPAK_ENTRY (ui_entry))
+        {
+          runtime_result = bz_flatpak_entry_get_runtime (BZ_FLATPAK_ENTRY (ui_entry));
+
+          if (runtime_result != NULL && !bz_result_get_resolved (runtime_result))
+            {
+              g_autoptr (DexFuture) runtime_future = bz_result_dup_future (runtime_result);
+              dex_future_disown (g_steal_pointer (&runtime_future));
+            }
+        }
+    }
+
+  return dex_future_new_for_boolean (TRUE);
+}
+
 void
 bz_full_view_set_entry_group (BzFullView   *self,
                               BzEntryGroup *group)
@@ -1280,6 +1308,8 @@ bz_full_view_set_entry_group (BzFullView   *self,
 
           future            = dex_future_new_for_object (store);
           self->group_model = bz_result_new (future);
+
+          on_ui_entry_resolved (dex_future_new_for_object (entry), self);
         }
       else
         {
@@ -1287,6 +1317,13 @@ bz_full_view_set_entry_group (BzFullView   *self,
 
           future            = bz_entry_group_dup_all_into_store (group);
           self->group_model = bz_result_new (future);
+
+          if (self->ui_entry != NULL)
+            {
+              g_autoptr (DexFuture) ui_future = bz_result_dup_future (self->ui_entry);
+              ui_future                       = dex_future_then (ui_future, on_ui_entry_resolved, g_object_ref (self), g_object_unref);
+              dex_future_disown (g_steal_pointer (&ui_future));
+            }
         }
 
       adw_view_stack_set_visible_child_name (self->stack, "content");
