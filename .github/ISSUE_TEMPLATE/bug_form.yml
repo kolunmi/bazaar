@@ -10,7 +10,7 @@ body:
     id: describe-bug
     attributes:
       label: Describe the bug
-      description: A clear and concise description of what the bug is. If you are reporting a crash with the flatpak version please follow https://docs.flatpak.org/en/latest/debugging.html
+      description: A clear and concise description of what the bug is. If you are reporting a crash please take a look at https://github.com/kolunmi/bazaar/blob/debug-symbols/docs/debugging.md#debugging-crashes
       placeholder: Tell us what happened!
       value: "When I entered 2 + 2, I got the answer 6."
     validations:
