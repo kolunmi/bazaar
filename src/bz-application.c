@@ -1270,7 +1270,7 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
 
             window = gtk_application_get_active_window (GTK_APPLICATION (self));
             if (window != NULL)
-              bz_show_error_for_widget (GTK_WIDGET (window), error);
+              bz_show_error_for_widget (GTK_WIDGET (window), _("A backend error occurred"), error);
           }
           break;
         case BZ_BACKEND_NOTIFICATION_KIND_TELL_INCOMING:
@@ -1604,7 +1604,7 @@ open_flatpakref_fiber (OpenFlatpakrefData *data)
         open_generic_id (self, g_value_get_string (value));
     }
   else
-    bz_show_error_for_widget (GTK_WIDGET (window), local_error->message);
+    bz_show_error_for_widget (GTK_WIDGET (window),_("Failed to open .flatpakref"), local_error->message);
 
   return dex_future_new_true ();
 }
@@ -1658,7 +1658,7 @@ init_fiber_finally (DexFuture *future,
           error_string = g_strdup_printf (
               "Could not initialize: %s",
               local_error->message);
-          bz_show_error_for_widget (GTK_WIDGET (window), error_string);
+          bz_show_error_for_widget (GTK_WIDGET (window),_("An initialization error occurred"), error_string);
         }
     }
 
@@ -1996,7 +1996,7 @@ fiber_check_for_updates (BzApplication *self)
       g_warning ("Failed to check for updates: %s", local_error->message);
 
       if (window != NULL)
-        bz_show_error_for_widget (GTK_WIDGET (window), local_error->message);
+        bz_show_error_for_widget (GTK_WIDGET (window),_("Failed to check for updates"), local_error->message);
     }
 
   bz_state_info_set_checking_for_updates (self->state, FALSE);
@@ -2892,7 +2892,7 @@ open_generic_id (BzApplication *self,
       g_autofree char *message = NULL;
 
       message = g_strdup_printf ("ID '%s' was not found", generic_id);
-      bz_show_error_for_widget (GTK_WIDGET (window), message);
+      bz_show_error_for_widget (GTK_WIDGET (window), _("Could not find app"), message);
     }
 }
 

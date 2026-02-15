@@ -24,17 +24,13 @@
 #include <glib/gi18n.h>
 
 #include "bz-error.h"
+#include "bz-error-dialog.h"
+#include "bz-window.h"
 
 static void
 show_alert (GtkWidget  *widget,
             const char *title,
-            const char *text,
-            gboolean    markup);
-
-static void
-error_alert_response (AdwAlertDialog *alert,
-                      gchar          *response,
-                      GtkWidget      *widget);
+            const char *text);
 
 static void
 await_alert_response (AdwAlertDialog *alert,
@@ -46,56 +42,63 @@ unref_dex_closure (gpointer  data,
                    GClosure *closure);
 
 void
-bz_show_alert_for_widget (GtkWidget  *widget,
-                          const char *title,
-                          const char *text,
-                          gboolean    markup)
-{
-  g_return_if_fail (GTK_IS_WIDGET (widget));
-  g_return_if_fail (title != NULL);
-  g_return_if_fail (text != NULL);
-
-  show_alert (widget, title, text, markup);
-}
-
-void
 bz_show_error_for_widget (GtkWidget  *widget,
+                          const char *title,
                           const char *text)
 {
   g_return_if_fail (GTK_IS_WIDGET (widget));
   g_return_if_fail (text != NULL);
 
-  show_alert (widget, _ ("An Error Occurred"), text, FALSE);
+  show_alert (widget, title, text);
+}
+
+static void
+on_toast_button_clicked (AdwToast  *toast,
+                         GtkWidget *widget)
+{
+  BzErrorDialog *dialog;
+  const char    *title = NULL;
+  const char    *text = NULL;
+
+  if (!GTK_IS_WIDGET (widget))
+    return;
+
+  title = g_object_get_data (G_OBJECT (toast), "title");
+  text = g_object_get_data (G_OBJECT (toast), "text");
+
+  dialog = bz_error_dialog_new (title ? title : _("Details"), text ? text : "");
+  adw_dialog_present (ADW_DIALOG (dialog), widget);
 }
 
 static void
 show_alert (GtkWidget  *widget,
             const char *title,
-            const char *text,
-            gboolean    markup)
+            const char *text)
 {
-  AdwDialog *alert = NULL;
+  BzWindow        *window = NULL;
+  AdwToast        *toast = NULL;
+  g_autofree char *toast_title = NULL;
 
-  alert = adw_alert_dialog_new (NULL, NULL);
-  adw_alert_dialog_set_prefer_wide_layout (ADW_ALERT_DIALOG (alert), TRUE);
-  adw_alert_dialog_set_heading (
-      ADW_ALERT_DIALOG (alert), title);
-  adw_alert_dialog_set_body (
-      ADW_ALERT_DIALOG (alert), text);
-  adw_alert_dialog_set_body_use_markup (
-      ADW_ALERT_DIALOG (alert), markup);
-  adw_alert_dialog_add_responses (
-      ADW_ALERT_DIALOG (alert),
-      "close", _ ("Close"),
-      "copy", _ ("Copy and Close"),
-      NULL);
-  adw_alert_dialog_set_response_appearance (
-      ADW_ALERT_DIALOG (alert), "copy", ADW_RESPONSE_SUGGESTED);
-  adw_alert_dialog_set_default_response (ADW_ALERT_DIALOG (alert), "close");
-  adw_alert_dialog_set_close_response (ADW_ALERT_DIALOG (alert), "close");
+  window = BZ_WINDOW (gtk_widget_get_ancestor (widget, BZ_TYPE_WINDOW));
+  if (window == NULL)
+    {
+      return;
+    }
 
-  g_signal_connect (alert, "response", G_CALLBACK (error_alert_response), widget);
-  adw_dialog_present (alert, GTK_WIDGET (widget));
+  toast_title = g_strdup_printf ("%s", title);
+  toast       = adw_toast_new (toast_title);
+  adw_toast_set_button_label (toast, _ ("Details"));
+  adw_toast_set_priority (toast, ADW_TOAST_PRIORITY_HIGH);
+  adw_toast_set_timeout (toast, 5);
+
+  g_object_set_data_full (G_OBJECT (toast), "title", g_strdup (title), g_free);
+  g_object_set_data_full (G_OBJECT (toast), "text", g_strdup (text), g_free);
+
+  g_signal_connect (toast, "button-clicked",
+                    G_CALLBACK (on_toast_button_clicked),
+                    widget);
+
+  bz_window_add_toast (window, toast);
 }
 
 DexFuture *
@@ -113,23 +116,6 @@ bz_make_alert_dialog_future (AdwAlertDialog *dialog)
       G_CONNECT_DEFAULT);
 
   return DEX_FUTURE (g_steal_pointer (&promise));
-}
-
-static void
-error_alert_response (AdwAlertDialog *alert,
-                      gchar          *response,
-                      GtkWidget      *widget)
-{
-  if (g_strcmp0 (response, "copy") == 0)
-    {
-      const char   *body = NULL;
-      GdkClipboard *clipboard;
-
-      body      = adw_alert_dialog_get_body (alert);
-      clipboard = gdk_display_get_clipboard (gdk_display_get_default ());
-
-      gdk_clipboard_set_text (clipboard, body);
-    }
 }
 
 static void

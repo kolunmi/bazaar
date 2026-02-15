@@ -335,7 +335,7 @@ run_cb (BzTransactionTile *self,
           &local_error);
 
       if (!result)
-        bz_show_error_for_widget (GTK_WIDGET (window), local_error->message);
+        bz_show_error_for_widget (GTK_WIDGET (window), _("Failed to launch application"), local_error->message);
     }
 }
 

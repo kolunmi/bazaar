@@ -30,6 +30,7 @@
     <file preprocess="xml-stripblanks">bz-developer-badge.ui</file>
     <file preprocess="xml-stripblanks">bz-entry-inspector.ui</file>
     <file preprocess="xml-stripblanks">bz-entry-selection-row.ui</file>
+    <file preprocess="xml-stripblanks">bz-error-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-favorite-button.ui</file>
     <file preprocess="xml-stripblanks">bz-favorites-page.ui</file>
     <file preprocess="xml-stripblanks">bz-favorites-tile.ui</file>
