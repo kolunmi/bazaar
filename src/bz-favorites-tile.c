@@ -357,7 +357,7 @@ unfavorite_fiber (BzFavoritesTile *tile)
       gtk_stack_set_visible_child_name (tile->unfavorite_stack, "button");
       window = gtk_widget_get_ancestor (GTK_WIDGET (tile), GTK_TYPE_WINDOW);
       if (window != NULL)
-        bz_show_error_for_widget (window, local_error->message);
+        bz_show_error_for_widget (window, _("Failed to remove favorite"), local_error->message);
     }
   else
     {

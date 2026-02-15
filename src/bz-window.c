@@ -663,7 +663,7 @@ transact_fiber (TransactData *data)
       bazaar_id = g_application_get_application_id (g_application_get_default ());
       if (g_strcmp0 (id_dup, bazaar_id) == 0)
         {
-          bz_show_error_for_widget (GTK_WIDGET (self), _ ("You can't remove Bazaar from Bazaar!"));
+          bz_show_error_for_widget (GTK_WIDGET (self), _("You can't remove Bazaar from Bazaar!"), _ ("You can't remove Bazaar from Bazaar!"));
           return dex_future_new_false ();
         }
     }

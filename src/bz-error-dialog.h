@@ -1,6 +1,6 @@
-/* bz-error.h
+/* bz-error-dialog.h
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2025 Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,16 +21,14 @@
 #pragma once
 
 #include <adwaita.h>
-#include <libdex.h>
 
 G_BEGIN_DECLS
 
-void
-bz_show_error_for_widget (GtkWidget  *widget,
-                          const char *title,
-                          const char *text);
+#define BZ_TYPE_ERROR_DIALOG (bz_error_dialog_get_type ())
 
-DexFuture *
-bz_make_alert_dialog_future (AdwAlertDialog *dialog);
+G_DECLARE_FINAL_TYPE (BzErrorDialog, bz_error_dialog, BZ, ERROR_DIALOG, AdwDialog)
+
+BzErrorDialog *bz_error_dialog_new (const char *title,
+                                    const char *text);
 
 G_END_DECLS

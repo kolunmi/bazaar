@@ -328,7 +328,7 @@ show_dialog_fiber (ShowDialogData *data)
       store = dex_await_object (bz_entry_group_dup_all_into_store (data->group), &local_error);
       if (store == NULL)
         {
-          bz_show_error_for_widget (data->parent, local_error->message);
+          bz_show_error_for_widget (data->parent, _("Failed to load transaction dialog"), local_error->message);
           return dex_future_new_for_error (g_steal_pointer (&local_error));
         }
 

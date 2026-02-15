@@ -43,6 +43,8 @@ src/bz-entry-selection-row.c
 src/bz-entry.c
 src/bz-env.c
 src/bz-error.c
+src/bz-error-dialog.blp
+src/bz-error-dialog.c
 src/bz-favorite-button.c
 src/bz-favorite-button.blp
 src/bz-favorites-tile.c
