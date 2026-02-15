@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-02-10 21:27+0100\n"
-"PO-Revision-Date: 2026-02-13 02:20+0100\n"
+"PO-Revision-Date: 2026-02-15 21:53+0100\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: be\n"
@@ -687,7 +687,7 @@ msgstr "Alexander Vanhee"
 #. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
 #: src/bz-application.c:706
 msgid "translator-credits"
-msgstr "падзякі перакладчыкам"
+msgstr "Аляксандр Клюеў <katoshrodingera@protonmail.ch>, 2026"
 
 #: src/bz-application.c:717
 msgid "Special Thanks"
