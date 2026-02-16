@@ -67,6 +67,10 @@
   min-height: 24px;
 }
 
+.search-pill {
+ font-weight: normal;
+}
+
 .search-grid {
   background-color: var(--window-bg-color);
 }
