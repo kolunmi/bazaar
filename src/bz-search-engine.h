@@ -23,6 +23,8 @@
 #include <gtk/gtk.h>
 #include <libdex.h>
 
+#include "bz-flathub-state.h"
+
 G_BEGIN_DECLS
 
 #define BZ_TYPE_SEARCH_ENGINE (bz_search_engine_get_type ())
@@ -37,6 +39,10 @@ bz_search_engine_get_model (BzSearchEngine *self);
 void
 bz_search_engine_set_model (BzSearchEngine *self,
                             GListModel     *model);
+
+void
+bz_search_engine_set_flathub_state (BzSearchEngine *self,
+                                    BzFlathubState *flathub_state);
 
 DexFuture *
 bz_search_engine_query (BzSearchEngine    *self,

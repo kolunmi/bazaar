@@ -21,6 +21,7 @@
 #include "bz-search-engine.h"
 #include "bz-entry-group.h"
 #include "bz-env.h"
+#include "bz-flathub-state.h"
 #include "bz-search-result.h"
 #include "bz-util.h"
 
@@ -28,7 +29,8 @@ struct _BzSearchEngine
 {
   GObject parent_instance;
 
-  GListModel *model;
+  GListModel     *model;
+  BzFlathubState *flathub_state;
 };
 
 G_DEFINE_FINAL_TYPE (BzSearchEngine, bz_search_engine, G_TYPE_OBJECT);
@@ -68,11 +70,13 @@ BZ_DEFINE_DATA (
     query_task,
     QueryTask,
     {
-      char     **terms;
-      GPtrArray *snapshot;
+      char          **terms;
+      GPtrArray      *snapshot;
+      BzFlathubState *flathub_state;
     },
     BZ_RELEASE_DATA (terms, g_strfreev);
-    BZ_RELEASE_DATA (snapshot, g_ptr_array_unref))
+    BZ_RELEASE_DATA (snapshot, g_ptr_array_unref);
+    g_clear_object (&self->flathub_state);)
 static DexFuture *
 query_task_fiber (QueryTaskData *data);
 
@@ -80,14 +84,16 @@ BZ_DEFINE_DATA (
     query_sub_task,
     QuerySubTask,
     {
-      char      *query_utf8;
-      GPtrArray *shallow_mirror;
-      double     threshold;
-      guint      work_offset;
-      guint      work_length;
+      char           *query_utf8;
+      GPtrArray      *shallow_mirror;
+      BzFlathubState *flathub_state;
+      double          threshold;
+      guint           work_offset;
+      guint           work_length;
     },
     BZ_RELEASE_DATA (query_utf8, g_free);
-    BZ_RELEASE_DATA (shallow_mirror, g_ptr_array_unref));
+    BZ_RELEASE_DATA (shallow_mirror, g_ptr_array_unref);
+    g_clear_object (&self->flathub_state););
 static DexFuture *
 query_sub_task_fiber (QuerySubTaskData *data);
 
@@ -106,6 +112,7 @@ bz_search_engine_dispose (GObject *object)
   BzSearchEngine *self = BZ_SEARCH_ENGINE (object);
 
   g_clear_object (&self->model);
+  g_clear_object (&self->flathub_state);
 
   G_OBJECT_CLASS (bz_search_engine_parent_class)->dispose (object);
 }
@@ -197,6 +204,18 @@ bz_search_engine_set_model (BzSearchEngine *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MODEL]);
 }
 
+void
+bz_search_engine_set_flathub_state (BzSearchEngine *self,
+                                    BzFlathubState *flathub_state)
+{
+  g_return_if_fail (BZ_IS_SEARCH_ENGINE (self));
+  g_return_if_fail (flathub_state == NULL || BZ_IS_FLATHUB_STATE (flathub_state));
+
+  g_clear_object (&self->flathub_state);
+  if (flathub_state != NULL)
+    self->flathub_state = g_object_ref (flathub_state);
+}
+
 DexFuture *
 bz_search_engine_query (BzSearchEngine    *self,
                         const char *const *terms)
@@ -246,9 +265,10 @@ bz_search_engine_query (BzSearchEngine    *self,
       for (guint i = 0; i < snapshot->len; i++)
         g_ptr_array_index (snapshot, i) = g_list_model_get_item (self->model, i);
 
-      data           = query_task_data_new ();
-      data->terms    = g_strdupv ((gchar **) terms);
-      data->snapshot = g_steal_pointer (&snapshot);
+      data                = query_task_data_new ();
+      data->terms         = g_strdupv ((gchar **) terms);
+      data->snapshot      = g_steal_pointer (&snapshot);
+      data->flathub_state = self->flathub_state ? g_object_ref (self->flathub_state) : NULL;
 
       return dex_scheduler_spawn (
           dex_thread_pool_scheduler_get_default (),
@@ -285,6 +305,7 @@ query_task_fiber (QueryTaskData *data)
       sub_data                 = query_sub_task_data_new ();
       sub_data->query_utf8     = g_strdup (query_utf8);
       sub_data->shallow_mirror = g_ptr_array_ref (shallow_mirror);
+      sub_data->flathub_state  = data->flathub_state ? g_object_ref (data->flathub_state) : NULL;
       sub_data->threshold      = 1.0;
       sub_data->work_offset    = i * scores_per_task;
       sub_data->work_length    = scores_per_task;
@@ -407,6 +428,10 @@ query_sub_task_fiber (QuerySubTaskData *data)
 
           append.idx = work_offset + i;
           append.val = score;
+
+          if (data->flathub_state != NULL)
+            append.val *= bz_flathub_state_get_app_score (data->flathub_state, id);
+
           g_array_append_val (scores_out, append);
         }
     }

@@ -1710,6 +1710,7 @@ flathub_update_finally (DexFuture *future,
       self->flathub = g_steal_pointer (&self->tmp_flathub);
       bz_flathub_state_set_map_factory (self->flathub, self->application_factory);
       bz_state_info_set_flathub (self->state, self->flathub);
+      bz_search_engine_set_flathub_state (self->search_engine, self->flathub);
 
       return dex_scheduler_spawn (
           dex_scheduler_get_default (),
