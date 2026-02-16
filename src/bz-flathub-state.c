@@ -892,7 +892,7 @@ initialize_fiber (GWeakRef *wr)
     score_ranked_list (self->app_scores, GET_BOXED (adwaita_f), TRUE, 0.7, 0.0);
 
   score_ranked_list (self->app_scores, GET_BOXED (trending_f), FALSE, 0.65, 0.005);
-  score_ranked_list (self->app_scores, GET_BOXED (popular_f), FALSE, 1.25, 0.003);
+  score_ranked_list (self->app_scores, GET_BOXED (popular_f), FALSE, 1.25, 0.006);
   score_ranked_list (self->app_scores, GET_BOXED (added_f), FALSE, 0.25, 0.004);
   score_ranked_list (self->app_scores, GET_BOXED (updated_f), FALSE, 0.25, 0.004);
   score_ranked_list (self->app_scores, GET_BOXED (mobile_f), FALSE, 0.15, 0.0);
