@@ -72,6 +72,7 @@ template $BzSearchWidget: Adw.Bin {
                 "circular",
                 "clear-button",
               ]
+
               clicked => $reset_search_cb(template);
             }
 
@@ -109,8 +110,25 @@ template $BzSearchWidget: Adw.Bin {
                 child: Box empty_box {
                   margin-start: 30;
                   margin-end: 30;
-                  margin-top: 20;
+                  margin-top: 16;
                   margin-bottom: 50;
+                  orientation: vertical;
+
+                  $BzSearchPillList {
+                    margin-bottom: 25;
+                    activated => $pill_list_cb(template);
+                  }
+
+                  Label {
+                    label: _("Browse Categories");
+                    halign: start;
+                    margin-bottom: 12;
+                    margin-start: 4;
+
+                    styles [
+                      "heading",
+                    ]
+                  }
 
                   $BzDynamicListView {
                     styles [

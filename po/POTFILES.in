@@ -99,6 +99,7 @@ src/bz-screenshot.c
 src/bz-screenshot-page.blp
 src/bz-screenshots-carousel.blp
 src/bz-search-engine.c
+src/bz-search-pill-list.c
 src/bz-search-widget.blp
 src/bz-search-widget.c
 src/bz-section-view.blp

@@ -135,6 +135,7 @@ bz_sources = files(
   'bz-screenshot.c',
   'bz-screenshots-carousel.c',
   'bz-search-engine.c',
+  'bz-search-pill-list.c',
   'bz-search-widget.c',
   'bz-section-view.c',
   'bz-serializable.c',
