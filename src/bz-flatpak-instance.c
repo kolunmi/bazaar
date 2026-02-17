@@ -845,19 +845,17 @@ ensure_flathub_fiber (EnsureFlathubData *data)
 static DexFuture *
 load_local_ref_fiber (LoadLocalRefData *data)
 {
-  GFile *file                                = data->file;
-  g_autoptr (GError) local_error             = NULL;
-  g_autofree char *uri                       = NULL;
-  g_autofree char *path                      = NULL;
-  g_autoptr (FlatpakBundleRef) bref          = NULL;
-  g_autoptr (BzFlatpakEntry) entry           = NULL;
-  g_autoptr (GBytes) appstream_gz            = NULL;
-  gboolean result                            = FALSE;
-  g_autoptr (AsComponent) component          = NULL;
-  g_autoptr (GBytes) appstream               = NULL;
-  g_autoptr (GInputStream) stream_gz         = NULL;
-  g_autoptr (GInputStream) stream_data       = NULL;
-  g_autoptr (GZlibDecompressor) decompressor = NULL;
+  GFile                              *file          = data->file;
+  g_autoptr (GError)                  local_error   = NULL;
+  g_autofree char                    *uri           = NULL;
+  g_autofree char                    *path          = NULL;
+  g_autoptr (FlatpakBundleRef)        bref          = NULL;
+  g_autoptr (BzFlatpakEntry)          entry         = NULL;
+  g_autoptr (GBytes)                  appstream_gz  = NULL;
+  gboolean                            result        = FALSE;
+  g_autoptr (AsComponent)             component     = NULL;
+  g_autoptr (GBytes)                  appstream     = NULL;
+  g_autoptr (GFile)                   working_file  = NULL;
 
   uri  = g_file_get_uri (file);
   path = g_file_get_path (file);
@@ -866,9 +864,9 @@ load_local_ref_fiber (LoadLocalRefData *data)
 
   if (g_str_has_suffix (uri, ".flatpakref"))
     {
-      const char *resolved_uri      = NULL;
-      g_autoptr (GKeyFile) key_file = g_key_file_new ();
-      g_autofree char *name         = NULL;
+      const char          *resolved_uri = NULL;
+      g_autoptr (GKeyFile) key_file     = g_key_file_new ();
+      g_autofree char     *name         = NULL;
 
       if (g_str_has_prefix (uri, "flatpak+https"))
         resolved_uri = uri + strlen ("flatpak+");
@@ -879,9 +877,9 @@ load_local_ref_fiber (LoadLocalRefData *data)
 
       if (g_str_has_prefix (resolved_uri, "http"))
         {
-          g_autoptr (SoupMessage) message  = NULL;
-          g_autoptr (GOutputStream) output = NULL;
-          g_autoptr (GBytes) bytes         = NULL;
+          g_autoptr (SoupMessage)   message = NULL;
+          g_autoptr (GOutputStream) output  = NULL;
+          g_autoptr (GBytes)        bytes   = NULL;
 
           message = soup_message_new (SOUP_METHOD_GET, resolved_uri);
           output  = g_memory_output_stream_new_resizable ();
@@ -924,6 +922,41 @@ load_local_ref_fiber (LoadLocalRefData *data)
       return dex_future_new_take_string (g_steal_pointer (&name));
     }
 
+  if (path != NULL &&
+        strstr (path, "/run/user/") != NULL)
+      {
+        g_autofree char *basename    = NULL;
+        g_autofree char *bundles_dir = NULL;
+        g_autofree char *tmp_path    = NULL;
+
+        basename    = g_file_get_basename (file);
+        bundles_dir = g_build_filename (g_get_user_cache_dir (), "bundles", NULL);
+        tmp_path    = g_build_filename (bundles_dir, basename, NULL);
+
+        if (g_mkdir_with_parents (bundles_dir, 0755) != 0)
+          return dex_future_new_reject (
+              BZ_FLATPAK_ERROR,
+              BZ_FLATPAK_ERROR_IO_MISBEHAVIOR,
+              "Failed to create bundle cache directory '%s'",
+              bundles_dir);
+
+        working_file = g_file_new_for_path (tmp_path);
+        if (!g_file_copy (file, working_file,
+                          G_FILE_COPY_OVERWRITE,
+                          data->cancellable,
+                          NULL, NULL,
+                          &local_error))
+          return dex_future_new_reject (
+              BZ_FLATPAK_ERROR,
+              BZ_FLATPAK_ERROR_IO_MISBEHAVIOR,
+              "Failed to copy bundle out of portal path '%s': %s",
+              path, local_error->message);
+
+        g_free (path);
+        path = g_steal_pointer (&tmp_path);
+        file = working_file;
+      }
+
   bref = flatpak_bundle_ref_new (file, &local_error);
   if (bref == NULL)
     return dex_future_new_reject (
@@ -937,7 +970,7 @@ load_local_ref_fiber (LoadLocalRefData *data)
   if (appstream_gz != NULL)
     {
       g_autoptr (XbBuilderSource) source = NULL;
-      g_autoptr (XbSilo) silo            = NULL;
+      g_autoptr (XbSilo)          silo   = NULL;
 
       appstream = decompress_appstream_gz (appstream_gz, NULL, &local_error);
       if (appstream == NULL)
@@ -1769,12 +1802,14 @@ transaction_fiber (TransactionData *data)
           BzFlatpakEntry  *entry                     = NULL;
           FlatpakRef      *ref                       = NULL;
           gboolean         is_user                   = FALSE;
+          gboolean         is_bundle                 = FALSE;
           g_autofree char *ref_fmt                   = NULL;
           g_autoptr (FlatpakTransaction) transaction = NULL;
 
           entry   = g_ptr_array_index (installations, i);
           ref     = bz_flatpak_entry_get_ref (entry);
           is_user = bz_flatpak_entry_is_user (BZ_FLATPAK_ENTRY (entry));
+          is_bundle = FLATPAK_IS_BUNDLE_REF (ref);
           ref_fmt = flatpak_ref_format_ref (ref);
 
           if ((is_user && self->user == NULL) ||
@@ -1804,12 +1839,28 @@ transaction_fiber (TransactionData *data)
                   local_error->message);
             }
 
-          result = flatpak_transaction_add_install (
-              transaction,
-              bz_entry_get_remote_repo_name (BZ_ENTRY (entry)),
-              ref_fmt,
-              NULL,
-              &local_error);
+          if (is_bundle)
+            {
+              GFile *bundle_file = NULL;
+
+              bundle_file = flatpak_bundle_ref_get_file (FLATPAK_BUNDLE_REF (ref));
+
+              result = flatpak_transaction_add_install_bundle (
+                  transaction,
+                  bundle_file,
+                  NULL, // gpg_data
+                  &local_error);
+            }
+          else
+            {
+              result = flatpak_transaction_add_install (
+                  transaction,
+                  bz_entry_get_remote_repo_name (BZ_ENTRY (entry)),
+                  ref_fmt,
+                  NULL,
+                  &local_error);
+            }
+
           if (!result)
             {
               dex_channel_close_send (channel);
