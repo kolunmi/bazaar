@@ -47,6 +47,9 @@ struct _BzFlathubState
   GListStore              *categories;
   gboolean                 has_connection_error;
 
+  GHashTable *app_scores;
+  GMutex      app_scores_mutex;
+
   DexFuture *initializing;
 };
 
@@ -104,6 +107,8 @@ bz_flathub_state_dispose (GObject *object)
 
   dex_clear (&self->initializing);
   g_clear_pointer (&self->map_factory, g_object_unref);
+  g_clear_pointer (&self->app_scores, g_hash_table_unref);
+  g_mutex_clear (&self->app_scores_mutex);
   clear (self);
 
   G_OBJECT_CLASS (bz_flathub_state_parent_class)->dispose (object);
@@ -243,6 +248,8 @@ bz_flathub_state_class_init (BzFlathubStateClass *klass)
 static void
 bz_flathub_state_init (BzFlathubState *self)
 {
+  self->app_scores = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+  g_mutex_init (&self->app_scores_mutex);
 }
 
 static void
@@ -506,6 +513,25 @@ bz_flathub_state_get_categories (BzFlathubState *self)
   return G_LIST_MODEL (self->categories);
 }
 
+/* threadsafe for the search engine */
+double
+bz_flathub_state_lookup_app_score (BzFlathubState *self,
+                                   const char     *app_id)
+{
+  g_autoptr (GMutexLocker) locker = NULL;
+  double *score                   = NULL;
+
+  g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self) && app_id != NULL, 1.0);
+
+  locker = g_mutex_locker_new (&self->app_scores_mutex);
+  if (self->initializing != NULL &&
+      dex_future_is_pending (self->initializing))
+    return 1.0;
+
+  score = g_hash_table_lookup (self->app_scores, app_id);
+  return score != NULL ? (1.0 + *score) : 1.0;
+}
+
 gboolean
 bz_flathub_state_get_has_connection_error (BzFlathubState *self)
 {
@@ -575,6 +601,77 @@ bz_flathub_state_set_map_factory (BzFlathubState          *self,
     self->map_factory = g_object_ref (map_factory);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MAP_FACTORY]);
+}
+
+static void
+add_score (GHashTable *scores,
+           const char *app_id,
+           double      points)
+{
+  double *current_score;
+  double  new_score;
+
+  current_score = g_hash_table_lookup (scores, app_id);
+
+  if (current_score != NULL)
+    new_score = *current_score + points;
+  else
+    new_score = points;
+
+  g_hash_table_replace (scores,
+                        g_strdup (app_id),
+                        g_memdup2 (&new_score, sizeof (double)));
+}
+
+static void
+score_ranked_list (GHashTable *scores,
+                   JsonNode   *node,
+                   gboolean    is_json_object,
+                   double      base_score,
+                   double      falloff_rate)
+{
+  if (is_json_object)
+    {
+      JsonObject    *object;
+      JsonObjectIter iter;
+      const char    *key;
+      guint          position = 0;
+
+      object = json_node_get_object (node);
+
+      json_object_iter_init (&iter, object);
+      while (json_object_iter_next (&iter, &key, NULL))
+        {
+          double score;
+
+          score = base_score * exp (-falloff_rate * position);
+          add_score (scores, key, score);
+          position++;
+        }
+    }
+  else
+    {
+      JsonObject *object;
+      JsonArray  *hits_array;
+      guint       length;
+
+      object     = json_node_get_object (node);
+      hits_array = json_object_get_array_member (object, "hits");
+      length     = json_array_get_length (hits_array);
+
+      for (guint i = 0; i < length; i++)
+        {
+          JsonObject *element;
+          const char *app_id;
+          double      score;
+
+          element = json_array_get_object_element (hits_array, i);
+          app_id  = json_object_get_string_member (element, "app_id");
+          score   = base_score * exp (-falloff_rate * i);
+
+          add_score (scores, app_id, score);
+        }
+    }
 }
 
 static gboolean
@@ -691,6 +788,7 @@ add_category (BzFlathubState *self,
 static DexFuture *
 initialize_fiber (GWeakRef *wr)
 {
+  g_autoptr (GMutexLocker) locker    = NULL;
   g_autoptr (BzFlathubState) self    = NULL;
   g_autoptr (GError) local_error     = NULL;
   gboolean result                    = FALSE;
@@ -712,6 +810,10 @@ initialize_fiber (GWeakRef *wr)
   bz_weak_get_or_return_reject (self, wr);
 
   quality_set = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+
+  locker = g_mutex_locker_new (&self->app_scores_mutex);
+  g_hash_table_remove_all (self->app_scores);
+  g_clear_pointer (&locker, g_mutex_locker_free);
 
 #define ADD_REQUEST(_var, ...)                                                         \
   G_STMT_START                                                                         \
@@ -753,6 +855,8 @@ initialize_fiber (GWeakRef *wr)
 
 #undef ADD_REQUEST
 
+  locker = g_mutex_locker_new (&self->app_scores_mutex);
+
 #define GET_BOXED(_future) g_value_get_boxed (dex_future_get_value ((_future), NULL))
 
   {
@@ -769,6 +873,7 @@ initialize_fiber (GWeakRef *wr)
         const char *app_id = NULL;
 
         app_id = json_array_get_string_element (array, i);
+        add_score (self->app_scores, app_id, 0.3);
         g_hash_table_replace (quality_set, g_strdup (app_id), NULL);
       }
   }
@@ -790,13 +895,24 @@ initialize_fiber (GWeakRef *wr)
     for (guint i = 0; i < length; i++)
       {
         JsonObject *element = NULL;
+        const char *app_id  = NULL;
 
         element = json_array_get_object_element (array, i);
-        gtk_string_list_append (
-            self->apps_of_the_week,
-            json_object_get_string_member (element, "app_id"));
+        app_id  = json_object_get_string_member (element, "app_id");
+        gtk_string_list_append (self->apps_of_the_week, app_id);
       }
   }
+
+  if (is_kde && toolkit_f != NULL)
+    score_ranked_list (self->app_scores, GET_BOXED (toolkit_f), FALSE, 0.7, 0.0);
+  else if (adwaita_f != NULL)
+    score_ranked_list (self->app_scores, GET_BOXED (adwaita_f), TRUE, 0.7, 0.0);
+
+  score_ranked_list (self->app_scores, GET_BOXED (trending_f), FALSE, 0.65, 0.005);
+  score_ranked_list (self->app_scores, GET_BOXED (popular_f), FALSE, 1.25, 0.006);
+  score_ranked_list (self->app_scores, GET_BOXED (added_f), FALSE, 0.25, 0.004);
+  score_ranked_list (self->app_scores, GET_BOXED (updated_f), FALSE, 0.25, 0.004);
+  score_ranked_list (self->app_scores, GET_BOXED (mobile_f), FALSE, 0.15, 0.0);
 
   add_category (self, "trending", GET_BOXED (trending_f), quality_set, FALSE, QUALITY_MODE_NONE, TRUE);
   add_category (self, "popular", GET_BOXED (popular_f), quality_set, FALSE, QUALITY_MODE_NONE, TRUE);
@@ -826,7 +942,11 @@ initialize_fiber (GWeakRef *wr)
             category, CATEGORY_FETCH_SIZE);
 
         future = bz_query_flathub_v2_json_take (g_steal_pointer (&request));
+
+        g_clear_pointer (&locker, g_mutex_locker_free);
         result = dex_await (dex_ref (future), &local_error);
+        locker = g_mutex_locker_new (&self->app_scores_mutex);
+
         if (!result)
           {
             g_warning ("Failed to complete request to flathub: %s", local_error->message);
