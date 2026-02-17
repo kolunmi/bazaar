@@ -1,4 +1,5 @@
 math = cc.find_library('m', required: false)
+xmllint = find_program('xmllint', required: true)
 
 gtk_dep              = dependency('gtk4')
 libadwaita_dep       = dependency('libadwaita-1', version: '>= 1.8')
@@ -313,10 +314,23 @@ blueprints = custom_target('blueprints',
   ],
 )
 
+release_notes = custom_target('release-notes.xml',
+  output: 'release-notes.xml',
+  input: meson.project_source_root() / 'data' / 'io.github.kolunmi.Bazaar.metainfo.xml.in',
+  command: [
+    'sh', '-c',
+    xmllint.full_path() + ' --xpath "//releases/release[1]" "$1" > "$2"',
+    '--',
+    '@INPUT@',
+    '@OUTPUT@',
+  ],
+)
+
 bz_sources += gnome.compile_resources('bz-resources',
   'bazaar.gresource.xml',
   c_name: 'bz',
-  dependencies: blueprints
+  source_dir: meson.current_build_dir(),
+  dependencies: [blueprints, release_notes],
 )
 
 executable('bazaar', bz_sources, gdbus_src, marshalers,
