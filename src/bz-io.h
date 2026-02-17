@@ -25,6 +25,9 @@
 
 G_BEGIN_DECLS
 
+char *
+bz_dup_user_data_path (const char *app_id);
+
 DexScheduler *
 bz_get_io_scheduler (void);
 
