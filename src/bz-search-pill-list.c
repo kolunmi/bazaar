@@ -58,34 +58,36 @@ bz_search_pill_list_class_init (BzSearchPillListClass *klass)
 static void
 bz_search_pill_list_init (BzSearchPillList *self)
 {
-  GtkLayoutManager *layout;
-  const char *pills[] = {
+  GtkLayoutManager *layout  = NULL;
+  const char       *pills[] = {
     /* Translators: Search suggestion: please use keywords that give good results */
-    N_("Browser"),
+    N_ ("Browser"),
     /* Translators: Search suggestion: please use keywords that give good results */
-    N_("Video"),
+    N_ ("Video"),
     /* Translators: Search suggestion: please use keywords that give good results */
-    N_("Music"),
+    N_ ("Music"),
     /* Translators: Search suggestion: please use keywords that give good results */
-    N_("Office"),
+    N_ ("Office"),
     /* Translators: Search suggestion: please use keywords that give good results */
-    N_("PDF"),
+    N_ ("PDF"),
     /* Translators: Search suggestion: please use keywords that give good results */
-    N_("Calendar"),
+    N_ ("Calendar"),
     /* Translators: Search suggestion: please use keywords that give good results */
-    N_("Messaging"),
+    N_ ("Messaging"),
     /* Translators: Search suggestion: please use keywords that give good results */
-    N_("Steam"),
+    N_ ("Steam"),
     /* Translators: Search suggestion: please use keywords that give good results */
-    N_("Paint"),
+    N_ ("Paint"),
     /* Translators: Search suggestion: please use keywords that give good results */
-    N_("VPN"),
+    N_ ("VPN"),
     /* Translators: Search suggestion: please use keywords that give good results */
-    N_("Torrent"),
+    N_ ("Torrent"),
     /* Translators: Search suggestion: please use keywords that give good results */
-    N_("Minecraft"),
+    N_ ("Minecraft"),
     /* Translators: Search suggestion: please use keywords that give good results */
-    N_("Emulator"),
+    N_ ("Emulator"),
+
+    /* This array MUST be NULL terminated */
     NULL
   };
 
@@ -98,9 +100,9 @@ bz_search_pill_list_init (BzSearchPillList *self)
 
   for (guint i = 0; pills[i] != NULL; i++)
     {
-      GtkWidget *button;
+      GtkWidget *button = NULL;
 
-      button = gtk_button_new_with_label (_ (pills[i]));
+      button = gtk_button_new_with_label (Q_ (pills[i]));
       gtk_widget_add_css_class (button, "small-pill");
       gtk_widget_add_css_class (button, "search-pill");
       g_signal_connect_swapped (button, "clicked",
@@ -119,7 +121,7 @@ static void
 pill_button_clicked_cb (BzSearchPillList *self,
                         GtkButton        *button)
 {
-  const char *label;
+  const char *label = NULL;
 
   g_return_if_fail (BZ_IS_SEARCH_PILL_LIST (self));
   g_return_if_fail (GTK_IS_BUTTON (button));
