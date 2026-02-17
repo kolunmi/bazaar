@@ -40,6 +40,9 @@ void
 bz_search_engine_set_model (BzSearchEngine *self,
                             GListModel     *model);
 
+BzFlathubState *
+bz_search_engine_get_flathub_state (BzSearchEngine *self);
+
 void
 bz_search_engine_set_flathub_state (BzSearchEngine *self,
                                     BzFlathubState *flathub_state);

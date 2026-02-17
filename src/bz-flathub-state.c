@@ -46,7 +46,9 @@ struct _BzFlathubState
   GtkStringList           *apps_of_the_week;
   GListStore              *categories;
   gboolean                 has_connection_error;
-  GHashTable              *app_scores;
+
+  GHashTable *app_scores;
+  GMutex      app_scores_mutex;
 
   DexFuture *initializing;
 };
@@ -106,6 +108,7 @@ bz_flathub_state_dispose (GObject *object)
   dex_clear (&self->initializing);
   g_clear_pointer (&self->map_factory, g_object_unref);
   g_clear_pointer (&self->app_scores, g_hash_table_unref);
+  g_mutex_clear (&self->app_scores_mutex);
   clear (self);
 
   G_OBJECT_CLASS (bz_flathub_state_parent_class)->dispose (object);
@@ -246,6 +249,7 @@ static void
 bz_flathub_state_init (BzFlathubState *self)
 {
   self->app_scores = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+  g_mutex_init (&self->app_scores_mutex);
 }
 
 static void
@@ -509,15 +513,23 @@ bz_flathub_state_get_categories (BzFlathubState *self)
   return G_LIST_MODEL (self->categories);
 }
 
+/* threadsafe for the search engine */
 double
-bz_flathub_state_get_app_score (BzFlathubState *self,
-                                const char     *app_id)
+bz_flathub_state_lookup_app_score (BzFlathubState *self,
+                                   const char     *app_id)
 {
-  double *score;
+  g_autoptr (GMutexLocker) locker = NULL;
+  double *score                   = NULL;
 
   g_return_val_if_fail (BZ_IS_FLATHUB_STATE (self) && app_id != NULL, 1.0);
 
-  return (score = g_hash_table_lookup (self->app_scores, app_id)) ? (1.0 + *score) : 1.0;
+  locker = g_mutex_locker_new (&self->app_scores_mutex);
+  if (self->initializing != NULL &&
+      dex_future_is_pending (self->initializing))
+    return 1.0;
+
+  score = g_hash_table_lookup (self->app_scores, app_id);
+  return score != NULL ? (1.0 + *score) : 1.0;
 }
 
 gboolean
@@ -625,7 +637,7 @@ score_ranked_list (GHashTable *scores,
       const char    *key;
       guint          position = 0;
 
-      object   = json_node_get_object (node);
+      object = json_node_get_object (node);
 
       json_object_iter_init (&iter, object);
       while (json_object_iter_next (&iter, &key, NULL))
@@ -776,6 +788,7 @@ add_category (BzFlathubState *self,
 static DexFuture *
 initialize_fiber (GWeakRef *wr)
 {
+  g_autoptr (GMutexLocker) locker    = NULL;
   g_autoptr (BzFlathubState) self    = NULL;
   g_autoptr (GError) local_error     = NULL;
   gboolean result                    = FALSE;
@@ -798,7 +811,9 @@ initialize_fiber (GWeakRef *wr)
 
   quality_set = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 
+  locker = g_mutex_locker_new (&self->app_scores_mutex);
   g_hash_table_remove_all (self->app_scores);
+  g_clear_pointer (&locker, g_mutex_locker_free);
 
 #define ADD_REQUEST(_var, ...)                                                         \
   G_STMT_START                                                                         \
@@ -839,6 +854,8 @@ initialize_fiber (GWeakRef *wr)
   ADD_REQUEST (mobile_f, "/collection/mobile?page=0&per_page=%d", COLLECTION_FETCH_SIZE);
 
 #undef ADD_REQUEST
+
+  locker = g_mutex_locker_new (&self->app_scores_mutex);
 
 #define GET_BOXED(_future) g_value_get_boxed (dex_future_get_value ((_future), NULL))
 
@@ -925,7 +942,11 @@ initialize_fiber (GWeakRef *wr)
             category, CATEGORY_FETCH_SIZE);
 
         future = bz_query_flathub_v2_json_take (g_steal_pointer (&request));
+
+        g_clear_pointer (&locker, g_mutex_locker_free);
         result = dex_await (dex_ref (future), &local_error);
+        locker = g_mutex_locker_new (&self->app_scores_mutex);
+
         if (!result)
           {
             g_warning ("Failed to complete request to flathub: %s", local_error->message);

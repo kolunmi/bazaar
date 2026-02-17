@@ -60,8 +60,8 @@ GListModel *
 bz_flathub_state_get_categories (BzFlathubState *self);
 
 double
-bz_flathub_state_get_app_score (BzFlathubState *self,
-                                const char     *app_id);
+bz_flathub_state_lookup_app_score (BzFlathubState *self,
+                                   const char     *app_id);
 
 gboolean
 bz_flathub_state_get_has_connection_error (BzFlathubState *self);
