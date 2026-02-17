@@ -262,6 +262,14 @@
 	--accent-bg-color: @window_fg_color;
 }
 
+.flathub-lotion {
+  color: #fafafa;
+}
+
+.flathub-gunmetal {
+  color: #251f32;
+}
+
 @media (prefers-color-scheme: dark) {
   .flathub {
     --accent-color: alpha(#fafafa,0.75);
