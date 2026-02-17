@@ -203,6 +203,9 @@ tile_activated_cb (BzListTile *tile)
   else
     return;
 
+  if (group == NULL)
+    return;
+
   g_signal_emit (self, signals[SIGNAL_SHOW], 0, group);
 }
 
