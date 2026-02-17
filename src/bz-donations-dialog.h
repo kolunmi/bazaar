@@ -32,13 +32,6 @@ G_DECLARE_FINAL_TYPE (BzDonationsDialog, bz_donations_dialog, BZ, DONATIONS_DIAL
 AdwDialog *
 bz_donations_dialog_new (void);
 
-BzStateInfo *
-bz_donations_dialog_get_state (BzDonationsDialog *self);
-
-void
-bz_donations_dialog_set_state (BzDonationsDialog *self,
-                               BzStateInfo       *state);
-
 G_END_DECLS
 
 /* End of bz-donations-dialog.h */
