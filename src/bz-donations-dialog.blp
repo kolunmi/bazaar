@@ -2,16 +2,10 @@ using Gtk 4.0;
 using Adw 1;
 
 template $BzDonationsDialog: Adw.Dialog {
-  width-request: 300;
-  height-request: 400;
-  content-width: 350;
-  content-height: 750;
+  width-request: 450;
+  follows-content-size: true;
 
   child: Adw.ToolbarView {
-    styles [
-      "bz-donations-dialog",
-    ]
-
     [top]
     Adw.HeaderBar {
       show-title: false;
@@ -19,73 +13,110 @@ template $BzDonationsDialog: Adw.Dialog {
 
     content: ScrolledWindow {
       hscrollbar-policy: never;
+      vscrollbar-policy: automatic;
+      propagate-natural-height: true;
+      min-content-height: 500;
 
       child: Box {
-        valign: center;
-        margin-start: 15;
-        margin-end: 15;
-        margin-top: 10;
-        margin-bottom: 10;
         orientation: vertical;
 
-        Label title {
-          styles [
-            "title-1",
-          ]
-          wrap: true;
-          justify: center;
-          margin-bottom: 20;
-        }
-
-        Button {
-          styles [
-            "pill",
-          ]
-          margin-start: 20;
-          margin-end: 20;
-          margin-bottom: 20;
-          label: _("View the Release Page");
-          clicked => $release_page_clicked(template);
-        }
-
-        Separator {
+        Box {
+          orientation: vertical;
+          margin-start: 40;
+          margin-end: 40;
           margin-top: 20;
           margin-bottom: 20;
+
+          Label title {
+            styles [
+              "title-1",
+            ]
+
+            wrap: true;
+            justify: center;
+            margin-bottom: 5;
+          }
+
+          Label subtitle {
+            styles [
+              "dimmed",
+            ]
+
+            wrap: true;
+            justify: center;
+            margin-bottom: 30;
+          }
+
+          $BzAppstreamDescriptionRender {
+            vexpand: true;
+            appstream-description: bind template.release-notes;
+          }
+
+          Button {
+            styles [
+              "pill",
+            ]
+
+            margin-start: 25;
+            margin-end: 20;
+            margin-bottom: 15;
+            halign: center;
+            label: _("Release Notes Website");
+            clicked => $release_page_clicked(template);
+          }
         }
 
-        Image {
-          icon-name: "heart-filled-symbolic";
-          pixel-size: 128;
-          margin-bottom: 10;
-        }
-
-        Label {
+        Adw.Bin {
           styles [
-            "title-2",
+            "bz-donations-dialog",
           ]
-          margin-bottom: 10;
-          wrap: true;
-          justify: center;
-          label: _("This Bazaar Release Was Made Possible By Users Like You!");
-        }
 
-        Label {
-          margin-bottom: 20;
-          wrap: true;
-          justify: center;
-          use-markup: true;
-          label: _("I love making Bazaar, but I cannot do it alone. If you would like to help support further development, please consider donating to the project at my ko-fi:");
-        }
+          child: Box {
+            orientation: vertical;
+            margin-start: 25;
+            margin-end: 25;
+            margin-top: 20;
+            margin-bottom: 20;
 
-        Button {
-          styles [
-            "pill",
-          ]
-          margin-start: 20;
-          margin-end: 20;
-          margin-bottom: 20;
-          label: _("Donate to Bazaar");
-          clicked => $donate_clicked(template);
+            Label {
+              styles [
+                "title-1",
+              ]
+
+              margin-top: 10;
+              margin-bottom: 20;
+              halign: center;
+              wrap: true;
+              justify: center;
+              label: _("This release was made possible by users like you!");
+            }
+
+            Label {
+              margin-bottom: 20;
+              wrap: true;
+              justify: center;
+              use-markup: true;
+              label: _("I love making Bazaar, but I cannot do it alone. Help support further development, by donating on Ko-Fi.");
+            }
+
+            Button {
+              styles [
+                "pill",
+              ]
+
+              margin-start: 20;
+              margin-end: 20;
+              margin-bottom: 20;
+              halign: center;
+
+              child: Adw.ButtonContent {
+                label: _("Donate to Bazaar");
+                icon-name: "heart-filled-symbolic";
+              };
+
+              clicked => $donate_clicked(template);
+            }
+          };
         }
       };
     };

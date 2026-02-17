@@ -1,9 +1,19 @@
-<p>This release comes with the following improvements:</p>
-<ul>
-  <li>Better track installed versions of apps</li>
-  <li>Add `enable-bulk-install` key to curated sections</li>
-  <li>Introduce the app library page</li>
-  <li>Add donations dialog</li>
-  <li>Fix broken addon and runtime eol detection</li>
-  <li>Add `override-eol-markings` main config string list</li>
-</ul>
+<release version="0.7.9" date="2026-02-02">
+  <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.7</url>
+  <description translate="no">
+    <p>**New Features**</p>
+    <ul>
+      <li>Redesigned category page</li>
+      <li>New Library view</li>
+    </ul>
+    <p>**Updated**</p>
+    <ul>
+      <li>Redesigned icons for permissions</li>
+      <li>Faster loading on startup</li>
+    </ul>
+    <p>**Minor**</p>
+    <ul>
+      <li>New translations: Esperanto, Dutch, and Italian</li>
+    </ul>
+  </description>
+</release>
