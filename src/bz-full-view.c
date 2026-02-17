@@ -280,9 +280,16 @@ format_size (gpointer object, guint64 value)
 
 static char *
 get_size_label (gpointer object,
-                gboolean is_installable)
+                gboolean is_installable,
+                gboolean runtime_installed,
+                guint64  runtime_size)
 {
-  // Translators: .
+  if (is_installable && !runtime_installed && runtime_size > 0)
+    {
+      g_autofree char *size_str = g_format_size (runtime_size);
+      return g_strdup_printf (_ ("+%s runtime"), size_str);
+    }
+
   return g_strdup (is_installable ? _ ("Download") : _ ("Installed"));
 }
 

@@ -33,6 +33,13 @@ get_user_data_size_fiber (char *app_id);
 static DexFuture *
 get_all_user_data_ids_fiber (void);
 
+char *
+bz_dup_user_data_path (const char *app_id)
+{
+  g_return_val_if_fail (app_id != NULL, NULL);
+  return g_build_filename (g_get_home_dir (), ".var", "app", app_id, NULL);
+}
+
 DexScheduler *
 bz_get_io_scheduler (void)
 {
@@ -158,7 +165,7 @@ reap_user_data_fiber (char *app_id)
   g_autoptr (GError) error           = NULL;
   gboolean result                    = FALSE;
 
-  user_data_path = g_build_filename (g_get_home_dir (), ".var", "app", app_id, NULL);
+  user_data_path = bz_dup_user_data_path (app_id);
   file           = g_file_new_for_path (user_data_path);
 
   trash_future = trash_file_dex (file);
@@ -244,7 +251,7 @@ get_user_data_size_fiber (char *app_id)
   g_autofree char *user_data_path = NULL;
   g_autoptr (GFile) file          = NULL;
 
-  user_data_path = g_build_filename (g_get_home_dir (), ".var", "app", app_id, NULL);
+  user_data_path = bz_dup_user_data_path (app_id);
   file           = g_file_new_for_path (user_data_path);
 
   return get_directory_size_fiber (file);
