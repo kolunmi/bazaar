@@ -105,7 +105,11 @@ template $BzAppSizeDialog: Adw.Dialog {
 
             [prefix]
             Label {
-              label: bind $format_size(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzFlatpakEntry>.runtime as <$BzResult>.object as <$BzEntry>.installed-size as <int>) as <string>;
+              label: bind $format_size($choose(
+                template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzFlatpakEntry>.runtime as <$BzResult>.object as <$BzEntry>.installed,
+                template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzFlatpakEntry>.runtime as <$BzResult>.object as <$BzEntry>.installed-size,
+                template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzFlatpakEntry>.runtime as <$BzResult>.object as <$BzEntry>.size
+              ) as <int>) as <string>;
               use-markup: true;
               valign: center;
               width-request: 90;
@@ -118,7 +122,7 @@ template $BzAppSizeDialog: Adw.Dialog {
                 "grey",
               ]
             }
-            title: _("Runtime Size");
+            title: bind $get_runtime_size_title(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzFlatpakEntry>.runtime as <$BzResult>.object as <$BzEntry>.installed) as <string>;
             subtitle: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzFlatpakEntry>.runtime as <$BzResult>.object as <$BzEntry>.title;
           }
         }
