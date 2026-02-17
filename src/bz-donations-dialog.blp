@@ -52,7 +52,7 @@ template $BzDonationsDialog: Adw.Dialog {
             appstream-description: bind template.release-notes;
           }
 
-          Button {
+          Button release_button {
             styles [
               "pill",
             ]
@@ -61,8 +61,21 @@ template $BzDonationsDialog: Adw.Dialog {
             margin-end: 20;
             margin-bottom: 15;
             halign: center;
-            label: _("Release Notes Website");
+            has-tooltip: true;
+
             clicked => $release_page_clicked(template);
+
+            child: Box {
+              orientation: horizontal;
+              spacing: 10;
+
+              Label {
+                label: _("Full Release Notes");
+              }
+              Image {
+                icon-name: "external-link-symbolic";
+              }
+            };
           }
         }
 

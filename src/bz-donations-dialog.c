@@ -36,8 +36,9 @@ struct _BzDonationsDialog
   AdwBreakpoint *breakpoint;
 
   /* Template widgets */
-  GtkLabel *title;
-  GtkLabel *subtitle;
+  GtkLabel  *title;
+  GtkLabel  *subtitle;
+  GtkButton *release_button;
 };
 
 G_DEFINE_FINAL_TYPE (BzDonationsDialog, bz_donations_dialog, ADW_TYPE_DIALOG);
@@ -105,6 +106,7 @@ on_map (BzDonationsDialog *self,
         gpointer           user_data)
 {
   GtkRoot *root = NULL;
+
   root = gtk_widget_get_root (GTK_WIDGET (self));
 
   if (root == NULL || self->breakpoint == NULL)
@@ -137,6 +139,7 @@ bz_donations_dialog_class_init (BzDonationsDialogClass *klass)
   bz_widget_class_bind_all_util_callbacks (widget_class);
   gtk_widget_class_bind_template_child (widget_class, BzDonationsDialog, title);
   gtk_widget_class_bind_template_child (widget_class, BzDonationsDialog, subtitle);
+  gtk_widget_class_bind_template_child (widget_class, BzDonationsDialog, release_button);
   gtk_widget_class_bind_template_callback (widget_class, donate_clicked);
   gtk_widget_class_bind_template_callback (widget_class, release_page_clicked);
 }
@@ -158,6 +161,8 @@ bz_donations_dialog_init (BzDonationsDialog *self)
   AdwBreakpointCondition *condition      = NULL;
 
   gtk_widget_init_template (GTK_WIDGET (self));
+
+  gtk_widget_set_tooltip_text (GTK_WIDGET (self->release_button), RELEASE_PAGE);
 
   condition = adw_breakpoint_condition_new_length (
       ADW_BREAKPOINT_CONDITION_MAX_WIDTH,
@@ -221,22 +226,22 @@ bz_donations_dialog_init (BzDonationsDialog *self)
     }
 
   if (date != NULL)
-      {
-        g_autofree char      *date_full    = NULL;
-        g_autoptr (GDateTime) dt           = NULL;
-        g_autofree char      *subtitle_str = NULL;
+    {
+      g_autofree char *date_full    = NULL;
+      g_autoptr (GDateTime) dt      = NULL;
+      g_autofree char *subtitle_str = NULL;
 
-        date_full    = g_strdup_printf ("%sT00:00:00Z", date);
-        dt           = g_date_time_new_from_iso8601 (date_full, NULL);
+      date_full = g_strdup_printf ("%sT00:00:00Z", date);
+      dt        = g_date_time_new_from_iso8601 (date_full, NULL);
 
-        if (dt != NULL)
-          {
-            /* Translators: this is a release date label, like "Released February 9, 2026" */
-            subtitle_str = g_date_time_format (dt, _("Released %B %-e, %Y"));
-            if (subtitle_str != NULL)
-              gtk_label_set_label (self->subtitle, subtitle_str);
-          }
-      }
+      if (dt != NULL)
+        {
+          /* Translators: this is a release date label, like "Released February 9, 2026" */
+          subtitle_str = g_date_time_format (dt, _ ("Released %B %-e, %Y"));
+          if (subtitle_str != NULL)
+            gtk_label_set_label (self->subtitle, subtitle_str);
+        }
+    }
 
   url_node = xb_silo_query_first (silo, "release/url[@type='details']", &error);
   if (url_node != NULL)
