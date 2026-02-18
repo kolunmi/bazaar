@@ -45,17 +45,9 @@
   outline-width: 2px;
 }
 
-.rich-screenshot-box {
-	background-color: var(--sidebar-bg-color);
-}
-
 @media (prefers-color-scheme: light) {
   .search-box {
     background-color: var(--shade-color);
-  }
-
-  .rich-screenshot-box {
-	  background-color: var(--sidebar-bg-color);
   }
 }
 

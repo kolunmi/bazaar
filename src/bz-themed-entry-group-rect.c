@@ -117,39 +117,39 @@ bz_themed_entry_group_rect_snapshot (GtkWidget   *widget,
   BzThemedEntryGroupRect *self          = BZ_THEMED_ENTRY_GROUP_RECT (widget);
   double                  widget_width  = 0.0;
   double                  widget_height = 0.0;
+  const char             *light_color  = NULL;
+  const char             *dark_color   = NULL;
+  GdkRGBA                 light_rgba   = { 0 };
+  GdkRGBA                 dark_rgba    = { 0 };
+  gboolean                is_dark      = FALSE;
 
   widget_width  = (double) gtk_widget_get_width (widget);
   widget_height = (double) gtk_widget_get_height (widget);
 
   if (self->group != NULL)
     {
-      const char *light_color = NULL;
-      const char *dark_color  = NULL;
-
       light_color = bz_entry_group_get_light_accent_color (self->group);
       dark_color  = bz_entry_group_get_dark_accent_color (self->group);
-
-      if (light_color != NULL || dark_color != NULL)
-        {
-          GdkRGBA  light_rgba = { 0 };
-          GdkRGBA  dark_rgba  = { 0 };
-          gboolean is_dark    = FALSE;
-
-          if (light_color != NULL)
-            gdk_rgba_parse (&light_rgba, light_color);
-          if (dark_color != NULL)
-            gdk_rgba_parse (&dark_rgba, dark_color);
-
-          is_dark = adw_style_manager_get_dark (adw_style_manager_get_default ());
-
-          gtk_snapshot_append_color (
-              snapshot,
-              dark_color != NULL && is_dark
-                  ? &dark_rgba
-                  : &light_rgba,
-              &GRAPHENE_RECT_INIT (0.0, 0.0, widget_width, widget_height));
-        }
     }
+
+  if (light_color != NULL)
+    gdk_rgba_parse (&light_rgba, light_color);
+  else
+    gdk_rgba_parse (&light_rgba, "#ebebed");
+
+  if (dark_color != NULL)
+    gdk_rgba_parse (&dark_rgba, dark_color);
+  else
+    gdk_rgba_parse (&dark_rgba, "#2e2e32");
+
+  is_dark = adw_style_manager_get_dark (adw_style_manager_get_default ());
+
+  gtk_snapshot_push_opacity (snapshot, 0.70);
+  gtk_snapshot_append_color (
+      snapshot,
+      is_dark ? &dark_rgba : &light_rgba,
+      &GRAPHENE_RECT_INIT (0.0, 0.0, widget_width, widget_height));
+  gtk_snapshot_pop (snapshot);
 
   if (self->child != NULL)
     gtk_widget_snapshot_child (widget, self->child, snapshot);
