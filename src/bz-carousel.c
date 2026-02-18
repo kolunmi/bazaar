@@ -35,6 +35,8 @@ struct _BzCarousel
   double              motion_x;
   double              motion_y;
 
+  GtkEventController *scroll;
+
   GtkGesture *click;
   gboolean    pressing;
   double      pressed_x;
@@ -145,6 +147,12 @@ static void
 update_motion (BzCarousel *self,
                gdouble     x,
                gdouble     y);
+
+static gboolean
+scroll (BzCarousel               *self,
+        gdouble                   dx,
+        gdouble                   dy,
+        GtkEventControllerScroll *controller);
 
 static void
 click_pressed (BzCarousel      *self,
@@ -448,6 +456,10 @@ bz_carousel_init (BzCarousel *self)
   g_signal_connect_swapped (self->motion, "motion", G_CALLBACK (motion_event), self);
   g_signal_connect_swapped (self->motion, "leave", G_CALLBACK (motion_leave), self);
   gtk_widget_add_controller (GTK_WIDGET (self), self->motion);
+
+  self->scroll = gtk_event_controller_scroll_new (GTK_EVENT_CONTROLLER_SCROLL_HORIZONTAL);
+  g_signal_connect_swapped (self->scroll, "scroll", G_CALLBACK (scroll), self);
+  gtk_widget_add_controller (GTK_WIDGET (self), self->scroll);
 
   self->click = gtk_gesture_click_new ();
   gtk_event_controller_set_propagation_phase (GTK_EVENT_CONTROLLER (self->click), GTK_PHASE_CAPTURE);
@@ -978,6 +990,39 @@ update_motion (BzCarousel *self,
 
   if (ensure)
     ensure_viewport (self, self->model, !self->pressing);
+}
+
+static gboolean
+scroll (BzCarousel               *self,
+        gdouble                   dx,
+        gdouble                   dy,
+        GtkEventControllerScroll *controller)
+{
+  guint n_items      = 0;
+  guint selected     = 0;
+  guint new_selected = 0;
+
+  if (self->model == NULL)
+    return FALSE;
+
+  n_items = g_list_model_get_n_items (G_LIST_MODEL (self->model));
+  if (n_items == 0)
+    return FALSE;
+
+  selected = gtk_single_selection_get_selected (self->model);
+
+  if (dx > 0)
+    new_selected = MIN (selected + 1, n_items - 1);
+  else
+    {
+      if (selected == 0)
+        new_selected = 0;
+      else
+        new_selected = selected - 1;
+    }
+  gtk_single_selection_set_selected (self->model, new_selected);
+
+  return TRUE;
 }
 
 static void
