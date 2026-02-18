@@ -113,7 +113,7 @@ template $BzDonationsDialog: Adw.Dialog {
               label: _("I love making Bazaar, but I cannot do it alone. Help support further development by donating on Ko-Fi.");
             }
 
-            Button {
+            Button donate_button {
               styles [
                 "pill",
               ]
@@ -122,6 +122,7 @@ template $BzDonationsDialog: Adw.Dialog {
               margin-end: 20;
               margin-bottom: 20;
               halign: center;
+              has-tooltip: true;
 
               child: Adw.ButtonContent {
                 label: _("Donate to Bazaar");

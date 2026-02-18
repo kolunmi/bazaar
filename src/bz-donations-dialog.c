@@ -39,6 +39,7 @@ struct _BzDonationsDialog
   GtkLabel  *title;
   GtkLabel  *subtitle;
   GtkButton *release_button;
+  GtkButton *donate_button;
 };
 
 G_DEFINE_FINAL_TYPE (BzDonationsDialog, bz_donations_dialog, ADW_TYPE_DIALOG);
@@ -140,6 +141,7 @@ bz_donations_dialog_class_init (BzDonationsDialogClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzDonationsDialog, title);
   gtk_widget_class_bind_template_child (widget_class, BzDonationsDialog, subtitle);
   gtk_widget_class_bind_template_child (widget_class, BzDonationsDialog, release_button);
+  gtk_widget_class_bind_template_child (widget_class, BzDonationsDialog, donate_button);
   gtk_widget_class_bind_template_callback (widget_class, donate_clicked);
   gtk_widget_class_bind_template_callback (widget_class, release_page_clicked);
 }
@@ -163,6 +165,7 @@ bz_donations_dialog_init (BzDonationsDialog *self)
   gtk_widget_init_template (GTK_WIDGET (self));
 
   gtk_widget_set_tooltip_text (GTK_WIDGET (self->release_button), RELEASE_PAGE);
+  gtk_widget_set_tooltip_text (GTK_WIDGET (self->donate_button), DONATE_LINK);
 
   condition = adw_breakpoint_condition_new_length (
       ADW_BREAKPOINT_CONDITION_MAX_WIDTH,
