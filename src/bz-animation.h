@@ -50,4 +50,11 @@ bz_animation_add_spring (BzAnimation        *self,
                          gpointer            user_data,
                          GDestroyNotify      destroy_data);
 
+void
+bz_animation_cancel (BzAnimation *self,
+                     const char  *key);
+
+void
+bz_animation_cancel_all (BzAnimation *self);
+
 G_END_DECLS

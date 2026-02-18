@@ -339,6 +339,74 @@ bz_animation_add_spring (BzAnimation        *self,
     destroy_data (user_data);
 }
 
+/**
+ * bz_animation_cancel:
+ * @self: a `BzAnimation`
+ * @key: a string ID to remove
+ *
+ * If @key exists on @self, cancel the associated animation.
+ */
+void
+bz_animation_cancel (BzAnimation *self,
+                     const char  *key)
+{
+  g_autoptr (GtkWidget) widget = NULL;
+
+  g_return_if_fail (BZ_IS_ANIMATION (self));
+  g_return_if_fail (key != NULL);
+  g_return_if_fail (g_hash_table_contains (self->data, key));
+
+  widget = g_weak_ref_get (&self->wr);
+  if (widget != NULL)
+    {
+      SpringData *data = NULL;
+
+      data = g_hash_table_lookup (self->data, key);
+      data->cb (widget, key, data->to, data->user_data);
+    }
+
+  g_hash_table_remove (self->data, key);
+}
+
+/**
+ * bz_animation_cancel_all:
+ * @self: a `BzAnimation`
+ *
+ * Cancel all animations on @self.
+ */
+void
+bz_animation_cancel_all (BzAnimation *self)
+{
+  g_autoptr (GtkWidget) widget = NULL;
+
+  g_return_if_fail (BZ_IS_ANIMATION (self));
+
+  widget = g_weak_ref_get (&self->wr);
+  if (widget != NULL)
+    {
+      GHashTableIter iter = { 0 };
+
+      g_hash_table_iter_init (&iter, self->data);
+
+      for (;;)
+        {
+          char       *key  = NULL;
+          SpringData *data = NULL;
+
+          if (!g_hash_table_iter_next (
+                  &iter,
+                  (gpointer *) &key,
+                  (gpointer *) &data))
+            break;
+
+          data->cb (widget, key, data->to, data->user_data);
+          g_hash_table_iter_remove (&iter);
+        }
+    }
+  else
+    g_hash_table_remove_all (self->data);
+}
+
 static gboolean
 tick_cb (GtkWidget     *widget,
          GdkFrameClock *frame_clock,
