@@ -34,7 +34,13 @@ struct _BzCarousel
   GtkEventController *motion;
   double              motion_x;
   double              motion_y;
-  BzAnimation        *animation;
+
+  GtkGesture *click;
+  gboolean    pressing;
+  double      pressed_x;
+  double      pressed_y;
+
+  BzAnimation *animation;
 
   gboolean            auto_scroll;
   gboolean            allow_long_swipes;
@@ -139,6 +145,35 @@ static void
 update_motion (BzCarousel *self,
                gdouble     x,
                gdouble     y);
+
+static void
+click_pressed (BzCarousel      *self,
+               gint             n_press,
+               gdouble          x,
+               gdouble          y,
+               GtkGestureClick *gesture);
+
+static void
+click_released (BzCarousel      *self,
+                gint             n_press,
+                gdouble          x,
+                gdouble          y,
+                GtkGestureClick *gesture);
+
+static void
+click_stopped (BzCarousel      *self,
+               GtkGestureClick *gesture);
+
+static void
+click_unpaired_release (BzCarousel       *self,
+                        gdouble           x,
+                        gdouble           y,
+                        guint             button,
+                        GdkEventSequence *sequence,
+                        GtkGestureClick  *gesture);
+
+static void
+cancel_drag (BzCarousel *self);
 
 static void
 bz_carousel_dispose (GObject *object)
@@ -413,6 +448,14 @@ bz_carousel_init (BzCarousel *self)
   g_signal_connect_swapped (self->motion, "motion", G_CALLBACK (motion_event), self);
   g_signal_connect_swapped (self->motion, "leave", G_CALLBACK (motion_leave), self);
   gtk_widget_add_controller (GTK_WIDGET (self), self->motion);
+
+  self->click = gtk_gesture_click_new ();
+  gtk_event_controller_set_propagation_phase (GTK_EVENT_CONTROLLER (self->click), GTK_PHASE_CAPTURE);
+  g_signal_connect_swapped (self->click, "pressed", G_CALLBACK (click_pressed), self);
+  g_signal_connect_swapped (self->click, "released", G_CALLBACK (click_released), self);
+  g_signal_connect_swapped (self->click, "stopped", G_CALLBACK (click_stopped), self);
+  g_signal_connect_swapped (self->click, "unpaired-release", G_CALLBACK (click_unpaired_release), self);
+  gtk_widget_add_controller (GTK_WIDGET (self), GTK_EVENT_CONTROLLER (self->click));
 }
 
 GtkWidget *
@@ -675,6 +718,8 @@ move_to_idx (BzCarousel *self,
   width  = gtk_widget_get_width (GTK_WIDGET (self));
   height = gtk_widget_get_height (GTK_WIDGET (self));
   offset = width / 2;
+  if (self->pressing)
+    offset += self->motion_x - self->pressed_x;
 
   for (guint i = 0; i <= idx; i++)
     {
@@ -916,8 +961,88 @@ update_motion (BzCarousel *self,
         }
     }
 
+  if (self->pressing)
+    ensure = TRUE;
+
   if (ensure)
-    ensure_viewport (self, self->model, TRUE);
+    ensure_viewport (self, self->model, !self->pressing);
+}
+
+static void
+click_pressed (BzCarousel      *self,
+               gint             n_press,
+               gdouble          x,
+               gdouble          y,
+               GtkGestureClick *gesture)
+{
+  if (gtk_gesture_single_get_current_button (GTK_GESTURE_SINGLE (gesture)) != GDK_BUTTON_PRIMARY)
+    return;
+
+  self->pressing  = TRUE;
+  self->pressed_x = x;
+  self->pressed_y = y;
+  ensure_viewport (self, self->model, FALSE);
+}
+
+static void
+click_released (BzCarousel      *self,
+                gint             n_press,
+                gdouble          x,
+                gdouble          y,
+                GtkGestureClick *gesture)
+{
+  if (gtk_gesture_single_get_current_button (GTK_GESTURE_SINGLE (gesture)) != GDK_BUTTON_PRIMARY)
+    return;
+
+  gtk_gesture_set_state (GTK_GESTURE (gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+
+  self->pressing = FALSE;
+  cancel_drag (self);
+}
+
+static void
+click_stopped (BzCarousel      *self,
+               GtkGestureClick *gesture)
+{
+}
+
+static void
+click_unpaired_release (BzCarousel       *self,
+                        gdouble           x,
+                        gdouble           y,
+                        guint             button,
+                        GdkEventSequence *sequence,
+                        GtkGestureClick  *gesture)
+{
+  if (button != GDK_BUTTON_PRIMARY)
+    return;
+
+  self->pressing = FALSE;
+  cancel_drag (self);
+}
+
+static void
+cancel_drag (BzCarousel *self)
+{
+  double width = 0.0;
+
+  if (self->model == NULL)
+    return;
+
+  width = gtk_widget_get_width (GTK_WIDGET (self));
+  for (guint i = 0; i < self->widgets->len; i++)
+    {
+      CarouselWidgetData *child = NULL;
+
+      child = g_ptr_array_index (self->widgets, i);
+
+      if (child->rect.origin.x <= width / 2.0 &&
+          child->rect.origin.x + child->rect.size.width > width / 2.0)
+        {
+          gtk_single_selection_set_selected (self->model, i);
+          break;
+        }
+    }
 }
 
 /* End of bz-carousel.c */
