@@ -25,6 +25,8 @@
 #include "bz-marshalers.h"
 #include "bz-util.h"
 
+#define RAISE_FACTOR 0.05
+
 struct _BzCarousel
 {
   GtkWidget parent_instance;
@@ -687,7 +689,7 @@ move_to_idx (BzCarousel *self,
       if (child->raised)
         child_height = height;
       else
-        child_height = round ((double) height * 0.9);
+        child_height = round ((double) height * (1.0 - RAISE_FACTOR));
 
       gtk_widget_measure (
           child->widget,
@@ -724,8 +726,8 @@ move_to_idx (BzCarousel *self,
         }
       else
         {
-          child_height = round ((double) height * 0.9);
-          child_y      = round ((double) height * 0.05);
+          child_height = round ((double) height * (1.0 - RAISE_FACTOR));
+          child_y      = round ((double) height * (0.5 * RAISE_FACTOR));
         }
 
       gtk_widget_measure (
