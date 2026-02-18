@@ -565,47 +565,31 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
         }
       else if (FLATPAK_IS_INSTALLED_REF (ref))
         {
-          const char *icon_name = flatpak_ref_get_name (ref);
-          const int   sizes[]   = { 512, 256, 128, 64, 48 };
+          BzStateInfo      *state     = NULL;
+          const char       *icon_name = NULL;
+          GtkIconTheme     *theme     = NULL;
+          GtkIconPaintable *paintable = NULL;
 
-          for (int i = 0; i < G_N_ELEMENTS (sizes); i++)
+          state     = bz_state_info_get_default ();
+          icon_name = flatpak_ref_get_name (ref);
+
+          theme = user
+              ? bz_state_info_get_user_icon_theme (state)
+              : bz_state_info_get_system_icon_theme (state);
+
+          if (theme != NULL)
             {
-              g_autofree char *size      = NULL;
-              g_autofree char *basename  = NULL;
-              g_autofree char *icon_path = NULL;
+              paintable = gtk_icon_theme_lookup_icon (
+                  theme,
+                  icon_name,
+                  NULL,
+                  128,
+                  1,
+                  GTK_TEXT_DIR_NONE,
+                  0);
 
-              size     = g_strdup_printf ("%dx%d", sizes[i], sizes[i]);
-              basename = g_strdup_printf ("%s.png", icon_name);
-              if (user)
-                icon_path = g_build_filename (
-                    g_get_home_dir (),
-                    ".local/share/flatpak/exports/share/icons/hicolor",
-                    size,
-                    "apps",
-                    basename,
-                    NULL);
-              else
-                icon_path = g_build_filename (
-                    "/var/lib/flatpak/exports/share/icons/hicolor",
-                    size,
-                    "apps",
-                    basename,
-                    NULL);
-
-              if (g_file_test (icon_path, G_FILE_TEST_EXISTS))
-                {
-                  g_autoptr (GFile) icon_file = NULL;
-                  GdkTexture *texture         = NULL;
-
-                  icon_file = g_file_new_for_path (icon_path);
-                  texture   = gdk_texture_new_from_file (icon_file, NULL);
-
-                  if (texture != NULL)
-                    {
-                      icon_paintable = (GdkPaintable *) g_steal_pointer (&texture);
-                      break;
-                    }
-                }
+              if (paintable != NULL)
+                icon_paintable = (GdkPaintable *) g_steal_pointer (&paintable);
             }
         }
     }
@@ -626,7 +610,7 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
       if (!g_str_has_suffix (title, self->flatpak_version)) // GNOME runtimes have the flatpak version at the end whilst others don't.
         {
           g_autofree char *original_title = g_strdup (title);
-          title = g_strdup_printf ("%s %s", original_title, self->flatpak_version);
+          title                           = g_strdup_printf ("%s %s", original_title, self->flatpak_version);
         }
     }
 

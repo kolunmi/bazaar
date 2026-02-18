@@ -2595,6 +2595,23 @@ init_service_struct (BzApplication *self,
   bz_state_info_set_busy (self->state, TRUE);
   bz_state_info_set_donation_prompt_dismissed (self->state, TRUE);
 
+  {
+    GtkIconTheme    *user_theme        = NULL;
+    GtkIconTheme    *system_theme      = NULL;
+    g_autofree char *user_export_dir   = NULL;
+
+    user_theme     = gtk_icon_theme_new ();
+    user_export_dir = g_build_filename (g_get_home_dir (), ".local/share/flatpak/exports/share/icons", NULL);
+    gtk_icon_theme_add_search_path (user_theme, user_export_dir);
+    bz_state_info_set_user_icon_theme (self->state, user_theme);
+    g_object_unref (user_theme);
+
+    system_theme = gtk_icon_theme_new ();
+    gtk_icon_theme_add_search_path (system_theme, "/var/lib/flatpak/exports/share/icons");
+    bz_state_info_set_system_icon_theme (self->state, system_theme);
+    g_object_unref (system_theme);
+  }
+
   g_signal_connect_swapped (
       self->state,
       "notify::disable-blocklists",

@@ -2765,7 +2765,6 @@ maybe_save_paintable (BzEntryPrivate  *priv,
 
   if (!BZ_IS_ASYNC_TEXTURE (paintable))
     {
-      g_warning ("Paintable must be of type BzAsyncTexture to be serialized!");
       return FALSE;
     }
 
