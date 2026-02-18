@@ -723,23 +723,18 @@ move_to_idx (BzCarousel *self,
 
   for (guint i = 0; i <= idx; i++)
     {
-      CarouselWidgetData *child        = NULL;
-      int                 hminimum     = 0;
-      int                 hnatural     = 0;
-      int                 unused       = 0;
-      int                 child_width  = 0;
-      int                 child_height = 0;
+      CarouselWidgetData *child       = NULL;
+      int                 hminimum    = 0;
+      int                 hnatural    = 0;
+      int                 unused      = 0;
+      int                 child_width = 0;
 
       child = g_ptr_array_index (self->widgets, i);
-      if (child->raised)
-        child_height = height;
-      else
-        child_height = round ((double) height * (1.0 - RAISE_FACTOR));
 
       gtk_widget_measure (
           child->widget,
           GTK_ORIENTATION_HORIZONTAL,
-          child_height,
+          height,
           &hminimum,
           &hnatural,
           &unused,
@@ -758,34 +753,51 @@ move_to_idx (BzCarousel *self,
       int                 hminimum     = 0;
       int                 hnatural     = 0;
       int                 unused       = 0;
+      int                 rect_width   = 0;
       int                 child_width  = 0;
       int                 child_height = 0;
+      int                 child_x      = 0;
       int                 child_y      = 0;
       graphene_rect_t     target       = { 0 };
 
       child = g_ptr_array_index (self->widgets, i);
+
+      gtk_widget_measure (
+          child->widget,
+          GTK_ORIENTATION_HORIZONTAL,
+          height,
+          &hminimum,
+          &hnatural,
+          &unused,
+          &unused);
+      rect_width = CLAMP (hnatural, hminimum, width);
+
       if (child->raised)
         {
+          child_width  = rect_width;
           child_height = height;
+          child_x      = offset;
           child_y      = 0;
         }
       else
         {
           child_height = round ((double) height * (1.0 - RAISE_FACTOR));
-          child_y      = round ((double) height * (0.5 * RAISE_FACTOR));
+
+          gtk_widget_measure (
+              child->widget,
+              GTK_ORIENTATION_HORIZONTAL,
+              child_height,
+              &hminimum,
+              &hnatural,
+              &unused,
+              &unused);
+          child_width = CLAMP (hnatural, hminimum, width);
+
+          child_x = offset + round ((double) (rect_width - child_width) * 0.5);
+          child_y = round ((double) height * (0.5 * RAISE_FACTOR));
         }
 
-      gtk_widget_measure (
-          child->widget,
-          GTK_ORIENTATION_HORIZONTAL,
-          child_height,
-          &hminimum,
-          &hnatural,
-          &unused,
-          &unused);
-      child_width = CLAMP (hnatural, hminimum, width);
-
-      target = GRAPHENE_RECT_INIT (offset, child_y, child_width, child_height);
+      target = GRAPHENE_RECT_INIT (child_x, child_y, child_width, child_height);
       if (graphene_rect_equal (&target, &child->target))
         child->target = target;
       else if (damping_ratio < 0.0 ||
@@ -845,7 +857,7 @@ move_to_idx (BzCarousel *self,
           child->target = target;
         }
 
-      offset += child_width;
+      offset += rect_width;
     }
 
   gtk_widget_queue_allocate (GTK_WIDGET (self));
