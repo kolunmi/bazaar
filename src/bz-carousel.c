@@ -691,7 +691,15 @@ items_changed (BzCarousel *self,
       object = g_list_model_get_item (model, position + i);
       child  = adw_bin_new ();
 
-      gtk_widget_set_parent (child, GTK_WIDGET (self));
+      if (position + i == 0)
+        gtk_widget_set_parent (child, GTK_WIDGET (self));
+      else
+        {
+          CarouselWidgetData *prev = NULL;
+
+          prev = g_ptr_array_index (self->widgets, position + i - 1);
+          gtk_widget_insert_after (child, GTK_WIDGET (self), prev->widget);
+        }
       g_signal_emit (self, signals[SIGNAL_BIND_WIDGET], 0, ADW_BIN (child), object);
 
       data         = carousel_widget_data_new ();
