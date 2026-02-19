@@ -713,7 +713,7 @@ model_selected_changed (BzCarousel         *self,
 
   idx = gtk_single_selection_get_selected (selection);
   if (idx != G_MAXUINT)
-    move_to_idx (self, idx, 1.2);
+    move_to_idx (self, idx, 1.0);
 
   gtk_widget_queue_allocate (GTK_WIDGET (self));
 }
