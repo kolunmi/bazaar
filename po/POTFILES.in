@@ -73,7 +73,6 @@ src/bz-inspector.c
 src/bz-installed-tile.blp
 src/bz-installed-tile.c
 src/bz-io.c
-src/bz-lazy-async-texture-model.c
 src/bz-library-page.blp
 src/bz-library-page.c
 src/bz-license-dialog.blp
