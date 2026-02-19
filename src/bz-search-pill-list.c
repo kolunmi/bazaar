@@ -58,8 +58,8 @@ bz_search_pill_list_class_init (BzSearchPillListClass *klass)
 static void
 bz_search_pill_list_init (BzSearchPillList *self)
 {
-  GtkLayoutManager *layout  = NULL;
-  const char       *pills[] = {
+  GtkLayoutManager  *layout  = NULL;
+  static const char *pills[] = {
     /* Translators: Search suggestion: please use keywords that give good results */
     N_ ("Browser"),
     /* Translators: Search suggestion: please use keywords that give good results */
@@ -107,6 +107,8 @@ bz_search_pill_list_init (BzSearchPillList *self)
       gtk_widget_add_css_class (button, "search-pill");
       g_signal_connect_swapped (button, "clicked",
                                 G_CALLBACK (pill_button_clicked_cb), self);
+      g_object_set_data_full (G_OBJECT (button), "search-token",
+                              g_strdup (pills[i]), g_free);
       gtk_box_append (GTK_BOX (self), button);
     }
 }
@@ -121,11 +123,8 @@ static void
 pill_button_clicked_cb (BzSearchPillList *self,
                         GtkButton        *button)
 {
-  const char *label = NULL;
+  const char *search_token = NULL;
 
-  g_return_if_fail (BZ_IS_SEARCH_PILL_LIST (self));
-  g_return_if_fail (GTK_IS_BUTTON (button));
-
-  label = gtk_button_get_label (button);
-  g_signal_emit (self, signals[SIGNAL_ACTIVATED], 0, label);
+  search_token = g_object_get_data (G_OBJECT (button), "search-token");
+  g_signal_emit (self, signals[SIGNAL_ACTIVATED], 0, search_token);
 }
