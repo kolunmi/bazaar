@@ -328,7 +328,7 @@ show_dialog_fiber (ShowDialogData *data)
       store = dex_await_object (bz_entry_group_dup_all_into_store (data->group), &local_error);
       if (store == NULL)
         {
-          bz_show_error_for_widget (data->parent, _("Failed to load transaction dialog"), local_error->message);
+          bz_show_error_for_widget (data->parent, _ ("Failed to load transaction dialog"), local_error->message);
           return dex_future_new_for_error (g_steal_pointer (&local_error));
         }
 
@@ -613,7 +613,7 @@ DexFuture *
 bz_bulk_install_dialog_show (GtkWidget  *parent,
                              GListModel *groups)
 {
-  g_autoptr (BulkInstallDialogData) data;
+  g_autoptr (BulkInstallDialogData) data = NULL;
 
   g_return_val_if_fail (GTK_IS_WIDGET (parent), NULL);
   g_return_val_if_fail (G_IS_LIST_MODEL (groups), NULL);
