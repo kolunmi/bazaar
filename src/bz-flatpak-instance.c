@@ -375,7 +375,7 @@ bz_flatpak_instance_init (BzFlatpakInstance *self)
   g_mutex_init (&self->notif_mutex);
 
   self->ongoing_cancellables = g_hash_table_new_full (
-      g_direct_hash, g_direct_equal, NULL, (GDestroyNotify) g_ptr_array_unref);
+      g_direct_hash, g_direct_equal, g_object_unref, (GDestroyNotify) g_ptr_array_unref);
   g_mutex_init (&self->transactions_mutex);
 }
 
@@ -576,6 +576,7 @@ bz_flatpak_instance_cancel_task_for_entry (BzBackend *backend,
       cancellable = g_ptr_array_index (cancellables, i);
       g_cancellable_cancel (cancellable);
     }
+
   return TRUE;
 }
 
@@ -2018,21 +2019,21 @@ transaction_fiber (TransactionData *data)
 
   g_mutex_lock (&self->transactions_mutex);
 
-#define REGISTER_CANCELLABLES(entry)                                            \
-  G_STMT_START                                                                  \
-  {                                                                             \
-    GPtrArray *cancellables = NULL;                                             \
-                                                                                \
-    cancellables = g_hash_table_lookup (self->ongoing_cancellables, entry);     \
-    if (cancellables != NULL)                                                   \
-      g_ptr_array_add (cancellables, g_object_ref (cancellable));               \
-    else                                                                        \
-      {                                                                         \
-        cancellables = g_ptr_array_new_with_free_func (g_object_unref);         \
-        g_ptr_array_add (cancellables, g_object_ref (cancellable));             \
-        g_hash_table_replace (self->ongoing_cancellables, entry, cancellables); \
-      }                                                                         \
-  }                                                                             \
+#define REGISTER_CANCELLABLES(entry)                                                           \
+  G_STMT_START                                                                                 \
+  {                                                                                            \
+    GPtrArray *cancellables = NULL;                                                            \
+                                                                                               \
+    cancellables = g_hash_table_lookup (self->ongoing_cancellables, entry);                    \
+    if (cancellables != NULL)                                                                  \
+      g_ptr_array_add (cancellables, g_object_ref (cancellable));                              \
+    else                                                                                       \
+      {                                                                                        \
+        cancellables = g_ptr_array_new_with_free_func (g_object_unref);                        \
+        g_ptr_array_add (cancellables, g_object_ref (cancellable));                            \
+        g_hash_table_replace (self->ongoing_cancellables, g_object_ref (entry), cancellables); \
+      }                                                                                        \
+  }                                                                                            \
   G_STMT_END
 
   if (installations != NULL)
