@@ -452,6 +452,7 @@ bz_carousel_init (BzCarousel *self)
   gtk_widget_set_overflow (GTK_WIDGET (self), GTK_OVERFLOW_HIDDEN);
 
   self->motion = gtk_event_controller_motion_new ();
+  gtk_event_controller_set_propagation_phase (GTK_EVENT_CONTROLLER (self->motion), GTK_PHASE_CAPTURE);
   g_signal_connect_swapped (self->motion, "enter", G_CALLBACK (motion_enter), self);
   g_signal_connect_swapped (self->motion, "motion", G_CALLBACK (motion_event), self);
   g_signal_connect_swapped (self->motion, "leave", G_CALLBACK (motion_leave), self);
@@ -815,8 +816,22 @@ move_to_idx (BzCarousel *self,
       else if (damping_ratio < 0.0 ||
                graphene_rect_equal (graphene_rect_zero (), &child->rect))
         {
+          char buf[64] = { 0 };
+
           child->rect   = target;
           child->target = target;
+
+          g_snprintf (buf, sizeof (buf), "x%p", child);
+          bz_animation_cancel (self->animation, buf);
+
+          g_snprintf (buf, sizeof (buf), "y%p", child);
+          bz_animation_cancel (self->animation, buf);
+
+          g_snprintf (buf, sizeof (buf), "w%p", child);
+          bz_animation_cancel (self->animation, buf);
+
+          g_snprintf (buf, sizeof (buf), "h%p", child);
+          bz_animation_cancel (self->animation, buf);
         }
       else
         {
@@ -936,7 +951,6 @@ motion_enter (BzCarousel               *self,
   self->motion_x = x;
   self->motion_y = y;
   update_motion (self, x, y);
-  gtk_widget_queue_draw (GTK_WIDGET (self));
 }
 
 static void
@@ -948,7 +962,6 @@ motion_event (BzCarousel               *self,
   self->motion_x = x;
   self->motion_y = y;
   update_motion (self, x, y);
-  gtk_widget_queue_draw (GTK_WIDGET (self));
 }
 
 static void
@@ -958,7 +971,6 @@ motion_leave (BzCarousel               *self,
   self->motion_x = -1.0;
   self->motion_y = -1.0;
   update_motion (self, -1.0, -1.0);
-  gtk_widget_queue_draw (GTK_WIDGET (self));
 }
 
 static void
@@ -1051,9 +1063,15 @@ click_released (BzCarousel      *self,
   if (gtk_gesture_single_get_current_button (GTK_GESTURE_SINGLE (gesture)) != GDK_BUTTON_PRIMARY)
     return;
 
-  gtk_gesture_set_state (GTK_GESTURE (gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+  if (x < self->pressed_x - 3 ||
+      x > self->pressed_x + 3 ||
+      y < self->pressed_y - 3 ||
+      y > self->pressed_y + 3)
+    gtk_gesture_set_state (GTK_GESTURE (gesture), GTK_EVENT_SEQUENCE_CLAIMED);
 
-  self->pressing = FALSE;
+  self->pressing  = FALSE;
+  self->pressed_x = -1.0;
+  self->pressed_y = -1.0;
   cancel_drag (self);
 }
 
@@ -1074,17 +1092,23 @@ click_unpaired_release (BzCarousel       *self,
   if (button != GDK_BUTTON_PRIMARY)
     return;
 
-  self->pressing = FALSE;
+  self->pressing  = FALSE;
+  self->pressed_x = 0.0;
+  self->pressed_y = 0.0;
   cancel_drag (self);
 }
 
 static void
 cancel_drag (BzCarousel *self)
 {
-  double width = 0.0;
+  guint    selected      = 0;
+  gboolean selection_set = FALSE;
+  double   width         = 0.0;
 
   if (self->model == NULL)
     return;
+
+  selected = gtk_single_selection_get_selected (self->model);
 
   width = gtk_widget_get_width (GTK_WIDGET (self));
   for (guint i = 0; i < self->widgets->len; i++)
@@ -1096,10 +1120,17 @@ cancel_drag (BzCarousel *self)
       if (child->rect.origin.x <= width / 2.0 &&
           child->rect.origin.x + child->rect.size.width > width / 2.0)
         {
-          gtk_single_selection_set_selected (self->model, i);
+          if (i != selected)
+            {
+              gtk_single_selection_set_selected (self->model, i);
+              selection_set = TRUE;
+            }
           break;
         }
     }
+
+  if (!selection_set)
+    ensure_viewport (self, self->model, TRUE);
 }
 
 /* End of bz-carousel.c */

@@ -354,7 +354,9 @@ bz_animation_cancel (BzAnimation *self,
 
   g_return_if_fail (BZ_IS_ANIMATION (self));
   g_return_if_fail (key != NULL);
-  g_return_if_fail (g_hash_table_contains (self->data, key));
+
+  if (!g_hash_table_contains (self->data, key))
+    return;
 
   widget = g_weak_ref_get (&self->wr);
   if (widget != NULL)
