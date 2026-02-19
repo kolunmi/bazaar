@@ -7,19 +7,9 @@
     color: black;
 }
 
-@keyframes donations-gradient-frames {
-    0% { background-image: linear-gradient(to top left, #1f2d8f, #159eff); }
-    100% { background-image: linear-gradient(to top right, #1f2d8f, #159eff); }
-}
-
 .bz-donations-dialog {
+    background: linear-gradient(to bottom left, #1f2d8f, #159eff);
     color: white;
-
-    animation-name: donations-gradient-frames;
-    animation-duration: 4s;
-    animation-direction: alternate;
-    animation-iteration-count: infinite;
-    animation-timing-function: ease-in-out;
 }
 
 .bz-donations-banner {
