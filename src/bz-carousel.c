@@ -25,7 +25,8 @@
 #include "bz-marshalers.h"
 #include "bz-util.h"
 
-#define RAISE_FACTOR 0.025
+#define RAISE_FACTOR      0.025
+#define HSCROLL_THRESHOLD 5
 
 struct _BzCarousel
 {
@@ -35,6 +36,7 @@ struct _BzCarousel
   double              motion_x;
   double              motion_y;
   GtkEventController *scroll;
+  int                 hscroll;
   GtkGesture         *drag;
   gboolean            dragging;
   BzAnimation        *animation;
@@ -1017,15 +1019,25 @@ scroll (BzCarousel               *self,
   guint new_selected = 0;
 
   if (self->model == NULL)
-    return FALSE;
+    {
+      self->hscroll = 0;
+      return FALSE;
+    }
 
   n_items = g_list_model_get_n_items (G_LIST_MODEL (self->model));
   if (n_items == 0)
-    return FALSE;
+    {
+      self->hscroll = 0;
+      return FALSE;
+    }
+
+  self->hscroll += dx;
+  if (ABS (self->hscroll) < HSCROLL_THRESHOLD)
+    return TRUE;
 
   selected = gtk_single_selection_get_selected (self->model);
 
-  if (dx > 0)
+  if (self->hscroll > 0)
     new_selected = MIN (selected + 1, n_items - 1);
   else
     {
@@ -1036,6 +1048,7 @@ scroll (BzCarousel               *self,
     }
   gtk_single_selection_set_selected (self->model, new_selected);
 
+  self->hscroll = 0;
   return TRUE;
 }
 
