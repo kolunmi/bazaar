@@ -60,31 +60,70 @@ bz_search_pill_list_init (BzSearchPillList *self)
 {
   GtkLayoutManager  *layout  = NULL;
   static const char *pills[] = {
-    /* Translators: Search suggestion: please use keywords that give good results */
+    /* Translators: Search suggestion: the english text will be used for the
+       search regardless of what you put here, so don't worry about the string
+       yielding poor search results. Focus on correctness and friendliness,
+       etc */
     N_ ("Browser"),
-    /* Translators: Search suggestion: please use keywords that give good results */
+    /* Translators: Search suggestion: the english text will be used for the
+       search regardless of what you put here, so don't worry about the string
+       yielding poor search results. Focus on correctness and friendliness,
+       etc */
     N_ ("Video"),
-    /* Translators: Search suggestion: please use keywords that give good results */
+    /* Translators: Search suggestion: the english text will be used for the
+       search regardless of what you put here, so don't worry about the string
+       yielding poor search results. Focus on correctness and friendliness,
+       etc */
     N_ ("Music"),
-    /* Translators: Search suggestion: please use keywords that give good results */
+    /* Translators: Search suggestion: the english text will be used for the
+       search regardless of what you put here, so don't worry about the string
+       yielding poor search results. Focus on correctness and friendliness,
+       etc */
     N_ ("Office"),
-    /* Translators: Search suggestion: please use keywords that give good results */
+    /* Translators: Search suggestion: the english text will be used for the
+       search regardless of what you put here, so don't worry about the string
+       yielding poor search results. Focus on correctness and friendliness,
+       etc */
     N_ ("PDF"),
-    /* Translators: Search suggestion: please use keywords that give good results */
+    /* Translators: Search suggestion: the english text will be used for the
+       search regardless of what you put here, so don't worry about the string
+       yielding poor search results. Focus on correctness and friendliness,
+       etc */
     N_ ("Calendar"),
-    /* Translators: Search suggestion: please use keywords that give good results */
+    /* Translators: Search suggestion: the english text will be used for the
+       search regardless of what you put here, so don't worry about the string
+       yielding poor search results. Focus on correctness and friendliness,
+       etc */
     N_ ("Messaging"),
-    /* Translators: Search suggestion: please use keywords that give good results */
+    /* Translators: Search suggestion: the english text will be used for the
+       search regardless of what you put here, so don't worry about the string
+       yielding poor search results. Focus on correctness and friendliness,
+       etc */
     N_ ("Steam"),
-    /* Translators: Search suggestion: please use keywords that give good results */
+    /* Translators: Search suggestion: the english text will be used for the
+       search regardless of what you put here, so don't worry about the string
+       yielding poor search results. Focus on correctness and friendliness,
+       etc */
     N_ ("Paint"),
-    /* Translators: Search suggestion: please use keywords that give good results */
+    /* Translators: Search suggestion: the english text will be used for the
+       search regardless of what you put here, so don't worry about the string
+       yielding poor search results. Focus on correctness and friendliness,
+       etc */
     N_ ("VPN"),
-    /* Translators: Search suggestion: please use keywords that give good results */
+    /* Translators: Search suggestion: the english text will be used for the
+       search regardless of what you put here, so don't worry about the string
+       yielding poor search results. Focus on correctness and friendliness,
+       etc */
     N_ ("Torrent"),
-    /* Translators: Search suggestion: please use keywords that give good results */
+    /* Translators: Search suggestion: the english text will be used for the
+       search regardless of what you put here, so don't worry about the string
+       yielding poor search results. Focus on correctness and friendliness,
+       etc */
     N_ ("Minecraft"),
-    /* Translators: Search suggestion: please use keywords that give good results */
+    /* Translators: Search suggestion: the english text will be used for the
+       search regardless of what you put here, so don't worry about the string
+       yielding poor search results. Focus on correctness and friendliness,
+       etc */
     N_ ("Emulator"),
 
     /* This array MUST be NULL terminated */
