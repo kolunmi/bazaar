@@ -968,6 +968,8 @@ static void
 motion_leave (BzCarousel               *self,
               GtkEventControllerMotion *controller)
 {
+  if (self->pressing)
+    return;
   self->motion_x = -1.0;
   self->motion_y = -1.0;
   update_motion (self, -1.0, -1.0);
@@ -1093,17 +1095,18 @@ click_unpaired_release (BzCarousel       *self,
     return;
 
   self->pressing  = FALSE;
-  self->pressed_x = 0.0;
-  self->pressed_y = 0.0;
+  self->pressed_x = -1.0;
+  self->pressed_y = -1.0;
   cancel_drag (self);
 }
 
 static void
 cancel_drag (BzCarousel *self)
 {
-  guint    selected      = 0;
-  gboolean selection_set = FALSE;
-  double   width         = 0.0;
+  guint  selected     = 0;
+  double width        = 0.0;
+  guint  new_selected = G_MAXUINT;
+  int    min_distance = G_MAXINT;
 
   if (self->model == NULL)
     return;
@@ -1113,24 +1116,36 @@ cancel_drag (BzCarousel *self)
   width = gtk_widget_get_width (GTK_WIDGET (self));
   for (guint i = 0; i < self->widgets->len; i++)
     {
-      CarouselWidgetData *child = NULL;
+      CarouselWidgetData *child                = NULL;
+      int                 left_distance        = 0;
+      int                 right_distance       = 0;
+      int                 distance_from_center = 0;
 
       child = g_ptr_array_index (self->widgets, i);
 
-      if (child->rect.origin.x <= width / 2.0 &&
-          child->rect.origin.x + child->rect.size.width > width / 2.0)
+      if (child->rect.origin.x > width / 2.0)
+        left_distance = child->rect.origin.x - width / 2.0;
+      else
+        left_distance = width / 2.0 - child->rect.origin.x;
+
+      if ((child->rect.origin.x + child->rect.size.width) > width / 2.0)
+        right_distance = (child->rect.origin.x + child->rect.size.width) - width / 2.0;
+      else
+        right_distance = width / 2.0 - (child->rect.origin.x + child->rect.size.width);
+
+      distance_from_center = MIN (left_distance, right_distance);
+      if (distance_from_center < min_distance)
         {
-          if (i != selected)
-            {
-              gtk_single_selection_set_selected (self->model, i);
-              selection_set = TRUE;
-            }
-          break;
+          new_selected = i;
+          min_distance = distance_from_center;
         }
     }
 
-  if (!selection_set)
+  if (new_selected == G_MAXUINT ||
+      new_selected == selected)
     ensure_viewport (self, self->model, TRUE);
+  else
+    gtk_single_selection_set_selected (self->model, new_selected);
 }
 
 /* End of bz-carousel.c */
