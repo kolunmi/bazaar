@@ -25,7 +25,7 @@
 #include "bz-marshalers.h"
 #include "bz-util.h"
 
-#define RAISE_FACTOR 0.02
+#define RAISE_FACTOR 0.025
 
 struct _BzCarousel
 {
