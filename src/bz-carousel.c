@@ -1074,10 +1074,15 @@ scroll (BzCarousel               *self,
   device = gtk_event_controller_get_current_event_device (GTK_EVENT_CONTROLLER (controller));
   source = gdk_device_get_source (device);
 
+  selected = gtk_single_selection_get_selected (self->model);
+
   if (source == GDK_SOURCE_TOUCHPAD || source == GDK_SOURCE_TRACKPOINT)
     {
       if (!self->pressing)
         {
+          if (dx < 0 && (selected == 0 || selected == G_MAXUINT))
+            return FALSE;
+
           self->pressing           = TRUE;
           self->scrolling_touchpad = TRUE;
           self->pressed_x          = self->motion_x;
@@ -1088,8 +1093,6 @@ scroll (BzCarousel               *self,
       ensure_viewport (self, self->model, FALSE);
       return TRUE;
     }
-
-  selected = gtk_single_selection_get_selected (self->model);
 
   if (dx > 0)
     new_selected = MIN (selected + 1, n_items - 1);
