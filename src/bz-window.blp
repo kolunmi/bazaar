@@ -132,7 +132,7 @@ template $BzWindow: Adw.ApplicationWindow {
                         }
 
                         Label {
-                          label: _("Refreshing Store Content");
+                          label: _("Refreshing...");
                           wrap: true;
                           justify: center;
                           margin-bottom: 24;
@@ -270,7 +270,7 @@ template $BzWindow: Adw.ApplicationWindow {
                               Label {
                                 hexpand: true;
                                 visible: bind $invert_boolean(status_popover_label.visible) as <bool>;
-                                label: _("No background tasks!");
+                                label: _("All your apps are up to date!");
                               }
                             };
                           };

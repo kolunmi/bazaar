@@ -1531,12 +1531,12 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
         {
           g_autofree char *label = NULL;
 
-          label = g_strdup_printf (_ ("Receiving %d entries..."), self->n_notifications_incoming);
+          label = g_strdup_printf (_ ("Receiving %d apps..."), self->n_notifications_incoming);
           bz_state_info_set_background_task_label (self->state, label);
         }
       else
         {
-          bz_state_info_set_background_task_label (self->state, _ ("Checking for updates"));
+          bz_state_info_set_background_task_label (self->state, _ ("Checking for updates..."));
           fiber_check_for_updates (self);
           finish_with_background_task_label (self);
         }
