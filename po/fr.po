@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-02-19 09:20+0100\n"
-"PO-Revision-Date: 2026-02-19 10:15+0100\n"
+"PO-Revision-Date: 2026-02-19 11:32+0100\n"
 "Last-Translator: Mimolet <theMimolet@proton.me>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -965,7 +965,7 @@ msgstr "Quoi de neuf en %s ?"
 #. Translators: this is a release date label, like "Released February 9, 2026"
 #: src/bz-donations-dialog.c:243
 msgid "Released %B %-e, %Y"
-msgstr "Publié le %m/%d/%y"
+msgstr "Publié le %e %B %Y"
 
 #: src/bz-entry-group-util.c:73
 msgid "Choose an Installation"
