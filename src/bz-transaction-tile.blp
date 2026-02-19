@@ -276,6 +276,20 @@ template $BzTransactionTile: $BzListTile {
             ]
           }
 
+          Button {
+            visible: bind $is_ongoing(template.tracker as <$BzTransactionEntryTracker>.status as <$BzTransactionEntryStatus>) as <bool>;
+
+            icon-name: "media-playback-stop-symbolic";
+            has-tooltip: true;
+            valign: center;
+            tooltip-text: _("Cancel Transaction");
+            clicked => $cancel_cb(template);
+
+            styles [
+              "error",
+            ]
+          }
+
           ToggleButton toggle {
             sensitive: bind $invert_boolean($is_empty(template.tracker as <$BzTransactionEntryTracker>.finished-ops) as <bool>) as <bool>;
 

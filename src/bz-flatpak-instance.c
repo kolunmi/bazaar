@@ -60,6 +60,10 @@ struct _BzFlatpakInstance
   GMutex     notif_mutex;
   GPtrArray *notif_channels;
   DexFuture *notif_send;
+
+  GMutex transactions_mutex;
+  /* BzEntry* -> GPtrArray* -> GCancellable* */
+  GHashTable *ongoing_cancellables;
 };
 
 static void
@@ -344,6 +348,9 @@ bz_flatpak_instance_dispose (GObject *object)
   dex_clear (&self->notif_send);
   g_mutex_clear (&self->notif_mutex);
 
+  g_clear_pointer (&self->ongoing_cancellables, g_hash_table_unref);
+  g_mutex_clear (&self->transactions_mutex);
+
   G_OBJECT_CLASS (bz_flatpak_instance_parent_class)->dispose (object);
 }
 
@@ -361,9 +368,15 @@ bz_flatpak_instance_init (BzFlatpakInstance *self)
   self->scheduler   = dex_thread_pool_scheduler_new ();
   self->system_mute = 0;
   self->user_mute   = 0;
+
   g_mutex_init (&self->mute_mutex);
+
   self->notif_channels = g_ptr_array_new_with_free_func (dex_unref);
   g_mutex_init (&self->notif_mutex);
+
+  self->ongoing_cancellables = g_hash_table_new_full (
+      g_direct_hash, g_direct_equal, NULL, (GDestroyNotify) g_ptr_array_unref);
+  g_mutex_init (&self->transactions_mutex);
 }
 
 static DexChannel *
@@ -542,6 +555,30 @@ bz_flatpak_instance_schedule_transaction (BzBackend    *backend,
       transaction_data_unref);
 }
 
+static gboolean
+bz_flatpak_instance_cancel_task_for_entry (BzBackend *backend,
+                                           BzEntry   *entry)
+{
+  BzFlatpakInstance *self         = BZ_FLATPAK_INSTANCE (backend);
+  g_autoptr (GMutexLocker) locker = NULL;
+  GPtrArray *cancellables         = NULL;
+
+  locker = g_mutex_locker_new (&self->transactions_mutex);
+
+  cancellables = g_hash_table_lookup (self->ongoing_cancellables, entry);
+  if (cancellables == NULL)
+    return FALSE;
+
+  for (guint i = 0; i < cancellables->len; i++)
+    {
+      GCancellable *cancellable = NULL;
+
+      cancellable = g_ptr_array_index (cancellables, i);
+      g_cancellable_cancel (cancellable);
+    }
+  return TRUE;
+}
+
 static void
 backend_iface_init (BzBackendInterface *iface)
 {
@@ -552,6 +589,7 @@ backend_iface_init (BzBackendInterface *iface)
   iface->retrieve_update_ids         = bz_flatpak_instance_retrieve_update_ids;
   iface->list_repositories           = bz_flatpak_instance_list_repositories;
   iface->schedule_transaction        = bz_flatpak_instance_schedule_transaction;
+  iface->cancel_task_for_entry       = bz_flatpak_instance_cancel_task_for_entry;
 }
 
 FlatpakInstallation *
@@ -1978,6 +2016,59 @@ transaction_fiber (TransactionData *data)
         }
     }
 
+  g_mutex_lock (&self->transactions_mutex);
+
+#define REGISTER_CANCELLABLES(entry)                                            \
+  G_STMT_START                                                                  \
+  {                                                                             \
+    GPtrArray *cancellables = NULL;                                             \
+                                                                                \
+    cancellables = g_hash_table_lookup (self->ongoing_cancellables, entry);     \
+    if (cancellables != NULL)                                                   \
+      g_ptr_array_add (cancellables, g_object_ref (cancellable));               \
+    else                                                                        \
+      {                                                                         \
+        cancellables = g_ptr_array_new_with_free_func (g_object_unref);         \
+        g_ptr_array_add (cancellables, g_object_ref (cancellable));             \
+        g_hash_table_replace (self->ongoing_cancellables, entry, cancellables); \
+      }                                                                         \
+  }                                                                             \
+  G_STMT_END
+
+  if (installations != NULL)
+    {
+      for (guint i = 0; i < installations->len; i++)
+        {
+          BzEntry *entry = NULL;
+
+          entry = g_ptr_array_index (installations, i);
+          REGISTER_CANCELLABLES (entry);
+        }
+    }
+  if (removals != NULL)
+    {
+      for (guint i = 0; i < removals->len; i++)
+        {
+          BzEntry *entry = NULL;
+
+          entry = g_ptr_array_index (removals, i);
+          REGISTER_CANCELLABLES (entry);
+        }
+    }
+  if (updates != NULL)
+    {
+      for (guint i = 0; i < updates->len; i++)
+        {
+          BzEntry *entry = NULL;
+
+          entry = g_ptr_array_index (updates, i);
+          REGISTER_CANCELLABLES (entry);
+        }
+    }
+
+#undef REGISTER_CANCELLABLES
+  g_mutex_unlock (&self->transactions_mutex);
+
   jobs = g_ptr_array_new_with_free_func (dex_unref);
   for (guint i = 0; i < transactions->len; i++)
     {
@@ -2004,6 +2095,58 @@ transaction_fiber (TransactionData *data)
                  (DexFuture *const *) jobs->pdata,
                  jobs->len),
              NULL);
+
+  g_mutex_lock (&self->transactions_mutex);
+
+#define UNREGISTER_CANCELLABLES(entry)                                      \
+  G_STMT_START                                                              \
+  {                                                                         \
+    GPtrArray *cancellables = NULL;                                         \
+                                                                            \
+    cancellables = g_hash_table_lookup (self->ongoing_cancellables, entry); \
+    if (cancellables != NULL)                                               \
+      {                                                                     \
+        g_ptr_array_remove (cancellables, cancellable);                     \
+        if (cancellables->len == 0)                                         \
+          g_hash_table_remove (self->ongoing_cancellables, entry);          \
+      }                                                                     \
+  }                                                                         \
+  G_STMT_END
+
+  if (installations != NULL)
+    {
+      for (guint i = 0; i < installations->len; i++)
+        {
+          BzEntry *entry = NULL;
+
+          entry = g_ptr_array_index (installations, i);
+          UNREGISTER_CANCELLABLES (entry);
+        }
+    }
+  if (removals != NULL)
+    {
+      for (guint i = 0; i < removals->len; i++)
+        {
+          BzEntry *entry = NULL;
+
+          entry = g_ptr_array_index (removals, i);
+          UNREGISTER_CANCELLABLES (entry);
+        }
+    }
+  if (updates != NULL)
+    {
+      for (guint i = 0; i < updates->len; i++)
+        {
+          BzEntry *entry = NULL;
+
+          entry = g_ptr_array_index (updates, i);
+          UNREGISTER_CANCELLABLES (entry);
+        }
+    }
+
+#undef UNREGISTER_CANCELLABLES
+  g_mutex_unlock (&self->transactions_mutex);
+
   if (data->send_futures->len > 0)
     dex_await (dex_future_allv (
                    (DexFuture *const *) data->send_futures->pdata,
