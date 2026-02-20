@@ -1531,7 +1531,7 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
         {
           g_autofree char *label = NULL;
 
-          label = g_strdup_printf (_ ("Receiving %d apps…"), self->n_notifications_incoming);
+          label = g_strdup_printf (_ ("Loading %d apps…"), self->n_notifications_incoming);
           bz_state_info_set_background_task_label (self->state, label);
         }
       else
@@ -3113,7 +3113,7 @@ finish_with_background_task_label (BzApplication *self)
     {
       g_autofree char *label = NULL;
 
-      label = g_strdup_printf (_ ("Receiving %d apps…"), self->n_notifications_incoming);
+      label = g_strdup_printf (_ ("Loading %d apps…"), self->n_notifications_incoming);
       bz_state_info_set_background_task_label (self->state, label);
     }
   else if (bz_state_info_get_syncing (self->state))
