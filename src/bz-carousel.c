@@ -170,9 +170,6 @@ drag_update (BzCarousel     *self,
              GtkGestureDrag *gesture);
 
 static void
-cancel_drag (BzCarousel *self);
-
-static void
 bz_carousel_dispose (GObject *object)
 {
   BzCarousel *self = BZ_CAROUSEL (object);
@@ -696,7 +693,7 @@ items_changed (BzCarousel *self,
       g_ptr_array_insert (self->widgets, position + i, data);
     }
 
-  gtk_widget_queue_allocate (GTK_WIDGET (self));
+  ensure_viewport (self, GTK_SINGLE_SELECTION (model), FALSE);
 }
 
 static void
@@ -1071,34 +1068,15 @@ drag_end (BzCarousel     *self,
           gdouble         offset_y,
           GtkGestureDrag *gesture)
 {
-  self->dragging = FALSE;
-  cancel_drag (self);
-
-  if (offset_x < -3 ||
-      offset_x > 3 ||
-      offset_y < -3 ||
-      offset_y > 3)
-    gtk_gesture_set_state (GTK_GESTURE (gesture), GTK_EVENT_SEQUENCE_CLAIMED);
-}
-
-static void
-drag_update (BzCarousel     *self,
-             gdouble         offset_x,
-             gdouble         offset_y,
-             GtkGestureDrag *gesture)
-{
-  ensure_viewport (self, self->model, FALSE);
-}
-
-static void
-cancel_drag (BzCarousel *self)
-{
   guint  selected     = 0;
   double width        = 0.0;
   guint  new_selected = G_MAXUINT;
   int    min_distance = G_MAXINT;
 
-  if (self->model == NULL)
+  self->dragging = FALSE;
+
+  if (self->model == NULL ||
+      self->widgets->len == 0)
     return;
 
   selected = gtk_single_selection_get_selected (self->model);
@@ -1131,11 +1109,37 @@ cancel_drag (BzCarousel *self)
         }
     }
 
+  if (new_selected == selected)
+    {
+      /* Ensure dragging is not too stiff; meaning if we drag the content at
+         least 15 pixels in either direction, it will automatically snap to the
+         next widget */
+      if (offset_x > 15 && selected > 0)
+        new_selected--;
+      else if (offset_x < -15 && selected < self->widgets->len - 1)
+        new_selected++;
+    }
+
   if (new_selected == G_MAXUINT ||
       new_selected == selected)
     ensure_viewport (self, self->model, TRUE);
   else
     gtk_single_selection_set_selected (self->model, new_selected);
+
+  if (offset_x < -3 ||
+      offset_x > 3 ||
+      offset_y < -3 ||
+      offset_y > 3)
+    gtk_gesture_set_state (GTK_GESTURE (gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+}
+
+static void
+drag_update (BzCarousel     *self,
+             gdouble         offset_x,
+             gdouble         offset_y,
+             GtkGestureDrag *gesture)
+{
+  ensure_viewport (self, self->model, FALSE);
 }
 
 /* End of bz-carousel.c */
