@@ -137,7 +137,7 @@ bz_flatpak_entry_get_property (GObject    *object,
       g_value_set_string (value, self->runtime_name);
       break;
     case PROP_RUNTIME_RESULT:
-      g_value_take_object (value, bz_flatpak_entry_get_runtime (self));
+      g_value_take_object (value, bz_flatpak_entry_dup_runtime_result (self));
       break;
     case PROP_ADDON_OF_REF:
       g_value_set_string (value, self->addon_extension_of_ref);
@@ -338,7 +338,7 @@ serializable_iface_init (BzSerializableInterface *iface)
 }
 
 BzResult *
-bz_flatpak_entry_get_runtime (BzFlatpakEntry *self)
+bz_flatpak_entry_dup_runtime_result (BzFlatpakEntry *self)
 {
   BzStateInfo             *state             = NULL;
   BzApplicationMapFactory *factory           = NULL;
@@ -574,8 +574,8 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
           icon_name = flatpak_ref_get_name (ref);
 
           theme = user
-              ? bz_state_info_get_user_icon_theme (state)
-              : bz_state_info_get_system_icon_theme (state);
+                      ? bz_state_info_get_user_icon_theme (state)
+                      : bz_state_info_get_system_icon_theme (state);
 
           if (theme != NULL)
             {

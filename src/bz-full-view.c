@@ -59,7 +59,9 @@ struct _BzFullView
   BzStateInfo          *state;
   BzTransactionManager *transactions;
   BzEntryGroup         *group;
+  DexFuture            *ui_future;
   BzResult             *ui_entry;
+  BzResult             *runtime;
   BzResult             *group_model;
   gboolean              show_sidebar;
 
@@ -116,10 +118,12 @@ bz_full_view_dispose (GObject *object)
 {
   BzFullView *self = BZ_FULL_VIEW (object);
 
+  dex_clear (&self->ui_future);
   g_clear_object (&self->state);
   g_clear_object (&self->transactions);
   g_clear_object (&self->group);
   g_clear_object (&self->ui_entry);
+  g_clear_object (&self->runtime);
   g_clear_object (&self->group_model);
   g_clear_object (&self->main_menu);
 
@@ -1252,12 +1256,12 @@ bz_full_view_new (void)
 }
 
 static DexFuture *
-on_ui_entry_resolved (DexFuture *future,
-                      gpointer   user_data)
+on_ui_entry_resolved (DexFuture  *future,
+                      BzFullView *self)
 {
-  BzEntry      *ui_entry       = NULL;
-  BzResult     *runtime_result = NULL;
-  const GValue *value          = NULL;
+  BzEntry *ui_entry                   = NULL;
+  g_autoptr (BzResult) runtime_result = NULL;
+  const GValue *value                 = NULL;
 
   value = dex_future_get_value (future, NULL);
   if (value != NULL && G_VALUE_HOLDS_OBJECT (value))
@@ -1265,15 +1269,7 @@ on_ui_entry_resolved (DexFuture *future,
       ui_entry = g_value_get_object (value);
 
       if (BZ_IS_FLATPAK_ENTRY (ui_entry))
-        {
-          runtime_result = bz_flatpak_entry_get_runtime (BZ_FLATPAK_ENTRY (ui_entry));
-
-          if (runtime_result != NULL && !bz_result_get_resolved (runtime_result))
-            {
-              g_autoptr (DexFuture) runtime_future = bz_result_dup_future (runtime_result);
-              dex_future_disown (g_steal_pointer (&runtime_future));
-            }
-        }
+        self->runtime = bz_flatpak_entry_dup_runtime_result (BZ_FLATPAK_ENTRY (ui_entry));
     }
 
   return dex_future_new_for_boolean (TRUE);
@@ -1290,8 +1286,10 @@ bz_full_view_set_entry_group (BzFullView   *self,
   if (group == self->group)
     return;
 
+  dex_clear (&self->ui_future);
   g_clear_object (&self->group);
   g_clear_object (&self->ui_entry);
+  g_clear_object (&self->runtime);
   g_clear_object (&self->group_model);
   gtk_toggle_button_set_active (self->description_toggle, FALSE);
 
@@ -1328,8 +1326,12 @@ bz_full_view_set_entry_group (BzFullView   *self,
             {
               g_autoptr (DexFuture) ui_future = bz_result_dup_future (self->ui_entry);
 
-              ui_future = dex_future_then (ui_future, on_ui_entry_resolved, g_object_ref (self), g_object_unref);
-              dex_future_disown (g_steal_pointer (&ui_future));
+              ui_future = dex_future_then (
+                  ui_future,
+                  (DexFutureCallback) on_ui_entry_resolved,
+                  g_object_ref (self),
+                  g_object_unref);
+              self->ui_future = g_steal_pointer (&ui_future);
             }
         }
 
