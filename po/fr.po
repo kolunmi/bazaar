@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-19 09:20+0100\n"
-"PO-Revision-Date: 2026-02-19 11:32+0100\n"
+"POT-Creation-Date: 2026-02-20 01:52+0100\n"
+"PO-Revision-Date: 2026-02-20 01:52+0100\n"
 "Last-Translator: Mimolet <theMimolet@proton.me>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -774,18 +774,18 @@ msgstr "Plus tard"
 msgid "A backend error occurred"
 msgstr "Une erreur de backend est survenue"
 
-#: src/bz-application.c:1387 src/bz-application.c:3105
+#: src/bz-application.c:1387
 msgid "Synchronizing..."
 msgstr "Synchronisation…"
 
-#: src/bz-application.c:1534 src/bz-application.c:3101
+#: src/bz-application.c:1534 src/bz-application.c:3116
 #, c-format
-msgid "Receiving %d entries..."
+msgid "Receiving %d apps…"
 msgstr "Réception de %d applis…"
 
 #: src/bz-application.c:1539
-msgid "Checking for updates"
-msgstr "Recherche de mises à jour..."
+msgid "Checking for updates…"
+msgstr "Recherche de mises à jour…"
 
 #: src/bz-application.c:1595
 msgid "Failed to open .flatpakref"
@@ -799,60 +799,64 @@ msgstr "Une erreur d'initialisation s'est produite"
 msgid "Failed to check for updates"
 msgstr "Échec de la vérification des mises à jour"
 
-#: src/bz-application.c:2884
+#: src/bz-application.c:2899
 msgid "Could not find app"
 msgstr "Impossible de trouver l'application"
 
-#: src/bz-application.c:3107
-msgid "Indexing Data..."
+#: src/bz-application.c:3120
+msgid "Synchronizing…"
+msgstr "Synchronisation…"
+
+#: src/bz-application.c:3122
+msgid "Indexing Data…"
 msgstr "Indexation des données…"
 
-#: src/bz-appstream-parser.c:265
+#: src/bz-appstream-parser.c:303
 msgctxt "Project URL Type"
 msgid "Flathub Page"
 msgstr "Page Flathub"
 
-#: src/bz-appstream-parser.c:286
+#: src/bz-appstream-parser.c:324
 msgctxt "Project URL Type"
 msgid "Project Website"
 msgstr "Site du projet"
 
-#: src/bz-appstream-parser.c:290
+#: src/bz-appstream-parser.c:328
 msgctxt "Project URL Type"
 msgid "Issue Tracker"
 msgstr "Signaler un problème"
 
-#: src/bz-appstream-parser.c:294
+#: src/bz-appstream-parser.c:332
 msgctxt "Project URL Type"
 msgid "FAQ"
 msgstr "FAQ"
 
-#: src/bz-appstream-parser.c:298
+#: src/bz-appstream-parser.c:336
 msgctxt "Project URL Type"
 msgid "Help"
 msgstr "Aide"
 
-#: src/bz-appstream-parser.c:302
+#: src/bz-appstream-parser.c:340
 msgctxt "Project URL Type"
 msgid "Donate"
 msgstr "Faire un don"
 
-#: src/bz-appstream-parser.c:308
+#: src/bz-appstream-parser.c:346
 msgctxt "Project URL Type"
 msgid "Translate"
 msgstr "Traduire"
 
-#: src/bz-appstream-parser.c:312
+#: src/bz-appstream-parser.c:350
 msgctxt "Project URL Type"
 msgid "Contact"
 msgstr "Contact"
 
-#: src/bz-appstream-parser.c:316
+#: src/bz-appstream-parser.c:354
 msgctxt "Project URL Type"
 msgid "Source Code"
 msgstr "Code Source"
 
-#: src/bz-appstream-parser.c:322
+#: src/bz-appstream-parser.c:360
 msgctxt "Project URL Type"
 msgid "Contribute"
 msgstr "Contribuer"
@@ -2076,6 +2080,26 @@ msgstr "Couleurs du drapeau neutrois"
 msgid "Version History"
 msgstr "Historique des versions"
 
+#. Translators: This is a date format for timestamps from the current year. Used in the app releases section.
+#. * %B is the full month name, %e is the day.
+#. * Example: "October 1"
+#. * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
+#. * Please modify to make it sound natural in your locale.
+#. *
+#: src/bz-releases-list.c:121
+msgid "%e %B"
+msgstr "%e %B"
+
+#. Translators: This is a date format for timestamps from previous years. Used in the app releases section.
+#. * %B is the full month name, %e is the day, %Y is the year.
+#. * Example: "October 1, 2025"
+#. * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
+#. * Please modify to make it sound natural in your locale.
+#. *
+#: src/bz-releases-list.c:129
+msgid "%e %B %Y"
+msgstr "%e %B %Y"
+
 #: src/bz-releases-list.c:168
 #, c-format
 msgid "Version %s"
@@ -2795,27 +2819,27 @@ msgstr "Des extensions seront aussi installées."
 msgid "Finished in %.02f seconds"
 msgstr "Terminé en %.02f secondes"
 
-#: src/bz-transaction-tile.blp:125
+#: src/bz-transaction-tile.blp:126
 msgid "App Add-on"
 msgstr "Extension de l’appli"
 
-#: src/bz-transaction-tile.blp:154
+#: src/bz-transaction-tile.blp:155
 msgid "Runtime"
 msgstr "Environnement d’exécution"
 
-#: src/bz-transaction-tile.blp:178
+#: src/bz-transaction-tile.blp:179
 msgid "In Queue"
 msgstr "En attente"
 
-#: src/bz-transaction-tile.blp:202
+#: src/bz-transaction-tile.blp:203
 msgid "Done"
 msgstr "Terminé"
 
-#: src/bz-transaction-tile.blp:226
+#: src/bz-transaction-tile.blp:227
 msgid "Error"
 msgstr "Erreur"
 
-#: src/bz-transaction-tile.blp:267
+#: src/bz-transaction-tile.blp:271
 msgid "Open App"
 msgstr "Ouvrir l'appli"
 
@@ -2865,12 +2889,9 @@ msgstr "Les données utilisateur de %s ont été mise à la corbeille"
 msgid "Trash User Data"
 msgstr "Mettre les données utilisateurs à la corbeille"
 
-# Texte affiché lors du l'écran de chargement - la traduction fourni le contexte nécessaire pour l'utilisateur sans le bombarder de texte
-#
-# Un nouveau label sera proposé à Kolunmi.
 #: src/bz-window.blp:135
-msgid "Refreshing Store Content"
-msgstr "Actualisation..."
+msgid "Refreshing…"
+msgstr "Actualisation…"
 
 #: src/bz-window.blp:153
 msgid "Curated"
@@ -2881,7 +2902,7 @@ msgid "Flathub"
 msgstr "Flathub"
 
 #: src/bz-window.blp:273
-msgid "No background tasks!"
+msgid "All your apps are up to date!"
 msgstr "Toutes vos applis sont à jour !"
 
 #: src/bz-window.blp:325
@@ -2933,7 +2954,7 @@ msgstr "Ouvrir les préférences"
 
 #: src/gtk/shortcuts-dialog.blp:19
 msgctxt "shortcut window"
-msgid "Synchronize Remotes"
+msgid "Refresh"
 msgstr "Actualiser"
 
 #: src/gtk/shortcuts-dialog.blp:24
