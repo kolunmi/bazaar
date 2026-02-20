@@ -1,6 +1,6 @@
-/* bz-donations-dialog.h
+/* bz-error-dialog.h
  *
- * Copyright 2026 Eva M
+ * Copyright 2025 Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,16 +22,13 @@
 
 #include <adwaita.h>
 
-#include "bz-state-info.h"
-
 G_BEGIN_DECLS
 
-#define BZ_TYPE_DONATIONS_DIALOG (bz_donations_dialog_get_type ())
-G_DECLARE_FINAL_TYPE (BzDonationsDialog, bz_donations_dialog, BZ, DONATIONS_DIALOG, AdwDialog)
+#define BZ_TYPE_ERROR_DIALOG (bz_error_dialog_get_type ())
 
-AdwDialog *
-bz_donations_dialog_new (void);
+G_DECLARE_FINAL_TYPE (BzErrorDialog, bz_error_dialog, BZ, ERROR_DIALOG, AdwDialog)
+
+BzErrorDialog *bz_error_dialog_new (const char *title,
+                                    const char *text);
 
 G_END_DECLS
-
-/* End of bz-donations-dialog.h */

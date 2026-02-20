@@ -28,6 +28,7 @@
 #include "bz-rich-app-tile.h"
 #include "bz-screenshot.h"
 #include "bz-search-result.h"
+#include "bz-search-pill-list.h"
 #include "bz-search-widget.h"
 #include "bz-util.h"
 
@@ -250,6 +251,16 @@ apps_page_select_cb (BzSearchWidget *self,
 }
 
 static void
+pill_list_cb (BzSearchWidget *self,
+              const char     *label,
+              GtkWidget      *pill_list)
+{
+
+  bz_search_widget_set_text (self, label);
+  update_filter (self);
+}
+
+static void
 category_clicked (BzFlathubCategory *category,
                   GtkButton         *button)
 {
@@ -378,6 +389,7 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
   g_type_ensure (BZ_TYPE_RICH_APP_TILE);
   g_type_ensure (BZ_TYPE_SCREENSHOT);
   g_type_ensure (BZ_TYPE_SEARCH_RESULT);
+  g_type_ensure (BZ_TYPE_SEARCH_PILL_LIST);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-search-widget.ui");
   gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, search_bar);
@@ -396,6 +408,7 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, idx_to_string);
   gtk_widget_class_bind_template_callback (widget_class, score_to_string);
   gtk_widget_class_bind_template_callback (widget_class, reset_search_cb);
+  gtk_widget_class_bind_template_callback (widget_class, pill_list_cb);
   gtk_widget_class_bind_template_callback (widget_class, no_results_found_subtitle);
   gtk_widget_class_bind_template_callback (widget_class, tile_activated_cb);
 }

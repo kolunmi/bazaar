@@ -1,6 +1,6 @@
-/* bz-lazy-async-texture-model.h
+/* bz-hooks.h
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2026 Eva M
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,23 +20,15 @@
 
 #pragma once
 
-#include <gtk/gtk.h>
+#include <libdex.h>
+
+#include "bz-hook.h"
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_LAZY_ASYNC_TEXTURE_MODEL (bz_lazy_async_texture_model_get_type ())
-G_DECLARE_FINAL_TYPE (BzLazyAsyncTextureModel, bz_lazy_async_texture_model, BZ, LAZY_ASYNC_TEXTURE_MODEL, GObject)
-
-BzLazyAsyncTextureModel *
-bz_lazy_async_texture_model_new (void);
-
-GListModel *
-bz_lazy_async_texture_model_get_model (BzLazyAsyncTextureModel *self);
-
-void
-bz_lazy_async_texture_model_set_model (BzLazyAsyncTextureModel *self,
-                                       GListModel              *model);
+DexFuture *
+bz_execute_hook (BzHook     *hook,
+                 const char *ts_type,
+                 const char *ts_appid);
 
 G_END_DECLS
-
-/* End of bz-lazy-async-texture-model.h */

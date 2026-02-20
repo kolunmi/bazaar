@@ -45,17 +45,9 @@
   outline-width: 2px;
 }
 
-.rich-screenshot-box {
-	background-color: var(--sidebar-bg-color);
-}
-
 @media (prefers-color-scheme: light) {
   .search-box {
     background-color: var(--shade-color);
-  }
-
-  .rich-screenshot-box {
-	  background-color: var(--sidebar-bg-color);
   }
 }
 
@@ -65,6 +57,10 @@
 
 .clear-button {
   min-height: 24px;
+}
+
+.search-pill {
+ font-weight: 450;
 }
 
 .search-grid {
@@ -212,7 +208,7 @@
 
 .circular-lozenge.grey,
 .lozenge.grey {
-  color: @window_fg_color;
+  color: #323237;
 	background-color: alpha(@dark_3, .25);
 }
 
@@ -241,6 +237,7 @@
 
   .circular-lozenge.grey,
   .lozenge.grey {
+    color: @window_fg_color;
 	  background-color: alpha(@light_5, .25);
   }
 }
@@ -256,6 +253,14 @@
 .flathub {
 	--accent-color: alpha(@window_fg_color,0.75);
 	--accent-bg-color: @window_fg_color;
+}
+
+.flathub-lotion {
+  color: #fafafa;
+}
+
+.flathub-gunmetal {
+  color: #251f32;
 }
 
 @media (prefers-color-scheme: dark) {

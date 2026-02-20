@@ -1,6 +1,6 @@
-/* bz-donations-dialog.h
+/* bz-search-pill-list.h
  *
- * Copyright 2026 Eva M
+ * Copyright 2026 Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,16 +22,12 @@
 
 #include <adwaita.h>
 
-#include "bz-state-info.h"
-
 G_BEGIN_DECLS
 
-#define BZ_TYPE_DONATIONS_DIALOG (bz_donations_dialog_get_type ())
-G_DECLARE_FINAL_TYPE (BzDonationsDialog, bz_donations_dialog, BZ, DONATIONS_DIALOG, AdwDialog)
+#define BZ_TYPE_SEARCH_PILL_LIST (bz_search_pill_list_get_type ())
 
-AdwDialog *
-bz_donations_dialog_new (void);
+G_DECLARE_FINAL_TYPE (BzSearchPillList, bz_search_pill_list, BZ, SEARCH_PILL_LIST, GtkBox)
+
+GtkWidget *bz_search_pill_list_new (void);
 
 G_END_DECLS
-
-/* End of bz-donations-dialog.h */

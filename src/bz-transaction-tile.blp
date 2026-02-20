@@ -91,6 +91,7 @@ template $BzTransactionTile: $BzListTile {
               };
             };
           }
+
           Revealer {
             reveal-child: bind progress_bars_revealer.reveal-child inverted;
             child: Box {
@@ -255,6 +256,9 @@ template $BzTransactionTile: $BzListTile {
         }
 
         Box {
+          orientation: horizontal;
+          spacing: 5;
+
           Button {
             visible: bind $is_both(
                             $is_both($is_entry_application(template.tracker as <$BzTransactionEntryTracker>) as <bool>,$is_completed(template.tracker as <$BzTransactionEntryTracker>.status as <$BzTransactionEntryStatus>) as <bool>) as <bool>,
@@ -269,6 +273,20 @@ template $BzTransactionTile: $BzListTile {
 
             styles [
               "flat",
+            ]
+          }
+
+          Button {
+            visible: bind $is_ongoing(template.tracker as <$BzTransactionEntryTracker>.status as <$BzTransactionEntryStatus>) as <bool>;
+
+            icon-name: "media-playback-stop-symbolic";
+            has-tooltip: true;
+            valign: center;
+            tooltip-text: _("Cancel Transaction");
+            clicked => $cancel_cb(template);
+
+            styles [
+              "error",
             ]
           }
 

@@ -56,7 +56,9 @@ Pre-built binaries are distributed via Flathub and GitHub actions:
 
 There also exist packages for [Debian](https://tracker.debian.org/pkg/bazaar)
 and [Arch](https://archlinux.org/packages/extra/x86_64/bazaar/). These are not
-directly supported but should work fine.
+directly supported but should work fine. If you encounter a bug on any package
+of Bazaar other than the flatpak, ensure the bug also exists on the flatpak
+before reporting it here.
 
 ### Supporting
 
@@ -87,13 +89,13 @@ You will need the following dependencies installed, along with a C compiler, mes
 | [libadwaita](https://gitlab.gnome.org/GNOME/libadwaita) | `libadwaita-1`    | `1.8`                  | GNOME styling                                       |
 | [libdex](https://gitlab.gnome.org/GNOME/libdex)         | `libdex-1`        | `1.0`                  | Async helpers                                       |
 | [flatpak](https://github.com/flatpak/flatpak)           | `flatpak`         | `1.9`                  | Flatpak installation management                     |
-| [appstream](https://github.com/ximion/appstream)        | `appstream`       | `1.0`                  | Download application metadata                       |
+| [appstream](https://github.com/ximion/appstream)        | `appstream`       | `1.0`                  | Interpret application metadata                      |
 | [xmlb](https://github.com/hughsie/libxmlb)              | `xmlb`            | `0.3.4`                | Handle binary xml appstream bundles/Parse plain xml |
-| [glycin](https://gitlab.gnome.org/GNOME/glycin)         | `glycin-2`        | `2.0`                  | Retrieve and decode image uris                      |
-| [glycin-gtk4](https://gitlab.gnome.org/GNOME/glycin)    | `glycin-gtk4-2`   | `2.0`                  | Convert glycin frames to `GdkTexture`s              |
+| [glycin](https://gitlab.gnome.org/GNOME/glycin)         | `glycin-2`        | `2.0`                  | Decode image URIs                                   |
+| [glycin-gtk4](https://gitlab.gnome.org/GNOME/glycin)    | `glycin-gtk4-2`   | `2.0`                  | Convert glycin frames to texture representations    |
 | [libyaml](https://github.com/yaml/libyaml)              | `yaml-0.1`        | `0.2.5`                | Parse YAML configs                                  |
 | [libsoup](https://gitlab.gnome.org/GNOME/libsoup)       | `libsoup-3.0`     | `3.6.0`                | HTTP operations                                     |
-| [json-glib](https://gitlab.gnome.org/GNOME/json-glib)   | `json-glib-1.0`   | `1.10.0`               | Parse HTTP replies from Flathub                     |
+| [json-glib](https://gitlab.gnome.org/GNOME/json-glib)   | `json-glib-1.0`   | `1.10.0`               | Parse some HTTP replies                             |
 | [md4c](https://github.com/mity/md4c)                    | `md4c`            | `0.5.1`                | Parse markdown (.md)                                |
 | [webkitgtk](https://webkitgtk.org/)                     | `webkitgtk-6.0`   | `2.50.2`               | Render web views                                    |
 | [libsecret](https://gitlab.gnome.org/GNOME/libsecret)   | `libsecret-1`     | `0.20`                 | Store Flathub account information                   |

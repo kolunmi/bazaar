@@ -246,7 +246,7 @@ install_addons_fiber (BzInstalledTile *tile)
 
 err:
   if (local_error != NULL)
-    bz_show_error_for_widget (window, local_error->message);
+    bz_show_error_for_widget (window, _("Failed to load add-ons"), local_error->message);
   g_clear_object (&state);
   return NULL;
 }

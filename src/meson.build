@@ -1,4 +1,5 @@
 math = cc.find_library('m', required: false)
+xmllint = find_program('xmllint', required: true)
 
 gtk_dep              = dependency('gtk4')
 libadwaita_dep       = dependency('libadwaita-1', version: '>= 1.8')
@@ -52,7 +53,6 @@ gdbus_src = gnome.gdbus_codegen(
 
 bz_sources = files(
   'bz-addons-dialog.c',
-  'bz-donations-dialog.c',
   'bz-age-rating-dialog.c',
   'bz-all-apps-page.c',
   'bz-animation.c',
@@ -79,6 +79,7 @@ bz_sources = files(
   'bz-data-graph.c',
   'bz-decorated-screenshot.c',
   'bz-developer-badge.c',
+  'bz-donations-dialog.c',
   'bz-download-worker.c',
   'bz-dynamic-list-view.c',
   'bz-entry-cache-manager.c',
@@ -88,6 +89,7 @@ bz_sources = files(
   'bz-entry-selection-row.c',
   'bz-entry.c',
   'bz-env.c',
+  'bz-error-dialog.c',
   'bz-error.c',
   'bz-fading-clamp.c',
   'bz-favorite-button.c',
@@ -108,11 +110,11 @@ bz_sources = files(
   'bz-gnome-shell-search-provider.c',
   'bz-group-tile-css-watcher.c',
   'bz-hardware-support-dialog.c',
+  'bz-hooks.c',
   'bz-inhibited-scrollable.c',
   'bz-inspector.c',
   'bz-installed-tile.c',
   'bz-io.c',
-  'bz-lazy-async-texture-model.c',
   'bz-library-page.c',
   'bz-license-dialog.c',
   'bz-list-tile.c',
@@ -135,6 +137,7 @@ bz_sources = files(
   'bz-screenshot.c',
   'bz-screenshots-carousel.c',
   'bz-search-engine.c',
+  'bz-search-pill-list.c',
   'bz-search-widget.c',
   'bz-section-view.c',
   'bz-serializable.c',
@@ -266,6 +269,7 @@ blueprints = custom_target('blueprints',
     'bz-developer-badge.blp',
     'bz-entry-inspector.blp',
     'bz-entry-selection-row.blp',
+    'bz-error-dialog.blp',
     'bz-favorite-button.blp',
     'bz-favorites-page.blp',
     'bz-favorites-tile.blp',
@@ -311,10 +315,23 @@ blueprints = custom_target('blueprints',
   ],
 )
 
+release_notes = custom_target('release-notes.xml',
+  output: 'release-notes.xml',
+  input: meson.project_source_root() / 'data' / 'io.github.kolunmi.Bazaar.metainfo.xml.in',
+  command: [
+    'sh', '-c',
+    xmllint.full_path() + ' --xpath "//releases/release[1]" "$1" > "$2"',
+    '--',
+    '@INPUT@',
+    '@OUTPUT@',
+  ],
+)
+
 bz_sources += gnome.compile_resources('bz-resources',
   'bazaar.gresource.xml',
   c_name: 'bz',
-  dependencies: blueprints
+  source_dir: meson.current_build_dir(),
+  dependencies: [blueprints, release_notes],
 )
 
 executable('bazaar', bz_sources, gdbus_src, marshalers,

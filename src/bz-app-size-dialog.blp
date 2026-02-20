@@ -78,7 +78,30 @@ template $BzAppSizeDialog: Adw.Dialog {
           }
 
           Adw.ActionRow {
-            visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.user-data-size ) as <bool>) as <bool>;
+            visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzFlatpakEntry>.runtime as <$BzResult>.object) as <bool>) as <bool>;
+
+            [prefix]
+            Label {
+              label: bind $format_size($choose(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzFlatpakEntry>.runtime as <$BzResult>.object as <$BzEntry>.installed, template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzFlatpakEntry>.runtime as <$BzResult>.object as <$BzEntry>.installed-size, template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzFlatpakEntry>.runtime as <$BzResult>.object as <$BzEntry>.size) as <int>) as <string>;
+              use-markup: true;
+              valign: center;
+              width-request: 90;
+              margin-top: 8;
+              margin-bottom: 8;
+
+              styles [
+                "circular-lozenge",
+                "title-4",
+                "grey",
+              ]
+            }
+
+            title: bind $get_runtime_size_title(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzFlatpakEntry>.runtime as <$BzResult>.object as <$BzEntry>.installed) as <string>;
+            subtitle: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzFlatpakEntry>.runtime as <$BzResult>.object as <$BzEntry>.title;
+          }
+
+          Adw.ActionRow {
+            visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.user-data-size) as <bool>) as <bool>;
 
             [prefix]
             Label {
@@ -93,6 +116,19 @@ template $BzAppSizeDialog: Adw.Dialog {
                 "circular-lozenge",
                 "title-4",
                 "grey",
+              ]
+            }
+
+            [suffix]
+            Button {
+              has-tooltip: true;
+              tooltip-text: _("Open user data folder");
+              icon-name: "folder-open-symbolic";
+              clicked => $open_user_data_folder_cb();
+              valign: center;
+
+              styles [
+                "flat",
               ]
             }
 

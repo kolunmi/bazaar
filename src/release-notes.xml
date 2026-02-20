@@ -1,9 +1,0 @@
-<p>This release comes with the following improvements:</p>
-<ul>
-  <li>Better track installed versions of apps</li>
-  <li>Add `enable-bulk-install` key to curated sections</li>
-  <li>Introduce the app library page</li>
-  <li>Add donations dialog</li>
-  <li>Fix broken addon and runtime eol detection</li>
-  <li>Add `override-eol-markings` main config string list</li>
-</ul>

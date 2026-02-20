@@ -43,6 +43,8 @@ src/bz-entry-selection-row.c
 src/bz-entry.c
 src/bz-env.c
 src/bz-error.c
+src/bz-error-dialog.blp
+src/bz-error-dialog.c
 src/bz-favorite-button.c
 src/bz-favorite-button.blp
 src/bz-favorites-tile.c
@@ -71,7 +73,6 @@ src/bz-inspector.c
 src/bz-installed-tile.blp
 src/bz-installed-tile.c
 src/bz-io.c
-src/bz-lazy-async-texture-model.c
 src/bz-library-page.blp
 src/bz-library-page.c
 src/bz-license-dialog.blp
@@ -97,6 +98,7 @@ src/bz-screenshot.c
 src/bz-screenshot-page.blp
 src/bz-screenshots-carousel.blp
 src/bz-search-engine.c
+src/bz-search-pill-list.c
 src/bz-search-widget.blp
 src/bz-search-widget.c
 src/bz-section-view.blp

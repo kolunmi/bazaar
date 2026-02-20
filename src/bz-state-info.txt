@@ -54,3 +54,5 @@ property=syncing gboolean G_TYPE_BOOLEAN boolean
 property=transaction_manager BzTransactionManager BZ_TYPE_TRANSACTION_MANAGER object
 property=txt_blocklists GListModel G_TYPE_LIST_MODEL object
 property=txt_blocklists_provider BzContentProvider BZ_TYPE_CONTENT_PROVIDER object
+property=user_icon_theme GtkIconTheme GTK_TYPE_ICON_THEME object
+property=system_icon_theme GtkIconTheme GTK_TYPE_ICON_THEME object

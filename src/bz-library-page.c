@@ -20,9 +20,6 @@
 
 #include <glib/gi18n.h>
 
-#include "bz-entry-group-util.h"
-#include "bz-env.h"
-#include "bz-error.h"
 #include "bz-installed-tile.h"
 #include "bz-library-page.h"
 #include "bz-section-view.h"
@@ -172,9 +169,8 @@ format_update_count (gpointer    object,
 static void
 tile_activated_cb (BzListTile *tile)
 {
-  BzLibraryPage *self            = NULL;
-  BzEntryGroup  *group           = NULL;
-  g_autoptr (BzEntry) entry      = NULL;
+  BzLibraryPage *self  = NULL;
+  BzEntryGroup  *group = NULL;
 
   g_assert (BZ_IS_LIST_TILE (tile));
 
@@ -189,18 +185,21 @@ tile_activated_cb (BzListTile *tile)
   else if (BZ_IS_TRANSACTION_TILE (tile))
     {
       BzTransactionEntryTracker *tracker = NULL;
+      BzEntry                   *entry   = NULL;
 
       tracker = bz_transaction_tile_get_tracker (BZ_TRANSACTION_TILE (tile));
       if (tracker == NULL)
         return;
 
       entry = bz_transaction_entry_tracker_get_entry (tracker);
-
       group = bz_application_map_factory_convert_one (
-        bz_state_info_get_application_factory (self->state),
-        gtk_string_object_new (bz_entry_get_id (entry)));
+          bz_state_info_get_application_factory (self->state),
+          gtk_string_object_new (bz_entry_get_id (entry)));
     }
   else
+    return;
+
+  if (group == NULL)
     return;
 
   g_signal_emit (self, signals[SIGNAL_SHOW], 0, group);

@@ -593,7 +593,6 @@ bz_application_donate_action (GSimpleAction *action,
     window = new_window (self);
 
   dialog = bz_donations_dialog_new ();
-  bz_donations_dialog_set_state (BZ_DONATIONS_DIALOG (dialog), self->state);
   adw_dialog_present (dialog, GTK_WIDGET (window));
 
   bz_state_info_set_donation_prompt_dismissed (self->state, TRUE);
@@ -664,11 +663,9 @@ bz_application_about_action (GSimpleAction *action,
                              GVariant      *parameter,
                              gpointer       user_data)
 {
-  BzApplication *self                    = user_data;
-  GtkWindow     *window                  = NULL;
-  AdwDialog     *dialog                  = NULL;
-  g_autoptr (GBytes) release_notes_bytes = NULL;
-  const char *release_notes_text         = NULL;
+  BzApplication *self   = user_data;
+  GtkWindow     *window = NULL;
+  AdwDialog     *dialog = NULL;
 
   const char *developers[] = {
     C_ ("About Dialog Developer Credit", "Adam Masciola <kolunmi@posteo.net>"),
@@ -688,14 +685,6 @@ bz_application_about_action (GSimpleAction *action,
   window = gtk_application_get_active_window (GTK_APPLICATION (self));
   dialog = adw_about_dialog_new ();
 
-  release_notes_bytes = g_resources_lookup_data (
-      "/io/github/kolunmi/Bazaar/release-notes.xml",
-      G_RESOURCE_LOOKUP_FLAGS_NONE,
-      NULL);
-
-  if (release_notes_bytes != NULL)
-    release_notes_text = g_bytes_get_data (release_notes_bytes, NULL);
-
   g_object_set (
       dialog,
       "application-name", "Bazaar",
@@ -709,7 +698,6 @@ bz_application_about_action (GSimpleAction *action,
       "license-type", GTK_LICENSE_GPL_3_0,
       "website", "https://github.com/kolunmi/bazaar",
       "issue-url", "https://github.com/kolunmi/bazaar/issues",
-      "release-notes", release_notes_text,
       NULL);
 
   adw_about_dialog_add_acknowledgement_section (
@@ -1270,7 +1258,7 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
 
             window = gtk_application_get_active_window (GTK_APPLICATION (self));
             if (window != NULL)
-              bz_show_error_for_widget (GTK_WIDGET (window), error);
+              bz_show_error_for_widget (GTK_WIDGET (window), _ ("A backend error occurred"), error);
           }
           break;
         case BZ_BACKEND_NOTIFICATION_KIND_TELL_INCOMING:
@@ -1604,7 +1592,7 @@ open_flatpakref_fiber (OpenFlatpakrefData *data)
         open_generic_id (self, g_value_get_string (value));
     }
   else
-    bz_show_error_for_widget (GTK_WIDGET (window), local_error->message);
+    bz_show_error_for_widget (GTK_WIDGET (window), _ ("Failed to open .flatpakref"), local_error->message);
 
   return dex_future_new_true ();
 }
@@ -1658,7 +1646,7 @@ init_fiber_finally (DexFuture *future,
           error_string = g_strdup_printf (
               "Could not initialize: %s",
               local_error->message);
-          bz_show_error_for_widget (GTK_WIDGET (window), error_string);
+          bz_show_error_for_widget (GTK_WIDGET (window), _ ("An initialization error occurred"), error_string);
         }
     }
 
@@ -1710,6 +1698,7 @@ flathub_update_finally (DexFuture *future,
       self->flathub = g_steal_pointer (&self->tmp_flathub);
       bz_flathub_state_set_map_factory (self->flathub, self->application_factory);
       bz_state_info_set_flathub (self->state, self->flathub);
+      bz_search_engine_set_flathub_state (self->search_engine, self->flathub);
 
       return dex_scheduler_spawn (
           dex_scheduler_get_default (),
@@ -1996,7 +1985,7 @@ fiber_check_for_updates (BzApplication *self)
       g_warning ("Failed to check for updates: %s", local_error->message);
 
       if (window != NULL)
-        bz_show_error_for_widget (GTK_WIDGET (window), local_error->message);
+        bz_show_error_for_widget (GTK_WIDGET (window), _ ("Failed to check for updates"), local_error->message);
     }
 
   bz_state_info_set_checking_for_updates (self->state, FALSE);
@@ -2606,6 +2595,21 @@ init_service_struct (BzApplication *self,
   bz_state_info_set_busy (self->state, TRUE);
   bz_state_info_set_donation_prompt_dismissed (self->state, TRUE);
 
+  {
+    g_autoptr (GtkIconTheme) user_theme   = NULL;
+    g_autoptr (GtkIconTheme) system_theme = NULL;
+    g_autofree char *user_export_dir      = NULL;
+
+    user_theme      = gtk_icon_theme_new ();
+    user_export_dir = g_build_filename (g_get_home_dir (), ".local/share/flatpak/exports/share/icons", NULL);
+    gtk_icon_theme_add_search_path (user_theme, user_export_dir);
+    bz_state_info_set_user_icon_theme (self->state, user_theme);
+
+    system_theme = gtk_icon_theme_new ();
+    gtk_icon_theme_add_search_path (system_theme, "/var/lib/flatpak/exports/share/icons");
+    bz_state_info_set_system_icon_theme (self->state, system_theme);
+  }
+
   g_signal_connect_swapped (
       self->state,
       "notify::disable-blocklists",
@@ -2892,7 +2896,7 @@ open_generic_id (BzApplication *self,
       g_autofree char *message = NULL;
 
       message = g_strdup_printf ("ID '%s' was not found", generic_id);
-      bz_show_error_for_widget (GTK_WIDGET (window), message);
+      bz_show_error_for_widget (GTK_WIDGET (window), _ ("Could not find app"), message);
     }
 }
 

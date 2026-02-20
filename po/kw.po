@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-02-04 23:40+0000\n"
-"PO-Revision-Date: 2026-02-05 13:42+0000\n"
+"PO-Revision-Date: 2026-02-16 13:09+0000\n"
 "Last-Translator: Flynn Peck <cirilla@tuta.io>\n"
 "Language-Team: kw\n"
 "Language: kw\n"
@@ -1301,7 +1301,7 @@ msgstr "Gwayadow"
 
 #: src/bz-flathub-page.blp:282
 msgid "Apps for your Linux phones and tablets"
-msgstr "Appys rag agas kellgowsoryon ha leghennow Linux"
+msgstr "Appys rag agas klapkodhow ha leghennow Linux"
 
 #: src/bz-flathub-page.blp:293 src/bz-flathub-page.blp:328
 msgid "More Mobile Apps"
@@ -1481,11 +1481,11 @@ msgstr "Amontyell Unnik"
 
 #: src/bz-full-view.c:460
 msgid "Works on desktop, tablets, and phones"
-msgstr "Gweythresek war amontyellow, leghennow, ha kellgowsoryon"
+msgstr "Gweythresek war amontyellow, leghennow, ha klapkodhow"
 
 #: src/bz-full-view.c:461
 msgid "May not work on mobile devices"
-msgstr "Res angweythresek war kellgowsoryon"
+msgstr "Res angweythresek war devisyow gwayadow"
 
 #: src/bz-full-view.c:472
 msgid "No URL"
@@ -1630,15 +1630,15 @@ msgstr "Skoodhyans ankoth rag tochskrinyow"
 
 #: src/bz-hardware-support-dialog.c:160
 msgid "Mobile support"
-msgstr "Skoodhyans kellgowser"
+msgstr "Skoodhyans klapkodh"
 
 #: src/bz-hardware-support-dialog.c:161
 msgid "Works on mobile devices"
-msgstr "Gweythresek war kellgowsoryon"
+msgstr "Gweythresek war devisyow gwayadow"
 
 #: src/bz-hardware-support-dialog.c:161
 msgid "May not work well on mobile devices"
-msgstr "Res angweythresek war kellgowsoryon"
+msgstr "Res angweythresek war devisyow gwayadow"
 
 #: src/bz-hardware-support-dialog.c:166
 msgid "Desktop support"
