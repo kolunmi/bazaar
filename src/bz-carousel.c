@@ -1047,13 +1047,13 @@ static void
 scroll_end (BzCarousel               *self,
             GtkEventControllerScroll *controller)
 {
-  self->scrolling       = FALSE;
-  self->hscroll_start   = -1;
-  self->hscroll_current = -1;
+  self->scrolling = FALSE;
   finish_horizontal_gesture (
       self,
       self->hscroll_start - self->hscroll_current,
       0);
+  self->hscroll_start   = -1;
+  self->hscroll_current = -1;
 }
 
 static gboolean
