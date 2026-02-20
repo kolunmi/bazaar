@@ -722,6 +722,13 @@ move_to_idx (BzCarousel *self,
 
   width  = gtk_widget_get_width (GTK_WIDGET (self));
   height = gtk_widget_get_height (GTK_WIDGET (self));
+  if (width == 0 ||
+      height == 0)
+    {
+      gtk_widget_queue_allocate (GTK_WIDGET (self));
+      return;
+    }
+
   offset = width / 2;
   if (self->dragging)
     {
@@ -762,16 +769,17 @@ move_to_idx (BzCarousel *self,
 
   for (guint i = 0; i < self->widgets->len; i++)
     {
-      CarouselWidgetData *child        = NULL;
-      int                 hminimum     = 0;
-      int                 hnatural     = 0;
-      int                 unused       = 0;
-      int                 rect_width   = 0;
-      int                 child_width  = 0;
-      int                 child_height = 0;
-      int                 child_x      = 0;
-      int                 child_y      = 0;
-      graphene_rect_t     target       = { 0 };
+      CarouselWidgetData *child           = NULL;
+      int                 hminimum        = 0;
+      int                 hnatural        = 0;
+      int                 unused          = 0;
+      int                 rect_width      = 0;
+      int                 child_width     = 0;
+      int                 child_height    = 0;
+      int                 child_x         = 0;
+      int                 child_y         = 0;
+      graphene_rect_t     target          = { 0 };
+      gboolean            avoid_animation = FALSE;
 
       child = g_ptr_array_index (self->widgets, i);
 
@@ -810,11 +818,10 @@ move_to_idx (BzCarousel *self,
           child_y = round ((double) height * (0.5 * RAISE_FACTOR));
         }
 
-      target = GRAPHENE_RECT_INIT (child_x, child_y, child_width, child_height);
-      if (graphene_rect_equal (&target, &child->target))
-        child->target = target;
-      else if (damping_ratio < 0.0 ||
-               graphene_rect_equal (graphene_rect_zero (), &child->rect))
+      target          = GRAPHENE_RECT_INIT (child_x, child_y, child_width, child_height);
+      avoid_animation = graphene_rect_equal (&target, &child->target);
+      if ((damping_ratio < 0.0 && !avoid_animation) ||
+          graphene_rect_equal (graphene_rect_zero (), &child->rect))
         {
           char buf[64] = { 0 };
 
@@ -833,6 +840,8 @@ move_to_idx (BzCarousel *self,
           g_snprintf (buf, sizeof (buf), "h%p", child);
           bz_animation_cancel (self->animation, buf);
         }
+      else if (avoid_animation)
+        child->target = target;
       else
         {
           char buf[64] = { 0 };
