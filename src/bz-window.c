@@ -33,6 +33,7 @@
 #include "bz-flathub-page.h"
 #include "bz-full-view.h"
 #include "bz-global-progress.h"
+#include "bz-hooks.h"
 #include "bz-io.h"
 #include "bz-library-page.h"
 #include "bz-popup-overlay.h"
@@ -646,6 +647,7 @@ transact_fiber (TransactData *data)
   g_autoptr (BzTransactionDialogResult) dialog_result = NULL;
   g_autoptr (DexFuture) transact_future               = NULL;
   g_autofree char *id_dup                             = NULL;
+  BzMainConfig    *config                             = NULL;
 
   bz_weak_get_or_return_reject (self, data->self);
 
@@ -667,6 +669,50 @@ transact_fiber (TransactData *data)
           return dex_future_new_false ();
         }
     }
+
+  config = bz_state_info_get_main_config (self->state);
+#define RUN_HOOK(_signal)                                              \
+  /* TODO: make reading config less bad */                             \
+  if (config != NULL &&                                                \
+      bz_main_config_get_hooks (config) != NULL)                       \
+    {                                                                  \
+      GListModel *hooks   = NULL;                                      \
+      guint       n_hooks = 0;                                         \
+                                                                       \
+      hooks   = bz_main_config_get_hooks (config);                     \
+      n_hooks = g_list_model_get_n_items (hooks);                      \
+                                                                       \
+      for (guint j = 0; j < n_hooks; j++)                              \
+        {                                                              \
+          g_autoptr (BzHook) hook        = NULL;                       \
+          BzHookSignal       when        = 0;                          \
+          BzHookReturnStatus hook_result = 0;                          \
+                                                                       \
+          hook = g_list_model_get_item (hooks, j);                     \
+          when = bz_hook_get_when (hook);                              \
+                                                                       \
+          if (when == (_signal))                                       \
+            hook_result = dex_await_int (                              \
+                bz_execute_hook (                                      \
+                    hook,                                              \
+                    data->remove                                       \
+                        ? "removal"                                    \
+                        : "install",                                   \
+                    id_dup),                                           \
+                NULL);                                                 \
+                                                                       \
+          if (hook_result == BZ_HOOK_RETURN_STATUS_CONFIRM ||          \
+              hook_result == BZ_HOOK_RETURN_STATUS_STOP)               \
+            break;                                                     \
+          else if (hook_result == BZ_HOOK_RETURN_STATUS_DENY)          \
+            return dex_future_new_reject (                             \
+                BZ_TRANSACTION_MGR_ERROR,                              \
+                BZ_TRANSACTION_MGR_ERROR_CANCELLED_BY_HOOK,            \
+                "The transaction was prevented by a configured hook"); \
+        }                                                              \
+    }
+
+  RUN_HOOK (BZ_HOOK_SIGNAL_BEFORE_TRANSACTION);
 
   // Show the dialog
   dialog_result = dex_await_object (
@@ -701,6 +747,9 @@ transact_fiber (TransactData *data)
       else
         dex_future_disown (bz_reap_user_data_dex (id_dup));
     }
+
+  RUN_HOOK (BZ_HOOK_SIGNAL_AFTER_TRANSACTION);
+#undef RUN_HOOK
 
   return dex_future_new_true ();
 }
