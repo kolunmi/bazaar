@@ -636,6 +636,7 @@ transaction_fiber (QueuedScheduleData *data)
   g_autoptr (DexFuture) future          = NULL;
   g_autoptr (GHashTable) op_set         = NULL;
   g_autoptr (GHashTable) pending_set    = NULL;
+  GHashTableIter iter                   = { 0 };
 
   bz_weak_get_or_return_reject (self, data->self);
 
@@ -822,6 +823,22 @@ transaction_fiber (QueuedScheduleData *data)
               g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PENDING]);
             }
         }
+    }
+
+  /* Finish off tasks that may not have received a final update */
+  g_hash_table_iter_init (&iter, op_set);
+  for (;;)
+    {
+      BzBackendTransactionOpPayload *payload = NULL;
+      gpointer                       dummy   = NULL;
+
+      if (!g_hash_table_iter_next (
+              &iter,
+              (gpointer *) &payload,
+              (gpointer *) &dummy))
+        break;
+
+      bz_transaction_error_out_task (transaction, payload, "Cancelled");
     }
 
   result = dex_await (g_steal_pointer (&future), &local_error);
