@@ -53,7 +53,6 @@ gdbus_src = gnome.gdbus_codegen(
 
 bz_sources = files(
   'bz-addons-dialog.c',
-  'bz-donations-dialog.c',
   'bz-age-rating-dialog.c',
   'bz-all-apps-page.c',
   'bz-animation.c',
@@ -80,6 +79,7 @@ bz_sources = files(
   'bz-data-graph.c',
   'bz-decorated-screenshot.c',
   'bz-developer-badge.c',
+  'bz-donations-dialog.c',
   'bz-download-worker.c',
   'bz-dynamic-list-view.c',
   'bz-entry-cache-manager.c',
@@ -89,8 +89,8 @@ bz_sources = files(
   'bz-entry-selection-row.c',
   'bz-entry.c',
   'bz-env.c',
-  'bz-error.c',
   'bz-error-dialog.c',
+  'bz-error.c',
   'bz-fading-clamp.c',
   'bz-favorite-button.c',
   'bz-favorites-page.c',
@@ -110,6 +110,7 @@ bz_sources = files(
   'bz-gnome-shell-search-provider.c',
   'bz-group-tile-css-watcher.c',
   'bz-hardware-support-dialog.c',
+  'bz-hooks.c',
   'bz-inhibited-scrollable.c',
   'bz-inspector.c',
   'bz-installed-tile.c',
