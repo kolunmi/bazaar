@@ -172,8 +172,7 @@ bz_full_view_set_property (GObject      *object,
       break;
     case PROP_UI_ENTRY:
     case PROP_MAIN_MENU:
-      if (self->main_menu)
-        g_object_unref (self->main_menu);
+      g_clear_object (&self->main_menu);
       self->main_menu = g_value_dup_object (value);
       break;
     default:
@@ -1326,7 +1325,8 @@ bz_full_view_set_entry_group (BzFullView   *self,
           if (self->ui_entry != NULL)
             {
               g_autoptr (DexFuture) ui_future = bz_result_dup_future (self->ui_entry);
-              ui_future                       = dex_future_then (ui_future, on_ui_entry_resolved, g_object_ref (self), g_object_unref);
+
+              ui_future = dex_future_then (ui_future, on_ui_entry_resolved, g_object_ref (self), g_object_unref);
               dex_future_disown (g_steal_pointer (&ui_future));
             }
         }
