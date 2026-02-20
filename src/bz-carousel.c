@@ -25,8 +25,7 @@
 #include "bz-marshalers.h"
 #include "bz-util.h"
 
-#define RAISE_FACTOR      0.025
-#define HSCROLL_THRESHOLD 5
+#define RAISE_FACTOR 0.025
 
 struct _BzCarousel
 {
@@ -36,7 +35,9 @@ struct _BzCarousel
   double              motion_x;
   double              motion_y;
   GtkEventController *scroll;
-  int                 hscroll;
+  gboolean            scrolling;
+  int                 hscroll_start;
+  int                 hscroll_current;
   GtkGesture         *drag;
   gboolean            dragging;
   BzAnimation        *animation;
@@ -145,6 +146,14 @@ update_motion (BzCarousel *self,
                gdouble     x,
                gdouble     y);
 
+static void
+scroll_begin (BzCarousel               *self,
+              GtkEventControllerScroll *controller);
+
+static void
+scroll_end (BzCarousel               *self,
+            GtkEventControllerScroll *controller);
+
 static gboolean
 scroll (BzCarousel               *self,
         gdouble                   dx,
@@ -170,7 +179,9 @@ drag_update (BzCarousel     *self,
              GtkGestureDrag *gesture);
 
 static void
-cancel_drag (BzCarousel *self);
+finish_horizontal_gesture (BzCarousel *self,
+                           int         offset_x,
+                           int         offset_y);
 
 static void
 bz_carousel_dispose (GObject *object)
@@ -446,7 +457,11 @@ bz_carousel_init (BzCarousel *self)
   g_signal_connect_swapped (self->motion, "leave", G_CALLBACK (motion_leave), self);
   gtk_widget_add_controller (GTK_WIDGET (self), self->motion);
 
-  self->scroll = gtk_event_controller_scroll_new (GTK_EVENT_CONTROLLER_SCROLL_HORIZONTAL);
+  self->scroll = gtk_event_controller_scroll_new (
+      GTK_EVENT_CONTROLLER_SCROLL_HORIZONTAL |
+      GTK_EVENT_CONTROLLER_SCROLL_KINETIC);
+  g_signal_connect_swapped (self->scroll, "scroll-begin", G_CALLBACK (scroll_begin), self);
+  g_signal_connect_swapped (self->scroll, "scroll-end", G_CALLBACK (scroll_end), self);
   g_signal_connect_swapped (self->scroll, "scroll", G_CALLBACK (scroll), self);
   gtk_widget_add_controller (GTK_WIDGET (self), self->scroll);
 
@@ -696,7 +711,7 @@ items_changed (BzCarousel *self,
       g_ptr_array_insert (self->widgets, position + i, data);
     }
 
-  gtk_widget_queue_allocate (GTK_WIDGET (self));
+  ensure_viewport (self, GTK_SINGLE_SELECTION (model), FALSE);
 }
 
 static void
@@ -725,7 +740,16 @@ move_to_idx (BzCarousel *self,
 
   width  = gtk_widget_get_width (GTK_WIDGET (self));
   height = gtk_widget_get_height (GTK_WIDGET (self));
+  if (width == 0 ||
+      height == 0)
+    {
+      gtk_widget_queue_allocate (GTK_WIDGET (self));
+      return;
+    }
+
   offset = width / 2;
+  if (self->scrolling)
+    offset += self->hscroll_start - self->hscroll_current;
   if (self->dragging)
     {
       gboolean result = FALSE;
@@ -765,16 +789,17 @@ move_to_idx (BzCarousel *self,
 
   for (guint i = 0; i < self->widgets->len; i++)
     {
-      CarouselWidgetData *child        = NULL;
-      int                 hminimum     = 0;
-      int                 hnatural     = 0;
-      int                 unused       = 0;
-      int                 rect_width   = 0;
-      int                 child_width  = 0;
-      int                 child_height = 0;
-      int                 child_x      = 0;
-      int                 child_y      = 0;
-      graphene_rect_t     target       = { 0 };
+      CarouselWidgetData *child           = NULL;
+      int                 hminimum        = 0;
+      int                 hnatural        = 0;
+      int                 unused          = 0;
+      int                 rect_width      = 0;
+      int                 child_width     = 0;
+      int                 child_height    = 0;
+      int                 child_x         = 0;
+      int                 child_y         = 0;
+      graphene_rect_t     target          = { 0 };
+      gboolean            avoid_animation = FALSE;
 
       child = g_ptr_array_index (self->widgets, i);
 
@@ -813,11 +838,10 @@ move_to_idx (BzCarousel *self,
           child_y = round ((double) height * (0.5 * RAISE_FACTOR));
         }
 
-      target = GRAPHENE_RECT_INIT (child_x, child_y, child_width, child_height);
-      if (graphene_rect_equal (&target, &child->target))
-        child->target = target;
-      else if (damping_ratio < 0.0 ||
-               graphene_rect_equal (graphene_rect_zero (), &child->rect))
+      target          = GRAPHENE_RECT_INIT (child_x, child_y, child_width, child_height);
+      avoid_animation = graphene_rect_equal (&target, &child->target);
+      if ((damping_ratio < 0.0 && !avoid_animation) ||
+          graphene_rect_equal (graphene_rect_zero (), &child->rect))
         {
           char buf[64] = { 0 };
 
@@ -836,6 +860,8 @@ move_to_idx (BzCarousel *self,
           g_snprintf (buf, sizeof (buf), "h%p", child);
           bz_animation_cancel (self->animation, buf);
         }
+      else if (avoid_animation)
+        child->target = target;
       else
         {
           char buf[64] = { 0 };
@@ -1008,47 +1034,89 @@ update_motion (BzCarousel *self,
     ensure_viewport (self, self->model, TRUE);
 }
 
+static void
+scroll_begin (BzCarousel               *self,
+              GtkEventControllerScroll *controller)
+{
+  self->scrolling       = TRUE;
+  self->hscroll_start   = self->motion_x;
+  self->hscroll_current = self->motion_x;
+}
+
+static void
+scroll_end (BzCarousel               *self,
+            GtkEventControllerScroll *controller)
+{
+  self->scrolling       = FALSE;
+  self->hscroll_start   = -1;
+  self->hscroll_current = -1;
+  finish_horizontal_gesture (
+      self,
+      self->hscroll_start - self->hscroll_current,
+      0);
+}
+
 static gboolean
 scroll (BzCarousel               *self,
         gdouble                   dx,
         gdouble                   dy,
         GtkEventControllerScroll *controller)
 {
-  guint n_items      = 0;
-  guint selected     = 0;
-  guint new_selected = 0;
+  guint          n_items = 0;
+  GdkDevice     *device  = NULL;
+  GdkInputSource source  = 0;
 
   if (self->model == NULL)
     {
-      self->hscroll = 0;
+      self->scrolling = FALSE;
       return FALSE;
     }
 
   n_items = g_list_model_get_n_items (G_LIST_MODEL (self->model));
   if (n_items == 0)
     {
-      self->hscroll = 0;
+      self->scrolling = FALSE;
       return FALSE;
     }
 
-  self->hscroll += dx;
-  if (ABS (self->hscroll) < HSCROLL_THRESHOLD)
-    return TRUE;
+  device = gtk_event_controller_get_current_event_device (
+      GTK_EVENT_CONTROLLER (controller));
+  source = gdk_device_get_source (device);
 
-  selected = gtk_single_selection_get_selected (self->model);
-
-  if (self->hscroll > 0)
-    new_selected = MIN (selected + 1, n_items - 1);
-  else
+  switch (source)
     {
-      if (selected == 0)
-        new_selected = 0;
-      else
-        new_selected = selected - 1;
-    }
-  gtk_single_selection_set_selected (self->model, new_selected);
+    case GDK_SOURCE_TOUCHPAD:
+    case GDK_SOURCE_TRACKPOINT:
+      {
+        self->hscroll_current += dx;
+        ensure_viewport (self, self->model, FALSE);
+      }
+      break;
+    case GDK_SOURCE_MOUSE:
+    case GDK_SOURCE_PEN:
+    case GDK_SOURCE_KEYBOARD:
+    case GDK_SOURCE_TOUCHSCREEN:
+    case GDK_SOURCE_TABLET_PAD:
+    default:
+      {
+        guint selected     = 0;
+        guint new_selected = 0;
 
-  self->hscroll = 0;
+        selected = gtk_single_selection_get_selected (self->model);
+        if (dx > 0)
+          new_selected = MIN (selected + 1, n_items - 1);
+        else
+          {
+            if (selected == 0)
+              new_selected = 0;
+            else
+              new_selected = selected - 1;
+          }
+        gtk_single_selection_set_selected (self->model, new_selected);
+      }
+      break;
+    }
+
   return TRUE;
 }
 
@@ -1072,7 +1140,7 @@ drag_end (BzCarousel     *self,
           GtkGestureDrag *gesture)
 {
   self->dragging = FALSE;
-  cancel_drag (self);
+  finish_horizontal_gesture (self, offset_x, offset_y);
 
   if (offset_x < -3 ||
       offset_x > 3 ||
@@ -1091,14 +1159,17 @@ drag_update (BzCarousel     *self,
 }
 
 static void
-cancel_drag (BzCarousel *self)
+finish_horizontal_gesture (BzCarousel *self,
+                           int         offset_x,
+                           int         offset_y)
 {
   guint  selected     = 0;
   double width        = 0.0;
   guint  new_selected = G_MAXUINT;
   int    min_distance = G_MAXINT;
 
-  if (self->model == NULL)
+  if (self->model == NULL ||
+      self->widgets->len == 0)
     return;
 
   selected = gtk_single_selection_get_selected (self->model);
@@ -1129,6 +1200,17 @@ cancel_drag (BzCarousel *self)
           new_selected = i;
           min_distance = distance_from_center;
         }
+    }
+
+  if (new_selected == selected)
+    {
+      /* Ensure dragging is not too stiff; meaning if we drag the content at
+         least 15 pixels in either direction, it will automatically snap to the
+         next widget */
+      if (offset_x > 15 && selected > 0)
+        new_selected--;
+      else if (offset_x < -15 && selected < self->widgets->len - 1)
+        new_selected++;
     }
 
   if (new_selected == G_MAXUINT ||
