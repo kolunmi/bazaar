@@ -118,7 +118,7 @@ format_timestamp (gpointer object,
      * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
      * Please modify to make it sound natural in your locale.
      *  */
-    return g_date_time_format (date, N_("%B %-e"));
+    return g_date_time_format (date, N_("%e %B"));
   else
     /* Translators: This is a date format for timestamps from previous years. Used in the app releases section.
      * %B is the full month name, %e is the day, %Y is the year.
