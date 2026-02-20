@@ -749,7 +749,7 @@ move_to_idx (BzCarousel *self,
 
   offset = width / 2;
   if (self->scrolling)
-    offset += self->hscroll_current - self->hscroll_start;
+    offset += self->hscroll_start - self->hscroll_current;
   if (self->dragging)
     {
       gboolean result = FALSE;
@@ -1052,7 +1052,7 @@ scroll_end (BzCarousel               *self,
   self->hscroll_current = -1;
   finish_horizontal_gesture (
       self,
-      self->hscroll_current - self->hscroll_start,
+      self->hscroll_start - self->hscroll_current,
       0);
 }
 
