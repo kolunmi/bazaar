@@ -1302,9 +1302,10 @@ bz_full_view_set_entry_group (BzFullView   *self,
 
       if (self->ui_entry != NULL && bz_result_get_resolved (self->ui_entry))
         {
-          g_autoptr (GListStore) store = NULL;
-          g_autoptr (DexFuture) future = NULL;
-          BzEntry *entry               = NULL;
+          BzEntry *entry                      = NULL;
+          g_autoptr (GListStore) store        = NULL;
+          g_autoptr (DexFuture) future        = NULL;
+          g_autoptr (DexFuture) object_future = NULL;
 
           entry = bz_result_get_object (self->ui_entry);
           store = g_list_store_new (BZ_TYPE_ENTRY);
@@ -1313,7 +1314,8 @@ bz_full_view_set_entry_group (BzFullView   *self,
           future            = dex_future_new_for_object (store);
           self->group_model = bz_result_new (future);
 
-          on_ui_entry_resolved (dex_future_new_for_object (entry), self);
+          object_future = dex_future_new_for_object (entry);
+          dex_future_disown (on_ui_entry_resolved (object_future, self));
         }
       else
         {
