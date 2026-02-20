@@ -174,11 +174,11 @@ bz_full_view_set_property (GObject      *object,
     case PROP_ENTRY_GROUP:
       bz_full_view_set_entry_group (self, g_value_get_object (value));
       break;
-    case PROP_UI_ENTRY:
     case PROP_MAIN_MENU:
       g_clear_object (&self->main_menu);
       self->main_menu = g_value_dup_object (value);
       break;
+    case PROP_UI_ENTRY:
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
