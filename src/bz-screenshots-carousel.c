@@ -85,20 +85,6 @@ static guint signals[N_SIGNALS];
 static void refresh_css (BzScreenshotsCarousel *self);
 static void clear_css (BzScreenshotsCarousel *self);
 
-static gboolean
-is_window_wide (BzScreenshotsCarousel *self)
-{
-  GtkRoot *root;
-  int      width, height;
-
-  root = gtk_widget_get_root (GTK_WIDGET (self));
-  if (root == NULL || !GTK_IS_WINDOW (root))
-    return FALSE;
-
-  gtk_window_get_default_size (GTK_WINDOW (root), &width, &height);
-  return width > 1000;
-}
-
 static void
 update_button_visibility (BzScreenshotsCarousel *self)
 {
@@ -271,10 +257,10 @@ on_bind_widget (BzScreenshotsCarousel *self,
                 BzAsyncTexture        *item,
                 BzCarousel            *carousel)
 {
-  GtkWidget *screenshot = NULL;
-  g_autofree char *caption = NULL;
-  guint n_items = 0;
-  guint index = 0;
+  GtkWidget       *screenshot = NULL;
+  g_autofree char *caption    = NULL;
+  guint            n_items    = 0;
+  guint            index      = 0;
 
   screenshot = g_object_new (BZ_TYPE_DECORATED_SCREENSHOT,
                              "async-texture", item,
@@ -288,7 +274,7 @@ on_bind_widget (BzScreenshotsCarousel *self,
         break;
     }
 
-  caption = g_strdup_printf (_("Screenshot %u of %u"), index + 1, n_items);
+  caption = g_strdup_printf (_ ("Screenshot %u of %u"), index + 1, n_items);
   gtk_accessible_update_property (GTK_ACCESSIBLE (screenshot),
                                   GTK_ACCESSIBLE_PROPERTY_LABEL, caption,
                                   -1);
@@ -521,7 +507,10 @@ bz_screenshots_carousel_set_model (BzScreenshotsCarousel *self, GListModel *mode
 
   g_clear_object (&self->model);
   if (model)
-    self->model = g_object_ref (model);
+    {
+      self->model = g_object_ref (model);
+      gtk_single_selection_set_selected (self->selection, 0);
+    }
 
   g_object_notify_by_pspec (G_OBJECT (self), properties[PROP_MODEL]);
 }

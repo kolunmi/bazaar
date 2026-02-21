@@ -666,11 +666,21 @@ items_changed (BzCarousel *self,
 {
   for (guint i = 0; i < removed; i++)
     {
-      GObject            *object = NULL;
-      CarouselWidgetData *child  = NULL;
+      GObject            *object  = NULL;
+      CarouselWidgetData *child   = NULL;
+      char                buf[64] = { 0 };
 
       object = g_ptr_array_index (self->mirror, position + i);
       child  = g_ptr_array_index (self->widgets, position + i);
+
+      g_snprintf (buf, sizeof (buf), "x%p", child);
+      bz_animation_cancel (self->animation, buf);
+      g_snprintf (buf, sizeof (buf), "y%p", child);
+      bz_animation_cancel (self->animation, buf);
+      g_snprintf (buf, sizeof (buf), "w%p", child);
+      bz_animation_cancel (self->animation, buf);
+      g_snprintf (buf, sizeof (buf), "h%p", child);
+      bz_animation_cancel (self->animation, buf);
 
       g_signal_emit (self, signals[SIGNAL_UNBIND_WIDGET], 0, child->widget, object);
     }
