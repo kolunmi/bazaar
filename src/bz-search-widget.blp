@@ -74,6 +74,10 @@ template $BzSearchWidget: Adw.Bin {
               ]
 
               clicked => $reset_search_cb(template);
+
+              accessibility {
+                label: _("Clear Search");
+              }
             }
 
             styles [
