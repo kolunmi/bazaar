@@ -701,8 +701,8 @@ transact_fiber (TransactData *data)
                 bz_execute_hook (                                      \
                     hook,                                              \
                     data->remove                                       \
-                        ? "removal"                                    \
-                        : "install",                                   \
+                        ? BZ_HOOK_TRANSACTION_TYPE_REMOVAL             \
+                        : BZ_HOOK_TRANSACTION_TYPE_INSTALL,            \
                     id_dup),                                           \
                 NULL);                                                 \
                                                                        \

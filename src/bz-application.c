@@ -2753,6 +2753,7 @@ init_service_struct (BzApplication *self,
   bz_state_info_set_transaction_manager (self->state, self->transactions);
   bz_state_info_set_txt_blocklists (self->state, G_LIST_MODEL (self->txt_blocklists));
   bz_state_info_set_txt_blocklists_provider (self->state, self->txt_blocklists_provider);
+  bz_state_info_set_cache_manager (self->state, self->cache);
 
   g_object_bind_property (
       self->state, "allow-manual-sync",
