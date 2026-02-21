@@ -22,20 +22,39 @@ template $BzInspector: Adw.Window {
         styles [
           "bz-debug"
         ]
+        orientation: vertical;
 
-        orientation: horizontal;
-        spacing: 10;
+        Box {
+          orientation: horizontal;
+          spacing: 10;
 
-        Label {
-          styles [
-            "heading"
-          ]
-          label: "Background Task Info:";
-          xalign: 0.0;
+          Label {
+            styles [
+              "heading"
+            ]
+            label: "Background Task Info:";
+            xalign: 0.0;
+          }
+          Label {
+            label: bind template.state as <$BzStateInfo>.background-task-label as <string>;
+            xalign: 0.0;
+          }
         }
-        Label {
-          label: bind template.state as <$BzStateInfo>.background-task-label as <string>;
-          xalign: 0.0;
+        Box {
+          orientation: horizontal;
+          spacing: 10;
+
+          Label {
+            styles [
+              "heading"
+            ]
+            label: "Active Entry Objects in Memory:";
+            xalign: 0.0;
+          }
+          Label {
+            label: bind $format_uint(template.state as <$BzStateInfo>.cache-manager as <$BzEntryCacheManager>.living-entries) as <string>;
+            xalign: 0.0;
+          }
         }
       }
 
