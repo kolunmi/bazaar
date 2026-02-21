@@ -400,6 +400,19 @@ template $BzTransactionTile: $BzListTile {
                       has-tooltip: true;
                       tooltip-text: bind template.item as <$BzTransactionTask>.error as <string>;
                     }
+
+                    Button {
+                      icon-name: "info-outline-symbolic";
+                      clicked => $error_clicked_cb(template);
+                      visible: bind $invert_boolean($is_null(template.item as <$BzTransactionTask>.error) as <bool>) as <bool>;
+                      has-tooltip: true;
+                      tooltip-text: _("Show Error Info");
+
+                      styles [
+                        "error",
+                        "flat",
+                      ]
+                    }
                   }
                 };
               }
