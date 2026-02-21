@@ -188,19 +188,13 @@ bz_carousel_dispose (GObject *object)
 {
   BzCarousel *self = BZ_CAROUSEL (object);
 
-  g_clear_pointer (&self->animation, g_object_unref);
-
   if (self->model != NULL)
     {
       g_signal_handlers_disconnect_by_func (self->model, items_changed, self);
       g_signal_handlers_disconnect_by_func (self->model, model_selected_changed, self);
-      items_changed (
-          self,
-          0,
-          g_list_model_get_n_items (G_LIST_MODEL (self->model)),
-          0,
-          G_LIST_MODEL (self->model));
     }
+
+  g_clear_pointer (&self->animation, g_object_unref);
   g_clear_pointer (&self->model, g_object_unref);
 
   g_clear_pointer (&self->mirror, g_ptr_array_unref);
