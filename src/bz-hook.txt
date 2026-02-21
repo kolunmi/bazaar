@@ -12,6 +12,7 @@ ensure=BZ_TYPE_HOOK_DIALOG_OPTION
 
 enum=bz hook_signal before_transaction after_transaction
 enum=bz hook_return_status continue stop confirm deny
+enum=bz hook_transaction_type install update removal
 
 property=id char G_TYPE_STRING string
 property=when BzHookSignal BZ_TYPE_HOOK_SIGNAL enum

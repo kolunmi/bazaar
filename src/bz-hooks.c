@@ -31,12 +31,11 @@ BZ_DEFINE_DATA (
     execute_hook,
     ExecuteHook,
     {
-      BzHook *hook;
-      char   *ts_type;
-      char   *ts_appid;
+      BzHook               *hook;
+      BzHookTransactionType ts_type;
+      char                 *ts_appid;
     },
     BZ_RELEASE_DATA (hook, g_object_unref);
-    BZ_RELEASE_DATA (ts_type, g_free);
     BZ_RELEASE_DATA (ts_appid, g_free))
 
 BZ_DEFINE_DATA (
@@ -53,9 +52,9 @@ static DexFuture *
 execute_hook_fiber (ExecuteHookData *data);
 
 DexFuture *
-bz_execute_hook (BzHook     *hook,
-                 const char *ts_type,
-                 const char *ts_appid)
+bz_execute_hook (BzHook               *hook,
+                 BzHookTransactionType ts_type,
+                 const char           *ts_appid)
 {
   g_autoptr (ExecuteHookData) data = NULL;
 
@@ -63,7 +62,7 @@ bz_execute_hook (BzHook     *hook,
 
   data           = execute_hook_data_new ();
   data->hook     = g_object_ref (hook);
-  data->ts_type  = bz_maybe_strdup (ts_type);
+  data->ts_type  = ts_type;
   data->ts_appid = bz_maybe_strdup (ts_appid);
 
   return dex_scheduler_spawn (
@@ -77,10 +76,10 @@ bz_execute_hook (BzHook     *hook,
 static DexFuture *
 execute_hook_fiber (ExecuteHookData *data)
 {
-  BzHook      *hook     = data->hook;
-  char        *ts_type  = data->ts_type;
-  char        *ts_appid = data->ts_appid;
-  BzHookSignal signal   = 0;
+  BzHook               *hook     = data->hook;
+  BzHookTransactionType ts_type  = data->ts_type;
+  char                 *ts_appid = data->ts_appid;
+  BzHookSignal          signal   = 0;
 
   signal = bz_hook_get_when (hook);
   switch (signal)
@@ -257,7 +256,7 @@ execute_hook_fiber (ExecuteHookData *data)
             g_subprocess_launcher_setenv (launcher, "BAZAAR_HOOK_WAS_ABORTED", hook_aborted ? "true" : "false", TRUE);
 
             g_subprocess_launcher_setenv (launcher, "BAZAAR_TS_APPID", ts_appid, TRUE);
-            g_subprocess_launcher_setenv (launcher, "BAZAAR_TS_TYPE", ts_type, TRUE);
+            g_subprocess_launcher_setenv (launcher, "BAZAAR_TS_TYPE", g_enum_to_string (BZ_TYPE_HOOK_TRANSACTION_TYPE, ts_type), TRUE);
 
             if (finish)
               hook_stage = "teardown";
