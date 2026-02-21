@@ -300,6 +300,7 @@ template $BzWindow: Adw.ApplicationWindow {
                           "global-progress-button",
                         ]
 
+                        can-focus: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
                         can-target: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
 
                         action-name: "window.open-library";
