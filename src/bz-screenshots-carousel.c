@@ -27,6 +27,7 @@
  */
 
 #include <adwaita.h>
+#include <glib/gi18n.h>
 
 #include "bz-carousel-indicator-dots.h"
 #include "bz-carousel.h"
@@ -271,10 +272,26 @@ on_bind_widget (BzScreenshotsCarousel *self,
                 BzCarousel            *carousel)
 {
   GtkWidget *screenshot = NULL;
+  g_autofree char *caption = NULL;
+  guint n_items = 0;
+  guint index = 0;
 
   screenshot = g_object_new (BZ_TYPE_DECORATED_SCREENSHOT,
                              "async-texture", item,
                              NULL);
+
+  n_items = g_list_model_get_n_items (self->model);
+  for (index = 0; index < n_items; index++)
+    {
+      g_autoptr (BzAsyncTexture) it = g_list_model_get_item (self->model, index);
+      if (it == item)
+        break;
+    }
+
+  caption = g_strdup_printf (_("Screenshot %u of %u"), index + 1, n_items);
+  gtk_accessible_update_property (GTK_ACCESSIBLE (screenshot),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL, caption,
+                                  -1);
 
   g_signal_connect (screenshot, "clicked",
                     G_CALLBACK (on_screenshot_clicked), self);
