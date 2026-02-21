@@ -637,14 +637,14 @@ hooks:
     dialogs:
       - id: jetbrains-warning
         title: >-
-          Jetbrains IDEs are not supported in this format
+          JetBrains IDEs are not supported in this format
         # If true, render inline markup commands in body; see
         # https://docs.gtk.org/Pango/pango_markup.html
         body-use-markup: true
         body: >-
-          This is a <a href="https://www.jetbrains.com/">Jetbrains</a>
+          This is a <a href="https://www.jetbrains.com/">JetBrains</a>
           application and is not officially supported on Flatpak. We
-          recommend using the Toolbox app to manage Jetbrains IDEs.
+          recommend using the Toolbox app to manage JetBrains IDEs.
         # Determines which option will be assumed if the user hits the
         # escape key or otherwise cancels the dialog
         default-response-id: cancel
@@ -652,7 +652,7 @@ hooks:
           - id: cancel
             string: "Cancel"
           - id: goto-web
-            string: "Download Jetbrains Toolbox"
+            string: "Download JetBrains Toolbox"
             # can be "destructive" or "suggested" or omit for no
             # styling
             style: suggested
@@ -699,7 +699,7 @@ hooks:
 
       case "$BAZAAR_HOOK_DIALOG_RESPONSE_ID" in
           goto-web)
-              # if the user pressed "Download Jetbrains Toolbox",
+              # if the user pressed "Download JetBrains Toolbox",
               # continue
               echo 'ok'
               ;;
@@ -733,7 +733,7 @@ hooks:
 
   handle_teardown_stage() {
 
-      # Let's always prevent the user from installing Jetbrains stuff
+      # Let's always prevent the user from installing JetBrains stuff
       echo 'deny'
 
   }
