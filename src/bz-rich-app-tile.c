@@ -24,6 +24,8 @@
 #include "bz-themed-entry-group-rect.h"
 #include "bz-util.h"
 
+#include <glib/gi18n.h>
+
 struct _BzRichAppTile
 {
   BzListTile    parent_instance;
@@ -260,12 +262,35 @@ void
 bz_rich_app_tile_set_group (BzRichAppTile *self,
                             BzEntryGroup  *group)
 {
+  const char *title = NULL;
+  gboolean verified = FALSE;
+  g_autofree char *label = NULL;
+
   g_return_if_fail (BZ_IS_RICH_APP_TILE (self));
 
   g_clear_object (&self->group);
 
   if (group != NULL)
-    self->group = g_object_ref (group);
+    {
+      self->group = g_object_ref (group);
+
+      title = bz_entry_group_get_title (self->group);
+      verified = bz_entry_group_get_is_verified (self->group);
+
+      if (verified)
+        {
+          label = g_strdup_printf ("%s, %s", title, _("Verified"));
+          gtk_accessible_update_property (GTK_ACCESSIBLE (self),
+                                          GTK_ACCESSIBLE_PROPERTY_LABEL, label,
+                                          -1);
+        }
+      else
+        {
+          gtk_accessible_update_property (GTK_ACCESSIBLE (self),
+                                          GTK_ACCESSIBLE_PROPERTY_LABEL, title,
+                                          -1);
+        }
+    }
 
   update_ui_entry (self);
 
