@@ -519,10 +519,9 @@ programmatically react to events and define dialogs with which you can query
 user input. Currently, the only events you can subscribe to are the
 "before-transaction" and "after-transaction" events:
 
-* `before-transaction`: run the hook right before a transaction is scheduled to
-  begin
+* `before-transaction`: run the hook right as the user invokes a transaction
 
-* `after-transaction`: run the hook after a transaction successfully completes
+* `after-transaction`: run the hook after a transaction completes
 
 Hooks are run like a signal emission. After an event occurs, hooks that are
 found to be of the appropriate type are evaluated in an order of priority.
