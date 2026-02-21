@@ -841,9 +841,6 @@ move_to_idx (BzCarousel *self,
         {
           char buf[64] = { 0 };
 
-          child->rect   = target;
-          child->target = target;
-
           g_snprintf (buf, sizeof (buf), "x%p", child);
           bz_animation_cancel (self->animation, buf);
 
@@ -855,6 +852,9 @@ move_to_idx (BzCarousel *self,
 
           g_snprintf (buf, sizeof (buf), "h%p", child);
           bz_animation_cancel (self->animation, buf);
+
+          child->rect   = target;
+          child->target = target;
         }
       else if (avoid_animation)
         child->target = target;
