@@ -642,12 +642,17 @@ has_inputs_changed (BzWindow          *self,
 static DexFuture *
 transact_fiber (TransactData *data)
 {
-  g_autoptr (BzWindow) self                           = NULL;
-  g_autoptr (GError) local_error                      = NULL;
-  g_autoptr (BzTransactionDialogResult) dialog_result = NULL;
-  g_autoptr (DexFuture) transact_future               = NULL;
-  g_autofree char *id_dup                             = NULL;
-  BzMainConfig    *config                             = NULL;
+  g_autoptr (BzWindow) self             = NULL;
+  g_autoptr (GError) local_error        = NULL;
+  g_autoptr (BzEntry) selected_entry    = NULL;
+  g_autoptr (DexFuture) transact_future = NULL;
+  g_autofree char *id_dup               = NULL;
+  BzMainConfig    *config               = NULL;
+  gboolean         delete_user_data     = FALSE;
+  GdkDisplay      *display              = NULL;
+  GdkSeat         *seat                 = NULL;
+  GdkDevice       *keyboard             = NULL;
+  GdkModifierType  modifiers            = GDK_NO_MODIFIER_MASK;
 
   bz_weak_get_or_return_reject (self, data->self);
 
@@ -714,25 +719,77 @@ transact_fiber (TransactData *data)
 
   RUN_HOOK (BZ_HOOK_SIGNAL_BEFORE_TRANSACTION);
 
-  // Show the dialog
-  dialog_result = dex_await_object (
-      bz_transaction_dialog_show (
-          GTK_WIDGET (self),
-          data->entry,
-          data->group,
-          data->remove,
-          data->auto_confirm),
-      &local_error);
+  display  = gdk_display_get_default ();
+  seat     = gdk_display_get_default_seat (display);
+  keyboard = gdk_seat_get_keyboard (seat);
+  if (keyboard != NULL)
+    modifiers = gdk_device_get_modifier_state (keyboard);
 
-  if (dialog_result == NULL)
-    return dex_future_new_for_error (g_steal_pointer (&local_error));
-  if (!bz_transaction_dialog_result_get_confirmed (dialog_result))
-    return dex_future_new_false ();
+  if (modifiers & GDK_SHIFT_MASK)
+    /* Holding shift while invoking a transaction skips the dialog and assumes
+       the first valid entry */
+    {
+      if (data->group != NULL)
+        {
+          g_autoptr (GListModel) store = NULL;
+          guint n_items                = 0;
+
+          store = dex_await_object (
+              bz_entry_group_dup_all_into_store (data->group),
+              &local_error);
+          if (store == NULL)
+            return dex_future_new_for_error (g_steal_pointer (&local_error));
+
+          n_items = g_list_model_get_n_items (store);
+          for (guint i = 0; i < n_items; i++)
+            {
+              g_autoptr (BzEntry) entry = NULL;
+              gboolean installed        = FALSE;
+
+              entry     = g_list_model_get_item (store, i);
+              installed = bz_entry_is_installed (entry);
+              if ((data->remove && installed) ||
+                  (!data->remove && !installed))
+                {
+                  selected_entry = g_steal_pointer (&entry);
+                  break;
+                }
+            }
+          if (selected_entry == NULL)
+            return dex_future_new_false ();
+        }
+      else
+        selected_entry = g_object_ref (data->entry);
+    }
+  else
+    {
+      g_autoptr (BzTransactionDialogResult) dialog_result = NULL;
+
+      // Show the dialog
+      dialog_result = dex_await_object (
+          bz_transaction_dialog_show (
+              GTK_WIDGET (self),
+              data->entry,
+              data->group,
+              data->remove,
+              data->auto_confirm),
+          &local_error);
+
+      if (dialog_result == NULL)
+        return dex_future_new_for_error (g_steal_pointer (&local_error));
+      if (!bz_transaction_dialog_result_get_confirmed (dialog_result))
+        return dex_future_new_false ();
+
+      selected_entry = g_object_ref (
+          bz_transaction_dialog_result_get_selected_entry (dialog_result));
+      delete_user_data = bz_transaction_dialog_result_get_delete_user_data (
+          dialog_result);
+    }
 
   // Perform the transaction
   transact_future = transact (
       self,
-      bz_transaction_dialog_result_get_selected_entry (dialog_result),
+      selected_entry,
       data->remove,
       data->source);
 
@@ -740,7 +797,7 @@ transact_fiber (TransactData *data)
     return dex_future_new_for_error (g_steal_pointer (&local_error));
 
   // Handle user data deletion
-  if (bz_transaction_dialog_result_get_delete_user_data (dialog_result))
+  if (delete_user_data)
     {
       if (data->group != NULL)
         bz_entry_group_reap_user_data (data->group);
