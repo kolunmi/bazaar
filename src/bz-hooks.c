@@ -76,12 +76,22 @@ bz_execute_hook (BzHook               *hook,
 static DexFuture *
 execute_hook_fiber (ExecuteHookData *data)
 {
-  BzHook               *hook     = data->hook;
-  BzHookTransactionType ts_type  = data->ts_type;
-  char                 *ts_appid = data->ts_appid;
-  BzHookSignal          signal   = 0;
+  BzHook               *hook                = data->hook;
+  BzHookTransactionType ts_type             = data->ts_type;
+  char                 *ts_appid            = data->ts_appid;
+  BzHookSignal          signal              = 0;
+  g_autoptr (GEnumClass) signal_enum_class  = NULL;
+  g_autoptr (GEnumClass) ts_type_enum_class = NULL;
+  GEnumValue *signal_enum                   = NULL;
+  GEnumValue *ts_type_enum                  = NULL;
 
-  signal = bz_hook_get_when (hook);
+  signal_enum_class  = g_type_class_ref (BZ_TYPE_HOOK_SIGNAL);
+  ts_type_enum_class = g_type_class_ref (BZ_TYPE_HOOK_TRANSACTION_TYPE);
+
+  signal       = bz_hook_get_when (hook);
+  signal_enum  = g_enum_get_value (signal_enum_class, signal);
+  ts_type_enum = g_enum_get_value (ts_type_enum_class, ts_type);
+
   switch (signal)
     {
     case BZ_HOOK_SIGNAL_BEFORE_TRANSACTION:
@@ -251,12 +261,12 @@ execute_hook_fiber (ExecuteHookData *data)
             g_subprocess_launcher_setenv (launcher, "BAZAAR_HOOK_STAGE_IDX", stage_str, TRUE);
 
             g_subprocess_launcher_setenv (launcher, "BAZAAR_HOOK_ID", id, TRUE);
-            g_subprocess_launcher_setenv (launcher, "BAZAAR_HOOK_TYPE", g_enum_to_string (BZ_TYPE_HOOK_SIGNAL, signal), TRUE);
+            g_subprocess_launcher_setenv (launcher, "BAZAAR_HOOK_TYPE", signal_enum->value_nick, TRUE);
 
             g_subprocess_launcher_setenv (launcher, "BAZAAR_HOOK_WAS_ABORTED", hook_aborted ? "true" : "false", TRUE);
 
             g_subprocess_launcher_setenv (launcher, "BAZAAR_TS_APPID", ts_appid, TRUE);
-            g_subprocess_launcher_setenv (launcher, "BAZAAR_TS_TYPE", g_enum_to_string (BZ_TYPE_HOOK_TRANSACTION_TYPE, ts_type), TRUE);
+            g_subprocess_launcher_setenv (launcher, "BAZAAR_TS_TYPE", ts_type_enum->value_nick, TRUE);
 
             if (finish)
               hook_stage = "teardown";
