@@ -31,7 +31,7 @@ body:
       label: Version
       description: |
         Please check the current version of Bazaar (Main Window > About Bazaar) so we can more easily indentify issues.
-        Output of `flatpak info io.github.kolunmi.Bazaar`. If you are on Bazzite please run `rpm -qi bazaar`
+        Output of `flatpak info io.github.kolunmi.Bazaar`. If you are on Bazzite or secureblue please run `rpm -qi bazaar`
     validations:
       required: true
 
