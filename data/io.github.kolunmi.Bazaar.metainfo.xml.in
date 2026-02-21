@@ -72,6 +72,24 @@
   </screenshots>
 
   <releases>
+    <release version="0.7.9" date="2026-02-21">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.9</url>
+      <description translate="no">
+        <p>**New Features**</p>
+        <ul>
+          <li>Search suggestion pills</li>
+          <li>**Cancel installation** transactions</li>
+          <li>Skip dialogs by pressing shift</li>
+          <li>Runtime size info for app pages</li>
+        </ul>
+        <p>**Updated**</p>
+        <ul>
+          <li>Redesigned "What's New" dialog</li>
+          <li>Improved search results by utilizing Flathub rankings</li>
+          <li>Improved screenshots carousel</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.7.8" date="2026-02-11">
       <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.8</url>
       <description translate="no">
