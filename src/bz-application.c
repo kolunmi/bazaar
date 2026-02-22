@@ -963,15 +963,27 @@ init_fiber (GWeakRef *wr)
           AdwDialog *alert = NULL;
 
           alert = adw_alert_dialog_new (NULL, NULL);
-          adw_alert_dialog_set_prefer_wide_layout (ADW_ALERT_DIALOG (alert), TRUE);
+
+#ifdef SANDBOXED_LIBFLATPAK
           adw_alert_dialog_format_heading (
               ADW_ALERT_DIALOG (alert),
-              _ ("Set Up Flathub"));
+              _ ("Set Up System Flathub?"));
+          adw_alert_dialog_format_body (
+              ADW_ALERT_DIALOG (alert),
+              _ ("The system Flathub remote is not set up. Bazaar requires "
+                 "Flathub to be configured on the system Flatpak installation "
+                 "to browse and install applications.\n\n"
+                 "You can still use Bazaar to browse and remove already installed apps."));
+#else
+          adw_alert_dialog_format_heading (
+              ADW_ALERT_DIALOG (alert),
+              _ ("Set Up Flathub?"));
           adw_alert_dialog_format_body (
               ADW_ALERT_DIALOG (alert),
               _ ("Flathub is not set up on this system. "
                  "You will not be able to browse and install applications in Bazaar if its unavailable.\n\n"
                  "You can still use Bazaar to browse and remove already installed apps."));
+#endif
           adw_alert_dialog_add_responses (
               ADW_ALERT_DIALOG (alert),
               "later", _ ("Later"),
