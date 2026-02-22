@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-02-22 13:16+0100\n"
-"PO-Revision-Date: 2026-02-19 17:14+0100\n"
+"PO-Revision-Date: 2026-02-22 13:24+0100\n"
 "Last-Translator: Daniel Rusek <mail@asciiwolf.com>\n"
 "Language-Team: Czech\n"
 "Language: cs\n"
@@ -688,7 +688,7 @@ msgstr "Stahovaná velikost prostředí"
 #: src/bz-app-tile.blp:57 src/bz-developer-badge.c:98
 #: src/bz-rich-app-tile.blp:103 src/bz-rich-app-tile.c:282
 msgid "Verified"
-msgstr ""
+msgstr "Ověřeno"
 
 #. Translators: As in 'The app is installed'.
 #: src/bz-app-tile.blp:89 src/bz-full-view.c:297 src/bz-releases-list.c:178
@@ -885,7 +885,7 @@ msgstr "Prohlížeč"
 
 #: src/bz-developer-badge.c:92 src/bz-developer-badge.c:98
 msgid "Not Verified"
-msgstr ""
+msgstr "Neověřeno"
 
 #: src/bz-developer-badge.c:145
 msgid "Developer information not available."
@@ -1763,7 +1763,7 @@ msgstr "hledat nainstalované aplikace"
 
 #: src/bz-library-page.blp:46
 msgid "Clear search"
-msgstr ""
+msgstr "Vymazat hledání"
 
 #: src/bz-library-page.blp:67
 msgid "No Apps Found"
@@ -2570,9 +2570,8 @@ msgid "Search Apps, Games, Software"
 msgstr "hledat aplikace, hry, software"
 
 #: src/bz-search-widget.blp:79
-#, fuzzy
 msgid "Clear Search"
-msgstr "Vyhledávání"
+msgstr "Vymazat hledání"
 
 #: src/bz-search-widget.blp:101
 msgid "Categories Unavailable"
@@ -2803,11 +2802,11 @@ msgstr "Otevřít aplikaci"
 
 #: src/bz-transaction-tile.blp:285
 msgid "Cancel Transaction"
-msgstr ""
+msgstr "Zrušit transakci"
 
 #: src/bz-transaction-tile.blp:409
 msgid "Show Error Info"
-msgstr ""
+msgstr "Zobrazit informace o chybě"
 
 #: src/bz-transaction-tile.c:112
 #, c-format
@@ -2816,7 +2815,7 @@ msgstr "%s uvolněno"
 
 #: src/bz-transaction-tile.c:398 src/bz-transaction-tile.c:401
 msgid "Transaction Error"
-msgstr ""
+msgstr "Chyba transakce"
 
 #: src/bz-transaction.c:342
 msgid "Pending"
@@ -2937,17 +2936,11 @@ msgid "Show Shortcuts"
 msgstr "Zobrazit zkratky"
 
 #: src/gtk/shortcuts-dialog.blp:35
-#, fuzzy
 msgctxt "shortcut window"
 msgid "Close Window"
-msgstr "Nové okno"
+msgstr "Zavřít okno"
 
 #: src/gtk/shortcuts-dialog.blp:41
-#, fuzzy
 msgctxt "shortcut window"
 msgid "Quit Bazaar"
-msgstr "_Ukončit Bazaar"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Quit"
-#~ msgstr "Ukončit"
+msgstr "Ukončit Bazaar"
