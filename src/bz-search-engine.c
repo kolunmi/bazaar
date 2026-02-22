@@ -21,7 +21,6 @@
 #include "bz-search-engine.h"
 #include "bz-entry-group.h"
 #include "bz-env.h"
-#include "bz-flathub-state.h"
 #include "bz-search-result.h"
 #include "bz-util.h"
 
@@ -29,8 +28,7 @@ struct _BzSearchEngine
 {
   GObject parent_instance;
 
-  GListModel     *model;
-  BzFlathubState *flathub_state;
+  GListModel *model;
 };
 
 G_DEFINE_FINAL_TYPE (BzSearchEngine, bz_search_engine, G_TYPE_OBJECT);
@@ -40,7 +38,6 @@ enum
   PROP_0,
 
   PROP_MODEL,
-  PROP_FLATHUB_STATE,
 
   LAST_PROP
 };
@@ -71,13 +68,11 @@ BZ_DEFINE_DATA (
     query_task,
     QueryTask,
     {
-      char          **terms;
-      GPtrArray      *snapshot;
-      BzFlathubState *flathub_state;
+      char     **terms;
+      GPtrArray *snapshot;
     },
     BZ_RELEASE_DATA (terms, g_strfreev);
-    BZ_RELEASE_DATA (snapshot, g_ptr_array_unref);
-    g_clear_object (&self->flathub_state);)
+    BZ_RELEASE_DATA (snapshot, g_ptr_array_unref))
 static DexFuture *
 query_task_fiber (QueryTaskData *data);
 
@@ -85,16 +80,14 @@ BZ_DEFINE_DATA (
     query_sub_task,
     QuerySubTask,
     {
-      char           *query_utf8;
-      GPtrArray      *shallow_mirror;
-      BzFlathubState *flathub_state;
-      double          threshold;
-      guint           work_offset;
-      guint           work_length;
+      char      *query_utf8;
+      GPtrArray *shallow_mirror;
+      double     threshold;
+      guint      work_offset;
+      guint      work_length;
     },
     BZ_RELEASE_DATA (query_utf8, g_free);
-    BZ_RELEASE_DATA (shallow_mirror, g_ptr_array_unref);
-    BZ_RELEASE_DATA (flathub_state, g_object_unref));
+    BZ_RELEASE_DATA (shallow_mirror, g_ptr_array_unref));
 static DexFuture *
 query_sub_task_fiber (QuerySubTaskData *data);
 
@@ -113,7 +106,6 @@ bz_search_engine_dispose (GObject *object)
   BzSearchEngine *self = BZ_SEARCH_ENGINE (object);
 
   g_clear_object (&self->model);
-  g_clear_object (&self->flathub_state);
 
   G_OBJECT_CLASS (bz_search_engine_parent_class)->dispose (object);
 }
@@ -130,9 +122,6 @@ bz_search_engine_get_property (GObject    *object,
     {
     case PROP_MODEL:
       g_value_set_object (value, bz_search_engine_get_model (self));
-      break;
-    case PROP_FLATHUB_STATE:
-      g_value_set_object (value, bz_search_engine_get_flathub_state (self));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -151,9 +140,6 @@ bz_search_engine_set_property (GObject      *object,
     {
     case PROP_MODEL:
       bz_search_engine_set_model (self, g_value_get_object (value));
-      break;
-    case PROP_FLATHUB_STATE:
-      bz_search_engine_set_flathub_state (self, g_value_get_object (value));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -174,13 +160,6 @@ bz_search_engine_class_init (BzSearchEngineClass *klass)
           "model",
           NULL, NULL,
           G_TYPE_LIST_MODEL,
-          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
-
-  props[PROP_FLATHUB_STATE] =
-      g_param_spec_object (
-          "flathub",
-          NULL, NULL,
-          BZ_TYPE_FLATHUB_STATE,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
@@ -216,27 +195,6 @@ bz_search_engine_set_model (BzSearchEngine *self,
     self->model = g_object_ref (model);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MODEL]);
-}
-
-BzFlathubState *
-bz_search_engine_get_flathub_state (BzSearchEngine *self)
-{
-  g_return_val_if_fail (BZ_IS_SEARCH_ENGINE (self), NULL);
-  return self->flathub_state;
-}
-
-void
-bz_search_engine_set_flathub_state (BzSearchEngine *self,
-                                    BzFlathubState *flathub_state)
-{
-  g_return_if_fail (BZ_IS_SEARCH_ENGINE (self));
-  g_return_if_fail (flathub_state == NULL || BZ_IS_FLATHUB_STATE (flathub_state));
-
-  g_clear_object (&self->flathub_state);
-  if (flathub_state != NULL)
-    self->flathub_state = g_object_ref (flathub_state);
-
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_FLATHUB_STATE]);
 }
 
 DexFuture *
@@ -288,10 +246,9 @@ bz_search_engine_query (BzSearchEngine    *self,
       for (guint i = 0; i < snapshot->len; i++)
         g_ptr_array_index (snapshot, i) = g_list_model_get_item (self->model, i);
 
-      data                = query_task_data_new ();
-      data->terms         = g_strdupv ((gchar **) terms);
-      data->snapshot      = g_steal_pointer (&snapshot);
-      data->flathub_state = bz_object_maybe_ref (self->flathub_state);
+      data           = query_task_data_new ();
+      data->terms    = g_strdupv ((gchar **) terms);
+      data->snapshot = g_steal_pointer (&snapshot);
 
       return dex_scheduler_spawn (
           dex_thread_pool_scheduler_get_default (),
@@ -304,9 +261,8 @@ bz_search_engine_query (BzSearchEngine    *self,
 static DexFuture *
 query_task_fiber (QueryTaskData *data)
 {
-  char          **terms             = data->terms;
-  GPtrArray      *shallow_mirror    = data->snapshot;
-  BzFlathubState *flathub_state     = data->flathub_state;
+  char     **terms                  = data->terms;
+  GPtrArray *shallow_mirror         = data->snapshot;
   g_autoptr (GError) local_error    = NULL;
   gboolean         result           = FALSE;
   g_autofree char *query_utf8       = NULL;
@@ -329,7 +285,6 @@ query_task_fiber (QueryTaskData *data)
       sub_data                 = query_sub_task_data_new ();
       sub_data->query_utf8     = g_strdup (query_utf8);
       sub_data->shallow_mirror = g_ptr_array_ref (shallow_mirror);
-      sub_data->flathub_state  = bz_object_maybe_ref (flathub_state);
       sub_data->threshold      = 1.0;
       sub_data->work_offset    = i * scores_per_task;
       sub_data->work_length    = scores_per_task;
@@ -452,11 +407,6 @@ query_sub_task_fiber (QuerySubTaskData *data)
 
           append.idx = work_offset + i;
           append.val = score;
-
-          if (data->flathub_state != NULL)
-            /* This is a threadsafe function */
-            append.val *= bz_flathub_state_lookup_app_score (data->flathub_state, id);
-
           g_array_append_val (scores_out, append);
         }
     }
