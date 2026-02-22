@@ -298,8 +298,20 @@ execute_hook_fiber (ExecuteHookData *data)
 
       g_subprocess_launcher_setenv (launcher, "BAZAAR_HOOK_WAS_ABORTED", hook_aborted ? "true" : "false", TRUE);
 
-      g_subprocess_launcher_setenv (launcher, "BAZAAR_TS_APPID", ts_appid, TRUE);
-      g_subprocess_launcher_setenv (launcher, "BAZAAR_TS_TYPE", ts_type_enum->value_nick, TRUE);
+      switch (signal)
+        {
+        case BZ_HOOK_SIGNAL_BEFORE_TRANSACTION:
+        case BZ_HOOK_SIGNAL_AFTER_TRANSACTION:
+          g_subprocess_launcher_setenv (launcher, "BAZAAR_TS_APPID", ts_appid, TRUE);
+          g_subprocess_launcher_setenv (launcher, "BAZAAR_TS_TYPE", ts_type_enum->value_nick, TRUE);
+          break;
+        case BZ_HOOK_SIGNAL_VIEW_APP:
+        default:
+          /* ts_appid is also used to hold an appid for non-transaction-related
+             hooks */
+          g_subprocess_launcher_setenv (launcher, "BAZAAR_APPID", ts_appid, TRUE);
+          break;
+        }
 
       if (finish)
         hook_stage = "teardown";

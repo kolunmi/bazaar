@@ -516,8 +516,10 @@ Here is how they did it:
 
 Hooks are an advanced feature of Bazaar. In essence, they allow you to
 programmatically react to events and define dialogs with which you can query
-user input. Currently, the only events you can subscribe to are the
-"before-transaction" and "after-transaction" events:
+user input. Currently, these are the event signals you can subscribe to:
+
+* `view-app`: run the hook when the user clicks on an app tile or otherwise
+  views an application in the main app page
 
 * `before-transaction`: run the hook right as the user invokes a transaction
 
@@ -576,8 +578,15 @@ Here is an overview of the environment variables the shell snippet will receive:
 * `BAZAAR_HOOK_DIALOG_RESPONSE_ID`: if applicable, the user response given
   through the current dialog
 
+* `BAZAAR_APPID`: if applicable, the appid of the entry Bazaar is currently
+  dealing with. Use this for hooks that are not related to transactions. If your
+  hook deals with transactions, such as `before-transaction` or
+  `after-transaction`, use `BAZAAR_TS_APPID` instead.
+
 * `BAZAAR_TS_APPID`: if applicable, the appid of the entry Bazaar is currently
-  dealing with
+  dealing with. Use this for hooks that are related to transactions. If your
+  hook does not deal with transactions, such as `view-app`, use `BAZAAR_APPID`
+  instead.
 
 * `BAZAAR_TS_TYPE`: if applicable, the type of transaction being run. Can be
   "install", "update", or "removal".

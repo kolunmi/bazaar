@@ -140,6 +140,11 @@ static void
 set_page (BzWindow *self);
 
 static void
+emit_hook_disown (BzWindow    *self,
+                  BzHookSignal signal,
+                  const char  *appid);
+
+static void
 bz_window_dispose (GObject *object)
 {
   BzWindow *self = BZ_WINDOW (object);
@@ -853,11 +858,15 @@ bz_window_show_group (BzWindow     *self,
                       BzEntryGroup *group)
 {
   AdwNavigationPage *visible_page = NULL;
+  const char        *appid        = NULL;
 
   g_return_if_fail (BZ_IS_WINDOW (self));
   g_return_if_fail (BZ_IS_ENTRY_GROUP (group));
 
   bz_full_view_set_entry_group (self->full_view, group);
+
+  appid = bz_entry_group_get_id (group);
+  emit_hook_disown (self, BZ_HOOK_SIGNAL_VIEW_APP, appid);
 
   visible_page = adw_navigation_view_get_visible_page (self->navigation_view);
   if (visible_page != adw_navigation_view_find_page (self->navigation_view, "view"))
@@ -1076,4 +1085,27 @@ set_page (BzWindow *self)
 
   if (g_strcmp0 (selected_navigation_page_name, "view") != 0)
     bz_full_view_set_entry_group (self->full_view, NULL);
+}
+
+static void
+emit_hook_disown (BzWindow    *self,
+                  BzHookSignal signal,
+                  const char  *appid)
+{
+  BzMainConfig *config = NULL;
+  GListModel   *hooks  = NULL;
+
+  if (self->state == NULL)
+    return;
+
+  config = bz_state_info_get_main_config (self->state);
+  if (config == NULL)
+    return;
+
+  hooks = bz_main_config_get_hooks (config);
+  if (hooks == NULL)
+    return;
+
+  dex_future_disown (bz_run_hook_emission (
+      hooks, signal, 0, appid));
 }
