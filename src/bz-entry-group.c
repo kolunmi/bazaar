@@ -600,6 +600,9 @@ bz_entry_group_new_for_single_entry (BzEntry *entry)
   if (unique_id != NULL)
     gtk_string_list_append (group->unique_ids, unique_id);
 
+  group->installable = 1;
+  group->installable_available = 1;
+
   future                     = dex_future_new_for_object (entry);
   group->standalone_ui_entry = bz_result_new (future);
   dex_unref (future);
@@ -1311,6 +1314,35 @@ dup_all_into_store_fiber (BzEntryGroup *self)
   guint n_items                 = 0;
   g_autoptr (GListStore) store  = NULL;
   guint n_resolved              = 0;
+
+  if (self->standalone_ui_entry != NULL)
+  {
+    g_autoptr (GError) error = NULL;
+    BzEntry *entry           = NULL;
+    DexFuture *future        = NULL;
+
+    store  = g_list_store_new (BZ_TYPE_ENTRY);
+    future = bz_result_dup_future (self->standalone_ui_entry);
+
+    if (dex_await (dex_ref (future), &error))
+      {
+        entry = g_value_get_object (dex_future_get_value (future, NULL));
+        if (entry != NULL)
+          {
+            bz_entry_group_connect_living (self, entry);
+            g_list_store_append (store, entry);
+            return dex_future_new_for_object (store);
+          }
+      }
+
+    g_warning ("Standalone entry for %s failed to resolve: %s",
+               self->id, error ? error->message : "unknown error");
+    return dex_future_new_reject (
+        G_IO_ERROR,
+        G_IO_ERROR_UNKNOWN,
+        "Standalone entry for %s failed to resolve",
+        self->id);
+  }
 
   futures = g_ptr_array_new_with_free_func (dex_unref);
 
