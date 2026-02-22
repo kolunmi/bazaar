@@ -608,8 +608,8 @@ add_score (GHashTable *scores,
            const char *app_id,
            double      points)
 {
-  double *current_score;
-  double  new_score;
+  double *current_score = NULL;
+  double  new_score     = 0.0;
 
   current_score = g_hash_table_lookup (scores, app_id);
 
@@ -632,9 +632,9 @@ score_ranked_list (GHashTable *scores,
 {
   if (is_json_object)
     {
-      JsonObject    *object;
-      JsonObjectIter iter;
-      const char    *key;
+      JsonObject    *object   = NULL;
+      JsonObjectIter iter     = { 0 };
+      const char    *key      = NULL;
       guint          position = 0;
 
       object = json_node_get_object (node);
@@ -642,7 +642,7 @@ score_ranked_list (GHashTable *scores,
       json_object_iter_init (&iter, object);
       while (json_object_iter_next (&iter, &key, NULL))
         {
-          double score;
+          double score = 0.0;
 
           score = base_score * exp (-falloff_rate * position);
           add_score (scores, key, score);
@@ -651,9 +651,9 @@ score_ranked_list (GHashTable *scores,
     }
   else
     {
-      JsonObject *object;
-      JsonArray  *hits_array;
-      guint       length;
+      JsonObject *object     = NULL;
+      JsonArray  *hits_array = NULL;
+      guint       length     = 0;
 
       object     = json_node_get_object (node);
       hits_array = json_object_get_array_member (object, "hits");
@@ -661,9 +661,9 @@ score_ranked_list (GHashTable *scores,
 
       for (guint i = 0; i < length; i++)
         {
-          JsonObject *element;
-          const char *app_id;
-          double      score;
+          JsonObject *element = NULL;
+          const char *app_id  = NULL;
+          double      score   = 0.0;
 
           element = json_array_get_object_element (hits_array, i);
           app_id  = json_object_get_string_member (element, "app_id");
@@ -694,8 +694,8 @@ add_category (BzFlathubState *self,
               QualityMode     quality_mode,
               gboolean        is_spotlight)
 {
-  JsonObject    *object = NULL;
-  JsonObjectIter iter;
+  JsonObject    *object                   = NULL;
+  JsonObjectIter iter                     = { 0 };
   JsonArray     *hits_array               = NULL;
   const char    *key                      = NULL;
   const char    *app                      = NULL;
