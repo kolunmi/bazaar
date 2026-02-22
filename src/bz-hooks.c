@@ -39,6 +39,18 @@ BZ_DEFINE_DATA (
     BZ_RELEASE_DATA (ts_appid, g_free))
 
 BZ_DEFINE_DATA (
+    run_emission,
+    RunEmission,
+    {
+      GListModel           *hooks;
+      BzHookSignal          signal;
+      BzHookTransactionType ts_type;
+      char                 *ts_appid;
+    },
+    BZ_RELEASE_DATA (hooks, g_object_unref);
+    BZ_RELEASE_DATA (ts_appid, g_free))
+
+BZ_DEFINE_DATA (
     dialog,
     Dialog,
     {
@@ -50,6 +62,9 @@ BZ_DEFINE_DATA (
 
 static DexFuture *
 execute_hook_fiber (ExecuteHookData *data);
+
+static DexFuture *
+run_emission_fiber (RunEmissionData *data);
 
 DexFuture *
 bz_execute_hook (BzHook               *hook,
@@ -69,6 +84,30 @@ bz_execute_hook (BzHook               *hook,
       dex_scheduler_get_default (),
       bz_get_dex_stack_size (),
       (DexFiberFunc) execute_hook_fiber,
+      execute_hook_data_ref (data),
+      execute_hook_data_unref);
+}
+
+DexFuture *
+bz_run_hook_emission (GListModel           *hooks,
+                      BzHookSignal          signal,
+                      BzHookTransactionType ts_type,
+                      const char           *ts_appid)
+{
+  g_autoptr (RunEmissionData) data = NULL;
+
+  dex_return_error_if_fail (G_IS_LIST_MODEL (hooks));
+
+  data           = run_emission_data_new ();
+  data->hooks    = g_object_ref (hooks);
+  data->signal   = signal;
+  data->ts_type  = ts_type;
+  data->ts_appid = bz_maybe_strdup (ts_appid);
+
+  return dex_scheduler_spawn (
+      dex_scheduler_get_default (),
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) run_emission_fiber,
       execute_hook_data_ref (data),
       execute_hook_data_unref);
 }
@@ -441,4 +480,41 @@ execute_hook_fiber (ExecuteHookData *data)
     }
 
   return dex_future_new_for_int (BZ_HOOK_RETURN_STATUS_CONTINUE);
+}
+
+static DexFuture *
+run_emission_fiber (RunEmissionData *data)
+{
+  GListModel           *hooks    = data->hooks;
+  BzHookSignal          signal   = data->signal;
+  BzHookTransactionType ts_type  = data->ts_type;
+  char                 *ts_appid = data->ts_appid;
+  guint                 n_hooks  = 0;
+
+  n_hooks = g_list_model_get_n_items (hooks);
+  for (guint i = 0; i < n_hooks; i++)
+    {
+      g_autoptr (BzHook) hook        = NULL;
+      BzHookSignal       when        = 0;
+      BzHookReturnStatus hook_result = BZ_HOOK_RETURN_STATUS_CONTINUE;
+
+      hook = g_list_model_get_item (hooks, i);
+      when = bz_hook_get_when (hook);
+
+      if (when == signal)
+        hook_result = dex_await_int (
+            bz_execute_hook (hook, ts_type, ts_appid),
+            NULL);
+
+      if (hook_result == BZ_HOOK_RETURN_STATUS_CONFIRM ||
+          hook_result == BZ_HOOK_RETURN_STATUS_STOP)
+        break;
+      else if (hook_result == BZ_HOOK_RETURN_STATUS_DENY)
+        return dex_future_new_reject (
+            G_IO_ERROR,
+            G_IO_ERROR_UNKNOWN,
+            "Prevented by a configured hook");
+    }
+
+  return dex_future_new_true ();
 }

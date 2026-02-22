@@ -31,4 +31,10 @@ bz_execute_hook (BzHook               *hook,
                  BzHookTransactionType ts_type,
                  const char           *ts_appid);
 
+DexFuture *
+bz_run_hook_emission (GListModel           *hooks,
+                      BzHookSignal          signal,
+                      BzHookTransactionType ts_type,
+                      const char           *ts_appid);
+
 G_END_DECLS

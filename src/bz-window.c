@@ -649,6 +649,7 @@ transact_fiber (TransactData *data)
   g_autoptr (DexFuture) transact_future = NULL;
   g_autofree char *id_dup               = NULL;
   BzMainConfig    *config               = NULL;
+  GListModel      *hooks                = NULL;
   gboolean         delete_user_data     = FALSE;
   GdkDisplay      *display              = NULL;
   GdkSeat         *seat                 = NULL;
@@ -677,46 +678,25 @@ transact_fiber (TransactData *data)
     }
 
   config = bz_state_info_get_main_config (self->state);
-#define RUN_HOOK(_signal)                                                  \
-  /* TODO: make reading config less bad */                                 \
-  if (config != NULL &&                                                    \
-      bz_main_config_get_hooks (config) != NULL)                           \
-    {                                                                      \
-      GListModel *hooks   = NULL;                                          \
-      guint       n_hooks = 0;                                             \
-                                                                           \
-      hooks   = bz_main_config_get_hooks (config);                         \
-      n_hooks = g_list_model_get_n_items (hooks);                          \
-                                                                           \
-      for (guint j = 0; j < n_hooks; j++)                                  \
-        {                                                                  \
-          g_autoptr (BzHook) hook        = NULL;                           \
-          BzHookSignal       when        = 0;                              \
-          BzHookReturnStatus hook_result = BZ_HOOK_RETURN_STATUS_CONTINUE; \
-                                                                           \
-          hook = g_list_model_get_item (hooks, j);                         \
-          when = bz_hook_get_when (hook);                                  \
-                                                                           \
-          if (when == (_signal))                                           \
-            hook_result = dex_await_int (                                  \
-                bz_execute_hook (                                          \
-                    hook,                                                  \
-                    data->remove                                           \
-                        ? BZ_HOOK_TRANSACTION_TYPE_REMOVAL                 \
-                        : BZ_HOOK_TRANSACTION_TYPE_INSTALL,                \
-                    id_dup),                                               \
-                NULL);                                                     \
-                                                                           \
-          if (hook_result == BZ_HOOK_RETURN_STATUS_CONFIRM ||              \
-              hook_result == BZ_HOOK_RETURN_STATUS_STOP)                   \
-            break;                                                         \
-          else if (hook_result == BZ_HOOK_RETURN_STATUS_DENY)              \
-            return dex_future_new_reject (                                 \
-                BZ_TRANSACTION_MGR_ERROR,                                  \
-                BZ_TRANSACTION_MGR_ERROR_CANCELLED_BY_HOOK,                \
-                "The transaction was prevented by a configured hook");     \
-        }                                                                  \
-    }
+  if (config != NULL)
+    hooks = bz_main_config_get_hooks (config);
+
+#define RUN_HOOK(_signal)                                               \
+  G_STMT_START                                                          \
+  {                                                                     \
+    if (hooks != NULL &&                                                \
+        !dex_await (                                                    \
+            bz_run_hook_emission (                                      \
+                hooks,                                                  \
+                (_signal),                                              \
+                data->remove                                            \
+                    ? BZ_HOOK_TRANSACTION_TYPE_REMOVAL                  \
+                    : BZ_HOOK_TRANSACTION_TYPE_INSTALL,                 \
+                id_dup),                                                \
+            &local_error))                                              \
+      return dex_future_new_for_error (g_steal_pointer (&local_error)); \
+  }                                                                     \
+  G_STMT_END
 
   RUN_HOOK (BZ_HOOK_SIGNAL_BEFORE_TRANSACTION);
 
