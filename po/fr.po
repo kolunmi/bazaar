@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-22 13:26+0100\n"
-"PO-Revision-Date: 2026-02-22 13:31+0100\n"
+"POT-Creation-Date: 2026-02-22 19:06+0100\n"
+"PO-Revision-Date: 2026-02-22 19:07+0100\n"
 "Last-Translator: Mimolet <theMimolet@proton.me>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -809,8 +809,8 @@ msgid "Could not find app"
 msgstr "Impossible de trouver l'application"
 
 #: src/bz-application.c:3122
-msgid "Getting App Info…"
-msgstr "Réception des informations des applis…"
+msgid "Writing to cache…"
+msgstr "Écriture dans le cache…"
 
 #: src/bz-appstream-parser.c:303
 msgctxt "Project URL Type"
@@ -1782,7 +1782,7 @@ msgstr "Rechercher des applis installées"
 
 #: src/bz-library-page.blp:46
 msgid "Clear search"
-msgstr ""
+msgstr "Effacer la recherche"
 
 #: src/bz-library-page.blp:67
 msgid "No Apps Found"
