@@ -1384,7 +1384,7 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
             GHashTableIter new_iter              = { 0 };
             g_autoptr (GPtrArray) diff_writes    = NULL;
 
-            bz_state_info_set_background_task_label (self->state, _ ("Synchronizing..."));
+            bz_state_info_set_background_task_label (self->state, _ ("Refreshing…"));
 
             installed_set = dex_await_boxed (
                 bz_backend_retrieve_install_ids (
@@ -1531,12 +1531,12 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
         {
           g_autofree char *label = NULL;
 
-          label = g_strdup_printf (_ ("Receiving %d entries..."), self->n_notifications_incoming);
+          label = g_strdup_printf (_ ("Loading %d apps…"), self->n_notifications_incoming);
           bz_state_info_set_background_task_label (self->state, label);
         }
       else
         {
-          bz_state_info_set_background_task_label (self->state, _ ("Checking for updates"));
+          bz_state_info_set_background_task_label (self->state, _ ("Checking for updates…"));
           fiber_check_for_updates (self);
           finish_with_background_task_label (self);
         }
@@ -3113,13 +3113,13 @@ finish_with_background_task_label (BzApplication *self)
     {
       g_autofree char *label = NULL;
 
-      label = g_strdup_printf (_ ("Receiving %d entries..."), self->n_notifications_incoming);
+      label = g_strdup_printf (_ ("Loading %d apps…"), self->n_notifications_incoming);
       bz_state_info_set_background_task_label (self->state, label);
     }
   else if (bz_state_info_get_syncing (self->state))
-    bz_state_info_set_background_task_label (self->state, _ ("Synchronizing..."));
+    bz_state_info_set_background_task_label (self->state, _ ("Refreshing…"));
   else if (bz_state_info_get_busy (self->state))
-    bz_state_info_set_background_task_label (self->state, _ ("Indexing Data..."));
+    bz_state_info_set_background_task_label (self->state, _ ("Getting App Info…"));
   else
     bz_state_info_set_background_task_label (self->state, NULL);
 }

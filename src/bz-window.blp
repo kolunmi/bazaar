@@ -132,7 +132,7 @@ template $BzWindow: Adw.ApplicationWindow {
                         }
 
                         Label {
-                          label: _("Refreshing Store Content");
+                          label: _("Refreshing…");
                           wrap: true;
                           justify: center;
                           margin-bottom: 24;
@@ -270,7 +270,7 @@ template $BzWindow: Adw.ApplicationWindow {
                               Label {
                                 hexpand: true;
                                 visible: bind $invert_boolean(status_popover_label.visible) as <bool>;
-                                label: _("No background tasks!");
+                                label: _("Refresh completed!");
                               }
                             };
                           };
@@ -332,7 +332,7 @@ template $BzWindow: Adw.ApplicationWindow {
                       sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.syncing as <bool>) as <bool>;
                       revealed: bind $logical_and($invert_boolean(template.state as <$BzStateInfo>.metered_connection as <bool>) as <bool>, $logical_and(template.state as <$BzStateInfo>.have_connection as <bool>, $invert_boolean(template.state as <$BzStateInfo>.online as <bool>) as <bool>) as <bool>) as <bool>;
                       title: _("You have a network connection but are viewing a cached version of Flathub");
-                      button-label: _("Sync Manually");
+                      button-label: _("Refresh Manually");
                       button-clicked => $sync_cb(template);
                     }
                   }
@@ -389,6 +389,11 @@ menu primary_menu {
 
   section {
     item {
+      label: _("_Refresh");
+      action: "app.sync-remotes";
+    }
+
+    item {
       label: _("_Preferences");
       action: "app.preferences";
     }
@@ -402,11 +407,6 @@ menu primary_menu {
     item {
       label: _("_Manage Leftover User Data");
       action: "window.user-data";
-    }
-
-    item {
-      label: _("_Synchronize Remotes");
-      action: "app.sync-remotes";
     }
 
     item {

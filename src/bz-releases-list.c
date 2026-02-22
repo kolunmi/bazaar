@@ -112,21 +112,21 @@ format_timestamp (gpointer object,
     return NULL;
 
   if (g_date_time_get_year (date) == g_date_time_get_year (now))
-    /* Translators: This is a date format for timestamps from previous years. Used in the app releases section.
-     * %B is the full month name, %e is the day, %Y is the year.
-     * Example: "October 1, 2025"
-     * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
-     * Please modify to make it sound natural in your locale.
-     *  */
-    return g_date_time_format (date, "%e %B");
-  else
     /* Translators: This is a date format for timestamps from the current year. Used in the app releases section.
      * %B is the full month name, %e is the day.
      * Example: "October 1"
      * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
      * Please modify to make it sound natural in your locale.
      *  */
-    return g_date_time_format (date, "%e %B %Y");
+    return g_date_time_format (date, N_("%e %B"));
+  else
+    /* Translators: This is a date format for timestamps from previous years. Used in the app releases section.
+     * %B is the full month name, %e is the day, %Y is the year.
+     * Example: "October 1, 2025"
+     * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
+     * Please modify to make it sound natural in your locale.
+     *  */
+    return g_date_time_format (date, N_("%e %B %Y"));
 }
 
 static GtkWidget *

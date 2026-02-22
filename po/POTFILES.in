@@ -22,8 +22,8 @@ src/bz-async-texture.c
 src/bz-backend.c
 src/bz-comet-overlay.c
 src/bz-content-provider.c
-src/bz-content-tile.blp
-src/bz-content-tile.c
+src/bz-context-tile.blp
+src/bz-context-tile.c
 src/bz-curated-view.blp
 src/bz-curated-view.c
 src/bz-data-graph.c
