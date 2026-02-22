@@ -140,9 +140,9 @@ static void
 set_page (BzWindow *self);
 
 static void
-emit_hook_disown (BzWindow    *self,
-                  BzHookSignal signal,
-                  const char  *appid);
+emit_hook_disown (BzWindow     *self,
+                  BzHookSignal  signal,
+                  BzEntryGroup *group);
 
 static void
 bz_window_dispose (GObject *object)
@@ -692,12 +692,11 @@ transact_fiber (TransactData *data)
     if (hooks != NULL &&                                                \
         !dex_await (                                                    \
             bz_run_hook_emission (                                      \
-                hooks,                                                  \
-                (_signal),                                              \
+                hooks, (_signal),                                       \
                 data->remove                                            \
                     ? BZ_HOOK_TRANSACTION_TYPE_REMOVAL                  \
                     : BZ_HOOK_TRANSACTION_TYPE_INSTALL,                 \
-                id_dup),                                                \
+                id_dup, NULL),                                          \
             &local_error))                                              \
       return dex_future_new_for_error (g_steal_pointer (&local_error)); \
   }                                                                     \
@@ -858,15 +857,12 @@ bz_window_show_group (BzWindow     *self,
                       BzEntryGroup *group)
 {
   AdwNavigationPage *visible_page = NULL;
-  const char        *appid        = NULL;
 
   g_return_if_fail (BZ_IS_WINDOW (self));
   g_return_if_fail (BZ_IS_ENTRY_GROUP (group));
 
   bz_full_view_set_entry_group (self->full_view, group);
-
-  appid = bz_entry_group_get_id (group);
-  emit_hook_disown (self, BZ_HOOK_SIGNAL_VIEW_APP, appid);
+  emit_hook_disown (self, BZ_HOOK_SIGNAL_VIEW_APP, group);
 
   visible_page = adw_navigation_view_get_visible_page (self->navigation_view);
   if (visible_page != adw_navigation_view_find_page (self->navigation_view, "view"))
@@ -1088,9 +1084,9 @@ set_page (BzWindow *self)
 }
 
 static void
-emit_hook_disown (BzWindow    *self,
-                  BzHookSignal signal,
-                  const char  *appid)
+emit_hook_disown (BzWindow     *self,
+                  BzHookSignal  signal,
+                  BzEntryGroup *group)
 {
   BzMainConfig *config = NULL;
   GListModel   *hooks  = NULL;
@@ -1107,5 +1103,5 @@ emit_hook_disown (BzWindow    *self,
     return;
 
   dex_future_disown (bz_run_hook_emission (
-      hooks, signal, 0, appid));
+      hooks, signal, 0, NULL, group));
 }

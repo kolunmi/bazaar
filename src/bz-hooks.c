@@ -34,9 +34,11 @@ BZ_DEFINE_DATA (
       BzHook               *hook;
       BzHookTransactionType ts_type;
       char                 *ts_appid;
+      BzEntryGroup         *group;
     },
     BZ_RELEASE_DATA (hook, g_object_unref);
-    BZ_RELEASE_DATA (ts_appid, g_free))
+    BZ_RELEASE_DATA (ts_appid, g_free);
+    BZ_RELEASE_DATA (group, g_object_unref))
 
 BZ_DEFINE_DATA (
     run_emission,
@@ -46,9 +48,11 @@ BZ_DEFINE_DATA (
       BzHookSignal          signal;
       BzHookTransactionType ts_type;
       char                 *ts_appid;
+      BzEntryGroup         *group;
     },
     BZ_RELEASE_DATA (hooks, g_object_unref);
-    BZ_RELEASE_DATA (ts_appid, g_free))
+    BZ_RELEASE_DATA (ts_appid, g_free);
+    BZ_RELEASE_DATA (group, g_object_unref))
 
 BZ_DEFINE_DATA (
     dialog,
@@ -69,7 +73,8 @@ run_emission_fiber (RunEmissionData *data);
 DexFuture *
 bz_execute_hook (BzHook               *hook,
                  BzHookTransactionType ts_type,
-                 const char           *ts_appid)
+                 const char           *ts_appid,
+                 BzEntryGroup         *group)
 {
   g_autoptr (ExecuteHookData) data = NULL;
 
@@ -79,6 +84,7 @@ bz_execute_hook (BzHook               *hook,
   data->hook     = g_object_ref (hook);
   data->ts_type  = ts_type;
   data->ts_appid = bz_maybe_strdup (ts_appid);
+  data->group    = bz_object_maybe_ref (group);
 
   return dex_scheduler_spawn (
       dex_scheduler_get_default (),
@@ -92,7 +98,8 @@ DexFuture *
 bz_run_hook_emission (GListModel           *hooks,
                       BzHookSignal          signal,
                       BzHookTransactionType ts_type,
-                      const char           *ts_appid)
+                      const char           *ts_appid,
+                      BzEntryGroup         *group)
 {
   g_autoptr (RunEmissionData) data = NULL;
 
@@ -103,6 +110,7 @@ bz_run_hook_emission (GListModel           *hooks,
   data->signal   = signal;
   data->ts_type  = ts_type;
   data->ts_appid = bz_maybe_strdup (ts_appid);
+  data->group    = bz_object_maybe_ref (group);
 
   return dex_scheduler_spawn (
       dex_scheduler_get_default (),
@@ -118,6 +126,7 @@ execute_hook_fiber (ExecuteHookData *data)
   BzHook               *hook                = data->hook;
   BzHookTransactionType ts_type             = data->ts_type;
   char                 *ts_appid            = data->ts_appid;
+  BzEntryGroup         *group               = data->group;
   BzHookSignal          signal              = 0;
   g_autoptr (GEnumClass) signal_enum_class  = NULL;
   g_autoptr (GEnumClass) ts_type_enum_class = NULL;
@@ -132,6 +141,18 @@ execute_hook_fiber (ExecuteHookData *data)
   g_autoptr (DialogData) current_dialog     = NULL;
   gboolean hook_aborted                     = FALSE;
   gboolean finish                           = FALSE;
+
+  switch (signal)
+    {
+    case BZ_HOOK_SIGNAL_BEFORE_TRANSACTION:
+    case BZ_HOOK_SIGNAL_AFTER_TRANSACTION:
+      dex_return_error_if_fail (ts_appid != NULL);
+      break;
+    case BZ_HOOK_SIGNAL_VIEW_APP:
+    default:
+      dex_return_error_if_fail (BZ_IS_ENTRY_GROUP (group));
+      break;
+    }
 
   signal_enum_class  = g_type_class_ref (BZ_TYPE_HOOK_SIGNAL);
   ts_type_enum_class = g_type_class_ref (BZ_TYPE_HOOK_TRANSACTION_TYPE);
@@ -307,9 +328,7 @@ execute_hook_fiber (ExecuteHookData *data)
           break;
         case BZ_HOOK_SIGNAL_VIEW_APP:
         default:
-          /* ts_appid is also used to hold an appid for non-transaction-related
-             hooks */
-          g_subprocess_launcher_setenv (launcher, "BAZAAR_APPID", ts_appid, TRUE);
+          g_subprocess_launcher_setenv (launcher, "BAZAAR_APPID", bz_entry_group_get_id (group), TRUE);
           break;
         }
 
@@ -486,6 +505,7 @@ run_emission_fiber (RunEmissionData *data)
   BzHookSignal          signal   = data->signal;
   BzHookTransactionType ts_type  = data->ts_type;
   char                 *ts_appid = data->ts_appid;
+  BzEntryGroup         *group    = data->group;
   guint                 n_hooks  = 0;
 
   n_hooks = g_list_model_get_n_items (hooks);
@@ -500,7 +520,7 @@ run_emission_fiber (RunEmissionData *data)
 
       if (when == signal)
         hook_result = dex_await_int (
-            bz_execute_hook (hook, ts_type, ts_appid),
+            bz_execute_hook (hook, ts_type, ts_appid, group),
             NULL);
 
       if (hook_result == BZ_HOOK_RETURN_STATUS_CONFIRM ||
