@@ -3119,7 +3119,7 @@ finish_with_background_task_label (BzApplication *self)
   else if (bz_state_info_get_syncing (self->state))
     bz_state_info_set_background_task_label (self->state, _ ("Refreshing…"));
   else if (bz_state_info_get_busy (self->state))
-    bz_state_info_set_background_task_label (self->state, _ ("Getting App Info…"));
+    bz_state_info_set_background_task_label (self->state, _ ("Writing to cache…"));
   else
     bz_state_info_set_background_task_label (self->state, NULL);
 }
