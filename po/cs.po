@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-22 13:16+0100\n"
+"POT-Creation-Date: 2026-02-22 21:22+0100\n"
 "PO-Revision-Date: 2026-02-22 13:24+0100\n"
 "Last-Translator: Daniel Rusek <mail@asciiwolf.com>\n"
 "Language-Team: Czech\n"
@@ -490,23 +490,23 @@ msgstr "Po_dpořit Bazaar ❤️"
 
 #: src/bz-all-apps-page.blp:25 src/bz-apps-page.blp:25
 #: src/bz-user-data-page.blp:26 src/bz-window.blp:392
-msgid "_Preferences"
-msgstr "_Předvolby"
+msgid "_Refresh"
+msgstr ""
 
 #: src/bz-all-apps-page.blp:30 src/bz-apps-page.blp:30
 #: src/bz-user-data-page.blp:31 src/bz-window.blp:397
+msgid "_Preferences"
+msgstr "_Předvolby"
+
+#: src/bz-all-apps-page.blp:35 src/bz-apps-page.blp:35
+#: src/bz-user-data-page.blp:36 src/bz-window.blp:402
 msgid "_Login with Flathub"
 msgstr "Přih_lásit se pomocí Flathubu"
 
-#: src/bz-all-apps-page.blp:36 src/bz-apps-page.blp:36
-#: src/bz-user-data-page.blp:37 src/bz-window.blp:403
-msgid "_Manage Leftover User Data"
-msgstr "Sp_ravovat zbylá uživatelská data"
-
 #: src/bz-all-apps-page.blp:41 src/bz-apps-page.blp:41
 #: src/bz-user-data-page.blp:42 src/bz-window.blp:408
-msgid "_Synchronize Remotes"
-msgstr "_Synchronizovat repozitáře"
+msgid "_Manage Leftover User Data"
+msgstr "Sp_ravovat zbylá uživatelská data"
 
 #: src/bz-all-apps-page.blp:46 src/bz-apps-page.blp:46
 #: src/bz-user-data-page.blp:47 src/bz-window.blp:413
@@ -739,11 +739,32 @@ msgstr "Úspěšně odhlášeni!"
 msgid "Performing setup..."
 msgstr "Provádí se nastavení..."
 
-#: src/bz-application.c:969 src/bz-application.c:978
-msgid "Set Up Flathub"
+#: src/bz-application.c:970
+#, fuzzy
+msgid "Set Up System Flathub?"
 msgstr "Nastavit Flathub"
 
-#: src/bz-application.c:972
+#: src/bz-application.c:973
+#, fuzzy
+msgid ""
+"The system Flathub remote is not set up. Bazaar requires Flathub to be "
+"configured on the system Flatpak installation to browse and install "
+"applications.\n"
+"\n"
+"You can still use Bazaar to browse and remove already installed apps."
+msgstr ""
+"Flathub není v tomto systému nastaven. Pokud není k dispozici, nebudete moci "
+"procházet a instalovat aplikace v Bazaaru.\n"
+"\n"
+"Bazaar můžete i nadále používat k procházení a odstraňování již "
+"nainstalovaných aplikací."
+
+#: src/bz-application.c:980
+#, fuzzy
+msgid "Set Up Flathub?"
+msgstr "Nastavit Flathub"
+
+#: src/bz-application.c:983
 msgid ""
 "Flathub is not set up on this system. You will not be able to browse and "
 "install applications in Bazaar if its unavailable.\n"
@@ -756,46 +777,51 @@ msgstr ""
 "Bazaar můžete i nadále používat k procházení a odstraňování již "
 "nainstalovaných aplikací."
 
-#: src/bz-application.c:977
+#: src/bz-application.c:989
 msgid "Later"
 msgstr "Později"
 
-#: src/bz-application.c:1261
+#: src/bz-application.c:990
+msgid "Set Up Flathub"
+msgstr "Nastavit Flathub"
+
+#: src/bz-application.c:1273
 msgid "A backend error occurred"
 msgstr "Došlo k chybě backendu"
 
-#: src/bz-application.c:1387 src/bz-application.c:3120
-msgid "Synchronizing..."
-msgstr "Synchronizuje se..."
+#: src/bz-application.c:1399 src/bz-application.c:3132 src/bz-window.blp:135
+msgid "Refreshing…"
+msgstr ""
 
-#: src/bz-application.c:1534 src/bz-application.c:3116
+#: src/bz-application.c:1546 src/bz-application.c:3128
 #, c-format
-msgid "Receiving %d entries..."
-msgstr "Získávání %d položek..."
+msgid "Loading %d apps…"
+msgstr ""
 
-#: src/bz-application.c:1539
-msgid "Checking for updates"
+#: src/bz-application.c:1551
+#, fuzzy
+msgid "Checking for updates…"
 msgstr "Kontrolují se aktualizace"
 
-#: src/bz-application.c:1595
+#: src/bz-application.c:1607
 msgid "Failed to open .flatpakref"
 msgstr "Nezdařilo se otevřít soubor .flatpakref"
 
-#: src/bz-application.c:1649
+#: src/bz-application.c:1661
 msgid "An initialization error occurred"
 msgstr "Došlo k chybě inicializace"
 
-#: src/bz-application.c:1987
+#: src/bz-application.c:1999
 msgid "Failed to check for updates"
 msgstr "Nezdařilo se zkontrolovat aktualizace"
 
-#: src/bz-application.c:2899
+#: src/bz-application.c:2911
 msgid "Could not find app"
 msgstr "Nezdařilo se najít aplikaci"
 
-#: src/bz-application.c:3122
-msgid "Indexing Data..."
-msgstr "Indexují se data..."
+#: src/bz-application.c:3134
+msgid "Writing to cache…"
+msgstr ""
 
 #: src/bz-appstream-parser.c:303
 msgctxt "Project URL Type"
@@ -1898,12 +1924,14 @@ msgid "Preferences"
 msgstr "Předvolby"
 
 #: src/bz-preferences-dialog.blp:25
-msgid "Network connection is metered — automatic store data sync is paused"
+#, fuzzy
+msgid "Network connection is metered — automatic store data refresh is paused"
 msgstr ""
 "Připojení k síti je měřené – automatická synchronizace dat je pozastavena"
 
 #: src/bz-preferences-dialog.blp:26 src/bz-window.blp:335
-msgid "Sync Manually"
+#, fuzzy
+msgid "Refresh Manually"
 msgstr "Synchronizovat ručně"
 
 #: src/bz-preferences-dialog.blp:31
@@ -2065,6 +2093,26 @@ msgstr "Barvy neutrois hrdosti"
 #: src/bz-updates-card.blp:150
 msgid "Version History"
 msgstr "Historie verzí"
+
+#. Translators: This is a date format for timestamps from the current year. Used in the app releases section.
+#. * %B is the full month name, %e is the day.
+#. * Example: "October 1"
+#. * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
+#. * Please modify to make it sound natural in your locale.
+#. *
+#: src/bz-releases-list.c:121
+msgid "%e %B"
+msgstr ""
+
+#. Translators: This is a date format for timestamps from previous years. Used in the app releases section.
+#. * %B is the full month name, %e is the day, %Y is the year.
+#. * Example: "October 1, 2025"
+#. * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
+#. * Please modify to make it sound natural in your locale.
+#. *
+#: src/bz-releases-list.c:129
+msgid "%e %B %Y"
+msgstr ""
 
 #: src/bz-releases-list.c:168
 #, c-format
@@ -2858,10 +2906,6 @@ msgstr "Uživatelská data aplikace %s byla vymazána"
 msgid "Trash User Data"
 msgstr "Vymazat uživatelská data"
 
-#: src/bz-window.blp:135
-msgid "Refreshing Store Content"
-msgstr "Aktualizace obsahu obchodu"
-
 #: src/bz-window.blp:153
 msgid "Curated"
 msgstr "Vybrané"
@@ -2871,8 +2915,8 @@ msgid "Flathub"
 msgstr "Flathub"
 
 #: src/bz-window.blp:273
-msgid "No background tasks!"
-msgstr "Žádné úlohy na pozadí!"
+msgid "Refresh completed!"
+msgstr ""
 
 #: src/bz-window.blp:326
 msgid "You are running a new version of Bazaar!"
@@ -2912,8 +2956,8 @@ msgstr "Obecné"
 
 #: src/gtk/shortcuts-dialog.blp:9
 msgctxt "shortcut window"
-msgid "Open Search Dialog"
-msgstr "Otevřít vyhledávání"
+msgid "Refresh"
+msgstr ""
 
 #: src/gtk/shortcuts-dialog.blp:14
 msgctxt "shortcut window"
@@ -2922,8 +2966,8 @@ msgstr "Otevřít předvolby"
 
 #: src/gtk/shortcuts-dialog.blp:19
 msgctxt "shortcut window"
-msgid "Synchronize Remotes"
-msgstr "Synchronizovat repozitáře"
+msgid "Open Search Dialog"
+msgstr "Otevřít vyhledávání"
 
 #: src/gtk/shortcuts-dialog.blp:24
 msgctxt "shortcut window"
@@ -2944,3 +2988,26 @@ msgstr "Zavřít okno"
 msgctxt "shortcut window"
 msgid "Quit Bazaar"
 msgstr "Ukončit Bazaar"
+
+#~ msgid "_Synchronize Remotes"
+#~ msgstr "_Synchronizovat repozitáře"
+
+#~ msgid "Synchronizing..."
+#~ msgstr "Synchronizuje se..."
+
+#, c-format
+#~ msgid "Receiving %d entries..."
+#~ msgstr "Získávání %d položek..."
+
+#~ msgid "Indexing Data..."
+#~ msgstr "Indexují se data..."
+
+#~ msgid "Refreshing Store Content"
+#~ msgstr "Aktualizace obsahu obchodu"
+
+#~ msgid "No background tasks!"
+#~ msgstr "Žádné úlohy na pozadí!"
+
+#~ msgctxt "shortcut window"
+#~ msgid "Synchronize Remotes"
+#~ msgstr "Synchronizovat repozitáře"
