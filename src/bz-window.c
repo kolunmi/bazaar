@@ -1049,9 +1049,7 @@ search (BzWindow   *self,
         const char *initial)
 {
   if (initial != NULL && *initial != '\0')
-    {
-      bz_search_widget_set_text (self->search_widget, initial);
-    }
+    bz_search_widget_set_text (self->search_widget, initial);
 
   adw_view_stack_set_visible_child_name (self->main_view_stack, "search");
   adw_navigation_view_pop_to_tag (self->navigation_view, "main");
@@ -1072,9 +1070,7 @@ set_page (BzWindow *self)
       adw_navigation_view_pop_to_tag (self->navigation_view, "main");
     }
   else
-    {
-      gtk_stack_set_visible_child_name (self->main_stack, "main");
-    }
+    gtk_stack_set_visible_child_name (self->main_stack, "main");
 
   selected_navigation_page_name = adw_navigation_view_get_visible_page_tag (self->navigation_view);
 
