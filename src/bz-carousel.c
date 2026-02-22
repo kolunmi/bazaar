@@ -188,16 +188,13 @@ bz_carousel_dispose (GObject *object)
 {
   BzCarousel *self = BZ_CAROUSEL (object);
 
-  g_clear_pointer (&self->animation, g_object_unref);
+  if (self->model != NULL)
+    {
+      g_signal_handlers_disconnect_by_func (self->model, items_changed, self);
+      g_signal_handlers_disconnect_by_func (self->model, model_selected_changed, self);
+    }
 
-  g_signal_handlers_disconnect_by_func (self->model, items_changed, self);
-  g_signal_handlers_disconnect_by_func (self->model, model_selected_changed, self);
-  items_changed (
-      self,
-      0,
-      g_list_model_get_n_items (G_LIST_MODEL (self->model)),
-      0,
-      G_LIST_MODEL (self->model));
+  g_clear_pointer (&self->animation, g_object_unref);
   g_clear_pointer (&self->model, g_object_unref);
 
   g_clear_pointer (&self->mirror, g_ptr_array_unref);
@@ -626,7 +623,6 @@ bz_carousel_set_model (BzCarousel         *self,
     {
       g_signal_handlers_disconnect_by_func (self->model, items_changed, self);
       g_signal_handlers_disconnect_by_func (self->model, model_selected_changed, self);
-
       items_changed (
           self,
           0,
@@ -670,11 +666,21 @@ items_changed (BzCarousel *self,
 {
   for (guint i = 0; i < removed; i++)
     {
-      GObject            *object = NULL;
-      CarouselWidgetData *child  = NULL;
+      GObject            *object  = NULL;
+      CarouselWidgetData *child   = NULL;
+      char                buf[64] = { 0 };
 
       object = g_ptr_array_index (self->mirror, position + i);
       child  = g_ptr_array_index (self->widgets, position + i);
+
+      g_snprintf (buf, sizeof (buf), "x%p", child);
+      bz_animation_cancel (self->animation, buf);
+      g_snprintf (buf, sizeof (buf), "y%p", child);
+      bz_animation_cancel (self->animation, buf);
+      g_snprintf (buf, sizeof (buf), "w%p", child);
+      bz_animation_cancel (self->animation, buf);
+      g_snprintf (buf, sizeof (buf), "h%p", child);
+      bz_animation_cancel (self->animation, buf);
 
       g_signal_emit (self, signals[SIGNAL_UNBIND_WIDGET], 0, child->widget, object);
     }
@@ -845,9 +851,6 @@ move_to_idx (BzCarousel *self,
         {
           char buf[64] = { 0 };
 
-          child->rect   = target;
-          child->target = target;
-
           g_snprintf (buf, sizeof (buf), "x%p", child);
           bz_animation_cancel (self->animation, buf);
 
@@ -859,6 +862,9 @@ move_to_idx (BzCarousel *self,
 
           g_snprintf (buf, sizeof (buf), "h%p", child);
           bz_animation_cancel (self->animation, buf);
+
+          child->rect   = target;
+          child->target = target;
         }
       else if (avoid_animation)
         child->target = target;
@@ -1047,13 +1053,13 @@ static void
 scroll_end (BzCarousel               *self,
             GtkEventControllerScroll *controller)
 {
-  self->scrolling       = FALSE;
-  self->hscroll_start   = -1;
-  self->hscroll_current = -1;
+  self->scrolling = FALSE;
   finish_horizontal_gesture (
       self,
       self->hscroll_start - self->hscroll_current,
       0);
+  self->hscroll_start   = -1;
+  self->hscroll_current = -1;
 }
 
 static gboolean

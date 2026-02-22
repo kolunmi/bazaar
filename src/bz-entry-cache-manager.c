@@ -41,6 +41,8 @@ BZ_DEFINE_DATA (
     ongoing_task,
     OngoingTask,
     {
+      GWeakRef *self;
+
       DexScheduler *scheduler;
       DexPromise   *init;
 
@@ -60,6 +62,7 @@ BZ_DEFINE_DATA (
       BzGuard *writing_gate;
       GMutex   writing_mutex;
     },
+    BZ_RELEASE_DATA (self, bz_weak_release);
     BZ_RELEASE_DATA (scheduler, dex_unref);
     BZ_RELEASE_DATA (init, dex_unref);
     BZ_RELEASE_DATA (alive_hash, g_hash_table_unref);
@@ -81,7 +84,8 @@ struct _BzEntryCacheManager
 {
   GObject parent_instance;
 
-  guint64 max_memory_usage;
+  GMutex mutex;
+  guint  living_entries;
 
   DexScheduler *scheduler;
   guint64       memory_usage;
@@ -96,7 +100,7 @@ enum
 {
   PROP_0,
 
-  PROP_MAX_MEMORY_USAGE,
+  PROP_LIVING_ENTRIES,
 
   LAST_PROP
 };
@@ -111,6 +115,9 @@ watch_cb (DexFuture       *future,
 
 static DexFuture *
 watch_work_fiber (OngoingTaskData *task_data);
+
+static DexFuture *
+notify_props_fiber (GWeakRef *wr);
 
 BZ_DEFINE_DATA (
     living_entry,
@@ -160,6 +167,8 @@ bz_entry_cache_manager_dispose (GObject *object)
 {
   BzEntryCacheManager *self = BZ_ENTRY_CACHE_MANAGER (object);
 
+  g_mutex_clear (&self->mutex);
+
   dex_clear (&self->scheduler);
   dex_clear (&self->watch_task);
   g_clear_pointer (&self->task_data, ongoing_task_data_unref);
@@ -177,8 +186,8 @@ bz_entry_cache_manager_get_property (GObject    *object,
 
   switch (prop_id)
     {
-    case PROP_MAX_MEMORY_USAGE:
-      g_value_set_uint64 (value, bz_entry_cache_manager_get_max_memory_usage (self));
+    case PROP_LIVING_ENTRIES:
+      g_value_set_uint (value, bz_entry_cache_manager_get_living_entries (self));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -193,11 +202,11 @@ bz_entry_cache_manager_set_property (GObject      *object,
 {
   BzEntryCacheManager *self = BZ_ENTRY_CACHE_MANAGER (object);
 
+  (void) self;
+
   switch (prop_id)
     {
-    case PROP_MAX_MEMORY_USAGE:
-      bz_entry_cache_manager_set_max_memory_usage (self, g_value_get_uint64 (value));
-      break;
+    case PROP_LIVING_ENTRIES:
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -212,12 +221,12 @@ bz_entry_cache_manager_class_init (BzEntryCacheManagerClass *klass)
   object_class->get_property = bz_entry_cache_manager_get_property;
   object_class->dispose      = bz_entry_cache_manager_dispose;
 
-  props[PROP_MAX_MEMORY_USAGE] =
-      g_param_spec_uint64 (
-          "max-memory-usage",
+  props[PROP_LIVING_ENTRIES] =
+      g_param_spec_uint (
+          "living-entries",
           NULL, NULL,
-          0, G_MAXUINT64, 0xccccccc,
-          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+          0, G_MAXUINT, 0,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 }
@@ -231,10 +240,13 @@ bz_entry_cache_manager_init (BzEntryCacheManager *self)
   if (g_once_init_enter_pointer (&global_scheduler))
     g_once_init_leave_pointer (&global_scheduler, dex_thread_pool_scheduler_new ());
 
+  g_mutex_init (&self->mutex);
+
   self->scheduler    = dex_ref (global_scheduler);
   self->memory_usage = 0;
 
   task_data             = ongoing_task_data_new ();
+  task_data->self       = bz_track_weak (self);
   task_data->scheduler  = dex_ref (self->scheduler);
   task_data->init       = dex_promise_new ();
   task_data->alive_hash = g_hash_table_new_full (
@@ -265,22 +277,15 @@ bz_entry_cache_manager_new (void)
   return g_object_new (BZ_TYPE_ENTRY_CACHE_MANAGER, NULL);
 }
 
-guint64
-bz_entry_cache_manager_get_max_memory_usage (BzEntryCacheManager *self)
+guint
+bz_entry_cache_manager_get_living_entries (BzEntryCacheManager *self)
 {
+  g_autoptr (GMutexLocker) locker = NULL;
+
   g_return_val_if_fail (BZ_IS_ENTRY_CACHE_MANAGER (self), 0);
-  return self->max_memory_usage;
-}
 
-void
-bz_entry_cache_manager_set_max_memory_usage (BzEntryCacheManager *self,
-                                             guint64              max_memory_usage)
-{
-  g_return_if_fail (BZ_IS_ENTRY_CACHE_MANAGER (self));
-
-  self->max_memory_usage = max_memory_usage;
-
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MAX_MEMORY_USAGE]);
+  locker = g_mutex_locker_new (&self->mutex);
+  return self->living_entries;
 }
 
 DexFuture *
@@ -832,13 +837,14 @@ watch_cb (DexFuture       *future,
 static DexFuture *
 watch_work_fiber (OngoingTaskData *task_data)
 {
-  g_autoptr (BzGuard) guard0 = NULL;
-  GHashTableIter iter        = { 0 };
-  g_autoptr (GTimer) timer   = NULL;
-  guint total                = 0;
-  guint active               = 0;
-  guint alive                = 0;
-  guint pruned               = 0;
+  g_autoptr (BzEntryCacheManager) self = NULL;
+  g_autoptr (BzGuard) guard0           = NULL;
+  GHashTableIter iter                  = { 0 };
+  g_autoptr (GTimer) timer             = NULL;
+  guint total                          = 0;
+  guint active                         = 0;
+  guint alive                          = 0;
+  guint pruned                         = 0;
 
   timer = g_timer_new ();
 
@@ -892,7 +898,30 @@ watch_work_fiber (OngoingTaskData *task_data)
            g_timer_elapsed (timer, NULL),
            total, active, alive, pruned, WATCH_CLEANUP_INTERVAL_MSEC);
 
+  bz_weak_get_or_return_reject (self, task_data->self);
+  g_mutex_lock (&self->mutex);
+  self->living_entries = active + alive;
+  g_mutex_unlock (&self->mutex);
+
+  dex_future_disown (dex_scheduler_spawn (
+      dex_scheduler_get_default (),
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) notify_props_fiber,
+      bz_track_weak (self),
+      bz_weak_release));
+
   return dex_timeout_new_msec (WATCH_CLEANUP_INTERVAL_MSEC);
+}
+
+static DexFuture *
+notify_props_fiber (GWeakRef *wr)
+{
+  g_autoptr (BzEntryCacheManager) self = NULL;
+
+  bz_weak_get_or_return_reject (self, wr);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_LIVING_ENTRIES]);
+  return dex_future_new_true ();
 }
 
 /* End of bz-entry-cache-manager.c */

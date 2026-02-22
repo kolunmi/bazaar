@@ -20,6 +20,7 @@
 
 #include "bz-inspector.h"
 #include "bz-entry-inspector.h"
+#include "bz-template-callbacks.h"
 #include "bz-window.h"
 
 struct _BzInspector
@@ -205,13 +206,6 @@ open_file_externally_cb (GtkListItem *list_item,
   g_app_info_launch_default_for_uri (uri, NULL, NULL);
 }
 
-static char *
-format_uint (gpointer object,
-             guint    value)
-{
-  return g_strdup_printf ("%d", value);
-}
-
 static void
 bz_inspector_class_init (BzInspectorClass *klass)
 {
@@ -232,6 +226,8 @@ bz_inspector_class_init (BzInspectorClass *klass)
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-inspector.ui");
+  bz_widget_class_bind_all_util_callbacks (widget_class);
+
   gtk_widget_class_bind_template_child (widget_class, BzInspector, debug_mode_check);
   gtk_widget_class_bind_template_child (widget_class, BzInspector, disable_blocklists_check);
   gtk_widget_class_bind_template_child (widget_class, BzInspector, search_entry);
@@ -242,7 +238,6 @@ bz_inspector_class_init (BzInspectorClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, decache_and_inspect_cb);
   gtk_widget_class_bind_template_callback (widget_class, open_file_externally_cb);
   gtk_widget_class_bind_template_callback (widget_class, entry_changed);
-  gtk_widget_class_bind_template_callback (widget_class, format_uint);
 }
 
 static void

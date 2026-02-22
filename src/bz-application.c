@@ -1698,7 +1698,6 @@ flathub_update_finally (DexFuture *future,
       self->flathub = g_steal_pointer (&self->tmp_flathub);
       bz_flathub_state_set_map_factory (self->flathub, self->application_factory);
       bz_state_info_set_flathub (self->state, self->flathub);
-      bz_search_engine_set_flathub_state (self->search_engine, self->flathub);
 
       return dex_scheduler_spawn (
           dex_scheduler_get_default (),
@@ -2753,6 +2752,7 @@ init_service_struct (BzApplication *self,
   bz_state_info_set_transaction_manager (self->state, self->transactions);
   bz_state_info_set_txt_blocklists (self->state, G_LIST_MODEL (self->txt_blocklists));
   bz_state_info_set_txt_blocklists_provider (self->state, self->txt_blocklists_provider);
+  bz_state_info_set_cache_manager (self->state, self->cache);
 
   g_object_bind_property (
       self->state, "allow-manual-sync",

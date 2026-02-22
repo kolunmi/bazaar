@@ -516,13 +516,14 @@ Here is how they did it:
 
 Hooks are an advanced feature of Bazaar. In essence, they allow you to
 programmatically react to events and define dialogs with which you can query
-user input. Currently, the only events you can subscribe to are the
-"before-transaction" and "after-transaction" events:
+user input. Currently, these are the event signals you can subscribe to:
 
-* `before-transaction`: run the hook right before a transaction is scheduled to
-  begin
+* `view-app`: run the hook when the user clicks on an app tile or otherwise
+  views an application in the main app page
 
-* `after-transaction`: run the hook after a transaction successfully completes
+* `before-transaction`: run the hook right as the user invokes a transaction
+
+* `after-transaction`: run the hook after a transaction completes
 
 Hooks are run like a signal emission. After an event occurs, hooks that are
 found to be of the appropriate type are evaluated in an order of priority.
@@ -577,8 +578,15 @@ Here is an overview of the environment variables the shell snippet will receive:
 * `BAZAAR_HOOK_DIALOG_RESPONSE_ID`: if applicable, the user response given
   through the current dialog
 
+* `BAZAAR_APPID`: if applicable, the appid of the entry Bazaar is currently
+  dealing with. Use this for hooks that are not related to transactions. If your
+  hook deals with transactions, such as `before-transaction` or
+  `after-transaction`, use `BAZAAR_TS_APPID` instead.
+
 * `BAZAAR_TS_APPID`: if applicable, the appid of the entry Bazaar is currently
-  dealing with
+  dealing with. Use this for hooks that are related to transactions. If your
+  hook does not deal with transactions, such as `view-app`, use `BAZAAR_APPID`
+  instead.
 
 * `BAZAAR_TS_TYPE`: if applicable, the type of transaction being run. Can be
   "install", "update", or "removal".
@@ -638,14 +646,14 @@ hooks:
     dialogs:
       - id: jetbrains-warning
         title: >-
-          Jetbrains IDEs are not supported in this format
+          JetBrains IDEs are not supported in this format
         # If true, render inline markup commands in body; see
         # https://docs.gtk.org/Pango/pango_markup.html
         body-use-markup: true
         body: >-
-          This is a <a href="https://www.jetbrains.com/">Jetbrains</a>
+          This is a <a href="https://www.jetbrains.com/">JetBrains</a>
           application and is not officially supported on Flatpak. We
-          recommend using the Toolbox app to manage Jetbrains IDEs.
+          recommend using the Toolbox app to manage JetBrains IDEs.
         # Determines which option will be assumed if the user hits the
         # escape key or otherwise cancels the dialog
         default-response-id: cancel
@@ -653,7 +661,7 @@ hooks:
           - id: cancel
             string: "Cancel"
           - id: goto-web
-            string: "Download Jetbrains Toolbox"
+            string: "Download JetBrains Toolbox"
             # can be "destructive" or "suggested" or omit for no
             # styling
             style: suggested
@@ -700,7 +708,7 @@ hooks:
 
       case "$BAZAAR_HOOK_DIALOG_RESPONSE_ID" in
           goto-web)
-              # if the user pressed "Download Jetbrains Toolbox",
+              # if the user pressed "Download JetBrains Toolbox",
               # continue
               echo 'ok'
               ;;
@@ -734,7 +742,7 @@ hooks:
 
   handle_teardown_stage() {
 
-      # Let's always prevent the user from installing Jetbrains stuff
+      # Let's always prevent the user from installing JetBrains stuff
       echo 'deny'
 
   }

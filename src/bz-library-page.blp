@@ -41,6 +41,10 @@ template $BzLibraryPage: Adw.Bin {
             ]
 
             clicked => $reset_search_cb(template);
+
+            accessibility {
+              label: _("Clear search");
+            }
           }
 
           styles [

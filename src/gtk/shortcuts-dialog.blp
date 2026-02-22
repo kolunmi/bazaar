@@ -32,7 +32,13 @@ Adw.ShortcutsDialog shortcuts_dialog {
     }
 
     Adw.ShortcutsItem {
-      title: C_("shortcut window", "Quit");
+      title: C_("shortcut window", "Close Window");
+      action-name: "window.quit";
+      accelerator: "<Control>w";
+    }
+
+    Adw.ShortcutsItem {
+      title: C_("shortcut window", "Quit Bazaar");
       action-name: "app.quit";
     }
   }

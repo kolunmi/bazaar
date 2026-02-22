@@ -617,6 +617,9 @@ search_activate (GtkText        *text,
   model   = gtk_grid_view_get_model (self->grid_view);
   n_items = g_list_model_get_n_items (G_LIST_MODEL (model));
 
+  if (gtk_widget_get_visible (GTK_WIDGET (self->search_busy)))
+    return;
+
   if (n_items > 0)
     {
       result = g_list_model_get_item (G_LIST_MODEL (model), 0);
