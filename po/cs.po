@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-02-24 00:31+0100\n"
-"PO-Revision-Date: 2026-02-23 00:18+0100\n"
+"PO-Revision-Date: 2026-02-24 00:56+0100\n"
 "Last-Translator: Daniel Rusek <mail@asciiwolf.com>\n"
 "Language-Team: Czech\n"
 "Language: cs\n"
@@ -73,7 +73,7 @@ msgstr "Domovská stránka zobrazující aplikace Flathubu"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:58
 msgid "Exhibit app page"
-msgstr "Stránka výstavních aplikací"
+msgstr "Stránka aplikace Exhibit"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:62
 msgid "Library page"
@@ -88,7 +88,6 @@ msgid "Category page"
 msgstr "Stránka kategorií"
 
 #: src/bz-addons-dialog.blp:16 src/bz-full-view.blp:710
-#, fuzzy
 msgid "Manage Add-Ons"
 msgstr "Spravovat doplňky"
 
@@ -500,7 +499,6 @@ msgstr "_Předvolby"
 
 #: src/bz-all-apps-page.blp:35 src/bz-apps-page.blp:35
 #: src/bz-user-data-page.blp:36
-#, fuzzy
 msgid "_Login With Flathub"
 msgstr "Přih_lásit se pomocí Flathubu"
 
@@ -999,7 +997,6 @@ msgid "Cancel"
 msgstr "Zrušit"
 
 #: src/bz-entry-selection-row.blp:17
-#, fuzzy
 msgid "For This User Only"
 msgstr "Pouze pro tohoto uživatele"
 
@@ -1049,12 +1046,10 @@ msgid "Failed to remove favorite"
 msgstr "Odebrání z oblíbených se nezdařilo"
 
 #: src/bz-favorites-tile.blp:70
-#, fuzzy
 msgid "Support This Application"
 msgstr "Podpořit tuto aplikaci"
 
 #: src/bz-favorites-tile.blp:119
-#, fuzzy
 msgid "Remove From Favorites"
 msgstr "Odebrat z oblíbených"
 
@@ -2832,7 +2827,6 @@ msgid "Finished in %.02f seconds"
 msgstr "Dokončeno v %.02f sekundách"
 
 #: src/bz-transaction-tile.blp:126
-#, fuzzy
 msgid "App Add-On"
 msgstr "Doplněk aplikace"
 
@@ -2898,7 +2892,6 @@ msgid "Manage Leftover User Data"
 msgstr "Správa zbylých uživatelských dat"
 
 #: src/bz-user-data-page.blp:89
-#, fuzzy
 msgid "No User Data Found"
 msgstr "Nenalezena žádná uživatelská data"
 
