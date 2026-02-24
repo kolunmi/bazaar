@@ -966,13 +966,7 @@ bz_entry_group_add (BzEntryGroup *self,
           self->description = g_strdup (description);
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DESCRIPTION]);
         }
-      /* only grab icon paintable if we don't have it already to reduce
-         flickering in UI */
-      if (icon_paintable != NULL &&
-          (self->icon_paintable == NULL ||
-           (BZ_IS_ASYNC_TEXTURE (self->icon_paintable) &&
-            !bz_async_texture_get_loaded (BZ_ASYNC_TEXTURE (self->icon_paintable)) &&
-            !bz_async_texture_is_loading (BZ_ASYNC_TEXTURE (self->icon_paintable)))))
+      if (icon_paintable != NULL)
         {
           g_clear_object (&self->icon_paintable);
           self->icon_paintable = g_object_ref (icon_paintable);
