@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-14 12:33+0900\n"
-"PO-Revision-Date: 2026-02-14 14:46+0900\n"
+"POT-Creation-Date: 2026-02-24 19:01+0900\n"
+"PO-Revision-Date: 2026-02-24 19:31+0900\n"
 "Last-Translator: camegone <hoge_huga@example.com>\n"
 "Language-Team: Japanese <kde-i18n-doc@kde.org>\n"
 "Language: ja\n"
@@ -80,539 +80,593 @@ msgid "Category page"
 msgstr "カテゴリーページ"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:78
+msgid "This release fixes some bugs and greatly improves search functionality."
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:82
+msgid ""
+"If you missed the previous release, in 0.7.9 we also added the ability to "
+"cancel transactions in the library view, a brand new screenshots carousel, "
+"search suggestion buttons, and app runtime size information. You can also "
+"now skip confirmation dialogs by holding shift as you start a transaction."
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:89
+msgid "Thanks for reading!"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:97
+msgid "**New Features**"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:99
+msgid "Search suggestion pills"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:100
+#, fuzzy
+msgid "**Cancel installation** transactions"
+msgstr "現在進行中のダウンロードを停止"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:101
+msgid "Skip dialogs by pressing shift"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:102
+msgid "Runtime size info for app pages"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:104
+#, fuzzy
+msgid "**Updated**"
+msgstr "更新されたアプリ"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:106
+msgid "Redesigned \"What's New\" dialog"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:107
+msgid "Improved search results by utilizing Flathub rankings"
+msgstr ""
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:108
+#, fuzzy
+msgid "Improved screenshots carousel"
+msgstr "スクリーンショット カルーセル"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:115
 msgid ""
 "This release lets you view and remove user-scoped installed apps from the "
 "library page in the Flatpak version of the app. Installing from user remotes "
 "is not supported yet."
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:87
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:101
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:123
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:135
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:156
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:175
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:206
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:217
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:235
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:246
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:259
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:269
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:281
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:124
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:138
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:160
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:172
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:193
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:212
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:243
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:254
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:272
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:283
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:296
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:306
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:318
 msgid "This release comes with the following improvements:"
 msgstr "このリリースには以下の改善点が含まれています:"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:89
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:126
 msgid "Merges the task sidebar and install page into the library page"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:90
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:127
 msgid "Add installed version numbers of each app on the library and app pages"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:91
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:128
 #, fuzzy
 msgid "Add donations dialog"
 msgstr "年齢レーティングダイアログ"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:92
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:129
 msgid "Fix broken addon and runtime eol detection"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:93
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:130
 msgid "Add `enable-bulk-install` key to curated sections"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:94
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:131
 msgid "Add `override-eol-markings` main config string list"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:103
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:140
 msgid "Improve context dialogs"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:104
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:141
 msgid "Fix leftover data bar being shown prematurely"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:105
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:142
 msgid "Have a rotation toggle for flags"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:106
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:143
 msgid "Add hard check to prevent removing Bazaar flatpak"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:107
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:144
 #, fuzzy
 msgid "Improve download statistics tooltips"
 msgstr "ダウンロードの統計"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:108
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:145
 msgid "Add read support for flatpak bundles"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:109
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:146
 msgid "Fix critical output sometimes during transactions"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:110
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:147
 msgid "Fix error popover refusing to spawn in transaction sidebar"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:117
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:154
 msgid "Minor bugfix release"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:125
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:162
 msgid "Fix issue where installed page is empty on opening second window"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:126
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:163
 msgid "Fix screenshot flickering in search results"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:127
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:164
 msgid "Fix pride flags sometimes not showing on certain locales"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:128
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:165
 msgid "Add \"Install all\" to favorites page"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:137
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:174
 msgid "Trash user data instead of deleting"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:138
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:175
 msgid "Tweaks to permissions dialog"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:139
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:176
 msgid "Fix broken EOL filtering"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:140
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:177
 msgid "Add text filter to installed page"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:141
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:178
 msgid ""
 "Add optional translations mappings for string properties in YAML configs"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:142
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:179
 msgid "Hide EOL apps by default"
 msgstr "更新終了のアプリをデフォルトで非表示"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:143
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:180
 msgid "Many other minor bug fixes and improvements"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:150
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:187
 msgid ""
 "This small release ensures the new icon is rendered correctly on KDE Plasma."
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:158
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:195
 msgid "New market stall icon"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:159
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:196
 msgid "Remove Flathub styling"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:160
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:197
 msgid "Add horizontal versions of pride flags"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:161
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:198
 msgid "Text selection in app descriptions can be made across paragraph breaks"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:162
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:199
 msgid "Support YAML anchors and aliases in config parsing"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:163
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:200
 msgid ""
 "Drastically reduce disk cache writes over time by skipping unchanged entries"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:164
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:201
 msgid "Show background status in popover"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:165
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:202
 msgid "Add app permission system"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:166
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:203
 msgid "Add back release URLs"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:167
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:204
 msgid "Fix sync-remotes action in shortcut dialog"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:168
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:205
 msgid "Fix visual hiccups in comet animations"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:177
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:214
 msgid "Flathub account support with the ability to manage bookmarks"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:178
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:215
 msgid ""
 "Flathub bookmarks replace star count; you can add or remove bookmarks from "
 "app pages"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:179
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:216
 msgid "An \"Only Show Verified\" option"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:180
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:217
 msgid "Exhaustive category pages for most categories"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:181
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:218
 msgid "An \"Adwaita\" or \"KDE\" category shown based on desktop environment"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:182
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:219
 msgid "Updated installed indicator for app tiles"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:183
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:220
 msgid "3 new flag options"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:184
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:221
 msgid "Fixed GNOME search provider to show the app page instead of search"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:185
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:222
 msgid ""
 "Fixed issue where flatpakref URIs did not open when the app wasn't running "
 "in the background"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:186
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:223
 msgid ""
 "Fixed issue where some proprietary apps were marked as \"Special License\""
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:187
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:224
 msgid "Fixed issue where graphs did not work with touch"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:194
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:231
 msgid ""
 "Another quick release to restore alphabetical sorting on the installed page"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:200
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:237
 msgid "Quick release to allow manual refresh if flathub is being flaky"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:208
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:245
 msgid ""
 "Fix frequent disk writes; set refresh frequency to 1 day rather than 1 hour"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:209
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:246
 msgid "Add \"Delete User Data\" option when uninstalling an application"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:210
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:247
 msgid "Version cache to prevent incompatibility between Bazaar versions"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:219
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:256
 msgid ""
 "Reworked loading to be substantially faster after first start via async "
 "loading"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:220
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:257
 msgid "A gaming section on the Flathub page"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:221
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:258
 msgid "Improved UI on mobile, especially on app pages"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:222
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:259
 msgid "Verified badges next to most places where apps are shown"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:223
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:260
 msgid "A popover that explains what verification and non-verification mean"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:224
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:261
 msgid "An \"other apps by\" page for when a developer has more than 6 apps"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:225
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:262
 msgid "Tags that show other apps with the same tag when pressed"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:226
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:263
 msgid "An age rating dialog"
 msgstr "年齢レーティングダイアログ"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:227
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:264
 msgid "Changed search filters into global content filters"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:228
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:265
 msgid "5 new pride flags"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:237
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:274
 msgid ""
 "Add \"hide-eol\" preferences option to prevent Bazaar from showing end-of-"
 "life applications or applications which depend on end-of-life runtimes"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:238
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:275
 msgid "Fix global progress bar theme sometimes not syncing with preferences"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:239
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:276
 msgid "Show version next to addon name in the addons dialog"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:248
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:285
 msgid "Add \"On the go\" section and mobile cateogry"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:249
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:286
 msgid "Greatly decrease reported memory usage"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:250
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:287
 msgid "Rework search UI"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:251
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:288
 msgid "Rework page stack navigation"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:252
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:289
 msgid "Change screenshot dialog to page"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:261
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:298
 msgid "Fix slow/inconsistent image loading"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:262
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:299
 msgid "Fix context row in full view"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:271
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:308
 msgid "Rework full view layout"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:272
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:309
 msgid "Improve progress bar theme selection"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:273
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:310
 msgid "Reduce quantity and improve quality of search results"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:274
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:311
 msgid "Allow the application window to fit on mobile screen sizes"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:283
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:320
 msgid "Add interactive screenshot dialog"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:284
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:321
 msgid "Fix empty update dialogs"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:285
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:322
 msgid "Greatly improve look of app description rendering"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:286
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:323
 msgid "Add pending state to the global progress bar"
 msgstr "全体のプログレスバーに中止の状態を追加しました"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:287
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:324
 msgid "Add featured apps carousel"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:294
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:331
 msgid "More improvements:"
 msgstr "改善点:"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:296
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:333
 msgid "Improve design of transaction dialog"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:297
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:334
 msgid "Update remove button pulse effect and comet size curve"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:298
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:335
 msgid "Reap and reload cached textures after a day"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:299
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:336
 msgid "Eliminate some crashes caused by race conditions"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:300
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:337
 msgid "Change preferences group to context bar in full view"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:301
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:338
 msgid "Switch side panels to sidebars and use flat header bar designs"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:302
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:339
 msgid "Add really useful app size dialog :)"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:309
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:321
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:346
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:358
 msgid "Some improvements:"
 msgstr "改善点:"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:311
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:348
 msgid ""
 "Make the global progress bar customizable with pride flags! Check preferences"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:312
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:349
 msgid "Add a new world map page to the download statistics dialog"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:313
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:350
 msgid ""
 "Allow clicking on entries on transaction sidebar to navigate to the original "
 "store page"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:314
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:351
 msgid "Add Alexander Vanhee to the developer credits"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:323
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:360
 msgid "Overhaul download history graph; make it interactive"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:324
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:361
 msgid "Smarter \"back\" functionality"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:325
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:362
 msgid "Hide bottom bar more often on small window sizes"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:326
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:363
 msgid ""
 "Make \"light-banner\" and \"dark-banner\" keys available to curated configs"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:333
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:370
 msgid "This release includes:"
 msgstr "今回のリリースに含まれる変更:"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:335
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:372
 msgid "553d041 * chore(po): update Ukrainian translation (#408)"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:336
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:373
 msgid "711732a * Rework Version History (#407)"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:337
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:374
 msgid ""
 "d2d3771 * Calculate detailed app tiles text color based on luminance of "
 "background accent color (#405)"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:338
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:375
 msgid "3787e6e * Save window size in gsettings"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:339
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:376
 msgid "18ba76c * AsyncTexture: increase HTTP timeout to 5 seconds"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:340
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:377
 msgid "980f752 * SearchWidget: prevent invalid item selection"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:341
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:378
 msgid "ab95593 * Add installed icons to app tiles (#404)"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:342
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:379
 msgid "203754b * (UI) Improve visiblility of add-on feature (#403)"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:343
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:380
 msgid "069ce61 * fix installed page list outline ring (#402)"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:344
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:381
 msgid ""
 "da9f7b8 * (UX) Refine the Flathub views to be denser and have less partial "
 "lines (#401)"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:345
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:382
 msgid "a6939ba * fix(po): fix Ukrainian translation (#400)"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:346
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:383
 msgid "35c9611 * decrease app-tile description width reqs"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:347
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:384
 msgid "6098be7 * chore(po): update Polish translation (#397)"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:348
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:385
 msgid "2944d1e * change per section limit to 12 from 9 (#396)"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:349
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:386
 msgid "0b04284 * Update Japanese Translation (#394)"
 msgstr ""
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:350
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:387
 msgid "fa60f4f * Move to brand new shiny Adw.ShortcutsDialog (#395)"
 msgstr ""
 
-#: src/bz-addons-dialog.blp:16 src/bz-full-view.blp:708
-#: src/bz-installed-tile.blp:101
-msgid "Manage Add-ons"
+#: src/bz-addons-dialog.blp:16 src/bz-full-view.blp:710
+msgid "Manage Add-Ons"
 msgstr "アドオンを管理する"
 
-#: src/bz-addons-dialog.c:94 src/bz-full-view.blp:495
+#: src/bz-addons-dialog.c:94 src/bz-full-view.blp:499
 #: src/bz-installed-tile.blp:119 src/bz-transaction-dialog.c:231
 msgid "Remove"
 msgstr "削除する"
 
-#: src/bz-addons-dialog.c:99 src/bz-favorites-tile.c:174
-#: src/bz-full-view.blp:262 src/bz-full-view.blp:482
+#: src/bz-addons-dialog.c:99 src/bz-favorites-tile.c:159
+#: src/bz-full-view.blp:262 src/bz-full-view.blp:486
 #: src/bz-transaction-dialog.c:202
 msgid "Install"
 msgstr "インストール"
 
 #: src/bz-age-rating-dialog.blp:7 src/bz-age-rating-dialog.blp:31
-#: src/bz-age-rating-dialog.c:726 src/bz-full-view.c:338 src/bz-full-view.c:345
+#: src/bz-age-rating-dialog.c:726 src/bz-full-view.c:348 src/bz-full-view.c:355
 msgid "Age Rating"
 msgstr "年齢レーティング"
 
@@ -629,12 +683,12 @@ msgstr "カートゥーン調の暴力に関する情報はありません"
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:94
 msgid "Fantasy Violence"
-msgstr "ファンタジーの暴力"
+msgstr "ファンタジー風の暴力"
 
 #. TRANSLATORS: content rating description, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:96
 msgid "No information regarding fantasy violence"
-msgstr "ファンタジーの暴力に関する情報はありません"
+msgstr "ファンタジー風の暴力に関する情報はありません"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:100
@@ -937,7 +991,7 @@ msgid "Violence"
 msgstr "暴力"
 
 #. Translators: Age rating format, e.g. "12+" for ages 12 and up
-#: src/bz-age-rating-dialog.c:676 src/bz-full-view.c:328
+#: src/bz-age-rating-dialog.c:676 src/bz-full-view.c:338
 #, c-format
 msgid "%d+"
 msgstr ""
@@ -993,42 +1047,42 @@ msgid "Main Menu"
 msgstr "メインメニュー"
 
 #: src/bz-all-apps-page.blp:18 src/bz-apps-page.blp:18
-#: src/bz-user-data-page.blp:19 src/bz-window.blp:384
+#: src/bz-user-data-page.blp:19 src/bz-window.blp:385
 msgid "_Donate to Bazaar ❤️"
 msgstr "Bazaar に寄付する❤️(_D)"
 
 #: src/bz-all-apps-page.blp:25 src/bz-apps-page.blp:25
-#: src/bz-user-data-page.blp:26 src/bz-window.blp:391
+#: src/bz-user-data-page.blp:26 src/bz-window.blp:392
+msgid "_Refresh"
+msgstr "再読み込み(_R)"
+
+#: src/bz-all-apps-page.blp:30 src/bz-apps-page.blp:30
+#: src/bz-user-data-page.blp:31 src/bz-window.blp:397
 msgid "_Preferences"
 msgstr "設定(_P)"
 
-#: src/bz-all-apps-page.blp:30 src/bz-apps-page.blp:30
-#: src/bz-user-data-page.blp:31 src/bz-window.blp:396
-msgid "_Login with Flathub"
+#: src/bz-all-apps-page.blp:35 src/bz-apps-page.blp:35
+#: src/bz-user-data-page.blp:36
+msgid "_Login With Flathub"
 msgstr "Flathub にログイン(_L)"
 
-#: src/bz-all-apps-page.blp:36 src/bz-apps-page.blp:36
-#: src/bz-user-data-page.blp:37 src/bz-window.blp:402
+#: src/bz-all-apps-page.blp:41 src/bz-apps-page.blp:41
+#: src/bz-user-data-page.blp:42 src/bz-window.blp:408
 msgid "_Manage Leftover User Data"
 msgstr "残存しているユーザーデータを管理(_M)"
 
-#: src/bz-all-apps-page.blp:41 src/bz-apps-page.blp:41
-#: src/bz-user-data-page.blp:42 src/bz-window.blp:407
-msgid "_Synchronize Remotes"
-msgstr "リモートと同期(_S)"
-
 #: src/bz-all-apps-page.blp:46 src/bz-apps-page.blp:46
-#: src/bz-user-data-page.blp:47 src/bz-window.blp:412
+#: src/bz-user-data-page.blp:47 src/bz-window.blp:413
 msgid "_Keyboard Shortcuts"
 msgstr "キーボードショートカット(_K)"
 
 #: src/bz-all-apps-page.blp:51 src/bz-apps-page.blp:51
-#: src/bz-user-data-page.blp:52 src/bz-window.blp:417
+#: src/bz-user-data-page.blp:52 src/bz-window.blp:418
 msgid "_About Bazaar"
 msgstr "Bazaar について(_A)"
 
 #: src/bz-all-apps-page.blp:58 src/bz-apps-page.blp:58
-#: src/bz-user-data-page.blp:59 src/bz-window.blp:424
+#: src/bz-user-data-page.blp:59 src/bz-window.blp:425
 msgid "_Quit Bazaar"
 msgstr "Bazaar を終了(_Q)"
 
@@ -1174,16 +1228,33 @@ msgstr "インストール済みのサイズ"
 msgid "Size on Disk"
 msgstr "ディスク上のサイズ"
 
-#: src/bz-app-size-dialog.blp:99
+#: src/bz-app-size-dialog.blp:125
+msgid "Open user data folder"
+msgstr "ユーザーデータのフォルダーを開く"
+
+#: src/bz-app-size-dialog.blp:135
 msgid "User Data Size"
 msgstr "ユーザーデータのサイズ"
 
-#: src/bz-app-size-dialog.blp:100
+#: src/bz-app-size-dialog.blp:136
 msgid "Caches, settings, and other app data"
 msgstr "キャッシュや設定、その他のアプリデータ"
 
+#: src/bz-app-size-dialog.c:99
+msgid "Installed Runtime Size"
+msgstr "インストール済みランタイムのサイズ"
+
+#: src/bz-app-size-dialog.c:99
+msgid "Runtime Download Size"
+msgstr "ランタイムのダウンロードサイズ"
+
+#: src/bz-app-tile.blp:57 src/bz-developer-badge.c:98
+#: src/bz-rich-app-tile.blp:103 src/bz-rich-app-tile.c:282
+msgid "Verified"
+msgstr "認証済み"
+
 #. Translators: As in 'The app is installed'.
-#: src/bz-app-tile.blp:86 src/bz-full-view.c:287 src/bz-releases-list.c:178
+#: src/bz-app-tile.blp:89 src/bz-full-view.c:297 src/bz-releases-list.c:178
 msgid "Installed"
 msgstr "インストール済み"
 
@@ -1201,42 +1272,61 @@ msgstr "全ての「%s」"
 msgid "%d Applications"
 msgstr "アプリケーション総数: %d"
 
-#: src/bz-application.c:674
+#: src/bz-application.c:678
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr ""
 
-#: src/bz-application.c:675
+#: src/bz-application.c:679
 msgctxt "About Dialog Developer Credit"
 msgid "Alexander Vanhee"
 msgstr ""
 
-#: src/bz-application.c:703
+#: src/bz-application.c:699
 msgid "Adam Masciola"
 msgstr ""
 
 #. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
-#: src/bz-application.c:706
+#: src/bz-application.c:702
 msgid "translator-credits"
 msgstr "camegone, 2025"
 
-#: src/bz-application.c:717
+#: src/bz-application.c:712
 msgid "Special Thanks"
 msgstr "スペシャルサンクス"
 
-#: src/bz-application.c:775
+#: src/bz-application.c:770
 msgid "Logged Out Successfully!"
 msgstr "正常にログアウトされました!"
 
-#: src/bz-application.c:898
+#: src/bz-application.c:893
 msgid "Performing setup..."
 msgstr "セットアップの実行中..."
 
-#: src/bz-application.c:981 src/bz-application.c:990
-msgid "Set Up Flathub"
-msgstr "Flathub をセットアップする"
+#: src/bz-application.c:977
+msgid "Set Up System Flathub?"
+msgstr "システムに Flathub をセットアップしますか?"
 
-#: src/bz-application.c:984
+#: src/bz-application.c:980
+msgid ""
+"The system Flathub remote is not set up. Bazaar requires Flathub to be "
+"configured on the system Flatpak installation to browse and install "
+"applications.\n"
+"\n"
+"You can still use Bazaar to browse and remove already installed apps."
+msgstr ""
+"Flathub リモートはあなたのシステムでセットアップされていません。Bazaar でアプ"
+"リを検索したりインストールするためには、システムに Flathub をセットアップする"
+"必要があります。 \n"
+"\n"
+"あなたは引き続き Bazaar でインストール済みのアプリを検索したり削除することが"
+"できます。"
+
+#: src/bz-application.c:987
+msgid "Set Up Flathub?"
+msgstr "Flathub をセットアップしますか?"
+
+#: src/bz-application.c:990
 msgid ""
 "Flathub is not set up on this system. You will not be able to browse and "
 "install applications in Bazaar if its unavailable.\n"
@@ -1244,83 +1334,109 @@ msgid ""
 "You can still use Bazaar to browse and remove already installed apps."
 msgstr ""
 "Flathub はあなたのシステムでセットアップされていません。Flathub が利用できな"
-"い場合、アプリを検索したりインストールすることができません。 あなたは引き続"
-"き Bazaar でインストール済みのアプリを検索したり削除することができます。"
+"い場合、アプリを検索したりインストールすることができません。\n"
+"\n"
+"あなたは引き続き Bazaar でインストール済みのアプリを検索したり削除することが"
+"できます。"
 
-#: src/bz-application.c:989
+#: src/bz-application.c:996
 msgid "Later"
 msgstr "後で"
 
-#: src/bz-application.c:1399 src/bz-application.c:3116
-msgid "Synchronizing..."
-msgstr "同期中..."
+#: src/bz-application.c:997
+msgid "Set Up Flathub"
+msgstr "Flathub をセットアップする"
 
-#: src/bz-application.c:1546 src/bz-application.c:3112
+#: src/bz-application.c:1280
+msgid "A backend error occurred"
+msgstr "バックエンドのエラーが発生しました"
+
+#: src/bz-application.c:1406 src/bz-application.c:3184 src/bz-window.blp:135
+msgid "Refreshing…"
+msgstr "再読み込み中..."
+
+#: src/bz-application.c:1553 src/bz-application.c:3180
 #, c-format
-msgid "Receiving %d entries..."
-msgstr "%d 件のエントリを受信中..."
+msgid "Loading %d apps…"
+msgstr "%d 個のアプリをロード中..."
 
-#: src/bz-application.c:1551
-msgid "Checking for updates"
-msgstr "更新を確認中"
+#: src/bz-application.c:1558
+msgid "Checking for updates…"
+msgstr "更新を確認中..."
 
-#: src/bz-application.c:3118
-msgid "Indexing Data..."
-msgstr "データをインデックス中..."
+#: src/bz-application.c:1614
+msgid "Failed to open .flatpakref"
+msgstr ".flatpakref を開けませんでした"
 
-#: src/bz-appstream-parser.c:265
+#: src/bz-application.c:1668
+msgid "An initialization error occurred"
+msgstr "初期化中にエラーが発生しました"
+
+#: src/bz-application.c:2006
+msgid "Failed to check for updates"
+msgstr "更新の確認に失敗しました"
+
+#: src/bz-application.c:2963
+msgid "Could not find app"
+msgstr "アプリが見つかりませんでした"
+
+#: src/bz-application.c:3186
+msgid "Writing to cache…"
+msgstr "キャッシュを書き込み中..."
+
+#: src/bz-appstream-parser.c:303
 msgctxt "Project URL Type"
 msgid "Flathub Page"
 msgstr "Flathub ページ"
 
-#: src/bz-appstream-parser.c:286
+#: src/bz-appstream-parser.c:324
 msgctxt "Project URL Type"
 msgid "Project Website"
 msgstr "プロジェクトのウェブサイト"
 
-#: src/bz-appstream-parser.c:290
+#: src/bz-appstream-parser.c:328
 msgctxt "Project URL Type"
 msgid "Issue Tracker"
 msgstr "バグトラッカー"
 
-#: src/bz-appstream-parser.c:294
+#: src/bz-appstream-parser.c:332
 msgctxt "Project URL Type"
 msgid "FAQ"
 msgstr "よくある質問"
 
-#: src/bz-appstream-parser.c:298
+#: src/bz-appstream-parser.c:336
 msgctxt "Project URL Type"
 msgid "Help"
 msgstr "ヘルプ"
 
-#: src/bz-appstream-parser.c:302
+#: src/bz-appstream-parser.c:340
 msgctxt "Project URL Type"
 msgid "Donate"
 msgstr "寄付"
 
-#: src/bz-appstream-parser.c:308
+#: src/bz-appstream-parser.c:346
 msgctxt "Project URL Type"
 msgid "Translate"
 msgstr "翻訳"
 
-#: src/bz-appstream-parser.c:312
+#: src/bz-appstream-parser.c:350
 msgctxt "Project URL Type"
 msgid "Contact"
 msgstr "連絡先"
 
-#: src/bz-appstream-parser.c:316
+#: src/bz-appstream-parser.c:354
 msgctxt "Project URL Type"
 msgid "Source Code"
 msgstr "ソースコード"
 
-#: src/bz-appstream-parser.c:322
+#: src/bz-appstream-parser.c:360
 msgctxt "Project URL Type"
 msgid "Contribute"
 msgstr "貢献する"
 
 #: src/bz-curated-view.blp:11 src/bz-favorites-page.blp:68
 #: src/bz-flathub-page.blp:19 src/bz-full-view.blp:61
-#: src/bz-library-page.blp:59 src/bz-user-data-page.blp:86
+#: src/bz-library-page.blp:63 src/bz-user-data-page.blp:86
 msgid "Empty"
 msgstr "空"
 
@@ -1345,15 +1461,24 @@ msgstr "Flathub を閲覧"
 msgid "Offline"
 msgstr "オフライン"
 
+#. Translators: Search suggestion: the english text will be used for the
+#. search regardless of what you put here, so don't worry about the string
+#. yielding poor search results. Focus on correctness and friendliness,
+#. etc
 #: src/bz-curated-view.blp:39 src/bz-flathub-page.blp:49
+#: src/bz-search-pill-list.c:67
 msgid "Browser"
 msgstr "ブラウザー"
 
-#: src/bz-developer-badge.c:131
+#: src/bz-developer-badge.c:92 src/bz-developer-badge.c:98
+msgid "Not Verified"
+msgstr "認証なし"
+
+#: src/bz-developer-badge.c:145
 msgid "Developer information not available."
 msgstr "開発者に関する情報がありません。"
 
-#: src/bz-developer-badge.c:137 src/bz-developer-badge.c:151
+#: src/bz-developer-badge.c:151 src/bz-developer-badge.c:165
 #, c-format
 msgid ""
 "The ownership of the %s app ID has not been verified and it may be a "
@@ -1362,14 +1487,14 @@ msgstr ""
 "このアプリ ID、%s の所有権は検証されておらず、コミュニティのパッケージである"
 "可能性があります。"
 
-#: src/bz-developer-badge.c:155
+#: src/bz-developer-badge.c:169
 #, c-format
 msgid ""
 "The ownership of the %s app ID has been manually verified by the Flathub "
 "team."
 msgstr "このアプリ ID、%s の所有権は Flathub のチームが手動で検証済みです。"
 
-#: src/bz-developer-badge.c:161
+#: src/bz-developer-badge.c:175
 #, c-format
 msgid ""
 "The ownership of the %1$s app ID has been verified by <b>%2$s</b> on "
@@ -1378,44 +1503,47 @@ msgstr ""
 "このアプリ ID、%1$s の所有権は <b>%3$s</b> に所属する <b>%2$s</b> によって検"
 "証済みです。"
 
-#: src/bz-developer-badge.c:168
+#: src/bz-developer-badge.c:182
 #, c-format
 msgid "The ownership of the %1$s app ID has been verified using %2$s."
 msgstr "このアプリ ID、%1$s の所有権は、%2$s を使って検証済みです。"
 
-#: src/bz-developer-badge.c:172
+#: src/bz-developer-badge.c:186
 #, c-format
 msgid "The ownership of the %s app ID has been verified."
 msgstr "このアプリ ID、%s の所有権は検証済みです。"
 
-#: src/bz-donations-dialog.blp:47
-msgid "View the Release Page"
-msgstr "リリースページを表示"
+#: src/bz-donations-dialog.blp:74
+msgid "Full Release Notes"
+msgstr "更新履歴の全文"
 
-#: src/bz-donations-dialog.blp:69
-msgid "This Bazaar Release Was Made Possible By Users Like You!"
-msgstr ""
-"この Bazaar の新バージョンはあなたのようなユーザーに支えられて実現しました!"
+#: src/bz-donations-dialog.blp:105
+msgid "This release was made possible by users like you!"
+msgstr "この新バージョンはあなたのようなユーザーのおかげで実現しました!"
 
-#: src/bz-donations-dialog.blp:77
+#: src/bz-donations-dialog.blp:113
 msgid ""
-"I love making Bazaar, but I cannot do it alone. If you would like to help "
-"support further development, please consider donating to the project at my "
-"ko-fi:"
+"I love making Bazaar, but I cannot do it alone. Help support further "
+"development by donating on Ko-Fi."
 msgstr ""
 "私は Bazaar の開発が好きですが、それは私一人だけではできません。もしあなたが"
 "将来的な開発の継続を支援したいなら、ko-fi でプロジェクトを支援することを検討"
-"してください:"
+"してください。"
 
-#: src/bz-donations-dialog.blp:87
+#: src/bz-donations-dialog.blp:128
 msgid "Donate to Bazaar"
 msgstr "Bazaar に寄付する"
 
 #. Translators: the %s format specifier will be something along the lines of "0.7.6" etc
-#: src/bz-donations-dialog.c:156
+#: src/bz-donations-dialog.c:227
 #, c-format
-msgid "What's New in Version %s?"
+msgid "What's New in %s?"
 msgstr "バージョン %s での変更点は何?"
+
+#. Translators: this is a release date label, like "Released February 9, 2026"
+#: src/bz-donations-dialog.c:243
+msgid "Released %B %-e, %Y"
+msgstr "リリース日: %Y/%0m/%0d"
 
 #: src/bz-entry-group-util.c:73
 msgid "Choose an Installation"
@@ -1436,7 +1564,7 @@ msgid "Cancel"
 msgstr "キャンセル"
 
 #: src/bz-entry-selection-row.blp:17
-msgid "For this user only"
+msgid "For This User Only"
 msgstr "このユーザーのみ"
 
 #: src/bz-entry-selection-row.c:112
@@ -1447,17 +1575,22 @@ msgstr "このユーザー"
 msgid "all users"
 msgstr "全てのユーザー"
 
-#: src/bz-error.c:68
-msgid "An Error Occurred"
-msgstr "エラーが発生しました"
+#: src/bz-error.c:69 src/bz-error.c:88 src/bz-error-dialog.blp:36
+#: src/bz-safety-dialog.blp:50
+msgid "Details"
+msgstr "詳細"
 
-#: src/bz-error.c:89
-msgid "Close"
-msgstr "閉じる"
+#: src/bz-error-dialog.blp:47
+msgid "Copy"
+msgstr "コピーする"
 
-#: src/bz-error.c:90
-msgid "Copy and Close"
-msgstr "コピーして閉じる"
+#: src/bz-error-dialog.c:56 src/bz-share-list.c:64
+msgid "Copied!"
+msgstr "コピーしました!"
+
+#: src/bz-favorite-button.c:388
+msgid "Failed to update favorite"
+msgstr "お気に入りを更新できませんでした"
 
 #: src/bz-favorite-button.c:434
 msgid "Log in with Flathub to manage favorites"
@@ -1471,31 +1604,35 @@ msgstr "ログイン"
 msgid "Favorite Count"
 msgstr "お気に入りされた数"
 
-#: src/bz-favorites-tile.c:172
+#: src/bz-favorites-tile.c:157
 msgid "Uninstall"
 msgstr "アンインストール"
 
-#: src/bz-favorites-tile.blp:70 src/bz-installed-tile.blp:77
-msgid "Support this application"
+#: src/bz-favorites-tile.c:360
+msgid "Failed to remove favorite"
+msgstr "お気に入りから削除できませんでした"
+
+#: src/bz-favorites-tile.blp:70
+msgid "Support This Application"
 msgstr "このアプリケーションを支援する"
 
 #: src/bz-favorites-tile.blp:119
-msgid "Remove from Favorites"
+msgid "Remove From Favorites"
 msgstr "お気に入りから削除"
 
 #: src/bz-favorites-page.blp:5 src/bz-favorites-page.blp:78
-#: src/bz-window.blp:442
+#: src/bz-window.blp:443
 msgid "Favorites"
 msgstr "お気に入り"
 
-#: src/bz-favorites-page.blp:22 src/bz-full-view.blp:44 src/bz-window.blp:307
-msgid "Open App Library"
-msgstr "アプリ ライブラリを開く"
-
-#: src/bz-favorites-page.blp:39 src/bz-section-view.blp:144
+#: src/bz-favorites-page.blp:17 src/bz-section-view.blp:144
 #: src/bz-transaction-dialog.c:579
 msgid "Install All"
 msgstr "全てインストール"
+
+#: src/bz-favorites-page.blp:34 src/bz-full-view.blp:44 src/bz-window.blp:308
+msgid "Open App Library"
+msgstr "アプリ ライブラリを開く"
 
 #: src/bz-favorites-page.blp:56 src/bz-user-data-page.blp:75
 msgid "Loading"
@@ -1533,7 +1670,11 @@ msgstr "Midi"
 msgid "Mixer"
 msgstr "ミキサー"
 
-#: src/bz-flathub-category.c:92
+#. Translators: Search suggestion: the english text will be used for the
+#. search regardless of what you put here, so don't worry about the string
+#. yielding poor search results. Focus on correctness and friendliness,
+#. etc
+#: src/bz-flathub-category.c:92 src/bz-search-pill-list.c:77
 msgid "Music"
 msgstr "音楽"
 
@@ -1848,8 +1989,8 @@ msgstr "ゲームやお気に入りのタイトルを遊ぶためのアプリ"
 msgid "More Games"
 msgstr "ゲームをもっと見る"
 
-#: src/bz-full-view.blp:65 src/bz-library-page.blp:70
-#: src/bz-library-page.blp:74
+#: src/bz-full-view.blp:65 src/bz-library-page.blp:74
+#: src/bz-library-page.blp:78
 msgid "No Results"
 msgstr "結果無し"
 
@@ -1870,11 +2011,11 @@ msgstr ""
 msgid "Support"
 msgstr "支援する"
 
-#: src/bz-full-view.blp:246 src/bz-full-view.blp:506
+#: src/bz-full-view.blp:246 src/bz-full-view.blp:510
 msgid "Open"
 msgstr "開く"
 
-#: src/bz-full-view.blp:259 src/bz-full-view.blp:479
+#: src/bz-full-view.blp:259 src/bz-full-view.blp:483
 msgid "Download & Install Application"
 msgstr "アプリケーションをダウンロードしてインストールする"
 
@@ -1882,19 +2023,19 @@ msgstr "アプリケーションをダウンロードしてインストールす
 msgid "Uninstall Application"
 msgstr "このアプリケーションをアンインストール"
 
-#: src/bz-full-view.blp:289 src/bz-full-view.blp:521
+#: src/bz-full-view.blp:289 src/bz-full-view.blp:525
 msgid "Install Other Version"
 msgstr "ほかのバージョンをインストール"
 
-#: src/bz-full-view.blp:443
+#: src/bz-full-view.blp:447
 msgid "Downloads/Month"
 msgstr "月あたりのダウンロード数"
 
-#: src/bz-full-view.blp:540
+#: src/bz-full-view.blp:544
 msgid "Stopped Receiving Core Updates"
 msgstr "アップデートの提供終了"
 
-#: src/bz-full-view.blp:554
+#: src/bz-full-view.blp:558
 msgid ""
 "This app uses a runtime that no longer receives updates or security fixes. "
 "It may become unsafe to use."
@@ -1902,126 +2043,130 @@ msgstr ""
 "このアプリは更新やセキュリティ修正の提供が終了したランタイムを使用していま"
 "す。 使用することが安全でなくなる可能性があります。"
 
-#: src/bz-full-view.blp:643
+#: src/bz-full-view.blp:645
 msgid "Trash Data"
-msgstr "データを捨てる"
+msgstr "データをゴミ箱に移動"
 
-#: src/bz-full-view.blp:784
+#: src/bz-full-view.blp:786
 msgid "Tags:"
 msgstr "タグ:"
 
-#: src/bz-full-view.c:227
+#: src/bz-full-view.c:230
 msgid "---"
 msgstr ""
 
 #. Translators: M is the suffix for millions
-#: src/bz-full-view.c:234
+#: src/bz-full-view.c:237
 #, c-format
 msgid "%.*fM"
 msgstr ""
 
 #. Translators: K is the suffix for thousands
-#: src/bz-full-view.c:241
+#: src/bz-full-view.c:244
 #, c-format
 msgid "%.*fK"
 msgstr ""
 
-#: src/bz-full-view.c:251
+#: src/bz-full-view.c:254
 #, c-format
 msgid "%d downloads in the last 30 days"
 msgstr "過去1ヶ月の間に %d ダウンロード"
 
-#: src/bz-full-view.c:263 src/bz-full-view.c:597 src/bz-full-view.c:614
+#: src/bz-full-view.c:266 src/bz-full-view.c:607 src/bz-full-view.c:624
 msgid "N/A"
 msgstr "利用不能"
 
-#. Translators: .
-#: src/bz-full-view.c:287
+#: src/bz-full-view.c:294
+#, c-format
+msgid "+%s runtime"
+msgstr "+%s ランタイム"
+
+#: src/bz-full-view.c:297
 msgid "Download"
 msgstr "ダウンロード"
 
-#: src/bz-full-view.c:307
+#: src/bz-full-view.c:317
 msgid "Size information unavailable"
 msgstr "サイズの情報がありません"
 
-#: src/bz-full-view.c:310
+#: src/bz-full-view.c:320
 #, c-format
 msgid "Download size of %s"
 msgstr "ダウンロードサイズ: %s"
 
-#: src/bz-full-view.c:343
+#: src/bz-full-view.c:353
 msgid "All Ages"
 msgstr "全年齢"
 
-#: src/bz-full-view.c:355
+#: src/bz-full-view.c:365
 msgid "Age rating information unavailable"
 msgstr "年齢レーティングの情報がありません"
 
-#: src/bz-full-view.c:360
+#: src/bz-full-view.c:370
 msgid "Suitable for all ages"
 msgstr "全ての年齢のユーザーに適している"
 
-#: src/bz-full-view.c:362
+#: src/bz-full-view.c:372
 #, c-format
 msgid "Suitable for ages %d and up"
 msgstr "%d 歳以上のユーザーに適している"
 
-#: src/bz-full-view.c:395 src/bz-full-view.c:400 src/bz-full-view.c:428
-#: src/bz-full-view.c:439
+#: src/bz-full-view.c:405 src/bz-full-view.c:410 src/bz-full-view.c:438
+#: src/bz-full-view.c:449
 msgid "Unknown"
 msgstr "不明"
 
-#: src/bz-full-view.c:405
+#: src/bz-full-view.c:415
 #, c-format
 msgid "Free software licensed under %s"
 msgstr "%s ライセンスのもと公開されているフリーソフト"
 
-#: src/bz-full-view.c:410
+#: src/bz-full-view.c:420
 msgid "Free software"
 msgstr "フリーのソフトウェア"
 
-#: src/bz-full-view.c:413
+#: src/bz-full-view.c:423
 msgid "Proprietary Software"
 msgstr "プロプライエタリ ソフトウェア"
 
-#: src/bz-full-view.c:416
+#: src/bz-full-view.c:426
 #, c-format
 msgid "Special License: %s"
 msgstr "特別なライセンス: %s"
 
-#: src/bz-full-view.c:433
+#: src/bz-full-view.c:443
 msgid "Free"
 msgstr "フリー"
 
-#: src/bz-full-view.c:436 src/bz-license-dialog.c:132
+#: src/bz-full-view.c:446 src/bz-license-dialog.c:132
 msgid "Proprietary"
 msgstr "プロプライエタリ"
 
-#: src/bz-full-view.c:441 src/bz-license-dialog.c:134
+#: src/bz-full-view.c:451 src/bz-license-dialog.c:134
 msgid "Special License"
 msgstr "特別なライセンス"
 
-#: src/bz-full-view.c:461
+#: src/bz-full-view.c:471
 msgid "Adaptive"
 msgstr "幅広いデバイスに対応"
 
-#: src/bz-full-view.c:461
+#: src/bz-full-view.c:471
 msgid "Desktop Only"
 msgstr "デスクトップのみ"
 
-#: src/bz-full-view.c:467
+#: src/bz-full-view.c:477
 msgid "Works on desktop, tablets, and phones"
 msgstr "デスクトップ、タブレット、携帯電話で動きます"
 
-#: src/bz-full-view.c:468
+#: src/bz-full-view.c:478
 msgid "May not work on mobile devices"
 msgstr "モバイル端末では動かない可能性があります"
 
-#: src/bz-full-view.c:479
+#: src/bz-full-view.c:489
 msgid "No URL"
 msgstr "URL がありません"
 
-#: src/bz-full-view.c:497
+#: src/bz-full-view.c:507
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -2029,7 +2174,7 @@ msgstr ""
 "このアプリケーションはフリーのOSSライセンスで公開されており、安全のためにソー"
 "スコードを確認することができます。"
 
-#: src/bz-full-view.c:498
+#: src/bz-full-view.c:508
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
@@ -2038,61 +2183,65 @@ msgstr ""
 "コードはプライベートで開発されているため、独立した第三者による検査を受けるこ"
 "とができません。"
 
-#: src/bz-full-view.c:505
+#: src/bz-full-view.c:515
 msgid "More Apps"
 msgstr "アプリをもっと見る"
 
-#: src/bz-full-view.c:506
+#: src/bz-full-view.c:516
 #, c-format
 msgid "More Apps by %s"
 msgstr "%s のアプリをもっと見る"
 
-#: src/bz-full-view.c:513
+#: src/bz-full-view.c:523
 msgid "Other Apps by this Developer"
 msgstr "この開発者の別のアプリ"
 
-#: src/bz-full-view.c:515 src/bz-full-view.c:715
+#: src/bz-full-view.c:525 src/bz-full-view.c:725
 #, c-format
 msgid "Other Apps by %s"
 msgstr "%s の別のアプリ"
 
-#: src/bz-full-view.c:524
+#: src/bz-full-view.c:534
 #, c-format
 msgid "%s is not installed, but it still has <b>%s</b> of data present."
 msgstr ""
 "%s はインストールされていませんが、<b>%s</b> のデータは残存しています。"
 
-#: src/bz-full-view.c:604 src/bz-safety-dialog.blp:31
+#: src/bz-full-view.c:614 src/bz-safety-dialog.blp:31
 msgid "Safe"
 msgstr "安全"
 
-#: src/bz-full-view.c:606 src/bz-full-view.c:608
+#: src/bz-full-view.c:616 src/bz-full-view.c:618
 msgid "Low Risk"
 msgstr "低いリスク"
 
-#: src/bz-full-view.c:610
+#: src/bz-full-view.c:620
 msgid "Medium Risk"
 msgstr "中間のリスク"
 
-#: src/bz-full-view.c:612
+#: src/bz-full-view.c:622
 msgid "High Risk"
 msgstr "高いリスク"
 
-#: src/bz-full-view.c:717
+#: src/bz-full-view.c:727
 msgid "Other Apps"
 msgstr "他のアプリ"
 
-#: src/bz-full-view.c:719
+#: src/bz-full-view.c:729
 #, c-format
 msgid "%d Application"
 msgid_plural "%d Applications"
 msgstr[0] "アプリケーション総数: %d"
 
-#: src/bz-full-view.c:1058
+#: src/bz-full-view.c:960 src/bz-transaction-tile.c:340
+msgid "Failed to launch application"
+msgstr "アプリケーションの起動失敗"
+
+#: src/bz-full-view.c:1068
 msgid "Show Less"
 msgstr "折り畳む"
 
-#: src/bz-full-view.c:1058
+#: src/bz-full-view.c:1068
 msgid "Show More"
 msgstr "もっと見る"
 
@@ -2190,50 +2339,66 @@ msgstr "%s は特定のデバイスが搭載された端末で快適に動作し
 msgid "%s works on most devices"
 msgstr "%s はほとんどのデバイスで動作します"
 
-#: src/bz-installed-tile.blp:63 src/bz-rich-app-tile.blp:136
+#: src/bz-installed-tile.blp:63 src/bz-rich-app-tile.blp:139
 msgid "Stopped Receiving Updates"
 msgstr "更新の提供終了"
+
+#: src/bz-installed-tile.blp:77
+msgid "Support this application"
+msgstr "このアプリケーションを支援する"
+
+#: src/bz-installed-tile.blp:101
+msgid "Manage Add-ons"
+msgstr "アドオンを管理する"
+
+#: src/bz-installed-tile.c:249
+msgid "Failed to load add-ons"
+msgstr "アドオンの読み込みに失敗しました"
 
 #: src/bz-library-page.blp:29
 msgid "Search installed apps"
 msgstr "インストール済みのアプリを検索"
 
-#: src/bz-library-page.blp:63
+#: src/bz-library-page.blp:46
+msgid "Clear search"
+msgstr "検索を削除"
+
+#: src/bz-library-page.blp:67
 msgid "No Apps Found"
 msgstr "アプリケーションがありません"
 
 #. Translators: .
-#: src/bz-library-page.blp:82 src/bz-window.blp:179
+#: src/bz-library-page.blp:86 src/bz-window.blp:179
 msgid "Library"
 msgstr "ライブラリー"
 
-#: src/bz-library-page.blp:110
+#: src/bz-library-page.blp:114
 msgid "Pending Updates"
 msgstr "実行待ちの更新"
 
-#: src/bz-library-page.blp:137
+#: src/bz-library-page.blp:141
 msgid "Downloads"
 msgstr "ダウンロード一覧"
 
-#: src/bz-library-page.blp:180
+#: src/bz-library-page.blp:184
 msgid "Recently Uninstalled"
 msgstr "最近アンインストールされたアプリ"
 
-#: src/bz-library-page.blp:231
+#: src/bz-library-page.blp:235
 msgid "Clear Finished Tasks"
 msgstr "完了したタスクを削除"
 
-#: src/bz-library-page.blp:242
+#: src/bz-library-page.blp:246
 msgid "Installed Apps"
 msgstr "インストール済みのアプリ"
 
-#: src/bz-library-page.c:153
+#: src/bz-library-page.c:150
 #, c-format
 msgid "No matches found for \"%s\" in the list of installed apps"
 msgstr ""
 "インストール済みのアプリ一覧には、「%s」という単語は見つかりませんでした"
 
-#: src/bz-library-page.c:166 src/bz-updates-card.c:257
+#: src/bz-library-page.c:163 src/bz-updates-card.c:257
 #, c-format
 msgid "%u Available Update"
 msgid_plural "%u Available Updates"
@@ -2321,7 +2486,7 @@ msgstr ""
 msgid "Finish"
 msgstr "完了"
 
-#: src/bz-login-page.c:663
+#: src/bz-login-page.c:664
 #, c-format
 msgid "Hello, %s!"
 msgstr "ようこそ、%s!"
@@ -2331,13 +2496,13 @@ msgid "Preferences"
 msgstr "設定"
 
 #: src/bz-preferences-dialog.blp:25
-msgid "Network connection is metered — automatic store data sync is paused"
+msgid "Network connection is metered — automatic store data refresh is paused"
 msgstr ""
-"従量課金のネットワークに接続しています — ストア情報の自動取得は一時停止されて"
-"います"
+"従量課金のネットワークに接続しています — ストア情報の自動読み込みは一時停止さ"
+"れています"
 
-#: src/bz-preferences-dialog.blp:26 src/bz-window.blp:334
-msgid "Sync Manually"
+#: src/bz-preferences-dialog.blp:26 src/bz-window.blp:335
+msgid "Refresh Manually"
 msgstr "手動で同期する"
 
 #: src/bz-preferences-dialog.blp:31
@@ -2499,6 +2664,26 @@ msgstr "ニュートロワ プライド カラー"
 msgid "Version History"
 msgstr "バージョン履歴"
 
+#. Translators: This is a date format for timestamps from the current year. Used in the app releases section.
+#. * %B is the full month name, %e is the day.
+#. * Example: "October 1"
+#. * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
+#. * Please modify to make it sound natural in your locale.
+#. *
+#: src/bz-releases-list.c:121
+msgid "%e %B"
+msgstr "%0m/%0d"
+
+#. Translators: This is a date format for timestamps from previous years. Used in the app releases section.
+#. * %B is the full month name, %e is the day, %Y is the year.
+#. * Example: "October 1, 2025"
+#. * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
+#. * Please modify to make it sound natural in your locale.
+#. *
+#: src/bz-releases-list.c:129
+msgid "%e %B %Y"
+msgstr "%Y/%0m/%0d"
+
 #: src/bz-releases-list.c:168
 #, c-format
 msgid "Version %s"
@@ -2512,7 +2697,7 @@ msgstr "このリリースの詳細情報がありません"
 msgid "Get More Information"
 msgstr "詳細情報を確認する"
 
-#: src/bz-rich-app-tile.blp:153
+#: src/bz-rich-app-tile.blp:156
 msgid "Get"
 msgstr "入手"
 
@@ -2830,10 +3015,6 @@ msgstr "KDE コネクトでペアリングされたデバイスと通信する�
 msgid "Safety"
 msgstr "安全性"
 
-#: src/bz-safety-dialog.blp:50
-msgid "Details"
-msgstr "詳細"
-
 #: src/bz-safety-dialog.blp:53
 msgid "License"
 msgstr "ライセンス"
@@ -2846,7 +3027,7 @@ msgstr "アプリ ID"
 msgid "SDK"
 msgstr "SDK"
 
-#: src/bz-safety-dialog.blp:101
+#: src/bz-safety-dialog.blp:104
 msgid ""
 "This app uses an outdated version of the software platform (SDK) and might "
 "contain bugs or security vulnerabilities which will not be fixed."
@@ -2911,34 +3092,126 @@ msgstr "ズームイン"
 msgid "Screenshots Carousel"
 msgstr "スクリーンショット カルーセル"
 
-#: src/bz-screenshots-carousel.blp:103
+#: src/bz-screenshots-carousel.blp:112
 msgid "Open Screenshot Viewer"
 msgstr "スクリーンショットビューアを開く"
+
+#. Translators: Search suggestion: the english text will be used for the
+#. search regardless of what you put here, so don't worry about the string
+#. yielding poor search results. Focus on correctness and friendliness,
+#. etc
+#: src/bz-search-pill-list.c:72
+msgid "Video"
+msgstr "動画"
+
+#. Translators: Search suggestion: the english text will be used for the
+#. search regardless of what you put here, so don't worry about the string
+#. yielding poor search results. Focus on correctness and friendliness,
+#. etc
+#: src/bz-search-pill-list.c:82
+msgid "Office"
+msgstr "オフィス"
+
+#. Translators: Search suggestion: the english text will be used for the
+#. search regardless of what you put here, so don't worry about the string
+#. yielding poor search results. Focus on correctness and friendliness,
+#. etc
+#: src/bz-search-pill-list.c:87
+msgid "PDF"
+msgstr "PDF"
+
+#. Translators: Search suggestion: the english text will be used for the
+#. search regardless of what you put here, so don't worry about the string
+#. yielding poor search results. Focus on correctness and friendliness,
+#. etc
+#: src/bz-search-pill-list.c:92
+msgid "Calendar"
+msgstr "カレンダー"
+
+#. Translators: Search suggestion: the english text will be used for the
+#. search regardless of what you put here, so don't worry about the string
+#. yielding poor search results. Focus on correctness and friendliness,
+#. etc
+#: src/bz-search-pill-list.c:97
+msgid "Messaging"
+msgstr "メッセージ"
+
+#. Translators: Search suggestion: the english text will be used for the
+#. search regardless of what you put here, so don't worry about the string
+#. yielding poor search results. Focus on correctness and friendliness,
+#. etc
+#: src/bz-search-pill-list.c:102
+msgid "Steam"
+msgstr "Steam"
+
+#. Translators: Search suggestion: the english text will be used for the
+#. search regardless of what you put here, so don't worry about the string
+#. yielding poor search results. Focus on correctness and friendliness,
+#. etc
+#: src/bz-search-pill-list.c:107
+msgid "Paint"
+msgstr "お絵描き"
+
+#. Translators: Search suggestion: the english text will be used for the
+#. search regardless of what you put here, so don't worry about the string
+#. yielding poor search results. Focus on correctness and friendliness,
+#. etc
+#: src/bz-search-pill-list.c:112
+msgid "VPN"
+msgstr "VPN"
+
+#. Translators: Search suggestion: the english text will be used for the
+#. search regardless of what you put here, so don't worry about the string
+#. yielding poor search results. Focus on correctness and friendliness,
+#. etc
+#: src/bz-search-pill-list.c:117
+msgid "Torrent"
+msgstr "Torrent"
+
+#. Translators: Search suggestion: the english text will be used for the
+#. search regardless of what you put here, so don't worry about the string
+#. yielding poor search results. Focus on correctness and friendliness,
+#. etc
+#: src/bz-search-pill-list.c:122
+msgid "Minecraft"
+msgstr "Minecraft"
+
+#. Translators: Search suggestion: the english text will be used for the
+#. search regardless of what you put here, so don't worry about the string
+#. yielding poor search results. Focus on correctness and friendliness,
+#. etc
+#: src/bz-search-pill-list.c:127
+msgid "Emulator"
+msgstr "エミュレーター"
 
 #: src/bz-search-widget.blp:57
 msgid "Search Apps, Games, Software"
 msgstr "アプリ、ゲーム、ソフトウェアを検索"
 
-#: src/bz-search-widget.blp:96
+#: src/bz-search-widget.blp:79
+msgid "Clear Search"
+msgstr "検索を削除"
+
+#: src/bz-search-widget.blp:152
 msgid "Categories Unavailable"
 msgstr "カテゴリーが利用不能です"
 
-#: src/bz-search-widget.blp:97
+#: src/bz-search-widget.blp:153
 msgid "Search for apps using the search bar above."
 msgstr "画面上側にある検索バーを使用してアプリを検索する。"
 
-#: src/bz-search-widget.blp:181
+#: src/bz-search-widget.blp:178
+msgid "Browse Categories"
+msgstr "カテゴリー一覧"
+
+#: src/bz-search-widget.blp:302
 msgid "No Applications Found"
 msgstr "アプリケーションがありません"
 
-#: src/bz-search-widget.c:241
+#: src/bz-search-widget.c:251
 #, c-format
 msgid "No results found for \"%s\" in Flathub"
 msgstr "「%s」という検索語句に合致するアプリは、Flathub にありませんでした"
-
-#: src/bz-share-list.c:64
-msgid "Copied!"
-msgstr "コピーしました!"
 
 #: src/bz-share-list.c:116
 msgid "Copy Link"
@@ -3080,6 +3353,10 @@ msgstr ""
 msgid "Install Anyway"
 msgstr "それでもインストールする"
 
+#: src/bz-transaction-dialog.c:331
+msgid "Failed to load transaction dialog"
+msgstr "ファイル操作のダイアログを読み込むことができませんでした"
+
 #: src/bz-transaction-dialog.c:549
 msgid "All apps are already installed"
 msgstr "全てのアプリがすでにインストール済みです"
@@ -3111,39 +3388,51 @@ msgstr "%d 個のアドオンがインストールされます。"
 msgid "Additionally, addons will be installed."
 msgstr "追加で、いくつかのアドオンがインストールされます。"
 
-#: src/bz-transaction-manager.c:1251
+#: src/bz-transaction-manager.c:766
 #, c-format
 msgid "Finished in %.02f seconds"
 msgstr "%.02f 秒で完了しました"
 
-#: src/bz-transaction-tile.blp:125
-msgid "App Add-on"
+#: src/bz-transaction-tile.blp:126
+msgid "App Add-On"
 msgstr "アプリ アドオン"
 
-#: src/bz-transaction-tile.blp:154
+#: src/bz-transaction-tile.blp:155
 msgid "Runtime"
 msgstr "ランタイム"
 
-#: src/bz-transaction-tile.blp:178
+#: src/bz-transaction-tile.blp:179
 msgid "In Queue"
 msgstr "順番待ち"
 
-#: src/bz-transaction-tile.blp:202
+#: src/bz-transaction-tile.blp:203
 msgid "Done"
 msgstr "完了"
 
-#: src/bz-transaction-tile.blp:226
+#: src/bz-transaction-tile.blp:227
 msgid "Error"
 msgstr "エラー"
 
-#: src/bz-transaction-tile.blp:267
+#: src/bz-transaction-tile.blp:271
 msgid "Open App"
 msgstr "アプリを開く"
 
-#: src/bz-transaction-tile.c:110
+#: src/bz-transaction-tile.blp:285
+msgid "Cancel Transaction"
+msgstr "ファイル操作をキャンセル"
+
+#: src/bz-transaction-tile.blp:409
+msgid "Show Error Info"
+msgstr "エラーの詳細を表示"
+
+#: src/bz-transaction-tile.c:112
 #, c-format
 msgid "%s Freed"
 msgstr "%s を解放しました"
+
+#: src/bz-transaction-tile.c:398 src/bz-transaction-tile.c:401
+msgid "Transaction Error"
+msgstr "ファイル操作のエラー"
 
 #: src/bz-transaction.c:342
 msgid "Pending"
@@ -3168,7 +3457,7 @@ msgid "Manage Leftover User Data"
 msgstr "残存するユーザーデータを管理"
 
 #: src/bz-user-data-page.blp:89
-msgid "No User Data found"
+msgid "No User Data Found"
 msgstr "ユーザーデータが見つかりませんでした"
 
 #: src/bz-user-data-page.blp:94
@@ -3184,10 +3473,6 @@ msgstr "%s のユーザーデータをゴミ箱に移す"
 msgid "Trash User Data"
 msgstr "ユーザーデータをゴミ箱に移動"
 
-#: src/bz-window.blp:135
-msgid "Refreshing Store Content"
-msgstr "ストアの内容を再読み込み中"
-
 #: src/bz-window.blp:153
 msgid "Curated"
 msgstr "特選アプリ"
@@ -3197,32 +3482,36 @@ msgid "Flathub"
 msgstr "Flathub"
 
 #: src/bz-window.blp:273
-msgid "No background tasks!"
-msgstr "バックグラウンドタスクがありません!"
+msgid "Refresh completed!"
+msgstr "再読み込み完了!"
 
-#: src/bz-window.blp:325
+#: src/bz-window.blp:326
 msgid "You are running a new version of Bazaar!"
 msgstr "Bazaar のバージョンが新しくなりました!"
 
-#: src/bz-window.blp:326
+#: src/bz-window.blp:327
 msgid "See What's New"
 msgstr "変更点を見る"
 
-#: src/bz-window.blp:333
+#: src/bz-window.blp:334
 msgid ""
 "You have a network connection but are viewing a cached version of Flathub"
 msgstr ""
 "ネットワークに接続されていますが、キャッシュされた Flathub を表示しています"
 
-#: src/bz-window.blp:449
+#: src/bz-window.blp:402
+msgid "_Login with Flathub"
+msgstr "Flathub にログイン(_L)"
+
+#: src/bz-window.blp:450
 msgid "Log Out"
 msgstr "ログアウト"
 
-#: src/bz-window.c:683
+#: src/bz-window.c:680
 msgid "You can't remove Bazaar from Bazaar!"
 msgstr "Bazaar を使って Bazaar を削除することはできません!"
 
-#: src/bz-window.c:891 src/bz-window.c:925
+#: src/bz-window.c:966 src/bz-window.c:1000
 msgid "Can't do that right now!"
 msgstr "今すぐにはできません!"
 
@@ -3238,8 +3527,8 @@ msgstr "一般"
 
 #: src/gtk/shortcuts-dialog.blp:9
 msgctxt "shortcut window"
-msgid "Open Search Dialog"
-msgstr "検索ダイアログを表示"
+msgid "Refresh"
+msgstr "再読み込み"
 
 #: src/gtk/shortcuts-dialog.blp:14
 msgctxt "shortcut window"
@@ -3248,8 +3537,8 @@ msgstr "設定を開く"
 
 #: src/gtk/shortcuts-dialog.blp:19
 msgctxt "shortcut window"
-msgid "Synchronize Remotes"
-msgstr "リモートと同期"
+msgid "Open Search Dialog"
+msgstr "検索ダイアログを表示"
 
 #: src/gtk/shortcuts-dialog.blp:24
 msgctxt "shortcut window"
@@ -3263,8 +3552,49 @@ msgstr "ショートカットを表示"
 
 #: src/gtk/shortcuts-dialog.blp:35
 msgctxt "shortcut window"
-msgid "Quit"
-msgstr "アプリを閉じる"
+msgid "Close Window"
+msgstr "ウィンドウを閉じる"
+
+#: src/gtk/shortcuts-dialog.blp:41
+msgctxt "shortcut window"
+msgid "Quit Bazaar"
+msgstr "Bazaar を終了"
+
+#~ msgid "_Synchronize Remotes"
+#~ msgstr "リモートと同期(_S)"
+
+#~ msgid "Synchronizing..."
+#~ msgstr "同期中..."
+
+#, c-format
+#~ msgid "Receiving %d entries..."
+#~ msgstr "%d 件のエントリを受信中..."
+
+#~ msgid "Indexing Data..."
+#~ msgstr "データをインデックス中..."
+
+#~ msgid "View the Release Page"
+#~ msgstr "リリースページを表示"
+
+#~ msgid "Close"
+#~ msgstr "閉じる"
+
+#~ msgid "Copy and Close"
+#~ msgstr "コピーして閉じる"
+
+#~ msgid "Refreshing Store Content"
+#~ msgstr "ストアの内容を再読み込み中"
+
+#~ msgid "No background tasks!"
+#~ msgstr "バックグラウンドタスクがありません!"
+
+#~ msgctxt "shortcut window"
+#~ msgid "Synchronize Remotes"
+#~ msgstr "リモートと同期"
+
+#~ msgctxt "shortcut window"
+#~ msgid "Quit"
+#~ msgstr "アプリを閉じる"
 
 #~ msgid "Nucleus app page"
 #~ msgstr "Nucleus アプリページ"
@@ -3272,9 +3602,6 @@ msgstr "アプリを閉じる"
 #, fuzzy
 #~ msgid "Better track installed versions of apps"
 #~ msgstr "インストール済みのアプリを検索"
-
-#~ msgid "_Refresh Content"
-#~ msgstr "ストアの内容を再読み込み(_R)"
 
 #~ msgid "Toggle transaction sidebar"
 #~ msgstr "ダウンロードのサイドバーを表示/非表示"
@@ -3297,9 +3624,6 @@ msgstr "アプリを閉じる"
 
 #~ msgid "Stop Active Tasks"
 #~ msgstr "現在進行中のタスクを停止"
-
-#~ msgid "Clear History"
-#~ msgstr "履歴を削除"
 
 #~ msgid "No Tasks Yet"
 #~ msgstr "タスクがありません"
@@ -3543,10 +3867,6 @@ msgstr "アプリを閉じる"
 #~ msgid "Open Bazaar Inspector"
 #~ msgstr "Bazaar インスペクターを開く"
 
-#~ msgctxt "shortcut window"
-#~ msgid "Refresh"
-#~ msgstr "再読み込み"
-
 #~ msgid "Show Git Forge Star Counts"
 #~ msgstr "Git Forge のスター数を表示"
 
@@ -3697,15 +4017,9 @@ msgstr "アプリを閉じる"
 #~ msgid "Graphics"
 #~ msgstr "グラフィック"
 
-#~ msgid "Office"
-#~ msgstr "オフィス"
-
 #~ msgctxt "Project URL Type"
 #~ msgid "Homepage"
 #~ msgstr "ホームページ"
-
-#~ msgid "Share this application"
-#~ msgstr "このアプリケーションを共有する"
 
 #~ msgid "Excludes shared components"
 #~ msgstr "共有のコンポーネントを除く"
@@ -3735,14 +4049,8 @@ msgstr "アプリを閉じる"
 #~ msgid "Manage Addons"
 #~ msgstr "アドオンを管理する"
 
-#~ msgid "%B %-d, %Y"
-#~ msgstr "%Y/%0m/%0d"
-
 #~ msgid "%B %-d"
 #~ msgstr "%0m/%0d"
-
-#~ msgid "Transactions"
-#~ msgstr "ファイル操作"
 
 #~ msgid "Up to date!"
 #~ msgstr "最新です!"
@@ -3773,9 +4081,6 @@ msgstr "アプリを閉じる"
 
 #~ msgid "Transactions Will Appear Here"
 #~ msgstr "ダウンロードはここに表示されます"
-
-#~ msgid "Halt the execution of transactions"
-#~ msgstr "現在進行中のダウンロードを停止"
 
 #~ msgid "Resume the execution of transactions"
 #~ msgstr "ダウンロードを再開する"
@@ -3829,10 +4134,6 @@ msgstr "アプリを閉じる"
 
 #~ msgid "Apps Of The Week"
 #~ msgstr "今週のアプリ"
-
-#, c-format
-#~ msgid "Released %x"
-#~ msgstr "リリース日 %x"
 
 #~ msgctxt "Project URL Type"
 #~ msgid "VCS Browser"
