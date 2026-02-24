@@ -1,0 +1,9 @@
+prefix=bz
+name=finished_search_query
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+property=interpreted_query char G_TYPE_STRING string
+property=results GPtrArray G_TYPE_PTR_ARRAY boxed g_ptr_array_unref g_ptr_array_ref
+property=n_results guint G_TYPE_UINT uint

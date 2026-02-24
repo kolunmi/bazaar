@@ -87,6 +87,57 @@ template $BzSearchWidget: Adw.Bin {
         };
       }
 
+      Adw.Clamp {
+        margin-start: 12;
+        margin-end: 12;
+        maximum-size: 375;
+
+        child: Box {
+          margin-start: 12;
+          margin-end: 12;
+          margin-top: 6;
+          margin-bottom: 6;
+
+          styles [
+            "bz-debug",
+          ]
+
+          orientation: vertical;
+          spacing: 5;
+          visible: bind template.state as <$BzStateInfo>.debug_mode;
+
+          Box {
+            orientation: horizontal;
+            spacing: 10;
+
+            Label {
+              label: "Interpreted Query:";
+            }
+            Label {
+              styles [
+                "caption-heading",
+              ]
+              label: bind template.current-query as <$BzFinishedSearchQuery>.interpreted-query;
+            }
+          }
+
+          Box {
+            orientation: horizontal;
+            spacing: 10;
+
+            Label {
+              label: "# of Results:";
+            }
+            Label {
+              styles [
+                "caption-heading",
+              ]
+              label: bind $format_uint(template.current-query as <$BzFinishedSearchQuery>.n-results as <uint>) as <string>;
+            }
+          }
+        };
+      }
+
       Stack search_stack {
         transition-type: crossfade;
 
@@ -181,10 +232,58 @@ template $BzSearchWidget: Adw.Bin {
 
                   factory: BuilderListItemFactory {
                     template ListItem {
-                      child: $BzRichAppTile {
-                        group: bind template.item as <$BzSearchResult>.group as <$BzEntryGroup>;
-                        install-clicked => $tile_install_clicked_cb(template);
-                        activated => $tile_activated_cb(template);
+                      child: Box {
+                        orientation: vertical;
+                        spacing: 5;
+
+                        $BzRichAppTile {
+                          group: bind template.item as <$BzSearchResult>.group as <$BzEntryGroup>;
+                          install-clicked => $tile_install_clicked_cb(template);
+                          activated => $tile_activated_cb(template);
+                        }
+
+                        Box {
+                          styles [
+                            "bz-debug",
+                          ]
+
+                          visible: bind template.item as <$BzSearchResult>.state as <$BzStateInfo>.debug_mode;
+                          orientation: vertical;
+                          spacing: 2;
+
+                          Box {
+                            orientation: horizontal;
+                            spacing: 10;
+
+                            Label {
+                              label: "Result Score:";
+                            }
+                            Label {
+                              styles [
+                                "caption-heading",
+                              ]
+                              label: bind $format_double(template.item as <$BzSearchResult>.score as <double>) as <string>;
+                            }
+                          }
+
+                          Box {
+                            orientation: horizontal;
+                            spacing: 10;
+
+                            Label {
+                              label: "appid:";
+                            }
+                            Label {
+                              styles [
+                                "caption-heading",
+                              ]
+                              label: bind template.item as <$BzSearchResult>.group as <$BzEntryGroup>.id;
+                              selectable: true;
+                              wrap: true;
+                              wrap-mode: char;
+                            }
+                          }
+                        }
                       };
                     }
                   };

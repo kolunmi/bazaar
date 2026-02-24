@@ -22,8 +22,8 @@ template $BzPreferencesDialog: Adw.PreferencesDialog {
     banner: Adw.Banner {
       sensitive: bind $invert_boolean(template.state as <$BzStateInfo>.syncing as <bool>) as <bool>;
       revealed: bind template.state as <$BzStateInfo>.metered_connection as <bool>;
-      title: _("Network connection is metered — automatic store data sync is paused");
-      button-label: _("Sync Manually");
+      title: _("Network connection is metered — automatic store data refresh is paused");
+      button-label: _("Refresh Manually");
       action-name: "app.sync-remotes";
     };
 

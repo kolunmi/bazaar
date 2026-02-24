@@ -7,4 +7,6 @@
   <typehint name="hooks" type="BzHook"/>
   <typehint name="hooks.dialogs" type="BzHookDialog"/>
   <typehint name="hooks.dialogs.options" type="BzHookDialogOption"/>
+  <typehint name="search-biases" type="BzSearchBias"/>
+  <typehint name="search-biases.boost-appids" type="GtkStringObject"/>
 </object>

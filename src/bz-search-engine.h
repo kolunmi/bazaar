@@ -38,6 +38,13 @@ void
 bz_search_engine_set_model (BzSearchEngine *self,
                             GListModel     *model);
 
+GListModel *
+bz_search_engine_get_biases (BzSearchEngine *self);
+
+void
+bz_search_engine_set_biases (BzSearchEngine *self,
+                             GListModel     *biases);
+
 DexFuture *
 bz_search_engine_query (BzSearchEngine    *self,
                         const char *const *terms);

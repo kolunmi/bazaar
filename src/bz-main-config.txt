@@ -6,10 +6,12 @@ author=AUTOGEN
 
 include=<gtk/gtk.h>
 include="bz-hook.h"
+include="bz-search-bias.h"
 
 ensure=BZ_TYPE_HOOK
 ensure=BZ_TYPE_HOOK_DIALOG
 ensure=BZ_TYPE_HOOK_DIALOG_OPTION
+ensure=BZ_TYPE_SEARCH_BIAS
 
 property=txt_blocklist_paths GListModel G_TYPE_LIST_MODEL object
 property=blocklist_version int G_TYPE_INT int
@@ -21,3 +23,5 @@ property=curated_config_paths GListModel G_TYPE_LIST_MODEL object
 property=override_eol_markings GListModel G_TYPE_LIST_MODEL object
 
 property=hooks GListModel G_TYPE_LIST_MODEL object
+
+property=search_biases GListModel G_TYPE_LIST_MODEL object

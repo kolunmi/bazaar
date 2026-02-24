@@ -24,22 +24,25 @@
 #include "bz-async-texture.h"
 #include "bz-category-tile.h"
 #include "bz-dynamic-list-view.h"
+#include "bz-finished-search-query.h"
 #include "bz-group-tile-css-watcher.h"
 #include "bz-rich-app-tile.h"
 #include "bz-screenshot.h"
-#include "bz-search-result.h"
 #include "bz-search-pill-list.h"
+#include "bz-search-result.h"
 #include "bz-search-widget.h"
+#include "bz-template-callbacks.h"
 #include "bz-util.h"
 
 struct _BzSearchWidget
 {
   AdwBin parent_instance;
 
-  BzStateInfo  *state;
-  BzEntryGroup *selected;
-  gboolean      remove;
-  gboolean      search_in_progress;
+  BzStateInfo           *state;
+  BzEntryGroup          *selected;
+  gboolean               remove;
+  gboolean               search_in_progress;
+  BzFinishedSearchQuery *current_query;
 
   BzContentProvider *blocklists_provider;
   BzContentProvider *txt_blocklists_provider;
@@ -64,6 +67,7 @@ enum
 
   PROP_STATE,
   PROP_TEXT,
+  PROP_CURRENT_QUERY,
 
   LAST_PROP
 };
@@ -131,6 +135,7 @@ bz_search_widget_dispose (GObject *object)
 
   g_clear_object (&self->state);
   g_clear_object (&self->selected);
+  g_clear_object (&self->current_query);
   g_clear_object (&self->blocklists_provider);
   g_clear_object (&self->txt_blocklists_provider);
   g_clear_object (&self->search_model);
@@ -155,6 +160,9 @@ bz_search_widget_get_property (GObject    *object,
     case PROP_TEXT:
       g_value_set_string (value, bz_search_widget_get_text (self));
       break;
+    case PROP_CURRENT_QUERY:
+      g_value_set_object (value, self->current_query);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -176,6 +184,7 @@ bz_search_widget_set_property (GObject      *object,
     case PROP_TEXT:
       bz_search_widget_set_text (self, g_value_get_string (value));
       break;
+    case PROP_CURRENT_QUERY:
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -255,7 +264,6 @@ pill_list_cb (BzSearchWidget *self,
               const char     *label,
               GtkWidget      *pill_list)
 {
-
   bz_search_widget_set_text (self, label);
   update_filter (self);
 }
@@ -368,6 +376,14 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
           "text",
           NULL, NULL, NULL,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_CURRENT_QUERY] =
+      g_param_spec_object (
+          "current-query",
+          NULL, NULL,
+          BZ_TYPE_FINISHED_SEARCH_QUERY,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   signals[SIGNAL_SELECT] =
@@ -392,6 +408,8 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
   g_type_ensure (BZ_TYPE_SEARCH_PILL_LIST);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-search-widget.ui");
+  bz_widget_class_bind_all_util_callbacks (widget_class);
+
   gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, search_bar);
   gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, search_busy);
   gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, content_box);
@@ -666,16 +684,29 @@ static DexFuture *
 search_query_then (DexFuture *future,
                    GWeakRef  *wr)
 {
-  g_autoptr (BzSearchWidget) self = NULL;
-  GPtrArray  *results             = NULL;
-  guint       old_length          = 0;
-  const char *page_name           = NULL;
+  g_autoptr (BzSearchWidget) self   = NULL;
+  BzFinishedSearchQuery *finished   = NULL;
+  GPtrArray             *results    = NULL;
+  guint                  old_length = 0;
+  const char            *page_name  = NULL;
 
   bz_weak_get_or_return_reject (self, wr);
 
-  results    = g_value_get_boxed (dex_future_get_value (future, NULL));
-  old_length = g_list_model_get_n_items (G_LIST_MODEL (self->search_model));
+  finished = g_value_get_object (dex_future_get_value (future, NULL));
+  results  = bz_finished_search_query_get_results (finished);
+  if (self->state != NULL)
+    /* This is for debug mode */
+    {
+      for (guint i = 0; i < results->len; i++)
+        {
+          BzSearchResult *result = NULL;
 
+          result = g_ptr_array_index (results, i);
+          bz_search_result_set_state (result, self->state);
+        }
+    }
+
+  old_length = g_list_model_get_n_items (G_LIST_MODEL (self->search_model));
   g_list_store_splice (
       self->search_model,
       0, old_length,
@@ -692,6 +723,9 @@ search_query_then (DexFuture *future,
       const char *search_text = gtk_editable_get_text (GTK_EDITABLE (self->search_bar));
       page_name               = (search_text && *search_text) ? "no-results" : "empty";
     }
+
+  self->current_query = g_object_ref (finished);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CURRENT_QUERY]);
 
   gtk_stack_set_visible_child_name (self->search_stack, page_name);
 
@@ -712,6 +746,10 @@ update_filter (BzSearchWidget *self)
 
   g_clear_handle_id (&self->search_update_timeout, g_source_remove);
   dex_clear (&self->search_query);
+
+  g_clear_object (&self->current_query);
+  self->current_query = bz_finished_search_query_new ();
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CURRENT_QUERY]);
 
   gtk_widget_set_visible (GTK_WIDGET (self->search_busy), FALSE);
 

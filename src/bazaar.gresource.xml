@@ -4,8 +4,10 @@
 
     <file alias="style.css">gtk/style.css</file>
 
+    <file>internal-config.yaml</file>
     <file alias="pride-flags.yaml">progress-bar-designs/pride/pride-flags.yaml</file>
 
+    <file preprocess="xml-stripblanks">internal-config-schema.xml</file>
     <file preprocess="xml-stripblanks">main-config-schema.xml</file>
     <file preprocess="xml-stripblanks">blocklist-schema.xml</file>
     <file preprocess="xml-stripblanks">curated-config-schema.xml</file>

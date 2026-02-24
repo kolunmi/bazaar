@@ -142,6 +142,7 @@ execute_hook_fiber (ExecuteHookData *data)
   gboolean hook_aborted                     = FALSE;
   gboolean finish                           = FALSE;
 
+  signal = bz_hook_get_when (hook);
   switch (signal)
     {
     case BZ_HOOK_SIGNAL_BEFORE_TRANSACTION:
@@ -156,10 +157,8 @@ execute_hook_fiber (ExecuteHookData *data)
 
   signal_enum_class  = g_type_class_ref (BZ_TYPE_HOOK_SIGNAL);
   ts_type_enum_class = g_type_class_ref (BZ_TYPE_HOOK_TRANSACTION_TYPE);
-
-  signal       = bz_hook_get_when (hook);
-  signal_enum  = g_enum_get_value (signal_enum_class, signal);
-  ts_type_enum = g_enum_get_value (ts_type_enum_class, ts_type);
+  signal_enum        = g_enum_get_value (signal_enum_class, signal);
+  ts_type_enum       = g_enum_get_value (ts_type_enum_class, ts_type);
 
   date           = g_date_time_new_now_utc ();
   timestamp_sec  = g_strdup_printf ("%zu", g_date_time_to_unix (date));

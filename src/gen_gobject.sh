@@ -358,7 +358,7 @@ print_init_properties () {
                 printf '\n          G_MIN%s, G_MAX%s, 0,\n' "$(to_upper "$LOC_PTYPE")" "$(to_upper "$LOC_PTYPE")"
                 ;;
             float|double)
-                printf '\n          0.0, G_MAX%s, 0.0,\n' "$(to_upper "$LOC_PTYPE")"
+                printf '\n          G_MININT, G_MAXINT, 0.0,\n' "$(to_upper "$LOC_PTYPE")"
                 ;;
             boolean)
                 printf ' FALSE,\n'

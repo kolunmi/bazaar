@@ -20,6 +20,7 @@
 
 #include "bz-gnome-shell-search-provider.h"
 #include "bz-entry-group.h"
+#include "bz-finished-search-query.h"
 #include "bz-search-result.h"
 #include "bz-util.h"
 #include "gs-shell-search-provider-generated.h"
@@ -369,15 +370,17 @@ request_finally (DexFuture   *future,
   BzGnomeShellSearchProvider *self       = data->self;
   GDBusMethodInvocation      *invocation = data->invocation;
   g_autoptr (GError) local_error         = NULL;
-  const GValue *value                    = NULL;
-  GPtrArray    *results                  = NULL;
+  const GValue          *value           = NULL;
+  BzFinishedSearchQuery *finished        = NULL;
+  GPtrArray             *results         = NULL;
   g_autoptr (GVariantBuilder) builder    = NULL;
 
   value = dex_future_get_value (future, &local_error);
   if (value != NULL)
     {
-      results = g_value_get_boxed (value);
-      builder = g_variant_builder_new (G_VARIANT_TYPE ("as"));
+      finished = g_value_get_object (value);
+      results  = bz_finished_search_query_get_results (finished);
+      builder  = g_variant_builder_new (G_VARIANT_TYPE ("as"));
 
       for (guint i = 0; i < results->len; i++)
         {

@@ -22,12 +22,17 @@ template $BzAllAppsPage: Adw.NavigationPage {
 
           section {
             item {
+              label: _("_Refresh");
+              action: "app.sync-remotes";
+            }
+
+            item {
               label: _("_Preferences");
               action: "app.preferences";
             }
 
             item {
-              label: _("_Login with Flathub");
+              label: _("_Login With Flathub");
               action: "app.flathub-login";
               hidden-when: "action-disabled";
             }
@@ -35,11 +40,6 @@ template $BzAllAppsPage: Adw.NavigationPage {
             item {
               label: _("_Manage Leftover User Data");
               action: "window.user-data";
-            }
-
-            item {
-              label: _("_Synchronize Remotes");
-              action: "app.sync-remotes";
             }
 
             item {

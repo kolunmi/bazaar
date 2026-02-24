@@ -136,6 +136,13 @@ format_uint (gpointer object,
   return g_strdup_printf ("%d", uint);
 }
 
+static char *
+format_double (gpointer object,
+               double   number)
+{
+  return g_strdup_printf ("%f", number);
+}
+
 void
 bz_widget_class_bind_all_util_callbacks (GtkWidgetClass *widget_class)
 {
@@ -156,4 +163,5 @@ bz_widget_class_bind_all_util_callbacks (GtkWidgetClass *widget_class)
   gtk_widget_class_bind_template_callback (widget_class, choose);
   gtk_widget_class_bind_template_callback (widget_class, format_int);
   gtk_widget_class_bind_template_callback (widget_class, format_uint);
+  gtk_widget_class_bind_template_callback (widget_class, format_double);
 }
