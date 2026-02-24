@@ -1020,6 +1020,9 @@ update_motion (BzCarousel *self,
 
   point = GRAPHENE_POINT_INIT (x, y);
 
+  if (self->scrolling)
+    return;
+
   for (guint i = 0; i < self->widgets->len; i++)
     {
       CarouselWidgetData *child     = NULL;
@@ -1060,6 +1063,8 @@ scroll_end (BzCarousel               *self,
       0);
   self->hscroll_start   = -1;
   self->hscroll_current = -1;
+
+  update_motion (self, self->motion_x, self->motion_y);
 }
 
 static gboolean
@@ -1094,6 +1099,15 @@ scroll (BzCarousel               *self,
     case GDK_SOURCE_TOUCHPAD:
     case GDK_SOURCE_TRACKPOINT:
       {
+        if (self->widgets->len > 0)
+          {
+            CarouselWidgetData *first = g_ptr_array_index (self->widgets, 0);
+            int                 width = gtk_widget_get_width (GTK_WIDGET (self));
+
+            if (dx < 0 && first->rect.origin.x >= width / 2 - first->rect.size.width / 2)
+              return FALSE;
+          }
+
         self->hscroll_current += dx;
         ensure_viewport (self, self->model, FALSE);
       }
