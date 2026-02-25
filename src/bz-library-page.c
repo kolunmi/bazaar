@@ -571,6 +571,7 @@ items_changed (BzLibraryPage *self,
                guint          added,
                GListModel    *model)
 {
+  set_page (self);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_APPS]);
 }
 
