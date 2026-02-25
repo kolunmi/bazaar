@@ -183,6 +183,7 @@ template $BzWindow: Adw.ApplicationWindow {
 
                           child: $BzLibraryPage library_page {
                             state: bind template.state;
+                            transactions: bind template.state as <$BzStateInfo>.transaction-manager;
                             model: bind template.state as <$BzStateInfo>.all-installed-entry-groups;
                             remove => $remove_installed_cb(template);
                             remove-addon => $remove_addon_cb(template);

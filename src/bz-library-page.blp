@@ -10,6 +10,8 @@ template $BzLibraryPage: Adw.Bin {
       margin-end: 12;
       maximum-size: 375;
 
+      visible: bind template.has-apps;
+
       child: Adw.Bin {
         halign: fill;
         margin-top: 10;
@@ -256,7 +258,7 @@ template $BzLibraryPage: Adw.Bin {
                   label: _("Installed Apps");
                   xalign: 0;
                   margin-start: 12;
-                  visible: bind $logical_or($logical_or($invert_boolean($is_zero(template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.removal-trackers as <FilterListModel>.n-items) as <bool>) as <bool>, $invert_boolean($is_zero(template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.install-trackers as <FilterListModel>.n-items) as <bool>) as <bool>) as <bool>, $invert_boolean($is_null(template.state as <$BzStateInfo>.available-updates) as <bool>) as <bool>) as <bool>;
+                  visible: bind template.has-apps;
 
                   styles [
                     "heading",
@@ -271,8 +273,10 @@ template $BzLibraryPage: Adw.Bin {
                   "installed-list-view",
                 ]
 
+                visible: bind template.has-apps;
+
                 model: NoSelection {
-                  model: FilterListModel {
+                  model: FilterListModel filter_model {
                     filter: CustomFilter filter {};
 
                     model: bind template.model;
