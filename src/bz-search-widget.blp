@@ -135,6 +135,21 @@ template $BzSearchWidget: Adw.Bin {
               label: bind $format_uint(template.current-query as <$BzFinishedSearchQuery>.n-results as <uint>) as <string>;
             }
           }
+
+          Box {
+            orientation: horizontal;
+            spacing: 10;
+
+            Label {
+              label: "Seconds Elapsed:";
+            }
+            Label {
+              styles [
+                "caption-heading",
+              ]
+              label: bind $format_double(template.current-query as <$BzFinishedSearchQuery>.elapsed as <double>) as <string>;
+            }
+          }
         };
       }
 
