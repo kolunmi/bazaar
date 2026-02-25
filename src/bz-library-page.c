@@ -252,6 +252,14 @@ reset_search_cb (BzLibraryPage *self,
 }
 
 static void
+n_filtered_items_changed (BzLibraryPage      *self,
+                          GParamSpec         *pspec,
+                          GtkFilterListModel *model)
+{
+  set_page (self);
+}
+
+static void
 clear_tasks_cb (BzLibraryPage *self)
 {
   BzTransactionManager *manager = NULL;
@@ -419,6 +427,7 @@ bz_library_page_class_init (BzLibraryPageClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, tile_activated_cb);
   gtk_widget_class_bind_template_callback (widget_class, reset_search_cb);
   gtk_widget_class_bind_template_callback (widget_class, search_text_changed);
+  gtk_widget_class_bind_template_callback (widget_class, n_filtered_items_changed);
   gtk_widget_class_bind_template_callback (widget_class, clear_tasks_cb);
   gtk_widget_class_bind_template_callback (widget_class, updates_card_update_cb);
   gtk_widget_class_bind_template_callback (widget_class, global_search_cb);
@@ -562,7 +571,6 @@ items_changed (BzLibraryPage *self,
                guint          added,
                GListModel    *model)
 {
-  set_page (self);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_APPS]);
 }
 
@@ -596,7 +604,10 @@ set_page (BzLibraryPage *self)
     }
 
   if (n_apps == 0 && !has_transactions)
-    adw_view_stack_set_visible_child_name (self->stack, "empty");
+    {
+      gtk_editable_set_text (GTK_EDITABLE (self->search_bar), "");
+      adw_view_stack_set_visible_child_name (self->stack, "empty");
+    }
   else if (n_apps > 0 && n_filtered == 0)
     adw_view_stack_set_visible_child_name (self->stack, "no-results");
   else

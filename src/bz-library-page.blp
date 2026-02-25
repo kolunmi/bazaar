@@ -280,6 +280,7 @@ template $BzLibraryPage: Adw.Bin {
                     filter: CustomFilter filter {};
 
                     model: bind template.model;
+                    notify::n-items => $n_filtered_items_changed(template);
                   };
                 };
 
