@@ -50,7 +50,6 @@ template $BzDonationsDialog: Adw.Dialog {
           $BzAppstreamDescriptionRender {
             vexpand: true;
             appstream-description: bind template.release-notes;
-            margin-bottom: 15;
           }
 
           Button release_button {
@@ -58,6 +57,7 @@ template $BzDonationsDialog: Adw.Dialog {
               "pill",
             ]
 
+            margin-top: 15;
             margin-start: 25;
             margin-end: 20;
             margin-bottom: 15;

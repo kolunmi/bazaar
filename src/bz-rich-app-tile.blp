@@ -4,7 +4,6 @@ template $BzRichAppTile: $BzListTile {
   overflow: hidden;
 
   accessibility {
-    labelled-by: title;
     described-by: description;
   }
 
@@ -99,6 +98,10 @@ template $BzRichAppTile: $BzListTile {
             visible: bind template.group as <$BzEntryGroup>.is-verified;
             icon-name: "verified-checkmark-symbolic";
             pixel-size: 14;
+
+            accessibility {
+              label: _("Verified");
+            }
           }
         }
 

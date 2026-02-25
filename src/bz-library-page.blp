@@ -41,6 +41,10 @@ template $BzLibraryPage: Adw.Bin {
             ]
 
             clicked => $reset_search_cb(template);
+
+            accessibility {
+              label: _("Clear search");
+            }
           }
 
           styles [
@@ -73,6 +77,16 @@ template $BzLibraryPage: Adw.Bin {
           icon-name: "library-symbolic";
           title: _("No Results");
           description: bind $no_results_found_subtitle(search_bar.text) as <string>;
+
+          child: Button {
+            styles [
+              "pill",
+            ]
+            halign: center;
+            label: "Search Store Instead";
+
+            clicked => $global_search_cb(template);
+          };
         };
       }
 

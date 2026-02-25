@@ -85,6 +85,20 @@ get_icon_name (gpointer object,
 }
 
 static char *
+get_verified_tooltip (gpointer object,
+                      GObject *status)
+{
+  if (status == NULL)
+    return g_strdup (_("Not Verified"));
+
+  gboolean verified = FALSE;
+
+  g_object_get (status, "verified", &verified, NULL);
+
+  return g_strdup (verified ? _("Verified") : _("Not Verified"));
+}
+
+static char *
 format_app_id (const char *app_id)
 {
   return g_strdup_printf ("<b>%s</b>", app_id);
@@ -266,6 +280,7 @@ bz_developer_badge_class_init (BzDeveloperBadgeClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, get_developer_name);
   gtk_widget_class_bind_template_callback (widget_class, get_icon_name);
+  gtk_widget_class_bind_template_callback (widget_class, get_verified_tooltip);
   gtk_widget_class_bind_template_callback (widget_class, get_popover_text);
 }
 

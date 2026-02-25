@@ -72,6 +72,43 @@
   </screenshots>
 
   <releases>
+    <release version="0.7.10" date="2026-02-22">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.10</url>
+      <description translate="no">
+        <p>
+          This release fixes some bugs and greatly improves search
+          functionality.
+        </p>
+        <p>
+          If you missed the previous release, in 0.7.9 we also added the ability
+          to cancel transactions in the library view, a brand new screenshots
+          carousel, search suggestion buttons, and app runtime size information.
+          You can also now skip confirmation dialogs by holding shift as you
+          start a transaction.
+        </p>
+        <p>
+          Thanks for reading!
+        </p>
+      </description>
+    </release>
+    <release version="0.7.9" date="2026-02-21">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.9</url>
+      <description translate="no">
+        <p>**New Features**</p>
+        <ul>
+          <li>Search suggestion pills</li>
+          <li>**Cancel installation** transactions</li>
+          <li>Skip dialogs by pressing shift</li>
+          <li>Runtime size info for app pages</li>
+        </ul>
+        <p>**Updated**</p>
+        <ul>
+          <li>Redesigned "What's New" dialog</li>
+          <li>Improved search results by utilizing Flathub rankings</li>
+          <li>Improved screenshots carousel</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.7.8" date="2026-02-11">
       <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.8</url>
       <description translate="no">

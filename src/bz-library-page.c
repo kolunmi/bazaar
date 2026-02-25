@@ -239,6 +239,19 @@ updates_card_update_cb (BzLibraryPage *self,
 }
 
 static void
+global_search_cb (BzLibraryPage *self,
+                  GtkButton     *button)
+{
+  const char *text = NULL;
+
+  text = gtk_editable_get_text (GTK_EDITABLE (self->search_bar));
+  if (text != NULL && *text != '\0')
+    gtk_widget_activate_action (GTK_WIDGET (self), "app.search", "s", text);
+
+  gtk_editable_set_text (GTK_EDITABLE (self->search_bar), "");
+}
+
+static void
 bz_library_page_class_init (BzLibraryPageClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
@@ -360,6 +373,7 @@ bz_library_page_class_init (BzLibraryPageClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, search_text_changed);
   gtk_widget_class_bind_template_callback (widget_class, clear_tasks_cb);
   gtk_widget_class_bind_template_callback (widget_class, updates_card_update_cb);
+  gtk_widget_class_bind_template_callback (widget_class, global_search_cb);
 }
 
 static void

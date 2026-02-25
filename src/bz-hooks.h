@@ -20,15 +20,22 @@
 
 #pragma once
 
-#include <libdex.h>
-
+#include "bz-entry-group.h"
 #include "bz-hook.h"
 
 G_BEGIN_DECLS
 
 DexFuture *
-bz_execute_hook (BzHook     *hook,
-                 const char *ts_type,
-                 const char *ts_appid);
+bz_execute_hook (BzHook               *hook,
+                 BzHookTransactionType ts_type,
+                 const char           *ts_appid,
+                 BzEntryGroup         *group);
+
+DexFuture *
+bz_run_hook_emission (GListModel           *hooks,
+                      BzHookSignal          signal,
+                      BzHookTransactionType ts_type,
+                      const char           *ts_appid,
+                      BzEntryGroup         *group);
 
 G_END_DECLS

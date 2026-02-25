@@ -24,6 +24,7 @@
 #include "bz-application.h"
 #include "bz-entry-group.h"
 #include "bz-entry.h"
+#include "bz-error-dialog.h"
 #include "bz-error.h"
 #include "bz-flatpak-entry.h"
 #include "bz-list-tile.h"
@@ -369,6 +370,40 @@ cancel_cb (BzTransactionTile *self,
 }
 
 static void
+error_clicked_cb (GtkListItem       *item,
+                  GtkButton         *button,
+                  BzTransactionTile *self)
+{
+  BzTransactionTask *task   = NULL;
+  const char        *error  = NULL;
+  const char        *name   = NULL;
+  BzErrorDialog     *dialog = NULL;
+
+  task = gtk_list_item_get_item (item);
+  if (task == NULL)
+    return;
+
+  error = bz_transaction_task_get_error (task);
+  if (error == NULL)
+    return;
+
+  name = bz_backend_transaction_op_payload_get_name (
+      bz_transaction_task_get_op (task));
+
+  if (name != NULL)
+    {
+      g_autofree char *body = NULL;
+
+      body   = g_strdup_printf ("%s: %s", name, error);
+      dialog = bz_error_dialog_new (_ ("Transaction Error"), body);
+    }
+  else
+    dialog = bz_error_dialog_new (_ ("Transaction Error"), error);
+
+  adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (self));
+}
+
+static void
 bz_transaction_tile_class_init (BzTransactionTileClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
@@ -409,6 +444,7 @@ bz_transaction_tile_class_init (BzTransactionTileClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, is_both);
   gtk_widget_class_bind_template_callback (widget_class, run_cb);
   gtk_widget_class_bind_template_callback (widget_class, cancel_cb);
+  gtk_widget_class_bind_template_callback (widget_class, error_clicked_cb);
 
   gtk_widget_class_set_accessible_role (widget_class, GTK_ACCESSIBLE_ROLE_BUTTON);
 }

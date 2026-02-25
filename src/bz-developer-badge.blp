@@ -27,6 +27,9 @@ template $BzDeveloperBadge: Box {
       "developer-badge",
     ]
 
+    has-tooltip: true;
+    tooltip-text: bind $get_verified_tooltip(template.entry as <$BzEntry>.verification-status) as <string>;
+
     EventControllerMotion {
       enter => $on_info_button_enter();
       leave => $on_info_button_leave();

@@ -768,6 +768,8 @@ check_has_flathub_fiber (CheckHasFlathubData *data)
       n_system_remotes = system_remotes->len;
     }
 
+// Downloading from user remotes in the Flatpak is unsupported.
+#ifndef SANDBOXED_LIBFLATPAK
   if (self->user != NULL)
     {
       user_remotes = flatpak_installation_list_remotes (
@@ -780,6 +782,7 @@ check_has_flathub_fiber (CheckHasFlathubData *data)
             local_error->message);
       n_user_remotes = user_remotes->len;
     }
+#endif
 
   for (guint i = 0; i < n_system_remotes + n_user_remotes; i++)
     {

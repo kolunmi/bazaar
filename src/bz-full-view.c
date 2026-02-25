@@ -51,6 +51,7 @@
 #include "bz-stats-dialog.h"
 #include "bz-tag-list.h"
 #include "bz-template-callbacks.h"
+#include "bz-util.h"
 
 struct _BzFullView
 {
@@ -1256,12 +1257,15 @@ bz_full_view_new (void)
 }
 
 static DexFuture *
-on_ui_entry_resolved (DexFuture  *future,
-                      BzFullView *self)
+on_ui_entry_resolved (DexFuture *future,
+                      GWeakRef  *wr)
 {
+  g_autoptr (BzFullView) self         = NULL;
   BzEntry *ui_entry                   = NULL;
   g_autoptr (BzResult) runtime_result = NULL;
   const GValue *value                 = NULL;
+
+  bz_weak_get_or_return_reject (self, wr);
 
   value = dex_future_get_value (future, NULL);
   if (value != NULL && G_VALUE_HOLDS_OBJECT (value))
@@ -1304,6 +1308,7 @@ bz_full_view_set_entry_group (BzFullView   *self,
           g_autoptr (GListStore) store        = NULL;
           g_autoptr (DexFuture) future        = NULL;
           g_autoptr (DexFuture) object_future = NULL;
+          GWeakRef *wr                        = NULL;
 
           entry = bz_result_get_object (self->ui_entry);
           store = g_list_store_new (BZ_TYPE_ENTRY);
@@ -1313,7 +1318,9 @@ bz_full_view_set_entry_group (BzFullView   *self,
           self->group_model = bz_result_new (future);
 
           object_future = dex_future_new_for_object (entry);
-          dex_future_disown (on_ui_entry_resolved (object_future, self));
+          wr            = bz_track_weak (self);
+          dex_unref (on_ui_entry_resolved (object_future, wr));
+          bz_weak_release (wr);
         }
       else
         {
@@ -1324,13 +1331,14 @@ bz_full_view_set_entry_group (BzFullView   *self,
 
           if (self->ui_entry != NULL)
             {
-              g_autoptr (DexFuture) ui_future = bz_result_dup_future (self->ui_entry);
+              g_autoptr (DexFuture) ui_future = NULL;
 
+              ui_future = bz_result_dup_future (self->ui_entry);
               ui_future = dex_future_then (
                   ui_future,
                   (DexFutureCallback) on_ui_entry_resolved,
-                  g_object_ref (self),
-                  g_object_unref);
+                  bz_track_weak (self),
+                  bz_weak_release);
               self->ui_future = g_steal_pointer (&ui_future);
             }
         }
