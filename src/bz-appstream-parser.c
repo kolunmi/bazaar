@@ -42,11 +42,12 @@ parse_control_value (const char *value)
 
 static gboolean
 calculate_is_mobile_friendly (guint required_controls,
-                              guint supported_controls,
-                              gint  min_display_length,
-                              gint  max_display_length)
+                              guint recommended_controls,
+                              guint supported_controls)
 {
-  return (supported_controls & BZ_CONTROL_TOUCH) != 0;
+  return (required_controls & BZ_CONTROL_TOUCH) != 0 ||
+         (recommended_controls & BZ_CONTROL_TOUCH) != 0 ||
+         (supported_controls & BZ_CONTROL_TOUCH) != 0;
 }
 
 static char *
@@ -588,9 +589,8 @@ bz_appstream_parser_populate_entry (BzEntry     *entry,
     }
 
   is_mobile_friendly = calculate_is_mobile_friendly (required_controls,
-                                                     supported_controls,
-                                                     min_display_length,
-                                                     max_display_length);
+                                                     recommended_controls,
+                                                     supported_controls);
 
   if (as_search_tokens != NULL)
     {
