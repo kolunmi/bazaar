@@ -308,7 +308,7 @@ blueprints = custom_target('blueprints',
     'bz-user-data-page.blp',
     'bz-user-data-tile.blp',
     'bz-window.blp',
-    'gtk/shortcuts-dialog.blp',
+    'shortcuts-dialog.blp',
   ),
   output: '.',
   command: [

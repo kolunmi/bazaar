@@ -2,7 +2,7 @@
 <gresources>
   <gresource prefix="/io/github/kolunmi/Bazaar/">
 
-    <file alias="style.css">gtk/style.css</file>
+    <file>style.css</file>
 
     <file>internal-config.yaml</file>
     <file alias="pride-flags.yaml">progress-bar-designs/pride/pride-flags.yaml</file>
@@ -66,7 +66,7 @@
     <file preprocess="xml-stripblanks">bz-user-data-page.ui</file>
     <file preprocess="xml-stripblanks">bz-user-data-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-window.ui</file>
-    <file alias="shortcuts-dialog.ui" preprocess="xml-stripblanks">gtk/shortcuts-dialog.ui</file>
+    <file preprocess="xml-stripblanks">shortcuts-dialog.ui</file>
 
     <file preprocess="xml-stripblanks">icons/scalable/actions/app-installed-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/bookmark-filled-symbolic.svg</file>
