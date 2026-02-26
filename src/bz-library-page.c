@@ -102,7 +102,7 @@ bz_library_page_dispose (GObject *object)
   if (self->model != NULL)
     g_signal_handlers_disconnect_by_func (self->model, items_changed, self);
   if (self->transactions != NULL)
-    g_signal_handlers_disconnect_by_func (self->model, has_transactions_changed, self);
+    g_signal_handlers_disconnect_by_func (self->transactions, has_transactions_changed, self);
 
   g_clear_object (&self->model);
   g_clear_object (&self->transactions);
@@ -488,7 +488,7 @@ bz_library_page_set_transactions (BzLibraryPage        *self,
   g_return_if_fail (transactions == NULL || BZ_IS_TRANSACTION_MANAGER (transactions));
 
   if (self->transactions != NULL)
-    g_signal_handlers_disconnect_by_func (self->model, has_transactions_changed, self);
+    g_signal_handlers_disconnect_by_func (self->transactions, has_transactions_changed, self);
 
   g_clear_object (&self->transactions);
   if (transactions != NULL)
