@@ -21,6 +21,11 @@
       <summary>Show Only Verified Content</summary>
       <description>Hide applications which are not verified on Flathub</description>
     </key>
+    <key name="show-only-mobile" type="b">
+      <default>false</default>
+      <summary>Show Only Mobile apps</summary>
+      <description>Hide applications which do not work well on mobile</description>
+    </key>
     <key name="search-debounce" type="b">
       <default>true</default>
       <summary>Debounce Search Inputs</summary>

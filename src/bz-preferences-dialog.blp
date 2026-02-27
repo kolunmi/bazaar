@@ -12,6 +12,7 @@ template $BzPreferencesDialog: Adw.PreferencesDialog {
 
     setters {
       flag_buttons_box.max-children-per-line: 6;
+      template.compact: true;
     }
   }
 
@@ -43,6 +44,12 @@ template $BzPreferencesDialog: Adw.PreferencesDialog {
       Adw.SwitchRow only_verified_switch {
         title: _("Verified Results Only");
         subtitle: _("Hide results that are not verified on Flathub");
+      }
+
+      Adw.SwitchRow only_mobile_switch {
+        visible: bind $logical_or(template.compact, only_mobile_switch.active) as <bool>;
+        title: _("Mobile Friendly Only");
+        subtitle: _("Hide applications that are not optimized for mobile devices");
       }
 
       Adw.SwitchRow hide_eol_switch {

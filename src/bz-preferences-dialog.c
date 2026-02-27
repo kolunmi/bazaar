@@ -19,6 +19,7 @@
  */
 
 #include "bz-preferences-dialog.h"
+#include "bz-template-callbacks.h"
 #include <glib/gi18n.h>
 
 typedef struct
@@ -29,28 +30,28 @@ typedef struct
 } BarTheme;
 
 static const BarTheme bar_themes[] = {
-  {                  "accent-color",                  "accent-color-theme",                              N_ ("Accent Color") },
-  {            "pride-rainbow-flag",            "pride-rainbow-flag-theme",                              N_ ("Pride Colors") },
-  {            "lesbian-pride-flag",            "lesbian-pride-flag-theme",                      N_ ("Lesbian Pride Colors") },
-  {                "gay-pride-flag",                "gay-pride-flag-theme",              N_ ("Male Homosexual Pride Colors") },
-  {              "transgender-flag",              "transgender-flag-theme",                  N_ ("Transgender Pride Colors") },
-  {                "nonbinary-flag",                "nonbinary-flag-theme",                    N_ ("Nonbinary Pride Colors") },
-  {                 "bisexual-flag",                 "bisexual-flag-theme",                     N_ ("Bisexual Pride Colors") },
-  {                  "asexual-flag",                  "asexual-flag-theme",                      N_ ("Asexual Pride Colors") },
-  {                "pansexual-flag",                "pansexual-flag-theme",                    N_ ("Pansexual Pride Colors") },
-  {                "aromantic-flag",                "aromantic-flag-theme",                    N_ ("Aromantic Pride Colors") },
-  {              "genderfluid-flag",              "genderfluid-flag-theme",                  N_ ("Genderfluid Pride Colors") },
-  {               "polysexual-flag",               "polysexual-flag-theme",                   N_ ("Polysexual Pride Colors") },
-  {               "omnisexual-flag",               "omnisexual-flag-theme",                   N_ ("Omnisexual Pride Colors") },
-  {                   "aroace-flag",                   "aroace-flag-theme",                       N_ ("Aroace Pride Colors") },
-  {                  "agender-flag",                  "agender-flag-theme",                      N_ ("Agender Pride Colors") },
-  {              "genderqueer-flag",              "genderqueer-flag-theme",                  N_ ("Genderqueer Pride Colors") },
-  {                 "intersex-flag",                 "intersex-flag-theme",                     N_ ("Intersex Pride Colors") },
-  {               "demigender-flag",               "demigender-flag-theme",                   N_ ("Demigender Pride Colors") },
-  {               "biromantic-flag",               "biromantic-flag-theme",                   N_ ("Biromantic Pride Colors") },
-  {               "disability-flag",               "disability-flag-theme",                   N_ ("Disability Pride Colors") },
-  {                   "femboy-flag",                   "femboy-flag-theme",                       N_ ("Femboy Pride Colors") },
-  {                 "neutrois-flag",                 "neutrois-flag-theme",                     N_ ("Neutrois Pride Colors") },
+  {       "accent-color",       "accent-color-theme",                 N_ ("Accent Color") },
+  { "pride-rainbow-flag", "pride-rainbow-flag-theme",                 N_ ("Pride Colors") },
+  { "lesbian-pride-flag", "lesbian-pride-flag-theme",         N_ ("Lesbian Pride Colors") },
+  {     "gay-pride-flag",     "gay-pride-flag-theme", N_ ("Male Homosexual Pride Colors") },
+  {   "transgender-flag",   "transgender-flag-theme",     N_ ("Transgender Pride Colors") },
+  {     "nonbinary-flag",     "nonbinary-flag-theme",       N_ ("Nonbinary Pride Colors") },
+  {      "bisexual-flag",      "bisexual-flag-theme",        N_ ("Bisexual Pride Colors") },
+  {       "asexual-flag",       "asexual-flag-theme",         N_ ("Asexual Pride Colors") },
+  {     "pansexual-flag",     "pansexual-flag-theme",       N_ ("Pansexual Pride Colors") },
+  {     "aromantic-flag",     "aromantic-flag-theme",       N_ ("Aromantic Pride Colors") },
+  {   "genderfluid-flag",   "genderfluid-flag-theme",     N_ ("Genderfluid Pride Colors") },
+  {    "polysexual-flag",    "polysexual-flag-theme",      N_ ("Polysexual Pride Colors") },
+  {    "omnisexual-flag",    "omnisexual-flag-theme",      N_ ("Omnisexual Pride Colors") },
+  {        "aroace-flag",        "aroace-flag-theme",          N_ ("Aroace Pride Colors") },
+  {       "agender-flag",       "agender-flag-theme",         N_ ("Agender Pride Colors") },
+  {   "genderqueer-flag",   "genderqueer-flag-theme",     N_ ("Genderqueer Pride Colors") },
+  {      "intersex-flag",      "intersex-flag-theme",        N_ ("Intersex Pride Colors") },
+  {    "demigender-flag",    "demigender-flag-theme",      N_ ("Demigender Pride Colors") },
+  {    "biromantic-flag",    "biromantic-flag-theme",      N_ ("Biromantic Pride Colors") },
+  {    "disability-flag",    "disability-flag-theme",      N_ ("Disability Pride Colors") },
+  {        "femboy-flag",        "femboy-flag-theme",          N_ ("Femboy Pride Colors") },
+  {      "neutrois-flag",      "neutrois-flag-theme",        N_ ("Neutrois Pride Colors") },
 };
 
 struct _BzPreferencesDialog
@@ -58,12 +59,14 @@ struct _BzPreferencesDialog
   AdwPreferencesDialog parent_instance;
 
   BzStateInfo *state;
+  gboolean     compact;
   GSettings   *settings;
 
   /* Template widgets */
   AdwSwitchRow *only_foss_switch;
   AdwSwitchRow *only_flathub_switch;
   AdwSwitchRow *only_verified_switch;
+  AdwSwitchRow *only_mobile_switch;
   AdwSwitchRow *search_debounce_switch;
   GtkFlowBox   *flag_buttons_box;
   AdwSwitchRow *hide_eol_switch;
@@ -79,6 +82,7 @@ enum
   PROP_0,
 
   PROP_STATE,
+  PROP_COMPACT,
 
   LAST_PROP
 };
@@ -139,7 +143,7 @@ on_rotate_switch_changed (AdwSwitchRow        *row,
                           BzPreferencesDialog *self)
 {
   gboolean active = FALSE;
-  active = adw_switch_row_get_active (row);
+  active          = adw_switch_row_get_active (row);
   for (guint i = 0; i < G_N_ELEMENTS (bar_themes); i++)
     {
       if (active)
@@ -205,6 +209,10 @@ bind_settings (BzPreferencesDialog *self)
                    self->only_verified_switch, "active",
                    G_SETTINGS_BIND_DEFAULT);
 
+  g_settings_bind (self->settings, "show-only-mobile",
+                   self->only_mobile_switch, "active",
+                   G_SETTINGS_BIND_DEFAULT);
+
   g_settings_bind (self->settings, "search-debounce",
                    self->search_debounce_switch, "active",
                    G_SETTINGS_BIND_DEFAULT);
@@ -214,8 +222,8 @@ bind_settings (BzPreferencesDialog *self)
                    G_SETTINGS_BIND_DEFAULT);
 
   g_settings_bind (self->settings, "rotate-flag",
-                 self->rotate_switch, "active",
-                 G_SETTINGS_BIND_DEFAULT);
+                   self->rotate_switch, "active",
+                   G_SETTINGS_BIND_DEFAULT);
 
   if (adw_switch_row_get_active (self->rotate_switch))
     {
@@ -246,6 +254,9 @@ bz_preferences_dialog_get_property (GObject    *object,
     case PROP_STATE:
       g_value_set_object (value, self->state);
       break;
+    case PROP_COMPACT:
+      g_value_set_boolean (value, self->compact);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -257,8 +268,14 @@ bz_preferences_dialog_set_property (GObject      *object,
                                     const GValue *value,
                                     GParamSpec   *pspec)
 {
+  BzPreferencesDialog *self = BZ_PREFERENCES_DIALOG (object);
+
   switch (prop_id)
     {
+    case PROP_COMPACT:
+      self->compact = g_value_get_boolean (value);
+      g_object_notify_by_pspec (object, props[PROP_COMPACT]);
+      break;
     case PROP_STATE:
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -289,13 +306,22 @@ bz_preferences_dialog_class_init (BzPreferencesDialogClass *klass)
           BZ_TYPE_STATE_INFO,
           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
+  props[PROP_COMPACT] =
+      g_param_spec_boolean (
+          "compact",
+          NULL, NULL, FALSE,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-preferences-dialog.ui");
 
+  bz_widget_class_bind_all_util_callbacks (widget_class);
+
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, only_foss_switch);
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, only_flathub_switch);
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, only_verified_switch);
+  gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, only_mobile_switch);
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, search_debounce_switch);
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, flag_buttons_box);
   gtk_widget_class_bind_template_child (widget_class, BzPreferencesDialog, hide_eol_switch);
