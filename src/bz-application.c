@@ -890,7 +890,7 @@ init_fiber (GWeakRef *wr)
 
   bz_state_info_set_online (self->state, TRUE);
   bz_state_info_set_busy (self->state, TRUE);
-  bz_state_info_set_background_task_label (self->state, _ ("Performing setup..."));
+  bz_state_info_set_background_task_label (self->state, _ ("Performing setup…"));
 
   root_cache_dir      = bz_dup_root_cache_dir ();
   root_cache_dir_file = g_file_new_for_path (root_cache_dir);

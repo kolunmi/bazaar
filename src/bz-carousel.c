@@ -1099,15 +1099,20 @@ scroll (BzCarousel               *self,
     case GDK_SOURCE_TOUCHPAD:
     case GDK_SOURCE_TRACKPOINT:
       {
-        CarouselWidgetData *first = NULL;
-        int                 width = 0;
-
         if (self->widgets->len > 0)
           {
+            CarouselWidgetData *first = NULL;
+            int                 width = 0;
+
             first = g_ptr_array_index (self->widgets, 0);
             width = gtk_widget_get_width (GTK_WIDGET (self));
-            if (dx < 0 && first->rect.origin.x >= width / 2 - first->rect.size.width / 2)
-              return FALSE;
+            if (dx < 0 &&
+                first->rect.origin.x >=
+                    (double) width / 2 - first->rect.size.width / 2)
+              {
+                self->scrolling = FALSE;
+                return FALSE;
+              }
           }
 
         self->hscroll_current += dx;
