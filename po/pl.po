@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-02-27 00:59+0100\n"
-"PO-Revision-Date: 2026-02-27 14:39+0100\n"
+"PO-Revision-Date: 2026-02-27 14:42+0100\n"
 "Last-Translator: Marcel Mrówka <micro.mail88@gmail.com>\n"
 "Language-Team: Polish <>\n"
 "Language: pl\n"
@@ -1587,7 +1587,9 @@ msgstr "Licencja specjalna"
 
 #: src/bz-full-view.c:471
 msgid "Adaptive"
-msgstr "Zmienne"
+msgstr ""
+"Na różne\n"
+"urządzenia"
 
 #: src/bz-full-view.c:471
 msgid "Desktop Only"
