@@ -93,20 +93,11 @@ static GParamSpec *props[LAST_PROP] = { 0 };
 
 enum
 {
-  SIGNAL_INSTALL,
-  SIGNAL_REMOVE,
-  SIGNAL_INSTALL_ADDON,
-  SIGNAL_REMOVE_ADDON,
   SIGNAL_UPDATE,
 
   LAST_SIGNAL,
 };
 static guint signals[LAST_SIGNAL];
-
-static void
-addon_transact_cb (BzFullView     *self,
-                   BzEntry        *entry,
-                   BzAddonsDialog *dialog);
 
 static void
 bz_full_view_dispose (GObject *object)
@@ -676,16 +667,6 @@ get_developer_apps_entries (gpointer object, GtkStringList *app_ids, BzEntry *en
 }
 
 static void
-apps_page_select_cb (BzFullView        *self,
-                     BzEntryGroup      *group,
-                     AdwNavigationPage *page)
-{
-  GtkWidget *nav_view = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
-  adw_navigation_view_pop (ADW_NAVIGATION_VIEW (nav_view));
-  bz_full_view_set_entry_group (self, group);
-}
-
-static void
 more_apps_button_clicked_cb (BzFullView *self,
                              GtkButton  *button)
 {
@@ -724,10 +705,6 @@ more_apps_button_clicked_cb (BzFullView *self,
 
   apps_page = bz_apps_page_new (title, model);
   bz_apps_page_set_subtitle (BZ_APPS_PAGE (apps_page), subtitle);
-
-  g_signal_connect_swapped (
-      apps_page, "select",
-      G_CALLBACK (apps_page_select_cb), self);
 
   nav_view = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
   if (nav_view != NULL)
@@ -959,20 +936,6 @@ run_cb (BzFullView *self,
 }
 
 static void
-install_cb (BzFullView *self,
-            GtkButton  *button)
-{
-  g_signal_emit (self, signals[SIGNAL_INSTALL], 0, button);
-}
-
-static void
-remove_cb (BzFullView *self,
-           GtkButton  *button)
-{
-  g_signal_emit (self, signals[SIGNAL_REMOVE], 0, button);
-}
-
-static void
 update_cb (BzFullView        *self,
            GListModel        *entries,
            BzInstallControls *controls)
@@ -1012,48 +975,11 @@ static void
 install_addons_cb (BzFullView *self,
                    GtkButton  *button)
 {
-  BzEntry    *entry                   = NULL;
-  GListModel *model                   = NULL;
-  g_autoptr (GListModel) mapped_model = NULL;
-  AdwDialog *addons_dialog            = NULL;
-
   if (self->group == NULL)
     return;
 
-  entry = bz_result_get_object (self->ui_entry);
-  if (entry == NULL)
-    return;
-
-  model = bz_entry_get_addons (entry);
-  if (model == NULL || g_list_model_get_n_items (model) == 0)
-    return;
-
-  mapped_model = bz_application_map_factory_generate (
-      bz_state_info_get_entry_factory (self->state),
-      model);
-
-  addons_dialog = bz_addons_dialog_new (entry, mapped_model);
-
-  g_signal_connect_swapped (
-      addons_dialog, "transact",
-      G_CALLBACK (addon_transact_cb), self);
-
-  adw_dialog_present (addons_dialog, GTK_WIDGET (self));
-}
-
-static void
-addon_transact_cb (BzFullView     *self,
-                   BzEntry        *entry,
-                   BzAddonsDialog *dialog)
-{
-  gboolean installed = FALSE;
-
-  g_object_get (entry, "installed", &installed, NULL);
-
-  if (installed)
-    g_signal_emit (self, signals[SIGNAL_REMOVE_ADDON], 0, entry);
-  else
-    g_signal_emit (self, signals[SIGNAL_INSTALL_ADDON], 0, entry);
+  gtk_widget_activate_action (GTK_WIDGET (self), "window.addons-group", "s",
+                              bz_entry_group_get_id (self->group));
 }
 
 static int
@@ -1109,64 +1035,6 @@ bz_full_view_class_init (BzFullViewClass *klass)
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
-
-  signals[SIGNAL_INSTALL] =
-      g_signal_new (
-          "install",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
-          g_cclosure_marshal_VOID__OBJECT,
-          G_TYPE_NONE, 0);
-  g_signal_set_va_marshaller (
-      signals[SIGNAL_INSTALL],
-      G_TYPE_FROM_CLASS (klass),
-      g_cclosure_marshal_VOID__OBJECTv);
-
-  signals[SIGNAL_REMOVE] =
-      g_signal_new (
-          "remove",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
-          g_cclosure_marshal_VOID__OBJECT,
-          G_TYPE_NONE, 0);
-  g_signal_set_va_marshaller (
-      signals[SIGNAL_REMOVE],
-      G_TYPE_FROM_CLASS (klass),
-      g_cclosure_marshal_VOID__OBJECTv);
-
-  signals[SIGNAL_INSTALL_ADDON] =
-      g_signal_new (
-          "install-addon",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
-          g_cclosure_marshal_VOID__OBJECT,
-          G_TYPE_NONE, 1,
-          BZ_TYPE_ENTRY);
-  g_signal_set_va_marshaller (
-      signals[SIGNAL_INSTALL_ADDON],
-      G_TYPE_FROM_CLASS (klass),
-      g_cclosure_marshal_VOID__OBJECTv);
-
-  signals[SIGNAL_REMOVE_ADDON] =
-      g_signal_new (
-          "remove-addon",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
-          g_cclosure_marshal_VOID__OBJECT,
-          G_TYPE_NONE, 1,
-          BZ_TYPE_ENTRY);
-  g_signal_set_va_marshaller (
-      signals[SIGNAL_REMOVE_ADDON],
-      G_TYPE_FROM_CLASS (klass),
-      g_cclosure_marshal_VOID__OBJECTv);
 
   signals[SIGNAL_UPDATE] =
     g_signal_new (
@@ -1244,14 +1112,11 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, formfactor_cb);
   gtk_widget_class_bind_template_callback (widget_class, safety_cb);
   gtk_widget_class_bind_template_callback (widget_class, run_cb);
-  gtk_widget_class_bind_template_callback (widget_class, install_cb);
-  gtk_widget_class_bind_template_callback (widget_class, remove_cb);
   gtk_widget_class_bind_template_callback (widget_class, update_cb);
   gtk_widget_class_bind_template_callback (widget_class, delete_user_data_cb);
   gtk_widget_class_bind_template_callback (widget_class, support_cb);
   gtk_widget_class_bind_template_callback (widget_class, pick_license_warning);
   gtk_widget_class_bind_template_callback (widget_class, install_addons_cb);
-  gtk_widget_class_bind_template_callback (widget_class, addon_transact_cb);
   gtk_widget_class_bind_template_callback (widget_class, bind_app_tile_cb);
   gtk_widget_class_bind_template_callback (widget_class, unbind_app_tile_cb);
   gtk_widget_class_bind_template_callback (widget_class, get_description_max_height);

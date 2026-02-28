@@ -167,8 +167,10 @@ template $BzRichAppTile: $BzListTile {
           ]
 
           icon-name: "user-trash-symbolic";
+          has-tooltip: true;
+          tooltip-text: _("Uninstall");
           valign: center;
-          clicked => $install_button_clicked_cb(template);
+          clicked => $remove_button_clicked_cb(template);
         }
       }
     }

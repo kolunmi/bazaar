@@ -53,32 +53,13 @@ enum
 
 static GParamSpec *props[LAST_PROP] = { 0 };
 
-enum
-{
-  SIGNAL_GROUP_SELECTED,
-  LAST_SIGNAL,
-};
-
-static guint signals[LAST_SIGNAL];
-
-static void
-apps_page_select_cb_forwarding (BzFlathubPage *flathub_page,
-                                BzEntryGroup  *group,
-                                BzAppsPage    *page)
-{
-  g_signal_emit_by_name (flathub_page, "group-selected", group);
-}
 
 static void
 tile_clicked (BzEntryGroup *group,
               GtkButton    *button)
 {
-  BzFlathubCategorySection *self = NULL;
-
-  self = BZ_FLATHUB_CATEGORY_SECTION (gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_FLATHUB_CATEGORY_SECTION));
-
-  if (self != NULL)
-    g_signal_emit (self, signals[SIGNAL_GROUP_SELECTED], 0, group);
+  gtk_widget_activate_action (GTK_WIDGET (button), "window.show-group", "s",
+                              bz_entry_group_get_id (group));
 }
 
 static void
@@ -103,10 +84,6 @@ on_more_button_clicked (GtkButton                *button,
   apps_page = bz_apps_page_new_from_category (self->category);
   if (apps_page == NULL)
     return;
-
-  g_signal_connect_swapped (
-      apps_page, "select",
-      G_CALLBACK (apps_page_select_cb_forwarding), flathub_page);
 
   adw_navigation_view_push (ADW_NAVIGATION_VIEW (nav_view), apps_page);
 }
@@ -266,21 +243,6 @@ bz_flathub_category_section_class_init (BzFlathubCategorySectionClass *klass)
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
-
-  signals[SIGNAL_GROUP_SELECTED] =
-      g_signal_new (
-          "group-selected",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
-          g_cclosure_marshal_VOID__OBJECT,
-          G_TYPE_NONE, 1,
-          BZ_TYPE_ENTRY_GROUP);
-  g_signal_set_va_marshaller (
-      signals[SIGNAL_GROUP_SELECTED],
-      G_TYPE_FROM_CLASS (klass),
-      g_cclosure_marshal_VOID__OBJECTv);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-flathub-category-section.ui");
 

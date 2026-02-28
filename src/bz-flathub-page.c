@@ -55,7 +55,6 @@ static GParamSpec *props[LAST_PROP] = { 0 };
 
 enum
 {
-  SIGNAL_GROUP_SELECTED,
   SIGNAL_OPEN_SEARCH,
 
   LAST_SIGNAL,
@@ -101,19 +100,6 @@ static void
 apps_page_select_cb (BzFlathubPage *self,
                      BzEntryGroup  *group,
                      BzAppsPage    *page);
-
-static void
-category_section_group_selected_cb (BzFlathubPage            *self,
-                                    BzEntryGroup             *group,
-                                    BzFlathubCategorySection *section);
-
-static void
-featured_carousel_group_clicked_cb (BzFlathubPage      *self,
-                                    BzEntryGroup       *group,
-                                    BzFeaturedCarousel *carousel)
-{
-  g_signal_emit (self, signals[SIGNAL_GROUP_SELECTED], 0, group);
-}
 
 static void
 bz_flathub_page_dispose (GObject *object)
@@ -237,6 +223,14 @@ open_search_cb (BzFlathubPage *self,
 }
 
 static void
+show_group_action (GtkWidget    *widget,
+                   BzEntryGroup *group)
+{
+  gtk_widget_activate_action (widget, "window.show-group", "s",
+                              bz_entry_group_get_id (group));
+}
+
+static void
 bz_flathub_page_class_init (BzFlathubPageClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
@@ -254,21 +248,6 @@ bz_flathub_page_class_init (BzFlathubPageClass *klass)
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
-
-  signals[SIGNAL_GROUP_SELECTED] =
-      g_signal_new (
-          "group-selected",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
-          g_cclosure_marshal_VOID__OBJECT,
-          G_TYPE_NONE, 1,
-          BZ_TYPE_ENTRY_GROUP);
-  g_signal_set_va_marshaller (
-      signals[SIGNAL_GROUP_SELECTED],
-      G_TYPE_FROM_CLASS (klass),
-      g_cclosure_marshal_VOID__OBJECTv);
 
   signals[SIGNAL_OPEN_SEARCH] =
       g_signal_new (
@@ -294,11 +273,9 @@ bz_flathub_page_class_init (BzFlathubPageClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, bind_widget_cb);
   gtk_widget_class_bind_template_callback (widget_class, unbind_widget_cb);
-  gtk_widget_class_bind_template_callback (widget_class, category_section_group_selected_cb);
   gtk_widget_class_bind_template_callback (widget_class, get_category_by_name_cb);
   gtk_widget_class_bind_template_callback (widget_class, show_more_mobile_cb);
   gtk_widget_class_bind_template_callback (widget_class, show_more_gaming_cb);
-  gtk_widget_class_bind_template_callback (widget_class, featured_carousel_group_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, open_search_cb);
 }
 
@@ -353,16 +330,6 @@ bz_flathub_page_get_state (BzFlathubPage *self)
 }
 
 static void
-tile_clicked (BzEntryGroup *group,
-              GtkButton    *button)
-{
-  GtkWidget *self = NULL;
-
-  self = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_FLATHUB_PAGE);
-  g_signal_emit (self, signals[SIGNAL_GROUP_SELECTED], 0, group);
-}
-
-static void
 show_more_clicked (BzFlathubPage *self,
                    GtkButton     *button,
                    const char    *category_name)
@@ -391,19 +358,18 @@ show_more_clicked (BzFlathubPage *self,
 }
 
 static void
+tile_clicked (BzEntryGroup *group,
+              GtkButton    *button)
+{
+  show_group_action (GTK_WIDGET (button), group);
+}
+
+static void
 apps_page_select_cb (BzFlathubPage *self,
                      BzEntryGroup  *group,
                      BzAppsPage    *page)
 {
-  g_signal_emit (self, signals[SIGNAL_GROUP_SELECTED], 0, group);
-}
-
-static void
-category_section_group_selected_cb (BzFlathubPage            *self,
-                                    BzEntryGroup             *group,
-                                    BzFlathubCategorySection *section)
-{
-  g_signal_emit (self, signals[SIGNAL_GROUP_SELECTED], 0, group);
+  show_group_action (GTK_WIDGET (self), group);
 }
 
 static void

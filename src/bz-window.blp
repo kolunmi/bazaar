@@ -155,7 +155,6 @@ template $BzWindow: Adw.ApplicationWindow {
 
                         child: $BzCuratedView browse {
                           state: bind template.state as <$BzStateInfo>;
-                          group-selected => $select_cb(template);
                           browse-flathub => $browse_flathub_cb(template);
                         };
                       }
@@ -167,7 +166,6 @@ template $BzWindow: Adw.ApplicationWindow {
 
                         child: $BzFlathubPage {
                           state: bind template.state as <$BzStateInfo>;
-                          group-selected => $select_cb(template);
                           open-search => $open_search_cb(template);
                         };
                       }
@@ -184,10 +182,6 @@ template $BzWindow: Adw.ApplicationWindow {
                           state: bind template.state;
                           transactions: bind template.state as <$BzStateInfo>.transaction-manager;
                           model: bind template.state as <$BzStateInfo>.all-installed-entry-groups;
-                          remove => $remove_installed_cb(template);
-                          remove-addon => $remove_addon_cb(template);
-                          install-addon => $install_addon_cb(template);
-                          show-entry => $select_cb(template);
                           update => $update_cb(template);
                         };
                       }
@@ -199,7 +193,6 @@ template $BzWindow: Adw.ApplicationWindow {
 
                         child: $BzSearchWidget search_widget {
                           state: bind template.state;
-                          select => $search_widget_select_cb(template);
                         };
                       }
                     };
@@ -353,11 +346,7 @@ template $BzWindow: Adw.ApplicationWindow {
               child: $BzFullView full_view {
                 state: bind template.state;
                 main-menu: primary_menu;
-                install => $full_view_install_cb(template);
-                remove => $full_view_remove_cb(template);
                 update => $update_cb(template);
-                install-addon => $install_addon_cb(template);
-                remove-addon => $remove_addon_cb(template);
               };
             }
           };
