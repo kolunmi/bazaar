@@ -890,7 +890,7 @@ init_fiber (GWeakRef *wr)
 
   bz_state_info_set_online (self->state, TRUE);
   bz_state_info_set_busy (self->state, TRUE);
-  bz_state_info_set_background_task_label (self->state, _ ("Performing setup..."));
+  bz_state_info_set_background_task_label (self->state, _ ("Performing setup…"));
 
   root_cache_dir      = bz_dup_root_cache_dir ();
   root_cache_dir_file = g_file_new_for_path (root_cache_dir);
@@ -1548,10 +1548,8 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
     {
       if (self->n_notifications_incoming > 0)
         {
-          g_autofree char *label = NULL;
-
-          label = g_strdup_printf (_ ("Loading %d apps…"), self->n_notifications_incoming);
-          bz_state_info_set_background_task_label (self->state, label);
+          bz_state_info_set_background_task_label_take_printf (
+              self->state, _ ("Loading %d apps…"), self->n_notifications_incoming);
         }
       else
         {
@@ -3174,12 +3172,8 @@ static void
 finish_with_background_task_label (BzApplication *self)
 {
   if (self->n_notifications_incoming > 0)
-    {
-      g_autofree char *label = NULL;
-
-      label = g_strdup_printf (_ ("Loading %d apps…"), self->n_notifications_incoming);
-      bz_state_info_set_background_task_label (self->state, label);
-    }
+    bz_state_info_set_background_task_label_take_printf (
+        self->state, _ ("Loading %d apps…"), self->n_notifications_incoming);
   else if (bz_state_info_get_syncing (self->state))
     bz_state_info_set_background_task_label (self->state, _ ("Refreshing…"));
   else if (bz_state_info_get_busy (self->state))

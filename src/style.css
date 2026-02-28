@@ -3,8 +3,13 @@
 }
 
 .bz-debug {
-    background-color: darkorange;
+    background: linear-gradient(to top, #ffaf4c, #ffc04c);
+    border-color: black;
+    border-radius: 6px;
+    border-style: solid;
+    border-width: 1px;
     color: black;
+    padding: 4px;
 }
 
 .bz-donations-dialog {

@@ -128,5 +128,5 @@ src/bz-window.c
 src/bz-world-map.c
 src/bz-yaml-parser.c
 src/dl-worker.c
-src/gtk/shortcuts-dialog.blp
+src/shortcuts-dialog.blp
 src/main.c

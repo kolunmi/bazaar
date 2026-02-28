@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-04 23:40+0000\n"
-"PO-Revision-Date: 2026-02-16 13:09+0000\n"
+"POT-Creation-Date: 2026-02-24 17:01+0000\n"
+"PO-Revision-Date: 2026-02-24 19:36+0000\n"
 "Last-Translator: Flynn Peck <cirilla@tuta.io>\n"
 "Language-Team: kw\n"
 "Language: kw\n"
@@ -27,7 +27,7 @@ msgstr "Basar"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:3
 msgid "Add, remove or update flatpak software on this computer"
-msgstr "Addya, remova, po nowedhi medhelweyth flatpak yn an amontyell ma"
+msgstr "Addya, remova, po nowedhi medhelweyth flatpak war'n amontyell ma"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:9
 msgid "GTK;System;PackageManager;Discover;Flatpak;Software;Store;"
@@ -46,8 +46,8 @@ msgid ""
 "A new app store for Linux with a focus on discovering and installing "
 "applications and addons from Flatpak remotes, particularly Flathub."
 msgstr ""
-"Unn gwerthji appys nowydh rag Linux gans unn fog war ow trovya hag ow lea "
-"appys hag ystynansow dhyworth gwerthjiow Flatpak, dres oll Flathub."
+"Gwerthji appys nowydh rag Linux gans fog war ow trovya hag ow lea appys hag "
+"ystynansow dhyworth gwerthjiow Flatpak, dres oll Flathub."
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:14
 msgid ""
@@ -55,11 +55,11 @@ msgid ""
 "Bazaar features a \"curated\" tab that can be configured by distributors to "
 "allow for a more localized experience."
 msgstr ""
-"Y posleva an skoodhyans rag an awtours neb a gul an ekokevreyth Linux. Basar "
-"omdhiskwedhes an \"dyghtys\" tabb dre konfigurys gans lesrenyadesow dhe "
-"alowa unn eksperyans leel."
+"Yth posleva ow skoodhya an awtours neb a gul an ekokevreyth Linux. Basar "
+"omdhiskwedhes an tabb \"dyghtys\" dre konfigurys gans lesrenyadesow dhe "
+"alowa rag eksperyans leel."
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29 src/bz-application.c:701
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29 src/bz-application.c:699
 msgid "Adam Masciola"
 msgstr "Adam Masciola"
 
@@ -68,35 +68,38 @@ msgid "The home page displaying Flathub apps"
 msgstr "An folen chi ow displetya appys Flathub"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:58
-msgid "Nucleus app page"
-msgstr "Folen app Nuklesen"
+msgid "Exhibit app page"
+msgstr "Folen app diskwedhyn"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:62
+msgid "Library page"
+msgstr "Folen lyverva"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:66
 msgid "Search page"
 msgstr "Folen hwithrans"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:66
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:70
 msgid "Category page"
 msgstr "Folen klassys"
 
-#: src/bz-addons-dialog.blp:14 src/bz-full-view.blp:695
-#: src/bz-installed-tile.blp:101
-msgid "Manage Add-ons"
+#: src/bz-addons-dialog.blp:16 src/bz-full-view.blp:710
+msgid "Manage Add-Ons"
 msgstr "Dyghtya Ystynansow"
 
-#: src/bz-addons-dialog.c:90 src/bz-full-view.blp:482
-#: src/bz-installed-tile.blp:119 src/bz-transaction-dialog.c:227
+#: src/bz-addons-dialog.c:94 src/bz-full-view.blp:499
+#: src/bz-installed-tile.blp:119 src/bz-transaction-dialog.c:231
 msgid "Remove"
 msgstr "Remova"
 
-#: src/bz-addons-dialog.c:95 src/bz-favorites-tile.c:174
-#: src/bz-full-view.blp:249 src/bz-full-view.blp:469
-#: src/bz-transaction-dialog.c:198
+#: src/bz-addons-dialog.c:99 src/bz-favorites-tile.c:159
+#: src/bz-full-view.blp:262 src/bz-full-view.blp:486
+#: src/bz-transaction-dialog.c:202
 msgid "Install"
 msgstr "Lea"
 
 #: src/bz-age-rating-dialog.blp:7 src/bz-age-rating-dialog.blp:31
-#: src/bz-age-rating-dialog.c:726 src/bz-full-view.c:331 src/bz-full-view.c:338
+#: src/bz-age-rating-dialog.c:726 src/bz-full-view.c:348 src/bz-full-view.c:355
 msgid "Age Rating"
 msgstr "Talvos Oos"
 
@@ -374,28 +377,28 @@ msgstr "Kedhlow vyth yn-kever kampollans dhe kethneth"
 
 #: src/bz-age-rating-dialog.c:424
 msgid "Does not include references to drugs"
-msgstr "Vyth komprehendya kampollans dhe droggys"
+msgstr "Ny komprehendya kampollans dhe droggys"
 
 #: src/bz-age-rating-dialog.c:426
 msgid ""
 "Does not include swearing, profanity, and other kinds of strong language"
-msgstr "Vyth komprehendya kossya"
+msgstr "Ny komprehendya kossya"
 
 #: src/bz-age-rating-dialog.c:428
 msgid "Does not include ads or monetary transactions"
-msgstr "Vyth komprehendya argemynnow po treuswriansow monesek"
+msgstr "Ny komprehendya argemynnow po treuswriansow monesek"
 
 #: src/bz-age-rating-dialog.c:430
 msgid "Does not include sex or nudity"
-msgstr "Vyth komprehendya kyjyans po nothedh"
+msgstr "Ny komprehendya kyjyans po nothedh"
 
 #: src/bz-age-rating-dialog.c:432
 msgid "Does not include uncontrolled chat functionality"
-msgstr "Vyth komprehendya keskows heb musur"
+msgstr "Ny komprehendya keskows heb musur"
 
 #: src/bz-age-rating-dialog.c:434
 msgid "Does not include violence"
-msgstr "Vyth komprehendya garowder"
+msgstr "Ny komprehendya garowder"
 
 #: src/bz-age-rating-dialog.c:469
 msgid "Drugs"
@@ -418,7 +421,7 @@ msgid "Violence"
 msgstr "Garowder"
 
 #. Translators: Age rating format, e.g. "12+" for ages 12 and up
-#: src/bz-age-rating-dialog.c:676 src/bz-full-view.c:321
+#: src/bz-age-rating-dialog.c:676 src/bz-full-view.c:338
 #, c-format
 msgid "%d+"
 msgstr "%d+"
@@ -431,85 +434,85 @@ msgstr "Oll"
 #: src/bz-age-rating-dialog.c:737
 #, c-format
 msgid "%s has an unknown age rating"
-msgstr "%s re unn talvos oos ankoth"
+msgstr "%s kavos talvos oos ankoth"
 
 #: src/bz-age-rating-dialog.c:743
 #, c-format
 msgid "%s is suitable for everyone"
-msgstr "%s usi fytti rag oll"
+msgstr "%s yw fytti rag oll"
 
 #: src/bz-age-rating-dialog.c:746
 #, c-format
 msgid "%s is suitable for young children"
-msgstr "%s usi fytti rag fleghes yowynk"
+msgstr "%s yw fytti rag fleghes yowynk"
 
 #: src/bz-age-rating-dialog.c:749
 #, c-format
 msgid "%s is suitable for children"
-msgstr "%s usi fytti rag fleghes"
+msgstr "%s yw fytti rag fleghes"
 
 #: src/bz-age-rating-dialog.c:752
 #, c-format
 msgid "%s is suitable for teenagers"
-msgstr "%s usi fytti rag degowogyon"
+msgstr "%s yw fytti rag degowogyon"
 
 #: src/bz-age-rating-dialog.c:755
 #, c-format
 msgid "%s is suitable for adults"
-msgstr "%s usi fytti rag tevesigesow"
+msgstr "%s yw fytti rag tevesigesow"
 
 #: src/bz-age-rating-dialog.c:758
 #, c-format
 msgid "%s is suitable for %s"
-msgstr "%s usi fytti rag %s"
+msgstr "%s yw fytti rag %s"
 
 #: src/bz-age-rating-dialog.c:852
 #, c-format
 msgid "%s • %s"
 msgstr "%s • %s"
 
-#: src/bz-all-apps-page.blp:13 src/bz-apps-page.blp:14 src/bz-full-view.blp:16
+#: src/bz-all-apps-page.blp:13 src/bz-apps-page.blp:14 src/bz-full-view.blp:29
 #: src/bz-user-data-page.blp:15 src/bz-window.blp:292
 msgid "Main Menu"
 msgstr "Rol Chif"
 
 #: src/bz-all-apps-page.blp:18 src/bz-apps-page.blp:18
-#: src/bz-user-data-page.blp:19 src/bz-window.blp:384
+#: src/bz-user-data-page.blp:19 src/bz-window.blp:385
 msgid "_Donate to Bazaar ❤️"
 msgstr "_Argevri dhe Basar ❤️"
 
 #: src/bz-all-apps-page.blp:25 src/bz-apps-page.blp:25
-#: src/bz-user-data-page.blp:26 src/bz-window.blp:391
+#: src/bz-user-data-page.blp:26 src/bz-window.blp:392
+msgid "_Refresh"
+msgstr "_Disegha"
+
+#: src/bz-all-apps-page.blp:30 src/bz-apps-page.blp:30
+#: src/bz-user-data-page.blp:31 src/bz-window.blp:397
 msgid "_Preferences"
 msgstr "_Settyansow"
 
-#: src/bz-all-apps-page.blp:30 src/bz-apps-page.blp:30
-#: src/bz-user-data-page.blp:31 src/bz-window.blp:396
-msgid "_Login with Flathub"
-msgstr "_Omgelmi gans Flathub"
+#: src/bz-all-apps-page.blp:35 src/bz-apps-page.blp:35
+#: src/bz-user-data-page.blp:36
+msgid "_Login With Flathub"
+msgstr "_Omgelmi Gans Flathub"
 
-#: src/bz-all-apps-page.blp:36 src/bz-apps-page.blp:36
-#: src/bz-user-data-page.blp:37 src/bz-window.blp:402
+#: src/bz-all-apps-page.blp:41 src/bz-apps-page.blp:41
+#: src/bz-user-data-page.blp:42 src/bz-window.blp:408
 msgid "_Manage Leftover User Data"
 msgstr "_Dyghtya Data Usyer Remenant"
 
-#: src/bz-all-apps-page.blp:41 src/bz-apps-page.blp:41
-#: src/bz-user-data-page.blp:42 src/bz-window.blp:407
-msgid "_Synchronize Remotes"
-msgstr "_Kerghes Gwerthjiow"
-
 #: src/bz-all-apps-page.blp:46 src/bz-apps-page.blp:46
-#: src/bz-user-data-page.blp:47 src/bz-window.blp:412
+#: src/bz-user-data-page.blp:47 src/bz-window.blp:413
 msgid "_Keyboard Shortcuts"
 msgstr "_Kesunyansow Bysowek"
 
 #: src/bz-all-apps-page.blp:51 src/bz-apps-page.blp:51
-#: src/bz-user-data-page.blp:52 src/bz-window.blp:417
+#: src/bz-user-data-page.blp:52 src/bz-window.blp:418
 msgid "_About Bazaar"
 msgstr "_A-dro Basar"
 
 #: src/bz-all-apps-page.blp:58 src/bz-apps-page.blp:58
-#: src/bz-user-data-page.blp:59 src/bz-window.blp:424
+#: src/bz-user-data-page.blp:59 src/bz-window.blp:425
 msgid "_Quit Bazaar"
 msgstr "_Kwytya Basar"
 
@@ -521,7 +524,7 @@ msgstr "Restrenva system %s"
 #: src/bz-app-permissions.c:162
 #, c-format
 msgid "Home subfolder %s"
-msgstr "Restrenva tre %s"
+msgstr "Isrestrenva tre %s"
 
 #: src/bz-app-permissions.c:164
 msgid "Host system folders"
@@ -655,16 +658,33 @@ msgstr "Braster Leys"
 msgid "Size on Disk"
 msgstr "Braster war Plasen"
 
-#: src/bz-app-size-dialog.blp:99
+#: src/bz-app-size-dialog.blp:125
+msgid "Open user data folder"
+msgstr "Ygeri restrenva data usyer"
+
+#: src/bz-app-size-dialog.blp:135
 msgid "User Data Size"
 msgstr "Braster Data Usyer"
 
-#: src/bz-app-size-dialog.blp:100
+#: src/bz-app-size-dialog.blp:136
 msgid "Caches, settings, and other app data"
-msgstr "Cache, settyansow, ha data appys aral"
+msgstr "Sornow, settyansow, ha data appys aral"
+
+#: src/bz-app-size-dialog.c:99
+msgid "Installed Runtime Size"
+msgstr "Braster Leys Kerghynnedh"
+
+#: src/bz-app-size-dialog.c:99
+msgid "Runtime Download Size"
+msgstr "Braster Iskarg Kerghynnedh"
+
+#: src/bz-app-tile.blp:57 src/bz-developer-badge.c:98
+#: src/bz-rich-app-tile.blp:103 src/bz-rich-app-tile.c:282
+msgid "Verified"
+msgstr "Gwirhys"
 
 #. Translators: As in 'The app is installed'.
-#: src/bz-app-tile.blp:86 src/bz-full-view.c:280 src/bz-releases-list.c:175
+#: src/bz-app-tile.blp:89 src/bz-full-view.c:297 src/bz-releases-list.c:178
 msgid "Installed"
 msgstr "Leys"
 
@@ -682,121 +702,164 @@ msgstr "Oll \"%s\""
 msgid "%d Applications"
 msgstr "%d Appys"
 
-#: src/bz-application.c:672
+#: src/bz-application.c:678
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr "Adam Masciola <kolunmi@posteo.net>"
 
-#: src/bz-application.c:673
+#: src/bz-application.c:679
 msgctxt "About Dialog Developer Credit"
 msgid "Alexander Vanhee"
 msgstr "Alexander Vanhee"
 
 #. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
-#: src/bz-application.c:704
+#: src/bz-application.c:702
 msgid "translator-credits"
 msgstr "Flynn <cirilla@tuta.io>"
 
-#: src/bz-application.c:715
+#: src/bz-application.c:712
 msgid "Special Thanks"
 msgstr "Grassow Arbennik"
 
-#: src/bz-application.c:773
+#: src/bz-application.c:770
 msgid "Logged Out Successfully!"
-msgstr "Omdennys yn Sewen!"
+msgstr "Omdhigelmys yn Sewen!"
 
-#: src/bz-application.c:896
+#: src/bz-application.c:893
 msgid "Performing setup..."
 msgstr "Ow gwruthyl selyans..."
 
-#: src/bz-application.c:975 src/bz-application.c:984
-msgid "Set Up Flathub"
-msgstr "Selya Flathub"
+#: src/bz-application.c:977
+msgid "Set Up System Flathub?"
+msgstr "Selya Flathub System?"
 
-#: src/bz-application.c:978
+#: src/bz-application.c:980
+msgid ""
+"The system Flathub remote is not set up. Bazaar requires Flathub to be "
+"configured on the system Flatpak installation to browse and install "
+"applications.\n"
+"\n"
+"You can still use Bazaar to browse and remove already installed apps."
+msgstr ""
+"An repositori system Flathub yw anselys. Basar res Flathub bos selys war'n "
+"leyans Flatpak system rag peuri ha lea appys.\n"
+"\n"
+"Ty a yll devnydhya Basar hwath rag peuri ha remova appys leys seulabrys."
+
+#: src/bz-application.c:987
+msgid "Set Up Flathub?"
+msgstr "Selya Flathub?"
+
+#: src/bz-application.c:990
 msgid ""
 "Flathub is not set up on this system. You will not be able to browse and "
 "install applications in Bazaar if its unavailable.\n"
 "\n"
 "You can still use Bazaar to browse and remove already installed apps."
 msgstr ""
-"Flathub yw na selys war an system ma. A Flathub yw ankavadow, ty na gallos "
-"peuri ha lea appys yn Basar."
+"Flathub yw anselys war'n system ma. Ty ny yllir peuri ha lea appys yn Basar "
+"mars yth yw ankavadow.\n"
+"\n"
+"Ty a yll devnydhya Basar hwath rag peuri ha remova appys leys seulabrys."
 
-#: src/bz-application.c:983
+#: src/bz-application.c:996
 msgid "Later"
 msgstr "Diwettha"
 
-#: src/bz-application.c:1393 src/bz-application.c:3087
-msgid "Synchronizing..."
-msgstr "Ow Kettermynyegi..."
+#: src/bz-application.c:997
+msgid "Set Up Flathub"
+msgstr "Selya Flathub"
 
-#: src/bz-application.c:1540 src/bz-application.c:3083
+#: src/bz-application.c:1280
+msgid "A backend error occurred"
+msgstr "Yma error a-dhelergh"
+
+#: src/bz-application.c:1406 src/bz-application.c:3184 src/bz-window.blp:135
+msgid "Refreshing…"
+msgstr "Ow Disegha…"
+
+#: src/bz-application.c:1553 src/bz-application.c:3180
 #, c-format
-msgid "Receiving %d entries..."
-msgstr "Ow receva %d enworrans manylyon..."
+msgid "Loading %d apps…"
+msgstr "Ow karga %d appys…"
 
-#: src/bz-application.c:1545
-msgid "Checking for updates"
-msgstr "Ow checkya rag nowedhyansow"
+#: src/bz-application.c:1558
+msgid "Checking for updates…"
+msgstr "Ow checkya rag nowedhyansow…"
 
-#: src/bz-application.c:3089
-msgid "Indexing Data..."
-msgstr "Ow Kevernya Data..."
+#: src/bz-application.c:1614
+msgid "Failed to open .flatpakref"
+msgstr "Ny yllir ygeri .flatpakref"
 
-#: src/bz-appstream-parser.c:265
+#: src/bz-application.c:1668
+msgid "An initialization error occurred"
+msgstr "Yma error dalleth"
+
+#: src/bz-application.c:2006
+msgid "Failed to check for updates"
+msgstr "Ny yllir checkya rag nowedhyansow"
+
+#: src/bz-application.c:2963
+msgid "Could not find app"
+msgstr "Ny yllir kavos app"
+
+#: src/bz-application.c:3186
+msgid "Writing to cache…"
+msgstr "Ow skrifa dhe sorn…"
+
+#: src/bz-appstream-parser.c:303
 msgctxt "Project URL Type"
 msgid "Flathub Page"
 msgstr "Folen Flathub"
 
-#: src/bz-appstream-parser.c:286
+#: src/bz-appstream-parser.c:324
 msgctxt "Project URL Type"
 msgid "Project Website"
 msgstr "Gwiasva Ragdres"
 
-#: src/bz-appstream-parser.c:290
+#: src/bz-appstream-parser.c:328
 msgctxt "Project URL Type"
 msgid "Issue Tracker"
-msgstr "Rol a Kudynnow"
+msgstr "Rol Kudynnow"
 
-#: src/bz-appstream-parser.c:294
+#: src/bz-appstream-parser.c:332
 msgctxt "Project URL Type"
 msgid "FAQ"
 msgstr "Govynnow Kemmyn"
 
-#: src/bz-appstream-parser.c:298
+#: src/bz-appstream-parser.c:336
 msgctxt "Project URL Type"
 msgid "Help"
 msgstr "Gweres"
 
-#: src/bz-appstream-parser.c:302
+#: src/bz-appstream-parser.c:340
 msgctxt "Project URL Type"
 msgid "Donate"
 msgstr "Argevri"
 
-#: src/bz-appstream-parser.c:308
+#: src/bz-appstream-parser.c:346
 msgctxt "Project URL Type"
 msgid "Translate"
 msgstr "Treylya"
 
-#: src/bz-appstream-parser.c:312
+#: src/bz-appstream-parser.c:350
 msgctxt "Project URL Type"
 msgid "Contact"
 msgstr "Kestava"
 
-#: src/bz-appstream-parser.c:316
+#: src/bz-appstream-parser.c:354
 msgctxt "Project URL Type"
 msgid "Source Code"
 msgstr "Kod"
 
-#: src/bz-appstream-parser.c:322
+#: src/bz-appstream-parser.c:360
 msgctxt "Project URL Type"
 msgid "Contribute"
 msgstr "Kevri"
 
 #: src/bz-curated-view.blp:11 src/bz-favorites-page.blp:68
-#: src/bz-flathub-page.blp:19 src/bz-full-view.blp:48
-#: src/bz-library-page.blp:59 src/bz-user-data-page.blp:86
+#: src/bz-flathub-page.blp:19 src/bz-full-view.blp:61
+#: src/bz-library-page.blp:63 src/bz-user-data-page.blp:86
 msgid "Empty"
 msgstr "Gwag"
 
@@ -809,8 +872,8 @@ msgid ""
 "There is no curation information provided on this system. You can still "
 "browse applications on Flathub"
 msgstr ""
-"Yma kudhlow dyghtyans vyth provys war an system ma. Ty gallos hwath peuri "
-"appys war Flathub"
+"Yma kedhlow dyghtyans vyth provys war'n system ma. Ty a yll peuri appys war "
+"Flathub hwath"
 
 #: src/bz-curated-view.blp:18
 msgid "Browse Flathub"
@@ -821,96 +884,110 @@ msgstr "Peuri Flathub"
 msgid "Offline"
 msgstr "Dhywarlinen"
 
+#. Translators: Search suggestion: the english text will be used for the
+#. search regardless of what you put here, so don't worry about the string
+#. yielding poor search results. Focus on correctness and friendliness,
+#. etc
 #: src/bz-curated-view.blp:39 src/bz-flathub-page.blp:49
+#: src/bz-search-pill-list.c:67
 msgid "Browser"
 msgstr "Peurell"
 
-#: src/bz-developer-badge.c:131
+#: src/bz-developer-badge.c:92 src/bz-developer-badge.c:98
+msgid "Not Verified"
+msgstr "Na Gwirhys"
+
+#: src/bz-developer-badge.c:145
 msgid "Developer information not available."
 msgstr "Kedhlow awtour ankavadow."
 
-#: src/bz-developer-badge.c:137 src/bz-developer-badge.c:151
+#: src/bz-developer-badge.c:151 src/bz-developer-badge.c:165
 #, c-format
 msgid ""
 "The ownership of the %s app ID has not been verified and it may be a "
 "community package."
 msgstr ""
-"An perghenogeth a an %s ID app na gwirys hag y yw unn fardel ansodhogel "
+"An perghenogeth a'n %s ID app yw angwirys hag yth yw fardel ansodhogel "
 "martesen."
 
-#: src/bz-developer-badge.c:155
+#: src/bz-developer-badge.c:169
 #, c-format
 msgid ""
 "The ownership of the %s app ID has been manually verified by the Flathub "
 "team."
 msgstr ""
-"An perghenogeth a an %s ID app yw gwirys dre dhorn gans an bagas Flathub."
+"An perghenogeth a'n %s ID app re gwirys dre dhorn gans an bagas Flathub."
 
-#: src/bz-developer-badge.c:161
+#: src/bz-developer-badge.c:175
 #, c-format
 msgid ""
 "The ownership of the %1$s app ID has been verified by <b>%2$s</b> on "
 "<b>%3$s</b>."
 msgstr ""
-"An perghenogeth a an %1$s ID app yw gwirys gans <b>%2$s</b> war <b>%3$s</b>."
+"An perghenogeth a'n %1$s ID app re gwirys gans <b>%2$s</b> war <b>%3$s</b>."
 
-#: src/bz-developer-badge.c:168
+#: src/bz-developer-badge.c:182
 #, c-format
 msgid "The ownership of the %1$s app ID has been verified using %2$s."
-msgstr "An perghenogeth a an %1s ID app yw gwirys ow devnydhya %1s."
+msgstr "An perghenogeth a'n %1$s ID app re gwirys ow devnydhya %2$s."
 
-#: src/bz-developer-badge.c:172
+#: src/bz-developer-badge.c:186
 #, c-format
 msgid "The ownership of the %s app ID has been verified."
-msgstr "An perghenogeth a an %s ID app yw gwirys."
+msgstr "An perghenogeth a'n %s ID app re gwirys."
 
-#: src/bz-donations-dialog.blp:22
-msgid "Bazaar is a Passion Project"
-msgstr "Basar yw Ragdres Passyon"
+#: src/bz-donations-dialog.blp:74
+msgid "Full Release Notes"
+msgstr "Notennow Dyllans Leun"
 
-#: src/bz-donations-dialog.blp:23 src/bz-window.blp:325
-msgid "Support the Future of Linux App Distribution"
-msgstr "Skoodhya an Termyn a Dheu a Lesrannans Appys Linux"
+#: src/bz-donations-dialog.blp:105
+msgid "This release was made possible by users like you!"
+msgstr "An dyllans ma o gwrys possybyl gans usyoryon avel ty!"
 
-#: src/bz-donations-dialog.blp:32
+#: src/bz-donations-dialog.blp:113
 msgid ""
-"I love making Bazaar, but I cannot do it alone. If you would like to help "
-"support further development, please consider donating to the project at my "
-"ko-fi:"
+"I love making Bazaar, but I cannot do it alone. Help support further "
+"development by donating on Ko-Fi."
 msgstr ""
-"My a gar ow gul Basar, mes ny allav gul yth yn unsel. Mar ty mynnes gweres "
-"skoodhya gwrians pella, mar pleg, prederi owth argevri dhe'n ragdres yn ow "
-"ko-fi:"
+"My a gar ow gul Basar, mes ny allav gul yth yn unsel. Gweres skoodhya "
+"displegyans pella gans owth argevri war Ko-Fi."
 
-#: src/bz-donations-dialog.blp:42
+#: src/bz-donations-dialog.blp:128
 msgid "Donate to Bazaar"
 msgstr "Argevri dhe Basar"
 
-#: src/bz-donations-dialog.blp:48
-msgid "Disable the donations banner on startup"
-msgstr "Ungallosegi an baner argevrohow dres dalleth"
+#. Translators: the %s format specifier will be something along the lines of "0.7.6" etc
+#: src/bz-donations-dialog.c:227
+#, c-format
+msgid "What's New in %s?"
+msgstr "Pyth yw Nowydh yn %s?"
+
+#. Translators: this is a release date label, like "Released February 9, 2026"
+#: src/bz-donations-dialog.c:243
+msgid "Released %B %-e, %Y"
+msgstr "Dyllys %-e ves %B, %Y"
 
 #: src/bz-entry-group-util.c:73
 msgid "Choose an Installation"
-msgstr "Dewis unn Ynstallyans"
+msgstr "Dewis Leyans"
 
 #: src/bz-entry-group-util.c:76
 msgid ""
 "You have multiple versions of this app installed. Which one would you like "
 "to proceed with?"
 msgstr ""
-"Ty kavos versyons liesek a an app ma leys. Pyneyl a vynn'ta y gavos procedya "
+"Ty kavos versyons liesek a'n app ma leys. Pyneyl a vynn'ta y gavos procedya "
 "gans?"
 
-#: src/bz-entry-group-util.c:80 src/bz-transaction-dialog.c:197
-#: src/bz-transaction-dialog.c:226 src/bz-transaction-dialog.c:271
-#: src/bz-transaction-dialog.c:561
+#: src/bz-entry-group-util.c:80 src/bz-transaction-dialog.c:201
+#: src/bz-transaction-dialog.c:230 src/bz-transaction-dialog.c:275
+#: src/bz-transaction-dialog.c:578
 msgid "Cancel"
 msgstr "Hedhi"
 
 #: src/bz-entry-selection-row.blp:17
-msgid "For this user only"
-msgstr "Rag an usyer ma hepken"
+msgid "For This User Only"
+msgstr "Rag An Usyer Ma Hepken"
 
 #: src/bz-entry-selection-row.c:112
 msgid "this user"
@@ -920,21 +997,26 @@ msgstr "an usyer"
 msgid "all users"
 msgstr "oll usyoryon"
 
-#: src/bz-error.c:68
-msgid "An Error Occurred"
-msgstr "Unn Error Hwarvos"
+#: src/bz-error.c:69 src/bz-error.c:88 src/bz-error-dialog.blp:36
+#: src/bz-safety-dialog.blp:50
+msgid "Details"
+msgstr "Manylyon"
 
-#: src/bz-error.c:89
-msgid "Close"
-msgstr "Kwytya"
+#: src/bz-error-dialog.blp:47
+msgid "Copy"
+msgstr "Kopia"
 
-#: src/bz-error.c:90
-msgid "Copy and Close"
-msgstr "Dasskrifa ha Kwytya"
+#: src/bz-error-dialog.c:56 src/bz-share-list.c:64
+msgid "Copied!"
+msgstr "Kopys!"
+
+#: src/bz-favorite-button.c:388
+msgid "Failed to update favorite"
+msgstr "Ny yllir nowedhi drudh"
 
 #: src/bz-favorite-button.c:434
 msgid "Log in with Flathub to manage favorites"
-msgstr "Omgelmi gans Flathub rag dyghtya drughyow"
+msgstr "Omgelmi gans Flathub rag dyghtya drudhyow"
 
 #: src/bz-favorite-button.c:440
 msgid "Log In"
@@ -942,33 +1024,37 @@ msgstr "Omgelmi"
 
 #: src/bz-favorite-button.blp:14
 msgid "Favorite Count"
-msgstr "Somm Drughyow"
+msgstr "Somm Drudhyow"
 
-#: src/bz-favorites-tile.c:172
+#: src/bz-favorites-tile.c:157
 msgid "Uninstall"
-msgstr "Dislea"
+msgstr "Dilea"
 
-#: src/bz-favorites-tile.blp:70 src/bz-installed-tile.blp:77
-msgid "Support this application"
-msgstr "Skoodhya an app ma"
+#: src/bz-favorites-tile.c:360
+msgid "Failed to remove favorite"
+msgstr "Ny yllir remova drudh"
+
+#: src/bz-favorites-tile.blp:70
+msgid "Support This Application"
+msgstr "Skoodhya An App Ma"
 
 #: src/bz-favorites-tile.blp:119
-msgid "Remove from Favorites"
-msgstr "Dilea a Drudhyow"
+msgid "Remove From Favorites"
+msgstr "Dilea Dhyworth Drudhyow"
 
 #: src/bz-favorites-page.blp:5 src/bz-favorites-page.blp:78
-#: src/bz-window.blp:442
+#: src/bz-window.blp:443
 msgid "Favorites"
 msgstr "Drudhyow"
 
-#: src/bz-favorites-page.blp:22 src/bz-full-view.blp:31 src/bz-window.blp:307
-msgid "Open App Library"
-msgstr "Ygeri Lyverva Appys"
-
-#: src/bz-favorites-page.blp:39 src/bz-section-view.blp:144
-#: src/bz-transaction-dialog.c:562
+#: src/bz-favorites-page.blp:17 src/bz-section-view.blp:144
+#: src/bz-transaction-dialog.c:579
 msgid "Install All"
 msgstr "Lea Oll"
+
+#: src/bz-favorites-page.blp:34 src/bz-full-view.blp:44 src/bz-window.blp:308
+msgid "Open App Library"
+msgstr "Ygeri Lyverva Appys"
 
 #: src/bz-favorites-page.blp:56 src/bz-user-data-page.blp:75
 msgid "Loading"
@@ -976,7 +1062,7 @@ msgstr "Ow Karga"
 
 #: src/bz-favorites-page.blp:71
 msgid "No Favorites"
-msgstr "Vyth Drudhyow"
+msgstr "Drudhyow Vyth"
 
 #: src/bz-favorites-page.blp:72
 msgid "Applications you mark as favorite will appear here"
@@ -996,7 +1082,7 @@ msgstr "App a'n Jydh"
 
 #: src/bz-flathub-category.c:89
 msgid "Editing"
-msgstr "Pennskrifa"
+msgstr "Ow Pennskrifa"
 
 #: src/bz-flathub-category.c:90
 msgid "Midi"
@@ -1006,7 +1092,11 @@ msgstr "Midi"
 msgid "Mixer"
 msgstr "Kemyskell"
 
-#: src/bz-flathub-category.c:92
+#. Translators: Search suggestion: the english text will be used for the
+#. search regardless of what you put here, so don't worry about the string
+#. yielding poor search results. Focus on correctness and friendliness,
+#. etc
+#: src/bz-flathub-category.c:92 src/bz-search-pill-list.c:77
 msgid "Music"
 msgstr "Ilow"
 
@@ -1270,11 +1360,11 @@ msgstr "Flathub heb Addya"
 
 #: src/bz-flathub-page.blp:24
 msgid "The Flathub remote was not found on any of your Flatpak installations"
-msgstr "An gwerthji Flathub na fonya war neb agas ynstalyansow Flatpak"
+msgstr "An gwerthji Flathub na kavas war neb dha leyansow Flatpak"
 
 #: src/bz-flathub-page.blp:35
 msgid "Flathub returned an error"
-msgstr "Flathub ri tre unn error"
+msgstr "Flathub ri tre error"
 
 #: src/bz-flathub-page.blp:41
 msgid "Retry Flathub Connection"
@@ -1288,8 +1378,7 @@ msgstr "Flathub Ankavadow"
 msgid ""
 "We could not connect to Flathub. You can still manage and search for "
 "applications."
-msgstr ""
-"Yma difygya dhe junya Flathub. Ty gallos hwath dyghtya ha hwilas rag appys."
+msgstr "Ni ny yllir junya Flathub. Ty a yll dyghtya ha hwilas appys hwath."
 
 #: src/bz-flathub-page.blp:61
 msgid "Search Apps"
@@ -1301,7 +1390,7 @@ msgstr "Gwayadow"
 
 #: src/bz-flathub-page.blp:282
 msgid "Apps for your Linux phones and tablets"
-msgstr "Appys rag agas klapkodhow ha leghennow Linux"
+msgstr "Appys rag dha klapkodhow ha leghennow Linux"
 
 #: src/bz-flathub-page.blp:293 src/bz-flathub-page.blp:328
 msgid "More Mobile Apps"
@@ -1313,254 +1402,262 @@ msgstr "Ni ♥ Gwariow​"
 
 #: src/bz-flathub-page.blp:401
 msgid "Games and apps to run your favorite titles"
-msgstr "Gwariow hag appys rag eksekutya agas titlys drudh"
+msgstr "Gwariow hag appys rag eksekutya dha titlys drudh"
 
 #: src/bz-flathub-page.blp:435
 msgid "More Games"
 msgstr "Moy Gwariow"
 
-#: src/bz-full-view.blp:52 src/bz-library-page.blp:70
-#: src/bz-library-page.blp:74
+#: src/bz-full-view.blp:65 src/bz-library-page.blp:74
+#: src/bz-library-page.blp:78
 msgid "No Results"
-msgstr "Vyth Sewyansow"
+msgstr "Sewyansow Vyth"
 
-#: src/bz-full-view.blp:53
+#: src/bz-full-view.blp:66
 msgid "Try a different search query"
-msgstr "Assaya hwithrans erel"
+msgstr "Assaya hwithrans aral"
 
-#: src/bz-full-view.blp:59
+#: src/bz-full-view.blp:72
 msgid "Content"
 msgstr "Dalgh"
 
-#: src/bz-full-view.blp:117
+#: src/bz-full-view.blp:130
 msgid "Installing .flatpak bundles is not yet supported"
-msgstr "Ow lea fardellow .flatpal na hwath skoodhys"
+msgstr "Ow lea fardellow .flatpak yw anskoodhys hwath"
 
-#: src/bz-full-view.blp:210
+#: src/bz-full-view.blp:223
 msgid "Support"
 msgstr "Skoodhya"
 
-#: src/bz-full-view.blp:233 src/bz-full-view.blp:493
+#: src/bz-full-view.blp:246 src/bz-full-view.blp:510
 msgid "Open"
 msgstr "Ygeri"
 
-#: src/bz-full-view.blp:246 src/bz-full-view.blp:466
+#: src/bz-full-view.blp:259 src/bz-full-view.blp:483
 msgid "Download & Install Application"
 msgstr "Iskarga & Lea App"
 
-#: src/bz-full-view.blp:261
+#: src/bz-full-view.blp:274
 msgid "Uninstall Application"
-msgstr "Dislea App"
+msgstr "Dilea App"
 
-#: src/bz-full-view.blp:276 src/bz-full-view.blp:508
+#: src/bz-full-view.blp:289 src/bz-full-view.blp:525
 msgid "Install Other Version"
-msgstr "Lea Versyon Erel"
+msgstr "Lea Versyon Aral"
 
-#: src/bz-full-view.blp:430
+#: src/bz-full-view.blp:447
 msgid "Downloads/Month"
 msgstr "Iskargow/Mis"
 
-#: src/bz-full-view.blp:527
+#: src/bz-full-view.blp:544
 msgid "Stopped Receiving Core Updates"
 msgstr "Na Fella Ow Receva Nowedhyansow Kolonnen"
 
-#: src/bz-full-view.blp:541
+#: src/bz-full-view.blp:558
 msgid ""
 "This app uses a runtime that no longer receives updates or security fixes. "
 "It may become unsafe to use."
 msgstr ""
-"An app ma devnydhya unn kerghynnedh may na fella receva nowedhyansow po "
-"ewnheans sawder. Y'n bos martesen diantel rag devnydh."
+"An app ma devnydhya kerghynnedh na fella ow receva nowedhyansow po "
+"ewnheansow sawder. Yth bos martesen diantel rag devnydh."
 
-#: src/bz-full-view.blp:630
+#: src/bz-full-view.blp:645
 msgid "Trash Data"
 msgstr "Data Atal"
 
-#: src/bz-full-view.blp:771
+#: src/bz-full-view.blp:786
 msgid "Tags:"
 msgstr "Taggys:"
 
-#: src/bz-full-view.c:220
+#: src/bz-full-view.c:230
 msgid "---"
 msgstr "---"
 
 #. Translators: M is the suffix for millions
-#: src/bz-full-view.c:227
+#: src/bz-full-view.c:237
 #, c-format
 msgid "%.*fM"
 msgstr "%.*fM"
 
 #. Translators: K is the suffix for thousands
-#: src/bz-full-view.c:234
+#: src/bz-full-view.c:244
 #, c-format
 msgid "%.*fK"
 msgstr "%.*fK"
 
-#: src/bz-full-view.c:244
+#: src/bz-full-view.c:254
 #, c-format
 msgid "%d downloads in the last 30 days"
 msgstr "%d iskargow y'n mis diwettha"
 
-#: src/bz-full-view.c:256 src/bz-full-view.c:590 src/bz-full-view.c:607
+#: src/bz-full-view.c:266 src/bz-full-view.c:607 src/bz-full-view.c:624
 msgid "N/A"
 msgstr "Ankavadow"
 
-#. Translators: .
-#: src/bz-full-view.c:280
+#: src/bz-full-view.c:294
+#, c-format
+msgid "+%s runtime"
+msgstr "+%s kerghynnedh rag app"
+
+#: src/bz-full-view.c:297
 msgid "Download"
 msgstr "Iskarg"
 
-#: src/bz-full-view.c:300
+#: src/bz-full-view.c:317
 msgid "Size information unavailable"
 msgstr "Kedhlow braster ankavadow"
 
-#: src/bz-full-view.c:303
+#: src/bz-full-view.c:320
 #, c-format
 msgid "Download size of %s"
 msgstr "Braster iskarg a %s"
 
-#: src/bz-full-view.c:336
+#: src/bz-full-view.c:353
 msgid "All Ages"
 msgstr "Oll Osow"
 
-#: src/bz-full-view.c:348
+#: src/bz-full-view.c:365
 msgid "Age rating information unavailable"
 msgstr "Kedhlow Talvos oos ankavadow"
 
-#: src/bz-full-view.c:353
+#: src/bz-full-view.c:370
 msgid "Suitable for all ages"
 msgstr "Fytti rag oll osow"
 
-#: src/bz-full-view.c:355
+#: src/bz-full-view.c:372
 #, c-format
 msgid "Suitable for ages %d and up"
 msgstr "Fytti rag osow %d ha war-vann"
 
-#: src/bz-full-view.c:388 src/bz-full-view.c:393 src/bz-full-view.c:421
-#: src/bz-full-view.c:432
+#: src/bz-full-view.c:405 src/bz-full-view.c:410 src/bz-full-view.c:438
+#: src/bz-full-view.c:449
 msgid "Unknown"
 msgstr "Ankoth"
 
-#: src/bz-full-view.c:398
+#: src/bz-full-view.c:415
 #, c-format
 msgid "Free software licensed under %s"
 msgstr "Medhelweyth dhe wari kummya a-woles dhe %s"
 
-#: src/bz-full-view.c:403
+#: src/bz-full-view.c:420
 msgid "Free software"
 msgstr "Medhelweyth dhe wari"
 
-#: src/bz-full-view.c:406
+#: src/bz-full-view.c:423
 msgid "Proprietary Software"
 msgstr "Medhelweyth Perghenogel"
 
-#: src/bz-full-view.c:409
+#: src/bz-full-view.c:426
 #, c-format
 msgid "Special License: %s"
-msgstr "Kummyas Arbennik: %s"
+msgstr "Leshyans Arbennik: %s"
 
-#: src/bz-full-view.c:426
+#: src/bz-full-view.c:443
 msgid "Free"
 msgstr "Dhe wari"
 
-#: src/bz-full-view.c:429 src/bz-license-dialog.c:132
+#: src/bz-full-view.c:446 src/bz-license-dialog.c:132
 msgid "Proprietary"
 msgstr "Perghenogel"
 
-#: src/bz-full-view.c:434 src/bz-license-dialog.c:134
+#: src/bz-full-view.c:451 src/bz-license-dialog.c:134
 msgid "Special License"
-msgstr "Kummyas Arbennik"
+msgstr "Leshyans Arbennik"
 
-#: src/bz-full-view.c:454
+#: src/bz-full-view.c:471
 msgid "Adaptive"
 msgstr "Desedhadow"
 
-#: src/bz-full-view.c:454
+#: src/bz-full-view.c:471
 msgid "Desktop Only"
-msgstr "Amontyell Unnik"
+msgstr "Amontyell  ik"
 
-#: src/bz-full-view.c:460
+#: src/bz-full-view.c:477
 msgid "Works on desktop, tablets, and phones"
 msgstr "Gweythresek war amontyellow, leghennow, ha klapkodhow"
 
-#: src/bz-full-view.c:461
+#: src/bz-full-view.c:478
 msgid "May not work on mobile devices"
 msgstr "Res angweythresek war devisyow gwayadow"
 
-#: src/bz-full-view.c:472
+#: src/bz-full-view.c:489
 msgid "No URL"
-msgstr "URL Vyth"
+msgstr "Gorgevren Vyth"
 
-#: src/bz-full-view.c:490
+#: src/bz-full-view.c:507
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
 msgstr ""
-"An app ma re unn kummyas dhe wari, ytho an kod gallos arhwilas rag salowder."
+"An app ma kavos leshyans rydh, ytho an kod a yll bos arhwilys rag salowder."
 
-#: src/bz-full-view.c:491
+#: src/bz-full-view.c:508
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
 msgstr ""
-"An app ma re unn kummyas perghenogel, ytho an kod usi displegya privedh ha "
-"na gallos arhwilas gans unn parti tressa."
+"An app ma kavos leshyans perghenogel, ytho an kod yw displegys privedh ha ny "
+"yllir bos arhwilys gans parti tressa anserghek."
 
-#: src/bz-full-view.c:498
+#: src/bz-full-view.c:515
 msgid "More Apps"
 msgstr "Moy Appys"
 
-#: src/bz-full-view.c:499
+#: src/bz-full-view.c:516
 #, c-format
 msgid "More Apps by %s"
 msgstr "Moy Appys gans %s"
 
-#: src/bz-full-view.c:506
+#: src/bz-full-view.c:523
 msgid "Other Apps by this Developer"
 msgstr "Appys Aral gans an Awtour ma"
 
-#: src/bz-full-view.c:508 src/bz-full-view.c:708
+#: src/bz-full-view.c:525 src/bz-full-view.c:725
 #, c-format
 msgid "Other Apps by %s"
 msgstr "Appys Aral gans %s"
 
-#: src/bz-full-view.c:517
+#: src/bz-full-view.c:534
 #, c-format
 msgid "%s is not installed, but it still has <b>%s</b> of data present."
-msgstr "%s usi na ynstallys, saw y hwath re <b>%s</b> a data remenant."
+msgstr "%s yw na leys, saw yth kavos <b>%s</b> a data remenant hwath."
 
-#: src/bz-full-view.c:597 src/bz-safety-dialog.blp:31
+#: src/bz-full-view.c:614 src/bz-safety-dialog.blp:31
 msgid "Safe"
 msgstr "Saw"
 
-#: src/bz-full-view.c:599 src/bz-full-view.c:601
+#: src/bz-full-view.c:616 src/bz-full-view.c:618
 msgid "Low Risk"
 msgstr "Peryl Isel"
 
-#: src/bz-full-view.c:603
+#: src/bz-full-view.c:620
 msgid "Medium Risk"
 msgstr "Peryl Kresek"
 
-#: src/bz-full-view.c:605
+#: src/bz-full-view.c:622
 msgid "High Risk"
 msgstr "Peryl Ughel"
 
-#: src/bz-full-view.c:710
+#: src/bz-full-view.c:727
 msgid "Other Apps"
 msgstr "Appys Aral"
 
-#: src/bz-full-view.c:712
+#: src/bz-full-view.c:729
 #, c-format
 msgid "%d Application"
 msgid_plural "%d Applications"
 msgstr[0] "%d App"
 msgstr[1] "%d Appys"
 
-#: src/bz-full-view.c:1051
+#: src/bz-full-view.c:960 src/bz-transaction-tile.c:340
+msgid "Failed to launch application"
+msgstr "Ny yllir lonchya app"
+
+#: src/bz-full-view.c:1068
 msgid "Show Less"
 msgstr "Diskwedhes Le"
 
-#: src/bz-full-view.c:1051
+#: src/bz-full-view.c:1068
 msgid "Show More"
 msgstr "Diskwedhes Moy"
 
@@ -1658,49 +1755,65 @@ msgstr "%s gweythresek gwella war kalesweyth komparek"
 msgid "%s works on most devices"
 msgstr "%s gweythresek war rann vrassa a devisyow"
 
-#: src/bz-installed-tile.blp:63 src/bz-rich-app-tile.blp:136
+#: src/bz-installed-tile.blp:63 src/bz-rich-app-tile.blp:139
 msgid "Stopped Receiving Updates"
 msgstr "Nowedhys Namoy"
+
+#: src/bz-installed-tile.blp:77
+msgid "Support this application"
+msgstr "Skoodhya an app ma"
+
+#: src/bz-installed-tile.blp:101
+msgid "Manage Add-ons"
+msgstr "Dyghtya Ystynansow"
+
+#: src/bz-installed-tile.c:249
+msgid "Failed to load add-ons"
+msgstr "Ny yllir karga ystynansow"
 
 #: src/bz-library-page.blp:29
 msgid "Search installed apps"
 msgstr "Hwilas appys leys"
 
-#: src/bz-library-page.blp:63
+#: src/bz-library-page.blp:46
+msgid "Clear search"
+msgstr "Dilea hwithrans"
+
+#: src/bz-library-page.blp:67
 msgid "No Apps Found"
-msgstr "Appys Kavosys Vyth"
+msgstr "Appys Kavas Vyth"
 
 #. Translators: .
-#: src/bz-library-page.blp:82 src/bz-window.blp:179
+#: src/bz-library-page.blp:86 src/bz-window.blp:179
 msgid "Library"
 msgstr "Lyverva"
 
-#: src/bz-library-page.blp:110
+#: src/bz-library-page.blp:114
 msgid "Pending Updates"
-msgstr "Nowedhys Ow Gortos"
+msgstr "Nowedhyansow Ow Gortos"
 
-#: src/bz-library-page.blp:137
+#: src/bz-library-page.blp:141
 msgid "Downloads"
 msgstr "Iskargow"
 
-#: src/bz-library-page.blp:180
+#: src/bz-library-page.blp:184
 msgid "Recently Uninstalled"
-msgstr "Disleys A-lergh"
+msgstr "Dileys A-Dhiwedhes"
 
-#: src/bz-library-page.blp:231
+#: src/bz-library-page.blp:235
 msgid "Clear Finished Tasks"
 msgstr "Dilea Oberennow Deu"
 
-#: src/bz-library-page.blp:242
+#: src/bz-library-page.blp:246
 msgid "Installed Apps"
 msgstr "Appys Leys"
 
-#: src/bz-library-page.c:152
+#: src/bz-library-page.c:150
 #, c-format
 msgid "No matches found for \"%s\" in the list of installed apps"
-msgstr "Parow vyth kavosys rag \"%s\" y'n rol appys leys"
+msgstr "Parow vyth kavas rag \"%s\" y'n rol appys leys"
 
-#: src/bz-library-page.c:165 src/bz-updates-card.c:225
+#: src/bz-library-page.c:163 src/bz-updates-card.c:257
 #, c-format
 msgid "%u Available Update"
 msgid_plural "%u Available Updates"
@@ -1713,7 +1826,7 @@ msgstr "Bos Omvyskys"
 
 #: src/bz-license-dialog.c:126
 msgid "Unknown License"
-msgstr "Kummyas Ankoth"
+msgstr "Leshyans Ankoth"
 
 #: src/bz-license-dialog.c:129
 msgid "Community Built"
@@ -1725,13 +1838,13 @@ msgid ""
 "\n"
 "You can participate and help make it even better."
 msgstr ""
-"An app ma usi gwrys y'n poblek gans unn kemeneth keswlasek.\n"
+"An app ma yw gwrys y'n poblek gans kemeneth keswlasek.\n"
 "\n"
-"Ty gallos kemeres rann ha gweres gwellhe y."
+"Ty a yll kemeres rann ha gweres gwellhe yth."
 
 #: src/bz-license-dialog.c:205
 msgid "The license of this app is not known"
-msgstr "An kummyas rag an app ma usi ankoth"
+msgstr "An leshyans rag an app ma yw ankoth"
 
 #: src/bz-license-dialog.c:211
 #, c-format
@@ -1741,8 +1854,10 @@ msgid ""
 "\n"
 "You can participate and help make it even better."
 msgstr ""
-"An app ma usi gwrys y'n poblek gans unn kemeneth keswlasek, hadyllo a-woles "
-"dhe an %s kummyas."
+"An app ma yw gwrys y'n poblek gans kemeneth keswlasek, ha dyllo a-woles "
+"dhe'n leshyans %s.\n"
+"\n"
+"Ty a yll kemeres rann ha gweres ow gwellhe yth."
 
 #: src/bz-license-dialog.c:219
 msgid ""
@@ -1752,11 +1867,11 @@ msgid ""
 "\n"
 "You may or may not be able to contribute to this app."
 msgstr ""
-"An app ma usi gwyrs na y'n poblek, ytho an awtours unnik aswon fatel y "
-"oberi. Y res usi andhiogel yn agwedhow dre kales dhe helergi, hag y res "
-"chanja heb ankov.\n"
+"An app ma yyw gwyrs na y'n poblek, ytho an awtours hepken aswon fatel yth "
+"oberi. Martesen, yth yw andhiogel yn agwedhow kales dhe helergi, hag yth a "
+"yll chanja heb ankov.\n"
 "\n"
-"Ty res po na res kevri dhe an app ma."
+"Ty res po na res kevri dhe'n app ma."
 
 #: src/bz-license-dialog.c:225
 #, c-format
@@ -1765,9 +1880,9 @@ msgid ""
 "\n"
 "You may or may not be able to contribute to this app."
 msgstr ""
-"An app ma usi gwyrs a-woles dhe an kummyas arbennik %s.\n"
+"An app ma yw gwyrs a-woles dhe'n leshyans arbennik %s.\n"
 "\n"
-"Ty res po na res kevri dhe an app ma."
+"Ty a yll po na res kevri dhe'n app ma."
 
 #: src/bz-login-page.blp:5 src/bz-login-page.blp:42
 msgid "Connect to Flathub"
@@ -1785,7 +1900,7 @@ msgstr "Junya dha akont Flathub dhe Basar rag dyghtya dha appys drudh."
 msgid "Finish"
 msgstr "Finsya"
 
-#: src/bz-login-page.c:663
+#: src/bz-login-page.c:664
 #, c-format
 msgid "Hello, %s!"
 msgstr "Dydh dha, %s!"
@@ -1795,14 +1910,14 @@ msgid "Preferences"
 msgstr "Settyansow"
 
 #: src/bz-preferences-dialog.blp:25
-msgid "Network connection is metered — automatic store data sync is paused"
+msgid "Network connection is metered — automatic store data refresh is paused"
 msgstr ""
-"Junyans kesrosweyth yw strothys — kerghow awtomatek synsas gwerthji yw "
+"Junyans kesrosweyth yw strothys — diseghans awtomatek dalgh gwerthji yw "
 "powesys"
 
-#: src/bz-preferences-dialog.blp:26 src/bz-window.blp:334
-msgid "Sync Manually"
-msgstr "Kerghes dre Dhorn"
+#: src/bz-preferences-dialog.blp:26 src/bz-window.blp:335
+msgid "Refresh Manually"
+msgstr "Disegha dre Dhorn"
 
 #: src/bz-preferences-dialog.blp:31
 msgid "Content Filters"
@@ -1810,25 +1925,27 @@ msgstr "Sidhlow Dalgh"
 
 #: src/bz-preferences-dialog.blp:34
 msgid "Free Software Only"
-msgstr "Medhelweyth dre wari Unnik"
+msgstr ""
+"Medhelweyth Rydh\n"
+"ik"
 
 #: src/bz-preferences-dialog.blp:35
 msgid "Hide proprietary applications when browsing and searching"
-msgstr "Kudha appys perghenogel dres peuryans ha hwithrans"
+msgstr "Kudha appys perghenogel dres ow peurya hag ow hwilas"
 
 #: src/bz-preferences-dialog.blp:39
 msgid "Flathub Results Only"
-msgstr "Sewyasow a Flathub Unnik"
+msgstr "Sewyasow Flathub Hepken"
 
 #: src/bz-preferences-dialog.blp:40
 msgid ""
 "Limit search and browse results to applications only available on Flathub"
 msgstr ""
-"Finwetha sewyasow hwithrans ha peuryans dhe appys kavadow unnik war Flathub"
+"Finwetha sewyansow hwithrans ha peuryans dhe appys kavadow war Flathub hepken"
 
 #: src/bz-preferences-dialog.blp:44
 msgid "Verified Results Only"
-msgstr "Sewyasow Gwirys Hepken"
+msgstr "Sewyansow Gwirys Hepken"
 
 #: src/bz-preferences-dialog.blp:45
 msgid "Hide results that are not verified on Flathub"
@@ -1840,7 +1957,7 @@ msgstr "Kudha Appys Marow"
 
 #: src/bz-preferences-dialog.blp:50
 msgid "Hide apps which are no longer supported by their developers"
-msgstr "Kudha appys may na skoodhya gans y'ga awtours"
+msgstr "Kudha appys skoodhya na fella gans aga awtours"
 
 #: src/bz-preferences-dialog.blp:55 src/bz-window.blp:197
 msgid "Search"
@@ -1848,7 +1965,7 @@ msgstr "Hwithrans"
 
 #: src/bz-preferences-dialog.blp:58
 msgid "Delay Search Results"
-msgstr "Delatya Sewyasow Hwithrans"
+msgstr "Delatya Sewyansow Hwithrans"
 
 #: src/bz-preferences-dialog.blp:59
 msgid "Improve results performance by debouncing search terms"
@@ -1860,7 +1977,7 @@ msgstr "Barr Avonsyans"
 
 #: src/bz-preferences-dialog.blp:65
 msgid "Choose a theme for the progress bar!"
-msgstr "Dewis unn thema rag an barr avonsyans!"
+msgstr "Dewis thema rag an barr avonsyans!"
 
 #: src/bz-preferences-dialog.blp:89
 msgid "Vertical Stripes"
@@ -1959,24 +2076,44 @@ msgid "Neutrois Pride Colors"
 msgstr "Kolors Gooth Newtroys"
 
 #: src/bz-releases-dialog.blp:5 src/bz-releases-list.blp:28
-#: src/bz-updates-card.blp:137
+#: src/bz-updates-card.blp:150
 msgid "Version History"
-msgstr "Istori a Versyons"
+msgstr "Istori Versyons"
 
-#: src/bz-releases-list.c:165
+#. Translators: This is a date format for timestamps from the current year. Used in the app releases section.
+#. * %B is the full month name, %e is the day.
+#. * Example: "October 1"
+#. * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
+#. * Please modify to make it sound natural in your locale.
+#. *
+#: src/bz-releases-list.c:121
+msgid "%e %B"
+msgstr "%e %B"
+
+#. Translators: This is a date format for timestamps from previous years. Used in the app releases section.
+#. * %B is the full month name, %e is the day, %Y is the year.
+#. * Example: "October 1, 2025"
+#. * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
+#. * Please modify to make it sound natural in your locale.
+#. *
+#: src/bz-releases-list.c:129
+msgid "%e %B %Y"
+msgstr "%e %B %Y"
+
+#: src/bz-releases-list.c:168
 #, c-format
 msgid "Version %s"
 msgstr "Versyon %s"
 
-#: src/bz-releases-list.c:215
+#: src/bz-releases-list.c:220
 msgid "No details for this release"
 msgstr "Manylyon vyth rag an veryson ma"
 
-#: src/bz-releases-list.c:227
+#: src/bz-releases-list.c:232
 msgid "Get More Information"
-msgstr "Kerghes Moy Kudhlow"
+msgstr "Kerghes Moy Kedhlow"
 
-#: src/bz-rich-app-tile.blp:153
+#: src/bz-rich-app-tile.blp:156
 msgid "Get"
 msgstr "Kerghes"
 
@@ -2002,7 +2139,7 @@ msgstr "Hedhas Kesrosweyth"
 
 #: src/bz-safety-calculator.c:104
 msgid "Can access the internet"
-msgstr "Gallos drehedhes an kesrosweyth"
+msgstr "A yll drehedhes an kesrosweyth"
 
 #: src/bz-safety-calculator.c:106
 msgid "No Network Access"
@@ -2010,7 +2147,7 @@ msgstr "Hedhas Kesrosweyth Vyth"
 
 #: src/bz-safety-calculator.c:107
 msgid "Cannot access the internet"
-msgstr "Na gallos drehedhes an kesrosweyth"
+msgstr "Ny yllir drehedhes an kesrosweyth"
 
 #: src/bz-safety-calculator.c:112
 msgid "User Device Access"
@@ -2018,7 +2155,7 @@ msgstr "Hedhas Devis Usyer"
 
 #: src/bz-safety-calculator.c:113
 msgid "Can access devices such as webcams or gaming controllers"
-msgstr "Gallos drehedhes devisyow kepar ha kameras po konsolen wariow gwydhyow"
+msgstr "A yll drehedhes devisyow kepar ha kameras po konsolen wariow gwydhyow"
 
 #: src/bz-safety-calculator.c:115
 msgid "No User Device Access"
@@ -2027,7 +2164,7 @@ msgstr "Hedhas Devis Usyer Vyth"
 #: src/bz-safety-calculator.c:116
 msgid "Cannot access devices such as webcams or gaming controllers"
 msgstr ""
-"Na gallos drehedhes devisyow kepar ha kameras po konsolen wariow gwydhyow"
+"Ny yllir drehedhes devisyow kepar ha kameras po konsolen wariow gwydhyow"
 
 #: src/bz-safety-calculator.c:121
 msgid "Input Device Access"
@@ -2035,7 +2172,7 @@ msgstr "Hedhas Devis Ynworrans"
 
 #: src/bz-safety-calculator.c:122
 msgid "Can access input devices"
-msgstr "Gallos drehedhes devisyow ynworrans"
+msgstr "A yll drehedhes devisyow ynworrans"
 
 #: src/bz-safety-calculator.c:128
 msgid "Microphone Access and Audio Playback"
@@ -2043,7 +2180,7 @@ msgstr "Hedhas Korrgewsell Ha Seni Son"
 
 #: src/bz-safety-calculator.c:129
 msgid "Can listen using microphones and play audio without asking permission"
-msgstr "Gallos goslowes gans korrgewsellow ha seni son neb ow peji gront"
+msgstr "A yll goslowes gans korrgewsellow ha seni son neb ow peji gront"
 
 #: src/bz-safety-calculator.c:135
 msgid "System Device Access"
@@ -2051,7 +2188,7 @@ msgstr "Hedhas Devis System"
 
 #: src/bz-safety-calculator.c:136
 msgid "Can access system devices which require elevated permissions"
-msgstr "Gallos drehedhes devisyow system may rekwirya grontys ughelhys"
+msgstr "A yll drehedhes devisyow system may rekwirya grontys ughelhys"
 
 #: src/bz-safety-calculator.c:142
 msgid "Screen Contents Access"
@@ -2059,7 +2196,7 @@ msgstr "Hedhas Dalgh Skrin"
 
 #: src/bz-safety-calculator.c:143
 msgid "Can access the contents of the screen or other windows"
-msgstr "Gallos drehedhes an dalgh skrin po fenestri aral"
+msgstr "A yll drehedhes an dalgh a'n skrin po fenestri aral"
 
 #: src/bz-safety-calculator.c:149
 msgid "Legacy Windowing System"
@@ -2067,7 +2204,7 @@ msgstr "System Fenester Anterrus"
 
 #: src/bz-safety-calculator.c:150
 msgid "Always uses a legacy windowing system (X11)"
-msgstr "Devnydhya prest unn system fenester anterrus (X11)"
+msgstr "Devnydhya prest system fenester anterrus (X11)"
 
 #: src/bz-safety-calculator.c:156
 msgid "Arbitrary Permissions"
@@ -2075,7 +2212,7 @@ msgstr "Grontys Siansek"
 
 #: src/bz-safety-calculator.c:157
 msgid "Can acquire arbitrary permissions"
-msgstr "Gallos kavos grontys siansek"
+msgstr "A yll kavos grontys siansek"
 
 #: src/bz-safety-calculator.c:163
 msgid "User Settings"
@@ -2083,7 +2220,7 @@ msgstr "Settyansow Usyer"
 
 #: src/bz-safety-calculator.c:164
 msgid "Can access and change user settings"
-msgstr "Gallos drehedhes ha chanjya settyansow usyer"
+msgstr "A yll drehedhes ha chanjya settyansow usyer"
 
 #: src/bz-safety-calculator.c:170
 msgid "Full File System Read/Write Access"
@@ -2091,15 +2228,15 @@ msgstr "Hedhas rag Redya/Skrifa System Restrenva Leun"
 
 #: src/bz-safety-calculator.c:171
 msgid "Can read and write all data on the file system"
-msgstr "Gallos redya ha skrifa oll data yn an system restrenva"
+msgstr "A yll redya ha skrifa oll data wa'n system restrenva"
 
 #: src/bz-safety-calculator.c:178
 msgid "Home Folder Read/Write Access"
-msgstr "Hedhas rag Redya/Skrifa Restrenva Tre"
+msgstr "Hedhas rag Redya/Skrifa Restrenva Chi"
 
 #: src/bz-safety-calculator.c:179
 msgid "Can read and write all data in your home directory"
-msgstr "Gallos redya ha skrifa oll data yn dha restrenva tre"
+msgstr "A yll redya ha skrifa oll data yn dha restrenva tre"
 
 #: src/bz-safety-calculator.c:186
 msgid "Full File System Read Access"
@@ -2107,7 +2244,7 @@ msgstr "Hedhas rag Redya System Restrenva Leun"
 
 #: src/bz-safety-calculator.c:187
 msgid "Can read all data on the file system"
-msgstr "Gallos redya oll data yn an system restrenva"
+msgstr "A yll redya oll data y'n system restrenva"
 
 #: src/bz-safety-calculator.c:195
 msgid "Home Folder Read Access"
@@ -2115,7 +2252,7 @@ msgstr "Hedhas rag Redya Restrenva Tre"
 
 #: src/bz-safety-calculator.c:196
 msgid "Can read all data in your home directory"
-msgstr "Gallos redya oll data yn dha restrenva tre"
+msgstr "A yll redya oll data yn dha restrenva tre"
 
 #: src/bz-safety-calculator.c:204
 msgid "Download Folder Read/Write Access"
@@ -2123,7 +2260,7 @@ msgstr "Hedhas rag Redya/Skrifa yn Restrenva Iskargow"
 
 #: src/bz-safety-calculator.c:205
 msgid "Can read and write all data in your downloads directory"
-msgstr "Gallos redya ha skrifa oll data yn dha restrenva iskargow"
+msgstr "A yll redya ha skrifa oll data yn dha restrenva iskargow"
 
 #: src/bz-safety-calculator.c:215
 msgid "Download Folder Read Access"
@@ -2131,15 +2268,15 @@ msgstr "Hedhas rag Redya yn Restrenva Iskargow"
 
 #: src/bz-safety-calculator.c:216
 msgid "Can read all data in your downloads directory"
-msgstr "Gallos redya oll data yn dha restrenva iskargow"
+msgstr "A yll redya oll data yn dha restrenva iskargow"
 
 #: src/bz-safety-calculator.c:229
 msgid "Can read and write all data in the directory"
-msgstr "Gallos redya ha skrifa oll data y'n restrenva"
+msgstr "A yll redya ha skrifa oll data y'n restrenva"
 
 #: src/bz-safety-calculator.c:243
 msgid "Can read all data in the directory"
-msgstr "Gallos redya oll data y'n restrenva"
+msgstr "A yll redya oll data y'n restrenva"
 
 #: src/bz-safety-calculator.c:258
 msgid "No File System Access"
@@ -2147,7 +2284,7 @@ msgstr "Hedhas System Restrenva Vyth"
 
 #: src/bz-safety-calculator.c:259
 msgid "Cannot access the file system at all"
-msgstr "Na gallos an system restrenva banna"
+msgstr "Ny yllir drehedhes an system restrenva banna"
 
 #: src/bz-safety-calculator.c:266
 msgid "Uses System Services"
@@ -2155,7 +2292,7 @@ msgstr "Devnydhya Gonisyow System"
 
 #: src/bz-safety-calculator.c:267
 msgid "Can request data from non-portal system services"
-msgstr "Gallos govyn data dhyworth gonisyow anportal system"
+msgstr "A yll govyn data dhyworth gonisyow anportal system"
 
 #: src/bz-safety-calculator.c:273
 msgid "Uses Session Services"
@@ -2163,7 +2300,7 @@ msgstr "Devnydhya Gonisyow Esedhek"
 
 #: src/bz-safety-calculator.c:274
 msgid "Can request data from non-portal session services"
-msgstr "Gallos govyn data dhyworth gonisyow anportal esedhek"
+msgstr "A yll govyn data dhyworth gonisyow anportal esedhek"
 
 #: src/bz-safety-calculator.c:322
 msgid "No Service Access"
@@ -2171,7 +2308,7 @@ msgstr "Hedhas Gonis Vyth"
 
 #: src/bz-safety-calculator.c:323
 msgid "Cannot access non-portal session or system services at all"
-msgstr "Na gallos drehedhes gonisyow anportal system po esedhek banna"
+msgstr "Ny yllir drehedhes gonisyow anportal system po esedhek banna"
 
 #: src/bz-safety-calculator.c:331
 msgid "Verified App Developer"
@@ -2179,7 +2316,7 @@ msgstr "Awtour App Gwirys"
 
 #: src/bz-safety-calculator.c:332
 msgid "The developer of this app has been verified to be who they say they are"
-msgstr "An awtour a an app ma yw gwirys rag bos piw i onwul"
+msgstr "An awtour a'n app ma yw gwirys rag bos piw i onwul"
 
 #: src/bz-safety-calculator.c:341
 msgid "Proprietary Code"
@@ -2190,8 +2327,8 @@ msgid ""
 "The source code is not public, so it cannot be independently audited and "
 "might be unsafe"
 msgstr ""
-"An kod na poblek, ytho y'n na gallos arhwilas yn anserghek ha bos martesen "
-"diantel"
+"An kod yw anpoblek, ytho yth ny yllir bos arhwilys yn anserghek ha bos "
+"martesen diantel"
 
 #: src/bz-safety-calculator.c:352
 msgid "Auditable Code"
@@ -2202,8 +2339,8 @@ msgid ""
 "The source code is public and can be independently audited, which makes the "
 "app more likely to be safe"
 msgstr ""
-"An kod yw poblek ha gallos arhwilas yn anserghek, ytho an app ma yw saw moy "
-"gwirhaval"
+"An kod yw poblek hag a yll bos arhwilys yn anserghek, ytho an app ma yw saw "
+"moy gwirhaval"
 
 #: src/bz-safety-calculator.c:493
 #, c-format
@@ -2222,15 +2359,15 @@ msgstr "Devnydhya an Gonis %s"
 
 #: src/bz-safety-calculator.c:511
 msgid "Can see the non-portal service"
-msgstr "Gallos gweles an gonis anportal"
+msgstr "A yll gweles an gonis anportal"
 
 #: src/bz-safety-calculator.c:513
 msgid "Can talk to the non-portal service"
-msgstr "Gallos kewsel dhe an gonis anportal"
+msgstr "A yll kewsel dhe'n gonis anportal"
 
 #: src/bz-safety-calculator.c:515
 msgid "Can own the non-portal service"
-msgstr "Gallos perghenna an gonis anportal"
+msgstr "A yll perghenna an gonis anportal"
 
 #: src/bz-safety-calculator.c:530
 msgid "Global Menu Integration"
@@ -2238,7 +2375,7 @@ msgstr "Oberyans Rol Olldalghus"
 
 #: src/bz-safety-calculator.c:531
 msgid "Can display its menus in a global menu bar"
-msgstr "Gallos diskwedhes rolyow yn unn barr rol olldalghus"
+msgstr "A yll diskwedhes rolyow yn barr rol olldalghus"
 
 #: src/bz-safety-calculator.c:536
 msgid "KDE Settings Integration"
@@ -2246,7 +2383,7 @@ msgstr "Oberyans Settyansow KDE"
 
 #: src/bz-safety-calculator.c:537
 msgid "Can detect when KDE desktop settings change"
-msgstr "Gallos helerghi pan settyansow KDE chanjya"
+msgstr "A yll helerghi pan settyansow KDE chanjya"
 
 #: src/bz-safety-calculator.c:542
 msgid "KDE Global Settings"
@@ -2254,7 +2391,7 @@ msgstr "Settyansow Olldalghus KDE"
 
 #: src/bz-safety-calculator.c:543
 msgid "Can read KDE desktop preferences like fonts and colors"
-msgstr "Gallos redya settyansow desktop KDE kepar ha fontow ha kolors"
+msgstr "A yll redya settyansow desktop KDE kepar ha fontow ha kolors"
 
 #: src/bz-safety-calculator.c:548
 msgid "Secret Storage Service"
@@ -2263,7 +2400,7 @@ msgstr "Gonis Gwithyans Kevrinyow"
 #: src/bz-safety-calculator.c:549
 msgid "Can store and retrieve its own passwords using the system keyring"
 msgstr ""
-"Gallos gwitha ha kerghes y geryow-tremena ow devnydhya an alhwedhow-bysow "
+"A yll gwitha ha kerghes yth geryow-tremena ow devnydhya an alhwedhow-kylgh "
 "system"
 
 #: src/bz-safety-calculator.c:554
@@ -2272,7 +2409,7 @@ msgstr "Gonis Gwarnyansow Desktop"
 
 #: src/bz-safety-calculator.c:555
 msgid "Can send desktop notifications"
-msgstr "Gallos danvon gwarnyansow desktop"
+msgstr "A yll danvon gwarnyansow desktop"
 
 #: src/bz-safety-calculator.c:561
 msgid "System Tray Integration"
@@ -2280,7 +2417,7 @@ msgstr "Oberyans Tallyour System"
 
 #: src/bz-safety-calculator.c:562
 msgid "Can display an icon in the system tray"
-msgstr "Gallos diskwedhes unn arwodhik y'n tallyour system"
+msgstr "A yll diskwedhes arwodhik y'n tallyour system"
 
 #: src/bz-safety-calculator.c:567
 msgid "KDE Connect Integration"
@@ -2288,19 +2425,15 @@ msgstr "Oberyans KDE Connect"
 
 #: src/bz-safety-calculator.c:568
 msgid "Can interact with devices paired via KDE Connect"
-msgstr "Gallos keskomunya gans devisyow junys dre KDE Connect"
+msgstr "A yll keskomunya gans devisyow junys dre KDE Connect"
 
 #: src/bz-safety-dialog.blp:7
 msgid "Safety"
 msgstr "Sawder"
 
-#: src/bz-safety-dialog.blp:50
-msgid "Details"
-msgstr "Manylyon"
-
 #: src/bz-safety-dialog.blp:53
 msgid "License"
-msgstr "Kummyas"
+msgstr "Leshyans"
 
 #: src/bz-safety-dialog.blp:63
 msgid "App ID"
@@ -2310,13 +2443,13 @@ msgstr "ID App"
 msgid "SDK"
 msgstr "SDK"
 
-#: src/bz-safety-dialog.blp:101
+#: src/bz-safety-dialog.blp:104
 msgid ""
 "This app uses an outdated version of the software platform (SDK) and might "
 "contain bugs or security vulnerabilities which will not be fixed."
 msgstr ""
-"An app ma devnydhya unn versyon anterrus a an kerghynnedh medhelweyth (SDK) "
-"ha kontaynya martesen kudynnow po goliadewderow sawder may na bos ewnhys."
+"An app ma devnydhya versyon anterrus a'n kerghynnedh medhelweyth (SDK) ha "
+"kontaynya martesen kudynnow po goliadewderow sawder may na bos ewnhys."
 
 #: src/bz-safety-dialog.c:227
 #, c-format
@@ -2326,7 +2459,7 @@ msgstr "%s yw Saw"
 #: src/bz-safety-dialog.c:232
 #, c-format
 msgid "%s has no Unsafe Permissions"
-msgstr "%s kavis Grontys Diantel Vyth"
+msgstr "%s kavas Grontys Diantel Vyth"
 
 #: src/bz-safety-dialog.c:237
 #, c-format
@@ -2357,7 +2490,7 @@ msgstr "Imach Nessa"
 
 #: src/bz-screenshot-page.blp:87
 msgid "Copy Image"
-msgstr "Dasskrifa Imach"
+msgstr "Kopia Imach"
 
 #: src/bz-screenshot-page.blp:147
 msgid "Reset View"
@@ -2375,38 +2508,130 @@ msgstr "Moghhe"
 msgid "Screenshots Carousel"
 msgstr "Res A-dro Imajys"
 
-#: src/bz-screenshots-carousel.blp:103
+#: src/bz-screenshots-carousel.blp:112
 msgid "Open Screenshot Viewer"
-msgstr "Ygeri Goloker Imajys"
+msgstr "Ygeri Gwelell Imajys"
+
+#. Translators: Search suggestion: the english text will be used for the
+#. search regardless of what you put here, so don't worry about the string
+#. yielding poor search results. Focus on correctness and friendliness,
+#. etc
+#: src/bz-search-pill-list.c:72
+msgid "Video"
+msgstr "Gwydhyow"
+
+#. Translators: Search suggestion: the english text will be used for the
+#. search regardless of what you put here, so don't worry about the string
+#. yielding poor search results. Focus on correctness and friendliness,
+#. etc
+#: src/bz-search-pill-list.c:82
+msgid "Office"
+msgstr "Buro"
+
+#. Translators: Search suggestion: the english text will be used for the
+#. search regardless of what you put here, so don't worry about the string
+#. yielding poor search results. Focus on correctness and friendliness,
+#. etc
+#: src/bz-search-pill-list.c:87
+msgid "PDF"
+msgstr "PDF"
+
+#. Translators: Search suggestion: the english text will be used for the
+#. search regardless of what you put here, so don't worry about the string
+#. yielding poor search results. Focus on correctness and friendliness,
+#. etc
+#: src/bz-search-pill-list.c:92
+msgid "Calendar"
+msgstr "Kalender"
+
+#. Translators: Search suggestion: the english text will be used for the
+#. search regardless of what you put here, so don't worry about the string
+#. yielding poor search results. Focus on correctness and friendliness,
+#. etc
+#: src/bz-search-pill-list.c:97
+msgid "Messaging"
+msgstr "Messajys"
+
+#. Translators: Search suggestion: the english text will be used for the
+#. search regardless of what you put here, so don't worry about the string
+#. yielding poor search results. Focus on correctness and friendliness,
+#. etc
+#: src/bz-search-pill-list.c:102
+msgid "Steam"
+msgstr "Steam"
+
+#. Translators: Search suggestion: the english text will be used for the
+#. search regardless of what you put here, so don't worry about the string
+#. yielding poor search results. Focus on correctness and friendliness,
+#. etc
+#: src/bz-search-pill-list.c:107
+msgid "Paint"
+msgstr "Liwa"
+
+#. Translators: Search suggestion: the english text will be used for the
+#. search regardless of what you put here, so don't worry about the string
+#. yielding poor search results. Focus on correctness and friendliness,
+#. etc
+#: src/bz-search-pill-list.c:112
+msgid "VPN"
+msgstr "VPN"
+
+#. Translators: Search suggestion: the english text will be used for the
+#. search regardless of what you put here, so don't worry about the string
+#. yielding poor search results. Focus on correctness and friendliness,
+#. etc
+#: src/bz-search-pill-list.c:117
+msgid "Torrent"
+msgstr "Keynres"
+
+#. Translators: Search suggestion: the english text will be used for the
+#. search regardless of what you put here, so don't worry about the string
+#. yielding poor search results. Focus on correctness and friendliness,
+#. etc
+#: src/bz-search-pill-list.c:122
+msgid "Minecraft"
+msgstr "Minecraft"
+
+#. Translators: Search suggestion: the english text will be used for the
+#. search regardless of what you put here, so don't worry about the string
+#. yielding poor search results. Focus on correctness and friendliness,
+#. etc
+#: src/bz-search-pill-list.c:127
+msgid "Emulator"
+msgstr "Omhevelians"
 
 #: src/bz-search-widget.blp:57
 msgid "Search Apps, Games, Software"
 msgstr "Hwials Appys, Gwariow, Medhelweyth"
 
-#: src/bz-search-widget.blp:96
-msgid "Categories Unavailable"
-msgstr "Kassys Ankavadow"
+#: src/bz-search-widget.blp:79
+msgid "Clear Search"
+msgstr "Dilea Hwithrans"
 
-#: src/bz-search-widget.blp:97
+#: src/bz-search-widget.blp:152
+msgid "Categories Unavailable"
+msgstr "Klassys Ankavadow"
+
+#: src/bz-search-widget.blp:153
 msgid "Search for apps using the search bar above."
 msgstr "Hwilas rag appys gans an barr hwithrans a-ugh."
 
-#: src/bz-search-widget.blp:181
-msgid "No Applications Found"
-msgstr "Appys Kavos Vyth"
+#: src/bz-search-widget.blp:178
+msgid "Browse Categories"
+msgstr "Peuri Klassys"
 
-#: src/bz-search-widget.c:241
+#: src/bz-search-widget.blp:302
+msgid "No Applications Found"
+msgstr "Appys Kavas Vyth"
+
+#: src/bz-search-widget.c:251
 #, c-format
 msgid "No results found for \"%s\" in Flathub"
-msgstr "Sewyansow kavos vyth rag \"%s\" yn Flathub"
-
-#: src/bz-share-list.c:64
-msgid "Copied!"
-msgstr "Dasskrifys"
+msgstr "Sewyansow kavas vyth rag \"%s\" yn Flathub"
 
 #: src/bz-share-list.c:116
 msgid "Copy Link"
-msgstr "Dasskrifa Gorgevren"
+msgstr "Kopia Gorgevren"
 
 #: src/bz-share-list.c:127
 msgid "Open Link"
@@ -2422,7 +2647,7 @@ msgstr "Leyansow:"
 
 #: src/bz-stats-dialog.blp:55
 msgid "World"
-msgstr "Nor"
+msgstr "Bys"
 
 #. Translators: M is the suffix for millions
 #: src/bz-stats-dialog.c:124
@@ -2443,7 +2668,7 @@ msgstr "%'d Somm Leyansow"
 
 #: src/bz-tag-list.c:96
 msgid "No Results Found"
-msgstr "Sewyansow Kavos Vyth"
+msgstr "Sewyansow Kavas Vyth"
 
 #: src/bz-tag-list.c:108
 #, c-format
@@ -2454,57 +2679,57 @@ msgstr "Appys Taggya avel \"%s\""
 msgid "Search failed"
 msgstr "Hwithrans fyllis"
 
-#: src/bz-transaction-dialog.c:151
+#: src/bz-transaction-dialog.c:155
 msgid "Keep Data"
-msgstr "Synsi Data"
+msgstr "Gwitha Data"
 
-#: src/bz-transaction-dialog.c:152
+#: src/bz-transaction-dialog.c:156
 msgid "Allow restoring settings and content"
-msgstr "Alowa dasserghyans settyansow ha d"
+msgstr "Alowa ow daskor settyansow ha dalgh"
 
-#: src/bz-transaction-dialog.c:161
+#: src/bz-transaction-dialog.c:165
 msgid "Delete Data"
 msgstr "Dilea Data"
 
-#: src/bz-transaction-dialog.c:162
+#: src/bz-transaction-dialog.c:166
 msgid "Permanently remove app data to save space"
-msgstr "Dilea yn fast data app dhe erbysi dalghuster"
+msgstr "Dilea yn fast data app rag erbysi dalghuster"
 
-#: src/bz-transaction-dialog.c:187
+#: src/bz-transaction-dialog.c:191
 #, c-format
 msgid "Install %s?"
 msgstr "Lea %s?"
 
-#: src/bz-transaction-dialog.c:192
+#: src/bz-transaction-dialog.c:196
 msgid ""
 "Select which version to install. May install additional shared components"
 msgstr ""
-"Dewis may versyon rag lea. Martesen a wra lea darnow kevrennys keworransel"
+"Dewis py versyon rag lea. Martesen a wra lea darnow kevrennys keworransel"
 
-#: src/bz-transaction-dialog.c:194
+#: src/bz-transaction-dialog.c:198
 msgid "May install additional shared components"
 msgstr "Res lea darnow keworransel poblek"
 
-#: src/bz-transaction-dialog.c:215
+#: src/bz-transaction-dialog.c:219
 #, c-format
 msgid "Remove %s?"
-msgstr "Dilea %s?"
+msgstr "Remova %s?"
 
-#: src/bz-transaction-dialog.c:218
+#: src/bz-transaction-dialog.c:222
 msgid "Select which version to remove."
 msgstr "Dewis mar verson rag remova."
 
-#: src/bz-transaction-dialog.c:220
+#: src/bz-transaction-dialog.c:224
 #, c-format
 msgid "It will not be possible to use %s after it is uninstalled."
-msgstr "Y yw angalladow dhe devnydhya %s wosa y yw dislea."
+msgstr "Yth yw angalladow dhe devnydhya %s wosa yth yw dileys."
 
-#: src/bz-transaction-dialog.c:243
+#: src/bz-transaction-dialog.c:247
 #, c-format
 msgid "“%s” is High Risk"
 msgstr "\"%s\" yw Peryl Ughel"
 
-#: src/bz-transaction-dialog.c:247
+#: src/bz-transaction-dialog.c:251
 msgid ""
 "This app has full access to your system, including all <b>your files, "
 "browser history, saved passwords</b>, and more. It also has access to the "
@@ -2514,10 +2739,14 @@ msgid ""
 "these permissions."
 msgstr ""
 "An app ma kavos hedhas leun dhe dha system, ow komprehendya oll <b>dha "
-"restrennow, istori peurell, geryow-tremena sawys</b> ha moy. Keffrys, y "
-"kavos hedhas kesrosweyth, ytho y gallos danvon dha data dhe partiow tressa."
+"restrennow, istori peurell, geryow-tremena sawys</b> ha moy. Ynwedh, yth "
+"kavos hedhas kesrosweyth, ytho yth a yll danvon dha data dhe partiow "
+"tressa.\n"
+"\n"
+"Dre reson an app yw perghenogel, yth ny yllir bos arwhilys rag pyth yth gul "
+"gans an grontys ma."
 
-#: src/bz-transaction-dialog.c:256
+#: src/bz-transaction-dialog.c:260
 msgid ""
 "This app uses the legacy X11 windowing system, which allows it to <b>record "
 "all keystrokes, capture screenshots, and monitor other applications</b>. It "
@@ -2527,79 +2756,99 @@ msgid ""
 "Because the app is proprietary, it can not be audited for what it does with "
 "these permissions."
 msgstr ""
-"An app ma devnydhys an system fenestri anterrus X11, ytho y'n gallos "
+"An app ma devnydhys an system fenestri anterrus X11, ytho yth a yll "
 "<b>rekordya oll jynnskrifow, kemeres skrin-imajys, ha helerghi appys aral</"
-"b>. Maga ta, y'n gallos drehedhes an kesrosweyth, ytho y'n gallos danvon dha "
+"b>. Maga ta, yth a yll drehedhes an kesrosweyth, ytho yth a yll danvon dha "
 "data dhe partiow tressa.\n"
 "\n"
-"Rag an app yw perghenogel, y'n na gallos bos arhwilas rag py y'n gul gans an "
-"grontys ma."
+"Dre reson an app yw perghenogel, yth ny yllir bos arwhilys rag pyth yth gul "
+"gans an grontys ma."
 
-#: src/bz-transaction-dialog.c:272
+#: src/bz-transaction-dialog.c:276
 msgid "Install Anyway"
 msgstr "Lea yn neb Kas"
 
-#: src/bz-transaction-dialog.c:532
+#: src/bz-transaction-dialog.c:331
+msgid "Failed to load transaction dialog"
+msgstr "Ny yllir karga fenester negys"
+
+#: src/bz-transaction-dialog.c:549
 msgid "All apps are already installed"
 msgstr "Oll appys yw leys seulabrys"
 
-#: src/bz-transaction-dialog.c:534
+#: src/bz-transaction-dialog.c:551
 msgid "OK"
 msgstr "Da Lowr"
 
-#: src/bz-transaction-dialog.c:550
+#: src/bz-transaction-dialog.c:567
 #, c-format
 msgid "Install %u App?"
 msgid_plural "Install %u Apps?"
 msgstr[0] "Lea %u App?"
 msgstr[1] "Lea %u Appys?"
 
-#: src/bz-transaction-dialog.c:558
+#: src/bz-transaction-dialog.c:575
 msgid ""
 "The following will be installed. Additional shared components may also be "
 "installed"
 msgstr ""
-"An taklow a sew a wra leys. Darnow kevrennys keworransel a wra leys maga ta "
-"martesen"
+"An taklow a sew a wra bos leys. Ynwedh, darnow kevrennys keworransel a wra "
+"leys martesen"
 
-#: src/bz-transaction-dialog.c:559
+#: src/bz-transaction-dialog.c:576
 #, c-format
 msgid "%d addons will be installed."
-msgstr "%d ystynansow a wra leys."
+msgstr "%d ystynansow a wra bos leys."
 
-#: src/bz-transaction-dialog.c:560
+#: src/bz-transaction-dialog.c:577
 msgid "Additionally, addons will be installed."
-msgstr "Maga ta, ystyanansow a wra leys."
+msgstr "Ynwedh, ystyanansow a wra bos leys."
 
-#: src/bz-transaction-manager.c:1246
+#: src/bz-transaction-manager.c:766
 #, c-format
 msgid "Finished in %.02f seconds"
 msgstr "Deu yn %.02f eylennow"
 
-#: src/bz-transaction-tile.blp:124
-msgid "App Add-on"
+#: src/bz-transaction-tile.blp:126
+msgid "App Add-On"
 msgstr "Ystynnans rag App"
 
-#: src/bz-transaction-tile.blp:153
+#: src/bz-transaction-tile.blp:155
 msgid "Runtime"
 msgstr "Kerghynnedh rag App"
 
-#: src/bz-transaction-tile.blp:177
+#: src/bz-transaction-tile.blp:179
 msgid "In Queue"
 msgstr "Yn Lost"
 
-#: src/bz-transaction-tile.blp:201
+#: src/bz-transaction-tile.blp:203
 msgid "Done"
 msgstr "Deu"
 
-#: src/bz-transaction-tile.blp:241
+#: src/bz-transaction-tile.blp:227
+msgid "Error"
+msgstr "Error"
+
+#: src/bz-transaction-tile.blp:271
 msgid "Open App"
 msgstr "Ygeri App"
 
-#: src/bz-transaction-tile.c:110
+#: src/bz-transaction-tile.blp:285
+msgid "Cancel Transaction"
+msgstr "Hedhi Negys"
+
+#: src/bz-transaction-tile.blp:409
+msgid "Show Error Info"
+msgstr "Diskwedhes Kedhlow Error"
+
+#: src/bz-transaction-tile.c:112
 #, c-format
 msgid "%s Freed"
 msgstr "%s Rythhys"
+
+#: src/bz-transaction-tile.c:398 src/bz-transaction-tile.c:401
+msgid "Transaction Error"
+msgstr "Error Negys"
 
 #: src/bz-transaction.c:342
 msgid "Pending"
@@ -2609,17 +2858,24 @@ msgstr "Ow Gortos"
 msgid "Update All"
 msgstr "Nowedhi Oll"
 
-#: src/bz-updates-card.blp:148
+#: src/bz-updates-card.blp:161 src/bz-updates-card.blp:186
 msgid "Update"
 msgstr "Nowedhyans"
+
+#: src/bz-updates-card.c:293
+#, c-format
+msgid "%u Runtime Update"
+msgid_plural "%u Runtime Updates"
+msgstr[0] "%u Nowedhyans Kerghynnedh"
+msgstr[1] "%u Nowedhyansow Kerghynnedh"
 
 #: src/bz-user-data-page.blp:5
 msgid "Manage Leftover User Data"
 msgstr "Dyghtya Data Usyer Remenant"
 
 #: src/bz-user-data-page.blp:89
-msgid "No User Data found"
-msgstr "Data Usyer kavos vyth"
+msgid "No User Data Found"
+msgstr "Data Usyer Kavas Vyth"
 
 #: src/bz-user-data-page.blp:94
 msgid "User Data"
@@ -2634,10 +2890,6 @@ msgstr "Removys Data User rag %s"
 msgid "Trash User Data"
 msgstr "Remova Data Usyer"
 
-#: src/bz-window.blp:135
-msgid "Refreshing Store Content"
-msgstr "Ow Diseghow Dalgh Gwerthji"
-
 #: src/bz-window.blp:153
 msgid "Curated"
 msgstr "Dyghtys"
@@ -2647,30 +2899,37 @@ msgid "Flathub"
 msgstr "Flathub"
 
 #: src/bz-window.blp:273
-msgid "No background tasks!"
-msgstr "Oberennow vyth yn kilva!"
+msgid "Refresh completed!"
+msgstr "Diseghans deu!"
 
 #: src/bz-window.blp:326
-msgid "See More"
-msgstr "Gweles Moy"
+msgid "You are running a new version of Bazaar!"
+msgstr "Owth eksekutya os ta versyon nowydh a Basar!"
 
-#: src/bz-window.blp:333
+#: src/bz-window.blp:327
+msgid "See What's New"
+msgstr "Pyth yw Nowydh"
+
+#: src/bz-window.blp:334
 msgid ""
 "You have a network connection but are viewing a cached version of Flathub"
-msgstr ""
-"Ty re unn junyans kewrosweyth lemen yw ow gweles unn versyon koth a Flathub"
+msgstr "Ty kavos junyans kewrosweyth mes yw ow gweles versyon koth a Flathub"
 
-#: src/bz-window.blp:449
+#: src/bz-window.blp:402
+msgid "_Login with Flathub"
+msgstr "_Omgelmi gans Flathub"
+
+#: src/bz-window.blp:450
 msgid "Log Out"
-msgstr "Omdenna"
+msgstr "Omdhigelmi"
 
-#: src/bz-window.c:669
+#: src/bz-window.c:680
 msgid "You can't remove Bazaar from Bazaar!"
-msgstr "Ty na gallos remova Basar dhyworth Basar!"
+msgstr "Ty ny yllir remova Basar dhyworth Basar!"
 
-#: src/bz-window.c:912 src/bz-window.c:946
+#: src/bz-window.c:966 src/bz-window.c:1000
 msgid "Can't do that right now!"
-msgstr "Ny allav gul na y'n eur ma"
+msgstr "Ny yllir gul an re na y'n eur ma"
 
 #: src/bz-world-map.c:587
 msgctxt "As in, \"100 Downloads\""
@@ -2684,8 +2943,8 @@ msgstr "Ollgemmyn"
 
 #: src/gtk/shortcuts-dialog.blp:9
 msgctxt "shortcut window"
-msgid "Open Search Dialog"
-msgstr "Ygeri Fenester Hwithrans"
+msgid "Refresh"
+msgstr "Disegha"
 
 #: src/gtk/shortcuts-dialog.blp:14
 msgctxt "shortcut window"
@@ -2694,29 +2953,80 @@ msgstr "Ygeri Settyansow"
 
 #: src/gtk/shortcuts-dialog.blp:19
 msgctxt "shortcut window"
-msgid "Synchronize Remotes"
-msgstr "_Kettermynyegi Gwerthjiow"
+msgid "Open Search Dialog"
+msgstr "Ygeri Fenester Hwithrans"
 
 #: src/gtk/shortcuts-dialog.blp:24
 msgctxt "shortcut window"
-msgid "Toggle Transaction Manager"
-msgstr "Dewis Dyghtyer Treuswrians"
+msgid "Open Library"
+msgstr "Ygeri Lyverva"
 
-#: src/gtk/shortcuts-dialog.blp:29
+#: src/gtk/shortcuts-dialog.blp:30
 msgctxt "shortcut window"
 msgid "Show Shortcuts"
 msgstr "Diskwedhes Kesunyansow Bysowek"
 
-#: src/gtk/shortcuts-dialog.blp:34
+#: src/gtk/shortcuts-dialog.blp:35
 msgctxt "shortcut window"
-msgid "Quit"
-msgstr "Kwytya"
+msgid "Close Window"
+msgstr "Degea Fenester"
 
-#~ msgid "_Refresh Content"
-#~ msgstr "_Dishegha Dalgh"
+#: src/gtk/shortcuts-dialog.blp:41
+msgctxt "shortcut window"
+msgid "Quit Bazaar"
+msgstr "Kwytya Basar"
 
-#~ msgid "Toggle transaction sidebar"
-#~ msgstr "Dewis bord lestri treuswrians"
+#~ msgid "Nucleus app page"
+#~ msgstr "Folen app Nuklesen"
+
+#~ msgid "_Synchronize Remotes"
+#~ msgstr "_Kerghes Gwerthjiow"
+
+#~ msgid "Synchronizing..."
+#~ msgstr "Ow Kettermynyegi..."
+
+#, c-format
+#~ msgid "Receiving %d entries..."
+#~ msgstr "Ow receva %d enworrans manylyon..."
+
+#~ msgid "Indexing Data..."
+#~ msgstr "Ow Kevernya Data..."
+
+#~ msgid "Bazaar is a Passion Project"
+#~ msgstr "Basar yw Ragdres Passyon"
+
+#~ msgid "Support the Future of Linux App Distribution"
+#~ msgstr "Skoodhya an Termyn a Dheu a Lesrannans Appys Linux"
+
+#~ msgid "Disable the donations banner on startup"
+#~ msgstr "Ungallosegi an baner argevrohow dres dalleth"
+
+#~ msgid "Close"
+#~ msgstr "Kwytya"
+
+#~ msgid "Copy and Close"
+#~ msgstr "Dasskrifa ha Kwytya"
+
+#~ msgid "Refreshing Store Content"
+#~ msgstr "Ow Diseghow Dalgh Gwerthji"
+
+#~ msgid "No background tasks!"
+#~ msgstr "Oberennow vyth yn kilva!"
+
+#~ msgid "See More"
+#~ msgstr "Gweles Moy"
+
+#~ msgctxt "shortcut window"
+#~ msgid "Synchronize Remotes"
+#~ msgstr "_Kettermynyegi Gwerthjiow"
+
+#~ msgctxt "shortcut window"
+#~ msgid "Toggle Transaction Manager"
+#~ msgstr "Dewis Dyghtyer Treuswrians"
+
+#~ msgctxt "shortcut window"
+#~ msgid "Quit"
+#~ msgstr "Kwytya"
 
 #~ msgid "Install Size"
 #~ msgstr "Braster Lea"
@@ -2736,9 +3046,6 @@ msgstr "Kwytya"
 
 #~ msgid "Stop Active Tasks"
 #~ msgstr "Hedhi Oberennow Byw"
-
-#~ msgid "Clear History"
-#~ msgstr "Dilea Istori"
 
 #~ msgid "No Tasks Yet"
 #~ msgstr "Oberennow Vyth Hwath"
@@ -3004,7 +3311,3 @@ msgstr "Kwytya"
 
 #~ msgid "Remove User Data"
 #~ msgstr "Remova Data Usyer"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Refresh"
-#~ msgstr "Disegha"

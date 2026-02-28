@@ -19,13 +19,16 @@
  */
 
 #include <adwaita.h>
+#include <bge.h>
 
-#include "bz-animation.h"
 #include "bz-carousel.h"
 #include "bz-marshalers.h"
 #include "bz-util.h"
 
 #define RAISE_FACTOR 0.025
+
+/* `ratio < 1.0` means it overshoots */
+#define ANIMATION_DAMPING_RATIO 1.15
 
 struct _BzCarousel
 {
@@ -40,7 +43,7 @@ struct _BzCarousel
   int                 hscroll_current;
   GtkGesture         *drag;
   gboolean            dragging;
-  BzAnimation        *animation;
+  BgeAnimation       *animation;
 
   gboolean            auto_scroll;
   gboolean            allow_long_swipes;
@@ -439,7 +442,7 @@ bz_carousel_class_init (BzCarouselClass *klass)
 static void
 bz_carousel_init (BzCarousel *self)
 {
-  self->animation = bz_animation_new (GTK_WIDGET (self));
+  self->animation = bge_animation_new (GTK_WIDGET (self));
 
   self->mirror = g_ptr_array_new_with_free_func (
       (GDestroyNotify) g_object_unref);
@@ -674,13 +677,13 @@ items_changed (BzCarousel *self,
       child  = g_ptr_array_index (self->widgets, position + i);
 
       g_snprintf (buf, sizeof (buf), "x%p", child);
-      bz_animation_cancel (self->animation, buf);
+      bge_animation_cancel (self->animation, buf);
       g_snprintf (buf, sizeof (buf), "y%p", child);
-      bz_animation_cancel (self->animation, buf);
+      bge_animation_cancel (self->animation, buf);
       g_snprintf (buf, sizeof (buf), "w%p", child);
-      bz_animation_cancel (self->animation, buf);
+      bge_animation_cancel (self->animation, buf);
       g_snprintf (buf, sizeof (buf), "h%p", child);
-      bz_animation_cancel (self->animation, buf);
+      bge_animation_cancel (self->animation, buf);
 
       g_signal_emit (self, signals[SIGNAL_UNBIND_WIDGET], 0, child->widget, object);
     }
@@ -729,7 +732,7 @@ model_selected_changed (BzCarousel         *self,
 
   idx = gtk_single_selection_get_selected (selection);
   if (idx != G_MAXUINT)
-    move_to_idx (self, idx, 1.0);
+    move_to_idx (self, idx, ANIMATION_DAMPING_RATIO);
 
   gtk_widget_queue_allocate (GTK_WIDGET (self));
 }
@@ -852,16 +855,16 @@ move_to_idx (BzCarousel *self,
           char buf[64] = { 0 };
 
           g_snprintf (buf, sizeof (buf), "x%p", child);
-          bz_animation_cancel (self->animation, buf);
+          bge_animation_cancel (self->animation, buf);
 
           g_snprintf (buf, sizeof (buf), "y%p", child);
-          bz_animation_cancel (self->animation, buf);
+          bge_animation_cancel (self->animation, buf);
 
           g_snprintf (buf, sizeof (buf), "w%p", child);
-          bz_animation_cancel (self->animation, buf);
+          bge_animation_cancel (self->animation, buf);
 
           g_snprintf (buf, sizeof (buf), "h%p", child);
-          bz_animation_cancel (self->animation, buf);
+          bge_animation_cancel (self->animation, buf);
 
           child->rect   = target;
           child->target = target;
@@ -873,43 +876,43 @@ move_to_idx (BzCarousel *self,
           char buf[64] = { 0 };
 
 #define MASS      1.0
-#define STIFFNESS 0.16
+#define STIFFNESS 800.0
 
           /* pointer is to ensure a unique identifier so as not to overwrite any
              other child's key */
           g_snprintf (buf, sizeof (buf), "x%p", child);
-          bz_animation_add_spring (
+          bge_animation_add_spring (
               self->animation, buf,
               child->rect.origin.x, target.origin.x,
               damping_ratio, MASS, STIFFNESS,
-              (BzAnimationCallback) animate,
+              (BgeAnimationCallback) animate,
               carousel_widget_data_ref (child),
               carousel_widget_data_unref);
 
           g_snprintf (buf, sizeof (buf), "y%p", child);
-          bz_animation_add_spring (
+          bge_animation_add_spring (
               self->animation, buf,
               child->rect.origin.y, target.origin.y,
               damping_ratio, MASS, STIFFNESS,
-              (BzAnimationCallback) animate,
+              (BgeAnimationCallback) animate,
               carousel_widget_data_ref (child),
               carousel_widget_data_unref);
 
           g_snprintf (buf, sizeof (buf), "w%p", child);
-          bz_animation_add_spring (
+          bge_animation_add_spring (
               self->animation, buf,
               child->rect.size.width, target.size.width,
               damping_ratio, MASS, STIFFNESS,
-              (BzAnimationCallback) animate,
+              (BgeAnimationCallback) animate,
               carousel_widget_data_ref (child),
               carousel_widget_data_unref);
 
           g_snprintf (buf, sizeof (buf), "h%p", child);
-          bz_animation_add_spring (
+          bge_animation_add_spring (
               self->animation, buf,
               child->rect.size.height, target.size.height,
               damping_ratio, MASS, STIFFNESS,
-              (BzAnimationCallback) animate,
+              (BgeAnimationCallback) animate,
               carousel_widget_data_ref (child),
               carousel_widget_data_unref);
 
@@ -968,10 +971,10 @@ ensure_viewport (BzCarousel         *self,
       if (selected == G_MAXUINT)
         {
           gtk_single_selection_set_selected (model, 0);
-          move_to_idx (self, 0, animate ? 1.0 : -1.0);
+          move_to_idx (self, 0, animate ? ANIMATION_DAMPING_RATIO : -1.0);
         }
       else
-        move_to_idx (self, selected, animate ? 1.0 : -1.0);
+        move_to_idx (self, selected, animate ? ANIMATION_DAMPING_RATIO : -1.0);
     }
 
   gtk_widget_queue_allocate (GTK_WIDGET (self));
@@ -1020,6 +1023,9 @@ update_motion (BzCarousel *self,
 
   point = GRAPHENE_POINT_INIT (x, y);
 
+  if (self->scrolling)
+    return;
+
   for (guint i = 0; i < self->widgets->len; i++)
     {
       CarouselWidgetData *child     = NULL;
@@ -1060,6 +1066,8 @@ scroll_end (BzCarousel               *self,
       0);
   self->hscroll_start   = -1;
   self->hscroll_current = -1;
+
+  update_motion (self, self->motion_x, self->motion_y);
 }
 
 static gboolean
@@ -1094,6 +1102,22 @@ scroll (BzCarousel               *self,
     case GDK_SOURCE_TOUCHPAD:
     case GDK_SOURCE_TRACKPOINT:
       {
+        if (self->widgets->len > 0)
+          {
+            CarouselWidgetData *first = NULL;
+            int                 width = 0;
+
+            first = g_ptr_array_index (self->widgets, 0);
+            width = gtk_widget_get_width (GTK_WIDGET (self));
+            if (dx < 0 &&
+                first->rect.origin.x >=
+                    (double) width / 2 - first->rect.size.width / 2)
+              {
+                self->scrolling = FALSE;
+                return FALSE;
+              }
+          }
+
         self->hscroll_current += dx;
         ensure_viewport (self, self->model, FALSE);
       }

@@ -55,7 +55,6 @@ bz_sources = files(
   'bz-addons-dialog.c',
   'bz-age-rating-dialog.c',
   'bz-all-apps-page.c',
-  'bz-animation.c',
   'bz-app-permissions.c',
   'bz-app-size-dialog.c',
   'bz-app-tile.c',
@@ -123,7 +122,6 @@ bz_sources = files(
   'bz-markdown-render.c',
   'bz-newline-parser.c',
   'bz-parser.c',
-  'bz-popup-overlay.c',
   'bz-preferences-dialog.c',
   'bz-progress-bar.c',
   'bz-releases-list.c',
@@ -166,6 +164,9 @@ bz_sources = files(
 subdir('progress-bar-designs')
 
 bz_deps = [
+  # Bazaar GTK Extensions; see ../bge/
+  bge_dep,
+
   math,
   gtk_dep,
   libadwaita_dep,
@@ -308,7 +309,7 @@ blueprints = custom_target('blueprints',
     'bz-user-data-page.blp',
     'bz-user-data-tile.blp',
     'bz-window.blp',
-    'gtk/shortcuts-dialog.blp',
+    'shortcuts-dialog.blp',
   ),
   output: '.',
   command: [

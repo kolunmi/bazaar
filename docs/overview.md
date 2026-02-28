@@ -763,6 +763,101 @@ hooks:
   exit 0
 ```
 
+## Search Biases
+
+Search biases are a mechanism provided by Bazaar to influence search results.
+Given a regex string with which to match a search query, a bias can replace the
+matched text with a new string and/or adjust the scores of certain appids
+according to a defined function if a match occurs. This is particularly useful
+in the following cases:
+
+* An application is, for example, an image editor, but doesn't show up in the
+  results for "image editor" because its metadata doesn't contain those search
+  tokens for whatever reason. A search bias can ensure that the app appears
+  despite this.
+
+* You want an abbreviation or phrase to be expanded into a version which is more
+  likely to yield better results. For example, Bazaar hardcodes the expansion of
+  the abbreviation `dl` to `download`, which is more helpful when searching
+  metadata.
+
+### Boost Functions
+
+Right now, there are two kinds of boost functions you can specify to influence
+the score of certain appids in the event of a regex match: linear and
+exponential:
+
+#### Linear
+
+Linear functions require a `slope` and a `y-intercept` and are evaluated like
+this:
+
+```
+new-score = y-intercept + (slope * original-score)
+```
+
+#### Exponential
+
+Linear functions require a `factor` and a `y-intercept` and are evaluated like
+this:
+
+```
+new-score = y-intercept * (factor ^ original-score)
+```
+
+### Examples
+
+Search biases are defined in the main yaml config as indicated by the
+`hardcoded_main_config_path` comptime var. Here is a basic example demonstrating
+how to define search biases:
+
+```yaml
+search-biases:
+  # Brief regex review:
+  #   `^` indicates the beginning of the string
+  #   `$` indicates the end of the string
+  #   `\b` indicates a word boundary
+  #   `(?i)` means case insensitive
+
+  # Convert queries like "smb server" to "samba server"
+  - regex: \b(?i)smb\b
+    convert-to: samba
+
+  # Give your favorite matrix clients a simple boost of 100.0 to their score
+  - regex: \b(?i)matrix\b
+    boost-appids:
+      - org.gnome.Fractal
+      - im.riot.Riot
+    linear-boost:
+      slope: 1.0
+      y-intercept: 100.0
+
+  # Convert the search _and_ boost appids
+  - regex: ^(?i)deck$
+    convert-to: steam deck
+    boost-appids:
+      - com.github.Matoking.protontricks
+      - com.steamgriddb.steam-rom-manager
+      - com.valvesoftware.SteamLink
+    linear-boost:
+      slope: 1.2
+      y-intercept: 20.0
+
+  # Biases are applied in the order that you specify them, so in both the case
+  # that the user types "deck" or "steam deck launcher", the following will be
+  # applied:
+  - regex: \bsteam deck\b
+    boost-appids:
+      - net.retrodeck.retrodeck
+    exponential-boost:
+      factor: 2.0
+      y-intercept: 5.0
+```
+
+Pro tip: pressing `ctrl-alt-d` in Bazaar activates debug mode, which enables you
+to see the scores of app results on the search page. This is useful for
+debugging search biases!
+
 ## Translations in YAML Configs
 
 For any string scalar property in YAML configs parsed by bazaar, you can

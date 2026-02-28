@@ -196,6 +196,17 @@ template $BzFullView: Adw.Bin {
                               label: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.title;
                             }
 
+                            Label {
+                              styles [
+                                "bz-debug",
+                              ]
+
+                              halign: start;
+                              selectable: true;
+                              visible: bind template.state as <$BzStateInfo>.debug-mode;
+                              label: bind template.entry-group as <$BzEntryGroup>.id;
+                            }
+
                             $BzDeveloperBadge {
                               entry: bind template.ui-entry as <$BzResult>.object as <$BzEntry>;
                             }

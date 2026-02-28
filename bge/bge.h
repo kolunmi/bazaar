@@ -1,4 +1,4 @@
-/* bz-popup-overlay.h
+/* bge.h - Bazaar GTK Extensions
  *
  * Copyright 2026 Eva M
  *
@@ -24,28 +24,13 @@
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_POPUP_OVERLAY (bz_popup_overlay_get_type ())
-G_DECLARE_FINAL_TYPE (BzPopupOverlay, bz_popup_overlay, BZ, POPUP_OVERLAY, GtkWidget)
+#define BGE_INSIDE
+#include "bge-version-macros.h"
+#include "bge-animation.h"
+#undef BGE_INSIDE
 
-BzPopupOverlay *
-bz_popup_overlay_new (void);
-
-GtkWidget *
-bz_popup_overlay_get_child (BzPopupOverlay *self);
-
+BGE_AVAILABLE_IN_ALL
 void
-bz_popup_overlay_set_child (BzPopupOverlay *self,
-                            GtkWidget      *child);
-
-void
-bz_popup_overlay_push (BzPopupOverlay *self,
-                       GtkWidget      *widget,
-                       GtkWidget      *source);
-
-void
-bz_popup_present (GtkWidget *popup,
-                  GtkWidget *source);
+bge_init (void);
 
 G_END_DECLS
-
-/* End of bz-popup-overlay.h */
