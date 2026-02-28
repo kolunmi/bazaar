@@ -355,6 +355,7 @@ template $BzWindow: Adw.ApplicationWindow {
                 main-menu: primary_menu;
                 install => $full_view_install_cb(template);
                 remove => $full_view_remove_cb(template);
+                update => $update_cb(template);
                 install-addon => $install_addon_cb(template);
                 remove-addon => $remove_addon_cb(template);
               };

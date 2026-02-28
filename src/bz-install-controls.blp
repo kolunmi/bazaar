@@ -15,28 +15,24 @@ template $BzInstallControls: Box {
 
     Stack {
       transition-type: crossfade;
-      visible-child-name: bind $bool_to_string($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>, "install", "open") as <string>;
+      visible-child-name: bind $get_visible_page(template.entry-group as <$BzEntryGroup>.installable, template.entry-group as <$BzEntryGroup>.removable, template.state as <$BzStateInfo>.available-updates) as <string>;
       hexpand: bind $invert_boolean(template.wide) as <bool>;
 
       StackPage install {
         name: "install";
 
-        child: Adw.Bin {
-          child: Button install_button {
-            styles [
-              "suggested-action",
-              "pill",
-            ]
-
-            visible: bind $logical_and($invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable) as <bool>) as <bool>, $is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
-            has-tooltip: true;
-            hexpand: bind $invert_boolean(template.wide) as <bool>;
-            halign: bind $choose(template.wide, 2, 0) as <int>;
-            tooltip-text: _("Download & Install Application");
-            sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
-            label: _("Install");
-            clicked => $install_cb(template);
-          };
+        child: Button install_button {
+          styles [
+            "suggested-action",
+            "pill",
+          ]
+          has-tooltip: true;
+          hexpand: bind $invert_boolean(template.wide) as <bool>;
+          halign: bind $choose(template.wide, 2, 0) as <int>;
+          tooltip-text: _("Download & Install Application");
+          sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
+          label: _("Install");
+          clicked => $install_cb(template);
         };
       }
 
@@ -89,6 +85,60 @@ template $BzInstallControls: Box {
           }
         };
       }
+
+      StackPage update {
+        name: "update";
+
+        child: Box {
+          spacing: bind $choose(template.wide, 10, 8) as <int>;
+          homogeneous: bind $invert_boolean(template.wide) as <bool>;
+
+          Button update_button {
+            styles [
+              "pill",
+              "suggested-action"
+            ]
+
+            hexpand: bind $invert_boolean(template.wide) as <bool>;
+            label: _("Update");
+            clicked => $update_cb(template);
+          }
+
+          Button {
+            styles [
+              "destructive-action",
+              "circular",
+            ]
+
+            width-request: bind $choose(template.wide, 45, -1) as <int>;
+            hexpand: bind $invert_boolean(template.wide) as <bool>;
+            has-tooltip: bind template.wide as <bool>;
+            tooltip-text: _("Uninstall Application");
+            sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
+            clicked => $remove_cb(template);
+
+            child: Box {
+              halign: center;
+              hexpand: true;
+
+              Label {
+                visible: bind $invert_boolean(template.wide) as <bool>;
+                label: _("Remove");
+              }
+
+              Image {
+                visible: bind template.wide as <bool>;
+                icon-name: "user-trash-symbolic";
+              }
+            };
+          }
+        };
+      }
+
+      StackPage empty {
+        name: "empty";
+        child: Adw.Bin {};
+      }
     }
   }
 
@@ -106,4 +156,3 @@ template $BzInstallControls: Box {
     clicked => $install_cb(template);
   }
 }
-

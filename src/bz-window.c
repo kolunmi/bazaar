@@ -281,7 +281,7 @@ remove_installed_cb (BzWindow     *self,
 static void
 update_cb (BzWindow      *self,
            GListModel    *entries,
-           BzLibraryPage *library_page)
+           GtkWidget     *widget )
 {
   g_autoptr (BzTransaction) transaction  = NULL;
   guint                n_updates         = 0;
@@ -290,7 +290,6 @@ update_cb (BzWindow      *self,
 
   g_return_if_fail (BZ_IS_WINDOW (self));
   g_return_if_fail (G_IS_LIST_MODEL (entries));
-  g_return_if_fail (BZ_IS_LIBRARY_PAGE (library_page));
 
   n_updates = g_list_model_get_n_items (entries);
   if (n_updates == 0)

@@ -21,6 +21,7 @@
 #include <glib/gi18n.h>
 
 #include "bz-install-controls.h"
+#include "bz-state-info.h"
 #include "bz-template-callbacks.h"
 #include "bz-util.h"
 
@@ -29,6 +30,7 @@ struct _BzInstallControls
   GtkBox parent_instance;
 
   BzEntryGroup *group;
+  BzStateInfo  *state;
   gboolean      wide;
 
   /* Template widgets */
@@ -43,6 +45,7 @@ enum
   PROP_0,
   PROP_WIDE,
   PROP_ENTRY_GROUP,
+  PROP_STATE,
   LAST_PROP
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
@@ -52,6 +55,7 @@ enum
   SIGNAL_INSTALL,
   SIGNAL_REMOVE,
   SIGNAL_RUN,
+  SIGNAL_UPDATE,
   LAST_SIGNAL,
 };
 static guint signals[LAST_SIGNAL];
@@ -77,12 +81,83 @@ run_cb (BzInstallControls *self,
   g_signal_emit (self, signals[SIGNAL_RUN], 0);
 }
 
+static GListStore *
+find_matching_updates (BzInstallControls *self,
+                       GListModel        *available_updates)
+{
+  const char *group_id = NULL;
+  guint       n_items  = 0;
+  GListStore *store    = NULL;
+
+  if (self->group == NULL || available_updates == NULL)
+    return NULL;
+
+  group_id = bz_entry_group_get_id (self->group);
+  n_items  = g_list_model_get_n_items (available_updates);
+  store    = g_list_store_new (BZ_TYPE_ENTRY);
+
+  for (guint i = 0; i < n_items; i++)
+    {
+      g_autoptr (BzEntry) entry = NULL;
+      const char *id            = NULL;
+
+      entry = g_list_model_get_item (available_updates, i);
+      id    = bz_entry_get_id (entry);
+
+      if (g_strcmp0 (id, group_id) == 0)
+        g_list_store_append (store, entry);
+    }
+
+  if (g_list_model_get_n_items (G_LIST_MODEL (store)) == 0)
+    g_clear_object (&store);
+
+  return store;
+}
+
+static void
+update_cb (BzInstallControls *self,
+           GtkButton         *button)
+{
+  GListModel *available_updates = NULL;
+  g_autoptr (GListStore) store  = NULL;
+
+  if (self->state == NULL)
+    return;
+
+  available_updates = bz_state_info_get_available_updates (self->state);
+  store             = find_matching_updates (self, available_updates);
+
+  if (store != NULL)
+    g_signal_emit (self, signals[SIGNAL_UPDATE], 0, G_LIST_MODEL (store));
+}
+
+static char *
+get_visible_page (gpointer    object,
+                  int         installable,
+                  int         removable,
+                  GListModel *available_updates)
+{
+  BzInstallControls *self      = BZ_INSTALL_CONTROLS (object);
+  g_autoptr (GListStore) store = NULL;
+
+  if (removable > 0)
+    {
+      store = find_matching_updates (self, available_updates);
+      return g_strdup (store != NULL ? "update" : "open");
+    }
+  else if (installable > 0)
+    return g_strdup ("install");
+  else
+    return g_strdup ("empty");
+}
+
 static void
 bz_install_controls_dispose (GObject *object)
 {
   BzInstallControls *self = BZ_INSTALL_CONTROLS (object);
 
   g_clear_object (&self->group);
+  g_clear_object (&self->state);
 
   G_OBJECT_CLASS (bz_install_controls_parent_class)->dispose (object);
 }
@@ -102,6 +177,9 @@ bz_install_controls_get_property (GObject    *object,
       break;
     case PROP_ENTRY_GROUP:
       g_value_set_object (value, self->group);
+      break;
+    case PROP_STATE:
+      g_value_set_object (value, self->state);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -123,6 +201,9 @@ bz_install_controls_set_property (GObject      *object,
       break;
     case PROP_ENTRY_GROUP:
       bz_install_controls_set_entry_group (self, g_value_get_object (value));
+      break;
+    case PROP_STATE:
+      bz_install_controls_set_state (self, g_value_get_object (value));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -151,6 +232,13 @@ bz_install_controls_class_init (BzInstallControlsClass *klass)
           "entry-group",
           NULL, NULL,
           BZ_TYPE_ENTRY_GROUP,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_STATE] =
+      g_param_spec_object (
+          "state",
+          NULL, NULL,
+          BZ_TYPE_STATE_INFO,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
@@ -185,7 +273,23 @@ bz_install_controls_class_init (BzInstallControlsClass *klass)
           NULL,
           G_TYPE_NONE, 0);
 
+  signals[SIGNAL_UPDATE] =
+      g_signal_new (
+          "update",
+          G_OBJECT_CLASS_TYPE (klass),
+          G_SIGNAL_RUN_FIRST,
+          0,
+          NULL, NULL,
+          g_cclosure_marshal_VOID__OBJECT,
+          G_TYPE_NONE, 1,
+          G_TYPE_LIST_MODEL);
+  g_signal_set_va_marshaller (
+      signals[SIGNAL_UPDATE],
+      G_TYPE_FROM_CLASS (klass),
+      g_cclosure_marshal_VOID__OBJECTv);
+
   g_type_ensure (BZ_TYPE_ENTRY_GROUP);
+  g_type_ensure (BZ_TYPE_STATE_INFO);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-install-controls.ui");
   bz_widget_class_bind_all_util_callbacks (widget_class);
@@ -196,6 +300,8 @@ bz_install_controls_class_init (BzInstallControlsClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, install_cb);
   gtk_widget_class_bind_template_callback (widget_class, remove_cb);
   gtk_widget_class_bind_template_callback (widget_class, run_cb);
+  gtk_widget_class_bind_template_callback (widget_class, update_cb);
+  gtk_widget_class_bind_template_callback (widget_class, get_visible_page);
 }
 
 static void
@@ -254,6 +360,26 @@ bz_install_controls_set_entry_group (BzInstallControls *self,
     self->group = g_object_ref (group);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ENTRY_GROUP]);
+}
+
+BzStateInfo *
+bz_install_controls_get_state (BzInstallControls *self)
+{
+  g_return_val_if_fail (BZ_IS_INSTALL_CONTROLS (self), NULL);
+  return self->state;
+}
+
+void
+bz_install_controls_set_state (BzInstallControls *self,
+                               BzStateInfo       *state)
+{
+  g_return_if_fail (BZ_IS_INSTALL_CONTROLS (self));
+
+  g_clear_object (&self->state);
+  if (state != NULL)
+    self->state = g_object_ref (state);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_STATE]);
 }
 
 void

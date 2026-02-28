@@ -97,6 +97,7 @@ enum
   SIGNAL_REMOVE,
   SIGNAL_INSTALL_ADDON,
   SIGNAL_REMOVE_ADDON,
+  SIGNAL_UPDATE,
 
   LAST_SIGNAL,
 };
@@ -972,6 +973,14 @@ remove_cb (BzFullView *self,
 }
 
 static void
+update_cb (BzFullView        *self,
+           GListModel        *entries,
+           BzInstallControls *controls)
+{
+  g_signal_emit (self, signals[SIGNAL_UPDATE], 0, entries);
+}
+
+static void
 delete_user_data_cb (BzFullView *self,
                      GtkButton  *button)
 {
@@ -1159,6 +1168,21 @@ bz_full_view_class_init (BzFullViewClass *klass)
       G_TYPE_FROM_CLASS (klass),
       g_cclosure_marshal_VOID__OBJECTv);
 
+  signals[SIGNAL_UPDATE] =
+    g_signal_new (
+        "update",
+        G_OBJECT_CLASS_TYPE (klass),
+        G_SIGNAL_RUN_FIRST,
+        0,
+        NULL, NULL,
+        g_cclosure_marshal_VOID__OBJECT,
+        G_TYPE_NONE, 1,
+        G_TYPE_LIST_MODEL);
+  g_signal_set_va_marshaller (
+      signals[SIGNAL_UPDATE],
+      G_TYPE_FROM_CLASS (klass),
+      g_cclosure_marshal_VOID__OBJECTv);
+
   g_type_ensure (BZ_TYPE_APPSTREAM_DESCRIPTION_RENDER);
   g_type_ensure (BZ_TYPE_DEVELOPER_BADGE);
   g_type_ensure (BZ_TYPE_DYNAMIC_LIST_VIEW);
@@ -1222,6 +1246,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, run_cb);
   gtk_widget_class_bind_template_callback (widget_class, install_cb);
   gtk_widget_class_bind_template_callback (widget_class, remove_cb);
+  gtk_widget_class_bind_template_callback (widget_class, update_cb);
   gtk_widget_class_bind_template_callback (widget_class, delete_user_data_cb);
   gtk_widget_class_bind_template_callback (widget_class, support_cb);
   gtk_widget_class_bind_template_callback (widget_class, pick_license_warning);

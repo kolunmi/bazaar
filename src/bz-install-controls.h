@@ -21,6 +21,7 @@
 #pragma once
 
 #include "bz-entry-group.h"
+#include "bz-state-info.h"
 #include <adwaita.h>
 
 G_BEGIN_DECLS
@@ -44,6 +45,13 @@ void
 
 bz_install_controls_set_entry_group (BzInstallControls *self,
                                      BzEntryGroup      *group);
+
+BzStateInfo *
+bz_install_controls_get_state (BzInstallControls *self);
+
+void
+bz_install_controls_set_state (BzInstallControls *self,
+                               BzStateInfo       *state);
 
 void
 bz_install_controls_grab_focus_preferred (BzInstallControls *self);
