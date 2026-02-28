@@ -19,8 +19,8 @@
  */
 
 #include <adwaita.h>
+#include <bge.h>
 
-#include "bz-animation.h"
 #include "bz-carousel.h"
 #include "bz-marshalers.h"
 #include "bz-util.h"
@@ -40,7 +40,7 @@ struct _BzCarousel
   int                 hscroll_current;
   GtkGesture         *drag;
   gboolean            dragging;
-  BzAnimation        *animation;
+  BgeAnimation       *animation;
 
   gboolean            auto_scroll;
   gboolean            allow_long_swipes;
@@ -439,7 +439,7 @@ bz_carousel_class_init (BzCarouselClass *klass)
 static void
 bz_carousel_init (BzCarousel *self)
 {
-  self->animation = bz_animation_new (GTK_WIDGET (self));
+  self->animation = bge_animation_new (GTK_WIDGET (self));
 
   self->mirror = g_ptr_array_new_with_free_func (
       (GDestroyNotify) g_object_unref);
@@ -674,13 +674,13 @@ items_changed (BzCarousel *self,
       child  = g_ptr_array_index (self->widgets, position + i);
 
       g_snprintf (buf, sizeof (buf), "x%p", child);
-      bz_animation_cancel (self->animation, buf);
+      bge_animation_cancel (self->animation, buf);
       g_snprintf (buf, sizeof (buf), "y%p", child);
-      bz_animation_cancel (self->animation, buf);
+      bge_animation_cancel (self->animation, buf);
       g_snprintf (buf, sizeof (buf), "w%p", child);
-      bz_animation_cancel (self->animation, buf);
+      bge_animation_cancel (self->animation, buf);
       g_snprintf (buf, sizeof (buf), "h%p", child);
-      bz_animation_cancel (self->animation, buf);
+      bge_animation_cancel (self->animation, buf);
 
       g_signal_emit (self, signals[SIGNAL_UNBIND_WIDGET], 0, child->widget, object);
     }
@@ -852,16 +852,16 @@ move_to_idx (BzCarousel *self,
           char buf[64] = { 0 };
 
           g_snprintf (buf, sizeof (buf), "x%p", child);
-          bz_animation_cancel (self->animation, buf);
+          bge_animation_cancel (self->animation, buf);
 
           g_snprintf (buf, sizeof (buf), "y%p", child);
-          bz_animation_cancel (self->animation, buf);
+          bge_animation_cancel (self->animation, buf);
 
           g_snprintf (buf, sizeof (buf), "w%p", child);
-          bz_animation_cancel (self->animation, buf);
+          bge_animation_cancel (self->animation, buf);
 
           g_snprintf (buf, sizeof (buf), "h%p", child);
-          bz_animation_cancel (self->animation, buf);
+          bge_animation_cancel (self->animation, buf);
 
           child->rect   = target;
           child->target = target;
@@ -878,38 +878,38 @@ move_to_idx (BzCarousel *self,
           /* pointer is to ensure a unique identifier so as not to overwrite any
              other child's key */
           g_snprintf (buf, sizeof (buf), "x%p", child);
-          bz_animation_add_spring (
+          bge_animation_add_spring (
               self->animation, buf,
               child->rect.origin.x, target.origin.x,
               damping_ratio, MASS, STIFFNESS,
-              (BzAnimationCallback) animate,
+              (BgeAnimationCallback) animate,
               carousel_widget_data_ref (child),
               carousel_widget_data_unref);
 
           g_snprintf (buf, sizeof (buf), "y%p", child);
-          bz_animation_add_spring (
+          bge_animation_add_spring (
               self->animation, buf,
               child->rect.origin.y, target.origin.y,
               damping_ratio, MASS, STIFFNESS,
-              (BzAnimationCallback) animate,
+              (BgeAnimationCallback) animate,
               carousel_widget_data_ref (child),
               carousel_widget_data_unref);
 
           g_snprintf (buf, sizeof (buf), "w%p", child);
-          bz_animation_add_spring (
+          bge_animation_add_spring (
               self->animation, buf,
               child->rect.size.width, target.size.width,
               damping_ratio, MASS, STIFFNESS,
-              (BzAnimationCallback) animate,
+              (BgeAnimationCallback) animate,
               carousel_widget_data_ref (child),
               carousel_widget_data_unref);
 
           g_snprintf (buf, sizeof (buf), "h%p", child);
-          bz_animation_add_spring (
+          bge_animation_add_spring (
               self->animation, buf,
               child->rect.size.height, target.size.height,
               damping_ratio, MASS, STIFFNESS,
-              (BzAnimationCallback) animate,
+              (BgeAnimationCallback) animate,
               carousel_widget_data_ref (child),
               carousel_widget_data_unref);
 

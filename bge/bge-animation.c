@@ -1,4 +1,4 @@
-/* bz-animation.c
+/* bge-animation.c
  *
  * Copyright 2026 Eva M
  *
@@ -22,20 +22,18 @@
    libpastry: https://github.com/kolunmi/libpastry */
 
 /**
- * BzAnimation:
+ * BgeAnimation:
  *
  * Manages animations for a widget. Individual value animations are tracked in a
  * hash map with string keys, allowing them to be easily restarted or replaced.
  */
 
-#define G_LOG_DOMAIN "BZ::ANIMATION"
+#define G_LOG_DOMAIN "BGE::ANIMATION"
 
 #define DELTA   0.001
 #define EPSILON 0.00001
 
-#include "config.h"
-
-#include "bz-animation.h"
+#include "bge.h"
 
 enum
 {
@@ -47,7 +45,7 @@ enum
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
 
-struct _BzAnimation
+struct _BgeAnimation
 {
   GObject parent_instance;
 
@@ -57,22 +55,22 @@ struct _BzAnimation
   guint       tag;
   GHashTable *data;
 };
-G_DEFINE_FINAL_TYPE (BzAnimation, bz_animation, G_TYPE_OBJECT)
+G_DEFINE_FINAL_TYPE (BgeAnimation, bge_animation, G_TYPE_OBJECT)
 
 typedef struct
 {
-  double              from;
-  double              to;
-  double              damping_ratio;
-  double              mass;
-  double              stiffness;
-  gboolean            clamp;
-  BzAnimationCallback cb;
-  gpointer            user_data;
-  GDestroyNotify      destroy_data;
-  double              est_duration;
-  GTimer             *timer;
-  double              velocity;
+  double               from;
+  double               to;
+  double               damping_ratio;
+  double               mass;
+  double               stiffness;
+  gboolean             clamp;
+  BgeAnimationCallback cb;
+  gpointer             user_data;
+  GDestroyNotify       destroy_data;
+  double               est_duration;
+  GTimer              *timer;
+  double               velocity;
 } SpringData;
 
 static gboolean
@@ -106,7 +104,7 @@ should_animate (GtkWidget *widget);
 static void
 dispose (GObject *object)
 {
-  BzAnimation *self            = BZ_ANIMATION (object);
+  BgeAnimation *self           = BGE_ANIMATION (object);
   g_autoptr (GtkWidget) widget = NULL;
 
   widget = g_weak_ref_get (&self->wr);
@@ -121,7 +119,7 @@ dispose (GObject *object)
   g_clear_object (&self->widget);
   g_clear_pointer (&self->data, g_hash_table_unref);
 
-  G_OBJECT_CLASS (bz_animation_parent_class)->dispose (object);
+  G_OBJECT_CLASS (bge_animation_parent_class)->dispose (object);
 }
 
 static void
@@ -130,12 +128,12 @@ get_property (GObject    *object,
               GValue     *value,
               GParamSpec *pspec)
 {
-  BzAnimation *self = BZ_ANIMATION (object);
+  BgeAnimation *self = BGE_ANIMATION (object);
 
   switch (prop_id)
     {
     case PROP_WIDGET:
-      g_value_take_object (value, bz_animation_dup_widget (self));
+      g_value_take_object (value, bge_animation_dup_widget (self));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -148,7 +146,7 @@ set_property (GObject      *object,
               const GValue *value,
               GParamSpec   *pspec)
 {
-  BzAnimation *self = BZ_ANIMATION (object);
+  BgeAnimation *self = BGE_ANIMATION (object);
 
   switch (prop_id)
     {
@@ -164,7 +162,7 @@ set_property (GObject      *object,
 static void
 constructed (GObject *object)
 {
-  BzAnimation *self = BZ_ANIMATION (object);
+  BgeAnimation *self = BGE_ANIMATION (object);
 
   if (GTK_IS_WIDGET (self->widget))
     {
@@ -183,7 +181,7 @@ constructed (GObject *object)
 }
 
 static void
-bz_animation_class_init (BzAnimationClass *klass)
+bge_animation_class_init (BgeAnimationClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
@@ -193,7 +191,7 @@ bz_animation_class_init (BzAnimationClass *klass)
   object_class->dispose      = dispose;
 
   /**
-   * BzAnimation:widget:
+   * BgeAnimation:widget:
    *
    * The widget on which this animation is attached.
    */
@@ -208,7 +206,7 @@ bz_animation_class_init (BzAnimationClass *klass)
 }
 
 static void
-bz_animation_init (BzAnimation *self)
+bge_animation_init (BgeAnimation *self)
 {
   g_weak_ref_init (&self->wr, NULL);
   self->data = g_hash_table_new_full (
@@ -216,41 +214,41 @@ bz_animation_init (BzAnimation *self)
 }
 
 /**
- * bz_animation_new:
+ * bge_animation_new:
  * @widget: The widget onto which to attach the tick callback
  *
- * Creates a new `BzAnimation` object.
+ * Creates a new `BgeAnimation` object.
  *
- * Returns: The newly created `BzAnimation` object.
+ * Returns: The newly created `BgeAnimation` object.
  */
-BzAnimation *
-bz_animation_new (GtkWidget *widget)
+BgeAnimation *
+bge_animation_new (GtkWidget *widget)
 {
   g_return_val_if_fail (GTK_IS_WIDGET (widget), NULL);
   return g_object_new (
-      BZ_TYPE_ANIMATION,
+      BGE_TYPE_ANIMATION,
       "widget", widget,
       NULL);
 }
 
 /**
- * bz_animation_dup_widget:
- * @self: a `BzAnimation`
+ * bge_animation_dup_widget:
+ * @self: a `BgeAnimation`
  *
  * Gets the widget on which @self is attached.
  *
  * Returns: (nullable) (transfer full): the widget for @self
  */
 GtkWidget *
-bz_animation_dup_widget (BzAnimation *self)
+bge_animation_dup_widget (BgeAnimation *self)
 {
-  g_return_val_if_fail (BZ_IS_ANIMATION (self), NULL);
+  g_return_val_if_fail (BGE_IS_ANIMATION (self), NULL);
   return g_weak_ref_get (&self->wr);
 }
 
 /**
- * bz_animation_add_spring:
- * @self: a `BzAnimation`
+ * bge_animation_add_spring:
+ * @self: a `BgeAnimation`
  * @key: a string ID to replace
  * @from: the start value
  * @to: the end value
@@ -265,20 +263,20 @@ bz_animation_dup_widget (BzAnimation *self)
  * @self, then the old animation is replaced, maintaining the current velocity.
  */
 void
-bz_animation_add_spring (BzAnimation        *self,
-                         const char         *key,
-                         double              from,
-                         double              to,
-                         double              damping_ratio,
-                         double              mass,
-                         double              stiffness,
-                         BzAnimationCallback cb,
-                         gpointer            user_data,
-                         GDestroyNotify      destroy_data)
+bge_animation_add_spring (BgeAnimation        *self,
+                          const char          *key,
+                          double               from,
+                          double               to,
+                          double               damping_ratio,
+                          double               mass,
+                          double               stiffness,
+                          BgeAnimationCallback cb,
+                          gpointer             user_data,
+                          GDestroyNotify       destroy_data)
 {
   g_autoptr (GtkWidget) widget = NULL;
 
-  g_return_if_fail (BZ_IS_ANIMATION (self));
+  g_return_if_fail (BGE_IS_ANIMATION (self));
   g_return_if_fail (key != NULL);
   g_return_if_fail (cb != NULL);
 
@@ -340,19 +338,19 @@ bz_animation_add_spring (BzAnimation        *self,
 }
 
 /**
- * bz_animation_cancel:
- * @self: a `BzAnimation`
+ * bge_animation_cancel:
+ * @self: a `BgeAnimation`
  * @key: a string ID to remove
  *
  * If @key exists on @self, cancel the associated animation.
  */
 void
-bz_animation_cancel (BzAnimation *self,
-                     const char  *key)
+bge_animation_cancel (BgeAnimation *self,
+                      const char   *key)
 {
   g_autoptr (GtkWidget) widget = NULL;
 
-  g_return_if_fail (BZ_IS_ANIMATION (self));
+  g_return_if_fail (BGE_IS_ANIMATION (self));
   g_return_if_fail (key != NULL);
 
   if (!g_hash_table_contains (self->data, key))
@@ -371,17 +369,17 @@ bz_animation_cancel (BzAnimation *self,
 }
 
 /**
- * bz_animation_cancel_all:
- * @self: a `BzAnimation`
+ * bge_animation_cancel_all:
+ * @self: a `BgeAnimation`
  *
  * Cancel all animations on @self.
  */
 void
-bz_animation_cancel_all (BzAnimation *self)
+bge_animation_cancel_all (BgeAnimation *self)
 {
   g_autoptr (GtkWidget) widget = NULL;
 
-  g_return_if_fail (BZ_IS_ANIMATION (self));
+  g_return_if_fail (BGE_IS_ANIMATION (self));
 
   widget = g_weak_ref_get (&self->wr);
   if (widget != NULL)
@@ -414,9 +412,9 @@ tick_cb (GtkWidget     *widget,
          GdkFrameClock *frame_clock,
          GWeakRef      *wr)
 {
-  g_autoptr (BzAnimation) self = NULL;
-  gboolean       cancel        = FALSE;
-  GHashTableIter iter          = { 0 };
+  g_autoptr (BgeAnimation) self = NULL;
+  gboolean       cancel         = FALSE;
+  GHashTableIter iter           = { 0 };
 
   self = g_weak_ref_get (wr);
   if (self == NULL)

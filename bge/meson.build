@@ -1,0 +1,60 @@
+api_version = '0.1'
+
+bge_sources = [
+  'libbge.c',
+  'bge-animation.c',
+]
+
+bge_headers = [
+  'bge.h',
+  'bge-animation.h',
+]
+
+version_split = meson.project_version().split('.')
+version_conf = configuration_data()
+version_conf.set('VERSION', meson.project_version())
+version_conf.set('MAJOR_VERSION', version_split[0])
+version_conf.set('MINOR_VERSION', version_split[1])
+version_conf.set('MICRO_VERSION', version_split[2])
+
+configure_file(
+          input: 'bge-version.h.in',
+         output: 'bge-version.h',
+  configuration: version_conf,
+        install: true,
+    install_dir: get_option('includedir') / 'bge'
+)
+
+bge_deps = [
+  cc.find_library('m', required: true),
+  dependency('gtk4', version: '>= 4.20'),
+]
+
+bge_lib = shared_library(
+  'bge-' + api_version,
+  bge_sources,
+  dependencies: bge_deps,
+       install: true,
+)
+
+install_headers(
+  bge_headers + files('bge-version-macros.h'),
+  subdir: 'bge')
+
+pkg = import('pkgconfig')
+pkg.generate(
+  description: 'A shared library for bge',
+    libraries: bge_lib,
+         name: 'libbge',
+     filebase: 'bge-' + api_version,
+      version: meson.project_version(),
+      subdirs: 'bge',
+     requires: 'gtk4',
+  install_dir: get_option('libdir') / 'pkgconfig'
+)
+
+bge_dep = declare_dependency(
+  link_with: bge_lib,
+  dependencies: [bge_deps],
+  include_directories : include_directories('..', '.'),
+)

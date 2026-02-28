@@ -55,7 +55,6 @@ bz_sources = files(
   'bz-addons-dialog.c',
   'bz-age-rating-dialog.c',
   'bz-all-apps-page.c',
-  'bz-animation.c',
   'bz-app-permissions.c',
   'bz-app-size-dialog.c',
   'bz-app-tile.c',
@@ -165,6 +164,9 @@ bz_sources = files(
 subdir('progress-bar-designs')
 
 bz_deps = [
+  # Bazaar GTK Extensions; see ../bge/
+  bge_dep,
+
   math,
   gtk_dep,
   libadwaita_dep,
