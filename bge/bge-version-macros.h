@@ -1,6 +1,6 @@
 /* bge-version-macros.h
  *
- * Copyright 2025 Eva M
+ * Copyright 2026 Eva M
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
