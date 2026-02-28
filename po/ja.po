@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-24 19:01+0900\n"
-"PO-Revision-Date: 2026-02-24 19:31+0900\n"
+"POT-Creation-Date: 2026-02-28 14:55+0900\n"
+"PO-Revision-Date: 2026-02-28 15:03+0900\n"
 "Last-Translator: camegone <hoge_huga@example.com>\n"
 "Language-Team: Japanese <kde-i18n-doc@kde.org>\n"
 "Language: ja\n"
@@ -21,7 +21,7 @@ msgstr ""
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:3
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:6
-#: src/bz-window.blp:111
+#: src/bz-window.blp:110
 msgid "Bazaar"
 msgstr "Bazaar"
 
@@ -39,7 +39,7 @@ msgstr "新しいウィンドウ"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:8
 msgid "Discover and install applications"
-msgstr "アプリケーションを検索し、インストールする"
+msgstr "アプリケーションを検索して、インストールする"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:10
 msgid ""
@@ -93,7 +93,7 @@ msgstr ""
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:89
 msgid "Thanks for reading!"
-msgstr ""
+msgstr "読んでくれてありがとう!"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:97
 msgid "**New Features**"
@@ -650,17 +650,18 @@ msgstr ""
 msgid "fa60f4f * Move to brand new shiny Adw.ShortcutsDialog (#395)"
 msgstr ""
 
-#: src/bz-addons-dialog.blp:16 src/bz-full-view.blp:710
+#: src/bz-addons-dialog.blp:16 src/bz-full-view.blp:721
+#: src/bz-installed-tile.blp:101
 msgid "Manage Add-Ons"
 msgstr "アドオンを管理する"
 
-#: src/bz-addons-dialog.c:94 src/bz-full-view.blp:499
+#: src/bz-addons-dialog.c:94 src/bz-full-view.blp:510
 #: src/bz-installed-tile.blp:119 src/bz-transaction-dialog.c:231
 msgid "Remove"
 msgstr "削除する"
 
 #: src/bz-addons-dialog.c:99 src/bz-favorites-tile.c:159
-#: src/bz-full-view.blp:262 src/bz-full-view.blp:486
+#: src/bz-full-view.blp:273 src/bz-full-view.blp:497
 #: src/bz-transaction-dialog.c:202
 msgid "Install"
 msgstr "インストール"
@@ -1047,42 +1048,42 @@ msgid "Main Menu"
 msgstr "メインメニュー"
 
 #: src/bz-all-apps-page.blp:18 src/bz-apps-page.blp:18
-#: src/bz-user-data-page.blp:19 src/bz-window.blp:385
+#: src/bz-user-data-page.blp:19 src/bz-window.blp:384
 msgid "_Donate to Bazaar ❤️"
 msgstr "Bazaar に寄付する❤️(_D)"
 
 #: src/bz-all-apps-page.blp:25 src/bz-apps-page.blp:25
-#: src/bz-user-data-page.blp:26 src/bz-window.blp:392
+#: src/bz-user-data-page.blp:26 src/bz-window.blp:391
 msgid "_Refresh"
 msgstr "再読み込み(_R)"
 
 #: src/bz-all-apps-page.blp:30 src/bz-apps-page.blp:30
-#: src/bz-user-data-page.blp:31 src/bz-window.blp:397
+#: src/bz-user-data-page.blp:31 src/bz-window.blp:396
 msgid "_Preferences"
 msgstr "設定(_P)"
 
 #: src/bz-all-apps-page.blp:35 src/bz-apps-page.blp:35
-#: src/bz-user-data-page.blp:36
+#: src/bz-user-data-page.blp:36 src/bz-window.blp:401
 msgid "_Login With Flathub"
 msgstr "Flathub にログイン(_L)"
 
 #: src/bz-all-apps-page.blp:41 src/bz-apps-page.blp:41
-#: src/bz-user-data-page.blp:42 src/bz-window.blp:408
+#: src/bz-user-data-page.blp:42 src/bz-window.blp:407
 msgid "_Manage Leftover User Data"
 msgstr "残存しているユーザーデータを管理(_M)"
 
 #: src/bz-all-apps-page.blp:46 src/bz-apps-page.blp:46
-#: src/bz-user-data-page.blp:47 src/bz-window.blp:413
+#: src/bz-user-data-page.blp:47 src/bz-window.blp:412
 msgid "_Keyboard Shortcuts"
 msgstr "キーボードショートカット(_K)"
 
 #: src/bz-all-apps-page.blp:51 src/bz-apps-page.blp:51
-#: src/bz-user-data-page.blp:52 src/bz-window.blp:418
+#: src/bz-user-data-page.blp:52 src/bz-window.blp:417
 msgid "_About Bazaar"
 msgstr "Bazaar について(_A)"
 
 #: src/bz-all-apps-page.blp:58 src/bz-apps-page.blp:58
-#: src/bz-user-data-page.blp:59 src/bz-window.blp:425
+#: src/bz-user-data-page.blp:59 src/bz-window.blp:424
 msgid "_Quit Bazaar"
 msgstr "Bazaar を終了(_Q)"
 
@@ -1300,8 +1301,8 @@ msgid "Logged Out Successfully!"
 msgstr "正常にログアウトされました!"
 
 #: src/bz-application.c:893
-msgid "Performing setup..."
-msgstr "セットアップの実行中..."
+msgid "Performing setup…"
+msgstr "セットアップの実行中…"
 
 #: src/bz-application.c:977
 msgid "Set Up System Flathub?"
@@ -1351,92 +1352,92 @@ msgstr "Flathub をセットアップする"
 msgid "A backend error occurred"
 msgstr "バックエンドのエラーが発生しました"
 
-#: src/bz-application.c:1406 src/bz-application.c:3184 src/bz-window.blp:135
+#: src/bz-application.c:1406 src/bz-application.c:3178 src/bz-window.blp:134
 msgid "Refreshing…"
-msgstr "再読み込み中..."
+msgstr "再読み込み中…"
 
-#: src/bz-application.c:1553 src/bz-application.c:3180
+#: src/bz-application.c:1552 src/bz-application.c:3176
 #, c-format
 msgid "Loading %d apps…"
-msgstr "%d 個のアプリをロード中..."
+msgstr "%d 個のアプリをロード中…"
 
-#: src/bz-application.c:1558
+#: src/bz-application.c:1556
 msgid "Checking for updates…"
-msgstr "更新を確認中..."
+msgstr "更新を確認中…"
 
-#: src/bz-application.c:1614
+#: src/bz-application.c:1612
 msgid "Failed to open .flatpakref"
 msgstr ".flatpakref を開けませんでした"
 
-#: src/bz-application.c:1668
+#: src/bz-application.c:1666
 msgid "An initialization error occurred"
 msgstr "初期化中にエラーが発生しました"
 
-#: src/bz-application.c:2006
+#: src/bz-application.c:2004
 msgid "Failed to check for updates"
 msgstr "更新の確認に失敗しました"
 
-#: src/bz-application.c:2963
+#: src/bz-application.c:2961
 msgid "Could not find app"
 msgstr "アプリが見つかりませんでした"
 
-#: src/bz-application.c:3186
+#: src/bz-application.c:3180
 msgid "Writing to cache…"
-msgstr "キャッシュを書き込み中..."
+msgstr "キャッシュを書き込み中…"
 
-#: src/bz-appstream-parser.c:303
+#: src/bz-appstream-parser.c:304
 msgctxt "Project URL Type"
 msgid "Flathub Page"
 msgstr "Flathub ページ"
 
-#: src/bz-appstream-parser.c:324
+#: src/bz-appstream-parser.c:325
 msgctxt "Project URL Type"
 msgid "Project Website"
 msgstr "プロジェクトのウェブサイト"
 
-#: src/bz-appstream-parser.c:328
+#: src/bz-appstream-parser.c:329
 msgctxt "Project URL Type"
 msgid "Issue Tracker"
 msgstr "バグトラッカー"
 
-#: src/bz-appstream-parser.c:332
+#: src/bz-appstream-parser.c:333
 msgctxt "Project URL Type"
 msgid "FAQ"
 msgstr "よくある質問"
 
-#: src/bz-appstream-parser.c:336
+#: src/bz-appstream-parser.c:337
 msgctxt "Project URL Type"
 msgid "Help"
 msgstr "ヘルプ"
 
-#: src/bz-appstream-parser.c:340
+#: src/bz-appstream-parser.c:341
 msgctxt "Project URL Type"
 msgid "Donate"
 msgstr "寄付"
 
-#: src/bz-appstream-parser.c:346
+#: src/bz-appstream-parser.c:347
 msgctxt "Project URL Type"
 msgid "Translate"
 msgstr "翻訳"
 
-#: src/bz-appstream-parser.c:350
+#: src/bz-appstream-parser.c:351
 msgctxt "Project URL Type"
 msgid "Contact"
 msgstr "連絡先"
 
-#: src/bz-appstream-parser.c:354
+#: src/bz-appstream-parser.c:355
 msgctxt "Project URL Type"
 msgid "Source Code"
 msgstr "ソースコード"
 
-#: src/bz-appstream-parser.c:360
+#: src/bz-appstream-parser.c:361
 msgctxt "Project URL Type"
 msgid "Contribute"
 msgstr "貢献する"
 
 #: src/bz-curated-view.blp:11 src/bz-favorites-page.blp:68
 #: src/bz-flathub-page.blp:19 src/bz-full-view.blp:61
-#: src/bz-library-page.blp:63 src/bz-user-data-page.blp:86
+#: src/bz-library-page.blp:65 src/bz-user-data-page.blp:86
 msgid "Empty"
 msgstr "空"
 
@@ -1612,7 +1613,7 @@ msgstr "アンインストール"
 msgid "Failed to remove favorite"
 msgstr "お気に入りから削除できませんでした"
 
-#: src/bz-favorites-tile.blp:70
+#: src/bz-favorites-tile.blp:70 src/bz-installed-tile.blp:77
 msgid "Support This Application"
 msgstr "このアプリケーションを支援する"
 
@@ -1621,7 +1622,7 @@ msgid "Remove From Favorites"
 msgstr "お気に入りから削除"
 
 #: src/bz-favorites-page.blp:5 src/bz-favorites-page.blp:78
-#: src/bz-window.blp:443
+#: src/bz-window.blp:442
 msgid "Favorites"
 msgstr "お気に入り"
 
@@ -1939,7 +1940,7 @@ msgstr "Flathub が見つかりません"
 #: src/bz-flathub-page.blp:24
 msgid "The Flathub remote was not found on any of your Flatpak installations"
 msgstr ""
-"このコンピューター上のどの flatpak にも Flathub リモートレポジトリが見つかり"
+"このコンピューター上のどの Flatpak にも Flathub リモートレポジトリが見つかり"
 "ませんでした"
 
 #: src/bz-flathub-page.blp:35
@@ -1989,8 +1990,8 @@ msgstr "ゲームやお気に入りのタイトルを遊ぶためのアプリ"
 msgid "More Games"
 msgstr "ゲームをもっと見る"
 
-#: src/bz-full-view.blp:65 src/bz-library-page.blp:74
-#: src/bz-library-page.blp:78
+#: src/bz-full-view.blp:65 src/bz-library-page.blp:76
+#: src/bz-library-page.blp:80
 msgid "No Results"
 msgstr "結果無し"
 
@@ -2007,47 +2008,47 @@ msgid "Installing .flatpak bundles is not yet supported"
 msgstr ""
 ".flatpak 形式のバンドルをインストールする機能はまだサポートされていません"
 
-#: src/bz-full-view.blp:223
+#: src/bz-full-view.blp:234
 msgid "Support"
 msgstr "支援する"
 
-#: src/bz-full-view.blp:246 src/bz-full-view.blp:510
+#: src/bz-full-view.blp:257 src/bz-full-view.blp:521
 msgid "Open"
 msgstr "開く"
 
-#: src/bz-full-view.blp:259 src/bz-full-view.blp:483
+#: src/bz-full-view.blp:270 src/bz-full-view.blp:494
 msgid "Download & Install Application"
 msgstr "アプリケーションをダウンロードしてインストールする"
 
-#: src/bz-full-view.blp:274
+#: src/bz-full-view.blp:285
 msgid "Uninstall Application"
 msgstr "このアプリケーションをアンインストール"
 
-#: src/bz-full-view.blp:289 src/bz-full-view.blp:525
+#: src/bz-full-view.blp:300 src/bz-full-view.blp:536
 msgid "Install Other Version"
 msgstr "ほかのバージョンをインストール"
 
-#: src/bz-full-view.blp:447
+#: src/bz-full-view.blp:458
 msgid "Downloads/Month"
 msgstr "月あたりのダウンロード数"
 
-#: src/bz-full-view.blp:544
+#: src/bz-full-view.blp:555
 msgid "Stopped Receiving Core Updates"
-msgstr "アップデートの提供終了"
+msgstr "コアアップデートの提供終了"
 
-#: src/bz-full-view.blp:558
+#: src/bz-full-view.blp:569
 msgid ""
 "This app uses a runtime that no longer receives updates or security fixes. "
 "It may become unsafe to use."
 msgstr ""
 "このアプリは更新やセキュリティ修正の提供が終了したランタイムを使用していま"
-"す。 使用することが安全でなくなる可能性があります。"
+"す。 将来的に使用することが安全でなくなる可能性があります。"
 
-#: src/bz-full-view.blp:645
+#: src/bz-full-view.blp:656
 msgid "Trash Data"
 msgstr "データをゴミ箱に移動"
 
-#: src/bz-full-view.blp:786
+#: src/bz-full-view.blp:797
 msgid "Tags:"
 msgstr "タグ:"
 
@@ -2343,62 +2344,54 @@ msgstr "%s はほとんどのデバイスで動作します"
 msgid "Stopped Receiving Updates"
 msgstr "更新の提供終了"
 
-#: src/bz-installed-tile.blp:77
-msgid "Support this application"
-msgstr "このアプリケーションを支援する"
-
-#: src/bz-installed-tile.blp:101
-msgid "Manage Add-ons"
-msgstr "アドオンを管理する"
-
 #: src/bz-installed-tile.c:249
 msgid "Failed to load add-ons"
 msgstr "アドオンの読み込みに失敗しました"
 
-#: src/bz-library-page.blp:29
+#: src/bz-library-page.blp:31
 msgid "Search installed apps"
 msgstr "インストール済みのアプリを検索"
 
-#: src/bz-library-page.blp:46
+#: src/bz-library-page.blp:48
 msgid "Clear search"
 msgstr "検索を削除"
 
-#: src/bz-library-page.blp:67
+#: src/bz-library-page.blp:69
 msgid "No Apps Found"
 msgstr "アプリケーションがありません"
 
 #. Translators: .
-#: src/bz-library-page.blp:86 src/bz-window.blp:179
+#: src/bz-library-page.blp:98 src/bz-window.blp:178
 msgid "Library"
 msgstr "ライブラリー"
 
-#: src/bz-library-page.blp:114
+#: src/bz-library-page.blp:126
 msgid "Pending Updates"
 msgstr "実行待ちの更新"
 
-#: src/bz-library-page.blp:141
+#: src/bz-library-page.blp:153
 msgid "Downloads"
 msgstr "ダウンロード一覧"
 
-#: src/bz-library-page.blp:184
+#: src/bz-library-page.blp:196
 msgid "Recently Uninstalled"
 msgstr "最近アンインストールされたアプリ"
 
-#: src/bz-library-page.blp:235
+#: src/bz-library-page.blp:247
 msgid "Clear Finished Tasks"
 msgstr "完了したタスクを削除"
 
-#: src/bz-library-page.blp:246
+#: src/bz-library-page.blp:258
 msgid "Installed Apps"
 msgstr "インストール済みのアプリ"
 
-#: src/bz-library-page.c:150
+#: src/bz-library-page.c:179
 #, c-format
 msgid "No matches found for \"%s\" in the list of installed apps"
 msgstr ""
 "インストール済みのアプリ一覧には、「%s」という単語は見つかりませんでした"
 
-#: src/bz-library-page.c:163 src/bz-updates-card.c:257
+#: src/bz-library-page.c:192 src/bz-updates-card.c:257
 #, c-format
 msgid "%u Available Update"
 msgid_plural "%u Available Updates"
@@ -2901,7 +2894,7 @@ msgstr "検証済みアプリ開発者"
 
 #: src/bz-safety-calculator.c:332
 msgid "The developer of this app has been verified to be who they say they are"
-msgstr "このアプリの開発者はなりすましてはないことが確認されています"
+msgstr "このアプリの開発者はなりすましではないことが確認されています"
 
 #: src/bz-safety-calculator.c:341
 msgid "Proprietary Code"
@@ -2985,7 +2978,7 @@ msgstr "シークレット ストレージ サービス"
 #: src/bz-safety-calculator.c:549
 msgid "Can store and retrieve its own passwords using the system keyring"
 msgstr ""
-"スステムのキーリングを使用して、パスワードを保存または引き出すことができます"
+"システムのキーリングを使用して、パスワードを保存または引き出すことができます"
 
 #: src/bz-safety-calculator.c:554
 msgid "Desktop Notifications Service"
@@ -3192,19 +3185,19 @@ msgstr "アプリ、ゲーム、ソフトウェアを検索"
 msgid "Clear Search"
 msgstr "検索を削除"
 
-#: src/bz-search-widget.blp:152
+#: src/bz-search-widget.blp:167
 msgid "Categories Unavailable"
 msgstr "カテゴリーが利用不能です"
 
-#: src/bz-search-widget.blp:153
+#: src/bz-search-widget.blp:168
 msgid "Search for apps using the search bar above."
 msgstr "画面上側にある検索バーを使用してアプリを検索する。"
 
-#: src/bz-search-widget.blp:178
+#: src/bz-search-widget.blp:193
 msgid "Browse Categories"
 msgstr "カテゴリー一覧"
 
-#: src/bz-search-widget.blp:302
+#: src/bz-search-widget.blp:317
 msgid "No Applications Found"
 msgstr "アプリケーションがありません"
 
@@ -3473,11 +3466,11 @@ msgstr "%s のユーザーデータをゴミ箱に移す"
 msgid "Trash User Data"
 msgstr "ユーザーデータをゴミ箱に移動"
 
-#: src/bz-window.blp:153
+#: src/bz-window.blp:152
 msgid "Curated"
 msgstr "特選アプリ"
 
-#: src/bz-window.blp:166
+#: src/bz-window.blp:165
 msgid "Flathub"
 msgstr "Flathub"
 
@@ -3499,19 +3492,15 @@ msgid ""
 msgstr ""
 "ネットワークに接続されていますが、キャッシュされた Flathub を表示しています"
 
-#: src/bz-window.blp:402
-msgid "_Login with Flathub"
-msgstr "Flathub にログイン(_L)"
-
-#: src/bz-window.blp:450
+#: src/bz-window.blp:449
 msgid "Log Out"
 msgstr "ログアウト"
 
-#: src/bz-window.c:680
+#: src/bz-window.c:675
 msgid "You can't remove Bazaar from Bazaar!"
 msgstr "Bazaar を使って Bazaar を削除することはできません!"
 
-#: src/bz-window.c:966 src/bz-window.c:1000
+#: src/bz-window.c:961 src/bz-window.c:995
 msgid "Can't do that right now!"
 msgstr "今すぐにはできません!"
 
@@ -3520,45 +3509,54 @@ msgctxt "As in, \"100 Downloads\""
 msgid "Downloads"
 msgstr "ダウンロード"
 
-#: src/gtk/shortcuts-dialog.blp:6
+#: src/shortcuts-dialog.blp:6
 msgctxt "shortcut window"
 msgid "General"
 msgstr "一般"
 
-#: src/gtk/shortcuts-dialog.blp:9
+#: src/shortcuts-dialog.blp:9
 msgctxt "shortcut window"
 msgid "Refresh"
 msgstr "再読み込み"
 
-#: src/gtk/shortcuts-dialog.blp:14
+#: src/shortcuts-dialog.blp:14
 msgctxt "shortcut window"
 msgid "Open Preferences"
 msgstr "設定を開く"
 
-#: src/gtk/shortcuts-dialog.blp:19
+#: src/shortcuts-dialog.blp:19
 msgctxt "shortcut window"
 msgid "Open Search Dialog"
 msgstr "検索ダイアログを表示"
 
-#: src/gtk/shortcuts-dialog.blp:24
+#: src/shortcuts-dialog.blp:24
 msgctxt "shortcut window"
 msgid "Open Library"
 msgstr "ライブラリを開く"
 
-#: src/gtk/shortcuts-dialog.blp:30
+#: src/shortcuts-dialog.blp:30
 msgctxt "shortcut window"
 msgid "Show Shortcuts"
 msgstr "ショートカットを表示"
 
-#: src/gtk/shortcuts-dialog.blp:35
+#: src/shortcuts-dialog.blp:35
 msgctxt "shortcut window"
 msgid "Close Window"
 msgstr "ウィンドウを閉じる"
 
-#: src/gtk/shortcuts-dialog.blp:41
+#: src/shortcuts-dialog.blp:41
 msgctxt "shortcut window"
 msgid "Quit Bazaar"
 msgstr "Bazaar を終了"
+
+#~ msgid "Support this application"
+#~ msgstr "このアプリケーションを支援する"
+
+#~ msgid "Manage Add-ons"
+#~ msgstr "アドオンを管理する"
+
+#~ msgid "_Login with Flathub"
+#~ msgstr "Flathub にログイン(_L)"
 
 #~ msgid "_Synchronize Remotes"
 #~ msgstr "リモートと同期(_S)"
