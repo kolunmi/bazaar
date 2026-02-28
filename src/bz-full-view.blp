@@ -242,66 +242,12 @@ template $BzFullView: Adw.Bin {
                               }
                             }
                           }
-
-                          Box wide_install_controls {
-                            orientation: horizontal;
-                            spacing: 10;
-                            valign: center;
-
-                            Button wide_open_button {
-                              styles [
-                                "pill",
-                              ]
-
-                              has-tooltip: true;
-                              label: _("Open");
-                              visible: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
-                              sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
-                              clicked => $run_cb(template);
-                            }
-
-                            Button wide_install_button {
-                              styles [
-                                "suggested-action",
-                                "pill",
-                              ]
-
-                              has-tooltip: true;
-                              tooltip-text: _("Download & Install Application");
-                              visible: bind $logical_and($invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable) as <bool>) as <bool>, $is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
-                              sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
-                              label: _("Install");
-                              clicked => $install_cb(template);
-                            }
-
-                            Button {
-                              styles [
-                                "destructive-action",
-                                "circular",
-                              ]
-
-                              width-request: 45;
-                              has-tooltip: true;
-                              tooltip-text: _("Uninstall Application");
-                              visible: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
-                              sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
-                              icon-name: "user-trash-symbolic";
-                              clicked => $remove_cb(template);
-                            }
-
-                            Button {
-                              styles [
-                                "circular",
-                              ]
-
-                              width-request: 45;
-                              has-tooltip: true;
-                              icon-name: "download-plus-symbolic";
-                              tooltip-text: _("Install Other Version");
-                              visible: bind $logical_and($invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable) as <bool>) as <bool>, $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>) as <bool>;
-                              sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
-                              clicked => $install_cb(template);
-                            }
+                          $BzInstallControls wide_install_controls {
+                            wide: true;
+                            entry-group: bind template.entry-group as <$BzEntryGroup>;
+                            install => $install_cb(template);
+                            remove => $remove_cb(template);
+                            run => $run_cb(template);
                           }
                         }
                       }
@@ -470,74 +416,13 @@ template $BzFullView: Adw.Bin {
                         }
                       }
 
-                      Box narrow_install_controls {
-                        orientation: horizontal;
-                        spacing: 8;
-                        margin-start: 4;
-                        margin-end: 4;
-                        valign: center;
+                      $BzInstallControls narrow_install_controls {
+                        wide: false;
                         visible: false;
-
-                        Box {
-                          homogeneous: true;
-                          spacing: 8;
-                          hexpand: true;
-
-                          Button narrow_install_button {
-                            styles [
-                              "suggested-action",
-                              "pill",
-                            ]
-
-                            hexpand: true;
-                            has-tooltip: true;
-                            tooltip-text: _("Download & Install Application");
-                            visible: bind $logical_and($invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable) as <bool>) as <bool>, $is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
-                            sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
-                            label: _("Install");
-                            clicked => $install_cb(template);
-                          }
-
-                          Button {
-                            styles [
-                              "destructive-action",
-                              "circular",
-                            ]
-
-                            hexpand: true;
-                            visible: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
-                            sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
-                            label: _("Remove");
-                            clicked => $remove_cb(template);
-                          }
-
-                          Button narrow_open_button {
-                            styles [
-                              "pill",
-                            ]
-
-                            hexpand: true;
-                            has-tooltip: true;
-                            label: _("Open");
-                            visible: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
-                            sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
-                            clicked => $run_cb(template);
-                          }
-                        }
-
-                        Button {
-                          styles [
-                            "circular",
-                          ]
-
-                          width-request: 45;
-                          has-tooltip: true;
-                          icon-name: "download-plus-symbolic";
-                          tooltip-text: _("Install Other Version");
-                          visible: bind $logical_and($invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable) as <bool>) as <bool>, $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable) as <bool>) as <bool>) as <bool>;
-                          sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
-                          clicked => $install_cb(template);
-                        }
+                        entry-group: bind template.entry-group as <$BzEntryGroup>;
+                        install => $install_cb(template);
+                        remove => $remove_cb(template);
+                        run => $run_cb(template);
                       }
 
                       Box {

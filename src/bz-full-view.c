@@ -38,6 +38,7 @@
 #include "bz-flatpak-entry.h"
 #include "bz-full-view.h"
 #include "bz-hardware-support-dialog.h"
+#include "bz-install-controls.h"
 #include "bz-license-dialog.h"
 #include "bz-releases-list.h"
 #include "bz-safety-calculator.h"
@@ -73,11 +74,6 @@ struct _BzFullView
   AdwViewStack      *stack;
   GtkWidget         *shadow_overlay;
   GtkToggleButton   *description_toggle;
-
-  GtkWidget *wide_open_button;
-  GtkWidget *wide_install_button;
-  GtkWidget *narrow_install_button;
-  GtkWidget *narrow_open_button;
 };
 
 G_DEFINE_FINAL_TYPE (BzFullView, bz_full_view, ADW_TYPE_BIN)
@@ -110,9 +106,6 @@ static void
 addon_transact_cb (BzFullView     *self,
                    BzEntry        *entry,
                    BzAddonsDialog *dialog);
-
-static void
-grab_first_button (BzFullView *self);
 
 static void
 bz_full_view_dispose (GObject *object)
@@ -1175,6 +1168,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   g_type_ensure (BZ_TYPE_FAVORITE_BUTTON);
   g_type_ensure (BZ_TYPE_FLATPAK_ENTRY);
   g_type_ensure (BZ_TYPE_HARDWARE_SUPPORT_DIALOG);
+  g_type_ensure (BZ_TYPE_INSTALL_CONTROLS);
   g_type_ensure (BZ_TYPE_SECTION_VIEW);
   g_type_ensure (BZ_TYPE_RELEASES_LIST);
   g_type_ensure (BZ_TYPE_SCREENSHOTS_CAROUSEL);
@@ -1189,10 +1183,6 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzFullView, main_scroll);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, shadow_overlay);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, description_toggle);
-  gtk_widget_class_bind_template_child (widget_class, BzFullView, wide_open_button);
-  gtk_widget_class_bind_template_child (widget_class, BzFullView, wide_install_button);
-  gtk_widget_class_bind_template_child (widget_class, BzFullView, narrow_install_button);
-  gtk_widget_class_bind_template_child (widget_class, BzFullView, narrow_open_button);
   gtk_widget_class_bind_template_callback (widget_class, is_scrolled_down);
   gtk_widget_class_bind_template_callback (widget_class, format_favorites_count);
   gtk_widget_class_bind_template_callback (widget_class, format_recent_downloads);
@@ -1348,8 +1338,6 @@ bz_full_view_set_entry_group (BzFullView   *self,
   else
     adw_view_stack_set_visible_child_name (self->stack, "empty");
 
-  grab_first_button (self);
-
   gtk_adjustment_set_value (gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (self->main_scroll)), 0.0);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ENTRY_GROUP]);
@@ -1361,19 +1349,4 @@ bz_full_view_get_entry_group (BzFullView *self)
 {
   g_return_val_if_fail (BZ_IS_FULL_VIEW (self), NULL);
   return self->group;
-}
-
-static void
-grab_first_button (BzFullView *self)
-{
-  g_return_if_fail (BZ_IS_FULL_VIEW (self));
-
-  if (gtk_widget_get_visible (self->wide_open_button))
-    gtk_widget_grab_focus (self->wide_open_button);
-  else if (gtk_widget_get_visible (self->wide_install_button))
-    gtk_widget_grab_focus (self->wide_install_button);
-  else if (gtk_widget_get_visible (self->narrow_install_button))
-    gtk_widget_grab_focus (self->narrow_install_button);
-  else if (gtk_widget_get_visible (self->narrow_open_button))
-    gtk_widget_grab_focus (self->narrow_open_button);
 }
