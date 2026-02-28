@@ -720,8 +720,10 @@ search_query_then (DexFuture *future,
     }
   else
     {
-      const char *search_text = gtk_editable_get_text (GTK_EDITABLE (self->search_bar));
-      page_name               = (search_text && *search_text) ? "no-results" : "empty";
+      const char *search_text = NULL;
+
+      search_text = gtk_editable_get_text (GTK_EDITABLE (self->search_bar));
+      page_name   = (search_text && *search_text) ? "no-results" : "empty";
     }
 
   self->current_query = g_object_ref (finished);
