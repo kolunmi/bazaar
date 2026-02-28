@@ -40,9 +40,11 @@ BGE_AVAILABLE_IN_ALL
 BgeAnimation *
 bge_animation_new (GtkWidget *widget);
 
+BGE_AVAILABLE_IN_ALL
 GtkWidget *
 bge_animation_dup_widget (BgeAnimation *self);
 
+BGE_AVAILABLE_IN_ALL
 void
 bge_animation_add_spring (BgeAnimation        *self,
                           const char          *key,
@@ -55,10 +57,12 @@ bge_animation_add_spring (BgeAnimation        *self,
                           gpointer             user_data,
                           GDestroyNotify       destroy_data);
 
+BGE_AVAILABLE_IN_ALL
 void
 bge_animation_cancel (BgeAnimation *self,
                       const char   *key);
 
+BGE_AVAILABLE_IN_ALL
 void
 bge_animation_cancel_all (BgeAnimation *self);
 
