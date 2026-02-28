@@ -42,6 +42,7 @@ template $BzInstallControls: Box {
         child: Box {
           spacing: bind $choose(template.wide, 10, 8) as <int>;
           homogeneous: bind $invert_boolean(template.wide) as <bool>;
+          halign: bind $choose(template.wide, 2, 0) as <int>;
 
           Button open_button {
             styles [
@@ -92,6 +93,7 @@ template $BzInstallControls: Box {
         child: Box {
           spacing: bind $choose(template.wide, 10, 8) as <int>;
           homogeneous: bind $invert_boolean(template.wide) as <bool>;
+          halign: bind $choose(template.wide, 2, 0) as <int>;
 
           Button update_button {
             styles [
