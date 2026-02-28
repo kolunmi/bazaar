@@ -64,6 +64,7 @@ typedef struct
   double               damping_ratio;
   double               mass;
   double               stiffness;
+  double               damping;
   gboolean             clamp;
   BgeAnimationCallback cb;
   gpointer             user_data;
@@ -315,6 +316,10 @@ bge_animation_add_spring (BgeAnimation        *self,
           data->user_data     = user_data;
           data->destroy_data  = destroy_data;
 
+          data->damping = damping_ratio *
+                          (/* critical damping */
+                           2 * sqrt (mass * stiffness));
+
           /* We'll fill this in on the first iteration */
           data->timer = NULL;
 
@@ -453,11 +458,7 @@ tick_cb (GtkWidget     *widget,
               value   = oscillate (data, elapsed, &data->velocity);
             }
 
-          finished = elapsed > data->est_duration ||
-                     (data->damping_ratio >= 1.0 &&
-                      (G_APPROX_VALUE (value, data->to, EPSILON) ||
-                       (data->from > data->to && value < data->to) ||
-                       (data->from < data->to && value > data->to)));
+          finished = elapsed >= data->est_duration;
         }
       if (finished)
         value = data->to;
@@ -486,8 +487,7 @@ oscillate (SpringData *data,
            double      time,
            double     *velocity)
 {
-  double t        = time * 100.0; // ?
-  double b        = data->damping_ratio;
+  double b        = data->damping;
   double m        = data->mass;
   double k        = data->stiffness;
   double v0       = 0.0;
@@ -499,7 +499,7 @@ oscillate (SpringData *data,
   beta     = b / (2 * m);
   omega0   = sqrt (k / m);
   x0       = data->from - data->to;
-  envelope = exp (-beta * t);
+  envelope = exp (-beta * time);
 
   /*
    * Solutions of the form C1*e^(lambda1*x) + C2*e^(lambda2*x)
@@ -513,12 +513,12 @@ oscillate (SpringData *data,
     {
       if (velocity != NULL)
         *velocity = envelope *
-                    (-beta * t * v0 -
-                     beta * beta * t * x0 +
+                    (-beta * time * v0 -
+                     beta * beta * time * x0 +
                      v0);
 
       return data->to + envelope *
-                            (x0 + (beta * x0 + v0) * t);
+                            (x0 + (beta * x0 + v0) * time);
     }
 
   /* Underdamped */
@@ -530,17 +530,17 @@ oscillate (SpringData *data,
 
       if (velocity != NULL)
         *velocity = envelope *
-                    (v0 * cos (omega1 * t) -
+                    (v0 * cos (omega1 * time) -
                      (x0 * omega1 +
                       (beta * beta * x0 + beta * v0) /
                           (omega1)) *
-                         sin (omega1 * t));
+                         sin (omega1 * time));
 
       return data->to + envelope *
-                            (x0 * cos (omega1 * t) +
+                            (x0 * cos (omega1 * time) +
                              ((beta * x0 + v0) /
                               omega1) *
-                                 sin (omega1 * t));
+                                 sin (omega1 * time));
     }
 
   /* Overdamped */
@@ -552,16 +552,16 @@ oscillate (SpringData *data,
 
       if (velocity != NULL)
         *velocity = envelope *
-                    (v0 * coshl (omega2 * t) +
+                    (v0 * coshl (omega2 * time) +
                      (omega2 * x0 -
                       (beta * beta * x0 + beta * v0) /
                           omega2) *
-                         sinhl (omega2 * t));
+                         sinhl (omega2 * time));
 
       return data->to + envelope *
-                            (x0 * coshl (omega2 * t) +
+                            (x0 * coshl (omega2 * time) +
                              ((beta * x0 + v0) / omega2) *
-                                 sinhl (omega2 * t));
+                                 sinhl (omega2 * time));
     }
 
   g_assert_not_reached ();
@@ -572,23 +572,16 @@ get_first_zero (SpringData *data)
 {
   /* The first frame is not that important and we avoid finding the trivial 0
    * for in-place animations. */
-  double i = 0.0;
-  double y = 0.0;
-
-  i = 0.001;
-  y = oscillate (data, i, NULL);
-
-  while ((data->to - data->from > DBL_EPSILON && data->to - y > EPSILON) ||
-         (data->from - data->to > DBL_EPSILON && y - data->to > EPSILON))
+  for (int i = 0; i < 20000; i++)
     {
-      if (i > 2.0)
-        return 0.0;
+      double y = 0.0;
 
-      i += 0.001;
-      y = oscillate (data, i, NULL);
+      y = oscillate (data, (double) i / 1000.0, NULL);
+      if (!((data->to - data->from > DBL_EPSILON && data->to - y > EPSILON) ||
+            (data->from - data->to > DBL_EPSILON && y - data->to > EPSILON)))
+        return y;
     }
-
-  return i;
+  return 0.0;
 }
 
 static double
@@ -601,9 +594,8 @@ calculate_duration (SpringData *data)
   double x1     = 0.0;
   double y1     = 0.0;
   double m      = 0.0;
-  double i      = 0.0;
 
-  beta = data->damping_ratio / (2 * data->mass);
+  beta = data->damping / (2 * data->mass);
 
   if (G_APPROX_VALUE (beta, 0, DBL_EPSILON) ||
       beta < 0)
@@ -643,11 +635,10 @@ calculate_duration (SpringData *data)
   x1 = (data->to - y0 + m * x0) / m;
   y1 = oscillate (data, x1, NULL);
 
-  while (ABS (data->to - y1) > EPSILON)
+  for (int i = 0;
+       ABS (data->to - y1) > EPSILON && i < 1000;
+       i++)
     {
-      if (i > 1.0)
-        return 0.0;
-
       x0 = x1;
       y0 = y1;
 
@@ -655,10 +646,12 @@ calculate_duration (SpringData *data)
 
       x1 = (data->to - y0 + m * x0) / m;
       y1 = oscillate (data, x1, NULL);
-      i += 0.001;
     }
 
-  return x1;
+  if (ABS (data->to - y1) <= EPSILON)
+    return x1;
+  else
+    return 0.0;
 }
 
 /* ///COPIED FROM LIBADWAITA */

@@ -27,6 +27,9 @@
 
 #define RAISE_FACTOR 0.025
 
+/* `ratio < 1.0` means it overshoots */
+#define ANIMATION_DAMPING_RATIO 1.15
+
 struct _BzCarousel
 {
   GtkWidget parent_instance;
@@ -729,7 +732,7 @@ model_selected_changed (BzCarousel         *self,
 
   idx = gtk_single_selection_get_selected (selection);
   if (idx != G_MAXUINT)
-    move_to_idx (self, idx, 1.0);
+    move_to_idx (self, idx, ANIMATION_DAMPING_RATIO);
 
   gtk_widget_queue_allocate (GTK_WIDGET (self));
 }
@@ -873,7 +876,7 @@ move_to_idx (BzCarousel *self,
           char buf[64] = { 0 };
 
 #define MASS      1.0
-#define STIFFNESS 0.16
+#define STIFFNESS 800.0
 
           /* pointer is to ensure a unique identifier so as not to overwrite any
              other child's key */
@@ -968,10 +971,10 @@ ensure_viewport (BzCarousel         *self,
       if (selected == G_MAXUINT)
         {
           gtk_single_selection_set_selected (model, 0);
-          move_to_idx (self, 0, animate ? 1.0 : -1.0);
+          move_to_idx (self, 0, animate ? ANIMATION_DAMPING_RATIO : -1.0);
         }
       else
-        move_to_idx (self, selected, animate ? 1.0 : -1.0);
+        move_to_idx (self, selected, animate ? ANIMATION_DAMPING_RATIO : -1.0);
     }
 
   gtk_widget_queue_allocate (GTK_WIDGET (self));
