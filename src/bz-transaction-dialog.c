@@ -152,8 +152,8 @@ create_entry_radio_buttons (AdwAlertDialog *alert,
       gtk_widget_add_css_class (listbox, "boxed-list");
 
       keep_data_row = adw_action_row_new ();
-      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (keep_data_row), _ ("Keep Data"));
-      adw_action_row_set_subtitle (ADW_ACTION_ROW (keep_data_row), _ ("Allow restoring settings and content"));
+      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (keep_data_row), _ ("Keep User Data"));
+      adw_action_row_set_subtitle (ADW_ACTION_ROW (keep_data_row), _ ("Allow restoring personal settings &amp; content"));
       keep_radio = gtk_check_button_new ();
       gtk_widget_set_valign (keep_radio, GTK_ALIGN_CENTER);
       gtk_check_button_set_active (GTK_CHECK_BUTTON (keep_radio), TRUE);
@@ -162,8 +162,8 @@ create_entry_radio_buttons (AdwAlertDialog *alert,
       gtk_list_box_append (GTK_LIST_BOX (listbox), keep_data_row);
 
       delete_data_row = adw_action_row_new ();
-      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (delete_data_row), _ ("Delete Data"));
-      adw_action_row_set_subtitle (ADW_ACTION_ROW (delete_data_row), _ ("Permanently remove app data to save space"));
+      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (delete_data_row), _ ("Delete All Data"));
+      adw_action_row_set_subtitle (ADW_ACTION_ROW (delete_data_row), _ ("Permanently erase user data to save space"));
       delete_radio = gtk_check_button_new ();
       gtk_widget_set_valign (delete_radio, GTK_ALIGN_CENTER);
       gtk_check_button_set_group (GTK_CHECK_BUTTON (delete_radio), GTK_CHECK_BUTTON (keep_radio));
