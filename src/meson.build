@@ -16,6 +16,7 @@ md4c_dep             = dependency('md4c', version: '>= 0.5.1')
 webkit_dep           = dependency('webkitgtk-6.0', version: '>= 2.50.2')
 libsecret_dep        = dependency('libsecret-1', version: '>= 0.20')
 libproxy_dep         = dependency('libproxy-1.0', version: '>= 0.5')
+malcontent_dep 	     = dependency('malcontent-0', version: '>= 0.12.0')
 
 
 dl_worker_sources = [
@@ -120,6 +121,7 @@ bz_sources = files(
   'bz-list-tile.c',
   'bz-login-page.c',
   'bz-lozenge.c',
+  'bz-malcontent-service.c',
   'bz-markdown-render.c',
   'bz-newline-parser.c',
   'bz-parser.c',
@@ -184,6 +186,7 @@ bz_deps = [
   webkit_dep,
   libsecret_dep,
   libproxy_dep,
+  malcontent_dep,
 ]
 
 gen_gobject = find_program('./gen_gobject.sh')

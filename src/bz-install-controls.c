@@ -159,6 +159,30 @@ get_visible_page (gpointer    object,
     return g_strdup ("empty");
 }
 
+static gboolean
+is_blocked (gpointer      object,
+            GListModel   *parental_blocked,
+            BzEntryGroup *group)
+{
+  const char *id = NULL;
+
+  if (parental_blocked == NULL || group == NULL)
+    return FALSE;
+
+  id = bz_entry_group_get_id (group);
+  if (id == NULL)
+    return FALSE;
+
+  for (guint i = 0; i < g_list_model_get_n_items (parental_blocked); i++)
+    {
+      g_autoptr (GtkStringObject) obj = g_list_model_get_item (parental_blocked, i);
+      if (strstr (gtk_string_object_get_string (obj), id) != NULL)
+        return TRUE;
+    }
+
+  return FALSE;
+}
+
 static void
 bz_install_controls_dispose (GObject *object)
 {
@@ -290,6 +314,7 @@ bz_install_controls_class_init (BzInstallControlsClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, run_cb);
   gtk_widget_class_bind_template_callback (widget_class, update_cb);
   gtk_widget_class_bind_template_callback (widget_class, get_visible_page);
+  gtk_widget_class_bind_template_callback (widget_class, is_blocked);
 }
 
 static void

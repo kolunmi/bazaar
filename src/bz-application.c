@@ -48,6 +48,7 @@
 #include "bz-internal-config.h"
 #include "bz-io.h"
 #include "bz-login-page.h"
+#include "bz-malcontent-service.h"
 #include "bz-newline-parser.h"
 #include "bz-parser.h"
 #include "bz-preferences-dialog.h"
@@ -78,6 +79,7 @@ struct _BzApplication
   BzGnomeShellSearchProvider *gs_search;
   BzInternalConfig           *internal_config;
   BzMainConfig               *config;
+  BzMalcontentService        *malcontent;
   BzNewlineParser            *txt_blocklist_parser;
   BzSearchEngine             *search_engine;
   BzStateInfo                *state;
@@ -349,6 +351,7 @@ bz_application_dispose (GObject *object)
   g_clear_object (&self->groups);
   g_clear_object (&self->gs_search);
   g_clear_object (&self->installed_apps);
+  g_clear_object (&self->malcontent);
   g_clear_object (&self->internal_config);
   g_clear_object (&self->network);
   g_clear_object (&self->search_biases);
@@ -1648,6 +1651,8 @@ init_fiber_finally (DexFuture *future,
       self->periodic_timeout_source = g_timeout_add_seconds (
           /* Check every day */
           60 * 60 * 24, (GSourceFunc) periodic_timeout_cb, self);
+
+      bz_malcontent_service_start (self->malcontent);
     }
   else
     {
@@ -2670,6 +2675,24 @@ init_service_struct (BzApplication *self,
     bz_state_info_set_system_icon_theme (self->state, system_theme);
   }
 
+  {
+    g_autoptr (GError)          bus_error = NULL;
+    g_autoptr (GDBusConnection) sys_bus   = NULL;
+
+    sys_bus = g_bus_get_sync (G_BUS_TYPE_SYSTEM, NULL, &bus_error);
+    if (sys_bus != NULL)
+      self->malcontent = bz_malcontent_service_new (sys_bus, self->state);
+    else
+      g_warning ("Failed to connect to system bus for malcontent: %s", bus_error->message);
+
+    if (self->malcontent != NULL)
+      g_signal_connect_swapped (
+          self->state,
+          "notify::parental-blocked-ids",
+          G_CALLBACK (show_hide_app_setting_changed),
+          self);
+  }
+
   g_signal_connect_swapped (
       self->state,
       "notify::disable-blocklists",
@@ -3095,6 +3118,18 @@ validate_group_for_ui (BzApplication *self,
   if (bz_state_info_get_show_only_verified (self->state) &&
       !bz_entry_group_get_is_verified (group))
     return FALSE;
+
+  if (self->malcontent != NULL)
+    {
+      int parental_age = 0;
+      int app_age      = 0;
+
+      parental_age = bz_state_info_get_parental_age_rating (self->state);
+      app_age      = bz_entry_group_get_content_age_rating (group);
+
+      if (app_age > parental_age && parental_age != 0)
+        return FALSE;
+    }
 
   if (bz_state_info_get_disable_blocklists (self->state))
     return TRUE;

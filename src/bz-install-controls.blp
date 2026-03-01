@@ -48,7 +48,7 @@ template $BzInstallControls: Box {
             styles [
               "pill",
             ]
-
+            visible: bind $invert_boolean($is_blocked(template.state as <$BzStateInfo>.parental-blocked-ids, template.entry-group as <$BzEntryGroup>) as <bool>) as <bool>;
             has-tooltip: true;
             hexpand: bind $invert_boolean(template.wide) as <bool>;
             label: _("Open");

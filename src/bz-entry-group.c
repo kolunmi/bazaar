@@ -54,6 +54,7 @@ struct _BzEntryGroup
   int            n_addons;
   char          *donation_url;
   GListModel    *categories;
+  int            content_age_rating;
 
   int max_usefulness;
 
@@ -747,6 +748,13 @@ bz_entry_group_get_categories (BzEntryGroup *self)
   return self->categories;
 }
 
+int
+bz_entry_group_get_content_age_rating (BzEntryGroup *self)
+{
+  g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), 0);
+  return self->content_age_rating;
+}
+
 guint64
 bz_entry_group_get_user_data_size (BzEntryGroup *self)
 {
@@ -861,29 +869,30 @@ bz_entry_group_add (BzEntryGroup *self,
                     BzEntry      *runtime,
                     gboolean      ignore_eol)
 {
-  g_autoptr (GMutexLocker) locker  = NULL;
-  const char   *unique_id          = NULL;
-  const char   *installed_version  = NULL;
-  gint          usefulness         = 0;
-  const char   *eol                = NULL;
-  const char   *title              = NULL;
-  const char   *developer          = NULL;
-  const char   *description        = NULL;
-  GdkPaintable *icon_paintable     = NULL;
-  GIcon        *mini_icon          = NULL;
-  const char   *search_tokens      = NULL;
-  gboolean      is_floss           = FALSE;
-  const char   *light_accent_color = NULL;
-  const char   *dark_accent_color  = NULL;
-  gboolean      is_flathub         = FALSE;
-  gboolean      is_verified        = FALSE;
-  guint64       installed_size     = 0;
-  GListModel   *addons             = NULL;
-  int           n_addons           = 0;
-  const char   *donation_url       = NULL;
-  GListModel   *entry_categories   = NULL;
-  guint         existing           = 0;
-  gboolean      is_searchable      = FALSE;
+  g_autoptr (GMutexLocker) locker     = NULL;
+  const char      *unique_id          = NULL;
+  const char      *installed_version  = NULL;
+  gint             usefulness         = 0;
+  const char      *eol                = NULL;
+  const char      *title              = NULL;
+  const char      *developer          = NULL;
+  const char      *description        = NULL;
+  GdkPaintable    *icon_paintable     = NULL;
+  GIcon           *mini_icon          = NULL;
+  const char      *search_tokens      = NULL;
+  gboolean         is_floss           = FALSE;
+  const char      *light_accent_color = NULL;
+  const char      *dark_accent_color  = NULL;
+  gboolean         is_flathub         = FALSE;
+  gboolean         is_verified        = FALSE;
+  guint64          installed_size     = 0;
+  GListModel      *addons             = NULL;
+  int              n_addons           = 0;
+  const char      *donation_url       = NULL;
+  GListModel      *entry_categories   = NULL;
+  guint            existing           = 0;
+  gboolean         is_searchable      = FALSE;
+  AsContentRating *content_rating     = NULL;
 
   g_return_if_fail (BZ_IS_ENTRY_GROUP (self));
   g_return_if_fail (BZ_IS_ENTRY (entry));
@@ -929,6 +938,7 @@ bz_entry_group_add (BzEntryGroup *self,
   installed_size     = bz_entry_get_installed_size (entry);
   donation_url       = bz_entry_get_donation_url (entry);
   entry_categories   = bz_entry_get_categories (entry);
+  content_rating     = bz_entry_get_content_rating (entry);
 
   addons        = bz_entry_get_addons (entry);
   is_searchable = bz_entry_is_searchable (entry);
@@ -1034,6 +1044,8 @@ bz_entry_group_add (BzEntryGroup *self,
           self->categories = g_object_ref (entry_categories);
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CATEGORIES]);
         }
+      if (content_rating != NULL)
+        self->content_age_rating = as_content_rating_get_minimum_age (content_rating);
 
       self->max_usefulness = usefulness;
     }

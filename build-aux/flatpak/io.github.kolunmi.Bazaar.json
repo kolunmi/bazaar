@@ -80,6 +80,29 @@
           ]
         },
         {
+          "name": "malcontent",
+          "buildsystem": "meson",
+          "config-opts": [
+	    "-Dui=disabled",
+	    "-Dinstalled_tests=false"
+          ],
+          "sources": [
+            {
+              "type": "git",
+              "url": "https://gitlab.freedesktop.org/pwithnall/malcontent.git",
+              "tag": "0.12.0"
+            },
+            {
+	      "type": "shell",
+	      "commands": [
+		"sed -i \"/subdir('tests')/d\" libmalcontent/meson.build",
+		"sed -i \"/subdir('tests')/d\" meson.build",
+		"sed -i \"/subdir('pam')/d\" meson.build"
+	      ]
+	    }
+          ]
+        },
+        {
           "name": "flatpak",
           "buildsystem": "meson",
           "config-opts": [
