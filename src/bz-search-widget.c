@@ -73,14 +73,6 @@ enum
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
 
-enum
-{
-  SIGNAL_SELECT,
-
-  LAST_SIGNAL,
-};
-static guint signals[LAST_SIGNAL];
-
 static void
 search_changed (GtkEditable    *editable,
                 BzSearchWidget *self);
@@ -251,13 +243,6 @@ no_results_found_subtitle (gpointer    object,
   return g_strdup_printf (_ ("No results found for \"%s\" in Flathub"), search_text);
 }
 
-static void
-apps_page_select_cb (BzSearchWidget *self,
-                     BzEntryGroup   *group,
-                     BzAppsPage     *page)
-{
-  g_signal_emit (self, signals[SIGNAL_SELECT], 0, group, FALSE);
-}
 
 static void
 pill_list_cb (BzSearchWidget *self,
@@ -284,10 +269,6 @@ category_clicked (BzFlathubCategory *category,
 
   apps_page = bz_apps_page_new_from_category (category);
 
-  g_signal_connect_swapped (
-      apps_page, "select",
-      G_CALLBACK (apps_page_select_cb), self);
-
   adw_navigation_view_push (ADW_NAVIGATION_VIEW (nav_view), apps_page);
 }
 
@@ -313,20 +294,11 @@ static void
 tile_activated_cb (GtkListItem   *list_item,
                    BzRichAppTile *tile)
 {
-  BzSearchWidget *self   = NULL;
-  BzSearchResult *result = NULL;
-  BzEntryGroup   *group  = NULL;
+  BzSearchResult *result = gtk_list_item_get_item (list_item);
+  BzEntryGroup   *group  = bz_search_result_get_group (result);
 
-  g_assert (GTK_IS_LIST_ITEM (list_item));
-  g_assert (BZ_IS_RICH_APP_TILE (tile));
-
-  self = BZ_SEARCH_WIDGET (gtk_widget_get_ancestor (GTK_WIDGET (tile),
-                                                    BZ_TYPE_SEARCH_WIDGET));
-
-  result = gtk_list_item_get_item (list_item);
-  group  = bz_search_result_get_group (result);
-
-  g_signal_emit (self, signals[SIGNAL_SELECT], 0, group, FALSE);
+  gtk_widget_activate_action (GTK_WIDGET (tile), "window.show-group", "s",
+                              bz_entry_group_get_id (group));
 }
 
 static void
@@ -335,23 +307,6 @@ reset_search_cb (BzSearchWidget *self,
 {
   bz_search_widget_set_text (self, "");
   bz_search_widget_refresh (self);
-}
-
-static void
-tile_install_clicked_cb (GtkListItem   *list_item,
-                         BzRichAppTile *tile)
-{
-  BzSearchWidget *self   = NULL;
-  BzSearchResult *result = NULL;
-  BzEntryGroup   *group  = NULL;
-
-  self = BZ_SEARCH_WIDGET (gtk_widget_get_ancestor (GTK_WIDGET (tile), BZ_TYPE_SEARCH_WIDGET));
-  g_assert (self != NULL);
-
-  result = gtk_list_item_get_item (list_item);
-  group  = bz_search_result_get_group (result);
-
-  g_signal_emit (self, signals[SIGNAL_SELECT], 0, group, TRUE);
 }
 
 static void
@@ -386,18 +341,6 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
-  signals[SIGNAL_SELECT] =
-      g_signal_new (
-          "select",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
-          NULL,
-          G_TYPE_NONE, 2,
-          BZ_TYPE_ENTRY_GROUP,
-          G_TYPE_BOOLEAN);
-
   g_type_ensure (BZ_TYPE_ASYNC_TEXTURE);
   g_type_ensure (BZ_TYPE_CATEGORY_TILE);
   g_type_ensure (BZ_TYPE_DYNAMIC_LIST_VIEW);
@@ -417,7 +360,6 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, grid_view);
   gtk_widget_class_bind_template_callback (widget_class, bind_category_tile_cb);
   gtk_widget_class_bind_template_callback (widget_class, unbind_category_tile_cb);
-  gtk_widget_class_bind_template_callback (widget_class, tile_install_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
@@ -630,8 +572,6 @@ search_activate (GtkText        *text,
   g_autoptr (BzSearchResult) result = NULL;
   BzEntryGroup *group               = NULL;
 
-  g_clear_object (&self->selected);
-
   model   = gtk_grid_view_get_model (self->grid_view);
   n_items = g_list_model_get_n_items (G_LIST_MODEL (model));
 
@@ -643,10 +583,15 @@ search_activate (GtkText        *text,
       result = g_list_model_get_item (G_LIST_MODEL (model), 0);
       group  = bz_search_result_get_group (result);
 
-      if (bz_entry_group_get_installable_and_available (group) > 0 ||
-          bz_entry_group_get_removable_and_available (group) > 0)
+      if (bz_entry_group_get_removable_and_available (group) > 0)
         {
-          g_signal_emit (self, signals[SIGNAL_SELECT], 0, group, TRUE);
+          gtk_widget_activate_action (GTK_WIDGET (self), "window.remove-group", "(sb)",
+                                      bz_entry_group_get_id (group), FALSE);
+        }
+      else if (bz_entry_group_get_installable_and_available (group) > 0)
+        {
+          gtk_widget_activate_action (GTK_WIDGET (self), "window.install-group", "(sb)",
+                                      bz_entry_group_get_id (group), FALSE);
         }
     }
 }
@@ -820,5 +765,6 @@ emit_idx (BzSearchWidget *self,
   result = g_list_model_get_item (G_LIST_MODEL (model), selected_idx);
   group  = bz_search_result_get_group (result);
 
-  g_signal_emit (self, signals[SIGNAL_SELECT], 0, group, FALSE);
+  gtk_widget_activate_action (GTK_WIDGET (self), "window.show-group", "s",
+                              bz_entry_group_get_id (group));
 }

@@ -53,16 +53,6 @@ static GParamSpec *props[LAST_PROP] = {
   NULL,
 };
 
-enum
-{
-  SIGNAL_GROUP_CLICKED,
-  LAST_SIGNAL
-};
-
-static guint signals[LAST_SIGNAL] = {
-  0,
-};
-
 static void
 show_relative_page (BzFeaturedCarousel *self,
                     gint                delta,
@@ -199,12 +189,10 @@ static void
 tile_clicked_cb (BzFeaturedTile *tile,
                  gpointer        user_data)
 {
-  BzFeaturedCarousel *self;
-  BzEntryGroup       *group;
-
-  self  = BZ_FEATURED_CAROUSEL (user_data);
+  BzEntryGroup *group = NULL;
   group = bz_featured_tile_get_group (tile);
-  g_signal_emit (self, signals[SIGNAL_GROUP_CLICKED], 0, group);
+  gtk_widget_activate_action (GTK_WIDGET (user_data), "window.show-group", "s",
+                              bz_entry_group_get_id (group));
 }
 
 static gboolean
@@ -408,12 +396,6 @@ bz_featured_carousel_class_init (BzFeaturedCarouselClass *klass)
                             G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
-
-  signals[SIGNAL_GROUP_CLICKED] =
-      g_signal_new ("group-clicked",
-                    G_TYPE_FROM_CLASS (object_class), G_SIGNAL_RUN_LAST,
-                    0, NULL, NULL, NULL,
-                    G_TYPE_NONE, 1, BZ_TYPE_ENTRY_GROUP);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-featured-carousel.ui");
   gtk_widget_class_set_accessible_role (widget_class, GTK_ACCESSIBLE_ROLE_GROUP);

@@ -23,8 +23,11 @@
 
 #include <glib/gi18n.h>
 
+#include "bz-addons-dialog.h"
+#include "bz-application.h"
 #include "bz-comet-overlay.h"
 #include "bz-curated-view.h"
+#include "bz-entry-group-util.h"
 #include "bz-entry-group.h"
 #include "bz-entry-inspector.h"
 #include "bz-env.h"
@@ -197,91 +200,9 @@ list_length (gpointer    object,
 }
 
 static void
-select_cb (BzWindow     *self,
-           BzEntryGroup *group)
-{
-  bz_window_show_group (self, group);
-}
-
-static void
-search_widget_select_cb (BzWindow       *self,
-                         BzEntryGroup   *group,
-                         gboolean        should_install,
-                         BzSearchWidget *search)
-{
-  if (should_install)
-    {
-      int      installable = 0;
-      int      removable   = 0;
-      gboolean remove      = FALSE;
-
-      g_object_get (
-          group,
-          "installable", &installable,
-          "removable", &removable,
-          NULL);
-
-      remove = removable > 0;
-      try_transact (self, NULL, group, remove, FALSE, NULL);
-    }
-  else
-    {
-      bz_window_show_group (self, group);
-    }
-}
-
-static void
-full_view_install_cb (BzWindow   *self,
-                      GtkWidget  *source,
-                      BzFullView *view)
-{
-  try_transact (self, NULL, bz_full_view_get_entry_group (view), FALSE, TRUE, source);
-}
-
-static void
-full_view_remove_cb (BzWindow   *self,
-                     GtkWidget  *source,
-                     BzFullView *view)
-{
-  try_transact (self, NULL, bz_full_view_get_entry_group (view), TRUE, FALSE, source);
-}
-
-static void
-install_addon_cb (BzWindow   *self,
-                  BzEntry    *entry,
-                  BzFullView *view)
-{
-  try_transact (self, entry, NULL, FALSE, TRUE, NULL);
-}
-
-static void
-remove_addon_cb (BzWindow   *self,
-                 BzEntry    *entry,
-                 BzFullView *view)
-{
-  try_transact (self, entry, NULL, TRUE, TRUE, NULL);
-}
-
-static void
-install_entry_cb (BzWindow     *self,
-                  BzEntryGroup *group,
-                  BzFullView   *view)
-{
-  try_transact (self, NULL, group, FALSE, FALSE, NULL);
-}
-
-static void
-remove_installed_cb (BzWindow     *self,
-                     BzEntryGroup *group,
-                     BzFullView   *view)
-{
-  try_transact (self, NULL, group, TRUE, FALSE, NULL);
-}
-
-static void
-update_cb (BzWindow      *self,
-           GListModel    *entries,
-           BzLibraryPage *library_page)
+update_cb (BzWindow   *self,
+           GListModel *entries,
+           GtkWidget  *widget)
 {
   g_autoptr (BzTransaction) transaction  = NULL;
   guint                n_updates         = 0;
@@ -290,7 +211,6 @@ update_cb (BzWindow      *self,
 
   g_return_if_fail (BZ_IS_WINDOW (self));
   g_return_if_fail (G_IS_LIST_MODEL (entries));
-  g_return_if_fail (BZ_IS_LIBRARY_PAGE (library_page));
 
   n_updates = g_list_model_get_n_items (entries);
   if (n_updates == 0)
@@ -346,14 +266,6 @@ update_cb (BzWindow      *self,
 
   for (guint i = 0; i < n_updates; i++)
     g_object_unref (updates_buf[i]);
-}
-
-static void
-bulk_install_cb (BzWindow   *self,
-                 GListModel *groups,
-                 gpointer    source)
-{
-  bz_window_bulk_install (self, groups);
 }
 
 void
@@ -454,6 +366,183 @@ format_progress (gpointer object,
   return g_strdup_printf ("%.0f%%", 100.0 * value);
 }
 
+static BzEntryGroup *
+resolve_group_from_parameter (BzWindow *self,
+                              GVariant *parameter,
+                              gboolean *auto_confirm)
+{
+  const char *id = NULL;
+
+  g_variant_get (parameter, "(&sb)", &id, auto_confirm);
+
+  return bz_application_map_factory_convert_one (
+      bz_state_info_get_application_factory (self->state),
+      gtk_string_object_new (id));
+}
+
+static void
+action_install_group (GtkWidget  *widget,
+                      const char *action_name,
+                      GVariant   *parameter)
+{
+  BzWindow *self                 = BZ_WINDOW (widget);
+  g_autoptr (BzEntryGroup) group = NULL;
+  gboolean auto_confirm          = FALSE;
+
+  group = resolve_group_from_parameter (self, parameter, &auto_confirm);
+  if (group != NULL)
+    try_transact (self, NULL, group, FALSE, auto_confirm, NULL);
+}
+
+static void
+action_remove_group (GtkWidget  *widget,
+                     const char *action_name,
+                     GVariant   *parameter)
+{
+  BzWindow *self                 = BZ_WINDOW (widget);
+  g_autoptr (BzEntryGroup) group = NULL;
+  gboolean auto_confirm          = FALSE;
+
+  group = resolve_group_from_parameter (self, parameter, &auto_confirm);
+  if (group != NULL)
+    try_transact (self, NULL, group, TRUE, auto_confirm, NULL);
+}
+
+static void
+action_show_group (GtkWidget  *widget,
+                   const char *action_name,
+                   GVariant   *parameter)
+{
+  BzWindow   *self               = BZ_WINDOW (widget);
+  const char *id                 = NULL;
+  g_autoptr (BzEntryGroup) group = NULL;
+
+  id    = g_variant_get_string (parameter, NULL);
+  group = bz_application_map_factory_convert_one (
+      bz_state_info_get_application_factory (self->state),
+      gtk_string_object_new (id));
+
+  if (group != NULL)
+    bz_window_show_group (self, group);
+}
+
+static gboolean
+test_has_addons (BzEntry *entry)
+{
+  GListModel *model = NULL;
+
+  model = bz_entry_get_addons (entry);
+  return model != NULL && g_list_model_get_n_items (model) > 0;
+}
+
+static void
+addon_transact_cb (BzWindow       *self,
+                   BzEntry        *entry,
+                   BzAddonsDialog *dialog)
+{
+  gboolean installed = FALSE;
+
+  g_object_get (entry, "installed", &installed, NULL);
+
+  try_transact (self, entry, NULL, installed, TRUE, NULL);
+}
+
+static DexFuture *
+addons_fiber (BzEntryGroup *group)
+{
+  g_autoptr (GError) local_error = NULL;
+  g_autoptr (BzEntry) entry      = NULL;
+  g_autoptr (GListModel) model   = NULL;
+  BzStateInfo *state             = NULL;
+  GtkWidget   *window            = NULL;
+  AdwDialog   *addons_dialog     = NULL;
+
+  state = bz_state_info_get_default ();
+  if (state == NULL)
+    return NULL;
+
+  window = GTK_WIDGET (gtk_application_get_active_window (
+      GTK_APPLICATION (g_application_get_default ())));
+
+  entry = bz_entry_group_find_entry (group, test_has_addons,
+                                     window, &local_error);
+  if (entry == NULL)
+    {
+      if (local_error != NULL)
+        bz_show_error_for_widget (window,
+                                  _ ("Failed to load add-ons"),
+                                  local_error->message);
+      return NULL;
+    }
+
+  model = bz_application_map_factory_generate (
+      bz_state_info_get_entry_factory (state),
+      bz_entry_get_addons (entry));
+
+  addons_dialog = bz_addons_dialog_new (entry, model);
+  g_signal_connect_swapped (
+      addons_dialog, "transact",
+      G_CALLBACK (addon_transact_cb), window);
+  gtk_widget_set_size_request (GTK_WIDGET (addons_dialog), 350, -1);
+
+  adw_dialog_present (addons_dialog, window);
+
+  return NULL;
+}
+
+static void
+action_addons_group (GtkWidget  *widget,
+                     const char *action_name,
+                     GVariant   *parameter)
+{
+  BzWindow   *self               = BZ_WINDOW (widget);
+  const char *id                 = NULL;
+  g_autoptr (BzEntryGroup) group = NULL;
+
+  id    = g_variant_get_string (parameter, NULL);
+  group = bz_application_map_factory_convert_one (
+      bz_state_info_get_application_factory (self->state),
+      gtk_string_object_new (id));
+
+  if (group == NULL)
+    return;
+
+  dex_future_disown (dex_scheduler_spawn (
+      dex_scheduler_get_default (),
+      bz_get_dex_stack_size (),
+      (DexFiberFunc) addons_fiber,
+      g_object_ref (group),
+      g_object_unref));
+}
+
+static void
+action_bulk_install (GtkWidget  *widget,
+                     const char *action_name,
+                     GVariant   *parameter)
+{
+  BzWindow *self                = BZ_WINDOW (widget);
+  g_autoptr (GListStore) ids    = NULL;
+  g_autoptr (GListModel) groups = NULL;
+  GVariantIter iter             = { 0 };
+  const char  *id               = NULL;
+
+  ids = g_list_store_new (GTK_TYPE_STRING_OBJECT);
+
+  g_variant_iter_init (&iter, parameter);
+  while (g_variant_iter_next (&iter, "&s", &id))
+    {
+      g_autoptr (GtkStringObject) string = gtk_string_object_new (id);
+      g_list_store_append (ids, string);
+    }
+
+  groups = bz_application_map_factory_generate (
+      bz_state_info_get_application_factory (self->state),
+      G_LIST_MODEL (ids));
+
+  if (groups != NULL && g_list_model_get_n_items (groups) > 0)
+    bz_window_bulk_install (self, groups);
+}
+
 static void
 action_user_data (GtkWidget  *widget,
                   const char *action_name,
@@ -547,13 +636,6 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzWindow, main_stack);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, debug_id_label);
   gtk_widget_class_bind_template_callback (widget_class, list_length);
-  gtk_widget_class_bind_template_callback (widget_class, select_cb);
-  gtk_widget_class_bind_template_callback (widget_class, search_widget_select_cb);
-  gtk_widget_class_bind_template_callback (widget_class, full_view_install_cb);
-  gtk_widget_class_bind_template_callback (widget_class, full_view_remove_cb);
-  gtk_widget_class_bind_template_callback (widget_class, install_addon_cb);
-  gtk_widget_class_bind_template_callback (widget_class, remove_addon_cb);
-  gtk_widget_class_bind_template_callback (widget_class, remove_installed_cb);
   gtk_widget_class_bind_template_callback (widget_class, update_cb);
   gtk_widget_class_bind_template_callback (widget_class, page_toggled_cb);
   gtk_widget_class_bind_template_callback (widget_class, breakpoint_apply_cb);
@@ -568,6 +650,12 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_install_action (widget_class, "escape", NULL, action_escape);
   gtk_widget_class_install_action (widget_class, "window.user-data", NULL, action_user_data);
   gtk_widget_class_install_action (widget_class, "window.open-library", NULL, action_open_library);
+
+  gtk_widget_class_install_action (widget_class, "window.install-group", "(sb)", action_install_group);
+  gtk_widget_class_install_action (widget_class, "window.remove-group", "(sb)", action_remove_group);
+  gtk_widget_class_install_action (widget_class, "window.show-group", "s", action_show_group);
+  gtk_widget_class_install_action (widget_class, "window.addons-group", "s", action_addons_group);
+  gtk_widget_class_install_action (widget_class, "window.bulk-install", NULL, action_bulk_install);
 
   gtk_widget_class_add_binding_action (widget_class, GDK_KEY_d, GDK_CONTROL_MASK, "window.open-library", NULL);
   gtk_widget_class_add_binding_action (widget_class, GDK_KEY_w, GDK_CONTROL_MASK, "window.close", NULL);
@@ -832,18 +920,19 @@ void
 bz_window_show_entry (BzWindow *self,
                       BzEntry  *entry)
 {
-  g_autoptr (BzEntryGroup) group  = NULL;
-  AdwNavigationPage *visible_page = NULL;
+  g_autoptr (BzEntryGroup) group = NULL;
+  AdwNavigationPage *view_page   = NULL;
 
   g_return_if_fail (BZ_IS_WINDOW (self));
   g_return_if_fail (BZ_IS_ENTRY (entry));
 
   group = bz_entry_group_new_for_single_entry (entry);
-
   bz_full_view_set_entry_group (self->full_view, group);
 
-  visible_page = adw_navigation_view_get_visible_page (self->navigation_view);
-  if (visible_page != adw_navigation_view_find_page (self->navigation_view, "view"))
+  view_page = adw_navigation_view_find_page (self->navigation_view, "view");
+  if (view_page != NULL)
+    adw_navigation_view_pop_to_page (self->navigation_view, view_page);
+  else
     adw_navigation_view_push_by_tag (self->navigation_view, "view");
 }
 
@@ -851,16 +940,29 @@ void
 bz_window_show_group (BzWindow     *self,
                       BzEntryGroup *group)
 {
-  AdwNavigationPage *visible_page = NULL;
+  GListModel *stack    = NULL;
+  gboolean    in_stack = FALSE;
 
   g_return_if_fail (BZ_IS_WINDOW (self));
   g_return_if_fail (BZ_IS_ENTRY_GROUP (group));
 
   bz_full_view_set_entry_group (self->full_view, group);
   emit_hook_disown (self, BZ_HOOK_SIGNAL_VIEW_APP, group);
+  stack = adw_navigation_view_get_navigation_stack (self->navigation_view);
 
-  visible_page = adw_navigation_view_get_visible_page (self->navigation_view);
-  if (visible_page != adw_navigation_view_find_page (self->navigation_view, "view"))
+  for (guint i = 0; i < g_list_model_get_n_items (stack); i++)
+    {
+      g_autoptr (AdwNavigationPage) page = NULL;
+      page                               = g_list_model_get_item (stack, i);
+
+      if (g_strcmp0 (adw_navigation_page_get_tag (page), "view") == 0)
+        {
+          in_stack = TRUE;
+          adw_navigation_view_pop_to_page (self->navigation_view, page);
+          break;
+        }
+    }
+  if (!in_stack)
     adw_navigation_view_push_by_tag (self->navigation_view, "view");
 }
 
@@ -879,14 +981,6 @@ bz_window_push_page (BzWindow *self, AdwNavigationPage *page)
 {
   g_return_if_fail (BZ_IS_WINDOW (self));
   g_return_if_fail (ADW_IS_NAVIGATION_PAGE (page));
-
-  if (BZ_IS_FAVORITES_PAGE (page))
-    {
-      g_signal_connect_swapped (page, "install", G_CALLBACK (install_entry_cb), self);
-      g_signal_connect_swapped (page, "remove", G_CALLBACK (remove_installed_cb), self);
-      g_signal_connect_swapped (page, "show-entry", G_CALLBACK (select_cb), self);
-      g_signal_connect_swapped (page, "bulk-install", G_CALLBACK (bulk_install_cb), self);
-    }
 
   adw_navigation_view_push (self->navigation_view, page);
 }
