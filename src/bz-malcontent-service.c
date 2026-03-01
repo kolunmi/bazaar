@@ -159,7 +159,7 @@ apply_filter (BzMalcontentService *self,
               MctAppFilter        *filter)
 {
   const char *const *oars_sections = NULL;
-  int                max_age       = 0;
+  int                max_age       = -1;
 
   g_clear_pointer (&self->filter, mct_app_filter_unref);
   self->filter = mct_app_filter_ref (filter);
