@@ -3121,13 +3121,13 @@ validate_group_for_ui (BzApplication *self,
 
   if (self->malcontent != NULL)
     {
-      int parental_age = 0;
+      int parental_age = -1;
       int app_age      = 0;
 
       parental_age = bz_state_info_get_parental_age_rating (self->state);
       app_age      = bz_entry_group_get_content_age_rating (group);
 
-      if (app_age > parental_age && parental_age != 0)
+      if (app_age > parental_age && parental_age != -1)
         return FALSE;
     }
 
