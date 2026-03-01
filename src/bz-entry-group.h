@@ -97,6 +97,9 @@ bz_entry_group_get_donation_url (BzEntryGroup *self);
 GListModel *
 bz_entry_group_get_categories (BzEntryGroup *self);
 
+int
+bz_entry_group_get_content_age_rating (BzEntryGroup *self);
+
 BzResult *
 bz_entry_group_dup_ui_entry (BzEntryGroup *self);
 
