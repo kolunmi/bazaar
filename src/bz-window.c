@@ -29,10 +29,8 @@
 #include "bz-curated-view.h"
 #include "bz-entry-group-util.h"
 #include "bz-entry-group.h"
-#include "bz-entry-inspector.h"
 #include "bz-env.h"
 #include "bz-error.h"
-#include "bz-favorites-page.h"
 #include "bz-flathub-page.h"
 #include "bz-full-view.h"
 #include "bz-global-progress.h"
@@ -67,7 +65,6 @@ struct _BzWindow
   AdwToastOverlay   *toasts;
   AdwViewStack      *main_view_stack;
   GtkStack          *main_stack;
-  GtkLabel          *debug_id_label;
 };
 
 G_DEFINE_FINAL_TYPE (BzWindow, bz_window, ADW_TYPE_APPLICATION_WINDOW)
@@ -568,34 +565,6 @@ action_open_library (GtkWidget  *widget,
 }
 
 static void
-debug_id_inspect_cb (BzWindow  *self,
-                     GtkButton *button)
-{
-  BzEntryGroup    *group             = NULL;
-  g_autofree char *unique_id         = NULL;
-  g_autoptr (GtkStringObject) string = NULL;
-  g_autoptr (BzResult) result        = NULL;
-
-  group = bz_full_view_get_entry_group (self->full_view);
-  if (group == NULL)
-    return;
-  unique_id = bz_entry_group_dup_ui_entry_id (group);
-
-  result = bz_application_map_factory_convert_one (
-      bz_state_info_get_entry_factory (self->state),
-      gtk_string_object_new (unique_id));
-  if (result != NULL)
-    {
-      BzEntryInspector *inspector = NULL;
-
-      inspector = bz_entry_inspector_new ();
-      bz_entry_inspector_set_result (inspector, result);
-
-      gtk_window_present (GTK_WINDOW (inspector));
-    }
-}
-
-static void
 bz_window_class_init (BzWindowClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
@@ -634,7 +603,6 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzWindow, library_page);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, main_view_stack);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, main_stack);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, debug_id_label);
   gtk_widget_class_bind_template_callback (widget_class, list_length);
   gtk_widget_class_bind_template_callback (widget_class, update_cb);
   gtk_widget_class_bind_template_callback (widget_class, page_toggled_cb);
@@ -645,7 +613,6 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, browse_flathub_cb);
   gtk_widget_class_bind_template_callback (widget_class, open_search_cb);
   gtk_widget_class_bind_template_callback (widget_class, format_progress);
-  gtk_widget_class_bind_template_callback (widget_class, debug_id_inspect_cb);
 
   gtk_widget_class_install_action (widget_class, "escape", NULL, action_escape);
   gtk_widget_class_install_action (widget_class, "window.user-data", NULL, action_user_data);

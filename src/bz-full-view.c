@@ -23,7 +23,6 @@
 #include <glib/gi18n.h>
 #include <json-glib/json-glib.h>
 
-#include "bz-addons-dialog.h"
 #include "bz-age-rating-dialog.h"
 #include "bz-app-size-dialog.h"
 #include "bz-app-tile.h"
@@ -32,6 +31,7 @@
 #include "bz-context-tile.h"
 #include "bz-developer-badge.h"
 #include "bz-dynamic-list-view.h"
+#include "bz-entry-inspector.h"
 #include "bz-error.h"
 #include "bz-fading-clamp.h"
 #include "bz-favorite-button.h"
@@ -997,6 +997,47 @@ get_description_toggle_text (gpointer object,
 }
 
 static void
+copy_id_cb (BzFullView *self,
+            GtkButton  *button)
+{
+  const char   *id        = NULL;
+  GdkClipboard *clipboard = NULL;
+
+  if (self->group == NULL)
+    return;
+  id = bz_entry_group_get_id (self->group);
+
+  clipboard = gdk_display_get_clipboard (gdk_display_get_default ());
+  gdk_clipboard_set_text (clipboard, id);
+}
+
+static void
+debug_id_inspect_cb (BzFullView *self,
+                     GtkButton  *button)
+{
+  g_autofree char *unique_id         = NULL;
+  g_autoptr (GtkStringObject) string = NULL;
+  g_autoptr (BzResult) result        = NULL;
+
+  if (self->group == NULL)
+    return;
+  unique_id = bz_entry_group_dup_ui_entry_id (self->group);
+
+  result = bz_application_map_factory_convert_one (
+      bz_state_info_get_entry_factory (self->state),
+      gtk_string_object_new (unique_id));
+  if (result != NULL)
+    {
+      BzEntryInspector *inspector = NULL;
+
+      inspector = bz_entry_inspector_new ();
+      bz_entry_inspector_set_result (inspector, result);
+
+      gtk_window_present (GTK_WINDOW (inspector));
+    }
+}
+
+static void
 bz_full_view_class_init (BzFullViewClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
@@ -1037,15 +1078,15 @@ bz_full_view_class_init (BzFullViewClass *klass)
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   signals[SIGNAL_UPDATE] =
-    g_signal_new (
-        "update",
-        G_OBJECT_CLASS_TYPE (klass),
-        G_SIGNAL_RUN_FIRST,
-        0,
-        NULL, NULL,
-        g_cclosure_marshal_VOID__OBJECT,
-        G_TYPE_NONE, 1,
-        G_TYPE_LIST_MODEL);
+      g_signal_new (
+          "update",
+          G_OBJECT_CLASS_TYPE (klass),
+          G_SIGNAL_RUN_FIRST,
+          0,
+          NULL, NULL,
+          g_cclosure_marshal_VOID__OBJECT,
+          G_TYPE_NONE, 1,
+          G_TYPE_LIST_MODEL);
   g_signal_set_va_marshaller (
       signals[SIGNAL_UPDATE],
       G_TYPE_FROM_CLASS (klass),
@@ -1122,6 +1163,8 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, get_description_max_height);
   gtk_widget_class_bind_template_callback (widget_class, get_description_toggle_text);
   gtk_widget_class_bind_template_callback (widget_class, tag_list_select_cb);
+  gtk_widget_class_bind_template_callback (widget_class, copy_id_cb);
+  gtk_widget_class_bind_template_callback (widget_class, debug_id_inspect_cb);
 }
 
 static void

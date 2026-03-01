@@ -196,15 +196,31 @@ template $BzFullView: Adw.Bin {
                               label: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.title;
                             }
 
-                            Label {
+                            Box {
                               styles [
                                 "bz-debug",
                               ]
 
                               halign: start;
-                              selectable: true;
+                              orientation: horizontal;
+                              spacing: 6;
                               visible: bind template.state as <$BzStateInfo>.debug-mode;
-                              label: bind template.entry-group as <$BzEntryGroup>.id;
+
+                              Button {
+                                icon-name: "edit-copy-symbolic";
+                                clicked => $copy_id_cb(template);
+                              }
+                              Label {
+                                styles [
+                                  "bz-monospace",
+                                ]
+                                selectable: true;
+                                label: bind template.entry-group as <$BzEntryGroup>.id;
+                              }
+                              Button {
+                                label: "Inspect UI Entry";
+                                clicked => $debug_id_inspect_cb(template);
+                              }
                             }
 
                             $BzDeveloperBadge {

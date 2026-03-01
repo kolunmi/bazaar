@@ -32,70 +32,6 @@ template $BzWindow: Adw.ApplicationWindow {
   }
 
   content: Adw.ToolbarView {
-    [bottom]
-    Adw.HeaderBar {
-      styles [
-        "bz-debug",
-      ]
-
-      visible: bind template.state as <$BzStateInfo>.debug_mode as <bool>;
-      show-title: false;
-      show-start-title-buttons: false;
-      show-end-title-buttons: false;
-
-      [start]
-      Box {
-        visible: bind $invert_boolean($is_null(full_view.entry_group as <$BzEntryGroup>) as <bool>) as <bool>;
-        orientation: horizontal;
-        spacing: 10;
-
-        Label {
-          styles [
-            "caption-heading",
-          ]
-
-          label: "ID:";
-        }
-
-        Label debug_id_label {
-          styles [
-            "bz-monospace",
-          ]
-
-          label: bind full_view.entry_group as <$BzEntryGroup>.id as <string>;
-          selectable: true;
-          ellipsize: end;
-        }
-
-        Button {
-          label: "Inspect UI Entry";
-          clicked => $debug_id_inspect_cb(template);
-        }
-      }
-
-      [end]
-      MenuButton {
-        label: "All Debug Actions";
-        menu-model: debug_menu;
-      }
-
-      [end]
-      Label {
-        styles [
-          "caption-heading",
-        ]
-
-        visible: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active as <bool>;
-        label: bind $format_progress(template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.current-progress as <double>) as <string>;
-      }
-
-      [end]
-      Label {
-        visible: bind $invert_boolean($is_null(template.state as <$BzStateInfo>.background-task-label as <string>) as <bool>) as <bool>;
-        label: bind template.state as <$BzStateInfo>.background-task-label as <string>;
-      }
-    }
-
     content: $BzCometOverlay comet_overlay {
       child: Adw.BreakpointBin split_breakpoint_bin {
         width-request: 360;
@@ -204,6 +140,24 @@ template $BzWindow: Adw.ApplicationWindow {
                   orientation: vertical;
 
                   Adw.HeaderBar top_header_bar {
+                    [start]
+                    Box {
+                      styles [
+                        "bz-debug",
+                      ]
+
+                      orientation: horizontal;
+                      spacing: 6;
+                      visible: bind template.state as <$BzStateInfo>.debug-mode;
+
+                      Button {
+                        has-tooltip: true;
+                        tooltip-text: "Open Bazaar Inspector";
+                        icon-name: "bug-symbolic";
+                        action-name: "app.bazaar-inspector";
+                      }
+                    }
+
                     [start]
                     MenuButton {
                       visible: bind template.state as <$BzStateInfo>.auth-state as <$BzAuthState>.authenticated;

@@ -9,7 +9,18 @@
     border-style: solid;
     border-width: 1px;
     color: black;
-    padding: 4px;
+    padding: 3px;
+}
+
+.bz-debug > button {
+    border-color: black;
+    border-style: dashed;
+    border-width: 1px;
+    border-radius: 3px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 2px;
+    padding-right: 2px;
 }
 
 .bz-donations-dialog {
