@@ -202,8 +202,6 @@ bz_appstream_parser_populate_entry (BzEntry     *entry,
   g_autoptr (GListStore) share_urls                    = NULL;
   g_autofree char *donation_url                        = NULL;
   g_autofree char *forge_url                           = NULL;
-  g_autoptr (GListStore) native_reviews                = NULL;
-  double           average_rating                      = 0.0;
   g_autofree char *ratings_summary                     = NULL;
   g_autoptr (GListStore) version_history               = NULL;
   const char *accent_color_light                       = NULL;
@@ -694,8 +692,6 @@ bz_appstream_parser_populate_entry (BzEntry     *entry,
       "share-urls", share_urls,
       "donation-url", donation_url,
       "forge-url", forge_url,
-      "reviews", native_reviews,
-      "average-rating", average_rating,
       "ratings-summary", ratings_summary,
       "version-history", version_history,
       "light-accent-color", accent_color_light,
