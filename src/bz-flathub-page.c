@@ -350,10 +350,6 @@ show_more_clicked (BzFlathubPage *self,
   nav_view = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
   g_assert (nav_view != NULL);
 
-  g_signal_connect_swapped (
-      apps_page, "select",
-      G_CALLBACK (apps_page_select_cb), self);
-
   adw_navigation_view_push (ADW_NAVIGATION_VIEW (nav_view), apps_page);
 }
 
@@ -362,14 +358,6 @@ tile_clicked (BzEntryGroup *group,
               GtkButton    *button)
 {
   show_group_action (GTK_WIDGET (button), group);
-}
-
-static void
-apps_page_select_cb (BzFlathubPage *self,
-                     BzEntryGroup  *group,
-                     BzAppsPage    *page)
-{
-  show_group_action (GTK_WIDGET (self), group);
 }
 
 static void
