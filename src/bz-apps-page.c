@@ -378,7 +378,7 @@ filter_applications_fiber (BzAppsPage *self)
   if (state_info == NULL)
     return NULL;
 
-  all_model = bz_state_info_get_all_entry_groups (state_info);
+  all_model = bz_state_info_get_filtered_entry_groups (state_info);
   if (all_model == NULL)
     return NULL;
 
