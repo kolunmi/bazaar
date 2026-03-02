@@ -476,7 +476,8 @@ tick_cb (GtkWidget     *widget,
         break;
 
       if (cancel ||
-          dex_future_is_rejected (DEX_FUTURE (data->cancellable)))
+          (data->cancellable != NULL &&
+           dex_future_is_rejected (DEX_FUTURE (data->cancellable))))
         finished = TRUE;
       else
         {
