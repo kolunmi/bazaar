@@ -2825,6 +2825,7 @@ init_service_struct (BzApplication *self,
 
   bz_state_info_set_all_entry_groups (self->state, G_LIST_MODEL (self->groups));
   bz_state_info_set_all_installed_entry_groups (self->state, G_LIST_MODEL (self->installed_apps));
+  bz_state_info_set_filtered_entry_groups (self->state, G_LIST_MODEL (self->group_filter_model));
   bz_state_info_set_application_factory (self->state, self->application_factory);
   bz_state_info_set_blocklists (self->state, G_LIST_MODEL (self->blocklists));
   bz_state_info_set_blocklists_provider (self->state, self->blocklists_provider);
