@@ -12,7 +12,7 @@
     padding: 3px;
 }
 
-.bz-debug > button {
+.bz-debug button {
     border-color: black;
     border-style: dashed;
     border-width: 1px;

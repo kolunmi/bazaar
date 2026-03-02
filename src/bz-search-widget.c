@@ -24,6 +24,7 @@
 #include "bz-async-texture.h"
 #include "bz-category-tile.h"
 #include "bz-dynamic-list-view.h"
+#include "bz-entry-inspector.h"
 #include "bz-finished-search-query.h"
 #include "bz-group-tile-css-watcher.h"
 #include "bz-rich-app-tile.h"
@@ -243,7 +244,6 @@ no_results_found_subtitle (gpointer    object,
   return g_strdup_printf (_ ("No results found for \"%s\" in Flathub"), search_text);
 }
 
-
 static void
 pill_list_cb (BzSearchWidget *self,
               const char     *label,
@@ -310,6 +310,54 @@ reset_search_cb (BzSearchWidget *self,
 }
 
 static void
+copy_id_cb (GtkListItem *list_item,
+            GtkButton   *button)
+{
+  BzSearchResult *result    = NULL;
+  BzEntryGroup   *group     = NULL;
+  const char     *id        = NULL;
+  GdkClipboard   *clipboard = NULL;
+
+  result = gtk_list_item_get_item (list_item);
+  group  = bz_search_result_get_group (result);
+  id     = bz_entry_group_get_id (group);
+
+  clipboard = gdk_display_get_clipboard (gdk_display_get_default ());
+  gdk_clipboard_set_text (clipboard, id);
+}
+
+static void
+debug_id_inspect_cb (GtkListItem *list_item,
+                     GtkButton   *button)
+{
+  BzSearchResult  *search_result = NULL;
+  BzStateInfo     *state         = NULL;
+  BzEntryGroup    *group         = NULL;
+  g_autofree char *unique_id     = NULL;
+  g_autoptr (BzResult) result    = NULL;
+
+  search_result = gtk_list_item_get_item (list_item);
+  state         = bz_search_result_get_state (search_result);
+  if (state == NULL)
+    return;
+
+  group     = bz_search_result_get_group (search_result);
+  unique_id = bz_entry_group_dup_ui_entry_id (group);
+  result    = bz_application_map_factory_convert_one (
+      bz_state_info_get_entry_factory (state),
+      gtk_string_object_new (unique_id));
+  if (result != NULL)
+    {
+      BzEntryInspector *inspector = NULL;
+
+      inspector = bz_entry_inspector_new ();
+      bz_entry_inspector_set_result (inspector, result);
+
+      gtk_window_present (GTK_WINDOW (inspector));
+    }
+}
+
+static void
 bz_search_widget_class_init (BzSearchWidgetClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
@@ -371,6 +419,8 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, pill_list_cb);
   gtk_widget_class_bind_template_callback (widget_class, no_results_found_subtitle);
   gtk_widget_class_bind_template_callback (widget_class, tile_activated_cb);
+  gtk_widget_class_bind_template_callback (widget_class, copy_id_cb);
+  gtk_widget_class_bind_template_callback (widget_class, debug_id_inspect_cb);
 }
 
 static void
