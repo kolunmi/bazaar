@@ -145,6 +145,17 @@ BZ_DEFINE_DATA (
     BZ_RELEASE_DATA (notif, g_object_unref))
 
 BZ_DEFINE_DATA (
+    cache_write_back,
+    CacheWriteBack,
+    {
+      GWeakRef  *self;
+      GPtrArray *notify_groups;
+      gboolean   update_filters;
+    },
+    BZ_RELEASE_DATA (self, bz_weak_release);
+    BZ_RELEASE_DATA (notify_groups, g_ptr_array_unref))
+
+BZ_DEFINE_DATA (
     open_flatpakref,
     OpenFlatpakref,
     {
@@ -196,8 +207,8 @@ flathub_update_finally (DexFuture *future,
                         GWeakRef  *wr);
 
 static DexFuture *
-cache_write_back_finally (DexFuture *future,
-                          GWeakRef  *wr);
+cache_write_back_finally (DexFuture          *future,
+                          CacheWriteBackData *data);
 
 static DexFuture *
 sync_then (DexFuture *future,
@@ -1230,19 +1241,22 @@ cache_flathub_fiber (GWeakRef *wr)
 static DexFuture *
 respond_to_flatpak_fiber (RespondToFlatpakData *data)
 {
-  g_autoptr (BzApplication) self       = NULL;
-  BzBackendNotification *notif         = data->notif;
-  g_autoptr (GError) local_error       = NULL;
-  g_autoptr (GPtrArray) build_futures  = NULL;
-  g_autoptr (DexFuture) read_future    = NULL;
-  g_autoptr (DexFuture) reread_timeout = NULL;
-  gboolean update_labels               = FALSE;
-  gboolean update_filter               = FALSE;
+  g_autoptr (BzApplication) self            = NULL;
+  BzBackendNotification *notif              = data->notif;
+  g_autoptr (GError) local_error            = NULL;
+  g_autoptr (GPtrArray) build_futures       = NULL;
+  g_autoptr (GPtrArray) build_notify_groups = NULL;
+  g_autoptr (DexFuture) read_future         = NULL;
+  g_autoptr (DexFuture) reread_timeout      = NULL;
+  gboolean update_labels                    = FALSE;
+  gboolean update_filters                   = FALSE;
 
   bz_weak_get_or_return_reject (self, data->self);
 
-  build_futures = g_ptr_array_new_with_free_func (dex_unref);
-  read_future   = dex_future_new_for_object (notif);
+  build_futures       = g_ptr_array_new_with_free_func (dex_unref);
+  build_notify_groups = g_ptr_array_new_with_free_func (g_object_unref);
+
+  read_future = dex_future_new_for_object (notif);
 
   /* `reread_timeout` defines how long we are allowed to spend adding to
      `build-futures` before we update the UI later */
@@ -1303,7 +1317,17 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
 
             g_ptr_array_add (build_futures, bz_entry_cache_manager_add (self->cache, entry));
             if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
-              update_filter = TRUE;
+              {
+                const char   *id    = NULL;
+                BzEntryGroup *group = NULL;
+
+                update_filters = TRUE;
+
+                id    = bz_entry_get_id (entry);
+                group = g_hash_table_lookup (self->ids_to_groups, id);
+                if (group != NULL)
+                  g_ptr_array_add (build_notify_groups, g_object_ref (group));
+              }
 
             self->n_notifications_incoming--;
             update_labels = TRUE;
@@ -1397,6 +1421,16 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
               };
 
             g_ptr_array_add (build_futures, bz_entry_cache_manager_add (self->cache, entry));
+            if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
+              {
+                const char   *id    = NULL;
+                BzEntryGroup *group = NULL;
+
+                id    = bz_entry_get_id (entry);
+                group = g_hash_table_lookup (self->ids_to_groups, id);
+                if (group != NULL)
+                  g_ptr_array_add (build_notify_groups, g_object_ref (group));
+              }
           }
           break;
         case BZ_BACKEND_NOTIFICATION_KIND_EXTERNAL_CHANGE:
@@ -1535,16 +1569,23 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
 
   if (build_futures->len > 0)
     {
-      g_autoptr (DexFuture) future = NULL;
+      g_autoptr (DexFuture) future                   = NULL;
+      g_autoptr (CacheWriteBackData) write_back_data = NULL;
 
       future = dex_future_allv (
           (DexFuture *const *) build_futures->pdata,
           build_futures->len);
-      if (update_filter)
-        future = dex_future_finally (
-            future,
-            (DexFutureCallback) cache_write_back_finally,
-            bz_track_weak (self), bz_weak_release);
+
+      write_back_data                 = cache_write_back_data_new ();
+      write_back_data->self           = bz_track_weak (self);
+      write_back_data->notify_groups  = g_ptr_array_ref (build_notify_groups);
+      write_back_data->update_filters = update_filters;
+
+      future = dex_future_finally (
+          future,
+          (DexFutureCallback) cache_write_back_finally,
+          cache_write_back_data_ref (write_back_data),
+          cache_write_back_data_unref);
       dex_future_disown (g_steal_pointer (&future));
     }
 
@@ -1736,15 +1777,28 @@ flathub_update_finally (DexFuture *future,
 }
 
 static DexFuture *
-cache_write_back_finally (DexFuture *future,
-                          GWeakRef  *wr)
+cache_write_back_finally (DexFuture          *future,
+                          CacheWriteBackData *data)
 {
   g_autoptr (BzApplication) self = NULL;
+  GPtrArray *notify_groups       = data->notify_groups;
+  gboolean   update_filters      = data->update_filters;
 
-  bz_weak_get_or_return_reject (self, wr);
+  bz_weak_get_or_return_reject (self, data->self);
 
-  gtk_filter_changed (GTK_FILTER (self->group_filter), GTK_FILTER_CHANGE_LESS_STRICT);
-  gtk_filter_changed (GTK_FILTER (self->appid_filter), GTK_FILTER_CHANGE_LESS_STRICT);
+  for (guint i = 0; i < notify_groups->len; i++)
+    {
+      BzEntryGroup *group = NULL;
+
+      group = g_ptr_array_index (notify_groups, i);
+      g_object_notify (G_OBJECT (group), "ui-entry");
+    }
+
+  if (update_filters)
+    {
+      gtk_filter_changed (GTK_FILTER (self->group_filter), GTK_FILTER_CHANGE_LESS_STRICT);
+      gtk_filter_changed (GTK_FILTER (self->appid_filter), GTK_FILTER_CHANGE_LESS_STRICT);
+    }
 
   return dex_future_new_true ();
 }
