@@ -59,7 +59,6 @@ struct _BzPreferencesDialog
   AdwPreferencesDialog parent_instance;
 
   BzStateInfo *state;
-  gboolean     compact;
   GSettings   *settings;
 
   /* Template widgets */
@@ -82,7 +81,6 @@ enum
   PROP_0,
 
   PROP_STATE,
-  PROP_COMPACT,
 
   LAST_PROP
 };
@@ -254,9 +252,6 @@ bz_preferences_dialog_get_property (GObject    *object,
     case PROP_STATE:
       g_value_set_object (value, self->state);
       break;
-    case PROP_COMPACT:
-      g_value_set_boolean (value, self->compact);
-      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -268,14 +263,8 @@ bz_preferences_dialog_set_property (GObject      *object,
                                     const GValue *value,
                                     GParamSpec   *pspec)
 {
-  BzPreferencesDialog *self = BZ_PREFERENCES_DIALOG (object);
-
   switch (prop_id)
     {
-    case PROP_COMPACT:
-      self->compact = g_value_get_boolean (value);
-      g_object_notify_by_pspec (object, props[PROP_COMPACT]);
-      break;
     case PROP_STATE:
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -305,12 +294,6 @@ bz_preferences_dialog_class_init (BzPreferencesDialogClass *klass)
           NULL, NULL,
           BZ_TYPE_STATE_INFO,
           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
-
-  props[PROP_COMPACT] =
-      g_param_spec_boolean (
-          "compact",
-          NULL, NULL, FALSE,
-          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
