@@ -55,7 +55,7 @@ template $BzUserDataTile: Adw.Bin {
           }
           Label description_label {
             halign: start;
-            label: bind $format_size(template.group as <$BzEntryGroup>.user-data-size) as <string>;
+            label: bind $format_size(template.group as <$BzEntryGroup>.user-data-size as <uint64>) as <string>;
             styles ["accent", "caption-heading"]
           }
         }
