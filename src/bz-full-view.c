@@ -740,13 +740,6 @@ unbind_app_tile_cb (BzFullView        *self,
 }
 
 static void
-tag_list_select_cb (BzFullView   *self,
-                    BzEntryGroup *group)
-{
-  bz_full_view_set_entry_group (self, group);
-}
-
-static void
 open_url_cb (BzFullView   *self,
              AdwActionRow *row)
 {
@@ -1162,7 +1155,6 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, unbind_app_tile_cb);
   gtk_widget_class_bind_template_callback (widget_class, get_description_max_height);
   gtk_widget_class_bind_template_callback (widget_class, get_description_toggle_text);
-  gtk_widget_class_bind_template_callback (widget_class, tag_list_select_cb);
   gtk_widget_class_bind_template_callback (widget_class, copy_id_cb);
   gtk_widget_class_bind_template_callback (widget_class, debug_id_inspect_cb);
 }
