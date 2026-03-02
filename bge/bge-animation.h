@@ -54,7 +54,8 @@ bge_animation_add_spring (BgeAnimation        *self,
                           double               stiffness,
                           BgeAnimationCallback cb,
                           gpointer             user_data,
-                          GDestroyNotify       destroy_data);
+                          GDestroyNotify       destroy_data,
+                          DexCancellable      *cancellable);
 
 BGE_AVAILABLE_IN_ALL
 void

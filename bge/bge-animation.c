@@ -73,6 +73,7 @@ typedef struct
   GTimer              *timer;
   double               velocity;
   DexPromise          *promise;
+  DexCancellable      *cancellable;
 } SpringData;
 
 static gboolean
@@ -258,8 +259,9 @@ bge_animation_dup_widget (BgeAnimation *self)
  * @mass: the mass
  * @stiffness: the stiffness
  * @cb: a tick callback
- * @user_data: the user data pointer to be passed to @cb
- * @destroy_data: the destruction function for @user_data
+ * @user_data: (nullable): the user data pointer to be passed to @cb
+ * @destroy_data: (nullable): the destruction function for @user_data
+ * @cancellable: (nullable): a cancellable to cancel the operation
  *
  * Adds a one shot spring animation to @self. If @key is already running in
  * @self, then the old animation is replaced, maintaining the current velocity.
@@ -277,7 +279,8 @@ bge_animation_add_spring (BgeAnimation        *self,
                           double               stiffness,
                           BgeAnimationCallback cb,
                           gpointer             user_data,
-                          GDestroyNotify       destroy_data)
+                          GDestroyNotify       destroy_data,
+                          DexCancellable      *cancellable)
 {
   g_autoptr (GtkWidget) widget = NULL;
 
@@ -302,6 +305,7 @@ bge_animation_add_spring (BgeAnimation        *self,
                 data->destroy_data (data->user_data);
 
               g_clear_pointer (&data->timer, g_timer_destroy);
+              dex_clear (&data->cancellable);
 
               /* old velocity is retained */
             }
@@ -332,8 +336,10 @@ bge_animation_add_spring (BgeAnimation        *self,
               !dex_future_is_pending (DEX_FUTURE (data->promise)))
             {
               dex_clear (&data->promise);
-              data->promise = dex_promise_new_cancellable ();
+              data->promise = dex_promise_new ();
             }
+          if (cancellable != NULL)
+            data->cancellable = dex_ref (cancellable);
 
           data->est_duration = calculate_duration (data);
 
@@ -469,32 +475,25 @@ tick_cb (GtkWidget     *widget,
               (gpointer *) &data))
         break;
 
-      if (cancel)
+      if (cancel ||
+          dex_future_is_rejected (DEX_FUTURE (data->cancellable)))
         finished = TRUE;
       else
         {
-          GCancellable *cancellable = NULL;
+          double elapsed = 0.0;
 
-          cancellable = dex_promise_get_cancellable (data->promise);
-          if (g_cancellable_is_cancelled (cancellable))
-            finished = TRUE;
+          if (data->timer == NULL)
+            {
+              data->timer = g_timer_new ();
+              value       = data->from;
+            }
           else
             {
-              double elapsed = 0.0;
-
-              if (data->timer == NULL)
-                {
-                  data->timer = g_timer_new ();
-                  value       = data->from;
-                }
-              else
-                {
-                  elapsed = g_timer_elapsed (data->timer, NULL);
-                  value   = oscillate (data, elapsed, &data->velocity);
-                }
-
-              finished = elapsed >= data->est_duration;
+              elapsed = g_timer_elapsed (data->timer, NULL);
+              value   = oscillate (data, elapsed, &data->velocity);
             }
+
+          finished = elapsed >= data->est_duration;
         }
       if (finished)
         value = data->to;
@@ -706,6 +705,7 @@ destroy_spring_data (gpointer ptr)
     data->destroy_data (data->user_data);
   g_clear_pointer (&data->timer, g_timer_destroy);
   dex_clear (&data->promise);
+  dex_clear (&data->cancellable);
   g_free (ptr);
 }
 

@@ -96,8 +96,11 @@ BZ_DEFINE_DATA (
       graphene_rect_t target;
 
       gboolean raised;
+
+      DexCancellable *cancellable;
     },
-    BZ_RELEASE_DATA (widget, gtk_widget_unparent))
+    BZ_RELEASE_DATA (widget, gtk_widget_unparent);
+    BZ_RELEASE_DATA (cancellable, dex_unref))
 
 static void
 items_changed (BzCarousel *self,
@@ -669,22 +672,14 @@ items_changed (BzCarousel *self,
 {
   for (guint i = 0; i < removed; i++)
     {
-      GObject            *object  = NULL;
-      CarouselWidgetData *child   = NULL;
-      char                buf[64] = { 0 };
+      GObject            *object = NULL;
+      CarouselWidgetData *child  = NULL;
 
       object = g_ptr_array_index (self->mirror, position + i);
       child  = g_ptr_array_index (self->widgets, position + i);
 
-      g_snprintf (buf, sizeof (buf), "x%p", child);
-      bge_animation_cancel (self->animation, buf);
-      g_snprintf (buf, sizeof (buf), "y%p", child);
-      bge_animation_cancel (self->animation, buf);
-      g_snprintf (buf, sizeof (buf), "w%p", child);
-      bge_animation_cancel (self->animation, buf);
-      g_snprintf (buf, sizeof (buf), "h%p", child);
-      bge_animation_cancel (self->animation, buf);
-
+      if (child->cancellable != NULL)
+        dex_cancellable_cancel (child->cancellable);
       g_signal_emit (self, signals[SIGNAL_UNBIND_WIDGET], 0, child->widget, object);
     }
   if (removed > 0)
@@ -852,19 +847,8 @@ move_to_idx (BzCarousel *self,
       if ((damping_ratio < 0.0 && !avoid_animation) ||
           graphene_rect_equal (graphene_rect_zero (), &child->rect))
         {
-          char buf[64] = { 0 };
-
-          g_snprintf (buf, sizeof (buf), "x%p", child);
-          bge_animation_cancel (self->animation, buf);
-
-          g_snprintf (buf, sizeof (buf), "y%p", child);
-          bge_animation_cancel (self->animation, buf);
-
-          g_snprintf (buf, sizeof (buf), "w%p", child);
-          bge_animation_cancel (self->animation, buf);
-
-          g_snprintf (buf, sizeof (buf), "h%p", child);
-          bge_animation_cancel (self->animation, buf);
+          if (child->cancellable != NULL)
+            dex_cancellable_cancel (child->cancellable);
 
           child->rect   = target;
           child->target = target;
@@ -874,6 +858,9 @@ move_to_idx (BzCarousel *self,
       else
         {
           char buf[64] = { 0 };
+
+          dex_clear (&child->cancellable);
+          child->cancellable = dex_cancellable_new ();
 
 #define MASS      1.0
 #define STIFFNESS 800.0
@@ -887,7 +874,8 @@ move_to_idx (BzCarousel *self,
               damping_ratio, MASS, STIFFNESS,
               (BgeAnimationCallback) animate,
               carousel_widget_data_ref (child),
-              carousel_widget_data_unref));
+              carousel_widget_data_unref,
+              child->cancellable));
 
           g_snprintf (buf, sizeof (buf), "y%p", child);
           dex_future_disown (bge_animation_add_spring (
@@ -896,7 +884,8 @@ move_to_idx (BzCarousel *self,
               damping_ratio, MASS, STIFFNESS,
               (BgeAnimationCallback) animate,
               carousel_widget_data_ref (child),
-              carousel_widget_data_unref));
+              carousel_widget_data_unref,
+              child->cancellable));
 
           g_snprintf (buf, sizeof (buf), "w%p", child);
           dex_future_disown (bge_animation_add_spring (
@@ -905,7 +894,8 @@ move_to_idx (BzCarousel *self,
               damping_ratio, MASS, STIFFNESS,
               (BgeAnimationCallback) animate,
               carousel_widget_data_ref (child),
-              carousel_widget_data_unref));
+              carousel_widget_data_unref,
+              child->cancellable));
 
           g_snprintf (buf, sizeof (buf), "h%p", child);
           dex_future_disown (bge_animation_add_spring (
@@ -914,7 +904,8 @@ move_to_idx (BzCarousel *self,
               damping_ratio, MASS, STIFFNESS,
               (BgeAnimationCallback) animate,
               carousel_widget_data_ref (child),
-              carousel_widget_data_unref));
+              carousel_widget_data_unref,
+              child->cancellable));
 
 #undef STIFFNESS
 #undef MASS
