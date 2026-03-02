@@ -21,11 +21,13 @@
 #pragma once
 
 #include <gtk/gtk.h>
+#include <libdex.h>
 
 G_BEGIN_DECLS
 
 #define BGE_INSIDE
 #include "bge-version-macros.h"
+
 #include "bge-animation.h"
 #undef BGE_INSIDE
 

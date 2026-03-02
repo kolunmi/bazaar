@@ -72,6 +72,7 @@ typedef struct
   double               est_duration;
   GTimer              *timer;
   double               velocity;
+  DexPromise          *promise;
 } SpringData;
 
 static gboolean
@@ -262,8 +263,11 @@ bge_animation_dup_widget (BgeAnimation *self)
  *
  * Adds a one shot spring animation to @self. If @key is already running in
  * @self, then the old animation is replaced, maintaining the current velocity.
+ *
+ * Returns: (transfer full): a future which will resolve when the animation
+ * completes, or reject when the animation is cancelled
  */
-void
+DexFuture *
 bge_animation_add_spring (BgeAnimation        *self,
                           const char          *key,
                           double               from,
@@ -277,9 +281,9 @@ bge_animation_add_spring (BgeAnimation        *self,
 {
   g_autoptr (GtkWidget) widget = NULL;
 
-  g_return_if_fail (BGE_IS_ANIMATION (self));
-  g_return_if_fail (key != NULL);
-  g_return_if_fail (cb != NULL);
+  dex_return_error_if_fail (BGE_IS_ANIMATION (self));
+  dex_return_error_if_fail (key != NULL);
+  dex_return_error_if_fail (cb != NULL);
 
   widget = g_weak_ref_get (&self->wr);
   if (widget != NULL)
@@ -323,9 +327,18 @@ bge_animation_add_spring (BgeAnimation        *self,
           /* We'll fill this in on the first iteration */
           data->timer = NULL;
 
+          /* If this animation is being replaced, reuse the old promise */
+          if (data->promise == NULL ||
+              !dex_future_is_pending (DEX_FUTURE (data->promise)))
+            {
+              dex_clear (&data->promise);
+              data->promise = dex_promise_new_cancellable ();
+            }
+
           data->est_duration = calculate_duration (data);
 
           cb (widget, key, from, user_data);
+          return dex_ref (data->promise);
         }
       else
         /* If we shouldn't animate, just invoke the callback at the final
@@ -335,11 +348,19 @@ bge_animation_add_spring (BgeAnimation        *self,
           if (user_data != NULL &&
               destroy_data != NULL)
             destroy_data (user_data);
+          return dex_future_new_true ();
         }
     }
-  else if (user_data != NULL &&
-           destroy_data != NULL)
-    destroy_data (user_data);
+  else
+    {
+      if (user_data != NULL &&
+          destroy_data != NULL)
+        destroy_data (user_data);
+      return dex_future_new_reject (
+          G_IO_ERROR,
+          G_IO_ERROR_INVAL,
+          "Animation's widget no longer exists");
+    }
 }
 
 /**
@@ -353,22 +374,26 @@ void
 bge_animation_cancel (BgeAnimation *self,
                       const char   *key)
 {
+  SpringData *data             = NULL;
   g_autoptr (GtkWidget) widget = NULL;
 
   g_return_if_fail (BGE_IS_ANIMATION (self));
   g_return_if_fail (key != NULL);
 
-  if (!g_hash_table_contains (self->data, key))
+  data = g_hash_table_lookup (self->data, key);
+  if (data == NULL)
     return;
 
   widget = g_weak_ref_get (&self->wr);
   if (widget != NULL)
-    {
-      SpringData *data = NULL;
+    data->cb (widget, key, data->to, data->user_data);
 
-      data = g_hash_table_lookup (self->data, key);
-      data->cb (widget, key, data->to, data->user_data);
-    }
+  dex_promise_reject (
+      data->promise,
+      g_error_new (
+          G_IO_ERROR,
+          G_IO_ERROR_CANCELLED,
+          "Animation was cancelled"));
 
   g_hash_table_remove (self->data, key);
 }
@@ -382,34 +407,37 @@ bge_animation_cancel (BgeAnimation *self,
 void
 bge_animation_cancel_all (BgeAnimation *self)
 {
+  GHashTableIter iter          = { 0 };
   g_autoptr (GtkWidget) widget = NULL;
 
   g_return_if_fail (BGE_IS_ANIMATION (self));
 
+  g_hash_table_iter_init (&iter, self->data);
   widget = g_weak_ref_get (&self->wr);
-  if (widget != NULL)
+
+  for (;;)
     {
-      GHashTableIter iter = { 0 };
+      char       *key  = NULL;
+      SpringData *data = NULL;
 
-      g_hash_table_iter_init (&iter, self->data);
+      if (!g_hash_table_iter_next (
+              &iter,
+              (gpointer *) &key,
+              (gpointer *) &data))
+        break;
 
-      for (;;)
-        {
-          char       *key  = NULL;
-          SpringData *data = NULL;
+      if (widget != NULL)
+        data->cb (widget, key, data->to, data->user_data);
 
-          if (!g_hash_table_iter_next (
-                  &iter,
-                  (gpointer *) &key,
-                  (gpointer *) &data))
-            break;
+      dex_promise_reject (
+          data->promise,
+          g_error_new (
+              G_IO_ERROR,
+              G_IO_ERROR_CANCELLED,
+              "Animation was cancelled"));
 
-          data->cb (widget, key, data->to, data->user_data);
-          g_hash_table_iter_remove (&iter);
-        }
+      g_hash_table_iter_remove (&iter);
     }
-  else
-    g_hash_table_remove_all (self->data);
 }
 
 static gboolean
@@ -445,20 +473,28 @@ tick_cb (GtkWidget     *widget,
         finished = TRUE;
       else
         {
-          double elapsed = 0.0;
+          GCancellable *cancellable = NULL;
 
-          if (data->timer == NULL)
-            {
-              data->timer = g_timer_new ();
-              value       = data->from;
-            }
+          cancellable = dex_promise_get_cancellable (data->promise);
+          if (g_cancellable_is_cancelled (cancellable))
+            finished = TRUE;
           else
             {
-              elapsed = g_timer_elapsed (data->timer, NULL);
-              value   = oscillate (data, elapsed, &data->velocity);
-            }
+              double elapsed = 0.0;
 
-          finished = elapsed >= data->est_duration;
+              if (data->timer == NULL)
+                {
+                  data->timer = g_timer_new ();
+                  value       = data->from;
+                }
+              else
+                {
+                  elapsed = g_timer_elapsed (data->timer, NULL);
+                  value   = oscillate (data, elapsed, &data->velocity);
+                }
+
+              finished = elapsed >= data->est_duration;
+            }
         }
       if (finished)
         value = data->to;
@@ -466,7 +502,11 @@ tick_cb (GtkWidget     *widget,
       data->cb (widget, key, value, data->user_data);
 
       if (finished)
-        g_hash_table_iter_remove (&iter);
+        {
+          if (dex_future_is_pending (DEX_FUTURE (data->promise)))
+            dex_promise_resolve_boolean (data->promise, TRUE);
+          g_hash_table_iter_remove (&iter);
+        }
     }
 
   return G_SOURCE_CONTINUE;
@@ -665,6 +705,7 @@ destroy_spring_data (gpointer ptr)
       data->user_data != NULL)
     data->destroy_data (data->user_data);
   g_clear_pointer (&data->timer, g_timer_destroy);
+  dex_clear (&data->promise);
   g_free (ptr);
 }
 

@@ -881,40 +881,40 @@ move_to_idx (BzCarousel *self,
           /* pointer is to ensure a unique identifier so as not to overwrite any
              other child's key */
           g_snprintf (buf, sizeof (buf), "x%p", child);
-          bge_animation_add_spring (
+          dex_future_disown (bge_animation_add_spring (
               self->animation, buf,
               child->rect.origin.x, target.origin.x,
               damping_ratio, MASS, STIFFNESS,
               (BgeAnimationCallback) animate,
               carousel_widget_data_ref (child),
-              carousel_widget_data_unref);
+              carousel_widget_data_unref));
 
           g_snprintf (buf, sizeof (buf), "y%p", child);
-          bge_animation_add_spring (
+          dex_future_disown (bge_animation_add_spring (
               self->animation, buf,
               child->rect.origin.y, target.origin.y,
               damping_ratio, MASS, STIFFNESS,
               (BgeAnimationCallback) animate,
               carousel_widget_data_ref (child),
-              carousel_widget_data_unref);
+              carousel_widget_data_unref));
 
           g_snprintf (buf, sizeof (buf), "w%p", child);
-          bge_animation_add_spring (
+          dex_future_disown (bge_animation_add_spring (
               self->animation, buf,
               child->rect.size.width, target.size.width,
               damping_ratio, MASS, STIFFNESS,
               (BgeAnimationCallback) animate,
               carousel_widget_data_ref (child),
-              carousel_widget_data_unref);
+              carousel_widget_data_unref));
 
           g_snprintf (buf, sizeof (buf), "h%p", child);
-          bge_animation_add_spring (
+          dex_future_disown (bge_animation_add_spring (
               self->animation, buf,
               child->rect.size.height, target.size.height,
               damping_ratio, MASS, STIFFNESS,
               (BgeAnimationCallback) animate,
               carousel_widget_data_ref (child),
-              carousel_widget_data_unref);
+              carousel_widget_data_unref));
 
 #undef STIFFNESS
 #undef MASS
