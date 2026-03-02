@@ -241,26 +241,6 @@ maybe_save_paintable (BzEntryPrivate  *priv,
 static GdkPaintable *
 make_async_texture (GVariant *parse);
 
-static DexFuture *
-icon_paintable_future_then (DexFuture *future,
-                            GWeakRef  *wr);
-
-BZ_DEFINE_DATA (
-    load_mini_icon,
-    LoadMiniIcon,
-    {
-      BzEntry *self;
-      char    *path;
-      GIcon   *result;
-    },
-    BZ_RELEASE_DATA (self, g_object_unref);
-    BZ_RELEASE_DATA (path, g_free);
-    BZ_RELEASE_DATA (result, g_object_unref))
-static DexFuture *
-load_mini_icon_fiber (LoadMiniIconData *data);
-static DexFuture *
-load_mini_icon_notify (LoadMiniIconData *data);
-
 static GIcon *
 load_mini_icon_sync (const char *unique_id_checksum,
                      const char *path);
@@ -342,7 +322,6 @@ bz_entry_get_property (GObject    *object,
       break;
     case PROP_ICON_PAINTABLE:
       g_value_set_object (value, priv->icon_paintable);
-      dex_unref (bz_entry_load_mini_icon (self));
       break;
     case PROP_MINI_ICON:
       g_value_set_object (value, priv->mini_icon);
@@ -2379,29 +2358,6 @@ bz_entry_get_is_flathub (BzEntry *self)
   return priv->is_flathub;
 }
 
-DexFuture *
-bz_entry_load_mini_icon (BzEntry *self)
-{
-  BzEntryPrivate *priv = NULL;
-
-  dex_return_error_if_fail (BZ_IS_ENTRY (self));
-  priv = bz_entry_get_instance_private (self);
-
-  if (priv->mini_icon == NULL &&
-      priv->mini_icon_future == NULL &&
-      BZ_IS_ASYNC_TEXTURE (priv->icon_paintable))
-    {
-      dex_clear (&priv->mini_icon_future);
-      priv->mini_icon_future = dex_future_then (
-          bz_async_texture_dup_future (BZ_ASYNC_TEXTURE (priv->icon_paintable)),
-          (DexFutureCallback) icon_paintable_future_then,
-          bz_track_weak (self), bz_weak_release);
-      return dex_ref (priv->mini_icon_future);
-    }
-  else
-    return dex_future_new_true ();
-}
-
 GIcon *
 bz_load_mini_icon_sync (const char *unique_id_checksum,
                         const char *path)
@@ -2829,55 +2785,6 @@ make_async_texture (GVariant *parse)
   return GDK_PAINTABLE (g_steal_pointer (&texture));
 }
 
-static DexFuture *
-icon_paintable_future_then (DexFuture *future,
-                            GWeakRef  *wr)
-{
-  g_autoptr (BzEntry) self          = NULL;
-  BzEntryPrivate *priv              = NULL;
-  const char     *icon_path         = NULL;
-  g_autoptr (LoadMiniIconData) data = NULL;
-
-  bz_weak_get_or_return_reject (self, wr);
-  priv = bz_entry_get_instance_private (self);
-
-  /* ? */
-  if (!BZ_IS_ASYNC_TEXTURE (priv->icon_paintable))
-    return NULL;
-
-  icon_path = bz_async_texture_get_cache_into_path (BZ_ASYNC_TEXTURE (priv->icon_paintable));
-  if (icon_path == NULL)
-    return NULL;
-
-  data       = load_mini_icon_data_new ();
-  data->self = g_object_ref (self);
-  data->path = g_strdup (icon_path);
-
-  return dex_scheduler_spawn (
-      bz_get_io_scheduler (),
-      bz_get_dex_stack_size (),
-      (DexFiberFunc) load_mini_icon_fiber,
-      load_mini_icon_data_ref (data),
-      load_mini_icon_data_unref);
-}
-
-static DexFuture *
-load_mini_icon_fiber (LoadMiniIconData *data)
-{
-  BzEntry *self = data->self;
-  char    *path = data->path;
-
-  data->result = load_mini_icon_sync (
-      bz_entry_get_unique_id_checksum (BZ_ENTRY (self)),
-      path);
-  return dex_scheduler_spawn (
-      dex_scheduler_get_default (),
-      bz_get_dex_stack_size (),
-      (DexFiberFunc) load_mini_icon_notify,
-      load_mini_icon_data_ref (data),
-      load_mini_icon_data_unref);
-}
-
 static GIcon *
 load_mini_icon_sync (const char *unique_id_checksum,
                      const char *path)
@@ -2930,19 +2837,6 @@ done:
   mini_icon_file = g_file_new_for_path (mini_icon_path);
   mini_icon      = g_file_icon_new (mini_icon_file);
   return g_steal_pointer (&mini_icon);
-}
-
-static DexFuture *
-load_mini_icon_notify (LoadMiniIconData *data)
-{
-  BzEntry *self   = data->self;
-  GIcon   *result = data->result;
-
-  g_object_set (
-      self,
-      "mini-icon", result,
-      NULL);
-  return dex_future_new_true ();
 }
 
 static void
