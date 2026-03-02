@@ -516,6 +516,12 @@ bz_search_widget_set_state (BzSearchWidget *self,
           G_CALLBACK (invalidating_state_prop_changed),
           self);
 
+      g_signal_connect_swapped (
+          state,
+          "notify::parental-age-rating",
+          G_CALLBACK (invalidating_state_prop_changed),
+          self);
+
       g_object_get (
           state,
           "blocklists-provider", &self->blocklists_provider,

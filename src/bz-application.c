@@ -2688,7 +2688,7 @@ init_service_struct (BzApplication *self,
     if (self->malcontent != NULL)
       g_signal_connect_swapped (
           self->state,
-          "notify::parental-blocked-ids",
+          "notify::parental-age-rating",
           G_CALLBACK (show_hide_app_setting_changed),
           self);
   }
