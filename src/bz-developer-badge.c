@@ -88,14 +88,14 @@ static char *
 get_verified_tooltip (gpointer object,
                       GObject *status)
 {
-  if (status == NULL)
-    return g_strdup (_("Not Verified"));
-
   gboolean verified = FALSE;
+
+  if (status == NULL)
+    return g_strdup (_ ("Not Verified"));
 
   g_object_get (status, "verified", &verified, NULL);
 
-  return g_strdup (verified ? _("Verified") : _("Not Verified"));
+  return g_strdup (verified ? _ ("Verified") : _ ("Not Verified"));
 }
 
 static char *

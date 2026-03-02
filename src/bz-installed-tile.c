@@ -54,9 +54,6 @@ enum
 
 static GParamSpec *props[LAST_PROP] = { 0 };
 
-static gboolean
-test_has_addons (BzEntry *entry);
-
 static void
 bz_installed_tile_dispose (GObject *object)
 {
@@ -173,25 +170,6 @@ format_description (gpointer    object,
 }
 
 static void
-addon_transact_cb (BzInstalledTile *self,
-                   BzEntry         *entry,
-                   BzAddonsDialog  *dialog)
-{
-  BzLibraryPage *page      = NULL;
-  gboolean       installed = FALSE;
-
-  page = BZ_LIBRARY_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (self), BZ_TYPE_LIBRARY_PAGE));
-  g_assert (page != NULL);
-
-  g_object_get (entry, "installed", &installed, NULL);
-
-  if (installed)
-    g_signal_emit_by_name (page, "remove-addon", entry);
-  else
-    g_signal_emit_by_name (page, "install-addon", entry);
-}
-
-static void
 support_cb (BzInstalledTile *self,
             GtkButton       *button)
 {
@@ -207,76 +185,26 @@ support_cb (BzInstalledTile *self,
   g_app_info_launch_default_for_uri (url, NULL, NULL);
 }
 
-static DexFuture *
-install_addons_fiber (BzInstalledTile *tile)
-{
-  g_autoptr (GError) local_error = NULL;
-  BzLibraryPage *page            = NULL;
-  BzStateInfo   *state           = NULL;
-  GtkWidget     *window          = NULL;
-  g_autoptr (BzEntry) entry      = NULL;
-  g_autoptr (GListModel) model   = NULL;
-  AdwDialog *addons_dialog       = NULL;
-
-  page = BZ_LIBRARY_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (tile), BZ_TYPE_LIBRARY_PAGE));
-  g_assert (page != NULL);
-
-  window = gtk_widget_get_ancestor (GTK_WIDGET (tile), GTK_TYPE_WINDOW);
-  g_assert (window != NULL);
-
-  g_object_get (page, "state", &state, NULL);
-  g_assert (state != NULL);
-
-  entry = bz_entry_group_find_entry (tile->group, test_has_addons, window, &local_error);
-  if (entry == NULL)
-    goto err;
-
-  model = bz_application_map_factory_generate (
-      bz_state_info_get_entry_factory (state),
-      bz_entry_get_addons (entry));
-
-  addons_dialog = bz_addons_dialog_new (entry, model);
-  gtk_widget_set_size_request (GTK_WIDGET (addons_dialog), 350, -1);
-  g_signal_connect_swapped (addons_dialog, "transact", G_CALLBACK (addon_transact_cb), tile);
-
-  adw_dialog_present (addons_dialog, GTK_WIDGET (tile));
-
-  g_clear_object (&state);
-  return NULL;
-
-err:
-  if (local_error != NULL)
-    bz_show_error_for_widget (window, _("Failed to load add-ons"), local_error->message);
-  g_clear_object (&state);
-  return NULL;
-}
-
 static void
 install_addons_cb (BzInstalledTile *self,
                    GtkButton       *button)
 {
-  dex_future_disown (dex_scheduler_spawn (
-      dex_scheduler_get_default (),
-      bz_get_dex_stack_size (),
-      (DexFiberFunc) install_addons_fiber,
-      g_object_ref (self),
-      g_object_unref));
+  if (self->group == NULL)
+    return;
+
+  gtk_widget_activate_action (GTK_WIDGET (self), "window.addons-group", "s",
+                              bz_entry_group_get_id (self->group));
 }
 
 static void
 remove_cb (BzInstalledTile *self,
            GtkButton       *button)
 {
-  BzLibraryPage *page = NULL;
-
-  page = BZ_LIBRARY_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (self), BZ_TYPE_LIBRARY_PAGE));
-  if (page == NULL)
-    return;
-
   if (self->group == NULL)
     return;
 
-  g_signal_emit_by_name (page, "remove", self->group);
+  gtk_widget_activate_action (GTK_WIDGET (self), "window.remove-group", "(sb)",
+                              bz_entry_group_get_id (self->group), FALSE);
 }
 
 static void
@@ -350,13 +278,4 @@ bz_installed_tile_get_group (BzInstalledTile *self)
 {
   g_return_val_if_fail (BZ_IS_INSTALLED_TILE (self), NULL);
   return self->group;
-}
-
-static gboolean
-test_has_addons (BzEntry *entry)
-{
-  GListModel *model = NULL;
-
-  model = bz_entry_get_addons (entry);
-  return model != NULL && g_list_model_get_n_items (model) > 0;
 }

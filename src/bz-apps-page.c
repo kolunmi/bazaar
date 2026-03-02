@@ -64,13 +64,6 @@ enum
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
 
-enum
-{
-  SIGNAL_SELECT,
-
-  LAST_SIGNAL,
-};
-static guint signals[LAST_SIGNAL];
 
 static void
 tile_clicked (BzEntryGroup *group,
@@ -206,15 +199,8 @@ featured_carousel_group_clicked_cb (BzAppsPage   *self,
                                     BzEntryGroup *group,
                                     GtkWidget    *carousel)
 {
-  g_signal_emit (self, signals[SIGNAL_SELECT], 0, group);
-}
-
-static void
-all_apps_select_cb (BzAllAppsPage *all_page,
-                    BzEntryGroup  *group,
-                    BzAppsPage    *self)
-{
-  g_signal_emit (self, signals[SIGNAL_SELECT], 0, group);
+  gtk_widget_activate_action (GTK_WIDGET (self), "window.show-group", "s",
+                              bz_entry_group_get_id (group));
 }
 
 static void
@@ -244,9 +230,6 @@ show_all_cb (BzAppsPage *self,
   all_page  = bz_all_apps_page_new (all_title, g_object_ref (self->all_applications));
   if (all_page == NULL)
     return;
-
-  g_signal_connect (all_page, "select",
-                    G_CALLBACK (all_apps_select_cb), self);
 
   adw_navigation_view_push (ADW_NAVIGATION_VIEW (nav_view), all_page);
 }
@@ -306,21 +289,6 @@ bz_apps_page_class_init (BzAppsPageClass *klass)
           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
-
-  signals[SIGNAL_SELECT] =
-      g_signal_new (
-          "select",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
-          g_cclosure_marshal_VOID__OBJECT,
-          G_TYPE_NONE, 1,
-          BZ_TYPE_ENTRY);
-  g_signal_set_va_marshaller (
-      signals[SIGNAL_SELECT],
-      G_TYPE_FROM_CLASS (klass),
-      g_cclosure_marshal_VOID__OBJECTv);
 
   g_type_ensure (BZ_TYPE_APP_TILE);
   g_type_ensure (BZ_TYPE_SUBCATEGORY_LIST);
@@ -560,8 +528,6 @@ static void
 tile_clicked (BzEntryGroup *group,
               GtkButton    *button)
 {
-  GtkWidget *self = NULL;
-
-  self = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_APPS_PAGE);
-  g_signal_emit (self, signals[SIGNAL_SELECT], 0, group);
+  gtk_widget_activate_action (GTK_WIDGET (button), "window.show-group", "s",
+                              bz_entry_group_get_id (group));
 }

@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-25 07:30+0100\n"
-"PO-Revision-Date: 2026-02-25 15:59+0100\n"
+"POT-Creation-Date: 2026-02-27 00:59+0100\n"
+"PO-Revision-Date: 2026-02-27 14:42+0100\n"
 "Last-Translator: Marcel Mrówka <micro.mail88@gmail.com>\n"
 "Language-Team: Polish <>\n"
 "Language: pl\n"
@@ -22,7 +22,7 @@ msgstr ""
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:2
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:6
-#: src/bz-window.blp:111
+#: src/bz-window.blp:110
 msgid "Bazaar"
 msgstr "Bazaar"
 
@@ -489,42 +489,42 @@ msgid "Main Menu"
 msgstr "Menu główne"
 
 #: src/bz-all-apps-page.blp:18 src/bz-apps-page.blp:18
-#: src/bz-user-data-page.blp:19 src/bz-window.blp:385
+#: src/bz-user-data-page.blp:19 src/bz-window.blp:384
 msgid "_Donate to Bazaar ❤️"
 msgstr "Przekaż _darowiznę ❤️"
 
 #: src/bz-all-apps-page.blp:25 src/bz-apps-page.blp:25
-#: src/bz-user-data-page.blp:26 src/bz-window.blp:392
+#: src/bz-user-data-page.blp:26 src/bz-window.blp:391
 msgid "_Refresh"
 msgstr "_Odśwież"
 
 #: src/bz-all-apps-page.blp:30 src/bz-apps-page.blp:30
-#: src/bz-user-data-page.blp:31 src/bz-window.blp:397
+#: src/bz-user-data-page.blp:31 src/bz-window.blp:396
 msgid "_Preferences"
 msgstr "_Preferencje"
 
 #: src/bz-all-apps-page.blp:35 src/bz-apps-page.blp:35
-#: src/bz-user-data-page.blp:36 src/bz-window.blp:402
+#: src/bz-user-data-page.blp:36 src/bz-window.blp:401
 msgid "_Login With Flathub"
 msgstr "Za_loguj się do Flathub"
 
 #: src/bz-all-apps-page.blp:41 src/bz-apps-page.blp:41
-#: src/bz-user-data-page.blp:42 src/bz-window.blp:408
+#: src/bz-user-data-page.blp:42 src/bz-window.blp:407
 msgid "_Manage Leftover User Data"
 msgstr "Zarządzaj _pozostałymi danymi"
 
 #: src/bz-all-apps-page.blp:46 src/bz-apps-page.blp:46
-#: src/bz-user-data-page.blp:47 src/bz-window.blp:413
+#: src/bz-user-data-page.blp:47 src/bz-window.blp:412
 msgid "_Keyboard Shortcuts"
 msgstr "Skróty _klawiszowe"
 
 #: src/bz-all-apps-page.blp:51 src/bz-apps-page.blp:51
-#: src/bz-user-data-page.blp:52 src/bz-window.blp:418
+#: src/bz-user-data-page.blp:52 src/bz-window.blp:417
 msgid "_About Bazaar"
 msgstr "O _aplikacji Bazaar"
 
 #: src/bz-all-apps-page.blp:58 src/bz-apps-page.blp:58
-#: src/bz-user-data-page.blp:59 src/bz-window.blp:425
+#: src/bz-user-data-page.blp:59 src/bz-window.blp:424
 msgid "_Quit Bazaar"
 msgstr "_Zamknij Bazaar"
 
@@ -707,7 +707,7 @@ msgstr "Pokaż wszystkie"
 #: src/bz-apps-page.c:243
 #, c-format
 msgid "All \"%s\""
-msgstr "Wszystkie \"%s\""
+msgstr "Wszystkie aplikacje dot. \"%s\""
 
 #: src/bz-apps-page.c:530 src/bz-tag-list.c:109
 #, c-format
@@ -738,8 +738,8 @@ msgid "Logged Out Successfully!"
 msgstr "Wylogowano pomyślnie!"
 
 #: src/bz-application.c:893
-msgid "Performing setup..."
-msgstr "Konfigurowanie..."
+msgid "Performing setup…"
+msgstr "Konfigurowanie…"
 
 #: src/bz-application.c:977
 msgid "Set Up System Flathub?"
@@ -753,11 +753,9 @@ msgid ""
 "\n"
 "You can still use Bazaar to browse and remove already installed apps."
 msgstr ""
-"Repozytorium Flathuba na poziomie systemu nie jest skonfigurowane. Bazaar wyma"
-"ga "
-"Flathuba skonfigurowanego na systemowej instalacji Flatpaka, aby móc przegląda"
-"ć oraz "
-"instalować aplikacje.\n"
+"Repozytorium Flathuba na poziomie systemu nie jest skonfigurowane. Bazaar "
+"wymaga Flathuba skonfigurowanego na systemowej instalacji Flatpaka, aby móc "
+"przeglądać oraz instalować aplikacje.\n"
 "\n"
 "Nadal możesz używać Bazaaru do przeglądania i usuwania już zainstalowanych "
 "aplikacji."
@@ -791,7 +789,7 @@ msgstr "Skonfiguruj Flathub"
 msgid "A backend error occurred"
 msgstr "Wystąpił błąd w backendzie"
 
-#: src/bz-application.c:1406 src/bz-application.c:3178 src/bz-window.blp:135
+#: src/bz-application.c:1406 src/bz-application.c:3178 src/bz-window.blp:134
 msgid "Refreshing…"
 msgstr "Odświeżanie…"
 
@@ -824,59 +822,59 @@ msgstr "Nie można znaleźć aplikacji"
 msgid "Writing to cache…"
 msgstr "Zapisywanie do pamięci podręcznej…"
 
-#: src/bz-appstream-parser.c:303
+#: src/bz-appstream-parser.c:304
 msgctxt "Project URL Type"
 msgid "Flathub Page"
 msgstr "Strona Flathub"
 
-#: src/bz-appstream-parser.c:324
+#: src/bz-appstream-parser.c:325
 msgctxt "Project URL Type"
 msgid "Project Website"
 msgstr "Strona projektu"
 
-#: src/bz-appstream-parser.c:328
+#: src/bz-appstream-parser.c:329
 msgctxt "Project URL Type"
 msgid "Issue Tracker"
 msgstr "Issue Tracker"
 
-#: src/bz-appstream-parser.c:332
+#: src/bz-appstream-parser.c:333
 msgctxt "Project URL Type"
 msgid "FAQ"
 msgstr "FAQ"
 
-#: src/bz-appstream-parser.c:336
+#: src/bz-appstream-parser.c:337
 msgctxt "Project URL Type"
 msgid "Help"
 msgstr "Pomoc"
 
-#: src/bz-appstream-parser.c:340
+#: src/bz-appstream-parser.c:341
 msgctxt "Project URL Type"
 msgid "Donate"
 msgstr "Przekaż darowiznę"
 
-#: src/bz-appstream-parser.c:346
+#: src/bz-appstream-parser.c:347
 msgctxt "Project URL Type"
 msgid "Translate"
 msgstr "Tłumacz"
 
-#: src/bz-appstream-parser.c:350
+#: src/bz-appstream-parser.c:351
 msgctxt "Project URL Type"
 msgid "Contact"
 msgstr "Skontaktuj się"
 
-#: src/bz-appstream-parser.c:354
+#: src/bz-appstream-parser.c:355
 msgctxt "Project URL Type"
 msgid "Source Code"
 msgstr "Kod źródłowy"
 
-#: src/bz-appstream-parser.c:360
+#: src/bz-appstream-parser.c:361
 msgctxt "Project URL Type"
 msgid "Contribute"
 msgstr "Miej wkład"
 
 #: src/bz-curated-view.blp:11 src/bz-favorites-page.blp:68
 #: src/bz-flathub-page.blp:19 src/bz-full-view.blp:61
-#: src/bz-library-page.blp:63 src/bz-user-data-page.blp:86
+#: src/bz-library-page.blp:65 src/bz-user-data-page.blp:86
 msgid "Empty"
 msgstr "Puste"
 
@@ -1064,7 +1062,7 @@ msgid "Remove From Favorites"
 msgstr "Usuń z ulubionych"
 
 #: src/bz-favorites-page.blp:5 src/bz-favorites-page.blp:78
-#: src/bz-window.blp:443
+#: src/bz-window.blp:442
 msgid "Favorites"
 msgstr "Ulubione"
 
@@ -1431,8 +1429,8 @@ msgstr "Gry i aplikacje do uruchamiania twoich ulubionych pozycji"
 msgid "More Games"
 msgstr "Więcej gier"
 
-#: src/bz-full-view.blp:65 src/bz-library-page.blp:74
-#: src/bz-library-page.blp:78
+#: src/bz-full-view.blp:65 src/bz-library-page.blp:76
+#: src/bz-library-page.blp:80
 msgid "No Results"
 msgstr "Brak wyników"
 
@@ -1589,7 +1587,9 @@ msgstr "Licencja specjalna"
 
 #: src/bz-full-view.c:471
 msgid "Adaptive"
-msgstr "Zmienne"
+msgstr ""
+"Na różne\n"
+"urządzenia"
 
 #: src/bz-full-view.c:471
 msgid "Desktop Only"
@@ -1790,49 +1790,49 @@ msgstr "Zatrzymano otrzymywanie wystąpień"
 msgid "Failed to load add-ons"
 msgstr "Ładowanie dodatków się nie powiodło"
 
-#: src/bz-library-page.blp:29
+#: src/bz-library-page.blp:31
 msgid "Search installed apps"
 msgstr "Wyszukuj zainstalowanych aplikacji"
 
-#: src/bz-library-page.blp:46
+#: src/bz-library-page.blp:48
 msgid "Clear search"
 msgstr "Wyczyść wyszukiwanie"
 
-#: src/bz-library-page.blp:67
+#: src/bz-library-page.blp:69
 msgid "No Apps Found"
 msgstr "Nie znaleziono aplikacji"
 
 #. Translators: .
-#: src/bz-library-page.blp:96 src/bz-window.blp:179
+#: src/bz-library-page.blp:98 src/bz-window.blp:178
 msgid "Library"
 msgstr "Biblioteka"
 
-#: src/bz-library-page.blp:124
+#: src/bz-library-page.blp:126
 msgid "Pending Updates"
 msgstr "Aktualizacje w toku"
 
-#: src/bz-library-page.blp:151
+#: src/bz-library-page.blp:153
 msgid "Downloads"
 msgstr "Pobrania"
 
-#: src/bz-library-page.blp:194
+#: src/bz-library-page.blp:196
 msgid "Recently Uninstalled"
 msgstr "Niedawno odinstalowane"
 
-#: src/bz-library-page.blp:245
+#: src/bz-library-page.blp:247
 msgid "Clear Finished Tasks"
 msgstr "Wyczyść zakończone zadania"
 
-#: src/bz-library-page.blp:256
+#: src/bz-library-page.blp:258
 msgid "Installed Apps"
 msgstr "Zainstalowane aplikacje"
 
-#: src/bz-library-page.c:150
+#: src/bz-library-page.c:179
 #, c-format
 msgid "No matches found for \"%s\" in the list of installed apps"
 msgstr "Brak wyników dla \"%s\" na liście zainstalowanych aplikacji"
 
-#: src/bz-library-page.c:163 src/bz-updates-card.c:257
+#: src/bz-library-page.c:192 src/bz-updates-card.c:257
 #, c-format
 msgid "%u Available Update"
 msgid_plural "%u Available Updates"
@@ -1875,7 +1875,7 @@ msgid ""
 "You can participate and help make it even better."
 msgstr ""
 "Ta aplikacja jest tworzona jako wolna przez międzynarodową społeczność i "
-"jest wydawana z licencją <a href=\"%s\">%s</a>.\n"
+"jest wydawana z licencją %s.\n"
 "\n"
 "Możesz mieć wkład w ulepszaniu jej."
 
@@ -2638,19 +2638,19 @@ msgstr "Wyszukuj aplikacje, gry i oprogramowanie"
 msgid "Clear Search"
 msgstr "Wyczyść wyszukiwanie"
 
-#: src/bz-search-widget.blp:152
+#: src/bz-search-widget.blp:167
 msgid "Categories Unavailable"
 msgstr "Kategorie są niedostępne"
 
-#: src/bz-search-widget.blp:153
+#: src/bz-search-widget.blp:168
 msgid "Search for apps using the search bar above."
 msgstr "Wyszukuj aplikacje korzystając z powyższego paska wyszukiwania"
 
-#: src/bz-search-widget.blp:178
+#: src/bz-search-widget.blp:193
 msgid "Browse Categories"
 msgstr "Przeglądaj kategorie"
 
-#: src/bz-search-widget.blp:302
+#: src/bz-search-widget.blp:317
 msgid "No Applications Found"
 msgstr "Nie znaleziono aplikacji"
 
@@ -2923,11 +2923,11 @@ msgstr "Przeniesiono do kosza dane użytkownika %s"
 msgid "Trash User Data"
 msgstr "Przenieś do kosza dane użytkownika"
 
-#: src/bz-window.blp:153
+#: src/bz-window.blp:152
 msgid "Curated"
 msgstr "Polecane"
 
-#: src/bz-window.blp:166
+#: src/bz-window.blp:165
 msgid "Flathub"
 msgstr "Flathub"
 
@@ -2950,15 +2950,15 @@ msgstr ""
 "Masz połączenie z internetem, ale przeglądasz wersję Flathuba, która została "
 "zapisana w pamięci twojego komputera"
 
-#: src/bz-window.blp:450
+#: src/bz-window.blp:449
 msgid "Log Out"
 msgstr "Wyloguj się"
 
-#: src/bz-window.c:680
+#: src/bz-window.c:675
 msgid "You can't remove Bazaar from Bazaar!"
 msgstr "Nie możesz usunąć Bazaaru z poziomu Bazaaru!"
 
-#: src/bz-window.c:966 src/bz-window.c:1000
+#: src/bz-window.c:961 src/bz-window.c:995
 msgid "Can't do that right now!"
 msgstr "Nie możesz tego teraz zrobić!"
 
@@ -2967,42 +2967,42 @@ msgctxt "As in, \"100 Downloads\""
 msgid "Downloads"
 msgstr "Pobrań"
 
-#: src/gtk/shortcuts-dialog.blp:6
+#: src/shortcuts-dialog.blp:6
 msgctxt "shortcut window"
 msgid "General"
 msgstr "Ogólne"
 
-#: src/gtk/shortcuts-dialog.blp:9
+#: src/shortcuts-dialog.blp:9
 msgctxt "shortcut window"
 msgid "Refresh"
 msgstr "Odśwież"
 
-#: src/gtk/shortcuts-dialog.blp:14
+#: src/shortcuts-dialog.blp:14
 msgctxt "shortcut window"
 msgid "Open Preferences"
 msgstr "Otwórz preferencje"
 
-#: src/gtk/shortcuts-dialog.blp:19
+#: src/shortcuts-dialog.blp:19
 msgctxt "shortcut window"
 msgid "Open Search Dialog"
 msgstr "Otwórz okno wyszukiwania"
 
-#: src/gtk/shortcuts-dialog.blp:24
+#: src/shortcuts-dialog.blp:24
 msgctxt "shortcut window"
 msgid "Open Library"
 msgstr "Otwórz bibliotekę"
 
-#: src/gtk/shortcuts-dialog.blp:30
+#: src/shortcuts-dialog.blp:30
 msgctxt "shortcut window"
 msgid "Show Shortcuts"
 msgstr "Pokaż skróty"
 
-#: src/gtk/shortcuts-dialog.blp:35
+#: src/shortcuts-dialog.blp:35
 msgctxt "shortcut window"
 msgid "Close Window"
 msgstr "Zamknij okno"
 
-#: src/gtk/shortcuts-dialog.blp:41
+#: src/shortcuts-dialog.blp:41
 msgctxt "shortcut window"
 msgid "Quit Bazaar"
 msgstr "Zamknij Bazaar"

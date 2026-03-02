@@ -48,14 +48,6 @@ enum
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
 
-enum
-{
-  SIGNAL_SELECT,
-
-  LAST_SIGNAL,
-};
-static guint signals[LAST_SIGNAL];
-
 static void
 tile_clicked_cb (GtkListItem *list_item,
                  BzAppTile   *tile);
@@ -140,17 +132,6 @@ bz_all_apps_page_class_init (BzAllAppsPageClass *klass)
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
-  signals[SIGNAL_SELECT] =
-      g_signal_new (
-          "select",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
-          NULL,
-          G_TYPE_NONE, 1,
-          BZ_TYPE_ENTRY_GROUP);
-
   g_type_ensure (BZ_TYPE_APP_TILE);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-all-apps-page.ui");
@@ -190,18 +171,12 @@ static void
 tile_clicked_cb (GtkListItem *list_item,
                  BzAppTile   *tile)
 {
-  BzAllAppsPage *self  = NULL;
-  BzEntryGroup  *group = NULL;
-
-  g_assert (GTK_IS_LIST_ITEM (list_item));
-  g_assert (BZ_IS_APP_TILE (tile));
-
-  self = BZ_ALL_APPS_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (tile),
-                                                    BZ_TYPE_ALL_APPS_PAGE));
+  BzEntryGroup *group = NULL;
 
   group = gtk_list_item_get_item (list_item);
   if (group == NULL)
     return;
 
-  g_signal_emit (self, signals[SIGNAL_SELECT], 0, group);
+  gtk_widget_activate_action (GTK_WIDGET (tile), "window.show-group", "s",
+                              bz_entry_group_get_id (group));
 }

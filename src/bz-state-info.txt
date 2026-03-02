@@ -59,3 +59,5 @@ property=transaction_manager BzTransactionManager BZ_TYPE_TRANSACTION_MANAGER ob
 property=txt_blocklists GListModel G_TYPE_LIST_MODEL object
 property=txt_blocklists_provider BzContentProvider BZ_TYPE_CONTENT_PROVIDER object
 property=user_icon_theme GtkIconTheme GTK_TYPE_ICON_THEME object
+property=parental_blocked_ids GListModel G_TYPE_LIST_MODEL object
+property=parental_age_rating int G_TYPE_INT int

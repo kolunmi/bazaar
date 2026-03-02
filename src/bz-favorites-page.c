@@ -59,17 +59,6 @@ enum
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
 
-enum
-{
-  SIGNAL_INSTALL,
-  SIGNAL_REMOVE,
-  SIGNAL_SHOW,
-  SIGNAL_BULK_INSTALL,
-
-  LAST_SIGNAL,
-};
-static guint signals[LAST_SIGNAL];
-
 static DexFuture *
 fetch_favorites_fiber (GWeakRef *wr);
 
@@ -199,20 +188,16 @@ is_favorited (GListModel   *favorites,
 static void
 tile_activated_cb (BzFavoritesTile *tile)
 {
-  BzFavoritesPage *self  = NULL;
-  BzEntryGroup    *group = NULL;
+  BzEntryGroup *group = NULL;
 
   g_assert (BZ_IS_FAVORITES_TILE (tile));
-
-  self = (BzFavoritesPage *) gtk_widget_get_ancestor (GTK_WIDGET (tile), BZ_TYPE_FAVORITES_PAGE);
-  if (self == NULL)
-    return;
 
   group = bz_favorites_tile_get_group (tile);
   if (group == NULL)
     return;
 
-  g_signal_emit (self, signals[SIGNAL_SHOW], 0, group);
+  gtk_widget_activate_action (GTK_WIDGET (tile), "window.show-group", "s",
+                              bz_entry_group_get_id (group));
 }
 
 static void
@@ -244,16 +229,15 @@ static void
 install_all_cb (BzFavoritesPage *self,
                 GtkButton       *button)
 {
-  g_autoptr (GListStore) installable_groups = NULL;
-  guint n_items                             = 0;
+  GVariantBuilder builder = G_VARIANT_BUILDER_INIT (G_VARIANT_TYPE ("as"));
+  guint n_items           = 0;
 
   g_return_if_fail (BZ_IS_FAVORITES_PAGE (self));
 
   if (self->model == NULL || self->favorites == NULL)
     return;
 
-  installable_groups = g_list_store_new (BZ_TYPE_ENTRY_GROUP);
-  n_items            = g_list_model_get_n_items (self->favorites);
+  n_items = g_list_model_get_n_items (self->favorites);
 
   for (guint i = 0; i < n_items; i++)
     {
@@ -264,10 +248,11 @@ install_all_cb (BzFavoritesPage *self,
       if (!is_favorited (self->favorites, group))
         continue;
 
-      g_list_store_append (installable_groups, group);
+      g_variant_builder_add (&builder, "s", bz_entry_group_get_id (group));
     }
 
-  g_signal_emit (self, signals[SIGNAL_BULK_INSTALL], 0, G_LIST_MODEL (installable_groups));
+  gtk_widget_activate_action (GTK_WIDGET (self), "window.bulk-install", "as",
+                              &builder);
 }
 
 static void
@@ -310,50 +295,6 @@ bz_favorites_page_class_init (BzFavoritesPageClass *klass)
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
-
-  signals[SIGNAL_INSTALL] =
-      g_signal_new (
-          "install",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
-          NULL,
-          G_TYPE_NONE, 1,
-          BZ_TYPE_ENTRY_GROUP);
-
-  signals[SIGNAL_REMOVE] =
-      g_signal_new (
-          "remove",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
-          NULL,
-          G_TYPE_NONE, 1,
-          BZ_TYPE_ENTRY_GROUP);
-
-  signals[SIGNAL_SHOW] =
-      g_signal_new (
-          "show-entry",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
-          NULL,
-          G_TYPE_NONE, 1,
-          BZ_TYPE_ENTRY_GROUP);
-
-  signals[SIGNAL_BULK_INSTALL] =
-      g_signal_new (
-          "bulk-install",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
-          NULL,
-          G_TYPE_NONE, 1,
-          G_TYPE_LIST_MODEL);
 
   g_type_ensure (BZ_TYPE_FAVORITES_TILE);
 

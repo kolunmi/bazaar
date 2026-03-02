@@ -112,6 +112,7 @@ else
   endforeach
   add_project_arguments(project_c_args, language: 'c')
 
+  subdir('bge')
   subdir('data')
   subdir('src')
   subdir('po')

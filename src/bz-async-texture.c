@@ -113,6 +113,9 @@ retry_cb (DexFuture *future,
 static gboolean
 idle_notify (BzAsyncTexture *self);
 
+static GMutex debug_n_textures_mutex = { 0 };
+static gsize  debug_n_textures       = 0;
+
 static void
 bz_async_texture_dispose (GObject *object)
 {
@@ -130,6 +133,15 @@ bz_async_texture_dispose (GObject *object)
   g_clear_pointer (&self->cache_into_path, g_free);
   g_clear_object (&self->paintable);
   g_mutex_clear (&self->texture_mutex);
+
+  if (!g_log_writer_default_would_drop (G_LOG_LEVEL_DEBUG, G_LOG_DOMAIN))
+    {
+      g_mutex_lock (&debug_n_textures_mutex);
+      debug_n_textures--;
+      g_debug ("%zu %s object(s) in memory",
+               debug_n_textures, g_type_name (BZ_TYPE_ASYNC_TEXTURE));
+      g_mutex_unlock (&debug_n_textures_mutex);
+    }
 
   G_OBJECT_CLASS (bz_async_texture_parent_class)->dispose (object);
 }
@@ -215,6 +227,13 @@ bz_async_texture_init (BzAsyncTexture *self)
   self->retries   = 0;
   self->paintable = NULL;
   g_mutex_init (&self->texture_mutex);
+
+  if (!g_log_writer_default_would_drop (G_LOG_LEVEL_DEBUG, G_LOG_DOMAIN))
+    {
+      g_mutex_lock (&debug_n_textures_mutex);
+      debug_n_textures++;
+      g_mutex_unlock (&debug_n_textures_mutex);
+    }
 }
 
 static void
