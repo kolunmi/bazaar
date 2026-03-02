@@ -150,8 +150,8 @@ template $BzFullView: Adw.Bin {
                           valign: center;
                           halign: center;
                           pixel-size: 128;
-                          paintable: bind template.entry-group as <$BzEntryGroup>.icon-paintable;
-                          visible: bind $invert_boolean($is_null(template.entry-group as <$BzEntryGroup>.icon-paintable) as <bool>) as <bool>;
+                          paintable: bind template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable;
+                          visible: bind $invert_boolean($is_null(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable) as <bool>) as <bool>;
 
                           styles [
                             "icon-dropshadow",
@@ -163,7 +163,7 @@ template $BzFullView: Adw.Bin {
                           halign: center;
                           pixel-size: 128;
                           icon-name: "application-x-executable";
-                          visible: bind $is_null(template.entry-group as <$BzEntryGroup>.icon-paintable) as <bool>;
+                          visible: bind $is_null(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable) as <bool>;
 
                           styles [
                             "icon-dropshadow",

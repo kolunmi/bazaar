@@ -58,9 +58,6 @@ bz_entry_group_get_developer (BzEntryGroup *self);
 const char *
 bz_entry_group_get_description (BzEntryGroup *self);
 
-GdkPaintable *
-bz_entry_group_get_icon_paintable (BzEntryGroup *self);
-
 GIcon *
 bz_entry_group_get_mini_icon (BzEntryGroup *self);
 

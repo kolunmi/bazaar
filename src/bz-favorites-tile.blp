@@ -17,8 +17,8 @@ template $BzFavoritesTile: $BzListTile {
       margin-bottom: 10;
       height-request: 48;
       width-request: 48;
-      paintable: bind template.group as <$BzEntryGroup>.icon-paintable;
-      visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.icon-paintable) as <bool>) as <bool>;
+      paintable: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable;
+      visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable) as <bool>) as <bool>;
       styles ["icon-dropshadow"]
     }
 
@@ -30,7 +30,7 @@ template $BzFavoritesTile: $BzListTile {
       width-request: 48;
       pixel-size: 48;
       icon-name: "application-x-executable";
-      visible: bind $is_null(template.group as <$BzEntryGroup>.icon-paintable) as <bool>;
+      visible: bind $is_null(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable) as <bool>;
       styles ["icon-dropshadow"]
     }
 
