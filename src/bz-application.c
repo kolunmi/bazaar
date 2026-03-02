@@ -34,6 +34,7 @@
 #include "bz-backend-notification.h"
 #include "bz-content-provider.h"
 #include "bz-donations-dialog.h"
+#include "bz-download-worker.h"
 #include "bz-entry-cache-manager.h"
 #include "bz-entry-group.h"
 #include "bz-env.h"
@@ -2150,14 +2151,31 @@ static gboolean
 window_close_request (BzApplication *self,
                       GtkWidget     *window)
 {
-  int width  = 0;
-  int height = 0;
+  int      width             = 0;
+  int      height            = 0;
+  GList   *remaining_windows = NULL;
+  gboolean reap_dl_workers   = TRUE;
 
   width  = gtk_widget_get_width (window);
   height = gtk_widget_get_height (window);
 
   g_settings_set (self->settings, "window-dimensions",
                   "(ii)", width, height);
+
+  remaining_windows = gtk_application_get_windows (
+      GTK_APPLICATION (self));
+  for (GList *l = remaining_windows; l != NULL; l = l->next)
+    {
+      if (l->data != window)
+        {
+          reap_dl_workers = FALSE;
+          break;
+        }
+    }
+  if (reap_dl_workers)
+    /* If no windows are left, kill the dl-worker subprocesses to minimize idle
+       memory usage */
+    bz_reap_default_download_workers ();
 
   /* Do not stop other handlers from being invoked for the signal */
   return FALSE;
@@ -2676,8 +2694,8 @@ init_service_struct (BzApplication *self,
   }
 
   {
-    g_autoptr (GError)          bus_error = NULL;
-    g_autoptr (GDBusConnection) sys_bus   = NULL;
+    g_autoptr (GError) bus_error        = NULL;
+    g_autoptr (GDBusConnection) sys_bus = NULL;
 
     sys_bus = g_bus_get_sync (G_BUS_TYPE_SYSTEM, NULL, &bus_error);
     if (sys_bus != NULL)
