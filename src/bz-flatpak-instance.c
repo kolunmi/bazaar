@@ -958,7 +958,7 @@ load_local_ref_fiber (LoadLocalRefData *data)
       return dex_future_new_take_string (g_steal_pointer (&name));
     }
   else
-    /* This is a bundle ref */
+    /* Otherwise, this is a bundle ref */
     {
       g_autoptr (FlatpakBundleRef) bref = NULL;
       g_autoptr (BzFlatpakEntry) entry  = NULL;
@@ -1813,13 +1813,15 @@ transaction_fiber (TransactionData *data)
           BzFlatpakEntry  *entry                     = NULL;
           FlatpakRef      *ref                       = NULL;
           gboolean         is_user                   = FALSE;
+          const char      *bundle_uri                = NULL;
           g_autofree char *ref_fmt                   = NULL;
           g_autoptr (FlatpakTransaction) transaction = NULL;
 
-          entry   = g_ptr_array_index (installations, i);
-          ref     = bz_flatpak_entry_get_ref (entry);
-          is_user = bz_flatpak_entry_is_user (BZ_FLATPAK_ENTRY (entry));
-          ref_fmt = flatpak_ref_format_ref (ref);
+          entry      = g_ptr_array_index (installations, i);
+          ref        = bz_flatpak_entry_get_ref (entry);
+          is_user    = bz_flatpak_entry_is_user (BZ_FLATPAK_ENTRY (entry));
+          bundle_uri = bz_flatpak_entry_get_bundle_uri (entry);
+          ref_fmt    = flatpak_ref_format_ref (ref);
 
           if ((is_user && self->user == NULL) ||
               (!is_user && self->system == NULL))
@@ -1848,12 +1850,24 @@ transaction_fiber (TransactionData *data)
                   local_error->message);
             }
 
-          result = flatpak_transaction_add_install (
-              transaction,
-              bz_entry_get_remote_repo_name (BZ_ENTRY (entry)),
-              ref_fmt,
-              NULL,
-              &local_error);
+          if (bundle_uri != NULL)
+            {
+              g_autoptr (GFile) file = NULL;
+
+              file   = g_file_new_for_uri (bundle_uri);
+              result = flatpak_transaction_add_install_bundle (
+                  transaction,
+                  file,
+                  NULL,
+                  &local_error);
+            }
+          else
+            result = flatpak_transaction_add_install (
+                transaction,
+                bz_entry_get_remote_repo_name (BZ_ENTRY (entry)),
+                ref_fmt,
+                NULL,
+                &local_error);
           if (!result)
             {
               dex_channel_close_send (channel);

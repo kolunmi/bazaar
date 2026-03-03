@@ -40,10 +40,6 @@ void
 bz_window_push_update_dialog (BzWindow *self);
 
 void
-bz_window_show_entry (BzWindow *self,
-                      BzEntry  *entry);
-
-void
 bz_window_show_group (BzWindow     *self,
                       BzEntryGroup *group);
 

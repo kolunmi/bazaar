@@ -126,11 +126,6 @@ template $BzFullView: Adw.Bin {
                   margin-bottom: 15;
                   spacing: 20;
 
-                  Adw.Banner {
-                    title: _("Installing .flatpak bundles is not yet supported");
-                    revealed: bind template.ui-entry as <$BzResult>.object as <$BzFlatpakEntry>.is-bundle as <bool>;
-                  }
-
                   Adw.Clamp {
                     maximum-size: 860;
                     tightening-threshold: 1000;

@@ -218,7 +218,7 @@ static DexFuture *
 watch_backend_notifs_then_loop_cb (DexFuture *future,
                                    GWeakRef  *wr);
 
-static void
+static BzEntryGroup *
 fiber_replace_entry (BzApplication *self,
                      BzEntry       *entry);
 
@@ -1119,10 +1119,11 @@ init_fiber (GWeakRef *wr)
           entries, (GCompareDataFunc) cmp_entry, NULL);
       for (guint i = 0; i < entries->len; i++)
         {
-          BzEntry *entry = NULL;
+          BzEntry *entry                 = NULL;
+          g_autoptr (BzEntryGroup) group = NULL;
 
           entry = g_ptr_array_index (entries, i);
-          fiber_replace_entry (self, entry);
+          group = fiber_replace_entry (self, entry);
         }
 
       gtk_filter_changed (GTK_FILTER (self->group_filter), GTK_FILTER_CHANGE_LESS_STRICT);
@@ -1310,23 +1311,17 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
           break;
         case BZ_BACKEND_NOTIFICATION_KIND_REPLACE_ENTRY:
           {
-            BzEntry *entry = NULL;
+            BzEntry *entry                 = NULL;
+            g_autoptr (BzEntryGroup) group = NULL;
 
             entry = bz_backend_notification_get_entry (notif);
-            fiber_replace_entry (self, entry);
+            group = fiber_replace_entry (self, entry);
 
             g_ptr_array_add (build_futures, bz_entry_cache_manager_add (self->cache, entry));
-            if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
+            if (group != NULL)
               {
-                const char   *id    = NULL;
-                BzEntryGroup *group = NULL;
-
                 update_filters = TRUE;
-
-                id    = bz_entry_get_id (entry);
-                group = g_hash_table_lookup (self->ids_to_groups, id);
-                if (group != NULL)
-                  g_ptr_array_add (build_notify_groups, g_object_ref (group));
+                g_ptr_array_add (build_notify_groups, g_object_ref (group));
               }
 
             self->n_notifications_incoming--;
@@ -1626,6 +1621,7 @@ open_flatpakref_fiber (OpenFlatpakrefData *data)
   g_autoptr (BzApplication) self = NULL;
   GFile *file                    = data->file;
   g_autoptr (GError) local_error = NULL;
+  gboolean result                = FALSE;
   g_autoptr (DexFuture) future   = NULL;
   GtkWindow    *window           = NULL;
   const GValue *value            = NULL;
@@ -1647,14 +1643,36 @@ open_flatpakref_fiber (OpenFlatpakrefData *data)
         {
           BzEntry *entry = NULL;
 
-          entry = g_value_get_object (value);
-          bz_window_show_entry (BZ_WINDOW (window), entry);
+          entry  = g_value_get_object (value);
+          result = dex_await (bz_entry_cache_manager_add (self->cache, entry), &local_error);
+          if (result)
+            {
+              g_autoptr (BzEntryGroup) group = NULL;
+
+              group = fiber_replace_entry (self, entry);
+              if (group != NULL)
+                bz_window_show_group (BZ_WINDOW (window), group);
+              else
+                /* TODO: handle standalone addons & runtimes in dedicated UI */
+                bz_show_error_for_widget (
+                    GTK_WIDGET (window),
+                    "Non-Application Bundle",
+                    "This flatpak ref is a standalone addon/runtime");
+            }
+          else
+            bz_show_error_for_widget (
+                GTK_WIDGET (window),
+                _ ("Failed to open package"),
+                local_error->message);
         }
       else
         open_generic_id (self, g_value_get_string (value));
     }
   else
-    bz_show_error_for_widget (GTK_WIDGET (window), _ ("Failed to open .flatpakref"), local_error->message);
+    bz_show_error_for_widget (
+        GTK_WIDGET (window),
+        _ ("Failed to open package"),
+        local_error->message);
 
   return dex_future_new_true ();
 }
@@ -1845,7 +1863,7 @@ watch_backend_notifs_then_loop_cb (DexFuture *future,
   return g_steal_pointer (&ret_future);
 }
 
-static void
+static BzEntryGroup *
 fiber_replace_entry (BzApplication *self,
                      BzEntry       *entry)
 {
@@ -1856,6 +1874,7 @@ fiber_replace_entry (BzApplication *self,
   gboolean    installed          = FALSE;
   const char *flatpak_id         = NULL;
   const char *version            = NULL;
+  g_autoptr (BzEntryGroup) group = NULL;
 
   id                 = bz_entry_get_id (entry);
   unique_id          = bz_entry_get_unique_id (entry);
@@ -1863,7 +1882,7 @@ fiber_replace_entry (BzApplication *self,
   if (id == NULL ||
       unique_id == NULL ||
       unique_id_checksum == NULL)
-    return;
+    return NULL;
   user = bz_flatpak_entry_is_user (BZ_FLATPAK_ENTRY (entry));
 
   installed = g_hash_table_contains (self->installed_set, unique_id);
@@ -1904,12 +1923,12 @@ fiber_replace_entry (BzApplication *self,
 
   if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
     {
-      BzEntryGroup *group        = NULL;
-      gboolean      ignore_eol   = FALSE;
-      const char   *runtime_name = NULL;
-      BzEntry      *eol_runtime  = NULL;
+      BzEntryGroup *existing_group = NULL;
+      gboolean      ignore_eol     = FALSE;
+      const char   *runtime_name   = NULL;
+      BzEntry      *eol_runtime    = NULL;
 
-      group = g_hash_table_lookup (self->ids_to_groups, id);
+      existing_group = g_hash_table_lookup (self->ids_to_groups, id);
       if (self->ignore_eol_set != NULL)
         ignore_eol = g_hash_table_contains (self->ignore_eol_set, id);
 
@@ -1917,13 +1936,15 @@ fiber_replace_entry (BzApplication *self,
       if (!ignore_eol && runtime_name != NULL)
         eol_runtime = g_hash_table_lookup (self->eol_runtimes, runtime_name);
 
-      if (group != NULL)
+      if (existing_group != NULL)
         {
-          bz_entry_group_add (group, entry, eol_runtime, ignore_eol);
-          if (installed && !g_list_store_find (self->installed_apps, group, NULL))
+          bz_entry_group_add (existing_group, entry, eol_runtime, ignore_eol);
+          if (installed && !g_list_store_find (self->installed_apps, existing_group, NULL))
             g_list_store_insert_sorted (
-                self->installed_apps, group,
+                self->installed_apps, existing_group,
                 (GCompareDataFunc) cmp_group, NULL);
+
+          group = g_object_ref (existing_group);
         }
       else
         {
@@ -1940,6 +1961,8 @@ fiber_replace_entry (BzApplication *self,
             g_list_store_insert_sorted (
                 self->installed_apps, new_group,
                 (GCompareDataFunc) cmp_group, NULL);
+
+          group = g_object_ref (new_group);
         }
     }
 
@@ -1996,6 +2019,8 @@ fiber_replace_entry (BzApplication *self,
                    "does not seem to extend anything",
                    unique_id);
     }
+
+  return g_steal_pointer (&group);
 }
 
 static void

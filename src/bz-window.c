@@ -884,26 +884,6 @@ bz_window_search (BzWindow   *self,
 }
 
 void
-bz_window_show_entry (BzWindow *self,
-                      BzEntry  *entry)
-{
-  g_autoptr (BzEntryGroup) group = NULL;
-  AdwNavigationPage *view_page   = NULL;
-
-  g_return_if_fail (BZ_IS_WINDOW (self));
-  g_return_if_fail (BZ_IS_ENTRY (entry));
-
-  group = bz_entry_group_new_for_single_entry (entry);
-  bz_full_view_set_entry_group (self->full_view, group);
-
-  view_page = adw_navigation_view_find_page (self->navigation_view, "view");
-  if (view_page != NULL)
-    adw_navigation_view_pop_to_page (self->navigation_view, view_page);
-  else
-    adw_navigation_view_push_by_tag (self->navigation_view, "view");
-}
-
-void
 bz_window_show_group (BzWindow     *self,
                       BzEntryGroup *group)
 {
