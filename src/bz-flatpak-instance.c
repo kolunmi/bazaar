@@ -887,19 +887,11 @@ ensure_flathub_fiber (EnsureFlathubData *data)
 static DexFuture *
 load_local_ref_fiber (LoadLocalRefData *data)
 {
-  GFile *file                                = data->file;
-  g_autoptr (GError) local_error             = NULL;
-  g_autofree char *uri                       = NULL;
-  g_autofree char *path                      = NULL;
-  g_autoptr (FlatpakBundleRef) bref          = NULL;
-  g_autoptr (BzFlatpakEntry) entry           = NULL;
-  g_autoptr (GBytes) appstream_gz            = NULL;
-  gboolean result                            = FALSE;
-  g_autoptr (AsComponent) component          = NULL;
-  g_autoptr (GBytes) appstream               = NULL;
-  g_autoptr (GInputStream) stream_gz         = NULL;
-  g_autoptr (GInputStream) stream_data       = NULL;
-  g_autoptr (GZlibDecompressor) decompressor = NULL;
+  GFile   *file                  = data->file;
+  gboolean result                = FALSE;
+  g_autoptr (GError) local_error = NULL;
+  g_autofree char *uri           = NULL;
+  g_autofree char *path          = NULL;
 
   uri  = g_file_get_uri (file);
   path = g_file_get_path (file);
@@ -965,75 +957,85 @@ load_local_ref_fiber (LoadLocalRefData *data)
 
       return dex_future_new_take_string (g_steal_pointer (&name));
     }
-
-  bref = flatpak_bundle_ref_new (file, &local_error);
-  if (bref == NULL)
-    return dex_future_new_reject (
-        BZ_FLATPAK_ERROR,
-        BZ_FLATPAK_ERROR_IO_MISBEHAVIOR,
-        "Failed to load local flatpak bundle '%s': %s",
-        path,
-        local_error->message);
-
-  appstream_gz = flatpak_bundle_ref_get_appstream (bref);
-  if (appstream_gz != NULL)
+  else
+    /* This is a bundle ref */
     {
-      g_autoptr (XbBuilderSource) source = NULL;
-      g_autoptr (XbSilo) silo            = NULL;
+      g_autoptr (FlatpakBundleRef) bref = NULL;
+      g_autoptr (BzFlatpakEntry) entry  = NULL;
+      g_autoptr (GBytes) appstream_gz   = NULL;
+      g_autoptr (GBytes) appstream      = NULL;
+      g_autoptr (AsComponent) component = NULL;
 
-      appstream = decompress_appstream_gz (appstream_gz, NULL, &local_error);
-      if (appstream == NULL)
+      bref = flatpak_bundle_ref_new (file, &local_error);
+      if (bref == NULL)
+        return dex_future_new_reject (
+            BZ_FLATPAK_ERROR,
+            BZ_FLATPAK_ERROR_IO_MISBEHAVIOR,
+            "Failed to load local flatpak bundle '%s': %s",
+            path,
+            local_error->message);
+
+      appstream_gz = flatpak_bundle_ref_get_appstream (bref);
+      if (appstream_gz != NULL)
         {
-          g_warning ("Failed to decompress AppStream data: %s", local_error->message);
-          g_clear_error (&local_error);
-        }
-      else
-        {
-          source = xb_builder_source_new ();
-          if (!xb_builder_source_load_bytes (source, appstream,
-                                             XB_BUILDER_SOURCE_FLAG_LITERAL_TEXT,
-                                             &local_error))
+          appstream = decompress_appstream_gz (appstream_gz, NULL, &local_error);
+          if (appstream == NULL)
             {
-              g_warning ("Failed to load AppStream bytes into xmlb: %s", local_error->message);
+              g_warning ("Failed to decompress AppStream data: %s", local_error->message);
               g_clear_error (&local_error);
             }
           else
             {
-              silo = build_silo (source, NULL, &local_error);
-              if (silo == NULL)
+              g_autoptr (XbBuilderSource) source = NULL;
+
+              source = xb_builder_source_new ();
+              if (!xb_builder_source_load_bytes (source, appstream,
+                                                 XB_BUILDER_SOURCE_FLAG_LITERAL_TEXT,
+                                                 &local_error))
                 {
-                  g_warning ("Failed to compile xmlb silo: %s", local_error->message);
+                  g_warning ("Failed to load AppStream bytes into xmlb: %s", local_error->message);
                   g_clear_error (&local_error);
                 }
               else
                 {
-                  component = extract_first_component_for_silo (silo, &local_error);
-                  if (component == NULL && local_error != NULL)
+                  g_autoptr (XbSilo) silo = NULL;
+
+                  silo = build_silo (source, NULL, &local_error);
+                  if (silo == NULL)
                     {
-                      g_warning ("Failed to parse component: %s", local_error->message);
+                      g_warning ("Failed to compile xmlb silo: %s", local_error->message);
                       g_clear_error (&local_error);
+                    }
+                  else
+                    {
+                      component = extract_first_component_for_silo (silo, &local_error);
+                      if (component == NULL && local_error != NULL)
+                        {
+                          g_warning ("Failed to parse component: %s", local_error->message);
+                          g_clear_error (&local_error);
+                        }
                     }
                 }
             }
         }
+
+      entry = bz_flatpak_entry_new_for_ref (
+          FLATPAK_REF (bref),
+          NULL,
+          FALSE,
+          component,
+          NULL,
+          &local_error);
+      if (entry == NULL)
+        return dex_future_new_reject (
+            BZ_FLATPAK_ERROR,
+            BZ_FLATPAK_ERROR_IO_MISBEHAVIOR,
+            "Failed to parse information from flatpak bundle '%s': %s",
+            path,
+            local_error->message);
+
+      return dex_future_new_for_object (entry);
     }
-
-  entry = bz_flatpak_entry_new_for_ref (
-      FLATPAK_REF (bref),
-      NULL,
-      FALSE,
-      component,
-      NULL,
-      &local_error);
-  if (entry == NULL)
-    return dex_future_new_reject (
-        BZ_FLATPAK_ERROR,
-        BZ_FLATPAK_ERROR_IO_MISBEHAVIOR,
-        "Failed to parse information from flatpak bundle '%s': %s",
-        path,
-        local_error->message);
-
-  return dex_future_new_for_object (entry);
 }
 
 static DexFuture *
