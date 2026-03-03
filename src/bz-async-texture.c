@@ -596,22 +596,6 @@ load_fiber_work (LoadData *data)
   }                                                 \
   G_STMT_END
 
-#define LOCK_INDEX(name, _idx)                             \
-  G_STMT_START                                             \
-  {                                                        \
-    FIND_LOCK (name, (_idx));                              \
-    locker = g_mutex_locker_new (&name##_mutexes[(_idx)]); \
-  }                                                        \
-  G_STMT_END
-
-#define UNLOCK_INDEX(name, _idx)                    \
-  G_STMT_START                                      \
-  {                                                 \
-    g_clear_pointer (&locker, g_mutex_locker_free); \
-    FINISH_LOCK (name, (_idx));                     \
-  }                                                 \
-  G_STMT_END
-
 #define RATE_LIMIT_BEGIN(name)                                 \
   G_STMT_START                                                 \
   {                                                            \
