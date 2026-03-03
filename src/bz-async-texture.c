@@ -73,7 +73,7 @@ struct _BzAsyncTexture
   DexFuture *retry_future;
 
   GdkPaintable *paintable;
-  GMutex        texture_mutex;
+  GMutex        mutex;
 };
 
 static void paintable_iface_init (GdkPaintableInterface *iface);
@@ -132,7 +132,7 @@ bz_async_texture_dispose (GObject *object)
   g_clear_object (&self->cache_into);
   g_clear_pointer (&self->cache_into_path, g_free);
   g_clear_object (&self->paintable);
-  g_mutex_clear (&self->texture_mutex);
+  g_mutex_clear (&self->mutex);
 
   if (!g_log_writer_default_would_drop (G_LOG_LEVEL_DEBUG, G_LOG_DOMAIN))
     {
@@ -226,7 +226,7 @@ bz_async_texture_init (BzAsyncTexture *self)
 {
   self->retries   = 0;
   self->paintable = NULL;
-  g_mutex_init (&self->texture_mutex);
+  g_mutex_init (&self->mutex);
 
   if (!g_log_writer_default_would_drop (G_LOG_LEVEL_DEBUG, G_LOG_DOMAIN))
     {
@@ -245,7 +245,7 @@ paintable_snapshot (GdkPaintable *paintable,
   BzAsyncTexture *self            = BZ_ASYNC_TEXTURE (paintable);
   g_autoptr (GMutexLocker) locker = NULL;
 
-  locker = g_mutex_locker_new (&self->texture_mutex);
+  locker = g_mutex_locker_new (&self->mutex);
   maybe_load (self);
 
   if (self->paintable != NULL)
@@ -258,7 +258,7 @@ paintable_get_current_image (GdkPaintable *paintable)
   BzAsyncTexture *self            = BZ_ASYNC_TEXTURE (paintable);
   g_autoptr (GMutexLocker) locker = NULL;
 
-  locker = g_mutex_locker_new (&self->texture_mutex);
+  locker = g_mutex_locker_new (&self->mutex);
   maybe_load (self);
 
   if (self->paintable != NULL)
@@ -273,7 +273,7 @@ paintable_get_flags (GdkPaintable *paintable)
   BzAsyncTexture *self            = BZ_ASYNC_TEXTURE (paintable);
   g_autoptr (GMutexLocker) locker = NULL;
 
-  locker = g_mutex_locker_new (&self->texture_mutex);
+  locker = g_mutex_locker_new (&self->mutex);
   maybe_load (self);
   return 0;
 }
@@ -284,7 +284,7 @@ paintable_get_intrinsic_width (GdkPaintable *paintable)
   BzAsyncTexture *self            = BZ_ASYNC_TEXTURE (paintable);
   g_autoptr (GMutexLocker) locker = NULL;
 
-  locker = g_mutex_locker_new (&self->texture_mutex);
+  locker = g_mutex_locker_new (&self->mutex);
   maybe_load (self);
 
   if (self->paintable != NULL)
@@ -299,7 +299,7 @@ paintable_get_intrinsic_height (GdkPaintable *paintable)
   BzAsyncTexture *self            = BZ_ASYNC_TEXTURE (paintable);
   g_autoptr (GMutexLocker) locker = NULL;
 
-  locker = g_mutex_locker_new (&self->texture_mutex);
+  locker = g_mutex_locker_new (&self->mutex);
   maybe_load (self);
 
   if (self->paintable != NULL)
@@ -314,7 +314,7 @@ paintable_get_intrinsic_aspect_ratio (GdkPaintable *paintable)
   BzAsyncTexture *self            = BZ_ASYNC_TEXTURE (paintable);
   g_autoptr (GMutexLocker) locker = NULL;
 
-  locker = g_mutex_locker_new (&self->texture_mutex);
+  locker = g_mutex_locker_new (&self->mutex);
   maybe_load (self);
 
   if (self->paintable != NULL)
@@ -408,7 +408,7 @@ bz_async_texture_get_loaded (BzAsyncTexture *self)
 
   g_return_val_if_fail (BZ_IS_ASYNC_TEXTURE (self), FALSE);
 
-  locker = g_mutex_locker_new (&self->texture_mutex);
+  locker = g_mutex_locker_new (&self->mutex);
   return GDK_IS_TEXTURE (self->paintable);
 }
 
@@ -419,7 +419,7 @@ bz_async_texture_dup_texture (BzAsyncTexture *self)
 
   g_return_val_if_fail (BZ_IS_ASYNC_TEXTURE (self), NULL);
 
-  locker = g_mutex_locker_new (&self->texture_mutex);
+  locker = g_mutex_locker_new (&self->mutex);
   if (GDK_IS_TEXTURE (self->paintable))
     return (GdkTexture *) g_object_ref (self->paintable);
   else
@@ -433,7 +433,7 @@ bz_async_texture_dup_future (BzAsyncTexture *self)
 
   g_return_val_if_fail (BZ_IS_ASYNC_TEXTURE (self), NULL);
 
-  locker = g_mutex_locker_new (&self->texture_mutex);
+  locker = g_mutex_locker_new (&self->mutex);
   maybe_load (self);
 
   if (self->task != NULL)
@@ -454,7 +454,7 @@ bz_async_texture_ensure (BzAsyncTexture *self)
 
   g_return_if_fail (BZ_IS_ASYNC_TEXTURE (self));
 
-  locker = g_mutex_locker_new (&self->texture_mutex);
+  locker = g_mutex_locker_new (&self->mutex);
   maybe_load (self);
 }
 
@@ -893,7 +893,7 @@ load_finally (DexFuture *future,
 
   bz_weak_get_or_return_reject (self, &data->self);
 
-  locker = g_mutex_locker_new (&self->texture_mutex);
+  locker = g_mutex_locker_new (&self->mutex);
   dex_clear (&self->task);
 
   if (dex_future_is_resolved (future))
@@ -947,7 +947,7 @@ retry_cb (DexFuture *future,
 
   bz_weak_get_or_return_reject (self, &data->self);
 
-  locker = g_mutex_locker_new (&self->texture_mutex);
+  locker = g_mutex_locker_new (&self->mutex);
   dex_clear (&self->retry_future);
 
   maybe_load (self);
