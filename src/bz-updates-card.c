@@ -300,6 +300,7 @@ static void
 remove_activated_style_cb (gpointer user_data)
 {
   gtk_widget_remove_css_class (GTK_WIDGET (user_data), "activated");
+  g_object_unref (user_data);
 }
 
 static void
