@@ -31,7 +31,8 @@ template $BzInstallControls: Box {
           halign: bind $choose(template.wide, 2, 0) as <int>;
           tooltip-text: _("Download & Install Application");
           sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
-          label: _("Install");
+          label: _("_Install");
+          use-underline: true;
           clicked => $install_cb(template);
         };
       }
@@ -51,7 +52,8 @@ template $BzInstallControls: Box {
             visible: bind $invert_boolean($is_blocked(template.state as <$BzStateInfo>.parental-blocked-ids, template.entry-group as <$BzEntryGroup>) as <bool>) as <bool>;
             has-tooltip: true;
             hexpand: bind $invert_boolean(template.wide) as <bool>;
-            label: _("Open");
+            label: _("_Open");
+            use-underline: true;
             sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
             clicked => $run_cb(template);
           }
@@ -75,7 +77,8 @@ template $BzInstallControls: Box {
 
               Label {
                 visible: bind $invert_boolean(template.wide) as <bool>;
-                label: _("Remove");
+                label: _("_Remove");
+                use-underline: true;
               }
 
               Image {
