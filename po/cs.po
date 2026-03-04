@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-03 16:49+0100\n"
-"PO-Revision-Date: 2026-03-03 17:28+0100\n"
+"POT-Creation-Date: 2026-03-04 17:33+0100\n"
+"PO-Revision-Date: 2026-03-04 17:54+0100\n"
 "Last-Translator: Daniel Rusek <mail@asciiwolf.com>\n"
 "Language-Team: Czech\n"
 "Language: cs\n"
@@ -87,19 +87,17 @@ msgstr "Stránka hledání"
 msgid "Category page"
 msgstr "Stránka kategorií"
 
-#: src/bz-addons-dialog.blp:16 src/bz-full-view.blp:622
+#: src/bz-addons-dialog.blp:16 src/bz-full-view.blp:623
 #: src/bz-installed-tile.blp:101
 msgid "Manage Add-Ons"
 msgstr "Spravovat doplňky"
 
-#: src/bz-addons-dialog.c:94 src/bz-install-controls.blp:78
-#: src/bz-install-controls.blp:128 src/bz-installed-tile.blp:119
-#: src/bz-transaction-dialog.c:231
+#: src/bz-addons-dialog.c:94 src/bz-install-controls.blp:131
+#: src/bz-installed-tile.blp:119
 msgid "Remove"
 msgstr "Odebrat"
 
 #: src/bz-addons-dialog.c:99 src/bz-favorites-tile.c:159
-#: src/bz-install-controls.blp:34 src/bz-transaction-dialog.c:202
 msgid "Install"
 msgstr "Instalovat"
 
@@ -991,9 +989,7 @@ msgid ""
 msgstr ""
 "Máte nainstalováno několik verzí této aplikace. S kterou chcete pokračovat?"
 
-#: src/bz-entry-group-util.c:80 src/bz-transaction-dialog.c:201
-#: src/bz-transaction-dialog.c:230 src/bz-transaction-dialog.c:275
-#: src/bz-transaction-dialog.c:578
+#: src/bz-entry-group-util.c:80
 msgid "Cancel"
 msgstr "Zrušit"
 
@@ -1060,7 +1056,6 @@ msgid "Favorites"
 msgstr "Oblíbené"
 
 #: src/bz-favorites-page.blp:17 src/bz-section-view.blp:144
-#: src/bz-transaction-dialog.c:579
 msgid "Install All"
 msgstr "Instalovat vše"
 
@@ -1439,19 +1434,19 @@ msgstr "Obsah"
 msgid "Installing .flatpak bundles is not yet supported"
 msgstr "Instalace souborů balíčků .flatpak zatím není podporována"
 
-#: src/bz-full-view.blp:250
-msgid "Support"
-msgstr "Podpořit"
+#: src/bz-full-view.blp:251
+msgid "_Support"
+msgstr "_Podpořit"
 
-#: src/bz-full-view.blp:420
+#: src/bz-full-view.blp:421
 msgid "Downloads/Month"
 msgstr "Stažení/měsíc"
 
-#: src/bz-full-view.blp:456
+#: src/bz-full-view.blp:457
 msgid "Stopped Receiving Core Updates"
 msgstr "Příjem základních aktualizací zastaven"
 
-#: src/bz-full-view.blp:470
+#: src/bz-full-view.blp:471
 msgid ""
 "This app uses a runtime that no longer receives updates or security fixes. "
 "It may become unsafe to use."
@@ -1459,11 +1454,11 @@ msgstr ""
 "Tato aplikace používá běhové prostředí, které již nedostává aktualizace ani "
 "opravy zabezpečení. Její používání nemusí být bezpečné."
 
-#: src/bz-full-view.blp:557
+#: src/bz-full-view.blp:558
 msgid "Trash Data"
 msgstr "Vymazat data"
 
-#: src/bz-full-view.blp:697
+#: src/bz-full-view.blp:698
 msgid "Tags:"
 msgstr "Štítky:"
 
@@ -1760,20 +1755,28 @@ msgstr "Aplikace %s funguje na většině zařízení"
 msgid "Download & Install Application"
 msgstr "Stáhnout a nainstalovat aplikaci"
 
-#: src/bz-install-controls.blp:54
-msgid "Open"
-msgstr "Otevřít"
+#: src/bz-install-controls.blp:34 src/bz-transaction-dialog.c:202
+msgid "_Install"
+msgstr "_Instalovat"
 
-#: src/bz-install-controls.blp:68 src/bz-install-controls.blp:118
+#: src/bz-install-controls.blp:55
+msgid "_Open"
+msgstr "_Otevřít"
+
+#: src/bz-install-controls.blp:70 src/bz-install-controls.blp:121
 msgid "Uninstall Application"
 msgstr "Odinstalovat aplikaci"
 
-#: src/bz-install-controls.blp:105 src/bz-updates-card.blp:161
+#: src/bz-install-controls.blp:80 src/bz-transaction-dialog.c:231
+msgid "_Remove"
+msgstr "Odeb_rat"
+
+#: src/bz-install-controls.blp:108 src/bz-updates-card.blp:161
 #: src/bz-updates-card.blp:186
 msgid "Update"
 msgstr "Aktualizovat"
 
-#: src/bz-install-controls.blp:155
+#: src/bz-install-controls.blp:158
 msgid "Install Other Version"
 msgstr "Nainstalovat jinou verzi"
 
@@ -2085,10 +2088,13 @@ msgstr "Barvy hrdosti femboyů"
 msgid "Neutrois Pride Colors"
 msgstr "Barvy neutrois hrdosti"
 
-#: src/bz-releases-dialog.blp:5 src/bz-releases-list.blp:28
-#: src/bz-updates-card.blp:150
+#: src/bz-releases-dialog.blp:5 src/bz-updates-card.blp:150
 msgid "Version History"
 msgstr "Historie verzí"
+
+#: src/bz-releases-list.blp:28
+msgid "_Version History"
+msgstr "Historie _verzí"
 
 #. Translators: This is a date format for timestamps from the current year. Used in the app releases section.
 #. * %B is the full month name, %e is the day.
@@ -2720,6 +2726,11 @@ msgstr ""
 msgid "May install additional shared components"
 msgstr "Může nainstalovat dodatečné sdílené komponenty"
 
+#: src/bz-transaction-dialog.c:201 src/bz-transaction-dialog.c:230
+#: src/bz-transaction-dialog.c:275 src/bz-transaction-dialog.c:578
+msgid "_Cancel"
+msgstr "_Zrušit"
+
 #: src/bz-transaction-dialog.c:219
 #, c-format
 msgid "Remove %s?"
@@ -2775,8 +2786,8 @@ msgstr ""
 "oprávněními dělá."
 
 #: src/bz-transaction-dialog.c:276
-msgid "Install Anyway"
-msgstr "Přesto nainstalovat"
+msgid "_Install Anyway"
+msgstr "Přesto na_instalovat"
 
 #: src/bz-transaction-dialog.c:331
 msgid "Failed to load transaction dialog"
@@ -2787,8 +2798,8 @@ msgid "All apps are already installed"
 msgstr "Všechny aplikace jsou již nainstalovány"
 
 #: src/bz-transaction-dialog.c:551
-msgid "OK"
-msgstr "Budiž"
+msgid "_OK"
+msgstr "_Budiž"
 
 #: src/bz-transaction-dialog.c:567
 #, c-format
@@ -2814,6 +2825,10 @@ msgstr "Bude nainstalováno %d doplňků."
 #: src/bz-transaction-dialog.c:577
 msgid "Additionally, addons will be installed."
 msgstr "Kromě toho budou nainstalovány doplňky."
+
+#: src/bz-transaction-dialog.c:579
+msgid "_Install All"
+msgstr "_Instalovat vše"
 
 #: src/bz-transaction-manager.c:766
 #, c-format
