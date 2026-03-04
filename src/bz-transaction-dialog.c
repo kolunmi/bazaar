@@ -198,8 +198,8 @@ configure_install_dialog (AdwAlertDialog *alert,
     adw_alert_dialog_set_body (alert, _ ("May install additional shared components"));
 
   adw_alert_dialog_add_responses (alert,
-                                  "cancel", _ ("Cancel"),
-                                  "install", _ ("Install"),
+                                  "cancel", _ ("_Cancel"),
+                                  "install", _ ("_Install"),
                                   NULL);
 
   adw_alert_dialog_set_response_appearance (alert, "install", ADW_RESPONSE_SUGGESTED);
@@ -227,8 +227,8 @@ configure_remove_dialog (AdwAlertDialog *alert,
   adw_alert_dialog_set_body (alert, body);
 
   adw_alert_dialog_add_responses (alert,
-                                  "cancel", _ ("Cancel"),
-                                  "remove", _ ("Remove"),
+                                  "cancel", _ ("_Cancel"),
+                                  "remove", _ ("_Remove"),
                                   NULL);
 
   adw_alert_dialog_set_response_appearance (alert, "remove", ADW_RESPONSE_DESTRUCTIVE);
@@ -272,8 +272,8 @@ configure_high_risk_warning_dialog (AdwAlertDialog *alert,
   adw_alert_dialog_set_prefer_wide_layout (alert, TRUE);
 
   adw_alert_dialog_add_responses (alert,
-                                  "cancel", _ ("Cancel"),
-                                  "install", _ ("Install Anyway"),
+                                  "cancel", _ ("_Cancel"),
+                                  "install", _ ("_Install Anyway"),
                                   NULL);
 
   adw_alert_dialog_set_response_appearance (alert, "install", ADW_RESPONSE_DESTRUCTIVE);
@@ -548,7 +548,7 @@ bulk_install_dialog_fiber (BulkInstallDialogData *data)
       info_alert = g_object_ref_sink (adw_alert_dialog_new (
           _ ("All apps are already installed"), NULL));
 
-      adw_alert_dialog_add_response (ADW_ALERT_DIALOG (info_alert), "ok", _ ("OK"));
+      adw_alert_dialog_add_response (ADW_ALERT_DIALOG (info_alert), "ok", _ ("_OK"));
       adw_alert_dialog_set_default_response (ADW_ALERT_DIALOG (info_alert), "ok");
       adw_alert_dialog_set_close_response (ADW_ALERT_DIALOG (info_alert), "ok");
 
@@ -575,8 +575,8 @@ bulk_install_dialog_fiber (BulkInstallDialogData *data)
       _ ("The following will be installed. Additional shared components may also be installed"),
       _ ("%d addons will be installed."),
       _ ("Additionally, addons will be installed."),
-      _ ("Cancel"),
-      _ ("Install All"));
+      _ ("_Cancel"),
+      _ ("_Install All"));
 
   adw_alert_dialog_set_default_response (ADW_ALERT_DIALOG (dialog), "confirm");
   adw_alert_dialog_set_close_response (ADW_ALERT_DIALOG (dialog), "cancel");
