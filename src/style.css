@@ -872,7 +872,13 @@ window.narrow .category-tile {
 }
 
 .update-toggle {
-	border-radius: 0;
+	border-radius: 12px;
+	transition: border-bottom-left-radius 150ms ease,
+	            border-bottom-right-radius 150ms ease;
+}
+.update-toggle.activated {
+	border-bottom-left-radius: 0px;
+	border-bottom-right-radius: 0px;
 }
 
 .update-card {
