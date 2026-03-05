@@ -3,11 +3,13 @@ api_version = '0.1'
 bge_sources = [
   'libbge.c',
   'bge-animation.c',
+  'bge-carousel.c',
 ]
 
 bge_headers = [
   'bge.h',
   'bge-animation.h',
+  'bge-carousel.h',
 ]
 
 version_split = meson.project_version().split('.')
@@ -31,9 +33,15 @@ bge_deps = [
   dependency('libdex-1', version: '>= 1.0.0'),
 ]
 
+bge_marshalers = gnome.genmarshal('bge-marshalers',
+  sources: 'bge-marshalers.list',
+  prefix: 'bge_marshal',
+  valist_marshallers: true,
+)
+
 bge_lib = shared_library(
   'bge-' + api_version,
-  bge_sources,
+  bge_sources, bge_marshalers,
   dependencies: bge_deps,
        install: true,
 )

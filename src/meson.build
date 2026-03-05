@@ -67,8 +67,6 @@ bz_sources = files(
   'bz-async-texture.c',
   'bz-auth-state.c',
   'bz-backend.c',
-  'bz-carousel-indicator-dots.c',
-  'bz-carousel.c',
   'bz-category-tile.c',
   'bz-comet-overlay.c',
   'bz-content-provider.c',

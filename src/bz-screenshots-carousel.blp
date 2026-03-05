@@ -22,14 +22,14 @@ template $BzScreenshotsCarousel: Gtk.Widget {
       halign: fill;
       valign: fill;
 
-      $BzCarousel carousel {
+      $BgeCarousel carousel {
         vexpand: true;
         hexpand: true;
         valign: fill;
         height-request: bind $get_carousel_height(template.compact) as <int>;
 
-        bind-widget => $on_bind_widget(template);
-        unbind-widget => $on_bind_widget(template);
+        create-widget => $on_create_widget(template);
+        remove-widget => $on_remove_widget(template);
 
         model: SingleSelection selection {
           autoselect: true;

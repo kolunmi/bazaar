@@ -29,6 +29,7 @@ G_BEGIN_DECLS
 #include "bge-version-macros.h"
 
 #include "bge-animation.h"
+#include "bge-carousel.h"
 #undef BGE_INSIDE
 
 BGE_AVAILABLE_IN_ALL

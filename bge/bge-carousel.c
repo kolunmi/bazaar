@@ -1,4 +1,4 @@
-/* bz-carousel.c
+/* bge-carousel.c
  *
  * Copyright 2026 Eva M
  *
@@ -18,19 +18,17 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include <adwaita.h>
-#include <bge.h>
+#include "bge.h"
 
-#include "bz-carousel.h"
-#include "bz-marshalers.h"
-#include "bz-util.h"
+#include "bge-marshalers.h"
+#include "util.h"
 
 #define RAISE_FACTOR 0.025
 
 /* `ratio < 1.0` means it overshoots */
 #define ANIMATION_DAMPING_RATIO 1.15
 
-struct _BzCarousel
+struct _BgeCarousel
 {
   GtkWidget parent_instance;
 
@@ -50,14 +48,13 @@ struct _BzCarousel
   gboolean            allow_mouse_drag;
   gboolean            allow_scroll_wheel;
   gboolean            allow_raise;
-  gboolean            raised;
   GtkSingleSelection *model;
 
   GPtrArray *mirror;
   GPtrArray *widgets;
 };
 
-G_DEFINE_FINAL_TYPE (BzCarousel, bz_carousel, GTK_TYPE_WIDGET);
+G_DEFINE_FINAL_TYPE (BgeCarousel, bge_carousel, GTK_TYPE_WIDGET);
 
 enum
 {
@@ -68,7 +65,6 @@ enum
   PROP_ALLOW_MOUSE_DRAG,
   PROP_ALLOW_SCROLL_WHEEL,
   PROP_ALLOW_RAISE,
-  PROP_RAISED,
   PROP_MODEL,
 
   LAST_PROP
@@ -77,14 +73,14 @@ static GParamSpec *props[LAST_PROP] = { 0 };
 
 enum
 {
-  SIGNAL_BIND_WIDGET,
-  SIGNAL_UNBIND_WIDGET,
+  SIGNAL_CREATE_WIDGET,
+  SIGNAL_REMOVE_WIDGET,
 
   LAST_SIGNAL,
 };
 static guint signals[LAST_SIGNAL];
 
-BZ_DEFINE_DATA (
+BGE_DEFINE_DATA (
     carousel_widget,
     CarouselWidget,
     {
@@ -99,100 +95,100 @@ BZ_DEFINE_DATA (
 
       DexCancellable *cancellable;
     },
-    BZ_RELEASE_DATA (widget, gtk_widget_unparent);
-    BZ_RELEASE_DATA (cancellable, dex_unref))
+    BGE_RELEASE_DATA (widget, gtk_widget_unparent);
+    BGE_RELEASE_DATA (cancellable, dex_unref))
 
 static void
-items_changed (BzCarousel *self,
-               guint       position,
-               guint       removed,
-               guint       added,
-               GListModel *model);
+items_changed (BgeCarousel *self,
+               guint        position,
+               guint        removed,
+               guint        added,
+               GListModel  *model);
 
 static void
-model_selected_changed (BzCarousel         *self,
+model_selected_changed (BgeCarousel        *self,
                         GParamSpec         *pspec,
                         GtkSingleSelection *selection);
 
 static void
-move_to_idx (BzCarousel *self,
-             guint       idx,
+move_to_idx (BgeCarousel *self,
+             guint        idx,
              /* damping_ratio <= 0.0 means no animation */
              double damping_ratio);
 
 static void
-animate (BzCarousel         *self,
+animate (BgeCarousel        *self,
          const char         *key,
          double              value,
          CarouselWidgetData *data);
 
 static void
-ensure_viewport (BzCarousel         *self,
+ensure_viewport (BgeCarousel        *self,
                  GtkSingleSelection *model,
                  gboolean            animate);
 
 static void
-motion_enter (BzCarousel               *self,
+motion_enter (BgeCarousel              *self,
               gdouble                   x,
               gdouble                   y,
               GtkEventControllerMotion *controller);
 
 static void
-motion_event (BzCarousel               *self,
+motion_event (BgeCarousel              *self,
               gdouble                   x,
               gdouble                   y,
               GtkEventControllerMotion *controller);
 
 static void
-motion_leave (BzCarousel               *self,
+motion_leave (BgeCarousel              *self,
               GtkEventControllerMotion *controller);
 
 static void
-update_motion (BzCarousel *self,
-               gdouble     x,
-               gdouble     y);
+update_motion (BgeCarousel *self,
+               gdouble      x,
+               gdouble      y);
 
 static void
-scroll_begin (BzCarousel               *self,
+scroll_begin (BgeCarousel              *self,
               GtkEventControllerScroll *controller);
 
 static void
-scroll_end (BzCarousel               *self,
+scroll_end (BgeCarousel              *self,
             GtkEventControllerScroll *controller);
 
 static gboolean
-scroll (BzCarousel               *self,
+scroll (BgeCarousel              *self,
         gdouble                   dx,
         gdouble                   dy,
         GtkEventControllerScroll *controller);
 
 static void
-drag_begin (BzCarousel     *self,
+drag_begin (BgeCarousel    *self,
             gdouble         start_x,
             gdouble         start_y,
             GtkGestureDrag *gesture);
 
 static void
-drag_end (BzCarousel     *self,
+drag_end (BgeCarousel    *self,
           gdouble         offset_x,
           gdouble         offset_y,
           GtkGestureDrag *gesture);
 
 static void
-drag_update (BzCarousel     *self,
+drag_update (BgeCarousel    *self,
              gdouble         offset_x,
              gdouble         offset_y,
              GtkGestureDrag *gesture);
 
 static void
-finish_horizontal_gesture (BzCarousel *self,
-                           int         offset_x,
-                           int         offset_y);
+finish_horizontal_gesture (BgeCarousel *self,
+                           int          offset_x,
+                           int          offset_y);
 
 static void
-bz_carousel_dispose (GObject *object)
+bge_carousel_dispose (GObject *object)
 {
-  BzCarousel *self = BZ_CAROUSEL (object);
+  BgeCarousel *self = BGE_CAROUSEL (object);
 
   if (self->model != NULL)
     {
@@ -206,39 +202,36 @@ bz_carousel_dispose (GObject *object)
   g_clear_pointer (&self->mirror, g_ptr_array_unref);
   g_clear_pointer (&self->widgets, g_ptr_array_unref);
 
-  G_OBJECT_CLASS (bz_carousel_parent_class)->dispose (object);
+  G_OBJECT_CLASS (bge_carousel_parent_class)->dispose (object);
 }
 
 static void
-bz_carousel_get_property (GObject    *object,
-                          guint       prop_id,
-                          GValue     *value,
-                          GParamSpec *pspec)
+bge_carousel_get_property (GObject    *object,
+                           guint       prop_id,
+                           GValue     *value,
+                           GParamSpec *pspec)
 {
-  BzCarousel *self = BZ_CAROUSEL (object);
+  BgeCarousel *self = BGE_CAROUSEL (object);
 
   switch (prop_id)
     {
     case PROP_AUTO_SCROLL:
-      g_value_set_boolean (value, bz_carousel_get_auto_scroll (self));
+      g_value_set_boolean (value, bge_carousel_get_auto_scroll (self));
       break;
     case PROP_ALLOW_LONG_SWIPES:
-      g_value_set_boolean (value, bz_carousel_get_allow_long_swipes (self));
+      g_value_set_boolean (value, bge_carousel_get_allow_long_swipes (self));
       break;
     case PROP_ALLOW_MOUSE_DRAG:
-      g_value_set_boolean (value, bz_carousel_get_allow_mouse_drag (self));
+      g_value_set_boolean (value, bge_carousel_get_allow_mouse_drag (self));
       break;
     case PROP_ALLOW_SCROLL_WHEEL:
-      g_value_set_boolean (value, bz_carousel_get_allow_scroll_wheel (self));
+      g_value_set_boolean (value, bge_carousel_get_allow_scroll_wheel (self));
       break;
     case PROP_ALLOW_RAISE:
-      g_value_set_boolean (value, bz_carousel_get_allow_raise (self));
-      break;
-    case PROP_RAISED:
-      g_value_set_boolean (value, bz_carousel_get_raised (self));
+      g_value_set_boolean (value, bge_carousel_get_allow_raise (self));
       break;
     case PROP_MODEL:
-      g_value_set_object (value, bz_carousel_get_model (self));
+      g_value_set_object (value, bge_carousel_get_model (self));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -246,35 +239,32 @@ bz_carousel_get_property (GObject    *object,
 }
 
 static void
-bz_carousel_set_property (GObject      *object,
-                          guint         prop_id,
-                          const GValue *value,
-                          GParamSpec   *pspec)
+bge_carousel_set_property (GObject      *object,
+                           guint         prop_id,
+                           const GValue *value,
+                           GParamSpec   *pspec)
 {
-  BzCarousel *self = BZ_CAROUSEL (object);
+  BgeCarousel *self = BGE_CAROUSEL (object);
 
   switch (prop_id)
     {
     case PROP_AUTO_SCROLL:
-      bz_carousel_set_auto_scroll (self, g_value_get_boolean (value));
+      bge_carousel_set_auto_scroll (self, g_value_get_boolean (value));
       break;
     case PROP_ALLOW_LONG_SWIPES:
-      bz_carousel_set_allow_long_swipes (self, g_value_get_boolean (value));
+      bge_carousel_set_allow_long_swipes (self, g_value_get_boolean (value));
       break;
     case PROP_ALLOW_MOUSE_DRAG:
-      bz_carousel_set_allow_mouse_drag (self, g_value_get_boolean (value));
+      bge_carousel_set_allow_mouse_drag (self, g_value_get_boolean (value));
       break;
     case PROP_ALLOW_SCROLL_WHEEL:
-      bz_carousel_set_allow_scroll_wheel (self, g_value_get_boolean (value));
+      bge_carousel_set_allow_scroll_wheel (self, g_value_get_boolean (value));
       break;
     case PROP_ALLOW_RAISE:
-      bz_carousel_set_allow_raise (self, g_value_get_boolean (value));
-      break;
-    case PROP_RAISED:
-      bz_carousel_set_raised (self, g_value_get_boolean (value));
+      bge_carousel_set_allow_raise (self, g_value_get_boolean (value));
       break;
     case PROP_MODEL:
-      bz_carousel_set_model (self, g_value_get_object (value));
+      bge_carousel_set_model (self, g_value_get_object (value));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -282,15 +272,15 @@ bz_carousel_set_property (GObject      *object,
 }
 
 static void
-bz_carousel_measure (GtkWidget     *widget,
-                     GtkOrientation orientation,
-                     int            for_size,
-                     int           *minimum,
-                     int           *natural,
-                     int           *minimum_baseline,
-                     int           *natural_baseline)
+bge_carousel_measure (GtkWidget     *widget,
+                      GtkOrientation orientation,
+                      int            for_size,
+                      int           *minimum,
+                      int           *natural,
+                      int           *minimum_baseline,
+                      int           *natural_baseline)
 {
-  BzCarousel *self = BZ_CAROUSEL (widget);
+  BgeCarousel *self = BGE_CAROUSEL (widget);
 
   for (guint i = 0; i < self->widgets->len; i++)
     {
@@ -323,12 +313,12 @@ bz_carousel_measure (GtkWidget     *widget,
 }
 
 static void
-bz_carousel_size_allocate (GtkWidget *widget,
-                           int        width,
-                           int        height,
-                           int        baseline)
+bge_carousel_size_allocate (GtkWidget *widget,
+                            int        width,
+                            int        height,
+                            int        baseline)
 {
-  BzCarousel *self = BZ_CAROUSEL (widget);
+  BgeCarousel *self = BGE_CAROUSEL (widget);
 
   ensure_viewport (self, self->model, FALSE);
 
@@ -352,14 +342,14 @@ bz_carousel_size_allocate (GtkWidget *widget,
 }
 
 static void
-bz_carousel_class_init (BzCarouselClass *klass)
+bge_carousel_class_init (BgeCarouselClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
-  object_class->set_property = bz_carousel_set_property;
-  object_class->get_property = bz_carousel_get_property;
-  object_class->dispose      = bz_carousel_dispose;
+  object_class->set_property = bge_carousel_set_property;
+  object_class->get_property = bge_carousel_get_property;
+  object_class->dispose      = bge_carousel_dispose;
 
   props[PROP_AUTO_SCROLL] =
       g_param_spec_boolean (
@@ -391,12 +381,6 @@ bz_carousel_class_init (BzCarouselClass *klass)
           NULL, NULL, FALSE,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
-  props[PROP_RAISED] =
-      g_param_spec_boolean (
-          "raised",
-          NULL, NULL, FALSE,
-          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
-
   props[PROP_MODEL] =
       g_param_spec_object (
           "model",
@@ -406,44 +390,44 @@ bz_carousel_class_init (BzCarouselClass *klass)
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
-  signals[SIGNAL_BIND_WIDGET] =
+  signals[SIGNAL_CREATE_WIDGET] =
       g_signal_new (
-          "bind-widget",
+          "create-widget",
           G_OBJECT_CLASS_TYPE (klass),
           G_SIGNAL_RUN_FIRST,
           0,
           NULL, NULL,
-          bz_marshal_VOID__OBJECT_OBJECT,
-          G_TYPE_NONE,
+          bge_marshal_OBJECT__OBJECT,
+          GTK_TYPE_WIDGET,
           1,
           GTK_TYPE_WIDGET);
   g_signal_set_va_marshaller (
-      signals[SIGNAL_BIND_WIDGET],
+      signals[SIGNAL_CREATE_WIDGET],
       G_TYPE_FROM_CLASS (klass),
-      bz_marshal_VOID__OBJECT_OBJECTv);
+      bge_marshal_OBJECT__OBJECTv);
 
-  signals[SIGNAL_UNBIND_WIDGET] =
+  signals[SIGNAL_REMOVE_WIDGET] =
       g_signal_new (
-          "unbind-widget",
+          "remove-widget",
           G_OBJECT_CLASS_TYPE (klass),
           G_SIGNAL_RUN_FIRST,
           0,
           NULL, NULL,
-          bz_marshal_VOID__OBJECT_OBJECT,
+          bge_marshal_VOID__OBJECT_OBJECT,
           G_TYPE_NONE,
-          1,
-          GTK_TYPE_WIDGET);
+          2,
+          GTK_TYPE_WIDGET, G_TYPE_OBJECT);
   g_signal_set_va_marshaller (
-      signals[SIGNAL_UNBIND_WIDGET],
+      signals[SIGNAL_REMOVE_WIDGET],
       G_TYPE_FROM_CLASS (klass),
-      bz_marshal_VOID__OBJECT_OBJECTv);
+      bge_marshal_VOID__OBJECT_OBJECTv);
 
-  widget_class->measure       = bz_carousel_measure;
-  widget_class->size_allocate = bz_carousel_size_allocate;
+  widget_class->measure       = bge_carousel_measure;
+  widget_class->size_allocate = bge_carousel_size_allocate;
 }
 
 static void
-bz_carousel_init (BzCarousel *self)
+bge_carousel_init (BgeCarousel *self)
 {
   self->animation = bge_animation_new (GTK_WIDGET (self));
 
@@ -477,65 +461,58 @@ bz_carousel_init (BzCarousel *self)
 }
 
 GtkWidget *
-bz_carousel_new (void)
+bge_carousel_new (void)
 {
-  return g_object_new (BZ_TYPE_CAROUSEL, NULL);
+  return g_object_new (BGE_TYPE_CAROUSEL, NULL);
 }
 
 gboolean
-bz_carousel_get_auto_scroll (BzCarousel *self)
+bge_carousel_get_auto_scroll (BgeCarousel *self)
 {
-  g_return_val_if_fail (BZ_IS_CAROUSEL (self), FALSE);
+  g_return_val_if_fail (BGE_IS_CAROUSEL (self), FALSE);
   return self->auto_scroll;
 }
 
 gboolean
-bz_carousel_get_allow_long_swipes (BzCarousel *self)
+bge_carousel_get_allow_long_swipes (BgeCarousel *self)
 {
-  g_return_val_if_fail (BZ_IS_CAROUSEL (self), FALSE);
+  g_return_val_if_fail (BGE_IS_CAROUSEL (self), FALSE);
   return self->allow_long_swipes;
 }
 
 gboolean
-bz_carousel_get_allow_mouse_drag (BzCarousel *self)
+bge_carousel_get_allow_mouse_drag (BgeCarousel *self)
 {
-  g_return_val_if_fail (BZ_IS_CAROUSEL (self), FALSE);
+  g_return_val_if_fail (BGE_IS_CAROUSEL (self), FALSE);
   return self->allow_mouse_drag;
 }
 
 gboolean
-bz_carousel_get_allow_scroll_wheel (BzCarousel *self)
+bge_carousel_get_allow_scroll_wheel (BgeCarousel *self)
 {
-  g_return_val_if_fail (BZ_IS_CAROUSEL (self), FALSE);
+  g_return_val_if_fail (BGE_IS_CAROUSEL (self), FALSE);
   return self->allow_scroll_wheel;
 }
 
 gboolean
-bz_carousel_get_allow_raise (BzCarousel *self)
+bge_carousel_get_allow_raise (BgeCarousel *self)
 {
-  g_return_val_if_fail (BZ_IS_CAROUSEL (self), FALSE);
+  g_return_val_if_fail (BGE_IS_CAROUSEL (self), FALSE);
   return self->allow_raise;
 }
 
-gboolean
-bz_carousel_get_raised (BzCarousel *self)
-{
-  g_return_val_if_fail (BZ_IS_CAROUSEL (self), FALSE);
-  return self->raised;
-}
-
 GtkSingleSelection *
-bz_carousel_get_model (BzCarousel *self)
+bge_carousel_get_model (BgeCarousel *self)
 {
-  g_return_val_if_fail (BZ_IS_CAROUSEL (self), NULL);
+  g_return_val_if_fail (BGE_IS_CAROUSEL (self), NULL);
   return self->model;
 }
 
 void
-bz_carousel_set_auto_scroll (BzCarousel *self,
-                             gboolean    auto_scroll)
+bge_carousel_set_auto_scroll (BgeCarousel *self,
+                              gboolean     auto_scroll)
 {
-  g_return_if_fail (BZ_IS_CAROUSEL (self));
+  g_return_if_fail (BGE_IS_CAROUSEL (self));
 
   if (!!auto_scroll == !!self->auto_scroll)
     return;
@@ -546,10 +523,10 @@ bz_carousel_set_auto_scroll (BzCarousel *self,
 }
 
 void
-bz_carousel_set_allow_long_swipes (BzCarousel *self,
-                                   gboolean    allow_long_swipes)
+bge_carousel_set_allow_long_swipes (BgeCarousel *self,
+                                    gboolean     allow_long_swipes)
 {
-  g_return_if_fail (BZ_IS_CAROUSEL (self));
+  g_return_if_fail (BGE_IS_CAROUSEL (self));
 
   if (!!allow_long_swipes == !!self->allow_long_swipes)
     return;
@@ -560,10 +537,10 @@ bz_carousel_set_allow_long_swipes (BzCarousel *self,
 }
 
 void
-bz_carousel_set_allow_mouse_drag (BzCarousel *self,
-                                  gboolean    allow_mouse_drag)
+bge_carousel_set_allow_mouse_drag (BgeCarousel *self,
+                                   gboolean     allow_mouse_drag)
 {
-  g_return_if_fail (BZ_IS_CAROUSEL (self));
+  g_return_if_fail (BGE_IS_CAROUSEL (self));
 
   if (!!allow_mouse_drag == !!self->allow_mouse_drag)
     return;
@@ -574,10 +551,10 @@ bz_carousel_set_allow_mouse_drag (BzCarousel *self,
 }
 
 void
-bz_carousel_set_allow_scroll_wheel (BzCarousel *self,
-                                    gboolean    allow_scroll_wheel)
+bge_carousel_set_allow_scroll_wheel (BgeCarousel *self,
+                                     gboolean     allow_scroll_wheel)
 {
-  g_return_if_fail (BZ_IS_CAROUSEL (self));
+  g_return_if_fail (BGE_IS_CAROUSEL (self));
 
   if (!!allow_scroll_wheel == !!self->allow_scroll_wheel)
     return;
@@ -588,10 +565,10 @@ bz_carousel_set_allow_scroll_wheel (BzCarousel *self,
 }
 
 void
-bz_carousel_set_allow_raise (BzCarousel *self,
-                             gboolean    allow_raise)
+bge_carousel_set_allow_raise (BgeCarousel *self,
+                              gboolean     allow_raise)
 {
-  g_return_if_fail (BZ_IS_CAROUSEL (self));
+  g_return_if_fail (BGE_IS_CAROUSEL (self));
 
   if (!!allow_raise == !!self->allow_raise)
     return;
@@ -602,24 +579,10 @@ bz_carousel_set_allow_raise (BzCarousel *self,
 }
 
 void
-bz_carousel_set_raised (BzCarousel *self,
-                        gboolean    raised)
+bge_carousel_set_model (BgeCarousel        *self,
+                        GtkSingleSelection *model)
 {
-  g_return_if_fail (BZ_IS_CAROUSEL (self));
-
-  if (!!raised == !!self->raised)
-    return;
-
-  self->raised = raised;
-
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_RAISED]);
-}
-
-void
-bz_carousel_set_model (BzCarousel         *self,
-                       GtkSingleSelection *model)
-{
-  g_return_if_fail (BZ_IS_CAROUSEL (self));
+  g_return_if_fail (BGE_IS_CAROUSEL (self));
   g_return_if_fail (model == NULL || GTK_IS_SINGLE_SELECTION (model));
 
   if (model == self->model)
@@ -664,11 +627,11 @@ bz_carousel_set_model (BzCarousel         *self,
 }
 
 static void
-items_changed (BzCarousel *self,
-               guint       position,
-               guint       removed,
-               guint       added,
-               GListModel *model)
+items_changed (BgeCarousel *self,
+               guint        position,
+               guint        removed,
+               guint        added,
+               GListModel  *model)
 {
   for (guint i = 0; i < removed; i++)
     {
@@ -680,7 +643,7 @@ items_changed (BzCarousel *self,
 
       if (child->cancellable != NULL)
         dex_cancellable_cancel (child->cancellable);
-      g_signal_emit (self, signals[SIGNAL_UNBIND_WIDGET], 0, child->widget, object);
+      g_signal_emit (self, signals[SIGNAL_REMOVE_WIDGET], 0, child->widget, object);
     }
   if (removed > 0)
     {
@@ -695,7 +658,13 @@ items_changed (BzCarousel *self,
       CarouselWidgetData *data   = NULL;
 
       object = g_list_model_get_item (model, position + i);
-      child  = adw_bin_new ();
+
+      g_signal_emit (self, signals[SIGNAL_CREATE_WIDGET], 0, object, &child);
+      if (child == NULL)
+        {
+          g_critical ("Failed to populate child for carousel widget");
+          child = gtk_fixed_new ();
+        }
 
       if (position + i == 0)
         gtk_widget_set_parent (child, GTK_WIDGET (self));
@@ -706,7 +675,6 @@ items_changed (BzCarousel *self,
           prev = g_ptr_array_index (self->widgets, position + i - 1);
           gtk_widget_insert_after (child, GTK_WIDGET (self), prev->widget);
         }
-      g_signal_emit (self, signals[SIGNAL_BIND_WIDGET], 0, ADW_BIN (child), object);
 
       data         = carousel_widget_data_new ();
       data->widget = child;
@@ -719,7 +687,7 @@ items_changed (BzCarousel *self,
 }
 
 static void
-model_selected_changed (BzCarousel         *self,
+model_selected_changed (BgeCarousel        *self,
                         GParamSpec         *pspec,
                         GtkSingleSelection *selection)
 {
@@ -733,8 +701,8 @@ model_selected_changed (BzCarousel         *self,
 }
 
 static void
-move_to_idx (BzCarousel *self,
-             guint       idx,
+move_to_idx (BgeCarousel *self,
+             guint        idx,
              /* damping_ratio <= 0.0 means no animation */
              double damping_ratio)
 {
@@ -920,7 +888,7 @@ move_to_idx (BzCarousel *self,
 }
 
 static void
-animate (BzCarousel         *self,
+animate (BgeCarousel        *self,
          const char         *key,
          double              value,
          CarouselWidgetData *data)
@@ -947,7 +915,7 @@ animate (BzCarousel         *self,
 }
 
 static void
-ensure_viewport (BzCarousel         *self,
+ensure_viewport (BgeCarousel        *self,
                  GtkSingleSelection *model,
                  gboolean            animate)
 {
@@ -972,7 +940,7 @@ ensure_viewport (BzCarousel         *self,
 }
 
 static void
-motion_enter (BzCarousel               *self,
+motion_enter (BgeCarousel              *self,
               gdouble                   x,
               gdouble                   y,
               GtkEventControllerMotion *controller)
@@ -983,7 +951,7 @@ motion_enter (BzCarousel               *self,
 }
 
 static void
-motion_event (BzCarousel               *self,
+motion_event (BgeCarousel              *self,
               gdouble                   x,
               gdouble                   y,
               GtkEventControllerMotion *controller)
@@ -994,7 +962,7 @@ motion_event (BzCarousel               *self,
 }
 
 static void
-motion_leave (BzCarousel               *self,
+motion_leave (BgeCarousel              *self,
               GtkEventControllerMotion *controller)
 {
   if (self->dragging)
@@ -1005,9 +973,9 @@ motion_leave (BzCarousel               *self,
 }
 
 static void
-update_motion (BzCarousel *self,
-               gdouble     x,
-               gdouble     y)
+update_motion (BgeCarousel *self,
+               gdouble      x,
+               gdouble      y)
 {
   graphene_point_t point  = { 0 };
   gboolean         ensure = FALSE;
@@ -1038,7 +1006,7 @@ update_motion (BzCarousel *self,
 }
 
 static void
-scroll_begin (BzCarousel               *self,
+scroll_begin (BgeCarousel              *self,
               GtkEventControllerScroll *controller)
 {
   self->scrolling       = TRUE;
@@ -1047,7 +1015,7 @@ scroll_begin (BzCarousel               *self,
 }
 
 static void
-scroll_end (BzCarousel               *self,
+scroll_end (BgeCarousel              *self,
             GtkEventControllerScroll *controller)
 {
   self->scrolling = FALSE;
@@ -1062,7 +1030,7 @@ scroll_end (BzCarousel               *self,
 }
 
 static gboolean
-scroll (BzCarousel               *self,
+scroll (BgeCarousel              *self,
         gdouble                   dx,
         gdouble                   dy,
         GtkEventControllerScroll *controller)
@@ -1142,7 +1110,7 @@ scroll (BzCarousel               *self,
 }
 
 static void
-drag_begin (BzCarousel     *self,
+drag_begin (BgeCarousel    *self,
             gdouble         start_x,
             gdouble         start_y,
             GtkGestureDrag *gesture)
@@ -1155,7 +1123,7 @@ drag_begin (BzCarousel     *self,
 }
 
 static void
-drag_end (BzCarousel     *self,
+drag_end (BgeCarousel    *self,
           gdouble         offset_x,
           gdouble         offset_y,
           GtkGestureDrag *gesture)
@@ -1171,7 +1139,7 @@ drag_end (BzCarousel     *self,
 }
 
 static void
-drag_update (BzCarousel     *self,
+drag_update (BgeCarousel    *self,
              gdouble         offset_x,
              gdouble         offset_y,
              GtkGestureDrag *gesture)
@@ -1180,9 +1148,9 @@ drag_update (BzCarousel     *self,
 }
 
 static void
-finish_horizontal_gesture (BzCarousel *self,
-                           int         offset_x,
-                           int         offset_y)
+finish_horizontal_gesture (BgeCarousel *self,
+                           int          offset_x,
+                           int          offset_y)
 {
   guint  selected     = 0;
   double width        = 0.0;
@@ -1241,4 +1209,4 @@ finish_horizontal_gesture (BzCarousel *self,
     gtk_single_selection_set_selected (self->model, new_selected);
 }
 
-/* End of bz-carousel.c */
+/* End of bge-carousel.c */
