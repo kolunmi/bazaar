@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-02-28 14:55+0900\n"
-"PO-Revision-Date: 2026-02-28 15:03+0900\n"
+"PO-Revision-Date: 2026-03-05 18:31+0900\n"
 "Last-Translator: camegone <hoge_huga@example.com>\n"
 "Language-Team: Japanese <kde-i18n-doc@kde.org>\n"
 "Language: ja\n"
@@ -61,11 +61,11 @@ msgstr ""
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:54
 msgid "The home page displaying Flathub apps"
-msgstr "Flathub のアプリが表示されるホームページ"
+msgstr "Flathub のアプリを表示しているホームページ"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:58
 msgid "Exhibit app page"
-msgstr "展示アプリ ページ"
+msgstr "Exhibit のアプリページ"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:62
 msgid "Library page"
