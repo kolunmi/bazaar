@@ -35,4 +35,5 @@ bge_init (void)
   gtk_init ();
 
   g_type_ensure (BGE_TYPE_ANIMATION);
+  g_type_ensure (BGE_TYPE_CAROUSEL);
 }
