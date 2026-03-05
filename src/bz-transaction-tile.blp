@@ -265,14 +265,12 @@ template $BzTransactionTile: $BzListTile {
                             $is_transaction_tracker_install(template.tracker as <$BzTransactionEntryTracker>) as <bool>
                         ) as <bool>;
 
-            icon-name: "execute-to-symbolic";
-            has-tooltip: true;
             valign: center;
             tooltip-text: _("Open App");
             clicked => $run_cb(template);
 
             styles [
-              "flat",
+              "medium-pill",
             ]
           }
 
