@@ -296,11 +296,11 @@ format_runtime_count (gpointer object,
                           n_items);
 }
 
-static void
+static gboolean
 remove_activated_style_cb (gpointer user_data)
 {
   gtk_widget_remove_css_class (GTK_WIDGET (user_data), "activated");
-  g_object_unref (user_data);
+  return G_SOURCE_REMOVE;
 }
 
 static void
@@ -322,7 +322,10 @@ tile_activated_cb (BzListTile    *tile,
     }
   else
     {
-      g_timeout_add_once (200, remove_activated_style_cb, g_object_ref (tile));
+      g_timeout_add_full (
+        G_PRIORITY_DEFAULT,
+        200, (GSourceFunc) remove_activated_style_cb,
+        g_object_ref (tile), g_object_unref);
       gtk_widget_remove_css_class (GTK_WIDGET (self->toggle_icon), "rotated");
     }
 }
