@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-04 17:33+0100\n"
-"PO-Revision-Date: 2026-03-04 17:54+0100\n"
+"POT-Creation-Date: 2026-03-05 21:04+0100\n"
+"PO-Revision-Date: 2026-03-05 23:14+0100\n"
 "Last-Translator: Daniel Rusek <mail@asciiwolf.com>\n"
 "Language-Team: Czech\n"
 "Language: cs\n"
@@ -2855,15 +2855,15 @@ msgstr "Hotovo"
 msgid "Error"
 msgstr "Chyba"
 
-#: src/bz-transaction-tile.blp:271
+#: src/bz-transaction-tile.blp:269
 msgid "Open App"
 msgstr "Otevřít aplikaci"
 
-#: src/bz-transaction-tile.blp:285
+#: src/bz-transaction-tile.blp:283
 msgid "Cancel Transaction"
 msgstr "Zrušit transakci"
 
-#: src/bz-transaction-tile.blp:409
+#: src/bz-transaction-tile.blp:407
 msgid "Show Error Info"
 msgstr "Zobrazit informace o chybě"
 
@@ -2880,9 +2880,9 @@ msgstr "Chyba transakce"
 msgid "Pending"
 msgstr "Čeká"
 
-#: src/bz-updates-card.blp:36
-msgid "Update All"
-msgstr "Aktualizovat vše"
+#: src/bz-updates-card.blp:34
+msgid "_Update All"
+msgstr "Akt_ualizovat vše"
 
 #: src/bz-updates-card.c:293
 #, c-format
