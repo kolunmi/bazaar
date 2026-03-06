@@ -354,7 +354,7 @@ bge_carousel_class_init (BgeCarouselClass *klass)
   object_class->dispose      = bge_carousel_dispose;
 
   /**
-   * BgeCarousel:auto-mouse-drag:
+   * BgeCarousel:allow-mouse-drag:
    *
    * Whether to allow dragging with the mouse.
    */
