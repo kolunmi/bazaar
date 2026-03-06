@@ -25,16 +25,18 @@
 #include "bz-featured-tile.h"
 #include "bz-template-callbacks.h"
 
-#define FEATURED_ROTATE_TIME 5
+#define FEATURED_ROTATE_TIME       5
+#define MANUAL_ROTATE_RECOVER_TIME 7.5
 
 struct _BzFeaturedCarousel
 {
   GtkBox parent_instance;
 
-  GListModel   *model;
-  gboolean      is_aotd;
-  guint         rotation_timer_id;
-  unsigned long settings_notify_id;
+  GListModel *model;
+  gboolean    is_aotd;
+
+  guint   rotation_timer_source;
+  GTimer *time_since_manual_rotate;
 
   BgeCarousel        *carousel;
   GtkSingleSelection *selection;
@@ -57,6 +59,14 @@ static GParamSpec *props[LAST_PROP] = {
 };
 
 static void
+on_notify_selected (BzFeaturedCarousel *self,
+                    GParamSpec         *pspec,
+                    GtkSingleSelection *selection)
+{
+  g_timer_start (self->time_since_manual_rotate);
+}
+
+static void
 show_relative_page (BzFeaturedCarousel *self,
                     gint                delta,
                     gboolean            use_custom_spring)
@@ -70,65 +80,24 @@ show_relative_page (BzFeaturedCarousel *self,
     return;
 
   current_page = gtk_single_selection_get_selected (self->selection);
+  new_page     = (n_pages + current_page + delta) % n_pages;
 
-  new_page = (n_pages + current_page + delta) % n_pages;
+  g_signal_handlers_block_by_func (self->selection, on_notify_selected, self);
   gtk_single_selection_set_selected (self->selection, new_page);
+  g_signal_handlers_unblock_by_func (self->selection, on_notify_selected, self);
 }
 
 static gboolean
 rotate_cb (gpointer user_data)
 {
-  BzFeaturedCarousel *self;
+  BzFeaturedCarousel *self    = BZ_FEATURED_CAROUSEL (user_data);
+  double              elapsed = 0.0;
 
-  self = BZ_FEATURED_CAROUSEL (user_data);
-  show_relative_page (self, +1, TRUE);
+  elapsed = g_timer_elapsed (self->time_since_manual_rotate, NULL);
+  if (elapsed > MANUAL_ROTATE_RECOVER_TIME)
+    show_relative_page (self, +1, TRUE);
 
   return G_SOURCE_CONTINUE;
-}
-
-static void
-start_rotation_timer (BzFeaturedCarousel *self)
-{
-  if (self->rotation_timer_id == 0)
-    {
-      self->rotation_timer_id = g_timeout_add_seconds (FEATURED_ROTATE_TIME,
-                                                       rotate_cb, self);
-    }
-}
-
-static void
-stop_rotation_timer (BzFeaturedCarousel *self)
-{
-  if (self->rotation_timer_id != 0)
-    {
-      g_source_remove (self->rotation_timer_id);
-      self->rotation_timer_id = 0;
-    }
-}
-
-static void
-maybe_start_rotation_timer (BzFeaturedCarousel *self)
-{
-  if (!adw_get_enable_animations (GTK_WIDGET (self)))
-    {
-      stop_rotation_timer (self);
-      return;
-    }
-
-  if (self->model != NULL && g_list_model_get_n_items (self->model) > 0 &&
-      gtk_widget_get_mapped (GTK_WIDGET (self)))
-    start_rotation_timer (self);
-}
-
-static void
-carousel_notify_settings_cb (GObject    *object,
-                             GParamSpec *pspec,
-                             gpointer    user_data)
-{
-  BzFeaturedCarousel *self;
-
-  self = BZ_FEATURED_CAROUSEL (user_data);
-  maybe_start_rotation_timer (self);
 }
 
 static void
@@ -190,32 +159,13 @@ key_pressed_cb (GtkEventControllerKey *controller,
 }
 
 static void
-bz_featured_carousel_map (GtkWidget *widget)
-{
-  BzFeaturedCarousel *self = BZ_FEATURED_CAROUSEL (widget);
-
-  GTK_WIDGET_CLASS (bz_featured_carousel_parent_class)->map (widget);
-
-  maybe_start_rotation_timer (self);
-}
-
-static void
-bz_featured_carousel_unmap (GtkWidget *widget)
-{
-  BzFeaturedCarousel *self = BZ_FEATURED_CAROUSEL (widget);
-
-  stop_rotation_timer (self);
-
-  GTK_WIDGET_CLASS (bz_featured_carousel_parent_class)->unmap (widget);
-}
-
-static void
 bz_featured_carousel_dispose (GObject *object)
 {
   BzFeaturedCarousel *self = BZ_FEATURED_CAROUSEL (object);
 
-  stop_rotation_timer (self);
-  g_clear_signal_handler (&self->settings_notify_id, gtk_widget_get_settings (GTK_WIDGET (self)));
+  g_clear_handle_id (&self->rotation_timer_source, g_source_remove);
+  g_clear_pointer (&self->time_since_manual_rotate, g_timer_destroy);
+
   g_clear_object (&self->model);
 
   G_OBJECT_CLASS (bz_featured_carousel_parent_class)->dispose (object);
@@ -299,15 +249,6 @@ on_remove_widget (BzFeaturedCarousel *self,
 }
 
 static void
-on_notify_selected (BzFeaturedCarousel *self,
-                    GParamSpec         *pspec,
-                    GtkSingleSelection *selection)
-{
-  stop_rotation_timer (self);
-  maybe_start_rotation_timer (self);
-}
-
-static void
 bz_featured_carousel_class_init (BzFeaturedCarouselClass *klass)
 {
   GObjectClass   *object_class;
@@ -319,9 +260,6 @@ bz_featured_carousel_class_init (BzFeaturedCarouselClass *klass)
   object_class->get_property = bz_featured_carousel_get_property;
   object_class->set_property = bz_featured_carousel_set_property;
   object_class->dispose      = bz_featured_carousel_dispose;
-
-  widget_class->map   = bz_featured_carousel_map;
-  widget_class->unmap = bz_featured_carousel_unmap;
 
   props[PROP_MODEL] =
       g_param_spec_object ("model", NULL, NULL,
@@ -356,14 +294,12 @@ bz_featured_carousel_class_init (BzFeaturedCarouselClass *klass)
 static void
 bz_featured_carousel_init (BzFeaturedCarousel *self)
 {
-  GtkSettings *settings;
-
   gtk_widget_init_template (GTK_WIDGET (self));
 
-  settings                 = gtk_widget_get_settings (GTK_WIDGET (self));
-  self->settings_notify_id = g_signal_connect (settings, "notify::gtk-enable-animations",
-                                               G_CALLBACK (carousel_notify_settings_cb),
-                                               self);
+  self->rotation_timer_source = g_timeout_add_seconds (
+      FEATURED_ROTATE_TIME,
+      rotate_cb, self);
+  self->time_since_manual_rotate = g_timer_new ();
 }
 
 BzFeaturedCarousel *
