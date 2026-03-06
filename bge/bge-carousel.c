@@ -49,9 +49,12 @@ struct _BgeCarousel
   int                 hscroll_current;
   GtkGesture         *drag;
   gboolean            dragging;
+  double              drag_x;
+  double              drag_y;
   BgeAnimation       *animation;
 
   gboolean            allow_mouse_drag;
+  gboolean            allow_overshoot;
   gboolean            allow_scroll_wheel;
   gboolean            allow_raise;
   GtkSingleSelection *model;
@@ -67,6 +70,7 @@ enum
   PROP_0,
 
   PROP_ALLOW_MOUSE_DRAG,
+  PROP_ALLOW_OVERSHOOT,
   PROP_ALLOW_SCROLL_WHEEL,
   PROP_ALLOW_RAISE,
   PROP_MODEL,
@@ -222,6 +226,9 @@ bge_carousel_get_property (GObject    *object,
     case PROP_ALLOW_MOUSE_DRAG:
       g_value_set_boolean (value, bge_carousel_get_allow_mouse_drag (self));
       break;
+    case PROP_ALLOW_OVERSHOOT:
+      g_value_set_boolean (value, bge_carousel_get_allow_overshoot (self));
+      break;
     case PROP_ALLOW_SCROLL_WHEEL:
       g_value_set_boolean (value, bge_carousel_get_allow_scroll_wheel (self));
       break;
@@ -248,6 +255,9 @@ bge_carousel_set_property (GObject      *object,
     {
     case PROP_ALLOW_MOUSE_DRAG:
       bge_carousel_set_allow_mouse_drag (self, g_value_get_boolean (value));
+      break;
+    case PROP_ALLOW_OVERSHOOT:
+      bge_carousel_set_allow_overshoot (self, g_value_get_boolean (value));
       break;
     case PROP_ALLOW_SCROLL_WHEEL:
       bge_carousel_set_allow_scroll_wheel (self, g_value_get_boolean (value));
@@ -351,6 +361,20 @@ bge_carousel_class_init (BgeCarouselClass *klass)
   props[PROP_ALLOW_MOUSE_DRAG] =
       g_param_spec_boolean (
           "allow-mouse-drag",
+          NULL, NULL, FALSE,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  /**
+   * BgeCarousel:allow-overshoot:
+   *
+   * Whether to allow overshooting the ends of the carousel with drag/touchpad
+   * input. Once the event completes, the carousel offset value will go back to
+   * that of the start/end widget. Setting this value to FALSE will prevent this
+   * widget from capturing input events which would result in an overshoot.
+   */
+  props[PROP_ALLOW_OVERSHOOT] =
+      g_param_spec_boolean (
+          "allow-overshoot",
           NULL, NULL, FALSE,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
@@ -508,6 +532,21 @@ bge_carousel_get_allow_mouse_drag (BgeCarousel *self)
 }
 
 /**
+ * bge_carousel_get_allow_overshoot:
+ * @self: a `BgeCarousel`
+ *
+ * Gets [property@Bge.Carousel:allow-overshoot].
+ *
+ * Returns: the value of the property
+ */
+gboolean
+bge_carousel_get_allow_overshoot (BgeCarousel *self)
+{
+  g_return_val_if_fail (BGE_IS_CAROUSEL (self), FALSE);
+  return self->allow_overshoot;
+}
+
+/**
  * bge_carousel_get_allow_scroll_wheel:
  * @self: a `BgeCarousel`
  *
@@ -571,16 +610,34 @@ bge_carousel_set_allow_mouse_drag (BgeCarousel *self,
   self->allow_mouse_drag = allow_mouse_drag;
   if (!allow_mouse_drag && self->dragging)
     {
-      double x = 0.0;
-      double y = 0.0;
-
       self->dragging = FALSE;
-
-      gtk_gesture_drag_get_offset (GTK_GESTURE_DRAG (self->drag), &x, &y);
-      finish_horizontal_gesture (self, (int) x, (int) y);
+      finish_horizontal_gesture (self, self->drag_x, self->drag_y);
+      self->drag_x = 0.0;
+      self->drag_y = 0.0;
     }
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ALLOW_MOUSE_DRAG]);
+}
+
+/**
+ * bge_carousel_set_allow_overshoot:
+ * @self: a `BgeCarousel`
+ * @allow_overshoot: a boolean
+ *
+ * Sets [property@Bge.Carousel:allow-overshoot].
+ */
+void
+bge_carousel_set_allow_overshoot (BgeCarousel *self,
+                                  gboolean     allow_overshoot)
+{
+  g_return_if_fail (BGE_IS_CAROUSEL (self));
+
+  if (!!allow_overshoot == !!self->allow_overshoot)
+    return;
+
+  self->allow_overshoot = allow_overshoot;
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ALLOW_OVERSHOOT]);
 }
 
 /**
@@ -779,15 +836,7 @@ move_to_idx (BgeCarousel *self,
   if (self->scrolling)
     offset += self->hscroll_start - self->hscroll_current;
   if (self->dragging)
-    {
-      gboolean result = FALSE;
-      double   drag_x = 0;
-      double   drag_y = 0;
-
-      result = gtk_gesture_drag_get_offset (GTK_GESTURE_DRAG (self->drag), &drag_x, &drag_y);
-      if (result)
-        offset += drag_x;
-    }
+    offset += self->drag_x;
 
   for (guint i = 0; i <= idx; i++)
     {
@@ -1123,16 +1172,14 @@ scroll (BgeCarousel              *self,
     case GDK_SOURCE_TOUCHPAD:
     case GDK_SOURCE_TRACKPOINT:
       {
-        if (self->widgets->len > 0)
+        if (self->widgets->len > 0 &&
+            !self->allow_overshoot)
           {
-            CarouselWidgetData *first = NULL;
-            int                 width = 0;
+            guint selection = 0;
 
-            first = g_ptr_array_index (self->widgets, 0);
-            width = gtk_widget_get_width (GTK_WIDGET (self));
-            if (dx < 0 &&
-                first->rect.origin.x >=
-                    (double) width / 2 - first->rect.size.width / 2)
+            selection = gtk_single_selection_get_selected (self->model);
+            if ((selection == 0 && self->hscroll_current + dx < 0) ||
+                (selection == self->widgets->len - 1 && self->hscroll_current + dx > 0))
               {
                 self->scrolling = FALSE;
                 return FALSE;
@@ -1202,7 +1249,9 @@ drag_end (BgeCarousel    *self,
     return;
 
   self->dragging = FALSE;
-  finish_horizontal_gesture (self, offset_x, offset_y);
+  finish_horizontal_gesture (self, self->drag_x, self->drag_y);
+  self->drag_x = 0.0;
+  self->drag_y = 0.0;
 
   if (offset_x < -3 ||
       offset_x > 3 ||
@@ -1219,6 +1268,24 @@ drag_update (BgeCarousel    *self,
 {
   if (!self->dragging)
     return;
+
+  self->drag_x = offset_x;
+  self->drag_y = offset_y;
+
+  if (self->model == NULL)
+    return;
+
+  if (self->widgets->len > 0 &&
+      !self->allow_overshoot)
+    {
+      guint selected = 0;
+
+      selected = gtk_single_selection_get_selected (self->model);
+      if (selected == 0)
+        self->drag_x = MIN (self->drag_x, 0.0);
+      if (selected == self->widgets->len - 1)
+        self->drag_x = MAX (self->drag_x, 0.0);
+    }
 
   ensure_viewport (self, self->model, FALSE);
 }

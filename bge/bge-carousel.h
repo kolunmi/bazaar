@@ -36,6 +36,9 @@ gboolean
 bge_carousel_get_allow_mouse_drag (BgeCarousel *self);
 
 gboolean
+bge_carousel_get_allow_overshoot (BgeCarousel *self);
+
+gboolean
 bge_carousel_get_allow_scroll_wheel (BgeCarousel *self);
 
 gboolean
@@ -47,6 +50,10 @@ bge_carousel_get_model (BgeCarousel *self);
 void
 bge_carousel_set_allow_mouse_drag (BgeCarousel *self,
                                    gboolean     allow_mouse_drag);
+
+void
+bge_carousel_set_allow_overshoot (BgeCarousel *self,
+                                  gboolean     allow_overshoot);
 
 void
 bge_carousel_set_allow_scroll_wheel (BgeCarousel *self,
