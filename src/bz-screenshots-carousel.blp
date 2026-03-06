@@ -28,6 +28,10 @@ template $BzScreenshotsCarousel: Gtk.Widget {
         valign: fill;
         height-request: bind $get_carousel_height(template.compact) as <int>;
 
+        allow-mouse-drag: true;
+        allow-scroll-wheel: true;
+        allow-raise: true;
+
         create-widget => $on_create_widget(template);
         remove-widget => $on_remove_widget(template);
 

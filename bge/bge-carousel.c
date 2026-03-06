@@ -569,6 +569,16 @@ bge_carousel_set_allow_mouse_drag (BgeCarousel *self,
     return;
 
   self->allow_mouse_drag = allow_mouse_drag;
+  if (!allow_mouse_drag && self->dragging)
+    {
+      double x = 0.0;
+      double y = 0.0;
+
+      self->dragging = FALSE;
+
+      gtk_gesture_drag_get_offset (GTK_GESTURE_DRAG (self->drag), &x, &y);
+      finish_horizontal_gesture (self, (int) x, (int) y);
+    }
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ALLOW_MOUSE_DRAG]);
 }
@@ -611,6 +621,8 @@ bge_carousel_set_allow_raise (BgeCarousel *self,
     return;
 
   self->allow_raise = allow_raise;
+  if (self->model != NULL)
+    ensure_viewport (self, self->model, TRUE);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ALLOW_RAISE]);
 }
@@ -829,7 +841,7 @@ move_to_idx (BgeCarousel *self,
           &unused);
       rect_width = CLAMP (hnatural, hminimum, width);
 
-      if (child->raised)
+      if (child->raised || !self->allow_raise)
         {
           child_width  = rect_width;
           child_height = height;
@@ -1135,6 +1147,9 @@ scroll (BgeCarousel              *self,
         guint selected     = 0;
         guint new_selected = 0;
 
+        if (!self->allow_scroll_wheel)
+          break;
+
         selected = gtk_single_selection_get_selected (self->model);
         if (dx > 0)
           new_selected = MIN (selected + 1, n_items - 1);
@@ -1159,6 +1174,9 @@ drag_begin (BgeCarousel    *self,
             gdouble         start_y,
             GtkGestureDrag *gesture)
 {
+  if (!self->allow_mouse_drag)
+    return;
+
   self->dragging = TRUE;
   if (self->model == NULL)
     return;
@@ -1172,6 +1190,11 @@ drag_end (BgeCarousel    *self,
           gdouble         offset_y,
           GtkGestureDrag *gesture)
 {
+  if (!self->dragging)
+    /* This situation will happen if the `allow-mouse-drag` prop is set to FALSE
+       while a drag is taking place */
+    return;
+
   self->dragging = FALSE;
   finish_horizontal_gesture (self, offset_x, offset_y);
 
@@ -1188,6 +1211,9 @@ drag_update (BgeCarousel    *self,
              gdouble         offset_y,
              GtkGestureDrag *gesture)
 {
+  if (!self->dragging)
+    return;
+
   ensure_viewport (self, self->model, FALSE);
 }
 
