@@ -409,7 +409,7 @@ bz_fading_clamp_set_max_height (BzFadingClamp *self, int max_height)
   self->animating_max_height = TRUE;
 
   future = bge_animation_add_spring (
-      self->animation, NULL,
+      self->animation, "height",
       self->current_height, target_height,
       1.25, 1.0, 800.0,
       (BgeAnimationCallback) animate,
