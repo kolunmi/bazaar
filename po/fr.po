@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-03 18:17+0100\n"
-"PO-Revision-Date: 2026-03-03 18:18+0100\n"
+"POT-Creation-Date: 2026-03-06 17:52+0100\n"
+"PO-Revision-Date: 2026-03-06 17:52+0100\n"
 "Last-Translator: Mimolet <theMimolet@proton.me>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -90,19 +90,17 @@ msgstr "Page Recherche"
 msgid "Category page"
 msgstr "Page Catégorie"
 
-#: src/bz-addons-dialog.blp:16 src/bz-full-view.blp:622
-#: src/bz-installed-tile.blp:101
+#: src/bz-addons-dialog.blp:16 src/bz-full-view.blp:623
+#: src/bz-installed-tile.blp:102
 msgid "Manage Add-Ons"
 msgstr "Gérer les extensions"
 
-#: src/bz-addons-dialog.c:94 src/bz-install-controls.blp:78
-#: src/bz-install-controls.blp:128 src/bz-installed-tile.blp:119
-#: src/bz-transaction-dialog.c:231
+#: src/bz-addons-dialog.c:94 src/bz-install-controls.blp:131
+#: src/bz-installed-tile.blp:120
 msgid "Remove"
 msgstr "Désinstaller"
 
 #: src/bz-addons-dialog.c:99 src/bz-favorites-tile.c:159
-#: src/bz-install-controls.blp:34 src/bz-transaction-dialog.c:202
 msgid "Install"
 msgstr "Installer"
 
@@ -972,11 +970,11 @@ msgstr "La propriété de l’identifiant applicatif %s a été vérifiée."
 msgid "Full Release Notes"
 msgstr "Notes de version complètes"
 
-#: src/bz-donations-dialog.blp:105
+#: src/bz-donations-dialog.blp:108
 msgid "This release was made possible by users like you!"
 msgstr "Bazaar existe grâce à vous !"
 
-#: src/bz-donations-dialog.blp:113
+#: src/bz-donations-dialog.blp:116
 msgid ""
 "I love making Bazaar, but I cannot do it alone. Help support further "
 "development by donating on Ko-Fi."
@@ -984,7 +982,7 @@ msgstr ""
 "J'adore travailler sur Bazaar, mais je ne peux pas y arriver seule. Vous "
 "pouvez m'aider à poursuivre le développement en faisant un don sur Ko-Fi."
 
-#: src/bz-donations-dialog.blp:128
+#: src/bz-donations-dialog.blp:131
 msgid "Donate to Bazaar"
 msgstr "Faire un don à Bazaar"
 
@@ -1011,9 +1009,7 @@ msgstr ""
 "Plusieurs versions de cette application sont installées. Avec quelle version "
 "souhaitez-vous poursuivre ?"
 
-#: src/bz-entry-group-util.c:80 src/bz-transaction-dialog.c:201
-#: src/bz-transaction-dialog.c:230 src/bz-transaction-dialog.c:275
-#: src/bz-transaction-dialog.c:578
+#: src/bz-entry-group-util.c:80
 msgid "Cancel"
 msgstr "Annuler"
 
@@ -1066,7 +1062,7 @@ msgstr "Désinstaller"
 msgid "Failed to remove favorite"
 msgstr "Échec de la suppression du favori"
 
-#: src/bz-favorites-tile.blp:70 src/bz-installed-tile.blp:77
+#: src/bz-favorites-tile.blp:70 src/bz-installed-tile.blp:78
 msgid "Support This Application"
 msgstr "Soutenez cette application"
 
@@ -1080,7 +1076,6 @@ msgid "Favorites"
 msgstr "Favoris"
 
 #: src/bz-favorites-page.blp:17 src/bz-section-view.blp:144
-#: src/bz-transaction-dialog.c:579
 msgid "Install All"
 msgstr "Tout installer"
 
@@ -1104,11 +1099,11 @@ msgstr "Les applications que vous marquerez comme favorites apparaîtront ici"
 msgid "Previous"
 msgstr "Précédent"
 
-#: src/bz-featured-carousel.blp:53
+#: src/bz-featured-carousel.blp:54
 msgid "Next"
 msgstr "Suivant"
 
-#: src/bz-featured-tile.blp:88
+#: src/bz-featured-tile.blp:90
 msgid "App of the Day"
 msgstr "Appli du jour"
 
@@ -1460,19 +1455,19 @@ msgstr "Contenu"
 msgid "Installing .flatpak bundles is not yet supported"
 msgstr "L’installation de lots .flatpak n’est pas encore prise en charge"
 
-#: src/bz-full-view.blp:250
-msgid "Support"
-msgstr "Soutenir"
+#: src/bz-full-view.blp:251
+msgid "_Support"
+msgstr "_Soutenir"
 
-#: src/bz-full-view.blp:420
+#: src/bz-full-view.blp:421
 msgid "Downloads/Month"
 msgstr "Téléchargements par mois"
 
-#: src/bz-full-view.blp:456
+#: src/bz-full-view.blp:457
 msgid "Stopped Receiving Core Updates"
 msgstr "Ne reçoit plus de mises à jour essentielles"
 
-#: src/bz-full-view.blp:470
+#: src/bz-full-view.blp:471
 msgid ""
 "This app uses a runtime that no longer receives updates or security fixes. "
 "It may become unsafe to use."
@@ -1480,11 +1475,11 @@ msgstr ""
 "L’environnement d’exécution utilisé par cette appli ne reçoit plus de mises "
 "à jour de sécurité. Son utilisation pourrait devenir risquée."
 
-#: src/bz-full-view.blp:557
+#: src/bz-full-view.blp:558
 msgid "Trash Data"
 msgstr "Supprimer les données"
 
-#: src/bz-full-view.blp:697
+#: src/bz-full-view.blp:698
 msgid "Tags:"
 msgstr "Étiquettes :"
 
@@ -1779,24 +1774,32 @@ msgstr "%s fonctionne sur la plupart des appareils"
 msgid "Download & Install Application"
 msgstr "Télécharger et installer l’application"
 
-#: src/bz-install-controls.blp:54
-msgid "Open"
-msgstr "Ouvrir"
+#: src/bz-install-controls.blp:34 src/bz-transaction-dialog.c:202
+msgid "_Install"
+msgstr "_Installer"
 
-#: src/bz-install-controls.blp:68 src/bz-install-controls.blp:118
+#: src/bz-install-controls.blp:55
+msgid "_Open"
+msgstr "_Ouvrir"
+
+#: src/bz-install-controls.blp:70 src/bz-install-controls.blp:121
 msgid "Uninstall Application"
 msgstr "Désinstaller l’application"
 
-#: src/bz-install-controls.blp:105 src/bz-updates-card.blp:161
+#: src/bz-install-controls.blp:80 src/bz-transaction-dialog.c:231
+msgid "_Remove"
+msgstr "_Désinstaller"
+
+#: src/bz-install-controls.blp:108 src/bz-updates-card.blp:161
 #: src/bz-updates-card.blp:186
 msgid "Update"
 msgstr "Mettre à jour"
 
-#: src/bz-install-controls.blp:155
+#: src/bz-install-controls.blp:158
 msgid "Install Other Version"
 msgstr "Installer une autre version"
 
-#: src/bz-installed-tile.blp:63 src/bz-rich-app-tile.blp:139
+#: src/bz-installed-tile.blp:64 src/bz-rich-app-tile.blp:139
 msgid "Stopped Receiving Updates"
 msgstr "Ne reçoit plus de mises à jour"
 
@@ -1930,7 +1933,7 @@ msgstr ""
 "Connectez votre compte Flathub à Bazaar pour gérer vos applications "
 "favorites."
 
-#: src/bz-login-page.blp:108
+#: src/bz-login-page.blp:110
 msgid "Finish"
 msgstr "Terminer"
 
@@ -2108,10 +2111,13 @@ msgstr "Couleurs de la fierté femboy"
 msgid "Neutrois Pride Colors"
 msgstr "Couleurs du drapeau neutrois"
 
-#: src/bz-releases-dialog.blp:5 src/bz-releases-list.blp:28
-#: src/bz-updates-card.blp:150
+#: src/bz-releases-dialog.blp:5 src/bz-updates-card.blp:150
 msgid "Version History"
 msgstr "Historique des versions"
+
+#: src/bz-releases-list.blp:28
+msgid "_Version History"
+msgstr "_Historique des versions"
 
 #. Translators: This is a date format for timestamps from the current year. Used in the app releases section.
 #. * %B is the full month name, %e is the day.
@@ -2553,7 +2559,7 @@ msgstr "Zoom avant"
 msgid "Screenshots Carousel"
 msgstr "Carrousel de captures d’écran"
 
-#: src/bz-screenshots-carousel.blp:112
+#: src/bz-screenshots-carousel.blp:116
 msgid "Open Screenshot Viewer"
 msgstr "Ouvrir la visionneuse de captures d’écran"
 
@@ -2665,7 +2671,7 @@ msgstr "Cherchez des applis en utilisant l'onglet « Rechercher »."
 msgid "Browse Categories"
 msgstr "Parcourir les catégories"
 
-#: src/bz-search-widget.blp:333
+#: src/bz-search-widget.blp:335
 msgid "No Applications Found"
 msgstr "Aucune application trouvée"
 
@@ -2757,6 +2763,11 @@ msgstr ""
 msgid "May install additional shared components"
 msgstr "Pourrait installer des composants partagés supplémentaires"
 
+#: src/bz-transaction-dialog.c:201 src/bz-transaction-dialog.c:230
+#: src/bz-transaction-dialog.c:275 src/bz-transaction-dialog.c:578
+msgid "_Cancel"
+msgstr "_Annuler"
+
 #: src/bz-transaction-dialog.c:219
 #, c-format
 msgid "Remove %s?"
@@ -2812,8 +2823,8 @@ msgstr ""
 "qu’elle fait avec ces autorisations."
 
 #: src/bz-transaction-dialog.c:276
-msgid "Install Anyway"
-msgstr "Installer quand même"
+msgid "_Install Anyway"
+msgstr "_Installer quand même"
 
 #: src/bz-transaction-dialog.c:331
 msgid "Failed to load transaction dialog"
@@ -2824,8 +2835,8 @@ msgid "All apps are already installed"
 msgstr "Toutes les applis sont déjà installées"
 
 #: src/bz-transaction-dialog.c:551
-msgid "OK"
-msgstr "D’accord"
+msgid "_OK"
+msgstr "D’_accord"
 
 #: src/bz-transaction-dialog.c:567
 #, c-format
@@ -2851,40 +2862,44 @@ msgstr "%d extensions seront installées."
 msgid "Additionally, addons will be installed."
 msgstr "Des extensions seront aussi installées."
 
+#: src/bz-transaction-dialog.c:579
+msgid "_Install All"
+msgstr "_Tout installer"
+
 #: src/bz-transaction-manager.c:766
 #, c-format
 msgid "Finished in %.02f seconds"
 msgstr "Terminé en %.02f secondes"
 
-#: src/bz-transaction-tile.blp:126
+#: src/bz-transaction-tile.blp:129
 msgid "App Add-On"
 msgstr "Extension de l’appli"
 
-#: src/bz-transaction-tile.blp:155
+#: src/bz-transaction-tile.blp:158
 msgid "Runtime"
 msgstr "Environnement d’exécution"
 
-#: src/bz-transaction-tile.blp:179
+#: src/bz-transaction-tile.blp:182
 msgid "In Queue"
 msgstr "En attente"
 
-#: src/bz-transaction-tile.blp:203
+#: src/bz-transaction-tile.blp:206
 msgid "Done"
 msgstr "Terminé"
 
-#: src/bz-transaction-tile.blp:227
+#: src/bz-transaction-tile.blp:230
 msgid "Error"
 msgstr "Erreur"
 
-#: src/bz-transaction-tile.blp:271
-msgid "Open App"
-msgstr "Ouvrir l'appli"
+#: src/bz-transaction-tile.blp:272
+msgid "Open"
+msgstr "Ouvrir"
 
-#: src/bz-transaction-tile.blp:285
+#: src/bz-transaction-tile.blp:286
 msgid "Cancel Transaction"
 msgstr "Annuler la tâche"
 
-#: src/bz-transaction-tile.blp:409
+#: src/bz-transaction-tile.blp:410
 msgid "Show Error Info"
 msgstr "Afficher les informations sur l'erreur"
 
@@ -2902,9 +2917,9 @@ msgstr "Erreur de transaction"
 msgid "Pending"
 msgstr "En attente"
 
-#: src/bz-updates-card.blp:36
-msgid "Update All"
-msgstr "Tout mettre à jour"
+#: src/bz-updates-card.blp:34
+msgid "_Update All"
+msgstr "Tout _mettre à jour"
 
 #: src/bz-updates-card.c:293
 #, c-format
