@@ -31,6 +31,8 @@ template $BzCategoryTile: Button {
       halign: center;
       xalign: 0.5;
       label: bind template.category as <$BzFlathubCategory>.short-name;
+      wrap: true;
+      wrap-mode: word_char;
     }
   };
 }

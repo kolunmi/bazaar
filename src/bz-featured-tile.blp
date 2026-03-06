@@ -62,6 +62,8 @@ template $BzFeaturedTile: Button {
               lines: 1;
               justify: center;
               label: bind template.group as <$BzEntryGroup>.description;
+              wrap: true;
+              wrap-mode: word_char;
 
               styles [
                 "caption",
@@ -86,6 +88,8 @@ template $BzFeaturedTile: Button {
                 lines: 1;
                 justify: center;
                 label: _("App of the Day");
+                wrap: true;
+                wrap-mode: word_char;
 
                 styles [
                   "caption",
