@@ -54,6 +54,7 @@ struct _BgeAnimation
 
   guint       tag;
   GHashTable *data;
+  GPtrArray  *anonymous;
 };
 G_DEFINE_FINAL_TYPE (BgeAnimation, bge_animation, G_TYPE_OBJECT)
 
@@ -121,6 +122,7 @@ dispose (GObject *object)
 
   g_clear_object (&self->widget);
   g_clear_pointer (&self->data, g_hash_table_unref);
+  g_clear_pointer (&self->anonymous, g_ptr_array_unref);
 
   G_OBJECT_CLASS (bge_animation_parent_class)->dispose (object);
 }
@@ -214,6 +216,8 @@ bge_animation_init (BgeAnimation *self)
   g_weak_ref_init (&self->wr, NULL);
   self->data = g_hash_table_new_full (
       g_str_hash, g_str_equal, g_free, destroy_spring_data);
+  self->anonymous = g_ptr_array_new_with_free_func (
+      destroy_spring_data);
 }
 
 /**
@@ -252,7 +256,7 @@ bge_animation_dup_widget (BgeAnimation *self)
 /**
  * bge_animation_add_spring:
  * @self: a `BgeAnimation`
- * @key: a string ID to replace
+ * @key: (nullable): a string ID to replace, or NULL for anonymous
  * @from: the start value
  * @to: the end value
  * @damping_ratio: the damping ratio
@@ -285,7 +289,6 @@ bge_animation_add_spring (BgeAnimation        *self,
   g_autoptr (GtkWidget) widget = NULL;
 
   dex_return_error_if_fail (BGE_IS_ANIMATION (self));
-  dex_return_error_if_fail (key != NULL);
   dex_return_error_if_fail (cb != NULL);
 
   widget = g_weak_ref_get (&self->wr);
@@ -295,8 +298,10 @@ bge_animation_add_spring (BgeAnimation        *self,
         {
           SpringData *data = NULL;
 
-          /* reuse old data if possible */
-          data = g_hash_table_lookup (self->data, key);
+          if (key != NULL)
+            /* reuse old data if possible */
+            data = g_hash_table_lookup (self->data, key);
+
           if (data != NULL)
             {
               if (data->user_data != NULL &&
@@ -312,7 +317,10 @@ bge_animation_add_spring (BgeAnimation        *self,
           else
             {
               data = g_new0 (typeof (*data), 1);
-              g_hash_table_replace (self->data, g_strdup (key), data);
+              if (key != NULL)
+                g_hash_table_replace (self->data, g_strdup (key), data);
+              else
+                g_ptr_array_add (self->anonymous, data);
             }
 
           data->from          = from;
@@ -461,6 +469,36 @@ tick_cb (GtkWidget     *widget,
 
   cancel = !should_animate (widget);
 
+#define UPDATE(_data, _out_value, _out_finished)                             \
+  G_STMT_START                                                               \
+  {                                                                          \
+    if (cancel ||                                                            \
+        ((_data)->cancellable != NULL &&                                     \
+         dex_future_is_rejected (DEX_FUTURE ((_data)->cancellable))))        \
+      (_out_finished) = TRUE;                                                \
+    else                                                                     \
+      {                                                                      \
+        double elapsed = 0.0;                                                \
+                                                                             \
+        if ((_data)->timer == NULL)                                          \
+          {                                                                  \
+            (_data)->timer = g_timer_new ();                                 \
+            (_out_value)   = (_data)->from;                                  \
+          }                                                                  \
+        else                                                                 \
+          {                                                                  \
+            elapsed      = g_timer_elapsed ((_data)->timer, NULL);           \
+            (_out_value) = oscillate ((_data), elapsed, &(_data)->velocity); \
+          }                                                                  \
+                                                                             \
+        (_out_finished) = elapsed >= (_data)->est_duration;                  \
+      }                                                                      \
+    if ((_out_finished))                                                     \
+      (_out_value) = (_data)->to;                                            \
+  }                                                                          \
+  G_STMT_END
+
+  /* Named anims */
   g_hash_table_iter_init (&iter, self->data);
   for (;;)
     {
@@ -475,30 +513,7 @@ tick_cb (GtkWidget     *widget,
               (gpointer *) &data))
         break;
 
-      if (cancel ||
-          (data->cancellable != NULL &&
-           dex_future_is_rejected (DEX_FUTURE (data->cancellable))))
-        finished = TRUE;
-      else
-        {
-          double elapsed = 0.0;
-
-          if (data->timer == NULL)
-            {
-              data->timer = g_timer_new ();
-              value       = data->from;
-            }
-          else
-            {
-              elapsed = g_timer_elapsed (data->timer, NULL);
-              value   = oscillate (data, elapsed, &data->velocity);
-            }
-
-          finished = elapsed >= data->est_duration;
-        }
-      if (finished)
-        value = data->to;
-
+      UPDATE (data, value, finished);
       data->cb (widget, key, value, data->user_data);
 
       if (finished)
@@ -508,6 +523,30 @@ tick_cb (GtkWidget     *widget,
           g_hash_table_iter_remove (&iter);
         }
     }
+
+  /* Anonymous anims */
+  for (guint i = 0; i < self->anonymous->len;)
+    {
+      SpringData *data     = NULL;
+      double      value    = 0.0;
+      gboolean    finished = FALSE;
+
+      data = g_ptr_array_index (self->anonymous, i);
+
+      UPDATE (data, value, finished);
+      data->cb (widget, NULL, value, data->user_data);
+
+      if (finished)
+        {
+          if (dex_future_is_pending (DEX_FUTURE (data->promise)))
+            dex_promise_resolve_boolean (data->promise, TRUE);
+          g_ptr_array_remove_index (self->anonymous, i);
+        }
+      else
+        i++;
+    }
+
+#undef UPDATE
 
   return G_SOURCE_CONTINUE;
 }
