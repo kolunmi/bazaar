@@ -393,7 +393,7 @@ bge_carousel_class_init (BgeCarouselClass *klass)
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   /**
-   * BgeCarousel:create-widget:
+   * BgeCarousel::create-widget:
    * @carousel: the object that received the signal
    * @object: a list item object from [property@Bge.Carousel:model]
    *
@@ -418,7 +418,7 @@ bge_carousel_class_init (BgeCarouselClass *klass)
       bge_marshal_OBJECT__OBJECTv);
 
   /**
-   * BgeCarousel:remove-widget:
+   * BgeCarousel::remove-widget:
    * @carousel: the object that received the signal
    * @widget: the widget which was created by [signal@Bge.Carousel::create-widget]
    * @object: a list item object from [property@Bge.Carousel:model]
