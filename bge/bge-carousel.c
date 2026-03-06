@@ -543,7 +543,7 @@ bge_carousel_get_allow_raise (BgeCarousel *self)
  *
  * Gets [property@Bge.Carousel:model].
  *
- * Returns: the value of the property
+ * Returns: (nullable): the value of the property
  */
 GtkSingleSelection *
 bge_carousel_get_model (BgeCarousel *self)
