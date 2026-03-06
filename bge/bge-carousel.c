@@ -293,11 +293,11 @@ bge_carousel_measure (GtkWidget     *widget,
           &tmp_minimum_baseline,
           &tmp_natural_baseline);
 
-      if (tmp_minimum > 0 && tmp_minimum < *minimum)
+      if (tmp_minimum > 0 && tmp_minimum > *minimum)
         *minimum = tmp_minimum;
       if (tmp_natural > 0 && tmp_natural > *natural)
         *natural = tmp_natural;
-      if (tmp_minimum_baseline > 0 && tmp_minimum_baseline < *minimum_baseline)
+      if (tmp_minimum_baseline > 0 && tmp_minimum_baseline > *minimum_baseline)
         *minimum_baseline = tmp_minimum_baseline;
       if (tmp_natural_baseline > 0 && tmp_natural_baseline > *natural_baseline)
         *natural_baseline = tmp_natural_baseline;
@@ -807,7 +807,10 @@ move_to_idx (BgeCarousel *self,
           &hnatural,
           &unused,
           &unused);
-      child_width = CLAMP (hnatural, hminimum, width);
+      if (gtk_widget_get_hexpand (child->widget))
+        child_width = MAX (hminimum, width);
+      else
+        child_width = CLAMP (hnatural, hminimum, width);
 
       if (i == idx)
         offset -= child_width / 2;
@@ -839,7 +842,10 @@ move_to_idx (BgeCarousel *self,
           &hnatural,
           &unused,
           &unused);
-      rect_width = CLAMP (hnatural, hminimum, width);
+      if (gtk_widget_get_hexpand (child->widget))
+        rect_width = MAX (hminimum, width);
+      else
+        rect_width = CLAMP (hnatural, hminimum, width);
 
       if (child->raised || !self->allow_raise)
         {
