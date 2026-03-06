@@ -109,12 +109,8 @@ group_activated_cb (GtkListItem  *list_item,
                     BzEntryGroup *group,
                     BzRowView    *view)
 {
-  GtkWidget *self = NULL;
-
-  self = gtk_widget_get_ancestor (GTK_WIDGET (view), BZ_TYPE_CURATED_VIEW);
-  g_assert (self != NULL);
-
-  g_signal_emit_by_name (self, "group-selected", group);
+  gtk_widget_activate_action (GTK_WIDGET (view), "window.show-group", "s",
+                              bz_entry_group_get_id (group));
 }
 
 static void

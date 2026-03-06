@@ -10,14 +10,15 @@ template $BzInstalledTile: $BzListTile {
     orientation: horizontal;
     spacing: 10;
 
-    Picture icon_picture {
+    Image icon_picture {
       margin-start: 10;
       margin-top: 10;
       margin-bottom: 10;
       height-request: 64;
       width-request: 64;
-      paintable: bind template.group as <$BzEntryGroup>.icon-paintable;
-      visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.icon-paintable) as <bool>) as <bool>;
+      pixel-size: 64;
+      paintable: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable;
+      visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable) as <bool>) as <bool>;
       styles ["icon-dropshadow"]
     }
 
@@ -29,7 +30,7 @@ template $BzInstalledTile: $BzListTile {
       width-request: 64;
       pixel-size: 64;
       icon-name: "application-x-executable";
-      visible: bind $is_null(template.group as <$BzEntryGroup>.icon-paintable) as <bool>;
+      visible: bind $is_null(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable) as <bool>;
       styles ["icon-dropshadow"]
     }
 

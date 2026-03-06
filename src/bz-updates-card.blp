@@ -7,8 +7,6 @@ template $BzUpdatesCard: Adw.Bin {
     margin-start: 4;
     margin-end: 4;
     margin-bottom: 4;
-    overflow: hidden;
-
     styles [
       "update-card",
     ]
@@ -33,7 +31,8 @@ template $BzUpdatesCard: Adw.Bin {
         }
 
         Button {
-          label: _("Update All");
+          label: _("_Update All");
+          use-underline: true;
           valign: center;
           clicked => $update_all_cb();
 
@@ -91,6 +90,7 @@ template $BzUpdatesCard: Adw.Bin {
           factory: BuilderListItemFactory {
             template ListItem {
               activatable: false;
+              focusable: false;
 
               child: Box {
                 orientation: horizontal;

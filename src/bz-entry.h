@@ -225,9 +225,6 @@ bz_entry_get_content_rating (BzEntry *self);
 GListModel *
 bz_entry_get_categories (BzEntry *self);
 
-DexFuture *
-bz_entry_load_mini_icon (BzEntry *self);
-
 gint
 bz_entry_calc_usefulness (BzEntry *self);
 
