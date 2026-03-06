@@ -18,6 +18,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/**
+ * BgeCarousel:
+ *
+ * Arranges widgets into a horizontal carousel
+ */
+
+#define G_LOG_DOMAIN "BGE::CAROUSEL"
+
 #include "bge.h"
 
 #include "bge-marshalers.h"
@@ -43,8 +51,6 @@ struct _BgeCarousel
   gboolean            dragging;
   BgeAnimation       *animation;
 
-  gboolean            auto_scroll;
-  gboolean            allow_long_swipes;
   gboolean            allow_mouse_drag;
   gboolean            allow_scroll_wheel;
   gboolean            allow_raise;
@@ -60,8 +66,6 @@ enum
 {
   PROP_0,
 
-  PROP_AUTO_SCROLL,
-  PROP_ALLOW_LONG_SWIPES,
   PROP_ALLOW_MOUSE_DRAG,
   PROP_ALLOW_SCROLL_WHEEL,
   PROP_ALLOW_RAISE,
@@ -215,12 +219,6 @@ bge_carousel_get_property (GObject    *object,
 
   switch (prop_id)
     {
-    case PROP_AUTO_SCROLL:
-      g_value_set_boolean (value, bge_carousel_get_auto_scroll (self));
-      break;
-    case PROP_ALLOW_LONG_SWIPES:
-      g_value_set_boolean (value, bge_carousel_get_allow_long_swipes (self));
-      break;
     case PROP_ALLOW_MOUSE_DRAG:
       g_value_set_boolean (value, bge_carousel_get_allow_mouse_drag (self));
       break;
@@ -248,12 +246,6 @@ bge_carousel_set_property (GObject      *object,
 
   switch (prop_id)
     {
-    case PROP_AUTO_SCROLL:
-      bge_carousel_set_auto_scroll (self, g_value_get_boolean (value));
-      break;
-    case PROP_ALLOW_LONG_SWIPES:
-      bge_carousel_set_allow_long_swipes (self, g_value_get_boolean (value));
-      break;
     case PROP_ALLOW_MOUSE_DRAG:
       bge_carousel_set_allow_mouse_drag (self, g_value_get_boolean (value));
       break;
@@ -351,36 +343,46 @@ bge_carousel_class_init (BgeCarouselClass *klass)
   object_class->get_property = bge_carousel_get_property;
   object_class->dispose      = bge_carousel_dispose;
 
-  props[PROP_AUTO_SCROLL] =
-      g_param_spec_boolean (
-          "auto-scroll",
-          NULL, NULL, FALSE,
-          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
-
-  props[PROP_ALLOW_LONG_SWIPES] =
-      g_param_spec_boolean (
-          "allow-long-swipes",
-          NULL, NULL, FALSE,
-          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
-
+  /**
+   * BgeCarousel:auto-mouse-drag:
+   *
+   * Whether to allow dragging with the mouse.
+   */
   props[PROP_ALLOW_MOUSE_DRAG] =
       g_param_spec_boolean (
           "allow-mouse-drag",
           NULL, NULL, FALSE,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
+  /**
+   * BgeCarousel:allow-scroll-wheel:
+   *
+   * Whether to allow moving the carousel contents with the horizontal scroll
+   * wheel.
+   */
   props[PROP_ALLOW_SCROLL_WHEEL] =
       g_param_spec_boolean (
           "allow-scroll-wheel",
           NULL, NULL, FALSE,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
+  /**
+   * BgeCarousel:allow-raise:
+   *
+   * Whether to allow raise animations when motion input events hover over them
+   * carousel widgets.
+   */
   props[PROP_ALLOW_RAISE] =
       g_param_spec_boolean (
           "allow-raise",
           NULL, NULL, FALSE,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
+  /**
+   * BgeCarousel:model:
+   *
+   * The selection model for the carousel contents.
+   */
   props[PROP_MODEL] =
       g_param_spec_object (
           "model",
@@ -390,6 +392,15 @@ bge_carousel_class_init (BgeCarouselClass *klass)
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
+  /**
+   * BgeCarousel:create-widget:
+   * @carousel: the object that received the signal
+   * @object: a list item object from [property@Bge.Carousel:model]
+   *
+   * Emitted when an object is being bound to the carousel
+   *
+   * Return: a newly allocated widget to add to the carousel
+   */
   signals[SIGNAL_CREATE_WIDGET] =
       g_signal_new (
           "create-widget",
@@ -400,12 +411,20 @@ bge_carousel_class_init (BgeCarouselClass *klass)
           bge_marshal_OBJECT__OBJECT,
           GTK_TYPE_WIDGET,
           1,
-          GTK_TYPE_WIDGET);
+          G_TYPE_OBJECT);
   g_signal_set_va_marshaller (
       signals[SIGNAL_CREATE_WIDGET],
       G_TYPE_FROM_CLASS (klass),
       bge_marshal_OBJECT__OBJECTv);
 
+  /**
+   * BgeCarousel:remove-widget:
+   * @carousel: the object that received the signal
+   * @widget: the widget which was created by [signal@Bge.Carousel::create-widget]
+   * @object: a list item object from [property@Bge.Carousel:model]
+   *
+   * Emitted when an object is being unbound from the carousel
+   */
   signals[SIGNAL_REMOVE_WIDGET] =
       g_signal_new (
           "remove-widget",
@@ -460,26 +479,27 @@ bge_carousel_init (BgeCarousel *self)
   gtk_widget_add_controller (GTK_WIDGET (self), GTK_EVENT_CONTROLLER (self->drag));
 }
 
+/**
+ * bge_carousel_new:
+ *
+ * Creates a new `BgeCarousel` object.
+ *
+ * Returns: The newly created `BgeCarousel` object.
+ */
 GtkWidget *
 bge_carousel_new (void)
 {
   return g_object_new (BGE_TYPE_CAROUSEL, NULL);
 }
 
-gboolean
-bge_carousel_get_auto_scroll (BgeCarousel *self)
-{
-  g_return_val_if_fail (BGE_IS_CAROUSEL (self), FALSE);
-  return self->auto_scroll;
-}
-
-gboolean
-bge_carousel_get_allow_long_swipes (BgeCarousel *self)
-{
-  g_return_val_if_fail (BGE_IS_CAROUSEL (self), FALSE);
-  return self->allow_long_swipes;
-}
-
+/**
+ * bge_carousel_get_allow_mouse_drag:
+ * @self: a `BgeCarousel`
+ *
+ * Gets [property@Bge.Carousel:allow-mouse-drag].
+ *
+ * Returns: the value of the property
+ */
 gboolean
 bge_carousel_get_allow_mouse_drag (BgeCarousel *self)
 {
@@ -487,6 +507,14 @@ bge_carousel_get_allow_mouse_drag (BgeCarousel *self)
   return self->allow_mouse_drag;
 }
 
+/**
+ * bge_carousel_get_allow_scroll_wheel:
+ * @self: a `BgeCarousel`
+ *
+ * Gets [property@Bge.Carousel:allow-scroll-wheel].
+ *
+ * Returns: the value of the property
+ */
 gboolean
 bge_carousel_get_allow_scroll_wheel (BgeCarousel *self)
 {
@@ -494,6 +522,14 @@ bge_carousel_get_allow_scroll_wheel (BgeCarousel *self)
   return self->allow_scroll_wheel;
 }
 
+/**
+ * bge_carousel_get_allow_raise:
+ * @self: a `BgeCarousel`
+ *
+ * Gets [property@Bge.Carousel:allow-raise].
+ *
+ * Returns: the value of the property
+ */
 gboolean
 bge_carousel_get_allow_raise (BgeCarousel *self)
 {
@@ -501,6 +537,14 @@ bge_carousel_get_allow_raise (BgeCarousel *self)
   return self->allow_raise;
 }
 
+/**
+ * bge_carousel_get_model:
+ * @self: a `BgeCarousel`
+ *
+ * Gets [property@Bge.Carousel:model].
+ *
+ * Returns: the value of the property
+ */
 GtkSingleSelection *
 bge_carousel_get_model (BgeCarousel *self)
 {
@@ -508,34 +552,13 @@ bge_carousel_get_model (BgeCarousel *self)
   return self->model;
 }
 
-void
-bge_carousel_set_auto_scroll (BgeCarousel *self,
-                              gboolean     auto_scroll)
-{
-  g_return_if_fail (BGE_IS_CAROUSEL (self));
-
-  if (!!auto_scroll == !!self->auto_scroll)
-    return;
-
-  self->auto_scroll = auto_scroll;
-
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_AUTO_SCROLL]);
-}
-
-void
-bge_carousel_set_allow_long_swipes (BgeCarousel *self,
-                                    gboolean     allow_long_swipes)
-{
-  g_return_if_fail (BGE_IS_CAROUSEL (self));
-
-  if (!!allow_long_swipes == !!self->allow_long_swipes)
-    return;
-
-  self->allow_long_swipes = allow_long_swipes;
-
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ALLOW_LONG_SWIPES]);
-}
-
+/**
+ * bge_carousel_set_allow_mouse_drag:
+ * @self: a `BgeCarousel`
+ * @allow_mouse_drag: a boolean
+ *
+ * Sets [property@Bge.Carousel:allow-mouse-drag].
+ */
 void
 bge_carousel_set_allow_mouse_drag (BgeCarousel *self,
                                    gboolean     allow_mouse_drag)
@@ -550,6 +573,13 @@ bge_carousel_set_allow_mouse_drag (BgeCarousel *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ALLOW_MOUSE_DRAG]);
 }
 
+/**
+ * bge_carousel_set_allow_scroll_wheel:
+ * @self: a `BgeCarousel`
+ * @allow_scroll_wheel: a boolean
+ *
+ * Sets [property@Bge.Carousel:allow-scroll-wheel].
+ */
 void
 bge_carousel_set_allow_scroll_wheel (BgeCarousel *self,
                                      gboolean     allow_scroll_wheel)
@@ -564,6 +594,13 @@ bge_carousel_set_allow_scroll_wheel (BgeCarousel *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ALLOW_SCROLL_WHEEL]);
 }
 
+/**
+ * bge_carousel_set_allow_raise:
+ * @self: a `BgeCarousel`
+ * @allow_raise: a boolean
+ *
+ * Sets [property@Bge.Carousel:allow-raise].
+ */
 void
 bge_carousel_set_allow_raise (BgeCarousel *self,
                               gboolean     allow_raise)
@@ -578,6 +615,13 @@ bge_carousel_set_allow_raise (BgeCarousel *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ALLOW_RAISE]);
 }
 
+/**
+ * bge_carousel_set_model:
+ * @self: a `BgeCarousel`
+ * @model: a `GtkSingleSelection` object
+ *
+ * Sets [property@Bge.Carousel:model].
+ */
 void
 bge_carousel_set_model (BgeCarousel        *self,
                         GtkSingleSelection *model)

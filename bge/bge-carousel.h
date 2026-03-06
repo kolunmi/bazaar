@@ -33,12 +33,6 @@ GtkWidget *
 bge_carousel_new (void);
 
 gboolean
-bge_carousel_get_auto_scroll (BgeCarousel *self);
-
-gboolean
-bge_carousel_get_allow_long_swipes (BgeCarousel *self);
-
-gboolean
 bge_carousel_get_allow_mouse_drag (BgeCarousel *self);
 
 gboolean
@@ -49,14 +43,6 @@ bge_carousel_get_allow_raise (BgeCarousel *self);
 
 GtkSingleSelection *
 bge_carousel_get_model (BgeCarousel *self);
-
-void
-bge_carousel_set_auto_scroll (BgeCarousel *self,
-                              gboolean     auto_scroll);
-
-void
-bge_carousel_set_allow_long_swipes (BgeCarousel *self,
-                                    gboolean     allow_long_swipes);
 
 void
 bge_carousel_set_allow_mouse_drag (BgeCarousel *self,
