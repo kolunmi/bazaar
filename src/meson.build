@@ -16,6 +16,7 @@ md4c_dep             = dependency('md4c', version: '>= 0.5.1')
 webkit_dep           = dependency('webkitgtk-6.0', version: '>= 2.50.2')
 libsecret_dep        = dependency('libsecret-1', version: '>= 0.20')
 libproxy_dep         = dependency('libproxy-1.0', version: '>= 0.5')
+malcontent_dep 	     = dependency('malcontent-0', version: '>= 0.12.0')
 
 
 dl_worker_sources = [
@@ -66,8 +67,6 @@ bz_sources = files(
   'bz-async-texture.c',
   'bz-auth-state.c',
   'bz-backend.c',
-  'bz-carousel-indicator-dots.c',
-  'bz-carousel.c',
   'bz-category-tile.c',
   'bz-comet-overlay.c',
   'bz-content-provider.c',
@@ -112,6 +111,7 @@ bz_sources = files(
   'bz-hooks.c',
   'bz-inhibited-scrollable.c',
   'bz-inspector.c',
+  'bz-install-controls.c',
   'bz-installed-tile.c',
   'bz-io.c',
   'bz-library-page.c',
@@ -119,6 +119,7 @@ bz_sources = files(
   'bz-list-tile.c',
   'bz-login-page.c',
   'bz-lozenge.c',
+  'bz-malcontent-service.c',
   'bz-markdown-render.c',
   'bz-newline-parser.c',
   'bz-parser.c',
@@ -183,6 +184,7 @@ bz_deps = [
   webkit_dep,
   libsecret_dep,
   libproxy_dep,
+  malcontent_dep,
 ]
 
 gen_gobject = find_program('./gen_gobject.sh')
@@ -286,6 +288,7 @@ blueprints = custom_target('blueprints',
     'bz-full-view.blp',
     'bz-hardware-support-dialog.blp',
     'bz-inspector.blp',
+    'bz-install-controls.blp',
     'bz-installed-tile.blp',
     'bz-library-page.blp',
     'bz-license-dialog.blp',
@@ -313,7 +316,7 @@ blueprints = custom_target('blueprints',
   ),
   output: '.',
   command: [
-    find_program('blueprint-compiler', version: '>= 0.18.0'),
+    find_program('blueprint-compiler', version: '>= 0.20.0'),
     'batch-compile',
     '@OUTPUT@',
     '@CURRENT_SOURCE_DIR@',

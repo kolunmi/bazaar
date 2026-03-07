@@ -3,11 +3,13 @@ api_version = '0.1'
 bge_sources = [
   'libbge.c',
   'bge-animation.c',
+  'bge-carousel.c',
 ]
 
 bge_headers = [
   'bge.h',
   'bge-animation.h',
+  'bge-carousel.h',
 ]
 
 version_split = meson.project_version().split('.')
@@ -28,11 +30,18 @@ configure_file(
 bge_deps = [
   cc.find_library('m', required: true),
   dependency('gtk4', version: '>= 4.20'),
+  dependency('libdex-1', version: '>= 1.0.0'),
 ]
+
+bge_marshalers = gnome.genmarshal('bge-marshalers',
+  sources: 'bge-marshalers.list',
+  prefix: 'bge_marshal',
+  valist_marshallers: true,
+)
 
 bge_lib = shared_library(
   'bge-' + api_version,
-  bge_sources,
+  bge_sources, bge_marshalers,
   dependencies: bge_deps,
        install: true,
 )
@@ -49,7 +58,7 @@ pkg.generate(
      filebase: 'bge-' + api_version,
       version: meson.project_version(),
       subdirs: 'bge',
-     requires: 'gtk4',
+     requires: ['gtk4', 'libdex-1'],
   install_dir: get_option('libdir') / 'pkgconfig'
 )
 

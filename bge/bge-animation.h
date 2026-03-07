@@ -24,8 +24,6 @@
 #error "Only <bge.h> can be included directly."
 #endif
 
-#include "bge-version-macros.h"
-
 G_BEGIN_DECLS
 
 #define BGE_TYPE_ANIMATION (bge_animation_get_type ())
@@ -45,7 +43,8 @@ GtkWidget *
 bge_animation_dup_widget (BgeAnimation *self);
 
 BGE_AVAILABLE_IN_ALL
-void
+G_GNUC_WARN_UNUSED_RESULT
+DexFuture *
 bge_animation_add_spring (BgeAnimation        *self,
                           const char          *key,
                           double               from,
@@ -55,7 +54,8 @@ bge_animation_add_spring (BgeAnimation        *self,
                           double               stiffness,
                           BgeAnimationCallback cb,
                           gpointer             user_data,
-                          GDestroyNotify       destroy_data);
+                          GDestroyNotify       destroy_data,
+                          DexCancellable      *cancellable);
 
 BGE_AVAILABLE_IN_ALL
 void

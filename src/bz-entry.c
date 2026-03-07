@@ -106,8 +106,6 @@ typedef struct
   GListModel       *share_urls;
   char             *donation_url;
   char             *forge_url;
-  GListModel       *reviews;
-  double            average_rating;
   char             *ratings_summary;
   GListModel       *version_history;
   char             *light_accent_color;
@@ -176,8 +174,6 @@ enum
   PROP_SHARE_URLS,
   PROP_DONATION_URL,
   PROP_FORGE_URL,
-  PROP_REVIEWS,
-  PROP_AVERAGE_RATING,
   PROP_RATINGS_SUMMARY,
   PROP_VERSION_HISTORY,
   PROP_IS_FLATHUB,
@@ -244,26 +240,6 @@ maybe_save_paintable (BzEntryPrivate  *priv,
 
 static GdkPaintable *
 make_async_texture (GVariant *parse);
-
-static DexFuture *
-icon_paintable_future_then (DexFuture *future,
-                            GWeakRef  *wr);
-
-BZ_DEFINE_DATA (
-    load_mini_icon,
-    LoadMiniIcon,
-    {
-      BzEntry *self;
-      char    *path;
-      GIcon   *result;
-    },
-    BZ_RELEASE_DATA (self, g_object_unref);
-    BZ_RELEASE_DATA (path, g_free);
-    BZ_RELEASE_DATA (result, g_object_unref))
-static DexFuture *
-load_mini_icon_fiber (LoadMiniIconData *data);
-static DexFuture *
-load_mini_icon_notify (LoadMiniIconData *data);
 
 static GIcon *
 load_mini_icon_sync (const char *unique_id_checksum,
@@ -346,7 +322,6 @@ bz_entry_get_property (GObject    *object,
       break;
     case PROP_ICON_PAINTABLE:
       g_value_set_object (value, priv->icon_paintable);
-      dex_unref (bz_entry_load_mini_icon (self));
       break;
     case PROP_MINI_ICON:
       g_value_set_object (value, priv->mini_icon);
@@ -396,12 +371,6 @@ bz_entry_get_property (GObject    *object,
       break;
     case PROP_FORGE_URL:
       g_value_set_string (value, priv->forge_url);
-      break;
-    case PROP_REVIEWS:
-      g_value_set_object (value, priv->reviews);
-      break;
-    case PROP_AVERAGE_RATING:
-      g_value_set_double (value, priv->average_rating);
       break;
     case PROP_RATINGS_SUMMARY:
       g_value_set_string (value, priv->ratings_summary);
@@ -615,13 +584,6 @@ bz_entry_set_property (GObject      *object,
     case PROP_FORGE_URL:
       g_clear_pointer (&priv->forge_url, g_free);
       priv->forge_url = g_value_dup_string (value);
-      break;
-    case PROP_REVIEWS:
-      g_clear_object (&priv->reviews);
-      priv->reviews = g_value_dup_object (value);
-      break;
-    case PROP_AVERAGE_RATING:
-      priv->average_rating = g_value_get_double (value);
       break;
     case PROP_RATINGS_SUMMARY:
       g_clear_pointer (&priv->ratings_summary, g_free);
@@ -956,20 +918,6 @@ bz_entry_class_init (BzEntryClass *klass)
       g_param_spec_string (
           "forge-url",
           NULL, NULL, NULL,
-          G_PARAM_READWRITE);
-
-  props[PROP_REVIEWS] =
-      g_param_spec_object (
-          "reviews",
-          NULL, NULL,
-          G_TYPE_LIST_MODEL,
-          G_PARAM_READWRITE);
-
-  props[PROP_AVERAGE_RATING] =
-      g_param_spec_double (
-          "average-rating",
-          NULL, NULL,
-          0.0, 1.0, 0.0,
           G_PARAM_READWRITE);
 
   props[PROP_RATINGS_SUMMARY] =
@@ -2410,29 +2358,6 @@ bz_entry_get_is_flathub (BzEntry *self)
   return priv->is_flathub;
 }
 
-DexFuture *
-bz_entry_load_mini_icon (BzEntry *self)
-{
-  BzEntryPrivate *priv = NULL;
-
-  dex_return_error_if_fail (BZ_IS_ENTRY (self));
-  priv = bz_entry_get_instance_private (self);
-
-  if (priv->mini_icon == NULL &&
-      priv->mini_icon_future == NULL &&
-      BZ_IS_ASYNC_TEXTURE (priv->icon_paintable))
-    {
-      dex_clear (&priv->mini_icon_future);
-      priv->mini_icon_future = dex_future_then (
-          bz_async_texture_dup_future (BZ_ASYNC_TEXTURE (priv->icon_paintable)),
-          (DexFutureCallback) icon_paintable_future_then,
-          bz_track_weak (self), bz_weak_release);
-      return dex_ref (priv->mini_icon_future);
-    }
-  else
-    return dex_future_new_true ();
-}
-
 GIcon *
 bz_load_mini_icon_sync (const char *unique_id_checksum,
                         const char *path)
@@ -2860,55 +2785,6 @@ make_async_texture (GVariant *parse)
   return GDK_PAINTABLE (g_steal_pointer (&texture));
 }
 
-static DexFuture *
-icon_paintable_future_then (DexFuture *future,
-                            GWeakRef  *wr)
-{
-  g_autoptr (BzEntry) self          = NULL;
-  BzEntryPrivate *priv              = NULL;
-  const char     *icon_path         = NULL;
-  g_autoptr (LoadMiniIconData) data = NULL;
-
-  bz_weak_get_or_return_reject (self, wr);
-  priv = bz_entry_get_instance_private (self);
-
-  /* ? */
-  if (!BZ_IS_ASYNC_TEXTURE (priv->icon_paintable))
-    return NULL;
-
-  icon_path = bz_async_texture_get_cache_into_path (BZ_ASYNC_TEXTURE (priv->icon_paintable));
-  if (icon_path == NULL)
-    return NULL;
-
-  data       = load_mini_icon_data_new ();
-  data->self = g_object_ref (self);
-  data->path = g_strdup (icon_path);
-
-  return dex_scheduler_spawn (
-      bz_get_io_scheduler (),
-      bz_get_dex_stack_size (),
-      (DexFiberFunc) load_mini_icon_fiber,
-      load_mini_icon_data_ref (data),
-      load_mini_icon_data_unref);
-}
-
-static DexFuture *
-load_mini_icon_fiber (LoadMiniIconData *data)
-{
-  BzEntry *self = data->self;
-  char    *path = data->path;
-
-  data->result = load_mini_icon_sync (
-      bz_entry_get_unique_id_checksum (BZ_ENTRY (self)),
-      path);
-  return dex_scheduler_spawn (
-      dex_scheduler_get_default (),
-      bz_get_dex_stack_size (),
-      (DexFiberFunc) load_mini_icon_notify,
-      load_mini_icon_data_ref (data),
-      load_mini_icon_data_unref);
-}
-
 static GIcon *
 load_mini_icon_sync (const char *unique_id_checksum,
                      const char *path)
@@ -2963,19 +2839,6 @@ done:
   return g_steal_pointer (&mini_icon);
 }
 
-static DexFuture *
-load_mini_icon_notify (LoadMiniIconData *data)
-{
-  BzEntry *self   = data->self;
-  GIcon   *result = data->result;
-
-  g_object_set (
-      self,
-      "mini-icon", result,
-      NULL);
-  return dex_future_new_true ();
-}
-
 static void
 clear_entry (BzEntry *self)
 {
@@ -3010,7 +2873,6 @@ clear_entry (BzEntry *self)
   g_clear_object (&priv->share_urls);
   g_clear_pointer (&priv->donation_url, g_free);
   g_clear_pointer (&priv->forge_url, g_free);
-  g_clear_object (&priv->reviews);
   g_clear_pointer (&priv->ratings_summary, g_free);
   g_clear_object (&priv->version_history);
   g_clear_pointer (&priv->light_accent_color, g_free);

@@ -72,6 +72,36 @@
   </screenshots>
 
   <releases>
+    <release version="0.7.11" date="2026-03-07">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.11</url>
+      <description translate="no">
+        <p>
+          This release contains many technical improvements. This changelog
+          reflects roughly 2 weeks of work.
+        </p>
+        <p>
+          <em>Changes</em>
+        </p>
+        <ul>
+          <li>Respect system parental controls settings</li>
+          <li>Reap download workers when all windows are closed, reducing total memory usage</li>
+          <li>Add mnemonics to full app view</li>
+          <li>Many updates to language translations</li>
+        </ul>
+        <p>
+          <em>Bug Fixes</em>
+        </p>
+        <ul>
+          <li>Fix broken library page when backing installed apps model is empty</li>
+          <li>Fix int casting bug that was causing RetroDeck to appear to be 18.4 exabytes</li>
+          <li>Make "all apps" category pages respect global filters</li>
+          <li>Fix some text wrapping issues</li>
+        </ul>
+        <p>
+          Thanks for reading and have a great day!
+        </p>
+      </description>
+    </release>
     <release version="0.7.10" date="2026-02-22">
       <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.10</url>
       <description translate="no">

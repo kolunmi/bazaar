@@ -72,6 +72,8 @@ src/bz-hardware-support-dialog.c
 src/bz-inhibited-scrollable.c
 src/bz-inspector.blp
 src/bz-inspector.c
+src/bz-install-controls.blp
+src/bz-install-controls.c
 src/bz-installed-tile.blp
 src/bz-installed-tile.c
 src/bz-io.c

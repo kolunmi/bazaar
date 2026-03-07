@@ -91,6 +91,10 @@ plumb_data_input_stream_read_line_finish (GDataInputStream *stream,
                                           GAsyncResult     *result,
                                           gpointer          user_data);
 
+static GMutex     default_worker_mutex = { 0 };
+static GPtrArray *default_workers      = NULL;
+static guint      next_default_worker  = 0;
+
 static void
 bz_download_worker_dispose (GObject *object)
 {
@@ -268,17 +272,14 @@ bz_download_worker_invoke (BzDownloadWorker *self,
 BzDownloadWorker *
 bz_download_worker_get_default (void)
 {
-  static GMutex     mutex         = { 0 };
-  static GPtrArray *workers       = NULL;
-  static guint      next          = 0;
   g_autoptr (GMutexLocker) locker = NULL;
   BzDownloadWorker *ret           = NULL;
 
-  locker = g_mutex_locker_new (&mutex);
+  locker = g_mutex_locker_new (&default_worker_mutex);
 
-  if (workers == NULL)
+  if (default_workers == NULL)
     {
-      workers = g_ptr_array_new_with_free_func (g_object_unref);
+      default_workers = g_ptr_array_new_with_free_func (g_object_unref);
 
       /* TODO: make number of workers controllable with envvar */
 #define N_WORKERS 8
@@ -294,16 +295,16 @@ bz_download_worker_get_default (void)
                        local_error->message);
           g_assert (worker != NULL);
 
-          g_ptr_array_add (workers, g_steal_pointer (&worker));
+          g_ptr_array_add (default_workers, g_steal_pointer (&worker));
         }
     }
 
   /* Check if any of the subprocesses need to be recreated */
-  for (guint i = 0; i < workers->len; i++)
+  for (guint i = 0; i < default_workers->len; i++)
     {
       BzDownloadWorker **loc = NULL;
 
-      loc = (BzDownloadWorker **) &g_ptr_array_index (workers, i);
+      loc = (BzDownloadWorker **) &g_ptr_array_index (default_workers, i);
       if (g_subprocess_get_identifier ((*loc)->subprocess) == NULL)
         {
           g_autoptr (GError) local_error      = NULL;
@@ -321,10 +322,31 @@ bz_download_worker_get_default (void)
         }
     }
 
-  ret  = g_ptr_array_index (workers, next);
-  next = (next + 1) % workers->len;
+  ret                 = g_ptr_array_index (default_workers, next_default_worker);
+  next_default_worker = (next_default_worker + 1) % default_workers->len;
 
   return ret;
+}
+
+void
+bz_reap_default_download_workers (void)
+{
+  g_autoptr (GMutexLocker) locker = NULL;
+
+  locker = g_mutex_locker_new (&default_worker_mutex);
+  if (default_workers == NULL)
+    return;
+
+  for (guint i = 0; i < default_workers->len; i++)
+    {
+      BzDownloadWorker *worker = NULL;
+
+      worker = g_ptr_array_index (default_workers, i);
+      g_subprocess_force_exit (worker->subprocess);
+    }
+  g_clear_pointer (&default_workers, g_ptr_array_unref);
+
+  next_default_worker = 0;
 }
 
 static DexFuture *

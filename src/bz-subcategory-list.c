@@ -50,23 +50,6 @@ enum
 
 static GParamSpec *props[LAST_PROP] = { 0 };
 
-enum
-{
-  SIGNAL_SELECT,
-  LAST_SIGNAL
-};
-
-static guint signals[LAST_SIGNAL];
-
-static void
-apps_page_select_cb (BzSubcategoryList *self,
-                     BzEntryGroup      *group,
-                     BzAppsPage        *page)
-{
-  GtkWidget *parentPage = NULL;
-  parentPage = gtk_widget_get_ancestor (GTK_WIDGET (self), BZ_TYPE_APPS_PAGE);
-  g_signal_emit_by_name (parentPage, "select", group);
-}
 
 static DexFuture *
 search_finally (DexFuture *future,
@@ -107,10 +90,6 @@ search_finally (DexFuture *future,
 
           apps_page = bz_apps_page_new (subcategory_name, model);
           bz_apps_page_set_subtitle (BZ_APPS_PAGE (apps_page), subtitle);
-
-          g_signal_connect_swapped (
-              apps_page, "select",
-              G_CALLBACK (apps_page_select_cb), self);
 
           nav_view = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
           adw_navigation_view_push (ADW_NAVIGATION_VIEW (nav_view), apps_page);
@@ -310,14 +289,6 @@ bz_subcategory_list_class_init (BzSubcategoryListClass *klass)
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
-
-  signals[SIGNAL_SELECT] =
-      g_signal_new ("select",
-                    G_TYPE_FROM_CLASS (klass),
-                    G_SIGNAL_RUN_LAST,
-                    0, NULL, NULL,
-                    g_cclosure_marshal_VOID__OBJECT,
-                    G_TYPE_NONE, 1, BZ_TYPE_ENTRY_GROUP);
 }
 
 static void

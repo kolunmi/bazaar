@@ -61,9 +61,9 @@ template $BzRichAppTile: $BzListTile {
 
       Image {
         pixel-size: 64;
-        paintable: bind template.group as <$BzEntryGroup>.icon-paintable;
+        paintable: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable;
 
-        visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.icon-paintable) as <bool>) as <bool>;
+        visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable) as <bool>) as <bool>;
 
         styles [
           "icon-dropshadow",
@@ -167,8 +167,10 @@ template $BzRichAppTile: $BzListTile {
           ]
 
           icon-name: "user-trash-symbolic";
+          has-tooltip: true;
+          tooltip-text: _("Uninstall");
           valign: center;
-          clicked => $install_button_clicked_cb(template);
+          clicked => $remove_button_clicked_cb(template);
         }
       }
     }

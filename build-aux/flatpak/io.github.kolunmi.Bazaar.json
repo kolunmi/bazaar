@@ -40,6 +40,26 @@
   ],
   "modules": [
     {
+      "name": "blueprint-compiler",
+      "buildsystem": "meson",
+      "cleanup": [
+        "*"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://gitlab.gnome.org/GNOME/blueprint-compiler.git",
+          "tag": "v0.20.0",
+          "commit": "aa5298cc1677cf855bd61f9671607362bd203f4f",
+          "x-checker-data": {
+            "type": "anitya",
+            "project-id": 279929,
+            "tag-template": "$version"
+          }
+        }
+      ]
+    },
+    {
       "name": "bazaar",
       "buildsystem": "meson",
       "build-options": {
@@ -77,6 +97,29 @@
                 "tag-pattern": "^release-([\\d.]+)$"
               }
             }
+          ]
+        },
+        {
+          "name": "malcontent",
+          "buildsystem": "meson",
+          "config-opts": [
+	        "-Dui=disabled",
+	        "-Dinstalled_tests=false"
+          ],
+          "sources": [
+            {
+              "type": "git",
+              "url": "https://gitlab.freedesktop.org/pwithnall/malcontent.git",
+              "tag": "0.12.0"
+            },
+            {
+	          "type": "shell",
+	          "commands": [
+		        "sed -i \"/subdir('tests')/d\" libmalcontent/meson.build",
+		        "sed -i \"/subdir('tests')/d\" meson.build",
+		        "sed -i \"/subdir('pam')/d\" meson.build"
+	          ]
+	        }
           ]
         },
         {

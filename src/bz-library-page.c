@@ -62,10 +62,6 @@ static GParamSpec *props[LAST_PROP] = { 0 };
 
 enum
 {
-  SIGNAL_REMOVE,
-  SIGNAL_REMOVE_ADDON,
-  SIGNAL_INSTALL_ADDON,
-  SIGNAL_SHOW,
   SIGNAL_UPDATE,
 
   LAST_SIGNAL,
@@ -231,7 +227,8 @@ tile_activated_cb (BzListTile *tile)
   if (group == NULL)
     return;
 
-  g_signal_emit (self, signals[SIGNAL_SHOW], 0, group);
+  gtk_widget_activate_action (GTK_WIDGET (self), "window.show-group", "s",
+                              bz_entry_group_get_id (group));
 }
 
 static void
@@ -331,66 +328,6 @@ bz_library_page_class_init (BzLibraryPageClass *klass)
           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
-
-  signals[SIGNAL_REMOVE] =
-      g_signal_new (
-          "remove",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
-          g_cclosure_marshal_VOID__OBJECT,
-          G_TYPE_NONE, 1,
-          BZ_TYPE_ENTRY_GROUP);
-  g_signal_set_va_marshaller (
-      signals[SIGNAL_REMOVE],
-      G_TYPE_FROM_CLASS (klass),
-      g_cclosure_marshal_VOID__OBJECTv);
-
-  signals[SIGNAL_INSTALL_ADDON] =
-      g_signal_new (
-          "install-addon",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
-          g_cclosure_marshal_VOID__OBJECT,
-          G_TYPE_NONE, 1,
-          BZ_TYPE_ENTRY);
-  g_signal_set_va_marshaller (
-      signals[SIGNAL_INSTALL_ADDON],
-      G_TYPE_FROM_CLASS (klass),
-      g_cclosure_marshal_VOID__OBJECTv);
-
-  signals[SIGNAL_REMOVE_ADDON] =
-      g_signal_new (
-          "remove-addon",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
-          g_cclosure_marshal_VOID__OBJECT,
-          G_TYPE_NONE, 1,
-          BZ_TYPE_ENTRY);
-  g_signal_set_va_marshaller (
-      signals[SIGNAL_REMOVE_ADDON],
-      G_TYPE_FROM_CLASS (klass),
-      g_cclosure_marshal_VOID__OBJECTv);
-
-  signals[SIGNAL_SHOW] =
-      g_signal_new (
-          "show-entry",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
-          g_cclosure_marshal_VOID__OBJECT,
-          G_TYPE_NONE, 1,
-          BZ_TYPE_ENTRY_GROUP);
-  g_signal_set_va_marshaller (
-      signals[SIGNAL_SHOW],
-      G_TYPE_FROM_CLASS (klass),
-      g_cclosure_marshal_VOID__OBJECTv);
 
   signals[SIGNAL_UPDATE] =
       g_signal_new (

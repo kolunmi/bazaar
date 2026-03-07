@@ -152,8 +152,8 @@ create_entry_radio_buttons (AdwAlertDialog *alert,
       gtk_widget_add_css_class (listbox, "boxed-list");
 
       keep_data_row = adw_action_row_new ();
-      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (keep_data_row), _ ("Keep Data"));
-      adw_action_row_set_subtitle (ADW_ACTION_ROW (keep_data_row), _ ("Allow restoring settings and content"));
+      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (keep_data_row), _ ("Keep User Data"));
+      adw_action_row_set_subtitle (ADW_ACTION_ROW (keep_data_row), _ ("Allow restoring personal settings &amp; content"));
       keep_radio = gtk_check_button_new ();
       gtk_widget_set_valign (keep_radio, GTK_ALIGN_CENTER);
       gtk_check_button_set_active (GTK_CHECK_BUTTON (keep_radio), TRUE);
@@ -162,8 +162,8 @@ create_entry_radio_buttons (AdwAlertDialog *alert,
       gtk_list_box_append (GTK_LIST_BOX (listbox), keep_data_row);
 
       delete_data_row = adw_action_row_new ();
-      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (delete_data_row), _ ("Delete Data"));
-      adw_action_row_set_subtitle (ADW_ACTION_ROW (delete_data_row), _ ("Permanently remove app data to save space"));
+      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (delete_data_row), _ ("Delete All Data"));
+      adw_action_row_set_subtitle (ADW_ACTION_ROW (delete_data_row), _ ("Permanently erase user data to save space"));
       delete_radio = gtk_check_button_new ();
       gtk_widget_set_valign (delete_radio, GTK_ALIGN_CENTER);
       gtk_check_button_set_group (GTK_CHECK_BUTTON (delete_radio), GTK_CHECK_BUTTON (keep_radio));
@@ -198,8 +198,8 @@ configure_install_dialog (AdwAlertDialog *alert,
     adw_alert_dialog_set_body (alert, _ ("May install additional shared components"));
 
   adw_alert_dialog_add_responses (alert,
-                                  "cancel", _ ("Cancel"),
-                                  "install", _ ("Install"),
+                                  "cancel", _ ("_Cancel"),
+                                  "install", _ ("_Install"),
                                   NULL);
 
   adw_alert_dialog_set_response_appearance (alert, "install", ADW_RESPONSE_SUGGESTED);
@@ -227,8 +227,8 @@ configure_remove_dialog (AdwAlertDialog *alert,
   adw_alert_dialog_set_body (alert, body);
 
   adw_alert_dialog_add_responses (alert,
-                                  "cancel", _ ("Cancel"),
-                                  "remove", _ ("Remove"),
+                                  "cancel", _ ("_Cancel"),
+                                  "remove", _ ("_Remove"),
                                   NULL);
 
   adw_alert_dialog_set_response_appearance (alert, "remove", ADW_RESPONSE_DESTRUCTIVE);
@@ -272,8 +272,8 @@ configure_high_risk_warning_dialog (AdwAlertDialog *alert,
   adw_alert_dialog_set_prefer_wide_layout (alert, TRUE);
 
   adw_alert_dialog_add_responses (alert,
-                                  "cancel", _ ("Cancel"),
-                                  "install", _ ("Install Anyway"),
+                                  "cancel", _ ("_Cancel"),
+                                  "install", _ ("_Install Anyway"),
                                   NULL);
 
   adw_alert_dialog_set_response_appearance (alert, "install", ADW_RESPONSE_DESTRUCTIVE);
@@ -548,7 +548,7 @@ bulk_install_dialog_fiber (BulkInstallDialogData *data)
       info_alert = g_object_ref_sink (adw_alert_dialog_new (
           _ ("All apps are already installed"), NULL));
 
-      adw_alert_dialog_add_response (ADW_ALERT_DIALOG (info_alert), "ok", _ ("OK"));
+      adw_alert_dialog_add_response (ADW_ALERT_DIALOG (info_alert), "ok", _ ("_OK"));
       adw_alert_dialog_set_default_response (ADW_ALERT_DIALOG (info_alert), "ok");
       adw_alert_dialog_set_close_response (ADW_ALERT_DIALOG (info_alert), "ok");
 
@@ -575,8 +575,8 @@ bulk_install_dialog_fiber (BulkInstallDialogData *data)
       _ ("The following will be installed. Additional shared components may also be installed"),
       _ ("%d addons will be installed."),
       _ ("Additionally, addons will be installed."),
-      _ ("Cancel"),
-      _ ("Install All"));
+      _ ("_Cancel"),
+      _ ("_Install All"));
 
   adw_alert_dialog_set_default_response (ADW_ALERT_DIALOG (dialog), "confirm");
   adw_alert_dialog_set_close_response (ADW_ALERT_DIALOG (dialog), "cancel");

@@ -1,5 +1,4 @@
 using Gtk 4.0;
-using Adw 1;
 
 template $BzFeaturedCarousel: Box {
   orientation: vertical;
@@ -18,6 +17,7 @@ template $BzFeaturedCarousel: Box {
       height-request: 48;
       margin-start: 12;
       icon-name: "go-previous-symbolic";
+      visible: bind $is_gt(selection.n-items, 1);
 
       clicked => $previous_button_clicked_cb();
 
@@ -40,6 +40,7 @@ template $BzFeaturedCarousel: Box {
       height-request: 48;
       margin-end: 12;
       icon-name: "go-next-symbolic";
+      visible: bind $is_gt(selection.n-items, 1);
 
       clicked => $next_button_clicked_cb();
 
@@ -54,14 +55,25 @@ template $BzFeaturedCarousel: Box {
       }
     }
 
-    Adw.Carousel carousel {
+    child: $BgeCarousel carousel {
       styles ["card"]
-      notify::position => $carousel_notify_position_cb();
-    }
-  }
 
-  Adw.CarouselIndicatorDots dots {
-    carousel: carousel;
+      allow-mouse-drag: true;
+      allow-overshoot: false;
+      allow-scroll-wheel: true;
+      allow-raise: false;
+
+      create-widget => $on_create_widget(template);
+      remove-widget => $on_remove_widget(template);
+
+      model: SingleSelection selection {
+        autoselect: true;
+        model: bind template.model;
+
+        notify::selected => $on_notify_selected(template);
+        // notify::n-items => $on_notify_n_items(template);
+      };
+    };
   }
 
   EventControllerKey {

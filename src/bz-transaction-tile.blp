@@ -96,7 +96,10 @@ template $BzTransactionTile: $BzListTile {
             reveal-child: bind progress_bars_revealer.reveal-child inverted;
             child: Box {
               orientation: horizontal;
-              spacing: 4;
+              layout-manager: Adw.WrapLayout {
+                child-spacing: 4;
+                line-spacing: 0;
+              };
 
               Box {
                 visible: bind $is_entry_addon(template.tracker) as <bool>;
@@ -128,7 +131,7 @@ template $BzTransactionTile: $BzListTile {
               }
 
               Box {
-                visible: bind $is_entry_runtime(template.tracker) as <bool>;
+                visible: bind $is_both($is_entry_runtime(template.tracker) as <bool>, $invert_boolean($is_entry_addon(template.tracker) as <bool>) as <bool>) as <bool>;
                 halign: start;
                 spacing: 4;
                 margin-top: 8;
@@ -265,14 +268,12 @@ template $BzTransactionTile: $BzListTile {
                             $is_transaction_tracker_install(template.tracker as <$BzTransactionEntryTracker>) as <bool>
                         ) as <bool>;
 
-            icon-name: "execute-to-symbolic";
-            has-tooltip: true;
             valign: center;
-            tooltip-text: _("Open App");
+            label: _("Open");
             clicked => $run_cb(template);
 
             styles [
-              "flat",
+              "medium-pill",
             ]
           }
 
