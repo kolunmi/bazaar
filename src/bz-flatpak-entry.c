@@ -41,8 +41,8 @@ struct _BzFlatpakEntry
   BzEntry parent_instance;
 
   gboolean  user;
-  gboolean  is_bundle;
   gboolean  is_installed_ref;
+  char     *bundle_uri;
   char     *flatpak_name;
   char     *flatpak_id;
   char     *flatpak_version;
@@ -71,7 +71,7 @@ enum
 
   PROP_USER,
   PROP_FLATPAK_NAME,
-  PROP_IS_BUNDLE,
+  PROP_BUNDLE_URI,
   PROP_FLATPAK_ID,
   PROP_FLATPAK_VERSION,
   PROP_APPLICATION_NAME,
@@ -124,8 +124,8 @@ bz_flatpak_entry_get_property (GObject    *object,
     case PROP_APPLICATION_NAME:
       g_value_set_string (value, self->application_name);
       break;
-    case PROP_IS_BUNDLE:
-      g_value_set_boolean (value, self->is_bundle);
+    case PROP_BUNDLE_URI:
+      g_value_set_string (value, self->bundle_uri);
       break;
     case PROP_APPLICATION_RUNTIME:
       g_value_set_string (value, self->application_runtime);
@@ -162,7 +162,7 @@ bz_flatpak_entry_set_property (GObject      *object,
     case PROP_FLATPAK_ID:
     case PROP_FLATPAK_VERSION:
     case PROP_APPLICATION_NAME:
-    case PROP_IS_BUNDLE:
+    case PROP_BUNDLE_URI:
     case PROP_APPLICATION_RUNTIME:
     case PROP_APPLICATION_COMMAND:
     case PROP_RUNTIME_NAME:
@@ -212,11 +212,10 @@ bz_flatpak_entry_class_init (BzFlatpakEntryClass *klass)
           NULL, NULL, NULL,
           G_PARAM_READABLE);
 
-  props[PROP_IS_BUNDLE] =
-      g_param_spec_boolean (
-          "is-bundle",
-          NULL, NULL,
-          FALSE,
+  props[PROP_BUNDLE_URI] =
+      g_param_spec_string (
+          "bundle-uri",
+          NULL, NULL, NULL,
           G_PARAM_READABLE);
 
   props[PROP_APPLICATION_RUNTIME] =
@@ -266,6 +265,8 @@ bz_flatpak_entry_real_serialize (BzSerializable  *serializable,
 
   g_variant_builder_add (builder, "{sv}", "user", g_variant_new_boolean (self->user));
   g_variant_builder_add (builder, "{sv}", "is-installed-ref", g_variant_new_boolean (self->is_installed_ref));
+  if (self->bundle_uri != NULL)
+    g_variant_builder_add (builder, "{sv}", "bundle-uri", g_variant_new_string (self->bundle_uri));
   if (self->flatpak_name != NULL)
     g_variant_builder_add (builder, "{sv}", "flatpak-name", g_variant_new_string (self->flatpak_name));
   if (self->flatpak_id != NULL)
@@ -309,6 +310,8 @@ bz_flatpak_entry_real_deserialize (BzSerializable *serializable,
         self->user = g_variant_get_boolean (value);
       else if (g_strcmp0 (key, "is-installed-ref") == 0)
         self->is_installed_ref = g_variant_get_boolean (value);
+      else if (g_strcmp0 (key, "bundle-uri") == 0)
+        self->bundle_uri = g_variant_dup_string (value, NULL);
       else if (g_strcmp0 (key, "flatpak-name") == 0)
         self->flatpak_name = g_variant_dup_string (value, NULL);
       else if (g_strcmp0 (key, "flatpak-id") == 0)
@@ -400,7 +403,6 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
 
   self                   = g_object_new (BZ_TYPE_FLATPAK_ENTRY, NULL);
   self->user             = user;
-  self->is_bundle        = FLATPAK_IS_BUNDLE_REF (ref);
   self->is_installed_ref = FLATPAK_IS_INSTALLED_REF (ref);
   self->ref              = g_object_ref (ref);
 
@@ -505,8 +507,17 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
   else if (FLATPAK_IS_BUNDLE_REF (ref))
     {
       g_autoptr (GFileInfo) file_info = NULL;
+      g_autoptr (GFile) bundle_file   = NULL;
 
-      GFile *bundle_file = flatpak_bundle_ref_get_file (FLATPAK_BUNDLE_REF (ref));
+      bundle_file      = flatpak_bundle_ref_get_file (FLATPAK_BUNDLE_REF (ref));
+      self->bundle_uri = g_file_get_uri (bundle_file);
+      if (self->bundle_uri == NULL)
+        {
+          g_autofree char *path = NULL;
+
+          path             = g_file_get_path (bundle_file);
+          self->bundle_uri = g_strdup_printf ("file://%s", path);
+        }
 
       file_info = g_file_query_info (bundle_file,
                                      G_FILE_ATTRIBUTE_STANDARD_SIZE,
@@ -754,11 +765,11 @@ bz_flatpak_entry_get_addon_extension_of_ref (BzFlatpakEntry *self)
   return self->addon_extension_of_ref;
 }
 
-gboolean
-bz_flatpak_entry_is_bundle (BzFlatpakEntry *self)
+const char *
+bz_flatpak_entry_get_bundle_uri (BzFlatpakEntry *self)
 {
   g_return_val_if_fail (BZ_IS_FLATPAK_ENTRY (self), FALSE);
-  return self->is_bundle;
+  return self->bundle_uri;
 }
 
 gboolean
@@ -816,6 +827,7 @@ bz_flatpak_entry_launch (BzFlatpakEntry    *self,
 static void
 clear_entry (BzFlatpakEntry *self)
 {
+  g_clear_pointer (&self->bundle_uri, g_free);
   g_clear_pointer (&self->flatpak_name, g_free);
   g_clear_pointer (&self->flatpak_id, g_free);
   g_clear_pointer (&self->flatpak_version, g_free);

@@ -57,8 +57,8 @@ bz_flatpak_entry_get_runtime_name (BzFlatpakEntry *self);
 BzResult *
 bz_flatpak_entry_dup_runtime_result (BzFlatpakEntry *self);
 
-gboolean
-bz_flatpak_entry_is_bundle (BzFlatpakEntry *self);
+const char *
+bz_flatpak_entry_get_bundle_uri (BzFlatpakEntry *self);
 
 gboolean
 bz_flatpak_entry_is_installed_ref (BzFlatpakEntry *self);
