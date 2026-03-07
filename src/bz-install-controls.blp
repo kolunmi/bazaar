@@ -17,6 +17,7 @@ template $BzInstallControls: Box {
       transition-type: crossfade;
       visible-child-name: bind $get_visible_page(template.entry-group as <$BzEntryGroup>.installable, template.entry-group as <$BzEntryGroup>.removable, template.state as <$BzStateInfo>.available-updates) as <string>;
       hexpand: bind $invert_boolean(template.wide) as <bool>;
+      hhomogeneous: false;
 
       StackPage install {
         name: "install";
