@@ -642,7 +642,7 @@ template $BzFullView: Adw.Bin {
 
                         Box {
                           orientation: vertical;
-                          visible: bind $has_other_apps(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer-apps, template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>) as <bool>;
+                          visible: bind $invert_boolean($is_zero(other_apps_model.n-items) as <int>) as <bool>;
 
                           Label {
                             styles [
@@ -668,7 +668,7 @@ template $BzFullView: Adw.Bin {
                             bind-widget => $bind_app_tile_cb(template);
                             unbind-widget => $unbind_app_tile_cb(template);
 
-                            model: SliceListModel {
+                            model: SliceListModel other_apps_model {
                               offset: 0;
                               size: 6;
                               model: bind $get_developer_apps_entries(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer-apps, template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>) as <Gio.ListModel>;
