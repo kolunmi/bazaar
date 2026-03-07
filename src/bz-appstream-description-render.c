@@ -312,12 +312,12 @@ compile (BzAppstreamDescriptionRender *self,
          int                           idx,
          gboolean                      is_last_sibling)
 {
-  const char  *element    = NULL;
-  const char  *text       = NULL;
-  XbNode      *child      = NULL;
-  int          kind       = NO_ELEMENT;
-  GtkTextMark *start_mark = NULL;
-  int          child_count= 0;
+  const char  *element     = NULL;
+  const char  *text        = NULL;
+  XbNode      *child       = NULL;
+  int          kind        = NO_ELEMENT;
+  GtkTextMark *start_mark  = NULL;
+  int          child_count = 0;
 
   element    = xb_node_get_element (node);
   text       = xb_node_get_text (node);
@@ -435,9 +435,9 @@ compile (BzAppstreamDescriptionRender *self,
 static char *
 normalize_whitespace (const char *text)
 {
-  GString *result   = NULL;
-  gboolean in_space = FALSE;
-  gboolean at_start = TRUE;
+  g_autoptr (GString) result = NULL;
+  gboolean in_space          = FALSE;
+  gboolean at_start          = TRUE;
 
   if (text == NULL)
     return NULL;
@@ -454,23 +454,20 @@ normalize_whitespace (const char *text)
       if (g_unichar_isspace (ch))
         {
           if (!at_start && !in_space)
-            {
-              g_string_append_c (result, ' ');
-              in_space = TRUE;
-            }
+            in_space = TRUE;
         }
       else
         {
+          if (!at_start && in_space)
+            g_string_append_c (result, ' ');
           g_string_append_unichar (result, ch);
+
           in_space = FALSE;
           at_start = FALSE;
         }
     }
 
-  if (result->len > 0 && result->str[result->len - 1] == ' ')
-    g_string_truncate (result, result->len - 1);
-
-  return g_string_free (result, FALSE);
+  return g_string_free (g_steal_pointer (&result), FALSE);
 }
 
 /* End of bz-appstream-description-render.c */
