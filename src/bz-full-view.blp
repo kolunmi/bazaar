@@ -96,7 +96,7 @@ template $BzFullView: Adw.Bin {
             height-request: 100;
 
             Adw.Breakpoint breakpoint {
-              condition ("max-width: 500px")
+              condition ("max-width: 525px")
 
               setters {
                 top_box.margin-start: 10;
@@ -191,6 +191,8 @@ template $BzFullView: Adw.Bin {
 
                               xalign: 0.0;
                               wrap: true;
+                              lines: 2;
+                              ellipsize: end;
                               wrap-mode: word_char;
                               natural-wrap-mode: word;
                               label: bind template.ui-entry as <$BzResult>.object as <$BzEntry>.title;
@@ -228,7 +230,10 @@ template $BzFullView: Adw.Bin {
                             }
 
                             Box {
-                              spacing: 8;
+                              layout-manager: Adw.WrapLayout {
+                                child-spacing: 4;
+                                line-spacing: 0;
+                              };
 
                               Button {
                                 visible: bind $invert_boolean($is_null(template.ui-entry as <$BzResult>.object as <$BzEntry>.donation-url) as <bool>) as <bool>;
