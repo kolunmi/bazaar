@@ -2731,6 +2731,7 @@ init_service_struct (BzApplication *self,
   self->state = bz_state_info_new ();
   bz_state_info_set_busy (self->state, TRUE);
   bz_state_info_set_donation_prompt_dismissed (self->state, TRUE);
+  bz_state_info_set_parental_age_rating (self->state, -1);
 
   {
     g_autoptr (GtkIconTheme) user_theme   = NULL;
