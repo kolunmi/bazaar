@@ -45,6 +45,11 @@ template $BzPreferencesDialog: Adw.PreferencesDialog {
         subtitle: _("Hide results that are not verified on Flathub");
       }
 
+      Adw.SwitchRow only_mobile_switch {
+        title: _("Mobile Friendly Only");
+        subtitle: _("Hide applications that are not optimized for mobile devices");
+      }
+
       Adw.SwitchRow hide_eol_switch {
         title: _("Hide EOL Apps");
         subtitle: _("Hide apps which are no longer supported by their developers");
