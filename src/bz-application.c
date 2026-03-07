@@ -711,7 +711,7 @@ bz_application_about_action (GSimpleAction *action,
       dialog,
       "application-name", "Bazaar",
       "application-icon", "io.github.kolunmi.Bazaar",
-      "developer-name", _ ("Adam Masciola"),
+      "developer-name", _ ("The Bazaar Contributors"),
       "developers", developers,
       // Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
       "translator-credits", _ ("translator-credits"),
