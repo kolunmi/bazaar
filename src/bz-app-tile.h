@@ -39,6 +39,13 @@ void
 bz_app_tile_set_group (BzAppTile    *self,
                        BzEntryGroup *group);
 
+gint
+bz_app_tile_get_preferred_width (BzAppTile *self);
+
+void
+bz_app_tile_set_preferred_width (BzAppTile *self,
+                                 gint       preferred_width);
+
 G_END_DECLS
 
 /* End of bz-app-tile.h */
