@@ -165,7 +165,7 @@ static char *
 format_uint (gpointer object,
              guint    uint)
 {
-  return g_strdup_printf ("%d", uint);
+  return g_strdup_printf ("%u", uint);
 }
 
 static char *
