@@ -1304,6 +1304,9 @@ finish_horizontal_gesture (BgeCarousel *self,
       self->widgets->len == 0)
     return;
 
+  if (offset_x == 0)
+    return;
+
   selected = gtk_single_selection_get_selected (self->model);
 
   width = gtk_widget_get_width (GTK_WIDGET (self));
