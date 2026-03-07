@@ -131,6 +131,19 @@ template $BzSectionView: Adw.Bin {
         bind-widget => $bind_widget_cb(template);
         unbind-widget => $unbind_widget_cb(template);
       }
+
+      Button {
+        styles [
+          "pill",
+        ]
+        margin-start: 25;
+        margin-end: 25;
+        margin-bottom: 20;
+        halign: center;
+        visible: bind template.section as <$BzCuratedSection>.category as <$BzCuratedCategoryInfo>.enable-bulk-install as <bool>;
+        label: _("Install All");
+        clicked => $install_all_clicked(template);
+      }
     }
 
     Box {

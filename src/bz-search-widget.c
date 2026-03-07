@@ -24,21 +24,26 @@
 #include "bz-async-texture.h"
 #include "bz-category-tile.h"
 #include "bz-dynamic-list-view.h"
+#include "bz-entry-inspector.h"
+#include "bz-finished-search-query.h"
 #include "bz-group-tile-css-watcher.h"
 #include "bz-rich-app-tile.h"
 #include "bz-screenshot.h"
+#include "bz-search-pill-list.h"
 #include "bz-search-result.h"
 #include "bz-search-widget.h"
+#include "bz-template-callbacks.h"
 #include "bz-util.h"
 
 struct _BzSearchWidget
 {
   AdwBin parent_instance;
 
-  BzStateInfo  *state;
-  BzEntryGroup *selected;
-  gboolean      remove;
-  gboolean      search_in_progress;
+  BzStateInfo           *state;
+  BzEntryGroup          *selected;
+  gboolean               remove;
+  gboolean               search_in_progress;
+  BzFinishedSearchQuery *current_query;
 
   BzContentProvider *blocklists_provider;
   BzContentProvider *txt_blocklists_provider;
@@ -63,18 +68,11 @@ enum
 
   PROP_STATE,
   PROP_TEXT,
+  PROP_CURRENT_QUERY,
 
   LAST_PROP
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
-
-enum
-{
-  SIGNAL_SELECT,
-
-  LAST_SIGNAL,
-};
-static guint signals[LAST_SIGNAL];
 
 static void
 search_changed (GtkEditable    *editable,
@@ -130,6 +128,7 @@ bz_search_widget_dispose (GObject *object)
 
   g_clear_object (&self->state);
   g_clear_object (&self->selected);
+  g_clear_object (&self->current_query);
   g_clear_object (&self->blocklists_provider);
   g_clear_object (&self->txt_blocklists_provider);
   g_clear_object (&self->search_model);
@@ -154,6 +153,9 @@ bz_search_widget_get_property (GObject    *object,
     case PROP_TEXT:
       g_value_set_string (value, bz_search_widget_get_text (self));
       break;
+    case PROP_CURRENT_QUERY:
+      g_value_set_object (value, self->current_query);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -175,6 +177,7 @@ bz_search_widget_set_property (GObject      *object,
     case PROP_TEXT:
       bz_search_widget_set_text (self, g_value_get_string (value));
       break;
+    case PROP_CURRENT_QUERY:
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -242,11 +245,12 @@ no_results_found_subtitle (gpointer    object,
 }
 
 static void
-apps_page_select_cb (BzSearchWidget *self,
-                     BzEntryGroup   *group,
-                     BzAppsPage     *page)
+pill_list_cb (BzSearchWidget *self,
+              const char     *label,
+              GtkWidget      *pill_list)
 {
-  g_signal_emit (self, signals[SIGNAL_SELECT], 0, group, FALSE);
+  bz_search_widget_set_text (self, label);
+  update_filter (self);
 }
 
 static void
@@ -264,10 +268,6 @@ category_clicked (BzFlathubCategory *category,
   g_assert (nav_view != NULL);
 
   apps_page = bz_apps_page_new_from_category (category);
-
-  g_signal_connect_swapped (
-      apps_page, "select",
-      G_CALLBACK (apps_page_select_cb), self);
 
   adw_navigation_view_push (ADW_NAVIGATION_VIEW (nav_view), apps_page);
 }
@@ -294,20 +294,11 @@ static void
 tile_activated_cb (GtkListItem   *list_item,
                    BzRichAppTile *tile)
 {
-  BzSearchWidget *self   = NULL;
-  BzSearchResult *result = NULL;
-  BzEntryGroup   *group  = NULL;
+  BzSearchResult *result = gtk_list_item_get_item (list_item);
+  BzEntryGroup   *group  = bz_search_result_get_group (result);
 
-  g_assert (GTK_IS_LIST_ITEM (list_item));
-  g_assert (BZ_IS_RICH_APP_TILE (tile));
-
-  self = BZ_SEARCH_WIDGET (gtk_widget_get_ancestor (GTK_WIDGET (tile),
-                                                    BZ_TYPE_SEARCH_WIDGET));
-
-  result = gtk_list_item_get_item (list_item);
-  group  = bz_search_result_get_group (result);
-
-  g_signal_emit (self, signals[SIGNAL_SELECT], 0, group, FALSE);
+  gtk_widget_activate_action (GTK_WIDGET (tile), "window.show-group", "s",
+                              bz_entry_group_get_id (group));
 }
 
 static void
@@ -319,20 +310,51 @@ reset_search_cb (BzSearchWidget *self,
 }
 
 static void
-tile_install_clicked_cb (GtkListItem   *list_item,
-                         BzRichAppTile *tile)
+copy_id_cb (GtkListItem *list_item,
+            GtkButton   *button)
 {
-  BzSearchWidget *self   = NULL;
-  BzSearchResult *result = NULL;
-  BzEntryGroup   *group  = NULL;
-
-  self = BZ_SEARCH_WIDGET (gtk_widget_get_ancestor (GTK_WIDGET (tile), BZ_TYPE_SEARCH_WIDGET));
-  g_assert (self != NULL);
+  BzSearchResult *result    = NULL;
+  BzEntryGroup   *group     = NULL;
+  const char     *id        = NULL;
+  GdkClipboard   *clipboard = NULL;
 
   result = gtk_list_item_get_item (list_item);
   group  = bz_search_result_get_group (result);
+  id     = bz_entry_group_get_id (group);
 
-  g_signal_emit (self, signals[SIGNAL_SELECT], 0, group, TRUE);
+  clipboard = gdk_display_get_clipboard (gdk_display_get_default ());
+  gdk_clipboard_set_text (clipboard, id);
+}
+
+static void
+debug_id_inspect_cb (GtkListItem *list_item,
+                     GtkButton   *button)
+{
+  BzSearchResult  *search_result = NULL;
+  BzStateInfo     *state         = NULL;
+  BzEntryGroup    *group         = NULL;
+  g_autofree char *unique_id     = NULL;
+  g_autoptr (BzResult) result    = NULL;
+
+  search_result = gtk_list_item_get_item (list_item);
+  state         = bz_search_result_get_state (search_result);
+  if (state == NULL)
+    return;
+
+  group     = bz_search_result_get_group (search_result);
+  unique_id = bz_entry_group_dup_ui_entry_id (group);
+  result    = bz_application_map_factory_convert_one (
+      bz_state_info_get_entry_factory (state),
+      gtk_string_object_new (unique_id));
+  if (result != NULL)
+    {
+      BzEntryInspector *inspector = NULL;
+
+      inspector = bz_entry_inspector_new ();
+      bz_entry_inspector_set_result (inspector, result);
+
+      gtk_window_present (GTK_WINDOW (inspector));
+    }
 }
 
 static void
@@ -357,19 +379,15 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
           "text",
           NULL, NULL, NULL,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
-  g_object_class_install_properties (object_class, LAST_PROP, props);
 
-  signals[SIGNAL_SELECT] =
-      g_signal_new (
-          "select",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
+  props[PROP_CURRENT_QUERY] =
+      g_param_spec_object (
+          "current-query",
           NULL, NULL,
-          NULL,
-          G_TYPE_NONE, 2,
-          BZ_TYPE_ENTRY_GROUP,
-          G_TYPE_BOOLEAN);
+          BZ_TYPE_FINISHED_SEARCH_QUERY,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  g_object_class_install_properties (object_class, LAST_PROP, props);
 
   g_type_ensure (BZ_TYPE_ASYNC_TEXTURE);
   g_type_ensure (BZ_TYPE_CATEGORY_TILE);
@@ -378,8 +396,11 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
   g_type_ensure (BZ_TYPE_RICH_APP_TILE);
   g_type_ensure (BZ_TYPE_SCREENSHOT);
   g_type_ensure (BZ_TYPE_SEARCH_RESULT);
+  g_type_ensure (BZ_TYPE_SEARCH_PILL_LIST);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-search-widget.ui");
+  bz_widget_class_bind_all_util_callbacks (widget_class);
+
   gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, search_bar);
   gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, search_busy);
   gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, content_box);
@@ -387,7 +408,6 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, grid_view);
   gtk_widget_class_bind_template_callback (widget_class, bind_category_tile_cb);
   gtk_widget_class_bind_template_callback (widget_class, unbind_category_tile_cb);
-  gtk_widget_class_bind_template_callback (widget_class, tile_install_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
@@ -396,8 +416,11 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, idx_to_string);
   gtk_widget_class_bind_template_callback (widget_class, score_to_string);
   gtk_widget_class_bind_template_callback (widget_class, reset_search_cb);
+  gtk_widget_class_bind_template_callback (widget_class, pill_list_cb);
   gtk_widget_class_bind_template_callback (widget_class, no_results_found_subtitle);
   gtk_widget_class_bind_template_callback (widget_class, tile_activated_cb);
+  gtk_widget_class_bind_template_callback (widget_class, copy_id_cb);
+  gtk_widget_class_bind_template_callback (widget_class, debug_id_inspect_cb);
 }
 
 static void
@@ -490,6 +513,12 @@ bz_search_widget_set_state (BzSearchWidget *self,
       g_signal_connect_swapped (
           state,
           "notify::show-only-verified",
+          G_CALLBACK (invalidating_state_prop_changed),
+          self);
+
+      g_signal_connect_swapped (
+          state,
+          "notify::parental-age-rating",
           G_CALLBACK (invalidating_state_prop_changed),
           self);
 
@@ -599,20 +628,26 @@ search_activate (GtkText        *text,
   g_autoptr (BzSearchResult) result = NULL;
   BzEntryGroup *group               = NULL;
 
-  g_clear_object (&self->selected);
-
   model   = gtk_grid_view_get_model (self->grid_view);
   n_items = g_list_model_get_n_items (G_LIST_MODEL (model));
+
+  if (gtk_widget_get_visible (GTK_WIDGET (self->search_busy)))
+    return;
 
   if (n_items > 0)
     {
       result = g_list_model_get_item (G_LIST_MODEL (model), 0);
       group  = bz_search_result_get_group (result);
 
-      if (bz_entry_group_get_installable_and_available (group) > 0 ||
-          bz_entry_group_get_removable_and_available (group) > 0)
+      if (bz_entry_group_get_removable_and_available (group) > 0)
         {
-          g_signal_emit (self, signals[SIGNAL_SELECT], 0, group, TRUE);
+          gtk_widget_activate_action (GTK_WIDGET (self), "window.remove-group", "(sb)",
+                                      bz_entry_group_get_id (group), FALSE);
+        }
+      else if (bz_entry_group_get_installable_and_available (group) > 0)
+        {
+          gtk_widget_activate_action (GTK_WIDGET (self), "window.install-group", "(sb)",
+                                      bz_entry_group_get_id (group), FALSE);
         }
     }
 }
@@ -650,16 +685,29 @@ static DexFuture *
 search_query_then (DexFuture *future,
                    GWeakRef  *wr)
 {
-  g_autoptr (BzSearchWidget) self = NULL;
-  GPtrArray  *results             = NULL;
-  guint       old_length          = 0;
-  const char *page_name           = NULL;
+  g_autoptr (BzSearchWidget) self   = NULL;
+  BzFinishedSearchQuery *finished   = NULL;
+  GPtrArray             *results    = NULL;
+  guint                  old_length = 0;
+  const char            *page_name  = NULL;
 
   bz_weak_get_or_return_reject (self, wr);
 
-  results    = g_value_get_boxed (dex_future_get_value (future, NULL));
-  old_length = g_list_model_get_n_items (G_LIST_MODEL (self->search_model));
+  finished = g_value_get_object (dex_future_get_value (future, NULL));
+  results  = bz_finished_search_query_get_results (finished);
+  if (self->state != NULL)
+    /* This is for debug mode */
+    {
+      for (guint i = 0; i < results->len; i++)
+        {
+          BzSearchResult *result = NULL;
 
+          result = g_ptr_array_index (results, i);
+          bz_search_result_set_state (result, self->state);
+        }
+    }
+
+  old_length = g_list_model_get_n_items (G_LIST_MODEL (self->search_model));
   g_list_store_splice (
       self->search_model,
       0, old_length,
@@ -673,9 +721,14 @@ search_query_then (DexFuture *future,
     }
   else
     {
-      const char *search_text = gtk_editable_get_text (GTK_EDITABLE (self->search_bar));
-      page_name               = (search_text && *search_text) ? "no-results" : "empty";
+      const char *search_text = NULL;
+
+      search_text = gtk_editable_get_text (GTK_EDITABLE (self->search_bar));
+      page_name   = (search_text && *search_text) ? "no-results" : "empty";
     }
+
+  self->current_query = g_object_ref (finished);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CURRENT_QUERY]);
 
   gtk_stack_set_visible_child_name (self->search_stack, page_name);
 
@@ -696,6 +749,10 @@ update_filter (BzSearchWidget *self)
 
   g_clear_handle_id (&self->search_update_timeout, g_source_remove);
   dex_clear (&self->search_query);
+
+  g_clear_object (&self->current_query);
+  self->current_query = bz_finished_search_query_new ();
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CURRENT_QUERY]);
 
   gtk_widget_set_visible (GTK_WIDGET (self->search_busy), FALSE);
 
@@ -764,5 +821,6 @@ emit_idx (BzSearchWidget *self,
   result = g_list_model_get_item (G_LIST_MODEL (model), selected_idx);
   group  = bz_search_result_get_group (result);
 
-  g_signal_emit (self, signals[SIGNAL_SELECT], 0, group, FALSE);
+  gtk_widget_activate_action (GTK_WIDGET (self), "window.show-group", "s",
+                              bz_entry_group_get_id (group));
 }

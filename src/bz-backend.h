@@ -66,6 +66,9 @@ struct _BzBackendInterface
                                       guint         n_removals,
                                       DexChannel   *channel,
                                       GCancellable *cancellable);
+
+  gboolean (*cancel_task_for_entry) (BzBackend *self,
+                                     BzEntry   *entry);
 };
 
 DexChannel *
@@ -108,5 +111,9 @@ bz_backend_merge_and_schedule_transactions (BzBackend    *self,
                                             GListModel   *transactions,
                                             DexChannel   *channel,
                                             GCancellable *cancellable);
+
+gboolean
+bz_backend_cancel_task_for_entry (BzBackend *self,
+                                  BzEntry   *entry);
 
 G_END_DECLS

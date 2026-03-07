@@ -7,6 +7,7 @@ template $BzContextTile: Button {
   ]
 
   focusable: false;
+  halign: center;
 
   Box {
     orientation: vertical;
@@ -29,6 +30,10 @@ template $BzContextTile: Button {
 
         halign: center;
       };
+
+      accessibility {
+        described-by: label;
+      }
     }
 
     Label label {

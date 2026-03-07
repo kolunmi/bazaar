@@ -50,24 +50,134 @@
 
   <screenshots>
     <screenshot type="default">
-      <image>https://github.com/user-attachments/assets/ebe32d33-136c-4d90-a6e4-9d468f664be7</image>
+      <image>https://github.com/user-attachments/assets/b7d749fb-ecc0-4f3e-a965-15b6771c54d3</image>
       <caption>The home page displaying Flathub apps</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/user-attachments/assets/8904e33b-37c5-41ae-ade6-3fa778bdc4c2</image>
-      <caption>Nucleus app page</caption>
+      <image>https://github.com/user-attachments/assets/7d306fbe-e1a7-4c74-91b2-f5061aba2c56</image>
+      <caption>Exhibit app page</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/user-attachments/assets/230ef503-cf4f-4eae-907a-b48bf42f8dd1</image>
+      <image>https://github.com/user-attachments/assets/cf0914b7-f256-436e-bbd5-6822cf3d0786</image>
+      <caption>Library page</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/user-attachments/assets/733bff33-a206-43b9-bbaf-08df9d1c65f3</image>
       <caption>Search page</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/user-attachments/assets/74f838e9-af47-4e06-a0db-42a9176b69c0</image>
+      <image>https://github.com/user-attachments/assets/fd721125-1842-4cf1-9ab3-a70ef6b9ce10</image>
       <caption>Category page</caption>
     </screenshot>
   </screenshots>
 
   <releases>
+    <release version="0.7.11" date="2026-03-07">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.11</url>
+      <description translate="no">
+        <p>
+          This release contains many technical improvements. This changelog
+          reflects roughly 2 weeks of work.
+        </p>
+        <p>
+          <em>Changes</em>
+        </p>
+        <ul>
+          <li>Respect system parental controls settings</li>
+          <li>Reap download workers when all windows are closed, reducing total memory usage</li>
+          <li>Add mnemonics to full app view</li>
+          <li>Many updates to language translations</li>
+        </ul>
+        <p>
+          <em>Bug Fixes</em>
+        </p>
+        <ul>
+          <li>Fix broken library page when backing installed apps model is empty</li>
+          <li>Fix int casting bug that was causing RetroDeck to appear to be 18.4 exabytes</li>
+          <li>Make "all apps" category pages respect global filters</li>
+          <li>Fix some text wrapping issues</li>
+        </ul>
+        <p>
+          Thanks for reading and have a great day!
+        </p>
+      </description>
+    </release>
+    <release version="0.7.10" date="2026-02-22">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.10</url>
+      <description translate="no">
+        <p>
+          This release fixes some bugs and greatly improves search
+          functionality.
+        </p>
+        <p>
+          If you missed the previous release, in 0.7.9 we also added the ability
+          to cancel transactions in the library view, a brand new screenshots
+          carousel, search suggestion buttons, and app runtime size information.
+          You can also now skip confirmation dialogs by holding shift as you
+          start a transaction.
+        </p>
+        <p>
+          Thanks for reading!
+        </p>
+      </description>
+    </release>
+    <release version="0.7.9" date="2026-02-21">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.9</url>
+      <description translate="no">
+        <p>**New Features**</p>
+        <ul>
+          <li>Search suggestion pills</li>
+          <li>**Cancel installation** transactions</li>
+          <li>Skip dialogs by pressing shift</li>
+          <li>Runtime size info for app pages</li>
+        </ul>
+        <p>**Updated**</p>
+        <ul>
+          <li>Redesigned "What's New" dialog</li>
+          <li>Improved search results by utilizing Flathub rankings</li>
+          <li>Improved screenshots carousel</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.7.8" date="2026-02-11">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.8</url>
+      <description translate="no">
+        <p>
+          This release lets you view and remove user-scoped installed apps from the library page in the Flatpak version of the app.
+          Installing from user remotes is not supported yet.
+        </p>
+      </description>
+    </release>
+    <release version="0.7.7" date="2026-02-09">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.7</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>Merges the task sidebar and install page into the library page</li>
+          <li>Add installed version numbers of each app on the library and app pages</li>
+          <li>Add donations dialog</li>
+          <li>Fix broken addon and runtime eol detection</li>
+          <li>Add `enable-bulk-install` key to curated sections</li>
+          <li>Add `override-eol-markings` main config string list</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.7.6" date="2026-01-28">
+      <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.6</url>
+      <description translate="no">
+        <p>This release comes with the following improvements:</p>
+        <ul>
+          <li>Improve context dialogs</li>
+          <li>Fix leftover data bar being shown prematurely</li>
+          <li>Have a rotation toggle for flags</li>
+          <li>Add hard check to prevent removing Bazaar flatpak</li>
+          <li>Improve download statistics tooltips</li>
+          <li>Add read support for flatpak bundles</li>
+          <li>Fix critical output sometimes during transactions</li>
+          <li>Fix error popover refusing to spawn in transaction sidebar</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.7.5" date="2026-01-18">
       <url type="details">https://github.com/kolunmi/bazaar/releases/tag/v0.7.5</url>
       <description translate="no">

@@ -163,7 +163,7 @@ setup_text_tags (GtkTextBuffer *buffer)
                               NULL);
 
   gtk_text_buffer_create_tag (buffer, "paragraph",
-                              "pixels-below-lines", 6,
+                              "pixels-below-lines", 12,
                               NULL);
 
   gtk_text_buffer_create_tag (buffer, "list-item-ul",
@@ -312,11 +312,12 @@ compile (BzAppstreamDescriptionRender *self,
          int                           idx,
          gboolean                      is_last_sibling)
 {
-  const char  *element    = NULL;
-  const char  *text       = NULL;
-  XbNode      *child      = NULL;
-  int          kind       = NO_ELEMENT;
-  GtkTextMark *start_mark = NULL;
+  const char  *element     = NULL;
+  const char  *text        = NULL;
+  XbNode      *child       = NULL;
+  int          kind        = NO_ELEMENT;
+  GtkTextMark *start_mark  = NULL;
+  int          child_count = 0;
 
   element    = xb_node_get_element (node);
   text       = xb_node_get_text (node);
@@ -354,7 +355,7 @@ compile (BzAppstreamDescriptionRender *self,
               gtk_text_buffer_apply_tag_by_name (buffer, "list-number", &prefix_start_iter, iter);
               gtk_text_buffer_delete_mark (buffer, prefix_start_mark);
             }
-          else if (parent_kind == UNORDERED_LIST)
+          else
             gtk_text_buffer_insert (buffer, iter, "• ", -1);
         }
       else if (g_strcmp0 (element, "code") == 0)
@@ -398,6 +399,7 @@ compile (BzAppstreamDescriptionRender *self,
 
       g_object_unref (child);
       child = next;
+      child_count++;
     }
 
   if (start_mark != NULL)
@@ -426,16 +428,16 @@ compile (BzAppstreamDescriptionRender *self,
 
   if (kind == PARAGRAPH && !is_last_sibling)
     gtk_text_buffer_insert (buffer, iter, "\n", 1);
-  else if ((kind == ORDERED_LIST || kind == UNORDERED_LIST) && !is_last_sibling)
+  else if ((kind == ORDERED_LIST || kind == UNORDERED_LIST) && !is_last_sibling && child_count > 0)
     gtk_text_buffer_insert (buffer, iter, "\n", 1);
 }
 
 static char *
 normalize_whitespace (const char *text)
 {
-  GString *result   = NULL;
-  gboolean in_space = FALSE;
-  gboolean at_start = TRUE;
+  g_autoptr (GString) result = NULL;
+  gboolean in_space          = FALSE;
+  gboolean at_start          = TRUE;
 
   if (text == NULL)
     return NULL;
@@ -452,23 +454,20 @@ normalize_whitespace (const char *text)
       if (g_unichar_isspace (ch))
         {
           if (!at_start && !in_space)
-            {
-              g_string_append_c (result, ' ');
-              in_space = TRUE;
-            }
+            in_space = TRUE;
         }
       else
         {
+          if (!at_start && in_space)
+            g_string_append_c (result, ' ');
           g_string_append_unichar (result, ch);
+
           in_space = FALSE;
           at_start = FALSE;
         }
     }
 
-  if (result->len > 0 && result->str[result->len - 1] == ' ')
-    g_string_truncate (result, result->len - 1);
-
-  return g_string_free (result, FALSE);
+  return g_string_free (g_steal_pointer (&result), FALSE);
 }
 
 /* End of bz-appstream-description-render.c */

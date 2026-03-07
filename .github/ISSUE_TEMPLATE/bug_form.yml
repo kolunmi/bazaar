@@ -10,7 +10,7 @@ body:
     id: describe-bug
     attributes:
       label: Describe the bug
-      description: A clear and concise description of what the bug is. If you are reporting a crash with the flatpak version please follow https://docs.flatpak.org/en/latest/debugging.html
+      description: A clear and concise description of what the bug is. If you are reporting a crash please take a look at https://github.com/kolunmi/bazaar/blob/debug-symbols/docs/debugging.md#debugging-crashes
       placeholder: Tell us what happened!
       value: "When I entered 2 + 2, I got the answer 6."
     validations:
@@ -31,7 +31,7 @@ body:
       label: Version
       description: |
         Please check the current version of Bazaar (Main Window > About Bazaar) so we can more easily indentify issues.
-        Output of `flatpak info io.github.kolunmi.Bazaar`. If you are on Bazzite please run `rpm -qi bazaar`
+        Output of `flatpak info io.github.kolunmi.Bazaar`. If you are on Bazzite or secureblue please run `rpm -qi bazaar`
     validations:
       required: true
 

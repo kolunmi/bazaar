@@ -1,0 +1,78 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzErrorDialog: Adw.Dialog {
+  content-width: 500;
+  content-height: 400;
+
+  child: Adw.ToastOverlay toast_overlay {
+    child: Adw.ToolbarView {
+      [top]
+      Adw.HeaderBar {}
+
+      content: Box {
+        orientation: vertical;
+        spacing: 0;
+        margin-start: 24;
+        margin-end: 24;
+        margin-top: 12;
+        margin-bottom: 24;
+
+        Label error_title {
+          halign: center;
+
+          styles [
+            "title-1",
+          ]
+        }
+
+        Box {
+          orientation: horizontal;
+          spacing: 6;
+          margin-top: 12;
+          margin-bottom: 6;
+
+          Label {
+            label: _("Details");
+            halign: start;
+            hexpand: true;
+
+            styles [
+              "heading",
+            ]
+          }
+
+          Button copy_button {
+            icon-name: "edit-copy-symbolic";
+            tooltip-text: _("Copy");
+            clicked => $on_copy_button_clicked();
+
+            styles [
+              "flat",
+            ]
+          }
+        }
+
+        ScrolledWindow {
+          vexpand: true;
+          hscrollbar-policy: automatic;
+          vscrollbar-policy: automatic;
+
+          TextView text_view {
+            editable: false;
+            wrap-mode: word_char;
+            monospace: true;
+            left-margin: 6;
+            right-margin: 6;
+            top-margin: 6;
+            bottom-margin: 6;
+
+            styles [
+              "card",
+            ]
+          }
+        }
+      };
+    };
+  };
+}

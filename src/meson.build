@@ -1,4 +1,5 @@
 math = cc.find_library('m', required: false)
+xmllint = find_program('xmllint', required: true)
 
 gtk_dep              = dependency('gtk4')
 libadwaita_dep       = dependency('libadwaita-1', version: '>= 1.8')
@@ -14,6 +15,8 @@ glycin_gtk4_dep      = dependency('glycin-gtk4-2', version: '>= 2.0')
 md4c_dep             = dependency('md4c', version: '>= 0.5.1')
 webkit_dep           = dependency('webkitgtk-6.0', version: '>= 2.50.2')
 libsecret_dep        = dependency('libsecret-1', version: '>= 0.20')
+libproxy_dep         = dependency('libproxy-1.0', version: '>= 0.5')
+malcontent_dep 	     = dependency('malcontent-0', version: '>= 0.12.0')
 
 
 dl_worker_sources = [
@@ -27,6 +30,7 @@ dl_worker_deps = [
   libdex_dep,
   libsoup_dep,
   json_glib_dep,
+  libproxy_dep,
 ]
 
 dl_worker_exe = executable(dl_worker_bin_name, dl_worker_sources,
@@ -59,11 +63,10 @@ bz_sources = files(
   'bz-application.c',
   'bz-apps-page.c',
   'bz-appstream-description-render.c',
+  'bz-appstream-parser.c',
   'bz-async-texture.c',
   'bz-auth-state.c',
   'bz-backend.c',
-  'bz-carousel-indicator-dots.c',
-  'bz-carousel.c',
   'bz-category-tile.c',
   'bz-comet-overlay.c',
   'bz-content-provider.c',
@@ -74,6 +77,7 @@ bz_sources = files(
   'bz-data-graph.c',
   'bz-decorated-screenshot.c',
   'bz-developer-badge.c',
+  'bz-donations-dialog.c',
   'bz-download-worker.c',
   'bz-dynamic-list-view.c',
   'bz-entry-cache-manager.c',
@@ -83,6 +87,7 @@ bz_sources = files(
   'bz-entry-selection-row.c',
   'bz-entry.c',
   'bz-env.c',
+  'bz-error-dialog.c',
   'bz-error.c',
   'bz-fading-clamp.c',
   'bz-favorite-button.c',
@@ -103,16 +108,18 @@ bz_sources = files(
   'bz-gnome-shell-search-provider.c',
   'bz-group-tile-css-watcher.c',
   'bz-hardware-support-dialog.c',
+  'bz-hooks.c',
   'bz-inhibited-scrollable.c',
   'bz-inspector.c',
-  'bz-installed-page.c',
+  'bz-install-controls.c',
   'bz-installed-tile.c',
   'bz-io.c',
-  'bz-lazy-async-texture-model.c',
+  'bz-library-page.c',
   'bz-license-dialog.c',
   'bz-list-tile.c',
   'bz-login-page.c',
   'bz-lozenge.c',
+  'bz-malcontent-service.c',
   'bz-markdown-render.c',
   'bz-newline-parser.c',
   'bz-parser.c',
@@ -129,6 +136,7 @@ bz_sources = files(
   'bz-screenshot.c',
   'bz-screenshots-carousel.c',
   'bz-search-engine.c',
+  'bz-search-pill-list.c',
   'bz-search-widget.c',
   'bz-section-view.c',
   'bz-serialize.c',
@@ -142,8 +150,9 @@ bz_sources = files(
   'bz-transaction-dialog.c',
   'bz-transaction-list-dialog.c',
   'bz-transaction-manager.c',
-  'bz-transaction-view.c',
+  'bz-transaction-tile.c',
   'bz-transaction.c',
+  'bz-updates-card.c',
   'bz-user-data-page.c',
   'bz-user-data-tile.c',
   'bz-window.c',
@@ -156,6 +165,9 @@ bz_sources = files(
 subdir('progress-bar-designs')
 
 bz_deps = [
+  # Bazaar GTK Extensions; see ../bge/
+  bge_dep,
+
   math,
   gtk_dep,
   libadwaita_dep,
@@ -171,6 +183,8 @@ bz_deps = [
   md4c_dep,
   webkit_dep,
   libsecret_dep,
+  libproxy_dep,
+  malcontent_dep,
 ]
 
 gen_gobject = find_program('./gen_gobject.sh')
@@ -194,6 +208,7 @@ gobject_specs = files(
   'bz-blocklist-condition-match-locale.txt',
   'bz-blocklist-condition.txt',
   'bz-blocklist.txt',
+  'bz-bulk-install-dialog-result.txt',
   'bz-comet.txt',
   'bz-country-data-point.txt',
   'bz-country.txt',
@@ -203,11 +218,16 @@ gobject_specs = files(
   'bz-curated-row.txt',
   'bz-curated-section.txt',
   'bz-data-point.txt',
+  'bz-exponential-function.txt',
+  'bz-finished-search-query.txt',
   'bz-flathub-auth-provider.txt',
+  'bz-flathub-sub-category.txt',
   'bz-hash-table-object.txt',
   'bz-hook-dialog-option.txt',
   'bz-hook-dialog.txt',
   'bz-hook.txt',
+  'bz-internal-config.txt',
+  'bz-linear-function.txt',
   'bz-main-config.txt',
   'bz-pride-flag-config.txt',
   'bz-pride-flag-spec.txt',
@@ -217,9 +237,10 @@ gobject_specs = files(
   'bz-root-blocklist.txt',
   'bz-root-curated-config.txt',
   'bz-safety-row.txt',
+  'bz-search-bias.txt',
   'bz-search-result.txt',
   'bz-state-info.txt',
-  'bz-flathub-sub-category.txt',
+  'bz-transaction-dialog-result.txt',
   'bz-transaction-entry-tracker.txt',
   'bz-transaction-task.txt',
   'bz-url.txt',
@@ -241,10 +262,11 @@ bz_deps += [ generated_gobjects ]
 blueprints = custom_target('blueprints',
   input: files(
     'bz-addons-dialog.blp',
+    'bz-donations-dialog.blp',
     'bz-age-rating-dialog.blp',
+    'bz-all-apps-page.blp',
     'bz-app-size-dialog.blp',
     'bz-app-tile.blp',
-    'bz-all-apps-page.blp',
     'bz-apps-page.blp',
     'bz-appstream-description-render.blp',
     'bz-category-tile.blp',
@@ -255,6 +277,7 @@ blueprints = custom_target('blueprints',
     'bz-developer-badge.blp',
     'bz-entry-inspector.blp',
     'bz-entry-selection-row.blp',
+    'bz-error-dialog.blp',
     'bz-favorite-button.blp',
     'bz-favorites-page.blp',
     'bz-favorites-tile.blp',
@@ -265,8 +288,9 @@ blueprints = custom_target('blueprints',
     'bz-full-view.blp',
     'bz-hardware-support-dialog.blp',
     'bz-inspector.blp',
-    'bz-installed-page.blp',
+    'bz-install-controls.blp',
     'bz-installed-tile.blp',
+    'bz-library-page.blp',
     'bz-license-dialog.blp',
     'bz-login-page.blp',
     'bz-markdown-render.blp',
@@ -282,16 +306,17 @@ blueprints = custom_target('blueprints',
     'bz-search-widget.blp',
     'bz-section-view.blp',
     'bz-stats-dialog.blp',
-    'bz-transaction-view.blp',
     'bz-transaction-list-dialog.blp',
+    'bz-transaction-tile.blp',
+    'bz-updates-card.blp',
     'bz-user-data-page.blp',
     'bz-user-data-tile.blp',
     'bz-window.blp',
-    'gtk/shortcuts-dialog.blp',
+    'shortcuts-dialog.blp',
   ),
   output: '.',
   command: [
-    find_program('blueprint-compiler', version: '>= 0.18.0'),
+    find_program('blueprint-compiler', version: '>= 0.20.0'),
     'batch-compile',
     '@OUTPUT@',
     '@CURRENT_SOURCE_DIR@',
@@ -299,10 +324,23 @@ blueprints = custom_target('blueprints',
   ],
 )
 
+release_notes = custom_target('release-notes.xml',
+  output: 'release-notes.xml',
+  input: meson.project_source_root() / 'data' / 'io.github.kolunmi.Bazaar.metainfo.xml.in',
+  command: [
+    'sh', '-c',
+    xmllint.full_path() + ' --xpath "//releases/release[1]" "$1" > "$2"',
+    '--',
+    '@INPUT@',
+    '@OUTPUT@',
+  ],
+)
+
 bz_sources += gnome.compile_resources('bz-resources',
   'bazaar.gresource.xml',
   c_name: 'bz',
-  dependencies: blueprints
+  source_dir: meson.current_build_dir(),
+  dependencies: [blueprints, release_notes],
 )
 
 executable('bazaar', bz_sources, gdbus_src, marshalers,

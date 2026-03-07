@@ -31,7 +31,7 @@ template $BzFeaturedTile: Button {
         margin-bottom: 50;
 
         Image image {
-          paintable: bind template.group as <$BzEntryGroup>.icon-paintable;
+          paintable: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable;
           margin-bottom: 12;
           pixel-size: 128;
 
@@ -62,6 +62,8 @@ template $BzFeaturedTile: Button {
               lines: 1;
               justify: center;
               label: bind template.group as <$BzEntryGroup>.description;
+              wrap: true;
+              wrap-mode: word_char;
 
               styles [
                 "caption",
@@ -86,6 +88,8 @@ template $BzFeaturedTile: Button {
                 lines: 1;
                 justify: center;
                 label: _("App of the Day");
+                wrap: true;
+                wrap-mode: word_char;
 
                 styles [
                   "caption",

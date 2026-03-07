@@ -24,6 +24,8 @@
 #include "bz-themed-entry-group-rect.h"
 #include "bz-util.h"
 
+#include <glib/gi18n.h>
+
 struct _BzRichAppTile
 {
   BzListTile    parent_instance;
@@ -46,13 +48,6 @@ enum
 
 static GParamSpec *props[LAST_PROP] = { 0 };
 
-enum
-{
-  SIGNAL_INSTALL_CLICKED,
-  LAST_SIGNAL
-};
-
-static guint signals[LAST_SIGNAL];
 
 static void update_ui_entry (BzRichAppTile *self);
 
@@ -183,7 +178,16 @@ static void
 install_button_clicked_cb (BzRichAppTile *self,
                            GtkButton     *button)
 {
-  g_signal_emit (self, signals[SIGNAL_INSTALL_CLICKED], 0);
+  gtk_widget_activate_action (GTK_WIDGET (self), "window.install-group", "(sb)",
+                              bz_entry_group_get_id (self->group), FALSE);
+}
+
+static void
+remove_button_clicked_cb (BzRichAppTile *self,
+                          GtkButton     *button)
+{
+  gtk_widget_activate_action (GTK_WIDGET (self), "window.remove-group", "(sb)",
+                              bz_entry_group_get_id (self->group), FALSE);
 }
 
 static void
@@ -212,16 +216,6 @@ bz_rich_app_tile_class_init (BzRichAppTileClass *klass)
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
-  signals[SIGNAL_INSTALL_CLICKED] =
-      g_signal_new (
-          "install-clicked",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
-          NULL,
-          G_TYPE_NONE, 0);
-
   g_type_ensure (BZ_TYPE_LIST_TILE);
   g_type_ensure (BZ_TYPE_ROUNDED_PICTURE);
   g_type_ensure (BZ_TYPE_THEMED_ENTRY_GROUP_RECT);
@@ -232,6 +226,7 @@ bz_rich_app_tile_class_init (BzRichAppTileClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, logical_and);
   gtk_widget_class_bind_template_callback (widget_class, install_button_clicked_cb);
+  gtk_widget_class_bind_template_callback (widget_class, remove_button_clicked_cb);
   gtk_widget_class_bind_template_child (widget_class, BzRichAppTile, picture_box);
 
   gtk_widget_class_set_accessible_role (widget_class, GTK_ACCESSIBLE_ROLE_BUTTON);
@@ -260,12 +255,35 @@ void
 bz_rich_app_tile_set_group (BzRichAppTile *self,
                             BzEntryGroup  *group)
 {
+  const char *title = NULL;
+  gboolean verified = FALSE;
+  g_autofree char *label = NULL;
+
   g_return_if_fail (BZ_IS_RICH_APP_TILE (self));
 
   g_clear_object (&self->group);
 
   if (group != NULL)
-    self->group = g_object_ref (group);
+    {
+      self->group = g_object_ref (group);
+
+      title = bz_entry_group_get_title (self->group);
+      verified = bz_entry_group_get_is_verified (self->group);
+
+      if (verified)
+        {
+          label = g_strdup_printf ("%s, %s", title, _("Verified"));
+          gtk_accessible_update_property (GTK_ACCESSIBLE (self),
+                                          GTK_ACCESSIBLE_PROPERTY_LABEL, label,
+                                          -1);
+        }
+      else
+        {
+          gtk_accessible_update_property (GTK_ACCESSIBLE (self),
+                                          GTK_ACCESSIBLE_PROPERTY_LABEL, title,
+                                          -1);
+        }
+    }
 
   update_ui_entry (self);
 

@@ -57,6 +57,38 @@ is_null (gpointer object,
 }
 
 static gboolean
+is_gt (gpointer object,
+       int      value1,
+       int      value2)
+{
+  return value1 > value2;
+}
+
+static gboolean
+is_lt (gpointer object,
+       int      value1,
+       int      value2)
+{
+  return value1 < value2;
+}
+
+static gboolean
+is_ge (gpointer object,
+       int      value1,
+       int      value2)
+{
+  return value1 >= value2;
+}
+
+static gboolean
+is_le (gpointer object,
+       int      value1,
+       int      value2)
+{
+  return value1 <= value2;
+}
+
+static gboolean
 logical_and (gpointer object,
              gboolean value1,
              gboolean value2)
@@ -113,6 +145,36 @@ bool_to_string (gpointer object,
   return g_strdup (condition ? if_true : if_false);
 }
 
+static gpointer
+choose (gpointer object,
+        gboolean condition,
+        gpointer if_true,
+        gpointer if_false)
+{
+  return condition ? if_true : if_false;
+}
+
+static char *
+format_int (gpointer object,
+            gint     integer)
+{
+  return g_strdup_printf ("%d", integer);
+}
+
+static char *
+format_uint (gpointer object,
+             guint    uint)
+{
+  return g_strdup_printf ("%d", uint);
+}
+
+static char *
+format_double (gpointer object,
+               double   number)
+{
+  return g_strdup_printf ("%f", number);
+}
+
 void
 bz_widget_class_bind_all_util_callbacks (GtkWidgetClass *widget_class)
 {
@@ -123,6 +185,10 @@ bz_widget_class_bind_all_util_callbacks (GtkWidgetClass *widget_class)
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, is_double_zero);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
+  gtk_widget_class_bind_template_callback (widget_class, is_gt);
+  gtk_widget_class_bind_template_callback (widget_class, is_lt);
+  gtk_widget_class_bind_template_callback (widget_class, is_ge);
+  gtk_widget_class_bind_template_callback (widget_class, is_le);
   gtk_widget_class_bind_template_callback (widget_class, logical_and);
   gtk_widget_class_bind_template_callback (widget_class, logical_or);
   gtk_widget_class_bind_template_callback (widget_class, is_positive);
@@ -130,4 +196,8 @@ bz_widget_class_bind_all_util_callbacks (GtkWidgetClass *widget_class)
   gtk_widget_class_bind_template_callback (widget_class, is_empty_string);
   gtk_widget_class_bind_template_callback (widget_class, is_longer);
   gtk_widget_class_bind_template_callback (widget_class, bool_to_string);
+  gtk_widget_class_bind_template_callback (widget_class, choose);
+  gtk_widget_class_bind_template_callback (widget_class, format_int);
+  gtk_widget_class_bind_template_callback (widget_class, format_uint);
+  gtk_widget_class_bind_template_callback (widget_class, format_double);
 }

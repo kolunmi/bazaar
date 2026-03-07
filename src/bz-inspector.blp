@@ -22,20 +22,39 @@ template $BzInspector: Adw.Window {
         styles [
           "bz-debug"
         ]
+        orientation: vertical;
 
-        orientation: horizontal;
-        spacing: 10;
+        Box {
+          orientation: horizontal;
+          spacing: 10;
 
-        Label {
-          styles [
-            "heading"
-          ]
-          label: "Background Task Info:";
-          xalign: 0.0;
+          Label {
+            styles [
+              "heading"
+            ]
+            label: "Background Task Info:";
+            xalign: 0.0;
+          }
+          Label {
+            label: bind template.state as <$BzStateInfo>.background-task-label as <string>;
+            xalign: 0.0;
+          }
         }
-        Label {
-          label: bind template.state as <$BzStateInfo>.background-task-label as <string>;
-          xalign: 0.0;
+        Box {
+          orientation: horizontal;
+          spacing: 10;
+
+          Label {
+            styles [
+              "heading"
+            ]
+            label: "Active Entry Objects in Memory:";
+            xalign: 0.0;
+          }
+          Label {
+            label: bind $format_uint(template.state as <$BzStateInfo>.cache-manager as <$BzEntryCacheManager>.living-entries) as <string>;
+            xalign: 0.0;
+          }
         }
       }
 
@@ -113,6 +132,44 @@ template $BzInspector: Adw.Window {
               model: bind template.state as <$BzStateInfo>.curated-configs;
             };
             factory: string_list_factory;
+          };
+        }
+      }
+
+      Box {
+        orientation: vertical;
+        spacing: 3;
+
+        Box {
+          orientation: horizontal;
+          spacing: 10;
+
+          Label {
+            styles [
+              "heading"
+            ]
+            label: "Max Age Rating:";
+            xalign: 0.0;
+          }
+          Label {
+            label: bind $format_uint(template.state as <$BzStateInfo>.parental-age-rating) as <string>;
+            xalign: 0.0;
+          }
+        }
+        Label {
+          styles [
+            "heading"
+          ]
+          label: "Restricted App IDs";
+          xalign: 0.0;
+        }
+        ScrolledWindow {
+          propagate-natural-height: true;
+          child: ListView {
+            model: NoSelection {
+              model: bind template.state as <$BzStateInfo>.parental-blocked-ids;
+            };
+            factory: plain_string_list_factory;
           };
         }
       }
@@ -237,6 +294,38 @@ BuilderListItemFactory string_list_factory {
       Button {
         label: "Open";
         clicked => $open_file_externally_cb(template);
+      }
+    };
+  }
+}
+
+BuilderListItemFactory plain_string_list_factory {
+  template ListItem {
+    selectable: false;
+    activatable: false;
+    child: Box {
+      orientation: horizontal;
+      spacing: 10;
+
+      Label {
+        styles [
+          "dimmed",
+          "bz-monospace",
+        ]
+        width-request: 30;
+        label: bind $format_uint(template.position) as <string>;
+        xalign: 1.0;
+      }
+      Label {
+        styles [
+          "bz-monospace",
+        ]
+        hexpand: true;
+        margin-top: 2;
+        margin-bottom: 2;
+        xalign: 0.0;
+        selectable: true;
+        label: bind template.item as <$GtkStringObject>.string as <string>;
       }
     };
   }

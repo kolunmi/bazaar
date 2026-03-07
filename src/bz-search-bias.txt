@@ -1,0 +1,15 @@
+prefix=bz
+name=search_bias
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+include=<gtk/gtk.h>
+include="bz-linear-function.h"
+include="bz-exponential-function.h"
+
+property=regex char G_TYPE_STRING string
+property=convert_to char G_TYPE_STRING string
+property=linear_boost BzLinearFunction BZ_TYPE_LINEAR_FUNCTION object
+property=exponential_boost BzExponentialFunction BZ_TYPE_EXPONENTIAL_FUNCTION object
+property=boost_appids GListModel G_TYPE_LIST_MODEL object

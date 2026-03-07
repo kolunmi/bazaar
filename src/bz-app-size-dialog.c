@@ -19,8 +19,10 @@
  */
 
 #include "bz-app-size-dialog.h"
+#include "bz-io.h"
 #include "bz-entry-group.h"
 #include "bz-lozenge.h"
+#include "bz-template-callbacks.h"
 
 #include <glib/gi18n.h>
 
@@ -90,18 +92,11 @@ bz_app_size_dialog_set_property (GObject      *object,
     }
 }
 
-static gboolean
-invert_boolean (gpointer object,
-                gboolean value)
+static char *
+get_runtime_size_title (gpointer object,
+                        gboolean runtime_installed)
 {
-  return !value;
-}
-
-static gboolean
-is_null (gpointer object,
-         GObject *value)
-{
-  return value == NULL;
+  return g_strdup (runtime_installed ? _ ("Installed Runtime Size") : _ ("Runtime Download Size"));
 }
 
 static char *
@@ -120,11 +115,32 @@ format_size (gpointer object, guint64 value)
   return g_strdup (size_str);
 }
 
-static gboolean
-is_zero (gpointer object,
-         int      value)
+static void
+open_user_data_folder_cb (GtkWidget *widget,
+                          gpointer   user_data)
 {
-  return value == 0;
+  BzAppSizeDialog            *self     = NULL;
+  const char                 *id       = NULL;
+  g_autofree char            *path     = NULL;
+  g_autoptr (GFile)           file     = NULL;
+  g_autoptr (GtkFileLauncher) launcher = NULL;
+  GtkRoot                    *root     = NULL;
+
+  self = BZ_APP_SIZE_DIALOG (gtk_widget_get_ancestor (widget, BZ_TYPE_APP_SIZE_DIALOG));
+
+  if (self->group == NULL)
+    return;
+
+  id = bz_entry_group_get_id (self->group);
+  if (id == NULL)
+    return;
+
+  path     = bz_dup_user_data_path (id);
+  file     = g_file_new_for_path (path);
+  launcher = gtk_file_launcher_new (file);
+  root     = gtk_widget_get_root (widget);
+
+  gtk_file_launcher_launch (launcher, GTK_WINDOW (root), NULL, NULL, NULL);
 }
 
 static void
@@ -149,10 +165,10 @@ bz_app_size_dialog_class_init (BzAppSizeDialogClass *klass)
   g_type_ensure (BZ_TYPE_LOZENGE);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-app-size-dialog.ui");
+  bz_widget_class_bind_all_util_callbacks (widget_class);
   gtk_widget_class_bind_template_callback (widget_class, format_size);
-  gtk_widget_class_bind_template_callback (widget_class, is_null);
-  gtk_widget_class_bind_template_callback (widget_class, is_zero);
-  gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
+  gtk_widget_class_bind_template_callback (widget_class, get_runtime_size_title);
+  gtk_widget_class_bind_template_callback (widget_class, open_user_data_folder_cb);
 }
 
 static void

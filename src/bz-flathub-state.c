@@ -432,8 +432,8 @@ add_category (BzFlathubState *self,
               QualityMode     quality_mode,
               gboolean        is_spotlight)
 {
-  JsonObject    *object = NULL;
-  JsonObjectIter iter;
+  JsonObject    *object                   = NULL;
+  JsonObjectIter iter                     = { 0 };
   JsonArray     *hits_array               = NULL;
   const char    *key                      = NULL;
   const char    *app                      = NULL;

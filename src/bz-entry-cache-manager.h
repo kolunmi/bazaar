@@ -42,12 +42,8 @@ G_DECLARE_FINAL_TYPE (BzEntryCacheManager, bz_entry_cache_manager, BZ, ENTRY_CAC
 BzEntryCacheManager *
 bz_entry_cache_manager_new (void);
 
-guint64
-bz_entry_cache_manager_get_max_memory_usage (BzEntryCacheManager *self);
-
-void
-bz_entry_cache_manager_set_max_memory_usage (BzEntryCacheManager *self,
-                                             guint64              max_memory_usage);
+guint
+bz_entry_cache_manager_get_living_entries (BzEntryCacheManager *self);
 
 DexFuture *
 bz_entry_cache_manager_add (BzEntryCacheManager *self,

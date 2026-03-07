@@ -18,3 +18,4 @@ property=banner_text_halign GtkAlign GTK_TYPE_ALIGN enum
 property=banner_text_valign GtkAlign GTK_TYPE_ALIGN enum
 property=banner_text_label_xalign double G_TYPE_DOUBLE double
 property=appids GListModel G_TYPE_LIST_MODEL object
+property=enable_bulk_install gboolean G_TYPE_BOOLEAN boolean

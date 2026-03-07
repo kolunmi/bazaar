@@ -1,0 +1,12 @@
+prefix=bz
+name=internal_config
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+include=<gtk/gtk.h>
+include="bz-search-bias.h"
+
+ensure=BZ_TYPE_SEARCH_BIAS
+
+property=search_biases GListModel G_TYPE_LIST_MODEL object

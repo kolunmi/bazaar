@@ -1,0 +1,8 @@
+prefix=bz
+name=exponential_function
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+property=factor double G_TYPE_DOUBLE double
+property=y_intercept double G_TYPE_DOUBLE double

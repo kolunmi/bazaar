@@ -24,6 +24,7 @@
 
 #include <glib/gi18n.h>
 #include <libdex.h>
+#include <bge.h>
 
 #include "bz-application.h"
 
@@ -47,6 +48,9 @@ main (int   argc,
   bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
   bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
   textdomain (GETTEXT_PACKAGE);
+
+  /* Init Bazaar GTK Extensions */
+  bge_init();
 
   g_debug ("Constructing main application object...");
   app = g_object_new (

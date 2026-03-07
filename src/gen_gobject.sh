@@ -358,7 +358,7 @@ print_init_properties () {
                 printf '\n          G_MIN%s, G_MAX%s, 0,\n' "$(to_upper "$LOC_PTYPE")" "$(to_upper "$LOC_PTYPE")"
                 ;;
             float|double)
-                printf '\n          0.0, G_MAX%s, 0.0,\n' "$(to_upper "$LOC_PTYPE")"
+                printf '\n          G_MININT, G_MAXINT, 0.0,\n' "$(to_upper "$LOC_PTYPE")"
                 ;;
             boolean)
                 printf ' FALSE,\n'
@@ -444,6 +444,7 @@ EOF
 
 print_set_property_methods () {
     HEADER="$1"
+    TAKE="$2"
 
     while IFS= read -r line; do
         set -- $line
@@ -455,29 +456,73 @@ print_set_property_methods () {
         LOC_FREE="$5"
         LOC_REF="$6"
 
-        printf 'void\n%s_set_%s (%s *self,\n    ' "$SNAKE" "$LOC_NAME" "$PASCAL"
-        case "$LOC_PTYPE" in
-            string) printf 'const ' ;;
-        esac
+        if [ "$TAKE" = take ]; then
+            case "$LOC_PTYPE" in
+                string) ;;
+                *) continue ;;
+            esac
+        fi
+
+        if [ "$TAKE" = take ]; then
+            printf 'void\n%s_set_%s_take (%s *self,\n    ' "$SNAKE" "$LOC_NAME" "$PASCAL"
+        else
+            printf 'void\n%s_set_%s (%s *self,\n    ' "$SNAKE" "$LOC_NAME" "$PASCAL"
+            case "$LOC_PTYPE" in
+                string) printf 'const ' ;;
+            esac
+        fi
         printf '%s ' "$LOC_CTYPE"
         case "$LOC_PTYPE" in
             char|uchar|boolean|int|uint|long|ulong|int64|uint64|unichar|enum|flags|float|double) ;;
-            *) printf '*'
+            *) printf '*' ;;
         esac
         printf '%s)' "$LOC_NAME"
 
         if [ "$HEADER" = header ]; then
             printf ';\n\n'
+
+            if [ "$TAKE" = take ]; then
+                case "$LOC_PTYPE" in
+                    string)
+                        printf '#define %s_set_%s_take_printf(self, ...) %s_set_%s_take (self, g_strdup_printf (__VA_ARGS__))\n\n' "$SNAKE" "$LOC_NAME" "$SNAKE" "$LOC_NAME"
+                        ;;
+                esac
+            fi
         else
             printf '{\n  g_return_if_fail (%s_IS_%s (self));\n\n' "$MACRO_PREF" "$MACRO_NAME"
 
             printf '  if ('
             case "$LOC_PTYPE" in
                 boolean) printf '!!%s == !!self->%s' "$LOC_NAME" "$LOC_NAME" ;;
-                string) printf '%s == self->%s || (%s != NULL && self->%s != NULL && g_strcmp0(%s, self->%s) == 0)' "$LOC_NAME" "$LOC_NAME" "$LOC_NAME" "$LOC_NAME" "$LOC_NAME" "$LOC_NAME";;
+                string)
+                    if [ "$TAKE" = take ]; then
+                        printf '%s != NULL && self->%s != NULL && g_strcmp0(%s, self->%s) == 0' "$LOC_NAME" "$LOC_NAME" "$LOC_NAME" "$LOC_NAME"
+                    else
+                        printf '%s == self->%s || (%s != NULL && self->%s != NULL && g_strcmp0(%s, self->%s) == 0)' "$LOC_NAME" "$LOC_NAME" "$LOC_NAME" "$LOC_NAME" "$LOC_NAME" "$LOC_NAME"
+                    fi
+                    ;;
                 *) printf '%s == self->%s' "$LOC_NAME" "$LOC_NAME" ;;
             esac
-            printf ')\n    return;\n\n'
+            if [ "$TAKE" = take ]; then
+                printf '){\n    '
+                case "$LOC_PTYPE" in
+                    char|uchar|boolean|int|uint|long|ulong|int64|uint64|unichar|enum|flags|float|double) ;;
+                    *)
+                        if [ -n "$LOC_FREE" ]; then
+                            printf "$LOC_FREE"
+                        else
+                            case "$LOC_PTYPE" in
+                                string) printf 'g_free' ;;
+                                *) printf 'g_object_unref' ;;
+                            esac
+                        fi
+                        printf ' (%s);\n' "$LOC_NAME"
+                        ;;
+                esac
+                printf '    return;\n  }\n\n'
+            else
+                printf ')\n    return;\n\n'
+            fi
 
             case "$LOC_PTYPE" in
                 char|uchar|boolean|int|uint|long|ulong|int64|uint64|unichar|enum|flags|float|double) ;;
@@ -498,21 +543,25 @@ print_set_property_methods () {
                     ;;
             esac
 
-            printf '  self->%s = ' "$LOC_NAME"
-            if [ -n "$LOC_REF" ]; then
-                printf '%s (%s)' "$LOC_REF" "$LOC_NAME"
+            if [ "$TAKE" = take ]; then
+                printf '  self->%s = %s' "$LOC_NAME" "$LOC_NAME"
             else
-                case "$LOC_PTYPE" in
-                    char|uchar|boolean|int|uint|long|ulong|int64|uint64|unichar|enum|flags|float|double)
-                        printf '%s' "$LOC_NAME"
-                        ;;
-                    string)
-                        printf 'g_strdup (%s)' "$LOC_NAME"
-                        ;;
-                    *)
-                        printf 'g_object_ref (%s)' "$LOC_NAME"
-                        ;;
-                esac
+                printf '  self->%s = ' "$LOC_NAME"
+                if [ -n "$LOC_REF" ]; then
+                    printf '%s (%s)' "$LOC_REF" "$LOC_NAME"
+                else
+                    case "$LOC_PTYPE" in
+                        char|uchar|boolean|int|uint|long|ulong|int64|uint64|unichar|enum|flags|float|double)
+                            printf '%s' "$LOC_NAME"
+                            ;;
+                        string)
+                            printf 'g_strdup (%s)' "$LOC_NAME"
+                            ;;
+                        *)
+                            printf 'g_object_ref (%s)' "$LOC_NAME"
+                            ;;
+                    esac
+                fi
             fi
             printf ';\n\n'
 
@@ -564,6 +613,8 @@ $(print_functions header)
 $(print_get_property_methods header)
 
 $(print_set_property_methods header)
+
+$(print_set_property_methods header take)
 
 G_END_DECLS
 
@@ -680,6 +731,8 @@ $(print_functions)
 $(print_get_property_methods)
 
 $(print_set_property_methods)
+
+$(print_set_property_methods '' take)
 
 /* End of $C_FILE */
 EOF

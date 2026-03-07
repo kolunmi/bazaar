@@ -1,0 +1,73 @@
+search-biases:
+  # Brief regex review:
+  #   `^` indicates the beginning of the string
+  #   `$` indicates the end of the string
+  #   `\b` indicates a word boundary
+  #   `(?i)` means case insensitive
+
+  - regex: ^(?i)browser$
+    convert-to: web browser
+    boost-appids:
+      - app.zen_browser.zen
+      - io.github.ungoogled_software.ungoogled_chromium
+      - org.chromium.Chromium
+      - org.gnome.Epiphany
+      - org.kde.falkon
+      - org.mozilla.firefox
+      - org.torproject.torbrowser-launcher
+    linear-boost:
+      slope: 1.333
+      y-intercept: 40.0
+
+  - regex: \b(?i)vm\b
+    convert-to: virtual machine
+    boost-appids:
+      - org.virt_manager.virt-manager
+      - org.gnome.Boxes
+    linear-boost:
+      slope: 1.0
+      y-intercept: 50.0
+
+  - regex: \b(?i)ide\b
+    convert-to: develop
+    boost-appids:
+      - com.visualstudio.code
+      - com.vscodium.codium
+      - dev.zed.Zed
+      - org.gnome.Builder
+      - org.kde.kdevelop
+    linear-boost:
+      slope: 1.0
+      y-intercept: 10.0
+
+  - regex: \b(?i)daw\b
+    boost-appids:
+      # these don't normally show, despite being DAWs
+      - fm.reaper.Reaper
+      - io.lmms.LMMS
+    linear-boost:
+      slope: 1.0
+      y-intercept: 20.0
+
+  - regex: \b(?i)photoshop\b
+    boost-appids:
+      - org.gimp.GIMP
+    linear-boost:
+      slope: 1.0
+      y-intercept: 20.0
+
+  - regex: \b(?i)illustrator\b
+    boost-appids:
+      - org.inkscape.Inkscape
+    linear-boost:
+      slope: 1.0
+      y-intercept: 20.0
+
+  - regex: \b(?i)dl\b
+    convert-to: download
+
+  - regex: \b(?i)yt\b
+    convert-to: youtube
+
+  - regex: \b(?i)vids?\b
+    convert-to: video

@@ -81,6 +81,13 @@ bz_backend_real_schedule_transaction (BzBackend    *self,
   return dex_future_new_reject (G_IO_ERROR, G_IO_ERROR_UNKNOWN, "Unimplemented");
 }
 
+static gboolean
+bz_backend_real_cancel_task_for_entry (BzBackend *self,
+                                       BzEntry   *entry)
+{
+  return FALSE;
+}
+
 static void
 bz_backend_default_init (BzBackendInterface *iface)
 {
@@ -91,6 +98,7 @@ bz_backend_default_init (BzBackendInterface *iface)
   iface->retrieve_update_ids         = bz_backend_real_retrieve_update_ids;
   iface->list_repositories           = bz_backend_real_list_repositories;
   iface->schedule_transaction        = bz_backend_real_schedule_transaction;
+  iface->cancel_task_for_entry       = bz_backend_real_cancel_task_for_entry;
 }
 
 DexChannel *
@@ -252,4 +260,14 @@ bz_backend_merge_and_schedule_transactions (BzBackend    *self,
       removals_pa->len,
       channel,
       cancellable);
+}
+
+gboolean
+bz_backend_cancel_task_for_entry (BzBackend *self,
+                                  BzEntry   *entry)
+{
+  g_return_val_if_fail (BZ_IS_BACKEND (self), FALSE);
+  g_return_val_if_fail (BZ_IS_ENTRY (entry), FALSE);
+
+  return BZ_BACKEND_GET_IFACE (self)->cancel_task_for_entry (self, entry);
 }

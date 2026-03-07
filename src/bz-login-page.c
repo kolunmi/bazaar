@@ -25,6 +25,7 @@
 
 #include "bz-auth-state.h"
 #include "bz-flathub-auth-provider.h"
+#include "bz-global-net.h"
 #include "bz-login-page.h"
 #include "bz-util.h"
 
@@ -699,7 +700,9 @@ bz_login_page_init (BzLoginPage *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
 
-  self->session    = soup_session_new ();
+  self->session = soup_session_new ();
+  soup_session_set_proxy_resolver (self->session, bz_get_default_proxy_resolver ());
+
   self->cookie_jar = soup_cookie_jar_new ();
   soup_cookie_jar_set_accept_policy (self->cookie_jar, SOUP_COOKIE_JAR_ACCEPT_ALWAYS);
   soup_session_add_feature (self->session, SOUP_SESSION_FEATURE (self->cookie_jar));

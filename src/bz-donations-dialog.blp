@@ -1,0 +1,142 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzDonationsDialog: Adw.Dialog {
+  width-request: 450;
+  follows-content-size: true;
+
+  child: Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {
+      show-title: false;
+    }
+
+    content: ScrolledWindow {
+      hscrollbar-policy: never;
+      vscrollbar-policy: automatic;
+      propagate-natural-height: true;
+      min-content-height: 500;
+
+      child: Box {
+        orientation: vertical;
+
+        Box {
+          orientation: vertical;
+          margin-start: 40;
+          margin-end: 40;
+          margin-top: 20;
+          margin-bottom: 20;
+
+          Label title {
+            styles [
+              "title-1",
+            ]
+
+            wrap: true;
+            justify: center;
+            margin-bottom: 5;
+          }
+
+          Label subtitle {
+            styles [
+              "dimmed",
+            ]
+
+            wrap: true;
+            justify: center;
+            margin-bottom: 15;
+          }
+
+          $BzAppstreamDescriptionRender {
+            vexpand: true;
+            appstream-description: bind template.release-notes;
+          }
+
+          Button release_button {
+            styles [
+              "pill",
+            ]
+
+            margin-top: 15;
+            margin-start: 25;
+            margin-end: 20;
+            margin-bottom: 15;
+            halign: center;
+            has-tooltip: true;
+
+            clicked => $release_page_clicked(template);
+
+            child: Box {
+              orientation: horizontal;
+              spacing: 10;
+
+              Label {
+                label: _("Full Release Notes");
+                wrap: true;
+                wrap-mode: word_char;
+                justify: right;
+              }
+              Image {
+                icon-name: "external-link-symbolic";
+              }
+            };
+          }
+        }
+
+        Adw.Bin {
+          styles [
+            "bz-donations-dialog",
+          ]
+
+          child: Box {
+            orientation: vertical;
+            margin-start: 25;
+            margin-end: 25;
+            margin-top: 20;
+            margin-bottom: 20;
+
+            Label {
+              styles [
+                "title-1",
+              ]
+
+              margin-top: 10;
+              margin-bottom: 20;
+              halign: center;
+              wrap: true;
+              justify: center;
+              label: _("This release was made possible by users like you!");
+            }
+
+            Label {
+              margin-bottom: 20;
+              wrap: true;
+              justify: center;
+              use-markup: true;
+              label: _("I love making Bazaar, but I cannot do it alone. Help support further development by donating on Ko-Fi.");
+            }
+
+            Button donate_button {
+              styles [
+                "pill",
+              ]
+
+              margin-start: 20;
+              margin-end: 20;
+              margin-bottom: 20;
+              halign: center;
+              has-tooltip: true;
+
+              child: Adw.ButtonContent {
+                label: _("Donate to Bazaar");
+                icon-name: "heart-filled-symbolic";
+              };
+
+              clicked => $donate_clicked(template);
+            }
+          };
+        }
+      };
+    };
+  };
+}

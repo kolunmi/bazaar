@@ -42,11 +42,13 @@ managing software through the GUI:
 ## CLI Usage
 
 You can start the bazaar daemon like this:
+
 ```
 bazaar [ARGS] [PACKAGE PATH/URI]
 ```
 
 To avoid spawning an initial window, use:
+
 ```
 bazaar --no-window [ARGS] [PACKAGE PATH/URI]
 ```
@@ -76,13 +78,33 @@ example of integration into the main config.
 yaml-blocklist-paths:
   - /path/to/yaml/blocklist.yaml
   - /path/to/another/yaml/blocklist.yaml
+  # Flatpak path with host-etc permission
+  - /run/host/etc/bazaar/blocklist.yaml
 txt-blocklist-paths:
   - /path/to/txt/blocklist.txt
   - /path/to/another/txt/blocklist.txt
+  # Flatpak path with host-etc permission
+  - /run/host/etc/bazaar/blocklist.txt
 curated-config-paths:
   - /path/to/yaml/file.yaml
   - /path/to/another/yaml/file.yaml
+  # Flatpak path with host-etc permission
+  - /run/host/etc/bazaar/curated.yaml
 ```
+
+### EOL Overrides
+
+In this file, you can also specify a list of apps for which to hide EOL warnings
+and therefore prevent users from being deterred from installing them:
+
+```yaml
+override-eol-markings:
+  - com.obsproject.Studio
+  - net.lutris.Lutris
+```
+
+(At the time of writing, the projects listed above rely on EOL runtimes but are
+otherwise widely used)
 
 ## Blocklists
 
@@ -187,9 +209,15 @@ com\.place\..*
 
 #### No Worky
 
-Check that the path the the blocklist exists and that Bazaar can access it.
-Also, sometimes host files accessed from a flatpak container require a special
-prefix.
+Check that the path of the blocklist exists and that Bazaar can access it. This command is useful for debugging this:
+
+```
+flatpak run --command=bash io.github.kolunmi.Bazaar
+```
+
+The `/etc` of the host system accessed from a Flatpak requires the `host-etc` permission.
+
+This means `/etc/bazaar/banner.png` turns into `/run/host/etc/bazaar/banner.png`.
 
 #### I want to to block a list of applications all the time, and also another list only on desktop environment X:
 
@@ -316,21 +344,31 @@ Right now, curated configs are essentially composed of a list of "sections"
 which appear stacked on top of each other inside of a scrollable viewport in the
 order they appear in the YAML. Each section has certain properties you can
 customize, like a title, an image banner URI, and of course a list of appids.
+
 Bazaar maps the appids you provide to the best matching "entry group" from the
 table of applications it was able to pull from remote sources (Simply put, an
 entry group in Bazaar is a collection of applications which share the same appid
 but come from different sources or installations). The entry group has a
 designated "ui entry" which was previously determined in the refresh process to
 have the most useful content associated with it as it pertains to presenting
-things like icons, descriptions, screenshots, etc to the user. When the user
-selects the app in the section, they are brought to a "full view" where they can
-see a bunch of information stored inside or referenced by the ui entry and
-choose to invoke transactions on the entry group, like installation or removal.
+things like icons, descriptions, screenshots, etc to the user.
 
-Additionally, curated configs allow you to define a css block from which you can
-reference classes inside sections and change the way gtk renders the content.
+When the user selects the app in the section, they are brought to a "full view"
+where they can see a bunch of information stored inside or referenced by the ui
+entry and choose to invoke transactions on the entry group, like installation
+or removal.
+
+Additionally, curated configs allow you to define a css block from which you
+can reference classes inside sections and change the way gtk renders the
+content.
 
 ### Example
+
+Here are practical examples:
+
+- [Aurora](https://github.com/get-aurora-dev/common/tree/0d86028dd0d737d1d0eee08205c33fc91997f155/system_files/shared/etc/bazaar) - https://getaurora.dev
+- [Bluefin](https://github.com/projectbluefin/common/tree/a868eba107b91c4eae60b6d1d6d2e2cdf05eb1c8/system_files/bluefin/etc/bazaar) - https://projectbluefin.io
+- [Bazzite](https://github.com/ublue-os/bazzite/blob/4cb928b7268d0cae38592ff112e061f972caed63/system_files/desktop/shared/usr/share/ublue-os/bazaar) - https://bazzite.gg
 
 Here is a basic curated config:
 ```yaml
@@ -387,7 +425,13 @@ rows:
         subtitle: "These are really good and you should download them!"
 
         # can be https as well
+        # If you want this to work with the Flatpak then use this path
+        # file:///run/host/etc/bazaar/banner-1.jxl
         banner: file:///home/kolunmi/banner-1.jxl
+
+        # Dynamically switching between light/dark variants of banners
+        light-banner: file:///home/kolunmi/banner-light.png
+        dark-banner: file:///home/kolunmi/banner-dark.png
 
         # can be "fill", "contain", "cover", or "scale-down"
         # see https://docs.gtk.org/gtk4/enum.ContentFit.html
@@ -399,6 +443,9 @@ rows:
         banner-text-halign: start
         # valign -> "vertical alignment"
         banner-text-valign: center
+
+        # size in pixels
+        banner-height: 400
 
         # "The horizontal alignment of the label text inside its size
         # allocation."
@@ -414,6 +461,9 @@ rows:
           - org.desmume.DeSmuME
           - org.duckstation.DuckStation
           - org.freecad.FreeCAD
+
+        # Show an "Install All" button
+        enable-bulk-install: true
 
       # reference the classes we defined earlier
       classes:
@@ -448,17 +498,32 @@ rows:
         - background-2
 ```
 
+### Integrate the curated section + blocklist with the official Flatpak for Administrators/Vendors
+
+For more practical examples check out the configuration from [Bluefin](https://github.com/projectbluefin/common/tree/a868eba107b91c4eae60b6d1d6d2e2cdf05eb1c8/system_files/bluefin/etc/bazaar) and [Aurora](https://github.com/get-aurora-dev/common/tree/0d86028dd0d737d1d0eee08205c33fc91997f155/system_files/shared/etc/bazaar).
+
+Bazaar by default looks for a config file in `/etc/bazaar` or `/run/host/etc/bazaar` inside the sandbox, this is [configured on build time](https://github.com/flathub/io.github.kolunmi.Bazaar/blob/709faccd8c4198c5fdabf20eb4a98db98a5aa1c6/io.github.kolunmi.Bazaar.yaml#L43-L46) This needs permission to `/etc` which can be granted with the `filesystem=host-etc` permission, the build on Flathub doesn't have this permission by default.
+
+This is not super straightforward to setup currently as Flatpak doesn't support overriding permissions in `/etc` or `/usr` yet, so you have to resort to `systemd-tmpfiles` to create this permission override in `/var/lib/flatpak/overrides/io.github.kolunmi.Bazaar`.
+
+Here is how they did it:
+
+- [tmpfiles](https://github.com/get-aurora-dev/common/blob/0d86028dd0d737d1d0eee08205c33fc91997f155/system_files/shared/usr/lib/tmpfiles.d/bazaar-flatpak.conf)
+
+- [actual permission override](https://github.com/get-aurora-dev/common/blob/0d86028dd0d737d1d0eee08205c33fc91997f155/system_files/shared/usr/share/ublue-os/flatpak-overrides/io.github.kolunmi.Bazaar), the filepath for this doesn't really matter, just a way for you to ship the symlink with tmpfiles
+
 ## Hooks
 
 Hooks are an advanced feature of Bazaar. In essence, they allow you to
 programmatically react to events and define dialogs with which you can query
-user input. Currently, the only events you can subscribe to are the
-"before-transaction" and "after-transaction" events:
+user input. Currently, these are the event signals you can subscribe to:
 
-* `before-transaction`: run the hook right before a transaction is scheduled to
-  begin
+* `view-app`: run the hook when the user clicks on an app tile or otherwise
+  views an application in the main app page
 
-* `after-transaction`: run the hook after a transaction successfully completes
+* `before-transaction`: run the hook right as the user invokes a transaction
+
+* `after-transaction`: run the hook after a transaction completes
 
 Hooks are run like a signal emission. After an event occurs, hooks that are
 found to be of the appropriate type are evaluated in an order of priority.
@@ -513,8 +578,15 @@ Here is an overview of the environment variables the shell snippet will receive:
 * `BAZAAR_HOOK_DIALOG_RESPONSE_ID`: if applicable, the user response given
   through the current dialog
 
+* `BAZAAR_APPID`: if applicable, the appid of the entry Bazaar is currently
+  dealing with. Use this for hooks that are not related to transactions. If your
+  hook deals with transactions, such as `before-transaction` or
+  `after-transaction`, use `BAZAAR_TS_APPID` instead.
+
 * `BAZAAR_TS_APPID`: if applicable, the appid of the entry Bazaar is currently
-  dealing with
+  dealing with. Use this for hooks that are related to transactions. If your
+  hook does not deal with transactions, such as `view-app`, use `BAZAAR_APPID`
+  instead.
 
 * `BAZAAR_TS_TYPE`: if applicable, the type of transaction being run. Can be
   "install", "update", or "removal".
@@ -574,14 +646,14 @@ hooks:
     dialogs:
       - id: jetbrains-warning
         title: >-
-          Jetbrains IDEs are not supported in this format
+          JetBrains IDEs are not supported in this format
         # If true, render inline markup commands in body; see
         # https://docs.gtk.org/Pango/pango_markup.html
         body-use-markup: true
         body: >-
-          This is a <a href="https://www.jetbrains.com/">Jetbrains</a>
+          This is a <a href="https://www.jetbrains.com/">JetBrains</a>
           application and is not officially supported on Flatpak. We
-          recommend using the Toolbox app to manage Jetbrains IDEs.
+          recommend using the Toolbox app to manage JetBrains IDEs.
         # Determines which option will be assumed if the user hits the
         # escape key or otherwise cancels the dialog
         default-response-id: cancel
@@ -589,7 +661,7 @@ hooks:
           - id: cancel
             string: "Cancel"
           - id: goto-web
-            string: "Download Jetbrains Toolbox"
+            string: "Download JetBrains Toolbox"
             # can be "destructive" or "suggested" or omit for no
             # styling
             style: suggested
@@ -636,7 +708,7 @@ hooks:
 
       case "$BAZAAR_HOOK_DIALOG_RESPONSE_ID" in
           goto-web)
-              # if the user pressed "Download Jetbrains Toolbox",
+              # if the user pressed "Download JetBrains Toolbox",
               # continue
               echo 'ok'
               ;;
@@ -670,7 +742,7 @@ hooks:
 
   handle_teardown_stage() {
 
-      # Let's always prevent the user from installing Jetbrains stuff
+      # Let's always prevent the user from installing JetBrains stuff
       echo 'deny'
 
   }
@@ -690,6 +762,101 @@ hooks:
   # exit successfully
   exit 0
 ```
+
+## Search Biases
+
+Search biases are a mechanism provided by Bazaar to influence search results.
+Given a regex string with which to match a search query, a bias can replace the
+matched text with a new string and/or adjust the scores of certain appids
+according to a defined function if a match occurs. This is particularly useful
+in the following cases:
+
+* An application is, for example, an image editor, but doesn't show up in the
+  results for "image editor" because its metadata doesn't contain those search
+  tokens for whatever reason. A search bias can ensure that the app appears
+  despite this.
+
+* You want an abbreviation or phrase to be expanded into a version which is more
+  likely to yield better results. For example, Bazaar hardcodes the expansion of
+  the abbreviation `dl` to `download`, which is more helpful when searching
+  metadata.
+
+### Boost Functions
+
+Right now, there are two kinds of boost functions you can specify to influence
+the score of certain appids in the event of a regex match: linear and
+exponential:
+
+#### Linear
+
+Linear functions require a `slope` and a `y-intercept` and are evaluated like
+this:
+
+```
+new-score = y-intercept + (slope * original-score)
+```
+
+#### Exponential
+
+Linear functions require a `factor` and a `y-intercept` and are evaluated like
+this:
+
+```
+new-score = y-intercept * (factor ^ original-score)
+```
+
+### Examples
+
+Search biases are defined in the main yaml config as indicated by the
+`hardcoded_main_config_path` comptime var. Here is a basic example demonstrating
+how to define search biases:
+
+```yaml
+search-biases:
+  # Brief regex review:
+  #   `^` indicates the beginning of the string
+  #   `$` indicates the end of the string
+  #   `\b` indicates a word boundary
+  #   `(?i)` means case insensitive
+
+  # Convert queries like "smb server" to "samba server"
+  - regex: \b(?i)smb\b
+    convert-to: samba
+
+  # Give your favorite matrix clients a simple boost of 100.0 to their score
+  - regex: \b(?i)matrix\b
+    boost-appids:
+      - org.gnome.Fractal
+      - im.riot.Riot
+    linear-boost:
+      slope: 1.0
+      y-intercept: 100.0
+
+  # Convert the search _and_ boost appids
+  - regex: ^(?i)deck$
+    convert-to: steam deck
+    boost-appids:
+      - com.github.Matoking.protontricks
+      - com.steamgriddb.steam-rom-manager
+      - com.valvesoftware.SteamLink
+    linear-boost:
+      slope: 1.2
+      y-intercept: 20.0
+
+  # Biases are applied in the order that you specify them, so in both the case
+  # that the user types "deck" or "steam deck launcher", the following will be
+  # applied:
+  - regex: \bsteam deck\b
+    boost-appids:
+      - net.retrodeck.retrodeck
+    exponential-boost:
+      factor: 2.0
+      y-intercept: 5.0
+```
+
+Pro tip: pressing `ctrl-alt-d` in Bazaar activates debug mode, which enables you
+to see the scores of app results on the search page. This is useful for
+debugging search biases!
 
 ## Translations in YAML Configs
 
