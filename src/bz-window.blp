@@ -3,7 +3,7 @@ using Gio 2.0;
 using Adw 1;
 
 template $BzWindow: Adw.ApplicationWindow {
-  title: _("Bazaar");
+  title: bind $format_title(navigation_view.visible-page as <Adw.NavigationPage>.title);
   default-width: 1220;
   default-height: 900;
   width-request: 360;
@@ -295,7 +295,7 @@ template $BzWindow: Adw.ApplicationWindow {
 
             Adw.NavigationPage {
               tag: "view";
-              title: "view";
+              title: bind full_view.entry-group as <$BzEntryGroup>.title as <string>;
 
               child: $BzFullView full_view {
                 state: bind template.state;

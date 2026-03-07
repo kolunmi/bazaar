@@ -363,6 +363,16 @@ format_progress (gpointer object,
   return g_strdup_printf ("%.0f%%", 100.0 * value);
 }
 
+static char *
+format_title (gpointer    object,
+              const char *title)
+{
+  if (title == NULL || *title == '\0' || g_strcmp0 (title, _("Bazaar")) == 0)
+    return g_strdup (_("Bazaar"));
+  /* Translators: %s is the title of the current page */
+  return g_strdup_printf (_("Bazaar — %s"), title);
+}
+
 static BzEntryGroup *
 resolve_group_from_parameter (BzWindow *self,
                               GVariant *parameter,
@@ -613,6 +623,7 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, browse_flathub_cb);
   gtk_widget_class_bind_template_callback (widget_class, open_search_cb);
   gtk_widget_class_bind_template_callback (widget_class, format_progress);
+  gtk_widget_class_bind_template_callback (widget_class, format_title);
 
   gtk_widget_class_install_action (widget_class, "escape", NULL, action_escape);
   gtk_widget_class_install_action (widget_class, "window.user-data", NULL, action_user_data);
