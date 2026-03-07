@@ -308,7 +308,8 @@ bz_app_tile_set_preferred_width (BzAppTile *self,
 
   self->preferred_width = preferred_width;
 
-  layout_manager                                       = gtk_widget_get_layout_manager (GTK_WIDGET (self));
+  layout_manager = gtk_widget_get_layout_manager (GTK_WIDGET (self));
+
   BZ_APP_TILE_LAYOUT (layout_manager)->preferred_width = preferred_width;
   gtk_layout_manager_layout_changed (layout_manager);
 
