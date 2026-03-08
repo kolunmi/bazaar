@@ -27,7 +27,12 @@ template $BzUpdatesCard: Adw.Bin {
         Label {
           label: bind $format_update_count(template.state as <$BzStateInfo>.available-updates) as <string>;
           hexpand: true;
+          wrap: true;
+          wrap-mode: word_char;
           halign: start;
+          valign: center;
+          margin-top: 8;
+          margin-bottom: 8;
         }
 
         Button {
