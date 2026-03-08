@@ -67,9 +67,10 @@ static void
 regenerate (BzAppstreamDescriptionRender *self);
 
 static void
-insert (GtkTextBuffer *buffer,
-        GtkTextIter   *iter,
-        const char    *text);
+insert (BzAppstreamDescriptionRender *self,
+        GtkTextBuffer                *buffer,
+        GtkTextIter                  *iter,
+        const char                   *text);
 
 static void
 compile (BzAppstreamDescriptionRender *self,
@@ -82,6 +83,24 @@ compile (BzAppstreamDescriptionRender *self,
 
 static char *
 normalize_whitespace (const char *text);
+
+static const char *
+get_link_at_coords (GtkTextView *text_view,
+                    double       x,
+                    double       y);
+
+static void
+on_click_released (GtkGestureClick *gesture,
+                   int              n_press,
+                   double           x,
+                   double           y,
+                   GtkTextView     *text_view);
+
+static void
+on_motion (GtkEventControllerMotion *controller,
+           double                    x,
+           double                    y,
+           GtkTextView              *text_view);
 
 static void
 bz_appstream_description_render_dispose (GObject *object)
@@ -187,13 +206,86 @@ setup_text_tags (GtkTextBuffer *buffer)
 static void
 bz_appstream_description_render_init (BzAppstreamDescriptionRender *self)
 {
-  GtkTextBuffer *buffer = NULL;
+  GtkTextBuffer      *buffer        = NULL;
+  GtkGesture         *click         = NULL;
+  GtkEventController *motion        = NULL;
+  AdwStyleManager    *style_manager = NULL;
 
   gtk_widget_init_template (GTK_WIDGET (self));
 
   buffer = gtk_text_view_get_buffer (self->text_view);
   setup_text_tags (buffer);
   gtk_widget_remove_css_class (GTK_WIDGET (self->text_view), "view");
+
+  click = gtk_gesture_click_new ();
+  gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (click), GDK_BUTTON_PRIMARY);
+  g_signal_connect (click, "released", G_CALLBACK (on_click_released), self->text_view);
+  gtk_widget_add_controller (GTK_WIDGET (self->text_view), GTK_EVENT_CONTROLLER (click));
+
+  motion = gtk_event_controller_motion_new ();
+  g_signal_connect (motion, "motion", G_CALLBACK (on_motion), self->text_view);
+  gtk_widget_add_controller (GTK_WIDGET (self->text_view), motion);
+
+  style_manager = adw_style_manager_get_default ();
+  g_signal_connect_object (style_manager, "notify::accent-color",
+                           G_CALLBACK (regenerate), self, G_CONNECT_SWAPPED);
+}
+
+static const char *
+get_link_at_coords (GtkTextView *text_view,
+                    double       x,
+                    double       y)
+{
+  GtkTextIter iter        = { 0 };
+  int         bx          = 0;
+  int         by          = 0;
+  g_autoptr (GSList) tags = NULL;
+  GSList     *l           = NULL;
+  const char *href        = NULL;
+
+  gtk_text_view_window_to_buffer_coords (text_view, GTK_TEXT_WINDOW_WIDGET,
+                                         (int) x, (int) y, &bx, &by);
+  gtk_text_view_get_iter_at_location (text_view, &iter, bx, by);
+  tags = gtk_text_iter_get_tags (&iter);
+  for (l = tags; l != NULL; l = l->next)
+    {
+      href = g_object_get_data (G_OBJECT (l->data), "href");
+      if (href != NULL)
+        return href;
+    }
+  return NULL;
+}
+
+static void
+on_click_released (GtkGestureClick *gesture,
+                   int              n_press,
+                   double           x,
+                   double           y,
+                   GtkTextView     *text_view)
+{
+  const char *href                    = NULL;
+  g_autoptr (GtkUriLauncher) launcher = NULL;
+  GtkWindow *root                     = NULL;
+
+  href = get_link_at_coords (text_view, x, y);
+  if (href == NULL)
+    return;
+
+  launcher = gtk_uri_launcher_new (href);
+  root     = GTK_WINDOW (gtk_widget_get_root (GTK_WIDGET (text_view)));
+  gtk_uri_launcher_launch (launcher, root, NULL, NULL, NULL);
+}
+
+static void
+on_motion (GtkEventControllerMotion *controller,
+           double                    x,
+           double                    y,
+           GtkTextView              *text_view)
+{
+  if (get_link_at_coords (text_view, x, y) != NULL)
+    gtk_widget_set_cursor_from_name (GTK_WIDGET (text_view), "pointer");
+  else
+    gtk_widget_set_cursor (GTK_WIDGET (text_view), NULL);
 }
 
 BzAppstreamDescriptionRender *
@@ -275,30 +367,85 @@ regenerate (BzAppstreamDescriptionRender *self)
 }
 
 static void
-insert (GtkTextBuffer *buffer,
-        GtkTextIter   *iter,
-        const char    *text)
+insert_url (BzAppstreamDescriptionRender *self,
+            GtkTextBuffer                *buffer,
+            GtkTextIter                  *iter,
+            const char                   *url)
 {
-  g_auto (GStrv) parts = NULL;
+  g_autoptr (GdkRGBA) rgba = NULL;
+  GtkTextTag  *tag         = NULL;
+  GtkTextMark *mark        = NULL;
+  GtkTextIter  start       = { 0 };
+
+  rgba = adw_style_manager_get_accent_color_rgba (adw_style_manager_get_default ());
+  tag  = gtk_text_buffer_create_tag (buffer, NULL,
+                                     "foreground-rgba", rgba,
+                                     "underline", PANGO_UNDERLINE_SINGLE,
+                                     NULL);
+  g_object_set_data_full (G_OBJECT (tag), "href", g_strdup (url), g_free);
+  mark = gtk_text_buffer_create_mark (buffer, NULL, iter, TRUE);
+  gtk_text_buffer_insert (buffer, iter, url, -1);
+  gtk_text_buffer_get_iter_at_mark (buffer, &start, mark);
+  gtk_text_buffer_apply_tag (buffer, tag, &start, iter);
+  gtk_text_buffer_delete_mark (buffer, mark);
+}
+
+static void
+insert (BzAppstreamDescriptionRender *self,
+        GtkTextBuffer                *buffer,
+        GtkTextIter                  *iter,
+        const char                   *text)
+{
+  g_auto (GStrv) parts       = NULL;
+  const char      *p         = NULL;
+  const char      *http      = NULL;
+  const char      *https     = NULL;
+  const char      *url_start = NULL;
+  const char      *url_end   = NULL;
+  const char      *chunk     = NULL;
+  GtkTextMark     *m         = NULL;
+  GtkTextIter      si        = { 0 };
+  g_autofree char *url       = NULL;
+  int              j         = 0;
 
   parts = g_strsplit (text, "**", -1);
-
-  for (int j = 0; parts[j] != NULL; j++)
+  for (j = 0; parts[j] != NULL; j++)
     {
-      if (j % 2 == 0)
+      chunk = parts[j];
+      if (j % 2 != 0)
         {
-          gtk_text_buffer_insert (buffer, iter, parts[j], -1);
-        }
-      else
-        {
-          GtkTextMark *m  = NULL;
-          GtkTextIter  si = { 0 };
-
           m = gtk_text_buffer_create_mark (buffer, NULL, iter, TRUE);
-          gtk_text_buffer_insert (buffer, iter, parts[j], -1);
+          gtk_text_buffer_insert (buffer, iter, chunk, -1);
           gtk_text_buffer_get_iter_at_mark (buffer, &si, m);
           gtk_text_buffer_apply_tag_by_name (buffer, "emphasis", &si, iter);
           gtk_text_buffer_delete_mark (buffer, m);
+          continue;
+        }
+
+      p = chunk;
+      while (*p != '\0')
+        {
+          http  = strstr (p, "http://");
+          https = strstr (p, "https://");
+
+          url_start = (http != NULL && (https == NULL || http < https)) ? http : https;
+
+          if (url_start == NULL)
+            {
+              gtk_text_buffer_insert (buffer, iter, p, -1);
+              break;
+            }
+
+          if (url_start > p)
+            gtk_text_buffer_insert (buffer, iter, p, (int) (url_start - p));
+
+          url_end = url_start;
+          while (*url_end != '\0' && !g_ascii_isspace (*url_end))
+            url_end++;
+
+          url = g_strndup (url_start, url_end - url_start);
+          insert_url (self, buffer, iter, url);
+          p = url_end;
         }
     }
 }
@@ -376,7 +523,7 @@ compile (BzAppstreamDescriptionRender *self,
 
       normalized = normalize_whitespace (text);
       if (normalized != NULL && *normalized != '\0')
-        insert (buffer, iter, normalized);
+        insert (self, buffer, iter, normalized);
     }
 
   for (int i = 0; child != NULL; i++)
@@ -394,7 +541,7 @@ compile (BzAppstreamDescriptionRender *self,
 
           normalized = normalize_whitespace (tail);
           if (normalized != NULL && *normalized != '\0')
-            insert (buffer, iter, normalized);
+            insert (self, buffer, iter, normalized);
         }
 
       g_object_unref (child);
