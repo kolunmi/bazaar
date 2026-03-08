@@ -2733,6 +2733,11 @@ init_service_struct (BzApplication *self,
   bz_state_info_set_donation_prompt_dismissed (self->state, TRUE);
 
   {
+    GtkSettings *gtk_settings = gtk_settings_get_default ();
+    g_object_set (gtk_settings, "gtk-icon-theme-name", "Adwaita", NULL);
+  }
+
+  {
     g_autoptr (GtkIconTheme) user_theme   = NULL;
     g_autoptr (GtkIconTheme) system_theme = NULL;
     g_autofree char *user_export_dir      = NULL;
