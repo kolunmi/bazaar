@@ -183,6 +183,19 @@ is_blocked (gpointer      object,
   return FALSE;
 }
 
+static gboolean
+idle_grab_focus (gpointer user_data)
+{
+  BzInstallControls *self = BZ_INSTALL_CONTROLS (user_data);
+
+  if (gtk_widget_is_visible (GTK_WIDGET (self)))
+    gtk_widget_grab_focus (self->group != NULL && bz_entry_group_get_removable (self->group) > 0
+                               ? self->open_button
+                               : self->install_button);
+
+  return G_SOURCE_REMOVE;
+}
+
 static void
 bz_install_controls_dispose (GObject *object)
 {
@@ -373,6 +386,9 @@ bz_install_controls_set_entry_group (BzInstallControls *self,
     self->group = g_object_ref (group);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ENTRY_GROUP]);
+
+  if (group != NULL)
+        g_idle_add (idle_grab_focus, self);
 }
 
 BzStateInfo *
@@ -393,15 +409,4 @@ bz_install_controls_set_state (BzInstallControls *self,
     self->state = g_object_ref (state);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_STATE]);
-}
-
-void
-bz_install_controls_grab_focus_preferred (BzInstallControls *self)
-{
-  g_return_if_fail (BZ_IS_INSTALL_CONTROLS (self));
-
-  if (gtk_widget_get_visible (self->open_button))
-    gtk_widget_grab_focus (self->open_button);
-  else if (gtk_widget_get_visible (self->install_button))
-    gtk_widget_grab_focus (self->install_button);
 }
