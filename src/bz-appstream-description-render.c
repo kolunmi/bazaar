@@ -444,6 +444,14 @@ insert (BzAppstreamDescriptionRender *self,
             url_end++;
 
           url = g_strndup (url_start, url_end - url_start);
+          for (char *end = url + strlen (url) - 1;
+               end >= url && strchr (").,!?", *end) != NULL;
+               end--)
+            {
+              *end = '\0';
+              url_end--;
+            }
+
           insert_url (self, buffer, iter, url);
           p = url_end;
         }
