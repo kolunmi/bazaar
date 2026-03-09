@@ -2802,12 +2802,15 @@ init_service_struct (BzApplication *self,
   self->settings = g_settings_new (app_id);
 
   if (g_settings_get_boolean (self->settings, "force-adwaita-icons"))
-  {
-    GtkSettings *gtk_settings = NULL;
-    gtk_settings = gtk_settings_get_default ();
+    {
+      GtkSettings *gtk_settings = NULL;
 
-    g_object_set (gtk_settings, "gtk-icon-theme-name", "Adwaita", NULL);
-  }
+      gtk_settings = gtk_settings_get_default ();
+      g_object_set (
+          gtk_settings,
+          "gtk-icon-theme-name", "Adwaita",
+          NULL);
+    }
 
   bz_state_info_set_hide_eol (
       self->state,
