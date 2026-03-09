@@ -33,26 +33,26 @@ struct _BzEntryGroup
 
   BzApplicationMapFactory *factory;
 
-  GtkStringList *unique_ids;
-  GtkStringList *installed_versions;
-  char          *id;
-  char          *title;
-  char          *developer;
-  char          *description;
-  GIcon         *mini_icon;
-  gboolean       is_floss;
-  char          *light_accent_color;
-  char          *dark_accent_color;
-  gboolean       is_flathub;
-  gboolean       is_verified;
-  char          *search_tokens;
-  char          *remote_repos_string;
-  char          *eol;
-  guint64        installed_size;
-  int            n_addons;
-  char          *donation_url;
-  GListModel    *categories;
-  int            content_age_rating;
+  GtkStringList  *unique_ids;
+  GtkStringList  *installed_versions;
+  char           *id;
+  char           *title;
+  char           *developer;
+  char           *description;
+  GIcon          *mini_icon;
+  gboolean        is_floss;
+  char           *light_accent_color;
+  char           *dark_accent_color;
+  gboolean        is_flathub;
+  gboolean        is_verified;
+  char           *search_tokens;
+  char           *remote_repos_string;
+  char           *eol;
+  guint64         installed_size;
+  int             n_addons;
+  char           *donation_url;
+  BzCategoryFlags categories;
+  int             content_age_rating;
 
   int max_usefulness;
 
@@ -154,7 +154,6 @@ bz_entry_group_dispose (GObject *object)
   g_clear_pointer (&self->remote_repos_string, g_free);
   g_clear_pointer (&self->eol, g_free);
   g_clear_pointer (&self->donation_url, g_free);
-  g_clear_object (&self->categories);
 
   g_weak_ref_clear (&self->ui_entry);
   g_clear_object (&self->standalone_ui_entry);
@@ -225,7 +224,7 @@ bz_entry_group_get_property (GObject    *object,
       g_value_set_string (value, bz_entry_group_get_donation_url (self));
       break;
     case PROP_CATEGORIES:
-      g_value_set_object (value, bz_entry_group_get_categories (self));
+      g_value_set_uint (value, self->categories);
       break;
     case PROP_UI_ENTRY:
       g_value_take_object (value, bz_entry_group_dup_ui_entry (self));
@@ -414,10 +413,11 @@ bz_entry_group_class_init (BzEntryGroupClass *klass)
           G_PARAM_READABLE);
 
   props[PROP_CATEGORIES] =
-      g_param_spec_object (
+      g_param_spec_uint (
           "categories",
           NULL, NULL,
-          G_TYPE_LIST_MODEL,
+          0, G_MAXUINT,
+          BZ_CATEGORY_FLAGS_NONE,
           G_PARAM_READABLE);
 
   props[PROP_UI_ENTRY] =
@@ -512,24 +512,24 @@ bz_entry_group_new (BzApplicationMapFactory *factory)
 BzEntryGroup *
 bz_entry_group_new_for_single_entry (BzEntry *entry)
 {
-  BzEntryGroup *group              = NULL;
-  const char   *id                 = NULL;
-  const char   *unique_id          = NULL;
-  const char   *title              = NULL;
-  const char   *developer          = NULL;
-  const char   *description        = NULL;
-  GIcon        *mini_icon          = NULL;
-  const char   *search_tokens      = NULL;
-  gboolean      is_floss           = FALSE;
-  const char   *light_accent_color = NULL;
-  const char   *dark_accent_color  = NULL;
-  gboolean      is_flathub         = FALSE;
-  gboolean      is_verified        = FALSE;
-  const char   *eol                = NULL;
-  guint64       installed_size     = 0;
-  const char   *donation_url       = NULL;
-  GListModel   *entry_categories   = NULL;
-  DexFuture    *future             = NULL;
+  BzEntryGroup   *group              = NULL;
+  const char     *id                 = NULL;
+  const char     *unique_id          = NULL;
+  const char     *title              = NULL;
+  const char     *developer          = NULL;
+  const char     *description        = NULL;
+  GIcon          *mini_icon          = NULL;
+  const char     *search_tokens      = NULL;
+  gboolean        is_floss           = FALSE;
+  const char     *light_accent_color = NULL;
+  const char     *dark_accent_color  = NULL;
+  gboolean        is_flathub         = FALSE;
+  gboolean        is_verified        = FALSE;
+  const char     *eol                = NULL;
+  guint64         installed_size     = 0;
+  const char     *donation_url       = NULL;
+  BzCategoryFlags entry_categories   = BZ_CATEGORY_FLAGS_NONE;
+  DexFuture      *future             = NULL;
 
   g_return_val_if_fail (BZ_IS_ENTRY (entry), NULL);
 
@@ -550,7 +550,7 @@ bz_entry_group_new_for_single_entry (BzEntry *entry)
   eol                = bz_entry_get_eol (entry);
   installed_size     = bz_entry_get_installed_size (entry);
   donation_url       = bz_entry_get_donation_url (entry);
-  entry_categories   = bz_entry_get_categories (entry);
+  entry_categories   = bz_entry_get_category_flags (entry);
 
   if (id != NULL)
     group->id = g_strdup (id);
@@ -576,8 +576,8 @@ bz_entry_group_new_for_single_entry (BzEntry *entry)
   group->installed_size = installed_size;
   if (donation_url != NULL)
     group->donation_url = g_strdup (donation_url);
-  if (entry_categories != NULL)
-    group->categories = g_object_ref (entry_categories);
+
+  group->categories = entry_categories;
 
   if (unique_id != NULL)
     gtk_string_list_append (group->unique_ids, unique_id);
@@ -715,11 +715,12 @@ bz_entry_group_get_donation_url (BzEntryGroup *self)
   return self->donation_url;
 }
 
-GListModel *
-bz_entry_group_get_categories (BzEntryGroup *self)
+gboolean
+bz_entry_group_has_category (BzEntryGroup *self,
+                             const char   *name)
 {
-  g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), NULL);
-  return self->categories;
+  g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), FALSE);
+  return bz_category_flags_has_name (self->categories, name);
 }
 
 int
@@ -862,7 +863,7 @@ bz_entry_group_add (BzEntryGroup *self,
   GListModel      *addons             = NULL;
   int              n_addons           = 0;
   const char      *donation_url       = NULL;
-  GListModel      *entry_categories   = NULL;
+  BzCategoryFlags  entry_categories   = BZ_CATEGORY_FLAGS_NONE;
   guint            existing           = 0;
   gboolean         is_searchable      = FALSE;
   AsContentRating *content_rating     = NULL;
@@ -909,7 +910,7 @@ bz_entry_group_add (BzEntryGroup *self,
   is_verified        = bz_entry_is_verified (entry);
   installed_size     = bz_entry_get_installed_size (entry);
   donation_url       = bz_entry_get_donation_url (entry);
-  entry_categories   = bz_entry_get_categories (entry);
+  entry_categories   = bz_entry_get_category_flags (entry);
   content_rating     = bz_entry_get_content_rating (entry);
 
   addons        = bz_entry_get_addons (entry);
@@ -1003,11 +1004,9 @@ bz_entry_group_add (BzEntryGroup *self,
           self->donation_url = g_strdup (donation_url);
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DONATION_URL]);
         }
-
-      if (entry_categories != NULL && g_list_model_get_n_items (entry_categories) > 0)
+      if (entry_categories != BZ_CATEGORY_FLAGS_NONE)
         {
-          g_clear_object (&self->categories);
-          self->categories = g_object_ref (entry_categories);
+          self->categories = entry_categories;
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CATEGORIES]);
         }
       if (content_rating != NULL)
