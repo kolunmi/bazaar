@@ -64,5 +64,10 @@
       <summary>Saved Window Dimensions</summary>
       <description>The window dimensions to be used by the next Bazaar window</description>
     </key>
+    <key name="force-adwaita-icons" type="b">
+      <default>true</default>
+      <summary>Force Adwaita Icon Theme</summary>
+      <description>Override the icon theme with Adwaita</description>
+    </key>
   </schema>
 </schemalist>
