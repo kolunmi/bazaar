@@ -184,15 +184,20 @@ is_blocked (gpointer      object,
 }
 
 static gboolean
-idle_grab_focus (gpointer user_data)
+idle_grab_focus (GWeakRef *wr)
 {
-  BzInstallControls *self = BZ_INSTALL_CONTROLS (user_data);
+  g_autoptr (BzInstallControls) self = NULL;
+
+  self = g_weak_ref_get (wr);
+  if (self == NULL)
+    goto done;
 
   if (gtk_widget_is_visible (GTK_WIDGET (self)))
     gtk_widget_grab_focus (self->group != NULL && bz_entry_group_get_removable (self->group) > 0
                                ? self->open_button
                                : self->install_button);
 
+done:
   return G_SOURCE_REMOVE;
 }
 
@@ -388,7 +393,10 @@ bz_install_controls_set_entry_group (BzInstallControls *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ENTRY_GROUP]);
 
   if (group != NULL)
-        g_idle_add (idle_grab_focus, self);
+    g_idle_add_full (
+        G_PRIORITY_DEFAULT_IDLE,
+        (GSourceFunc) idle_grab_focus,
+        bz_track_weak (self), bz_weak_release);
 }
 
 BzStateInfo *
