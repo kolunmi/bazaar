@@ -440,8 +440,8 @@ insert (BzAppstreamDescriptionRender *self,
             gtk_text_buffer_insert (buffer, iter, p, (int) (url_start - p));
 
           url_end = url_start;
-          while (*url_end != '\0' && !g_ascii_isspace (*url_end))
-            url_end++;
+          while (*url_end != '\0' && !g_unichar_isspace (g_utf8_get_char (url_end)))
+            url_end = g_utf8_next_char (url_end);
 
           url = g_strndup (url_start, url_end - url_start);
           for (char *end = url + strlen (url) - 1;
