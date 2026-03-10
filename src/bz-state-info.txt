@@ -53,6 +53,7 @@ property=settings GSettings G_TYPE_SETTINGS object
 property=show_only_flathub gboolean G_TYPE_BOOLEAN boolean
 property=show_only_foss gboolean G_TYPE_BOOLEAN boolean
 property=show_only_verified gboolean G_TYPE_BOOLEAN boolean
+property=show_only_mobile gboolean G_TYPE_BOOLEAN boolean
 property=syncing gboolean G_TYPE_BOOLEAN boolean
 property=system_icon_theme GtkIconTheme GTK_TYPE_ICON_THEME object
 property=transaction_manager BzTransactionManager BZ_TYPE_TRANSACTION_MANAGER object

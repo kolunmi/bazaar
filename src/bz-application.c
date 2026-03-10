@@ -2194,6 +2194,7 @@ show_hide_app_setting_changed (BzApplication *self,
   bz_state_info_set_show_only_foss (self->state, g_settings_get_boolean (self->settings, "show-only-foss"));
   bz_state_info_set_show_only_flathub (self->state, g_settings_get_boolean (self->settings, "show-only-flathub"));
   bz_state_info_set_show_only_verified (self->state, g_settings_get_boolean (self->settings, "show-only-verified"));
+  bz_state_info_set_show_only_mobile (self->state, g_settings_get_boolean (self->settings, "show-only-mobile"));
 
   gtk_filter_changed (GTK_FILTER (self->group_filter), GTK_FILTER_CHANGE_DIFFERENT);
   gtk_filter_changed (GTK_FILTER (self->appid_filter), GTK_FILTER_CHANGE_DIFFERENT);
@@ -2849,6 +2850,15 @@ init_service_struct (BzApplication *self,
       G_CALLBACK (show_hide_app_setting_changed),
       self);
 
+    bz_state_info_set_show_only_mobile (
+      self->state,
+      g_settings_get_boolean (self->settings, "show-only-mobile"));
+  g_signal_connect_swapped (
+      self->settings,
+      "changed::show-only-mobile",
+      G_CALLBACK (show_hide_app_setting_changed),
+      self);
+
   self->blocklist_regexes = g_ptr_array_new_with_free_func (
       (GDestroyNotify) g_ptr_array_unref);
   self->blocklists_provider = bz_content_provider_new ();
@@ -3202,6 +3212,9 @@ validate_group_for_ui (BzApplication *self,
     return FALSE;
   if (bz_state_info_get_show_only_verified (self->state) &&
       !bz_entry_group_get_is_verified (group))
+    return FALSE;
+  if (bz_state_info_get_show_only_mobile (self->state) &&
+      !bz_entry_group_get_is_mobile_friendly (group))
     return FALSE;
 
   if (self->malcontent != NULL)

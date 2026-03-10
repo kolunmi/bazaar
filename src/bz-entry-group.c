@@ -45,6 +45,7 @@ struct _BzEntryGroup
   char          *dark_accent_color;
   gboolean       is_flathub;
   gboolean       is_verified;
+  gboolean       is_mobile_friendly;
   char          *search_tokens;
   char          *eol;
   guint64        installed_size;
@@ -92,6 +93,7 @@ enum
   PROP_DARK_ACCENT_COLOR,
   PROP_IS_FLATHUB,
   PROP_IS_VERIFIED,
+  PROP_IS_MOBILE_FRIENDLY,
   PROP_SEARCH_TOKENS,
   PROP_UI_ENTRY,
   PROP_EOL,
@@ -206,6 +208,9 @@ bz_entry_group_get_property (GObject    *object,
     case PROP_IS_VERIFIED:
       g_value_set_boolean (value, bz_entry_group_get_is_verified (self));
       break;
+    case PROP_IS_MOBILE_FRIENDLY:
+      g_value_set_boolean (value, bz_entry_group_get_is_mobile_friendly (self));
+      break;
     case PROP_SEARCH_TOKENS:
       g_value_set_boxed (value, bz_entry_group_get_search_tokens (self));
       break;
@@ -274,6 +279,7 @@ bz_entry_group_set_property (GObject      *object,
     case PROP_DARK_ACCENT_COLOR:
     case PROP_IS_FLATHUB:
     case PROP_IS_VERIFIED:
+    case PROP_IS_MOBILE_FRIENDLY:
     case PROP_SEARCH_TOKENS:
     case PROP_EOL:
     case PROP_UI_ENTRY:
@@ -371,6 +377,12 @@ bz_entry_group_class_init (BzEntryGroupClass *klass)
   props[PROP_IS_VERIFIED] =
       g_param_spec_boolean (
           "is-verified",
+          NULL, NULL, FALSE,
+          G_PARAM_READABLE);
+
+  props[PROP_IS_MOBILE_FRIENDLY] =
+      g_param_spec_boolean (
+          "is-mobile-friendly",
           NULL, NULL, FALSE,
           G_PARAM_READABLE);
 
@@ -512,6 +524,7 @@ bz_entry_group_new_for_single_entry (BzEntry *entry)
   const char   *dark_accent_color  = NULL;
   gboolean      is_flathub         = FALSE;
   gboolean      is_verified        = FALSE;
+  gboolean      is_mobile_friendly = FALSE;
   const char   *eol                = NULL;
   guint64       installed_size     = 0;
   const char   *donation_url       = NULL;
@@ -534,6 +547,7 @@ bz_entry_group_new_for_single_entry (BzEntry *entry)
   dark_accent_color  = bz_entry_get_dark_accent_color (entry);
   is_flathub         = bz_entry_get_is_flathub (entry);
   is_verified        = bz_entry_is_verified (entry);
+  is_mobile_friendly = bz_entry_get_is_mobile_friendly (entry);
   eol                = bz_entry_get_eol (entry);
   installed_size     = bz_entry_get_installed_size (entry);
   donation_url       = bz_entry_get_donation_url (entry);
@@ -556,8 +570,9 @@ bz_entry_group_new_for_single_entry (BzEntry *entry)
     group->light_accent_color = g_strdup (light_accent_color);
   if (dark_accent_color != NULL)
     group->dark_accent_color = g_strdup (dark_accent_color);
-  group->is_flathub  = is_flathub;
-  group->is_verified = is_verified;
+  group->is_flathub         = is_flathub;
+  group->is_verified        = is_verified;
+  group->is_mobile_friendly = is_mobile_friendly;
   if (eol != NULL)
     group->eol = g_strdup (eol);
   group->installed_size = installed_size;
@@ -665,6 +680,13 @@ bz_entry_group_get_is_verified (BzEntryGroup *self)
 {
   g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), FALSE);
   return self->is_verified;
+}
+
+gboolean
+bz_entry_group_get_is_mobile_friendly (BzEntryGroup *self)
+{
+  g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), FALSE);
+  return self->is_mobile_friendly;
 }
 
 const char *
@@ -845,6 +867,7 @@ bz_entry_group_add (BzEntryGroup *self,
   const char      *dark_accent_color  = NULL;
   gboolean         is_flathub         = FALSE;
   gboolean         is_verified        = FALSE;
+  gboolean         is_mobile_friendly = FALSE;
   guint64          installed_size     = 0;
   GListModel      *addons             = NULL;
   int              n_addons           = 0;
@@ -894,6 +917,7 @@ bz_entry_group_add (BzEntryGroup *self,
   dark_accent_color  = bz_entry_get_dark_accent_color (entry);
   is_flathub         = bz_entry_get_is_flathub (entry);
   is_verified        = bz_entry_is_verified (entry);
+  is_mobile_friendly = bz_entry_get_is_mobile_friendly (entry);
   installed_size     = bz_entry_get_installed_size (entry);
   donation_url       = bz_entry_get_donation_url (entry);
   entry_categories   = bz_entry_get_categories (entry);
@@ -973,6 +997,11 @@ bz_entry_group_add (BzEntryGroup *self,
         {
           self->is_verified = is_verified;
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_IS_VERIFIED]);
+        }
+      if (!!is_mobile_friendly != !!self->is_mobile_friendly)
+        {
+          self->is_mobile_friendly = is_mobile_friendly;
+          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_IS_MOBILE_FRIENDLY]);
         }
       if (installed_size != self->installed_size)
         {
