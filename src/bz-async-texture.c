@@ -25,6 +25,7 @@
 #define HTTP_TIMEOUT_SECONDS   5
 #define MAX_LOAD_RETRIES       3
 #define RETRY_INTERVAL_SECONDS 1
+#define TEXTURE_LINGER_SECONDS 2
 
 #include "config.h"
 
@@ -36,6 +37,131 @@
 #include "bz-env.h"
 #include "bz-io.h"
 #include "bz-util.h"
+
+typedef struct
+{
+  GdkTexture *texture;
+  guint       linger_source_id;
+  gsize       refcount;
+} TextureCacheEntry;
+
+static GMutex      texture_cache_mutex = { 0 };
+static GHashTable *texture_cache       = NULL;
+
+static void
+texture_cache_ensure (void)
+{
+  if (texture_cache == NULL)
+    texture_cache = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+}
+
+static gboolean
+linger_timeout_cb (char *uri)
+{
+  TextureCacheEntry *entry = NULL;
+
+  g_mutex_lock (&texture_cache_mutex);
+  texture_cache_ensure ();
+
+  entry = g_hash_table_lookup (texture_cache, uri);
+  if (entry != NULL)
+    {
+      if (entry->refcount == 0)
+        {
+          g_clear_object (&entry->texture);
+          g_hash_table_remove (texture_cache, uri);
+          g_slice_free (TextureCacheEntry, entry);
+          g_debug ("Texture cache: evicted '%s' after linger (table size: %u)\n",
+                   uri, g_hash_table_size (texture_cache));
+        }
+      else
+        entry->linger_source_id = 0;
+    }
+
+  g_mutex_unlock (&texture_cache_mutex);
+  return G_SOURCE_REMOVE;
+}
+
+static GdkTexture *
+texture_cache_acquire (const char *uri)
+{
+  TextureCacheEntry *entry = NULL;
+  GdkTexture        *tex   = NULL;
+
+  g_mutex_lock (&texture_cache_mutex);
+  texture_cache_ensure ();
+
+  entry = g_hash_table_lookup (texture_cache, uri);
+  if (entry != NULL && entry->texture != NULL)
+    {
+      entry->refcount++;
+      if (entry->linger_source_id != 0)
+        {
+          g_source_remove (entry->linger_source_id);
+          entry->linger_source_id = 0;
+        }
+      tex = g_object_ref (entry->texture);
+    }
+
+  g_mutex_unlock (&texture_cache_mutex);
+  return tex;
+}
+
+static void
+texture_cache_store (const char *uri,
+                     GdkTexture *texture)
+{
+  TextureCacheEntry *entry = NULL;
+
+  g_mutex_lock (&texture_cache_mutex);
+  texture_cache_ensure ();
+
+  entry = g_hash_table_lookup (texture_cache, uri);
+  if (entry == NULL)
+    {
+      entry = g_slice_new0 (TextureCacheEntry);
+      g_hash_table_insert (texture_cache, g_strdup (uri), entry);
+    }
+
+  if (entry->texture != texture)
+    {
+      g_clear_object (&entry->texture);
+      entry->texture = g_object_ref (texture);
+    }
+  entry->refcount++;
+
+  g_mutex_unlock (&texture_cache_mutex);
+}
+
+static void
+texture_cache_release (const char *uri)
+{
+  TextureCacheEntry *entry = NULL;
+
+  g_mutex_lock (&texture_cache_mutex);
+  texture_cache_ensure ();
+
+  entry = g_hash_table_lookup (texture_cache, uri);
+  if (entry == NULL)
+    {
+      g_mutex_unlock (&texture_cache_mutex);
+      return;
+    }
+
+  if (entry->refcount > 0)
+    entry->refcount--;
+
+  if (entry->refcount == 0 && entry->linger_source_id == 0 && entry->texture != NULL)
+    {
+      entry->linger_source_id = g_timeout_add_seconds_full (
+          G_PRIORITY_DEFAULT,
+          TEXTURE_LINGER_SECONDS,
+          (GSourceFunc) linger_timeout_cb,
+          g_strdup (uri), g_free);
+    }
+
+  g_mutex_unlock (&texture_cache_mutex);
+}
 
 BZ_DEFINE_DATA (
     load,
@@ -74,6 +200,8 @@ struct _BzAsyncTexture
 
   GdkPaintable *paintable;
   GMutex        mutex;
+
+  gboolean cache_acquired;
 };
 
 static void paintable_iface_init (GdkPaintableInterface *iface);
@@ -128,6 +256,13 @@ bz_async_texture_dispose (GObject *object)
   dex_clear (&self->retry_future);
 
   g_clear_object (&self->source);
+
+  if (self->cache_acquired && self->source_uri != NULL)
+    {
+      texture_cache_release (self->source_uri);
+      self->cache_acquired = FALSE;
+    }
+
   g_clear_pointer (&self->source_uri, g_free);
   g_clear_object (&self->cache_into);
   g_clear_pointer (&self->cache_into_path, g_free);
@@ -224,8 +359,9 @@ bz_async_texture_class_init (BzAsyncTextureClass *klass)
 static void
 bz_async_texture_init (BzAsyncTexture *self)
 {
-  self->retries   = 0;
-  self->paintable = NULL;
+  self->retries        = 0;
+  self->paintable      = NULL;
+  self->cache_acquired = FALSE;
   g_mutex_init (&self->mutex);
 
   if (!g_log_writer_default_would_drop (G_LOG_LEVEL_DEBUG, G_LOG_DOMAIN))
@@ -487,6 +623,24 @@ maybe_load (BzAsyncTexture *self)
       (self->task != NULL && dex_future_is_pending (self->task)) ||
       self->retries >= MAX_LOAD_RETRIES)
     return;
+
+  if (!self->cache_acquired)
+    {
+      GdkTexture *cached = NULL;
+      cached             = texture_cache_acquire (self->source_uri);
+      if (cached != NULL)
+        {
+          g_clear_object (&self->paintable);
+          self->paintable      = GDK_PAINTABLE (cached);
+          self->cache_acquired = TRUE;
+
+          g_idle_add_full (
+              G_PRIORITY_DEFAULT_IDLE,
+              (GSourceFunc) idle_notify,
+              g_object_ref (self), g_object_unref);
+          return;
+        }
+    }
 
   if (self->cancellable != NULL)
     g_cancellable_cancel (self->cancellable);
@@ -898,8 +1052,17 @@ load_finally (DexFuture *future,
 
   if (dex_future_is_resolved (future))
     {
+      GdkTexture *texture = NULL;
+      texture = g_value_dup_object (dex_future_get_value (future, NULL));
+
       g_clear_object (&self->paintable);
-      self->paintable = g_value_dup_object (dex_future_get_value (future, NULL));
+      self->paintable = GDK_PAINTABLE (texture);
+
+      if (!self->cache_acquired)
+        {
+          texture_cache_store (self->source_uri, texture);
+          self->cache_acquired = TRUE;
+        }
 
       g_idle_add_full (
           G_PRIORITY_DEFAULT_IDLE,
