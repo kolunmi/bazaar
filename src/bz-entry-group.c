@@ -46,7 +46,6 @@ struct _BzEntryGroup
   gboolean        is_flathub;
   gboolean        is_verified;
   char           *search_tokens;
-  char           *remote_repos_string;
   char           *eol;
   guint64         installed_size;
   int             n_addons;
@@ -95,7 +94,6 @@ enum
   PROP_IS_VERIFIED,
   PROP_SEARCH_TOKENS,
   PROP_UI_ENTRY,
-  PROP_REMOTE_REPOS_STRING,
   PROP_EOL,
   PROP_INSTALLED_SIZE,
   PROP_N_ADDONS,
@@ -151,7 +149,6 @@ bz_entry_group_dispose (GObject *object)
   g_clear_pointer (&self->dark_accent_color, g_free);
   g_clear_object (&self->mini_icon);
   g_clear_pointer (&self->search_tokens, g_free);
-  g_clear_pointer (&self->remote_repos_string, g_free);
   g_clear_pointer (&self->eol, g_free);
   g_clear_pointer (&self->donation_url, g_free);
 
@@ -229,9 +226,6 @@ bz_entry_group_get_property (GObject    *object,
     case PROP_UI_ENTRY:
       g_value_take_object (value, bz_entry_group_dup_ui_entry (self));
       break;
-    case PROP_REMOTE_REPOS_STRING:
-      g_value_set_string (value, self->remote_repos_string);
-      break;
     case PROP_INSTALLABLE:
       g_value_set_int (value, bz_entry_group_get_installable (self));
       break;
@@ -282,7 +276,6 @@ bz_entry_group_set_property (GObject      *object,
     case PROP_SEARCH_TOKENS:
     case PROP_EOL:
     case PROP_UI_ENTRY:
-    case PROP_REMOTE_REPOS_STRING:
     case PROP_INSTALLABLE:
     case PROP_UPDATABLE:
     case PROP_REMOVABLE:
@@ -425,12 +418,6 @@ bz_entry_group_class_init (BzEntryGroupClass *klass)
           "ui-entry",
           NULL, NULL,
           BZ_TYPE_RESULT,
-          G_PARAM_READABLE);
-
-  props[PROP_REMOTE_REPOS_STRING] =
-      g_param_spec_string (
-          "remote-repos-string",
-          NULL, NULL, NULL,
           G_PARAM_READABLE);
 
   props[PROP_INSTALLABLE] =
@@ -1071,38 +1058,6 @@ bz_entry_group_add (BzEntryGroup *self,
 
   if (existing == G_MAXUINT)
     {
-      const char *remote_repo = NULL;
-
-      remote_repo = bz_entry_get_remote_repo_name (entry);
-      if (remote_repo != NULL)
-        {
-          g_autofree char *capitalized_repo = NULL;
-
-          if (remote_repo[0] != '\0')
-            {
-              capitalized_repo    = g_strdup (remote_repo);
-              capitalized_repo[0] = g_ascii_toupper (capitalized_repo[0]);
-            }
-          else
-            {
-              capitalized_repo = g_strdup (remote_repo);
-            }
-
-          if (self->remote_repos_string != NULL)
-            {
-              g_autofree char *old_string = NULL;
-              if (strstr (self->remote_repos_string, capitalized_repo) == NULL)
-                {
-                  old_string                = g_steal_pointer (&self->remote_repos_string);
-                  self->remote_repos_string = g_strdup_printf ("%s • %s", old_string, capitalized_repo);
-                }
-            }
-          else
-            {
-              self->remote_repos_string = g_strdup (capitalized_repo);
-            }
-        }
-
       if (bz_entry_is_installed (entry))
         {
           self->removable++;

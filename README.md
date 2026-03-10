@@ -76,7 +76,7 @@ If you would like to try this project on your local machine, clone it
 on the cli and type these commands inside the project root:
 
 ```sh
-meson setup build --prefix=/usr/local
+meson setup build --prefix=/usr --libdir=/usr/lib64
 ninja -C build
 sudo ninja -C build install
 bazaar
