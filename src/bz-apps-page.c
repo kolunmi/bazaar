@@ -339,30 +339,10 @@ static gboolean
 filter_by_category (BzEntryGroup *group,
                     const char   *category_name)
 {
-  GListModel *categories = NULL;
-  guint       n_items    = 0;
-
   g_return_val_if_fail (BZ_IS_ENTRY_GROUP (group), FALSE);
   g_return_val_if_fail (category_name != NULL, FALSE);
 
-  categories = bz_entry_group_get_categories (group);
-  if (categories == NULL)
-    return FALSE;
-
-  n_items = g_list_model_get_n_items (categories);
-  for (guint i = 0; i < n_items; i++)
-    {
-      g_autoptr (BzFlathubCategory) category = NULL;
-      const char *name                       = NULL;
-
-      category = g_list_model_get_item (categories, i);
-      name     = bz_flathub_category_get_name (category);
-
-      if (g_strcmp0 (name, category_name) == 0)
-        return TRUE;
-    }
-
-  return FALSE;
+  return bz_entry_group_has_category (group, category_name);
 }
 
 static DexFuture *

@@ -67,6 +67,7 @@ bz_sources = files(
   'bz-async-texture.c',
   'bz-auth-state.c',
   'bz-backend.c',
+  'bz-category-flags.c',
   'bz-category-tile.c',
   'bz-comet-overlay.c',
   'bz-content-provider.c',
