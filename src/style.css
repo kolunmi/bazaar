@@ -873,6 +873,7 @@ window.narrow .category-tile {
 
 .update-toggle {
 	border-radius: 12px;
+	box-shadow: none;
 	transition: border-bottom-left-radius 150ms ease,
 	            border-bottom-right-radius 150ms ease;
 }
