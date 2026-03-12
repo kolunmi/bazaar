@@ -58,9 +58,6 @@ bz_entry_group_get_developer (BzEntryGroup *self);
 const char *
 bz_entry_group_get_description (BzEntryGroup *self);
 
-GdkPaintable *
-bz_entry_group_get_icon_paintable (BzEntryGroup *self);
-
 GIcon *
 bz_entry_group_get_mini_icon (BzEntryGroup *self);
 
@@ -94,8 +91,12 @@ bz_entry_group_get_n_addons (BzEntryGroup *self);
 const char *
 bz_entry_group_get_donation_url (BzEntryGroup *self);
 
-GListModel *
-bz_entry_group_get_categories (BzEntryGroup *self);
+gboolean
+bz_entry_group_has_category (BzEntryGroup *self,
+                             const char   *name);
+
+int
+bz_entry_group_get_content_age_rating (BzEntryGroup *self);
 
 BzResult *
 bz_entry_group_dup_ui_entry (BzEntryGroup *self);

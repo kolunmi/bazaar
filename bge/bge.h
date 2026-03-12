@@ -1,7 +1,6 @@
-/* bz-carousel-indicator-dots.h
+/* bge.h - Bazaar GTK Extensions
  *
- * Copyright (C) 2020 Alice Mikhaylenko <alicem@gnome.org>
- * Copyright 2026 Alexander Vanhee
+ * Copyright 2026 Eva M
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,19 +20,20 @@
 
 #pragma once
 
-#include "bz-carousel.h"
 #include <gtk/gtk.h>
+#include <libdex.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_CAROUSEL_INDICATOR_DOTS (bz_carousel_indicator_dots_get_type ())
+#define BGE_INSIDE
+#include "bge-version-macros.h"
 
-G_DECLARE_FINAL_TYPE (BzCarouselIndicatorDots, bz_carousel_indicator_dots, BZ, CAROUSEL_INDICATOR_DOTS, GtkWidget)
+#include "bge-animation.h"
+#include "bge-carousel.h"
+#undef BGE_INSIDE
 
-GtkWidget *bz_carousel_indicator_dots_new (void) G_GNUC_WARN_UNUSED_RESULT;
-
-BzCarousel *bz_carousel_indicator_dots_get_carousel (BzCarouselIndicatorDots *self);
-void        bz_carousel_indicator_dots_set_carousel (BzCarouselIndicatorDots *self,
-                                                     BzCarousel              *carousel);
+BGE_AVAILABLE_IN_ALL
+void
+bge_init (void);
 
 G_END_DECLS

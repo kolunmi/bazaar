@@ -1,6 +1,6 @@
-/* bz-popup-overlay.h
+/* bz-malcontent-service.h
  *
- * Copyright 2026 Eva M
+ * Copyright 2026 Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,32 +20,19 @@
 
 #pragma once
 
-#include <gtk/gtk.h>
+#include "bz-state-info.h"
+#include <appstream.h>
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_POPUP_OVERLAY (bz_popup_overlay_get_type ())
-G_DECLARE_FINAL_TYPE (BzPopupOverlay, bz_popup_overlay, BZ, POPUP_OVERLAY, GtkWidget)
+#define BZ_TYPE_MALCONTENT_SERVICE bz_malcontent_service_get_type ()
+G_DECLARE_FINAL_TYPE (BzMalcontentService, bz_malcontent_service, BZ, MALCONTENT_SERVICE, GObject)
 
-BzPopupOverlay *
-bz_popup_overlay_new (void);
-
-GtkWidget *
-bz_popup_overlay_get_child (BzPopupOverlay *self);
-
+BzMalcontentService *
+bz_malcontent_service_new (GDBusConnection *bus,
+                           BzStateInfo     *state);
 void
-bz_popup_overlay_set_child (BzPopupOverlay *self,
-                            GtkWidget      *child);
-
-void
-bz_popup_overlay_push (BzPopupOverlay *self,
-                       GtkWidget      *widget,
-                       GtkWidget      *source);
-
-void
-bz_popup_present (GtkWidget *popup,
-                  GtkWidget *source);
+bz_malcontent_service_start (BzMalcontentService *self);
 
 G_END_DECLS
-
-/* End of bz-popup-overlay.h */

@@ -296,6 +296,13 @@ format_runtime_count (gpointer object,
                           n_items);
 }
 
+static gboolean
+remove_activated_style_cb (gpointer user_data)
+{
+  gtk_widget_remove_css_class (GTK_WIDGET (user_data), "activated");
+  return G_SOURCE_REMOVE;
+}
+
 static void
 tile_activated_cb (BzListTile    *tile,
                    BzUpdatesCard *self)
@@ -309,9 +316,18 @@ tile_activated_cb (BzListTile    *tile,
   gtk_revealer_set_reveal_child (self->revealer, !current_state);
 
   if (!current_state)
-    gtk_widget_add_css_class (GTK_WIDGET (self->toggle_icon), "rotated");
+    {
+      gtk_widget_add_css_class (GTK_WIDGET (tile), "activated");
+      gtk_widget_add_css_class (GTK_WIDGET (self->toggle_icon), "rotated");
+    }
   else
-    gtk_widget_remove_css_class (GTK_WIDGET (self->toggle_icon), "rotated");
+    {
+      g_timeout_add_full (
+        G_PRIORITY_DEFAULT,
+        200, (GSourceFunc) remove_activated_style_cb,
+        g_object_ref (tile), g_object_unref);
+      gtk_widget_remove_css_class (GTK_WIDGET (self->toggle_icon), "rotated");
+    }
 }
 
 static void

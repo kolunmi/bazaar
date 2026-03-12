@@ -40,6 +40,13 @@ GListModel *
 bz_library_page_get_model (BzLibraryPage *self);
 
 void
+bz_library_page_set_transactions (BzLibraryPage        *self,
+                                  BzTransactionManager *transactions);
+
+BzTransactionManager *
+bz_library_page_get_transactions (BzLibraryPage *self);
+
+void
 bz_library_page_set_state (BzLibraryPage *self,
                            BzStateInfo   *state);
 

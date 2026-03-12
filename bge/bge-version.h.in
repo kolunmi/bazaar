@@ -1,0 +1,96 @@
+/* bge-version.h.in
+ *
+ * Copyright 2026 Eva M
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+#pragma once
+
+#if !defined(BGE_INSIDE) && !defined(BGE_COMPILATION)
+# error "Only <bge.h> can be included directly."
+#endif
+
+/**
+ * SECTION:bgeversion
+ * @short_description: bge version checking
+ *
+ * bge provides macros to check the version of the library
+ * at compile-time
+ */
+
+/**
+ * BGE_MAJOR_VERSION:
+ *
+ * bge major version component (e.g. 1 if %BGE_VERSION is 1.2.3)
+ */
+#define BGE_MAJOR_VERSION (@MAJOR_VERSION@)
+
+/**
+ * BGE_MINOR_VERSION:
+ *
+ * bge minor version component (e.g. 2 if %BGE_VERSION is 1.2.3)
+ */
+#define BGE_MINOR_VERSION (@MINOR_VERSION@)
+
+/**
+ * BGE_MICRO_VERSION:
+ *
+ * bge micro version component (e.g. 3 if %BGE_VERSION is 1.2.3)
+ */
+#define BGE_MICRO_VERSION (@MICRO_VERSION@)
+
+/**
+ * BGE_VERSION
+ *
+ * bge version.
+ */
+#define BGE_VERSION (@VERSION@)
+
+/**
+ * BGE_VERSION_S:
+ *
+ * bge version, encoded as a string, useful for printing and
+ * concatenation.
+ */
+#define BGE_VERSION_S "@VERSION@"
+
+#define BGE_ENCODE_VERSION(major,minor,micro) \
+        ((major) << 24 | (minor) << 16 | (micro) << 8)
+
+/**
+ * BGE_VERSION_HEX:
+ *
+ * bge version, encoded as an hexadecimal number, useful for
+ * integer comparisons.
+ */
+#define BGE_VERSION_HEX \
+        (BGE_ENCODE_VERSION (BGE_MAJOR_VERSION, BGE_MINOR_VERSION, BGE_MICRO_VERSION))
+
+/**
+ * BGE_CHECK_VERSION:
+ * @major: required major version
+ * @minor: required minor version
+ * @micro: required micro version
+ *
+ * Compile-time version checking. Evaluates to %TRUE if the version
+ * of bge is greater than the required one.
+ */
+#define BGE_CHECK_VERSION(major,minor,micro)   \
+        (BGE_MAJOR_VERSION > (major) || \
+         (BGE_MAJOR_VERSION == (major) && BGE_MINOR_VERSION > (minor)) || \
+         (BGE_MAJOR_VERSION == (major) && BGE_MINOR_VERSION == (minor) && \
+          BGE_MICRO_VERSION >= (micro)))

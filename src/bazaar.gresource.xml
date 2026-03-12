@@ -2,7 +2,7 @@
 <gresources>
   <gresource prefix="/io/github/kolunmi/Bazaar/">
 
-    <file alias="style.css">gtk/style.css</file>
+    <file>style.css</file>
 
     <file>internal-config.yaml</file>
     <file alias="pride-flags.yaml">progress-bar-designs/pride/pride-flags.yaml</file>
@@ -43,6 +43,7 @@
     <file preprocess="xml-stripblanks">bz-full-view.ui</file>
     <file preprocess="xml-stripblanks">bz-hardware-support-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-inspector.ui</file>
+    <file preprocess="xml-stripblanks">bz-install-controls.ui</file>
     <file preprocess="xml-stripblanks">bz-library-page.ui</file>
     <file preprocess="xml-stripblanks">bz-installed-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-license-dialog.ui</file>
@@ -66,11 +67,12 @@
     <file preprocess="xml-stripblanks">bz-user-data-page.ui</file>
     <file preprocess="xml-stripblanks">bz-user-data-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-window.ui</file>
-    <file alias="shortcuts-dialog.ui" preprocess="xml-stripblanks">gtk/shortcuts-dialog.ui</file>
+    <file preprocess="xml-stripblanks">shortcuts-dialog.ui</file>
 
     <file preprocess="xml-stripblanks">icons/scalable/actions/app-installed-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/bookmark-filled-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/bookmark-outline-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/bug-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/check-plain-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/circle-filled-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/code-symbolic.svg</file>
@@ -112,14 +114,14 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/person-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/pip-out-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/power-profile-performance-symbolic.svg</file>
-    <file preprocess="xml-stripblanks">icons/scalable/actions/puzzle-piece-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/proprietary-code-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/puzzle-piece-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/regex-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/right-large-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/sad-computer-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/server-pick-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/share-alt-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/share-symbolic.svg</file>
-    <file preprocess="xml-stripblanks">icons/scalable/actions/server-pick-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/sidebar-show-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/sliders-horizontal-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/smartphone2-symbolic.svg</file>

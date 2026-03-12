@@ -34,6 +34,7 @@
 #include "bz-backend-notification.h"
 #include "bz-content-provider.h"
 #include "bz-donations-dialog.h"
+#include "bz-download-worker.h"
 #include "bz-entry-cache-manager.h"
 #include "bz-entry-group.h"
 #include "bz-env.h"
@@ -48,6 +49,7 @@
 #include "bz-internal-config.h"
 #include "bz-io.h"
 #include "bz-login-page.h"
+#include "bz-malcontent-service.h"
 #include "bz-newline-parser.h"
 #include "bz-parser.h"
 #include "bz-preferences-dialog.h"
@@ -78,6 +80,7 @@ struct _BzApplication
   BzGnomeShellSearchProvider *gs_search;
   BzInternalConfig           *internal_config;
   BzMainConfig               *config;
+  BzMalcontentService        *malcontent;
   BzNewlineParser            *txt_blocklist_parser;
   BzSearchEngine             *search_engine;
   BzStateInfo                *state;
@@ -142,6 +145,17 @@ BZ_DEFINE_DATA (
     BZ_RELEASE_DATA (notif, g_object_unref))
 
 BZ_DEFINE_DATA (
+    cache_write_back,
+    CacheWriteBack,
+    {
+      GWeakRef  *self;
+      GPtrArray *notify_groups;
+      gboolean   update_filters;
+    },
+    BZ_RELEASE_DATA (self, bz_weak_release);
+    BZ_RELEASE_DATA (notify_groups, g_ptr_array_unref))
+
+BZ_DEFINE_DATA (
     open_flatpakref,
     OpenFlatpakref,
     {
@@ -193,8 +207,8 @@ flathub_update_finally (DexFuture *future,
                         GWeakRef  *wr);
 
 static DexFuture *
-cache_write_back_finally (DexFuture *future,
-                          GWeakRef  *wr);
+cache_write_back_finally (DexFuture          *future,
+                          CacheWriteBackData *data);
 
 static DexFuture *
 sync_then (DexFuture *future,
@@ -349,6 +363,7 @@ bz_application_dispose (GObject *object)
   g_clear_object (&self->groups);
   g_clear_object (&self->gs_search);
   g_clear_object (&self->installed_apps);
+  g_clear_object (&self->malcontent);
   g_clear_object (&self->internal_config);
   g_clear_object (&self->network);
   g_clear_object (&self->search_biases);
@@ -696,7 +711,7 @@ bz_application_about_action (GSimpleAction *action,
       dialog,
       "application-name", "Bazaar",
       "application-icon", "io.github.kolunmi.Bazaar",
-      "developer-name", _ ("Adam Masciola"),
+      "developer-name", _ ("The Bazaar Contributors"),
       "developers", developers,
       // Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
       "translator-credits", _ ("translator-credits"),
@@ -890,7 +905,7 @@ init_fiber (GWeakRef *wr)
 
   bz_state_info_set_online (self->state, TRUE);
   bz_state_info_set_busy (self->state, TRUE);
-  bz_state_info_set_background_task_label (self->state, _ ("Performing setup..."));
+  bz_state_info_set_background_task_label (self->state, _ ("Performing setup…"));
 
   root_cache_dir      = bz_dup_root_cache_dir ();
   root_cache_dir_file = g_file_new_for_path (root_cache_dir);
@@ -1226,19 +1241,22 @@ cache_flathub_fiber (GWeakRef *wr)
 static DexFuture *
 respond_to_flatpak_fiber (RespondToFlatpakData *data)
 {
-  g_autoptr (BzApplication) self       = NULL;
-  BzBackendNotification *notif         = data->notif;
-  g_autoptr (GError) local_error       = NULL;
-  g_autoptr (GPtrArray) build_futures  = NULL;
-  g_autoptr (DexFuture) read_future    = NULL;
-  g_autoptr (DexFuture) reread_timeout = NULL;
-  gboolean update_labels               = FALSE;
-  gboolean update_filter               = FALSE;
+  g_autoptr (BzApplication) self            = NULL;
+  BzBackendNotification *notif              = data->notif;
+  g_autoptr (GError) local_error            = NULL;
+  g_autoptr (GPtrArray) build_futures       = NULL;
+  g_autoptr (GPtrArray) build_notify_groups = NULL;
+  g_autoptr (DexFuture) read_future         = NULL;
+  g_autoptr (DexFuture) reread_timeout      = NULL;
+  gboolean update_labels                    = FALSE;
+  gboolean update_filters                   = FALSE;
 
   bz_weak_get_or_return_reject (self, data->self);
 
-  build_futures = g_ptr_array_new_with_free_func (dex_unref);
-  read_future   = dex_future_new_for_object (notif);
+  build_futures       = g_ptr_array_new_with_free_func (dex_unref);
+  build_notify_groups = g_ptr_array_new_with_free_func (g_object_unref);
+
+  read_future = dex_future_new_for_object (notif);
 
   /* `reread_timeout` defines how long we are allowed to spend adding to
      `build-futures` before we update the UI later */
@@ -1299,7 +1317,17 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
 
             g_ptr_array_add (build_futures, bz_entry_cache_manager_add (self->cache, entry));
             if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
-              update_filter = TRUE;
+              {
+                const char   *id    = NULL;
+                BzEntryGroup *group = NULL;
+
+                update_filters = TRUE;
+
+                id    = bz_entry_get_id (entry);
+                group = g_hash_table_lookup (self->ids_to_groups, id);
+                if (group != NULL)
+                  g_ptr_array_add (build_notify_groups, g_object_ref (group));
+              }
 
             self->n_notifications_incoming--;
             update_labels = TRUE;
@@ -1393,6 +1421,16 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
               };
 
             g_ptr_array_add (build_futures, bz_entry_cache_manager_add (self->cache, entry));
+            if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
+              {
+                const char   *id    = NULL;
+                BzEntryGroup *group = NULL;
+
+                id    = bz_entry_get_id (entry);
+                group = g_hash_table_lookup (self->ids_to_groups, id);
+                if (group != NULL)
+                  g_ptr_array_add (build_notify_groups, g_object_ref (group));
+              }
           }
           break;
         case BZ_BACKEND_NOTIFICATION_KIND_EXTERNAL_CHANGE:
@@ -1531,16 +1569,23 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
 
   if (build_futures->len > 0)
     {
-      g_autoptr (DexFuture) future = NULL;
+      g_autoptr (DexFuture) future                   = NULL;
+      g_autoptr (CacheWriteBackData) write_back_data = NULL;
 
       future = dex_future_allv (
           (DexFuture *const *) build_futures->pdata,
           build_futures->len);
-      if (update_filter)
-        future = dex_future_finally (
-            future,
-            (DexFutureCallback) cache_write_back_finally,
-            bz_track_weak (self), bz_weak_release);
+
+      write_back_data                 = cache_write_back_data_new ();
+      write_back_data->self           = bz_track_weak (self);
+      write_back_data->notify_groups  = g_ptr_array_ref (build_notify_groups);
+      write_back_data->update_filters = update_filters;
+
+      future = dex_future_finally (
+          future,
+          (DexFutureCallback) cache_write_back_finally,
+          cache_write_back_data_ref (write_back_data),
+          cache_write_back_data_unref);
       dex_future_disown (g_steal_pointer (&future));
     }
 
@@ -1548,10 +1593,8 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
     {
       if (self->n_notifications_incoming > 0)
         {
-          g_autofree char *label = NULL;
-
-          label = g_strdup_printf (_ ("Loading %d apps…"), self->n_notifications_incoming);
-          bz_state_info_set_background_task_label (self->state, label);
+          bz_state_info_set_background_task_label_take_printf (
+              self->state, _ ("Loading %d apps…"), self->n_notifications_incoming);
         }
       else
         {
@@ -1650,6 +1693,8 @@ init_fiber_finally (DexFuture *future,
       self->periodic_timeout_source = g_timeout_add_seconds (
           /* Check every day */
           60 * 60 * 24, (GSourceFunc) periodic_timeout_cb, self);
+
+      bz_malcontent_service_start (self->malcontent);
     }
   else
     {
@@ -1732,15 +1777,28 @@ flathub_update_finally (DexFuture *future,
 }
 
 static DexFuture *
-cache_write_back_finally (DexFuture *future,
-                          GWeakRef  *wr)
+cache_write_back_finally (DexFuture          *future,
+                          CacheWriteBackData *data)
 {
   g_autoptr (BzApplication) self = NULL;
+  GPtrArray *notify_groups       = data->notify_groups;
+  gboolean   update_filters      = data->update_filters;
 
-  bz_weak_get_or_return_reject (self, wr);
+  bz_weak_get_or_return_reject (self, data->self);
 
-  gtk_filter_changed (GTK_FILTER (self->group_filter), GTK_FILTER_CHANGE_LESS_STRICT);
-  gtk_filter_changed (GTK_FILTER (self->appid_filter), GTK_FILTER_CHANGE_LESS_STRICT);
+  for (guint i = 0; i < notify_groups->len; i++)
+    {
+      BzEntryGroup *group = NULL;
+
+      group = g_ptr_array_index (notify_groups, i);
+      g_object_notify (G_OBJECT (group), "ui-entry");
+    }
+
+  if (update_filters)
+    {
+      gtk_filter_changed (GTK_FILTER (self->group_filter), GTK_FILTER_CHANGE_LESS_STRICT);
+      gtk_filter_changed (GTK_FILTER (self->appid_filter), GTK_FILTER_CHANGE_LESS_STRICT);
+    }
 
   return dex_future_new_true ();
 }
@@ -2147,14 +2205,31 @@ static gboolean
 window_close_request (BzApplication *self,
                       GtkWidget     *window)
 {
-  int width  = 0;
-  int height = 0;
+  int      width             = 0;
+  int      height            = 0;
+  GList   *remaining_windows = NULL;
+  gboolean reap_dl_workers   = TRUE;
 
   width  = gtk_widget_get_width (window);
   height = gtk_widget_get_height (window);
 
   g_settings_set (self->settings, "window-dimensions",
                   "(ii)", width, height);
+
+  remaining_windows = gtk_application_get_windows (
+      GTK_APPLICATION (self));
+  for (GList *l = remaining_windows; l != NULL; l = l->next)
+    {
+      if (l->data != window)
+        {
+          reap_dl_workers = FALSE;
+          break;
+        }
+    }
+  if (reap_dl_workers)
+    /* If no windows are left, kill the dl-worker subprocesses to minimize idle
+       memory usage */
+    bz_reap_default_download_workers ();
 
   /* Do not stop other handlers from being invoked for the signal */
   return FALSE;
@@ -2656,6 +2731,7 @@ init_service_struct (BzApplication *self,
   self->state = bz_state_info_new ();
   bz_state_info_set_busy (self->state, TRUE);
   bz_state_info_set_donation_prompt_dismissed (self->state, TRUE);
+  bz_state_info_set_parental_age_rating (self->state, -1);
 
   {
     g_autoptr (GtkIconTheme) user_theme   = NULL;
@@ -2670,6 +2746,24 @@ init_service_struct (BzApplication *self,
     system_theme = gtk_icon_theme_new ();
     gtk_icon_theme_add_search_path (system_theme, "/var/lib/flatpak/exports/share/icons");
     bz_state_info_set_system_icon_theme (self->state, system_theme);
+  }
+
+  {
+    g_autoptr (GError) bus_error        = NULL;
+    g_autoptr (GDBusConnection) sys_bus = NULL;
+
+    sys_bus = g_bus_get_sync (G_BUS_TYPE_SYSTEM, NULL, &bus_error);
+    if (sys_bus != NULL)
+      self->malcontent = bz_malcontent_service_new (sys_bus, self->state);
+    else
+      g_warning ("Failed to connect to system bus for malcontent: %s", bus_error->message);
+
+    if (self->malcontent != NULL)
+      g_signal_connect_swapped (
+          self->state,
+          "notify::parental-age-rating",
+          G_CALLBACK (show_hide_app_setting_changed),
+          self);
   }
 
   g_signal_connect_swapped (
@@ -2707,6 +2801,17 @@ init_service_struct (BzApplication *self,
   g_assert (app_id != NULL);
   g_debug ("Constructing gsettings for %s ...", app_id);
   self->settings = g_settings_new (app_id);
+
+  if (g_settings_get_boolean (self->settings, "force-adwaita-icons"))
+    {
+      GtkSettings *gtk_settings = NULL;
+
+      gtk_settings = gtk_settings_get_default ();
+      g_object_set (
+          gtk_settings,
+          "gtk-icon-theme-name", "Adwaita",
+          NULL);
+    }
 
   bz_state_info_set_hide_eol (
       self->state,
@@ -2804,6 +2909,7 @@ init_service_struct (BzApplication *self,
 
   bz_state_info_set_all_entry_groups (self->state, G_LIST_MODEL (self->groups));
   bz_state_info_set_all_installed_entry_groups (self->state, G_LIST_MODEL (self->installed_apps));
+  bz_state_info_set_filtered_entry_groups (self->state, G_LIST_MODEL (self->group_filter_model));
   bz_state_info_set_application_factory (self->state, self->application_factory);
   bz_state_info_set_blocklists (self->state, G_LIST_MODEL (self->blocklists));
   bz_state_info_set_blocklists_provider (self->state, self->blocklists_provider);
@@ -3098,6 +3204,18 @@ validate_group_for_ui (BzApplication *self,
       !bz_entry_group_get_is_verified (group))
     return FALSE;
 
+  if (self->malcontent != NULL)
+    {
+      int parental_age = -1;
+      int app_age      = 0;
+
+      parental_age = bz_state_info_get_parental_age_rating (self->state);
+      app_age      = bz_entry_group_get_content_age_rating (group);
+
+      if (app_age > parental_age && parental_age != -1)
+        return FALSE;
+    }
+
   if (bz_state_info_get_disable_blocklists (self->state))
     return TRUE;
 
@@ -3174,12 +3292,8 @@ static void
 finish_with_background_task_label (BzApplication *self)
 {
   if (self->n_notifications_incoming > 0)
-    {
-      g_autofree char *label = NULL;
-
-      label = g_strdup_printf (_ ("Loading %d apps…"), self->n_notifications_incoming);
-      bz_state_info_set_background_task_label (self->state, label);
-    }
+    bz_state_info_set_background_task_label_take_printf (
+        self->state, _ ("Loading %d apps…"), self->n_notifications_incoming);
   else if (bz_state_info_get_syncing (self->state))
     bz_state_info_set_background_task_label (self->state, _ ("Refreshing…"));
   else if (bz_state_info_get_busy (self->state))

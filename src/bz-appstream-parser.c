@@ -9,7 +9,7 @@
 
 #include "bz-appstream-parser.h"
 #include "bz-async-texture.h"
-#include "bz-flathub-category.h"
+#include "bz-category-flags.h"
 #include "bz-io.h"
 #include "bz-release.h"
 #include "bz-url.h"
@@ -42,11 +42,12 @@ parse_control_value (const char *value)
 
 static gboolean
 calculate_is_mobile_friendly (guint required_controls,
-                              guint supported_controls,
-                              gint  min_display_length,
-                              gint  max_display_length)
+                              guint recommended_controls,
+                              guint supported_controls)
 {
-  return (supported_controls & BZ_CONTROL_TOUCH) != 0;
+  return (required_controls & BZ_CONTROL_TOUCH) != 0 ||
+         (recommended_controls & BZ_CONTROL_TOUCH) != 0 ||
+         (supported_controls & BZ_CONTROL_TOUCH) != 0;
 }
 
 static char *
@@ -201,8 +202,6 @@ bz_appstream_parser_populate_entry (BzEntry     *entry,
   g_autoptr (GListStore) share_urls                    = NULL;
   g_autofree char *donation_url                        = NULL;
   g_autofree char *forge_url                           = NULL;
-  g_autoptr (GListStore) native_reviews                = NULL;
-  double           average_rating                      = 0.0;
   g_autofree char *ratings_summary                     = NULL;
   g_autoptr (GListStore) version_history               = NULL;
   const char *accent_color_light                       = NULL;
@@ -217,7 +216,7 @@ bz_appstream_parser_populate_entry (BzEntry     *entry,
   GPtrArray *as_keywords                               = NULL;
   g_autoptr (GListStore) keywords                      = NULL;
   GPtrArray *as_categories                             = NULL;
-  g_autoptr (GListModel) categories                    = NULL;
+  BzCategoryFlags categories                           = BZ_CATEGORY_FLAGS_NONE;
   g_autoptr (BzVerificationStatus) verification_status = NULL;
 
   g_return_val_if_fail (BZ_IS_ENTRY (entry), FALSE);
@@ -588,9 +587,8 @@ bz_appstream_parser_populate_entry (BzEntry     *entry,
     }
 
   is_mobile_friendly = calculate_is_mobile_friendly (required_controls,
-                                                     supported_controls,
-                                                     min_display_length,
-                                                     max_display_length);
+                                                     recommended_controls,
+                                                     supported_controls);
 
   if (as_search_tokens != NULL)
     {
@@ -627,9 +625,15 @@ bz_appstream_parser_populate_entry (BzEntry     *entry,
     }
 
   as_categories = as_component_get_categories (component);
-  if (as_categories != NULL && as_categories->len > 0)
+  if (as_categories != NULL)
     {
-      categories = bz_flathub_category_list_from_appstream (as_categories);
+      for (guint i = 0; i < as_categories->len; i++)
+        {
+          const char *name = NULL;
+
+          name = g_ptr_array_index (as_categories, i);
+          categories = bz_category_flags_add (categories, name);
+        }
     }
 
   if (g_strcmp0 (remote_name, "flathub") == 0)
@@ -694,8 +698,6 @@ bz_appstream_parser_populate_entry (BzEntry     *entry,
       "share-urls", share_urls,
       "donation-url", donation_url,
       "forge-url", forge_url,
-      "reviews", native_reviews,
-      "average-rating", average_rating,
       "ratings-summary", ratings_summary,
       "version-history", version_history,
       "light-accent-color", accent_color_light,

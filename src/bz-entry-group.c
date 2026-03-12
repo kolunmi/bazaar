@@ -22,7 +22,6 @@
 #define BAZAAR_MODULE "entry-group"
 
 #include "bz-entry-group.h"
-#include "bz-async-texture.h"
 #include "bz-env.h"
 #include "bz-flatpak-entry.h"
 #include "bz-io.h"
@@ -34,26 +33,25 @@ struct _BzEntryGroup
 
   BzApplicationMapFactory *factory;
 
-  GtkStringList *unique_ids;
-  GtkStringList *installed_versions;
-  char          *id;
-  char          *title;
-  char          *developer;
-  char          *description;
-  GdkPaintable  *icon_paintable;
-  GIcon         *mini_icon;
-  gboolean       is_floss;
-  char          *light_accent_color;
-  char          *dark_accent_color;
-  gboolean       is_flathub;
-  gboolean       is_verified;
-  char          *search_tokens;
-  char          *remote_repos_string;
-  char          *eol;
-  guint64        installed_size;
-  int            n_addons;
-  char          *donation_url;
-  GListModel    *categories;
+  GtkStringList  *unique_ids;
+  GtkStringList  *installed_versions;
+  char           *id;
+  char           *title;
+  char           *developer;
+  char           *description;
+  GIcon          *mini_icon;
+  gboolean        is_floss;
+  char           *light_accent_color;
+  char           *dark_accent_color;
+  gboolean        is_flathub;
+  gboolean        is_verified;
+  char           *search_tokens;
+  char           *eol;
+  guint64         installed_size;
+  int             n_addons;
+  char           *donation_url;
+  BzCategoryFlags categories;
+  int             content_age_rating;
 
   int max_usefulness;
 
@@ -88,7 +86,6 @@ enum
   PROP_TITLE,
   PROP_DEVELOPER,
   PROP_DESCRIPTION,
-  PROP_ICON_PAINTABLE,
   PROP_MINI_ICON,
   PROP_IS_FLOSS,
   PROP_LIGHT_ACCENT_COLOR,
@@ -97,7 +94,6 @@ enum
   PROP_IS_VERIFIED,
   PROP_SEARCH_TOKENS,
   PROP_UI_ENTRY,
-  PROP_REMOTE_REPOS_STRING,
   PROP_EOL,
   PROP_INSTALLED_SIZE,
   PROP_N_ADDONS,
@@ -151,13 +147,10 @@ bz_entry_group_dispose (GObject *object)
   g_clear_pointer (&self->description, g_free);
   g_clear_pointer (&self->light_accent_color, g_free);
   g_clear_pointer (&self->dark_accent_color, g_free);
-  g_clear_object (&self->icon_paintable);
   g_clear_object (&self->mini_icon);
   g_clear_pointer (&self->search_tokens, g_free);
-  g_clear_pointer (&self->remote_repos_string, g_free);
   g_clear_pointer (&self->eol, g_free);
   g_clear_pointer (&self->donation_url, g_free);
-  g_clear_object (&self->categories);
 
   g_weak_ref_clear (&self->ui_entry);
   g_clear_object (&self->standalone_ui_entry);
@@ -194,9 +187,6 @@ bz_entry_group_get_property (GObject    *object,
     case PROP_DESCRIPTION:
       g_value_set_string (value, bz_entry_group_get_description (self));
       break;
-    case PROP_ICON_PAINTABLE:
-      g_value_set_object (value, bz_entry_group_get_icon_paintable (self));
-      break;
     case PROP_MINI_ICON:
       g_value_set_object (value, bz_entry_group_get_mini_icon (self));
       break;
@@ -231,13 +221,10 @@ bz_entry_group_get_property (GObject    *object,
       g_value_set_string (value, bz_entry_group_get_donation_url (self));
       break;
     case PROP_CATEGORIES:
-      g_value_set_object (value, bz_entry_group_get_categories (self));
+      g_value_set_uint (value, self->categories);
       break;
     case PROP_UI_ENTRY:
       g_value_take_object (value, bz_entry_group_dup_ui_entry (self));
-      break;
-    case PROP_REMOTE_REPOS_STRING:
-      g_value_set_string (value, self->remote_repos_string);
       break;
     case PROP_INSTALLABLE:
       g_value_set_int (value, bz_entry_group_get_installable (self));
@@ -280,7 +267,6 @@ bz_entry_group_set_property (GObject      *object,
     case PROP_TITLE:
     case PROP_DEVELOPER:
     case PROP_DESCRIPTION:
-    case PROP_ICON_PAINTABLE:
     case PROP_MINI_ICON:
     case PROP_IS_FLOSS:
     case PROP_LIGHT_ACCENT_COLOR:
@@ -290,7 +276,6 @@ bz_entry_group_set_property (GObject      *object,
     case PROP_SEARCH_TOKENS:
     case PROP_EOL:
     case PROP_UI_ENTRY:
-    case PROP_REMOTE_REPOS_STRING:
     case PROP_INSTALLABLE:
     case PROP_UPDATABLE:
     case PROP_REMOVABLE:
@@ -349,13 +334,6 @@ bz_entry_group_class_init (BzEntryGroupClass *klass)
       g_param_spec_string (
           "description",
           NULL, NULL, NULL,
-          G_PARAM_READABLE);
-
-  props[PROP_ICON_PAINTABLE] =
-      g_param_spec_object (
-          "icon-paintable",
-          NULL, NULL,
-          GDK_TYPE_PAINTABLE,
           G_PARAM_READABLE);
 
   props[PROP_MINI_ICON] =
@@ -428,10 +406,11 @@ bz_entry_group_class_init (BzEntryGroupClass *klass)
           G_PARAM_READABLE);
 
   props[PROP_CATEGORIES] =
-      g_param_spec_object (
+      g_param_spec_uint (
           "categories",
           NULL, NULL,
-          G_TYPE_LIST_MODEL,
+          0, G_MAXUINT,
+          BZ_CATEGORY_FLAGS_NONE,
           G_PARAM_READABLE);
 
   props[PROP_UI_ENTRY] =
@@ -439,12 +418,6 @@ bz_entry_group_class_init (BzEntryGroupClass *klass)
           "ui-entry",
           NULL, NULL,
           BZ_TYPE_RESULT,
-          G_PARAM_READABLE);
-
-  props[PROP_REMOTE_REPOS_STRING] =
-      g_param_spec_string (
-          "remote-repos-string",
-          NULL, NULL, NULL,
           G_PARAM_READABLE);
 
   props[PROP_INSTALLABLE] =
@@ -526,25 +499,24 @@ bz_entry_group_new (BzApplicationMapFactory *factory)
 BzEntryGroup *
 bz_entry_group_new_for_single_entry (BzEntry *entry)
 {
-  BzEntryGroup *group              = NULL;
-  const char   *id                 = NULL;
-  const char   *unique_id          = NULL;
-  const char   *title              = NULL;
-  const char   *developer          = NULL;
-  const char   *description        = NULL;
-  GdkPaintable *icon_paintable     = NULL;
-  GIcon        *mini_icon          = NULL;
-  const char   *search_tokens      = NULL;
-  gboolean      is_floss           = FALSE;
-  const char   *light_accent_color = NULL;
-  const char   *dark_accent_color  = NULL;
-  gboolean      is_flathub         = FALSE;
-  gboolean      is_verified        = FALSE;
-  const char   *eol                = NULL;
-  guint64       installed_size     = 0;
-  const char   *donation_url       = NULL;
-  GListModel   *entry_categories   = NULL;
-  DexFuture    *future             = NULL;
+  BzEntryGroup   *group              = NULL;
+  const char     *id                 = NULL;
+  const char     *unique_id          = NULL;
+  const char     *title              = NULL;
+  const char     *developer          = NULL;
+  const char     *description        = NULL;
+  GIcon          *mini_icon          = NULL;
+  const char     *search_tokens      = NULL;
+  gboolean        is_floss           = FALSE;
+  const char     *light_accent_color = NULL;
+  const char     *dark_accent_color  = NULL;
+  gboolean        is_flathub         = FALSE;
+  gboolean        is_verified        = FALSE;
+  const char     *eol                = NULL;
+  guint64         installed_size     = 0;
+  const char     *donation_url       = NULL;
+  BzCategoryFlags entry_categories   = BZ_CATEGORY_FLAGS_NONE;
+  DexFuture      *future             = NULL;
 
   g_return_val_if_fail (BZ_IS_ENTRY (entry), NULL);
 
@@ -555,7 +527,6 @@ bz_entry_group_new_for_single_entry (BzEntry *entry)
   title              = bz_entry_get_title (entry);
   developer          = bz_entry_get_developer (entry);
   description        = bz_entry_get_description (entry);
-  icon_paintable     = bz_entry_get_icon_paintable (entry);
   mini_icon          = bz_entry_get_mini_icon (entry);
   search_tokens      = bz_entry_get_search_tokens (entry);
   is_floss           = bz_entry_get_is_foss (entry);
@@ -566,7 +537,7 @@ bz_entry_group_new_for_single_entry (BzEntry *entry)
   eol                = bz_entry_get_eol (entry);
   installed_size     = bz_entry_get_installed_size (entry);
   donation_url       = bz_entry_get_donation_url (entry);
-  entry_categories   = bz_entry_get_categories (entry);
+  entry_categories   = bz_entry_get_category_flags (entry);
 
   if (id != NULL)
     group->id = g_strdup (id);
@@ -576,8 +547,6 @@ bz_entry_group_new_for_single_entry (BzEntry *entry)
     group->developer = g_strdup (developer);
   if (description != NULL)
     group->description = g_strdup (description);
-  if (icon_paintable != NULL)
-    group->icon_paintable = g_object_ref (icon_paintable);
   if (mini_icon != NULL)
     group->mini_icon = g_object_ref (mini_icon);
   if (search_tokens != NULL)
@@ -594,8 +563,8 @@ bz_entry_group_new_for_single_entry (BzEntry *entry)
   group->installed_size = installed_size;
   if (donation_url != NULL)
     group->donation_url = g_strdup (donation_url);
-  if (entry_categories != NULL)
-    group->categories = g_object_ref (entry_categories);
+
+  group->categories = entry_categories;
 
   if (unique_id != NULL)
     gtk_string_list_append (group->unique_ids, unique_id);
@@ -654,13 +623,6 @@ bz_entry_group_get_description (BzEntryGroup *self)
 {
   g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), NULL);
   return self->description;
-}
-
-GdkPaintable *
-bz_entry_group_get_icon_paintable (BzEntryGroup *self)
-{
-  g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), NULL);
-  return self->icon_paintable;
 }
 
 GIcon *
@@ -740,11 +702,19 @@ bz_entry_group_get_donation_url (BzEntryGroup *self)
   return self->donation_url;
 }
 
-GListModel *
-bz_entry_group_get_categories (BzEntryGroup *self)
+gboolean
+bz_entry_group_has_category (BzEntryGroup *self,
+                             const char   *name)
 {
-  g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), NULL);
-  return self->categories;
+  g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), FALSE);
+  return bz_category_flags_has_name (self->categories, name);
+}
+
+int
+bz_entry_group_get_content_age_rating (BzEntryGroup *self)
+{
+  g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), 0);
+  return self->content_age_rating;
 }
 
 guint64
@@ -861,29 +831,29 @@ bz_entry_group_add (BzEntryGroup *self,
                     BzEntry      *runtime,
                     gboolean      ignore_eol)
 {
-  g_autoptr (GMutexLocker) locker  = NULL;
-  const char   *unique_id          = NULL;
-  const char   *installed_version  = NULL;
-  gint          usefulness         = 0;
-  const char   *eol                = NULL;
-  const char   *title              = NULL;
-  const char   *developer          = NULL;
-  const char   *description        = NULL;
-  GdkPaintable *icon_paintable     = NULL;
-  GIcon        *mini_icon          = NULL;
-  const char   *search_tokens      = NULL;
-  gboolean      is_floss           = FALSE;
-  const char   *light_accent_color = NULL;
-  const char   *dark_accent_color  = NULL;
-  gboolean      is_flathub         = FALSE;
-  gboolean      is_verified        = FALSE;
-  guint64       installed_size     = 0;
-  GListModel   *addons             = NULL;
-  int           n_addons           = 0;
-  const char   *donation_url       = NULL;
-  GListModel   *entry_categories   = NULL;
-  guint         existing           = 0;
-  gboolean      is_searchable      = FALSE;
+  g_autoptr (GMutexLocker) locker     = NULL;
+  const char      *unique_id          = NULL;
+  const char      *installed_version  = NULL;
+  gint             usefulness         = 0;
+  const char      *eol                = NULL;
+  const char      *title              = NULL;
+  const char      *developer          = NULL;
+  const char      *description        = NULL;
+  GIcon           *mini_icon          = NULL;
+  const char      *search_tokens      = NULL;
+  gboolean         is_floss           = FALSE;
+  const char      *light_accent_color = NULL;
+  const char      *dark_accent_color  = NULL;
+  gboolean         is_flathub         = FALSE;
+  gboolean         is_verified        = FALSE;
+  guint64          installed_size     = 0;
+  GListModel      *addons             = NULL;
+  int              n_addons           = 0;
+  const char      *donation_url       = NULL;
+  BzCategoryFlags  entry_categories   = BZ_CATEGORY_FLAGS_NONE;
+  guint            existing           = 0;
+  gboolean         is_searchable      = FALSE;
+  AsContentRating *content_rating     = NULL;
 
   g_return_if_fail (BZ_IS_ENTRY_GROUP (self));
   g_return_if_fail (BZ_IS_ENTRY (entry));
@@ -918,7 +888,6 @@ bz_entry_group_add (BzEntryGroup *self,
   title              = bz_entry_get_title (entry);
   developer          = bz_entry_get_developer (entry);
   description        = bz_entry_get_description (entry);
-  icon_paintable     = bz_entry_get_icon_paintable (entry);
   mini_icon          = bz_entry_get_mini_icon (entry);
   search_tokens      = bz_entry_get_search_tokens (entry);
   is_floss           = bz_entry_get_is_foss (entry);
@@ -928,7 +897,8 @@ bz_entry_group_add (BzEntryGroup *self,
   is_verified        = bz_entry_is_verified (entry);
   installed_size     = bz_entry_get_installed_size (entry);
   donation_url       = bz_entry_get_donation_url (entry);
-  entry_categories   = bz_entry_get_categories (entry);
+  entry_categories   = bz_entry_get_category_flags (entry);
+  content_rating     = bz_entry_get_content_rating (entry);
 
   addons        = bz_entry_get_addons (entry);
   is_searchable = bz_entry_is_searchable (entry);
@@ -965,12 +935,6 @@ bz_entry_group_add (BzEntryGroup *self,
           g_clear_pointer (&self->description, g_free);
           self->description = g_strdup (description);
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DESCRIPTION]);
-        }
-      if (icon_paintable != NULL)
-        {
-          g_clear_object (&self->icon_paintable);
-          self->icon_paintable = g_object_ref (icon_paintable);
-          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ICON_PAINTABLE]);
         }
       if (mini_icon != NULL)
         {
@@ -1027,13 +991,13 @@ bz_entry_group_add (BzEntryGroup *self,
           self->donation_url = g_strdup (donation_url);
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DONATION_URL]);
         }
-
-      if (entry_categories != NULL && g_list_model_get_n_items (entry_categories) > 0)
+      if (entry_categories != BZ_CATEGORY_FLAGS_NONE)
         {
-          g_clear_object (&self->categories);
-          self->categories = g_object_ref (entry_categories);
+          self->categories = entry_categories;
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CATEGORIES]);
         }
+      if (content_rating != NULL)
+        self->content_age_rating = as_content_rating_get_minimum_age (content_rating);
 
       self->max_usefulness = usefulness;
     }
@@ -1059,11 +1023,6 @@ bz_entry_group_add (BzEntryGroup *self,
         {
           self->description = g_strdup (description);
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DESCRIPTION]);
-        }
-      if (icon_paintable != NULL && self->icon_paintable == NULL)
-        {
-          self->icon_paintable = g_object_ref (icon_paintable);
-          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ICON_PAINTABLE]);
         }
       if (mini_icon != NULL && self->mini_icon == NULL)
         {
@@ -1099,38 +1058,6 @@ bz_entry_group_add (BzEntryGroup *self,
 
   if (existing == G_MAXUINT)
     {
-      const char *remote_repo = NULL;
-
-      remote_repo = bz_entry_get_remote_repo_name (entry);
-      if (remote_repo != NULL)
-        {
-          g_autofree char *capitalized_repo = NULL;
-
-          if (remote_repo[0] != '\0')
-            {
-              capitalized_repo    = g_strdup (remote_repo);
-              capitalized_repo[0] = g_ascii_toupper (capitalized_repo[0]);
-            }
-          else
-            {
-              capitalized_repo = g_strdup (remote_repo);
-            }
-
-          if (self->remote_repos_string != NULL)
-            {
-              g_autofree char *old_string = NULL;
-              if (strstr (self->remote_repos_string, capitalized_repo) == NULL)
-                {
-                  old_string                = g_steal_pointer (&self->remote_repos_string);
-                  self->remote_repos_string = g_strdup_printf ("%s • %s", old_string, capitalized_repo);
-                }
-            }
-          else
-            {
-              self->remote_repos_string = g_strdup (capitalized_repo);
-            }
-        }
-
       if (bz_entry_is_installed (entry))
         {
           self->removable++;

@@ -32,15 +32,17 @@ struct _BzLibraryPage
 {
   AdwBin parent_instance;
 
-  GListModel  *model;
-  BzStateInfo *state;
+  GListModel           *model;
+  BzTransactionManager *transactions;
+  BzStateInfo          *state;
 
   /* Template widgets */
-  AdwViewStack      *stack;
-  GtkText           *search_bar;
-  GtkScrolledWindow *scroll;
-  GtkCustomFilter   *filter;
-  GtkListView       *list_view;
+  AdwViewStack       *stack;
+  GtkText            *search_bar;
+  GtkScrolledWindow  *scroll;
+  GtkFilterListModel *filter_model;
+  GtkCustomFilter    *filter;
+  GtkListView        *list_view;
 };
 
 G_DEFINE_FINAL_TYPE (BzLibraryPage, bz_library_page, ADW_TYPE_BIN)
@@ -50,7 +52,9 @@ enum
   PROP_0,
 
   PROP_MODEL,
+  PROP_TRANSACTIONS,
   PROP_STATE,
+  PROP_HAS_APPS,
 
   LAST_PROP
 };
@@ -58,10 +62,6 @@ static GParamSpec *props[LAST_PROP] = { 0 };
 
 enum
 {
-  SIGNAL_REMOVE,
-  SIGNAL_REMOVE_ADDON,
-  SIGNAL_INSTALL_ADDON,
-  SIGNAL_SHOW,
   SIGNAL_UPDATE,
 
   LAST_SIGNAL,
@@ -74,6 +74,11 @@ items_changed (BzLibraryPage *self,
                guint          removed,
                guint          added,
                GListModel    *model);
+
+static void
+has_transactions_changed (BzLibraryPage        *self,
+                          GParamSpec           *pspec,
+                          BzTransactionManager *transactions);
 
 static void
 set_page (BzLibraryPage *self);
@@ -92,7 +97,11 @@ bz_library_page_dispose (GObject *object)
 
   if (self->model != NULL)
     g_signal_handlers_disconnect_by_func (self->model, items_changed, self);
+  if (self->transactions != NULL)
+    g_signal_handlers_disconnect_by_func (self->transactions, has_transactions_changed, self);
+
   g_clear_object (&self->model);
+  g_clear_object (&self->transactions);
   g_clear_object (&self->state);
 
   G_OBJECT_CLASS (bz_library_page_parent_class)->dispose (object);
@@ -111,8 +120,20 @@ bz_library_page_get_property (GObject    *object,
     case PROP_MODEL:
       g_value_set_object (value, bz_library_page_get_model (self));
       break;
+    case PROP_TRANSACTIONS:
+      g_value_set_object (value, bz_library_page_get_transactions (self));
+      break;
     case PROP_STATE:
       g_value_set_object (value, bz_library_page_get_state (self));
+      break;
+    case PROP_HAS_APPS:
+      {
+        guint n_apps = 0;
+
+        if (self->model != NULL)
+          n_apps = g_list_model_get_n_items (self->model);
+        g_value_set_boolean (value, n_apps > 0);
+      }
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -132,9 +153,13 @@ bz_library_page_set_property (GObject      *object,
     case PROP_MODEL:
       bz_library_page_set_model (self, g_value_get_object (value));
       break;
+    case PROP_TRANSACTIONS:
+      bz_library_page_set_transactions (self, g_value_get_object (value));
+      break;
     case PROP_STATE:
       bz_library_page_set_state (self, g_value_get_object (value));
       break;
+    case PROP_HAS_APPS:
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -202,7 +227,8 @@ tile_activated_cb (BzListTile *tile)
   if (group == NULL)
     return;
 
-  g_signal_emit (self, signals[SIGNAL_SHOW], 0, group);
+  gtk_widget_activate_action (GTK_WIDGET (self), "window.show-group", "s",
+                              bz_entry_group_get_id (group));
 }
 
 static void
@@ -223,11 +249,24 @@ reset_search_cb (BzLibraryPage *self,
 }
 
 static void
+n_filtered_items_changed (BzLibraryPage      *self,
+                          GParamSpec         *pspec,
+                          GtkFilterListModel *model)
+{
+  set_page (self);
+}
+
+static void
 clear_tasks_cb (BzLibraryPage *self)
 {
   BzTransactionManager *manager = NULL;
-  manager                       = bz_state_info_get_transaction_manager (self->state);
-  bz_transaction_manager_clear_finished (manager);
+
+  if (self->state == NULL)
+    return;
+  manager = bz_state_info_get_transaction_manager (self->state);
+
+  if (manager != NULL)
+    bz_transaction_manager_clear_finished (manager);
 }
 
 static void
@@ -236,6 +275,19 @@ updates_card_update_cb (BzLibraryPage *self,
                         BzUpdatesCard *card)
 {
   g_signal_emit (self, signals[SIGNAL_UPDATE], 0, entries);
+}
+
+static void
+global_search_cb (BzLibraryPage *self,
+                  GtkButton     *button)
+{
+  const char *text = NULL;
+
+  text = gtk_editable_get_text (GTK_EDITABLE (self->search_bar));
+  if (text != NULL && *text != '\0')
+    gtk_widget_activate_action (GTK_WIDGET (self), "app.search", "s", text);
+
+  gtk_editable_set_text (GTK_EDITABLE (self->search_bar), "");
 }
 
 static void
@@ -255,6 +307,13 @@ bz_library_page_class_init (BzLibraryPageClass *klass)
           G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
+  props[PROP_TRANSACTIONS] =
+      g_param_spec_object (
+          "transactions",
+          NULL, NULL,
+          BZ_TYPE_TRANSACTION_MANAGER,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
   props[PROP_STATE] =
       g_param_spec_object (
           "state",
@@ -262,67 +321,13 @@ bz_library_page_class_init (BzLibraryPageClass *klass)
           BZ_TYPE_STATE_INFO,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
+  props[PROP_HAS_APPS] =
+      g_param_spec_boolean (
+          "has-apps",
+          NULL, NULL, FALSE,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
   g_object_class_install_properties (object_class, LAST_PROP, props);
-
-  signals[SIGNAL_REMOVE] =
-      g_signal_new (
-          "remove",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
-          g_cclosure_marshal_VOID__OBJECT,
-          G_TYPE_NONE, 1,
-          BZ_TYPE_ENTRY_GROUP);
-  g_signal_set_va_marshaller (
-      signals[SIGNAL_REMOVE],
-      G_TYPE_FROM_CLASS (klass),
-      g_cclosure_marshal_VOID__OBJECTv);
-
-  signals[SIGNAL_INSTALL_ADDON] =
-      g_signal_new (
-          "install-addon",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
-          g_cclosure_marshal_VOID__OBJECT,
-          G_TYPE_NONE, 1,
-          BZ_TYPE_ENTRY);
-  g_signal_set_va_marshaller (
-      signals[SIGNAL_INSTALL_ADDON],
-      G_TYPE_FROM_CLASS (klass),
-      g_cclosure_marshal_VOID__OBJECTv);
-
-  signals[SIGNAL_REMOVE_ADDON] =
-      g_signal_new (
-          "remove-addon",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
-          g_cclosure_marshal_VOID__OBJECT,
-          G_TYPE_NONE, 1,
-          BZ_TYPE_ENTRY);
-  g_signal_set_va_marshaller (
-      signals[SIGNAL_REMOVE_ADDON],
-      G_TYPE_FROM_CLASS (klass),
-      g_cclosure_marshal_VOID__OBJECTv);
-
-  signals[SIGNAL_SHOW] =
-      g_signal_new (
-          "show-entry",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
-          g_cclosure_marshal_VOID__OBJECT,
-          G_TYPE_NONE, 1,
-          BZ_TYPE_ENTRY_GROUP);
-  g_signal_set_va_marshaller (
-      signals[SIGNAL_SHOW],
-      G_TYPE_FROM_CLASS (klass),
-      g_cclosure_marshal_VOID__OBJECTv);
 
   signals[SIGNAL_UPDATE] =
       g_signal_new (
@@ -351,6 +356,7 @@ bz_library_page_class_init (BzLibraryPageClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, stack);
   gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, search_bar);
   gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, scroll);
+  gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, filter_model);
   gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, filter);
   gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, list_view);
   gtk_widget_class_bind_template_callback (widget_class, no_results_found_subtitle);
@@ -358,8 +364,10 @@ bz_library_page_class_init (BzLibraryPageClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, tile_activated_cb);
   gtk_widget_class_bind_template_callback (widget_class, reset_search_cb);
   gtk_widget_class_bind_template_callback (widget_class, search_text_changed);
+  gtk_widget_class_bind_template_callback (widget_class, n_filtered_items_changed);
   gtk_widget_class_bind_template_callback (widget_class, clear_tasks_cb);
   gtk_widget_class_bind_template_callback (widget_class, updates_card_update_cb);
+  gtk_widget_class_bind_template_callback (widget_class, global_search_cb);
 }
 
 static void
@@ -399,6 +407,7 @@ bz_library_page_set_model (BzLibraryPage *self,
       g_object_unref);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MODEL]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_APPS]);
 }
 
 GListModel *
@@ -406,6 +415,36 @@ bz_library_page_get_model (BzLibraryPage *self)
 {
   g_return_val_if_fail (BZ_IS_LIBRARY_PAGE (self), NULL);
   return self->model;
+}
+
+void
+bz_library_page_set_transactions (BzLibraryPage        *self,
+                                  BzTransactionManager *transactions)
+{
+  g_return_if_fail (BZ_IS_LIBRARY_PAGE (self));
+  g_return_if_fail (transactions == NULL || BZ_IS_TRANSACTION_MANAGER (transactions));
+
+  if (self->transactions != NULL)
+    g_signal_handlers_disconnect_by_func (self->transactions, has_transactions_changed, self);
+
+  g_clear_object (&self->transactions);
+  if (transactions != NULL)
+    {
+      self->transactions = g_object_ref (transactions);
+
+      g_signal_connect_swapped (
+          transactions, "notify::has-transactions",
+          G_CALLBACK (has_transactions_changed), self);
+    }
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TRANSACTIONS]);
+}
+
+BzTransactionManager *
+bz_library_page_get_transactions (BzLibraryPage *self)
+{
+  g_return_val_if_fail (BZ_IS_LIBRARY_PAGE (self), NULL);
+  return self->transactions;
 }
 
 void
@@ -470,24 +509,44 @@ items_changed (BzLibraryPage *self,
                GListModel    *model)
 {
   set_page (self);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_HAS_APPS]);
+}
+
+static void
+has_transactions_changed (BzLibraryPage        *self,
+                          GParamSpec           *pspec,
+                          BzTransactionManager *transactions)
+{
+  set_page (self);
 }
 
 static void
 set_page (BzLibraryPage *self)
 {
-  GtkSelectionModel *selection_model;
-  GListModel        *filter_model;
+  guint    n_apps           = 0;
+  guint    n_filtered       = 0;
+  gboolean has_transactions = FALSE;
 
-  if (self->model == NULL || g_list_model_get_n_items (self->model) == 0)
+  if (self->model != NULL)
     {
-      adw_view_stack_set_visible_child_name (self->stack, "empty");
-      return;
+      n_apps     = g_list_model_get_n_items (self->model);
+      n_filtered = g_list_model_get_n_items (G_LIST_MODEL (self->filter_model));
     }
 
-  selection_model = gtk_list_view_get_model (self->list_view);
-  filter_model    = gtk_no_selection_get_model (GTK_NO_SELECTION (selection_model));
+  if (self->state != NULL)
+    {
+      BzTransactionManager *manager = NULL;
 
-  if (g_list_model_get_n_items (filter_model) == 0)
+      manager          = bz_state_info_get_transaction_manager (self->state);
+      has_transactions = bz_transaction_manager_get_has_transactions (manager);
+    }
+
+  if (n_apps == 0 && !has_transactions)
+    {
+      gtk_editable_set_text (GTK_EDITABLE (self->search_bar), "");
+      adw_view_stack_set_visible_child_name (self->stack, "empty");
+    }
+  else if (n_apps > 0 && n_filtered == 0)
     adw_view_stack_set_visible_child_name (self->stack, "no-results");
   else
     adw_view_stack_set_visible_child_name (self->stack, "content");

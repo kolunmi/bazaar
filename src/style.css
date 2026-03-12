@@ -3,8 +3,24 @@
 }
 
 .bz-debug {
-    background-color: darkorange;
+    background: linear-gradient(to top, #ffaf4c, #ffc04c);
+    border-color: black;
+    border-radius: 6px;
+    border-style: solid;
+    border-width: 1px;
     color: black;
+    padding: 3px;
+}
+
+.bz-debug button {
+    border-color: black;
+    border-style: dashed;
+    border-width: 1px;
+    border-radius: 3px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 2px;
+    padding-right: 2px;
 }
 
 .bz-donations-dialog {
@@ -577,6 +593,7 @@ headerbar,
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
   padding-left: 32px;
   padding-right: 32px;
+  outline-offset: 2px;
 }
 
 @media (prefers-contrast: more) {
@@ -855,7 +872,14 @@ window.narrow .category-tile {
 }
 
 .update-toggle {
-	border-radius: 0;
+	border-radius: 12px;
+	box-shadow: none;
+	transition: border-bottom-left-radius 150ms ease,
+	            border-bottom-right-radius 150ms ease;
+}
+.update-toggle.activated {
+	border-bottom-left-radius: 0px;
+	border-bottom-right-radius: 0px;
 }
 
 .update-card {
@@ -877,10 +901,4 @@ window.narrow .category-tile {
 curated-list-view,
 curated-list-view list {
   background: var(--bg-color);
-}
-
-.bz-popup {
-    border-radius: 15px;
-    background: var(--window-bg-color);
-    /* box-shadow: 0 0 20px 1px black; */
 }

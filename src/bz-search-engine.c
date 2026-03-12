@@ -337,6 +337,7 @@ bz_search_engine_query (BzSearchEngine    *self,
       bz_finished_search_query_set_interpreted_query (finished, "");
       bz_finished_search_query_set_results (finished, results);
       bz_finished_search_query_set_n_results (finished, n_groups);
+      bz_finished_search_query_set_elapsed (finished, 0.0);
 
       return dex_future_new_for_object (finished);
     }
@@ -371,12 +372,36 @@ biases_changed (BzSearchEngine *self,
                 guint           added,
                 GListModel     *model)
 {
-  if (removed > 0)
-    g_ptr_array_remove_range (self->biases_mirror, position, removed);
+  g_autoptr (GPtrArray) new_mirror = NULL;
+
+  /* Since `self->biases_mirror` is used in other threads, it should be
+     immutable after its construction; so we have to make a new mirror upon
+     every change */
+  new_mirror = g_ptr_array_new_with_free_func (bias_data_unref);
+  g_ptr_array_set_size (new_mirror, self->biases_mirror->len + added - removed);
+
+#define COPY_OVER(_old_idx, _new_idx, _len)                                   \
+  for (guint _i = 0; _i < (_len); _i++)                                       \
+    {                                                                         \
+      BiasData  *_data = NULL;                                                \
+      BiasData **_loc  = NULL;                                                \
+                                                                              \
+      _data = g_ptr_array_index (self->biases_mirror, (_old_idx) + _i);       \
+      _loc  = (BiasData **) &g_ptr_array_index (new_mirror, (_new_idx) + _i); \
+      *_loc = bias_data_ref (_data);                                          \
+    }
+
+  COPY_OVER (0, 0, position);
+  COPY_OVER (position + removed,
+             position + added,
+             self->biases_mirror->len - (position + removed));
+
+#undef COPY_OVER
 
   for (guint i = 0; i < added; i++)
     {
       g_autoptr (GError) local_error              = NULL;
+      BiasData **loc                              = NULL;
       g_autoptr (BzSearchBias) bias               = NULL;
       const char            *regex_string         = NULL;
       const char            *convert_to           = NULL;
@@ -387,6 +412,8 @@ biases_changed (BzSearchEngine *self,
       g_autoptr (GHashTable) boost                = NULL;
       g_autoptr (BiasData) data                   = NULL;
 
+      loc = (BiasData **) &g_ptr_array_index (new_mirror, position + i);
+
       bias                 = g_list_model_get_item (model, position + i);
       regex_string         = bz_search_bias_get_regex (bias);
       convert_to           = bz_search_bias_get_convert_to (bias);
@@ -394,15 +421,15 @@ biases_changed (BzSearchEngine *self,
       linear_function      = bz_search_bias_get_linear_boost (bias);
       exponential_function = bz_search_bias_get_exponential_boost (bias);
 
-#define SKIP()                                                                     \
-  G_STMT_START                                                                     \
-  {                                                                                \
-    g_autoptr (BiasData) _data = NULL;                                             \
-                                                                                   \
-    _data          = bias_data_new ();                                             \
-    _data->invalid = TRUE;                                                         \
-    g_ptr_array_insert (self->biases_mirror, position + i, bias_data_ref (_data)); \
-  }                                                                                \
+#define SKIP()                              \
+  G_STMT_START                              \
+  {                                         \
+    g_autoptr (BiasData) _data = NULL;      \
+                                            \
+    _data          = bias_data_new ();      \
+    _data->invalid = TRUE;                  \
+    *loc           = bias_data_ref (_data); \
+  }                                         \
   G_STMT_END
 
       if (regex_string == NULL ||
@@ -477,8 +504,11 @@ biases_changed (BzSearchEngine *self,
           data->exponential_boost.y_intercept = bz_exponential_function_get_y_intercept (exponential_function);
         }
 
-      g_ptr_array_insert (self->biases_mirror, position + i, bias_data_ref (data));
+      *loc = bias_data_ref (data);
     }
+
+  g_clear_pointer (&self->biases_mirror, g_ptr_array_unref);
+  self->biases_mirror = g_steal_pointer (&new_mirror);
 }
 
 static DexFuture *
@@ -488,7 +518,8 @@ query_task_fiber (QueryTaskData *data)
   GPtrArray *shallow_mirror                  = data->snapshot;
   GPtrArray *biases                          = data->biases;
   g_autoptr (GError) local_error             = NULL;
-  gboolean         result                    = FALSE;
+  gboolean result                            = FALSE;
+  g_autoptr (GTimer) timer                   = NULL;
   g_autofree char *query_utf8                = NULL;
   guint            n_sub_tasks               = 0;
   guint            scores_per_task           = 0;
@@ -498,41 +529,40 @@ query_task_fiber (QueryTaskData *data)
   g_autoptr (GPtrArray) results              = NULL;
   g_autoptr (BzFinishedSearchQuery) finished = NULL;
 
+  timer = g_timer_new ();
+
   query_utf8      = g_strjoinv (" ", terms);
   n_sub_tasks     = MAX (1, MIN (shallow_mirror->len / 512, g_get_num_processors ()));
   scores_per_task = shallow_mirror->len / n_sub_tasks;
 
   active_biases = g_ptr_array_new_with_free_func (bias_data_unref);
-  if (biases->len > 0)
+  for (guint i = 0; i < biases->len; i++)
     {
-      for (guint i = 0; i < biases->len; i++)
+      BiasData *bias = NULL;
+
+      bias = g_ptr_array_index (biases, i);
+      if (bias->invalid)
+        continue;
+
+      if (!g_regex_match (bias->regex, query_utf8, G_REGEX_MATCH_DEFAULT, NULL))
+        continue;
+
+      if (bias->convert_to != NULL)
         {
-          BiasData *bias = NULL;
+          g_autofree char *tmp = NULL;
 
-          bias = g_ptr_array_index (biases, i);
-          if (bias->invalid)
-            continue;
-
-          if (!g_regex_match (bias->regex, query_utf8, G_REGEX_MATCH_DEFAULT, NULL))
-            continue;
-
-          if (bias->convert_to != NULL)
+          tmp = g_regex_replace (
+              bias->regex, query_utf8,
+              -1, 0, bias->convert_to,
+              G_REGEX_MATCH_DEFAULT, NULL);
+          if (tmp != NULL)
             {
-              g_autofree char *tmp = NULL;
-
-              tmp = g_regex_replace (
-                  bias->regex, query_utf8,
-                  -1, 0, bias->convert_to,
-                  G_REGEX_MATCH_DEFAULT, NULL);
-              if (tmp != NULL)
-                {
-                  g_clear_pointer (&query_utf8, g_free);
-                  query_utf8 = g_steal_pointer (&tmp);
-                }
+              g_clear_pointer (&query_utf8, g_free);
+              query_utf8 = g_steal_pointer (&tmp);
             }
-
-          g_ptr_array_add (active_biases, bias_data_ref (bias));
         }
+
+      g_ptr_array_add (active_biases, bias_data_ref (bias));
     }
 
   sub_futures = g_ptr_array_new_with_free_func (dex_unref);
@@ -606,6 +636,7 @@ query_task_fiber (QueryTaskData *data)
   bz_finished_search_query_set_interpreted_query (finished, query_utf8);
   bz_finished_search_query_set_results (finished, results);
   bz_finished_search_query_set_n_results (finished, results->len);
+  bz_finished_search_query_set_elapsed (finished, g_timer_elapsed (timer, NULL));
 
   return dex_future_new_for_object (finished);
 }
@@ -682,7 +713,7 @@ query_sub_task_fiber (QuerySubTaskData *data)
               score = bias->linear_boost.slope * score + bias->linear_boost.y_intercept;
               break;
             case EXPONENTIAL:
-              score = pow (bias->exponential_boost.factor, score) + bias->exponential_boost.y_intercept;
+              score = pow (bias->exponential_boost.factor, score) * bias->exponential_boost.y_intercept;
               break;
             default:
               break;

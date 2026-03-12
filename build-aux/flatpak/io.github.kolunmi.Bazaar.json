@@ -17,10 +17,10 @@
     "--device=dri",
     "--filesystem=/var/lib/flatpak",
     "--filesystem=xdg-data/flatpak",
-    "--filesystem=~/.var/app",
     "--talk-name=org.freedesktop.Flatpak",
     "--system-talk-name=org.freedesktop.Flatpak.SystemHelper",
     "--filesystem=/var/tmp",
+    "--filesystem=~/.var/app",
     "--system-talk-name=org.freedesktop.Accounts"
   ],
   "cleanup": [
@@ -39,6 +39,26 @@
     "*.a"
   ],
   "modules": [
+    {
+      "name": "blueprint-compiler",
+      "buildsystem": "meson",
+      "cleanup": [
+        "*"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://gitlab.gnome.org/GNOME/blueprint-compiler.git",
+          "commit": "aa5298cc1677cf855bd61f9671607362bd203f4f",
+          "tag": "v0.20.0",
+          "x-checker-data": {
+            "type": "anitya",
+            "project-id": 279929,
+            "tag-template": "$version"
+          }
+        }
+      ]
+    },
     {
       "name": "bazaar",
       "buildsystem": "meson",
@@ -80,6 +100,30 @@
           ]
         },
         {
+          "name": "malcontent",
+          "buildsystem": "meson",
+          "config-opts": [
+	        "-Dui=disabled",
+	        "-Dinstalled_tests=false"
+          ],
+          "sources": [
+            {
+              "type": "git",
+              "url": "https://gitlab.freedesktop.org/pwithnall/malcontent.git",
+              "commit": "3ba80995bb25b7aeda7e21d547f9e39ff9a81736",
+              "tag": "0.12.0"
+            },
+            {
+	          "type": "shell",
+	          "commands": [
+		        "sed -i \"/subdir('tests')/d\" libmalcontent/meson.build",
+		        "sed -i \"/subdir('tests')/d\" meson.build",
+		        "sed -i \"/subdir('pam')/d\" meson.build"
+	          ]
+	        }
+          ]
+        },
+        {
           "name": "flatpak",
           "buildsystem": "meson",
           "config-opts": [
@@ -89,15 +133,13 @@
             "-Dman=disabled",
             "-Dseccomp=disabled",
             "-Dselinux_module=disabled",
-            "-Dmalcontent=disabled",
+            "-Dmalcontent=enabled",
             "-Dsandboxed_triggers=false",
             "-Dsystem_helper=enabled",
-            "-Dhttp_backend=curl",
             "-Dsystemd=disabled",
             "-Dsystem_install_dir=/var/lib/flatpak",
             "-Dsystem_bubblewrap=bwrap",
             "-Dsystem_dbus_proxy=xdg-dbus-proxy",
-            "-Dgir=disabled",
             "--sysconfdir=/var/run/host/etc"
           ],
           "cleanup": [
@@ -121,8 +163,8 @@
             {
               "type": "git",
               "url": "https://github.com/flatpak/flatpak",
-              "commit": "0835c0272f3a0389f97b02cad4b208f80fec99ed",
-              "tag": "1.17.0",
+              "commit": "20599618d623630f7aa38d61a2bb81d86fb25f09",
+              "tag": "1.17.2",
               "x-checker-data": {
                 "type": "git",
                 "url-template": "$version",
@@ -143,8 +185,8 @@
               "sources": [
                 {
                   "type": "file",
-                  "url": "https://files.pythonhosted.org/packages/f2/a5/181488fc2b9d093e3972d2a472855aae8a03f000592dbfce716a512b3359/pyparsing-3.2.5.tar.gz",
-                  "sha256": "2df8d5b7b2802ef88e8d016a2eb9c7aeaa923529cd251ed0fe4608275d4105b6",
+                  "url": "https://files.pythonhosted.org/packages/f3/91/9c6ee907786a473bf81c5f53cf703ba0957b23ab84c264080fb5a450416f/pyparsing-3.3.2.tar.gz",
+                  "sha256": "c777f4d763f140633dcb6d8a3eda953bf7a214dc4eff598413c070bcdc117cbc",
                   "x-checker-data": {
                     "type": "pypi",
                     "name": "pyparsing"
@@ -189,8 +231,8 @@
                 {
                   "type": "git",
                   "url": "https://github.com/polkit-org/polkit",
-                  "commit": "d627b0d1e1108563658dabe3fb8d2a065e64df10",
-                  "tag": "126",
+                  "commit": "9e4894c969eecf26a3ba762f4f7a268aa0fb3e51",
+                  "tag": "127",
                   "x-checker-data": {
                     "type": "git",
                     "tag-pattern": "^([\\d.]+)$"

@@ -232,6 +232,7 @@ create_release_row (const char *version,
       markup          = g_markup_printf_escaped ("<a href=\"%s\">%s</a>", url, _ ("Get More Information"));
       more_info_label = GTK_LABEL (gtk_label_new (NULL));
       gtk_label_set_markup (more_info_label, markup);
+      gtk_widget_set_tooltip_text (GTK_WIDGET(more_info_label), url);
       gtk_box_append (more_info_box, GTK_WIDGET (more_info_label));
 
       more_info_icon = GTK_IMAGE (gtk_image_new_from_icon_name ("external-link-symbolic"));
