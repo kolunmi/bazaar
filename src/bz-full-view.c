@@ -427,11 +427,11 @@ get_license_label (gpointer object,
   if (is_floss)
     return g_strdup (_ ("Free"));
 
-  if (bz_spdx_is_proprietary (license))
-    return g_strdup (_ ("Proprietary"));
-
   if (license == NULL || *license == '\0')
     return g_strdup (_ ("Unknown"));
+
+  if (bz_spdx_is_proprietary (license))
+    return g_strdup (_ ("Proprietary"));
 
   return g_strdup (_ ("Special License"));
 }
