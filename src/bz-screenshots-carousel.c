@@ -32,6 +32,7 @@
 
 #include "bz-decorated-screenshot.h"
 #include "bz-screenshots-carousel.h"
+#include "bz-template-callbacks.h"
 
 #define LIGHT_CLASS          "screenshot-carousel-light"
 #define DARK_CLASS           "screenshot-carousel-dark"
@@ -445,6 +446,8 @@ bz_screenshots_carousel_class_init (BzScreenshotsCarouselClass *klass)
                     G_TYPE_UINT);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-screenshots-carousel.ui");
+  bz_widget_class_bind_all_util_callbacks (widget_class);
+
   gtk_widget_class_bind_template_child (widget_class, BzScreenshotsCarousel, carousel);
   gtk_widget_class_bind_template_child (widget_class, BzScreenshotsCarousel, prev_button);
   gtk_widget_class_bind_template_child (widget_class, BzScreenshotsCarousel, prev_button_revealer);
