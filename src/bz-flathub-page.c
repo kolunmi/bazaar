@@ -97,11 +97,6 @@ show_more_clicked (BzFlathubPage *self,
                    const char    *category_name);
 
 static void
-apps_page_select_cb (BzFlathubPage *self,
-                     BzEntryGroup  *group,
-                     BzAppsPage    *page);
-
-static void
 bz_flathub_page_dispose (GObject *object)
 {
   BzFlathubPage *self = BZ_FLATHUB_PAGE (object);
