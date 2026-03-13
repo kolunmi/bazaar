@@ -559,11 +559,13 @@ bz_releases_list_set_version_history (BzReleasesList *self,
     {
       self->version_history = g_object_ref (version_history);
       populate_preview_box (self);
+      gtk_widget_set_visible (GTK_WIDGET (self),
+                        g_list_model_get_n_items (version_history) > 0);
     }
   else
     {
       clear_preview_box (self);
-      gtk_widget_set_visible (GTK_WIDGET (self->show_all_box), FALSE);
+      gtk_widget_set_visible (GTK_WIDGET (self), FALSE);
     }
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_VERSION_HISTORY]);
