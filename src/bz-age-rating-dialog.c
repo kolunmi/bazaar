@@ -570,6 +570,16 @@ collect_attribute (const gchar         *attribute,
                                                         (GCompareFunc) attributes_compare);
 }
 
+static AsContentRatingValue
+get_rating_value (AsContentRating *content_rating,
+                  const gchar     *id)
+{
+  if (content_rating == NULL)
+    return AS_CONTENT_RATING_VALUE_UNKNOWN;
+
+  return as_content_rating_get_value (content_rating, id);
+}
+
 static void
 process_attributes (AsContentRating  *content_rating,
                     gboolean          show_worst_only,
@@ -606,7 +616,7 @@ process_attributes (AsContentRating  *content_rating,
 
   for (gsize i = 0; rating_ids[i] != NULL; i++)
     {
-      rating_value = as_content_rating_get_value (content_rating, rating_ids[i]);
+      rating_value = get_rating_value (content_rating, rating_ids[i]);
       rating_age   = as_content_rating_attribute_to_csm_age (rating_ids[i], rating_value);
 
       if (rating_age > age_bad)
@@ -627,7 +637,7 @@ process_attributes (AsContentRating  *content_rating,
           g_strv_contains (social_group, rating_ids[i]))
         continue;
 
-      rating_value = as_content_rating_get_value (content_rating, rating_ids[i]);
+      rating_value = get_rating_value (content_rating, rating_ids[i]);
       rating_age   = as_content_rating_attribute_to_csm_age (rating_ids[i], rating_value);
 
       if (show_worst_only && rating_age < age_bad)
@@ -635,8 +645,8 @@ process_attributes (AsContentRating  *content_rating,
 
       if (g_strv_contains (coalesce_groups + 1, rating_ids[i]) &&
           as_content_rating_attribute_to_csm_age (coalesce_groups[0],
-                                                  as_content_rating_get_value (content_rating,
-                                                                               coalesce_groups[0])) >= rating_age)
+                                                  get_rating_value (content_rating,
+                                                                    coalesce_groups[0])) >= rating_age)
         continue;
 
       callback (rating_ids[i], rating_value, user_data);
@@ -644,7 +654,7 @@ process_attributes (AsContentRating  *content_rating,
 
   for (gsize i = 0; violence_group[i] != NULL; i++)
     {
-      rating_value = as_content_rating_get_value (content_rating, violence_group[i]);
+      rating_value = get_rating_value (content_rating, violence_group[i]);
       rating_age   = as_content_rating_attribute_to_csm_age (violence_group[i], rating_value);
 
       if (show_worst_only && rating_age < age_bad)
@@ -655,7 +665,7 @@ process_attributes (AsContentRating  *content_rating,
 
   for (gsize i = 0; social_group[i] != NULL; i++)
     {
-      rating_value = as_content_rating_get_value (content_rating, social_group[i]);
+      rating_value = get_rating_value (content_rating, social_group[i]);
       rating_age   = as_content_rating_attribute_to_csm_age (social_group[i], rating_value);
 
       if (show_worst_only && rating_age < age_bad)

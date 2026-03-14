@@ -232,6 +232,7 @@ create_release_row (const char *version,
       markup          = g_markup_printf_escaped ("<a href=\"%s\">%s</a>", url, _ ("Get More Information"));
       more_info_label = GTK_LABEL (gtk_label_new (NULL));
       gtk_label_set_markup (more_info_label, markup);
+      gtk_widget_set_tooltip_text (GTK_WIDGET (more_info_label), url);
       gtk_box_append (more_info_box, GTK_WIDGET (more_info_label));
 
       more_info_icon = GTK_IMAGE (gtk_image_new_from_icon_name ("external-link-symbolic"));
@@ -314,50 +315,6 @@ bz_releases_dialog_new (GListModel *version_history,
     }
 
   return GTK_WIDGET (dialog);
-}
-
-void
-bz_releases_dialog_set_version_history (BzReleasesDialog *self,
-                                        GListModel       *version_history,
-                                        GListModel       *installed_versions)
-{
-  guint      n_items = 0;
-  GtkWidget *child   = NULL;
-
-  g_return_if_fail (self != NULL);
-
-  while ((child = gtk_widget_get_first_child (GTK_WIDGET (self->releases_box))) != NULL)
-    gtk_list_box_remove (self->releases_box, child);
-
-  g_clear_object (&self->installed_versions);
-  if (installed_versions)
-    self->installed_versions = g_object_ref (installed_versions);
-
-  if (version_history == NULL)
-    return;
-
-  n_items = g_list_model_get_n_items (version_history);
-  for (guint i = 0; i < n_items; i++)
-    {
-      g_autoptr (BzRelease) release = NULL;
-      const char *version           = NULL;
-      const char *description       = NULL;
-      const char *url               = NULL;
-      guint64     timestamp         = 0;
-      GtkWidget  *row               = NULL;
-
-      release = g_list_model_get_item (version_history, i);
-      if (release == NULL)
-        continue;
-
-      version     = bz_release_get_version (release);
-      description = bz_release_get_description (release);
-      url         = bz_release_get_url (release);
-      timestamp   = bz_release_get_timestamp (release);
-
-      row = create_release_row (version, description, timestamp, url, FALSE, self->installed_versions);
-      gtk_list_box_append (self->releases_box, row);
-    }
 }
 
 static void
@@ -558,11 +515,13 @@ bz_releases_list_set_version_history (BzReleasesList *self,
     {
       self->version_history = g_object_ref (version_history);
       populate_preview_box (self);
+      gtk_widget_set_visible (GTK_WIDGET (self),
+                              g_list_model_get_n_items (version_history) > 0);
     }
   else
     {
       clear_preview_box (self);
-      gtk_widget_set_visible (GTK_WIDGET (self->show_all_box), FALSE);
+      gtk_widget_set_visible (GTK_WIDGET (self), FALSE);
     }
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_VERSION_HISTORY]);

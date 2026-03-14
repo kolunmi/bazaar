@@ -871,8 +871,13 @@ window.narrow .category-tile {
 	border-radius: 0 0 12px 12px;
 }
 
+.update-list > row {
+    padding: 0;
+}
+
 .update-toggle {
 	border-radius: 12px;
+	box-shadow: none;
 	transition: border-bottom-left-radius 150ms ease,
 	            border-bottom-right-radius 150ms ease;
 }

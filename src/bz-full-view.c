@@ -427,11 +427,11 @@ get_license_label (gpointer object,
   if (is_floss)
     return g_strdup (_ ("Free"));
 
-  if (bz_spdx_is_proprietary (license))
-    return g_strdup (_ ("Proprietary"));
-
   if (license == NULL || *license == '\0')
     return g_strdup (_ ("Unknown"));
+
+  if (bz_spdx_is_proprietary (license))
+    return g_strdup (_ ("Proprietary"));
 
   return g_strdup (_ ("Special License"));
 }
@@ -640,13 +640,6 @@ filter_own_app_id (BzEntry *entry, GtkStringList *app_ids)
     return g_steal_pointer (&filtered);
   else
     return NULL;
-}
-
-static gboolean
-has_other_apps (gpointer object, GtkStringList *app_ids, BzEntry *entry)
-{
-  g_autoptr (GtkStringList) filtered = filter_own_app_id (BZ_ENTRY (entry), app_ids);
-  return filtered != NULL;
 }
 
 static GListModel *
@@ -1136,7 +1129,6 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, format_more_other_apps_label);
   gtk_widget_class_bind_template_callback (widget_class, get_developer_apps_entries);
   gtk_widget_class_bind_template_callback (widget_class, more_apps_button_clicked_cb);
-  gtk_widget_class_bind_template_callback (widget_class, has_other_apps);
   gtk_widget_class_bind_template_callback (widget_class, open_url_cb);
   gtk_widget_class_bind_template_callback (widget_class, license_cb);
   gtk_widget_class_bind_template_callback (widget_class, dl_stats_cb);

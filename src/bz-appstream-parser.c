@@ -9,7 +9,7 @@
 
 #include "bz-appstream-parser.h"
 #include "bz-async-texture.h"
-#include "bz-flathub-category.h"
+#include "bz-category-flags.h"
 #include "bz-io.h"
 #include "bz-release.h"
 #include "bz-url.h"
@@ -216,7 +216,7 @@ bz_appstream_parser_populate_entry (BzEntry     *entry,
   GPtrArray *as_keywords                               = NULL;
   g_autoptr (GListStore) keywords                      = NULL;
   GPtrArray *as_categories                             = NULL;
-  g_autoptr (GListModel) categories                    = NULL;
+  BzCategoryFlags categories                           = BZ_CATEGORY_FLAGS_NONE;
   g_autoptr (BzVerificationStatus) verification_status = NULL;
 
   g_return_val_if_fail (BZ_IS_ENTRY (entry), FALSE);
@@ -625,9 +625,15 @@ bz_appstream_parser_populate_entry (BzEntry     *entry,
     }
 
   as_categories = as_component_get_categories (component);
-  if (as_categories != NULL && as_categories->len > 0)
+  if (as_categories != NULL)
     {
-      categories = bz_flathub_category_list_from_appstream (as_categories);
+      for (guint i = 0; i < as_categories->len; i++)
+        {
+          const char *name = NULL;
+
+          name = g_ptr_array_index (as_categories, i);
+          categories = bz_category_flags_add (categories, name);
+        }
     }
 
   if (g_strcmp0 (remote_name, "flathub") == 0)
