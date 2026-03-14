@@ -69,5 +69,10 @@
       <summary>Force Adwaita Icon Theme</summary>
       <description>Override the icon theme with Adwaita</description>
     </key>
+    <key name="show-permission-banner" type="b">
+      <default>true</default>
+      <summary>Show Permission Warning Banner</summary>
+      <description>Show a warning banner on the permissions page</description>
+    </key>
   </schema>
 </schemalist>

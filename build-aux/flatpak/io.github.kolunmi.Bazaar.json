@@ -21,7 +21,8 @@
     "--system-talk-name=org.freedesktop.Flatpak.SystemHelper",
     "--filesystem=/var/tmp",
     "--filesystem=~/.var/app",
-    "--system-talk-name=org.freedesktop.Accounts"
+    "--system-talk-name=org.freedesktop.Accounts",
+    "--talk-name=org.freedesktop.impl.portal.PermissionStore"
   ],
   "cleanup": [
     "/share/zsh",

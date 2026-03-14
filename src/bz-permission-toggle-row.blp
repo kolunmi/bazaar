@@ -1,0 +1,36 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzPermissionToggleRow: Adw.ActionRow {
+  activatable-widget: toggle;
+
+  [suffix]
+  Button reset_button {
+    icon-name: "edit-undo-symbolic";
+    valign: center;
+    sensitive: false;
+    tooltip-text: _("Reset to default");
+    clicked => $reset_button_clicked_cb();
+
+    styles [
+      "flat",
+    ]
+  }
+
+  [suffix]
+  Separator {
+    orientation: vertical;
+    valign: center;
+    margin-end: 4;
+
+    styles [
+      "spacer",
+    ]
+  }
+
+  [suffix]
+  Switch toggle {
+    valign: center;
+    notify::active => $toggle_active_changed_cb();
+  }
+}

@@ -1,0 +1,424 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzPermissionsPage: Adw.NavigationPage {
+  title: _("Permissions");
+
+  Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {
+      [end]
+      MenuButton {
+        primary: true;
+        icon-name: "open-menu-symbolic";
+        has-tooltip: true;
+        tooltip-text: _("Main Menu");
+        menu-model: menu {
+          section {
+            item {
+              label: _("_Donate to Bazaar ❤️");
+              action: "app.donate";
+            }
+          }
+
+          section {
+            item {
+              label: _("_Preferences");
+              action: "app.preferences";
+            }
+
+            item {
+              label: _("_Keyboard Shortcuts");
+              action: "app.shortcuts";
+            }
+
+            item {
+              label: _("_About Bazaar");
+              action: "app.about";
+            }
+          }
+
+          section {
+            item {
+              label: _("_Quit Bazaar");
+              action: "app.quit";
+            }
+          }
+        };
+      }
+    }
+
+    [top]
+    Adw.Banner banner {
+      revealed: true;
+      title: _("Modifying permissions may cause apps to break. Do not make bug reports with them modified!");
+      use-markup: true;
+      button-label: _("OK");
+      button-clicked => $banner_clicked_cb(template);
+
+      styles [
+      "warning"
+      ]
+    }
+
+    content: ScrolledWindow {
+      child: Adw.Clamp {
+        maximum-size: 600;
+        margin-top: 24;
+        margin-bottom: 24;
+        margin-start: 12;
+        margin-end: 12;
+
+        child: Box {
+          orientation: vertical;
+          spacing: 12;
+
+          Box {
+            orientation: vertical;
+            spacing: 4;
+            halign: center;
+
+            Image {
+              pixel-size: 128;
+              paintable: bind template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable;
+
+              styles [
+                "icon-dropshadow",
+              ]
+            }
+
+            Label {
+              styles [
+                "title-1",
+              ]
+
+              wrap: true;
+              lines: 2;
+              ellipsize: end;
+              justify: center;
+              wrap-mode: word_char;
+              natural-wrap-mode: word;
+              label: bind template.entry-group as <$BzEntryGroup>.title;
+            }
+
+            Label {
+              styles [
+                "title-4",
+                "dimmed",
+              ]
+
+              wrap: true;
+              lines: 2;
+              ellipsize: end;
+              justify: center;
+              wrap-mode: word_char;
+              natural-wrap-mode: word;
+              label: bind template.entry-group as <$BzEntryGroup>.developer;
+            }
+
+            Button{
+              label: _("Reset Changes");
+              clicked => $reset_button_clicked_cb();
+              sensitive: bind $invert_boolean(template.is-default) as <bool>;
+              margin-top: 18;
+              halign: center;
+
+              styles [
+                "pill"
+              ]
+            }
+          }
+
+          $BzPortalPermissions {
+            app-id: bind template.entry-group as <$BzEntryGroup>.id;
+            margin-top: 12;
+            margin-start: 4;
+            margin-end: 4;
+          }
+
+          Adw.PreferencesGroup {
+            title: _("General");
+            margin-top: 12;
+            margin-start: 4;
+            margin-end: 4;
+
+            $BzPermissionToggleRow {
+              title: _("Network");
+              subtitle: _("Access the internet");
+              key: "shared=network";
+              group: "Context";
+            }
+
+            $BzPermissionToggleRow {
+              title: _("Audio Server");
+              subtitle: _("Play and record sound via PulseAudio, bypassing the individual permissions");
+              key: "sockets=pulseaudio";
+              group: "Context";
+            }
+
+            $BzPermissionToggleRow {
+              title: _("Bluetooth");
+              subtitle: _("Manage both Bluetooth settings and devices");
+              key: "features=bluetooth";
+              group: "Context";
+            }
+
+            $BzPermissionToggleRow {
+              title: _("Printing");
+              subtitle: _("Talk to the CUPS printing system");
+              key: "sockets=cups";
+              group: "Context";
+            }
+          }
+
+          Adw.PreferencesGroup {
+            title: _("Devices");
+            margin-top: 12;
+            margin-start: 4;
+            margin-end: 4;
+
+            $BzPermissionToggleRow {
+              title: _("Smart Cards");
+              subtitle: _("Access smart card readers via PC/SC");
+              key: "sockets=pcsc";
+              group: "Context";
+            }
+
+            $BzPermissionToggleRow all_devices {
+              title: _("All Devices");
+              subtitle: _("Access all devices such as webcam, GPU, etc.");
+              key: "devices=all";
+              group: "Context";
+            }
+
+            $BzPermissionToggleRow {
+              title: _("GPU Acceleration");
+              sensitive: bind all_devices.active inverted;
+              subtitle: _("Access GPU rendering");
+              key: "devices=dri";
+              group: "Context";
+            }
+
+            $BzPermissionToggleRow {
+              title: _("USB Devices");
+              sensitive: bind all_devices.active inverted;
+              subtitle: _("Manage USB devices directly");
+              key: "devices=usb";
+              group: "Context";
+            }
+
+            $BzPermissionToggleRow {
+              title: _("Input Devices");
+              sensitive: bind all_devices.active inverted;
+              subtitle: _("Access Input devices");
+              key: "devices=input";
+              group: "Context";
+            }
+
+            $BzPermissionToggleRow {
+              title: _("KVM Virtualization");
+              sensitive: bind all_devices.active inverted;
+              subtitle: _("Access KVM for virtual machines");
+              key: "devices=kvm";
+              group: "Context";
+            }
+
+            $BzPermissionToggleRow {
+              title: _("Shared Memory");
+              sensitive: bind all_devices.active inverted;
+              subtitle: _("Create shared memory objects");
+              key: "devices=shm";
+              group: "Context";
+            }
+          }
+
+          Adw.PreferencesGroup {
+            title: _("Filesystem");
+            margin-top: 12;
+            margin-start: 4;
+            margin-end: 4;
+
+            $BzPermissionToggleRow host_filesystem {
+              title: _("Host Filesystem");
+              subtitle: _("Full access to entire filesystem");
+              key: "filesystems=host";
+              group: "Context";
+            }
+
+            $BzPermissionToggleRow {
+              title: _("Home Folder");
+              sensitive: bind host_filesystem.active inverted;
+              subtitle: _("Full access to your home directory");
+              key: "filesystems=home";
+              group: "Context";
+            }
+
+            $BzPermissionToggleRow {
+              title: _("Downloads");
+              sensitive: bind host_filesystem.active inverted;
+              subtitle: _("Access the Downloads folder");
+              key: "filesystems=xdg-download";
+              group: "Context";
+            }
+
+            $BzPermissionEntryRow other_files {
+              title: _("Other Paths");
+              sensitive: bind host_filesystem.active inverted;
+              subtitle: _("Grant access to additional files and folders");
+            }
+          }
+
+          Revealer {
+            reveal-child: bind toggle.active;
+            transition-type: slide_up;
+            transition-duration: 500;
+
+            child: Box {
+              orientation: vertical;
+              spacing: 24;
+              margin-start: 6;
+              margin-end: 6;
+
+              Adw.PreferencesGroup {
+                title: _("Advanced System Access");
+                margin-top: 12;
+
+                $BzPermissionToggleRow {
+                  title: _("Inter-process Communication");
+                  subtitle: _("Share IPC namespace with the host");
+                  key: "shared=ipc";
+                  group: "Context";
+                }
+
+                $BzPermissionToggleRow {
+                  title: _("SSH Authentication");
+                  subtitle: _("Access the SSH authentication agent");
+                  key: "sockets=ssh-auth";
+                  group: "Context";
+                }
+
+                $BzPermissionToggleRow {
+                  title: _("GPG Agent");
+                  subtitle: _("Access GPG agent directories things like encryption and git commit signing");
+                  key: "sockets=gpg-agent";
+                  group: "Context";
+                }
+              }
+
+              Adw.PreferencesGroup {
+                title: _("Session Bus Policy");
+                margin-top: 12;
+                $BzPermissionToggleRow session_bus {
+                  title: _("Full Access");
+                  subtitle: _("Give full access to the D-Bus session bus");
+                  key: "sockets=session-bus";
+                  group: "Context";
+                }
+                $BzPermissionEntryRow session_bus_talk {
+                  title: _("Talk");
+                  subtitle: _("Names on the session bus the app is allowed to send messages to");
+                  sensitive: bind session_bus.active inverted;
+                }
+                $BzPermissionEntryRow session_bus_own {
+                  title: _("Own");
+                  subtitle: _("Names on the session bus the app is allowed to claim ownership of");
+                  sensitive: bind session_bus.active inverted;
+                }
+              }
+
+              Adw.PreferencesGroup {
+                title: _("System Bus Policy");
+                margin-top: 12;
+
+                $BzPermissionToggleRow system_bus {
+                  title: _("Full Access");
+                  subtitle: _("Give full access to the full D-Bus system bus");
+                  key: "sockets=system-bus";
+                  group: "Context";
+                }
+                $BzPermissionEntryRow system_bus_talk {
+                  title: _("Talk");
+                  subtitle: _("Names on the system bus the app is allowed to send messages to");
+                  sensitive: bind system_bus.active inverted;
+                }
+                $BzPermissionEntryRow system_bus_own {
+                  title: _("Own");
+                  subtitle: _("Names on the system bus the app is allowed to claim ownership of");
+                  sensitive: bind system_bus.active inverted;
+                }
+              }
+
+              Adw.PreferencesGroup {
+                title: _("Developer Options");
+                margin-top: 12;
+                margin-bottom: 6;
+
+                $BzPermissionToggleRow {
+                  title: _("Wayland Windowing System");
+                  subtitle: _("Show windows using Wayland");
+                  key: "sockets=wayland";
+                  group: "Context";
+                }
+
+                $BzPermissionToggleRow {
+                  title: _("X11 Windowing System");
+                  subtitle: _("Show windows using X11");
+                  key: "sockets=x11";
+                  group: "Context";
+                }
+
+                $BzPermissionToggleRow {
+                  title: _("Fallback X11 Windowing System");
+                  subtitle: _("Show windows using X11 if Wayland is not available");
+                  key: "sockets=fallback-x11";
+                  group: "Context";
+                }
+
+                $BzPermissionToggleRow {
+                  title: _("Development Syscalls");
+                  subtitle: _("Access development syscalls such as ptrace");
+                  key: "features=devel";
+                  group: "Context";
+                }
+
+                $BzPermissionToggleRow {
+                  title: _("Multiarch");
+                  subtitle: _("Run multiarch / multilib binaries");
+                  key: "features=multiarch";
+                  group: "Context";
+                }
+
+                $BzPermissionToggleRow {
+                  title: _("CAN Bus");
+                  subtitle: _("Access the CAN bus");
+                  key: "features=canbus";
+                  group: "Context";
+                }
+
+                $BzPermissionToggleRow {
+                  title: _("Per-App Shared Memory");
+                  subtitle: _("Share <tt>/dev/shm</tt> between app instances &amp; subsandboxes");
+                  key: "features=per-app-dev-shm";
+                  group: "Context";
+                }
+
+                $BzPermissionEntryRow environment_vars {
+                  title: _("Variables");
+                  subtitle: _("Environment variables to set in the application");
+                }
+              }
+            };
+          }
+
+          ToggleButton toggle {
+            label: bind $get_show_more_label(toggle.active);
+            halign: center;
+            styles [
+              "pill",
+            ]
+          }
+        };
+      };
+    };
+  }
+}

@@ -39,7 +39,6 @@ struct _BzInstalledTile
   GtkImage   *fallback_icon;
   GtkLabel   *title_label;
   GtkButton  *support_button;
-  GtkButton  *addons_button;
   GtkButton  *remove_button;
 };
 
@@ -121,6 +120,14 @@ is_zero (gpointer object,
   return value == 0;
 }
 
+static gboolean
+logical_and (gpointer object,
+             gboolean a,
+             gboolean b)
+{
+  return a && b;
+}
+
 static char *
 format_description (gpointer    object,
                     guint64     size,
@@ -186,8 +193,17 @@ support_cb (BzInstalledTile *self,
 }
 
 static void
-install_addons_cb (BzInstalledTile *self,
-                   GtkButton       *button)
+permissions_cb (BzInstalledTile *self)
+{
+  if (self->group == NULL)
+    return;
+
+  gtk_widget_activate_action (GTK_WIDGET (self), "window.permissions", "s",
+                              bz_entry_group_get_id (self->group));
+}
+
+static void
+install_addons_cb (BzInstalledTile *self)
 {
   if (self->group == NULL)
     return;
@@ -234,15 +250,21 @@ bz_installed_tile_class_init (BzInstalledTileClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzInstalledTile, fallback_icon);
   gtk_widget_class_bind_template_child (widget_class, BzInstalledTile, title_label);
   gtk_widget_class_bind_template_child (widget_class, BzInstalledTile, support_button);
-  gtk_widget_class_bind_template_child (widget_class, BzInstalledTile, addons_button);
   gtk_widget_class_bind_template_child (widget_class, BzInstalledTile, remove_button);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
+  gtk_widget_class_bind_template_callback (widget_class, logical_and);
   gtk_widget_class_bind_template_callback (widget_class, format_description);
   gtk_widget_class_bind_template_callback (widget_class, support_cb);
   gtk_widget_class_bind_template_callback (widget_class, install_addons_cb);
   gtk_widget_class_bind_template_callback (widget_class, remove_cb);
+  gtk_widget_class_bind_template_callback (widget_class, permissions_cb);
+
+  gtk_widget_class_install_action (widget_class, "installed-tile.install-addons", NULL,
+                                 (GtkWidgetActionActivateFunc) install_addons_cb);
+  gtk_widget_class_install_action (widget_class, "installed-tile.permissions", NULL,
+                                   (GtkWidgetActionActivateFunc) permissions_cb);
 
   gtk_widget_class_set_accessible_role (widget_class, GTK_ACCESSIBLE_ROLE_BUTTON);
 }
