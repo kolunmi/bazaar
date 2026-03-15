@@ -27,7 +27,7 @@ template $BzFavoritesPage: Adw.NavigationPage {
           "global-progress-button",
         ]
 
-        can-target: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
+        can-focus: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
 
         action-name: "window.open-library";
         has-tooltip: true;
