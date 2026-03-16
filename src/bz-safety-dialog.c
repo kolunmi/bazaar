@@ -58,7 +58,7 @@ static GParamSpec *props[LAST_PROP] = { 0 };
 
 static AdwActionRow *create_permission_row (BzSafetyRow *row_data);
 static void          update_permissions_list (BzSafetyDialog *self);
-static void          edit_cb                 (BzSafetyDialog *self);
+static void          edit_cb (BzSafetyDialog *self);
 
 static void
 bz_safety_dialog_dispose (GObject *object)
@@ -141,7 +141,6 @@ bz_safety_dialog_class_init (BzSafetyDialogClass *klass)
                                                "/io/github/kolunmi/Bazaar/bz-safety-dialog.ui");
   bz_widget_class_bind_all_util_callbacks (widget_class);
 
-
   gtk_widget_class_bind_template_child (widget_class, BzSafetyDialog, lozenge);
   gtk_widget_class_bind_template_child (widget_class, BzSafetyDialog, permissions_list);
   gtk_widget_class_bind_template_callback (widget_class, edit_cb);
@@ -210,9 +209,10 @@ update_permissions_list (BzSafetyDialog *self)
     {
       for (gint j = 0; j < n_items; j++)
         {
-          g_autoptr (BzSafetyRow) row_data;
-          AdwActionRow *row;
-          BzImportance row_importance;
+          g_autoptr (BzSafetyRow) row_data = NULL;
+          AdwActionRow *row                = NULL;
+          BzImportance  row_importance     = 0;
+
           row_data       = g_list_model_get_item (model, j);
           row_importance = bz_safety_row_get_importance (row_data);
           if (row_importance != level)
@@ -263,8 +263,8 @@ update_permissions_list (BzSafetyDialog *self)
 static void
 edit_cb (BzSafetyDialog *self)
 {
-  GtkWidget         *window = NULL;
-  GtkWidget         *page   = NULL;
+  GtkWidget *window = NULL;
+  GtkWidget *page   = NULL;
 
   if (self->group == NULL)
     return;

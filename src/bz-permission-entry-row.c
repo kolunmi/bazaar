@@ -160,7 +160,7 @@ add_entry (BzPermissionEntryRow *self,
   g_object_set_data (G_OBJECT (row), "error-prefix", error_icon);
 
   button = GTK_BUTTON (gtk_button_new_from_icon_name ("cross-small-circle-outline-symbolic"));
-  gtk_widget_set_tooltip_text (GTK_WIDGET (button), _("Remove"));
+  gtk_widget_set_tooltip_text (GTK_WIDGET (button), _ ("Remove"));
   gtk_widget_add_css_class (GTK_WIDGET (button), "error");
   gtk_widget_set_valign (GTK_WIDGET (button), GTK_ALIGN_CENTER);
   gtk_widget_add_css_class (GTK_WIDGET (button), "flat");
@@ -273,24 +273,21 @@ bz_permission_entry_row_new (const char *title,
 GStrv
 bz_permission_entry_row_get_values (BzPermissionEntryRow *self)
 {
-  GPtrArray *arr = NULL;
+  g_autoptr (GStrvBuilder) builder = NULL;
 
   g_return_val_if_fail (BZ_IS_PERMISSION_ENTRY_ROW (self), NULL);
 
-  arr = g_ptr_array_new ();
-
+  builder = g_strv_builder_new ();
   for (guint i = 0; i < self->entries->len; i++)
     {
       AdwEntryRow *row  = g_ptr_array_index (self->entries, i);
       const char  *text = gtk_editable_get_text (GTK_EDITABLE (row));
 
       if (text != NULL && text[0] != '\0')
-        g_ptr_array_add (arr, g_strdup (text));
+        g_strv_builder_add (builder, text);
     }
 
-  g_ptr_array_add (arr, NULL);
-
-  return (GStrv) g_ptr_array_free (arr, FALSE);
+  return g_strv_builder_end (builder);
 }
 
 void
@@ -323,7 +320,7 @@ bz_permission_entry_row_set_default_values (BzPermissionEntryRow *self,
 {
   g_return_if_fail (BZ_IS_PERMISSION_ENTRY_ROW (self));
 
-  g_strfreev (self->default_values);
+  g_clear_pointer (&self->default_values, g_strfreev);
   self->default_values = g_strdupv ((char **) values);
 
   update_reset_visibility (self);

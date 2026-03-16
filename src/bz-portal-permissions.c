@@ -387,7 +387,7 @@ bz_portal_permissions_set_property (GObject      *object,
   switch (prop_id)
     {
     case PROP_APP_ID:
-      g_free (self->app_id);
+      g_clear_pointer (&self->app_id, g_free);
       self->app_id = g_value_dup_string (value);
       if (self->proxy != NULL && self->app_id != NULL)
         load_permissions (self);

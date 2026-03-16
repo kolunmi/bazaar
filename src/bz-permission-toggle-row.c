@@ -104,9 +104,11 @@ bz_permission_toggle_row_set_property (GObject      *object,
   switch (prop_id)
     {
     case PROP_KEY:
+      g_clear_pointer (&self->key, g_free);
       self->key = g_value_dup_string (value);
       break;
     case PROP_GROUP:
+      g_clear_pointer (&self->group, g_free);
       self->group = g_value_dup_string (value);
       break;
     case PROP_ACTIVE:
@@ -163,8 +165,8 @@ bz_permission_toggle_row_finalize (GObject *object)
 {
   BzPermissionToggleRow *self = BZ_PERMISSION_TOGGLE_ROW (object);
 
-  g_free (self->key);
-  g_free (self->group);
+  g_clear_pointer (&self->key, g_free);
+  g_clear_pointer (&self->group, g_free);
 
   G_OBJECT_CLASS (bz_permission_toggle_row_parent_class)->finalize (object);
 }
