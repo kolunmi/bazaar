@@ -5,32 +5,30 @@ template $BzPermissionToggleRow: Adw.ActionRow {
   activatable-widget: toggle;
 
   [suffix]
-  Button reset_button {
-    icon-name: "edit-undo-symbolic";
-    valign: center;
-    sensitive: false;
-    tooltip-text: _("Reset to default");
-    clicked => $reset_button_clicked_cb();
+  Box {
+    Button reset_button {
+      icon-name: "edit-undo-symbolic";
+      valign: center;
+      sensitive: false;
+      tooltip-text: _("Reset to default");
+      clicked => $reset_button_clicked_cb();
 
-    styles [
-      "flat",
-    ]
-  }
+      styles [
+        "flat",
+      ]
+    }
 
-  [suffix]
-  Separator {
-    orientation: vertical;
-    valign: center;
-    margin-end: 4;
+    Separator {
+      orientation: vertical;
+      valign: center;
+      height-request: 28;
+      margin-end: 6;
+      margin-start: 2;
+    }
 
-    styles [
-      "spacer",
-    ]
-  }
-
-  [suffix]
-  Switch toggle {
-    valign: center;
-    notify::active => $toggle_active_changed_cb();
+    Switch toggle {
+      valign: center;
+      notify::active => $toggle_active_changed_cb();
+    }
   }
 }
