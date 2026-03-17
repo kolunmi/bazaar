@@ -30,6 +30,7 @@
 #include "bz-portal-permissions.h"
 #include "bz-state-info.h"
 #include "bz-template-callbacks.h"
+#include "bz-window.h"
 
 #define REGEX_FILESYSTEM "^(~|/|xdg-[a-z-]+)[^ ]*(:ro|:rw|:create)?$"
 #define REGEX_DBUS_NAME  "^[a-zA-Z_][a-zA-Z0-9_]*(\\.[a-zA-Z_][a-zA-Z0-9_]*)+(\\.\\*)?$"
@@ -761,6 +762,9 @@ static void
 reset_button_clicked_cb (GtkButton         *button,
                          BzPermissionsPage *self)
 {
+  BzWindow *window = NULL;
+  AdwToast *toast = NULL;
+
   if (self->override_path != NULL)
     g_remove (self->override_path);
 
@@ -772,6 +776,10 @@ reset_button_clicked_cb (GtkButton         *button,
 
   load_all_entry_row_states (self);
   update_is_default (self);
+
+  window = BZ_WINDOW (gtk_widget_get_root (GTK_WIDGET (self)));
+  toast = adw_toast_new (_("Permissions reset!"));
+  bz_window_add_toast (window, toast);
 }
 
 static void

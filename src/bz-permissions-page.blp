@@ -81,11 +81,21 @@ template $BzPermissionsPage: Adw.NavigationPage {
             Image {
               pixel-size: 128;
               paintable: bind template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable;
-
+              visible: bind $invert_boolean($is_null(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable) as <bool>) as <bool>;
               styles [
                 "icon-dropshadow",
               ]
             }
+
+            Image {
+              pixel-size: 128;
+              icon-name: "application-x-executable";
+              visible: bind $is_null(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable) as <bool>;
+              styles [
+                "icon-dropshadow"
+              ]
+            }
+
 
             Label {
               styles [
@@ -98,6 +108,7 @@ template $BzPermissionsPage: Adw.NavigationPage {
               justify: center;
               wrap-mode: word_char;
               natural-wrap-mode: word;
+              margin-top: 2;
               label: bind template.entry-group as <$BzEntryGroup>.title;
             }
 

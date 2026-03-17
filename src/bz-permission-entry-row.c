@@ -155,6 +155,7 @@ add_entry (BzPermissionEntryRow *self,
 
   error_icon = gtk_image_new_from_icon_name ("dialog-warning-symbolic");
   gtk_widget_add_css_class (error_icon, "error");
+  gtk_widget_set_tooltip_text(error_icon, _("Invalid Format"));
   gtk_widget_set_visible (error_icon, FALSE);
   adw_entry_row_add_prefix (row, error_icon);
   g_object_set_data (G_OBJECT (row), "error-prefix", error_icon);
