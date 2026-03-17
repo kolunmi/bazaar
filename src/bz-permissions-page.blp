@@ -51,7 +51,7 @@ template $BzPermissionsPage: Adw.NavigationPage {
     [top]
     Adw.Banner banner {
       revealed: true;
-      title: _("Modifying permissions may cause apps to break. Do not make bug reports with them modified!");
+      title: _("Modifying permissions may cause apps to break or be less secure. Do not make bug reports with them modified!");
       use-markup: true;
       button-label: _("OK");
       button-clicked => $banner_clicked_cb(template);
@@ -66,8 +66,8 @@ template $BzPermissionsPage: Adw.NavigationPage {
         maximum-size: 600;
         margin-top: 24;
         margin-bottom: 24;
-        margin-start: 12;
-        margin-end: 12;
+        margin-start: 8;
+        margin-end: 8;
 
         child: Box {
           orientation: vertical;
@@ -126,17 +126,28 @@ template $BzPermissionsPage: Adw.NavigationPage {
               natural-wrap-mode: word;
               label: bind template.entry-group as <$BzEntryGroup>.developer;
             }
-
-            Button{
-              label: _("Reset Changes");
-              clicked => $reset_button_clicked_cb();
-              sensitive: bind $invert_boolean(template.is-default) as <bool>;
+            Box {
               margin-top: 18;
               halign: center;
+              spacing: 12;
 
-              styles [
-                "pill"
-              ]
+              Button {
+                label: _("Open");
+                clicked => $run_cb();
+
+                styles [
+                  "pill"
+                ]
+              }
+              Button {
+                label: _("Reset");
+                clicked => $reset_button_clicked_cb();
+                sensitive: bind $invert_boolean(template.is-default) as <bool>;
+
+                styles [
+                  "pill"
+                ]
+              }
             }
           }
 
@@ -155,28 +166,28 @@ template $BzPermissionsPage: Adw.NavigationPage {
 
             $BzPermissionToggleRow {
               title: _("Network");
-              subtitle: _("Access the internet");
+              subtitle: _("Share the host's network access");
               key: "shared=network";
               group: "Context";
             }
 
             $BzPermissionToggleRow {
               title: _("Audio Server");
-              subtitle: _("Play and record sound via PulseAudio, bypassing the individual permissions");
+              subtitle: _("Play and record sound, enabling this bypasses the individual permissions");
               key: "sockets=pulseaudio";
               group: "Context";
             }
 
             $BzPermissionToggleRow {
               title: _("Bluetooth");
-              subtitle: _("Manage both Bluetooth settings and devices");
+              subtitle: _("Manage both Bluetooth devices and settings");
               key: "features=bluetooth";
               group: "Context";
             }
 
             $BzPermissionToggleRow {
               title: _("Printing");
-              subtitle: _("Talk to the CUPS printing system");
+              subtitle: _("Access the system's printing system");
               key: "sockets=cups";
               group: "Context";
             }
@@ -251,7 +262,7 @@ template $BzPermissionsPage: Adw.NavigationPage {
 
             $BzPermissionToggleRow host_filesystem {
               title: _("Host Filesystem");
-              subtitle: _("Full access to entire filesystem");
+              subtitle: _("Full access to the entire filesystem");
               key: "filesystems=host";
               group: "Context";
             }
@@ -310,7 +321,7 @@ template $BzPermissionsPage: Adw.NavigationPage {
 
                 $BzPermissionToggleRow {
                   title: _("GPG Agent");
-                  subtitle: _("Access GPG agent directories things like encryption and git commit signing");
+                  subtitle: _("Access the GPG agent for things like encryption and git commit signing");
                   key: "sockets=gpg-agent";
                   group: "Context";
                 }
@@ -343,7 +354,7 @@ template $BzPermissionsPage: Adw.NavigationPage {
 
                 $BzPermissionToggleRow system_bus {
                   title: _("Full Access");
-                  subtitle: _("Give full access to the full D-Bus system bus");
+                  subtitle: _("Give full access to the D-Bus system bus");
                   key: "sockets=system-bus";
                   group: "Context";
                 }

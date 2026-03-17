@@ -269,7 +269,6 @@ template $BzFullView: Adw.Bin {
                             entry-group: bind template.entry-group as <$BzEntryGroup>;
                             state: bind template.state as <$BzStateInfo>;
                             update => $update_cb(template);
-                            run => $run_cb(template);
                           }
                         }
                       }
@@ -444,7 +443,6 @@ template $BzFullView: Adw.Bin {
                         entry-group: bind template.entry-group as <$BzEntryGroup>;
                         state: bind template.state as <$BzStateInfo>;
                         update => $update_cb(template);
-                        run => $run_cb(template);
                       }
 
                       Box {

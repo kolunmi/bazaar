@@ -54,7 +54,6 @@ static GParamSpec *props[LAST_PROP] = { 0 };
 
 enum
 {
-  SIGNAL_RUN,
   SIGNAL_UPDATE,
   LAST_SIGNAL,
 };
@@ -86,7 +85,11 @@ static void
 run_cb (BzInstallControls *self,
         GtkButton         *button)
 {
-  g_signal_emit (self, signals[SIGNAL_RUN], 0);
+  if (self->group == NULL)
+    return;
+
+  gtk_widget_activate_action (GTK_WIDGET (self), "window.launch-group", "s",
+                              bz_entry_group_get_id (self->group));
 }
 
 static GListStore *
@@ -292,16 +295,6 @@ bz_install_controls_class_init (BzInstallControlsClass *klass)
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
-
-  signals[SIGNAL_RUN] =
-      g_signal_new (
-          "run",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
-          NULL,
-          G_TYPE_NONE, 0);
 
   signals[SIGNAL_UPDATE] =
       g_signal_new (

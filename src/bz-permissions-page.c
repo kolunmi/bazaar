@@ -790,6 +790,17 @@ banner_clicked_cb (AdwBanner         *banner,
                           "show-permission-banner", FALSE);
 }
 
+static void
+run_cb (GtkButton         *button,
+        BzPermissionsPage *self)
+{
+  if (self->entry_group == NULL)
+    return;
+
+  gtk_widget_activate_action (GTK_WIDGET (self), "window.launch-group", "s",
+                              bz_entry_group_get_id (self->entry_group));
+}
+
 static char *
 get_show_more_label (gpointer object,
                      gboolean active)
@@ -895,6 +906,7 @@ bz_permissions_page_class_init (BzPermissionsPageClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, reset_button_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, banner_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, get_show_more_label);
+  gtk_widget_class_bind_template_callback (widget_class, run_cb);
 }
 
 static void
