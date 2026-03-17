@@ -27,10 +27,13 @@
 #include "bz-entry-group.h"
 #include "bz-entry.h"
 #include "bz-lozenge.h"
+#include "bz-permissions-page.h"
 #include "bz-result.h"
 #include "bz-safety-calculator.h"
 #include "bz-safety-dialog.h"
 #include "bz-safety-row.h"
+#include "bz-template-callbacks.h"
+#include "bz-window.h"
 
 struct _BzSafetyDialog
 {
@@ -55,8 +58,7 @@ static GParamSpec *props[LAST_PROP] = { 0 };
 
 static AdwActionRow *create_permission_row (BzSafetyRow *row_data);
 static void          update_permissions_list (BzSafetyDialog *self);
-static gboolean      invert_boolean (gpointer object, gboolean value);
-static gboolean      is_null (gpointer object, GObject *value);
+static void          edit_cb (BzSafetyDialog *self);
 
 static void
 bz_safety_dialog_dispose (GObject *object)
@@ -137,11 +139,11 @@ bz_safety_dialog_class_init (BzSafetyDialogClass *klass)
 
   gtk_widget_class_set_template_from_resource (widget_class,
                                                "/io/github/kolunmi/Bazaar/bz-safety-dialog.ui");
+  bz_widget_class_bind_all_util_callbacks (widget_class);
 
   gtk_widget_class_bind_template_child (widget_class, BzSafetyDialog, lozenge);
   gtk_widget_class_bind_template_child (widget_class, BzSafetyDialog, permissions_list);
-  gtk_widget_class_bind_template_callback (widget_class, is_null);
-  gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
+  gtk_widget_class_bind_template_callback (widget_class, edit_cb);
 }
 
 static void
@@ -207,9 +209,10 @@ update_permissions_list (BzSafetyDialog *self)
     {
       for (gint j = 0; j < n_items; j++)
         {
-          g_autoptr (BzSafetyRow) row_data;
-          AdwActionRow *row;
-          BzImportance row_importance;
+          g_autoptr (BzSafetyRow) row_data = NULL;
+          AdwActionRow *row                = NULL;
+          BzImportance  row_importance     = 0;
+
           row_data       = g_list_model_get_item (model, j);
           row_importance = bz_safety_row_get_importance (row_data);
           if (row_importance != level)
@@ -257,16 +260,22 @@ update_permissions_list (BzSafetyDialog *self)
   g_clear_object (&result);
 }
 
-static gboolean
-invert_boolean (gpointer object,
-                gboolean value)
+static void
+edit_cb (BzSafetyDialog *self)
 {
-  return !value;
-}
+  GtkWidget *window = NULL;
+  GtkWidget *page   = NULL;
 
-static gboolean
-is_null (gpointer object,
-         GObject *value)
-{
-  return value == NULL;
+  if (self->group == NULL)
+    return;
+
+  page = bz_permissions_page_new (self->group);
+
+  adw_dialog_close (ADW_DIALOG (self));
+
+  window = GTK_WIDGET (gtk_application_get_active_window (
+      GTK_APPLICATION (g_application_get_default ())));
+
+  if (BZ_IS_WINDOW (window))
+    bz_window_push_page (BZ_WINDOW (window), ADW_NAVIGATION_PAGE (page));
 }
