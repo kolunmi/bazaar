@@ -281,10 +281,7 @@ bz_download_worker_get_default (void)
     {
       default_workers = g_ptr_array_new_with_free_func (g_object_unref);
 
-      /* TODO: make number of workers controllable with envvar */
-#define N_WORKERS 8
-
-      for (guint i = 0; i < N_WORKERS; i++)
+      for (guint i = 0; i < bz_get_n_download_workers (); i++)
         {
           g_autoptr (GError) local_error      = NULL;
           g_autoptr (BzDownloadWorker) worker = NULL;
