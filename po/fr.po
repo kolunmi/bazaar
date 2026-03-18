@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-18 21:07+0100\n"
-"PO-Revision-Date: 2026-03-17 23:23+0100\n"
+"POT-Creation-Date: 2026-03-18 23:18+0100\n"
+"PO-Revision-Date: 2026-03-18 23:01+0100\n"
 "Last-Translator: Mimolet <theMimolet@proton.me>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -96,7 +96,7 @@ msgid "Manage Add-Ons"
 msgstr "Gérer les extensions"
 
 #: src/bz-addons-dialog.c:94 src/bz-install-controls.blp:137
-#: src/bz-installed-tile.blp:131 src/bz-permission-entry-row.c:164
+#: src/bz-installed-tile.blp:131 src/bz-permission-entry-row.c:165
 msgid "Remove"
 msgstr "Désinstaller"
 
@@ -2007,7 +2007,7 @@ msgstr "Réseau"
 
 #: src/bz-permissions-page.blp:169
 msgid "Share the host's network access"
-msgstr "Peut accéder à la connexion réseau de l'hôte"
+msgstr "Autorise l'accès au réseau"
 
 #: src/bz-permissions-page.blp:175
 msgid "Audio Server"
@@ -2017,8 +2017,8 @@ msgstr "Audio"
 msgid ""
 "Play and record sound, enabling this bypasses the individual permissions"
 msgstr ""
-"Peut lire et enregistrer du son, l'activer outre-passe les autorisations "
-"individuelles"
+"Autorise la lecture ou l'enregistrement de fichiers audio\n"
+"(l'activer prend le dessus sur les autorisations individuelles)"
 
 #: src/bz-permissions-page.blp:182
 msgid "Bluetooth"
@@ -2026,15 +2026,15 @@ msgstr "Bluetooth"
 
 #: src/bz-permissions-page.blp:183
 msgid "Manage both Bluetooth devices and settings"
-msgstr "Peut gérer les paramètres et les appareils Bluetooth"
+msgstr "Autorise la gestion des paramètres et des appareils Bluetooth"
 
 #: src/bz-permissions-page.blp:189
 msgid "Printing"
-msgstr "Impression"
+msgstr "Imprimantes"
 
 #: src/bz-permissions-page.blp:190
 msgid "Access the system's printing system"
-msgstr "Peut communiquer avec le système d'impression"
+msgstr "Accorde l'accès au système d'impression de l'hôte"
 
 #: src/bz-permissions-page.blp:197
 msgid "Devices"
@@ -2046,7 +2046,7 @@ msgstr "Cartes à puce"
 
 #: src/bz-permissions-page.blp:204
 msgid "Access smart card readers via PC/SC"
-msgstr "Peut accéder aux lecteurs de cartes à puce avec PC/SC"
+msgstr "Accorde l'accès aux lecteurs de cartes à puce avec PC/SC"
 
 #: src/bz-permissions-page.blp:210
 msgid "All Devices"
@@ -2055,7 +2055,8 @@ msgstr "Tous les périphériques"
 #: src/bz-permissions-page.blp:211
 msgid "Access all devices such as webcam, GPU, etc."
 msgstr ""
-"Peut accéder à des périphériques tels que des webcams ou des manettes de jeu"
+"Accorde l'accès à des périphériques tels que des webcams ou des manettes de "
+"jeu"
 
 #: src/bz-permissions-page.blp:217
 msgid "GPU Acceleration"
@@ -2063,7 +2064,7 @@ msgstr "Accélération GPU"
 
 #: src/bz-permissions-page.blp:219
 msgid "Access GPU rendering"
-msgstr "Peut accéder au rendu de la carte graphique"
+msgstr "Accorde l'accès au rendu de la carte graphique"
 
 #: src/bz-permissions-page.blp:225
 msgid "USB Devices"
@@ -2071,7 +2072,7 @@ msgstr "Périphériques USB"
 
 #: src/bz-permissions-page.blp:227
 msgid "Manage USB devices directly"
-msgstr "Peut gérer directement les périphériques USB"
+msgstr "Autorise la gestion directe des périphériques USB"
 
 #: src/bz-permissions-page.blp:233
 msgid "Input Devices"
@@ -2079,7 +2080,7 @@ msgstr "Périphériques d’entrée"
 
 #: src/bz-permissions-page.blp:235
 msgid "Access Input devices"
-msgstr "Peut accéder aux périphériques d’entrée"
+msgstr "Accorde l'accès aux périphériques d’entrée"
 
 #: src/bz-permissions-page.blp:241
 msgid "KVM Virtualization"
@@ -2087,7 +2088,7 @@ msgstr "Virtualisation"
 
 #: src/bz-permissions-page.blp:243
 msgid "Access KVM for virtual machines"
-msgstr "Peut accéder à KVM pour les machines virtuelles"
+msgstr "Accorde l'accès à KVM pour les machines virtuelles"
 
 #: src/bz-permissions-page.blp:249
 msgid "Shared Memory"
@@ -2095,7 +2096,7 @@ msgstr "Mémoire partagée"
 
 #: src/bz-permissions-page.blp:251
 msgid "Create shared memory objects"
-msgstr "Peut créer des objets de mémoire partagée"
+msgstr "Permet de créer des objets de mémoire partagée"
 
 #: src/bz-permissions-page.blp:258
 msgid "Filesystem"
@@ -2107,7 +2108,7 @@ msgstr "Système de fichiers de l'hôte"
 
 #: src/bz-permissions-page.blp:265
 msgid "Full access to the entire filesystem"
-msgstr "Accorde un accès complet à l'ensemble du système de fichiers"
+msgstr "Accorde un accès complet à l'ensemble des fichiers du système"
 
 #: src/bz-permissions-page.blp:271
 msgid "Home Folder"
@@ -2119,7 +2120,7 @@ msgstr "Accorde un accès complet à l'ensemble de votre dossier personnel"
 
 #: src/bz-permissions-page.blp:281
 msgid "Access the Downloads folder"
-msgstr "Peut accéder au dossier « Téléchargements »"
+msgstr "Accorde l'accès au dossier « Téléchargements »"
 
 #: src/bz-permissions-page.blp:287
 msgid "Other Paths"
@@ -2139,7 +2140,7 @@ msgstr "Communication interprocessus"
 
 #: src/bz-permissions-page.blp:310
 msgid "Share IPC namespace with the host"
-msgstr "Peut partager l'espace de noms IPC avec l'hôte"
+msgstr "Permet de partager l'espace de noms IPC avec l'hôte"
 
 #: src/bz-permissions-page.blp:316
 msgid "SSH Authentication"
@@ -2147,7 +2148,7 @@ msgstr "Authentification SSH"
 
 #: src/bz-permissions-page.blp:317
 msgid "Access the SSH authentication agent"
-msgstr "Peut accéder à l'agent d'authentification SSH"
+msgstr "Accorde l'accès à l'agent d'authentification SSH"
 
 #: src/bz-permissions-page.blp:323
 msgid "GPG Agent"
@@ -2156,8 +2157,8 @@ msgstr "Agent GPG"
 #: src/bz-permissions-page.blp:324
 msgid "Access the GPG agent for things like encryption and git commit signing"
 msgstr ""
-"Peut accéder à l'agent GPG pour des opérations telles que le chiffrement et "
-"la signature des commits Git"
+"Accorde l'accès à l'agent GPG pour des opérations telles que le chiffrement "
+"et la signature des commits Git"
 
 #: src/bz-permissions-page.blp:331
 msgid "Session Bus Policy"
@@ -2178,8 +2179,8 @@ msgstr "Communique sur…"
 #: src/bz-permissions-page.blp:341
 msgid "Names on the session bus the app is allowed to send messages to"
 msgstr ""
-"Noms des destinataires dont l'appli est autorisée à envoyer des messages sur "
-"le bus de session"
+"Noms des destinataires sur le bus de session auxquels l'application peut "
+"envoyer des messages"
 
 #: src/bz-permissions-page.blp:345 src/bz-permissions-page.blp:367
 msgid "Own"
@@ -2187,7 +2188,8 @@ msgstr "Possède…"
 
 #: src/bz-permissions-page.blp:346
 msgid "Names on the session bus the app is allowed to claim ownership of"
-msgstr "Noms sur le bus de session dont l'appli est autorisée à s'approprier"
+msgstr ""
+"Noms sur le bus de session dont l'application peut revendiquer la propriété"
 
 #: src/bz-permissions-page.blp:352
 msgid "System Bus Policy"
@@ -2200,13 +2202,13 @@ msgstr "Accorde un accès complet au bus système D-Bus"
 #: src/bz-permissions-page.blp:363
 msgid "Names on the system bus the app is allowed to send messages to"
 msgstr ""
-"Noms des destinataires sur le bus système auxquels l'application est "
-"autorisée à envoyer des messages"
+"Noms des destinataires sur le bus système auxquels l'application peut "
+"envoyer des messages"
 
 #: src/bz-permissions-page.blp:368
 msgid "Names on the system bus the app is allowed to claim ownership of"
 msgstr ""
-"Noms sur le bus système dont l'application est autorisée à s'approprier"
+"Noms sur le bus système dont l'application peut revendiquer la propriété"
 
 #: src/bz-permissions-page.blp:374
 msgid "Developer Options"
@@ -2242,7 +2244,7 @@ msgstr "Appels système de développement"
 
 #: src/bz-permissions-page.blp:401
 msgid "Access development syscalls such as ptrace"
-msgstr "Peut accéder aux appels système de développement tels que ptrace"
+msgstr "Accorde l'accès aux appels système de développement tels que ptrace"
 
 #: src/bz-permissions-page.blp:407
 msgid "Multiarch"
@@ -2250,7 +2252,7 @@ msgstr "Multi-architecture"
 
 #: src/bz-permissions-page.blp:408
 msgid "Run multiarch / multilib binaries"
-msgstr "Peut exécuter des binaires multiarch / multilib"
+msgstr "Permet d'exécuter des binaires multiarch / multilib"
 
 #: src/bz-permissions-page.blp:414
 msgid "CAN Bus"
@@ -2258,7 +2260,7 @@ msgstr "Bus de données CAN"
 
 #: src/bz-permissions-page.blp:415
 msgid "Access the CAN bus"
-msgstr "Peut accéder au bus CAN"
+msgstr "Accorde l'accès au bus CAN"
 
 #: src/bz-permissions-page.blp:421
 msgid "Per-App Shared Memory"
@@ -2267,8 +2269,8 @@ msgstr "Mémoire partagée par application"
 #: src/bz-permissions-page.blp:422
 msgid "Share <tt>/dev/shm</tt> between app instances &amp; subsandboxes"
 msgstr ""
-"Peut partager <tt>/dev/shm</tt> entre les instances d'application et les "
-"sous-sandboxes"
+"Permet de partager <tt>/dev/shm</tt> entre les instances d'application et "
+"les sous-sandboxes"
 
 #: src/bz-permissions-page.blp:428
 msgid "Variables"
