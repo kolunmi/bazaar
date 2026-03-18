@@ -93,16 +93,26 @@ template $BzInstalledTile: $BzListTile {
       hexpand: true;
       halign: end;
 
+      Button addons_button {
+        styles [
+          "flat"
+        ]
+
+        tooltip-text: _("Manage Add-Ons");
+        visible: bind $logical_and($invert_boolean(template.compact) as <bool>, $invert_boolean($is_zero(template.group as <$BzEntryGroup>.n-addons as <int>) as <bool>) as <bool>) as <bool>;
+        valign: center;
+        icon-name: "application-x-addon-symbolic";
+
+        clicked => $install_addons_cb() swapped;
+      }
+
       Button permissions_button {
         styles [
           "flat"
         ]
 
-        has-tooltip: true;
         tooltip-text: _("Manage Permissions");
-        visible: bind $logical_and($is_zero(template.group as <$BzEntryGroup>.n-addons as <int>) as <bool>, $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <bool> ) as <bool>;
-        width-request: 32;
-        height-request: 32;
+        visible: bind $logical_and($invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <bool>, $logical_or($invert_boolean(template.compact) as <bool>, $is_zero(template.group as <$BzEntryGroup>.n-addons as <int>) as <bool>) as <bool>) as <bool>;
         valign: center;
         icon-name: "sliders-horizontal-symbolic";
 
@@ -110,9 +120,8 @@ template $BzInstalledTile: $BzListTile {
       }
 
       MenuButton {
-        visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.n-addons as <int>) as <bool>) as <bool>;
+        visible: bind $logical_and(template.compact, $invert_boolean($is_zero(template.group as <$BzEntryGroup>.n-addons as <int>) as <bool>) as <bool>) as <bool>;
         icon-name: "view-more-horizontal-symbolic";
-        has-tooltip: true;
         tooltip-text: _("Show Other Options…");
         menu-model: menu;
         valign: center;
@@ -127,11 +136,7 @@ template $BzInstalledTile: $BzListTile {
           "flat",
         ]
 
-        has-tooltip: true;
         tooltip-text: _("Remove");
-
-        width-request: 32;
-        height-request: 32;
         valign: center;
         icon-name: "user-trash-symbolic";
         visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <bool>;

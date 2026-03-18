@@ -76,6 +76,7 @@ enum
   PROP_0,
 
   PROP_STATE,
+  PROP_COMPACT,
 
   LAST_PROP
 };
@@ -166,6 +167,9 @@ bz_window_get_property (GObject    *object,
     {
     case PROP_STATE:
       g_value_set_object (value, self->state);
+      break;
+    case PROP_COMPACT:
+      g_value_set_boolean (value, self->breakpoint_applied);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -313,6 +317,7 @@ breakpoint_apply_cb (BzWindow      *self,
   self->breakpoint_applied = TRUE;
 
   gtk_widget_add_css_class (GTK_WIDGET (self), "narrow");
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_COMPACT]);
 }
 
 static void
@@ -322,6 +327,7 @@ breakpoint_unapply_cb (BzWindow      *self,
   self->breakpoint_applied = FALSE;
 
   gtk_widget_remove_css_class (GTK_WIDGET (self), "narrow");
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_COMPACT]);
 }
 
 static void
@@ -681,6 +687,12 @@ bz_window_class_init (BzWindowClass *klass)
           NULL, NULL,
           BZ_TYPE_STATE_INFO,
           G_PARAM_READABLE);
+
+  props[PROP_COMPACT] =
+      g_param_spec_boolean (
+          "compact",
+          NULL, NULL, FALSE,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
