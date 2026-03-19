@@ -57,7 +57,8 @@ struct _BzPermissionsPage
 
   GPtrArray *rows;
 
-  AdwBanner *banner;
+  AdwBanner       *banner;
+  AdwToastOverlay *toast_overlay;
 
   BzPermissionEntryRow *other_files;
   BusPolicyMapping      bus_entries[4];
@@ -792,7 +793,6 @@ static void
 reset_button_clicked_cb (GtkButton         *button,
                          BzPermissionsPage *self)
 {
-  BzWindow        *window             = NULL;
   AdwToast        *toast              = NULL;
   g_autofree char *old_data           = NULL;
   gsize            old_len            = 0;
@@ -814,7 +814,6 @@ reset_button_clicked_cb (GtkButton         *button,
   load_all_entry_row_states (self);
   update_is_default (self);
 
-  window = BZ_WINDOW (gtk_widget_get_root (GTK_WIDGET (self)));
   toast  = adw_toast_new (_ ("Permissions reset!"));
   adw_toast_set_button_label (toast, _ ("Undo"));
 
@@ -831,7 +830,7 @@ reset_button_clicked_cb (GtkButton         *button,
                         G_CALLBACK (reset_undo_cb), self);
     }
 
-  bz_window_add_toast (window, toast);
+  adw_toast_overlay_add_toast (self->toast_overlay, toast);
 }
 
 static void
@@ -954,6 +953,7 @@ bz_permissions_page_class_init (BzPermissionsPageClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzPermissionsPage, system_bus_own);
   gtk_widget_class_bind_template_child (widget_class, BzPermissionsPage, environment_vars);
   gtk_widget_class_bind_template_child (widget_class, BzPermissionsPage, banner);
+  gtk_widget_class_bind_template_child (widget_class, BzPermissionsPage, toast_overlay);
 
   gtk_widget_class_bind_template_callback (widget_class, reset_button_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, banner_clicked_cb);
