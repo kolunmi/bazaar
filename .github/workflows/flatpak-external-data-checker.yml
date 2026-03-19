@@ -1,7 +1,7 @@
 name: Check for Flatpak dependency updates
 on:
   schedule:
-  - cron: "* * * * *" # every day
+  - cron: "0 0 * * *" # every day
   workflow_dispatch:
 
 jobs:
