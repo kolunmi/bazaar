@@ -814,7 +814,7 @@ reset_button_clicked_cb (GtkButton         *button,
   load_all_entry_row_states (self);
   update_is_default (self);
 
-  toast  = adw_toast_new (_ ("Permissions reset!"));
+  toast = adw_toast_new (_ ("Permissions reset!"));
   adw_toast_set_button_label (toast, _ ("Undo"));
 
   if (old_data != NULL)
@@ -981,10 +981,10 @@ bz_permissions_page_new (BzEntryGroup *entry_group)
 static void
 populate (BzPermissionsPage *self)
 {
-  self->bus_entries[0] = (BusPolicyMapping) { self->session_bus_talk, "Session Bus Policy", "talk" };
-  self->bus_entries[1] = (BusPolicyMapping) { self->session_bus_own, "Session Bus Policy", "own" };
-  self->bus_entries[2] = (BusPolicyMapping) { self->system_bus_talk, "System Bus Policy", "talk" };
-  self->bus_entries[3] = (BusPolicyMapping) { self->system_bus_own, "System Bus Policy", "own" };
+  self->bus_entries[0] = (BusPolicyMapping){ self->session_bus_talk, "Session Bus Policy", "talk" };
+  self->bus_entries[1] = (BusPolicyMapping){ self->session_bus_own, "Session Bus Policy", "own" };
+  self->bus_entries[2] = (BusPolicyMapping){ self->system_bus_talk, "System Bus Policy", "talk" };
+  self->bus_entries[3] = (BusPolicyMapping){ self->system_bus_own, "System Bus Policy", "own" };
 
   if (self->entry_group == NULL)
     return;
