@@ -53,8 +53,7 @@
           "commit": "aa5298cc1677cf855bd61f9671607362bd203f4f",
           "tag": "v0.20.0",
           "x-checker-data": {
-            "type": "anitya",
-            "project-id": 279929,
+            "type": "git",
             "tag-template": "$version"
           }
         }
