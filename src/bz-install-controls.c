@@ -54,7 +54,6 @@ static GParamSpec *props[LAST_PROP] = { 0 };
 
 enum
 {
-  SIGNAL_RUN,
   SIGNAL_UPDATE,
   LAST_SIGNAL,
 };
@@ -86,7 +85,11 @@ static void
 run_cb (BzInstallControls *self,
         GtkButton         *button)
 {
-  g_signal_emit (self, signals[SIGNAL_RUN], 0);
+  if (self->group == NULL)
+    return;
+
+  gtk_widget_activate_action (GTK_WIDGET (self), "window.launch-group", "s",
+                              bz_entry_group_get_id (self->group));
 }
 
 static GListStore *
@@ -183,6 +186,24 @@ is_blocked (gpointer      object,
   return FALSE;
 }
 
+static gboolean
+idle_grab_focus (GWeakRef *wr)
+{
+  g_autoptr (BzInstallControls) self = NULL;
+
+  self = g_weak_ref_get (wr);
+  if (self == NULL)
+    goto done;
+
+  if (gtk_widget_is_visible (GTK_WIDGET (self)))
+    gtk_widget_grab_focus (self->group != NULL && bz_entry_group_get_removable (self->group) > 0
+                               ? self->open_button
+                               : self->install_button);
+
+done:
+  return G_SOURCE_REMOVE;
+}
+
 static void
 bz_install_controls_dispose (GObject *object)
 {
@@ -275,16 +296,6 @@ bz_install_controls_class_init (BzInstallControlsClass *klass)
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
-  signals[SIGNAL_RUN] =
-      g_signal_new (
-          "run",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
-          NULL,
-          G_TYPE_NONE, 0);
-
   signals[SIGNAL_UPDATE] =
       g_signal_new (
           "update",
@@ -373,6 +384,12 @@ bz_install_controls_set_entry_group (BzInstallControls *self,
     self->group = g_object_ref (group);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ENTRY_GROUP]);
+
+  if (group != NULL)
+    g_idle_add_full (
+        G_PRIORITY_DEFAULT_IDLE,
+        (GSourceFunc) idle_grab_focus,
+        bz_track_weak (self), bz_weak_release);
 }
 
 BzStateInfo *
@@ -393,15 +410,4 @@ bz_install_controls_set_state (BzInstallControls *self,
     self->state = g_object_ref (state);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_STATE]);
-}
-
-void
-bz_install_controls_grab_focus_preferred (BzInstallControls *self)
-{
-  g_return_if_fail (BZ_IS_INSTALL_CONTROLS (self));
-
-  if (gtk_widget_get_visible (self->open_button))
-    gtk_widget_grab_focus (self->open_button);
-  else if (gtk_widget_get_visible (self->install_button))
-    gtk_widget_grab_focus (self->install_button);
 }

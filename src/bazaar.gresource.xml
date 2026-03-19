@@ -49,6 +49,10 @@
     <file preprocess="xml-stripblanks">bz-license-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-login-page.ui</file>
     <file preprocess="xml-stripblanks">bz-markdown-render.ui</file>
+    <file preprocess="xml-stripblanks">bz-permissions-page.ui</file>
+    <file preprocess="xml-stripblanks">bz-permission-entry-row.ui</file>
+    <file preprocess="xml-stripblanks">bz-permission-toggle-row.ui</file>
+    <file preprocess="xml-stripblanks">bz-portal-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-preferences-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-progress-bar.ui</file>
     <file preprocess="xml-stripblanks">bz-releases-dialog.ui</file>
@@ -70,6 +74,8 @@
     <file preprocess="xml-stripblanks">shortcuts-dialog.ui</file>
 
     <file preprocess="xml-stripblanks">icons/scalable/actions/app-installed-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/background-app-ghost-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/background-app-ghost-disabled-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/bookmark-filled-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/bookmark-outline-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/bug-symbolic.svg</file>
@@ -79,6 +85,7 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/community-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/connected-squares-x-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/copy-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/cross-small-circle-outline-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/cross-large-circle-filled-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/delay-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/device-support-adaptive-symbolic.svg</file>
@@ -92,6 +99,7 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/execute-to-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/external-link-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/eye-outline-filled-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/film-camera-disabled-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/flathub-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/flatpak-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/folder-download-symbolic.svg</file>
@@ -108,6 +116,7 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/media-playback-pause-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/media-playback-start-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/media-playback-stop-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/notifications-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/newspaper-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/parent-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/people-symbolic.svg</file>
@@ -122,6 +131,7 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/server-pick-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/share-alt-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/share-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/speaker-0-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/sidebar-show-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/sliders-horizontal-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/smartphone2-symbolic.svg</file>

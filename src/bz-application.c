@@ -711,7 +711,7 @@ bz_application_about_action (GSimpleAction *action,
       dialog,
       "application-name", "Bazaar",
       "application-icon", "io.github.kolunmi.Bazaar",
-      "developer-name", _ ("Adam Masciola"),
+      "developer-name", _ ("The Bazaar Contributors"),
       "developers", developers,
       // Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
       "translator-credits", _ ("translator-credits"),
@@ -2731,6 +2731,7 @@ init_service_struct (BzApplication *self,
   self->state = bz_state_info_new ();
   bz_state_info_set_busy (self->state, TRUE);
   bz_state_info_set_donation_prompt_dismissed (self->state, TRUE);
+  bz_state_info_set_parental_age_rating (self->state, -1);
 
   {
     g_autoptr (GtkIconTheme) user_theme   = NULL;
@@ -2800,6 +2801,17 @@ init_service_struct (BzApplication *self,
   g_assert (app_id != NULL);
   g_debug ("Constructing gsettings for %s ...", app_id);
   self->settings = g_settings_new (app_id);
+
+  if (g_settings_get_boolean (self->settings, "force-adwaita-icons"))
+    {
+      GtkSettings *gtk_settings = NULL;
+
+      gtk_settings = gtk_settings_get_default ();
+      g_object_set (
+          gtk_settings,
+          "gtk-icon-theme-name", "Adwaita",
+          NULL);
+    }
 
   bz_state_info_set_hide_eol (
       self->state,

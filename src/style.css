@@ -32,6 +32,11 @@
     --banner-color: #159eff;
 }
 
+banner.warning, banner.warning * {
+    --banner-color: @warning_bg_color;
+    color: @warning_color;
+}
+
 .updates-amount {
 	background-color: white;
 	color: var(--accent-bg-color);
@@ -871,8 +876,13 @@ window.narrow .category-tile {
 	border-radius: 0 0 12px 12px;
 }
 
+.update-list > row {
+    padding: 0;
+}
+
 .update-toggle {
 	border-radius: 12px;
+	box-shadow: none;
 	transition: border-bottom-left-radius 150ms ease,
 	            border-bottom-right-radius 150ms ease;
 }
@@ -900,4 +910,11 @@ window.narrow .category-tile {
 curated-list-view,
 curated-list-view list {
   background: var(--bg-color);
+}
+
+.portal-flow-box > * {
+    padding: 0;
+    transition: background-color 200ms;
+    min-height: 0;
+    border-radius: 12px;
 }

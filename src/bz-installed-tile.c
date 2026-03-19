@@ -28,18 +28,20 @@
 #include "bz-installed-tile.h"
 #include "bz-library-page.h"
 #include "bz-state-info.h"
+#include "bz-window.h"
 
 struct _BzInstalledTile
 {
   BzListTile parent_instance;
 
   BzEntryGroup *group;
+  gboolean      compact;
+  GBinding     *compact_binding;
 
   GtkPicture *icon_picture;
   GtkImage   *fallback_icon;
   GtkLabel   *title_label;
   GtkButton  *support_button;
-  GtkButton  *addons_button;
   GtkButton  *remove_button;
 };
 
@@ -49,6 +51,7 @@ enum
 {
   PROP_0,
   PROP_GROUP,
+  PROP_COMPACT,
   LAST_PROP
 };
 
@@ -59,9 +62,34 @@ bz_installed_tile_dispose (GObject *object)
 {
   BzInstalledTile *self = BZ_INSTALLED_TILE (object);
 
+  g_clear_pointer (&self->compact_binding, g_binding_unbind);
   g_clear_object (&self->group);
 
   G_OBJECT_CLASS (bz_installed_tile_parent_class)->dispose (object);
+}
+
+static void
+bz_installed_tile_map (GtkWidget *widget)
+{
+  BzInstalledTile *self   = BZ_INSTALLED_TILE (widget);
+  GtkWidget       *window = NULL;
+
+  GTK_WIDGET_CLASS (bz_installed_tile_parent_class)->map (widget);
+
+  window = gtk_widget_get_ancestor (widget, BZ_TYPE_WINDOW);
+  if (window != NULL && self->compact_binding == NULL)
+    self->compact_binding = g_object_bind_property (window, "compact",
+                                                    self, "compact",
+                                                    G_BINDING_SYNC_CREATE);
+}
+
+static void
+bz_installed_tile_unmap (GtkWidget *widget)
+{
+  BzInstalledTile *self = BZ_INSTALLED_TILE (widget);
+  g_clear_pointer (&self->compact_binding, g_binding_unbind);
+
+  GTK_WIDGET_CLASS (bz_installed_tile_parent_class)->unmap (widget);
 }
 
 static void
@@ -76,6 +104,9 @@ bz_installed_tile_get_property (GObject    *object,
     {
     case PROP_GROUP:
       g_value_set_object (value, bz_installed_tile_get_group (self));
+      break;
+    case PROP_COMPACT:
+      g_value_set_boolean (value, self->compact);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -94,6 +125,10 @@ bz_installed_tile_set_property (GObject      *object,
     {
     case PROP_GROUP:
       bz_installed_tile_set_group (self, g_value_get_object (value));
+      break;
+    case PROP_COMPACT:
+      self->compact = g_value_get_boolean (value);
+      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_COMPACT]);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -119,6 +154,22 @@ is_zero (gpointer object,
          int      value)
 {
   return value == 0;
+}
+
+static gboolean
+logical_and (gpointer object,
+             gboolean a,
+             gboolean b)
+{
+  return a && b;
+}
+
+static gboolean
+logical_or (gpointer object,
+            gboolean a,
+            gboolean b)
+{
+  return a || b;
 }
 
 static char *
@@ -186,8 +237,17 @@ support_cb (BzInstalledTile *self,
 }
 
 static void
-install_addons_cb (BzInstalledTile *self,
-                   GtkButton       *button)
+permissions_cb (BzInstalledTile *self)
+{
+  if (self->group == NULL)
+    return;
+
+  gtk_widget_activate_action (GTK_WIDGET (self), "window.permissions", "s",
+                              bz_entry_group_get_id (self->group));
+}
+
+static void
+install_addons_cb (BzInstalledTile *self)
 {
   if (self->group == NULL)
     return;
@@ -216,12 +276,21 @@ bz_installed_tile_class_init (BzInstalledTileClass *klass)
   object_class->dispose      = bz_installed_tile_dispose;
   object_class->get_property = bz_installed_tile_get_property;
   object_class->set_property = bz_installed_tile_set_property;
+  widget_class->map          = bz_installed_tile_map;
+  widget_class->unmap        = bz_installed_tile_unmap;
 
   props[PROP_GROUP] =
       g_param_spec_object (
           "group",
           NULL, NULL,
           BZ_TYPE_ENTRY_GROUP,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_COMPACT] =
+      g_param_spec_boolean (
+          "compact",
+          NULL, NULL,
+          FALSE,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
@@ -234,15 +303,22 @@ bz_installed_tile_class_init (BzInstalledTileClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzInstalledTile, fallback_icon);
   gtk_widget_class_bind_template_child (widget_class, BzInstalledTile, title_label);
   gtk_widget_class_bind_template_child (widget_class, BzInstalledTile, support_button);
-  gtk_widget_class_bind_template_child (widget_class, BzInstalledTile, addons_button);
   gtk_widget_class_bind_template_child (widget_class, BzInstalledTile, remove_button);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
+  gtk_widget_class_bind_template_callback (widget_class, logical_and);
+  gtk_widget_class_bind_template_callback (widget_class, logical_or);
   gtk_widget_class_bind_template_callback (widget_class, format_description);
   gtk_widget_class_bind_template_callback (widget_class, support_cb);
   gtk_widget_class_bind_template_callback (widget_class, install_addons_cb);
   gtk_widget_class_bind_template_callback (widget_class, remove_cb);
+  gtk_widget_class_bind_template_callback (widget_class, permissions_cb);
+
+  gtk_widget_class_install_action (widget_class, "installed-tile.install-addons", NULL,
+                                 (GtkWidgetActionActivateFunc) install_addons_cb);
+  gtk_widget_class_install_action (widget_class, "installed-tile.permissions", NULL,
+                                   (GtkWidgetActionActivateFunc) permissions_cb);
 
   gtk_widget_class_set_accessible_role (widget_class, GTK_ACCESSIBLE_ROLE_BUTTON);
 }

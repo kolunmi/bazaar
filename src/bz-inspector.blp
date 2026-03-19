@@ -152,7 +152,7 @@ template $BzInspector: Adw.Window {
             xalign: 0.0;
           }
           Label {
-            label: bind $format_uint(template.state as <$BzStateInfo>.parental-age-rating) as <string>;
+            label: bind $format_int(template.state as <$BzStateInfo>.parental-age-rating) as <string>;
             xalign: 0.0;
           }
         }

@@ -427,11 +427,11 @@ get_license_label (gpointer object,
   if (is_floss)
     return g_strdup (_ ("Free"));
 
-  if (bz_spdx_is_proprietary (license))
-    return g_strdup (_ ("Proprietary"));
-
   if (license == NULL || *license == '\0')
     return g_strdup (_ ("Unknown"));
+
+  if (bz_spdx_is_proprietary (license))
+    return g_strdup (_ ("Proprietary"));
 
   return g_strdup (_ ("Special License"));
 }
@@ -640,13 +640,6 @@ filter_own_app_id (BzEntry *entry, GtkStringList *app_ids)
     return g_steal_pointer (&filtered);
   else
     return NULL;
-}
-
-static gboolean
-has_other_apps (gpointer object, GtkStringList *app_ids, BzEntry *entry)
-{
-  g_autoptr (GtkStringList) filtered = filter_own_app_id (BZ_ENTRY (entry), app_ids);
-  return filtered != NULL;
 }
 
 static GListModel *
@@ -888,47 +881,6 @@ safety_cb (BzFullView *self,
 }
 
 static void
-run_cb (BzFullView *self,
-        GtkButton  *button)
-{
-  GListModel *model   = NULL;
-  guint       n_items = 0;
-
-  if (self->group == NULL || !bz_result_get_resolved (self->group_model))
-    return;
-
-  model   = bz_result_get_object (self->group_model);
-  n_items = g_list_model_get_n_items (model);
-
-  for (guint i = 0; i < n_items; i++)
-    {
-      g_autoptr (BzEntry) entry = NULL;
-
-      entry = g_list_model_get_item (model, i);
-
-      if (BZ_IS_FLATPAK_ENTRY (entry) && bz_entry_is_installed (entry))
-        {
-          g_autoptr (GError) local_error = NULL;
-          gboolean result                = FALSE;
-
-          result = bz_flatpak_entry_launch (
-              BZ_FLATPAK_ENTRY (entry),
-              BZ_FLATPAK_INSTANCE (bz_state_info_get_backend (self->state)),
-              &local_error);
-          if (!result)
-            {
-              GtkWidget *window = NULL;
-
-              window = gtk_widget_get_ancestor (GTK_WIDGET (button), GTK_TYPE_WINDOW);
-              if (window != NULL)
-                bz_show_error_for_widget (window, _ ("Failed to launch application"), local_error->message);
-            }
-          break;
-        }
-    }
-}
-
-static void
 update_cb (BzFullView        *self,
            GListModel        *entries,
            BzInstallControls *controls)
@@ -1136,7 +1088,6 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, format_more_other_apps_label);
   gtk_widget_class_bind_template_callback (widget_class, get_developer_apps_entries);
   gtk_widget_class_bind_template_callback (widget_class, more_apps_button_clicked_cb);
-  gtk_widget_class_bind_template_callback (widget_class, has_other_apps);
   gtk_widget_class_bind_template_callback (widget_class, open_url_cb);
   gtk_widget_class_bind_template_callback (widget_class, license_cb);
   gtk_widget_class_bind_template_callback (widget_class, dl_stats_cb);
@@ -1145,7 +1096,6 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, get_size_type);
   gtk_widget_class_bind_template_callback (widget_class, formfactor_cb);
   gtk_widget_class_bind_template_callback (widget_class, safety_cb);
-  gtk_widget_class_bind_template_callback (widget_class, run_cb);
   gtk_widget_class_bind_template_callback (widget_class, update_cb);
   gtk_widget_class_bind_template_callback (widget_class, delete_user_data_cb);
   gtk_widget_class_bind_template_callback (widget_class, support_cb);
