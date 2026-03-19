@@ -30,7 +30,7 @@ template $BzInstalledTile: $BzListTile {
       width-request: 64;
       pixel-size: 64;
       icon-name: "application-x-executable";
-      visible: bind $is_null(template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable) as <bool>;
+      visible: bind icon_picture.visible inverted;
       styles ["icon-dropshadow"]
     }
 
