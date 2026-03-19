@@ -207,6 +207,7 @@ BZ_DEFINE_DATA (
       int      prop;
       char    *id;
       char    *developer;
+      int      recent_downloads;
     },
     g_weak_ref_clear (&self->self);
     BZ_RELEASE_DATA (id, g_free);
@@ -648,28 +649,6 @@ bz_entry_set_property (GObject      *object,
           {
             g_clear_object (&priv->download_stats);
             priv->download_stats = g_value_dup_object (value);
-
-            if (priv->download_stats != NULL)
-              {
-                guint n_items          = 0;
-                guint start            = 0;
-                guint recent_downloads = 0;
-
-                n_items = g_list_model_get_n_items (priv->download_stats);
-                start   = n_items - MIN (n_items, 30);
-
-                for (guint i = start; i < n_items; i++)
-                  {
-                    g_autoptr (BzDataPoint) point = NULL;
-
-                    point = g_list_model_get_item (priv->download_stats, i);
-                    recent_downloads += bz_data_point_get_dependent (point);
-                  }
-                priv->recent_downloads = recent_downloads;
-              }
-            else
-              priv->recent_downloads = 0;
-            g_object_notify_by_pspec (object, props[PROP_RECENT_DOWNLOADS]);
           }
         else
           {
@@ -2469,6 +2448,7 @@ query_flathub_fiber (QueryFlathubData *data)
     {
     case PROP_DOWNLOAD_STATS:
       {
+        JsonObject *root             = NULL;
         JsonObject *per_day          = NULL;
         g_autoptr (GListStore) store = NULL;
 
@@ -2481,10 +2461,9 @@ query_flathub_fiber (QueryFlathubData *data)
                              "Unexpected JSON response format"));
           }
 
-        per_day = json_object_get_object_member (
-            json_node_get_object (node),
-            "installs_per_day");
-        store = g_list_store_new (BZ_TYPE_DATA_POINT);
+        root    = json_node_get_object (node);
+        per_day = json_object_get_object_member (root, "installs_per_day");
+        store   = g_list_store_new (BZ_TYPE_DATA_POINT);
 
         json_object_foreach_member (
             per_day,
@@ -2492,6 +2471,10 @@ query_flathub_fiber (QueryFlathubData *data)
             store);
 
         g_list_store_sort (store, (GCompareDataFunc) compare_dates, NULL);
+
+        if (json_object_has_member (root, "installs_last_month"))
+          data->recent_downloads = json_object_get_int_member (root, "installs_last_month");
+
         return dex_future_new_for_object (store);
       }
       break;
@@ -2578,6 +2561,11 @@ query_flathub_then (DexFuture        *future,
 
   value = dex_future_get_value (future, NULL);
   g_object_set_property (G_OBJECT (self), props[prop]->name, value);
+
+  if (prop == PROP_DOWNLOAD_STATS)
+      g_object_set (G_OBJECT (self),
+                    "recent-downloads", data->recent_downloads,
+                    NULL);
   return NULL;
 }
 
