@@ -759,11 +759,48 @@ entry_row_changed_cb (BzPermissionEntryRow *entry_row,
 }
 
 static void
+reset_undo_cb (AdwToast          *toast,
+               BzPermissionsPage *self)
+{
+  const char      *old_data      = NULL;
+  gsize            old_len       = 0;
+  const char      *override_path = NULL;
+  g_autofree char *dir           = NULL;
+
+  old_data      = g_object_get_data (G_OBJECT (toast), "old-data");
+  old_len       = GPOINTER_TO_SIZE (g_object_get_data (G_OBJECT (toast), "old-data-len"));
+  override_path = g_object_get_data (G_OBJECT (toast), "override-path");
+
+  if (old_data == NULL || override_path == NULL)
+    return;
+
+  dir = g_path_get_dirname (override_path);
+  g_mkdir_with_parents (dir, 0755);
+  g_file_set_contents (override_path, old_data, old_len, NULL);
+
+  g_clear_pointer (&self->overrides, g_key_file_unref);
+  self->overrides = load_key_file_from_path (self->override_path);
+
+  for (guint i = 0; i < self->rows->len; i++)
+    load_row_state (self, g_ptr_array_index (self->rows, i));
+
+  load_all_entry_row_states (self);
+  update_is_default (self);
+}
+
+static void
 reset_button_clicked_cb (GtkButton         *button,
                          BzPermissionsPage *self)
 {
-  BzWindow *window = NULL;
-  AdwToast *toast = NULL;
+  BzWindow        *window             = NULL;
+  AdwToast        *toast              = NULL;
+  g_autofree char *old_data           = NULL;
+  gsize            old_len            = 0;
+  char            *override_path_copy = NULL;
+
+  if (self->override_path != NULL &&
+      g_file_test (self->override_path, G_FILE_TEST_EXISTS))
+    g_file_get_contents (self->override_path, &old_data, &old_len, NULL);
 
   if (self->override_path != NULL)
     g_remove (self->override_path);
@@ -778,7 +815,22 @@ reset_button_clicked_cb (GtkButton         *button,
   update_is_default (self);
 
   window = BZ_WINDOW (gtk_widget_get_root (GTK_WIDGET (self)));
-  toast = adw_toast_new (_("Permissions reset!"));
+  toast  = adw_toast_new (_ ("Permissions reset!"));
+  adw_toast_set_button_label (toast, _ ("Undo"));
+
+  if (old_data != NULL)
+    {
+      override_path_copy = g_strdup (self->override_path);
+      g_object_set_data_full (G_OBJECT (toast), "old-data",
+                              g_steal_pointer (&old_data), g_free);
+      g_object_set_data_full (G_OBJECT (toast), "old-data-len",
+                              GSIZE_TO_POINTER (old_len), NULL);
+      g_object_set_data_full (G_OBJECT (toast), "override-path",
+                              override_path_copy, g_free);
+      g_signal_connect (toast, "button-clicked",
+                        G_CALLBACK (reset_undo_cb), self);
+    }
+
   bz_window_add_toast (window, toast);
 }
 
