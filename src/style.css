@@ -820,6 +820,10 @@ window.narrow .category-tile {
     margin: 5px 4.5px;
 }
 
+.installed-section {
+  padding-top: 0;
+}
+
 .narrow .installed-list-view > * {
     margin: 4px 4.5px;
 }
