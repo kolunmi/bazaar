@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-18 05:46+0700\n"
-"PO-Revision-Date: 2026-03-18 12:18+0700\n"
+"POT-Creation-Date: 2026-03-20 05:04+0700\n"
+"PO-Revision-Date: 2026-03-20 20:29+0700\n"
 "Last-Translator: Jill Fiore <contact@lumaeris.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -20,11 +20,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Gtranslator 49.0\n"
+"X-Generator: Gtranslator 50.0\n"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:2
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:46
-#: src/bz-window.c:372 src/bz-window.c:373
+#: src/bz-window.c:378 src/bz-window.c:379
 msgid "Bazaar"
 msgstr "Bazaar"
 
@@ -42,58 +42,71 @@ msgid "New Window"
 msgstr "Новое окно"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:8
-msgid "Discover and install applications"
-msgstr "Поиск и установка приложений"
+msgid "Discover and manage applications"
+msgstr "Поиск и управление приложениями"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:10
 msgid ""
-"A new app store for Linux with a focus on discovering and installing "
-"applications and addons from Flatpak remotes, particularly Flathub."
+"A fast and modern app store for Linux with a focus on discovering and "
+"installing Flatpak apps and addons, particularly from Flathub."
 msgstr ""
-"Новый магазин приложений для Linux с фокусом на поиске, установке приложений "
-"и дополнений из Flatpak репозиторий, в частности с Flathub."
+"Быстрый и современный магазин приложений для Linux с фокусом на поиске, "
+"установке приложений и дополнений из Flatpak репозиторий, в частности с "
+"Flathub."
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:14
-msgid ""
-"It emphasizes supporting the developers who make the Linux desktop possible. "
-"Bazaar features a \"curated\" tab that can be configured by distributors to "
-"allow for a more localized experience."
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:15
+msgid "Queue multiple installs and keep browsing"
 msgstr ""
-"Оно подчёркивает поддержку разработчиков, которые делают настольный Linux "
-"возможным. Bazaar внедряет вкладку \"Курируемое\", которая настраивается "
-"дистрибьюторами для обеспечения более ориентированного опыта."
+"Добавьте несколько установок в очередь и продолжайте просматривать страницы"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:16
+msgid "Easily view and edit app permissions"
+msgstr "Просто просматривайте и редактируйте разрешения приложений"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:17
+msgid "Sign in to Flathub to view and manage your favorites"
+msgstr ""
+"Войдите в Flathub для просмотра и управления вашими избранными приложениями"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:18
+msgid "Search apps directly from GNOME Shell"
+msgstr "Поиск приложения напрямую с GNOME Shell"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:30
 msgid "Adam Masciola"
 msgstr "Адам Масциола"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:54
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:55
 msgid "The home page displaying Flathub apps"
 msgstr "Главная страница, отображающая приложения Flathub"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:58
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:59
 msgid "Exhibit app page"
 msgstr "Страница приложения Exhibit"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:62
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:63
 msgid "Library page"
 msgstr "Страница библиотеки"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:66
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:67
 msgid "Search page"
 msgstr "Страница поиска"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:70
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:71
 msgid "Category page"
 msgstr "Страница категорий"
 
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:75
+msgid "Fractal permissions page"
+msgstr "Страница разрешений Fractal"
+
 #: src/bz-addons-dialog.blp:16 src/bz-full-view.blp:627
-#: src/bz-installed-tile.blp:156
+#: src/bz-installed-tile.blp:101 src/bz-installed-tile.blp:161
 msgid "Manage Add-Ons"
 msgstr "Управление дополнениями"
 
 #: src/bz-addons-dialog.c:94 src/bz-install-controls.blp:137
-#: src/bz-installed-tile.blp:131 src/bz-permission-entry-row.c:164
+#: src/bz-installed-tile.blp:139 src/bz-permission-entry-row.c:164
 msgid "Remove"
 msgstr "Удалить"
 
@@ -1793,15 +1806,15 @@ msgstr "Обновить"
 msgid "Stopped Receiving Updates"
 msgstr "Прекращено получение обновлений"
 
-#: src/bz-installed-tile.blp:102
+#: src/bz-installed-tile.blp:114
 msgid "Manage Permissions"
 msgstr "Управление разрешениями"
 
-#: src/bz-installed-tile.blp:116
+#: src/bz-installed-tile.blp:125
 msgid "Show Other Options…"
 msgstr "Показать другие опции…"
 
-#: src/bz-installed-tile.blp:161 src/bz-safety-dialog.blp:57
+#: src/bz-installed-tile.blp:166 src/bz-safety-dialog.blp:57
 msgid "Edit Permissions"
 msgstr "Редактировать разрешения"
 
@@ -1826,7 +1839,7 @@ msgstr "Библиотека"
 msgid "Pending Updates"
 msgstr "Ожидают обновления"
 
-#: src/bz-library-page.blp:153 src/bz-permissions-page.blp:279
+#: src/bz-library-page.blp:153 src/bz-permissions-page.blp:280
 msgid "Downloads"
 msgstr "Загрузки"
 
@@ -1974,298 +1987,302 @@ msgstr ""
 msgid "OK"
 msgstr "ОК"
 
-#: src/bz-permissions-page.blp:135 src/bz-transaction-tile.blp:272
+#: src/bz-permissions-page.blp:136 src/bz-transaction-tile.blp:272
 msgid "Open"
 msgstr "Открыть"
 
-#: src/bz-permissions-page.blp:143
+#: src/bz-permissions-page.blp:144
 msgid "Reset"
 msgstr "Сбросить"
 
-#: src/bz-permissions-page.blp:162
+#: src/bz-permissions-page.blp:163
 msgid "General"
 msgstr "Общее"
 
-#: src/bz-permissions-page.blp:168
+#: src/bz-permissions-page.blp:169
 msgid "Network"
 msgstr "Сеть"
 
-#: src/bz-permissions-page.blp:169
+#: src/bz-permissions-page.blp:170
 msgid "Share the host's network access"
 msgstr "Доступ к сети компьютера"
 
-#: src/bz-permissions-page.blp:175
-msgid "Audio Server"
-msgstr "Аудио-сервер"
-
 #: src/bz-permissions-page.blp:176
+msgid "Audio Server"
+msgstr "Звуковой сервер"
+
+#: src/bz-permissions-page.blp:177
 msgid ""
 "Play and record sound, enabling this bypasses the individual permissions"
 msgstr ""
 "Проигрывать и записывать звук, включая эту опцию пропускаются индивидуальные "
 "разрешения"
 
-#: src/bz-permissions-page.blp:182
+#: src/bz-permissions-page.blp:183
 msgid "Bluetooth"
 msgstr "Bluetooth"
 
-#: src/bz-permissions-page.blp:183
+#: src/bz-permissions-page.blp:184
 msgid "Manage both Bluetooth devices and settings"
 msgstr "Управлять устройствами и настройками Bluetooth"
 
-#: src/bz-permissions-page.blp:189
+#: src/bz-permissions-page.blp:190
 msgid "Printing"
 msgstr "Печать"
 
-#: src/bz-permissions-page.blp:190
+#: src/bz-permissions-page.blp:191
 msgid "Access the system's printing system"
 msgstr "Доступ к системе печати"
 
-#: src/bz-permissions-page.blp:197
+#: src/bz-permissions-page.blp:198
 msgid "Devices"
 msgstr "Устройства"
 
-#: src/bz-permissions-page.blp:203
+#: src/bz-permissions-page.blp:204
 msgid "Smart Cards"
 msgstr "Смарт-карты"
 
-#: src/bz-permissions-page.blp:204
+#: src/bz-permissions-page.blp:205
 msgid "Access smart card readers via PC/SC"
 msgstr "Доступ к смарт-картам через PC/SC"
 
-#: src/bz-permissions-page.blp:210
+#: src/bz-permissions-page.blp:211
 msgid "All Devices"
 msgstr "Все устройства"
 
-#: src/bz-permissions-page.blp:211
+#: src/bz-permissions-page.blp:212
 msgid "Access all devices such as webcam, GPU, etc."
 msgstr "Доступ к таким устройствам, как веб-камеры, ГПУ, и так далее"
 
-#: src/bz-permissions-page.blp:217
+#: src/bz-permissions-page.blp:218
 msgid "GPU Acceleration"
 msgstr "Ускорение ГПУ"
 
-#: src/bz-permissions-page.blp:219
+#: src/bz-permissions-page.blp:220
 msgid "Access GPU rendering"
 msgstr "Доступ к рендерингу ГПУ"
 
-#: src/bz-permissions-page.blp:225
+#: src/bz-permissions-page.blp:226
 msgid "USB Devices"
 msgstr "Устройства USB"
 
-#: src/bz-permissions-page.blp:227
+#: src/bz-permissions-page.blp:228
 msgid "Manage USB devices directly"
 msgstr "Управлять устройствами USB напрямую"
 
-#: src/bz-permissions-page.blp:233
+#: src/bz-permissions-page.blp:234
 msgid "Input Devices"
 msgstr "Устройства ввода"
 
-#: src/bz-permissions-page.blp:235
+#: src/bz-permissions-page.blp:236
 msgid "Access Input devices"
 msgstr "Доступ к устройствам ввода"
 
-#: src/bz-permissions-page.blp:241
+#: src/bz-permissions-page.blp:242
 msgid "KVM Virtualization"
 msgstr "Виртуализация KVM"
 
-#: src/bz-permissions-page.blp:243
+#: src/bz-permissions-page.blp:244
 msgid "Access KVM for virtual machines"
 msgstr "Доступ к KVM для виртуальных машин"
 
-#: src/bz-permissions-page.blp:249
+#: src/bz-permissions-page.blp:250
 msgid "Shared Memory"
 msgstr "Общая память"
 
-#: src/bz-permissions-page.blp:251
+#: src/bz-permissions-page.blp:252
 msgid "Create shared memory objects"
 msgstr "Создавать общие объекты памяти"
 
-#: src/bz-permissions-page.blp:258
+#: src/bz-permissions-page.blp:259
 msgid "Filesystem"
 msgstr "Файловая система"
 
-#: src/bz-permissions-page.blp:264
+#: src/bz-permissions-page.blp:265
 msgid "Host Filesystem"
 msgstr "Хостовая файловая система"
 
-#: src/bz-permissions-page.blp:265
+#: src/bz-permissions-page.blp:266
 msgid "Full access to the entire filesystem"
 msgstr "Полный доступ ко всей файловой системе"
 
-#: src/bz-permissions-page.blp:271
+#: src/bz-permissions-page.blp:272
 msgid "Home Folder"
 msgstr "Домашняя папка"
 
-#: src/bz-permissions-page.blp:273
+#: src/bz-permissions-page.blp:274
 msgid "Full access to your home directory"
 msgstr "Доступ к вашей домашней папке"
 
-#: src/bz-permissions-page.blp:281
+#: src/bz-permissions-page.blp:282
 msgid "Access the Downloads folder"
 msgstr "Доступ к папке Загрузок"
 
-#: src/bz-permissions-page.blp:287
+#: src/bz-permissions-page.blp:288
 msgid "Other Paths"
 msgstr "Другие пути"
 
-#: src/bz-permissions-page.blp:289
+#: src/bz-permissions-page.blp:290
 msgid "Grant access to additional files and folders"
 msgstr "Предоставить доступ к дополнительным файлам и папкам"
 
-#: src/bz-permissions-page.blp:305
+#: src/bz-permissions-page.blp:306
 msgid "Advanced System Access"
 msgstr "Продвинутый доступ к системе"
 
-#: src/bz-permissions-page.blp:309
+#: src/bz-permissions-page.blp:310
 msgid "Inter-process Communication"
 msgstr "Межпроцессное взаимодействие"
 
-#: src/bz-permissions-page.blp:310
+#: src/bz-permissions-page.blp:311
 msgid "Share IPC namespace with the host"
 msgstr "Использовать пространство имён IPC хоста"
 
-#: src/bz-permissions-page.blp:316
+#: src/bz-permissions-page.blp:317
 msgid "SSH Authentication"
 msgstr "Авторизация по SSH"
 
-#: src/bz-permissions-page.blp:317
+#: src/bz-permissions-page.blp:318
 msgid "Access the SSH authentication agent"
 msgstr "Доступ к сервису авторизации SSH"
 
-#: src/bz-permissions-page.blp:323
-msgid "GPG Agent"
-msgstr "Сервис GPG"
-
 #: src/bz-permissions-page.blp:324
+msgid "GPG Agent"
+msgstr "Агент GPG"
+
+#: src/bz-permissions-page.blp:325
 msgid "Access the GPG agent for things like encryption and git commit signing"
 msgstr ""
-"Доступ к сервису GPG для таких действий как шифрование и подпись коммитов git"
+"Доступ к агенту GPG для таких действий как шифрование и подпись коммитов git"
 
-#: src/bz-permissions-page.blp:331
+#: src/bz-permissions-page.blp:332
 msgid "Session Bus Policy"
 msgstr "Политика сеансовой шины"
 
-#: src/bz-permissions-page.blp:334 src/bz-permissions-page.blp:356
+#: src/bz-permissions-page.blp:335 src/bz-permissions-page.blp:357
 msgid "Full Access"
 msgstr "Полный доступ"
 
-#: src/bz-permissions-page.blp:335
+#: src/bz-permissions-page.blp:336
 msgid "Give full access to the D-Bus session bus"
 msgstr "Предоставить полный доступ к сеансовой шине D-Bus"
 
-#: src/bz-permissions-page.blp:340 src/bz-permissions-page.blp:362
+#: src/bz-permissions-page.blp:341 src/bz-permissions-page.blp:363
 msgid "Talk"
-msgstr "Общение"
+msgstr "Переговоры"
 
-#: src/bz-permissions-page.blp:341
+#: src/bz-permissions-page.blp:342
 msgid "Names on the session bus the app is allowed to send messages to"
 msgstr ""
 "Названия на сеансовой шине, к которым приложение может отправлять сообщения"
 
-#: src/bz-permissions-page.blp:345 src/bz-permissions-page.blp:367
+#: src/bz-permissions-page.blp:346 src/bz-permissions-page.blp:368
 msgid "Own"
-msgstr "Владение"
+msgstr "Владельцы"
 
-#: src/bz-permissions-page.blp:346
+#: src/bz-permissions-page.blp:347
 msgid "Names on the session bus the app is allowed to claim ownership of"
 msgstr "Названия на сеансовой шине, которыми владеет приложение"
 
-#: src/bz-permissions-page.blp:352
+#: src/bz-permissions-page.blp:353
 msgid "System Bus Policy"
 msgstr "Политика системной шины"
 
-#: src/bz-permissions-page.blp:357
+#: src/bz-permissions-page.blp:358
 msgid "Give full access to the D-Bus system bus"
 msgstr "Предоставить полный доступ к системной шине D-Bus"
 
-#: src/bz-permissions-page.blp:363
+#: src/bz-permissions-page.blp:364
 msgid "Names on the system bus the app is allowed to send messages to"
 msgstr ""
 "Названия на системной шине, к которым приложение может отправлять сообщения"
 
-#: src/bz-permissions-page.blp:368
+#: src/bz-permissions-page.blp:369
 msgid "Names on the system bus the app is allowed to claim ownership of"
 msgstr "Названия на системной шине, которыми владеет приложение"
 
-#: src/bz-permissions-page.blp:374
+#: src/bz-permissions-page.blp:375
 msgid "Developer Options"
 msgstr "Настройки разработчика"
 
-#: src/bz-permissions-page.blp:379
+#: src/bz-permissions-page.blp:380
 msgid "Wayland Windowing System"
 msgstr "Оконная система Wayland"
 
-#: src/bz-permissions-page.blp:380
+#: src/bz-permissions-page.blp:381
 msgid "Show windows using Wayland"
 msgstr "Показывать окна используя Wayland"
 
-#: src/bz-permissions-page.blp:386
+#: src/bz-permissions-page.blp:387
 msgid "X11 Windowing System"
 msgstr "Оконная система X11"
 
-#: src/bz-permissions-page.blp:387
+#: src/bz-permissions-page.blp:388
 msgid "Show windows using X11"
 msgstr "Показывать окна используя X11"
 
-#: src/bz-permissions-page.blp:393
-msgid "Fallback X11 Windowing System"
-msgstr "Сброс к оконной системе X11"
-
 #: src/bz-permissions-page.blp:394
+msgid "Fallback X11 Windowing System"
+msgstr "Возврат к оконной системе X11"
+
+#: src/bz-permissions-page.blp:395
 msgid "Show windows using X11 if Wayland is not available"
 msgstr "Показывать окна используя X11, если Wayland недоступен"
 
-#: src/bz-permissions-page.blp:400
+#: src/bz-permissions-page.blp:401
 msgid "Development Syscalls"
 msgstr "Системные вызовы для разработки"
 
-#: src/bz-permissions-page.blp:401
+#: src/bz-permissions-page.blp:402
 msgid "Access development syscalls such as ptrace"
 msgstr "Доступ к системным вызовам как ptrace"
 
-#: src/bz-permissions-page.blp:407
+#: src/bz-permissions-page.blp:408
 msgid "Multiarch"
 msgstr "Мультиархитектура"
 
-#: src/bz-permissions-page.blp:408
+#: src/bz-permissions-page.blp:409
 msgid "Run multiarch / multilib binaries"
 msgstr "Запускать мультиархитектурные бинарные файлы"
 
-#: src/bz-permissions-page.blp:414
+#: src/bz-permissions-page.blp:415
 msgid "CAN Bus"
 msgstr "Шина CAN"
 
-#: src/bz-permissions-page.blp:415
+#: src/bz-permissions-page.blp:416
 msgid "Access the CAN bus"
 msgstr "Доступ к шине CAN"
 
-#: src/bz-permissions-page.blp:421
+#: src/bz-permissions-page.blp:422
 msgid "Per-App Shared Memory"
 msgstr "Общая память для каждого приложения"
 
-#: src/bz-permissions-page.blp:422
+#: src/bz-permissions-page.blp:423
 msgid "Share <tt>/dev/shm</tt> between app instances &amp; subsandboxes"
 msgstr ""
-"Предоставлять <tt>/dev/shm</tt> между экземплярами приложения и подпесочницам"
+"Обмениваться <tt>/dev/shm</tt> между экземплярами приложения и подпесочницам"
 
-#: src/bz-permissions-page.blp:428
+#: src/bz-permissions-page.blp:429
 msgid "Variables"
 msgstr "Переменные"
 
-#: src/bz-permissions-page.blp:429
+#: src/bz-permissions-page.blp:430
 msgid "Environment variables to set in the application"
 msgstr "Переменные среды заданные в приложении"
 
-#: src/bz-permissions-page.c:781
+#: src/bz-permissions-page.c:817
 msgid "Permissions reset!"
 msgstr "Разрешения сброшены!"
 
-#: src/bz-permissions-page.c:808
+#: src/bz-permissions-page.c:818
+msgid "Undo"
+msgstr "Отменить"
+
+#: src/bz-permissions-page.c:859
 msgid "Hide Developer Options"
 msgstr "Скрыть настройки разработчика"
 
-#: src/bz-permissions-page.c:808
+#: src/bz-permissions-page.c:859
 msgid "Show Developer Options"
 msgstr "Показать настройки разработчика"
 
@@ -2861,12 +2878,12 @@ msgstr "%s имеет небезопасные разрешения"
 #: src/bz-safety-dialog.c:240
 #, c-format
 msgid "%s is Probably Safe"
-msgstr "%s возможно безопасное"
+msgstr "%s вероятно безопасное"
 
 #: src/bz-safety-dialog.c:245
 #, c-format
 msgid "%s is Possibly Unsafe"
-msgstr "%s возможно небезопасное"
+msgstr "%s вероятно небезопасное"
 
 #: src/bz-safety-dialog.c:250
 #, c-format
@@ -3322,24 +3339,24 @@ msgid "Log Out"
 msgstr "Выйти"
 
 #. Translators: %s is the title of the current page
-#: src/bz-window.c:375
+#: src/bz-window.c:381
 #, c-format
 msgid "Bazaar — %s"
 msgstr "Bazaar — %s"
 
-#: src/bz-window.c:482
+#: src/bz-window.c:488
 msgid "Failed to load add-ons"
 msgstr "Не удалось загрузить дополнения"
 
-#: src/bz-window.c:596 src/bz-window.c:613
+#: src/bz-window.c:602 src/bz-window.c:619
 msgid "Failed to launch application"
 msgstr "Не удалось запустить приложение"
 
-#: src/bz-window.c:834
+#: src/bz-window.c:846
 msgid "You can't remove Bazaar from Bazaar!"
 msgstr "Вы не можете удалить Bazaar из Bazaar!"
 
-#: src/bz-window.c:1126 src/bz-window.c:1160
+#: src/bz-window.c:1138 src/bz-window.c:1172
 msgid "Can't do that right now!"
 msgstr "Нельзя сделать это прямо сейчас!"
 
@@ -3387,6 +3404,3 @@ msgstr "Закрыть окно"
 msgctxt "shortcut window"
 msgid "Quit Bazaar"
 msgstr "Завершить Bazaar"
-
-#~ msgid "Install Other Version"
-#~ msgstr "Установить другую версию"

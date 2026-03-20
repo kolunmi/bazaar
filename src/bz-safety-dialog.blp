@@ -45,20 +45,6 @@ template $BzSafetyDialog: Adw.Dialog {
             ]
           }
 
-          ListBox {
-            selection-mode: none;
-            visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
-
-            styles [
-              "boxed-list",
-            ]
-
-            Adw.ButtonRow {
-              title: _("Edit Permissions");
-              activated => $edit_cb(template);
-            }
-          }
-
           Adw.PreferencesGroup {
             margin-top: 10;
             title: _("Details");

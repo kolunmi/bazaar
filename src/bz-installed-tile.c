@@ -28,6 +28,7 @@
 #include "bz-installed-tile.h"
 #include "bz-library-page.h"
 #include "bz-state-info.h"
+#include "bz-window.h"
 
 struct _BzInstalledTile
 {
@@ -126,6 +127,14 @@ logical_and (gpointer object,
              gboolean b)
 {
   return a && b;
+}
+
+static gboolean
+logical_or (gpointer object,
+            gboolean a,
+            gboolean b)
+{
+  return a || b;
 }
 
 static char *
@@ -255,6 +264,7 @@ bz_installed_tile_class_init (BzInstalledTileClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
   gtk_widget_class_bind_template_callback (widget_class, logical_and);
+  gtk_widget_class_bind_template_callback (widget_class, logical_or);
   gtk_widget_class_bind_template_callback (widget_class, format_description);
   gtk_widget_class_bind_template_callback (widget_class, support_cb);
   gtk_widget_class_bind_template_callback (widget_class, install_addons_cb);

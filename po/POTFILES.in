@@ -85,14 +85,6 @@ src/bz-license-dialog.h
 src/bz-login-page.blp
 src/bz-login-page.c
 src/bz-login-page.h
-src/bz-permission-entry-row.blp
-src/bz-permission-entry-row.c
-src/bz-permission-toggle-row.blp
-src/bz-permission-toggle-row.c
-src/bz-permissions-page.blp
-src/bz-permissions-page.c
-src/bz-portal-permissions.c
-src/bz-portal-tile.blp
 src/bz-preferences-dialog.blp
 src/bz-preferences-dialog.c
 src/bz-progress-bar.blp

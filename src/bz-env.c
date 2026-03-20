@@ -69,3 +69,44 @@ bz_get_dex_stack_size (void)
 
   return stack_size;
 }
+
+guint64
+bz_get_n_download_workers (void)
+{
+  static guint64 n_dl_workers = 0;
+
+  if (g_once_init_enter (&n_dl_workers))
+    {
+      const char *envvar = NULL;
+      guint64     value  = 0;
+
+      value = 8;
+
+      envvar = g_getenv ("BAZAAR_N_DOWNLOAD_WORKERS");
+      if (envvar != NULL)
+        {
+          g_autoptr (GError) local_error = NULL;
+          g_autoptr (GVariant) variant   = NULL;
+
+          variant = g_variant_parse (
+              G_VARIANT_TYPE_UINT64, envvar,
+              NULL, NULL, &local_error);
+          if (variant != NULL)
+            {
+              guint64 parse_result = 0;
+
+              parse_result = g_variant_get_uint64 (variant);
+              if (parse_result == 0)
+                g_warning ("BAZAAR_N_DOWNLOAD_WORKERS must be greater than 0");
+              else
+                value = parse_result;
+            }
+          else
+            g_warning ("BAZAAR_N_DOWNLOAD_WORKERS is invalid: %s", local_error->message);
+        }
+
+      g_once_init_leave (&n_dl_workers, value);
+    }
+
+  return n_dl_workers;
+}

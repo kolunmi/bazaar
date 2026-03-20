@@ -38,7 +38,6 @@
 #include "bz-hooks.h"
 #include "bz-io.h"
 #include "bz-library-page.h"
-#include "bz-permissions-page.h"
 #include "bz-progress-bar.h"
 #include "bz-search-widget.h"
 #include "bz-template-callbacks.h"
@@ -76,6 +75,7 @@ enum
   PROP_0,
 
   PROP_STATE,
+  PROP_COMPACT,
 
   LAST_PROP
 };
@@ -166,6 +166,9 @@ bz_window_get_property (GObject    *object,
     {
     case PROP_STATE:
       g_value_set_object (value, self->state);
+      break;
+    case PROP_COMPACT:
+      g_value_set_boolean (value, self->breakpoint_applied);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -313,6 +316,7 @@ breakpoint_apply_cb (BzWindow      *self,
   self->breakpoint_applied = TRUE;
 
   gtk_widget_add_css_class (GTK_WIDGET (self), "narrow");
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_COMPACT]);
 }
 
 static void
@@ -322,6 +326,7 @@ breakpoint_unapply_cb (BzWindow      *self,
   self->breakpoint_applied = FALSE;
 
   gtk_widget_remove_css_class (GTK_WIDGET (self), "narrow");
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_COMPACT]);
 }
 
 static void
@@ -645,27 +650,6 @@ action_launch_group (GtkWidget  *widget,
 }
 
 static void
-action_permissions (GtkWidget  *widget,
-                    const char *action_name,
-                    GVariant   *parameter)
-{
-  BzWindow   *self               = BZ_WINDOW (widget);
-  const char *id                 = NULL;
-  g_autoptr (BzEntryGroup) group = NULL;
-
-  id    = g_variant_get_string (parameter, NULL);
-  group = bz_application_map_factory_convert_one (
-      bz_state_info_get_application_factory (self->state),
-      gtk_string_object_new (id));
-
-  if (group == NULL)
-    return;
-
-  adw_navigation_view_push (self->navigation_view,
-                            ADW_NAVIGATION_PAGE (bz_permissions_page_new (group)));
-}
-
-static void
 bz_window_class_init (BzWindowClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
@@ -681,6 +665,12 @@ bz_window_class_init (BzWindowClass *klass)
           NULL, NULL,
           BZ_TYPE_STATE_INFO,
           G_PARAM_READABLE);
+
+  props[PROP_COMPACT] =
+      g_param_spec_boolean (
+          "compact",
+          NULL, NULL, FALSE,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
@@ -725,7 +715,6 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_install_action (widget_class, "window.show-group", "s", action_show_group);
   gtk_widget_class_install_action (widget_class, "window.addons-group", "s", action_addons_group);
   gtk_widget_class_install_action (widget_class, "window.bulk-install", NULL, action_bulk_install);
-  gtk_widget_class_install_action (widget_class, "window.permissions", "s", action_permissions);
   gtk_widget_class_install_action (widget_class, "window.launch-group", "s", action_launch_group);
 
   gtk_widget_class_add_binding_action (widget_class, GDK_KEY_d, GDK_CONTROL_MASK, "window.open-library", NULL);
