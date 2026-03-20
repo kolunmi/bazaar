@@ -99,36 +99,11 @@ template $BzInstalledTile: $BzListTile {
         ]
 
         tooltip-text: _("Manage Add-Ons");
-        visible: bind $logical_and($invert_boolean(template.compact) as <bool>, $invert_boolean($is_zero(template.group as <$BzEntryGroup>.n-addons as <int>) as <bool>) as <bool>) as <bool>;
+        visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.n-addons as <int>) as <bool>) as <bool>;
         valign: center;
         icon-name: "application-x-addon-symbolic";
 
         clicked => $install_addons_cb() swapped;
-      }
-
-      Button permissions_button {
-        styles [
-          "flat"
-        ]
-
-        tooltip-text: _("Manage Permissions");
-        visible: bind $logical_and($invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <bool>, $logical_or($invert_boolean(template.compact) as <bool>, $is_zero(template.group as <$BzEntryGroup>.n-addons as <int>) as <bool>) as <bool>) as <bool>;
-        valign: center;
-        icon-name: "sliders-horizontal-symbolic";
-
-        clicked => $permissions_cb() swapped;
-      }
-
-      MenuButton {
-        visible: bind $logical_and(template.compact, $invert_boolean($is_zero(template.group as <$BzEntryGroup>.n-addons as <int>) as <bool>) as <bool>) as <bool>;
-        icon-name: "view-more-horizontal-symbolic";
-        tooltip-text: _("Show Other Options…");
-        menu-model: menu;
-        valign: center;
-
-        styles [
-          "flat"
-        ]
       }
 
       Button remove_button {
@@ -153,18 +128,4 @@ template $BzInstalledTile: $BzListTile {
       }
     }
   };
-}
-
-menu menu {
-  section {
-    item {
-      label: _("Manage Add-Ons");
-      action: "installed-tile.install-addons";
-    }
-
-    item {
-      label: _("Edit Permissions");
-      action: "installed-tile.permissions";
-    }
-  }
 }
