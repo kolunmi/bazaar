@@ -27,7 +27,6 @@
 #include "bz-entry-group.h"
 #include "bz-entry.h"
 #include "bz-lozenge.h"
-#include "bz-permissions-page.h"
 #include "bz-result.h"
 #include "bz-safety-calculator.h"
 #include "bz-safety-dialog.h"
@@ -58,7 +57,6 @@ static GParamSpec *props[LAST_PROP] = { 0 };
 
 static AdwActionRow *create_permission_row (BzSafetyRow *row_data);
 static void          update_permissions_list (BzSafetyDialog *self);
-static void          edit_cb (BzSafetyDialog *self);
 
 static void
 bz_safety_dialog_dispose (GObject *object)
@@ -143,7 +141,6 @@ bz_safety_dialog_class_init (BzSafetyDialogClass *klass)
 
   gtk_widget_class_bind_template_child (widget_class, BzSafetyDialog, lozenge);
   gtk_widget_class_bind_template_child (widget_class, BzSafetyDialog, permissions_list);
-  gtk_widget_class_bind_template_callback (widget_class, edit_cb);
 }
 
 static void
@@ -258,24 +255,4 @@ update_permissions_list (BzSafetyDialog *self)
   bz_lozenge_set_importance (self->lozenge, importance);
 
   g_clear_object (&result);
-}
-
-static void
-edit_cb (BzSafetyDialog *self)
-{
-  GtkWidget *window = NULL;
-  GtkWidget *page   = NULL;
-
-  if (self->group == NULL)
-    return;
-
-  page = bz_permissions_page_new (self->group);
-
-  adw_dialog_close (ADW_DIALOG (self));
-
-  window = GTK_WIDGET (gtk_application_get_active_window (
-      GTK_APPLICATION (g_application_get_default ())));
-
-  if (BZ_IS_WINDOW (window))
-    bz_window_push_page (BZ_WINDOW (window), ADW_NAVIGATION_PAGE (page));
 }
