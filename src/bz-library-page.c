@@ -20,6 +20,7 @@
 
 #include <glib/gi18n.h>
 
+#include "bz-entry-group.h"
 #include "bz-installed-tile.h"
 #include "bz-library-page.h"
 #include "bz-section-view.h"
@@ -43,6 +44,10 @@ struct _BzLibraryPage
   GtkFilterListModel *filter_model;
   GtkCustomFilter    *filter;
   GtkListView        *list_view;
+  GtkSortListModel   *sort_model;
+  GtkCustomSorter    *sorter;
+  GtkCheckButton     *sort_name;
+  GtkCheckButton     *sort_size;
 };
 
 G_DEFINE_FINAL_TYPE (BzLibraryPage, bz_library_page, ADW_TYPE_BIN)
@@ -290,6 +295,35 @@ global_search_cb (BzLibraryPage *self,
   gtk_editable_set_text (GTK_EDITABLE (self->search_bar), "");
 }
 
+static int
+sort_func (BzEntryGroup  *a,
+           BzEntryGroup  *b,
+           BzLibraryPage *self)
+{
+  if (gtk_check_button_get_active (self->sort_size))
+    {
+      guint64 size_a = 0;
+      guint64 size_b = 0;
+
+      size_a = bz_entry_group_get_installed_size (a);
+      size_b = bz_entry_group_get_installed_size (b);
+
+      return size_a > size_b ? -1 :
+             size_a < size_b ?  1 : 0;
+    }
+
+  return g_utf8_collate (bz_entry_group_get_title (a),
+                         bz_entry_group_get_title (b));
+}
+
+static void
+sort_changed_cb (BzLibraryPage  *self,
+                 GtkCheckButton *button)
+{
+  gtk_sorter_changed (GTK_SORTER (self->sorter),
+                      GTK_SORTER_CHANGE_DIFFERENT);
+}
+
 static void
 bz_library_page_class_init (BzLibraryPageClass *klass)
 {
@@ -359,6 +393,10 @@ bz_library_page_class_init (BzLibraryPageClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, filter_model);
   gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, filter);
   gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, list_view);
+  gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, sort_model);
+  gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, sorter);
+  gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, sort_name);
+  gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, sort_size);
   gtk_widget_class_bind_template_callback (widget_class, no_results_found_subtitle);
   gtk_widget_class_bind_template_callback (widget_class, format_update_count);
   gtk_widget_class_bind_template_callback (widget_class, tile_activated_cb);
@@ -368,6 +406,7 @@ bz_library_page_class_init (BzLibraryPageClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, clear_tasks_cb);
   gtk_widget_class_bind_template_callback (widget_class, updates_card_update_cb);
   gtk_widget_class_bind_template_callback (widget_class, global_search_cb);
+  gtk_widget_class_bind_template_callback (widget_class, sort_changed_cb);
 }
 
 static void
@@ -376,6 +415,9 @@ bz_library_page_init (BzLibraryPage *self)
   gtk_widget_init_template (GTK_WIDGET (self));
   gtk_custom_filter_set_filter_func (
       self->filter, (GtkCustomFilterFunc) filter,
+      self, NULL);
+  gtk_custom_sorter_set_sort_func (
+      self->sorter, (GCompareDataFunc) sort_func,
       self, NULL);
 }
 

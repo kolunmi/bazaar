@@ -253,17 +253,26 @@ template $BzLibraryPage: Adw.Bin {
                     }
                   };
                 }
-
-                Label {
-                  label: _("Installed Apps");
-                  xalign: 0;
+                Box {
                   margin-start: 12;
-                  visible: bind template.has-apps;
+                  margin-end: 4;
+                  Label {
+                    label: _("Installed Apps");
+                    xalign: 0;
+                    visible: bind template.has-apps;
+                    hexpand: true;
+                    margin-top: 4;
 
-                  styles [
-                    "heading",
-                    "h4",
-                  ]
+                    styles [
+                      "heading",
+                      "h4",
+                    ]
+                  }
+                  MenuButton {
+                    icon-name: "sliders-horizontal-symbolic";
+                    popover: sort_popover;
+                    styles ["flat"]
+                  }
                 }
               }
 
@@ -271,6 +280,7 @@ template $BzLibraryPage: Adw.Bin {
                 styles [
                   "navigation-sidebar",
                   "installed-list-view",
+                  "installed-section"
                 ]
 
                 visible: bind template.has-apps;
@@ -279,7 +289,11 @@ template $BzLibraryPage: Adw.Bin {
                   model: FilterListModel filter_model {
                     filter: CustomFilter filter {};
 
-                    model: bind template.model;
+                    model: SortListModel sort_model {
+                      sorter: CustomSorter sorter {};
+                      model: bind template.model;
+                    };
+
                     notify::n-items => $n_filtered_items_changed(template);
                   };
                 };
@@ -301,6 +315,44 @@ template $BzLibraryPage: Adw.Bin {
           };
         };
       }
+    }
+  };
+}
+
+Popover sort_popover {
+  width-request: 90;
+  child: Box {
+    orientation: vertical;
+    spacing: 6;
+    margin-top: 4;
+    margin-bottom: 4;
+    margin-start: 4;
+    margin-end: 4;
+
+    Label {
+      label: _("Sort By");
+      wrap: true;
+      wrap-mode: word_char;
+      xalign: 0;
+      margin-start: 28;
+
+      styles [
+        "heading",
+        "h4",
+        "dimmed"
+      ]
+    }
+
+    CheckButton sort_name {
+      label: _("Name");
+      active: true;
+      toggled => $sort_changed_cb(template);
+    }
+
+    CheckButton sort_size {
+      label: _("Size");
+      group: sort_name;
+      toggled => $sort_changed_cb(template);
     }
   };
 }
