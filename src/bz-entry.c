@@ -429,7 +429,7 @@ bz_entry_get_property (GObject    *object,
       g_value_set_object (value, priv->download_stats_per_country);
       break;
     case PROP_RECENT_DOWNLOADS:
-      query_flathub (self, PROP_DOWNLOAD_STATS);
+      query_flathub (self, PROP_RECENT_DOWNLOADS);
       g_value_set_int (value, priv->recent_downloads);
       break;
     case PROP_TOTAL_DOWNLOADS:
@@ -648,28 +648,6 @@ bz_entry_set_property (GObject      *object,
           {
             g_clear_object (&priv->download_stats);
             priv->download_stats = g_value_dup_object (value);
-
-            if (priv->download_stats != NULL)
-              {
-                guint n_items          = 0;
-                guint start            = 0;
-                guint recent_downloads = 0;
-
-                n_items = g_list_model_get_n_items (priv->download_stats);
-                start   = n_items - MIN (n_items, 30);
-
-                for (guint i = start; i < n_items; i++)
-                  {
-                    g_autoptr (BzDataPoint) point = NULL;
-
-                    point = g_list_model_get_item (priv->download_stats, i);
-                    recent_downloads += bz_data_point_get_dependent (point);
-                  }
-                priv->recent_downloads = recent_downloads;
-              }
-            else
-              priv->recent_downloads = 0;
-            g_object_notify_by_pspec (object, props[PROP_RECENT_DOWNLOADS]);
           }
         else
           {
@@ -2386,6 +2364,7 @@ query_flathub (BzEntry *self,
 
   is_download_stat = (prop == PROP_DOWNLOAD_STATS ||
                       prop == PROP_DOWNLOAD_STATS_PER_COUNTRY ||
+                      prop == PROP_RECENT_DOWNLOADS ||
                       prop == PROP_TOTAL_DOWNLOADS);
 
   if (!is_download_stat && !priv->is_flathub)
@@ -2442,6 +2421,7 @@ query_flathub_fiber (QueryFlathubData *data)
     {
     case PROP_DOWNLOAD_STATS:
     case PROP_DOWNLOAD_STATS_PER_COUNTRY:
+    case PROP_RECENT_DOWNLOADS:
     case PROP_TOTAL_DOWNLOADS:
       request = g_strdup_printf ("/stats/%s?all=false&days=175", id);
       break;
@@ -2469,6 +2449,7 @@ query_flathub_fiber (QueryFlathubData *data)
     {
     case PROP_DOWNLOAD_STATS:
       {
+        JsonObject *root             = NULL;
         JsonObject *per_day          = NULL;
         g_autoptr (GListStore) store = NULL;
 
@@ -2481,10 +2462,9 @@ query_flathub_fiber (QueryFlathubData *data)
                              "Unexpected JSON response format"));
           }
 
-        per_day = json_object_get_object_member (
-            json_node_get_object (node),
-            "installs_per_day");
-        store = g_list_store_new (BZ_TYPE_DATA_POINT);
+        root    = json_node_get_object (node);
+        per_day = json_object_get_object_member (root, "installs_per_day");
+        store   = g_list_store_new (BZ_TYPE_DATA_POINT);
 
         json_object_foreach_member (
             per_day,
@@ -2492,6 +2472,7 @@ query_flathub_fiber (QueryFlathubData *data)
             store);
 
         g_list_store_sort (store, (GCompareDataFunc) compare_dates, NULL);
+
         return dex_future_new_for_object (store);
       }
       break;
@@ -2513,6 +2494,17 @@ query_flathub_fiber (QueryFlathubData *data)
             store);
 
         return dex_future_new_for_object (store);
+      }
+      break;
+
+    case PROP_RECENT_DOWNLOADS:
+      {
+        int recent_downloads = 0;
+
+        if (json_object_has_member (json_node_get_object (node), "installs_last_month"))
+          recent_downloads = json_object_get_int_member (json_node_get_object (node), "installs_last_month");
+
+        return dex_future_new_for_int (recent_downloads);
       }
       break;
     case PROP_TOTAL_DOWNLOADS:
@@ -2578,6 +2570,7 @@ query_flathub_then (DexFuture        *future,
 
   value = dex_future_get_value (future, NULL);
   g_object_set_property (G_OBJECT (self), props[prop]->name, value);
+
   return NULL;
 }
 
