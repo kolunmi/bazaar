@@ -373,11 +373,11 @@ invalidating_state_changed (BzFlathubPage *self,
     }
 
   if (flathub != NULL && has_repo)
-      page = "content";
-    else if (!has_repo)
-      page = "empty";
-    else
-      page = "offline";
+    page = "content";
+  else if (!has_repo)
+    page = "empty";
+  else
+    page = "offline";
 
   adw_view_stack_set_visible_child_name (self->stack, page);
 }

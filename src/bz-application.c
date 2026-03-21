@@ -896,7 +896,6 @@ init_fiber (GWeakRef *wr)
   g_autoptr (GFile) root_cache_dir_file = NULL;
   g_autoptr (GListModel) repos          = NULL;
   gboolean has_flathub                  = FALSE;
-  gboolean just_added_flathub           = FALSE;
   gboolean result                       = FALSE;
   g_autoptr (GHashTable) cached_set     = NULL;
   g_autofree char *flathub_cache        = NULL;
@@ -1029,18 +1028,17 @@ init_fiber (GWeakRef *wr)
           result = dex_await (
               bz_flatpak_instance_ensure_has_flathub (self->flatpak, NULL),
               &local_error);
-          if (!result)
+          if (result)
+            has_flathub = TRUE;
+          else
             {
               g_warning ("Failed to install flathub: %s",
                          local_error->message);
               g_clear_error (&local_error);
             }
-          else
-            just_added_flathub = TRUE;
         }
     }
-
-  bz_state_info_set_has_flathub (self->state, has_flathub || just_added_flathub);
+  bz_state_info_set_has_flathub (self->state, has_flathub);
 
   self->installed_set = dex_await_boxed (
       bz_backend_retrieve_install_ids (
