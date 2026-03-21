@@ -69,7 +69,7 @@ msgstr "Connectez-vous à Flathub pour consulter et gérer vos favoris"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:18
 msgid "Search apps directly from GNOME Shell"
-msgstr "Recherchezz des applications directement depuis le Shell GNOME"
+msgstr "Recherchez des applications directement depuis le Shell GNOME"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:30
 msgid "Adam Masciola"
