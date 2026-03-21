@@ -815,6 +815,10 @@ window.narrow .category-tile {
     margin: 5px 4.5px;
 }
 
+.installed-section {
+  padding-top: 0;
+}
+
 .narrow .installed-list-view > * {
     margin: 4px 4.5px;
 }
@@ -846,7 +850,7 @@ window.narrow .category-tile {
 }
 
 .operations {
-	background-color: rgba(0, 0, 0, 0.10);
+	background-color: rgba(255, 255, 255, 0.040);
 	border-radius: 0px 0px 12px 12px;
 }
 

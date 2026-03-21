@@ -5,17 +5,18 @@
   <project_license>GPL-3.0-or-later</project_license>
 
   <name>Bazaar</name>
-  <summary>Discover and install applications</summary>
+  <summary>Discover and manage applications</summary>
   <description>
     <p>
-      A new app store for Linux with a focus on discovering and installing
-      applications and addons from Flatpak remotes, particularly Flathub.
+      A fast and modern app store for Linux with a focus on discovering
+      and installing Flatpak apps and addons, particularly from Flathub.
     </p>
-    <p>
-      It emphasizes supporting the developers who make the Linux desktop
-      possible. Bazaar features a "curated" tab that can be configured by
-      distributors to allow for a more localized experience.
-    </p>
+    <ul>
+      <li>Queue multiple installs and keep browsing</li>
+      <li>Easily view app permissions</li>
+      <li>Sign in to Flathub to view and manage your favorites</li>
+      <li>Search apps directly from GNOME Shell</li>
+    </ul>
   </description>
 
   <supports>
@@ -58,7 +59,7 @@
       <caption>Exhibit app page</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/user-attachments/assets/cf0914b7-f256-436e-bbd5-6822cf3d0786</image>
+      <image>https://github.com/user-attachments/assets/a25269a3-0560-4d75-9166-a38bc7a7f429</image>
       <caption>Library page</caption>
     </screenshot>
     <screenshot>

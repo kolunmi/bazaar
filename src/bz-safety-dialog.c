@@ -31,6 +31,8 @@
 #include "bz-safety-calculator.h"
 #include "bz-safety-dialog.h"
 #include "bz-safety-row.h"
+#include "bz-template-callbacks.h"
+#include "bz-window.h"
 
 struct _BzSafetyDialog
 {
@@ -55,8 +57,6 @@ static GParamSpec *props[LAST_PROP] = { 0 };
 
 static AdwActionRow *create_permission_row (BzSafetyRow *row_data);
 static void          update_permissions_list (BzSafetyDialog *self);
-static gboolean      invert_boolean (gpointer object, gboolean value);
-static gboolean      is_null (gpointer object, GObject *value);
 
 static void
 bz_safety_dialog_dispose (GObject *object)
@@ -137,11 +137,10 @@ bz_safety_dialog_class_init (BzSafetyDialogClass *klass)
 
   gtk_widget_class_set_template_from_resource (widget_class,
                                                "/io/github/kolunmi/Bazaar/bz-safety-dialog.ui");
+  bz_widget_class_bind_all_util_callbacks (widget_class);
 
   gtk_widget_class_bind_template_child (widget_class, BzSafetyDialog, lozenge);
   gtk_widget_class_bind_template_child (widget_class, BzSafetyDialog, permissions_list);
-  gtk_widget_class_bind_template_callback (widget_class, is_null);
-  gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
 }
 
 static void
@@ -207,9 +206,10 @@ update_permissions_list (BzSafetyDialog *self)
     {
       for (gint j = 0; j < n_items; j++)
         {
-          g_autoptr (BzSafetyRow) row_data;
-          AdwActionRow *row;
-          BzImportance row_importance;
+          g_autoptr (BzSafetyRow) row_data = NULL;
+          AdwActionRow *row                = NULL;
+          BzImportance  row_importance     = 0;
+
           row_data       = g_list_model_get_item (model, j);
           row_importance = bz_safety_row_get_importance (row_data);
           if (row_importance != level)
@@ -255,18 +255,4 @@ update_permissions_list (BzSafetyDialog *self)
   bz_lozenge_set_importance (self->lozenge, importance);
 
   g_clear_object (&result);
-}
-
-static gboolean
-invert_boolean (gpointer object,
-                gboolean value)
-{
-  return !value;
-}
-
-static gboolean
-is_null (gpointer object,
-         GObject *value)
-{
-  return value == NULL;
 }

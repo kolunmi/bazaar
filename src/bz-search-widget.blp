@@ -160,9 +160,13 @@ template $BzSearchWidget: Adw.Bin {
           name: "empty";
 
           child: Box {
+            orientation: vertical;
+            vexpand: true;
+
             Adw.StatusPage {
               visible: bind $is_empty(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories) as <bool>;
               hexpand: true;
+              vexpand: true;
               icon-name: "system-search-symbolic";
               title: _("Categories Unavailable");
               description: _("Search for apps using the search bar above.");
@@ -170,6 +174,7 @@ template $BzSearchWidget: Adw.Bin {
 
             ScrolledWindow {
               hscrollbar-policy: never;
+              vexpand: true;
               visible: bind $invert_boolean($is_empty(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories) as <bool>) as <bool>;
 
               child: Adw.Clamp {

@@ -27,4 +27,7 @@ G_BEGIN_DECLS
 gsize
 bz_get_dex_stack_size (void);
 
+guint64
+bz_get_n_download_workers (void);
+
 G_END_DECLS

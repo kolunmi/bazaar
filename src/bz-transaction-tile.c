@@ -291,32 +291,11 @@ run_cb (BzTransactionTile *self,
     return;
 
   entry = bz_transaction_entry_tracker_get_entry (tracker);
-  if (entry == NULL || !BZ_IS_FLATPAK_ENTRY (entry))
+  if (entry == NULL)
     return;
 
-  if (bz_entry_is_installed (entry))
-    {
-      g_autoptr (GError) local_error = NULL;
-      gboolean     result            = FALSE;
-      BzWindow    *window            = NULL;
-      BzStateInfo *state             = NULL;
-
-      window = (BzWindow *) gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_WINDOW);
-      if (window == NULL)
-        return;
-
-      state = bz_window_get_state_info (window);
-      if (state == NULL)
-        return;
-
-      result = bz_flatpak_entry_launch (
-          BZ_FLATPAK_ENTRY (entry),
-          BZ_FLATPAK_INSTANCE (bz_state_info_get_backend (state)),
-          &local_error);
-
-      if (!result)
-        bz_show_error_for_widget (GTK_WIDGET (window), _ ("Failed to launch application"), local_error->message);
-    }
+  gtk_widget_activate_action (GTK_WIDGET (self), "window.launch-group", "s",
+                              bz_entry_get_id (entry));
 }
 
 static void
