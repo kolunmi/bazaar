@@ -814,7 +814,6 @@ ensure_flathub_fiber (EnsureFlathubData *data)
   g_autoptr (FlatpakRemote) sys_remote = NULL;
   g_autoptr (FlatpakRemote) usr_remote = NULL;
   gboolean result                      = FALSE;
-  g_autoptr (FlatpakRemote) remote     = NULL;
 
   bz_weak_get_or_return_reject (self, data->self);
 
@@ -828,21 +827,30 @@ ensure_flathub_fiber (EnsureFlathubData *data)
         self->user, "flathub", cancellable, NULL);
 
   if (sys_remote != NULL)
-    remote = g_steal_pointer (&sys_remote);
-  else if (usr_remote != NULL)
-    remote = g_steal_pointer (&usr_remote);
-
-  if (remote != NULL)
     {
-      flatpak_remote_set_disabled (remote, FALSE);
-      flatpak_remote_set_noenumerate (remote, FALSE);
-      flatpak_remote_set_gpg_verify (remote, TRUE);
+      flatpak_remote_set_disabled (sys_remote, FALSE);
+      flatpak_remote_set_noenumerate (sys_remote, FALSE);
+      flatpak_remote_set_gpg_verify (sys_remote, TRUE);
+
+      result = flatpak_installation_modify_remote (
+          self->system, sys_remote, cancellable, &local_error);
+      if (!result)
+        return dex_future_new_reject (
+            BZ_FLATPAK_ERROR,
+            BZ_FLATPAK_ERROR_REMOTE_SYNCHRONIZATION_FAILURE,
+            "Failed to modify existing system flathub remote: %s",
+            local_error->message);
     }
-  else
+  #ifndef SANDBOXED_LIBFLATPAK
+  else if (self->system != NULL)
+  #else
+  else if (self->system != NULL && usr_remote == NULL)
+  #endif
     {
       g_autoptr (SoupMessage) message  = NULL;
       g_autoptr (GOutputStream) output = NULL;
       g_autoptr (GBytes) bytes         = NULL;
+      g_autoptr (FlatpakRemote) remote = NULL;
 
       message = soup_message_new (SOUP_METHOD_GET, REPO_URL);
       output  = g_memory_output_stream_new_resizable ();
@@ -868,18 +876,32 @@ ensure_flathub_fiber (EnsureFlathubData *data)
       flatpak_remote_set_gpg_verify (remote, TRUE);
 
       result = flatpak_installation_add_remote (
-          self->system != NULL ? self->system : self->user,
-          remote,
-          TRUE,
-          cancellable,
-          &local_error);
+          self->system, remote, TRUE, cancellable, &local_error);
       if (!result)
         return dex_future_new_reject (
             BZ_FLATPAK_ERROR,
             BZ_FLATPAK_ERROR_REMOTE_SYNCHRONIZATION_FAILURE,
-            "Failed to add flathub to flatpak installation: %s",
+            "Failed to add flathub to system flatpak installation: %s",
             local_error->message);
     }
+
+#ifndef SANDBOXED_LIBFLATPAK
+  if (usr_remote != NULL)
+    {
+      flatpak_remote_set_disabled (usr_remote, FALSE);
+      flatpak_remote_set_noenumerate (usr_remote, FALSE);
+      flatpak_remote_set_gpg_verify (usr_remote, TRUE);
+
+      result = flatpak_installation_modify_remote (
+          self->user, usr_remote, cancellable, &local_error);
+      if (!result)
+        return dex_future_new_reject (
+            BZ_FLATPAK_ERROR,
+            BZ_FLATPAK_ERROR_REMOTE_SYNCHRONIZATION_FAILURE,
+            "Failed to modify existing user flathub remote: %s",
+            local_error->message);
+    }
+#endif
 
   return dex_future_new_true ();
 }
