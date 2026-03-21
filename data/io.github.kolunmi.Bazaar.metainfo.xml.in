@@ -13,7 +13,7 @@
     </p>
     <ul>
       <li>Queue multiple installs and keep browsing</li>
-      <li>Easily view and edit app permissions</li>
+      <li>Easily view app permissions</li>
       <li>Sign in to Flathub to view and manage your favorites</li>
       <li>Search apps directly from GNOME Shell</li>
     </ul>
@@ -69,10 +69,6 @@
     <screenshot>
       <image>https://github.com/user-attachments/assets/fd721125-1842-4cf1-9ab3-a70ef6b9ce10</image>
       <caption>Category page</caption>
-    </screenshot>
-    <screenshot>
-      <image>https://github.com/user-attachments/assets/36feaeb2-b8ee-4b87-9601-9e1536758b69</image>
-      <caption>Fractal permissions page</caption>
     </screenshot>
   </screenshots>
 
