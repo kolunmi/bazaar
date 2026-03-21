@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-18 23:18+0100\n"
-"PO-Revision-Date: 2026-03-18 23:01+0100\n"
+"POT-Creation-Date: 2026-03-21 21:09+0100\n"
+"PO-Revision-Date: 2026-03-21 21:10+0100\n"
 "Last-Translator: Mimolet <theMimolet@proton.me>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -20,11 +20,11 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Gtranslator 49.0\n"
+"X-Generator: Gtranslator 50.0\n"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:3
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:46
-#: src/bz-window.c:372 src/bz-window.c:373
+#: src/bz-window.c:377 src/bz-window.c:378
 msgid "Bazaar"
 msgstr "Bazaar"
 
@@ -35,68 +35,73 @@ msgstr "Ajoutez, désinstallez ou mettez à jour des applications flatpak"
 #: data/io.github.kolunmi.Bazaar.desktop.in:10
 msgid "GTK;System;PackageManager;Discover;Flatpak;Software;Store;"
 msgstr ""
-"GTK;System;Système;PackageManager;Gestionnaire de paquets;Discover;Découvrir;"
-"Flatpak;Software;Logiciel;Store;Magasin;Applis;Logithèque;"
+"GTK;System;Système;PackageManager;Gestionnaire de "
+"paquets;Discover;Découvrir;Flatpak;Software;Logiciel;Store;Magasin;Applis;Logithèque;"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:17
 msgid "New Window"
 msgstr "Nouvelle fenêtre"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:8
-msgid "Discover and install applications"
-msgstr "Découvrez et installez de nouvelles applications"
+msgid "Discover and manage applications"
+msgstr "Découvrez et gérez des applications"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:10
 msgid ""
-"A new app store for Linux with a focus on discovering and installing "
-"applications and addons from Flatpak remotes, particularly Flathub."
+"A fast and modern app store for Linux with a focus on discovering and "
+"installing Flatpak apps and addons, particularly from Flathub."
 msgstr ""
-"Une nouvelle logithèque pour Linux, focalisée sur la découverte et "
-"l’installation d’applications et d’extensions à partir de dépôts Flatpak "
-"distants, en particulier Flathub."
+"Une logithèque rapide et moderne pour Linux, spécialement conçue pour "
+"découvrir et installer des applications et des extensions Flatpak, notamment "
+"celles disponibles sur Flathub."
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:14
-msgid ""
-"It emphasizes supporting the developers who make the Linux desktop possible. "
-"Bazaar features a \"curated\" tab that can be configured by distributors to "
-"allow for a more localized experience."
-msgstr ""
-"Bazaar encourage activement à soutenir les développeurs qui rendent "
-"l’environnement de bureau Linux possible. Bazaar est doté d’un onglet "
-"« Sélection » qui peut être configuré par les distributeurs, pour une "
-"expérience personnalisée."
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:15
+msgid "Queue multiple installs and keep browsing"
+msgstr "Gérez plusieurs installations en même temps tout en naviguant"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:16
+msgid "Easily view app permissions"
+msgstr "Consultez facilement les autorisations des applications"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:17
+msgid "Sign in to Flathub to view and manage your favorites"
+msgstr "Connectez-vous à Flathub pour consulter et gérer vos favoris"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:18
+msgid "Search apps directly from GNOME Shell"
+msgstr "Recherchezz des applications directement depuis le Shell GNOME"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:30
 msgid "Adam Masciola"
 msgstr "Adam Masciola"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:54
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:55
 msgid "The home page displaying Flathub apps"
 msgstr "Page d’accueil affichant les applis de Flathub"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:58
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:59
 msgid "Exhibit app page"
 msgstr "Page de l’appli Exhibit"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:62
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:63
 msgid "Library page"
 msgstr "Page Bibliothèque"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:66
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:67
 msgid "Search page"
 msgstr "Page Recherche"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:70
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:71
 msgid "Category page"
 msgstr "Page Catégorie"
 
 #: src/bz-addons-dialog.blp:16 src/bz-full-view.blp:627
-#: src/bz-installed-tile.blp:156
+#: src/bz-installed-tile.blp:101
 msgid "Manage Add-Ons"
 msgstr "Gérer les extensions"
 
 #: src/bz-addons-dialog.c:94 src/bz-install-controls.blp:137
-#: src/bz-installed-tile.blp:131 src/bz-permission-entry-row.c:165
+#: src/bz-installed-tile.blp:114
 msgid "Remove"
 msgstr "Désinstaller"
 
@@ -491,14 +496,12 @@ msgid "%s • %s"
 msgstr "%s • %s"
 
 #: src/bz-all-apps-page.blp:13 src/bz-apps-page.blp:14 src/bz-full-view.blp:29
-#: src/bz-permissions-page.blp:15 src/bz-user-data-page.blp:15
-#: src/bz-window.blp:239
+#: src/bz-user-data-page.blp:15 src/bz-window.blp:239
 msgid "Main Menu"
 msgstr "Menu principal"
 
 #: src/bz-all-apps-page.blp:18 src/bz-apps-page.blp:18
-#: src/bz-permissions-page.blp:19 src/bz-user-data-page.blp:19
-#: src/bz-window.blp:328
+#: src/bz-user-data-page.blp:19 src/bz-window.blp:328
 msgid "_Donate to Bazaar ❤️"
 msgstr "_Faire un don à Bazaar ❤️"
 
@@ -508,8 +511,7 @@ msgid "_Refresh"
 msgstr "_Actualiser"
 
 #: src/bz-all-apps-page.blp:30 src/bz-apps-page.blp:30
-#: src/bz-permissions-page.blp:26 src/bz-user-data-page.blp:31
-#: src/bz-window.blp:340
+#: src/bz-user-data-page.blp:31 src/bz-window.blp:340
 msgid "_Preferences"
 msgstr "_Préférences"
 
@@ -524,20 +526,17 @@ msgid "_Manage Leftover User Data"
 msgstr "_Gérer les données utilisateurs orphelines"
 
 #: src/bz-all-apps-page.blp:46 src/bz-apps-page.blp:46
-#: src/bz-permissions-page.blp:31 src/bz-user-data-page.blp:47
-#: src/bz-window.blp:356
+#: src/bz-user-data-page.blp:47 src/bz-window.blp:356
 msgid "_Keyboard Shortcuts"
 msgstr "_Raccourcis clavier"
 
 #: src/bz-all-apps-page.blp:51 src/bz-apps-page.blp:51
-#: src/bz-permissions-page.blp:36 src/bz-user-data-page.blp:52
-#: src/bz-window.blp:361
+#: src/bz-user-data-page.blp:52 src/bz-window.blp:361
 msgid "_About Bazaar"
 msgstr "À _propos de Bazaar"
 
 #: src/bz-all-apps-page.blp:58 src/bz-apps-page.blp:58
-#: src/bz-permissions-page.blp:43 src/bz-user-data-page.blp:59
-#: src/bz-window.blp:368
+#: src/bz-user-data-page.blp:59 src/bz-window.blp:368
 msgid "_Quit Bazaar"
 msgstr "_Quitter Bazaar"
 
@@ -806,40 +805,40 @@ msgstr "Plus tard"
 msgid "Set Up Flathub"
 msgstr "Configurer Flathub"
 
-#: src/bz-application.c:1298
+#: src/bz-application.c:1301
 msgid "A backend error occurred"
 msgstr "Une erreur de backend est survenue"
 
-#: src/bz-application.c:1444 src/bz-application.c:3298 src/bz-window.blp:70
+#: src/bz-application.c:1447 src/bz-application.c:3301 src/bz-window.blp:70
 msgid "Refreshing…"
 msgstr "Actualisation…"
 
-#: src/bz-application.c:1597 src/bz-application.c:3296
+#: src/bz-application.c:1600 src/bz-application.c:3299
 #, c-format
 msgid "Loading %d apps…"
 msgstr "Chargement de %d applis…"
 
-#: src/bz-application.c:1601
+#: src/bz-application.c:1604
 msgid "Checking for updates…"
 msgstr "Recherche de mises à jour…"
 
-#: src/bz-application.c:1657
+#: src/bz-application.c:1660
 msgid "Failed to open .flatpakref"
 msgstr "Échec de l’ouverture du .flatpakref"
 
-#: src/bz-application.c:1713
+#: src/bz-application.c:1716
 msgid "An initialization error occurred"
 msgstr "Une erreur d'initialisation s'est produite"
 
-#: src/bz-application.c:2064
+#: src/bz-application.c:2067
 msgid "Failed to check for updates"
 msgstr "Échec de la vérification des mises à jour"
 
-#: src/bz-application.c:3069
+#: src/bz-application.c:3072
 msgid "Could not find app"
 msgstr "Impossible de trouver l'application"
 
-#: src/bz-application.c:3300
+#: src/bz-application.c:3303
 msgid "Writing to cache…"
 msgstr "Écriture dans le cache…"
 
@@ -958,8 +957,8 @@ msgstr ""
 #: src/bz-developer-badge.c:175
 #, c-format
 msgid ""
-"The ownership of the %1$s app ID has been verified by <b>%2$s</b> on <b>"
-"%3$s</b>."
+"The ownership of the %1$s app ID has been verified by <b>%2$s</b> on "
+"<b>%3$s</b>."
 msgstr ""
 "La propriété de l’identifiant applicatif %1$s a été vérifiée par <b>%2$s</b> "
 "sur <b>%3$s</b>."
@@ -1036,7 +1035,7 @@ msgid "all users"
 msgstr "tous les utilisateurs"
 
 #: src/bz-error.c:69 src/bz-error.c:88 src/bz-error-dialog.blp:36
-#: src/bz-safety-dialog.blp:64
+#: src/bz-safety-dialog.blp:50
 msgid "Details"
 msgstr "Détails"
 
@@ -1511,8 +1510,8 @@ msgstr "%.*f mil."
 
 #: src/bz-full-view.c:239
 #, c-format
-msgid "%d downloads in the last 30 days"
-msgstr "%d téléchargements ces 30 derniers jours"
+msgid "%d downloads in the last month"
+msgstr "%d téléchargements au cours du dernier mois"
 
 #: src/bz-full-view.c:251 src/bz-full-view.c:592 src/bz-full-view.c:609
 msgid "N/A"
@@ -1521,7 +1520,7 @@ msgstr "Inconnu"
 #: src/bz-full-view.c:279
 #, c-format
 msgid "+%s runtime"
-msgstr "+%s environnement(s) d’exécution"
+msgstr "+%s d'environnement d’exécution"
 
 #: src/bz-full-view.c:282
 msgid "Download"
@@ -1805,18 +1804,6 @@ msgstr "Mettre à jour"
 msgid "Stopped Receiving Updates"
 msgstr "Ne reçoit plus de mises à jour"
 
-#: src/bz-installed-tile.blp:102
-msgid "Manage Permissions"
-msgstr "Gérer autorisation"
-
-#: src/bz-installed-tile.blp:116
-msgid "Show Other Options…"
-msgstr "Montrer des options supplémentaires"
-
-#: src/bz-installed-tile.blp:161 src/bz-safety-dialog.blp:57
-msgid "Edit Permissions"
-msgstr "Modifier les autorisations"
-
 #: src/bz-library-page.blp:31
 msgid "Search installed apps"
 msgstr "Rechercher des applis installées"
@@ -1839,7 +1826,7 @@ msgstr "Bibliothèque"
 msgid "Pending Updates"
 msgstr "Mises à jour en attente"
 
-#: src/bz-library-page.blp:153 src/bz-permissions-page.blp:279
+#: src/bz-library-page.blp:153
 msgid "Downloads"
 msgstr "Téléchargements"
 
@@ -1851,16 +1838,28 @@ msgstr "Désinstallées récemment"
 msgid "Clear Finished Tasks"
 msgstr "Effacer les tâches effectuées"
 
-#: src/bz-library-page.blp:258
+#: src/bz-library-page.blp:260
 msgid "Installed Apps"
 msgstr "Applis installées"
 
-#: src/bz-library-page.c:175
+#: src/bz-library-page.blp:333
+msgid "Sort By"
+msgstr "Trier par"
+
+#: src/bz-library-page.blp:347
+msgid "Name"
+msgstr "Nom"
+
+#: src/bz-library-page.blp:353
+msgid "Size"
+msgstr "Taille"
+
+#: src/bz-library-page.c:180
 #, c-format
 msgid "No matches found for \"%s\" in the list of installed apps"
 msgstr "Aucune application installée ne correspond à « %s »"
 
-#: src/bz-library-page.c:188 src/bz-updates-card.c:257
+#: src/bz-library-page.c:193 src/bz-updates-card.c:257
 #, c-format
 msgid "%u Available Update"
 msgid_plural "%u Available Updates"
@@ -1955,366 +1954,6 @@ msgstr "Terminer"
 #, c-format
 msgid "Hello, %s!"
 msgstr "Bonjour, %s !"
-
-#: src/bz-permission-entry-row.blp:13
-msgid "Reset to defaults"
-msgstr "Réinitialiser"
-
-#: src/bz-permission-entry-row.blp:32
-msgid "New Entry"
-msgstr "Nouvelle entrée"
-
-#: src/bz-permission-entry-row.c:158
-msgid "Invalid Format"
-msgstr "Format invalide"
-
-#: src/bz-permission-toggle-row.blp:13
-msgid "Reset to default"
-msgstr "Réinitialiser"
-
-#: src/bz-permissions-page.blp:5
-msgid "Permissions"
-msgstr "Autorisations"
-
-#: src/bz-permissions-page.blp:54
-msgid ""
-"Modifying permissions may cause apps to break or be less secure. Do not make "
-"bug reports with them modified!"
-msgstr ""
-"Modifier les autorisations peut casser les applis ou les rendre moins "
-"sécurisées.\n"
-"N'envoyez pas de rapports de bogues si ces autorisations ont été modifiées !"
-
-#: src/bz-permissions-page.blp:56
-msgid "OK"
-msgstr "OK"
-
-#: src/bz-permissions-page.blp:135 src/bz-transaction-tile.blp:272
-msgid "Open"
-msgstr "Ouvrir"
-
-#: src/bz-permissions-page.blp:143
-msgid "Reset"
-msgstr "Réinitialiser"
-
-#: src/bz-permissions-page.blp:162
-msgid "General"
-msgstr "Général"
-
-#: src/bz-permissions-page.blp:168
-msgid "Network"
-msgstr "Réseau"
-
-#: src/bz-permissions-page.blp:169
-msgid "Share the host's network access"
-msgstr "Autorise l'accès au réseau"
-
-#: src/bz-permissions-page.blp:175
-msgid "Audio Server"
-msgstr "Audio"
-
-#: src/bz-permissions-page.blp:176
-msgid ""
-"Play and record sound, enabling this bypasses the individual permissions"
-msgstr ""
-"Autorise la lecture ou l'enregistrement de fichiers audio\n"
-"(l'activer prend le dessus sur les autorisations individuelles)"
-
-#: src/bz-permissions-page.blp:182
-msgid "Bluetooth"
-msgstr "Bluetooth"
-
-#: src/bz-permissions-page.blp:183
-msgid "Manage both Bluetooth devices and settings"
-msgstr "Autorise la gestion des paramètres et des appareils Bluetooth"
-
-#: src/bz-permissions-page.blp:189
-msgid "Printing"
-msgstr "Imprimantes"
-
-#: src/bz-permissions-page.blp:190
-msgid "Access the system's printing system"
-msgstr "Accorde l'accès au système d'impression de l'hôte"
-
-#: src/bz-permissions-page.blp:197
-msgid "Devices"
-msgstr "Appareils"
-
-#: src/bz-permissions-page.blp:203
-msgid "Smart Cards"
-msgstr "Cartes à puce"
-
-#: src/bz-permissions-page.blp:204
-msgid "Access smart card readers via PC/SC"
-msgstr "Accorde l'accès aux lecteurs de cartes à puce avec PC/SC"
-
-#: src/bz-permissions-page.blp:210
-msgid "All Devices"
-msgstr "Tous les périphériques"
-
-#: src/bz-permissions-page.blp:211
-msgid "Access all devices such as webcam, GPU, etc."
-msgstr ""
-"Accorde l'accès à des périphériques tels que des webcams ou des manettes de "
-"jeu"
-
-#: src/bz-permissions-page.blp:217
-msgid "GPU Acceleration"
-msgstr "Accélération GPU"
-
-#: src/bz-permissions-page.blp:219
-msgid "Access GPU rendering"
-msgstr "Accorde l'accès au rendu de la carte graphique"
-
-#: src/bz-permissions-page.blp:225
-msgid "USB Devices"
-msgstr "Périphériques USB"
-
-#: src/bz-permissions-page.blp:227
-msgid "Manage USB devices directly"
-msgstr "Autorise la gestion directe des périphériques USB"
-
-#: src/bz-permissions-page.blp:233
-msgid "Input Devices"
-msgstr "Périphériques d’entrée"
-
-#: src/bz-permissions-page.blp:235
-msgid "Access Input devices"
-msgstr "Accorde l'accès aux périphériques d’entrée"
-
-#: src/bz-permissions-page.blp:241
-msgid "KVM Virtualization"
-msgstr "Virtualisation"
-
-#: src/bz-permissions-page.blp:243
-msgid "Access KVM for virtual machines"
-msgstr "Accorde l'accès à KVM pour les machines virtuelles"
-
-#: src/bz-permissions-page.blp:249
-msgid "Shared Memory"
-msgstr "Mémoire partagée"
-
-#: src/bz-permissions-page.blp:251
-msgid "Create shared memory objects"
-msgstr "Permet de créer des objets de mémoire partagée"
-
-#: src/bz-permissions-page.blp:258
-msgid "Filesystem"
-msgstr "Système de fichiers"
-
-#: src/bz-permissions-page.blp:264
-msgid "Host Filesystem"
-msgstr "Système de fichiers de l'hôte"
-
-#: src/bz-permissions-page.blp:265
-msgid "Full access to the entire filesystem"
-msgstr "Accorde un accès complet à l'ensemble des fichiers du système"
-
-#: src/bz-permissions-page.blp:271
-msgid "Home Folder"
-msgstr "Dossier Personnel"
-
-#: src/bz-permissions-page.blp:273
-msgid "Full access to your home directory"
-msgstr "Accorde un accès complet à l'ensemble de votre dossier personnel"
-
-#: src/bz-permissions-page.blp:281
-msgid "Access the Downloads folder"
-msgstr "Accorde l'accès au dossier « Téléchargements »"
-
-#: src/bz-permissions-page.blp:287
-msgid "Other Paths"
-msgstr "Autres chemins"
-
-#: src/bz-permissions-page.blp:289
-msgid "Grant access to additional files and folders"
-msgstr "Accorde l'accès à d'autres fichiers et dossiers"
-
-#: src/bz-permissions-page.blp:305
-msgid "Advanced System Access"
-msgstr "Accès avancé au système"
-
-#: src/bz-permissions-page.blp:309
-msgid "Inter-process Communication"
-msgstr "Communication interprocessus"
-
-#: src/bz-permissions-page.blp:310
-msgid "Share IPC namespace with the host"
-msgstr "Permet de partager l'espace de noms IPC avec l'hôte"
-
-#: src/bz-permissions-page.blp:316
-msgid "SSH Authentication"
-msgstr "Authentification SSH"
-
-#: src/bz-permissions-page.blp:317
-msgid "Access the SSH authentication agent"
-msgstr "Accorde l'accès à l'agent d'authentification SSH"
-
-#: src/bz-permissions-page.blp:323
-msgid "GPG Agent"
-msgstr "Agent GPG"
-
-#: src/bz-permissions-page.blp:324
-msgid "Access the GPG agent for things like encryption and git commit signing"
-msgstr ""
-"Accorde l'accès à l'agent GPG pour des opérations telles que le chiffrement "
-"et la signature des commits Git"
-
-#: src/bz-permissions-page.blp:331
-msgid "Session Bus Policy"
-msgstr "Règles relatives au bus de session"
-
-#: src/bz-permissions-page.blp:334 src/bz-permissions-page.blp:356
-msgid "Full Access"
-msgstr "Accès complet"
-
-#: src/bz-permissions-page.blp:335
-msgid "Give full access to the D-Bus session bus"
-msgstr "Accorde un accès complet au bus de session D-Bus"
-
-#: src/bz-permissions-page.blp:340 src/bz-permissions-page.blp:362
-msgid "Talk"
-msgstr "Communique sur…"
-
-#: src/bz-permissions-page.blp:341
-msgid "Names on the session bus the app is allowed to send messages to"
-msgstr ""
-"Noms des destinataires sur le bus de session auxquels l'application peut "
-"envoyer des messages"
-
-#: src/bz-permissions-page.blp:345 src/bz-permissions-page.blp:367
-msgid "Own"
-msgstr "Possède…"
-
-#: src/bz-permissions-page.blp:346
-msgid "Names on the session bus the app is allowed to claim ownership of"
-msgstr ""
-"Noms sur le bus de session dont l'application peut revendiquer la propriété"
-
-#: src/bz-permissions-page.blp:352
-msgid "System Bus Policy"
-msgstr "Règles relatives au bus système"
-
-#: src/bz-permissions-page.blp:357
-msgid "Give full access to the D-Bus system bus"
-msgstr "Accorde un accès complet au bus système D-Bus"
-
-#: src/bz-permissions-page.blp:363
-msgid "Names on the system bus the app is allowed to send messages to"
-msgstr ""
-"Noms des destinataires sur le bus système auxquels l'application peut "
-"envoyer des messages"
-
-#: src/bz-permissions-page.blp:368
-msgid "Names on the system bus the app is allowed to claim ownership of"
-msgstr ""
-"Noms sur le bus système dont l'application peut revendiquer la propriété"
-
-#: src/bz-permissions-page.blp:374
-msgid "Developer Options"
-msgstr "Options pour les développeurs"
-
-#: src/bz-permissions-page.blp:379
-msgid "Wayland Windowing System"
-msgstr "Système de fenêtrage Wayland"
-
-#: src/bz-permissions-page.blp:380
-msgid "Show windows using Wayland"
-msgstr "Affiche les fenêtres en utilisant Wayland"
-
-#: src/bz-permissions-page.blp:386
-msgid "X11 Windowing System"
-msgstr "Système de fenêtrage X11"
-
-#: src/bz-permissions-page.blp:387
-msgid "Show windows using X11"
-msgstr "Affiche les fenêtres en utilisant X11"
-
-#: src/bz-permissions-page.blp:393
-msgid "Fallback X11 Windowing System"
-msgstr "Système de fenêtrage X11 de secours"
-
-#: src/bz-permissions-page.blp:394
-msgid "Show windows using X11 if Wayland is not available"
-msgstr "Affiche les fenêtres en utilisant X11 si Wayland n'est pas disponible"
-
-#: src/bz-permissions-page.blp:400
-msgid "Development Syscalls"
-msgstr "Appels système de développement"
-
-#: src/bz-permissions-page.blp:401
-msgid "Access development syscalls such as ptrace"
-msgstr "Accorde l'accès aux appels système de développement tels que ptrace"
-
-#: src/bz-permissions-page.blp:407
-msgid "Multiarch"
-msgstr "Multi-architecture"
-
-#: src/bz-permissions-page.blp:408
-msgid "Run multiarch / multilib binaries"
-msgstr "Permet d'exécuter des binaires multiarch / multilib"
-
-#: src/bz-permissions-page.blp:414
-msgid "CAN Bus"
-msgstr "Bus de données CAN"
-
-#: src/bz-permissions-page.blp:415
-msgid "Access the CAN bus"
-msgstr "Accorde l'accès au bus CAN"
-
-#: src/bz-permissions-page.blp:421
-msgid "Per-App Shared Memory"
-msgstr "Mémoire partagée par application"
-
-#: src/bz-permissions-page.blp:422
-msgid "Share <tt>/dev/shm</tt> between app instances &amp; subsandboxes"
-msgstr ""
-"Permet de partager <tt>/dev/shm</tt> entre les instances d'application et "
-"les sous-sandboxes"
-
-#: src/bz-permissions-page.blp:428
-msgid "Variables"
-msgstr "Variables"
-
-#: src/bz-permissions-page.blp:429
-msgid "Environment variables to set in the application"
-msgstr "Variables d'environnement exportées vers l'application"
-
-#: src/bz-permissions-page.c:781
-msgid "Permissions reset!"
-msgstr "Les autorisations ont été réinitialisées !"
-
-#: src/bz-permissions-page.c:808
-msgid "Hide Developer Options"
-msgstr "Cacher les options pour les développeurs"
-
-#: src/bz-permissions-page.c:808
-msgid "Show Developer Options"
-msgstr "Afficher les options pour les développeurs"
-
-#: src/bz-portal-permissions.c:41
-msgid "Background"
-msgstr "Arrière-plan"
-
-#: src/bz-portal-permissions.c:42
-msgid "Notifications"
-msgstr "Notifications"
-
-#: src/bz-portal-permissions.c:43
-msgid "Speakers"
-msgstr "Haut-parleurs"
-
-#: src/bz-portal-permissions.c:44
-msgid "Camera"
-msgstr "Caméra"
-
-#: src/bz-portal-permissions.c:45
-msgid "Location"
-msgstr "Emplacement"
-
-#: src/bz-portal-permissions.c:46
-msgid "Microphone"
-msgstr "Microphone"
 
 #: src/bz-preferences-dialog.blp:19
 msgid "Preferences"
@@ -2855,19 +2494,19 @@ msgstr "Peut interagir avec les appareils connectés avec KDE Connect"
 msgid "Safety"
 msgstr "Sécurité"
 
-#: src/bz-safety-dialog.blp:67
+#: src/bz-safety-dialog.blp:53
 msgid "License"
 msgstr "Licence"
 
-#: src/bz-safety-dialog.blp:77
+#: src/bz-safety-dialog.blp:63
 msgid "App ID"
 msgstr "Identifiant applicatif"
 
-#: src/bz-safety-dialog.blp:87
+#: src/bz-safety-dialog.blp:73
 msgid "SDK"
 msgstr "Plateforme logicielle"
 
-#: src/bz-safety-dialog.blp:118
+#: src/bz-safety-dialog.blp:104
 msgid ""
 "This app uses an outdated version of the software platform (SDK) and might "
 "contain bugs or security vulnerabilities which will not be fixed."
@@ -2876,27 +2515,27 @@ msgstr ""
 "(SDK) et peut contenir des bogues ou des failles de sécurité qui ne seront "
 "pas corrigés."
 
-#: src/bz-safety-dialog.c:230
+#: src/bz-safety-dialog.c:227
 #, c-format
 msgid "%s is Safe"
 msgstr "%s est sûr"
 
-#: src/bz-safety-dialog.c:235
+#: src/bz-safety-dialog.c:232
 #, c-format
 msgid "%s has no Unsafe Permissions"
 msgstr "%s n’a pas d’autorisations à risque"
 
-#: src/bz-safety-dialog.c:240
+#: src/bz-safety-dialog.c:237
 #, c-format
 msgid "%s is Probably Safe"
 msgstr "%s est probablement sûr"
 
-#: src/bz-safety-dialog.c:245
+#: src/bz-safety-dialog.c:242
 #, c-format
 msgid "%s is Possibly Unsafe"
 msgstr "%s pourrait ne pas être sûr"
 
-#: src/bz-safety-dialog.c:250
+#: src/bz-safety-dialog.c:247
 #, c-format
 msgid "%s is Unsafe"
 msgstr "%s n’est pas sûr"
@@ -3265,6 +2904,10 @@ msgstr "Terminé"
 msgid "Error"
 msgstr "Erreur"
 
+#: src/bz-transaction-tile.blp:272
+msgid "Open"
+msgstr "Ouvrir"
+
 #: src/bz-transaction-tile.blp:286
 msgid "Cancel Transaction"
 msgstr "Annuler la tâche"
@@ -3351,24 +2994,24 @@ msgid "Log Out"
 msgstr "Se déconnecter"
 
 #. Translators: %s is the title of the current page
-#: src/bz-window.c:375
+#: src/bz-window.c:380
 #, c-format
 msgid "Bazaar — %s"
 msgstr "Bazaar — %s"
 
-#: src/bz-window.c:482
+#: src/bz-window.c:487
 msgid "Failed to load add-ons"
 msgstr "Échec du chargement des modules complémentaires"
 
-#: src/bz-window.c:596 src/bz-window.c:613
+#: src/bz-window.c:601 src/bz-window.c:618
 msgid "Failed to launch application"
 msgstr "Échec du lancement de l'application"
 
-#: src/bz-window.c:834
+#: src/bz-window.c:823
 msgid "You can't remove Bazaar from Bazaar!"
 msgstr "Vous ne pouvez supprimer Bazaar depuis Bazaar !"
 
-#: src/bz-window.c:1126 src/bz-window.c:1160
+#: src/bz-window.c:1115 src/bz-window.c:1149
 msgid "Can't do that right now!"
 msgstr "Impossible de faire ceci pour le moment !"
 
