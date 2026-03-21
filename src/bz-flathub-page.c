@@ -70,9 +70,6 @@ invalidating_state_changed (BzFlathubPage *self,
                             GParamSpec    *pspec,
                             BzStateInfo   *info);
 
-static void
-check_online (BzFlathubPage *self);
-
 static gboolean
 invert_boolean (gpointer object,
                 gboolean value)
@@ -307,12 +304,17 @@ bz_flathub_page_set_state (BzFlathubPage *self,
           self);
       g_signal_connect_swapped (
           state,
+          "notify::has-flathub",
+          G_CALLBACK (invalidating_state_changed),
+          self);
+      g_signal_connect_swapped (
+          state,
           "notify::online",
           G_CALLBACK (invalidating_state_changed),
           self);
     }
 
-  check_online (self);
+  invalidating_state_changed (self, NULL, state);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_STATE]);
 }
@@ -360,21 +362,22 @@ invalidating_state_changed (BzFlathubPage *self,
                             GParamSpec    *pspec,
                             BzStateInfo   *info)
 {
-  check_online (self);
-}
-
-static void
-check_online (BzFlathubPage *self)
-{
-  BzFlathubState *flathub = NULL;
-  const char     *page    = NULL;
+  BzFlathubState *flathub  = NULL;
+  gboolean        has_repo = FALSE;
+  const char     *page     = NULL;
 
   if (self->state != NULL)
-    flathub = bz_state_info_get_flathub (self->state);
-  if (flathub != NULL)
-    page = "content";
-  else
-    page = "offline";
+    {
+      flathub  = bz_state_info_get_flathub (self->state);
+      has_repo = bz_state_info_get_has_flathub (self->state);
+    }
+
+  if (flathub != NULL && has_repo)
+      page = "content";
+    else if (!has_repo)
+      page = "empty";
+    else
+      page = "offline";
 
   adw_view_stack_set_visible_child_name (self->stack, page);
 }

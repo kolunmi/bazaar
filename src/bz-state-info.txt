@@ -41,6 +41,7 @@ property=disable_blocklists gboolean G_TYPE_BOOLEAN boolean
 property=donation_prompt_dismissed gboolean G_TYPE_BOOLEAN boolean
 property=entry_factory BzApplicationMapFactory BZ_TYPE_APPLICATION_MAP_FACTORY object
 property=flathub BzFlathubState BZ_TYPE_FLATHUB_STATE object
+property=has_flathub gboolean G_TYPE_BOOLEAN boolean
 property=have_connection gboolean G_TYPE_BOOLEAN boolean
 property=hide_eol gboolean G_TYPE_BOOLEAN boolean
 property=internal_config BzInternalConfig BZ_TYPE_INTERNAL_CONFIG object
