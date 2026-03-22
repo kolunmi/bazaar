@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-19 23:04+0100\n"
-"PO-Revision-Date: 2026-03-20 09:56+0100\n"
+"POT-Creation-Date: 2026-03-21 20:02+0100\n"
+"PO-Revision-Date: 2026-03-22 02:46+0100\n"
 "Last-Translator: Daniel Rusek <mail@asciiwolf.com>\n"
 "Language-Team: Czech\n"
 "Language: cs\n"
@@ -23,7 +23,7 @@ msgstr ""
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:2
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:46
-#: src/bz-window.c:378 src/bz-window.c:379
+#: src/bz-window.c:377 src/bz-window.c:378
 msgid "Bazaar"
 msgstr "Bazaar"
 
@@ -58,8 +58,8 @@ msgid "Queue multiple installs and keep browsing"
 msgstr "Zařaďte více instalací do fronty a pokračujte v prohlížení"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:16
-msgid "Easily view and edit app permissions"
-msgstr "Jednoduše si zobrazte a upravujte oprávnění aplikací"
+msgid "Easily view app permissions"
+msgstr "Jednoduše si zobrazte oprávnění aplikací"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:17
 msgid "Sign in to Flathub to view and manage your favorites"
@@ -94,17 +94,13 @@ msgstr "Stránka hledání"
 msgid "Category page"
 msgstr "Stránka kategorií"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:75
-msgid "Fractal permissions page"
-msgstr "Stránka oprávnění aplikace Fractal"
-
 #: src/bz-addons-dialog.blp:16 src/bz-full-view.blp:627
-#: src/bz-installed-tile.blp:101 src/bz-installed-tile.blp:161
+#: src/bz-installed-tile.blp:101
 msgid "Manage Add-Ons"
 msgstr "Spravovat doplňky"
 
 #: src/bz-addons-dialog.c:94 src/bz-install-controls.blp:137
-#: src/bz-installed-tile.blp:139 src/bz-permission-entry-row.c:164
+#: src/bz-installed-tile.blp:114
 msgid "Remove"
 msgstr "Odebrat"
 
@@ -488,14 +484,12 @@ msgid "%s • %s"
 msgstr "%s • %s"
 
 #: src/bz-all-apps-page.blp:13 src/bz-apps-page.blp:14 src/bz-full-view.blp:29
-#: src/bz-permissions-page.blp:15 src/bz-user-data-page.blp:15
-#: src/bz-window.blp:239
+#: src/bz-user-data-page.blp:15 src/bz-window.blp:239
 msgid "Main Menu"
 msgstr "Hlavní nabídka"
 
 #: src/bz-all-apps-page.blp:18 src/bz-apps-page.blp:18
-#: src/bz-permissions-page.blp:19 src/bz-user-data-page.blp:19
-#: src/bz-window.blp:328
+#: src/bz-user-data-page.blp:19 src/bz-window.blp:328
 msgid "_Donate to Bazaar ❤️"
 msgstr "Po_dpořit Bazaar ❤️"
 
@@ -505,8 +499,7 @@ msgid "_Refresh"
 msgstr "_Obnovit"
 
 #: src/bz-all-apps-page.blp:30 src/bz-apps-page.blp:30
-#: src/bz-permissions-page.blp:26 src/bz-user-data-page.blp:31
-#: src/bz-window.blp:340
+#: src/bz-user-data-page.blp:31 src/bz-window.blp:340
 msgid "_Preferences"
 msgstr "_Předvolby"
 
@@ -521,20 +514,17 @@ msgid "_Manage Leftover User Data"
 msgstr "Sp_ravovat zbylá uživatelská data"
 
 #: src/bz-all-apps-page.blp:46 src/bz-apps-page.blp:46
-#: src/bz-permissions-page.blp:31 src/bz-user-data-page.blp:47
-#: src/bz-window.blp:356
+#: src/bz-user-data-page.blp:47 src/bz-window.blp:356
 msgid "_Keyboard Shortcuts"
 msgstr "_Klávesové zkratky"
 
 #: src/bz-all-apps-page.blp:51 src/bz-apps-page.blp:51
-#: src/bz-permissions-page.blp:36 src/bz-user-data-page.blp:52
-#: src/bz-window.blp:361
+#: src/bz-user-data-page.blp:52 src/bz-window.blp:361
 msgid "_About Bazaar"
 msgstr "O _aplikaci Bazaar"
 
 #: src/bz-all-apps-page.blp:58 src/bz-apps-page.blp:58
-#: src/bz-permissions-page.blp:43 src/bz-user-data-page.blp:59
-#: src/bz-window.blp:368
+#: src/bz-user-data-page.blp:59 src/bz-window.blp:368
 msgid "_Quit Bazaar"
 msgstr "_Ukončit Bazaar"
 
@@ -802,40 +792,40 @@ msgstr "Později"
 msgid "Set Up Flathub"
 msgstr "Nastavit Flathub"
 
-#: src/bz-application.c:1298
+#: src/bz-application.c:1301
 msgid "A backend error occurred"
 msgstr "Došlo k chybě backendu"
 
-#: src/bz-application.c:1444 src/bz-application.c:3298 src/bz-window.blp:70
+#: src/bz-application.c:1447 src/bz-application.c:3301 src/bz-window.blp:70
 msgid "Refreshing…"
 msgstr "Obnovuje se…"
 
-#: src/bz-application.c:1597 src/bz-application.c:3296
+#: src/bz-application.c:1600 src/bz-application.c:3299
 #, c-format
 msgid "Loading %d apps…"
 msgstr "Načítá se %d aplikací…"
 
-#: src/bz-application.c:1601
+#: src/bz-application.c:1604
 msgid "Checking for updates…"
 msgstr "Kontrolují se aktualizace…"
 
-#: src/bz-application.c:1657
+#: src/bz-application.c:1660
 msgid "Failed to open .flatpakref"
 msgstr "Nezdařilo se otevřít soubor .flatpakref"
 
-#: src/bz-application.c:1713
+#: src/bz-application.c:1716
 msgid "An initialization error occurred"
 msgstr "Došlo k chybě inicializace"
 
-#: src/bz-application.c:2064
+#: src/bz-application.c:2067
 msgid "Failed to check for updates"
 msgstr "Nezdařilo se zkontrolovat aktualizace"
 
-#: src/bz-application.c:3069
+#: src/bz-application.c:3072
 msgid "Could not find app"
 msgstr "Nezdařilo se najít aplikaci"
 
-#: src/bz-application.c:3300
+#: src/bz-application.c:3303
 msgid "Writing to cache…"
 msgstr "Zapisuje se do mezipaměti…"
 
@@ -1027,7 +1017,7 @@ msgid "all users"
 msgstr "všichni uživatelé"
 
 #: src/bz-error.c:69 src/bz-error.c:88 src/bz-error-dialog.blp:36
-#: src/bz-safety-dialog.blp:64
+#: src/bz-safety-dialog.blp:50
 msgid "Details"
 msgstr "Podrobnosti"
 
@@ -1501,8 +1491,8 @@ msgstr "%.*f tis."
 
 #: src/bz-full-view.c:239
 #, c-format
-msgid "%d downloads in the last 30 days"
-msgstr "%d stažení za posledních 30 dní"
+msgid "%d downloads in the last month"
+msgstr "%d stažení za poslední měsíc"
 
 #: src/bz-full-view.c:251 src/bz-full-view.c:592 src/bz-full-view.c:609
 msgid "N/A"
@@ -1797,18 +1787,6 @@ msgstr "Aktualizovat"
 msgid "Stopped Receiving Updates"
 msgstr "Příjem aktualizací zastaven"
 
-#: src/bz-installed-tile.blp:114
-msgid "Manage Permissions"
-msgstr "Spravovat oprávnění"
-
-#: src/bz-installed-tile.blp:125
-msgid "Show Other Options…"
-msgstr "Zobrazit další možnosti…"
-
-#: src/bz-installed-tile.blp:166 src/bz-safety-dialog.blp:57
-msgid "Edit Permissions"
-msgstr "Upravit oprávnění"
-
 #: src/bz-library-page.blp:31
 msgid "Search installed apps"
 msgstr "hledat nainstalované aplikace"
@@ -1830,7 +1808,7 @@ msgstr "Knihovna"
 msgid "Pending Updates"
 msgstr "Čekající aktualizace"
 
-#: src/bz-library-page.blp:153 src/bz-permissions-page.blp:280
+#: src/bz-library-page.blp:153
 msgid "Downloads"
 msgstr "Stažení"
 
@@ -1842,16 +1820,28 @@ msgstr "Nedávno odinstalované"
 msgid "Clear Finished Tasks"
 msgstr "Vymazat dokončené úlohy"
 
-#: src/bz-library-page.blp:258
+#: src/bz-library-page.blp:260
 msgid "Installed Apps"
 msgstr "Nainstalované aplikace"
 
-#: src/bz-library-page.c:175
+#: src/bz-library-page.blp:333
+msgid "Sort By"
+msgstr "Řadit podle"
+
+#: src/bz-library-page.blp:347
+msgid "Name"
+msgstr "Název"
+
+#: src/bz-library-page.blp:353
+msgid "Size"
+msgstr "Velikost"
+
+#: src/bz-library-page.c:180
 #, c-format
 msgid "No matches found for \"%s\" in the list of installed apps"
 msgstr "Žádné shody pro výraz „%s“ v seznamu nainstalovaných aplikací"
 
-#: src/bz-library-page.c:188 src/bz-updates-card.c:257
+#: src/bz-library-page.c:193 src/bz-updates-card.c:257
 #, c-format
 msgid "%u Available Update"
 msgid_plural "%u Available Updates"
@@ -1944,358 +1934,6 @@ msgstr "Dokončit"
 #, c-format
 msgid "Hello, %s!"
 msgstr "Ahoj, %s!"
-
-#: src/bz-permission-entry-row.blp:13
-msgid "Reset to defaults"
-msgstr "Vrátit na výchozí"
-
-#: src/bz-permission-entry-row.blp:32
-msgid "New Entry"
-msgstr "Nová položka"
-
-#: src/bz-permission-entry-row.c:158
-msgid "Invalid Format"
-msgstr "Neplatný formát"
-
-#: src/bz-permission-toggle-row.blp:13
-msgid "Reset to default"
-msgstr "Vrátit na výchozí"
-
-#: src/bz-permissions-page.blp:5
-msgid "Permissions"
-msgstr "Oprávnění"
-
-#: src/bz-permissions-page.blp:54
-msgid ""
-"Modifying permissions may cause apps to break or be less secure. Do not make "
-"bug reports with them modified!"
-msgstr ""
-"Úprava oprávnění může způsobit selhání aplikací nebo snížení jejich "
-"bezpečnosti. Neohlašujte chyby, pokud jsou oprávnění upravena!"
-
-#: src/bz-permissions-page.blp:56
-msgid "OK"
-msgstr "Budiž"
-
-#: src/bz-permissions-page.blp:136 src/bz-transaction-tile.blp:272
-msgid "Open"
-msgstr "Otevřít"
-
-#: src/bz-permissions-page.blp:144
-msgid "Reset"
-msgstr "Výchozí"
-
-#: src/bz-permissions-page.blp:163
-msgid "General"
-msgstr "Obecné"
-
-#: src/bz-permissions-page.blp:169
-msgid "Network"
-msgstr "Síť"
-
-#: src/bz-permissions-page.blp:170
-msgid "Share the host's network access"
-msgstr "Sdílení síťového přístupu hostitele"
-
-#: src/bz-permissions-page.blp:176
-msgid "Audio Server"
-msgstr "Zvukový server"
-
-#: src/bz-permissions-page.blp:177
-msgid ""
-"Play and record sound, enabling this bypasses the individual permissions"
-msgstr "Přehrávání a nahrávání zvuku, obchází individuální oprávnění"
-
-#: src/bz-permissions-page.blp:183
-msgid "Bluetooth"
-msgstr "Bluetooth"
-
-#: src/bz-permissions-page.blp:184
-msgid "Manage both Bluetooth devices and settings"
-msgstr "Správa nastavení a zařízení Bluetooth"
-
-#: src/bz-permissions-page.blp:190
-msgid "Printing"
-msgstr "Tisk"
-
-#: src/bz-permissions-page.blp:191
-msgid "Access the system's printing system"
-msgstr "Přístup k tiskovému systému"
-
-#: src/bz-permissions-page.blp:198
-msgid "Devices"
-msgstr "Zařízení"
-
-#: src/bz-permissions-page.blp:204
-msgid "Smart Cards"
-msgstr "Čipové karty"
-
-#: src/bz-permissions-page.blp:205
-msgid "Access smart card readers via PC/SC"
-msgstr "Přístup ke čtečkám čipových karet přes PC/SC"
-
-#: src/bz-permissions-page.blp:211
-msgid "All Devices"
-msgstr "Všechna zařízení"
-
-#: src/bz-permissions-page.blp:212
-msgid "Access all devices such as webcam, GPU, etc."
-msgstr "Přístup ke všem zařízením jako jsou webkamera, grafická karta atd."
-
-#: src/bz-permissions-page.blp:218
-msgid "GPU Acceleration"
-msgstr "Akcelerace GPU"
-
-#: src/bz-permissions-page.blp:220
-msgid "Access GPU rendering"
-msgstr "Přístup k vykreslování na GPU"
-
-#: src/bz-permissions-page.blp:226
-msgid "USB Devices"
-msgstr "Zařízení USB"
-
-#: src/bz-permissions-page.blp:228
-msgid "Manage USB devices directly"
-msgstr "Přímá správa zařízení USB"
-
-#: src/bz-permissions-page.blp:234
-msgid "Input Devices"
-msgstr "Vstupní zařízení"
-
-#: src/bz-permissions-page.blp:236
-msgid "Access Input devices"
-msgstr "Přístup ke vstupním zařízením"
-
-#: src/bz-permissions-page.blp:242
-msgid "KVM Virtualization"
-msgstr "Virtualizace KVM"
-
-#: src/bz-permissions-page.blp:244
-msgid "Access KVM for virtual machines"
-msgstr "Přístup k KVM pro virtuální stroje"
-
-#: src/bz-permissions-page.blp:250
-msgid "Shared Memory"
-msgstr "Sdílená paměť"
-
-#: src/bz-permissions-page.blp:252
-msgid "Create shared memory objects"
-msgstr "Vytváření objektů sdílené paměti"
-
-#: src/bz-permissions-page.blp:259
-msgid "Filesystem"
-msgstr "Souborový systém"
-
-#: src/bz-permissions-page.blp:265
-msgid "Host Filesystem"
-msgstr "Souborový systém hostitele"
-
-#: src/bz-permissions-page.blp:266
-msgid "Full access to the entire filesystem"
-msgstr "Plný přístup k celému souborovému systému"
-
-#: src/bz-permissions-page.blp:272
-msgid "Home Folder"
-msgstr "Domovská složka"
-
-#: src/bz-permissions-page.blp:274
-msgid "Full access to your home directory"
-msgstr "Plný přístup k vaší domovské složce"
-
-#: src/bz-permissions-page.blp:282
-msgid "Access the Downloads folder"
-msgstr "Přístup ke složce Stažené"
-
-#: src/bz-permissions-page.blp:288
-msgid "Other Paths"
-msgstr "Další cesty"
-
-#: src/bz-permissions-page.blp:290
-msgid "Grant access to additional files and folders"
-msgstr "Udělit přístup k dalším souborům a složkám"
-
-#: src/bz-permissions-page.blp:306
-msgid "Advanced System Access"
-msgstr "Pokročilý přístup k systému"
-
-#: src/bz-permissions-page.blp:310
-msgid "Inter-process Communication"
-msgstr "Meziprocesová komunikace"
-
-#: src/bz-permissions-page.blp:311
-msgid "Share IPC namespace with the host"
-msgstr "Sdílení jmenného prostoru IPC s hostitelem"
-
-#: src/bz-permissions-page.blp:317
-msgid "SSH Authentication"
-msgstr "Ověřování SSH"
-
-#: src/bz-permissions-page.blp:318
-msgid "Access the SSH authentication agent"
-msgstr "Přístup k ověřovacímu agentu SSH"
-
-#: src/bz-permissions-page.blp:324
-msgid "GPG Agent"
-msgstr "Agent GPG"
-
-#: src/bz-permissions-page.blp:325
-msgid "Access the GPG agent for things like encryption and git commit signing"
-msgstr ""
-"Přístup k agentu GPG, například pro šifrování a podepisování commitů gitu"
-
-#: src/bz-permissions-page.blp:332
-msgid "Session Bus Policy"
-msgstr "Zásady sběrnice sezení"
-
-#: src/bz-permissions-page.blp:335 src/bz-permissions-page.blp:357
-msgid "Full Access"
-msgstr "Plný přístup"
-
-#: src/bz-permissions-page.blp:336
-msgid "Give full access to the D-Bus session bus"
-msgstr "Umožnit plný přístup ke sběrnici sezení D-Bus"
-
-#: src/bz-permissions-page.blp:341 src/bz-permissions-page.blp:363
-msgid "Talk"
-msgstr "Komunikace"
-
-#: src/bz-permissions-page.blp:342
-msgid "Names on the session bus the app is allowed to send messages to"
-msgstr "Jména na sběrnici sezení, kterým aplikace smí odesílat zprávy"
-
-#: src/bz-permissions-page.blp:346 src/bz-permissions-page.blp:368
-msgid "Own"
-msgstr "Vlastnění"
-
-#: src/bz-permissions-page.blp:347
-msgid "Names on the session bus the app is allowed to claim ownership of"
-msgstr ""
-"Jména na sběrnici sezení, ke kterým si aplikace smí nárokovat vlastnictví"
-
-#: src/bz-permissions-page.blp:353
-msgid "System Bus Policy"
-msgstr "Zásady systémové sběrnice"
-
-#: src/bz-permissions-page.blp:358
-msgid "Give full access to the D-Bus system bus"
-msgstr "Umožnit plný přístup k systémové sběrnici D-Bus"
-
-#: src/bz-permissions-page.blp:364
-msgid "Names on the system bus the app is allowed to send messages to"
-msgstr "Jména na systémové sběrnici, kterým aplikace smí odesílat zprávy"
-
-#: src/bz-permissions-page.blp:369
-msgid "Names on the system bus the app is allowed to claim ownership of"
-msgstr ""
-"Jména na systémové sběrnici, ke kterým si aplikace smí nárokovat vlastnictví"
-
-#: src/bz-permissions-page.blp:375
-msgid "Developer Options"
-msgstr "Možnosti pro vývojáře"
-
-#: src/bz-permissions-page.blp:380
-msgid "Wayland Windowing System"
-msgstr "Okenní systém Wayland"
-
-#: src/bz-permissions-page.blp:381
-msgid "Show windows using Wayland"
-msgstr "Zobrazovat okna pomocí Waylandu"
-
-#: src/bz-permissions-page.blp:387
-msgid "X11 Windowing System"
-msgstr "Okenní systém X11"
-
-#: src/bz-permissions-page.blp:388
-msgid "Show windows using X11"
-msgstr "Zobrazovat okna pomocí X11"
-
-#: src/bz-permissions-page.blp:394
-msgid "Fallback X11 Windowing System"
-msgstr "Záložní okenní systém X11"
-
-#: src/bz-permissions-page.blp:395
-msgid "Show windows using X11 if Wayland is not available"
-msgstr "Zobrazovat okna pomocí X11, pokud Wayland není k dispozici"
-
-#: src/bz-permissions-page.blp:401
-msgid "Development Syscalls"
-msgstr "Vývojářská systémová volání"
-
-#: src/bz-permissions-page.blp:402
-msgid "Access development syscalls such as ptrace"
-msgstr "Přístup k vývojářským systémovým voláním, jako je ptrace"
-
-#: src/bz-permissions-page.blp:408
-msgid "Multiarch"
-msgstr "Multiarch"
-
-#: src/bz-permissions-page.blp:409
-msgid "Run multiarch / multilib binaries"
-msgstr "Spouštění binárních souborů multiarch / multilib"
-
-#: src/bz-permissions-page.blp:415
-msgid "CAN Bus"
-msgstr "Sběrnice CAN"
-
-#: src/bz-permissions-page.blp:416
-msgid "Access the CAN bus"
-msgstr "Přístup k sběrnici CAN"
-
-#: src/bz-permissions-page.blp:422
-msgid "Per-App Shared Memory"
-msgstr "Sdílená paměť pro jednotlivé aplikace"
-
-#: src/bz-permissions-page.blp:423
-msgid "Share <tt>/dev/shm</tt> between app instances &amp; subsandboxes"
-msgstr "Sdílení <tt>/dev/shm</tt> mezi instancemi aplikací a subsandboxy"
-
-#: src/bz-permissions-page.blp:429
-msgid "Variables"
-msgstr "Proměnné"
-
-#: src/bz-permissions-page.blp:430
-msgid "Environment variables to set in the application"
-msgstr "Proměnné prostředí, které se mají nastavit v aplikaci"
-
-#: src/bz-permissions-page.c:817
-msgid "Permissions reset!"
-msgstr "Oprávnění resetována!"
-
-#: src/bz-permissions-page.c:818
-msgid "Undo"
-msgstr "Zpět"
-
-#: src/bz-permissions-page.c:859
-msgid "Hide Developer Options"
-msgstr "Skrýt možnosti pro vývojáře"
-
-#: src/bz-permissions-page.c:859
-msgid "Show Developer Options"
-msgstr "Zobrazit možnosti pro vývojáře"
-
-#: src/bz-portal-permissions.c:41
-msgid "Background"
-msgstr "Pozadí"
-
-#: src/bz-portal-permissions.c:42
-msgid "Notifications"
-msgstr "Upozornění"
-
-#: src/bz-portal-permissions.c:43
-msgid "Speakers"
-msgstr "Reproduktory"
-
-#: src/bz-portal-permissions.c:44
-msgid "Camera"
-msgstr "Kamera"
-
-#: src/bz-portal-permissions.c:45
-msgid "Location"
-msgstr "Umístění"
-
-#: src/bz-portal-permissions.c:46
-msgid "Microphone"
-msgstr "Mikrofon"
 
 #: src/bz-preferences-dialog.blp:19
 msgid "Preferences"
@@ -2823,19 +2461,19 @@ msgstr "Může komunikovat se zařízeními spárovanými přes KDE Connect"
 msgid "Safety"
 msgstr "Bezpečnost"
 
-#: src/bz-safety-dialog.blp:67
+#: src/bz-safety-dialog.blp:53
 msgid "License"
 msgstr "Licence"
 
-#: src/bz-safety-dialog.blp:77
+#: src/bz-safety-dialog.blp:63
 msgid "App ID"
 msgstr "ID aplikace"
 
-#: src/bz-safety-dialog.blp:87
+#: src/bz-safety-dialog.blp:73
 msgid "SDK"
 msgstr "SDK"
 
-#: src/bz-safety-dialog.blp:118
+#: src/bz-safety-dialog.blp:104
 msgid ""
 "This app uses an outdated version of the software platform (SDK) and might "
 "contain bugs or security vulnerabilities which will not be fixed."
@@ -2843,27 +2481,27 @@ msgstr ""
 "Tato aplikace používá zastaralou verzi softwarové platformy (SDK) a může "
 "obsahovat chyby nebo slabá místa zabezpečení, která nebudou opravena."
 
-#: src/bz-safety-dialog.c:230
+#: src/bz-safety-dialog.c:227
 #, c-format
 msgid "%s is Safe"
 msgstr "Aplikace %s je bezpečná"
 
-#: src/bz-safety-dialog.c:235
+#: src/bz-safety-dialog.c:232
 #, c-format
 msgid "%s has no Unsafe Permissions"
 msgstr "Aplikace %s nemá žádná nebezpečná oprávnění"
 
-#: src/bz-safety-dialog.c:240
+#: src/bz-safety-dialog.c:237
 #, c-format
 msgid "%s is Probably Safe"
 msgstr "Aplikace %s je pravděpodobně bezpečná"
 
-#: src/bz-safety-dialog.c:245
+#: src/bz-safety-dialog.c:242
 #, c-format
 msgid "%s is Possibly Unsafe"
 msgstr "Aplikace %s pravděpodobně není bezpečná"
 
-#: src/bz-safety-dialog.c:250
+#: src/bz-safety-dialog.c:247
 #, c-format
 msgid "%s is Unsafe"
 msgstr "Aplikace %s není bezpečná"
@@ -3232,6 +2870,10 @@ msgstr "Hotovo"
 msgid "Error"
 msgstr "Chyba"
 
+#: src/bz-transaction-tile.blp:272
+msgid "Open"
+msgstr "Otevřít"
+
 #: src/bz-transaction-tile.blp:286
 msgid "Cancel Transaction"
 msgstr "Zrušit transakci"
@@ -3317,24 +2959,24 @@ msgid "Log Out"
 msgstr "Odhlásit se"
 
 #. Translators: %s is the title of the current page
-#: src/bz-window.c:381
+#: src/bz-window.c:380
 #, c-format
 msgid "Bazaar — %s"
 msgstr "Bazaar – %s"
 
-#: src/bz-window.c:488
+#: src/bz-window.c:487
 msgid "Failed to load add-ons"
 msgstr "Načtení doplňků se nezdařilo"
 
-#: src/bz-window.c:602 src/bz-window.c:619
+#: src/bz-window.c:601 src/bz-window.c:618
 msgid "Failed to launch application"
 msgstr "Aplikaci se nezdařilo spustit"
 
-#: src/bz-window.c:846
+#: src/bz-window.c:823
 msgid "You can't remove Bazaar from Bazaar!"
 msgstr "Bazaar nelze odstranit z Bazaaru!"
 
-#: src/bz-window.c:1138 src/bz-window.c:1172
+#: src/bz-window.c:1115 src/bz-window.c:1149
 msgid "Can't do that right now!"
 msgstr "Toto teď nelze provést!"
 
@@ -3382,3 +3024,280 @@ msgstr "Zavřít okno"
 msgctxt "shortcut window"
 msgid "Quit Bazaar"
 msgstr "Ukončit Bazaar"
+
+#~ msgid "Fractal permissions page"
+#~ msgstr "Stránka oprávnění aplikace Fractal"
+
+#~ msgid "Manage Permissions"
+#~ msgstr "Spravovat oprávnění"
+
+#~ msgid "Show Other Options…"
+#~ msgstr "Zobrazit další možnosti…"
+
+#~ msgid "Edit Permissions"
+#~ msgstr "Upravit oprávnění"
+
+#~ msgid "Reset to defaults"
+#~ msgstr "Vrátit na výchozí"
+
+#~ msgid "New Entry"
+#~ msgstr "Nová položka"
+
+#~ msgid "Invalid Format"
+#~ msgstr "Neplatný formát"
+
+#~ msgid "Reset to default"
+#~ msgstr "Vrátit na výchozí"
+
+#~ msgid "Permissions"
+#~ msgstr "Oprávnění"
+
+#~ msgid ""
+#~ "Modifying permissions may cause apps to break or be less secure. Do not "
+#~ "make bug reports with them modified!"
+#~ msgstr ""
+#~ "Úprava oprávnění může způsobit selhání aplikací nebo snížení jejich "
+#~ "bezpečnosti. Neohlašujte chyby, pokud jsou oprávnění upravena!"
+
+#~ msgid "OK"
+#~ msgstr "Budiž"
+
+#~ msgid "Reset"
+#~ msgstr "Výchozí"
+
+#~ msgid "General"
+#~ msgstr "Obecné"
+
+#~ msgid "Network"
+#~ msgstr "Síť"
+
+#~ msgid "Share the host's network access"
+#~ msgstr "Sdílení síťového přístupu hostitele"
+
+#~ msgid "Audio Server"
+#~ msgstr "Zvukový server"
+
+#~ msgid ""
+#~ "Play and record sound, enabling this bypasses the individual permissions"
+#~ msgstr "Přehrávání a nahrávání zvuku, obchází individuální oprávnění"
+
+#~ msgid "Bluetooth"
+#~ msgstr "Bluetooth"
+
+#~ msgid "Manage both Bluetooth devices and settings"
+#~ msgstr "Správa nastavení a zařízení Bluetooth"
+
+#~ msgid "Printing"
+#~ msgstr "Tisk"
+
+#~ msgid "Access the system's printing system"
+#~ msgstr "Přístup k tiskovému systému"
+
+#~ msgid "Devices"
+#~ msgstr "Zařízení"
+
+#~ msgid "Smart Cards"
+#~ msgstr "Čipové karty"
+
+#~ msgid "Access smart card readers via PC/SC"
+#~ msgstr "Přístup ke čtečkám čipových karet přes PC/SC"
+
+#~ msgid "All Devices"
+#~ msgstr "Všechna zařízení"
+
+#~ msgid "Access all devices such as webcam, GPU, etc."
+#~ msgstr "Přístup ke všem zařízením jako jsou webkamera, grafická karta atd."
+
+#~ msgid "GPU Acceleration"
+#~ msgstr "Akcelerace GPU"
+
+#~ msgid "Access GPU rendering"
+#~ msgstr "Přístup k vykreslování na GPU"
+
+#~ msgid "USB Devices"
+#~ msgstr "Zařízení USB"
+
+#~ msgid "Manage USB devices directly"
+#~ msgstr "Přímá správa zařízení USB"
+
+#~ msgid "Input Devices"
+#~ msgstr "Vstupní zařízení"
+
+#~ msgid "Access Input devices"
+#~ msgstr "Přístup ke vstupním zařízením"
+
+#~ msgid "KVM Virtualization"
+#~ msgstr "Virtualizace KVM"
+
+#~ msgid "Access KVM for virtual machines"
+#~ msgstr "Přístup k KVM pro virtuální stroje"
+
+#~ msgid "Shared Memory"
+#~ msgstr "Sdílená paměť"
+
+#~ msgid "Create shared memory objects"
+#~ msgstr "Vytváření objektů sdílené paměti"
+
+#~ msgid "Filesystem"
+#~ msgstr "Souborový systém"
+
+#~ msgid "Host Filesystem"
+#~ msgstr "Souborový systém hostitele"
+
+#~ msgid "Full access to the entire filesystem"
+#~ msgstr "Plný přístup k celému souborovému systému"
+
+#~ msgid "Home Folder"
+#~ msgstr "Domovská složka"
+
+#~ msgid "Full access to your home directory"
+#~ msgstr "Plný přístup k vaší domovské složce"
+
+#~ msgid "Access the Downloads folder"
+#~ msgstr "Přístup ke složce Stažené"
+
+#~ msgid "Other Paths"
+#~ msgstr "Další cesty"
+
+#~ msgid "Grant access to additional files and folders"
+#~ msgstr "Udělit přístup k dalším souborům a složkám"
+
+#~ msgid "Advanced System Access"
+#~ msgstr "Pokročilý přístup k systému"
+
+#~ msgid "Inter-process Communication"
+#~ msgstr "Meziprocesová komunikace"
+
+#~ msgid "Share IPC namespace with the host"
+#~ msgstr "Sdílení jmenného prostoru IPC s hostitelem"
+
+#~ msgid "SSH Authentication"
+#~ msgstr "Ověřování SSH"
+
+#~ msgid "Access the SSH authentication agent"
+#~ msgstr "Přístup k ověřovacímu agentu SSH"
+
+#~ msgid "GPG Agent"
+#~ msgstr "Agent GPG"
+
+#~ msgid ""
+#~ "Access the GPG agent for things like encryption and git commit signing"
+#~ msgstr ""
+#~ "Přístup k agentu GPG, například pro šifrování a podepisování commitů gitu"
+
+#~ msgid "Session Bus Policy"
+#~ msgstr "Zásady sběrnice sezení"
+
+#~ msgid "Full Access"
+#~ msgstr "Plný přístup"
+
+#~ msgid "Give full access to the D-Bus session bus"
+#~ msgstr "Umožnit plný přístup ke sběrnici sezení D-Bus"
+
+#~ msgid "Talk"
+#~ msgstr "Komunikace"
+
+#~ msgid "Names on the session bus the app is allowed to send messages to"
+#~ msgstr "Jména na sběrnici sezení, kterým aplikace smí odesílat zprávy"
+
+#~ msgid "Own"
+#~ msgstr "Vlastnění"
+
+#~ msgid "Names on the session bus the app is allowed to claim ownership of"
+#~ msgstr ""
+#~ "Jména na sběrnici sezení, ke kterým si aplikace smí nárokovat vlastnictví"
+
+#~ msgid "System Bus Policy"
+#~ msgstr "Zásady systémové sběrnice"
+
+#~ msgid "Give full access to the D-Bus system bus"
+#~ msgstr "Umožnit plný přístup k systémové sběrnici D-Bus"
+
+#~ msgid "Names on the system bus the app is allowed to send messages to"
+#~ msgstr "Jména na systémové sběrnici, kterým aplikace smí odesílat zprávy"
+
+#~ msgid "Names on the system bus the app is allowed to claim ownership of"
+#~ msgstr ""
+#~ "Jména na systémové sběrnici, ke kterým si aplikace smí nárokovat "
+#~ "vlastnictví"
+
+#~ msgid "Developer Options"
+#~ msgstr "Možnosti pro vývojáře"
+
+#~ msgid "Wayland Windowing System"
+#~ msgstr "Okenní systém Wayland"
+
+#~ msgid "Show windows using Wayland"
+#~ msgstr "Zobrazovat okna pomocí Waylandu"
+
+#~ msgid "X11 Windowing System"
+#~ msgstr "Okenní systém X11"
+
+#~ msgid "Show windows using X11"
+#~ msgstr "Zobrazovat okna pomocí X11"
+
+#~ msgid "Fallback X11 Windowing System"
+#~ msgstr "Záložní okenní systém X11"
+
+#~ msgid "Show windows using X11 if Wayland is not available"
+#~ msgstr "Zobrazovat okna pomocí X11, pokud Wayland není k dispozici"
+
+#~ msgid "Development Syscalls"
+#~ msgstr "Vývojářská systémová volání"
+
+#~ msgid "Access development syscalls such as ptrace"
+#~ msgstr "Přístup k vývojářským systémovým voláním, jako je ptrace"
+
+#~ msgid "Multiarch"
+#~ msgstr "Multiarch"
+
+#~ msgid "Run multiarch / multilib binaries"
+#~ msgstr "Spouštění binárních souborů multiarch / multilib"
+
+#~ msgid "CAN Bus"
+#~ msgstr "Sběrnice CAN"
+
+#~ msgid "Access the CAN bus"
+#~ msgstr "Přístup k sběrnici CAN"
+
+#~ msgid "Per-App Shared Memory"
+#~ msgstr "Sdílená paměť pro jednotlivé aplikace"
+
+#~ msgid "Share <tt>/dev/shm</tt> between app instances &amp; subsandboxes"
+#~ msgstr "Sdílení <tt>/dev/shm</tt> mezi instancemi aplikací a subsandboxy"
+
+#~ msgid "Variables"
+#~ msgstr "Proměnné"
+
+#~ msgid "Environment variables to set in the application"
+#~ msgstr "Proměnné prostředí, které se mají nastavit v aplikaci"
+
+#~ msgid "Permissions reset!"
+#~ msgstr "Oprávnění resetována!"
+
+#~ msgid "Undo"
+#~ msgstr "Zpět"
+
+#~ msgid "Hide Developer Options"
+#~ msgstr "Skrýt možnosti pro vývojáře"
+
+#~ msgid "Show Developer Options"
+#~ msgstr "Zobrazit možnosti pro vývojáře"
+
+#~ msgid "Background"
+#~ msgstr "Pozadí"
+
+#~ msgid "Notifications"
+#~ msgstr "Upozornění"
+
+#~ msgid "Speakers"
+#~ msgstr "Reproduktory"
+
+#~ msgid "Camera"
+#~ msgstr "Kamera"
+
+#~ msgid "Location"
+#~ msgstr "Umístění"
+
+#~ msgid "Microphone"
+#~ msgstr "Mikrofon"
