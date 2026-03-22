@@ -609,10 +609,15 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
 
   if ((kinds & BZ_ENTRY_KIND_RUNTIME) && !(kinds & BZ_ENTRY_KIND_ADDON) && self->flatpak_version != NULL)
     {
-      g_autoptr (GRegex) version_regex = NULL;
-      g_autofree char *stripped_title  = NULL;
+      static GRegex   *version_regex  = NULL;
+      g_autofree char *stripped_title = NULL;
 
-      version_regex = g_regex_new (VERSION_SUFFIX_REGEX, 0, 0, NULL); // GNOME runtimes have the flatpak version at the end whilst others don't.
+      if (g_once_init_enter_pointer (&version_regex))
+        {
+          GRegex *re = NULL;
+          re =  g_regex_new (VERSION_SUFFIX_REGEX, 0, 0, NULL); // GNOME runtimes have the flatpak version at the end whilst others don't.
+          g_once_init_leave_pointer (&version_regex, g_steal_pointer (&re));
+        }
       stripped_title = g_regex_replace (version_regex, title, -1, 0, "", 0, NULL);
 
       title = g_strdup_printf ("%s %s", stripped_title, self->flatpak_version);
