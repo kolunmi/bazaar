@@ -36,6 +36,8 @@
 #include "bz-serializable.h"
 #include "bz-state-info.h"
 
+#define VERSION_SUFFIX_REGEX "\\s+[0-9][0-9.]*\\s*$"
+
 struct _BzFlatpakEntry
 {
   BzEntry parent_instance;
@@ -607,11 +609,13 @@ bz_flatpak_entry_new_for_ref (FlatpakRef    *ref,
 
   if ((kinds & BZ_ENTRY_KIND_RUNTIME) && !(kinds & BZ_ENTRY_KIND_ADDON) && self->flatpak_version != NULL)
     {
-      if (!g_str_has_suffix (title, self->flatpak_version)) // GNOME runtimes have the flatpak version at the end whilst others don't.
-        {
-          g_autofree char *original_title = g_strdup (title);
-          title                           = g_strdup_printf ("%s %s", original_title, self->flatpak_version);
-        }
+      g_autoptr (GRegex) version_regex = NULL;
+      g_autofree char *stripped_title  = NULL;
+
+      version_regex = g_regex_new (VERSION_SUFFIX_REGEX, 0, 0, NULL); // GNOME runtimes have the flatpak version at the end whilst others don't.
+      stripped_title = g_regex_replace (version_regex, title, -1, 0, "", 0, NULL);
+
+      title = g_strdup_printf ("%s %s", stripped_title, self->flatpak_version);
     }
 
   if (FLATPAK_IS_REMOTE_REF (ref))
