@@ -8,6 +8,7 @@ project('bazaar', 'c',
   ],
 )
 
+python3 = find_program('python3')
 i18n = import('i18n')
 if get_option('im_a_translator')
   subdir('po')

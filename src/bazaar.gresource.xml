@@ -14,7 +14,7 @@
     <file preprocess="xml-stripblanks">pride-flag-config-schema.xml</file>
     <file>release-notes.xml</file>
 
-    <file>countries.json</file>
+    <file>countries.gvariant</file>
 
     <file preprocess="xml-stripblanks">bz-addons-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-donations-dialog.ui</file>

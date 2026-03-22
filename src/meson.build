@@ -337,11 +337,24 @@ release_notes = custom_target('release-notes.xml',
   ],
 )
 
+countries_gvariant = custom_target(
+  'countries-gvariant',
+  input: files('../scripts/countries.json.in'),
+  output: 'countries.gvariant',
+  command: [
+    python3,
+    meson.project_source_root() / 'scripts' / 'countries.py',
+    '@INPUT@',
+    meson.project_source_root() / 'po' / 'LINGUAS',
+    '@OUTPUT@',
+  ],
+)
+
 bz_sources += gnome.compile_resources('bz-resources',
   'bazaar.gresource.xml',
   c_name: 'bz',
   source_dir: meson.current_build_dir(),
-  dependencies: [blueprints, release_notes],
+  dependencies: [blueprints, release_notes, countries_gvariant],
 )
 
 executable('bazaar', bz_sources, gdbus_src, marshalers,

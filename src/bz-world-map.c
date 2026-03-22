@@ -142,39 +142,38 @@ calculate_bounds (BzWorldMap *self)
 
   for (guint i = 0; i < n_items; i++)
     {
-      BzCountry *country     = g_list_model_get_item (self->countries, i);
-      JsonArray *coordinates = bz_country_get_coordinates (country);
+      g_autoptr (BzCountry) country = g_list_model_get_item (self->countries, i);
+      GVariant    *coordinates      = bz_country_get_coordinates (country);
+      GVariantIter poly_iter, ring_iter, point_iter;
+      GVariant    *polygon = NULL;
+      GVariant    *ring    = NULL;
+      double       lon, lat;
 
-      if (coordinates != NULL)
+      if (coordinates == NULL)
+        continue;
+
+      g_variant_iter_init (&poly_iter, coordinates);
+      while ((polygon = g_variant_iter_next_value (&poly_iter)))
         {
-          for (guint j = 0; j < json_array_get_length (coordinates); j++)
+          g_variant_iter_init (&ring_iter, polygon);
+          while ((ring = g_variant_iter_next_value (&ring_iter)))
             {
-              JsonArray *polygon_array = json_array_get_array_element (coordinates, j);
-
-              for (guint k = 0; k < json_array_get_length (polygon_array); k++)
+              g_variant_iter_init (&point_iter, ring);
+              while (g_variant_iter_next (&point_iter, "(dd)", &lon, &lat))
                 {
-                  JsonArray *ring_array = json_array_get_array_element (polygon_array, k);
-
-                  for (guint l = 0; l < json_array_get_length (ring_array); l++)
-                    {
-                      JsonArray *point_array = json_array_get_array_element (ring_array, l);
-                      double     lon         = json_array_get_double_element (point_array, 0);
-                      double     lat         = json_array_get_double_element (point_array, 1);
-
-                      if (lon < self->min_lon)
-                        self->min_lon = lon;
-                      if (lon > self->max_lon)
-                        self->max_lon = lon;
-                      if (lat < self->min_lat)
-                        self->min_lat = lat;
-                      if (lat > self->max_lat)
-                        self->max_lat = lat;
-                    }
+                  if (lon < self->min_lon)
+                    self->min_lon = lon;
+                  if (lon > self->max_lon)
+                    self->max_lon = lon;
+                  if (lat < self->min_lat)
+                    self->min_lat = lat;
+                  if (lat > self->max_lat)
+                    self->max_lat = lat;
                 }
+              g_clear_pointer (&ring, g_variant_unref);
             }
+          g_clear_pointer (&polygon, g_variant_unref);
         }
-
-      g_object_unref (country);
     }
 }
 
@@ -225,34 +224,33 @@ build_paths (BzWorldMap *self,
     {
       for (guint i = 0; i < self->n_paths; i++)
         g_clear_pointer (&self->country_paths[i], gsk_path_unref);
-      g_free (self->country_paths);
-      self->country_paths = NULL;
+      g_clear_pointer (&self->country_paths, g_free);
     }
 
-  if (self->path_to_country != NULL)
-    {
-      g_free (self->path_to_country);
-      self->path_to_country = NULL;
-    }
+  g_clear_pointer (&self->path_to_country, g_free);
 
   n_items = g_list_model_get_n_items (self->countries);
 
   self->n_paths = 0;
   for (guint i = 0; i < n_items; i++)
     {
-      BzCountry *country     = g_list_model_get_item (self->countries, i);
-      JsonArray *coordinates = bz_country_get_coordinates (country);
+      g_autoptr (BzCountry) country = NULL;
+      GVariant    *coordinates      = NULL;
+      GVariantIter poly_iter        = { 0 };
+      GVariant    *polygon          = NULL;
 
-      if (coordinates != NULL)
+      country     = g_list_model_get_item (self->countries, i);
+      coordinates = bz_country_get_coordinates (country);
+
+      if (coordinates == NULL)
+        continue;
+
+      g_variant_iter_init (&poly_iter, coordinates);
+      while ((polygon = g_variant_iter_next_value (&poly_iter)))
         {
-          for (guint j = 0; j < json_array_get_length (coordinates); j++)
-            {
-              JsonArray *polygon_array = json_array_get_array_element (coordinates, j);
-              self->n_paths += json_array_get_length (polygon_array);
-            }
+          self->n_paths += g_variant_n_children (polygon);
+          g_clear_pointer (&polygon, g_variant_unref);
         }
-
-      g_object_unref (country);
     }
 
   self->country_paths   = g_new0 (GskPath *, self->n_paths);
@@ -260,51 +258,62 @@ build_paths (BzWorldMap *self,
 
   for (guint i = 0; i < n_items; i++)
     {
-      BzCountry *country     = g_list_model_get_item (self->countries, i);
-      JsonArray *coordinates = bz_country_get_coordinates (country);
+      g_autoptr (BzCountry) country = NULL;
+      GVariant    *coordinates      = NULL;
+      GVariantIter poly_iter        = { 0 };
+      GVariant    *polygon          = NULL;
 
-      if (coordinates != NULL)
+      country     = g_list_model_get_item (self->countries, i);
+      coordinates = bz_country_get_coordinates (country);
+
+      if (coordinates == NULL)
+        continue;
+
+      g_variant_iter_init (&poly_iter, coordinates);
+      while ((polygon = g_variant_iter_next_value (&poly_iter)))
         {
-          for (guint j = 0; j < json_array_get_length (coordinates); j++)
+          GVariantIter ring_iter = { 0 };
+          GVariant    *ring      = NULL;
+
+          g_variant_iter_init (&ring_iter, polygon);
+          while ((ring = g_variant_iter_next_value (&ring_iter)))
             {
-              JsonArray *polygon_array = json_array_get_array_element (coordinates, j);
+              g_autoptr (GskPathBuilder) builder = NULL;
+              GVariantIter point_iter            = { 0 };
+              double       lon                   = 0.0;
+              double       lat                   = 0.0;
+              gboolean     first                 = TRUE;
 
-              for (guint k = 0; k < json_array_get_length (polygon_array); k++)
+              builder = gsk_path_builder_new ();
+
+              g_variant_iter_init (&point_iter, ring);
+              while (g_variant_iter_next (&point_iter, "(dd)", &lon, &lat))
                 {
-                  JsonArray *ring_array              = json_array_get_array_element (polygon_array, k);
-                  g_autoptr (GskPathBuilder) builder = gsk_path_builder_new ();
-                  gboolean first                     = TRUE;
+                  double x = 0.0;
+                  double y = 0.0;
 
-                  for (guint l = 0; l < json_array_get_length (ring_array); l++)
+                  project_point (self, lon, lat, width, height, &x, &y);
+
+                  if (first)
                     {
-                      JsonArray *point_array = json_array_get_array_element (ring_array, l);
-                      double     lon         = json_array_get_double_element (point_array, 0);
-                      double     lat         = json_array_get_double_element (point_array, 1);
-                      double     x           = 0.0;
-                      double     y           = 0.0;
-
-                      project_point (self, lon, lat, width, height, &x, &y);
-
-                      if (first)
-                        {
-                          gsk_path_builder_move_to (builder, x, y);
-                          first = FALSE;
-                        }
-                      else
-                        {
-                          gsk_path_builder_line_to (builder, x, y);
-                        }
+                      gsk_path_builder_move_to (builder, x, y);
+                      first = FALSE;
                     }
-
-                  gsk_path_builder_close (builder);
-                  self->country_paths[path_index]   = gsk_path_builder_to_path (builder);
-                  self->path_to_country[path_index] = i;
-                  path_index++;
+                  else
+                    {
+                      gsk_path_builder_line_to (builder, x, y);
+                    }
                 }
-            }
-        }
 
-      g_object_unref (country);
+              gsk_path_builder_close (builder);
+              self->country_paths[path_index]   = gsk_path_builder_to_path (builder);
+              self->path_to_country[path_index] = i;
+              path_index++;
+
+              g_clear_pointer (&ring, g_variant_unref);
+            }
+          g_clear_pointer (&polygon, g_variant_unref);
+        }
     }
 
   self->cache_valid = TRUE;
@@ -694,7 +703,7 @@ bz_world_map_init (BzWorldMap *self)
                     G_CALLBACK (on_style_changed), self);
 
   if (bz_world_map_parser_load_from_resource (self->parser,
-                                              "/io/github/kolunmi/Bazaar/countries.json",
+                                              "/io/github/kolunmi/Bazaar/countries.gvariant",
                                               &error))
     {
       self->countries = g_object_ref (bz_world_map_parser_get_countries (self->parser));

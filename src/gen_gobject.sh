@@ -369,6 +369,9 @@ print_init_properties () {
             enum)
                 printf '\n          %s, 0,\n' "$LOC_GTYPE"
                 ;;
+	    variant)
+                printf '\n          G_VARIANT_TYPE_ANY, NULL,\n'
+                ;;
             *)
                 printf '\n          %s,\n' "$LOC_GTYPE"
                 ;;
