@@ -127,7 +127,7 @@ template $BzWindow: Adw.ApplicationWindow {
                         title: _("Search");
                         icon-name: "system-search-symbolic";
 
-                        child: $BzSearchWidget search_widget {
+                        child: $BzSearchPage search_page {
                           state: bind template.state;
                         };
                       }
