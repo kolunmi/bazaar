@@ -988,6 +988,13 @@ load_local_ref_fiber (LoadLocalRefData *data)
       g_autoptr (GBytes) appstream      = NULL;
       g_autoptr (AsComponent) component = NULL;
 
+      if (path == NULL)
+        return dex_future_new_reject (
+            BZ_FLATPAK_ERROR,
+            BZ_FLATPAK_ERROR_IO_MISBEHAVIOR,
+            "Cannot load '%s' as a flatpak bundle: URI is not a local file",
+            uri);
+
       bref = flatpak_bundle_ref_new (file, &local_error);
       if (bref == NULL)
         return dex_future_new_reject (
