@@ -135,6 +135,7 @@ bz_search_pill_list_init (BzSearchPillList *self)
   layout = GTK_LAYOUT_MANAGER (adw_wrap_layout_new ());
   adw_wrap_layout_set_child_spacing (ADW_WRAP_LAYOUT (layout), 10);
   adw_wrap_layout_set_line_spacing (ADW_WRAP_LAYOUT (layout), 8);
+  adw_wrap_layout_set_justify (ADW_WRAP_LAYOUT (layout), ADW_JUSTIFY_FILL);
   gtk_widget_set_layout_manager (GTK_WIDGET (self), layout);
 
   for (guint i = 0; pills[i] != NULL; i++)

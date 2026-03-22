@@ -39,7 +39,7 @@
 #include "bz-io.h"
 #include "bz-library-page.h"
 #include "bz-progress-bar.h"
-#include "bz-search-widget.h"
+#include "bz-search-page.h"
 #include "bz-template-callbacks.h"
 #include "bz-transaction-dialog.h"
 #include "bz-transaction-manager.h"
@@ -61,7 +61,7 @@ struct _BzWindow
   BzCometOverlay    *comet_overlay;
   AdwNavigationView *navigation_view;
   BzFullView        *full_view;
-  BzSearchWidget    *search_widget;
+  BzSearchPage      *search_page;
   BzLibraryPage     *library_page;
   AdwToastOverlay   *toasts;
   AdwViewStack      *main_view_stack;
@@ -304,7 +304,7 @@ browse_flathub_cb (BzWindow      *self,
 
 static void
 open_search_cb (BzWindow       *self,
-                BzSearchWidget *widget)
+                BzSearchPage *widget)
 {
   adw_view_stack_set_visible_child_name (self->main_view_stack, "search");
 }
@@ -675,7 +675,7 @@ bz_window_class_init (BzWindowClass *klass)
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   g_type_ensure (BZ_TYPE_COMET_OVERLAY);
-  g_type_ensure (BZ_TYPE_SEARCH_WIDGET);
+  g_type_ensure (BZ_TYPE_SEARCH_PAGE);
   g_type_ensure (BZ_TYPE_GLOBAL_PROGRESS);
   g_type_ensure (BZ_TYPE_PROGRESS_BAR);
   g_type_ensure (BZ_TYPE_CURATED_VIEW);
@@ -690,7 +690,7 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzWindow, navigation_view);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, full_view);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, toasts);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, search_widget);
+  gtk_widget_class_bind_template_child (widget_class, BzWindow, search_page);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, library_page);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, main_view_stack);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, main_stack);
@@ -747,7 +747,7 @@ key_pressed (BzWindow              *self,
   else
     {
       adw_view_stack_set_visible_child_name (self->main_view_stack, "search");
-      return bz_search_widget_ensure_active (self->search_widget, buf);
+      return bz_search_page_ensure_active (self->search_page, buf);
     }
 }
 
@@ -775,7 +775,7 @@ app_busy_changed (BzWindow    *self,
                   GParamSpec  *pspec,
                   BzStateInfo *info)
 {
-  bz_search_widget_refresh (self->search_widget);
+  bz_search_page_refresh (self->search_page);
   set_page (self);
 }
 
@@ -1203,11 +1203,11 @@ search (BzWindow   *self,
         const char *initial)
 {
   if (initial != NULL && *initial != '\0')
-    bz_search_widget_set_text (self->search_widget, initial);
+    bz_search_page_set_text (self->search_page, initial);
 
   adw_view_stack_set_visible_child_name (self->main_view_stack, "search");
   adw_navigation_view_pop_to_tag (self->navigation_view, "main");
-  gtk_widget_grab_focus (GTK_WIDGET (self->search_widget));
+  gtk_widget_grab_focus (GTK_WIDGET (self->search_page));
 }
 
 static void
