@@ -594,6 +594,9 @@ bz_transaction_add_task (BzTransaction                 *self,
     {
       GListModel *current_ops = NULL;
 
+      if (bz_transaction_entry_tracker_get_kind (tracker) == BZ_TRANSACTION_ENTRY_KIND_UPDATE)
+        bz_backend_transaction_op_payload_set_download_size (payload, (guint64) -1);
+
       current_ops = bz_transaction_entry_tracker_get_current_ops (tracker);
       g_list_store_append (G_LIST_STORE (current_ops), task);
       g_object_notify (G_OBJECT (tracker), "current-ops");

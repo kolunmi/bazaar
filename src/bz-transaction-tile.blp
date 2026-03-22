@@ -84,7 +84,7 @@ template $BzTransactionTile: $BzListTile {
                       xalign: 0;
                       ellipsize: end;
                       single-line-mode: true;
-                      label: bind $format_download_progress(template.item as <$BzTransactionTask>.last-progress as <$BzBackendTransactionOpProgressPayload>.progress, template.item as <$BzTransactionTask>.op as <$BzBackendTransactionOpPayload>.download-size) as <string>;
+                      label: bind $format_download_progress(template.item as <$BzTransactionTask>.last-progress as <$BzBackendTransactionOpProgressPayload>.bytes-transferred, template.item as <$BzTransactionTask>.op as <$BzBackendTransactionOpPayload>.download-size) as <string>;
                     }
                   };
                 }
