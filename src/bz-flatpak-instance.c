@@ -841,11 +841,11 @@ ensure_flathub_fiber (EnsureFlathubData *data)
             "Failed to modify existing system flathub remote: %s",
             local_error->message);
     }
-  #ifndef SANDBOXED_LIBFLATPAK
+#ifndef SANDBOXED_LIBFLATPAK
   else if (self->system != NULL)
-  #else
+#else
   else if (self->system != NULL && usr_remote == NULL)
-  #endif
+#endif
     {
       g_autoptr (SoupMessage) message  = NULL;
       g_autoptr (GOutputStream) output = NULL;
