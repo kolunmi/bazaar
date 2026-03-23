@@ -1,371 +1,391 @@
 {
-  "id": "io.github.kolunmi.Bazaar",
-  "runtime": "org.gnome.Platform",
-  "runtime-version": "50",
-  "sdk": "org.gnome.Sdk",
-  "command": "bazaar",
-  "sdk-extensions": [
-    "org.freedesktop.Sdk.Extension.llvm20"
-  ],
-  "tags": [ "nightly" ],
-  "desktop-file-name-suffix": " (Nightly)",
-  "finish-args": [
-    "--share=network",
-    "--share=ipc",
-    "--socket=fallback-x11",
-    "--socket=wayland",
-    "--device=dri",
-    "--filesystem=/var/lib/flatpak",
-    "--filesystem=xdg-data/flatpak",
-    "--talk-name=org.freedesktop.Flatpak",
-    "--system-talk-name=org.freedesktop.Flatpak.SystemHelper",
-    "--filesystem=/var/tmp",
-    "--filesystem=~/.var/app",
-    "--system-talk-name=org.freedesktop.Accounts",
-    "--talk-name=org.freedesktop.impl.portal.PermissionStore"
-  ],
-  "cleanup": [
-    "/share/zsh",
-    "/share/gettext",
-    "/include",
-    "/lib/pkgconfig",
-    "/lib/cmake",
-    "/share/applications/mimeinfo.cache",
-    "/share/bash-completion",
-    "/share/zsh/site-functions",
-    "/share/icons/hicolor/icon-theme.cache",
-    "/share/man",
-    "/share/pkgconfig",
-    "*.la",
-    "*.a"
-  ],
-  "modules": [
-    {
-      "name": "blueprint-compiler",
-      "buildsystem": "meson",
-      "cleanup": [
-        "*"
-      ],
-      "sources": [
+    "id": "io.github.kolunmi.Bazaar",
+    "runtime": "org.gnome.Platform",
+    "runtime-version": "50",
+    "sdk": "org.gnome.Sdk",
+    "command": "bazaar",
+    "sdk-extensions": [
+        "org.freedesktop.Sdk.Extension.llvm20"
+    ],
+    "tags": [
+        "nightly"
+    ],
+    "desktop-file-name-suffix": " (Nightly)",
+    "finish-args": [
+        "--share=network",
+        "--share=ipc",
+        "--socket=fallback-x11",
+        "--socket=wayland",
+        "--device=dri",
+        "--filesystem=/var/lib/flatpak",
+        "--filesystem=xdg-data/flatpak",
+        "--talk-name=org.freedesktop.Flatpak",
+        "--system-talk-name=org.freedesktop.Flatpak.SystemHelper",
+        "--filesystem=/var/tmp",
+        "--filesystem=~/.var/app",
+        "--system-talk-name=org.freedesktop.Accounts",
+        "--talk-name=org.freedesktop.impl.portal.PermissionStore"
+    ],
+    "cleanup": [
+        "/share/zsh",
+        "/share/gettext",
+        "/include",
+        "/lib/pkgconfig",
+        "/lib/cmake",
+        "/share/applications/mimeinfo.cache",
+        "/share/bash-completion",
+        "/share/zsh/site-functions",
+        "/share/icons/hicolor/icon-theme.cache",
+        "/share/man",
+        "/share/pkgconfig",
+        "*.la",
+        "*.a"
+    ],
+    "modules": [
         {
-          "type": "git",
-          "url": "https://gitlab.gnome.org/GNOME/blueprint-compiler.git",
-          "commit": "aa5298cc1677cf855bd61f9671607362bd203f4f",
-          "tag": "v0.20.0",
-          "x-checker-data": {
-            "type": "anitya",
-            "project-id": 279929,
-            "tag-template": "$version"
-          }
-        }
-      ]
-    },
-    {
-      "name": "bazaar",
-      "buildsystem": "meson",
-      "build-options": {
-        "append-path": "/usr/lib/sdk/llvm20/bin",
-        "prepend-ld-library-path": "/usr/lib/sdk/llvm20/lib"
-      },
-      "config-opts": [
-        "-Ddevelopment=true",
-        "-Dsandboxed_libflatpak=true",
-        "-Dhardcoded_main_config_path=/run/host/etc/bazaar/bazaar.yaml",
-        "-Dhardcoded_content_config_path=/run/host/etc/bazaar/config.yaml",
-        "-Dhardcoded_blocklist_path=/run/host/etc/bazaar/blocklist.txt"
-      ],
-      "sources": [
-        {
-          "type": "dir",
-          "path": "../.."
-        }
-      ],
-      "modules": [
-        {
-          "name": "md4c",
-          "buildsystem": "cmake",
-          "config-opts": [
-            "-DBUILD_MD2HTML_EXECUTABLE=Off"
-          ],
-          "sources": [
-            {
-              "type": "git",
-              "url": "https://github.com/mity/md4c.git",
-              "commit": "729e6b8b320caa96328968ab27d7db2235e4fb47",
-              "tag": "release-0.5.2",
-              "x-checker-data": {
-                "type": "git",
-                "tag-pattern": "^release-([\\d.]+)$"
-              }
-            }
-          ]
-        },
-        {
-          "name": "malcontent",
-          "buildsystem": "meson",
-          "config-opts": [
-	        "-Dui=disabled",
-	        "-Dinstalled_tests=false"
-          ],
-          "sources": [
-            {
-              "type": "git",
-              "url": "https://gitlab.freedesktop.org/pwithnall/malcontent.git",
-              "commit": "3ba80995bb25b7aeda7e21d547f9e39ff9a81736",
-              "tag": "0.12.0"
-            },
-            {
-	          "type": "shell",
-	          "commands": [
-		        "sed -i \"/subdir('tests')/d\" libmalcontent/meson.build",
-		        "sed -i \"/subdir('tests')/d\" meson.build",
-		        "sed -i \"/subdir('pam')/d\" meson.build"
-	          ]
-	        }
-          ]
-        },
-        {
-          "name": "flatpak",
-          "buildsystem": "meson",
-          "config-opts": [
-            "-Dgtkdoc=disabled",
-            "-Ddocbook_docs=disabled",
-            "-Dtests=false",
-            "-Dman=disabled",
-            "-Dseccomp=disabled",
-            "-Dselinux_module=disabled",
-            "-Dmalcontent=enabled",
-            "-Dsandboxed_triggers=false",
-            "-Dsystem_helper=enabled",
-            "-Dsystemd=disabled",
-            "-Dsystem_install_dir=/var/lib/flatpak",
-            "-Dsystem_bubblewrap=bwrap",
-            "-Dsystem_dbus_proxy=xdg-dbus-proxy",
-            "--sysconfdir=/var/run/host/etc"
-          ],
-          "cleanup": [
-            "/bin/flatpak-bisect",
-            "/bin/flatpak-coredumpctl",
-            "/etc/profile.d",
-            "/lib/systemd",
-            "/share/dbus-1/interfaces/org.freedesktop.*",
-            "/share/dbus-1/services/org.freedesktop.*",
-            "/share/flatpak/triggers",
-            "/share/gdm",
-            "/share/zsh",
-            "/share/fish",
-            "/lib/sysusers.d",
-            "/lib/tmpfiles.d"
-          ],
-          "post-install": [
-            "install -Dpm0755 -t /app/bin /usr/bin/update-{mime,desktop}-database"
-          ],
-          "sources": [
-            {
-              "type": "git",
-              "url": "https://github.com/flatpak/flatpak",
-              "commit": "20599618d623630f7aa38d61a2bb81d86fb25f09",
-              "tag": "1.17.2",
-              "x-checker-data": {
-                "type": "git",
-                "url-template": "$version",
-                "is-important": true
-              }
-            }
-          ],
-          "modules": [
-            {
-              "name": "python3-pyparsing",
-              "buildsystem": "simple",
-              "cleanup": [
+            "name": "blueprint-compiler",
+            "buildsystem": "meson",
+            "cleanup": [
                 "*"
-              ],
-              "build-commands": [
-                "pip3 install --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} pyparsing"
-              ],
-              "sources": [
+            ],
+            "sources": [
                 {
-                  "type": "file",
-                  "url": "https://files.pythonhosted.org/packages/f3/91/9c6ee907786a473bf81c5f53cf703ba0957b23ab84c264080fb5a450416f/pyparsing-3.3.2.tar.gz",
-                  "sha256": "c777f4d763f140633dcb6d8a3eda953bf7a214dc4eff598413c070bcdc117cbc",
-                  "x-checker-data": {
-                    "type": "pypi",
-                    "name": "pyparsing"
-                  }
-                },
-                {
-                  "type": "file",
-                  "url": "https://files.pythonhosted.org/packages/69/59/b6fc2188dfc7ea4f936cd12b49d707f66a1cb7a1d2c16172963534db741b/flit_core-3.12.0.tar.gz",
-                  "sha256": "18f63100d6f94385c6ed57a72073443e1a71a4acb4339491615d0f16d6ff01b2",
-                  "x-checker-data": {
-                    "type": "pypi",
-                    "name": "flit_core"
-                  }
-                }
-              ]
-            },
-            {
-              "name": "polkit",
-              "buildsystem": "meson",
-              "config-opts": [
-                "-Dlibs-only=true",
-                "-Dintrospection=false",
-                "-Dauthfw=shadow"
-              ],
-              "rm-configure": true,
-              "build-options": {
-                "env": {
-                  "CFLAGS": "-Wno-implicit-function-declaration"
-                }
-              },
-              "cleanup": [
-                "/bin/*",
-                "/etc/dbus-1",
-                "/etc/pam.d",
-                "/include",
-                "/lib/pkgconfig",
-                "/lib/polkit-1",
-                "/share/dbus-1/system-services/*",
-                "/share/polkit-1"
-              ],
-              "sources": [
-                {
-                  "type": "git",
-                  "url": "https://github.com/polkit-org/polkit",
-                  "commit": "9e4894c969eecf26a3ba762f4f7a268aa0fb3e51",
-                  "tag": "127",
-                  "x-checker-data": {
                     "type": "git",
-                    "tag-pattern": "^([\\d.]+)$"
-                  }
+                    "url": "https://gitlab.gnome.org/GNOME/blueprint-compiler.git",
+                    "commit": "d0a00f09703ca86230377fd542dc5e28188f0111",
+                    "tag": "v0.20.2",
+                    "x-checker-data": {
+                        "type": "git",
+                        "tag-template": "$version"
+                    }
                 }
-              ],
-              "modules": [
+            ]
+        },
+        {
+            "name": "bazaar",
+            "buildsystem": "meson",
+            "build-options": {
+                "append-path": "/usr/lib/sdk/llvm20/bin",
+                "prepend-ld-library-path": "/usr/lib/sdk/llvm20/lib"
+            },
+            "config-opts": [
+                "-Ddevelopment=true",
+                "-Dsandboxed_libflatpak=true",
+                "-Dhardcoded_main_config_path=/run/host/etc/bazaar/bazaar.yaml",
+                "-Dhardcoded_content_config_path=/run/host/etc/bazaar/config.yaml",
+                "-Dhardcoded_blocklist_path=/run/host/etc/bazaar/blocklist.txt"
+            ],
+            "sources": [
                 {
-                  "name": "ostree",
-                  "build-options": {
-                    "env": {
-                      "BASH_COMPLETIONSDIR": "/app/share/bash-completion/completions"
-                    },
+                    "type": "dir",
+                    "path": "../.."
+                }
+            ],
+            "modules": [
+                {
+                    "name": "md4c",
+                    "buildsystem": "cmake",
                     "config-opts": [
-                      "--disable-man",
-                      "--enable-introspection=no",
-                      "--with-curl",
-                      "--without-libsystemd"
+                        "-DBUILD_MD2HTML_EXECUTABLE=Off"
+                    ],
+                    "sources": [
+                        {
+                            "type": "git",
+                            "url": "https://github.com/mity/md4c.git",
+                            "commit": "729e6b8b320caa96328968ab27d7db2235e4fb47",
+                            "tag": "release-0.5.2",
+                            "x-checker-data": {
+                                "type": "git",
+                                "tag-pattern": "^release-([\\d.]+)$"
+                            }
+                        }
                     ]
-                  },
-                  "cleanup": [
-                    "/bin",
-                    "/etc/grub.d",
-                    "/etc/ostree",
-                    "/share/ostree",
-                    "/libexec"
-                  ],
-                  "sources": [
-                    {
-                      "type": "git",
-                      "url": "https://github.com/ostreedev/ostree",
-                      "tag": "v2025.7",
-                      "commit": "134d144cb52ff018cfedfb936b661189bccc76e6",
-                      "x-checker-data": {
-                        "type": "anitya",
-                        "project-id": 10899,
-                        "tag-template": "v$version",
-                        "is-important": true
-                      }
-                    }
-                  ],
-                  "modules": [
-                    {
-                      "name": "libfuse",
-                      "build-options": {
-                        "env": {
-                          "MOUNT_FUSE_PATH": "../tmp/"
-                        }
-                      },
-                      "config-opts": [
-                        "UDEV_RULES_PATH=/app/etc/udev/rules.d",
-                        "INIT_D_PATH=/app/etc/init.d"
-                      ],
-                      "cleanup": [
-                        "/bin/ulockmgr_server",
-                        "/etc"
-                      ],
-                      "post-install": [
-                        "install -Dpm0755 ./fusermount-wrapper.sh /app/bin/fusermount"
-                      ],
-                      "sources": [
-                        {
-                          "type": "archive",
-                          "url": "https://github.com/libfuse/libfuse/releases/download/fuse-2.9.9/fuse-2.9.9.tar.gz",
-                          "sha256": "d0e69d5d608cc22ff4843791ad097f554dd32540ddc9bed7638cc6fea7c1b4b5"
-                        },
-                        {
-                          "type": "patch",
-                          "path": "fuse-2.9.2-namespace-conflict-fix.patch"
-                        },
-                        {
-                          "type": "patch",
-                          "path": "fuse-disable-sys-mount-under-flatpak.patch"
-                        },
-                        {
-                          "type": "patch",
-                          "path": "fuse-2.9.2-closefrom.patch"
-                        },
-                        {
-                          "type": "file",
-                          "path": "fusermount-wrapper.sh"
-                        }
-                      ]
-                    }
-                  ]
                 },
                 {
-                  "name": "xdg-dbus-proxy",
-                  "buildsystem": "meson",
-                  "config-opts": [
-                    "-Dman=disabled",
-                    "-Dtests=false"
-                  ],
-                  "sources": [
-                    {
-                      "type": "git",
-                      "url": "https://github.com/flatpak/xdg-dbus-proxy",
-                      "commit": "1c1989e56f94b9eb3b7567f8a6e8a0aa16cba496",
-                      "tag": "0.1.6",
-                      "x-checker-data": {
+                    "name": "malcontent",
+                    "buildsystem": "meson",
+                    "config-opts": [
+                        "-Dui=disabled",
+                        "-Dinstalled_tests=false"
+                    ],
+                    "sources": [
+                        {
+                            "type": "git",
+                            "url": "https://gitlab.freedesktop.org/pwithnall/malcontent.git",
+                            "commit": "3ba80995bb25b7aeda7e21d547f9e39ff9a81736",
+                            "tag": "0.12.0"
+                        },
+                        {
+                            "type": "shell",
+                            "commands": [
+                                "sed -i \"/subdir('tests')/d\" libmalcontent/meson.build",
+                                "sed -i \"/subdir('tests')/d\" meson.build",
+                                "sed -i \"/subdir('pam')/d\" meson.build"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "flatpak",
+                    "buildsystem": "meson",
+                    "config-opts": [
+                        "-Dgtkdoc=disabled",
+                        "-Ddocbook_docs=disabled",
+                        "-Dtests=false",
+                        "-Dman=disabled",
+                        "-Dseccomp=disabled",
+                        "-Dselinux_module=disabled",
+                        "-Dmalcontent=enabled",
+                        "-Dsandboxed_triggers=false",
+                        "-Dsystem_helper=enabled",
+                        "-Dsystemd=disabled",
+                        "-Dsystem_install_dir=/var/lib/flatpak",
+                        "-Dsystem_bubblewrap=bwrap",
+                        "-Dsystem_dbus_proxy=xdg-dbus-proxy",
+                        "--sysconfdir=/var/run/host/etc"
+                    ],
+                    "cleanup": [
+                        "/bin/flatpak-bisect",
+                        "/bin/flatpak-coredumpctl",
+                        "/etc/profile.d",
+                        "/lib/systemd",
+                        "/share/dbus-1/interfaces/org.freedesktop.*",
+                        "/share/dbus-1/services/org.freedesktop.*",
+                        "/share/flatpak/triggers",
+                        "/share/gdm",
+                        "/share/zsh",
+                        "/share/fish",
+                        "/lib/sysusers.d",
+                        "/lib/tmpfiles.d"
+                    ],
+                    "post-install": [
+                        "install -Dpm0755 -t /app/bin /usr/bin/update-{mime,desktop}-database"
+                    ],
+                    "sources": [
+                        {
+                            "type": "git",
+                            "url": "https://github.com/flatpak/flatpak",
+                            "commit": "13b26a94a3bd6fec309a16982a3a80d83776d7ac",
+                            "tag": "1.17.3",
+                            "x-checker-data": {
+                                "type": "git",
+                                "url-template": "$version",
+                                "is-important": true
+                            }
+                        }
+                    ],
+                    "modules": [
+                        {
+                            "name": "python3-pyparsing",
+                            "buildsystem": "simple",
+                            "cleanup": [
+                                "*"
+                            ],
+                            "build-commands": [
+                                "pip3 install --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} pyparsing"
+                            ],
+                            "sources": [
+                                {
+                                    "type": "file",
+                                    "url": "https://files.pythonhosted.org/packages/f3/91/9c6ee907786a473bf81c5f53cf703ba0957b23ab84c264080fb5a450416f/pyparsing-3.3.2.tar.gz",
+                                    "sha256": "c777f4d763f140633dcb6d8a3eda953bf7a214dc4eff598413c070bcdc117cbc",
+                                    "x-checker-data": {
+                                        "type": "pypi",
+                                        "name": "pyparsing"
+                                    }
+                                },
+                                {
+                                    "type": "file",
+                                    "url": "https://files.pythonhosted.org/packages/69/59/b6fc2188dfc7ea4f936cd12b49d707f66a1cb7a1d2c16172963534db741b/flit_core-3.12.0.tar.gz",
+                                    "sha256": "18f63100d6f94385c6ed57a72073443e1a71a4acb4339491615d0f16d6ff01b2",
+                                    "x-checker-data": {
+                                        "type": "pypi",
+                                        "name": "flit_core"
+                                    }
+                                }
+                            ]
+                        },
+			{
+			    "name": "python3-babel",
+			    "buildsystem": "simple",
+			    "cleanup": ["*"],
+			    "build-commands": [
+				"pip3 install --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} babel"
+			    ],
+			    "sources": [
+				{
+				    "type": "file",
+				    "url": "https://files.pythonhosted.org/packages/77/f5/21d2de20e8b8b0408f0681956ca2c69f1320a3848ac50e6e7f39c6159675/babel-2.18.0-py3-none-any.whl",
+				    "sha256": "e2b422b277c2b9a9630c1d7903c2a00d0830c409c59ac8cae9081c92f1aeba35",
+				     "x-checker-data": {
+					"type": "pypi",
+					"name": "babel"
+				    }
+				}
+			    ]
+			},
+                        {
+                            "name": "polkit",
+                            "buildsystem": "meson",
+                            "config-opts": [
+                                "-Dlibs-only=true",
+                                "-Dintrospection=false",
+                                "-Dauthfw=shadow"
+                            ],
+                            "rm-configure": true,
+                            "build-options": {
+                                "env": {
+                                    "CFLAGS": "-Wno-implicit-function-declaration"
+                                }
+                            },
+                            "cleanup": [
+                                "/bin/*",
+                                "/etc/dbus-1",
+                                "/etc/pam.d",
+                                "/include",
+                                "/lib/pkgconfig",
+                                "/lib/polkit-1",
+                                "/share/dbus-1/system-services/*",
+                                "/share/polkit-1"
+                            ],
+                            "sources": [
+                                {
+                                    "type": "git",
+                                    "url": "https://github.com/polkit-org/polkit",
+                                    "commit": "9e4894c969eecf26a3ba762f4f7a268aa0fb3e51",
+                                    "tag": "127",
+                                    "x-checker-data": {
+                                        "type": "git",
+                                        "tag-pattern": "^([\\d.]+)$"
+                                    }
+                                }
+                            ],
+                            "modules": [
+                                {
+                                    "name": "ostree",
+                                    "build-options": {
+                                        "env": {
+                                            "BASH_COMPLETIONSDIR": "/app/share/bash-completion/completions"
+                                        },
+                                        "config-opts": [
+                                            "--disable-man",
+                                            "--enable-introspection=no",
+                                            "--with-curl",
+                                            "--without-libsystemd"
+                                        ]
+                                    },
+                                    "cleanup": [
+                                        "/bin",
+                                        "/etc/grub.d",
+                                        "/etc/ostree",
+                                        "/share/ostree",
+                                        "/libexec"
+                                    ],
+                                    "sources": [
+                                        {
+                                            "type": "git",
+                                            "url": "https://github.com/ostreedev/ostree",
+                                            "tag": "v2025.7",
+                                            "commit": "134d144cb52ff018cfedfb936b661189bccc76e6",
+                                            "x-checker-data": {
+                                                "type": "anitya",
+                                                "project-id": 10899,
+                                                "tag-template": "v$version",
+                                                "is-important": true
+                                            }
+                                        }
+                                    ],
+                                    "modules": [
+                                        {
+                                            "name": "libfuse",
+                                            "build-options": {
+                                                "env": {
+                                                    "MOUNT_FUSE_PATH": "../tmp/"
+                                                }
+                                            },
+                                            "config-opts": [
+                                                "UDEV_RULES_PATH=/app/etc/udev/rules.d",
+                                                "INIT_D_PATH=/app/etc/init.d"
+                                            ],
+                                            "cleanup": [
+                                                "/bin/ulockmgr_server",
+                                                "/etc"
+                                            ],
+                                            "post-install": [
+                                                "install -Dpm0755 ./fusermount-wrapper.sh /app/bin/fusermount"
+                                            ],
+                                            "sources": [
+                                                {
+                                                    "type": "archive",
+                                                    "url": "https://github.com/libfuse/libfuse/releases/download/fuse-2.9.9/fuse-2.9.9.tar.gz",
+                                                    "sha256": "d0e69d5d608cc22ff4843791ad097f554dd32540ddc9bed7638cc6fea7c1b4b5"
+                                                },
+                                                {
+                                                    "type": "patch",
+                                                    "path": "fuse-2.9.2-namespace-conflict-fix.patch"
+                                                },
+                                                {
+                                                    "type": "patch",
+                                                    "path": "fuse-disable-sys-mount-under-flatpak.patch"
+                                                },
+                                                {
+                                                    "type": "patch",
+                                                    "path": "fuse-2.9.2-closefrom.patch"
+                                                },
+                                                {
+                                                    "type": "file",
+                                                    "path": "fusermount-wrapper.sh"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "name": "xdg-dbus-proxy",
+                                    "buildsystem": "meson",
+                                    "config-opts": [
+                                        "-Dman=disabled",
+                                        "-Dtests=false"
+                                    ],
+                                    "sources": [
+                                        {
+                                            "type": "git",
+                                            "url": "https://github.com/flatpak/xdg-dbus-proxy",
+                                            "commit": "1c1989e56f94b9eb3b7567f8a6e8a0aa16cba496",
+                                            "tag": "0.1.6",
+                                            "x-checker-data": {
+                                                "type": "git",
+                                                "url-template": "$version"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "bubblewrap",
+            "buildsystem": "meson",
+            "config-opts": [
+                "-Dman=disabled",
+                "-Dselinux=disabled",
+                "-Dtests=false"
+            ],
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://github.com/containers/bubblewrap",
+                    "commit": "9ca3b05ec787acfb4b17bed37db5719fa777834f",
+                    "tag": "v0.11.0",
+                    "x-checker-data": {
                         "type": "git",
                         "url-template": "$version"
-                      }
                     }
-                  ]
                 }
-              ]
-            }
-          ]
+            ]
         }
-      ]
-    },
-    {
-      "name": "bubblewrap",
-      "buildsystem": "meson",
-      "config-opts": [
-        "-Dman=disabled",
-        "-Dselinux=disabled",
-        "-Dtests=false"
-      ],
-      "sources": [
-        {
-          "type": "git",
-          "url": "https://github.com/containers/bubblewrap",
-          "commit": "9ca3b05ec787acfb4b17bed37db5719fa777834f",
-          "tag": "v0.11.0",
-          "x-checker-data": {
-            "type": "git",
-            "url-template": "$version"
-          }
-        }
-      ]
-    }
-  ]
+    ]
 }

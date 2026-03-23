@@ -1,4 +1,4 @@
-/* bz-search-widget.c
+/* bz-search-page.c
  *
  * Copyright 2025 Adam Masciola
  *
@@ -31,11 +31,11 @@
 #include "bz-screenshot.h"
 #include "bz-search-pill-list.h"
 #include "bz-search-result.h"
-#include "bz-search-widget.h"
+#include "bz-search-page.h"
 #include "bz-template-callbacks.h"
 #include "bz-util.h"
 
-struct _BzSearchWidget
+struct _BzSearchPage
 {
   AdwBin parent_instance;
 
@@ -60,7 +60,7 @@ struct _BzSearchWidget
   GtkGridView *grid_view;
 };
 
-G_DEFINE_FINAL_TYPE (BzSearchWidget, bz_search_widget, ADW_TYPE_BIN)
+G_DEFINE_FINAL_TYPE (BzSearchPage, bz_search_page, ADW_TYPE_BIN)
 
 enum
 {
@@ -76,24 +76,24 @@ static GParamSpec *props[LAST_PROP] = { 0 };
 
 static void
 search_changed (GtkEditable    *editable,
-                BzSearchWidget *self);
+                BzSearchPage *self);
 
 static void
 search_activate (GtkText        *text,
-                 BzSearchWidget *self);
+                 BzSearchPage *self);
 
 static void
 grid_activate (GtkGridView    *grid_view,
                guint           position,
-               BzSearchWidget *self);
+               BzSearchPage *self);
 
 static void
-invalidating_state_prop_changed (BzSearchWidget *self,
+invalidating_state_prop_changed (BzSearchPage *self,
                                  GParamSpec     *pspec,
                                  BzStateInfo    *info);
 
 static void
-blocklists_items_changed (BzSearchWidget *self,
+blocklists_items_changed (BzSearchPage *self,
                           guint           position,
                           guint           removed,
                           guint           added,
@@ -104,17 +104,17 @@ search_query_then (DexFuture *future,
                    GWeakRef  *wr);
 
 static void
-update_filter (BzSearchWidget *self);
+update_filter (BzSearchPage *self);
 
 static void
-emit_idx (BzSearchWidget *self,
+emit_idx (BzSearchPage *self,
           GListModel     *model,
           guint           selected_idx);
 
 static void
-bz_search_widget_dispose (GObject *object)
+bz_search_page_dispose (GObject *object)
 {
-  BzSearchWidget *self = BZ_SEARCH_WIDGET (object);
+  BzSearchPage *self = BZ_SEARCH_PAGE (object);
 
   if (self->state != NULL)
     g_signal_handlers_disconnect_by_func (self->state, invalidating_state_prop_changed, self);
@@ -134,24 +134,24 @@ bz_search_widget_dispose (GObject *object)
   g_clear_object (&self->search_model);
   g_clear_object (&self->selection_model);
 
-  G_OBJECT_CLASS (bz_search_widget_parent_class)->dispose (object);
+  G_OBJECT_CLASS (bz_search_page_parent_class)->dispose (object);
 }
 
 static void
-bz_search_widget_get_property (GObject    *object,
+bz_search_page_get_property (GObject    *object,
                                guint       prop_id,
                                GValue     *value,
                                GParamSpec *pspec)
 {
-  BzSearchWidget *self = BZ_SEARCH_WIDGET (object);
+  BzSearchPage *self = BZ_SEARCH_PAGE (object);
 
   switch (prop_id)
     {
     case PROP_STATE:
-      g_value_set_object (value, bz_search_widget_get_state (self));
+      g_value_set_object (value, bz_search_page_get_state (self));
       break;
     case PROP_TEXT:
-      g_value_set_string (value, bz_search_widget_get_text (self));
+      g_value_set_string (value, bz_search_page_get_text (self));
       break;
     case PROP_CURRENT_QUERY:
       g_value_set_object (value, self->current_query);
@@ -162,20 +162,20 @@ bz_search_widget_get_property (GObject    *object,
 }
 
 static void
-bz_search_widget_set_property (GObject      *object,
+bz_search_page_set_property (GObject      *object,
                                guint         prop_id,
                                const GValue *value,
                                GParamSpec   *pspec)
 {
-  BzSearchWidget *self = BZ_SEARCH_WIDGET (object);
+  BzSearchPage *self = BZ_SEARCH_PAGE (object);
 
   switch (prop_id)
     {
     case PROP_STATE:
-      bz_search_widget_set_state (self, g_value_get_object (value));
+      bz_search_page_set_state (self, g_value_get_object (value));
       break;
     case PROP_TEXT:
-      bz_search_widget_set_text (self, g_value_get_string (value));
+      bz_search_page_set_text (self, g_value_get_string (value));
       break;
     case PROP_CURRENT_QUERY:
     default:
@@ -245,11 +245,11 @@ no_results_found_subtitle (gpointer    object,
 }
 
 static void
-pill_list_cb (BzSearchWidget *self,
+pill_list_cb (BzSearchPage *self,
               const char     *label,
               GtkWidget      *pill_list)
 {
-  bz_search_widget_set_text (self, label);
+  bz_search_page_set_text (self, label);
   update_filter (self);
 }
 
@@ -261,7 +261,7 @@ category_clicked (BzFlathubCategory *category,
   GtkWidget         *nav_view  = NULL;
   AdwNavigationPage *apps_page = NULL;
 
-  self = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_SEARCH_WIDGET);
+  self = gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_SEARCH_PAGE);
   g_assert (self != NULL);
 
   nav_view = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
@@ -273,7 +273,7 @@ category_clicked (BzFlathubCategory *category,
 }
 
 static void
-bind_category_tile_cb (BzSearchWidget    *self,
+bind_category_tile_cb (BzSearchPage    *self,
                        BzCategoryTile    *tile,
                        BzFlathubCategory *category,
                        BzDynamicListView *view)
@@ -282,7 +282,7 @@ bind_category_tile_cb (BzSearchWidget    *self,
 }
 
 static void
-unbind_category_tile_cb (BzSearchWidget    *self,
+unbind_category_tile_cb (BzSearchPage    *self,
                          BzCategoryTile    *tile,
                          BzFlathubCategory *category,
                          BzDynamicListView *view)
@@ -302,11 +302,11 @@ tile_activated_cb (GtkListItem   *list_item,
 }
 
 static void
-reset_search_cb (BzSearchWidget *self,
+reset_search_cb (BzSearchPage *self,
                  GtkButton      *button)
 {
-  bz_search_widget_set_text (self, "");
-  bz_search_widget_refresh (self);
+  bz_search_page_set_text (self, "");
+  bz_search_page_refresh (self);
 }
 
 static void
@@ -358,14 +358,14 @@ debug_id_inspect_cb (GtkListItem *list_item,
 }
 
 static void
-bz_search_widget_class_init (BzSearchWidgetClass *klass)
+bz_search_page_class_init (BzSearchPageClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
-  object_class->dispose      = bz_search_widget_dispose;
-  object_class->get_property = bz_search_widget_get_property;
-  object_class->set_property = bz_search_widget_set_property;
+  object_class->dispose      = bz_search_page_dispose;
+  object_class->get_property = bz_search_page_get_property;
+  object_class->set_property = bz_search_page_set_property;
 
   props[PROP_STATE] =
       g_param_spec_object (
@@ -398,14 +398,14 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
   g_type_ensure (BZ_TYPE_SEARCH_RESULT);
   g_type_ensure (BZ_TYPE_SEARCH_PILL_LIST);
 
-  gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-search-widget.ui");
+  gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-search-page.ui");
   bz_widget_class_bind_all_util_callbacks (widget_class);
 
-  gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, search_bar);
-  gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, search_busy);
-  gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, content_box);
-  gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, search_stack);
-  gtk_widget_class_bind_template_child (widget_class, BzSearchWidget, grid_view);
+  gtk_widget_class_bind_template_child (widget_class, BzSearchPage, search_bar);
+  gtk_widget_class_bind_template_child (widget_class, BzSearchPage, search_busy);
+  gtk_widget_class_bind_template_child (widget_class, BzSearchPage, content_box);
+  gtk_widget_class_bind_template_child (widget_class, BzSearchPage, search_stack);
+  gtk_widget_class_bind_template_child (widget_class, BzSearchPage, grid_view);
   gtk_widget_class_bind_template_callback (widget_class, bind_category_tile_cb);
   gtk_widget_class_bind_template_callback (widget_class, unbind_category_tile_cb);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
@@ -424,7 +424,7 @@ bz_search_widget_class_init (BzSearchWidgetClass *klass)
 }
 
 static void
-bz_search_widget_init (BzSearchWidget *self)
+bz_search_page_init (BzSearchPage *self)
 {
   self->search_model = g_list_store_new (BZ_TYPE_SEARCH_RESULT);
 
@@ -442,13 +442,13 @@ bz_search_widget_init (BzSearchWidget *self)
 }
 
 GtkWidget *
-bz_search_widget_new (GListModel *model,
+bz_search_page_new (GListModel *model,
                       const char *initial)
 {
-  BzSearchWidget *self = NULL;
+  BzSearchPage *self = NULL;
 
   self = g_object_new (
-      BZ_TYPE_SEARCH_WIDGET,
+      BZ_TYPE_SEARCH_PAGE,
       "model", model,
       NULL);
 
@@ -459,10 +459,10 @@ bz_search_widget_new (GListModel *model,
 }
 
 BzEntryGroup *
-bz_search_widget_get_selected (BzSearchWidget *self,
+bz_search_page_get_selected (BzSearchPage *self,
                                gboolean       *remove)
 {
-  g_return_val_if_fail (BZ_IS_SEARCH_WIDGET (self), NULL);
+  g_return_val_if_fail (BZ_IS_SEARCH_PAGE (self), NULL);
 
   if (remove != NULL)
     *remove = self->remove;
@@ -470,10 +470,10 @@ bz_search_widget_get_selected (BzSearchWidget *self,
 }
 
 void
-bz_search_widget_set_state (BzSearchWidget *self,
-                            BzStateInfo    *state)
+bz_search_page_set_state (BzSearchPage *self,
+                          BzStateInfo    *state)
 {
-  g_return_if_fail (BZ_IS_SEARCH_WIDGET (self));
+  g_return_if_fail (BZ_IS_SEARCH_PAGE (self));
 
   if (self->state != NULL)
     g_signal_handlers_disconnect_by_func (self->state, invalidating_state_prop_changed, self);
@@ -547,17 +547,17 @@ bz_search_widget_set_state (BzSearchWidget *self,
 }
 
 BzStateInfo *
-bz_search_widget_get_state (BzSearchWidget *self)
+bz_search_page_get_state (BzSearchPage *self)
 {
-  g_return_val_if_fail (BZ_IS_SEARCH_WIDGET (self), NULL);
+  g_return_val_if_fail (BZ_IS_SEARCH_PAGE (self), NULL);
   return self->state;
 }
 
 void
-bz_search_widget_set_text (BzSearchWidget *self,
+bz_search_page_set_text (BzSearchPage *self,
                            const char     *text)
 {
-  g_return_if_fail (BZ_IS_SEARCH_WIDGET (self));
+  g_return_if_fail (BZ_IS_SEARCH_PAGE (self));
 
   gtk_editable_set_text (GTK_EDITABLE (self->search_bar), text);
   if (text != NULL)
@@ -567,26 +567,26 @@ bz_search_widget_set_text (BzSearchWidget *self,
 }
 
 const char *
-bz_search_widget_get_text (BzSearchWidget *self)
+bz_search_page_get_text (BzSearchPage *self)
 {
-  g_return_val_if_fail (BZ_IS_SEARCH_WIDGET (self), NULL);
+  g_return_val_if_fail (BZ_IS_SEARCH_PAGE (self), NULL);
   return gtk_editable_get_text (GTK_EDITABLE (self->search_bar));
 }
 
 void
-bz_search_widget_refresh (BzSearchWidget *self)
+bz_search_page_refresh (BzSearchPage *self)
 {
-  g_return_if_fail (BZ_IS_SEARCH_WIDGET (self));
+  g_return_if_fail (BZ_IS_SEARCH_PAGE (self));
   update_filter (self);
 }
 
 gboolean
-bz_search_widget_ensure_active (BzSearchWidget *self,
+bz_search_page_ensure_active (BzSearchPage *self,
                                 const char     *initial)
 {
   const char *text = NULL;
 
-  g_return_val_if_fail (BZ_IS_SEARCH_WIDGET (self), FALSE);
+  g_return_val_if_fail (BZ_IS_SEARCH_PAGE (self), FALSE);
 
   text = gtk_editable_get_text (GTK_EDITABLE (self->search_bar));
   if (text != NULL && *text != '\0' &&
@@ -594,14 +594,14 @@ bz_search_widget_ensure_active (BzSearchWidget *self,
     return FALSE;
 
   gtk_widget_grab_focus (GTK_WIDGET (self->search_bar));
-  bz_search_widget_set_text (self, initial);
+  bz_search_page_set_text (self, initial);
 
   return TRUE;
 }
 
 static void
 search_changed (GtkEditable    *editable,
-                BzSearchWidget *self)
+                BzSearchPage *self)
 {
   GSettings *settings = NULL;
 
@@ -621,7 +621,7 @@ search_changed (GtkEditable    *editable,
 
 static void
 search_activate (GtkText        *text,
-                 BzSearchWidget *self)
+                 BzSearchPage *self)
 {
   GtkSelectionModel *model          = NULL;
   guint              n_items        = 0;
@@ -655,7 +655,7 @@ search_activate (GtkText        *text,
 static void
 grid_activate (GtkGridView    *grid_view,
                guint           position,
-               BzSearchWidget *self)
+               BzSearchPage *self)
 {
   GtkSelectionModel *model = NULL;
 
@@ -664,7 +664,7 @@ grid_activate (GtkGridView    *grid_view,
 }
 
 static void
-invalidating_state_prop_changed (BzSearchWidget *self,
+invalidating_state_prop_changed (BzSearchPage *self,
                                  GParamSpec     *pspec,
                                  BzStateInfo    *info)
 {
@@ -672,7 +672,7 @@ invalidating_state_prop_changed (BzSearchWidget *self,
 }
 
 static void
-blocklists_items_changed (BzSearchWidget *self,
+blocklists_items_changed (BzSearchPage *self,
                           guint           position,
                           guint           removed,
                           guint           added,
@@ -685,7 +685,7 @@ static DexFuture *
 search_query_then (DexFuture *future,
                    GWeakRef  *wr)
 {
-  g_autoptr (BzSearchWidget) self   = NULL;
+  g_autoptr (BzSearchPage) self   = NULL;
   BzFinishedSearchQuery *finished   = NULL;
   GPtrArray             *results    = NULL;
   guint                  old_length = 0;
@@ -737,7 +737,7 @@ search_query_then (DexFuture *future,
 }
 
 static void
-update_filter (BzSearchWidget *self)
+update_filter (BzSearchPage *self)
 {
   BzSearchEngine *engine           = NULL;
   const char     *search_text      = NULL;
@@ -811,7 +811,7 @@ update_filter (BzSearchWidget *self)
 }
 
 static void
-emit_idx (BzSearchWidget *self,
+emit_idx (BzSearchPage *self,
           GListModel     *model,
           guint           selected_idx)
 {

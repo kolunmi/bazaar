@@ -55,10 +55,25 @@ template $BzStatsDialog: Adw.Dialog {
           title: _("World");
           icon-name: "globe-symbolic";
 
-          child: $BzWorldMap world_map {
+          child: Box {
+            orientation: vertical;
+            margin-top:10;
+            margin-bottom: 10;
+
+            $BzWorldMap world_map {
               model: bind template.country-model;
-              margin-top:10;
-              margin-bottom: 10;
+              vexpand: true;
+            }
+
+            Label {
+              label: _("Since 4/15/2024");
+              halign: center;
+
+              styles [
+                "dimmed",
+                "caption"
+              ]
+            }
           };
         }
       }

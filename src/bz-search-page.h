@@ -1,4 +1,4 @@
-/* bz-search-widget.h
+/* bz-search-page.h
  *
  * Copyright 2025 Adam Masciola
  *
@@ -26,40 +26,39 @@
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_SEARCH_WIDGET (bz_search_widget_get_type ())
-G_DECLARE_FINAL_TYPE (BzSearchWidget, bz_search_widget, BZ, SEARCH_WIDGET, AdwBin)
+#define BZ_TYPE_SEARCH_PAGE (bz_search_page_get_type ())
+G_DECLARE_FINAL_TYPE (BzSearchPage, bz_search_page, BZ, SEARCH_PAGE, AdwBin)
 
 GtkWidget *
-bz_search_widget_new (GListModel *model,
-                      const char *initial);
+bz_search_page_new (GListModel *model,
+                    const char *initial);
 
 void
-bz_search_widget_set_state (BzSearchWidget *self,
-                            BzStateInfo    *state);
+bz_search_page_set_state (BzSearchPage *self,
+                          BzStateInfo  *state);
 
 BzStateInfo *
-bz_search_widget_get_state (BzSearchWidget *self);
-
+bz_search_page_get_state (BzSearchPage *self);
 
 void
-bz_search_widget_set_text (BzSearchWidget *self,
-                           const char     *text);
+bz_search_page_set_text (BzSearchPage *self,
+                         const char   *text);
 
 const char *
-bz_search_widget_get_text (BzSearchWidget *self);
+bz_search_page_get_text (BzSearchPage *self);
 
 BzEntryGroup *
-bz_search_widget_get_selected (BzSearchWidget *self,
-                               gboolean       *remove);
+bz_search_page_get_selected (BzSearchPage *self,
+                             gboolean     *remove);
 
 BzEntryGroup *
-bz_search_widget_get_previewing (BzSearchWidget *self);
+bz_search_page_get_previewing (BzSearchPage *self);
 
 void
-bz_search_widget_refresh (BzSearchWidget *self);
+bz_search_page_refresh (BzSearchPage *self);
 
 gboolean
-bz_search_widget_ensure_active (BzSearchWidget *self,
-                                const char     *initial);
+bz_search_page_ensure_active (BzSearchPage *self,
+                              const char   *initial);
 
 G_END_DECLS

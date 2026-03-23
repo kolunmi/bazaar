@@ -116,9 +116,11 @@ struct _BzApplication
   GtkStringList              *blocklists;
   GtkStringList              *curated_configs;
   GtkStringList              *txt_blocklists;
+  gboolean                    flathub_remote_initialized;
   gboolean                    running;
   guint                       periodic_timeout_source;
-  int                         n_notifications_incoming;
+  int                         n_entries_incoming;
+  int                         n_remotes_syncing;
 };
 
 G_DEFINE_FINAL_TYPE (BzApplication, bz_application, ADW_TYPE_APPLICATION)
@@ -848,27 +850,27 @@ bz_application_init (BzApplication *self)
   gtk_application_set_accels_for_action (
       GTK_APPLICATION (self),
       "app.quit",
-      (const char *[]) { "<primary>q", NULL });
+      (const char *[]){ "<primary>q", NULL });
   gtk_application_set_accels_for_action (
       GTK_APPLICATION (self),
       "app.preferences",
-      (const char *[]) { "<primary>comma", NULL });
+      (const char *[]){ "<primary>comma", NULL });
   gtk_application_set_accels_for_action (
       GTK_APPLICATION (self),
       "app.sync-remotes",
-      (const char *[]) { "<primary>r", NULL });
+      (const char *[]){ "<primary>r", NULL });
   gtk_application_set_accels_for_action (
       GTK_APPLICATION (self),
       "app.search('')",
-      (const char *[]) { "<primary>f", NULL });
+      (const char *[]){ "<primary>f", NULL });
   gtk_application_set_accels_for_action (
       GTK_APPLICATION (self),
       "app.bazaar-inspector",
-      (const char *[]) { "<primary><alt><shift>i", NULL });
+      (const char *[]){ "<primary><alt><shift>i", NULL });
   gtk_application_set_accels_for_action (
       GTK_APPLICATION (self),
       "app.toggle-debug-mode",
-      (const char *[]) { "<primary><alt>d", NULL });
+      (const char *[]){ "<primary><alt>d", NULL });
 }
 
 BzStateInfo *
@@ -1028,7 +1030,9 @@ init_fiber (GWeakRef *wr)
           result = dex_await (
               bz_flatpak_instance_ensure_has_flathub (self->flatpak, NULL),
               &local_error);
-          if (!result)
+          if (result)
+            has_flathub = TRUE;
+          else
             {
               g_warning ("Failed to install flathub: %s",
                          local_error->message);
@@ -1036,6 +1040,7 @@ init_fiber (GWeakRef *wr)
             }
         }
     }
+  bz_state_info_set_has_flathub (self->state, has_flathub);
 
   self->installed_set = dex_await_boxed (
       bz_backend_retrieve_install_ids (
@@ -1303,7 +1308,7 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
             int n_incoming = 0;
 
             n_incoming = bz_backend_notification_get_n_incoming (notif);
-            self->n_notifications_incoming += n_incoming;
+            self->n_entries_incoming += n_incoming;
 
             update_labels = TRUE;
           }
@@ -1329,8 +1334,56 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
                   g_ptr_array_add (build_notify_groups, g_object_ref (group));
               }
 
-            self->n_notifications_incoming--;
+            self->n_entries_incoming--;
             update_labels = TRUE;
+          }
+          break;
+        case BZ_BACKEND_NOTIFICATION_KIND_REMOTE_SYNC_START:
+          {
+            const char *remote_name = NULL;
+
+            remote_name = bz_backend_notification_get_remote_name (notif);
+
+            if (bz_state_info_get_has_flathub (self->state))
+              /* We only count instances of the "flathub" remote if we have
+                 flathub, since that's all we care about for the UI */
+              {
+                if (g_strcmp0 (remote_name, "flathub") == 0)
+                  self->n_remotes_syncing++;
+              }
+            else
+              self->n_remotes_syncing++;
+
+            g_debug ("remote '%s' has begun synchronization; "
+                     "now currently syncing %u remote(s)",
+                     remote_name, self->n_remotes_syncing);
+          }
+          break;
+        case BZ_BACKEND_NOTIFICATION_KIND_REMOTE_SYNC_FINISH:
+          {
+            const char *remote_name = NULL;
+
+            remote_name = bz_backend_notification_get_remote_name (notif);
+
+            if (bz_state_info_get_has_flathub (self->state))
+              {
+                if (g_strcmp0 (remote_name, "flathub") == 0)
+                  {
+                    self->n_remotes_syncing--;
+                    if (self->n_remotes_syncing == 0)
+                      self->flathub_remote_initialized = TRUE;
+                  }
+              }
+            else
+              {
+                self->n_remotes_syncing--;
+                if (self->n_remotes_syncing == 0)
+                  bz_state_info_set_busy (self->state, FALSE);
+              }
+
+            g_debug ("remote '%s' has finished synchronization; "
+                     "now currently syncing %u remote(s)",
+                     remote_name, self->n_remotes_syncing);
           }
           break;
         case BZ_BACKEND_NOTIFICATION_KIND_INSTALL_DONE:
@@ -1415,6 +1468,8 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
               case BZ_BACKEND_NOTIFICATION_KIND_ERROR:
               case BZ_BACKEND_NOTIFICATION_KIND_TELL_INCOMING:
               case BZ_BACKEND_NOTIFICATION_KIND_REPLACE_ENTRY:
+              case BZ_BACKEND_NOTIFICATION_KIND_REMOTE_SYNC_START:
+              case BZ_BACKEND_NOTIFICATION_KIND_REMOTE_SYNC_FINISH:
               case BZ_BACKEND_NOTIFICATION_KIND_EXTERNAL_CHANGE:
               default:
                 g_assert_not_reached ();
@@ -1591,17 +1646,22 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
 
   if (update_labels)
     {
-      if (self->n_notifications_incoming > 0)
-        {
-          bz_state_info_set_background_task_label_take_printf (
-              self->state, _ ("Loading %d apps…"), self->n_notifications_incoming);
-        }
+      if (self->n_entries_incoming > 0)
+        bz_state_info_set_background_task_label_take_printf (
+            self->state, _ ("Loading %d apps…"), self->n_entries_incoming);
       else
         {
           bz_state_info_set_background_task_label (self->state, _ ("Checking for updates…"));
           fiber_check_for_updates (self);
           finish_with_background_task_label (self);
         }
+    }
+
+  if (self->n_entries_incoming == 0 &&
+      self->flathub_remote_initialized)
+    {
+      bz_state_info_set_busy (self->state, FALSE);
+      finish_with_background_task_label (self);
     }
 
   return g_steal_pointer (&read_future);
@@ -1726,8 +1786,7 @@ init_sync_finally (DexFuture *future,
 
   bz_weak_get_or_return_reject (self, wr);
 
-  bz_state_info_set_busy (self->state, FALSE);
-  finish_with_background_task_label (self);
+  /* Do nothing */
 
   return dex_future_new_true ();
 }
@@ -3291,9 +3350,9 @@ make_sync_future (BzApplication *self)
 static void
 finish_with_background_task_label (BzApplication *self)
 {
-  if (self->n_notifications_incoming > 0)
+  if (self->n_entries_incoming > 0)
     bz_state_info_set_background_task_label_take_printf (
-        self->state, _ ("Loading %d apps…"), self->n_notifications_incoming);
+        self->state, _ ("Loading %d apps…"), self->n_entries_incoming);
   else if (bz_state_info_get_syncing (self->state))
     bz_state_info_set_background_task_label (self->state, _ ("Refreshing…"));
   else if (bz_state_info_get_busy (self->state))

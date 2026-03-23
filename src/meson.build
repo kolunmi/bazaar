@@ -1,7 +1,7 @@
 math = cc.find_library('m', required: false)
 xmllint = find_program('xmllint', required: true)
 
-gtk_dep              = dependency('gtk4')
+gtk_dep              = dependency('gtk4', version: '>= 4.22.1')
 libadwaita_dep       = dependency('libadwaita-1', version: '>= 1.8')
 libdex_dep           = dependency('libdex-1', version: '>= 1.0.0')
 flatpak_dep          = dependency('flatpak', version: '>= 1.9')
@@ -124,10 +124,6 @@ bz_sources = files(
   'bz-markdown-render.c',
   'bz-newline-parser.c',
   'bz-parser.c',
-  'bz-permissions-page.c',
-  'bz-permission-entry-row.c',
-  'bz-permission-toggle-row.c',
-  'bz-portal-permissions.c',
   'bz-preferences-dialog.c',
   'bz-progress-bar.c',
   'bz-releases-list.c',
@@ -142,7 +138,7 @@ bz_sources = files(
   'bz-screenshots-carousel.c',
   'bz-search-engine.c',
   'bz-search-pill-list.c',
-  'bz-search-widget.c',
+  'bz-search-page.c',
   'bz-section-view.c',
   'bz-serializable.c',
   'bz-share-list.c',
@@ -299,10 +295,6 @@ blueprints = custom_target('blueprints',
     'bz-license-dialog.blp',
     'bz-login-page.blp',
     'bz-markdown-render.blp',
-    'bz-permissions-page.blp',
-    'bz-permission-entry-row.blp',
-    'bz-permission-toggle-row.blp',
-    'bz-portal-tile.blp',
     'bz-preferences-dialog.blp',
     'bz-progress-bar.blp',
     'bz-releases-dialog.blp',
@@ -312,7 +304,7 @@ blueprints = custom_target('blueprints',
     'bz-safety-dialog.blp',
     'bz-screenshot-page.blp',
     'bz-screenshots-carousel.blp',
-    'bz-search-widget.blp',
+    'bz-search-page.blp',
     'bz-section-view.blp',
     'bz-stats-dialog.blp',
     'bz-transaction-list-dialog.blp',
@@ -345,11 +337,24 @@ release_notes = custom_target('release-notes.xml',
   ],
 )
 
+countries_gvariant = custom_target(
+  'countries-gvariant',
+  input: files('../scripts/countries.json.in'),
+  output: 'countries.gvariant',
+  command: [
+    python3,
+    meson.project_source_root() / 'scripts' / 'countries.py',
+    '@INPUT@',
+    meson.project_source_root() / 'po' / 'LINGUAS',
+    '@OUTPUT@',
+  ],
+)
+
 bz_sources += gnome.compile_resources('bz-resources',
   'bazaar.gresource.xml',
   c_name: 'bz',
   source_dir: meson.current_build_dir(),
-  dependencies: [blueprints, release_notes],
+  dependencies: [blueprints, release_notes, countries_gvariant],
 )
 
 executable('bazaar', bz_sources, gdbus_src, marshalers,

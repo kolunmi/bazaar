@@ -38,9 +38,8 @@
 #include "bz-hooks.h"
 #include "bz-io.h"
 #include "bz-library-page.h"
-#include "bz-permissions-page.h"
 #include "bz-progress-bar.h"
-#include "bz-search-widget.h"
+#include "bz-search-page.h"
 #include "bz-template-callbacks.h"
 #include "bz-transaction-dialog.h"
 #include "bz-transaction-manager.h"
@@ -62,7 +61,7 @@ struct _BzWindow
   BzCometOverlay    *comet_overlay;
   AdwNavigationView *navigation_view;
   BzFullView        *full_view;
-  BzSearchWidget    *search_widget;
+  BzSearchPage      *search_page;
   BzLibraryPage     *library_page;
   AdwToastOverlay   *toasts;
   AdwViewStack      *main_view_stack;
@@ -305,7 +304,7 @@ browse_flathub_cb (BzWindow      *self,
 
 static void
 open_search_cb (BzWindow       *self,
-                BzSearchWidget *widget)
+                BzSearchPage *widget)
 {
   adw_view_stack_set_visible_child_name (self->main_view_stack, "search");
 }
@@ -651,27 +650,6 @@ action_launch_group (GtkWidget  *widget,
 }
 
 static void
-action_permissions (GtkWidget  *widget,
-                    const char *action_name,
-                    GVariant   *parameter)
-{
-  BzWindow   *self               = BZ_WINDOW (widget);
-  const char *id                 = NULL;
-  g_autoptr (BzEntryGroup) group = NULL;
-
-  id    = g_variant_get_string (parameter, NULL);
-  group = bz_application_map_factory_convert_one (
-      bz_state_info_get_application_factory (self->state),
-      gtk_string_object_new (id));
-
-  if (group == NULL)
-    return;
-
-  adw_navigation_view_push (self->navigation_view,
-                            ADW_NAVIGATION_PAGE (bz_permissions_page_new (group)));
-}
-
-static void
 bz_window_class_init (BzWindowClass *klass)
 {
   GObjectClass   *object_class = G_OBJECT_CLASS (klass);
@@ -697,7 +675,7 @@ bz_window_class_init (BzWindowClass *klass)
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   g_type_ensure (BZ_TYPE_COMET_OVERLAY);
-  g_type_ensure (BZ_TYPE_SEARCH_WIDGET);
+  g_type_ensure (BZ_TYPE_SEARCH_PAGE);
   g_type_ensure (BZ_TYPE_GLOBAL_PROGRESS);
   g_type_ensure (BZ_TYPE_PROGRESS_BAR);
   g_type_ensure (BZ_TYPE_CURATED_VIEW);
@@ -712,7 +690,7 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzWindow, navigation_view);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, full_view);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, toasts);
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, search_widget);
+  gtk_widget_class_bind_template_child (widget_class, BzWindow, search_page);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, library_page);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, main_view_stack);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, main_stack);
@@ -737,7 +715,6 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_install_action (widget_class, "window.show-group", "s", action_show_group);
   gtk_widget_class_install_action (widget_class, "window.addons-group", "s", action_addons_group);
   gtk_widget_class_install_action (widget_class, "window.bulk-install", NULL, action_bulk_install);
-  gtk_widget_class_install_action (widget_class, "window.permissions", "s", action_permissions);
   gtk_widget_class_install_action (widget_class, "window.launch-group", "s", action_launch_group);
 
   gtk_widget_class_add_binding_action (widget_class, GDK_KEY_d, GDK_CONTROL_MASK, "window.open-library", NULL);
@@ -770,7 +747,7 @@ key_pressed (BzWindow              *self,
   else
     {
       adw_view_stack_set_visible_child_name (self->main_view_stack, "search");
-      return bz_search_widget_ensure_active (self->search_widget, buf);
+      return bz_search_page_ensure_active (self->search_page, buf);
     }
 }
 
@@ -798,7 +775,7 @@ app_busy_changed (BzWindow    *self,
                   GParamSpec  *pspec,
                   BzStateInfo *info)
 {
-  bz_search_widget_refresh (self->search_widget);
+  bz_search_page_refresh (self->search_page);
   set_page (self);
 }
 
@@ -1004,19 +981,12 @@ bz_window_show_entry (BzWindow *self,
                       BzEntry  *entry)
 {
   g_autoptr (BzEntryGroup) group = NULL;
-  AdwNavigationPage *view_page   = NULL;
 
   g_return_if_fail (BZ_IS_WINDOW (self));
   g_return_if_fail (BZ_IS_ENTRY (entry));
 
   group = bz_entry_group_new_for_single_entry (entry);
-  bz_full_view_set_entry_group (self->full_view, group);
-
-  view_page = adw_navigation_view_find_page (self->navigation_view, "view");
-  if (view_page != NULL)
-    adw_navigation_view_pop_to_page (self->navigation_view, view_page);
-  else
-    adw_navigation_view_push_by_tag (self->navigation_view, "view");
+  bz_window_show_group(self, group);
 }
 
 void
@@ -1226,11 +1196,11 @@ search (BzWindow   *self,
         const char *initial)
 {
   if (initial != NULL && *initial != '\0')
-    bz_search_widget_set_text (self->search_widget, initial);
+    bz_search_page_set_text (self->search_page, initial);
 
   adw_view_stack_set_visible_child_name (self->main_view_stack, "search");
   adw_navigation_view_pop_to_tag (self->navigation_view, "main");
-  gtk_widget_grab_focus (GTK_WIDGET (self->search_widget));
+  gtk_widget_grab_focus (GTK_WIDGET (self->search_page));
 }
 
 static void

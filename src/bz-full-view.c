@@ -236,7 +236,7 @@ static char *
 format_recent_downloads_tooltip (gpointer object,
                                  int      value)
 {
-  return g_strdup_printf (_ ("%d downloads in the last 30 days"), value);
+  return g_strdup_printf (_ ("%d downloads in the last month"), value);
 }
 
 static char *
