@@ -16,37 +16,6 @@ else
   gnome = import('gnome')
   cc = meson.get_compiler('c')
 
-  config_h = configuration_data()
-
-  config_h.set_quoted('PACKAGE_VERSION', meson.project_version())
-  config_h.set_quoted('GETTEXT_PACKAGE', 'bazaar')
-  config_h.set_quoted('LOCALEDIR', get_option('prefix') / get_option('localedir'))
-  config_h.set_quoted('DONATE_LINK', 'https://ko-fi.com/kolunmi')
-  config_h.set_quoted('RELEASE_PAGE', run_command('version.sh', 'get-gh-release').stdout().strip())
-
-  dl_worker_bin_name = 'bazaar-dl-worker'
-  config_h.set_quoted('DL_WORKER_BIN_NAME', dl_worker_bin_name)
-
-  if get_option('hardcoded_main_config_path') != ''
-    config_h.set_quoted('HARDCODED_MAIN_CONFIG', get_option('hardcoded_main_config_path'))
-  endif
-  if get_option('hardcoded_blocklist_path') != ''
-    config_h.set_quoted('HARDCODED_BLOCKLIST', get_option('hardcoded_blocklist_path'))
-  endif
-  if get_option('hardcoded_content_config_path') != ''
-    config_h.set_quoted('HARDCODED_CONTENT_CONFIG', get_option('hardcoded_content_config_path'))
-  endif
-  if get_option('sandboxed_libflatpak')
-    config_h.set_quoted('SANDBOXED_LIBFLATPAK', '1')
-  endif
-
-  if get_option('development')
-    config_h.set10('DEVELOPMENT_BUILD', get_option('development'))
-  endif
-
-  configure_file(output: 'config.h', configuration: config_h)
-  add_project_arguments(['-I' + meson.project_build_root()], language: 'c')
-
   project_c_args = []
   test_c_args = [
     '-Wcast-align',
@@ -113,14 +82,49 @@ else
   endforeach
   add_project_arguments(project_c_args, language: 'c')
 
-  subdir('bge')
-  subdir('data')
-  subdir('src')
-  subdir('po')
+  if get_option('bge_only')
+    subdir('bge')
+  else
+    config_h = configuration_data()
 
-  gnome.post_install(
-    glib_compile_schemas: true,
-    gtk_update_icon_cache: true,
-    update_desktop_database: true,
-  )
+    config_h.set_quoted('PACKAGE_VERSION', meson.project_version())
+    config_h.set_quoted('GETTEXT_PACKAGE', 'bazaar')
+    config_h.set_quoted('LOCALEDIR', get_option('prefix') / get_option('localedir'))
+    config_h.set_quoted('DONATE_LINK', 'https://ko-fi.com/kolunmi')
+    config_h.set_quoted('RELEASE_PAGE', run_command('version.sh', 'get-gh-release').stdout().strip())
+
+    dl_worker_bin_name = 'bazaar-dl-worker'
+    config_h.set_quoted('DL_WORKER_BIN_NAME', dl_worker_bin_name)
+
+    if get_option('hardcoded_main_config_path') != ''
+      config_h.set_quoted('HARDCODED_MAIN_CONFIG', get_option('hardcoded_main_config_path'))
+    endif
+    if get_option('hardcoded_blocklist_path') != ''
+      config_h.set_quoted('HARDCODED_BLOCKLIST', get_option('hardcoded_blocklist_path'))
+    endif
+    if get_option('hardcoded_content_config_path') != ''
+      config_h.set_quoted('HARDCODED_CONTENT_CONFIG', get_option('hardcoded_content_config_path'))
+    endif
+    if get_option('sandboxed_libflatpak')
+      config_h.set_quoted('SANDBOXED_LIBFLATPAK', '1')
+    endif
+
+    if get_option('development')
+      config_h.set10('DEVELOPMENT_BUILD', get_option('development'))
+    endif
+
+    configure_file(output: 'config.h', configuration: config_h)
+    add_project_arguments(['-I' + meson.project_build_root()], language: 'c')
+
+    subdir('bge')
+    subdir('data')
+    subdir('src')
+    subdir('po')
+
+    gnome.post_install(
+      glib_compile_schemas: true,
+      gtk_update_icon_cache: true,
+      update_desktop_database: true,
+    )
+  endif
 endif
