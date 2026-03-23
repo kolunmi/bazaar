@@ -28,8 +28,7 @@
 #include "bz-world-map-parser.h"
 #include "bz-world-map.h"
 
-#define CARD_EDGE_THRESHOLD 160
-#define OPACITY_MULTIPLIER  2
+#define OPACITY_MULTIPLIER 2
 
 struct _BzWorldMap
 {
@@ -600,7 +599,7 @@ bz_world_map_snapshot (GtkWidget   *widget,
 
       gtk_widget_allocate (self->tooltip_box, natural_size.width, natural_size.height, -1, NULL);
 
-      if (widget_width - self->motion_x < CARD_EDGE_THRESHOLD)
+      if (self->motion_x > widget_width / 2.0)
         card_x = self->motion_x - natural_size.width - 10.0;
       else
         card_x = self->motion_x + 10.0;
