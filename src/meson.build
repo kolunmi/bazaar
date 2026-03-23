@@ -1,7 +1,7 @@
 math = cc.find_library('m', required: false)
 xmllint = find_program('xmllint', required: true)
 
-gtk_dep              = dependency('gtk4')
+gtk_dep              = dependency('gtk4', version: '>= 4.22.1')
 libadwaita_dep       = dependency('libadwaita-1', version: '>= 1.8')
 libdex_dep           = dependency('libdex-1', version: '>= 1.0.0')
 flatpak_dep          = dependency('flatpak', version: '>= 1.9')
