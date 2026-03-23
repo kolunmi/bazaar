@@ -12,9 +12,9 @@
     applications and addons from Flatpak remotes, particularly Flathub.
   </description>
 
-  <homepage rdf:resource="https://github.com/kolunmi/bazaar" />
-  <download-page rdf:resource="https://github.com/kolunmi/bazaar/releases" />
-  <bug-database rdf:resource="https://github.com/kolunmi/bazaar/issues" />
+  <homepage rdf:resource="https://github.com/bazaar-org/bazaar" />
+  <download-page rdf:resource="https://github.com/bazaar-org/bazaar/releases" />
+  <bug-database rdf:resource="https://github.com/bazaar-org/bazaar/issues" />
 
   <programming-language>C</programming-language>
 
