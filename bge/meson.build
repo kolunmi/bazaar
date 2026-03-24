@@ -4,6 +4,7 @@ bge_sources = [
   'libbge.c',
   'bge-animation.c',
   'bge-carousel.c',
+  'bge-markdown-render.c',
 ]
 
 bge_headers = [
@@ -31,6 +32,7 @@ bge_deps = [
   cc.find_library('m', required: true),
   dependency('gtk4', version: '>= 4.22.1'),
   dependency('libdex-1', version: '>= 1.0.0'),
+  dependency('md4c', version: '>= 0.5.1'),
 ]
 
 bge_marshalers = gnome.genmarshal('bge-marshalers',

@@ -12,7 +12,6 @@ libsoup_dep          = dependency('libsoup-3.0', version: '>= 3.6.0')
 json_glib_dep        = dependency('json-glib-1.0', version: '>= 1.10.0')
 glycin_dep           = dependency('glycin-2', version: '>= 2.0')
 glycin_gtk4_dep      = dependency('glycin-gtk4-2', version: '>= 2.0')
-md4c_dep             = dependency('md4c', version: '>= 0.5.1')
 webkit_dep           = dependency('webkitgtk-6.0', version: '>= 2.50.2')
 libsecret_dep        = dependency('libsecret-1', version: '>= 0.20')
 libproxy_dep         = dependency('libproxy-1.0', version: '>= 0.5')
@@ -121,7 +120,6 @@ bz_sources = files(
   'bz-login-page.c',
   'bz-lozenge.c',
   'bz-malcontent-service.c',
-  'bz-markdown-render.c',
   'bz-newline-parser.c',
   'bz-parser.c',
   'bz-preferences-dialog.c',
@@ -181,7 +179,6 @@ bz_deps = [
   libdex_dep,
   glycin_dep,
   glycin_gtk4_dep,
-  md4c_dep,
   webkit_dep,
   libsecret_dep,
   libproxy_dep,
@@ -294,7 +291,6 @@ blueprints = custom_target('blueprints',
     'bz-library-page.blp',
     'bz-license-dialog.blp',
     'bz-login-page.blp',
-    'bz-markdown-render.blp',
     'bz-preferences-dialog.blp',
     'bz-progress-bar.blp',
     'bz-releases-dialog.blp',

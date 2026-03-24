@@ -36,4 +36,5 @@ bge_init (void)
 
   g_type_ensure (BGE_TYPE_ANIMATION);
   g_type_ensure (BGE_TYPE_CAROUSEL);
+  g_type_ensure (BGE_TYPE_MARKDOWN_RENDER);
 }
