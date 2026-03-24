@@ -79,10 +79,11 @@ typedef struct
   GtkTextBuffer *buffer;
   char          *beginning;
   GArray        *block_stack;
+  GArray        *list_index_stack;
+  GArray        *list_prefix_stack;
   GPtrArray     *tags;
   int            indent;
-  int            list_index;
-  MD_CHAR        list_prefix;
+  int            running_list_index;
 } ParseCtx;
 
 static int
@@ -296,13 +297,14 @@ regenerate (BgeMarkdownRender *self)
   if (self->markdown == NULL)
     return;
 
-  ctx.buffer      = gtk_text_buffer_new (NULL);
-  ctx.beginning   = self->markdown;
-  ctx.block_stack = g_array_new (FALSE, TRUE, sizeof (int));
-  ctx.tags        = g_ptr_array_new_with_free_func (tag_data_unref);
-  ctx.indent      = 0;
-  ctx.list_index  = 0;
-  ctx.list_prefix = '\0';
+  ctx.buffer             = gtk_text_buffer_new (NULL);
+  ctx.beginning          = self->markdown;
+  ctx.block_stack        = g_array_new (FALSE, TRUE, sizeof (int));
+  ctx.list_index_stack   = g_array_new (FALSE, TRUE, sizeof (int));
+  ctx.list_prefix_stack  = g_array_new (FALSE, TRUE, sizeof (MD_CHAR));
+  ctx.tags               = g_ptr_array_new_with_free_func (tag_data_unref);
+  ctx.indent             = 0;
+  ctx.running_list_index = -1;
 
   iresult = md_parse (
       self->markdown,
@@ -332,8 +334,10 @@ error:
 
 done:
   g_object_unref (ctx.buffer);
-  g_ptr_array_unref (ctx.tags);
   g_array_unref (ctx.block_stack);
+  g_array_unref (ctx.list_index_stack);
+  g_array_unref (ctx.list_prefix_stack);
+  g_ptr_array_unref (ctx.tags);
 }
 
 static int
@@ -343,10 +347,16 @@ enter_block (MD_BLOCKTYPE type,
 {
   ParseCtx *ctx           = user_data;
   int       list_parent   = 0;
+  int       list_index    = 0;
+  MD_CHAR   list_prefix   = 0;
   g_autoptr (TagData) tag = NULL;
 
   if (ctx->block_stack->len > 1)
     list_parent = g_array_index (ctx->block_stack, int, ctx->block_stack->len - 2);
+  if (ctx->list_index_stack->len > 0)
+    list_index = g_array_index (ctx->list_index_stack, int, ctx->list_index_stack->len - 1);
+  if (ctx->list_prefix_stack->len > 0)
+    list_prefix = g_array_index (ctx->list_prefix_stack, MD_CHAR, ctx->list_prefix_stack->len - 1);
 
   switch (type)
     {
@@ -354,38 +364,49 @@ enter_block (MD_BLOCKTYPE type,
       break;
     case MD_BLOCK_QUOTE:
       INIT_TAG_DATA_LOCATION (&tag, ctx->buffer,
-                              "indent", 25,
-                              "paragraph-background", "darkgray");
+                              "left-margin", 25,
+                              "paragraph-background", "lightgray");
       break;
     case MD_BLOCK_UL:
       {
         MD_BLOCK_UL_DETAIL *ul_detail = detail;
+        const int           zero      = 0;
 
         ctx->indent++;
-        ctx->list_index  = 0;
-        ctx->list_prefix = ul_detail->mark;
+        ctx->running_list_index = 0;
+        g_array_append_val (ctx->list_index_stack, zero);
+        g_array_append_val (ctx->list_prefix_stack, ul_detail->mark);
 
-        INIT_TAG_DATA_LOCATION (&tag, ctx->buffer, "indent", 25);
+        INIT_TAG_DATA_LOCATION (
+            &tag, ctx->buffer,
+            "left-margin", 25);
       }
       break;
     case MD_BLOCK_OL:
       {
         MD_BLOCK_OL_DETAIL *ol_detail = detail;
+        const int           zero      = 0;
 
         ctx->indent++;
-        ctx->list_index  = 0;
-        ctx->list_prefix = ol_detail->mark_delimiter;
+        ctx->running_list_index = 0;
+        g_array_append_val (ctx->list_index_stack, zero);
+        g_array_append_val (ctx->list_prefix_stack, ol_detail->mark_delimiter);
 
-        INIT_TAG_DATA_LOCATION (&tag, ctx->buffer, "indent", 25);
+        INIT_TAG_DATA_LOCATION (
+            &tag, ctx->buffer,
+            "left-margin", 25);
       }
       break;
     case MD_BLOCK_LI:
       {
+        if (ctx->indent > 1 ||
+            list_index > 0)
+          gtk_text_buffer_insert_at_cursor (ctx->buffer, "\n", -1);
         if (list_parent == MD_BLOCK_OL)
           {
             g_autofree char *prefix_text = NULL;
 
-            prefix_text = g_strdup_printf ("%d%c ", ctx->list_index, ctx->list_prefix);
+            prefix_text = g_strdup_printf ("%d%c ", list_index, list_prefix);
             gtk_text_buffer_insert_at_cursor (ctx->buffer, prefix_text, -1);
           }
         else
@@ -405,9 +426,11 @@ enter_block (MD_BLOCKTYPE type,
       {
         MD_BLOCK_H_DETAIL *h_detail = detail;
 
+        gtk_text_buffer_insert_at_cursor (ctx->buffer, "\n", -1);
         INIT_TAG_DATA_LOCATION (
             &tag, ctx->buffer,
-            "size-points", 22.0f - (float) h_detail->level);
+            "size-points", 22.0f - (float) h_detail->level,
+            "pixels-below-lines", 10);
       }
       break;
     case MD_BLOCK_CODE:
@@ -417,6 +440,11 @@ enter_block (MD_BLOCKTYPE type,
           "paragraph-background", "darkgray");
       break;
     case MD_BLOCK_P:
+      INIT_TAG_DATA_LOCATION (
+          &tag, ctx->buffer,
+          "indent", 15,
+          "pixels-below-lines", 4);
+      break;
     case MD_BLOCK_HTML:
     case MD_BLOCK_TABLE:
     case MD_BLOCK_THEAD:
@@ -440,7 +468,8 @@ leave_block (MD_BLOCKTYPE type,
              void        *detail,
              void        *user_data)
 {
-  ParseCtx *ctx = user_data;
+  ParseCtx *ctx     = user_data;
+  int       parent1 = -1;
 
 #define TERMINATE_TAG_FROM_SET_PROP(_set_prop)           \
   for (guint i = ctx->tags->len; i > 0; i--)             \
@@ -464,7 +493,9 @@ leave_block (MD_BLOCKTYPE type,
     }
 
   g_assert (ctx->block_stack->len > 0);
-  if (g_array_index (ctx->block_stack, int, ctx->block_stack->len - 1) >= 0)
+  parent1 = g_array_index (ctx->block_stack, int, ctx->block_stack->len - 1);
+
+  if (parent1 >= 0)
     {
       switch (type)
         {
@@ -472,26 +503,37 @@ leave_block (MD_BLOCKTYPE type,
           break;
         case MD_BLOCK_QUOTE:
           TERMINATE_TAG_FROM_SET_PROP ("paragraph-background-set");
-          gtk_text_buffer_insert_at_cursor (ctx->buffer, "\n", -1);
+          gtk_text_buffer_insert_at_cursor (ctx->buffer, "\n\n", -1);
           break;
         case MD_BLOCK_UL:
           {
             // MD_BLOCK_UL_DETAIL *ul_detail = detail;
 
-            TERMINATE_TAG_FROM_SET_PROP ("indent-set");
+            TERMINATE_TAG_FROM_SET_PROP ("left-margin-set");
             ctx->indent--;
+            ctx->running_list_index = -1;
+            g_array_set_size (ctx->list_index_stack, ctx->list_index_stack->len - 1);
+            g_array_set_size (ctx->list_prefix_stack, ctx->list_prefix_stack->len - 1);
+            if (ctx->indent == 0)
+              gtk_text_buffer_insert_at_cursor (ctx->buffer, "\n\n", -1);
           }
           break;
         case MD_BLOCK_OL:
           {
             // MD_BLOCK_OL_DETAIL *ol_detail = detail;
 
-            TERMINATE_TAG_FROM_SET_PROP ("indent-set");
+            TERMINATE_TAG_FROM_SET_PROP ("left-margin-set");
             ctx->indent--;
+            ctx->running_list_index = -1;
+            g_array_set_size (ctx->list_index_stack, ctx->list_index_stack->len - 1);
+            g_array_set_size (ctx->list_prefix_stack, ctx->list_prefix_stack->len - 1);
+            if (ctx->indent == 0)
+              gtk_text_buffer_insert_at_cursor (ctx->buffer, "\n", -1);
           }
           break;
         case MD_BLOCK_LI:
-          ctx->list_index++;
+          ++g_array_index (ctx->list_index_stack, int, ctx->list_index_stack->len - 1);
+          ctx->running_list_index++;
           break;
         case MD_BLOCK_HR:
           break;
@@ -500,11 +542,13 @@ leave_block (MD_BLOCKTYPE type,
           gtk_text_buffer_insert_at_cursor (ctx->buffer, "\n", -1);
           break;
         case MD_BLOCK_CODE:
-          TERMINATE_TAG_FROM_SET_PROP ("family");
+          TERMINATE_TAG_FROM_SET_PROP ("family-set");
           gtk_text_buffer_insert_at_cursor (ctx->buffer, "\n", -1);
           break;
         case MD_BLOCK_P:
-          gtk_text_buffer_insert_at_cursor (ctx->buffer, "\n\n", -1);
+          TERMINATE_TAG_FROM_SET_PROP ("indent-set");
+          if (ctx->running_list_index < 0)
+            gtk_text_buffer_insert_at_cursor (ctx->buffer, "\n\n", -1);
           break;
         case MD_BLOCK_HTML:
         case MD_BLOCK_TABLE:
@@ -635,10 +679,8 @@ text (MD_TEXTTYPE    type,
   g_autofree char *escaped = NULL;
 
   if (type == MD_TEXT_SOFTBR)
-    /* ctx->markup->len > 0) */
     gtk_text_buffer_insert_at_cursor (ctx->buffer, " ", -1);
   else if (type == MD_TEXT_BR)
-    /* ctx->markup->len > 0) */
     gtk_text_buffer_insert_at_cursor (ctx->buffer, "\n", -1);
   else
     gtk_text_buffer_insert_at_cursor (ctx->buffer, buf, size);
