@@ -13,6 +13,8 @@ bge_headers = [
   'bge-carousel.h',
 ]
 
+subdir('wdgt')
+
 version_split = meson.project_version().split('.')
 version_conf = configuration_data()
 version_conf.set('VERSION', meson.project_version())

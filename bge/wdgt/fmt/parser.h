@@ -1,6 +1,6 @@
-/* libbge.c
+/* parser.h
  *
- * Copyright 2025 Eva M
+ * Copyright 2026 Eva M
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,36 +18,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#define G_LOG_DOMAIN "BGE::CORE"
+#include <glib.h>
 
-#include "bge.h"
+G_BEGIN_DECLS
 
-#include "wdgt/fmt/parser.h"
+gboolean
+bge_wdgt_parse_string (const char *string,
+                       GError    **error);
 
-/**
- * bge_init:
- *
- * Initializes BGE (And GTK).
- *
- * This function must be called before using any other BGE functions.
- */
-void
-bge_init (void)
-{
-  gtk_init ();
-
-  g_type_ensure (BGE_TYPE_ANIMATION);
-  g_type_ensure (BGE_TYPE_CAROUSEL);
-  g_type_ensure (BGE_TYPE_MARKDOWN_RENDER);
-
-  {
-    g_autoptr (GError) local_error = NULL;
-    gboolean result                = FALSE;
-
-    result = bge_wdgt_parse_string (
-        "  defwidget \"Yo Yo\"{atoken   ",
-        &local_error);
-    if (!result)
-      g_print ("Error!! %s\n", local_error->message);
-  }
-}
+G_END_DECLS
