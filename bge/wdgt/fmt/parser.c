@@ -22,12 +22,20 @@
 
 #include "parser.h"
 
+#define SINGLE_CHAR_TOKENS "{}=.;"
+
 #define STR_DEFWIDGET  "defwidget"
 #define STR_CHILD      "child"
 #define STR_STATE      "state"
 #define STR_TRANSITION "transition"
 #define STR_ALLOCATE   "%allocate"
 #define STR_SNAPSHOT   "%snapshot"
+
+typedef enum
+{
+  TOKEN_PARSE_DEFAULT = 0,
+  TOKEN_PARSE_QUOTED  = 1 << 0,
+} TokenParseFlags;
 
 enum
 {
@@ -56,10 +64,10 @@ enum
   G_STMT_END
 
 static char *
-consume_token (const char **pp,
-               gboolean     quoted,
-               gboolean     allow_brackets,
-               GError     **error);
+consume_token (const char    **pp,
+               const char     *single_chars,
+               TokenParseFlags flags,
+               GError        **error);
 
 gboolean
 bge_wdgt_parse_string (const char *string,
@@ -89,20 +97,32 @@ bge_wdgt_parse_string (const char *string,
   }                                      \
   G_STMT_END
 
-#define EXPECT_TOKEN(_string, _token)         \
+#define EXPECT_TOKEN(_string, _token)            \
+  G_STMT_START                                   \
+  {                                              \
+    if (g_strcmp0 ((_string), (_token)) != 0)    \
+      {                                          \
+        g_set_error (                            \
+            error,                               \
+            G_IO_ERROR,                          \
+            G_IO_ERROR_UNKNOWN,                  \
+            "wdgt fmt parser error: "            \
+            "expected token \"%s\", got \"%s\"", \
+            (_token), (_string));                \
+        return FALSE;                            \
+      }                                          \
+  }                                              \
+  G_STMT_END
+
+#define UNEXPECTED_TOKEN(_token)              \
   G_STMT_START                                \
   {                                           \
-    if (g_strcmp0 ((_string), (_token)) != 0) \
-      {                                       \
-        g_set_error (                         \
-            error,                            \
-            G_IO_ERROR,                       \
-            G_IO_ERROR_UNKNOWN,               \
-            "wdgt fmt parser error: "         \
-            "expected token %s, got \"%s\"",  \
-            (_token), (_string));             \
-        return FALSE;                         \
-      }                                       \
+    g_set_error (                             \
+        error,                                \
+        G_IO_ERROR,                           \
+        G_IO_ERROR_UNKNOWN,                   \
+        "Unexpected token \"%s\"", (_token)); \
+    return FALSE;                             \
   }                                           \
   G_STMT_END
 
@@ -110,45 +130,74 @@ bge_wdgt_parse_string (const char *string,
        p != NULL && *p != '\0';
        p = g_utf8_next_char (p))
     {
-      g_autofree char *token0 = NULL;
+      g_autofree char *token = NULL;
 
-      token0 = consume_token (&p, FALSE, FALSE, &local_error);
-      RETURN_ERROR_UNLESS (token0 != NULL);
-      EXPECT_TOKEN (token0, STR_DEFWIDGET);
-      g_print ("%s\n", token0);
-      g_clear_pointer (&token0, g_free);
+#define GET_TOKEN(_token_out, _flags)            \
+  G_STMT_START                                   \
+  {                                              \
+    g_clear_pointer ((_token_out), g_free);      \
+    *(_token_out) = consume_token (              \
+        &p,                                      \
+        SINGLE_CHAR_TOKENS,                      \
+        (_flags),                                \
+        &local_error);                           \
+    RETURN_ERROR_UNLESS (*(_token_out) != NULL); \
+  }                                              \
+  G_STMT_END
 
-      token0 = consume_token (&p, TRUE, FALSE, &local_error);
-      RETURN_ERROR_UNLESS (token0 != NULL);
-      g_print ("%s\n", token0);
-      g_clear_pointer (&token0, g_free);
+#define GET_TOKEN_EXPECT(_token_out, _flags, _expect) \
+  G_STMT_START                                        \
+  {                                                   \
+    GET_TOKEN ((_token_out), (_flags));               \
+    EXPECT_TOKEN (*(_token_out), (_expect));          \
+  }                                                   \
+  G_STMT_END
 
-      token0 = consume_token (&p, FALSE, TRUE, &local_error);
-      RETURN_ERROR_UNLESS (token0 != NULL);
-      EXPECT_TOKEN (token0, "{");
-      g_print ("%s\n", token0);
-      g_clear_pointer (&token0, g_free);
+      GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, STR_DEFWIDGET);
+      GET_TOKEN (&token, TOKEN_PARSE_QUOTED);
+      g_print ("Widget name: %s\n", token);
 
-      token0 = consume_token (&p, FALSE, FALSE, &local_error);
-      RETURN_ERROR_UNLESS (token0 != NULL);
-      EXPECT_TOKEN (token0, "atoken");
-      g_print ("%s\n", token0);
-      g_clear_pointer (&token0, g_free);
+      GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "{");
+      for (;;)
+        {
+          GET_TOKEN (&token, TOKEN_PARSE_DEFAULT);
+          if (g_strcmp0 (token, "}") == 0)
+            break;
+          else if (g_strcmp0 (token, STR_CHILD) == 0)
+            {
+              GET_TOKEN (&token, TOKEN_PARSE_QUOTED);
+              g_print ("Made child %s\n", token);
+              GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "=");
+              GET_TOKEN (&token, TOKEN_PARSE_QUOTED);
+              g_print ("child is %s\n", token);
+              GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ";");
+            }
+          else if (g_strcmp0 (token, STR_STATE) == 0)
+            {
+              GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "=");
+            }
+          else
+            UNEXPECTED_TOKEN (token);
+        }
 
       break;
+
+#undef GET_TOKEN_EXPECT
+#undef GET_TOKEN
     }
 
-#undef RETURN_ERROR_UNLESS
+#undef UNEXPECTED_TOKEN
 #undef EXPECT_TOKEN
+#undef RETURN_ERROR_UNLESS
 
   return TRUE;
 }
 
 static char *
-consume_token (const char **pp,
-               gboolean     quoted,
-               gboolean     allow_brackets,
-               GError     **error)
+consume_token (const char    **pp,
+               const char     *single_chars,
+               TokenParseFlags flags,
+               GError        **error)
 {
   const char *p             = *pp;
   gboolean    hit_non_space = FALSE;
@@ -195,23 +244,22 @@ consume_token (const char **pp,
       gunichar ch            = 0;
       gboolean is_whitespace = FALSE;
       gboolean is_quotes     = FALSE;
-      gboolean is_brackets   = FALSE;
 
       ch            = g_utf8_get_char (p);
       is_whitespace = ch == '\n' || g_unichar_isspace (ch);
       is_quotes     = ch == '"';
-      is_brackets   = ch == '{' || ch == '}';
 
       if (is_whitespace)
         {
-          if (!quoted && hit_non_space)
+          if (!(flags & TOKEN_PARSE_QUOTED) &&
+              hit_non_space)
             RETURN_TOKEN;
         }
       else
         {
           if (is_quotes)
             {
-              if (!quoted)
+              if (!(flags & TOKEN_PARSE_QUOTED))
                 {
                   g_set_error (
                       error,
@@ -220,7 +268,7 @@ consume_token (const char **pp,
                       "Unexpected quote");
                   return NULL;
                 }
-              if (hit_non_space)
+              else if (hit_non_space)
                 RETURN_TOKEN_ADJUST_NEXT_CHAR;
               else
                 {
@@ -230,7 +278,7 @@ consume_token (const char **pp,
                   hit_non_space = TRUE;
                 }
             }
-          else if (quoted)
+          else if (flags & TOKEN_PARSE_QUOTED)
             {
               if (!hit_non_space)
                 {
@@ -242,26 +290,18 @@ consume_token (const char **pp,
                   return NULL;
                 }
             }
-          else if (is_brackets)
+          else if (single_chars != NULL &&
+                   g_utf8_strchr (single_chars, -1, ch) != NULL)
             {
               if (hit_non_space)
                 RETURN_TOKEN;
-              else if (allow_brackets)
-                {
-                  *pp = g_utf8_next_char (p);
-                  if (ch == '}')
-                    return g_strdup ("}");
-                  else
-                    return g_strdup ("{");
-                }
               else
                 {
-                  g_set_error (
-                      error,
-                      G_IO_ERROR,
-                      G_IO_ERROR_UNKNOWN,
-                      "Expected token");
-                  return NULL;
+                  char buf[16] = { 0 };
+
+                  g_unichar_to_utf8 (ch, buf);
+                  *pp = g_utf8_next_char (p);
+                  return g_strdup (buf);
                 }
             }
 
@@ -273,7 +313,7 @@ consume_token (const char **pp,
         }
     }
 
-  if (!quoted && hit_non_space)
+  if (!(flags & TOKEN_PARSE_QUOTED) && hit_non_space)
     RETURN_TOKEN;
 
   UNEXPECTED_EOF;

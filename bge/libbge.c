@@ -45,7 +45,7 @@ bge_init (void)
     gboolean result                = FALSE;
 
     result = bge_wdgt_parse_string (
-        "  defwidget \"Yo Yo\"{atoken   ",
+        "  defwidget \"MyWidget\"{child \"btn\" =\"GtkButton\"; }  ",
         &local_error);
     if (!result)
       g_print ("Error!! %s\n", local_error->message);
