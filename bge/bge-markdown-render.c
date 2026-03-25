@@ -364,8 +364,13 @@ enter_block (MD_BLOCKTYPE type,
       break;
     case MD_BLOCK_QUOTE:
       INIT_TAG_DATA_LOCATION (&tag, ctx->buffer,
-                              "left-margin", 25,
-                              "paragraph-background", "lightgray");
+                              "left-margin", 50,
+                              "right-margin", 50,
+                              "justification", GTK_JUSTIFY_CENTER,
+                              "foreground", "gray",
+                              "weight", 600,
+                              "scale", 1.1,
+                              "style", PANGO_STYLE_ITALIC);
       break;
     case MD_BLOCK_UL:
       {
@@ -429,7 +434,7 @@ enter_block (MD_BLOCKTYPE type,
         gtk_text_buffer_insert_at_cursor (ctx->buffer, "\n", -1);
         INIT_TAG_DATA_LOCATION (
             &tag, ctx->buffer,
-            "size-points", 22.0f - (float) h_detail->level,
+            "scale", MAX (2.0 - 0.16 * (float) h_detail->level, 1.0),
             "pixels-below-lines", 10);
       }
       break;
@@ -437,7 +442,7 @@ enter_block (MD_BLOCKTYPE type,
       INIT_TAG_DATA_LOCATION (
           &tag, ctx->buffer,
           "family", "monospace",
-          "paragraph-background", "darkgray");
+          "foreground", "gray");
       break;
     case MD_BLOCK_P:
       INIT_TAG_DATA_LOCATION (
@@ -502,7 +507,7 @@ leave_block (MD_BLOCKTYPE type,
         case MD_BLOCK_DOC:
           break;
         case MD_BLOCK_QUOTE:
-          TERMINATE_TAG_FROM_SET_PROP ("paragraph-background-set");
+          TERMINATE_TAG_FROM_SET_PROP ("style-set");
           gtk_text_buffer_insert_at_cursor (ctx->buffer, "\n\n", -1);
           break;
         case MD_BLOCK_UL:
@@ -538,7 +543,7 @@ leave_block (MD_BLOCKTYPE type,
         case MD_BLOCK_HR:
           break;
         case MD_BLOCK_H:
-          TERMINATE_TAG_FROM_SET_PROP ("size-set");
+          TERMINATE_TAG_FROM_SET_PROP ("scale-set");
           gtk_text_buffer_insert_at_cursor (ctx->buffer, "\n", -1);
           break;
         case MD_BLOCK_CODE:
