@@ -239,6 +239,7 @@ bge_markdown_render_init (BgeMarkdownRender *self)
 {
   self->text_view = (GtkTextView *) gtk_text_view_new ();
   gtk_text_view_set_wrap_mode (self->text_view, GTK_WRAP_WORD_CHAR);
+  gtk_text_view_set_editable (self->text_view, FALSE);
   gtk_widget_set_parent (GTK_WIDGET (self->text_view), GTK_WIDGET (self));
 }
 
@@ -346,13 +347,13 @@ enter_block (MD_BLOCKTYPE type,
              void        *user_data)
 {
   ParseCtx *ctx           = user_data;
-  int       list_parent   = 0;
+  int       parent        = 0;
   int       list_index    = 0;
   MD_CHAR   list_prefix   = 0;
   g_autoptr (TagData) tag = NULL;
 
-  if (ctx->block_stack->len > 1)
-    list_parent = g_array_index (ctx->block_stack, int, ctx->block_stack->len - 2);
+  if (ctx->block_stack->len > 0)
+    parent = g_array_index (ctx->block_stack, int, ctx->block_stack->len - 1);
   if (ctx->list_index_stack->len > 0)
     list_index = g_array_index (ctx->list_index_stack, int, ctx->list_index_stack->len - 1);
   if (ctx->list_prefix_stack->len > 0)
@@ -363,14 +364,15 @@ enter_block (MD_BLOCKTYPE type,
     case MD_BLOCK_DOC:
       break;
     case MD_BLOCK_QUOTE:
-      INIT_TAG_DATA_LOCATION (&tag, ctx->buffer,
-                              "left-margin", 50,
-                              "right-margin", 50,
-                              "justification", GTK_JUSTIFY_CENTER,
-                              "foreground", "gray",
-                              "weight", 600,
-                              "scale", 1.1,
-                              "style", PANGO_STYLE_ITALIC);
+      INIT_TAG_DATA_LOCATION (
+          &tag, ctx->buffer,
+          "left-margin", 50,
+          "right-margin", 50,
+          "justification", GTK_JUSTIFY_CENTER,
+          "foreground", "gray",
+          "weight", 600,
+          "scale", 1.1,
+          "style", PANGO_STYLE_ITALIC);
       break;
     case MD_BLOCK_UL:
       {
@@ -407,21 +409,30 @@ enter_block (MD_BLOCKTYPE type,
         if (ctx->indent > 1 ||
             list_index > 0)
           gtk_text_buffer_insert_at_cursor (ctx->buffer, "\n", -1);
-        if (list_parent == MD_BLOCK_OL)
+        if (parent == MD_BLOCK_OL)
           {
             g_autofree char *prefix_text = NULL;
+
+            INIT_TAG_DATA_LOCATION (
+                &tag, ctx->buffer,
+                "indent", -18);
 
             prefix_text = g_strdup_printf ("%d%c ", list_index, list_prefix);
             gtk_text_buffer_insert_at_cursor (ctx->buffer, prefix_text, -1);
           }
         else
-          /* TODO:
+          {
+            INIT_TAG_DATA_LOCATION (
+                &tag, ctx->buffer,
+                "indent", -12);
+            /* TODO:
 
-            `ctx->list_prefix` is '-', '+', '*'
+              `ctx->list_prefix` is '-', '+', '*'
 
-            maybe handle these?
-           */
-          gtk_text_buffer_insert_at_cursor (ctx->buffer, "• ", -1);
+              maybe handle these?
+             */
+            gtk_text_buffer_insert_at_cursor (ctx->buffer, "• ", -1);
+          }
       }
       break;
     case MD_BLOCK_HR:
@@ -434,7 +445,7 @@ enter_block (MD_BLOCKTYPE type,
         gtk_text_buffer_insert_at_cursor (ctx->buffer, "\n", -1);
         INIT_TAG_DATA_LOCATION (
             &tag, ctx->buffer,
-            "scale", MAX (2.0 - 0.16 * (float) h_detail->level, 1.0),
+            "scale", MAX (2.2 - 0.2 * (float) h_detail->level, 1.0),
             "pixels-below-lines", 10);
       }
       break;
@@ -445,10 +456,11 @@ enter_block (MD_BLOCKTYPE type,
           "foreground", "gray");
       break;
     case MD_BLOCK_P:
-      INIT_TAG_DATA_LOCATION (
-          &tag, ctx->buffer,
-          "indent", 15,
-          "pixels-below-lines", 4);
+      if (parent != MD_BLOCK_LI)
+        INIT_TAG_DATA_LOCATION (
+            &tag, ctx->buffer,
+            "indent", 15,
+            "pixels-below-lines", 4);
       break;
     case MD_BLOCK_HTML:
     case MD_BLOCK_TABLE:
@@ -473,8 +485,8 @@ leave_block (MD_BLOCKTYPE type,
              void        *detail,
              void        *user_data)
 {
-  ParseCtx *ctx     = user_data;
-  int       parent1 = -1;
+  ParseCtx *ctx    = user_data;
+  int       parent = -1;
 
 #define TERMINATE_TAG_FROM_SET_PROP(_set_prop)           \
   for (guint i = ctx->tags->len; i > 0; i--)             \
@@ -498,9 +510,9 @@ leave_block (MD_BLOCKTYPE type,
     }
 
   g_assert (ctx->block_stack->len > 0);
-  parent1 = g_array_index (ctx->block_stack, int, ctx->block_stack->len - 1);
+  parent = g_array_index (ctx->block_stack, int, ctx->block_stack->len - 1);
 
-  if (parent1 >= 0)
+  if (parent >= 0)
     {
       switch (type)
         {
@@ -537,6 +549,7 @@ leave_block (MD_BLOCKTYPE type,
           }
           break;
         case MD_BLOCK_LI:
+          TERMINATE_TAG_FROM_SET_PROP ("indent-set");
           ++g_array_index (ctx->list_index_stack, int, ctx->list_index_stack->len - 1);
           ctx->running_list_index++;
           break;
@@ -551,7 +564,8 @@ leave_block (MD_BLOCKTYPE type,
           gtk_text_buffer_insert_at_cursor (ctx->buffer, "\n", -1);
           break;
         case MD_BLOCK_P:
-          TERMINATE_TAG_FROM_SET_PROP ("indent-set");
+          if (parent != MD_BLOCK_LI)
+            TERMINATE_TAG_FROM_SET_PROP ("indent-set");
           if (ctx->running_list_index < 0)
             gtk_text_buffer_insert_at_cursor (ctx->buffer, "\n\n", -1);
           break;
@@ -649,6 +663,7 @@ leave_span (MD_SPANTYPE type,
       TERMINATE_TAG_FROM_SET_PROP ("weight-set");
       break;
     case MD_SPAN_A:
+      gtk_text_buffer_insert_at_cursor (ctx->buffer, "</a>", -1);
       break;
     case MD_SPAN_IMG:
       // g_warning ("Images aren't implemented yet!");
