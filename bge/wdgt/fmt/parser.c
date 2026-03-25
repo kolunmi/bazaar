@@ -230,14 +230,17 @@ consume_token (const char **pp,
                   hit_non_space = TRUE;
                 }
             }
-          else if (quoted && !hit_non_space)
+          else if (quoted)
             {
-              g_set_error (
-                  error,
-                  G_IO_ERROR,
-                  G_IO_ERROR_UNKNOWN,
-                  "Expected quote");
-              return NULL;
+              if (!hit_non_space)
+                {
+                  g_set_error (
+                      error,
+                      G_IO_ERROR,
+                      G_IO_ERROR_UNKNOWN,
+                      "Expected quote");
+                  return NULL;
+                }
             }
           else if (is_brackets)
             {
