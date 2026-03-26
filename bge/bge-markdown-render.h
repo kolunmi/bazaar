@@ -1,4 +1,4 @@
-/* bz-markdown-render.h
+/* bge-markdown-render.h
  *
  * Copyright 2025 Eva M
  *
@@ -20,30 +20,32 @@
 
 #pragma once
 
-#include <adwaita.h>
+#ifndef BGE_INSIDE
+#error "Only <bge.h> can be included directly."
+#endif
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_MARKDOWN_RENDER (bz_markdown_render_get_type ())
-G_DECLARE_FINAL_TYPE (BzMarkdownRender, bz_markdown_render, BZ, MARKDOWN_RENDER, AdwBin)
+#define BGE_TYPE_MARKDOWN_RENDER (bge_markdown_render_get_type ())
+G_DECLARE_FINAL_TYPE (BgeMarkdownRender, bge_markdown_render, BGE, MARKDOWN_RENDER, GtkWidget)
 
 GtkWidget *
-bz_markdown_render_new (void);
+bge_markdown_render_new (void);
 
 const char *
-bz_markdown_render_get_markdown (BzMarkdownRender *self);
+bge_markdown_render_get_markdown (BgeMarkdownRender *self);
 
 gboolean
-bz_markdown_render_get_selectable (BzMarkdownRender *self);
+bge_markdown_render_get_selectable (BgeMarkdownRender *self);
 
 void
-bz_markdown_render_set_markdown (BzMarkdownRender *self,
-                                 const char       *markdown);
+bge_markdown_render_set_markdown (BgeMarkdownRender *self,
+                                  const char        *markdown);
 
 void
-bz_markdown_render_set_selectable (BzMarkdownRender *self,
-                                   gboolean          selectable);
+bge_markdown_render_set_selectable (BgeMarkdownRender *self,
+                                    gboolean           selectable);
 
 G_END_DECLS
 
-/* End of bz-markdown-render.h */
+/* End of bge-markdown-render.h */

@@ -18,14 +18,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "bz-section-view.h"
+#include <bge.h>
+
 #include "bz-application.h"
 #include "bz-async-texture.h"
 #include "bz-curated-app-tile.h"
 #include "bz-curated-section.h"
 #include "bz-dynamic-list-view.h"
 #include "bz-entry-group.h"
-#include "bz-markdown-render.h"
+#include "bz-section-view.h"
 #include "bz-window.h"
 
 struct _BzSectionView
@@ -304,7 +305,6 @@ bz_section_view_class_init (BzSectionViewClass *klass)
 
   g_type_ensure (BZ_TYPE_CURATED_APP_TILE);
   g_type_ensure (BZ_TYPE_DYNAMIC_LIST_VIEW);
-  g_type_ensure (BZ_TYPE_MARKDOWN_RENDER);
   g_type_ensure (BZ_TYPE_ASYNC_TEXTURE);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-section-view.ui");
