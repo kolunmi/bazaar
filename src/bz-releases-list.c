@@ -95,38 +95,64 @@ is_version_installed (GListModel *installed_versions, const char *version)
   return FALSE;
 }
 
+// From gs-common.c
 static char *
-format_timestamp (gpointer object,
-                  guint64  value)
+format_timestamp (guint64 unix_time)
 {
-  g_autoptr (GDateTime) date = NULL;
+  g_autoptr (GDateTime) then = NULL;
   g_autoptr (GDateTime) now  = NULL;
+  gint days, weeks, months, years;
 
-  if (value == 0)
+  if (unix_time == 0)
     return NULL;
 
-  date = g_date_time_new_from_unix_utc (value);
+  then = g_date_time_new_from_unix_utc (unix_time);
   now  = g_date_time_new_now_local ();
 
-  if (date == NULL || now == NULL)
+  if (then == NULL || now == NULL)
     return NULL;
 
-  if (g_date_time_get_year (date) == g_date_time_get_year (now))
-    /* Translators: This is a date format for timestamps from the current year. Used in the app releases section.
-     * %B is the full month name, %e is the day.
-     * Example: "October 1"
-     * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
-     * Please modify to make it sound natural in your locale.
-     *  */
-    return g_date_time_format (date, N_ ("%e %B"));
+  days   = (gint) (g_date_time_difference (now, then) / G_TIME_SPAN_DAY);
+  weeks  = days / 7;
+  months = days / 30;
+  years  = weeks / 52;
+
+  if (days < 1)
+    /* Translators: something happened less than a day ago */
+    return g_strdup (_ ("Today"));
+  else if (days < 2)
+    /* Translators: something happened more than a day ago but less than 2 days ago */
+    return g_strdup (_ ("Yesterday"));
+  else if (days < 15)
+    /* Translators: something happened days ago */
+    return g_strdup_printf (ngettext ("%d day ago", "%d days ago", days), days);
+  else if (weeks < 8)
+    /* Translators: something happened weeks ago */
+    return g_strdup_printf (ngettext ("%d week ago", "%d weeks ago", weeks), weeks);
+  else if (years < 1)
+    /* Translators: something happened months ago */
+    return g_strdup_printf (ngettext ("%d month ago", "%d months ago", months), months);
   else
-    /* Translators: This is a date format for timestamps from previous years. Used in the app releases section.
-     * %B is the full month name, %e is the day, %Y is the year.
-     * Example: "October 1, 2025"
-     * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
-     * Please modify to make it sound natural in your locale.
-     *  */
-    return g_date_time_format (date, N_ ("%e %B %Y"));
+    /* Translators: something happened years ago */
+    return g_strdup_printf (ngettext ("%d year ago", "%d years ago", years), years);
+}
+
+static char *
+format_timestamp_tooltip (guint64 unix_time)
+{
+  g_autoptr (GDateTime) then = NULL;
+
+  if (unix_time == 0)
+    return NULL;
+
+  then = g_date_time_new_from_unix_utc (unix_time);
+
+  if (then == NULL)
+    return NULL;
+
+  /* TRANSLATORS: This is the date string with: day number, month name, year.
+   i.e. "22 March 2026" */
+  return g_date_time_format (then, _ ("%e %B %Y"));
 }
 
 static GtkWidget *
@@ -149,10 +175,11 @@ create_release_row (const char *version,
   GtkLabel                     *more_info_label    = NULL;
   GtkImage                     *more_info_icon     = NULL;
   g_autofree char              *date_str           = NULL;
+  g_autofree char              *date_tooltip       = NULL;
   g_autofree char              *version_text       = NULL;
   g_autofree char              *markup             = NULL;
 
-  date_str = format_timestamp (NULL, timestamp);
+  date_str = format_timestamp (timestamp);
 
   row = ADW_ACTION_ROW (adw_action_row_new ());
   gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), FALSE);
@@ -190,6 +217,9 @@ create_release_row (const char *version,
   date_label = GTK_LABEL (gtk_label_new (date_str ? date_str : ""));
   gtk_widget_add_css_class (GTK_WIDGET (date_label), "dim-label");
   gtk_widget_set_halign (GTK_WIDGET (date_label), GTK_ALIGN_END);
+  date_tooltip = format_timestamp_tooltip (timestamp);
+  if (date_tooltip != NULL)
+    gtk_widget_set_tooltip_text (GTK_WIDGET (date_label), date_tooltip);
   gtk_box_append (header_box, GTK_WIDGET (date_label));
 
   gtk_box_append (content_box, GTK_WIDGET (header_box));

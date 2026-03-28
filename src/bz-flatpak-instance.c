@@ -841,11 +841,11 @@ ensure_flathub_fiber (EnsureFlathubData *data)
             "Failed to modify existing system flathub remote: %s",
             local_error->message);
     }
-  #ifndef SANDBOXED_LIBFLATPAK
+#ifndef SANDBOXED_LIBFLATPAK
   else if (self->system != NULL)
-  #else
+#else
   else if (self->system != NULL && usr_remote == NULL)
-  #endif
+#endif
     {
       g_autoptr (SoupMessage) message  = NULL;
       g_autoptr (GOutputStream) output = NULL;
@@ -987,6 +987,13 @@ load_local_ref_fiber (LoadLocalRefData *data)
       g_autoptr (GBytes) appstream_gz   = NULL;
       g_autoptr (GBytes) appstream      = NULL;
       g_autoptr (AsComponent) component = NULL;
+
+      if (path == NULL)
+        return dex_future_new_reject (
+            BZ_FLATPAK_ERROR,
+            BZ_FLATPAK_ERROR_IO_MISBEHAVIOR,
+            "Cannot load '%s' as a flatpak bundle: URI is not a local file",
+            uri);
 
       bref = flatpak_bundle_ref_new (file, &local_error);
       if (bref == NULL)
@@ -1131,6 +1138,15 @@ retrieve_remote_refs_fiber (GatherRefsData *data)
         }
 
       name = flatpak_remote_get_name (remote);
+      {
+        g_autoptr (BzBackendNotification) notif = NULL;
+
+        notif = bz_backend_notification_new ();
+        bz_backend_notification_set_kind (notif, BZ_BACKEND_NOTIFICATION_KIND_REMOTE_SYNC_START);
+        bz_backend_notification_set_remote_name (notif, name);
+
+        send_notif_all (self, notif, TRUE);
+      }
 
       job_data               = retrieve_refs_for_remote_data_new ();
       job_data->parent       = gather_refs_data_ref (data);
@@ -1550,11 +1566,12 @@ retrieve_refs_for_noenumerable_remote (RetrieveRefsForRemoteData *data,
 static DexFuture *
 retrieve_refs_for_remote_fiber (RetrieveRefsForRemoteData *data)
 {
-  FlatpakInstallation *installation   = data->installation;
-  FlatpakRemote       *remote         = data->remote;
-  const char          *remote_name    = NULL;
-  gboolean             is_noenumerate = FALSE;
-  g_autoptr (BzFlatpakInstance) self  = NULL;
+  FlatpakInstallation *installation  = data->installation;
+  FlatpakRemote       *remote        = data->remote;
+  g_autoptr (BzFlatpakInstance) self = NULL;
+  const char *remote_name            = NULL;
+  gboolean    is_noenumerate         = FALSE;
+  g_autoptr (DexFuture) ret          = NULL;
 
   bz_weak_get_or_return_reject (self, data->parent->self);
 
@@ -1570,9 +1587,23 @@ retrieve_refs_for_remote_fiber (RetrieveRefsForRemoteData *data)
 #else
   if (is_noenumerate)
 #endif
-    return retrieve_refs_for_noenumerable_remote (data, remote_name, installation, remote);
+    ret = retrieve_refs_for_noenumerable_remote (
+        data, remote_name, installation, remote);
   else
-    return retrieve_refs_for_enumerable_remote (data, remote_name, installation, remote);
+    ret = retrieve_refs_for_enumerable_remote (
+        data, remote_name, installation, remote);
+
+  {
+    g_autoptr (BzBackendNotification) notif = NULL;
+
+    notif = bz_backend_notification_new ();
+    bz_backend_notification_set_kind (notif, BZ_BACKEND_NOTIFICATION_KIND_REMOTE_SYNC_FINISH);
+    bz_backend_notification_set_remote_name (notif, remote_name);
+
+    send_notif_all (self, notif, TRUE);
+  }
+
+  return g_steal_pointer (&ret);
 }
 
 static DexFuture *

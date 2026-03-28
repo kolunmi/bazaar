@@ -615,7 +615,7 @@ load_fiber_work (LoadData *data)
          processors divided by 2
 
         See:
-          https://github.com/kolunmi/bazaar/issues/497
+          https://github.com/bazaar-org/bazaar/issues/497
           https://docs.gtk.org/glib/func.get_num_processors.html
 
         Eva Thu, 23 Oct 2025 14:19:44 -0700
@@ -1069,7 +1069,10 @@ texture_cache_acquire (const char *uri)
 
   data = g_hash_table_lookup (texture_cache, uri);
   if (data != NULL)
-    return g_object_ref (data->texture);
+    {
+      dex_clear (&data->linger_timeout);
+      return g_object_ref (data->texture);
+    }
   else
     return NULL;
 }

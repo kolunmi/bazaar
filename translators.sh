@@ -97,7 +97,7 @@ translators_helper() {
 
     echo "--------------------------------"
     printf "\nConfiguration done. Now ready for you to open your \"po\" file in your text editor and begin translating.\n"
-    printf "When you are done, commit your changes form your fork and submit a pull request on \n%s also, refer to TRANSLATORS.md if needed\e]8;;\e\\ \n\n" "https://github.com/kolunmi/bazaar/blob/master/TRANSLATORS.md"
+    printf "When you are done, commit your changes form your fork and submit a pull request on \n%s also, refer to TRANSLATORS.md if needed\e]8;;\e\\ \n\n" "https://github.com/bazaar-org/bazaar/blob/master/TRANSLATORS.md"
     echo "--------------------------------"
 
     popd || return 1

@@ -14,7 +14,7 @@
     <file preprocess="xml-stripblanks">pride-flag-config-schema.xml</file>
     <file>release-notes.xml</file>
 
-    <file>countries.json</file>
+    <file>countries.gvariant</file>
 
     <file preprocess="xml-stripblanks">bz-addons-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-donations-dialog.ui</file>
@@ -48,7 +48,6 @@
     <file preprocess="xml-stripblanks">bz-installed-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-license-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-login-page.ui</file>
-    <file preprocess="xml-stripblanks">bz-markdown-render.ui</file>
     <file preprocess="xml-stripblanks">bz-preferences-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-progress-bar.ui</file>
     <file preprocess="xml-stripblanks">bz-releases-dialog.ui</file>
@@ -58,7 +57,7 @@
     <file preprocess="xml-stripblanks">bz-safety-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-screenshot-page.ui</file>
     <file preprocess="xml-stripblanks">bz-screenshots-carousel.ui</file>
-    <file preprocess="xml-stripblanks">bz-search-widget.ui</file>
+    <file preprocess="xml-stripblanks">bz-search-page.ui</file>
     <file preprocess="xml-stripblanks">bz-section-view.ui</file>
     <file preprocess="xml-stripblanks">bz-stats-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-transaction-tile.ui</file>

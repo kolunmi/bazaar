@@ -160,8 +160,8 @@ template $BzRichAppTile: $BzListTile {
         }
 
         Button {
-          visible: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <bool>;
-          sensitive: bind $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>;
+          visible: bind $logical_and($invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <bool>, template.removable-at-start) as <bool>;
+          sensitive: bind $logical_and($invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>, template.removable-at-start) as <bool>;
 
           styles [
             "circular"
@@ -172,6 +172,19 @@ template $BzRichAppTile: $BzListTile {
           tooltip-text: _("Uninstall");
           valign: center;
           clicked => $remove_button_clicked_cb(template);
+        }
+
+        Button {
+          visible: bind $logical_and($invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <bool>, $invert_boolean(template.removable-at-start) as <bool>) as <bool>;
+          sensitive: bind $logical_and($invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>, $invert_boolean(template.removable-at-start) as <bool>) as <bool>;
+
+          styles [
+            "medium-pill",
+          ]
+
+          label: _("Open");
+          valign: center;
+          clicked => $run_button_clicked_cb(template);
         }
       }
     }

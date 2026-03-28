@@ -1,0 +1,711 @@
+/* bge-markdown-render.c
+ *
+ * Copyright 2025 Eva M
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+#define G_LOG_DOMAIN "BGE::MARKDOWN-RENDER"
+
+#include <md4c.h>
+
+#include "bge.h"
+#include "util.h"
+
+struct _BgeMarkdownRender
+{
+  GtkWidget parent_instance;
+
+  char    *markdown;
+  gboolean selectable;
+
+  GtkTextView *text_view;
+};
+
+G_DEFINE_FINAL_TYPE (BgeMarkdownRender, bge_markdown_render, GTK_TYPE_WIDGET);
+
+enum
+{
+  PROP_0,
+
+  PROP_MARKDOWN,
+  PROP_SELECTABLE,
+
+  LAST_PROP
+};
+static GParamSpec *props[LAST_PROP] = { 0 };
+
+static void
+regenerate (BgeMarkdownRender *self);
+
+BGE_DEFINE_DATA (
+    tag,
+    Tag,
+    {
+      GtkTextTag *tag;
+      int         start;
+      int         end;
+    },
+    BGE_RELEASE_DATA (tag, g_object_unref));
+
+#define INIT_TAG_DATA_LOCATION(_loc, _buffer, ...)                        \
+  G_STMT_START                                                            \
+  {                                                                       \
+    *(_loc) = tag_data_new ();                                            \
+    g_object_get ((_buffer), "cursor-position", &(*(_loc))->start, NULL); \
+    (*(_loc))->end = -1;                                                  \
+    (*(_loc))->tag = gtk_text_buffer_create_tag (                         \
+        (_buffer), NULL,                                                  \
+        "accumulative-margin", TRUE,                                      \
+        ##__VA_ARGS__, NULL);                                             \
+  }                                                                       \
+  G_STMT_END
+
+typedef struct
+{
+  GtkTextBuffer *buffer;
+  char          *beginning;
+  GArray        *block_stack;
+  GArray        *list_index_stack;
+  GArray        *list_prefix_stack;
+  GPtrArray     *tags;
+  int            indent;
+  int            running_list_index;
+} ParseCtx;
+
+static int
+enter_block (MD_BLOCKTYPE type,
+             void        *detail,
+             void        *user_data);
+
+static int
+leave_block (MD_BLOCKTYPE type,
+             void        *detail,
+             void        *user_data);
+
+static int
+enter_span (MD_SPANTYPE type,
+            void       *detail,
+            void       *user_data);
+
+static int
+leave_span (MD_SPANTYPE type,
+            void       *detail,
+            void       *user_data);
+
+static int
+text (MD_TEXTTYPE    type,
+      const MD_CHAR *buf,
+      MD_SIZE        size,
+      void          *user_data);
+
+static const MD_PARSER parser = {
+  .flags       = MD_FLAG_COLLAPSEWHITESPACE |
+                 MD_FLAG_NOHTMLBLOCKS |
+                 MD_FLAG_NOHTMLSPANS,
+  .enter_block = enter_block,
+  .leave_block = leave_block,
+  .enter_span  = enter_span,
+  .leave_span  = leave_span,
+  .text        = text,
+};
+
+static void
+bge_markdown_render_dispose (GObject *object)
+{
+  BgeMarkdownRender *self = BGE_MARKDOWN_RENDER (object);
+
+  g_clear_pointer (&self->markdown, g_free);
+
+  gtk_widget_unparent (GTK_WIDGET (self->text_view));
+
+  G_OBJECT_CLASS (bge_markdown_render_parent_class)->dispose (object);
+}
+
+static void
+bge_markdown_render_get_property (GObject    *object,
+                                  guint       prop_id,
+                                  GValue     *value,
+                                  GParamSpec *pspec)
+{
+  BgeMarkdownRender *self = BGE_MARKDOWN_RENDER (object);
+
+  switch (prop_id)
+    {
+    case PROP_MARKDOWN:
+      g_value_set_string (value, bge_markdown_render_get_markdown (self));
+      break;
+    case PROP_SELECTABLE:
+      g_value_set_boolean (value, bge_markdown_render_get_selectable (self));
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+    }
+}
+
+static void
+bge_markdown_render_set_property (GObject      *object,
+                                  guint         prop_id,
+                                  const GValue *value,
+                                  GParamSpec   *pspec)
+{
+  BgeMarkdownRender *self = BGE_MARKDOWN_RENDER (object);
+
+  switch (prop_id)
+    {
+    case PROP_MARKDOWN:
+      bge_markdown_render_set_markdown (self, g_value_get_string (value));
+      break;
+    case PROP_SELECTABLE:
+      bge_markdown_render_set_selectable (self, g_value_get_boolean (value));
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+    }
+}
+
+static void
+bge_markdown_render_measure (GtkWidget     *widget,
+                             GtkOrientation orientation,
+                             int            for_size,
+                             int           *minimum,
+                             int           *natural,
+                             int           *minimum_baseline,
+                             int           *natural_baseline)
+{
+  BgeMarkdownRender *self = BGE_MARKDOWN_RENDER (widget);
+
+  gtk_widget_measure (
+      GTK_WIDGET (self->text_view),
+      orientation, for_size,
+      minimum, natural,
+      minimum_baseline, natural_baseline);
+}
+
+static void
+bge_markdown_render_size_allocate (GtkWidget *widget,
+                                   int        width,
+                                   int        height,
+                                   int        baseline)
+{
+  BgeMarkdownRender *self = BGE_MARKDOWN_RENDER (widget);
+
+  gtk_widget_allocate (GTK_WIDGET (self->text_view), width, height, baseline, NULL);
+}
+
+static void
+bge_markdown_render_class_init (BgeMarkdownRenderClass *klass)
+{
+  GObjectClass   *object_class = G_OBJECT_CLASS (klass);
+  GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
+
+  object_class->set_property = bge_markdown_render_set_property;
+  object_class->get_property = bge_markdown_render_get_property;
+  object_class->dispose      = bge_markdown_render_dispose;
+
+  props[PROP_MARKDOWN] =
+      g_param_spec_string (
+          "markdown",
+          NULL, NULL, NULL,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_SELECTABLE] =
+      g_param_spec_boolean (
+          "selectable",
+          NULL, NULL, FALSE,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  g_object_class_install_properties (object_class, LAST_PROP, props);
+
+  widget_class->measure       = bge_markdown_render_measure;
+  widget_class->size_allocate = bge_markdown_render_size_allocate;
+}
+
+static void
+bge_markdown_render_init (BgeMarkdownRender *self)
+{
+  self->text_view = (GtkTextView *) gtk_text_view_new ();
+  gtk_text_view_set_wrap_mode (self->text_view, GTK_WRAP_WORD_CHAR);
+  gtk_text_view_set_editable (self->text_view, FALSE);
+  gtk_widget_set_parent (GTK_WIDGET (self->text_view), GTK_WIDGET (self));
+}
+
+GtkWidget *
+bge_markdown_render_new (void)
+{
+  return g_object_new (BGE_TYPE_MARKDOWN_RENDER, NULL);
+}
+
+const char *
+bge_markdown_render_get_markdown (BgeMarkdownRender *self)
+{
+  g_return_val_if_fail (BGE_IS_MARKDOWN_RENDER (self), NULL);
+  return self->markdown;
+}
+
+gboolean
+bge_markdown_render_get_selectable (BgeMarkdownRender *self)
+{
+  g_return_val_if_fail (BGE_IS_MARKDOWN_RENDER (self), FALSE);
+  return self->selectable;
+}
+
+void
+bge_markdown_render_set_markdown (BgeMarkdownRender *self,
+                                  const char        *markdown)
+{
+  g_return_if_fail (BGE_IS_MARKDOWN_RENDER (self));
+
+  g_clear_pointer (&self->markdown, g_free);
+  if (markdown != NULL)
+    self->markdown = g_strdup (markdown);
+
+  regenerate (self);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MARKDOWN]);
+}
+
+void
+bge_markdown_render_set_selectable (BgeMarkdownRender *self,
+                                    gboolean           selectable)
+{
+  g_return_if_fail (BGE_IS_MARKDOWN_RENDER (self));
+
+  self->selectable = selectable;
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SELECTABLE]);
+}
+
+static void
+regenerate (BgeMarkdownRender *self)
+{
+  int      iresult = 0;
+  ParseCtx ctx     = { 0 };
+
+  if (self->markdown == NULL)
+    return;
+
+  ctx.buffer             = gtk_text_buffer_new (NULL);
+  ctx.beginning          = self->markdown;
+  ctx.block_stack        = g_array_new (FALSE, TRUE, sizeof (int));
+  ctx.list_index_stack   = g_array_new (FALSE, TRUE, sizeof (int));
+  ctx.list_prefix_stack  = g_array_new (FALSE, TRUE, sizeof (MD_CHAR));
+  ctx.tags               = g_ptr_array_new_with_free_func (tag_data_unref);
+  ctx.indent             = 0;
+  ctx.running_list_index = -1;
+
+  iresult = md_parse (
+      self->markdown,
+      strlen (self->markdown),
+      &parser,
+      &ctx);
+  if (iresult != 0)
+    goto error;
+
+  for (guint i = 0; i < ctx.tags->len; i++)
+    {
+      TagData    *data       = NULL;
+      GtkTextIter start_iter = { 0 };
+      GtkTextIter end_iter   = { 0 };
+
+      data = g_ptr_array_index (ctx.tags, i);
+
+      gtk_text_buffer_get_iter_at_offset (ctx.buffer, &start_iter, data->start);
+      gtk_text_buffer_get_iter_at_offset (ctx.buffer, &end_iter, data->end);
+      gtk_text_buffer_apply_tag (ctx.buffer, g_object_ref (data->tag), &start_iter, &end_iter);
+    }
+  gtk_text_view_set_buffer (self->text_view, ctx.buffer);
+  goto done;
+
+error:
+  g_warning ("Failed to parse markdown text");
+
+done:
+  g_object_unref (ctx.buffer);
+  g_array_unref (ctx.block_stack);
+  g_array_unref (ctx.list_index_stack);
+  g_array_unref (ctx.list_prefix_stack);
+  g_ptr_array_unref (ctx.tags);
+}
+
+static int
+enter_block (MD_BLOCKTYPE type,
+             void        *detail,
+             void        *user_data)
+{
+  ParseCtx *ctx           = user_data;
+  int       parent        = 0;
+  int       list_index    = 0;
+  MD_CHAR   list_prefix   = 0;
+  g_autoptr (TagData) tag = NULL;
+
+  if (ctx->block_stack->len > 0)
+    parent = g_array_index (ctx->block_stack, int, ctx->block_stack->len - 1);
+  if (ctx->list_index_stack->len > 0)
+    list_index = g_array_index (ctx->list_index_stack, int, ctx->list_index_stack->len - 1);
+  if (ctx->list_prefix_stack->len > 0)
+    list_prefix = g_array_index (ctx->list_prefix_stack, MD_CHAR, ctx->list_prefix_stack->len - 1);
+
+  switch (type)
+    {
+    case MD_BLOCK_DOC:
+      break;
+    case MD_BLOCK_QUOTE:
+      INIT_TAG_DATA_LOCATION (
+          &tag, ctx->buffer,
+          "left-margin", 50,
+          "right-margin", 50,
+          "justification", GTK_JUSTIFY_CENTER,
+          "foreground", "gray",
+          "weight", 600,
+          "scale", 1.1,
+          "style", PANGO_STYLE_ITALIC);
+      break;
+    case MD_BLOCK_UL:
+      {
+        MD_BLOCK_UL_DETAIL *ul_detail = detail;
+        const int           zero      = 0;
+
+        ctx->indent++;
+        ctx->running_list_index = 0;
+        g_array_append_val (ctx->list_index_stack, zero);
+        g_array_append_val (ctx->list_prefix_stack, ul_detail->mark);
+
+        INIT_TAG_DATA_LOCATION (
+            &tag, ctx->buffer,
+            "left-margin", 25);
+      }
+      break;
+    case MD_BLOCK_OL:
+      {
+        MD_BLOCK_OL_DETAIL *ol_detail = detail;
+        const int           zero      = 0;
+
+        ctx->indent++;
+        ctx->running_list_index = 0;
+        g_array_append_val (ctx->list_index_stack, zero);
+        g_array_append_val (ctx->list_prefix_stack, ol_detail->mark_delimiter);
+
+        INIT_TAG_DATA_LOCATION (
+            &tag, ctx->buffer,
+            "left-margin", 25);
+      }
+      break;
+    case MD_BLOCK_LI:
+      {
+        if (ctx->indent > 1 ||
+            list_index > 0)
+          gtk_text_buffer_insert_at_cursor (ctx->buffer, "\n", -1);
+        if (parent == MD_BLOCK_OL)
+          {
+            g_autofree char *prefix_text = NULL;
+
+            INIT_TAG_DATA_LOCATION (
+                &tag, ctx->buffer,
+                "indent", -18);
+
+            prefix_text = g_strdup_printf ("%d%c ", list_index, list_prefix);
+            gtk_text_buffer_insert_at_cursor (ctx->buffer, prefix_text, -1);
+          }
+        else
+          {
+            INIT_TAG_DATA_LOCATION (
+                &tag, ctx->buffer,
+                "indent", -12);
+            /* TODO:
+
+              `ctx->list_prefix` is '-', '+', '*'
+
+              maybe handle these?
+             */
+            gtk_text_buffer_insert_at_cursor (ctx->buffer, "• ", -1);
+          }
+      }
+      break;
+    case MD_BLOCK_HR:
+      gtk_text_buffer_insert_at_cursor (ctx->buffer, "\n", -1);
+      break;
+    case MD_BLOCK_H:
+      {
+        MD_BLOCK_H_DETAIL *h_detail = detail;
+
+        gtk_text_buffer_insert_at_cursor (ctx->buffer, "\n", -1);
+        INIT_TAG_DATA_LOCATION (
+            &tag, ctx->buffer,
+            "scale", MAX (2.2 - 0.2 * (float) h_detail->level, 1.0),
+            "pixels-below-lines", 10);
+      }
+      break;
+    case MD_BLOCK_CODE:
+      INIT_TAG_DATA_LOCATION (
+          &tag, ctx->buffer,
+          "family", "monospace",
+          "foreground", "gray");
+      break;
+    case MD_BLOCK_P:
+      if (parent != MD_BLOCK_LI)
+        INIT_TAG_DATA_LOCATION (
+            &tag, ctx->buffer,
+            "indent", 15,
+            "pixels-below-lines", 4);
+      break;
+    case MD_BLOCK_HTML:
+    case MD_BLOCK_TABLE:
+    case MD_BLOCK_THEAD:
+    case MD_BLOCK_TBODY:
+    case MD_BLOCK_TR:
+    case MD_BLOCK_TH:
+    case MD_BLOCK_TD:
+    default:
+      break;
+    }
+
+  if (tag != NULL)
+    g_ptr_array_add (ctx->tags, g_steal_pointer (&tag));
+  g_array_append_val (ctx->block_stack, type);
+
+  return 0;
+}
+
+static int
+leave_block (MD_BLOCKTYPE type,
+             void        *detail,
+             void        *user_data)
+{
+  ParseCtx *ctx    = user_data;
+  int       parent = -1;
+
+#define TERMINATE_TAG_FROM_SET_PROP(_set_prop)           \
+  for (guint i = ctx->tags->len; i > 0; i--)             \
+    {                                                    \
+      TagData *data = NULL;                              \
+      gboolean set  = FALSE;                             \
+                                                         \
+      data = g_ptr_array_index (ctx->tags, i - 1);       \
+      if (data->end >= 0)                                \
+        continue;                                        \
+                                                         \
+      g_object_get (data->tag, (_set_prop), &set, NULL); \
+      if (set)                                           \
+        {                                                \
+          g_object_get (                                 \
+              ctx->buffer,                               \
+              "cursor-position", &data->end,             \
+              NULL);                                     \
+          break;                                         \
+        }                                                \
+    }
+
+  g_assert (ctx->block_stack->len > 0);
+  parent = g_array_index (ctx->block_stack, int, ctx->block_stack->len - 1);
+
+  if (parent >= 0)
+    {
+      switch (type)
+        {
+        case MD_BLOCK_DOC:
+          break;
+        case MD_BLOCK_QUOTE:
+          TERMINATE_TAG_FROM_SET_PROP ("style-set");
+          gtk_text_buffer_insert_at_cursor (ctx->buffer, "\n\n", -1);
+          break;
+        case MD_BLOCK_UL:
+          {
+            // MD_BLOCK_UL_DETAIL *ul_detail = detail;
+
+            TERMINATE_TAG_FROM_SET_PROP ("left-margin-set");
+            ctx->indent--;
+            ctx->running_list_index = -1;
+            g_array_set_size (ctx->list_index_stack, ctx->list_index_stack->len - 1);
+            g_array_set_size (ctx->list_prefix_stack, ctx->list_prefix_stack->len - 1);
+            if (ctx->indent == 0)
+              gtk_text_buffer_insert_at_cursor (ctx->buffer, "\n\n", -1);
+          }
+          break;
+        case MD_BLOCK_OL:
+          {
+            // MD_BLOCK_OL_DETAIL *ol_detail = detail;
+
+            TERMINATE_TAG_FROM_SET_PROP ("left-margin-set");
+            ctx->indent--;
+            ctx->running_list_index = -1;
+            g_array_set_size (ctx->list_index_stack, ctx->list_index_stack->len - 1);
+            g_array_set_size (ctx->list_prefix_stack, ctx->list_prefix_stack->len - 1);
+            if (ctx->indent == 0)
+              gtk_text_buffer_insert_at_cursor (ctx->buffer, "\n", -1);
+          }
+          break;
+        case MD_BLOCK_LI:
+          TERMINATE_TAG_FROM_SET_PROP ("indent-set");
+          ++g_array_index (ctx->list_index_stack, int, ctx->list_index_stack->len - 1);
+          ctx->running_list_index++;
+          break;
+        case MD_BLOCK_HR:
+          break;
+        case MD_BLOCK_H:
+          TERMINATE_TAG_FROM_SET_PROP ("scale-set");
+          gtk_text_buffer_insert_at_cursor (ctx->buffer, "\n", -1);
+          break;
+        case MD_BLOCK_CODE:
+          TERMINATE_TAG_FROM_SET_PROP ("family-set");
+          gtk_text_buffer_insert_at_cursor (ctx->buffer, "\n", -1);
+          break;
+        case MD_BLOCK_P:
+          if (parent != MD_BLOCK_LI)
+            TERMINATE_TAG_FROM_SET_PROP ("indent-set");
+          if (ctx->running_list_index < 0)
+            gtk_text_buffer_insert_at_cursor (ctx->buffer, "\n\n", -1);
+          break;
+        case MD_BLOCK_HTML:
+        case MD_BLOCK_TABLE:
+        case MD_BLOCK_THEAD:
+        case MD_BLOCK_TBODY:
+        case MD_BLOCK_TR:
+        case MD_BLOCK_TH:
+        case MD_BLOCK_TD:
+        default:
+          g_warning ("Unsupported markdown event (Did you use html/tables?)");
+          return 1;
+        }
+    }
+  g_array_set_size (ctx->block_stack, ctx->block_stack->len - 1);
+
+  return 0;
+}
+
+static int
+enter_span (MD_SPANTYPE type,
+            void       *detail,
+            void       *user_data)
+{
+  ParseCtx *ctx           = user_data;
+  g_autoptr (TagData) tag = NULL;
+
+  switch (type)
+    {
+    case MD_SPAN_EM:
+      INIT_TAG_DATA_LOCATION (&tag, ctx->buffer, "weight", 600);
+      break;
+    case MD_SPAN_STRONG:
+      INIT_TAG_DATA_LOCATION (&tag, ctx->buffer, "weight", 800);
+      break;
+    case MD_SPAN_A:
+      {
+        MD_SPAN_A_DETAIL *a_detail = detail;
+        g_autofree char  *href     = NULL;
+        g_autofree char  *title    = NULL;
+        g_autofree char  *xml      = NULL;
+
+        href = g_strndup (a_detail->href.text, a_detail->href.size);
+        if (a_detail->title.text != NULL)
+          title = g_strndup (a_detail->title.text, a_detail->title.size);
+
+        xml = g_strdup_printf (
+            "<a href=\"%s\" title=\"%s\">",
+            href,
+            title != NULL ? title : href);
+        gtk_text_buffer_insert_at_cursor (ctx->buffer, xml, -1);
+      }
+      break;
+    case MD_SPAN_IMG:
+      g_warning ("Images aren't implemented yet!");
+      break;
+    case MD_SPAN_CODE:
+      INIT_TAG_DATA_LOCATION (&tag, ctx->buffer, "family", "monospace");
+      break;
+    case MD_SPAN_DEL:
+      INIT_TAG_DATA_LOCATION (&tag, ctx->buffer, "strikethrough", TRUE);
+      break;
+    case MD_SPAN_U:
+      INIT_TAG_DATA_LOCATION (&tag, ctx->buffer, "underline", TRUE);
+      break;
+    case MD_SPAN_LATEXMATH:
+    case MD_SPAN_LATEXMATH_DISPLAY:
+    case MD_SPAN_WIKILINK:
+    default:
+      g_warning ("Unsupported markdown event (Did you use latex/wikilinks?)");
+      return 1;
+      break;
+    }
+
+  if (tag != NULL)
+    g_ptr_array_add (ctx->tags, g_steal_pointer (&tag));
+
+  return 0;
+}
+
+static int
+leave_span (MD_SPANTYPE type,
+            void       *detail,
+            void       *user_data)
+{
+  ParseCtx *ctx = user_data;
+
+  switch (type)
+    {
+    case MD_SPAN_EM:
+      TERMINATE_TAG_FROM_SET_PROP ("weight-set");
+      break;
+    case MD_SPAN_STRONG:
+      TERMINATE_TAG_FROM_SET_PROP ("weight-set");
+      break;
+    case MD_SPAN_A:
+      gtk_text_buffer_insert_at_cursor (ctx->buffer, "</a>", -1);
+      break;
+    case MD_SPAN_IMG:
+      // g_warning ("Images aren't implemented yet!");
+      break;
+    case MD_SPAN_CODE:
+      TERMINATE_TAG_FROM_SET_PROP ("family-set");
+      break;
+    case MD_SPAN_DEL:
+      TERMINATE_TAG_FROM_SET_PROP ("strikethrough-set");
+      break;
+    case MD_SPAN_U:
+      TERMINATE_TAG_FROM_SET_PROP ("underline-set");
+      break;
+    case MD_SPAN_LATEXMATH:
+    case MD_SPAN_LATEXMATH_DISPLAY:
+    case MD_SPAN_WIKILINK:
+    default:
+      g_warning ("Unsupported markdown event (Did you use latex/wikilinks?)");
+      return 1;
+      break;
+    }
+
+  return 0;
+}
+
+static int
+text (MD_TEXTTYPE    type,
+      const MD_CHAR *buf,
+      MD_SIZE        size,
+      void          *user_data)
+{
+  ParseCtx        *ctx     = user_data;
+  g_autofree char *escaped = NULL;
+
+  if (type == MD_TEXT_SOFTBR)
+    gtk_text_buffer_insert_at_cursor (ctx->buffer, " ", -1);
+  else if (type == MD_TEXT_BR)
+    gtk_text_buffer_insert_at_cursor (ctx->buffer, "\n", -1);
+  else
+    gtk_text_buffer_insert_at_cursor (ctx->buffer, buf, size);
+
+  return 0;
+}
+
+/* End of bge-markdown-render.c */

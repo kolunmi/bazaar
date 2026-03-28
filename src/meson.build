@@ -1,7 +1,7 @@
 math = cc.find_library('m', required: false)
 xmllint = find_program('xmllint', required: true)
 
-gtk_dep              = dependency('gtk4')
+gtk_dep              = dependency('gtk4', version: '>= 4.22.1')
 libadwaita_dep       = dependency('libadwaita-1', version: '>= 1.8')
 libdex_dep           = dependency('libdex-1', version: '>= 1.0.0')
 flatpak_dep          = dependency('flatpak', version: '>= 1.9')
@@ -12,7 +12,6 @@ libsoup_dep          = dependency('libsoup-3.0', version: '>= 3.6.0')
 json_glib_dep        = dependency('json-glib-1.0', version: '>= 1.10.0')
 glycin_dep           = dependency('glycin-2', version: '>= 2.0')
 glycin_gtk4_dep      = dependency('glycin-gtk4-2', version: '>= 2.0')
-md4c_dep             = dependency('md4c', version: '>= 0.5.1')
 webkit_dep           = dependency('webkitgtk-6.0', version: '>= 2.50.2')
 libsecret_dep        = dependency('libsecret-1', version: '>= 0.20')
 libproxy_dep         = dependency('libproxy-1.0', version: '>= 0.5')
@@ -121,7 +120,6 @@ bz_sources = files(
   'bz-login-page.c',
   'bz-lozenge.c',
   'bz-malcontent-service.c',
-  'bz-markdown-render.c',
   'bz-newline-parser.c',
   'bz-parser.c',
   'bz-preferences-dialog.c',
@@ -138,7 +136,7 @@ bz_sources = files(
   'bz-screenshots-carousel.c',
   'bz-search-engine.c',
   'bz-search-pill-list.c',
-  'bz-search-widget.c',
+  'bz-search-page.c',
   'bz-section-view.c',
   'bz-serializable.c',
   'bz-share-list.c',
@@ -181,7 +179,6 @@ bz_deps = [
   libdex_dep,
   glycin_dep,
   glycin_gtk4_dep,
-  md4c_dep,
   webkit_dep,
   libsecret_dep,
   libproxy_dep,
@@ -294,7 +291,6 @@ blueprints = custom_target('blueprints',
     'bz-library-page.blp',
     'bz-license-dialog.blp',
     'bz-login-page.blp',
-    'bz-markdown-render.blp',
     'bz-preferences-dialog.blp',
     'bz-progress-bar.blp',
     'bz-releases-dialog.blp',
@@ -304,7 +300,7 @@ blueprints = custom_target('blueprints',
     'bz-safety-dialog.blp',
     'bz-screenshot-page.blp',
     'bz-screenshots-carousel.blp',
-    'bz-search-widget.blp',
+    'bz-search-page.blp',
     'bz-section-view.blp',
     'bz-stats-dialog.blp',
     'bz-transaction-list-dialog.blp',
@@ -337,11 +333,24 @@ release_notes = custom_target('release-notes.xml',
   ],
 )
 
+countries_gvariant = custom_target(
+  'countries-gvariant',
+  input: files('../scripts/countries.json.in'),
+  output: 'countries.gvariant',
+  command: [
+    python3,
+    meson.project_source_root() / 'scripts' / 'countries.py',
+    '@INPUT@',
+    meson.project_source_root() / 'po' / 'LINGUAS',
+    '@OUTPUT@',
+  ],
+)
+
 bz_sources += gnome.compile_resources('bz-resources',
   'bazaar.gresource.xml',
   c_name: 'bz',
   source_dir: meson.current_build_dir(),
-  dependencies: [blueprints, release_notes],
+  dependencies: [blueprints, release_notes, countries_gvariant],
 )
 
 executable('bazaar', bz_sources, gdbus_src, marshalers,

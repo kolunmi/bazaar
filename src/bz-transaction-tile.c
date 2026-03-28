@@ -109,14 +109,21 @@ format_removal_size (gpointer object,
 
 static char *
 format_download_progress (gpointer object,
-                          double   progress,
+                          guint64  bytes_transferred,
                           guint64  total_size)
 {
-  guint64          downloaded     = (guint64) (progress * total_size);
-  g_autofree char *downloaded_str = g_format_size (downloaded);
-  g_autofree char *total_str      = g_format_size (total_size);
+  g_autofree char *downloaded_str = NULL;
+  g_autofree char *total_str      = NULL;
 
-  return g_strdup_printf ("%s / %s", downloaded_str, total_str);
+  downloaded_str = g_format_size (bytes_transferred);
+
+  if (total_size == (guint64) -1)
+    return g_strdup_printf ("%s", downloaded_str);
+  else
+    {
+      total_str = g_format_size (total_size);
+      return g_strdup_printf ("%s / %s", downloaded_str, total_str);
+    }
 }
 
 static gboolean

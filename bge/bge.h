@@ -30,6 +30,7 @@ G_BEGIN_DECLS
 
 #include "bge-animation.h"
 #include "bge-carousel.h"
+#include "bge-markdown-render.h"
 #undef BGE_INSIDE
 
 BGE_AVAILABLE_IN_ALL
