@@ -829,6 +829,8 @@ void
 bge_wdgt_renderer_set_spec (BgeWdgtRenderer *self,
                             BgeWdgtSpec     *spec)
 {
+  GBinding *name_binding = NULL;
+
   g_return_if_fail (BGE_IS_WDGT_RENDERER (self));
 
   if (spec == self->spec)
@@ -839,6 +841,15 @@ bge_wdgt_renderer_set_spec (BgeWdgtRenderer *self,
     self->spec = g_object_ref (spec);
 
   regenerate (self);
+  apply_state (self);
+
+  if (spec != NULL)
+    {
+      name_binding = g_object_bind_property (spec, "name", self, "name", G_BINDING_SYNC_CREATE);
+      g_ptr_array_add (self->bindings, name_binding);
+    }
+  else
+    gtk_widget_set_name (GTK_WIDGET (self), NULL);
 
   g_object_notify_by_pspec (G_OBJECT (self), renderer_props[RENDERER_PROP_SPEC]);
 }
