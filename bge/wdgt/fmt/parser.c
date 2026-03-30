@@ -70,6 +70,13 @@ consume_token (const char    **pp,
                TokenParseFlags flags,
                GError        **error);
 
+static char *
+make_object_property_name (const char *object,
+                           const char *property);
+
+static char *
+make_anon_name (guint n);
+
 BgeWdgtSpec *
 bge_wdgt_parse_string (const char *string,
                        GError    **error)
@@ -77,6 +84,7 @@ bge_wdgt_parse_string (const char *string,
   gboolean result                = FALSE;
   g_autoptr (GError) local_error = NULL;
   g_autoptr (BgeWdgtSpec) spec   = NULL;
+  guint n_anon_vals              = 0;
 
   g_return_val_if_fail (string != NULL, FALSE);
 
@@ -130,10 +138,10 @@ bge_wdgt_parse_string (const char *string,
   G_STMT_END
 
   for (const char *p = string;
-       p != NULL && *p != '\0';
-       p = g_utf8_next_char (p))
+       p != NULL && *p != '\0';)
     {
-      g_autofree char *token = NULL;
+      g_autofree char *token       = NULL;
+      g_autofree char *widget_name = NULL;
 
 #define GET_TOKEN(_token_out, _flags)            \
   G_STMT_START                                   \
@@ -157,8 +165,8 @@ bge_wdgt_parse_string (const char *string,
   G_STMT_END
 
       GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, STR_DEFWIDGET);
-      GET_TOKEN (&token, TOKEN_PARSE_QUOTED);
-      bge_wdgt_spec_set_name_take (spec, g_steal_pointer (&token));
+      GET_TOKEN (&widget_name, TOKEN_PARSE_QUOTED);
+      bge_wdgt_spec_set_name (spec, widget_name);
 
       GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "{");
       for (;;)
@@ -171,11 +179,9 @@ bge_wdgt_parse_string (const char *string,
               g_autofree char *name  = NULL;
               g_autofree char *gtype = NULL;
 
-              GET_TOKEN (&token, TOKEN_PARSE_QUOTED);
-              name = g_steal_pointer (&token);
+              GET_TOKEN (&name, TOKEN_PARSE_QUOTED);
               GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "=");
-              GET_TOKEN (&token, TOKEN_PARSE_QUOTED);
-              gtype = g_steal_pointer (&token);
+              GET_TOKEN (&gtype, TOKEN_PARSE_QUOTED);
               GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ";");
 
               result = bge_wdgt_spec_add_child (spec, g_type_from_name (gtype), name, &local_error);
@@ -184,7 +190,53 @@ bge_wdgt_parse_string (const char *string,
           else if (g_strcmp0 (token, STR_STATE) == 0 ||
                    g_strcmp0 (token, STR_DEFAULT_STATE) == 0)
             {
+              g_autofree char *state_name = NULL;
+
+              GET_TOKEN (&state_name, TOKEN_PARSE_QUOTED);
+              result = bge_wdgt_spec_add_state (spec, state_name, &local_error);
+              RETURN_ERROR_UNLESS (result);
+
               GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "=");
+              GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "{");
+
+              for (;;)
+                {
+                  GET_TOKEN (&token, TOKEN_PARSE_DEFAULT);
+                  if (g_strcmp0 (token, "}") == 0)
+                    break;
+                  else if (g_strcmp0 (token, STR_CHILD) == 0)
+                    {
+                      g_autofree char *child_name    = NULL;
+                      g_autofree char *property_name = NULL;
+                      g_autofree char *string_value  = NULL;
+                      g_autofree char *dest_key      = NULL;
+                      g_autofree char *src_key       = NULL;
+                      GValue           value         = G_VALUE_INIT;
+
+                      GET_TOKEN (&child_name, TOKEN_PARSE_QUOTED);
+                      GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ".");
+                      GET_TOKEN (&property_name, TOKEN_PARSE_DEFAULT);
+                      GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "=");
+                      GET_TOKEN (&string_value, TOKEN_PARSE_QUOTED);
+                      GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ";");
+
+                      dest_key = make_object_property_name (child_name, property_name);
+                      result   = bge_wdgt_spec_add_property_value (spec, dest_key, child_name, property_name, &local_error);
+                      RETURN_ERROR_UNLESS (result);
+
+                      src_key = make_anon_name (n_anon_vals++);
+                      g_value_init (&value, G_TYPE_STRING);
+                      g_value_set_string (&value, string_value);
+                      result = bge_wdgt_spec_add_constant_source_value (spec, src_key, &value, &local_error);
+                      g_value_unset (&value);
+                      RETURN_ERROR_UNLESS (result);
+
+                      result = bge_wdgt_spec_set_value (spec, state_name, dest_key, src_key, &local_error);
+                      RETURN_ERROR_UNLESS (result);
+                    }
+                  else
+                    UNEXPECTED_TOKEN (token);
+                }
             }
           else
             UNEXPECTED_TOKEN (token);
@@ -330,4 +382,17 @@ consume_token (const char    **pp,
 #undef RETURN_TOKEN_ADJUST_NEXT_CHAR
 #undef RETURN_TOKEN
 #undef UNEXPECTED_EOF
+}
+
+static char *
+make_object_property_name (const char *object,
+                           const char *property)
+{
+  return g_strdup_printf ("prop@%s.%s", object, property);
+}
+
+static char *
+make_anon_name (guint n)
+{
+  return g_strdup_printf ("anon@%u", n);
 }

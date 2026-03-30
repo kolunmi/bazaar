@@ -19,6 +19,7 @@
  */
 
 #include "bge-wdgt-spec.h"
+#include "bge-wdgt-spec-renderer.h"
 #include "util.h"
 
 typedef enum
@@ -58,7 +59,9 @@ BGE_DEFINE_DATA (
       };
       GPtrArray *notify;
     },
+    g_value_unset (&self->constant);
     BGE_RELEASE_DATA (name, g_free);
+    BGE_RELEASE_DATA (property.child, child_data_unref);
     BGE_RELEASE_DATA (property.prop_name, g_free);
     BGE_RELEASE_DATA (notify, g_ptr_array_unref))
 
@@ -72,6 +75,10 @@ BGE_DEFINE_DATA (
     BGE_RELEASE_DATA (name, g_free);
     BGE_RELEASE_DATA (setters, g_hash_table_unref))
 
+/* --------------------------- */
+/* Spec Builder Implementation */
+/* --------------------------- */
+
 struct _BgeWdgtSpec
 {
   GObject parent_instance;
@@ -79,7 +86,6 @@ struct _BgeWdgtSpec
   char *name;
 
   GHashTable *values;
-  GHashTable *connections;
   GHashTable *children;
   GHashTable *states;
 
@@ -111,7 +117,6 @@ bge_wdgt_spec_dispose (GObject *object)
   g_clear_pointer (&self->name, g_free);
 
   g_clear_pointer (&self->values, g_hash_table_unref);
-  g_clear_pointer (&self->connections, g_hash_table_unref);
   g_clear_pointer (&self->children, g_hash_table_unref);
   g_clear_pointer (&self->states, g_hash_table_unref);
   g_clear_pointer (&self->default_state, state_data_unref);
@@ -176,8 +181,9 @@ bge_wdgt_spec_class_init (BgeWdgtSpecClass *klass)
 static void
 bge_wdgt_spec_init (BgeWdgtSpec *self)
 {
-  self->children = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
-  self->states   = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+  self->values   = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, value_data_unref);
+  self->children = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, child_data_unref);
+  self->states   = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, state_data_unref);
 }
 
 BgeWdgtSpec *
@@ -322,7 +328,8 @@ bge_wdgt_spec_add_property_value (BgeWdgtSpec *self,
                                   const char  *property,
                                   GError     **error)
 {
-  g_autoptr (ChildData) child_data  = NULL;
+  ChildData *child_data             = NULL;
+  ValueData *existing_value         = NULL;
   g_autoptr (GTypeClass) type_class = NULL;
   GParamSpec *pspec                 = NULL;
   g_autoptr (ValueData) value       = NULL;
@@ -332,19 +339,27 @@ bge_wdgt_spec_add_property_value (BgeWdgtSpec *self,
   g_return_val_if_fail (child != NULL, FALSE);
   g_return_val_if_fail (property != NULL, FALSE);
 
-  if (g_hash_table_contains (self->values, name))
-    {
-      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
-                   "value '%s' already exists", name);
-      return FALSE;
-    }
-
   child_data = g_hash_table_lookup (self->children, child);
   if (child_data == NULL)
     {
       g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
                    "child '%s' doesn't exist", child);
       return FALSE;
+    }
+
+  existing_value = g_hash_table_lookup (self->values, name);
+  if (existing_value != NULL)
+    {
+      if (existing_value->kind == VALUE_PROPERTY &&
+          existing_value->property.child == child_data &&
+          g_strcmp0 (existing_value->property.prop_name, property) == 0)
+        return TRUE;
+      else
+        {
+          g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                       "value '%s' already exists", name);
+          return FALSE;
+        }
     }
 
   type_class = g_type_class_ref (child_data->type);
@@ -523,6 +538,301 @@ bge_wdgt_spec_set_value (BgeWdgtSpec *self,
       value_data_ref (dest_data),
       value_data_ref (src_data));
   return TRUE;
+}
+
+/* ------------------------------ */
+/* Widget Renderer Implementation */
+/* ------------------------------ */
+
+struct _BgeWdgtRenderer
+{
+  GtkWidget parent_instance;
+
+  BgeWdgtSpec *spec;
+  char        *state;
+  GObject     *reference;
+  GtkWidget   *child;
+};
+
+G_DEFINE_FINAL_TYPE (BgeWdgtRenderer, bge_wdgt_renderer, GTK_TYPE_WIDGET);
+
+enum
+{
+  RENDERER_PROP_0,
+
+  RENDERER_PROP_SPEC,
+  RENDERER_PROP_STATE,
+  RENDERER_PROP_REFERENCE,
+  RENDERER_PROP_CHILD,
+
+  LAST_RENDERER_PROP
+};
+static GParamSpec *renderer_props[LAST_RENDERER_PROP] = { 0 };
+
+static void
+bge_wdgt_renderer_dispose (GObject *object)
+{
+  BgeWdgtRenderer *self = BGE_WDGT_RENDERER (object);
+
+  g_clear_pointer (&self->spec, g_object_unref);
+  g_clear_pointer (&self->state, g_free);
+  g_clear_pointer (&self->reference, g_object_unref);
+  g_clear_pointer (&self->child, gtk_widget_unparent);
+
+  G_OBJECT_CLASS (bge_wdgt_renderer_parent_class)->dispose (object);
+}
+
+static void
+bge_wdgt_renderer_get_property (GObject    *object,
+                                guint       prop_id,
+                                GValue     *value,
+                                GParamSpec *pspec)
+{
+  BgeWdgtRenderer *self = BGE_WDGT_RENDERER (object);
+
+  switch (prop_id)
+    {
+    case RENDERER_PROP_SPEC:
+      g_value_set_object (value, bge_wdgt_renderer_get_spec (self));
+      break;
+    case RENDERER_PROP_STATE:
+      g_value_set_string (value, bge_wdgt_renderer_get_state (self));
+      break;
+    case RENDERER_PROP_REFERENCE:
+      g_value_set_object (value, bge_wdgt_renderer_get_reference (self));
+      break;
+    case RENDERER_PROP_CHILD:
+      g_value_set_object (value, bge_wdgt_renderer_get_child (self));
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+    }
+}
+
+static void
+bge_wdgt_renderer_set_property (GObject      *object,
+                                guint         prop_id,
+                                const GValue *value,
+                                GParamSpec   *pspec)
+{
+  BgeWdgtRenderer *self = BGE_WDGT_RENDERER (object);
+
+  switch (prop_id)
+    {
+    case RENDERER_PROP_SPEC:
+      bge_wdgt_renderer_set_spec (self, g_value_get_object (value));
+      break;
+    case RENDERER_PROP_STATE:
+      bge_wdgt_renderer_set_state (self, g_value_get_string (value));
+      break;
+    case RENDERER_PROP_REFERENCE:
+      bge_wdgt_renderer_set_reference (self, g_value_get_object (value));
+      break;
+    case RENDERER_PROP_CHILD:
+      bge_wdgt_renderer_set_child (self, g_value_get_object (value));
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+    }
+}
+
+static void
+bge_wdgt_renderer_measure (GtkWidget     *widget,
+                           GtkOrientation orientation,
+                           int            for_size,
+                           int           *minimum,
+                           int           *natural,
+                           int           *minimum_baseline,
+                           int           *natural_baseline)
+{
+  BgeWdgtRenderer *self = BGE_WDGT_RENDERER (widget);
+}
+
+static void
+bge_wdgt_renderer_size_allocate (GtkWidget *widget,
+                                 int        width,
+                                 int        height,
+                                 int        baseline)
+{
+  BgeWdgtRenderer *self = BGE_WDGT_RENDERER (widget);
+}
+
+static void
+bge_wdgt_renderer_snapshot (GtkWidget   *widget,
+                            GtkSnapshot *snapshot)
+{
+  BgeWdgtRenderer *self = BGE_WDGT_RENDERER (widget);
+}
+
+static void
+bge_wdgt_renderer_class_init (BgeWdgtRendererClass *klass)
+{
+  GObjectClass   *object_class = G_OBJECT_CLASS (klass);
+  GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
+
+  object_class->set_property = bge_wdgt_renderer_set_property;
+  object_class->get_property = bge_wdgt_renderer_get_property;
+  object_class->dispose      = bge_wdgt_renderer_dispose;
+
+  renderer_props[RENDERER_PROP_SPEC] =
+      g_param_spec_object (
+          "spec",
+          NULL, NULL,
+          BGE_TYPE_WDGT_SPEC,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  renderer_props[RENDERER_PROP_STATE] =
+      g_param_spec_string (
+          "state",
+          NULL, NULL, NULL,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  renderer_props[RENDERER_PROP_REFERENCE] =
+      g_param_spec_object (
+          "reference",
+          NULL, NULL,
+          G_TYPE_OBJECT,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  renderer_props[RENDERER_PROP_CHILD] =
+      g_param_spec_object (
+          "child",
+          NULL, NULL,
+          GTK_TYPE_WIDGET,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  g_object_class_install_properties (object_class, LAST_RENDERER_PROP, renderer_props);
+
+  widget_class->measure       = bge_wdgt_renderer_measure;
+  widget_class->size_allocate = bge_wdgt_renderer_size_allocate;
+  widget_class->snapshot      = bge_wdgt_renderer_snapshot;
+}
+
+static void
+bge_wdgt_renderer_init (BgeWdgtRenderer *self)
+{
+}
+
+BgeWdgtRenderer *
+bge_wdgt_renderer_new (void)
+{
+  return g_object_new (BGE_TYPE_WDGT_RENDERER, NULL);
+}
+
+BgeWdgtSpec *
+bge_wdgt_renderer_get_spec (BgeWdgtRenderer *self)
+{
+  g_return_val_if_fail (BGE_IS_WDGT_RENDERER (self), NULL);
+  return self->spec;
+}
+
+const char *
+bge_wdgt_renderer_get_state (BgeWdgtRenderer *self)
+{
+  g_return_val_if_fail (BGE_IS_WDGT_RENDERER (self), NULL);
+  return self->state;
+}
+
+GObject *
+bge_wdgt_renderer_get_reference (BgeWdgtRenderer *self)
+{
+  g_return_val_if_fail (BGE_IS_WDGT_RENDERER (self), NULL);
+  return self->reference;
+}
+
+GtkWidget *
+bge_wdgt_renderer_get_child (BgeWdgtRenderer *self)
+{
+  g_return_val_if_fail (BGE_IS_WDGT_RENDERER (self), NULL);
+  return self->child;
+}
+
+void
+bge_wdgt_renderer_set_spec (BgeWdgtRenderer *self,
+                            BgeWdgtSpec     *spec)
+{
+  g_return_if_fail (BGE_IS_WDGT_RENDERER (self));
+
+  if (spec == self->spec)
+    return;
+
+  g_clear_pointer (&self->spec, g_object_unref);
+  if (spec != NULL)
+    self->spec = g_object_ref (spec);
+
+  g_object_notify_by_pspec (G_OBJECT (self), renderer_props[RENDERER_PROP_SPEC]);
+}
+
+void
+bge_wdgt_renderer_set_state (BgeWdgtRenderer *self,
+                             const char      *state)
+{
+  g_return_if_fail (BGE_IS_WDGT_RENDERER (self));
+
+  if (state == self->state || (state != NULL && self->state != NULL && g_strcmp0 (state, self->state) == 0))
+    return;
+
+  g_clear_pointer (&self->state, g_free);
+  if (state != NULL)
+    self->state = g_strdup (state);
+
+  g_object_notify_by_pspec (G_OBJECT (self), renderer_props[RENDERER_PROP_STATE]);
+}
+
+void
+bge_wdgt_renderer_set_reference (BgeWdgtRenderer *self,
+                                 GObject         *reference)
+{
+  g_return_if_fail (BGE_IS_WDGT_RENDERER (self));
+
+  if (reference == self->reference)
+    return;
+
+  g_clear_pointer (&self->reference, g_object_unref);
+  if (reference != NULL)
+    self->reference = g_object_ref (reference);
+
+  g_object_notify_by_pspec (G_OBJECT (self), renderer_props[RENDERER_PROP_REFERENCE]);
+}
+
+void
+bge_wdgt_renderer_set_child (BgeWdgtRenderer *self,
+                             GtkWidget       *child)
+{
+  g_return_if_fail (BGE_IS_WDGT_RENDERER (self));
+
+  if (self->child == child)
+    return;
+
+  if (child != NULL)
+    g_return_if_fail (gtk_widget_get_parent (child) == NULL);
+
+  g_clear_pointer (&self->child, gtk_widget_unparent);
+  self->child = child;
+
+  if (child != NULL)
+    gtk_widget_set_parent (child, GTK_WIDGET (self));
+
+  g_object_notify_by_pspec (G_OBJECT (self), renderer_props[RENDERER_PROP_CHILD]);
+}
+
+void
+bge_wdgt_renderer_set_state_take (BgeWdgtRenderer *self,
+                                  char            *state)
+{
+  g_return_if_fail (BGE_IS_WDGT_RENDERER (self));
+
+  if (state != NULL && self->state != NULL && g_strcmp0 (state, self->state) == 0)
+    {
+      g_free (state);
+      return;
+    }
+
+  g_clear_pointer (&self->state, g_free);
+  if (state != NULL)
+    self->state = state;
+
+  g_object_notify_by_pspec (G_OBJECT (self), renderer_props[RENDERER_PROP_STATE]);
 }
 
 /* End of bge-wdgt-spec.c */

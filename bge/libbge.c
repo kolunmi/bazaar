@@ -42,11 +42,14 @@ bge_init (void)
 
   {
     g_autoptr (GError) local_error = NULL;
+    gsize            length        = 0;
+    g_autofree char *contents      = NULL;
     g_autoptr (BgeWdgtSpec) spec   = NULL;
 
-    spec = bge_wdgt_parse_string (
-        "  defwidget \"MyWidget\"{child \"btn\" =\"BgeCarousel\"; }  ",
-        &local_error);
+    g_assert (g_file_get_contents ("/home/kol/Projects/bazaar/bge/test.wdgt", &contents, &length, NULL));
+
+    g_type_ensure (GTK_TYPE_LABEL);
+    spec = bge_wdgt_parse_string (contents, &local_error);
     if (spec == NULL)
       g_print ("Error!! %s\n", local_error->message);
   }
