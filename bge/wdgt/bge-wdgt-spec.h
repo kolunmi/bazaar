@@ -49,36 +49,42 @@ bge_wdgt_spec_set_name_take (BgeWdgtSpec *self,
 
 #define bge_wdgt_spec_set_name_take_printf(self, ...) bge_wdgt_spec_set_name_take (self, g_strdup_printf (__VA_ARGS__))
 
-void
+gboolean
 bge_wdgt_spec_add_constant_source_value (BgeWdgtSpec  *self,
                                          const char   *name,
-                                         const GValue *constant);
+                                         const GValue *constant,
+                                         GError      **error);
 
-void
+gboolean
 bge_wdgt_spec_add_special_source_value (BgeWdgtSpec        *self,
                                         const char         *name,
-                                        BgeWdgtSpecialValue kind);
+                                        BgeWdgtSpecialValue kind,
+                                        GError            **error);
 
-void
+gboolean
 bge_wdgt_spec_add_property_value (BgeWdgtSpec *self,
                                   const char  *name,
                                   const char  *child,
-                                  const char  *property);
+                                  const char  *property,
+                                  GError     **error);
 
-void
+gboolean
 bge_wdgt_spec_add_child (BgeWdgtSpec *self,
                          GType        type,
-                         const char  *name);
+                         const char  *name,
+                         GError     **error);
 
-void
+gboolean
 bge_wdgt_spec_add_state (BgeWdgtSpec *self,
-                         const char  *name);
+                         const char  *name,
+                         GError     **error);
 
-void
+gboolean
 bge_wdgt_spec_set_value (BgeWdgtSpec *self,
                          const char  *state,
                          const char  *dest_value,
-                         const char  *src_value);
+                         const char  *src_value,
+                         GError     **error);
 
 G_END_DECLS
 

@@ -74,6 +74,7 @@ BgeWdgtSpec *
 bge_wdgt_parse_string (const char *string,
                        GError    **error)
 {
+  gboolean result                = FALSE;
   g_autoptr (GError) local_error = NULL;
   g_autoptr (BgeWdgtSpec) spec   = NULL;
 
@@ -91,7 +92,9 @@ bge_wdgt_parse_string (const char *string,
             G_IO_ERROR,                  \
             G_IO_ERROR_UNKNOWN,          \
             "wdgt fmt parser error: %s", \
-            local_error->message);       \
+            local_error != NULL          \
+                ? local_error->message   \
+                : "???");                \
         return FALSE;                    \
       }                                  \
   }                                      \
@@ -175,7 +178,8 @@ bge_wdgt_parse_string (const char *string,
               gtype = g_steal_pointer (&token);
               GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ";");
 
-              bge_wdgt_spec_add_child (spec, g_type_from_name (gtype), name);
+              result = bge_wdgt_spec_add_child (spec, g_type_from_name (gtype), name, &local_error);
+              RETURN_ERROR_UNLESS (result);
             }
           else if (g_strcmp0 (token, STR_STATE) == 0 ||
                    g_strcmp0 (token, STR_DEFAULT_STATE) == 0)

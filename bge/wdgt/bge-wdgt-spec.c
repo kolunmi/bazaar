@@ -228,17 +228,24 @@ bge_wdgt_spec_set_name_take (BgeWdgtSpec *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_NAME]);
 }
 
-void
+gboolean
 bge_wdgt_spec_add_constant_source_value (BgeWdgtSpec  *self,
                                          const char   *name,
-                                         const GValue *constant)
+                                         const GValue *constant,
+                                         GError      **error)
 {
   g_autoptr (ValueData) value = NULL;
 
-  g_return_if_fail (BGE_IS_WDGT_SPEC (self));
-  g_return_if_fail (name != NULL);
-  g_return_if_fail (constant != NULL);
-  g_return_if_fail (!g_hash_table_contains (self->values, name));
+  g_return_val_if_fail (BGE_IS_WDGT_SPEC (self), FALSE);
+  g_return_val_if_fail (name != NULL, FALSE);
+  g_return_val_if_fail (constant != NULL, FALSE);
+
+  if (g_hash_table_contains (self->values, name))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' already exists", name);
+      return FALSE;
+    }
 
   value       = value_data_new ();
   value->name = g_strdup (name);
@@ -247,18 +254,26 @@ bge_wdgt_spec_add_constant_source_value (BgeWdgtSpec  *self,
   value->notify = g_ptr_array_new_with_free_func (value_data_unref);
 
   g_hash_table_replace (self->values, g_strdup (name), value_data_ref (value));
+  return TRUE;
 }
 
-void
+gboolean
 bge_wdgt_spec_add_special_source_value (BgeWdgtSpec        *self,
                                         const char         *name,
-                                        BgeWdgtSpecialValue kind)
+                                        BgeWdgtSpecialValue kind,
+                                        GError            **error)
 {
   g_autoptr (ValueData) value = NULL;
 
-  g_return_if_fail (BGE_IS_WDGT_SPEC (self));
-  g_return_if_fail (name != NULL);
-  g_return_if_fail (!g_hash_table_contains (self->values, name));
+  g_return_val_if_fail (BGE_IS_WDGT_SPEC (self), FALSE);
+  g_return_val_if_fail (name != NULL, FALSE);
+
+  if (g_hash_table_contains (self->values, name))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' already exists", name);
+      return FALSE;
+    }
 
   switch (kind)
     {
@@ -272,7 +287,7 @@ bge_wdgt_spec_add_special_source_value (BgeWdgtSpec        *self,
       break;
     default:
       g_critical ("Invalid special value specified");
-      return;
+      return FALSE;
     }
 
   if (value == NULL)
@@ -297,31 +312,50 @@ bge_wdgt_spec_add_special_source_value (BgeWdgtSpec        *self,
     }
 
   g_hash_table_replace (self->values, g_strdup (name), value_data_ref (value));
+  return TRUE;
 }
 
-void
+gboolean
 bge_wdgt_spec_add_property_value (BgeWdgtSpec *self,
                                   const char  *name,
                                   const char  *child,
-                                  const char  *property)
+                                  const char  *property,
+                                  GError     **error)
 {
   g_autoptr (ChildData) child_data  = NULL;
   g_autoptr (GTypeClass) type_class = NULL;
   GParamSpec *pspec                 = NULL;
   g_autoptr (ValueData) value       = NULL;
 
-  g_return_if_fail (BGE_IS_WDGT_SPEC (self));
-  g_return_if_fail (name != NULL);
-  g_return_if_fail (child != NULL);
-  g_return_if_fail (property != NULL);
-  g_return_if_fail (!g_hash_table_contains (self->values, name));
+  g_return_val_if_fail (BGE_IS_WDGT_SPEC (self), FALSE);
+  g_return_val_if_fail (name != NULL, FALSE);
+  g_return_val_if_fail (child != NULL, FALSE);
+  g_return_val_if_fail (property != NULL, FALSE);
+
+  if (g_hash_table_contains (self->values, name))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' already exists", name);
+      return FALSE;
+    }
 
   child_data = g_hash_table_lookup (self->children, child);
-  g_return_if_fail (child_data != NULL);
+  if (child_data == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "child '%s' doesn't exist", child);
+      return FALSE;
+    }
 
   type_class = g_type_class_ref (child_data->type);
   pspec      = g_object_class_find_property (G_OBJECT_CLASS (type_class), property);
-  g_return_if_fail (pspec != NULL);
+  if (pspec == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "property '%s' doesn't exist on type %s",
+                   property, g_type_name (child_data->type));
+      return FALSE;
+    }
 
   value                       = value_data_new ();
   value->name                 = g_strdup (name);
@@ -332,37 +366,65 @@ bge_wdgt_spec_add_property_value (BgeWdgtSpec *self,
   value->notify               = g_ptr_array_new_with_free_func (value_data_unref);
 
   g_hash_table_replace (self->values, g_strdup (name), value_data_ref (value));
+  return TRUE;
 }
 
-void
+gboolean
 bge_wdgt_spec_add_child (BgeWdgtSpec *self,
                          GType        type,
-                         const char  *name)
+                         const char  *name,
+                         GError     **error)
 {
   g_autoptr (ChildData) child = NULL;
 
-  g_return_if_fail (BGE_IS_WDGT_SPEC (self));
-  g_return_if_fail (g_type_is_a (type, GTK_TYPE_WIDGET));
-  g_return_if_fail (G_TYPE_IS_INSTANTIATABLE (type));
-  g_return_if_fail (name != NULL);
-  g_return_if_fail (!g_hash_table_contains (self->children, name));
+  g_return_val_if_fail (BGE_IS_WDGT_SPEC (self), FALSE);
+  g_return_val_if_fail (name != NULL, FALSE);
+
+  if (g_hash_table_contains (self->children, name))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "child '%s' already exists", name);
+      return FALSE;
+    }
+  if (!g_type_is_a (type, GTK_TYPE_WIDGET))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "type '%s' does not derive from GtkWidget",
+                   g_type_name (type));
+      return FALSE;
+    }
+  if (!G_TYPE_IS_INSTANTIATABLE (type))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "type '%s' is not instantiable",
+                   g_type_name (type));
+      return FALSE;
+    }
 
   child       = child_data_new ();
   child->type = type;
   child->name = g_strdup (name);
 
   g_hash_table_replace (self->children, g_strdup (name), child_data_ref (child));
+  return TRUE;
 }
 
-void
+gboolean
 bge_wdgt_spec_add_state (BgeWdgtSpec *self,
-                         const char  *name)
+                         const char  *name,
+                         GError     **error)
 {
   g_autoptr (StateData) state = NULL;
 
-  g_return_if_fail (BGE_IS_WDGT_SPEC (self));
-  g_return_if_fail (name != NULL);
-  g_return_if_fail (!g_hash_table_contains (self->states, name));
+  g_return_val_if_fail (BGE_IS_WDGT_SPEC (self), FALSE);
+  g_return_val_if_fail (name != NULL, FALSE);
+
+  if (g_hash_table_contains (self->states, name))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "state '%s' already exists", name);
+      return FALSE;
+    }
 
   state          = state_data_new ();
   state->name    = g_strdup (name);
@@ -371,45 +433,96 @@ bge_wdgt_spec_add_state (BgeWdgtSpec *self,
       value_data_unref, value_data_unref);
 
   g_hash_table_replace (self->states, g_strdup (name), state_data_ref (state));
+  return TRUE;
 }
 
-void
+gboolean
 bge_wdgt_spec_set_value (BgeWdgtSpec *self,
                          const char  *state,
                          const char  *dest_value,
-                         const char  *src_value)
+                         const char  *src_value,
+                         GError     **error)
 {
   StateData *state_data = NULL;
   ValueData *dest_data  = NULL;
   ValueData *src_data   = NULL;
 
-  g_return_if_fail (BGE_IS_WDGT_SPEC (self));
-  g_return_if_fail (state != NULL);
-  g_return_if_fail (dest_value != NULL);
-  g_return_if_fail (src_value != NULL);
+  g_return_val_if_fail (BGE_IS_WDGT_SPEC (self), FALSE);
+  g_return_val_if_fail (state != NULL, FALSE);
+  g_return_val_if_fail (dest_value != NULL, FALSE);
+  g_return_val_if_fail (src_value != NULL, FALSE);
 
   state_data = g_hash_table_lookup (self->states, state);
   dest_data  = g_hash_table_lookup (self->values, dest_value);
   src_data   = g_hash_table_lookup (self->values, src_value);
 
-  g_return_if_fail (state_data != NULL);
-  g_return_if_fail (dest_data != NULL);
-  g_return_if_fail (src_data != NULL);
-  g_return_if_fail (dest_data != src_data);
-  g_return_if_fail (g_type_is_a (dest_data->type, src_data->type) ||
-                    g_type_is_a (src_data->type, dest_data->type));
-  g_return_if_fail (dest_data->kind != VALUE_SPECIAL);
-  g_return_if_fail (dest_data->kind != VALUE_CONSTANT);
-
-  if (dest_data->kind == VALUE_PROPERTY)
-    g_return_if_fail (dest_data->property.pspec_flags & G_PARAM_WRITABLE);
-  if (src_data->kind == VALUE_PROPERTY)
-    g_return_if_fail (dest_data->property.pspec_flags & G_PARAM_READABLE);
+  if (state_data == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "state '%s' is undefined", state);
+      return FALSE;
+    }
+  if (dest_data == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' is undefined", dest_value);
+      return FALSE;
+    }
+  if (src_data == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' is undefined", src_value);
+      return FALSE;
+    }
+  if (dest_data == src_data)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "cannot assign '%s' to itself", src_value);
+      return FALSE;
+    }
+  if (!g_type_is_a (src_data->type, dest_data->type))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "source type %s cannot be assigned to destination type %s",
+                   g_type_name (src_data->type), g_type_name (dest_data->type));
+      return FALSE;
+    }
+  if (dest_data->kind == VALUE_CONSTANT)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "cannot assign to a constant source value");
+      return FALSE;
+    }
+  if (dest_data->kind == VALUE_SPECIAL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "cannot assign to a special source value");
+      return FALSE;
+    }
+  if (dest_data->kind == VALUE_PROPERTY &&
+      !(dest_data->property.pspec_flags & G_PARAM_WRITABLE))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "property %s on type %s is not writable",
+                   dest_data->property.prop_name,
+                   g_type_name (dest_data->type));
+      return FALSE;
+    }
+  if (src_data->kind == VALUE_PROPERTY &&
+      !(src_data->property.pspec_flags & G_PARAM_READABLE))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "property %s on type %s is not writable",
+                   src_data->property.prop_name,
+                   g_type_name (src_data->type));
+      return FALSE;
+    }
 
   g_hash_table_replace (
       state_data->setters,
       value_data_ref (dest_data),
       value_data_ref (src_data));
+  return TRUE;
 }
 
 /* End of bge-wdgt-spec.c */
