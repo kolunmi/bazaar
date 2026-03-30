@@ -1,0 +1,9 @@
+defwidget "My Widget" {
+  child "btn" = "GtkLabel";
+  state@default "default" = {
+    child "btn".label = "default";
+  }
+  state "other" = {
+    child "btn".label = "other";
+  }
+}

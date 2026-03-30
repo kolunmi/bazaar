@@ -18,8 +18,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "bge.h"
-
 #include "parser.h"
 
 #define SINGLE_CHAR_TOKENS "{}=.;"

@@ -20,7 +20,9 @@
 
 #pragma once
 
-#include <gtk/gtk.h>
+#ifndef BGE_INSIDE
+#error "Only <bge.h> can be included directly."
+#endif
 
 G_BEGIN_DECLS
 
@@ -35,6 +37,10 @@ G_DECLARE_FINAL_TYPE (BgeWdgtSpec, bge_wdgt_spec, BGE, WDGT_SPEC, GObject)
 
 BgeWdgtSpec *
 bge_wdgt_spec_new (void);
+
+BgeWdgtSpec *
+bge_wdgt_spec_new_for_resource (const char *resource,
+                                GError    **error);
 
 const char *
 bge_wdgt_spec_get_name (BgeWdgtSpec *self);

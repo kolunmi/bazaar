@@ -18,8 +18,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "bge-wdgt-spec.h"
-#include "bge-wdgt-spec-renderer.h"
+#include <gtk/gtk.h>
+
+#include "bge.h"
+#include "fmt/parser.h"
 #include "util.h"
 
 typedef enum
@@ -190,6 +192,22 @@ BgeWdgtSpec *
 bge_wdgt_spec_new (void)
 {
   return g_object_new (BGE_TYPE_WDGT_SPEC, NULL);
+}
+
+BgeWdgtSpec *
+bge_wdgt_spec_new_for_resource (const char *resource,
+                                GError    **error)
+{
+  g_autoptr (GBytes) bytes = NULL;
+  gsize         size       = 0;
+  gconstpointer data       = NULL;
+
+  bytes = g_resources_lookup_data (resource, G_RESOURCE_LOOKUP_FLAGS_NONE, error);
+  if (bytes == NULL)
+    return NULL;
+
+  data = g_bytes_get_data (bytes, &size);
+  return bge_wdgt_parse_string ((const char *) data, error);
 }
 
 const char *
@@ -552,6 +570,9 @@ struct _BgeWdgtRenderer
   char        *state;
   GObject     *reference;
   GtkWidget   *child;
+
+  GHashTable *children;
+  GPtrArray  *bindings;
 };
 
 G_DEFINE_FINAL_TYPE (BgeWdgtRenderer, bge_wdgt_renderer, GTK_TYPE_WIDGET);
@@ -570,6 +591,12 @@ enum
 static GParamSpec *renderer_props[LAST_RENDERER_PROP] = { 0 };
 
 static void
+regenerate (BgeWdgtRenderer *self);
+
+static void
+apply_state (BgeWdgtRenderer *self);
+
+static void
 bge_wdgt_renderer_dispose (GObject *object)
 {
   BgeWdgtRenderer *self = BGE_WDGT_RENDERER (object);
@@ -578,6 +605,9 @@ bge_wdgt_renderer_dispose (GObject *object)
   g_clear_pointer (&self->state, g_free);
   g_clear_pointer (&self->reference, g_object_unref);
   g_clear_pointer (&self->child, gtk_widget_unparent);
+
+  g_clear_pointer (&self->children, g_hash_table_unref);
+  g_clear_pointer (&self->bindings, g_ptr_array_unref);
 
   G_OBJECT_CLASS (bge_wdgt_renderer_parent_class)->dispose (object);
 }
@@ -646,6 +676,13 @@ bge_wdgt_renderer_measure (GtkWidget     *widget,
                            int           *natural_baseline)
 {
   BgeWdgtRenderer *self = BGE_WDGT_RENDERER (widget);
+
+  if (self->child != NULL)
+    gtk_widget_measure (
+        GTK_WIDGET (self->child),
+        orientation, for_size,
+        minimum, natural,
+        minimum_baseline, natural_baseline);
 }
 
 static void
@@ -655,6 +692,25 @@ bge_wdgt_renderer_size_allocate (GtkWidget *widget,
                                  int        baseline)
 {
   BgeWdgtRenderer *self = BGE_WDGT_RENDERER (widget);
+  GHashTableIter   iter = { 0 };
+
+  if (self->child != NULL &&
+      gtk_widget_should_layout (self->child))
+    gtk_widget_allocate (self->child, width, height, baseline, NULL);
+
+  g_hash_table_iter_init (&iter, self->children);
+  for (;;)
+    {
+      char      *name  = NULL;
+      GtkWidget *child = NULL;
+
+      if (!g_hash_table_iter_next (
+              &iter,
+              (gpointer *) &name,
+              (gpointer *) &child))
+        break;
+      gtk_widget_allocate (child, width, height, baseline, NULL);
+    }
 }
 
 static void
@@ -662,6 +718,24 @@ bge_wdgt_renderer_snapshot (GtkWidget   *widget,
                             GtkSnapshot *snapshot)
 {
   BgeWdgtRenderer *self = BGE_WDGT_RENDERER (widget);
+  GHashTableIter   iter = { 0 };
+
+  if (self->child != NULL)
+    gtk_widget_snapshot_child (GTK_WIDGET (self), self->child, snapshot);
+
+  g_hash_table_iter_init (&iter, self->children);
+  for (;;)
+    {
+      char      *name  = NULL;
+      GtkWidget *child = NULL;
+
+      if (!g_hash_table_iter_next (
+              &iter,
+              (gpointer *) &name,
+              (gpointer *) &child))
+        break;
+      gtk_widget_snapshot_child (GTK_WIDGET (self), child, snapshot);
+    }
 }
 
 static void
@@ -711,6 +785,10 @@ bge_wdgt_renderer_class_init (BgeWdgtRendererClass *klass)
 static void
 bge_wdgt_renderer_init (BgeWdgtRenderer *self)
 {
+  self->children = g_hash_table_new_full (
+      g_str_hash, g_str_equal,
+      g_free, (GDestroyNotify) gtk_widget_unparent);
+  self->bindings = g_ptr_array_new_with_free_func (g_object_unref);
 }
 
 BgeWdgtRenderer *
@@ -760,6 +838,8 @@ bge_wdgt_renderer_set_spec (BgeWdgtRenderer *self,
   if (spec != NULL)
     self->spec = g_object_ref (spec);
 
+  regenerate (self);
+
   g_object_notify_by_pspec (G_OBJECT (self), renderer_props[RENDERER_PROP_SPEC]);
 }
 
@@ -775,6 +855,8 @@ bge_wdgt_renderer_set_state (BgeWdgtRenderer *self,
   g_clear_pointer (&self->state, g_free);
   if (state != NULL)
     self->state = g_strdup (state);
+
+  apply_state (self);
 
   g_object_notify_by_pspec (G_OBJECT (self), renderer_props[RENDERER_PROP_STATE]);
 }
@@ -833,6 +915,127 @@ bge_wdgt_renderer_set_state_take (BgeWdgtRenderer *self,
     self->state = state;
 
   g_object_notify_by_pspec (G_OBJECT (self), renderer_props[RENDERER_PROP_STATE]);
+}
+
+static void
+regenerate (BgeWdgtRenderer *self)
+{
+  BgeWdgtSpec   *spec = self->spec;
+  GHashTableIter iter = { 0 };
+
+  g_hash_table_remove_all (self->children);
+
+  if (self->spec == NULL)
+    return;
+
+  g_hash_table_iter_init (&iter, spec->children);
+  for (;;)
+    {
+      char      *name   = NULL;
+      ChildData *data   = NULL;
+      GtkWidget *widget = NULL;
+
+      if (!g_hash_table_iter_next (
+              &iter,
+              (gpointer *) &name,
+              (gpointer *) &data))
+        break;
+
+      widget = g_object_new (
+          data->type,
+          "name", name,
+          NULL);
+      gtk_widget_set_parent (widget, GTK_WIDGET (self));
+      g_hash_table_replace (self->children, g_strdup (name), widget);
+    }
+
+  gtk_widget_queue_allocate (GTK_WIDGET (self));
+  gtk_widget_queue_draw (GTK_WIDGET (self));
+}
+
+static void
+apply_state (BgeWdgtRenderer *self)
+{
+  BgeWdgtSpec   *spec       = self->spec;
+  StateData     *state_data = NULL;
+  GHashTableIter iter       = { 0 };
+
+  g_ptr_array_set_size (self->bindings, 0);
+
+  if (self->spec == NULL ||
+      self->state == NULL)
+    return;
+
+  state_data = g_hash_table_lookup (spec->states, self->state);
+  if (state_data == NULL)
+    {
+      g_critical ("state \"%s\" doesn't exist on spec \"%s\"",
+                  self->state, spec->name);
+      return;
+    }
+
+  g_hash_table_iter_init (&iter, state_data->setters);
+  for (;;)
+    {
+      ValueData  *dest_value_data = NULL;
+      ValueData  *src_value_data  = NULL;
+      GObject    *dest_object     = NULL;
+      const char *dest_property   = NULL;
+
+      if (!g_hash_table_iter_next (
+              &iter,
+              (gpointer *) &dest_value_data,
+              (gpointer *) &src_value_data))
+        break;
+
+      switch (dest_value_data->kind)
+        {
+        case VALUE_PROPERTY:
+          dest_object = g_hash_table_lookup (
+              self->children,
+              dest_value_data->property.child->name);
+          g_assert (dest_object != NULL);
+          dest_property = dest_value_data->property.prop_name;
+          break;
+        case VALUE_CONSTANT:
+        case VALUE_SPECIAL:
+        default:
+          g_assert_not_reached ();
+        }
+
+      switch (src_value_data->kind)
+        {
+        case VALUE_CONSTANT:
+          g_object_set_property (
+              dest_object,
+              dest_property,
+              &src_value_data->constant);
+          break;
+        case VALUE_PROPERTY:
+          {
+            GObject  *src_object = NULL;
+            GBinding *binding    = NULL;
+
+            src_object = g_hash_table_lookup (
+                self->children,
+                src_value_data->property.child->name);
+            g_assert (src_object != NULL);
+
+            binding = g_object_bind_property (
+                src_object, src_value_data->property.prop_name,
+                dest_object, dest_property,
+                G_BINDING_SYNC_CREATE);
+            if (binding != NULL)
+              g_ptr_array_add (self->bindings, binding);
+          }
+          break;
+        case VALUE_SPECIAL:
+          /* TODO */
+          break;
+        default:
+          break;
+        }
+    }
 }
 
 /* End of bge-wdgt-spec.c */

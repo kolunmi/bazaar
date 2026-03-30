@@ -22,8 +22,6 @@
 
 #include "bge.h"
 
-#include "wdgt/fmt/parser.h"
-
 /**
  * bge_init:
  *
@@ -39,18 +37,5 @@ bge_init (void)
   g_type_ensure (BGE_TYPE_ANIMATION);
   g_type_ensure (BGE_TYPE_CAROUSEL);
   g_type_ensure (BGE_TYPE_MARKDOWN_RENDER);
-
-  {
-    g_autoptr (GError) local_error = NULL;
-    gsize            length        = 0;
-    g_autofree char *contents      = NULL;
-    g_autoptr (BgeWdgtSpec) spec   = NULL;
-
-    g_assert (g_file_get_contents ("/home/kol/Projects/bazaar/bge/test.wdgt", &contents, &length, NULL));
-
-    g_type_ensure (GTK_TYPE_LABEL);
-    spec = bge_wdgt_parse_string (contents, &local_error);
-    if (spec == NULL)
-      g_print ("Error!! %s\n", local_error->message);
-  }
+  g_type_ensure (BGE_TYPE_WDGT_RENDERER);
 }

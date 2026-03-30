@@ -71,3 +71,5 @@ bge_dep = declare_dependency(
   dependencies: [bge_deps],
   include_directories : include_directories('..', '.'),
 )
+
+subdir('demo')

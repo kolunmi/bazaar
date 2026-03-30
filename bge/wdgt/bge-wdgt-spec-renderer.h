@@ -20,7 +20,11 @@
 
 #pragma once
 
-#include <gtk/gtk.h>
+#ifndef BGE_INSIDE
+#error "Only <bge.h> can be included directly."
+#endif
+
+#include "bge-wdgt-spec.h"
 
 G_BEGIN_DECLS
 

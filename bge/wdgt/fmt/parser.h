@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "../bge-wdgt-spec.h"
+#include "bge.h"
 
 G_BEGIN_DECLS
 
