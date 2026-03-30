@@ -24,12 +24,13 @@
 
 #define SINGLE_CHAR_TOKENS "{}=.;"
 
-#define STR_DEFWIDGET  "defwidget"
-#define STR_CHILD      "child"
-#define STR_STATE      "state"
-#define STR_TRANSITION "transition"
-#define STR_ALLOCATE   "%allocate"
-#define STR_SNAPSHOT   "%snapshot"
+#define STR_DEFWIDGET     "defwidget"
+#define STR_CHILD         "child"
+#define STR_STATE         "state"
+#define STR_DEFAULT_STATE "state@default"
+#define STR_TRANSITION    "transition"
+#define STR_ALLOCATE      "%allocate"
+#define STR_SNAPSHOT      "%snapshot"
 
 typedef enum
 {
@@ -69,17 +70,16 @@ consume_token (const char    **pp,
                TokenParseFlags flags,
                GError        **error);
 
-gboolean
+BgeWdgtSpec *
 bge_wdgt_parse_string (const char *string,
                        GError    **error)
 {
   g_autoptr (GError) local_error = NULL;
-  g_autoptr (GArray) blocks      = NULL;
+  g_autoptr (BgeWdgtSpec) spec   = NULL;
 
   g_return_val_if_fail (string != NULL, FALSE);
 
-  blocks = g_array_new (FALSE, TRUE, sizeof (int));
-  APPEND_ENUM_TO_ARRAY (blocks, BLK_TOPLEVEL);
+  spec = bge_wdgt_spec_new ();
 
 #define RETURN_ERROR_UNLESS(_cond)       \
   G_STMT_START                           \
@@ -155,7 +155,7 @@ bge_wdgt_parse_string (const char *string,
 
       GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, STR_DEFWIDGET);
       GET_TOKEN (&token, TOKEN_PARSE_QUOTED);
-      g_print ("Widget name: %s\n", token);
+      bge_wdgt_spec_set_name_take (spec, g_steal_pointer (&token));
 
       GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "{");
       for (;;)
@@ -165,14 +165,20 @@ bge_wdgt_parse_string (const char *string,
             break;
           else if (g_strcmp0 (token, STR_CHILD) == 0)
             {
+              g_autofree char *name  = NULL;
+              g_autofree char *gtype = NULL;
+
               GET_TOKEN (&token, TOKEN_PARSE_QUOTED);
-              g_print ("Made child %s\n", token);
+              name = g_steal_pointer (&token);
               GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "=");
               GET_TOKEN (&token, TOKEN_PARSE_QUOTED);
-              g_print ("child is %s\n", token);
+              gtype = g_steal_pointer (&token);
               GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ";");
+
+              bge_wdgt_spec_add_child (spec, g_type_from_name (gtype), name);
             }
-          else if (g_strcmp0 (token, STR_STATE) == 0)
+          else if (g_strcmp0 (token, STR_STATE) == 0 ||
+                   g_strcmp0 (token, STR_DEFAULT_STATE) == 0)
             {
               GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "=");
             }
@@ -190,7 +196,7 @@ bge_wdgt_parse_string (const char *string,
 #undef EXPECT_TOKEN
 #undef RETURN_ERROR_UNLESS
 
-  return TRUE;
+  return g_steal_pointer (&spec);
 }
 
 static char *

@@ -42,12 +42,12 @@ bge_init (void)
 
   {
     g_autoptr (GError) local_error = NULL;
-    gboolean result                = FALSE;
+    g_autoptr (BgeWdgtSpec) spec   = NULL;
 
-    result = bge_wdgt_parse_string (
-        "  defwidget \"MyWidget\"{child \"btn\" =\"GtkButton\"; }  ",
+    spec = bge_wdgt_parse_string (
+        "  defwidget \"MyWidget\"{child \"btn\" =\"BgeCarousel\"; }  ",
         &local_error);
-    if (!result)
+    if (spec == NULL)
       g_print ("Error!! %s\n", local_error->message);
   }
 }

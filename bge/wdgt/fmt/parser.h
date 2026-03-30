@@ -18,11 +18,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include <glib.h>
+#include "../bge-wdgt-spec.h"
 
 G_BEGIN_DECLS
 
-gboolean
+BgeWdgtSpec *
 bge_wdgt_parse_string (const char *string,
                        GError    **error);
 
