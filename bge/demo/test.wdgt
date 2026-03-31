@@ -3,22 +3,24 @@ defwidget "My Widget" {
   state@default "default" = {
     child "btn":label = "default";
     %snapshot = {
-      with blur(10.0) {
-        save {
-          move translate(#point(100.0, 100.0));
-          move rotate(40.0);
-          add color(#rgba("#ff6677"), #rect(0.0, 0.0, 50.0, 50.0));
-          move translate(#point(100.0, -50.0));
-          add color(#rgba("#6677ff"), #rect(0.0, 0.0, 50.0, 50.0));
-        }
+      add linear-gradient(#rect(0.0,0.0,300.0,300.0),
+                          #point(0.0,0.0),
+                          #point(300.0,300.0),
+                          0.0,#rgba("#3584e4"),
+                          1.0,#rgba("#9141ac"),);
+      save {
+        move rotate(40.0);
+        move translate(#point(100.0, 0.0));
+        add color(#rgba("purple"), #rect(0.0, 0.0, 50.0, 50.0));
+        move translate(#point(100.0, 0.0));
+        add color(#rgba("orange"), #rect(0.0, 0.0, 50.0, 50.0));
+        move translate(#point(100.0, 0.0));
+        move scale(1.5, 1.5);
+        add color(#rgba("green"), #rect(0.0, 0.0, 50.0, 50.0));
       }
-      add color(#rgba("#66ff77"), #rect(0.0, 0.0, 50.0, 50.0));
-    }
-  }
-  state "other" = {
-    child "btn":label = "other";
-    %snapshot = {
-      move translate(#point(50.0, 60.0));
+      with blur(2.0) {
+        add color(#rgba("red"), #rect(0.0, 0.0, 50.0, 50.0));
+      }
     }
   }
 }

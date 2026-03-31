@@ -733,6 +733,7 @@ bge_wdgt_spec_append_snapshot_instr (BgeWdgtSpec             *self,
   gboolean      result              = FALSE;
   StateData    *state_data          = NULL;
   SnapshotInstr match               = { 0 };
+  guint         match_rest_start    = 0;
   g_autoptr (SnapshotCallData) call = NULL;
 
   g_return_val_if_fail (BGE_IS_WDGT_SPEC (self), FALSE);
@@ -791,14 +792,27 @@ bge_wdgt_spec_append_snapshot_instr (BgeWdgtSpec             *self,
       g_critical ("invalid snapshot instruction kind specified");
       return FALSE;
     }
+  match_rest_start = match.n_args - match.n_rest;
 
   if (n_args != match.n_args)
     {
-      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
-                   "snapshot instruction %s requires %u "
-                   "arguments, got %u",
-                   match.name, match.n_args, n_args);
-      return FALSE;
+      if (match.n_rest > 0 &&
+          n_args > match.n_args)
+        {
+          if ((n_args - match.n_args) % match.n_rest != 0)
+            g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                         "snapshot instruction %s cannot handle %u "
+                         "trailing arguments",
+                         match.name, n_args - match.n_args);
+        }
+      else
+        {
+          g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                       "snapshot instruction %s requires %u "
+                       "arguments, got %u",
+                       match.name, match.n_args, n_args);
+          return FALSE;
+        }
     }
 
   call       = snapshot_call_data_new ();
@@ -809,7 +823,9 @@ bge_wdgt_spec_append_snapshot_instr (BgeWdgtSpec             *self,
 
   for (guint i = 0; i < n_args; i++)
     {
-      ValueData *value_data = NULL;
+      ValueData *value_data    = NULL;
+      gboolean   in_rest       = FALSE;
+      GType      expected_type = 0;
 
       value_data = g_hash_table_lookup (self->values, args[i]);
       if (value_data == NULL)
@@ -818,18 +834,30 @@ bge_wdgt_spec_append_snapshot_instr (BgeWdgtSpec             *self,
                        "value '%s' is undefined", args[i]);
           return FALSE;
         }
-      if (!g_type_is_a (value_data->type, match.args[i]))
+
+      in_rest = i >= match_rest_start;
+      if (in_rest)
+        expected_type = match.args[match_rest_start +
+                                   ((i - match_rest_start) %
+                                    match.n_rest)];
+      else
+        expected_type = match.args[i];
+
+      if (!g_type_is_a (value_data->type, expected_type))
         {
           g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
                        "argument %u for snapshot instruction %s "
                        "must be of type %s, got %s",
                        i, match.name,
-                       g_type_name (match.args[i]),
+                       g_type_name (expected_type),
                        g_type_name (value_data->type));
           return FALSE;
         }
 
-      g_ptr_array_add (call->args, value_data_ref (value_data));
+      if (in_rest)
+        g_ptr_array_add (call->rest, value_data_ref (value_data));
+      else
+        g_ptr_array_add (call->args, value_data_ref (value_data));
     }
 
   g_ptr_array_add (state_data->snapshot, snapshot_call_data_ref (call));
@@ -2274,20 +2302,38 @@ bge_wdgt_renderer_snapshot (GtkWidget   *widget,
             case BGE_WDGT_SNAPSHOT_INSTR_PUSH:
             case BGE_WDGT_SNAPSHOT_INSTR_TRANSFORM:
               {
-                GValue values[32] = { 0 };
+                GValue arg_values[32]  = { 0 };
+                guint  n_arg_values    = 0;
+                GValue rest_values[32] = { 0 };
+                guint  n_rest_values   = 0;
 
-                for (guint j = 0; j < call->args->len; j++)
+                n_arg_values  = MIN (call->args->len, G_N_ELEMENTS (arg_values));
+                n_rest_values = MIN (call->rest->len, G_N_ELEMENTS (rest_values));
+
+                for (guint j = 0; j < n_arg_values; j++)
                   {
                     ValueData *value = NULL;
 
                     value = g_ptr_array_index (call->args, j);
-                    resolve_value (self->spec, value, &values[j]);
+                    resolve_value (self->spec, value, &arg_values[j]);
                   }
-                call->func (snapshot, values, NULL, 0);
-
-                for (guint j = 0; j < call->args->len; j++)
+                for (guint j = 0; j < n_rest_values; j++)
                   {
-                    g_value_unset (&values[j]);
+                    ValueData *value = NULL;
+
+                    value = g_ptr_array_index (call->rest, j);
+                    resolve_value (self->spec, value, &rest_values[j]);
+                  }
+
+                call->func (snapshot, arg_values, rest_values, n_rest_values);
+
+                for (guint j = 0; j < n_rest_values; j++)
+                  {
+                    g_value_unset (&rest_values[j]);
+                  }
+                for (guint j = 0; j < n_arg_values; j++)
+                  {
+                    g_value_unset (&arg_values[j]);
                   }
               }
               break;
