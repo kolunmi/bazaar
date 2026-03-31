@@ -365,40 +365,98 @@ parse_args (const char  *p,
               return NULL;
             }
         }
-      else if (g_strcmp0 (token, "#point") == 0)
+      else if (g_strcmp0 (token, "#rgba") == 0)
         {
-          g_auto (GStrv) point_args     = NULL;
-          guint            n_point_args = 0;
-          GType            point_type   = 0;
-          g_autofree char *point_key    = NULL;
+          g_autofree char *rgba_spec  = NULL;
+          GdkRGBA          rgba       = { 0 };
+          g_autofree char *rgba_key   = NULL;
+          GValue           rgba_value = { 0 };
 
-          p = parse_args (p, spec, n_anon_vals, &point_args, &n_point_args, &local_error);
-          RETURN_ERROR_UNLESS (p != NULL);
+          GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "(");
+          GET_TOKEN (&rgba_spec, TOKEN_PARSE_QUOTED);
+          GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ")");
 
-          switch (n_point_args)
+          result = gdk_rgba_parse (&rgba, rgba_spec);
+          if (!result)
             {
-            case 2:
-              point_type = GRAPHENE_TYPE_POINT;
-              break;
-            case 3:
-              point_type = GRAPHENE_TYPE_POINT3D;
-              break;
-            default:
               g_set_error (
                   error,
                   G_IO_ERROR,
                   G_IO_ERROR_UNKNOWN,
-                  "#point() specifier can have 2 or 3 arguments, got %u",
-                  n_point_args);
+                  "#color() specifier failed to "
+                  "parse color from string");
               return NULL;
             }
 
-          point_key = make_anon_name ((*n_anon_vals)++);
-          result    = bge_wdgt_spec_add_component_source_value (
-              spec, point_key, point_type, (const char *const *) point_args, n_point_args, &local_error);
+          rgba_key = make_anon_name ((*n_anon_vals)++);
+          g_value_set_boxed (g_value_init (&rgba_value, GDK_TYPE_RGBA), &rgba);
+          result = bge_wdgt_spec_add_constant_source_value (
+              spec, rgba_key, &rgba_value, &local_error);
+          g_value_unset (&rgba_value);
           RETURN_ERROR_UNLESS (result);
 
-          g_strv_builder_take (builder, g_steal_pointer (&point_key));
+          g_strv_builder_take (builder, g_steal_pointer (&rgba_key));
+          n_args++;
+
+          need_comma = TRUE;
+        }
+      else if (g_strcmp0 (token, "#point") == 0 ||
+               g_strcmp0 (token, "#rect") == 0)
+        {
+          g_auto (GStrv) component_args     = NULL;
+          guint            n_component_args = 0;
+          GType            component_type   = 0;
+          g_autofree char *component_key    = NULL;
+
+          p = parse_args (p, spec, n_anon_vals, &component_args, &n_component_args, &local_error);
+          RETURN_ERROR_UNLESS (p != NULL);
+
+          if (g_strcmp0 (token, "#point") == 0)
+            {
+              switch (n_component_args)
+                {
+                case 2:
+                  component_type = GRAPHENE_TYPE_POINT;
+                  break;
+                case 3:
+                  component_type = GRAPHENE_TYPE_POINT3D;
+                  break;
+                default:
+                  g_set_error (
+                      error,
+                      G_IO_ERROR,
+                      G_IO_ERROR_UNKNOWN,
+                      "#point() specifier can have 2 or 3 arguments, got %u",
+                      n_component_args);
+                  return NULL;
+                }
+            }
+          else if (g_strcmp0 (token, "#rect") == 0)
+            {
+              switch (n_component_args)
+                {
+                case 4:
+                  component_type = GRAPHENE_TYPE_RECT;
+                  break;
+                default:
+                  g_set_error (
+                      error,
+                      G_IO_ERROR,
+                      G_IO_ERROR_UNKNOWN,
+                      "#rect() specifier can have 4 arguments, got %u",
+                      n_component_args);
+                  return NULL;
+                }
+            }
+
+          component_key = make_anon_name ((*n_anon_vals)++);
+          result        = bge_wdgt_spec_add_component_source_value (
+              spec, component_key, component_type,
+              (const char *const *) component_args,
+              n_component_args, &local_error);
+          RETURN_ERROR_UNLESS (result);
+
+          g_strv_builder_take (builder, g_steal_pointer (&component_key));
           n_args++;
 
           need_comma = TRUE;
@@ -474,26 +532,6 @@ parse_token_fundamental (const char  *token,
       else
         g_value_set_int64 (g_value_init (&value, G_TYPE_INT64),
                            g_variant_get_int64 (variant));
-    }
-  else if (g_str_has_prefix (token, "rgba:"))
-    {
-      const char *color = NULL;
-      GdkRGBA     rgba  = { 0 };
-
-      color  = token + strlen ("rgba:");
-      result = gdk_rgba_parse (&rgba, color);
-      if (!result)
-        {
-          g_set_error (
-              error,
-              G_IO_ERROR,
-              G_IO_ERROR_UNKNOWN,
-              "Unable to parse color '%s'",
-              color);
-          return FALSE;
-        }
-
-      g_value_set_boxed (g_value_init (&value, GDK_TYPE_RGBA), &rgba);
     }
   else
     return g_strdup (token);

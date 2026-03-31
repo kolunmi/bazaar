@@ -3,7 +3,8 @@ defwidget "My Widget" {
   state@default "default" = {
     child "btn":label = "default";
     %snapshot = {
-      move translate(#point(-50.0, 60.0)) {}
+      add color(#rgba("#ff6677"), #rect(20.0, 30.0, 50.0, 50.0));
+      add color(#rgba("#ff6677"), #rect(50.0, 70.0, 100.0, 50.0));
     }
   }
   state "other" = {

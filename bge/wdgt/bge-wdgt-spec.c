@@ -375,6 +375,19 @@ bge_wdgt_spec_add_component_source_value (BgeWdgtSpec       *self,
       expected_types[1] = G_TYPE_FLOAT;
       expected_types[2] = G_TYPE_FLOAT;
     }
+  else if (type == GRAPHENE_TYPE_RECT)
+    {
+      if (n_components != 4)
+        {
+          g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                       "composed rectangle value needs 4 arguments");
+          return FALSE;
+        }
+      expected_types[0] = G_TYPE_FLOAT;
+      expected_types[1] = G_TYPE_FLOAT;
+      expected_types[2] = G_TYPE_FLOAT;
+      expected_types[3] = G_TYPE_FLOAT;
+    }
   else
     {
       g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
@@ -2021,6 +2034,17 @@ resolve_value (BgeWdgtSpec *self,
                 g_value_get_float (&components[1]),
                 g_value_get_float (&components[2]));
             g_value_set_boxed (out, &point);
+          }
+        else if (value->type == GRAPHENE_TYPE_RECT)
+          {
+            graphene_rect_t rect = { 0 };
+
+            rect = GRAPHENE_RECT_INIT (
+                g_value_get_float (&components[0]),
+                g_value_get_float (&components[1]),
+                g_value_get_float (&components[2]),
+                g_value_get_float (&components[3]));
+            g_value_set_boxed (out, &rect);
           }
 
         for (guint i = 0; i < n_components; i++)
