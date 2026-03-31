@@ -2,10 +2,13 @@ using Gtk 4.0;
 
 Box root {
   Paned {
-    start-child: TextView {
-      styles ["monospace"]
-      monospace: true;
-      buffer: TextBuffer buffer {
+    position: 400;
+    start-child: ScrolledWindow {
+      child: TextView {
+        styles ["monospace"]
+        monospace: true;
+        buffer: TextBuffer buffer {
+        };
       };
     };
     end-child: $BgeWdgtRenderer wdgt {
