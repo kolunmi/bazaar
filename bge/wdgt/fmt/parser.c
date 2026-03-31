@@ -551,8 +551,8 @@ parse_token_fundamental (const char  *token,
         }
 
       if (is_double)
-        g_value_set_float (g_value_init (&value, G_TYPE_FLOAT),
-                           g_variant_get_double (variant));
+        g_value_set_double (g_value_init (&value, G_TYPE_DOUBLE),
+                            g_variant_get_double (variant));
       else
         g_value_set_int64 (g_value_init (&value, G_TYPE_INT64),
                            g_variant_get_int64 (variant));

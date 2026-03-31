@@ -5,7 +5,12 @@ defwidget "My Widget" {
     %snapshot = {
       save {
         move translate(#point(100.0, 100.0));
+        move rotate(40.0);
         add color(#rgba("#ff6677"), #rect(0.0, 0.0, 50.0, 50.0));
+        move translate(#point(100.0, 100.0));
+        with opacity(0.5) {
+          add color(#rgba("#6677ff"), #rect(0.0, 0.0, 50.0, 50.0));
+        }
       }
       add color(#rgba("#66ff77"), #rect(0.0, 0.0, 50.0, 50.0));
     }

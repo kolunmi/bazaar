@@ -370,8 +370,8 @@ bge_wdgt_spec_add_component_source_value (BgeWdgtSpec       *self,
                        "composed point value needs 2 arguments");
           return FALSE;
         }
-      expected_types[0] = G_TYPE_FLOAT;
-      expected_types[1] = G_TYPE_FLOAT;
+      expected_types[0] = G_TYPE_DOUBLE;
+      expected_types[1] = G_TYPE_DOUBLE;
     }
   else if (type == GRAPHENE_TYPE_POINT3D)
     {
@@ -381,9 +381,9 @@ bge_wdgt_spec_add_component_source_value (BgeWdgtSpec       *self,
                        "composed 3d point value needs 3 arguments");
           return FALSE;
         }
-      expected_types[0] = G_TYPE_FLOAT;
-      expected_types[1] = G_TYPE_FLOAT;
-      expected_types[2] = G_TYPE_FLOAT;
+      expected_types[0] = G_TYPE_DOUBLE;
+      expected_types[1] = G_TYPE_DOUBLE;
+      expected_types[2] = G_TYPE_DOUBLE;
     }
   else if (type == GRAPHENE_TYPE_RECT)
     {
@@ -393,10 +393,10 @@ bge_wdgt_spec_add_component_source_value (BgeWdgtSpec       *self,
                        "composed rectangle value needs 4 arguments");
           return FALSE;
         }
-      expected_types[0] = G_TYPE_FLOAT;
-      expected_types[1] = G_TYPE_FLOAT;
-      expected_types[2] = G_TYPE_FLOAT;
-      expected_types[3] = G_TYPE_FLOAT;
+      expected_types[0] = G_TYPE_DOUBLE;
+      expected_types[1] = G_TYPE_DOUBLE;
+      expected_types[2] = G_TYPE_DOUBLE;
+      expected_types[3] = G_TYPE_DOUBLE;
     }
   else
     {
@@ -975,9 +975,9 @@ snapshot_push_instr_shadow (GtkSnapshot *snapshot,
   for (guint i = 0; i < n_shadows; i++)
     {
       shadows[i].color  = *(GdkRGBA *) g_value_get_boxed (&rest[i * 4 + 0]);
-      shadows[i].dx     = g_value_get_float (&rest[i * 4 + 1]);
-      shadows[i].dy     = g_value_get_float (&rest[i * 4 + 2]);
-      shadows[i].radius = g_value_get_float (&rest[i * 4 + 3]);
+      shadows[i].dx     = g_value_get_double (&rest[i * 4 + 1]);
+      shadows[i].dy     = g_value_get_double (&rest[i * 4 + 2]);
+      shadows[i].radius = g_value_get_double (&rest[i * 4 + 3]);
     }
 
   gtk_snapshot_push_shadow (
@@ -1162,9 +1162,9 @@ lookup_snapshot_push_instr (const char    *lookup_name,
      4,
      {
      GDK_TYPE_RGBA,
-     G_TYPE_FLOAT,
-     G_TYPE_FLOAT,
-     G_TYPE_FLOAT,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
      },
      gtk_snapshot_push_shadow,
      snapshot_push_instr_shadow,
@@ -1282,7 +1282,7 @@ snapshot_transform_instr_rotate (GtkSnapshot *snapshot,
 {
   gtk_snapshot_rotate (
       snapshot,
-      g_value_get_float (&args[0]));
+      g_value_get_double (&args[0]));
 }
 
 static void
@@ -1293,7 +1293,7 @@ snapshot_transform_instr_rotate_3d (GtkSnapshot *snapshot,
 {
   gtk_snapshot_rotate_3d (
       snapshot,
-      g_value_get_float (&args[0]),
+      g_value_get_double (&args[0]),
       g_value_get_boxed (&args[1]));
 }
 
@@ -1305,8 +1305,8 @@ snapshot_transform_instr_scale (GtkSnapshot *snapshot,
 {
   gtk_snapshot_scale (
       snapshot,
-      g_value_get_float (&args[0]),
-      g_value_get_float (&args[1]));
+      g_value_get_double (&args[0]),
+      g_value_get_double (&args[1]));
 }
 
 static void
@@ -1317,9 +1317,9 @@ snapshot_transform_instr_scale_3d (GtkSnapshot *snapshot,
 {
   gtk_snapshot_scale_3d (
       snapshot,
-      g_value_get_float (&args[0]),
-      g_value_get_float (&args[1]),
-      g_value_get_float (&args[2]));
+      g_value_get_double (&args[0]),
+      g_value_get_double (&args[1]),
+      g_value_get_double (&args[2]));
 }
 
 static void
@@ -1330,9 +1330,9 @@ snapshot_transform_instr_perspective (GtkSnapshot *snapshot,
 {
   gtk_snapshot_scale_3d (
       snapshot,
-      g_value_get_float (&args[0]),
-      g_value_get_float (&args[1]),
-      g_value_get_float (&args[2]));
+      g_value_get_double (&args[0]),
+      g_value_get_double (&args[1]),
+      g_value_get_double (&args[2]));
 }
 
 static gboolean
@@ -1385,7 +1385,7 @@ lookup_snapshot_transform_instr (const char    *lookup_name,
      1,
      0,
      {
-     G_TYPE_FLOAT,
+     G_TYPE_DOUBLE,
      },
      gtk_snapshot_rotate,
      snapshot_transform_instr_rotate,
@@ -1395,7 +1395,7 @@ lookup_snapshot_transform_instr (const char    *lookup_name,
      2,
      0,
      {
-     G_TYPE_FLOAT,
+     G_TYPE_DOUBLE,
      GRAPHENE_TYPE_VEC3,
      },
      gtk_snapshot_rotate_3d,
@@ -1406,8 +1406,8 @@ lookup_snapshot_transform_instr (const char    *lookup_name,
      2,
      0,
      {
-     G_TYPE_FLOAT,
-     G_TYPE_FLOAT,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
      },
      gtk_snapshot_scale,
      snapshot_transform_instr_scale,
@@ -1417,9 +1417,9 @@ lookup_snapshot_transform_instr (const char    *lookup_name,
      3,
      0,
      {
-     G_TYPE_FLOAT,
-     G_TYPE_FLOAT,
-     G_TYPE_FLOAT,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
      },
      gtk_snapshot_scale_3d,
      snapshot_transform_instr_scale_3d,
@@ -1429,7 +1429,7 @@ lookup_snapshot_transform_instr (const char    *lookup_name,
      1,
      0,
      {
-     G_TYPE_FLOAT,
+     G_TYPE_DOUBLE,
      },
      gtk_snapshot_perspective,
      snapshot_transform_instr_perspective,
@@ -1507,7 +1507,7 @@ snapshot_append_instr_linear_gradient (GtkSnapshot *snapshot,
   n_stops = MIN (n_rest / 2, G_N_ELEMENTS (stops));
   for (guint i = 0; i < n_stops; i++)
     {
-      stops[i].offset = g_value_get_float (&rest[i * 2 + 0]);
+      stops[i].offset = g_value_get_double (&rest[i * 2 + 0]);
       stops[i].color  = *(GdkRGBA *) g_value_get_boxed (&rest[i * 2 + 1]);
     }
 
@@ -1532,7 +1532,7 @@ snapshot_append_instr_repeating_linear_gradient (GtkSnapshot *snapshot,
   n_stops = MIN (n_rest / 2, G_N_ELEMENTS (stops));
   for (guint i = 0; i < n_stops; i++)
     {
-      stops[i].offset = g_value_get_float (&rest[i * 2 + 0]);
+      stops[i].offset = g_value_get_double (&rest[i * 2 + 0]);
       stops[i].color  = *(GdkRGBA *) g_value_get_boxed (&rest[i * 2 + 1]);
     }
 
@@ -1557,7 +1557,7 @@ snapshot_append_instr_radial_gradient (GtkSnapshot *snapshot,
   n_stops = MIN (n_rest / 2, G_N_ELEMENTS (stops));
   for (guint i = 0; i < n_stops; i++)
     {
-      stops[i].offset = g_value_get_float (&rest[i * 2 + 0]);
+      stops[i].offset = g_value_get_double (&rest[i * 2 + 0]);
       stops[i].color  = *(GdkRGBA *) g_value_get_boxed (&rest[i * 2 + 1]);
     }
 
@@ -1565,10 +1565,10 @@ snapshot_append_instr_radial_gradient (GtkSnapshot *snapshot,
       snapshot,
       g_value_get_boxed (&args[0]),
       g_value_get_boxed (&args[1]),
-      g_value_get_float (&args[2]),
-      g_value_get_float (&args[3]),
-      g_value_get_float (&args[4]),
-      g_value_get_float (&args[5]),
+      g_value_get_double (&args[2]),
+      g_value_get_double (&args[3]),
+      g_value_get_double (&args[4]),
+      g_value_get_double (&args[5]),
       stops,
       n_stops);
 }
@@ -1585,7 +1585,7 @@ snapshot_append_instr_repeating_radial_gradient (GtkSnapshot *snapshot,
   n_stops = MIN (n_rest / 2, G_N_ELEMENTS (stops));
   for (guint i = 0; i < n_stops; i++)
     {
-      stops[i].offset = g_value_get_float (&rest[i * 2 + 0]);
+      stops[i].offset = g_value_get_double (&rest[i * 2 + 0]);
       stops[i].color  = *(GdkRGBA *) g_value_get_boxed (&rest[i * 2 + 1]);
     }
 
@@ -1593,10 +1593,10 @@ snapshot_append_instr_repeating_radial_gradient (GtkSnapshot *snapshot,
       snapshot,
       g_value_get_boxed (&args[0]),
       g_value_get_boxed (&args[1]),
-      g_value_get_float (&args[2]),
-      g_value_get_float (&args[3]),
-      g_value_get_float (&args[4]),
-      g_value_get_float (&args[5]),
+      g_value_get_double (&args[2]),
+      g_value_get_double (&args[3]),
+      g_value_get_double (&args[4]),
+      g_value_get_double (&args[5]),
       stops,
       n_stops);
 }
@@ -1613,7 +1613,7 @@ snapshot_append_instr_conic_gradient (GtkSnapshot *snapshot,
   n_stops = MIN (n_rest / 2, G_N_ELEMENTS (stops));
   for (guint i = 0; i < n_stops; i++)
     {
-      stops[i].offset = g_value_get_float (&rest[i * 2 + 0]);
+      stops[i].offset = g_value_get_double (&rest[i * 2 + 0]);
       stops[i].color  = *(GdkRGBA *) g_value_get_boxed (&rest[i * 2 + 1]);
     }
 
@@ -1621,7 +1621,7 @@ snapshot_append_instr_conic_gradient (GtkSnapshot *snapshot,
       snapshot,
       g_value_get_boxed (&args[0]),
       g_value_get_boxed (&args[1]),
-      g_value_get_float (&args[2]),
+      g_value_get_double (&args[2]),
       stops,
       n_stops);
 }
@@ -1642,10 +1642,10 @@ snapshot_append_instr_border (GtkSnapshot *snapshot,
   rrect.corner[2] = *(graphene_size_t *) g_value_get_boxed (&args[3]);
   rrect.corner[3] = *(graphene_size_t *) g_value_get_boxed (&args[4]);
 
-  border_width[0] = g_value_get_float (&args[5]);
-  border_width[1] = g_value_get_float (&args[6]);
-  border_width[2] = g_value_get_float (&args[7]);
-  border_width[3] = g_value_get_float (&args[8]);
+  border_width[0] = g_value_get_double (&args[5]);
+  border_width[1] = g_value_get_double (&args[6]);
+  border_width[2] = g_value_get_double (&args[7]);
+  border_width[3] = g_value_get_double (&args[8]);
 
   border_color[0] = *(GdkRGBA *) g_value_get_boxed (&args[9]);
   border_color[1] = *(GdkRGBA *) g_value_get_boxed (&args[10]);
@@ -1677,10 +1677,10 @@ snapshot_append_instr_inset_shadow (GtkSnapshot *snapshot,
       snapshot,
       &rrect,
       g_value_get_boxed (&args[5]),
-      g_value_get_float (&args[6]),
-      g_value_get_float (&args[7]),
-      g_value_get_float (&args[8]),
-      g_value_get_float (&args[9]));
+      g_value_get_double (&args[6]),
+      g_value_get_double (&args[7]),
+      g_value_get_double (&args[8]),
+      g_value_get_double (&args[9]));
 }
 
 static void
@@ -1701,10 +1701,10 @@ snapshot_append_instr_outset_shadow (GtkSnapshot *snapshot,
       snapshot,
       &rrect,
       g_value_get_boxed (&args[5]),
-      g_value_get_float (&args[6]),
-      g_value_get_float (&args[7]),
-      g_value_get_float (&args[8]),
-      g_value_get_float (&args[9]));
+      g_value_get_double (&args[6]),
+      g_value_get_double (&args[7]),
+      g_value_get_double (&args[8]),
+      g_value_get_double (&args[9]));
 }
 
 static void
@@ -1814,7 +1814,7 @@ lookup_snapshot_append_instr (const char    *lookup_name,
      GRAPHENE_TYPE_RECT,
      GRAPHENE_TYPE_POINT,
      GRAPHENE_TYPE_POINT,
-     G_TYPE_FLOAT,
+     G_TYPE_DOUBLE,
      GDK_TYPE_RGBA,
      },
      gtk_snapshot_append_linear_gradient,
@@ -1828,7 +1828,7 @@ lookup_snapshot_append_instr (const char    *lookup_name,
      GRAPHENE_TYPE_RECT,
      GRAPHENE_TYPE_POINT,
      GRAPHENE_TYPE_POINT,
-     G_TYPE_FLOAT,
+     G_TYPE_DOUBLE,
      GDK_TYPE_RGBA,
      },
      gtk_snapshot_append_repeating_linear_gradient,
@@ -1841,11 +1841,11 @@ lookup_snapshot_append_instr (const char    *lookup_name,
      {
      GRAPHENE_TYPE_RECT,
      GRAPHENE_TYPE_POINT,
-     G_TYPE_FLOAT,
-     G_TYPE_FLOAT,
-     G_TYPE_FLOAT,
-     G_TYPE_FLOAT,
-     G_TYPE_FLOAT,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
      GDK_TYPE_RGBA,
      },
      gtk_snapshot_append_radial_gradient,
@@ -1858,11 +1858,11 @@ lookup_snapshot_append_instr (const char    *lookup_name,
      {
      GRAPHENE_TYPE_RECT,
      GRAPHENE_TYPE_POINT,
-     G_TYPE_FLOAT,
-     G_TYPE_FLOAT,
-     G_TYPE_FLOAT,
-     G_TYPE_FLOAT,
-     G_TYPE_FLOAT,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
      GDK_TYPE_RGBA,
      },
      gtk_snapshot_append_repeating_radial_gradient,
@@ -1875,8 +1875,8 @@ lookup_snapshot_append_instr (const char    *lookup_name,
      {
      GRAPHENE_TYPE_RECT,
      GRAPHENE_TYPE_POINT,
-     G_TYPE_FLOAT,
-     G_TYPE_FLOAT,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
      GDK_TYPE_RGBA,
      },
      gtk_snapshot_append_conic_gradient,
@@ -1892,10 +1892,10 @@ lookup_snapshot_append_instr (const char    *lookup_name,
      GRAPHENE_TYPE_SIZE,
      GRAPHENE_TYPE_SIZE,
      GRAPHENE_TYPE_SIZE,
-     G_TYPE_FLOAT,
-     G_TYPE_FLOAT,
-     G_TYPE_FLOAT,
-     G_TYPE_FLOAT,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
      GDK_TYPE_RGBA,
      GDK_TYPE_RGBA,
      GDK_TYPE_RGBA,
@@ -1915,10 +1915,10 @@ lookup_snapshot_append_instr (const char    *lookup_name,
      GRAPHENE_TYPE_SIZE,
      GRAPHENE_TYPE_SIZE,
      GDK_TYPE_RGBA,
-     G_TYPE_FLOAT,
-     G_TYPE_FLOAT,
-     G_TYPE_FLOAT,
-     G_TYPE_FLOAT,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
      },
      gtk_snapshot_append_inset_shadow,
      snapshot_append_instr_inset_shadow,
@@ -1934,10 +1934,10 @@ lookup_snapshot_append_instr (const char    *lookup_name,
      GRAPHENE_TYPE_SIZE,
      GRAPHENE_TYPE_SIZE,
      GDK_TYPE_RGBA,
-     G_TYPE_FLOAT,
-     G_TYPE_FLOAT,
-     G_TYPE_FLOAT,
-     G_TYPE_FLOAT,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
      },
      gtk_snapshot_append_outset_shadow,
      snapshot_append_instr_outset_shadow,
@@ -2031,8 +2031,8 @@ resolve_value (BgeWdgtSpec *self,
             graphene_point_t point = { 0 };
 
             point = GRAPHENE_POINT_INIT (
-                g_value_get_float (&components[0]),
-                g_value_get_float (&components[1]));
+                g_value_get_double (&components[0]),
+                g_value_get_double (&components[1]));
             g_value_set_boxed (out, &point);
           }
         else if (value->type == GRAPHENE_TYPE_POINT)
@@ -2040,9 +2040,9 @@ resolve_value (BgeWdgtSpec *self,
             graphene_point3d_t point = { 0 };
 
             point = GRAPHENE_POINT3D_INIT (
-                g_value_get_float (&components[0]),
-                g_value_get_float (&components[1]),
-                g_value_get_float (&components[2]));
+                g_value_get_double (&components[0]),
+                g_value_get_double (&components[1]),
+                g_value_get_double (&components[2]));
             g_value_set_boxed (out, &point);
           }
         else if (value->type == GRAPHENE_TYPE_RECT)
@@ -2050,10 +2050,10 @@ resolve_value (BgeWdgtSpec *self,
             graphene_rect_t rect = { 0 };
 
             rect = GRAPHENE_RECT_INIT (
-                g_value_get_float (&components[0]),
-                g_value_get_float (&components[1]),
-                g_value_get_float (&components[2]),
-                g_value_get_float (&components[3]));
+                g_value_get_double (&components[0]),
+                g_value_get_double (&components[1]),
+                g_value_get_double (&components[2]),
+                g_value_get_double (&components[3]));
             g_value_set_boxed (out, &rect);
           }
 
