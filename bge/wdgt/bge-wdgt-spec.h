@@ -49,6 +49,10 @@ BgeWdgtSpec *
 bge_wdgt_spec_new (void);
 
 BgeWdgtSpec *
+bge_wdgt_spec_new_for_string (const char *string,
+                              GError    **error);
+
+BgeWdgtSpec *
 bge_wdgt_spec_new_for_resource (const char *resource,
                                 GError    **error);
 

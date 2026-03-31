@@ -243,12 +243,22 @@ bge_wdgt_spec_new (void)
 }
 
 BgeWdgtSpec *
+bge_wdgt_spec_new_for_string (const char *string,
+                              GError    **error)
+{
+  g_return_val_if_fail (string != NULL, NULL);
+  return bge_wdgt_parse_string (string, error);
+}
+
+BgeWdgtSpec *
 bge_wdgt_spec_new_for_resource (const char *resource,
                                 GError    **error)
 {
   g_autoptr (GBytes) bytes = NULL;
   gsize         size       = 0;
   gconstpointer data       = NULL;
+
+  g_return_val_if_fail (resource != NULL, NULL);
 
   bytes = g_resources_lookup_data (resource, G_RESOURCE_LOOKUP_FLAGS_NONE, error);
   if (bytes == NULL)
