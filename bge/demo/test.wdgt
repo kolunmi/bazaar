@@ -1,9 +1,15 @@
 defwidget "My Widget" {
   child "btn" = "GtkLabel";
   state@default "default" = {
-    child "btn".label = "default";
+    child "btn":label = "default";
+    %snapshot = {
+      move translate(#point(-50.0, 60.0)) {}
+    }
   }
   state "other" = {
-    child "btn".label = "other";
+    child "btn":label = "other";
+    %snapshot = {
+      move translate(#point(50.0, 60.0)) {}
+    }
   }
 }

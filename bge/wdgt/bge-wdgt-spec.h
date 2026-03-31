@@ -32,6 +32,16 @@ typedef enum
   BGE_WDGT_SPECIAL_VALUE_MOTION_Y,
 } BgeWdgtSpecialValue;
 
+typedef enum
+{
+  BGE_WDGT_SNAPSHOT_INSTR_APPEND = 0,
+  BGE_WDGT_SNAPSHOT_INSTR_PUSH,
+  BGE_WDGT_SNAPSHOT_INSTR_POP,
+  BGE_WDGT_SNAPSHOT_INSTR_SAVE,
+  BGE_WDGT_SNAPSHOT_INSTR_TRANSFORM,
+  BGE_WDGT_SNAPSHOT_INSTR_RESTORE,
+} BgeWdgtSnapshotInstrKind;
+
 #define BGE_TYPE_WDGT_SPEC (bge_wdgt_spec_get_type ())
 G_DECLARE_FINAL_TYPE (BgeWdgtSpec, bge_wdgt_spec, BGE, WDGT_SPEC, GObject)
 
@@ -60,6 +70,14 @@ bge_wdgt_spec_add_constant_source_value (BgeWdgtSpec  *self,
                                          const char   *name,
                                          const GValue *constant,
                                          GError      **error);
+
+gboolean
+bge_wdgt_spec_add_component_source_value (BgeWdgtSpec       *self,
+                                          const char        *name,
+                                          GType              type,
+                                          const char *const *components,
+                                          guint              n_components,
+                                          GError           **error);
 
 gboolean
 bge_wdgt_spec_add_special_source_value (BgeWdgtSpec        *self,
@@ -91,6 +109,15 @@ bge_wdgt_spec_set_value (BgeWdgtSpec *self,
                          const char  *dest_value,
                          const char  *src_value,
                          GError     **error);
+
+gboolean
+bge_wdgt_spec_append_snapshot_instr (BgeWdgtSpec             *self,
+                                     const char              *state,
+                                     BgeWdgtSnapshotInstrKind kind,
+                                     const char              *instr,
+                                     const char *const       *args,
+                                     guint                    n_args,
+                                     GError                 **error);
 
 G_END_DECLS
 
