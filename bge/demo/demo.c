@@ -64,6 +64,7 @@ on_activate (GtkApplication *app)
   gconstpointer wdgt_buffer         = NULL;
 
   window = gtk_application_window_new (app);
+  gtk_window_set_default_size (GTK_WINDOW (window), 1000, 500);
 
   scope = gtk_builder_cscope_new ();
 
