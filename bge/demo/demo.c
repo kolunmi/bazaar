@@ -23,6 +23,10 @@
 static void
 on_activate (GtkApplication *app);
 
+static void
+on_buffer_changed (GtkTextBuffer   *buffer,
+                   BgeWdgtRenderer *wdgt);
+
 int
 main (int argc, char **argv)
 {
@@ -51,9 +55,13 @@ on_activate (GtkApplication *app)
 {
   GtkWidget       *window           = NULL;
   GtkWidget       *root             = NULL;
-  BgeWdgtRenderer *renderer         = NULL;
+  GtkTextBuffer   *buffer           = NULL;
+  BgeWdgtRenderer *wdgt             = NULL;
   g_autoptr (GtkBuilder) builder    = NULL;
   g_autoptr (GtkBuilderScope) scope = NULL;
+  g_autoptr (GBytes) wdgt_bytes     = NULL;
+  gsize         wdgt_buffer_size    = 0;
+  gconstpointer wdgt_buffer         = NULL;
 
   window = gtk_application_window_new (app);
 
@@ -62,22 +70,42 @@ on_activate (GtkApplication *app)
   builder = gtk_builder_new ();
   gtk_builder_set_scope (builder, scope);
   gtk_builder_add_from_resource (builder, "/io/github/kolunmi/BgeDemo/window.ui", NULL);
-  root     = GTK_WIDGET (gtk_builder_get_object (builder, "root"));
-  renderer = BGE_WDGT_RENDERER (gtk_builder_get_object (builder, "wdgt"));
+  root   = GTK_WIDGET (gtk_builder_get_object (builder, "root"));
+  buffer = GTK_TEXT_BUFFER (gtk_builder_get_object (builder, "buffer"));
+  wdgt   = BGE_WDGT_RENDERER (gtk_builder_get_object (builder, "wdgt"));
 
-  {
-    g_autoptr (GError) local_error = NULL;
-    g_autoptr (BgeWdgtSpec) spec   = NULL;
+  g_signal_connect (
+      buffer, "changed",
+      G_CALLBACK (on_buffer_changed),
+      wdgt);
 
-    g_type_ensure (GTK_TYPE_LABEL);
-    spec = bge_wdgt_spec_new_for_resource ("/io/github/kolunmi/BgeDemo/test.wdgt", &local_error);
-    if (spec == NULL)
-      g_print ("Error!! %s\n", local_error->message);
-
-    bge_wdgt_renderer_set_spec (renderer, spec);
-    bge_wdgt_renderer_set_state (renderer, "default");
-  }
+  wdgt_bytes = g_resources_lookup_data (
+      "/io/github/kolunmi/BgeDemo/test.wdgt",
+      G_RESOURCE_LOOKUP_FLAGS_NONE, NULL);
+  g_assert (wdgt_bytes != NULL);
+  wdgt_buffer = g_bytes_get_data (wdgt_bytes, &wdgt_buffer_size);
+  gtk_text_buffer_set_text (buffer, wdgt_buffer, wdgt_buffer_size);
 
   gtk_window_set_child (GTK_WINDOW (window), g_object_ref_sink (root));
   gtk_window_present (GTK_WINDOW (window));
+}
+
+static void
+on_buffer_changed (GtkTextBuffer   *buffer,
+                   BgeWdgtRenderer *wdgt)
+{
+  g_autoptr (GError) local_error = NULL;
+  g_autofree char *text          = NULL;
+  GtkTextIter      start_iter    = { 0 };
+  GtkTextIter      end_iter      = { 0 };
+  g_autoptr (BgeWdgtSpec) spec   = NULL;
+
+  gtk_text_buffer_get_start_iter (buffer, &start_iter);
+  gtk_text_buffer_get_end_iter (buffer, &end_iter);
+
+  text = gtk_text_buffer_get_text (buffer, &start_iter, &end_iter, FALSE);
+  spec = bge_wdgt_spec_new_for_string (text, &local_error);
+  if (spec == NULL)
+    g_print ("Error!! %s\n", local_error->message);
+  bge_wdgt_renderer_set_spec (wdgt, spec);
 }

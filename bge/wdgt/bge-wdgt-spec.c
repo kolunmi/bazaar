@@ -2420,7 +2420,7 @@ bge_wdgt_renderer_set_spec (BgeWdgtRenderer *self,
   if (spec != NULL)
     {
       name_binding = g_object_bind_property (spec, "name", self, "name", G_BINDING_SYNC_CREATE);
-      g_ptr_array_add (self->bindings, name_binding);
+      g_ptr_array_add (self->bindings, g_object_ref (name_binding));
     }
   else
     gtk_widget_set_name (GTK_WIDGET (self), NULL);
@@ -2618,7 +2618,7 @@ apply_state (BgeWdgtRenderer *self)
                 dest_object, dest_property,
                 G_BINDING_SYNC_CREATE);
             if (binding != NULL)
-              g_ptr_array_add (self->bindings, binding);
+              g_ptr_array_add (self->bindings, g_object_ref (binding));
           }
           break;
         case VALUE_SPECIAL:

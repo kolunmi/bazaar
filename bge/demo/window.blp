@@ -1,9 +1,17 @@
 using Gtk 4.0;
 
 Box root {
-  $BgeWdgtRenderer wdgt {
-    hexpand: true;
-    vexpand: true;
-    state: "default";
+  Paned {
+    start-child: TextView {
+      styles ["monospace"]
+      monospace: true;
+      buffer: TextBuffer buffer {
+      };
+    };
+    end-child: $BgeWdgtRenderer wdgt {
+      hexpand: true;
+      vexpand: true;
+      state: "default";
+    };
   }
 }

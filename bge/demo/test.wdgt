@@ -3,12 +3,12 @@ defwidget "My Widget" {
   state@default "default" = {
     child "btn":label = "default";
     %snapshot = {
-      save {
-        move translate(#point(100.0, 100.0));
-        move rotate(40.0);
-        add color(#rgba("#ff6677"), #rect(0.0, 0.0, 50.0, 50.0));
-        move translate(#point(100.0, 100.0));
-        with opacity(0.5) {
+      with blur(10.0) {
+        save {
+          move translate(#point(100.0, 100.0));
+          move rotate(40.0);
+          add color(#rgba("#ff6677"), #rect(0.0, 0.0, 50.0, 50.0));
+          move translate(#point(100.0, -50.0));
           add color(#rgba("#6677ff"), #rect(0.0, 0.0, 50.0, 50.0));
         }
       }
