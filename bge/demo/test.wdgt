@@ -1,25 +1,33 @@
 defwidget "My Widget" {
-  child "btn" = "GtkLabel";
+  var "hey" = "gdouble";
   state@default "default" = {
-    child "btn":label = "default";
+    var "hey" = 23.0;
     %snapshot = {
-      add linear-gradient(#rect(0.0,0.0,300.0,300.0),
-                          #point(0.0,0.0),
-                          #point(300.0,300.0),
-                          0.0,#rgba("#3584e4"),
-                          1.0,#rgba("#9141ac"),);
-      save {
-        move rotate(40.0);
-        move translate(#point(100.0, 0.0));
-        add color(#rgba("purple"), #rect(0.0, 0.0, 50.0, 50.0));
-        move translate(#point(100.0, 0.0));
-        add color(#rgba("orange"), #rect(0.0, 0.0, 50.0, 50.0));
-        move translate(#point(100.0, 0.0));
-        move scale(1.5, 1.5);
-        add color(#rgba("green"), #rect(0.0, 0.0, 50.0, 50.0));
-      }
-      with blur(2.0) {
-        add color(#rgba("red"), #rect(0.0, 0.0, 50.0, 50.0));
+      move translate(#point(10.0, 10.0));
+      with rounded-clip(
+          #rect(0.0,0.0,300.0,300.0),
+          #size(20.0,20.0),#size(20.0,20.0),
+          #size(20.0,20.0),#size(20.0,20.0),) {
+        add linear-gradient(
+           #rect(0.0,0.0,300.0,300.0),
+           #point(0.0,0.0),
+           #point(0.0,300.0),
+           
+           0.0, #rgba("#5BCEFA"),
+           0.2, #rgba("#5BCEFA"),
+           
+           0.2, #rgba("#F5A9B8"),
+           0.4, #rgba("#F5A9B8"),
+           
+           0.4, #rgba("#FFFFFF"),
+           0.6, #rgba("#FFFFFF"),
+           
+           0.6, #rgba("#F5A9B8"),
+           0.8, #rgba("#F5A9B8"),
+           
+           0.8, #rgba("#5BCEFA"),
+           1.0, #rgba("#5BCEFA"),
+        );
       }
     }
   }

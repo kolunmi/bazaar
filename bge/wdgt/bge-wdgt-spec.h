@@ -90,6 +90,12 @@ bge_wdgt_spec_add_special_source_value (BgeWdgtSpec        *self,
                                         GError            **error);
 
 gboolean
+bge_wdgt_spec_add_variable_value (BgeWdgtSpec *self,
+                                  GType        type,
+                                  const char  *name,
+                                  GError     **error);
+
+gboolean
 bge_wdgt_spec_add_property_value (BgeWdgtSpec *self,
                                   const char  *name,
                                   const char  *child,
@@ -105,6 +111,7 @@ bge_wdgt_spec_add_child (BgeWdgtSpec *self,
 gboolean
 bge_wdgt_spec_add_state (BgeWdgtSpec *self,
                          const char  *name,
+                         gboolean     default_state,
                          GError     **error);
 
 gboolean
