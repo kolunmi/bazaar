@@ -98,7 +98,7 @@ bge_wdgt_spec_add_variable_value (BgeWdgtSpec *self,
 gboolean
 bge_wdgt_spec_add_property_value (BgeWdgtSpec *self,
                                   const char  *name,
-                                  const char  *child,
+                                  const char  *object,
                                   const char  *property,
                                   GError     **error);
 
@@ -129,6 +129,9 @@ bge_wdgt_spec_append_snapshot_instr (BgeWdgtSpec             *self,
                                      const char *const       *args,
                                      guint                    n_args,
                                      GError                 **error);
+
+void
+bge_wdgt_spec_mark_ready (BgeWdgtSpec *self);
 
 G_END_DECLS
 

@@ -316,6 +316,7 @@ bge_wdgt_parse_string (const char *string,
       break;
     }
 
+  bge_wdgt_spec_mark_ready (spec);
   return g_steal_pointer (&spec);
 }
 
@@ -420,9 +421,13 @@ parse_args (const char  *p,
 
   if (!is_right_assignment)
     GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "(");
-  for (gboolean need_comma = FALSE;;)
+  for (gboolean need_comma = FALSE,
+                get_token  = TRUE;
+       ;)
     {
-      GET_TOKEN (&token, TOKEN_PARSE_DEFAULT);
+      if (get_token)
+        GET_TOKEN (&token, TOKEN_PARSE_DEFAULT);
+      get_token = TRUE;
       if ((is_right_assignment && g_strcmp0 (token, ";") == 0) ||
           (!is_right_assignment && g_strcmp0 (token, ")") == 0))
         break;
@@ -443,37 +448,45 @@ parse_args (const char  *p,
               return NULL;
             }
         }
-      else if (g_strcmp0 (token, "#rgba") == 0)
+      else if (g_strcmp0 (token, "#rgba") == 0 ||
+               g_strcmp0 (token, "#s") == 0)
         {
-          g_autofree char *rgba_spec  = NULL;
-          GdkRGBA          rgba       = { 0 };
-          g_autofree char *rgba_key   = NULL;
-          GValue           rgba_value = { 0 };
+          g_autofree char *tmp_token = NULL;
+          g_autofree char *string    = NULL;
+          g_autofree char *key       = NULL;
+          GValue           value     = { 0 };
 
-          GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "(");
-          GET_TOKEN (&rgba_spec, TOKEN_PARSE_QUOTED);
-          GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ")");
+          GET_TOKEN_EXPECT (&tmp_token, TOKEN_PARSE_DEFAULT, "(");
+          GET_TOKEN (&string, TOKEN_PARSE_QUOTED);
+          GET_TOKEN_EXPECT (&tmp_token, TOKEN_PARSE_DEFAULT, ")");
 
-          result = gdk_rgba_parse (&rgba, rgba_spec);
-          if (!result)
+          if (g_strcmp0 (token, "#rgba") == 0)
             {
-              g_set_error (
-                  error,
-                  G_IO_ERROR,
-                  G_IO_ERROR_UNKNOWN,
-                  "#color() specifier failed to "
-                  "parse color from string");
-              return NULL;
-            }
+              GdkRGBA rgba = { 0 };
 
-          rgba_key = make_anon_name ((*n_anon_vals)++);
-          g_value_set_boxed (g_value_init (&rgba_value, GDK_TYPE_RGBA), &rgba);
+              result = gdk_rgba_parse (&rgba, string);
+              if (!result)
+                {
+                  g_set_error (
+                      error,
+                      G_IO_ERROR,
+                      G_IO_ERROR_UNKNOWN,
+                      "#color() specifier failed to "
+                      "parse color from string");
+                  return NULL;
+                }
+              g_value_set_boxed (g_value_init (&value, GDK_TYPE_RGBA), &rgba);
+            }
+          else if (g_strcmp0 (token, "#s") == 0)
+            g_value_set_string (g_value_init (&value, G_TYPE_STRING), string);
+
+          key    = make_anon_name ((*n_anon_vals)++);
           result = bge_wdgt_spec_add_constant_source_value (
-              spec, rgba_key, &rgba_value, &local_error);
-          g_value_unset (&rgba_value);
+              spec, key, &value, &local_error);
+          g_value_unset (&value);
           RETURN_ERROR_UNLESS (result);
 
-          g_strv_builder_take (builder, g_steal_pointer (&rgba_key));
+          g_strv_builder_take (builder, g_steal_pointer (&key));
           n_args++;
 
           need_comma = TRUE;
