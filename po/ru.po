@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-30 03:41+0700\n"
-"PO-Revision-Date: 2026-03-30 09:57+0700\n"
+"POT-Creation-Date: 2026-04-01 08:48+0700\n"
+"PO-Revision-Date: 2026-04-01 13:54+0700\n"
 "Last-Translator: Jill Fiore <contact@lumaeris.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -101,7 +101,7 @@ msgstr "Страница категорий"
 msgid "Manage Add-Ons"
 msgstr "Управление дополнениями"
 
-#: src/bz-addons-dialog.c:94 src/bz-install-controls.blp:137
+#: src/bz-addons-dialog.c:94 src/bz-install-controls.blp:142
 #: src/bz-installed-tile.blp:114
 msgid "Remove"
 msgstr "Удалить"
@@ -1779,7 +1779,7 @@ msgstr "_Установить"
 msgid "_Open"
 msgstr "_Открыть"
 
-#: src/bz-install-controls.blp:76 src/bz-install-controls.blp:127
+#: src/bz-install-controls.blp:76 src/bz-install-controls.blp:132
 msgid "Uninstall Application"
 msgstr "Удалить приложение"
 
@@ -1787,7 +1787,7 @@ msgstr "Удалить приложение"
 msgid "_Remove"
 msgstr "_Удалить"
 
-#: src/bz-install-controls.blp:114 src/bz-updates-card.blp:184
+#: src/bz-install-controls.blp:119 src/bz-updates-card.blp:184
 #: src/bz-updates-card.blp:212
 msgid "Update"
 msgstr "Обновить"
@@ -2931,7 +2931,7 @@ msgstr "Ошибка"
 
 #: src/bz-transaction-tile.blp:286
 msgid "Cancel Transaction"
-msgstr "Отмеинить транзакцию"
+msgstr "Отменить транзакцию"
 
 #: src/bz-transaction-tile.blp:410
 msgid "Show Error Info"
