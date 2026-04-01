@@ -73,6 +73,34 @@
   </screenshots>
 
   <releases>
+    <release version="0.7.13" date="2026-04-1">
+      <url type="details">https://github.com/bazaar-org/bazaar/releases/tag/v0.7.13</url>
+      <description translate="no">
+        <p>
+          <em>Changes</em>
+        </p>
+        <ul>
+          <li>Update to GNOME 50 Runtime</li>
+          <li>Force Adwaita icon theme to ensure consistency</li>
+          <li>Add support for clickable links in app descriptions</li>
+          <li>Add timed lingering cache to async textures, thereby reducing image flickering</li>
+          <li>Add ability to sort installed apps by size in library view</li>
+          <li>Add BAZAAR_N_DOWNLOAD_WORKERS envvar support</li>
+        </ul>
+        <p>
+          <em>Bug Fixes</em>
+        </p>
+        <ul>
+          <li>Fix double shadow around update cards</li>
+          <li>Fix global progress button displaying a focus ring when invisible</li>
+          <li>Fix incorrect total size displayed on update tasks</li>
+          <li>Fix empty UI when Flathub hasn't finished syncing yet</li>
+        </ul>
+        <p>
+          Thanks for reading and have a great day!
+        </p>
+      </description>
+    </release>
     <release version="0.7.11" date="2026-03-07">
       <url type="details">https://github.com/bazaar-org/bazaar/releases/tag/v0.7.11</url>
       <description translate="no">
