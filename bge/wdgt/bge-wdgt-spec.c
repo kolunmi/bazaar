@@ -232,6 +232,25 @@ bge_wdgt_spec_class_init (BgeWdgtSpecClass *klass)
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
+
+  /* Make sure these names are available for the parser */
+  g_type_ensure (GRAPHENE_TYPE_POINT);
+  g_type_ensure (GRAPHENE_TYPE_POINT3D);
+  g_type_ensure (GRAPHENE_TYPE_SIZE);
+  g_type_ensure (GRAPHENE_TYPE_RECT);
+  g_type_ensure (GRAPHENE_TYPE_VEC2);
+  g_type_ensure (GRAPHENE_TYPE_VEC3);
+  g_type_ensure (GRAPHENE_TYPE_VEC4);
+  g_type_ensure (GRAPHENE_TYPE_QUAD);
+  g_type_ensure (GRAPHENE_TYPE_QUATERNION);
+  g_type_ensure (GRAPHENE_TYPE_MATRIX);
+  g_type_ensure (GRAPHENE_TYPE_PLANE);
+  g_type_ensure (GRAPHENE_TYPE_FRUSTUM);
+  g_type_ensure (GRAPHENE_TYPE_SPHERE);
+  g_type_ensure (GRAPHENE_TYPE_BOX);
+  g_type_ensure (GRAPHENE_TYPE_TRIANGLE);
+  g_type_ensure (GRAPHENE_TYPE_EULER);
+  g_type_ensure (GRAPHENE_TYPE_RAY);
 }
 
 static void

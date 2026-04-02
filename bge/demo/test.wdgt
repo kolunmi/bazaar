@@ -2,15 +2,18 @@ defwidget "My Widget" {
 
   child "scale" = "GtkScale";
   var "r" = "gdouble";
+  var "corner" = "GrapheneSize";
 
   state@default "default" = {
     var "r" = scale:adjustment:value;
+    var "corner" = #size(r, r);
+    
     %snapshot = {
       move translate(#point(10.0, 10.0));
       with rounded-clip(
           #rect(0.0,0.0,300.0,300.0),
-          #size(r, r),#size(r, r),
-          #size(r, r),#size(r, r),) {
+          corner,corner,
+          corner,corner,) {
         add linear-gradient(
            #rect(0.0,0.0,300.0,300.0),
            #point(0.0,0.0),

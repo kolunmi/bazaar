@@ -501,7 +501,7 @@ parse_args (const char  *p,
           g_autofree char *component_key    = NULL;
 
           p = parse_args (p, spec, n_anon_vals, &component_args,
-                          &n_component_args, is_right_assignment, &local_error);
+                          &n_component_args, FALSE, &local_error);
           RETURN_ERROR_UNLESS (p != NULL);
 
           if (g_strcmp0 (token, "#point") == 0)
