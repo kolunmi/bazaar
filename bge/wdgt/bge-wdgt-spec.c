@@ -29,12 +29,12 @@
 typedef enum
 {
   VALUE_OBJECT = 0,
-  VALUE_CHILD,
   VALUE_CONSTANT,
   VALUE_COMPONENT,
   VALUE_SPECIAL,
   VALUE_VARIABLE,
   VALUE_PROPERTY,
+  VALUE_CHILD,
 } ValueKind;
 
 typedef void (*SnapshotCallFunc) (GtkSnapshot *snapshot,
@@ -62,13 +62,20 @@ BGE_DEFINE_DATA (
           char       *prop_name;
           GParamFlags pspec_flags;
         } property;
+        struct
+        {
+          ValueData *widget;
+          char      *builder_type;
+        } child;
       };
     },
     g_value_unset (&self->constant);
     BGE_RELEASE_DATA (name, g_free);
     BGE_RELEASE_DATA (component, g_ptr_array_unref);
     BGE_RELEASE_DATA (property.object, value_data_unref);
-    BGE_RELEASE_DATA (property.prop_name, g_free))
+    BGE_RELEASE_DATA (property.prop_name, g_free);
+    BGE_RELEASE_DATA (child.widget, value_data_unref);
+    BGE_RELEASE_DATA (child.builder_type, g_free))
 
 BGE_DEFINE_DATA (
     snapshot_call,
@@ -1113,6 +1120,52 @@ bge_wdgt_spec_add_property_value (BgeWdgtSpec *self,
 }
 
 gboolean
+bge_wdgt_spec_add_child_value (BgeWdgtSpec *self,
+                               const char  *name,
+                               const char  *widget,
+                               const char  *builder_type,
+                               GError     **error)
+{
+  ValueData *widget_value     = NULL;
+  g_autoptr (ValueData) value = NULL;
+
+  g_return_val_if_fail (BGE_IS_WDGT_SPEC (self), FALSE);
+  g_return_val_if_fail (name != NULL, FALSE);
+  g_return_val_if_fail (widget != NULL, FALSE);
+
+  if (g_hash_table_contains (self->values, name))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' already exists", name);
+      return FALSE;
+    }
+
+  widget_value = g_hash_table_lookup (self->values, widget);
+  if (widget_value == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' is undefined", widget);
+      return FALSE;
+    }
+  if (!g_type_is_a (widget_value->type, GTK_TYPE_BUILDABLE))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' is not a buildable widget", widget);
+      return FALSE;
+    }
+
+  value                     = value_data_new ();
+  value->name               = g_strdup (name);
+  value->type               = GTK_TYPE_WIDGET;
+  value->kind               = VALUE_CHILD;
+  value->child.widget       = value_data_ref (widget_value);
+  value->child.builder_type = builder_type != NULL ? g_strdup (builder_type) : NULL;
+
+  g_hash_table_replace (self->values, g_strdup (name), value_data_ref (value));
+  return TRUE;
+}
+
+gboolean
 bge_wdgt_spec_add_child (BgeWdgtSpec *self,
                          GType        type,
                          const char  *name,
@@ -1145,7 +1198,7 @@ bge_wdgt_spec_add_child (BgeWdgtSpec *self,
     }
 
   child       = value_data_new ();
-  child->kind = VALUE_CHILD;
+  child->kind = VALUE_OBJECT;
   child->type = type;
   child->name = g_strdup (name);
 
@@ -3138,7 +3191,7 @@ regenerate (BgeWdgtRenderer *self)
       GtkWidget *widget = NULL;
 
       value = g_ptr_array_index (spec->children, i);
-      g_assert (value->kind == VALUE_CHILD);
+      g_assert (value->kind == VALUE_OBJECT);
 
       widget = g_object_new (
           value->type,
@@ -3325,10 +3378,8 @@ apply_state (BgeWdgtRenderer *self)
   g_hash_table_iter_init (&iter, state->setters);
   for (;;)
     {
-      ValueData  *dest          = NULL;
-      ValueData  *src           = NULL;
-      GObject    *dest_object   = NULL;
-      const char *dest_property = NULL;
+      ValueData *dest = NULL;
+      ValueData *src  = NULL;
 
       if (!g_hash_table_iter_next (
               &iter,
@@ -3336,54 +3387,72 @@ apply_state (BgeWdgtRenderer *self)
               (gpointer *) &src))
         break;
 
+      if (src->kind == VALUE_VARIABLE)
+        src = dig_variable_value (src, state);
+
       switch (dest->kind)
         {
         case VALUE_PROPERTY:
-          dest_object = g_hash_table_lookup (
-              self->objects,
-              dest->property.object);
-          g_assert (dest_object != NULL);
-          dest_property = dest->property.prop_name;
+          {
+            GObject       *dest_object   = NULL;
+            const char    *dest_property = NULL;
+            GtkExpression *expression    = NULL;
+            GValue         resolved      = G_VALUE_INIT;
+
+            dest_object = g_hash_table_lookup (
+                self->objects,
+                dest->property.object);
+            g_assert (dest_object != NULL);
+            dest_property = dest->property.prop_name;
+
+            expression = g_hash_table_lookup (
+                instance->expressions, src);
+            gtk_expression_evaluate (expression, self, &resolved);
+            g_object_set_property (
+                dest_object,
+                dest_property,
+                &resolved);
+            g_value_unset (&resolved);
+          }
+          break;
+        case VALUE_CHILD:
+          {
+            GtkWidget     *parent_widget = NULL;
+            GtkExpression *expression    = NULL;
+            GValue         resolved      = G_VALUE_INIT;
+            GtkWidget     *child_widget  = NULL;
+
+            if (src == NULL)
+              break;
+
+            parent_widget = g_hash_table_lookup (
+                self->objects,
+                dest->child.widget);
+            g_assert (parent_widget != NULL);
+
+            expression = g_hash_table_lookup (
+                instance->expressions, src);
+            gtk_expression_evaluate (expression, self, &resolved);
+
+            child_widget = g_value_get_object (&resolved);
+            if (child_widget != NULL &&
+                gtk_widget_get_parent (child_widget) != parent_widget)
+              {
+                gtk_widget_unparent (child_widget);
+                gtk_widget_set_parent (child_widget, parent_widget);
+              }
+
+            g_value_unset (&resolved);
+          }
           break;
         case VALUE_VARIABLE:
           break;
         case VALUE_COMPONENT:
         case VALUE_CONSTANT:
         case VALUE_SPECIAL:
-        case VALUE_CHILD:
         case VALUE_OBJECT:
         default:
           g_assert_not_reached ();
-        }
-      if (dest_object == NULL)
-        continue;
-
-      if (src->kind == VALUE_VARIABLE)
-        src = dig_variable_value (src, state);
-
-      if (src != NULL)
-        {
-          GtkExpression *expression = NULL;
-          GValue         resolved   = G_VALUE_INIT;
-
-          expression = g_hash_table_lookup (
-              instance->expressions, src);
-          gtk_expression_evaluate (expression, self, &resolved);
-          g_object_set_property (
-              dest_object,
-              dest_property,
-              &resolved);
-        }
-      else
-        {
-          GValue empty = G_VALUE_INIT;
-
-          g_value_init (&empty, dest->type);
-          g_object_set_property (
-              dest_object,
-              dest_property,
-              &empty);
-          g_value_unset (&empty);
         }
     }
 
@@ -3496,7 +3565,6 @@ ensure_expressions (BgeWdgtRenderer   *self,
       expression = gtk_constant_expression_new_for_value (&value->constant);
       break;
     case VALUE_OBJECT:
-    case VALUE_CHILD:
       {
         GtkWidget *object = NULL;
 
@@ -3584,6 +3652,15 @@ ensure_expressions (BgeWdgtRenderer   *self,
             value->property.object->type,
             g_steal_pointer (&object_expression),
             value->property.prop_name);
+      }
+      break;
+    case VALUE_CHILD:
+      {
+        GValue empty_value = G_VALUE_INIT;
+
+        g_value_init (&empty_value, value->type);
+        expression = gtk_constant_expression_new_for_value (&empty_value);
+        g_value_unset (&empty_value);
       }
       break;
     case VALUE_SPECIAL:

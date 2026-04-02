@@ -109,6 +109,13 @@ bge_wdgt_spec_add_property_value (BgeWdgtSpec *self,
                                   GError     **error);
 
 gboolean
+bge_wdgt_spec_add_child_value (BgeWdgtSpec *self,
+                               const char  *name,
+                               const char  *widget,
+                               const char  *builder_type,
+                               GError     **error);
+
+gboolean
 bge_wdgt_spec_add_child (BgeWdgtSpec *self,
                          GType        type,
                          const char  *name,

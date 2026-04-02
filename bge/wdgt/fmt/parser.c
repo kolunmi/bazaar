@@ -604,20 +604,33 @@ parse_args (const char  *p,
           GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "(");
           for (;;)
             {
-              g_autofree char *property_name = NULL;
-              g_autofree char *property_key  = NULL;
-              g_auto (GStrv) value_args      = NULL;
-              guint n_value_args             = 0;
+              g_autofree char *property_name   = NULL;
+              gboolean         is_widget_child = FALSE;
+              g_autofree char *key             = NULL;
+              g_auto (GStrv) value_args        = NULL;
+              guint n_value_args               = 0;
 
               GET_TOKEN (&property_name, TOKEN_PARSE_DEFAULT);
               if (g_strcmp0 (property_name, ")") == 0)
                 break;
-              GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "=");
 
-              property_key = make_object_property_name (object_name, property_name);
-              result       = bge_wdgt_spec_add_property_value (
-                  spec, property_key, object_name, property_name, &local_error);
-              RETURN_ERROR_UNLESS (result);
+              is_widget_child = g_strcmp0 (property_name, "%child") == 0;
+              if (is_widget_child)
+                {
+                  key    = make_anon_name ((*n_anon_vals)++);
+                  result = bge_wdgt_spec_add_child_value (
+                      spec, key, object_name, NULL, &local_error);
+                  RETURN_ERROR_UNLESS (result);
+                }
+              else
+                {
+                  GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "=");
+
+                  key    = make_object_property_name (object_name, property_name);
+                  result = bge_wdgt_spec_add_property_value (
+                      spec, key, object_name, property_name, &local_error);
+                  RETURN_ERROR_UNLESS (result);
+                }
 
               p = parse_args (p, spec, state, n_anon_vals, &value_args,
                               &n_value_args, TRUE, &local_error);
@@ -629,11 +642,12 @@ parse_args (const char  *p,
                       error,
                       G_IO_ERROR,
                       G_IO_ERROR_UNKNOWN,
-                      "Property assignment needs a single argument");
+                      "property/child assignment "
+                      "needs a single argument");
                   return NULL;
                 }
 
-              result = bge_wdgt_spec_set_value (spec, state, property_key,
+              result = bge_wdgt_spec_set_value (spec, state, key,
                                                 value_args[0], &local_error);
               RETURN_ERROR_UNLESS (result);
             }
@@ -896,7 +910,7 @@ static char *
 make_object_property_name (const char *object,
                            const char *property)
 {
-  return g_strdup_printf ("prop@%s.%s", object, property);
+  return g_strdup_printf ("prop@(%s).%s", object, property);
 }
 
 static char *
