@@ -20,6 +20,7 @@
 
 #include <gtk/gtk.h>
 
+#include "bge-marshalers.h"
 #include "bge.h"
 #include "fmt/parser.h"
 #include "graphene-gobject.h"
@@ -85,10 +86,8 @@ BGE_DEFINE_DATA (
     Snapshot,
     {
       GPtrArray *calls;
-      GPtrArray *dependencies;
     },
-    BGE_RELEASE_DATA (calls, g_ptr_array_unref);
-    BGE_RELEASE_DATA (dependencies, g_ptr_array_unref))
+    BGE_RELEASE_DATA (calls, g_ptr_array_unref))
 
 BGE_DEFINE_DATA (
     state,
@@ -938,66 +937,7 @@ bge_wdgt_spec_append_snapshot_instr (BgeWdgtSpec             *self,
 void
 bge_wdgt_spec_mark_ready (BgeWdgtSpec *self)
 {
-  GHashTableIter iter = { 0 };
-
   g_return_if_fail (BGE_IS_WDGT_SPEC (self));
-  g_return_if_fail (!self->ready);
-
-  g_hash_table_iter_init (&iter, self->states);
-  for (;;)
-    {
-      char      *name         = NULL;
-      StateData *state        = NULL;
-      GPtrArray *calls        = NULL;
-      GPtrArray *dependencies = NULL;
-
-      if (!g_hash_table_iter_next (
-              &iter,
-              (gpointer *) &name,
-              (gpointer *) &state))
-        break;
-
-      if (state->snapshot == NULL)
-        continue;
-
-      calls        = state->snapshot->calls;
-      dependencies = state->snapshot->dependencies;
-      for (guint i = 0; i < calls->len; i++)
-        {
-          SnapshotCallData *call = NULL;
-          GPtrArray        *args = NULL;
-
-          call = g_ptr_array_index (calls, i);
-          args = call->args;
-          if (args == NULL)
-            /* pop, save, restore... */
-            continue;
-
-          for (guint j = 0; j < args->len; j++)
-            {
-              ValueData *value = NULL;
-
-              value = g_ptr_array_index (args, j);
-              if (value->type == VALUE_VARIABLE)
-                {
-                  value = dig_variable_value (value, state);
-                  if (value == NULL)
-                    continue;
-                }
-
-              if (value->kind == VALUE_PROPERTY)
-                {
-                  guint    idx   = 0;
-                  gboolean found = FALSE;
-
-                  found = g_ptr_array_find (dependencies, value, &idx);
-                  if (!found)
-                    g_ptr_array_add (dependencies, value_data_ref (value));
-                }
-            }
-        }
-    }
-
   self->ready = TRUE;
 }
 
@@ -2170,27 +2110,18 @@ static ValueData *
 dig_variable_value (ValueData *value,
                     StateData *state)
 {
-  ValueData *ret = NULL;
-
   g_assert (value->kind == VALUE_VARIABLE);
   for (;;)
     {
-      ValueData *data = NULL;
-
-      data = g_hash_table_lookup (
-          state->setters,
-          ret != NULL ? ret : value);
-      if (data != NULL)
+      value = g_hash_table_lookup (state->setters, value);
+      if (value != NULL)
         {
-          ret = data;
-          if (ret->kind != VALUE_VARIABLE)
-            break;
+          if (value->kind != VALUE_VARIABLE)
+            return value;
         }
       else
-        break;
+        return NULL;
     }
-
-  return ret;
 }
 
 static void
@@ -2202,8 +2133,6 @@ ensure_state_snapshot (StateData *state)
   state->snapshot        = snapshot_data_new ();
   state->snapshot->calls = g_ptr_array_new_with_free_func (
       snapshot_call_data_unref);
-  state->snapshot->dependencies = g_ptr_array_new_with_free_func (
-      value_data_unref);
 }
 
 /* ------------------------------ */
@@ -2224,9 +2153,10 @@ struct _BgeWdgtRenderer
 
   GHashTable *objects;
   GPtrArray  *children;
+  GHashTable *state_instances;
 
   GPtrArray *bindings;
-  GPtrArray *connections;
+  GPtrArray *watches;
 };
 
 G_DEFINE_FINAL_TYPE (BgeWdgtRenderer, bge_wdgt_renderer, GTK_TYPE_WIDGET);
@@ -2244,35 +2174,36 @@ enum
 };
 static GParamSpec *renderer_props[LAST_RENDERER_PROP] = { 0 };
 
+BGE_DEFINE_DATA (
+    state_instance,
+    StateInstance,
+    {
+      GHashTable *expressions;
+      GPtrArray  *snapshot_deps;
+    },
+    BGE_RELEASE_DATA (expressions, g_hash_table_unref);
+    BGE_RELEASE_DATA (snapshot_deps, g_ptr_array_unref))
+
 static void
 regenerate (BgeWdgtRenderer *self);
 
 static void
 apply_state (BgeWdgtRenderer *self);
 
-static void
-resolve_value (BgeWdgtRenderer *self,
-               ValueData       *value,
-               StateData       *state,
-               GValue          *out);
+static GtkExpression *
+ensure_expressions (BgeWdgtRenderer   *self,
+                    ValueData         *value,
+                    StateData         *state,
+                    StateInstanceData *instance);
 
 static void
 discard_binding (gpointer ptr);
 
 static void
-prop_change_queue_draw (BgeWdgtRenderer *self,
-                        GParamSpec      *pspec,
-                        gpointer         object);
+discard_watch (gpointer ptr);
 
-BGE_DEFINE_DATA (
-    connection,
-    Connection,
-    {
-      gpointer instance;
-      gulong   id;
-    },
-    g_signal_handler_disconnect (self->instance, self->id);
-    BGE_RELEASE_DATA (instance, g_object_unref))
+static void
+prop_change_queue_draw (BgeWdgtRenderer *self);
 
 static void
 bge_wdgt_renderer_dispose (GObject *object)
@@ -2289,9 +2220,10 @@ bge_wdgt_renderer_dispose (GObject *object)
 
   g_clear_pointer (&self->objects, g_hash_table_unref);
   g_clear_pointer (&self->children, g_ptr_array_unref);
+  g_clear_pointer (&self->state_instances, g_hash_table_unref);
 
   g_clear_pointer (&self->bindings, g_ptr_array_unref);
-  g_clear_pointer (&self->connections, g_ptr_array_unref);
+  g_clear_pointer (&self->watches, g_ptr_array_unref);
 
   G_OBJECT_CLASS (bge_wdgt_renderer_parent_class)->dispose (object);
 }
@@ -2394,16 +2326,23 @@ static void
 bge_wdgt_renderer_snapshot (GtkWidget   *widget,
                             GtkSnapshot *snapshot)
 {
-  BgeWdgtRenderer *self       = BGE_WDGT_RENDERER (widget);
-  StateData       *state_data = NULL;
-  GPtrArray       *calls      = NULL;
-
-  state_data = self->active_state;
-  if (self->active_snapshot != NULL)
-    calls = self->active_snapshot->calls;
+  BgeWdgtRenderer   *self     = BGE_WDGT_RENDERER (widget);
+  StateData         *state    = NULL;
+  StateInstanceData *instance = NULL;
+  GPtrArray         *calls    = NULL;
 
   if (self->child != NULL)
     gtk_widget_snapshot_child (GTK_WIDGET (self), self->child, snapshot);
+
+  if (self->active_state == NULL)
+    return;
+
+  state = self->active_state;
+  if (self->active_snapshot != NULL)
+    calls = self->active_snapshot->calls;
+
+  instance = g_hash_table_lookup (self->state_instances, state);
+  g_assert (instance != NULL);
 
   if (calls != NULL)
     {
@@ -2437,17 +2376,21 @@ bge_wdgt_renderer_snapshot (GtkWidget   *widget,
 
                 for (guint j = 0; j < n_arg_values; j++)
                   {
-                    ValueData *value = NULL;
+                    ValueData     *value      = NULL;
+                    GtkExpression *expression = NULL;
 
-                    value = g_ptr_array_index (call->args, j);
-                    resolve_value (self, value, state_data, &arg_values[j]);
+                    value      = g_ptr_array_index (call->args, j);
+                    expression = g_hash_table_lookup (instance->expressions, value);
+                    gtk_expression_evaluate (expression, self, &arg_values[j]);
                   }
                 for (guint j = 0; j < n_rest_values; j++)
                   {
-                    ValueData *value = NULL;
+                    ValueData     *value      = NULL;
+                    GtkExpression *expression = NULL;
 
-                    value = g_ptr_array_index (call->rest, j);
-                    resolve_value (self, value, state_data, &rest_values[j]);
+                    value      = g_ptr_array_index (call->rest, j);
+                    expression = g_hash_table_lookup (instance->expressions, value);
+                    gtk_expression_evaluate (expression, self, &rest_values[j]);
                   }
 
                 call->func (snapshot, arg_values, rest_values, n_rest_values);
@@ -2527,10 +2470,14 @@ bge_wdgt_renderer_init (BgeWdgtRenderer *self)
   self->objects = g_hash_table_new_full (
       g_direct_hash, g_direct_equal,
       value_data_unref, g_object_unref);
+  self->children = g_ptr_array_new_with_free_func (
+      (GDestroyNotify) gtk_widget_unparent);
+  self->state_instances = g_hash_table_new_full (
+      g_direct_hash, g_direct_equal,
+      state_data_unref, state_instance_data_unref);
 
-  self->children    = g_ptr_array_new_with_free_func ((GDestroyNotify) gtk_widget_unparent);
-  self->bindings    = g_ptr_array_new_with_free_func (discard_binding);
-  self->connections = g_ptr_array_new_with_free_func (connection_data_unref);
+  self->bindings = g_ptr_array_new_with_free_func (discard_binding);
+  self->watches  = g_ptr_array_new_with_free_func (discard_watch);
 }
 
 BgeWdgtRenderer *
@@ -2676,10 +2623,12 @@ bge_wdgt_renderer_set_state_take (BgeWdgtRenderer *self,
 static void
 regenerate (BgeWdgtRenderer *self)
 {
-  BgeWdgtSpec *spec = self->spec;
+  BgeWdgtSpec   *spec       = self->spec;
+  GHashTableIter state_iter = { 0 };
 
   g_hash_table_remove_all (self->objects);
   g_ptr_array_set_size (self->children, 0);
+  g_hash_table_remove_all (self->state_instances);
 
   if (self->spec == NULL)
     return;
@@ -2704,6 +2653,125 @@ regenerate (BgeWdgtRenderer *self)
       g_ptr_array_add (self->children, g_object_ref (widget));
     }
 
+  g_hash_table_iter_init (&state_iter, spec->states);
+  for (;;)
+    {
+      GHashTableIter value_iter              = { 0 };
+      char          *state_name              = NULL;
+      StateData     *state                   = NULL;
+      g_autoptr (StateInstanceData) instance = NULL;
+
+      if (!g_hash_table_iter_next (
+              &state_iter,
+              (gpointer *) &state_name,
+              (gpointer *) &state))
+        break;
+
+      instance              = state_instance_data_new ();
+      instance->expressions = g_hash_table_new_full (
+          g_direct_hash, g_direct_equal,
+          value_data_unref, (GDestroyNotify) gtk_expression_unref);
+      instance->snapshot_deps = g_ptr_array_new_with_free_func (
+          (GDestroyNotify) gtk_expression_unref);
+
+      g_hash_table_iter_init (&value_iter, spec->values);
+      for (;;)
+        {
+          char      *value_name                = NULL;
+          ValueData *value                     = NULL;
+          g_autoptr (GtkExpression) expression = NULL;
+
+          if (!g_hash_table_iter_next (
+                  &value_iter,
+                  (gpointer *) &value_name,
+                  (gpointer *) &value))
+            break;
+
+          expression = ensure_expressions (self, value, state, instance);
+        }
+
+      g_hash_table_replace (self->state_instances,
+                            state_data_ref (state),
+                            state_instance_data_ref (instance));
+    }
+
+  g_hash_table_iter_init (&state_iter, spec->states);
+  for (;;)
+    {
+      char              *state_name        = NULL;
+      StateData         *state             = NULL;
+      StateInstanceData *instance          = NULL;
+      StateData         *snapshot_state    = NULL;
+      StateInstanceData *snapshot_instance = NULL;
+
+      if (!g_hash_table_iter_next (
+              &state_iter,
+              (gpointer *) &state_name,
+              (gpointer *) &state))
+        break;
+
+      instance = g_hash_table_lookup (self->state_instances, state);
+      g_assert (instance != NULL);
+
+      if (state->snapshot != NULL)
+        {
+          snapshot_state    = state;
+          snapshot_instance = instance;
+        }
+      else
+        {
+          if (self->spec->default_state != NULL)
+            /* If this state doesn't have snapshot instructions specified, fallback
+               on using the default state */
+            {
+              snapshot_state    = self->spec->default_state;
+              snapshot_instance = g_hash_table_lookup (self->state_instances, snapshot_state);
+              g_assert (snapshot_instance != NULL);
+            }
+          else
+            continue;
+        }
+
+      for (guint i = 0; i < snapshot_state->snapshot->calls->len; i++)
+        {
+          SnapshotCallData *call = NULL;
+
+          call = g_ptr_array_index (snapshot_state->snapshot->calls, i);
+          if (call->args == NULL)
+            /* pop, save, restore... */
+            continue;
+
+          for (guint j = 0; j < call->args->len; j++)
+            {
+              ValueData     *arg        = NULL;
+              gboolean       found      = FALSE;
+              GtkExpression *expression = NULL;
+
+              arg        = g_ptr_array_index (call->args, j);
+              expression = g_hash_table_lookup (instance->expressions, arg);
+              g_assert (expression != NULL);
+
+              for (guint k = 0; k < instance->snapshot_deps->len; k++)
+                {
+                  GtkExpression *other = NULL;
+
+                  other = g_ptr_array_index (instance->snapshot_deps, k);
+                  if (expression == other)
+                    {
+                      found = TRUE;
+                      break;
+                    }
+                }
+              if (found)
+                /* Ensure we don't duplicate deps */
+                continue;
+
+              g_ptr_array_add (instance->snapshot_deps,
+                               gtk_expression_ref (expression));
+            }
+        }
+    }
+
   gtk_widget_queue_allocate (GTK_WIDGET (self));
   gtk_widget_queue_draw (GTK_WIDGET (self));
 }
@@ -2711,33 +2779,35 @@ regenerate (BgeWdgtRenderer *self)
 static void
 apply_state (BgeWdgtRenderer *self)
 {
-  BgeWdgtSpec   *spec       = self->spec;
-  StateData     *state_data = NULL;
-  GHashTableIter iter       = { 0 };
-  SnapshotData  *snapshot   = NULL;
+  BgeWdgtSpec       *spec     = self->spec;
+  StateData         *state    = NULL;
+  StateInstanceData *instance = NULL;
+  GHashTableIter     iter     = { 0 };
 
   g_clear_pointer (&self->active_state, state_data_unref);
   g_clear_pointer (&self->active_snapshot, snapshot_data_unref);
 
   g_ptr_array_set_size (self->bindings, 0);
-  g_ptr_array_set_size (self->connections, 0);
+  g_ptr_array_set_size (self->watches, 0);
   gtk_widget_queue_draw (GTK_WIDGET (self));
 
   if (self->spec == NULL ||
       self->state == NULL)
     return;
 
-  state_data = g_hash_table_lookup (spec->states, self->state);
-  if (state_data == NULL)
+  state = g_hash_table_lookup (spec->states, self->state);
+  if (state == NULL)
     {
       g_critical ("state \"%s\" doesn't exist on spec \"%s\"",
                   self->state, spec->name);
       return;
     }
+  instance = g_hash_table_lookup (self->state_instances, state);
+  g_assert (instance != NULL);
 
-  self->active_state = state_data_ref (state_data);
+  self->active_state = state_data_ref (state);
 
-  g_hash_table_iter_init (&iter, state_data->setters);
+  g_hash_table_iter_init (&iter, state->setters);
   for (;;)
     {
       ValueData  *dest_value_data = NULL;
@@ -2774,7 +2844,7 @@ apply_state (BgeWdgtRenderer *self)
         continue;
 
       if (src_value_data->kind == VALUE_VARIABLE)
-        src_value_data = dig_variable_value (src_value_data, state_data);
+        src_value_data = dig_variable_value (src_value_data, state);
 
       if (src_value_data != NULL)
         {
@@ -2833,125 +2903,120 @@ apply_state (BgeWdgtRenderer *self)
         }
     }
 
-  if (state_data->snapshot != NULL)
-    snapshot = state_data->snapshot;
-  if (snapshot == NULL &&
-      self->spec->default_state != NULL)
-    /* If this state doesn't have snapshot instructions specified, fallback
-       on using the default state */
-    snapshot = self->spec->default_state->snapshot;
+  if (state->snapshot != NULL)
+    self->active_snapshot = snapshot_data_ref (state->snapshot);
+  else if (self->spec->default_state != NULL)
+    self->active_snapshot = snapshot_data_ref (self->spec->default_state->snapshot);
 
-  if (snapshot != NULL)
-    self->active_snapshot = snapshot_data_ref (snapshot);
-
-  if (snapshot != NULL)
+  if (self->active_snapshot != NULL)
     {
-      for (guint i = 0; i < snapshot->dependencies->len; i++)
+      for (guint i = 0; i < instance->snapshot_deps->len; i++)
         {
-          ValueData *src_value                  = NULL;
-          GObject   *src_object                 = NULL;
-          char       signal_buf[128]            = { 0 };
-          g_autoptr (ConnectionData) connection = NULL;
+          GtkExpression      *expression = NULL;
+          GtkExpressionWatch *watch      = NULL;
 
-          src_value = g_ptr_array_index (snapshot->dependencies, i);
-          if (src_value->kind != VALUE_PROPERTY)
-            continue;
-
-          src_object = g_hash_table_lookup (
-              self->objects,
-              src_value->property.object);
-          g_assert (src_object != NULL);
-
-          g_snprintf (signal_buf, sizeof (signal_buf),
-                      "notify::%s", src_value->property.prop_name);
-
-          connection           = connection_data_new ();
-          connection->instance = g_object_ref (src_object);
-          connection->id       = g_signal_connect_swapped (
-              src_object, signal_buf,
-              G_CALLBACK (prop_change_queue_draw), self);
+          expression = g_ptr_array_index (instance->snapshot_deps, i);
+          watch      = gtk_expression_watch (
+              expression,
+              self,
+              (GtkExpressionNotify) prop_change_queue_draw,
+              self, NULL);
+          g_ptr_array_add (self->watches, watch);
         }
     }
 }
 
-static void
-resolve_value (BgeWdgtRenderer *self,
-               ValueData       *value,
-               StateData       *state,
-               GValue          *out)
+static graphene_point_t *
+expression_create_point (gpointer object,
+                         double   x,
+                         double   y,
+                         gpointer user_data)
 {
+  graphene_point_t *point = NULL;
+
+  point    = graphene_point_alloc ();
+  point->x = x;
+  point->y = y;
+
+  return point;
+}
+
+static graphene_size_t *
+expression_create_size (gpointer object,
+                        double   width,
+                        double   height,
+                        gpointer user_data)
+{
+  graphene_size_t *size = NULL;
+
+  size         = graphene_size_alloc ();
+  size->width  = width;
+  size->height = height;
+
+  return size;
+}
+
+static graphene_point3d_t *
+expression_create_point3d (gpointer object,
+                           double   x,
+                           double   y,
+                           double   z,
+                           gpointer user_data)
+{
+  graphene_point3d_t *point3d = NULL;
+
+  point3d    = graphene_point3d_alloc ();
+  point3d->x = x;
+  point3d->y = y;
+  point3d->z = z;
+
+  return point3d;
+}
+
+static graphene_rect_t *
+expression_create_rect (gpointer object,
+                        double   x,
+                        double   y,
+                        double   width,
+                        double   height,
+                        gpointer user_data)
+{
+  graphene_rect_t *rect = NULL;
+
+  rect              = graphene_rect_alloc ();
+  rect->origin.x    = x;
+  rect->origin.y    = y;
+  rect->size.width  = width;
+  rect->size.height = height;
+
+  return rect;
+}
+
+static GtkExpression *
+ensure_expressions (BgeWdgtRenderer   *self,
+                    ValueData         *value,
+                    StateData         *state,
+                    StateInstanceData *instance)
+{
+  GtkExpression *cached                = NULL;
+  g_autoptr (GtkExpression) expression = NULL;
+
+  cached = g_hash_table_lookup (instance->expressions, value);
+  if (cached != NULL)
+    return gtk_expression_ref (cached);
+
   switch (value->kind)
     {
+    case VALUE_CONSTANT:
+      expression = gtk_constant_expression_new_for_value (&value->constant);
+      break;
     case VALUE_CHILD:
       {
         GtkWidget *widget = NULL;
 
         widget = g_hash_table_lookup (self->objects, value);
         g_assert (widget != NULL);
-        g_value_set_object (g_value_init (out, value->type), widget);
-      }
-      break;
-    case VALUE_CONSTANT:
-      g_value_copy (&value->constant, g_value_init (out, value->type));
-      break;
-    case VALUE_COMPONENT:
-      {
-        GValue components[32] = { 0 };
-        guint  n_components   = 0;
-
-        n_components = MIN (value->component->len, G_N_ELEMENTS (components));
-        for (guint i = 0; i < n_components; i++)
-          {
-            ValueData *component = NULL;
-
-            component = g_ptr_array_index (value->component, i);
-            resolve_value (self, component, state, &components[i]);
-          }
-
-        if (value->type == GRAPHENE_TYPE_POINT)
-          {
-            graphene_point_t point = { 0 };
-
-            point = GRAPHENE_POINT_INIT (
-                g_value_get_double (&components[0]),
-                g_value_get_double (&components[1]));
-            g_value_set_boxed (g_value_init (out, value->type), &point);
-          }
-        else if (value->type == GRAPHENE_TYPE_POINT3D)
-          {
-            graphene_point3d_t point = { 0 };
-
-            point = GRAPHENE_POINT3D_INIT (
-                g_value_get_double (&components[0]),
-                g_value_get_double (&components[1]),
-                g_value_get_double (&components[2]));
-            g_value_set_boxed (g_value_init (out, value->type), &point);
-          }
-        else if (value->type == GRAPHENE_TYPE_SIZE)
-          {
-            graphene_size_t size = { 0 };
-
-            size = GRAPHENE_SIZE_INIT (
-                g_value_get_double (&components[0]),
-                g_value_get_double (&components[1]));
-            g_value_set_boxed (g_value_init (out, value->type), &size);
-          }
-        else if (value->type == GRAPHENE_TYPE_RECT)
-          {
-            graphene_rect_t rect = { 0 };
-
-            rect = GRAPHENE_RECT_INIT (
-                g_value_get_double (&components[0]),
-                g_value_get_double (&components[1]),
-                g_value_get_double (&components[2]),
-                g_value_get_double (&components[3]));
-            g_value_set_boxed (g_value_init (out, value->type), &rect);
-          }
-
-        for (guint i = 0; i < n_components; i++)
-          {
-            g_value_unset (&components[i]);
-          }
+        expression = gtk_constant_expression_new (value->type, widget);
       }
       break;
     case VALUE_VARIABLE:
@@ -2960,31 +3025,94 @@ resolve_value (BgeWdgtRenderer *self,
 
         dig = dig_variable_value (value, state);
         if (dig != NULL)
-          resolve_value (self, dig, state, out);
+          expression = ensure_expressions (self, dig, state, instance);
+        else
+          {
+            GValue empty_value = G_VALUE_INIT;
+
+            g_value_init (&empty_value, value->type);
+            expression = gtk_constant_expression_new_for_value (&empty_value);
+            g_value_unset (&empty_value);
+          }
+      }
+      break;
+    case VALUE_COMPONENT:
+      {
+        g_autoptr (GPtrArray) params = NULL;
+        GClosureMarshal marshal      = NULL;
+        GCallback       callback     = NULL;
+
+        params = g_ptr_array_new ();
+
+        for (guint i = 0; i < value->component->len; i++)
+          {
+            ValueData *member                     = NULL;
+            g_autoptr (GtkExpression) member_expr = NULL;
+
+            member      = g_ptr_array_index (value->component, i);
+            member_expr = ensure_expressions (self, member, state, instance);
+            g_ptr_array_add (params, g_steal_pointer (&member_expr));
+          }
+
+        if (value->type == GRAPHENE_TYPE_POINT)
+          {
+            marshal  = bge_marshal_BOXED__DOUBLE_DOUBLE;
+            callback = G_CALLBACK (expression_create_point);
+          }
+        else if (value->type == GRAPHENE_TYPE_SIZE)
+          {
+            marshal  = bge_marshal_BOXED__DOUBLE_DOUBLE;
+            callback = G_CALLBACK (expression_create_size);
+          }
+        else if (value->type == GRAPHENE_TYPE_POINT3D)
+          {
+            marshal  = bge_marshal_BOXED__DOUBLE_DOUBLE_DOUBLE;
+            callback = G_CALLBACK (expression_create_point3d);
+          }
+        else if (value->type == GRAPHENE_TYPE_RECT)
+          {
+            marshal  = bge_marshal_BOXED__DOUBLE_DOUBLE_DOUBLE_DOUBLE;
+            callback = G_CALLBACK (expression_create_rect);
+          }
+        else
+          g_assert (FALSE);
+
+        expression = gtk_cclosure_expression_new (
+            value->type,
+            marshal,
+            params->len,
+            (GtkExpression **) params->pdata,
+            callback,
+            self,
+            NULL);
       }
       break;
     case VALUE_PROPERTY:
       {
-        GValue   property_object = G_VALUE_INIT;
-        gpointer object          = NULL;
+        g_autoptr (GtkExpression) object_expression = NULL;
 
-        g_value_init (&property_object, value->property.object->type);
-        resolve_value (self, value->property.object, state, &property_object);
-
-        object = g_value_get_object (&property_object);
-        g_value_init (out, value->type);
-        if (object != NULL)
-          g_object_get_property (object, value->property.prop_name, out);
-
-        g_value_unset (&property_object);
+        /* Mark subproperty values as dependencies as well */
+        object_expression = ensure_expressions (
+            self, value->property.object, state, instance);
+        expression = gtk_property_expression_new (
+            value->property.object->type,
+            g_steal_pointer (&object_expression),
+            value->property.prop_name);
       }
       break;
     case VALUE_SPECIAL:
-      /* TODO */
+      g_assert (FALSE);
       break;
     default:
+      g_assert_not_reached ();
       break;
     }
+
+  g_hash_table_replace (
+      instance->expressions,
+      value_data_ref (value),
+      gtk_expression_ref (expression));
+  return gtk_expression_ref (expression);
 }
 
 static void
@@ -2997,9 +3125,16 @@ discard_binding (gpointer ptr)
 }
 
 static void
-prop_change_queue_draw (BgeWdgtRenderer *self,
-                        GParamSpec      *pspec,
-                        gpointer         object)
+discard_watch (gpointer ptr)
+{
+  GtkExpressionWatch *watch = ptr;
+
+  /* unrefs for us */
+  gtk_expression_watch_unwatch (watch);
+}
+
+static void
+prop_change_queue_draw (BgeWdgtRenderer *self)
 {
   gtk_widget_queue_draw (GTK_WIDGET (self));
 }

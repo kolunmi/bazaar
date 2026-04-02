@@ -577,6 +577,30 @@ parse_args (const char  *p,
 
           parsed = parse_token_fundamental (token, spec, n_anon_vals, &local_error);
           RETURN_ERROR_UNLESS (parsed != NULL);
+
+          for (;;)
+            {
+              GET_TOKEN (&token, TOKEN_PARSE_DEFAULT);
+              if (g_strcmp0 (token, ":") == 0)
+                {
+                  g_autofree char *property = NULL;
+                  g_autofree char *name     = NULL;
+
+                  GET_TOKEN (&property, TOKEN_PARSE_DEFAULT);
+                  name = make_object_property_name (parsed, property);
+
+                  result = bge_wdgt_spec_add_property_value (
+                      spec, name, parsed, property, &local_error);
+                  RETURN_ERROR_UNLESS (result);
+
+                  g_clear_pointer (&parsed, g_free);
+                  parsed = g_steal_pointer (&name);
+                }
+              else
+                break;
+            }
+          get_token = FALSE;
+
           g_strv_builder_take (builder, g_steal_pointer (&parsed));
           n_args++;
 
