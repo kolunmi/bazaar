@@ -84,6 +84,12 @@ bge_wdgt_spec_add_component_source_value (BgeWdgtSpec       *self,
                                           GError           **error);
 
 gboolean
+bge_wdgt_spec_add_instance_source_value (BgeWdgtSpec *self,
+                                         const char  *name,
+                                         GType        type,
+                                         GError     **error);
+
+gboolean
 bge_wdgt_spec_add_special_source_value (BgeWdgtSpec        *self,
                                         const char         *name,
                                         BgeWdgtSpecialValue kind,

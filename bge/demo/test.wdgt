@@ -5,6 +5,12 @@ defwidget "My Widget" {
   var "corner" = "GrapheneSize";
 
   state@default "default" = {
+    child "scale":adjustment = #o:"GtkAdjustment"(
+      lower = 0.0;
+      value = 50.0;
+      upper = 100.0;
+    );
+
     var "r" = scale:adjustment:value;
     var "corner" = #size(r, r);
     
