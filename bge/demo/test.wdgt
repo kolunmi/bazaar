@@ -10,6 +10,7 @@ defwidget "My Widget" {
       value = 50.0;
       upper = 100.0;
     );
+    scale:valign = #e:"GtkAlign"(end);
 
     r = scale:adjustment:value;
     corner = #size(r, r);

@@ -464,20 +464,20 @@ parse_args (const char  *p,
             }
         }
       else if (g_strcmp0 (token, "#rgba") == 0 ||
-               g_strcmp0 (token, "#s") == 0)
+               g_strcmp0 (token, "#e") == 0 ||
+               g_strcmp0 (token, "#enum") == 0)
         {
           g_autofree char *tmp_token = NULL;
-          g_autofree char *string    = NULL;
           g_autofree char *key       = NULL;
           GValue           value     = { 0 };
 
-          GET_TOKEN_EXPECT (&tmp_token, TOKEN_PARSE_DEFAULT, "(");
-          GET_TOKEN (&string, TOKEN_PARSE_QUOTED);
-          GET_TOKEN_EXPECT (&tmp_token, TOKEN_PARSE_DEFAULT, ")");
-
           if (g_strcmp0 (token, "#rgba") == 0)
             {
-              GdkRGBA rgba = { 0 };
+              g_autofree char *string = NULL;
+              GdkRGBA          rgba   = { 0 };
+
+              GET_TOKEN_EXPECT (&tmp_token, TOKEN_PARSE_DEFAULT, "(");
+              GET_TOKEN (&string, TOKEN_PARSE_QUOTED);
 
               result = gdk_rgba_parse (&rgba, string);
               if (!result)
@@ -491,9 +491,53 @@ parse_args (const char  *p,
                   return NULL;
                 }
               g_value_set_boxed (g_value_init (&value, GDK_TYPE_RGBA), &rgba);
+              GET_TOKEN_EXPECT (&tmp_token, TOKEN_PARSE_DEFAULT, ")");
             }
-          else if (g_strcmp0 (token, "#s") == 0)
-            g_value_set_string (g_value_init (&value, G_TYPE_STRING), string);
+          else if (g_strcmp0 (token, "#e") == 0 ||
+                   g_strcmp0 (token, "#enum") == 0)
+            {
+              g_autofree char *enum_type_name   = NULL;
+              g_autofree char *enum_nick        = NULL;
+              GType            enum_type        = 0;
+              g_autoptr (GEnumClass) enum_class = NULL;
+              GEnumValue *enum_value            = NULL;
+
+              GET_TOKEN_EXPECT (&tmp_token, TOKEN_PARSE_DEFAULT, ":");
+              GET_TOKEN (&enum_type_name, TOKEN_PARSE_QUOTED);
+              GET_TOKEN_EXPECT (&tmp_token, TOKEN_PARSE_DEFAULT, "(");
+
+              enum_type = g_type_from_name (enum_type_name);
+              if (!g_type_is_a (enum_type, G_TYPE_ENUM))
+                {
+                  g_set_error (
+                      error,
+                      G_IO_ERROR,
+                      G_IO_ERROR_UNKNOWN,
+                      "'%s' not found to be an enum type",
+                      enum_type_name);
+                  return NULL;
+                }
+
+              GET_TOKEN (&enum_nick, TOKEN_PARSE_DEFAULT);
+
+              enum_class = g_type_class_ref (enum_type);
+              enum_value = g_enum_get_value_by_nick (enum_class, enum_nick);
+              if (enum_value == NULL)
+                enum_value = g_enum_get_value_by_name (enum_class, enum_nick);
+              if (enum_value == NULL)
+                {
+                  g_set_error (
+                      error,
+                      G_IO_ERROR,
+                      G_IO_ERROR_UNKNOWN,
+                      "'%s' not found in enum type %s",
+                      enum_nick, enum_type_name);
+                  return NULL;
+                }
+
+              g_value_set_enum (g_value_init (&value, enum_type), enum_value->value);
+              GET_TOKEN_EXPECT (&tmp_token, TOKEN_PARSE_DEFAULT, ")");
+            }
 
           key    = make_anon_name ((*n_anon_vals)++);
           result = bge_wdgt_spec_add_constant_source_value (
