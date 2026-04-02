@@ -2804,7 +2804,8 @@ regenerate (BgeWdgtRenderer *self)
         }
       else
         {
-          if (self->spec->default_state != NULL)
+          if (self->spec->default_state != NULL &&
+              self->spec->default_state->snapshot != NULL)
             /* If this state doesn't have snapshot instructions specified, fallback
                on using the default state */
             {
@@ -2958,7 +2959,8 @@ apply_state (BgeWdgtRenderer *self)
 
   if (state->snapshot != NULL)
     self->active_snapshot = snapshot_data_ref (state->snapshot);
-  else if (self->spec->default_state != NULL)
+  else if (self->spec->default_state != NULL &&
+           self->spec->default_state->snapshot != NULL)
     self->active_snapshot = snapshot_data_ref (self->spec->default_state->snapshot);
 
   if (self->active_snapshot != NULL)
