@@ -1,18 +1,18 @@
 defwidget "My Widget" {
 
-  child "scale" = "GtkScale";
-  var "r" = "gdouble";
-  var "corner" = "GrapheneSize";
+  child scale : "GtkScale";
+  var r : "gdouble";
+  var corner : "GrapheneSize";
 
   state@default "default" = {
-    child "scale":adjustment = #o:"GtkAdjustment"(
+    scale:adjustment = #o:"GtkAdjustment"(
       lower = 0.0;
       value = 50.0;
       upper = 100.0;
     );
 
-    var "r" = scale:adjustment:value;
-    var "corner" = #size(r, r);
+    r = scale:adjustment:value;
+    corner = #size(r, r);
     
     %snapshot = {
       move translate(#point(10.0, 10.0));
