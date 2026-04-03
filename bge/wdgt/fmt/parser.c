@@ -39,22 +39,6 @@ typedef enum
   TOKEN_PARSE_QUOTED  = 1 << 0,
 } TokenParseFlags;
 
-enum
-{
-  BLK_TOPLEVEL = 0,
-  BLK_DEFWIDGET,
-  BLK_STATE,
-  BLK_PROPERTIES,
-  BLK_ALLOCATE_FUNC,
-  BLK_SNAPSHOT_FUNC,
-};
-
-enum
-{
-  LEFT_ASSIGN = 0,
-  RIGHT_ASSIGN,
-};
-
 #define IS_EOF(_p) ((_p) == NULL || *(_p) == '\0')
 
 static const char *
