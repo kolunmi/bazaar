@@ -740,7 +740,8 @@ load_fiber_work (LoadData *data)
             {
               g_warning ("Couldn't load associated metadata file %s for cached texture at %s, "
                          "reaping and fetching from original source at %s instead: %s",
-                         async_tex_data_path, cache_into_path, source_uri, local_error->message);
+                         async_tex_data_path, cache_into_path, source_uri,
+                         local_error != NULL ? local_error->message : "variant parse failed");
               g_clear_pointer (&local_error, g_error_free);
             }
 
@@ -987,12 +988,12 @@ load_finally (DexFuture *future,
             g_warning ("Loading %s failed: %s. Retrying in %d seconds. This will "
                        "be the last retry, after which this texture will remain invalid",
                        self->source_uri,
-                       local_error->message,
+                       local_error != NULL ? local_error->message : "unknown error",
                        RETRY_INTERVAL_SECONDS);
           else
             g_warning ("Loading %s failed: %s. Retrying in %d seconds. Retries left: %d",
                        self->source_uri,
-                       local_error->message,
+                       local_error != NULL ? local_error->message : "unknown error",
                        RETRY_INTERVAL_SECONDS,
                        MAX_LOAD_RETRIES - self->retries);
           self->retries++;
