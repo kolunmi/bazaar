@@ -1,26 +1,16 @@
 defwidget "My Widget" {
 
   var t : "BgeWdgtTime";
-
-  child scale : "GtkScale";
-  child progress : "GtkProgressBar";
-  child overlay : "GtkOverlay";
+  var overlay : "GtkBox";
 
   state@default "default" = {
     set t = #o:"BgeWdgtTime"(notify-msec = #i:"guint"(5););
-    set scale:valign, progress:valign = #e:"GtkAlign"(start), #e:"GtkAlign"(end);
-
-    set scale:adjustment:lower = 0.0;
-    set scale:adjustment:upper = 1.0;
-    
-    set progress:fraction = #eval(0.5+sin(#(t:time))/2.0);
-
-    set scale:adjustment:value = #eval(1.0-#(progress:fraction));
-
-    set overlay:child = #o:"GtkBox"(
-      %child() #o:"GtkLabel"(label = "heyyyy";);
+    set overlay = #ch:"GtkBox":""(
+      _ = #ch:"GtkLabel":""(label="start";);
+      _ = #ch:"GtkLabel":""(label="center";
+                            hexpand=true;);
+      _ = #ch:"GtkLabel":""(label="end";);
     );
-
 
     %snapshot = {
       save {

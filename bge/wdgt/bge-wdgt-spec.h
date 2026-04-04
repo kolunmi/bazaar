@@ -90,6 +90,14 @@ bge_wdgt_spec_add_instance_source_value (BgeWdgtSpec *self,
                                          GError     **error);
 
 gboolean
+bge_wdgt_spec_add_child_source_value (BgeWdgtSpec *self,
+                                      const char  *name,
+                                      GType        type,
+                                      const char  *parent_widget,
+                                      const char  *builder_type,
+                                      GError     **error);
+
+gboolean
 bge_wdgt_spec_add_cclosure_source_value (BgeWdgtSpec       *self,
                                          const char        *name,
                                          GType              type,
@@ -120,19 +128,6 @@ bge_wdgt_spec_add_property_value (BgeWdgtSpec *self,
                                   const char  *object,
                                   const char  *property,
                                   GError     **error);
-
-gboolean
-bge_wdgt_spec_add_child_value (BgeWdgtSpec *self,
-                               const char  *name,
-                               const char  *widget,
-                               const char  *builder_type,
-                               GError     **error);
-
-gboolean
-bge_wdgt_spec_add_child (BgeWdgtSpec *self,
-                         GType        type,
-                         const char  *name,
-                         GError     **error);
 
 gboolean
 bge_wdgt_spec_add_state (BgeWdgtSpec *self,

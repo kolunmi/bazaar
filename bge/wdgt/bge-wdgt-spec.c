@@ -73,7 +73,7 @@ BGE_DEFINE_DATA (
         } property;
         struct
         {
-          ValueData *widget;
+          ValueData *parent_widget;
           char      *builder_type;
         } child;
       };
@@ -110,7 +110,7 @@ deinit_value (gpointer ptr)
       g_clear_pointer (&value->property.prop_name, g_free);
       break;
     case VALUE_CHILD:
-      g_clear_pointer (&value->child.widget, value_data_unref);
+      g_clear_pointer (&value->child.parent_widget, value_data_unref);
       g_clear_pointer (&value->child.builder_type, g_free);
       break;
     default:
@@ -1003,6 +1003,79 @@ bge_wdgt_spec_add_instance_source_value (BgeWdgtSpec *self,
 }
 
 gboolean
+bge_wdgt_spec_add_child_source_value (BgeWdgtSpec *self,
+                                      const char  *name,
+                                      GType        type,
+                                      const char  *parent,
+                                      const char  *builder_type,
+                                      GError     **error)
+{
+  g_autoptr (ValueData) value = NULL;
+
+  g_return_val_if_fail (BGE_IS_WDGT_SPEC (self), FALSE);
+  g_return_val_if_fail (name != NULL, FALSE);
+
+  if (g_hash_table_contains (self->values, name))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' already exists", name);
+      return FALSE;
+    }
+  if (!g_type_is_a (type, GTK_TYPE_WIDGET))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "type '%s' does not derive from GtkWidget",
+                   g_type_name (type));
+      return FALSE;
+    }
+  if (!G_TYPE_IS_INSTANTIATABLE (type))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "type '%s' is not instantiable",
+                   g_type_name (type));
+      return FALSE;
+    }
+
+  value                     = value_data_new ();
+  value->kind               = VALUE_CHILD;
+  value->type               = type;
+  value->name               = g_strdup (name);
+  value->child.builder_type = builder_type != NULL ? g_strdup (builder_type) : NULL;
+
+  if (parent != NULL)
+    {
+      ValueData *parent_data = NULL;
+
+      parent_data = g_hash_table_lookup (self->values, parent);
+      if (parent_data == NULL)
+        {
+          g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                       "value '%s' is undefined", parent);
+          return FALSE;
+        }
+      if (parent_data->kind != VALUE_CHILD)
+        {
+          g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                       "value '%s' is not a child widget", parent);
+          return FALSE;
+        }
+      if (!g_type_is_a (parent_data->type, GTK_TYPE_BUILDABLE))
+        {
+          g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                       "parent widget '%s' is not of type %s",
+                       g_type_name (GTK_TYPE_BUILDABLE), parent);
+          return FALSE;
+        }
+
+      value->child.parent_widget = value_data_ref (parent_data);
+    }
+
+  g_hash_table_replace (self->values, g_strdup (name), value_data_ref (value));
+  g_ptr_array_add (self->children, value_data_ref (value));
+  return TRUE;
+}
+
+gboolean
 bge_wdgt_spec_add_cclosure_source_value (BgeWdgtSpec       *self,
                                          const char        *name,
                                          GType              type,
@@ -1239,94 +1312,6 @@ bge_wdgt_spec_add_property_value (BgeWdgtSpec *self,
   value->property.pspec_flags = pspec->flags;
 
   g_hash_table_replace (self->values, g_strdup (name), value_data_ref (value));
-  return TRUE;
-}
-
-gboolean
-bge_wdgt_spec_add_child_value (BgeWdgtSpec *self,
-                               const char  *name,
-                               const char  *widget,
-                               const char  *builder_type,
-                               GError     **error)
-{
-  ValueData *widget_value     = NULL;
-  g_autoptr (ValueData) value = NULL;
-
-  g_return_val_if_fail (BGE_IS_WDGT_SPEC (self), FALSE);
-  g_return_val_if_fail (name != NULL, FALSE);
-  g_return_val_if_fail (widget != NULL, FALSE);
-
-  if (g_hash_table_contains (self->values, name))
-    {
-      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
-                   "value '%s' already exists", name);
-      return FALSE;
-    }
-
-  widget_value = g_hash_table_lookup (self->values, widget);
-  if (widget_value == NULL)
-    {
-      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
-                   "value '%s' is undefined", widget);
-      return FALSE;
-    }
-  if (!g_type_is_a (widget_value->type, GTK_TYPE_BUILDABLE))
-    {
-      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
-                   "value '%s' is not a buildable widget", widget);
-      return FALSE;
-    }
-
-  value                     = value_data_new ();
-  value->name               = g_strdup (name);
-  value->type               = GTK_TYPE_WIDGET;
-  value->kind               = VALUE_CHILD;
-  value->child.widget       = value_data_ref (widget_value);
-  value->child.builder_type = builder_type != NULL ? g_strdup (builder_type) : NULL;
-
-  g_hash_table_replace (self->values, g_strdup (name), value_data_ref (value));
-  return TRUE;
-}
-
-gboolean
-bge_wdgt_spec_add_child (BgeWdgtSpec *self,
-                         GType        type,
-                         const char  *name,
-                         GError     **error)
-{
-  g_autoptr (ValueData) child = NULL;
-
-  g_return_val_if_fail (BGE_IS_WDGT_SPEC (self), FALSE);
-  g_return_val_if_fail (name != NULL, FALSE);
-
-  if (g_hash_table_contains (self->values, name))
-    {
-      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
-                   "value '%s' already exists", name);
-      return FALSE;
-    }
-  if (!g_type_is_a (type, GTK_TYPE_WIDGET))
-    {
-      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
-                   "type '%s' does not derive from GtkWidget",
-                   g_type_name (type));
-      return FALSE;
-    }
-  if (!G_TYPE_IS_INSTANTIATABLE (type))
-    {
-      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
-                   "type '%s' is not instantiable",
-                   g_type_name (type));
-      return FALSE;
-    }
-
-  child       = value_data_new ();
-  child->kind = VALUE_OBJECT;
-  child->type = type;
-  child->name = g_strdup (name);
-
-  g_hash_table_replace (self->values, g_strdup (name), value_data_ref (child));
-  g_ptr_array_add (self->children, value_data_ref (child));
   return TRUE;
 }
 
@@ -3322,8 +3307,9 @@ bge_wdgt_renderer_set_state_take (BgeWdgtRenderer *self,
 static void
 regenerate (BgeWdgtRenderer *self)
 {
-  BgeWdgtSpec   *spec       = self->spec;
-  GHashTableIter state_iter = { 0 };
+  BgeWdgtSpec *spec                    = self->spec;
+  g_autoptr (GtkBuilder) dummy_builder = NULL;
+  GHashTableIter state_iter            = { 0 };
 
   g_hash_table_remove_all (self->state_instances);
   g_hash_table_remove_all (self->objects);
@@ -3333,24 +3319,45 @@ regenerate (BgeWdgtRenderer *self)
   if (self->spec == NULL)
     return;
 
+  dummy_builder = gtk_builder_new ();
   for (guint i = 0; i < spec->children->len; i++)
     {
       ValueData *value  = NULL;
       GtkWidget *widget = NULL;
 
       value = g_ptr_array_index (spec->children, i);
-      g_assert (value->kind == VALUE_OBJECT);
+      g_assert (value->kind == VALUE_CHILD);
 
       widget = g_object_new (
           value->type,
           "name", value->name,
           NULL);
-      gtk_widget_set_parent (widget, GTK_WIDGET (self));
+
+      if (value->child.parent_widget != NULL)
+        {
+          GtkWidget *parent_widget = NULL;
+
+          parent_widget = g_hash_table_lookup (
+              self->objects,
+              value->child.parent_widget);
+          g_assert (parent_widget != NULL);
+
+          GTK_BUILDABLE_GET_IFACE (parent_widget)
+              ->add_child (
+                  GTK_BUILDABLE (parent_widget),
+                  dummy_builder,
+                  G_OBJECT (widget),
+                  value->child.builder_type);
+        }
+      else
+        {
+          gtk_widget_set_parent (widget, GTK_WIDGET (self));
+          g_ptr_array_add (self->children, g_object_ref (widget));
+        }
 
       g_hash_table_replace (self->objects,
                             value_data_ref (value),
                             g_object_ref (widget));
-      g_ptr_array_add (self->children, g_object_ref (widget));
     }
 
   for (guint i = 0; i < spec->nonchildren->len; i++)
@@ -3653,8 +3660,9 @@ ensure_expressions (BgeWdgtRenderer   *self,
       expression = gtk_constant_expression_new_for_value (&value->constant);
       break;
     case VALUE_OBJECT:
+    case VALUE_CHILD:
       {
-        GtkWidget *object = NULL;
+        gpointer object = NULL;
 
         object = g_hash_table_lookup (self->objects, value);
         g_assert (object != NULL);
@@ -3768,15 +3776,6 @@ ensure_expressions (BgeWdgtRenderer   *self,
             value->property.prop_name);
       }
       break;
-    case VALUE_CHILD:
-      {
-        GValue empty_value = G_VALUE_INIT;
-
-        g_value_init (&empty_value, value->type);
-        expression = gtk_constant_expression_new_for_value (&empty_value);
-        g_value_unset (&empty_value);
-      }
-      break;
     case VALUE_SPECIAL:
       g_assert (FALSE);
       break;
@@ -3870,40 +3869,6 @@ set_value (BgeWdgtRenderer   *self,
       }
       break;
     case VALUE_CHILD:
-      {
-        GtkWidget     *parent_widget = NULL;
-        GtkExpression *expression    = NULL;
-        GValue         resolved      = G_VALUE_INIT;
-        GtkWidget     *child_widget  = NULL;
-
-        parent_widget = g_hash_table_lookup (
-            self->objects,
-            dest->child.widget);
-        g_assert (parent_widget != NULL);
-
-        expression = g_hash_table_lookup (
-            instance->expressions, src);
-        gtk_expression_evaluate (expression, self, &resolved);
-
-        child_widget = g_value_get_object (&resolved);
-        if (child_widget != NULL &&
-            gtk_widget_get_parent (child_widget) != parent_widget)
-          {
-            g_autoptr (GtkBuilder) builder = NULL;
-
-            gtk_widget_unparent (child_widget);
-
-            builder = gtk_builder_new ();
-            GTK_BUILDABLE_GET_IFACE (parent_widget)
-                ->add_child (
-                    GTK_BUILDABLE (parent_widget),
-                    builder,
-                    G_OBJECT (child_widget),
-                    dest->child.builder_type);
-          }
-
-        g_value_unset (&resolved);
-      }
       break;
     case VALUE_VARIABLE:
       break;

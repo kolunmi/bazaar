@@ -108,6 +108,7 @@ static const char *
 parse_args (const char   *p,
             BgeWdgtSpec  *spec,
             const char   *state,
+            const char   *enclosing_object,
             guint        *n_anon_vals,
             char       ***values_out,
             guint        *n_out,
@@ -253,21 +254,7 @@ bge_wdgt_parse_string (const char *string,
           GET_TOKEN (&token, TOKEN_PARSE_DEFAULT);
           if (g_strcmp0 (token, "}") == 0)
             break;
-          else if (g_strcmp0 (token, STR_CHILD) == 0)
-            {
-              g_autofree char *name  = NULL;
-              g_autofree char *gtype = NULL;
-
-              GET_TOKEN (&name, TOKEN_PARSE_DEFAULT);
-              GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ":");
-              GET_TOKEN (&gtype, TOKEN_PARSE_QUOTED);
-              GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ";");
-
-              result = bge_wdgt_spec_add_child (
-                  spec, g_type_from_name (gtype), name, &local_error);
-              RETURN_ERROR_UNLESS (result);
-            }
-          else if (g_strcmp0 (token, STR_VARIABLE) == 0)
+          if (g_strcmp0 (token, STR_VARIABLE) == 0)
             {
               g_autofree char *name  = NULL;
               g_autofree char *gtype = NULL;
@@ -316,7 +303,7 @@ bge_wdgt_parse_string (const char *string,
                       guint n_src_values         = 0;
                       g_auto (GStrv) src_values  = NULL;
 
-                      p = parse_args (p, spec, state_name, &n_anon_vals, &dest_values,
+                      p = parse_args (p, spec, state_name, NULL, &n_anon_vals, &dest_values,
                                       &n_dest_values, ARGS_PARSE_LEFT_ASSIGN, &local_error);
                       RETURN_ERROR_UNLESS (p != NULL);
                       if (n_dest_values == 0)
@@ -329,7 +316,7 @@ bge_wdgt_parse_string (const char *string,
                           return NULL;
                         }
 
-                      p = parse_args (p, spec, state_name, &n_anon_vals, &src_values,
+                      p = parse_args (p, spec, state_name, NULL, &n_anon_vals, &src_values,
                                       &n_src_values, ARGS_PARSE_RIGHT_ASSIGN, &local_error);
                       RETURN_ERROR_UNLESS (p != NULL);
                       if (n_src_values != n_dest_values)
@@ -411,7 +398,7 @@ parse_snapshot_block (const char  *p,
       else
         {
           GET_TOKEN (&instr, TOKEN_PARSE_DEFAULT);
-          p = parse_args (p, spec, state, n_anon_vals, &args,
+          p = parse_args (p, spec, state, NULL, n_anon_vals, &args,
                           &n_args, ARGS_PARSE_PARENS, &local_error);
           RETURN_ERROR_UNLESS (p != NULL);
 
@@ -518,7 +505,7 @@ parse_eval (const char  *p,
           g_auto (GStrv) escape_args = NULL;
           guint n_escape_args        = 0;
 
-          p = parse_args (p, spec, state, n_anon_vals, &escape_args,
+          p = parse_args (p, spec, state, NULL, n_anon_vals, &escape_args,
                           &n_escape_args, ARGS_PARSE_PARENS, &local_error);
           RETURN_ERROR_UNLESS (p != NULL);
           if (n_escape_args != 1)
@@ -675,6 +662,7 @@ static const char *
 parse_args (const char   *p,
             BgeWdgtSpec  *spec,
             const char   *state,
+            const char   *enclosing_object,
             guint        *n_anon_vals,
             char       ***values_out,
             guint        *n_out,
@@ -900,7 +888,7 @@ parse_args (const char   *p,
           GType            component_type   = 0;
           g_autofree char *component_key    = NULL;
 
-          p = parse_args (p, spec, state, n_anon_vals, &component_args,
+          p = parse_args (p, spec, state, enclosing_object, n_anon_vals, &component_args,
                           &n_component_args, ARGS_PARSE_PARENS, &local_error);
           RETURN_ERROR_UNLESS (p != NULL);
 
@@ -973,57 +961,65 @@ parse_args (const char   *p,
         }
       else if (g_strcmp0 (token, "#o") == 0 ||
                g_strcmp0 (token, "#obj") == 0 ||
-               g_strcmp0 (token, "#object") == 0)
+               g_strcmp0 (token, "#object") == 0 ||
+               g_strcmp0 (token, "#ch") == 0 ||
+               g_strcmp0 (token, "#child") == 0)
         {
+          g_autofree char *tmp_token   = NULL;
           g_autofree char *object_type = NULL;
           g_autofree char *object_name = NULL;
 
-          GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ":");
+          GET_TOKEN_EXPECT (&tmp_token, TOKEN_PARSE_DEFAULT, ":");
           GET_TOKEN (&object_type, TOKEN_PARSE_QUOTED);
 
           object_name = make_anon_name ((*n_anon_vals)++);
-          result      = bge_wdgt_spec_add_instance_source_value (
-              spec, object_name, g_type_from_name (object_type), &local_error);
-          RETURN_ERROR_UNLESS (result);
+          if (g_strcmp0 (token, "#o") == 0 ||
+              g_strcmp0 (token, "#obj") == 0 ||
+              g_strcmp0 (token, "#object") == 0)
+            {
+              result = bge_wdgt_spec_add_instance_source_value (
+                  spec, object_name, g_type_from_name (object_type), &local_error);
+              RETURN_ERROR_UNLESS (result);
+            }
+          else if (g_strcmp0 (token, "#ch") == 0 ||
+                   g_strcmp0 (token, "#child") == 0)
+            {
+              g_autofree char *builder_type = NULL;
+
+              GET_TOKEN_EXPECT (&tmp_token, TOKEN_PARSE_DEFAULT, ":");
+              GET_TOKEN (&builder_type, TOKEN_PARSE_QUOTED);
+              if (*builder_type == '\0')
+                g_clear_pointer (&builder_type, g_free);
+
+              result = bge_wdgt_spec_add_child_source_value (
+                  spec, object_name, g_type_from_name (object_type),
+                  enclosing_object, builder_type, &local_error);
+              RETURN_ERROR_UNLESS (result);
+            }
 
           GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "(");
           for (;;)
             {
               g_autofree char *property_name = NULL;
-              g_autofree char *key           = NULL;
+              g_autofree char *set_key       = NULL;
               g_auto (GStrv) value_args      = NULL;
               guint n_value_args             = 0;
 
               GET_TOKEN (&property_name, TOKEN_PARSE_DEFAULT);
               if (g_strcmp0 (property_name, ")") == 0)
                 break;
-              else if (g_strcmp0 (property_name, "%child") == 0)
+              else if (g_strcmp0 (property_name, "%set") == 0)
+                GET_TOKEN (&set_key, TOKEN_PARSE_DEFAULT);
+              else if (g_strcmp0 (property_name, "_") != 0)
                 {
-                  g_autofree char *builder_type = NULL;
-
-                  GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "(");
-                  GET_TOKEN (&builder_type, TOKEN_PARSE_DEFAULT);
-                  if (g_strcmp0 (builder_type, ")") == 0)
-                    g_clear_pointer (&builder_type, g_free);
-                  else
-                    GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ")");
-
-                  key    = make_anon_name ((*n_anon_vals)++);
-                  result = bge_wdgt_spec_add_child_value (
-                      spec, key, object_name, builder_type, &local_error);
+                  set_key = make_object_property_name (object_name, property_name);
+                  result  = bge_wdgt_spec_add_property_value (
+                      spec, set_key, object_name, property_name, &local_error);
                   RETURN_ERROR_UNLESS (result);
                 }
-              else
-                {
-                  GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "=");
+              GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "=");
 
-                  key    = make_object_property_name (object_name, property_name);
-                  result = bge_wdgt_spec_add_property_value (
-                      spec, key, object_name, property_name, &local_error);
-                  RETURN_ERROR_UNLESS (result);
-                }
-
-              p = parse_args (p, spec, state, n_anon_vals, &value_args,
+              p = parse_args (p, spec, state, object_name, n_anon_vals, &value_args,
                               &n_value_args, ARGS_PARSE_RIGHT_ASSIGN, &local_error);
               RETURN_ERROR_UNLESS (p != NULL);
 
@@ -1038,9 +1034,12 @@ parse_args (const char   *p,
                   return NULL;
                 }
 
-              result = bge_wdgt_spec_set_value (spec, state, key,
-                                                value_args[0], &local_error);
-              RETURN_ERROR_UNLESS (result);
+              if (set_key != NULL)
+                {
+                  result = bge_wdgt_spec_set_value (spec, state, set_key,
+                                                    value_args[0], &local_error);
+                  RETURN_ERROR_UNLESS (result);
+                }
             }
 
           g_strv_builder_take (builder, g_steal_pointer (&object_name));
