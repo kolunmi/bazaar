@@ -989,22 +989,28 @@ parse_args (const char   *p,
           GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "(");
           for (;;)
             {
-              g_autofree char *property_name   = NULL;
-              gboolean         is_widget_child = FALSE;
-              g_autofree char *key             = NULL;
-              g_auto (GStrv) value_args        = NULL;
-              guint n_value_args               = 0;
+              g_autofree char *property_name = NULL;
+              g_autofree char *key           = NULL;
+              g_auto (GStrv) value_args      = NULL;
+              guint n_value_args             = 0;
 
               GET_TOKEN (&property_name, TOKEN_PARSE_DEFAULT);
               if (g_strcmp0 (property_name, ")") == 0)
                 break;
-
-              is_widget_child = g_strcmp0 (property_name, "%child") == 0;
-              if (is_widget_child)
+              else if (g_strcmp0 (property_name, "%child") == 0)
                 {
+                  g_autofree char *builder_type = NULL;
+
+                  GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "(");
+                  GET_TOKEN (&builder_type, TOKEN_PARSE_DEFAULT);
+                  if (g_strcmp0 (builder_type, ")") == 0)
+                    g_clear_pointer (&builder_type, g_free);
+                  else
+                    GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ")");
+
                   key    = make_anon_name ((*n_anon_vals)++);
                   result = bge_wdgt_spec_add_child_value (
-                      spec, key, object_name, NULL, &local_error);
+                      spec, key, object_name, builder_type, &local_error);
                   RETURN_ERROR_UNLESS (result);
                 }
               else

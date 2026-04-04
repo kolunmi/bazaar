@@ -3876,9 +3876,6 @@ set_value (BgeWdgtRenderer   *self,
         GValue         resolved      = G_VALUE_INIT;
         GtkWidget     *child_widget  = NULL;
 
-        if (src == NULL)
-          break;
-
         parent_widget = g_hash_table_lookup (
             self->objects,
             dest->child.widget);
@@ -3892,8 +3889,17 @@ set_value (BgeWdgtRenderer   *self,
         if (child_widget != NULL &&
             gtk_widget_get_parent (child_widget) != parent_widget)
           {
+            g_autoptr (GtkBuilder) builder = NULL;
+
             gtk_widget_unparent (child_widget);
-            gtk_widget_set_parent (child_widget, parent_widget);
+
+            builder = gtk_builder_new ();
+            GTK_BUILDABLE_GET_IFACE (parent_widget)
+                ->add_child (
+                    GTK_BUILDABLE (parent_widget),
+                    builder,
+                    G_OBJECT (child_widget),
+                    dest->child.builder_type);
           }
 
         g_value_unset (&resolved);
