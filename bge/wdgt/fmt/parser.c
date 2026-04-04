@@ -466,8 +466,6 @@ parse_eval (const char  *p,
   ops         = g_array_new (FALSE, FALSE, sizeof (EvalOperator));
   value_types = g_array_new (FALSE, FALSE, sizeof (GType));
 
-  GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "(");
-
 #define GET_TOKEN_EVAL(_token_out, _flags) \
   GET_TOKEN_FULL (_token_out, _flags, EVAL_SINGLE_CHAR_TOKENS, NULL)
   for (;;)
@@ -678,6 +676,7 @@ parse_args (const char  *p,
         {
           g_autofree char *key = NULL;
 
+          GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "(");
           p = parse_eval (p, spec, state, n_anon_vals, &key, &local_error);
           RETURN_ERROR_UNLESS (p != NULL);
 
@@ -686,34 +685,64 @@ parse_args (const char  *p,
 
           need_comma = TRUE;
         }
-      else if (g_strcmp0 (token, "#rgba") == 0 ||
+      else if (g_strcmp0 (token, "#i") == 0 ||
                g_strcmp0 (token, "#e") == 0 ||
-               g_strcmp0 (token, "#enum") == 0)
+               g_strcmp0 (token, "#enum") == 0 ||
+               g_strcmp0 (token, "#rgba") == 0)
         {
           g_autofree char *tmp_token = NULL;
           g_autofree char *key       = NULL;
           GValue           value     = { 0 };
 
-          if (g_strcmp0 (token, "#rgba") == 0)
+          if (g_strcmp0 (token, "#i") == 0)
             {
-              g_autofree char *string = NULL;
-              GdkRGBA          rgba   = { 0 };
+              g_autofree char    *int_type_name = NULL;
+              GType               int_type      = 0;
+              const GVariantType *variant_type  = NULL;
+              g_autofree char    *int_string    = NULL;
+              g_autoptr (GVariant) variant      = NULL;
 
+              GET_TOKEN_EXPECT (&tmp_token, TOKEN_PARSE_DEFAULT, ":");
+              GET_TOKEN (&int_type_name, TOKEN_PARSE_QUOTED);
               GET_TOKEN_EXPECT (&tmp_token, TOKEN_PARSE_DEFAULT, "(");
-              GET_TOKEN (&string, TOKEN_PARSE_QUOTED);
 
-              result = gdk_rgba_parse (&rgba, string);
-              if (!result)
+              int_type = g_type_from_name (int_type_name);
+              if (int_type == G_TYPE_INT)
+                variant_type = G_VARIANT_TYPE_INT32;
+              else if (int_type == G_TYPE_INT64)
+                variant_type = G_VARIANT_TYPE_INT64;
+              else if (int_type == G_TYPE_UINT)
+                variant_type = G_VARIANT_TYPE_UINT32;
+              else if (int_type == G_TYPE_UINT64)
+                variant_type = G_VARIANT_TYPE_UINT64;
+              else
                 {
                   g_set_error (
                       error,
                       G_IO_ERROR,
                       G_IO_ERROR_UNKNOWN,
-                      "#color() specifier failed to "
-                      "parse color from string");
+                      "'%s' not found to be a valid int type",
+                      int_type_name);
                   return NULL;
                 }
-              g_value_set_boxed (g_value_init (&value, GDK_TYPE_RGBA), &rgba);
+
+              GET_TOKEN (&int_string, TOKEN_PARSE_DEFAULT);
+              variant = g_variant_parse (variant_type, int_string, NULL, NULL, &local_error);
+              RETURN_ERROR_UNLESS (variant != NULL);
+
+              if (int_type == G_TYPE_INT)
+                g_value_set_int (g_value_init (&value, G_TYPE_INT),
+                                 g_variant_get_int32 (variant));
+              else if (int_type == G_TYPE_INT64)
+                g_value_set_int64 (g_value_init (&value, G_TYPE_INT64),
+                                   g_variant_get_int64 (variant));
+              else if (int_type == G_TYPE_UINT)
+                g_value_set_uint (g_value_init (&value, G_TYPE_UINT),
+                                  g_variant_get_uint32 (variant));
+              else if (int_type == G_TYPE_UINT64)
+                g_value_set_uint64 (g_value_init (&value, G_TYPE_UINT64),
+                                    g_variant_get_uint64 (variant));
+
               GET_TOKEN_EXPECT (&tmp_token, TOKEN_PARSE_DEFAULT, ")");
             }
           else if (g_strcmp0 (token, "#e") == 0 ||
@@ -759,6 +788,28 @@ parse_args (const char  *p,
                 }
 
               g_value_set_enum (g_value_init (&value, enum_type), enum_value->value);
+              GET_TOKEN_EXPECT (&tmp_token, TOKEN_PARSE_DEFAULT, ")");
+            }
+          else if (g_strcmp0 (token, "#rgba") == 0)
+            {
+              g_autofree char *string = NULL;
+              GdkRGBA          rgba   = { 0 };
+
+              GET_TOKEN_EXPECT (&tmp_token, TOKEN_PARSE_DEFAULT, "(");
+              GET_TOKEN (&string, TOKEN_PARSE_QUOTED);
+
+              result = gdk_rgba_parse (&rgba, string);
+              if (!result)
+                {
+                  g_set_error (
+                      error,
+                      G_IO_ERROR,
+                      G_IO_ERROR_UNKNOWN,
+                      "#color() specifier failed to "
+                      "parse color from string");
+                  return NULL;
+                }
+              g_value_set_boxed (g_value_init (&value, GDK_TYPE_RGBA), &rgba);
               GET_TOKEN_EXPECT (&tmp_token, TOKEN_PARSE_DEFAULT, ")");
             }
 
@@ -999,7 +1050,7 @@ parse_token_fundamental (const char  *token,
         variant = g_variant_parse (G_VARIANT_TYPE_DOUBLE, token,
                                    NULL, NULL, &local_error);
       else
-        variant = g_variant_parse (G_VARIANT_TYPE_INT64, token,
+        variant = g_variant_parse (G_VARIANT_TYPE_INT32, token,
                                    NULL, NULL, &local_error);
 
       if (variant == NULL)
@@ -1017,8 +1068,8 @@ parse_token_fundamental (const char  *token,
         g_value_set_double (g_value_init (&value, G_TYPE_DOUBLE),
                             g_variant_get_double (variant));
       else
-        g_value_set_int64 (g_value_init (&value, G_TYPE_INT64),
-                           g_variant_get_int64 (variant));
+        g_value_set_int (g_value_init (&value, G_TYPE_INT),
+                         g_variant_get_int32 (variant));
     }
   else if (g_strcmp0 (token, "true") == 0)
     g_value_set_boolean (g_value_init (&value, G_TYPE_BOOLEAN),

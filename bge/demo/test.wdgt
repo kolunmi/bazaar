@@ -1,10 +1,14 @@
 defwidget "My Widget" {
 
   child scale : "GtkScale";
+  var t : "BgeWdgtTime";
+  
   var r : "gdouble";
   var corner : "GrapheneSize";
 
   state@default "default" = {
+    t = #o:"BgeWdgtTime"(notify-msec = #i:"guint"(30););
+    
     scale:adjustment = #o:"GtkAdjustment"(
       lower = 0.0;
       value = 50.0;
@@ -12,35 +16,14 @@ defwidget "My Widget" {
     );
     scale:valign = #e:"GtkAlign"(end);
 
-    r = #eval(2.0*1.0+ #(scale:adjustment:value));
+    r = #eval(#(t:time)*25.0);
     corner = #size(r, r);
     
     %snapshot = {
-      move translate(#point(10.0, 10.0));
-      with rounded-clip(
-          #rect(0.0,0.0,300.0,300.0),
-          corner,corner,
-          corner,corner,) {
-        add linear-gradient(
-           #rect(0.0,0.0,300.0,300.0),
-           #point(0.0,0.0),
-           #point(0.0,300.0),
-           
-           0.0, #rgba("#5BCEFA"),
-           0.2, #rgba("#5BCEFA"),
-           
-           0.2, #rgba("#F5A9B8"),
-           0.4, #rgba("#F5A9B8"),
-           
-           0.4, #rgba("#FFFFFF"),
-           0.6, #rgba("#FFFFFF"),
-           
-           0.6, #rgba("#F5A9B8"),
-           0.8, #rgba("#F5A9B8"),
-           
-           0.8, #rgba("#5BCEFA"),
-           1.0, #rgba("#5BCEFA"),
-        );
+      save {
+        move translate(#point(200.0, 200.0));
+        move rotate(r);
+        add color(#rgba("orange"), #rect(-50.0,-50.0,100.0,100.0));
       }
     }
   }

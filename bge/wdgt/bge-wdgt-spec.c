@@ -284,6 +284,8 @@ bge_wdgt_spec_class_init (BgeWdgtSpecClass *klass)
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
+  g_type_ensure (BGE_TYPE_WDGT_TIME);
+
   /* Make sure these names are available for the parser */
   g_type_ensure (GRAPHENE_TYPE_POINT);
   g_type_ensure (GRAPHENE_TYPE_POINT3D);

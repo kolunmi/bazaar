@@ -1,4 +1,4 @@
-/* bge.h - Bazaar GTK Extensions
+/* bge-wdgt-time.h
  *
  * Copyright 2026 Eva M
  *
@@ -20,24 +20,28 @@
 
 #pragma once
 
-#include <gtk/gtk.h>
-#include <libdex.h>
+#ifndef BGE_INSIDE
+#error "Only <bge.h> can be included directly."
+#endif
 
 G_BEGIN_DECLS
 
-#define BGE_INSIDE
-#include "bge-version-macros.h"
+#define BGE_TYPE_WDGT_TIME (bge_wdgt_time_get_type ())
+G_DECLARE_FINAL_TYPE (BgeWdgtTime, bge_wdgt_time, BGE, WDGT_TIME, GObject)
 
-#include "bge-animation.h"
-#include "bge-carousel.h"
-#include "bge-markdown-render.h"
-#include "wdgt/bge-wdgt-spec-renderer.h"
-#include "wdgt/bge-wdgt-spec.h"
-#include "wdgt/bge-wdgt-time.h"
-#undef BGE_INSIDE
+BgeWdgtTime *
+bge_wdgt_time_new (void);
 
-BGE_AVAILABLE_IN_ALL
+double
+bge_wdgt_time_get_time (BgeWdgtTime *self);
+
+guint
+bge_wdgt_time_get_notify_msec (BgeWdgtTime *self);
+
 void
-bge_init (void);
+bge_wdgt_time_set_notify_msec (BgeWdgtTime *self,
+                               guint        notify_msec);
 
 G_END_DECLS
+
+/* End of bge-wdgt-time.h */
