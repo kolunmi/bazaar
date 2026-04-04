@@ -16,7 +16,7 @@ defwidget "My Widget" {
     );
     scale:valign = #e:"GtkAlign"(end);
 
-    r = #eval(#(t:time)*25.0);
+    r = #eval(sin(#(t:time))*25.0);
     corner = #size(r, r);
     
     %snapshot = {

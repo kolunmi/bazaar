@@ -20,6 +20,7 @@
 
 #include <graphene-gobject.h>
 
+#include "bge-marshalers.h"
 #include "parser.h"
 #include "util.h"
 
@@ -445,6 +446,22 @@ parse_snapshot_block (const char  *p,
   return p;
 }
 
+static gdouble
+sin_closure (gpointer this,
+             gdouble  x,
+             gpointer data)
+{
+  return sin (x);
+}
+
+static gdouble
+cos_closure (gpointer this,
+             gdouble  x,
+             gpointer data)
+{
+  return cos (x);
+}
+
 static const char *
 parse_eval (const char  *p,
             BgeWdgtSpec *spec,
@@ -468,6 +485,15 @@ parse_eval (const char  *p,
 
 #define GET_TOKEN_EVAL(_token_out, _flags) \
   GET_TOKEN_FULL (_token_out, _flags, EVAL_SINGLE_CHAR_TOKENS, NULL)
+
+#define GET_TOKEN_EVAL_EXPECT(_token_out, _flags, _expect) \
+  G_STMT_START                                             \
+  {                                                        \
+    GET_TOKEN_EVAL ((_token_out), (_flags));               \
+    EXPECT_TOKEN (*(_token_out), (_expect));               \
+  }                                                        \
+  G_STMT_END
+
   for (;;)
     {
       g_autofree char *value          = NULL;
@@ -502,6 +528,38 @@ parse_eval (const char  *p,
             }
 
           value = g_strdup (escape_args[0]);
+        }
+      else if (g_strcmp0 (token, "sin") == 0 ||
+               g_strcmp0 (token, "cos") == 0)
+        {
+          GCallback        cb            = NULL;
+          g_autofree char *arg           = NULL;
+          g_autofree char *math_func_key = NULL;
+
+          if (g_strcmp0 (token, "sin") == 0)
+            cb = G_CALLBACK (sin_closure);
+          else if (g_strcmp0 (token, "cos") == 0)
+            cb = G_CALLBACK (cos_closure);
+
+          GET_TOKEN_EVAL_EXPECT (&token, TOKEN_PARSE_DEFAULT, "(");
+          p = parse_eval (p, spec, state, n_anon_vals, &arg, &local_error);
+          RETURN_ERROR_UNLESS (p != NULL);
+
+          math_func_key = make_anon_name ((*n_anon_vals)++);
+          result        = bge_wdgt_spec_add_cclosure_source_value (
+              spec,
+              math_func_key,
+              G_TYPE_DOUBLE,
+              bge_marshal_DOUBLE__DOUBLE,
+              cb,
+              (const char *const[]){ arg },
+              (GType[]){ G_TYPE_DOUBLE },
+              1,
+              NULL, NULL,
+              &local_error);
+          RETURN_ERROR_UNLESS (result);
+
+          value = g_steal_pointer (&math_func_key);
         }
       else if (g_strcmp0 (token, "+") == 0)
         op = OPERATOR_ADD;
@@ -579,7 +637,10 @@ parse_eval (const char  *p,
     }
 
   if (values->len == 1)
-    return g_ptr_array_steal_index (values, 0);
+    {
+      *value_out = g_ptr_array_steal_index (values, 0);
+      return p;
+    }
 
   g_array_sort (ops, (GCompareFunc) cmp_operator);
 
