@@ -90,6 +90,19 @@ bge_wdgt_spec_add_instance_source_value (BgeWdgtSpec *self,
                                          GError     **error);
 
 gboolean
+bge_wdgt_spec_add_cclosure_source_value (BgeWdgtSpec       *self,
+                                         const char        *name,
+                                         GType              type,
+                                         GClosureMarshal    marshal,
+                                         GCallback          func,
+                                         const char *const *args,
+                                         const GType       *arg_types,
+                                         guint              n_args,
+                                         gpointer           user_data,
+                                         GDestroyNotify     destroy_user_data,
+                                         GError           **error);
+
+gboolean
 bge_wdgt_spec_add_special_source_value (BgeWdgtSpec        *self,
                                         const char         *name,
                                         BgeWdgtSpecialValue kind,

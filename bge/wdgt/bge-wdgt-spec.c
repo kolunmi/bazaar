@@ -31,6 +31,7 @@ typedef enum
   VALUE_OBJECT = 0,
   VALUE_CONSTANT,
   VALUE_COMPONENT,
+  VALUE_CLOSURE,
   VALUE_SPECIAL,
   VALUE_VARIABLE,
   VALUE_PROPERTY,
@@ -42,6 +43,8 @@ typedef void (*SnapshotCallFunc) (GtkSnapshot *snapshot,
                                   const GValue rest[],
                                   guint        n_rest);
 
+static void
+deinit_value (gpointer ptr);
 BGE_DEFINE_DATA (
     value,
     Value,
@@ -49,13 +52,19 @@ BGE_DEFINE_DATA (
       char     *name;
       GType     type;
       ValueKind kind;
-      // union
-      struct
+      union
       {
-        GValue              constant;
-        GPtrArray          *component;
+        GValue     constant;
+        GPtrArray *component;
+        struct
+        {
+          GPtrArray      *args;
+          GClosureMarshal marshal;
+          GCallback       func;
+          gpointer        user_data;
+          GDestroyNotify  destroy_user_data;
+        } closure;
         BgeWdgtSpecialValue special;
-        /* Variables are just used as a proxy */
         struct
         {
           ValueData  *object;
@@ -69,13 +78,45 @@ BGE_DEFINE_DATA (
         } child;
       };
     },
-    g_value_unset (&self->constant);
-    BGE_RELEASE_DATA (name, g_free);
-    BGE_RELEASE_DATA (component, g_ptr_array_unref);
-    BGE_RELEASE_DATA (property.object, value_data_unref);
-    BGE_RELEASE_DATA (property.prop_name, g_free);
-    BGE_RELEASE_DATA (child.widget, value_data_unref);
-    BGE_RELEASE_DATA (child.builder_type, g_free))
+    deinit_value (self);)
+
+static void
+deinit_value (gpointer ptr)
+{
+  ValueData *value = ptr;
+
+  g_clear_pointer (&value->name, g_free);
+  switch (value->kind)
+    {
+    case VALUE_OBJECT:
+      break;
+    case VALUE_CONSTANT:
+      g_value_unset (&value->constant);
+      break;
+    case VALUE_COMPONENT:
+      g_clear_pointer (&value->component, g_ptr_array_unref);
+      break;
+    case VALUE_CLOSURE:
+      g_clear_pointer (&value->closure.args, g_ptr_array_unref);
+      if (value->closure.destroy_user_data != NULL)
+        g_clear_pointer (&value->closure.user_data, value->closure.destroy_user_data);
+      break;
+    case VALUE_SPECIAL:
+      break;
+    case VALUE_VARIABLE:
+      break;
+    case VALUE_PROPERTY:
+      g_clear_pointer (&value->property.object, value_data_unref);
+      g_clear_pointer (&value->property.prop_name, g_free);
+      break;
+    case VALUE_CHILD:
+      g_clear_pointer (&value->child.widget, value_data_unref);
+      g_clear_pointer (&value->child.builder_type, g_free);
+      break;
+    default:
+      g_assert_not_reached ();
+    }
+}
 
 BGE_DEFINE_DATA (
     snapshot_call,
@@ -956,6 +997,86 @@ bge_wdgt_spec_add_instance_source_value (BgeWdgtSpec *self,
 
   g_hash_table_replace (self->values, g_strdup (name), value_data_ref (value));
   g_ptr_array_add (self->nonchildren, value_data_ref (value));
+  return TRUE;
+}
+
+gboolean
+bge_wdgt_spec_add_cclosure_source_value (BgeWdgtSpec       *self,
+                                         const char        *name,
+                                         GType              type,
+                                         GClosureMarshal    marshal,
+                                         GCallback          func,
+                                         const char *const *args,
+                                         const GType       *arg_types,
+                                         guint              n_args,
+                                         gpointer           user_data,
+                                         GDestroyNotify     destroy_user_data,
+                                         GError           **error)
+{
+  g_autoptr (ValueData) value = NULL;
+
+  g_return_val_if_fail (BGE_IS_WDGT_SPEC (self), FALSE);
+  g_return_val_if_fail (name != NULL, FALSE);
+  g_return_val_if_fail (func != NULL, FALSE);
+  g_return_val_if_fail (args != NULL, FALSE);
+  g_return_val_if_fail (n_args > 0, FALSE);
+
+  if (g_hash_table_contains (self->values, name))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' already exists", name);
+      if (user_data != NULL &&
+          destroy_user_data != NULL)
+        destroy_user_data (user_data);
+      return FALSE;
+    }
+  if (!G_TYPE_IS_VALUE (type))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "invalid type '%s'", g_type_name (type));
+      if (user_data != NULL &&
+          destroy_user_data != NULL)
+        destroy_user_data (user_data);
+      return FALSE;
+    }
+
+  value                            = value_data_new ();
+  value->kind                      = VALUE_CLOSURE;
+  value->name                      = g_strdup (name);
+  value->type                      = type;
+  value->closure.marshal           = marshal;
+  value->closure.func              = func;
+  value->closure.args              = g_ptr_array_new_with_free_func (value_data_unref);
+  value->closure.user_data         = user_data;
+  value->closure.destroy_user_data = destroy_user_data;
+
+  for (guint i = 0; i < n_args; i++)
+    {
+      ValueData *value_data = NULL;
+
+      value_data = g_hash_table_lookup (self->values, args[i]);
+      if (value_data == NULL)
+        {
+          g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                       "value '%s' is undefined", args[i]);
+          return FALSE;
+        }
+      if (arg_types != NULL &&
+          !g_type_is_a (value_data->type, arg_types[i]))
+        {
+          g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                       "component %u for type %s "
+                       "must be of type %s, got %s",
+                       i, g_type_name (type),
+                       g_type_name (arg_types[i]),
+                       g_type_name (value_data->type));
+          return FALSE;
+        }
+
+      g_ptr_array_add (value->closure.args, value_data_ref (value_data));
+    }
+
+  g_hash_table_replace (self->values, g_strdup (name), value_data_ref (value));
   return TRUE;
 }
 
@@ -2877,7 +2998,6 @@ bge_wdgt_renderer_snapshot (GtkWidget   *widget,
                             GtkSnapshot *snapshot)
 {
   BgeWdgtRenderer   *self     = BGE_WDGT_RENDERER (widget);
-  StateData         *state    = NULL;
   StateInstanceData *instance = NULL;
   GPtrArray         *calls    = NULL;
 
@@ -2887,11 +3007,10 @@ bge_wdgt_renderer_snapshot (GtkWidget   *widget,
   if (self->active_state == NULL)
     return;
 
-  state = self->active_state;
   if (self->active_snapshot != NULL)
     calls = self->active_snapshot->calls;
 
-  instance = g_hash_table_lookup (self->state_instances, state);
+  instance = g_hash_table_lookup (self->state_instances, self->active_state);
   g_assert (instance != NULL);
 
   if (calls != NULL)
@@ -3178,9 +3297,10 @@ regenerate (BgeWdgtRenderer *self)
   BgeWdgtSpec   *spec       = self->spec;
   GHashTableIter state_iter = { 0 };
 
+  g_hash_table_remove_all (self->state_instances);
   g_hash_table_remove_all (self->objects);
   g_ptr_array_set_size (self->children, 0);
-  g_hash_table_remove_all (self->state_instances);
+  g_ptr_array_set_size (self->nonchildren, 0);
 
   if (self->spec == NULL)
     return;
@@ -3448,6 +3568,7 @@ apply_state (BgeWdgtRenderer *self)
         case VALUE_VARIABLE:
           break;
         case VALUE_COMPONENT:
+        case VALUE_CLOSURE:
         case VALUE_CONSTANT:
         case VALUE_SPECIAL:
         case VALUE_OBJECT:
@@ -3638,6 +3759,32 @@ ensure_expressions (BgeWdgtRenderer   *self,
             (GtkExpression **) params->pdata,
             callback,
             self,
+            NULL);
+      }
+      break;
+    case VALUE_CLOSURE:
+      {
+        g_autoptr (GPtrArray) params = NULL;
+
+        params = g_ptr_array_new ();
+
+        for (guint i = 0; i < value->closure.args->len; i++)
+          {
+            ValueData *member                     = NULL;
+            g_autoptr (GtkExpression) member_expr = NULL;
+
+            member      = g_ptr_array_index (value->closure.args, i);
+            member_expr = ensure_expressions (self, member, state, instance);
+            g_ptr_array_add (params, g_steal_pointer (&member_expr));
+          }
+
+        expression = gtk_cclosure_expression_new (
+            value->type,
+            value->closure.marshal,
+            params->len,
+            (GtkExpression **) params->pdata,
+            value->closure.func,
+            value->closure.user_data,
             NULL);
       }
       break;

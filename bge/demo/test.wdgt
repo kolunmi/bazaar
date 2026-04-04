@@ -12,7 +12,7 @@ defwidget "My Widget" {
     );
     scale:valign = #e:"GtkAlign"(end);
 
-    r = scale:adjustment:value;
+    r = #eval(2.0*1.0+ #(scale:adjustment:value));
     corner = #size(r, r);
     
     %snapshot = {

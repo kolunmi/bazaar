@@ -21,8 +21,12 @@
 #include <graphene-gobject.h>
 
 #include "parser.h"
+#include "util.h"
 
-#define SINGLE_CHAR_TOKENS "{}()=:;,"
+#define IS_EOF(_p) ((_p) == NULL || *(_p) == '\0')
+
+#define SINGLE_CHAR_TOKENS      "{}()=:;,"
+#define EVAL_SINGLE_CHAR_TOKENS "#(),+-*/^%"
 
 #define STR_DEFWIDGET     "defwidget"
 #define STR_CHILD         "child"
@@ -39,7 +43,42 @@ typedef enum
   TOKEN_PARSE_QUOTED  = 1 << 0,
 } TokenParseFlags;
 
-#define IS_EOF(_p) ((_p) == NULL || *(_p) == '\0')
+typedef enum
+{
+  OPERATOR_ADD = 0,
+  OPERATOR_SUBTRACT,
+  OPERATOR_MULTIPLY,
+  OPERATOR_DIVIDE,
+  OPERATOR_MODULUS,
+  OPERATOR_POWER,
+} Operator;
+
+static const int operator_precedence[] = {
+  [OPERATOR_ADD]      = 0,
+  [OPERATOR_SUBTRACT] = 0,
+  [OPERATOR_MULTIPLY] = 1,
+  [OPERATOR_DIVIDE]   = 1,
+  [OPERATOR_MODULUS]  = 1,
+  [OPERATOR_POWER]    = 2,
+};
+
+typedef struct
+{
+  Operator op;
+  guint    pos;
+} EvalOperator;
+
+BGE_DEFINE_DATA (
+    eval_closure,
+    EvalClosure,
+    {
+      GArray  *ops;
+      gdouble *workbuf0;
+      gdouble *workbuf1;
+    },
+    BGE_RELEASE_DATA (ops, g_array_unref);
+    BGE_RELEASE_DATA (workbuf0, g_free);
+    BGE_RELEASE_DATA (workbuf1, g_free));
 
 static const char *
 parse_snapshot_block (const char  *p,
@@ -47,6 +86,14 @@ parse_snapshot_block (const char  *p,
                       const char  *state,
                       guint       *n_anon_vals,
                       GError     **error);
+
+static const char *
+parse_eval (const char  *p,
+            BgeWdgtSpec *spec,
+            const char  *state,
+            guint       *n_anon_vals,
+            char       **value_out,
+            GError     **error);
 
 static const char *
 parse_args (const char  *p,
@@ -71,12 +118,30 @@ consume_token (const char    **pp,
                gboolean       *was_quoted,
                GError        **error);
 
+static gdouble
+eval_closure (gpointer         this,
+              guint            n_param_values,
+              const GValue    *param_values,
+              EvalClosureData *data);
+
 static char *
 make_object_property_name (const char *object,
                            const char *property);
 
 static char *
 make_anon_name (guint n);
+
+static gint
+cmp_operator (EvalOperator *a,
+              EvalOperator *b);
+
+static void
+_marshal_DOUBLE__ARGS_DIRECT (GClosure                *closure,
+                              GValue                  *return_value,
+                              guint                    n_param_values,
+                              const GValue            *param_values,
+                              gpointer invocation_hint G_GNUC_UNUSED,
+                              gpointer                 marshal_data);
 
 BgeWdgtSpec *
 bge_wdgt_parse_string (const char *string,
@@ -144,22 +209,22 @@ bge_wdgt_parse_string (const char *string,
       g_autofree char *token       = NULL;
       g_autofree char *widget_name = NULL;
 
-#define GET_TOKEN_FULL(_token_out, _flags, _was_quoted) \
-  G_STMT_START                                          \
-  {                                                     \
-    g_clear_pointer ((_token_out), g_free);             \
-    *(_token_out) = consume_token (                     \
-        &p,                                             \
-        SINGLE_CHAR_TOKENS,                             \
-        (_flags),                                       \
-        (_was_quoted),                                  \
-        &local_error);                                  \
-    RETURN_ERROR_UNLESS (*(_token_out) != NULL);        \
-  }                                                     \
+#define GET_TOKEN_FULL(_token_out, _flags, _single_chars, _was_quoted) \
+  G_STMT_START                                                         \
+  {                                                                    \
+    g_clear_pointer ((_token_out), g_free);                            \
+    *(_token_out) = consume_token (                                    \
+        &p,                                                            \
+        (_single_chars),                                               \
+        (_flags),                                                      \
+        (_was_quoted),                                                 \
+        &local_error);                                                 \
+    RETURN_ERROR_UNLESS (*(_token_out) != NULL);                       \
+  }                                                                    \
   G_STMT_END
 
 #define GET_TOKEN(_token_out, _flags) \
-  GET_TOKEN_FULL (_token_out, _flags, NULL)
+  GET_TOKEN_FULL (_token_out, _flags, SINGLE_CHAR_TOKENS, NULL)
 
 #define GET_TOKEN_EXPECT(_token_out, _flags, _expect) \
   G_STMT_START                                        \
@@ -381,6 +446,168 @@ parse_snapshot_block (const char  *p,
 }
 
 static const char *
+parse_eval (const char  *p,
+            BgeWdgtSpec *spec,
+            const char  *state,
+            guint       *n_anon_vals,
+            char       **value_out,
+            GError     **error)
+{
+  g_autoptr (GError) local_error   = NULL;
+  gboolean         result          = FALSE;
+  g_autofree char *token           = NULL;
+  g_autoptr (GPtrArray) values     = NULL;
+  g_autoptr (GArray) ops           = NULL;
+  g_autoptr (GArray) value_types   = NULL;
+  g_autofree char *key             = NULL;
+  g_autoptr (EvalClosureData) data = NULL;
+
+  values      = g_ptr_array_new_with_free_func (g_free);
+  ops         = g_array_new (FALSE, FALSE, sizeof (EvalOperator));
+  value_types = g_array_new (FALSE, FALSE, sizeof (GType));
+
+  GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "(");
+
+#define GET_TOKEN_EVAL(_token_out, _flags) \
+  GET_TOKEN_FULL (_token_out, _flags, EVAL_SINGLE_CHAR_TOKENS, NULL)
+  for (;;)
+    {
+      g_autofree char *value          = NULL;
+      Operator         op             = -1;
+      gboolean         expected_value = FALSE;
+
+      GET_TOKEN_EVAL (&token, TOKEN_PARSE_DEFAULT);
+      if (g_strcmp0 (token, ")") == 0)
+        break;
+      else if (g_strcmp0 (token, "(") == 0)
+        {
+          p = parse_eval (p, spec, state, n_anon_vals, &value, &local_error);
+          RETURN_ERROR_UNLESS (p != NULL);
+        }
+      else if (g_strcmp0 (token, "#") == 0)
+        {
+          g_auto (GStrv) escape_args = NULL;
+          guint n_escape_args        = 0;
+
+          p = parse_args (p, spec, state, n_anon_vals, &escape_args,
+                          &n_escape_args, FALSE, &local_error);
+          RETURN_ERROR_UNLESS (p != NULL);
+          if (n_escape_args != 1)
+            {
+              g_set_error (
+                  error,
+                  G_IO_ERROR,
+                  G_IO_ERROR_UNKNOWN,
+                  "evaluation escape "
+                  "needs a single argument");
+              return NULL;
+            }
+
+          value = g_strdup (escape_args[0]);
+        }
+      else if (g_strcmp0 (token, "+") == 0)
+        op = OPERATOR_ADD;
+      else if (g_strcmp0 (token, "-") == 0)
+        op = OPERATOR_SUBTRACT;
+      else if (g_strcmp0 (token, "*") == 0)
+        op = OPERATOR_MULTIPLY;
+      else if (g_strcmp0 (token, "/") == 0)
+        op = OPERATOR_DIVIDE;
+      else if (g_strcmp0 (token, "%") == 0)
+        op = OPERATOR_MODULUS;
+      else if (g_strcmp0 (token, "^") == 0)
+        op = OPERATOR_POWER;
+      else
+        {
+          value = parse_token_fundamental (
+              token, spec, n_anon_vals, &local_error);
+          RETURN_ERROR_UNLESS (value != NULL);
+        }
+
+      expected_value = values->len == ops->len;
+      if (value != NULL)
+        {
+          GType type_double = G_TYPE_DOUBLE;
+
+          if (!expected_value)
+            {
+              g_set_error (
+                  error,
+                  G_IO_ERROR,
+                  G_IO_ERROR_UNKNOWN,
+                  "Expected operator, got \"%s\"", token);
+              return NULL;
+            }
+          g_ptr_array_add (values, g_steal_pointer (&value));
+          g_array_append_val (value_types, type_double);
+        }
+      else if (op >= 0)
+        {
+          EvalOperator append = { 0 };
+
+          if (expected_value)
+            {
+              g_set_error (
+                  error,
+                  G_IO_ERROR,
+                  G_IO_ERROR_UNKNOWN,
+                  "Expected value, got \"%s\"", token);
+              return NULL;
+            }
+
+          append.op  = op;
+          append.pos = ops->len;
+          g_array_append_val (ops, append);
+        }
+    }
+
+  if (values->len == 0)
+    {
+      g_set_error (
+          error,
+          G_IO_ERROR,
+          G_IO_ERROR_UNKNOWN,
+          "Empty evaluation block");
+      return NULL;
+    }
+  if (ops->len != values->len - 1)
+    {
+      g_set_error (
+          error,
+          G_IO_ERROR,
+          G_IO_ERROR_UNKNOWN,
+          "Invalid syntax in evaluation block");
+      return NULL;
+    }
+
+  if (values->len == 1)
+    return g_ptr_array_steal_index (values, 0);
+
+  g_array_sort (ops, (GCompareFunc) cmp_operator);
+
+  data           = eval_closure_data_new ();
+  data->ops      = g_array_ref (ops);
+  data->workbuf0 = g_malloc0_n (values->len, sizeof (gdouble));
+  data->workbuf1 = g_malloc0_n (values->len, sizeof (gdouble));
+
+  key    = make_anon_name ((*n_anon_vals)++);
+  result = bge_wdgt_spec_add_cclosure_source_value (
+      spec, key, G_TYPE_DOUBLE,
+      _marshal_DOUBLE__ARGS_DIRECT,
+      G_CALLBACK (eval_closure),
+      (const char *const *) values->pdata,
+      (const GType *) (void *) value_types->data,
+      values->len,
+      eval_closure_data_ref (data),
+      eval_closure_data_unref,
+      &local_error);
+  RETURN_ERROR_UNLESS (result);
+
+  *value_out = g_steal_pointer (&key);
+  return p;
+}
+
+static const char *
 parse_args (const char  *p,
             BgeWdgtSpec *spec,
             const char  *state,
@@ -406,7 +633,7 @@ parse_args (const char  *p,
        ;)
     {
       if (get_token)
-        GET_TOKEN_FULL (&token, TOKEN_PARSE_DEFAULT, &was_quoted);
+        GET_TOKEN_FULL (&token, TOKEN_PARSE_DEFAULT, SINGLE_CHAR_TOKENS, &was_quoted);
       get_token = TRUE;
       if (was_quoted)
         {
@@ -446,6 +673,18 @@ parse_args (const char  *p,
                   "Arguments must be comma-separated");
               return NULL;
             }
+        }
+      else if (g_strcmp0 (token, "#eval") == 0)
+        {
+          g_autofree char *key = NULL;
+
+          p = parse_eval (p, spec, state, n_anon_vals, &key, &local_error);
+          RETURN_ERROR_UNLESS (p != NULL);
+
+          g_strv_builder_take (builder, g_steal_pointer (&key));
+          n_args++;
+
+          need_comma = TRUE;
         }
       else if (g_strcmp0 (token, "#rgba") == 0 ||
                g_strcmp0 (token, "#e") == 0 ||
@@ -934,6 +1173,80 @@ consume_token (const char    **pp,
 #undef UNEXPECTED_EOF
 }
 
+static gdouble
+eval_closure (gpointer         this,
+              guint            n_param_values,
+              const GValue    *param_values,
+              EvalClosureData *data)
+{
+  GArray  *ops      = data->ops;
+  gdouble *workbuf0 = data->workbuf0;
+  gdouble *workbuf1 = data->workbuf1;
+  gdouble  result   = 0.0;
+
+  for (guint i = 0; i < n_param_values; i++)
+    {
+      workbuf0[i] = g_value_get_double (&param_values[i]);
+      workbuf1[i] = 1.0;
+    }
+
+  for (guint i = 0; i < ops->len; i++)
+    {
+      EvalOperator *op        = NULL;
+      guint         left_idx  = 0;
+      guint         right_idx = 0;
+      gdouble       left      = 0.0;
+      gdouble       right     = 0.0;
+
+      op = &g_array_index (ops, EvalOperator, i);
+
+      left_idx = op->pos;
+      while (workbuf1[left_idx] < 0.0)
+        {
+          left_idx--;
+        }
+
+      right_idx = op->pos + 1;
+      while (workbuf1[right_idx] < 0.0)
+        {
+          right_idx++;
+        }
+
+      left  = workbuf0[left_idx];
+      right = workbuf0[right_idx];
+
+      switch (op->op)
+        {
+        case OPERATOR_ADD:
+          result = left + right;
+          break;
+        case OPERATOR_SUBTRACT:
+          result = left - right;
+          break;
+        case OPERATOR_MULTIPLY:
+          result = left * right;
+          break;
+        case OPERATOR_DIVIDE:
+          result = left / right;
+          break;
+        case OPERATOR_MODULUS:
+          result = fmod (left, right);
+          break;
+        case OPERATOR_POWER:
+          result = pow (left, right);
+          break;
+        default:
+          g_assert_not_reached ();
+        }
+
+      workbuf0[left_idx]  = result;
+      workbuf1[left_idx]  = 1.0;
+      workbuf1[right_idx] = -1.0;
+    }
+
+  return result;
+}
+
 static char *
 make_object_property_name (const char *object,
                            const char *property)
@@ -945,4 +1258,57 @@ static char *
 make_anon_name (guint n)
 {
   return g_strdup_printf ("anon@%u", n);
+}
+
+static gint
+cmp_operator (EvalOperator *a,
+              EvalOperator *b)
+{
+  int a_prec = 0;
+  int b_prec = 0;
+
+  a_prec = operator_precedence[a->op];
+  b_prec = operator_precedence[b->op];
+
+  return a_prec > b_prec ? -1 : 1;
+}
+
+static void
+_marshal_DOUBLE__ARGS_DIRECT (GClosure                *closure,
+                              GValue                  *return_value,
+                              guint                    n_param_values,
+                              const GValue            *param_values,
+                              gpointer invocation_hint G_GNUC_UNUSED,
+                              gpointer                 marshal_data)
+{
+  typedef gdouble (*GMarshalFunc_DOUBLE__ARGS_DIRECT) (gpointer      data1,
+                                                       guint         n_param_values,
+                                                       const GValue *param_values,
+                                                       gpointer      data2);
+  GCClosure                       *cc = (GCClosure *) closure;
+  gpointer                         data1, data2;
+  GMarshalFunc_DOUBLE__ARGS_DIRECT callback;
+  gdouble                          v_return;
+
+  g_return_if_fail (return_value != NULL);
+  g_return_if_fail (n_param_values >= 1);
+
+  if (G_CCLOSURE_SWAP_DATA (closure))
+    {
+      data1 = closure->data;
+      data2 = g_value_peek_pointer (param_values + 0);
+    }
+  else
+    {
+      data1 = g_value_peek_pointer (param_values + 0);
+      data2 = closure->data;
+    }
+  callback = (GMarshalFunc_DOUBLE__ARGS_DIRECT) (marshal_data ? marshal_data : cc->callback);
+
+  v_return = callback (data1,
+                       n_param_values - 1,
+                       param_values + 1,
+                       data2);
+
+  g_value_set_double (return_value, v_return);
 }
