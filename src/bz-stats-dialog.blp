@@ -1,17 +1,16 @@
 using Gtk 4.0;
 using Adw 1;
 
-template $BzStatsDialog: Adw.Dialog {
+template $BzStatsDialog: Adw.BreakpointBin {
   width-request: 360;
   height-request: 450;
-  content-width: 1250;
-  content-height: 750;
   child: Adw.ToolbarView {
     bottom-bar-style: raised_border;
 
     [top]
     Adw.HeaderBar {
       title-widget: Adw.ViewSwitcher switcher_title {
+        visible: bind $invert_boolean($is_null(template.country-model) as <bool>) as <bool>;
         stack: stack;
         policy: wide;
       };
@@ -79,6 +78,7 @@ template $BzStatsDialog: Adw.Dialog {
       }
 
       Adw.ViewSwitcherBar switcher_bar {
+        visible: bind $invert_boolean($is_null(template.country-model) as <bool>) as <bool>;
         stack: stack;
       }
     };
@@ -90,7 +90,6 @@ template $BzStatsDialog: Adw.Dialog {
     setters {
       switcher_title.stack: null;
       switcher_bar.reveal: true;
-      template.content-height: 300;
     }
   }
 }

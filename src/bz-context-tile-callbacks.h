@@ -1,6 +1,6 @@
-/* bz-app-size-dialog.h
+/* bz-context-tile-callbacks.h
  *
- * Copyright 2025 Adam Masciola, Alexander Vanhee
+ * Copyright 2026 Eva M, Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,19 +20,7 @@
 
 #pragma once
 
-#include "bz-entry-group.h"
-#include <adwaita.h>
+#include <gtk/gtk.h>
 
-G_BEGIN_DECLS
-
-#define BZ_TYPE_APP_SIZE_DIALOG (bz_app_size_dialog_get_type ())
-
-G_DECLARE_FINAL_TYPE (BzAppSizeDialog, bz_app_size_dialog, BZ, APP_SIZE_DIALOG, AdwBin)
-
-AdwDialog *
-bz_app_size_dialog_new (BzEntryGroup *group);
-
-AdwNavigationPage *
-bz_app_size_page_new (BzEntryGroup *group);
-
-G_END_DECLS
+void
+bz_widget_class_bind_all_context_tile_callbacks (GtkWidgetClass *widget_class);

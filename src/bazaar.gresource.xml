@@ -16,6 +16,7 @@
 
     <file>countries.gvariant</file>
 
+    <file preprocess="xml-stripblanks">bz-addon-tile.ui</file>
     <file preprocess="xml-stripblanks">bz-addons-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-donations-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-age-rating-dialog.ui</file>

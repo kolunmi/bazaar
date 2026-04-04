@@ -85,6 +85,13 @@ bz_entry_group_get_eol (BzEntryGroup *self);
 guint64
 bz_entry_group_get_installed_size (BzEntryGroup *self);
 
+GListModel *
+bz_entry_group_get_addon_group_ids (BzEntryGroup *self);
+
+void
+bz_entry_group_append_addon_group_id (BzEntryGroup *self,
+                                      const char   *id);
+
 int
 bz_entry_group_get_n_addons (BzEntryGroup *self);
 
@@ -124,6 +131,9 @@ bz_entry_group_get_removable_and_available (BzEntryGroup *self);
 
 gboolean
 bz_entry_group_is_searchable (BzEntryGroup *self);
+
+gboolean
+bz_entry_group_is_addon (BzEntryGroup *self);
 
 guint64
 bz_entry_group_get_user_data_size (BzEntryGroup *self);

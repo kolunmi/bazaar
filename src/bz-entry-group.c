@@ -48,6 +48,7 @@ struct _BzEntryGroup
   char           *search_tokens;
   char           *eol;
   guint64         installed_size;
+  GtkStringList  *addon_group_ids;
   int             n_addons;
   char           *donation_url;
   BzCategoryFlags categories;
@@ -63,6 +64,7 @@ struct _BzEntryGroup
   int      removable_available;
   gboolean read_only;
   gboolean searchable;
+  gboolean is_addon;
 
   guint64 user_data_size;
 
@@ -688,6 +690,33 @@ bz_entry_group_get_installed_size (BzEntryGroup *self)
   return self->installed_size;
 }
 
+GListModel *
+bz_entry_group_get_addon_group_ids (BzEntryGroup *self)
+{
+  g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), NULL);
+
+  if (self->addon_group_ids == NULL)
+    return NULL;
+
+  return G_LIST_MODEL (self->addon_group_ids);
+}
+
+void
+bz_entry_group_append_addon_group_id (BzEntryGroup *self,
+                                      const char   *id)
+{
+  g_return_if_fail (BZ_IS_ENTRY_GROUP (self));
+  g_return_if_fail (id != NULL);
+
+  if (self->addon_group_ids == NULL)
+    self->addon_group_ids = gtk_string_list_new (NULL);
+
+  if (gtk_string_list_find (self->addon_group_ids, id) != G_MAXUINT)
+    return;
+
+  gtk_string_list_append (self->addon_group_ids, id);
+}
+
 int
 bz_entry_group_get_n_addons (BzEntryGroup *self)
 {
@@ -825,6 +854,13 @@ bz_entry_group_is_searchable (BzEntryGroup *self)
   return self->searchable;
 }
 
+gboolean
+bz_entry_group_is_addon (BzEntryGroup *self)
+{
+  g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), FALSE);
+  return self->is_addon;
+}
+
 void
 bz_entry_group_add (BzEntryGroup *self,
                     BzEntry      *entry,
@@ -854,12 +890,18 @@ bz_entry_group_add (BzEntryGroup *self,
   guint            existing           = 0;
   gboolean         is_searchable      = FALSE;
   AsContentRating *content_rating     = NULL;
+  gboolean         is_addon           = FALSE;
 
   g_return_if_fail (BZ_IS_ENTRY_GROUP (self));
   g_return_if_fail (BZ_IS_ENTRY (entry));
   g_return_if_fail (runtime == NULL || BZ_IS_ENTRY (runtime));
 
   locker = g_mutex_locker_new (&self->mutex);
+
+  is_addon = bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_ADDON);
+
+  if (is_addon)
+    self->is_addon = TRUE;
 
   if (self->id == NULL)
     {
@@ -886,24 +928,30 @@ bz_entry_group_add (BzEntryGroup *self,
     }
 
   title              = bz_entry_get_title (entry);
-  developer          = bz_entry_get_developer (entry);
   description        = bz_entry_get_description (entry);
-  mini_icon          = bz_entry_get_mini_icon (entry);
-  search_tokens      = bz_entry_get_search_tokens (entry);
-  is_floss           = bz_entry_get_is_foss (entry);
-  light_accent_color = bz_entry_get_light_accent_color (entry);
-  dark_accent_color  = bz_entry_get_dark_accent_color (entry);
-  is_flathub         = bz_entry_get_is_flathub (entry);
-  is_verified        = bz_entry_is_verified (entry);
   installed_size     = bz_entry_get_installed_size (entry);
-  donation_url       = bz_entry_get_donation_url (entry);
-  entry_categories   = bz_entry_get_category_flags (entry);
-  content_rating     = bz_entry_get_content_rating (entry);
+  is_flathub         = bz_entry_get_is_flathub (entry);
+  is_floss           = bz_entry_get_is_foss (entry);
 
-  addons        = bz_entry_get_addons (entry);
-  is_searchable = bz_entry_is_searchable (entry);
-  if (addons != NULL)
-    n_addons = g_list_model_get_n_items (addons);
+  if (is_addon) // You would not see any addon when the filter is on without this.
+    is_verified = TRUE;
+
+  if (!is_addon)
+    {
+      developer          = bz_entry_get_developer (entry);
+      mini_icon          = bz_entry_get_mini_icon (entry);
+      search_tokens      = bz_entry_get_search_tokens (entry);
+      light_accent_color = bz_entry_get_light_accent_color (entry);
+      dark_accent_color  = bz_entry_get_dark_accent_color (entry);
+      is_verified        = bz_entry_is_verified (entry);
+      donation_url       = bz_entry_get_donation_url (entry);
+      entry_categories   = bz_entry_get_category_flags (entry);
+      content_rating     = bz_entry_get_content_rating (entry);
+      addons             = bz_entry_get_addons (entry);
+      is_searchable      = bz_entry_is_searchable (entry);
+      if (addons != NULL)
+        n_addons = g_list_model_get_n_items (addons);
+    }
 
   usefulness = bz_entry_calc_usefulness (entry);
   existing   = gtk_string_list_find (self->unique_ids, unique_id);
@@ -924,80 +972,84 @@ bz_entry_group_add (BzEntryGroup *self,
           self->title = g_strdup (title);
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TITLE]);
         }
-      if (developer != NULL)
-        {
-          g_clear_pointer (&self->developer, g_free);
-          self->developer = g_strdup (developer);
-          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DEVELOPER]);
-        }
       if (description != NULL)
         {
           g_clear_pointer (&self->description, g_free);
           self->description = g_strdup (description);
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DESCRIPTION]);
         }
-      if (mini_icon != NULL)
+      if (installed_size != self->installed_size)
         {
-          g_clear_object (&self->mini_icon);
-          self->mini_icon = g_object_ref (mini_icon);
-          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MINI_ICON]);
-        }
-      if (search_tokens != NULL)
-        {
-          g_clear_pointer (&self->search_tokens, g_free);
-          self->search_tokens = g_strdup (search_tokens);
-          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SEARCH_TOKENS]);
-        }
-      if (!!is_floss != !!self->is_floss)
-        {
-          self->is_floss = is_floss;
-          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_IS_FLOSS]);
-        }
-      if (light_accent_color != NULL)
-        {
-          g_clear_pointer (&self->light_accent_color, g_free);
-          self->light_accent_color = g_strdup (light_accent_color);
-          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_LIGHT_ACCENT_COLOR]);
-        }
-      if (dark_accent_color != NULL)
-        {
-          g_clear_pointer (&self->dark_accent_color, g_free);
-          self->dark_accent_color = g_strdup (dark_accent_color);
-          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DARK_ACCENT_COLOR]);
+          self->installed_size = installed_size;
+          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLED_SIZE]);
         }
       if (!!is_flathub != !!self->is_flathub)
         {
           self->is_flathub = is_flathub;
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_IS_FLATHUB]);
         }
+      if (!!is_floss != !!self->is_floss)
+        {
+          self->is_floss = is_floss;
+          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_IS_FLOSS]);
+        }
       if (!!is_verified != !!self->is_verified)
         {
           self->is_verified = is_verified;
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_IS_VERIFIED]);
         }
-      if (installed_size != self->installed_size)
+
+      if (!is_addon)
         {
-          self->installed_size = installed_size;
-          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLED_SIZE]);
+          if (developer != NULL)
+            {
+              g_clear_pointer (&self->developer, g_free);
+              self->developer = g_strdup (developer);
+              g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DEVELOPER]);
+            }
+          if (mini_icon != NULL)
+            {
+              g_clear_object (&self->mini_icon);
+              self->mini_icon = g_object_ref (mini_icon);
+              g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MINI_ICON]);
+            }
+          if (search_tokens != NULL)
+            {
+              g_clear_pointer (&self->search_tokens, g_free);
+              self->search_tokens = g_strdup (search_tokens);
+              g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SEARCH_TOKENS]);
+            }
+          if (light_accent_color != NULL)
+            {
+              g_clear_pointer (&self->light_accent_color, g_free);
+              self->light_accent_color = g_strdup (light_accent_color);
+              g_object_notify_by_pspec (G_OBJECT (self), props[PROP_LIGHT_ACCENT_COLOR]);
+            }
+          if (dark_accent_color != NULL)
+            {
+              g_clear_pointer (&self->dark_accent_color, g_free);
+              self->dark_accent_color = g_strdup (dark_accent_color);
+              g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DARK_ACCENT_COLOR]);
+            }
+          if (n_addons != self->n_addons)
+            {
+              self->n_addons = n_addons;
+              g_object_notify_by_pspec (G_OBJECT (self), props[PROP_N_ADDONS]);
+            }
+          if (donation_url != NULL)
+            {
+              g_clear_pointer (&self->donation_url, g_free);
+              self->donation_url = g_strdup (donation_url);
+              g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DONATION_URL]);
+            }
+          if (entry_categories != BZ_CATEGORY_FLAGS_NONE)
+            {
+              self->categories = entry_categories;
+              g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CATEGORIES]);
+            }
+          if (content_rating != NULL)
+            self->content_age_rating = as_content_rating_get_minimum_age (content_rating);
         }
-      if (n_addons != self->n_addons)
-        {
-          self->n_addons = n_addons;
-          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_N_ADDONS]);
-        }
-      if (donation_url != NULL)
-        {
-          g_clear_pointer (&self->donation_url, g_free);
-          self->donation_url = g_strdup (donation_url);
-          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DONATION_URL]);
-        }
-      if (entry_categories != BZ_CATEGORY_FLAGS_NONE)
-        {
-          self->categories = entry_categories;
-          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CATEGORIES]);
-        }
-      if (content_rating != NULL)
-        self->content_age_rating = as_content_rating_get_minimum_age (content_rating);
 
       self->max_usefulness = usefulness;
     }
@@ -1014,45 +1066,49 @@ bz_entry_group_add (BzEntryGroup *self,
           self->title = g_strdup (title);
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TITLE]);
         }
-      if (developer != NULL && self->developer == NULL)
-        {
-          self->developer = g_strdup (developer);
-          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DEVELOPER]);
-        }
       if (description != NULL && self->description == NULL)
         {
           self->description = g_strdup (description);
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DESCRIPTION]);
-        }
-      if (mini_icon != NULL && self->mini_icon == NULL)
-        {
-          self->mini_icon = g_object_ref (mini_icon);
-          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MINI_ICON]);
-        }
-      if (search_tokens != NULL && self->search_tokens == NULL)
-        {
-          self->search_tokens = g_strdup (search_tokens);
-          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SEARCH_TOKENS]);
-        }
-      if (light_accent_color != NULL && self->light_accent_color == NULL)
-        {
-          self->light_accent_color = g_strdup (light_accent_color);
-          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_LIGHT_ACCENT_COLOR]);
-        }
-      if (dark_accent_color != NULL && self->dark_accent_color == NULL)
-        {
-          self->dark_accent_color = g_strdup (dark_accent_color);
-          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DARK_ACCENT_COLOR]);
         }
       if (installed_size > 0 && self->installed_size == 0)
         {
           self->installed_size = installed_size;
           g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INSTALLED_SIZE]);
         }
-      if (donation_url != NULL && self->donation_url == NULL)
+
+      if (!is_addon)
         {
-          self->donation_url = g_strdup (donation_url);
-          g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DONATION_URL]);
+          if (developer != NULL && self->developer == NULL)
+            {
+              self->developer = g_strdup (developer);
+              g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DEVELOPER]);
+            }
+          if (mini_icon != NULL && self->mini_icon == NULL)
+            {
+              self->mini_icon = g_object_ref (mini_icon);
+              g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MINI_ICON]);
+            }
+          if (search_tokens != NULL && self->search_tokens == NULL)
+            {
+              self->search_tokens = g_strdup (search_tokens);
+              g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SEARCH_TOKENS]);
+            }
+          if (light_accent_color != NULL && self->light_accent_color == NULL)
+            {
+              self->light_accent_color = g_strdup (light_accent_color);
+              g_object_notify_by_pspec (G_OBJECT (self), props[PROP_LIGHT_ACCENT_COLOR]);
+            }
+          if (dark_accent_color != NULL && self->dark_accent_color == NULL)
+            {
+              self->dark_accent_color = g_strdup (dark_accent_color);
+              g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DARK_ACCENT_COLOR]);
+            }
+          if (donation_url != NULL && self->donation_url == NULL)
+            {
+              self->donation_url = g_strdup (donation_url);
+              g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DONATION_URL]);
+            }
         }
     }
 
@@ -1087,10 +1143,9 @@ bz_entry_group_add (BzEntryGroup *self,
             }
         }
     }
-  if (is_searchable && !self->searchable)
-    {
-      self->searchable = TRUE;
-    }
+
+  if (!is_addon && is_searchable && !self->searchable)
+    self->searchable = TRUE;
 }
 
 void

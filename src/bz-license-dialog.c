@@ -20,6 +20,7 @@
 
 #include "config.h"
 
+#include <adwaita.h>
 #include <glib/gi18n.h>
 
 #include "bz-entry.h"
@@ -30,12 +31,12 @@
 
 struct _BzLicenseDialog
 {
-  AdwDialog parent_instance;
+  AdwBin parent_instance;
 
   BzEntry *entry;
 };
 
-G_DEFINE_FINAL_TYPE (BzLicenseDialog, bz_license_dialog, ADW_TYPE_DIALOG)
+G_DEFINE_FINAL_TYPE (BzLicenseDialog, bz_license_dialog, ADW_TYPE_BIN)
 
 enum
 {
@@ -289,8 +290,27 @@ bz_license_dialog_init (BzLicenseDialog *self)
 AdwDialog *
 bz_license_dialog_new (BzEntry *entry)
 {
-  return g_object_new (BZ_TYPE_LICENSE_DIALOG,
-                       "entry", entry,
-                       NULL);
+  BzLicenseDialog *widget = NULL;
+  AdwDialog       *dialog = NULL;
+
+  widget = g_object_new (BZ_TYPE_LICENSE_DIALOG, "entry", entry, NULL);
+
+  dialog = adw_dialog_new ();
+  adw_dialog_set_content_width (dialog, 400);
+  adw_dialog_set_child (dialog, GTK_WIDGET (widget));
+
+  return dialog;
 }
 
+AdwNavigationPage *
+bz_license_page_new (BzEntry *entry)
+{
+  BzLicenseDialog   *widget = NULL;
+  AdwNavigationPage *page   = NULL;
+
+  widget = g_object_new (BZ_TYPE_LICENSE_DIALOG, "entry", entry, NULL);
+  page   = adw_navigation_page_new (GTK_WIDGET (widget), _ ("License"));
+  adw_navigation_page_set_tag (page, "license");
+
+  return page;
+}
