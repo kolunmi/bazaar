@@ -1,28 +1,15 @@
 defwidget "My Widget" {
 
-  child scale : "GtkScale";
   var t : "BgeWdgtTime";
-  
-  var r : "gdouble";
-  var corner : "GrapheneSize";
 
   state@default "default" = {
-    t = #o:"BgeWdgtTime"(notify-msec = #i:"guint"(30););
-    
-    scale:adjustment = #o:"GtkAdjustment"(
-      lower = 0.0;
-      value = 50.0;
-      upper = 100.0;
-    );
-    scale:valign = #e:"GtkAlign"(end);
-
-    r = #eval(sin(#(t:time))*25.0);
-    corner = #size(r, r);
+    t = #o:"BgeWdgtTime"(notify-msec = #i:"guint"(5););
     
     %snapshot = {
       save {
         move translate(#point(200.0, 200.0));
-        move rotate(r);
+        move translate(#point(#eval(100.0*cos(2.0*#(t:time))),
+                              #eval(100.0*sin(2.0*#(t:time)))));
         add color(#rgba("orange"), #rect(-50.0,-50.0,100.0,100.0));
       }
     }
