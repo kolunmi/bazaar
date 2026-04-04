@@ -2856,6 +2856,21 @@ BGE_DEFINE_DATA (
     BGE_RELEASE_DATA (expressions, g_hash_table_unref);
     BGE_RELEASE_DATA (snapshot_deps, g_ptr_array_unref))
 
+BGE_DEFINE_DATA (
+    watch_setter,
+    WatchSetter,
+    {
+      BgeWdgtRenderer   *self;
+      StateData         *state;
+      StateInstanceData *instance;
+      ValueData         *dest;
+      ValueData         *src;
+    },
+    BGE_RELEASE_DATA (state, state_data_unref);
+    BGE_RELEASE_DATA (instance, state_instance_data_unref);
+    BGE_RELEASE_DATA (dest, value_data_unref);
+    BGE_RELEASE_DATA (src, value_data_unref))
+
 static void
 regenerate (BgeWdgtRenderer *self);
 
@@ -2869,6 +2884,14 @@ ensure_expressions (BgeWdgtRenderer   *self,
                     StateInstanceData *instance);
 
 static void
+set_value (BgeWdgtRenderer   *self,
+           StateData         *state,
+           StateInstanceData *instance,
+           ValueData         *dest,
+           ValueData         *src,
+           gboolean           setup_watches);
+
+static void
 discard_binding (gpointer ptr);
 
 static void
@@ -2876,6 +2899,9 @@ discard_watch (gpointer ptr);
 
 static void
 prop_change_queue_draw (BgeWdgtRenderer *self);
+
+static void
+reset_setter (WatchSetterData *data);
 
 static void
 bge_wdgt_renderer_dispose (GObject *object)
@@ -3509,74 +3535,13 @@ apply_state (BgeWdgtRenderer *self)
               (gpointer *) &src))
         break;
 
-      if (src->kind == VALUE_VARIABLE)
-        src = dig_variable_value (src, state);
-
-      switch (dest->kind)
-        {
-        case VALUE_PROPERTY:
-          {
-            GObject       *dest_object   = NULL;
-            const char    *dest_property = NULL;
-            GtkExpression *expression    = NULL;
-            GValue         resolved      = G_VALUE_INIT;
-
-            dest_object = g_hash_table_lookup (
-                self->objects,
-                dest->property.object);
-            g_assert (dest_object != NULL);
-            dest_property = dest->property.prop_name;
-
-            expression = g_hash_table_lookup (
-                instance->expressions, src);
-            gtk_expression_evaluate (expression, self, &resolved);
-            g_object_set_property (
-                dest_object,
-                dest_property,
-                &resolved);
-            g_value_unset (&resolved);
-          }
-          break;
-        case VALUE_CHILD:
-          {
-            GtkWidget     *parent_widget = NULL;
-            GtkExpression *expression    = NULL;
-            GValue         resolved      = G_VALUE_INIT;
-            GtkWidget     *child_widget  = NULL;
-
-            if (src == NULL)
-              break;
-
-            parent_widget = g_hash_table_lookup (
-                self->objects,
-                dest->child.widget);
-            g_assert (parent_widget != NULL);
-
-            expression = g_hash_table_lookup (
-                instance->expressions, src);
-            gtk_expression_evaluate (expression, self, &resolved);
-
-            child_widget = g_value_get_object (&resolved);
-            if (child_widget != NULL &&
-                gtk_widget_get_parent (child_widget) != parent_widget)
-              {
-                gtk_widget_unparent (child_widget);
-                gtk_widget_set_parent (child_widget, parent_widget);
-              }
-
-            g_value_unset (&resolved);
-          }
-          break;
-        case VALUE_VARIABLE:
-          break;
-        case VALUE_COMPONENT:
-        case VALUE_CLOSURE:
-        case VALUE_CONSTANT:
-        case VALUE_SPECIAL:
-        case VALUE_OBJECT:
-        default:
-          g_assert_not_reached ();
-        }
+      set_value (
+          self,
+          state,
+          instance,
+          dest,
+          src,
+          TRUE);
     }
 
   if (state->snapshot != NULL)
@@ -3828,6 +3793,105 @@ ensure_expressions (BgeWdgtRenderer   *self,
 }
 
 static void
+set_value (BgeWdgtRenderer   *self,
+           StateData         *state,
+           StateInstanceData *instance,
+           ValueData         *dest,
+           ValueData         *src,
+           gboolean           setup_watches)
+{
+  if (src->kind == VALUE_VARIABLE)
+    src = dig_variable_value (src, state);
+
+  switch (dest->kind)
+    {
+    case VALUE_PROPERTY:
+      {
+        GObject       *dest_object   = NULL;
+        const char    *dest_property = NULL;
+        GtkExpression *expression    = NULL;
+        GValue         resolved      = G_VALUE_INIT;
+
+        dest_object = g_hash_table_lookup (
+            self->objects,
+            dest->property.object);
+        g_assert (dest_object != NULL);
+        dest_property = dest->property.prop_name;
+
+        expression = g_hash_table_lookup (
+            instance->expressions, src);
+        gtk_expression_evaluate (expression, self, &resolved);
+        g_object_set_property (
+            dest_object,
+            dest_property,
+            &resolved);
+        g_value_unset (&resolved);
+
+        if (setup_watches)
+          {
+            g_autoptr (WatchSetterData) watch_data = NULL;
+            GtkExpressionWatch *watch              = NULL;
+
+            watch_data           = watch_setter_data_new ();
+            watch_data->self     = self;
+            watch_data->state    = state_data_ref (state);
+            watch_data->instance = state_instance_data_ref (instance);
+            watch_data->dest     = value_data_ref (dest);
+            watch_data->src      = value_data_ref (src);
+
+            watch = gtk_expression_watch (
+                expression,
+                self,
+                (GtkExpressionNotify) reset_setter,
+                watch_setter_data_ref (watch_data),
+                watch_setter_data_unref);
+            g_ptr_array_add (self->watches, watch);
+          }
+      }
+      break;
+    case VALUE_CHILD:
+      {
+        GtkWidget     *parent_widget = NULL;
+        GtkExpression *expression    = NULL;
+        GValue         resolved      = G_VALUE_INIT;
+        GtkWidget     *child_widget  = NULL;
+
+        if (src == NULL)
+          break;
+
+        parent_widget = g_hash_table_lookup (
+            self->objects,
+            dest->child.widget);
+        g_assert (parent_widget != NULL);
+
+        expression = g_hash_table_lookup (
+            instance->expressions, src);
+        gtk_expression_evaluate (expression, self, &resolved);
+
+        child_widget = g_value_get_object (&resolved);
+        if (child_widget != NULL &&
+            gtk_widget_get_parent (child_widget) != parent_widget)
+          {
+            gtk_widget_unparent (child_widget);
+            gtk_widget_set_parent (child_widget, parent_widget);
+          }
+
+        g_value_unset (&resolved);
+      }
+      break;
+    case VALUE_VARIABLE:
+      break;
+    case VALUE_COMPONENT:
+    case VALUE_CLOSURE:
+    case VALUE_CONSTANT:
+    case VALUE_SPECIAL:
+    case VALUE_OBJECT:
+    default:
+      g_assert_not_reached ();
+    }
+}
+
+static void
 discard_binding (gpointer ptr)
 {
   GBinding *binding = ptr;
@@ -3849,6 +3913,18 @@ static void
 prop_change_queue_draw (BgeWdgtRenderer *self)
 {
   gtk_widget_queue_draw (GTK_WIDGET (self));
+}
+
+static void
+reset_setter (WatchSetterData *data)
+{
+  set_value (
+      data->self,
+      data->state,
+      data->instance,
+      data->dest,
+      data->src,
+      FALSE);
 }
 
 /* End of bge-wdgt-spec.c */

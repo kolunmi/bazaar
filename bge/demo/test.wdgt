@@ -1,9 +1,13 @@
 defwidget "My Widget" {
 
+  child progress : "GtkProgressBar";
   var t : "BgeWdgtTime";
 
   state@default "default" = {
     t = #o:"BgeWdgtTime"(notify-msec = #i:"guint"(5););
+
+    progress:valign = #e:"GtkAlign"(end);
+    progress:fraction = #eval(0.5+sin(#(t:time))/2.0);
     
     %snapshot = {
       save {
