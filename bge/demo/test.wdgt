@@ -1,14 +1,22 @@
 defwidget "My Widget" {
 
-  child progress : "GtkProgressBar";
   var t : "BgeWdgtTime";
 
-  state@default "default" = {
-    t = #o:"BgeWdgtTime"(notify-msec = #i:"guint"(5););
+  child scale : "GtkScale";
+  child progress : "GtkProgressBar";
 
-    progress:valign = #e:"GtkAlign"(end);
-    progress:fraction = #eval(0.5+sin(#(t:time))/2.0);
+  state@default "default" = {
+    set t = #o:"BgeWdgtTime"(notify-msec = #i:"guint"(5););
+    set scale:valign, progress:valign = #e:"GtkAlign"(start), #e:"GtkAlign"(end);
+
+    set scale:adjustment:lower = 0.0;
+    set scale:adjustment:upper = 1.0;
     
+    set progress:fraction = #eval(0.5+sin(#(t:time))/2.0);
+
+    set scale:adjustment:value = #eval(1.0-#(progress:fraction));
+
+
     %snapshot = {
       save {
         move translate(#point(200.0, 200.0));

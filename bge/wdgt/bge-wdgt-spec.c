@@ -3807,25 +3807,37 @@ set_value (BgeWdgtRenderer   *self,
     {
     case VALUE_PROPERTY:
       {
-        GObject       *dest_object   = NULL;
-        const char    *dest_property = NULL;
-        GtkExpression *expression    = NULL;
-        GValue         resolved      = G_VALUE_INIT;
+        GtkExpression *dest_obj_expression = NULL;
+        GValue         dest_obj_resolved   = G_VALUE_INIT;
+        GObject       *dest_obj            = NULL;
+        GtkExpression *src_expression      = NULL;
+        GValue         src_resolved        = G_VALUE_INIT;
 
-        dest_object = g_hash_table_lookup (
-            self->objects,
-            dest->property.object);
-        g_assert (dest_object != NULL);
-        dest_property = dest->property.prop_name;
+        dest_obj_expression = g_hash_table_lookup (
+            instance->expressions, dest->property.object);
+        g_assert (dest_obj_expression != NULL);
+        gtk_expression_evaluate (
+            dest_obj_expression,
+            self,
+            &dest_obj_resolved);
+        dest_obj = g_value_get_object (&dest_obj_resolved);
 
-        expression = g_hash_table_lookup (
+        src_expression = g_hash_table_lookup (
             instance->expressions, src);
-        gtk_expression_evaluate (expression, self, &resolved);
-        g_object_set_property (
-            dest_object,
-            dest_property,
-            &resolved);
-        g_value_unset (&resolved);
+        g_assert (src_expression != NULL);
+        gtk_expression_evaluate (
+            src_expression,
+            self,
+            &src_resolved);
+
+        if (dest_obj != NULL)
+          g_object_set_property (
+              dest_obj,
+              dest->property.prop_name,
+              &src_resolved);
+
+        g_value_unset (&dest_obj_resolved);
+        g_value_unset (&src_resolved);
 
         if (setup_watches)
           {
@@ -3840,7 +3852,15 @@ set_value (BgeWdgtRenderer   *self,
             watch_data->src      = value_data_ref (src);
 
             watch = gtk_expression_watch (
-                expression,
+                dest_obj_expression,
+                self,
+                (GtkExpressionNotify) reset_setter,
+                watch_setter_data_ref (watch_data),
+                watch_setter_data_unref);
+            g_ptr_array_add (self->watches, watch);
+
+            watch = gtk_expression_watch (
+                src_expression,
                 self,
                 (GtkExpressionNotify) reset_setter,
                 watch_setter_data_ref (watch_data),

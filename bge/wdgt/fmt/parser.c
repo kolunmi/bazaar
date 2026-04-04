@@ -34,6 +34,7 @@
 #define STR_VARIABLE      "var"
 #define STR_STATE         "state"
 #define STR_DEFAULT_STATE "state@default"
+#define STR_SET           "set"
 #define STR_TRANSITION    "transition"
 #define STR_ALLOCATE      "%allocate"
 #define STR_SNAPSHOT      "%snapshot"
@@ -43,6 +44,13 @@ typedef enum
   TOKEN_PARSE_DEFAULT = 0,
   TOKEN_PARSE_QUOTED  = 1 << 0,
 } TokenParseFlags;
+
+typedef enum
+{
+  ARGS_PARSE_PARENS = 0,
+  ARGS_PARSE_LEFT_ASSIGN,
+  ARGS_PARSE_RIGHT_ASSIGN,
+} ArgsParseKind;
 
 typedef enum
 {
@@ -97,14 +105,14 @@ parse_eval (const char  *p,
             GError     **error);
 
 static const char *
-parse_args (const char  *p,
-            BgeWdgtSpec *spec,
-            const char  *state,
-            guint       *n_anon_vals,
-            char      ***values_out,
-            guint       *n_out,
-            gboolean     is_right_assignment,
-            GError     **error);
+parse_args (const char   *p,
+            BgeWdgtSpec  *spec,
+            const char   *state,
+            guint        *n_anon_vals,
+            char       ***values_out,
+            guint        *n_out,
+            ArgsParseKind parse_kind,
+            GError      **error);
 
 static char *
 parse_token_fundamental (const char  *token,
@@ -157,22 +165,22 @@ bge_wdgt_parse_string (const char *string,
 
   spec = bge_wdgt_spec_new ();
 
-#define RETURN_ERROR_UNLESS(_cond)       \
-  G_STMT_START                           \
-  {                                      \
-    if (!(_cond))                        \
-      {                                  \
-        g_set_error (                    \
-            error,                       \
-            G_IO_ERROR,                  \
-            G_IO_ERROR_UNKNOWN,          \
-            "wdgt fmt parser error: %s", \
-            local_error != NULL          \
-                ? local_error->message   \
-                : "???");                \
-        return NULL;                     \
-      }                                  \
-  }                                      \
+#define RETURN_ERROR_UNLESS(_cond)     \
+  G_STMT_START                         \
+  {                                    \
+    if (!(_cond))                      \
+      {                                \
+        g_set_error (                  \
+            error,                     \
+            G_IO_ERROR,                \
+            G_IO_ERROR_UNKNOWN,        \
+            "%s",                      \
+            local_error != NULL        \
+                ? local_error->message \
+                : "???");              \
+        return NULL;                   \
+      }                                \
+  }                                    \
   G_STMT_END
 
 #define EXPECT_TOKEN(_string, _token)            \
@@ -301,54 +309,51 @@ bge_wdgt_parse_string (const char *string,
                       p = parse_snapshot_block (p, spec, state_name, &n_anon_vals, &local_error);
                       RETURN_ERROR_UNLESS (p != NULL);
                     }
-                  else
+                  else if (g_strcmp0 (token, STR_SET) == 0)
                     {
-                      g_autofree char *dest_name     = NULL;
-                      g_autofree char *property_name = NULL;
-                      g_autofree char *property_key  = NULL;
-                      guint            n_src_values  = 0;
-                      g_auto (GStrv) src_values      = NULL;
+                      guint n_dest_values        = 0;
+                      g_auto (GStrv) dest_values = NULL;
+                      guint n_src_values         = 0;
+                      g_auto (GStrv) src_values  = NULL;
 
-                      dest_name = g_steal_pointer (&token);
-
-                      GET_TOKEN (&token, TOKEN_PARSE_DEFAULT);
-                      if (g_strcmp0 (token, ":") == 0)
-                        {
-                          GET_TOKEN (&property_name, TOKEN_PARSE_DEFAULT);
-                          GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "=");
-                        }
-                      else if (g_strcmp0 (token, "=") != 0)
-                        UNEXPECTED_TOKEN (token);
-
-                      if (property_name != NULL)
-                        {
-                          property_key = make_object_property_name (dest_name, property_name);
-                          result       = bge_wdgt_spec_add_property_value (spec, property_key, dest_name, property_name, &local_error);
-                          RETURN_ERROR_UNLESS (result);
-                        }
-
-                      p = parse_args (p, spec, state_name, &n_anon_vals, &src_values,
-                                      &n_src_values, TRUE, &local_error);
+                      p = parse_args (p, spec, state_name, &n_anon_vals, &dest_values,
+                                      &n_dest_values, ARGS_PARSE_LEFT_ASSIGN, &local_error);
                       RETURN_ERROR_UNLESS (p != NULL);
-                      if (n_src_values != 1)
+                      if (n_dest_values == 0)
                         {
                           g_set_error (
                               error,
                               G_IO_ERROR,
                               G_IO_ERROR_UNKNOWN,
-                              "Right assignment needs a single argument");
+                              "Left assignment needs at least one argument");
                           return NULL;
                         }
 
-                      result = bge_wdgt_spec_set_value (
-                          spec,
-                          state_name,
-                          property_key != NULL
-                              ? property_key
-                              : dest_name,
-                          src_values[0],
-                          &local_error);
-                      RETURN_ERROR_UNLESS (result);
+                      p = parse_args (p, spec, state_name, &n_anon_vals, &src_values,
+                                      &n_src_values, ARGS_PARSE_RIGHT_ASSIGN, &local_error);
+                      RETURN_ERROR_UNLESS (p != NULL);
+                      if (n_src_values != n_dest_values)
+                        {
+                          g_set_error (
+                              error,
+                              G_IO_ERROR,
+                              G_IO_ERROR_UNKNOWN,
+                              "Right assignment needs %d argument(s) "
+                              "to match the left side",
+                              n_dest_values);
+                          return NULL;
+                        }
+
+                      for (guint i = 0; i < n_dest_values; i++)
+                        {
+                          result = bge_wdgt_spec_set_value (
+                              spec,
+                              state_name,
+                              dest_values[i],
+                              src_values[i],
+                              &local_error);
+                          RETURN_ERROR_UNLESS (result);
+                        }
                     }
                 }
             }
@@ -407,7 +412,7 @@ parse_snapshot_block (const char  *p,
         {
           GET_TOKEN (&instr, TOKEN_PARSE_DEFAULT);
           p = parse_args (p, spec, state, n_anon_vals, &args,
-                          &n_args, FALSE, &local_error);
+                          &n_args, ARGS_PARSE_PARENS, &local_error);
           RETURN_ERROR_UNLESS (p != NULL);
 
           result = bge_wdgt_spec_append_snapshot_instr (
@@ -514,7 +519,7 @@ parse_eval (const char  *p,
           guint n_escape_args        = 0;
 
           p = parse_args (p, spec, state, n_anon_vals, &escape_args,
-                          &n_escape_args, FALSE, &local_error);
+                          &n_escape_args, ARGS_PARSE_PARENS, &local_error);
           RETURN_ERROR_UNLESS (p != NULL);
           if (n_escape_args != 1)
             {
@@ -667,14 +672,14 @@ parse_eval (const char  *p,
 }
 
 static const char *
-parse_args (const char  *p,
-            BgeWdgtSpec *spec,
-            const char  *state,
-            guint       *n_anon_vals,
-            char      ***values_out,
-            guint       *n_out,
-            gboolean     is_right_assignment,
-            GError     **error)
+parse_args (const char   *p,
+            BgeWdgtSpec  *spec,
+            const char   *state,
+            guint        *n_anon_vals,
+            char       ***values_out,
+            guint        *n_out,
+            ArgsParseKind parse_kind,
+            GError      **error)
 {
   g_autoptr (GError) local_error   = NULL;
   gboolean         result          = FALSE;
@@ -684,7 +689,7 @@ parse_args (const char  *p,
 
   builder = g_strv_builder_new ();
 
-  if (!is_right_assignment)
+  if (parse_kind == ARGS_PARSE_PARENS)
     GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "(");
   for (gboolean need_comma = FALSE,
                 get_token  = TRUE,
@@ -713,8 +718,9 @@ parse_args (const char  *p,
 
           need_comma = TRUE;
         }
-      else if ((is_right_assignment && g_strcmp0 (token, ";") == 0) ||
-               (!is_right_assignment && g_strcmp0 (token, ")") == 0))
+      else if ((parse_kind == ARGS_PARSE_LEFT_ASSIGN && g_strcmp0 (token, "=") == 0) ||
+               (parse_kind == ARGS_PARSE_RIGHT_ASSIGN && g_strcmp0 (token, ";") == 0) ||
+               (parse_kind == ARGS_PARSE_PARENS && g_strcmp0 (token, ")") == 0))
         break;
       else if (need_comma)
         {
@@ -895,7 +901,7 @@ parse_args (const char  *p,
           g_autofree char *component_key    = NULL;
 
           p = parse_args (p, spec, state, n_anon_vals, &component_args,
-                          &n_component_args, FALSE, &local_error);
+                          &n_component_args, ARGS_PARSE_PARENS, &local_error);
           RETURN_ERROR_UNLESS (p != NULL);
 
           if (g_strcmp0 (token, "#point") == 0)
@@ -1012,7 +1018,7 @@ parse_args (const char  *p,
                 }
 
               p = parse_args (p, spec, state, n_anon_vals, &value_args,
-                              &n_value_args, TRUE, &local_error);
+                              &n_value_args, ARGS_PARSE_RIGHT_ASSIGN, &local_error);
               RETURN_ERROR_UNLESS (p != NULL);
 
               if (n_value_args != 1)
