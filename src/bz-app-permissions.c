@@ -548,6 +548,8 @@ bz_app_permissions_new_from_metadata (GKeyFile *keyfile,
         {                   "xdg-download:ro",                                  BZ_APP_PERMISSIONS_FLAGS_DOWNLOADS_READ },
         { "xdg-data/flatpak/overrides:create",                                  BZ_APP_PERMISSIONS_FLAGS_ESCAPE_SANDBOX },
         {                "xdg-run/pipewire-0", BZ_APP_PERMISSIONS_FLAGS_SCREEN | BZ_APP_PERMISSIONS_FLAGS_AUDIO_DEVICES },
+        {             "xdg-run/pipewire-0:rw", BZ_APP_PERMISSIONS_FLAGS_SCREEN | BZ_APP_PERMISSIONS_FLAGS_AUDIO_DEVICES },
+        {             "xdg-run/pipewire-0:ro", BZ_APP_PERMISSIONS_FLAGS_SCREEN | BZ_APP_PERMISSIONS_FLAGS_AUDIO_DEVICES },
         {                     "xdg-run/gvfsd",                                 BZ_APP_PERMISSIONS_FLAGS_FILESYSTEM_FULL },
       };
       guint filesystems_hits = 0;
