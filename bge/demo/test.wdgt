@@ -1,41 +1,43 @@
 defwidget "My Widget" {
 
-  var t : "BgeWdgtTime";
-  var box : "GtkBox";
-
+  var progress-bar : "GtkProgressBar";
+  var fraction : "gdouble";
+  
   var radius : "gdouble";
-  var coords : "GraphenePoint";
+  var corner : "GrapheneSize";
+  var rect : "GrapheneRect";
+  
 
   init {
-    set t = #o:"BgeWdgtTime"(notify-msec = #i:"guint"(5););
-    
-    set box = #ch:"GtkBox":""(
-      _ = #ch:"GtkLabel":""(label="start";);
-      _ = #ch:"GtkLabel":""(label="center";
-                            hexpand=true;);
-      _ = #ch:"GtkLabel":""(label="end";);
+    set progress-bar = #ch:"GtkProgressBar":""(
+      fraction = fraction;
     );
-
-    set radius = 100.0;
-    set coords = #point(#eval(radius*cos(2.0*#(t:time))),
-                        #eval(radius*sin(2.0*#(t:time))));
+    set rect = #rect(-50.0,-50.0,100.0,100.0);
+    set corner = #size(radius, radius);
     
     %snapshot = {
       save {
         move translate(#point(200.0, 200.0));
-        move translate(coords);
-        add color(#rgba("orange"), #rect(-50.0,-50.0,100.0,100.0));
+        with rounded-clip(rect, corner, corner, corner, corner) {
+          add color(#rgba("orange"), rect);
+        }
       }
     }
   }
 
   state@default "d" = {
-    set radius = 100.0;
-    transition radius linear 1.0;
+    set fraction = 0.0;
+    transition fraction ease-in 0.3;
+    
+    set radius = 10.0;
+    transition radius ease 0.4;
   }
 
   state "s" = {
-    set radius = 200.0;
-    transition radius linear 2.0;
+    set fraction = 1.0;
+    transition fraction ease-out 0.3;
+    
+    set radius = 50.0;
+    transition radius ease 0.2;
   }
 }

@@ -113,7 +113,7 @@ bge_wdgt_time_class_init (BgeWdgtTimeClass *klass)
       g_param_spec_double (
           "time",
           NULL, NULL,
-          G_MININT, G_MAXINT, 0.0,
+          0.0, G_MAXDOUBLE, 0.0,
           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   props[PROP_NOTIFY_MSEC] =

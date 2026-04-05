@@ -42,7 +42,11 @@ G_DEFINE_ENUM_TYPE (
     G_DEFINE_ENUM_VALUE (BGE_EASE_IN_OUT_BACK, "in-out-back"),
     G_DEFINE_ENUM_VALUE (BGE_EASE_IN_BOUNCE, "in-bounce"),
     G_DEFINE_ENUM_VALUE (BGE_EASE_OUT_BOUNCE, "out-bounce"),
-    G_DEFINE_ENUM_VALUE (BGE_EASE_IN_OUT_BOUNCE, "in-out-bounce"));
+    G_DEFINE_ENUM_VALUE (BGE_EASE_IN_OUT_BOUNCE, "in-out-bounce"),
+    G_DEFINE_ENUM_VALUE (BGE_EASE, "ease"),
+    G_DEFINE_ENUM_VALUE (BGE_EASE_IN, "ease-in"),
+    G_DEFINE_ENUM_VALUE (BGE_EASE_OUT, "ease-out"),
+    G_DEFINE_ENUM_VALUE (BGE_EASE_IN_OUT, "ease-in-out"));
 
 #include <math.h>
 

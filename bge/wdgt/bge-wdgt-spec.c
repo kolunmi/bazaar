@@ -1526,6 +1526,12 @@ bge_wdgt_spec_transition_value (BgeWdgtSpec *self,
       state_data->transitions,
       value_data_ref (value_data),
       transition_data_ref (transition));
+  /* We want the init state to track the transition as well in case of value
+     overlays */
+  g_hash_table_replace (
+      self->init_state->transitions,
+      value_data_ref (value_data),
+      transition_data_ref (transition));
   return TRUE;
 }
 
@@ -2869,14 +2875,110 @@ ensure_state_snapshot (StateData *state)
 /* Widget Renderer Implementation */
 /* ------------------------------ */
 
+#define BGE_TYPE_WDGT_NOTIFIER (bge_wdgt_notifier_get_type ())
+G_DECLARE_FINAL_TYPE (BgeWdgtNotifier, bge_wdgt_notifier, BGE, WDGT_NOTIFIER, GObject)
+
+struct _BgeWdgtNotifier
+{
+  GObject parent_instance;
+
+  double value;
+};
+
+G_DEFINE_FINAL_TYPE (BgeWdgtNotifier, bge_wdgt_notifier, G_TYPE_OBJECT);
+
+enum
+{
+  NOTIFIER_PROP_0,
+
+  NOTIFIER_PROP_VALUE,
+
+  LAST_NOTIFIER_PROP
+};
+static GParamSpec *notifier_props[LAST_NOTIFIER_PROP] = { 0 };
+
+static void
+bge_wdgt_notifier_dispose (GObject *object)
+{
+  BgeWdgtNotifier *self = BGE_WDGT_NOTIFIER (object);
+
+  (void) self;
+
+  G_OBJECT_CLASS (bge_wdgt_notifier_parent_class)->dispose (object);
+}
+
+static void
+bge_wdgt_notifier_get_property (GObject    *object,
+                                guint       prop_id,
+                                GValue     *value,
+                                GParamSpec *pspec)
+{
+  BgeWdgtNotifier *self = BGE_WDGT_NOTIFIER (object);
+
+  switch (prop_id)
+    {
+    case NOTIFIER_PROP_VALUE:
+      g_value_set_double (value, self->value);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+    }
+}
+
+static void
+bge_wdgt_notifier_set_property (GObject      *object,
+                                guint         prop_id,
+                                const GValue *value,
+                                GParamSpec   *pspec)
+{
+  BgeWdgtNotifier *self = BGE_WDGT_NOTIFIER (object);
+
+  switch (prop_id)
+    {
+    case NOTIFIER_PROP_VALUE:
+      self->value = g_value_get_double (value);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+    }
+}
+
+static void
+bge_wdgt_notifier_class_init (BgeWdgtNotifierClass *klass)
+{
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
+
+  object_class->set_property = bge_wdgt_notifier_set_property;
+  object_class->get_property = bge_wdgt_notifier_get_property;
+  object_class->dispose      = bge_wdgt_notifier_dispose;
+
+  notifier_props[NOTIFIER_PROP_VALUE] =
+      g_param_spec_double (
+          "value",
+          NULL, NULL,
+          G_MININT, G_MAXINT, 0.0,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  g_object_class_install_properties (object_class, LAST_PROP, notifier_props);
+}
+
+static void
+bge_wdgt_notifier_init (BgeWdgtNotifier *self)
+{
+}
+
+/* --- */
+
 BGE_DEFINE_DATA (
     state_instance,
     StateInstance,
     {
       GHashTable *expressions;
+      GHashTable *transition_notifiers;
       GPtrArray  *snapshot_deps;
     },
     BGE_RELEASE_DATA (expressions, g_hash_table_unref);
+    BGE_RELEASE_DATA (transition_notifiers, g_hash_table_unref);
     BGE_RELEASE_DATA (snapshot_deps, g_ptr_array_unref))
 
 struct _BgeWdgtRenderer
@@ -2891,11 +2993,13 @@ struct _BgeWdgtRenderer
   StateInstanceData *init_instance;
   GPtrArray         *init_watches;
 
-  StateData    *active_state;
-  SnapshotData *active_snapshot;
+  StateData         *active_state;
+  StateInstanceData *active_instance;
+  SnapshotData      *active_snapshot;
 
-  StateData *last_state;
-  GTimer    *since_last_state;
+  StateData         *last_state;
+  StateInstanceData *last_instance;
+  GTimer            *since_last_state;
 
   GHashTable *objects;
   GPtrArray  *children;
@@ -3002,9 +3106,11 @@ bge_wdgt_renderer_dispose (GObject *object)
   g_clear_pointer (&self->init_watches, g_ptr_array_unref);
 
   g_clear_pointer (&self->active_state, state_data_unref);
+  g_clear_pointer (&self->active_instance, state_instance_data_unref);
   g_clear_pointer (&self->active_snapshot, snapshot_data_unref);
 
   g_clear_pointer (&self->last_state, state_data_unref);
+  g_clear_pointer (&self->last_instance, state_instance_data_unref);
   g_clear_pointer (&self->since_last_state, g_timer_destroy);
 
   g_clear_pointer (&self->objects, g_hash_table_unref);
@@ -3116,9 +3222,8 @@ static void
 bge_wdgt_renderer_snapshot (GtkWidget   *widget,
                             GtkSnapshot *snapshot)
 {
-  BgeWdgtRenderer   *self     = BGE_WDGT_RENDERER (widget);
-  StateInstanceData *instance = NULL;
-  GPtrArray         *calls    = NULL;
+  BgeWdgtRenderer *self  = BGE_WDGT_RENDERER (widget);
+  GPtrArray       *calls = NULL;
 
   if (self->child != NULL)
     gtk_widget_snapshot_child (GTK_WIDGET (self), self->child, snapshot);
@@ -3128,9 +3233,6 @@ bge_wdgt_renderer_snapshot (GtkWidget   *widget,
 
   if (self->active_snapshot != NULL)
     calls = self->active_snapshot->calls;
-
-  instance = g_hash_table_lookup (self->state_instances, self->active_state);
-  g_assert (instance != NULL);
 
   if (calls != NULL)
     {
@@ -3168,7 +3270,7 @@ bge_wdgt_renderer_snapshot (GtkWidget   *widget,
                     GtkExpression *expression = NULL;
 
                     value      = g_ptr_array_index (call->args, j);
-                    expression = g_hash_table_lookup (instance->expressions, value);
+                    expression = g_hash_table_lookup (self->active_instance->expressions, value);
                     gtk_expression_evaluate (expression, self, &arg_values[j]);
                   }
                 for (guint j = 0; j < n_rest_values; j++)
@@ -3177,7 +3279,7 @@ bge_wdgt_renderer_snapshot (GtkWidget   *widget,
                     GtkExpression *expression = NULL;
 
                     value      = g_ptr_array_index (call->rest, j);
-                    expression = g_hash_table_lookup (instance->expressions, value);
+                    expression = g_hash_table_lookup (self->active_instance->expressions, value);
                     gtk_expression_evaluate (expression, self, &rest_values[j]);
                   }
 
@@ -3250,6 +3352,8 @@ bge_wdgt_renderer_class_init (BgeWdgtRendererClass *klass)
   widget_class->measure       = bge_wdgt_renderer_measure;
   widget_class->size_allocate = bge_wdgt_renderer_size_allocate;
   widget_class->snapshot      = bge_wdgt_renderer_snapshot;
+
+  g_type_ensure (BGE_TYPE_WDGT_NOTIFIER);
 }
 
 static gboolean
@@ -3257,55 +3361,52 @@ tick_cb (BgeWdgtRenderer *self,
          GdkFrameClock   *frame_clock,
          gpointer         user_data)
 {
-  GHashTableIter     iter            = { 0 };
-  StateInstanceData *active_instance = NULL;
-  StateInstanceData *last_instance   = NULL;
-  double             elapsed         = 0.0;
-  gboolean           finished_all    = TRUE;
+  GHashTableIter iter         = { 0 };
+  double         elapsed      = 0.0;
+  gboolean       finished_all = TRUE;
 
   if (self->spec == NULL ||
       self->active_state == NULL ||
-      self->last_state == NULL)
+      self->active_instance == NULL ||
+      self->last_state == NULL ||
+      self->last_instance == NULL)
     return G_SOURCE_CONTINUE;
-
-  active_instance = g_hash_table_lookup (self->state_instances, self->active_state);
-  g_assert (active_instance != NULL);
-  last_instance = g_hash_table_lookup (self->state_instances, self->last_state);
-  g_assert (last_instance != NULL);
 
   elapsed = g_timer_elapsed (self->since_last_state, NULL);
 
   g_hash_table_iter_init (&iter, self->active_state->transitions);
   for (;;)
     {
-      ValueData      *dest       = NULL;
-      TransitionData *transition = NULL;
-      ValueData      *src        = NULL;
-      guint           idx        = 0;
-      gboolean        found      = FALSE;
+      ValueData       *value      = NULL;
+      TransitionData  *transition = NULL;
+      BgeWdgtNotifier *notifier   = NULL;
 
       if (!g_hash_table_iter_next (
               &iter,
-              (gpointer *) &dest,
+              (gpointer *) &value,
               (gpointer *) &transition))
         break;
 
-      src = g_hash_table_lookup (self->active_state->setters, dest);
-      if (src == NULL)
-        continue;
-
-      set_value (self, self->active_state, active_instance, dest, src, NULL);
-
-      found = g_ptr_array_find (active_instance->snapshot_deps, dest, &idx);
-      if (found)
-        gtk_widget_queue_draw (GTK_WIDGET (self));
+      notifier = g_hash_table_lookup (self->active_instance->transition_notifiers, value);
+      if (notifier != NULL)
+        g_object_notify_by_pspec (
+            G_OBJECT (notifier),
+            notifier_props[NOTIFIER_PROP_VALUE]);
+      notifier = g_hash_table_lookup (self->init_instance->transition_notifiers, value);
+      if (notifier != NULL)
+        g_object_notify_by_pspec (
+            G_OBJECT (notifier),
+            notifier_props[NOTIFIER_PROP_VALUE]);
 
       if (elapsed <= transition->seconds)
         finished_all = FALSE;
     }
 
   if (finished_all)
-    g_clear_pointer (&self->last_state, state_data_unref);
+    {
+      g_clear_pointer (&self->last_state, state_data_unref);
+      g_clear_pointer (&self->last_instance, state_instance_data_unref);
+    }
 
   return G_SOURCE_CONTINUE;
 }
@@ -3493,7 +3594,9 @@ regenerate (BgeWdgtRenderer *self)
   g_ptr_array_set_size (self->nonchildren, 0);
 
   g_clear_pointer (&self->last_state, state_data_unref);
+  g_clear_pointer (&self->last_instance, state_instance_data_unref);
   g_clear_pointer (&self->active_state, state_data_unref);
+  g_clear_pointer (&self->active_instance, state_instance_data_unref);
   g_clear_pointer (&self->active_snapshot, snapshot_data_unref);
   g_ptr_array_set_size (self->bindings, 0);
   g_ptr_array_set_size (self->watches, 0);
@@ -3574,6 +3677,9 @@ regenerate (BgeWdgtRenderer *self)
       instance->expressions = g_hash_table_new_full (
           g_direct_hash, g_direct_equal,
           value_data_unref, (GDestroyNotify) gtk_expression_unref);
+      instance->transition_notifiers = g_hash_table_new_full (
+          g_direct_hash, g_direct_equal,
+          value_data_unref, g_object_unref);
       instance->snapshot_deps = g_ptr_array_new_with_free_func (
           (GDestroyNotify) gtk_expression_unref);
 
@@ -3721,11 +3827,17 @@ apply_state (BgeWdgtRenderer *self)
   GHashTableIter     iter     = { 0 };
 
   g_clear_pointer (&self->last_state, state_data_unref);
-  if (self->active_state != NULL)
-    self->last_state = state_data_ref (self->active_state);
+  g_clear_pointer (&self->last_instance, state_instance_data_unref);
+  if (self->active_state != NULL &&
+      self->active_instance != NULL)
+    {
+      self->last_state    = g_steal_pointer (&self->active_state);
+      self->last_instance = g_steal_pointer (&self->active_instance);
+    }
   g_timer_start (self->since_last_state);
 
   g_clear_pointer (&self->active_state, state_data_unref);
+  g_clear_pointer (&self->active_instance, state_instance_data_unref);
   g_clear_pointer (&self->active_snapshot, snapshot_data_unref);
 
   g_ptr_array_set_size (self->bindings, 0);
@@ -3746,7 +3858,8 @@ apply_state (BgeWdgtRenderer *self)
   instance = g_hash_table_lookup (self->state_instances, state);
   g_assert (instance != NULL);
 
-  self->active_state = state_data_ref (state);
+  self->active_state    = state_data_ref (state);
+  self->active_instance = state_instance_data_ref (instance);
 
   if (state->snapshot != NULL)
     self->active_snapshot = snapshot_data_ref (state->snapshot);
@@ -3858,34 +3971,50 @@ expression_create_rect (gpointer object,
 static double
 expression_adjust_transition (BgeWdgtRenderer       *this,
                               double                 in,
+                              double                 notifier,
                               TransitionClosureData *data)
 {
-  gboolean           result              = FALSE;
-  StateInstanceData *last_instance       = NULL;
-  ValueData         *last_in_value       = NULL;
-  GtkExpression     *last_in_expression  = NULL;
-  GValue             last_in_resolved    = G_VALUE_INIT;
-  double             last_in             = 0.0;
-  TransitionData    *transition          = NULL;
-  double             elapsed             = 0.0;
-  double             progress            = 0.0;
-  double             interpolated_number = 0.0;
+  gboolean        result              = FALSE;
+  ValueData      *last_in_value       = NULL;
+  GtkExpression  *last_in_expression  = NULL;
+  GValue          last_in_resolved    = G_VALUE_INIT;
+  double          last_in             = 0.0;
+  TransitionData *transition          = NULL;
+  double          elapsed             = 0.0;
+  double          progress            = 0.0;
+  double          interpolated_number = 0.0;
 
   g_assert (data->value->type == G_TYPE_DOUBLE);
 
   if (this->active_state == NULL ||
-      this->last_state == NULL)
+      this->active_instance == NULL ||
+      this->last_state == NULL ||
+      this->last_instance == NULL)
     return in;
 
-  last_instance = g_hash_table_lookup (this->state_instances, this->last_state);
-  g_assert (last_instance != NULL);
+  if (data->instance != this->active_instance)
+    {
+      GtkExpression *corrected_in_expression = NULL;
+      GValue         corrected_in_resolved   = G_VALUE_INIT;
+
+      corrected_in_expression = g_hash_table_lookup (
+          this->active_instance->expressions, data->value);
+      g_assert (corrected_in_expression != NULL);
+      result = gtk_expression_evaluate (
+          corrected_in_expression,
+          this,
+          &corrected_in_resolved);
+      if (result)
+        in = g_value_get_double (&corrected_in_resolved);
+      g_value_unset (&corrected_in_resolved);
+    }
 
   last_in_value = g_hash_table_lookup (this->last_state->setters, data->value);
   if (last_in_value == NULL)
     return in;
 
   last_in_expression = g_hash_table_lookup (
-      last_instance->expressions, last_in_value);
+      this->last_instance->expressions, last_in_value);
   g_assert (last_in_expression != NULL);
   result = gtk_expression_evaluate (
       last_in_expression,
@@ -3897,7 +4026,8 @@ expression_adjust_transition (BgeWdgtRenderer       *this,
     return in;
 
   transition = g_hash_table_lookup (this->active_state->transitions, data->value);
-  g_assert (transition != NULL);
+  if (transition == NULL)
+    return in;
   elapsed = g_timer_elapsed (this->since_last_state, NULL);
 
   if (elapsed >= transition->seconds)
@@ -4059,7 +4189,20 @@ ensure_expressions (BgeWdgtRenderer   *self,
   if (value->type == G_TYPE_DOUBLE &&
       g_hash_table_contains (state->transitions, value))
     {
+      g_autoptr (BgeWdgtNotifier) notifier_object;
+      GtkExpression *notifier_constant       = NULL;
+      GtkExpression *notify_expression       = NULL;
       g_autoptr (TransitionClosureData) data = NULL;
+
+      notifier_object   = g_object_new (BGE_TYPE_WDGT_NOTIFIER, NULL);
+      notifier_constant = gtk_constant_expression_new (
+          BGE_TYPE_WDGT_NOTIFIER, notifier_object);
+      notify_expression = gtk_property_expression_new_for_pspec (
+          notifier_constant, notifier_props[NOTIFIER_PROP_VALUE]);
+
+      g_hash_table_replace (instance->transition_notifiers,
+                            value_data_ref (value),
+                            g_object_ref (notifier_object));
 
       data           = transition_closure_data_new ();
       data->state    = state_data_ref (state);
@@ -4068,8 +4211,8 @@ ensure_expressions (BgeWdgtRenderer   *self,
 
       expression = gtk_cclosure_expression_new (
           value->type,
-          bge_marshal_DOUBLE__DOUBLE,
-          1, &expression,
+          bge_marshal_DOUBLE__DOUBLE_DOUBLE,
+          2, (GtkExpression *[]){ expression, notify_expression },
           G_CALLBACK (expression_adjust_transition),
           transition_closure_data_ref (data),
           transition_closure_data_unref_closure);
@@ -4090,6 +4233,16 @@ set_value (BgeWdgtRenderer   *self,
            ValueData         *src,
            GPtrArray         *watches)
 {
+  GtkExpression *src_expression  = NULL;
+  GtkExpression *dest_expression = NULL;
+
+  src_expression = g_hash_table_lookup (
+      instance->expressions, src);
+  g_assert (src_expression != NULL);
+  dest_expression = g_hash_table_lookup (
+      instance->expressions, dest);
+  g_assert (dest_expression != NULL);
+
   switch (dest->kind)
     {
     case VALUE_PROPERTY:
@@ -4097,7 +4250,6 @@ set_value (BgeWdgtRenderer   *self,
         GtkExpression *dest_obj_expression = NULL;
         GValue         dest_obj_resolved   = G_VALUE_INIT;
         GObject       *dest_obj            = NULL;
-        GtkExpression *src_expression      = NULL;
         GValue         src_resolved        = G_VALUE_INIT;
 
         dest_obj_expression = g_hash_table_lookup (
@@ -4109,9 +4261,6 @@ set_value (BgeWdgtRenderer   *self,
             &dest_obj_resolved);
         dest_obj = g_value_get_object (&dest_obj_resolved);
 
-        src_expression = g_hash_table_lookup (
-            instance->expressions, src);
-        g_assert (src_expression != NULL);
         gtk_expression_evaluate (
             src_expression,
             self,
@@ -4125,48 +4274,45 @@ set_value (BgeWdgtRenderer   *self,
 
         g_value_unset (&dest_obj_resolved);
         g_value_unset (&src_resolved);
-
-        if (watches != NULL)
-          {
-            g_autoptr (WatchSetterData) watch_data = NULL;
-            GtkExpressionWatch *watch              = NULL;
-
-            watch_data           = watch_setter_data_new ();
-            watch_data->self     = self;
-            watch_data->state    = state_data_ref (state);
-            watch_data->instance = state_instance_data_ref (instance);
-            watch_data->dest     = value_data_ref (dest);
-            watch_data->src      = value_data_ref (src);
-
-            watch = gtk_expression_watch (
-                dest_obj_expression,
-                self,
-                (GtkExpressionNotify) reset_setter,
-                watch_setter_data_ref (watch_data),
-                watch_setter_data_unref);
-            g_ptr_array_add (watches, watch);
-
-            watch = gtk_expression_watch (
-                src_expression,
-                self,
-                (GtkExpressionNotify) reset_setter,
-                watch_setter_data_ref (watch_data),
-                watch_setter_data_unref);
-            g_ptr_array_add (watches, watch);
-          }
       }
-      break;
-    case VALUE_CHILD:
       break;
     case VALUE_VARIABLE:
       break;
+    case VALUE_CHILD:
+      break;
     case VALUE_COMPONENT:
+      break;
     case VALUE_CLOSURE:
+      break;
     case VALUE_CONSTANT:
+      break;
     case VALUE_SPECIAL:
+      break;
     case VALUE_OBJECT:
+      break;
     default:
       g_assert_not_reached ();
+    }
+
+  if (watches != NULL)
+    {
+      g_autoptr (WatchSetterData) watch_data = NULL;
+      GtkExpressionWatch *watch              = NULL;
+
+      watch_data           = watch_setter_data_new ();
+      watch_data->self     = self;
+      watch_data->state    = state_data_ref (state);
+      watch_data->instance = state_instance_data_ref (instance);
+      watch_data->dest     = value_data_ref (dest);
+      watch_data->src      = value_data_ref (src);
+
+      watch = gtk_expression_watch (
+          src_expression,
+          self,
+          (GtkExpressionNotify) reset_setter,
+          watch_setter_data_ref (watch_data),
+          watch_setter_data_unref);
+      g_ptr_array_add (watches, watch);
     }
 }
 
