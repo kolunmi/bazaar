@@ -119,6 +119,15 @@ deinit_value (gpointer ptr)
 }
 
 BGE_DEFINE_DATA (
+    transition,
+    Transition,
+    {
+      double    seconds;
+      BgeEasing easing;
+    },
+    (void) self;)
+
+BGE_DEFINE_DATA (
     snapshot_call,
     SnapshotCall,
     {
@@ -144,10 +153,12 @@ BGE_DEFINE_DATA (
     {
       char         *name;
       GHashTable   *setters;
+      GHashTable   *transitions;
       SnapshotData *snapshot;
     },
     BGE_RELEASE_DATA (name, g_free);
     BGE_RELEASE_DATA (setters, g_hash_table_unref);
+    BGE_RELEASE_DATA (transitions, g_hash_table_unref);
     BGE_RELEASE_DATA (snapshot, snapshot_data_unref))
 
 /* --------------------------- */
@@ -207,10 +218,6 @@ lookup_snapshot_transform_instr (const char    *lookup_name,
 static gboolean
 lookup_snapshot_append_instr (const char    *lookup_name,
                               SnapshotInstr *out);
-
-static ValueData *
-dig_variable_value (ValueData *value,
-                    StateData *state);
 
 static void
 ensure_state_snapshot (StateData *state);
@@ -286,6 +293,7 @@ bge_wdgt_spec_class_init (BgeWdgtSpecClass *klass)
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
+  g_type_ensure (BGE_TYPE_EASING);
   g_type_ensure (BGE_TYPE_WDGT_TIME);
 
   /* Make sure these names are available for the parser */
@@ -751,6 +759,9 @@ bge_wdgt_spec_init (BgeWdgtSpec *self)
   self->init_state->setters = g_hash_table_new_full (
       g_direct_hash, g_direct_equal,
       value_data_unref, value_data_unref);
+  self->init_state->transitions = g_hash_table_new_full (
+      g_direct_hash, g_direct_equal,
+      value_data_unref, transition_data_unref);
   ensure_state_snapshot (self->init_state);
   g_hash_table_replace (self->states,
                         g_strdup ("init"),
@@ -1356,6 +1367,9 @@ bge_wdgt_spec_add_state (BgeWdgtSpec *self,
   state->setters = g_hash_table_new_full (
       g_direct_hash, g_direct_equal,
       value_data_unref, value_data_unref);
+  state->transitions = g_hash_table_new_full (
+      g_direct_hash, g_direct_equal,
+      value_data_unref, transition_data_unref);
 
   g_hash_table_replace (self->states, g_strdup (name), state_data_ref (state));
   if (default_state)
@@ -1453,6 +1467,65 @@ bge_wdgt_spec_set_value (BgeWdgtSpec *self,
       state_data->setters,
       value_data_ref (dest_data),
       value_data_ref (src_data));
+  return TRUE;
+}
+
+gboolean
+bge_wdgt_spec_transition_value (BgeWdgtSpec *self,
+                                const char  *state,
+                                const char  *value,
+                                double       seconds,
+                                BgeEasing    easing,
+                                GError     **error)
+{
+  StateData *state_data                 = NULL;
+  ValueData *value_data                 = NULL;
+  g_autoptr (TransitionData) transition = NULL;
+
+  g_return_val_if_fail (BGE_IS_WDGT_SPEC (self), FALSE);
+  /* state is required for transitions */
+  g_return_val_if_fail (state != NULL, FALSE);
+  g_return_val_if_fail (value != NULL, FALSE);
+
+  if (seconds <= 0.0)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "transition period must be greater than 0.0");
+      return FALSE;
+    }
+
+  state_data = g_hash_table_lookup (self->states, state);
+  value_data = g_hash_table_lookup (self->values, value);
+
+  if (state_data == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "state '%s' is undefined", state);
+      return FALSE;
+    }
+  if (value_data == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' is undefined", value);
+      return FALSE;
+    }
+  if (value_data->type != G_TYPE_DOUBLE)
+    /* TODO: support more types */
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "type %s cannot be transitioned",
+                   g_type_name (value_data->type));
+      return FALSE;
+    }
+
+  transition          = transition_data_new ();
+  transition->seconds = seconds;
+  transition->easing  = easing;
+
+  g_hash_table_replace (
+      state_data->transitions,
+      value_data_ref (value_data),
+      transition_data_ref (transition));
   return TRUE;
 }
 
@@ -2781,24 +2854,6 @@ lookup_snapshot_append_instr (const char    *lookup_name,
   return FALSE;
 }
 
-static ValueData *
-dig_variable_value (ValueData *value,
-                    StateData *state)
-{
-  g_assert (value->kind == VALUE_VARIABLE);
-  for (;;)
-    {
-      value = g_hash_table_lookup (state->setters, value);
-      if (value != NULL)
-        {
-          if (value->kind != VALUE_VARIABLE)
-            return value;
-        }
-      else
-        return NULL;
-    }
-}
-
 static void
 ensure_state_snapshot (StateData *state)
 {
@@ -2839,6 +2894,9 @@ struct _BgeWdgtRenderer
   StateData    *active_state;
   SnapshotData *active_snapshot;
 
+  StateData *last_state;
+  GTimer    *since_last_state;
+
   GHashTable *objects;
   GPtrArray  *children;
   GPtrArray  *nonchildren;
@@ -2846,6 +2904,8 @@ struct _BgeWdgtRenderer
 
   GPtrArray *bindings;
   GPtrArray *watches;
+
+  guint tick;
 };
 
 G_DEFINE_FINAL_TYPE (BgeWdgtRenderer, bge_wdgt_renderer, GTK_TYPE_WIDGET);
@@ -2877,6 +2937,18 @@ BGE_DEFINE_DATA (
     BGE_RELEASE_DATA (instance, state_instance_data_unref);
     BGE_RELEASE_DATA (dest, value_data_unref);
     BGE_RELEASE_DATA (src, value_data_unref))
+
+BGE_DEFINE_DATA (
+    transition_closure,
+    TransitionClosure,
+    {
+      StateData         *state;
+      StateInstanceData *instance;
+      ValueData         *value;
+    },
+    BGE_RELEASE_DATA (state, state_data_unref);
+    BGE_RELEASE_DATA (instance, state_instance_data_unref);
+    BGE_RELEASE_DATA (value, value_data_unref))
 
 static void
 regenerate (BgeWdgtRenderer *self);
@@ -2915,6 +2987,12 @@ bge_wdgt_renderer_dispose (GObject *object)
 {
   BgeWdgtRenderer *self = BGE_WDGT_RENDERER (object);
 
+  if (self->tick > 0)
+    {
+      gtk_widget_remove_tick_callback (GTK_WIDGET (self), self->tick);
+      self->tick = 0;
+    }
+
   g_clear_pointer (&self->spec, g_object_unref);
   g_clear_pointer (&self->state, g_free);
   g_clear_pointer (&self->reference, g_object_unref);
@@ -2925,6 +3003,9 @@ bge_wdgt_renderer_dispose (GObject *object)
 
   g_clear_pointer (&self->active_state, state_data_unref);
   g_clear_pointer (&self->active_snapshot, snapshot_data_unref);
+
+  g_clear_pointer (&self->last_state, state_data_unref);
+  g_clear_pointer (&self->since_last_state, g_timer_destroy);
 
   g_clear_pointer (&self->objects, g_hash_table_unref);
   g_clear_pointer (&self->children, g_ptr_array_unref);
@@ -3171,6 +3252,64 @@ bge_wdgt_renderer_class_init (BgeWdgtRendererClass *klass)
   widget_class->snapshot      = bge_wdgt_renderer_snapshot;
 }
 
+static gboolean
+tick_cb (BgeWdgtRenderer *self,
+         GdkFrameClock   *frame_clock,
+         gpointer         user_data)
+{
+  GHashTableIter     iter            = { 0 };
+  StateInstanceData *active_instance = NULL;
+  StateInstanceData *last_instance   = NULL;
+  double             elapsed         = 0.0;
+  gboolean           finished_all    = TRUE;
+
+  if (self->spec == NULL ||
+      self->active_state == NULL ||
+      self->last_state == NULL)
+    return G_SOURCE_CONTINUE;
+
+  active_instance = g_hash_table_lookup (self->state_instances, self->active_state);
+  g_assert (active_instance != NULL);
+  last_instance = g_hash_table_lookup (self->state_instances, self->last_state);
+  g_assert (last_instance != NULL);
+
+  elapsed = g_timer_elapsed (self->since_last_state, NULL);
+
+  g_hash_table_iter_init (&iter, self->active_state->transitions);
+  for (;;)
+    {
+      ValueData      *dest       = NULL;
+      TransitionData *transition = NULL;
+      ValueData      *src        = NULL;
+      guint           idx        = 0;
+      gboolean        found      = FALSE;
+
+      if (!g_hash_table_iter_next (
+              &iter,
+              (gpointer *) &dest,
+              (gpointer *) &transition))
+        break;
+
+      src = g_hash_table_lookup (self->active_state->setters, dest);
+      if (src == NULL)
+        continue;
+
+      set_value (self, self->active_state, active_instance, dest, src, NULL);
+
+      found = g_ptr_array_find (active_instance->snapshot_deps, dest, &idx);
+      if (found)
+        gtk_widget_queue_draw (GTK_WIDGET (self));
+
+      if (elapsed <= transition->seconds)
+        finished_all = FALSE;
+    }
+
+  if (finished_all)
+    g_clear_pointer (&self->last_state, state_data_unref);
+
+  return G_SOURCE_CONTINUE;
+}
+
 static void
 bge_wdgt_renderer_init (BgeWdgtRenderer *self)
 {
@@ -3189,6 +3328,13 @@ bge_wdgt_renderer_init (BgeWdgtRenderer *self)
 
   self->bindings = g_ptr_array_new_with_free_func (discard_binding);
   self->watches  = g_ptr_array_new_with_free_func (discard_watch);
+
+  self->since_last_state = g_timer_new ();
+
+  self->tick = gtk_widget_add_tick_callback (
+      GTK_WIDGET (self),
+      (GtkTickCallback) tick_cb,
+      NULL, NULL);
 }
 
 BgeWdgtRenderer *
@@ -3345,6 +3491,12 @@ regenerate (BgeWdgtRenderer *self)
   g_hash_table_remove_all (self->objects);
   g_ptr_array_set_size (self->children, 0);
   g_ptr_array_set_size (self->nonchildren, 0);
+
+  g_clear_pointer (&self->last_state, state_data_unref);
+  g_clear_pointer (&self->active_state, state_data_unref);
+  g_clear_pointer (&self->active_snapshot, snapshot_data_unref);
+  g_ptr_array_set_size (self->bindings, 0);
+  g_ptr_array_set_size (self->watches, 0);
 
   if (self->spec == NULL)
     return;
@@ -3568,6 +3720,11 @@ apply_state (BgeWdgtRenderer *self)
   StateInstanceData *instance = NULL;
   GHashTableIter     iter     = { 0 };
 
+  g_clear_pointer (&self->last_state, state_data_unref);
+  if (self->active_state != NULL)
+    self->last_state = state_data_ref (self->active_state);
+  g_timer_start (self->since_last_state);
+
   g_clear_pointer (&self->active_state, state_data_unref);
   g_clear_pointer (&self->active_snapshot, snapshot_data_unref);
 
@@ -3698,6 +3855,61 @@ expression_create_rect (gpointer object,
   return rect;
 }
 
+static double
+expression_adjust_transition (BgeWdgtRenderer       *this,
+                              double                 in,
+                              TransitionClosureData *data)
+{
+  gboolean           result              = FALSE;
+  StateInstanceData *last_instance       = NULL;
+  ValueData         *last_in_value       = NULL;
+  GtkExpression     *last_in_expression  = NULL;
+  GValue             last_in_resolved    = G_VALUE_INIT;
+  double             last_in             = 0.0;
+  TransitionData    *transition          = NULL;
+  double             elapsed             = 0.0;
+  double             progress            = 0.0;
+  double             interpolated_number = 0.0;
+
+  g_assert (data->value->type == G_TYPE_DOUBLE);
+
+  if (this->active_state == NULL ||
+      this->last_state == NULL)
+    return in;
+
+  last_instance = g_hash_table_lookup (this->state_instances, this->last_state);
+  g_assert (last_instance != NULL);
+
+  last_in_value = g_hash_table_lookup (this->last_state->setters, data->value);
+  if (last_in_value == NULL)
+    return in;
+
+  last_in_expression = g_hash_table_lookup (
+      last_instance->expressions, last_in_value);
+  g_assert (last_in_expression != NULL);
+  result = gtk_expression_evaluate (
+      last_in_expression,
+      this,
+      &last_in_resolved);
+  last_in = g_value_get_double (&last_in_resolved);
+  g_value_unset (&last_in_resolved);
+  if (!result)
+    return in;
+
+  transition = g_hash_table_lookup (this->active_state->transitions, data->value);
+  g_assert (transition != NULL);
+  elapsed = g_timer_elapsed (this->since_last_state, NULL);
+
+  if (elapsed >= transition->seconds)
+    progress = 1.0;
+  else
+    progress = bge_easing_ease (transition->easing,
+                                elapsed / transition->seconds);
+
+  interpolated_number = last_in + progress * (in - last_in);
+  return interpolated_number;
+}
+
 static GtkExpression *
 ensure_expressions (BgeWdgtRenderer   *self,
                     ValueData         *value,
@@ -3728,21 +3940,14 @@ ensure_expressions (BgeWdgtRenderer   *self,
       break;
     case VALUE_VARIABLE:
       {
-        ValueData         *dig            = NULL;
-        StateInstanceData *which_instance = NULL;
+        ValueData *holds = NULL;
 
-        dig = dig_variable_value (value, state);
-        if (dig != NULL)
-          which_instance = instance;
-        else
-          {
-            dig = dig_variable_value (value, self->spec->init_state);
-            if (dig != NULL)
-              which_instance = self->init_instance;
-          }
+        holds = g_hash_table_lookup (state->setters, value);
+        if (holds == NULL)
+          holds = g_hash_table_lookup (self->spec->init_state->setters, value);
 
-        if (dig != NULL)
-          expression = ensure_expressions (self, dig, state, which_instance);
+        if (holds != NULL)
+          expression = ensure_expressions (self, holds, state, instance);
         else
           {
             GValue empty_value = G_VALUE_INIT;
@@ -3849,6 +4054,25 @@ ensure_expressions (BgeWdgtRenderer   *self,
     default:
       g_assert_not_reached ();
       break;
+    }
+
+  if (value->type == G_TYPE_DOUBLE &&
+      g_hash_table_contains (state->transitions, value))
+    {
+      g_autoptr (TransitionClosureData) data = NULL;
+
+      data           = transition_closure_data_new ();
+      data->state    = state_data_ref (state);
+      data->instance = state_instance_data_ref (instance);
+      data->value    = value_data_ref (value);
+
+      expression = gtk_cclosure_expression_new (
+          value->type,
+          bge_marshal_DOUBLE__DOUBLE,
+          1, &expression,
+          G_CALLBACK (expression_adjust_transition),
+          transition_closure_data_ref (data),
+          transition_closure_data_unref_closure);
     }
 
   g_hash_table_replace (

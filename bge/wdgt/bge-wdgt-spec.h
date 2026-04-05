@@ -143,6 +143,14 @@ bge_wdgt_spec_set_value (BgeWdgtSpec *self,
                          GError     **error);
 
 gboolean
+bge_wdgt_spec_transition_value (BgeWdgtSpec *self,
+                                const char  *state,
+                                const char  *value,
+                                double       seconds,
+                                BgeEasing    easing,
+                                GError     **error);
+
+gboolean
 bge_wdgt_spec_append_snapshot_instr (BgeWdgtSpec             *self,
                                      const char              *state,
                                      BgeWdgtSnapshotInstrKind kind,

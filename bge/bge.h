@@ -31,6 +31,7 @@ G_BEGIN_DECLS
 #include "bge-animation.h"
 #include "bge-carousel.h"
 #include "bge-markdown-render.h"
+#include "wdgt/bge-easing.h"
 #include "wdgt/bge-wdgt-spec-renderer.h"
 #include "wdgt/bge-wdgt-spec.h"
 #include "wdgt/bge-wdgt-time.h"

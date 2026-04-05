@@ -347,6 +347,55 @@ bge_wdgt_parse_string (const char *string,
                           RETURN_ERROR_UNLESS (result);
                         }
                     }
+                  else if (g_strcmp0 (token, STR_TRANSITION) == 0)
+                    {
+                      g_autofree char *transition_value    = NULL;
+                      g_autofree char *transition_type     = NULL;
+                      g_autofree char *transition_seconds  = NULL;
+                      g_autoptr (GEnumClass) enum_class    = NULL;
+                      GEnumValue *enum_value               = NULL;
+                      g_autoptr (GVariant) seconds_variant = NULL;
+                      gdouble seconds                      = 0.0;
+
+                      GET_TOKEN (&transition_value, TOKEN_PARSE_DEFAULT);
+                      GET_TOKEN (&transition_type, TOKEN_PARSE_DEFAULT);
+                      GET_TOKEN (&transition_seconds, TOKEN_PARSE_DEFAULT);
+
+                      enum_class = g_type_class_ref (BGE_TYPE_EASING);
+                      enum_value = g_enum_get_value_by_nick (enum_class, transition_type);
+                      if (enum_value == NULL)
+                        enum_value = g_enum_get_value_by_name (enum_class, transition_type);
+                      if (enum_value == NULL)
+                        {
+                          g_set_error (
+                              error,
+                              G_IO_ERROR,
+                              G_IO_ERROR_UNKNOWN,
+                              "'%s' not found in enum type %s",
+                              transition_type, g_type_name (BGE_TYPE_EASING));
+                          return NULL;
+                        }
+
+                      seconds_variant = g_variant_parse (
+                          G_VARIANT_TYPE_DOUBLE,
+                          transition_seconds,
+                          NULL, NULL, &local_error);
+                      RETURN_ERROR_UNLESS (seconds_variant != NULL);
+                      seconds = g_variant_get_double (seconds_variant);
+
+                      result = bge_wdgt_spec_transition_value (
+                          spec,
+                          state_name,
+                          transition_value,
+                          seconds,
+                          enum_value->value,
+                          &local_error);
+                      RETURN_ERROR_UNLESS (result);
+
+                      GET_TOKEN_EXPECT (&transition_seconds, TOKEN_PARSE_DEFAULT, ";");
+                    }
+                  else
+                    UNEXPECTED_TOKEN (token);
                 }
             }
           else
