@@ -9,9 +9,6 @@ defwidget "My Widget" {
   
 
   init {
-    set progress-bar = #ch:"GtkProgressBar":""(
-      fraction = fraction;
-    );
     set rect = #rect(-50.0,-50.0,100.0,100.0);
     set corner = #size(radius, radius);
     
@@ -26,18 +23,12 @@ defwidget "My Widget" {
   }
 
   state@default "d" = {
-    set fraction = 0.0;
-    transition fraction ease-in 3.0;
-    
     set radius = 10.0;
-    transition radius ease 0.4;
+    transition-spring radius 1.0, 0.1, 10.0;
   }
 
   state "s" = {
-    set fraction = 1.0;
-    transition fraction ease-out 2.0;
-    
-    set radius = 50.0;
-    transition radius ease 0.2;
+    set radius = 25.0;
+    transition-spring radius 0.1, 0.1, 20.0;
   }
 }

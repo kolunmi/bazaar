@@ -151,6 +151,15 @@ bge_wdgt_spec_transition_value (BgeWdgtSpec *self,
                                 GError     **error);
 
 gboolean
+bge_wdgt_spec_transition_value_spring (BgeWdgtSpec *self,
+                                       const char  *state,
+                                       const char  *value,
+                                       const char  *damping_ratio,
+                                       const char  *mass,
+                                       const char  *stiffness,
+                                       GError     **error);
+
+gboolean
 bge_wdgt_spec_append_snapshot_instr (BgeWdgtSpec             *self,
                                      const char              *state,
                                      BgeWdgtSnapshotInstrKind kind,

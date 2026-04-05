@@ -29,16 +29,17 @@
 #define SINGLE_CHAR_TOKENS      "{}()=:;,"
 #define EVAL_SINGLE_CHAR_TOKENS "#(),+-*/^%"
 
-#define STR_DEFWIDGET     "defwidget"
-#define STR_CHILD         "child"
-#define STR_VARIABLE      "var"
-#define STR_INIT          "init"
-#define STR_STATE         "state"
-#define STR_DEFAULT_STATE "state@default"
-#define STR_SET           "set"
-#define STR_TRANSITION    "transition"
-#define STR_ALLOCATE      "%allocate"
-#define STR_SNAPSHOT      "%snapshot"
+#define STR_DEFWIDGET         "defwidget"
+#define STR_CHILD             "child"
+#define STR_VARIABLE          "var"
+#define STR_INIT              "init"
+#define STR_STATE             "state"
+#define STR_DEFAULT_STATE     "state@default"
+#define STR_SET               "set"
+#define STR_TRANSITION        "transition"
+#define STR_TRANSITION_SPRING "transition-spring"
+#define STR_ALLOCATE          "%allocate"
+#define STR_SNAPSHOT          "%snapshot"
 
 typedef enum
 {
@@ -393,6 +394,39 @@ bge_wdgt_parse_string (const char *string,
                       RETURN_ERROR_UNLESS (result);
 
                       GET_TOKEN_EXPECT (&transition_seconds, TOKEN_PARSE_DEFAULT, ";");
+                    }
+                  else if (g_strcmp0 (token, STR_TRANSITION_SPRING) == 0)
+                    {
+                      g_autofree char *transition_value = NULL;
+                      guint            n_spec_values    = 0;
+                      g_auto (GStrv) spec_values        = NULL;
+
+                      GET_TOKEN (&transition_value, TOKEN_PARSE_DEFAULT);
+
+                      p = parse_args (p, spec, state_name, NULL, &n_anon_vals, &spec_values,
+                                      &n_spec_values, ARGS_PARSE_RIGHT_ASSIGN, &local_error);
+                      RETURN_ERROR_UNLESS (p != NULL);
+                      if (n_spec_values != 3)
+                        {
+                          g_set_error (
+                              error,
+                              G_IO_ERROR,
+                              G_IO_ERROR_UNKNOWN,
+                              "spring transition spec needs 3 arguments "
+                              "(damping-ratio, mass, stiffness), got %u",
+                              n_spec_values);
+                          return NULL;
+                        }
+
+                      result = bge_wdgt_spec_transition_value_spring (
+                          spec,
+                          state_name,
+                          transition_value,
+                          spec_values[0],
+                          spec_values[1],
+                          spec_values[2],
+                          &local_error);
+                      RETURN_ERROR_UNLESS (result);
                     }
                   else
                     UNEXPECTED_TOKEN (token);

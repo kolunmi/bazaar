@@ -20,6 +20,7 @@
 
 #include <gtk/gtk.h>
 
+#include "../bge-animation-private.h"
 #include "bge-marshalers.h"
 #include "bge.h"
 #include "fmt/parser.h"
@@ -37,6 +38,12 @@ typedef enum
   VALUE_PROPERTY,
   VALUE_CHILD,
 } ValueKind;
+
+typedef enum
+{
+  TRANSITION_EASE = 0,
+  TRANSITION_SPRING,
+} TransitionKind;
 
 typedef void (*SnapshotCallFunc) (GtkSnapshot *snapshot,
                                   const GValue args[],
@@ -118,14 +125,48 @@ deinit_value (gpointer ptr)
     }
 }
 
+static void
+deinit_transition (gpointer ptr);
 BGE_DEFINE_DATA (
     transition,
     Transition,
     {
-      double    seconds;
-      BgeEasing easing;
+      TransitionKind kind;
+      union
+      {
+        struct
+        {
+          double    seconds;
+          BgeEasing easing;
+        } ease;
+        struct
+        {
+          ValueData *damping_ratio;
+          ValueData *mass;
+          ValueData *stiffness;
+        } spring;
+      };
     },
-    (void) self;)
+    deinit_transition (self);)
+
+static void
+deinit_transition (gpointer ptr)
+{
+  TransitionData *transition = ptr;
+
+  switch (transition->kind)
+    {
+    case TRANSITION_EASE:
+      break;
+    case TRANSITION_SPRING:
+      g_clear_pointer (&transition->spring.damping_ratio, value_data_unref);
+      g_clear_pointer (&transition->spring.mass, value_data_unref);
+      g_clear_pointer (&transition->spring.stiffness, value_data_unref);
+      break;
+    default:
+      g_assert_not_reached ();
+    }
+}
 
 BGE_DEFINE_DATA (
     snapshot_call,
@@ -1518,9 +1559,124 @@ bge_wdgt_spec_transition_value (BgeWdgtSpec *self,
       return FALSE;
     }
 
-  transition          = transition_data_new ();
-  transition->seconds = seconds;
-  transition->easing  = easing;
+  transition               = transition_data_new ();
+  transition->kind         = TRANSITION_EASE;
+  transition->ease.seconds = seconds;
+  transition->ease.easing  = easing;
+
+  g_hash_table_replace (
+      state_data->transitions,
+      value_data_ref (value_data),
+      transition_data_ref (transition));
+  /* We want the init state to track the transition as well in case of value
+     overlays */
+  g_hash_table_replace (
+      self->init_state->transitions,
+      value_data_ref (value_data),
+      transition_data_ref (transition));
+  return TRUE;
+}
+
+gboolean
+bge_wdgt_spec_transition_value_spring (BgeWdgtSpec *self,
+                                       const char  *state,
+                                       const char  *value,
+                                       const char  *damping_ratio,
+                                       const char  *mass,
+                                       const char  *stiffness,
+                                       GError     **error)
+{
+  StateData *state_data                 = NULL;
+  ValueData *value_data                 = NULL;
+  ValueData *damping_ratio_data         = NULL;
+  ValueData *mass_data                  = NULL;
+  ValueData *stiffness_data             = NULL;
+  g_autoptr (TransitionData) transition = NULL;
+
+  g_return_val_if_fail (BGE_IS_WDGT_SPEC (self), FALSE);
+  /* state is required for transitions */
+  g_return_val_if_fail (state != NULL, FALSE);
+  g_return_val_if_fail (value != NULL, FALSE);
+  g_return_val_if_fail (damping_ratio != NULL, FALSE);
+  g_return_val_if_fail (mass != NULL, FALSE);
+  g_return_val_if_fail (stiffness != NULL, FALSE);
+
+  state_data         = g_hash_table_lookup (self->states, state);
+  value_data         = g_hash_table_lookup (self->values, value);
+  damping_ratio_data = g_hash_table_lookup (self->values, damping_ratio);
+  mass_data          = g_hash_table_lookup (self->values, mass);
+  stiffness_data     = g_hash_table_lookup (self->values, stiffness);
+
+  if (state_data == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "state '%s' is undefined", state);
+      return FALSE;
+    }
+  if (value_data == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' is undefined", value);
+      return FALSE;
+    }
+  if (damping_ratio_data == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' is undefined", damping_ratio);
+      return FALSE;
+    }
+  if (mass_data == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' is undefined", mass);
+      return FALSE;
+    }
+  if (stiffness_data == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' is undefined", stiffness);
+      return FALSE;
+    }
+
+  if (value_data->type != G_TYPE_DOUBLE)
+    /* TODO: support more types */
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "type %s cannot be transitioned",
+                   g_type_name (value_data->type));
+      return FALSE;
+    }
+
+  if (damping_ratio_data->type != G_TYPE_DOUBLE)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "transition damping ratio must of type %s, got %s",
+                   g_type_name (G_TYPE_DOUBLE),
+                   g_type_name (damping_ratio_data->type));
+      return FALSE;
+    }
+  if (mass_data->type != G_TYPE_DOUBLE)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "transition mass must of type %s, got %s",
+                   g_type_name (G_TYPE_DOUBLE),
+                   g_type_name (mass_data->type));
+      return FALSE;
+    }
+  if (stiffness_data->type != G_TYPE_DOUBLE)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "transition stiffness must of type %s, got %s",
+                   g_type_name (G_TYPE_DOUBLE),
+                   g_type_name (stiffness_data->type));
+      return FALSE;
+    }
+
+  transition                       = transition_data_new ();
+  transition->kind                 = TRANSITION_SPRING;
+  transition->spring.damping_ratio = value_data_ref (damping_ratio_data);
+  transition->spring.mass          = value_data_ref (mass_data);
+  transition->spring.stiffness     = value_data_ref (stiffness_data);
 
   g_hash_table_replace (
       state_data->transitions,
@@ -3049,6 +3205,14 @@ BGE_DEFINE_DATA (
       double           value;
       double           elapsed;
       BgeWdgtNotifier *notifier;
+      struct
+      {
+        double velocity;
+        double est_duration;
+        double cache_damping_ratio;
+        double cache_mass;
+        double cache_stiffness;
+      } spring;
     },
     BGE_RELEASE_DATA (notifier, g_object_unref))
 
@@ -3083,6 +3247,11 @@ set_value (BgeWdgtRenderer   *self,
            ValueData         *dest,
            ValueData         *src,
            GPtrArray         *watches);
+
+static double
+resolve_value_double (BgeWdgtRenderer   *self,
+                      ValueData         *value,
+                      StateInstanceData *instance);
 
 static void
 discard_binding (gpointer ptr);
@@ -3387,9 +3556,10 @@ tick_cb (BgeWdgtRenderer *self,
   g_hash_table_iter_init (&iter, self->active_state->transitions);
   for (;;)
     {
-      ValueData              *value               = NULL;
-      TransitionData         *transition          = NULL;
-      TransitionInstanceData *transition_instance = NULL;
+      ValueData              *value                    = NULL;
+      TransitionData         *transition               = NULL;
+      TransitionInstanceData *transition_instance      = NULL;
+      TransitionInstanceData *init_transition_instance = NULL;
 
       if (!g_hash_table_iter_next (
               &iter,
@@ -3402,14 +3572,26 @@ tick_cb (BgeWdgtRenderer *self,
         g_object_notify_by_pspec (
             G_OBJECT (transition_instance->notifier),
             notifier_props[NOTIFIER_PROP_VALUE]);
-      transition_instance = g_hash_table_lookup (self->init_instance->transitions, value);
+      init_transition_instance = g_hash_table_lookup (self->init_instance->transitions, value);
       if (transition_instance != NULL)
         g_object_notify_by_pspec (
-            G_OBJECT (transition_instance->notifier),
+            G_OBJECT (init_transition_instance->notifier),
             notifier_props[NOTIFIER_PROP_VALUE]);
 
-      if (elapsed <= transition->seconds)
-        finished_all = FALSE;
+      switch (transition->kind)
+        {
+        case TRANSITION_EASE:
+          if (elapsed <= transition->ease.seconds)
+            finished_all = FALSE;
+          break;
+        case TRANSITION_SPRING:
+          if (transition_instance->spring.est_duration < 0.0 ||
+              elapsed <= transition_instance->spring.est_duration)
+            finished_all = FALSE;
+          break;
+        default:
+          g_assert_not_reached ();
+        }
     }
 
   if (finished_all)
@@ -3879,8 +4061,9 @@ apply_state (BgeWdgtRenderer *self)
   g_hash_table_iter_init (&iter, state->setters);
   for (;;)
     {
-      ValueData *dest = NULL;
-      ValueData *src  = NULL;
+      ValueData              *dest                = NULL;
+      ValueData              *src                 = NULL;
+      TransitionInstanceData *transition_instance = NULL;
 
       if (!g_hash_table_iter_next (
               &iter,
@@ -3895,6 +4078,10 @@ apply_state (BgeWdgtRenderer *self)
           dest,
           src,
           self->watches);
+
+      transition_instance = g_hash_table_lookup (instance->transitions, dest);
+      if (transition_instance != NULL)
+        transition_instance->spring.est_duration = -1.0;
     }
 
   for (guint i = 0; i < instance->snapshot_deps->len; i++)
@@ -3990,8 +4177,6 @@ expression_adjust_transition (BgeWdgtRenderer       *this,
   TransitionInstanceData *transition_instance      = NULL;
   TransitionInstanceData *last_transition_instance = NULL;
   ValueData              *last_in_value            = NULL;
-  GtkExpression          *last_in_expression       = NULL;
-  GValue                  last_in_resolved         = G_VALUE_INIT;
   double                  last_in                  = 0.0;
   double                  elapsed                  = 0.0;
   double                  progress                 = 0.0;
@@ -4037,36 +4222,102 @@ expression_adjust_transition (BgeWdgtRenderer       *this,
 
   if (last_transition != NULL &&
       last_transition_instance != NULL &&
-      last_transition_instance->elapsed < last_transition->seconds)
+      ((last_transition->kind == TRANSITION_EASE &&
+        last_transition_instance->elapsed < last_transition->ease.seconds) ||
+       (last_transition->kind == TRANSITION_SPRING &&
+        last_transition_instance->spring.est_duration >= 0.0 &&
+        last_transition_instance->elapsed < last_transition_instance->spring.est_duration)))
     last_in = last_transition_instance->value;
   else
     {
       last_in_value = g_hash_table_lookup (this->last_state->setters, data->value);
       if (last_in_value == NULL)
         return in;
-      last_in_expression = g_hash_table_lookup (
-          this->last_instance->expressions, last_in_value);
-      g_assert (last_in_expression != NULL);
-      result = gtk_expression_evaluate (
-          last_in_expression,
-          this,
-          &last_in_resolved);
-      last_in = g_value_get_double (&last_in_resolved);
-      g_value_unset (&last_in_resolved);
-      if (!result)
-        return in;
+      last_in = resolve_value_double (this, last_in_value, this->last_instance);
     }
 
   elapsed                      = g_timer_elapsed (this->since_last_state, NULL);
   transition_instance->elapsed = elapsed;
 
-  if (elapsed >= transition->seconds)
-    progress = 1.0;
-  else
-    progress = bge_easing_ease (transition->easing,
-                                elapsed / transition->seconds);
+  switch (transition->kind)
+    {
+    case TRANSITION_SPRING:
+      {
+        double damping_ratio = 0.0;
+        double mass          = 0.0;
+        double stiffness     = 0.0;
+        double damping       = 0.0;
 
-  interpolated_number        = last_in + progress * (in - last_in);
+        damping_ratio = resolve_value_double (
+            this,
+            transition->spring.damping_ratio,
+            this->active_instance);
+        mass = resolve_value_double (
+            this,
+            transition->spring.mass,
+            this->active_instance);
+        stiffness = resolve_value_double (
+            this,
+            transition->spring.stiffness,
+            this->active_instance);
+
+        damping = damping_ratio *
+                  (/* critical damping */
+                   2 * sqrt (mass * stiffness));
+
+        if (transition_instance->spring.est_duration < 0.0 ||
+            damping_ratio != transition_instance->spring.cache_damping_ratio ||
+            mass != transition_instance->spring.cache_mass ||
+            stiffness != transition_instance->spring.cache_stiffness)
+          {
+            if (last_transition != NULL &&
+                last_transition->kind == TRANSITION_SPRING)
+              transition_instance->spring.velocity = last_transition_instance->spring.velocity;
+            else
+              transition_instance->spring.velocity = 0.0;
+
+            transition_instance->spring.est_duration = spring_calculate_duration (
+                damping,
+                mass,
+                stiffness,
+                last_in,
+                in,
+                FALSE);
+
+            transition_instance->spring.cache_damping_ratio = damping_ratio;
+            transition_instance->spring.cache_mass          = mass;
+            transition_instance->spring.cache_stiffness     = stiffness;
+          }
+
+        if (elapsed >= transition_instance->spring.est_duration)
+          interpolated_number = in;
+        else
+          interpolated_number = spring_oscillate (
+              damping,
+              mass,
+              stiffness,
+              last_in,
+              in,
+              elapsed,
+              &transition_instance->spring.velocity);
+      }
+      break;
+    case TRANSITION_EASE:
+      {
+        if (elapsed >= transition->ease.seconds)
+          interpolated_number = in;
+        else
+          {
+            progress            = bge_easing_ease (transition->ease.easing,
+                                                   elapsed / transition->ease.seconds);
+            interpolated_number = last_in + progress * (in - last_in);
+          }
+      }
+      break;
+    default:
+      g_assert_not_reached ();
+    }
+
   transition_instance->value = interpolated_number;
   return interpolated_number;
 }
@@ -4230,8 +4481,18 @@ ensure_expressions (BgeWdgtRenderer   *self,
 
       notifier_object = g_object_new (BGE_TYPE_WDGT_NOTIFIER, NULL);
 
-      instance_data           = transition_instance_data_new ();
-      instance_data->elapsed  = transition->seconds;
+      instance_data = transition_instance_data_new ();
+      switch (transition->kind)
+        {
+        case TRANSITION_EASE:
+          instance_data->elapsed = transition->ease.seconds;
+          break;
+        case TRANSITION_SPRING:
+          instance_data->spring.est_duration = -1.0;
+          break;
+        default:
+          g_assert_not_reached ();
+        }
       instance_data->notifier = g_object_ref (notifier_object);
       g_hash_table_replace (instance->transitions,
                             value_data_ref (value),
@@ -4352,6 +4613,27 @@ set_value (BgeWdgtRenderer   *self,
           watch_setter_data_unref);
       g_ptr_array_add (watches, watch);
     }
+}
+
+static double
+resolve_value_double (BgeWdgtRenderer   *self,
+                      ValueData         *value,
+                      StateInstanceData *instance)
+{
+  GtkExpression *expression = NULL;
+  GValue         resolved   = G_VALUE_INIT;
+  double         ret        = 0.0;
+
+  expression = g_hash_table_lookup (instance->expressions, value);
+  g_assert (expression != NULL);
+  gtk_expression_evaluate (
+      expression,
+      self,
+      &resolved);
+  ret = g_value_get_double (&resolved);
+  g_value_unset (&resolved);
+
+  return ret;
 }
 
 static void
