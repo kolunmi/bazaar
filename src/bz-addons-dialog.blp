@@ -243,13 +243,17 @@ template $BzAddonsDialog: Adw.Dialog {
                 Stack {
                   transition-type: crossfade;
                   halign: center;
-                  margin-top: 12;
-                  margin-bottom: 16;
+                  margin-top: 6;
+                  margin-bottom: 8;
                   visible-child-name: bind $get_install_stack_page(template.selected-group as <$BzEntryGroup>.installable, template.selected-group as <$BzEntryGroup>.removable) as <string>;
 
                   StackPage {
                     name: "install";
                     child: Button {
+                      margin-top: 6;
+                      margin-bottom: 6;
+                      margin-start: 6;
+                      margin-end: 6;
                       styles ["pill", "suggested-action"]
                       label: _("Install");
                       sensitive: bind $invert_boolean($is_zero(template.selected-group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
@@ -261,6 +265,10 @@ template $BzAddonsDialog: Adw.Dialog {
                     name: "open";
                     child: Box {
                       spacing: 8;
+                      margin-top: 6;
+                      margin-bottom: 6;
+                      margin-start: 6;
+                      margin-end: 6;
 
                       Button {
                         styles ["pill"]

@@ -249,11 +249,11 @@ bz_addons_dialog_init (BzAddonsDialog *self)
   gtk_widget_init_template (GTK_WIDGET (self));
 
   width_target          = adw_property_animation_target_new (G_OBJECT (self), "content-width");
-  self->width_animation = adw_timed_animation_new (GTK_WIDGET (self), 0, 0, 200, width_target);
+  self->width_animation = adw_timed_animation_new (GTK_WIDGET (self), 0, 0, 300, width_target);
   adw_timed_animation_set_easing (ADW_TIMED_ANIMATION (self->width_animation), ADW_EASE_IN_OUT_CUBIC);
 
   height_target          = adw_property_animation_target_new (G_OBJECT (self), "content-height");
-  self->height_animation = adw_timed_animation_new (GTK_WIDGET (self), 0, 0, 200, height_target);
+  self->height_animation = adw_timed_animation_new (GTK_WIDGET (self), 0, 0, 300, height_target);
   adw_timed_animation_set_easing (ADW_TIMED_ANIMATION (self->height_animation), ADW_EASE_IN_OUT_CUBIC);
 }
 
