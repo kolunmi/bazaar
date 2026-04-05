@@ -11,10 +11,16 @@ Box root {
         };
       };
     };
-    end-child: $BgeWdgtRenderer wdgt {
-      hexpand: true;
-      vexpand: true;
-      state: "default";
+    end-child: Box {
+      orientation: vertical;
+      $BgeWdgtRenderer wdgt {
+        hexpand: true;
+        vexpand: true;
+        state: bind state_entry.text;
+      }
+      Entry state_entry {
+        text: "default";
+      }
     };
   }
 }

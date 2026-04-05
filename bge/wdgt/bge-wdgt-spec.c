@@ -167,6 +167,7 @@ struct _BgeWdgtSpec
   GPtrArray  *children;
   GPtrArray  *nonchildren;
 
+  StateData *init_state;
   StateData *default_state;
   struct
   {
@@ -226,6 +227,7 @@ bge_wdgt_spec_dispose (GObject *object)
   g_clear_pointer (&self->children, g_ptr_array_unref);
   g_clear_pointer (&self->nonchildren, g_ptr_array_unref);
 
+  g_clear_pointer (&self->init_state, state_data_unref);
   g_clear_pointer (&self->default_state, state_data_unref);
 
   G_OBJECT_CLASS (bge_wdgt_spec_parent_class)->dispose (object);
@@ -743,6 +745,16 @@ bge_wdgt_spec_init (BgeWdgtSpec *self)
   self->states      = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, state_data_unref);
   self->children    = g_ptr_array_new_with_free_func (value_data_unref);
   self->nonchildren = g_ptr_array_new_with_free_func (value_data_unref);
+
+  self->init_state          = state_data_new ();
+  self->init_state->name    = g_strdup ("init");
+  self->init_state->setters = g_hash_table_new_full (
+      g_direct_hash, g_direct_equal,
+      value_data_unref, value_data_unref);
+  ensure_state_snapshot (self->init_state);
+  g_hash_table_replace (self->states,
+                        g_strdup ("init"),
+                        state_data_ref (self->init_state));
 }
 
 BgeWdgtSpec *
@@ -1364,13 +1376,16 @@ bge_wdgt_spec_set_value (BgeWdgtSpec *self,
   ValueData *src_data   = NULL;
 
   g_return_val_if_fail (BGE_IS_WDGT_SPEC (self), FALSE);
-  g_return_val_if_fail (state != NULL, FALSE);
   g_return_val_if_fail (dest_value != NULL, FALSE);
   g_return_val_if_fail (src_value != NULL, FALSE);
 
-  state_data = g_hash_table_lookup (self->states, state);
-  dest_data  = g_hash_table_lookup (self->values, dest_value);
-  src_data   = g_hash_table_lookup (self->values, src_value);
+  if (state != NULL)
+    state_data = g_hash_table_lookup (self->states, state);
+  else
+    state_data = self->init_state;
+
+  dest_data = g_hash_table_lookup (self->values, dest_value);
+  src_data  = g_hash_table_lookup (self->values, src_value);
 
   if (state_data == NULL)
     {
@@ -1457,17 +1472,21 @@ bge_wdgt_spec_append_snapshot_instr (BgeWdgtSpec             *self,
   g_autoptr (SnapshotCallData) call = NULL;
 
   g_return_val_if_fail (BGE_IS_WDGT_SPEC (self), FALSE);
-  g_return_val_if_fail (state != NULL, FALSE);
   g_return_val_if_fail (instr != NULL, FALSE);
   g_return_val_if_fail (n_args == 0 || args != NULL, FALSE);
 
-  state_data = g_hash_table_lookup (self->states, state);
-  if (state_data == NULL)
+  if (state != NULL)
     {
-      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
-                   "state '%s' is undefined", state);
-      return FALSE;
+      state_data = g_hash_table_lookup (self->states, state);
+      if (state_data == NULL)
+        {
+          g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                       "state '%s' is undefined", state);
+          return FALSE;
+        }
     }
+  else
+    state_data = self->init_state;
 
   switch (kind)
     {
@@ -2795,6 +2814,16 @@ ensure_state_snapshot (StateData *state)
 /* Widget Renderer Implementation */
 /* ------------------------------ */
 
+BGE_DEFINE_DATA (
+    state_instance,
+    StateInstance,
+    {
+      GHashTable *expressions;
+      GPtrArray  *snapshot_deps;
+    },
+    BGE_RELEASE_DATA (expressions, g_hash_table_unref);
+    BGE_RELEASE_DATA (snapshot_deps, g_ptr_array_unref))
+
 struct _BgeWdgtRenderer
 {
   GtkWidget parent_instance;
@@ -2803,6 +2832,9 @@ struct _BgeWdgtRenderer
   char        *state;
   GObject     *reference;
   GtkWidget   *child;
+
+  StateInstanceData *init_instance;
+  GPtrArray         *init_watches;
 
   StateData    *active_state;
   SnapshotData *active_snapshot;
@@ -2830,16 +2862,6 @@ enum
   LAST_RENDERER_PROP
 };
 static GParamSpec *renderer_props[LAST_RENDERER_PROP] = { 0 };
-
-BGE_DEFINE_DATA (
-    state_instance,
-    StateInstance,
-    {
-      GHashTable *expressions;
-      GPtrArray  *snapshot_deps;
-    },
-    BGE_RELEASE_DATA (expressions, g_hash_table_unref);
-    BGE_RELEASE_DATA (snapshot_deps, g_ptr_array_unref))
 
 BGE_DEFINE_DATA (
     watch_setter,
@@ -2874,7 +2896,7 @@ set_value (BgeWdgtRenderer   *self,
            StateInstanceData *instance,
            ValueData         *dest,
            ValueData         *src,
-           gboolean           setup_watches);
+           GPtrArray         *watches);
 
 static void
 discard_binding (gpointer ptr);
@@ -2897,6 +2919,9 @@ bge_wdgt_renderer_dispose (GObject *object)
   g_clear_pointer (&self->state, g_free);
   g_clear_pointer (&self->reference, g_object_unref);
   g_clear_pointer (&self->child, gtk_widget_unparent);
+
+  g_clear_pointer (&self->init_instance, state_instance_data_unref);
+  g_clear_pointer (&self->init_watches, g_ptr_array_unref);
 
   g_clear_pointer (&self->active_state, state_data_unref);
   g_clear_pointer (&self->active_snapshot, snapshot_data_unref);
@@ -3149,6 +3174,8 @@ bge_wdgt_renderer_class_init (BgeWdgtRendererClass *klass)
 static void
 bge_wdgt_renderer_init (BgeWdgtRenderer *self)
 {
+  self->init_watches = g_ptr_array_new_with_free_func (discard_watch);
+
   self->objects = g_hash_table_new_full (
       g_direct_hash, g_direct_equal,
       value_data_unref, g_object_unref);
@@ -3310,7 +3337,10 @@ regenerate (BgeWdgtRenderer *self)
   BgeWdgtSpec *spec                    = self->spec;
   g_autoptr (GtkBuilder) dummy_builder = NULL;
   GHashTableIter state_iter            = { 0 };
+  GHashTableIter setters_iter          = { 0 };
 
+  g_clear_pointer (&self->init_instance, state_instance_data_unref);
+  g_ptr_array_set_size (self->init_watches, 0);
   g_hash_table_remove_all (self->state_instances);
   g_hash_table_remove_all (self->objects);
   g_ptr_array_set_size (self->children, 0);
@@ -3378,9 +3408,8 @@ regenerate (BgeWdgtRenderer *self)
   g_hash_table_iter_init (&state_iter, spec->states);
   for (;;)
     {
-      GHashTableIter value_iter              = { 0 };
-      char          *state_name              = NULL;
-      StateData     *state                   = NULL;
+      char      *state_name                  = NULL;
+      StateData *state                       = NULL;
       g_autoptr (StateInstanceData) instance = NULL;
 
       if (!g_hash_table_iter_next (
@@ -3395,6 +3424,33 @@ regenerate (BgeWdgtRenderer *self)
           value_data_unref, (GDestroyNotify) gtk_expression_unref);
       instance->snapshot_deps = g_ptr_array_new_with_free_func (
           (GDestroyNotify) gtk_expression_unref);
+
+      g_hash_table_replace (self->state_instances,
+                            state_data_ref (state),
+                            state_instance_data_ref (instance));
+
+      if (state == spec->init_state)
+        self->init_instance = state_instance_data_ref (instance);
+    }
+
+  /* Separate to ensure `self->init_instance` has been set */
+
+  g_hash_table_iter_init (&state_iter, spec->states);
+  for (;;)
+    {
+      GHashTableIter     value_iter = { 0 };
+      char              *state_name = NULL;
+      StateData         *state      = NULL;
+      StateInstanceData *instance   = NULL;
+
+      if (!g_hash_table_iter_next (
+              &state_iter,
+              (gpointer *) &state_name,
+              (gpointer *) &state))
+        break;
+
+      instance = g_hash_table_lookup (self->state_instances, state);
+      g_assert (instance != NULL);
 
       g_hash_table_iter_init (&value_iter, spec->values);
       for (;;)
@@ -3411,20 +3467,15 @@ regenerate (BgeWdgtRenderer *self)
 
           expression = ensure_expressions (self, value, state, instance);
         }
-
-      g_hash_table_replace (self->state_instances,
-                            state_data_ref (state),
-                            state_instance_data_ref (instance));
     }
 
   g_hash_table_iter_init (&state_iter, spec->states);
   for (;;)
     {
-      char              *state_name        = NULL;
-      StateData         *state             = NULL;
-      StateInstanceData *instance          = NULL;
-      StateData         *snapshot_state    = NULL;
-      StateInstanceData *snapshot_instance = NULL;
+      char              *state_name     = NULL;
+      StateData         *state          = NULL;
+      StateInstanceData *instance       = NULL;
+      StateData         *snapshot_state = NULL;
 
       if (!g_hash_table_iter_next (
               &state_iter,
@@ -3436,24 +3487,11 @@ regenerate (BgeWdgtRenderer *self)
       g_assert (instance != NULL);
 
       if (state->snapshot != NULL)
-        {
-          snapshot_state    = state;
-          snapshot_instance = instance;
-        }
+        snapshot_state = state;
       else
-        {
-          if (self->spec->default_state != NULL &&
-              self->spec->default_state->snapshot != NULL)
-            /* If this state doesn't have snapshot instructions specified, fallback
-               on using the default state */
-            {
-              snapshot_state    = self->spec->default_state;
-              snapshot_instance = g_hash_table_lookup (self->state_instances, snapshot_state);
-              g_assert (snapshot_instance != NULL);
-            }
-          else
-            continue;
-        }
+        /* If this state doesn't have snapshot instructions specified, fallback
+           on using the init state */
+        snapshot_state = self->spec->init_state;
 
       for (guint i = 0; i < snapshot_state->snapshot->calls->len; i++)
         {
@@ -3495,6 +3533,29 @@ regenerate (BgeWdgtRenderer *self)
         }
     }
 
+  g_hash_table_iter_init (
+      &setters_iter,
+      self->spec->init_state->setters);
+  for (;;)
+    {
+      ValueData *dest = NULL;
+      ValueData *src  = NULL;
+
+      if (!g_hash_table_iter_next (
+              &setters_iter,
+              (gpointer *) &dest,
+              (gpointer *) &src))
+        break;
+
+      set_value (
+          self,
+          self->spec->init_state,
+          self->init_instance,
+          dest,
+          src,
+          self->init_watches);
+    }
+
   gtk_widget_queue_allocate (GTK_WIDGET (self));
   gtk_widget_queue_draw (GTK_WIDGET (self));
 }
@@ -3530,6 +3591,11 @@ apply_state (BgeWdgtRenderer *self)
 
   self->active_state = state_data_ref (state);
 
+  if (state->snapshot != NULL)
+    self->active_snapshot = snapshot_data_ref (state->snapshot);
+  else if (self->spec->init_state->snapshot != NULL)
+    self->active_snapshot = snapshot_data_ref (self->spec->init_state->snapshot);
+
   g_hash_table_iter_init (&iter, state->setters);
   for (;;)
     {
@@ -3548,30 +3614,21 @@ apply_state (BgeWdgtRenderer *self)
           instance,
           dest,
           src,
-          TRUE);
+          self->watches);
     }
 
-  if (state->snapshot != NULL)
-    self->active_snapshot = snapshot_data_ref (state->snapshot);
-  else if (self->spec->default_state != NULL &&
-           self->spec->default_state->snapshot != NULL)
-    self->active_snapshot = snapshot_data_ref (self->spec->default_state->snapshot);
-
-  if (self->active_snapshot != NULL)
+  for (guint i = 0; i < instance->snapshot_deps->len; i++)
     {
-      for (guint i = 0; i < instance->snapshot_deps->len; i++)
-        {
-          GtkExpression      *expression = NULL;
-          GtkExpressionWatch *watch      = NULL;
+      GtkExpression      *expression = NULL;
+      GtkExpressionWatch *watch      = NULL;
 
-          expression = g_ptr_array_index (instance->snapshot_deps, i);
-          watch      = gtk_expression_watch (
-              expression,
-              self,
-              (GtkExpressionNotify) prop_change_queue_draw,
-              self, NULL);
-          g_ptr_array_add (self->watches, watch);
-        }
+      expression = g_ptr_array_index (instance->snapshot_deps, i);
+      watch      = gtk_expression_watch (
+          expression,
+          self,
+          (GtkExpressionNotify) prop_change_queue_draw,
+          self, NULL);
+      g_ptr_array_add (self->watches, watch);
     }
 }
 
@@ -3671,11 +3728,21 @@ ensure_expressions (BgeWdgtRenderer   *self,
       break;
     case VALUE_VARIABLE:
       {
-        ValueData *dig = NULL;
+        ValueData         *dig            = NULL;
+        StateInstanceData *which_instance = NULL;
 
         dig = dig_variable_value (value, state);
         if (dig != NULL)
-          expression = ensure_expressions (self, dig, state, instance);
+          which_instance = instance;
+        else
+          {
+            dig = dig_variable_value (value, self->spec->init_state);
+            if (dig != NULL)
+              which_instance = self->init_instance;
+          }
+
+        if (dig != NULL)
+          expression = ensure_expressions (self, dig, state, which_instance);
         else
           {
             GValue empty_value = G_VALUE_INIT;
@@ -3797,11 +3864,8 @@ set_value (BgeWdgtRenderer   *self,
            StateInstanceData *instance,
            ValueData         *dest,
            ValueData         *src,
-           gboolean           setup_watches)
+           GPtrArray         *watches)
 {
-  if (src->kind == VALUE_VARIABLE)
-    src = dig_variable_value (src, state);
-
   switch (dest->kind)
     {
     case VALUE_PROPERTY:
@@ -3838,7 +3902,7 @@ set_value (BgeWdgtRenderer   *self,
         g_value_unset (&dest_obj_resolved);
         g_value_unset (&src_resolved);
 
-        if (setup_watches)
+        if (watches != NULL)
           {
             g_autoptr (WatchSetterData) watch_data = NULL;
             GtkExpressionWatch *watch              = NULL;
@@ -3856,7 +3920,7 @@ set_value (BgeWdgtRenderer   *self,
                 (GtkExpressionNotify) reset_setter,
                 watch_setter_data_ref (watch_data),
                 watch_setter_data_unref);
-            g_ptr_array_add (self->watches, watch);
+            g_ptr_array_add (watches, watch);
 
             watch = gtk_expression_watch (
                 src_expression,
@@ -3864,7 +3928,7 @@ set_value (BgeWdgtRenderer   *self,
                 (GtkExpressionNotify) reset_setter,
                 watch_setter_data_ref (watch_data),
                 watch_setter_data_unref);
-            g_ptr_array_add (self->watches, watch);
+            g_ptr_array_add (watches, watch);
           }
       }
       break;
@@ -3909,13 +3973,25 @@ prop_change_queue_draw (BgeWdgtRenderer *self)
 static void
 reset_setter (WatchSetterData *data)
 {
+  BgeWdgtRenderer *self = data->self;
+
+  /* Active state watchers are "overlayed" over the permanent init state. Thus,
+     if this is the init state and the active state also sets this value, we
+     should avoid touching it */
+  if (self->active_state != NULL /* ? */ &&
+      data->state == self->spec->init_state &&
+      g_hash_table_contains (
+          self->active_state->setters,
+          data->dest))
+    return;
+
   set_value (
       data->self,
       data->state,
       data->instance,
       data->dest,
       data->src,
-      FALSE);
+      NULL);
 }
 
 /* End of bge-wdgt-spec.c */

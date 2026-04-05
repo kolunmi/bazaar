@@ -1,24 +1,37 @@
 defwidget "My Widget" {
 
   var t : "BgeWdgtTime";
-  var overlay : "GtkBox";
+  var box : "GtkBox";
+  var coords : "GraphenePoint";
 
-  state@default "default" = {
+  init {
     set t = #o:"BgeWdgtTime"(notify-msec = #i:"guint"(5););
-    set overlay = #ch:"GtkBox":""(
+    
+    set box = #ch:"GtkBox":""(
       _ = #ch:"GtkLabel":""(label="start";);
       _ = #ch:"GtkLabel":""(label="center";
                             hexpand=true;);
       _ = #ch:"GtkLabel":""(label="end";);
     );
 
+    set coords = #point(0.0,0.0);
+    
     %snapshot = {
       save {
         move translate(#point(200.0, 200.0));
-        move translate(#point(#eval(100.0*cos(2.0*#(t:time))),
-                              #eval(100.0*sin(2.0*#(t:time)))));
+        move translate(coords);
         add color(#rgba("orange"), #rect(-50.0,-50.0,100.0,100.0));
       }
     }
+  }
+
+  state@default "default" = {
+    set coords = #point(#eval(100.0*cos(2.0*#(t:time))),
+                        #eval(100.0*sin(2.0*#(t:time))));
+  }
+
+  state "secondary" = {
+    set coords = #point(#eval(50.0*cos(2.0*#(t:time))),
+                        #eval(50.0*sin(2.0*#(t:time))));
   }
 }

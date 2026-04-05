@@ -32,6 +32,7 @@
 #define STR_DEFWIDGET     "defwidget"
 #define STR_CHILD         "child"
 #define STR_VARIABLE      "var"
+#define STR_INIT          "init"
 #define STR_STATE         "state"
 #define STR_DEFAULT_STATE "state@default"
 #define STR_SET           "set"
@@ -268,22 +269,26 @@ bge_wdgt_parse_string (const char *string,
                   spec, g_type_from_name (gtype), name, &local_error);
               RETURN_ERROR_UNLESS (result);
             }
-          else if (g_strcmp0 (token, STR_STATE) == 0 ||
+          else if (g_strcmp0 (token, STR_INIT) == 0 ||
+                   g_strcmp0 (token, STR_STATE) == 0 ||
                    g_strcmp0 (token, STR_DEFAULT_STATE) == 0)
             {
               g_autofree char *state_name = NULL;
 
-              GET_TOKEN (&state_name, TOKEN_PARSE_QUOTED);
-              result = bge_wdgt_spec_add_state (
-                  spec,
-                  state_name,
-                  g_strcmp0 (token, STR_DEFAULT_STATE) == 0,
-                  &local_error);
-              RETURN_ERROR_UNLESS (result);
+              if (g_strcmp0 (token, STR_INIT) != 0)
+                {
+                  GET_TOKEN (&state_name, TOKEN_PARSE_QUOTED);
 
-              GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "=");
+                  result = bge_wdgt_spec_add_state (
+                      spec,
+                      state_name,
+                      g_strcmp0 (token, STR_DEFAULT_STATE) == 0,
+                      &local_error);
+                  RETURN_ERROR_UNLESS (result);
+                  GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "=");
+                }
+
               GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "{");
-
               for (;;)
                 {
                   GET_TOKEN (&token, TOKEN_PARSE_DEFAULT);
