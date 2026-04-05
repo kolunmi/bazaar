@@ -27,7 +27,7 @@ defwidget "My Widget" {
 
   state@default "d" = {
     set fraction = 0.0;
-    transition fraction ease-in 0.3;
+    transition fraction ease-in 3.0;
     
     set radius = 10.0;
     transition radius ease 0.4;
@@ -35,7 +35,7 @@ defwidget "My Widget" {
 
   state "s" = {
     set fraction = 1.0;
-    transition fraction ease-out 0.3;
+    transition fraction ease-out 2.0;
     
     set radius = 50.0;
     transition radius ease 0.2;
