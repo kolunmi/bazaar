@@ -170,7 +170,7 @@ update_is_zoomed (BzScreenshotPage *self)
                 : GSK_SCALING_FILTER_NEAREST);
     }
 
-  self->is_zoomed = (zoom_level != 1.0);
+  self->is_zoomed = zoom != NULL && bz_zoom_is_transformed (zoom);
 
   if (was_zoomed != self->is_zoomed)
     g_object_notify_by_pspec (G_OBJECT (self), props[PROP_IS_ZOOMED]);
