@@ -259,14 +259,14 @@ bz_dynamic_list_view_class_init (BzDynamicListViewClass *klass)
       g_param_spec_uint (
           "row-spacing",
           NULL, NULL,
-          0, G_MAXUINT, 5,
+          0, G_MAXUINT, 11,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   props[PROP_COLUMN_SPACING] =
       g_param_spec_uint (
           "column-spacing",
           NULL, NULL,
-          0, G_MAXUINT, 5,
+          0, G_MAXUINT, 11,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   props[PROP_CHILD_TYPE] =
@@ -335,8 +335,8 @@ bz_dynamic_list_view_init (BzDynamicListView *self)
   self->child_type            = G_TYPE_INVALID;
   self->noscroll_kind         = BZ_DYNAMIC_LIST_VIEW_KIND_LIST_BOX;
   self->max_children_per_line = 4;
-  self->row_spacing           = 5;
-  self->column_spacing        = 5;
+  self->row_spacing           = 11;
+  self->column_spacing        = 11;
   self->box_children          = g_ptr_array_new ();
 }
 
