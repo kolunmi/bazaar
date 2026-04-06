@@ -1,22 +1,29 @@
 defwidget "My Widget" {
 
-  var progress-bar : "GtkProgressBar";
-  var fraction : "gdouble";
+  var rect-size : "gdouble";
+  var rect : "GrapheneRect";
   
   var radius : "gdouble";
   var corner : "GrapheneSize";
-  var rect : "GrapheneRect";
-  
+
+  var grad-os : "gdouble";
 
   init {
-    set rect = #rect(-50.0,-50.0,100.0,100.0);
+    set rect = #rect(#eval(0.0-#(rect-size)/2.0),
+                     #eval(0.0-#(rect-size)/2.0),
+                     rect-size, rect-size);
     set corner = #size(radius, radius);
     
     %snapshot = {
       save {
-        move translate(#point(200.0, 200.0));
+        move translate(#point(400.0, 400.0));
         with rounded-clip(rect, corner, corner, corner, corner) {
-          add color(#rgba("orange"), rect);
+          add linear-gradient(
+            rect,
+            #point(#eval(#(grad-os)*#(rect-size)), #eval(0.0-#(rect-size))),
+            #point(#eval(0.0-#(grad-os)*#(rect-size)), #eval(0.0+#(rect-size))),
+            0.0, #rgba("#3584e4"),
+            1.0, #rgba("#e62d42"),);
         }
       }
     }
@@ -25,10 +32,22 @@ defwidget "My Widget" {
   state@default "d" = {
     set radius = 10.0;
     transition-spring radius 1.0, 0.1, 10.0;
+    
+    set rect-size = 60.0;
+    transition-spring rect-size 1.0, 0.1, 10.0;
+
+    set grad-os = -1.0;
+    transition-spring grad-os 1.0, 0.1, 10.0;
   }
 
   state "s" = {
     set radius = 25.0;
-    transition-spring radius 0.1, 0.1, 20.0;
+    transition-spring radius 0.6, 0.1, 20.0;
+    
+    set rect-size = 400.0;
+    transition-spring rect-size 0.5, 0.5, 100.0;
+    
+    set grad-os = 1.0;
+    transition-spring grad-os 1.0, 0.1, 10.0;
   }
 }
