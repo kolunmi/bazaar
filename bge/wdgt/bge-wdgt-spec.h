@@ -84,6 +84,15 @@ bge_wdgt_spec_add_component_source_value (BgeWdgtSpec       *self,
                                           GError           **error);
 
 gboolean
+bge_wdgt_spec_add_transform_source_value (BgeWdgtSpec       *self,
+                                          const char        *name,
+                                          const char        *next,
+                                          const char        *instruction,
+                                          const char *const *args,
+                                          guint              n_args,
+                                          GError           **error);
+
+gboolean
 bge_wdgt_spec_add_instance_source_value (BgeWdgtSpec *self,
                                          const char  *name,
                                          GType        type,
@@ -128,6 +137,24 @@ bge_wdgt_spec_add_property_value (BgeWdgtSpec *self,
                                   const char  *object,
                                   const char  *property,
                                   GError     **error);
+
+gboolean
+bge_wdgt_spec_add_allocation_width_value (BgeWdgtSpec *self,
+                                          const char  *name,
+                                          const char  *child,
+                                          GError     **error);
+
+gboolean
+bge_wdgt_spec_add_allocation_height_value (BgeWdgtSpec *self,
+                                           const char  *name,
+                                           const char  *child,
+                                           GError     **error);
+
+gboolean
+bge_wdgt_spec_add_allocation_transform_value (BgeWdgtSpec *self,
+                                              const char  *name,
+                                              const char  *child,
+                                              GError     **error);
 
 gboolean
 bge_wdgt_spec_add_state (BgeWdgtSpec *self,

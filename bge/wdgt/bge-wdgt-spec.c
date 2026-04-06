@@ -29,16 +29,28 @@
 
 #define ARGBUF_SIZE 128
 
+static void
+_marshal_BOXED__ARGS_DIRECT (GClosure                *closure,
+                             GValue                  *return_value,
+                             guint                    n_param_values,
+                             const GValue            *param_values,
+                             gpointer invocation_hint G_GNUC_UNUSED,
+                             gpointer                 marshal_data);
+
 typedef enum
 {
   VALUE_OBJECT = 0,
   VALUE_CONSTANT,
   VALUE_COMPONENT,
+  VALUE_TRANSFORM,
   VALUE_CLOSURE,
   VALUE_SPECIAL,
   VALUE_VARIABLE,
   VALUE_PROPERTY,
   VALUE_CHILD,
+  VALUE_ALLOCATION_WIDTH,
+  VALUE_ALLOCATION_HEIGHT,
+  VALUE_ALLOCATION_TRANSFORM,
 } ValueKind;
 
 typedef enum
@@ -47,10 +59,32 @@ typedef enum
   TRANSITION_SPRING,
 } TransitionKind;
 
+typedef GskTransform *(*TransformCallFunc) (GskTransform *next,
+                                            const GValue  args[]);
+
+typedef struct
+{
+  const char       *name;
+  guint             n_args;
+  GType             args[16];
+  gpointer          func;
+  TransformCallFunc call;
+} TransformInstr;
+
 typedef void (*SnapshotCallFunc) (GtkSnapshot *snapshot,
                                   const GValue args[],
                                   const GValue rest[],
                                   guint        n_rest);
+
+typedef struct
+{
+  const char      *name;
+  guint            n_args;
+  guint            n_rest;
+  GType            args[16];
+  gpointer         func;
+  SnapshotCallFunc call;
+} SnapshotInstr;
 
 static void
 deinit_value (gpointer ptr);
@@ -65,6 +99,12 @@ BGE_DEFINE_DATA (
       {
         GValue     constant;
         GPtrArray *component;
+        struct
+        {
+          TransformCallFunc func;
+          ValueData        *next;
+          GPtrArray        *args;
+        } transform;
         struct
         {
           GPtrArray      *args;
@@ -85,6 +125,10 @@ BGE_DEFINE_DATA (
           ValueData *parent_widget;
           char      *builder_type;
         } child;
+        struct
+        {
+          ValueData *widget;
+        } allocation;
       };
     },
     deinit_value (self);)
@@ -105,6 +149,10 @@ deinit_value (gpointer ptr)
     case VALUE_COMPONENT:
       g_clear_pointer (&value->component, g_ptr_array_unref);
       break;
+    case VALUE_TRANSFORM:
+      g_clear_pointer (&value->transform.next, value_data_unref);
+      g_clear_pointer (&value->transform.args, g_ptr_array_unref);
+      break;
     case VALUE_CLOSURE:
       g_clear_pointer (&value->closure.args, g_ptr_array_unref);
       if (value->closure.destroy_user_data != NULL)
@@ -121,6 +169,11 @@ deinit_value (gpointer ptr)
     case VALUE_CHILD:
       g_clear_pointer (&value->child.parent_widget, value_data_unref);
       g_clear_pointer (&value->child.builder_type, g_free);
+      break;
+    case VALUE_ALLOCATION_WIDTH:
+    case VALUE_ALLOCATION_HEIGHT:
+    case VALUE_ALLOCATION_TRANSFORM:
+      g_clear_pointer (&value->allocation.widget, value_data_unref);
       break;
     default:
       g_assert_not_reached ();
@@ -242,15 +295,9 @@ enum
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
 
-typedef struct
-{
-  const char      *name;
-  guint            n_args;
-  guint            n_rest;
-  GType            args[16];
-  gpointer         func;
-  SnapshotCallFunc call;
-} SnapshotInstr;
+static gboolean
+lookup_transform_instr (const char     *lookup_name,
+                        TransformInstr *out);
 
 static gboolean
 lookup_snapshot_push_instr (const char    *lookup_name,
@@ -1027,6 +1074,106 @@ bge_wdgt_spec_add_component_source_value (BgeWdgtSpec       *self,
 }
 
 gboolean
+bge_wdgt_spec_add_transform_source_value (BgeWdgtSpec       *self,
+                                          const char        *name,
+                                          const char        *next,
+                                          const char        *instruction,
+                                          const char *const *args,
+                                          guint              n_args,
+                                          GError           **error)
+{
+  gboolean   result           = FALSE;
+  ValueData *next_data        = NULL;
+  g_autoptr (ValueData) value = NULL;
+  TransformInstr match        = { 0 };
+
+  g_return_val_if_fail (BGE_IS_WDGT_SPEC (self), FALSE);
+  g_return_val_if_fail (name != NULL, FALSE);
+  g_return_val_if_fail (next != NULL, FALSE);
+  g_return_val_if_fail (instruction != NULL, FALSE);
+  g_return_val_if_fail (n_args == 0 || args != NULL, FALSE);
+
+  if (g_hash_table_contains (self->values, name))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' already exists", name);
+      return FALSE;
+    }
+
+  next_data = g_hash_table_lookup (self->values, next);
+  if (next_data == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' is undefined", next);
+      return FALSE;
+    }
+  if (next_data->type != GSK_TYPE_TRANSFORM)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' must be of type %s to "
+                   "build a transform, got %s",
+                   next,
+                   g_type_name (GSK_TYPE_TRANSFORM),
+                   g_type_name (next_data->type));
+      return FALSE;
+    }
+
+  result = lookup_transform_instr (instruction, &match);
+  if (!result)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "\"%s\" is not a valid transform builder instruction",
+                   instruction);
+      return FALSE;
+    }
+  if (n_args != match.n_args)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "transform builder function %s requires %u "
+                   "arguments, got %u",
+                   match.name, match.n_args, n_args);
+      return FALSE;
+    }
+
+  value                 = value_data_new ();
+  value->name           = g_strdup (name);
+  value->type           = GSK_TYPE_TRANSFORM;
+  value->kind           = VALUE_TRANSFORM;
+  value->transform.func = match.call;
+  value->transform.next = value_data_ref (next_data);
+  value->transform.args = g_ptr_array_new_with_free_func (value_data_unref);
+
+  for (guint i = 0; i < n_args; i++)
+    {
+      ValueData *value_data = NULL;
+
+      value_data = g_hash_table_lookup (self->values, args[i]);
+      if (value_data == NULL)
+        {
+          g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                       "value '%s' is undefined", args[i]);
+          return FALSE;
+        }
+
+      if (!g_type_is_a (value_data->type, match.args[i]))
+        {
+          g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                       "argument %u for snapshot instruction %s "
+                       "must be of type %s, got %s",
+                       i, match.name,
+                       g_type_name (match.args[i]),
+                       g_type_name (value_data->type));
+          return FALSE;
+        }
+
+      g_ptr_array_add (value->transform.args, value_data_ref (value_data));
+    }
+
+  g_hash_table_replace (self->values, g_strdup (name), value_data_ref (value));
+  return TRUE;
+}
+
+gboolean
 bge_wdgt_spec_add_instance_source_value (BgeWdgtSpec *self,
                                          const char  *name,
                                          GType        type,
@@ -1376,6 +1523,138 @@ bge_wdgt_spec_add_property_value (BgeWdgtSpec *self,
   value->property.object      = value_data_ref (object_value);
   value->property.prop_name   = g_strdup (property);
   value->property.pspec_flags = pspec->flags;
+
+  g_hash_table_replace (self->values, g_strdup (name), value_data_ref (value));
+  return TRUE;
+}
+
+gboolean
+bge_wdgt_spec_add_allocation_width_value (BgeWdgtSpec *self,
+                                          const char  *name,
+                                          const char  *child,
+                                          GError     **error)
+{
+  ValueData *child_value      = NULL;
+  g_autoptr (ValueData) value = NULL;
+
+  g_return_val_if_fail (BGE_IS_WDGT_SPEC (self), FALSE);
+  g_return_val_if_fail (name != NULL, FALSE);
+  g_return_val_if_fail (child != NULL, FALSE);
+
+  if (g_hash_table_contains (self->values, name))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' already exists", name);
+      return FALSE;
+    }
+
+  child_value = g_hash_table_lookup (self->values, child);
+  if (child_value == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' is undefined", child);
+      return FALSE;
+    }
+  if (!g_type_is_a (child_value->type, GTK_TYPE_WIDGET))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' is not a widget", child);
+      return FALSE;
+    }
+
+  value                    = value_data_new ();
+  value->name              = g_strdup (name);
+  value->type              = G_TYPE_INT;
+  value->kind              = VALUE_ALLOCATION_WIDTH;
+  value->allocation.widget = value_data_ref (child_value);
+
+  g_hash_table_replace (self->values, g_strdup (name), value_data_ref (value));
+  return TRUE;
+}
+
+gboolean
+bge_wdgt_spec_add_allocation_height_value (BgeWdgtSpec *self,
+                                           const char  *name,
+                                           const char  *child,
+                                           GError     **error)
+{
+  ValueData *child_value      = NULL;
+  g_autoptr (ValueData) value = NULL;
+
+  g_return_val_if_fail (BGE_IS_WDGT_SPEC (self), FALSE);
+  g_return_val_if_fail (name != NULL, FALSE);
+  g_return_val_if_fail (child != NULL, FALSE);
+
+  if (g_hash_table_contains (self->values, name))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' already exists", name);
+      return FALSE;
+    }
+
+  child_value = g_hash_table_lookup (self->values, child);
+  if (child_value == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' is undefined", child);
+      return FALSE;
+    }
+  if (!g_type_is_a (child_value->type, GTK_TYPE_WIDGET))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' is not a widget", child);
+      return FALSE;
+    }
+
+  value                    = value_data_new ();
+  value->name              = g_strdup (name);
+  value->type              = G_TYPE_INT;
+  value->kind              = VALUE_ALLOCATION_HEIGHT;
+  value->allocation.widget = value_data_ref (child_value);
+
+  g_hash_table_replace (self->values, g_strdup (name), value_data_ref (value));
+  return TRUE;
+}
+
+gboolean
+bge_wdgt_spec_add_allocation_transform_value (BgeWdgtSpec *self,
+                                              const char  *name,
+                                              const char  *child,
+                                              GError     **error)
+{
+  ValueData *child_value      = NULL;
+  g_autoptr (ValueData) value = NULL;
+
+  g_return_val_if_fail (BGE_IS_WDGT_SPEC (self), FALSE);
+  g_return_val_if_fail (name != NULL, FALSE);
+  g_return_val_if_fail (child != NULL, FALSE);
+
+  if (g_hash_table_contains (self->values, name))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' already exists", name);
+      return FALSE;
+    }
+
+  child_value = g_hash_table_lookup (self->values, child);
+  if (child_value == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' is undefined", child);
+      return FALSE;
+    }
+  if (!g_type_is_a (child_value->type, GTK_TYPE_WIDGET))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' is not a widget", child);
+      return FALSE;
+    }
+
+  value                    = value_data_new ();
+  value->name              = g_strdup (name);
+  value->type              = GSK_TYPE_TRANSFORM;
+  value->kind              = VALUE_ALLOCATION_TRANSFORM;
+  value->allocation.widget = value_data_ref (child_value);
 
   g_hash_table_replace (self->values, g_strdup (name), value_data_ref (value));
   return TRUE;
@@ -1851,6 +2130,258 @@ bge_wdgt_spec_mark_ready (BgeWdgtSpec *self)
 {
   g_return_if_fail (BGE_IS_WDGT_SPEC (self));
   self->ready = TRUE;
+}
+
+static GskTransform *
+transform_instr_transform (GskTransform *next,
+                           const GValue  args[])
+{
+  return gsk_transform_transform (
+      next,
+      g_value_get_boxed (&args[0]));
+}
+
+static GskTransform *
+transform_instr_invert (GskTransform *next,
+                        const GValue  args[])
+{
+  return gsk_transform_transform (
+      next,
+      g_value_get_boxed (&args[0]));
+}
+
+static GskTransform *
+transform_instr_matrix (GskTransform *next,
+                        const GValue  args[])
+{
+  return gsk_transform_matrix (
+      next,
+      g_value_get_boxed (&args[0]));
+}
+
+static GskTransform *
+transform_instr_matrix_2d (GskTransform *next,
+                           const GValue  args[])
+{
+  return gsk_transform_matrix_2d (
+      next,
+      g_value_get_double (&args[0]),
+      g_value_get_double (&args[1]),
+      g_value_get_double (&args[2]),
+      g_value_get_double (&args[3]),
+      g_value_get_double (&args[4]),
+      g_value_get_double (&args[5]));
+}
+
+static GskTransform *
+transform_instr_translate (GskTransform *next,
+                           const GValue  args[])
+{
+  return gsk_transform_translate (
+      next,
+      g_value_get_boxed (&args[0]));
+}
+
+static GskTransform *
+transform_instr_translate_3d (GskTransform *next,
+                              const GValue  args[])
+{
+  return gsk_transform_translate_3d (
+      next,
+      g_value_get_boxed (&args[0]));
+}
+
+static GskTransform *
+transform_instr_skew (GskTransform *next,
+                      const GValue  args[])
+{
+  return gsk_transform_skew (
+      next,
+      g_value_get_double (&args[0]),
+      g_value_get_double (&args[1]));
+}
+
+static GskTransform *
+transform_instr_rotate (GskTransform *next,
+                        const GValue  args[])
+{
+  return gsk_transform_rotate (
+      next,
+      g_value_get_double (&args[0]));
+}
+
+static GskTransform *
+transform_instr_rotate_3d (GskTransform *next,
+                           const GValue  args[])
+{
+  return gsk_transform_rotate_3d (
+      next,
+      g_value_get_double (&args[0]),
+      g_value_get_boxed (&args[1]));
+}
+
+static GskTransform *
+transform_instr_scale (GskTransform *next,
+                       const GValue  args[])
+{
+  return gsk_transform_scale (
+      next,
+      g_value_get_double (&args[0]),
+      g_value_get_double (&args[1]));
+}
+
+static GskTransform *
+transform_instr_scale_3d (GskTransform *next,
+                          const GValue  args[])
+{
+  return gsk_transform_scale_3d (
+      next,
+      g_value_get_double (&args[0]),
+      g_value_get_double (&args[1]),
+      g_value_get_double (&args[2]));
+}
+
+static GskTransform *
+transform_instr_perspective (GskTransform *next,
+                             const GValue  args[])
+{
+  return gsk_transform_perspective (
+      next,
+      g_value_get_double (&args[0]));
+}
+
+static gboolean
+lookup_transform_instr (const char     *lookup_name,
+                        TransformInstr *out)
+{
+  TransformInstr instrs[] = {
+    {
+     "transform",
+     1,
+     {
+     GSK_TYPE_TRANSFORM,
+     },
+     gsk_transform_transform,
+     transform_instr_transform,
+     },
+    {
+     "invert",
+     0,
+     {},
+     gsk_transform_invert,
+     transform_instr_invert,
+     },
+    {
+     "matrix",
+     1,
+     {
+     GRAPHENE_TYPE_MATRIX,
+     },
+     gsk_transform_matrix,
+     transform_instr_matrix,
+     },
+    {
+     "matrix-2d",
+     6,
+     {
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     },
+     gsk_transform_matrix_2d,
+     transform_instr_matrix_2d,
+     },
+    {
+     "translate",
+     1,
+     {
+     GRAPHENE_TYPE_POINT,
+     },
+     gsk_transform_translate,
+     transform_instr_translate,
+     },
+    {
+     "translate-3d",
+     1,
+     {
+     GRAPHENE_TYPE_POINT3D,
+     },
+     gsk_transform_translate_3d,
+     transform_instr_translate_3d,
+     },
+    {
+     "skew",
+     2,
+     {
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     },
+     gsk_transform_skew,
+     transform_instr_skew,
+     },
+    {
+     "rotate",
+     1,
+     {
+     G_TYPE_DOUBLE,
+     },
+     gsk_transform_rotate,
+     transform_instr_rotate,
+     },
+    {
+     "rotate-3d",
+     2,
+     {
+     G_TYPE_DOUBLE,
+     GRAPHENE_TYPE_VEC3,
+     },
+     gsk_transform_rotate_3d,
+     transform_instr_rotate_3d,
+     },
+    {
+     "scale",
+     2,
+     {
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     },
+     gsk_transform_scale,
+     transform_instr_scale,
+     },
+    {
+     "scale-3d",
+     3,
+     {
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     },
+     gsk_transform_scale_3d,
+     transform_instr_scale_3d,
+     },
+    {
+     "perspective",
+     1,
+     {
+     G_TYPE_DOUBLE,
+     },
+     gsk_transform_perspective,
+     transform_instr_perspective,
+     },
+  };
+
+  for (guint i = 0; i < G_N_ELEMENTS (instrs); i++)
+    {
+      if (g_strcmp0 (lookup_name, instrs[i].name) == 0)
+        {
+          *out = instrs[i];
+          return TRUE;
+        }
+    }
+  return FALSE;
 }
 
 static void
@@ -3161,6 +3692,7 @@ struct _BgeWdgtRenderer
 
   GHashTable *objects;
   GPtrArray  *children;
+  GHashTable *allocations;
   GPtrArray  *nonchildren;
   GHashTable *state_instances;
 
@@ -3199,6 +3731,16 @@ BGE_DEFINE_DATA (
     BGE_RELEASE_DATA (instance, state_instance_data_unref);
     BGE_RELEASE_DATA (dest, value_data_unref);
     BGE_RELEASE_DATA (src, value_data_unref))
+
+BGE_DEFINE_DATA (
+    allocation,
+    Allocation,
+    {
+      int           width;
+      int           height;
+      GskTransform *transform;
+    },
+    BGE_RELEASE_DATA (transform, gsk_transform_unref))
 
 BGE_DEFINE_DATA (
     transition_instance,
@@ -3296,6 +3838,7 @@ bge_wdgt_renderer_dispose (GObject *object)
 
   g_clear_pointer (&self->objects, g_hash_table_unref);
   g_clear_pointer (&self->children, g_ptr_array_unref);
+  g_clear_pointer (&self->allocations, g_hash_table_unref);
   g_clear_pointer (&self->nonchildren, g_ptr_array_unref);
   g_clear_pointer (&self->state_instances, g_hash_table_unref);
 
@@ -3392,10 +3935,24 @@ bge_wdgt_renderer_size_allocate (GtkWidget *widget,
 
   for (guint i = 0; i < self->children->len; i++)
     {
-      GtkWidget *child = NULL;
+      GtkWidget      *child      = NULL;
+      AllocationData *allocation = NULL;
 
-      child = g_ptr_array_index (self->children, i);
-      gtk_widget_allocate (child, width, height, baseline, NULL);
+      child      = g_ptr_array_index (self->children, i);
+      allocation = g_hash_table_lookup (self->allocations, child);
+
+      gtk_widget_allocate (
+          child,
+          allocation->width > 0
+              ? allocation->width
+              : width,
+          allocation->height > 0
+              ? allocation->height
+              : height,
+          baseline,
+          allocation != NULL && allocation->transform != NULL
+              ? gsk_transform_ref (allocation->transform)
+              : NULL);
     }
 }
 
@@ -3615,6 +4172,9 @@ bge_wdgt_renderer_init (BgeWdgtRenderer *self)
       value_data_unref, g_object_unref);
   self->children = g_ptr_array_new_with_free_func (
       (GDestroyNotify) gtk_widget_unparent);
+  self->allocations = g_hash_table_new_full (
+      g_direct_hash, g_direct_equal,
+      g_object_unref, allocation_data_unref);
   self->nonchildren = g_ptr_array_new_with_free_func (
       (GDestroyNotify) g_object_unref);
   self->state_instances = g_hash_table_new_full (
@@ -3785,6 +4345,7 @@ regenerate (BgeWdgtRenderer *self)
   g_hash_table_remove_all (self->state_instances);
   g_hash_table_remove_all (self->objects);
   g_ptr_array_set_size (self->children, 0);
+  g_hash_table_remove_all (self->allocations);
   g_ptr_array_set_size (self->nonchildren, 0);
 
   g_clear_pointer (&self->last_state, state_data_unref);
@@ -3801,8 +4362,9 @@ regenerate (BgeWdgtRenderer *self)
   dummy_builder = gtk_builder_new ();
   for (guint i = 0; i < spec->children->len; i++)
     {
-      ValueData *value  = NULL;
-      GtkWidget *widget = NULL;
+      ValueData *value                      = NULL;
+      GtkWidget *widget                     = NULL;
+      g_autoptr (AllocationData) allocation = NULL;
 
       value = g_ptr_array_index (spec->children, i);
       g_assert (value->kind == VALUE_CHILD);
@@ -3837,6 +4399,11 @@ regenerate (BgeWdgtRenderer *self)
       g_hash_table_replace (self->objects,
                             value_data_ref (value),
                             g_object_ref (widget));
+
+      allocation = allocation_data_new ();
+      g_hash_table_replace (self->allocations,
+                            g_object_ref (widget),
+                            allocation_data_ref (allocation));
     }
 
   for (guint i = 0; i < spec->nonchildren->len; i++)
@@ -4224,11 +4791,8 @@ expression_adjust_transition (BgeWdgtRenderer       *this,
 
   if (last_transition != NULL &&
       last_transition_instance != NULL &&
-      ((last_transition->kind == TRANSITION_EASE &&
-        last_transition_instance->elapsed < last_transition->ease.seconds) ||
-       (last_transition->kind == TRANSITION_SPRING &&
-        last_transition_instance->spring.est_duration >= 0.0 &&
-        last_transition_instance->elapsed < last_transition_instance->spring.est_duration)))
+      last_transition->kind == TRANSITION_EASE &&
+      last_transition_instance->elapsed < last_transition->ease.seconds)
     last_in = last_transition_instance->value;
   else
     {
@@ -4324,6 +4888,15 @@ expression_adjust_transition (BgeWdgtRenderer       *this,
   return interpolated_number;
 }
 
+static GskTransform *
+expression_perform_transform (gpointer          this,
+                              guint             n_param_values,
+                              const GValue     *param_values,
+                              TransformCallFunc func)
+{
+  return func (g_value_dup_boxed (&param_values[0]), param_values + 1);
+}
+
 static GtkExpression *
 ensure_expressions (BgeWdgtRenderer   *self,
                     ValueData         *value,
@@ -4354,6 +4927,9 @@ ensure_expressions (BgeWdgtRenderer   *self,
       }
       break;
     case VALUE_VARIABLE:
+    case VALUE_ALLOCATION_WIDTH:
+    case VALUE_ALLOCATION_HEIGHT:
+    case VALUE_ALLOCATION_TRANSFORM:
       {
         ValueData *holds = NULL;
 
@@ -4421,6 +4997,36 @@ ensure_expressions (BgeWdgtRenderer   *self,
             (GtkExpression **) params->pdata,
             callback,
             self,
+            NULL);
+      }
+      break;
+    case VALUE_TRANSFORM:
+      {
+        g_autoptr (GPtrArray) params        = NULL;
+        g_autoptr (GtkExpression) next_expr = NULL;
+
+        params = g_ptr_array_new ();
+
+        next_expr = ensure_expressions (self, value->transform.next, state, instance);
+        g_ptr_array_add (params, g_steal_pointer (&next_expr));
+
+        for (guint i = 0; i < value->transform.args->len; i++)
+          {
+            ValueData *arg                     = NULL;
+            g_autoptr (GtkExpression) arg_expr = NULL;
+
+            arg      = g_ptr_array_index (value->transform.args, i);
+            arg_expr = ensure_expressions (self, arg, state, instance);
+            g_ptr_array_add (params, g_steal_pointer (&arg_expr));
+          }
+
+        expression = gtk_cclosure_expression_new (
+            value->type,
+            _marshal_BOXED__ARGS_DIRECT,
+            params->len,
+            (GtkExpression **) params->pdata,
+            G_CALLBACK (expression_perform_transform),
+            value->transform.func,
             NULL);
       }
       break;
@@ -4534,6 +5140,7 @@ set_value (BgeWdgtRenderer   *self,
            ValueData         *src,
            GPtrArray         *watches)
 {
+  gboolean       result          = FALSE;
   GtkExpression *src_expression  = NULL;
   GtkExpression *dest_expression = NULL;
 
@@ -4551,7 +5158,6 @@ set_value (BgeWdgtRenderer   *self,
         GtkExpression *dest_obj_expression = NULL;
         GValue         dest_obj_resolved   = G_VALUE_INIT;
         GObject       *dest_obj            = NULL;
-        GValue         src_resolved        = G_VALUE_INIT;
 
         dest_obj_expression = g_hash_table_lookup (
             instance->expressions, dest->property.object);
@@ -4562,19 +5168,88 @@ set_value (BgeWdgtRenderer   *self,
             &dest_obj_resolved);
         dest_obj = g_value_get_object (&dest_obj_resolved);
 
-        gtk_expression_evaluate (
-            src_expression,
-            self,
-            &src_resolved);
-
         if (dest_obj != NULL)
-          g_object_set_property (
-              dest_obj,
-              dest->property.prop_name,
-              &src_resolved);
+          {
+            GValue src_resolved = G_VALUE_INIT;
+
+            gtk_expression_evaluate (
+                src_expression,
+                self,
+                &src_resolved);
+
+            g_object_set_property (
+                dest_obj,
+                dest->property.prop_name,
+                &src_resolved);
+            g_value_unset (&src_resolved);
+          }
 
         g_value_unset (&dest_obj_resolved);
-        g_value_unset (&src_resolved);
+      }
+      break;
+    case VALUE_ALLOCATION_WIDTH:
+    case VALUE_ALLOCATION_HEIGHT:
+    case VALUE_ALLOCATION_TRANSFORM:
+      {
+        GtkExpression *dest_widget_expression = NULL;
+        GValue         dest_widget_resolved   = G_VALUE_INIT;
+        GtkWidget     *dest_widget            = NULL;
+
+        dest_widget_expression = g_hash_table_lookup (
+            instance->expressions, dest->allocation.widget);
+        g_assert (dest_widget_expression != NULL);
+        gtk_expression_evaluate (
+            dest_widget_expression,
+            self,
+            &dest_widget_resolved);
+        dest_widget = g_value_get_object (&dest_widget_resolved);
+
+        if (dest_widget != NULL)
+          {
+            AllocationData *allocation = NULL;
+
+            allocation = g_hash_table_lookup (self->allocations, dest_widget);
+            if (allocation != NULL)
+              {
+                GValue src_resolved = G_VALUE_INIT;
+
+                result = gtk_expression_evaluate (
+                    src_expression,
+                    self,
+                    &src_resolved);
+
+                switch (dest->kind)
+                  {
+                  case VALUE_ALLOCATION_WIDTH:
+                    allocation->width = g_value_get_int (&src_resolved);
+                    break;
+                  case VALUE_ALLOCATION_HEIGHT:
+                    allocation->height = g_value_get_int (&src_resolved);
+                    break;
+                  case VALUE_ALLOCATION_TRANSFORM:
+                    g_clear_pointer (&allocation->transform, gsk_transform_unref);
+                    allocation->transform = result
+                                                ? g_value_dup_boxed (&src_resolved)
+                                                : gsk_transform_new ();
+                    break;
+                  case VALUE_PROPERTY:
+                  case VALUE_VARIABLE:
+                  case VALUE_CHILD:
+                  case VALUE_COMPONENT:
+                  case VALUE_TRANSFORM:
+                  case VALUE_CLOSURE:
+                  case VALUE_CONSTANT:
+                  case VALUE_SPECIAL:
+                  case VALUE_OBJECT:
+                  default:
+                    g_assert_not_reached ();
+                  }
+
+                gtk_widget_queue_allocate (GTK_WIDGET (self));
+              }
+          }
+
+        g_value_unset (&dest_widget_resolved);
       }
       break;
     case VALUE_VARIABLE:
@@ -4582,6 +5257,8 @@ set_value (BgeWdgtRenderer   *self,
     case VALUE_CHILD:
       break;
     case VALUE_COMPONENT:
+      break;
+    case VALUE_TRANSFORM:
       break;
     case VALUE_CLOSURE:
       break;
@@ -4684,6 +5361,46 @@ reset_setter (WatchSetterData *data)
       data->dest,
       data->src,
       NULL);
+}
+
+static void
+_marshal_BOXED__ARGS_DIRECT (GClosure                *closure,
+                             GValue                  *return_value,
+                             guint                    n_param_values,
+                             const GValue            *param_values,
+                             gpointer invocation_hint G_GNUC_UNUSED,
+                             gpointer                 marshal_data)
+{
+  typedef gpointer (*GMarshalFunc_BOXED__ARGS_DIRECT) (gpointer      data1,
+                                                       guint         n_param_values,
+                                                       const GValue *param_values,
+                                                       gpointer      data2);
+  GCClosure                      *cc = (GCClosure *) closure;
+  gpointer                        data1, data2;
+  GMarshalFunc_BOXED__ARGS_DIRECT callback;
+  gpointer                        v_return;
+
+  g_return_if_fail (return_value != NULL);
+  g_return_if_fail (n_param_values >= 1);
+
+  if (G_CCLOSURE_SWAP_DATA (closure))
+    {
+      data1 = closure->data;
+      data2 = g_value_peek_pointer (param_values + 0);
+    }
+  else
+    {
+      data1 = g_value_peek_pointer (param_values + 0);
+      data2 = closure->data;
+    }
+  callback = (GMarshalFunc_BOXED__ARGS_DIRECT) (marshal_data ? marshal_data : cc->callback);
+
+  v_return = callback (data1,
+                       n_param_values - 1,
+                       param_values + 1,
+                       data2);
+
+  g_value_take_boxed (return_value, v_return);
 }
 
 /* End of bge-wdgt-spec.c */

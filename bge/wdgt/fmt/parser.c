@@ -38,7 +38,7 @@
 #define STR_SET               "set"
 #define STR_TRANSITION        "transition"
 #define STR_TRANSITION_SPRING "transition-spring"
-#define STR_ALLOCATE          "%allocate"
+#define STR_ALLOCATE          "allocate"
 #define STR_SNAPSHOT          "%snapshot"
 
 typedef enum
@@ -138,7 +138,12 @@ eval_closure (gpointer         this,
 
 static char *
 make_object_property_name (const char *object,
-                           const char *property);
+                           const char *property,
+                           guint       n);
+
+static char *
+make_widget_allocation_name (const char *widget,
+                             guint       n);
 
 static char *
 make_anon_name (guint n);
@@ -427,6 +432,63 @@ bge_wdgt_parse_string (const char *string,
                           spec_values[2],
                           &local_error);
                       RETURN_ERROR_UNLESS (result);
+                    }
+                  else if (g_strcmp0 (token, STR_ALLOCATE) == 0)
+                    {
+                      g_autofree char *child_value         = NULL;
+                      guint            n_allocation_values = 0;
+                      g_auto (GStrv) allocation_values     = NULL;
+
+                      GET_TOKEN (&child_value, TOKEN_PARSE_DEFAULT);
+
+                      p = parse_args (p, spec, state_name, NULL, &n_anon_vals, &allocation_values,
+                                      &n_allocation_values, ARGS_PARSE_RIGHT_ASSIGN, &local_error);
+                      RETURN_ERROR_UNLESS (p != NULL);
+                      if (n_allocation_values != 2 &&
+                          n_allocation_values != 3)
+                        {
+                          g_set_error (
+                              error,
+                              G_IO_ERROR,
+                              G_IO_ERROR_UNKNOWN,
+                              "allocation needs 2 or 3 values, a width "
+                              "and height and one transform, got %u",
+                              n_allocation_values);
+                          return NULL;
+                        }
+
+                      for (guint i = 0; i < n_allocation_values; i++)
+                        {
+                          g_autofree char *allocation_key = NULL;
+
+                          allocation_key = make_widget_allocation_name (child_value, n_anon_vals++);
+                          switch (i)
+                            {
+                            case 0:
+                              result = bge_wdgt_spec_add_allocation_width_value (
+                                  spec, allocation_key, child_value, &local_error);
+                              break;
+                            case 1:
+                              result = bge_wdgt_spec_add_allocation_height_value (
+                                  spec, allocation_key, child_value, &local_error);
+                              break;
+                            case 2:
+                              result = bge_wdgt_spec_add_allocation_transform_value (
+                                  spec, allocation_key, child_value, &local_error);
+                              break;
+                            default:
+                              g_assert_not_reached ();
+                            }
+                          RETURN_ERROR_UNLESS (result);
+
+                          result = bge_wdgt_spec_set_value (
+                              spec,
+                              state_name,
+                              allocation_key,
+                              allocation_values[i],
+                              &local_error);
+                          RETURN_ERROR_UNLESS (result);
+                        }
                     }
                   else
                     UNEXPECTED_TOKEN (token);
@@ -1100,7 +1162,7 @@ parse_args (const char   *p,
                 GET_TOKEN (&set_key, TOKEN_PARSE_DEFAULT);
               else if (g_strcmp0 (property_name, "_") != 0)
                 {
-                  set_key = make_object_property_name (object_name, property_name);
+                  set_key = make_object_property_name (object_name, property_name, (*n_anon_vals)++);
                   result  = bge_wdgt_spec_add_property_value (
                       spec, set_key, object_name, property_name, &local_error);
                   RETURN_ERROR_UNLESS (result);
@@ -1135,6 +1197,53 @@ parse_args (const char   *p,
 
           need_comma = TRUE;
         }
+      else if (g_strcmp0 (token, "#transform") == 0)
+        {
+          g_autofree char *last_key = NULL;
+          GValue           value    = G_VALUE_INIT;
+
+          last_key = make_anon_name ((*n_anon_vals)++);
+          g_value_take_boxed (g_value_init (&value, GSK_TYPE_TRANSFORM),
+                              gsk_transform_new ());
+          result = bge_wdgt_spec_add_constant_source_value (
+              spec, last_key, &value, error);
+          g_value_unset (&value);
+          if (!result)
+            return NULL;
+
+          GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "(");
+          for (;;)
+            {
+              g_autofree char *instr        = NULL;
+              g_auto (GStrv) value_args     = NULL;
+              guint            n_value_args = 0;
+              g_autofree char *key          = NULL;
+
+              GET_TOKEN (&instr, TOKEN_PARSE_DEFAULT);
+              if (g_strcmp0 (instr, ")") == 0)
+                break;
+
+              p = parse_args (p, spec, state, enclosing_object, n_anon_vals, &value_args,
+                              &n_value_args, ARGS_PARSE_PARENS, &local_error);
+              RETURN_ERROR_UNLESS (p != NULL);
+              GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ";");
+
+              key    = make_anon_name ((*n_anon_vals)++);
+              result = bge_wdgt_spec_add_transform_source_value (
+                  spec, key, last_key, instr,
+                  (const char *const *) value_args,
+                  n_value_args, &local_error);
+              RETURN_ERROR_UNLESS (result);
+
+              g_clear_pointer (&last_key, g_free);
+              last_key = g_steal_pointer (&key);
+            }
+
+          g_strv_builder_take (builder, g_steal_pointer (&last_key));
+          n_args++;
+
+          need_comma = TRUE;
+        }
       else
         {
           g_autofree char *parsed = NULL;
@@ -1151,7 +1260,7 @@ parse_args (const char   *p,
                   g_autofree char *name     = NULL;
 
                   GET_TOKEN (&property, TOKEN_PARSE_DEFAULT);
-                  name = make_object_property_name (parsed, property);
+                  name = make_object_property_name (parsed, property, (*n_anon_vals)++);
 
                   result = bge_wdgt_spec_add_property_value (
                       spec, name, parsed, property, &local_error);
@@ -1460,9 +1569,17 @@ eval_closure (gpointer         this,
 
 static char *
 make_object_property_name (const char *object,
-                           const char *property)
+                           const char *property,
+                           guint       n)
 {
-  return g_strdup_printf ("prop@(%s).%s", object, property);
+  return g_strdup_printf ("prop@%u(%s).%s", n, object, property);
+}
+
+static char *
+make_widget_allocation_name (const char *widget,
+                             guint       n)
+{
+  return g_strdup_printf ("allocation@%u(%s)", n, widget);
 }
 
 static char *

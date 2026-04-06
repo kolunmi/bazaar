@@ -1,4 +1,9 @@
 defwidget "My Widget" {
+  var btn : "GtkButton";
+
+  var t : "BgeWdgtTime";
+
+  var rotate : "gdouble";
 
   var rect-size : "gdouble";
   var rect : "GrapheneRect";
@@ -9,6 +14,11 @@ defwidget "My Widget" {
   var grad-os : "gdouble";
 
   init {
+    set btn = #ch:"GtkButton":""(label = "hello";);
+    allocate btn 100, 100, #transform(translate(#point(10.0, 10.0)););
+
+    set t = #o:"BgeWdgtTime"(notify-msec = #i:"guint"(10););
+
     set rect = #rect(#eval(0.0-#(rect-size)/2.0),
                      #eval(0.0-#(rect-size)/2.0),
                      rect-size, rect-size);
@@ -16,7 +26,8 @@ defwidget "My Widget" {
     
     %snapshot = {
       save {
-        move translate(#point(400.0, 400.0));
+        move translate(#point(200.0, 200.0));
+        move rotate(rotate);
         with rounded-clip(rect, corner, corner, corner, corner) {
           add linear-gradient(
             rect,
@@ -30,6 +41,9 @@ defwidget "My Widget" {
   }
 
   state@default "d" = {
+    set rotate = #eval(30.0*sin(#(t:time)));
+    transition-spring rotate 1.0, 0.1, 10.0;
+
     set radius = 10.0;
     transition-spring radius 1.0, 0.1, 10.0;
     
@@ -41,10 +55,13 @@ defwidget "My Widget" {
   }
 
   state "s" = {
+    set rotate = 0.0;
+    transition-spring rotate 1.0, 0.1, 10.0;
+    
     set radius = 25.0;
     transition-spring radius 0.6, 0.1, 20.0;
     
-    set rect-size = 400.0;
+    set rect-size = 100.0;
     transition-spring rect-size 0.5, 0.5, 100.0;
     
     set grad-os = 1.0;
