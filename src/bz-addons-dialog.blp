@@ -41,7 +41,10 @@ template $BzAddonsDialog: Adw.Dialog {
                 ]
 
                 model: NoSelection {
-                  model: bind template.addon-groups;
+                  model: SortListModel {
+                    sorter: CustomSorter sorter {};
+                    model: bind template.addon-groups;
+                  };
                 };
 
                 factory: BuilderListItemFactory {

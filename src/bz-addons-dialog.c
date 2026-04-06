@@ -61,6 +61,7 @@ struct _BzAddonsDialog
   GtkToggleButton   *description_toggle;
   AdwClamp          *full_view_clamp;
   AdwClamp          *list_clamp;
+  GtkCustomSorter   *sorter;
 };
 
 G_DEFINE_FINAL_TYPE (BzAddonsDialog, bz_addons_dialog, ADW_TYPE_DIALOG)
@@ -78,22 +79,23 @@ enum
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
 
-static char *format_parent_title (gpointer object, const char *title);
-static int get_description_max_height (gpointer object, gboolean active);
-static char *get_description_toggle_text (gpointer object, gboolean active);
-static void size_cb (BzAddonsDialog *self, GtkButton *button);
-static void license_cb (BzAddonsDialog *self, GtkButton *button);
-static void dl_stats_cb (BzAddonsDialog *self, GtkButton *button);
-static void animate_to_size (BzAddonsDialog *self);
-static void on_visible_page_tag_changed (AdwNavigationView *nav_view, GParamSpec *pspec, BzAddonsDialog *self);
-static char *get_install_stack_page (gpointer object, int installable, int removable);
-static void install_cb (GtkButton *button, BzAddonsDialog *self);
-static void remove_cb (GtkButton *button, BzAddonsDialog *self);
-static void run_cb (GtkButton *button, BzAddonsDialog *self);
+static char      *format_parent_title (gpointer object, const char *title);
+static int        get_description_max_height (gpointer object, gboolean active);
+static char      *get_description_toggle_text (gpointer object, gboolean active);
+static void       size_cb (BzAddonsDialog *self, GtkButton *button);
+static void       license_cb (BzAddonsDialog *self, GtkButton *button);
+static void       dl_stats_cb (BzAddonsDialog *self, GtkButton *button);
+static void       animate_to_size (BzAddonsDialog *self);
+static void       on_visible_page_tag_changed (AdwNavigationView *nav_view, GParamSpec *pspec, BzAddonsDialog *self);
+static char      *get_install_stack_page (gpointer object, int installable, int removable);
+static void       install_cb (GtkButton *button, BzAddonsDialog *self);
+static void       remove_cb (GtkButton *button, BzAddonsDialog *self);
+static void       run_cb (GtkButton *button, BzAddonsDialog *self);
 static DexFuture *on_parent_ui_entry_resolved (DexFuture *future, GWeakRef *wr);
 static DexFuture *on_selected_ui_entry_resolved (DexFuture *future, GWeakRef *wr);
-static void set_selected_group (BzAddonsDialog *self, BzEntryGroup *group);
-static void tile_activated_cb (BzAddonTile *tile);
+static void       set_selected_group (BzAddonsDialog *self, BzEntryGroup *group);
+static void       tile_activated_cb (BzAddonTile *tile);
+static int        sort_func (BzEntryGroup *a, BzEntryGroup *b, BzAddonsDialog *self);
 
 static void
 bz_addons_dialog_dispose (GObject *object)
@@ -224,6 +226,7 @@ bz_addons_dialog_class_init (BzAddonsDialogClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzAddonsDialog, description_toggle);
   gtk_widget_class_bind_template_child (widget_class, BzAddonsDialog, full_view_clamp);
   gtk_widget_class_bind_template_child (widget_class, BzAddonsDialog, list_clamp);
+  gtk_widget_class_bind_template_child (widget_class, BzAddonsDialog, sorter);
 
   gtk_widget_class_bind_template_callback (widget_class, tile_activated_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_visible_page_tag_changed);
@@ -248,13 +251,14 @@ bz_addons_dialog_init (BzAddonsDialog *self)
 
   gtk_widget_init_template (GTK_WIDGET (self));
 
-  width_target          = adw_property_animation_target_new (G_OBJECT (self), "content-width");
-  self->width_animation = adw_timed_animation_new (GTK_WIDGET (self), 0, 0, 300, width_target);
-  adw_timed_animation_set_easing (ADW_TIMED_ANIMATION (self->width_animation), ADW_EASE_IN_OUT_CUBIC);
-
+  width_target           = adw_property_animation_target_new (G_OBJECT (self), "content-width");
+  self->width_animation  = adw_timed_animation_new (GTK_WIDGET (self), 0, 0, 300, width_target);
   height_target          = adw_property_animation_target_new (G_OBJECT (self), "content-height");
   self->height_animation = adw_timed_animation_new (GTK_WIDGET (self), 0, 0, 300, height_target);
-  adw_timed_animation_set_easing (ADW_TIMED_ANIMATION (self->height_animation), ADW_EASE_IN_OUT_CUBIC);
+
+  g_signal_connect_swapped (self, "map", G_CALLBACK (animate_to_size), self);
+
+  gtk_custom_sorter_set_sort_func (self->sorter, (GCompareDataFunc) sort_func, self, NULL);
 }
 
 AdwDialog *
@@ -287,8 +291,6 @@ bz_addons_dialog_new (BzEntryGroup *group)
       full_view_page = adw_navigation_view_find_page (self->navigation_view, "full-view");
       adw_navigation_view_replace (self->navigation_view, &full_view_page, 1);
     }
-  else
-    g_idle_add_once ((GSourceOnceFunc) animate_to_size, self);
 
   return ADW_DIALOG (self);
 }
@@ -399,6 +401,12 @@ animate_to_size (BzAddonsDialog *self)
   int         nat           = 0;
   int         cur_width     = 0;
   int         measure_for   = 0;
+  int         cur_w         = 0;
+  int         cur_h         = 0;
+  int         delta_w       = 0;
+  int         delta_h       = 0;
+  int         delta         = 0;
+  guint       duration      = 0;
 
   tag = adw_navigation_view_get_visible_page_tag (self->navigation_view);
 
@@ -406,7 +414,7 @@ animate_to_size (BzAddonsDialog *self)
     {
       cur_width    = gtk_widget_get_width (GTK_WIDGET (self));
       target_width = 500;
-      measure_for  = MIN (target_width, cur_width) - 48;
+      measure_for  = MAX (-1, MIN (target_width, cur_width) - 48);
       gtk_widget_measure (GTK_WIDGET (self->list_clamp), GTK_ORIENTATION_VERTICAL, measure_for, NULL, &nat, NULL, NULL);
       target_height = CLAMP (nat + 50, 300, 600);
     }
@@ -414,7 +422,7 @@ animate_to_size (BzAddonsDialog *self)
     {
       cur_width    = gtk_widget_get_width (GTK_WIDGET (self));
       target_width = 500;
-      measure_for  = MIN (target_width, cur_width) - 48;
+      measure_for  = MAX (-1, MIN (target_width, cur_width) - 48);
       gtk_widget_measure (GTK_WIDGET (self->full_view_clamp), GTK_ORIENTATION_VERTICAL, measure_for, NULL, &nat, NULL, NULL);
       target_height = CLAMP (nat + 50, 300, 700);
     }
@@ -429,7 +437,7 @@ animate_to_size (BzAddonsDialog *self)
       target_width = 400;
       measure_for  = target_width - 48;
       gtk_widget_measure (GTK_WIDGET (self->navigation_view), GTK_ORIENTATION_VERTICAL, measure_for, NULL, &nat, NULL, NULL);
-      target_height = CLAMP (nat + 0, 300, 700);
+      target_height = CLAMP (nat, 300, 700);
     }
   else if (g_strcmp0 (tag, "stats") == 0)
     {
@@ -439,9 +447,20 @@ animate_to_size (BzAddonsDialog *self)
   else
     return;
 
-  adw_timed_animation_set_value_from (ADW_TIMED_ANIMATION (self->width_animation), adw_dialog_get_content_width (ADW_DIALOG (self)));
+  cur_w   = adw_dialog_get_content_width (ADW_DIALOG (self));
+  cur_h   = adw_dialog_get_content_height (ADW_DIALOG (self));
+  delta_w = ABS (target_width - cur_w);
+  delta_h = ABS (target_height - cur_h);
+  delta   = MAX (delta_w, delta_h);
+
+  duration = (guint) CLAMP (delta * 0.6, 200, (target_width < cur_w || target_height < cur_h) ? 300 : 600);
+
+  adw_timed_animation_set_duration (ADW_TIMED_ANIMATION (self->width_animation), duration);
+  adw_timed_animation_set_duration (ADW_TIMED_ANIMATION (self->height_animation), duration);
+
+  adw_timed_animation_set_value_from (ADW_TIMED_ANIMATION (self->width_animation), cur_w);
   adw_timed_animation_set_value_to (ADW_TIMED_ANIMATION (self->width_animation), target_width);
-  adw_timed_animation_set_value_from (ADW_TIMED_ANIMATION (self->height_animation), adw_dialog_get_content_height (ADW_DIALOG (self)));
+  adw_timed_animation_set_value_from (ADW_TIMED_ANIMATION (self->height_animation), cur_h);
   adw_timed_animation_set_value_to (ADW_TIMED_ANIMATION (self->height_animation), target_height);
   adw_animation_play (self->width_animation);
   adw_animation_play (self->height_animation);
@@ -649,4 +668,28 @@ tile_activated_cb (BzAddonTile *tile)
   set_selected_group (self, group);
 
   adw_navigation_view_push_by_tag (self->navigation_view, "full-view");
+}
+
+static int
+sort_func (BzEntryGroup   *a,
+           BzEntryGroup   *b,
+           BzAddonsDialog *self)
+{
+  const char *desc_a = NULL;
+  const char *desc_b = NULL;
+  gboolean    has_a  = FALSE;
+  gboolean    has_b  = FALSE;
+  int         result = 0;
+
+  desc_a = bz_entry_group_get_description (a);
+  desc_b = bz_entry_group_get_description (b);
+  has_a  = desc_a != NULL && *desc_a != '\0';
+  has_b  = desc_b != NULL && *desc_b != '\0';
+  if (has_a != has_b)
+    result = has_b - has_a;
+  else
+    result = g_utf8_collate (bz_entry_group_get_title (a),
+                             bz_entry_group_get_title (b));
+
+  return result;
 }
