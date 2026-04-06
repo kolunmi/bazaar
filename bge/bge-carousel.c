@@ -592,6 +592,28 @@ bge_carousel_get_model (BgeCarousel *self)
 }
 
 /**
+ * bge_carousel_get_nth_page:
+ * @self: a `BgeCarousel`
+ * @index: Index of the page.
+ *
+ * Returns: (nullable) (transfer none): the page at @index, or NULL if out of bounds
+ */
+GtkWidget *
+bge_carousel_get_nth_page (BgeCarousel *self,
+                           guint        index)
+{
+  CarouselWidgetData *data = NULL;
+
+  g_return_val_if_fail (BGE_IS_CAROUSEL (self), NULL);
+
+  if (index >= self->widgets->len)
+    return NULL;
+
+  data = g_ptr_array_index (self->widgets, index);
+  return data->widget;
+}
+
+/**
  * bge_carousel_set_allow_mouse_drag:
  * @self: a `BgeCarousel`
  * @allow_mouse_drag: a boolean
