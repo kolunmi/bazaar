@@ -659,6 +659,13 @@ get_developer_apps_entries (gpointer object, GtkStringList *app_ids, BzEntry *en
   return bz_application_map_factory_generate (factory, G_LIST_MODEL (filtered));
 }
 
+static int
+get_dev_apps_max_children_per_line (gpointer object, GListModel *model)
+{
+    if (!model) return 3;
+    return g_list_model_get_n_items (model) > 2 ? 3 : 2;
+}
+
 static void
 more_apps_button_clicked_cb (BzFullView *self,
                              GtkButton  *button)
@@ -1087,6 +1094,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, format_other_apps_label);
   gtk_widget_class_bind_template_callback (widget_class, format_more_other_apps_label);
   gtk_widget_class_bind_template_callback (widget_class, get_developer_apps_entries);
+  gtk_widget_class_bind_template_callback (widget_class, get_dev_apps_max_children_per_line);
   gtk_widget_class_bind_template_callback (widget_class, more_apps_button_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, open_url_cb);
   gtk_widget_class_bind_template_callback (widget_class, license_cb);
