@@ -663,7 +663,7 @@ template $BzFullView: Adw.Bin {
                             noscroll-kind: flow-box;
                             child-type: "BzAppTile";
                             child-prop: "group";
-                            max-children-per-line: 3;
+                            max-children-per-line: bind $get_dev_apps_max_children_per_line(other_apps_model.model) as <int>;
                             bind-widget => $bind_app_tile_cb(template);
                             unbind-widget => $unbind_app_tile_cb(template);
 
