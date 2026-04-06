@@ -59,11 +59,44 @@ static GParamSpec *props[LAST_PROP] = {
 };
 
 static void
+update_buttons_for_tile (BzFeaturedCarousel *self)
+{
+  GtkWidget  *child      = NULL;
+  const char *class_name = NULL;
+  guint       index      = 0;
+
+  index = gtk_single_selection_get_selected (self->selection);
+  child = bge_carousel_get_nth_page (self->carousel, index);
+  if (child == NULL)
+    return;
+
+  class_name = gtk_widget_has_css_class (child, "flathub-lotion")
+                   ? "flathub-lotion"
+                   : "flathub-gunmetal";
+
+  gtk_widget_remove_css_class (GTK_WIDGET (self->next_button), "flathub-lotion");
+  gtk_widget_remove_css_class (GTK_WIDGET (self->next_button), "flathub-gunmetal");
+  gtk_widget_remove_css_class (GTK_WIDGET (self->previous_button), "flathub-lotion");
+  gtk_widget_remove_css_class (GTK_WIDGET (self->previous_button), "flathub-gunmetal");
+  gtk_widget_add_css_class (GTK_WIDGET (self->next_button), class_name);
+  gtk_widget_add_css_class (GTK_WIDGET (self->previous_button), class_name);
+}
+
+static void
+on_style_changed (AdwStyleManager    *style_manager,
+                  GParamSpec         *pspec,
+                  BzFeaturedCarousel *self)
+{
+  g_idle_add_once ((GSourceOnceFunc) update_buttons_for_tile, self);
+}
+
+static void
 on_notify_selected (BzFeaturedCarousel *self,
                     GParamSpec         *pspec,
                     GtkSingleSelection *selection)
 {
   g_timer_start (self->time_since_manual_rotate);
+  update_buttons_for_tile (self);
 }
 
 static void
@@ -85,6 +118,8 @@ show_relative_page (BzFeaturedCarousel *self,
   g_signal_handlers_block_by_func (self->selection, on_notify_selected, self);
   gtk_single_selection_set_selected (self->selection, new_page);
   g_signal_handlers_unblock_by_func (self->selection, on_notify_selected, self);
+
+  update_buttons_for_tile (self);
 }
 
 static gboolean
@@ -162,6 +197,9 @@ static void
 bz_featured_carousel_dispose (GObject *object)
 {
   BzFeaturedCarousel *self = BZ_FEATURED_CAROUSEL (object);
+
+  g_signal_handlers_disconnect_by_func (adw_style_manager_get_default (),
+                                        on_style_changed, self);
 
   g_clear_handle_id (&self->rotation_timer_source, g_source_remove);
   g_clear_pointer (&self->time_since_manual_rotate, g_timer_destroy);
@@ -300,6 +338,9 @@ bz_featured_carousel_init (BzFeaturedCarousel *self)
       FEATURED_ROTATE_TIME,
       rotate_cb, self);
   self->time_since_manual_rotate = g_timer_new ();
+
+  g_signal_connect (adw_style_manager_get_default (), "notify::dark",
+                    G_CALLBACK (on_style_changed), self);
 }
 
 BzFeaturedCarousel *

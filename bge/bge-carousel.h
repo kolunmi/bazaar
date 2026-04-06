@@ -47,6 +47,10 @@ bge_carousel_get_allow_raise (BgeCarousel *self);
 GtkSingleSelection *
 bge_carousel_get_model (BgeCarousel *self);
 
+GtkWidget *
+bge_carousel_get_nth_page (BgeCarousel *self,
+                           guint        index);
+
 void
 bge_carousel_set_allow_mouse_drag (BgeCarousel *self,
                                    gboolean     allow_mouse_drag);
