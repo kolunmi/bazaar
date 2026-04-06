@@ -247,7 +247,7 @@ typedef struct
   const char      *name;
   guint            n_args;
   guint            n_rest;
-  GType            args[ARGBUF_SIZE];
+  GType            args[16];
   gpointer         func;
   SnapshotCallFunc call;
 } SnapshotInstr;
