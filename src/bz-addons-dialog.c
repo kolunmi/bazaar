@@ -284,10 +284,8 @@ bz_addons_dialog_new (BzEntryGroup *group)
       AdwNavigationPage *full_view_page = NULL;
 
       set_selected_group (self, single);
-
-      adw_navigation_view_push_by_tag (self->navigation_view, "full-view");
       full_view_page = adw_navigation_view_find_page (self->navigation_view, "full-view");
-      adw_navigation_page_set_can_pop (full_view_page, FALSE);
+      adw_navigation_view_replace (self->navigation_view, &full_view_page, 1);
     }
   else
     g_idle_add_once ((GSourceOnceFunc) animate_to_size, self);
@@ -305,11 +303,8 @@ bz_addons_dialog_new_single (BzEntryGroup *group)
 
   set_selected_group (self, group);
 
-  adw_navigation_view_push_by_tag (self->navigation_view, "full-view");
-
   full_view = adw_navigation_view_find_page (self->navigation_view, "full-view");
-  if (full_view != NULL)
-    adw_navigation_page_set_can_pop (full_view, FALSE);
+  adw_navigation_view_replace (self->navigation_view, &full_view, 1);
 
   return ADW_DIALOG (self);
 }
