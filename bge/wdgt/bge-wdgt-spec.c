@@ -27,6 +27,8 @@
 #include "graphene-gobject.h"
 #include "util.h"
 
+#define ARGBUF_SIZE 128
+
 typedef enum
 {
   VALUE_OBJECT = 0,
@@ -245,7 +247,7 @@ typedef struct
   const char      *name;
   guint            n_args;
   guint            n_rest;
-  GType            args[16];
+  GType            args[ARGBUF_SIZE];
   gpointer         func;
   SnapshotCallFunc call;
 } SnapshotInstr;
@@ -920,8 +922,8 @@ bge_wdgt_spec_add_component_source_value (BgeWdgtSpec       *self,
                                           guint              n_components,
                                           GError           **error)
 {
-  GType expected_types[32]    = { 0 };
-  g_autoptr (ValueData) value = NULL;
+  GType expected_types[ARGBUF_SIZE] = { 0 };
+  g_autoptr (ValueData) value       = NULL;
 
   g_return_val_if_fail (BGE_IS_WDGT_SPEC (self), FALSE);
   g_return_val_if_fail (name != NULL, FALSE);
@@ -1982,8 +1984,8 @@ snapshot_push_instr_shadow (GtkSnapshot *snapshot,
                             const GValue rest[],
                             guint        n_rest)
 {
-  guint     n_shadows   = 0;
-  GskShadow shadows[32] = { 0 };
+  guint     n_shadows            = 0;
+  GskShadow shadows[ARGBUF_SIZE] = { 0 };
 
   n_shadows = MIN (n_rest / 4, G_N_ELEMENTS (shadows));
 
@@ -2516,8 +2518,8 @@ snapshot_append_instr_linear_gradient (GtkSnapshot *snapshot,
                                        const GValue rest[],
                                        guint        n_rest)
 {
-  guint        n_stops   = 0;
-  GskColorStop stops[32] = { 0 };
+  guint        n_stops            = 0;
+  GskColorStop stops[ARGBUF_SIZE] = { 0 };
 
   n_stops = MIN (n_rest / 2, G_N_ELEMENTS (stops));
   for (guint i = 0; i < n_stops; i++)
@@ -2541,8 +2543,8 @@ snapshot_append_instr_repeating_linear_gradient (GtkSnapshot *snapshot,
                                                  const GValue rest[],
                                                  guint        n_rest)
 {
-  guint        n_stops   = 0;
-  GskColorStop stops[32] = { 0 };
+  guint        n_stops            = 0;
+  GskColorStop stops[ARGBUF_SIZE] = { 0 };
 
   n_stops = MIN (n_rest / 2, G_N_ELEMENTS (stops));
   for (guint i = 0; i < n_stops; i++)
@@ -2566,8 +2568,8 @@ snapshot_append_instr_radial_gradient (GtkSnapshot *snapshot,
                                        const GValue rest[],
                                        guint        n_rest)
 {
-  guint        n_stops   = 0;
-  GskColorStop stops[32] = { 0 };
+  guint        n_stops            = 0;
+  GskColorStop stops[ARGBUF_SIZE] = { 0 };
 
   n_stops = MIN (n_rest / 2, G_N_ELEMENTS (stops));
   for (guint i = 0; i < n_stops; i++)
@@ -2594,8 +2596,8 @@ snapshot_append_instr_repeating_radial_gradient (GtkSnapshot *snapshot,
                                                  const GValue rest[],
                                                  guint        n_rest)
 {
-  guint        n_stops   = 0;
-  GskColorStop stops[32] = { 0 };
+  guint        n_stops            = 0;
+  GskColorStop stops[ARGBUF_SIZE] = { 0 };
 
   n_stops = MIN (n_rest / 2, G_N_ELEMENTS (stops));
   for (guint i = 0; i < n_stops; i++)
@@ -2622,8 +2624,8 @@ snapshot_append_instr_conic_gradient (GtkSnapshot *snapshot,
                                       const GValue rest[],
                                       guint        n_rest)
 {
-  guint        n_stops   = 0;
-  GskColorStop stops[32] = { 0 };
+  guint        n_stops            = 0;
+  GskColorStop stops[ARGBUF_SIZE] = { 0 };
 
   n_stops = MIN (n_rest / 2, G_N_ELEMENTS (stops));
   for (guint i = 0; i < n_stops; i++)
@@ -3435,10 +3437,10 @@ bge_wdgt_renderer_snapshot (GtkWidget   *widget,
             case BGE_WDGT_SNAPSHOT_INSTR_PUSH:
             case BGE_WDGT_SNAPSHOT_INSTR_TRANSFORM:
               {
-                GValue arg_values[32]  = { 0 };
-                guint  n_arg_values    = 0;
-                GValue rest_values[32] = { 0 };
-                guint  n_rest_values   = 0;
+                GValue arg_values[ARGBUF_SIZE]  = { 0 };
+                guint  n_arg_values             = 0;
+                GValue rest_values[ARGBUF_SIZE] = { 0 };
+                guint  n_rest_values            = 0;
 
                 n_arg_values  = MIN (call->args->len, G_N_ELEMENTS (arg_values));
                 n_rest_values = MIN (call->rest->len, G_N_ELEMENTS (rest_values));
