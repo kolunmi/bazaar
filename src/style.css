@@ -904,6 +904,7 @@ window.narrow .category-tile {
 .disable-adw-flow-box-styling {
     background-color: transparent;
     box-shadow: none;
+    padding: 0;
 }
 
 curated-list-view,

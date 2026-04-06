@@ -110,7 +110,7 @@ static int
 get_spacing (gpointer object,
              gboolean compact)
 {
-  return compact ? 3 : 5;
+  return compact ? 9 : 11;
 }
 
 static void
