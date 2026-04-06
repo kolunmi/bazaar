@@ -29,7 +29,7 @@
 }
 
 .bz-donations-banner {
-    --banner-color: #159eff;
+    --banner-color: var(--accent-bg-color);
 }
 
 .updates-amount {
