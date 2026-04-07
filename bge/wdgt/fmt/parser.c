@@ -1015,6 +1015,33 @@ parse_args (const char        *p,
                   key = parse_token_fundamental (token, spec, n_anon_vals, &local_error);
                   RETURN_ERROR_UNLESS (key != NULL);
                 }
+              else if (type == G_TYPE_BOOLEAN)
+                {
+                  if (expect_closing_paren)
+                    GET_TOKEN (&token, TOKEN_PARSE_DEFAULT);
+
+                  if (g_strcmp0 (token, "true") == 0)
+                    g_value_set_boolean (g_value_init (&value, G_TYPE_BOOLEAN),
+                                         TRUE);
+                  else if (g_strcmp0 (token, "false") == 0)
+                    g_value_set_boolean (g_value_init (&value, G_TYPE_BOOLEAN),
+                                         FALSE);
+                  else
+                    {
+                      g_set_error (
+                          error,
+                          G_IO_ERROR,
+                          G_IO_ERROR_UNKNOWN,
+                          "a boolean value must be 'true' "
+                          "or 'false', got \"%s\"",
+                          token);
+                      return NULL;
+                    }
+                  constant = TRUE;
+
+                  if (expect_closing_paren)
+                    GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ")");
+                }
               else if (type == G_TYPE_INT ||
                        type == G_TYPE_INT64 ||
                        type == G_TYPE_UINT ||
