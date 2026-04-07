@@ -124,6 +124,7 @@ BGE_DEFINE_DATA (
         {
           ValueData *parent_widget;
           char      *builder_type;
+          GPtrArray *css_classes;
         } child;
         struct
         {
@@ -169,6 +170,7 @@ deinit_value (gpointer ptr)
     case VALUE_CHILD:
       g_clear_pointer (&value->child.parent_widget, value_data_unref);
       g_clear_pointer (&value->child.builder_type, g_free);
+      g_clear_pointer (&value->child.css_classes, g_ptr_array_unref);
       break;
     case VALUE_ALLOCATION_WIDTH:
     case VALUE_ALLOCATION_HEIGHT:
@@ -1216,12 +1218,14 @@ bge_wdgt_spec_add_instance_source_value (BgeWdgtSpec *self,
 }
 
 gboolean
-bge_wdgt_spec_add_child_source_value (BgeWdgtSpec *self,
-                                      const char  *name,
-                                      GType        type,
-                                      const char  *parent,
-                                      const char  *builder_type,
-                                      GError     **error)
+bge_wdgt_spec_add_child_source_value (BgeWdgtSpec       *self,
+                                      const char        *name,
+                                      GType              type,
+                                      const char        *parent,
+                                      const char        *builder_type,
+                                      const char *const *css_classes,
+                                      guint              n_css_classes,
+                                      GError           **error)
 {
   g_autoptr (ValueData) value = NULL;
 
@@ -1254,6 +1258,18 @@ bge_wdgt_spec_add_child_source_value (BgeWdgtSpec *self,
   value->type               = type;
   value->name               = g_strdup (name);
   value->child.builder_type = builder_type != NULL ? g_strdup (builder_type) : NULL;
+
+  if (n_css_classes > 0 &&
+      css_classes != NULL)
+    {
+      value->child.css_classes = g_ptr_array_new_with_free_func (g_free);
+      g_ptr_array_set_size (value->child.css_classes, n_css_classes);
+
+      for (guint i = 0; i < n_css_classes; i++)
+        {
+          g_ptr_array_index (value->child.css_classes, i) = g_strdup (css_classes[i]);
+        }
+    }
 
   if (parent != NULL)
     {
@@ -4377,6 +4393,16 @@ regenerate (BgeWdgtRenderer *self)
           value->type,
           "name", value->name,
           NULL);
+      if (value->child.css_classes != NULL)
+        {
+          for (guint j = 0; j < value->child.css_classes->len; j++)
+            {
+              const char *class = NULL;
+
+              class = g_ptr_array_index (value->child.css_classes, j);
+              gtk_widget_add_css_class (widget, class);
+            }
+        }
 
       if (value->child.parent_widget != NULL)
         {

@@ -1221,15 +1221,27 @@ parse_args (const char        *p,
                   key = make_anon_name ((*n_anon_vals)++);
                   if (is_child)
                     {
-                      g_autofree char *builder_type = NULL;
+                      g_autofree char *builder_type     = NULL;
+                      g_autoptr (GPtrArray) css_classes = NULL;
 
                       GET_TOKEN (&builder_type, TOKEN_PARSE_QUOTED);
                       if (*builder_type == '\0')
                         g_clear_pointer (&builder_type, g_free);
 
+                      css_classes = g_ptr_array_new_with_free_func (g_free);
+                      GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "(");
+                      for (;;)
+                        {
+                          GET_TOKEN (&token, TOKEN_PARSE_DEFAULT);
+                          if (g_strcmp0 (token, ")") == 0)
+                            break;
+                          g_ptr_array_add (css_classes, g_steal_pointer (&token));
+                        }
+
                       result = bge_wdgt_spec_add_child_source_value (
-                          spec, key, type,
-                          enclosing_object, builder_type, &local_error);
+                          spec, key, type, enclosing_object, builder_type,
+                          (const char *const *) css_classes->pdata, css_classes->len,
+                          &local_error);
                       RETURN_ERROR_UNLESS (result);
                     }
                   else

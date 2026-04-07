@@ -99,12 +99,14 @@ bge_wdgt_spec_add_instance_source_value (BgeWdgtSpec *self,
                                          GError     **error);
 
 gboolean
-bge_wdgt_spec_add_child_source_value (BgeWdgtSpec *self,
-                                      const char  *name,
-                                      GType        type,
-                                      const char  *parent_widget,
-                                      const char  *builder_type,
-                                      GError     **error);
+bge_wdgt_spec_add_child_source_value (BgeWdgtSpec       *self,
+                                      const char        *name,
+                                      GType              type,
+                                      const char        *parent_widget,
+                                      const char        *builder_type,
+                                      const char *const *css_classes,
+                                      guint              n_css_classes,
+                                      GError           **error);
 
 gboolean
 bge_wdgt_spec_add_cclosure_source_value (BgeWdgtSpec       *self,
