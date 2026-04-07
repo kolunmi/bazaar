@@ -1464,6 +1464,7 @@ bge_wdgt_spec_add_property_value (BgeWdgtSpec *self,
                                   const char  *name,
                                   const char  *object,
                                   const char  *property,
+                                  GType       *type_out,
                                   GError     **error)
 {
   ValueData *object_value           = NULL;
@@ -1525,6 +1526,9 @@ bge_wdgt_spec_add_property_value (BgeWdgtSpec *self,
   value->property.pspec_flags = pspec->flags;
 
   g_hash_table_replace (self->values, g_strdup (name), value_data_ref (value));
+
+  if (type_out != NULL)
+    *type_out = pspec->value_type;
   return TRUE;
 }
 

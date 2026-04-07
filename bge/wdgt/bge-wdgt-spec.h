@@ -136,6 +136,7 @@ bge_wdgt_spec_add_property_value (BgeWdgtSpec *self,
                                   const char  *name,
                                   const char  *object,
                                   const char  *property,
+                                  GType       *type_out,
                                   GError     **error);
 
 gboolean

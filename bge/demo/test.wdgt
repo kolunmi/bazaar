@@ -14,27 +14,27 @@ defwidget "My Widget" {
   var grad-os : "gdouble";
 
   init {
-    set btn = #ch:"GtkButton":""(label = "hello";);
-    allocate btn 100, 100, #transform(translate(#point(10.0, 10.0)););
+    set btn = #child/("" label = "hello";);
+    allocate btn 100, 100, #(translate(#GraphenePoint(10.0, 10.0)););
 
-    set t = #o:"BgeWdgtTime"(notify-msec = #i:"guint"(10););
+    set t = #(notify-msec = 10;);
 
-    set rect = #rect(#eval(0.0-#(rect-size)/2.0),
+    set rect = #(#eval(0.0-#(rect-size)/2.0),
                      #eval(0.0-#(rect-size)/2.0),
                      rect-size, rect-size);
-    set corner = #size(radius, radius);
-    
+    set corner = #(radius, radius);
+
     %snapshot = {
       save {
-        move translate(#point(200.0, 200.0));
+        move translate(#GraphenePoint(200.0, 200.0));
         move rotate(rotate);
         with rounded-clip(rect, corner, corner, corner, corner) {
           add linear-gradient(
             rect,
-            #point(#eval(#(grad-os)*#(rect-size)), #eval(0.0-#(rect-size))),
-            #point(#eval(0.0-#(grad-os)*#(rect-size)), #eval(0.0+#(rect-size))),
-            0.0, #rgba("#3584e4"),
-            1.0, #rgba("#e62d42"),);
+            #GraphenePoint(#eval(#(grad-os)*#(rect-size)), #eval(0.0-#(rect-size))),
+            #GraphenePoint(#eval(0.0-#(grad-os)*#(rect-size)), #eval(0.0+#(rect-size))),
+            0.0, #GdkRGBA("#3584e4"),
+            1.0, #GdkRGBA("#e62d42"),);
         }
       }
     }
