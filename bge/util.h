@@ -20,20 +20,20 @@
 
 #pragma once
 
-#define BGE_RELEASE_DATA(name, unref)          \
+#define BGE_RELEASE_DATA(name, unref)         \
   if ((unref) != NULL)                        \
     {                                         \
       g_clear_pointer (&self->name, (unref)); \
     }
 
-#define BGE_RELEASE_UTAG(name, remove)            \
+#define BGE_RELEASE_UTAG(name, remove)           \
   if ((remove) != NULL)                          \
     {                                            \
       g_clear_handle_id (&self->name, (remove)); \
     }
 
 /* va args = releases */
-#define BGE_DEFINE_DATA(name, Name, layout, ...)    \
+#define BGE_DEFINE_DATA(name, Name, layout, ...)   \
   typedef struct _##Name##Data Name##Data;         \
   struct _##Name##Data                             \
   {                                                \
@@ -57,6 +57,9 @@
     g_atomic_ref_count_inc (&self->rc);            \
     return self;                                   \
   }                                                \
+  G_GNUC_UNUSED                                    \
+  static void                                      \
+  name##_data_unref (gpointer ptr);                \
   G_GNUC_UNUSED                                    \
   static void                                      \
   name##_data_deinit (gpointer ptr)                \

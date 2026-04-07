@@ -246,6 +246,47 @@ contribute_cb (BzLicenseDialog *self)
     g_app_info_launch_default_for_uri (url, NULL, NULL);
 }
 
+static char *
+get_eula_url (BzEntry *entry)
+{
+  g_autofree char *license = NULL;
+  const char *url = NULL;
+
+  if (entry == NULL)
+    return NULL;
+
+  g_object_get (entry, "project-license", &license, NULL);
+
+  if (license == NULL || !g_str_has_prefix (license, "LicenseRef-proprietary="))
+    return NULL;
+
+  url = license + strlen ("LicenseRef-proprietary=");
+  return (*url != '\0') ? g_strdup (url) : NULL;
+}
+
+static gboolean
+should_show_eula (gpointer object,
+                  BzEntry *entry)
+{
+  g_autofree char *url = get_eula_url (entry);
+  return url != NULL;
+}
+
+static char *
+eula_tooltip (gpointer object,
+              BzEntry *entry)
+{
+  return get_eula_url (entry);
+}
+
+static void
+eula_cb (BzLicenseDialog *self)
+{
+  g_autofree char *url = get_eula_url (self->entry);
+  if (url != NULL)
+    g_app_info_launch_default_for_uri (url, NULL, NULL);
+}
+
 static void
 bz_license_dialog_class_init (BzLicenseDialogClass *klass)
 {
@@ -277,7 +318,10 @@ bz_license_dialog_class_init (BzLicenseDialogClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, get_label_cb);
   gtk_widget_class_bind_template_callback (widget_class, get_license_info);
   gtk_widget_class_bind_template_callback (widget_class, get_involved_tooltip);
+  gtk_widget_class_bind_template_callback (widget_class, should_show_eula);
+  gtk_widget_class_bind_template_callback (widget_class, eula_tooltip);
   gtk_widget_class_bind_template_callback (widget_class, contribute_cb);
+  gtk_widget_class_bind_template_callback (widget_class, eula_cb);
 }
 
 static void

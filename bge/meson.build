@@ -13,6 +13,8 @@ bge_headers = [
   'bge-carousel.h',
 ]
 
+subdir('wdgt')
+
 version_split = meson.project_version().split('.')
 version_conf = configuration_data()
 version_conf.set('VERSION', meson.project_version())
@@ -69,3 +71,5 @@ bge_dep = declare_dependency(
   dependencies: [bge_deps],
   include_directories : include_directories('..', '.'),
 )
+
+subdir('demo')

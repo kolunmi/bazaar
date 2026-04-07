@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/io/github/kolunmi/BgeDemo">
+    <file>window.ui</file>
+    <file>style.css</file>
+    <file>test.wdgt</file>
+  </gresource>
+</gresources>

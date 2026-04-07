@@ -35,6 +35,8 @@
 
 #include "bge.h"
 
+#include "bge-animation-private.h"
+
 enum
 {
   PROP_0,
@@ -81,20 +83,6 @@ static gboolean
 tick_cb (GtkWidget     *widget,
          GdkFrameClock *frame_clock,
          GWeakRef      *wr);
-
-/* Copied with modifications from libadwaita */
-static double
-oscillate (SpringData *data,
-           double      time,
-           double     *velocity);
-
-/* Copied with modifications from libadwaita */
-static double
-get_first_zero (SpringData *data);
-
-/* Copied with modifications from libadwaita */
-static double
-calculate_duration (SpringData *data);
 
 static void
 destroy_spring_data (gpointer ptr);
@@ -349,7 +337,13 @@ bge_animation_add_spring (BgeAnimation        *self,
           if (cancellable != NULL)
             data->cancellable = dex_ref (cancellable);
 
-          data->est_duration = calculate_duration (data);
+          data->est_duration = spring_calculate_duration (
+              data->damping,
+              data->mass,
+              data->stiffness,
+              data->from,
+              data->to,
+              data->clamp);
 
           cb (widget, key, from, user_data);
           return dex_ref (data->promise);
@@ -469,33 +463,40 @@ tick_cb (GtkWidget     *widget,
 
   cancel = !should_animate (widget);
 
-#define UPDATE(_data, _out_value, _out_finished)                             \
-  G_STMT_START                                                               \
-  {                                                                          \
-    if (cancel ||                                                            \
-        ((_data)->cancellable != NULL &&                                     \
-         dex_future_is_rejected (DEX_FUTURE ((_data)->cancellable))))        \
-      (_out_finished) = TRUE;                                                \
-    else                                                                     \
-      {                                                                      \
-        double elapsed = 0.0;                                                \
-                                                                             \
-        if ((_data)->timer == NULL)                                          \
-          {                                                                  \
-            (_data)->timer = g_timer_new ();                                 \
-            (_out_value)   = (_data)->from;                                  \
-          }                                                                  \
-        else                                                                 \
-          {                                                                  \
-            elapsed      = g_timer_elapsed ((_data)->timer, NULL);           \
-            (_out_value) = oscillate ((_data), elapsed, &(_data)->velocity); \
-          }                                                                  \
-                                                                             \
-        (_out_finished) = elapsed >= (_data)->est_duration;                  \
-      }                                                                      \
-    if ((_out_finished))                                                     \
-      (_out_value) = (_data)->to;                                            \
-  }                                                                          \
+#define UPDATE(_data, _out_value, _out_finished)                      \
+  G_STMT_START                                                        \
+  {                                                                   \
+    if (cancel ||                                                     \
+        ((_data)->cancellable != NULL &&                              \
+         dex_future_is_rejected (DEX_FUTURE ((_data)->cancellable)))) \
+      (_out_finished) = TRUE;                                         \
+    else                                                              \
+      {                                                               \
+        double elapsed = 0.0;                                         \
+                                                                      \
+        if ((_data)->timer == NULL)                                   \
+          {                                                           \
+            (_data)->timer = g_timer_new ();                          \
+            (_out_value)   = (_data)->from;                           \
+          }                                                           \
+        else                                                          \
+          {                                                           \
+            elapsed      = g_timer_elapsed ((_data)->timer, NULL);    \
+            (_out_value) = spring_oscillate (                         \
+                data->damping,                                        \
+                data->mass,                                           \
+                data->stiffness,                                      \
+                data->from,                                           \
+                data->to,                                             \
+                elapsed,                                              \
+                &(_data)->velocity);                                  \
+          }                                                           \
+                                                                      \
+        (_out_finished) = elapsed >= (_data)->est_duration;           \
+      }                                                               \
+    if ((_out_finished))                                              \
+      (_out_value) = (_data)->to;                                     \
+  }                                                                   \
   G_STMT_END
 
   /* Named anims */
@@ -561,14 +562,18 @@ tick_cb (GtkWidget     *widget,
  * -1 and 0 will be lerped to the desired range afterwards. Otherwise use 0 for in-place
  * animations which already start at equilibrium
  */
-static double
-oscillate (SpringData *data,
-           double      time,
-           double     *velocity)
+double
+spring_oscillate (double  damping,
+                  double  mass,
+                  double  stiffness,
+                  double  from,
+                  double  to,
+                  double  time,
+                  double *velocity)
 {
-  double b        = data->damping;
-  double m        = data->mass;
-  double k        = data->stiffness;
+  double b        = damping;
+  double m        = mass;
+  double k        = stiffness;
   double v0       = 0.0;
   double beta     = 0.0;
   double omega0   = 0.0;
@@ -577,7 +582,7 @@ oscillate (SpringData *data,
 
   beta     = b / (2 * m);
   omega0   = sqrt (k / m);
-  x0       = data->from - data->to;
+  x0       = from - to;
   envelope = exp (-beta * time);
 
   /*
@@ -596,8 +601,8 @@ oscillate (SpringData *data,
                      beta * beta * time * x0 +
                      v0);
 
-      return data->to + envelope *
-                            (x0 + (beta * x0 + v0) * time);
+      return to + envelope *
+                      (x0 + (beta * x0 + v0) * time);
     }
 
   /* Underdamped */
@@ -615,11 +620,11 @@ oscillate (SpringData *data,
                           (omega1)) *
                          sin (omega1 * time));
 
-      return data->to + envelope *
-                            (x0 * cos (omega1 * time) +
-                             ((beta * x0 + v0) /
-                              omega1) *
-                                 sin (omega1 * time));
+      return to + envelope *
+                      (x0 * cos (omega1 * time) +
+                       ((beta * x0 + v0) /
+                        omega1) *
+                           sin (omega1 * time));
     }
 
   /* Overdamped */
@@ -637,17 +642,21 @@ oscillate (SpringData *data,
                           omega2) *
                          sinhl (omega2 * time));
 
-      return data->to + envelope *
-                            (x0 * coshl (omega2 * time) +
-                             ((beta * x0 + v0) / omega2) *
-                                 sinhl (omega2 * time));
+      return to + envelope *
+                      (x0 * coshl (omega2 * time) +
+                       ((beta * x0 + v0) / omega2) *
+                           sinhl (omega2 * time));
     }
 
   g_assert_not_reached ();
 }
 
-static double
-get_first_zero (SpringData *data)
+double
+spring_get_first_zero (double damping,
+                       double mass,
+                       double stiffness,
+                       double from,
+                       double to)
 {
   /* The first frame is not that important and we avoid finding the trivial 0
    * for in-place animations. */
@@ -655,16 +664,28 @@ get_first_zero (SpringData *data)
     {
       double y = 0.0;
 
-      y = oscillate (data, (double) i / 1000.0, NULL);
-      if (!((data->to - data->from > DBL_EPSILON && data->to - y > EPSILON) ||
-            (data->from - data->to > DBL_EPSILON && y - data->to > EPSILON)))
+      y = spring_oscillate (
+          damping,
+          mass,
+          stiffness,
+          from,
+          to,
+          (double) i / 1000.0,
+          NULL);
+      if (!((to - from > DBL_EPSILON && to - y > EPSILON) ||
+            (from - to > DBL_EPSILON && y - to > EPSILON)))
         return y;
     }
   return 0.0;
 }
 
-static double
-calculate_duration (SpringData *data)
+double
+spring_calculate_duration (double   damping,
+                           double   mass,
+                           double   stiffness,
+                           double   from,
+                           double   to,
+                           gboolean clamp)
 {
   double beta   = 0.0;
   double omega0 = 0.0;
@@ -674,20 +695,24 @@ calculate_duration (SpringData *data)
   double y1     = 0.0;
   double m      = 0.0;
 
-  beta = data->damping / (2 * data->mass);
+  beta = damping / (2 * mass);
 
   if (G_APPROX_VALUE (beta, 0, DBL_EPSILON) ||
       beta < 0)
     return G_MAXDOUBLE;
 
-  if (data->clamp)
+  if (clamp)
     {
-      if (G_APPROX_VALUE (data->to, data->from, DBL_EPSILON))
+      if (G_APPROX_VALUE (to, from, DBL_EPSILON))
         return 0;
-      return get_first_zero (data);
+      return spring_get_first_zero (damping,
+                                    mass,
+                                    stiffness,
+                                    from,
+                                    to);
     }
 
-  omega0 = sqrt (data->stiffness / data->mass);
+  omega0 = sqrt (stiffness / mass);
 
   /*
    * As first ansatz for the overdamped solution,
@@ -708,26 +733,64 @@ calculate_duration (SpringData *data)
    * Newton's root finding method is a good candidate in this particular case:
    * https://en.wikipedia.org/wiki/Newton%27s_method
    */
-  y0 = oscillate (data, x0, NULL);
-  m  = (oscillate (data, (x0 + DELTA), NULL) - y0) / DELTA;
+  y0 = spring_oscillate (damping,
+                         mass,
+                         stiffness,
+                         from,
+                         to,
+                         x0,
+                         NULL);
+  m  = (spring_oscillate (
+            damping,
+            mass,
+            stiffness,
+            from,
+            to,
+            (x0 + DELTA),
+            NULL) -
+        y0) /
+       DELTA;
 
-  x1 = (data->to - y0 + m * x0) / m;
-  y1 = oscillate (data, x1, NULL);
+  x1 = (to - y0 + m * x0) / m;
+  y1 = spring_oscillate (
+      damping,
+      mass,
+      stiffness,
+      from,
+      to,
+      x1,
+      NULL);
 
   for (int i = 0;
-       ABS (data->to - y1) > EPSILON && i < 1000;
+       ABS (to - y1) > EPSILON && i < 1000;
        i++)
     {
       x0 = x1;
       y0 = y1;
 
-      m = (oscillate (data, x0 + DELTA, NULL) - y0) / DELTA;
+      m = (spring_oscillate (
+               damping,
+               mass,
+               stiffness,
+               from,
+               to,
+               x0 + DELTA,
+               NULL) -
+           y0) /
+          DELTA;
 
-      x1 = (data->to - y0 + m * x0) / m;
-      y1 = oscillate (data, x1, NULL);
+      x1 = (to - y0 + m * x0) / m;
+      y1 = spring_oscillate (
+          damping,
+          mass,
+          stiffness,
+          from,
+          to,
+          x1,
+          NULL);
     }
 
-  if (ABS (data->to - y1) <= EPSILON)
+  if (ABS (to - y1) <= EPSILON)
     return x1;
   else
     return 0.0;

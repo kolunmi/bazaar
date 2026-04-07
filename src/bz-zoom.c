@@ -223,7 +223,7 @@ on_drag_begin (BzZoom     *self,
                double      start_y,
                GtkGesture *gesture)
 {
-  if (fabs (self->zoom_level - 1.0) < 0.001)
+  if (!bz_zoom_is_transformed(self))
     {
       gtk_gesture_set_state (gesture, GTK_EVENT_SEQUENCE_DENIED);
       return;
@@ -381,7 +381,7 @@ bz_zoom_class_init (BzZoomClass *klass)
       g_param_spec_double (
           "min-zoom",
           NULL, NULL,
-          0.1, 1.0, 0.25,
+          0.1, 1.0, 1,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   props[PROP_MAX_ZOOM] =
@@ -398,7 +398,7 @@ static void
 bz_zoom_init (BzZoom *self)
 {
   self->zoom_level         = 1.0;
-  self->min_zoom           = 0.25;
+  self->min_zoom           = 1.0;
   self->max_zoom           = 5.0;
   self->pan_x              = 0.0;
   self->pan_y              = 0.0;
@@ -489,10 +489,19 @@ bz_zoom_set_zoom_level (BzZoom *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ZOOM_LEVEL]);
 }
 
+gboolean
+bz_zoom_is_transformed (BzZoom *self)
+{
+  g_return_val_if_fail (BZ_IS_ZOOM (self), FALSE);
+  return fabs (self->zoom_level - 1.0) >= 0.001 ||
+         fabs (self->pan_x) >= 0.5 ||
+         fabs (self->pan_y) >= 0.5;
+}
+
 double
 bz_zoom_get_min_zoom (BzZoom *self)
 {
-  g_return_val_if_fail (BZ_IS_ZOOM (self), 0.25);
+  g_return_val_if_fail (BZ_IS_ZOOM (self), 1);
   return self->min_zoom;
 }
 

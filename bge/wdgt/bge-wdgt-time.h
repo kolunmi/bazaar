@@ -1,6 +1,6 @@
-/* libbge.c
+/* bge-wdgt-time.h
  *
- * Copyright 2025 Eva M
+ * Copyright 2026 Eva M
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,25 +18,30 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#define G_LOG_DOMAIN "BGE::CORE"
+#pragma once
 
-#include "bge.h"
+#ifndef BGE_INSIDE
+#error "Only <bge.h> can be included directly."
+#endif
 
-/**
- * bge_init:
- *
- * Initializes BGE (And GTK).
- *
- * This function must be called before using any other BGE functions.
- */
+G_BEGIN_DECLS
+
+#define BGE_TYPE_WDGT_TIME (bge_wdgt_time_get_type ())
+G_DECLARE_FINAL_TYPE (BgeWdgtTime, bge_wdgt_time, BGE, WDGT_TIME, GObject)
+
+BgeWdgtTime *
+bge_wdgt_time_new (void);
+
+double
+bge_wdgt_time_get_time (BgeWdgtTime *self);
+
+guint
+bge_wdgt_time_get_notify_msec (BgeWdgtTime *self);
+
 void
-bge_init (void)
-{
-  gtk_init ();
+bge_wdgt_time_set_notify_msec (BgeWdgtTime *self,
+                               guint        notify_msec);
 
-  g_type_ensure (BGE_TYPE_ANIMATION);
-  g_type_ensure (BGE_TYPE_CAROUSEL);
-  g_type_ensure (BGE_TYPE_MARKDOWN_RENDER);
-  g_type_ensure (BGE_TYPE_WDGT_TIME);
-  g_type_ensure (BGE_TYPE_WDGT_RENDERER);
-}
+G_END_DECLS
+
+/* End of bge-wdgt-time.h */

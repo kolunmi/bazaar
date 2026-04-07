@@ -1,0 +1,26 @@
+using Gtk 4.0;
+
+Box root {
+  Paned {
+    position: 400;
+    start-child: ScrolledWindow {
+      child: TextView {
+        styles ["source-edit"]
+        monospace: true;
+        buffer: TextBuffer buffer {
+        };
+      };
+    };
+    end-child: Box {
+      orientation: vertical;
+      $BgeWdgtRenderer wdgt {
+        hexpand: true;
+        vexpand: true;
+        state: bind state_entry.text;
+      }
+      Entry state_entry {
+        text: "1";
+      }
+    };
+  }
+}

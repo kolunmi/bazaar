@@ -29,7 +29,7 @@
 }
 
 .bz-donations-banner {
-    --banner-color: #159eff;
+    --banner-color: var(--accent-bg-color);
 }
 
 .updates-amount {
@@ -904,6 +904,7 @@ window.narrow .category-tile {
 .disable-adw-flow-box-styling {
     background-color: transparent;
     box-shadow: none;
+    padding: 0;
 }
 
 curated-list-view,
