@@ -288,6 +288,7 @@ struct _BgeWdgtSpec
   gboolean ready;
 
   GHashTable *values;
+  GPtrArray  *anon_values;
   GHashTable *states;
   GPtrArray  *children;
   GPtrArray  *nonchildren;
@@ -323,8 +324,9 @@ coerce_value (const GValue *in,
               GValue       *out);
 
 static ValueData *
-wrap_coerce_value (ValueData *value,
-                   GType      dest_type);
+wrap_coerce_value (BgeWdgtSpec *self,
+                   ValueData   *value,
+                   GType        dest_type);
 
 static gboolean
 lookup_transform_instr (const char     *lookup_name,
@@ -351,6 +353,7 @@ bge_wdgt_spec_dispose (GObject *object)
   g_clear_pointer (&self->name, g_free);
 
   g_clear_pointer (&self->values, g_hash_table_unref);
+  g_clear_pointer (&self->anon_values, g_ptr_array_unref);
   g_clear_pointer (&self->states, g_hash_table_unref);
   g_clear_pointer (&self->children, g_ptr_array_unref);
   g_clear_pointer (&self->nonchildren, g_ptr_array_unref);
@@ -871,6 +874,7 @@ static void
 bge_wdgt_spec_init (BgeWdgtSpec *self)
 {
   self->values      = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, value_data_unref);
+  self->anon_values = g_ptr_array_new_with_free_func (value_data_unref);
   self->states      = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, state_data_unref);
   self->children    = g_ptr_array_new_with_free_func (value_data_unref);
   self->nonchildren = g_ptr_array_new_with_free_func (value_data_unref);
@@ -1190,7 +1194,7 @@ bge_wdgt_spec_add_transform_source_value (BgeWdgtSpec       *self,
         {
           if (check_can_coerce_type (match.args[i], value_data->type))
             g_ptr_array_add (value->transform.args,
-                             wrap_coerce_value (value_data, match.args[i]));
+                             wrap_coerce_value (self, value_data, match.args[i]));
           else
             {
               g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
@@ -1409,7 +1413,7 @@ bge_wdgt_spec_add_cclosure_source_value (BgeWdgtSpec       *self,
         {
           if (check_can_coerce_type (arg_types[i], value_data->type))
             g_ptr_array_add (value->closure.args,
-                             wrap_coerce_value (value_data, arg_types[i]));
+                             wrap_coerce_value (self, value_data, arg_types[i]));
           else
             {
               g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
@@ -1816,7 +1820,7 @@ bge_wdgt_spec_set_value (BgeWdgtSpec *self,
   if (!g_type_is_a (src_data->type, dest_data->type))
     {
       if (check_can_coerce_type (dest_data->type, src_data->type))
-        coerced_src_data = wrap_coerce_value (src_data, dest_data->type);
+        coerced_src_data = wrap_coerce_value (self, src_data, dest_data->type);
       else
         {
           g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
@@ -2371,8 +2375,9 @@ coerce_value (const GValue *in,
 }
 
 static ValueData *
-wrap_coerce_value (ValueData *value,
-                   GType      dest_type)
+wrap_coerce_value (BgeWdgtSpec *self,
+                   ValueData   *value,
+                   GType        dest_type)
 {
   g_autoptr (ValueData) coerced = NULL;
 
@@ -2383,6 +2388,7 @@ wrap_coerce_value (ValueData *value,
   coerced->kind           = VALUE_COERCION;
   coerced->coercion.value = value_data_ref (value);
 
+  g_ptr_array_add (self->anon_values, value_data_ref (coerced));
   return g_steal_pointer (&coerced);
 }
 
@@ -4751,6 +4757,15 @@ regenerate (BgeWdgtRenderer *self)
                   (gpointer *) &value))
             break;
 
+          expression = ensure_expressions (self, value, state, instance);
+        }
+
+      for (guint i = 0; i < spec->anon_values->len; i++)
+        {
+          ValueData *value                     = NULL;
+          g_autoptr (GtkExpression) expression = NULL;
+
+          value      = g_ptr_array_index (spec->anon_values, i);
           expression = ensure_expressions (self, value, state, instance);
         }
     }
