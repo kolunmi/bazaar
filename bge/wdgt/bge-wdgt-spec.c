@@ -1323,12 +1323,6 @@ bge_wdgt_spec_add_child_source_value (BgeWdgtSpec       *self,
                        "value '%s' is undefined", parent);
           return FALSE;
         }
-      if (parent_data->kind != VALUE_CHILD)
-        {
-          g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
-                       "value '%s' is not a child widget", parent);
-          return FALSE;
-        }
       if (!g_type_is_a (parent_data->type, GTK_TYPE_BUILDABLE))
         {
           g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
@@ -4619,6 +4613,24 @@ regenerate (BgeWdgtRenderer *self)
   if (self->spec == NULL)
     return;
 
+  for (guint i = 0; i < spec->nonchildren->len; i++)
+    {
+      ValueData *value           = NULL;
+      g_autoptr (GObject) object = NULL;
+
+      value = g_ptr_array_index (spec->nonchildren, i);
+      g_assert (value->kind == VALUE_OBJECT);
+
+      object = g_object_new (value->type, NULL);
+      if (g_type_is_a (value->type, G_TYPE_INITIALLY_UNOWNED))
+        g_object_ref_sink (object);
+
+      g_hash_table_replace (self->objects,
+                            value_data_ref (value),
+                            g_object_ref (object));
+      g_ptr_array_add (self->nonchildren, g_object_ref (object));
+    }
+
   dummy_builder = gtk_builder_new ();
   for (guint i = 0; i < spec->children->len; i++)
     {
@@ -4674,24 +4686,6 @@ regenerate (BgeWdgtRenderer *self)
       g_hash_table_replace (self->allocations,
                             g_object_ref (widget),
                             allocation_data_ref (allocation));
-    }
-
-  for (guint i = 0; i < spec->nonchildren->len; i++)
-    {
-      ValueData *value           = NULL;
-      g_autoptr (GObject) object = NULL;
-
-      value = g_ptr_array_index (spec->nonchildren, i);
-      g_assert (value->kind == VALUE_OBJECT);
-
-      object = g_object_new (value->type, NULL);
-      if (g_type_is_a (value->type, G_TYPE_INITIALLY_UNOWNED))
-        g_object_ref_sink (object);
-
-      g_hash_table_replace (self->objects,
-                            value_data_ref (value),
-                            g_object_ref (object));
-      g_ptr_array_add (self->nonchildren, g_object_ref (object));
     }
 
   g_hash_table_iter_init (&state_iter, spec->states);
