@@ -4524,9 +4524,12 @@ regenerate (BgeWdgtRenderer *self)
       g_assert (value->kind == VALUE_OBJECT);
 
       object = g_object_new (value->type, NULL);
+      if (g_type_is_a (value->type, G_TYPE_INITIALLY_UNOWNED))
+        g_object_ref_sink (object);
+
       g_hash_table_replace (self->objects,
                             value_data_ref (value),
-                            g_object_ref_sink (object));
+                            g_object_ref (object));
       g_ptr_array_add (self->nonchildren, g_object_ref (object));
     }
 
