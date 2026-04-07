@@ -1156,7 +1156,9 @@ parse_args (const char        *p,
           g_autofree char *key  = NULL;
           GType            type = G_TYPE_INVALID;
 
-          if (g_hash_table_lookup (type_hints, token))
+          if (g_hash_table_contains (type_hints, token) ||
+              /* A macro placed this here */
+              g_utf8_strchr (token, -1, '@') != NULL)
             key = g_steal_pointer (&token);
           else
             {
