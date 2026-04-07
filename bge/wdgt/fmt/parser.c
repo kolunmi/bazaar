@@ -844,7 +844,7 @@ parse_eval (const char  *p,
   }                                                        \
   G_STMT_END
 
-  for (;;)
+  for (gboolean apply_negative = FALSE;;)
     {
       g_autofree char *value          = NULL;
       Operator         op             = -1;
@@ -954,6 +954,33 @@ parse_eval (const char  *p,
                   "Expected operator, got \"%s\"", token);
               return NULL;
             }
+
+          if (apply_negative)
+            {
+              GValue           gvalue       = G_VALUE_INIT;
+              g_autofree char *negative_key = NULL;
+              EvalOperator     append       = { 0 };
+
+              g_value_set_double (g_value_init (&gvalue, G_TYPE_DOUBLE), -1.0);
+              negative_key = make_anon_name ((*n_anon_vals)++);
+              result       = bge_wdgt_spec_add_constant_source_value (
+                  spec,
+                  negative_key,
+                  &gvalue,
+                  &local_error);
+              g_value_unset (&gvalue);
+              RETURN_ERROR_UNLESS (result);
+
+              g_ptr_array_add (values, g_steal_pointer (&negative_key));
+              g_array_append_val (value_types, type_double);
+
+              append.op  = OPERATOR_MULTIPLY;
+              append.pos = ops->len;
+              g_array_append_val (ops, append);
+
+              apply_negative = FALSE;
+            }
+
           g_ptr_array_add (values, g_steal_pointer (&value));
           g_array_append_val (value_types, type_double);
         }
@@ -963,17 +990,26 @@ parse_eval (const char  *p,
 
           if (expected_value)
             {
-              g_set_error (
-                  error,
-                  G_IO_ERROR,
-                  G_IO_ERROR_UNKNOWN,
-                  "Expected value, got \"%s\"", token);
-              return NULL;
+              if (op == OPERATOR_SUBTRACT)
+                apply_negative = !apply_negative;
+              else if (op != OPERATOR_ADD)
+                /* Allow adding `+` in front of numbers for alignment with
+                   negatives etc */
+                {
+                  g_set_error (
+                      error,
+                      G_IO_ERROR,
+                      G_IO_ERROR_UNKNOWN,
+                      "Expected value, got \"%s\"", token);
+                  return NULL;
+                }
             }
-
-          append.op  = op;
-          append.pos = ops->len;
-          g_array_append_val (ops, append);
+          else
+            {
+              append.op  = op;
+              append.pos = ops->len;
+              g_array_append_val (ops, append);
+            }
         }
     }
 

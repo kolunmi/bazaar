@@ -28,8 +28,8 @@ defwidget "My Widget" {
     var corner@i@ : "GrapheneSize";
     
     init {
-      set rect@i@ = #(#eval(0.0-#(rect-size@i@)/2.0),
-                    #eval(0.0-#(rect-size@i@)/2.0),
+      set rect@i@ = #(#eval(-#(rect-size@i@)/2.0),
+                    #eval(-#(rect-size@i@)/2.0),
                     rect-size@i@, rect-size@i@);
       set corner@i@ = #(radius@i@, radius@i@);
     
@@ -40,8 +40,8 @@ defwidget "My Widget" {
           with rounded-clip(rect@i@, corner@i@, corner@i@, corner@i@, corner@i@) {
             add linear-gradient(
               rect@i@,
-              #GraphenePoint(#eval(#(rect-size@i@)), #eval(0.0-#(rect-size@i@))),
-              #GraphenePoint(#eval(0.0-#(rect-size@i@)), #eval(0.0+#(rect-size@i@))),
+              #GraphenePoint(#eval(#(rect-size@i@)), #eval(-#(rect-size@i@))),
+              #GraphenePoint(#eval(-#(rect-size@i@)), #eval(0.0+#(rect-size@i@))),
               0.0, #GdkRGBA("#6f8396"),
               1.0, color,);
           }
