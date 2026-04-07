@@ -1515,7 +1515,10 @@ parse_args (const char        *p,
                       if (g_strcmp0 (property_name, ")") == 0)
                         break;
                       else if (g_strcmp0 (property_name, "%set") == 0)
-                        GET_TOKEN (&set_key, TOKEN_PARSE_DEFAULT);
+                        {
+                          GET_TOKEN (&set_key, TOKEN_PARSE_DEFAULT);
+                          prop_type = GPOINTER_TO_SIZE (g_hash_table_lookup (type_hints, set_key));
+                        }
                       else if (g_strcmp0 (property_name, "_") != 0)
                         {
                           set_key = make_object_property_name (key, property_name, (*n_anon_vals)++);
