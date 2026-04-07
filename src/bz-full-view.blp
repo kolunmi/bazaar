@@ -672,7 +672,7 @@ template $BzFullView: Adw.Bin {
                               size: 6;
                               model: FilterListModel {
                                 model: bind template.developer-apps-model as <Gio.ListModel>;
-                                filter: CustomFilter is_equal_filter {};
+                                filter: CustomFilter is_group_equal_filter {};
                               };
                             };
                           }
