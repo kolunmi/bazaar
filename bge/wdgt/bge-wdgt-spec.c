@@ -1199,7 +1199,8 @@ bge_wdgt_spec_add_instance_source_value (BgeWdgtSpec *self,
                    g_type_name (type));
       return FALSE;
     }
-  if (!G_TYPE_IS_INSTANTIATABLE (type))
+  if (!G_TYPE_IS_INSTANTIATABLE (type) ||
+      G_TYPE_IS_ABSTRACT (type))
     {
       g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
                    "type '%s' is not instantiable",
@@ -1245,7 +1246,8 @@ bge_wdgt_spec_add_child_source_value (BgeWdgtSpec       *self,
                    g_type_name (type));
       return FALSE;
     }
-  if (!G_TYPE_IS_INSTANTIATABLE (type))
+  if (!G_TYPE_IS_INSTANTIATABLE (type) ||
+      G_TYPE_IS_ABSTRACT (type))
     {
       g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
                    "type '%s' is not instantiable",
