@@ -30,6 +30,14 @@
 #define ARGBUF_SIZE 128
 
 static void
+_marshal_DIRECT__ARGS_DIRECT (GClosure                *closure,
+                              GValue                  *return_value,
+                              guint                    n_param_values,
+                              const GValue            *param_values,
+                              gpointer invocation_hint G_GNUC_UNUSED,
+                              gpointer                 marshal_data);
+
+static void
 _marshal_BOXED__ARGS_DIRECT (GClosure                *closure,
                              GValue                  *return_value,
                              guint                    n_param_values,
@@ -104,10 +112,12 @@ BGE_DEFINE_DATA (
           TransformCallFunc func;
           ValueData        *next;
           GPtrArray        *args;
+          GArray           *args_types;
         } transform;
         struct
         {
           GPtrArray      *args;
+          GArray         *args_types;
           GClosureMarshal marshal;
           GCallback       func;
           gpointer        user_data;
@@ -153,9 +163,11 @@ deinit_value (gpointer ptr)
     case VALUE_TRANSFORM:
       g_clear_pointer (&value->transform.next, value_data_unref);
       g_clear_pointer (&value->transform.args, g_ptr_array_unref);
+      g_clear_pointer (&value->transform.args_types, g_array_unref);
       break;
     case VALUE_CLOSURE:
       g_clear_pointer (&value->closure.args, g_ptr_array_unref);
+      g_clear_pointer (&value->closure.args_types, g_array_unref);
       if (value->closure.destroy_user_data != NULL)
         g_clear_pointer (&value->closure.user_data, value->closure.destroy_user_data);
       break;
@@ -296,6 +308,10 @@ enum
   LAST_PROP
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
+
+static gboolean
+check_can_coerce_type (GType dest,
+                       GType src);
 
 static gboolean
 lookup_transform_instr (const char     *lookup_name,
@@ -1137,13 +1153,14 @@ bge_wdgt_spec_add_transform_source_value (BgeWdgtSpec       *self,
       return FALSE;
     }
 
-  value                 = value_data_new ();
-  value->name           = g_strdup (name);
-  value->type           = GSK_TYPE_TRANSFORM;
-  value->kind           = VALUE_TRANSFORM;
-  value->transform.func = match.call;
-  value->transform.next = value_data_ref (next_data);
-  value->transform.args = g_ptr_array_new_with_free_func (value_data_unref);
+  value                       = value_data_new ();
+  value->name                 = g_strdup (name);
+  value->type                 = GSK_TYPE_TRANSFORM;
+  value->kind                 = VALUE_TRANSFORM;
+  value->transform.func       = match.call;
+  value->transform.next       = value_data_ref (next_data);
+  value->transform.args       = g_ptr_array_new_with_free_func (value_data_unref);
+  value->transform.args_types = g_array_new (FALSE, TRUE, sizeof (GType));
 
   for (guint i = 0; i < n_args; i++)
     {
@@ -1157,7 +1174,8 @@ bge_wdgt_spec_add_transform_source_value (BgeWdgtSpec       *self,
           return FALSE;
         }
 
-      if (!g_type_is_a (value_data->type, match.args[i]))
+      if (!g_type_is_a (value_data->type, match.args[i]) &&
+          !check_can_coerce_type (match.args[i], value_data->type))
         {
           g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
                        "argument %u for snapshot instruction %s "
@@ -1169,6 +1187,7 @@ bge_wdgt_spec_add_transform_source_value (BgeWdgtSpec       *self,
         }
 
       g_ptr_array_add (value->transform.args, value_data_ref (value_data));
+      g_array_append_val (value->transform.args_types, match.args[i]);
     }
 
   g_hash_table_replace (self->values, g_strdup (name), value_data_ref (value));
@@ -1346,13 +1365,15 @@ bge_wdgt_spec_add_cclosure_source_value (BgeWdgtSpec       *self,
       return FALSE;
     }
 
-  value                            = value_data_new ();
-  value->kind                      = VALUE_CLOSURE;
-  value->name                      = g_strdup (name);
-  value->type                      = type;
-  value->closure.marshal           = marshal;
-  value->closure.func              = func;
-  value->closure.args              = g_ptr_array_new_with_free_func (value_data_unref);
+  value                     = value_data_new ();
+  value->kind               = VALUE_CLOSURE;
+  value->name               = g_strdup (name);
+  value->type               = type;
+  value->closure.marshal    = marshal;
+  value->closure.func       = func;
+  value->closure.args       = g_ptr_array_new_with_free_func (value_data_unref);
+  value->closure.args_types = g_array_new (FALSE, TRUE, sizeof (GType));
+
   value->closure.user_data         = user_data;
   value->closure.destroy_user_data = destroy_user_data;
 
@@ -1368,7 +1389,8 @@ bge_wdgt_spec_add_cclosure_source_value (BgeWdgtSpec       *self,
           return FALSE;
         }
       if (arg_types != NULL &&
-          !g_type_is_a (value_data->type, arg_types[i]))
+          !g_type_is_a (value_data->type, arg_types[i]) &&
+          !check_can_coerce_type (arg_types[i], value_data->type))
         {
           g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
                        "component %u for type %s "
@@ -1380,6 +1402,7 @@ bge_wdgt_spec_add_cclosure_source_value (BgeWdgtSpec       *self,
         }
 
       g_ptr_array_add (value->closure.args, value_data_ref (value_data));
+      g_array_append_val (value->closure.args_types, arg_types[i]);
     }
 
   g_hash_table_replace (self->values, g_strdup (name), value_data_ref (value));
@@ -1769,7 +1792,8 @@ bge_wdgt_spec_set_value (BgeWdgtSpec *self,
                    "cannot assign '%s' to itself", src_value);
       return FALSE;
     }
-  if (!g_type_is_a (src_data->type, dest_data->type))
+  if (!g_type_is_a (src_data->type, dest_data->type) &&
+      !check_can_coerce_type (dest_data->type, src_data->type))
     {
       g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
                    "source type %s cannot be assigned to destination type %s",
@@ -2152,6 +2176,59 @@ bge_wdgt_spec_mark_ready (BgeWdgtSpec *self)
 {
   g_return_if_fail (BGE_IS_WDGT_SPEC (self));
   self->ready = TRUE;
+}
+
+static gboolean
+check_can_coerce_type (GType dest,
+                       GType src)
+{
+  const struct
+  {
+    GType dest;
+    GType src;
+  } valid_pairings[] = {
+    {    G_TYPE_INT,   G_TYPE_UINT },
+    {    G_TYPE_INT,  G_TYPE_FLOAT },
+    {    G_TYPE_INT, G_TYPE_DOUBLE },
+
+    {   G_TYPE_UINT,    G_TYPE_INT },
+    {   G_TYPE_UINT,  G_TYPE_FLOAT },
+    {   G_TYPE_UINT, G_TYPE_DOUBLE },
+
+    {  G_TYPE_INT64,    G_TYPE_INT },
+    {  G_TYPE_INT64,   G_TYPE_UINT },
+    {  G_TYPE_INT64,  G_TYPE_FLOAT },
+    {  G_TYPE_INT64, G_TYPE_DOUBLE },
+
+    { G_TYPE_UINT64,    G_TYPE_INT },
+    { G_TYPE_UINT64,   G_TYPE_UINT },
+    { G_TYPE_UINT64,  G_TYPE_INT64 },
+    { G_TYPE_UINT64,  G_TYPE_FLOAT },
+    { G_TYPE_UINT64, G_TYPE_DOUBLE },
+
+    {  G_TYPE_FLOAT,    G_TYPE_INT },
+    {  G_TYPE_FLOAT,   G_TYPE_UINT },
+    {  G_TYPE_FLOAT, G_TYPE_DOUBLE },
+
+    { G_TYPE_DOUBLE,    G_TYPE_INT },
+    { G_TYPE_DOUBLE,   G_TYPE_UINT },
+    { G_TYPE_DOUBLE,  G_TYPE_FLOAT },
+
+    { G_TYPE_STRING,    G_TYPE_INT },
+    { G_TYPE_STRING,   G_TYPE_UINT },
+    { G_TYPE_STRING,  G_TYPE_INT64 },
+    { G_TYPE_STRING, G_TYPE_UINT64 },
+    { G_TYPE_STRING,  G_TYPE_FLOAT },
+    { G_TYPE_STRING, G_TYPE_DOUBLE },
+  };
+
+  for (guint i = 0; i < G_N_ELEMENTS (valid_pairings); i++)
+    {
+      if (dest == valid_pairings[i].dest &&
+          src == valid_pairings[i].src)
+        return TRUE;
+    }
+  return FALSE;
 }
 
 static GskTransform *
@@ -4766,6 +4843,124 @@ expression_create_rect (gpointer object,
   return rect;
 }
 
+static void
+expression_coerce_type (gpointer      this,
+                        GValue       *return_value,
+                        guint         n_param_values,
+                        const GValue *param_values,
+                        gpointer      dest_type_ptr)
+{
+  GType dest_type = GPOINTER_TO_SIZE (dest_type_ptr);
+
+  g_value_init (return_value, dest_type);
+
+  /* Not a switch for style, though not the case here GType macros can sometimes
+     be non-compile-time constants */
+  if (dest_type == G_TYPE_INT)
+    {
+      int val = 0;
+
+      if (param_values[0].g_type == G_TYPE_UINT)
+        val = g_value_get_uint (&param_values[0]);
+      else if (param_values[0].g_type == G_TYPE_FLOAT)
+        val = round (g_value_get_float (&param_values[0]));
+      else if (param_values[0].g_type == G_TYPE_DOUBLE)
+        val = round (g_value_get_double (&param_values[0]));
+
+      g_value_set_int (return_value, val);
+    }
+  else if (dest_type == G_TYPE_UINT)
+    {
+      guint val = 0;
+
+      if (param_values[0].g_type == G_TYPE_INT)
+        val = g_value_get_int (&param_values[0]);
+      else if (param_values[0].g_type == G_TYPE_FLOAT)
+        val = round (g_value_get_float (&param_values[0]));
+      else if (param_values[0].g_type == G_TYPE_DOUBLE)
+        val = round (g_value_get_double (&param_values[0]));
+
+      g_value_set_uint (return_value, val);
+    }
+  else if (dest_type == G_TYPE_INT64)
+    {
+      gint64 val = 0;
+
+      if (param_values[0].g_type == G_TYPE_INT)
+        val = g_value_get_int (&param_values[0]);
+      else if (param_values[0].g_type == G_TYPE_UINT)
+        val = g_value_get_uint (&param_values[0]);
+      else if (param_values[0].g_type == G_TYPE_FLOAT)
+        val = round (g_value_get_float (&param_values[0]));
+      else if (param_values[0].g_type == G_TYPE_DOUBLE)
+        val = round (g_value_get_double (&param_values[0]));
+
+      g_value_set_int64 (return_value, val);
+    }
+  else if (dest_type == G_TYPE_UINT64)
+    {
+      guint64 val = 0;
+
+      if (param_values[0].g_type == G_TYPE_INT)
+        val = g_value_get_int (&param_values[0]);
+      else if (param_values[0].g_type == G_TYPE_UINT)
+        val = g_value_get_uint (&param_values[0]);
+      else if (param_values[0].g_type == G_TYPE_INT64)
+        val = g_value_get_int64 (&param_values[0]);
+      else if (param_values[0].g_type == G_TYPE_UINT64)
+        val = round (g_value_get_float (&param_values[0]));
+      else if (param_values[0].g_type == G_TYPE_DOUBLE)
+        val = round (g_value_get_double (&param_values[0]));
+
+      g_value_set_uint64 (return_value, val);
+    }
+  else if (dest_type == G_TYPE_FLOAT)
+    {
+      float val = 0;
+
+      if (param_values[0].g_type == G_TYPE_INT)
+        val = g_value_get_int (&param_values[0]);
+      else if (param_values[0].g_type == G_TYPE_UINT)
+        val = g_value_get_uint (&param_values[0]);
+      else if (param_values[0].g_type == G_TYPE_DOUBLE)
+        val = round (g_value_get_double (&param_values[0]));
+
+      g_value_set_float (return_value, val);
+    }
+  else if (dest_type == G_TYPE_DOUBLE)
+    {
+      double val = 0;
+
+      if (param_values[0].g_type == G_TYPE_INT)
+        val = g_value_get_int (&param_values[0]);
+      else if (param_values[0].g_type == G_TYPE_UINT)
+        val = g_value_get_uint (&param_values[0]);
+      else if (param_values[0].g_type == G_TYPE_FLOAT)
+        val = round (g_value_get_float (&param_values[0]));
+
+      g_value_set_double (return_value, val);
+    }
+  else if (dest_type == G_TYPE_STRING)
+    {
+      g_autofree char *val = NULL;
+
+      if (param_values[0].g_type == G_TYPE_INT)
+        val = g_strdup_printf ("%d", g_value_get_int (&param_values[0]));
+      else if (param_values[0].g_type == G_TYPE_UINT)
+        val = g_strdup_printf ("%u", g_value_get_uint (&param_values[0]));
+      else if (param_values[0].g_type == G_TYPE_INT64)
+        val = g_strdup_printf ("%zd", g_value_get_int64 (&param_values[0]));
+      else if (param_values[0].g_type == G_TYPE_UINT64)
+        val = g_strdup_printf ("%zu", g_value_get_uint64 (&param_values[0]));
+      else if (param_values[0].g_type == G_TYPE_FLOAT)
+        val = g_strdup_printf ("%f", g_value_get_float (&param_values[0]));
+      else if (param_values[0].g_type == G_TYPE_DOUBLE)
+        val = g_strdup_printf ("%f", g_value_get_double (&param_values[0]));
+
+      g_value_take_string (return_value, g_steal_pointer (&val));
+    }
+}
+
 static double
 expression_adjust_transition (BgeWdgtRenderer       *this,
                               double                 in,
@@ -4970,7 +5165,17 @@ ensure_expressions (BgeWdgtRenderer   *self,
           holds = g_hash_table_lookup (self->spec->init_state->setters, value);
 
         if (holds != NULL)
-          expression = ensure_expressions (self, holds, state, instance);
+          {
+            expression = ensure_expressions (self, holds, state, instance);
+            if (!g_type_is_a (holds->type, value->type))
+              expression = gtk_cclosure_expression_new (
+                  value->type,
+                  _marshal_DIRECT__ARGS_DIRECT,
+                  1, (GtkExpression *[]){ expression },
+                  G_CALLBACK (expression_coerce_type),
+                  GSIZE_TO_POINTER (value->type),
+                  NULL);
+          }
         else
           {
             GValue empty_value = G_VALUE_INIT;
@@ -4996,6 +5201,15 @@ ensure_expressions (BgeWdgtRenderer   *self,
 
             member      = g_ptr_array_index (value->component, i);
             member_expr = ensure_expressions (self, member, state, instance);
+            if (member->type != G_TYPE_DOUBLE)
+              member_expr = gtk_cclosure_expression_new (
+                  value->type,
+                  _marshal_DIRECT__ARGS_DIRECT,
+                  1, (GtkExpression *[]){ member_expr },
+                  G_CALLBACK (expression_coerce_type),
+                  GSIZE_TO_POINTER (G_TYPE_DOUBLE),
+                  NULL);
+
             g_ptr_array_add (params, g_steal_pointer (&member_expr));
           }
 
@@ -5045,10 +5259,22 @@ ensure_expressions (BgeWdgtRenderer   *self,
         for (guint i = 0; i < value->transform.args->len; i++)
           {
             ValueData *arg                     = NULL;
+            GType      arg_type                = G_TYPE_INVALID;
             g_autoptr (GtkExpression) arg_expr = NULL;
 
             arg      = g_ptr_array_index (value->transform.args, i);
+            arg_type = g_array_index (value->transform.args_types, GType, i);
+
             arg_expr = ensure_expressions (self, arg, state, instance);
+            if (!g_type_is_a (arg->type, arg_type))
+              arg_expr = gtk_cclosure_expression_new (
+                  value->type,
+                  _marshal_DIRECT__ARGS_DIRECT,
+                  1, (GtkExpression *[]){ arg_expr },
+                  G_CALLBACK (expression_coerce_type),
+                  GSIZE_TO_POINTER (arg_type),
+                  NULL);
+
             g_ptr_array_add (params, g_steal_pointer (&arg_expr));
           }
 
@@ -5070,12 +5296,24 @@ ensure_expressions (BgeWdgtRenderer   *self,
 
         for (guint i = 0; i < value->closure.args->len; i++)
           {
-            ValueData *member                     = NULL;
-            g_autoptr (GtkExpression) member_expr = NULL;
+            ValueData *arg                     = NULL;
+            GType      arg_type                = G_TYPE_INVALID;
+            g_autoptr (GtkExpression) arg_expr = NULL;
 
-            member      = g_ptr_array_index (value->closure.args, i);
-            member_expr = ensure_expressions (self, member, state, instance);
-            g_ptr_array_add (params, g_steal_pointer (&member_expr));
+            arg      = g_ptr_array_index (value->closure.args, i);
+            arg_type = g_array_index (value->closure.args_types, GType, i);
+
+            arg_expr = ensure_expressions (self, arg, state, instance);
+            if (!g_type_is_a (arg->type, arg_type))
+              arg_expr = gtk_cclosure_expression_new (
+                  value->type,
+                  _marshal_DIRECT__ARGS_DIRECT,
+                  1, (GtkExpression *[]){ arg_expr },
+                  G_CALLBACK (expression_coerce_type),
+                  GSIZE_TO_POINTER (arg_type),
+                  NULL);
+
+            g_ptr_array_add (params, g_steal_pointer (&arg_expr));
           }
 
         expression = gtk_cclosure_expression_new (
@@ -5393,6 +5631,45 @@ reset_setter (WatchSetterData *data)
       data->dest,
       data->src,
       NULL);
+}
+
+static void
+_marshal_DIRECT__ARGS_DIRECT (GClosure                *closure,
+                              GValue                  *return_value,
+                              guint                    n_param_values,
+                              const GValue            *param_values,
+                              gpointer invocation_hint G_GNUC_UNUSED,
+                              gpointer                 marshal_data)
+{
+  typedef void (*GMarshalFunc_DIRECT__ARGS_DIRECT) (gpointer      data1,
+                                                    GValue       *return_value,
+                                                    guint         n_param_values,
+                                                    const GValue *param_values,
+                                                    gpointer      data2);
+  GCClosure                       *cc = (GCClosure *) closure;
+  gpointer                         data1, data2;
+  GMarshalFunc_DIRECT__ARGS_DIRECT callback;
+
+  g_return_if_fail (return_value != NULL);
+  g_return_if_fail (n_param_values >= 1);
+
+  if (G_CCLOSURE_SWAP_DATA (closure))
+    {
+      data1 = closure->data;
+      data2 = g_value_peek_pointer (param_values + 0);
+    }
+  else
+    {
+      data1 = g_value_peek_pointer (param_values + 0);
+      data2 = closure->data;
+    }
+  callback = (GMarshalFunc_DIRECT__ARGS_DIRECT) (marshal_data ? marshal_data : cc->callback);
+
+  callback (data1,
+            return_value,
+            n_param_values - 1,
+            param_values + 1,
+            data2);
 }
 
 static void
