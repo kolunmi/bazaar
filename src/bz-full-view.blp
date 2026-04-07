@@ -670,12 +670,15 @@ template $BzFullView: Adw.Bin {
                             model: SliceListModel other_apps_model {
                               offset: 0;
                               size: 6;
-                              model: bind $get_developer_apps_entries(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer-apps, template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>) as <Gio.ListModel>;
+                              model: FilterListModel {
+                                model: bind template.developer-apps-model as <Gio.ListModel>;
+                                filter: CustomFilter is_equal_filter {};
+                              };
                             };
                           }
 
                           Button {
-                            visible: bind $is_longer(template.entry-group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.developer-apps, 6) as <bool>;
+                            visible: bind $is_longer(template.developer-apps-model, 6) as <bool>;
                             clicked => $more_apps_button_clicked_cb(template);
                             halign: center;
                             margin-top: 11;
