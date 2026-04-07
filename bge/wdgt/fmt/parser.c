@@ -119,6 +119,7 @@ parse_args (const char        *p,
             GType              destinations_types[],
             guint              n_destinations,
             char            ***values_out,
+            GType            **types_out,
             guint             *n_out,
             ArgsParseKind      parse_kind,
             GError           **error);
@@ -324,14 +325,16 @@ bge_wdgt_parse_string (const char *string,
                     }
                   else if (g_strcmp0 (token, STR_SET) == 0)
                     {
-                      guint n_dest_values        = 0;
-                      g_auto (GStrv) dest_values = NULL;
-                      guint n_src_values         = 0;
-                      g_auto (GStrv) src_values  = NULL;
+                      guint n_dest_values            = 0;
+                      g_auto (GStrv) dest_values     = NULL;
+                      g_autofree GType *dest_types   = NULL;
+                      guint             n_src_values = 0;
+                      g_auto (GStrv) src_values      = NULL;
 
                       p = parse_args (p, spec, state_name, NULL, &n_anon_vals,
                                       type_hints, NULL, NULL, 0, &dest_values,
-                                      &n_dest_values, ARGS_PARSE_LEFT_ASSIGN, &local_error);
+                                      &dest_types, &n_dest_values, ARGS_PARSE_LEFT_ASSIGN,
+                                      &local_error);
                       RETURN_ERROR_UNLESS (p != NULL);
                       if (n_dest_values == 0)
                         {
@@ -344,8 +347,9 @@ bge_wdgt_parse_string (const char *string,
                         }
 
                       p = parse_args (p, spec, state_name, NULL, &n_anon_vals,
-                                      type_hints, (const char *const *) dest_values, NULL, n_dest_values,
-                                      &src_values, &n_src_values, ARGS_PARSE_RIGHT_ASSIGN, &local_error);
+                                      type_hints, (const char *const *) dest_values,
+                                      dest_types, n_dest_values, &src_values, NULL,
+                                      &n_src_values, ARGS_PARSE_RIGHT_ASSIGN, &local_error);
                       RETURN_ERROR_UNLESS (p != NULL);
                       if (n_src_values != n_dest_values)
                         {
@@ -427,7 +431,7 @@ bge_wdgt_parse_string (const char *string,
 
                       p = parse_args (p, spec, state_name, NULL, &n_anon_vals, type_hints, NULL,
                                       (GType[]){ G_TYPE_DOUBLE, G_TYPE_DOUBLE, G_TYPE_DOUBLE }, 3,
-                                      &spec_values, &n_spec_values, ARGS_PARSE_RIGHT_ASSIGN, &local_error);
+                                      &spec_values, NULL, &n_spec_values, ARGS_PARSE_RIGHT_ASSIGN, &local_error);
                       RETURN_ERROR_UNLESS (p != NULL);
                       if (n_spec_values != 3)
                         {
@@ -461,8 +465,8 @@ bge_wdgt_parse_string (const char *string,
 
                       p = parse_args (p, spec, state_name, NULL, &n_anon_vals, type_hints, NULL,
                                       (GType[]){ G_TYPE_INT, G_TYPE_INT, GSK_TYPE_TRANSFORM }, 3,
-                                      &allocation_values, &n_allocation_values, ARGS_PARSE_RIGHT_ASSIGN,
-                                      &local_error);
+                                      &allocation_values, NULL, &n_allocation_values,
+                                      ARGS_PARSE_RIGHT_ASSIGN, &local_error);
                       RETURN_ERROR_UNLESS (p != NULL);
                       if (n_allocation_values != 2 &&
                           n_allocation_values != 3)
@@ -571,8 +575,8 @@ parse_snapshot_block (const char  *p,
           GET_TOKEN (&instr, TOKEN_PARSE_DEFAULT);
           GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "(");
           p = parse_args (p, spec, state, NULL, n_anon_vals, type_hints,
-                          NULL, NULL, 0, &args, &n_args, ARGS_PARSE_PARENS,
-                          &local_error);
+                          NULL, NULL, 0, &args, NULL, &n_args,
+                          ARGS_PARSE_PARENS, &local_error);
           RETURN_ERROR_UNLESS (p != NULL);
 
           result = bge_wdgt_spec_append_snapshot_instr (
@@ -683,7 +687,7 @@ parse_eval (const char  *p,
           GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "(");
           p = parse_args (p, spec, state, NULL, n_anon_vals, type_hints,
                           NULL, (GType[]){ G_TYPE_DOUBLE }, 1, &escape_args,
-                          &n_escape_args, ARGS_PARSE_PARENS, &local_error);
+                          NULL, &n_escape_args, ARGS_PARSE_PARENS, &local_error);
           RETURN_ERROR_UNLESS (p != NULL);
           if (n_escape_args != 1)
             {
@@ -847,6 +851,7 @@ parse_args (const char        *p,
             GType              destinations_types[],
             guint              n_destinations,
             char            ***values_out,
+            GType            **types_out,
             guint             *n_out,
             ArgsParseKind      parse_kind,
             GError           **error)
@@ -856,8 +861,10 @@ parse_args (const char        *p,
   g_autofree char *token           = NULL;
   guint            n_args          = 0;
   g_autoptr (GStrvBuilder) builder = NULL;
+  g_autoptr (GArray) types_array   = NULL;
 
-  builder = g_strv_builder_new ();
+  builder     = g_strv_builder_new ();
+  types_array = g_array_new (FALSE, TRUE, sizeof (GType));
 
   for (gboolean need_comma = FALSE,
                 get_token  = TRUE,
@@ -923,14 +930,14 @@ parse_args (const char        *p,
         }
       else
         {
-          g_autofree char *key = NULL;
+          g_autofree char *key  = NULL;
+          GType            type = G_TYPE_INVALID;
 
           if (g_hash_table_lookup (type_hints, token))
             key = g_steal_pointer (&token);
           else
             {
               GType    type_hint            = G_TYPE_INVALID;
-              GType    explicit_type        = G_TYPE_INVALID;
               gboolean expect_closing_paren = FALSE;
               gboolean is_child             = FALSE;
               gboolean constant             = FALSE;
@@ -967,12 +974,12 @@ parse_args (const char        *p,
                               "Unable to guess type for value");
                           return NULL;
                         }
-                      explicit_type = type_hint;
+                      type = type_hint;
                     }
                   else
                     {
-                      explicit_type = g_type_from_name (type_name);
-                      if (explicit_type == G_TYPE_INVALID)
+                      type = g_type_from_name (type_name);
+                      if (type == G_TYPE_INVALID)
                         {
                           g_set_error (
                               error,
@@ -988,10 +995,10 @@ parse_args (const char        *p,
                   expect_closing_paren = TRUE;
                 }
               else
-                explicit_type = type_hint;
+                type = type_hint;
 
               if (is_child &&
-                  !g_type_is_a (explicit_type, GTK_TYPE_WIDGET))
+                  !g_type_is_a (type, GTK_TYPE_WIDGET))
                 {
                   g_set_error (
                       error,
@@ -1001,33 +1008,33 @@ parse_args (const char        *p,
                   return NULL;
                 }
 
-              if (explicit_type == G_TYPE_INVALID)
+              if (type == G_TYPE_INVALID)
                 {
                   if (expect_closing_paren)
                     GET_TOKEN (&token, TOKEN_PARSE_DEFAULT);
                   key = parse_token_fundamental (token, spec, n_anon_vals, &local_error);
                   RETURN_ERROR_UNLESS (key != NULL);
                 }
-              else if (explicit_type == G_TYPE_INT ||
-                       explicit_type == G_TYPE_INT64 ||
-                       explicit_type == G_TYPE_UINT ||
-                       explicit_type == G_TYPE_UINT64 ||
-                       explicit_type == G_TYPE_FLOAT ||
-                       explicit_type == G_TYPE_DOUBLE)
+              else if (type == G_TYPE_INT ||
+                       type == G_TYPE_INT64 ||
+                       type == G_TYPE_UINT ||
+                       type == G_TYPE_UINT64 ||
+                       type == G_TYPE_FLOAT ||
+                       type == G_TYPE_DOUBLE)
                 {
                   const GVariantType *variant_type = NULL;
                   g_autoptr (GVariant) variant     = NULL;
 
-                  if (explicit_type == G_TYPE_INT)
+                  if (type == G_TYPE_INT)
                     variant_type = G_VARIANT_TYPE_INT32;
-                  else if (explicit_type == G_TYPE_INT64)
+                  else if (type == G_TYPE_INT64)
                     variant_type = G_VARIANT_TYPE_INT64;
-                  else if (explicit_type == G_TYPE_UINT)
+                  else if (type == G_TYPE_UINT)
                     variant_type = G_VARIANT_TYPE_UINT32;
-                  else if (explicit_type == G_TYPE_UINT64)
+                  else if (type == G_TYPE_UINT64)
                     variant_type = G_VARIANT_TYPE_UINT64;
-                  else if (explicit_type == G_TYPE_FLOAT ||
-                           explicit_type == G_TYPE_DOUBLE)
+                  else if (type == G_TYPE_FLOAT ||
+                           type == G_TYPE_DOUBLE)
                     variant_type = G_VARIANT_TYPE_DOUBLE;
 
                   if (expect_closing_paren)
@@ -1035,22 +1042,22 @@ parse_args (const char        *p,
                   variant = g_variant_parse (variant_type, token, NULL, NULL, &local_error);
                   RETURN_ERROR_UNLESS (variant != NULL);
 
-                  if (explicit_type == G_TYPE_INT)
+                  if (type == G_TYPE_INT)
                     g_value_set_int (g_value_init (&value, G_TYPE_INT),
                                      g_variant_get_int32 (variant));
-                  else if (explicit_type == G_TYPE_INT64)
+                  else if (type == G_TYPE_INT64)
                     g_value_set_int64 (g_value_init (&value, G_TYPE_INT64),
                                        g_variant_get_int64 (variant));
-                  else if (explicit_type == G_TYPE_UINT)
+                  else if (type == G_TYPE_UINT)
                     g_value_set_uint (g_value_init (&value, G_TYPE_UINT),
                                       g_variant_get_uint32 (variant));
-                  else if (explicit_type == G_TYPE_UINT64)
+                  else if (type == G_TYPE_UINT64)
                     g_value_set_uint64 (g_value_init (&value, G_TYPE_UINT64),
                                         g_variant_get_uint64 (variant));
-                  else if (explicit_type == G_TYPE_FLOAT)
+                  else if (type == G_TYPE_FLOAT)
                     g_value_set_float (g_value_init (&value, G_TYPE_FLOAT),
                                        g_variant_get_double (variant));
-                  else if (explicit_type == G_TYPE_DOUBLE)
+                  else if (type == G_TYPE_DOUBLE)
                     g_value_set_double (g_value_init (&value, G_TYPE_DOUBLE),
                                         g_variant_get_double (variant));
                   constant = TRUE;
@@ -1058,7 +1065,7 @@ parse_args (const char        *p,
                   if (expect_closing_paren)
                     GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ")");
                 }
-              else if (g_type_is_a (explicit_type, G_TYPE_ENUM))
+              else if (g_type_is_a (type, G_TYPE_ENUM))
                 {
                   g_autoptr (GEnumClass) enum_class = NULL;
                   GEnumValue *enum_value            = NULL;
@@ -1066,7 +1073,7 @@ parse_args (const char        *p,
                   if (expect_closing_paren)
                     GET_TOKEN (&token, TOKEN_PARSE_DEFAULT);
 
-                  enum_class = g_type_class_ref (explicit_type);
+                  enum_class = g_type_class_ref (type);
                   enum_value = g_enum_get_value_by_nick (enum_class, token);
                   if (enum_value == NULL)
                     enum_value = g_enum_get_value_by_name (enum_class, token);
@@ -1077,18 +1084,18 @@ parse_args (const char        *p,
                           G_IO_ERROR,
                           G_IO_ERROR_UNKNOWN,
                           "\"%s\" not found in enum type %s",
-                          token, g_type_name (explicit_type));
+                          token, g_type_name (type));
                       return NULL;
                     }
 
-                  g_value_set_enum (g_value_init (&value, explicit_type),
+                  g_value_set_enum (g_value_init (&value, type),
                                     enum_value->value);
                   constant = TRUE;
 
                   if (expect_closing_paren)
                     GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ")");
                 }
-              else if (explicit_type == GDK_TYPE_RGBA)
+              else if (type == GDK_TYPE_RGBA)
                 {
                   GdkRGBA rgba = { 0 };
 
@@ -1111,9 +1118,9 @@ parse_args (const char        *p,
                   if (expect_closing_paren)
                     GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ")");
                 }
-              else if (explicit_type == GRAPHENE_TYPE_POINT ||
-                       explicit_type == GRAPHENE_TYPE_SIZE ||
-                       explicit_type == GRAPHENE_TYPE_RECT)
+              else if (type == GRAPHENE_TYPE_POINT ||
+                       type == GRAPHENE_TYPE_SIZE ||
+                       type == GRAPHENE_TYPE_RECT)
                 {
                   g_auto (GStrv) component_args = NULL;
                   guint n_component_args        = 0;
@@ -1126,16 +1133,17 @@ parse_args (const char        *p,
                           G_IO_ERROR,
                           G_IO_ERROR_UNKNOWN,
                           "type %s must be wrapped in #(...)",
-                          g_type_name (explicit_type));
+                          g_type_name (type));
                       return NULL;
                     }
 
                   p = parse_args (p, spec, state, enclosing_object, n_anon_vals, type_hints, NULL,
                                   (GType[]){ G_TYPE_DOUBLE, G_TYPE_DOUBLE, G_TYPE_DOUBLE, G_TYPE_DOUBLE }, 4,
-                                  &component_args, &n_component_args, ARGS_PARSE_PARENS, &local_error);
+                                  &component_args, NULL, &n_component_args, ARGS_PARSE_PARENS,
+                                  &local_error);
                   RETURN_ERROR_UNLESS (p != NULL);
 
-                  if (explicit_type == GRAPHENE_TYPE_POINT)
+                  if (type == GRAPHENE_TYPE_POINT)
                     {
                       switch (n_component_args)
                         {
@@ -1155,7 +1163,7 @@ parse_args (const char        *p,
                           return NULL;
                         }
                     }
-                  else if (explicit_type == GRAPHENE_TYPE_SIZE)
+                  else if (type == GRAPHENE_TYPE_SIZE)
                     {
                       switch (n_component_args)
                         {
@@ -1172,7 +1180,7 @@ parse_args (const char        *p,
                           return NULL;
                         }
                     }
-                  else if (explicit_type == GRAPHENE_TYPE_RECT)
+                  else if (type == GRAPHENE_TYPE_RECT)
                     {
                       switch (n_component_args)
                         {
@@ -1197,7 +1205,7 @@ parse_args (const char        *p,
                       n_component_args, &local_error);
                   RETURN_ERROR_UNLESS (result);
                 }
-              else if (g_type_is_a (explicit_type, G_TYPE_OBJECT))
+              else if (g_type_is_a (type, G_TYPE_OBJECT))
                 {
                   if (!expect_closing_paren)
                     {
@@ -1206,7 +1214,7 @@ parse_args (const char        *p,
                           G_IO_ERROR,
                           G_IO_ERROR_UNKNOWN,
                           "type %s must be wrapped in #(...)",
-                          g_type_name (explicit_type));
+                          g_type_name (type));
                       return NULL;
                     }
 
@@ -1220,14 +1228,14 @@ parse_args (const char        *p,
                         g_clear_pointer (&builder_type, g_free);
 
                       result = bge_wdgt_spec_add_child_source_value (
-                          spec, key, explicit_type,
+                          spec, key, type,
                           enclosing_object, builder_type, &local_error);
                       RETURN_ERROR_UNLESS (result);
                     }
                   else
                     {
                       result = bge_wdgt_spec_add_instance_source_value (
-                          spec, key, explicit_type, &local_error);
+                          spec, key, type, &local_error);
                       RETURN_ERROR_UNLESS (result);
                     }
 
@@ -1254,8 +1262,8 @@ parse_args (const char        *p,
                       GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "=");
 
                       p = parse_args (p, spec, state, key, n_anon_vals, type_hints,
-                                      NULL, (GType[]){ prop_type }, 1,
-                                      &value_args, &n_value_args, ARGS_PARSE_RIGHT_ASSIGN,
+                                      NULL, (GType[]){ prop_type }, 1, &value_args,
+                                      NULL, &n_value_args, ARGS_PARSE_RIGHT_ASSIGN,
                                       &local_error);
                       RETURN_ERROR_UNLESS (p != NULL);
 
@@ -1279,7 +1287,7 @@ parse_args (const char        *p,
                         }
                     }
                 }
-              else if (explicit_type == GSK_TYPE_TRANSFORM)
+              else if (type == GSK_TYPE_TRANSFORM)
                 {
                   g_autofree char *last_key = NULL;
 
@@ -1290,7 +1298,7 @@ parse_args (const char        *p,
                           G_IO_ERROR,
                           G_IO_ERROR_UNKNOWN,
                           "type %s must be wrapped in #(...)",
-                          g_type_name (explicit_type));
+                          g_type_name (type));
                       return NULL;
                     }
 
@@ -1316,7 +1324,7 @@ parse_args (const char        *p,
 
                       GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "(");
                       p = parse_args (p, spec, state, enclosing_object, n_anon_vals,
-                                      type_hints, NULL, NULL, 0, &value_args,
+                                      type_hints, NULL, NULL, 0, &value_args, NULL,
                                       &n_value_args, ARGS_PARSE_PARENS, &local_error);
                       RETURN_ERROR_UNLESS (p != NULL);
                       GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ";");
@@ -1341,7 +1349,7 @@ parse_args (const char        *p,
                       G_IO_ERROR,
                       G_IO_ERROR_UNKNOWN,
                       "Can't parse type %s",
-                      g_type_name (explicit_type));
+                      g_type_name (type));
                   return NULL;
                 }
 
@@ -1367,7 +1375,7 @@ parse_args (const char        *p,
                   name = make_object_property_name (key, property, (*n_anon_vals)++);
 
                   result = bge_wdgt_spec_add_property_value (
-                      spec, name, key, property, NULL, &local_error);
+                      spec, name, key, property, &type, &local_error);
                   RETURN_ERROR_UNLESS (result);
 
                   g_clear_pointer (&key, g_free);
@@ -1379,6 +1387,7 @@ parse_args (const char        *p,
           get_token = FALSE;
 
           g_strv_builder_add (builder, key);
+          g_array_append_val (types_array, type);
           n_args++;
           need_comma = TRUE;
         }
@@ -1388,6 +1397,8 @@ parse_args (const char        *p,
     *n_out = n_args;
   if (values_out != NULL)
     *values_out = g_strv_builder_end (builder);
+  if (types_out != NULL)
+    *types_out = g_array_steal (types_array, NULL);
 
   return p;
 }
