@@ -1238,6 +1238,18 @@ parse_args (const char        *p,
                   key = parse_token_fundamental (token, spec, n_anon_vals, &local_error);
                   RETURN_ERROR_UNLESS (key != NULL);
                 }
+              else if (type == G_TYPE_STRING)
+                {
+                  if (expect_closing_paren)
+                    GET_TOKEN (&token, TOKEN_PARSE_DEFAULT);
+
+                  g_value_set_string (g_value_init (&value, G_TYPE_STRING),
+                                      token);
+                  constant = TRUE;
+
+                  if (expect_closing_paren)
+                    GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ")");
+                }
               else if (type == G_TYPE_BOOLEAN)
                 {
                   if (expect_closing_paren)
