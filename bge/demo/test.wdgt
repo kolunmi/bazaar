@@ -1,70 +1,122 @@
 defwidget "My Widget" {
-  var btn : "GtkButton";
-
   var t : "BgeWdgtTime";
+  var label : "GtkLabel";
 
-  var rotate : "gdouble";
+  var x1 : "gdouble";
+  var y1 : "gdouble";
+  var rotate1 : "gdouble";
+  var rect-size1 : "gdouble";
+  var radius1 : "gdouble";
+  var rect1 : "GrapheneRect";
+  var corner1 : "GrapheneSize";
 
-  var rect-size : "gdouble";
-  var rect : "GrapheneRect";
-  
-  var radius : "gdouble";
-  var corner : "GrapheneSize";
-
-  var grad-os : "gdouble";
+  var x2 : "gdouble";
+  var y2 : "gdouble";
+  var rotate2 : "gdouble";
+  var rect-size2 : "gdouble";
+  var radius2 : "gdouble";
+  var rect2 : "GrapheneRect";
+  var corner2 : "GrapheneSize";
 
   init {
-    set btn = #child/("" label = "hello";);
-    allocate btn 100, 100, #(translate(#GraphenePoint(10.0, 10.0)););
+    set label = #child/("" ("title-1") valign=center;);
 
     set t = #(notify-msec = 10;);
 
-    set rect = #(#eval(0.0-#(rect-size)/2.0),
-                     #eval(0.0-#(rect-size)/2.0),
-                     rect-size, rect-size);
-    set corner = #(radius, radius);
+    set rect1 = #(#eval(0.0-#(rect-size1)/2.0),
+                  #eval(0.0-#(rect-size1)/2.0),
+                  rect-size1, rect-size1);
+    set corner1 = #(radius1, radius1);
+
+    set rect2 = #(#eval(0.0-#(rect-size2)/2.0),
+                  #eval(0.0-#(rect-size2)/2.0),
+                  rect-size2, rect-size2);
+    set corner2 = #(radius2, radius2);
+
 
     %snapshot = {
       save {
-        move translate(#GraphenePoint(200.0, 200.0));
-        move rotate(rotate);
-        with rounded-clip(rect, corner, corner, corner, corner) {
+        move translate(#GraphenePoint(x1, y1));
+        move rotate(rotate1);
+        with rounded-clip(rect1, corner1, corner1, corner1, corner1) {
           add linear-gradient(
-            rect,
-            #GraphenePoint(#eval(#(grad-os)*#(rect-size)), #eval(0.0-#(rect-size))),
-            #GraphenePoint(#eval(0.0-#(grad-os)*#(rect-size)), #eval(0.0+#(rect-size))),
+            rect1,
+            #GraphenePoint(#eval(#(rect-size1)), #eval(0.0-#(rect-size1))),
+            #GraphenePoint(#eval(0.0-#(rect-size1)), #eval(0.0+#(rect-size1))),
             0.0, #GdkRGBA("#3584e4"),
+            1.0, #GdkRGBA("#e62d42"),);
+        }
+      }
+      save {
+        move translate(#GraphenePoint(x2, y2));
+        move rotate(rotate2);
+        with rounded-clip(rect2, corner2, corner2, corner2, corner2) {
+          add linear-gradient(
+            rect2,
+            #GraphenePoint(#eval(#(rect-size2)), #eval(0.0-#(rect-size2))),
+            #GraphenePoint(#eval(0.0-#(rect-size2)), #eval(0.0+#(rect-size2))),
+            0.0, #GdkRGBA("#c88800"),
             1.0, #GdkRGBA("#e62d42"),);
         }
       }
     }
   }
 
-  state@default "d" = {
-    set rotate = #eval(30.0*sin(#(t:time)));
-    transition-spring rotate 1.0, 0.1, 10.0;
+  state@default "1" = {
+    set label:label = "purpley";
 
-    set radius = 10.0;
-    transition-spring radius 1.0, 0.1, 10.0;
-    
-    set rect-size = 60.0;
-    transition-spring rect-size 1.0, 0.1, 10.0;
+    set x1 = 300.0;
+    transition-spring x1 0.8, 0.1, 20.0;
+    set y1 = 300.0;
+    transition-spring y1 0.8, 0.1, 20.0;
 
-    set grad-os = -1.0;
-    transition-spring grad-os 1.0, 0.1, 10.0;
+    set x2 = 100.0;
+    transition-spring x2 1.2, 0.1, 30.0;
+    set y2 = 100.0;
+    transition-spring y2 1.2, 0.1, 30.0;
+
+    set rotate1 = 0.0;
+    transition-spring rotate1 1.0, 0.1, 10.0;
+    set rotate2 = #eval(50.0*sin(#(t:time)));
+    transition-spring rotate2 1.0, 0.1, 10.0;
+
+    set radius1 = 30.0;
+    transition-spring radius1 1.0, 0.1, 10.0;
+    set radius2 = 10.0;
+    transition-spring radius2 1.0, 0.1, 10.0;
+
+    set rect-size1 = 150.0;
+    transition-spring rect-size1 1.0, 0.1, 10.0;
+    set rect-size2 = 60.0;
+    transition-spring rect-size2 1.0, 0.1, 10.0;
   }
 
-  state "s" = {
-    set rotate = 0.0;
-    transition-spring rotate 1.0, 0.1, 10.0;
+  state "2" = {
+    set label:label = "orangey";
     
-    set radius = 25.0;
-    transition-spring radius 0.6, 0.1, 20.0;
-    
-    set rect-size = 100.0;
-    transition-spring rect-size 0.5, 0.5, 100.0;
-    
-    set grad-os = 1.0;
-    transition-spring grad-os 1.0, 0.1, 10.0;
+    set x1 = 100.0;
+    transition-spring x1 1.2, 0.1, 30.0;
+    set y1 = 100.0;
+    transition-spring y1 1.2, 0.1, 30.0;
+
+    set x2 = 300.0;
+    transition-spring x2 0.8, 0.1, 20.0;
+    set y2 = 300.0;
+    transition-spring y2 0.8, 0.1, 20.0;
+
+    set rotate1 = #eval(50.0*sin(#(t:time)));
+    transition-spring rotate1 1.0, 0.1, 10.0;
+    set rotate2 = 0.0;
+    transition-spring rotate2 1.0, 0.1, 10.0;
+
+    set radius1 = 10.0;
+    transition-spring radius1 1.0, 0.1, 10.0;
+    set radius2 = 30.0;
+    transition-spring radius2 1.0, 0.1, 10.0;
+
+    set rect-size1 = 60.0;
+    transition-spring rect-size1 1.0, 0.1, 10.0;
+    set rect-size2 = 150.0;
+    transition-spring rect-size2 1.0, 0.1, 10.0;
   }
 }
