@@ -720,6 +720,8 @@ parse_snapshot_block (const char  *p,
         kind = BGE_WDGT_SNAPSHOT_INSTR_APPEND;
       else if (g_strcmp0 (action, "move") == 0)
         kind = BGE_WDGT_SNAPSHOT_INSTR_TRANSFORM;
+      else if (g_strcmp0 (action, "do-child") == 0)
+        kind = BGE_WDGT_SNAPSHOT_INSTR_SNAPSHOT_CHILD;
       else
         UNEXPECTED_TOKEN (action);
 
@@ -728,6 +730,19 @@ parse_snapshot_block (const char  *p,
           result = bge_wdgt_spec_append_snapshot_instr (
               spec, state, BGE_WDGT_SNAPSHOT_INSTR_SAVE,
               "save", NULL, 0, &local_error);
+          RETURN_ERROR_UNLESS (result);
+        }
+      else if (kind == BGE_WDGT_SNAPSHOT_INSTR_SNAPSHOT_CHILD)
+        {
+          p = parse_args (p, spec, state, NULL, macro_replacements,
+                          n_anon_vals, type_hints,
+                          NULL, NULL, 0, &args, NULL, &n_args,
+                          ARGS_PARSE_RIGHT_ASSIGN, &local_error);
+          RETURN_ERROR_UNLESS (p != NULL);
+
+          result = bge_wdgt_spec_append_snapshot_instr (
+              spec, state, BGE_WDGT_SNAPSHOT_INSTR_SNAPSHOT_CHILD,
+              "do-child", (const char *const *) args, n_args, &local_error);
           RETURN_ERROR_UNLESS (result);
         }
       else

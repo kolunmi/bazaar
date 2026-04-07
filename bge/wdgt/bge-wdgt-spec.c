@@ -249,9 +249,11 @@ BGE_DEFINE_DATA (
       SnapshotCallFunc         func;
       GPtrArray               *args;
       GPtrArray               *rest;
+      ValueData               *child;
     },
     BGE_RELEASE_DATA (args, g_ptr_array_unref);
-    BGE_RELEASE_DATA (rest, g_ptr_array_unref))
+    BGE_RELEASE_DATA (rest, g_ptr_array_unref);
+    BGE_RELEASE_DATA (child, value_data_unref))
 
 BGE_DEFINE_DATA (
     snapshot,
@@ -2113,6 +2115,40 @@ bge_wdgt_spec_append_snapshot_instr (BgeWdgtSpec             *self,
       {
         call       = snapshot_call_data_new ();
         call->kind = kind;
+
+        ensure_state_snapshot (state_data);
+        g_ptr_array_add (state_data->snapshot->calls, snapshot_call_data_ref (call));
+      }
+      return TRUE;
+    case BGE_WDGT_SNAPSHOT_INSTR_SNAPSHOT_CHILD:
+      {
+        ValueData *child = NULL;
+
+        if (n_args != 1)
+          {
+            g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                         "child snapshot instruction requires "
+                         "a single argument");
+            return FALSE;
+          }
+
+        child = g_hash_table_lookup (self->values, args[0]);
+        if (child == NULL)
+          {
+            g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                         "value '%s' is undefined", args[0]);
+            return FALSE;
+          }
+        if (!g_type_is_a (child->type, GTK_TYPE_WIDGET))
+          {
+            g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                         "value '%s' is not a child", args[0]);
+            return FALSE;
+          }
+
+        call        = snapshot_call_data_new ();
+        call->kind  = kind;
+        call->child = value_data_ref (child);
 
         ensure_state_snapshot (state_data);
         g_ptr_array_add (state_data->snapshot->calls, snapshot_call_data_ref (call));
@@ -4287,19 +4323,43 @@ bge_wdgt_renderer_snapshot (GtkWidget   *widget,
                   }
               }
               break;
+            case BGE_WDGT_SNAPSHOT_INSTR_SNAPSHOT_CHILD:
+              {
+                GtkExpression *expression  = NULL;
+                GValue         child_value = G_VALUE_INIT;
+                GtkWidget     *child       = NULL;
+
+                expression = g_hash_table_lookup (
+                    self->active_instance->expressions,
+                    call->child);
+                gtk_expression_evaluate (expression, self, &child_value);
+
+                child = g_value_get_object (&child_value);
+                if (child != NULL)
+                  {
+                    if (gtk_widget_get_parent (child) == GTK_WIDGET (self))
+                      gtk_widget_snapshot_child (GTK_WIDGET (self), child, snapshot);
+                    else
+                      g_critical ("Trying to snapshot a widget which is "
+                                  "not a direct child of this spec! Skipping");
+                  }
+
+                g_value_unset (&child_value);
+              }
+              break;
             default:
               break;
             }
         }
     }
 
-  for (guint i = 0; i < self->children->len; i++)
-    {
-      GtkWidget *child = NULL;
-
-      child = g_ptr_array_index (self->children, i);
-      gtk_widget_snapshot_child (GTK_WIDGET (self), child, snapshot);
-    }
+  // for (guint i = 0; i < self->children->len; i++)
+  //   {
+  //     GtkWidget *child = NULL;
+  //
+  //     child = g_ptr_array_index (self->children, i);
+  //     gtk_widget_snapshot_child (GTK_WIDGET (self), child, snapshot);
+  //   }
 }
 
 static void

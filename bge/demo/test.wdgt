@@ -16,6 +16,9 @@ defwidget "My Widget" {
   init {
     set t = #(notify-msec = 10;);
     set label = #child/("" ("title-1") valign=center;);
+    %snapshot {
+      do-child label;
+    }
   }
 
   %FOREACH color, idx, i IN arr {
@@ -50,8 +53,6 @@ defwidget "My Widget" {
     }
     
     state-default "1" {
-      set label:label = "";
-    
       set x@i@ = #eval(120.0*floor(1.0+(@i@.0 % 4.0)));
       transition-spring x@i@ 0.8, 0.1, 20.0;
       set y@i@ = #eval(120.0*floor(1.0+(@i@.0 / 4.0)));
@@ -68,8 +69,6 @@ defwidget "My Widget" {
     }
 
     state "2" {
-      set label:label = "";
-      
       set x@i@ = #eval(100.0*(1.0+@i@.0));
       transition-spring x@i@ 1.2, 0.1, 30.0;
       set y@i@ = 100.0;
