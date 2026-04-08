@@ -1,0 +1,91 @@
+defwidget "Global Progress Widget" {
+  reference state : "BzStateInfo";
+
+  var t : "BgeWdgtTime";
+  var fixed : "GtkFixed";
+
+  var x : "gdouble";
+  var y : "gdouble";
+  var w : "gdouble";
+  var h : "gdouble";
+  var corner : "gdouble";
+  var opacity : "gdouble";
+  var ww : "gdouble";
+
+  init {
+    measure ww, ww, -1, -1;
+    
+    set t = #(notify-msec = 10;);
+    
+    set fixed = #child/(""("accent"));
+    allocate fixed w, h, #(translate(#GraphenePoint(x, y)););
+    
+    snapshot {
+      with opacity(opacity) {
+      with rounded-clip(
+        #GrapheneRect(x, y, w, h),
+        #GrapheneSize(corner, corner),
+        #GrapheneSize(corner, corner),
+        #GrapheneSize(corner, corner),
+        #GrapheneSize(corner, corner),
+      ) {
+        do-child fixed;
+      }
+      }
+    }
+  }
+
+  state-default "inactive" {
+    set x = #eval(#(%width%)/2.0);
+    set y = #eval(#(%height%)/2.0);
+    set w = 0.0;
+    set h = 0.0;
+    set corner = 10.0;
+    set opacity = 0.0;
+    set ww = 0.0;
+
+    transition-spring x 1.0, 0.5, 100.0;
+    transition-spring y 1.0, 0.5, 100.0;
+    transition-spring w 1.0, 0.5, 100.0;
+    transition-spring h 1.0, 0.5, 100.0;
+    transition-spring corner 1.0, 0.5, 100.0;
+    transition-spring opacity 1.0, 0.5, 100.0;
+    transition-spring ww 1.0, 0.5, 100.0;
+  }
+  
+  state "pending" {
+    set x = #eval(#(%height%)*0.2 + (0.5+0.5*sin(3.0*#(t:time))) * 0.35*(#(%width%)-#(%height%)*0.4));
+    set y = #eval(#(%height%)*0.2);
+    set w = #eval(0.65*(#(%width%)-#(%height%)*0.4));
+    set h = #eval(#(%height%)*0.6);
+    set corner = #eval(#(%height%)*0.5);
+    set opacity = 1.0;
+    set ww = 100.0;
+
+    transition-spring x 1.0, 0.5, 100.0;
+    transition-spring y 1.0, 0.5, 100.0;
+    transition-spring w 1.0, 0.5, 100.0;
+    transition-spring h 1.0, 0.5, 100.0;
+    transition-spring corner 1.0, 0.5, 100.0;
+    transition-spring opacity 1.0, 0.5, 100.0;
+    transition-spring ww 1.0, 0.5, 100.0;
+  }
+
+  state "fraction" {
+    set x = 0.0;
+    set y = 0.0;
+    set w = #eval(#(%width%)*#(state:transaction-manager:current-progress));
+    set h = %height%;
+    set corner = #eval(#(%height%)*0.25);
+    set opacity = 1.0;
+    set ww = 100.0;
+
+    transition-spring x 1.0, 0.5, 100.0;
+    transition-spring y 1.0, 0.5, 100.0;
+    transition-spring w 1.0, 0.5, 100.0;
+    transition-spring h 1.0, 0.5, 100.0;
+    transition-spring corner 1.0, 0.5, 100.0;
+    transition-spring opacity 1.0, 0.5, 100.0;
+    transition-spring ww 1.0, 0.5, 100.0;
+  }
+}

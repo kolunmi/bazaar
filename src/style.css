@@ -287,10 +287,10 @@
 }
 
 global-progress {
-  color: var(--accent-bg-color);
+    color: transparent;
 }
 
-global-progress > *:first-child {
+global-progress > *:first-child > *:first-child {
   background: var(--flag-gradient, var(--accent-bg-color));
 }
 
