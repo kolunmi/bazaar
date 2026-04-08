@@ -1,4 +1,6 @@
 defwidget "My Widget" {
+  reference ref-string : "GtkStringObject";
+
   var t : "BgeWdgtTime";
   var box : "GtkBox";
 
@@ -23,7 +25,7 @@ defwidget "My Widget" {
         margin-top = 10;
         margin-bottom = 10;
         
-        label = "Thank you for using Bazaar!";
+        label = ref-string:string;
         wrap = true;
       );
     );

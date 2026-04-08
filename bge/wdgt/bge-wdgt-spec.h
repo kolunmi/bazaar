@@ -158,6 +158,12 @@ bge_wdgt_spec_add_variable_value (BgeWdgtSpec *self,
                                   GError     **error);
 
 gboolean
+bge_wdgt_spec_add_reference_object_value (BgeWdgtSpec *self,
+                                          GType        type,
+                                          const char  *name,
+                                          GError     **error);
+
+gboolean
 bge_wdgt_spec_add_property_value (BgeWdgtSpec *self,
                                   const char  *name,
                                   const char  *object,

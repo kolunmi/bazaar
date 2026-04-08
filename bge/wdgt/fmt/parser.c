@@ -34,6 +34,7 @@
 #define STR_FOREACH   "%FOREACH"
 
 #define STR_VARIABLE          "var"
+#define STR_REFERENCE         "reference"
 #define STR_INIT              "init"
 #define STR_STATE             "state"
 #define STR_DEFAULT_STATE     "state-default"
@@ -474,6 +475,26 @@ parse_widget_block (const char  *p,
 
           type   = g_type_from_name (type_string);
           result = bge_wdgt_spec_add_variable_value (
+              spec, type, name, &local_error);
+          RETURN_ERROR_UNLESS (result);
+
+          g_hash_table_replace (type_hints,
+                                g_steal_pointer (&name),
+                                GSIZE_TO_POINTER (type));
+        }
+      else if (g_strcmp0 (token, STR_REFERENCE) == 0)
+        {
+          g_autofree char *name        = NULL;
+          g_autofree char *type_string = NULL;
+          GType            type        = 0;
+
+          GET_TOKEN (&name, TOKEN_PARSE_DEFAULT);
+          GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ":");
+          GET_TOKEN (&type_string, TOKEN_PARSE_QUOTED);
+          GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ";");
+
+          type   = g_type_from_name (type_string);
+          result = bge_wdgt_spec_add_reference_object_value (
               spec, type, name, &local_error);
           RETURN_ERROR_UNLESS (result);
 

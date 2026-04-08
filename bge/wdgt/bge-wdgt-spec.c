@@ -55,6 +55,7 @@ typedef enum
   VALUE_COERCION,
   VALUE_SPECIAL,
   VALUE_VARIABLE,
+  VALUE_REFERENCE_OBJECT,
   VALUE_PROPERTY,
   VALUE_CHILD,
   VALUE_ALLOCATION_WIDTH,
@@ -186,6 +187,8 @@ deinit_value (gpointer ptr)
       break;
     case VALUE_VARIABLE:
       break;
+    case VALUE_REFERENCE_OBJECT:
+      break;
     case VALUE_PROPERTY:
       g_clear_pointer (&value->property.object, value_data_unref);
       g_clear_pointer (&value->property.prop_name, g_free);
@@ -312,6 +315,9 @@ struct _BgeWdgtSpec
 
   StateData *init_state;
   StateData *default_state;
+
+  ValueData *reference;
+
   struct
   {
     ValueData *motion_x;
@@ -377,6 +383,8 @@ bge_wdgt_spec_dispose (GObject *object)
 
   g_clear_pointer (&self->init_state, state_data_unref);
   g_clear_pointer (&self->default_state, state_data_unref);
+
+  g_clear_pointer (&self->reference, value_data_unref);
 
   G_OBJECT_CLASS (bge_wdgt_spec_parent_class)->dispose (object);
 }
@@ -1610,6 +1618,47 @@ bge_wdgt_spec_add_variable_value (BgeWdgtSpec *self,
   value->kind = VALUE_VARIABLE;
 
   g_hash_table_replace (self->values, g_strdup (name), value_data_ref (value));
+  return TRUE;
+}
+
+gboolean
+bge_wdgt_spec_add_reference_object_value (BgeWdgtSpec *self,
+                                          GType        type,
+                                          const char  *name,
+                                          GError     **error)
+{
+  g_autoptr (ValueData) value = NULL;
+
+  g_return_val_if_fail (BGE_IS_WDGT_SPEC (self), FALSE);
+  g_return_val_if_fail (name != NULL, FALSE);
+
+  if (self->reference != NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "an object reference value has already been defined");
+      return FALSE;
+    }
+  if (g_hash_table_contains (self->values, name))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' already exists", name);
+      return FALSE;
+    }
+  if (!g_type_is_a (type, G_TYPE_OBJECT))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "type '%s' cannot be stored in reference object value '%s'",
+                   g_type_name (type), name);
+      return FALSE;
+    }
+
+  value       = value_data_new ();
+  value->name = g_strdup (name);
+  value->type = type;
+  value->kind = VALUE_REFERENCE_OBJECT;
+
+  g_hash_table_replace (self->values, g_strdup (name), value_data_ref (value));
+  self->reference = value_data_ref (value);
   return TRUE;
 }
 
@@ -4119,6 +4168,7 @@ struct _BgeWdgtRenderer
   StateData         *last_state;
   StateInstanceData *last_instance;
   GTimer            *since_last_state;
+  guint              tick;
 
   GHashTable *objects;
   GPtrArray  *children;
@@ -4128,6 +4178,8 @@ struct _BgeWdgtRenderer
 
   GPtrArray *bindings;
   GPtrArray *watches;
+
+  BgeWdgtNotifier *reference_notifier;
 
   int              measure_minimum_width;
   int              measure_natural_width;
@@ -4140,8 +4192,6 @@ struct _BgeWdgtRenderer
   int              widget_height;
   BgeWdgtNotifier *widget_width_notifier;
   BgeWdgtNotifier *widget_height_notifier;
-
-  guint tick;
 };
 
 G_DEFINE_FINAL_TYPE (BgeWdgtRenderer, bge_wdgt_renderer, GTK_TYPE_WIDGET);
@@ -4299,6 +4349,7 @@ bge_wdgt_renderer_dispose (GObject *object)
   g_clear_pointer (&self->bindings, g_ptr_array_unref);
   g_clear_pointer (&self->watches, g_ptr_array_unref);
 
+  g_clear_pointer (&self->reference_notifier, g_object_unref);
   g_clear_pointer (&self->measure_for_size_notifier, g_object_unref);
   g_clear_pointer (&self->widget_width_notifier, g_object_unref);
   g_clear_pointer (&self->widget_height_notifier, g_object_unref);
@@ -4713,6 +4764,7 @@ bge_wdgt_renderer_init (BgeWdgtRenderer *self)
 
   self->since_last_state = g_timer_new ();
 
+  self->reference_notifier        = g_object_new (BGE_TYPE_WDGT_NOTIFIER, NULL);
   self->measure_for_size_notifier = g_object_new (BGE_TYPE_WDGT_NOTIFIER, NULL);
   self->widget_width_notifier     = g_object_new (BGE_TYPE_WDGT_NOTIFIER, NULL);
   self->widget_height_notifier    = g_object_new (BGE_TYPE_WDGT_NOTIFIER, NULL);
@@ -4821,6 +4873,7 @@ bge_wdgt_renderer_set_reference (BgeWdgtRenderer *self,
     self->reference = g_object_ref (reference);
 
   g_object_notify_by_pspec (G_OBJECT (self), renderer_props[RENDERER_PROP_REFERENCE]);
+  g_object_notify_by_pspec (G_OBJECT (self->reference_notifier), notifier_props[NOTIFIER_PROP_VALUE]);
 }
 
 void
@@ -5346,6 +5399,16 @@ expression_get_widget_height (BgeWdgtRenderer *this,
   return (double) this->widget_height;
 }
 
+static gpointer
+expression_get_reference_object (BgeWdgtRenderer *this,
+                                 double           notify,
+                                 gpointer         user_data)
+{
+  return this->reference != NULL
+             ? g_object_ref (this->reference)
+             : NULL;
+}
+
 static double
 expression_adjust_transition (BgeWdgtRenderer       *this,
                               double                 in,
@@ -5536,6 +5599,25 @@ ensure_expressions (BgeWdgtRenderer   *self,
         object = g_hash_table_lookup (self->objects, value);
         g_assert (object != NULL);
         expression = gtk_constant_expression_new (value->type, object);
+      }
+      break;
+    case VALUE_REFERENCE_OBJECT:
+      {
+        GtkExpression *notifier_constant = NULL;
+        GtkExpression *notify_expression = NULL;
+
+        notifier_constant = gtk_constant_expression_new (
+            BGE_TYPE_WDGT_NOTIFIER, self->reference_notifier);
+        notify_expression = gtk_property_expression_new_for_pspec (
+            notifier_constant, notifier_props[NOTIFIER_PROP_VALUE]);
+
+        expression = gtk_cclosure_expression_new (
+            value->type,
+            bge_marshal_OBJECT__DOUBLE,
+            1, (GtkExpression *[]){ notify_expression },
+            G_CALLBACK (expression_get_reference_object),
+            GSIZE_TO_POINTER (value->type),
+            NULL);
       }
       break;
     case VALUE_VARIABLE:
@@ -5922,6 +6004,7 @@ set_value (BgeWdgtRenderer   *self,
                   case VALUE_MEASURE_NATURAL_WIDTH:
                   case VALUE_OBJECT:
                   case VALUE_PROPERTY:
+                  case VALUE_REFERENCE_OBJECT:
                   case VALUE_SPECIAL:
                   case VALUE_TRANSFORM:
                   case VALUE_VARIABLE:
@@ -5975,6 +6058,7 @@ set_value (BgeWdgtRenderer   *self,
           case VALUE_MEASURE_FOR_SIZE:
           case VALUE_OBJECT:
           case VALUE_PROPERTY:
+          case VALUE_REFERENCE_OBJECT:
           case VALUE_SPECIAL:
           case VALUE_TRANSFORM:
           case VALUE_VARIABLE:
@@ -5996,6 +6080,7 @@ set_value (BgeWdgtRenderer   *self,
     case VALUE_CONSTANT:
     case VALUE_MEASURE_FOR_SIZE:
     case VALUE_OBJECT:
+    case VALUE_REFERENCE_OBJECT:
     case VALUE_SPECIAL:
     case VALUE_TRANSFORM:
     case VALUE_VARIABLE:
