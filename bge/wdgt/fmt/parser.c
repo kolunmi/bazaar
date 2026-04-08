@@ -20,6 +20,7 @@
 
 #include <graphene-gobject.h>
 
+#include "../bge-wdgt-spec-private.h"
 #include "bge-marshalers.h"
 #include "parser.h"
 #include "util.h"
@@ -367,7 +368,6 @@ bge_wdgt_parse_string (const char *string,
         UNEXPECTED_TOKEN (token);
     }
 
-  bge_wdgt_spec_mark_ready (spec);
   return g_steal_pointer (&spec);
 }
 

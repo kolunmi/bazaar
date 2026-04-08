@@ -1,4 +1,4 @@
-/* bge-wdgt-spec-renderer.h
+/* bge-wdgt-renderer.h
  *
  * Copyright 2026 Eva M
  *
@@ -70,4 +70,4 @@ bge_wdgt_renderer_set_state_take (BgeWdgtRenderer *self,
 
 G_END_DECLS
 
-/* End of bge-wdgt-spec-renderer.h */
+/* End of bge-wdgt-renderer.h */

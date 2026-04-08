@@ -22,6 +22,7 @@
 
 #include "../bge-animation-private.h"
 #include "bge-marshalers.h"
+#include "bge-wdgt-spec-private.h"
 #include "bge.h"
 #include "fmt/parser.h"
 #include "graphene-gobject.h"
@@ -304,8 +305,6 @@ struct _BgeWdgtSpec
   GObject parent_instance;
 
   char *name;
-
-  gboolean ready;
 
   GHashTable *values;
   GPtrArray  *anon_values;
@@ -2419,13 +2418,6 @@ bge_wdgt_spec_append_snapshot_instr (BgeWdgtSpec             *self,
   g_ptr_array_add (state_data->snapshot->calls, snapshot_call_data_ref (call));
 
   return TRUE;
-}
-
-void
-bge_wdgt_spec_mark_ready (BgeWdgtSpec *self)
-{
-  g_return_if_fail (BGE_IS_WDGT_SPEC (self));
-  self->ready = TRUE;
 }
 
 static gboolean
@@ -4817,8 +4809,6 @@ bge_wdgt_renderer_set_spec (BgeWdgtRenderer *self,
 
   g_return_if_fail (BGE_IS_WDGT_RENDERER (self));
   g_return_if_fail (spec == NULL || BGE_IS_WDGT_SPEC (spec));
-  if (spec != NULL)
-    g_return_if_fail (spec->ready);
 
   if (spec == self->spec)
     return;
