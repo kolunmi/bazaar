@@ -13,8 +13,8 @@ defwidget "Global Progress Widget" {
   var ww : "gdouble";
 
   init {
-    measure ww, ww, -1, -1;
-    
+    measure -1, ww, -1, -1;
+
     set t = #(notify-msec = 10;);
     
     set fixed = #child/(""("accent"));
@@ -44,13 +44,13 @@ defwidget "Global Progress Widget" {
     set opacity = 0.0;
     set ww = 0.0;
 
-    transition-spring x 1.0, 0.5, 100.0;
+    transition-spring x 1.5, 1.0, 100.0;
     transition-spring y 1.0, 0.5, 100.0;
     transition-spring w 1.0, 0.5, 100.0;
     transition-spring h 1.0, 0.5, 100.0;
     transition-spring corner 1.0, 0.5, 100.0;
-    transition-spring opacity 1.0, 0.5, 100.0;
-    transition-spring ww 1.0, 0.5, 100.0;
+    transition-spring opacity 1.5, 0.1, 100.0;
+    transition-spring ww 1.2, 0.1, 100.0;
   }
   
   state "pending" {
@@ -58,17 +58,17 @@ defwidget "Global Progress Widget" {
     set y = #eval(#(%height%)*0.2);
     set w = #eval(0.65*(#(%width%)-#(%height%)*0.4));
     set h = #eval(#(%height%)*0.6);
-    set corner = #eval(#(%height%)*0.5);
+    set corner = #eval(#(%height%)*0.25);
     set opacity = 1.0;
     set ww = 100.0;
 
-    transition-spring x 1.0, 0.5, 100.0;
+    transition-spring x 0.8, 0.8, 100.0;
     transition-spring y 1.0, 0.5, 100.0;
     transition-spring w 1.0, 0.5, 100.0;
     transition-spring h 1.0, 0.5, 100.0;
-    transition-spring corner 1.0, 0.5, 100.0;
+    transition-spring corner 0.8, 0.5, 100.0;
     transition-spring opacity 1.0, 0.5, 100.0;
-    transition-spring ww 1.0, 0.5, 100.0;
+    transition-spring ww 0.8, 0.2, 20.0;
   }
 
   state "fraction" {
@@ -80,12 +80,12 @@ defwidget "Global Progress Widget" {
     set opacity = 1.0;
     set ww = 100.0;
 
-    transition-spring x 1.0, 0.5, 100.0;
+    transition-spring x 0.8, 0.8, 100.0;
     transition-spring y 1.0, 0.5, 100.0;
     transition-spring w 1.0, 0.5, 100.0;
     transition-spring h 1.0, 0.5, 100.0;
-    transition-spring corner 1.0, 0.5, 100.0;
+    transition-spring corner 1.0, 2.0, 50.0;
     transition-spring opacity 1.0, 0.5, 100.0;
-    transition-spring ww 1.0, 0.5, 100.0;
+    transition-spring ww 0.8, 0.2, 20.0;
   }
 }
