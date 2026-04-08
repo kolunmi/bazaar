@@ -29,24 +29,30 @@ G_BEGIN_DECLS
 #define BGE_TYPE_WDGT_SPEC (bge_wdgt_spec_get_type ())
 G_DECLARE_FINAL_TYPE (BgeWdgtSpec, bge_wdgt_spec, BGE, WDGT_SPEC, GObject)
 
+BGE_AVAILABLE_IN_ALL
 BgeWdgtSpec *
 bge_wdgt_spec_new (void);
 
+BGE_AVAILABLE_IN_ALL
 BgeWdgtSpec *
 bge_wdgt_spec_new_for_string (const char *string,
                               GError    **error);
 
+BGE_AVAILABLE_IN_ALL
 BgeWdgtSpec *
 bge_wdgt_spec_new_for_resource (const char *resource,
                                 GError    **error);
 
+BGE_AVAILABLE_IN_ALL
 const char *
 bge_wdgt_spec_get_name (BgeWdgtSpec *self);
 
+BGE_AVAILABLE_IN_ALL
 void
 bge_wdgt_spec_set_name (BgeWdgtSpec *self,
                         const char  *name);
 
+BGE_AVAILABLE_IN_ALL
 void
 bge_wdgt_spec_set_name_take (BgeWdgtSpec *self,
                              char        *name);

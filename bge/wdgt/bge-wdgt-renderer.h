@@ -31,37 +31,47 @@ G_BEGIN_DECLS
 #define BGE_TYPE_WDGT_RENDERER (bge_wdgt_renderer_get_type ())
 G_DECLARE_FINAL_TYPE (BgeWdgtRenderer, bge_wdgt_renderer, BGE, WDGT_RENDERER, GtkWidget)
 
+BGE_AVAILABLE_IN_ALL
 BgeWdgtRenderer *
 bge_wdgt_renderer_new (void);
 
+BGE_AVAILABLE_IN_ALL
 BgeWdgtSpec *
 bge_wdgt_renderer_get_spec (BgeWdgtRenderer *self);
 
+BGE_AVAILABLE_IN_ALL
 const char *
 bge_wdgt_renderer_get_state (BgeWdgtRenderer *self);
 
+BGE_AVAILABLE_IN_ALL
 GObject *
 bge_wdgt_renderer_get_reference (BgeWdgtRenderer *self);
 
+BGE_AVAILABLE_IN_ALL
 GtkWidget *
 bge_wdgt_renderer_get_child (BgeWdgtRenderer *self);
 
+BGE_AVAILABLE_IN_ALL
 void
 bge_wdgt_renderer_set_spec (BgeWdgtRenderer *self,
                             BgeWdgtSpec     *spec);
 
+BGE_AVAILABLE_IN_ALL
 void
 bge_wdgt_renderer_set_state (BgeWdgtRenderer *self,
                              const char      *state);
 
+BGE_AVAILABLE_IN_ALL
 void
 bge_wdgt_renderer_set_reference (BgeWdgtRenderer *self,
                                  GObject         *reference);
 
+BGE_AVAILABLE_IN_ALL
 void
 bge_wdgt_renderer_set_child (BgeWdgtRenderer *self,
                              GtkWidget       *child);
 
+BGE_AVAILABLE_IN_ALL
 void
 bge_wdgt_renderer_set_state_take (BgeWdgtRenderer *self,
                                   char            *state);
