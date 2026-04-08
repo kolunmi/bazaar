@@ -52,8 +52,8 @@
                 {
                     "type": "git",
                     "url": "https://gitlab.gnome.org/GNOME/blueprint-compiler.git",
-                    "commit": "d0a00f09703ca86230377fd542dc5e28188f0111",
-                    "tag": "v0.20.2",
+                    "commit": "31b62c24a72c1670d2d93dcdf2d130f1ae12778e",
+                    "tag": "v0.20.4",
                     "x-checker-data": {
                         "type": "git",
                         "tag-template": "$version"
@@ -165,8 +165,8 @@
                         {
                             "type": "git",
                             "url": "https://github.com/flatpak/flatpak",
-                            "commit": "13b26a94a3bd6fec309a16982a3a80d83776d7ac",
-                            "tag": "1.17.3",
+                            "commit": "2c7f24dcbf45aaec453960b61d24574c4f489dae",
+                            "tag": "1.17.4",
                             "x-checker-data": {
                                 "type": "git",
                                 "url-template": "$version",
@@ -351,8 +351,8 @@
                                         {
                                             "type": "git",
                                             "url": "https://github.com/flatpak/xdg-dbus-proxy",
-                                            "commit": "1c1989e56f94b9eb3b7567f8a6e8a0aa16cba496",
-                                            "tag": "0.1.6",
+                                            "commit": "6a170fa77e3cbecb48f9dd2478fe5c0a119eb467",
+                                            "tag": "0.1.7",
                                             "x-checker-data": {
                                                 "type": "git",
                                                 "url-template": "$version"
@@ -378,8 +378,8 @@
                 {
                     "type": "git",
                     "url": "https://github.com/containers/bubblewrap",
-                    "commit": "9ca3b05ec787acfb4b17bed37db5719fa777834f",
-                    "tag": "v0.11.0",
+                    "commit": "124c4cdf4321f63ef17a1cb0ce8f9dd45bd7adbe",
+                    "tag": "v0.11.1",
                     "x-checker-data": {
                         "type": "git",
                         "url-template": "$version"
