@@ -22,7 +22,7 @@
 
 #include <glib/gi18n.h>
 
-#include "bz-list-tile.h"
+#include "bz-entry.h"
 #include "bz-release.h"
 #include "bz-releases-list.h"
 #include "bz-template-callbacks.h"
@@ -35,11 +35,12 @@ struct _BzUpdatesCard
   BzStateInfo *state;
 
   /* Template widgets */
-  GtkRevealer        *revealer;
-  GtkImage           *toggle_icon;
-  GtkCustomFilter    *apps_filter;
+  AdwExpanderRow     *expander_row;
   GtkCustomFilter    *runtimes_filter;
   GtkFilterListModel *runtimes_filter_model;
+
+  GPtrArray *app_rows;
+  GtkWidget *runtimes_row;
 };
 
 G_DEFINE_FINAL_TYPE (BzUpdatesCard, bz_updates_card, ADW_TYPE_BIN)
@@ -61,46 +62,215 @@ enum
 
 static guint signals[LAST_SIGNAL];
 
-static char *
-format_update_count (gpointer    object,
-                     GListModel *updates);
-
-static char *
-format_version_change (gpointer    object,
-                       GListModel *version_history,
-                       const char *installed_version);
-
-static char *
-format_runtime_count (gpointer object,
-                      guint    n_items);
+static char    *format_update_count (gpointer object, GListModel *updates);
+static void     update_all_cb (GtkButton *button, BzUpdatesCard *self);
+static void     update_runtimes_cb (GtkButton *button, BzUpdatesCard *self);
+static gboolean filter_runtimes (BzEntry *entry, BzUpdatesCard *self);
+static void     on_available_updates_changed (BzUpdatesCard *self, GParamSpec *pspec, BzStateInfo *state);
+static void     on_runtimes_changed (GtkFilterListModel *model, guint position, guint removed, guint added, BzUpdatesCard *self);
 
 static void
-tile_activated_cb (BzListTile    *tile,
-                   BzUpdatesCard *self);
+on_update_single_cb (GtkButton *button,
+                     BzEntry   *entry)
+{
+  BzUpdatesCard *self          = NULL;
+  g_autoptr (GListStore) store = NULL;
+
+  self  = BZ_UPDATES_CARD (gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_UPDATES_CARD));
+  store = g_list_store_new (BZ_TYPE_ENTRY);
+  g_list_store_append (store, entry);
+  g_signal_emit (self, signals[SIGNAL_UPDATE], 0, store);
+}
 
 static void
-show_version_history_cb (GtkListItem *template,
-                         GtkButton   *button);
+on_version_history_cb (GtkButton *button,
+                       BzEntry   *entry)
+{
+  GtkRoot    *root    = NULL;
+  GListModel *history = NULL;
+  GtkWidget  *dialog  = NULL;
+
+  root = gtk_widget_get_root (GTK_WIDGET (button));
+  if (root == NULL)
+    return;
+
+  g_object_get (entry, "version-history", &history, NULL);
+  dialog = bz_releases_dialog_new (history, NULL);
+  adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (root));
+  g_clear_object (&history);
+}
+
+static GtkWidget *
+build_app_row (BzEntry       *entry,
+               BzUpdatesCard *self)
+{
+  AdwActionRow *row            = NULL;
+  GtkWidget    *icon           = NULL;
+  GtkWidget    *history_button = NULL;
+  GtkWidget    *update_button  = NULL;
+  GdkPaintable *paintable      = NULL;
+  GListModel   *history        = NULL;
+  const char   *installed_ver  = NULL;
+  const char   *new_ver        = NULL; // This will probably the same as the installed version if using cache...
+
+  row = ADW_ACTION_ROW (adw_action_row_new ());
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
+                                 bz_entry_get_title (entry));
+
+  g_object_get (entry, "icon-paintable", &paintable, NULL);
+  icon = paintable != NULL
+             ? gtk_image_new_from_paintable (paintable)
+             : gtk_image_new_from_icon_name ("application-x-executable");
+  g_clear_object (&paintable);
+
+  gtk_image_set_pixel_size (GTK_IMAGE (icon), 48);
+  gtk_widget_set_size_request (icon, 48, 48);
+  gtk_widget_set_margin_top (icon, 6);
+  gtk_widget_set_margin_bottom (icon, 6);
+  gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
+  gtk_widget_add_css_class (icon, "icon-dropshadow");
+  adw_action_row_add_prefix (row, icon);
+
+  g_object_get (entry,
+                "version-history", &history,
+                "installed-version", &installed_ver,
+                NULL);
+
+  if (history != NULL && g_list_model_get_n_items (history) > 0 && installed_ver != NULL)
+    {
+      g_autoptr (BzRelease) first = g_list_model_get_item (history, 0);
+      new_ver                     = bz_release_get_version (first);
+
+      if (new_ver != NULL && g_strcmp0 (installed_ver, new_ver) != 0)
+        {
+          g_autofree char *subtitle = g_strdup_printf ("%s → %s", installed_ver, new_ver);
+          adw_action_row_set_subtitle (row, subtitle);
+        }
+    }
+
+  history_button = gtk_button_new_from_icon_name ("view-list-bullet-symbolic");
+  gtk_widget_set_valign (history_button, GTK_ALIGN_CENTER);
+  gtk_widget_set_tooltip_text (history_button, _ ("Version History"));
+  gtk_widget_add_css_class (history_button, "flat");
+  gtk_widget_set_visible (history_button, history != NULL && g_list_model_get_n_items (history) > 0);
+  g_signal_connect_data (history_button, "clicked",
+                         G_CALLBACK (on_version_history_cb),
+                         g_object_ref (entry), (GClosureNotify) g_object_unref,
+                         0);
+  adw_action_row_add_suffix (row, history_button);
+
+  update_button = gtk_button_new_with_label (_ ("Update"));
+  gtk_widget_set_valign (update_button, GTK_ALIGN_CENTER);
+  g_signal_connect_data (update_button, "clicked",
+                         G_CALLBACK (on_update_single_cb),
+                         g_object_ref (entry), (GClosureNotify) g_object_unref,
+                         0);
+  adw_action_row_add_suffix (row, update_button);
+
+  g_clear_object (&history);
+
+  return GTK_WIDGET (row);
+}
+
+static GtkWidget *
+build_runtimes_row (BzUpdatesCard *self)
+{
+  AdwActionRow *row           = NULL;
+  GtkWidget    *update_button = NULL;
+
+  row = ADW_ACTION_ROW (adw_action_row_new ());
+  gtk_widget_set_visible (GTK_WIDGET (row), FALSE);
+
+  update_button = gtk_button_new_with_label (_ ("Update"));
+  gtk_widget_set_valign (update_button, GTK_ALIGN_CENTER);
+  g_signal_connect (update_button, "clicked",
+                    G_CALLBACK (update_runtimes_cb), self);
+  adw_action_row_add_suffix (row, update_button);
+
+  return GTK_WIDGET (row);
+}
 
 static void
-update_entry_cb (GtkListItem *template,
-                 GtkButton   *button);
+on_runtimes_changed (GtkFilterListModel *model,
+                     guint               position,
+                     guint               removed,
+                     guint               added,
+                     BzUpdatesCard      *self)
+{
+  guint            n_items = 0;
+  g_autofree char *title   = NULL;
+
+  if (self->runtimes_row == NULL)
+    return;
+
+  n_items = g_list_model_get_n_items (G_LIST_MODEL (model));
+  gtk_widget_set_visible (self->runtimes_row, n_items > 0);
+
+  if (n_items == 0)
+    return;
+
+  title = g_strdup_printf (ngettext ("%u Runtime Update", "%u Runtime Updates", n_items), n_items);
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->runtimes_row), title);
+}
 
 static void
-update_all_cb (GtkButton     *button,
-               BzUpdatesCard *self);
+repopulate_expander_row (BzUpdatesCard *self)
+{
+  GListModel *updates = NULL;
+  guint       n_items = 0;
+  guint       i       = 0;
+
+  for (i = 0; i < self->app_rows->len; i++)
+    adw_expander_row_remove (self->expander_row, g_ptr_array_index (self->app_rows, i));
+  g_ptr_array_set_size (self->app_rows, 0);
+
+  if (self->runtimes_row != NULL)
+    {
+      adw_expander_row_remove (self->expander_row, self->runtimes_row);
+      self->runtimes_row = NULL;
+    }
+
+  if (self->state == NULL)
+    return;
+
+  updates = bz_state_info_get_available_updates (self->state);
+  if (updates == NULL)
+    return;
+
+  n_items = g_list_model_get_n_items (updates);
+
+  for (i = 0; i < n_items; i++)
+    {
+      g_autoptr (BzEntry) entry = NULL;
+      GtkWidget *row            = NULL;
+
+      entry = g_list_model_get_item (updates, i);
+
+      if (entry == NULL || !BZ_IS_ENTRY (entry))
+        continue;
+
+      if (!bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
+        continue;
+
+      row = build_app_row (entry, self);
+      adw_expander_row_add_row (self->expander_row, row);
+      g_ptr_array_add (self->app_rows, row);
+    }
+
+  self->runtimes_row = build_runtimes_row (self);
+  adw_expander_row_add_row (self->expander_row, self->runtimes_row);
+  on_runtimes_changed (self->runtimes_filter_model, 0, 0, 0, self);
+}
 
 static void
-update_runtimes_cb (GtkButton     *button,
-                    BzUpdatesCard *self);
-
-static gboolean
-filter_apps (BzEntry       *entry,
-             BzUpdatesCard *self);
-
-static gboolean
-filter_runtimes (BzEntry       *entry,
-                 BzUpdatesCard *self);
+on_available_updates_changed (BzUpdatesCard *self,
+                              GParamSpec    *pspec,
+                              BzStateInfo   *state)
+{
+  gtk_filter_changed (GTK_FILTER (self->runtimes_filter),
+                      GTK_FILTER_CHANGE_DIFFERENT);
+  repopulate_expander_row (self);
+}
 
 static void
 bz_updates_card_dispose (GObject *object)
@@ -108,6 +278,8 @@ bz_updates_card_dispose (GObject *object)
   BzUpdatesCard *self = BZ_UPDATES_CARD (object);
 
   g_clear_object (&self->state);
+  g_ptr_array_unref (self->app_rows);
+  gtk_widget_dispose_template (GTK_WIDGET (self), BZ_TYPE_UPDATES_CARD);
 
   G_OBJECT_CLASS (bz_updates_card_parent_class)->dispose (object);
 }
@@ -182,24 +354,14 @@ bz_updates_card_class_init (BzUpdatesCardClass *klass)
       G_TYPE_FROM_CLASS (klass),
       g_cclosure_marshal_VOID__OBJECTv);
 
-  g_type_ensure (BZ_TYPE_LIST_TILE);
-
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-updates-card.ui");
-  bz_widget_class_bind_all_util_callbacks (widget_class);
 
-  gtk_widget_class_bind_template_child (widget_class, BzUpdatesCard, revealer);
-  gtk_widget_class_bind_template_child (widget_class, BzUpdatesCard, toggle_icon);
-  gtk_widget_class_bind_template_child (widget_class, BzUpdatesCard, apps_filter);
+  bz_widget_class_bind_all_util_callbacks (widget_class);
+  gtk_widget_class_bind_template_child (widget_class, BzUpdatesCard, expander_row);
   gtk_widget_class_bind_template_child (widget_class, BzUpdatesCard, runtimes_filter);
   gtk_widget_class_bind_template_child (widget_class, BzUpdatesCard, runtimes_filter_model);
   gtk_widget_class_bind_template_callback (widget_class, format_update_count);
-  gtk_widget_class_bind_template_callback (widget_class, format_version_change);
-  gtk_widget_class_bind_template_callback (widget_class, format_runtime_count);
-  gtk_widget_class_bind_template_callback (widget_class, tile_activated_cb);
-  gtk_widget_class_bind_template_callback (widget_class, show_version_history_cb);
-  gtk_widget_class_bind_template_callback (widget_class, update_entry_cb);
   gtk_widget_class_bind_template_callback (widget_class, update_all_cb);
-  gtk_widget_class_bind_template_callback (widget_class, update_runtimes_cb);
 }
 
 static void
@@ -207,13 +369,14 @@ bz_updates_card_init (BzUpdatesCard *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
 
-  gtk_custom_filter_set_filter_func (
-      self->apps_filter, (GtkCustomFilterFunc) filter_apps,
-      self, NULL);
+  self->app_rows = g_ptr_array_new ();
 
   gtk_custom_filter_set_filter_func (
       self->runtimes_filter, (GtkCustomFilterFunc) filter_runtimes,
       self, NULL);
+
+  g_signal_connect (self->runtimes_filter_model, "items-changed",
+                    G_CALLBACK (on_runtimes_changed), self);
 }
 
 GtkWidget *
@@ -231,7 +394,17 @@ bz_updates_card_set_state (BzUpdatesCard *self,
 
   g_clear_object (&self->state);
   if (state != NULL)
-    self->state = g_object_ref (state);
+    {
+      self->state = g_object_ref (state);
+      g_signal_connect_object (state, "notify::available-updates",
+                               G_CALLBACK (on_available_updates_changed),
+                               self, G_CONNECT_SWAPPED);
+    }
+
+  gtk_filter_changed (GTK_FILTER (self->runtimes_filter),
+                      GTK_FILTER_CHANGE_DIFFERENT);
+
+  repopulate_expander_row (self);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_STATE]);
 }
@@ -258,129 +431,6 @@ format_update_count (gpointer    object,
                                     "%u Available Updates",
                                     n_updates),
                           n_updates);
-}
-
-static char *
-format_version_change (gpointer    object,
-                       GListModel *version_history,
-                       const char *installed_version)
-{
-  const char *new_version             = NULL; // This will probably the same as the installed version if using cache...
-  g_autoptr (BzRelease) first_release = NULL;
-
-  if (installed_version == NULL)
-    return g_strdup ("");
-
-  if (version_history == NULL || g_list_model_get_n_items (version_history) == 0)
-    return g_strdup ("");
-
-  first_release = g_list_model_get_item (version_history, 0);
-  new_version   = bz_release_get_version (first_release);
-
-  if (new_version == NULL)
-    return g_strdup ("");
-
-  if (g_strcmp0 (installed_version, new_version) == 0)
-    return g_strdup ("");
-
-  return g_strdup_printf ("%s → %s", installed_version, new_version);
-}
-
-static char *
-format_runtime_count (gpointer object,
-                      guint    n_items)
-{
-  return g_strdup_printf (ngettext ("%u Runtime Update",
-                                    "%u Runtime Updates",
-                                    n_items),
-                          n_items);
-}
-
-static gboolean
-remove_activated_style_cb (gpointer user_data)
-{
-  gtk_widget_remove_css_class (GTK_WIDGET (user_data), "activated");
-  return G_SOURCE_REMOVE;
-}
-
-static void
-tile_activated_cb (BzListTile    *tile,
-                   BzUpdatesCard *self)
-{
-  gboolean current_state = FALSE;
-
-  g_assert (BZ_IS_LIST_TILE (tile));
-  g_assert (BZ_IS_UPDATES_CARD (self));
-
-  current_state = gtk_revealer_get_reveal_child (self->revealer);
-  gtk_revealer_set_reveal_child (self->revealer, !current_state);
-
-  if (!current_state)
-    {
-      gtk_widget_add_css_class (GTK_WIDGET (tile), "activated");
-      gtk_widget_add_css_class (GTK_WIDGET (self->toggle_icon), "rotated");
-    }
-  else
-    {
-      g_timeout_add_full (
-        G_PRIORITY_DEFAULT,
-        200, (GSourceFunc) remove_activated_style_cb,
-        g_object_ref (tile), g_object_unref);
-      gtk_widget_remove_css_class (GTK_WIDGET (self->toggle_icon), "rotated");
-    }
-}
-
-static void
-show_version_history_cb (GtkListItem *template,
-                         GtkButton   *button)
-{
-  GtkWidget  *dialog          = NULL;
-  GtkRoot    *root            = NULL;
-  GListModel *version_history = NULL;
-  BzEntry    *entry           = NULL;
-
-  g_return_if_fail (GTK_IS_BUTTON (button));
-  g_return_if_fail (GTK_IS_LIST_ITEM (template));
-
-  root = gtk_widget_get_root (GTK_WIDGET (button));
-  if (root == NULL)
-    return;
-
-  entry = gtk_list_item_get_item (template);
-  if (entry == NULL || !BZ_IS_ENTRY (entry))
-    return;
-
-  g_object_get (entry, "version-history", &version_history, NULL);
-
-  dialog = bz_releases_dialog_new (version_history, NULL);
-  adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (root));
-
-  g_clear_object (&version_history);
-}
-
-static void
-update_entry_cb (GtkListItem *template,
-                 GtkButton   *button)
-{
-  BzUpdatesCard *self          = NULL;
-  BzEntry       *entry         = NULL;
-  g_autoptr (GListStore) store = NULL;
-
-  g_return_if_fail (GTK_IS_BUTTON (button));
-  g_return_if_fail (GTK_IS_LIST_ITEM (template));
-
-  self = BZ_UPDATES_CARD (gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_UPDATES_CARD));
-  if (self == NULL)
-    return;
-
-  entry = gtk_list_item_get_item (template);
-  if (entry == NULL || !BZ_IS_ENTRY (entry))
-    return;
-
-  store = g_list_store_new (BZ_TYPE_ENTRY);
-  g_list_store_append (store, entry);
-
-  g_signal_emit (self, signals[SIGNAL_UPDATE], 0, store);
 }
 
 static void
@@ -426,15 +476,6 @@ update_runtimes_cb (GtkButton     *button,
     }
 
   g_signal_emit (self, signals[SIGNAL_UPDATE], 0, store);
-}
-
-static gboolean
-filter_apps (BzEntry       *entry,
-             BzUpdatesCard *self)
-{
-  g_return_val_if_fail (BZ_IS_ENTRY (entry), FALSE);
-
-  return bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION);
 }
 
 static gboolean
