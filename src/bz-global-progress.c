@@ -374,6 +374,13 @@ set_wdgt_state (BzGlobalProgress *self)
 static void
 ensure_draw_css (BzGlobalProgress *self)
 {
+  g_autoptr (GtkWidget) draw_widget = NULL;
+
+  draw_widget = bge_wdgt_renderer_lookup_object (
+      BGE_WDGT_RENDERER (self->wdgt), "fixed");
+  if (draw_widget == NULL)
+    return;
+
   if (self->settings != NULL)
     {
       g_autofree char *id       = NULL;
@@ -395,16 +402,16 @@ ensure_draw_css (BzGlobalProgress *self)
           g_strcmp0 (self->draw_widget_class, class) == 0)
         return;
 
-      /* if (self->draw_widget_class != NULL) */
-      /*   gtk_widget_remove_css_class (self->draw_widget, self->draw_widget_class); */
+      if (self->draw_widget_class != NULL)
+        gtk_widget_remove_css_class (draw_widget, self->draw_widget_class);
       g_clear_pointer (&self->draw_widget_class, g_free);
-      /* gtk_widget_add_css_class (self->draw_widget, class); */
+      gtk_widget_add_css_class (draw_widget, class);
       self->draw_widget_class = g_steal_pointer (&class);
     }
   else
     {
-      /* if (self->draw_widget_class != NULL) */
-      /*   gtk_widget_remove_css_class (self->draw_widget, self->draw_widget_class); */
+      if (self->draw_widget_class != NULL)
+        gtk_widget_remove_css_class (draw_widget, self->draw_widget_class);
       g_clear_pointer (&self->draw_widget_class, g_free);
     }
 }

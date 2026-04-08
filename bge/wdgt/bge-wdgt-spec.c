@@ -4294,6 +4294,11 @@ resolve_value_boxed_dup (BgeWdgtRenderer   *self,
                          ValueData         *value,
                          StateInstanceData *instance);
 
+static gpointer
+resolve_value_object_dup (BgeWdgtRenderer   *self,
+                          ValueData         *value,
+                          StateInstanceData *instance);
+
 static void
 discard_binding (gpointer ptr);
 
@@ -4907,6 +4912,29 @@ bge_wdgt_renderer_set_state_take (BgeWdgtRenderer *self,
     self->state = state;
 
   g_object_notify_by_pspec (G_OBJECT (self), renderer_props[RENDERER_PROP_STATE]);
+}
+
+gpointer
+bge_wdgt_renderer_lookup_object (BgeWdgtRenderer *self,
+                                 const char      *name)
+{
+  ValueData *value = NULL;
+
+  g_return_val_if_fail (BGE_IS_WDGT_RENDERER (self), NULL);
+  g_return_val_if_fail (name != NULL, NULL);
+
+  if (self->spec == NULL ||
+      self->active_instance == NULL)
+    return NULL;
+
+  value = g_hash_table_lookup (self->spec->values, name);
+  if (value == NULL)
+    return NULL;
+
+  if (!g_type_is_a (value->type, G_TYPE_OBJECT))
+    return NULL;
+
+  return resolve_value_object_dup (self, value, self->active_instance);
 }
 
 static void
@@ -6168,6 +6196,27 @@ resolve_value_boxed_dup (BgeWdgtRenderer   *self,
       self,
       &resolved);
   ret = g_value_dup_boxed (&resolved);
+  g_value_unset (&resolved);
+
+  return ret;
+}
+
+static gpointer
+resolve_value_object_dup (BgeWdgtRenderer   *self,
+                          ValueData         *value,
+                          StateInstanceData *instance)
+{
+  GtkExpression *expression = NULL;
+  GValue         resolved   = G_VALUE_INIT;
+  gpointer       ret        = NULL;
+
+  expression = g_hash_table_lookup (instance->expressions, value);
+  g_assert (expression != NULL);
+  gtk_expression_evaluate (
+      expression,
+      self,
+      &resolved);
+  ret = g_value_dup_object (&resolved);
   g_value_unset (&resolved);
 
   return ret;

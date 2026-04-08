@@ -17,7 +17,7 @@ defwidget "Global Progress Widget" {
 
     set t = #(notify-msec = 10;);
     
-    set fixed = #child/(""("accent"));
+    set fixed = #child/(""());
     allocate fixed w, h, #(translate(#GraphenePoint(x, y)););
     
     snapshot {
