@@ -2,12 +2,18 @@ defwidget "Global Progress Widget" {
   reference state : "BzStateInfo";
 
   var t : "BgeWdgtTime";
-  var fixed : "GtkFixed";
+  var fg : "GtkFixed";
+  var bg : "GtkFixed";
 
-  var x : "gdouble";
-  var y : "gdouble";
-  var w : "gdouble";
-  var h : "gdouble";
+  var fg-x : "gdouble";
+  var fg-y : "gdouble";
+  var fg-w : "gdouble";
+  var fg-h : "gdouble";
+  var bg-x : "gdouble";
+  var bg-y : "gdouble";
+  var bg-w : "gdouble";
+  var bg-h : "gdouble";
+
   var corner : "gdouble";
   var opacity : "gdouble";
   var ww : "gdouble";
@@ -17,73 +23,122 @@ defwidget "Global Progress Widget" {
 
     set t = #(notify-msec = 10;);
     
-    set fixed = #child/(""());
-    allocate fixed w, h, #(translate(#GraphenePoint(x, y)););
-    
+    set fg = #child/(""());
+    allocate fg fg-w, fg-h, #(translate(#GraphenePoint(fg-x, fg-y)););
+
+    set bg = #child/(""("global-progress-bg"));
+    allocate bg bg-w, bg-h, #(translate(#GraphenePoint(bg-x, bg-y)););
+
     snapshot {
       with opacity(opacity) {
-      with rounded-clip(
-        #GrapheneRect(x, y, w, h),
-        #GrapheneSize(corner, corner),
-        #GrapheneSize(corner, corner),
-        #GrapheneSize(corner, corner),
-        #GrapheneSize(corner, corner),
-      ) {
-        do-child fixed;
-      }
+        with rounded-clip(
+          #GrapheneRect(bg-x, bg-y, bg-w, bg-h),
+          #GrapheneSize(corner, corner),
+          #GrapheneSize(corner, corner),
+          #GrapheneSize(corner, corner),
+          #GrapheneSize(corner, corner),
+        ) {
+          do-child bg;
+        }
+        with rounded-clip(
+          #GrapheneRect(fg-x, fg-y, fg-w, fg-h),
+          #GrapheneSize(corner, corner),
+          #GrapheneSize(corner, corner),
+          #GrapheneSize(corner, corner),
+          #GrapheneSize(corner, corner),
+        ) {
+          do-child fg;
+        }
       }
     }
   }
 
   state-default "inactive" {
-    set x = #eval(#(%width%)/2.0);
-    set y = #eval(#(%height%)/2.0);
-    set w = 0.0;
-    set h = 0.0;
+    set fg-x = #eval(#(%width%)/2.0);
+    set fg-y = #eval(#(%height%)/2.0);
+    set fg-w = 0.0;
+    set fg-h = 0.0;
+
+    set bg-x = #eval(#(%width%)/2.0);
+    set bg-y = #eval(#(%height%)/2.0);
+    set bg-w = 0.0;
+    set bg-h = 0.0;
+
     set corner = 10.0;
     set opacity = 0.0;
     set ww = 0.0;
 
-    transition-spring x 1.5, 1.0, 100.0;
-    transition-spring y 1.0, 0.5, 100.0;
-    transition-spring w 1.0, 0.5, 100.0;
-    transition-spring h 1.0, 0.5, 100.0;
+    transition-spring fg-x 1.5, 1.0, 100.0;
+    transition-spring fg-y 1.0, 0.5, 100.0;
+    transition-spring fg-w 1.0, 0.5, 100.0;
+    transition-spring fg-h 1.0, 0.5, 100.0;
+
+    transition-spring bg-x 1.5, 1.0, 100.0;
+    transition-spring bg-y 1.0, 0.5, 100.0;
+    transition-spring bg-w 1.0, 0.5, 100.0;
+    transition-spring bg-h 1.0, 0.5, 100.0;
+
     transition-spring corner 1.0, 0.5, 100.0;
     transition-spring opacity 1.5, 0.1, 100.0;
     transition-spring ww 1.2, 0.1, 100.0;
   }
   
   state "pending" {
-    set x = #eval(#(%height%)*0.2 + (0.5+0.5*sin(3.0*#(t:time))) * 0.35*(#(%width%)-#(%height%)*0.4));
-    set y = #eval(#(%height%)*0.2);
-    set w = #eval(0.65*(#(%width%)-#(%height%)*0.4));
-    set h = #eval(#(%height%)*0.6);
+    set fg-x = #eval(#(%height%)*0.2 + (0.5+0.5*sin(3.0*#(t:time))) * 0.35*(#(%width%)-#(%height%)*0.4));
+    set fg-y = #eval(#(%height%)*0.2);
+    set fg-w = #eval(0.65*(#(%width%)-#(%height%)*0.4));
+    set fg-h = #eval(#(%height%)*0.6);
+
+    set bg-x = #eval(#(%height%)*0.1);
+    set bg-y = #eval(#(%height%)*0.1);
+    set bg-w = #eval(#(%width%)-#(%height%)*0.2);
+    set bg-h = #eval(#(%height%)*0.8);
+
     set corner = #eval(#(%height%)*0.25);
     set opacity = 1.0;
     set ww = 100.0;
 
-    transition-spring x 0.8, 0.8, 100.0;
-    transition-spring y 1.0, 0.5, 100.0;
-    transition-spring w 1.0, 0.5, 100.0;
-    transition-spring h 1.0, 0.5, 100.0;
+    transition-spring fg-x 1.0, 0.5, 50.0;
+    transition-spring fg-y 1.0, 0.5, 50.0;
+    transition-spring fg-w 1.0, 0.5, 50.0;
+    transition-spring fg-h 1.0, 0.5, 50.0;
+
+    transition-spring bg-x 1.0, 0.2, 300.0;
+    transition-spring bg-y 1.0, 0.2, 300.0;
+    transition-spring bg-w 1.0, 0.2, 300.0;
+    transition-spring bg-h 1.0, 0.2, 300.0;
+
     transition-spring corner 0.8, 0.5, 100.0;
     transition-spring opacity 1.0, 0.5, 100.0;
     transition-spring ww 0.8, 0.2, 20.0;
   }
 
   state "fraction" {
-    set x = 0.0;
-    set y = 0.0;
-    set w = #eval(#(%width%)*#(state:transaction-manager:current-progress));
-    set h = %height%;
+    set fg-x = #eval(#(%height%)*0.1);
+    set fg-y = #eval(#(%height%)*0.1);
+    set fg-w = #eval((#(%width%)-#(%height%)*0.2)
+                     *#(state:transaction-manager:current-progress));
+    set fg-h = #eval(#(%height%)*0.8);
+
+    set bg-x = 0.0;
+    set bg-y = 0.0;
+    set bg-w = %width%;
+    set bg-h = %height%;
+    
     set corner = #eval(#(%height%)*0.25);
     set opacity = 1.0;
     set ww = 100.0;
 
-    transition-spring x 0.8, 0.8, 100.0;
-    transition-spring y 1.0, 0.5, 100.0;
-    transition-spring w 1.0, 0.5, 100.0;
-    transition-spring h 1.0, 0.5, 100.0;
+    transition-spring fg-x 1.0, 0.5, 50.0;
+    transition-spring fg-y 1.0, 0.5, 50.0;
+    transition-spring fg-w 1.0, 0.5, 50.0;
+    transition-spring fg-h 1.0, 0.5, 50.0;
+
+    transition-spring bg-x 1.0, 0.2, 300.0;
+    transition-spring bg-y 1.0, 0.2, 300.0;
+    transition-spring bg-w 1.0, 0.2, 300.0;
+    transition-spring bg-h 1.0, 0.2, 300.0;
+
     transition-spring corner 1.0, 2.0, 50.0;
     transition-spring opacity 1.0, 0.5, 100.0;
     transition-spring ww 0.8, 0.2, 20.0;

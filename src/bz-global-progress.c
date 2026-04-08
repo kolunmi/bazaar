@@ -377,7 +377,7 @@ ensure_draw_css (BzGlobalProgress *self)
   g_autoptr (GtkWidget) draw_widget = NULL;
 
   draw_widget = bge_wdgt_renderer_lookup_object (
-      BGE_WDGT_RENDERER (self->wdgt), "fixed");
+      BGE_WDGT_RENDERER (self->wdgt), "fg");
   if (draw_widget == NULL)
     return;
 

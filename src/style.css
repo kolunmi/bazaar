@@ -292,11 +292,11 @@
 }
 
 global-progress {
-    color: transparent;
+  color: transparent;
 }
 
-global-progress > *:first-child > *:first-child {
-  background: var(--flag-gradient, var(--accent-bg-color));
+global-progress > *:first-child > * {
+    background: var(--flag-gradient, var(--accent-bg-color));
 }
 
 global-progress image {
@@ -305,6 +305,10 @@ global-progress image {
 
 .global-progress-button {
 	padding: 5px;
+}
+
+.global-progress-bg {
+    opacity: 0.5;
 }
 
 .lozenge {
