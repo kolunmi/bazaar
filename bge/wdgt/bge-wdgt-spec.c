@@ -4161,6 +4161,7 @@ struct _BgeWdgtRenderer
   StateInstanceData *last_instance;
   GTimer            *since_last_state;
   guint              tick;
+  gboolean           had_tick_since_state_switch;
 
   GHashTable *objects;
   GPtrArray  *children;
@@ -4673,6 +4674,8 @@ tick_cb (BgeWdgtRenderer *self,
   double         elapsed      = 0.0;
   gboolean       finished_all = TRUE;
 
+  self->had_tick_since_state_switch = TRUE;
+
   if (self->spec == NULL ||
       self->active_state == NULL ||
       self->active_instance == NULL ||
@@ -5183,15 +5186,19 @@ apply_state (BgeWdgtRenderer *self)
   StateInstanceData *instance = NULL;
   GHashTableIter     iter     = { 0 };
 
-  g_clear_pointer (&self->last_state, state_data_unref);
-  g_clear_pointer (&self->last_instance, state_instance_data_unref);
-  if (self->active_state != NULL &&
-      self->active_instance != NULL)
+  if (self->had_tick_since_state_switch)
     {
-      self->last_state    = g_steal_pointer (&self->active_state);
-      self->last_instance = g_steal_pointer (&self->active_instance);
+      g_clear_pointer (&self->last_state, state_data_unref);
+      g_clear_pointer (&self->last_instance, state_instance_data_unref);
+      if (self->active_state != NULL &&
+          self->active_instance != NULL)
+        {
+          self->last_state    = g_steal_pointer (&self->active_state);
+          self->last_instance = g_steal_pointer (&self->active_instance);
+        }
+      g_timer_start (self->since_last_state);
+      self->had_tick_since_state_switch = FALSE;
     }
-  g_timer_start (self->since_last_state);
 
   g_clear_pointer (&self->active_state, state_data_unref);
   g_clear_pointer (&self->active_instance, state_instance_data_unref);
