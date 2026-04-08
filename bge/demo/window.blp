@@ -14,6 +14,9 @@ Box root {
     end-child: Box {
       orientation: vertical;
       $BgeWdgtRenderer wdgt {
+        styles ["debug"]
+        halign: center;
+        valign: center;
         hexpand: true;
         vexpand: true;
         state: bind state_entry.text;
@@ -22,5 +25,6 @@ Box root {
         text: "1";
       }
     };
+    shrink-end-child: false;
   }
 }

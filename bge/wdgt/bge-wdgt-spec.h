@@ -43,6 +43,14 @@ typedef enum
   BGE_WDGT_SNAPSHOT_INSTR_SNAPSHOT_CHILD,
 } BgeWdgtSnapshotInstrKind;
 
+typedef enum
+{
+  BGE_WDGT_MEASURE_MINIMUM_WIDTH,
+  BGE_WDGT_MEASURE_NATURAL_WIDTH,
+  BGE_WDGT_MEASURE_MINIMUM_HEIGHT,
+  BGE_WDGT_MEASURE_NATURAL_HEIGHT,
+} BgeWdgtMeasureKind;
+
 #define BGE_TYPE_WDGT_SPEC (bge_wdgt_spec_get_type ())
 G_DECLARE_FINAL_TYPE (BgeWdgtSpec, bge_wdgt_spec, BGE, WDGT_SPEC, GObject)
 
@@ -123,6 +131,21 @@ bge_wdgt_spec_add_cclosure_source_value (BgeWdgtSpec       *self,
                                          GError           **error);
 
 gboolean
+bge_wdgt_spec_add_measure_for_size_source_value (BgeWdgtSpec *self,
+                                                 const char  *name,
+                                                 GError     **error);
+
+gboolean
+bge_wdgt_spec_add_widget_width_source_value (BgeWdgtSpec *self,
+                                             const char  *name,
+                                             GError     **error);
+
+gboolean
+bge_wdgt_spec_add_widget_height_source_value (BgeWdgtSpec *self,
+                                              const char  *name,
+                                              GError     **error);
+
+gboolean
 bge_wdgt_spec_add_special_source_value (BgeWdgtSpec        *self,
                                         const char         *name,
                                         BgeWdgtSpecialValue kind,
@@ -159,6 +182,12 @@ bge_wdgt_spec_add_allocation_transform_value (BgeWdgtSpec *self,
                                               const char  *name,
                                               const char  *child,
                                               GError     **error);
+
+gboolean
+bge_wdgt_spec_add_measure_value (BgeWdgtSpec       *self,
+                                 const char        *name,
+                                 BgeWdgtMeasureKind kind,
+                                 GError           **error);
 
 gboolean
 bge_wdgt_spec_add_state (BgeWdgtSpec *self,

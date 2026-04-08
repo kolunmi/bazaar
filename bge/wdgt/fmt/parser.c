@@ -41,7 +41,8 @@
 #define STR_TRANSITION        "transition"
 #define STR_TRANSITION_SPRING "transition-spring"
 #define STR_ALLOCATE          "allocate"
-#define STR_SNAPSHOT          "%snapshot"
+#define STR_MEASURE           "measure"
+#define STR_SNAPSHOT          "snapshot"
 
 typedef enum
 {
@@ -175,6 +176,9 @@ make_widget_allocation_name (const char *widget,
                              guint       n);
 
 static char *
+make_widget_measurement_name (guint n);
+
+static char *
 make_anon_name (guint n);
 
 static gint
@@ -194,6 +198,7 @@ bge_wdgt_parse_string (const char *string,
                        GError    **error)
 {
   g_autoptr (GError) local_error            = NULL;
+  gboolean result                           = FALSE;
   g_autoptr (BgeWdgtSpec) spec              = NULL;
   g_autoptr (GHashTable) macro_arrays       = NULL;
   g_autoptr (GHashTable) macro_replacements = NULL;
@@ -256,6 +261,30 @@ bge_wdgt_parse_string (const char *string,
     return NULL;                              \
   }                                           \
   G_STMT_END
+
+  result = bge_wdgt_spec_add_measure_for_size_source_value (
+      spec, "%for-size%", &local_error);
+  RETURN_ERROR_UNLESS (result);
+  g_hash_table_replace (
+      type_hints,
+      g_strdup ("%for-size%"),
+      GSIZE_TO_POINTER (G_TYPE_INT));
+
+  result = bge_wdgt_spec_add_widget_width_source_value (
+      spec, "%width%", &local_error);
+  RETURN_ERROR_UNLESS (result);
+  g_hash_table_replace (
+      type_hints,
+      g_strdup ("%width%"),
+      GSIZE_TO_POINTER (G_TYPE_INT));
+
+  result = bge_wdgt_spec_add_widget_height_source_value (
+      spec, "%height%", &local_error);
+  RETURN_ERROR_UNLESS (result);
+  g_hash_table_replace (
+      type_hints,
+      g_strdup ("%height%"),
+      GSIZE_TO_POINTER (G_TYPE_INT));
 
   for (const char *p = string;
        !IS_EOF (p);)
@@ -673,6 +702,70 @@ parse_widget_block (const char  *p,
                           state_name,
                           allocation_key,
                           allocation_values[i],
+                          &local_error);
+                      RETURN_ERROR_UNLESS (result);
+                    }
+                }
+              else if (g_strcmp0 (token, STR_MEASURE) == 0)
+                {
+                  guint n_measurement_values        = 0;
+                  g_auto (GStrv) measurement_values = NULL;
+
+                  p = parse_args (p, spec, state_name, NULL, macro_replacements, n_anon_vals, type_hints, NULL,
+                                  (GType[]){ G_TYPE_INT, G_TYPE_INT, G_TYPE_INT, G_TYPE_INT }, 4,
+                                  &measurement_values, NULL, &n_measurement_values,
+                                  ARGS_PARSE_RIGHT_ASSIGN, &local_error);
+                  RETURN_ERROR_UNLESS (p != NULL);
+                  if (n_measurement_values != 4)
+                    {
+                      g_set_error (
+                          error,
+                          G_IO_ERROR,
+                          G_IO_ERROR_UNKNOWN,
+                          "measurement needs 4 values, a "
+                          "minimum width, "
+                          "natural width, "
+                          "minimum height, "
+                          "and "
+                          "natural height, "
+                          "got %u",
+                          n_measurement_values);
+                      return NULL;
+                    }
+
+                  for (guint i = 0; i < n_measurement_values; i++)
+                    {
+                      g_autofree char *measurement_key = NULL;
+
+                      measurement_key = make_widget_measurement_name ((*n_anon_vals)++);
+                      switch (i)
+                        {
+                        case 0:
+                          result = bge_wdgt_spec_add_measure_value (
+                              spec, measurement_key, BGE_WDGT_MEASURE_MINIMUM_WIDTH, &local_error);
+                          break;
+                        case 1:
+                          result = bge_wdgt_spec_add_measure_value (
+                              spec, measurement_key, BGE_WDGT_MEASURE_NATURAL_WIDTH, &local_error);
+                          break;
+                        case 2:
+                          result = bge_wdgt_spec_add_measure_value (
+                              spec, measurement_key, BGE_WDGT_MEASURE_MINIMUM_HEIGHT, &local_error);
+                          break;
+                        case 3:
+                          result = bge_wdgt_spec_add_measure_value (
+                              spec, measurement_key, BGE_WDGT_MEASURE_NATURAL_HEIGHT, &local_error);
+                          break;
+                        default:
+                          g_assert_not_reached ();
+                        }
+                      RETURN_ERROR_UNLESS (result);
+
+                      result = bge_wdgt_spec_set_value (
+                          spec,
+                          state_name,
+                          measurement_key,
+                          measurement_values[i],
                           &local_error);
                       RETURN_ERROR_UNLESS (result);
                     }
@@ -2078,6 +2171,12 @@ make_widget_allocation_name (const char *widget,
                              guint       n)
 {
   return g_strdup_printf ("allocation@%u(%s)", n, widget);
+}
+
+static char *
+make_widget_measurement_name (guint n)
+{
+  return g_strdup_printf ("measurement@%u", n);
 }
 
 static char *
