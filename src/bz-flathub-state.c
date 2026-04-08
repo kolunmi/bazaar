@@ -805,25 +805,24 @@ initialize_fiber (GWeakRef *wr)
   add_category (self, "mobile", GET_BOXED (mobile_f), quality_set, FALSE, QUALITY_MODE_NONE, TRUE);
 
   {
-    JsonArray *array                       = NULL;
-    guint      length                      = 0;
+    static const char *categories[] = {
+      "audiovideo", "development", "education", "game", "graphics",
+      "network", "office", "science", "system", "utility", NULL
+    };
     g_autoptr (GPtrArray) category_futures = NULL;
-
-    array  = json_node_get_array (GET_BOXED (categories_f));
-    length = json_array_get_length (array);
+    guint length                           = 0;
 
     category_futures = g_ptr_array_new_with_free_func (dex_unref);
+    length           = g_strv_length ((GStrv) categories);
 
     for (guint i = 0; i < length; i++)
       {
-        const char      *category    = NULL;
         g_autofree char *request     = NULL;
         g_autoptr (DexFuture) future = NULL;
 
-        category = json_array_get_string_element (array, i);
-        request  = g_strdup_printf (
+        request = g_strdup_printf (
             "/collection/category/%s?page=0&per_page=%d",
-            category, CATEGORY_FETCH_SIZE);
+            categories[i], CATEGORY_FETCH_SIZE);
 
         future = bz_query_flathub_v2_json_take (g_steal_pointer (&request));
         result = dex_await (dex_ref (future), &local_error);
@@ -839,13 +838,11 @@ initialize_fiber (GWeakRef *wr)
       {
         DexFuture  *future = NULL;
         JsonNode   *node   = NULL;
-        const char *name   = NULL;
 
         future = g_ptr_array_index (category_futures, i);
         node   = GET_BOXED (future);
-        name   = json_array_get_string_element (array, i);
 
-        add_category (self, name, node, quality_set, FALSE, QUALITY_MODE_FIRST, FALSE);
+        add_category (self, categories[i], node, quality_set, FALSE, QUALITY_MODE_FIRST, FALSE);
       }
   }
 
