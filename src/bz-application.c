@@ -97,6 +97,8 @@ struct _BzApplication
   GHashTable                 *installed_set;
   GHashTable                 *sys_name_to_addons;
   GHashTable                 *usr_name_to_addons;
+  GHashTable                 *sys_ref_to_addon_group_ids;
+  GHashTable                 *usr_ref_to_addon_group_ids;
   GListStore                 *groups;
   GListStore                 *installed_apps;
   GListStore                 *search_biases_backing;
@@ -388,6 +390,8 @@ bz_application_dispose (GObject *object)
   g_clear_pointer (&self->sys_name_to_addons, g_hash_table_unref);
   g_clear_pointer (&self->txt_blocked_id_sets, g_ptr_array_unref);
   g_clear_pointer (&self->usr_name_to_addons, g_hash_table_unref);
+  g_clear_pointer (&self->sys_ref_to_addon_group_ids, g_hash_table_unref);
+  g_clear_pointer (&self->usr_ref_to_addon_group_ids, g_hash_table_unref);
   g_weak_ref_clear (&self->main_window);
 
   G_OBJECT_CLASS (bz_application_parent_class)->dispose (object);
@@ -1994,9 +1998,12 @@ fiber_replace_entry (BzApplication *self,
 
   if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
     {
-      gboolean    ignore_eol   = FALSE;
-      const char *runtime_name = NULL;
-      BzEntry    *eol_runtime  = NULL;
+      gboolean      ignore_eol              = FALSE;
+      const char   *runtime_name            = NULL;
+      BzEntry      *eol_runtime             = NULL;
+      BzEntryGroup *group                   = NULL;
+      GHashTable   *ref_to_addon_group_ids  = NULL;
+      GPtrArray    *pending                 = NULL;
 
       if (self->ignore_eol_set != NULL)
         ignore_eol = g_hash_table_contains (self->ignore_eol_set, id);
@@ -2005,7 +2012,18 @@ fiber_replace_entry (BzApplication *self,
       if (!ignore_eol && runtime_name != NULL)
         eol_runtime = g_hash_table_lookup (self->eol_runtimes, runtime_name);
 
-      ensure_group_and_add (self, id, entry, eol_runtime, ignore_eol, installed);
+      group = ensure_group_and_add (self, id, entry, eol_runtime, ignore_eol, installed);
+
+      ref_to_addon_group_ids = user
+          ? self->usr_ref_to_addon_group_ids
+          : self->sys_ref_to_addon_group_ids;
+      pending = g_hash_table_lookup (ref_to_addon_group_ids, id);
+      if (pending != NULL)
+        {
+          for (guint i = 0; i < pending->len; i++)
+            bz_entry_group_append_addon_group_id (group, g_ptr_array_index (pending, i));
+          g_hash_table_remove (ref_to_addon_group_ids, id);
+        }
     }
 
   if (flatpak_id != NULL &&
@@ -2050,6 +2068,22 @@ fiber_replace_entry (BzApplication *self,
               app_group = g_hash_table_lookup (self->ids_to_groups, parts[1]);
               if (app_group != NULL)
                 bz_entry_group_append_addon_group_id (app_group, id);
+              else
+                {
+                  GHashTable *ref_to_addon_group_ids = user
+                      ? self->usr_ref_to_addon_group_ids
+                      : self->sys_ref_to_addon_group_ids;
+                  GPtrArray  *pending                = NULL;
+
+                  pending = g_hash_table_lookup (ref_to_addon_group_ids, parts[1]);
+                  if (pending == NULL)
+                    {
+                      pending = g_ptr_array_new_with_free_func (g_free);
+                      g_hash_table_replace (ref_to_addon_group_ids,
+                                            g_strdup (parts[1]), pending);
+                    }
+                  g_ptr_array_add (pending, g_strdup (id));
+                }
             }
         }
 
@@ -2951,6 +2985,10 @@ init_service_struct (BzApplication *self,
   self->sys_name_to_addons = g_hash_table_new_full (
       g_str_hash, g_str_equal, g_free, (GDestroyNotify) g_ptr_array_unref);
   self->usr_name_to_addons = g_hash_table_new_full (
+      g_str_hash, g_str_equal, g_free, (GDestroyNotify) g_ptr_array_unref);
+  self->sys_ref_to_addon_group_ids = g_hash_table_new_full (
+    g_str_hash, g_str_equal, g_free, (GDestroyNotify) g_ptr_array_unref);
+  self->usr_ref_to_addon_group_ids = g_hash_table_new_full (
       g_str_hash, g_str_equal, g_free, (GDestroyNotify) g_ptr_array_unref);
 
   self->entry_factory = bz_application_map_factory_new (
