@@ -7,7 +7,8 @@ template $BzDeveloperBadge: Box {
   visible: bind $invert_boolean($is_null(template.entry as <$BzEntry>.developer) as <bool>) as <bool>;
 
   Label developer_label {
-    label: bind $get_developer_name(template.entry) as <string>;
+    label: bind $get_developer_link(template.entry, template.entry as <$BzEntry>.verification-status) as <string>;
+    use-markup: true;
     xalign: 0.0;
     wrap: true;
     lines: 3;
