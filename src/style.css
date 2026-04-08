@@ -127,6 +127,11 @@
   color: @blue_2;
 }
 
+.app-developer link{
+  color: @blue_2;
+  text-decoration: none;
+}
+
 .support {
     --accent-fg-color : #f06292;
     --accent-bg-color : alpha(#f06292, 0.25);
