@@ -278,7 +278,7 @@ bz_updates_card_dispose (GObject *object)
   BzUpdatesCard *self = BZ_UPDATES_CARD (object);
 
   g_clear_object (&self->state);
-  g_ptr_array_unref (self->app_rows);
+  g_clear_pointer (&self->app_rows, g_ptr_array_unref);
   gtk_widget_dispose_template (GTK_WIDGET (self), BZ_TYPE_UPDATES_CARD);
 
   G_OBJECT_CLASS (bz_updates_card_parent_class)->dispose (object);
