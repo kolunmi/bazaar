@@ -97,6 +97,8 @@ struct _BzApplication
   GHashTable                 *installed_set;
   GHashTable                 *sys_name_to_addons;
   GHashTable                 *usr_name_to_addons;
+  GHashTable                 *sys_ref_to_addon_group_ids;
+  GHashTable                 *usr_ref_to_addon_group_ids;
   GListStore                 *groups;
   GListStore                 *installed_apps;
   GListStore                 *search_biases_backing;
@@ -219,6 +221,14 @@ sync_then (DexFuture *future,
 static DexFuture *
 watch_backend_notifs_then_loop_cb (DexFuture *future,
                                    GWeakRef  *wr);
+
+static BzEntryGroup *
+ensure_group_and_add (BzApplication *self,
+                      const char    *id,
+                      BzEntry       *entry,
+                      BzEntry       *eol_runtime,
+                      gboolean       ignore_eol,
+                      gboolean       installed);
 
 static void
 fiber_replace_entry (BzApplication *self,
@@ -388,6 +398,8 @@ bz_application_dispose (GObject *object)
   g_clear_pointer (&self->sys_name_to_addons, g_hash_table_unref);
   g_clear_pointer (&self->txt_blocked_id_sets, g_ptr_array_unref);
   g_clear_pointer (&self->usr_name_to_addons, g_hash_table_unref);
+  g_clear_pointer (&self->sys_ref_to_addon_group_ids, g_hash_table_unref);
+  g_clear_pointer (&self->usr_ref_to_addon_group_ids, g_hash_table_unref);
   g_weak_ref_clear (&self->main_window);
 
   G_OBJECT_CLASS (bz_application_parent_class)->dispose (object);
@@ -1904,6 +1916,43 @@ watch_backend_notifs_then_loop_cb (DexFuture *future,
   return g_steal_pointer (&ret_future);
 }
 
+static BzEntryGroup *
+ensure_group_and_add (BzApplication *self,
+                      const char    *id,
+                      BzEntry       *entry,
+                      BzEntry       *eol_runtime,
+                      gboolean       ignore_eol,
+                      gboolean       installed)
+{
+  BzEntryGroup *group = NULL;
+
+  group = g_hash_table_lookup (self->ids_to_groups, id);
+  if (group != NULL)
+    {
+      bz_entry_group_add (group, entry, eol_runtime, ignore_eol);
+    }
+  else
+    {
+      g_autoptr (BzEntryGroup) new_group = NULL;
+
+      g_debug ("Creating new application group for id %s", id);
+      new_group = bz_entry_group_new (self->entry_factory);
+      bz_entry_group_add (new_group, entry, eol_runtime, ignore_eol);
+
+      g_list_store_append (self->groups, new_group);
+      g_hash_table_replace (self->ids_to_groups, g_strdup (id), g_object_ref (new_group));
+
+      group = new_group;
+    }
+
+  if (installed && !g_list_store_find (self->installed_apps, group, NULL))
+    g_list_store_insert_sorted (
+        self->installed_apps, group,
+        (GCompareDataFunc) cmp_group, NULL);
+
+  return group;
+}
+
 static void
 fiber_replace_entry (BzApplication *self,
                      BzEntry       *entry)
@@ -1915,6 +1964,7 @@ fiber_replace_entry (BzApplication *self,
   gboolean    installed          = FALSE;
   const char *flatpak_id         = NULL;
   const char *version            = NULL;
+  GHashTable *name_to_addons     = NULL;
 
   id                 = bz_entry_get_id (entry);
   unique_id          = bz_entry_get_unique_id (entry);
@@ -1924,6 +1974,7 @@ fiber_replace_entry (BzApplication *self,
       unique_id_checksum == NULL)
     return;
   user = bz_flatpak_entry_is_user (BZ_FLATPAK_ENTRY (entry));
+  name_to_addons = user ? self->usr_name_to_addons : self->sys_name_to_addons;
 
   installed = g_hash_table_contains (self->installed_set, unique_id);
   bz_entry_set_installed (entry, installed);
@@ -1937,11 +1988,7 @@ fiber_replace_entry (BzApplication *self,
     {
       GPtrArray *addons = NULL;
 
-      addons = g_hash_table_lookup (
-          user
-              ? self->usr_name_to_addons
-              : self->sys_name_to_addons,
-          flatpak_id);
+      addons = g_hash_table_lookup (name_to_addons, flatpak_id);
       if (addons != NULL)
         {
           g_debug ("Appending %d addons to %s", addons->len, unique_id);
@@ -1952,23 +1999,20 @@ fiber_replace_entry (BzApplication *self,
               addon_id = g_ptr_array_index (addons, i);
               bz_entry_append_addon (entry, addon_id);
             }
-          g_hash_table_remove (
-              user
-                  ? self->usr_name_to_addons
-                  : self->sys_name_to_addons,
-              flatpak_id);
+          g_hash_table_remove (name_to_addons, flatpak_id);
           addons = NULL;
         }
     }
 
   if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
     {
-      BzEntryGroup *group        = NULL;
-      gboolean      ignore_eol   = FALSE;
-      const char   *runtime_name = NULL;
-      BzEntry      *eol_runtime  = NULL;
+      gboolean      ignore_eol              = FALSE;
+      const char   *runtime_name            = NULL;
+      BzEntry      *eol_runtime             = NULL;
+      BzEntryGroup *group                   = NULL;
+      GHashTable   *ref_to_addon_group_ids  = NULL;
+      GPtrArray    *pending                 = NULL;
 
-      group = g_hash_table_lookup (self->ids_to_groups, id);
       if (self->ignore_eol_set != NULL)
         ignore_eol = g_hash_table_contains (self->ignore_eol_set, id);
 
@@ -1976,29 +2020,17 @@ fiber_replace_entry (BzApplication *self,
       if (!ignore_eol && runtime_name != NULL)
         eol_runtime = g_hash_table_lookup (self->eol_runtimes, runtime_name);
 
-      if (group != NULL)
+      group = ensure_group_and_add (self, id, entry, eol_runtime, ignore_eol, installed);
+
+      ref_to_addon_group_ids = user
+          ? self->usr_ref_to_addon_group_ids
+          : self->sys_ref_to_addon_group_ids;
+      pending = g_hash_table_lookup (ref_to_addon_group_ids, id);
+      if (pending != NULL)
         {
-          bz_entry_group_add (group, entry, eol_runtime, ignore_eol);
-          if (installed && !g_list_store_find (self->installed_apps, group, NULL))
-            g_list_store_insert_sorted (
-                self->installed_apps, group,
-                (GCompareDataFunc) cmp_group, NULL);
-        }
-      else
-        {
-          g_autoptr (BzEntryGroup) new_group = NULL;
-
-          g_debug ("Creating new application group for id %s", id);
-          new_group = bz_entry_group_new (self->entry_factory);
-          bz_entry_group_add (new_group, entry, eol_runtime, ignore_eol);
-
-          g_list_store_append (self->groups, new_group);
-          g_hash_table_replace (self->ids_to_groups, g_strdup (id), g_object_ref (new_group));
-
-          if (installed)
-            g_list_store_insert_sorted (
-                self->installed_apps, new_group,
-                (GCompareDataFunc) cmp_group, NULL);
+          for (guint i = 0; i < pending->len; i++)
+            bz_entry_group_append_addon_group_id (group, g_ptr_array_index (pending, i));
+          g_hash_table_remove (ref_to_addon_group_ids, id);
         }
     }
 
@@ -2029,23 +2061,51 @@ fiber_replace_entry (BzApplication *self,
 
       extension_of_what = bz_flatpak_entry_get_addon_extension_of_ref (
           BZ_FLATPAK_ENTRY (entry));
+
+      if (extension_of_what != NULL &&
+          g_str_has_prefix (extension_of_what, "app/"))
+        {
+          g_auto (GStrv) parts     = NULL;
+          BzEntryGroup  *app_group = NULL;
+
+          ensure_group_and_add (self, id, entry, NULL, FALSE, installed);
+
+          parts = g_strsplit (extension_of_what, "/", -1);
+          if (parts != NULL && parts[1] != NULL)
+            {
+              app_group = g_hash_table_lookup (self->ids_to_groups, parts[1]);
+              if (app_group != NULL)
+                bz_entry_group_append_addon_group_id (app_group, id);
+              else
+                {
+                  GHashTable *ref_to_addon_group_ids = user
+                      ? self->usr_ref_to_addon_group_ids
+                      : self->sys_ref_to_addon_group_ids;
+                  GPtrArray  *pending                = NULL;
+
+                  pending = g_hash_table_lookup (ref_to_addon_group_ids, parts[1]);
+                  if (pending == NULL)
+                    {
+                      pending = g_ptr_array_new_with_free_func (g_free);
+                      g_hash_table_replace (ref_to_addon_group_ids,
+                                            g_strdup (parts[1]), pending);
+                    }
+                  g_ptr_array_add (pending, g_strdup (id));
+                }
+            }
+        }
+
       if (extension_of_what != NULL)
         {
           GPtrArray *addons = NULL;
 
           /* BzFlatpakInstance ensures addons come before applications */
-          addons = g_hash_table_lookup (
-              user
-                  ? self->usr_name_to_addons
-                  : self->sys_name_to_addons,
-              extension_of_what);
+          addons = g_hash_table_lookup (name_to_addons, extension_of_what);
           if (addons == NULL)
             {
               addons = g_ptr_array_new_with_free_func (g_free);
               g_hash_table_replace (
-                  user
-                      ? self->usr_name_to_addons
-                      : self->sys_name_to_addons,
+                  name_to_addons,
                   g_strdup (extension_of_what), addons);
             }
           g_ptr_array_add (addons, g_strdup (unique_id));
@@ -2934,6 +2994,10 @@ init_service_struct (BzApplication *self,
       g_str_hash, g_str_equal, g_free, (GDestroyNotify) g_ptr_array_unref);
   self->usr_name_to_addons = g_hash_table_new_full (
       g_str_hash, g_str_equal, g_free, (GDestroyNotify) g_ptr_array_unref);
+  self->sys_ref_to_addon_group_ids = g_hash_table_new_full (
+    g_str_hash, g_str_equal, g_free, (GDestroyNotify) g_ptr_array_unref);
+  self->usr_ref_to_addon_group_ids = g_hash_table_new_full (
+      g_str_hash, g_str_equal, g_free, (GDestroyNotify) g_ptr_array_unref);
 
   self->entry_factory = bz_application_map_factory_new (
       (GtkMapListModelMapFunc) map_ids_to_entries,
@@ -3112,14 +3176,13 @@ open_generic_id (BzApplication *self,
   BzEntryGroup *group  = NULL;
   GtkWindow    *window = NULL;
 
-  group = g_hash_table_lookup (self->ids_to_groups, generic_id);
-
+  group  = g_hash_table_lookup (self->ids_to_groups, generic_id);
   window = gtk_application_get_active_window (GTK_APPLICATION (self));
   if (window == NULL)
     window = new_window (self);
 
   if (group != NULL)
-    bz_window_show_group (BZ_WINDOW (window), group);
+    gtk_widget_activate_action (GTK_WIDGET (window), "window.show-group", "s", generic_id);
   else
     {
       g_autofree char *message = NULL;

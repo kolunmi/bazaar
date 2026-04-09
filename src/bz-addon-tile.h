@@ -1,6 +1,6 @@
-/* bz-app-size-dialog.h
+/* bz-addon-tile.h
  *
- * Copyright 2025 Adam Masciola, Alexander Vanhee
+ * Copyright 2026 Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,18 +21,22 @@
 #pragma once
 
 #include "bz-entry-group.h"
+#include "bz-list-tile.h"
 #include <adwaita.h>
 
 G_BEGIN_DECLS
 
-#define BZ_TYPE_APP_SIZE_DIALOG (bz_app_size_dialog_get_type ())
+#define BZ_TYPE_ADDON_TILE (bz_addon_tile_get_type ())
+G_DECLARE_FINAL_TYPE (BzAddonTile, bz_addon_tile, BZ, ADDON_TILE, BzListTile)
 
-G_DECLARE_FINAL_TYPE (BzAppSizeDialog, bz_app_size_dialog, BZ, APP_SIZE_DIALOG, AdwBin)
+GtkWidget *
+bz_addon_tile_new (void);
 
-AdwDialog *
-bz_app_size_dialog_new (BzEntryGroup *group);
+void
+bz_addon_tile_set_group (BzAddonTile  *self,
+                         BzEntryGroup *group);
 
-AdwNavigationPage *
-bz_app_size_page_new (BzEntryGroup *group);
+BzEntryGroup *
+bz_addon_tile_get_group (BzAddonTile *self);
 
 G_END_DECLS

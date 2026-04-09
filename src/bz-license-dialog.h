@@ -27,9 +27,12 @@ G_BEGIN_DECLS
 
 #define BZ_TYPE_LICENSE_DIALOG (bz_license_dialog_get_type ())
 
-G_DECLARE_FINAL_TYPE (BzLicenseDialog, bz_license_dialog, BZ, LICENSE_DIALOG, AdwDialog)
+G_DECLARE_FINAL_TYPE (BzLicenseDialog, bz_license_dialog, BZ, LICENSE_DIALOG, AdwBin)
 
 AdwDialog *
 bz_license_dialog_new (BzEntry *entry);
+
+AdwNavigationPage *
+bz_license_page_new (BzEntry *entry);
 
 G_END_DECLS

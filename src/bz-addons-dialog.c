@@ -1,6 +1,6 @@
 /* bz-addons-dialog.c
  *
- * Copyright 2025 Adam Masciola
+ * Copyright 2025 Adam Masciola, Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,26 +18,50 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+#include "config.h"
+
 #include <glib/gi18n.h>
 
+#include "bz-addon-tile.h"
 #include "bz-addons-dialog.h"
-#include "bz-entry.h"
-#include "bz-env.h"
+#include "bz-app-size-dialog.h"
+#include "bz-application-map-factory.h"
+#include "bz-application.h"
+#include "bz-appstream-description-render.h"
+#include "bz-context-tile-callbacks.h"
+#include "bz-context-tile.h"
+#include "bz-entry-group.h"
+#include "bz-fading-clamp.h"
 #include "bz-flatpak-entry.h"
+#include "bz-install-controls.h"
+#include "bz-license-dialog.h"
 #include "bz-result.h"
+#include "bz-share-list.h"
+#include "bz-state-info.h"
+#include "bz-stats-dialog.h"
+#include "bz-template-callbacks.h"
 #include "bz-util.h"
 
 struct _BzAddonsDialog
 {
   AdwDialog parent_instance;
 
-  BzResult   *entry;
-  GListModel *model;
+  GListModel   *addon_groups;
+  BzEntryGroup *selected_group;
+  BzResult     *selected_ui_entry;
+  DexFuture    *selected_ui_future;
+  BzResult     *parent_ui_entry;
+  DexFuture    *parent_ui_future;
 
-  DexFuture *task;
+  AdwAnimation *width_animation;
+  AdwAnimation *height_animation;
 
   /* Template widgets */
-  AdwPreferencesGroup *addons_group;
+  AdwNavigationView *navigation_view;
+  GtkToggleButton   *description_toggle;
+  AdwClamp          *full_view_clamp;
+  AdwClamp          *list_clamp;
+  GtkCustomSorter   *sorter;
 };
 
 G_DEFINE_FINAL_TYPE (BzAddonsDialog, bz_addons_dialog, ADW_TYPE_DIALOG)
@@ -46,237 +70,46 @@ enum
 {
   PROP_0,
 
-  PROP_ENTRY,
-  PROP_MODEL,
+  PROP_ADDON_GROUPS,
+  PROP_SELECTED_GROUP,
+  PROP_SELECTED_UI_ENTRY,
+  PROP_PARENT_UI_ENTRY,
 
   LAST_PROP
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
 
-enum
-{
-  SIGNAL_TRANSACT,
-
-  LAST_SIGNAL,
-};
-static guint signals[LAST_SIGNAL];
-
-static void
-transact_cb (BzAddonsDialog *self,
-             GtkButton      *button)
-{
-  BzEntry *entry = NULL;
-
-  entry = g_object_get_data (G_OBJECT (button), "entry");
-  if (entry == NULL)
-    return;
-
-  g_signal_emit (self, signals[SIGNAL_TRANSACT], 0, entry);
-}
-
-static void
-update_button_for_entry (GtkButton *button,
-                         BzEntry   *entry)
-{
-  gboolean    installed = FALSE;
-  gboolean    holding   = FALSE;
-  const char *icon_name;
-  const char *tooltip_text;
-
-  g_object_get (entry,
-                "installed", &installed,
-                "holding", &holding,
-                NULL);
-
-  if (installed)
-    {
-      icon_name    = "user-trash-symbolic";
-      tooltip_text = _ ("Remove");
-    }
-  else
-    {
-      icon_name    = "folder-download-symbolic";
-      tooltip_text = _ ("Install");
-    }
-
-  gtk_button_set_icon_name (button, icon_name);
-  gtk_widget_set_tooltip_text (GTK_WIDGET (button), tooltip_text);
-  gtk_widget_set_sensitive (GTK_WIDGET (button), !holding);
-}
-
-static void
-entry_notify_cb (BzEntry      *entry,
-                 GParamSpec   *pspec,
-                 AdwActionRow *action_row)
-{
-  g_autofree char *title         = NULL;
-  g_autofree char *description   = NULL;
-  GtkButton       *action_button = NULL;
-
-  action_button = g_object_get_data (G_OBJECT (action_row), "button");
-  if (action_button == NULL)
-    return;
-
-  g_object_get (entry,
-                "title", &title,
-                "description", &description,
-                NULL);
-
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (action_row), title);
-  adw_action_row_set_subtitle (action_row, description);
-
-  update_button_for_entry (action_button, entry);
-}
-
-static AdwActionRow *
-make_action_row (BzAddonsDialog *self,
-                 BzEntry        *entry)
-{
-  AdwActionRow    *action_row      = NULL;
-  const char      *flatpak_version = NULL;
-  const char      *title           = NULL;
-  const char      *description     = NULL;
-  g_autofree char *title_text      = NULL;
-  GtkButton       *action_button   = NULL;
-
-  action_row = ADW_ACTION_ROW (adw_action_row_new ());
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (action_row), FALSE);
-
-  flatpak_version = bz_flatpak_entry_get_flatpak_version (BZ_FLATPAK_ENTRY (entry));
-  title           = bz_entry_get_title (entry);
-  description     = bz_entry_get_description (entry);
-
-  title_text = g_strdup_printf ("<b>%s</b> <small><tt>%s</tt></small>", title, flatpak_version);
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (action_row), title_text);
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (action_row), TRUE);
-
-  adw_action_row_set_subtitle (action_row, description);
-
-  action_button = GTK_BUTTON (gtk_button_new ());
-  gtk_widget_set_valign (GTK_WIDGET (action_button), GTK_ALIGN_CENTER);
-  gtk_widget_add_css_class (GTK_WIDGET (action_button), "flat");
-  g_object_set_data_full (G_OBJECT (action_button), "entry", g_object_ref (entry), g_object_unref);
-  g_signal_connect_swapped (action_button, "clicked",
-                            G_CALLBACK (transact_cb), self);
-
-  update_button_for_entry (action_button, entry);
-
-  g_object_set_data (G_OBJECT (action_row), "button", action_button);
-
-  adw_action_row_add_suffix (action_row, GTK_WIDGET (action_button));
-  adw_action_row_set_activatable_widget (action_row, GTK_WIDGET (action_button));
-
-  g_signal_connect_object (entry, "notify::installed",
-                           G_CALLBACK (entry_notify_cb),
-                           action_row, G_CONNECT_DEFAULT);
-  g_signal_connect_object (entry, "notify::holding",
-                           G_CALLBACK (entry_notify_cb),
-                           action_row, G_CONNECT_DEFAULT);
-
-  return action_row;
-}
-
-static gint
-cmp_future (DexFuture *a,
-            DexFuture *b)
-{
-  const GValue *a_val   = NULL;
-  const GValue *b_val   = NULL;
-  BzEntry      *a_entry = NULL;
-  BzEntry      *b_entry = NULL;
-
-  a_val = dex_future_get_value (a, NULL);
-  b_val = dex_future_get_value (b, NULL);
-
-  if (a_val == NULL || b_val == NULL)
-    return 0;
-
-  a_entry = g_value_get_object (a_val);
-  b_entry = g_value_get_object (b_val);
-
-  return strcasecmp (bz_entry_get_title (a_entry),
-                     bz_entry_get_title (b_entry));
-}
-
-static DexFuture *
-populate_addons_fiber (GWeakRef *wr)
-{
-  g_autoptr (BzAddonsDialog) self = NULL;
-  guint n_results                 = 0;
-  g_autoptr (GPtrArray) futures   = NULL;
-
-  bz_weak_get_or_return_reject (self, wr);
-
-  n_results = g_list_model_get_n_items (self->model);
-  futures   = g_ptr_array_new_with_free_func (dex_unref);
-  for (guint i = 0; i < n_results; i++)
-    {
-      g_autoptr (BzResult) result  = NULL;
-      g_autoptr (DexFuture) future = NULL;
-
-      result = g_list_model_get_item (self->model, i);
-      future = bz_result_dup_future (result);
-      if (future != NULL)
-        g_ptr_array_add (futures, g_steal_pointer (&future));
-    }
-  dex_await (
-      dex_future_allv (
-          (DexFuture *const *) futures->pdata,
-          futures->len),
-      NULL);
-  g_ptr_array_sort_values (futures, (GCompareFunc) cmp_future);
-
-  for (guint i = 0; i < futures->len; i++)
-    {
-      DexFuture    *future     = NULL;
-      const GValue *value      = NULL;
-      BzEntry      *entry      = NULL;
-      const char   *id         = NULL;
-      AdwActionRow *action_row = NULL;
-
-      future = g_ptr_array_index (futures, i);
-      value  = dex_future_get_value (future, NULL);
-      if (value == NULL)
-        continue;
-      entry = g_value_get_object (value);
-
-      id = bz_entry_get_id (entry);
-      if (strstr (id, ".Debug") != NULL ||
-          strstr (id, ".Locale") != NULL)
-        continue;
-
-      action_row = make_action_row (self, entry);
-      if (action_row != NULL)
-        adw_preferences_group_add (self->addons_group, GTK_WIDGET (action_row));
-    }
-
-  return dex_future_new_true ();
-}
-
-static void
-populate_addons (BzAddonsDialog *self)
-{
-  if (self->model == NULL ||
-      self->addons_group == NULL)
-    return;
-
-  dex_clear (&self->task);
-  self->task = dex_scheduler_spawn (
-      dex_scheduler_get_default (),
-      bz_get_dex_stack_size (),
-      (DexFiberFunc) populate_addons_fiber,
-      bz_track_weak (self),
-      bz_weak_release);
-}
+static char      *format_parent_title (gpointer object, const char *title);
+static int        get_description_max_height (gpointer object, gboolean active);
+static char      *get_description_toggle_text (gpointer object, gboolean active);
+static void       size_cb (BzAddonsDialog *self, GtkButton *button);
+static void       license_cb (BzAddonsDialog *self, GtkButton *button);
+static void       dl_stats_cb (BzAddonsDialog *self, GtkButton *button);
+static void       animate_to_size (BzAddonsDialog *self);
+static void       on_visible_page_tag_changed (AdwNavigationView *nav_view, GParamSpec *pspec, BzAddonsDialog *self);
+static char      *get_install_stack_page (gpointer object, int installable, int removable);
+static void       install_cb (GtkButton *button, BzAddonsDialog *self);
+static void       remove_cb (GtkButton *button, BzAddonsDialog *self);
+static void       run_cb (GtkButton *button, BzAddonsDialog *self);
+static DexFuture *on_parent_ui_entry_resolved (DexFuture *future, GWeakRef *wr);
+static DexFuture *on_selected_ui_entry_resolved (DexFuture *future, GWeakRef *wr);
+static void       set_selected_group (BzAddonsDialog *self, BzEntryGroup *group);
+static void       tile_activated_cb (BzAddonTile *tile);
+static int        sort_func (BzEntryGroup *a, BzEntryGroup *b, BzAddonsDialog *self);
 
 static void
 bz_addons_dialog_dispose (GObject *object)
 {
   BzAddonsDialog *self = BZ_ADDONS_DIALOG (object);
 
-  g_clear_object (&self->entry);
-  g_clear_object (&self->model);
-  dex_clear (&self->task);
+  dex_clear (&self->selected_ui_future);
+  dex_clear (&self->parent_ui_future);
+  g_clear_object (&self->addon_groups);
+  g_clear_object (&self->selected_group);
+  g_clear_object (&self->selected_ui_entry);
+  g_clear_object (&self->parent_ui_entry);
+  g_clear_object (&self->width_animation);
+  g_clear_object (&self->height_animation);
 
   G_OBJECT_CLASS (bz_addons_dialog_parent_class)->dispose (object);
 }
@@ -291,11 +124,17 @@ bz_addons_dialog_get_property (GObject    *object,
 
   switch (prop_id)
     {
-    case PROP_ENTRY:
-      g_value_set_object (value, self->entry);
+    case PROP_ADDON_GROUPS:
+      g_value_set_object (value, self->addon_groups);
       break;
-    case PROP_MODEL:
-      g_value_set_object (value, self->model);
+    case PROP_SELECTED_GROUP:
+      g_value_set_object (value, self->selected_group);
+      break;
+    case PROP_SELECTED_UI_ENTRY:
+      g_value_set_object (value, self->selected_ui_entry);
+      break;
+    case PROP_PARENT_UI_ENTRY:
+      g_value_set_object (value, self->parent_ui_entry);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -312,29 +151,19 @@ bz_addons_dialog_set_property (GObject      *object,
 
   switch (prop_id)
     {
-    case PROP_ENTRY:
-      g_clear_object (&self->entry);
-      self->entry = g_value_dup_object (value);
+    case PROP_ADDON_GROUPS:
+      g_clear_object (&self->addon_groups);
+      self->addon_groups = g_value_dup_object (value);
+      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ADDON_GROUPS]);
       break;
-    case PROP_MODEL:
-      g_clear_object (&self->model);
-      self->model = g_value_dup_object (value);
-      populate_addons (self);
+    case PROP_SELECTED_GROUP:
+      g_clear_object (&self->selected_group);
+      self->selected_group = g_value_dup_object (value);
+      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SELECTED_GROUP]);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
-}
-
-static void
-bz_addons_dialog_constructed (GObject *object)
-{
-  BzAddonsDialog *self = BZ_ADDONS_DIALOG (object);
-
-  G_OBJECT_CLASS (bz_addons_dialog_parent_class)->constructed (object);
-
-  if (self->model && self->addons_group)
-    populate_addons (self);
 }
 
 static void
@@ -344,62 +173,524 @@ bz_addons_dialog_class_init (BzAddonsDialogClass *klass)
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
   object_class->dispose      = bz_addons_dialog_dispose;
-  object_class->constructed  = bz_addons_dialog_constructed;
   object_class->get_property = bz_addons_dialog_get_property;
   object_class->set_property = bz_addons_dialog_set_property;
 
-  props[PROP_ENTRY] =
+  props[PROP_ADDON_GROUPS] =
       g_param_spec_object (
-          "entry",
-          NULL, NULL,
-          BZ_TYPE_ENTRY,
-          G_PARAM_READWRITE);
-
-  props[PROP_MODEL] =
-      g_param_spec_object (
-          "model",
+          "addon-groups",
           NULL, NULL,
           G_TYPE_LIST_MODEL,
-          G_PARAM_READWRITE);
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_SELECTED_GROUP] =
+      g_param_spec_object (
+          "selected-group",
+          NULL, NULL,
+          BZ_TYPE_ENTRY_GROUP,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_SELECTED_UI_ENTRY] =
+      g_param_spec_object (
+          "selected-ui-entry",
+          NULL, NULL,
+          BZ_TYPE_RESULT,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  props[PROP_PARENT_UI_ENTRY] =
+      g_param_spec_object (
+          "parent-ui-entry",
+          NULL, NULL,
+          BZ_TYPE_RESULT,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
-  signals[SIGNAL_TRANSACT] =
-      g_signal_new (
-          "transact",
-          G_OBJECT_CLASS_TYPE (klass),
-          G_SIGNAL_RUN_FIRST,
-          0,
-          NULL, NULL,
-          g_cclosure_marshal_VOID__OBJECT,
-          G_TYPE_NONE, 1,
-          BZ_TYPE_ENTRY);
-  g_signal_set_va_marshaller (
-      signals[SIGNAL_TRANSACT],
-      G_TYPE_FROM_CLASS (klass),
-      g_cclosure_marshal_VOID__OBJECTv);
+  g_type_ensure (BZ_TYPE_ADDON_TILE);
+  g_type_ensure (BZ_TYPE_APPSTREAM_DESCRIPTION_RENDER);
+  g_type_ensure (BZ_TYPE_CONTEXT_TILE);
+  g_type_ensure (BZ_TYPE_ENTRY);
+  g_type_ensure (BZ_TYPE_ENTRY_GROUP);
+  g_type_ensure (BZ_TYPE_FADING_CLAMP);
+  g_type_ensure (BZ_TYPE_FLATPAK_ENTRY);
+  g_type_ensure (BZ_TYPE_INSTALL_CONTROLS);
+  g_type_ensure (BZ_TYPE_RESULT);
+  g_type_ensure (BZ_TYPE_SHARE_LIST);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-addons-dialog.ui");
-  gtk_widget_class_bind_template_child (widget_class, BzAddonsDialog, addons_group);
+
+  bz_widget_class_bind_all_util_callbacks (widget_class);
+  bz_widget_class_bind_all_context_tile_callbacks (widget_class);
+
+  gtk_widget_class_bind_template_child (widget_class, BzAddonsDialog, navigation_view);
+  gtk_widget_class_bind_template_child (widget_class, BzAddonsDialog, description_toggle);
+  gtk_widget_class_bind_template_child (widget_class, BzAddonsDialog, full_view_clamp);
+  gtk_widget_class_bind_template_child (widget_class, BzAddonsDialog, list_clamp);
+  gtk_widget_class_bind_template_child (widget_class, BzAddonsDialog, sorter);
+
+  gtk_widget_class_bind_template_callback (widget_class, tile_activated_cb);
+  gtk_widget_class_bind_template_callback (widget_class, on_visible_page_tag_changed);
+  gtk_widget_class_bind_template_callback (widget_class, format_parent_title);
+  gtk_widget_class_bind_template_callback (widget_class, get_description_max_height);
+  gtk_widget_class_bind_template_callback (widget_class, get_description_toggle_text);
+  gtk_widget_class_bind_template_callback (widget_class, get_install_stack_page);
+  gtk_widget_class_bind_template_callback (widget_class, install_cb);
+  gtk_widget_class_bind_template_callback (widget_class, remove_cb);
+  gtk_widget_class_bind_template_callback (widget_class, run_cb);
+
+  gtk_widget_class_bind_template_callback (widget_class, license_cb);
+  gtk_widget_class_bind_template_callback (widget_class, size_cb);
+  gtk_widget_class_bind_template_callback (widget_class, dl_stats_cb);
 }
 
 static void
 bz_addons_dialog_init (BzAddonsDialog *self)
 {
+  AdwAnimationTarget *width_target  = NULL;
+  AdwAnimationTarget *height_target = NULL;
+
   gtk_widget_init_template (GTK_WIDGET (self));
+
+  width_target           = adw_property_animation_target_new (G_OBJECT (self), "content-width");
+  self->width_animation  = adw_timed_animation_new (GTK_WIDGET (self), 0, 0, 300, width_target);
+  height_target          = adw_property_animation_target_new (G_OBJECT (self), "content-height");
+  self->height_animation = adw_timed_animation_new (GTK_WIDGET (self), 0, 0, 300, height_target);
+
+  g_signal_connect_swapped (self, "map", G_CALLBACK (animate_to_size), self);
+
+  gtk_custom_sorter_set_sort_func (self->sorter, (GCompareDataFunc) sort_func, self, NULL);
 }
 
 AdwDialog *
-bz_addons_dialog_new (BzEntry    *entry,
-                      GListModel *model)
+bz_addons_dialog_new (BzEntryGroup *group)
 {
-  BzAddonsDialog *addons_dialog = NULL;
+  GListModel              *ids     = NULL;
+  GListModel              *groups  = NULL;
+  BzApplicationMapFactory *factory = NULL;
+  BzAddonsDialog          *self    = NULL;
 
-  addons_dialog = g_object_new (
+  ids = bz_entry_group_get_addon_group_ids (group);
+  if (ids != NULL)
+    {
+      factory = bz_state_info_get_application_factory (bz_state_info_get_default ());
+      if (factory != NULL)
+        groups = bz_application_map_factory_generate (factory, ids);
+    }
+
+  self = g_object_new (
       BZ_TYPE_ADDONS_DIALOG,
-      "entry", entry,
-      "model", model,
+      "addon-groups", groups,
       NULL);
 
-  return ADW_DIALOG (addons_dialog);
+  if (groups != NULL && g_list_model_get_n_items (groups) == 1)
+    {
+      g_autoptr (BzEntryGroup) single   = g_list_model_get_item (groups, 0);
+      AdwNavigationPage *full_view_page = NULL;
+
+      set_selected_group (self, single);
+      full_view_page = adw_navigation_view_find_page (self->navigation_view, "full-view");
+      adw_navigation_view_replace (self->navigation_view, &full_view_page, 1);
+    }
+
+  return ADW_DIALOG (self);
+}
+
+AdwDialog *
+bz_addons_dialog_new_single (BzEntryGroup *group)
+{
+  BzAddonsDialog    *self      = NULL;
+  AdwNavigationPage *full_view = NULL;
+
+  self = g_object_new (BZ_TYPE_ADDONS_DIALOG, NULL);
+
+  set_selected_group (self, group);
+
+  full_view = adw_navigation_view_find_page (self->navigation_view, "full-view");
+  adw_navigation_view_replace (self->navigation_view, &full_view, 1);
+
+  return ADW_DIALOG (self);
+}
+
+static char *
+format_parent_title (gpointer    object,
+                     const char *title)
+{
+  if (title == NULL || *title == '\0')
+    return g_strdup ("");
+
+  return g_strdup_printf (_ ("Add-on for %s"), title);
+}
+
+static int
+get_description_max_height (gpointer object,
+                            gboolean active)
+{
+  return active ? 10000 : 170;
+}
+
+static char *
+get_description_toggle_text (gpointer object,
+                             gboolean active)
+{
+  return g_strdup (active ? _ ("Show Less") : _ ("Show More"));
+}
+
+static void
+size_cb (BzAddonsDialog *self,
+         GtkButton      *button)
+{
+  AdwNavigationPage *page = NULL;
+
+  if (self->selected_group == NULL)
+    return;
+
+  page = bz_app_size_page_new (self->selected_group);
+  adw_navigation_view_push (self->navigation_view, page);
+}
+
+static void
+license_cb (BzAddonsDialog *self,
+            GtkButton      *button)
+{
+  AdwNavigationPage *page     = NULL;
+  BzEntry           *ui_entry = NULL;
+
+  if (self->selected_ui_entry == NULL)
+    return;
+
+  ui_entry = bz_result_get_object (self->selected_ui_entry);
+  if (ui_entry == NULL)
+    return;
+
+  page = bz_license_page_new (ui_entry);
+  adw_navigation_view_push (self->navigation_view, page);
+}
+
+static void
+dl_stats_cb (BzAddonsDialog *self,
+             GtkButton      *button)
+{
+  BzStatsDialog     *bin      = NULL;
+  AdwNavigationPage *page     = NULL;
+  BzEntry           *ui_entry = NULL;
+
+  if (self->selected_ui_entry == NULL)
+    return;
+
+  ui_entry = bz_result_get_object (self->selected_ui_entry);
+  if (ui_entry == NULL)
+    return;
+
+  bin  = BZ_STATS_DIALOG (bz_stats_dialog_new (NULL, NULL, 0));
+  page = adw_navigation_page_new (GTK_WIDGET (bin), _ ("Download Stats"));
+  adw_navigation_page_set_tag (page, "stats");
+
+  g_object_bind_property (ui_entry, "download-stats", bin, "model", G_BINDING_SYNC_CREATE);
+  g_object_bind_property (ui_entry, "total-downloads", bin, "total-downloads", G_BINDING_SYNC_CREATE);
+
+  adw_navigation_view_push (self->navigation_view, page);
+  bz_stats_dialog_animate_open (bin);
+}
+
+static void
+animate_to_size (BzAddonsDialog *self)
+{
+  const char *tag           = NULL;
+  int         target_width  = 0;
+  int         target_height = 0;
+  int         nat           = 0;
+  int         cur_width     = 0;
+  int         measure_for   = 0;
+  int         cur_w         = 0;
+  int         cur_h         = 0;
+  int         delta_w       = 0;
+  int         delta_h       = 0;
+  int         delta         = 0;
+  guint       duration      = 0;
+
+  tag = adw_navigation_view_get_visible_page_tag (self->navigation_view);
+
+  if (g_strcmp0 (tag, "list") == 0)
+    {
+      cur_width    = gtk_widget_get_width (GTK_WIDGET (self));
+      target_width = 500;
+      measure_for  = MAX (-1, MIN (target_width, cur_width) - 48);
+      gtk_widget_measure (GTK_WIDGET (self->list_clamp), GTK_ORIENTATION_VERTICAL, measure_for, NULL, &nat, NULL, NULL);
+      target_height = CLAMP (nat + 50, 300, 600);
+    }
+  else if (g_strcmp0 (tag, "full-view") == 0)
+    {
+      cur_width    = gtk_widget_get_width (GTK_WIDGET (self));
+      target_width = 500;
+      measure_for  = MAX (-1, MIN (target_width, cur_width) - 48);
+      gtk_widget_measure (GTK_WIDGET (self->full_view_clamp), GTK_ORIENTATION_VERTICAL, measure_for, NULL, &nat, NULL, NULL);
+      target_height = CLAMP (nat + 50, 300, 700);
+    }
+  else if (g_strcmp0 (tag, "app-size") == 0)
+    {
+      target_width  = 500;
+      target_height = 300;
+    }
+  else if (g_strcmp0 (tag, "license") == 0)
+    {
+      cur_width    = gtk_widget_get_width (GTK_WIDGET (self));
+      target_width = 400;
+      measure_for  = target_width - 48;
+      gtk_widget_measure (GTK_WIDGET (self->navigation_view), GTK_ORIENTATION_VERTICAL, measure_for, NULL, &nat, NULL, NULL);
+      target_height = CLAMP (nat, 300, 700);
+    }
+  else if (g_strcmp0 (tag, "stats") == 0)
+    {
+      target_width  = 1250;
+      target_height = 750;
+    }
+  else
+    return;
+
+  cur_w   = adw_dialog_get_content_width (ADW_DIALOG (self));
+  cur_h   = adw_dialog_get_content_height (ADW_DIALOG (self));
+  delta_w = ABS (target_width - cur_w);
+  delta_h = ABS (target_height - cur_h);
+  delta   = MAX (delta_w, delta_h);
+
+  duration = (guint) CLAMP (delta * 0.6, 200, (target_width < cur_w || target_height < cur_h) ? 300 : 600);
+
+  adw_timed_animation_set_duration (ADW_TIMED_ANIMATION (self->width_animation), duration);
+  adw_timed_animation_set_duration (ADW_TIMED_ANIMATION (self->height_animation), duration);
+
+  adw_timed_animation_set_value_from (ADW_TIMED_ANIMATION (self->width_animation), cur_w);
+  adw_timed_animation_set_value_to (ADW_TIMED_ANIMATION (self->width_animation), target_width);
+  adw_timed_animation_set_value_from (ADW_TIMED_ANIMATION (self->height_animation), cur_h);
+  adw_timed_animation_set_value_to (ADW_TIMED_ANIMATION (self->height_animation), target_height);
+  adw_animation_play (self->width_animation);
+  adw_animation_play (self->height_animation);
+}
+
+static void
+on_visible_page_tag_changed (AdwNavigationView *nav_view,
+                             GParamSpec        *pspec,
+                             BzAddonsDialog    *self)
+{
+  g_idle_add_once ((GSourceOnceFunc) animate_to_size, self);
+}
+
+static char *
+get_install_stack_page (gpointer object,
+                        int      installable,
+                        int      removable)
+{
+  if (removable > 0)
+    return g_strdup ("open");
+  else if (installable > 0)
+    return g_strdup ("install");
+  else
+    return g_strdup ("empty");
+}
+
+static void
+install_cb (GtkButton      *button,
+            BzAddonsDialog *self)
+{
+  if (self->selected_group == NULL)
+    return;
+  gtk_widget_activate_action (GTK_WIDGET (self), "window.install-group", "(sb)",
+                              bz_entry_group_get_id (self->selected_group), TRUE);
+}
+
+static void
+remove_cb (GtkButton      *button,
+           BzAddonsDialog *self)
+{
+  if (self->selected_group == NULL)
+    return;
+  gtk_widget_activate_action (GTK_WIDGET (self), "window.remove-group", "(sb)",
+                              bz_entry_group_get_id (self->selected_group), TRUE);
+}
+
+static void
+run_cb (GtkButton      *button,
+        BzAddonsDialog *self)
+{
+  BzEntry *entry = NULL;
+  entry          = bz_result_get_object (self->parent_ui_entry);
+
+  gtk_widget_activate_action (GTK_WIDGET (self), "window.launch-group", "s",
+                              bz_entry_get_id (entry));
+}
+
+static DexFuture *
+on_parent_ui_entry_resolved (DexFuture *future,
+                             GWeakRef  *wr)
+{
+  g_autoptr (BzAddonsDialog) self = NULL;
+
+  bz_weak_get_or_return_reject (self, wr);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PARENT_UI_ENTRY]);
+
+  return dex_future_new_for_boolean (TRUE);
+}
+
+static DexFuture *
+on_selected_ui_entry_resolved (DexFuture *future,
+                               GWeakRef  *wr)
+{
+  g_autoptr (BzAddonsDialog) self       = NULL;
+  const GValue *value                   = NULL;
+  g_autoptr (BzEntry) ui_entry          = NULL;
+  const char *ref                       = NULL;
+  g_auto (GStrv) parts                  = NULL;
+  BzApplicationMapFactory *factory      = NULL;
+  GtkStringObject         *item         = NULL;
+  BzEntryGroup            *parent_group = NULL;
+
+  bz_weak_get_or_return_reject (self, wr);
+
+  value = dex_future_get_value (future, NULL);
+  if (value == NULL || !G_VALUE_HOLDS_OBJECT (value))
+    return dex_future_new_for_boolean (TRUE);
+
+  ui_entry = g_value_dup_object (value);
+  if (ui_entry == NULL || !BZ_IS_FLATPAK_ENTRY (ui_entry))
+    return dex_future_new_for_boolean (TRUE);
+
+  ref = bz_flatpak_entry_get_addon_extension_of_ref (BZ_FLATPAK_ENTRY (ui_entry));
+  if (ref == NULL)
+    return dex_future_new_for_boolean (TRUE);
+
+  parts = g_strsplit (ref, "/", -1);
+  if (parts[0] == NULL || parts[1] == NULL)
+    return dex_future_new_for_boolean (TRUE);
+
+  factory      = bz_state_info_get_application_factory (bz_state_info_get_default ());
+  item         = gtk_string_object_new (parts[1]);
+  parent_group = bz_application_map_factory_convert_one (factory, item);
+
+  if (parent_group == NULL)
+    return dex_future_new_for_boolean (TRUE);
+
+  g_clear_object (&self->parent_ui_entry);
+  self->parent_ui_entry = bz_entry_group_dup_ui_entry (parent_group);
+
+  if (self->parent_ui_entry == NULL)
+    return dex_future_new_for_boolean (TRUE);
+
+  if (bz_result_get_resolved (self->parent_ui_entry))
+    {
+      g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PARENT_UI_ENTRY]);
+    }
+  else
+    {
+      g_autoptr (DexFuture) parent_future = NULL;
+      GWeakRef *parent_wr                 = NULL;
+
+      parent_future = bz_result_dup_future (self->parent_ui_entry);
+      parent_wr     = bz_track_weak (self);
+      parent_future = dex_future_then (
+          parent_future,
+          (DexFutureCallback) on_parent_ui_entry_resolved,
+          parent_wr,
+          bz_weak_release);
+      dex_clear (&self->parent_ui_future);
+      self->parent_ui_future = g_steal_pointer (&parent_future);
+    }
+
+  return dex_future_new_for_boolean (TRUE);
+}
+
+static void
+set_selected_group (BzAddonsDialog *self,
+                    BzEntryGroup   *group)
+{
+  dex_clear (&self->selected_ui_future);
+  dex_clear (&self->parent_ui_future);
+  g_clear_object (&self->selected_group);
+  g_clear_object (&self->selected_ui_entry);
+  g_clear_object (&self->parent_ui_entry);
+
+  gtk_toggle_button_set_active (self->description_toggle, FALSE);
+
+  if (group == NULL)
+    return;
+
+  self->selected_group    = g_object_ref (group);
+  self->selected_ui_entry = bz_entry_group_dup_ui_entry (group);
+
+  if (self->selected_ui_entry == NULL)
+    goto notify;
+
+  if (bz_result_get_resolved (self->selected_ui_entry))
+    {
+      g_autoptr (BzEntry) entry           = NULL;
+      g_autoptr (DexFuture) object_future = NULL;
+      GWeakRef *wr                        = NULL;
+
+      entry         = g_object_ref (bz_result_get_object (self->selected_ui_entry));
+      object_future = dex_future_new_for_object (entry);
+      wr            = bz_track_weak (self);
+      dex_unref (on_selected_ui_entry_resolved (object_future, wr));
+      bz_weak_release (wr);
+    }
+  else
+    {
+      g_autoptr (DexFuture) ui_future = NULL;
+      GWeakRef *wr                    = NULL;
+
+      ui_future = bz_result_dup_future (self->selected_ui_entry);
+      wr        = bz_track_weak (self);
+      ui_future = dex_future_then (
+          ui_future,
+          (DexFutureCallback) on_selected_ui_entry_resolved,
+          wr,
+          bz_weak_release);
+      self->selected_ui_future = g_steal_pointer (&ui_future);
+    }
+
+notify:
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SELECTED_GROUP]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SELECTED_UI_ENTRY]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PARENT_UI_ENTRY]);
+}
+
+static void
+tile_activated_cb (BzAddonTile *tile)
+{
+  BzAddonsDialog *self  = NULL;
+  BzEntryGroup   *group = NULL;
+
+  self = BZ_ADDONS_DIALOG (gtk_widget_get_ancestor (GTK_WIDGET (tile), BZ_TYPE_ADDONS_DIALOG));
+  if (self == NULL)
+    return;
+
+  group = bz_addon_tile_get_group (tile);
+  if (group == NULL)
+    return;
+
+  set_selected_group (self, group);
+
+  adw_navigation_view_push_by_tag (self->navigation_view, "full-view");
+}
+
+static int
+sort_func (BzEntryGroup   *a,
+           BzEntryGroup   *b,
+           BzAddonsDialog *self)
+{
+  const char *desc_a = NULL;
+  const char *desc_b = NULL;
+  gboolean    has_a  = FALSE;
+  gboolean    has_b  = FALSE;
+  int         result = 0;
+
+  desc_a = bz_entry_group_get_description (a);
+  desc_b = bz_entry_group_get_description (b);
+  has_a  = desc_a != NULL && *desc_a != '\0';
+  has_b  = desc_b != NULL && *desc_b != '\0';
+  if (has_a != has_b)
+    result = has_b - has_a;
+  else
+    result = g_utf8_collate (bz_entry_group_get_title (a),
+                             bz_entry_group_get_title (b));
+
+  return result;
 }
