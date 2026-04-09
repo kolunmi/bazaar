@@ -117,6 +117,15 @@ bge_wdgt_spec_add_widget_height_source_value (BgeWdgtSpec *self,
                                               GError     **error);
 
 gboolean
+bge_wdgt_spec_add_track_transition_source_value (BgeWdgtSpec *self,
+                                                 const char  *name,
+                                                 const char  *src,
+                                                 const char  *damping_ratio,
+                                                 const char  *mass,
+                                                 const char  *stiffness,
+                                                 GError     **error);
+
+gboolean
 bge_wdgt_spec_add_special_source_value (BgeWdgtSpec        *self,
                                         const char         *name,
                                         BgeWdgtSpecialValue kind,

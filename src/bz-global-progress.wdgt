@@ -18,6 +18,8 @@ defwidget "Global Progress Widget" {
   var opacity : "gdouble";
   var ww : "gdouble";
 
+  var animated-progress : "gdouble";
+
   init {
     measure -1, ww, -1, -1;
 
@@ -29,6 +31,9 @@ defwidget "Global Progress Widget" {
     set bg = #child/(""("global-progress-bg"));
     allocate bg bg-w, bg-h, #(translate(#GraphenePoint(bg-x, bg-y)););
 
+    set animated-progress = #transition(state:transaction-manager:current-progress,
+                                        1.1, 0.1, 10.0);
+    
     snapshot {
       with opacity(opacity) {
         with rounded-clip(
@@ -116,8 +121,7 @@ defwidget "Global Progress Widget" {
   state "fraction" {
     set fg-x = #eval(#(%height%)*0.1);
     set fg-y = #eval(#(%height%)*0.1);
-    set fg-w = #eval((#(%width%)-#(%height%)*0.2)
-                     *#(state:transaction-manager:current-progress));
+    set fg-w = #eval((#(%width%)-#(%height%)*0.2) * #(animated-progress));
     set fg-h = #eval(#(%height%)*0.8);
 
     set bg-x = 0.0;
