@@ -5789,15 +5789,15 @@ expression_adjust_state_transition (BgeWdgtRenderer       *this,
 static double
 expression_adjust_track_transition (BgeWdgtRenderer            *this,
                                     double                      in,
+                                    double                      damping_ratio,
+                                    double                      mass,
+                                    double                      stiffness,
                                     double                      notifier,
                                     TrackTransitionClosureData *data)
 {
-  guint    idx           = 0;
-  gboolean registered    = FALSE;
-  double   damping_ratio = 0.0;
-  double   mass          = 0.0;
-  double   stiffness     = 0.0;
-  double   damping       = 0.0;
+  guint    idx        = 0;
+  gboolean registered = FALSE;
+  double   damping    = 0.0;
 
   g_assert (data->value->type == G_TYPE_DOUBLE);
 
@@ -5805,25 +5805,6 @@ expression_adjust_track_transition (BgeWdgtRenderer            *this,
   if (!registered)
     g_ptr_array_add (this->track_transitions,
                      track_transition_closure_data_ref (data));
-
-  damping_ratio = resolve_value_double (
-      this,
-      data->value->track_transition.spring.damping_ratio,
-      this->active_instance != NULL
-          ? this->active_instance
-          : this->init_instance);
-  mass = resolve_value_double (
-      this,
-      data->value->track_transition.spring.mass,
-      this->active_instance != NULL
-          ? this->active_instance
-          : this->init_instance);
-  stiffness = resolve_value_double (
-      this,
-      data->value->track_transition.spring.stiffness,
-      this->active_instance != NULL
-          ? this->active_instance
-          : this->init_instance);
 
   damping = damping_ratio *
             (/* critical damping */
@@ -6032,6 +6013,9 @@ ensure_expressions (BgeWdgtRenderer   *self,
         g_autoptr (BgeWdgtNotifier) notifier_object         = NULL;
         GtkExpression *notifier_constant                    = NULL;
         GtkExpression *notify_expression                    = NULL;
+        GtkExpression *damping_ratio_expression             = NULL;
+        GtkExpression *mass_expression                      = NULL;
+        GtkExpression *stiffness_expression                 = NULL;
         g_autoptr (TrackTransitionClosureData) closure_data = NULL;
 
         notifier_object   = g_object_new (BGE_TYPE_WDGT_NOTIFIER, NULL);
@@ -6039,6 +6023,13 @@ ensure_expressions (BgeWdgtRenderer   *self,
             BGE_TYPE_WDGT_NOTIFIER, notifier_object);
         notify_expression = gtk_property_expression_new_for_pspec (
             notifier_constant, notifier_props[NOTIFIER_PROP_VALUE]);
+
+        damping_ratio_expression = ensure_expressions (
+            self, value->track_transition.spring.damping_ratio, state, instance);
+        mass_expression = ensure_expressions (
+            self, value->track_transition.spring.mass, state, instance);
+        stiffness_expression = ensure_expressions (
+            self, value->track_transition.spring.stiffness, state, instance);
 
         closure_data           = track_transition_closure_data_new ();
         closure_data->value    = value_data_ref (value);
@@ -6049,8 +6040,8 @@ ensure_expressions (BgeWdgtRenderer   *self,
             self, value->track_transition.src, state, instance);
         expression = gtk_cclosure_expression_new (
             value->type,
-            bge_marshal_DOUBLE__DOUBLE_DOUBLE,
-            2, (GtkExpression *[]){ expression, notify_expression },
+            bge_marshal_DOUBLE__DOUBLE_DOUBLE_DOUBLE_DOUBLE_DOUBLE,
+            5, (GtkExpression *[]){ expression, damping_ratio_expression, mass_expression, stiffness_expression, notify_expression },
             G_CALLBACK (expression_adjust_track_transition),
             track_transition_closure_data_ref (closure_data),
             track_transition_closure_data_unref_closure);
