@@ -1,0 +1,72 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $BzSearchFilterPopover: Gtk.Popover {
+  child: ScrolledWindow {
+    propagate-natural-height: true;
+    propagate-natural-width: true;
+
+    child: Box {
+      orientation: vertical;
+      spacing: 12;
+      margin-top: 12;
+      margin-bottom: 12;
+      margin-start: 12;
+      margin-end: 12;
+
+      Label {
+        label: _("Filters");
+        halign: start;
+
+        styles [
+          "heading",
+        ]
+      }
+
+      Adw.WrapBox {
+        justify: fill;
+        child-spacing: 6;
+        line-spacing: 6;
+        natural-line-length: 320;
+        justify-last-line: true;
+
+        Button verified_button {
+          name: "verified";
+          label: _("_Verified");
+          clicked => $on_filter_button_clicked();
+          use-underline: true;
+        }
+
+        Button free_button {
+          name: "free";
+          label: _("_Free/Open");
+          clicked => $on_filter_button_clicked();
+          use-underline: true;
+        }
+
+        Button non_eol_button {
+          name: "non-eol";
+          label: _("Non-_EOL");
+          clicked => $on_filter_button_clicked();
+          use-underline: true;
+        }
+      }
+
+      Label {
+        label: _("Categories");
+        halign: start;
+
+        styles [
+          "heading",
+        ]
+      }
+
+      Adw.WrapBox wrap_box {
+        justify: fill;
+        child-spacing: 6;
+        line-spacing: 6;
+        natural-line-length: 320;
+      }
+    };
+  };
+}

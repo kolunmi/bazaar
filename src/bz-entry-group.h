@@ -102,6 +102,9 @@ gboolean
 bz_entry_group_has_category (BzEntryGroup *self,
                              const char   *name);
 
+BzCategoryFlags
+bz_entry_group_get_categories (BzEntryGroup *self);
+
 int
 bz_entry_group_get_content_age_rating (BzEntryGroup *self);
 
