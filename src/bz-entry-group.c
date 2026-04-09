@@ -739,6 +739,13 @@ bz_entry_group_has_category (BzEntryGroup *self,
   return bz_category_flags_has_name (self->categories, name);
 }
 
+BzCategoryFlags
+bz_entry_group_get_categories (BzEntryGroup *self)
+{
+  g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), BZ_CATEGORY_FLAGS_NONE);
+  return self->categories;
+}
+
 int
 bz_entry_group_get_content_age_rating (BzEntryGroup *self)
 {
