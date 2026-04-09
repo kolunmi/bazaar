@@ -5150,6 +5150,7 @@ regenerate (BgeWdgtRenderer *self)
   g_ptr_array_set_size (self->children, 0);
   g_hash_table_remove_all (self->allocations);
   g_ptr_array_set_size (self->nonchildren, 0);
+  g_ptr_array_set_size (self->track_transitions, 0);
 
   g_clear_pointer (&self->last_state, state_data_unref);
   g_clear_pointer (&self->last_instance, state_instance_data_unref);
