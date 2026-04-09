@@ -222,6 +222,14 @@ static DexFuture *
 watch_backend_notifs_then_loop_cb (DexFuture *future,
                                    GWeakRef  *wr);
 
+static BzEntryGroup *
+ensure_group_and_add (BzApplication *self,
+                      const char    *id,
+                      BzEntry       *entry,
+                      BzEntry       *eol_runtime,
+                      gboolean       ignore_eol,
+                      gboolean       installed);
+
 static void
 fiber_replace_entry (BzApplication *self,
                      BzEntry       *entry);

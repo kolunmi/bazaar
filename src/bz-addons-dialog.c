@@ -621,10 +621,11 @@ set_selected_group (BzAddonsDialog *self,
 
   if (bz_result_get_resolved (self->selected_ui_entry))
     {
-      g_autoptr (BzEntry) entry           = g_object_ref (bz_result_get_object (self->selected_ui_entry));
+      g_autoptr (BzEntry) entry           = NULL;
       g_autoptr (DexFuture) object_future = NULL;
       GWeakRef *wr                        = NULL;
 
+      entry         = g_object_ref (bz_result_get_object (self->selected_ui_entry));
       object_future = dex_future_new_for_object (entry);
       wr            = bz_track_weak (self);
       dex_unref (on_selected_ui_entry_resolved (object_future, wr));
