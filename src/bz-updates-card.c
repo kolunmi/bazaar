@@ -86,9 +86,9 @@ static void
 on_version_history_cb (GtkButton *button,
                        BzEntry   *entry)
 {
-  GtkRoot    *root    = NULL;
-  GListModel *history = NULL;
-  GtkWidget  *dialog  = NULL;
+  GtkRoot *root                  = NULL;
+  g_autoptr (GListModel) history = NULL;
+  GtkWidget *dialog              = NULL;
 
   root = gtk_widget_get_root (GTK_WIDGET (button));
   if (root == NULL)
@@ -97,21 +97,20 @@ on_version_history_cb (GtkButton *button,
   g_object_get (entry, "version-history", &history, NULL);
   dialog = bz_releases_dialog_new (history, NULL);
   adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (root));
-  g_clear_object (&history);
 }
 
 static GtkWidget *
 build_app_row (BzEntry       *entry,
                BzUpdatesCard *self)
 {
-  AdwActionRow *row            = NULL;
-  GtkWidget    *icon           = NULL;
-  GtkWidget    *history_button = NULL;
-  GtkWidget    *update_button  = NULL;
-  GdkPaintable *paintable      = NULL;
-  GListModel   *history        = NULL;
-  const char   *installed_ver  = NULL;
-  const char   *new_ver        = NULL; // This will probably the same as the installed version if using cache...
+  AdwActionRow *row              = NULL;
+  GtkWidget    *icon             = NULL;
+  GtkWidget    *history_button   = NULL;
+  GtkWidget    *update_button    = NULL;
+  GdkPaintable *paintable        = NULL;
+  g_autoptr (GListModel) history = NULL;
+  g_autofree char *installed_ver = NULL;
+  const char      *new_ver       = NULL; // This will probably the same as the installed version if using cache...
 
   row = ADW_ACTION_ROW (adw_action_row_new ());
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
@@ -166,9 +165,6 @@ build_app_row (BzEntry       *entry,
                          g_object_ref (entry), (GClosureNotify) g_object_unref,
                          0);
   adw_action_row_add_suffix (row, update_button);
-
-  g_clear_object (&history);
-
   return GTK_WIDGET (row);
 }
 
