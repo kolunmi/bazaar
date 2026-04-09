@@ -54,6 +54,7 @@ typedef enum
   VALUE_TRANSFORM,
   VALUE_CLOSURE,
   VALUE_COERCION,
+  VALUE_TRACK_TRANSITION,
   VALUE_SPECIAL,
   VALUE_VARIABLE,
   VALUE_REFERENCE_OBJECT,
@@ -131,6 +132,16 @@ BGE_DEFINE_DATA (
           gpointer        user_data;
           GDestroyNotify  destroy_user_data;
         } closure;
+        struct
+        {
+          ValueData *src;
+          struct
+          {
+            ValueData *damping_ratio;
+            ValueData *mass;
+            ValueData *stiffness;
+          } spring;
+        } track_transition;
         BgeWdgtSpecialValue special;
         struct
         {
@@ -183,6 +194,12 @@ deinit_value (gpointer ptr)
       break;
     case VALUE_COERCION:
       g_clear_pointer (&value->coercion.value, value_data_unref);
+      break;
+    case VALUE_TRACK_TRANSITION:
+      g_clear_pointer (&value->track_transition.src, value_data_unref);
+      g_clear_pointer (&value->track_transition.spring.damping_ratio, value_data_unref);
+      g_clear_pointer (&value->track_transition.spring.mass, value_data_unref);
+      g_clear_pointer (&value->track_transition.spring.stiffness, value_data_unref);
       break;
     case VALUE_SPECIAL:
       break;
@@ -1524,6 +1541,147 @@ bge_wdgt_spec_add_widget_height_source_value (BgeWdgtSpec *self,
   value->name = g_strdup (name);
   value->kind = VALUE_WIDGET_HEIGHT;
   value->type = G_TYPE_DOUBLE;
+
+  g_hash_table_replace (self->values, g_strdup (name), value_data_ref (value));
+  return TRUE;
+}
+
+gboolean
+bge_wdgt_spec_add_track_transition_source_value (BgeWdgtSpec *self,
+                                                 const char  *name,
+                                                 const char  *src,
+                                                 const char  *damping_ratio,
+                                                 const char  *mass,
+                                                 const char  *stiffness,
+                                                 GError     **error)
+{
+  ValueData *src_value                              = NULL;
+  g_autoptr (ValueData) coerced_src_value           = NULL;
+  ValueData *damping_ratio_value                    = NULL;
+  g_autoptr (ValueData) coerced_damping_ratio_value = NULL;
+  ValueData *mass_value                             = NULL;
+  g_autoptr (ValueData) coerced_mass_value          = NULL;
+  ValueData *stiffness_value                        = NULL;
+  g_autoptr (ValueData) coerced_stiffness_value     = NULL;
+  g_autoptr (ValueData) value                       = NULL;
+
+  g_return_val_if_fail (BGE_IS_WDGT_SPEC (self), FALSE);
+  g_return_val_if_fail (name != NULL, FALSE);
+  g_return_val_if_fail (src != NULL, FALSE);
+  g_return_val_if_fail (damping_ratio != NULL, FALSE);
+  g_return_val_if_fail (mass != NULL, FALSE);
+  g_return_val_if_fail (stiffness != NULL, FALSE);
+
+  if (g_hash_table_contains (self->values, name))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' already exists", name);
+      return FALSE;
+    }
+
+  /* TODO clean up type checking process */
+
+  src_value = g_hash_table_lookup (self->values, src);
+  if (src_value == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' is undefined", src);
+      return FALSE;
+    }
+  if (src_value->type != G_TYPE_DOUBLE)
+    {
+      if (check_can_coerce_type (G_TYPE_DOUBLE, src_value->type))
+        coerced_src_value = wrap_coerce_value (self, src_value, src_value->type);
+      else
+        {
+          g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                       "source type %s cannot be transitioned",
+                       g_type_name (src_value->type));
+          return FALSE;
+        }
+    }
+
+  damping_ratio_value = g_hash_table_lookup (self->values, damping_ratio);
+  if (damping_ratio_value == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' is undefined", damping_ratio);
+      return FALSE;
+    }
+  if (damping_ratio_value->type != G_TYPE_DOUBLE)
+    {
+      if (check_can_coerce_type (G_TYPE_DOUBLE, damping_ratio_value->type))
+        coerced_damping_ratio_value = wrap_coerce_value (self, damping_ratio_value, damping_ratio_value->type);
+      else
+        {
+          g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                       "damping ratio must be a double, got type %s",
+                       g_type_name (damping_ratio_value->type));
+          return FALSE;
+        }
+    }
+
+  mass_value = g_hash_table_lookup (self->values, mass);
+  if (mass_value == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' is undefined", mass);
+      return FALSE;
+    }
+  if (mass_value->type != G_TYPE_DOUBLE)
+    {
+      if (check_can_coerce_type (G_TYPE_DOUBLE, mass_value->type))
+        coerced_mass_value = wrap_coerce_value (self, mass_value, mass_value->type);
+      else
+        {
+          g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                       "mass must be a double, got type %s",
+                       g_type_name (mass_value->type));
+          return FALSE;
+        }
+    }
+
+  stiffness_value = g_hash_table_lookup (self->values, stiffness);
+  if (stiffness_value == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' is undefined", stiffness);
+      return FALSE;
+    }
+  if (stiffness_value->type != G_TYPE_DOUBLE)
+    {
+      if (check_can_coerce_type (G_TYPE_DOUBLE, stiffness_value->type))
+        coerced_stiffness_value = wrap_coerce_value (self, stiffness_value, stiffness_value->type);
+      else
+        {
+          g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                       "stiffness must be a double, got type %s",
+                       g_type_name (stiffness_value->type));
+          return FALSE;
+        }
+    }
+
+  value       = value_data_new ();
+  value->name = g_strdup (name);
+  value->kind = VALUE_TRACK_TRANSITION;
+  value->type = G_TYPE_DOUBLE;
+
+  value->track_transition.src =
+      coerced_src_value != NULL
+          ? value_data_ref (coerced_src_value)
+          : value_data_ref (src_value);
+  value->track_transition.spring.damping_ratio =
+      coerced_damping_ratio_value != NULL
+          ? value_data_ref (coerced_damping_ratio_value)
+          : value_data_ref (damping_ratio_value);
+  value->track_transition.spring.mass =
+      coerced_mass_value != NULL
+          ? value_data_ref (coerced_mass_value)
+          : value_data_ref (mass_value);
+  value->track_transition.spring.stiffness =
+      coerced_stiffness_value != NULL
+          ? value_data_ref (coerced_stiffness_value)
+          : value_data_ref (stiffness_value);
 
   g_hash_table_replace (self->values, g_strdup (name), value_data_ref (value));
   return TRUE;
@@ -4168,6 +4326,7 @@ struct _BgeWdgtRenderer
   GHashTable *allocations;
   GPtrArray  *nonchildren;
   GHashTable *state_instances;
+  GPtrArray  *track_transitions;
 
   GPtrArray *bindings;
   GPtrArray *watches;
@@ -4229,6 +4388,15 @@ BGE_DEFINE_DATA (
     BGE_RELEASE_DATA (height, value_data_unref);
     BGE_RELEASE_DATA (transform, value_data_unref))
 
+typedef struct
+{
+  double velocity;
+  double est_duration;
+  double cache_damping_ratio;
+  double cache_mass;
+  double cache_stiffness;
+} SpringCache;
+
 BGE_DEFINE_DATA (
     transition_instance,
     TransitionInstance,
@@ -4236,14 +4404,7 @@ BGE_DEFINE_DATA (
       double           value;
       double           elapsed;
       BgeWdgtNotifier *notifier;
-      struct
-      {
-        double velocity;
-        double est_duration;
-        double cache_damping_ratio;
-        double cache_mass;
-        double cache_stiffness;
-      } spring;
+      SpringCache      spring;
     },
     BGE_RELEASE_DATA (notifier, g_object_unref))
 
@@ -4257,7 +4418,24 @@ BGE_DEFINE_DATA (
     },
     BGE_RELEASE_DATA (state, state_data_unref);
     BGE_RELEASE_DATA (instance, state_instance_data_unref);
-    BGE_RELEASE_DATA (value, value_data_unref))
+    BGE_RELEASE_DATA (value, value_data_unref));
+
+BGE_DEFINE_DATA (
+    track_transition_closure,
+    TrackTransitionClosure,
+    {
+      ValueData       *value;
+      GTimer          *timer;
+      BgeWdgtNotifier *notifier;
+      double           elapsed;
+      double           current;
+      double           target;
+      double           last;
+      SpringCache      spring;
+    },
+    BGE_RELEASE_DATA (value, value_data_unref);
+    BGE_RELEASE_DATA (notifier, g_object_unref);
+    BGE_RELEASE_DATA (timer, g_timer_destroy));
 
 static void
 regenerate (BgeWdgtRenderer *self);
@@ -4293,6 +4471,11 @@ static gpointer
 resolve_value_boxed_dup (BgeWdgtRenderer   *self,
                          ValueData         *value,
                          StateInstanceData *instance);
+
+static gpointer
+resolve_value_object_dup (BgeWdgtRenderer   *self,
+                          ValueData         *value,
+                          StateInstanceData *instance);
 
 static void
 discard_binding (gpointer ptr);
@@ -4338,6 +4521,7 @@ bge_wdgt_renderer_dispose (GObject *object)
   g_clear_pointer (&self->allocations, g_hash_table_unref);
   g_clear_pointer (&self->nonchildren, g_ptr_array_unref);
   g_clear_pointer (&self->state_instances, g_hash_table_unref);
+  g_clear_pointer (&self->track_transitions, g_ptr_array_unref);
 
   g_clear_pointer (&self->bindings, g_ptr_array_unref);
   g_clear_pointer (&self->watches, g_ptr_array_unref);
@@ -4670,11 +4854,28 @@ tick_cb (BgeWdgtRenderer *self,
          GdkFrameClock   *frame_clock,
          gpointer         user_data)
 {
-  GHashTableIter iter         = { 0 };
-  double         elapsed      = 0.0;
-  gboolean       finished_all = TRUE;
+  GHashTableIter iter                           = { 0 };
+  double         elapsed                        = 0.0;
+  gboolean       finished_all_state_transitions = TRUE;
 
   self->had_tick_since_state_switch = TRUE;
+
+  for (guint i = 0; i < self->track_transitions->len;)
+    {
+      TrackTransitionClosureData *data = NULL;
+
+      data    = g_ptr_array_index (self->track_transitions, i);
+      elapsed = g_timer_elapsed (data->timer, NULL);
+
+      g_object_notify_by_pspec (
+          G_OBJECT (data->notifier),
+          notifier_props[NOTIFIER_PROP_VALUE]);
+
+      if (elapsed <= data->spring.est_duration)
+        i++;
+      else
+        g_ptr_array_remove_index (self->track_transitions, i);
+    }
 
   if (self->spec == NULL ||
       self->active_state == NULL ||
@@ -4714,19 +4915,19 @@ tick_cb (BgeWdgtRenderer *self,
         {
         case TRANSITION_EASE:
           if (elapsed <= transition->ease.seconds)
-            finished_all = FALSE;
+            finished_all_state_transitions = FALSE;
           break;
         case TRANSITION_SPRING:
           if (transition_instance->spring.est_duration < 0.0 ||
               elapsed <= transition_instance->spring.est_duration)
-            finished_all = FALSE;
+            finished_all_state_transitions = FALSE;
           break;
         default:
           g_assert_not_reached ();
         }
     }
 
-  if (finished_all)
+  if (finished_all_state_transitions)
     {
       g_clear_pointer (&self->last_state, state_data_unref);
       g_clear_pointer (&self->last_instance, state_instance_data_unref);
@@ -4753,6 +4954,8 @@ bge_wdgt_renderer_init (BgeWdgtRenderer *self)
   self->state_instances = g_hash_table_new_full (
       g_direct_hash, g_direct_equal,
       state_data_unref, state_instance_data_unref);
+  self->track_transitions = g_ptr_array_new_with_free_func (
+      track_transition_closure_data_unref);
 
   self->bindings = g_ptr_array_new_with_free_func (discard_binding);
   self->watches  = g_ptr_array_new_with_free_func (discard_watch);
@@ -4909,6 +5112,29 @@ bge_wdgt_renderer_set_state_take (BgeWdgtRenderer *self,
   g_object_notify_by_pspec (G_OBJECT (self), renderer_props[RENDERER_PROP_STATE]);
 }
 
+gpointer
+bge_wdgt_renderer_lookup_object (BgeWdgtRenderer *self,
+                                 const char      *name)
+{
+  ValueData *value = NULL;
+
+  g_return_val_if_fail (BGE_IS_WDGT_RENDERER (self), NULL);
+  g_return_val_if_fail (name != NULL, NULL);
+
+  if (self->spec == NULL ||
+      self->active_instance == NULL)
+    return NULL;
+
+  value = g_hash_table_lookup (self->spec->values, name);
+  if (value == NULL)
+    return NULL;
+
+  if (!g_type_is_a (value->type, G_TYPE_OBJECT))
+    return NULL;
+
+  return resolve_value_object_dup (self, value, self->active_instance);
+}
+
 static void
 regenerate (BgeWdgtRenderer *self)
 {
@@ -4924,6 +5150,7 @@ regenerate (BgeWdgtRenderer *self)
   g_ptr_array_set_size (self->children, 0);
   g_hash_table_remove_all (self->allocations);
   g_ptr_array_set_size (self->nonchildren, 0);
+  g_ptr_array_set_size (self->track_transitions, 0);
 
   g_clear_pointer (&self->last_state, state_data_unref);
   g_clear_pointer (&self->last_instance, state_instance_data_unref);
@@ -5407,10 +5634,10 @@ expression_get_reference_object (BgeWdgtRenderer *this,
 }
 
 static double
-expression_adjust_transition (BgeWdgtRenderer       *this,
-                              double                 in,
-                              double                 notifier,
-                              TransitionClosureData *data)
+expression_adjust_state_transition (BgeWdgtRenderer       *this,
+                                    double                 in,
+                                    double                 notifier,
+                                    TransitionClosureData *data)
 {
   gboolean                result                   = FALSE;
   TransitionData         *transition               = NULL;
@@ -5558,6 +5785,74 @@ expression_adjust_transition (BgeWdgtRenderer       *this,
 
   transition_instance->value = interpolated_number;
   return interpolated_number;
+}
+
+static double
+expression_adjust_track_transition (BgeWdgtRenderer            *this,
+                                    double                      in,
+                                    double                      damping_ratio,
+                                    double                      mass,
+                                    double                      stiffness,
+                                    double                      notifier,
+                                    TrackTransitionClosureData *data)
+{
+  guint    idx        = 0;
+  gboolean registered = FALSE;
+  double   damping    = 0.0;
+
+  g_assert (data->value->type == G_TYPE_DOUBLE);
+
+  registered = g_ptr_array_find (this->track_transitions, data, &idx);
+  if (!registered)
+    g_ptr_array_add (this->track_transitions,
+                     track_transition_closure_data_ref (data));
+
+  damping = damping_ratio *
+            (/* critical damping */
+             2 * sqrt (mass * stiffness));
+
+  if (!registered ||
+      data->target != in ||
+      damping_ratio != data->spring.cache_damping_ratio ||
+      mass != data->spring.cache_mass ||
+      stiffness != data->spring.cache_stiffness)
+    {
+      data->target  = in;
+      data->last    = data->current;
+      data->elapsed = 0.0;
+      g_timer_start (data->timer);
+
+      data->spring.est_duration = spring_calculate_duration (
+          damping,
+          mass,
+          stiffness,
+          data->last,
+          data->target,
+          FALSE);
+
+      data->spring.cache_damping_ratio = damping_ratio;
+      data->spring.cache_mass          = mass;
+      data->spring.cache_stiffness     = stiffness;
+    }
+  else
+    data->elapsed = g_timer_elapsed (data->timer, NULL);
+
+  if (data->elapsed >= data->spring.est_duration)
+    {
+      data->current = data->target;
+      data->last    = data->target;
+    }
+  else
+    data->current = spring_oscillate (
+        damping,
+        mass,
+        stiffness,
+        data->last,
+        data->target,
+        data->elapsed,
+        &data->spring.velocity);
+
+  return data->current;
 }
 
 static GskTransform *
@@ -5712,6 +6007,45 @@ ensure_expressions (BgeWdgtRenderer   *self,
             G_CALLBACK (expression_coerce_type),
             GSIZE_TO_POINTER (value->type),
             NULL);
+      }
+      break;
+    case VALUE_TRACK_TRANSITION:
+      {
+        g_autoptr (BgeWdgtNotifier) notifier_object         = NULL;
+        GtkExpression *notifier_constant                    = NULL;
+        GtkExpression *notify_expression                    = NULL;
+        GtkExpression *damping_ratio_expression             = NULL;
+        GtkExpression *mass_expression                      = NULL;
+        GtkExpression *stiffness_expression                 = NULL;
+        g_autoptr (TrackTransitionClosureData) closure_data = NULL;
+
+        notifier_object   = g_object_new (BGE_TYPE_WDGT_NOTIFIER, NULL);
+        notifier_constant = gtk_constant_expression_new (
+            BGE_TYPE_WDGT_NOTIFIER, notifier_object);
+        notify_expression = gtk_property_expression_new_for_pspec (
+            notifier_constant, notifier_props[NOTIFIER_PROP_VALUE]);
+
+        damping_ratio_expression = ensure_expressions (
+            self, value->track_transition.spring.damping_ratio, state, instance);
+        mass_expression = ensure_expressions (
+            self, value->track_transition.spring.mass, state, instance);
+        stiffness_expression = ensure_expressions (
+            self, value->track_transition.spring.stiffness, state, instance);
+
+        closure_data           = track_transition_closure_data_new ();
+        closure_data->value    = value_data_ref (value);
+        closure_data->timer    = g_timer_new ();
+        closure_data->notifier = g_object_ref (notifier_object);
+
+        expression = ensure_expressions (
+            self, value->track_transition.src, state, instance);
+        expression = gtk_cclosure_expression_new (
+            value->type,
+            bge_marshal_DOUBLE__DOUBLE_DOUBLE_DOUBLE_DOUBLE_DOUBLE,
+            5, (GtkExpression *[]){ expression, damping_ratio_expression, mass_expression, stiffness_expression, notify_expression },
+            G_CALLBACK (expression_adjust_track_transition),
+            track_transition_closure_data_ref (closure_data),
+            track_transition_closure_data_unref_closure);
       }
       break;
     case VALUE_COMPONENT:
@@ -5885,7 +6219,7 @@ ensure_expressions (BgeWdgtRenderer   *self,
           value->type,
           bge_marshal_DOUBLE__DOUBLE_DOUBLE,
           2, (GtkExpression *[]){ expression, notify_expression },
-          G_CALLBACK (expression_adjust_transition),
+          G_CALLBACK (expression_adjust_state_transition),
           transition_closure_data_ref (closure_data),
           transition_closure_data_unref_closure);
     }
@@ -6003,6 +6337,7 @@ set_value (BgeWdgtRenderer   *self,
                   case VALUE_PROPERTY:
                   case VALUE_REFERENCE_OBJECT:
                   case VALUE_SPECIAL:
+                  case VALUE_TRACK_TRANSITION:
                   case VALUE_TRANSFORM:
                   case VALUE_VARIABLE:
                   case VALUE_WIDGET_HEIGHT:
@@ -6057,6 +6392,7 @@ set_value (BgeWdgtRenderer   *self,
           case VALUE_PROPERTY:
           case VALUE_REFERENCE_OBJECT:
           case VALUE_SPECIAL:
+          case VALUE_TRACK_TRANSITION:
           case VALUE_TRANSFORM:
           case VALUE_VARIABLE:
           case VALUE_WIDGET_HEIGHT:
@@ -6079,6 +6415,7 @@ set_value (BgeWdgtRenderer   *self,
     case VALUE_OBJECT:
     case VALUE_REFERENCE_OBJECT:
     case VALUE_SPECIAL:
+    case VALUE_TRACK_TRANSITION:
     case VALUE_TRANSFORM:
     case VALUE_VARIABLE:
     case VALUE_WIDGET_HEIGHT:
@@ -6168,6 +6505,27 @@ resolve_value_boxed_dup (BgeWdgtRenderer   *self,
       self,
       &resolved);
   ret = g_value_dup_boxed (&resolved);
+  g_value_unset (&resolved);
+
+  return ret;
+}
+
+static gpointer
+resolve_value_object_dup (BgeWdgtRenderer   *self,
+                          ValueData         *value,
+                          StateInstanceData *instance)
+{
+  GtkExpression *expression = NULL;
+  GValue         resolved   = G_VALUE_INIT;
+  gpointer       ret        = NULL;
+
+  expression = g_hash_table_lookup (instance->expressions, value);
+  g_assert (expression != NULL);
+  gtk_expression_evaluate (
+      expression,
+      self,
+      &resolved);
+  ret = g_value_dup_object (&resolved);
   g_value_unset (&resolved);
 
   return ret;

@@ -1277,7 +1277,45 @@ parse_args (const char        *p,
 
           g_strv_builder_take (builder, g_steal_pointer (&key));
           n_args++;
+          need_comma = TRUE;
+        }
+      else if (g_strcmp0 (token, "#transition") == 0)
+        {
+          g_autofree char *key           = NULL;
+          guint            n_spec_values = 0;
+          g_auto (GStrv) spec_values     = NULL;
 
+          GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "(");
+          p = parse_args (p, spec, state, NULL, macro_replacements, n_anon_vals, type_hints, NULL,
+                          (GType[]){ G_TYPE_DOUBLE, G_TYPE_DOUBLE, G_TYPE_DOUBLE, G_TYPE_DOUBLE }, 4,
+                          &spec_values, NULL, &n_spec_values, ARGS_PARSE_PARENS, &local_error);
+          RETURN_ERROR_UNLESS (p != NULL);
+          if (n_spec_values != 4)
+            {
+              g_set_error (
+                  error,
+                  G_IO_ERROR,
+                  G_IO_ERROR_UNKNOWN,
+                  "#transition() needs 4 arguments "
+                  "(variable, damping-ratio, mass, stiffness), "
+                  "got %u",
+                  n_spec_values);
+              return NULL;
+            }
+
+          key    = make_anon_name ((*n_anon_vals)++);
+          result = bge_wdgt_spec_add_track_transition_source_value (
+              spec,
+              key,
+              spec_values[0],
+              spec_values[1],
+              spec_values[2],
+              spec_values[3],
+              &local_error);
+          RETURN_ERROR_UNLESS (result);
+
+          g_strv_builder_take (builder, g_steal_pointer (&key));
+          n_args++;
           need_comma = TRUE;
         }
       else

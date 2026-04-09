@@ -78,6 +78,11 @@ bge_wdgt_renderer_set_state_take (BgeWdgtRenderer *self,
 
 #define bge_wdgt_renderer_set_state_take_printf(self, ...) bge_wdgt_renderer_set_state_take (self, g_strdup_printf (__VA_ARGS__))
 
+BGE_AVAILABLE_IN_ALL
+gpointer
+bge_wdgt_renderer_lookup_object (BgeWdgtRenderer *self,
+                                 const char      *name);
+
 G_END_DECLS
 
 /* End of bge-wdgt-renderer.h */
