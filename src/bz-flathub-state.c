@@ -807,15 +807,13 @@ initialize_fiber (GWeakRef *wr)
   {
     static const char *categories[] = {
       "audiovideo", "development", "education", "game", "graphics",
-      "network", "office", "science", "system", "utility", NULL
+      "network", "office", "science", "system", "utility"
     };
     g_autoptr (GPtrArray) category_futures = NULL;
-    guint length                           = 0;
 
     category_futures = g_ptr_array_new_with_free_func (dex_unref);
-    length           = g_strv_length ((GStrv) categories);
 
-    for (guint i = 0; i < length; i++)
+    for (guint i = 0; i < G_N_ELEMENTS (categories); i++)
       {
         g_autofree char *request     = NULL;
         g_autoptr (DexFuture) future = NULL;
@@ -834,10 +832,10 @@ initialize_fiber (GWeakRef *wr)
         g_ptr_array_add (category_futures, dex_ref (future));
       }
 
-    for (guint i = 0; i < length; i++)
+    for (guint i = 0; i < G_N_ELEMENTS (categories); i++)
       {
-        DexFuture  *future = NULL;
-        JsonNode   *node   = NULL;
+        DexFuture *future = NULL;
+        JsonNode  *node   = NULL;
 
         future = g_ptr_array_index (category_futures, i);
         node   = GET_BOXED (future);
