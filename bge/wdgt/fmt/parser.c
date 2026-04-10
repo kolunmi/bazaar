@@ -20,6 +20,7 @@
 
 #include <graphene-gobject.h>
 
+#include "../bge-wdgt-spec-private.h"
 #include "bge-marshalers.h"
 #include "parser.h"
 #include "util.h"
@@ -34,6 +35,7 @@
 #define STR_FOREACH   "%FOREACH"
 
 #define STR_VARIABLE          "var"
+#define STR_REFERENCE         "reference"
 #define STR_INIT              "init"
 #define STR_STATE             "state"
 #define STR_DEFAULT_STATE     "state-default"
@@ -41,7 +43,8 @@
 #define STR_TRANSITION        "transition"
 #define STR_TRANSITION_SPRING "transition-spring"
 #define STR_ALLOCATE          "allocate"
-#define STR_SNAPSHOT          "%snapshot"
+#define STR_MEASURE           "measure"
+#define STR_SNAPSHOT          "snapshot"
 
 typedef enum
 {
@@ -175,6 +178,9 @@ make_widget_allocation_name (const char *widget,
                              guint       n);
 
 static char *
+make_widget_measurement_name (guint n);
+
+static char *
 make_anon_name (guint n);
 
 static gint
@@ -194,6 +200,7 @@ bge_wdgt_parse_string (const char *string,
                        GError    **error)
 {
   g_autoptr (GError) local_error            = NULL;
+  gboolean result                           = FALSE;
   g_autoptr (BgeWdgtSpec) spec              = NULL;
   g_autoptr (GHashTable) macro_arrays       = NULL;
   g_autoptr (GHashTable) macro_replacements = NULL;
@@ -256,6 +263,30 @@ bge_wdgt_parse_string (const char *string,
     return NULL;                              \
   }                                           \
   G_STMT_END
+
+  result = bge_wdgt_spec_add_measure_for_size_source_value (
+      spec, "%for-size%", &local_error);
+  RETURN_ERROR_UNLESS (result);
+  g_hash_table_replace (
+      type_hints,
+      g_strdup ("%for-size%"),
+      GSIZE_TO_POINTER (G_TYPE_INT));
+
+  result = bge_wdgt_spec_add_widget_width_source_value (
+      spec, "%width%", &local_error);
+  RETURN_ERROR_UNLESS (result);
+  g_hash_table_replace (
+      type_hints,
+      g_strdup ("%width%"),
+      GSIZE_TO_POINTER (G_TYPE_INT));
+
+  result = bge_wdgt_spec_add_widget_height_source_value (
+      spec, "%height%", &local_error);
+  RETURN_ERROR_UNLESS (result);
+  g_hash_table_replace (
+      type_hints,
+      g_strdup ("%height%"),
+      GSIZE_TO_POINTER (G_TYPE_INT));
 
   for (const char *p = string;
        !IS_EOF (p);)
@@ -337,7 +368,6 @@ bge_wdgt_parse_string (const char *string,
         UNEXPECTED_TOKEN (token);
     }
 
-  bge_wdgt_spec_mark_ready (spec);
   return g_steal_pointer (&spec);
 }
 
@@ -445,6 +475,26 @@ parse_widget_block (const char  *p,
 
           type   = g_type_from_name (type_string);
           result = bge_wdgt_spec_add_variable_value (
+              spec, type, name, &local_error);
+          RETURN_ERROR_UNLESS (result);
+
+          g_hash_table_replace (type_hints,
+                                g_steal_pointer (&name),
+                                GSIZE_TO_POINTER (type));
+        }
+      else if (g_strcmp0 (token, STR_REFERENCE) == 0)
+        {
+          g_autofree char *name        = NULL;
+          g_autofree char *type_string = NULL;
+          GType            type        = 0;
+
+          GET_TOKEN (&name, TOKEN_PARSE_DEFAULT);
+          GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ":");
+          GET_TOKEN (&type_string, TOKEN_PARSE_QUOTED);
+          GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ";");
+
+          type   = g_type_from_name (type_string);
+          result = bge_wdgt_spec_add_reference_object_value (
               spec, type, name, &local_error);
           RETURN_ERROR_UNLESS (result);
 
@@ -677,6 +727,70 @@ parse_widget_block (const char  *p,
                       RETURN_ERROR_UNLESS (result);
                     }
                 }
+              else if (g_strcmp0 (token, STR_MEASURE) == 0)
+                {
+                  guint n_measurement_values        = 0;
+                  g_auto (GStrv) measurement_values = NULL;
+
+                  p = parse_args (p, spec, state_name, NULL, macro_replacements, n_anon_vals, type_hints, NULL,
+                                  (GType[]){ G_TYPE_INT, G_TYPE_INT, G_TYPE_INT, G_TYPE_INT }, 4,
+                                  &measurement_values, NULL, &n_measurement_values,
+                                  ARGS_PARSE_RIGHT_ASSIGN, &local_error);
+                  RETURN_ERROR_UNLESS (p != NULL);
+                  if (n_measurement_values != 4)
+                    {
+                      g_set_error (
+                          error,
+                          G_IO_ERROR,
+                          G_IO_ERROR_UNKNOWN,
+                          "measurement needs 4 values, a "
+                          "minimum width, "
+                          "natural width, "
+                          "minimum height, "
+                          "and "
+                          "natural height, "
+                          "got %u",
+                          n_measurement_values);
+                      return NULL;
+                    }
+
+                  for (guint i = 0; i < n_measurement_values; i++)
+                    {
+                      g_autofree char *measurement_key = NULL;
+
+                      measurement_key = make_widget_measurement_name ((*n_anon_vals)++);
+                      switch (i)
+                        {
+                        case 0:
+                          result = bge_wdgt_spec_add_measure_value (
+                              spec, measurement_key, BGE_WDGT_MEASURE_MINIMUM_WIDTH, &local_error);
+                          break;
+                        case 1:
+                          result = bge_wdgt_spec_add_measure_value (
+                              spec, measurement_key, BGE_WDGT_MEASURE_NATURAL_WIDTH, &local_error);
+                          break;
+                        case 2:
+                          result = bge_wdgt_spec_add_measure_value (
+                              spec, measurement_key, BGE_WDGT_MEASURE_MINIMUM_HEIGHT, &local_error);
+                          break;
+                        case 3:
+                          result = bge_wdgt_spec_add_measure_value (
+                              spec, measurement_key, BGE_WDGT_MEASURE_NATURAL_HEIGHT, &local_error);
+                          break;
+                        default:
+                          g_assert_not_reached ();
+                        }
+                      RETURN_ERROR_UNLESS (result);
+
+                      result = bge_wdgt_spec_set_value (
+                          spec,
+                          state_name,
+                          measurement_key,
+                          measurement_values[i],
+                          &local_error);
+                      RETURN_ERROR_UNLESS (result);
+                    }
+                }
               else
                 UNEXPECTED_TOKEN (token);
             }
@@ -720,6 +834,8 @@ parse_snapshot_block (const char  *p,
         kind = BGE_WDGT_SNAPSHOT_INSTR_APPEND;
       else if (g_strcmp0 (action, "move") == 0)
         kind = BGE_WDGT_SNAPSHOT_INSTR_TRANSFORM;
+      else if (g_strcmp0 (action, "do-child") == 0)
+        kind = BGE_WDGT_SNAPSHOT_INSTR_SNAPSHOT_CHILD;
       else
         UNEXPECTED_TOKEN (action);
 
@@ -728,6 +844,19 @@ parse_snapshot_block (const char  *p,
           result = bge_wdgt_spec_append_snapshot_instr (
               spec, state, BGE_WDGT_SNAPSHOT_INSTR_SAVE,
               "save", NULL, 0, &local_error);
+          RETURN_ERROR_UNLESS (result);
+        }
+      else if (kind == BGE_WDGT_SNAPSHOT_INSTR_SNAPSHOT_CHILD)
+        {
+          p = parse_args (p, spec, state, NULL, macro_replacements,
+                          n_anon_vals, type_hints,
+                          NULL, NULL, 0, &args, NULL, &n_args,
+                          ARGS_PARSE_RIGHT_ASSIGN, &local_error);
+          RETURN_ERROR_UNLESS (p != NULL);
+
+          result = bge_wdgt_spec_append_snapshot_instr (
+              spec, state, BGE_WDGT_SNAPSHOT_INSTR_SNAPSHOT_CHILD,
+              "do-child", (const char *const *) args, n_args, &local_error);
           RETURN_ERROR_UNLESS (result);
         }
       else
@@ -791,7 +920,7 @@ ceil_closure (gpointer this,
               gdouble  x,
               gpointer data)
 {
-  return floor (x);
+  return ceil (x);
 }
 
 static gdouble
@@ -1148,7 +1277,45 @@ parse_args (const char        *p,
 
           g_strv_builder_take (builder, g_steal_pointer (&key));
           n_args++;
+          need_comma = TRUE;
+        }
+      else if (g_strcmp0 (token, "#transition") == 0)
+        {
+          g_autofree char *key           = NULL;
+          guint            n_spec_values = 0;
+          g_auto (GStrv) spec_values     = NULL;
 
+          GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "(");
+          p = parse_args (p, spec, state, NULL, macro_replacements, n_anon_vals, type_hints, NULL,
+                          (GType[]){ G_TYPE_DOUBLE, G_TYPE_DOUBLE, G_TYPE_DOUBLE, G_TYPE_DOUBLE }, 4,
+                          &spec_values, NULL, &n_spec_values, ARGS_PARSE_PARENS, &local_error);
+          RETURN_ERROR_UNLESS (p != NULL);
+          if (n_spec_values != 4)
+            {
+              g_set_error (
+                  error,
+                  G_IO_ERROR,
+                  G_IO_ERROR_UNKNOWN,
+                  "#transition() needs 4 arguments "
+                  "(variable, damping-ratio, mass, stiffness), "
+                  "got %u",
+                  n_spec_values);
+              return NULL;
+            }
+
+          key    = make_anon_name ((*n_anon_vals)++);
+          result = bge_wdgt_spec_add_track_transition_source_value (
+              spec,
+              key,
+              spec_values[0],
+              spec_values[1],
+              spec_values[2],
+              spec_values[3],
+              &local_error);
+          RETURN_ERROR_UNLESS (result);
+
+          g_strv_builder_take (builder, g_steal_pointer (&key));
+          n_args++;
           need_comma = TRUE;
         }
       else
@@ -2063,6 +2230,12 @@ make_widget_allocation_name (const char *widget,
                              guint       n)
 {
   return g_strdup_printf ("allocation@%u(%s)", n, widget);
+}
+
+static char *
+make_widget_measurement_name (guint n)
+{
+  return g_strdup_printf ("measurement@%u", n);
 }
 
 static char *

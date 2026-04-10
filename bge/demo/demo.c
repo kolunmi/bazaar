@@ -53,15 +53,16 @@ main (int argc, char **argv)
 static void
 on_activate (GtkApplication *app)
 {
-  GtkWidget       *window           = NULL;
-  GtkWidget       *root             = NULL;
-  GtkTextBuffer   *buffer           = NULL;
-  BgeWdgtRenderer *wdgt             = NULL;
-  g_autoptr (GtkBuilder) builder    = NULL;
-  g_autoptr (GtkBuilderScope) scope = NULL;
-  g_autoptr (GBytes) wdgt_bytes     = NULL;
-  gsize         wdgt_buffer_size    = 0;
-  gconstpointer wdgt_buffer         = NULL;
+  GtkWidget       *window               = NULL;
+  GtkWidget       *root                 = NULL;
+  GtkTextBuffer   *buffer               = NULL;
+  BgeWdgtRenderer *wdgt                 = NULL;
+  g_autoptr (GtkStringObject) reference = NULL;
+  g_autoptr (GtkBuilder) builder        = NULL;
+  g_autoptr (GtkBuilderScope) scope     = NULL;
+  g_autoptr (GBytes) wdgt_bytes         = NULL;
+  gsize         wdgt_buffer_size        = 0;
+  gconstpointer wdgt_buffer             = NULL;
 
   window = gtk_application_window_new (app);
   gtk_window_set_default_size (GTK_WINDOW (window), 1000, 500);
@@ -74,6 +75,9 @@ on_activate (GtkApplication *app)
   root   = GTK_WIDGET (gtk_builder_get_object (builder, "root"));
   buffer = GTK_TEXT_BUFFER (gtk_builder_get_object (builder, "buffer"));
   wdgt   = BGE_WDGT_RENDERER (gtk_builder_get_object (builder, "wdgt"));
+
+  reference = gtk_string_object_new ("Hello from demo.c!!");
+  bge_wdgt_renderer_set_reference (wdgt, G_OBJECT (reference));
 
   g_signal_connect (
       buffer, "changed",

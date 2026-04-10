@@ -1,88 +1,82 @@
-defarray arr (
-  #GdkRGBA("#3584e4"),
-  #GdkRGBA("#2190a4"),
-  #GdkRGBA("#3a944a"),
-  #GdkRGBA("#c88800"),
-  #GdkRGBA("#ed5b00"),
-  #GdkRGBA("#e62d42"),
-  #GdkRGBA("#d56199"),
-  #GdkRGBA("#9141ac"),
-)
-
 defwidget "My Widget" {
+  reference ref-string : "GtkStringObject";
+
   var t : "BgeWdgtTime";
-  var label : "GtkLabel";
+  var box : "GtkBox";
+
+  var cx : "gdouble";
+  var cy : "gdouble";
+  var w : "gdouble";
+  var h : "gdouble";
+  var corner : "gdouble";
+
+  var x : "gdouble";
+  var y : "gdouble";
 
   init {
     set t = #(notify-msec = 10;);
-    set label = #child/("" ("title-1") valign=center;);
-  }
+    
+    set box = #child/(""("gradient")
+      orientation = vertical;
+      
+      _=#child/GtkLabel(""()
+        margin-start = 10;
+        margin-end = 10;
+        margin-top = 10;
+        margin-bottom = 10;
+        
+        label = ref-string:string;
+        wrap = true;
+      );
+    );
 
-  %FOREACH color, idx, i IN arr {
-    var x@i@ : "gdouble";
-    var y@i@ : "gdouble";
-    var rotate@i@ : "gdouble";
-    var rect-size@i@ : "gdouble";
-    var radius@i@ : "gdouble";
-    var rect@i@ : "GrapheneRect";
-    var corner@i@ : "GrapheneSize";
+    measure 200, 300, 200, 300;
     
-    init {
-      set rect@i@ = #(#eval(-#(rect-size@i@)/2.0),
-                    #eval(-#(rect-size@i@)/2.0),
-                    rect-size@i@, rect-size@i@);
-      set corner@i@ = #(radius@i@, radius@i@);
-    
-      %snapshot {
-        save {
-          move translate(#GraphenePoint(x@i@, y@i@));
-          move rotate(rotate@i@);
-          with rounded-clip(rect@i@, corner@i@, corner@i@, corner@i@, corner@i@) {
-            add linear-gradient(
-              rect@i@,
-              #GraphenePoint(#eval(#(rect-size@i@)), #eval(-#(rect-size@i@))),
-              #GraphenePoint(#eval(-#(rect-size@i@)), #eval(0.0+#(rect-size@i@))),
-              0.0, #GdkRGBA("#6f8396"),
-              1.0, color,);
-          }
-        }
+    set x = #eval(#(cx)-#(w)/2.0);
+    set y = #eval(#(cy)-#(h)/2.0);
+    allocate box w, h,
+                 #(translate(#GraphenePoint(x, y)););
+
+    snapshot {
+      with rounded-clip(
+        #GrapheneRect(x, y, w, h),
+        #GrapheneSize(corner, corner),
+        #GrapheneSize(corner, corner),
+        #GrapheneSize(corner, corner),
+        #GrapheneSize(corner, corner),
+      ) {
+        do-child box;
       }
     }
-    
-    state-default "1" {
-      set label:label = "";
-    
-      set x@i@ = #eval(120.0*floor(1.0+(@i@.0 % 4.0)));
-      transition-spring x@i@ 0.8, 0.1, 20.0;
-      set y@i@ = #eval(120.0*floor(1.0+(@i@.0 / 4.0)));
-      transition-spring y@i@ 0.8, 0.1, 20.0;
-    
-      set rotate@i@ = 0.0;
-      transition-spring rotate@i@ 1.0, 0.1, 10.0;
-    
-      set radius@i@ = 30.0;
-      transition-spring radius@i@ 1.0, 0.1, 10.0;
-    
-      set rect-size@i@ = 110.0;
-      transition-spring rect-size@i@ 1.0, 0.1, 10.0;
-    }
+  }
 
-    state "2" {
-      set label:label = "";
-      
-      set x@i@ = #eval(100.0*(1.0+@i@.0));
-      transition-spring x@i@ 1.2, 0.1, 30.0;
-      set y@i@ = 100.0;
-      transition-spring y@i@ 1.2, 0.1, 30.0;
-    
-      set rotate@i@ = #eval(50.0*sin(#(t:time)));
-      transition-spring rotate@i@ 1.0, 0.1, 10.0;
-    
-      set radius@i@ = 10.0;
-      transition-spring radius@i@ 1.0, 0.1, 10.0;
-    
-      set rect-size@i@ = 60.0;
-      transition-spring rect-size@i@ 1.0, 0.1, 10.0;
-    }
+  state-default "1" {
+    set w = 100.0;
+    set h = 100.0;
+    set corner = 10.0;
+
+    set cx = #eval(30.0*sin(#(t:time)) + #(%width%)/2.0);
+    set cy = #eval(#(%height%)/2.0);
+
+    transition-spring w 1.0, 0.5, 100.0;
+    transition-spring h 1.0, 0.5, 100.0;
+    transition-spring corner 1.0, 0.5, 100.0;
+    transition-spring cx 1.0, 0.5, 100.0;
+    transition-spring cy 1.0, 0.5, 100.0;
+  }
+  
+  state "2" {
+    set w = 200.0;
+    set h = 200.0;
+    set corner = 20.0;
+
+    set cx = #eval(#(%width%)/2.0);
+    set cy = #eval(#(%height%)/2.0);
+
+    transition-spring w 0.9, 0.5, 100.0;
+    transition-spring h 0.9, 0.5, 100.0;
+    transition-spring corner 0.9, 0.5, 100.0;
+    transition-spring cx 0.9, 0.5, 100.0;
+    transition-spring cy 0.9, 0.5, 100.0;
   }
 }

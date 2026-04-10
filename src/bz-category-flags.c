@@ -46,6 +46,42 @@ static const struct
   {              "kde",              BZ_CATEGORY_FLAGS_KDE },
 };
 
+GType
+bz_category_flags_get_type (void)
+{
+  static gsize g_define_type_id = 0;
+
+  if (g_once_init_enter (&g_define_type_id))
+    {
+      static const GFlagsValue values[] = {
+        {             BZ_CATEGORY_FLAGS_NONE,             "BZ_CATEGORY_FLAGS_NONE",             "none" },
+        {       BZ_CATEGORY_FLAGS_AUDIOVIDEO,       "BZ_CATEGORY_FLAGS_AUDIOVIDEO",       "audiovideo" },
+        {      BZ_CATEGORY_FLAGS_DEVELOPMENT,      "BZ_CATEGORY_FLAGS_DEVELOPMENT",      "development" },
+        {        BZ_CATEGORY_FLAGS_EDUCATION,        "BZ_CATEGORY_FLAGS_EDUCATION",        "education" },
+        {             BZ_CATEGORY_FLAGS_GAME,             "BZ_CATEGORY_FLAGS_GAME",             "game" },
+        {         BZ_CATEGORY_FLAGS_GRAPHICS,         "BZ_CATEGORY_FLAGS_GRAPHICS",         "graphics" },
+        {          BZ_CATEGORY_FLAGS_NETWORK,          "BZ_CATEGORY_FLAGS_NETWORK",          "network" },
+        {           BZ_CATEGORY_FLAGS_OFFICE,           "BZ_CATEGORY_FLAGS_OFFICE",           "office" },
+        {          BZ_CATEGORY_FLAGS_SCIENCE,          "BZ_CATEGORY_FLAGS_SCIENCE",          "science" },
+        {           BZ_CATEGORY_FLAGS_SYSTEM,           "BZ_CATEGORY_FLAGS_SYSTEM",           "system" },
+        {          BZ_CATEGORY_FLAGS_UTILITY,          "BZ_CATEGORY_FLAGS_UTILITY",          "utility" },
+        {         BZ_CATEGORY_FLAGS_TRENDING,         "BZ_CATEGORY_FLAGS_TRENDING",         "trending" },
+        {          BZ_CATEGORY_FLAGS_POPULAR,          "BZ_CATEGORY_FLAGS_POPULAR",          "popular" },
+        {   BZ_CATEGORY_FLAGS_RECENTLY_ADDED,   "BZ_CATEGORY_FLAGS_RECENTLY_ADDED",   "recently-added" },
+        { BZ_CATEGORY_FLAGS_RECENTLY_UPDATED, "BZ_CATEGORY_FLAGS_RECENTLY_UPDATED", "recently-updated" },
+        {           BZ_CATEGORY_FLAGS_MOBILE,           "BZ_CATEGORY_FLAGS_MOBILE",           "mobile" },
+        {          BZ_CATEGORY_FLAGS_ADWAITA,          "BZ_CATEGORY_FLAGS_ADWAITA",          "adwaita" },
+        {              BZ_CATEGORY_FLAGS_KDE,              "BZ_CATEGORY_FLAGS_KDE",              "kde" },
+        {                                  0,                                 NULL,               NULL }
+      };
+
+      GType type = g_flags_register_static ("BzCategoryFlags", values);
+      g_once_init_leave (&g_define_type_id, type);
+    }
+
+  return g_define_type_id;
+}
+
 BzCategoryFlags
 bz_category_flags_add (BzCategoryFlags flags,
                        const char     *name)
@@ -76,4 +112,16 @@ bz_category_flags_has_name (BzCategoryFlags flags,
     }
 
   return FALSE;
+}
+
+BzCategoryFlags
+bz_category_flags_from_name (const char *name)
+{
+  g_autofree char *lower = g_ascii_strdown (name, -1);
+
+  for (gsize i = 0; i < G_N_ELEMENTS (name_flag_map); i++)
+    if (g_strcmp0 (name_flag_map[i].name, lower) == 0)
+      return name_flag_map[i].flag;
+
+  return BZ_CATEGORY_FLAGS_NONE;
 }

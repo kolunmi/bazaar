@@ -510,26 +510,63 @@ run_emission_fiber (RunEmissionData *data)
   n_hooks = g_list_model_get_n_items (hooks);
   for (guint i = 0; i < n_hooks; i++)
     {
-      g_autoptr (BzHook) hook        = NULL;
-      BzHookSignal       when        = 0;
-      BzHookReturnStatus hook_result = BZ_HOOK_RETURN_STATUS_CONTINUE;
+      g_autoptr (BzHook) hook = NULL;
+      BzHookSignal when       = 0;
 
       hook = g_list_model_get_item (hooks, i);
       when = bz_hook_get_when (hook);
 
       if (when == signal)
-        hook_result = dex_await_int (
-            bz_execute_hook (hook, ts_type, ts_appid, group),
-            NULL);
+        {
+          const char        *check_appid_regex = NULL;
+          BzHookReturnStatus hook_result       = BZ_HOOK_RETURN_STATUS_CONTINUE;
 
-      if (hook_result == BZ_HOOK_RETURN_STATUS_CONFIRM ||
-          hook_result == BZ_HOOK_RETURN_STATUS_STOP)
-        break;
-      else if (hook_result == BZ_HOOK_RETURN_STATUS_DENY)
-        return dex_future_new_reject (
-            G_IO_ERROR,
-            G_IO_ERROR_UNKNOWN,
-            "Prevented by a configured hook");
+          check_appid_regex = bz_hook_get_check_appid_regex (hook);
+          if (check_appid_regex != NULL)
+            {
+              GRegex *regex = NULL;
+
+              regex = g_object_get_data (G_OBJECT (hook), "check-appid-regex");
+              if (regex == NULL)
+                {
+                  g_autoptr (GError) local_error = NULL;
+
+                  regex = g_regex_new (
+                      check_appid_regex,
+                      G_REGEX_OPTIMIZE,
+                      G_REGEX_MATCH_DEFAULT,
+                      &local_error);
+                  if (regex != NULL)
+                    g_object_set_data_full (
+                        G_OBJECT (hook),
+                        "check-appid-regex",
+                        regex,
+                        (GDestroyNotify) g_regex_unref);
+                  else
+                    g_warning ("Hook check-appid-regex property '%s' "
+                               "is an invalid regex string: %s",
+                               check_appid_regex,
+                               local_error->message);
+                }
+
+              if (regex != NULL &&
+                  !g_regex_match (regex, ts_appid, G_REGEX_MATCH_DEFAULT, NULL))
+                continue;
+            }
+
+          hook_result = dex_await_int (
+              bz_execute_hook (hook, ts_type, ts_appid, group),
+              NULL);
+
+          if (hook_result == BZ_HOOK_RETURN_STATUS_CONFIRM ||
+              hook_result == BZ_HOOK_RETURN_STATUS_STOP)
+            break;
+          else if (hook_result == BZ_HOOK_RETURN_STATUS_DENY)
+            return dex_future_new_reject (
+                G_IO_ERROR,
+                G_IO_ERROR_UNKNOWN,
+                "Prevented by a configured hook");
+        }
     }
 
   return dex_future_new_true ();

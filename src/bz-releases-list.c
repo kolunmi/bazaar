@@ -259,7 +259,7 @@ create_release_row (const char *version,
     {
       more_info_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4));
 
-      markup          = g_markup_printf_escaped ("<a href=\"%s\">%s</a>", url, _ ("Get More Information"));
+      markup = g_markup_printf_escaped ("<a href=\"%s\" title=\"%s\">%s</a>", url, url, _ ("Get More Information"));
       more_info_label = GTK_LABEL (gtk_label_new (NULL));
       gtk_label_set_markup (more_info_label, markup);
       gtk_widget_set_tooltip_text (GTK_WIDGET (more_info_label), url);

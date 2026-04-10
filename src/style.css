@@ -71,8 +71,9 @@
     opacity: 0.55;
 }
 
-.clear-button {
+.searchbar-button, .searchbar-button > button {
   min-height: 24px;
+  min-width: 24px;
 }
 
 .search-pill {
@@ -125,6 +126,11 @@
 
 .verified {
   color: @blue_2;
+}
+
+.app-developer link{
+  color: @blue_2;
+  text-decoration: none;
 }
 
 .support {
@@ -287,11 +293,11 @@
 }
 
 global-progress {
-  color: var(--accent-bg-color);
+  color: transparent;
 }
 
-global-progress > *:first-child {
-  background: var(--flag-gradient, var(--accent-bg-color));
+global-progress > *:first-child > * {
+    background: var(--flag-gradient, var(--accent-bg-color));
 }
 
 global-progress image {
@@ -300,6 +306,10 @@ global-progress image {
 
 .global-progress-button {
 	padding: 5px;
+}
+
+.global-progress-bg {
+    opacity: 0.5;
 }
 
 .lozenge {
@@ -868,31 +878,6 @@ window.narrow .category-tile {
 .ops-toggle:checked,
 .ops-toggle.rotated {
 	transform: rotate(270deg);
-}
-
-.update-list {
-	background-color: alpha(@card_bg_color, 0.8);
-	border-radius: 0 0 12px 12px;
-}
-
-.update-list > row {
-    padding: 0;
-}
-
-.update-toggle {
-	border-radius: 12px;
-	box-shadow: none;
-	transition: border-bottom-left-radius 150ms ease,
-	            border-bottom-right-radius 150ms ease;
-}
-.update-toggle.activated {
-	border-bottom-left-radius: 0px;
-	border-bottom-right-radius: 0px;
-}
-
-.update-card {
-  border-radius: 12px;
-	box-shadow: 0 0 0 1px rgba(0,0,6,0.03), 0 1px 3px 1px rgba(0,0,6,0.07), 0 2px 6px 2px rgba(0,0,6,0.03);
 }
 
 @media (prefers-color-scheme: dark) {

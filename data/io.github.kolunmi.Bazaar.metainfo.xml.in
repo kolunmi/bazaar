@@ -30,7 +30,7 @@
     <name>Adam Masciola</name>
   </developer>
 
-  <url type="homepage">https://github.com/bazaar-org/bazaar</url>
+  <url type="homepage">https://usebazaar.org/</url>
   <url type="vcs-browser">https://github.com/bazaar-org/bazaar</url>
   <url type="bugtracker">https://github.com/bazaar-org/bazaar/issues</url>
   <url type="translate">https://github.com/bazaar-org/bazaar/tree/master/po</url>
@@ -73,6 +73,31 @@
   </screenshots>
 
   <releases>
+    <release version="0.7.14" date="2026-04-10">
+      <url type="details">https://github.com/bazaar-org/bazaar/releases/tag/v0.7.14</url>
+        <description translate="no">
+          <p>
+            <em>New Features</em>
+          </p>
+          <ul>
+            <li>Rework the add-ons dialog</li>
+            <li>Add a gradient under the download timeline</li>
+            <li>Add a filter button to the search page</li>
+            <li>Add a button to show the EULA for some proprietary apps</li>
+            <li>Make the names of verified developers clickable links</li>
+          </ul>
+          <p>
+            <em>Fixes</em>
+          </p>
+          <ul>
+            <li>Fix the colours of the update card</li>
+            <li>Make the update banner follow the accent colour</li>
+          </ul>
+          <p>
+            Thanks for reading, and have a great day!
+          </p>
+        </description>
+    </release>
     <release version="0.7.13" date="2026-04-1">
       <url type="details">https://github.com/bazaar-org/bazaar/releases/tag/v0.7.13</url>
       <description translate="no">

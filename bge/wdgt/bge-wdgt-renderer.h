@@ -1,4 +1,4 @@
-/* bge-wdgt-spec-renderer.h
+/* bge-wdgt-renderer.h
  *
  * Copyright 2026 Eva M
  *
@@ -31,43 +31,58 @@ G_BEGIN_DECLS
 #define BGE_TYPE_WDGT_RENDERER (bge_wdgt_renderer_get_type ())
 G_DECLARE_FINAL_TYPE (BgeWdgtRenderer, bge_wdgt_renderer, BGE, WDGT_RENDERER, GtkWidget)
 
+BGE_AVAILABLE_IN_ALL
 BgeWdgtRenderer *
 bge_wdgt_renderer_new (void);
 
+BGE_AVAILABLE_IN_ALL
 BgeWdgtSpec *
 bge_wdgt_renderer_get_spec (BgeWdgtRenderer *self);
 
+BGE_AVAILABLE_IN_ALL
 const char *
 bge_wdgt_renderer_get_state (BgeWdgtRenderer *self);
 
+BGE_AVAILABLE_IN_ALL
 GObject *
 bge_wdgt_renderer_get_reference (BgeWdgtRenderer *self);
 
+BGE_AVAILABLE_IN_ALL
 GtkWidget *
 bge_wdgt_renderer_get_child (BgeWdgtRenderer *self);
 
+BGE_AVAILABLE_IN_ALL
 void
 bge_wdgt_renderer_set_spec (BgeWdgtRenderer *self,
                             BgeWdgtSpec     *spec);
 
+BGE_AVAILABLE_IN_ALL
 void
 bge_wdgt_renderer_set_state (BgeWdgtRenderer *self,
                              const char      *state);
 
+BGE_AVAILABLE_IN_ALL
 void
 bge_wdgt_renderer_set_reference (BgeWdgtRenderer *self,
                                  GObject         *reference);
 
+BGE_AVAILABLE_IN_ALL
 void
 bge_wdgt_renderer_set_child (BgeWdgtRenderer *self,
                              GtkWidget       *child);
 
+BGE_AVAILABLE_IN_ALL
 void
 bge_wdgt_renderer_set_state_take (BgeWdgtRenderer *self,
                                   char            *state);
 
 #define bge_wdgt_renderer_set_state_take_printf(self, ...) bge_wdgt_renderer_set_state_take (self, g_strdup_printf (__VA_ARGS__))
 
+BGE_AVAILABLE_IN_ALL
+gpointer
+bge_wdgt_renderer_lookup_object (BgeWdgtRenderer *self,
+                                 const char      *name);
+
 G_END_DECLS
 
-/* End of bge-wdgt-spec-renderer.h */
+/* End of bge-wdgt-renderer.h */

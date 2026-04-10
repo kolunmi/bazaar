@@ -436,72 +436,18 @@ action_show_group (GtkWidget  *widget,
       bz_state_info_get_application_factory (self->state),
       gtk_string_object_new (id));
 
-  if (group != NULL)
-    bz_window_show_group (self, group);
-}
+  if (group == NULL)
+    return;
 
-static gboolean
-test_has_addons (BzEntry *entry)
-{
-  GListModel *model = NULL;
-
-  model = bz_entry_get_addons (entry);
-  return model != NULL && g_list_model_get_n_items (model) > 0;
-}
-
-static void
-addon_transact_cb (BzWindow       *self,
-                   BzEntry        *entry,
-                   BzAddonsDialog *dialog)
-{
-  gboolean installed = FALSE;
-
-  g_object_get (entry, "installed", &installed, NULL);
-
-  try_transact (self, entry, NULL, installed, TRUE, NULL);
-}
-
-static DexFuture *
-addons_fiber (BzEntryGroup *group)
-{
-  g_autoptr (GError) local_error = NULL;
-  g_autoptr (BzEntry) entry      = NULL;
-  g_autoptr (GListModel) model   = NULL;
-  BzStateInfo *state             = NULL;
-  GtkWidget   *window            = NULL;
-  AdwDialog   *addons_dialog     = NULL;
-
-  state = bz_state_info_get_default ();
-  if (state == NULL)
-    return NULL;
-
-  window = GTK_WIDGET (gtk_application_get_active_window (
-      GTK_APPLICATION (g_application_get_default ())));
-
-  entry = bz_entry_group_find_entry (group, test_has_addons,
-                                     window, &local_error);
-  if (entry == NULL)
+  if (bz_entry_group_is_addon (group))
     {
-      if (local_error != NULL)
-        bz_show_error_for_widget (window,
-                                  _ ("Failed to load add-ons"),
-                                  local_error->message);
-      return NULL;
+      AdwDialog *dialog = NULL;
+
+      dialog =bz_addons_dialog_new_single (group);
+      adw_dialog_present (dialog, GTK_WIDGET (self));
     }
-
-  model = bz_application_map_factory_generate (
-      bz_state_info_get_entry_factory (state),
-      bz_entry_get_addons (entry));
-
-  addons_dialog = bz_addons_dialog_new (entry, model);
-  g_signal_connect_swapped (
-      addons_dialog, "transact",
-      G_CALLBACK (addon_transact_cb), window);
-  gtk_widget_set_size_request (GTK_WIDGET (addons_dialog), 350, -1);
-
-  adw_dialog_present (addons_dialog, window);
-
-  return NULL;
+  else
+    bz_window_show_group (self, group);
 }
 
 static void
@@ -512,6 +458,7 @@ action_addons_group (GtkWidget  *widget,
   BzWindow   *self               = BZ_WINDOW (widget);
   const char *id                 = NULL;
   g_autoptr (BzEntryGroup) group = NULL;
+  AdwDialog  *addons_dialog      = NULL;
 
   id    = g_variant_get_string (parameter, NULL);
   group = bz_application_map_factory_convert_one (
@@ -521,12 +468,8 @@ action_addons_group (GtkWidget  *widget,
   if (group == NULL)
     return;
 
-  dex_future_disown (dex_scheduler_spawn (
-      dex_scheduler_get_default (),
-      bz_get_dex_stack_size (),
-      (DexFiberFunc) addons_fiber,
-      g_object_ref (group),
-      g_object_unref));
+  addons_dialog = bz_addons_dialog_new (group);
+  adw_dialog_present (addons_dialog, GTK_WIDGET (self));
 }
 
 static void

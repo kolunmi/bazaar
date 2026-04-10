@@ -1,6 +1,6 @@
-/* bge.h - Bazaar GTK Extensions
+/* bz-search-filter-popover.h
  *
- * Copyright 2026 Eva M
+ * Copyright 2026 Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,28 +17,32 @@
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
-
 #pragma once
-
+#include "bz-category-flags.h"
 #include <gtk/gtk.h>
-#include <libdex.h>
 
 G_BEGIN_DECLS
 
-#define BGE_INSIDE
-#include "bge-version-macros.h"
+#define BZ_TYPE_SEARCH_FILTER_POPOVER (bz_search_filter_popover_get_type ())
 
-#include "bge-animation.h"
-#include "bge-carousel.h"
-#include "bge-markdown-render.h"
-#include "wdgt/bge-easing.h"
-#include "wdgt/bge-wdgt-renderer.h"
-#include "wdgt/bge-wdgt-spec.h"
-#include "wdgt/bge-wdgt-time.h"
-#undef BGE_INSIDE
+G_DECLARE_FINAL_TYPE (BzSearchFilterPopover, bz_search_filter_popover, BZ, SEARCH_FILTER_POPOVER, GtkPopover)
 
-BGE_AVAILABLE_IN_ALL
+GtkWidget *
+bz_search_filter_popover_new (void);
+
+BzCategoryFlags
+bz_search_filter_popover_get_selected_categories (BzSearchFilterPopover *self);
+
+gboolean
+bz_search_filter_popover_get_only_verified (BzSearchFilterPopover *self);
+
+gboolean
+bz_search_filter_popover_get_only_free (BzSearchFilterPopover *self);
+
+gboolean
+bz_search_filter_popover_get_only_non_eol (BzSearchFilterPopover *self);
+
 void
-bge_init (void);
+bz_search_filter_popover_clear (BzSearchFilterPopover *self);
 
 G_END_DECLS

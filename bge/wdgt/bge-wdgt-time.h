@@ -29,15 +29,19 @@ G_BEGIN_DECLS
 #define BGE_TYPE_WDGT_TIME (bge_wdgt_time_get_type ())
 G_DECLARE_FINAL_TYPE (BgeWdgtTime, bge_wdgt_time, BGE, WDGT_TIME, GObject)
 
+BGE_AVAILABLE_IN_ALL
 BgeWdgtTime *
 bge_wdgt_time_new (void);
 
+BGE_AVAILABLE_IN_ALL
 double
 bge_wdgt_time_get_time (BgeWdgtTime *self);
 
+BGE_AVAILABLE_IN_ALL
 guint
 bge_wdgt_time_get_notify_msec (BgeWdgtTime *self);
 
+BGE_AVAILABLE_IN_ALL
 void
 bge_wdgt_time_set_notify_msec (BgeWdgtTime *self,
                                guint        notify_msec);
