@@ -21,7 +21,6 @@
 #pragma once
 
 #include <gtk/gtk.h>
-#include <libdex.h>
 
 G_BEGIN_DECLS
 

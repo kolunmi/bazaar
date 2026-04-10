@@ -33,7 +33,6 @@ configure_file(
 bge_deps = [
   cc.find_library('m', required: true),
   dependency('gtk4', version: '>= 4.22.1'),
-  dependency('libdex-1', version: '>= 1.0.0'),
   dependency('md4c', version: '>= 0.5.1'),
 ]
 
@@ -62,7 +61,7 @@ pkg.generate(
      filebase: 'bge-' + api_version,
       version: meson.project_version(),
       subdirs: 'bge',
-     requires: ['gtk4', 'libdex-1'],
+     requires: ['gtk4', 'md4c'],
   install_dir: get_option('libdir') / 'pkgconfig'
 )
 
