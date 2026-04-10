@@ -66,6 +66,24 @@ template $BzAddonsDialog: Adw.Dialog {
       }
 
       Adw.NavigationPage {
+        tag: "empty";
+        title: _("Manage Add-Ons");
+
+        child: Adw.ToolbarView {
+          [top]
+          Adw.HeaderBar {
+            show-title: false;
+          }
+
+          content: Adw.StatusPage {
+            icon-name: "application-x-addon-symbolic";
+            title: _("No Add-Ons Visible");
+            description: _("Your current filter preferences are hiding all known add-ons. Try adjusting them.");
+          };
+        };
+      }
+
+      Adw.NavigationPage {
         tag: "full-view";
         title: bind try { template.selected-ui-entry as <$BzResult>.object as <$BzEntry>.title, _("Add-on Page") };
 

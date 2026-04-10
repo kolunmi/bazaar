@@ -20,9 +20,11 @@
 
 #pragma once
 
-#include <glib.h>
+#include <glib-object.h>
 
 G_BEGIN_DECLS
+
+#define BZ_TYPE_CATEGORY_FLAGS (bz_category_flags_get_type ())
 
 typedef enum
 {
@@ -46,10 +48,18 @@ typedef enum
   BZ_CATEGORY_FLAGS_KDE              = 1 << 16,
 } BzCategoryFlags;
 
-BzCategoryFlags bz_category_flags_add (BzCategoryFlags flags,
-                                       const char     *name);
+GType
+bz_category_flags_get_type (void);
 
-gboolean bz_category_flags_has_name (BzCategoryFlags flags,
-                                     const char     *name);
+BzCategoryFlags
+bz_category_flags_add (BzCategoryFlags flags,
+                       const char     *name);
+
+gboolean
+bz_category_flags_has_name (BzCategoryFlags flags,
+                            const char     *name);
+
+BzCategoryFlags
+bz_category_flags_from_name (const char *name);
 
 G_END_DECLS

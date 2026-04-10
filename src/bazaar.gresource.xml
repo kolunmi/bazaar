@@ -59,6 +59,7 @@
     <file preprocess="xml-stripblanks">bz-screenshot-page.ui</file>
     <file preprocess="xml-stripblanks">bz-screenshots-carousel.ui</file>
     <file preprocess="xml-stripblanks">bz-search-page.ui</file>
+    <file preprocess="xml-stripblanks">bz-search-filter-popover.ui</file>
     <file preprocess="xml-stripblanks">bz-section-view.ui</file>
     <file preprocess="xml-stripblanks">bz-stats-dialog.ui</file>
     <file preprocess="xml-stripblanks">bz-transaction-tile.ui</file>
@@ -105,11 +106,14 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/left-large-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/library-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/license-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/meeting-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/media-playback-pause-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/media-playback-start-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/media-playback-stop-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/newspaper-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/open-book-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/parent-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/paintbrush-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/people-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/person-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/pip-out-symbolic.svg</file>
@@ -119,6 +123,7 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/regex-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/right-large-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/sad-computer-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/school-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/server-pick-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/share-alt-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/share-symbolic.svg</file>

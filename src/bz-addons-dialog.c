@@ -282,7 +282,11 @@ bz_addons_dialog_new (BzEntryGroup *group)
       "addon-groups", groups,
       NULL);
 
-  if (groups != NULL && g_list_model_get_n_items (groups) == 1)
+  if (groups == NULL || g_list_model_get_n_items (groups) == 0)
+      adw_navigation_view_replace (self->navigation_view,
+                                  (AdwNavigationPage *[]) { adw_navigation_view_find_page (self->navigation_view, "empty") },
+                                   1);
+  else if (g_list_model_get_n_items (groups) == 1)
     {
       g_autoptr (BzEntryGroup) single   = g_list_model_get_item (groups, 0);
       AdwNavigationPage *full_view_page = NULL;
@@ -416,7 +420,7 @@ animate_to_size (BzAddonsDialog *self)
       target_width = 500;
       measure_for  = MAX (-1, MIN (target_width, cur_width) - 48);
       gtk_widget_measure (GTK_WIDGET (self->list_clamp), GTK_ORIENTATION_VERTICAL, measure_for, NULL, &nat, NULL, NULL);
-      target_height = CLAMP (nat + 50, 300, 600);
+      target_height = CLAMP (nat + 50, 150, 600);
     }
   else if (g_strcmp0 (tag, "full-view") == 0)
     {
@@ -443,6 +447,11 @@ animate_to_size (BzAddonsDialog *self)
     {
       target_width  = 1250;
       target_height = 750;
+    }
+  else if (g_strcmp0 (tag, "empty") == 0)
+    {
+      target_width  = 500;
+      target_height = 500;
     }
   else
     return;

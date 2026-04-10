@@ -71,8 +71,9 @@
     opacity: 0.55;
 }
 
-.clear-button {
+.searchbar-button, .searchbar-button > button {
   min-height: 24px;
+  min-width: 24px;
 }
 
 .search-pill {

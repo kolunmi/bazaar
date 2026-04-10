@@ -106,6 +106,8 @@ src/bz-screenshot-page.blp
 src/bz-screenshots-carousel.blp
 src/bz-search-engine.c
 src/bz-search-pill-list.c
+src/bz-search-filter-popover.blp
+src/bz-search-filter-popover.c
 src/bz-search-page.blp
 src/bz-search-page.c
 src/bz-section-view.blp

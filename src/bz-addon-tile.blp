@@ -29,7 +29,7 @@ template $BzAddonTile: $BzListTile {
       Label description_label {
         halign: start;
         label: bind template.group as <$BzEntryGroup>.description;
-        visible: bind eol_label.visible inverted;
+        visible: bind $logical_and($invert_boolean(eol_label.visible) as <bool>, $invert_boolean($is_empty(template.group as <$BzEntryGroup>.description) as <bool>) as <bool>) as <bool>;
         xalign: 0.0;
         ellipsize: end;
         single-line-mode: true;

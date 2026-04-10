@@ -18,3 +18,4 @@ property=id char G_TYPE_STRING string
 property=when BzHookSignal BZ_TYPE_HOOK_SIGNAL enum
 property=dialogs GListModel G_TYPE_LIST_MODEL object
 property=shell char G_TYPE_STRING string
+property=check_appid_regex char G_TYPE_STRING string
