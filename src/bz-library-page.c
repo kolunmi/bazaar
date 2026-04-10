@@ -196,6 +196,16 @@ format_update_count (gpointer    object,
                           n_updates);
 }
 
+static char *
+format_install_count (gpointer  object,
+                      gint      n_items)
+{
+  return g_strdup_printf (ngettext ("%u Installed App",
+                                    "%u Installed Apps",
+                                    n_items),
+                          n_items);
+}
+
 static void
 tile_activated_cb (BzListTile *tile)
 {
@@ -399,6 +409,7 @@ bz_library_page_class_init (BzLibraryPageClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzLibraryPage, sort_size);
   gtk_widget_class_bind_template_callback (widget_class, no_results_found_subtitle);
   gtk_widget_class_bind_template_callback (widget_class, format_update_count);
+  gtk_widget_class_bind_template_callback (widget_class, format_install_count);
   gtk_widget_class_bind_template_callback (widget_class, tile_activated_cb);
   gtk_widget_class_bind_template_callback (widget_class, reset_search_cb);
   gtk_widget_class_bind_template_callback (widget_class, search_text_changed);
