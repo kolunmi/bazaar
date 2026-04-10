@@ -920,7 +920,7 @@ ceil_closure (gpointer this,
               gdouble  x,
               gpointer data)
 {
-  return floor (x);
+  return ceil (x);
 }
 
 static gdouble
