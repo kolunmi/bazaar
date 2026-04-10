@@ -28,6 +28,7 @@ template $BzLibraryPage: Adw.Bin {
 
           Text search_bar {
             hexpand: true;
+            max-length: 50;
             placeholder-text: _("Search installed apps");
             notify::text => $search_text_changed(template);
           }
@@ -257,7 +258,7 @@ template $BzLibraryPage: Adw.Bin {
                   margin-start: 12;
                   margin-end: 4;
                   Label {
-                    label: _("Installed Apps");
+                    label: bind $format_install_count(filter_model.n-items) as <string>;
                     xalign: 0;
                     visible: bind template.has-apps;
                     hexpand: true;
