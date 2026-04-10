@@ -278,13 +278,147 @@ bz_data_graph_snapshot (GtkWidget   *widget,
     }
 
   if (self->transition_progress > 0.0)
-    gtk_snapshot_append_stroke (
-        snapshot,
-        transitioning != NULL
-            ? transitioning
-            : self->path,
-        stroke,
-        accent_color);
+    {
+      g_autoptr (GskPathBuilder) builder = NULL;
+      GskPathPoint     point0            = { 0 };
+      GskPathPoint     point1            = { 0 };
+      graphene_point_t start_position    = { 0 };
+      graphene_point_t end_position      = { 0 };
+      g_autoptr (GskPath) path           = NULL;
+
+      const GskColorStop gradient_stops[] = {
+        {
+         0.0,
+         {
+         .red   = accent_color->red,
+         .green = accent_color->green,
+         .blue  = accent_color->blue,
+         .alpha = 0.75,
+         },
+         },
+        {
+         1.0,
+         {
+         .red   = accent_color->red,
+         .green = accent_color->green,
+         .blue  = accent_color->blue,
+         .alpha = 0.0,
+         },
+         },
+      };
+      const GskColorStop hfadeout_mask_stops[] = {
+        {
+         0.0,
+         {
+         .red   = 0.0,
+         .green = 0.0,
+         .blue  = 0.0,
+         .alpha = 1.0,
+         },
+         },
+        {
+         0.75,
+         {
+         .red   = 0.0,
+         .green = 0.0,
+         .blue  = 0.0,
+         .alpha = 1.0,
+         },
+         },
+        {
+         1.0,
+         {
+         .red   = 0.0,
+         .green = 0.0,
+         .blue  = 0.0,
+         .alpha = 0.0,
+         },
+         },
+      };
+
+      gtk_snapshot_append_stroke (
+          snapshot,
+          transitioning != NULL
+              ? transitioning
+              : self->path,
+          stroke, accent_color);
+
+      /* Gradient under the graph line */
+      builder = gsk_path_builder_new ();
+
+      gsk_path_get_start_point (
+          transitioning != NULL
+              ? transitioning
+              : self->path,
+          &point0);
+      gsk_path_point_get_position (
+          &point0,
+          transitioning != NULL
+              ? transitioning
+              : self->path,
+          &start_position);
+      gsk_path_get_end_point (
+          transitioning != NULL
+              ? transitioning
+              : self->path,
+          &point1);
+      gsk_path_point_get_position (
+          &point1,
+          transitioning != NULL
+              ? transitioning
+              : self->path,
+          &end_position);
+
+      gsk_path_builder_move_to (builder, start_position.x, start_position.y);
+      gsk_path_builder_add_segment (
+          builder,
+          transitioning != NULL
+              ? transitioning
+              : self->path,
+          &point0, &point1);
+      gsk_path_builder_move_to (builder, end_position.x, end_position.y);
+
+      /* close the loop for `gtk_snapshot_push_fill` */
+      gsk_path_builder_line_to (builder, end_position.x, widget_height - LABEL_MARGIN);
+      gsk_path_builder_line_to (builder, start_position.x, widget_height - LABEL_MARGIN);
+      gsk_path_builder_line_to (builder, start_position.x, start_position.y);
+
+      path = gsk_path_builder_to_path (builder);
+      gtk_snapshot_push_fill (
+          snapshot,
+          path,
+          GSK_FILL_RULE_WINDING);
+
+      gtk_snapshot_push_mask (snapshot, GSK_MASK_MODE_ALPHA);
+
+      gtk_snapshot_append_linear_gradient (
+          snapshot,
+          &GRAPHENE_RECT_INIT (
+              0.0,
+              0.0,
+              end_position.x,
+              widget_height - LABEL_MARGIN),
+          &GRAPHENE_POINT_INIT (0.0, 0.0),
+          &GRAPHENE_POINT_INIT (end_position.x, 0.0),
+          hfadeout_mask_stops,
+          G_N_ELEMENTS (hfadeout_mask_stops));
+      gtk_snapshot_pop (snapshot); /* Push Mask (mask) */
+
+      gtk_snapshot_append_linear_gradient (
+          snapshot,
+          &GRAPHENE_RECT_INIT (
+              0.0,
+              0.0,
+              end_position.x,
+              widget_height - LABEL_MARGIN),
+          &GRAPHENE_POINT_INIT (0.0, 0.0),
+          &GRAPHENE_POINT_INIT (0.0, widget_height - LABEL_MARGIN),
+          gradient_stops,
+          G_N_ELEMENTS (gradient_stops));
+
+      gtk_snapshot_pop (snapshot); /* Push Mask (image) */
+      gtk_snapshot_pop (snapshot); /* Push Fill */
+    }
   gtk_snapshot_restore (snapshot);
 
   if (self->motion_x >= LABEL_MARGIN &&
