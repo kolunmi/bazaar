@@ -28,6 +28,7 @@ template $BzLibraryPage: Adw.Bin {
 
           Text search_bar {
             hexpand: true;
+            max-length: 50;
             placeholder-text: _("Search installed apps");
             notify::text => $search_text_changed(template);
           }
