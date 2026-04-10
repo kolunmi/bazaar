@@ -308,7 +308,7 @@ bz_data_graph_snapshot (GtkWidget   *widget,
       double           rounded_axis_max      = 0.0;
       const char      *prefix                = NULL;
       g_autofree char *line2_text            = NULL;
-      GtkRequisition   natural_size;
+      GtkRequisition   natural_size          = { 0 };
 
       n_items     = g_list_model_get_n_items (self->model);
       graph_width = widget_width - LABEL_MARGIN - LABEL_MARGIN_RIGHT;
@@ -320,9 +320,7 @@ bz_data_graph_snapshot (GtkWidget   *widget,
       point = g_list_model_get_item (self->model, hovered_idx);
 
       if (self->rounded_axis_max > 0.0)
-        {
-          rounded_axis_max = self->rounded_axis_max;
-        }
+        rounded_axis_max = self->rounded_axis_max;
       else
         {
           double max_dependent = 0.0;
@@ -973,7 +971,7 @@ refresh_path (BzDataGraph *self,
           gtk_snapshot_translate (snapshot, &GRAPHENE_POINT_INIT (x, height + LABEL_MARGIN / 10.0));
           gtk_snapshot_rotate (snapshot, -LABEL_MARGIN_RIGHT);
           gtk_snapshot_translate (snapshot, &GRAPHENE_POINT_INIT (-extents.width, 0));
-          gtk_snapshot_append_layout (snapshot, layout, &(GdkRGBA) { 1.0, 1.0, 1.0, 1.0 });
+          gtk_snapshot_append_layout (snapshot, layout, &(GdkRGBA){ 1.0, 1.0, 1.0, 1.0 });
           gtk_snapshot_restore (snapshot);
 
           gsk_path_builder_move_to (grid_builder, x, height);
@@ -1017,7 +1015,7 @@ refresh_path (BzDataGraph *self,
 
       gtk_snapshot_save (snapshot);
       gtk_snapshot_translate (snapshot, &GRAPHENE_POINT_INIT (0, y_pos));
-      gtk_snapshot_append_layout (snapshot, layout, &(GdkRGBA) { 1.0, 1.0, 1.0, 1.0 });
+      gtk_snapshot_append_layout (snapshot, layout, &(GdkRGBA){ 1.0, 1.0, 1.0, 1.0 });
       gtk_snapshot_restore (snapshot);
 
       gsk_path_builder_move_to (grid_builder, -TICK_LENGTH, y_pos);
@@ -1031,7 +1029,7 @@ refresh_path (BzDataGraph *self,
 
   grid        = gsk_path_builder_to_path (grid_builder);
   grid_stroke = gsk_stroke_new (1.0);
-  gtk_snapshot_append_stroke (snapshot, grid, grid_stroke, &(GdkRGBA) { 1.0, 1.0, 1.0, 1.0 });
+  gtk_snapshot_append_stroke (snapshot, grid, grid_stroke, &(GdkRGBA){ 1.0, 1.0, 1.0, 1.0 });
 
   self->path         = gsk_path_builder_to_path (curve_builder);
   self->path_measure = gsk_path_measure_new (self->path);
