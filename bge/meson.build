@@ -1,4 +1,4 @@
-api_version = '0.1'
+api_version = meson.project_version()
 
 bge_sources = [
   'libbge.c',
@@ -56,7 +56,7 @@ install_headers(
 
 pkg = import('pkgconfig')
 pkg.generate(
-  description: 'A shared library for bge',
+  description: 'Bazaar GTK Extensions',
     libraries: bge_lib,
          name: 'libbge',
      filebase: 'bge-' + api_version,
