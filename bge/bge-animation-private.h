@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <glib.h>
+#include <gtk/gtk.h>
 
 /* Copied with modifications from libadwaita */
 double
@@ -48,3 +48,6 @@ spring_calculate_duration (double   damping,
                            double   from,
                            double   to,
                            gboolean clamp);
+
+gboolean
+bge_should_animate (GtkWidget *widget);

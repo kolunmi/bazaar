@@ -4854,15 +4854,18 @@ tick_cb (BgeWdgtRenderer *self,
          GdkFrameClock   *frame_clock,
          gpointer         user_data)
 {
+  gboolean       should_animate                 = FALSE;
   GHashTableIter iter                           = { 0 };
-  double         elapsed                        = 0.0;
   gboolean       finished_all_state_transitions = TRUE;
 
   self->had_tick_since_state_switch = TRUE;
 
+  should_animate = bge_should_animate (GTK_WIDGET (self));
+
   for (guint i = 0; i < self->track_transitions->len;)
     {
-      TrackTransitionClosureData *data = NULL;
+      TrackTransitionClosureData *data    = NULL;
+      double                      elapsed = 0.0;
 
       data    = g_ptr_array_index (self->track_transitions, i);
       elapsed = g_timer_elapsed (data->timer, NULL);
@@ -4871,59 +4874,63 @@ tick_cb (BgeWdgtRenderer *self,
           G_OBJECT (data->notifier),
           notifier_props[NOTIFIER_PROP_VALUE]);
 
-      if (elapsed <= data->spring.est_duration)
+      if (should_animate &&
+          elapsed <= data->spring.est_duration)
         i++;
       else
         g_ptr_array_remove_index (self->track_transitions, i);
     }
 
-  if (self->spec == NULL ||
-      self->active_state == NULL ||
-      self->active_instance == NULL ||
-      self->last_state == NULL ||
-      self->last_instance == NULL)
-    return G_SOURCE_CONTINUE;
-
-  elapsed = g_timer_elapsed (self->since_last_state, NULL);
-
-  g_hash_table_iter_init (&iter, self->active_state->transitions);
-  for (;;)
+  if (should_animate &&
+      self->spec != NULL &&
+      self->active_state != NULL &&
+      self->active_instance != NULL &&
+      self->last_state != NULL &&
+      self->last_instance != NULL)
     {
-      ValueData              *value                    = NULL;
-      TransitionData         *transition               = NULL;
-      TransitionInstanceData *transition_instance      = NULL;
-      TransitionInstanceData *init_transition_instance = NULL;
+      double elapsed = 0.0;
 
-      if (!g_hash_table_iter_next (
-              &iter,
-              (gpointer *) &value,
-              (gpointer *) &transition))
-        break;
+      elapsed = g_timer_elapsed (self->since_last_state, NULL);
 
-      transition_instance = g_hash_table_lookup (self->active_instance->transitions, value);
-      if (transition_instance != NULL)
-        g_object_notify_by_pspec (
-            G_OBJECT (transition_instance->notifier),
-            notifier_props[NOTIFIER_PROP_VALUE]);
-      init_transition_instance = g_hash_table_lookup (self->init_instance->transitions, value);
-      if (init_transition_instance != NULL)
-        g_object_notify_by_pspec (
-            G_OBJECT (init_transition_instance->notifier),
-            notifier_props[NOTIFIER_PROP_VALUE]);
-
-      switch (transition->kind)
+      g_hash_table_iter_init (&iter, self->active_state->transitions);
+      for (;;)
         {
-        case TRANSITION_EASE:
-          if (elapsed <= transition->ease.seconds)
-            finished_all_state_transitions = FALSE;
-          break;
-        case TRANSITION_SPRING:
-          if (transition_instance->spring.est_duration < 0.0 ||
-              elapsed <= transition_instance->spring.est_duration)
-            finished_all_state_transitions = FALSE;
-          break;
-        default:
-          g_assert_not_reached ();
+          ValueData              *value                    = NULL;
+          TransitionData         *transition               = NULL;
+          TransitionInstanceData *transition_instance      = NULL;
+          TransitionInstanceData *init_transition_instance = NULL;
+
+          if (!g_hash_table_iter_next (
+                  &iter,
+                  (gpointer *) &value,
+                  (gpointer *) &transition))
+            break;
+
+          transition_instance = g_hash_table_lookup (self->active_instance->transitions, value);
+          if (transition_instance != NULL)
+            g_object_notify_by_pspec (
+                G_OBJECT (transition_instance->notifier),
+                notifier_props[NOTIFIER_PROP_VALUE]);
+          init_transition_instance = g_hash_table_lookup (self->init_instance->transitions, value);
+          if (init_transition_instance != NULL)
+            g_object_notify_by_pspec (
+                G_OBJECT (init_transition_instance->notifier),
+                notifier_props[NOTIFIER_PROP_VALUE]);
+
+          switch (transition->kind)
+            {
+            case TRANSITION_EASE:
+              if (elapsed <= transition->ease.seconds)
+                finished_all_state_transitions = FALSE;
+              break;
+            case TRANSITION_SPRING:
+              if (transition_instance->spring.est_duration < 0.0 ||
+                  elapsed <= transition_instance->spring.est_duration)
+                finished_all_state_transitions = FALSE;
+              break;
+            default:
+              g_assert_not_reached ();
+            }
         }
     }
 
@@ -5652,6 +5659,9 @@ expression_adjust_state_transition (BgeWdgtRenderer       *this,
 
   g_assert (data->value->type == G_TYPE_DOUBLE);
 
+  if (!bge_should_animate (GTK_WIDGET (this)))
+    return in;
+
   if (this->active_state == NULL ||
       this->active_instance == NULL ||
       this->last_state == NULL ||
@@ -5801,6 +5811,9 @@ expression_adjust_track_transition (BgeWdgtRenderer            *this,
   double   damping    = 0.0;
 
   g_assert (data->value->type == G_TYPE_DOUBLE);
+
+  if (!bge_should_animate (GTK_WIDGET (this)))
+    return in;
 
   registered = g_ptr_array_find (this->track_transitions, data, &idx);
   if (!registered)

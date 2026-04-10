@@ -90,9 +90,6 @@ destroy_spring_data (gpointer ptr);
 static void
 destroy_wr (gpointer ptr);
 
-static gboolean
-should_animate (GtkWidget *widget);
-
 static void
 dispose (GObject *object)
 {
@@ -282,7 +279,7 @@ bge_animation_add_spring (BgeAnimation        *self,
   widget = g_weak_ref_get (&self->wr);
   if (widget != NULL)
     {
-      if (should_animate (widget))
+      if (bge_should_animate (widget))
         {
           SpringData *data = NULL;
 
@@ -461,7 +458,7 @@ tick_cb (GtkWidget     *widget,
   if (self == NULL)
     return G_SOURCE_REMOVE;
 
-  cancel = !should_animate (widget);
+  cancel = !bge_should_animate (widget);
 
 #define UPDATE(_data, _out_value, _out_finished)                      \
   G_STMT_START                                                        \
@@ -821,8 +818,8 @@ destroy_wr (gpointer ptr)
   g_free (ptr);
 }
 
-static gboolean
-should_animate (GtkWidget *widget)
+gboolean
+bge_should_animate (GtkWidget *widget)
 {
   GtkSettings *settings          = NULL;
   gboolean     enable_animations = FALSE;
