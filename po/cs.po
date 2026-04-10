@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-10 09:28+0200\n"
-"PO-Revision-Date: 2026-04-10 14:24+0200\n"
+"POT-Creation-Date: 2026-04-10 20:23+0200\n"
+"PO-Revision-Date: 2026-04-10 23:08+0200\n"
 "Last-Translator: Daniel Rusek <mail@asciiwolf.com>\n"
 "Language-Team: Czech\n"
 "Language: cs\n"
@@ -1081,7 +1081,7 @@ msgstr "Vysoké riziko"
 
 #: src/bz-curated-view.blp:11 src/bz-favorites-page.blp:68
 #: src/bz-flathub-page.blp:19 src/bz-full-view.blp:62
-#: src/bz-library-page.blp:65 src/bz-user-data-page.blp:86
+#: src/bz-library-page.blp:66 src/bz-user-data-page.blp:86
 msgid "Empty"
 msgstr "Prázdné"
 
@@ -1624,8 +1624,8 @@ msgstr "Hry a aplikace pro spuštění vašich oblíbených titulů"
 msgid "More Games"
 msgstr "Více z Her"
 
-#: src/bz-full-view.blp:66 src/bz-library-page.blp:76
-#: src/bz-library-page.blp:80
+#: src/bz-full-view.blp:66 src/bz-library-page.blp:77
+#: src/bz-library-page.blp:81
 msgid "No Results"
 msgstr "Žádné výsledky"
 
@@ -1832,52 +1832,48 @@ msgstr "Odeb_rat"
 msgid "Update"
 msgstr "Aktualizovat"
 
-#: src/bz-library-page.blp:31
+#: src/bz-library-page.blp:32
 msgid "Search installed apps"
 msgstr "hledat nainstalované aplikace"
 
-#: src/bz-library-page.blp:48
+#: src/bz-library-page.blp:49
 msgid "Clear search"
 msgstr "Vymazat hledání"
 
-#: src/bz-library-page.blp:69
+#: src/bz-library-page.blp:70
 msgid "No Apps Found"
 msgstr "Nenalezeny žádné aplikace"
 
 #. Translators: .
-#: src/bz-library-page.blp:98 src/bz-window.blp:112
+#: src/bz-library-page.blp:99 src/bz-window.blp:112
 msgid "Library"
 msgstr "Knihovna"
 
-#: src/bz-library-page.blp:126
+#: src/bz-library-page.blp:127
 msgid "Pending Updates"
 msgstr "Čekající aktualizace"
 
-#: src/bz-library-page.blp:153
+#: src/bz-library-page.blp:154
 msgid "Downloads"
 msgstr "Stažení"
 
-#: src/bz-library-page.blp:196
+#: src/bz-library-page.blp:197
 msgid "Recently Uninstalled"
 msgstr "Nedávno odinstalované"
 
-#: src/bz-library-page.blp:247
+#: src/bz-library-page.blp:248
 msgid "Clear Finished Tasks"
 msgstr "Vymazat dokončené úlohy"
 
-#: src/bz-library-page.blp:260
-msgid "Installed Apps"
-msgstr "Nainstalované aplikace"
-
-#: src/bz-library-page.blp:332
+#: src/bz-library-page.blp:333
 msgid "Sort By"
 msgstr "Řadit podle"
 
-#: src/bz-library-page.blp:346
+#: src/bz-library-page.blp:347
 msgid "Name"
 msgstr "Název"
 
-#: src/bz-library-page.blp:352
+#: src/bz-library-page.blp:353
 msgid "Size"
 msgstr "Velikost"
 
@@ -1893,6 +1889,14 @@ msgid_plural "%u Available Updates"
 msgstr[0] "%u dostupná aktualizace"
 msgstr[1] "%u dostupné aktualizace"
 msgstr[2] "%u dostupných aktualizací"
+
+#: src/bz-library-page.c:203
+#, c-format
+msgid "%u Installed App"
+msgid_plural "%u Installed Apps"
+msgstr[0] "%u nainstalovaná aplikace"
+msgstr[1] "%u nainstalované aplikace"
+msgstr[2] "%u nainstalovaných aplikací"
 
 #: src/bz-license-dialog.blp:94
 msgid "Get Involved"
@@ -2711,7 +2715,7 @@ msgstr "Minecraft"
 msgid "Emulator"
 msgstr "Emulátor"
 
-#: src/bz-search-filter-popover.blp:18 src/bz-search-page.blp:82
+#: src/bz-search-filter-popover.blp:18 src/bz-search-page.blp:83
 msgid "Filters"
 msgstr "Filtry"
 
@@ -2731,31 +2735,31 @@ msgstr "N_ezastaralé"
 msgid "Categories"
 msgstr "Kategorie"
 
-#: src/bz-search-page.blp:57
+#: src/bz-search-page.blp:58
 msgid "Search Apps, Games, Software"
 msgstr "hledat aplikace, hry, software"
 
-#: src/bz-search-page.blp:69
+#: src/bz-search-page.blp:70
 msgid "Search Filters"
 msgstr "Filtry vyhledávání"
 
-#: src/bz-search-page.blp:99
+#: src/bz-search-page.blp:100
 msgid "Clear Search"
 msgstr "Vymazat hledání"
 
-#: src/bz-search-page.blp:191
+#: src/bz-search-page.blp:192
 msgid "Categories Unavailable"
 msgstr "Kategorie nejsou k dispozici"
 
-#: src/bz-search-page.blp:192
+#: src/bz-search-page.blp:193
 msgid "Search for apps using the search bar above."
 msgstr "Vyhledejte aplikace pomocí vyhledávacího panelu výše."
 
-#: src/bz-search-page.blp:218
+#: src/bz-search-page.blp:219
 msgid "Browse Categories"
 msgstr "Procházet kategorie"
 
-#: src/bz-search-page.blp:360
+#: src/bz-search-page.blp:361
 msgid "No Applications Found"
 msgstr "Nenalezeny žádné aplikace"
 
