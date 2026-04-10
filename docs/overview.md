@@ -670,7 +670,7 @@ hooks:
     # appid before incurring the overhead of spawning a subprocess. This
     # improves performance and reduces script boilerplate for long lists of
     # hooks that execute on specific appids.
-    check-appid-regex: com\.jetbrains\..*
+    check-appid-regex: ^com\.jetbrains\..*$
 ```
 
 `/absolute/path/to/bazaar-jetbrains-hook.bash`:
