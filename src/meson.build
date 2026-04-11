@@ -246,6 +246,7 @@ gobject_specs = files(
   'bz-transaction-task.txt',
   'bz-url.txt',
   'bz-verification-status.txt',
+  'progress-bar-designs/floaty-circles/bz-floaty-circle-design.txt',
 )
 
 gen_gobject_srcs = []

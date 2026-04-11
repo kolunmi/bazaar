@@ -29,6 +29,7 @@
     <key name="global-progress-bar-theme" type="s">
       <choices>
         <choice value="accent-color"/>
+
         <choice value="pride-rainbow-flag"/>
         <choice value="lesbian-pride-flag"/>
         <choice value="gay-pride-flag"/>
@@ -50,6 +51,8 @@
         <choice value="disability-flag"/>
         <choice value="femboy-flag"/>
 	    <choice value="neutrois-flag"/>
+
+        <choice value="floaty-circles"/>
       </choices>
       <default>'accent-color'</default>
       <summary>Global Progress Bar Theme</summary>

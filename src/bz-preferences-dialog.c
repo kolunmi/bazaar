@@ -28,6 +28,7 @@ typedef struct
   const char *tooltip;
 } BarTheme;
 
+/* clang-format off */
 static const BarTheme bar_themes[] = {
   {                  "accent-color",                  "accent-color-theme",                              N_ ("Accent Color") },
   {            "pride-rainbow-flag",            "pride-rainbow-flag-theme",                              N_ ("Pride Colors") },
@@ -51,7 +52,9 @@ static const BarTheme bar_themes[] = {
   {               "disability-flag",               "disability-flag-theme",                   N_ ("Disability Pride Colors") },
   {                   "femboy-flag",                   "femboy-flag-theme",                       N_ ("Femboy Pride Colors") },
   {                 "neutrois-flag",                 "neutrois-flag-theme",                     N_ ("Neutrois Pride Colors") },
+  {                "floaty-circles",                "floaty-circles-theme",                            N_ ("Floaty Circles") },
 };
+/* clang-format on */
 
 struct _BzPreferencesDialog
 {
@@ -139,6 +142,7 @@ on_rotate_switch_changed (AdwSwitchRow        *row,
                           BzPreferencesDialog *self)
 {
   gboolean active = FALSE;
+
   active = adw_switch_row_get_active (row);
   for (guint i = 0; i < G_N_ELEMENTS (bar_themes); i++)
     {
@@ -214,8 +218,8 @@ bind_settings (BzPreferencesDialog *self)
                    G_SETTINGS_BIND_DEFAULT);
 
   g_settings_bind (self->settings, "rotate-flag",
-                 self->rotate_switch, "active",
-                 G_SETTINGS_BIND_DEFAULT);
+                   self->rotate_switch, "active",
+                   G_SETTINGS_BIND_DEFAULT);
 
   if (adw_switch_row_get_active (self->rotate_switch))
     {

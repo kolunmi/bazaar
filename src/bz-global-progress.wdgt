@@ -2,7 +2,7 @@ defwidget "Global Progress Widget" {
   reference state : "BzStateInfo";
 
   var t : "BgeWdgtTime";
-  var fg : "GtkFixed";
+  var fg : "BgeWdgtRenderer";
   var bg : "GtkFixed";
 
   var fg-x : "gdouble";

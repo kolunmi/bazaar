@@ -32,7 +32,7 @@ struct _BzGlobalProgress
   GtkWidget   *wdgt;
   BgeWdgtSpec *wdgt_spec;
 
-  char *draw_widget_class;
+  char *fg_widget_class;
 
   BzStateInfo *state;
   gboolean     active;
@@ -83,6 +83,8 @@ bz_global_progress_dispose (GObject *object)
   g_clear_object (&self->wdgt_spec);
   g_clear_object (&self->state);
   g_clear_object (&self->settings);
+
+  g_clear_pointer (&self->fg_widget_class, g_free);
 
   G_OBJECT_CLASS (bz_global_progress_parent_class)->dispose (object);
 }
@@ -284,6 +286,8 @@ void
 bz_global_progress_set_state (BzGlobalProgress *self,
                               BzStateInfo      *state)
 {
+  g_autoptr (GtkWidget) fg = NULL;
+
   g_return_if_fail (BZ_IS_GLOBAL_PROGRESS (self));
   g_return_if_fail (state == NULL || BZ_IS_STATE_INFO (state));
 
@@ -293,6 +297,12 @@ bz_global_progress_set_state (BzGlobalProgress *self,
 
   bge_wdgt_renderer_set_reference (BGE_WDGT_RENDERER (self->wdgt),
                                    (GObject *) state);
+
+  fg = bge_wdgt_renderer_lookup_object (
+      BGE_WDGT_RENDERER (self->wdgt), "fg");
+  if (fg != NULL)
+    bge_wdgt_renderer_set_reference (BGE_WDGT_RENDERER (fg),
+                                     G_OBJECT (self->state));
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_STATE]);
 }
@@ -356,7 +366,8 @@ global_progress_bar_flag_changed (BzGlobalProgress *self,
 static void
 set_wdgt_state (BzGlobalProgress *self)
 {
-  const char *state = NULL;
+  const char *state        = NULL;
+  g_autoptr (GtkWidget) fg = NULL;
 
   if (self->active)
     {
@@ -369,49 +380,65 @@ set_wdgt_state (BzGlobalProgress *self)
     state = "inactive";
 
   bge_wdgt_renderer_set_state (BGE_WDGT_RENDERER (self->wdgt), state);
+
+  fg = bge_wdgt_renderer_lookup_object (
+      BGE_WDGT_RENDERER (self->wdgt), "fg");
+  if (fg != NULL)
+    bge_wdgt_renderer_set_state (BGE_WDGT_RENDERER (fg), state);
 }
 
 static void
 ensure_draw_css (BzGlobalProgress *self)
 {
-  g_autoptr (GtkWidget) draw_widget = NULL;
+  g_autoptr (GError) local_error = NULL;
+  g_autoptr (GtkWidget) fg       = NULL;
 
-  draw_widget = bge_wdgt_renderer_lookup_object (
+  fg = bge_wdgt_renderer_lookup_object (
       BGE_WDGT_RENDERER (self->wdgt), "fg");
-  if (draw_widget == NULL)
+  if (fg == NULL)
     return;
+
+  bge_wdgt_renderer_set_spec (BGE_WDGT_RENDERER (fg), NULL);
+
+  if (self->fg_widget_class != NULL)
+    gtk_widget_remove_css_class (fg, self->fg_widget_class);
+  g_clear_pointer (&self->fg_widget_class, g_free);
 
   if (self->settings != NULL)
     {
-      g_autofree char *id       = NULL;
-      g_autofree char *final_id = NULL;
-      g_autofree char *class    = NULL;
-      gboolean         rotate   = FALSE;
+      g_autofree char *id = NULL;
 
-      id     = g_settings_get_string (self->settings, "global-progress-bar-theme");
-      rotate = g_settings_get_boolean (self->settings, "rotate-flag");
+      id = g_settings_get_string (self->settings, "global-progress-bar-theme");
+      if (g_strcmp0 (id, "floaty-circles") == 0)
+        {
+          g_autoptr (BgeWdgtSpec) spec = NULL;
 
-      if (rotate && g_strcmp0 (id, "accent-color") != 0)
-        final_id = g_strdup_printf ("%s-horizontal", id);
+          g_type_ensure (BZ_TYPE_FLOATY_CIRCLE_DESIGN);
+          spec = bge_wdgt_spec_new_for_resource (
+              "/io/github/kolunmi/Bazaar/progress-bar-designs/floaty-circles/floaty-circles.wdgt",
+              &local_error);
+          if (spec == NULL)
+            g_error ("%s\n", local_error->message);
+
+          bge_wdgt_renderer_set_spec (BGE_WDGT_RENDERER (fg), spec);
+        }
       else
-        final_id = g_strdup (id);
+        {
+          g_autofree char *final_id = NULL;
+          g_autofree char *class    = NULL;
+          gboolean         rotate   = FALSE;
 
-      class = bz_dup_css_class_for_pride_id (final_id);
+          rotate = g_settings_get_boolean (self->settings, "rotate-flag");
 
-      if (self->draw_widget_class != NULL &&
-          g_strcmp0 (self->draw_widget_class, class) == 0)
-        return;
+          if (rotate && g_strcmp0 (id, "accent-color") != 0)
+            final_id = g_strdup_printf ("%s-horizontal", id);
+          else
+            final_id = g_strdup (id);
 
-      if (self->draw_widget_class != NULL)
-        gtk_widget_remove_css_class (draw_widget, self->draw_widget_class);
-      g_clear_pointer (&self->draw_widget_class, g_free);
-      gtk_widget_add_css_class (draw_widget, class);
-      self->draw_widget_class = g_steal_pointer (&class);
-    }
-  else
-    {
-      if (self->draw_widget_class != NULL)
-        gtk_widget_remove_css_class (draw_widget, self->draw_widget_class);
-      g_clear_pointer (&self->draw_widget_class, g_free);
+          class = bz_dup_css_class_for_pride_id (final_id);
+
+          gtk_widget_add_css_class (fg, class);
+          self->fg_widget_class = g_steal_pointer (&class);
+        }
     }
 }

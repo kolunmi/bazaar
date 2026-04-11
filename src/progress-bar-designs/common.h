@@ -20,4 +20,5 @@
 
 #pragma once
 
+#include "bz-floaty-circle-design.h"
 #include "pride/pride.h"

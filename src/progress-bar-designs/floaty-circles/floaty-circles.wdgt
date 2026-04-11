@@ -1,0 +1,116 @@
+defarray circles (
+  #BzFloatyCircleDesign(size=10.000000; x=62.000000; y=7.000000; depth=0.710000; color-center=#("#2190a4ff"); color-outer = #("#2190a400");),
+  #BzFloatyCircleDesign(size=8.000000; x=46.000000; y=12.000000; depth=0.040000; color-center=#("#9141acff"); color-outer = #("#9141ac00");),
+  #BzFloatyCircleDesign(size=11.000000; x=11.000000; y=1.000000; depth=0.850000; color-center=#("#c88800ff"); color-outer = #("#c8880000");),
+  #BzFloatyCircleDesign(size=9.000000; x=66.000000; y=5.000000; depth=0.360000; color-center=#("#3a944aff"); color-outer = #("#3a944a00");),
+  #BzFloatyCircleDesign(size=5.000000; x=68.000000; y=20.000000; depth=0.100000; color-center=#("#6f8396ff"); color-outer = #("#6f839600");),
+  #BzFloatyCircleDesign(size=5.000000; x=89.000000; y=6.000000; depth=0.640000; color-center=#("#ed5b00ff"); color-outer = #("#ed5b0000");),
+  #BzFloatyCircleDesign(size=6.000000; x=1.000000; y=19.000000; depth=0.690000; color-center=#("#ed5b00ff"); color-outer = #("#ed5b0000");),
+  #BzFloatyCircleDesign(size=8.000000; x=94.000000; y=13.000000; depth=0.580000; color-center=#("#ed5b00ff"); color-outer = #("#ed5b0000");),
+  #BzFloatyCircleDesign(size=6.000000; x=16.000000; y=16.000000; depth=0.540000; color-center=#("#3584e4ff"); color-outer = #("#3584e400");),
+  #BzFloatyCircleDesign(size=5.000000; x=92.000000; y=19.000000; depth=0.040000; color-center=#("#9141acff"); color-outer = #("#9141ac00");),
+  #BzFloatyCircleDesign(size=7.000000; x=25.000000; y=9.000000; depth=0.080000; color-center=#("#6f8396ff"); color-outer = #("#6f839600");),
+  #BzFloatyCircleDesign(size=6.000000; x=22.000000; y=20.000000; depth=0.170000; color-center=#("#e62d42ff"); color-outer = #("#e62d4200");),
+  #BzFloatyCircleDesign(size=9.000000; x=75.000000; y=11.000000; depth=0.230000; color-center=#("#3584e4ff"); color-outer = #("#3584e400");),
+  #BzFloatyCircleDesign(size=5.000000; x=38.000000; y=23.000000; depth=0.990000; color-center=#("#e62d42ff"); color-outer = #("#e62d4200");),
+  #BzFloatyCircleDesign(size=5.000000; x=81.000000; y=24.000000; depth=0.080000; color-center=#("#3584e4ff"); color-outer = #("#3584e400");),
+  #BzFloatyCircleDesign(size=5.000000; x=74.000000; y=11.000000; depth=0.370000; color-center=#("#c88800ff"); color-outer = #("#c8880000");),
+  #BzFloatyCircleDesign(size=7.000000; x=84.000000; y=16.000000; depth=0.860000; color-center=#("#ed5b00ff"); color-outer = #("#ed5b0000");),
+  #BzFloatyCircleDesign(size=5.000000; x=1.000000; y=9.000000; depth=0.940000; color-center=#("#ed5b00ff"); color-outer = #("#ed5b0000");),
+  #BzFloatyCircleDesign(size=9.000000; x=79.000000; y=6.000000; depth=0.950000; color-center=#("#e62d42ff"); color-outer = #("#e62d4200");),
+  #BzFloatyCircleDesign(size=12.000000; x=95.000000; y=14.000000; depth=0.310000; color-center=#("#ed5b00ff"); color-outer = #("#ed5b0000");),
+  #BzFloatyCircleDesign(size=8.000000; x=6.000000; y=16.000000; depth=0.350000; color-center=#("#3a944aff"); color-outer = #("#3a944a00");),
+  #BzFloatyCircleDesign(size=8.000000; x=11.000000; y=5.000000; depth=0.600000; color-center=#("#3584e4ff"); color-outer = #("#3584e400");),
+  #BzFloatyCircleDesign(size=5.000000; x=52.000000; y=12.000000; depth=0.660000; color-center=#("#d56199ff"); color-outer = #("#d5619900");),
+  #BzFloatyCircleDesign(size=5.000000; x=65.000000; y=6.000000; depth=0.770000; color-center=#("#6f8396ff"); color-outer = #("#6f839600");),
+  #BzFloatyCircleDesign(size=5.000000; x=75.000000; y=19.000000; depth=0.740000; color-center=#("#2190a4ff"); color-outer = #("#2190a400");),
+  #BzFloatyCircleDesign(size=14.000000; x=46.000000; y=7.000000; depth=0.390000; color-center=#("#3584e4ff"); color-outer = #("#3584e400");),
+  #BzFloatyCircleDesign(size=14.000000; x=98.000000; y=22.000000; depth=0.680000; color-center=#("#d56199ff"); color-outer = #("#d5619900");),
+  #BzFloatyCircleDesign(size=8.000000; x=69.000000; y=22.000000; depth=0.840000; color-center=#("#e62d42ff"); color-outer = #("#e62d4200");),
+  #BzFloatyCircleDesign(size=5.000000; x=5.000000; y=1.000000; depth=0.680000; color-center=#("#ed5b00ff"); color-outer = #("#ed5b0000");),
+  #BzFloatyCircleDesign(size=14.000000; x=92.000000; y=20.000000; depth=0.290000; color-center=#("#ed5b00ff"); color-outer = #("#ed5b0000");),
+  #BzFloatyCircleDesign(size=11.000000; x=80.000000; y=23.000000; depth=0.190000; color-center=#("#e62d42ff"); color-outer = #("#e62d4200");),
+  #BzFloatyCircleDesign(size=9.000000; x=76.000000; y=16.000000; depth=0.450000; color-center=#("#9141acff"); color-outer = #("#9141ac00");),
+  #BzFloatyCircleDesign(size=12.000000; x=47.000000; y=22.000000; depth=0.710000; color-center=#("#2190a4ff"); color-outer = #("#2190a400");),
+  #BzFloatyCircleDesign(size=5.000000; x=16.000000; y=14.000000; depth=0.690000; color-center=#("#c88800ff"); color-outer = #("#c8880000");),
+  #BzFloatyCircleDesign(size=10.000000; x=34.000000; y=14.000000; depth=0.950000; color-center=#("#ed5b00ff"); color-outer = #("#ed5b0000");),
+  #BzFloatyCircleDesign(size=5.000000; x=36.000000; y=6.000000; depth=0.020000; color-center=#("#e62d42ff"); color-outer = #("#e62d4200");),
+  #BzFloatyCircleDesign(size=5.000000; x=61.000000; y=12.000000; depth=0.170000; color-center=#("#3a944aff"); color-outer = #("#3a944a00");),
+  #BzFloatyCircleDesign(size=11.000000; x=97.000000; y=10.000000; depth=0.020000; color-center=#("#e62d42ff"); color-outer = #("#e62d4200");),
+  #BzFloatyCircleDesign(size=8.000000; x=29.000000; y=2.000000; depth=0.320000; color-center=#("#d56199ff"); color-outer = #("#d5619900");),
+  #BzFloatyCircleDesign(size=7.000000; x=48.000000; y=18.000000; depth=0.960000; color-center=#("#6f8396ff"); color-outer = #("#6f839600");),
+  #BzFloatyCircleDesign(size=10.000000; x=85.000000; y=3.000000; depth=0.890000; color-center=#("#e62d42ff"); color-outer = #("#e62d4200");),
+  #BzFloatyCircleDesign(size=5.000000; x=0.000000; y=11.000000; depth=0.120000; color-center=#("#ed5b00ff"); color-outer = #("#ed5b0000");),
+  #BzFloatyCircleDesign(size=5.000000; x=26.000000; y=24.000000; depth=0.160000; color-center=#("#3a944aff"); color-outer = #("#3a944a00");),
+  #BzFloatyCircleDesign(size=5.000000; x=75.000000; y=2.000000; depth=0.180000; color-center=#("#ed5b00ff"); color-outer = #("#ed5b0000");),
+  #BzFloatyCircleDesign(size=7.000000; x=86.000000; y=22.000000; depth=0.070000; color-center=#("#d56199ff"); color-outer = #("#d5619900");),
+  #BzFloatyCircleDesign(size=5.000000; x=2.000000; y=23.000000; depth=0.150000; color-center=#("#ed5b00ff"); color-outer = #("#ed5b0000");),
+  #BzFloatyCircleDesign(size=8.000000; x=96.000000; y=14.000000; depth=0.840000; color-center=#("#c88800ff"); color-outer = #("#c8880000");),
+  #BzFloatyCircleDesign(size=5.000000; x=1.000000; y=7.000000; depth=0.490000; color-center=#("#c88800ff"); color-outer = #("#c8880000");),
+  #BzFloatyCircleDesign(size=10.000000; x=73.000000; y=10.000000; depth=0.050000; color-center=#("#2190a4ff"); color-outer = #("#2190a400");),
+  #BzFloatyCircleDesign(size=13.000000; x=35.000000; y=10.000000; depth=0.710000; color-center=#("#c88800ff"); color-outer = #("#c8880000");),
+  #BzFloatyCircleDesign(size=5.000000; x=76.000000; y=0.000000; depth=0.890000; color-center=#("#3584e4ff"); color-outer = #("#3584e400");),
+)
+
+defwidget "Floaty Circles Global Progress Design" {
+  reference state : "BzStateInfo";
+  var t : "BgeWdgtTime";
+
+  var progress : "gdouble";
+  var shake : "gdouble";
+
+  init {
+    set t = #(notify-msec = 10;);
+    set progress = #transition(state:transaction-manager:current-progress,
+                               2.0, 1.0, 1.0);
+    
+    snapshot {
+      add color(#GdkRGBA("black"),
+                #GrapheneRect(0.0, 0.0, %width%, %height%));
+    }
+  }
+
+  %FOREACH circle, idx, i IN circles {
+    var r@i@ : "gdouble";
+    var x@i@ : "gdouble";
+    init {
+      set r@i@ = #eval(#(circle:size)/2.0);
+      set x@i@ = #eval(#(circle:x) -  #(%width%)*#(progress)*#(circle:depth) + #(shake));
+      snapshot {
+        add radial-gradient(
+          #GrapheneRect(
+            #eval(#(x@i@) - #(r@i@)),
+            #eval(#(circle:y) - #(r@i@)),
+            circle:size,
+            circle:size,
+          ),
+          #GraphenePoint(
+            x@i@,
+            circle:y,
+          ),
+          r@i@,
+          r@i@,
+          0.0,
+          1.0,
+          0.0, circle:color-center,
+          0.9, circle:color-center,
+          0.9, circle:color-outer,
+          1.0, circle:color-outer,
+        );
+      }
+    }
+  }
+
+  state-default "inactive" {
+    set shake = 0.0;
+    transition-spring shake 1.0, 0.2, 1.0;
+  }
+  state "pending" {
+    set shake = #eval(12.0*cos(3.0*#(t:time)));
+    transition-spring shake 1.0, 0.2, 1.0;
+  }
+  state "fraction" {
+    set shake = 0.0;
+    transition-spring shake 2.0, 0.4, 1.0;
+  }
+}

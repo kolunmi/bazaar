@@ -1,0 +1,15 @@
+prefix=bz
+name=floaty_circle_design
+parent-prefix=g
+parent-name=object
+author=AUTOGEN
+
+include=<gtk/gtk.h>
+
+property=name char G_TYPE_STRING string
+property=size double G_TYPE_DOUBLE double
+property=x double G_TYPE_DOUBLE double
+property=y double G_TYPE_DOUBLE double
+property=depth double G_TYPE_DOUBLE double
+property=color_center GdkRGBA GDK_TYPE_RGBA boxed gdk_rgba_free gdk_rgba_copy
+property=color_outer GdkRGBA GDK_TYPE_RGBA boxed gdk_rgba_free gdk_rgba_copy
