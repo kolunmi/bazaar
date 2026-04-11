@@ -337,6 +337,7 @@ bz_search_engine_query (BzSearchEngine    *self,
       bz_finished_search_query_set_interpreted_query (finished, "");
       bz_finished_search_query_set_results (finished, results);
       bz_finished_search_query_set_n_results (finished, n_groups);
+      bz_finished_search_query_set_elapsed (finished, 0.0);
 
       return dex_future_new_for_object (finished);
     }
@@ -517,7 +518,8 @@ query_task_fiber (QueryTaskData *data)
   GPtrArray *shallow_mirror                  = data->snapshot;
   GPtrArray *biases                          = data->biases;
   g_autoptr (GError) local_error             = NULL;
-  gboolean         result                    = FALSE;
+  gboolean result                            = FALSE;
+  g_autoptr (GTimer) timer                   = NULL;
   g_autofree char *query_utf8                = NULL;
   guint            n_sub_tasks               = 0;
   guint            scores_per_task           = 0;
@@ -526,6 +528,8 @@ query_task_fiber (QueryTaskData *data)
   g_autoptr (GArray) scores                  = NULL;
   g_autoptr (GPtrArray) results              = NULL;
   g_autoptr (BzFinishedSearchQuery) finished = NULL;
+
+  timer = g_timer_new ();
 
   query_utf8      = g_strjoinv (" ", terms);
   n_sub_tasks     = MAX (1, MIN (shallow_mirror->len / 512, g_get_num_processors ()));
@@ -632,6 +636,7 @@ query_task_fiber (QueryTaskData *data)
   bz_finished_search_query_set_interpreted_query (finished, query_utf8);
   bz_finished_search_query_set_results (finished, results);
   bz_finished_search_query_set_n_results (finished, results->len);
+  bz_finished_search_query_set_elapsed (finished, g_timer_elapsed (timer, NULL));
 
   return dex_future_new_for_object (finished);
 }

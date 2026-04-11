@@ -91,7 +91,9 @@ template $BzLoginPage: Adw.NavigationPage {
                 Label {
                   halign: center;
                   label: bind $format_greeting(template.auth-state as <$BzAuthState>.name as <string>) as <string>;
-
+                  wrap: true;
+                  wrap-mode: word_char;
+                  justify: center;
                   styles [
                     "title-1",
                   ]

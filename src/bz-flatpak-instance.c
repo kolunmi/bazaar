@@ -814,7 +814,6 @@ ensure_flathub_fiber (EnsureFlathubData *data)
   g_autoptr (FlatpakRemote) sys_remote = NULL;
   g_autoptr (FlatpakRemote) usr_remote = NULL;
   gboolean result                      = FALSE;
-  g_autoptr (FlatpakRemote) remote     = NULL;
 
   bz_weak_get_or_return_reject (self, data->self);
 
@@ -828,21 +827,30 @@ ensure_flathub_fiber (EnsureFlathubData *data)
         self->user, "flathub", cancellable, NULL);
 
   if (sys_remote != NULL)
-    remote = g_steal_pointer (&sys_remote);
-  else if (usr_remote != NULL)
-    remote = g_steal_pointer (&usr_remote);
-
-  if (remote != NULL)
     {
-      flatpak_remote_set_disabled (remote, FALSE);
-      flatpak_remote_set_noenumerate (remote, FALSE);
-      flatpak_remote_set_gpg_verify (remote, TRUE);
+      flatpak_remote_set_disabled (sys_remote, FALSE);
+      flatpak_remote_set_noenumerate (sys_remote, FALSE);
+      flatpak_remote_set_gpg_verify (sys_remote, TRUE);
+
+      result = flatpak_installation_modify_remote (
+          self->system, sys_remote, cancellable, &local_error);
+      if (!result)
+        return dex_future_new_reject (
+            BZ_FLATPAK_ERROR,
+            BZ_FLATPAK_ERROR_REMOTE_SYNCHRONIZATION_FAILURE,
+            "Failed to modify existing system flathub remote: %s",
+            local_error->message);
     }
-  else
+#ifndef SANDBOXED_LIBFLATPAK
+  else if (self->system != NULL)
+#else
+  else if (self->system != NULL && usr_remote == NULL)
+#endif
     {
       g_autoptr (SoupMessage) message  = NULL;
       g_autoptr (GOutputStream) output = NULL;
       g_autoptr (GBytes) bytes         = NULL;
+      g_autoptr (FlatpakRemote) remote = NULL;
 
       message = soup_message_new (SOUP_METHOD_GET, REPO_URL);
       output  = g_memory_output_stream_new_resizable ();
@@ -868,18 +876,32 @@ ensure_flathub_fiber (EnsureFlathubData *data)
       flatpak_remote_set_gpg_verify (remote, TRUE);
 
       result = flatpak_installation_add_remote (
-          self->system != NULL ? self->system : self->user,
-          remote,
-          TRUE,
-          cancellable,
-          &local_error);
+          self->system, remote, TRUE, cancellable, &local_error);
       if (!result)
         return dex_future_new_reject (
             BZ_FLATPAK_ERROR,
             BZ_FLATPAK_ERROR_REMOTE_SYNCHRONIZATION_FAILURE,
-            "Failed to add flathub to flatpak installation: %s",
+            "Failed to add flathub to system flatpak installation: %s",
             local_error->message);
     }
+
+#ifndef SANDBOXED_LIBFLATPAK
+  if (usr_remote != NULL)
+    {
+      flatpak_remote_set_disabled (usr_remote, FALSE);
+      flatpak_remote_set_noenumerate (usr_remote, FALSE);
+      flatpak_remote_set_gpg_verify (usr_remote, TRUE);
+
+      result = flatpak_installation_modify_remote (
+          self->user, usr_remote, cancellable, &local_error);
+      if (!result)
+        return dex_future_new_reject (
+            BZ_FLATPAK_ERROR,
+            BZ_FLATPAK_ERROR_REMOTE_SYNCHRONIZATION_FAILURE,
+            "Failed to modify existing user flathub remote: %s",
+            local_error->message);
+    }
+#endif
 
   return dex_future_new_true ();
 }
@@ -887,19 +909,11 @@ ensure_flathub_fiber (EnsureFlathubData *data)
 static DexFuture *
 load_local_ref_fiber (LoadLocalRefData *data)
 {
-  GFile *file                                = data->file;
-  g_autoptr (GError) local_error             = NULL;
-  g_autofree char *uri                       = NULL;
-  g_autofree char *path                      = NULL;
-  g_autoptr (FlatpakBundleRef) bref          = NULL;
-  g_autoptr (BzFlatpakEntry) entry           = NULL;
-  g_autoptr (GBytes) appstream_gz            = NULL;
-  gboolean result                            = FALSE;
-  g_autoptr (AsComponent) component          = NULL;
-  g_autoptr (GBytes) appstream               = NULL;
-  g_autoptr (GInputStream) stream_gz         = NULL;
-  g_autoptr (GInputStream) stream_data       = NULL;
-  g_autoptr (GZlibDecompressor) decompressor = NULL;
+  GFile   *file                  = data->file;
+  gboolean result                = FALSE;
+  g_autoptr (GError) local_error = NULL;
+  g_autofree char *uri           = NULL;
+  g_autofree char *path          = NULL;
 
   uri  = g_file_get_uri (file);
   path = g_file_get_path (file);
@@ -965,75 +979,92 @@ load_local_ref_fiber (LoadLocalRefData *data)
 
       return dex_future_new_take_string (g_steal_pointer (&name));
     }
-
-  bref = flatpak_bundle_ref_new (file, &local_error);
-  if (bref == NULL)
-    return dex_future_new_reject (
-        BZ_FLATPAK_ERROR,
-        BZ_FLATPAK_ERROR_IO_MISBEHAVIOR,
-        "Failed to load local flatpak bundle '%s': %s",
-        path,
-        local_error->message);
-
-  appstream_gz = flatpak_bundle_ref_get_appstream (bref);
-  if (appstream_gz != NULL)
+  else
+    /* This is a bundle ref */
     {
-      g_autoptr (XbBuilderSource) source = NULL;
-      g_autoptr (XbSilo) silo            = NULL;
+      g_autoptr (FlatpakBundleRef) bref = NULL;
+      g_autoptr (BzFlatpakEntry) entry  = NULL;
+      g_autoptr (GBytes) appstream_gz   = NULL;
+      g_autoptr (GBytes) appstream      = NULL;
+      g_autoptr (AsComponent) component = NULL;
 
-      appstream = decompress_appstream_gz (appstream_gz, NULL, &local_error);
-      if (appstream == NULL)
+      if (path == NULL)
+        return dex_future_new_reject (
+            BZ_FLATPAK_ERROR,
+            BZ_FLATPAK_ERROR_IO_MISBEHAVIOR,
+            "Cannot load '%s' as a flatpak bundle: URI is not a local file",
+            uri);
+
+      bref = flatpak_bundle_ref_new (file, &local_error);
+      if (bref == NULL)
+        return dex_future_new_reject (
+            BZ_FLATPAK_ERROR,
+            BZ_FLATPAK_ERROR_IO_MISBEHAVIOR,
+            "Failed to load local flatpak bundle '%s': %s",
+            path,
+            local_error->message);
+
+      appstream_gz = flatpak_bundle_ref_get_appstream (bref);
+      if (appstream_gz != NULL)
         {
-          g_warning ("Failed to decompress AppStream data: %s", local_error->message);
-          g_clear_error (&local_error);
-        }
-      else
-        {
-          source = xb_builder_source_new ();
-          if (!xb_builder_source_load_bytes (source, appstream,
-                                             XB_BUILDER_SOURCE_FLAG_LITERAL_TEXT,
-                                             &local_error))
+          appstream = decompress_appstream_gz (appstream_gz, NULL, &local_error);
+          if (appstream == NULL)
             {
-              g_warning ("Failed to load AppStream bytes into xmlb: %s", local_error->message);
+              g_warning ("Failed to decompress AppStream data: %s", local_error->message);
               g_clear_error (&local_error);
             }
           else
             {
-              silo = build_silo (source, NULL, &local_error);
-              if (silo == NULL)
+              g_autoptr (XbBuilderSource) source = NULL;
+
+              source = xb_builder_source_new ();
+              if (!xb_builder_source_load_bytes (source, appstream,
+                                                 XB_BUILDER_SOURCE_FLAG_LITERAL_TEXT,
+                                                 &local_error))
                 {
-                  g_warning ("Failed to compile xmlb silo: %s", local_error->message);
+                  g_warning ("Failed to load AppStream bytes into xmlb: %s", local_error->message);
                   g_clear_error (&local_error);
                 }
               else
                 {
-                  component = extract_first_component_for_silo (silo, &local_error);
-                  if (component == NULL && local_error != NULL)
+                  g_autoptr (XbSilo) silo = NULL;
+
+                  silo = build_silo (source, NULL, &local_error);
+                  if (silo == NULL)
                     {
-                      g_warning ("Failed to parse component: %s", local_error->message);
+                      g_warning ("Failed to compile xmlb silo: %s", local_error->message);
                       g_clear_error (&local_error);
+                    }
+                  else
+                    {
+                      component = extract_first_component_for_silo (silo, &local_error);
+                      if (component == NULL && local_error != NULL)
+                        {
+                          g_warning ("Failed to parse component: %s", local_error->message);
+                          g_clear_error (&local_error);
+                        }
                     }
                 }
             }
         }
+
+      entry = bz_flatpak_entry_new_for_ref (
+          FLATPAK_REF (bref),
+          NULL,
+          FALSE,
+          component,
+          NULL,
+          &local_error);
+      if (entry == NULL)
+        return dex_future_new_reject (
+            BZ_FLATPAK_ERROR,
+            BZ_FLATPAK_ERROR_IO_MISBEHAVIOR,
+            "Failed to parse information from flatpak bundle '%s': %s",
+            path,
+            local_error->message);
+
+      return dex_future_new_for_object (entry);
     }
-
-  entry = bz_flatpak_entry_new_for_ref (
-      FLATPAK_REF (bref),
-      NULL,
-      FALSE,
-      component,
-      NULL,
-      &local_error);
-  if (entry == NULL)
-    return dex_future_new_reject (
-        BZ_FLATPAK_ERROR,
-        BZ_FLATPAK_ERROR_IO_MISBEHAVIOR,
-        "Failed to parse information from flatpak bundle '%s': %s",
-        path,
-        local_error->message);
-
-  return dex_future_new_for_object (entry);
 }
 
 static DexFuture *
@@ -1107,6 +1138,15 @@ retrieve_remote_refs_fiber (GatherRefsData *data)
         }
 
       name = flatpak_remote_get_name (remote);
+      {
+        g_autoptr (BzBackendNotification) notif = NULL;
+
+        notif = bz_backend_notification_new ();
+        bz_backend_notification_set_kind (notif, BZ_BACKEND_NOTIFICATION_KIND_REMOTE_SYNC_START);
+        bz_backend_notification_set_remote_name (notif, name);
+
+        send_notif_all (self, notif, TRUE);
+      }
 
       job_data               = retrieve_refs_for_remote_data_new ();
       job_data->parent       = gather_refs_data_ref (data);
@@ -1526,11 +1566,12 @@ retrieve_refs_for_noenumerable_remote (RetrieveRefsForRemoteData *data,
 static DexFuture *
 retrieve_refs_for_remote_fiber (RetrieveRefsForRemoteData *data)
 {
-  FlatpakInstallation *installation   = data->installation;
-  FlatpakRemote       *remote         = data->remote;
-  const char          *remote_name    = NULL;
-  gboolean             is_noenumerate = FALSE;
-  g_autoptr (BzFlatpakInstance) self  = NULL;
+  FlatpakInstallation *installation  = data->installation;
+  FlatpakRemote       *remote        = data->remote;
+  g_autoptr (BzFlatpakInstance) self = NULL;
+  const char *remote_name            = NULL;
+  gboolean    is_noenumerate         = FALSE;
+  g_autoptr (DexFuture) ret          = NULL;
 
   bz_weak_get_or_return_reject (self, data->parent->self);
 
@@ -1546,9 +1587,23 @@ retrieve_refs_for_remote_fiber (RetrieveRefsForRemoteData *data)
 #else
   if (is_noenumerate)
 #endif
-    return retrieve_refs_for_noenumerable_remote (data, remote_name, installation, remote);
+    ret = retrieve_refs_for_noenumerable_remote (
+        data, remote_name, installation, remote);
   else
-    return retrieve_refs_for_enumerable_remote (data, remote_name, installation, remote);
+    ret = retrieve_refs_for_enumerable_remote (
+        data, remote_name, installation, remote);
+
+  {
+    g_autoptr (BzBackendNotification) notif = NULL;
+
+    notif = bz_backend_notification_new ();
+    bz_backend_notification_set_kind (notif, BZ_BACKEND_NOTIFICATION_KIND_REMOTE_SYNC_FINISH);
+    bz_backend_notification_set_remote_name (notif, remote_name);
+
+    send_notif_all (self, notif, TRUE);
+  }
+
+  return g_steal_pointer (&ret);
 }
 
 static DexFuture *

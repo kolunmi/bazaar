@@ -66,6 +66,7 @@ template $BzTransactionListDialog: Adw.AlertDialog {
                   hexpand: true;
                   xalign: 0.0;
                   wrap: true;
+                  wrap-mode: word_char;
                   single-line-mode: true;
                   selectable: true;
                   label: bind template.item as <$BzEntry>.id;

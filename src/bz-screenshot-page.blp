@@ -6,7 +6,7 @@ template $BzScreenshotPage: Adw.NavigationPage {
 
   child: Adw.BreakpointBin {
     width-request: 360;
-    height-request: 450;
+    height-request: 100;
 
     Adw.Breakpoint {
       condition ("max-width: 700px")
@@ -103,7 +103,7 @@ template $BzScreenshotPage: Adw.NavigationPage {
             can-target: false;
 
             child: Box mobile_caption_box {
-              margin-bottom: 20;
+              margin-bottom: 12;
               styles [
                 "osd-box",
               ]
@@ -112,9 +112,12 @@ template $BzScreenshotPage: Adw.NavigationPage {
                 halign: center;
                 hexpand: true;
                 label: bind template.current-caption;
+                height-request: 34;
                 justify: center;
                 max-width-chars: 30;
                 wrap: true;
+                margin-start: 8;
+                margin-end: 8;
                 wrap-mode: word_char;
                 styles [
                   "heading"

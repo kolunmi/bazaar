@@ -18,31 +18,38 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "bz-fading-clamp.h"
+#include <bge.h>
 
-#define FADE_HEIGHT 75
+#include "bz-fading-clamp.h"
+#include "bz-util.h"
+
+#define FADE_HEIGHT  75
 #define CLAMP_LEEWAY 100
 
 struct _BzFadingClamp
 {
-  GtkWidget     parent_instance;
-  GtkWidget    *child;
-  int           max_height;
-  int           min_max_height;
-  AdwAnimation *animation;
-  int           current_height;
-  int           allocated_width;
-  gboolean      animating_max_height;
-  gboolean      will_change;
+  GtkWidget parent_instance;
+
+  BgeAnimation *animation;
+
+  GtkWidget *child;
+
+  int      max_height;
+  int      min_max_height;
+  int      current_height;
+  int      allocated_width;
+  gboolean will_change;
 };
 
 enum
 {
   PROP_0,
+
   PROP_CHILD,
   PROP_MAX_HEIGHT,
   PROP_MIN_MAX_HEIGHT,
   PROP_WILL_CHANGE,
+
   N_PROPS
 };
 
@@ -51,16 +58,13 @@ static GParamSpec *properties[N_PROPS];
 G_DEFINE_TYPE (BzFadingClamp, bz_fading_clamp, GTK_TYPE_WIDGET)
 
 static void
-on_animation_value_changed (double value, BzFadingClamp *self)
+animate (BzFadingClamp *self,
+         const char    *key,
+         double         value,
+         gpointer       user_data)
 {
-  self->current_height = (int) value;
+  self->current_height = round (value);
   gtk_widget_queue_resize (GTK_WIDGET (self));
-}
-
-static void
-on_animation_done (AdwAnimation *animation, BzFadingClamp *self)
-{
-  self->animating_max_height = FALSE;
 }
 
 static void
@@ -92,8 +96,10 @@ static void
 bz_fading_clamp_dispose (GObject *object)
 {
   BzFadingClamp *self = BZ_FADING_CLAMP (object);
-  g_clear_pointer (&self->child, gtk_widget_unparent);
+
   g_clear_object (&self->animation);
+  g_clear_pointer (&self->child, gtk_widget_unparent);
+
   G_OBJECT_CLASS (bz_fading_clamp_parent_class)->dispose (object);
 }
 
@@ -150,10 +156,16 @@ bz_fading_clamp_get_request_mode (GtkWidget *widget)
 }
 
 static void
-bz_fading_clamp_measure (GtkWidget *widget, GtkOrientation orientation, int for_size, int *minimum, int *natural, int *minimum_baseline, int *natural_baseline)
+bz_fading_clamp_measure (GtkWidget     *widget,
+                         GtkOrientation orientation,
+                         int            for_size,
+                         int           *minimum,
+                         int           *natural,
+                         int           *minimum_baseline,
+                         int           *natural_baseline)
 {
-  int            target_height;
-  BzFadingClamp *self = BZ_FADING_CLAMP (widget);
+  int            target_height = 0;
+  BzFadingClamp *self          = BZ_FADING_CLAMP (widget);
 
   if (!self->child)
     {
@@ -163,9 +175,7 @@ bz_fading_clamp_measure (GtkWidget *widget, GtkOrientation orientation, int for_
     }
 
   if (orientation == GTK_ORIENTATION_HORIZONTAL)
-    {
-      gtk_widget_measure (self->child, orientation, for_size, minimum, natural, minimum_baseline, natural_baseline);
-    }
+    gtk_widget_measure (self->child, orientation, for_size, minimum, natural, minimum_baseline, natural_baseline);
   else
     {
       gtk_widget_measure (self->child, GTK_ORIENTATION_VERTICAL, for_size, minimum, natural, minimum_baseline, natural_baseline);
@@ -177,18 +187,19 @@ bz_fading_clamp_measure (GtkWidget *widget, GtkOrientation orientation, int for_
 
       bz_fading_clamp_update_will_change (self);
 
-      if (!self->animating_max_height && target_height != self->current_height)
-        {
-          self->current_height = target_height;
-        }
+      if (!bge_animation_has_key (self->animation, "height"))
+        self->current_height = target_height;
 
-      *minimum = MIN (*minimum, self->current_height);
-      *natural = MIN (*natural, self->current_height);
+      *minimum = self->current_height;
+      *natural = self->current_height;
     }
 }
 
 static void
-bz_fading_clamp_size_allocate (GtkWidget *widget, int width, int height, int baseline)
+bz_fading_clamp_size_allocate (GtkWidget *widget,
+                               int        width,
+                               int        height,
+                               int        baseline)
 {
   BzFadingClamp *self = BZ_FADING_CLAMP (widget);
 
@@ -200,11 +211,15 @@ bz_fading_clamp_size_allocate (GtkWidget *widget, int width, int height, int bas
 
   if (self->child)
     {
-      int child_height = height;
-      int natural_height;
+      int child_height   = 0;
+      int natural_height = 0;
+
       gtk_widget_measure (self->child, GTK_ORIENTATION_VERTICAL, width, NULL, &natural_height, NULL, NULL);
+
       if (natural_height > height)
         child_height = natural_height;
+      else
+        child_height = height;
       gtk_widget_allocate (self->child, width, child_height, baseline, NULL);
     }
 }
@@ -247,10 +262,10 @@ bz_fading_clamp_snapshot (GtkWidget *widget, GtkSnapshot *snapshot)
 
   stop_offset = CLAMP ((float) gradient_start / height, 0.0f, 1.0f);
 
-  stops[0] = (GskColorStop) {
+  stops[0] = (GskColorStop){
     stop_offset, { 1, 1, 1, 1 }
   };
-  stops[1] = (GskColorStop) {
+  stops[1] = (GskColorStop){
     1.0, { 1, 1, 1, 0 }
   };
 
@@ -298,18 +313,13 @@ bz_fading_clamp_class_init (BzFadingClampClass *klass)
 static void
 bz_fading_clamp_init (BzFadingClamp *self)
 {
-  AdwAnimationTarget *target;
+  self->animation = bge_animation_new (GTK_WIDGET (self));
 
-  self->max_height           = 300;
-  self->min_max_height       = 150;
-  self->current_height       = 0;
-  self->allocated_width      = 0;
-  self->animating_max_height = FALSE;
-  self->will_change          = FALSE;
-
-  target          = adw_callback_animation_target_new ((AdwAnimationTargetFunc) on_animation_value_changed, self, NULL);
-  self->animation = adw_timed_animation_new (GTK_WIDGET (self), 0, 300, 250, target);
-  g_signal_connect (self->animation, "done", G_CALLBACK (on_animation_done), self);
+  self->max_height      = 300;
+  self->min_max_height  = 150;
+  self->current_height  = CLAMP_LEEWAY;
+  self->allocated_width = 0;
+  self->will_change     = FALSE;
 }
 
 GtkWidget *
@@ -351,8 +361,9 @@ bz_fading_clamp_get_child (BzFadingClamp *self)
 void
 bz_fading_clamp_set_max_height (BzFadingClamp *self, int max_height)
 {
-  int natural_height, target_height;
-  int width;
+  int natural_height = 0;
+  int target_height  = 0;
+  int width          = 0;
 
   g_return_if_fail (BZ_IS_FADING_CLAMP (self));
 
@@ -376,14 +387,14 @@ bz_fading_clamp_set_max_height (BzFadingClamp *self, int max_height)
         target_height = max_height;
     }
   else
-    {
-      target_height = max_height;
-    }
+    target_height = max_height;
 
-  self->animating_max_height = TRUE;
-  adw_timed_animation_set_value_from (ADW_TIMED_ANIMATION (self->animation), self->current_height);
-  adw_timed_animation_set_value_to (ADW_TIMED_ANIMATION (self->animation), target_height);
-  adw_animation_play (self->animation);
+  bge_animation_add_spring (
+      self->animation, "height",
+      self->current_height, target_height,
+      1.25, 1.0, 800.0,
+      (BgeAnimationCallback) animate,
+      NULL, NULL, NULL);
 
   bz_fading_clamp_update_will_change (self);
   g_object_notify_by_pspec (G_OBJECT (self), properties[PROP_MAX_HEIGHT]);

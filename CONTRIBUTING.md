@@ -1,6 +1,6 @@
 # Contributing Guide
 
-Thank you for contributing to Bazaar! Here are some instructions to get you started. 
+Thank you for contributing to Bazaar! Here are some instructions to get you started.
 
 * [New Contributor Guide](#contributing-guide)
   * [Ways to Contribute](#ways-to-contribute)
@@ -34,18 +34,18 @@ We welcome many different types of contributions including:
 * Issue Triage
 * Answering questions in Discussions
 * Release management
-* [Translations](https://github.com/kolunmi/bazaar/blob/master/TRANSLATORS.md) - follow the dedicated instructions in that document
+* [Translations](https://github.com/bazaar-org/bazaar/blob/master/TRANSLATORS.md) - follow the dedicated instructions in that document
 
 ## Find an Issue
 
 These are the issues that need the most amount of attention and would be an effective way to get started:
 
-- [Help Wanted issues](https://github.com/kolunmi/bazaar/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22help%20wanted%22)
-- [Good first issues](https://github.com/kolunmi/bazaar/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22good%20first%20issue%22)
+- [Help Wanted issues](https://github.com/bazaar-org/bazaar/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22help%20wanted%22)
+- [Good first issues](https://github.com/bazaar-org/bazaar/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22good%20first%20issue%22)
 
 Sometimes there won’t be any issues with these labels. That’s ok! There is
 likely still something for you to work on. If you want to contribute but you
-don’t know where to start or can't find a suitable issue then feel free to post on the [discussion forum](https://github.com/kolunmi/bazaar/discussions)
+don’t know where to start or can't find a suitable issue then feel free to post on the [discussion forum](https://github.com/bazaar-org/bazaar/discussions)
 
 Once you see an issue that you'd like to work on, please post a comment saying
 that you want to work on it. Something like "I want to work on this" is fine.
@@ -55,7 +55,7 @@ that you want to work on it. Something like "I want to work on this" is fine.
 The best way to reach us with a question when contributing is to ask on:
 
 * The original github issue you want to contribute to
-* The [discussions](https://github.com/kolunmi/bazaar/discussions) area
+* The [discussions](https://github.com/bazaar-org/bazaar/discussions) area
 
 ## Building
 

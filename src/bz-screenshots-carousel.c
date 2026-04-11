@@ -27,12 +27,12 @@
  */
 
 #include <adwaita.h>
+#include <bge.h>
 #include <glib/gi18n.h>
 
-#include "bz-carousel-indicator-dots.h"
-#include "bz-carousel.h"
 #include "bz-decorated-screenshot.h"
 #include "bz-screenshots-carousel.h"
+#include "bz-template-callbacks.h"
 
 #define LIGHT_CLASS          "screenshot-carousel-light"
 #define DARK_CLASS           "screenshot-carousel-dark"
@@ -43,7 +43,7 @@ struct _BzScreenshotsCarousel
 {
   GtkWidget parent_instance;
 
-  BzCarousel *carousel;
+  BgeCarousel *carousel;
   // GtkWidget          *carousel_indicator;
   GtkButton          *prev_button;
   GtkWidget          *prev_button_revealer;
@@ -251,11 +251,10 @@ on_screenshot_focus_changed (BzDecoratedScreenshot *screenshot,
     }
 }
 
-static void
-on_bind_widget (BzScreenshotsCarousel *self,
-                AdwBin                *widget,
-                BzAsyncTexture        *item,
-                BzCarousel            *carousel)
+static GtkWidget *
+on_create_widget (BzScreenshotsCarousel *self,
+                  BzAsyncTexture        *item,
+                  BgeCarousel           *carousel)
 {
   GtkWidget       *screenshot = NULL;
   g_autofree char *caption    = NULL;
@@ -284,16 +283,15 @@ on_bind_widget (BzScreenshotsCarousel *self,
   g_signal_connect (screenshot, "notify::has-focus",
                     G_CALLBACK (on_screenshot_focus_changed), self);
 
-  adw_bin_set_child (widget, screenshot);
+  return screenshot;
 }
 
 static void
-on_unbind_widget (BzScreenshotsCarousel *self,
-                  AdwBin                *widget,
+on_remove_widget (BzScreenshotsCarousel *self,
+                  BzDecoratedScreenshot *screenshot,
                   BzAsyncTexture        *item,
-                  BzCarousel            *carousel)
+                  BgeCarousel           *carousel)
 {
-  adw_bin_set_child (widget, NULL);
 }
 
 static void
@@ -447,12 +445,10 @@ bz_screenshots_carousel_class_init (BzScreenshotsCarouselClass *klass)
                     1,
                     G_TYPE_UINT);
 
-  g_type_ensure (BZ_TYPE_CAROUSEL);
-  g_type_ensure (BZ_TYPE_CAROUSEL_INDICATOR_DOTS);
-
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-screenshots-carousel.ui");
+  bz_widget_class_bind_all_util_callbacks (widget_class);
+
   gtk_widget_class_bind_template_child (widget_class, BzScreenshotsCarousel, carousel);
-  // gtk_widget_class_bind_template_child (widget_class, BzScreenshotsCarousel, carousel_indicator);
   gtk_widget_class_bind_template_child (widget_class, BzScreenshotsCarousel, prev_button);
   gtk_widget_class_bind_template_child (widget_class, BzScreenshotsCarousel, prev_button_revealer);
   gtk_widget_class_bind_template_child (widget_class, BzScreenshotsCarousel, next_button);
@@ -462,8 +458,8 @@ bz_screenshots_carousel_class_init (BzScreenshotsCarouselClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, on_next_clicked);
   gtk_widget_class_bind_template_callback (widget_class, on_notify_selected);
   gtk_widget_class_bind_template_callback (widget_class, on_notify_n_items);
-  gtk_widget_class_bind_template_callback (widget_class, on_bind_widget);
-  gtk_widget_class_bind_template_callback (widget_class, on_unbind_widget);
+  gtk_widget_class_bind_template_callback (widget_class, on_create_widget);
+  gtk_widget_class_bind_template_callback (widget_class, on_remove_widget);
   gtk_widget_class_bind_template_callback (widget_class, on_expand_clicked);
   gtk_widget_class_bind_template_callback (widget_class, get_carousel_height);
 

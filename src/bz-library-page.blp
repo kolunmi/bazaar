@@ -10,6 +10,8 @@ template $BzLibraryPage: Adw.Bin {
       margin-end: 12;
       maximum-size: 375;
 
+      visible: bind template.has-apps;
+
       child: Adw.Bin {
         halign: fill;
         margin-top: 10;
@@ -26,6 +28,7 @@ template $BzLibraryPage: Adw.Bin {
 
           Text search_bar {
             hexpand: true;
+            max-length: 50;
             placeholder-text: _("Search installed apps");
             notify::text => $search_text_changed(template);
           }
@@ -37,7 +40,7 @@ template $BzLibraryPage: Adw.Bin {
             styles [
               "flat",
               "circular",
-              "clear-button",
+              "searchbar-button",
             ]
 
             clicked => $reset_search_cb(template);
@@ -83,7 +86,7 @@ template $BzLibraryPage: Adw.Bin {
               "pill",
             ]
             halign: center;
-            label: "Search Store Instead";
+            label: _("Search Store Instead");
 
             clicked => $global_search_cb(template);
           };
@@ -251,17 +254,26 @@ template $BzLibraryPage: Adw.Bin {
                     }
                   };
                 }
-
-                Label {
-                  label: _("Installed Apps");
-                  xalign: 0;
+                Box {
                   margin-start: 12;
-                  visible: bind $logical_or($logical_or($invert_boolean($is_zero(template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.removal-trackers as <FilterListModel>.n-items) as <bool>) as <bool>, $invert_boolean($is_zero(template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.install-trackers as <FilterListModel>.n-items) as <bool>) as <bool>) as <bool>, $invert_boolean($is_null(template.state as <$BzStateInfo>.available-updates) as <bool>) as <bool>) as <bool>;
+                  margin-end: 4;
+                  Label {
+                    label: bind $format_install_count(filter_model.n-items) as <string>;
+                    xalign: 0;
+                    visible: bind template.has-apps;
+                    hexpand: true;
+                    margin-top: 4;
 
-                  styles [
-                    "heading",
-                    "h4",
-                  ]
+                    styles [
+                      "heading",
+                      "h4",
+                    ]
+                  }
+                  MenuButton {
+                    icon-name: "sliders-horizontal-symbolic";
+                    popover: sort_popover;
+                    styles ["flat"]
+                  }
                 }
               }
 
@@ -269,13 +281,21 @@ template $BzLibraryPage: Adw.Bin {
                 styles [
                   "navigation-sidebar",
                   "installed-list-view",
+                  "installed-section"
                 ]
 
+                visible: bind template.has-apps;
+
                 model: NoSelection {
-                  model: FilterListModel {
+                  model: FilterListModel filter_model {
                     filter: CustomFilter filter {};
 
-                    model: bind template.model;
+                    model: SortListModel sort_model {
+                      sorter: CustomSorter sorter {};
+                      model: bind template.model;
+                    };
+
+                    notify::n-items => $n_filtered_items_changed(template);
                   };
                 };
 
@@ -296,6 +316,43 @@ template $BzLibraryPage: Adw.Bin {
           };
         };
       }
+    }
+  };
+}
+
+Popover sort_popover {
+  child: Box {
+    orientation: vertical;
+    spacing: 6;
+    margin-top: 8;
+    margin-bottom: 8;
+    margin-start: 8;
+    margin-end: 16;
+
+    Label {
+      label: _("Sort By");
+      wrap: true;
+      wrap-mode: word_char;
+      xalign: 0;
+      margin-start: 28;
+
+      styles [
+        "heading",
+        "h4",
+        "dimmed"
+      ]
+    }
+
+    CheckButton sort_name {
+      label: _("Name");
+      active: true;
+      toggled => $sort_changed_cb(template);
+    }
+
+    CheckButton sort_size {
+      label: _("Size");
+      group: sort_name;
+      toggled => $sort_changed_cb(template);
     }
   };
 }

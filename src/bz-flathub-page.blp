@@ -4,11 +4,11 @@ using Adw 1;
 template $BzFlathubPage: Adw.Bin {
   child: Adw.BreakpointBin {
     width-request: 360;
-    height-request: 450;
+    height-request: 100;
 
     child: Adw.BreakpointBin {
       width-request: 360;
-      height-request: 450;
+      height-request: 100;
 
       child: Adw.ViewStack stack {
         enable-transitions: true;
@@ -88,17 +88,14 @@ template $BzFlathubPage: Adw.Bin {
                     spacing: 15;
 
                     $BzFeaturedCarousel {
-                      margin-start: 3;
-                      margin-end: 3;
-
                       styles [
                         "flathub-page-section",
                       ]
 
                       margin-top: 16;
+                      margin-bottom: 3;
                       hexpand: true;
                       model: bind template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.apps_of_the_week;
-                      group-clicked => $featured_carousel_group_clicked_cb(template);
                     }
 
                     Box section_toggles_box {
@@ -143,7 +140,6 @@ template $BzFlathubPage: Adw.Bin {
 
                     Adw.ViewStack sections_stack {
                       enable-transitions: true;
-                      vhomogeneous: false;
                       transition-duration: 300;
                       visible-child-name: bind section_toggles.active-name bidirectional;
 
@@ -153,7 +149,6 @@ template $BzFlathubPage: Adw.Bin {
 
                         child: $BzFlathubCategorySection section_trending {
                           category: bind $get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "trending") as <$BzFlathubCategory>;
-                          group-selected => $category_section_group_selected_cb() swapped;
                           min-items: 12;
                         };
                       }
@@ -164,7 +159,6 @@ template $BzFlathubPage: Adw.Bin {
 
                         child: $BzFlathubCategorySection section_recently_updated {
                           category: bind $get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "recently-updated") as <$BzFlathubCategory>;
-                          group-selected => $category_section_group_selected_cb() swapped;
                           min-items: 12;
                         };
                       }
@@ -175,7 +169,6 @@ template $BzFlathubPage: Adw.Bin {
 
                         child: $BzFlathubCategorySection section_recently_added {
                           category: bind $get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "recently-added") as <$BzFlathubCategory>;
-                          group-selected => $category_section_group_selected_cb() swapped;
                           min-items: 12;
                         };
                       }
@@ -186,7 +179,6 @@ template $BzFlathubPage: Adw.Bin {
 
                         child: $BzFlathubCategorySection section_popular {
                           category: bind $get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "popular") as <$BzFlathubCategory>;
-                          group-selected => $category_section_group_selected_cb() swapped;
                           min-items: 12;
                         };
                       }
@@ -194,18 +186,16 @@ template $BzFlathubPage: Adw.Bin {
 
                     $BzFlathubCategorySection section_productivity {
                       category: bind $get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "office") as <$BzFlathubCategory>;
-                      group-selected => $category_section_group_selected_cb() swapped;
                     }
 
                     $BzFeaturedCarousel {
-                      margin-start: 3;
-                      margin-end: 3;
 
                       styles [
                         "flathub-page-section",
                       ]
 
                       margin-top: 16;
+                      margin-bottom: 8;
                       hexpand: true;
 
                       model: SliceListModel {
@@ -215,23 +205,18 @@ template $BzFlathubPage: Adw.Bin {
                       };
 
                       is-aotd: true;
-                      group-clicked => $featured_carousel_group_clicked_cb(template);
                     }
 
                     $BzFlathubCategorySection section_graphics {
                       category: bind $get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "graphics") as <$BzFlathubCategory>;
-                      group-selected => $category_section_group_selected_cb() swapped;
                     }
 
                     $BzFlathubCategorySection section_audiovideo {
                       category: bind $get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "audiovideo") as <$BzFlathubCategory>;
-                      group-selected => $category_section_group_selected_cb() swapped;
                     }
 
                     Box otg_box {
                       visible: bind $invert_boolean($is_null($get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "mobile") as <$BzFlathubCategory>) as <bool>) as <bool>;
-                      margin-start: 3;
-                      margin-end: 3;
                       margin-top: 8;
                       margin-bottom: 8;
 
@@ -336,19 +321,15 @@ template $BzFlathubPage: Adw.Bin {
 
                     $BzFlathubCategorySection section_education {
                       category: bind $get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "education") as <$BzFlathubCategory>;
-                      group-selected => $category_section_group_selected_cb() swapped;
                     }
 
 
                     $BzFlathubCategorySection section_network {
                       category: bind $get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "network") as <$BzFlathubCategory>;
-                      group-selected => $category_section_group_selected_cb() swapped;
                     }
 
                     Box {
                       visible: bind $invert_boolean($is_null($get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "game") as <$BzFlathubCategory>) as <bool>) as <bool>;
-                      margin-start: 3;
-                      margin-end: 3;
                       margin-top: 8;
                       margin-bottom: 8;
 
@@ -444,22 +425,18 @@ template $BzFlathubPage: Adw.Bin {
 
                     $BzFlathubCategorySection section_development {
                       category: bind $get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "development") as <$BzFlathubCategory>;
-                      group-selected => $category_section_group_selected_cb() swapped;
                     }
 
                     $BzFlathubCategorySection section_science {
                       category: bind $get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "science") as <$BzFlathubCategory>;
-                      group-selected => $category_section_group_selected_cb() swapped;
                     }
 
                     $BzFlathubCategorySection section_system {
                       category: bind $get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "system") as <$BzFlathubCategory>;
-                      group-selected => $category_section_group_selected_cb() swapped;
                     }
 
                     $BzFlathubCategorySection section_utility {
                       category: bind $get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "utility") as <$BzFlathubCategory>;
-                      group-selected => $category_section_group_selected_cb() swapped;
                     }
                   };
                 };
@@ -470,7 +447,7 @@ template $BzFlathubPage: Adw.Bin {
       };
 
       Adw.Breakpoint {
-        condition ("max-width: 1150sp")
+        condition ("max-width: 1250sp")
 
         setters {
           otg_list.max-children-per-line: 2;
@@ -511,7 +488,7 @@ template $BzFlathubPage: Adw.Bin {
     };
 
     Adw.Breakpoint {
-      condition ("max-width: 900px")
+      condition ("max-width: 970sp")
 
       setters {
         section_toggles_box.width-request: -1;

@@ -51,6 +51,7 @@ copy_cb (BzShareList *self,
   const char   *link      = NULL;
   GdkClipboard *clipboard = NULL;
   AdwToast     *toast     = NULL;
+  GtkWidget    *ancestor  = NULL;
   GtkRoot      *root      = NULL;
 
   link = g_object_get_data (G_OBJECT (button), "url");
@@ -58,13 +59,19 @@ copy_cb (BzShareList *self,
   clipboard = gdk_display_get_clipboard (gdk_display_get_default ());
   gdk_clipboard_set_text (clipboard, link);
 
-  root = gtk_widget_get_root (GTK_WIDGET (self));
-  if (root && BZ_IS_WINDOW (root))
+  toast = adw_toast_new (_ ("Copied!"));
+  adw_toast_set_timeout (toast, 1);
+
+  ancestor = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_TOAST_OVERLAY);
+  if (ancestor != NULL)
     {
-      toast = adw_toast_new (_ ("Copied!"));
-      adw_toast_set_timeout (toast, 1);
-      bz_window_add_toast (BZ_WINDOW (root), toast);
+      adw_toast_overlay_add_toast (ADW_TOAST_OVERLAY (ancestor), toast);
+      return;
     }
+
+  root = gtk_widget_get_root (GTK_WIDGET (self));
+  if (root != NULL && BZ_IS_WINDOW (root))
+    bz_window_add_toast (BZ_WINDOW (root), toast);
 }
 
 static void

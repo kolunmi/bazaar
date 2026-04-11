@@ -1,3 +1,8 @@
+option('bge_only',
+       type: 'boolean',
+       value: false,
+       description: 'Whether to restrict the build to libbge')
+
 option('hardcoded_main_config_path',
        type: 'string',
        value: '',

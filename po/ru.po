@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-24 11:40+0700\n"
-"PO-Revision-Date: 2026-02-24 18:56+0700\n"
+"POT-Creation-Date: 2026-04-10 14:20+0700\n"
+"PO-Revision-Date: 2026-04-10 14:24+0700\n"
 "Last-Translator: Jill Fiore <contact@lumaeris.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -20,11 +20,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Gtranslator 49.0\n"
+"X-Generator: Gtranslator 50.0\n"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:2
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:6
-#: src/bz-window.blp:111
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:46
+#: src/bz-window.c:377 src/bz-window.c:378
 msgid "Bazaar"
 msgstr "Bazaar"
 
@@ -37,73 +37,149 @@ msgstr ""
 msgid "GTK;System;PackageManager;Discover;Flatpak;Software;Store;"
 msgstr "GTK;Система;УправлениеПакетами;Discover;Flatpak;Приложения;Магазин;"
 
-#: data/io.github.kolunmi.Bazaar.desktop.in:15
+#: data/io.github.kolunmi.Bazaar.desktop.in:16
 msgid "New Window"
 msgstr "Новое окно"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:8
-msgid "Discover and install applications"
-msgstr "Поиск и установка приложений"
+msgid "Discover and manage applications"
+msgstr "Поиск и управление приложениями"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:10
 msgid ""
-"A new app store for Linux with a focus on discovering and installing "
-"applications and addons from Flatpak remotes, particularly Flathub."
+"A fast and modern app store for Linux with a focus on discovering and "
+"installing Flatpak apps and addons, particularly from Flathub."
 msgstr ""
-"Новый магазин приложений для Linux с фокусом на поиске, установке приложений "
-"и дополнений из Flatpak репозиторий, в частности с Flathub."
+"Быстрый и современный магазин приложений для Linux с фокусом на поиске, "
+"установке приложений и дополнений из Flatpak репозиторий, в частности с "
+"Flathub."
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:14
-msgid ""
-"It emphasizes supporting the developers who make the Linux desktop possible. "
-"Bazaar features a \"curated\" tab that can be configured by distributors to "
-"allow for a more localized experience."
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:15
+msgid "Queue multiple installs and keep browsing"
 msgstr ""
-"Оно подчёркивает поддержку разработчиков, которые делают настольный Linux "
-"возможным. Bazaar внедряет вкладку \"Курируемое\", которая настраивается "
-"дистрибьюторами для обеспечения более ориентированного опыта."
+"Добавьте несколько установок в очередь и продолжайте просматривать страницы"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29 src/bz-application.c:699
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:16
+msgid "Easily view app permissions"
+msgstr "Просто просматривайте разрешения приложений"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:17
+msgid "Sign in to Flathub to view and manage your favorites"
+msgstr ""
+"Войдите в Flathub для просмотра и управления вашими избранными приложениями"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:18
+msgid "Search apps directly from GNOME Shell"
+msgstr "Поиск приложения напрямую с GNOME Shell"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:30
 msgid "Adam Masciola"
 msgstr "Адам Масциола"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:54
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:55
 msgid "The home page displaying Flathub apps"
 msgstr "Главная страница, отображающая приложения Flathub"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:58
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:59
 msgid "Exhibit app page"
 msgstr "Страница приложения Exhibit"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:62
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:63
 msgid "Library page"
 msgstr "Страница библиотеки"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:66
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:67
 msgid "Search page"
 msgstr "Страница поиска"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:70
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:71
 msgid "Category page"
 msgstr "Страница категорий"
 
-#: src/bz-addons-dialog.blp:16 src/bz-full-view.blp:710
-msgid "Manage Add-Ons"
-msgstr "Управление дополнениями"
+#: src/bz-addon-tile.blp:49 src/bz-installed-tile.blp:64
+#: src/bz-rich-app-tile.blp:140
+msgid "Stopped Receiving Updates"
+msgstr "Прекращено получение обновлений"
 
-#: src/bz-addons-dialog.c:94 src/bz-full-view.blp:499
-#: src/bz-installed-tile.blp:119 src/bz-transaction-dialog.c:231
-msgid "Remove"
+#: src/bz-addon-tile.c:155 src/bz-favorites-tile.c:157
+#: src/bz-rich-app-tile.blp:172
+msgid "Uninstall"
 msgstr "Удалить"
 
-#: src/bz-addons-dialog.c:99 src/bz-favorites-tile.c:159
-#: src/bz-full-view.blp:262 src/bz-full-view.blp:486
-#: src/bz-transaction-dialog.c:202
+#: src/bz-addon-tile.c:157 src/bz-addons-dialog.blp:280
+#: src/bz-favorites-tile.c:159
 msgid "Install"
 msgstr "Установить"
 
+#: src/bz-addons-dialog.blp:14 src/bz-addons-dialog.blp:21
+#: src/bz-addons-dialog.blp:70 src/bz-full-view.blp:627
+#: src/bz-installed-tile.blp:101
+msgid "Manage Add-Ons"
+msgstr "Управление дополнениями"
+
+#: src/bz-addons-dialog.blp:80
+msgid "No Add-Ons Visible"
+msgstr "Нет видимых дополнений"
+
+#: src/bz-addons-dialog.blp:81
+msgid ""
+"Your current filter preferences are hiding all known add-ons. Try adjusting "
+"them."
+msgstr ""
+"Ваши параметры фильтра скрывают все известные дополнения. Попробуйте "
+"изменить их."
+
+#: src/bz-addons-dialog.blp:88
+msgid "Add-on Page"
+msgstr "Страница дополнений"
+
+#: src/bz-addons-dialog.blp:202 src/bz-full-view.blp:426
+msgid "Downloads/Month"
+msgstr "Загрузок в месяц"
+
+#: src/bz-addons-dialog.blp:229 src/bz-full-view.blp:461
+msgid "Stopped Receiving Core Updates"
+msgstr "Прекращено получение основных обновлений"
+
+#: src/bz-addons-dialog.blp:243
+msgid ""
+"This add-on uses a runtime that no longer receives updates or security "
+"fixes. It may become unsafe to use."
+msgstr ""
+"Это дополнение использует среду выполнения, которая больше не получает "
+"обновления или исправления ошибок безопасности. Оно может стать небезопасным "
+"для использования."
+
+#: src/bz-addons-dialog.blp:297 src/bz-rich-app-tile.blp:185
+#: src/bz-transaction-tile.blp:272
+msgid "Open"
+msgstr "Открыть"
+
+#: src/bz-addons-dialog.blp:304 src/bz-install-controls.blp:141
+#: src/bz-installed-tile.blp:114
+msgid "Remove"
+msgstr "Удалить"
+
+#: src/bz-addons-dialog.c:325
+#, c-format
+msgid "Add-on for %s"
+msgstr "Дополнение к %s"
+
+#: src/bz-addons-dialog.c:339 src/bz-full-view.c:577
+msgid "Show Less"
+msgstr "Показать меньше"
+
+#: src/bz-addons-dialog.c:339 src/bz-full-view.c:577
+msgid "Show More"
+msgstr "Показать больше"
+
+#: src/bz-addons-dialog.c:389
+msgid "Download Stats"
+msgstr "Статистика загрузок"
+
 #: src/bz-age-rating-dialog.blp:7 src/bz-age-rating-dialog.blp:31
-#: src/bz-age-rating-dialog.c:726 src/bz-full-view.c:348 src/bz-full-view.c:355
+#: src/bz-age-rating-dialog.c:736 src/bz-context-tile-callbacks.c:186
+#: src/bz-context-tile-callbacks.c:193
 msgid "Age Rating"
 msgstr "Возраст"
 
@@ -432,98 +508,98 @@ msgid "Violence"
 msgstr "Насилие"
 
 #. Translators: Age rating format, e.g. "12+" for ages 12 and up
-#: src/bz-age-rating-dialog.c:676 src/bz-full-view.c:338
+#: src/bz-age-rating-dialog.c:686 src/bz-context-tile-callbacks.c:176
 #, c-format
 msgid "%d+"
 msgstr "%d+"
 
-#: src/bz-age-rating-dialog.c:701
+#: src/bz-age-rating-dialog.c:711
 msgctxt "Age rating"
 msgid "All"
 msgstr "Все"
 
-#: src/bz-age-rating-dialog.c:737
+#: src/bz-age-rating-dialog.c:747
 #, c-format
 msgid "%s has an unknown age rating"
 msgstr "%s имеет неизвестное возрастное ограничение"
 
-#: src/bz-age-rating-dialog.c:743
+#: src/bz-age-rating-dialog.c:753
 #, c-format
 msgid "%s is suitable for everyone"
 msgstr "%s предназначено для всех возрастов"
 
-#: src/bz-age-rating-dialog.c:746
+#: src/bz-age-rating-dialog.c:756
 #, c-format
 msgid "%s is suitable for young children"
 msgstr "%s предназначено для маленьких детей"
 
-#: src/bz-age-rating-dialog.c:749
+#: src/bz-age-rating-dialog.c:759
 #, c-format
 msgid "%s is suitable for children"
 msgstr "%s предназначено для детей"
 
-#: src/bz-age-rating-dialog.c:752
+#: src/bz-age-rating-dialog.c:762
 #, c-format
 msgid "%s is suitable for teenagers"
 msgstr "%s предназначено для подростков"
 
-#: src/bz-age-rating-dialog.c:755
+#: src/bz-age-rating-dialog.c:765
 #, c-format
 msgid "%s is suitable for adults"
 msgstr "%s предназначено для взрослых"
 
-#: src/bz-age-rating-dialog.c:758
+#: src/bz-age-rating-dialog.c:768
 #, c-format
 msgid "%s is suitable for %s"
 msgstr "%s предназначено для %s"
 
-#: src/bz-age-rating-dialog.c:852
+#: src/bz-age-rating-dialog.c:862
 #, c-format
 msgid "%s • %s"
 msgstr "%s • %s"
 
 #: src/bz-all-apps-page.blp:13 src/bz-apps-page.blp:14 src/bz-full-view.blp:29
-#: src/bz-user-data-page.blp:15 src/bz-window.blp:292
+#: src/bz-user-data-page.blp:15 src/bz-window.blp:239
 msgid "Main Menu"
 msgstr "Главное меню"
 
 #: src/bz-all-apps-page.blp:18 src/bz-apps-page.blp:18
-#: src/bz-user-data-page.blp:19 src/bz-window.blp:385
+#: src/bz-user-data-page.blp:19 src/bz-window.blp:328
 msgid "_Donate to Bazaar ❤️"
 msgstr "_Поддержать Bazaar ❤️"
 
 #: src/bz-all-apps-page.blp:25 src/bz-apps-page.blp:25
-#: src/bz-user-data-page.blp:26 src/bz-window.blp:392
+#: src/bz-user-data-page.blp:26 src/bz-window.blp:335
 msgid "_Refresh"
 msgstr "_Обновить"
 
 #: src/bz-all-apps-page.blp:30 src/bz-apps-page.blp:30
-#: src/bz-user-data-page.blp:31 src/bz-window.blp:397
+#: src/bz-user-data-page.blp:31 src/bz-window.blp:340
 msgid "_Preferences"
 msgstr "П_араметры"
 
 #: src/bz-all-apps-page.blp:35 src/bz-apps-page.blp:35
-#: src/bz-user-data-page.blp:36
+#: src/bz-user-data-page.blp:36 src/bz-window.blp:345
 msgid "_Login With Flathub"
 msgstr "_Войти в Flathub"
 
 #: src/bz-all-apps-page.blp:41 src/bz-apps-page.blp:41
-#: src/bz-user-data-page.blp:42 src/bz-window.blp:408
+#: src/bz-user-data-page.blp:42 src/bz-window.blp:351
 msgid "_Manage Leftover User Data"
 msgstr "_Управлять оставшимися данными"
 
 #: src/bz-all-apps-page.blp:46 src/bz-apps-page.blp:46
-#: src/bz-user-data-page.blp:47 src/bz-window.blp:413
+#: src/bz-user-data-page.blp:47 src/bz-window.blp:356
 msgid "_Keyboard Shortcuts"
 msgstr "_Сочетание клавиш"
 
 #: src/bz-all-apps-page.blp:51 src/bz-apps-page.blp:51
-#: src/bz-user-data-page.blp:52 src/bz-window.blp:418
+#: src/bz-user-data-page.blp:52 src/bz-window.blp:361
 msgid "_About Bazaar"
 msgstr "О _Bazaar"
 
 #: src/bz-all-apps-page.blp:58 src/bz-apps-page.blp:58
-#: src/bz-user-data-page.blp:59 src/bz-window.blp:425
+#: src/bz-user-data-page.blp:59 src/bz-window.blp:368
 msgid "_Quit Bazaar"
 msgstr "_Завершить Bazaar"
 
@@ -653,31 +729,31 @@ msgstr "Доступ к файловой системе в %s"
 msgid "Unknown filesystem path"
 msgstr "Неизвестный путь файловой системы"
 
-#: src/bz-app-size-dialog.blp:29 src/bz-app-size-dialog.blp:55
+#: src/bz-app-size-dialog.blp:26 src/bz-app-size-dialog.blp:52
 msgid "Download Size"
 msgstr "Размер скачивания"
 
-#: src/bz-app-size-dialog.blp:56
+#: src/bz-app-size-dialog.blp:53
 msgid "Amount to download from the internet"
 msgstr "Размер скачивания из интернета"
 
-#: src/bz-app-size-dialog.blp:76
+#: src/bz-app-size-dialog.blp:73
 msgid "Installed Size"
 msgstr "Размер установки"
 
-#: src/bz-app-size-dialog.blp:77
+#: src/bz-app-size-dialog.blp:74
 msgid "Size on Disk"
 msgstr "Размер на диске"
 
-#: src/bz-app-size-dialog.blp:125
+#: src/bz-app-size-dialog.blp:121
 msgid "Open user data folder"
 msgstr "Открыть папку пользовательских данных"
 
-#: src/bz-app-size-dialog.blp:135
+#: src/bz-app-size-dialog.blp:131
 msgid "User Data Size"
 msgstr "Размер пользовательских данных"
 
-#: src/bz-app-size-dialog.blp:136
+#: src/bz-app-size-dialog.blp:132
 msgid "Caches, settings, and other app data"
 msgstr "Кэши, настройки и другие пользовательские данные"
 
@@ -689,13 +765,18 @@ msgstr "Размер установленной среды выполнения"
 msgid "Runtime Download Size"
 msgstr "Размер скачивания среды выполнения"
 
+#: src/bz-app-size-dialog.c:204
+msgid "App Size"
+msgstr "Размер приложения"
+
 #: src/bz-app-tile.blp:57 src/bz-developer-badge.c:98
-#: src/bz-rich-app-tile.blp:103 src/bz-rich-app-tile.c:282
+#: src/bz-rich-app-tile.blp:104 src/bz-rich-app-tile.c:304
 msgid "Verified"
 msgstr "Подтверждено"
 
 #. Translators: As in 'The app is installed'.
-#: src/bz-app-tile.blp:89 src/bz-full-view.c:297 src/bz-releases-list.c:178
+#: src/bz-app-tile.blp:88 src/bz-context-tile-callbacks.c:135
+#: src/bz-releases-list.c:205
 msgid "Installed"
 msgstr "Установлено"
 
@@ -703,48 +784,52 @@ msgstr "Установлено"
 msgid "Show All"
 msgstr "Показать все"
 
-#: src/bz-apps-page.c:243
+#: src/bz-apps-page.c:229
 #, c-format
 msgid "All \"%s\""
 msgstr "Все \"%s\""
 
-#: src/bz-apps-page.c:530 src/bz-tag-list.c:109
+#: src/bz-apps-page.c:478 src/bz-tag-list.c:91
 #, c-format
 msgid "%d Applications"
 msgstr "%d приложений"
 
-#: src/bz-application.c:678
+#: src/bz-application.c:707
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr "Адам Масциола <kolunmi@posteo.net>"
 
-#: src/bz-application.c:679
+#: src/bz-application.c:708
 msgctxt "About Dialog Developer Credit"
 msgid "Alexander Vanhee"
 msgstr "Александр Фанхе"
 
+#: src/bz-application.c:728
+msgid "The Bazaar Contributors"
+msgstr "Разработчики Bazaar"
+
 #. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
-#: src/bz-application.c:702
+#: src/bz-application.c:731
 msgid "translator-credits"
 msgstr "Джилл Фиори <contact@lumaeris.com>, 2025, 2026"
 
-#: src/bz-application.c:712
+#: src/bz-application.c:741
 msgid "Special Thanks"
 msgstr "Особая благодарность"
 
-#: src/bz-application.c:770
+#: src/bz-application.c:799
 msgid "Logged Out Successfully!"
 msgstr "Выход из аккаунта выполнен успешно!"
 
-#: src/bz-application.c:893
-msgid "Performing setup..."
-msgstr "Выполняется настройка..."
+#: src/bz-application.c:922
+msgid "Performing setup…"
+msgstr "Выполняется настройка…"
 
-#: src/bz-application.c:977
+#: src/bz-application.c:1006
 msgid "Set Up System Flathub?"
 msgstr "Добавить системный Flathub?"
 
-#: src/bz-application.c:980
+#: src/bz-application.c:1009
 msgid ""
 "The system Flathub remote is not set up. Bazaar requires Flathub to be "
 "configured on the system Flatpak installation to browse and install "
@@ -758,11 +843,11 @@ msgstr ""
 "Вы по-прежнему можете использовать Bazaar для обзора и удаления уже "
 "установленных приложений."
 
-#: src/bz-application.c:987
+#: src/bz-application.c:1016
 msgid "Set Up Flathub?"
 msgstr "Добавить Flathub?"
 
-#: src/bz-application.c:990
+#: src/bz-application.c:1019
 msgid ""
 "Flathub is not set up on this system. You will not be able to browse and "
 "install applications in Bazaar if its unavailable.\n"
@@ -775,104 +860,232 @@ msgstr ""
 "Вы по-прежнему можете использовать Bazaar для обзора и удаления уже "
 "установленных приложений."
 
-#: src/bz-application.c:996
+#: src/bz-application.c:1025
 msgid "Later"
 msgstr "Позже"
 
-#: src/bz-application.c:997
+#: src/bz-application.c:1026
 msgid "Set Up Flathub"
 msgstr "Добавить Flathub"
 
-#: src/bz-application.c:1280
+#: src/bz-application.c:1315
 msgid "A backend error occurred"
 msgstr "Произошла ошибка бэкэнда"
 
-#: src/bz-application.c:1406 src/bz-application.c:3184 src/bz-window.blp:135
+#: src/bz-application.c:1511 src/bz-application.c:3420 src/bz-window.blp:70
 msgid "Refreshing…"
-msgstr "Обновление..."
+msgstr "Обновление…"
 
-#: src/bz-application.c:1553 src/bz-application.c:3180
+#: src/bz-application.c:1663 src/bz-application.c:3418
 #, c-format
 msgid "Loading %d apps…"
 msgstr "Загрузка %d приложений…"
 
-#: src/bz-application.c:1558
+#: src/bz-application.c:1666
 msgid "Checking for updates…"
 msgstr "Проверка на наличие обновлений…"
 
-#: src/bz-application.c:1614
+#: src/bz-application.c:1729
 msgid "Failed to open .flatpakref"
 msgstr "Невозможно открыть .flatpakref"
 
-#: src/bz-application.c:1668
+#: src/bz-application.c:1785
 msgid "An initialization error occurred"
 msgstr "Произошла ошибка инициализации"
 
-#: src/bz-application.c:2006
+#: src/bz-application.c:2183
 msgid "Failed to check for updates"
 msgstr "Невозможно проверить на наличие обновлений"
 
-#: src/bz-application.c:2963
+#: src/bz-application.c:3191
 msgid "Could not find app"
 msgstr "Не удалось найти приложение"
 
-#: src/bz-application.c:3186
+#: src/bz-application.c:3422
 msgid "Writing to cache…"
 msgstr "Запись в кэш…"
 
-#: src/bz-appstream-parser.c:303
+#: src/bz-appstream-parser.c:302
 msgctxt "Project URL Type"
 msgid "Flathub Page"
 msgstr "Страница Flathub"
 
-#: src/bz-appstream-parser.c:324
+#: src/bz-appstream-parser.c:323
 msgctxt "Project URL Type"
 msgid "Project Website"
 msgstr "Веб-сайт проекта"
 
-#: src/bz-appstream-parser.c:328
+#: src/bz-appstream-parser.c:327
 msgctxt "Project URL Type"
 msgid "Issue Tracker"
 msgstr "Отслеживание ошибок"
 
-#: src/bz-appstream-parser.c:332
+#: src/bz-appstream-parser.c:331
 msgctxt "Project URL Type"
 msgid "FAQ"
 msgstr "Часто задаваемые вопросы"
 
-#: src/bz-appstream-parser.c:336
+#: src/bz-appstream-parser.c:335
 msgctxt "Project URL Type"
 msgid "Help"
 msgstr "Помощь"
 
-#: src/bz-appstream-parser.c:340
+#: src/bz-appstream-parser.c:339
 msgctxt "Project URL Type"
 msgid "Donate"
 msgstr "Пожертвовать"
 
-#: src/bz-appstream-parser.c:346
+#: src/bz-appstream-parser.c:345
 msgctxt "Project URL Type"
 msgid "Translate"
 msgstr "Перевод"
 
-#: src/bz-appstream-parser.c:350
+#: src/bz-appstream-parser.c:349
 msgctxt "Project URL Type"
 msgid "Contact"
 msgstr "Связаться"
 
-#: src/bz-appstream-parser.c:354
+#: src/bz-appstream-parser.c:353
 msgctxt "Project URL Type"
 msgid "Source Code"
 msgstr "Исходный код"
 
-#: src/bz-appstream-parser.c:360
+#: src/bz-appstream-parser.c:359
 msgctxt "Project URL Type"
 msgid "Contribute"
-msgstr "Сделать вклад"
+msgstr "Внести вклад"
+
+#: src/bz-context-tile-callbacks.c:68
+msgid "---"
+msgstr "---"
+
+#. Translators: M is the suffix for millions
+#: src/bz-context-tile-callbacks.c:75
+#, c-format
+msgid "%.*fM"
+msgstr "%.*f мил."
+
+#. Translators: K is the suffix for thousands
+#: src/bz-context-tile-callbacks.c:82
+#, c-format
+msgid "%.*fK"
+msgstr "%.*f тыс."
+
+#: src/bz-context-tile-callbacks.c:92
+#, c-format
+msgid "%d downloads in the last month"
+msgstr "%d загрузок за последний месяц"
+
+#: src/bz-context-tile-callbacks.c:104 src/bz-context-tile-callbacks.c:389
+#: src/bz-context-tile-callbacks.c:406
+msgid "N/A"
+msgstr "Н/Д"
+
+#: src/bz-context-tile-callbacks.c:132
+#, c-format
+msgid "+%s runtime"
+msgstr "+%s среды выполнения"
+
+#: src/bz-context-tile-callbacks.c:135
+msgid "Download"
+msgstr "Скачивание"
+
+#: src/bz-context-tile-callbacks.c:155
+msgid "Size information unavailable"
+msgstr "Информация о размере недоступна"
+
+#: src/bz-context-tile-callbacks.c:158
+#, c-format
+msgid "Download size of %s"
+msgstr "Размер скачивания %s"
+
+#: src/bz-context-tile-callbacks.c:191
+msgid "All Ages"
+msgstr "Для всех"
+
+#: src/bz-context-tile-callbacks.c:203
+msgid "Age rating information unavailable"
+msgstr "Информация о возрастном ограничении недоступна"
+
+#: src/bz-context-tile-callbacks.c:208
+msgid "Suitable for all ages"
+msgstr "Предназначено для всех возрастов"
+
+#: src/bz-context-tile-callbacks.c:210
+#, c-format
+msgid "Suitable for ages %d and up"
+msgstr "Предназначено для лиц старше %d лет"
+
+#: src/bz-context-tile-callbacks.c:243 src/bz-context-tile-callbacks.c:248
+#: src/bz-context-tile-callbacks.c:276 src/bz-context-tile-callbacks.c:284
+msgid "Unknown"
+msgstr "Неизвестно"
+
+#: src/bz-context-tile-callbacks.c:253
+#, c-format
+msgid "Free software licensed under %s"
+msgstr "Свободное программное обеспечение, лицензированное под %s"
+
+#: src/bz-context-tile-callbacks.c:258
+msgid "Free software"
+msgstr "Cвободное программное обеспечение"
+
+#: src/bz-context-tile-callbacks.c:261
+msgid "Proprietary Software"
+msgstr "Проприетарное программное обеспечение"
+
+#: src/bz-context-tile-callbacks.c:264
+#, c-format
+msgid "Special License: %s"
+msgstr "Специальная лицензия: %s"
+
+#: src/bz-context-tile-callbacks.c:281
+msgid "Free"
+msgstr "Свободное"
+
+#: src/bz-context-tile-callbacks.c:287 src/bz-license-dialog.c:133
+msgid "Proprietary"
+msgstr "Проприетарное"
+
+#: src/bz-context-tile-callbacks.c:289 src/bz-license-dialog.c:135
+msgid "Special License"
+msgstr "Специальная лицензия"
+
+#: src/bz-context-tile-callbacks.c:309
+msgid "Adaptive"
+msgstr "Адаптивное"
+
+#: src/bz-context-tile-callbacks.c:309
+msgid "Desktop Only"
+msgstr "Только для ПК"
+
+#: src/bz-context-tile-callbacks.c:315
+msgid "Works on desktop, tablets, and phones"
+msgstr "Работает на настольных компьютерах, планшетах и телефонах"
+
+#: src/bz-context-tile-callbacks.c:316
+msgid "May not work on mobile devices"
+msgstr "Может не работать на мобильных устройствах"
+
+#: src/bz-context-tile-callbacks.c:396 src/bz-safety-dialog.blp:31
+msgid "Safe"
+msgstr "Безопасно"
+
+#: src/bz-context-tile-callbacks.c:398 src/bz-context-tile-callbacks.c:400
+msgid "Low Risk"
+msgstr "Низкий риск"
+
+#: src/bz-context-tile-callbacks.c:402
+msgid "Medium Risk"
+msgstr "Средний риск"
+
+#: src/bz-context-tile-callbacks.c:404
+msgid "High Risk"
+msgstr "Высокий риск"
 
 #: src/bz-curated-view.blp:11 src/bz-favorites-page.blp:68
-#: src/bz-flathub-page.blp:19 src/bz-full-view.blp:61
-#: src/bz-library-page.blp:63 src/bz-user-data-page.blp:86
+#: src/bz-flathub-page.blp:19 src/bz-full-view.blp:62
+#: src/bz-library-page.blp:65 src/bz-user-data-page.blp:86
 msgid "Empty"
 msgstr "Пусто"
 
@@ -906,15 +1119,15 @@ msgstr "Нет интернета"
 msgid "Browser"
 msgstr "Браузеры"
 
-#: src/bz-developer-badge.c:92 src/bz-developer-badge.c:98
+#: src/bz-developer-badge.c:94 src/bz-developer-badge.c:98
 msgid "Not Verified"
 msgstr "Не подтверждено"
 
-#: src/bz-developer-badge.c:145
+#: src/bz-developer-badge.c:210
 msgid "Developer information not available."
 msgstr "Информация о разработчике недоступна."
 
-#: src/bz-developer-badge.c:151 src/bz-developer-badge.c:165
+#: src/bz-developer-badge.c:216 src/bz-developer-badge.c:230
 #, c-format
 msgid ""
 "The ownership of the %s app ID has not been verified and it may be a "
@@ -923,7 +1136,7 @@ msgstr ""
 "Право собственности на ID приложения %s не было подтверждено, это приложение "
 "может быть неофициальным."
 
-#: src/bz-developer-badge.c:169
+#: src/bz-developer-badge.c:234
 #, c-format
 msgid ""
 "The ownership of the %s app ID has been manually verified by the Flathub "
@@ -931,7 +1144,7 @@ msgid ""
 msgstr ""
 "Право собственности на ID приложения %s было подтверждено командой Flathub."
 
-#: src/bz-developer-badge.c:175
+#: src/bz-developer-badge.c:250
 #, c-format
 msgid ""
 "The ownership of the %1$s app ID has been verified by <b>%2$s</b> on "
@@ -940,13 +1153,13 @@ msgstr ""
 "Право собственности на ID приложения %1$s было подтверждено <b>%2$s</b> на "
 "<b>%3$s</b>."
 
-#: src/bz-developer-badge.c:182
+#: src/bz-developer-badge.c:257
 #, c-format
 msgid "The ownership of the %1$s app ID has been verified using %2$s."
 msgstr ""
 "Право собственности на ID приложения %1$s было подтверждено используя %2$s."
 
-#: src/bz-developer-badge.c:186
+#: src/bz-developer-badge.c:261
 #, c-format
 msgid "The ownership of the %s app ID has been verified."
 msgstr "Право собственности на ID приложения %s было подтверждено."
@@ -955,11 +1168,11 @@ msgstr "Право собственности на ID приложения %s б
 msgid "Full Release Notes"
 msgstr "Полные изменения выпуска"
 
-#: src/bz-donations-dialog.blp:105
+#: src/bz-donations-dialog.blp:108
 msgid "This release was made possible by users like you!"
 msgstr "Этот выпуск был сделан благодаря таким пользователям, как Вы!"
 
-#: src/bz-donations-dialog.blp:113
+#: src/bz-donations-dialog.blp:116
 msgid ""
 "I love making Bazaar, but I cannot do it alone. Help support further "
 "development by donating on Ko-Fi."
@@ -967,7 +1180,7 @@ msgstr ""
 "Мне нравится делать Bazaar, но я не могу это делать в одиночку. Поддержите "
 "дальнейшую разработку пожертвовав средства в мой Ko-Fi."
 
-#: src/bz-donations-dialog.blp:128
+#: src/bz-donations-dialog.blp:131
 msgid "Donate to Bazaar"
 msgstr "Поддержать Bazaar"
 
@@ -980,7 +1193,7 @@ msgstr "Что нового в %s?"
 #. Translators: this is a release date label, like "Released February 9, 2026"
 #: src/bz-donations-dialog.c:243
 msgid "Released %B %-e, %Y"
-msgstr "Выпущено %B %-e, %Y"
+msgstr "Выпущено %-e %B, %Y"
 
 #: src/bz-entry-group-util.c:73
 msgid "Choose an Installation"
@@ -994,9 +1207,7 @@ msgstr ""
 "Вы установили несколько версий данного приложения. Какое вы хотите выбрать "
 "для продолжения?"
 
-#: src/bz-entry-group-util.c:80 src/bz-transaction-dialog.c:201
-#: src/bz-transaction-dialog.c:230 src/bz-transaction-dialog.c:275
-#: src/bz-transaction-dialog.c:578
+#: src/bz-entry-group-util.c:80
 msgid "Cancel"
 msgstr "Отмена"
 
@@ -1021,7 +1232,7 @@ msgstr "Детали"
 msgid "Copy"
 msgstr "Скопировать"
 
-#: src/bz-error-dialog.c:56 src/bz-share-list.c:64
+#: src/bz-error-dialog.c:56 src/bz-share-list.c:62
 msgid "Copied!"
 msgstr "Скопировано!"
 
@@ -1041,15 +1252,11 @@ msgstr "Войти"
 msgid "Favorite Count"
 msgstr "Число избранных"
 
-#: src/bz-favorites-tile.c:157
-msgid "Uninstall"
-msgstr "Удалить"
-
-#: src/bz-favorites-tile.c:360
+#: src/bz-favorites-tile.c:357
 msgid "Failed to remove favorite"
 msgstr "Не удалось удалить из избранных"
 
-#: src/bz-favorites-tile.blp:70
+#: src/bz-favorites-tile.blp:70 src/bz-installed-tile.blp:78
 msgid "Support This Application"
 msgstr "Поддержать это приложение"
 
@@ -1058,16 +1265,15 @@ msgid "Remove From Favorites"
 msgstr "Удалить из избранных"
 
 #: src/bz-favorites-page.blp:5 src/bz-favorites-page.blp:78
-#: src/bz-window.blp:443
+#: src/bz-window.blp:386
 msgid "Favorites"
 msgstr "Избранные"
 
 #: src/bz-favorites-page.blp:17 src/bz-section-view.blp:144
-#: src/bz-transaction-dialog.c:579
 msgid "Install All"
 msgstr "Установить все"
 
-#: src/bz-favorites-page.blp:34 src/bz-full-view.blp:44 src/bz-window.blp:308
+#: src/bz-favorites-page.blp:34 src/bz-full-view.blp:45 src/bz-window.blp:255
 msgid "Open App Library"
 msgstr "Открыть библиотеку приложений"
 
@@ -1087,23 +1293,23 @@ msgstr "Приложения помеченные как избранные бу
 msgid "Previous"
 msgstr "Предыдущий"
 
-#: src/bz-featured-carousel.blp:53
+#: src/bz-featured-carousel.blp:54
 msgid "Next"
 msgstr "Следующий"
 
-#: src/bz-featured-tile.blp:88
+#: src/bz-featured-tile.blp:90
 msgid "App of the Day"
 msgstr "Приложение дня"
 
-#: src/bz-flathub-category.c:89
+#: src/bz-flathub-category.c:93
 msgid "Editing"
 msgstr "Монтаж"
 
-#: src/bz-flathub-category.c:90
+#: src/bz-flathub-category.c:94
 msgid "Midi"
 msgstr "Midi"
 
-#: src/bz-flathub-category.c:91
+#: src/bz-flathub-category.c:95
 msgid "Mixer"
 msgstr "Микшеры"
 
@@ -1111,261 +1317,261 @@ msgstr "Микшеры"
 #. search regardless of what you put here, so don't worry about the string
 #. yielding poor search results. Focus on correctness and friendliness,
 #. etc
-#: src/bz-flathub-category.c:92 src/bz-search-pill-list.c:77
+#: src/bz-flathub-category.c:96 src/bz-search-pill-list.c:77
 msgid "Music"
 msgstr "Музыка"
 
-#: src/bz-flathub-category.c:93
+#: src/bz-flathub-category.c:97
 msgid "Player"
 msgstr "Проигрыватели"
 
-#: src/bz-flathub-category.c:94
+#: src/bz-flathub-category.c:98
 msgid "Recorder"
 msgstr "Звукозапись"
 
-#: src/bz-flathub-category.c:95
+#: src/bz-flathub-category.c:99
 msgid "Sequencer"
 msgstr "Секвенсоры"
 
-#: src/bz-flathub-category.c:96
+#: src/bz-flathub-category.c:100
 msgid "Tuner"
 msgstr "Тюнеры"
 
-#: src/bz-flathub-category.c:97
+#: src/bz-flathub-category.c:101
 msgid "TV"
 msgstr "ТВ"
 
-#: src/bz-flathub-category.c:102
+#: src/bz-flathub-category.c:106
 msgid "Emulation"
 msgstr "Эмуляторы"
 
-#: src/bz-flathub-category.c:103
+#: src/bz-flathub-category.c:107
 msgid "Action"
 msgstr "Экшен"
 
-#: src/bz-flathub-category.c:104
+#: src/bz-flathub-category.c:108
 msgid "Adventure"
 msgstr "Приключения"
 
-#: src/bz-flathub-category.c:105
+#: src/bz-flathub-category.c:109
 msgid "Arcade"
 msgstr "Аркады"
 
-#: src/bz-flathub-category.c:106
+#: src/bz-flathub-category.c:110
 msgid "Blocks"
 msgstr "Блоки"
 
-#: src/bz-flathub-category.c:107
+#: src/bz-flathub-category.c:111
 msgid "Board"
 msgstr "Настольные"
 
-#: src/bz-flathub-category.c:108
+#: src/bz-flathub-category.c:112
 msgid "Card"
 msgstr "Карточные"
 
-#: src/bz-flathub-category.c:109
+#: src/bz-flathub-category.c:113
 msgid "Kids"
 msgstr "Для детей"
 
-#: src/bz-flathub-category.c:110
+#: src/bz-flathub-category.c:114
 msgid "Logic"
 msgstr "Логические"
 
-#: src/bz-flathub-category.c:111
+#: src/bz-flathub-category.c:115
 msgid "Role Playing"
 msgstr "Ролевые"
 
-#: src/bz-flathub-category.c:112
+#: src/bz-flathub-category.c:116
 msgid "Shooter"
 msgstr "Шутеры"
 
-#: src/bz-flathub-category.c:113
+#: src/bz-flathub-category.c:117
 msgid "Simulation"
 msgstr "Симуляторы"
 
-#: src/bz-flathub-category.c:114
+#: src/bz-flathub-category.c:118
 msgid "Sports"
 msgstr "Спортивные"
 
-#: src/bz-flathub-category.c:115
+#: src/bz-flathub-category.c:119
 msgid "Strategy"
 msgstr "Стратегии"
 
-#: src/bz-flathub-category.c:120
+#: src/bz-flathub-category.c:124
 msgid "Audio & Video"
 msgstr "Аудио и видео"
 
-#: src/bz-flathub-category.c:120
+#: src/bz-flathub-category.c:124
 msgid "Media"
 msgstr "Медиа"
 
-#: src/bz-flathub-category.c:120
+#: src/bz-flathub-category.c:124
 msgid "More Audio & Video"
 msgstr "Больше приложений для аудио и видео"
 
-#: src/bz-flathub-category.c:121
+#: src/bz-flathub-category.c:125
 msgid "Developer Tools"
 msgstr "Инструменты разработчика"
 
-#: src/bz-flathub-category.c:121
+#: src/bz-flathub-category.c:125
 msgid "Develop"
 msgstr "Разработчикам"
 
-#: src/bz-flathub-category.c:121
+#: src/bz-flathub-category.c:125
 msgid "More Developer Tools"
 msgstr "Больше приложений для разработки"
 
-#: src/bz-flathub-category.c:122
+#: src/bz-flathub-category.c:126
 msgid "Education"
 msgstr "Образование"
 
-#: src/bz-flathub-category.c:122
+#: src/bz-flathub-category.c:126
 msgid "Learn"
 msgstr "Обучение"
 
-#: src/bz-flathub-category.c:122
+#: src/bz-flathub-category.c:126
 msgid "More Education"
 msgstr "Больше образовательных приложений"
 
-#: src/bz-flathub-category.c:123
+#: src/bz-flathub-category.c:127
 msgid "Gaming"
 msgstr "Игры"
 
-#: src/bz-flathub-category.c:123
+#: src/bz-flathub-category.c:127
 msgid "Play"
 msgstr "Игры"
 
-#: src/bz-flathub-category.c:123
+#: src/bz-flathub-category.c:127
 msgid "More Gaming"
 msgstr "Больше игр"
 
-#: src/bz-flathub-category.c:124
+#: src/bz-flathub-category.c:128
 msgid "Graphics & Photography"
 msgstr "Графика и фотография"
 
-#: src/bz-flathub-category.c:124
+#: src/bz-flathub-category.c:128
 msgid "Create"
 msgstr "Творение"
 
-#: src/bz-flathub-category.c:124
+#: src/bz-flathub-category.c:128
 msgid "More Graphics & Photography"
 msgstr "Больше приложений для графики"
 
-#: src/bz-flathub-category.c:125
+#: src/bz-flathub-category.c:129
 msgid "Networking"
 msgstr "Сеть"
 
-#: src/bz-flathub-category.c:125
+#: src/bz-flathub-category.c:129
 msgid "Internet"
 msgstr "Сеть"
 
-#: src/bz-flathub-category.c:125
+#: src/bz-flathub-category.c:129
 msgid "More Networking"
 msgstr "Больше сетевых приложений"
 
-#: src/bz-flathub-category.c:126
+#: src/bz-flathub-category.c:130
 msgid "Productivity"
 msgstr "Продуктивность"
 
-#: src/bz-flathub-category.c:126
+#: src/bz-flathub-category.c:130
 msgid "Work"
 msgstr "Работа"
 
-#: src/bz-flathub-category.c:126
+#: src/bz-flathub-category.c:130
 msgid "More Productivity"
 msgstr "Больше приложений для продуктивности"
 
-#: src/bz-flathub-category.c:127
+#: src/bz-flathub-category.c:131
 msgid "Science"
 msgstr "Наука"
 
-#: src/bz-flathub-category.c:127
+#: src/bz-flathub-category.c:131
 msgid "More Science"
 msgstr "Больше научных приложений"
 
-#: src/bz-flathub-category.c:128
+#: src/bz-flathub-category.c:132
 msgid "System"
 msgstr "Система"
 
-#: src/bz-flathub-category.c:128
+#: src/bz-flathub-category.c:132
 msgid "More System"
 msgstr "Больше системных приложений"
 
-#: src/bz-flathub-category.c:129
+#: src/bz-flathub-category.c:133
 msgid "Utilities"
 msgstr "Утилиты"
 
-#: src/bz-flathub-category.c:129
+#: src/bz-flathub-category.c:133
 msgid "Tools"
 msgstr "Утилиты"
 
-#: src/bz-flathub-category.c:129
+#: src/bz-flathub-category.c:133
 msgid "More Utilities"
 msgstr "Больше утилит"
 
-#: src/bz-flathub-category.c:130 src/bz-flathub-page.blp:119
-#: src/bz-flathub-page.blp:152
+#: src/bz-flathub-category.c:134 src/bz-flathub-page.blp:116
+#: src/bz-flathub-page.blp:148
 msgid "Trending"
 msgstr "В тренде"
 
-#: src/bz-flathub-category.c:130
+#: src/bz-flathub-category.c:134
 msgid "More Trending"
 msgstr "Больше трендовых"
 
-#: src/bz-flathub-category.c:131 src/bz-flathub-page.blp:125
-#: src/bz-flathub-page.blp:185
+#: src/bz-flathub-category.c:135 src/bz-flathub-page.blp:122
+#: src/bz-flathub-page.blp:178
 msgid "Popular"
 msgstr "Популярное"
 
-#: src/bz-flathub-category.c:131
+#: src/bz-flathub-category.c:135
 msgid "More Popular"
 msgstr "Больше популярных"
 
-#: src/bz-flathub-category.c:132 src/bz-flathub-page.blp:174
+#: src/bz-flathub-category.c:136 src/bz-flathub-page.blp:168
 msgid "Recently Added"
 msgstr "Недавно добавленные"
 
-#: src/bz-flathub-category.c:132 src/bz-flathub-page.blp:131
+#: src/bz-flathub-category.c:136 src/bz-flathub-page.blp:128
 msgid "New"
 msgstr "Новое"
 
-#: src/bz-flathub-category.c:132
+#: src/bz-flathub-category.c:136
 msgid "More New"
 msgstr "Больше новинок"
 
-#: src/bz-flathub-category.c:133 src/bz-flathub-page.blp:163
+#: src/bz-flathub-category.c:137 src/bz-flathub-page.blp:158
 msgid "Recently Updated"
 msgstr "Недавно обновленные"
 
-#: src/bz-flathub-category.c:133 src/bz-flathub-page.blp:137
+#: src/bz-flathub-category.c:137 src/bz-flathub-page.blp:134
 msgid "Updated"
 msgstr "Обновлённые"
 
-#: src/bz-flathub-category.c:133
+#: src/bz-flathub-category.c:137
 msgid "More Updated"
 msgstr "Больше обновленных"
 
-#: src/bz-flathub-category.c:134
+#: src/bz-flathub-category.c:138
 msgid "Mobile"
 msgstr "Мобильные"
 
-#: src/bz-flathub-category.c:134
+#: src/bz-flathub-category.c:138
 msgid "More Mobile"
 msgstr "Больше мобильных приложений"
 
-#: src/bz-flathub-category.c:135
+#: src/bz-flathub-category.c:139
 msgid "Adwaita"
 msgstr "Adwaita"
 
-#: src/bz-flathub-category.c:135
+#: src/bz-flathub-category.c:139
 msgid "More Adwaita"
 msgstr "Больше Adwaita"
 
-#: src/bz-flathub-category.c:136
+#: src/bz-flathub-category.c:140
 msgid "KDE Apps"
 msgstr "KDE приложения"
 
-#: src/bz-flathub-category.c:136
+#: src/bz-flathub-category.c:140
 msgid "More KDE Apps"
 msgstr "Больше приложений к KDE"
 
@@ -1401,76 +1607,52 @@ msgstr ""
 msgid "Search Apps"
 msgstr "Поиск приложений"
 
-#: src/bz-flathub-page.blp:270
+#: src/bz-flathub-page.blp:255
 msgid "On the Go"
 msgstr "Всегда под рукой"
 
-#: src/bz-flathub-page.blp:282
+#: src/bz-flathub-page.blp:267
 msgid "Apps for your Linux phones and tablets"
 msgstr "Приложения для ваших телефонов и планшетов на Linux"
 
-#: src/bz-flathub-page.blp:293 src/bz-flathub-page.blp:328
+#: src/bz-flathub-page.blp:278 src/bz-flathub-page.blp:313
 msgid "More Mobile Apps"
 msgstr "Больше мобильных приложений"
 
-#: src/bz-flathub-page.blp:388
+#: src/bz-flathub-page.blp:369
 msgid "We​ ♥​ Games"
 msgstr "Мы ♥ Игры"
 
-#: src/bz-flathub-page.blp:401
+#: src/bz-flathub-page.blp:382
 msgid "Games and apps to run your favorite titles"
 msgstr "Игры и приложения для запуска ваших любимых тайтлов"
 
-#: src/bz-flathub-page.blp:435
+#: src/bz-flathub-page.blp:416
 msgid "More Games"
 msgstr "Больше игр"
 
-#: src/bz-full-view.blp:65 src/bz-library-page.blp:74
-#: src/bz-library-page.blp:78
+#: src/bz-full-view.blp:66 src/bz-library-page.blp:76
+#: src/bz-library-page.blp:80
 msgid "No Results"
 msgstr "Нет результатов"
 
-#: src/bz-full-view.blp:66
+#: src/bz-full-view.blp:67
 msgid "Try a different search query"
 msgstr "Попробуйте выполнить другой поисковый запрос"
 
-#: src/bz-full-view.blp:72
+#: src/bz-full-view.blp:73
 msgid "Content"
 msgstr "Содержимое"
 
-#: src/bz-full-view.blp:130
+#: src/bz-full-view.blp:131
 msgid "Installing .flatpak bundles is not yet supported"
 msgstr "Установка пакетов .flatpak пока не поддерживается"
 
-#: src/bz-full-view.blp:223
-msgid "Support"
-msgstr "Поддержать"
+#: src/bz-full-view.blp:257
+msgid "_Support"
+msgstr "_Поддержать"
 
-#: src/bz-full-view.blp:246 src/bz-full-view.blp:510
-msgid "Open"
-msgstr "Открыть"
-
-#: src/bz-full-view.blp:259 src/bz-full-view.blp:483
-msgid "Download & Install Application"
-msgstr "Скачать и установить приложение"
-
-#: src/bz-full-view.blp:274
-msgid "Uninstall Application"
-msgstr "Удалить приложение"
-
-#: src/bz-full-view.blp:289 src/bz-full-view.blp:525
-msgid "Install Other Version"
-msgstr "Установить другую версию"
-
-#: src/bz-full-view.blp:447
-msgid "Downloads/Month"
-msgstr "Загрузок в месяц"
-
-#: src/bz-full-view.blp:544
-msgid "Stopped Receiving Core Updates"
-msgstr "Прекращено получение основных обновлений"
-
-#: src/bz-full-view.blp:558
+#: src/bz-full-view.blp:475
 msgid ""
 "This app uses a runtime that no longer receives updates or security fixes. "
 "It may become unsafe to use."
@@ -1479,130 +1661,19 @@ msgstr ""
 "обновления или исправления ошибок безопасности. Оно может стать небезопасным "
 "для использования."
 
-#: src/bz-full-view.blp:645
+#: src/bz-full-view.blp:562
 msgid "Trash Data"
 msgstr "Отправить в корзину"
 
-#: src/bz-full-view.blp:786
+#: src/bz-full-view.blp:702
 msgid "Tags:"
 msgstr "Метки:"
 
-#: src/bz-full-view.c:230
-msgid "---"
-msgstr "---"
-
-#. Translators: M is the suffix for millions
-#: src/bz-full-view.c:237
-#, c-format
-msgid "%.*fM"
-msgstr "%.*f мил."
-
-#. Translators: K is the suffix for thousands
-#: src/bz-full-view.c:244
-#, c-format
-msgid "%.*fK"
-msgstr "%.*f тыс."
-
-#: src/bz-full-view.c:254
-#, c-format
-msgid "%d downloads in the last 30 days"
-msgstr "%d загрузок за последние 30 дней"
-
-#: src/bz-full-view.c:266 src/bz-full-view.c:607 src/bz-full-view.c:624
-msgid "N/A"
-msgstr "Н/Д"
-
-#: src/bz-full-view.c:294
-#, c-format
-msgid "+%s runtime"
-msgstr "+%s среды выполнения"
-
-#: src/bz-full-view.c:297
-msgid "Download"
-msgstr "Скачивание"
-
-#: src/bz-full-view.c:317
-msgid "Size information unavailable"
-msgstr "Информация о размере недоступна"
-
-#: src/bz-full-view.c:320
-#, c-format
-msgid "Download size of %s"
-msgstr "Размер скачивания %s"
-
-#: src/bz-full-view.c:353
-msgid "All Ages"
-msgstr "Для всех"
-
-#: src/bz-full-view.c:365
-msgid "Age rating information unavailable"
-msgstr "Информация о возрастном ограничении недоступна"
-
-#: src/bz-full-view.c:370
-msgid "Suitable for all ages"
-msgstr "Предназначено для всех возрастов"
-
-#: src/bz-full-view.c:372
-#, c-format
-msgid "Suitable for ages %d and up"
-msgstr "Предназначено для лиц старше %d лет"
-
-#: src/bz-full-view.c:405 src/bz-full-view.c:410 src/bz-full-view.c:438
-#: src/bz-full-view.c:449
-msgid "Unknown"
-msgstr "Неизвестно"
-
-#: src/bz-full-view.c:415
-#, c-format
-msgid "Free software licensed under %s"
-msgstr "Свободное программное обеспечение, лицензированное под %s"
-
-#: src/bz-full-view.c:420
-msgid "Free software"
-msgstr "Cвободное программное обеспечение"
-
-#: src/bz-full-view.c:423
-msgid "Proprietary Software"
-msgstr "Проприетарное программное обеспечение"
-
-#: src/bz-full-view.c:426
-#, c-format
-msgid "Special License: %s"
-msgstr "Специальная лицензия: %s"
-
-#: src/bz-full-view.c:443
-msgid "Free"
-msgstr "Свободное"
-
-#: src/bz-full-view.c:446 src/bz-license-dialog.c:132
-msgid "Proprietary"
-msgstr "Проприетарное"
-
-#: src/bz-full-view.c:451 src/bz-license-dialog.c:134
-msgid "Special License"
-msgstr "Специальная лицензия"
-
-#: src/bz-full-view.c:471
-msgid "Adaptive"
-msgstr "Адаптивное"
-
-#: src/bz-full-view.c:471
-msgid "Desktop Only"
-msgstr "Только для ПК"
-
-#: src/bz-full-view.c:477
-msgid "Works on desktop, tablets, and phones"
-msgstr "Работает на настольных компьютерах, планшетах и телефонах"
-
-#: src/bz-full-view.c:478
-msgid "May not work on mobile devices"
-msgstr "Может не работать на мобильных устройствах"
-
-#: src/bz-full-view.c:489
+#: src/bz-full-view.c:189
 msgid "No URL"
 msgstr "Нет URL"
 
-#: src/bz-full-view.c:507
+#: src/bz-full-view.c:207
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -1610,7 +1681,7 @@ msgstr ""
 "Это приложение имеет лицензию FLOSS, что значит исходный код может быть "
 "проверен на безопасность."
 
-#: src/bz-full-view.c:508
+#: src/bz-full-view.c:208
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
@@ -1619,70 +1690,42 @@ msgstr ""
 "разрабатывается в тайне и не может быть проверен независимой третьей "
 "стороной."
 
-#: src/bz-full-view.c:515
+#: src/bz-full-view.c:215
 msgid "More Apps"
 msgstr "Больше приложений"
 
-#: src/bz-full-view.c:516
+#: src/bz-full-view.c:216
 #, c-format
 msgid "More Apps by %s"
 msgstr "Больше приложений от %s"
 
-#: src/bz-full-view.c:523
+#: src/bz-full-view.c:223
 msgid "Other Apps by this Developer"
 msgstr "Другие приложения от этого разработчика"
 
-#: src/bz-full-view.c:525 src/bz-full-view.c:725
+#: src/bz-full-view.c:225 src/bz-full-view.c:324
 #, c-format
 msgid "Other Apps by %s"
 msgstr "Другие приложения от %s"
 
-#: src/bz-full-view.c:534
+#: src/bz-full-view.c:234
 #, c-format
 msgid "%s is not installed, but it still has <b>%s</b> of data present."
 msgstr ""
 "%s не установлено, но пользовательские данные в размере <b>%s</b> ещё "
 "присутствуют."
 
-#: src/bz-full-view.c:614 src/bz-safety-dialog.blp:31
-msgid "Safe"
-msgstr "Безопасно"
-
-#: src/bz-full-view.c:616 src/bz-full-view.c:618
-msgid "Low Risk"
-msgstr "Низкий риск"
-
-#: src/bz-full-view.c:620
-msgid "Medium Risk"
-msgstr "Средний риск"
-
-#: src/bz-full-view.c:622
-msgid "High Risk"
-msgstr "Высокий риск"
-
-#: src/bz-full-view.c:727
+#: src/bz-full-view.c:326
 msgid "Other Apps"
 msgstr "Другие приложения"
 
-#: src/bz-full-view.c:729
+#: src/bz-full-view.c:328
 #, c-format
 msgid "%d Application"
 msgid_plural "%d Applications"
 msgstr[0] "%d приложение"
 msgstr[1] "%d приложения"
 msgstr[2] "%d приложений"
-
-#: src/bz-full-view.c:960 src/bz-transaction-tile.c:340
-msgid "Failed to launch application"
-msgstr "Не удалось запустить приложение"
-
-#: src/bz-full-view.c:1068
-msgid "Show Less"
-msgstr "Показать меньше"
-
-#: src/bz-full-view.c:1068
-msgid "Show More"
-msgstr "Показать больше"
 
 #: src/bz-hardware-support-dialog.blp:7 src/bz-hardware-support-dialog.blp:31
 msgid "Hardware Support"
@@ -1778,65 +1821,82 @@ msgstr "%s работает лучше на определённых устро�
 msgid "%s works on most devices"
 msgstr "%s работает на большинстве устройств"
 
-#: src/bz-installed-tile.blp:63 src/bz-rich-app-tile.blp:139
-msgid "Stopped Receiving Updates"
-msgstr "Прекращено получение обновлений"
+#: src/bz-install-controls.blp:34 src/bz-transaction-dialog.c:202
+msgid "_Install"
+msgstr "_Установить"
 
-#: src/bz-installed-tile.blp:77
-msgid "Support this application"
-msgstr "Поддержать это приложение"
+#: src/bz-install-controls.blp:60
+msgid "_Open"
+msgstr "_Открыть"
 
-#: src/bz-installed-tile.blp:101
-msgid "Manage Add-ons"
-msgstr "Управление дополнениями"
+#: src/bz-install-controls.blp:75 src/bz-install-controls.blp:131
+msgid "Uninstall Application"
+msgstr "Удалить приложение"
 
-#: src/bz-installed-tile.c:249
-msgid "Failed to load add-ons"
-msgstr "Не удалось загрузить дополнения"
+#: src/bz-install-controls.blp:85 src/bz-transaction-dialog.c:231
+msgid "_Remove"
+msgstr "_Удалить"
 
-#: src/bz-library-page.blp:29
+#: src/bz-install-controls.blp:118 src/bz-updates-card.c:161
+#: src/bz-updates-card.c:180
+msgid "Update"
+msgstr "Обновить"
+
+#: src/bz-library-page.blp:31
 msgid "Search installed apps"
 msgstr "Поиск установленных приложений"
 
-#: src/bz-library-page.blp:46
+#: src/bz-library-page.blp:48
 msgid "Clear search"
 msgstr "Очистить поиск"
 
-#: src/bz-library-page.blp:67
+#: src/bz-library-page.blp:69
 msgid "No Apps Found"
 msgstr "Приложение не найдено"
 
 #. Translators: .
-#: src/bz-library-page.blp:86 src/bz-window.blp:179
+#: src/bz-library-page.blp:98 src/bz-window.blp:112
 msgid "Library"
 msgstr "Библиотека"
 
-#: src/bz-library-page.blp:114
+#: src/bz-library-page.blp:126
 msgid "Pending Updates"
 msgstr "Ожидают обновления"
 
-#: src/bz-library-page.blp:141
+#: src/bz-library-page.blp:153
 msgid "Downloads"
 msgstr "Загрузки"
 
-#: src/bz-library-page.blp:184
+#: src/bz-library-page.blp:196
 msgid "Recently Uninstalled"
 msgstr "Недавно удалённые"
 
-#: src/bz-library-page.blp:235
+#: src/bz-library-page.blp:247
 msgid "Clear Finished Tasks"
 msgstr "Очистить выполненные задачи"
 
-#: src/bz-library-page.blp:246
+#: src/bz-library-page.blp:260
 msgid "Installed Apps"
 msgstr "Установленные приложения"
 
-#: src/bz-library-page.c:150
+#: src/bz-library-page.blp:332
+msgid "Sort By"
+msgstr "Сортирововать"
+
+#: src/bz-library-page.blp:346
+msgid "Name"
+msgstr "Название"
+
+#: src/bz-library-page.blp:352
+msgid "Size"
+msgstr "Размер"
+
+#: src/bz-library-page.c:180
 #, c-format
 msgid "No matches found for \"%s\" in the list of installed apps"
 msgstr "Нет результатов по запросу \"%s\" в списке установленных приложений"
 
-#: src/bz-library-page.c:163 src/bz-updates-card.c:257
+#: src/bz-library-page.c:193 src/bz-updates-card.c:426
 #, c-format
 msgid "%u Available Update"
 msgid_plural "%u Available Updates"
@@ -1844,19 +1904,23 @@ msgstr[0] "Доступно %u обновление"
 msgstr[1] "Доступно %u обновления"
 msgstr[2] "Доступно %u обновлений"
 
-#: src/bz-license-dialog.blp:95
+#: src/bz-license-dialog.blp:94
 msgid "Get Involved"
 msgstr "Внести вклад"
 
-#: src/bz-license-dialog.c:126
+#: src/bz-license-dialog.blp:111
+msgid "Learn More"
+msgstr "Узнать больше"
+
+#: src/bz-license-dialog.c:127
 msgid "Unknown License"
 msgstr "Неизвестная лицензия"
 
-#: src/bz-license-dialog.c:129
+#: src/bz-license-dialog.c:130
 msgid "Community Built"
 msgstr "Сделано сообществом"
 
-#: src/bz-license-dialog.c:202
+#: src/bz-license-dialog.c:203
 msgid ""
 "This app is developed in the open by an international community.\n"
 "\n"
@@ -1866,11 +1930,11 @@ msgstr ""
 "\n"
 "Вы можете внести свой вклад и сделать это приложение ещё лучше."
 
-#: src/bz-license-dialog.c:205
+#: src/bz-license-dialog.c:206
 msgid "The license of this app is not known"
 msgstr "Лицензия этого приложения неизвестна"
 
-#: src/bz-license-dialog.c:211
+#: src/bz-license-dialog.c:212
 #, c-format
 msgid ""
 "This app is developed in the open by an international community, and "
@@ -1883,7 +1947,7 @@ msgstr ""
 "\n"
 "Вы можете внести свой вклад и сделать это приложение ещё лучше."
 
-#: src/bz-license-dialog.c:219
+#: src/bz-license-dialog.c:220
 msgid ""
 "This app is not developed in the open, so only its developers know how it "
 "works. It may be insecure in ways that are hard to detect, and it may change "
@@ -1897,7 +1961,7 @@ msgstr ""
 "\n"
 "Вы можете не иметь возможности внести вклад в это приложение."
 
-#: src/bz-license-dialog.c:225
+#: src/bz-license-dialog.c:226
 #, c-format
 msgid ""
 "This app is developed under the special license %s.\n"
@@ -1907,6 +1971,10 @@ msgstr ""
 "Это приложение разрабатывается под специальной лицензией %s.\n"
 "\n"
 "Вы можете не иметь возможности внести вклад в это приложение."
+
+#: src/bz-license-dialog.c:356 src/bz-safety-dialog.blp:53
+msgid "License"
+msgstr "Лицензия"
 
 #: src/bz-login-page.blp:5 src/bz-login-page.blp:42
 msgid "Connect to Flathub"
@@ -1922,7 +1990,7 @@ msgstr ""
 "Подключитесь к своему аккаунту Flathub в Bazaar для управления вашими "
 "избранными приложениями."
 
-#: src/bz-login-page.blp:108
+#: src/bz-login-page.blp:110
 msgid "Finish"
 msgstr "Завершить"
 
@@ -1941,7 +2009,7 @@ msgstr ""
 "Сетевое соединение ограничено — автоматическое обновление данных магазина "
 "приостановлена"
 
-#: src/bz-preferences-dialog.blp:26 src/bz-window.blp:335
+#: src/bz-preferences-dialog.blp:26 src/bz-window.blp:282
 msgid "Refresh Manually"
 msgstr "Обновить вручную"
 
@@ -1982,7 +2050,7 @@ msgstr "Скрыть неподдерживаемые приложения"
 msgid "Hide apps which are no longer supported by their developers"
 msgstr "Скрыть приложения, которые больше не поддерживаются разработчиками"
 
-#: src/bz-preferences-dialog.blp:55 src/bz-window.blp:197
+#: src/bz-preferences-dialog.blp:55 src/bz-window.blp:127
 msgid "Search"
 msgstr "Поиск"
 
@@ -2100,45 +2168,80 @@ msgstr "Цвета гордости фембоев"
 msgid "Neutrois Pride Colors"
 msgstr "Цвета гордости нейтроис"
 
-#: src/bz-releases-dialog.blp:5 src/bz-releases-list.blp:28
-#: src/bz-updates-card.blp:150
+#: src/bz-releases-dialog.blp:5 src/bz-updates-card.c:152
 msgid "Version History"
 msgstr "История версий"
 
-#. Translators: This is a date format for timestamps from the current year. Used in the app releases section.
-#. * %B is the full month name, %e is the day.
-#. * Example: "October 1"
-#. * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
-#. * Please modify to make it sound natural in your locale.
-#. *
-#: src/bz-releases-list.c:121
-msgid "%e %B"
-msgstr "%e %B"
+#: src/bz-releases-list.blp:27
+msgid "_Version History"
+msgstr "_История версий"
 
-#. Translators: This is a date format for timestamps from previous years. Used in the app releases section.
-#. * %B is the full month name, %e is the day, %Y is the year.
-#. * Example: "October 1, 2025"
-#. * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
-#. * Please modify to make it sound natural in your locale.
-#. *
-#: src/bz-releases-list.c:129
+#. Translators: something happened less than a day ago
+#: src/bz-releases-list.c:122
+msgid "Today"
+msgstr "Сегодня"
+
+#. Translators: something happened more than a day ago but less than 2 days ago
+#: src/bz-releases-list.c:125
+msgid "Yesterday"
+msgstr "Вчера"
+
+#. Translators: something happened days ago
+#: src/bz-releases-list.c:128
+#, c-format
+msgid "%d day ago"
+msgid_plural "%d days ago"
+msgstr[0] "%d день назад"
+msgstr[1] "%d дня назад"
+msgstr[2] "%d дней назад"
+
+#. Translators: something happened weeks ago
+#: src/bz-releases-list.c:131
+#, c-format
+msgid "%d week ago"
+msgid_plural "%d weeks ago"
+msgstr[0] "%d неделю назад"
+msgstr[1] "%d недели назад"
+msgstr[2] "%d недель назад"
+
+#. Translators: something happened months ago
+#: src/bz-releases-list.c:134
+#, c-format
+msgid "%d month ago"
+msgid_plural "%d months ago"
+msgstr[0] "%d месяц назад"
+msgstr[1] "%d месяца назад"
+msgstr[2] "%d месяцев назад"
+
+#. Translators: something happened years ago
+#: src/bz-releases-list.c:137
+#, c-format
+msgid "%d year ago"
+msgid_plural "%d years ago"
+msgstr[0] "%d год назад"
+msgstr[1] "%d года назад"
+msgstr[2] "%d лет назад"
+
+#. TRANSLATORS: This is the date string with: day number, month name, year.
+#. i.e. "22 March 2026"
+#: src/bz-releases-list.c:155
 msgid "%e %B %Y"
 msgstr "%e %B %Y"
 
-#: src/bz-releases-list.c:168
+#: src/bz-releases-list.c:195
 #, c-format
 msgid "Version %s"
 msgstr "Версия %s"
 
-#: src/bz-releases-list.c:220
+#: src/bz-releases-list.c:250
 msgid "No details for this release"
 msgstr "Нет подробностей"
 
-#: src/bz-releases-list.c:232
+#: src/bz-releases-list.c:262
 msgid "Get More Information"
 msgstr "Получить дополнительную информацию"
 
-#: src/bz-rich-app-tile.blp:156
+#: src/bz-rich-app-tile.blp:157
 msgid "Get"
 msgstr "Скачать"
 
@@ -2463,10 +2566,6 @@ msgstr "Может взаимодействовать с устройстами 
 msgid "Safety"
 msgstr "Безопасность"
 
-#: src/bz-safety-dialog.blp:53
-msgid "License"
-msgstr "Лицензия"
-
 #: src/bz-safety-dialog.blp:63
 msgid "App ID"
 msgstr "ID приложения"
@@ -2496,12 +2595,12 @@ msgstr "%s имеет небезопасные разрешения"
 #: src/bz-safety-dialog.c:237
 #, c-format
 msgid "%s is Probably Safe"
-msgstr "%s возможно безопасное"
+msgstr "%s вероятно безопасное"
 
 #: src/bz-safety-dialog.c:242
 #, c-format
 msgid "%s is Possibly Unsafe"
-msgstr "%s возможно небезопасное"
+msgstr "%s вероятно небезопасное"
 
 #: src/bz-safety-dialog.c:247
 #, c-format
@@ -2524,15 +2623,15 @@ msgstr "Следующий скриншот"
 msgid "Copy Image"
 msgstr "Скопировать изображение"
 
-#: src/bz-screenshot-page.blp:147
+#: src/bz-screenshot-page.blp:150
 msgid "Reset View"
 msgstr "Возобновить вид"
 
-#: src/bz-screenshot-page.blp:158
+#: src/bz-screenshot-page.blp:161
 msgid "Zoom Out"
 msgstr "Отдалить"
 
-#: src/bz-screenshot-page.blp:168
+#: src/bz-screenshot-page.blp:171
 msgid "Zoom In"
 msgstr "Приблизить"
 
@@ -2540,7 +2639,7 @@ msgstr "Приблизить"
 msgid "Screenshots Carousel"
 msgstr "Карусель скриншотов"
 
-#: src/bz-screenshots-carousel.blp:112
+#: src/bz-screenshots-carousel.blp:117
 msgid "Open Screenshot Viewer"
 msgstr "Открыть просмотрщик скриншотов"
 
@@ -2632,99 +2731,127 @@ msgstr "Minecraft"
 msgid "Emulator"
 msgstr "Эмуляторы"
 
-#: src/bz-search-widget.blp:57
+#: src/bz-search-filter-popover.blp:18 src/bz-search-page.blp:82
+msgid "Filters"
+msgstr "Фильтры"
+
+#: src/bz-search-filter-popover.blp:35
+msgid "_Verified"
+msgstr "_Подтвержденные"
+
+#: src/bz-search-filter-popover.blp:42
+msgid "_Free/Open"
+msgstr "_Свободные"
+
+#: src/bz-search-filter-popover.blp:49
+msgid "Non-_EOL"
+msgstr "П_оддерживаемые"
+
+#: src/bz-search-filter-popover.blp:56
+msgid "Categories"
+msgstr "Категории"
+
+#: src/bz-search-page.blp:57
 msgid "Search Apps, Games, Software"
 msgstr "Поиск приложений, игр, ПО"
 
-#: src/bz-search-widget.blp:79
+#: src/bz-search-page.blp:69
+msgid "Search Filters"
+msgstr "Фильтры поиска"
+
+#: src/bz-search-page.blp:99
 msgid "Clear Search"
 msgstr "Очистить поиск"
 
-#: src/bz-search-widget.blp:152
+#: src/bz-search-page.blp:191
 msgid "Categories Unavailable"
 msgstr "Категории недоступны"
 
-#: src/bz-search-widget.blp:153
+#: src/bz-search-page.blp:192
 msgid "Search for apps using the search bar above."
 msgstr "Попробуйте поискать приложения используя поле ввода запроса выше."
 
-#: src/bz-search-widget.blp:178
+#: src/bz-search-page.blp:218
 msgid "Browse Categories"
 msgstr "Обзор категорий"
 
-#: src/bz-search-widget.blp:302
+#: src/bz-search-page.blp:360
 msgid "No Applications Found"
 msgstr "Приложение не найдено"
 
-#: src/bz-search-widget.c:251
+#: src/bz-search-page.c:247
 #, c-format
 msgid "No results found for \"%s\" in Flathub"
 msgstr "Нет результатов по запросу \"%s\" в Flathub"
 
-#: src/bz-share-list.c:116
+#: src/bz-share-list.c:123
 msgid "Copy Link"
 msgstr "Скопировать ссылку"
 
-#: src/bz-share-list.c:127
+#: src/bz-share-list.c:134
 msgid "Open Link"
 msgstr "Открыть ссылку"
 
-#: src/bz-stats-dialog.blp:28
+#: src/bz-stats-dialog.blp:27
 msgid "Timeline"
 msgstr "Временная шкала"
 
-#: src/bz-stats-dialog.blp:46
+#: src/bz-stats-dialog.blp:45
 msgid "Installs:"
 msgstr "Установок:"
 
-#: src/bz-stats-dialog.blp:55
+#: src/bz-stats-dialog.blp:54
 msgid "World"
 msgstr "Карта мира"
 
+#: src/bz-stats-dialog.blp:68
+msgid "Since 4/15/2024"
+msgstr "С 15 апреля 2024"
+
 #. Translators: M is the suffix for millions
-#: src/bz-stats-dialog.c:124
+#: src/bz-stats-dialog.c:125
 #, c-format
 msgid "%.2fM Total Installs"
 msgstr "%.2f миллионов общих установок"
 
 #. Translators: K is the suffix for thousands
-#: src/bz-stats-dialog.c:127
+#: src/bz-stats-dialog.c:128
 #, c-format
 msgid "%.2fK Total Installs"
 msgstr "%.2f тысяч общих установок"
 
-#: src/bz-stats-dialog.c:129
+#: src/bz-stats-dialog.c:130
 #, c-format
 msgid "%'d Total Installs"
 msgstr "%'d общих установок"
 
-#: src/bz-tag-list.c:96
+#: src/bz-tag-list.c:78
 msgid "No Results Found"
 msgstr "Нет результатов"
 
-#: src/bz-tag-list.c:108
+#: src/bz-tag-list.c:90
 #, c-format
 msgid "Apps Tagged \"%s\""
 msgstr "Приложения с меткой \"%s\""
 
-#: src/bz-tag-list.c:124
+#: src/bz-tag-list.c:103
 msgid "Search failed"
 msgstr "Ошибка поиска"
 
 #: src/bz-transaction-dialog.c:155
-msgid "Keep Data"
-msgstr "Оставить данные"
+msgid "Keep User Data"
+msgstr "Оставить пользовательские данные"
 
 #: src/bz-transaction-dialog.c:156
-msgid "Allow restoring settings and content"
+msgid "Allow restoring personal settings &amp; content"
 msgstr "Возможно восстановление настроек и содержимого"
 
 #: src/bz-transaction-dialog.c:165
-msgid "Delete Data"
-msgstr "Удалить данные"
+msgid "Delete All Data"
+msgstr "Удалить все данные"
 
 #: src/bz-transaction-dialog.c:166
-msgid "Permanently remove app data to save space"
+msgid "Permanently erase user data to save space"
 msgstr "Навсегда удалить данные приложения для сохранения места"
 
 #: src/bz-transaction-dialog.c:191
@@ -2742,6 +2869,11 @@ msgstr ""
 #: src/bz-transaction-dialog.c:198
 msgid "May install additional shared components"
 msgstr "Может установить дополнительные общие компоненты"
+
+#: src/bz-transaction-dialog.c:201 src/bz-transaction-dialog.c:230
+#: src/bz-transaction-dialog.c:275 src/bz-transaction-dialog.c:578
+msgid "_Cancel"
+msgstr "_Отмена"
 
 #: src/bz-transaction-dialog.c:219
 #, c-format
@@ -2798,8 +2930,8 @@ msgstr ""
 "разрешениями является невозможной."
 
 #: src/bz-transaction-dialog.c:276
-msgid "Install Anyway"
-msgstr "Всё равно установить"
+msgid "_Install Anyway"
+msgstr "_Всё равно установить"
 
 #: src/bz-transaction-dialog.c:331
 msgid "Failed to load transaction dialog"
@@ -2810,8 +2942,8 @@ msgid "All apps are already installed"
 msgstr "Все приложения уже были установлены"
 
 #: src/bz-transaction-dialog.c:551
-msgid "OK"
-msgstr "ОК"
+msgid "_OK"
+msgstr "_ОК"
 
 #: src/bz-transaction-dialog.c:567
 #, c-format
@@ -2838,49 +2970,49 @@ msgstr "%d дополнений будет установлено."
 msgid "Additionally, addons will be installed."
 msgstr "Также будут установлены дополнения."
 
+#: src/bz-transaction-dialog.c:579
+msgid "_Install All"
+msgstr "_Установить все"
+
 #: src/bz-transaction-manager.c:766
 #, c-format
 msgid "Finished in %.02f seconds"
 msgstr "Закончено за %.02f секунд"
 
-#: src/bz-transaction-tile.blp:126
+#: src/bz-transaction-tile.blp:129
 msgid "App Add-On"
 msgstr "Дополнение приложения"
 
-#: src/bz-transaction-tile.blp:155
+#: src/bz-transaction-tile.blp:158
 msgid "Runtime"
 msgstr "Среда выполнения"
 
-#: src/bz-transaction-tile.blp:179
+#: src/bz-transaction-tile.blp:182
 msgid "In Queue"
 msgstr "В очереди"
 
-#: src/bz-transaction-tile.blp:203
+#: src/bz-transaction-tile.blp:206
 msgid "Done"
 msgstr "Готово"
 
-#: src/bz-transaction-tile.blp:227
+#: src/bz-transaction-tile.blp:230
 msgid "Error"
 msgstr "Ошибка"
 
-#: src/bz-transaction-tile.blp:271
-msgid "Open App"
-msgstr "Открыть приложение"
-
-#: src/bz-transaction-tile.blp:285
+#: src/bz-transaction-tile.blp:286
 msgid "Cancel Transaction"
-msgstr "Отмеинить транзакцию"
+msgstr "Отменить транзакцию"
 
-#: src/bz-transaction-tile.blp:409
+#: src/bz-transaction-tile.blp:410
 msgid "Show Error Info"
 msgstr "Показать информацию об ошибке"
 
-#: src/bz-transaction-tile.c:112
+#: src/bz-transaction-tile.c:107
 #, c-format
 msgid "%s Freed"
 msgstr "%s очищено"
 
-#: src/bz-transaction-tile.c:398 src/bz-transaction-tile.c:401
+#: src/bz-transaction-tile.c:362 src/bz-transaction-tile.c:365
 msgid "Transaction Error"
 msgstr "Ошибка транзакции"
 
@@ -2888,15 +3020,11 @@ msgstr "Ошибка транзакции"
 msgid "Pending"
 msgstr "В ожидании"
 
-#: src/bz-updates-card.blp:36
-msgid "Update All"
-msgstr "Обновить все"
+#: src/bz-updates-card.blp:22
+msgid "_Update All"
+msgstr "_Обновить все"
 
-#: src/bz-updates-card.blp:161 src/bz-updates-card.blp:186
-msgid "Update"
-msgstr "Обновить"
-
-#: src/bz-updates-card.c:293
+#: src/bz-updates-card.c:208
 #, c-format
 msgid "%u Runtime Update"
 msgid_plural "%u Runtime Updates"
@@ -2925,116 +3053,95 @@ msgstr "Пользовательские данные к %s отправлены
 msgid "Trash User Data"
 msgstr "Отправить в корзину"
 
-#: src/bz-window.blp:153
+#: src/bz-window.blp:88
 msgid "Curated"
 msgstr "Курируемое"
 
-#: src/bz-window.blp:166
+#: src/bz-window.blp:100
 msgid "Flathub"
 msgstr "Flathub"
 
-#: src/bz-window.blp:273
+#: src/bz-window.blp:220
 msgid "Refresh completed!"
 msgstr "Обновление завершено!"
 
-#: src/bz-window.blp:326
+#: src/bz-window.blp:273
 msgid "You are running a new version of Bazaar!"
 msgstr "Вы используете новую версию Bazaar!"
 
-#: src/bz-window.blp:327
+#: src/bz-window.blp:274
 msgid "See What's New"
 msgstr "Посмотреть что нового"
 
-#: src/bz-window.blp:334
+#: src/bz-window.blp:281
 msgid ""
 "You have a network connection but are viewing a cached version of Flathub"
 msgstr ""
 "Вы имеете сетевое подключение, но просматриваете кэшируемую версию Flathub"
 
-#: src/bz-window.blp:402
-msgid "_Login with Flathub"
-msgstr "_Войти в Flathub"
-
-#: src/bz-window.blp:450
+#: src/bz-window.blp:393
 msgid "Log Out"
 msgstr "Выйти"
 
-#: src/bz-window.c:680
+#. Translators: %s is the title of the current page
+#: src/bz-window.c:380
+#, c-format
+msgid "Bazaar — %s"
+msgstr "Bazaar — %s"
+
+#: src/bz-window.c:544 src/bz-window.c:561
+msgid "Failed to launch application"
+msgstr "Не удалось запустить приложение"
+
+#: src/bz-window.c:766
 msgid "You can't remove Bazaar from Bazaar!"
 msgstr "Вы не можете удалить Bazaar из Bazaar!"
 
-#: src/bz-window.c:966 src/bz-window.c:1000
+#: src/bz-window.c:1051 src/bz-window.c:1085
 msgid "Can't do that right now!"
 msgstr "Нельзя сделать это прямо сейчас!"
 
-#: src/bz-world-map.c:587
+#: src/bz-world-map.c:595
 msgctxt "As in, \"100 Downloads\""
 msgid "Downloads"
 msgstr "загрузок"
 
-#: src/gtk/shortcuts-dialog.blp:6
+#: src/shortcuts-dialog.blp:6
 msgctxt "shortcut window"
 msgid "General"
 msgstr "Общее"
 
-#: src/gtk/shortcuts-dialog.blp:9
+#: src/shortcuts-dialog.blp:9
+msgctxt "shortcut window"
+msgid "Open Search Page"
+msgstr "Открыть страницу поиска"
+
+#: src/shortcuts-dialog.blp:14
+msgctxt "shortcut window"
+msgid "Open Library Page"
+msgstr "Открыть страницу библиотеки"
+
+#: src/shortcuts-dialog.blp:20
 msgctxt "shortcut window"
 msgid "Refresh"
 msgstr "Обновить"
 
-#: src/gtk/shortcuts-dialog.blp:14
+#: src/shortcuts-dialog.blp:25
 msgctxt "shortcut window"
 msgid "Open Preferences"
 msgstr "Открыть параметры"
 
-#: src/gtk/shortcuts-dialog.blp:19
-msgctxt "shortcut window"
-msgid "Open Search Dialog"
-msgstr "Открыть диалог поиска"
-
-#: src/gtk/shortcuts-dialog.blp:24
-msgctxt "shortcut window"
-msgid "Open Library"
-msgstr "Открыть библиотеку"
-
-#: src/gtk/shortcuts-dialog.blp:30
+#: src/shortcuts-dialog.blp:30
 msgctxt "shortcut window"
 msgid "Show Shortcuts"
 msgstr "Открыть сочетания клавиш"
 
-#: src/gtk/shortcuts-dialog.blp:35
+#: src/shortcuts-dialog.blp:35
 msgctxt "shortcut window"
 msgid "Close Window"
 msgstr "Закрыть окно"
 
-#: src/gtk/shortcuts-dialog.blp:41
+#: src/shortcuts-dialog.blp:41
 msgctxt "shortcut window"
 msgid "Quit Bazaar"
 msgstr "Завершить Bazaar"
-
-#~ msgid "_Synchronize Remotes"
-#~ msgstr "С_инхронизировать репозитории"
-
-#~ msgid "Synchronizing..."
-#~ msgstr "Синхронизация..."
-
-#, c-format
-#~ msgid "Receiving %d entries..."
-#~ msgstr "Получение %d элементов"
-
-#~ msgid "Indexing Data..."
-#~ msgstr "Индексация данных..."
-
-#~ msgid "Refreshing Store Content"
-#~ msgstr "Обновление содержимого магазина"
-
-#~ msgid "No background tasks!"
-#~ msgstr "Нет фоновых задач!"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Synchronize Remotes"
-#~ msgstr "Синхронизировать репозитории"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Quit"
-#~ msgstr "Закрыть"

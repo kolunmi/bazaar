@@ -279,22 +279,19 @@ static void
 install_remove_cb (BzFavoritesTile *self,
                    GtkButton       *button)
 {
-  BzFavoritesPage *page      = NULL;
-  int              removable = 0;
+  int removable = 0;
 
   if (self->group == NULL)
-    return;
-
-  page = BZ_FAVORITES_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (self), BZ_TYPE_FAVORITES_PAGE));
-  if (page == NULL)
     return;
 
   removable = bz_entry_group_get_removable (self->group);
 
   if (removable > 0)
-    g_signal_emit_by_name (page, "remove", self->group);
+    gtk_widget_activate_action (GTK_WIDGET (self), "window.remove-group", "(sb)",
+                                bz_entry_group_get_id (self->group), FALSE);
   else
-    g_signal_emit_by_name (page, "install", self->group);
+    gtk_widget_activate_action (GTK_WIDGET (self), "window.install-group", "(sb)",
+                                bz_entry_group_get_id (self->group), TRUE);
 }
 
 static void

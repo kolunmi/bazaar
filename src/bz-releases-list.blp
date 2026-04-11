@@ -1,9 +1,8 @@
 using Gtk 4.0;
 using Adw 1;
-using Gio 2.0;
 
 template $BzReleasesList: Adw.Bin {
-  visible: bind $invert_boolean($is_zero(template.version-history as <Gio.ListStore>.n-items) as <bool>) as <bool>;
+  visible: false;
   child: Box {
     orientation: vertical;
     spacing: 12;
@@ -25,7 +24,8 @@ template $BzReleasesList: Adw.Bin {
       selection-mode: none;
 
       Adw.ButtonRow {
-        title: _("Version History");
+        title: _("_Version History");
+        use-underline: true;
         activated => $show_all_releases_cb();
         end-icon-name: "go-next-symbolic";
       }

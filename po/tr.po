@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: io.github.kolunmi.Bazaar master\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-23 08:26+0300\n"
-"PO-Revision-Date: 2026-02-23 17:29+0300\n"
+"POT-Creation-Date: 2026-04-10 23:58+0300\n"
+"PO-Revision-Date: 2026-04-11 00:47+0300\n"
 "Last-Translator: Sabri Ünal <yakushabb@gmail.com>\n"
 "Language-Team: Turkish <takim@gnome.org.tr>\n"
 "Language: tr\n"
@@ -17,11 +17,11 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 3.8\n"
+"X-Generator: Poedit 3.9\n"
 
 #: data/io.github.kolunmi.Bazaar.desktop.in:2
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:6
-#: src/bz-window.blp:111
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:46
+#: src/bz-window.c:377 src/bz-window.c:378
 msgid "Bazaar"
 msgstr "Bazaar"
 
@@ -35,75 +35,146 @@ msgstr ""
 "GTK;System;PackageManager;Discover;Flatpak;Software;Store;Sistem;Paket "
 "Yöneticisi;Keşfet;Yazılımlar;Mağaza;Çarşı;"
 
-#: data/io.github.kolunmi.Bazaar.desktop.in:15
+#: data/io.github.kolunmi.Bazaar.desktop.in:16
 msgid "New Window"
 msgstr "Yeni Pencere"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:8
-msgid "Discover and install applications"
-msgstr "Uygulamaları keşfet ve kur"
+msgid "Discover and manage applications"
+msgstr "Uygulamaları keşfet ve yönet"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:10
 msgid ""
-"A new app store for Linux with a focus on discovering and installing "
-"applications and addons from Flatpak remotes, particularly Flathub."
+"A fast and modern app store for Linux with a focus on discovering and "
+"installing Flatpak apps and addons, particularly from Flathub."
 msgstr ""
-"Flatpak uzaklarından, özellikle Flathubʼdan uygulama ve eklentileri "
-"keşfetmeye ve kurmaya odaklanan yeni uygulama mağazası."
+"Özellikle Flathubʼdan Flatpak uygulamalarını ve eklentilerini keşfetmeye ve "
+"kurmaya odaklanan, Linux için hızlı ve modern uygulama mağazası."
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:14
-msgid ""
-"It emphasizes supporting the developers who make the Linux desktop possible. "
-"Bazaar features a \"curated\" tab that can be configured by distributors to "
-"allow for a more localized experience."
-msgstr ""
-"Linux masaüstünü mümkün kılan geliştiricileri desteklemeyi vurgular. Bazaar, "
-"daha yerelleştirilmiş deneyim sunmak için dağıtıcılarca yapılandırılabilen "
-"bir \"Özelleştirilmiş\" sekmeye sahiptir."
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:15
+msgid "Queue multiple installs and keep browsing"
+msgstr "Birden çok kurulumu kuyruklar ve gezinmeye devam et"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:29 src/bz-application.c:695
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:16
+msgid "Easily view app permissions"
+msgstr "Uygulama izinlerini kolayca görüntüle"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:17
+msgid "Sign in to Flathub to view and manage your favorites"
+msgstr "Gözdelerinizi görüntülemek ve yönetmek için Flathub ile oturum açın"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:18
+msgid "Search apps directly from GNOME Shell"
+msgstr "Uygulamaları GNOME Shell üstünden ara"
+
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:30
 msgid "Adam Masciola"
 msgstr "Adam Masciola"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:54
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:55
 msgid "The home page displaying Flathub apps"
 msgstr "Flathub uygulamalarını görüntüleyen ana görünüm"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:58
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:59
 msgid "Exhibit app page"
 msgstr "Uygulama sergisi sayfası"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:62
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:63
 msgid "Library page"
 msgstr "Kitaplık sayfası"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:66
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:67
 msgid "Search page"
 msgstr "Arama sayfası"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:70
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:71
 msgid "Category page"
 msgstr "Kategori sayfası"
 
-#: src/bz-addons-dialog.blp:16 src/bz-full-view.blp:710
-#: src/bz-installed-tile.blp:101
-msgid "Manage Add-ons"
-msgstr "Eklentileri Yönet"
+#: src/bz-addon-tile.blp:49 src/bz-installed-tile.blp:64
+#: src/bz-rich-app-tile.blp:140
+msgid "Stopped Receiving Updates"
+msgstr "Güncellemelerin Alınması Durduruldu"
 
-#: src/bz-addons-dialog.c:94 src/bz-full-view.blp:499
-#: src/bz-installed-tile.blp:119 src/bz-transaction-dialog.c:231
-msgid "Remove"
+#: src/bz-addon-tile.c:155 src/bz-favorites-tile.c:157
+#: src/bz-rich-app-tile.blp:172
+msgid "Uninstall"
 msgstr "Kaldır"
 
-#: src/bz-addons-dialog.c:99 src/bz-favorites-tile.c:159
-#: src/bz-full-view.blp:262 src/bz-full-view.blp:486
-#: src/bz-transaction-dialog.c:202
+#: src/bz-addon-tile.c:157 src/bz-addons-dialog.blp:280
+#: src/bz-favorites-tile.c:159
 msgid "Install"
 msgstr "Kur"
 
+#: src/bz-addons-dialog.blp:14 src/bz-addons-dialog.blp:21
+#: src/bz-addons-dialog.blp:70 src/bz-full-view.blp:627
+#: src/bz-installed-tile.blp:101
+msgid "Manage Add-Ons"
+msgstr "Eklentileri Yönet"
+
+#: src/bz-addons-dialog.blp:80
+msgid "No Add-Ons Visible"
+msgstr "Görünün Eklenti Yok"
+
+#: src/bz-addons-dialog.blp:81
+msgid ""
+"Your current filter preferences are hiding all known add-ons. Try adjusting "
+"them."
+msgstr ""
+"Geçerli süzgeçleriniz, bilinen tüm eklentileri gizliyor. Süzgeç ayarlarını "
+"düzenleyin."
+
+#: src/bz-addons-dialog.blp:88
+msgid "Add-on Page"
+msgstr "Eklenti Sayfası"
+
+#: src/bz-addons-dialog.blp:202 src/bz-full-view.blp:426
+msgid "Downloads/Month"
+msgstr "İndirme/Ay"
+
+#: src/bz-addons-dialog.blp:229 src/bz-full-view.blp:461
+msgid "Stopped Receiving Core Updates"
+msgstr "Çekirdek Güncellemelerinin Alınması Durduruldu"
+
+#: src/bz-addons-dialog.blp:243
+msgid ""
+"This add-on uses a runtime that no longer receives updates or security "
+"fixes. It may become unsafe to use."
+msgstr ""
+"Bu eklenti, artık güncelleme ya da güvenlik düzeltmesi almayan bir çalışma "
+"zamanı kullanıyor. Kullanımı güvenli olmayabilir."
+
+#: src/bz-addons-dialog.blp:297 src/bz-rich-app-tile.blp:185
+#: src/bz-transaction-tile.blp:272
+msgid "Open"
+msgstr "Aç"
+
+#: src/bz-addons-dialog.blp:304 src/bz-install-controls.blp:141
+#: src/bz-installed-tile.blp:114
+msgid "Remove"
+msgstr "Kaldır"
+
+#: src/bz-addons-dialog.c:325
+#, c-format
+msgid "Add-on for %s"
+msgstr "%s Eklentisi"
+
+#: src/bz-addons-dialog.c:339 src/bz-full-view.c:577
+msgid "Show Less"
+msgstr "Daha Az Göster"
+
+#: src/bz-addons-dialog.c:339 src/bz-full-view.c:577
+msgid "Show More"
+msgstr "Daha Çok Göster"
+
+#: src/bz-addons-dialog.c:389
+msgid "Download Stats"
+msgstr "İndirme İstatistikleri"
+
 # Arayüzde sığmadığı için new line eklendi
 #: src/bz-age-rating-dialog.blp:7 src/bz-age-rating-dialog.blp:31
-#: src/bz-age-rating-dialog.c:726 src/bz-full-view.c:348 src/bz-full-view.c:355
+#: src/bz-age-rating-dialog.c:736 src/bz-context-tile-callbacks.c:186
+#: src/bz-context-tile-callbacks.c:193
 msgid "Age Rating"
 msgstr ""
 "Yaş\n"
@@ -429,98 +500,98 @@ msgid "Violence"
 msgstr "Şiddet"
 
 #. Translators: Age rating format, e.g. "12+" for ages 12 and up
-#: src/bz-age-rating-dialog.c:676 src/bz-full-view.c:338
+#: src/bz-age-rating-dialog.c:686 src/bz-context-tile-callbacks.c:176
 #, c-format
 msgid "%d+"
 msgstr "%d+"
 
-#: src/bz-age-rating-dialog.c:701
+#: src/bz-age-rating-dialog.c:711
 msgctxt "Age rating"
 msgid "All"
 msgstr "Tümü"
 
-#: src/bz-age-rating-dialog.c:737
+#: src/bz-age-rating-dialog.c:747
 #, c-format
 msgid "%s has an unknown age rating"
 msgstr "%s yaş derecelendirmesi bilinmiyor"
 
-#: src/bz-age-rating-dialog.c:743
+#: src/bz-age-rating-dialog.c:753
 #, c-format
 msgid "%s is suitable for everyone"
 msgstr "%s, herkese uygundur"
 
-#: src/bz-age-rating-dialog.c:746
+#: src/bz-age-rating-dialog.c:756
 #, c-format
 msgid "%s is suitable for young children"
 msgstr "%s, küçük çocuklara uygundur"
 
-#: src/bz-age-rating-dialog.c:749
+#: src/bz-age-rating-dialog.c:759
 #, c-format
 msgid "%s is suitable for children"
 msgstr "%s, çocuklara uygundur"
 
-#: src/bz-age-rating-dialog.c:752
+#: src/bz-age-rating-dialog.c:762
 #, c-format
 msgid "%s is suitable for teenagers"
 msgstr "%s, ergenlere uygundur"
 
-#: src/bz-age-rating-dialog.c:755
+#: src/bz-age-rating-dialog.c:765
 #, c-format
 msgid "%s is suitable for adults"
 msgstr "%s, yetişkinlere uygundur"
 
-#: src/bz-age-rating-dialog.c:758
+#: src/bz-age-rating-dialog.c:768
 #, c-format
 msgid "%s is suitable for %s"
 msgstr "%s, %s için uygundur"
 
-#: src/bz-age-rating-dialog.c:852
+#: src/bz-age-rating-dialog.c:862
 #, c-format
 msgid "%s • %s"
 msgstr "%s • %s"
 
 #: src/bz-all-apps-page.blp:13 src/bz-apps-page.blp:14 src/bz-full-view.blp:29
-#: src/bz-user-data-page.blp:15 src/bz-window.blp:292
+#: src/bz-user-data-page.blp:15 src/bz-window.blp:239
 msgid "Main Menu"
 msgstr "Ana Menü"
 
 #: src/bz-all-apps-page.blp:18 src/bz-apps-page.blp:18
-#: src/bz-user-data-page.blp:19 src/bz-window.blp:385
+#: src/bz-user-data-page.blp:19 src/bz-window.blp:328
 msgid "_Donate to Bazaar ❤️"
 msgstr "Bazaarʼa _Bağış Yap ❤️"
 
 #: src/bz-all-apps-page.blp:25 src/bz-apps-page.blp:25
-#: src/bz-user-data-page.blp:26 src/bz-window.blp:392
+#: src/bz-user-data-page.blp:26 src/bz-window.blp:335
 msgid "_Refresh"
 msgstr "_Yenile"
 
 #: src/bz-all-apps-page.blp:30 src/bz-apps-page.blp:30
-#: src/bz-user-data-page.blp:31 src/bz-window.blp:397
+#: src/bz-user-data-page.blp:31 src/bz-window.blp:340
 msgid "_Preferences"
 msgstr "_Tercihler"
 
 #: src/bz-all-apps-page.blp:35 src/bz-apps-page.blp:35
-#: src/bz-user-data-page.blp:36 src/bz-window.blp:402
-msgid "_Login with Flathub"
+#: src/bz-user-data-page.blp:36 src/bz-window.blp:345
+msgid "_Login With Flathub"
 msgstr "Flathub İle _Oturum Aç"
 
 #: src/bz-all-apps-page.blp:41 src/bz-apps-page.blp:41
-#: src/bz-user-data-page.blp:42 src/bz-window.blp:408
+#: src/bz-user-data-page.blp:42 src/bz-window.blp:351
 msgid "_Manage Leftover User Data"
 msgstr "Artık Kullanıcı Verisini _Yönet"
 
 #: src/bz-all-apps-page.blp:46 src/bz-apps-page.blp:46
-#: src/bz-user-data-page.blp:47 src/bz-window.blp:413
+#: src/bz-user-data-page.blp:47 src/bz-window.blp:356
 msgid "_Keyboard Shortcuts"
 msgstr "_Klavye Kısayolları"
 
 #: src/bz-all-apps-page.blp:51 src/bz-apps-page.blp:51
-#: src/bz-user-data-page.blp:52 src/bz-window.blp:418
+#: src/bz-user-data-page.blp:52 src/bz-window.blp:361
 msgid "_About Bazaar"
 msgstr "Bazaar _Hakkında"
 
 #: src/bz-all-apps-page.blp:58 src/bz-apps-page.blp:58
-#: src/bz-user-data-page.blp:59 src/bz-window.blp:425
+#: src/bz-user-data-page.blp:59 src/bz-window.blp:368
 msgid "_Quit Bazaar"
 msgstr "Bazaarʼdan Çı_k"
 
@@ -650,98 +721,108 @@ msgstr "Dosya sistemi erişimi %s"
 msgid "Unknown filesystem path"
 msgstr "Bilinmeyen dosya sistemi yolu"
 
-#: src/bz-app-size-dialog.blp:29 src/bz-app-size-dialog.blp:55
+#: src/bz-app-size-dialog.blp:26 src/bz-app-size-dialog.blp:52
 msgid "Download Size"
 msgstr "İndirme Boyutu"
 
-#: src/bz-app-size-dialog.blp:56
+#: src/bz-app-size-dialog.blp:53
 msgid "Amount to download from the internet"
 msgstr "İnternetten indirilecek miktar"
 
-#: src/bz-app-size-dialog.blp:76
+#: src/bz-app-size-dialog.blp:73
 msgid "Installed Size"
-msgstr "Kurulu Boyut"
+msgstr "Kurulum Boyutu"
 
-#: src/bz-app-size-dialog.blp:77
+# Kasten daha açıklayıcı bir çeviri kullanıldı
+#: src/bz-app-size-dialog.blp:74
 msgid "Size on Disk"
-msgstr "Diskteki Boyut"
+msgstr "Diskteki kapladığı alan"
 
-#: src/bz-app-size-dialog.blp:125
+#: src/bz-app-size-dialog.blp:121
 msgid "Open user data folder"
 msgstr "Kullanıcı veri klasörünü aç"
 
-#: src/bz-app-size-dialog.blp:135
+#: src/bz-app-size-dialog.blp:131
 msgid "User Data Size"
 msgstr "Kullanıcı Verisi Boyutu"
 
-#: src/bz-app-size-dialog.blp:136
+#: src/bz-app-size-dialog.blp:132
 msgid "Caches, settings, and other app data"
 msgstr "Önbellekler, ayarlar ve diğer uygulama verileri"
 
 #: src/bz-app-size-dialog.c:99
 msgid "Installed Runtime Size"
-msgstr "Kurulu Çalışma Zamanı Boyutu"
+msgstr "Çalışma Zamanı Kurulum Boyutu"
 
 #: src/bz-app-size-dialog.c:99
 msgid "Runtime Download Size"
 msgstr "Çalışma Zamanı İndirme Boyutu"
 
+#: src/bz-app-size-dialog.c:204
+msgid "App Size"
+msgstr "Uygulama Boyutu"
+
 #: src/bz-app-tile.blp:57 src/bz-developer-badge.c:98
-#: src/bz-rich-app-tile.blp:103 src/bz-rich-app-tile.c:282
+#: src/bz-rich-app-tile.blp:104 src/bz-rich-app-tile.c:304
 msgid "Verified"
 msgstr "Doğrulanmış"
 
 #. Translators: As in 'The app is installed'.
-#: src/bz-app-tile.blp:89 src/bz-full-view.c:297 src/bz-releases-list.c:178
+#: src/bz-app-tile.blp:88 src/bz-context-tile-callbacks.c:135
+#: src/bz-releases-list.c:205
 msgid "Installed"
-msgstr "Kurulu"
+msgstr "Kuruldu"
 
 #: src/bz-apps-page.blp:142
 msgid "Show All"
 msgstr "Tümünü Göster"
 
-#: src/bz-apps-page.c:243
+#: src/bz-apps-page.c:229
 #, c-format
 msgid "All \"%s\""
 msgstr "Tüm \"%s\""
 
-#: src/bz-apps-page.c:530 src/bz-tag-list.c:109
+#: src/bz-apps-page.c:478 src/bz-tag-list.c:91
 #, c-format
 msgid "%d Applications"
 msgstr "%d Uygulama"
 
-#: src/bz-application.c:674
+#: src/bz-application.c:707
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr "Adam Masciola <kolunmi@posteo.net>"
 
-#: src/bz-application.c:675
+#: src/bz-application.c:708
 msgctxt "About Dialog Developer Credit"
 msgid "Alexander Vanhee"
 msgstr "Alexander Vanhee"
 
+#: src/bz-application.c:728
+msgid "The Bazaar Contributors"
+msgstr "Bazaar Katkıcıları"
+
 #. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
-#: src/bz-application.c:698
+#: src/bz-application.c:731
 msgid "translator-credits"
 msgstr "Sabri Ünal <yakushabb@gmail.com>, 2025-2026"
 
-#: src/bz-application.c:708
+#: src/bz-application.c:741
 msgid "Special Thanks"
 msgstr "Özel Teşekkürler"
 
-#: src/bz-application.c:766
+#: src/bz-application.c:799
 msgid "Logged Out Successfully!"
 msgstr "Oturum Kapatıldı!"
 
-#: src/bz-application.c:889
-msgid "Performing setup..."
-msgstr "Kurulum gerçekleştiriliyor..."
+#: src/bz-application.c:922
+msgid "Performing setup…"
+msgstr "Kurulum gerçekleştiriliyor…"
 
-#: src/bz-application.c:973
+#: src/bz-application.c:1006
 msgid "Set Up System Flathub?"
 msgstr "Sistem Flathubʼı Kurulsun Mu?"
 
-#: src/bz-application.c:976
+#: src/bz-application.c:1009
 msgid ""
 "The system Flathub remote is not set up. Bazaar requires Flathub to be "
 "configured on the system Flatpak installation to browse and install "
@@ -756,11 +837,11 @@ msgstr ""
 "Yine de Bazaarʼı kullanarak zaten kurulmuş uygulamalara göz atabilir ve "
 "kaldırabilirsiniz."
 
-#: src/bz-application.c:983
+#: src/bz-application.c:1016
 msgid "Set Up Flathub?"
 msgstr "Flathub Kurulsun Mu?"
 
-#: src/bz-application.c:986
+#: src/bz-application.c:1019
 msgid ""
 "Flathub is not set up on this system. You will not be able to browse and "
 "install applications in Bazaar if its unavailable.\n"
@@ -773,104 +854,235 @@ msgstr ""
 "Yine de Bazaarʼı kullanarak zaten kurulmuş uygulamalara göz atabilir ve "
 "kaldırabilirsiniz."
 
-#: src/bz-application.c:992
+#: src/bz-application.c:1025
 msgid "Later"
 msgstr "Sonra"
 
-#: src/bz-application.c:993
+#: src/bz-application.c:1026
 msgid "Set Up Flathub"
 msgstr "Flathubʼı Kur"
 
-#: src/bz-application.c:1276
+#: src/bz-application.c:1315
 msgid "A backend error occurred"
 msgstr "Arka uç hatası oluştu"
 
-#: src/bz-application.c:1402 src/bz-application.c:3159 src/bz-window.blp:135
+#: src/bz-application.c:1511 src/bz-application.c:3420 src/bz-window.blp:70
 msgid "Refreshing…"
 msgstr "Yenileniyor…"
 
-#: src/bz-application.c:1549 src/bz-application.c:3155
+#: src/bz-application.c:1663 src/bz-application.c:3418
 #, c-format
 msgid "Loading %d apps…"
 msgstr "%d uygulama yükleniyor…"
 
-#: src/bz-application.c:1554
+#: src/bz-application.c:1666
 msgid "Checking for updates…"
 msgstr "Güncellemeler denetleniyor…"
 
-#: src/bz-application.c:1610
+#: src/bz-application.c:1729
 msgid "Failed to open .flatpakref"
 msgstr ".flatpakref dosyası açılamadı"
 
-#: src/bz-application.c:1664
+#: src/bz-application.c:1785
 msgid "An initialization error occurred"
 msgstr "İlklendirme hatası oluştu"
 
-#: src/bz-application.c:2002
+#: src/bz-application.c:2183
 msgid "Failed to check for updates"
 msgstr "Güncellemeler denetlenemedi"
 
-#: src/bz-application.c:2938
+#: src/bz-application.c:3191
 msgid "Could not find app"
 msgstr "Uygulama bulunamadı"
 
-#: src/bz-application.c:3161
+#: src/bz-application.c:3422
 msgid "Writing to cache…"
 msgstr "Ön belleğe yazılıyor…"
 
-#: src/bz-appstream-parser.c:303
+#: src/bz-appstream-parser.c:302
 msgctxt "Project URL Type"
 msgid "Flathub Page"
 msgstr "Flathub Sayfası"
 
-#: src/bz-appstream-parser.c:324
+#: src/bz-appstream-parser.c:323
 msgctxt "Project URL Type"
 msgid "Project Website"
 msgstr "Proje Web Sitesi"
 
-#: src/bz-appstream-parser.c:328
+#: src/bz-appstream-parser.c:327
 msgctxt "Project URL Type"
 msgid "Issue Tracker"
 msgstr "Sorun İzleyici"
 
-#: src/bz-appstream-parser.c:332
+#: src/bz-appstream-parser.c:331
 msgctxt "Project URL Type"
 msgid "FAQ"
 msgstr "SSS"
 
-#: src/bz-appstream-parser.c:336
+#: src/bz-appstream-parser.c:335
 msgctxt "Project URL Type"
 msgid "Help"
 msgstr "Yardım"
 
-#: src/bz-appstream-parser.c:340
+#: src/bz-appstream-parser.c:339
 msgctxt "Project URL Type"
 msgid "Donate"
 msgstr "Bağış"
 
-#: src/bz-appstream-parser.c:346
+#: src/bz-appstream-parser.c:345
 msgctxt "Project URL Type"
 msgid "Translate"
 msgstr "Çevir"
 
-#: src/bz-appstream-parser.c:350
+#: src/bz-appstream-parser.c:349
 msgctxt "Project URL Type"
 msgid "Contact"
-msgstr "Kişi"
+msgstr "İletişim"
 
-#: src/bz-appstream-parser.c:354
+#: src/bz-appstream-parser.c:353
 msgctxt "Project URL Type"
 msgid "Source Code"
 msgstr "Kaynak Kodu"
 
-#: src/bz-appstream-parser.c:360
+#: src/bz-appstream-parser.c:359
 msgctxt "Project URL Type"
 msgid "Contribute"
 msgstr "Katkı Ver"
 
+#: src/bz-context-tile-callbacks.c:68
+msgid "---"
+msgstr "---"
+
+#. Translators: M is the suffix for millions
+#: src/bz-context-tile-callbacks.c:75
+#, c-format
+msgid "%.*fM"
+msgstr "%.*fM"
+
+#. Translators: K is the suffix for thousands
+#: src/bz-context-tile-callbacks.c:82
+#, c-format
+msgid "%.*fK"
+msgstr "%.*fK"
+
+#: src/bz-context-tile-callbacks.c:92
+#, c-format
+msgid "%d downloads in the last month"
+msgstr "Son ay içinde %d indirme"
+
+#: src/bz-context-tile-callbacks.c:104 src/bz-context-tile-callbacks.c:389
+#: src/bz-context-tile-callbacks.c:406
+msgid "N/A"
+msgstr "Yok"
+
+#: src/bz-context-tile-callbacks.c:132
+#, c-format
+msgid "+%s runtime"
+msgstr "+%s çalışma zamanı"
+
+#: src/bz-context-tile-callbacks.c:135
+msgid "Download"
+msgstr "İndirme Boyutu"
+
+#: src/bz-context-tile-callbacks.c:155
+msgid "Size information unavailable"
+msgstr "Boyut bilgisi yok"
+
+#: src/bz-context-tile-callbacks.c:158
+#, c-format
+msgid "Download size of %s"
+msgstr "%s İndirme Boyutu"
+
+#: src/bz-context-tile-callbacks.c:191
+msgid "All Ages"
+msgstr "Tüm Yaşlar"
+
+#: src/bz-context-tile-callbacks.c:203
+msgid "Age rating information unavailable"
+msgstr "Yaş derecelendirme bilgisi yok"
+
+#: src/bz-context-tile-callbacks.c:208
+msgid "Suitable for all ages"
+msgstr "Tüm yaşlar için uygun"
+
+#: src/bz-context-tile-callbacks.c:210
+#, c-format
+msgid "Suitable for ages %d and up"
+msgstr "%d ve üstü yaşlar için uygun"
+
+#: src/bz-context-tile-callbacks.c:243 src/bz-context-tile-callbacks.c:248
+#: src/bz-context-tile-callbacks.c:276 src/bz-context-tile-callbacks.c:284
+msgid "Unknown"
+msgstr "Bilinmiyor"
+
+#: src/bz-context-tile-callbacks.c:253
+#, c-format
+msgid "Free software licensed under %s"
+msgstr "%s altında lisanslanmış özgür yazılım"
+
+#: src/bz-context-tile-callbacks.c:258
+msgid "Free software"
+msgstr "Özgür yazılım"
+
+#: src/bz-context-tile-callbacks.c:261
+msgid "Proprietary Software"
+msgstr "Sahipli Yazılım"
+
+#: src/bz-context-tile-callbacks.c:264
+#, c-format
+msgid "Special License: %s"
+msgstr "Özel Lisans: %s"
+
+#: src/bz-context-tile-callbacks.c:281
+msgid "Free"
+msgstr "Özgür"
+
+#: src/bz-context-tile-callbacks.c:287 src/bz-license-dialog.c:133
+msgid "Proprietary"
+msgstr "Sahipli"
+
+#: src/bz-context-tile-callbacks.c:289 src/bz-license-dialog.c:135
+msgid "Special License"
+msgstr "Özel Lisans"
+
+#: src/bz-context-tile-callbacks.c:309
+msgid "Adaptive"
+msgstr "Uyarlanır"
+
+# Arayüzde sığmadığı için new line eklendi
+#: src/bz-context-tile-callbacks.c:309
+msgid "Desktop Only"
+msgstr ""
+"Yalnızca\n"
+"Masaüstü"
+
+#: src/bz-context-tile-callbacks.c:315
+msgid "Works on desktop, tablets, and phones"
+msgstr "Telefonlarda, tabletlerde ve masaüstülerde çalışır"
+
+#: src/bz-context-tile-callbacks.c:316
+msgid "May not work on mobile devices"
+msgstr "Mobil aygıtlarda çalışmayabilir"
+
+#: src/bz-context-tile-callbacks.c:396 src/bz-safety-dialog.blp:31
+msgid "Safe"
+msgstr "Güvenli"
+
+#: src/bz-context-tile-callbacks.c:398 src/bz-context-tile-callbacks.c:400
+msgid "Low Risk"
+msgstr "Düşük Risk"
+
+#: src/bz-context-tile-callbacks.c:402
+msgid "Medium Risk"
+msgstr "Orta Risk"
+
+#: src/bz-context-tile-callbacks.c:404
+msgid "High Risk"
+msgstr "Yüksek Risk"
+
 #: src/bz-curated-view.blp:11 src/bz-favorites-page.blp:68
-#: src/bz-flathub-page.blp:19 src/bz-full-view.blp:61
-#: src/bz-library-page.blp:63 src/bz-user-data-page.blp:86
+#: src/bz-flathub-page.blp:19 src/bz-full-view.blp:62
+#: src/bz-library-page.blp:66 src/bz-user-data-page.blp:86
 msgid "Empty"
 msgstr "Boş"
 
@@ -904,15 +1116,15 @@ msgstr "Çevrim Dışı"
 msgid "Browser"
 msgstr "Tarayıcı"
 
-#: src/bz-developer-badge.c:92 src/bz-developer-badge.c:98
+#: src/bz-developer-badge.c:94 src/bz-developer-badge.c:98
 msgid "Not Verified"
 msgstr "Doğrulanmamış"
 
-#: src/bz-developer-badge.c:145
+#: src/bz-developer-badge.c:210
 msgid "Developer information not available."
 msgstr "Geliştirici bilgisi yok."
 
-#: src/bz-developer-badge.c:151 src/bz-developer-badge.c:165
+#: src/bz-developer-badge.c:216 src/bz-developer-badge.c:230
 #, c-format
 msgid ""
 "The ownership of the %s app ID has not been verified and it may be a "
@@ -921,7 +1133,7 @@ msgstr ""
 "%s uygulama kimliğinin sahipliği doğrulanmadı ve topluluk paketlemesi "
 "olabilir."
 
-#: src/bz-developer-badge.c:169
+#: src/bz-developer-badge.c:234
 #, c-format
 msgid ""
 "The ownership of the %s app ID has been manually verified by the Flathub "
@@ -929,7 +1141,7 @@ msgid ""
 msgstr ""
 "%s uygulama kimliğinin sahipliği Flathub ekibi tarafından elle doğrulandı."
 
-#: src/bz-developer-badge.c:175
+#: src/bz-developer-badge.c:250
 #, c-format
 msgid ""
 "The ownership of the %1$s app ID has been verified by <b>%2$s</b> on "
@@ -938,12 +1150,12 @@ msgstr ""
 "%1$s uygulama kimliğinin sahipliği <b>%2$s</b> tarafından <b>%3$s</b> "
 "sitesinden doğrulandı."
 
-#: src/bz-developer-badge.c:182
+#: src/bz-developer-badge.c:257
 #, c-format
 msgid "The ownership of the %1$s app ID has been verified using %2$s."
 msgstr "%1$s uygulama kimliğinin sahipliği %2$s kullanılarak doğrulandı."
 
-#: src/bz-developer-badge.c:186
+#: src/bz-developer-badge.c:261
 #, c-format
 msgid "The ownership of the %s app ID has been verified."
 msgstr "%s uygulama kimliğinin sahipliği doğrulandı."
@@ -952,11 +1164,11 @@ msgstr "%s uygulama kimliğinin sahipliği doğrulandı."
 msgid "Full Release Notes"
 msgstr "Tam Sürüm Notları"
 
-#: src/bz-donations-dialog.blp:105
+#: src/bz-donations-dialog.blp:108
 msgid "This release was made possible by users like you!"
 msgstr "Bu sürüm, sizin gibi kullanıcılar sayesinde mümkün oldu!"
 
-#: src/bz-donations-dialog.blp:113
+#: src/bz-donations-dialog.blp:116
 msgid ""
 "I love making Bazaar, but I cannot do it alone. Help support further "
 "development by donating on Ko-Fi."
@@ -964,7 +1176,7 @@ msgstr ""
 "Bazaar uygulamasını geliştirmeyi çok seviyorum, yine de bunu tek başıma "
 "yapamam. Ko-Fi ile bağış yaparak geliştirilmesine destek olun."
 
-#: src/bz-donations-dialog.blp:128
+#: src/bz-donations-dialog.blp:131
 msgid "Donate to Bazaar"
 msgstr "Bazaarʼa Bağış Yap"
 
@@ -990,15 +1202,13 @@ msgid ""
 msgstr ""
 "Bu uygulamanın birden çok sürümü kurulu. Hangisiyle devam etmek istersiniz?"
 
-#: src/bz-entry-group-util.c:80 src/bz-transaction-dialog.c:201
-#: src/bz-transaction-dialog.c:230 src/bz-transaction-dialog.c:275
-#: src/bz-transaction-dialog.c:578
+#: src/bz-entry-group-util.c:80
 msgid "Cancel"
 msgstr "İptal"
 
 #: src/bz-entry-selection-row.blp:17
-msgid "For this user only"
-msgstr "Yalnızca bu kullanıcı için"
+msgid "For This User Only"
+msgstr "Yalnızca Bu Kullanıcı İçin"
 
 #: src/bz-entry-selection-row.c:112
 msgid "this user"
@@ -1017,7 +1227,7 @@ msgstr "Ayrıntılar"
 msgid "Copy"
 msgstr "Kopyala"
 
-#: src/bz-error-dialog.c:56 src/bz-share-list.c:64
+#: src/bz-error-dialog.c:56 src/bz-share-list.c:62
 msgid "Copied!"
 msgstr "Kopyalandı!"
 
@@ -1037,33 +1247,28 @@ msgstr "Oturum Aç"
 msgid "Favorite Count"
 msgstr "Gözde Sayısı"
 
-#: src/bz-favorites-tile.c:157
-msgid "Uninstall"
-msgstr "Kaldır"
-
-#: src/bz-favorites-tile.c:360
+#: src/bz-favorites-tile.c:357
 msgid "Failed to remove favorite"
 msgstr "Gözdelerden kaldırılamadı"
 
-#: src/bz-favorites-tile.blp:70 src/bz-installed-tile.blp:77
-msgid "Support this application"
-msgstr "Bu uygulamayı destekle"
+#: src/bz-favorites-tile.blp:70 src/bz-installed-tile.blp:78
+msgid "Support This Application"
+msgstr "Bu Uygulamayı Destekle"
 
 #: src/bz-favorites-tile.blp:119
-msgid "Remove from Favorites"
+msgid "Remove From Favorites"
 msgstr "Gözdelerden Kaldır"
 
 #: src/bz-favorites-page.blp:5 src/bz-favorites-page.blp:78
-#: src/bz-window.blp:443
+#: src/bz-window.blp:386
 msgid "Favorites"
 msgstr "Gözdeler"
 
 #: src/bz-favorites-page.blp:17 src/bz-section-view.blp:144
-#: src/bz-transaction-dialog.c:579
 msgid "Install All"
 msgstr "Tümünü Kur"
 
-#: src/bz-favorites-page.blp:34 src/bz-full-view.blp:44 src/bz-window.blp:308
+#: src/bz-favorites-page.blp:34 src/bz-full-view.blp:45 src/bz-window.blp:255
 msgid "Open App Library"
 msgstr "Uygulama Kitaplığını Aç"
 
@@ -1083,23 +1288,23 @@ msgstr "Gözde olarak imlediğiniz uygulamalar burada görünecek"
 msgid "Previous"
 msgstr "Önceki"
 
-#: src/bz-featured-carousel.blp:53
+#: src/bz-featured-carousel.blp:54
 msgid "Next"
 msgstr "Sonraki"
 
-#: src/bz-featured-tile.blp:88
+#: src/bz-featured-tile.blp:90
 msgid "App of the Day"
 msgstr "Günün Uygulaması"
 
-#: src/bz-flathub-category.c:89
+#: src/bz-flathub-category.c:93
 msgid "Editing"
 msgstr "Düzenleme"
 
-#: src/bz-flathub-category.c:90
+#: src/bz-flathub-category.c:94
 msgid "Midi"
 msgstr "Midi"
 
-#: src/bz-flathub-category.c:91
+#: src/bz-flathub-category.c:95
 msgid "Mixer"
 msgstr "Mixer"
 
@@ -1107,262 +1312,262 @@ msgstr "Mixer"
 #. search regardless of what you put here, so don't worry about the string
 #. yielding poor search results. Focus on correctness and friendliness,
 #. etc
-#: src/bz-flathub-category.c:92 src/bz-search-pill-list.c:77
+#: src/bz-flathub-category.c:96 src/bz-search-pill-list.c:77
 msgid "Music"
 msgstr "Müzik"
 
-#: src/bz-flathub-category.c:93
+#: src/bz-flathub-category.c:97
 msgid "Player"
 msgstr "Oynatıcı"
 
-#: src/bz-flathub-category.c:94
+#: src/bz-flathub-category.c:98
 msgid "Recorder"
 msgstr "Kaydedici"
 
-#: src/bz-flathub-category.c:95
+#: src/bz-flathub-category.c:99
 msgid "Sequencer"
 msgstr "Ardışımlayıcı"
 
-#: src/bz-flathub-category.c:96
+#: src/bz-flathub-category.c:100
 msgid "Tuner"
 msgstr "İnce Ayar"
 
-#: src/bz-flathub-category.c:97
+#: src/bz-flathub-category.c:101
 msgid "TV"
 msgstr "TV"
 
-#: src/bz-flathub-category.c:102
+#: src/bz-flathub-category.c:106
 msgid "Emulation"
 msgstr "Öykünme"
 
-#: src/bz-flathub-category.c:103
+#: src/bz-flathub-category.c:107
 msgid "Action"
 msgstr "Aksiyon"
 
-#: src/bz-flathub-category.c:104
+#: src/bz-flathub-category.c:108
 msgid "Adventure"
 msgstr "Macera"
 
-#: src/bz-flathub-category.c:105
+#: src/bz-flathub-category.c:109
 msgid "Arcade"
 msgstr "Atari"
 
-#: src/bz-flathub-category.c:106
+#: src/bz-flathub-category.c:110
 msgid "Blocks"
 msgstr "Bloklar"
 
-#: src/bz-flathub-category.c:107
+#: src/bz-flathub-category.c:111
 msgid "Board"
 msgstr "Tahta"
 
-#: src/bz-flathub-category.c:108
+#: src/bz-flathub-category.c:112
 msgid "Card"
 msgstr "Kart"
 
-#: src/bz-flathub-category.c:109
+#: src/bz-flathub-category.c:113
 msgid "Kids"
 msgstr "Çocuk"
 
-#: src/bz-flathub-category.c:110
+#: src/bz-flathub-category.c:114
 msgid "Logic"
 msgstr "Mantık"
 
-#: src/bz-flathub-category.c:111
+#: src/bz-flathub-category.c:115
 msgid "Role Playing"
 msgstr "Rol Yapma"
 
-#: src/bz-flathub-category.c:112
+#: src/bz-flathub-category.c:116
 msgid "Shooter"
 msgstr "Atış"
 
-#: src/bz-flathub-category.c:113
+#: src/bz-flathub-category.c:117
 msgid "Simulation"
 msgstr "Simulasyon"
 
-#: src/bz-flathub-category.c:114
+#: src/bz-flathub-category.c:118
 msgid "Sports"
 msgstr "Spor"
 
-#: src/bz-flathub-category.c:115
+#: src/bz-flathub-category.c:119
 msgid "Strategy"
 msgstr "Strateji"
 
-#: src/bz-flathub-category.c:120
+#: src/bz-flathub-category.c:124
 msgid "Audio & Video"
 msgstr "Ses ve Video"
 
-#: src/bz-flathub-category.c:120
+#: src/bz-flathub-category.c:124
 msgid "Media"
 msgstr "Ortam"
 
-#: src/bz-flathub-category.c:120
+#: src/bz-flathub-category.c:124
 msgid "More Audio & Video"
 msgstr "Ses ve Video"
 
-#: src/bz-flathub-category.c:121
+#: src/bz-flathub-category.c:125
 msgid "Developer Tools"
 msgstr "Geliştirici Araçları"
 
-#: src/bz-flathub-category.c:121
+#: src/bz-flathub-category.c:125
 msgid "Develop"
 msgstr "Geliştir"
 
-#: src/bz-flathub-category.c:121
+#: src/bz-flathub-category.c:125
 msgid "More Developer Tools"
 msgstr "Daha Çok Geliştirici Araçları"
 
-#: src/bz-flathub-category.c:122
+#: src/bz-flathub-category.c:126
 msgid "Education"
 msgstr "Eğitim"
 
-#: src/bz-flathub-category.c:122
+#: src/bz-flathub-category.c:126
 msgid "Learn"
 msgstr "Öğren"
 
-#: src/bz-flathub-category.c:122
+#: src/bz-flathub-category.c:126
 msgid "More Education"
 msgstr "Eğitim"
 
-#: src/bz-flathub-category.c:123
+#: src/bz-flathub-category.c:127
 msgid "Gaming"
 msgstr "Oyun"
 
 # Oyun Oyna anlamında Oyna, Oynat değil!
-#: src/bz-flathub-category.c:123
+#: src/bz-flathub-category.c:127
 msgid "Play"
 msgstr "Oyna"
 
-#: src/bz-flathub-category.c:123
+#: src/bz-flathub-category.c:127
 msgid "More Gaming"
 msgstr "Daha Çok Oyun"
 
-#: src/bz-flathub-category.c:124
+#: src/bz-flathub-category.c:128
 msgid "Graphics & Photography"
 msgstr "Grafikler ve Fotoğrafçılık"
 
-#: src/bz-flathub-category.c:124
+#: src/bz-flathub-category.c:128
 msgid "Create"
 msgstr "Oluştur"
 
-#: src/bz-flathub-category.c:124
+#: src/bz-flathub-category.c:128
 msgid "More Graphics & Photography"
 msgstr "Daha Çok Grafikler ve Fotoğrafçılık"
 
-#: src/bz-flathub-category.c:125
+#: src/bz-flathub-category.c:129
 msgid "Networking"
 msgstr "Ağ"
 
-#: src/bz-flathub-category.c:125
+#: src/bz-flathub-category.c:129
 msgid "Internet"
 msgstr "İnternet"
 
-#: src/bz-flathub-category.c:125
+#: src/bz-flathub-category.c:129
 msgid "More Networking"
 msgstr "Ağ"
 
-#: src/bz-flathub-category.c:126
+#: src/bz-flathub-category.c:130
 msgid "Productivity"
 msgstr "Verimlilik"
 
-#: src/bz-flathub-category.c:126
+#: src/bz-flathub-category.c:130
 msgid "Work"
 msgstr "İş"
 
-#: src/bz-flathub-category.c:126
+#: src/bz-flathub-category.c:130
 msgid "More Productivity"
 msgstr "Daha Çok Verimlilik"
 
-#: src/bz-flathub-category.c:127
+#: src/bz-flathub-category.c:131
 msgid "Science"
 msgstr "Bilim"
 
-#: src/bz-flathub-category.c:127
+#: src/bz-flathub-category.c:131
 msgid "More Science"
 msgstr "Bilim"
 
-#: src/bz-flathub-category.c:128
+#: src/bz-flathub-category.c:132
 msgid "System"
 msgstr "Sistem"
 
-#: src/bz-flathub-category.c:128
+#: src/bz-flathub-category.c:132
 msgid "More System"
 msgstr "Sistem"
 
-#: src/bz-flathub-category.c:129
+#: src/bz-flathub-category.c:133
 msgid "Utilities"
 msgstr "Araçlar"
 
-#: src/bz-flathub-category.c:129
+#: src/bz-flathub-category.c:133
 msgid "Tools"
 msgstr "Araçlar"
 
-#: src/bz-flathub-category.c:129
+#: src/bz-flathub-category.c:133
 msgid "More Utilities"
 msgstr "Daha Çok Araçlar"
 
-#: src/bz-flathub-category.c:130 src/bz-flathub-page.blp:119
-#: src/bz-flathub-page.blp:152
+#: src/bz-flathub-category.c:134 src/bz-flathub-page.blp:116
+#: src/bz-flathub-page.blp:148
 msgid "Trending"
 msgstr "Trend"
 
-#: src/bz-flathub-category.c:130
+#: src/bz-flathub-category.c:134
 msgid "More Trending"
 msgstr "Daha Çok Trend"
 
-#: src/bz-flathub-category.c:131 src/bz-flathub-page.blp:125
-#: src/bz-flathub-page.blp:185
+#: src/bz-flathub-category.c:135 src/bz-flathub-page.blp:122
+#: src/bz-flathub-page.blp:178
 msgid "Popular"
 msgstr "Popüler"
 
-#: src/bz-flathub-category.c:131
+#: src/bz-flathub-category.c:135
 msgid "More Popular"
 msgstr "Daha Çok Popüler"
 
-#: src/bz-flathub-category.c:132 src/bz-flathub-page.blp:174
+#: src/bz-flathub-category.c:136 src/bz-flathub-page.blp:168
 msgid "Recently Added"
 msgstr "Son Eklenenler"
 
-#: src/bz-flathub-category.c:132 src/bz-flathub-page.blp:131
+#: src/bz-flathub-category.c:136 src/bz-flathub-page.blp:128
 msgid "New"
 msgstr "Yeni"
 
-#: src/bz-flathub-category.c:132
+#: src/bz-flathub-category.c:136
 msgid "More New"
 msgstr "Daha Çok Yeni"
 
-#: src/bz-flathub-category.c:133 src/bz-flathub-page.blp:163
+#: src/bz-flathub-category.c:137 src/bz-flathub-page.blp:158
 msgid "Recently Updated"
 msgstr "Son Güncellenenler"
 
-#: src/bz-flathub-category.c:133 src/bz-flathub-page.blp:137
+#: src/bz-flathub-category.c:137 src/bz-flathub-page.blp:134
 msgid "Updated"
 msgstr "Güncellendi"
 
-#: src/bz-flathub-category.c:133
+#: src/bz-flathub-category.c:137
 msgid "More Updated"
 msgstr "Daha Çok Güncellenenler"
 
-#: src/bz-flathub-category.c:134
+#: src/bz-flathub-category.c:138
 msgid "Mobile"
 msgstr "Mobil"
 
-#: src/bz-flathub-category.c:134
+#: src/bz-flathub-category.c:138
 msgid "More Mobile"
 msgstr "Daha Çok Mobil"
 
-#: src/bz-flathub-category.c:135
+#: src/bz-flathub-category.c:139
 msgid "Adwaita"
 msgstr "Adwaita"
 
-#: src/bz-flathub-category.c:135
+#: src/bz-flathub-category.c:139
 msgid "More Adwaita"
 msgstr "Daha Çok Adwaita"
 
-#: src/bz-flathub-category.c:136
+#: src/bz-flathub-category.c:140
 msgid "KDE Apps"
 msgstr "KDE Uygulamaları"
 
-#: src/bz-flathub-category.c:136
+#: src/bz-flathub-category.c:140
 msgid "More KDE Apps"
 msgstr "Daha Çok KDE Uygulaması"
 
@@ -1397,76 +1602,52 @@ msgstr ""
 msgid "Search Apps"
 msgstr "Uygulamaları Ara"
 
-#: src/bz-flathub-page.blp:270
+#: src/bz-flathub-page.blp:255
 msgid "On the Go"
 msgstr "Hareket Halindeyken"
 
-#: src/bz-flathub-page.blp:282
+#: src/bz-flathub-page.blp:267
 msgid "Apps for your Linux phones and tablets"
 msgstr "Linux telefonlarınız ve tabletleriniz için uygulamalar"
 
-#: src/bz-flathub-page.blp:293 src/bz-flathub-page.blp:328
+#: src/bz-flathub-page.blp:278 src/bz-flathub-page.blp:313
 msgid "More Mobile Apps"
 msgstr "Daha Çok Mobil Uygulama"
 
-#: src/bz-flathub-page.blp:388
+#: src/bz-flathub-page.blp:369
 msgid "We​ ♥​ Games"
-msgstr "Oyunları Severiz ♥​"
+msgstr "Oyunları ♥​ Severiz"
 
-#: src/bz-flathub-page.blp:401
+#: src/bz-flathub-page.blp:382
 msgid "Games and apps to run your favorite titles"
 msgstr "Sevdiğiniz oyunları çalıştırabileceğiniz oyunlar ve uygulamalar"
 
-#: src/bz-flathub-page.blp:435
+#: src/bz-flathub-page.blp:416
 msgid "More Games"
 msgstr "Daha Çok Oyun"
 
-#: src/bz-full-view.blp:65 src/bz-library-page.blp:74
-#: src/bz-library-page.blp:78
+#: src/bz-full-view.blp:66 src/bz-library-page.blp:77
+#: src/bz-library-page.blp:81
 msgid "No Results"
 msgstr "Sonuç Yok"
 
-#: src/bz-full-view.blp:66
+#: src/bz-full-view.blp:67
 msgid "Try a different search query"
 msgstr "Başka arama deneyin"
 
-#: src/bz-full-view.blp:72
+#: src/bz-full-view.blp:73
 msgid "Content"
 msgstr "İçerik"
 
-#: src/bz-full-view.blp:130
+#: src/bz-full-view.blp:131
 msgid "Installing .flatpak bundles is not yet supported"
 msgstr ".flatpak destelerinin kurulumu henüz desteklenmiyor"
 
-#: src/bz-full-view.blp:223
-msgid "Support"
-msgstr "Destek"
+#: src/bz-full-view.blp:257
+msgid "_Support"
+msgstr "_Destekle"
 
-#: src/bz-full-view.blp:246 src/bz-full-view.blp:510
-msgid "Open"
-msgstr "Aç"
-
-#: src/bz-full-view.blp:259 src/bz-full-view.blp:483
-msgid "Download & Install Application"
-msgstr "Uygulama İndir ve Kur"
-
-#: src/bz-full-view.blp:274
-msgid "Uninstall Application"
-msgstr "Uygulamayı Kaldır"
-
-#: src/bz-full-view.blp:289 src/bz-full-view.blp:525
-msgid "Install Other Version"
-msgstr "Diğer Sürümü Kur"
-
-#: src/bz-full-view.blp:447
-msgid "Downloads/Month"
-msgstr "İndirme/Ay"
-
-#: src/bz-full-view.blp:544
-msgid "Stopped Receiving Core Updates"
-msgstr "Çekirdek Güncellemelerinin Alınması Durduruldu"
-
-#: src/bz-full-view.blp:558
+#: src/bz-full-view.blp:475
 msgid ""
 "This app uses a runtime that no longer receives updates or security fixes. "
 "It may become unsafe to use."
@@ -1474,133 +1655,19 @@ msgstr ""
 "Bu uygulama, artık güncelleme ya da güvenlik düzeltmesi almayan bir çalışma "
 "zamanı kullanıyor. Kullanımı güvenli olmayabilir."
 
-#: src/bz-full-view.blp:645
+#: src/bz-full-view.blp:562
 msgid "Trash Data"
 msgstr "Çöp Verisi"
 
-#: src/bz-full-view.blp:786
+#: src/bz-full-view.blp:702
 msgid "Tags:"
 msgstr "Etiketler:"
 
-#: src/bz-full-view.c:230
-msgid "---"
-msgstr "---"
-
-#. Translators: M is the suffix for millions
-#: src/bz-full-view.c:237
-#, c-format
-msgid "%.*fM"
-msgstr "%.*fM"
-
-#. Translators: K is the suffix for thousands
-#: src/bz-full-view.c:244
-#, c-format
-msgid "%.*fK"
-msgstr "%.*fK"
-
-#: src/bz-full-view.c:254
-#, c-format
-msgid "%d downloads in the last 30 days"
-msgstr "Son 30 günde %d indirme"
-
-#: src/bz-full-view.c:266 src/bz-full-view.c:607 src/bz-full-view.c:624
-msgid "N/A"
-msgstr "Yok"
-
-#: src/bz-full-view.c:294
-#, c-format
-msgid "+%s runtime"
-msgstr "+%s çalışma zamanı"
-
-#: src/bz-full-view.c:297
-msgid "Download"
-msgstr "İndir"
-
-#: src/bz-full-view.c:317
-msgid "Size information unavailable"
-msgstr "Boyut bilgisi yok"
-
-#: src/bz-full-view.c:320
-#, c-format
-msgid "Download size of %s"
-msgstr "%s İndirme Boyutu"
-
-#: src/bz-full-view.c:353
-msgid "All Ages"
-msgstr "Tüm Yaşlar"
-
-#: src/bz-full-view.c:365
-msgid "Age rating information unavailable"
-msgstr "Yaş derecelendirme bilgisi yok"
-
-#: src/bz-full-view.c:370
-msgid "Suitable for all ages"
-msgstr "Tüm yaşlar için uygun"
-
-#: src/bz-full-view.c:372
-#, c-format
-msgid "Suitable for ages %d and up"
-msgstr "%d ve üstü yaşlar için uygun"
-
-#: src/bz-full-view.c:405 src/bz-full-view.c:410 src/bz-full-view.c:438
-#: src/bz-full-view.c:449
-msgid "Unknown"
-msgstr "Bilinmiyor"
-
-#: src/bz-full-view.c:415
-#, c-format
-msgid "Free software licensed under %s"
-msgstr "%s altında lisanslanmış özgür yazılım"
-
-#: src/bz-full-view.c:420
-msgid "Free software"
-msgstr "Özgür yazılım"
-
-#: src/bz-full-view.c:423
-msgid "Proprietary Software"
-msgstr "Sahipli Yazılım"
-
-#: src/bz-full-view.c:426
-#, c-format
-msgid "Special License: %s"
-msgstr "Özel Lisans: %s"
-
-#: src/bz-full-view.c:443
-msgid "Free"
-msgstr "Özgür"
-
-#: src/bz-full-view.c:446 src/bz-license-dialog.c:132
-msgid "Proprietary"
-msgstr "Sahipli"
-
-#: src/bz-full-view.c:451 src/bz-license-dialog.c:134
-msgid "Special License"
-msgstr "Özel Lisans"
-
-#: src/bz-full-view.c:471
-msgid "Adaptive"
-msgstr "Uyarlanır"
-
-# Arayüzde sığmadığı için new line eklendi
-#: src/bz-full-view.c:471
-msgid "Desktop Only"
-msgstr ""
-"Yalnızca\n"
-"Masaüstü"
-
-#: src/bz-full-view.c:477
-msgid "Works on desktop, tablets, and phones"
-msgstr "Telefonlarda, tabletlerde ve masaüstülerde çalışır"
-
-#: src/bz-full-view.c:478
-msgid "May not work on mobile devices"
-msgstr "Mobil aygıtlarda çalışmayabilir"
-
-#: src/bz-full-view.c:489
+#: src/bz-full-view.c:189
 msgid "No URL"
 msgstr "URL Yok"
 
-#: src/bz-full-view.c:507
+#: src/bz-full-view.c:207
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -1608,7 +1675,7 @@ msgstr ""
 "Bu uygulama FLOSS (Özgür ya da Açık Kaynak Yazılım) lisansına sahip, yani "
 "kaynak kodu güvenlik açısından denetlenebilir."
 
-#: src/bz-full-view.c:508
+#: src/bz-full-view.c:208
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
@@ -1616,66 +1683,38 @@ msgstr ""
 "Bu uygulama sahipli lisansa sahip, yani kaynak kodu özel olarak "
 "geliştirilmiştir ve bağımsız üçüncü tarafca denetlenemez."
 
-#: src/bz-full-view.c:515
+#: src/bz-full-view.c:215
 msgid "More Apps"
 msgstr "Daha Çok Uygulama"
 
-#: src/bz-full-view.c:516
+#: src/bz-full-view.c:216
 #, c-format
 msgid "More Apps by %s"
 msgstr "Daha Çok %s Uygulamaları"
 
-#: src/bz-full-view.c:523
+#: src/bz-full-view.c:223
 msgid "Other Apps by this Developer"
 msgstr "Bu Geliştiricinin Diğer Uygulamaları"
 
-#: src/bz-full-view.c:525 src/bz-full-view.c:725
+#: src/bz-full-view.c:225 src/bz-full-view.c:324
 #, c-format
 msgid "Other Apps by %s"
 msgstr "Diğer %s Uygulamaları"
 
-#: src/bz-full-view.c:534
+#: src/bz-full-view.c:234
 #, c-format
 msgid "%s is not installed, but it still has <b>%s</b> of data present."
 msgstr "%s kurulmamış, ancak yine de <b>%s</b> verisi var."
 
-#: src/bz-full-view.c:614 src/bz-safety-dialog.blp:31
-msgid "Safe"
-msgstr "Güvenli"
-
-#: src/bz-full-view.c:616 src/bz-full-view.c:618
-msgid "Low Risk"
-msgstr "Düşük Risk"
-
-#: src/bz-full-view.c:620
-msgid "Medium Risk"
-msgstr "Ortak Risk"
-
-#: src/bz-full-view.c:622
-msgid "High Risk"
-msgstr "Yüksek Risk"
-
-#: src/bz-full-view.c:727
+#: src/bz-full-view.c:326
 msgid "Other Apps"
 msgstr "Diğer Uygulamalar"
 
-#: src/bz-full-view.c:729
+#: src/bz-full-view.c:328
 #, c-format
 msgid "%d Application"
 msgid_plural "%d Applications"
 msgstr[0] "%d Uygulama"
-
-#: src/bz-full-view.c:960 src/bz-transaction-tile.c:340
-msgid "Failed to launch application"
-msgstr "Uygulama başlatılamadı"
-
-#: src/bz-full-view.c:1068
-msgid "Show Less"
-msgstr "Daha Azını Göster"
-
-#: src/bz-full-view.c:1068
-msgid "Show More"
-msgstr "Daha Çok Göster"
 
 #: src/bz-hardware-support-dialog.blp:7 src/bz-hardware-support-dialog.blp:31
 msgid "Hardware Support"
@@ -1771,75 +1810,110 @@ msgstr "%s belirli donanımlarda daha iyi çalışır"
 msgid "%s works on most devices"
 msgstr "%s çoğu aygıtta çalışır"
 
-#: src/bz-installed-tile.blp:63 src/bz-rich-app-tile.blp:139
-msgid "Stopped Receiving Updates"
-msgstr "Güncellemelerin Alınması Durduruldu"
+#: src/bz-install-controls.blp:34 src/bz-transaction-dialog.c:202
+msgid "_Install"
+msgstr "_Kur"
 
-#: src/bz-installed-tile.c:249
-msgid "Failed to load add-ons"
-msgstr "Eklentiler yüklenemedi"
+#: src/bz-install-controls.blp:60
+msgid "_Open"
+msgstr "_Aç"
 
-#: src/bz-library-page.blp:29
+#: src/bz-install-controls.blp:75 src/bz-install-controls.blp:131
+msgid "Uninstall Application"
+msgstr "Uygulamayı Kaldır"
+
+#: src/bz-install-controls.blp:85 src/bz-transaction-dialog.c:231
+msgid "_Remove"
+msgstr "_Kaldır"
+
+#: src/bz-install-controls.blp:118 src/bz-updates-card.c:161
+#: src/bz-updates-card.c:180
+msgid "Update"
+msgstr "Güncelle"
+
+#: src/bz-library-page.blp:32
 msgid "Search installed apps"
 msgstr "Kurulu uygulamaları ara"
 
-#: src/bz-library-page.blp:46
+#: src/bz-library-page.blp:49
 msgid "Clear search"
 msgstr "Aramayı temizle"
 
-#: src/bz-library-page.blp:67
+#: src/bz-library-page.blp:70
 msgid "No Apps Found"
 msgstr "Uygulama Bulunamadı"
 
+#: src/bz-library-page.blp:89
+msgid "Search Store Instead"
+msgstr "Mağazada Ara"
+
 #. Translators: .
-#: src/bz-library-page.blp:86 src/bz-window.blp:179
+#: src/bz-library-page.blp:99 src/bz-window.blp:112
 msgid "Library"
 msgstr "Kitaplık"
 
-#: src/bz-library-page.blp:114
+#: src/bz-library-page.blp:127
 msgid "Pending Updates"
 msgstr "Güncellemeler Bekliyor"
 
-#: src/bz-library-page.blp:141
+#: src/bz-library-page.blp:154
 msgid "Downloads"
 msgstr "İndirmeler"
 
-#: src/bz-library-page.blp:184
+#: src/bz-library-page.blp:197
 msgid "Recently Uninstalled"
 msgstr "Son Kaldırılanlar"
 
-#: src/bz-library-page.blp:235
+#: src/bz-library-page.blp:248
 msgid "Clear Finished Tasks"
 msgstr "Tamamlanan Görevleri Temizle"
 
-#: src/bz-library-page.blp:246
-msgid "Installed Apps"
-msgstr "Kurulu Uygulamalar"
+#: src/bz-library-page.blp:333
+msgid "Sort By"
+msgstr "Sırala"
 
-#: src/bz-library-page.c:150
+#: src/bz-library-page.blp:347
+msgid "Name"
+msgstr "Ad"
+
+#: src/bz-library-page.blp:353
+msgid "Size"
+msgstr "Boyut"
+
+#: src/bz-library-page.c:180
 #, c-format
 msgid "No matches found for \"%s\" in the list of installed apps"
 msgstr "Kurulu uygulamalar listesinde \"%s\" ile eşleşen hiçbir öge bulunamadı"
 
-#: src/bz-library-page.c:163 src/bz-updates-card.c:257
+#: src/bz-library-page.c:193 src/bz-updates-card.c:426
 #, c-format
 msgid "%u Available Update"
 msgid_plural "%u Available Updates"
 msgstr[0] "%u Güncelleme Var"
 
-#: src/bz-license-dialog.blp:95
+#: src/bz-library-page.c:203
+#, c-format
+msgid "%u Installed App"
+msgid_plural "%u Installed Apps"
+msgstr[0] "%u Kurulu Uygulama"
+
+#: src/bz-license-dialog.blp:94
 msgid "Get Involved"
 msgstr "Katılım Sağlayın"
 
-#: src/bz-license-dialog.c:126
+#: src/bz-license-dialog.blp:111
+msgid "Learn More"
+msgstr "Daha Çoğunu Öğren"
+
+#: src/bz-license-dialog.c:127
 msgid "Unknown License"
 msgstr "Bilinmeyen Lisans"
 
-#: src/bz-license-dialog.c:129
+#: src/bz-license-dialog.c:130
 msgid "Community Built"
 msgstr "Topluluk İnşası"
 
-#: src/bz-license-dialog.c:202
+#: src/bz-license-dialog.c:203
 msgid ""
 "This app is developed in the open by an international community.\n"
 "\n"
@@ -1850,11 +1924,11 @@ msgstr ""
 "\n"
 "Katılarak daha iyi olmasını sağlayabilirsiniz."
 
-#: src/bz-license-dialog.c:205
+#: src/bz-license-dialog.c:206
 msgid "The license of this app is not known"
 msgstr "Uygulamanın lisansı bilinmiyor"
 
-#: src/bz-license-dialog.c:211
+#: src/bz-license-dialog.c:212
 #, c-format
 msgid ""
 "This app is developed in the open by an international community, and "
@@ -1867,7 +1941,7 @@ msgstr ""
 "\n"
 "Katılarak daha iyi olmasını sağlayabilirsiniz."
 
-#: src/bz-license-dialog.c:219
+#: src/bz-license-dialog.c:220
 msgid ""
 "This app is not developed in the open, so only its developers know how it "
 "works. It may be insecure in ways that are hard to detect, and it may change "
@@ -1881,7 +1955,7 @@ msgstr ""
 "\n"
 "Bu uygulamaya katkıda bulunabilir ya da bulunamayabilirsiniz."
 
-#: src/bz-license-dialog.c:225
+#: src/bz-license-dialog.c:226
 #, c-format
 msgid ""
 "This app is developed under the special license %s.\n"
@@ -1892,9 +1966,13 @@ msgstr ""
 "\n"
 "Bu uygulamaya katkıda bulunabilir ya da bulunamayabilirsiniz."
 
+#: src/bz-license-dialog.c:356 src/bz-safety-dialog.blp:53
+msgid "License"
+msgstr "Lisans"
+
 #: src/bz-login-page.blp:5 src/bz-login-page.blp:42
 msgid "Connect to Flathub"
-msgstr "Flathubʼa bağlan"
+msgstr "Flathubʼa Bağlan"
 
 #: src/bz-login-page.blp:32
 msgid "Something Went Wrong"
@@ -1904,7 +1982,7 @@ msgstr "Bir Şeyler Yanlış Gitti"
 msgid "Connect your Flathub account to Bazaar to manage your favorited apps."
 msgstr "Flathub hesabınızı Bazaarʼa bağlayarak gözde uygulamalarınızı yönetin."
 
-#: src/bz-login-page.blp:108
+#: src/bz-login-page.blp:110
 msgid "Finish"
 msgstr "Bitti"
 
@@ -1923,7 +2001,7 @@ msgstr ""
 "Ağ bağlantısı ölçülü — kendiliğinden mağaza verilerinin yenilenmesi "
 "duraklatıldı"
 
-#: src/bz-preferences-dialog.blp:26 src/bz-window.blp:335
+#: src/bz-preferences-dialog.blp:26 src/bz-window.blp:282
 msgid "Refresh Manually"
 msgstr "Elle Yenile"
 
@@ -1966,7 +2044,7 @@ msgstr "Ömrünün Sonuna Gelmiş Uygulamaları Gizle"
 msgid "Hide apps which are no longer supported by their developers"
 msgstr "Geliştiricilerince artık desteklenmeyen uygulamaları gizle"
 
-#: src/bz-preferences-dialog.blp:55 src/bz-window.blp:197
+#: src/bz-preferences-dialog.blp:55 src/bz-window.blp:127
 msgid "Search"
 msgstr "Ara"
 
@@ -2082,45 +2160,72 @@ msgstr "Femboy Pride Colors"
 msgid "Neutrois Pride Colors"
 msgstr "Neutrois Pride Colors"
 
-#: src/bz-releases-dialog.blp:5 src/bz-releases-list.blp:28
-#: src/bz-updates-card.blp:150
+#: src/bz-releases-dialog.blp:5 src/bz-updates-card.c:152
 msgid "Version History"
 msgstr "Sürüm Geçmişi"
 
-#. Translators: This is a date format for timestamps from the current year. Used in the app releases section.
-#. * %B is the full month name, %e is the day.
-#. * Example: "October 1"
-#. * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
-#. * Please modify to make it sound natural in your locale.
-#. *
-#: src/bz-releases-list.c:121
-msgid "%e %B"
-msgstr "%e %B"
+#: src/bz-releases-list.blp:27
+msgid "_Version History"
+msgstr "_Sürüm Geçmişi"
 
-#. Translators: This is a date format for timestamps from previous years. Used in the app releases section.
-#. * %B is the full month name, %e is the day, %Y is the year.
-#. * Example: "October 1, 2025"
-#. * See https://docs.gtk.org/glib/method.DateTime.format.html for format options
-#. * Please modify to make it sound natural in your locale.
-#. *
-#: src/bz-releases-list.c:129
+#. Translators: something happened less than a day ago
+#: src/bz-releases-list.c:122
+msgid "Today"
+msgstr "Bugün"
+
+#. Translators: something happened more than a day ago but less than 2 days ago
+#: src/bz-releases-list.c:125
+msgid "Yesterday"
+msgstr "Dün"
+
+#. Translators: something happened days ago
+#: src/bz-releases-list.c:128
+#, c-format
+msgid "%d day ago"
+msgid_plural "%d days ago"
+msgstr[0] "%d gün önce"
+
+#. Translators: something happened weeks ago
+#: src/bz-releases-list.c:131
+#, c-format
+msgid "%d week ago"
+msgid_plural "%d weeks ago"
+msgstr[0] "%d hafta önce"
+
+#. Translators: something happened months ago
+#: src/bz-releases-list.c:134
+#, c-format
+msgid "%d month ago"
+msgid_plural "%d months ago"
+msgstr[0] "%d ay önce"
+
+#. Translators: something happened years ago
+#: src/bz-releases-list.c:137
+#, c-format
+msgid "%d year ago"
+msgid_plural "%d years ago"
+msgstr[0] "%d yıl önce"
+
+#. TRANSLATORS: This is the date string with: day number, month name, year.
+#. i.e. "22 March 2026"
+#: src/bz-releases-list.c:155
 msgid "%e %B %Y"
 msgstr "%e %B %Y"
 
-#: src/bz-releases-list.c:168
+#: src/bz-releases-list.c:195
 #, c-format
 msgid "Version %s"
 msgstr "Sürüm %s"
 
-#: src/bz-releases-list.c:220
+#: src/bz-releases-list.c:250
 msgid "No details for this release"
 msgstr "Bu sürüm için ayrıntı yok"
 
-#: src/bz-releases-list.c:232
+#: src/bz-releases-list.c:262
 msgid "Get More Information"
 msgstr "Daha Çok Bilgi"
 
-#: src/bz-rich-app-tile.blp:156
+#: src/bz-rich-app-tile.blp:157
 msgid "Get"
 msgstr "Al"
 
@@ -2437,10 +2542,6 @@ msgstr "KDE Connect aracılığıyla eşleştirilen aygıtlarla etkileşime gire
 msgid "Safety"
 msgstr "Güvenlik"
 
-#: src/bz-safety-dialog.blp:53
-msgid "License"
-msgstr "Lisans"
-
 #: src/bz-safety-dialog.blp:63
 msgid "App ID"
 msgstr "Uygulama Kimliği"
@@ -2499,15 +2600,15 @@ msgstr "Sonraki Ekran Görüntüsü"
 msgid "Copy Image"
 msgstr "Resmi Kopyala"
 
-#: src/bz-screenshot-page.blp:147
+#: src/bz-screenshot-page.blp:150
 msgid "Reset View"
 msgstr "Görünümü Sıfırla"
 
-#: src/bz-screenshot-page.blp:158
+#: src/bz-screenshot-page.blp:161
 msgid "Zoom Out"
 msgstr "Uzaklaştır"
 
-#: src/bz-screenshot-page.blp:168
+#: src/bz-screenshot-page.blp:171
 msgid "Zoom In"
 msgstr "Yakınlaştır"
 
@@ -2515,7 +2616,7 @@ msgstr "Yakınlaştır"
 msgid "Screenshots Carousel"
 msgstr "Ekran Görüntüsü Sergisi"
 
-#: src/bz-screenshots-carousel.blp:112
+#: src/bz-screenshots-carousel.blp:117
 msgid "Open Screenshot Viewer"
 msgstr "Ekran Görüntüsü Görüntüleyiciyi Aç"
 
@@ -2607,100 +2708,129 @@ msgstr "Minecraft"
 msgid "Emulator"
 msgstr "Öykünücü"
 
-#: src/bz-search-widget.blp:57
+#: src/bz-search-filter-popover.blp:18 src/bz-search-page.blp:83
+msgid "Filters"
+msgstr "Süzgeçler"
+
+#: src/bz-search-filter-popover.blp:35
+msgid "_Verified"
+msgstr "_Doğrulanmış"
+
+#: src/bz-search-filter-popover.blp:42
+msgid "_Free/Open"
+msgstr "Ö_zgür/Açık Kaynak"
+
+#: src/bz-search-filter-popover.blp:49
+msgid "Non-_EOL"
+msgstr "_Yaşam Döngüsünde"
+
+#: src/bz-search-filter-popover.blp:56
+msgid "Categories"
+msgstr "Kategoriler"
+
+#: src/bz-search-page.blp:58
 msgid "Search Apps, Games, Software"
 msgstr "Uygulamaları, Oyunları, Yazılımları Ara"
 
-#: src/bz-search-widget.blp:79
+#: src/bz-search-page.blp:70
+msgid "Search Filters"
+msgstr "Arama Süzgeçleri"
+
+#: src/bz-search-page.blp:100
 msgid "Clear Search"
 msgstr "Aramayı Temizle"
 
-#: src/bz-search-widget.blp:101
+#: src/bz-search-page.blp:192
 msgid "Categories Unavailable"
 msgstr "Kategoriler Kullanılamıyor"
 
-#: src/bz-search-widget.blp:102
+#: src/bz-search-page.blp:193
 msgid "Search for apps using the search bar above."
 msgstr "Yukarıdaki arama çubuğunu kullanarak uygulamaları ara."
 
-#: src/bz-search-widget.blp:127
+#: src/bz-search-page.blp:219
 msgid "Browse Categories"
 msgstr "Kategorilere Göz At"
 
-#: src/bz-search-widget.blp:203
+#: src/bz-search-page.blp:361
 msgid "No Applications Found"
 msgstr "Uygulama Bulunamadı."
 
-#: src/bz-search-widget.c:242
+#: src/bz-search-page.c:247
 #, c-format
 msgid "No results found for \"%s\" in Flathub"
 msgstr "Flathubʼda \"%s\" için sonuç bulunamadı"
 
-#: src/bz-share-list.c:116
+#: src/bz-share-list.c:123
 msgid "Copy Link"
 msgstr "Bağlantıyı Kopyala"
 
-#: src/bz-share-list.c:127
+#: src/bz-share-list.c:134
 msgid "Open Link"
 msgstr "Bağlantıyı Aç"
 
-#: src/bz-stats-dialog.blp:28
+# Konumu gereği başlık düzeni kullanıldı. Ayrıca Zaman Çizgisi yerine Zaman Çizelgesi çevirisi yeğlendi.
+#: src/bz-stats-dialog.blp:27
 msgid "Timeline"
-msgstr "Zaman çizgisi"
+msgstr "Zaman Çizelgesi"
 
-#: src/bz-stats-dialog.blp:46
+#: src/bz-stats-dialog.blp:45
 msgid "Installs:"
-msgstr "Kurulumlar:"
+msgstr "Kurulum Sayısı:"
 
-#: src/bz-stats-dialog.blp:55
+#: src/bz-stats-dialog.blp:54
 msgid "World"
 msgstr "Dünya"
 
+#: src/bz-stats-dialog.blp:68
+msgid "Since 4/15/2024"
+msgstr "15 Nisan 2024 tarihinden beri"
+
 #. Translators: M is the suffix for millions
-#: src/bz-stats-dialog.c:124
+#: src/bz-stats-dialog.c:125
 #, c-format
 msgid "%.2fM Total Installs"
 msgstr "%.2fM Toplam Kurulum"
 
 #. Translators: K is the suffix for thousands
-#: src/bz-stats-dialog.c:127
+#: src/bz-stats-dialog.c:128
 #, c-format
 msgid "%.2fK Total Installs"
 msgstr "%.2fK Toplam Kurulum"
 
-#: src/bz-stats-dialog.c:129
+#: src/bz-stats-dialog.c:130
 #, c-format
 msgid "%'d Total Installs"
 msgstr "%'d Toplam Kurulum"
 
-#: src/bz-tag-list.c:96
+#: src/bz-tag-list.c:78
 msgid "No Results Found"
 msgstr "Hiçbir Sonuç Bulunamadı"
 
-#: src/bz-tag-list.c:108
+#: src/bz-tag-list.c:90
 #, c-format
 msgid "Apps Tagged \"%s\""
 msgstr "\"%s\" Etiketli Uygulamalar"
 
-#: src/bz-tag-list.c:124
+#: src/bz-tag-list.c:103
 msgid "Search failed"
 msgstr "Arama başarısız"
 
 #: src/bz-transaction-dialog.c:155
-msgid "Keep Data"
-msgstr "Verileri Tut"
+msgid "Keep User Data"
+msgstr "Kullanıcı Verisini Tut"
 
 #: src/bz-transaction-dialog.c:156
-msgid "Allow restoring settings and content"
-msgstr "Ayarların ve içeriğin geri yüklenmesine izin ver"
+msgid "Allow restoring personal settings &amp; content"
+msgstr "Kişisel ayarların ve içeriğin geri yüklenmesine izin ver"
 
 #: src/bz-transaction-dialog.c:165
-msgid "Delete Data"
-msgstr "Verileri Sil"
+msgid "Delete All Data"
+msgstr "Tüm Verileri Sil"
 
 #: src/bz-transaction-dialog.c:166
-msgid "Permanently remove app data to save space"
-msgstr "Disk alanını korumak için uygulama verilerini kalıcı olarak sil"
+msgid "Permanently erase user data to save space"
+msgstr "Disk alanını korumak için kullanıcı verisini sil"
 
 #: src/bz-transaction-dialog.c:191
 #, c-format
@@ -2715,6 +2845,11 @@ msgstr "Hangi sürümün kurulacağını seç. Ek paylaşımlı bileşenler kura
 #: src/bz-transaction-dialog.c:198
 msgid "May install additional shared components"
 msgstr "Ek paylaşımlı bileşenler kurabilir"
+
+#: src/bz-transaction-dialog.c:201 src/bz-transaction-dialog.c:230
+#: src/bz-transaction-dialog.c:275 src/bz-transaction-dialog.c:578
+msgid "_Cancel"
+msgstr "İ_ptal"
 
 #: src/bz-transaction-dialog.c:219
 #, c-format
@@ -2769,8 +2904,8 @@ msgstr ""
 "Uygulama sahipli olduğundan, bu izinlerle ne yaptığı denetlenemez."
 
 #: src/bz-transaction-dialog.c:276
-msgid "Install Anyway"
-msgstr "Yine De Kur"
+msgid "_Install Anyway"
+msgstr "Yine De _Kur"
 
 #: src/bz-transaction-dialog.c:331
 msgid "Failed to load transaction dialog"
@@ -2781,8 +2916,8 @@ msgid "All apps are already installed"
 msgstr "Tüm uygulamalar zaten kurulmuş"
 
 #: src/bz-transaction-dialog.c:551
-msgid "OK"
-msgstr "Tamam"
+msgid "_OK"
+msgstr "_Tamam"
 
 #: src/bz-transaction-dialog.c:567
 #, c-format
@@ -2805,50 +2940,50 @@ msgstr "%d eklenti kurulacak."
 msgid "Additionally, addons will be installed."
 msgstr "Ayrıca, uzantılar kurulacak."
 
+#: src/bz-transaction-dialog.c:579
+msgid "_Install All"
+msgstr "Tümünü _Kur"
+
 #: src/bz-transaction-manager.c:766
 #, c-format
 msgid "Finished in %.02f seconds"
 msgstr "%.02f saniyede bitti"
 
-#: src/bz-transaction-tile.blp:126
-msgid "App Add-on"
+#: src/bz-transaction-tile.blp:129
+msgid "App Add-On"
 msgstr "Uygulama Eklentisi"
 
-#: src/bz-transaction-tile.blp:155
+#: src/bz-transaction-tile.blp:158
 msgid "Runtime"
 msgstr "Çalışma Zamanı"
 
-#: src/bz-transaction-tile.blp:179
+#: src/bz-transaction-tile.blp:182
 msgid "In Queue"
 msgstr "Kuyrukta"
 
-#: src/bz-transaction-tile.blp:203
+#: src/bz-transaction-tile.blp:206
 msgid "Done"
 msgstr "Bitti"
 
-#: src/bz-transaction-tile.blp:227
+#: src/bz-transaction-tile.blp:230
 msgid "Error"
 msgstr "Hata"
 
-#: src/bz-transaction-tile.blp:271
-msgid "Open App"
-msgstr "Uygulamayı Aç"
-
-#: src/bz-transaction-tile.blp:285
+#: src/bz-transaction-tile.blp:286
 msgid "Cancel Transaction"
 msgstr "İşlemi İptal Et"
 
-#: src/bz-transaction-tile.blp:409
+#: src/bz-transaction-tile.blp:410
 msgid "Show Error Info"
 msgstr "Hata Bilgisini Göster"
 
-#: src/bz-transaction-tile.c:112
+#: src/bz-transaction-tile.c:107
 #, c-format
 msgid "%s Freed"
 msgstr "%s Temizlendi"
 
 # Transaction dese de para ile ilgisi yok. O sebeple sadece İşlemler diye çevirdim.
-#: src/bz-transaction-tile.c:398 src/bz-transaction-tile.c:401
+#: src/bz-transaction-tile.c:362 src/bz-transaction-tile.c:365
 msgid "Transaction Error"
 msgstr "İşlem Hatası"
 
@@ -2856,15 +2991,11 @@ msgstr "İşlem Hatası"
 msgid "Pending"
 msgstr "Beklemede"
 
-#: src/bz-updates-card.blp:36
-msgid "Update All"
-msgstr "Tümünü Güncelle"
+#: src/bz-updates-card.blp:22
+msgid "_Update All"
+msgstr "Tümünü _Güncelle"
 
-#: src/bz-updates-card.blp:161 src/bz-updates-card.blp:186
-msgid "Update"
-msgstr "Güncelle"
-
-#: src/bz-updates-card.c:293
+#: src/bz-updates-card.c:208
 #, c-format
 msgid "%u Runtime Update"
 msgid_plural "%u Runtime Updates"
@@ -2875,7 +3006,7 @@ msgid "Manage Leftover User Data"
 msgstr "Artık Kullanıcı Verisini Yönet"
 
 #: src/bz-user-data-page.blp:89
-msgid "No User Data found"
+msgid "No User Data Found"
 msgstr "Kullanıcı Verisi bulunamadı"
 
 #: src/bz-user-data-page.blp:94
@@ -2891,85 +3022,102 @@ msgstr "%s İçin Kullanıcı Verisi Çöpe Taşındı"
 msgid "Trash User Data"
 msgstr "Kullanıcı Verisini Çöpe Taşı"
 
-#: src/bz-window.blp:153
+#: src/bz-window.blp:88
 msgid "Curated"
 msgstr "Özelleştirilmiş"
 
-#: src/bz-window.blp:166
+#: src/bz-window.blp:100
 msgid "Flathub"
 msgstr "Flathub"
 
-#: src/bz-window.blp:273
+#: src/bz-window.blp:220
 msgid "Refresh completed!"
 msgstr "Yenileme tamamlandı!"
 
-#: src/bz-window.blp:326
+#: src/bz-window.blp:273
 msgid "You are running a new version of Bazaar!"
 msgstr "Bazaarʼın yeni bir sürümünü kullanıyorsunuz!"
 
-#: src/bz-window.blp:327
+#: src/bz-window.blp:274
 msgid "See What's New"
 msgstr "Neler Yeni Gör"
 
-#: src/bz-window.blp:334
+#: src/bz-window.blp:281
 msgid ""
 "You have a network connection but are viewing a cached version of Flathub"
 msgstr ""
 "Ağ bağlantınız var ancak Flathubʼın önbelleklenmiş sürümünü görüntülüyorsunuz"
 
-#: src/bz-window.blp:450
+#: src/bz-window.blp:393
 msgid "Log Out"
 msgstr "Oturumu Kapat"
 
-#: src/bz-window.c:680
+#. Translators: %s is the title of the current page
+#: src/bz-window.c:380
+#, c-format
+msgid "Bazaar — %s"
+msgstr "Bazaar — %s"
+
+#: src/bz-window.c:544 src/bz-window.c:561
+msgid "Failed to launch application"
+msgstr "Uygulama başlatılamadı"
+
+#: src/bz-window.c:766
 msgid "You can't remove Bazaar from Bazaar!"
 msgstr "Bazaarʼı Bazaar ile kaldıramazsınız!"
 
-#: src/bz-window.c:966 src/bz-window.c:1000
+#: src/bz-window.c:1051 src/bz-window.c:1085
 msgid "Can't do that right now!"
 msgstr "Şimdi yapma!"
 
-#: src/bz-world-map.c:587
+# Timeline sayfasıyla uyumlu olması için Kurulum şeklinde çevrildi. Hata raporlanacak.
+#: src/bz-world-map.c:595
 msgctxt "As in, \"100 Downloads\""
 msgid "Downloads"
-msgstr "İndirme"
+msgstr "Kurulum"
 
-#: src/gtk/shortcuts-dialog.blp:6
+#: src/shortcuts-dialog.blp:6
 msgctxt "shortcut window"
 msgid "General"
 msgstr "Genel"
 
-#: src/gtk/shortcuts-dialog.blp:9
+#: src/shortcuts-dialog.blp:9
+msgctxt "shortcut window"
+msgid "Open Search Page"
+msgstr "Arama Sayfasını Aç"
+
+#: src/shortcuts-dialog.blp:14
+msgctxt "shortcut window"
+msgid "Open Library Page"
+msgstr "Kitaplık Sayfasını Aç"
+
+#: src/shortcuts-dialog.blp:20
 msgctxt "shortcut window"
 msgid "Refresh"
 msgstr "Yenile"
 
-#: src/gtk/shortcuts-dialog.blp:14
+#: src/shortcuts-dialog.blp:25
 msgctxt "shortcut window"
 msgid "Open Preferences"
 msgstr "Tercihleri Aç"
 
-#: src/gtk/shortcuts-dialog.blp:19
-msgctxt "shortcut window"
-msgid "Open Search Dialog"
-msgstr "Arama İletişim Kutusunu Aç"
-
-#: src/gtk/shortcuts-dialog.blp:24
-msgctxt "shortcut window"
-msgid "Open Library"
-msgstr "Kitaplığı Aç"
-
-#: src/gtk/shortcuts-dialog.blp:30
+#: src/shortcuts-dialog.blp:30
 msgctxt "shortcut window"
 msgid "Show Shortcuts"
 msgstr "Kısayolları Göster"
 
-#: src/gtk/shortcuts-dialog.blp:35
+#: src/shortcuts-dialog.blp:35
 msgctxt "shortcut window"
 msgid "Close Window"
 msgstr "Pencereyi Kapat"
 
-#: src/gtk/shortcuts-dialog.blp:41
+#: src/shortcuts-dialog.blp:41
 msgctxt "shortcut window"
 msgid "Quit Bazaar"
 msgstr "Bazaarʼdan Çık"
+
+#~ msgid "Download & Install Application"
+#~ msgstr "Uygulama İndir ve Kur"
+
+#~ msgid "Failed to load add-ons"
+#~ msgstr "Eklentiler yüklenemedi"

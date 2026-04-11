@@ -28,6 +28,7 @@
 #include "bz-installed-tile.h"
 #include "bz-library-page.h"
 #include "bz-state-info.h"
+#include "bz-window.h"
 
 struct _BzInstalledTile
 {
@@ -39,7 +40,6 @@ struct _BzInstalledTile
   GtkImage   *fallback_icon;
   GtkLabel   *title_label;
   GtkButton  *support_button;
-  GtkButton  *addons_button;
   GtkButton  *remove_button;
 };
 
@@ -53,9 +53,6 @@ enum
 };
 
 static GParamSpec *props[LAST_PROP] = { 0 };
-
-static gboolean
-test_has_addons (BzEntry *entry);
 
 static void
 bz_installed_tile_dispose (GObject *object)
@@ -124,6 +121,22 @@ is_zero (gpointer object,
   return value == 0;
 }
 
+static gboolean
+logical_and (gpointer object,
+             gboolean a,
+             gboolean b)
+{
+  return a && b;
+}
+
+static gboolean
+logical_or (gpointer object,
+            gboolean a,
+            gboolean b)
+{
+  return a || b;
+}
+
 static char *
 format_description (gpointer    object,
                     guint64     size,
@@ -173,25 +186,6 @@ format_description (gpointer    object,
 }
 
 static void
-addon_transact_cb (BzInstalledTile *self,
-                   BzEntry         *entry,
-                   BzAddonsDialog  *dialog)
-{
-  BzLibraryPage *page      = NULL;
-  gboolean       installed = FALSE;
-
-  page = BZ_LIBRARY_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (self), BZ_TYPE_LIBRARY_PAGE));
-  g_assert (page != NULL);
-
-  g_object_get (entry, "installed", &installed, NULL);
-
-  if (installed)
-    g_signal_emit_by_name (page, "remove-addon", entry);
-  else
-    g_signal_emit_by_name (page, "install-addon", entry);
-}
-
-static void
 support_cb (BzInstalledTile *self,
             GtkButton       *button)
 {
@@ -207,76 +201,35 @@ support_cb (BzInstalledTile *self,
   g_app_info_launch_default_for_uri (url, NULL, NULL);
 }
 
-static DexFuture *
-install_addons_fiber (BzInstalledTile *tile)
+static void
+permissions_cb (BzInstalledTile *self)
 {
-  g_autoptr (GError) local_error = NULL;
-  BzLibraryPage *page            = NULL;
-  BzStateInfo   *state           = NULL;
-  GtkWidget     *window          = NULL;
-  g_autoptr (BzEntry) entry      = NULL;
-  g_autoptr (GListModel) model   = NULL;
-  AdwDialog *addons_dialog       = NULL;
+  if (self->group == NULL)
+    return;
 
-  page = BZ_LIBRARY_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (tile), BZ_TYPE_LIBRARY_PAGE));
-  g_assert (page != NULL);
-
-  window = gtk_widget_get_ancestor (GTK_WIDGET (tile), GTK_TYPE_WINDOW);
-  g_assert (window != NULL);
-
-  g_object_get (page, "state", &state, NULL);
-  g_assert (state != NULL);
-
-  entry = bz_entry_group_find_entry (tile->group, test_has_addons, window, &local_error);
-  if (entry == NULL)
-    goto err;
-
-  model = bz_application_map_factory_generate (
-      bz_state_info_get_entry_factory (state),
-      bz_entry_get_addons (entry));
-
-  addons_dialog = bz_addons_dialog_new (entry, model);
-  gtk_widget_set_size_request (GTK_WIDGET (addons_dialog), 350, -1);
-  g_signal_connect_swapped (addons_dialog, "transact", G_CALLBACK (addon_transact_cb), tile);
-
-  adw_dialog_present (addons_dialog, GTK_WIDGET (tile));
-
-  g_clear_object (&state);
-  return NULL;
-
-err:
-  if (local_error != NULL)
-    bz_show_error_for_widget (window, _("Failed to load add-ons"), local_error->message);
-  g_clear_object (&state);
-  return NULL;
+  gtk_widget_activate_action (GTK_WIDGET (self), "window.permissions", "s",
+                              bz_entry_group_get_id (self->group));
 }
 
 static void
-install_addons_cb (BzInstalledTile *self,
-                   GtkButton       *button)
+install_addons_cb (BzInstalledTile *self)
 {
-  dex_future_disown (dex_scheduler_spawn (
-      dex_scheduler_get_default (),
-      bz_get_dex_stack_size (),
-      (DexFiberFunc) install_addons_fiber,
-      g_object_ref (self),
-      g_object_unref));
+  if (self->group == NULL)
+    return;
+
+  gtk_widget_activate_action (GTK_WIDGET (self), "window.addons-group", "s",
+                              bz_entry_group_get_id (self->group));
 }
 
 static void
 remove_cb (BzInstalledTile *self,
            GtkButton       *button)
 {
-  BzLibraryPage *page = NULL;
-
-  page = BZ_LIBRARY_PAGE (gtk_widget_get_ancestor (GTK_WIDGET (self), BZ_TYPE_LIBRARY_PAGE));
-  if (page == NULL)
-    return;
-
   if (self->group == NULL)
     return;
 
-  g_signal_emit_by_name (page, "remove", self->group);
+  gtk_widget_activate_action (GTK_WIDGET (self), "window.remove-group", "(sb)",
+                              bz_entry_group_get_id (self->group), FALSE);
 }
 
 static void
@@ -306,15 +259,22 @@ bz_installed_tile_class_init (BzInstalledTileClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzInstalledTile, fallback_icon);
   gtk_widget_class_bind_template_child (widget_class, BzInstalledTile, title_label);
   gtk_widget_class_bind_template_child (widget_class, BzInstalledTile, support_button);
-  gtk_widget_class_bind_template_child (widget_class, BzInstalledTile, addons_button);
   gtk_widget_class_bind_template_child (widget_class, BzInstalledTile, remove_button);
   gtk_widget_class_bind_template_callback (widget_class, invert_boolean);
   gtk_widget_class_bind_template_callback (widget_class, is_null);
   gtk_widget_class_bind_template_callback (widget_class, is_zero);
+  gtk_widget_class_bind_template_callback (widget_class, logical_and);
+  gtk_widget_class_bind_template_callback (widget_class, logical_or);
   gtk_widget_class_bind_template_callback (widget_class, format_description);
   gtk_widget_class_bind_template_callback (widget_class, support_cb);
   gtk_widget_class_bind_template_callback (widget_class, install_addons_cb);
   gtk_widget_class_bind_template_callback (widget_class, remove_cb);
+  gtk_widget_class_bind_template_callback (widget_class, permissions_cb);
+
+  gtk_widget_class_install_action (widget_class, "installed-tile.install-addons", NULL,
+                                 (GtkWidgetActionActivateFunc) install_addons_cb);
+  gtk_widget_class_install_action (widget_class, "installed-tile.permissions", NULL,
+                                   (GtkWidgetActionActivateFunc) permissions_cb);
 
   gtk_widget_class_set_accessible_role (widget_class, GTK_ACCESSIBLE_ROLE_BUTTON);
 }
@@ -350,13 +310,4 @@ bz_installed_tile_get_group (BzInstalledTile *self)
 {
   g_return_val_if_fail (BZ_IS_INSTALLED_TILE (self), NULL);
   return self->group;
-}
-
-static gboolean
-test_has_addons (BzEntry *entry)
-{
-  GListModel *model = NULL;
-
-  model = bz_entry_get_addons (entry);
-  return model != NULL && g_list_model_get_n_items (model) > 0;
 }

@@ -1,6 +1,7 @@
 using Gtk 4.0;
 
 template $BzAppTile: Button {
+  preferred-width: 270;
   styles [
     "card",
     "app-tile",
@@ -18,7 +19,7 @@ template $BzAppTile: Button {
 
       Image {
         pixel-size: 64;
-        paintable: bind template.group as <$BzEntryGroup>.icon-paintable;
+        paintable: bind template.group as <$BzEntryGroup>.ui-entry as <$BzResult>.object as <$BzEntry>.icon-paintable;
 
         styles ["icon-dropshadow"]
       }
@@ -42,7 +43,6 @@ template $BzAppTile: Button {
             xalign: 0.0;
             ellipsize: end;
             label: bind template.group as <$BzEntryGroup>.title;
-            max-width-chars: 18;
           }
 
           Image {
@@ -67,7 +67,6 @@ template $BzAppTile: Button {
           ellipsize: end;
           vexpand: true;
           lines: bind $description_line_amount($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>) as <int>;
-          max-width-chars: 15;
           single-line-mode: true;
           label: bind template.group as <$BzEntryGroup>.description;
         }

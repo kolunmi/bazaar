@@ -20,7 +20,6 @@
 
 #include <glib/gi18n.h>
 
-#include "bz-application-map-factory.h"
 #include "bz-application.h"
 #include "bz-entry-group.h"
 #include "bz-entry.h"
@@ -51,10 +50,6 @@ enum
   LAST_PROP
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
-
-static BzEntryGroup *
-resolve_group_from_entry (BzEntry  *entry,
-                          BzWindow *window);
 
 static void
 bz_transaction_tile_dispose (GObject *object)
@@ -114,14 +109,21 @@ format_removal_size (gpointer object,
 
 static char *
 format_download_progress (gpointer object,
-                          double   progress,
+                          guint64  bytes_transferred,
                           guint64  total_size)
 {
-  guint64          downloaded     = (guint64) (progress * total_size);
-  g_autofree char *downloaded_str = g_format_size (downloaded);
-  g_autofree char *total_str      = g_format_size (total_size);
+  g_autofree char *downloaded_str = NULL;
+  g_autofree char *total_str      = NULL;
 
-  return g_strdup_printf ("%s / %s", downloaded_str, total_str);
+  downloaded_str = g_format_size (bytes_transferred);
+
+  if (total_size == (guint64) -1)
+    return g_strdup_printf ("%s", downloaded_str);
+  else
+    {
+      total_str = g_format_size (total_size);
+      return g_strdup_printf ("%s / %s", downloaded_str, total_str);
+    }
 }
 
 static gboolean
@@ -234,23 +236,6 @@ get_main_icon (gpointer                   object,
   icon_paintable = bz_entry_get_icon_paintable (entry);
   if (icon_paintable != NULL)
     return g_object_ref (icon_paintable);
-  else if (BZ_IS_FLATPAK_ENTRY (entry))
-    {
-      BzWindow *window               = NULL;
-      g_autoptr (BzEntryGroup) group = NULL;
-
-      window = (BzWindow *) gtk_widget_get_ancestor (object, BZ_TYPE_WINDOW);
-      if (window == NULL)
-        goto return_generic;
-
-      group = resolve_group_from_entry (entry, window);
-      if (group == NULL)
-        goto return_generic;
-
-      icon_paintable = bz_entry_group_get_icon_paintable (group);
-      if (icon_paintable != NULL)
-        return g_object_ref (icon_paintable);
-    }
 
 return_generic:
   return (GdkPaintable *) gtk_icon_theme_lookup_icon (
@@ -313,32 +298,11 @@ run_cb (BzTransactionTile *self,
     return;
 
   entry = bz_transaction_entry_tracker_get_entry (tracker);
-  if (entry == NULL || !BZ_IS_FLATPAK_ENTRY (entry))
+  if (entry == NULL)
     return;
 
-  if (bz_entry_is_installed (entry))
-    {
-      g_autoptr (GError) local_error = NULL;
-      gboolean     result            = FALSE;
-      BzWindow    *window            = NULL;
-      BzStateInfo *state             = NULL;
-
-      window = (BzWindow *) gtk_widget_get_ancestor (GTK_WIDGET (button), BZ_TYPE_WINDOW);
-      if (window == NULL)
-        return;
-
-      state = bz_window_get_state_info (window);
-      if (state == NULL)
-        return;
-
-      result = bz_flatpak_entry_launch (
-          BZ_FLATPAK_ENTRY (entry),
-          BZ_FLATPAK_INSTANCE (bz_state_info_get_backend (state)),
-          &local_error);
-
-      if (!result)
-        bz_show_error_for_widget (GTK_WIDGET (window), _ ("Failed to launch application"), local_error->message);
-    }
+  gtk_widget_activate_action (GTK_WIDGET (self), "window.launch-group", "s",
+                              bz_entry_get_id (entry));
 }
 
 static void
@@ -479,56 +443,6 @@ bz_transaction_tile_set_tracker (BzTransactionTile         *self,
     self->tracker = g_object_ref (tracker);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TRACKER]);
-}
-
-static BzEntryGroup *
-resolve_group_from_entry (BzEntry  *entry,
-                          BzWindow *window)
-{
-  BzStateInfo     *info                 = NULL;
-  const char      *extension_of_ref     = NULL;
-  g_autofree char *extension_of_ref_dup = NULL;
-  char            *generic_id           = NULL;
-  char            *generic_id_term      = NULL;
-  g_autoptr (BzEntryGroup) group        = NULL;
-
-  info = bz_window_get_state_info (window);
-  if (info == NULL)
-    return NULL;
-
-  if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
-    {
-      const char *id = NULL;
-
-      id    = bz_entry_get_id (entry);
-      group = bz_application_map_factory_convert_one (
-          bz_state_info_get_application_factory (info),
-          gtk_string_object_new (id));
-      if (group != NULL)
-        return g_steal_pointer (&group);
-    }
-
-  extension_of_ref = bz_flatpak_entry_get_addon_extension_of_ref (BZ_FLATPAK_ENTRY (entry));
-  if (extension_of_ref == NULL)
-    return NULL;
-
-  extension_of_ref_dup = g_strdup (extension_of_ref);
-  generic_id           = strchr (extension_of_ref_dup, '/');
-  if (generic_id == NULL)
-    return NULL;
-
-  generic_id++;
-  generic_id_term = strchr (generic_id, '/');
-  if (generic_id_term != NULL)
-    *generic_id_term = '\0';
-
-  group = bz_application_map_factory_convert_one (
-      bz_state_info_get_application_factory (info),
-      gtk_string_object_new (generic_id));
-  if (group == NULL)
-    return NULL;
-
-  return g_steal_pointer (&group);
 }
 
 /* End of bz-transaction-tile.c */

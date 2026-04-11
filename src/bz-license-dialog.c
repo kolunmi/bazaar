@@ -20,6 +20,7 @@
 
 #include "config.h"
 
+#include <adwaita.h>
 #include <glib/gi18n.h>
 
 #include "bz-entry.h"
@@ -30,12 +31,12 @@
 
 struct _BzLicenseDialog
 {
-  AdwDialog parent_instance;
+  AdwBin parent_instance;
 
   BzEntry *entry;
 };
 
-G_DEFINE_FINAL_TYPE (BzLicenseDialog, bz_license_dialog, ADW_TYPE_DIALOG)
+G_DEFINE_FINAL_TYPE (BzLicenseDialog, bz_license_dialog, ADW_TYPE_BIN)
 
 enum
 {
@@ -246,6 +247,47 @@ contribute_cb (BzLicenseDialog *self)
     g_app_info_launch_default_for_uri (url, NULL, NULL);
 }
 
+static char *
+get_eula_url (BzEntry *entry)
+{
+  g_autofree char *license = NULL;
+  const char *url = NULL;
+
+  if (entry == NULL)
+    return NULL;
+
+  g_object_get (entry, "project-license", &license, NULL);
+
+  if (license == NULL || !g_str_has_prefix (license, "LicenseRef-proprietary="))
+    return NULL;
+
+  url = license + strlen ("LicenseRef-proprietary=");
+  return (*url != '\0') ? g_strdup (url) : NULL;
+}
+
+static gboolean
+should_show_eula (gpointer object,
+                  BzEntry *entry)
+{
+  g_autofree char *url = get_eula_url (entry);
+  return url != NULL;
+}
+
+static char *
+eula_tooltip (gpointer object,
+              BzEntry *entry)
+{
+  return get_eula_url (entry);
+}
+
+static void
+eula_cb (BzLicenseDialog *self)
+{
+  g_autofree char *url = get_eula_url (self->entry);
+  if (url != NULL)
+    g_app_info_launch_default_for_uri (url, NULL, NULL);
+}
+
 static void
 bz_license_dialog_class_init (BzLicenseDialogClass *klass)
 {
@@ -277,7 +319,10 @@ bz_license_dialog_class_init (BzLicenseDialogClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, get_label_cb);
   gtk_widget_class_bind_template_callback (widget_class, get_license_info);
   gtk_widget_class_bind_template_callback (widget_class, get_involved_tooltip);
+  gtk_widget_class_bind_template_callback (widget_class, should_show_eula);
+  gtk_widget_class_bind_template_callback (widget_class, eula_tooltip);
   gtk_widget_class_bind_template_callback (widget_class, contribute_cb);
+  gtk_widget_class_bind_template_callback (widget_class, eula_cb);
 }
 
 static void
@@ -289,8 +334,27 @@ bz_license_dialog_init (BzLicenseDialog *self)
 AdwDialog *
 bz_license_dialog_new (BzEntry *entry)
 {
-  return g_object_new (BZ_TYPE_LICENSE_DIALOG,
-                       "entry", entry,
-                       NULL);
+  BzLicenseDialog *widget = NULL;
+  AdwDialog       *dialog = NULL;
+
+  widget = g_object_new (BZ_TYPE_LICENSE_DIALOG, "entry", entry, NULL);
+
+  dialog = adw_dialog_new ();
+  adw_dialog_set_content_width (dialog, 400);
+  adw_dialog_set_child (dialog, GTK_WIDGET (widget));
+
+  return dialog;
 }
 
+AdwNavigationPage *
+bz_license_page_new (BzEntry *entry)
+{
+  BzLicenseDialog   *widget = NULL;
+  AdwNavigationPage *page   = NULL;
+
+  widget = g_object_new (BZ_TYPE_LICENSE_DIALOG, "entry", entry, NULL);
+  page   = adw_navigation_page_new (GTK_WIDGET (widget), _ ("License"));
+  adw_navigation_page_set_tag (page, "license");
+
+  return page;
+}

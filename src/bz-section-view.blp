@@ -9,8 +9,8 @@ template $BzSectionView: Adw.Bin {
   child: Box {
     hexpand: true;
     vexpand: true;
-    halign: center;
-    valign: center;
+    halign: fill;
+    valign: fill;
 
     Box {
       visible: bind $invert_boolean($is_null(template.section as <$BzCuratedSection>.category) as <bool>) as <bool>;
@@ -147,9 +147,13 @@ template $BzSectionView: Adw.Bin {
     }
 
     Box {
+      hexpand: true;
+      vexpand: true;
       visible: bind $invert_boolean($is_null(template.section as <$BzCuratedSection>.markdown) as <bool>) as <bool>;
 
-      $BzMarkdownRender {
+      $BgeMarkdownRender {
+        hexpand: true;
+        vexpand: true;
         markdown: bind template.section as <$BzCuratedSection>.markdown as <$BzCuratedMarkdownInfo>.string as <string>;
       }
     }

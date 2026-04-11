@@ -2,6 +2,8 @@
 # Please keep this file sorted alphabetically.
 data/io.github.kolunmi.Bazaar.desktop.in
 data/io.github.kolunmi.Bazaar.metainfo.xml.in
+src/bz-addon-tile.blp
+src/bz-addon-tile.c
 src/bz-addons-dialog.blp
 src/bz-addons-dialog.c
 src/bz-age-rating-dialog.blp
@@ -24,6 +26,7 @@ src/bz-comet-overlay.c
 src/bz-content-provider.c
 src/bz-context-tile.blp
 src/bz-context-tile.c
+src/bz-context-tile-callbacks.c
 src/bz-curated-view.blp
 src/bz-curated-view.c
 src/bz-data-graph.c
@@ -72,6 +75,8 @@ src/bz-hardware-support-dialog.c
 src/bz-inhibited-scrollable.c
 src/bz-inspector.blp
 src/bz-inspector.c
+src/bz-install-controls.blp
+src/bz-install-controls.c
 src/bz-installed-tile.blp
 src/bz-installed-tile.c
 src/bz-io.c
@@ -101,8 +106,10 @@ src/bz-screenshot-page.blp
 src/bz-screenshots-carousel.blp
 src/bz-search-engine.c
 src/bz-search-pill-list.c
-src/bz-search-widget.blp
-src/bz-search-widget.c
+src/bz-search-filter-popover.blp
+src/bz-search-filter-popover.c
+src/bz-search-page.blp
+src/bz-search-page.c
 src/bz-section-view.blp
 src/bz-section-view.c
 src/bz-serializable.c
@@ -128,5 +135,5 @@ src/bz-window.c
 src/bz-world-map.c
 src/bz-yaml-parser.c
 src/dl-worker.c
-src/gtk/shortcuts-dialog.blp
+src/shortcuts-dialog.blp
 src/main.c

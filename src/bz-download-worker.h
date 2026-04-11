@@ -46,6 +46,9 @@ bz_download_worker_invoke (BzDownloadWorker *self,
 BzDownloadWorker *
 bz_download_worker_get_default (void);
 
+void
+bz_reap_default_download_workers (void);
+
 G_END_DECLS
 
 /* End of bz-download-worker.h */

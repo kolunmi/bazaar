@@ -21,23 +21,23 @@ template $BzFavoritesPage: Adw.NavigationPage {
       }
 
       [end]
-      Button {
+      Button progress_button {
         styles [
           "flat",
           "global-progress-button",
         ]
 
-        can-target: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
-
+        can-focus: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
+        can-target: bind progress_button.can-focus;
         action-name: "window.open-library";
         has-tooltip: true;
         tooltip-text: _("Open App Library");
 
         child: $BzGlobalProgress {
           expand-size: 125;
+          state: bind template.state as <$BzStateInfo>;
           active: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
           pending: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.pending;
-          fraction: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.current-progress;
           settings: bind template.state as <$BzStateInfo>.settings;
         };
       }
@@ -45,7 +45,7 @@ template $BzFavoritesPage: Adw.NavigationPage {
 
     content: Adw.BreakpointBin {
       width-request: 360;
-      height-request: 450;
+      height-request: 100;
 
       child: Adw.ViewStack stack {
         enable-transitions: true;
