@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-10 20:23+0200\n"
-"PO-Revision-Date: 2026-04-10 23:08+0200\n"
+"POT-Creation-Date: 2026-04-11 00:49+0200\n"
+"PO-Revision-Date: 2026-04-11 11:04+0200\n"
 "Last-Translator: Daniel Rusek <mail@asciiwolf.com>\n"
 "Language-Team: Czech\n"
 "Language: cs\n"
@@ -1844,6 +1844,10 @@ msgstr "Vymazat hledání"
 msgid "No Apps Found"
 msgstr "Nenalezeny žádné aplikace"
 
+#: src/bz-library-page.blp:89
+msgid "Search Store Instead"
+msgstr "Hledat v obchodě"
+
 #. Translators: .
 #: src/bz-library-page.blp:99 src/bz-window.blp:112
 msgid "Library"
@@ -3086,9 +3090,9 @@ msgid "Can't do that right now!"
 msgstr "Toto teď nelze provést!"
 
 #: src/bz-world-map.c:595
-msgctxt "As in, \"100 Downloads\""
-msgid "Downloads"
-msgstr "stažení"
+msgctxt "As in, \"100 Installs\""
+msgid "Installs"
+msgstr "instalací"
 
 #: src/shortcuts-dialog.blp:6
 msgctxt "shortcut window"
