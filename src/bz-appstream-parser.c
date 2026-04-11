@@ -14,6 +14,7 @@
 #include "bz-release.h"
 #include "bz-url.h"
 #include "bz-verification-status.h"
+#include "bz-flatpak-entry.h"
 
 static guint
 parse_control_value (const char *value)
@@ -122,7 +123,7 @@ find_screenshot (GPtrArray  *images,
 
       if (match_highest)
         {
-          if (pixels > best_res)
+          if (best_url == NULL || pixels > best_res)
             {
               best_url = url;
               best_res = pixels;
@@ -131,7 +132,7 @@ find_screenshot (GPtrArray  *images,
       else
         {
           gint diff = ABS ((gint) pixels - (gint) target_pixels);
-          if (diff < best_diff)
+          if (best_url == NULL || diff < best_diff)
             {
               best_url  = url;
               best_diff = diff;
@@ -715,4 +716,72 @@ bz_appstream_parser_populate_entry (BzEntry     *entry,
       NULL);
 
   return TRUE;
+}
+
+BzEntry *
+bz_appstream_parser_entry_from_metainfo (GFile   *metainfo_file,
+                                         GFile   *icon_file,
+                                         GError **error)
+{
+  g_autoptr (AsMetadata) mdata  = as_metadata_new ();
+  AsComponent *component        = NULL;
+  g_autofree char *xml_contents = NULL;
+  g_autofree char *xml_path     = NULL;
+  g_autofree char *xml_dir      = NULL;
+  g_autofree char *module_dir   = NULL;
+  g_autofree char *checksum     = NULL;
+  gsize xml_length              = 0;
+  g_autoptr (BzEntry) entry     = NULL;
+
+  g_return_val_if_fail (G_IS_FILE (metainfo_file), NULL);
+
+  xml_path = g_file_get_path (metainfo_file);
+
+  if (!g_file_get_contents (xml_path, &xml_contents, &xml_length, error))
+    return NULL;
+
+  as_metadata_parse_data (mdata, xml_contents, xml_length, AS_FORMAT_KIND_XML, error);
+  if (*error != NULL)
+    return NULL;
+
+  component = as_metadata_get_component (mdata);
+  if (component == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                   "No component found in metainfo file");
+      return NULL;
+    }
+
+  xml_dir    = g_path_get_dirname (xml_path);
+  module_dir = bz_dup_module_dir ();
+  checksum   = g_compute_checksum_for_string (G_CHECKSUM_MD5, xml_path, -1);
+
+  entry = BZ_ENTRY (g_object_new (BZ_TYPE_FLATPAK_ENTRY, NULL));
+
+  bz_appstream_parser_populate_entry (
+      entry, component,
+      xml_dir,
+      "local-preview",
+      module_dir,
+      checksum,
+      as_component_get_id (component),
+      BZ_ENTRY_KIND_APPLICATION,
+      NULL);
+
+  g_object_set (entry, "remote-repo-name", "local-preview", NULL);
+
+  if (icon_file != NULL)
+    {
+      g_autoptr (GFile) cache_into = NULL;
+
+      cache_into = g_file_new_build_filename (
+          module_dir, checksum, "icon-paintable.png", NULL);
+
+      g_object_set (
+          entry,
+          "icon-paintable", GDK_PAINTABLE (bz_async_texture_new_lazy (icon_file, cache_into)),
+          NULL);
+    }
+
+  return g_steal_pointer (&entry);
 }

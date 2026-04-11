@@ -41,6 +41,7 @@
 #include "bz-hardware-support-dialog.h"
 #include "bz-install-controls.h"
 #include "bz-license-dialog.h"
+#include "bz-metainfo-preview.h"
 #include "bz-releases-list.h"
 #include "bz-safety-calculator.h"
 #include "bz-safety-dialog.h"
@@ -54,6 +55,7 @@
 #include "bz-tag-list.h"
 #include "bz-template-callbacks.h"
 #include "bz-util.h"
+#include "bz-window.h"
 
 struct _BzFullView
 {
@@ -577,6 +579,24 @@ get_description_toggle_text (gpointer object,
   return g_strdup (active ? _ ("Show Less") : _ ("Show More"));
 }
 
+static gboolean
+metainfo_banner_visible (gpointer    object,
+                         const char *remote_name)
+{
+  return g_strcmp0 (remote_name, "local-preview") == 0;
+}
+
+static void
+preview_other_metainfo_cb (BzFullView *self,
+                           AdwBanner  *banner)
+{
+  GtkWidget *window = NULL;
+
+  window = GTK_WIDGET (gtk_widget_get_root (GTK_WIDGET (self)));
+  bz_window_push_page (BZ_WINDOW (window),
+                       create_entry_group_preview_page (self->group));
+}
+
 static void
 copy_id_cb (BzFullView *self,
             GtkButton  *button)
@@ -723,6 +743,8 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, unbind_app_tile_cb);
   gtk_widget_class_bind_template_callback (widget_class, get_description_max_height);
   gtk_widget_class_bind_template_callback (widget_class, get_description_toggle_text);
+  gtk_widget_class_bind_template_callback (widget_class, metainfo_banner_visible);
+  gtk_widget_class_bind_template_callback (widget_class, preview_other_metainfo_cb);
   gtk_widget_class_bind_template_callback (widget_class, copy_id_cb);
   gtk_widget_class_bind_template_callback (widget_class, debug_id_inspect_cb);
 }
