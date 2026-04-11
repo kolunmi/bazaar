@@ -165,7 +165,6 @@ on_icon_chosen (GtkFileDialog *dialog,
   g_autoptr (PickFilesData) owned_data = data;
   g_autoptr (GFile) icon_file          = NULL;
   BzMetainfoPickResult *pick           = NULL;
-  GValue                value          = G_VALUE_INIT;
 
   icon_file = gtk_file_dialog_open_finish (dialog, result, NULL);
 
@@ -173,10 +172,10 @@ on_icon_chosen (GtkFileDialog *dialog,
   pick->metainfo_file = g_object_ref (owned_data->metainfo_file);
   pick->icon_file     = g_steal_pointer (&icon_file);
 
-  g_value_init (&value, bz_metainfo_pick_result_get_type ());
-  g_value_take_boxed (&value, pick);
-  dex_promise_resolve (owned_data->promise, &value);
-  g_value_unset (&value);
+  dex_promise_resolve_boxed (
+      owned_data->promise,
+      bz_metainfo_pick_result_get_type (),
+      g_steal_pointer (&pick));
 }
 
 AdwNavigationPage *
