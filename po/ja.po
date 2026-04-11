@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-04-10 20:40+0900\n"
-"PO-Revision-Date: 2026-04-10 20:48+0900\n"
+"PO-Revision-Date: 2026-04-11 19:41+0900\n"
 "Last-Translator: camegone <hoge_huga@example.com>\n"
 "Language-Team: Japanese <kde-i18n-doc@kde.org>\n"
 "Language: ja\n"
@@ -3417,11 +3417,11 @@ msgstr "認証済み(_V)"
 
 #: src/bz-search-filter-popover.blp:42
 msgid "_Free/Open"
-msgstr "フリー/オープン(_O)"
+msgstr "フリー/オープン(_F)"
 
 #: src/bz-search-filter-popover.blp:49
 msgid "Non-_EOL"
-msgstr "非EOL(_E)"
+msgstr "サポート中(_E)"
 
 #: src/bz-search-filter-popover.blp:56
 msgid "Categories"
