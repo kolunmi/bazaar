@@ -20,22 +20,17 @@
 
 #pragma once
 
-#include <gtk/gtk.h>
+#include <adwaita.h>
+
+#include "bz-state-info.h"
 
 G_BEGIN_DECLS
 
 #define BZ_TYPE_GLOBAL_PROGRESS (bz_global_progress_get_type ())
-G_DECLARE_FINAL_TYPE (BzGlobalProgress, bz_global_progress, BZ, GLOBAL_PROGRESS, GtkWidget)
+G_DECLARE_FINAL_TYPE (BzGlobalProgress, bz_global_progress, BZ, GLOBAL_PROGRESS, AdwBin)
 
 GtkWidget *
 bz_global_progress_new (void);
-
-GtkWidget *
-bz_global_progress_get_child (BzGlobalProgress *self);
-
-void
-bz_global_progress_set_child (BzGlobalProgress *self,
-                              GtkWidget        *child);
 
 void
 bz_global_progress_set_active (BzGlobalProgress *self,
@@ -52,39 +47,18 @@ gboolean
 bz_global_progress_get_pending (BzGlobalProgress *self);
 
 void
-bz_global_progress_set_fraction (BzGlobalProgress *self,
-                                 double            fraction);
-
-double
-bz_global_progress_get_fraction (BzGlobalProgress *self);
-
-void
-bz_global_progress_set_actual_fraction (BzGlobalProgress *self,
-                                        double            fraction);
-
-double
-bz_global_progress_get_actual_fraction (BzGlobalProgress *self);
-
-void
-bz_global_progress_set_transition_progress (BzGlobalProgress *self,
-                                            double            progress);
-
-double
-bz_global_progress_get_transition_progress (BzGlobalProgress *self);
-
-void
-bz_global_progress_set_pending_progress (BzGlobalProgress *self,
-                                         double            progress);
-
-double
-bz_global_progress_get_pending_progress (BzGlobalProgress *self);
-
-void
 bz_global_progress_set_expand_size (BzGlobalProgress *self,
                                     int               expand_size);
 
 int
 bz_global_progress_get_expand_size (BzGlobalProgress *self);
+
+void
+bz_global_progress_set_state (BzGlobalProgress *self,
+                              BzStateInfo      *state);
+
+BzStateInfo *
+bz_global_progress_get_state (BzGlobalProgress *self);
 
 void
 bz_global_progress_set_settings (BzGlobalProgress *self,

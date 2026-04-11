@@ -1,4 +1,4 @@
-api_version = '0.1'
+api_version = meson.project_version()
 
 bge_sources = [
   'libbge.c',
@@ -12,6 +12,8 @@ bge_headers = [
   'bge-animation.h',
   'bge-carousel.h',
 ]
+
+subdir('wdgt')
 
 version_split = meson.project_version().split('.')
 version_conf = configuration_data()
@@ -31,7 +33,6 @@ configure_file(
 bge_deps = [
   cc.find_library('m', required: true),
   dependency('gtk4', version: '>= 4.22.1'),
-  dependency('libdex-1', version: '>= 1.0.0'),
   dependency('md4c', version: '>= 0.5.1'),
 ]
 
@@ -54,13 +55,13 @@ install_headers(
 
 pkg = import('pkgconfig')
 pkg.generate(
-  description: 'A shared library for bge',
+  description: 'Bazaar GTK Extensions',
     libraries: bge_lib,
          name: 'libbge',
      filebase: 'bge-' + api_version,
       version: meson.project_version(),
       subdirs: 'bge',
-     requires: ['gtk4', 'libdex-1'],
+     requires: ['gtk4', 'md4c'],
   install_dir: get_option('libdir') / 'pkgconfig'
 )
 
@@ -69,3 +70,5 @@ bge_dep = declare_dependency(
   dependencies: [bge_deps],
   include_directories : include_directories('..', '.'),
 )
+
+subdir('demo')

@@ -38,7 +38,6 @@ struct _BzFadingClamp
   int      min_max_height;
   int      current_height;
   int      allocated_width;
-  gboolean animating_max_height;
   gboolean will_change;
 };
 
@@ -66,18 +65,6 @@ animate (BzFadingClamp *self,
 {
   self->current_height = round (value);
   gtk_widget_queue_resize (GTK_WIDGET (self));
-}
-
-static DexFuture *
-animation_finally (DexFuture *future,
-                   GWeakRef  *wr)
-{
-  g_autoptr (BzFadingClamp) self = NULL;
-
-  bz_weak_get_or_return_reject (self, wr);
-
-  self->animating_max_height = FALSE;
-  return dex_future_new_true ();
 }
 
 static void
@@ -177,8 +164,8 @@ bz_fading_clamp_measure (GtkWidget     *widget,
                          int           *minimum_baseline,
                          int           *natural_baseline)
 {
-  int            target_height;
-  BzFadingClamp *self = BZ_FADING_CLAMP (widget);
+  int            target_height = 0;
+  BzFadingClamp *self          = BZ_FADING_CLAMP (widget);
 
   if (!self->child)
     {
@@ -200,7 +187,7 @@ bz_fading_clamp_measure (GtkWidget     *widget,
 
       bz_fading_clamp_update_will_change (self);
 
-      if (!self->animating_max_height)
+      if (!bge_animation_has_key (self->animation, "height"))
         self->current_height = target_height;
 
       *minimum = self->current_height;
@@ -275,10 +262,10 @@ bz_fading_clamp_snapshot (GtkWidget *widget, GtkSnapshot *snapshot)
 
   stop_offset = CLAMP ((float) gradient_start / height, 0.0f, 1.0f);
 
-  stops[0] = (GskColorStop) {
+  stops[0] = (GskColorStop){
     stop_offset, { 1, 1, 1, 1 }
   };
-  stops[1] = (GskColorStop) {
+  stops[1] = (GskColorStop){
     1.0, { 1, 1, 1, 0 }
   };
 
@@ -328,12 +315,11 @@ bz_fading_clamp_init (BzFadingClamp *self)
 {
   self->animation = bge_animation_new (GTK_WIDGET (self));
 
-  self->max_height           = 300;
-  self->min_max_height       = 150;
-  self->current_height       = 0;
-  self->allocated_width      = 0;
-  self->animating_max_height = FALSE;
-  self->will_change          = FALSE;
+  self->max_height      = 300;
+  self->min_max_height  = 150;
+  self->current_height  = CLAMP_LEEWAY;
+  self->allocated_width = 0;
+  self->will_change     = FALSE;
 }
 
 GtkWidget *
@@ -375,10 +361,9 @@ bz_fading_clamp_get_child (BzFadingClamp *self)
 void
 bz_fading_clamp_set_max_height (BzFadingClamp *self, int max_height)
 {
-  int natural_height           = 0;
-  int target_height            = 0;
-  int width                    = 0;
-  g_autoptr (DexFuture) future = NULL;
+  int natural_height = 0;
+  int target_height  = 0;
+  int width          = 0;
 
   g_return_if_fail (BZ_IS_FADING_CLAMP (self));
 
@@ -402,23 +387,14 @@ bz_fading_clamp_set_max_height (BzFadingClamp *self, int max_height)
         target_height = max_height;
     }
   else
-    {
-      target_height = max_height;
-    }
+    target_height = max_height;
 
-  self->animating_max_height = TRUE;
-
-  future = bge_animation_add_spring (
+  bge_animation_add_spring (
       self->animation, "height",
       self->current_height, target_height,
       1.25, 1.0, 800.0,
       (BgeAnimationCallback) animate,
       NULL, NULL, NULL);
-  future = dex_future_finally (
-      future,
-      (DexFutureCallback) animation_finally,
-      bz_track_weak (self), bz_weak_release);
-  dex_future_disown (g_steal_pointer (&future));
 
   bz_fading_clamp_update_will_change (self);
   g_object_notify_by_pspec (G_OBJECT (self), properties[PROP_MAX_HEIGHT]);

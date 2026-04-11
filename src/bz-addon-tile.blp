@@ -1,0 +1,89 @@
+using Gtk 4.0;
+
+template $BzAddonTile: $BzListTile {
+  accessibility {
+    labelled-by: title_label;
+    described-by: description_label;
+  }
+
+  child: Box {
+    orientation: horizontal;
+    spacing: 10;
+    height-request: 64;
+
+    Box {
+      orientation: vertical;
+      valign: center;
+      spacing: 4;
+      margin-start: 10;
+
+      Label title_label {
+        xalign: 0.0;
+        ellipsize: end;
+        single-line-mode: true;
+        has-tooltip: true;
+        tooltip-text: bind template.group as <$BzEntryGroup>.id;
+        label: bind template.group as <$BzEntryGroup>.title;
+      }
+
+      Label description_label {
+        halign: start;
+        label: bind template.group as <$BzEntryGroup>.description;
+        visible: bind $logical_and($invert_boolean(eol_label.visible) as <bool>, $invert_boolean($is_empty(template.group as <$BzEntryGroup>.description) as <bool>) as <bool>) as <bool>;
+        xalign: 0.0;
+        ellipsize: end;
+        single-line-mode: true;
+        styles ["dim-label", "caption"]
+      }
+
+      Label eol_label{
+        visible: bind $invert_boolean($is_null(template.group as <$BzEntryGroup>.eol) as <bool>) as <bool>;
+        wrap: true;
+        wrap-mode: word_char;
+        ellipsize: end;
+        vexpand: true;
+        lines: 2;
+        single-line-mode: true;
+        halign: start;
+        hexpand: true;
+        label: _("Stopped Receiving Updates");
+
+        styles [
+          "warning",
+        ]
+      }
+    }
+
+    Box {
+      orientation: horizontal;
+      spacing: 8;
+      margin-end: 8;
+      hexpand: true;
+      halign: end;
+
+      Button install_remove_button {
+        styles ["flat"]
+        width-request: 32;
+        height-request: 32;
+        valign: center;
+        has-tooltip: true;
+        visible: bind $invert_boolean($logical_and($is_zero(template.group as <$BzEntryGroup>.removable) as <bool>, $is_zero(template.group as <$BzEntryGroup>.installable) as <bool>) as <bool>) as <bool>;
+        tooltip-text: bind $get_install_remove_tooltip(template.group as <$BzEntryGroup>.removable) as <string>;
+        sensitive: bind $switch_bool(
+                          template.group as <$BzEntryGroup>.removable,
+                          $invert_boolean($is_zero(template.group as <$BzEntryGroup>.removable-and-available) as <bool>) as <bool>,
+                          $invert_boolean($is_zero(template.group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>,
+                        ) as <bool>;
+        icon-name: bind $get_install_remove_icon(template.group as <$BzEntryGroup>.removable) as <string>;
+        clicked => $install_remove_cb() swapped;
+      }
+
+      Image {
+        pixel-size: 14;
+        icon-name: "go-next-symbolic";
+        margin-end: 4;
+        styles ["dimmed"]
+      }
+    }
+  };
+}

@@ -28,6 +28,7 @@ template $BzLibraryPage: Adw.Bin {
 
           Text search_bar {
             hexpand: true;
+            max-length: 50;
             placeholder-text: _("Search installed apps");
             notify::text => $search_text_changed(template);
           }
@@ -39,7 +40,7 @@ template $BzLibraryPage: Adw.Bin {
             styles [
               "flat",
               "circular",
-              "clear-button",
+              "searchbar-button",
             ]
 
             clicked => $reset_search_cb(template);
@@ -85,7 +86,7 @@ template $BzLibraryPage: Adw.Bin {
               "pill",
             ]
             halign: center;
-            label: "Search Store Instead";
+            label: _("Search Store Instead");
 
             clicked => $global_search_cb(template);
           };
@@ -257,7 +258,7 @@ template $BzLibraryPage: Adw.Bin {
                   margin-start: 12;
                   margin-end: 4;
                   Label {
-                    label: _("Installed Apps");
+                    label: bind $format_install_count(filter_model.n-items) as <string>;
                     xalign: 0;
                     visible: bind template.has-apps;
                     hexpand: true;
@@ -320,14 +321,13 @@ template $BzLibraryPage: Adw.Bin {
 }
 
 Popover sort_popover {
-  width-request: 90;
   child: Box {
     orientation: vertical;
     spacing: 6;
-    margin-top: 4;
-    margin-bottom: 4;
-    margin-start: 4;
-    margin-end: 4;
+    margin-top: 8;
+    margin-bottom: 8;
+    margin-start: 8;
+    margin-end: 16;
 
     Label {
       label: _("Sort By");

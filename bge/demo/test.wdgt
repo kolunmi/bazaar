@@ -1,0 +1,82 @@
+defwidget "My Widget" {
+  reference ref-string : "GtkStringObject";
+
+  var t : "BgeWdgtTime";
+  var box : "GtkBox";
+
+  var cx : "gdouble";
+  var cy : "gdouble";
+  var w : "gdouble";
+  var h : "gdouble";
+  var corner : "gdouble";
+
+  var x : "gdouble";
+  var y : "gdouble";
+
+  init {
+    set t = #(notify-msec = 10;);
+    
+    set box = #child/(""("gradient")
+      orientation = vertical;
+      
+      _=#child/GtkLabel(""()
+        margin-start = 10;
+        margin-end = 10;
+        margin-top = 10;
+        margin-bottom = 10;
+        
+        label = ref-string:string;
+        wrap = true;
+      );
+    );
+
+    measure 200, 300, 200, 300;
+    
+    set x = #eval(#(cx)-#(w)/2.0);
+    set y = #eval(#(cy)-#(h)/2.0);
+    allocate box w, h,
+                 #(translate(#GraphenePoint(x, y)););
+
+    snapshot {
+      with rounded-clip(
+        #GrapheneRect(x, y, w, h),
+        #GrapheneSize(corner, corner),
+        #GrapheneSize(corner, corner),
+        #GrapheneSize(corner, corner),
+        #GrapheneSize(corner, corner),
+      ) {
+        do-child box;
+      }
+    }
+  }
+
+  state-default "1" {
+    set w = 100.0;
+    set h = 100.0;
+    set corner = 10.0;
+
+    set cx = #eval(30.0*sin(#(t:time)) + #(%width%)/2.0);
+    set cy = #eval(#(%height%)/2.0);
+
+    transition-spring w 1.0, 0.5, 100.0;
+    transition-spring h 1.0, 0.5, 100.0;
+    transition-spring corner 1.0, 0.5, 100.0;
+    transition-spring cx 1.0, 0.5, 100.0;
+    transition-spring cy 1.0, 0.5, 100.0;
+  }
+  
+  state "2" {
+    set w = 200.0;
+    set h = 200.0;
+    set corner = 20.0;
+
+    set cx = #eval(#(%width%)/2.0);
+    set cy = #eval(#(%height%)/2.0);
+
+    transition-spring w 0.9, 0.5, 100.0;
+    transition-spring h 0.9, 0.5, 100.0;
+    transition-spring corner 0.9, 0.5, 100.0;
+    transition-spring cx 0.9, 0.5, 100.0;
+    transition-spring cy 0.9, 0.5, 100.0;
+  }
+}

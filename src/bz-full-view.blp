@@ -46,9 +46,9 @@ template $BzFullView: Adw.Bin {
 
         child: $BzGlobalProgress {
           expand-size: 125;
+          state: bind template.state as <$BzStateInfo>;
           active: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active;
           pending: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.pending;
-          fraction: bind template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.current-progress;
           settings: bind template.state as <$BzStateInfo>.settings;
         };
       }
@@ -129,7 +129,16 @@ template $BzFullView: Adw.Bin {
 
                   Adw.Banner {
                     title: _("Installing .flatpak bundles is not yet supported");
-                    revealed: bind template.ui-entry as <$BzResult>.object as <$BzFlatpakEntry>.is-bundle as <bool>;
+                    visible: bind template.ui-entry as <$BzResult>.object as <$BzFlatpakEntry>.is-bundle as <bool>;
+                    revealed: true;
+                  }
+
+                  Adw.Banner {
+                    title: _("This is a local preview, some details may differ from the published listing");
+                    visible: bind $metainfo_banner_visible(template.ui-entry as <$BzResult>.object as <$BzFlatpakEntry>.remote-repo-name) as <bool>;
+                    revealed: true;
+                    button-label: _("Preview Store Appearance");
+                    button-clicked => $preview_other_metainfo_cb(template);
                   }
 
                   Adw.Clamp {
@@ -663,7 +672,7 @@ template $BzFullView: Adw.Bin {
                             noscroll-kind: flow-box;
                             child-type: "BzAppTile";
                             child-prop: "group";
-                            max-children-per-line: 3;
+                            max-children-per-line: bind $get_dev_apps_max_children_per_line(other_apps_model.model) as <int>;
                             bind-widget => $bind_app_tile_cb(template);
                             unbind-widget => $unbind_app_tile_cb(template);
 

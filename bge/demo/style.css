@@ -1,0 +1,13 @@
+.source-edit {
+    font-family: monospace;
+    font-size: large;
+}
+
+.debug {
+    background-color: pink;
+}
+
+.gradient {
+    background-image: linear-gradient(to bottom left, #1f2d8f, #159eff);
+    color: white;
+}

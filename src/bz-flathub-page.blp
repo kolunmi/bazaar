@@ -88,9 +88,6 @@ template $BzFlathubPage: Adw.Bin {
                     spacing: 15;
 
                     $BzFeaturedCarousel {
-                      margin-start: 3;
-                      margin-end: 3;
-
                       styles [
                         "flathub-page-section",
                       ]
@@ -143,7 +140,6 @@ template $BzFlathubPage: Adw.Bin {
 
                     Adw.ViewStack sections_stack {
                       enable-transitions: true;
-                      vhomogeneous: false;
                       transition-duration: 300;
                       visible-child-name: bind section_toggles.active-name bidirectional;
 
@@ -193,8 +189,6 @@ template $BzFlathubPage: Adw.Bin {
                     }
 
                     $BzFeaturedCarousel {
-                      margin-start: 3;
-                      margin-end: 3;
 
                       styles [
                         "flathub-page-section",
@@ -223,8 +217,6 @@ template $BzFlathubPage: Adw.Bin {
 
                     Box otg_box {
                       visible: bind $invert_boolean($is_null($get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "mobile") as <$BzFlathubCategory>) as <bool>) as <bool>;
-                      margin-start: 3;
-                      margin-end: 3;
                       margin-top: 8;
                       margin-bottom: 8;
 
@@ -338,8 +330,6 @@ template $BzFlathubPage: Adw.Bin {
 
                     Box {
                       visible: bind $invert_boolean($is_null($get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "game") as <$BzFlathubCategory>) as <bool>) as <bool>;
-                      margin-start: 3;
-                      margin-end: 3;
                       margin-top: 8;
                       margin-bottom: 8;
 

@@ -1,20 +1,20 @@
-# French translations for bazaar package.
-# Copyright (C) 2025 THE bazaar'S COPYRIGHT HOLDER
+# French translations for Bazaar.
+# Copyright (C) 2025-2026 The Bazaar Contributors
 # This file is distributed under the same license as the bazaar package.
 # Automatically generated, 2025.
 # Atom <29772841+AtomHare@users.noreply.github.com>, 2025.
 # Léane GRASSER <leane.grasser@proton.me>, 2025.
 # Irénée THIRION <irenee.thirion@e.email>, 2026.
-# Mimolet <theMimolet@proton.me>, 2025-2026.
+# Mimolet <themimolet@proton.me>, 2025-2026.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-22 23:08+0100\n"
-"PO-Revision-Date: 2026-03-22 23:10+0100\n"
-"Last-Translator: Mimolet <theMimolet@proton.me>\n"
-"Language-Team: French <>\n"
+"POT-Creation-Date: 2026-04-10 20:10+0200\n"
+"PO-Revision-Date: 2026-04-10 20:45+0200\n"
+"Last-Translator: Mimolet <themimolet@proton.me>\n"
+"Language-Team: French\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -22,23 +22,23 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Generator: Gtranslator 50.0\n"
 
-#: data/io.github.kolunmi.Bazaar.desktop.in:3
+#: data/io.github.kolunmi.Bazaar.desktop.in:2
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:7 src/bz-window.blp:46
 #: src/bz-window.c:377 src/bz-window.c:378
 msgid "Bazaar"
 msgstr "Bazaar"
 
-#: data/io.github.kolunmi.Bazaar.desktop.in:4
+#: data/io.github.kolunmi.Bazaar.desktop.in:3
 msgid "Add, remove or update flatpak software on this computer"
-msgstr "Ajoutez, désinstallez ou mettez à jour des applications flatpak"
+msgstr "Ajoutez, désinstallez ou mettez à jour vos applications flatpak"
 
-#: data/io.github.kolunmi.Bazaar.desktop.in:10
+#: data/io.github.kolunmi.Bazaar.desktop.in:9
 msgid "GTK;System;PackageManager;Discover;Flatpak;Software;Store;"
 msgstr ""
 "GTK;System;Système;PackageManager;Gestionnaire de "
-"paquets;Discover;Découvrir;Flatpak;Software;Logiciel;Store;Magasin;Applis;Logithèque;"
+"paquets;Discover;Découvrir;Flatpak;Software;Applis;Logiciel;Store;Magasin;Logithèque;"
 
-#: data/io.github.kolunmi.Bazaar.desktop.in:17
+#: data/io.github.kolunmi.Bazaar.desktop.in:16
 msgid "New Window"
 msgstr "Nouvelle fenêtre"
 
@@ -95,24 +95,91 @@ msgstr "Page Recherche"
 msgid "Category page"
 msgstr "Page Catégorie"
 
-#: src/bz-addons-dialog.blp:16 src/bz-full-view.blp:627
+#: src/bz-addon-tile.blp:49 src/bz-installed-tile.blp:64
+#: src/bz-rich-app-tile.blp:140
+msgid "Stopped Receiving Updates"
+msgstr "Ne reçoit plus de mises à jour"
+
+#: src/bz-addon-tile.c:155 src/bz-favorites-tile.c:157
+#: src/bz-rich-app-tile.blp:172
+msgid "Uninstall"
+msgstr "Désinstaller"
+
+#: src/bz-addon-tile.c:157 src/bz-addons-dialog.blp:280
+#: src/bz-favorites-tile.c:159
+msgid "Install"
+msgstr "Installer"
+
+#: src/bz-addons-dialog.blp:14 src/bz-addons-dialog.blp:21
+#: src/bz-addons-dialog.blp:70 src/bz-full-view.blp:627
 #: src/bz-installed-tile.blp:101
 msgid "Manage Add-Ons"
 msgstr "Gérer les extensions"
 
-#: src/bz-addons-dialog.c:94 src/bz-install-controls.blp:137
+#: src/bz-addons-dialog.blp:80
+msgid "No Add-Ons Visible"
+msgstr "Aucune extension visible"
+
+#: src/bz-addons-dialog.blp:81
+msgid ""
+"Your current filter preferences are hiding all known add-ons. Try adjusting "
+"them."
+msgstr ""
+"Toutes extensions connues de cette appli sont cachés par vos préférences de "
+"filtrage. Ajustez les pour voir les extensions cachées. "
+
+#: src/bz-addons-dialog.blp:88
+msgid "Add-on Page"
+msgstr "Page des extensions"
+
+#: src/bz-addons-dialog.blp:202 src/bz-full-view.blp:426
+msgid "Downloads/Month"
+msgstr "Téléchargements/mois"
+
+#: src/bz-addons-dialog.blp:229 src/bz-full-view.blp:461
+msgid "Stopped Receiving Core Updates"
+msgstr "Ne reçoit plus de mises à jour essentielles"
+
+#: src/bz-addons-dialog.blp:243
+msgid ""
+"This add-on uses a runtime that no longer receives updates or security "
+"fixes. It may become unsafe to use."
+msgstr ""
+"L’environnement d’exécution utilisé par cette extension n'est plus pris en "
+"charge. Son utilisation pourrait devenir risquée."
+
+#: src/bz-addons-dialog.blp:297 src/bz-rich-app-tile.blp:185
+#: src/bz-transaction-tile.blp:272
+msgid "Open"
+msgstr "Ouvrir"
+
+#: src/bz-addons-dialog.blp:304 src/bz-install-controls.blp:141
 #: src/bz-installed-tile.blp:114
 msgid "Remove"
 msgstr "Désinstaller"
 
-#: src/bz-addons-dialog.c:99 src/bz-favorites-tile.c:159
-msgid "Install"
-msgstr "Installer"
+#: src/bz-addons-dialog.c:325
+#, c-format
+msgid "Add-on for %s"
+msgstr "Extension pour %s"
+
+#: src/bz-addons-dialog.c:339 src/bz-full-view.c:577
+msgid "Show Less"
+msgstr "Montrer moins"
+
+#: src/bz-addons-dialog.c:339 src/bz-full-view.c:577
+msgid "Show More"
+msgstr "Montrer plus"
+
+#: src/bz-addons-dialog.c:389
+msgid "Download Stats"
+msgstr "Statistiques de téléchargement"
 
 #: src/bz-age-rating-dialog.blp:7 src/bz-age-rating-dialog.blp:31
-#: src/bz-age-rating-dialog.c:736 src/bz-full-view.c:333 src/bz-full-view.c:340
+#: src/bz-age-rating-dialog.c:736 src/bz-context-tile-callbacks.c:186
+#: src/bz-context-tile-callbacks.c:193
 msgid "Age Rating"
-msgstr "Limite d’âge"
+msgstr "Classification d'âge"
 
 #. TRANSLATORS: content rating title, see https://hughsie.github.io/oars/
 #: src/bz-age-rating-dialog.c:88
@@ -445,7 +512,7 @@ msgid "Violence"
 msgstr "Violence"
 
 #. Translators: Age rating format, e.g. "12+" for ages 12 and up
-#: src/bz-age-rating-dialog.c:686 src/bz-full-view.c:323
+#: src/bz-age-rating-dialog.c:686 src/bz-context-tile-callbacks.c:176
 #, c-format
 msgid "%d+"
 msgstr "%d+"
@@ -666,31 +733,31 @@ msgstr "Accès à %s dans le système de fichiers"
 msgid "Unknown filesystem path"
 msgstr "Chemin d’accès au système de fichiers inconnu"
 
-#: src/bz-app-size-dialog.blp:29 src/bz-app-size-dialog.blp:55
+#: src/bz-app-size-dialog.blp:26 src/bz-app-size-dialog.blp:52
 msgid "Download Size"
 msgstr "Taille du téléchargement"
 
-#: src/bz-app-size-dialog.blp:56
+#: src/bz-app-size-dialog.blp:53
 msgid "Amount to download from the internet"
 msgstr "Volume à télécharger depuis Internet"
 
-#: src/bz-app-size-dialog.blp:76
+#: src/bz-app-size-dialog.blp:73
 msgid "Installed Size"
 msgstr "Taille après installation"
 
-#: src/bz-app-size-dialog.blp:77
+#: src/bz-app-size-dialog.blp:74
 msgid "Size on Disk"
 msgstr "Taille sur le disque"
 
-#: src/bz-app-size-dialog.blp:125
+#: src/bz-app-size-dialog.blp:121
 msgid "Open user data folder"
 msgstr "Ouvrir le dossier des données utilisateur"
 
-#: src/bz-app-size-dialog.blp:135
+#: src/bz-app-size-dialog.blp:131
 msgid "User Data Size"
 msgstr "Taille des données utilisateur"
 
-#: src/bz-app-size-dialog.blp:136
+#: src/bz-app-size-dialog.blp:132
 msgid "Caches, settings, and other app data"
 msgstr "Caches, paramètres et autres données"
 
@@ -702,13 +769,18 @@ msgstr "Taille de l'environnement d’exécution"
 msgid "Runtime Download Size"
 msgstr "Taille du téléchargement de l'environnement d’exécution"
 
+#: src/bz-app-size-dialog.c:204
+msgid "App Size"
+msgstr "Taille de l'appli"
+
 #: src/bz-app-tile.blp:57 src/bz-developer-badge.c:98
 #: src/bz-rich-app-tile.blp:104 src/bz-rich-app-tile.c:304
 msgid "Verified"
-msgstr "Verifié"
+msgstr "Vérifié"
 
 #. Translators: As in 'The app is installed'.
-#: src/bz-app-tile.blp:88 src/bz-full-view.c:282 src/bz-releases-list.c:205
+#: src/bz-app-tile.blp:88 src/bz-context-tile-callbacks.c:135
+#: src/bz-releases-list.c:205
 msgid "Installed"
 msgstr "Installée"
 
@@ -726,22 +798,22 @@ msgstr "Toutes les applis « %s »"
 msgid "%d Applications"
 msgstr "%d applications"
 
-#: src/bz-application.c:693
+#: src/bz-application.c:707
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr "Adam Masciola <kolunmi@posteo.net>"
 
-#: src/bz-application.c:694
+#: src/bz-application.c:708
 msgctxt "About Dialog Developer Credit"
 msgid "Alexander Vanhee"
 msgstr "Alexander Vanhee"
 
-#: src/bz-application.c:714
+#: src/bz-application.c:728
 msgid "The Bazaar Contributors"
 msgstr "Les Contributeurs de Bazaar"
 
 #. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
-#: src/bz-application.c:717
+#: src/bz-application.c:731
 msgid "translator-credits"
 msgstr ""
 "Atom <29772841+AtomHare@users.noreply.github.com>, 2025\n"
@@ -749,23 +821,23 @@ msgstr ""
 "Mimolet <theMimolet@proton.me>, 2025-2026\n"
 "Irénée THIRION <irenee.thirion@e.email>, 2026"
 
-#: src/bz-application.c:727
+#: src/bz-application.c:741
 msgid "Special Thanks"
 msgstr "Remerciements particuliers à"
 
-#: src/bz-application.c:785
+#: src/bz-application.c:799
 msgid "Logged Out Successfully!"
 msgstr "Déconnexion réussie !"
 
-#: src/bz-application.c:908
+#: src/bz-application.c:922
 msgid "Performing setup…"
 msgstr "Configuration en cours…"
 
-#: src/bz-application.c:992
+#: src/bz-application.c:1006
 msgid "Set Up System Flathub?"
 msgstr "Configurer Flathub sur le système ? "
 
-#: src/bz-application.c:995
+#: src/bz-application.c:1009
 msgid ""
 "The system Flathub remote is not set up. Bazaar requires Flathub to be "
 "configured on the system Flatpak installation to browse and install "
@@ -780,11 +852,11 @@ msgstr ""
 "Vous pouvez toujours utiliser Bazaar pour parcourir et désinstaller des "
 "applis déjà installées."
 
-#: src/bz-application.c:1002
+#: src/bz-application.c:1016
 msgid "Set Up Flathub?"
 msgstr "Configurer Flathub ?"
 
-#: src/bz-application.c:1005
+#: src/bz-application.c:1019
 msgid ""
 "Flathub is not set up on this system. You will not be able to browse and "
 "install applications in Bazaar if its unavailable.\n"
@@ -797,48 +869,48 @@ msgstr ""
 "Vous pouvez toujours utiliser Bazaar pour parcourir et désinstaller des "
 "applis déjà installées."
 
-#: src/bz-application.c:1011
+#: src/bz-application.c:1025
 msgid "Later"
 msgstr "Plus tard"
 
-#: src/bz-application.c:1012
+#: src/bz-application.c:1026
 msgid "Set Up Flathub"
 msgstr "Configurer Flathub"
 
-#: src/bz-application.c:1301
+#: src/bz-application.c:1315
 msgid "A backend error occurred"
 msgstr "Une erreur de backend est survenue"
 
-#: src/bz-application.c:1447 src/bz-application.c:3301 src/bz-window.blp:70
+#: src/bz-application.c:1511 src/bz-application.c:3420 src/bz-window.blp:70
 msgid "Refreshing…"
 msgstr "Actualisation…"
 
-#: src/bz-application.c:1600 src/bz-application.c:3299
+#: src/bz-application.c:1663 src/bz-application.c:3418
 #, c-format
 msgid "Loading %d apps…"
 msgstr "Chargement de %d applis…"
 
-#: src/bz-application.c:1604
+#: src/bz-application.c:1666
 msgid "Checking for updates…"
 msgstr "Recherche de mises à jour…"
 
-#: src/bz-application.c:1660
+#: src/bz-application.c:1729
 msgid "Failed to open .flatpakref"
 msgstr "Échec de l’ouverture du .flatpakref"
 
-#: src/bz-application.c:1716
+#: src/bz-application.c:1785
 msgid "An initialization error occurred"
 msgstr "Une erreur d'initialisation s'est produite"
 
-#: src/bz-application.c:2067
+#: src/bz-application.c:2183
 msgid "Failed to check for updates"
 msgstr "Échec de la vérification des mises à jour"
 
-#: src/bz-application.c:3072
+#: src/bz-application.c:3191
 msgid "Could not find app"
 msgstr "Impossible de trouver l'application"
 
-#: src/bz-application.c:3303
+#: src/bz-application.c:3422
 msgid "Writing to cache…"
 msgstr "Écriture dans le cache…"
 
@@ -892,9 +964,137 @@ msgctxt "Project URL Type"
 msgid "Contribute"
 msgstr "Contribuer"
 
+#: src/bz-context-tile-callbacks.c:68
+msgid "---"
+msgstr "---"
+
+#. Translators: M is the suffix for millions
+#: src/bz-context-tile-callbacks.c:75
+#, c-format
+msgid "%.*fM"
+msgstr "%.*f Mio."
+
+#. Translators: K is the suffix for thousands
+#: src/bz-context-tile-callbacks.c:82
+#, c-format
+msgid "%.*fK"
+msgstr "%.*f mil."
+
+#: src/bz-context-tile-callbacks.c:92
+#, c-format
+msgid "%d downloads in the last month"
+msgstr "%d téléchargements au cours du dernier mois"
+
+#: src/bz-context-tile-callbacks.c:104 src/bz-context-tile-callbacks.c:389
+#: src/bz-context-tile-callbacks.c:406
+msgid "N/A"
+msgstr "Inconnu"
+
+#: src/bz-context-tile-callbacks.c:132
+#, c-format
+msgid "+%s runtime"
+msgstr "+%s d'environnement d’exécution"
+
+#: src/bz-context-tile-callbacks.c:135
+msgid "Download"
+msgstr "À télécharger"
+
+#: src/bz-context-tile-callbacks.c:155
+msgid "Size information unavailable"
+msgstr "Informations sur la taille non disponibles"
+
+#: src/bz-context-tile-callbacks.c:158
+#, c-format
+msgid "Download size of %s"
+msgstr "Taille du téléchargement de %s"
+
+#: src/bz-context-tile-callbacks.c:191
+msgid "All Ages"
+msgstr "Tout public"
+
+#: src/bz-context-tile-callbacks.c:203
+msgid "Age rating information unavailable"
+msgstr "Informations sur la classification d’âge non disponibles"
+
+#: src/bz-context-tile-callbacks.c:208
+msgid "Suitable for all ages"
+msgstr "Convient à tout public"
+
+#: src/bz-context-tile-callbacks.c:210
+#, c-format
+msgid "Suitable for ages %d and up"
+msgstr "Approprié dès %d ans et plus"
+
+#: src/bz-context-tile-callbacks.c:243 src/bz-context-tile-callbacks.c:248
+#: src/bz-context-tile-callbacks.c:276 src/bz-context-tile-callbacks.c:284
+msgid "Unknown"
+msgstr "Inconnue"
+
+#: src/bz-context-tile-callbacks.c:253
+#, c-format
+msgid "Free software licensed under %s"
+msgstr "Logiciel libre sous licence %s"
+
+#: src/bz-context-tile-callbacks.c:258
+msgid "Free software"
+msgstr "Logiciel libre"
+
+#: src/bz-context-tile-callbacks.c:261
+msgid "Proprietary Software"
+msgstr "Logiciel propriétaire"
+
+#: src/bz-context-tile-callbacks.c:264
+#, c-format
+msgid "Special License: %s"
+msgstr "Licence spéciale : %s"
+
+#: src/bz-context-tile-callbacks.c:281
+msgid "Free"
+msgstr "Libre"
+
+#: src/bz-context-tile-callbacks.c:287 src/bz-license-dialog.c:133
+msgid "Proprietary"
+msgstr "Propriétaire"
+
+#: src/bz-context-tile-callbacks.c:289 src/bz-license-dialog.c:135
+msgid "Special License"
+msgstr "Licence spéciale"
+
+#: src/bz-context-tile-callbacks.c:309
+msgid "Adaptive"
+msgstr "Adaptatif"
+
+#: src/bz-context-tile-callbacks.c:309
+msgid "Desktop Only"
+msgstr "PC uniquement"
+
+#: src/bz-context-tile-callbacks.c:315
+msgid "Works on desktop, tablets, and phones"
+msgstr "Fonctionne sur ordinateur, tablette et téléphone"
+
+#: src/bz-context-tile-callbacks.c:316
+msgid "May not work on mobile devices"
+msgstr "Peut ne pas fonctionner sur les appareils mobiles"
+
+#: src/bz-context-tile-callbacks.c:396 src/bz-safety-dialog.blp:31
+msgid "Safe"
+msgstr "Fiable"
+
+#: src/bz-context-tile-callbacks.c:398 src/bz-context-tile-callbacks.c:400
+msgid "Low Risk"
+msgstr "Risque faible"
+
+#: src/bz-context-tile-callbacks.c:402
+msgid "Medium Risk"
+msgstr "Risque moyen"
+
+#: src/bz-context-tile-callbacks.c:404
+msgid "High Risk"
+msgstr "Risque élevé"
+
 #: src/bz-curated-view.blp:11 src/bz-favorites-page.blp:68
 #: src/bz-flathub-page.blp:19 src/bz-full-view.blp:62
-#: src/bz-library-page.blp:65 src/bz-user-data-page.blp:86
+#: src/bz-library-page.blp:66 src/bz-user-data-page.blp:86
 msgid "Empty"
 msgstr "Vide"
 
@@ -932,48 +1132,44 @@ msgstr "Navigateur"
 msgid "Not Verified"
 msgstr "Non-vérifié"
 
-#: src/bz-developer-badge.c:145
+#: src/bz-developer-badge.c:210
 msgid "Developer information not available."
 msgstr "Informations sur le développeur non disponibles."
 
-#: src/bz-developer-badge.c:151 src/bz-developer-badge.c:165
+#: src/bz-developer-badge.c:216 src/bz-developer-badge.c:230
 #, c-format
 msgid ""
 "The ownership of the %s app ID has not been verified and it may be a "
 "community package."
 msgstr ""
-"La propriété de l’identifiant applicatif %s n’a pas été vérifiée et il "
-"pourrait s’agir d’un paquet géré par la communauté."
+"La propriété de l'identifiant %s n’a pas été vérifiée et il pourrait s’agir "
+"d’un paquet géré par la communauté."
 
-#: src/bz-developer-badge.c:169
+#: src/bz-developer-badge.c:234
 #, c-format
 msgid ""
 "The ownership of the %s app ID has been manually verified by the Flathub "
 "team."
-msgstr ""
-"La propriété de l’identifiant applicatif %s a été vérifiée manuellement par "
-"l’équipe de Flathub."
+msgstr "La propriété de l'identifiant %s a été vérifiée par l’équipe Flathub."
 
-#: src/bz-developer-badge.c:175
+#: src/bz-developer-badge.c:250
 #, c-format
 msgid ""
 "The ownership of the %1$s app ID has been verified by <b>%2$s</b> on "
 "<b>%3$s</b>."
 msgstr ""
-"La propriété de l’identifiant applicatif %1$s a été vérifiée par <b>%2$s</b> "
-"sur <b>%3$s</b>."
+"La propriété de l'identifiant %1$s a été vérifiée par <b>%2$s</b> sur "
+"<b>%3$s</b>."
 
-#: src/bz-developer-badge.c:182
+#: src/bz-developer-badge.c:257
 #, c-format
 msgid "The ownership of the %1$s app ID has been verified using %2$s."
-msgstr ""
-"La propriété de l’identifiant applicatif %1$s a été vérifiée en utilisant "
-"%2$s."
+msgstr "La propriété de l'identifiant %1$s a été vérifiée en utilisant %2$s."
 
-#: src/bz-developer-badge.c:186
+#: src/bz-developer-badge.c:261
 #, c-format
 msgid "The ownership of the %s app ID has been verified."
-msgstr "La propriété de l’identifiant applicatif %s a été vérifiée."
+msgstr "La propriété de l'identifiant %s a été vérifiée."
 
 #: src/bz-donations-dialog.blp:74
 msgid "Full Release Notes"
@@ -1043,7 +1239,7 @@ msgstr "Détails"
 msgid "Copy"
 msgstr "Copier"
 
-#: src/bz-error-dialog.c:56 src/bz-share-list.c:64
+#: src/bz-error-dialog.c:56 src/bz-share-list.c:62
 msgid "Copied!"
 msgstr "Copié !"
 
@@ -1062,10 +1258,6 @@ msgstr "Se connecter"
 #: src/bz-favorite-button.blp:14
 msgid "Favorite Count"
 msgstr "Nombre de favoris"
-
-#: src/bz-favorites-tile.c:157 src/bz-rich-app-tile.blp:172
-msgid "Uninstall"
-msgstr "Désinstaller"
 
 #: src/bz-favorites-tile.c:357
 msgid "Failed to remove favorite"
@@ -1116,15 +1308,15 @@ msgstr "Suivant"
 msgid "App of the Day"
 msgstr "Appli du jour"
 
-#: src/bz-flathub-category.c:89
+#: src/bz-flathub-category.c:93
 msgid "Editing"
 msgstr "Édition"
 
-#: src/bz-flathub-category.c:90
+#: src/bz-flathub-category.c:94
 msgid "Midi"
 msgstr "Midi"
 
-#: src/bz-flathub-category.c:91
+#: src/bz-flathub-category.c:95
 msgid "Mixer"
 msgstr "Mixage"
 
@@ -1132,261 +1324,261 @@ msgstr "Mixage"
 #. search regardless of what you put here, so don't worry about the string
 #. yielding poor search results. Focus on correctness and friendliness,
 #. etc
-#: src/bz-flathub-category.c:92 src/bz-search-pill-list.c:77
+#: src/bz-flathub-category.c:96 src/bz-search-pill-list.c:77
 msgid "Music"
 msgstr "Musique"
 
-#: src/bz-flathub-category.c:93
+#: src/bz-flathub-category.c:97
 msgid "Player"
 msgstr "Lecteur"
 
-#: src/bz-flathub-category.c:94
+#: src/bz-flathub-category.c:98
 msgid "Recorder"
 msgstr "Enregistreur"
 
-#: src/bz-flathub-category.c:95
+#: src/bz-flathub-category.c:99
 msgid "Sequencer"
 msgstr "Séquenceur"
 
-#: src/bz-flathub-category.c:96
+#: src/bz-flathub-category.c:100
 msgid "Tuner"
 msgstr "Accordeur"
 
-#: src/bz-flathub-category.c:97
+#: src/bz-flathub-category.c:101
 msgid "TV"
 msgstr "TV"
 
-#: src/bz-flathub-category.c:102
+#: src/bz-flathub-category.c:106
 msgid "Emulation"
 msgstr "Émulateurs"
 
-#: src/bz-flathub-category.c:103
+#: src/bz-flathub-category.c:107
 msgid "Action"
 msgstr "Action"
 
-#: src/bz-flathub-category.c:104
+#: src/bz-flathub-category.c:108
 msgid "Adventure"
 msgstr "Aventure"
 
-#: src/bz-flathub-category.c:105
+#: src/bz-flathub-category.c:109
 msgid "Arcade"
 msgstr "Arcade"
 
-#: src/bz-flathub-category.c:106
+#: src/bz-flathub-category.c:110
 msgid "Blocks"
 msgstr "Blocs"
 
-#: src/bz-flathub-category.c:107
+#: src/bz-flathub-category.c:111
 msgid "Board"
 msgstr "Plateau"
 
-#: src/bz-flathub-category.c:108
+#: src/bz-flathub-category.c:112
 msgid "Card"
 msgstr "Jeux de cartes"
 
-#: src/bz-flathub-category.c:109
+#: src/bz-flathub-category.c:113
 msgid "Kids"
 msgstr "Jeux pour enfants"
 
-#: src/bz-flathub-category.c:110
+#: src/bz-flathub-category.c:114
 msgid "Logic"
 msgstr "Logique"
 
-#: src/bz-flathub-category.c:111
+#: src/bz-flathub-category.c:115
 msgid "Role Playing"
 msgstr "Jeux de rôle"
 
-#: src/bz-flathub-category.c:112
+#: src/bz-flathub-category.c:116
 msgid "Shooter"
 msgstr "Jeux de tir"
 
-#: src/bz-flathub-category.c:113
+#: src/bz-flathub-category.c:117
 msgid "Simulation"
 msgstr "Simulation"
 
-#: src/bz-flathub-category.c:114
+#: src/bz-flathub-category.c:118
 msgid "Sports"
 msgstr "Sports"
 
-#: src/bz-flathub-category.c:115
+#: src/bz-flathub-category.c:119
 msgid "Strategy"
 msgstr "Jeux de stratégie"
 
-#: src/bz-flathub-category.c:120
+#: src/bz-flathub-category.c:124
 msgid "Audio & Video"
 msgstr "Audio & Vidéo"
 
-#: src/bz-flathub-category.c:120
+#: src/bz-flathub-category.c:124
 msgid "Media"
 msgstr "Média"
 
-#: src/bz-flathub-category.c:120
+#: src/bz-flathub-category.c:124
 msgid "More Audio & Video"
 msgstr "Plus d’applis audio & vidéo"
 
-#: src/bz-flathub-category.c:121
+#: src/bz-flathub-category.c:125
 msgid "Developer Tools"
 msgstr "Outils de Développement"
 
-#: src/bz-flathub-category.c:121
+#: src/bz-flathub-category.c:125
 msgid "Develop"
-msgstr "Développer"
+msgstr "Coder"
 
-#: src/bz-flathub-category.c:121
+#: src/bz-flathub-category.c:125
 msgid "More Developer Tools"
 msgstr "Plus d’outils de développement"
 
-#: src/bz-flathub-category.c:122
+#: src/bz-flathub-category.c:126
 msgid "Education"
 msgstr "Éducation"
 
-#: src/bz-flathub-category.c:122
+#: src/bz-flathub-category.c:126
 msgid "Learn"
 msgstr "Apprendre"
 
-#: src/bz-flathub-category.c:122
+#: src/bz-flathub-category.c:126
 msgid "More Education"
 msgstr "Plus d’applis éducatives"
 
-#: src/bz-flathub-category.c:123
+#: src/bz-flathub-category.c:127
 msgid "Gaming"
 msgstr "Jeux vidéos"
 
-#: src/bz-flathub-category.c:123
+#: src/bz-flathub-category.c:127
 msgid "Play"
 msgstr "Jouer"
 
-#: src/bz-flathub-category.c:123
+#: src/bz-flathub-category.c:127
 msgid "More Gaming"
 msgstr "Plus de jeux"
 
-#: src/bz-flathub-category.c:124
+#: src/bz-flathub-category.c:128
 msgid "Graphics & Photography"
 msgstr "Graphisme & Photographie"
 
-#: src/bz-flathub-category.c:124
+#: src/bz-flathub-category.c:128
 msgid "Create"
 msgstr "Créer"
 
-#: src/bz-flathub-category.c:124
+#: src/bz-flathub-category.c:128
 msgid "More Graphics & Photography"
 msgstr "Plus d’applis de graphisme et photographie"
 
-#: src/bz-flathub-category.c:125
+#: src/bz-flathub-category.c:129
 msgid "Networking"
 msgstr "Réseau"
 
-#: src/bz-flathub-category.c:125
+#: src/bz-flathub-category.c:129
 msgid "Internet"
 msgstr "Internet"
 
-#: src/bz-flathub-category.c:125
+#: src/bz-flathub-category.c:129
 msgid "More Networking"
 msgstr "Plus d’applis réseau"
 
-#: src/bz-flathub-category.c:126
+#: src/bz-flathub-category.c:130
 msgid "Productivity"
 msgstr "Productivité"
 
-#: src/bz-flathub-category.c:126
+#: src/bz-flathub-category.c:130
 msgid "Work"
 msgstr "Travailler"
 
-#: src/bz-flathub-category.c:126
+#: src/bz-flathub-category.c:130
 msgid "More Productivity"
 msgstr "Plus d’applis de productivité"
 
-#: src/bz-flathub-category.c:127
+#: src/bz-flathub-category.c:131
 msgid "Science"
 msgstr "Sciences"
 
-#: src/bz-flathub-category.c:127
+#: src/bz-flathub-category.c:131
 msgid "More Science"
 msgstr "Plus d’applis scientifiques"
 
-#: src/bz-flathub-category.c:128
+#: src/bz-flathub-category.c:132
 msgid "System"
 msgstr "Système"
 
-#: src/bz-flathub-category.c:128
+#: src/bz-flathub-category.c:132
 msgid "More System"
 msgstr "Plus d’applis système"
 
-#: src/bz-flathub-category.c:129
+#: src/bz-flathub-category.c:133
 msgid "Utilities"
 msgstr "Utilitaires"
 
-#: src/bz-flathub-category.c:129
+#: src/bz-flathub-category.c:133
 msgid "Tools"
 msgstr "Outils"
 
-#: src/bz-flathub-category.c:129
+#: src/bz-flathub-category.c:133
 msgid "More Utilities"
 msgstr "Plus d’utilitaires"
 
-#: src/bz-flathub-category.c:130 src/bz-flathub-page.blp:119
-#: src/bz-flathub-page.blp:152
+#: src/bz-flathub-category.c:134 src/bz-flathub-page.blp:116
+#: src/bz-flathub-page.blp:148
 msgid "Trending"
 msgstr "Tendances"
 
-#: src/bz-flathub-category.c:130
+#: src/bz-flathub-category.c:134
 msgid "More Trending"
 msgstr "Plus de tendances"
 
-#: src/bz-flathub-category.c:131 src/bz-flathub-page.blp:125
-#: src/bz-flathub-page.blp:182
+#: src/bz-flathub-category.c:135 src/bz-flathub-page.blp:122
+#: src/bz-flathub-page.blp:178
 msgid "Popular"
 msgstr "Populaires"
 
-#: src/bz-flathub-category.c:131
+#: src/bz-flathub-category.c:135
 msgid "More Popular"
 msgstr "Plus d’applis populaires"
 
-#: src/bz-flathub-category.c:132 src/bz-flathub-page.blp:172
+#: src/bz-flathub-category.c:136 src/bz-flathub-page.blp:168
 msgid "Recently Added"
 msgstr "Ajoutées récemment"
 
-#: src/bz-flathub-category.c:132 src/bz-flathub-page.blp:131
+#: src/bz-flathub-category.c:136 src/bz-flathub-page.blp:128
 msgid "New"
 msgstr "Nouveautés"
 
-#: src/bz-flathub-category.c:132
+#: src/bz-flathub-category.c:136
 msgid "More New"
 msgstr "Plus de nouveautés"
 
-#: src/bz-flathub-category.c:133 src/bz-flathub-page.blp:162
+#: src/bz-flathub-category.c:137 src/bz-flathub-page.blp:158
 msgid "Recently Updated"
 msgstr "Mises à jour récemment"
 
-#: src/bz-flathub-category.c:133 src/bz-flathub-page.blp:137
+#: src/bz-flathub-category.c:137 src/bz-flathub-page.blp:134
 msgid "Updated"
 msgstr "Mises à jour"
 
-#: src/bz-flathub-category.c:133
+#: src/bz-flathub-category.c:137
 msgid "More Updated"
 msgstr "Plus d’applis mises à jour"
 
-#: src/bz-flathub-category.c:134
+#: src/bz-flathub-category.c:138
 msgid "Mobile"
 msgstr "Mobile"
 
-#: src/bz-flathub-category.c:134
+#: src/bz-flathub-category.c:138
 msgid "More Mobile"
 msgstr "Plus d’applis mobiles"
 
-#: src/bz-flathub-category.c:135
+#: src/bz-flathub-category.c:139
 msgid "Adwaita"
 msgstr "Adwaita"
 
-#: src/bz-flathub-category.c:135
+#: src/bz-flathub-category.c:139
 msgid "More Adwaita"
 msgstr "Plus d’applis Adwaita"
 
-#: src/bz-flathub-category.c:136
+#: src/bz-flathub-category.c:140
 msgid "KDE Apps"
 msgstr "KDE"
 
-#: src/bz-flathub-category.c:136
+#: src/bz-flathub-category.c:140
 msgid "More KDE Apps"
 msgstr "Plus d’applis KDE"
 
@@ -1423,32 +1615,32 @@ msgstr ""
 msgid "Search Apps"
 msgstr "Rechercher des applis"
 
-#: src/bz-flathub-page.blp:263
+#: src/bz-flathub-page.blp:255
 msgid "On the Go"
 msgstr "Sur tous vos écrans"
 
-#: src/bz-flathub-page.blp:275
+#: src/bz-flathub-page.blp:267
 msgid "Apps for your Linux phones and tablets"
 msgstr "Applis pour vos téléphones et tablettes Linux"
 
-#: src/bz-flathub-page.blp:286 src/bz-flathub-page.blp:321
+#: src/bz-flathub-page.blp:278 src/bz-flathub-page.blp:313
 msgid "More Mobile Apps"
 msgstr "Plus d’applis mobiles"
 
-#: src/bz-flathub-page.blp:379
+#: src/bz-flathub-page.blp:369
 msgid "We​ ♥​ Games"
 msgstr "Nous + jeux = ♥"
 
-#: src/bz-flathub-page.blp:392
+#: src/bz-flathub-page.blp:382
 msgid "Games and apps to run your favorite titles"
 msgstr "Jeux et applis pour lancer vos titres préférés"
 
-#: src/bz-flathub-page.blp:426
+#: src/bz-flathub-page.blp:416
 msgid "More Games"
 msgstr "Plus de jeux"
 
-#: src/bz-full-view.blp:66 src/bz-library-page.blp:76
-#: src/bz-library-page.blp:80
+#: src/bz-full-view.blp:66 src/bz-library-page.blp:77
+#: src/bz-library-page.blp:81
 msgid "No Results"
 msgstr "Aucun résultat"
 
@@ -1468,21 +1660,13 @@ msgstr "L’installation de lots .flatpak n’est pas encore prise en charge"
 msgid "_Support"
 msgstr "_Soutenir"
 
-#: src/bz-full-view.blp:426
-msgid "Downloads/Month"
-msgstr "Téléchargements par mois"
-
-#: src/bz-full-view.blp:461
-msgid "Stopped Receiving Core Updates"
-msgstr "Ne reçoit plus de mises à jour essentielles"
-
 #: src/bz-full-view.blp:475
 msgid ""
 "This app uses a runtime that no longer receives updates or security fixes. "
 "It may become unsafe to use."
 msgstr ""
-"L’environnement d’exécution utilisé par cette appli ne reçoit plus de mises "
-"à jour de sécurité. Son utilisation pourrait devenir risquée."
+"L’environnement d’exécution utilisé par cette application n'est plus pris en "
+"charge. Son utilisation pourrait devenir risquée."
 
 #: src/bz-full-view.blp:562
 msgid "Trash Data"
@@ -1492,122 +1676,11 @@ msgstr "Supprimer les données"
 msgid "Tags:"
 msgstr "Étiquettes :"
 
-#: src/bz-full-view.c:215
-msgid "---"
-msgstr "---"
-
-#. Translators: M is the suffix for millions
-#: src/bz-full-view.c:222
-#, c-format
-msgid "%.*fM"
-msgstr "%.*f Mio."
-
-#. Translators: K is the suffix for thousands
-#: src/bz-full-view.c:229
-#, c-format
-msgid "%.*fK"
-msgstr "%.*f mil."
-
-#: src/bz-full-view.c:239
-#, c-format
-msgid "%d downloads in the last month"
-msgstr "%d téléchargements au cours du dernier mois"
-
-#: src/bz-full-view.c:251 src/bz-full-view.c:592 src/bz-full-view.c:609
-msgid "N/A"
-msgstr "Inconnu"
-
-#: src/bz-full-view.c:279
-#, c-format
-msgid "+%s runtime"
-msgstr "+%s d'environnement d’exécution"
-
-#: src/bz-full-view.c:282
-msgid "Download"
-msgstr "Taille"
-
-#: src/bz-full-view.c:302
-msgid "Size information unavailable"
-msgstr "Informations sur la taille non disponibles"
-
-#: src/bz-full-view.c:305
-#, c-format
-msgid "Download size of %s"
-msgstr "Taille du téléchargement de %s"
-
-#: src/bz-full-view.c:338
-msgid "All Ages"
-msgstr "Tout public"
-
-#: src/bz-full-view.c:350
-msgid "Age rating information unavailable"
-msgstr "Informations sur la limite d’âge non disponibles"
-
-#: src/bz-full-view.c:355
-msgid "Suitable for all ages"
-msgstr "Convient à tout public"
-
-#: src/bz-full-view.c:357
-#, c-format
-msgid "Suitable for ages %d and up"
-msgstr "Approprié dès %d ans et plus"
-
-#: src/bz-full-view.c:390 src/bz-full-view.c:395 src/bz-full-view.c:423
-#: src/bz-full-view.c:431
-msgid "Unknown"
-msgstr "Inconnue"
-
-#: src/bz-full-view.c:400
-#, c-format
-msgid "Free software licensed under %s"
-msgstr "Logiciel libre sous licence %s"
-
-#: src/bz-full-view.c:405
-msgid "Free software"
-msgstr "Logiciel libre"
-
-#: src/bz-full-view.c:408
-msgid "Proprietary Software"
-msgstr "Logiciel propriétaire"
-
-#: src/bz-full-view.c:411
-#, c-format
-msgid "Special License: %s"
-msgstr "Licence spéciale : %s"
-
-#: src/bz-full-view.c:428
-msgid "Free"
-msgstr "Libre"
-
-#: src/bz-full-view.c:434 src/bz-license-dialog.c:132
-msgid "Proprietary"
-msgstr "Propriétaire"
-
-#: src/bz-full-view.c:436 src/bz-license-dialog.c:134
-msgid "Special License"
-msgstr "Licence spéciale"
-
-#: src/bz-full-view.c:456
-msgid "Adaptive"
-msgstr "Adaptatif"
-
-#: src/bz-full-view.c:456
-msgid "Desktop Only"
-msgstr "Ordinateur uniquement"
-
-#: src/bz-full-view.c:462
-msgid "Works on desktop, tablets, and phones"
-msgstr "Fonctionne sur ordinateur, tablette et téléphone"
-
-#: src/bz-full-view.c:463
-msgid "May not work on mobile devices"
-msgstr "Peut ne pas fonctionner sur les appareils mobiles"
-
-#: src/bz-full-view.c:474
+#: src/bz-full-view.c:189
 msgid "No URL"
 msgstr "Aucune URL"
 
-#: src/bz-full-view.c:492
+#: src/bz-full-view.c:207
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -1615,7 +1688,7 @@ msgstr ""
 "Cette application est sous une licence FLOSS, la fiabilité de son code "
 "source peut donc être auditée."
 
-#: src/bz-full-view.c:493
+#: src/bz-full-view.c:208
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
@@ -1623,63 +1696,39 @@ msgstr ""
 "Cette application est soumise à une licence propriétaire, son code source "
 "est donc privé et ne peut pas être audité par un tiers indépendant."
 
-#: src/bz-full-view.c:500
+#: src/bz-full-view.c:215
 msgid "More Apps"
 msgstr "Plus d’applis"
 
-#: src/bz-full-view.c:501
+#: src/bz-full-view.c:216
 #, c-format
 msgid "More Apps by %s"
 msgstr "Plus d’applis par %s"
 
-#: src/bz-full-view.c:508
+#: src/bz-full-view.c:223
 msgid "Other Apps by this Developer"
 msgstr "D’autres applis de ce développeur"
 
-#: src/bz-full-view.c:510 src/bz-full-view.c:693
+#: src/bz-full-view.c:225 src/bz-full-view.c:324
 #, c-format
 msgid "Other Apps by %s"
 msgstr "D’autres applis par %s"
 
-#: src/bz-full-view.c:519
+#: src/bz-full-view.c:234
 #, c-format
 msgid "%s is not installed, but it still has <b>%s</b> of data present."
 msgstr "%s n’est pas installé, mais a toujours <b>%s</b> de données présentes."
 
-#: src/bz-full-view.c:599 src/bz-safety-dialog.blp:31
-msgid "Safe"
-msgstr "Sûr"
-
-#: src/bz-full-view.c:601 src/bz-full-view.c:603
-msgid "Low Risk"
-msgstr "Risque faible"
-
-#: src/bz-full-view.c:605
-msgid "Medium Risk"
-msgstr "Risque moyen"
-
-#: src/bz-full-view.c:607
-msgid "High Risk"
-msgstr "Risque élevé"
-
-#: src/bz-full-view.c:695
+#: src/bz-full-view.c:326
 msgid "Other Apps"
 msgstr "D’autres applis"
 
-#: src/bz-full-view.c:697
+#: src/bz-full-view.c:328
 #, c-format
 msgid "%d Application"
 msgid_plural "%d Applications"
 msgstr[0] "%d application"
 msgstr[1] "%d applications"
-
-#: src/bz-full-view.c:941
-msgid "Show Less"
-msgstr "Montrer moins"
-
-#: src/bz-full-view.c:941
-msgid "Show More"
-msgstr "Montrer plus"
 
 #: src/bz-hardware-support-dialog.blp:7 src/bz-hardware-support-dialog.blp:31
 msgid "Hardware Support"
@@ -1755,92 +1804,84 @@ msgstr "Fonctionne sur les appareils mobiles"
 
 #: src/bz-hardware-support-dialog.c:161
 msgid "May not work well on mobile devices"
-msgstr "Pourrait ne pas fonctionner correctement sur les appareils mobiles"
+msgstr "Peut ne pas fonctionner correctement sur les appareils mobiles"
 
 #: src/bz-hardware-support-dialog.c:166
 msgid "Desktop support"
-msgstr "Prise en charge des ordinateurs"
+msgstr "Prise en charge PC"
 
 #: src/bz-hardware-support-dialog.c:167
 msgid "Works well on large screens"
-msgstr "Fonctionne bien sur les écrans large"
+msgstr "Fonctionne bien sur grands écrans"
 
 #: src/bz-hardware-support-dialog.c:201
 #, c-format
 msgid "%s works best on specific hardware"
-msgstr "%s fonctionne mieux sur du matériel spécifique"
+msgstr "%s fonctionne mieux sur certains appareils"
 
 #: src/bz-hardware-support-dialog.c:209
 #, c-format
 msgid "%s works on most devices"
 msgstr "%s fonctionne sur la plupart des appareils"
 
-#: src/bz-install-controls.blp:33
-msgid "Download & Install Application"
-msgstr "Télécharger et installer l’application"
-
-#: src/bz-install-controls.blp:35 src/bz-transaction-dialog.c:202
+#: src/bz-install-controls.blp:34 src/bz-transaction-dialog.c:202
 msgid "_Install"
 msgstr "_Installer"
 
-#: src/bz-install-controls.blp:61
+#: src/bz-install-controls.blp:60
 msgid "_Open"
 msgstr "_Ouvrir"
 
-#: src/bz-install-controls.blp:76 src/bz-install-controls.blp:127
+#: src/bz-install-controls.blp:75 src/bz-install-controls.blp:131
 msgid "Uninstall Application"
 msgstr "Désinstaller l’application"
 
-#: src/bz-install-controls.blp:86 src/bz-transaction-dialog.c:231
+#: src/bz-install-controls.blp:85 src/bz-transaction-dialog.c:231
 msgid "_Remove"
 msgstr "_Désinstaller"
 
-#: src/bz-install-controls.blp:114 src/bz-updates-card.blp:184
-#: src/bz-updates-card.blp:212
+#: src/bz-install-controls.blp:118 src/bz-updates-card.c:161
+#: src/bz-updates-card.c:180
 msgid "Update"
 msgstr "Mettre à jour"
 
-#: src/bz-installed-tile.blp:64 src/bz-rich-app-tile.blp:140
-msgid "Stopped Receiving Updates"
-msgstr "Ne reçoit plus de mises à jour"
-
-#: src/bz-library-page.blp:31
+#: src/bz-library-page.blp:32
 msgid "Search installed apps"
 msgstr "Rechercher des applis installées"
 
-#: src/bz-library-page.blp:48
+#: src/bz-library-page.blp:49
 msgid "Clear search"
 msgstr "Effacer la recherche"
 
-#: src/bz-library-page.blp:69
+#: src/bz-library-page.blp:70
 msgid "No Apps Found"
 msgstr "Aucune appli trouvée"
 
+#: src/bz-library-page.blp:89
+msgid "Search Store Instead"
+msgstr "Consulter Flathub"
+
 # "Bibliothèque" est trop long sous un format "mobile"
 #. Translators: .
-#: src/bz-library-page.blp:98 src/bz-window.blp:112
+#: src/bz-library-page.blp:99 src/bz-window.blp:112
 msgid "Library"
 msgstr "Bibliothèque"
 
-#: src/bz-library-page.blp:126
+#: src/bz-library-page.blp:127
 msgid "Pending Updates"
 msgstr "Mises à jour en attente"
 
-#: src/bz-library-page.blp:153
+#: src/bz-library-page.blp:154
 msgid "Downloads"
 msgstr "Téléchargements"
 
-#: src/bz-library-page.blp:196
+#: src/bz-library-page.blp:197
 msgid "Recently Uninstalled"
 msgstr "Désinstallées récemment"
 
-#: src/bz-library-page.blp:247
+#: src/bz-library-page.blp:248
 msgid "Clear Finished Tasks"
 msgstr "Effacer les tâches effectuées"
-
-#: src/bz-library-page.blp:260
-msgid "Installed Apps"
-msgstr "Applis installées"
 
 #: src/bz-library-page.blp:333
 msgid "Sort By"
@@ -1859,26 +1900,37 @@ msgstr "Taille"
 msgid "No matches found for \"%s\" in the list of installed apps"
 msgstr "Aucune application installée ne correspond à « %s »"
 
-#: src/bz-library-page.c:193 src/bz-updates-card.c:257
+#: src/bz-library-page.c:193 src/bz-updates-card.c:426
 #, c-format
 msgid "%u Available Update"
 msgid_plural "%u Available Updates"
 msgstr[0] "%u mise à jour disponible"
 msgstr[1] "%u mises à jour disponibles"
 
-#: src/bz-license-dialog.blp:95
+#: src/bz-library-page.c:203
+#, c-format
+msgid "%u Installed App"
+msgid_plural "%u Installed Apps"
+msgstr[0] "%u appli installée"
+msgstr[1] "%u applis installées"
+
+#: src/bz-license-dialog.blp:94
 msgid "Get Involved"
 msgstr "S’impliquer"
 
-#: src/bz-license-dialog.c:126
+#: src/bz-license-dialog.blp:111
+msgid "Learn More"
+msgstr "En savoir plus"
+
+#: src/bz-license-dialog.c:127
 msgid "Unknown License"
 msgstr "Licence inconnue"
 
-#: src/bz-license-dialog.c:129
+#: src/bz-license-dialog.c:130
 msgid "Community Built"
 msgstr "Construite par la communauté"
 
-#: src/bz-license-dialog.c:202
+#: src/bz-license-dialog.c:203
 msgid ""
 "This app is developed in the open by an international community.\n"
 "\n"
@@ -1889,11 +1941,11 @@ msgstr ""
 "\n"
 "Vous pouvez participer à son amélioration."
 
-#: src/bz-license-dialog.c:205
+#: src/bz-license-dialog.c:206
 msgid "The license of this app is not known"
 msgstr "La licence de cette appli est inconnue"
 
-#: src/bz-license-dialog.c:211
+#: src/bz-license-dialog.c:212
 #, c-format
 msgid ""
 "This app is developed in the open by an international community, and "
@@ -1906,7 +1958,7 @@ msgstr ""
 "\n"
 "Vous pouvez participer à son amélioration."
 
-#: src/bz-license-dialog.c:219
+#: src/bz-license-dialog.c:220
 msgid ""
 "This app is not developed in the open, so only its developers know how it "
 "works. It may be insecure in ways that are hard to detect, and it may change "
@@ -1916,12 +1968,12 @@ msgid ""
 msgstr ""
 "Cette appli n’est pas développée de manière ouverte : seuls ses développeurs "
 "connaissent son fonctionnement. Elle est susceptible de comporter des "
-"failles de sécurité difficiles à détecter et peut changer sans aucun "
+"failles de sécurité difficiles à détecter et peut être modifiée sans aucun "
 "contrôle préalable.\n"
 "\n"
 "Vous ne pourrez peut-être pas contribuer à cette application."
 
-#: src/bz-license-dialog.c:225
+#: src/bz-license-dialog.c:226
 #, c-format
 msgid ""
 "This app is developed under the special license %s.\n"
@@ -1931,6 +1983,10 @@ msgstr ""
 "Cette appli est développée sous la licence spéciale %s.\n"
 "\n"
 "Vous ne pourrez peut-être pas contribuer à cette application."
+
+#: src/bz-license-dialog.c:356 src/bz-safety-dialog.blp:53
+msgid "License"
+msgstr "Licence"
 
 #: src/bz-login-page.blp:5 src/bz-login-page.blp:42
 msgid "Connect to Flathub"
@@ -2124,7 +2180,7 @@ msgstr "Couleurs de la fierté femboy"
 msgid "Neutrois Pride Colors"
 msgstr "Couleurs du drapeau neutrois"
 
-#: src/bz-releases-dialog.blp:5 src/bz-updates-card.blp:171
+#: src/bz-releases-dialog.blp:5 src/bz-updates-card.c:152
 msgid "Version History"
 msgstr "Historique des versions"
 
@@ -2197,10 +2253,6 @@ msgstr "Obtenir plus d’informations"
 #: src/bz-rich-app-tile.blp:157
 msgid "Get"
 msgstr "Installer"
-
-#: src/bz-rich-app-tile.blp:185 src/bz-transaction-tile.blp:272
-msgid "Open"
-msgstr "Ouvrir"
 
 #: src/bz-safety-calculator.c:82
 msgid "Unknown Permissions"
@@ -2526,17 +2578,13 @@ msgstr "Peut interagir avec les appareils connectés avec KDE Connect"
 msgid "Safety"
 msgstr "Sécurité"
 
-#: src/bz-safety-dialog.blp:53
-msgid "License"
-msgstr "Licence"
-
 #: src/bz-safety-dialog.blp:63
 msgid "App ID"
-msgstr "Identifiant applicatif"
+msgstr "Identifiant"
 
 #: src/bz-safety-dialog.blp:73
 msgid "SDK"
-msgstr "Plateforme logicielle"
+msgstr "Plateforme logicielle (SDK)"
 
 #: src/bz-safety-dialog.blp:104
 msgid ""
@@ -2550,7 +2598,7 @@ msgstr ""
 #: src/bz-safety-dialog.c:227
 #, c-format
 msgid "%s is Safe"
-msgstr "%s est sûr"
+msgstr "%s est fiable"
 
 #: src/bz-safety-dialog.c:232
 #, c-format
@@ -2560,17 +2608,17 @@ msgstr "%s n’a pas d’autorisations à risque"
 #: src/bz-safety-dialog.c:237
 #, c-format
 msgid "%s is Probably Safe"
-msgstr "%s est probablement sûr"
+msgstr "%s est probablement fiable"
 
 #: src/bz-safety-dialog.c:242
 #, c-format
 msgid "%s is Possibly Unsafe"
-msgstr "%s pourrait ne pas être sûr"
+msgstr "%s n'est peut-être pas fiable"
 
 #: src/bz-safety-dialog.c:247
 #, c-format
 msgid "%s is Unsafe"
-msgstr "%s n’est pas sûr"
+msgstr "%s n’est pas fiable"
 
 #: src/bz-screenshot-page.blp:5
 msgid "Screenshots"
@@ -2588,15 +2636,15 @@ msgstr "Capture d’écran suivante"
 msgid "Copy Image"
 msgstr "Copier l’image"
 
-#: src/bz-screenshot-page.blp:147
+#: src/bz-screenshot-page.blp:150
 msgid "Reset View"
 msgstr "Réinitialiser l’affichage"
 
-#: src/bz-screenshot-page.blp:158
+#: src/bz-screenshot-page.blp:161
 msgid "Zoom Out"
 msgstr "Zoom arrière"
 
-#: src/bz-screenshot-page.blp:168
+#: src/bz-screenshot-page.blp:171
 msgid "Zoom In"
 msgstr "Zoom avant"
 
@@ -2696,72 +2744,96 @@ msgstr "Minecraft"
 msgid "Emulator"
 msgstr "Émulateur"
 
-#: src/bz-search-page.blp:57
+#: src/bz-search-filter-popover.blp:18 src/bz-search-page.blp:83
+msgid "Filters"
+msgstr "Filtres"
+
+#: src/bz-search-filter-popover.blp:35
+msgid "_Verified"
+msgstr "_Vérifiées"
+
+#: src/bz-search-filter-popover.blp:42
+msgid "_Free/Open"
+msgstr "_Libres"
+
+#: src/bz-search-filter-popover.blp:49
+msgid "Non-_EOL"
+msgstr "À _jour"
+
+#: src/bz-search-filter-popover.blp:56
+msgid "Categories"
+msgstr "Catégories"
+
+#: src/bz-search-page.blp:58
 msgid "Search Apps, Games, Software"
 msgstr "Rechercher applis, jeux et logiciels"
 
-#: src/bz-search-page.blp:79
+#: src/bz-search-page.blp:70
+msgid "Search Filters"
+msgstr "Filtres de recherche"
+
+#: src/bz-search-page.blp:100
 msgid "Clear Search"
 msgstr "Effacer la recherche"
 
-#: src/bz-search-page.blp:171
+#: src/bz-search-page.blp:192
 msgid "Categories Unavailable"
 msgstr "Catégories non disponibles"
 
-#: src/bz-search-page.blp:172
+#: src/bz-search-page.blp:193
 msgid "Search for apps using the search bar above."
 msgstr "Cherchez des applis en utilisant l'onglet « Rechercher »."
 
-#: src/bz-search-page.blp:198
+#: src/bz-search-page.blp:219
 msgid "Browse Categories"
 msgstr "Parcourir les catégories"
 
-#: src/bz-search-page.blp:340
+#: src/bz-search-page.blp:361
 msgid "No Applications Found"
 msgstr "Aucune application trouvée"
 
-#: src/bz-search-page.c:244
+#: src/bz-search-page.c:247
 #, c-format
 msgid "No results found for \"%s\" in Flathub"
 msgstr "Aucun résultat trouvé pour « %s » dans Flathub"
 
-#: src/bz-share-list.c:116
+#: src/bz-share-list.c:123
 msgid "Copy Link"
 msgstr "Copier le lien"
 
-#: src/bz-share-list.c:127
+#: src/bz-share-list.c:134
 msgid "Open Link"
 msgstr "Ouvrir le lien"
 
-#: src/bz-stats-dialog.blp:28
+#: src/bz-stats-dialog.blp:27
 msgid "Timeline"
 msgstr "Chronologie"
 
-#: src/bz-stats-dialog.blp:46
+#: src/bz-stats-dialog.blp:45
 msgid "Installs:"
 msgstr "Installations :"
 
-#: src/bz-stats-dialog.blp:55
+#: src/bz-stats-dialog.blp:54
 msgid "World"
 msgstr "Monde"
 
-#: src/bz-stats-dialog.blp:69
+#: src/bz-stats-dialog.blp:68
 msgid "Since 4/15/2024"
 msgstr "Depuis le 15 Avril 2024"
 
 #. Translators: M is the suffix for millions
-#: src/bz-stats-dialog.c:124
+#: src/bz-stats-dialog.c:125
 #, c-format
 msgid "%.2fM Total Installs"
 msgstr "%.2f Mio installations en tout"
 
 #. Translators: K is the suffix for thousands
-#: src/bz-stats-dialog.c:127
+#: src/bz-stats-dialog.c:128
 #, c-format
 msgid "%.2fK Total Installs"
 msgstr "%.2f mil. installations en tout"
 
-#: src/bz-stats-dialog.c:129
+#: src/bz-stats-dialog.c:130
 #, c-format
 msgid "%'d Total Installs"
 msgstr "%'d téléchargements en tout"
@@ -2922,7 +2994,7 @@ msgstr "Terminé en %.02f secondes"
 
 #: src/bz-transaction-tile.blp:129
 msgid "App Add-On"
-msgstr "Extension de l’appli"
+msgstr "Extension d'application"
 
 #: src/bz-transaction-tile.blp:158
 msgid "Runtime"
@@ -2962,11 +3034,11 @@ msgstr "Erreur de transaction"
 msgid "Pending"
 msgstr "En attente"
 
-#: src/bz-updates-card.blp:40
+#: src/bz-updates-card.blp:22
 msgid "_Update All"
 msgstr "Tout _mettre à jour"
 
-#: src/bz-updates-card.c:293
+#: src/bz-updates-card.c:208
 #, c-format
 msgid "%u Runtime Update"
 msgid_plural "%u Runtime Updates"
@@ -3031,23 +3103,19 @@ msgstr "Se déconnecter"
 msgid "Bazaar — %s"
 msgstr "Bazaar — %s"
 
-#: src/bz-window.c:487
-msgid "Failed to load add-ons"
-msgstr "Échec du chargement des modules complémentaires"
-
-#: src/bz-window.c:601 src/bz-window.c:618
+#: src/bz-window.c:544 src/bz-window.c:561
 msgid "Failed to launch application"
 msgstr "Échec du lancement de l'application"
 
-#: src/bz-window.c:823
+#: src/bz-window.c:766
 msgid "You can't remove Bazaar from Bazaar!"
 msgstr "Vous ne pouvez supprimer Bazaar depuis Bazaar !"
 
-#: src/bz-window.c:1108 src/bz-window.c:1142
+#: src/bz-window.c:1051 src/bz-window.c:1085
 msgid "Can't do that right now!"
 msgstr "Impossible de faire ceci pour le moment !"
 
-#: src/bz-world-map.c:596
+#: src/bz-world-map.c:595
 msgctxt "As in, \"100 Downloads\""
 msgid "Downloads"
 msgstr "téléchargements"

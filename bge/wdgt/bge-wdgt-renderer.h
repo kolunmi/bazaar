@@ -1,0 +1,88 @@
+/* bge-wdgt-renderer.h
+ *
+ * Copyright 2026 Eva M
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+#pragma once
+
+#ifndef BGE_INSIDE
+#error "Only <bge.h> can be included directly."
+#endif
+
+#include "bge-wdgt-spec.h"
+
+G_BEGIN_DECLS
+
+#define BGE_TYPE_WDGT_RENDERER (bge_wdgt_renderer_get_type ())
+G_DECLARE_FINAL_TYPE (BgeWdgtRenderer, bge_wdgt_renderer, BGE, WDGT_RENDERER, GtkWidget)
+
+BGE_AVAILABLE_IN_ALL
+BgeWdgtRenderer *
+bge_wdgt_renderer_new (void);
+
+BGE_AVAILABLE_IN_ALL
+BgeWdgtSpec *
+bge_wdgt_renderer_get_spec (BgeWdgtRenderer *self);
+
+BGE_AVAILABLE_IN_ALL
+const char *
+bge_wdgt_renderer_get_state (BgeWdgtRenderer *self);
+
+BGE_AVAILABLE_IN_ALL
+GObject *
+bge_wdgt_renderer_get_reference (BgeWdgtRenderer *self);
+
+BGE_AVAILABLE_IN_ALL
+GtkWidget *
+bge_wdgt_renderer_get_child (BgeWdgtRenderer *self);
+
+BGE_AVAILABLE_IN_ALL
+void
+bge_wdgt_renderer_set_spec (BgeWdgtRenderer *self,
+                            BgeWdgtSpec     *spec);
+
+BGE_AVAILABLE_IN_ALL
+void
+bge_wdgt_renderer_set_state (BgeWdgtRenderer *self,
+                             const char      *state);
+
+BGE_AVAILABLE_IN_ALL
+void
+bge_wdgt_renderer_set_reference (BgeWdgtRenderer *self,
+                                 GObject         *reference);
+
+BGE_AVAILABLE_IN_ALL
+void
+bge_wdgt_renderer_set_child (BgeWdgtRenderer *self,
+                             GtkWidget       *child);
+
+BGE_AVAILABLE_IN_ALL
+void
+bge_wdgt_renderer_set_state_take (BgeWdgtRenderer *self,
+                                  char            *state);
+
+#define bge_wdgt_renderer_set_state_take_printf(self, ...) bge_wdgt_renderer_set_state_take (self, g_strdup_printf (__VA_ARGS__))
+
+BGE_AVAILABLE_IN_ALL
+gpointer
+bge_wdgt_renderer_lookup_object (BgeWdgtRenderer *self,
+                                 const char      *name);
+
+G_END_DECLS
+
+/* End of bge-wdgt-renderer.h */

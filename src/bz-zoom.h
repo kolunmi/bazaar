@@ -46,6 +46,9 @@ double bz_zoom_get_max_zoom (BzZoom *self);
 void   bz_zoom_set_max_zoom (BzZoom *self,
                              double  max_zoom);
 
+gboolean
+bz_zoom_is_transformed (BzZoom *self);
+
 void bz_zoom_zoom_in (BzZoom *self);
 void bz_zoom_zoom_out (BzZoom *self);
 void bz_zoom_reset (BzZoom *self);

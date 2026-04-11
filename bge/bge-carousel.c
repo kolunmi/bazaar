@@ -101,10 +101,10 @@ BGE_DEFINE_DATA (
 
       gboolean raised;
 
-      DexCancellable *cancellable;
+      GCancellable *cancellable;
     },
     BGE_RELEASE_DATA (widget, gtk_widget_unparent);
-    BGE_RELEASE_DATA (cancellable, dex_unref))
+    BGE_RELEASE_DATA (cancellable, g_object_unref))
 
 static void
 items_changed (BgeCarousel *self,
@@ -592,6 +592,28 @@ bge_carousel_get_model (BgeCarousel *self)
 }
 
 /**
+ * bge_carousel_get_nth_page:
+ * @self: a `BgeCarousel`
+ * @index: Index of the page.
+ *
+ * Returns: (nullable) (transfer none): the page at @index, or NULL if out of bounds
+ */
+GtkWidget *
+bge_carousel_get_nth_page (BgeCarousel *self,
+                           guint        index)
+{
+  CarouselWidgetData *data = NULL;
+
+  g_return_val_if_fail (BGE_IS_CAROUSEL (self), NULL);
+
+  if (index >= self->widgets->len)
+    return NULL;
+
+  data = g_ptr_array_index (self->widgets, index);
+  return data->widget;
+}
+
+/**
  * bge_carousel_set_allow_mouse_drag:
  * @self: a `BgeCarousel`
  * @allow_mouse_drag: a boolean
@@ -755,7 +777,7 @@ items_changed (BgeCarousel *self,
       child  = g_ptr_array_index (self->widgets, position + i);
 
       if (child->cancellable != NULL)
-        dex_cancellable_cancel (child->cancellable);
+        g_cancellable_cancel (child->cancellable);
       g_signal_emit (self, signals[SIGNAL_REMOVE_WIDGET], 0, child->widget, object);
     }
   if (removed > 0)
@@ -927,7 +949,7 @@ move_to_idx (BgeCarousel *self,
           graphene_rect_equal (graphene_rect_zero (), &child->rect))
         {
           if (child->cancellable != NULL)
-            dex_cancellable_cancel (child->cancellable);
+            g_cancellable_cancel (child->cancellable);
 
           child->rect   = target;
           child->target = target;
@@ -938,8 +960,8 @@ move_to_idx (BgeCarousel *self,
         {
           char buf[64] = { 0 };
 
-          dex_clear (&child->cancellable);
-          child->cancellable = dex_cancellable_new ();
+          g_clear_object (&child->cancellable);
+          child->cancellable = g_cancellable_new ();
 
 #define MASS      1.0
 #define STIFFNESS 800.0
@@ -947,44 +969,44 @@ move_to_idx (BgeCarousel *self,
           /* pointer is to ensure a unique identifier so as not to overwrite any
              other child's key */
           g_snprintf (buf, sizeof (buf), "x%p", child);
-          dex_future_disown (bge_animation_add_spring (
+          bge_animation_add_spring (
               self->animation, buf,
               child->rect.origin.x, target.origin.x,
               damping_ratio, MASS, STIFFNESS,
               (BgeAnimationCallback) animate,
               carousel_widget_data_ref (child),
               carousel_widget_data_unref,
-              child->cancellable));
+              child->cancellable);
 
           g_snprintf (buf, sizeof (buf), "y%p", child);
-          dex_future_disown (bge_animation_add_spring (
+          bge_animation_add_spring (
               self->animation, buf,
               child->rect.origin.y, target.origin.y,
               damping_ratio, MASS, STIFFNESS,
               (BgeAnimationCallback) animate,
               carousel_widget_data_ref (child),
               carousel_widget_data_unref,
-              child->cancellable));
+              child->cancellable);
 
           g_snprintf (buf, sizeof (buf), "w%p", child);
-          dex_future_disown (bge_animation_add_spring (
+          bge_animation_add_spring (
               self->animation, buf,
               child->rect.size.width, target.size.width,
               damping_ratio, MASS, STIFFNESS,
               (BgeAnimationCallback) animate,
               carousel_widget_data_ref (child),
               carousel_widget_data_unref,
-              child->cancellable));
+              child->cancellable);
 
           g_snprintf (buf, sizeof (buf), "h%p", child);
-          dex_future_disown (bge_animation_add_spring (
+          bge_animation_add_spring (
               self->animation, buf,
               child->rect.size.height, target.size.height,
               damping_ratio, MASS, STIFFNESS,
               (BgeAnimationCallback) animate,
               carousel_widget_data_ref (child),
               carousel_widget_data_unref,
-              child->cancellable));
+              child->cancellable);
 
 #undef STIFFNESS
 #undef MASS

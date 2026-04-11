@@ -30,7 +30,6 @@ template $BzInstallControls: Box {
         has-tooltip: true;
         hexpand: bind $invert_boolean(template.wide) as <bool>;
         halign: bind $choose(template.wide, 2, 0) as <int>;
-        tooltip-text: _("Download & Install Application");
         sensitive: bind $invert_boolean($is_zero(template.entry-group as <$BzEntryGroup>.installable-and-available) as <bool>) as <bool>;
         label: _("_Install");
         use-underline: true;
@@ -103,6 +102,11 @@ template $BzInstallControls: Box {
         spacing: bind $choose(template.wide, 10, 8) as <int>;
         homogeneous: bind $invert_boolean(template.wide) as <bool>;
         halign: bind $choose(template.wide, 2, 0) as <int>;
+
+        margin-top: 3;
+        margin-bottom: 3;
+        margin-start: 3;
+        margin-end: 3;
 
         Button update_button {
           styles [
