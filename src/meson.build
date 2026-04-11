@@ -122,6 +122,7 @@ bz_sources = files(
   'bz-login-page.c',
   'bz-lozenge.c',
   'bz-malcontent-service.c',
+  'bz-metainfo-preview.c',
   'bz-newline-parser.c',
   'bz-parser.c',
   'bz-preferences-dialog.c',
