@@ -99,7 +99,6 @@ typedef struct
   char             *project_group;
   char             *developer;
   char             *developer_id;
-  GListModel       *developer_apps;
   GListModel       *screenshot_paintables;
   GListModel       *screenshot_captions;
   GdkPaintable     *thumbnail_paintable;
@@ -167,7 +166,6 @@ enum
   PROP_PROJECT_GROUP,
   PROP_DEVELOPER,
   PROP_DEVELOPER_ID,
-  PROP_DEVELOPER_APPS,
   PROP_SCREENSHOT_PAINTABLES,
   PROP_SCREENSHOT_CAPTIONS,
   PROP_THUMBNAIL_PAINTABLE,
@@ -206,11 +204,9 @@ BZ_DEFINE_DATA (
       GWeakRef self;
       int      prop;
       char    *id;
-      char    *developer;
     },
     g_weak_ref_clear (&self->self);
-    BZ_RELEASE_DATA (id, g_free);
-    BZ_RELEASE_DATA (developer, g_free));
+    BZ_RELEASE_DATA (id, g_free););
 static DexFuture *
 query_flathub_fiber (QueryFlathubData *data);
 static DexFuture *
@@ -349,10 +345,6 @@ bz_entry_get_property (GObject    *object,
       break;
     case PROP_DEVELOPER_ID:
       g_value_set_string (value, priv->developer_id);
-      break;
-    case PROP_DEVELOPER_APPS:
-      query_flathub (self, PROP_DEVELOPER_APPS);
-      g_value_set_object (value, priv->developer_apps);
       break;
     case PROP_SCREENSHOT_PAINTABLES:
       g_value_set_object (value, priv->screenshot_paintables);
@@ -556,10 +548,6 @@ bz_entry_set_property (GObject      *object,
     case PROP_DEVELOPER_ID:
       g_clear_pointer (&priv->developer_id, g_free);
       priv->developer_id = g_value_dup_string (value);
-      break;
-    case PROP_DEVELOPER_APPS:
-      g_clear_object (&priv->developer_apps);
-      priv->developer_apps = g_value_dup_object (value);
       break;
     case PROP_SCREENSHOT_PAINTABLES:
       g_clear_object (&priv->screenshot_paintables);
@@ -848,13 +836,6 @@ bz_entry_class_init (BzEntryClass *klass)
       g_param_spec_string (
           "developer-id",
           NULL, NULL, NULL,
-          G_PARAM_READWRITE);
-
-  props[PROP_DEVELOPER_APPS] =
-      g_param_spec_object (
-          "developer-apps",
-          NULL, NULL,
-          G_TYPE_LIST_MODEL,
           G_PARAM_READWRITE);
 
   props[PROP_SCREENSHOT_PAINTABLES] =
@@ -2381,7 +2362,6 @@ query_flathub (BzEntry *self,
   g_weak_ref_init (&data->self, self);
   data->prop      = prop;
   data->id        = g_strdup (priv->id);
-  data->developer = g_strdup (priv->developer);
 
   future = dex_scheduler_spawn (
       bz_get_io_scheduler (),
@@ -2412,7 +2392,6 @@ query_flathub_fiber (QueryFlathubData *data)
 {
   int   prop                     = data->prop;
   char *id                       = data->id;
-  char *developer                = data->developer;
   g_autoptr (GError) local_error = NULL;
   g_autofree char *request       = NULL;
   g_autoptr (JsonNode) node      = NULL;
@@ -2424,9 +2403,6 @@ query_flathub_fiber (QueryFlathubData *data)
     case PROP_RECENT_DOWNLOADS:
     case PROP_TOTAL_DOWNLOADS:
       request = g_strdup_printf ("/stats/%s?all=false&days=175", id);
-      break;
-    case PROP_DEVELOPER_APPS:
-      request = g_strdup_printf ("/collection/developer/%s", developer);
       break;
     case PROP_FAVORITES_COUNT:
       request = g_strdup_printf ("/favorites/%s/count", id);
@@ -2515,29 +2491,6 @@ query_flathub_fiber (QueryFlathubData *data)
           total_downloads = json_object_get_int_member (json_node_get_object (node), "installs_total");
 
         return dex_future_new_for_int (total_downloads);
-      }
-      break;
-
-    case PROP_DEVELOPER_APPS:
-      {
-        JsonObject *response_obj          = NULL;
-        JsonArray  *apps_array            = NULL;
-        g_autoptr (GtkStringList) app_ids = NULL;
-
-        response_obj = json_node_get_object (node);
-        apps_array   = json_object_get_array_member (response_obj, "hits");
-
-        app_ids = gtk_string_list_new (NULL);
-        for (guint i = 0; i < json_array_get_length (apps_array); i++)
-          {
-            JsonObject *app_obj = json_array_get_object_element (apps_array, i);
-            const char *app_id  = json_object_get_string_member (app_obj, "app_id");
-
-            if (app_id != NULL)
-              gtk_string_list_append (app_ids, app_id);
-          }
-
-        return dex_future_new_for_object (app_ids);
       }
       break;
     case PROP_FAVORITES_COUNT:
@@ -2815,7 +2768,6 @@ clear_entry (BzEntry *self)
   g_clear_pointer (&priv->project_group, g_free);
   g_clear_pointer (&priv->developer, g_free);
   g_clear_pointer (&priv->developer_id, g_free);
-  g_clear_object (&priv->developer_apps);
   g_clear_object (&priv->screenshot_paintables);
   g_clear_object (&priv->screenshot_captions);
   g_clear_object (&priv->thumbnail_paintable);

@@ -67,6 +67,7 @@ struct _BzFullView
   BzResult             *runtime;
   BzResult             *group_model;
   gboolean              show_sidebar;
+  GListModel           *developer_apps_model;
 
   GMenuModel *main_menu;
 
@@ -75,6 +76,7 @@ struct _BzFullView
   AdwViewStack      *stack;
   GtkWidget         *shadow_overlay;
   GtkToggleButton   *description_toggle;
+  GtkCustomFilter   *is_group_equal_filter;
 };
 
 G_DEFINE_FINAL_TYPE (BzFullView, bz_full_view, ADW_TYPE_BIN)
@@ -87,6 +89,7 @@ enum
   PROP_ENTRY_GROUP,
   PROP_UI_ENTRY,
   PROP_MAIN_MENU,
+  PROP_DEVELOPER_APPS_MODEL,
 
   LAST_PROP
 };
@@ -138,6 +141,9 @@ bz_full_view_get_property (GObject    *object,
       break;
     case PROP_MAIN_MENU:
       g_value_set_object (value, self->main_menu);
+      break;
+    case PROP_DEVELOPER_APPS_MODEL:
+      g_value_set_object (value, self->developer_apps_model);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -294,40 +300,29 @@ static void
 more_apps_button_clicked_cb (BzFullView *self,
                              GtkButton  *button)
 {
-  g_autoptr (GListModel) model = NULL;
-  guint              n_items;
-  g_autofree char   *title       = NULL;
-  g_autofree char   *subtitle    = NULL;
-  AdwNavigationPage *apps_page   = NULL;
-  GtkWidget         *nav_view    = NULL;
-  g_autoptr (GListModel) app_ids = NULL;
-  BzEntry    *entry              = NULL;
-  const char *developer          = NULL;
+  guint              n_items   = 0;
+  g_autofree char   *title     = NULL;
+  g_autofree char   *subtitle  = NULL;
+  AdwNavigationPage *apps_page = NULL;
+  GtkWidget         *nav_view  = NULL;
+  const char        *developer = NULL;
 
   g_return_if_fail (BZ_IS_FULL_VIEW (self));
   g_return_if_fail (GTK_IS_BUTTON (button));
 
-  entry = bz_result_get_object (self->ui_entry);
-  if (entry == NULL)
+  if (self->developer_apps_model == NULL)
     return;
 
-  g_object_get (entry, "developer-apps", &app_ids, NULL);
+  developer = bz_entry_group_get_developer (self->group);
+  n_items   = g_list_model_get_n_items (self->developer_apps_model);
 
-  model = bz_application_map_factory_generate (
-      bz_state_info_get_application_factory (self->state),
-      app_ids);
-
-  n_items = g_list_model_get_n_items (model);
-
-  developer = bz_entry_get_developer (entry);
   if (developer != NULL && *developer != '\0')
-    title = g_strdup_printf (_ ("Other Apps by %s"), developer);
+    title = g_strdup_printf (_ ("All Apps by %s"), developer);
   else
-    title = g_strdup (_ ("Other Apps"));
+    title = g_strdup (_ ("All Apps by developer"));
 
-  subtitle = g_strdup_printf (ngettext ("%d Application", "%d Applications", n_items), n_items);
-
-  apps_page = bz_apps_page_new (title, model);
+  subtitle  = g_strdup_printf (ngettext ("%d Application", "%d Applications", n_items), n_items);
+  apps_page = bz_apps_page_new (title, self->developer_apps_model);
   bz_apps_page_set_subtitle (BZ_APPS_PAGE (apps_page), subtitle);
 
   nav_view = gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
@@ -577,6 +572,13 @@ get_description_toggle_text (gpointer object,
   return g_strdup (active ? _ ("Show Less") : _ ("Show More"));
 }
 
+static gboolean
+filter_own_group (BzEntryGroup *group,
+                  BzFullView   *self)
+{
+  return g_strcmp0 (bz_entry_group_get_id (group), bz_entry_group_get_id (self->group)) != 0;
+}
+
 static void
 copy_id_cb (BzFullView *self,
             GtkButton  *button)
@@ -656,6 +658,13 @@ bz_full_view_class_init (BzFullViewClass *klass)
           G_TYPE_MENU_MODEL,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
+  props[PROP_DEVELOPER_APPS_MODEL] =
+      g_param_spec_object (
+          "developer-apps-model",
+          NULL, NULL,
+          G_TYPE_LIST_MODEL,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   signals[SIGNAL_UPDATE] =
@@ -697,6 +706,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_child (widget_class, BzFullView, main_scroll);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, shadow_overlay);
   gtk_widget_class_bind_template_child (widget_class, BzFullView, description_toggle);
+  gtk_widget_class_bind_template_child (widget_class, BzFullView, is_group_equal_filter);
   gtk_widget_class_bind_template_callback (widget_class, is_scrolled_down);
   gtk_widget_class_bind_template_callback (widget_class, age_rating_cb);
   gtk_widget_class_bind_template_callback (widget_class, format_as_link);
@@ -704,6 +714,7 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, format_leftover_label);
   gtk_widget_class_bind_template_callback (widget_class, format_other_apps_label);
   gtk_widget_class_bind_template_callback (widget_class, format_more_other_apps_label);
+  gtk_widget_class_bind_template_callback (widget_class, filter_own_group);
   gtk_widget_class_bind_template_callback (widget_class, get_developer_apps_entries);
   gtk_widget_class_bind_template_callback (widget_class, get_dev_apps_max_children_per_line);
   gtk_widget_class_bind_template_callback (widget_class, more_apps_button_clicked_cb);
@@ -727,10 +738,21 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, debug_id_inspect_cb);
 }
 
+static gboolean
+is_group_equal_filter (BzEntryGroup *group,
+                 BzFullView   *self)
+{
+  return g_strcmp0 (bz_entry_group_get_id (group), bz_entry_group_get_id (self->group)) != 0;
+}
+
 static void
 bz_full_view_init (BzFullView *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
+
+  gtk_custom_filter_set_filter_func (
+      self->is_group_equal_filter, (GtkCustomFilterFunc) is_group_equal_filter,
+      self, NULL);
 }
 
 GtkWidget *
@@ -762,6 +784,13 @@ on_ui_entry_resolved (DexFuture *future,
   return dex_future_new_for_boolean (TRUE);
 }
 
+static gboolean
+filter_by_developer (BzEntryGroup *group,
+                     const char   *developer)
+{
+  return g_strcmp0 (bz_entry_group_get_developer (group), developer) == 0;
+}
+
 void
 bz_full_view_set_entry_group (BzFullView   *self,
                               BzEntryGroup *group)
@@ -778,6 +807,7 @@ bz_full_view_set_entry_group (BzFullView   *self,
   g_clear_object (&self->ui_entry);
   g_clear_object (&self->runtime);
   g_clear_object (&self->group_model);
+  g_clear_object (&self->developer_apps_model);
   gtk_toggle_button_set_active (self->description_toggle, FALSE);
 
   if (group != NULL)
@@ -826,6 +856,27 @@ bz_full_view_set_entry_group (BzFullView   *self,
             }
         }
 
+      {
+        const char *developer  = NULL;
+        GListModel *all_groups = NULL;
+
+        developer = bz_entry_group_get_developer (group);
+        if (developer != NULL && *developer != '\0')
+          {
+            all_groups = bz_state_info_get_filtered_entry_groups (
+                self->state);
+
+            if (all_groups != NULL)
+              self->developer_apps_model = G_LIST_MODEL (
+                  gtk_filter_list_model_new (
+                      g_object_ref (all_groups),
+                      GTK_FILTER (gtk_custom_filter_new (
+                          (GtkCustomFilterFunc) filter_by_developer,
+                          g_strdup (developer),
+                          g_free))));
+          }
+      }
+
       adw_view_stack_set_visible_child_name (self->stack, "content");
     }
   else
@@ -835,6 +886,7 @@ bz_full_view_set_entry_group (BzFullView   *self,
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ENTRY_GROUP]);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_UI_ENTRY]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DEVELOPER_APPS_MODEL]);
 }
 
 BzEntryGroup *
