@@ -88,6 +88,7 @@ src/bz-license-dialog.h
 src/bz-login-page.blp
 src/bz-login-page.c
 src/bz-login-page.h
+src/bz-metainfo-preview.c
 src/bz-preferences-dialog.blp
 src/bz-preferences-dialog.c
 src/bz-progress-bar.blp

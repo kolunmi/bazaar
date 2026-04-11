@@ -30,6 +30,7 @@
 
 #include "bz-application-map-factory.h"
 #include "bz-application.h"
+#include "bz-appstream-parser.h"
 #include "bz-auth-state.h"
 #include "bz-backend-notification.h"
 #include "bz-content-provider.h"
@@ -50,6 +51,7 @@
 #include "bz-io.h"
 #include "bz-login-page.h"
 #include "bz-malcontent-service.h"
+#include "bz-metainfo-preview.h"
 #include "bz-newline-parser.h"
 #include "bz-parser.h"
 #include "bz-preferences-dialog.h"
@@ -306,6 +308,10 @@ static void
 open_generic_id (BzApplication *self,
                  const char    *generic_id);
 
+static DexFuture *
+preview_metainfo_then (DexFuture *future,
+                       GWeakRef  *wr);
+
 static gpointer
 map_strings_to_files (GtkStringObject *string,
                       gpointer         data);
@@ -426,6 +432,7 @@ bz_application_command_line (GApplication            *app,
   g_auto (GStrv) blocklists_strv      = NULL;
   g_auto (GStrv) content_configs_strv = NULL;
   g_auto (GStrv) locations            = NULL;
+  gboolean preview_metainfo           = FALSE;
 
   GOptionEntry main_entries[] = {
     { "help", 0, 0, G_OPTION_ARG_NONE, &help, "Print help" },
@@ -434,6 +441,7 @@ bz_application_command_line (GApplication            *app,
     { "extra-curated-config", 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &content_configs_strv, "Add an extra yaml file with which to configure the app browser" },
     /* Here for backwards compat */
     { "extra-content-config", 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &content_configs_strv, "Add an extra yaml file with which to configure the app browser (backwards compat)" },
+    { "preview-metainfo", 0, 0, G_OPTION_ARG_NONE, &preview_metainfo, "Preview a metainfo file by selecting it via file dialog" },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &locations, "flatpakref file to open" },
     { NULL }
   };
@@ -531,11 +539,24 @@ bz_application_command_line (GApplication            *app,
       dex_future_disown (g_steal_pointer (&init));
     }
 
-  if (!no_window)
+  if (!no_window && !preview_metainfo)
     new_window (self);
 
   if (locations != NULL && *locations != NULL)
     command_line_open_location (self, cmdline, locations[0]);
+
+  if (preview_metainfo)
+    {
+      g_autoptr (DexFuture) future = NULL;
+
+      future = bz_metainfo_preview_pick_files ();
+      future = dex_future_then (
+          g_steal_pointer (&future),
+          (DexFutureCallback) preview_metainfo_then,
+          bz_track_weak (self),
+          bz_weak_release);
+      dex_future_disown (g_steal_pointer (&future));
+    }
 
   return EXIT_SUCCESS;
 }
@@ -1973,7 +1994,8 @@ fiber_replace_entry (BzApplication *self,
       unique_id == NULL ||
       unique_id_checksum == NULL)
     return;
-  user = bz_flatpak_entry_is_user (BZ_FLATPAK_ENTRY (entry));
+
+  user           = bz_flatpak_entry_is_user (BZ_FLATPAK_ENTRY (entry));
   name_to_addons = user ? self->usr_name_to_addons : self->sys_name_to_addons;
 
   installed = g_hash_table_contains (self->installed_set, unique_id);
@@ -2006,12 +2028,12 @@ fiber_replace_entry (BzApplication *self,
 
   if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
     {
-      gboolean      ignore_eol              = FALSE;
-      const char   *runtime_name            = NULL;
-      BzEntry      *eol_runtime             = NULL;
-      BzEntryGroup *group                   = NULL;
-      GHashTable   *ref_to_addon_group_ids  = NULL;
-      GPtrArray    *pending                 = NULL;
+      gboolean      ignore_eol             = FALSE;
+      const char   *runtime_name           = NULL;
+      BzEntry      *eol_runtime            = NULL;
+      BzEntryGroup *group                  = NULL;
+      GHashTable   *ref_to_addon_group_ids = NULL;
+      GPtrArray    *pending                = NULL;
 
       if (self->ignore_eol_set != NULL)
         ignore_eol = g_hash_table_contains (self->ignore_eol_set, id);
@@ -2022,9 +2044,10 @@ fiber_replace_entry (BzApplication *self,
 
       group = ensure_group_and_add (self, id, entry, eol_runtime, ignore_eol, installed);
 
-      ref_to_addon_group_ids = user
-          ? self->usr_ref_to_addon_group_ids
-          : self->sys_ref_to_addon_group_ids;
+      ref_to_addon_group_ids =
+          user
+              ? self->usr_ref_to_addon_group_ids
+              : self->sys_ref_to_addon_group_ids;
       pending = g_hash_table_lookup (ref_to_addon_group_ids, id);
       if (pending != NULL)
         {
@@ -2065,8 +2088,8 @@ fiber_replace_entry (BzApplication *self,
       if (extension_of_what != NULL &&
           g_str_has_prefix (extension_of_what, "app/"))
         {
-          g_auto (GStrv) parts     = NULL;
-          BzEntryGroup  *app_group = NULL;
+          g_auto (GStrv) parts    = NULL;
+          BzEntryGroup *app_group = NULL;
 
           ensure_group_and_add (self, id, entry, NULL, FALSE, installed);
 
@@ -2078,10 +2101,11 @@ fiber_replace_entry (BzApplication *self,
                 bz_entry_group_append_addon_group_id (app_group, id);
               else
                 {
-                  GHashTable *ref_to_addon_group_ids = user
-                      ? self->usr_ref_to_addon_group_ids
-                      : self->sys_ref_to_addon_group_ids;
-                  GPtrArray  *pending                = NULL;
+                  GHashTable *ref_to_addon_group_ids =
+                      user
+                          ? self->usr_ref_to_addon_group_ids
+                          : self->sys_ref_to_addon_group_ids;
+                  GPtrArray *pending = NULL;
 
                   pending = g_hash_table_lookup (ref_to_addon_group_ids, parts[1]);
                   if (pending == NULL)
@@ -2995,7 +3019,7 @@ init_service_struct (BzApplication *self,
   self->usr_name_to_addons = g_hash_table_new_full (
       g_str_hash, g_str_equal, g_free, (GDestroyNotify) g_ptr_array_unref);
   self->sys_ref_to_addon_group_ids = g_hash_table_new_full (
-    g_str_hash, g_str_equal, g_free, (GDestroyNotify) g_ptr_array_unref);
+      g_str_hash, g_str_equal, g_free, (GDestroyNotify) g_ptr_array_unref);
   self->usr_ref_to_addon_group_ids = g_hash_table_new_full (
       g_str_hash, g_str_equal, g_free, (GDestroyNotify) g_ptr_array_unref);
 
@@ -3190,6 +3214,45 @@ open_generic_id (BzApplication *self,
       message = g_strdup_printf ("ID '%s' was not found", generic_id);
       bz_show_error_for_widget (GTK_WIDGET (window), _ ("Could not find app"), message);
     }
+}
+
+static DexFuture *
+preview_metainfo_then (DexFuture *future,
+                       GWeakRef  *wr)
+{
+  g_autoptr (BzApplication) self = NULL;
+  g_autoptr (GError) local_error = NULL;
+  const GValue         *value    = NULL;
+  BzMetainfoPickResult *result   = NULL;
+  g_autoptr (BzEntry) entry      = NULL;
+  GtkWindow *window              = NULL;
+
+  bz_weak_get_or_return_reject (self, wr);
+
+  value = dex_future_get_value (future, &local_error);
+  if (value == NULL)
+    return dex_future_new_true ();
+
+  result = g_value_get_boxed (value);
+  window = gtk_application_get_active_window (GTK_APPLICATION (self));
+  if (window == NULL)
+    window = new_window (self);
+
+  entry = bz_appstream_parser_entry_from_metainfo (
+      result->metainfo_file,
+      result->icon_file,
+      &local_error);
+  if (entry == NULL)
+    {
+      bz_show_error_for_widget (GTK_WIDGET (window),
+                                _ ("Failed to load metainfo"),
+                                local_error->message);
+      return dex_future_new_true ();
+    }
+
+  bz_window_show_entry (BZ_WINDOW (window), entry);
+
+  return dex_future_new_true ();
 }
 
 static gpointer
