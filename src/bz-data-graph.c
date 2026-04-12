@@ -259,6 +259,7 @@ on_style_changed (BzDataGraph     *self,
                   GParamSpec      *pspec,
                   AdwStyleManager *style_manager)
 {
+  refresh_graph (self);
   gtk_widget_queue_draw (GTK_WIDGET (self));
 }
 
