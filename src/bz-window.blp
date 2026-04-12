@@ -299,7 +299,6 @@ template $BzWindow: Adw.ApplicationWindow {
 
               child: $BzFullView full_view {
                 state: bind template.state;
-                main-menu: primary_menu;
                 update => $update_cb(template);
               };
             }
