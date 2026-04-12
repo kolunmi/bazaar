@@ -670,7 +670,7 @@ window.narrow .category-tile {
   text-shadow: 0 1px rgba(255, 255, 255, 0.35);
 }
 .category-tile.category-mobile:hover {
-  background: linear-gradient(135deg, shade(#c6eaf8, 1.1), shade(#c4f3c9, 1.1));
+  background: linear-gradient(135deg, shade(#c6eaf8, 1.05), shade(#c4f3c9, 1.05));
 }
 .category-tile.category-mobile:active {
   background: linear-gradient(135deg, shade(#c6eaf8, .95), shade(#c4f3c9, .95));
@@ -690,7 +690,7 @@ window.narrow .category-tile {
   background: linear-gradient(135deg, #444449 30%, #333337 100%);
 }
 .category-tile.category-development:hover {
-  background: linear-gradient(135deg, shade(#444449, 1.06) 30%, shade(#333337, 1.06) 100%);
+  background: linear-gradient(135deg, shade(#444449, 1.13) 30%, shade(#333337, 1.13) 100%);
 }
 .category-tile.category-development:active {
   background: linear-gradient(135deg, shade(#444449, .95) 30%, shade(#333337, .95) 100%);
@@ -739,7 +739,7 @@ window.narrow .category-tile {
   background-position: -1px -4px, center -1px;
 }
 .category-tile.category-office:hover {
-  background-color: shade(#fdf8d7, 1.03);
+  background-color: shade(#fdf8d7, 1.05);
   background-image: linear-gradient(shade(#deddda, 1.04) 1px, transparent 1px),
                     linear-gradient(90deg, shade(#deddda, 1.04) 1px, transparent 1px);
 }
@@ -785,7 +785,7 @@ window.narrow .category-tile {
   background: linear-gradient(135deg, #f6f5f4 0%, #deddda 100%);
 }
 .category-tile.category-utility:hover {
-  background: linear-gradient(135deg, shade(#f6f5f4, 1.08) 0%, shade(#deddda, 1.08) 100%);
+  background: linear-gradient(135deg, shade(#f6f5f4, 1.05) 0%, shade(#deddda, 1.05) 100%);
 }
 .category-tile.category-utility:active {
   background: linear-gradient(135deg, shade(#f6f5f4, .95) 0%, shade(#deddda, .95) 100%);
@@ -796,7 +796,7 @@ window.narrow .category-tile {
   background: linear-gradient(45deg, #1c71d8 0%, #57e289 100%);
 }
 .category-tile.category-adwaita:hover {
-  background: linear-gradient(45deg, shade(#1c71d8, 1.08) 0%, shade(#57e289, 1.08) 100%);
+  background: linear-gradient(45deg, shade(#1c71d8, 1.15) 0%, shade(#57e289, 1.15) 100%);
 }
 .category-tile.category-adwaita:active {
   background: linear-gradient(45deg, shade(#1c71d8, .95) 0%, shade(#57e289, .95) 100%);
