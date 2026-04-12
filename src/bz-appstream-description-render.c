@@ -84,6 +84,10 @@ compile (BzAppstreamDescriptionRender *self,
 static char *
 normalize_whitespace (const char *text);
 
+static void
+on_map (GtkWidget                    *widget,
+        BzAppstreamDescriptionRender *self);
+
 static const char *
 get_link_at_coords (GtkTextView *text_view,
                     double       x,
@@ -216,6 +220,8 @@ bz_appstream_description_render_init (BzAppstreamDescriptionRender *self)
   buffer = gtk_text_view_get_buffer (self->text_view);
   setup_text_tags (buffer);
   gtk_widget_remove_css_class (GTK_WIDGET (self->text_view), "view");
+
+  g_signal_connect (self, "map", G_CALLBACK (on_map), self);
 
   click = gtk_gesture_click_new ();
   gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (click), GDK_BUTTON_PRIMARY);
@@ -585,6 +591,13 @@ compile (BzAppstreamDescriptionRender *self,
     gtk_text_buffer_insert (buffer, iter, "\n", 1);
   else if ((kind == ORDERED_LIST || kind == UNORDERED_LIST) && !is_last_sibling && child_count > 0)
     gtk_text_buffer_insert (buffer, iter, "\n", 1);
+}
+
+static void
+on_map (GtkWidget                    *widget,
+        BzAppstreamDescriptionRender *self)
+{
+  gtk_widget_queue_resize (GTK_WIDGET (self));
 }
 
 static char *
