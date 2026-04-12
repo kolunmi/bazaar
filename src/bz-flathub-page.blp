@@ -195,7 +195,7 @@ template $BzFlathubPage: Adw.Bin {
                       ]
 
                       margin-top: 16;
-                      margin-bottom: 8;
+                      margin-bottom: 20;
                       hexpand: true;
 
                       model: SliceListModel {
@@ -218,7 +218,7 @@ template $BzFlathubPage: Adw.Bin {
                     Box otg_box {
                       visible: bind $invert_boolean($is_null($get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "mobile") as <$BzFlathubCategory>) as <bool>) as <bool>;
                       margin-top: 8;
-                      margin-bottom: 8;
+                      margin-bottom: 20;
 
                       styles [
                         "sp-section",
@@ -331,7 +331,7 @@ template $BzFlathubPage: Adw.Bin {
                     Box {
                       visible: bind $invert_boolean($is_null($get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "game") as <$BzFlathubCategory>) as <bool>) as <bool>;
                       margin-top: 8;
-                      margin-bottom: 8;
+                      margin-bottom: 20;
 
                       styles [
                         "sp-section",
