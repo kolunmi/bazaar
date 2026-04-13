@@ -4353,6 +4353,7 @@ enum
   RENDERER_PROP_0,
 
   RENDERER_PROP_SPEC,
+  RENDERER_PROP_RESOURCE,
   RENDERER_PROP_STATE,
   RENDERER_PROP_REFERENCE,
   RENDERER_PROP_CHILD,
@@ -4490,6 +4491,10 @@ static void
 reset_setter (WatchSetterData *data);
 
 static void
+wdgt_renderer_set_from_resource (BgeWdgtRenderer *self,
+                                 const char      *resource);
+
+static void
 bge_wdgt_renderer_dispose (GObject *object)
 {
   BgeWdgtRenderer *self = BGE_WDGT_RENDERER (object);
@@ -4556,6 +4561,7 @@ bge_wdgt_renderer_get_property (GObject    *object,
     case RENDERER_PROP_CHILD:
       g_value_set_object (value, bge_wdgt_renderer_get_child (self));
       break;
+    case RENDERER_PROP_RESOURCE:
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -4573,6 +4579,9 @@ bge_wdgt_renderer_set_property (GObject      *object,
     {
     case RENDERER_PROP_SPEC:
       bge_wdgt_renderer_set_spec (self, g_value_get_object (value));
+      break;
+    case RENDERER_PROP_RESOURCE:
+      wdgt_renderer_set_from_resource (self, g_value_get_string (value));
       break;
     case RENDERER_PROP_STATE:
       bge_wdgt_renderer_set_state (self, g_value_get_string (value));
@@ -4608,23 +4617,42 @@ bge_wdgt_renderer_measure (GtkWidget     *widget,
   switch (orientation)
     {
     case GTK_ORIENTATION_HORIZONTAL:
-      *minimum = self->measure_minimum_width;
-      *natural = self->measure_natural_width;
+      if (self->measure_minimum_width > 0 ||
+          self->measure_natural_width > 0)
+        {
+          *minimum = self->measure_minimum_width;
+          *natural = self->measure_natural_width;
+        }
+      else
+        {
+          if (self->child != NULL)
+            gtk_widget_measure (
+                GTK_WIDGET (self->child),
+                orientation, for_size,
+                minimum, natural,
+                minimum_baseline, natural_baseline);
+        }
       break;
     case GTK_ORIENTATION_VERTICAL:
-      *minimum = self->measure_minimum_height;
-      *natural = self->measure_natural_height;
+      if (self->measure_minimum_height > 0 ||
+          self->measure_natural_height > 0)
+        {
+          *minimum = self->measure_minimum_height;
+          *natural = self->measure_natural_height;
+        }
+      else
+        {
+          if (self->child != NULL)
+            gtk_widget_measure (
+                GTK_WIDGET (self->child),
+                orientation, for_size,
+                minimum, natural,
+                minimum_baseline, natural_baseline);
+        }
       break;
     default:
       g_assert_not_reached ();
     }
-
-  // if (self->child != NULL)
-  //   gtk_widget_measure (
-  //       GTK_WIDGET (self->child),
-  //       orientation, for_size,
-  //       minimum, natural,
-  //       minimum_baseline, natural_baseline);
 }
 
 static void
@@ -4694,11 +4722,8 @@ bge_wdgt_renderer_snapshot (GtkWidget   *widget,
   BgeWdgtRenderer *self  = BGE_WDGT_RENDERER (widget);
   GPtrArray       *calls = NULL;
 
-  if (self->child != NULL)
-    gtk_widget_snapshot_child (GTK_WIDGET (self), self->child, snapshot);
-
   if (self->active_state == NULL)
-    return;
+    goto done;
 
   if (self->active_snapshot != NULL)
     calls = self->active_snapshot->calls;
@@ -4794,6 +4819,10 @@ bge_wdgt_renderer_snapshot (GtkWidget   *widget,
         }
     }
 
+done:
+  if (self->child != NULL)
+    gtk_widget_snapshot_child (GTK_WIDGET (self), self->child, snapshot);
+
   // for (guint i = 0; i < self->children->len; i++)
   //   {
   //     GtkWidget *child = NULL;
@@ -4819,6 +4848,12 @@ bge_wdgt_renderer_class_init (BgeWdgtRendererClass *klass)
           NULL, NULL,
           BGE_TYPE_WDGT_SPEC,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  renderer_props[RENDERER_PROP_RESOURCE] =
+      g_param_spec_string (
+          "resource",
+          NULL, NULL, NULL,
+          G_PARAM_WRITABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   renderer_props[RENDERER_PROP_STATE] =
       g_param_spec_string (
@@ -6590,6 +6625,41 @@ reset_setter (WatchSetterData *data)
       data->dest,
       data->src,
       NULL);
+}
+
+static void
+wdgt_renderer_set_from_resource (BgeWdgtRenderer *self,
+                                 const char      *resource)
+{
+  g_autoptr (GError) local_error = NULL;
+  g_autoptr (GBytes) bytes       = NULL;
+  gsize         buffer_size      = 0;
+  gconstpointer buffer           = NULL;
+  g_autoptr (BgeWdgtSpec) spec   = NULL;
+
+  bytes = g_resources_lookup_data (
+      resource,
+      G_RESOURCE_LOOKUP_FLAGS_NONE,
+      &local_error);
+  if (bytes == NULL)
+    {
+      g_critical ("failed to set renderer spec from resource: %s",
+                  local_error->message);
+      bge_wdgt_renderer_set_spec (self, NULL);
+      return;
+    }
+
+  buffer = g_bytes_get_data (bytes, &buffer_size);
+  spec   = bge_wdgt_spec_new_for_string (buffer, &local_error);
+  if (spec == NULL)
+    {
+      g_critical ("failed to set renderer spec from resource %s: %s",
+                  resource, local_error->message);
+      bge_wdgt_renderer_set_spec (self, NULL);
+      return;
+    }
+
+  bge_wdgt_renderer_set_spec (self, spec);
 }
 
 static void
