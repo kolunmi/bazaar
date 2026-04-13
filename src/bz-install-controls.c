@@ -22,6 +22,8 @@
 
 #include <glib/gi18n.h>
 
+#include <bge.h>
+
 #include "bz-install-controls.h"
 #include "bz-state-info.h"
 #include "bz-template-callbacks.h"
@@ -160,6 +162,19 @@ get_visible_page (gpointer    object,
     return g_strdup ("install");
   else
     return g_strdup ("empty");
+}
+
+static char *
+get_install_btn_state (gpointer object,
+                       gboolean active,
+                       gboolean pending)
+{
+  if (pending)
+    return g_strdup ("pending");
+  else if (active)
+    return g_strdup ("fraction");
+  else
+    return g_strdup ("inactive");
 }
 
 static gboolean
@@ -325,15 +340,24 @@ bz_install_controls_class_init (BzInstallControlsClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, run_cb);
   gtk_widget_class_bind_template_callback (widget_class, update_cb);
   gtk_widget_class_bind_template_callback (widget_class, get_visible_page);
+  gtk_widget_class_bind_template_callback (widget_class, get_install_btn_state);
   gtk_widget_class_bind_template_callback (widget_class, is_blocked);
 }
 
 static void
 bz_install_controls_init (BzInstallControls *self)
 {
+  g_autoptr (GtkWidget) btn = NULL;
+
   self->wide = TRUE;
 
   gtk_widget_init_template (GTK_WIDGET (self));
+
+  btn = bge_wdgt_renderer_lookup_object (
+      BGE_WDGT_RENDERER (self->install_button), "btn");
+  g_signal_connect_swapped (
+      btn, "clicked",
+      G_CALLBACK (install_cb), self);
 }
 
 GtkWidget *

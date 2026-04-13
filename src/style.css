@@ -895,3 +895,13 @@ curated-list-view,
 curated-list-view list {
   background: var(--bg-color);
 }
+
+
+.install-button {
+    background-color: alpha(var(--accent-bg-color), 0.333);
+    color: var(--accent-color);
+}
+
+.install-button-indicator {
+    border-radius: 9999px;
+}
