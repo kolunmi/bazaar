@@ -39,6 +39,7 @@ struct _BzInstallControls
 
   /* Template widgets */
   GtkWidget *open_button;
+  GtkWidget *animated_button;
   GtkWidget *install_button;
 };
 
@@ -344,7 +345,7 @@ bz_install_controls_class_init (BzInstallControlsClass *klass)
   bz_widget_class_bind_all_util_callbacks (widget_class);
 
   gtk_widget_class_bind_template_child (widget_class, BzInstallControls, open_button);
-  gtk_widget_class_bind_template_child (widget_class, BzInstallControls, install_button);
+  gtk_widget_class_bind_template_child (widget_class, BzInstallControls, animated_button);
 
   gtk_widget_class_bind_template_callback (widget_class, install_cb);
   gtk_widget_class_bind_template_callback (widget_class, remove_cb);
@@ -358,21 +359,20 @@ bz_install_controls_class_init (BzInstallControlsClass *klass)
 static void
 bz_install_controls_init (BzInstallControls *self)
 {
-  g_autoptr (GtkWidget) btn_install = NULL;
   g_autoptr (GtkWidget) btn_cancel  = NULL;
 
   self->wide = TRUE;
 
   gtk_widget_init_template (GTK_WIDGET (self));
 
-  btn_install = bge_wdgt_renderer_lookup_object (
-      BGE_WDGT_RENDERER (self->install_button), "btn-install");
+  self->install_button = bge_wdgt_renderer_lookup_object (
+      BGE_WDGT_RENDERER (self->animated_button), "btn-install");
   g_signal_connect_swapped (
-      btn_install, "clicked",
+      self->install_button, "clicked",
       G_CALLBACK (install_cb), self);
 
   btn_cancel = bge_wdgt_renderer_lookup_object (
-      BGE_WDGT_RENDERER (self->install_button), "btn-cancel");
+      BGE_WDGT_RENDERER (self->animated_button), "btn-cancel");
   g_signal_connect_swapped (
       btn_cancel, "clicked",
       G_CALLBACK (cancel_cb), self);
