@@ -6,6 +6,10 @@ defwidget "Install Button" {
   var btn : "GtkButton";
   var bg : "GtkFixed";
 
+  var stack : "GtkStack";
+  var install-label : "GtkLabel";
+  var cancel-label : "GtkLabel";
+
   var x : "gdouble";
   var w : "gdouble";
   var b : "gdouble";
@@ -20,8 +24,16 @@ defwidget "Install Button" {
     set progress = #transition(state:transaction-manager:current-progress, 1.1, 0.1, 10.0);
     set t = #(notify-msec = 10;);
 
+    set stack = #GtkStack(
+      %set install-label = #child/GtkLabel(""()
+        label = "Install";
+      );
+      %set cancel-label = #child/GtkLabel(""()
+        label = "Cancel";
+      );
+    );
     set btn = #child/("" ("pill" "install-button")
-      use-underline = true;
+      child = stack;
     );
     allocate btn %width%, %height%, #();
 
@@ -42,7 +54,7 @@ defwidget "Install Button" {
   }
 
   state-default "inactive" {
-    set btn:label = "_Install";
+    set stack:visible-child = install-label;
       
     set x = #eval((#(%width%)-#(w))/2.0);
     set w = #eval(#(b)*2.0);
@@ -56,7 +68,7 @@ defwidget "Install Button" {
   }
   
   state "pending" {
-    set btn:label = "_Cancel";
+    set stack:visible-child = cancel-label;
     
     set x = #eval((0.5+0.5*sin(3.0*#(t:time))) * (#(%width%)-#(w)));
     set w = #eval(#(%width%)*0.8);
@@ -70,7 +82,7 @@ defwidget "Install Button" {
   }
 
   state "fraction" {
-    set btn:label = "_Cancel";
+    set stack:visible-child = cancel-label;
     
     set x = 0.0;
     set w = #eval(#(%height%)+(#(%width%)-#(%height%))*#(progress));
