@@ -27,9 +27,17 @@ defwidget "Install Button" {
       transition-duration = 200;
       %set btn-install = #child/GtkButton(""("pill" "suggested-action")
         label = "Install";
+        margin-top = 4;
+        margin-bottom = 4;
+	margin-start = 4;
+	margin-end = 4;
       );
       %set btn-cancel = #child/GtkButton(""("pill" "install-button")
         label = "Cancel";
+        margin-top = 4;
+        margin-bottom = 4;
+	margin-start = 4;
+	margin-end = 4;
       );
     );
     allocate stack %width%, %height%, #();
