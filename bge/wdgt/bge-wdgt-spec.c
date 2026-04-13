@@ -4606,7 +4606,8 @@ bge_wdgt_renderer_measure (GtkWidget     *widget,
                            int           *minimum_baseline,
                            int           *natural_baseline)
 {
-  BgeWdgtRenderer *self = BGE_WDGT_RENDERER (widget);
+  BgeWdgtRenderer *self          = BGE_WDGT_RENDERER (widget);
+  gboolean         wdgt_measured = FALSE;
 
   self->current_measure_for_size = for_size;
   /* This will update our measurement values in self */
@@ -4620,38 +4621,35 @@ bge_wdgt_renderer_measure (GtkWidget     *widget,
       if (self->measure_minimum_width > 0 ||
           self->measure_natural_width > 0)
         {
-          *minimum = self->measure_minimum_width;
-          *natural = self->measure_natural_width;
-        }
-      else
-        {
-          if (self->child != NULL)
-            gtk_widget_measure (
-                GTK_WIDGET (self->child),
-                orientation, for_size,
-                minimum, natural,
-                minimum_baseline, natural_baseline);
+          *minimum      = self->measure_minimum_width;
+          *natural      = self->measure_natural_width;
+          wdgt_measured = TRUE;
         }
       break;
     case GTK_ORIENTATION_VERTICAL:
       if (self->measure_minimum_height > 0 ||
           self->measure_natural_height > 0)
         {
-          *minimum = self->measure_minimum_height;
-          *natural = self->measure_natural_height;
-        }
-      else
-        {
-          if (self->child != NULL)
-            gtk_widget_measure (
-                GTK_WIDGET (self->child),
-                orientation, for_size,
-                minimum, natural,
-                minimum_baseline, natural_baseline);
+          *minimum      = self->measure_minimum_height;
+          *natural      = self->measure_natural_height;
+          wdgt_measured = TRUE;
         }
       break;
     default:
       g_assert_not_reached ();
+    }
+
+  if (!wdgt_measured)
+    {
+      GtkWidget *child = NULL;
+
+      child = gtk_widget_get_first_child (GTK_WIDGET (self));
+      if (child != NULL)
+        gtk_widget_measure (
+            GTK_WIDGET (child),
+            orientation, for_size,
+            minimum, natural,
+            minimum_baseline, natural_baseline);
     }
 }
 
@@ -4708,8 +4706,8 @@ bge_wdgt_renderer_size_allocate (GtkWidget *widget,
 
       gtk_widget_allocate (
           child,
-          alloc_width,
-          alloc_height,
+          MAX (alloc_width, 0.0),
+          MAX (alloc_height, 0.0),
           baseline,
           g_steal_pointer (&transform));
     }
@@ -5163,8 +5161,7 @@ bge_wdgt_renderer_lookup_object (BgeWdgtRenderer *self,
   g_return_val_if_fail (BGE_IS_WDGT_RENDERER (self), NULL);
   g_return_val_if_fail (name != NULL, NULL);
 
-  if (self->spec == NULL ||
-      self->active_instance == NULL)
+  if (self->spec == NULL)
     return NULL;
 
   value = g_hash_table_lookup (self->spec->values, name);
@@ -5174,7 +5171,11 @@ bge_wdgt_renderer_lookup_object (BgeWdgtRenderer *self,
   if (!g_type_is_a (value->type, G_TYPE_OBJECT))
     return NULL;
 
-  return resolve_value_object_dup (self, value, self->active_instance);
+  return resolve_value_object_dup (
+      self, value,
+      self->active_instance != NULL
+          ? self->active_instance
+          : self->init_instance);
 }
 
 static void
@@ -5201,6 +5202,11 @@ regenerate (BgeWdgtRenderer *self)
   g_clear_pointer (&self->active_snapshot, snapshot_data_unref);
   g_ptr_array_set_size (self->bindings, 0);
   g_ptr_array_set_size (self->watches, 0);
+
+  self->measure_minimum_width  = -1;
+  self->measure_natural_width  = -1;
+  self->measure_minimum_height = -1;
+  self->measure_natural_height = -1;
 
   if (self->spec == NULL)
     return;
