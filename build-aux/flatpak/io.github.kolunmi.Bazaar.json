@@ -165,8 +165,8 @@
                         {
                             "type": "git",
                             "url": "https://github.com/flatpak/flatpak",
-                            "commit": "2c7f24dcbf45aaec453960b61d24574c4f489dae",
-                            "tag": "1.17.4",
+                            "commit": "9b21874f1a175a9b7c79175a221fa043e202ca73",
+                            "tag": "1.17.6",
                             "x-checker-data": {
                                 "type": "git",
                                 "url-template": "$version",
@@ -287,8 +287,8 @@
                                         {
                                             "type": "git",
                                             "url": "https://github.com/ostreedev/ostree",
-                                            "tag": "v2025.7",
-                                            "commit": "134d144cb52ff018cfedfb936b661189bccc76e6",
+                                            "tag": "v2026.1",
+                                            "commit": "84fcfe17adcc69b926e8205782c1f735c09bfdd9",
                                             "x-checker-data": {
                                                 "type": "anitya",
                                                 "project-id": 10899,
