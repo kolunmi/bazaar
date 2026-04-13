@@ -902,6 +902,14 @@ curated-list-view list {
     color: var(--accent-color);
 }
 
+.install-button:hover {
+    background-color: alpha(var(--accent-bg-color), 0.5);
+}
+
+.install-button:active {
+    background-color: alpha(var(--accent-bg-color), 0.666);
+}
+
 .install-button-indicator {
     border-radius: 9999px;
 }

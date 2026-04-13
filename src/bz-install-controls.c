@@ -354,7 +354,7 @@ bz_install_controls_init (BzInstallControls *self)
   gtk_widget_init_template (GTK_WIDGET (self));
 
   btn = bge_wdgt_renderer_lookup_object (
-      BGE_WDGT_RENDERER (self->install_button), "btn");
+      BGE_WDGT_RENDERER (self->install_button), "btn-install");
   g_signal_connect_swapped (
       btn, "clicked",
       G_CALLBACK (install_cb), self);
