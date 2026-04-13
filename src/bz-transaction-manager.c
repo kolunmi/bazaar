@@ -493,6 +493,13 @@ bz_transaction_manager_get_has_transactions (BzTransactionManager *self)
   return g_list_model_get_n_items (G_LIST_MODEL (self->transactions)) > 0;
 }
 
+GListModel *
+bz_transaction_manager_get_all_trackers (BzTransactionManager *self)
+{
+  g_return_val_if_fail (BZ_IS_TRANSACTION_MANAGER (self), NULL);
+  return G_LIST_MODEL (self->all_trackers);
+}
+
 DexFuture *
 bz_transaction_manager_add (BzTransactionManager *self,
                             BzTransaction        *transaction)

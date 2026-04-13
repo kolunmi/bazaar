@@ -689,6 +689,8 @@ finish (BzTransactionPrivate *priv)
       g_autoptr (BzTransactionEntryTracker) tracker = NULL;
 
       tracker = g_list_model_get_item (G_LIST_MODEL (priv->trackers), i);
+      if (bz_transaction_entry_tracker_get_status (tracker) == BZ_TRANSACTION_ENTRY_STATUS_CANCELLED)
+        continue;
       bz_transaction_entry_tracker_set_status (tracker, BZ_TRANSACTION_ENTRY_STATUS_DONE);
     }
 }

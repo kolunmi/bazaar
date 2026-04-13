@@ -62,6 +62,17 @@ enum
 static guint signals[LAST_SIGNAL];
 
 static void
+cancel_cb (BzInstallControls *self,
+           GtkButton         *button)
+{
+  if (self->group == NULL)
+    return;
+
+  gtk_widget_activate_action (GTK_WIDGET (self), "window.cancel-group", "s",
+                              bz_entry_group_get_id (self->group));
+}
+
+static void
 install_cb (BzInstallControls *self,
             GtkButton         *button)
 {
@@ -347,17 +358,24 @@ bz_install_controls_class_init (BzInstallControlsClass *klass)
 static void
 bz_install_controls_init (BzInstallControls *self)
 {
-  g_autoptr (GtkWidget) btn = NULL;
+  g_autoptr (GtkWidget) btn_install = NULL;
+  g_autoptr (GtkWidget) btn_cancel  = NULL;
 
   self->wide = TRUE;
 
   gtk_widget_init_template (GTK_WIDGET (self));
 
-  btn = bge_wdgt_renderer_lookup_object (
+  btn_install = bge_wdgt_renderer_lookup_object (
       BGE_WDGT_RENDERER (self->install_button), "btn-install");
   g_signal_connect_swapped (
-      btn, "clicked",
+      btn_install, "clicked",
       G_CALLBACK (install_cb), self);
+
+  btn_cancel = bge_wdgt_renderer_lookup_object (
+      BGE_WDGT_RENDERER (self->install_button), "btn-cancel");
+  g_signal_connect_swapped (
+      btn_cancel, "clicked",
+      G_CALLBACK (cancel_cb), self);
 }
 
 GtkWidget *

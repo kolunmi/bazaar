@@ -23,7 +23,7 @@ defwidget "Install Button" {
     set progress = #transition(state:transaction-manager:current-progress, 1.1, 0.1, 10.0);
     set t = #(notify-msec = 10;);
     set stack = #child/GtkStack(""()
-      transition-type = #GtkStackTransitionType(crossfade);
+      transition-type = crossfade;
       transition-duration = 200;
       %set btn-install = #child/GtkButton(""("pill" "suggested-action")
         label = "Install";
