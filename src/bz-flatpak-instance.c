@@ -757,6 +757,22 @@ init_fiber (InitData *data)
       g_clear_pointer (&local_error, g_error_free);
     }
 
+#ifdef SANDBOXED_LIBFLATPAK
+  if (g_getenv ("FLATPAK_BINARY") == NULL)
+    {
+      g_autofree char *flatpak_path = NULL;
+      gint             exit_status  = 0;
+
+      g_spawn_command_line_sync ("flatpak-spawn --host sh -c 'command -v flatpak'",
+                                 &flatpak_path, NULL, &exit_status, NULL);
+
+      if (exit_status == 0 && flatpak_path != NULL)
+        g_setenv ("FLATPAK_BINARY", g_strstrip (flatpak_path), FALSE);
+      else
+        g_warning ("Failed to resolve host flatpak binary! User refs wont be updated");
+    }
+#endif
+
   if (self->system == NULL && self->user == NULL)
     return dex_future_new_reject (
         BZ_FLATPAK_ERROR,
@@ -1745,7 +1761,11 @@ retrieve_updates_fiber (GatherRefsData *data)
       n_sys_refs = system_refs->len;
     }
 
+#ifndef SANDBOXED_LIBFLATPAK
   if (self->user != NULL)
+#else
+  if (self->user != NULL && g_getenv ("FLATPAK_BINARY") != NULL)
+#endif
     {
       user_refs = flatpak_installation_list_installed_refs_for_update (
           self->user, cancellable, &local_error);
