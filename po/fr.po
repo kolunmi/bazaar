@@ -73,7 +73,7 @@ msgstr "Recherchez des applications directement depuis le Shell GNOME"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:30 src/bz-application.c:749
 msgid "The Bazaar Contributors"
-msgstr "Les Contributeurs de "
+msgstr "Les Contributeurs de Bazaar"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:55
 msgid "The home page displaying Flathub apps"
