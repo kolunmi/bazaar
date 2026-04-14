@@ -191,6 +191,7 @@ create_release_row (const char *version,
   gtk_widget_set_margin_end (GTK_WIDGET (content_box), 15);
 
   header_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8));
+  gtk_widget_set_size_request (GTK_WIDGET (header_box), -1, 24);
 
   version_text  = g_strdup_printf (_ ("Version %s"), version);
   version_label = GTK_LABEL (gtk_label_new (version_text));
