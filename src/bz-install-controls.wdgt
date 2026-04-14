@@ -1,5 +1,5 @@
 defwidget "Install Button" {
-  reference state : "BzStateInfo";
+  reference state : "BzTransactionEntryTracker";
   var progress : "gdouble";
 
   var t : "BgeWdgtTime";
@@ -20,7 +20,7 @@ defwidget "Install Button" {
   var final-h : "gdouble";
 
   init {
-    set progress = #transition(state:transaction-manager:current-progress, 1.1, 0.1, 10.0);
+    set progress = #transition(state:progress, 1.1, 0.1, 10.0);
     set t = #(notify-msec = 10;);
     set stack = #child/GtkStack(""()
       transition-type = crossfade;

@@ -6,7 +6,10 @@ template $BzInstallControls: Box {
 
   Stack {
     transition-type: crossfade;
-    visible-child-name: bind $get_visible_page(template.entry-group as <$BzEntryGroup>.installable, template.entry-group as <$BzEntryGroup>.removable, template.state as <$BzStateInfo>.available-updates, template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active as <bool>) as <string>;
+    visible-child-name: bind try {
+                              $get_visible_page(template.entry-group as <$BzEntryGroup>.installable, template.entry-group as <$BzEntryGroup>.removable, template.state as <$BzStateInfo>.available-updates, template.tracker as <$BzTransactionEntryTracker>.active as <bool> ) as <string>,
+                              $get_visible_page(template.entry-group as <$BzEntryGroup>.installable, template.entry-group as <$BzEntryGroup>.removable, template.state as <$BzStateInfo>.available-updates, false ) as <string>
+                              };
     hexpand: bind $invert_boolean(template.wide) as <bool>;
     valign: center;
 
@@ -20,12 +23,13 @@ template $BzInstallControls: Box {
         margin-end: 3;
 
         resource: "/io/github/kolunmi/Bazaar/bz-install-controls.wdgt";
-        reference: bind template.state as <$BzStateInfo>;
+        reference: bind template.tracker as <$BzTransactionEntryTracker>;
 
-        state: bind $get_install_btn_state(
-          template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active as <bool>,
-          template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.pending as <bool>
-        ) as <string>;
+        state: bind try { $get_install_btn_state(
+                  template.tracker as <$BzTransactionEntryTracker>.active as <bool>,
+                  template.tracker as <$BzTransactionEntryTracker>.pending as <bool>,
+                  template.tracker as <$BzTransactionEntryTracker>.progress as <double>
+                ) as <string>, "inactive"};
 
         has-tooltip: true;
         hexpand: bind $invert_boolean(template.wide) as <bool>;

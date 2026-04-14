@@ -33,9 +33,10 @@ struct _BzInstallControls
 {
   GtkBox parent_instance;
 
-  BzEntryGroup *group;
-  BzStateInfo  *state;
-  gboolean      wide;
+  BzEntryGroup              *group;
+  BzStateInfo               *state;
+  gboolean                   wide;
+  BzTransactionEntryTracker *tracker;
 
   /* Template widgets */
   GtkWidget *open_button;
@@ -51,6 +52,7 @@ enum
   PROP_WIDE,
   PROP_ENTRY_GROUP,
   PROP_STATE,
+  PROP_TRACKER,
   LAST_PROP
 };
 static GParamSpec *props[LAST_PROP] = { 0 };
@@ -61,6 +63,53 @@ enum
   LAST_SIGNAL,
 };
 static guint signals[LAST_SIGNAL];
+
+static void
+update_tracker (BzInstallControls *self)
+{
+  BzTransactionManager              *manager  = NULL;
+  g_autoptr (GListModel)             all      = NULL;
+  const char                        *group_id = NULL;
+  g_autoptr (BzTransactionEntryTracker) found = NULL;
+
+  if (self->state != NULL)
+    manager = bz_state_info_get_transaction_manager (self->state);
+  if (manager != NULL)
+    g_object_get (manager, "all-trackers", &all, NULL);
+  if (self->group != NULL)
+    group_id = bz_entry_group_get_id (self->group);
+
+  if (all != NULL && group_id != NULL)
+    {
+      for (guint i = 0; i < g_list_model_get_n_items (all); i++)
+        {
+          g_autoptr (BzTransactionEntryTracker) tracker = NULL;
+          BzEntry                              *entry   = NULL;
+
+          tracker = g_list_model_get_item (all, i);
+          entry   = bz_transaction_entry_tracker_get_entry (tracker);
+
+          if (g_strcmp0 (entry != NULL ? bz_entry_get_id (entry) : NULL, group_id) == 0)
+            {
+              found = g_steal_pointer (&tracker);
+              break;
+            }
+        }
+    }
+
+  if (g_set_object (&self->tracker, found))
+    g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TRACKER]);
+}
+
+static void
+on_all_trackers_changed (GListModel        *model,
+                         guint              position,
+                         guint              removed,
+                         guint              added,
+                         BzInstallControls *self)
+{
+  update_tracker (self);
+}
 
 static void
 cancel_cb (BzInstallControls *self,
@@ -183,7 +232,8 @@ get_visible_page (gpointer    object,
 static char *
 get_install_btn_state (gpointer object,
                        gboolean active,
-                       gboolean pending)
+                       gboolean pending,
+                       double   progress)
 {
   if (pending)
     return g_strdup ("pending");
@@ -242,6 +292,7 @@ bz_install_controls_dispose (GObject *object)
 
   g_clear_object (&self->group);
   g_clear_object (&self->state);
+  g_clear_object (&self->tracker);
 
   G_OBJECT_CLASS (bz_install_controls_parent_class)->dispose (object);
 }
@@ -264,6 +315,9 @@ bz_install_controls_get_property (GObject    *object,
       break;
     case PROP_STATE:
       g_value_set_object (value, self->state);
+      break;
+    case PROP_TRACKER:
+      g_value_set_object (value, self->tracker);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -325,6 +379,13 @@ bz_install_controls_class_init (BzInstallControlsClass *klass)
           BZ_TYPE_STATE_INFO,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
+  props[PROP_TRACKER] =
+      g_param_spec_object (
+          "tracker",
+          NULL, NULL,
+          BZ_TYPE_TRANSACTION_ENTRY_TRACKER,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   signals[SIGNAL_UPDATE] =
@@ -363,7 +424,7 @@ bz_install_controls_class_init (BzInstallControlsClass *klass)
 static void
 bz_install_controls_init (BzInstallControls *self)
 {
-  g_autoptr (GtkWidget) btn_cancel  = NULL;
+  g_autoptr (GtkWidget) btn_cancel = NULL;
 
   self->wide = TRUE;
 
@@ -436,6 +497,8 @@ bz_install_controls_set_entry_group (BzInstallControls *self,
         G_PRIORITY_DEFAULT_IDLE,
         (GSourceFunc) idle_grab_focus,
         bz_track_weak (self), bz_weak_release);
+
+  update_tracker (self);
 }
 
 BzStateInfo *
@@ -451,9 +514,33 @@ bz_install_controls_set_state (BzInstallControls *self,
 {
   g_return_if_fail (BZ_IS_INSTALL_CONTROLS (self));
 
-  g_clear_object (&self->state);
+  if (self->state != NULL)
+    {
+      BzTransactionManager  *old_mgr = NULL;
+      g_autoptr (GListModel) all     = NULL;
+
+      old_mgr = bz_state_info_get_transaction_manager (self->state);
+      if (old_mgr != NULL)
+        g_object_get (old_mgr, "all-trackers", &all, NULL);
+      if (all != NULL)
+        g_signal_handlers_disconnect_by_func (all, on_all_trackers_changed, self);
+    }
+
+  g_set_object (&self->state, state);
+
   if (state != NULL)
-    self->state = g_object_ref (state);
+    {
+      BzTransactionManager  *mgr = NULL;
+      g_autoptr (GListModel) all = NULL;
+
+      mgr = bz_state_info_get_transaction_manager (state);
+      if (mgr != NULL)
+        g_object_get (mgr, "all-trackers", &all, NULL);
+      if (all != NULL)
+        g_signal_connect (all, "items-changed",
+                          G_CALLBACK (on_all_trackers_changed), self);
+    }
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_STATE]);
+  update_tracker (self);
 }
