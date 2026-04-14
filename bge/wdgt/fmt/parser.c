@@ -1794,6 +1794,121 @@ parse_args (const char        *p,
 
                   key = g_steal_pointer (&last_key);
                 }
+              else if (type == GSK_TYPE_PATH)
+                {
+                  g_autoptr (GPtrArray) instrs = NULL;
+                  g_autoptr (GPtrArray) argss  = NULL;
+                  g_autoptr (GArray) n_argss   = NULL;
+
+                  instrs  = g_ptr_array_new_with_free_func (g_free);
+                  argss   = g_ptr_array_new_with_free_func ((GDestroyNotify) g_strfreev);
+                  n_argss = g_array_new (FALSE, FALSE, sizeof (guint));
+
+                  if (!expect_closing_paren)
+                    {
+                      g_set_error (
+                          error,
+                          G_IO_ERROR,
+                          G_IO_ERROR_UNKNOWN,
+                          "type %s must be wrapped in #(...)",
+                          g_type_name (type));
+                      return NULL;
+                    }
+
+                  for (;;)
+                    {
+                      g_autofree char *instr   = NULL;
+                      g_auto (GStrv) call_args = NULL;
+                      guint n_call_args        = 0;
+
+                      GET_TOKEN (&instr, TOKEN_PARSE_DEFAULT);
+                      if (g_strcmp0 (instr, ")") == 0)
+                        break;
+
+                      GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "(");
+                      p = parse_args (p, spec, state, enclosing_object,
+                                      macro_replacements, n_anon_vals,
+                                      type_hints, NULL, NULL, 0, &call_args, NULL,
+                                      &n_call_args, ARGS_PARSE_PARENS, &local_error);
+                      RETURN_ERROR_UNLESS (p != NULL);
+                      GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ";");
+
+                      g_ptr_array_add (instrs, g_steal_pointer (&instr));
+                      g_ptr_array_add (argss, g_steal_pointer (&call_args));
+                      g_array_append_val (n_argss, n_call_args);
+                    }
+
+                  if (instrs->len == 0)
+                    {
+                      g_set_error (
+                          error,
+                          G_IO_ERROR,
+                          G_IO_ERROR_UNKNOWN,
+                          "not enough path builder instructions");
+                      return NULL;
+                    }
+
+                  key    = make_anon_name ((*n_anon_vals)++);
+                  result = bge_wdgt_spec_add_path_source_value (
+                      spec, key,
+                      (const char *const *) instrs->pdata,
+                      (const char *const *const *) argss->pdata,
+                      (const guint *) (void *) n_argss->data,
+                      instrs->len,
+                      &local_error);
+                  RETURN_ERROR_UNLESS (result);
+                }
+              else if (type == GSK_TYPE_STROKE)
+                {
+                  g_auto (GStrv) component_args = NULL;
+                  guint n_component_args        = 0;
+
+                  GType types[] = {
+                    G_TYPE_DOUBLE, /* line width */
+                    GSK_TYPE_LINE_CAP,
+                    GSK_TYPE_LINE_JOIN,
+                    G_TYPE_DOUBLE, /* miter limit */
+                  };
+
+                  if (!expect_closing_paren)
+                    {
+                      g_set_error (
+                          error,
+                          G_IO_ERROR,
+                          G_IO_ERROR_UNKNOWN,
+                          "type %s must be wrapped in #(...)",
+                          g_type_name (type));
+                      return NULL;
+                    }
+
+                  p = parse_args (p, spec, state, enclosing_object,
+                                  macro_replacements,
+                                  n_anon_vals, type_hints, NULL,
+                                  types, G_N_ELEMENTS (types),
+                                  &component_args, NULL, &n_component_args, ARGS_PARSE_PARENS,
+                                  &local_error);
+                  RETURN_ERROR_UNLESS (p != NULL);
+
+                  if (n_component_args != G_N_ELEMENTS (types))
+                    {
+                      g_set_error (
+                          error,
+                          G_IO_ERROR,
+                          G_IO_ERROR_UNKNOWN,
+                          "%s type initializer can have %d arguments, got %u",
+                          g_type_name (GSK_TYPE_STROKE),
+                          (int) G_N_ELEMENTS (types),
+                          n_component_args);
+                      return NULL;
+                    }
+
+                  key    = make_anon_name ((*n_anon_vals)++);
+                  result = bge_wdgt_spec_add_component_source_value (
+                      spec, key, GSK_TYPE_STROKE,
+                      (const char *const *) component_args,
+                      n_component_args, &local_error);
+                  RETURN_ERROR_UNLESS (result);
+                }
               else
                 {
                   g_set_error (
