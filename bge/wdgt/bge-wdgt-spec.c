@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include <gtk/gtk.h>
+#define G_LOG_DOMAIN "BGE::WDGT"
 
 #include "../bge-animation-private.h"
 #include "bge-marshalers.h"
@@ -52,6 +52,7 @@ typedef enum
   VALUE_CONSTANT,
   VALUE_COMPONENT,
   VALUE_TRANSFORM,
+  VALUE_PATH,
   VALUE_CLOSURE,
   VALUE_COERCION,
   VALUE_TRACK_TRANSITION,
@@ -90,6 +91,18 @@ typedef struct
   TransformCallFunc call;
 } TransformInstr;
 
+typedef void (*PathBuilderCallFunc) (GskPathBuilder *builder,
+                                     const GValue    args[]);
+
+typedef struct
+{
+  const char         *name;
+  guint               n_args;
+  GType               args[16];
+  gpointer            func;
+  PathBuilderCallFunc call;
+} PathBuilderInstr;
+
 typedef void (*SnapshotCallFunc) (GtkSnapshot *snapshot,
                                   const GValue args[],
                                   const GValue rest[],
@@ -124,6 +137,11 @@ BGE_DEFINE_DATA (
           ValueData        *next;
           GPtrArray        *args;
         } transform;
+        struct
+        {
+          GPtrArray *funcs;
+          GPtrArray *argss;
+        } path;
         struct
         {
           GPtrArray      *args;
@@ -186,6 +204,10 @@ deinit_value (gpointer ptr)
     case VALUE_TRANSFORM:
       g_clear_pointer (&value->transform.next, value_data_unref);
       g_clear_pointer (&value->transform.args, g_ptr_array_unref);
+      break;
+    case VALUE_PATH:
+      g_clear_pointer (&value->path.funcs, g_ptr_array_unref);
+      g_clear_pointer (&value->path.argss, g_ptr_array_unref);
       break;
     case VALUE_CLOSURE:
       g_clear_pointer (&value->closure.args, g_ptr_array_unref);
@@ -370,6 +392,10 @@ wrap_coerce_value (BgeWdgtSpec *self,
 static gboolean
 lookup_transform_instr (const char     *lookup_name,
                         TransformInstr *out);
+
+static gboolean
+lookup_path_builder_instr (const char       *lookup_name,
+                           PathBuilderInstr *out);
 
 static gboolean
 lookup_snapshot_push_instr (const char    *lookup_name,
@@ -1106,6 +1132,19 @@ bge_wdgt_spec_add_component_source_value (BgeWdgtSpec       *self,
       expected_types[2] = G_TYPE_DOUBLE;
       expected_types[3] = G_TYPE_DOUBLE;
     }
+  else if (type == GSK_TYPE_STROKE)
+    {
+      if (n_components != 4)
+        {
+          g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                       "composed rectangle value needs 4 arguments");
+          return FALSE;
+        }
+      expected_types[0] = G_TYPE_DOUBLE; /* line width */
+      expected_types[1] = GSK_TYPE_LINE_CAP;
+      expected_types[2] = GSK_TYPE_LINE_JOIN;
+      expected_types[3] = G_TYPE_DOUBLE; /* miter limit */
+    }
   else
     {
       g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
@@ -1249,6 +1288,103 @@ bge_wdgt_spec_add_transform_source_value (BgeWdgtSpec       *self,
         }
       else
         g_ptr_array_add (value->transform.args, value_data_ref (value_data));
+    }
+
+  g_hash_table_replace (self->values, g_strdup (name), value_data_ref (value));
+  return TRUE;
+}
+
+gboolean
+bge_wdgt_spec_add_path_source_value (BgeWdgtSpec              *self,
+                                     const char               *name,
+                                     const char *const        *instructions,
+                                     const char *const *const *argss,
+                                     const guint              *n_argss,
+                                     guint                     n_args,
+                                     GError                  **error)
+{
+  gboolean result             = FALSE;
+  g_autoptr (ValueData) value = NULL;
+
+  g_return_val_if_fail (BGE_IS_WDGT_SPEC (self), FALSE);
+  g_return_val_if_fail (name != NULL, FALSE);
+  g_return_val_if_fail (instructions != NULL, FALSE);
+  g_return_val_if_fail (argss != NULL, FALSE);
+  g_return_val_if_fail (n_argss != NULL, FALSE);
+  g_return_val_if_fail (n_args > 0, FALSE);
+
+  if (g_hash_table_contains (self->values, name))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' already exists", name);
+      return FALSE;
+    }
+
+  value             = value_data_new ();
+  value->name       = g_strdup (name);
+  value->type       = GSK_TYPE_PATH;
+  value->kind       = VALUE_PATH;
+  value->path.funcs = g_ptr_array_new ();
+  value->path.argss = g_ptr_array_new_with_free_func (
+      (GDestroyNotify) g_ptr_array_unref);
+
+  for (guint i = 0; i < n_args; i++)
+    {
+      PathBuilderInstr match     = { 0 };
+      g_autoptr (GPtrArray) args = NULL;
+
+      result = lookup_path_builder_instr (instructions[i], &match);
+      if (!result)
+        {
+          g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                       "\"%s\" is not a valid path builder instruction",
+                       instructions[i]);
+          return FALSE;
+        }
+      if (n_argss[i] != match.n_args)
+        {
+          g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                       "path builder instructions %s requires %u "
+                       "arguments, got %u",
+                       match.name, match.n_args, n_argss[i]);
+          return FALSE;
+        }
+
+      args = g_ptr_array_new_with_free_func (value_data_unref);
+
+      for (guint j = 0; j < n_argss[i]; j++)
+        {
+          ValueData *value_data = NULL;
+
+          value_data = g_hash_table_lookup (self->values, argss[i][j]);
+          if (value_data == NULL)
+            {
+              g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                           "value '%s' is undefined", argss[i][j]);
+              return FALSE;
+            }
+
+          if (!g_type_is_a (value_data->type, match.args[j]))
+            {
+              if (check_can_coerce_type (match.args[j], value_data->type))
+                g_ptr_array_add (args, wrap_coerce_value (self, value_data, match.args[j]));
+              else
+                {
+                  g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                               "argument %u for path builder instruction %s "
+                               "must be of type %s, got %s",
+                               j, match.name,
+                               g_type_name (match.args[j]),
+                               g_type_name (value_data->type));
+                  return FALSE;
+                }
+            }
+          else
+            g_ptr_array_add (args, value_data_ref (value_data));
+        }
+
+      g_ptr_array_add (value->path.funcs, match.call);
+      g_ptr_array_add (value->path.argss, g_steal_pointer (&args));
     }
 
   g_hash_table_replace (self->values, g_strdup (name), value_data_ref (value));
@@ -3014,6 +3150,578 @@ lookup_transform_instr (const char     *lookup_name,
 }
 
 static void
+path_builder_instr_add_circle (GskPathBuilder *builder,
+                               const GValue    args[])
+{
+  gsk_path_builder_add_circle (
+      builder,
+      g_value_get_boxed (&args[0]),
+      g_value_get_double (&args[1]));
+}
+
+static void
+path_builder_instr_add_layout (GskPathBuilder *builder,
+                               const GValue    args[])
+{
+  gsk_path_builder_add_layout (
+      builder,
+      g_value_get_object (&args[0]));
+}
+
+static void
+path_builder_instr_add_path (GskPathBuilder *builder,
+                             const GValue    args[])
+{
+  gsk_path_builder_add_path (
+      builder,
+      g_value_get_boxed (&args[0]));
+}
+
+static void
+path_builder_instr_add_rect (GskPathBuilder *builder,
+                             const GValue    args[])
+{
+  gsk_path_builder_add_rect (
+      builder,
+      g_value_get_boxed (&args[0]));
+}
+
+static void
+path_builder_instr_add_reverse_path (GskPathBuilder *builder,
+                                     const GValue    args[])
+{
+  gsk_path_builder_add_reverse_path (
+      builder,
+      g_value_get_boxed (&args[0]));
+}
+
+static void
+path_builder_instr_add_rounded_rect (GskPathBuilder *builder,
+                                     const GValue    args[])
+{
+  GskRoundedRect rrect = { 0 };
+
+  rrect.bounds    = *(graphene_rect_t *) g_value_get_boxed (&args[0]);
+  rrect.corner[0] = *(graphene_size_t *) g_value_get_boxed (&args[1]);
+  rrect.corner[1] = *(graphene_size_t *) g_value_get_boxed (&args[2]);
+  rrect.corner[2] = *(graphene_size_t *) g_value_get_boxed (&args[3]);
+  rrect.corner[3] = *(graphene_size_t *) g_value_get_boxed (&args[4]);
+
+  gsk_path_builder_add_rounded_rect (
+      builder,
+      &rrect);
+}
+
+static void
+path_builder_instr_add_segment (GskPathBuilder *builder,
+                                const GValue    args[])
+{
+  gsk_path_builder_add_segment (
+      builder,
+      g_value_get_boxed (&args[0]),
+      g_value_get_boxed (&args[1]),
+      g_value_get_boxed (&args[2]));
+}
+
+static void
+path_builder_instr_arc_to (GskPathBuilder *builder,
+                           const GValue    args[])
+{
+  gsk_path_builder_arc_to (
+      builder,
+      g_value_get_double (&args[0]),
+      g_value_get_double (&args[1]),
+      g_value_get_double (&args[2]),
+      g_value_get_double (&args[3]));
+}
+
+static void
+path_builder_instr_close (GskPathBuilder *builder,
+                          const GValue    args[])
+{
+  gsk_path_builder_close (builder);
+}
+
+static void
+path_builder_instr_conic_to (GskPathBuilder *builder,
+                             const GValue    args[])
+{
+  gsk_path_builder_conic_to (
+      builder,
+      g_value_get_double (&args[0]),
+      g_value_get_double (&args[1]),
+      g_value_get_double (&args[2]),
+      g_value_get_double (&args[3]),
+      g_value_get_double (&args[4]));
+}
+
+static void
+path_builder_instr_cubic_to (GskPathBuilder *builder,
+                             const GValue    args[])
+{
+  gsk_path_builder_cubic_to (
+      builder,
+      g_value_get_double (&args[0]),
+      g_value_get_double (&args[1]),
+      g_value_get_double (&args[2]),
+      g_value_get_double (&args[3]),
+      g_value_get_double (&args[4]),
+      g_value_get_double (&args[5]));
+}
+
+static void
+path_builder_instr_rel_arc_to (GskPathBuilder *builder,
+                               const GValue    args[])
+{
+  gsk_path_builder_rel_arc_to (
+      builder,
+      g_value_get_double (&args[0]),
+      g_value_get_double (&args[1]),
+      g_value_get_double (&args[2]),
+      g_value_get_double (&args[3]));
+}
+
+static void
+path_builder_instr_html_arc_to (GskPathBuilder *builder,
+                                const GValue    args[])
+{
+  gsk_path_builder_html_arc_to (
+      builder,
+      g_value_get_double (&args[0]),
+      g_value_get_double (&args[1]),
+      g_value_get_double (&args[2]),
+      g_value_get_double (&args[3]),
+      g_value_get_double (&args[4]));
+}
+
+static void
+path_builder_instr_line_to (GskPathBuilder *builder,
+                            const GValue    args[])
+{
+  gsk_path_builder_line_to (
+      builder,
+      g_value_get_double (&args[0]),
+      g_value_get_double (&args[1]));
+}
+
+static void
+path_builder_instr_move_to (GskPathBuilder *builder,
+                            const GValue    args[])
+{
+  gsk_path_builder_move_to (
+      builder,
+      g_value_get_double (&args[0]),
+      g_value_get_double (&args[1]));
+}
+
+static void
+path_builder_instr_quad_to (GskPathBuilder *builder,
+                            const GValue    args[])
+{
+  gsk_path_builder_quad_to (
+      builder,
+      g_value_get_double (&args[0]),
+      g_value_get_double (&args[1]),
+      g_value_get_double (&args[2]),
+      g_value_get_double (&args[3]));
+}
+
+static void
+path_builder_instr_rel_conic_to (GskPathBuilder *builder,
+                                 const GValue    args[])
+{
+  gsk_path_builder_rel_conic_to (
+      builder,
+      g_value_get_double (&args[0]),
+      g_value_get_double (&args[1]),
+      g_value_get_double (&args[2]),
+      g_value_get_double (&args[3]),
+      g_value_get_double (&args[4]));
+}
+
+static void
+path_builder_instr_rel_cubic_to (GskPathBuilder *builder,
+                                 const GValue    args[])
+{
+  gsk_path_builder_rel_cubic_to (
+      builder,
+      g_value_get_double (&args[0]),
+      g_value_get_double (&args[1]),
+      g_value_get_double (&args[2]),
+      g_value_get_double (&args[3]),
+      g_value_get_double (&args[4]),
+      g_value_get_double (&args[5]));
+}
+
+static void
+path_builder_instr_rel_html_arc_to (GskPathBuilder *builder,
+                                    const GValue    args[])
+{
+  gsk_path_builder_rel_html_arc_to (
+      builder,
+      g_value_get_double (&args[0]),
+      g_value_get_double (&args[1]),
+      g_value_get_double (&args[2]),
+      g_value_get_double (&args[3]),
+      g_value_get_double (&args[4]));
+}
+
+static void
+path_builder_instr_rel_line_to (GskPathBuilder *builder,
+                                const GValue    args[])
+{
+  gsk_path_builder_rel_line_to (
+      builder,
+      g_value_get_double (&args[0]),
+      g_value_get_double (&args[1]));
+}
+
+static void
+path_builder_instr_rel_move_to (GskPathBuilder *builder,
+                                const GValue    args[])
+{
+  gsk_path_builder_rel_move_to (
+      builder,
+      g_value_get_double (&args[0]),
+      g_value_get_double (&args[1]));
+}
+
+static void
+path_builder_instr_rel_quad_to (GskPathBuilder *builder,
+                                const GValue    args[])
+{
+  gsk_path_builder_rel_quad_to (
+      builder,
+      g_value_get_double (&args[0]),
+      g_value_get_double (&args[1]),
+      g_value_get_double (&args[2]),
+      g_value_get_double (&args[3]));
+}
+
+static void
+path_builder_instr_svg_arc_to (GskPathBuilder *builder,
+                               const GValue    args[])
+{
+  gsk_path_builder_svg_arc_to (
+      builder,
+      g_value_get_double (&args[0]),
+      g_value_get_double (&args[1]),
+      g_value_get_double (&args[2]),
+      g_value_get_boolean (&args[3]),
+      g_value_get_boolean (&args[4]),
+      g_value_get_double (&args[5]),
+      g_value_get_double (&args[6]));
+}
+
+static void
+path_builder_instr_rel_svg_arc_to (GskPathBuilder *builder,
+                                   const GValue    args[])
+{
+  gsk_path_builder_rel_svg_arc_to (
+      builder,
+      g_value_get_double (&args[0]),
+      g_value_get_double (&args[1]),
+      g_value_get_double (&args[2]),
+      g_value_get_boolean (&args[3]),
+      g_value_get_boolean (&args[4]),
+      g_value_get_double (&args[5]),
+      g_value_get_double (&args[6]));
+}
+
+static gboolean
+lookup_path_builder_instr (const char       *lookup_name,
+                           PathBuilderInstr *out)
+{
+  PathBuilderInstr instrs[] = {
+    {
+     "add-circle",
+     2,
+     {
+     GRAPHENE_TYPE_POINT,
+     G_TYPE_DOUBLE,
+     },
+     gsk_path_builder_add_circle,
+     path_builder_instr_add_circle,
+     },
+    {
+     "add-layout",
+     1,
+     {
+     PANGO_TYPE_LAYOUT,
+     },
+     gsk_path_builder_add_layout,
+     path_builder_instr_add_layout,
+     },
+    {
+     "add-path",
+     1,
+     {
+     GSK_TYPE_PATH,
+     },
+     gsk_path_builder_add_path,
+     path_builder_instr_add_path,
+     },
+    {
+     "add-rect",
+     1,
+     {
+     GRAPHENE_TYPE_RECT,
+     },
+     gsk_path_builder_add_rect,
+     path_builder_instr_add_rect,
+     },
+    {
+     "add-reverse-path",
+     1,
+     {
+     GSK_TYPE_PATH,
+     },
+     gsk_path_builder_add_reverse_path,
+     path_builder_instr_add_reverse_path,
+     },
+    {
+     "add-rounded-rect",
+     5,
+     {
+     GRAPHENE_TYPE_RECT,
+     GRAPHENE_TYPE_SIZE,
+     GRAPHENE_TYPE_SIZE,
+     GRAPHENE_TYPE_SIZE,
+     GRAPHENE_TYPE_SIZE,
+     },
+     gsk_path_builder_add_rounded_rect,
+     path_builder_instr_add_rounded_rect,
+     },
+    {
+     "add-segment",
+     3,
+     {
+     GSK_TYPE_PATH,
+     GSK_TYPE_PATH_POINT,
+     GSK_TYPE_PATH_POINT,
+     },
+     gsk_path_builder_add_segment,
+     path_builder_instr_add_segment,
+     },
+    {
+     "arc-to",
+     4,
+     {
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     },
+     gsk_path_builder_arc_to,
+     path_builder_instr_arc_to,
+     },
+    {
+     "close",
+     0,
+     {},
+     gsk_path_builder_close,
+     path_builder_instr_close,
+     },
+    {
+     "conic-to",
+     5,
+     {
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     },
+     gsk_path_builder_conic_to,
+     path_builder_instr_conic_to,
+     },
+    {
+     "cubic-to",
+     6,
+     {
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     },
+     gsk_path_builder_cubic_to,
+     path_builder_instr_cubic_to,
+     },
+    {
+     "html-arc-to",
+     5,
+     {
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     },
+     gsk_path_builder_html_arc_to,
+     path_builder_instr_html_arc_to,
+     },
+    {
+     "line-to",
+     2,
+     {
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     },
+     gsk_path_builder_line_to,
+     path_builder_instr_line_to,
+     },
+    {
+     "move-to",
+     2,
+     {
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     },
+     gsk_path_builder_move_to,
+     path_builder_instr_move_to,
+     },
+    {
+     "quad-to",
+     4,
+     {
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     },
+     gsk_path_builder_quad_to,
+     path_builder_instr_quad_to,
+     },
+    {
+     "rel-arc-to",
+     4,
+     {
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     },
+     gsk_path_builder_rel_arc_to,
+     path_builder_instr_rel_arc_to,
+     },
+    {
+     "rel-conic-to",
+     5,
+     {
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     },
+     gsk_path_builder_rel_conic_to,
+     path_builder_instr_rel_conic_to,
+     },
+    {
+     "rel-cubic-to",
+     6,
+     {
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     },
+     gsk_path_builder_rel_cubic_to,
+     path_builder_instr_rel_cubic_to,
+     },
+    {
+     "rel-html-arc-to",
+     5,
+     {
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     },
+     gsk_path_builder_rel_html_arc_to,
+     path_builder_instr_rel_html_arc_to,
+     },
+    {
+     "rel-line-to",
+     2,
+     {
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     },
+     gsk_path_builder_rel_line_to,
+     path_builder_instr_rel_line_to,
+     },
+    {
+     "rel-move-to",
+     2,
+     {
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     },
+     gsk_path_builder_rel_move_to,
+     path_builder_instr_rel_move_to,
+     },
+    {
+     "rel-quad-to",
+     4,
+     {
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     },
+     gsk_path_builder_rel_quad_to,
+     path_builder_instr_rel_quad_to,
+     },
+    {
+     "rel-svg-arc-to",
+     7,
+     {
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_BOOLEAN,
+     G_TYPE_BOOLEAN,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     },
+     gsk_path_builder_rel_svg_arc_to,
+     path_builder_instr_rel_svg_arc_to,
+     },
+    {
+     "svg-arc-to",
+     7,
+     {
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     G_TYPE_BOOLEAN,
+     G_TYPE_BOOLEAN,
+     G_TYPE_DOUBLE,
+     G_TYPE_DOUBLE,
+     },
+     gsk_path_builder_svg_arc_to,
+     path_builder_instr_svg_arc_to,
+     },
+  };
+
+  for (guint i = 0; i < G_N_ELEMENTS (instrs); i++)
+    {
+      if (g_strcmp0 (lookup_name, instrs[i].name) == 0)
+        {
+          *out = instrs[i];
+          return TRUE;
+        }
+    }
+  return FALSE;
+}
+
+static void
 snapshot_push_instr_opacity (GtkSnapshot *snapshot,
                              const GValue args[],
                              const GValue rest[],
@@ -4353,6 +5061,7 @@ enum
   RENDERER_PROP_0,
 
   RENDERER_PROP_SPEC,
+  RENDERER_PROP_RESOURCE,
   RENDERER_PROP_STATE,
   RENDERER_PROP_REFERENCE,
   RENDERER_PROP_CHILD,
@@ -4490,6 +5199,10 @@ static void
 reset_setter (WatchSetterData *data);
 
 static void
+wdgt_renderer_set_from_resource (BgeWdgtRenderer *self,
+                                 const char      *resource);
+
+static void
 bge_wdgt_renderer_dispose (GObject *object)
 {
   BgeWdgtRenderer *self = BGE_WDGT_RENDERER (object);
@@ -4556,6 +5269,7 @@ bge_wdgt_renderer_get_property (GObject    *object,
     case RENDERER_PROP_CHILD:
       g_value_set_object (value, bge_wdgt_renderer_get_child (self));
       break;
+    case RENDERER_PROP_RESOURCE:
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -4573,6 +5287,9 @@ bge_wdgt_renderer_set_property (GObject      *object,
     {
     case RENDERER_PROP_SPEC:
       bge_wdgt_renderer_set_spec (self, g_value_get_object (value));
+      break;
+    case RENDERER_PROP_RESOURCE:
+      wdgt_renderer_set_from_resource (self, g_value_get_string (value));
       break;
     case RENDERER_PROP_STATE:
       bge_wdgt_renderer_set_state (self, g_value_get_string (value));
@@ -4597,7 +5314,8 @@ bge_wdgt_renderer_measure (GtkWidget     *widget,
                            int           *minimum_baseline,
                            int           *natural_baseline)
 {
-  BgeWdgtRenderer *self = BGE_WDGT_RENDERER (widget);
+  BgeWdgtRenderer *self          = BGE_WDGT_RENDERER (widget);
+  gboolean         wdgt_measured = FALSE;
 
   self->current_measure_for_size = for_size;
   /* This will update our measurement values in self */
@@ -4608,23 +5326,39 @@ bge_wdgt_renderer_measure (GtkWidget     *widget,
   switch (orientation)
     {
     case GTK_ORIENTATION_HORIZONTAL:
-      *minimum = self->measure_minimum_width;
-      *natural = self->measure_natural_width;
+      if (self->measure_minimum_width > 0 ||
+          self->measure_natural_width > 0)
+        {
+          *minimum      = self->measure_minimum_width;
+          *natural      = self->measure_natural_width;
+          wdgt_measured = TRUE;
+        }
       break;
     case GTK_ORIENTATION_VERTICAL:
-      *minimum = self->measure_minimum_height;
-      *natural = self->measure_natural_height;
+      if (self->measure_minimum_height > 0 ||
+          self->measure_natural_height > 0)
+        {
+          *minimum      = self->measure_minimum_height;
+          *natural      = self->measure_natural_height;
+          wdgt_measured = TRUE;
+        }
       break;
     default:
       g_assert_not_reached ();
     }
 
-  // if (self->child != NULL)
-  //   gtk_widget_measure (
-  //       GTK_WIDGET (self->child),
-  //       orientation, for_size,
-  //       minimum, natural,
-  //       minimum_baseline, natural_baseline);
+  if (!wdgt_measured)
+    {
+      GtkWidget *child = NULL;
+
+      child = gtk_widget_get_first_child (GTK_WIDGET (self));
+      if (child != NULL)
+        gtk_widget_measure (
+            GTK_WIDGET (child),
+            orientation, for_size,
+            minimum, natural,
+            minimum_baseline, natural_baseline);
+    }
 }
 
 static void
@@ -4680,8 +5414,8 @@ bge_wdgt_renderer_size_allocate (GtkWidget *widget,
 
       gtk_widget_allocate (
           child,
-          alloc_width,
-          alloc_height,
+          MAX (alloc_width, 0.0),
+          MAX (alloc_height, 0.0),
           baseline,
           g_steal_pointer (&transform));
     }
@@ -4694,11 +5428,8 @@ bge_wdgt_renderer_snapshot (GtkWidget   *widget,
   BgeWdgtRenderer *self  = BGE_WDGT_RENDERER (widget);
   GPtrArray       *calls = NULL;
 
-  if (self->child != NULL)
-    gtk_widget_snapshot_child (GTK_WIDGET (self), self->child, snapshot);
-
   if (self->active_state == NULL)
-    return;
+    goto done;
 
   if (self->active_snapshot != NULL)
     calls = self->active_snapshot->calls;
@@ -4794,6 +5525,10 @@ bge_wdgt_renderer_snapshot (GtkWidget   *widget,
         }
     }
 
+done:
+  if (self->child != NULL)
+    gtk_widget_snapshot_child (GTK_WIDGET (self), self->child, snapshot);
+
   // for (guint i = 0; i < self->children->len; i++)
   //   {
   //     GtkWidget *child = NULL;
@@ -4819,6 +5554,12 @@ bge_wdgt_renderer_class_init (BgeWdgtRendererClass *klass)
           NULL, NULL,
           BGE_TYPE_WDGT_SPEC,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  renderer_props[RENDERER_PROP_RESOURCE] =
+      g_param_spec_string (
+          "resource",
+          NULL, NULL, NULL,
+          G_PARAM_WRITABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   renderer_props[RENDERER_PROP_STATE] =
       g_param_spec_string (
@@ -5128,8 +5869,7 @@ bge_wdgt_renderer_lookup_object (BgeWdgtRenderer *self,
   g_return_val_if_fail (BGE_IS_WDGT_RENDERER (self), NULL);
   g_return_val_if_fail (name != NULL, NULL);
 
-  if (self->spec == NULL ||
-      self->active_instance == NULL)
+  if (self->spec == NULL)
     return NULL;
 
   value = g_hash_table_lookup (self->spec->values, name);
@@ -5139,7 +5879,11 @@ bge_wdgt_renderer_lookup_object (BgeWdgtRenderer *self,
   if (!g_type_is_a (value->type, G_TYPE_OBJECT))
     return NULL;
 
-  return resolve_value_object_dup (self, value, self->active_instance);
+  return resolve_value_object_dup (
+      self, value,
+      self->active_instance != NULL
+          ? self->active_instance
+          : self->init_instance);
 }
 
 static void
@@ -5166,6 +5910,11 @@ regenerate (BgeWdgtRenderer *self)
   g_clear_pointer (&self->active_snapshot, snapshot_data_unref);
   g_ptr_array_set_size (self->bindings, 0);
   g_ptr_array_set_size (self->watches, 0);
+
+  self->measure_minimum_width  = -1;
+  self->measure_natural_width  = -1;
+  self->measure_minimum_height = -1;
+  self->measure_natural_height = -1;
 
   if (self->spec == NULL)
     return;
@@ -5595,6 +6344,24 @@ expression_create_rect (gpointer object,
   return rect;
 }
 
+static GskStroke *
+expression_create_stroke (gpointer    object,
+                          double      line_width,
+                          GskLineCap  line_cap,
+                          GskLineJoin line_join,
+                          double      miter_limit,
+                          gpointer    user_data)
+{
+  GskStroke *stroke = NULL;
+
+  stroke = gsk_stroke_new (line_width);
+  gsk_stroke_set_line_cap (stroke, line_cap);
+  gsk_stroke_set_line_join (stroke, line_join);
+  gsk_stroke_set_miter_limit (stroke, miter_limit);
+
+  return stroke;
+}
+
 static void
 expression_coerce_type (gpointer      this,
                         GValue       *return_value,
@@ -5877,6 +6644,35 @@ expression_perform_transform (gpointer          this,
   return func (g_value_dup_boxed (&param_values[0]), param_values + 1);
 }
 
+static GskPath *
+expression_perform_path_build (gpointer      this,
+                               guint         n_param_values,
+                               const GValue *param_values,
+                               ValueData    *path_value)
+{
+  g_autoptr (GskPathBuilder) builder = NULL;
+  const GValue *cursor               = 0;
+
+  g_assert (path_value->kind == VALUE_PATH);
+
+  builder = gsk_path_builder_new ();
+  cursor  = param_values;
+
+  for (guint i = 0; i < path_value->path.argss->len; i++)
+    {
+      PathBuilderCallFunc func = NULL;
+      GPtrArray          *args = NULL;
+
+      func = g_ptr_array_index (path_value->path.funcs, i);
+      args = g_ptr_array_index (path_value->path.argss, i);
+
+      func (builder, cursor);
+      cursor += args->len;
+    }
+
+  return gsk_path_builder_to_path (builder);
+}
+
 static GtkExpression *
 ensure_expressions (BgeWdgtRenderer   *self,
                     ValueData         *value,
@@ -6099,8 +6895,13 @@ ensure_expressions (BgeWdgtRenderer   *self,
             marshal  = bge_marshal_BOXED__DOUBLE_DOUBLE_DOUBLE_DOUBLE;
             callback = G_CALLBACK (expression_create_rect);
           }
+        else if (value->type == GSK_TYPE_STROKE)
+          {
+            marshal  = bge_marshal_BOXED__DOUBLE_ENUM_ENUM_DOUBLE;
+            callback = G_CALLBACK (expression_create_stroke);
+          }
         else
-          g_assert (FALSE);
+          g_assert_not_reached ();
 
         expression = gtk_cclosure_expression_new (
             value->type,
@@ -6140,6 +6941,40 @@ ensure_expressions (BgeWdgtRenderer   *self,
             G_CALLBACK (expression_perform_transform),
             value->transform.func,
             NULL);
+      }
+      break;
+    case VALUE_PATH:
+      {
+        g_autoptr (GPtrArray) params        = NULL;
+        g_autoptr (GtkExpression) next_expr = NULL;
+
+        params = g_ptr_array_new ();
+
+        g_assert (value->path.funcs->len == value->path.argss->len);
+        for (guint i = 0; i < value->path.argss->len; i++)
+          {
+            GPtrArray *args = NULL;
+
+            args = g_ptr_array_index (value->path.argss, i);
+            for (guint j = 0; j < args->len; j++)
+              {
+                ValueData *arg                     = NULL;
+                g_autoptr (GtkExpression) arg_expr = NULL;
+
+                arg      = g_ptr_array_index (args, j);
+                arg_expr = ensure_expressions (self, arg, state, instance);
+                g_ptr_array_add (params, g_steal_pointer (&arg_expr));
+              }
+          }
+
+        expression = gtk_cclosure_expression_new (
+            value->type,
+            _marshal_BOXED__ARGS_DIRECT,
+            params->len,
+            (GtkExpression **) params->pdata,
+            G_CALLBACK (expression_perform_path_build),
+            value_data_ref (value),
+            value_data_unref_closure);
       }
       break;
     case VALUE_CLOSURE:
@@ -6347,6 +7182,7 @@ set_value (BgeWdgtRenderer   *self,
                   case VALUE_MEASURE_NATURAL_HEIGHT:
                   case VALUE_MEASURE_NATURAL_WIDTH:
                   case VALUE_OBJECT:
+                  case VALUE_PATH:
                   case VALUE_PROPERTY:
                   case VALUE_REFERENCE_OBJECT:
                   case VALUE_SPECIAL:
@@ -6402,6 +7238,7 @@ set_value (BgeWdgtRenderer   *self,
           case VALUE_CONSTANT:
           case VALUE_MEASURE_FOR_SIZE:
           case VALUE_OBJECT:
+          case VALUE_PATH:
           case VALUE_PROPERTY:
           case VALUE_REFERENCE_OBJECT:
           case VALUE_SPECIAL:
@@ -6426,6 +7263,7 @@ set_value (BgeWdgtRenderer   *self,
     case VALUE_CONSTANT:
     case VALUE_MEASURE_FOR_SIZE:
     case VALUE_OBJECT:
+    case VALUE_PATH:
     case VALUE_REFERENCE_OBJECT:
     case VALUE_SPECIAL:
     case VALUE_TRACK_TRANSITION:
@@ -6590,6 +7428,41 @@ reset_setter (WatchSetterData *data)
       data->dest,
       data->src,
       NULL);
+}
+
+static void
+wdgt_renderer_set_from_resource (BgeWdgtRenderer *self,
+                                 const char      *resource)
+{
+  g_autoptr (GError) local_error = NULL;
+  g_autoptr (GBytes) bytes       = NULL;
+  gsize         buffer_size      = 0;
+  gconstpointer buffer           = NULL;
+  g_autoptr (BgeWdgtSpec) spec   = NULL;
+
+  bytes = g_resources_lookup_data (
+      resource,
+      G_RESOURCE_LOOKUP_FLAGS_NONE,
+      &local_error);
+  if (bytes == NULL)
+    {
+      g_critical ("failed to set renderer spec from resource: %s",
+                  local_error->message);
+      bge_wdgt_renderer_set_spec (self, NULL);
+      return;
+    }
+
+  buffer = g_bytes_get_data (bytes, &buffer_size);
+  spec   = bge_wdgt_spec_new_for_string (buffer, &local_error);
+  if (spec == NULL)
+    {
+      g_critical ("failed to set renderer spec from resource %s: %s",
+                  resource, local_error->message);
+      bge_wdgt_renderer_set_spec (self, NULL);
+      return;
+    }
+
+  bge_wdgt_renderer_set_spec (self, spec);
 }
 
 static void
