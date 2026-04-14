@@ -77,7 +77,7 @@ defwidget "Install Button" {
     
     set x = #eval((0.5+0.5*sin(3.0*#(t:time))) * (#(%width%)-#(w)));
     set w = #eval(#(%width%)*0.8);
-    set b = #eval(#(%height%)*0.2);
+    set b = #eval(#(%height%)*0.175);
     set opacity = 1.0;
 
     transition-spring x 1.0, 0.1, 50.0;

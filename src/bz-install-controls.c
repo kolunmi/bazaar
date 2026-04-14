@@ -160,10 +160,14 @@ static char *
 get_visible_page (gpointer    object,
                   int         installable,
                   int         removable,
-                  GListModel *available_updates)
+                  GListModel *available_updates,
+                  gboolean    active)
 {
   BzInstallControls *self      = BZ_INSTALL_CONTROLS (object);
   g_autoptr (GListStore) store = NULL;
+
+  if (active)
+    return g_strdup ("install");
 
   if (removable > 0)
     {

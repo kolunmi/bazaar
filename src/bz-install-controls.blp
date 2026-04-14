@@ -6,9 +6,8 @@ template $BzInstallControls: Box {
 
   Stack {
     transition-type: crossfade;
-    visible-child-name: bind $get_visible_page(template.entry-group as <$BzEntryGroup>.installable, template.entry-group as <$BzEntryGroup>.removable, template.state as <$BzStateInfo>.available-updates) as <string>;
+    visible-child-name: bind $get_visible_page(template.entry-group as <$BzEntryGroup>.installable, template.entry-group as <$BzEntryGroup>.removable, template.state as <$BzStateInfo>.available-updates, template.state as <$BzStateInfo>.transaction-manager as <$BzTransactionManager>.active as <bool>) as <string>;
     hexpand: bind $invert_boolean(template.wide) as <bool>;
-    hhomogeneous: false;
     valign: center;
 
     StackPage install {
