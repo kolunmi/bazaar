@@ -91,7 +91,8 @@ find_and_maybe_transfer (GListStore    *from,
 static void
 tracker_update (BzTransactionPrivate          *priv,
                 BzBackendTransactionOpPayload *payload,
-                gboolean                       transfer);
+                gboolean                       transfer,
+                gboolean                       set_done);
 
 static void
 bz_transaction_dispose (GObject *object)
@@ -627,7 +628,7 @@ bz_transaction_update_task (BzTransaction                         *self,
   if (result)
     bz_transaction_task_set_last_progress (task, payload);
 
-  tracker_update (priv, op, FALSE);
+  tracker_update (priv, op, FALSE, FALSE);
 }
 
 void
@@ -648,7 +649,7 @@ bz_transaction_finish_task (BzTransaction                 *self,
       (GEqualFuncFull) find_payload_eq_func,
       NULL);
 
-  tracker_update (priv, payload, TRUE);
+  tracker_update (priv, payload, TRUE, FALSE);
 }
 
 void
@@ -675,7 +676,7 @@ bz_transaction_error_out_task (BzTransaction                 *self,
   if (result)
     bz_transaction_task_set_error (task, message);
 
-  tracker_update (priv, payload, TRUE);
+  tracker_update (priv, payload, TRUE, TRUE);
 }
 
 static void
@@ -744,7 +745,8 @@ find_and_maybe_transfer (GListStore    *from,
 static void
 tracker_update (BzTransactionPrivate          *priv,
                 BzBackendTransactionOpPayload *payload,
-                gboolean                       transfer)
+                gboolean                       transfer,
+                gboolean                       set_done)
 {
   BzEntry *entry                                = NULL;
   g_autoptr (BzTransactionEntryTracker) tracker = NULL;
@@ -765,7 +767,8 @@ tracker_update (BzTransactionPrivate          *priv,
           GListModel *from = NULL;
           GListModel *to   = NULL;
 
-          bz_transaction_entry_tracker_set_status (tracker, BZ_TRANSACTION_ENTRY_STATUS_DONE);
+          if (set_done)
+            bz_transaction_entry_tracker_set_status (tracker, BZ_TRANSACTION_ENTRY_STATUS_DONE);
 
           from   = bz_transaction_entry_tracker_get_current_ops (tracker);
           to     = bz_transaction_entry_tracker_get_finished_ops (tracker);
