@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include <gtk/gtk.h>
+#define G_LOG_DOMAIN "BGE::WDGT"
 
 #include "../bge-animation-private.h"
 #include "bge-marshalers.h"

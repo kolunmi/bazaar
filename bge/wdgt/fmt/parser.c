@@ -18,6 +18,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+#define G_LOG_DOMAIN "BGE::WDGT-PARSE"
+
 #include <graphene-gobject.h>
 
 #include "../bge-wdgt-spec-private.h"

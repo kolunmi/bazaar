@@ -7,6 +7,8 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later
  */
 
+#define G_LOG_DOMAIN "BGE::EASING"
+
 #include "bge.h"
 
 G_DEFINE_ENUM_TYPE (
