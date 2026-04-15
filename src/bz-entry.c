@@ -2343,6 +2343,7 @@ GIcon *
 bz_load_mini_icon_sync (const char *unique_id_checksum,
                         const char *path)
 {
+  guint            icon_size             = 0;
   g_autofree char *main_cache            = NULL;
   g_autoptr (GString) mini_icon_basename = NULL;
   g_autofree char *mini_icon_path        = NULL;
@@ -2356,9 +2357,11 @@ bz_load_mini_icon_sync (const char *unique_id_checksum,
   g_autoptr (GFile) mini_icon_file       = NULL;
   g_autoptr (GIcon) mini_icon            = NULL;
 
+  icon_size = bz_get_desktop_search_provider_icon_size ();
+
   main_cache         = bz_dup_module_dir ();
   mini_icon_basename = g_string_new (unique_id_checksum);
-  g_string_append (mini_icon_basename, "-24x24.png");
+  g_string_append_printf (mini_icon_basename, "-%ux%u.png", icon_size, icon_size);
   mini_icon_path = g_build_filename (main_cache, mini_icon_basename->str, NULL);
 
   if (g_file_test (mini_icon_path, G_FILE_TEST_EXISTS))
@@ -2369,11 +2372,12 @@ bz_load_mini_icon_sync (const char *unique_id_checksum,
   width      = cairo_image_surface_get_width (surface_in);
   height     = cairo_image_surface_get_height (surface_in);
 
-  /* 24x24 for the gnome-shell search provider */
-  surface_out = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, 24, 24);
+  surface_out = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, icon_size, icon_size);
   cairo       = cairo_create (surface_out);
 
-  cairo_scale (cairo, 24.0 / (double) width, 24.0 / (double) height);
+  cairo_scale (cairo,
+               (double) icon_size / (double) width,
+               (double) icon_size / (double) height);
   cairo_set_source_surface (cairo, surface_in, 0, 0);
   cairo_paint (cairo);
   cairo_restore (cairo);

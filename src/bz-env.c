@@ -110,3 +110,46 @@ bz_get_n_download_workers (void)
 
   return n_dl_workers;
 }
+
+guint
+bz_get_desktop_search_provider_icon_size (void)
+{
+  static guint64 icon_size = 0;
+
+  if (g_once_init_enter (&icon_size))
+    {
+      const char *envvar = NULL;
+      guint64     value  = 0;
+
+      /* default 24x24 for the gnome-shell search provider */
+      value = 24;
+
+      envvar = g_getenv ("BAZAAR_DESKTOP_SEARCH_PROVIDER_ICON_SIZE");
+      if (envvar != NULL)
+        {
+          g_autoptr (GError) local_error = NULL;
+          g_autoptr (GVariant) variant   = NULL;
+
+          variant = g_variant_parse (
+              G_VARIANT_TYPE_UINT64, envvar,
+              NULL, NULL, &local_error);
+          if (variant != NULL)
+            {
+              guint64 parse_result = 0;
+
+              parse_result = g_variant_get_uint64 (variant);
+              if (parse_result == 0 || parse_result > 256)
+                g_warning ("BAZAAR_DESKTOP_SEARCH_PROVIDER_ICON_SIZE must be "
+                           "greater than 0 but no greater than 256");
+              else
+                value = parse_result;
+            }
+          else
+            g_warning ("BAZAAR_DESKTOP_SEARCH_PROVIDER_ICON_SIZE is invalid: %s", local_error->message);
+        }
+
+      g_once_init_leave (&icon_size, value);
+    }
+
+  return (guint) icon_size;
+}
