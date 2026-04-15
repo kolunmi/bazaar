@@ -2021,7 +2021,7 @@ msgstr "Logiciels libres seulement"
 
 #: src/bz-preferences-dialog.blp:35
 msgid "Hide proprietary applications when browsing and searching"
-msgstr "Masque les applications propriétaires lors de recherche"
+msgstr "Masque les applications propriétaires dans les résultats de recherche"
 
 #: src/bz-preferences-dialog.blp:39
 msgid "Flathub Results Only"
