@@ -2,7 +2,6 @@ defwidget "Install Button" {
   reference state : "BzTransactionEntryTracker";
   var progress : "gdouble";
 
-  var t : "BgeWdgtTime";
   var btn-install : "GtkButton";
   var btn-cancel : "GtkButton";
   var bg : "GtkFixed";
@@ -21,7 +20,6 @@ defwidget "Install Button" {
 
   init {
     set progress = #transition(state:progress, 1.1, 0.1, 10.0);
-    set t = #(notify-msec = 10;);
     set stack = #child/GtkStack(""()
       transition-type = crossfade;
       transition-duration = 200;
@@ -75,7 +73,7 @@ defwidget "Install Button" {
   state "pending" {
     set stack:visible-child = btn-cancel;
     
-    set x = #eval((0.5+0.5*sin(3.0*#(t:time))) * (#(%width%)-#(w)));
+    set x = #eval((0.5+0.5*sin(3.0*#(%tick%))) * (#(%width%)-#(w)));
     set w = #eval(#(%width%)*0.8);
     set b = #eval(#(%height%)*0.175);
     set opacity = 1.0;
