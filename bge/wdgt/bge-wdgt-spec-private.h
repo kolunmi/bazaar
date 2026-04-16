@@ -73,6 +73,15 @@ bge_wdgt_spec_add_transform_source_value (BgeWdgtSpec       *self,
                                           GError           **error);
 
 gboolean
+bge_wdgt_spec_add_path_source_value (BgeWdgtSpec              *self,
+                                     const char               *name,
+                                     const char *const        *instructions,
+                                     const char *const *const *argss,
+                                     const guint              *n_argss,
+                                     guint                     n_args,
+                                     GError                  **error);
+
+gboolean
 bge_wdgt_spec_add_instance_source_value (BgeWdgtSpec *self,
                                          const char  *name,
                                          GType        type,
@@ -115,6 +124,11 @@ gboolean
 bge_wdgt_spec_add_widget_height_source_value (BgeWdgtSpec *self,
                                               const char  *name,
                                               GError     **error);
+
+gboolean
+bge_wdgt_spec_add_tick_time_source_value (BgeWdgtSpec *self,
+                                          const char  *name,
+                                          GError     **error);
 
 gboolean
 bge_wdgt_spec_add_track_transition_source_value (BgeWdgtSpec *self,

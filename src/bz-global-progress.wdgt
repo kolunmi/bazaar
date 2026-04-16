@@ -1,7 +1,6 @@
 defwidget "Global Progress Widget" {
   reference state : "BzStateInfo";
 
-  var t : "BgeWdgtTime";
   var fg : "GtkFixed";
   var bg : "GtkFixed";
 
@@ -26,8 +25,6 @@ defwidget "Global Progress Widget" {
   init {
     measure -1, ww, -1, -1;
 
-    set t = #(notify-msec = 10;);
-    
     set fg = #child/(""());
     allocate fg fg-w, fg-h, #(translate(#GraphenePoint(fg-x, fg-y)););
 
@@ -96,7 +93,7 @@ defwidget "Global Progress Widget" {
   }
   
   state "pending" {
-    set fg-x = #eval(#(%height%)*0.2 + (0.5+0.5*sin(3.0*#(t:time))) * 0.35*(#(%width%)-#(%height%)*0.4));
+    set fg-x = #eval(#(%height%)*0.2 + (0.5+0.5*sin(3.0*#(%tick%))) * 0.35*(#(%width%)-#(%height%)*0.4));
     set fg-y = #eval(#(%height%)*0.2);
     set fg-w = #eval(0.65*(#(%width%)-#(%height%)*0.4));
     set fg-h = #eval(#(%height%)*0.6);
