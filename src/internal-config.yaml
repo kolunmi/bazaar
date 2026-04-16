@@ -72,5 +72,5 @@ search-biases:
   - regex: \b(?i)vids?\b
     convert-to: video
 
-  - regex: \b(?i)mc?\b
+  - regex: \b(?i)mc\b
     convert-to: minecraft
