@@ -290,6 +290,14 @@ bge_wdgt_parse_string (const char *string,
       g_strdup ("%height%"),
       GSIZE_TO_POINTER (G_TYPE_INT));
 
+  result = bge_wdgt_spec_add_tick_time_source_value (
+      spec, "%tick%", &local_error);
+  RETURN_ERROR_UNLESS (result);
+  g_hash_table_replace (
+      type_hints,
+      g_strdup ("%tick%"),
+      GSIZE_TO_POINTER (G_TYPE_DOUBLE));
+
   for (const char *p = string;
        !IS_EOF (p);)
     {

@@ -71,6 +71,7 @@ typedef enum
   VALUE_MEASURE_FOR_SIZE,
   VALUE_WIDGET_WIDTH,
   VALUE_WIDGET_HEIGHT,
+  VALUE_TICK_TIME,
 } ValueKind;
 
 typedef enum
@@ -250,6 +251,7 @@ deinit_value (gpointer ptr)
     case VALUE_MEASURE_FOR_SIZE:
     case VALUE_WIDGET_WIDTH:
     case VALUE_WIDGET_HEIGHT:
+    case VALUE_TICK_TIME:
       break;
     default:
       g_assert_not_reached ();
@@ -485,7 +487,6 @@ bge_wdgt_spec_class_init (BgeWdgtSpecClass *klass)
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   g_type_ensure (BGE_TYPE_EASING);
-  g_type_ensure (BGE_TYPE_WDGT_TIME);
 
   /* Make sure these names are available for the parser */
   g_type_ensure (GRAPHENE_TYPE_POINT);
@@ -1676,6 +1677,32 @@ bge_wdgt_spec_add_widget_height_source_value (BgeWdgtSpec *self,
   value       = value_data_new ();
   value->name = g_strdup (name);
   value->kind = VALUE_WIDGET_HEIGHT;
+  value->type = G_TYPE_DOUBLE;
+
+  g_hash_table_replace (self->values, g_strdup (name), value_data_ref (value));
+  return TRUE;
+}
+
+gboolean
+bge_wdgt_spec_add_tick_time_source_value (BgeWdgtSpec *self,
+                                          const char  *name,
+                                          GError     **error)
+{
+  g_autoptr (ValueData) value = NULL;
+
+  g_return_val_if_fail (BGE_IS_WDGT_SPEC (self), FALSE);
+  g_return_val_if_fail (name != NULL, FALSE);
+
+  if (g_hash_table_contains (self->values, name))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' already exists", name);
+      return FALSE;
+    }
+
+  value       = value_data_new ();
+  value->name = g_strdup (name);
+  value->kind = VALUE_TICK_TIME;
   value->type = G_TYPE_DOUBLE;
 
   g_hash_table_replace (self->values, g_strdup (name), value_data_ref (value));
@@ -5052,6 +5079,9 @@ struct _BgeWdgtRenderer
   int              widget_height;
   BgeWdgtNotifier *widget_width_notifier;
   BgeWdgtNotifier *widget_height_notifier;
+
+  GTimer          *tick_time;
+  BgeWdgtNotifier *tick_time_notifier;
 };
 
 G_DEFINE_FINAL_TYPE (BgeWdgtRenderer, bge_wdgt_renderer, GTK_TYPE_WIDGET);
@@ -5243,6 +5273,9 @@ bge_wdgt_renderer_dispose (GObject *object)
   g_clear_pointer (&self->measure_for_size_notifier, g_object_unref);
   g_clear_pointer (&self->widget_width_notifier, g_object_unref);
   g_clear_pointer (&self->widget_height_notifier, g_object_unref);
+
+  g_clear_pointer (&self->tick_time, g_timer_destroy);
+  g_clear_pointer (&self->tick_time_notifier, g_object_unref);
 
   G_OBJECT_CLASS (bge_wdgt_renderer_parent_class)->dispose (object);
 }
@@ -5601,6 +5634,10 @@ tick_cb (BgeWdgtRenderer *self,
 
   self->had_tick_since_state_switch = TRUE;
 
+  g_object_notify_by_pspec (
+      G_OBJECT (self->tick_time_notifier),
+      notifier_props[NOTIFIER_PROP_VALUE]);
+
   should_animate = bge_should_animate (GTK_WIDGET (self));
 
   for (guint i = 0; i < self->track_transitions->len;)
@@ -5709,11 +5746,13 @@ bge_wdgt_renderer_init (BgeWdgtRenderer *self)
   self->watches  = g_ptr_array_new_with_free_func (discard_watch);
 
   self->since_last_state = g_timer_new ();
+  self->tick_time        = g_timer_new ();
 
   self->reference_notifier        = g_object_new (BGE_TYPE_WDGT_NOTIFIER, NULL);
   self->measure_for_size_notifier = g_object_new (BGE_TYPE_WDGT_NOTIFIER, NULL);
   self->widget_width_notifier     = g_object_new (BGE_TYPE_WDGT_NOTIFIER, NULL);
   self->widget_height_notifier    = g_object_new (BGE_TYPE_WDGT_NOTIFIER, NULL);
+  self->tick_time_notifier        = g_object_new (BGE_TYPE_WDGT_NOTIFIER, NULL);
 
   self->tick = gtk_widget_add_tick_callback (
       GTK_WIDGET (self),
@@ -6397,6 +6436,14 @@ expression_get_widget_height (BgeWdgtRenderer *this,
   return (double) this->widget_height;
 }
 
+static double
+expression_get_tick_time (BgeWdgtRenderer *this,
+                          double           notify,
+                          gpointer         user_data)
+{
+  return g_timer_elapsed (this->tick_time, NULL);
+}
+
 static gpointer
 expression_get_reference_object (BgeWdgtRenderer *this,
                                  double           notify,
@@ -6805,6 +6852,25 @@ ensure_expressions (BgeWdgtRenderer   *self,
             NULL);
       }
       break;
+    case VALUE_TICK_TIME:
+      {
+        GtkExpression *notifier_constant = NULL;
+        GtkExpression *notify_expression = NULL;
+
+        notifier_constant = gtk_constant_expression_new (
+            BGE_TYPE_WDGT_NOTIFIER, self->tick_time_notifier);
+        notify_expression = gtk_property_expression_new_for_pspec (
+            notifier_constant, notifier_props[NOTIFIER_PROP_VALUE]);
+
+        expression = gtk_cclosure_expression_new (
+            value->type,
+            bge_marshal_DOUBLE__DOUBLE,
+            1, (GtkExpression *[]){ notify_expression },
+            G_CALLBACK (expression_get_tick_time),
+            GSIZE_TO_POINTER (value->type),
+            NULL);
+      }
+      break;
     case VALUE_COERCION:
       {
         expression = ensure_expressions (
@@ -7190,6 +7256,7 @@ set_value (BgeWdgtRenderer   *self,
                   case VALUE_TRANSFORM:
                   case VALUE_VARIABLE:
                   case VALUE_WIDGET_HEIGHT:
+                  case VALUE_TICK_TIME:
                   case VALUE_WIDGET_WIDTH:
                   default:
                     g_assert_not_reached ();
@@ -7246,6 +7313,7 @@ set_value (BgeWdgtRenderer   *self,
           case VALUE_TRANSFORM:
           case VALUE_VARIABLE:
           case VALUE_WIDGET_HEIGHT:
+          case VALUE_TICK_TIME:
           case VALUE_WIDGET_WIDTH:
           default:
             g_assert_not_reached ();
@@ -7270,6 +7338,7 @@ set_value (BgeWdgtRenderer   *self,
     case VALUE_TRANSFORM:
     case VALUE_VARIABLE:
     case VALUE_WIDGET_HEIGHT:
+    case VALUE_TICK_TIME:
     case VALUE_WIDGET_WIDTH:
       break;
     default:

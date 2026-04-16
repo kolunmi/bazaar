@@ -126,6 +126,11 @@ bge_wdgt_spec_add_widget_height_source_value (BgeWdgtSpec *self,
                                               GError     **error);
 
 gboolean
+bge_wdgt_spec_add_tick_time_source_value (BgeWdgtSpec *self,
+                                          const char  *name,
+                                          GError     **error);
+
+gboolean
 bge_wdgt_spec_add_track_transition_source_value (BgeWdgtSpec *self,
                                                  const char  *name,
                                                  const char  *src,
