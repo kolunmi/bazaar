@@ -27,15 +27,15 @@ defwidget "Install Button" {
         label = "Install";
         margin-top = 4;
         margin-bottom = 4;
-	margin-start = 4;
-	margin-end = 4;
+        margin-start = 4;
+        margin-end = 4;
       );
       %set btn-cancel = #child/GtkButton(""("pill" "install-button")
         label = "Cancel";
         margin-top = 4;
         margin-bottom = 4;
-	margin-start = 4;
-	margin-end = 4;
+        margin-start = 4;
+        margin-end = 4;
       );
     );
     allocate stack %width%, %height%, #();
