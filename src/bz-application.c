@@ -1371,6 +1371,23 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
             update_labels = TRUE;
           }
           break;
+        case BZ_BACKEND_NOTIFICATION_KIND_INVALIDATE_REMOTES:
+          {
+            g_autoptr (GListModel) repos = NULL;
+
+            repos = dex_await_object (
+                bz_backend_list_repositories (BZ_BACKEND (self->flatpak), NULL),
+                &local_error);
+
+            if (repos != NULL)
+              bz_state_info_set_repositories (self->state, repos);
+            else
+              {
+                g_warning ("Failed to enumerate repositories: %s", local_error->message);
+                g_clear_error (&local_error);
+              }
+          }
+          break;
         case BZ_BACKEND_NOTIFICATION_KIND_REMOTE_SYNC_START:
           {
             const char *remote_name = NULL;
@@ -1499,11 +1516,12 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
                 }
                 break;
               case BZ_BACKEND_NOTIFICATION_KIND_ERROR:
-              case BZ_BACKEND_NOTIFICATION_KIND_TELL_INCOMING:
-              case BZ_BACKEND_NOTIFICATION_KIND_REPLACE_ENTRY:
-              case BZ_BACKEND_NOTIFICATION_KIND_REMOTE_SYNC_START:
-              case BZ_BACKEND_NOTIFICATION_KIND_REMOTE_SYNC_FINISH:
               case BZ_BACKEND_NOTIFICATION_KIND_EXTERNAL_CHANGE:
+              case BZ_BACKEND_NOTIFICATION_KIND_INVALIDATE_REMOTES:
+              case BZ_BACKEND_NOTIFICATION_KIND_REMOTE_SYNC_FINISH:
+              case BZ_BACKEND_NOTIFICATION_KIND_REMOTE_SYNC_START:
+              case BZ_BACKEND_NOTIFICATION_KIND_REPLACE_ENTRY:
+              case BZ_BACKEND_NOTIFICATION_KIND_TELL_INCOMING:
               default:
                 g_assert_not_reached ();
               };
@@ -1735,17 +1753,7 @@ open_flatpakref_fiber (OpenFlatpakrefData *data)
 
   value = dex_future_get_value (future, &local_error);
   if (value != NULL)
-    {
-      if (G_VALUE_HOLDS_OBJECT (value))
-        {
-          BzEntry *entry = NULL;
-
-          entry = g_value_get_object (value);
-          bz_window_show_entry (BZ_WINDOW (window), entry);
-        }
-      else
-        open_generic_id (self, g_value_get_string (value));
-    }
+    open_generic_id (self, g_value_get_string (value));
   else
     bz_show_error_for_widget (GTK_WIDGET (window), _ ("Failed to open .flatpakref"), local_error->message);
 
