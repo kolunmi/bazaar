@@ -1029,12 +1029,23 @@ load_local_ref_fiber (LoadLocalRefData *data)
             "Failed to load locate \"Name\" key in flatpakref '%s': %s",
             uri, local_error->message);
 
+      {
+        g_autoptr (BzBackendNotification) notif = NULL;
+
+        notif = bz_backend_notification_new ();
+        bz_backend_notification_set_kind (notif, BZ_BACKEND_NOTIFICATION_KIND_PRESENT_ID);
+        bz_backend_notification_set_generic_id (notif, name);
+
+        send_notif_all (self, notif, TRUE);
+      }
+
       return dex_future_new_take_string (g_steal_pointer (&name));
     }
   else
     /* This is a bundle ref */
     {
       g_autoptr (FlatpakBundleRef) bref        = NULL;
+      g_autoptr (GFile) resolved_file          = NULL;
       const char          *name                = NULL;
       const char          *origin              = NULL;
       FlatpakInstallation *add_to_installation = NULL;
@@ -1051,7 +1062,46 @@ load_local_ref_fiber (LoadLocalRefData *data)
             "Cannot load '%s' as a flatpak bundle: URI is not a local file",
             uri);
 
-      bref = flatpak_bundle_ref_new (file, &local_error);
+#ifdef SANDBOXED_LIBFLATPAK
+      {
+        g_autofree char *basename          = NULL;
+        g_autofree char *module_dir        = NULL;
+        g_autofree char *staging           = NULL;
+        g_autofree char *dest              = NULL;
+        g_autoptr (GSubprocess) subprocess = NULL;
+
+        basename   = g_path_get_basename (path);
+        module_dir = bz_dup_module_dir ();
+        staging    = g_build_filename (module_dir, "bundle-staging", NULL);
+        g_mkdir_with_parents (staging, 0755);
+        dest = g_build_filename (staging, basename, NULL);
+
+        subprocess = g_subprocess_new (
+            G_SUBPROCESS_FLAGS_STDERR_PIPE,
+            &local_error,
+            "flatpak-spawn",
+            "--host",
+            "cp",
+            path,
+            dest,
+            NULL);
+        result = dex_await (
+            dex_subprocess_wait_check (subprocess),
+            &local_error);
+        if (!result)
+          return dex_future_new_reject (
+              BZ_FLATPAK_ERROR,
+              BZ_FLATPAK_ERROR_IO_MISBEHAVIOR,
+              "Failed to copy bundle from %s to %s : %s",
+              path, dest, local_error->message);
+
+        resolved_file = g_file_new_for_path (dest);
+      }
+#else
+      resolved_file = g_object_ref (file);
+#endif
+
+      bref = flatpak_bundle_ref_new (resolved_file, &local_error);
       if (bref == NULL)
         return dex_future_new_reject (
             BZ_FLATPAK_ERROR,
@@ -1240,43 +1290,31 @@ load_local_ref_fiber (LoadLocalRefData *data)
             local_error->message);
 
       {
-        g_autoptr (BzBackendNotification) notif        = NULL;
-        g_autoptr (BzBackendNotification) inc_incoming = NULL;
-        g_autoptr (GMutexLocker) locker                = NULL;
+        g_autoptr (BzBackendNotification) notif = NULL;
+
+        notif = bz_backend_notification_new ();
+        bz_backend_notification_set_kind (notif, BZ_BACKEND_NOTIFICATION_KIND_TELL_INCOMING);
+        bz_backend_notification_set_n_incoming (notif, 1);
+
+        send_notif_all (self, notif, TRUE);
+      }
+      {
+        g_autoptr (BzBackendNotification) notif = NULL;
 
         notif = bz_backend_notification_new ();
         bz_backend_notification_set_kind (notif, BZ_BACKEND_NOTIFICATION_KIND_REPLACE_ENTRY);
         bz_backend_notification_set_entry (notif, BZ_ENTRY (entry));
 
-        inc_incoming = bz_backend_notification_new ();
-        bz_backend_notification_set_kind (inc_incoming, BZ_BACKEND_NOTIFICATION_KIND_TELL_INCOMING);
-        bz_backend_notification_set_n_incoming (inc_incoming, 1);
+        send_notif_all (self, notif, TRUE);
+      }
+      {
+        g_autoptr (BzBackendNotification) notif = NULL;
 
-        locker = g_mutex_locker_new (&self->notif_mutex);
-        for (guint i = 0; i < self->notif_channels->len;)
-          {
-            DexChannel *channel = NULL;
+        notif = bz_backend_notification_new ();
+        bz_backend_notification_set_kind (notif, BZ_BACKEND_NOTIFICATION_KIND_PRESENT_ID);
+        bz_backend_notification_set_generic_id (notif, bz_entry_get_id (BZ_ENTRY (entry)));
 
-            channel = g_ptr_array_index (self->notif_channels, i);
-            if (dex_channel_can_send (channel))
-              {
-                /* We need to ensure the notification has been completely
-                   processed before returning the ID to avoid racing */
-                dex_await (
-                    dex_channel_send (
-                        channel,
-                        dex_future_new_for_object (inc_incoming)),
-                    NULL);
-                dex_await (
-                    dex_channel_send (
-                        channel,
-                        dex_future_new_for_object (notif)),
-                    NULL);
-                i++;
-              }
-            else
-              g_ptr_array_remove_index_fast (self->notif_channels, i);
-          }
+        send_notif_all (self, notif, TRUE);
       }
 
       return dex_future_new_for_string (name);
@@ -2111,40 +2149,9 @@ transaction_fiber (TransactionData *data)
           if (bundle_path != NULL)
             /* Prioritize bundle installation */
             {
-              g_autoptr (GFile) file          = NULL;
-              g_autofree char  *resolved_path = NULL;
+              g_autoptr (GFile) file = NULL;
 
-              if (g_str_has_prefix (bundle_path, "/run/user/") &&
-                  strstr (bundle_path, "/doc/") != NULL)
-                {
-                  g_autofree char *basename = NULL;
-                  g_autofree char *staging  = NULL;
-                  g_autoptr (GFile) src     = NULL;
-                  g_autoptr (GFile) dst     = NULL;
-
-                  basename = g_path_get_basename (bundle_path);
-                  staging  = g_build_filename (g_get_user_cache_dir (), "bundle-staging", NULL);
-
-                  g_mkdir_with_parents (staging, 0755);
-
-                  resolved_path = g_build_filename (staging, basename, NULL);
-                  src           = g_file_new_for_path (bundle_path);
-                  dst           = g_file_new_for_path (resolved_path);
-
-                  if (!g_file_copy (src, dst,
-                                    G_FILE_COPY_OVERWRITE | G_FILE_COPY_NOFOLLOW_SYMLINKS,
-                                    cancellable, NULL, NULL, &local_error))
-                    {
-                      dex_channel_close_send (channel);
-                      return dex_future_new_reject (
-                          BZ_FLATPAK_ERROR,
-                          BZ_FLATPAK_ERROR_TRANSACTION_FAILURE,
-                          "Failed to stage bundle '%s': %s",
-                          bundle_path, local_error->message);
-                    }
-                }
-
-              file   = g_file_new_for_path (resolved_path != NULL ? resolved_path : bundle_path);
+              file   = g_file_new_for_path (bundle_path);
               result = flatpak_transaction_add_install_bundle (
                   transaction,
                   file,

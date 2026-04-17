@@ -1145,7 +1145,17 @@ init_fiber (GWeakRef *wr)
           future = g_ptr_array_index (futures, i);
           value  = dex_future_get_value (future, &local_error);
           if (value != NULL)
-            g_ptr_array_add (entries, g_value_dup_object (value));
+            {
+              g_autoptr (BzEntry) entry = NULL;
+
+              entry = g_value_dup_object (value);
+              if (BZ_IS_FLATPAK_ENTRY (entry) &&
+                  bz_flatpak_entry_get_bundle_path (BZ_FLATPAK_ENTRY (entry)))
+                /* refrain from restoring bundle entries */
+                continue;
+
+              g_ptr_array_add (entries, g_steal_pointer (&entry));
+            }
           else
             {
               g_warning ("Unable to retrieve cached entry: %s", local_error->message);
@@ -1320,6 +1330,17 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
       kind  = bz_backend_notification_get_kind (notif);
       switch (kind)
         {
+        case BZ_BACKEND_NOTIFICATION_KIND_PRESENT_ID:
+          {
+            const char *id = NULL;
+
+            id = bz_backend_notification_get_generic_id (notif);
+            if (id == NULL)
+              break;
+
+            open_generic_id (self, id);
+          }
+          break;
         case BZ_BACKEND_NOTIFICATION_KIND_ERROR:
           {
             const char *error  = NULL;
@@ -1518,6 +1539,7 @@ respond_to_flatpak_fiber (RespondToFlatpakData *data)
               case BZ_BACKEND_NOTIFICATION_KIND_ERROR:
               case BZ_BACKEND_NOTIFICATION_KIND_EXTERNAL_CHANGE:
               case BZ_BACKEND_NOTIFICATION_KIND_INVALIDATE_REMOTES:
+              case BZ_BACKEND_NOTIFICATION_KIND_PRESENT_ID:
               case BZ_BACKEND_NOTIFICATION_KIND_REMOTE_SYNC_FINISH:
               case BZ_BACKEND_NOTIFICATION_KIND_REMOTE_SYNC_START:
               case BZ_BACKEND_NOTIFICATION_KIND_REPLACE_ENTRY:
@@ -1738,7 +1760,6 @@ open_flatpakref_fiber (OpenFlatpakrefData *data)
   GFile *file                    = data->file;
   g_autoptr (GError) local_error = NULL;
   g_autoptr (DexFuture) future   = NULL;
-  GtkWindow    *window           = NULL;
   const GValue *value            = NULL;
 
   bz_weak_get_or_return_reject (self, data->self);
@@ -1747,15 +1768,20 @@ open_flatpakref_fiber (OpenFlatpakrefData *data)
   future = bz_backend_load_local_package (BZ_BACKEND (self->flatpak), file, NULL);
   dex_await (dex_ref (future), NULL);
 
-  window = gtk_application_get_active_window (GTK_APPLICATION (self));
-  if (window == NULL)
-    window = new_window (self);
-
   value = dex_future_get_value (future, &local_error);
-  if (value != NULL)
-    open_generic_id (self, g_value_get_string (value));
-  else
-    bz_show_error_for_widget (GTK_WIDGET (window), _ ("Failed to open .flatpakref"), local_error->message);
+  if (value == NULL)
+    {
+      GtkWindow *window = NULL;
+
+      window = gtk_application_get_active_window (GTK_APPLICATION (self));
+      if (window == NULL)
+        window = new_window (self);
+
+      bz_show_error_for_widget (
+          GTK_WIDGET (window),
+          _ ("Failed to open file"),
+          local_error->message);
+    }
 
   return dex_future_new_true ();
 }
