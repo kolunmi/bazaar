@@ -848,6 +848,7 @@ parse_snapshot_block (const char  *p,
       g_autofree char         *instr  = NULL;
       guint                    n_args = 0;
       g_auto (GStrv) args             = NULL;
+      guint n_pops                    = 0;
 
       GET_TOKEN (&action, TOKEN_PARSE_DEFAULT);
       if (g_strcmp0 (action, "}") == 0)
@@ -869,7 +870,7 @@ parse_snapshot_block (const char  *p,
         {
           result = bge_wdgt_spec_append_snapshot_instr (
               spec, state, BGE_WDGT_SNAPSHOT_INSTR_SAVE,
-              "save", NULL, 0, &local_error);
+              "save", NULL, 0, NULL, &local_error);
           RETURN_ERROR_UNLESS (result);
         }
       else if (kind == BGE_WDGT_SNAPSHOT_INSTR_SNAPSHOT_CHILD)
@@ -882,7 +883,8 @@ parse_snapshot_block (const char  *p,
 
           result = bge_wdgt_spec_append_snapshot_instr (
               spec, state, BGE_WDGT_SNAPSHOT_INSTR_SNAPSHOT_CHILD,
-              "do-child", (const char *const *) args, n_args, &local_error);
+              "do-child", (const char *const *) args, n_args, NULL,
+              &local_error);
           RETURN_ERROR_UNLESS (result);
         }
       else
@@ -897,7 +899,8 @@ parse_snapshot_block (const char  *p,
 
           result = bge_wdgt_spec_append_snapshot_instr (
               spec, state, kind,
-              instr, (const char *const *) args, n_args, &local_error);
+              instr, (const char *const *) args, n_args,
+              &n_pops, &local_error);
           RETURN_ERROR_UNLESS (result);
         }
 
@@ -906,15 +909,21 @@ parse_snapshot_block (const char  *p,
         GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ";");
       else if (kind == BGE_WDGT_SNAPSHOT_INSTR_PUSH)
         {
-          GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "{");
-          p = parse_snapshot_block (p, spec, state, macro_replacements,
-                                    n_anon_vals, type_hints, &local_error);
-          RETURN_ERROR_UNLESS (p != NULL);
+          for (guint i = 0; i < n_pops; i++)
+            {
+              if (i > 0)
+                GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "then");
 
-          result = bge_wdgt_spec_append_snapshot_instr (
-              spec, state, BGE_WDGT_SNAPSHOT_INSTR_POP,
-              "pop", NULL, 0, &local_error);
-          RETURN_ERROR_UNLESS (result);
+              GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "{");
+              p = parse_snapshot_block (p, spec, state, macro_replacements,
+                                        n_anon_vals, type_hints, &local_error);
+              RETURN_ERROR_UNLESS (p != NULL);
+
+              result = bge_wdgt_spec_append_snapshot_instr (
+                  spec, state, BGE_WDGT_SNAPSHOT_INSTR_POP,
+                  "pop", NULL, 0, NULL, &local_error);
+              RETURN_ERROR_UNLESS (result);
+            }
         }
       else if (kind == BGE_WDGT_SNAPSHOT_INSTR_SAVE)
         {
@@ -925,7 +934,7 @@ parse_snapshot_block (const char  *p,
 
           result = bge_wdgt_spec_append_snapshot_instr (
               spec, state, BGE_WDGT_SNAPSHOT_INSTR_RESTORE,
-              "restore", NULL, 0, &local_error);
+              "restore", NULL, 0, NULL, &local_error);
           RETURN_ERROR_UNLESS (result);
         }
     }

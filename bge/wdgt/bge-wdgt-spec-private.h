@@ -226,6 +226,7 @@ bge_wdgt_spec_append_snapshot_instr (BgeWdgtSpec             *self,
                                      const char              *instr,
                                      const char *const       *args,
                                      guint                    n_args,
+                                     guint                   *n_pops_out,
                                      GError                 **error);
 
 G_END_DECLS
