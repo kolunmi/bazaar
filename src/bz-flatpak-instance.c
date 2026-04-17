@@ -2111,9 +2111,40 @@ transaction_fiber (TransactionData *data)
           if (bundle_path != NULL)
             /* Prioritize bundle installation */
             {
-              g_autoptr (GFile) file = NULL;
+              g_autoptr (GFile) file          = NULL;
+              g_autofree char  *resolved_path = NULL;
 
-              file   = g_file_new_for_path (bundle_path);
+              if (g_str_has_prefix (bundle_path, "/run/user/") &&
+                  strstr (bundle_path, "/doc/") != NULL)
+                {
+                  g_autofree char *basename = NULL;
+                  g_autofree char *staging  = NULL;
+                  g_autoptr (GFile) src     = NULL;
+                  g_autoptr (GFile) dst     = NULL;
+
+                  basename = g_path_get_basename (bundle_path);
+                  staging  = g_build_filename (g_get_user_cache_dir (), "bundle-staging", NULL);
+
+                  g_mkdir_with_parents (staging, 0755);
+
+                  resolved_path = g_build_filename (staging, basename, NULL);
+                  src           = g_file_new_for_path (bundle_path);
+                  dst           = g_file_new_for_path (resolved_path);
+
+                  if (!g_file_copy (src, dst,
+                                    G_FILE_COPY_OVERWRITE | G_FILE_COPY_NOFOLLOW_SYMLINKS,
+                                    cancellable, NULL, NULL, &local_error))
+                    {
+                      dex_channel_close_send (channel);
+                      return dex_future_new_reject (
+                          BZ_FLATPAK_ERROR,
+                          BZ_FLATPAK_ERROR_TRANSACTION_FAILURE,
+                          "Failed to stage bundle '%s': %s",
+                          bundle_path, local_error->message);
+                    }
+                }
+
+              file   = g_file_new_for_path (resolved_path != NULL ? resolved_path : bundle_path);
               result = flatpak_transaction_add_install_bundle (
                   transaction,
                   file,
