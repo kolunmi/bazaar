@@ -1064,11 +1064,10 @@ load_local_ref_fiber (LoadLocalRefData *data)
 
 #ifdef SANDBOXED_LIBFLATPAK
       {
-        g_autofree char *basename          = NULL;
-        g_autofree char *module_dir        = NULL;
-        g_autofree char *staging           = NULL;
-        g_autofree char *dest              = NULL;
-        g_autoptr (GSubprocess) subprocess = NULL;
+        g_autofree char *basename   = NULL;
+        g_autofree char *module_dir = NULL;
+        g_autofree char *staging    = NULL;
+        g_autofree char *dest       = NULL;
 
         basename   = g_path_get_basename (path);
         module_dir = bz_dup_module_dir ();
@@ -1076,17 +1075,12 @@ load_local_ref_fiber (LoadLocalRefData *data)
         g_mkdir_with_parents (staging, 0755);
         dest = g_build_filename (staging, basename, NULL);
 
-        subprocess = g_subprocess_new (
-            G_SUBPROCESS_FLAGS_STDERR_PIPE,
-            &local_error,
-            "flatpak-spawn",
-            "--host",
-            "cp",
-            path,
-            dest,
-            NULL);
-        result = dex_await (
-            dex_subprocess_wait_check (subprocess),
+        resolved_file = g_file_new_for_path (dest);
+
+        result = g_file_copy (
+            file, resolved_file,
+            G_FILE_COPY_OVERWRITE | G_FILE_COPY_NOFOLLOW_SYMLINKS,
+            NULL, NULL, NULL,
             &local_error);
         if (!result)
           return dex_future_new_reject (
@@ -1094,8 +1088,6 @@ load_local_ref_fiber (LoadLocalRefData *data)
               BZ_FLATPAK_ERROR_IO_MISBEHAVIOR,
               "Failed to copy bundle from %s to %s : %s",
               path, dest, local_error->message);
-
-        resolved_file = g_file_new_for_path (dest);
       }
 #else
       resolved_file = g_object_ref (file);
