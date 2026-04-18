@@ -761,14 +761,14 @@ tracker_update (BzTransactionPrivate                  *priv,
   g_autoptr (BzTransactionEntryTracker) tracker = NULL;
   gboolean result                               = FALSE;
 
-  entry = bz_backend_transaction_op_payload_get_entry (payload);
-
+  entry  = bz_backend_transaction_op_payload_get_entry (payload);
   result = find_and_maybe_transfer (
       priv->trackers,
       NULL,
       entry,
       (GEqualFuncFull) find_entry_eq_func,
       (gpointer *) &tracker);
+
   if (result)
     {
       if (transfer)
@@ -776,11 +776,12 @@ tracker_update (BzTransactionPrivate                  *priv,
           GListModel *from = NULL;
           GListModel *to   = NULL;
 
-          if (set_done) {
-            bz_transaction_entry_tracker_set_active (tracker, FALSE);
-            bz_transaction_entry_tracker_set_status (tracker, BZ_TRANSACTION_ENTRY_STATUS_DONE);
-            bz_transaction_entry_tracker_set_pending (tracker, FALSE);
-          }
+          if (set_done)
+            {
+              bz_transaction_entry_tracker_set_active (tracker, FALSE);
+              bz_transaction_entry_tracker_set_status (tracker, BZ_TRANSACTION_ENTRY_STATUS_DONE);
+              bz_transaction_entry_tracker_set_pending (tracker, FALSE);
+            }
 
           from   = bz_transaction_entry_tracker_get_current_ops (tracker);
           to     = bz_transaction_entry_tracker_get_finished_ops (tracker);
@@ -798,8 +799,14 @@ tracker_update (BzTransactionPrivate                  *priv,
         {
           if (progress_payload != NULL)
             {
+              double progress = 0.0;
+              double scaled   = 0.0;
+
+              progress = bz_backend_transaction_op_progress_payload_get_total_progress (progress_payload);
+              scaled   = progress >= 1.0 ? 1.0 : progress * 0.9;
+
               g_object_set (tracker,
-                            "progress", bz_backend_transaction_op_progress_payload_get_total_progress (progress_payload),
+                            "progress", scaled,
                             "pending", bz_backend_transaction_op_progress_payload_get_is_estimating (progress_payload),
                             NULL);
             }
