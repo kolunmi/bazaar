@@ -2343,26 +2343,25 @@ GIcon *
 bz_load_mini_icon_sync (const char *unique_id_checksum,
                         const char *path)
 {
-  guint            icon_size             = 0;
-  g_autofree char *main_cache            = NULL;
-  g_autoptr (GString) mini_icon_basename = NULL;
-  g_autofree char *mini_icon_path        = NULL;
-  g_autoptr (GBytes) bytes               = NULL;
-  cairo_surface_t *surface_in            = NULL;
-  int              width                 = 0;
-  int              height                = 0;
-  cairo_surface_t *surface_out           = NULL;
-  cairo_t         *cairo                 = NULL;
-  g_autoptr (GFile) parent_file          = NULL;
-  g_autoptr (GFile) mini_icon_file       = NULL;
-  g_autoptr (GIcon) mini_icon            = NULL;
+  guint            icon_size          = 0;
+  g_autofree char *main_cache         = NULL;
+  g_autofree char *mini_icon_basename = NULL;
+  g_autofree char *mini_icon_path     = NULL;
+  g_autoptr (GBytes) bytes            = NULL;
+  cairo_surface_t *surface_in         = NULL;
+  int              width              = 0;
+  int              height             = 0;
+  cairo_surface_t *surface_out        = NULL;
+  cairo_t         *cairo              = NULL;
+  g_autoptr (GFile) parent_file       = NULL;
+  g_autoptr (GFile) mini_icon_file    = NULL;
+  g_autoptr (GIcon) mini_icon         = NULL;
 
   icon_size = bz_get_desktop_search_provider_icon_size ();
 
   main_cache         = bz_dup_module_dir ();
-  mini_icon_basename = g_string_new (unique_id_checksum);
-  g_string_append_printf (mini_icon_basename, "-%ux%u.png", icon_size, icon_size);
-  mini_icon_path = g_build_filename (main_cache, mini_icon_basename->str, NULL);
+  mini_icon_basename = g_strdup_printf ("%s-%ux%u", unique_id_checksum, icon_size, icon_size);
+  mini_icon_path     = g_build_filename (main_cache, mini_icon_basename, NULL);
 
   if (g_file_test (mini_icon_path, G_FILE_TEST_EXISTS))
     /* Assume the icon left behind by last writer */
