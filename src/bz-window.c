@@ -572,10 +572,10 @@ action_open_library (GtkWidget  *widget,
 static DexFuture *
 launch_group_fiber (BzEntryGroup *group)
 {
-  g_autoptr (GError) local_error = NULL;
-  g_autoptr (GListStore) store   = NULL;
-  GtkWidget   *window            = NULL;
-  BzStateInfo *state             = NULL;
+  g_autoptr (GError) local_error  = NULL;
+  g_autoptr (GListStore) store    = NULL;
+  GtkWidget   *window             = NULL;
+  BzStateInfo *state              = NULL;
 
   state  = bz_state_info_get_default ();
   window = GTK_WIDGET (gtk_application_get_active_window (
@@ -592,21 +592,40 @@ launch_group_fiber (BzEntryGroup *group)
 
   for (guint i = 0; i < g_list_model_get_n_items (G_LIST_MODEL (store)); i++)
     {
-      g_autoptr (BzEntry) entry = NULL;
+      g_autoptr (BzEntry) entry    = NULL;
+      const char         *ref      = NULL;
+      gboolean            result   = FALSE;
 
       entry = g_list_model_get_item (G_LIST_MODEL (store), i);
-      if (BZ_IS_FLATPAK_ENTRY (entry) && bz_entry_is_installed (entry))
+
+      if (!BZ_IS_FLATPAK_ENTRY (entry) || !bz_entry_is_installed (entry))
+        continue;
+
+      ref = bz_flatpak_entry_get_addon_extension_of_ref (BZ_FLATPAK_ENTRY (entry));
+      if (ref != NULL)
         {
-          gboolean result = bz_flatpak_entry_launch (
-              BZ_FLATPAK_ENTRY (entry),
-              BZ_FLATPAK_INSTANCE (bz_state_info_get_backend (state)),
-              &local_error);
+          g_auto (GStrv)           parts   = NULL;
+          BzApplicationMapFactory *factory = NULL;
+          g_autoptr (BzEntryGroup) parent  = NULL;
 
-          if (!result && window != NULL)
-            bz_show_error_for_widget (window, _ ("Failed to launch application"), local_error->message);
-
-          return result ? dex_future_new_true () : dex_future_new_for_error (g_steal_pointer (&local_error));
+          parts = g_strsplit (ref, "/", -1);
+          if (parts[0] != NULL && parts[1] != NULL)
+            {
+              factory = bz_state_info_get_application_factory (state);
+              parent  = bz_application_map_factory_convert_one (
+                  factory, gtk_string_object_new (parts[1]));
+              if (parent != NULL)
+                return launch_group_fiber (parent);
+            }
         }
+
+      result = bz_flatpak_entry_launch (
+          BZ_FLATPAK_ENTRY (entry),
+          BZ_FLATPAK_INSTANCE (bz_state_info_get_backend (state)),
+          &local_error);
+      if (!result && window != NULL)
+        bz_show_error_for_widget (window, _ ("Failed to launch application"), local_error->message);
+      return result ? dex_future_new_true () : dex_future_new_for_error (g_steal_pointer (&local_error));
     }
 
   return dex_future_new_false ();

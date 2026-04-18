@@ -220,7 +220,8 @@ get_visible_page (gpointer    object,
 
   if (removable > 0)
     {
-      store = find_matching_updates (self, available_updates);
+      if (g_signal_has_handler_pending (self, signals[SIGNAL_UPDATE], 0, FALSE))
+        store = find_matching_updates (self, available_updates);
       return g_strdup (store != NULL ? "update" : "open");
     }
   else if (installable > 0)
