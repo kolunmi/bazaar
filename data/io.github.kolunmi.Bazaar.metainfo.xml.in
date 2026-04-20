@@ -73,6 +73,31 @@
   </screenshots>
 
   <releases>
+    <release version="0.7.15" date="2026-04-17">
+      <url type="details">https://github.com/bazaar-org/bazaar/releases/tag/v0.7.15</url>
+      <description translate="no">
+        <p>
+          <em>New Features</em>
+        </p>
+        <ul>
+          <li>Add support for previewing metainfo files</li>
+          <li>Show total installed apps number in the library view</li>
+          <li>Make exported desktop search provider app icon sizes adjustable</li>
+        </ul>
+        <p>
+          <em>Fixes</em>
+        </p>
+        <ul>
+          <li>Fix download timeline graph rerendering too much</li>
+          <li>Fix animated widget ticks not being in sync with fps</li>
+          <li>Fix progress animation for vertical pride flag stripes</li>
+          <li>Many other bug fixes</li>
+        </ul>
+        <p>
+          Thanks for reading, and have a great day!
+        </p>
+      </description>
+    </release>
     <release version="0.7.14" date="2026-04-10">
       <url type="details">https://github.com/bazaar-org/bazaar/releases/tag/v0.7.14</url>
         <description translate="no">

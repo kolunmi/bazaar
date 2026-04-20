@@ -117,6 +117,8 @@ typedef struct
   GType            args[16];
   gpointer         func;
   SnapshotCallFunc call;
+  /* for push instrs only */
+  guint n_pops;
 } SnapshotInstr;
 
 static void
@@ -2561,6 +2563,7 @@ bge_wdgt_spec_append_snapshot_instr (BgeWdgtSpec             *self,
                                      const char              *instr,
                                      const char *const       *args,
                                      guint                    n_args,
+                                     guint                   *n_pops_out,
                                      GError                 **error)
 {
   gboolean      result              = FALSE;
@@ -2597,6 +2600,8 @@ bge_wdgt_spec_append_snapshot_instr (BgeWdgtSpec             *self,
                        instr);
           return FALSE;
         }
+      if (n_pops_out != NULL)
+        *n_pops_out = match.n_pops;
       break;
     case BGE_WDGT_SNAPSHOT_INSTR_TRANSFORM:
       result = lookup_snapshot_transform_instr (instr, &match);
@@ -3966,6 +3971,7 @@ lookup_snapshot_push_instr (const char    *lookup_name,
      },
      gtk_snapshot_push_opacity,
      snapshot_push_instr_opacity,
+     1,
      },
     {
      "isolation",
@@ -3976,6 +3982,7 @@ lookup_snapshot_push_instr (const char    *lookup_name,
      },
      gtk_snapshot_push_isolation,
      snapshot_push_instr_isolation,
+     1,
      },
     {
      "blur",
@@ -3986,6 +3993,7 @@ lookup_snapshot_push_instr (const char    *lookup_name,
      },
      gtk_snapshot_push_blur,
      snapshot_push_instr_blur,
+     1,
      },
     {
      "color-matrix",
@@ -3997,6 +4005,7 @@ lookup_snapshot_push_instr (const char    *lookup_name,
      },
      gtk_snapshot_push_color_matrix,
      snapshot_push_instr_color_matrix,
+     2,
      },
     {
      "component-transfer",
@@ -4010,6 +4019,7 @@ lookup_snapshot_push_instr (const char    *lookup_name,
      },
      gtk_snapshot_push_component_transfer,
      snapshot_push_instr_component_transfer,
+     2,
      },
     {
      "repeat",
@@ -4021,6 +4031,7 @@ lookup_snapshot_push_instr (const char    *lookup_name,
      },
      gtk_snapshot_push_repeat,
      snapshot_push_instr_repeat,
+     2,
      },
     {
      "clip",
@@ -4031,6 +4042,7 @@ lookup_snapshot_push_instr (const char    *lookup_name,
      },
      gtk_snapshot_push_clip,
      snapshot_push_instr_clip,
+     1,
      },
     {
      "rounded-clip",
@@ -4045,6 +4057,7 @@ lookup_snapshot_push_instr (const char    *lookup_name,
      },
      gtk_snapshot_push_rounded_clip,
      snapshot_push_instr_rounded_clip,
+     1,
      },
     {
      "fill",
@@ -4056,6 +4069,7 @@ lookup_snapshot_push_instr (const char    *lookup_name,
      },
      gtk_snapshot_push_fill,
      snapshot_push_instr_fill,
+     2,
      },
     {
      "stroke",
@@ -4067,6 +4081,7 @@ lookup_snapshot_push_instr (const char    *lookup_name,
      },
      gtk_snapshot_push_stroke,
      snapshot_push_instr_stroke,
+     2,
      },
     {
      "shadow",
@@ -4080,6 +4095,7 @@ lookup_snapshot_push_instr (const char    *lookup_name,
      },
      gtk_snapshot_push_shadow,
      snapshot_push_instr_shadow,
+     2,
      },
     {
      "blend",
@@ -4090,6 +4106,7 @@ lookup_snapshot_push_instr (const char    *lookup_name,
      },
      gtk_snapshot_push_blend,
      snapshot_push_instr_blend,
+     2,
      },
     {
      "mask",
@@ -4100,6 +4117,7 @@ lookup_snapshot_push_instr (const char    *lookup_name,
      },
      gtk_snapshot_push_mask,
      snapshot_push_instr_mask,
+     2,
      },
     {
      "copy",
@@ -4108,6 +4126,7 @@ lookup_snapshot_push_instr (const char    *lookup_name,
      {},
      gtk_snapshot_push_copy,
      snapshot_push_instr_copy,
+     1,
      },
     {
      "composite",
@@ -4118,6 +4137,7 @@ lookup_snapshot_push_instr (const char    *lookup_name,
      },
      gtk_snapshot_push_composite,
      snapshot_push_instr_composite,
+     2,
      },
     {
      "cross-fade",
@@ -4128,6 +4148,7 @@ lookup_snapshot_push_instr (const char    *lookup_name,
      },
      gtk_snapshot_push_cross_fade,
      snapshot_push_instr_cross_fade,
+     2,
      },
   };
 
