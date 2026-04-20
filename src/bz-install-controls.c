@@ -67,9 +67,9 @@ static guint signals[LAST_SIGNAL];
 static void
 update_tracker (BzInstallControls *self)
 {
-  BzTransactionManager              *manager  = NULL;
-  g_autoptr (GListModel)             all      = NULL;
-  const char                        *group_id = NULL;
+  BzTransactionManager *manager               = NULL;
+  g_autoptr (GListModel) all                  = NULL;
+  const char *group_id                        = NULL;
   g_autoptr (BzTransactionEntryTracker) found = NULL;
 
   if (self->state != NULL)
@@ -84,7 +84,7 @@ update_tracker (BzInstallControls *self)
       for (guint i = 0; i < g_list_model_get_n_items (all); i++)
         {
           g_autoptr (BzTransactionEntryTracker) tracker = NULL;
-          BzEntry                              *entry   = NULL;
+          BzEntry *entry                                = NULL;
 
           tracker = g_list_model_get_item (all, i);
           entry   = bz_transaction_entry_tracker_get_entry (tracker);
@@ -517,8 +517,8 @@ bz_install_controls_set_state (BzInstallControls *self,
 
   if (self->state != NULL)
     {
-      BzTransactionManager  *old_mgr = NULL;
-      g_autoptr (GListModel) all     = NULL;
+      BzTransactionManager *old_mgr = NULL;
+      g_autoptr (GListModel) all    = NULL;
 
       old_mgr = bz_state_info_get_transaction_manager (self->state);
       if (old_mgr != NULL)
@@ -531,7 +531,7 @@ bz_install_controls_set_state (BzInstallControls *self,
 
   if (state != NULL)
     {
-      BzTransactionManager  *mgr = NULL;
+      BzTransactionManager *mgr  = NULL;
       g_autoptr (GListModel) all = NULL;
 
       mgr = bz_state_info_get_transaction_manager (state);
