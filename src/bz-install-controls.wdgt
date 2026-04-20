@@ -59,9 +59,9 @@ defwidget "Install Button" {
   state-default "inactive" {
     set stack:visible-child = btn-install;
 
-    set x = #eval((#(%width%)-#(w))/2.0);
-    set w = #eval(#(b)*2.0);
-    set b = #eval(#(%height%)/3.0);
+    set x = 0.0;
+    set w = %width%;
+    set b = 0.0;
     set opacity = 0.0;
     
     transition-spring x 1.0, 0.1, 10.0;
