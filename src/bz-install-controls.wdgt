@@ -74,7 +74,7 @@ defwidget "Install Button" {
     set stack:visible-child = btn-cancel;
     
     set x = #eval((0.5+0.5*sin(3.0*#(%tick%))) * (#(%width%)-#(w)));
-    set w = #eval(#(%width%)*0.8);
+    set w = #eval(#(%width%)*0.7);
     set b = #eval(#(%height%)*0.175);
     set opacity = 1.0;
 
