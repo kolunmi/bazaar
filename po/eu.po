@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-04-18 14:36+0200\n"
-"PO-Revision-Date: 2026-04-14 20:20+0200\n"
+"PO-Revision-Date: 2026-04-20 23:40+0200\n"
 "Last-Translator: Ibai Oihanguren Sala <ibaios@disroot.org>\n"
 "Language-Team: Basque\n"
 "Language: eu\n"
@@ -2029,7 +2029,6 @@ msgid "Hide results that are not verified on Flathub"
 msgstr "Ezkutatu Flathub-ek egiaztatu gabeko emaitzak"
 
 #: src/bz-preferences-dialog.blp:49
-#, fuzzy
 msgid "Hide End-of-Life Apps"
 msgstr "Ezkutatu bizirik ez dauden aplikazioak"
 
@@ -2725,7 +2724,7 @@ msgstr "Bizirik"
 
 #: src/bz-search-filter-popover.blp:52
 msgid "Filter out End-of-Life apps"
-msgstr ""
+msgstr "Ez erakutsi bizirik ez dauden aplikazioak"
 
 #: src/bz-search-filter-popover.blp:57
 msgid "Categories"
@@ -3037,7 +3036,7 @@ msgstr "Aukeratua"
 
 #: src/bz-window.blp:100
 msgid "Explore"
-msgstr ""
+msgstr "Arakatu"
 
 #: src/bz-window.blp:220
 msgid "Refresh completed!"
@@ -3062,9 +3061,8 @@ msgstr ""
 "Sareko konexioa daukazu, baina Flathub-en bertsio cacheratua ari zara ikusten"
 
 #: src/bz-window.blp:327
-#, fuzzy
 msgid "_Donate to Bazaar"
-msgstr "Lagundu Bazaar diruz"
+msgstr "_Lagundu Bazaar diruz"
 
 #: src/bz-window.blp:334
 msgid "_Refresh"
@@ -3119,7 +3117,7 @@ msgstr "Orain ezin duzu hori egin!"
 #: src/bz-world-map.c:603
 msgctxt "As in, \"100 Installs\""
 msgid "Installs"
-msgstr "Instalazioak"
+msgstr "instalazio"
 
 #: src/shortcuts-dialog.blp:6
 msgctxt "shortcut window"
