@@ -853,6 +853,36 @@ parse_snapshot_block (const char  *p,
       GET_TOKEN (&action, TOKEN_PARSE_DEFAULT);
       if (g_strcmp0 (action, "}") == 0)
         break;
+      else if (g_strcmp0 (action, "foreach") == 0)
+        {
+          g_autofree char *var                 = NULL;
+          g_autofree char *element_type_string = NULL;
+          g_autofree char *idx_var             = NULL;
+          g_autofree char *model               = NULL;
+          GType            element_type        = G_TYPE_INVALID;
+
+          GET_TOKEN (&var, TOKEN_PARSE_DEFAULT);
+          GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ":");
+          GET_TOKEN (&element_type_string, TOKEN_PARSE_DEFAULT);
+          GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ",");
+          GET_TOKEN (&idx_var, TOKEN_PARSE_DEFAULT);
+          GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "in");
+          GET_TOKEN (&model, TOKEN_PARSE_DEFAULT);
+
+          element_type = g_type_from_name (element_type_string);
+
+          result = bge_wdgt_spec_push_foreach (
+              spec, model, var, idx_var, element_type, &local_error);
+          RETURN_ERROR_UNLESS (result);
+
+          GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "{");
+          p = parse_snapshot_block (p, spec, state, macro_replacements,
+                                    n_anon_vals, type_hints, &local_error);
+          RETURN_ERROR_UNLESS (p != NULL);
+
+          bge_wdgt_spec_pop_foreach (spec);
+          continue;
+        }
       else if (g_strcmp0 (action, "save") == 0)
         kind = BGE_WDGT_SNAPSHOT_INSTR_SAVE;
       else if (g_strcmp0 (action, "with") == 0)
