@@ -43,8 +43,7 @@ GtkWidget *
 bge_animation_dup_widget (BgeAnimation *self);
 
 BGE_AVAILABLE_IN_ALL
-G_GNUC_WARN_UNUSED_RESULT
-DexFuture *
+void
 bge_animation_add_spring (BgeAnimation        *self,
                           const char          *key,
                           double               from,
@@ -55,7 +54,12 @@ bge_animation_add_spring (BgeAnimation        *self,
                           BgeAnimationCallback cb,
                           gpointer             user_data,
                           GDestroyNotify       destroy_data,
-                          DexCancellable      *cancellable);
+                          GCancellable        *cancellable);
+
+BGE_AVAILABLE_IN_ALL
+gboolean
+bge_animation_has_key (BgeAnimation *self,
+                       const char   *key);
 
 BGE_AVAILABLE_IN_ALL
 void

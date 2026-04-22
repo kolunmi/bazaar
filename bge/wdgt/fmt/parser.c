@@ -18,6 +18,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+#define G_LOG_DOMAIN "BGE::WDGT-PARSE"
+
 #include <graphene-gobject.h>
 
 #include "../bge-wdgt-spec-private.h"
@@ -188,6 +190,22 @@ cmp_operator (EvalOperator *a,
               EvalOperator *b);
 
 static void
+_marshal_DIRECT__ARGS_DIRECT (GClosure                *closure,
+                              GValue                  *return_value,
+                              guint                    n_param_values,
+                              const GValue            *param_values,
+                              gpointer invocation_hint G_GNUC_UNUSED,
+                              gpointer                 marshal_data);
+
+static void
+_marshal_BOOL__ARGS_DIRECT (GClosure                *closure,
+                            GValue                  *return_value,
+                            guint                    n_param_values,
+                            const GValue            *param_values,
+                            gpointer invocation_hint G_GNUC_UNUSED,
+                            gpointer                 marshal_data);
+
+static void
 _marshal_DOUBLE__ARGS_DIRECT (GClosure                *closure,
                               GValue                  *return_value,
                               guint                    n_param_values,
@@ -287,6 +305,14 @@ bge_wdgt_parse_string (const char *string,
       type_hints,
       g_strdup ("%height%"),
       GSIZE_TO_POINTER (G_TYPE_INT));
+
+  result = bge_wdgt_spec_add_tick_time_source_value (
+      spec, "%tick%", &local_error);
+  RETURN_ERROR_UNLESS (result);
+  g_hash_table_replace (
+      type_hints,
+      g_strdup ("%tick%"),
+      GSIZE_TO_POINTER (G_TYPE_DOUBLE));
 
   for (const char *p = string;
        !IS_EOF (p);)
@@ -822,10 +848,41 @@ parse_snapshot_block (const char  *p,
       g_autofree char         *instr  = NULL;
       guint                    n_args = 0;
       g_auto (GStrv) args             = NULL;
+      guint n_pops                    = 0;
 
       GET_TOKEN (&action, TOKEN_PARSE_DEFAULT);
       if (g_strcmp0 (action, "}") == 0)
         break;
+      else if (g_strcmp0 (action, "foreach") == 0)
+        {
+          g_autofree char *var                 = NULL;
+          g_autofree char *element_type_string = NULL;
+          g_autofree char *idx_var             = NULL;
+          g_autofree char *model               = NULL;
+          GType            element_type        = G_TYPE_INVALID;
+
+          GET_TOKEN (&var, TOKEN_PARSE_DEFAULT);
+          GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ":");
+          GET_TOKEN (&element_type_string, TOKEN_PARSE_DEFAULT);
+          GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ",");
+          GET_TOKEN (&idx_var, TOKEN_PARSE_DEFAULT);
+          GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "in");
+          GET_TOKEN (&model, TOKEN_PARSE_DEFAULT);
+
+          element_type = g_type_from_name (element_type_string);
+
+          result = bge_wdgt_spec_push_foreach (
+              spec, model, var, idx_var, element_type, &local_error);
+          RETURN_ERROR_UNLESS (result);
+
+          GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "{");
+          p = parse_snapshot_block (p, spec, state, macro_replacements,
+                                    n_anon_vals, type_hints, &local_error);
+          RETURN_ERROR_UNLESS (p != NULL);
+
+          bge_wdgt_spec_pop_foreach (spec);
+          continue;
+        }
       else if (g_strcmp0 (action, "save") == 0)
         kind = BGE_WDGT_SNAPSHOT_INSTR_SAVE;
       else if (g_strcmp0 (action, "with") == 0)
@@ -843,7 +900,7 @@ parse_snapshot_block (const char  *p,
         {
           result = bge_wdgt_spec_append_snapshot_instr (
               spec, state, BGE_WDGT_SNAPSHOT_INSTR_SAVE,
-              "save", NULL, 0, &local_error);
+              "save", NULL, 0, NULL, &local_error);
           RETURN_ERROR_UNLESS (result);
         }
       else if (kind == BGE_WDGT_SNAPSHOT_INSTR_SNAPSHOT_CHILD)
@@ -856,7 +913,8 @@ parse_snapshot_block (const char  *p,
 
           result = bge_wdgt_spec_append_snapshot_instr (
               spec, state, BGE_WDGT_SNAPSHOT_INSTR_SNAPSHOT_CHILD,
-              "do-child", (const char *const *) args, n_args, &local_error);
+              "do-child", (const char *const *) args, n_args, NULL,
+              &local_error);
           RETURN_ERROR_UNLESS (result);
         }
       else
@@ -871,7 +929,8 @@ parse_snapshot_block (const char  *p,
 
           result = bge_wdgt_spec_append_snapshot_instr (
               spec, state, kind,
-              instr, (const char *const *) args, n_args, &local_error);
+              instr, (const char *const *) args, n_args,
+              &n_pops, &local_error);
           RETURN_ERROR_UNLESS (result);
         }
 
@@ -880,15 +939,21 @@ parse_snapshot_block (const char  *p,
         GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ";");
       else if (kind == BGE_WDGT_SNAPSHOT_INSTR_PUSH)
         {
-          GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "{");
-          p = parse_snapshot_block (p, spec, state, macro_replacements,
-                                    n_anon_vals, type_hints, &local_error);
-          RETURN_ERROR_UNLESS (p != NULL);
+          for (guint i = 0; i < n_pops; i++)
+            {
+              if (i > 0)
+                GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "then");
 
-          result = bge_wdgt_spec_append_snapshot_instr (
-              spec, state, BGE_WDGT_SNAPSHOT_INSTR_POP,
-              "pop", NULL, 0, &local_error);
-          RETURN_ERROR_UNLESS (result);
+              GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "{");
+              p = parse_snapshot_block (p, spec, state, macro_replacements,
+                                        n_anon_vals, type_hints, &local_error);
+              RETURN_ERROR_UNLESS (p != NULL);
+
+              result = bge_wdgt_spec_append_snapshot_instr (
+                  spec, state, BGE_WDGT_SNAPSHOT_INSTR_POP,
+                  "pop", NULL, 0, NULL, &local_error);
+              RETURN_ERROR_UNLESS (result);
+            }
         }
       else if (kind == BGE_WDGT_SNAPSHOT_INSTR_SAVE)
         {
@@ -899,7 +964,7 @@ parse_snapshot_block (const char  *p,
 
           result = bge_wdgt_spec_append_snapshot_instr (
               spec, state, BGE_WDGT_SNAPSHOT_INSTR_RESTORE,
-              "restore", NULL, 0, &local_error);
+              "restore", NULL, 0, NULL, &local_error);
           RETURN_ERROR_UNLESS (result);
         }
     }
@@ -1191,6 +1256,197 @@ parse_eval (const char  *p,
   return p;
 }
 
+static gboolean
+not_closure (gpointer         this,
+             guint            n_param_values,
+             const GValue    *param_values,
+             EvalClosureData *data)
+{
+  for (guint i = 0; i < n_param_values; i++)
+    {
+      if (!g_value_get_boolean (&param_values[i]))
+        return TRUE;
+    }
+  return FALSE;
+}
+
+static gboolean
+and_closure (gpointer         this,
+             guint            n_param_values,
+             const GValue    *param_values,
+             EvalClosureData *data)
+{
+  for (guint i = 0; i < n_param_values; i++)
+    {
+      if (!g_value_get_boolean (&param_values[i]))
+        return FALSE;
+    }
+  return TRUE;
+}
+
+static gboolean
+or_closure (gpointer         this,
+            guint            n_param_values,
+            const GValue    *param_values,
+            EvalClosureData *data)
+{
+  for (guint i = 0; i < n_param_values; i++)
+    {
+      if (g_value_get_boolean (&param_values[i]))
+        return TRUE;
+    }
+  return FALSE;
+}
+
+static gboolean
+lt_closure (gpointer         this,
+            guint            n_param_values,
+            const GValue    *param_values,
+            EvalClosureData *data)
+{
+  gdouble cmp_with = 0.0;
+
+  cmp_with = g_value_get_double (param_values);
+  for (guint i = 1; i < n_param_values; i++)
+    {
+      if (!(cmp_with < g_value_get_double (&param_values[i])))
+        return FALSE;
+    }
+  return TRUE;
+}
+
+static gboolean
+gt_closure (gpointer         this,
+            guint            n_param_values,
+            const GValue    *param_values,
+            EvalClosureData *data)
+{
+  gdouble cmp_with = 0.0;
+
+  cmp_with = g_value_get_double (param_values);
+  for (guint i = 1; i < n_param_values; i++)
+    {
+      if (!(cmp_with > g_value_get_double (&param_values[i])))
+        return FALSE;
+    }
+  return TRUE;
+}
+
+static gboolean
+lte_closure (gpointer         this,
+             guint            n_param_values,
+             const GValue    *param_values,
+             EvalClosureData *data)
+{
+  gdouble cmp_with = 0.0;
+
+  cmp_with = g_value_get_double (param_values);
+  for (guint i = 1; i < n_param_values; i++)
+    {
+      if (!(cmp_with <= g_value_get_double (&param_values[i])))
+        return FALSE;
+    }
+  return TRUE;
+}
+
+static gboolean
+gte_closure (gpointer         this,
+             guint            n_param_values,
+             const GValue    *param_values,
+             EvalClosureData *data)
+{
+  gdouble cmp_with = 0.0;
+
+  cmp_with = g_value_get_double (param_values);
+  for (guint i = 1; i < n_param_values; i++)
+    {
+      if (!(cmp_with >= g_value_get_double (&param_values[i])))
+        return FALSE;
+    }
+  return TRUE;
+}
+
+static gboolean
+eq_closure (gpointer         this,
+            guint            n_param_values,
+            const GValue    *param_values,
+            EvalClosureData *data)
+{
+  gdouble cmp_with = 0.0;
+
+  cmp_with = g_value_get_double (param_values);
+  for (guint i = 1; i < n_param_values; i++)
+    {
+      if (!(cmp_with == g_value_get_double (&param_values[i])))
+        return FALSE;
+    }
+  return TRUE;
+}
+
+static gboolean
+neq_closure (gpointer         this,
+             guint            n_param_values,
+             const GValue    *param_values,
+             EvalClosureData *data)
+{
+  gdouble cmp_with = 0.0;
+
+  cmp_with = g_value_get_double (param_values);
+  for (guint i = 1; i < n_param_values; i++)
+    {
+      if (!(cmp_with != g_value_get_double (&param_values[i])))
+        return FALSE;
+    }
+  return TRUE;
+}
+
+static gboolean
+aeq_closure (gpointer         this,
+             guint            n_param_values,
+             const GValue    *param_values,
+             EvalClosureData *data)
+{
+  gdouble cmp_with = 0.0;
+
+  cmp_with = g_value_get_double (param_values);
+  for (guint i = 1; i < n_param_values; i++)
+    {
+      if (!(G_APPROX_VALUE (cmp_with, g_value_get_double (&param_values[i]), 0.00001)))
+        return FALSE;
+    }
+  return TRUE;
+}
+
+static gboolean
+aneq_closure (gpointer         this,
+              guint            n_param_values,
+              const GValue    *param_values,
+              EvalClosureData *data)
+{
+  gdouble cmp_with = 0.0;
+
+  cmp_with = g_value_get_double (param_values);
+  for (guint i = 1; i < n_param_values; i++)
+    {
+      if (!(!G_APPROX_VALUE (cmp_with, g_value_get_double (&param_values[i]), 0.00001)))
+        return FALSE;
+    }
+  return TRUE;
+}
+
+static void
+ifelse_closure (gpointer      this,
+                GValue       *return_value,
+                guint         n_param_values,
+                const GValue *param_values,
+                gpointer      dest_type_ptr)
+{
+  if (g_value_get_boolean (param_values))
+    g_value_copy (&param_values[1], return_value);
+  else
+    g_value_copy (&param_values[2], return_value);
+}
+
 static const char *
 parse_args (const char        *p,
             BgeWdgtSpec       *spec,
@@ -1274,6 +1530,197 @@ parse_args (const char        *p,
           p = parse_eval (p, spec, state, macro_replacements, n_anon_vals,
                           type_hints, &key, &local_error);
           RETURN_ERROR_UNLESS (p != NULL);
+
+          g_strv_builder_take (builder, g_steal_pointer (&key));
+          n_args++;
+          need_comma = TRUE;
+        }
+      else if (g_strcmp0 (token, "#not") == 0 ||
+               g_strcmp0 (token, "#!") == 0 ||
+               g_strcmp0 (token, "#and") == 0 ||
+               g_strcmp0 (token, "#or") == 0 ||
+               g_strcmp0 (token, "#<") == 0 ||
+               g_strcmp0 (token, "#>") == 0 ||
+               g_strcmp0 (token, "#<eq") == 0 ||
+               g_strcmp0 (token, "#>eq") == 0 ||
+               g_strcmp0 (token, "#eq") == 0 ||
+               g_strcmp0 (token, "#neq") == 0 ||
+               g_strcmp0 (token, "#~eq") == 0 ||
+               g_strcmp0 (token, "#~neq") == 0)
+        {
+          g_autofree char *key                  = NULL;
+          GCallback        cb                   = NULL;
+          GType            all_type             = G_TYPE_INVALID;
+          guint            require_n_cmp_values = 0;
+          guint            n_cmp_values         = 0;
+          g_auto (GStrv) cmp_values             = NULL;
+          g_autofree GType *all_types           = NULL;
+
+          if (g_strcmp0 (token, "#not") == 0 ||
+              g_strcmp0 (token, "#!") == 0)
+            {
+              cb                   = G_CALLBACK (not_closure);
+              all_type             = G_TYPE_BOOLEAN;
+              require_n_cmp_values = 1;
+            }
+          else if (g_strcmp0 (token, "#and") == 0)
+            {
+              cb                   = G_CALLBACK (and_closure);
+              all_type             = G_TYPE_BOOLEAN;
+              require_n_cmp_values = 2;
+            }
+          else if (g_strcmp0 (token, "#or") == 0)
+            {
+              cb                   = G_CALLBACK (or_closure);
+              all_type             = G_TYPE_BOOLEAN;
+              require_n_cmp_values = 2;
+            }
+          else if (g_strcmp0 (token, "#<") == 0)
+            {
+              cb                   = G_CALLBACK (lt_closure);
+              all_type             = G_TYPE_DOUBLE;
+              require_n_cmp_values = 2;
+            }
+          else if (g_strcmp0 (token, "#>") == 0)
+            {
+              cb                   = G_CALLBACK (gt_closure);
+              all_type             = G_TYPE_DOUBLE;
+              require_n_cmp_values = 2;
+            }
+          else if (g_strcmp0 (token, "#<eq") == 0)
+            {
+              cb                   = G_CALLBACK (lte_closure);
+              all_type             = G_TYPE_DOUBLE;
+              require_n_cmp_values = 2;
+            }
+          else if (g_strcmp0 (token, "#>eq") == 0)
+            {
+              cb                   = G_CALLBACK (gte_closure);
+              all_type             = G_TYPE_DOUBLE;
+              require_n_cmp_values = 2;
+            }
+          else if (g_strcmp0 (token, "#eq") == 0)
+            {
+              cb                   = G_CALLBACK (eq_closure);
+              all_type             = G_TYPE_DOUBLE;
+              require_n_cmp_values = 2;
+            }
+          else if (g_strcmp0 (token, "#neq") == 0)
+            {
+              cb                   = G_CALLBACK (neq_closure);
+              all_type             = G_TYPE_DOUBLE;
+              require_n_cmp_values = 2;
+            }
+          else if (g_strcmp0 (token, "#~eq") == 0)
+            {
+              cb                   = G_CALLBACK (aeq_closure);
+              all_type             = G_TYPE_DOUBLE;
+              require_n_cmp_values = 2;
+            }
+          else if (g_strcmp0 (token, "#~neq") == 0)
+            {
+              cb                   = G_CALLBACK (aneq_closure);
+              all_type             = G_TYPE_DOUBLE;
+              require_n_cmp_values = 2;
+            }
+          else
+            g_assert_not_reached ();
+
+          GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "(");
+          p = parse_args (p, spec, state, NULL, macro_replacements, n_anon_vals, type_hints, NULL,
+                          NULL, 0, &cmp_values, NULL, &n_cmp_values, ARGS_PARSE_PARENS, &local_error);
+          RETURN_ERROR_UNLESS (p != NULL);
+
+          if (n_cmp_values < require_n_cmp_values)
+            {
+              g_set_error (
+                  error,
+                  G_IO_ERROR,
+                  G_IO_ERROR_UNKNOWN,
+                  "%s() needs at least %u argument(s), "
+                  "got %u",
+                  token, require_n_cmp_values, n_cmp_values);
+              return NULL;
+            }
+
+          all_types = g_new (GType, n_cmp_values);
+          for (guint i = 0; i < n_cmp_values; i++)
+            {
+              all_types[i] = all_type;
+            }
+
+          key    = make_anon_name ((*n_anon_vals)++);
+          result = bge_wdgt_spec_add_cclosure_source_value (
+              spec,
+              key,
+              G_TYPE_BOOLEAN,
+              _marshal_BOOL__ARGS_DIRECT,
+              cb, (const char *const *) cmp_values,
+              all_types,
+              n_cmp_values,
+              NULL, NULL,
+              &local_error);
+          RETURN_ERROR_UNLESS (result);
+
+          g_strv_builder_take (builder, g_steal_pointer (&key));
+          n_args++;
+          need_comma = TRUE;
+        }
+      else if (g_strcmp0 (token, "#ifelse") == 0)
+        {
+          g_autofree char *key           = NULL;
+          GType            type_hint     = G_TYPE_INVALID;
+          guint            n_expr_values = 0;
+          g_auto (GStrv) expr_values     = NULL;
+          g_autofree GType *expr_types   = NULL;
+
+          if (n_args < n_destinations)
+            {
+              if (destinations != NULL)
+                type_hint = GPOINTER_TO_SIZE (g_hash_table_lookup (
+                    type_hints, destinations[n_args]));
+              if (type_hint == G_TYPE_INVALID &&
+                  destinations_types != NULL)
+                type_hint = destinations_types[n_args];
+            }
+
+          GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "(");
+          p = parse_args (p, spec, state, NULL, macro_replacements, n_anon_vals, type_hints, NULL,
+                          (GType[]){ G_TYPE_BOOLEAN }, 1,
+                          &expr_values, &expr_types, &n_expr_values,
+                          ARGS_PARSE_PARENS, &local_error);
+          RETURN_ERROR_UNLESS (p != NULL);
+
+          if (n_expr_values != 3)
+            {
+              g_set_error (
+                  error,
+                  G_IO_ERROR,
+                  G_IO_ERROR_UNKNOWN,
+                  "#ifelse() needs exactly 3 argument(s), "
+                  "got %u",
+                  n_expr_values);
+              return NULL;
+            }
+
+          if (type_hint == G_TYPE_INVALID)
+            /* Use the return type of the TRUE value and coerce the FALSE
+               value to this if necessary */
+            type_hint = expr_types[1];
+
+          key    = make_anon_name ((*n_anon_vals)++);
+          result = bge_wdgt_spec_add_cclosure_source_value (
+              spec,
+              key,
+              type_hint,
+              _marshal_DIRECT__ARGS_DIRECT,
+              G_CALLBACK (ifelse_closure),
+              (const char *const *) expr_values,
+              (GType[]){ G_TYPE_BOOLEAN, type_hint, type_hint },
+              n_expr_values,
+              NULL, NULL,
+              &local_error);
+          RETURN_ERROR_UNLESS (result);
 
           g_strv_builder_take (builder, g_steal_pointer (&key));
           n_args++;
@@ -1792,6 +2239,121 @@ parse_args (const char        *p,
 
                   key = g_steal_pointer (&last_key);
                 }
+              else if (type == GSK_TYPE_PATH)
+                {
+                  g_autoptr (GPtrArray) instrs = NULL;
+                  g_autoptr (GPtrArray) argss  = NULL;
+                  g_autoptr (GArray) n_argss   = NULL;
+
+                  instrs  = g_ptr_array_new_with_free_func (g_free);
+                  argss   = g_ptr_array_new_with_free_func ((GDestroyNotify) g_strfreev);
+                  n_argss = g_array_new (FALSE, FALSE, sizeof (guint));
+
+                  if (!expect_closing_paren)
+                    {
+                      g_set_error (
+                          error,
+                          G_IO_ERROR,
+                          G_IO_ERROR_UNKNOWN,
+                          "type %s must be wrapped in #(...)",
+                          g_type_name (type));
+                      return NULL;
+                    }
+
+                  for (;;)
+                    {
+                      g_autofree char *instr   = NULL;
+                      g_auto (GStrv) call_args = NULL;
+                      guint n_call_args        = 0;
+
+                      GET_TOKEN (&instr, TOKEN_PARSE_DEFAULT);
+                      if (g_strcmp0 (instr, ")") == 0)
+                        break;
+
+                      GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, "(");
+                      p = parse_args (p, spec, state, enclosing_object,
+                                      macro_replacements, n_anon_vals,
+                                      type_hints, NULL, NULL, 0, &call_args, NULL,
+                                      &n_call_args, ARGS_PARSE_PARENS, &local_error);
+                      RETURN_ERROR_UNLESS (p != NULL);
+                      GET_TOKEN_EXPECT (&token, TOKEN_PARSE_DEFAULT, ";");
+
+                      g_ptr_array_add (instrs, g_steal_pointer (&instr));
+                      g_ptr_array_add (argss, g_steal_pointer (&call_args));
+                      g_array_append_val (n_argss, n_call_args);
+                    }
+
+                  if (instrs->len == 0)
+                    {
+                      g_set_error (
+                          error,
+                          G_IO_ERROR,
+                          G_IO_ERROR_UNKNOWN,
+                          "not enough path builder instructions");
+                      return NULL;
+                    }
+
+                  key    = make_anon_name ((*n_anon_vals)++);
+                  result = bge_wdgt_spec_add_path_source_value (
+                      spec, key,
+                      (const char *const *) instrs->pdata,
+                      (const char *const *const *) argss->pdata,
+                      (const guint *) (void *) n_argss->data,
+                      instrs->len,
+                      &local_error);
+                  RETURN_ERROR_UNLESS (result);
+                }
+              else if (type == GSK_TYPE_STROKE)
+                {
+                  g_auto (GStrv) component_args = NULL;
+                  guint n_component_args        = 0;
+
+                  GType types[] = {
+                    G_TYPE_DOUBLE, /* line width */
+                    GSK_TYPE_LINE_CAP,
+                    GSK_TYPE_LINE_JOIN,
+                    G_TYPE_DOUBLE, /* miter limit */
+                  };
+
+                  if (!expect_closing_paren)
+                    {
+                      g_set_error (
+                          error,
+                          G_IO_ERROR,
+                          G_IO_ERROR_UNKNOWN,
+                          "type %s must be wrapped in #(...)",
+                          g_type_name (type));
+                      return NULL;
+                    }
+
+                  p = parse_args (p, spec, state, enclosing_object,
+                                  macro_replacements,
+                                  n_anon_vals, type_hints, NULL,
+                                  types, G_N_ELEMENTS (types),
+                                  &component_args, NULL, &n_component_args, ARGS_PARSE_PARENS,
+                                  &local_error);
+                  RETURN_ERROR_UNLESS (p != NULL);
+
+                  if (n_component_args != G_N_ELEMENTS (types))
+                    {
+                      g_set_error (
+                          error,
+                          G_IO_ERROR,
+                          G_IO_ERROR_UNKNOWN,
+                          "%s type initializer can have %d arguments, got %u",
+                          g_type_name (GSK_TYPE_STROKE),
+                          (int) G_N_ELEMENTS (types),
+                          n_component_args);
+                      return NULL;
+                    }
+
+                  key    = make_anon_name ((*n_anon_vals)++);
+                  result = bge_wdgt_spec_add_component_source_value (
+                      spec, key, GSK_TYPE_STROKE,
+                      (const char *const *) component_args,
+                      n_component_args, &local_error);
+                  RETURN_ERROR_UNLESS (result);
+                }
               else
                 {
                   g_set_error (
@@ -2255,6 +2817,85 @@ cmp_operator (EvalOperator *a,
   b_prec = operator_precedence[b->op];
 
   return a_prec > b_prec ? -1 : 1;
+}
+
+static void
+_marshal_DIRECT__ARGS_DIRECT (GClosure                *closure,
+                              GValue                  *return_value,
+                              guint                    n_param_values,
+                              const GValue            *param_values,
+                              gpointer invocation_hint G_GNUC_UNUSED,
+                              gpointer                 marshal_data)
+{
+  typedef void (*GMarshalFunc_DIRECT__ARGS_DIRECT) (gpointer      data1,
+                                                    GValue       *return_value,
+                                                    guint         n_param_values,
+                                                    const GValue *param_values,
+                                                    gpointer      data2);
+  GCClosure                       *cc = (GCClosure *) closure;
+  gpointer                         data1, data2;
+  GMarshalFunc_DIRECT__ARGS_DIRECT callback;
+
+  g_return_if_fail (return_value != NULL);
+  g_return_if_fail (n_param_values >= 1);
+
+  if (G_CCLOSURE_SWAP_DATA (closure))
+    {
+      data1 = closure->data;
+      data2 = g_value_peek_pointer (param_values + 0);
+    }
+  else
+    {
+      data1 = g_value_peek_pointer (param_values + 0);
+      data2 = closure->data;
+    }
+  callback = (GMarshalFunc_DIRECT__ARGS_DIRECT) (marshal_data ? marshal_data : cc->callback);
+
+  callback (data1,
+            return_value,
+            n_param_values - 1,
+            param_values + 1,
+            data2);
+}
+
+static void
+_marshal_BOOL__ARGS_DIRECT (GClosure                *closure,
+                            GValue                  *return_value,
+                            guint                    n_param_values,
+                            const GValue            *param_values,
+                            gpointer invocation_hint G_GNUC_UNUSED,
+                            gpointer                 marshal_data)
+{
+  typedef gboolean (*GMarshalFunc_BOOL__ARGS_DIRECT) (gpointer      data1,
+                                                      guint         n_param_values,
+                                                      const GValue *param_values,
+                                                      gpointer      data2);
+  GCClosure                     *cc = (GCClosure *) closure;
+  gpointer                       data1, data2;
+  GMarshalFunc_BOOL__ARGS_DIRECT callback;
+  gboolean                       v_return;
+
+  g_return_if_fail (return_value != NULL);
+  g_return_if_fail (n_param_values >= 1);
+
+  if (G_CCLOSURE_SWAP_DATA (closure))
+    {
+      data1 = closure->data;
+      data2 = g_value_peek_pointer (param_values + 0);
+    }
+  else
+    {
+      data1 = g_value_peek_pointer (param_values + 0);
+      data2 = closure->data;
+    }
+  callback = (GMarshalFunc_BOOL__ARGS_DIRECT) (marshal_data ? marshal_data : cc->callback);
+
+  v_return = callback (data1,
+                       n_param_values - 1,
+                       param_values + 1,
+                       data2);
+
+  g_value_set_boolean (return_value, v_return);
 }
 
 static void

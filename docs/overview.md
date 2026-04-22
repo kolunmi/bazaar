@@ -803,8 +803,8 @@ new-score = y-intercept + (slope * original-score)
 
 #### Exponential
 
-Linear functions require a `factor` and a `y-intercept` and are evaluated like
-this:
+Exponential functions require a `factor` and a `y-intercept` and are evaluated
+like this:
 
 ```
 new-score = y-intercept * (factor ^ original-score)

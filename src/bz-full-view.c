@@ -41,6 +41,7 @@
 #include "bz-hardware-support-dialog.h"
 #include "bz-install-controls.h"
 #include "bz-license-dialog.h"
+#include "bz-metainfo-preview.h"
 #include "bz-releases-list.h"
 #include "bz-safety-calculator.h"
 #include "bz-safety-dialog.h"
@@ -54,6 +55,7 @@
 #include "bz-tag-list.h"
 #include "bz-template-callbacks.h"
 #include "bz-util.h"
+#include "bz-window.h"
 
 struct _BzFullView
 {
@@ -67,8 +69,6 @@ struct _BzFullView
   BzResult             *runtime;
   BzResult             *group_model;
   gboolean              show_sidebar;
-
-  GMenuModel *main_menu;
 
   /* Template widgets */
   GtkScrolledWindow *main_scroll;
@@ -86,7 +86,6 @@ enum
   PROP_STATE,
   PROP_ENTRY_GROUP,
   PROP_UI_ENTRY,
-  PROP_MAIN_MENU,
 
   LAST_PROP
 };
@@ -112,7 +111,6 @@ bz_full_view_dispose (GObject *object)
   g_clear_object (&self->ui_entry);
   g_clear_object (&self->runtime);
   g_clear_object (&self->group_model);
-  g_clear_object (&self->main_menu);
 
   G_OBJECT_CLASS (bz_full_view_parent_class)->dispose (object);
 }
@@ -136,9 +134,6 @@ bz_full_view_get_property (GObject    *object,
     case PROP_UI_ENTRY:
       g_value_set_object (value, self->ui_entry);
       break;
-    case PROP_MAIN_MENU:
-      g_value_set_object (value, self->main_menu);
-      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -160,10 +155,6 @@ bz_full_view_set_property (GObject      *object,
       break;
     case PROP_ENTRY_GROUP:
       bz_full_view_set_entry_group (self, g_value_get_object (value));
-      break;
-    case PROP_MAIN_MENU:
-      g_clear_object (&self->main_menu);
-      self->main_menu = g_value_dup_object (value);
       break;
     case PROP_UI_ENTRY:
     default:
@@ -577,6 +568,24 @@ get_description_toggle_text (gpointer object,
   return g_strdup (active ? _ ("Show Less") : _ ("Show More"));
 }
 
+static gboolean
+metainfo_banner_visible (gpointer    object,
+                         const char *remote_name)
+{
+  return g_strcmp0 (remote_name, "local-preview") == 0;
+}
+
+static void
+preview_other_metainfo_cb (BzFullView *self,
+                           AdwBanner  *banner)
+{
+  GtkWidget *window = NULL;
+
+  window = GTK_WIDGET (gtk_widget_get_root (GTK_WIDGET (self)));
+  bz_window_push_page (BZ_WINDOW (window),
+                       create_entry_group_preview_page (self->group));
+}
+
 static void
 copy_id_cb (BzFullView *self,
             GtkButton  *button)
@@ -649,13 +658,6 @@ bz_full_view_class_init (BzFullViewClass *klass)
           BZ_TYPE_RESULT,
           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
-  props[PROP_MAIN_MENU] =
-      g_param_spec_object (
-          "main-menu",
-          NULL, NULL,
-          G_TYPE_MENU_MODEL,
-          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   signals[SIGNAL_UPDATE] =
@@ -723,6 +725,8 @@ bz_full_view_class_init (BzFullViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, unbind_app_tile_cb);
   gtk_widget_class_bind_template_callback (widget_class, get_description_max_height);
   gtk_widget_class_bind_template_callback (widget_class, get_description_toggle_text);
+  gtk_widget_class_bind_template_callback (widget_class, metainfo_banner_visible);
+  gtk_widget_class_bind_template_callback (widget_class, preview_other_metainfo_cb);
   gtk_widget_class_bind_template_callback (widget_class, copy_id_cb);
   gtk_widget_class_bind_template_callback (widget_class, debug_id_inspect_cb);
 }

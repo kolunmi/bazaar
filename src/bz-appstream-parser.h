@@ -36,4 +36,9 @@ gboolean bz_appstream_parser_populate_entry (BzEntry     *entry,
                                              guint        kinds,
                                              GError     **error);
 
+BzEntry *
+bz_appstream_parser_entry_from_metainfo (GFile   *metainfo_file,
+                                         GFile   *icon_file,
+                                         GError **error);
+
 G_END_DECLS

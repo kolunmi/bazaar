@@ -1,0 +1,86 @@
+{
+  "$schema": "https://fundingjson.org/schema/v1.1.0.json",
+  "version": "v1.0.0",
+  "entity": {
+    "type": "individual",
+    "role": "maintainer",
+    "name": "Adam Masciola",
+    "email": "kolunmi@posteo.net",
+    "phone": "",
+    "description": "",
+    "webpageUrl": {
+      "url": "https://www.kolunmi.net/",
+      "wellKnown": "https://github.com/bazaar-org/bazaar/blob/main/.well-known/funding-manifest-urls"
+    }
+  },
+  "projects": [
+    {
+      "guid": "bazaar",
+      "name": "Bazaar",
+      "description": "Bazaar is a vertically-integrated App Store for Linux desktop applications, tightly integrating with Flatpak application packages and flathub.org, the central Flatpak repository. It provides a beautiful and high-performance frontend to these open standards and open infrastructure for Linux desktop apps.",
+      "webpageUrl": {
+        "url": "https://usebazaar.org/",
+        "wellKnown": "https://github.com/bazaar-org/bazaar/blob/main/.well-known/funding-manifest-urls"
+      },
+      "repositoryUrl": {
+        "url": "https://github.com/bazaar-org/bazaar",
+        "wellKnown": "https://github.com/bazaar-org/bazaar/blob/main/.well-known/funding-manifest-urls"
+      },
+      "licenses": ["spdx:GPL-3.0"],
+      "tags": ["app-store", "flatpak"]
+    }
+  ],
+  "funding": {
+    "channels": [
+      {
+        "guid": "kolunmi-bank",
+        "type": "bank",
+        "address": "",
+        "description": "Direct bank transfers to USA bank. Please e-mail me for details."
+      }
+    ],
+    "plans": [
+      {
+        "guid": "curation",
+        "status": "active",
+        "name": "Curation",
+        "description": "Bazaar acts as both a software frontend and a curated frontend to flathub.org, which requires a small amount of continuous curation of applications (in the form of presentation layer tweaks) as they flow through Flathub.",
+        "amount": 200,
+        "currency": "USD",
+        "frequency": "monthly",
+        "channels": ["kolunmi-bank"]
+      },
+      {
+        "guid": "developer-time",
+        "status": "active",
+        "name": "Developer Compensation",
+        "description": "This will cover the cost of kolunmi's full-time contribution to Bazaar and integration with other projects.",
+        "amount": 2000,
+        "currency": "USD",
+        "frequency": "monthly",
+        "channels": ["kolunmi-bank"]
+      },
+      {
+        "guid": "donations",
+        "status": "active",
+        "name": "Donation GUI Enhancements",
+        "description": "Because Bazaar is increasingly the default Linux App Store, and many desktop Linux applications are F/OSS, carefully-designed donation opportunities to those projects will grow the overall Linux desktop.",
+        "amount": 300,
+        "currency": "USD",
+        "frequency": "monthly",
+        "channels": ["kolunmi-bank"]
+      },
+      {
+        "guid": "gnome-core",
+        "status": "active",
+        "name": "GNOME Circle and Core",
+        "description": "This is an ongoing task to get Bazaar into GNOME Circle and, ultimately, GNOME Core. This will require code review, security concerns, code cleanup, etc. in conjunction with the GNOME Core teams. Some of this work has already begun with the GNOME Design Team. Bazaar is already the default App Store on Bazzite, Nobara, and the other Universal Blue distributions.",
+        "amount": 500,
+        "currency": "USD",
+        "frequency": "monthly",
+        "channels": ["kolunmi-bank"]
+      }
+    ],
+    "history": []
+  }
+}

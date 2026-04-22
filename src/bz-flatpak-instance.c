@@ -48,10 +48,12 @@ struct _BzFlatpakInstance
   DexScheduler *scheduler;
 
   FlatpakInstallation *system;
+  FlatpakInstallation *system_interactive;
   GFileMonitor        *system_events;
   int                  system_mute;
 
   FlatpakInstallation *user;
+  FlatpakInstallation *user_interactive;
   GFileMonitor        *user_events;
   int                  user_mute;
 
@@ -338,8 +340,10 @@ bz_flatpak_instance_dispose (GObject *object)
   dex_clear (&self->scheduler);
 
   g_clear_object (&self->system);
+  g_clear_object (&self->system_interactive);
   g_clear_object (&self->system_events);
   g_clear_object (&self->user);
+  g_clear_object (&self->user_interactive);
   g_clear_object (&self->user_events);
 
   g_mutex_clear (&self->mute_mutex);
@@ -674,6 +678,16 @@ init_fiber (InitData *data)
   self->system = flatpak_installation_new_system (NULL, &local_error);
   if (self->system != NULL)
     {
+      g_autoptr (GFile) path = NULL;
+
+      flatpak_installation_set_no_interaction (self->system, TRUE);
+
+      path                     = flatpak_installation_get_path (self->system);
+      self->system_interactive = flatpak_installation_new_for_path (
+          path, FALSE, NULL, NULL);
+      g_assert (self->system_interactive != NULL);
+      flatpak_installation_set_no_interaction (self->system_interactive, FALSE);
+
       self->system_events = flatpak_installation_create_monitor (
           self->system, NULL, &local_error);
       if (self->system_events != NULL)
@@ -713,6 +727,16 @@ init_fiber (InitData *data)
 
   if (self->user != NULL)
     {
+      g_autoptr (GFile) path = NULL;
+
+      flatpak_installation_set_no_interaction (self->user, TRUE);
+
+      path                   = flatpak_installation_get_path (self->user);
+      self->user_interactive = flatpak_installation_new_for_path (
+          path, TRUE, NULL, NULL);
+      g_assert (self->user_interactive != NULL);
+      flatpak_installation_set_no_interaction (self->user_interactive, FALSE);
+
       self->user_events = flatpak_installation_create_monitor (
           self->user, NULL, &local_error);
       if (self->user_events != NULL)
@@ -732,6 +756,22 @@ init_fiber (InitData *data)
                  local_error->message);
       g_clear_pointer (&local_error, g_error_free);
     }
+
+#ifdef SANDBOXED_LIBFLATPAK
+  if (g_getenv ("FLATPAK_BINARY") == NULL)
+    {
+      g_autofree char *flatpak_path = NULL;
+      gint             exit_status  = 0;
+
+      g_spawn_command_line_sync ("flatpak-spawn --host sh -c 'command -v flatpak'",
+                                 &flatpak_path, NULL, &exit_status, NULL);
+
+      if (exit_status == 0 && flatpak_path != NULL)
+        g_setenv ("FLATPAK_BINARY", g_strstrip (flatpak_path), FALSE);
+      else
+        g_warning ("Failed to resolve host flatpak binary! User refs wont be updated");
+    }
+#endif
 
   if (self->system == NULL && self->user == NULL)
     return dex_future_new_reject (
@@ -1721,7 +1761,11 @@ retrieve_updates_fiber (GatherRefsData *data)
       n_sys_refs = system_refs->len;
     }
 
+#ifndef SANDBOXED_LIBFLATPAK
   if (self->user != NULL)
+#else
+  if (self->user != NULL && g_getenv ("FLATPAK_BINARY") != NULL)
+#endif
     {
       user_refs = flatpak_installation_list_installed_refs_for_update (
           self->user, cancellable, &local_error);
@@ -1888,8 +1932,8 @@ transaction_fiber (TransactionData *data)
 
           transaction = flatpak_transaction_new_for_installation (
               is_user
-                  ? self->user
-                  : self->system,
+                  ? self->user_interactive
+                  : self->system_interactive,
               cancellable, &local_error);
           if (transaction == NULL)
             {
@@ -1957,12 +2001,12 @@ transaction_fiber (TransactionData *data)
 
           if (is_user && user_transaction == NULL)
             user_transaction = flatpak_transaction_new_for_installation (
-                self->user,
+                self->user_interactive,
                 cancellable,
                 &local_error);
           else if (!is_user && sys_transaction == NULL)
             sys_transaction = flatpak_transaction_new_for_installation (
-                self->system,
+                self->system_interactive,
                 cancellable,
                 &local_error);
           if ((is_user && user_transaction == NULL) ||
@@ -2039,8 +2083,8 @@ transaction_fiber (TransactionData *data)
 
           transaction = flatpak_transaction_new_for_installation (
               is_user
-                  ? self->user
-                  : self->system,
+                  ? self->user_interactive
+                  : self->system_interactive,
               cancellable, &local_error);
           if (transaction == NULL)
             {
@@ -2281,7 +2325,7 @@ transaction_new_operation (FlatpakTransaction          *transaction,
       kind == FLATPAK_TRANSACTION_OPERATION_UNINSTALL)
     {
       g_mutex_lock (&self->mute_mutex);
-      if (self->user ==
+      if (self->user_interactive ==
           flatpak_transaction_get_installation (transaction))
         self->user_mute++;
       else
@@ -2394,7 +2438,7 @@ transaction_operation_done (FlatpakTransaction          *transaction,
 
   origin    = flatpak_transaction_operation_get_remote (operation);
   ref       = flatpak_transaction_operation_get_ref (operation);
-  is_user   = flatpak_transaction_get_installation (transaction) == self->user;
+  is_user   = flatpak_transaction_get_installation (transaction) == self->user_interactive;
   unique_id = bz_flatpak_ref_parts_format_unique (origin, ref, is_user);
 
   if (notif_kind == BZ_BACKEND_NOTIFICATION_KIND_INSTALL_DONE ||

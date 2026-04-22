@@ -30,4 +30,7 @@ bz_get_dex_stack_size (void);
 guint64
 bz_get_n_download_workers (void);
 
+guint
+bz_get_desktop_search_provider_icon_size (void);
+
 G_END_DECLS

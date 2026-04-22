@@ -1,7 +1,6 @@
 defwidget "My Widget" {
   reference ref-string : "GtkStringObject";
 
-  var t : "BgeWdgtTime";
   var box : "GtkBox";
 
   var cx : "gdouble";
@@ -14,8 +13,6 @@ defwidget "My Widget" {
   var y : "gdouble";
 
   init {
-    set t = #(notify-msec = 10;);
-    
     set box = #child/(""("gradient")
       orientation = vertical;
       
@@ -55,7 +52,7 @@ defwidget "My Widget" {
     set h = 100.0;
     set corner = 10.0;
 
-    set cx = #eval(30.0*sin(#(t:time)) + #(%width%)/2.0);
+    set cx = #eval(30.0*sin(#(%tick%)) + #(%width%)/2.0);
     set cy = #eval(#(%height%)/2.0);
 
     transition-spring w 1.0, 0.5, 100.0;

@@ -22,15 +22,6 @@ template $BzFullView: Adw.Bin {
       }
 
       [end]
-      MenuButton {
-        primary: true;
-        icon-name: "open-menu-symbolic";
-        has-tooltip: true;
-        tooltip-text: _("Main Menu");
-        menu-model: bind template.main-menu;
-      }
-
-      [end]
       Button progress_button {
         styles [
           "flat",
@@ -129,7 +120,16 @@ template $BzFullView: Adw.Bin {
 
                   Adw.Banner {
                     title: _("Installing .flatpak bundles is not yet supported");
-                    revealed: bind template.ui-entry as <$BzResult>.object as <$BzFlatpakEntry>.is-bundle as <bool>;
+                    visible: bind template.ui-entry as <$BzResult>.object as <$BzFlatpakEntry>.is-bundle as <bool>;
+                    revealed: true;
+                  }
+
+                  Adw.Banner {
+                    title: _("This is a local preview, some details may differ from the published listing");
+                    visible: bind $metainfo_banner_visible(template.ui-entry as <$BzResult>.object as <$BzFlatpakEntry>.remote-repo-name) as <bool>;
+                    revealed: true;
+                    button-label: _("Preview Store Appearance");
+                    button-clicked => $preview_other_metainfo_cb(template);
                   }
 
                   Adw.Clamp {

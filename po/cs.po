@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-09 11:14+0200\n"
-"PO-Revision-Date: 2026-04-09 11:28+0200\n"
+"POT-Creation-Date: 2026-04-12 23:58+0200\n"
+"PO-Revision-Date: 2026-04-13 11:36+0200\n"
 "Last-Translator: Daniel Rusek <mail@asciiwolf.com>\n"
 "Language-Team: Czech\n"
 "Language: cs\n"
@@ -70,9 +70,9 @@ msgstr ""
 msgid "Search apps directly from GNOME Shell"
 msgstr "Vyhledávejte aplikace přímo z GNOME Shellu"
 
-#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:30
-msgid "Adam Masciola"
-msgstr "Adam Masciola"
+#: data/io.github.kolunmi.Bazaar.metainfo.xml.in:30 src/bz-application.c:749
+msgid "The Bazaar Contributors"
+msgstr "Přispěvatelé aplikace Bazaar"
 
 #: data/io.github.kolunmi.Bazaar.metainfo.xml.in:55
 msgid "The home page displaying Flathub apps"
@@ -99,34 +99,47 @@ msgstr "Stránka kategorií"
 msgid "Stopped Receiving Updates"
 msgstr "Příjem aktualizací zastaven"
 
-#: src/bz-addon-tile.c:148 src/bz-favorites-tile.c:157
+#: src/bz-addon-tile.c:155 src/bz-favorites-tile.c:157
 #: src/bz-rich-app-tile.blp:172
 msgid "Uninstall"
 msgstr "Odinstalovat"
 
-#: src/bz-addon-tile.c:150 src/bz-addons-dialog.blp:262
+#: src/bz-addon-tile.c:157 src/bz-addons-dialog.blp:280
 #: src/bz-favorites-tile.c:159
 msgid "Install"
 msgstr "Instalovat"
 
 #: src/bz-addons-dialog.blp:14 src/bz-addons-dialog.blp:21
-#: src/bz-full-view.blp:627 src/bz-installed-tile.blp:101
+#: src/bz-addons-dialog.blp:70 src/bz-full-view.blp:627
+#: src/bz-installed-tile.blp:101
 msgid "Manage Add-Ons"
 msgstr "Spravovat doplňky"
 
-#: src/bz-addons-dialog.blp:70
+#: src/bz-addons-dialog.blp:80
+msgid "No Add-Ons Visible"
+msgstr "Žádné viditelné doplňky"
+
+#: src/bz-addons-dialog.blp:81
+msgid ""
+"Your current filter preferences are hiding all known add-ons. Try adjusting "
+"them."
+msgstr ""
+"Vaše aktuální nastavení filtrů skrývají všechny známé doplňky. Zkuste je "
+"upravit."
+
+#: src/bz-addons-dialog.blp:88
 msgid "Add-on Page"
 msgstr "Stránka doplňků"
 
-#: src/bz-addons-dialog.blp:184 src/bz-full-view.blp:426
+#: src/bz-addons-dialog.blp:202 src/bz-full-view.blp:426
 msgid "Downloads/Month"
 msgstr "Stažení/měsíc"
 
-#: src/bz-addons-dialog.blp:211 src/bz-full-view.blp:461
+#: src/bz-addons-dialog.blp:229 src/bz-full-view.blp:461
 msgid "Stopped Receiving Core Updates"
 msgstr "Příjem základních aktualizací zastaven"
 
-#: src/bz-addons-dialog.blp:225
+#: src/bz-addons-dialog.blp:243
 msgid ""
 "This add-on uses a runtime that no longer receives updates or security "
 "fixes. It may become unsafe to use."
@@ -134,30 +147,30 @@ msgstr ""
 "Tento doplněk používá běhové prostředí, které již nedostává aktualizace ani "
 "opravy zabezpečení. Jeho používání nemusí být bezpečné."
 
-#: src/bz-addons-dialog.blp:279 src/bz-rich-app-tile.blp:185
+#: src/bz-addons-dialog.blp:297 src/bz-rich-app-tile.blp:185
 #: src/bz-transaction-tile.blp:272
 msgid "Open"
 msgstr "Otevřít"
 
-#: src/bz-addons-dialog.blp:286 src/bz-install-controls.blp:141
+#: src/bz-addons-dialog.blp:304 src/bz-install-controls.blp:141
 #: src/bz-installed-tile.blp:114
 msgid "Remove"
 msgstr "Odebrat"
 
-#: src/bz-addons-dialog.c:321
+#: src/bz-addons-dialog.c:325
 #, c-format
 msgid "Add-on for %s"
 msgstr "Doplněk pro %s"
 
-#: src/bz-addons-dialog.c:335 src/bz-full-view.c:577
+#: src/bz-addons-dialog.c:339 src/bz-full-view.c:568
 msgid "Show Less"
 msgstr "Zobrazit méně"
 
-#: src/bz-addons-dialog.c:335 src/bz-full-view.c:577
+#: src/bz-addons-dialog.c:339 src/bz-full-view.c:568
 msgid "Show More"
 msgstr "Zobrazit více"
 
-#: src/bz-addons-dialog.c:385
+#: src/bz-addons-dialog.c:389
 msgid "Download Stats"
 msgstr "Statistiky stahování"
 
@@ -537,51 +550,6 @@ msgstr "Aplikace %s je vhodná pro %s"
 msgid "%s • %s"
 msgstr "%s • %s"
 
-#: src/bz-all-apps-page.blp:13 src/bz-apps-page.blp:14 src/bz-full-view.blp:29
-#: src/bz-user-data-page.blp:15 src/bz-window.blp:239
-msgid "Main Menu"
-msgstr "Hlavní nabídka"
-
-#: src/bz-all-apps-page.blp:18 src/bz-apps-page.blp:18
-#: src/bz-user-data-page.blp:19 src/bz-window.blp:328
-msgid "_Donate to Bazaar ❤️"
-msgstr "Po_dpořit Bazaar ❤️"
-
-#: src/bz-all-apps-page.blp:25 src/bz-apps-page.blp:25
-#: src/bz-user-data-page.blp:26 src/bz-window.blp:335
-msgid "_Refresh"
-msgstr "_Obnovit"
-
-#: src/bz-all-apps-page.blp:30 src/bz-apps-page.blp:30
-#: src/bz-user-data-page.blp:31 src/bz-window.blp:340
-msgid "_Preferences"
-msgstr "_Předvolby"
-
-#: src/bz-all-apps-page.blp:35 src/bz-apps-page.blp:35
-#: src/bz-user-data-page.blp:36 src/bz-window.blp:345
-msgid "_Login With Flathub"
-msgstr "Přih_lásit se pomocí Flathubu"
-
-#: src/bz-all-apps-page.blp:41 src/bz-apps-page.blp:41
-#: src/bz-user-data-page.blp:42 src/bz-window.blp:351
-msgid "_Manage Leftover User Data"
-msgstr "Sp_ravovat zbylá uživatelská data"
-
-#: src/bz-all-apps-page.blp:46 src/bz-apps-page.blp:46
-#: src/bz-user-data-page.blp:47 src/bz-window.blp:356
-msgid "_Keyboard Shortcuts"
-msgstr "_Klávesové zkratky"
-
-#: src/bz-all-apps-page.blp:51 src/bz-apps-page.blp:51
-#: src/bz-user-data-page.blp:52 src/bz-window.blp:361
-msgid "_About Bazaar"
-msgstr "O _aplikaci Bazaar"
-
-#: src/bz-all-apps-page.blp:58 src/bz-apps-page.blp:58
-#: src/bz-user-data-page.blp:59 src/bz-window.blp:368
-msgid "_Quit Bazaar"
-msgstr "_Ukončit Bazaar"
-
 #: src/bz-app-permissions.c:160
 #, c-format
 msgid "System folder %s"
@@ -759,7 +727,7 @@ msgstr "Ověřeno"
 msgid "Installed"
 msgstr "Nainstalováno"
 
-#: src/bz-apps-page.blp:142
+#: src/bz-apps-page.blp:86
 msgid "Show All"
 msgstr "Zobrazit vše"
 
@@ -773,45 +741,41 @@ msgstr "Všechny „%s“"
 msgid "%d Applications"
 msgstr "%d aplikací"
 
-#: src/bz-application.c:707
+#: src/bz-application.c:728
 msgctxt "About Dialog Developer Credit"
 msgid "Adam Masciola <kolunmi@posteo.net>"
 msgstr "Adam Masciola <kolunmi@posteo.net>"
 
-#: src/bz-application.c:708
+#: src/bz-application.c:729
 msgctxt "About Dialog Developer Credit"
 msgid "Alexander Vanhee"
 msgstr "Alexander Vanhee"
 
-#: src/bz-application.c:728
-msgid "The Bazaar Contributors"
-msgstr "Přispěvatelé aplikace Bazaar"
-
 #. Translators: Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
-#: src/bz-application.c:731
+#: src/bz-application.c:752
 msgid "translator-credits"
 msgstr ""
 "Vlastimil Dědek <dedek.vlastimil2@proton.me>, 2025\n"
 "Pavel Borecki <pavel@borecki.cz>, 2026\n"
 "Daniel Rusek <mail@asciiwolf.com>, 2026"
 
-#: src/bz-application.c:741
+#: src/bz-application.c:762
 msgid "Special Thanks"
 msgstr "Zvláštní poděkování patří"
 
-#: src/bz-application.c:799
+#: src/bz-application.c:820
 msgid "Logged Out Successfully!"
 msgstr "Úspěšně odhlášeni!"
 
-#: src/bz-application.c:922
+#: src/bz-application.c:943
 msgid "Performing setup…"
 msgstr "Provádí se nastavení…"
 
-#: src/bz-application.c:1006
+#: src/bz-application.c:1027
 msgid "Set Up System Flathub?"
 msgstr "Nastavit systémový Flathub?"
 
-#: src/bz-application.c:1009
+#: src/bz-application.c:1030
 msgid ""
 "The system Flathub remote is not set up. Bazaar requires Flathub to be "
 "configured on the system Flatpak installation to browse and install "
@@ -826,11 +790,11 @@ msgstr ""
 "Bazaar můžete i nadále používat k procházení a odstraňování již "
 "nainstalovaných aplikací."
 
-#: src/bz-application.c:1016
+#: src/bz-application.c:1037
 msgid "Set Up Flathub?"
 msgstr "Nastavit Flathub?"
 
-#: src/bz-application.c:1019
+#: src/bz-application.c:1040
 msgid ""
 "Flathub is not set up on this system. You will not be able to browse and "
 "install applications in Bazaar if its unavailable.\n"
@@ -843,97 +807,101 @@ msgstr ""
 "Bazaar můžete i nadále používat k procházení a odstraňování již "
 "nainstalovaných aplikací."
 
-#: src/bz-application.c:1025
+#: src/bz-application.c:1046
 msgid "Later"
 msgstr "Později"
 
-#: src/bz-application.c:1026
+#: src/bz-application.c:1047
 msgid "Set Up Flathub"
 msgstr "Nastavit Flathub"
 
-#: src/bz-application.c:1315
+#: src/bz-application.c:1336
 msgid "A backend error occurred"
 msgstr "Došlo k chybě backendu"
 
-#: src/bz-application.c:1511 src/bz-application.c:3420 src/bz-window.blp:70
+#: src/bz-application.c:1532 src/bz-application.c:3483 src/bz-window.blp:70
 msgid "Refreshing…"
 msgstr "Obnovuje se…"
 
-#: src/bz-application.c:1663 src/bz-application.c:3418
+#: src/bz-application.c:1684 src/bz-application.c:3481
 #, c-format
 msgid "Loading %d apps…"
 msgstr "Načítá se %d aplikací…"
 
-#: src/bz-application.c:1666
+#: src/bz-application.c:1687
 msgid "Checking for updates…"
 msgstr "Kontrolují se aktualizace…"
 
-#: src/bz-application.c:1729
+#: src/bz-application.c:1750
 msgid "Failed to open .flatpakref"
 msgstr "Nezdařilo se otevřít soubor .flatpakref"
 
-#: src/bz-application.c:1785
+#: src/bz-application.c:1806
 msgid "An initialization error occurred"
 msgstr "Došlo k chybě inicializace"
 
-#: src/bz-application.c:2183
+#: src/bz-application.c:2207
 msgid "Failed to check for updates"
 msgstr "Nezdařilo se zkontrolovat aktualizace"
 
-#: src/bz-application.c:3191
+#: src/bz-application.c:3215
 msgid "Could not find app"
 msgstr "Nezdařilo se najít aplikaci"
 
-#: src/bz-application.c:3422
+#: src/bz-application.c:3248
+msgid "Failed to load metainfo"
+msgstr "Nezdařilo se načíst metainfo"
+
+#: src/bz-application.c:3485
 msgid "Writing to cache…"
 msgstr "Zapisuje se do mezipaměti…"
 
-#: src/bz-appstream-parser.c:302
+#: src/bz-appstream-parser.c:303
 msgctxt "Project URL Type"
 msgid "Flathub Page"
 msgstr "Stránka na Flathubu"
 
-#: src/bz-appstream-parser.c:323
+#: src/bz-appstream-parser.c:324
 msgctxt "Project URL Type"
 msgid "Project Website"
 msgstr "Stránky projektu"
 
-#: src/bz-appstream-parser.c:327
+#: src/bz-appstream-parser.c:328
 msgctxt "Project URL Type"
 msgid "Issue Tracker"
 msgstr "Sledování problémů"
 
-#: src/bz-appstream-parser.c:331
+#: src/bz-appstream-parser.c:332
 msgctxt "Project URL Type"
 msgid "FAQ"
 msgstr "Časté otázky"
 
-#: src/bz-appstream-parser.c:335
+#: src/bz-appstream-parser.c:336
 msgctxt "Project URL Type"
 msgid "Help"
 msgstr "Nápověda"
 
-#: src/bz-appstream-parser.c:339
+#: src/bz-appstream-parser.c:340
 msgctxt "Project URL Type"
 msgid "Donate"
 msgstr "Věnovat dar"
 
-#: src/bz-appstream-parser.c:345
+#: src/bz-appstream-parser.c:346
 msgctxt "Project URL Type"
 msgid "Translate"
 msgstr "Překlad"
 
-#: src/bz-appstream-parser.c:349
+#: src/bz-appstream-parser.c:350
 msgctxt "Project URL Type"
 msgid "Contact"
 msgstr "Kontakt"
 
-#: src/bz-appstream-parser.c:353
+#: src/bz-appstream-parser.c:354
 msgctxt "Project URL Type"
 msgid "Source Code"
 msgstr "Zdrojový kód"
 
-#: src/bz-appstream-parser.c:359
+#: src/bz-appstream-parser.c:360
 msgctxt "Project URL Type"
 msgid "Contribute"
 msgstr "Přispět"
@@ -1067,8 +1035,8 @@ msgid "High Risk"
 msgstr "Vysoké riziko"
 
 #: src/bz-curated-view.blp:11 src/bz-favorites-page.blp:68
-#: src/bz-flathub-page.blp:19 src/bz-full-view.blp:62
-#: src/bz-library-page.blp:65 src/bz-user-data-page.blp:86
+#: src/bz-flathub-page.blp:19 src/bz-full-view.blp:53
+#: src/bz-library-page.blp:66 src/bz-user-data-page.blp:30
 msgid "Empty"
 msgstr "Prázdné"
 
@@ -1245,7 +1213,7 @@ msgid "Remove From Favorites"
 msgstr "Odebrat z oblíbených"
 
 #: src/bz-favorites-page.blp:5 src/bz-favorites-page.blp:78
-#: src/bz-window.blp:386
+#: src/bz-window.blp:385
 msgid "Favorites"
 msgstr "Oblíbené"
 
@@ -1253,11 +1221,11 @@ msgstr "Oblíbené"
 msgid "Install All"
 msgstr "Instalovat vše"
 
-#: src/bz-favorites-page.blp:34 src/bz-full-view.blp:45 src/bz-window.blp:255
+#: src/bz-favorites-page.blp:34 src/bz-full-view.blp:36 src/bz-window.blp:255
 msgid "Open App Library"
 msgstr "Otevřít knihovnu aplikací"
 
-#: src/bz-favorites-page.blp:56 src/bz-user-data-page.blp:75
+#: src/bz-favorites-page.blp:56 src/bz-user-data-page.blp:19
 msgid "Loading"
 msgstr "Načítání"
 
@@ -1277,19 +1245,15 @@ msgstr "Předchozí"
 msgid "Next"
 msgstr "Další"
 
-#: src/bz-featured-tile.blp:90
-msgid "App of the Day"
-msgstr "Aplikace dne"
-
-#: src/bz-flathub-category.c:89
+#: src/bz-flathub-category.c:93
 msgid "Editing"
 msgstr "Úprava"
 
-#: src/bz-flathub-category.c:90
+#: src/bz-flathub-category.c:94
 msgid "Midi"
 msgstr "Midi"
 
-#: src/bz-flathub-category.c:91
+#: src/bz-flathub-category.c:95
 msgid "Mixer"
 msgstr "Mixer"
 
@@ -1297,261 +1261,261 @@ msgstr "Mixer"
 #. search regardless of what you put here, so don't worry about the string
 #. yielding poor search results. Focus on correctness and friendliness,
 #. etc
-#: src/bz-flathub-category.c:92 src/bz-search-pill-list.c:77
+#: src/bz-flathub-category.c:96 src/bz-search-pill-list.c:77
 msgid "Music"
 msgstr "Hudba"
 
-#: src/bz-flathub-category.c:93
+#: src/bz-flathub-category.c:97
 msgid "Player"
 msgstr "Přehrávač"
 
-#: src/bz-flathub-category.c:94
+#: src/bz-flathub-category.c:98
 msgid "Recorder"
 msgstr "Záznamník"
 
-#: src/bz-flathub-category.c:95
+#: src/bz-flathub-category.c:99
 msgid "Sequencer"
 msgstr "Sekvencer"
 
-#: src/bz-flathub-category.c:96
+#: src/bz-flathub-category.c:100
 msgid "Tuner"
 msgstr "Tuner"
 
-#: src/bz-flathub-category.c:97
+#: src/bz-flathub-category.c:101
 msgid "TV"
 msgstr "TV"
 
-#: src/bz-flathub-category.c:102
+#: src/bz-flathub-category.c:106
 msgid "Emulation"
 msgstr "Emulace"
 
-#: src/bz-flathub-category.c:103
+#: src/bz-flathub-category.c:107
 msgid "Action"
 msgstr "Akční"
 
-#: src/bz-flathub-category.c:104
+#: src/bz-flathub-category.c:108
 msgid "Adventure"
 msgstr "Adventury"
 
-#: src/bz-flathub-category.c:105
+#: src/bz-flathub-category.c:109
 msgid "Arcade"
 msgstr "Arkádové"
 
-#: src/bz-flathub-category.c:106
+#: src/bz-flathub-category.c:110
 msgid "Blocks"
 msgstr "Blokové"
 
-#: src/bz-flathub-category.c:107
+#: src/bz-flathub-category.c:111
 msgid "Board"
 msgstr "Deskové"
 
-#: src/bz-flathub-category.c:108
+#: src/bz-flathub-category.c:112
 msgid "Card"
 msgstr "Karetní"
 
-#: src/bz-flathub-category.c:109
+#: src/bz-flathub-category.c:113
 msgid "Kids"
 msgstr "Dětské"
 
-#: src/bz-flathub-category.c:110
+#: src/bz-flathub-category.c:114
 msgid "Logic"
 msgstr "Logické"
 
-#: src/bz-flathub-category.c:111
+#: src/bz-flathub-category.c:115
 msgid "Role Playing"
 msgstr "Na hrdiny"
 
-#: src/bz-flathub-category.c:112
+#: src/bz-flathub-category.c:116
 msgid "Shooter"
 msgstr "Střílečky"
 
-#: src/bz-flathub-category.c:113
+#: src/bz-flathub-category.c:117
 msgid "Simulation"
 msgstr "Simulace"
 
-#: src/bz-flathub-category.c:114
+#: src/bz-flathub-category.c:118
 msgid "Sports"
 msgstr "Sporty"
 
-#: src/bz-flathub-category.c:115
+#: src/bz-flathub-category.c:119
 msgid "Strategy"
 msgstr "Strategické"
 
-#: src/bz-flathub-category.c:120
+#: src/bz-flathub-category.c:124
 msgid "Audio & Video"
 msgstr "Audio a video"
 
-#: src/bz-flathub-category.c:120
+#: src/bz-flathub-category.c:124
 msgid "Media"
 msgstr "Multimédia"
 
-#: src/bz-flathub-category.c:120
+#: src/bz-flathub-category.c:124
 msgid "More Audio & Video"
 msgstr "Více z Audio a video"
 
-#: src/bz-flathub-category.c:121
+#: src/bz-flathub-category.c:125
 msgid "Developer Tools"
 msgstr "Vývojářské nástroje"
 
-#: src/bz-flathub-category.c:121
+#: src/bz-flathub-category.c:125
 msgid "Develop"
 msgstr "Vývoj"
 
-#: src/bz-flathub-category.c:121
+#: src/bz-flathub-category.c:125
 msgid "More Developer Tools"
 msgstr "Více z Vývojářské nástroje"
 
-#: src/bz-flathub-category.c:122
+#: src/bz-flathub-category.c:126
 msgid "Education"
 msgstr "Vzdělávání"
 
-#: src/bz-flathub-category.c:122
+#: src/bz-flathub-category.c:126
 msgid "Learn"
 msgstr "Učení"
 
-#: src/bz-flathub-category.c:122
+#: src/bz-flathub-category.c:126
 msgid "More Education"
 msgstr "Více z Vzdělávání"
 
-#: src/bz-flathub-category.c:123
+#: src/bz-flathub-category.c:127
 msgid "Gaming"
 msgstr "Hraní her"
 
-#: src/bz-flathub-category.c:123
+#: src/bz-flathub-category.c:127
 msgid "Play"
 msgstr "Hraní"
 
-#: src/bz-flathub-category.c:123
+#: src/bz-flathub-category.c:127
 msgid "More Gaming"
 msgstr "Více z Hraní her"
 
-#: src/bz-flathub-category.c:124
+#: src/bz-flathub-category.c:128
 msgid "Graphics & Photography"
 msgstr "Grafika a fotografie"
 
-#: src/bz-flathub-category.c:124
+#: src/bz-flathub-category.c:128
 msgid "Create"
 msgstr "Vytváření"
 
-#: src/bz-flathub-category.c:124
+#: src/bz-flathub-category.c:128
 msgid "More Graphics & Photography"
 msgstr "Více z Grafika a fotografie"
 
-#: src/bz-flathub-category.c:125
+#: src/bz-flathub-category.c:129
 msgid "Networking"
 msgstr "Síť"
 
-#: src/bz-flathub-category.c:125
+#: src/bz-flathub-category.c:129
 msgid "Internet"
 msgstr "Internet"
 
-#: src/bz-flathub-category.c:125
+#: src/bz-flathub-category.c:129
 msgid "More Networking"
 msgstr "Více z Síť"
 
-#: src/bz-flathub-category.c:126
+#: src/bz-flathub-category.c:130
 msgid "Productivity"
 msgstr "Produktivita"
 
-#: src/bz-flathub-category.c:126
+#: src/bz-flathub-category.c:130
 msgid "Work"
 msgstr "Práce"
 
-#: src/bz-flathub-category.c:126
+#: src/bz-flathub-category.c:130
 msgid "More Productivity"
 msgstr "Více z Produktivita"
 
-#: src/bz-flathub-category.c:127
+#: src/bz-flathub-category.c:131
 msgid "Science"
 msgstr "Věda"
 
-#: src/bz-flathub-category.c:127
+#: src/bz-flathub-category.c:131
 msgid "More Science"
 msgstr "Více z Věda"
 
-#: src/bz-flathub-category.c:128
+#: src/bz-flathub-category.c:132
 msgid "System"
 msgstr "Systém"
 
-#: src/bz-flathub-category.c:128
+#: src/bz-flathub-category.c:132
 msgid "More System"
 msgstr "Více z Systém"
 
-#: src/bz-flathub-category.c:129
+#: src/bz-flathub-category.c:133
 msgid "Utilities"
 msgstr "Utility"
 
-#: src/bz-flathub-category.c:129
+#: src/bz-flathub-category.c:133
 msgid "Tools"
 msgstr "Nástroje"
 
-#: src/bz-flathub-category.c:129
+#: src/bz-flathub-category.c:133
 msgid "More Utilities"
 msgstr "Více z Utility"
 
-#: src/bz-flathub-category.c:130 src/bz-flathub-page.blp:116
+#: src/bz-flathub-category.c:134 src/bz-flathub-page.blp:116
 #: src/bz-flathub-page.blp:148
 msgid "Trending"
 msgstr "Trendy"
 
-#: src/bz-flathub-category.c:130
+#: src/bz-flathub-category.c:134
 msgid "More Trending"
 msgstr "Více z Trendů"
 
-#: src/bz-flathub-category.c:131 src/bz-flathub-page.blp:122
+#: src/bz-flathub-category.c:135 src/bz-flathub-page.blp:122
 #: src/bz-flathub-page.blp:178
 msgid "Popular"
 msgstr "Populární"
 
-#: src/bz-flathub-category.c:131
+#: src/bz-flathub-category.c:135
 msgid "More Popular"
 msgstr "Více z Populárních"
 
-#: src/bz-flathub-category.c:132 src/bz-flathub-page.blp:168
+#: src/bz-flathub-category.c:136 src/bz-flathub-page.blp:168
 msgid "Recently Added"
 msgstr "Nedávno přidané"
 
-#: src/bz-flathub-category.c:132 src/bz-flathub-page.blp:128
+#: src/bz-flathub-category.c:136 src/bz-flathub-page.blp:128
 msgid "New"
 msgstr "Nové"
 
-#: src/bz-flathub-category.c:132
+#: src/bz-flathub-category.c:136
 msgid "More New"
 msgstr "Více z Nových"
 
-#: src/bz-flathub-category.c:133 src/bz-flathub-page.blp:158
+#: src/bz-flathub-category.c:137 src/bz-flathub-page.blp:158
 msgid "Recently Updated"
 msgstr "Nedávno aktualizované"
 
-#: src/bz-flathub-category.c:133 src/bz-flathub-page.blp:134
+#: src/bz-flathub-category.c:137 src/bz-flathub-page.blp:134
 msgid "Updated"
 msgstr "Aktualizované"
 
-#: src/bz-flathub-category.c:133
+#: src/bz-flathub-category.c:137
 msgid "More Updated"
 msgstr "Více z Aktualizovaných"
 
-#: src/bz-flathub-category.c:134
+#: src/bz-flathub-category.c:138
 msgid "Mobile"
 msgstr "Mobilní"
 
-#: src/bz-flathub-category.c:134
+#: src/bz-flathub-category.c:138
 msgid "More Mobile"
 msgstr "Více z Mobilních"
 
-#: src/bz-flathub-category.c:135
+#: src/bz-flathub-category.c:139
 msgid "Adwaita"
 msgstr "Adwaita"
 
-#: src/bz-flathub-category.c:135
+#: src/bz-flathub-category.c:139
 msgid "More Adwaita"
 msgstr "Více z Adwaita"
 
-#: src/bz-flathub-category.c:136
+#: src/bz-flathub-category.c:140
 msgid "KDE Apps"
 msgstr "KDE aplikace"
 
-#: src/bz-flathub-category.c:136
+#: src/bz-flathub-category.c:140
 msgid "More KDE Apps"
 msgstr "Více z KDE aplikací"
 
@@ -1587,46 +1551,60 @@ msgstr ""
 msgid "Search Apps"
 msgstr "Hledat aplikace"
 
-#: src/bz-flathub-page.blp:255
+#: src/bz-flathub-page.blp:200
+msgid "App of the Day"
+msgstr "Aplikace dne"
+
+#: src/bz-flathub-page.blp:264
 msgid "On the Go"
 msgstr "Na cestách"
 
-#: src/bz-flathub-page.blp:267
+#: src/bz-flathub-page.blp:276
 msgid "Apps for your Linux phones and tablets"
 msgstr "Aplikace pro vaše linuxové telefony a tablety"
 
-#: src/bz-flathub-page.blp:278 src/bz-flathub-page.blp:313
+#: src/bz-flathub-page.blp:287 src/bz-flathub-page.blp:322
 msgid "More Mobile Apps"
 msgstr "Více z Mobilních aplikací"
 
-#: src/bz-flathub-page.blp:369
+#: src/bz-flathub-page.blp:378
 msgid "We​ ♥​ Games"
 msgstr "Máme ♥​ hry"
 
-#: src/bz-flathub-page.blp:382
+#: src/bz-flathub-page.blp:391
 msgid "Games and apps to run your favorite titles"
 msgstr "Hry a aplikace pro spuštění vašich oblíbených titulů"
 
-#: src/bz-flathub-page.blp:416
+#: src/bz-flathub-page.blp:425
 msgid "More Games"
 msgstr "Více z Her"
 
-#: src/bz-full-view.blp:66 src/bz-library-page.blp:76
-#: src/bz-library-page.blp:80
+#: src/bz-full-view.blp:57 src/bz-library-page.blp:77
+#: src/bz-library-page.blp:81
 msgid "No Results"
 msgstr "Žádné výsledky"
 
-#: src/bz-full-view.blp:67
+#: src/bz-full-view.blp:58
 msgid "Try a different search query"
 msgstr "Zkuste jiný dotaz"
 
-#: src/bz-full-view.blp:73
+#: src/bz-full-view.blp:64
 msgid "Content"
 msgstr "Obsah"
 
-#: src/bz-full-view.blp:131
+#: src/bz-full-view.blp:122
 msgid "Installing .flatpak bundles is not yet supported"
 msgstr "Instalace souborů balíčků .flatpak zatím není podporována"
+
+#: src/bz-full-view.blp:128
+msgid ""
+"This is a local preview, some details may differ from the published listing"
+msgstr ""
+"Toto je místní náhled, některé podrobnosti se mohou lišit od zveřejněné verze"
+
+#: src/bz-full-view.blp:131
+msgid "Preview Store Appearance"
+msgstr "Náhled vzhledu obchodu"
 
 #: src/bz-full-view.blp:257
 msgid "_Support"
@@ -1648,11 +1626,11 @@ msgstr "Vymazat data"
 msgid "Tags:"
 msgstr "Štítky:"
 
-#: src/bz-full-view.c:189
+#: src/bz-full-view.c:180
 msgid "No URL"
 msgstr "Žádná adresa URL"
 
-#: src/bz-full-view.c:207
+#: src/bz-full-view.c:198
 msgid ""
 "This application has a FLOSS license, meaning the source code can be audited "
 "for safety."
@@ -1660,7 +1638,7 @@ msgstr ""
 "Tato aplikace má licenci FLOSS. To znamená, že její zdrojový kód může být "
 "ověřen pro bezpečnost."
 
-#: src/bz-full-view.c:208
+#: src/bz-full-view.c:199
 msgid ""
 "This application has a proprietary license, meaning the source code is "
 "developed privately and cannot be audited by an independent third party."
@@ -1668,35 +1646,35 @@ msgstr ""
 "Tato aplikace má proprietární licenci. To znamená, že její zdrojový kód je "
 "vyvíjen v soukromí a nemůže být ověřen třetí stranou."
 
-#: src/bz-full-view.c:215
+#: src/bz-full-view.c:206
 msgid "More Apps"
 msgstr "Více aplikací"
 
-#: src/bz-full-view.c:216
+#: src/bz-full-view.c:207
 #, c-format
 msgid "More Apps by %s"
 msgstr "Více aplikací od %s"
 
-#: src/bz-full-view.c:223
+#: src/bz-full-view.c:214
 msgid "Other Apps by this Developer"
 msgstr "Další aplikace od tohoto vývojáře"
 
-#: src/bz-full-view.c:225 src/bz-full-view.c:324
+#: src/bz-full-view.c:216 src/bz-full-view.c:315
 #, c-format
 msgid "Other Apps by %s"
 msgstr "Další aplikace od %s"
 
-#: src/bz-full-view.c:234
+#: src/bz-full-view.c:225
 #, c-format
 msgid "%s is not installed, but it still has <b>%s</b> of data present."
 msgstr ""
 "Aplikace %s není nainstalována, ale má stále k dispozici <b>%s</b> dat."
 
-#: src/bz-full-view.c:326
+#: src/bz-full-view.c:317
 msgid "Other Apps"
 msgstr "Další aplikace"
 
-#: src/bz-full-view.c:328
+#: src/bz-full-view.c:319
 #, c-format
 msgid "%d Application"
 msgid_plural "%d Applications"
@@ -1819,42 +1797,42 @@ msgstr "Odeb_rat"
 msgid "Update"
 msgstr "Aktualizovat"
 
-#: src/bz-library-page.blp:31
+#: src/bz-library-page.blp:32
 msgid "Search installed apps"
 msgstr "hledat nainstalované aplikace"
 
-#: src/bz-library-page.blp:48
+#: src/bz-library-page.blp:49
 msgid "Clear search"
 msgstr "Vymazat hledání"
 
-#: src/bz-library-page.blp:69
+#: src/bz-library-page.blp:70
 msgid "No Apps Found"
 msgstr "Nenalezeny žádné aplikace"
 
+#: src/bz-library-page.blp:89
+msgid "Search Store Instead"
+msgstr "Hledat v obchodě"
+
 #. Translators: .
-#: src/bz-library-page.blp:98 src/bz-window.blp:112
+#: src/bz-library-page.blp:99 src/bz-window.blp:112
 msgid "Library"
 msgstr "Knihovna"
 
-#: src/bz-library-page.blp:126
+#: src/bz-library-page.blp:127
 msgid "Pending Updates"
 msgstr "Čekající aktualizace"
 
-#: src/bz-library-page.blp:153
+#: src/bz-library-page.blp:154
 msgid "Downloads"
 msgstr "Stažení"
 
-#: src/bz-library-page.blp:196
+#: src/bz-library-page.blp:197
 msgid "Recently Uninstalled"
 msgstr "Nedávno odinstalované"
 
-#: src/bz-library-page.blp:247
+#: src/bz-library-page.blp:248
 msgid "Clear Finished Tasks"
 msgstr "Vymazat dokončené úlohy"
-
-#: src/bz-library-page.blp:260
-msgid "Installed Apps"
-msgstr "Nainstalované aplikace"
 
 #: src/bz-library-page.blp:333
 msgid "Sort By"
@@ -1880,6 +1858,14 @@ msgid_plural "%u Available Updates"
 msgstr[0] "%u dostupná aktualizace"
 msgstr[1] "%u dostupné aktualizace"
 msgstr[2] "%u dostupných aktualizací"
+
+#: src/bz-library-page.c:203
+#, c-format
+msgid "%u Installed App"
+msgid_plural "%u Installed Apps"
+msgstr[0] "%u nainstalovaná aplikace"
+msgstr[1] "%u nainstalované aplikace"
+msgstr[2] "%u nainstalovaných aplikací"
 
 #: src/bz-license-dialog.blp:94
 msgid "Get Involved"
@@ -1975,6 +1961,26 @@ msgstr "Dokončit"
 msgid "Hello, %s!"
 msgstr "Ahoj, %s!"
 
+#: src/bz-metainfo-preview.c:84
+msgid "Select Metainfo File"
+msgstr "Vyberte soubor metainfo"
+
+#: src/bz-metainfo-preview.c:87
+msgid "Metainfo Files"
+msgstr "Soubory metainfo"
+
+#: src/bz-metainfo-preview.c:141
+msgid "Select Icon (Optional)"
+msgstr "Vyberte ikonu (volitelné)"
+
+#: src/bz-metainfo-preview.c:144
+msgid "Image Files"
+msgstr "Soubory obrázků"
+
+#: src/bz-metainfo-preview.c:231
+msgid "Preview"
+msgstr "Náhled"
+
 #: src/bz-preferences-dialog.blp:19
 msgid "Preferences"
 msgstr "Předvolby"
@@ -2020,7 +2026,7 @@ msgid "Hide results that are not verified on Flathub"
 msgstr "Skrýt výsledky, které nejsou ověřeny na Flathubu"
 
 #: src/bz-preferences-dialog.blp:49
-msgid "Hide EOL Apps"
+msgid "Hide End-of-Life Apps"
 msgstr "Skrýt zastaralé aplikace"
 
 #: src/bz-preferences-dialog.blp:50
@@ -2698,31 +2704,59 @@ msgstr "Minecraft"
 msgid "Emulator"
 msgstr "Emulátor"
 
-#: src/bz-search-page.blp:57
+#: src/bz-search-filter-popover.blp:18 src/bz-search-page.blp:83
+msgid "Filters"
+msgstr "Filtry"
+
+#: src/bz-search-filter-popover.blp:35
+msgid "_Verified"
+msgstr "O_věřené"
+
+#: src/bz-search-filter-popover.blp:42
+msgid "_Free/Open"
+msgstr "_Svobodné/otevřené"
+
+#: src/bz-search-filter-popover.blp:49
+msgid "Non-_EOL"
+msgstr "N_ezastaralé"
+
+#: src/bz-search-filter-popover.blp:52
+msgid "Filter out End-of-Life apps"
+msgstr "Filtrovat zastaralé aplikace"
+
+#: src/bz-search-filter-popover.blp:57
+msgid "Categories"
+msgstr "Kategorie"
+
+#: src/bz-search-page.blp:58
 msgid "Search Apps, Games, Software"
 msgstr "hledat aplikace, hry, software"
 
-#: src/bz-search-page.blp:79
+#: src/bz-search-page.blp:70
+msgid "Search Filters"
+msgstr "Filtry vyhledávání"
+
+#: src/bz-search-page.blp:100
 msgid "Clear Search"
 msgstr "Vymazat hledání"
 
-#: src/bz-search-page.blp:171
+#: src/bz-search-page.blp:192
 msgid "Categories Unavailable"
 msgstr "Kategorie nejsou k dispozici"
 
-#: src/bz-search-page.blp:172
+#: src/bz-search-page.blp:193
 msgid "Search for apps using the search bar above."
 msgstr "Vyhledejte aplikace pomocí vyhledávacího panelu výše."
 
-#: src/bz-search-page.blp:198
+#: src/bz-search-page.blp:219
 msgid "Browse Categories"
 msgstr "Procházet kategorie"
 
-#: src/bz-search-page.blp:340
+#: src/bz-search-page.blp:361
 msgid "No Applications Found"
 msgstr "Nenalezeny žádné aplikace"
 
-#: src/bz-search-page.c:244
+#: src/bz-search-page.c:247
 #, c-format
 msgid "No results found for \"%s\" in Flathub"
 msgstr "Žádné výsledky pro „%s“ v Flathubu"
@@ -2979,11 +3013,11 @@ msgstr[2] "%u aktualizací prostředí"
 msgid "Manage Leftover User Data"
 msgstr "Správa zbylých uživatelských dat"
 
-#: src/bz-user-data-page.blp:89
+#: src/bz-user-data-page.blp:33
 msgid "No User Data Found"
 msgstr "Nenalezena žádná uživatelská data"
 
-#: src/bz-user-data-page.blp:94
+#: src/bz-user-data-page.blp:38
 msgid "User Data"
 msgstr "Uživatelská data"
 
@@ -3001,12 +3035,16 @@ msgid "Curated"
 msgstr "Vybrané"
 
 #: src/bz-window.blp:100
-msgid "Flathub"
-msgstr "Flathub"
+msgid "Explore"
+msgstr "Procházet"
 
 #: src/bz-window.blp:220
 msgid "Refresh completed!"
 msgstr "Obnovení dokončeno!"
+
+#: src/bz-window.blp:239
+msgid "Main Menu"
+msgstr "Hlavní nabídka"
 
 #: src/bz-window.blp:273
 msgid "You are running a new version of Bazaar!"
@@ -3022,7 +3060,39 @@ msgid ""
 msgstr ""
 "Máte připojení k síti, ale prohlížíte si verzi Flathubu uloženou v mezipaměti"
 
-#: src/bz-window.blp:393
+#: src/bz-window.blp:327
+msgid "_Donate to Bazaar"
+msgstr "Po_dpořit Bazaar"
+
+#: src/bz-window.blp:334
+msgid "_Refresh"
+msgstr "_Obnovit"
+
+#: src/bz-window.blp:339
+msgid "_Preferences"
+msgstr "_Předvolby"
+
+#: src/bz-window.blp:344
+msgid "_Login With Flathub"
+msgstr "Přih_lásit se pomocí Flathubu"
+
+#: src/bz-window.blp:350
+msgid "_Manage Leftover User Data"
+msgstr "Sp_ravovat zbylá uživatelská data"
+
+#: src/bz-window.blp:355
+msgid "_Keyboard Shortcuts"
+msgstr "_Klávesové zkratky"
+
+#: src/bz-window.blp:360
+msgid "_About Bazaar"
+msgstr "O _aplikaci Bazaar"
+
+#: src/bz-window.blp:367
+msgid "_Quit Bazaar"
+msgstr "_Ukončit Bazaar"
+
+#: src/bz-window.blp:392
 msgid "Log Out"
 msgstr "Odhlásit se"
 
@@ -3044,10 +3114,10 @@ msgstr "Bazaar nelze odstranit z Bazaaru!"
 msgid "Can't do that right now!"
 msgstr "Toto teď nelze provést!"
 
-#: src/bz-world-map.c:595
-msgctxt "As in, \"100 Downloads\""
-msgid "Downloads"
-msgstr "stažení"
+#: src/bz-world-map.c:603
+msgctxt "As in, \"100 Installs\""
+msgid "Installs"
+msgstr "instalací"
 
 #: src/shortcuts-dialog.blp:6
 msgctxt "shortcut window"

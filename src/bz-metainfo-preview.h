@@ -1,6 +1,6 @@
-/* bge-wdgt-time.h
+/* bz-metainfo-preview.h
  *
- * Copyright 2026 Eva M
+ * Copyright 2026 Alexander Vanhee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,32 +20,31 @@
 
 #pragma once
 
-#ifndef BGE_INSIDE
-#error "Only <bge.h> can be included directly."
-#endif
+#include <adwaita.h>
+#include <gio/gio.h>
+#include <gtk/gtk.h>
+#include <libdex.h>
+
+#include "bz-entry-group.h"
 
 G_BEGIN_DECLS
 
-#define BGE_TYPE_WDGT_TIME (bge_wdgt_time_get_type ())
-G_DECLARE_FINAL_TYPE (BgeWdgtTime, bge_wdgt_time, BGE, WDGT_TIME, GObject)
+typedef struct
+{
+  GFile *metainfo_file;
+  GFile *icon_file;
+} BzMetainfoPickResult;
 
-BGE_AVAILABLE_IN_ALL
-BgeWdgtTime *
-bge_wdgt_time_new (void);
-
-BGE_AVAILABLE_IN_ALL
-double
-bge_wdgt_time_get_time (BgeWdgtTime *self);
-
-BGE_AVAILABLE_IN_ALL
-guint
-bge_wdgt_time_get_notify_msec (BgeWdgtTime *self);
-
-BGE_AVAILABLE_IN_ALL
 void
-bge_wdgt_time_set_notify_msec (BgeWdgtTime *self,
-                               guint        notify_msec);
+bz_metainfo_pick_result_free (BzMetainfoPickResult *result);
+
+GType
+bz_metainfo_pick_result_get_type (void);
+
+DexFuture *
+bz_metainfo_preview_pick_files (void);
+
+AdwNavigationPage *
+create_entry_group_preview_page (BzEntryGroup *group);
 
 G_END_DECLS
-
-/* End of bge-wdgt-time.h */
