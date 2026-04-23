@@ -93,6 +93,9 @@ else
     config_h.set_quoted('DONATE_LINK', 'https://ko-fi.com/kolunmi')
     config_h.set_quoted('RELEASE_PAGE', run_command('version.sh', 'get-gh-release').stdout().strip())
 
+    refresh_worker_bin_name = 'bazaar-refresh-worker'
+    config_h.set_quoted('REFRESH_WORKER_BIN_NAME', refresh_worker_bin_name)
+
     dl_worker_bin_name = 'bazaar-dl-worker'
     config_h.set_quoted('DL_WORKER_BIN_NAME', dl_worker_bin_name)
 

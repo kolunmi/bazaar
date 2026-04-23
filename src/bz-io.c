@@ -387,14 +387,17 @@ get_all_user_data_ids_fiber (void)
 char *
 bz_dup_root_cache_dir (void)
 {
-  const char *user_cache = NULL;
-  const char *id         = NULL;
+  GApplication *application = NULL;
+  const char   *user_cache  = NULL;
+  const char   *id          = NULL;
 
   user_cache = g_get_user_cache_dir ();
 
-  id = g_application_get_application_id (g_application_get_default ());
+  application = g_application_get_default ();
+  if (application != NULL)
+    id = g_application_get_application_id (application);
   if (id == NULL)
-    id = "Bazaar";
+    id = "io.github.kolunmi.Bazaar";
 
   return g_build_filename (user_cache, id, NULL);
 }

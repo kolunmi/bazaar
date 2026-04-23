@@ -185,6 +185,9 @@ static DexFuture *
 init_fiber (GWeakRef *wr);
 
 static DexFuture *
+enumerate_disk_entries_fiber (GWeakRef *wr);
+
+static DexFuture *
 cache_flathub_fiber (GWeakRef *wr);
 
 static DexFuture *
@@ -217,8 +220,8 @@ cache_write_back_finally (DexFuture          *future,
                           CacheWriteBackData *data);
 
 static DexFuture *
-sync_then (DexFuture *future,
-           GWeakRef  *wr);
+sync_finally (DexFuture *future,
+              GWeakRef  *wr);
 
 static DexFuture *
 watch_backend_notifs_then_loop_cb (DexFuture *future,
@@ -930,9 +933,8 @@ init_fiber (GWeakRef *wr)
   g_autofree char *root_cache_dir       = NULL;
   g_autoptr (GFile) root_cache_dir_file = NULL;
   g_autoptr (GListModel) repos          = NULL;
-  gboolean has_flathub                  = FALSE;
-  gboolean result                       = FALSE;
-  g_autoptr (GHashTable) cached_set     = NULL;
+  gboolean         has_flathub          = FALSE;
+  gboolean         result               = FALSE;
   g_autofree char *flathub_cache        = NULL;
   g_autoptr (GFile) flathub_cache_file  = NULL;
 
@@ -1103,74 +1105,14 @@ init_fiber (GWeakRef *wr)
     }
 
   /* Revive old cache from previous Bazaar process */
-  cached_set = dex_await_boxed (
-      bz_entry_cache_manager_enumerate_disk (self->cache),
-      &local_error);
-  if (cached_set != NULL)
-    {
-      g_autoptr (GPtrArray) futures = NULL;
-      GHashTableIter iter           = { 0 };
-      g_autoptr (GPtrArray) entries = NULL;
-
-      futures = g_ptr_array_new_with_free_func (dex_unref);
-
-      g_hash_table_iter_init (&iter, cached_set);
-      for (;;)
-        {
-          char *checksum = NULL;
-
-          if (!g_hash_table_iter_next (
-                  &iter, (gpointer *) &checksum, NULL))
-            break;
-
-          g_ptr_array_add (
-              futures,
-              bz_entry_cache_manager_get_by_checksum (
-                  self->cache, checksum));
-        }
-      g_clear_pointer (&cached_set, g_hash_table_unref);
-
-      if (futures->len > 0)
-        dex_await (dex_future_allv (
-                       (DexFuture *const *) futures->pdata,
-                       futures->len),
-                   NULL);
-
-      entries = g_ptr_array_new_with_free_func (g_object_unref);
-      for (guint i = 0; i < futures->len; i++)
-        {
-          DexFuture    *future = NULL;
-          const GValue *value  = NULL;
-
-          future = g_ptr_array_index (futures, i);
-          value  = dex_future_get_value (future, &local_error);
-          if (value != NULL)
-            g_ptr_array_add (entries, g_value_dup_object (value));
-          else
-            {
-              g_warning ("Unable to retrieve cached entry: %s", local_error->message);
-              g_clear_error (&local_error);
-            }
-        }
-
-      g_ptr_array_sort_values_with_data (
-          entries, (GCompareDataFunc) cmp_entry, NULL);
-      for (guint i = 0; i < entries->len; i++)
-        {
-          BzEntry *entry = NULL;
-
-          entry = g_ptr_array_index (entries, i);
-          fiber_replace_entry (self, entry);
-        }
-
-      gtk_filter_changed (GTK_FILTER (self->group_filter), GTK_FILTER_CHANGE_LESS_STRICT);
-      gtk_filter_changed (GTK_FILTER (self->appid_filter), GTK_FILTER_CHANGE_LESS_STRICT);
-    }
-  else
-    {
-      g_warning ("Unable to enumerate cached entries: %s", local_error->message);
-      g_clear_error (&local_error);
-    }
+  dex_await (
+      dex_scheduler_spawn (
+          dex_scheduler_get_default (),
+          bz_get_dex_stack_size (),
+          (DexFiberFunc) enumerate_disk_entries_fiber,
+          bz_track_weak (self),
+          bz_weak_release),
+      NULL);
 
   flathub_cache_file = fiber_dup_flathub_cache_file (&flathub_cache, &local_error);
   if (flathub_cache_file != NULL)
@@ -1227,6 +1169,84 @@ init_fiber (GWeakRef *wr)
       g_warning ("Unable to ensure cache directory: %s", local_error->message);
       g_clear_error (&local_error);
     }
+
+  return dex_future_new_true ();
+}
+
+static DexFuture *
+enumerate_disk_entries_fiber (GWeakRef *wr)
+{
+  g_autoptr (BzApplication) self    = NULL;
+  g_autoptr (GError) local_error    = NULL;
+  g_autoptr (GHashTable) cached_set = NULL;
+  g_autoptr (GPtrArray) futures     = NULL;
+  GHashTableIter iter               = { 0 };
+  g_autoptr (GPtrArray) entries     = NULL;
+
+  bz_weak_get_or_return_reject (self, wr);
+
+  cached_set = dex_await_boxed (
+      bz_entry_cache_manager_enumerate_disk (self->cache),
+      &local_error);
+  if (cached_set == NULL)
+    {
+      g_warning ("Unable to enumerate cached entries: %s", local_error->message);
+      return dex_future_new_for_error (g_steal_pointer (&local_error));
+    }
+
+  futures = g_ptr_array_new_with_free_func (dex_unref);
+
+  g_hash_table_iter_init (&iter, cached_set);
+  for (;;)
+    {
+      char *checksum = NULL;
+
+      if (!g_hash_table_iter_next (
+              &iter, (gpointer *) &checksum, NULL))
+        break;
+
+      g_ptr_array_add (
+          futures,
+          bz_entry_cache_manager_get_by_checksum (
+              self->cache, checksum));
+    }
+  g_clear_pointer (&cached_set, g_hash_table_unref);
+
+  if (futures->len > 0)
+    dex_await (dex_future_allv (
+                   (DexFuture *const *) futures->pdata,
+                   futures->len),
+               NULL);
+
+  entries = g_ptr_array_new_with_free_func (g_object_unref);
+  for (guint i = 0; i < futures->len; i++)
+    {
+      DexFuture    *future = NULL;
+      const GValue *value  = NULL;
+
+      future = g_ptr_array_index (futures, i);
+      value  = dex_future_get_value (future, &local_error);
+      if (value != NULL)
+        g_ptr_array_add (entries, g_value_dup_object (value));
+      else
+        {
+          g_warning ("Unable to retrieve cached entry: %s", local_error->message);
+          g_clear_error (&local_error);
+        }
+    }
+
+  g_ptr_array_sort_values_with_data (
+      entries, (GCompareDataFunc) cmp_entry, NULL);
+  for (guint i = 0; i < entries->len; i++)
+    {
+      BzEntry *entry = NULL;
+
+      entry = g_ptr_array_index (entries, i);
+      fiber_replace_entry (self, entry);
+    }
+
+  gtk_filter_changed (GTK_FILTER (self->group_filter), GTK_FILTER_CHANGE_LESS_STRICT);
+  gtk_filter_changed (GTK_FILTER (self->appid_filter), GTK_FILTER_CHANGE_LESS_STRICT);
 
   return dex_future_new_true ();
 }
@@ -1832,11 +1852,15 @@ backend_sync_finally (DexFuture *future,
 
   bz_weak_get_or_return_reject (self, wr);
 
-  bz_state_info_set_online (self->state, dex_future_is_resolved (future));
-  bz_state_info_set_syncing (self->state, FALSE);
-  bz_state_info_set_allow_manual_sync (self->state, TRUE);
-
-  return dex_future_new_true ();
+  if (dex_future_is_resolved (future))
+    return dex_scheduler_spawn (
+        dex_scheduler_get_default (),
+        bz_get_dex_stack_size (),
+        (DexFiberFunc) enumerate_disk_entries_fiber,
+        bz_track_weak (self),
+        bz_weak_release);
+  else
+    return dex_ref (future);
 }
 
 static DexFuture *
@@ -1896,14 +1920,21 @@ cache_write_back_finally (DexFuture          *future,
 }
 
 static DexFuture *
-sync_then (DexFuture *future,
-           GWeakRef  *wr)
+sync_finally (DexFuture *future,
+              GWeakRef  *wr)
 {
   g_autoptr (BzApplication) self = NULL;
 
   bz_weak_get_or_return_reject (self, wr);
 
+  bz_state_info_set_online (self->state, dex_future_is_resolved (future));
+  bz_state_info_set_allow_manual_sync (self->state, TRUE);
+  bz_state_info_set_busy (self->state, FALSE);
+  bz_state_info_set_syncing (self->state, FALSE);
+  finish_with_background_task_label (self);
+
   dex_promise_resolve_boolean (self->ready_to_open_files, TRUE);
+
   return dex_future_new_true ();
 }
 
@@ -3441,14 +3472,27 @@ validate_group_for_ui (BzApplication *self,
 static DexFuture *
 make_sync_future (BzApplication *self)
 {
-  g_autoptr (DexFuture) backend_future = NULL;
-  g_autoptr (DexFuture) flathub_future = NULL;
-  g_autoptr (DexFuture) ret_future     = NULL;
+  g_autoptr (GError) local_error         = NULL;
+  g_autoptr (GSubprocess) refresh_worker = NULL;
+  g_autoptr (DexFuture) backend_future   = NULL;
+  g_autoptr (DexFuture) flathub_future   = NULL;
+  g_autoptr (DexFuture) ret_future       = NULL;
 
   bz_state_info_set_allow_manual_sync (self->state, FALSE);
 
   bz_state_info_set_syncing (self->state, TRUE);
-  backend_future = bz_backend_retrieve_remote_entries (BZ_BACKEND (self->flatpak), NULL);
+
+  refresh_worker = g_subprocess_new (
+      G_SUBPROCESS_FLAGS_NONE,
+      &local_error,
+      REFRESH_WORKER_BIN_NAME,
+      NULL);
+  if (refresh_worker == NULL)
+    g_critical ("FATAL!!! The refresh worker could not be spawned: %s",
+                local_error->message);
+  g_assert (refresh_worker != NULL);
+
+  backend_future = dex_subprocess_wait_check (refresh_worker);
   backend_future = dex_future_finally (
       backend_future,
       (DexFutureCallback) backend_sync_finally,
@@ -3466,9 +3510,9 @@ make_sync_future (BzApplication *self)
       dex_ref (backend_future),
       dex_ref (flathub_future),
       NULL);
-  ret_future = dex_future_then (
+  ret_future = dex_future_finally (
       ret_future,
-      (DexFutureCallback) sync_then,
+      (DexFutureCallback) sync_finally,
       bz_track_weak (self), bz_weak_release);
   return g_steal_pointer (&ret_future);
 }
