@@ -356,6 +356,9 @@ static void
 finish_with_background_task_label (BzApplication *self);
 
 static void
+state_info_set_icon_themes (BzStateInfo *state);
+
+static void
 bz_application_dispose (GObject *object)
 {
   BzApplication *self = BZ_APPLICATION (object);
@@ -917,7 +920,23 @@ bz_state_info_get_default (void)
 
   app = g_application_get_default ();
   if G_UNLIKELY (app == NULL)
-    return NULL;
+    {
+      static BzStateInfo *fallback_state = NULL;
+
+      if (g_once_init_enter_pointer (&fallback_state))
+        {
+          g_autoptr (BzStateInfo) tmp = NULL;
+
+          tmp = bz_state_info_new ();
+          state_info_set_icon_themes (tmp);
+
+          g_once_init_leave_pointer (
+              &fallback_state,
+              g_steal_pointer (&tmp));
+        }
+
+      return fallback_state;
+    }
 
   self = (BzApplication *) app;
   g_assert (BZ_IS_APPLICATION (self));
@@ -2922,20 +2941,7 @@ init_service_struct (BzApplication *self,
   bz_state_info_set_donation_prompt_dismissed (self->state, TRUE);
   bz_state_info_set_parental_age_rating (self->state, -1);
 
-  {
-    g_autoptr (GtkIconTheme) user_theme   = NULL;
-    g_autoptr (GtkIconTheme) system_theme = NULL;
-    g_autofree char *user_export_dir      = NULL;
-
-    user_theme      = gtk_icon_theme_new ();
-    user_export_dir = g_build_filename (g_get_home_dir (), ".local/share/flatpak/exports/share/icons", NULL);
-    gtk_icon_theme_add_search_path (user_theme, user_export_dir);
-    bz_state_info_set_user_icon_theme (self->state, user_theme);
-
-    system_theme = gtk_icon_theme_new ();
-    gtk_icon_theme_add_search_path (system_theme, "/var/lib/flatpak/exports/share/icons");
-    bz_state_info_set_system_icon_theme (self->state, system_theme);
-  }
+  state_info_set_icon_themes (self->state);
 
   {
     g_autoptr (GError) bus_error        = NULL;
@@ -3545,4 +3551,21 @@ finish_with_background_task_label (BzApplication *self)
     bz_state_info_set_background_task_label (self->state, _ ("Writing to cache…"));
   else
     bz_state_info_set_background_task_label (self->state, NULL);
+}
+
+static void
+state_info_set_icon_themes (BzStateInfo *state)
+{
+  g_autoptr (GtkIconTheme) user_theme   = NULL;
+  g_autoptr (GtkIconTheme) system_theme = NULL;
+  g_autofree char *user_export_dir      = NULL;
+
+  user_theme      = gtk_icon_theme_new ();
+  user_export_dir = g_build_filename (g_get_home_dir (), ".local/share/flatpak/exports/share/icons", NULL);
+  gtk_icon_theme_add_search_path (user_theme, user_export_dir);
+  bz_state_info_set_user_icon_theme (state, user_theme);
+
+  system_theme = gtk_icon_theme_new ();
+  gtk_icon_theme_add_search_path (system_theme, "/var/lib/flatpak/exports/share/icons");
+  bz_state_info_set_system_icon_theme (state, system_theme);
 }
