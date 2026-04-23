@@ -194,8 +194,8 @@ gboolean
 bge_wdgt_spec_transition_value (BgeWdgtSpec *self,
                                 const char  *state,
                                 const char  *value,
-                                double       seconds,
-                                BgeEasing    easing,
+                                const char  *seconds,
+                                const char  *easing,
                                 GError     **error);
 
 gboolean

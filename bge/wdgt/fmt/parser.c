@@ -615,50 +615,36 @@ parse_widget_block (const char  *p,
                 }
               else if (g_strcmp0 (token, STR_TRANSITION) == 0)
                 {
-                  g_autofree char *transition_value    = NULL;
-                  g_autofree char *transition_type     = NULL;
-                  g_autofree char *transition_seconds  = NULL;
-                  g_autoptr (GEnumClass) enum_class    = NULL;
-                  GEnumValue *enum_value               = NULL;
-                  g_autoptr (GVariant) seconds_variant = NULL;
-                  gdouble seconds                      = 0.0;
+                  g_autofree char *transition_value = NULL;
+                  guint            n_spec_values    = 0;
+                  g_auto (GStrv) spec_values        = NULL;
 
                   GET_TOKEN (&transition_value, TOKEN_PARSE_DEFAULT);
-                  GET_TOKEN (&transition_type, TOKEN_PARSE_DEFAULT);
-                  GET_TOKEN (&transition_seconds, TOKEN_PARSE_DEFAULT);
 
-                  enum_class = g_type_class_ref (BGE_TYPE_EASING);
-                  enum_value = g_enum_get_value_by_nick (enum_class, transition_type);
-                  if (enum_value == NULL)
-                    enum_value = g_enum_get_value_by_name (enum_class, transition_type);
-                  if (enum_value == NULL)
+                  p = parse_args (p, spec, state_name, NULL, macro_replacements, n_anon_vals, type_hints, NULL,
+                                  (GType[]){ G_TYPE_DOUBLE, BGE_TYPE_EASING }, 2,
+                                  &spec_values, NULL, &n_spec_values, ARGS_PARSE_RIGHT_ASSIGN, &local_error);
+                  RETURN_ERROR_UNLESS (p != NULL);
+                  if (n_spec_values != 2)
                     {
                       g_set_error (
                           error,
                           G_IO_ERROR,
                           G_IO_ERROR_UNKNOWN,
-                          "'%s' not found in enum type %s",
-                          transition_type, g_type_name (BGE_TYPE_EASING));
+                          "transition spec needs 2 arguments "
+                          "(animation length in seconds, easing type), got %u",
+                          n_spec_values);
                       return NULL;
                     }
-
-                  seconds_variant = g_variant_parse (
-                      G_VARIANT_TYPE_DOUBLE,
-                      transition_seconds,
-                      NULL, NULL, &local_error);
-                  RETURN_ERROR_UNLESS (seconds_variant != NULL);
-                  seconds = g_variant_get_double (seconds_variant);
 
                   result = bge_wdgt_spec_transition_value (
                       spec,
                       state_name,
                       transition_value,
-                      seconds,
-                      enum_value->value,
+                      spec_values[0],
+                      spec_values[1],
                       &local_error);
                   RETURN_ERROR_UNLESS (result);
-
-                  GET_TOKEN_EXPECT (&transition_seconds, TOKEN_PARSE_DEFAULT, ";");
                 }
               else if (g_strcmp0 (token, STR_TRANSITION_SPRING) == 0)
                 {

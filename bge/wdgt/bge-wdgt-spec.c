@@ -292,8 +292,8 @@ BGE_DEFINE_DATA (
       {
         struct
         {
-          double    seconds;
-          BgeEasing easing;
+          ValueData *seconds;
+          ValueData *easing;
         } ease;
         struct
         {
@@ -313,6 +313,8 @@ deinit_transition (gpointer ptr)
   switch (transition->kind)
     {
     case TRANSITION_EASE:
+      g_clear_pointer (&transition->ease.seconds, value_data_unref);
+      g_clear_pointer (&transition->ease.easing, value_data_unref);
       break;
     case TRANSITION_SPRING:
       g_clear_pointer (&transition->spring.damping_ratio, value_data_unref);
@@ -2350,35 +2352,35 @@ gboolean
 bge_wdgt_spec_transition_value (BgeWdgtSpec *self,
                                 const char  *state,
                                 const char  *value,
-                                double       seconds,
-                                BgeEasing    easing,
+                                const char  *seconds,
+                                const char  *easing,
                                 GError     **error)
 {
   StateData *state_data                 = NULL;
   ValueData *value_data                 = NULL;
+  ValueData *seconds_data               = NULL;
+  ValueData *easing_data                = NULL;
   g_autoptr (TransitionData) transition = NULL;
 
   g_return_val_if_fail (BGE_IS_WDGT_SPEC (self), FALSE);
   /* state is required for transitions */
   g_return_val_if_fail (state != NULL, FALSE);
   g_return_val_if_fail (value != NULL, FALSE);
-
-  if (seconds <= 0.0)
-    {
-      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
-                   "transition period must be greater than 0.0");
-      return FALSE;
-    }
+  g_return_val_if_fail (seconds != NULL, FALSE);
+  g_return_val_if_fail (easing != NULL, FALSE);
 
   state_data = g_hash_table_lookup (self->states, state);
-  value_data = g_hash_table_lookup (self->values, value);
-
   if (state_data == NULL)
     {
       g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
                    "state '%s' is undefined", state);
       return FALSE;
     }
+
+  value_data   = g_hash_table_lookup (self->values, value);
+  seconds_data = g_hash_table_lookup (self->values, seconds);
+  easing_data  = g_hash_table_lookup (self->values, easing);
+
   if (value_data == NULL)
     {
       g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
@@ -2394,10 +2396,39 @@ bge_wdgt_spec_transition_value (BgeWdgtSpec *self,
       return FALSE;
     }
 
+  if (seconds_data == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' is undefined", value);
+      return FALSE;
+    }
+  if (seconds_data->type != G_TYPE_DOUBLE)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "transition ease seconds value must be a double, got %s",
+                   g_type_name (seconds_data->type));
+      return FALSE;
+    }
+
+  if (easing_data == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "value '%s' is undefined", value);
+      return FALSE;
+    }
+  if (easing_data->type != BGE_TYPE_EASING)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_UNKNOWN,
+                   "transition ease easing value must be of type %s, got %s",
+                   g_type_name (BGE_TYPE_EASING),
+                   g_type_name (easing_data->type));
+      return FALSE;
+    }
+
   transition               = transition_data_new ();
   transition->kind         = TRANSITION_EASE;
-  transition->ease.seconds = seconds;
-  transition->ease.easing  = easing;
+  transition->ease.seconds = value_data_ref (seconds_data);
+  transition->ease.easing  = value_data_ref (easing_data);
 
   g_hash_table_replace (
       state_data->transitions,
@@ -5288,7 +5319,12 @@ BGE_DEFINE_DATA (
       double           value;
       double           elapsed;
       BgeWdgtNotifier *notifier;
-      SpringCache      spring;
+      struct
+      {
+        BgeEasing easing;
+        double    seconds;
+      } ease;
+      SpringCache spring;
     },
     BGE_RELEASE_DATA (notifier, g_object_unref))
 
@@ -5359,6 +5395,11 @@ static double
 resolve_value_double (BgeWdgtRenderer   *self,
                       ValueData         *value,
                       StateInstanceData *instance);
+
+static gint
+resolve_value_enum (BgeWdgtRenderer   *self,
+                    ValueData         *value,
+                    StateInstanceData *instance);
 
 static gpointer
 resolve_value_boxed_dup (BgeWdgtRenderer   *self,
@@ -5941,7 +5982,7 @@ tick_cb (BgeWdgtRenderer *self,
           switch (transition->kind)
             {
             case TRANSITION_EASE:
-              if (elapsed <= transition->ease.seconds)
+              if (elapsed <= transition_instance->ease.seconds)
                 finished_all_state_transitions = FALSE;
               break;
             case TRANSITION_SPRING:
@@ -6845,7 +6886,7 @@ expression_adjust_state_transition (BgeWdgtRenderer       *this,
   if (last_transition != NULL &&
       last_transition_instance != NULL &&
       last_transition->kind == TRANSITION_EASE &&
-      last_transition_instance->elapsed < last_transition->ease.seconds)
+      last_transition_instance->elapsed < last_transition_instance->ease.seconds)
     last_in = last_transition_instance->value;
   else
     {
@@ -6860,6 +6901,32 @@ expression_adjust_state_transition (BgeWdgtRenderer       *this,
 
   switch (transition->kind)
     {
+    case TRANSITION_EASE:
+      {
+        BgeEasing easing  = 0;
+        double    seconds = 0.0;
+
+        easing = resolve_value_enum (
+            this,
+            transition->ease.easing,
+            this->active_instance);
+        seconds = resolve_value_double (
+            this,
+            transition->ease.seconds,
+            this->active_instance);
+
+        if (elapsed >= seconds)
+          interpolated_number = in;
+        else
+          {
+            progress            = bge_easing_ease (easing, elapsed / seconds);
+            interpolated_number = last_in + progress * (in - last_in);
+          }
+
+        transition_instance->ease.easing  = easing;
+        transition_instance->ease.seconds = seconds;
+      }
+      break;
     case TRANSITION_SPRING:
       {
         double damping_ratio = 0.0;
@@ -6919,18 +6986,6 @@ expression_adjust_state_transition (BgeWdgtRenderer       *this,
               in,
               elapsed,
               &transition_instance->spring.velocity);
-      }
-      break;
-    case TRANSITION_EASE:
-      {
-        if (elapsed >= transition->ease.seconds)
-          interpolated_number = in;
-        else
-          {
-            progress            = bge_easing_ease (transition->ease.easing,
-                                                   elapsed / transition->ease.seconds);
-            interpolated_number = last_in + progress * (in - last_in);
-          }
       }
       break;
     default:
@@ -7475,7 +7530,7 @@ ensure_expressions (BgeWdgtRenderer   *self,
       switch (transition->kind)
         {
         case TRANSITION_EASE:
-          instance_data->elapsed = transition->ease.seconds;
+          instance_data->elapsed = G_MAXINT;
           break;
         case TRANSITION_SPRING:
           instance_data->spring.est_duration = -1.0;
@@ -7773,6 +7828,27 @@ resolve_value_double (BgeWdgtRenderer   *self,
       self,
       &resolved);
   ret = g_value_get_double (&resolved);
+  g_value_unset (&resolved);
+
+  return ret;
+}
+
+static gint
+resolve_value_enum (BgeWdgtRenderer   *self,
+                    ValueData         *value,
+                    StateInstanceData *instance)
+{
+  GtkExpression *expression = NULL;
+  GValue         resolved   = G_VALUE_INIT;
+  gint           ret        = 0;
+
+  expression = g_hash_table_lookup (instance->expressions, value);
+  g_assert (expression != NULL);
+  gtk_expression_evaluate (
+      expression,
+      self,
+      &resolved);
+  ret = g_value_get_enum (&resolved);
   g_value_unset (&resolved);
 
   return ret;
