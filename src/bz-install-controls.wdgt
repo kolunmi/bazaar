@@ -4,6 +4,7 @@ defwidget "Install Button" {
 
   var btn-install : "GtkButton";
   var btn-cancel : "GtkButton";
+  var btn-cancelling : "GtkButton";
   var bg : "GtkFixed";
 
   var stack : "GtkStack";
@@ -32,6 +33,14 @@ defwidget "Install Button" {
       );
       %set btn-cancel = #child/GtkButton(""("pill" "install-button")
         label = "Cancel";
+        margin-top = 4;
+        margin-bottom = 4;
+        margin-start = 4;
+        margin-end = 4;
+      );
+      %set btn-cancelling = #child/GtkButton(""("pill")
+        sensitive = false;
+        label = "Cancelling";
         margin-top = 4;
         margin-bottom = 4;
         margin-start = 4;
@@ -96,5 +105,19 @@ defwidget "Install Button" {
     transition-spring w 1.1, 0.1, 100.0;
     transition-spring b 1.1, 0.1, 100.0;
     transition-spring opacity 1.1, 0.1, 10.0;
+  }
+
+  state "cancelling" {
+    set stack:visible-child = btn-cancelling;
+    
+    set x = #eval((#(%width%)-#(w))/2.0);
+    set w = #eval(#(%width%)*0.8);
+    set b = #eval(#(%height%)*0.175);
+    set opacity = 0.0;
+
+    transition-spring x 0.95, 0.25, 50.0;
+    transition-spring w 0.95, 0.25, 50.0;
+    transition-spring b 0.95, 0.25, 50.0;
+    transition-spring opacity 1.0, 1.0, 50.0;
   }
 }

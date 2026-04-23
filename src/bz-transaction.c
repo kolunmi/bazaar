@@ -771,6 +771,9 @@ tracker_update (BzTransactionPrivate                  *priv,
 
   if (result)
     {
+      BzTransactionEntryStatus existing_status = 0;
+
+      existing_status = bz_transaction_entry_tracker_get_status (tracker);
       if (transfer)
         {
           GListModel *from = NULL;
@@ -811,7 +814,9 @@ tracker_update (BzTransactionPrivate                  *priv,
                             NULL);
             }
           bz_transaction_entry_tracker_set_active (tracker, TRUE);
-          bz_transaction_entry_tracker_set_status (tracker, BZ_TRANSACTION_ENTRY_STATUS_ONGOING);
+
+          if (existing_status != BZ_TRANSACTION_ENTRY_STATUS_CANCELLED)
+            bz_transaction_entry_tracker_set_status (tracker, BZ_TRANSACTION_ENTRY_STATUS_ONGOING);
         }
     }
 }

@@ -26,6 +26,7 @@ template $BzInstallControls: Box {
         reference: bind template.tracker as <$BzTransactionEntryTracker>;
 
         state: bind try { $get_install_btn_state(
+                  template.tracker as <$BzTransactionEntryTracker>.status as <$BzTransactionEntryStatus>,
                   template.tracker as <$BzTransactionEntryTracker>.active as <bool>,
                   template.tracker as <$BzTransactionEntryTracker>.pending as <bool>,
                   template.tracker as <$BzTransactionEntryTracker>.progress as <double>

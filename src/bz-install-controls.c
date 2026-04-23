@@ -231,17 +231,20 @@ get_visible_page (gpointer    object,
 }
 
 static char *
-get_install_btn_state (gpointer object,
-                       gboolean active,
-                       gboolean pending,
-                       double   progress)
+get_install_btn_state (gpointer                 object,
+                       BzTransactionEntryStatus status,
+                       gboolean                 active,
+                       gboolean                 pending,
+                       double                   progress)
 {
-  if (pending)
+  if ((active || pending) && status == BZ_TRANSACTION_ENTRY_STATUS_CANCELLED)
+    return g_strdup ("cancelling");
+  else if (pending || status == BZ_TRANSACTION_ENTRY_STATUS_QUEUED)
     return g_strdup ("pending");
-  else if (active)
-    return g_strdup ("fraction");
-  else
+  else if (!active || status == BZ_TRANSACTION_ENTRY_STATUS_DONE)
     return g_strdup ("inactive");
+  else
+    return g_strdup ("fraction");
 }
 
 static gboolean
