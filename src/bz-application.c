@@ -3485,6 +3485,7 @@ make_sync_future (BzApplication *self)
   bz_state_info_set_allow_manual_sync (self->state, FALSE);
 
   bz_state_info_set_syncing (self->state, TRUE);
+  finish_with_background_task_label (self);
 
   refresh_worker = g_subprocess_new (
       G_SUBPROCESS_FLAGS_NONE,
