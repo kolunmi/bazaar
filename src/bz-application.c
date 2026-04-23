@@ -1248,6 +1248,10 @@ enumerate_disk_entries_fiber (GWeakRef *wr)
   gtk_filter_changed (GTK_FILTER (self->group_filter), GTK_FILTER_CHANGE_LESS_STRICT);
   gtk_filter_changed (GTK_FILTER (self->appid_filter), GTK_FILTER_CHANGE_LESS_STRICT);
 
+  bz_state_info_set_background_task_label (self->state, _ ("Checking for updates…"));
+  fiber_check_for_updates (self);
+  finish_with_background_task_label (self);
+
   return dex_future_new_true ();
 }
 
