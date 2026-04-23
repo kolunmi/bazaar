@@ -2063,9 +2063,9 @@ fiber_replace_entry (BzApplication *self,
 
   if (bz_entry_is_of_kinds (entry, BZ_ENTRY_KIND_APPLICATION))
     {
-      gboolean      ignore_eol             = FALSE;
-      const char   *runtime_name           = NULL;
-      BzEntry      *eol_runtime            = NULL;
+      gboolean    ignore_eol               = FALSE;
+      const char *runtime_name             = NULL;
+      g_autoptr (BzEntry) eol_runtime      = NULL;
       BzEntryGroup *group                  = NULL;
       GHashTable   *ref_to_addon_group_ids = NULL;
       GPtrArray    *pending                = NULL;
@@ -2074,8 +2074,19 @@ fiber_replace_entry (BzApplication *self,
         ignore_eol = g_hash_table_contains (self->ignore_eol_set, id);
 
       runtime_name = bz_flatpak_entry_get_application_runtime (BZ_FLATPAK_ENTRY (entry));
-      if (!ignore_eol && runtime_name != NULL)
-        eol_runtime = g_hash_table_lookup (self->eol_runtimes, runtime_name);
+      if (!ignore_eol &&
+          runtime_name != NULL)
+        {
+          char *runtime_checksum = NULL;
+
+          runtime_checksum = g_hash_table_lookup (self->eol_runtimes, runtime_name);
+          if (runtime_checksum != NULL)
+            eol_runtime = dex_await_object (
+                bz_entry_cache_manager_get_by_checksum (
+                    self->cache,
+                    runtime_checksum),
+                NULL);
+        }
 
       group = ensure_group_and_add (self, id, entry, eol_runtime, ignore_eol, installed);
 
@@ -2106,7 +2117,7 @@ fiber_replace_entry (BzApplication *self,
         g_hash_table_replace (
             self->eol_runtimes,
             g_strdup (stripped),
-            g_object_ref (entry));
+            g_strdup (unique_id_checksum));
       else
         g_hash_table_remove (self->eol_runtimes, stripped);
     }
@@ -3048,7 +3059,7 @@ init_service_struct (BzApplication *self,
   self->ids_to_groups  = g_hash_table_new_full (
       g_str_hash, g_str_equal, g_free, g_object_unref);
   self->eol_runtimes = g_hash_table_new_full (
-      g_str_hash, g_str_equal, g_free, g_object_unref);
+      g_str_hash, g_str_equal, g_free, g_free);
   self->sys_name_to_addons = g_hash_table_new_full (
       g_str_hash, g_str_equal, g_free, (GDestroyNotify) g_ptr_array_unref);
   self->usr_name_to_addons = g_hash_table_new_full (
