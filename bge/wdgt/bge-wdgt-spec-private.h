@@ -26,12 +26,6 @@ G_BEGIN_DECLS
 
 typedef enum
 {
-  BGE_WDGT_SPECIAL_VALUE_MOTION_X,
-  BGE_WDGT_SPECIAL_VALUE_MOTION_Y,
-} BgeWdgtSpecialValue;
-
-typedef enum
-{
   BGE_WDGT_SNAPSHOT_INSTR_APPEND = 0,
   BGE_WDGT_SNAPSHOT_INSTR_PUSH,
   BGE_WDGT_SNAPSHOT_INSTR_POP,
@@ -138,12 +132,6 @@ bge_wdgt_spec_add_track_transition_source_value (BgeWdgtSpec *self,
                                                  const char  *mass,
                                                  const char  *stiffness,
                                                  GError     **error);
-
-gboolean
-bge_wdgt_spec_add_special_source_value (BgeWdgtSpec        *self,
-                                        const char         *name,
-                                        BgeWdgtSpecialValue kind,
-                                        GError            **error);
 
 gboolean
 bge_wdgt_spec_add_variable_value (BgeWdgtSpec *self,
