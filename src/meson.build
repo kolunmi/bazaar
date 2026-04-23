@@ -163,7 +163,6 @@ bz_sources = files(
   'bz-world-map.c',
   'bz-yaml-parser.c',
   'bz-zoom.c',
-  'main.c',
 )
 subdir('progress-bar-designs')
 
@@ -359,7 +358,14 @@ bz_sources += gnome.compile_resources('bz-resources',
   dependencies: [blueprints, release_notes, countries_gvariant],
 )
 
-executable('bazaar', bz_sources, gdbus_src, marshalers,
+executable('bazaar', bz_sources + ['main.c'], gdbus_src, marshalers,
+           dependencies: bz_deps,
+           install: true,
+)
+
+executable(refresh_worker_bin_name,
+           bz_sources + ['refresh-worker.c'],
+           gdbus_src, marshalers,
            dependencies: bz_deps,
            install: true,
 )

@@ -229,6 +229,17 @@ bge_wdgt_spec_append_snapshot_instr (BgeWdgtSpec             *self,
                                      guint                   *n_pops_out,
                                      GError                 **error);
 
+gboolean
+bge_wdgt_spec_push_foreach (BgeWdgtSpec *self,
+                            const char  *model,
+                            const char  *value_iterator,
+                            const char  *index_iterator,
+                            GType        iterator_type,
+                            GError     **error);
+
+gboolean
+bge_wdgt_spec_pop_foreach (BgeWdgtSpec *self);
+
 G_END_DECLS
 
 /* End of bge-wdgt-spec-private.h */
