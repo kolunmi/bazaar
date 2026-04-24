@@ -166,7 +166,6 @@ struct _BzFeaturedTile
 
   BzEntryGroup *group;
   gboolean      narrow_mode;
-  gboolean      is_aotd;
   guint         refresh_id;
 
   BzGroupTileCssWatcher *css;
@@ -192,7 +191,6 @@ enum
   PROP_FIRST_SCREENSHOT,
   PROP_HAS_SCREENSHOT,
   PROP_NARROW,
-  PROP_IS_AOTD,
   LAST_PROP
 };
 
@@ -381,9 +379,6 @@ bz_featured_tile_get_property (GObject    *object,
     case PROP_NARROW:
       g_value_set_boolean (value, self->narrow_mode);
       break;
-    case PROP_IS_AOTD:
-      g_value_set_boolean (value, bz_featured_tile_get_is_aotd (self));
-      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -404,9 +399,6 @@ bz_featured_tile_set_property (GObject      *object,
     {
     case PROP_GROUP:
       bz_featured_tile_set_group (self, g_value_get_object (value));
-      break;
-    case PROP_IS_AOTD:
-      bz_featured_tile_set_is_aotd (self, g_value_get_boolean (value));
       break;
     case PROP_FIRST_SCREENSHOT:
     case PROP_HAS_SCREENSHOT:
@@ -449,11 +441,6 @@ bz_featured_tile_class_init (BzFeaturedTileClass *klass)
       g_param_spec_boolean ("narrow", NULL, NULL,
                             FALSE,
                             G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
-
-  props[PROP_IS_AOTD] =
-      g_param_spec_boolean ("is-aotd", NULL, NULL,
-                            FALSE,
-                            G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
@@ -535,22 +522,3 @@ bz_featured_tile_set_group (BzFeaturedTile *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_GROUP]);
 }
 
-gboolean
-bz_featured_tile_get_is_aotd (BzFeaturedTile *self)
-{
-  g_return_val_if_fail (BZ_IS_FEATURED_TILE (self), FALSE);
-  return self->is_aotd;
-}
-
-void
-bz_featured_tile_set_is_aotd (BzFeaturedTile *self,
-                              gboolean        is_aotd)
-{
-  g_return_if_fail (BZ_IS_FEATURED_TILE (self));
-
-  if (self->is_aotd == is_aotd)
-    return;
-
-  self->is_aotd = is_aotd;
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_IS_AOTD]);
-}

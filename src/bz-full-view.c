@@ -70,8 +70,6 @@ struct _BzFullView
   BzResult             *group_model;
   gboolean              show_sidebar;
 
-  GMenuModel *main_menu;
-
   /* Template widgets */
   GtkScrolledWindow *main_scroll;
   AdwViewStack      *stack;
@@ -88,7 +86,6 @@ enum
   PROP_STATE,
   PROP_ENTRY_GROUP,
   PROP_UI_ENTRY,
-  PROP_MAIN_MENU,
 
   LAST_PROP
 };
@@ -114,7 +111,6 @@ bz_full_view_dispose (GObject *object)
   g_clear_object (&self->ui_entry);
   g_clear_object (&self->runtime);
   g_clear_object (&self->group_model);
-  g_clear_object (&self->main_menu);
 
   G_OBJECT_CLASS (bz_full_view_parent_class)->dispose (object);
 }
@@ -138,9 +134,6 @@ bz_full_view_get_property (GObject    *object,
     case PROP_UI_ENTRY:
       g_value_set_object (value, self->ui_entry);
       break;
-    case PROP_MAIN_MENU:
-      g_value_set_object (value, self->main_menu);
-      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -162,10 +155,6 @@ bz_full_view_set_property (GObject      *object,
       break;
     case PROP_ENTRY_GROUP:
       bz_full_view_set_entry_group (self, g_value_get_object (value));
-      break;
-    case PROP_MAIN_MENU:
-      g_clear_object (&self->main_menu);
-      self->main_menu = g_value_dup_object (value);
       break;
     case PROP_UI_ENTRY:
     default:
@@ -668,13 +657,6 @@ bz_full_view_class_init (BzFullViewClass *klass)
           NULL, NULL,
           BZ_TYPE_RESULT,
           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
-
-  props[PROP_MAIN_MENU] =
-      g_param_spec_object (
-          "main-menu",
-          NULL, NULL,
-          G_TYPE_MENU_MODEL,
-          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 

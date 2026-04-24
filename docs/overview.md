@@ -64,6 +64,23 @@ configuration file into Bazaar. If this is not defined at compile time, Bazaar
 will never attempt to read a main config. See the next section of this document
 to see an example config file.
 
+## Environment Variables
+
+Bazaar reads the following environment variables, which may be of interest:
+
+* `BAZAAR_DESKTOP_SEARCH_PROVIDER_ICON_SIZE`: may be read as an unsigned integer
+from 1 to 256 to specify the square pixel size of icons sent to the desktop
+search provider. This should be configured to be a higher value than its default
+value of 24x24 when on KDE, as krunner paints result icons as much larger than
+gnome-shell does. This way, the images will not appear blurry.
+
+* `BAZAAR_N_DOWNLOAD_WORKERS`: may be read as an unsigned integer greater than 0
+to specify the number of image download worker subprocesses that should be
+spawned and managed by Bazaar to fetch screenshots, icons, and other images. By
+default, Bazaar spawns 8 download workers. Download workers are always killed
+when Bazaar has no active windows and ensured when Bazaar returns to having 1 or
+more windows.
+
 ## Main Configuration
 
 This is the primary YAML configuration file for bazaar, as designated by the
@@ -803,8 +820,8 @@ new-score = y-intercept + (slope * original-score)
 
 #### Exponential
 
-Linear functions require a `factor` and a `y-intercept` and are evaluated like
-this:
+Exponential functions require a `factor` and a `y-intercept` and are evaluated
+like this:
 
 ```
 new-score = y-intercept * (factor ^ original-score)

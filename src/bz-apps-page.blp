@@ -5,63 +5,7 @@ template $BzAppsPage: Adw.NavigationPage {
 
   Adw.ToolbarView {
     [top]
-    Adw.HeaderBar {
-      [end]
-      MenuButton {
-        primary: true;
-        icon-name: "open-menu-symbolic";
-        has-tooltip: true;
-        tooltip-text: _("Main Menu");
-        menu-model: menu {
-          section {
-            item {
-              label: _("_Donate to Bazaar ❤️");
-              action: "app.donate";
-            }
-          }
-
-          section {
-            item {
-              label: _("_Refresh");
-              action: "app.sync-remotes";
-            }
-
-            item {
-              label: _("_Preferences");
-              action: "app.preferences";
-            }
-
-            item {
-              label: _("_Login With Flathub");
-              action: "app.flathub-login";
-              hidden-when: "action-disabled";
-            }
-
-            item {
-              label: _("_Manage Leftover User Data");
-              action: "window.user-data";
-            }
-
-            item {
-              label: _("_Keyboard Shortcuts");
-              action: "app.shortcuts";
-            }
-
-            item {
-              label: _("_About Bazaar");
-              action: "app.about";
-            }
-          }
-
-          section {
-            item {
-              label: _("_Quit Bazaar");
-              action: "app.quit";
-            }
-          }
-        };
-      }
-    }
+    Adw.HeaderBar {}
 
     content: Adw.BreakpointBin {
       width-request: 360;

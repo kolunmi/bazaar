@@ -188,14 +188,25 @@ template $BzFlathubPage: Adw.Bin {
                       category: bind $get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "office") as <$BzFlathubCategory>;
                     }
 
-                    $BzFeaturedCarousel {
+                    Label {
+                      styles [
+                        "title-1",
+                      ]
+                      xalign: 0.0;
+                      hexpand: true;
+                      margin-start: 3;
+                      margin-end: 3;
+                      ellipsize: end;
+                      label: _("App of the Day");
+                    }
 
+                    $BzFeaturedCarousel {
                       styles [
                         "flathub-page-section",
                       ]
 
                       margin-top: 16;
-                      margin-bottom: 8;
+                      margin-bottom: 20;
                       hexpand: true;
 
                       model: SliceListModel {
@@ -203,8 +214,6 @@ template $BzFlathubPage: Adw.Bin {
                         size: 1;
                         model: bind template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.apps_of_the_day_week;
                       };
-
-                      is-aotd: true;
                     }
 
                     $BzFlathubCategorySection section_graphics {
@@ -218,7 +227,7 @@ template $BzFlathubPage: Adw.Bin {
                     Box otg_box {
                       visible: bind $invert_boolean($is_null($get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "mobile") as <$BzFlathubCategory>) as <bool>) as <bool>;
                       margin-top: 8;
-                      margin-bottom: 8;
+                      margin-bottom: 20;
 
                       styles [
                         "sp-section",
@@ -331,7 +340,7 @@ template $BzFlathubPage: Adw.Bin {
                     Box {
                       visible: bind $invert_boolean($is_null($get_category_by_name_cb(template.state as <$BzStateInfo>.flathub as <$BzFlathubState>.categories, "game") as <$BzFlathubCategory>) as <bool>) as <bool>;
                       margin-top: 8;
-                      margin-bottom: 8;
+                      margin-bottom: 20;
 
                       styles [
                         "sp-section",

@@ -33,7 +33,6 @@ struct _BzFeaturedCarousel
   GtkBox parent_instance;
 
   GListModel *model;
-  gboolean    is_aotd;
 
   guint   rotation_timer_source;
   GTimer *time_since_manual_rotate;
@@ -50,7 +49,6 @@ enum
 {
   PROP_0,
   PROP_MODEL,
-  PROP_IS_AOTD,
   LAST_PROP
 };
 
@@ -224,9 +222,6 @@ bz_featured_carousel_get_property (GObject    *object,
     case PROP_MODEL:
       g_value_set_object (value, bz_featured_carousel_get_model (self));
       break;
-    case PROP_IS_AOTD:
-      g_value_set_boolean (value, bz_featured_carousel_get_is_aotd (self));
-      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -248,9 +243,6 @@ bz_featured_carousel_set_property (GObject      *object,
     case PROP_MODEL:
       bz_featured_carousel_set_model (self, g_value_get_object (value));
       break;
-    case PROP_IS_AOTD:
-      bz_featured_carousel_set_is_aotd (self, g_value_get_boolean (value));
-      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -265,8 +257,6 @@ on_create_widget (BzFeaturedCarousel *self,
   BzFeaturedTile *tile = NULL;
 
   tile = bz_featured_tile_new (group);
-
-  g_object_bind_property (self, "is-aotd", tile, "is-aotd", G_BINDING_SYNC_CREATE);
 
   gtk_widget_set_hexpand (GTK_WIDGET (tile), TRUE);
   gtk_widget_set_vexpand (GTK_WIDGET (tile), TRUE);
@@ -303,11 +293,6 @@ bz_featured_carousel_class_init (BzFeaturedCarouselClass *klass)
       g_param_spec_object ("model", NULL, NULL,
                            G_TYPE_LIST_MODEL,
                            G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY | G_PARAM_STATIC_STRINGS);
-
-  props[PROP_IS_AOTD] =
-      g_param_spec_boolean ("is-aotd", NULL, NULL,
-                            FALSE,
-                            G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
@@ -373,23 +358,3 @@ bz_featured_carousel_set_model (BzFeaturedCarousel *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MODEL]);
 }
 
-gboolean
-bz_featured_carousel_get_is_aotd (BzFeaturedCarousel *self)
-{
-  g_return_val_if_fail (BZ_IS_FEATURED_CAROUSEL (self), FALSE);
-  return self->is_aotd;
-}
-
-void
-bz_featured_carousel_set_is_aotd (BzFeaturedCarousel *self,
-                                  gboolean            is_aotd)
-{
-  g_return_if_fail (BZ_IS_FEATURED_CAROUSEL (self));
-
-  if (self->is_aotd == is_aotd)
-    return;
-
-  self->is_aotd = is_aotd;
-
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_IS_AOTD]);
-}

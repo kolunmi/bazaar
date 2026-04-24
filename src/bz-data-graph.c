@@ -47,7 +47,10 @@ struct _BzDataGraph
 
   GskPath        *path;
   GskPathMeasure *path_measure;
-  GskRenderNode  *fg;
+
+  GskRenderNode *other;
+  GskRenderNode *graph;
+  GskRenderNode *overlay;
 
   gboolean wants_animate_open;
 
@@ -60,6 +63,9 @@ struct _BzDataGraph
   GtkWidget *tooltip_label1;
   GtkWidget *tooltip_prefix_label;
   GtkWidget *tooltip_label2;
+
+  int allocated_width;
+  int allocated_height;
 };
 
 G_DEFINE_FINAL_TYPE (BzDataGraph, bz_data_graph, GTK_TYPE_WIDGET)
@@ -101,6 +107,12 @@ on_style_changed (BzDataGraph     *self,
                   AdwStyleManager *style_manager);
 
 static void
+refresh_graph (BzDataGraph *self);
+
+static void
+refresh_overlay (BzDataGraph *self);
+
+static void
 bz_data_graph_dispose (GObject *object)
 {
   BzDataGraph *self = BZ_DATA_GRAPH (object);
@@ -119,7 +131,9 @@ bz_data_graph_dispose (GObject *object)
   g_clear_pointer (&self->tooltip_prefix, g_free);
   g_clear_pointer (&self->path, gsk_path_unref);
   g_clear_pointer (&self->path_measure, gsk_path_measure_unref);
-  g_clear_pointer (&self->fg, gsk_render_node_unref);
+  g_clear_pointer (&self->other, gsk_render_node_unref);
+  g_clear_pointer (&self->graph, gsk_render_node_unref);
+  g_clear_pointer (&self->overlay, gsk_render_node_unref);
 
   if (self->tooltip_box != NULL)
     gtk_widget_unparent (self->tooltip_box);
@@ -205,9 +219,38 @@ bz_data_graph_size_allocate (GtkWidget *widget,
                              int        height,
                              int        baseline)
 {
-  BzDataGraph *self = BZ_DATA_GRAPH (widget);
+  BzDataGraph     *self          = BZ_DATA_GRAPH (widget);
+  GtkRequisition   natural_size  = { 0 };
+  graphene_point_t card_position = { 0 };
 
-  refresh_path (self, (double) width - LABEL_MARGIN - LABEL_MARGIN_RIGHT, (double) height - LABEL_MARGIN);
+  if (width != self->allocated_width ||
+      height != self->allocated_height)
+    {
+      refresh_path (
+          self,
+          (double) width - LABEL_MARGIN - LABEL_MARGIN_RIGHT,
+          (double) height - LABEL_MARGIN);
+      refresh_graph (self);
+      refresh_overlay (self);
+
+      self->allocated_width  = width;
+      self->allocated_height = height;
+    }
+
+  gtk_widget_get_preferred_size (self->tooltip_box, NULL, &natural_size);
+  if (self->motion_x > width / 2.0)
+    card_position.x = self->motion_x - natural_size.width - 10.0;
+  else
+    card_position.x = self->motion_x + 10.0;
+  card_position.y = self->motion_y + 10.0;
+
+  gtk_widget_allocate (
+      self->tooltip_box,
+      natural_size.width,
+      natural_size.height,
+      baseline,
+      gsk_transform_translate (NULL, &card_position));
+
   gtk_widget_queue_draw (widget);
 }
 
@@ -216,6 +259,7 @@ on_style_changed (BzDataGraph     *self,
                   GParamSpec      *pspec,
                   AdwStyleManager *style_manager)
 {
+  refresh_graph (self);
   gtk_widget_queue_draw (GTK_WIDGET (self));
 }
 
@@ -223,309 +267,39 @@ static void
 bz_data_graph_snapshot (GtkWidget   *widget,
                         GtkSnapshot *snapshot)
 {
-  BzDataGraph     *self             = BZ_DATA_GRAPH (widget);
-  double           widget_width     = 0.0;
-  double           widget_height    = 0.0;
-  AdwStyleManager *style_manager    = NULL;
-  g_autoptr (GdkRGBA) accent_color  = NULL;
-  GdkRGBA widget_color              = { 0 };
-  g_autoptr (GskPath) transitioning = NULL;
-  g_autoptr (GskStroke) stroke      = NULL;
+  BzDataGraph *self = BZ_DATA_GRAPH (widget);
 
   if (self->path == NULL)
     return;
 
-  widget_width  = gtk_widget_get_width (widget);
-  widget_height = gtk_widget_get_height (widget);
+  if (self->graph != NULL)
+    gtk_snapshot_append_node (snapshot, self->graph);
 
-  style_manager = adw_style_manager_get_default ();
-  accent_color  = adw_style_manager_get_accent_color_rgba (style_manager);
-  gtk_widget_get_color (widget, &widget_color);
-
-  if (self->transition_progress > 0.0 && self->transition_progress < 1.0)
+  if (self->other != NULL)
     {
-      GskPathPoint point0                = { 0 };
-      double       path_distance         = 0.0;
-      GskPathPoint point1                = { 0 };
-      g_autoptr (GskPathBuilder) builder = NULL;
+      GdkRGBA widget_color = { 0 };
 
-      gsk_path_get_start_point (self->path, &point0);
-      path_distance = gsk_path_measure_get_length (self->path_measure) * self->transition_progress;
-      gsk_path_measure_get_point (self->path_measure, path_distance, &point1);
-
-      builder = gsk_path_builder_new ();
-      gsk_path_builder_add_segment (builder, self->path, &point0, &point1);
-      transitioning = gsk_path_builder_to_path (builder);
-    }
-
-  stroke = gsk_stroke_new (3.0);
-  gsk_stroke_set_line_cap (stroke, GSK_LINE_CAP_ROUND);
-
-  gtk_snapshot_save (snapshot);
-  gtk_snapshot_translate (snapshot, &GRAPHENE_POINT_INIT (LABEL_MARGIN, 0.0));
-
-  if (self->fg != NULL)
-    {
-      graphene_rect_t bounds = { 0 };
-
-      gsk_render_node_get_bounds (self->fg, &bounds);
-
-      gtk_snapshot_push_mask (snapshot, GSK_MASK_MODE_ALPHA);
-      gtk_snapshot_append_node (snapshot, self->fg);
-      gtk_snapshot_pop (snapshot);
-      gtk_snapshot_append_color (snapshot, &widget_color, &bounds);
-      gtk_snapshot_pop (snapshot);
-    }
-
-  if (self->transition_progress > 0.0)
-    {
-      g_autoptr (GskPathBuilder) builder = NULL;
-      GskPathPoint     point0            = { 0 };
-      GskPathPoint     point1            = { 0 };
-      graphene_point_t start_position    = { 0 };
-      graphene_point_t end_position      = { 0 };
-      g_autoptr (GskPath) path           = NULL;
-
-      const GskColorStop gradient_stops[] = {
+      gtk_widget_get_color (widget, &widget_color);
+      if (self->other != NULL)
         {
-         0.0,
-         {
-         .red   = accent_color->red,
-         .green = accent_color->green,
-         .blue  = accent_color->blue,
-         .alpha = 0.75,
-         },
-         },
-        {
-         1.0,
-         {
-         .red   = accent_color->red,
-         .green = accent_color->green,
-         .blue  = accent_color->blue,
-         .alpha = 0.0,
-         },
-         },
-      };
-      const GskColorStop hfadeout_mask_stops[] = {
-        {
-         0.0,
-         {
-         .red   = 0.0,
-         .green = 0.0,
-         .blue  = 0.0,
-         .alpha = 1.0,
-         },
-         },
-        {
-         0.75,
-         {
-         .red   = 0.0,
-         .green = 0.0,
-         .blue  = 0.0,
-         .alpha = 1.0,
-         },
-         },
-        {
-         1.0,
-         {
-         .red   = 0.0,
-         .green = 0.0,
-         .blue  = 0.0,
-         .alpha = 0.0,
-         },
-         },
-      };
+          graphene_rect_t bounds = { 0 };
 
-      gtk_snapshot_append_stroke (
-          snapshot,
-          transitioning != NULL
-              ? transitioning
-              : self->path,
-          stroke, accent_color);
+          gsk_render_node_get_bounds (self->other, &bounds);
 
-      /* Gradient under the graph line */
-      builder = gsk_path_builder_new ();
-
-      gsk_path_get_start_point (
-          transitioning != NULL
-              ? transitioning
-              : self->path,
-          &point0);
-      gsk_path_point_get_position (
-          &point0,
-          transitioning != NULL
-              ? transitioning
-              : self->path,
-          &start_position);
-      gsk_path_get_end_point (
-          transitioning != NULL
-              ? transitioning
-              : self->path,
-          &point1);
-      gsk_path_point_get_position (
-          &point1,
-          transitioning != NULL
-              ? transitioning
-              : self->path,
-          &end_position);
-
-      gsk_path_builder_move_to (builder, start_position.x, start_position.y);
-      gsk_path_builder_add_segment (
-          builder,
-          transitioning != NULL
-              ? transitioning
-              : self->path,
-          &point0, &point1);
-      gsk_path_builder_move_to (builder, end_position.x, end_position.y);
-
-      /* close the loop for `gtk_snapshot_push_fill` */
-      gsk_path_builder_line_to (builder, end_position.x, widget_height - LABEL_MARGIN);
-      gsk_path_builder_line_to (builder, start_position.x, widget_height - LABEL_MARGIN);
-      gsk_path_builder_line_to (builder, start_position.x, start_position.y);
-
-      path = gsk_path_builder_to_path (builder);
-      gtk_snapshot_push_fill (
-          snapshot,
-          path,
-          GSK_FILL_RULE_WINDING);
-
-      gtk_snapshot_push_mask (snapshot, GSK_MASK_MODE_ALPHA);
-
-      gtk_snapshot_append_linear_gradient (
-          snapshot,
-          &GRAPHENE_RECT_INIT (
-              0.0,
-              0.0,
-              end_position.x,
-              widget_height - LABEL_MARGIN),
-          &GRAPHENE_POINT_INIT (0.0, 0.0),
-          &GRAPHENE_POINT_INIT (end_position.x, 0.0),
-          hfadeout_mask_stops,
-          G_N_ELEMENTS (hfadeout_mask_stops));
-      gtk_snapshot_pop (snapshot); /* Push Mask (mask) */
-
-      gtk_snapshot_append_linear_gradient (
-          snapshot,
-          &GRAPHENE_RECT_INIT (
-              0.0,
-              0.0,
-              end_position.x,
-              widget_height - LABEL_MARGIN),
-          &GRAPHENE_POINT_INIT (0.0, 0.0),
-          &GRAPHENE_POINT_INIT (0.0, widget_height - LABEL_MARGIN),
-          gradient_stops,
-          G_N_ELEMENTS (gradient_stops));
-
-      gtk_snapshot_pop (snapshot); /* Push Mask (image) */
-      gtk_snapshot_pop (snapshot); /* Push Fill */
-    }
-  gtk_snapshot_restore (snapshot);
-
-  if (self->motion_x >= LABEL_MARGIN &&
-      self->motion_y >= 0.0 &&
-      self->motion_x < widget_width - LABEL_MARGIN_RIGHT &&
-      self->motion_y < widget_height - LABEL_MARGIN)
-    {
-      guint n_items                          = 0;
-      guint hovered_idx                      = 0;
-      g_autoptr (BzDataPoint) point          = NULL;
-      g_autoptr (GskStroke) crosshair_stroke = NULL;
-      double           graph_height          = 0.0;
-      double           graph_width           = 0.0;
-      double           fraction              = 0.0;
-      double           point_x               = 0.0;
-      double           point_y               = 0.0;
-      GskRoundedRect   rounded_rect          = { { { 0 } } };
-      GdkRGBA          line_color            = { 0 };
-      double           card_x                = 0.0;
-      double           card_y                = 0.0;
-      double           rounded_axis_max      = 0.0;
-      const char      *prefix                = NULL;
-      g_autofree char *line2_text            = NULL;
-      GtkRequisition   natural_size          = { 0 };
-
-      n_items     = g_list_model_get_n_items (self->model);
-      graph_width = widget_width - LABEL_MARGIN - LABEL_MARGIN_RIGHT;
-      fraction    = (self->motion_x - LABEL_MARGIN) / graph_width;
-      hovered_idx = floor ((double) n_items * fraction);
-      if (hovered_idx >= n_items)
-        hovered_idx = n_items - 1;
-
-      point = g_list_model_get_item (self->model, hovered_idx);
-
-      if (self->rounded_axis_max > 0.0)
-        rounded_axis_max = self->rounded_axis_max;
-      else
-        {
-          double max_dependent = 0.0;
-          for (guint i = 0; i < n_items; i++)
-            {
-              g_autoptr (BzDataPoint) p = g_list_model_get_item (self->model, i);
-              double dep                = bz_data_point_get_dependent (p);
-              if (i == 0 || dep > max_dependent)
-                max_dependent = dep;
-            }
-          rounded_axis_max = calculate_axis_tick_value (max_dependent, TRUE);
+          gtk_snapshot_push_mask (snapshot, GSK_MASK_MODE_ALPHA);
+          gtk_snapshot_append_node (snapshot, self->other);
+          gtk_snapshot_pop (snapshot);
+          gtk_snapshot_append_color (snapshot, &widget_color, &bounds);
+          gtk_snapshot_pop (snapshot);
         }
+    }
 
-      graph_height = widget_height - LABEL_MARGIN;
+  if (self->overlay != NULL)
+    {
+      gtk_snapshot_append_node (snapshot, self->overlay);
 
-      point_x = ((double) hovered_idx / (double) (n_items - 1)) * graph_width + LABEL_MARGIN;
-      point_y = (1.0 - bz_data_point_get_dependent (point) / rounded_axis_max) * graph_height;
-
-      line_color       = widget_color;
-      line_color.alpha = 0.5;
-
-      crosshair_stroke = gsk_stroke_new (1.0);
-
-#define APPEND_LINE(x0, y0, x1, y1, color)                                  \
-  G_STMT_START                                                              \
-  {                                                                         \
-    g_autoptr (GskPathBuilder) builder = NULL;                              \
-    g_autoptr (GskPath) path           = NULL;                              \
-                                                                            \
-    builder = gsk_path_builder_new ();                                      \
-    gsk_path_builder_move_to (builder, (x0), (y0));                         \
-    gsk_path_builder_line_to (builder, (x1), (y1));                         \
-                                                                            \
-    path = gsk_path_builder_to_path (builder);                              \
-    gtk_snapshot_append_stroke (snapshot, path, crosshair_stroke, (color)); \
-  }                                                                         \
-  G_STMT_END
-
-      APPEND_LINE (self->motion_x, 0.0, self->motion_x, widget_height - LABEL_MARGIN, &line_color);
-
-#undef APPEND_LINE
-
-      gsk_rounded_rect_init_from_rect (
-          &rounded_rect,
-          &GRAPHENE_RECT_INIT (point_x - 4.0, point_y - 4.0, 8.0, 8.0),
-          4.0);
-      gtk_snapshot_push_rounded_clip (snapshot, &rounded_rect);
-      gtk_snapshot_append_color (snapshot, accent_color, &rounded_rect.bounds);
-      gtk_snapshot_pop (snapshot);
-
-      gtk_label_set_text (GTK_LABEL (self->tooltip_label1), bz_data_point_get_label (point));
-
-      prefix = self->tooltip_prefix != NULL ? self->tooltip_prefix : "";
-      gtk_label_set_text (GTK_LABEL (self->tooltip_prefix_label), prefix);
-      line2_text = g_strdup_printf ("%'.0f", bz_data_point_get_dependent (point));
-      gtk_label_set_text (GTK_LABEL (self->tooltip_label2), line2_text);
-
-      gtk_widget_get_preferred_size (self->tooltip_box, NULL, &natural_size);
-
-      gtk_widget_allocate (self->tooltip_box, natural_size.width, natural_size.height, -1, NULL);
-
-      if (self->motion_x > widget_width / 2.0)
-        card_x = self->motion_x - natural_size.width - 10.0;
-      else
-        card_x = self->motion_x + 10.0;
-      card_y = self->motion_y + 10.0;
-
-      gtk_snapshot_save (snapshot);
-      gtk_snapshot_translate (snapshot, &GRAPHENE_POINT_INIT (card_x, card_y));
-      gtk_widget_snapshot_child (widget, self->tooltip_box, snapshot);
-      gtk_snapshot_restore (snapshot);
+      /* tooltip card */
+      gtk_widget_snapshot_child (GTK_WIDGET (self), self->tooltip_box, snapshot);
     }
 
   if (self->wants_animate_open)
@@ -621,6 +395,9 @@ update_cursor (BzDataGraph *self,
     gtk_widget_set_cursor_from_name (GTK_WIDGET (self), "crosshair");
   else
     gtk_widget_set_cursor (GTK_WIDGET (self), NULL);
+
+  refresh_overlay (self);
+  gtk_widget_queue_allocate (GTK_WIDGET (self));
 }
 
 static void
@@ -632,7 +409,6 @@ motion_enter (BzDataGraph              *self,
   self->motion_x = x;
   self->motion_y = y;
   update_cursor (self, x, y);
-  gtk_widget_queue_draw (GTK_WIDGET (self));
 }
 
 static void
@@ -644,7 +420,6 @@ motion_event (BzDataGraph              *self,
   self->motion_x = x;
   self->motion_y = y;
   update_cursor (self, x, y);
-  gtk_widget_queue_draw (GTK_WIDGET (self));
 }
 
 static void
@@ -653,8 +428,7 @@ motion_leave (BzDataGraph              *self,
 {
   self->motion_x = -1.0;
   self->motion_y = -1.0;
-  gtk_widget_set_cursor (GTK_WIDGET (self), NULL);
-  gtk_widget_queue_draw (GTK_WIDGET (self));
+  update_cursor (self, -1.0, -1.0);
 }
 
 static void
@@ -829,7 +603,10 @@ bz_data_graph_set_model (BzDataGraph *self,
   if (model != NULL)
     self->model = g_object_ref (model);
 
+  self->allocated_width  = -1;
+  self->allocated_height = -1;
   gtk_widget_queue_allocate (GTK_WIDGET (self));
+
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MODEL]);
 }
 
@@ -906,6 +683,7 @@ bz_data_graph_set_transition_progress (BzDataGraph *self, double transition_prog
 
   self->transition_progress = transition_progress;
 
+  refresh_graph (self);
   gtk_widget_queue_draw (GTK_WIDGET (self));
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TRANSITION_PROGRESS]);
 }
@@ -986,7 +764,7 @@ refresh_path (BzDataGraph *self,
 
   g_clear_pointer (&self->path, gsk_path_unref);
   g_clear_pointer (&self->path_measure, gsk_path_measure_unref);
-  g_clear_pointer (&self->fg, gsk_render_node_unref);
+  g_clear_pointer (&self->other, gsk_render_node_unref);
 
   if (self->model == NULL)
     return;
@@ -1044,6 +822,9 @@ refresh_path (BzDataGraph *self,
   curve_builder = gsk_path_builder_new ();
   snapshot      = gtk_snapshot_new ();
   grid_builder  = gsk_path_builder_new ();
+
+  gtk_snapshot_save (snapshot);
+  gtk_snapshot_translate (snapshot, &GRAPHENE_POINT_INIT (LABEL_MARGIN, 0.0));
 
   for (guint i = 0; i < n_items; i++)
     {
@@ -1155,7 +936,6 @@ refresh_path (BzDataGraph *self,
       gsk_path_builder_move_to (grid_builder, -TICK_LENGTH, y_pos);
       gsk_path_builder_line_to (grid_builder, 0.0, y_pos);
     }
-
   gtk_snapshot_restore (snapshot);
 
   gsk_path_builder_move_to (grid_builder, 0.0, 0.0);
@@ -1163,9 +943,327 @@ refresh_path (BzDataGraph *self,
 
   grid        = gsk_path_builder_to_path (grid_builder);
   grid_stroke = gsk_stroke_new (1.0);
+
   gtk_snapshot_append_stroke (snapshot, grid, grid_stroke, &(GdkRGBA){ 1.0, 1.0, 1.0, 1.0 });
+  gtk_snapshot_restore (snapshot);
 
   self->path         = gsk_path_builder_to_path (curve_builder);
   self->path_measure = gsk_path_measure_new (self->path);
-  self->fg           = gtk_snapshot_to_node (snapshot);
+  self->other        = gtk_snapshot_to_node (snapshot);
+}
+
+static void
+refresh_graph (BzDataGraph *self)
+{
+  double           widget_width     = 0.0;
+  double           widget_height    = 0.0;
+  AdwStyleManager *style_manager    = NULL;
+  g_autoptr (GdkRGBA) accent_color  = NULL;
+  GdkRGBA widget_color              = { 0 };
+  g_autoptr (GskPath) transitioning = NULL;
+  g_autoptr (GskStroke) stroke      = NULL;
+  g_autoptr (GtkSnapshot) snapshot  = NULL;
+
+  if (self->path == NULL)
+    {
+      g_clear_pointer (&self->graph, gsk_render_node_unref);
+      return;
+    }
+
+  widget_width = gtk_widget_get_width (GTK_WIDGET (self));
+  (void) widget_width;
+  widget_height = gtk_widget_get_height (GTK_WIDGET (self));
+
+  style_manager = adw_style_manager_get_default ();
+  accent_color  = adw_style_manager_get_accent_color_rgba (style_manager);
+  gtk_widget_get_color (GTK_WIDGET (self), &widget_color);
+
+  if (self->transition_progress > 0.0 && self->transition_progress < 1.0)
+    {
+      GskPathPoint point0                = { 0 };
+      double       path_distance         = 0.0;
+      GskPathPoint point1                = { 0 };
+      g_autoptr (GskPathBuilder) builder = NULL;
+
+      gsk_path_get_start_point (self->path, &point0);
+      path_distance = gsk_path_measure_get_length (self->path_measure) * self->transition_progress;
+      gsk_path_measure_get_point (self->path_measure, path_distance, &point1);
+
+      builder = gsk_path_builder_new ();
+      gsk_path_builder_add_segment (builder, self->path, &point0, &point1);
+      transitioning = gsk_path_builder_to_path (builder);
+    }
+
+  stroke = gsk_stroke_new (3.0);
+  gsk_stroke_set_line_cap (stroke, GSK_LINE_CAP_ROUND);
+
+  snapshot = gtk_snapshot_new ();
+  gtk_snapshot_save (snapshot);
+  gtk_snapshot_translate (snapshot, &GRAPHENE_POINT_INIT (LABEL_MARGIN, 0.0));
+
+  if (self->transition_progress > 0.0)
+    {
+      g_autoptr (GskPathBuilder) builder = NULL;
+      GskPathPoint     point0            = { 0 };
+      GskPathPoint     point1            = { 0 };
+      graphene_point_t start_position    = { 0 };
+      graphene_point_t end_position      = { 0 };
+      g_autoptr (GskPath) path           = NULL;
+
+      const GskColorStop gradient_stops[] = {
+        {
+         0.0,
+         {
+         .red   = accent_color->red,
+         .green = accent_color->green,
+         .blue  = accent_color->blue,
+         .alpha = 0.75,
+         },
+         },
+        {
+         1.0,
+         {
+         .red   = accent_color->red,
+         .green = accent_color->green,
+         .blue  = accent_color->blue,
+         .alpha = 0.0,
+         },
+         },
+      };
+      const GskColorStop hfadeout_mask_stops[] = {
+        {
+         0.0,
+         {
+         .red   = 0.0,
+         .green = 0.0,
+         .blue  = 0.0,
+         .alpha = 1.0,
+         },
+         },
+        {
+         0.75,
+         {
+         .red   = 0.0,
+         .green = 0.0,
+         .blue  = 0.0,
+         .alpha = 1.0,
+         },
+         },
+        {
+         1.0,
+         {
+         .red   = 0.0,
+         .green = 0.0,
+         .blue  = 0.0,
+         .alpha = 0.0,
+         },
+         },
+      };
+
+      gtk_snapshot_append_stroke (
+          snapshot,
+          transitioning != NULL
+              ? transitioning
+              : self->path,
+          stroke, accent_color);
+
+      /* Gradient under the graph line */
+      builder = gsk_path_builder_new ();
+
+      gsk_path_get_start_point (
+          transitioning != NULL
+              ? transitioning
+              : self->path,
+          &point0);
+      gsk_path_point_get_position (
+          &point0,
+          transitioning != NULL
+              ? transitioning
+              : self->path,
+          &start_position);
+      gsk_path_get_end_point (
+          transitioning != NULL
+              ? transitioning
+              : self->path,
+          &point1);
+      gsk_path_point_get_position (
+          &point1,
+          transitioning != NULL
+              ? transitioning
+              : self->path,
+          &end_position);
+
+      gsk_path_builder_move_to (builder, start_position.x, start_position.y);
+      gsk_path_builder_add_segment (
+          builder,
+          transitioning != NULL
+              ? transitioning
+              : self->path,
+          &point0, &point1);
+      gsk_path_builder_move_to (builder, end_position.x, end_position.y);
+
+      /* close the loop for `gtk_snapshot_push_fill` */
+      gsk_path_builder_line_to (builder, end_position.x, widget_height - LABEL_MARGIN);
+      gsk_path_builder_line_to (builder, start_position.x, widget_height - LABEL_MARGIN);
+      gsk_path_builder_line_to (builder, start_position.x, start_position.y);
+
+      path = gsk_path_builder_to_path (builder);
+      gtk_snapshot_push_fill (
+          snapshot,
+          path,
+          GSK_FILL_RULE_WINDING);
+
+      gtk_snapshot_push_mask (snapshot, GSK_MASK_MODE_ALPHA);
+
+      gtk_snapshot_append_linear_gradient (
+          snapshot,
+          &GRAPHENE_RECT_INIT (
+              0.0,
+              0.0,
+              end_position.x,
+              widget_height - LABEL_MARGIN),
+          &GRAPHENE_POINT_INIT (0.0, 0.0),
+          &GRAPHENE_POINT_INIT (end_position.x, 0.0),
+          hfadeout_mask_stops,
+          G_N_ELEMENTS (hfadeout_mask_stops));
+      gtk_snapshot_pop (snapshot); /* Push Mask (mask) */
+
+      gtk_snapshot_append_linear_gradient (
+          snapshot,
+          &GRAPHENE_RECT_INIT (
+              0.0,
+              0.0,
+              end_position.x,
+              widget_height - LABEL_MARGIN),
+          &GRAPHENE_POINT_INIT (0.0, 0.0),
+          &GRAPHENE_POINT_INIT (0.0, widget_height - LABEL_MARGIN),
+          gradient_stops,
+          G_N_ELEMENTS (gradient_stops));
+
+      gtk_snapshot_pop (snapshot); /* Push Mask (image) */
+      gtk_snapshot_pop (snapshot); /* Push Fill */
+    }
+  gtk_snapshot_restore (snapshot);
+
+  g_clear_pointer (&self->graph, gsk_render_node_unref);
+  self->graph = gtk_snapshot_to_node (snapshot);
+}
+
+static void
+refresh_overlay (BzDataGraph *self)
+{
+  double           widget_width          = 0.0;
+  double           widget_height         = 0.0;
+  GdkRGBA          widget_color          = { 0 };
+  AdwStyleManager *style_manager         = NULL;
+  g_autoptr (GdkRGBA) accent_color       = NULL;
+  guint n_items                          = 0;
+  guint hovered_idx                      = 0;
+  g_autoptr (BzDataPoint) point          = NULL;
+  g_autoptr (GskStroke) crosshair_stroke = NULL;
+  double           graph_height          = 0.0;
+  double           graph_width           = 0.0;
+  double           fraction              = 0.0;
+  double           point_x               = 0.0;
+  double           point_y               = 0.0;
+  GskRoundedRect   rounded_rect          = { { { 0 } } };
+  GdkRGBA          line_color            = { 0 };
+  double           rounded_axis_max      = 0.0;
+  const char      *prefix                = NULL;
+  g_autofree char *line2_text            = NULL;
+  g_autoptr (GtkSnapshot) snapshot       = NULL;
+
+  if (self->path == NULL)
+    {
+      g_clear_pointer (&self->overlay, gsk_render_node_unref);
+      return;
+    }
+
+  widget_width  = gtk_widget_get_width (GTK_WIDGET (self));
+  widget_height = gtk_widget_get_height (GTK_WIDGET (self));
+
+  if (self->motion_x < LABEL_MARGIN ||
+      self->motion_y < 0.0 ||
+      self->motion_x >= widget_width - LABEL_MARGIN_RIGHT ||
+      self->motion_y >= widget_height - LABEL_MARGIN)
+    {
+      g_clear_pointer (&self->overlay, gsk_render_node_unref);
+      return;
+    }
+
+  gtk_widget_get_color (GTK_WIDGET (self), &widget_color);
+  style_manager = adw_style_manager_get_default ();
+  accent_color  = adw_style_manager_get_accent_color_rgba (style_manager);
+
+  n_items     = g_list_model_get_n_items (self->model);
+  graph_width = widget_width - LABEL_MARGIN - LABEL_MARGIN_RIGHT;
+  fraction    = (self->motion_x - LABEL_MARGIN) / graph_width;
+  hovered_idx = floor ((double) n_items * fraction);
+  if (hovered_idx >= n_items)
+    hovered_idx = n_items - 1;
+
+  point = g_list_model_get_item (self->model, hovered_idx);
+
+  if (self->rounded_axis_max > 0.0)
+    rounded_axis_max = self->rounded_axis_max;
+  else
+    {
+      double max_dependent = 0.0;
+      for (guint i = 0; i < n_items; i++)
+        {
+          g_autoptr (BzDataPoint) p = g_list_model_get_item (self->model, i);
+          double dep                = bz_data_point_get_dependent (p);
+          if (i == 0 || dep > max_dependent)
+            max_dependent = dep;
+        }
+      rounded_axis_max = calculate_axis_tick_value (max_dependent, TRUE);
+    }
+
+  snapshot = gtk_snapshot_new ();
+
+  graph_height = widget_height - LABEL_MARGIN;
+
+  point_x = ((double) hovered_idx / (double) (n_items - 1)) * graph_width + LABEL_MARGIN;
+  point_y = (1.0 - bz_data_point_get_dependent (point) / rounded_axis_max) * graph_height;
+
+  line_color       = widget_color;
+  line_color.alpha = 0.5;
+
+  crosshair_stroke = gsk_stroke_new (1.0);
+
+#define APPEND_LINE(x0, y0, x1, y1, color)                                  \
+  G_STMT_START                                                              \
+  {                                                                         \
+    g_autoptr (GskPathBuilder) builder = NULL;                              \
+    g_autoptr (GskPath) path           = NULL;                              \
+                                                                            \
+    builder = gsk_path_builder_new ();                                      \
+    gsk_path_builder_move_to (builder, (x0), (y0));                         \
+    gsk_path_builder_line_to (builder, (x1), (y1));                         \
+                                                                            \
+    path = gsk_path_builder_to_path (builder);                              \
+    gtk_snapshot_append_stroke (snapshot, path, crosshair_stroke, (color)); \
+  }                                                                         \
+  G_STMT_END
+
+  APPEND_LINE (self->motion_x, 0.0, self->motion_x, widget_height - LABEL_MARGIN, &line_color);
+
+#undef APPEND_LINE
+
+  gsk_rounded_rect_init_from_rect (
+      &rounded_rect,
+      &GRAPHENE_RECT_INIT (point_x - 4.0, point_y - 4.0, 8.0, 8.0),
+      4.0);
+  gtk_snapshot_push_rounded_clip (snapshot, &rounded_rect);
+  gtk_snapshot_append_color (snapshot, accent_color, &rounded_rect.bounds);
+  gtk_snapshot_pop (snapshot);
+
+  g_clear_pointer (&self->overlay, gsk_render_node_unref);
+  self->overlay = gtk_snapshot_to_node (snapshot);
+
+  gtk_label_set_label (GTK_LABEL (self->tooltip_label1), bz_data_point_get_label (point));
+  prefix = self->tooltip_prefix != NULL ? self->tooltip_prefix : "";
+  gtk_label_set_label (GTK_LABEL (self->tooltip_prefix_label), prefix);
+  line2_text = g_strdup_printf ("%'.0f", bz_data_point_get_dependent (point));
+  gtk_label_set_label (GTK_LABEL (self->tooltip_label2), line2_text);
 }

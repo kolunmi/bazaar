@@ -1645,16 +1645,16 @@ msgstr "Nur Flathub Ergebnisse"
 
 #: src/bz-preferences-dialog.blp:40
 msgid "Limit search and browse results to applications only available on Flathub"
-msgstr "Suchergebnisse auf Apps beschränken, die auf Flathub verfügbar sind"
+msgstr "Apps ausschließen, die nicht von Flathub stammen"
 
 #: src/bz-preferences-dialog.blp:44
 #, fuzzy
 msgid "Verified Results Only"
-msgstr "Nur Flathub Ergebnisse"
+msgstr "Nur verifizierte Ergebnisse"
 
 #: src/bz-preferences-dialog.blp:45
 msgid "Hide results that are not verified on Flathub"
-msgstr "Apps ausschließen, die nicht von Flathub stammen"
+msgstr "Apps ausschließen, die nicht von Flathub verifiziert wurden"
 
 #: src/bz-preferences-dialog.blp:49
 msgid "Hide EOL Apps"
@@ -1662,7 +1662,7 @@ msgstr "EOL-Apps ausblenden"
 
 #: src/bz-preferences-dialog.blp:50
 msgid "Hide apps which are no longer supported by their developers"
-msgstr ""
+msgstr "Apps ausschließen, die nicht mehr aktiv weiterentwickelt werden"
 
 #: src/bz-preferences-dialog.blp:55 src/bz-window.blp:314
 msgid "Search"
@@ -1674,7 +1674,7 @@ msgstr "Suchergebnisse verzögern"
 
 #: src/bz-preferences-dialog.blp:59
 msgid "Improve results performance by debouncing search terms"
-msgstr ""
+msgstr "Ergebnis-Performance durch Debouncing der Suchbegriffe verbessern"
 
 #: src/bz-preferences-dialog.blp:64
 msgid "Progress Bar"
