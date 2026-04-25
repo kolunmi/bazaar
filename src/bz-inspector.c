@@ -241,6 +241,13 @@ bz_inspector_class_init (BzInspectorClass *klass)
 }
 
 static void
+on_map (BzInspector *self,
+        GtkWidget   *widget)
+{
+  gtk_widget_grab_focus (GTK_WIDGET (self->search_entry));
+}
+
+static void
 bz_inspector_init (BzInspector *self)
 {
   GtkCustomFilter *filter = NULL;
@@ -249,6 +256,8 @@ bz_inspector_init (BzInspector *self)
 
   filter = gtk_custom_filter_new ((GtkCustomFilterFunc) filter_func, self, NULL);
   gtk_filter_list_model_set_filter (self->filter_model, GTK_FILTER (filter));
+
+  g_signal_connect_swapped (self, "map", G_CALLBACK (on_map), self);
 }
 
 BzInspector *
