@@ -223,40 +223,191 @@ template $BzInspector: Adw.Window {
               template ListItem {
                 activatable: false;
                 child: Expander {
+                  styles [
+                    "bz-monospace",
+                  ]
                   label: bind template.item as <$BzEntryGroup>.id as <string>;
-
                   child: Box {
-                    orientation: vertical;
+                    orientation: horizontal;
+                    spacing: 10;
 
-                    Separator {}
-                    ScrolledWindow {
-                      propagate-natural-height: true;
-                      child: ListView {
+                    Separator {
+                      margin-start: 2;
+                      width-request: 4;
+                      orientation: vertical;
+                    }
+
+                    Box {
+                      orientation: vertical;
+                      spacing: 2;
+
+                      Grid {
+                        column-spacing: 2;
+                        row-spacing: 1;
+
+                        Label {
+                          layout {
+                            column: 0;
+                            row: 0;
+                          }
+                          label: "Installable:";
+                          xalign: 1.0;
+                        }
+                        Label {
+                          layout {
+                            column: 1;
+                            row: 0;
+                          }
+                          label: bind $format_int(template.item as <$BzEntryGroup>.installable) as <string>;
+                          xalign: 0.0;
+                        }
+                        Label {
+                          layout {
+                            column: 0;
+                            row: 1;
+                          }
+                          label: "Installable-And-Available:";
+                          xalign: 1.0;
+                        }
+                        Label {
+                          layout {
+                            column: 1;
+                            row: 1;
+                          }
+                          label: bind $format_int(template.item as <$BzEntryGroup>.installable-and-available) as <string>;
+                          xalign: 0.0;
+                        }
+
+                        Label {
+                          layout {
+                            column: 0;
+                            row: 2;
+                          }
+                          label: "Updatable:";
+                          xalign: 1.0;
+                        }
+                        Label {
+                          layout {
+                            column: 1;
+                            row: 2;
+                          }
+                          label: bind $format_int(template.item as <$BzEntryGroup>.updatable) as <string>;
+                          xalign: 0.0;
+                        }
+                        Label {
+                          layout {
+                            column: 0;
+                            row: 3;
+                          }
+                          label: "Updatable-And-Available:";
+                          xalign: 1.0;
+                        }
+                        Label {
+                          layout {
+                            column: 1;
+                            row: 3;
+                          }
+                          label: bind $format_int(template.item as <$BzEntryGroup>.updatable-and-available) as <string>;
+                          xalign: 0.0;
+                        }
+
+                        Label {
+                          layout {
+                            column: 0;
+                            row: 4;
+                          }
+                          label: "Removable:";
+                          xalign: 1.0;
+                        }
+                        Label {
+                          layout {
+                            column: 1;
+                            row: 4;
+                          }
+                          label: bind $format_int(template.item as <$BzEntryGroup>.removable) as <string>;
+                          xalign: 0.0;
+                        }
+                        Label {
+                          layout {
+                            column: 0;
+                            row: 5;
+                          }
+                          label: "Removable-And-Available:";
+                          xalign: 1.0;
+                        }
+                        Label {
+                          layout {
+                            column: 1;
+                            row: 5;
+                          }
+                          label: bind $format_int(template.item as <$BzEntryGroup>.removable-and-available) as <string>;
+                          xalign: 0.0;
+                        }
+                      }
+
+                      Separator {
+                        orientation: horizontal;
+                      }
+
+                      ListView {
                         model: NoSelection {
                           model: bind template.item as <$BzEntryGroup>.model;
                         };
                         factory: BuilderListItemFactory {
                           template ListItem {
                             activatable: false;
-                            child: Box {
-                              orientation: horizontal;
 
+                            child: Box {
+                              margin-top: 1;
+                              margin-bottom: 1;
+                              orientation: horizontal;
+                              spacing: 5;
+
+                              Box {
+                                styles [
+                                  "linked",
+                                ]
+                                orientation: horizontal;
+
+                                Button {
+                                  styles [
+                                    "bz-small-button",
+                                  ]
+                                  has-tooltip: true;
+                                  tooltip-text: "Decache and Inspect";
+
+                                  child: Image {
+                                    icon-name: "external-link-symbolic";
+                                    pixel-size: 12;
+                                  };
+                                  clicked => $decache_and_inspect_cb(template);
+                                }
+                                Button {
+                                  styles [
+                                    "bz-small-button",
+                                  ]
+                                  has-tooltip: true;
+                                  tooltip-text: "Copy Unique ID";
+
+                                  child: Image {
+                                    icon-name: "edit-copy-symbolic";
+                                    pixel-size: 12;
+                                  };
+                                  clicked => $copy_unique_id_cb(template);
+                                }
+                              }
                               Label {
                                 hexpand: true;
                                 ellipsize: end;
                                 xalign: 0.0;
                                 label: bind template.item as <$GtkStringObject>.string as <string>;
-                              }
-                              Button {
-                                label: "Decache and Inspect";
-                                clicked => $decache_and_inspect_cb(template);
+                                selectable: true;
                               }
                             };
                           }
                         };
-                      };
+                      }
                     }
-                    Separator {}
                   };
                 };
               }

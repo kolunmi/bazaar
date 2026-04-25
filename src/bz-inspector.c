@@ -192,6 +192,21 @@ decache_and_inspect_cb (GtkListItem *list_item,
 }
 
 static void
+copy_unique_id_cb (GtkListItem *list_item,
+                   GtkButton   *button)
+{
+  GtkStringObject *item      = NULL;
+  const char      *text      = NULL;
+  GdkClipboard    *clipboard = NULL;
+
+  item = gtk_list_item_get_item (list_item);
+  text = gtk_string_object_get_string (item);
+
+  clipboard = gdk_display_get_clipboard (gdk_display_get_default ());
+  gdk_clipboard_set_text (clipboard, text);
+}
+
+static void
 open_file_externally_cb (GtkListItem *list_item,
                          GtkButton   *button)
 {
@@ -236,6 +251,7 @@ bz_inspector_class_init (BzInspectorClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, preview_changed);
   gtk_widget_class_bind_template_callback (widget_class, selected_group_changed);
   gtk_widget_class_bind_template_callback (widget_class, decache_and_inspect_cb);
+  gtk_widget_class_bind_template_callback (widget_class, copy_unique_id_cb);
   gtk_widget_class_bind_template_callback (widget_class, open_file_externally_cb);
   gtk_widget_class_bind_template_callback (widget_class, entry_changed);
 }
