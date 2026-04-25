@@ -271,20 +271,179 @@ template $BzInspector: Adw.Window {
                   styles [
                     "bz-monospace",
                   ]
-                  label: bind template.item as <$BzEntryGroup>.id as <string>;
-                  child: Box {
-                    orientation: horizontal;
-                    spacing: 10;
 
-                    Separator {
-                      margin-start: 2;
-                      width-request: 4;
-                      orientation: vertical;
-                    }
+                  resize-toplevel: true;
+                  label-widget: Label {
+                    label: bind template.item as <$BzEntryGroup>.id as <string>;
+                  };
+
+                  child: Box {
+                    styles [
+                      "card",
+                    ]
+                    margin-start: 3;
+                    margin-end: 3;
+                    margin-top: 3;
+                    margin-bottom: 3;
+
+                    halign: start;
+                    orientation: horizontal;
 
                     Box {
+                      margin-start: 5;
+                      margin-end: 5;
+                      margin-top: 5;
+                      margin-bottom: 5;
+
                       orientation: vertical;
                       spacing: 2;
+
+                      Box {
+                        margin-start: 2;
+                        orientation: horizontal;
+                        spacing: 2;
+
+                        Label {
+                          styles [
+                            "accent",
+                          ]
+                          label: bind template.item as <$BzEntryGroup>.title;
+                        }
+                        Image {
+                          gicon: bind template.item as <$BzEntryGroup>.mini-icon;
+                        }
+
+                        Box {
+                          styles [
+                            "linked",
+                          ]
+                          hexpand: true;
+                          halign: end;
+                          orientation: horizontal;
+
+                          MenuButton {
+                            styles [
+                              "bz-small-button",
+                            ]
+
+                            child: Label {
+                              styles [
+                                "bz-monospace",
+                              ]
+                              margin-start: 2;
+                              margin-end: 2;
+                              label: "Entries";
+                            };
+                            popover: Popover {
+                              child: ScrolledWindow {
+                                propagate-natural-width: true;
+                                propagate-natural-height: true;
+                                child: ListView {
+                                  model: NoSelection {
+                                    model: bind template.item as <$BzEntryGroup>.model;
+                                  };
+                                  factory: BuilderListItemFactory {
+                                    template ListItem {
+                                      activatable: false;
+
+                                      child: Box {
+                                        margin-top: 1;
+                                        margin-bottom: 1;
+                                        orientation: horizontal;
+                                        spacing: 5;
+
+                                        Box {
+                                          styles [
+                                            "linked",
+                                          ]
+                                          orientation: horizontal;
+
+                                          Button {
+                                            styles [
+                                              "bz-small-button",
+                                            ]
+                                            has-tooltip: true;
+                                            tooltip-text: "Decache and Inspect";
+
+                                            child: Image {
+                                              icon-name: "external-link-symbolic";
+                                              pixel-size: 12;
+                                            };
+                                            clicked => $decache_and_inspect_cb(template);
+                                          }
+                                          Button {
+                                            styles [
+                                              "bz-small-button",
+                                            ]
+                                            has-tooltip: true;
+                                            tooltip-text: "Copy Unique ID";
+
+                                            child: Image {
+                                              icon-name: "edit-copy-symbolic";
+                                              pixel-size: 12;
+                                            };
+                                            clicked => $copy_unique_id_cb(template);
+                                          }
+                                        }
+                                        Label {
+                                          hexpand: true;
+                                          ellipsize: end;
+                                          xalign: 0.0;
+                                          label: bind template.item as <$GtkStringObject>.string as <string>;
+                                          selectable: true;
+                                        }
+                                      };
+                                    }
+                                  };
+                                };
+                              };
+                            };
+                          }
+
+                          MenuButton {
+                            styles [
+                              "bz-small-button",
+                            ]
+                            visible: bind $not($is_null(template.item as <$BzEntryGroup>.addons-model as <$GListModel>) as <bool>) as <bool>;
+
+                            child: Label {
+                              styles [
+                                "bz-monospace",
+                              ]
+                              margin-start: 2;
+                              margin-end: 2;
+                              label: "Addons";
+                            };
+                            popover: Popover {
+                              child: ScrolledWindow {
+                                propagate-natural-width: true;
+                                propagate-natural-height: true;
+                                child: ListView {
+                                  model: NoSelection {
+                                    model: bind template.item as <$BzEntryGroup>.addons-model;
+                                  };
+                                  factory: BuilderListItemFactory {
+                                    template ListItem {
+                                      activatable: false;
+                                      child: Label {
+                                        hexpand: true;
+                                        ellipsize: end;
+                                        xalign: 0.0;
+                                        label: bind template.item as <$GtkStringObject>.string as <string>;
+                                        selectable: true;
+                                      };
+                                    }
+                                  };
+                                };
+                              };
+                            };
+                          }
+                        }
+                      }
+
+                      Separator {
+                        orientation: horizontal;
+                      }
 
                       Grid {
                         column-spacing: 2;
@@ -295,7 +454,7 @@ template $BzInspector: Adw.Window {
                             column: 0;
                             row: 0;
                           }
-                          label: "Installable:";
+                          label: "Developer:";
                           xalign: 1.0;
                         }
                         Label {
@@ -303,12 +462,78 @@ template $BzInspector: Adw.Window {
                             column: 1;
                             row: 0;
                           }
+                          styles [
+                            "accent",
+                          ]
+                          label: bind template.item as <$BzEntryGroup>.developer;
+                          ellipsize: end;
+                          xalign: 0.5;
+                        }
+
+                        Label {
+                          layout {
+                            column: 0;
+                            row: 1;
+                          }
+                          label: "Description:";
+                          xalign: 1.0;
+                        }
+                        Label {
+                          layout {
+                            column: 1;
+                            row: 1;
+                          }
+                          styles [
+                            "accent",
+                          ]
+                          label: bind template.item as <$BzEntryGroup>.description;
+                          ellipsize: end;
+                          xalign: 0.5;
+                        }
+
+                        Label {
+                          layout {
+                            column: 0;
+                            row: 2;
+                          }
+                          label: "EOL:";
+                          xalign: 1.0;
+                        }
+                        Label {
+                          layout {
+                            column: 1;
+                            row: 2;
+                          }
+                          styles [
+                            "accent",
+                          ]
+                          label: bind template.item as <$BzEntryGroup>.eol;
+                          ellipsize: end;
+                          xalign: 0.5;
+                        }
+
+                        Label {
+                          layout {
+                            column: 2;
+                            row: 0;
+                          }
+                          label: "Installable:";
+                          xalign: 1.0;
+                        }
+                        Label {
+                          layout {
+                            column: 3;
+                            row: 0;
+                          }
+                          styles [
+                            "accent",
+                          ]
                           label: bind $format_int(template.item as <$BzEntryGroup>.installable) as <string>;
                           xalign: 0.0;
                         }
                         Label {
                           layout {
-                            column: 0;
+                            column: 2;
                             row: 1;
                           }
                           label: "Installable-And-Available:";
@@ -316,16 +541,19 @@ template $BzInspector: Adw.Window {
                         }
                         Label {
                           layout {
-                            column: 1;
+                            column: 3;
                             row: 1;
                           }
+                          styles [
+                            "accent",
+                          ]
                           label: bind $format_int(template.item as <$BzEntryGroup>.installable-and-available) as <string>;
                           xalign: 0.0;
                         }
 
                         Label {
                           layout {
-                            column: 0;
+                            column: 2;
                             row: 2;
                           }
                           label: "Updatable:";
@@ -333,15 +561,18 @@ template $BzInspector: Adw.Window {
                         }
                         Label {
                           layout {
-                            column: 1;
+                            column: 3;
                             row: 2;
                           }
+                          styles [
+                            "accent",
+                          ]
                           label: bind $format_int(template.item as <$BzEntryGroup>.updatable) as <string>;
                           xalign: 0.0;
                         }
                         Label {
                           layout {
-                            column: 0;
+                            column: 2;
                             row: 3;
                           }
                           label: "Updatable-And-Available:";
@@ -349,16 +580,19 @@ template $BzInspector: Adw.Window {
                         }
                         Label {
                           layout {
-                            column: 1;
+                            column: 3;
                             row: 3;
                           }
+                          styles [
+                            "accent",
+                          ]
                           label: bind $format_int(template.item as <$BzEntryGroup>.updatable-and-available) as <string>;
                           xalign: 0.0;
                         }
 
                         Label {
                           layout {
-                            column: 0;
+                            column: 2;
                             row: 4;
                           }
                           label: "Removable:";
@@ -366,15 +600,18 @@ template $BzInspector: Adw.Window {
                         }
                         Label {
                           layout {
-                            column: 1;
+                            column: 3;
                             row: 4;
                           }
+                          styles [
+                            "accent",
+                          ]
                           label: bind $format_int(template.item as <$BzEntryGroup>.removable) as <string>;
                           xalign: 0.0;
                         }
                         Label {
                           layout {
-                            column: 0;
+                            column: 2;
                             row: 5;
                           }
                           label: "Removable-And-Available:";
@@ -382,75 +619,15 @@ template $BzInspector: Adw.Window {
                         }
                         Label {
                           layout {
-                            column: 1;
+                            column: 3;
                             row: 5;
                           }
+                          styles [
+                            "accent",
+                          ]
                           label: bind $format_int(template.item as <$BzEntryGroup>.removable-and-available) as <string>;
                           xalign: 0.0;
                         }
-                      }
-
-                      Separator {
-                        orientation: horizontal;
-                      }
-
-                      ListView {
-                        model: NoSelection {
-                          model: bind template.item as <$BzEntryGroup>.model;
-                        };
-                        factory: BuilderListItemFactory {
-                          template ListItem {
-                            activatable: false;
-
-                            child: Box {
-                              margin-top: 1;
-                              margin-bottom: 1;
-                              orientation: horizontal;
-                              spacing: 5;
-
-                              Box {
-                                styles [
-                                  "linked",
-                                ]
-                                orientation: horizontal;
-
-                                Button {
-                                  styles [
-                                    "bz-small-button",
-                                  ]
-                                  has-tooltip: true;
-                                  tooltip-text: "Decache and Inspect";
-
-                                  child: Image {
-                                    icon-name: "external-link-symbolic";
-                                    pixel-size: 12;
-                                  };
-                                  clicked => $decache_and_inspect_cb(template);
-                                }
-                                Button {
-                                  styles [
-                                    "bz-small-button",
-                                  ]
-                                  has-tooltip: true;
-                                  tooltip-text: "Copy Unique ID";
-
-                                  child: Image {
-                                    icon-name: "edit-copy-symbolic";
-                                    pixel-size: 12;
-                                  };
-                                  clicked => $copy_unique_id_cb(template);
-                                }
-                              }
-                              Label {
-                                hexpand: true;
-                                ellipsize: end;
-                                xalign: 0.0;
-                                label: bind template.item as <$GtkStringObject>.string as <string>;
-                                selectable: true;
-                              }
-                            };
-                          }
-                        };
                       }
                     }
                   };

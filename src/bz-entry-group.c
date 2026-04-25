@@ -83,6 +83,7 @@ enum
   PROP_0,
 
   PROP_MODEL,
+  PROP_ADDONS_MODEL,
   PROP_INSTALLED_VERSIONS,
   PROP_ID,
   PROP_TITLE,
@@ -173,6 +174,9 @@ bz_entry_group_get_property (GObject    *object,
     {
     case PROP_MODEL:
       g_value_set_object (value, bz_entry_group_get_model (self));
+      break;
+    case PROP_ADDONS_MODEL:
+      g_value_set_object (value, bz_entry_group_get_addon_group_ids (self));
       break;
     case PROP_INSTALLED_VERSIONS:
       g_value_set_object (value, bz_entry_group_get_installed_versions (self));
@@ -265,6 +269,7 @@ bz_entry_group_set_property (GObject      *object,
   switch (prop_id)
     {
     case PROP_MODEL:
+    case PROP_ADDONS_MODEL:
     case PROP_ID:
     case PROP_TITLE:
     case PROP_DEVELOPER:
@@ -303,6 +308,13 @@ bz_entry_group_class_init (BzEntryGroupClass *klass)
   props[PROP_MODEL] =
       g_param_spec_object (
           "model",
+          NULL, NULL,
+          G_TYPE_LIST_MODEL,
+          G_PARAM_READABLE);
+
+  props[PROP_ADDONS_MODEL] =
+      g_param_spec_object (
+          "addons-model",
           NULL, NULL,
           G_TYPE_LIST_MODEL,
           G_PARAM_READABLE);
@@ -934,11 +946,11 @@ bz_entry_group_add (BzEntryGroup *self,
         }
     }
 
-  title              = bz_entry_get_title (entry);
-  description        = bz_entry_get_description (entry);
-  installed_size     = bz_entry_get_installed_size (entry);
-  is_flathub         = bz_entry_get_is_flathub (entry);
-  is_floss           = bz_entry_get_is_foss (entry);
+  title          = bz_entry_get_title (entry);
+  description    = bz_entry_get_description (entry);
+  installed_size = bz_entry_get_installed_size (entry);
+  is_flathub     = bz_entry_get_is_flathub (entry);
+  is_floss       = bz_entry_get_is_foss (entry);
 
   if (is_addon) // You would not see any addon when the filter is on without this.
     is_verified = TRUE;
@@ -970,8 +982,8 @@ bz_entry_group_add (BzEntryGroup *self,
           gtk_string_list_remove (self->unique_ids, existing);
           gtk_string_list_remove (self->installed_versions, existing);
         }
-      gtk_string_list_splice (self->unique_ids, 0, 0, (const char *const[]) { unique_id, NULL });
-      gtk_string_list_splice (self->installed_versions, 0, 0, (const char *const[]) { installed_version != NULL ? installed_version : "", NULL });
+      gtk_string_list_splice (self->unique_ids, 0, 0, (const char *const[]){ unique_id, NULL });
+      gtk_string_list_splice (self->installed_versions, 0, 0, (const char *const[]){ installed_version != NULL ? installed_version : "", NULL });
 
       if (title != NULL)
         {
@@ -1211,7 +1223,7 @@ installed_changed (BzEntryGroup *self,
   if (index != G_MAXUINT)
     {
       gtk_string_list_splice (self->installed_versions, index, 1,
-                              (const char *const[]) {
+                              (const char *const[]){
                                   version != NULL ? version : "",
                                   NULL });
     }
