@@ -214,6 +214,7 @@ template $BzInspector: Adw.Window {
           child: ListView {
             model: SingleSelection groups_selection {
               model: FilterListModel filter_model {
+                incremental: true;
                 model: bind template.state as <$BzStateInfo>.all-entry-groups;
               };
               notify::selected-item => $selected_group_changed(template);
