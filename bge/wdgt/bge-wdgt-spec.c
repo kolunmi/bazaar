@@ -540,6 +540,14 @@ bge_wdgt_spec_class_init (BgeWdgtSpecClass *klass)
   g_type_ensure (GRAPHENE_TYPE_EULER);
   g_type_ensure (GRAPHENE_TYPE_RAY);
 
+  g_type_ensure (GSK_TYPE_PATH);
+  g_type_ensure (GSK_TYPE_PATH_POINT);
+  g_type_ensure (GSK_TYPE_PATH_MEASURE);
+  g_type_ensure (GSK_TYPE_TRANSFORM);
+  g_type_ensure (GSK_TYPE_FILL_RULE);
+  g_type_ensure (GSK_TYPE_LINE_CAP);
+  g_type_ensure (GSK_TYPE_LINE_JOIN);
+
   /* Ensure GTK names are available for the parser */
   g_type_ensure (gtk_at_context_get_type ());
   g_type_ensure (gtk_about_dialog_get_type ());
@@ -4214,7 +4222,7 @@ lookup_snapshot_push_instr (const char    *lookup_name,
      },
      gtk_snapshot_push_fill,
      snapshot_push_instr_fill,
-     2,
+     1,
      },
     {
      "stroke",
@@ -4226,7 +4234,7 @@ lookup_snapshot_push_instr (const char    *lookup_name,
      },
      gtk_snapshot_push_stroke,
      snapshot_push_instr_stroke,
-     2,
+     1,
      },
     {
      "shadow",
@@ -4240,7 +4248,7 @@ lookup_snapshot_push_instr (const char    *lookup_name,
      },
      gtk_snapshot_push_shadow,
      snapshot_push_instr_shadow,
-     2,
+     1,
      },
     {
      "blend",
