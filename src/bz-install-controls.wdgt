@@ -85,7 +85,7 @@ defwidget "Install Button" {
               #path-point(outline-measure, #eval(#(end)*#(#path-length(outline-measure)))),
             );
           ),
-          #GskStroke(outline-width, round, round, 0.0),
+          #GskStroke(outline-width, butt, round, 0.0),
         ) {
           do-child flag;
         }
