@@ -5662,7 +5662,7 @@ bge_wdgt_renderer_size_allocate (GtkWidget *widget,
     }
 }
 
-static void
+static gboolean
 recurse_snapshot (BgeWdgtRenderer *self,
                   GtkSnapshot     *snapshot,
                   GPtrArray       *calls,
@@ -5671,6 +5671,7 @@ recurse_snapshot (BgeWdgtRenderer *self,
                   ForeachData     *parent_foreach,
                   gboolean         skip_foreach)
 {
+  gboolean             result           = FALSE;
   guint                start_idx        = 0;
   guint                n_iters          = 0;
   ForeachData         *next_foreach     = NULL;
@@ -5722,14 +5723,18 @@ recurse_snapshot (BgeWdgtRenderer *self,
       *idx = start_idx;
 
       if (next_foreach != NULL)
-        recurse_snapshot (
-            self,
-            snapshot,
-            calls,
-            idx,
-            next_foreach,
-            foreach_context,
-            skip_foreach);
+        {
+          result = recurse_snapshot (
+              self,
+              snapshot,
+              calls,
+              idx,
+              next_foreach,
+              foreach_context,
+              skip_foreach);
+          if (!result)
+            return FALSE;
+        }
 
       for (; *idx < calls->len; (*idx)++)
         {
@@ -5742,14 +5747,18 @@ recurse_snapshot (BgeWdgtRenderer *self,
               call->foreach_context == parent_foreach)
             break;
           else if (call->foreach_context != foreach_context)
-            recurse_snapshot (
-                self,
-                snapshot,
-                calls,
-                idx,
-                call->foreach_context,
-                foreach_context,
-                skip_foreach);
+            {
+              result = recurse_snapshot (
+                  self,
+                  snapshot,
+                  calls,
+                  idx,
+                  call->foreach_context,
+                  foreach_context,
+                  skip_foreach);
+              if (!result)
+                return FALSE;
+            }
           else if (!skip_foreach)
             {
               switch (call->kind)
@@ -5782,7 +5791,9 @@ recurse_snapshot (BgeWdgtRenderer *self,
 
                         value      = g_ptr_array_index (call->args, j);
                         expression = g_hash_table_lookup (self->active_instance->expressions, value);
-                        gtk_expression_evaluate (expression, self, &arg_values[j]);
+                        result     = gtk_expression_evaluate (expression, self, &arg_values[j]);
+                        if (!result)
+                          return FALSE;
                       }
                     for (guint j = 0; j < n_rest_values; j++)
                       {
@@ -5791,7 +5802,9 @@ recurse_snapshot (BgeWdgtRenderer *self,
 
                         value      = g_ptr_array_index (call->rest, j);
                         expression = g_hash_table_lookup (self->active_instance->expressions, value);
-                        gtk_expression_evaluate (expression, self, &rest_values[j]);
+                        result     = gtk_expression_evaluate (expression, self, &rest_values[j]);
+                        if (!result)
+                          return FALSE;
                       }
 
                     call->func (snapshot, arg_values, rest_values, n_rest_values);
@@ -5836,6 +5849,8 @@ recurse_snapshot (BgeWdgtRenderer *self,
             }
         }
     }
+
+  return TRUE;
 }
 
 static void
