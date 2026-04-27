@@ -106,7 +106,6 @@ bz_sources = files(
   'bz-flatpak-instance.c',
   'bz-full-view.c',
   'bz-global-net.c',
-  'bz-global-progress.c',
   'bz-gnome-shell-search-provider.c',
   'bz-group-tile-css-watcher.c',
   'bz-hardware-support-dialog.c',
