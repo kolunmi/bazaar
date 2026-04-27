@@ -98,7 +98,7 @@ defwidget "Install Button" {
     set stack:visible-child = lbl-install;
 
     set start = 0.0;
-    set end = 1.0;
+    set end = 0.001;
     set outline-width = 5.0;
     set outline-opacity = 0.0;
     
@@ -112,13 +112,11 @@ defwidget "Install Button" {
     set btn:sensitive = true;
     set stack:visible-child = lbl-cancel;
     
-    set start = #eval(0.4+0.4*sin(#(%tick%)));
-    set end = #eval(#(start)+0.2);
+    set start = #eval((#(%tick%)/3.0)%1.0);
+    set end = #eval((#(start)+0.2)%1.0);
     set outline-width = 5.0;
     set outline-opacity = 1.0;
 
-    transition-spring start 1.0, 0.1, 10.0;
-    transition-spring end 1.0, 0.1, 10.0;
     transition-spring outline-width 1.0, 0.1, 10.0;
     transition-spring outline-opacity 1.0, 0.1, 10.0;
   }
@@ -133,7 +131,7 @@ defwidget "Install Button" {
     set outline-opacity = 1.0;
 
     transition-spring start 1.0, 0.1, 100.0;
-    transition-spring end 1.1, 0.1, 10.0;
+    transition-spring end 1.0, 0.1, 100.0;
     transition-spring outline-width 1.1, 0.1, 10.0;
     transition-spring outline-opacity 1.1, 0.1, 10.0;
   }
@@ -143,7 +141,7 @@ defwidget "Install Button" {
     set stack:visible-child = lbl-cancelling;
     
     set start = 0.0;
-    set end = 1.0;
+    set end = 0.001;
     set outline-width = 0.0;
     set outline-opacity = 1.0;
 
