@@ -81,8 +81,8 @@ defwidget "Install Button" {
           #GskPath(
             add-segment(
               outline,
-              #path-point(outline-measure, #eval(#(start)*#(#path-length(outline-measure)))),
-              #path-point(outline-measure, #eval(#(end)*#(#path-length(outline-measure)))),
+              #path-point(outline-measure, #eval((#(start)%1.0)*#(#path-length(outline-measure)))),
+              #path-point(outline-measure, #eval((#(end)%1.0)*#(#path-length(outline-measure)))),
             );
           ),
           #GskStroke(outline-width, butt, round, 0.0),
@@ -112,8 +112,8 @@ defwidget "Install Button" {
     set btn:sensitive = true;
     set stack:visible-child = lbl-cancel;
     
-    set start = #eval((#(%tick%)/3.0)%1.0);
-    set end = #eval((#(start)+0.2)%1.0);
+    set start = #eval((#(%tick%)/3.0)%2.0);
+    set end = #eval((#(start)+0.2)%2.0);
     set outline-width = 5.0;
     set outline-opacity = 1.0;
 
@@ -125,8 +125,8 @@ defwidget "Install Button" {
     set btn:sensitive = true;
     set stack:visible-child = lbl-cancel;
     
-    set start = 0.0;
-    set end = progress;
+    set start = 1.0;
+    set end = #eval(1.0+#(progress));
     set outline-width = 5.0;
     set outline-opacity = 1.0;
 
