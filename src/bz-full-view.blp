@@ -269,6 +269,7 @@ template $BzFullView: Adw.Bin {
                             wide: true;
                             entry-group: bind template.entry-group as <$BzEntryGroup>;
                             state: bind template.state as <$BzStateInfo>;
+                            settings: bind template.state as <$BzStateInfo>.settings;
                             update => $update_cb(template);
                           }
                         }
@@ -443,6 +444,7 @@ template $BzFullView: Adw.Bin {
                         visible: false;
                         entry-group: bind template.entry-group as <$BzEntryGroup>;
                         state: bind template.state as <$BzStateInfo>;
+                        settings: bind template.state as <$BzStateInfo>.settings;
                         update => $update_cb(template);
                       }
 
