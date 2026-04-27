@@ -99,13 +99,13 @@ defwidget "Install Button" {
 
     set start = 0.0;
     set end = 1.0;
-    set outline-width = 0.0;
+    set outline-width = 4.0;
     set outline-opacity = 0.0;
     
     transition-spring start 1.0, 0.1, 5.0;
     transition-spring end 1.0, 0.1, 5.0;
-    transition-spring outline-width 1.0, 0.4, 20.0;
-    transition-spring outline-opacity 1.0, 0.4, 20.0;
+    transition-spring outline-width 1.2, 0.1, 5.0;
+    transition-spring outline-opacity 1.2, 0.1, 5.0;
   }
   
   state "pending" {
@@ -114,7 +114,7 @@ defwidget "Install Button" {
     
     set start = #eval(0.4+0.4*sin(#(%tick%)));
     set end = #eval(#(start)+0.2);
-    set outline-width = 4.0;
+    set outline-width = 6.0;
     set outline-opacity = 1.0;
 
     transition-spring start 1.0, 0.1, 10.0;
@@ -129,7 +129,7 @@ defwidget "Install Button" {
     
     set start = 0.0;
     set end = progress;
-    set outline-width = 6.0;
+    set outline-width = 8.0;
     set outline-opacity = 1.0;
 
     transition-spring start 1.0, 0.1, 10.0;
