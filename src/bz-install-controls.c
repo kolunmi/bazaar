@@ -527,6 +527,7 @@ bz_install_controls_init (BzInstallControls *self)
 
   self->install_button = bge_wdgt_renderer_lookup_object (
       BGE_WDGT_RENDERER (self->animated_button), "btn");
+  gtk_widget_add_css_class (self->install_button, "pill");
   g_signal_connect_swapped (
       self->install_button, "clicked",
       G_CALLBACK (install_cancel_cb), self);

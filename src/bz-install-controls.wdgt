@@ -37,7 +37,7 @@ defwidget "Install Button" {
     );
     allocate stack %width%, %height%, #();
     
-    set btn = #child/(""("pill" "suggested-action")
+    set btn = #child/(""("pill")
       child = stack;
       margin-start = 6;
       margin-end = 6;
