@@ -301,26 +301,6 @@
   }
 }
 
-global-progress {
-  color: transparent;
-}
-
-global-progress > *:first-child > * {
-    background: var(--flag-gradient, var(--accent-bg-color));
-}
-
-global-progress image {
-  color: var(--window-fg-color);
-}
-
-.global-progress-button {
-	padding: 5px;
-}
-
-.global-progress-bg {
-    opacity: 0.5;
-}
-
 .lozenge {
 	  font-size: 18px;
 	  font-weight: bold;
@@ -907,19 +887,7 @@ curated-list-view list {
 }
 
 
-.install-button {
-    background-color: alpha(var(--accent-bg-color), 0.333);
-    color: var(--accent-color);
-}
-
-.install-button:hover {
-    background-color: alpha(var(--accent-bg-color), 0.5);
-}
-
-.install-button:active {
-    background-color: alpha(var(--accent-bg-color), 0.666);
-}
-
 .install-button-indicator {
+    background: var(--flag-gradient, var(--accent-bg-color));
     border-radius: 9999px;
 }
