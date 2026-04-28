@@ -236,6 +236,12 @@
     --accent-color : alpha(@window_fg_color,0.75);
 }
 
+@media (prefers-contrast: more) {
+  .circular-lozenge {
+    box-shadow: inset 0 0 0 1px;
+  }
+}
+
 .circular-lozenge.green,
 .lozenge.green {
 	color: @green_5;
