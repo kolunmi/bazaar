@@ -546,6 +546,17 @@ toggle-group.huge * {
   }
 }
 
+@media (prefers-contrast: more) {
+  .card.category-tile, .card.app-tile {
+    box-shadow: inset 0 0 0 1px var(--hc-border);
+  }
+
+  .card.category-tile:focus-within, .card.app-tile :focus-within {
+    box-shadow: none;
+    outline-color: var(--accent-color);
+  }
+}
+
 .sp-section-image {
 	margin-top: -95px;
 	margin-bottom: -95px;
