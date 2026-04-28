@@ -397,6 +397,16 @@ button.context-tile:active .lozenge {
     border-radius: 99999px;
 }
 
+@media (prefers-contrast: more) {
+  .small-pill {
+    box-shadow: inset 0 0 0 1px;
+  }
+
+  .small-pill:focus-within {
+    box-shadow: none;
+  }
+}
+
 .medium-pill {
 	border-radius: 99999px;
 }
