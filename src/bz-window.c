@@ -25,7 +25,6 @@
 
 #include "bz-addons-dialog.h"
 #include "bz-application.h"
-#include "bz-comet-overlay.h"
 #include "bz-curated-view.h"
 #include "bz-entry-group-util.h"
 #include "bz-entry-group.h"
@@ -57,7 +56,6 @@ struct _BzWindow
   gboolean breakpoint_applied;
 
   /* Template widgets */
-  BzCometOverlay    *comet_overlay;
   AdwNavigationView *navigation_view;
   BzFullView        *full_view;
   BzSearchPage      *search_page;
@@ -680,7 +678,6 @@ bz_window_class_init (BzWindowClass *klass)
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
-  g_type_ensure (BZ_TYPE_COMET_OVERLAY);
   g_type_ensure (BZ_TYPE_SEARCH_PAGE);
   g_type_ensure (BZ_TYPE_PROGRESS_BAR);
   g_type_ensure (BZ_TYPE_CURATED_VIEW);
@@ -691,7 +688,6 @@ bz_window_class_init (BzWindowClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class, "/io/github/kolunmi/Bazaar/bz-window.ui");
   bz_widget_class_bind_all_util_callbacks (widget_class);
 
-  gtk_widget_class_bind_template_child (widget_class, BzWindow, comet_overlay);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, navigation_view);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, full_view);
   gtk_widget_class_bind_template_child (widget_class, BzWindow, toasts);
