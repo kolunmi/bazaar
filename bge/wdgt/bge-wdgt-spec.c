@@ -8055,39 +8055,79 @@ reset_setter (WatchSetterData *data)
       NULL);
 }
 
+static GHashTable *renderer_resource_cache = NULL;
+
+static void
+cache_weak_notify (char    *resource,
+                   GObject *where_the_object_was)
+{
+  g_hash_table_remove (renderer_resource_cache, resource);
+  g_free (resource);
+}
+
 static void
 wdgt_renderer_set_from_resource (BgeWdgtRenderer *self,
                                  const char      *resource)
 {
   g_autoptr (GError) local_error = NULL;
   g_autoptr (GBytes) bytes       = NULL;
+  BgeWdgtSpec  *cached           = NULL;
   gsize         buffer_size      = 0;
   gconstpointer buffer           = NULL;
   g_autoptr (BgeWdgtSpec) spec   = NULL;
 
-  bytes = g_resources_lookup_data (
-      resource,
-      G_RESOURCE_LOOKUP_FLAGS_NONE,
-      &local_error);
-  if (bytes == NULL)
+  if (g_once_init_enter_pointer (&renderer_resource_cache))
     {
-      g_critical ("failed to set renderer spec from resource: %s",
-                  local_error->message);
-      bge_wdgt_renderer_set_spec (self, NULL);
-      return;
+      GHashTable *tmp = NULL;
+
+      tmp = g_hash_table_new_full (
+          g_str_hash,
+          g_str_equal,
+          g_free,
+          NULL);
+      g_once_init_leave_pointer (&renderer_resource_cache, tmp);
     }
 
-  buffer = g_bytes_get_data (bytes, &buffer_size);
-  spec   = bge_wdgt_spec_new_for_string (buffer, &local_error);
-  if (spec == NULL)
+  cached = g_hash_table_lookup (
+      renderer_resource_cache,
+      resource);
+  if (cached == NULL)
     {
-      g_critical ("failed to set renderer spec from resource %s: %s",
-                  resource, local_error->message);
-      bge_wdgt_renderer_set_spec (self, NULL);
-      return;
+      bytes = g_resources_lookup_data (
+          resource,
+          G_RESOURCE_LOOKUP_FLAGS_NONE,
+          &local_error);
+      if (bytes == NULL)
+        {
+          g_critical ("failed to set renderer spec from resource: %s",
+                      local_error->message);
+          bge_wdgt_renderer_set_spec (self, NULL);
+          return;
+        }
+
+      buffer = g_bytes_get_data (bytes, &buffer_size);
+      spec   = bge_wdgt_spec_new_for_string (buffer, &local_error);
+      if (spec == NULL)
+        {
+          g_critical ("failed to set renderer spec from resource %s: %s",
+                      resource, local_error->message);
+          bge_wdgt_renderer_set_spec (self, NULL);
+          return;
+        }
+
+      g_hash_table_replace (
+          renderer_resource_cache,
+          g_strdup (resource),
+          spec);
+      g_object_weak_ref (
+          G_OBJECT (spec),
+          (GWeakNotify) cache_weak_notify,
+          g_strdup (resource));
+
+      cached = spec;
     }
 
-  bge_wdgt_renderer_set_spec (self, spec);
+  bge_wdgt_renderer_set_spec (self, cached);
 }
 
 static void
