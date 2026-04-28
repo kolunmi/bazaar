@@ -283,12 +283,14 @@ get_install_btn_state (gpointer                 object,
         gtk_widget_remove_css_class (
             self->install_button,
             self->install_btn_class);
-      if (class != NULL)
-        gtk_widget_add_css_class (
-            self->install_button,
-            class);
       g_clear_pointer (&self->install_btn_class, g_free);
-      self->install_btn_class = g_strdup (class);
+      if (class != NULL)
+        {
+          gtk_widget_add_css_class (
+              self->install_button,
+              class);
+          self->install_btn_class = g_strdup (class);
+        }
     }
 
   return g_steal_pointer (&state);
@@ -531,6 +533,9 @@ bz_install_controls_init (BzInstallControls *self)
   g_signal_connect_swapped (
       self->install_button, "clicked",
       G_CALLBACK (install_cancel_cb), self);
+
+  gtk_widget_add_css_class (self->install_button, "suggested-action");
+  self->install_btn_class = g_strdup ("suggested-action");
 }
 
 GtkWidget *
