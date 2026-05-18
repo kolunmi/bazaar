@@ -191,8 +191,10 @@ reap_app_dir_fiber (char *path)
 
   if (!result)
     {
-      if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
-        g_warning ("failed to trash directory '%s': %s", path, error->message);
+      if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
+        return dex_future_new_true ();
+      g_warning ("failed to trash directory '%s': %s", path, error->message);
+      return dex_future_new_for_error (g_steal_pointer (&error));
     }
 
   return dex_future_new_true ();

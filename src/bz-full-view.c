@@ -519,16 +519,42 @@ update_cb (BzFullView        *self,
   g_signal_emit (self, signals[SIGNAL_UPDATE], 0, entries);
 }
 
+static DexFuture *
+reap_user_data_done (DexFuture *future,
+                     GWeakRef  *wr)
+{
+  g_autoptr (BzFullView) self = NULL;
+  g_autoptr (GError) error    = NULL;
+
+  dex_future_get_value (future, &error);
+
+  self = g_weak_ref_get (wr);
+  if (self != NULL && error != NULL)
+    bz_show_error_for_widget (
+        GTK_WIDGET (gtk_widget_get_root (GTK_WIDGET (self))),
+        _ ("Failed to Remove User Data"),
+        error->message);
+
+  return dex_future_new_true ();
+}
+
 static void
 delete_user_data_cb (BzFullView *self,
                      GtkButton  *button)
 {
+  g_autoptr (DexFuture) future = NULL;
+
   g_return_if_fail (BZ_IS_FULL_VIEW (self));
 
   if (self->group == NULL)
     return;
 
-  bz_entry_group_reap_user_data (self->group);
+  future = bz_entry_group_reap_user_data (self->group);
+  if (future != NULL)
+    dex_future_disown (dex_future_finally (dex_ref (future),
+                                           (DexFutureCallback) reap_user_data_done,
+                                           bz_track_weak (self),
+                                           bz_weak_release));
 }
 
 static void

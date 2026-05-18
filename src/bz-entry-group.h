@@ -144,10 +144,10 @@ bz_entry_group_get_user_data_size (BzEntryGroup *self);
 guint64
 bz_entry_group_get_cache_size (BzEntryGroup *self);
 
-void
+DexFuture *
 bz_entry_group_reap_user_data (BzEntryGroup *self);
 
-void
+DexFuture *
 bz_entry_group_reap_user_cache (BzEntryGroup *self);
 
 void

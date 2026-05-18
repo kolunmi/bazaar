@@ -1515,20 +1515,22 @@ reap_user_data_then (DexFuture *future,
   return dex_future_new_true ();
 }
 
-void
+DexFuture *
 bz_entry_group_reap_user_data (BzEntryGroup *self)
 {
-  g_return_if_fail (BZ_IS_ENTRY_GROUP (self));
-  g_return_if_fail (self->id != NULL);
+  dex_return_error_if_fail (BZ_IS_ENTRY_GROUP (self));
+  dex_return_error_if_fail (self->id != NULL);
 
   if (self->reap_user_data_future != NULL)
-    return;
+    return dex_ref (self->reap_user_data_future);
 
   self->reap_user_data_future = dex_future_then (
       bz_reap_user_data_dex (self->id),
       (DexFutureCallback) reap_user_data_then,
       bz_track_weak (self),
       bz_weak_release);
+
+  return dex_ref (self->reap_user_data_future);
 }
 
 static DexFuture *
@@ -1546,20 +1548,22 @@ reap_user_cache_then (DexFuture *future,
   return dex_future_new_true ();
 }
 
-void
+DexFuture *
 bz_entry_group_reap_user_cache (BzEntryGroup *self)
 {
-  g_return_if_fail (BZ_IS_ENTRY_GROUP (self));
-  g_return_if_fail (self->id != NULL);
+  g_return_val_if_fail (BZ_IS_ENTRY_GROUP (self), NULL);
+  g_return_val_if_fail (self->id != NULL, NULL);
 
   if (self->reap_cache_future != NULL)
-    return;
+    return dex_ref (self->reap_cache_future);
 
   self->reap_cache_future = dex_future_then (
       bz_reap_user_cache_dex (self->id),
       (DexFutureCallback) reap_user_cache_then,
       bz_track_weak (self),
       bz_weak_release);
+
+  return dex_ref (self->reap_cache_future);
 }
 
 static DexFuture *
