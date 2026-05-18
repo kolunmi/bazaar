@@ -126,26 +126,27 @@ format_size (gpointer object, guint64 value)
 }
 
 static DexFuture *
-reap_user_data_done (DexFuture      *future,
-                     GWeakRef       *wr)
+reap_user_data_done (DexFuture *future,
+                     GWeakRef  *wr)
 {
   g_autoptr (BzUserDataTile) self = NULL;
-  g_autoptr (GError) error        = NULL;
+  g_autoptr (GError) local_error  = NULL;
 
-  dex_future_get_value (future, &error);
+  dex_future_get_value (future, &local_error);
 
   self = g_weak_ref_get (wr);
   if (self == NULL)
     return dex_future_new_true ();
 
-  if (error != NULL)
+  if (local_error != NULL)
     bz_show_error_for_widget (
         GTK_WIDGET (gtk_widget_get_root (GTK_WIDGET (self))),
         _ ("Failed to Remove User Data"),
-        error->message);
+        local_error->message);
   else
     {
       g_autofree char *message = NULL;
+
       message = g_strdup_printf (_ ("Trashed User Data for %s"),
                                  bz_entry_group_get_title (self->group));
       bz_window_add_toast (
@@ -167,10 +168,11 @@ remove_cb (BzUserDataTile *self,
 
   future = bz_entry_group_reap_user_data (self->group);
   if (future != NULL)
-    dex_future_disown (dex_future_finally (dex_ref (future),
-                                           (DexFutureCallback) reap_user_data_done,
-                                           bz_track_weak (self),
-                                           bz_weak_release));
+    dex_future_disown (dex_future_finally (
+        dex_ref (future),
+        (DexFutureCallback) reap_user_data_done,
+        bz_track_weak (self),
+        bz_weak_release));
 }
 
 static void
