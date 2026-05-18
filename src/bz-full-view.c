@@ -28,8 +28,8 @@
 #include "bz-app-tile.h"
 #include "bz-apps-page.h"
 #include "bz-appstream-description-render.h"
-#include "bz-context-tile.h"
 #include "bz-context-tile-callbacks.h"
+#include "bz-context-tile.h"
 #include "bz-developer-badge.h"
 #include "bz-dynamic-list-view.h"
 #include "bz-entry-inspector.h"
@@ -277,8 +277,9 @@ get_developer_apps_entries (gpointer object, GtkStringList *app_ids, BzEntry *en
 static int
 get_dev_apps_max_children_per_line (gpointer object, GListModel *model)
 {
-    if (!model) return 3;
-    return g_list_model_get_n_items (model) > 2 ? 3 : 2;
+  if (!model)
+    return 3;
+  return g_list_model_get_n_items (model) > 2 ? 3 : 2;
 }
 
 static void
@@ -410,9 +411,9 @@ static void
 dl_stats_cb (BzFullView *self,
              GtkButton  *button)
 {
-  AdwDialog         *dialog   = NULL;
-  AdwBreakpointBin  *bin      = NULL;
-  BzEntry           *ui_entry = NULL;
+  AdwDialog        *dialog   = NULL;
+  AdwBreakpointBin *bin      = NULL;
+  BzEntry          *ui_entry = NULL;
 
   if (self->group == NULL)
     return;
@@ -523,17 +524,17 @@ static DexFuture *
 reap_user_data_done (DexFuture *future,
                      GWeakRef  *wr)
 {
-  g_autoptr (BzFullView) self = NULL;
-  g_autoptr (GError) error    = NULL;
+  g_autoptr (BzFullView) self    = NULL;
+  g_autoptr (GError) local_error = NULL;
 
-  dex_future_get_value (future, &error);
+  dex_future_get_value (future, &local_error);
 
   self = g_weak_ref_get (wr);
-  if (self != NULL && error != NULL)
+  if (self != NULL && local_error != NULL)
     bz_show_error_for_widget (
         GTK_WIDGET (gtk_widget_get_root (GTK_WIDGET (self))),
         _ ("Failed to Remove User Data"),
-        error->message);
+        local_error->message);
 
   return dex_future_new_true ();
 }
@@ -551,10 +552,11 @@ delete_user_data_cb (BzFullView *self,
 
   future = bz_entry_group_reap_user_data (self->group);
   if (future != NULL)
-    dex_future_disown (dex_future_finally (dex_ref (future),
-                                           (DexFutureCallback) reap_user_data_done,
-                                           bz_track_weak (self),
-                                           bz_weak_release));
+    dex_future_disown (dex_future_finally (
+        dex_ref (future),
+        (DexFutureCallback) reap_user_data_done,
+        bz_track_weak (self),
+        bz_weak_release));
 }
 
 static void
