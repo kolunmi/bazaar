@@ -170,7 +170,7 @@ template $BzRichAppTile: $BzListTile {
 
         StackPage {
           name: "get";
-          child: Button {
+          child: Button get_button {
             sensitive: bind $invert_boolean(
               $is_zero(template.group as <$BzEntryGroup>.installable-and-available) as <bool>
             ) as <bool>;
@@ -179,7 +179,6 @@ template $BzRichAppTile: $BzListTile {
               "medium-pill",
             ]
 
-            label: _("Get");
             valign: center;
             clicked => $install_button_clicked_cb(template);
           };

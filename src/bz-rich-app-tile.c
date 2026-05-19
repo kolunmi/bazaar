@@ -40,6 +40,7 @@ struct _BzRichAppTile
   GListModel                *all_trackers;
 
   GtkWidget          *picture_box;
+  GtkWidget          *get_button;
   BzTransactIconInfo *transact_icon_info;
 };
 
@@ -349,6 +350,7 @@ bz_rich_app_tile_class_init (BzRichAppTileClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, run_button_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, cancel_button_clicked_cb);
   gtk_widget_class_bind_template_child (widget_class, BzRichAppTile, picture_box);
+  gtk_widget_class_bind_template_child (widget_class, BzRichAppTile, get_button);
   gtk_widget_class_bind_template_child (widget_class, BzRichAppTile, transact_icon_info);
 
   gtk_widget_class_set_accessible_role (widget_class, GTK_ACCESSIBLE_ROLE_BUTTON);
@@ -357,10 +359,18 @@ bz_rich_app_tile_class_init (BzRichAppTileClass *klass)
 static void
 bz_rich_app_tile_init (BzRichAppTile *self)
 {
-  BzStateInfo          *state   = NULL;
-  BzTransactionManager *manager = NULL;
+  BzStateInfo          *state     = NULL;
+  BzTransactionManager *manager   = NULL;
+  const char           *get_label = NULL;
 
   gtk_widget_init_template (GTK_WIDGET (self));
+
+  /* Translators: If you can't find a short enough translation, use "/" to use an icon instead. */
+  get_label = _ ("Get");
+  if (get_label != NULL && *get_label != '\0' && g_strcmp0 (get_label, "/") != 0)
+    gtk_button_set_label (GTK_BUTTON (self->get_button), get_label);
+  else
+    gtk_button_set_icon_name (GTK_BUTTON (self->get_button), "folder-download-symbolic");
 
   state   = bz_state_info_get_default ();
   manager = bz_state_info_get_transaction_manager (state);
