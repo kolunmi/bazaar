@@ -3413,8 +3413,8 @@ open_generic_id (BzApplication *self,
       // if it has more than 3 parts and end with ".desktop" then cut it off.
       if (len > 8 && g_str_has_suffix (generic_id, ".desktop"))
         {
-          guint n_dots         = 0;
-          g_auto (GStrv) parts = NULL;
+          guint       n_dots = 0;
+          const char *suffix = NULL;
 
           for (const char *p = strchr (generic_id, '.');
                p != NULL;
@@ -3422,19 +3422,18 @@ open_generic_id (BzApplication *self,
             {
               if (++n_dots >= 3)
                 {
-                  gsize trimmed_len = 0;
-
-                  trimmed_len = p - generic_id;
-                  if (trimmed_len > 1)
-                    {
-                      trimmed_len--;
-                      corrected_id = g_strndup (generic_id, trimmed_len);
-                      generic_id   = corrected_id;
-                      matched_id   = corrected_id;
-                      group        = g_hash_table_lookup (self->ids_to_groups, generic_id);
-                    }
+                  suffix = strstr (generic_id, ".desktop");
+                  g_assert (suffix != NULL);
                   break;
                 }
+            }
+
+          if (suffix != NULL)
+            {
+              corrected_id = g_strndup (generic_id, suffix - generic_id);
+              generic_id   = corrected_id;
+              matched_id   = corrected_id;
+              group        = g_hash_table_lookup (self->ids_to_groups, generic_id);
             }
         }
 
