@@ -106,7 +106,6 @@ typedef struct
   GdkPaintable     *thumbnail_paintable;
   GListModel       *share_urls;
   char             *donation_url;
-  char             *forge_url;
   char             *ratings_summary;
   GListModel       *version_history;
   char             *light_accent_color;
@@ -174,7 +173,6 @@ enum
   PROP_THUMBNAIL_PAINTABLE,
   PROP_SHARE_URLS,
   PROP_DONATION_URL,
-  PROP_FORGE_URL,
   PROP_RATINGS_SUMMARY,
   PROP_VERSION_HISTORY,
   PROP_IS_FLATHUB,
@@ -368,9 +366,6 @@ bz_entry_get_property (GObject    *object,
       break;
     case PROP_DONATION_URL:
       g_value_set_string (value, priv->donation_url);
-      break;
-    case PROP_FORGE_URL:
-      g_value_set_string (value, priv->forge_url);
       break;
     case PROP_RATINGS_SUMMARY:
       g_value_set_string (value, priv->ratings_summary);
@@ -583,10 +578,6 @@ bz_entry_set_property (GObject      *object,
     case PROP_DONATION_URL:
       g_clear_pointer (&priv->donation_url, g_free);
       priv->donation_url = g_value_dup_string (value);
-      break;
-    case PROP_FORGE_URL:
-      g_clear_pointer (&priv->forge_url, g_free);
-      priv->forge_url = g_value_dup_string (value);
       break;
     case PROP_RATINGS_SUMMARY:
       g_clear_pointer (&priv->ratings_summary, g_free);
@@ -900,12 +891,6 @@ bz_entry_class_init (BzEntryClass *klass)
           NULL, NULL, NULL,
           G_PARAM_READWRITE);
 
-  props[PROP_FORGE_URL] =
-      g_param_spec_string (
-          "forge-url",
-          NULL, NULL, NULL,
-          G_PARAM_READWRITE);
-
   props[PROP_RATINGS_SUMMARY] =
       g_param_spec_string (
           "ratings-summary",
@@ -1205,27 +1190,24 @@ bz_entry_real_serialize (BzSerializable  *serializable,
         {
           g_autoptr (GVariantBuilder) sub_builder = NULL;
 
-          sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("a(sss)"));
+          sub_builder = g_variant_builder_new (G_VARIANT_TYPE ("a(ss)"));
           for (guint i = 0; i < n_items; i++)
             {
               g_autoptr (BzUrl) url = NULL;
-              const char *name      = NULL;
+              const char *id        = NULL;
               const char *url_str   = NULL;
-              const char *icon_name = NULL;
 
-              url       = g_list_model_get_item (priv->share_urls, i);
-              name      = bz_url_get_name (url);
-              url_str   = bz_url_get_url (url);
-              icon_name = bz_url_get_icon_name (url);
-              g_variant_builder_add (sub_builder, "(sss)", name, url_str, icon_name ? icon_name : "");
+              url     = g_list_model_get_item (priv->share_urls, i);
+              id      = bz_url_get_id (url);
+              url_str = bz_url_get_url (url);
+
+              g_variant_builder_add (sub_builder, "(ss)", id ? id : "", url_str ? url_str : "");
             }
           g_variant_builder_add (builder, "{sv}", "share-urls", g_variant_builder_end (sub_builder));
         }
     }
   if (priv->donation_url != NULL)
     g_variant_builder_add (builder, "{sv}", "donation-url", g_variant_new_string (priv->donation_url));
-  if (priv->forge_url != NULL)
-    g_variant_builder_add (builder, "{sv}", "forge-url", g_variant_new_string (priv->forge_url));
   if (priv->version_history != NULL)
     {
       guint n_items = 0;
@@ -1543,22 +1525,19 @@ bz_entry_real_deserialize (BzSerializable *serializable,
           g_autoptr (GListStore) store      = NULL;
           g_autoptr (GVariantIter) url_iter = NULL;
 
-          store = g_list_store_new (BZ_TYPE_URL);
-
+          store    = g_list_store_new (BZ_TYPE_URL);
           url_iter = g_variant_iter_new (value);
           for (;;)
             {
-              g_autofree char *name      = NULL;
-              g_autofree char *url_str   = NULL;
-              g_autoptr (BzUrl) url      = NULL;
-              g_autofree char *icon_name = NULL;
+              g_autofree char *id      = NULL;
+              g_autofree char *url_str = NULL;
+              g_autoptr (BzUrl) url    = NULL;
 
-              if (!g_variant_iter_next (url_iter, "(sss)", &name, &url_str, &icon_name))
+              if (!g_variant_iter_next (url_iter, "(ss)", &id, &url_str))
                 break;
               url = bz_url_new ();
-              bz_url_set_name (url, name);
+              bz_url_set_id (url, id);
               bz_url_set_url (url, url_str);
-              bz_url_set_icon_name (url, icon_name);
               g_list_store_append (store, url);
             }
 
@@ -1566,8 +1545,6 @@ bz_entry_real_deserialize (BzSerializable *serializable,
         }
       else if (g_strcmp0 (key, "donation-url") == 0)
         priv->donation_url = g_variant_dup_string (value, NULL);
-      else if (g_strcmp0 (key, "forge-url") == 0)
-        priv->forge_url = g_variant_dup_string (value, NULL);
       else if (g_strcmp0 (key, "version-history") == 0)
         {
           g_autoptr (GListStore) store          = NULL;
@@ -2092,17 +2069,6 @@ bz_entry_get_donation_url (BzEntry *self)
   priv = bz_entry_get_instance_private (self);
 
   return priv->donation_url;
-}
-
-const char *
-bz_entry_get_forge_url (BzEntry *self)
-{
-  BzEntryPrivate *priv = NULL;
-
-  g_return_val_if_fail (BZ_IS_ENTRY (self), NULL);
-  priv = bz_entry_get_instance_private (self);
-
-  return priv->forge_url;
 }
 
 BzRepository *
@@ -2847,7 +2813,6 @@ clear_entry (BzEntry *self)
   g_clear_object (&priv->thumbnail_paintable);
   g_clear_object (&priv->share_urls);
   g_clear_pointer (&priv->donation_url, g_free);
-  g_clear_pointer (&priv->forge_url, g_free);
   g_clear_pointer (&priv->ratings_summary, g_free);
   g_clear_object (&priv->version_history);
   g_clear_pointer (&priv->light_accent_color, g_free);
