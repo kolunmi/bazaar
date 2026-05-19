@@ -3393,14 +3393,43 @@ static void
 open_generic_id (BzApplication *self,
                  const char    *generic_id)
 {
-  BzEntryGroup *group  = NULL;
-  GtkWindow    *window = NULL;
+  BzEntryGroup *group      = NULL;
+  GtkWindow    *window     = NULL;
+  const char   *matched_id = generic_id;
+  gboolean      case_fixed = FALSE;
 
-  group  = g_hash_table_lookup (self->ids_to_groups, generic_id);
+  group = g_hash_table_lookup (self->ids_to_groups, generic_id);
+
+  // This is needed because KDE likes to send us IDs in the wrong case...
+  if (group == NULL)
+    {
+      GHashTableIter iter       = { 0 };
+      gpointer       key, value = NULL;
+
+      g_hash_table_iter_init (&iter, self->ids_to_groups);
+      while (g_hash_table_iter_next (&iter, &key, &value))
+        {
+          if (g_ascii_strcasecmp ((const char *) key, generic_id) == 0)
+            {
+              group      = value;
+              matched_id = key;
+              case_fixed = TRUE;
+              break;
+            }
+        }
+    }
+
   window = get_or_create_window (self);
 
   if (group != NULL)
-    gtk_widget_activate_action (GTK_WIDGET (window), "window.show-group", "s", generic_id);
+    {
+      gtk_widget_activate_action (GTK_WIDGET (window), "window.show-group", "s", matched_id);
+
+      if (case_fixed)
+        bz_show_error_for_widget (GTK_WIDGET (window),
+                                  _ ("Malformed Link"),
+                                  _ ("The link used to open this app has incorrect capitalisation and may stop working in the future.\n\nThis is most likely caused by KRunner sending incorrect app IDs"));
+    }
   else
     {
       g_autofree char *message = NULL;
