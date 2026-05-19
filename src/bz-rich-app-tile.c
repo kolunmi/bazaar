@@ -366,11 +366,11 @@ bz_rich_app_tile_init (BzRichAppTile *self)
   gtk_widget_init_template (GTK_WIDGET (self));
 
   /* Translators: If you can't find a short enough translation, use "/" to use an icon instead. */
-  get_label = _("Get");
-    if (get_label != NULL && *get_label != '\0' && g_strcmp0 (get_label, "/") != 0)
-      gtk_button_set_label (GTK_BUTTON (self->get_button), get_label);
-    else
-      gtk_button_set_icon_name (GTK_BUTTON (self->get_button), "folder-download-symbolic");
+  get_label = _ ("Get");
+  if (get_label != NULL && *get_label != '\0' && g_strcmp0 (get_label, "/") != 0)
+    gtk_button_set_label (GTK_BUTTON (self->get_button), get_label);
+  else
+    gtk_button_set_icon_name (GTK_BUTTON (self->get_button), "folder-download-symbolic");
 
   state   = bz_state_info_get_default ();
   manager = bz_state_info_get_transaction_manager (state);
