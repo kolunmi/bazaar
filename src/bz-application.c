@@ -43,9 +43,9 @@
 #include "bz-error.h"
 #include "bz-favorites-page.h"
 #include "bz-flathub-state.h"
+#include "bz-flatpak-bundle-result.h"
 #include "bz-flatpak-entry.h"
 #include "bz-flatpak-instance.h"
-#include "bz-flatpak-bundle-result.h"
 #include "bz-gnome-shell-search-provider.h"
 #include "bz-hash-table-object.h"
 #include "bz-inspector.h"
@@ -181,7 +181,7 @@ BZ_DEFINE_DATA (
       GWeakRef *self;
       char     *id;
     },
-    BZ_RELEASE_DATA (self, g_object_unref);
+    BZ_RELEASE_DATA (self, bz_weak_release);
     BZ_RELEASE_DATA (id, g_free))
 
 static DexFuture *
@@ -1114,7 +1114,7 @@ init_fiber (GWeakRef *wr)
           g_str_hash, g_str_equal, g_free, g_free);
     }
 
-    repos = dex_await_object (
+  repos = dex_await_object (
       bz_backend_list_repositories (BZ_BACKEND (self->flatpak), NULL),
       &local_error);
 
@@ -1168,10 +1168,11 @@ init_fiber (GWeakRef *wr)
                   bz_flathub_state_set_map_factory (self->flathub, self->application_factory);
                   bz_state_info_set_flathub (self->state, self->flathub);
 
-                  if (cache_has_flathub){
-                    dex_promise_resolve_boolean (self->ready_to_open_files, TRUE);
-                    bz_state_info_set_busy (self->state, FALSE);
-                  }
+                  if (cache_has_flathub)
+                    {
+                      dex_promise_resolve_boolean (self->ready_to_open_files, TRUE);
+                      bz_state_info_set_busy (self->state, FALSE);
+                    }
                 }
               else
                 {
@@ -1859,8 +1860,8 @@ open_flatpakref_fiber (OpenFlatpakrefData *data)
 
       install_ui = g_object_new (
           BZ_TYPE_BUNDLE_INSTALL_DIALOG,
-          "state",        self->state,
-          "entry",        entry,
+          "state", self->state,
+          "entry", entry,
           "runtime-repo", repo,
           NULL);
 
@@ -3393,19 +3394,94 @@ static void
 open_generic_id (BzApplication *self,
                  const char    *generic_id)
 {
-  BzEntryGroup *group  = NULL;
-  GtkWindow    *window = NULL;
+  BzEntryGroup    *group        = NULL;
+  GtkWindow       *window       = NULL;
+  g_autofree char *corrected_id = NULL;
+  const char      *original_id  = generic_id;
+  const char      *matched_id   = generic_id;
+  gboolean         case_fixed   = FALSE;
 
-  group  = g_hash_table_lookup (self->ids_to_groups, generic_id);
+  group = g_hash_table_lookup (self->ids_to_groups, generic_id);
+
+  // This is needed because KDE likes to mangle IDs just for fun...
+  if (group == NULL)
+    {
+      gsize len = 0;
+
+      len = strlen (generic_id);
+
+      // if it has more than 3 parts and end with ".desktop" then cut it off.
+      if (len > 8 && g_str_has_suffix (generic_id, ".desktop"))
+        {
+          guint       n_dots = 0;
+          const char *suffix = NULL;
+
+          for (const char *p = strchr (generic_id, '.');
+               p != NULL;
+               p = strchr (p, '.'))
+            {
+              if (++n_dots >= 3)
+                {
+                  suffix = strstr (generic_id, ".desktop");
+                  g_assert (suffix != NULL);
+                  break;
+                }
+            }
+
+          if (suffix != NULL)
+            {
+              corrected_id = g_strndup (generic_id, suffix - generic_id);
+              generic_id   = corrected_id;
+              matched_id   = corrected_id;
+              group        = g_hash_table_lookup (self->ids_to_groups, generic_id);
+            }
+        }
+
+      if (group == NULL)
+        {
+          GHashTableIter iter = { 0 };
+
+          g_hash_table_iter_init (&iter, self->ids_to_groups);
+          for (;;)
+            /* screeching sounds */
+            {
+              char         *key   = NULL;
+              BzEntryGroup *value = NULL;
+
+              if (!g_hash_table_iter_next (
+                      &iter, (gpointer *) &key, (gpointer *) &value))
+                break;
+
+              if (g_ascii_strcasecmp (key, generic_id) == 0)
+                {
+                  group      = value;
+                  matched_id = key;
+                  case_fixed = TRUE;
+                  break;
+                }
+            }
+        }
+
+      if (group == NULL)
+        matched_id = original_id;
+    }
+
   window = get_or_create_window (self);
 
   if (group != NULL)
-    gtk_widget_activate_action (GTK_WIDGET (window), "window.show-group", "s", generic_id);
+    {
+      gtk_widget_activate_action (GTK_WIDGET (window), "window.show-group", "s", matched_id);
+
+      if (case_fixed)
+        bz_show_error_for_widget (GTK_WIDGET (window),
+                                  _ ("Malformed Link"),
+                                  _ ("The link used to open this app has incorrect capitalisation and may stop working in the future.\n\nThis is most likely caused by KRunner sending incorrect app IDs"));
+    }
   else
     {
       g_autofree char *message = NULL;
 
-      message = g_strdup_printf ("ID '%s' was not found", generic_id);
+      message = g_strdup_printf ("ID '%s' was not found", original_id);
       bz_show_error_for_widget (GTK_WIDGET (window), _ ("Could not find app"), message);
     }
 }
