@@ -43,9 +43,9 @@
 #include "bz-error.h"
 #include "bz-favorites-page.h"
 #include "bz-flathub-state.h"
+#include "bz-flatpak-bundle-result.h"
 #include "bz-flatpak-entry.h"
 #include "bz-flatpak-instance.h"
-#include "bz-flatpak-bundle-result.h"
 #include "bz-gnome-shell-search-provider.h"
 #include "bz-hash-table-object.h"
 #include "bz-inspector.h"
@@ -1114,7 +1114,7 @@ init_fiber (GWeakRef *wr)
           g_str_hash, g_str_equal, g_free, g_free);
     }
 
-    repos = dex_await_object (
+  repos = dex_await_object (
       bz_backend_list_repositories (BZ_BACKEND (self->flatpak), NULL),
       &local_error);
 
@@ -1168,10 +1168,11 @@ init_fiber (GWeakRef *wr)
                   bz_flathub_state_set_map_factory (self->flathub, self->application_factory);
                   bz_state_info_set_flathub (self->state, self->flathub);
 
-                  if (cache_has_flathub){
-                    dex_promise_resolve_boolean (self->ready_to_open_files, TRUE);
-                    bz_state_info_set_busy (self->state, FALSE);
-                  }
+                  if (cache_has_flathub)
+                    {
+                      dex_promise_resolve_boolean (self->ready_to_open_files, TRUE);
+                      bz_state_info_set_busy (self->state, FALSE);
+                    }
                 }
               else
                 {
@@ -1859,8 +1860,8 @@ open_flatpakref_fiber (OpenFlatpakrefData *data)
 
       install_ui = g_object_new (
           BZ_TYPE_BUNDLE_INSTALL_DIALOG,
-          "state",        self->state,
-          "entry",        entry,
+          "state", self->state,
+          "entry", entry,
           "runtime-repo", repo,
           NULL);
 
@@ -3393,11 +3394,11 @@ static void
 open_generic_id (BzApplication *self,
                  const char    *generic_id)
 {
-  BzEntryGroup *group         = NULL;
-  GtkWindow    *window        = NULL;
-  const char   *original_id   = generic_id;
-  const char   *matched_id    = generic_id;
-  gboolean      case_fixed    = FALSE;
+  BzEntryGroup *group       = NULL;
+  GtkWindow    *window      = NULL;
+  const char   *original_id = generic_id;
+  const char   *matched_id  = generic_id;
+  gboolean      case_fixed  = FALSE;
 
   group = g_hash_table_lookup (self->ids_to_groups, generic_id);
 
@@ -3415,8 +3416,8 @@ open_generic_id (BzApplication *self,
       // if it has more than 3 parts and end with ".desktop" then cut it off.
       if (len > 8 && g_str_has_suffix (generic_id, ".desktop"))
         {
-          g_auto(GStrv) parts      = NULL;
-          guint         part_count = 0;
+          g_auto (GStrv) parts = NULL;
+          guint part_count     = 0;
 
           parts      = g_strsplit (generic_id, ".", -1);
           part_count = g_strv_length (parts);
@@ -3425,10 +3426,10 @@ open_generic_id (BzApplication *self,
             {
               g_free (parts[part_count - 1]);
               parts[part_count - 1] = NULL;
-              trimmed_id = g_strjoinv (".", parts);
-              generic_id = trimmed_id;
-              matched_id = trimmed_id;
-              group      = g_hash_table_lookup (self->ids_to_groups, generic_id);
+              trimmed_id            = g_strjoinv (".", parts);
+              generic_id            = trimmed_id;
+              matched_id            = trimmed_id;
+              group                 = g_hash_table_lookup (self->ids_to_groups, generic_id);
             }
         }
 
