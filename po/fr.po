@@ -2292,7 +2292,7 @@ msgstr "Obtenir plus d’informations"
 # Dans le contexte d'App Store - "Get" serait plutôt traduit en "Télécharger" ou comme ici en "Installer"
 #: src/bz-rich-app-tile.blp:158
 msgid "Get"
-msgstr "Installer"
+msgstr "/"
 
 #: src/bz-rich-app-tile.blp:173
 msgid "Uninstall"
