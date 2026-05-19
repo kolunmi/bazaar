@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: bazaar\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-05-19 22:56+0200\n"
-"PO-Revision-Date: 2026-04-20 23:40+0200\n"
+"PO-Revision-Date: 2026-05-19 23:20+0200\n"
 "Last-Translator: Ibai Oihanguren Sala <ibaios@disroot.org>\n"
 "Language-Team: Basque\n"
 "Language: eu\n"
@@ -95,14 +95,12 @@ msgid "Stopped Receiving Updates"
 msgstr "Eguneratzeak jasotzeari utzi dio"
 
 #: src/bz-addon-tile.c:167 src/bz-favorites-tile.c:155
-#, fuzzy
 msgctxt "Install Controls"
 msgid "Uninstall"
 msgstr "Desinstalatu"
 
 #: src/bz-addon-tile.c:169 src/bz-bundle-install-dialog.blp:126
 #: src/bz-favorites-tile.c:157 src/bz-install-controls.wdgt:29
-#, fuzzy
 msgctxt "Install Controls"
 msgid "Install"
 msgstr "Instalatu"
@@ -693,9 +691,8 @@ msgid "Open user data folder"
 msgstr "Ireki erabiltzaile-datuen karpeta"
 
 #: src/bz-app-size-dialog.blp:143
-#, fuzzy
 msgid "Your User Data"
-msgstr "Erabiltzaile-datuak"
+msgstr "Zure erabiltzaile-datuak"
 
 #: src/bz-app-size-dialog.blp:144
 msgid "Caches, settings, and other app data"
@@ -703,16 +700,15 @@ msgstr "Cachea, ezarpenak eta aplikazioaren bestelako datuak"
 
 #: src/bz-app-size-dialog.blp:165
 msgid "Cache"
-msgstr ""
+msgstr "Cachea"
 
 #: src/bz-app-size-dialog.blp:166
 msgid "Temporary cached data"
-msgstr ""
+msgstr "Aldi baterako cacheratutako datuak"
 
 #: src/bz-app-size-dialog.blp:176
-#, fuzzy
 msgid "Clear Cache"
-msgstr "Garbitu bilaketa"
+msgstr "Garbitu cachea"
 
 #: src/bz-app-size-dialog.c:99
 msgid "Installed Runtime Size"
@@ -812,9 +808,8 @@ msgid "Loading %d apps…"
 msgstr "%d aplikazioak kargatzen…"
 
 #: src/bz-application.c:1825
-#, fuzzy
 msgid "Failed to open file"
-msgstr "Ezin izan da .flatpakref ireki"
+msgstr "Ezin izan da fitxategia ireki"
 
 #: src/bz-application.c:1930
 msgid "An initialization error occurred"
@@ -830,7 +825,7 @@ msgstr "Ezin izan dira eguneratzeak bilatu"
 
 #: src/bz-application.c:3477
 msgid "Malformed Link"
-msgstr ""
+msgstr "Gaizki eratutako esteka"
 
 #: src/bz-application.c:3478
 msgid ""
@@ -839,6 +834,11 @@ msgid ""
 "\n"
 "This is most likely caused by KRunner sending incorrect app IDs"
 msgstr ""
+"Aplikazio hau irekitzeko erabilitako estekak maiuskulen okerreko erabilera "
+"dauka, eta baliteke noizbait funtzionatzeari uztea.\n"
+"\n"
+"Seguruenera hau KRunner-ek okerreko aplikazio IDak bidaltzen dituelako "
+"izango da."
 
 #: src/bz-application.c:3485
 msgid "Could not find app"
@@ -867,13 +867,12 @@ msgid "%d Applications"
 msgstr "%d aplikazio"
 
 #: src/bz-bundle-install-dialog.blp:8 src/bz-bundle-install-dialog.blp:14
-#, fuzzy
 msgid "Bundle Installation"
-msgstr "Aukeratu instalazio bat"
+msgstr "Sortaren instalazioa"
 
 #: src/bz-bundle-install-dialog.blp:147
 msgid "Additional dependencies may take extra space"
-msgstr ""
+msgstr "Menpekotasun gehigarriek leku gehiago har dezakete"
 
 #: src/bz-bundle-install-dialog.blp:181
 msgid ""
@@ -882,11 +881,14 @@ msgid ""
 "\n"
 "Only add this source if you're sure you trust it."
 msgstr ""
+"Baliteke aplikazio hau instalatzeko software-iturri berri bat gehitu behar "
+"izatea. Iturri honetako beste aplikazioak ere Bazaarren azalduko dira.\n"
+"\n"
+"Ez gehitu iturri hau ez bazaude bere fidagarritasunaz ziur."
 
 #: src/bz-bundle-install-dialog.blp:357
-#, fuzzy
 msgid "Successfully Installed!"
-msgstr "Berriki desinstalatuak"
+msgstr "Behar bezala instalatu da!"
 
 #: src/bz-bundle-install-dialog.blp:381 src/bz-bundle-install-dialog.blp:463
 #: src/bz-rich-app-tile.blp:198 src/bz-transaction-tile.blp:298
@@ -894,29 +896,25 @@ msgid "Open"
 msgstr "Ireki"
 
 #: src/bz-bundle-install-dialog.blp:391 src/bz-bundle-install-dialog.blp:473
-#, fuzzy
 msgid "Show App Details"
-msgstr "Xehetasunak"
+msgstr "Erakutsi aplikazioaren xehetasunak"
 
 #: src/bz-bundle-install-dialog.blp:440
-#, fuzzy
 msgid "Already Installed"
-msgstr "Instalatua"
+msgstr "Dagoeneko instalatua"
 
 #: src/bz-bundle-install-dialog.blp:485
-#, fuzzy
 msgid "Installation Failed"
-msgstr "Instalatua"
+msgstr "Instalazioak huts egin du"
 
 #: src/bz-bundle-install-dialog.c:169
-#, fuzzy
 msgid "Unknown install size"
-msgstr "Lizentzia ezezaguna"
+msgstr "Instalazio tamaina ezezaguna"
 
 #: src/bz-bundle-install-dialog.c:172
 #, c-format
 msgid "About %s to install"
-msgstr ""
+msgstr "%s inguru instalatzeko"
 
 #: src/bz-bundle-install-dialog.c:186 src/bz-context-tile-callbacks.c:104
 #: src/bz-context-tile-callbacks.c:392 src/bz-context-tile-callbacks.c:409
@@ -924,9 +922,8 @@ msgid "N/A"
 msgstr "E/E"
 
 #: src/bz-bundle-install-dialog.c:215
-#, fuzzy
 msgid "No special permissions"
-msgstr "Baimenik ez"
+msgstr "Baimen berezirik ez"
 
 #: src/bz-context-tile-callbacks.c:68
 msgid "---"
@@ -1606,7 +1603,6 @@ msgid "Content"
 msgstr "Edukia"
 
 #: src/bz-full-view.blp:103
-#, fuzzy
 msgid ""
 "This is a local preview, some details may differ from the published listing"
 msgstr ""
@@ -1614,7 +1610,6 @@ msgstr ""
 "zerrendarekin bat ez etortzea"
 
 #: src/bz-full-view.blp:106
-#, fuzzy
 msgid "Preview Store Appearance"
 msgstr "Aurreikusi biltegiaren itxura"
 
@@ -1695,9 +1690,8 @@ msgstr[0] "Aplikazio %d"
 msgstr[1] "%d aplikazio"
 
 #: src/bz-full-view.c:536 src/bz-user-data-tile.c:144
-#, fuzzy
 msgid "Failed to Remove User Data"
-msgstr "Huts egin du gogokoa kentzeak"
+msgstr "Huts egin du erabiltzaile-datuak ezabatzeak"
 
 #: src/bz-hardware-support-dialog.blp:7 src/bz-hardware-support-dialog.blp:31
 msgid "Hardware Support"
@@ -1815,16 +1809,14 @@ msgid "Remove"
 msgstr "Kendu"
 
 #: src/bz-install-controls.wdgt:32
-#, fuzzy
 msgctxt "Install Controls"
 msgid "Cancel"
 msgstr "Utzi"
 
 #: src/bz-install-controls.wdgt:35
-#, fuzzy
 msgctxt "Install Controls"
 msgid "Cancelling"
-msgstr "Utzi"
+msgstr "Uzten"
 
 #: src/bz-library-page.blp:32
 msgid "Search installed apps"
@@ -3043,9 +3035,8 @@ msgid "Done"
 msgstr "Egina"
 
 #: src/bz-transaction-tile.blp:230
-#, fuzzy
 msgid "Cancelled"
-msgstr "Utzi"
+msgstr "Utzita"
 
 #: src/bz-transaction-tile.blp:254
 msgid "Error"
@@ -3105,9 +3096,8 @@ msgid "Trashed User Data for %s"
 msgstr "%s(r)en erabiltzaile-datuak zakarrontzira bota dira"
 
 #: src/bz-window.blp:70
-#, fuzzy
 msgid "Refreshing"
-msgstr "Berritzen…"
+msgstr "Berritzen"
 
 #: src/bz-window.blp:88
 msgid "Curated"
@@ -3191,44 +3181,40 @@ msgstr "Orain ezin duzu hori egin!"
 
 #. Translators: As in, "1 Install" / "100 Installs"
 #: src/bz-world-map.c:604
-#, fuzzy
 msgid "Install"
 msgid_plural "Installs"
-msgstr[0] "Instalatu"
-msgstr[1] "Instalatu"
+msgstr[0] "instalazio"
+msgstr[1] "instalazio"
 
 #: src/shortcuts-dialog.blp:5
-#, fuzzy
 msgctxt "shortcut window"
 msgid "Navigation"
-msgstr "Simulazioa"
+msgstr "Nabigazioa"
 
 #: src/shortcuts-dialog.blp:8
-#, fuzzy
 msgctxt "shortcut window"
 msgid "Open Explore Page"
-msgstr "Ireki bilaketa orria"
+msgstr "Ireki Arakatu orria"
 
 #: src/shortcuts-dialog.blp:14
 msgctxt "shortcut window"
 msgid "Open Library Page"
-msgstr "Ireki liburutegi orria"
+msgstr "Ireki Liburutegia orria"
 
 #: src/shortcuts-dialog.blp:20
 msgctxt "shortcut window"
 msgid "Open Search Page"
-msgstr "Ireki bilaketa orria"
+msgstr "Ireki Bilaketa orria"
 
 #: src/shortcuts-dialog.blp:25
-#, fuzzy
 msgctxt "shortcut window"
 msgid "Remotes"
-msgstr "Kendu"
+msgstr "Urrunekoak"
 
 #: src/shortcuts-dialog.blp:27
 msgctxt "shortcut window"
 msgid "Sync Remotes"
-msgstr ""
+msgstr "Sinkronizatu urrunekoak"
 
 #: src/shortcuts-dialog.blp:33
 msgctxt "shortcut window"
