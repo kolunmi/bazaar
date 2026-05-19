@@ -1676,7 +1676,7 @@ msgstr "%s(r)en beste aplikazioak"
 #, c-format
 msgid "%s is not installed, but it still has <b>%s</b> of data present."
 msgstr ""
-"%s ez dago instalatua, baina oraindik <b>%s</b> dauden gordeta datuetan."
+"%s ez dago instalatua, baina oraindik <b>%s</b> daude gordeta datuetan."
 
 #: src/bz-full-view.c:318
 msgid "Other Apps"
