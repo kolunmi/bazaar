@@ -181,7 +181,7 @@ BZ_DEFINE_DATA (
       GWeakRef *self;
       char     *id;
     },
-    BZ_RELEASE_DATA (self, g_object_unref);
+    BZ_RELEASE_DATA (self, bz_weak_release);
     BZ_RELEASE_DATA (id, g_free))
 
 static DexFuture *
@@ -3400,11 +3400,34 @@ open_generic_id (BzApplication *self,
 
   group = g_hash_table_lookup (self->ids_to_groups, generic_id);
 
-  // This is needed because KDE likes to send us IDs in the wrong case...
+  // This is needed because KDE likes to mangle IDs just for fun...
   if (group == NULL)
     {
-      GHashTableIter iter       = { 0 };
-      gpointer       key, value = NULL;
+      GHashTableIter   iter        = { 0 };
+      gpointer         key, value  = NULL;
+      gsize            len         = strlen (generic_id);
+      g_autofree char *trimmed_id  = NULL;
+
+      // if it has more than 3 parts and end with ".desktop" then cut it off.
+      if (len > 8 && g_str_has_suffix (generic_id, ".desktop"))
+        {
+          g_autofree char *without_suffix = NULL;
+          int part_count = 1;
+
+          without_suffix = g_strndup (generic_id, len - 8);
+          for (const char *p = without_suffix; *p; p++)
+            {
+              if (*p == '.')
+                part_count++;
+            }
+          if (part_count >= 3)
+            {
+              trimmed_id = g_steal_pointer (&without_suffix);
+              generic_id = trimmed_id;
+              matched_id = trimmed_id;
+              group      = g_hash_table_lookup (self->ids_to_groups, generic_id);
+            }
+        }
 
       g_hash_table_iter_init (&iter, self->ids_to_groups);
       while (g_hash_table_iter_next (&iter, &key, &value))
