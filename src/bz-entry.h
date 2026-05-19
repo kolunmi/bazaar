@@ -173,9 +173,6 @@ bz_entry_get_url (BzEntry *self);
 const char *
 bz_entry_get_donation_url (BzEntry *self);
 
-const char *
-bz_entry_get_forge_url (BzEntry *self);
-
 BzRepository *
 bz_entry_get_repository (BzEntry    *self,
                          GListModel *repos);
