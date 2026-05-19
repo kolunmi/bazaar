@@ -3393,36 +3393,39 @@ static void
 open_generic_id (BzApplication *self,
                  const char    *generic_id)
 {
-  BzEntryGroup *group      = NULL;
-  GtkWindow    *window     = NULL;
-  const char   *matched_id = generic_id;
-  gboolean      case_fixed = FALSE;
+  BzEntryGroup *group         = NULL;
+  GtkWindow    *window        = NULL;
+  const char   *original_id   = generic_id;
+  const char   *matched_id    = generic_id;
+  gboolean      case_fixed    = FALSE;
 
   group = g_hash_table_lookup (self->ids_to_groups, generic_id);
 
   // This is needed because KDE likes to mangle IDs just for fun...
   if (group == NULL)
     {
-      GHashTableIter   iter        = { 0 };
-      gpointer         key, value  = NULL;
-      gsize            len         = strlen (generic_id);
-      g_autofree char *trimmed_id  = NULL;
+      GHashTableIter   iter       = { 0 };
+      gpointer         key        = NULL;
+      gpointer         value      = NULL;
+      gsize            len        = 0;
+      g_autofree char *trimmed_id = NULL;
+
+      len = strlen (generic_id);
 
       // if it has more than 3 parts and end with ".desktop" then cut it off.
       if (len > 8 && g_str_has_suffix (generic_id, ".desktop"))
         {
-          g_autofree char *without_suffix = NULL;
-          int part_count = 1;
+          g_auto(GStrv) parts      = NULL;
+          guint         part_count = 0;
 
-          without_suffix = g_strndup (generic_id, len - 8);
-          for (const char *p = without_suffix; *p; p++)
+          parts      = g_strsplit (generic_id, ".", -1);
+          part_count = g_strv_length (parts);
+
+          if (part_count >= 4)
             {
-              if (*p == '.')
-                part_count++;
-            }
-          if (part_count >= 3)
-            {
-              trimmed_id = g_steal_pointer (&without_suffix);
+              g_free (parts[part_count - 1]);
+              parts[part_count - 1] = NULL;
+              trimmed_id = g_strjoinv (".", parts);
               generic_id = trimmed_id;
               matched_id = trimmed_id;
               group      = g_hash_table_lookup (self->ids_to_groups, generic_id);
@@ -3440,6 +3443,9 @@ open_generic_id (BzApplication *self,
               break;
             }
         }
+
+      if (group == NULL)
+        matched_id = original_id;
     }
 
   window = get_or_create_window (self);
@@ -3457,7 +3463,7 @@ open_generic_id (BzApplication *self,
     {
       g_autofree char *message = NULL;
 
-      message = g_strdup_printf ("ID '%s' was not found", generic_id);
+      message = g_strdup_printf ("ID '%s' was not found", original_id);
       bz_show_error_for_widget (GTK_WIDGET (window), _ ("Could not find app"), message);
     }
 }
