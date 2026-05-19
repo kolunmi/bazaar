@@ -3394,54 +3394,72 @@ static void
 open_generic_id (BzApplication *self,
                  const char    *generic_id)
 {
-  BzEntryGroup *group       = NULL;
-  GtkWindow    *window      = NULL;
-  const char   *original_id = generic_id;
-  const char   *matched_id  = generic_id;
-  gboolean      case_fixed  = FALSE;
+  BzEntryGroup    *group        = NULL;
+  GtkWindow       *window       = NULL;
+  g_autofree char *corrected_id = NULL;
+  const char      *original_id  = generic_id;
+  const char      *matched_id   = generic_id;
+  gboolean         case_fixed   = FALSE;
 
   group = g_hash_table_lookup (self->ids_to_groups, generic_id);
 
   // This is needed because KDE likes to mangle IDs just for fun...
   if (group == NULL)
     {
-      GHashTableIter   iter       = { 0 };
-      gpointer         key        = NULL;
-      gpointer         value      = NULL;
-      gsize            len        = 0;
-      g_autofree char *trimmed_id = NULL;
+      gsize len = 0;
 
       len = strlen (generic_id);
 
       // if it has more than 3 parts and end with ".desktop" then cut it off.
       if (len > 8 && g_str_has_suffix (generic_id, ".desktop"))
         {
+          guint n_dots         = 0;
           g_auto (GStrv) parts = NULL;
-          guint part_count     = 0;
 
-          parts      = g_strsplit (generic_id, ".", -1);
-          part_count = g_strv_length (parts);
-
-          if (part_count >= 4)
+          for (const char *p = strchr (generic_id, '.');
+               p != NULL;
+               p = strchr (p, '.'))
             {
-              g_free (parts[part_count - 1]);
-              parts[part_count - 1] = NULL;
-              trimmed_id            = g_strjoinv (".", parts);
-              generic_id            = trimmed_id;
-              matched_id            = trimmed_id;
-              group                 = g_hash_table_lookup (self->ids_to_groups, generic_id);
+              if (++n_dots >= 3)
+                {
+                  gsize trimmed_len = 0;
+
+                  trimmed_len = p - generic_id;
+                  if (trimmed_len > 1)
+                    {
+                      trimmed_len--;
+                      corrected_id = g_strndup (generic_id, trimmed_len);
+                      generic_id   = corrected_id;
+                      matched_id   = corrected_id;
+                      group        = g_hash_table_lookup (self->ids_to_groups, generic_id);
+                    }
+                  break;
+                }
             }
         }
 
-      g_hash_table_iter_init (&iter, self->ids_to_groups);
-      while (g_hash_table_iter_next (&iter, &key, &value))
+      if (group == NULL)
         {
-          if (g_ascii_strcasecmp ((const char *) key, generic_id) == 0)
+          GHashTableIter iter = { 0 };
+
+          g_hash_table_iter_init (&iter, self->ids_to_groups);
+          for (;;)
+            /* screeching sounds */
             {
-              group      = value;
-              matched_id = key;
-              case_fixed = TRUE;
-              break;
+              char         *key   = NULL;
+              BzEntryGroup *value = NULL;
+
+              if (!g_hash_table_iter_next (
+                      &iter, (gpointer *) &key, (gpointer *) &value))
+                break;
+
+              if (g_ascii_strcasecmp (key, generic_id) == 0)
+                {
+                  group      = value;
+                  matched_id = key;
+                  case_fixed = TRUE;
+                  break;
+                }
             }
         }
 
