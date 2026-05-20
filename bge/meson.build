@@ -62,7 +62,7 @@ pkg.generate(
      filebase: 'bge-' + api_version,
       version: api_version,
       subdirs: 'bge',
-     requires: ['gtk4', 'md4c'],
+     requires: ['gtk4', 'md4c', 'gtksourceview-5'],
   install_dir: get_option('libdir') / 'pkgconfig'
 )
 
