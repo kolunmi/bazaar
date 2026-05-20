@@ -763,7 +763,7 @@ bz_application_about_action (GSimpleAction *action,
       "version", PACKAGE_VCS_VERSION,
       "copyright", "© 2025-2026 The Bazaar Contributors",
       "license-type", GTK_LICENSE_GPL_3_0,
-      "website", "https://github.com/bazaar-org/bazaar",
+      "website", "https://usebazaar.org",
       "issue-url", "https://github.com/bazaar-org/bazaar/issues",
       NULL);
 
