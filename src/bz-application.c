@@ -3473,9 +3473,11 @@ open_generic_id (BzApplication *self,
       gtk_widget_activate_action (GTK_WIDGET (window), "window.show-group", "s", matched_id);
 
       if (case_fixed)
-        bz_show_error_for_widget (GTK_WIDGET (window),
-                                  _ ("Malformed Link"),
-                                  _ ("The link used to open this app has incorrect capitalisation and may stop working in the future.\n\nThis is most likely caused by KRunner sending incorrect app IDs"));
+        bz_show_error_for_widget (
+            GTK_WIDGET (window),
+            _ ("Malformed Link"),
+            _ ("The link used to open this app has incorrect capitalization and may stop working in the future.\n\n"
+               "This is most likely caused by KRunner sending incorrect app IDs"));
     }
   else
     {
